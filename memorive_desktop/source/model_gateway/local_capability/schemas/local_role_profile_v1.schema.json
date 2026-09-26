@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:capabilities:local-inference:local-role-profile:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile_id",
+    "logical_role",
+    "profile_revision",
+    "runtime_asset_manifest_id",
+    "input_contract_version",
+    "output_contract_version",
+    "allowed_ownership_classes",
+    "resource_envelope_id",
+    "allowed_deterministic_fallbacks",
+    "same_model_independence",
+    "route_eligibility",
+    "activation_status",
+    "qualification_mode_allowed"
+  ],
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "logical_role": {
+      "enum": [
+        "LOCAL_OCR",
+        "LOCAL_DISTILL",
+        "LOCAL_ANALYSIS",
+        "LOCAL_VERIFY",
+        "LOCAL_EMBED",
+        "LOCAL_RETRIEVE"
+      ]
+    },
+    "profile_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_asset_manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output_contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_ownership_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "self",
+          "entrusted",
+          "unknown",
+          "mixed"
+        ]
+      }
+    },
+    "resource_envelope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_deterministic_fallbacks": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "same_model_independence": {
+      "enum": [
+        "NOT_INDEPENDENT",
+        "STRUCTURAL_ONLY",
+        "INDEPENDENT"
+      ]
+    },
+    "route_eligibility": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "activation_status": {
+      "enum": [
+        "DISABLED",
+        "ENABLED"
+      ]
+    },
+    "qualification_mode_allowed": {
+      "type": "boolean"
+    }
+  }
+}

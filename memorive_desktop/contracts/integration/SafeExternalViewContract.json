@@ -1,0 +1,36 @@
+{
+  "allowed_suffixes": [
+    ".pdf",
+    ".md",
+    ".txt",
+    ".json",
+    ".docx",
+    ".xlsx",
+    ".pptx",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".tif",
+    ".tiff"
+  ],
+  "construction_a_mode": "VALIDATE_ONLY_NO_LAUNCH",
+  "forbidden": [
+    "URL_URI",
+    "UNC",
+    "DEVICE_PATH",
+    "TRAVERSAL",
+    "SYMLINK_ESCAPE",
+    "NON_REGULAR",
+    "EXECUTABLE",
+    "SCRIPT",
+    "SHORTCUT",
+    "SHELL_CONCAT",
+    "PRIVATE",
+    "RESTRICTED"
+  ],
+  "launch_performed": false,
+  "protocol_handler_invoked": false,
+  "schema_version": "LibrarySafeExternalViewContract-v1",
+  "shell_invoked": false,
+  "status": "PASS"
+}

@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:quality:fact-identity:absence-policy:r1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "policy_id",
+    "policy_version",
+    "literature_type",
+    "template_contract_ref",
+    "required_sections_or_roles",
+    "section_and_material_scope",
+    "search_protocol",
+    "allowed_methods",
+    "prohibited_methods",
+    "coverage_rule",
+    "coverage_complete_definition",
+    "global_decision_rules",
+    "per_slot_policy",
+    "absence_check_evidence_minimum_fields",
+    "authority",
+    "approval_status",
+    "approved_by",
+    "approved_at",
+    "approval_event_ref",
+    "supersedes",
+    "non_authoritative",
+    "approval_event_artifact",
+    "derived_from_candidate"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "absence_check_policy"
+    },
+    "policy_id": {
+      "const": "fact_identity-absence-policy-experimental-primary-study"
+    },
+    "policy_version": {
+      "const": "r1.0"
+    },
+    "literature_type": {
+      "const": "intervention-or-prespecified-exposure-experimental-primary-study"
+    },
+    "template_contract_ref": {
+      "type": "object"
+    },
+    "required_sections_or_roles": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "section_and_material_scope": {
+      "type": "object"
+    },
+    "search_protocol": {
+      "type": "object"
+    },
+    "allowed_methods": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "prohibited_methods": {
+      "type": "array",
+      "minItems": 1
+    },
+    "coverage_rule": {
+      "const": "all_applicable_required_roles_and_embedded_materials_checked"
+    },
+    "coverage_complete_definition": {
+      "type": "object"
+    },
+    "global_decision_rules": {
+      "type": "object"
+    },
+    "per_slot_policy": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slot_id",
+          "required_roles",
+          "structural_probes",
+          "not_applicable_rule_ids"
+        ],
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_roles": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "structural_probes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "not_applicable_rule_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "absence_check_evidence_minimum_fields": {
+      "type": "array",
+      "minItems": 20,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "authority": {
+      "const": "user-approved-contract"
+    },
+    "approval_status": {
+      "const": "approved"
+    },
+    "approved_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approved_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_event_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supersedes": {},
+    "non_authoritative": {
+      "const": false
+    },
+    "approval_event_artifact": {
+      "type": "object"
+    },
+    "derived_from_candidate": {
+      "type": "object"
+    }
+  }
+}

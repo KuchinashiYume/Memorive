@@ -1,0 +1,24 @@
+{
+  "artifact_type": "fact_fingerprint_policy",
+  "policy_version": "fact_identity-fact-fingerprint-r0.4",
+  "claim_normalization_rules": [
+    "unicode_casefold",
+    "whitespace_collapse"
+  ],
+  "evidence_signature_rules": [
+    "same_paper_source_anchor_refs_only"
+  ],
+  "semantic_scope_rules": [
+    "condition_and_semantic_role_are_identity_dimensions"
+  ],
+  "numeric_and_unit_rules": [
+    "decimal_normalization_without_unit_conversion",
+    "numeric_or_unit_difference_blocks_auto_merge"
+  ],
+  "merge_candidate_thresholds": {
+    "exact_fingerprint_required_for_candidate_group": true,
+    "fingerprint_never_decides_identity": true
+  },
+  "supersedes": null,
+  "created_at": "2026-07-17T00:00:00Z"
+}

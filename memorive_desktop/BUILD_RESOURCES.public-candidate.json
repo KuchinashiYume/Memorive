@@ -1,0 +1,2516 @@
+{
+  "schema": "MemoriveBuildResourceMap-v1",
+  "paths_relative_to": "repository_root",
+  "files": [
+    {
+      "source": "memorive_desktop/product/web/assets/assistant/adopted_inline_001.png",
+      "destination": "adopted_inline_001.png",
+      "sha256": "5374cd25658256fe5d2042d9d8997854e3d8b2d01a13e4d724177b1be2a0ebca"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/brand_profile.json",
+      "destination": "brand_profile.json",
+      "sha256": "989ded15c96014bf0317dfe086cb314af5d9e5414e22a9b9ff9f975cc7fda954"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/bundle_assistant.html",
+      "destination": "bundle_assistant.html",
+      "sha256": "61d1c2e730e7f2d0c11f5892bc8cbc75bbbc7a97e6a5a1864c5acba572f5f3a1"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/bundle_integrated.html",
+      "destination": "bundle_integrated.html",
+      "sha256": "de2332ecd898085b7b78f34b29b000de82aa9f88f5d66eab45c6b84657dd366b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
+      "destination": "PDFJS-LICENSE.txt",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/pdf_runtime.js",
+      "destination": "pdf_runtime.js",
+      "sha256": "942bbf098a85ea1db00748b737c070f23173ef526c4e212c3bd78a368de19096"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/release_identity_binding.json",
+      "destination": "release_identity_binding.json",
+      "sha256": "17e2698a9d58cc354847f0f2644845b3b5eed5c4c3583be9cd67202995ee60ec"
+    },
+    {
+      "source": "memorive_desktop/contracts/InboxImportContract.json",
+      "destination": "contracts/InboxImportContract.json",
+      "sha256": "eca08255c37b3b2e1a53729b20bb52a0883e034cee44eeaee18793eadc5dda61"
+    },
+    {
+      "source": "memorive_desktop/contracts/kimi_domestic_international_endpoint_resolution_candidate_v1.json",
+      "destination": "contracts/kimi_domestic_international_endpoint_resolution_candidate_v1.json",
+      "sha256": "0525d3944ed21655b8ff2e9923d5a5fc3ac0de2387a5ad254a8b0ed5d46dcb81"
+    },
+    {
+      "source": "memorive_desktop/contracts/kimi_domestic_international_endpoint_resolution_candidate_v2.json",
+      "destination": "contracts/kimi_domestic_international_endpoint_resolution_candidate_v2.json",
+      "sha256": "5fc7ff79dfd87a9fb10d6e52517f17b030b5a5697bff7917d3b25cf2983565fc"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v1.json",
+      "destination": "contracts/ModelLeaderboardProductMethods-v1.json",
+      "sha256": "315ed854b00ac155692121cc86cbc80e52d2870fcefcebe2c0832c2bb0c62e8b"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v2.json",
+      "destination": "contracts/ModelLeaderboardProductMethods-v2.json",
+      "sha256": "2dd9e7b890193195e5a51aa326ffe67e57b0bc8904a3dbce88d048837918ebc0"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v3.json",
+      "destination": "contracts/ModelLeaderboardProductMethods-v3.json",
+      "sha256": "8d9eff4262035d073463662b50adcf78268d77e4d255b0bb1b3babaa3ee4c548"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v4.json",
+      "destination": "contracts/ModelLeaderboardProductMethods-v4.json",
+      "sha256": "46af0cb21e60a2b81fd60c1d0551620dbcdecc75ae8a2a1a9c0edc990653f6ec"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProjection-v1.schema.json",
+      "destination": "contracts/ModelLeaderboardProjection-v1.schema.json",
+      "sha256": "1725d6e66e034fe01504df04195113b7bb8b1266ac9ac718e1a4d3dd6ac4f23f"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProjection-v2.schema.json",
+      "destination": "contracts/ModelLeaderboardProjection-v2.schema.json",
+      "sha256": "4df717e453df0af56f9c653b6c46017ad299e271413b200d9a4d296b11ce2052"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProjection-v3.schema.json",
+      "destination": "contracts/ModelLeaderboardProjection-v3.schema.json",
+      "sha256": "a66b42c75525f785164985dff92d763f1db87f0eb5f04083735c28f81fb5ad50"
+    },
+    {
+      "source": "memorive_desktop/contracts/ModelLeaderboardProjection-v4.schema.json",
+      "destination": "contracts/ModelLeaderboardProjection-v4.schema.json",
+      "sha256": "0e6ff07f57741162bee627b21ba6c168cb3dbca6201cc6a90551d1fd9598fe2c"
+    },
+    {
+      "source": "memorive_desktop/contracts/WorkflowOcrExamScoreSuccessor.json",
+      "destination": "contracts/WorkflowOcrExamScoreSuccessor.json",
+      "sha256": "b2c195e0941ab5a128d5f4a438d6b411e2175d272d52f81692cc4fd032cac24a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/design.md",
+      "destination": "help/en-US/design.md",
+      "sha256": "9daeb2f6225c0cbef3dad4a71cb8fd00b06caeff35d2f83b8bee9ee0dd7af1e4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/design.pdf",
+      "destination": "help/en-US/design.pdf",
+      "sha256": "5273e64cd5acd94465343feb505bec5fb079c1dd56ed10a5090ca47ae9ed6fd8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/index.html",
+      "destination": "help/en-US/index.html",
+      "sha256": "bf0076914cc7e327c0867af049bc01e295aaaa010a540ab13ccdc1f4ab758205"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/manual-text.md",
+      "destination": "help/en-US/manual-text.md",
+      "sha256": "b1b6b7f9370b2139e42f137d23e40ca7337c1e22aa0fb01750f3e4a4b9d02c6a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/manual.md",
+      "destination": "help/en-US/manual.md",
+      "sha256": "24ca0ac93518ac08bd001b6231be91175807249fe6ee91edb8aa893252e47e0f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/manual.pdf",
+      "destination": "help/en-US/manual.pdf",
+      "sha256": "0e98ad031a4110ae2c0d4a514cb2e1276b716efdf234c67149a54d0d576692ad"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/design.md",
+      "destination": "help/ja-JP/design.md",
+      "sha256": "f9d7f3da0ff85ef46ed7ce564671f053d24c6137af03f7fbada3173928fe1159"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/design.pdf",
+      "destination": "help/ja-JP/design.pdf",
+      "sha256": "8c542b992770757a2512264450e313bf12c2f7b755440a72adb30b6ce32cb510"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/index.html",
+      "destination": "help/ja-JP/index.html",
+      "sha256": "6c3b8097387f827710d8d303199948a70eb7e83baa21eed0d64d87e41186527f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/manual-text.md",
+      "destination": "help/ja-JP/manual-text.md",
+      "sha256": "712305071e43751f035567e4ae994e5b4941615c45238ae491003a88a0dc70b8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/manual.md",
+      "destination": "help/ja-JP/manual.md",
+      "sha256": "50c0320e5e5138f3e5422ddc7fb49fba4829c0feb77b10faeb57fe0c2788e3a3"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/manual.pdf",
+      "destination": "help/ja-JP/manual.pdf",
+      "sha256": "72c562f7e3c5eb09f3988dc619e1f76180366b3e84664d5c96c5030073021d0a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/app.css",
+      "destination": "help/web/app.css",
+      "sha256": "da493ddf7462d59d12655a2bbd125faf71c5c10719c5f3fd1d0cf319deb72719"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/app.js",
+      "destination": "help/web/app.js",
+      "sha256": "595541c7b37001412de32fe49d896e0c504b06dfd29175dafb2ddb51e06a1cca"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/content.js",
+      "destination": "help/web/content.js",
+      "sha256": "50fa1f1578b8891bccea136798dfc37aad247197472e49d7f0af1983675aae83"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/index.html",
+      "destination": "help/web/index.html",
+      "sha256": "b9143612725a483874f5faa31bdc136d85b62c6f16a8bbc88d4ff79f3d3d1f7a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/README.md",
+      "destination": "help/web/README.md",
+      "sha256": "6fd3228e5e8689fd685af8eba83439f22cb349b0848b021aaa22d39cc6b4949a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/WEB_DESIGN.md",
+      "destination": "help/web/WEB_DESIGN.md",
+      "sha256": "43b27e9a038e74598cca118673b1661f8a7cd848940baf4ef73c512c4c49e89e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/design.md",
+      "destination": "help/zh-CN/design.md",
+      "sha256": "8a60eb49225a9a6962179cbb32b663bfa61f4f58a8be466a2f9fac211706a484"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/design.pdf",
+      "destination": "help/zh-CN/design.pdf",
+      "sha256": "aef016e44817ac596fc34735843f737fe84175982218baf71c76cb06b64cfe4e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/index.html",
+      "destination": "help/zh-CN/index.html",
+      "sha256": "bd831f97cb1ad35863b89b9b36bd84c6f34d9a64117c9eb2cd13f6159abc1085"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/manual-text.md",
+      "destination": "help/zh-CN/manual-text.md",
+      "sha256": "11fe5c063d9518b410343ab4b5ccb28f813d12b4859bbfc68f87dc3c6ab42330"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/manual.md",
+      "destination": "help/zh-CN/manual.md",
+      "sha256": "7b2400b37688c1c7f8bc261e90eae1bd6839e69f564d039e7811bb1d90c97c46"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/manual.pdf",
+      "destination": "help/zh-CN/manual.pdf",
+      "sha256": "221d974c04f5bbc57dca1d89eb5c6bff8ee4612d98e15bd4d8bcbd4093d1097b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/billing.svg",
+      "destination": "help/zh-CN/assets/billing.svg",
+      "sha256": "5ee90f78420e3dd078279349cbe1a048a6dd06f49c1169dc1495a0ca9ec67f77"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/citation.svg",
+      "destination": "help/zh-CN/assets/citation.svg",
+      "sha256": "04bc02d7fceaa40e6d1611ad943e728dcf58b23508bdb3c1b2605e1c596e3ae8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/cli.svg",
+      "destination": "help/zh-CN/assets/cli.svg",
+      "sha256": "7938d15736afccfbcdd445023efa9ae0c70038d4003cf0b5614c12463c7189be"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/flow.svg",
+      "destination": "help/zh-CN/assets/flow.svg",
+      "sha256": "4e09447363a4fcbc9185c25d3471b08b980a01a843d404f4b914f1a2b0b3685c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/home.png",
+      "destination": "help/zh-CN/assets/home.png",
+      "sha256": "abaefb787b18167573609e129eb40d2c32da762f96fee6de6cf154ab3a20742d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/inbox.png",
+      "destination": "help/zh-CN/assets/inbox.png",
+      "sha256": "8485781d16f3c6047b339e6817c0a666fed5f4707f7fa2307876ea8e7da94270"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/leaderboard.png",
+      "destination": "help/zh-CN/assets/leaderboard.png",
+      "sha256": "ede34385330fcfcf38c2f65233858554b647fad5516a7fb11ab1dc97ef1f590e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/library.png",
+      "destination": "help/zh-CN/assets/library.png",
+      "sha256": "ef686c60216024d870941a7d0ba76ba7a4c55e65b2b9f7f61454a015772ec88f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/local.svg",
+      "destination": "help/zh-CN/assets/local.svg",
+      "sha256": "6caba036f4f5a41c3c0c25cccb1b66063511206eca5a14cdc5753f437b8dfeb6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/messages.png",
+      "destination": "help/zh-CN/assets/messages.png",
+      "sha256": "aabf80df2a9db8d82b681ff429fb07822a6f04c7d6402dd270c65831b1793190"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/research.png",
+      "destination": "help/zh-CN/assets/research.png",
+      "sha256": "beeaa0135733cd9447af305dc991c85e6c029b8ecce3a548aaada469ee0b715d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/research.svg",
+      "destination": "help/zh-CN/assets/research.svg",
+      "sha256": "8e93fa201367156f373dfcfabd16f5e4275759a540c47afda44e1174621691c0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/sessions.svg",
+      "destination": "help/zh-CN/assets/sessions.svg",
+      "sha256": "0686217b3aaaa2db91028562903e5e97b101951cadb698b1eb92f5efb8fe4e4a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/settings.png",
+      "destination": "help/zh-CN/assets/settings.png",
+      "sha256": "ef96450c87713f3021886ee04c9cc314dee0d696018e1c1744dbaf158bfdf05b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/tasks.png",
+      "destination": "help/zh-CN/assets/tasks.png",
+      "sha256": "a327d9cbd545a4fc7e6ee62acaa294fb79b9003ede9a767a42d825de01cfe50e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/web-reading.svg",
+      "destination": "help/zh-CN/assets/web-reading.svg",
+      "sha256": "90d8b225b2cdc211b67e89f5d3332896e88bd4ba4ef27da84a1c9e4cb8c2dcf4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/weights.png",
+      "destination": "help/zh-CN/assets/weights.png",
+      "sha256": "36ed1ed0a2864b19c31a52b65bf1700c6eb9c4588a34e8fba046f1c919085ff8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/wink.svg",
+      "destination": "help/web/assets/wink.svg",
+      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/design.md",
+      "destination": "help/web/downloads/en-US/design.md",
+      "sha256": "515b95a3e50f79ed90bca664fce4fe5b7ebe194b22ceec1291e6a9dbe3a4bd2f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/design.pdf",
+      "destination": "help/web/downloads/en-US/design.pdf",
+      "sha256": "5273e64cd5acd94465343feb505bec5fb079c1dd56ed10a5090ca47ae9ed6fd8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/manual-text.md",
+      "destination": "help/web/downloads/en-US/manual-text.md",
+      "sha256": "b1b6b7f9370b2139e42f137d23e40ca7337c1e22aa0fb01750f3e4a4b9d02c6a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/manual.md",
+      "destination": "help/web/downloads/en-US/manual.md",
+      "sha256": "d37364c0a30bf76448e02294af8800dbecdbeae4463eaa38393fdc5572d9abf0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/manual.pdf",
+      "destination": "help/web/downloads/en-US/manual.pdf",
+      "sha256": "0e98ad031a4110ae2c0d4a514cb2e1276b716efdf234c67149a54d0d576692ad"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/design.md",
+      "destination": "help/web/downloads/ja-JP/design.md",
+      "sha256": "364e22f41da31d64d0f225f036db7dc9821e2c7935023a9380a995c519197f4e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/design.pdf",
+      "destination": "help/web/downloads/ja-JP/design.pdf",
+      "sha256": "8c542b992770757a2512264450e313bf12c2f7b755440a72adb30b6ce32cb510"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/manual-text.md",
+      "destination": "help/web/downloads/ja-JP/manual-text.md",
+      "sha256": "712305071e43751f035567e4ae994e5b4941615c45238ae491003a88a0dc70b8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/manual.md",
+      "destination": "help/web/downloads/ja-JP/manual.md",
+      "sha256": "c7449047dbb98e5440745b75f892241e1dee808e1abafebf34ba6d8da19b4de7"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/manual.pdf",
+      "destination": "help/web/downloads/ja-JP/manual.pdf",
+      "sha256": "72c562f7e3c5eb09f3988dc619e1f76180366b3e84664d5c96c5030073021d0a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/zh-CN/design.md",
+      "destination": "help/web/downloads/zh-CN/design.md",
+      "sha256": "315a3acb895d6eb96bc2987b98c9ba2ba4fb9e1598e4965cf5bb03442f5839bc"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/zh-CN/design.pdf",
+      "destination": "help/web/downloads/zh-CN/design.pdf",
+      "sha256": "aef016e44817ac596fc34735843f737fe84175982218baf71c76cb06b64cfe4e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/zh-CN/manual-text.md",
+      "destination": "help/web/downloads/zh-CN/manual-text.md",
+      "sha256": "11fe5c063d9518b410343ab4b5ccb28f813d12b4859bbfc68f87dc3c6ab42330"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/zh-CN/manual.md",
+      "destination": "help/web/downloads/zh-CN/manual.md",
+      "sha256": "e65721fac4a365db15da1ebdc0ae148f227e31db81531df55e7e9ec079951437"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/downloads/zh-CN/manual.pdf",
+      "destination": "help/web/downloads/zh-CN/manual.pdf",
+      "sha256": "221d974c04f5bbc57dca1d89eb5c6bff8ee4612d98e15bd4d8bcbd4093d1097b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-01.png",
+      "destination": "help/web/design-assets/en-US/figure-01.png",
+      "sha256": "b3c9d8bc1a8bac4d7ad27e3d93eeda58f93a9110c10cadfc1715857a52cb50d8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-02.png",
+      "destination": "help/web/design-assets/en-US/figure-02.png",
+      "sha256": "11c50f6bc27d68e9f5ef0cf8acbfac3aeb933fbb1365a2a2d6a796331c8ac3fd"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-03.png",
+      "destination": "help/web/design-assets/en-US/figure-03.png",
+      "sha256": "e8ae19955bb8ebd9f62ee79c97dcdd8a871225eb34a97e478f39bacd26964cea"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-04.png",
+      "destination": "help/web/design-assets/en-US/figure-04.png",
+      "sha256": "575be0ff36d9c539df7b9bfacafb5eac6b87887a42632a2798f2edfac2247464"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-05.png",
+      "destination": "help/web/design-assets/en-US/figure-05.png",
+      "sha256": "f8a20c12f1fd868a932fba4cb35bc70a02352ce14935e83b4810a724462c9988"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-06.png",
+      "destination": "help/web/design-assets/en-US/figure-06.png",
+      "sha256": "a571de188539767e7227ae3cc4e68460bdd94aa86afcc5226fa0d91afad0e568"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-07.png",
+      "destination": "help/web/design-assets/en-US/figure-07.png",
+      "sha256": "aa73ea602c01191711498d6c05e389ac2626bcebd37e117e34b781211ec550e2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-08.png",
+      "destination": "help/web/design-assets/en-US/figure-08.png",
+      "sha256": "060e37b62ce70beaaa9e4e2e83581d60efb0dd063e870e5deed2f1a658062041"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-09.png",
+      "destination": "help/web/design-assets/en-US/figure-09.png",
+      "sha256": "396bcfd81576fa35b1937e8d7b6c707eab55f69082025d4d3fc055d8c475a58a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-10.png",
+      "destination": "help/web/design-assets/en-US/figure-10.png",
+      "sha256": "525016dda23a9103ece9920fabb75c7da635f447a66ebb353eefc00e6aef7f2a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-11.png",
+      "destination": "help/web/design-assets/en-US/figure-11.png",
+      "sha256": "adbb5bc4fe66eef3ff03613e7b770900706ca78e36373fb64969c0badda5150d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-12.png",
+      "destination": "help/web/design-assets/en-US/figure-12.png",
+      "sha256": "baadf25adec436e842982c294099279a2ff54c7f0606e29c4cdc48e7a6712005"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-13.png",
+      "destination": "help/web/design-assets/en-US/figure-13.png",
+      "sha256": "8b81aea087111c03ac2d7c783c3a967a3fa81b63f884e51271c8c4ec99078b6c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-14.png",
+      "destination": "help/web/design-assets/en-US/figure-14.png",
+      "sha256": "e2f8b8541ff152ed9eea0d978b01adb21069faf0f647c5d9f8e07c371ebba89e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-15.png",
+      "destination": "help/web/design-assets/en-US/figure-15.png",
+      "sha256": "ea1682ac56ec72e7383b2ec9e43231ec86dc73dffa5830d5b038cd97972f0c63"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-16.png",
+      "destination": "help/web/design-assets/en-US/figure-16.png",
+      "sha256": "8001bff8242b7d247a905ce68cc7eed7db5300cbd6f34b68b615482865c2b086"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-17.png",
+      "destination": "help/web/design-assets/en-US/figure-17.png",
+      "sha256": "f6785a0885b20b1f79528523fafac2a0442eea913aa0eac22d2fcf5f741f2d6c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/en-US/figure-18.png",
+      "destination": "help/web/design-assets/en-US/figure-18.png",
+      "sha256": "0871ff89b53216c048e35291fabf242bb9d0ad937460a64ee319b1ba14d6851f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-01.png",
+      "destination": "help/web/design-assets/ja-JP/figure-01.png",
+      "sha256": "04258184dd6f8ab4d0420058b3489964c029dc1974aafb4535b889ca0ad50778"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-02.png",
+      "destination": "help/web/design-assets/ja-JP/figure-02.png",
+      "sha256": "3b393f072742bfb940f05c5e6f8c584471eb1a55cf10444c862f9d446328bfd4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-03.png",
+      "destination": "help/web/design-assets/ja-JP/figure-03.png",
+      "sha256": "dfb8a6e1e3eff236b82d1ed31f49b97744b4dc7f1022c81e141300e84458cf98"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-04.png",
+      "destination": "help/web/design-assets/ja-JP/figure-04.png",
+      "sha256": "0c15b232d4af5cc05a7bf89f7cfd5c1422c500f63e4a9f8fe2f5095a978b1081"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-05.png",
+      "destination": "help/web/design-assets/ja-JP/figure-05.png",
+      "sha256": "fa2b5c9b45ef4960caa976c32252ae75e1c42307ef853a46fa451dc8b633585f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-06.png",
+      "destination": "help/web/design-assets/ja-JP/figure-06.png",
+      "sha256": "f0bd4dec190cbc9c3df3e04a49d376fceb12799dda2810266288cef495f35d23"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-07.png",
+      "destination": "help/web/design-assets/ja-JP/figure-07.png",
+      "sha256": "de5af4563b3f7aa875f0c2c89fe6b4cbf3a5981af810736726ecea88acc636a6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-08.png",
+      "destination": "help/web/design-assets/ja-JP/figure-08.png",
+      "sha256": "5dd157075525b1d8ba51c284a25e06f6324ff7e5586f4ded4b8875b19811f0c2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-09.png",
+      "destination": "help/web/design-assets/ja-JP/figure-09.png",
+      "sha256": "dd34669efd967698d44185ce94fbbb64f8288eaaa0987b9abe6979ce76d4be89"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-10.png",
+      "destination": "help/web/design-assets/ja-JP/figure-10.png",
+      "sha256": "1cefc6570986fe987a2f6944a29d41bba01184fadcfb60c383bb8c18d5c4c66e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-11.png",
+      "destination": "help/web/design-assets/ja-JP/figure-11.png",
+      "sha256": "dae8e0be13eea2d064c9b311506749c32320ffeff6e8639cb3a7b1b912a775ef"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-12.png",
+      "destination": "help/web/design-assets/ja-JP/figure-12.png",
+      "sha256": "6cdfe4a4296756e66cf10b1651e424954ed042930635d44e34d0c3f501c0b7a6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-13.png",
+      "destination": "help/web/design-assets/ja-JP/figure-13.png",
+      "sha256": "0a7f9230169cc6d69df5a05c92286f93255744f1f42bf9216a6031ca6a9243c6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-14.png",
+      "destination": "help/web/design-assets/ja-JP/figure-14.png",
+      "sha256": "04dcb3fb4441105083259b2c852ae319b2dc12216375aae5c3274f33c3f9cf77"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-15.png",
+      "destination": "help/web/design-assets/ja-JP/figure-15.png",
+      "sha256": "05027427140c9393f404a0ccf5fc0eaeac91ef8f9e7180a7213dc2bbc5b07326"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-16.png",
+      "destination": "help/web/design-assets/ja-JP/figure-16.png",
+      "sha256": "6eda38009c77275244b9388c24daff5b3c1be32414863360b9358a292a093ce6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-17.png",
+      "destination": "help/web/design-assets/ja-JP/figure-17.png",
+      "sha256": "19d2bbeaf11816c5650cdc26a24518fb3915d182a897bbc814cc0871289ae37a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/ja-JP/figure-18.png",
+      "destination": "help/web/design-assets/ja-JP/figure-18.png",
+      "sha256": "2cf4aa7ad7f494ff63ec1412ee41259a4c3009e8c59049c10dd8442317bae548"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-01.png",
+      "destination": "help/web/design-assets/zh-CN/figure-01.png",
+      "sha256": "78b122ae7ab7f77d84ab34e6642139a1ba2d37ccab4bd63f882a60f94da5dde5"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-02.png",
+      "destination": "help/web/design-assets/zh-CN/figure-02.png",
+      "sha256": "4ac526f915e77c8c0eebbc4b2ded91640a24757247fbd9ba6d92f3eecb817409"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-03.png",
+      "destination": "help/web/design-assets/zh-CN/figure-03.png",
+      "sha256": "69df2c52b2704263cd5e4d6ef8bd6fbbdd0db3ce8202e1929bf674581bc68e3e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-04.png",
+      "destination": "help/web/design-assets/zh-CN/figure-04.png",
+      "sha256": "6ad5db235a58536e57e4fdafd8e10da92b21104341499f6e51f50fba19e2e0aa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-05.png",
+      "destination": "help/web/design-assets/zh-CN/figure-05.png",
+      "sha256": "0f7aadfdd80d5309530843dd17a27c6a6e902ba3723a93a0e132315c75e276ff"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-06.png",
+      "destination": "help/web/design-assets/zh-CN/figure-06.png",
+      "sha256": "55ae4625897058b7ffd54df4a58ef12c0d91f4bdb7a58a74c75d8905601a22f1"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-07.png",
+      "destination": "help/web/design-assets/zh-CN/figure-07.png",
+      "sha256": "0bae6e777cf4b92692eb120d5fed50440cedcfb65a38fa654cfbc1fe53d4ab04"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-08.png",
+      "destination": "help/web/design-assets/zh-CN/figure-08.png",
+      "sha256": "efc28ef1f4d79134222ca97419305646c3b2f7bf81f758d9f45fa09b8a348877"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-09.png",
+      "destination": "help/web/design-assets/zh-CN/figure-09.png",
+      "sha256": "b0a2eaffaae5e07062ab0d4ff6b38374e5e2684533cdd5b02e30e4a0a894bc11"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-10.png",
+      "destination": "help/web/design-assets/zh-CN/figure-10.png",
+      "sha256": "0b3b1df4cdd34cfaf90e9aab61f6d77357950b90f51329ee70144d1237516a3f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-11.png",
+      "destination": "help/web/design-assets/zh-CN/figure-11.png",
+      "sha256": "73ce30c9269b3d45e65b8e78a7a23fe70b18b5ee104bc347ff87894457706e24"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-12.png",
+      "destination": "help/web/design-assets/zh-CN/figure-12.png",
+      "sha256": "2421bede87a6442ed1fc26d27a4fa25e7636791abf9d470fef51945f3a194305"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-13.png",
+      "destination": "help/web/design-assets/zh-CN/figure-13.png",
+      "sha256": "c1b1a38cd2c55074abbb5e8a5b5d8237d21a1178cf1e7ca90d5baa0e4810a6c9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-14.png",
+      "destination": "help/web/design-assets/zh-CN/figure-14.png",
+      "sha256": "5405b9fc0fc3d41445f2785a4db4cfe8e09580f961e45f068fa802ff0a76bc5e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-15.png",
+      "destination": "help/web/design-assets/zh-CN/figure-15.png",
+      "sha256": "1195595ef542453c7826f5576c754b8976befcc42cc15ebb304878afa2b95ebb"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-16.png",
+      "destination": "help/web/design-assets/zh-CN/figure-16.png",
+      "sha256": "387d87394519b0b7326b8a01bc6a73241f224f14b163ef51490ebbed9590cff9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-17.png",
+      "destination": "help/web/design-assets/zh-CN/figure-17.png",
+      "sha256": "d9ec7e09fdd9b1f73d16c25b1dfd64cd386b5d70b2ea9fa009531efb99cdbf24"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/design-assets/zh-CN/figure-18.png",
+      "destination": "help/web/design-assets/zh-CN/figure-18.png",
+      "sha256": "c9c9f6166017163173fa1e3a77301c1e98407dc6c29d18f6358cac67f50edc3b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/api-route.svg",
+      "destination": "help/web/assets/en-US/api-route.svg",
+      "sha256": "722bf0e774e1a84d800ab2cab3be34ff04830e47b2aad400d485375bc1641b75"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/billing.svg",
+      "destination": "help/web/assets/en-US/billing.svg",
+      "sha256": "9e0a50aaae34a5fcf5aee9220b08a78c35acc46c91e0f18e309de5b0c0b37acb"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/citation.svg",
+      "destination": "help/web/assets/en-US/citation.svg",
+      "sha256": "6fdbd2b3623793a2907fa32f71c4bd3d9b7f5d2e01b733e231b54fece1ac2b5a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/cli.svg",
+      "destination": "help/web/assets/en-US/cli.svg",
+      "sha256": "32331dbfcbf887999018816d400dbc497257aba7843d95aa22e345b60457707f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/flow.svg",
+      "destination": "help/web/assets/en-US/flow.svg",
+      "sha256": "2e4e1eacf1f640b7849158c41660f3ea83377d5e4d9a6b4a96a50abd9e6da7c8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/home.png",
+      "destination": "help/web/assets/en-US/home.png",
+      "sha256": "d659b620f1b081c2a7e60b71fabd5c61f35864a296db45a879fafc0e7bca8139"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/inbox.png",
+      "destination": "help/web/assets/en-US/inbox.png",
+      "sha256": "b1aa11af37d6d7b867c84f9b5196806d4a0bc14eb7d05244d2fb0bda6b6a1518"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/leaderboard.png",
+      "destination": "help/web/assets/en-US/leaderboard.png",
+      "sha256": "f5247ed6d25a81e25bdc33a5b519ef64247c9fb96ceb9a723fd8ea9a417ed665"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/library.png",
+      "destination": "help/web/assets/en-US/library.png",
+      "sha256": "deadfa51a4faabddbc334f29ed182bc99c06ec6011f98bedc11a905f285b0adf"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/local.svg",
+      "destination": "help/web/assets/en-US/local.svg",
+      "sha256": "f1592e2672f2127bc945db27ea43516b98d5415f3975deb05299dda1e9834e35"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/messages.png",
+      "destination": "help/web/assets/en-US/messages.png",
+      "sha256": "232959a8c23f68643a99ddc696280b01f0fa55c10f7eb976088159a983ada3c9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/research-illustration.svg",
+      "destination": "help/web/assets/en-US/research-illustration.svg",
+      "sha256": "c53cc7213d524bb1f421f19a23e6d53655c3f93ddb9ed0ba862c094314341084"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/research.svg",
+      "destination": "help/web/assets/en-US/research.svg",
+      "sha256": "c53cc7213d524bb1f421f19a23e6d53655c3f93ddb9ed0ba862c094314341084"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/sessions.svg",
+      "destination": "help/web/assets/en-US/sessions.svg",
+      "sha256": "b799f229e72b9ed9f88a94990c5bf4230cad8cc64d1b66680470b938cfc6bcb2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/settings.png",
+      "destination": "help/web/assets/en-US/settings.png",
+      "sha256": "ef96450c87713f3021886ee04c9cc314dee0d696018e1c1744dbaf158bfdf05b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/tasks.png",
+      "destination": "help/web/assets/en-US/tasks.png",
+      "sha256": "6dbe4c07ce2a692c58d14791c7a6e6bbc48b93730ceeefe2788405c7b3396103"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/web-reading.svg",
+      "destination": "help/web/assets/en-US/web-reading.svg",
+      "sha256": "177c86e52d9d383ff467c9bcec895a18ed84c3b1e3babf911024f42fff4c8f7d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/weights.png",
+      "destination": "help/web/assets/en-US/weights.png",
+      "sha256": "10dbbd181c27f6b87708e7572de123d4ff920c57642a0482c8b08be89eaddbb0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/api-route.svg",
+      "destination": "help/web/assets/ja-JP/api-route.svg",
+      "sha256": "cbe55915733a50940036dca9a75eb82a0748ab9a805d92a52c743d9115dc0208"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/billing.svg",
+      "destination": "help/web/assets/ja-JP/billing.svg",
+      "sha256": "6c6402e5db413d21a37e9608e5176ace71a4a51c0bfaf449ab0e8b454c98ebd4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/citation.svg",
+      "destination": "help/web/assets/ja-JP/citation.svg",
+      "sha256": "08b79bbeb9fa29d9e17804ab358d05e7deb8906096015d75ea84fb65a1d9d052"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/cli.svg",
+      "destination": "help/web/assets/ja-JP/cli.svg",
+      "sha256": "d101a994410ae6cbb68cf8f04a71f4581b6d902125c20475a289595fa143a725"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/flow.svg",
+      "destination": "help/web/assets/ja-JP/flow.svg",
+      "sha256": "bccaca5d41ba4df501e6d104e3cc312e4d3a0135df3340a570763e96178cdf45"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/home.png",
+      "destination": "help/web/assets/ja-JP/home.png",
+      "sha256": "cd48ab6232fd8ada00382b57107d1b98bbfb9afe9b08c30a65fd59a9f0cff7ed"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/inbox.png",
+      "destination": "help/web/assets/ja-JP/inbox.png",
+      "sha256": "ae4337356e23187d4c01b1238b8329afedb592b7cde15e0ccf65fa9051079657"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/leaderboard.png",
+      "destination": "help/web/assets/ja-JP/leaderboard.png",
+      "sha256": "7c353266bdc4b3c2e67bb397fd1b340b8a8c59feca7890d4e7ed8b1b06e64c4f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/library.png",
+      "destination": "help/web/assets/ja-JP/library.png",
+      "sha256": "d5a481362520ea4df095c99e4faa1442cd27781594624d74fcac9c96d6352a4f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/local.svg",
+      "destination": "help/web/assets/ja-JP/local.svg",
+      "sha256": "2c2dfa9eeabe2181960d1456983a0f06a82e21a7f4635592645c0ac0a86aec22"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/messages.png",
+      "destination": "help/web/assets/ja-JP/messages.png",
+      "sha256": "32638294e0ba705d5f81eb65df1c3b17acf5020df030f5bc3de4f0c85aebe360"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/research-illustration.svg",
+      "destination": "help/web/assets/ja-JP/research-illustration.svg",
+      "sha256": "0e76e1e5b152bb09924c6e01e889e7d07d1be6953a48e71ea5cccdc6d0ec0183"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/research.svg",
+      "destination": "help/web/assets/ja-JP/research.svg",
+      "sha256": "0e76e1e5b152bb09924c6e01e889e7d07d1be6953a48e71ea5cccdc6d0ec0183"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/sessions.svg",
+      "destination": "help/web/assets/ja-JP/sessions.svg",
+      "sha256": "556a2af90125b5c84e87f07863ed5b64a4610f071ae1a6dd0f495f5640a5d756"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/settings.png",
+      "destination": "help/web/assets/ja-JP/settings.png",
+      "sha256": "ef96450c87713f3021886ee04c9cc314dee0d696018e1c1744dbaf158bfdf05b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/tasks.png",
+      "destination": "help/web/assets/ja-JP/tasks.png",
+      "sha256": "e95daca4ead08fe29a217f5d6422ba13e8f6ee8bfebfc2ef7080ab6c66752fd6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/web-reading.svg",
+      "destination": "help/web/assets/ja-JP/web-reading.svg",
+      "sha256": "9594243d180285a0629f172375b02af172ef69aa146b5b6ea1d4665dca0ce171"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/weights.png",
+      "destination": "help/web/assets/ja-JP/weights.png",
+      "sha256": "24e4bd2d911cc9b4a4f2ee4c8c6fc80f72edd578c2a6119db468be9027d8f404"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/billing.svg",
+      "destination": "help/web/assets/zh-CN/billing.svg",
+      "sha256": "5ee90f78420e3dd078279349cbe1a048a6dd06f49c1169dc1495a0ca9ec67f77"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/citation.svg",
+      "destination": "help/web/assets/zh-CN/citation.svg",
+      "sha256": "04bc02d7fceaa40e6d1611ad943e728dcf58b23508bdb3c1b2605e1c596e3ae8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/cli.svg",
+      "destination": "help/web/assets/zh-CN/cli.svg",
+      "sha256": "7938d15736afccfbcdd445023efa9ae0c70038d4003cf0b5614c12463c7189be"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/flow.svg",
+      "destination": "help/web/assets/zh-CN/flow.svg",
+      "sha256": "4e09447363a4fcbc9185c25d3471b08b980a01a843d404f4b914f1a2b0b3685c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/home.png",
+      "destination": "help/web/assets/zh-CN/home.png",
+      "sha256": "abaefb787b18167573609e129eb40d2c32da762f96fee6de6cf154ab3a20742d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/inbox.png",
+      "destination": "help/web/assets/zh-CN/inbox.png",
+      "sha256": "8485781d16f3c6047b339e6817c0a666fed5f4707f7fa2307876ea8e7da94270"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/leaderboard.png",
+      "destination": "help/web/assets/zh-CN/leaderboard.png",
+      "sha256": "ede34385330fcfcf38c2f65233858554b647fad5516a7fb11ab1dc97ef1f590e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/library.png",
+      "destination": "help/web/assets/zh-CN/library.png",
+      "sha256": "ef686c60216024d870941a7d0ba76ba7a4c55e65b2b9f7f61454a015772ec88f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/local.svg",
+      "destination": "help/web/assets/zh-CN/local.svg",
+      "sha256": "6caba036f4f5a41c3c0c25cccb1b66063511206eca5a14cdc5753f437b8dfeb6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/messages.png",
+      "destination": "help/web/assets/zh-CN/messages.png",
+      "sha256": "aabf80df2a9db8d82b681ff429fb07822a6f04c7d6402dd270c65831b1793190"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/research.png",
+      "destination": "help/web/assets/zh-CN/research.png",
+      "sha256": "beeaa0135733cd9447af305dc991c85e6c029b8ecce3a548aaada469ee0b715d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/research.svg",
+      "destination": "help/web/assets/zh-CN/research.svg",
+      "sha256": "8e93fa201367156f373dfcfabd16f5e4275759a540c47afda44e1174621691c0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/sessions.svg",
+      "destination": "help/web/assets/zh-CN/sessions.svg",
+      "sha256": "0686217b3aaaa2db91028562903e5e97b101951cadb698b1eb92f5efb8fe4e4a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/settings.png",
+      "destination": "help/web/assets/zh-CN/settings.png",
+      "sha256": "ef96450c87713f3021886ee04c9cc314dee0d696018e1c1744dbaf158bfdf05b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/tasks.png",
+      "destination": "help/web/assets/zh-CN/tasks.png",
+      "sha256": "a327d9cbd545a4fc7e6ee62acaa294fb79b9003ede9a767a42d825de01cfe50e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/web-reading.svg",
+      "destination": "help/web/assets/zh-CN/web-reading.svg",
+      "sha256": "90d8b225b2cdc211b67e89f5d3332896e88bd4ba4ef27da84a1c9e4cb8c2dcf4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/weights.png",
+      "destination": "help/web/assets/zh-CN/weights.png",
+      "sha256": "36ed1ed0a2864b19c31a52b65bf1700c6eb9c4588a34e8fba046f1c919085ff8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/api-route.svg",
+      "destination": "help/ja-JP/assets/api-route.svg",
+      "sha256": "cbe55915733a50940036dca9a75eb82a0748ab9a805d92a52c743d9115dc0208"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/billing.svg",
+      "destination": "help/ja-JP/assets/billing.svg",
+      "sha256": "6c6402e5db413d21a37e9608e5176ace71a4a51c0bfaf449ab0e8b454c98ebd4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/citation.svg",
+      "destination": "help/ja-JP/assets/citation.svg",
+      "sha256": "08b79bbeb9fa29d9e17804ab358d05e7deb8906096015d75ea84fb65a1d9d052"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/cli.svg",
+      "destination": "help/ja-JP/assets/cli.svg",
+      "sha256": "d101a994410ae6cbb68cf8f04a71f4581b6d902125c20475a289595fa143a725"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/flow.svg",
+      "destination": "help/ja-JP/assets/flow.svg",
+      "sha256": "bccaca5d41ba4df501e6d104e3cc312e4d3a0135df3340a570763e96178cdf45"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/home.png",
+      "destination": "help/ja-JP/assets/home.png",
+      "sha256": "cd48ab6232fd8ada00382b57107d1b98bbfb9afe9b08c30a65fd59a9f0cff7ed"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/inbox.png",
+      "destination": "help/ja-JP/assets/inbox.png",
+      "sha256": "ae4337356e23187d4c01b1238b8329afedb592b7cde15e0ccf65fa9051079657"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/leaderboard.png",
+      "destination": "help/ja-JP/assets/leaderboard.png",
+      "sha256": "7c353266bdc4b3c2e67bb397fd1b340b8a8c59feca7890d4e7ed8b1b06e64c4f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/library.png",
+      "destination": "help/ja-JP/assets/library.png",
+      "sha256": "d5a481362520ea4df095c99e4faa1442cd27781594624d74fcac9c96d6352a4f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/local.svg",
+      "destination": "help/ja-JP/assets/local.svg",
+      "sha256": "2c2dfa9eeabe2181960d1456983a0f06a82e21a7f4635592645c0ac0a86aec22"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/messages.png",
+      "destination": "help/ja-JP/assets/messages.png",
+      "sha256": "32638294e0ba705d5f81eb65df1c3b17acf5020df030f5bc3de4f0c85aebe360"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/research-illustration.svg",
+      "destination": "help/ja-JP/assets/research-illustration.svg",
+      "sha256": "0e76e1e5b152bb09924c6e01e889e7d07d1be6953a48e71ea5cccdc6d0ec0183"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/research.svg",
+      "destination": "help/ja-JP/assets/research.svg",
+      "sha256": "0e76e1e5b152bb09924c6e01e889e7d07d1be6953a48e71ea5cccdc6d0ec0183"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/sessions.svg",
+      "destination": "help/ja-JP/assets/sessions.svg",
+      "sha256": "556a2af90125b5c84e87f07863ed5b64a4610f071ae1a6dd0f495f5640a5d756"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/settings.png",
+      "destination": "help/ja-JP/assets/settings.png",
+      "sha256": "9578670dc467dc4a74b166d35c325b6791dc6bafa2152b3ab13021b674fa2de6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/tasks.png",
+      "destination": "help/ja-JP/assets/tasks.png",
+      "sha256": "e95daca4ead08fe29a217f5d6422ba13e8f6ee8bfebfc2ef7080ab6c66752fd6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/web-reading.svg",
+      "destination": "help/ja-JP/assets/web-reading.svg",
+      "sha256": "9594243d180285a0629f172375b02af172ef69aa146b5b6ea1d4665dca0ce171"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/weights.png",
+      "destination": "help/ja-JP/assets/weights.png",
+      "sha256": "24e4bd2d911cc9b4a4f2ee4c8c6fc80f72edd578c2a6119db468be9027d8f404"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/api-route.svg",
+      "destination": "help/en-US/assets/api-route.svg",
+      "sha256": "722bf0e774e1a84d800ab2cab3be34ff04830e47b2aad400d485375bc1641b75"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/billing.svg",
+      "destination": "help/en-US/assets/billing.svg",
+      "sha256": "9e0a50aaae34a5fcf5aee9220b08a78c35acc46c91e0f18e309de5b0c0b37acb"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/citation.svg",
+      "destination": "help/en-US/assets/citation.svg",
+      "sha256": "6fdbd2b3623793a2907fa32f71c4bd3d9b7f5d2e01b733e231b54fece1ac2b5a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/cli.svg",
+      "destination": "help/en-US/assets/cli.svg",
+      "sha256": "32331dbfcbf887999018816d400dbc497257aba7843d95aa22e345b60457707f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/flow.svg",
+      "destination": "help/en-US/assets/flow.svg",
+      "sha256": "2e4e1eacf1f640b7849158c41660f3ea83377d5e4d9a6b4a96a50abd9e6da7c8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/home.png",
+      "destination": "help/en-US/assets/home.png",
+      "sha256": "d659b620f1b081c2a7e60b71fabd5c61f35864a296db45a879fafc0e7bca8139"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/inbox.png",
+      "destination": "help/en-US/assets/inbox.png",
+      "sha256": "b1aa11af37d6d7b867c84f9b5196806d4a0bc14eb7d05244d2fb0bda6b6a1518"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/leaderboard.png",
+      "destination": "help/en-US/assets/leaderboard.png",
+      "sha256": "f5247ed6d25a81e25bdc33a5b519ef64247c9fb96ceb9a723fd8ea9a417ed665"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/library.png",
+      "destination": "help/en-US/assets/library.png",
+      "sha256": "deadfa51a4faabddbc334f29ed182bc99c06ec6011f98bedc11a905f285b0adf"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/local.svg",
+      "destination": "help/en-US/assets/local.svg",
+      "sha256": "f1592e2672f2127bc945db27ea43516b98d5415f3975deb05299dda1e9834e35"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/messages.png",
+      "destination": "help/en-US/assets/messages.png",
+      "sha256": "232959a8c23f68643a99ddc696280b01f0fa55c10f7eb976088159a983ada3c9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/research-illustration.svg",
+      "destination": "help/en-US/assets/research-illustration.svg",
+      "sha256": "c53cc7213d524bb1f421f19a23e6d53655c3f93ddb9ed0ba862c094314341084"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/research.svg",
+      "destination": "help/en-US/assets/research.svg",
+      "sha256": "c53cc7213d524bb1f421f19a23e6d53655c3f93ddb9ed0ba862c094314341084"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/sessions.svg",
+      "destination": "help/en-US/assets/sessions.svg",
+      "sha256": "b799f229e72b9ed9f88a94990c5bf4230cad8cc64d1b66680470b938cfc6bcb2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/settings.png",
+      "destination": "help/en-US/assets/settings.png",
+      "sha256": "06775ad2a01632d52be10a5aa732fbf84903c07c2d81c230ff03c3fb289f387b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/tasks.png",
+      "destination": "help/en-US/assets/tasks.png",
+      "sha256": "6dbe4c07ce2a692c58d14791c7a6e6bbc48b93730ceeefe2788405c7b3396103"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/web-reading.svg",
+      "destination": "help/en-US/assets/web-reading.svg",
+      "sha256": "177c86e52d9d383ff467c9bcec895a18ed84c3b1e3babf911024f42fff4c8f7d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/weights.png",
+      "destination": "help/en-US/assets/weights.png",
+      "sha256": "10dbbd181c27f6b87708e7572de123d4ff920c57642a0482c8b08be89eaddbb0"
+    },
+    {
+      "source": "memorive_desktop/contracts/accounting/AccountingPanelProductMethod-v3.json",
+      "destination": "contracts/accounting/AccountingPanelProductMethod-v3.json",
+      "sha256": "1af5b65dd2a036d63ab0f7f57706f885801edb50b6ad9f6581b54581e38c9a9e"
+    },
+    {
+      "source": "memorive_desktop/contracts/accounting/AccountingPanelProjection-v3.schema.json",
+      "destination": "contracts/accounting/AccountingPanelProjection-v3.schema.json",
+      "sha256": "3f75e7c756947fbb501a24a8ef524806bffdd7a0922b21fc52c4ac46ff1ec497"
+    },
+    {
+      "source": "memorive_desktop/contracts/accounting/SharedModelCommerceContext-v1.schema.json",
+      "destination": "contracts/accounting/SharedModelCommerceContext-v1.schema.json",
+      "sha256": "f5c3a67b3b306479cc53dac4b4b3052bc5916c934f257fc96e22ad6b87568567"
+    },
+    {
+      "source": "memorive_desktop/contracts/accounting/SharedModelCommerceContextBinding-v1.json",
+      "destination": "contracts/accounting/SharedModelCommerceContextBinding-v1.json",
+      "sha256": "ee9ed9fbf67b85288405b4b2f04cd14df45049cab506121097504d271bf3ea90"
+    },
+    {
+      "source": "memorive_desktop/contracts/verification/CurrentTaskStateContract.json",
+      "destination": "contracts/verification/CurrentTaskStateContract.json",
+      "sha256": "49152b87a0217b29edb8231e3728d1dcfd12aa31041e9330c91b50f8cf23b522"
+    },
+    {
+      "source": "memorive_desktop/contracts/verification/RouteContract.json",
+      "destination": "contracts/verification/RouteContract.json",
+      "sha256": "40aca49491cf67f141601fc089adeed4eda9e0c3e6b890227fa84c91eaf5900d"
+    },
+    {
+      "source": "memorive_desktop/contracts/retrieval/LocatorRouteContract.json",
+      "destination": "contracts/retrieval/LocatorRouteContract.json",
+      "sha256": "88f1ea50ac5c23223ce75016f32011ab78ef81e5e0e00495e068b32e9e806b98"
+    },
+    {
+      "source": "memorive_desktop/contracts/retrieval/MessageIdentityDedupeOrderRules.json",
+      "destination": "contracts/retrieval/MessageIdentityDedupeOrderRules.json",
+      "sha256": "2d88bcf5afb883dcef4b1eeaccf25c471ccbe9bf079bc4cf52a337962ef50e2e"
+    },
+    {
+      "source": "memorive_desktop/contracts/retrieval/MessageStateAxesContract.json",
+      "destination": "contracts/retrieval/MessageStateAxesContract.json",
+      "sha256": "b36ea03cedc60ed0d13fbc864d7506847d8148e6fdef59898920b309759ccec8"
+    },
+    {
+      "source": "memorive_desktop/contracts/retrieval/NotificationPrivacyPolicy.json",
+      "destination": "contracts/retrieval/NotificationPrivacyPolicy.json",
+      "sha256": "bba8b43b650ae03763d3e78706b2ff68639460f9d531bf07d757c60acf09bce8"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/FrozenSourceAccessEnvelope.json",
+      "destination": "contracts/analysis/FrozenSourceAccessEnvelope.json",
+      "sha256": "b815e82c99f85b91f9a94a568d1ce9e25310314a6e630595ae83fbecad0faefd"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionsSessionActionStateContract.json",
+      "destination": "contracts/analysis/SessionsSessionActionStateContract.json",
+      "sha256": "7d36cb889dc5b6564f1cdc5a7657119498048861340888d4bb3f2bd62afcb809"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionAcceptanceDenominator.json",
+      "destination": "contracts/analysis/SessionAcceptanceDenominator.json",
+      "sha256": "0dd1d198c26bbd1b6fa9deebd0d15ff8019d5dc9013c1824c50c4526263b4455"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionCaptureWorkflowContract.json",
+      "destination": "contracts/analysis/SessionCaptureWorkflowContract.json",
+      "sha256": "3c726b93cad4371863644903e6eac941a1723bee3a7e152643fa230932f629e2"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionFaultDenominator.json",
+      "destination": "contracts/analysis/SessionFaultDenominator.json",
+      "sha256": "d92eb5cca433fedd8f163d4dac6eb93b050b1bcf50ace71511fd46bf8cb9fc9e"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionIdentityDedupeLineageContract.json",
+      "destination": "contracts/analysis/SessionIdentityDedupeLineageContract.json",
+      "sha256": "e878968ed0382e47478d79eb596ff2898e1271e54d8308eb70aa8f5e36ec8fdc"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionPrivacyProjectionContract.json",
+      "destination": "contracts/analysis/SessionPrivacyProjectionContract.json",
+      "sha256": "525018f454f4ff73c3ff6c9ec2cbf2847817fb006da31b64cb446162ea4ff67a"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SessionSourceCapabilityMatrix.json",
+      "destination": "contracts/analysis/SessionSourceCapabilityMatrix.json",
+      "sha256": "4360220bbf2ad0e51f96d24893244f77c599c609da82a30b6981eb900185f5ce"
+    },
+    {
+      "source": "memorive_desktop/contracts/analysis/SourceAccessEnvelope.schema.json",
+      "destination": "contracts/analysis/SourceAccessEnvelope.schema.json",
+      "sha256": "44c83f100d8298c0b78fffd0f8e2cb044f6c273f0b57d6d061b06d9bd63fce3b"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/CanonicalArtifactRegistryReadOnlyBoundary.json",
+      "destination": "contracts/integration/CanonicalArtifactRegistryReadOnlyBoundary.json",
+      "sha256": "870a0c6faa1e9cb10f6db36b3b6c6efbf6be8e3c8657f51d1b2f7de82d0b2cfe"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/LibraryAcceptanceDenominator.json",
+      "destination": "contracts/integration/LibraryAcceptanceDenominator.json",
+      "sha256": "1a5072804126745a23af034397d0edee45f6d4c88a3179c0004f0e3c4abc4aa3"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/LibraryAssetIdentityContract.json",
+      "destination": "contracts/integration/LibraryAssetIdentityContract.json",
+      "sha256": "5d076f4f977d10e887017eada38d3a4af78013e6378df7e6e247f9686ae2f398"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/LibraryFaultDenominator.json",
+      "destination": "contracts/integration/LibraryFaultDenominator.json",
+      "sha256": "97a4a8abc2b3387ba73032a8dd6ffcf84c0a6f92452cfbff244a3d12aef09d77"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/LibraryLineageRightsStatusContract.json",
+      "destination": "contracts/integration/LibraryLineageRightsStatusContract.json",
+      "sha256": "739ed2b713eb57a7c1f1bad60c850d31f0b285a7248cf422ce714bbb5092b63d"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/LibraryLocatorFallbackContract.json",
+      "destination": "contracts/integration/LibraryLocatorFallbackContract.json",
+      "sha256": "954b811b1440e3e7586d235363fb424eeeae0b9c2461afc50aed003e3560d03a"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/LibraryLibraryActionStateContract.json",
+      "destination": "contracts/integration/LibraryLibraryActionStateContract.json",
+      "sha256": "f1a67416286ff67c3f21d7ba0e7a9b68add7e1da1d900aed61e943f9befea120"
+    },
+    {
+      "source": "memorive_desktop/contracts/integration/SafeExternalViewContract.json",
+      "destination": "contracts/integration/SafeExternalViewContract.json",
+      "sha256": "5fa0a79c12dbaf96ad30b049f62cea32f44adfcd5d9f2f8703d87b5a59c59bea"
+    },
+    {
+      "source": "memorive_desktop/contracts/logging/WorklogWorkLogActionStateContract.json",
+      "destination": "contracts/logging/WorklogWorkLogActionStateContract.json",
+      "sha256": "8dde77f6e8b2019b41a0cb3054a6d78cf8ce316aa40ce0f831b2a6f1e5aa9876"
+    },
+    {
+      "source": "memorive_desktop/contracts/logging/WorkLogAcceptanceDenominator.json",
+      "destination": "contracts/logging/WorkLogAcceptanceDenominator.json",
+      "sha256": "3d4667129532d2355b5aaa0ca62bd5a07eb081fa3b62aed383a54797aec165c5"
+    },
+    {
+      "source": "memorive_desktop/contracts/logging/WorkLogAuthoritySeparationContract.json",
+      "destination": "contracts/logging/WorkLogAuthoritySeparationContract.json",
+      "sha256": "f9ecc36bc6e78ea157aac2f0c01ca44081136e8a283dc85a8c9b22939fffa275"
+    },
+    {
+      "source": "memorive_desktop/contracts/logging/WorkLogEventContract.json",
+      "destination": "contracts/logging/WorkLogEventContract.json",
+      "sha256": "faa62a9160aea0f3062dffbf5117463c62a20e1f220f8b03e12dc42a335bfca5"
+    },
+    {
+      "source": "memorive_desktop/contracts/logging/WorkLogFaultDenominator.json",
+      "destination": "contracts/logging/WorkLogFaultDenominator.json",
+      "sha256": "55c6b192bff30c2e818d779ad56a258a62009e93239502f3e4b2db1d56227dbf"
+    },
+    {
+      "source": "memorive_desktop/contracts/logging/WorkLogPublicSafeExportContract.json",
+      "destination": "contracts/logging/WorkLogPublicSafeExportContract.json",
+      "sha256": "d3513a974194dbe41f4a19722435477eb79fbdc7e99a2bf4ad0b7c2167f46f47"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/AssistantStatePresentationContract.json",
+      "destination": "contracts/extensions/AssistantStatePresentationContract.json",
+      "sha256": "82e145f4d4f622ff2f6a69534708a067fc91cec9359f1ad626bc3a3d8547d77a"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/AssistantWindowCapabilityContract.json",
+      "destination": "contracts/extensions/AssistantWindowCapabilityContract.json",
+      "sha256": "6b7e15aa0ac87ef75035133126022fb3008e34113b5172b62956404ccc81b75d"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/DesktopFolderManagementPolicy.json",
+      "destination": "contracts/extensions/DesktopFolderManagementPolicy.json",
+      "sha256": "e51d2a5d00efb6d39e59ff1933c18d0a0d9a56fe85a28dd435070f055a965cb5"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/DesktopResourceLimitsPolicy.json",
+      "destination": "contracts/extensions/DesktopResourceLimitsPolicy.json",
+      "sha256": "f47be465717daddd454129bded5d3faefe36aca06811e4b1b23a3de3cee53141"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/SafeShortcutRegistryContract.json",
+      "destination": "contracts/extensions/SafeShortcutRegistryContract.json",
+      "sha256": "763377eb7af1b5a6685034a23abf098da754a27b14475f3bc8c7b1dd66e4fe5b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.png",
+      "destination": "assets/decorations/assistant-error.png",
+      "sha256": "65cd34d76bcc53257e77724771093b35fc0326054e4f724a24041c0ebfaa897e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
+      "destination": "assets/decorations/assistant-error.svg",
+      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.png",
+      "destination": "assets/decorations/assistant-save-success.png",
+      "sha256": "c93994fa3b6a871b5e247c0cfcdfe2a2788384d7513153510025923854c65600"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
+      "destination": "assets/decorations/assistant-save-success.svg",
+      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.png",
+      "destination": "assets/decorations/empty-state.png",
+      "sha256": "edc2423a19b17878effb73f11fccffc96fcc17ea0274a1e03930618875a84443"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
+      "destination": "assets/decorations/empty-state.svg",
+      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.png",
+      "destination": "assets/decorations/home-interaction.png",
+      "sha256": "e3dd7792cba61a66873f94ecc526af6751e03f20c7b426063fed73ba7f3f9e99"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
+      "destination": "assets/decorations/home-interaction.svg",
+      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.png",
+      "destination": "assets/decorations/home-question.png",
+      "sha256": "d676100706521a8688838f2b2681d14707c0a781cf1afb5ced692fda1fe63efa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
+      "destination": "assets/decorations/home-question.svg",
+      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_01.svg",
+      "destination": "assets/decorations/加载中合成_01.svg",
+      "sha256": "135e21e204bc00c998fe14e582b6de14d75d595c9363c8b74feed751c785a35d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_02.svg",
+      "destination": "assets/decorations/加载中合成_02.svg",
+      "sha256": "32a56726740a17d8b5c04d77906b36c372f061ecf3a250f7c35b9dc73c476806"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_03.svg",
+      "destination": "assets/decorations/加载中合成_03.svg",
+      "sha256": "18e39118246cee4025a65719284f65746b5b718940bfe8c627dc27ea80aef36b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_04.svg",
+      "destination": "assets/decorations/加载中合成_04.svg",
+      "sha256": "f8d189dbe981c57a0c7705587c1746a7f5b3a48523eadace91f1b871a26b7488"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_05.svg",
+      "destination": "assets/decorations/加载中合成_05.svg",
+      "sha256": "fc3a49e310064381e4928411f3ee3eed79f5badafe6a2cd2bbb2209d75bbe8b4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_06.svg",
+      "destination": "assets/decorations/加载中合成_06.svg",
+      "sha256": "2a7f68f821f9aae8a89e1349faa4e86e7bb6893b864b80aea04cb1c1b8fbcc34"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
+      "destination": "assets/illustrations/empty.svg",
+      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
+      "destination": "assets/illustrations/injury.svg",
+      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/manifest.json",
+      "destination": "assets/illustrations/manifest.json",
+      "sha256": "b3d3f0a97de560da0c57a0c2e9765a1dbe5041322d106b5ed2cd6752a444a533"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/neutral.svg",
+      "destination": "assets/illustrations/neutral.svg",
+      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/one_eye.svg",
+      "destination": "assets/illustrations/one_eye.svg",
+      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/memorive.ico",
+      "destination": "assets/illustrations/memorive.ico",
+      "sha256": "69323726708144b820e961eb8e203527b4fee798db7a5a67023fc5c9ab3f35b6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
+      "destination": "assets/illustrations/question.svg",
+      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/shovel.svg",
+      "destination": "assets/illustrations/shovel.svg",
+      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/sleepy.svg",
+      "destination": "assets/illustrations/sleepy.svg",
+      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/sprite.svg",
+      "destination": "assets/illustrations/sprite.svg",
+      "sha256": "1981f58e0f8e0fc6f42a29d29b1f5d276fb1929fb92205deaed7ade46f14cd9e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
+      "destination": "assets/illustrations/success.svg",
+      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
+      "destination": "assets/illustrations/wink.svg",
+      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/writing.svg",
+      "destination": "assets/illustrations/writing.svg",
+      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
+      "destination": "assets/illustrations/互动logo.svg",
+      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/writing.svg",
+      "destination": "assets/illustrations/完成logo.svg",
+      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/one_eye.svg",
+      "destination": "assets/illustrations/常驻logo.svg",
+      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
+      "destination": "assets/illustrations/报错logo.svg",
+      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/shovel.svg",
+      "destination": "assets/illustrations/施工logo.svg",
+      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
+      "destination": "assets/illustrations/无文件logo.svg",
+      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
+      "destination": "assets/illustrations/疑问logo.svg",
+      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/neutral.svg",
+      "destination": "assets/illustrations/眨眼logo01.svg",
+      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/sleepy.svg",
+      "destination": "assets/illustrations/眨眼logo02.svg",
+      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
+      "destination": "assets/illustrations/确认logo.svg",
+      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/DesktopExpressionConsoleContract-v1.json",
+      "destination": "contracts/extensions/DesktopExpressionConsoleContract-v1.json",
+      "sha256": "7f7d0721e482a7ea6bd8059cddfede727b118ab24d3aedab7d17154afd676fc8"
+    },
+    {
+      "source": "memorive_desktop/contracts/extensions/DesktopExpressionConsoleHandoff-v1.md",
+      "destination": "contracts/extensions/DesktopExpressionConsoleHandoff-v1.md",
+      "sha256": "c8c88dfb4737c8dfbfff71559d365531cba6c8f5bd7f3e16d684015819cbf550"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_任务依赖与接口矩阵_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_任务依赖与接口矩阵_模块契约_r0.1.json",
+      "sha256": "362806857104dd0e8233aa676320bdcf8caf5e208569e0eea8d846f75da08f9d"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_任务依赖与接口矩阵_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_任务依赖与接口矩阵_模块契约_r0.1.md",
+      "sha256": "6db6a9ea4f3e5e2759ba3cda9f3a4edf24c3dbbb0a0187956df7438d59542207"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_共同合同设计清单_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_共同合同设计清单_模块契约_r0.1.json",
+      "sha256": "c5ffcc4ee38d259cea038949889b79fe16d9f0acba7f5933d5c25e364e0914a1"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_发现共同对象_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_发现共同对象_模块契约_r0.1.md",
+      "sha256": "d97e06841b537991d5db640ea024746aa4e4b73bd5f391c9a24b746294007067"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_发现共同对象_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_发现共同对象_模块契约_r0.1.schema.json",
+      "sha256": "dc97cacd7a94e94a2a8b79db7b764ca732a465ab00b75da79cb9c2c3c10e8c5b"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_对象所有权与接口基线_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_对象所有权与接口基线_模块契约_r0.1.json",
+      "sha256": "04727fa5993011e1741543f594377e01579d14a0099c4bcb3c439c97c3cd5322"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_对象所有权与接口基线_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_对象所有权与接口基线_模块契约_r0.1.md",
+      "sha256": "44a691d72eb3e6bccbb5ab78032994ff0d2c660820a08e4492bdd41e0858de86"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_正交状态迁移_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_正交状态迁移_模块契约_r0.1.md",
+      "sha256": "b97bfd55c349e30666dcdd753b67e04c7720caf0327336116d977417c7309986"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_正交状态迁移_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_正交状态迁移_模块契约_r0.1.schema.json",
+      "sha256": "5637c64a2f5b27caf84c66ddc5e542145b65a6642d5e7868685ce0781abc6f9c"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_正交状态迁移表_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_正交状态迁移表_模块契约_r0.1.json",
+      "sha256": "35fe19917a41d6d3c1d9f3dcaa4866d0f63a16613eb0daf2eb02a4e42ca65b9c"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_研究上下文_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_研究上下文_模块契约_r0.1.md",
+      "sha256": "9c3065d849aa10960fdda9d9be4e789c1d5129a286269b5620fda5545fdd2570"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_研究上下文_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_研究上下文_模块契约_r0.1.schema.json",
+      "sha256": "42e457ad2a82686cac709da889498565cf9f8f2da15033392615884b9f5689f5"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_错误语义目录_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_错误语义目录_模块契约_r0.1.json",
+      "sha256": "83603b06c53d23a3bfbff0a54e1bd0f112949c960df5e31a77387e8b472eff2f"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_错误语义目录_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_错误语义目录_模块契约_r0.1.md",
+      "sha256": "408032eef0f0d1de513bead34a59a6f85bf1402c03eb6b0069a908f52f4a985f"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_门禁Profile对齐矩阵_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_门禁Profile对齐矩阵_模块契约_r0.1.json",
+      "sha256": "fd5bbe34a0ac99af031adfad9268eaa4e0f69b188f5c43bb9e8eb406f434d838"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_门禁Profile对齐矩阵_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_门禁Profile对齐矩阵_模块契约_r0.1.md",
+      "sha256": "5b6819800f5ba117a231be127fce19425459079e6590434ca9393779a1af7462"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_ExternalSourceRequestReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_ExternalSourceRequestReceipt_模块契约_r0.1.schema.json",
+      "sha256": "f4a3da9cf2efa87d8fb6bfa3c3b6057930c8f0b0c26e91d893798321533d8b71"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_ExternalSourceRequestReceipt_模块契约_r0.2.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_ExternalSourceRequestReceipt_模块契约_r0.2.schema.json",
+      "sha256": "8ede4e78bed816cede1bf29dc9570e43ee216ee98e7a3bf4692771e09305876f"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceObservation_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceObservation_模块契约_r0.1.schema.json",
+      "sha256": "e7a2768cf53a4d7497efa9e0b42c132a3b55f93e44cd43a64c93cefd91dd4cd6"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceObservation_模块契约_r0.2.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceObservation_模块契约_r0.2.schema.json",
+      "sha256": "5f4fd24da948dad15777a745aa16644fc0d9e8c9d3a0d6ba3cafd1da49c7f74a"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceSnapshot_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceSnapshot_模块契约_r0.1.schema.json",
+      "sha256": "9fec6e4165a8499298e72b9bb309c027e2989c754eda0cfd835bfef609a4d555"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceSnapshot_模块契约_r0.2.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_SourceSnapshot_模块契约_r0.2.schema.json",
+      "sha256": "c9998192e4d4a495f45a46a504248a2405d448e62475f40df9e76d5b303096ae"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器与来源证据_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器与来源证据_模块契约_r0.1.md",
+      "sha256": "363563b6a658ebe2e9c330db732c2bb6ae4128c3f049c1d90eea3821de043486"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器协议_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器协议_模块契约_r0.1.schema.json",
+      "sha256": "c672527a2f033e2e618504f404234e4d3883a394a069ab55a23458d2b3c94dae"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器注册表_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器注册表_模块契约_r0.1.json",
+      "sha256": "b751de09b10ea5cb64ac8858a24b6e56975ba4d57039ba655041189928c49fa0"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器能力声明_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_连接器能力声明_模块契约_r0.1.schema.json",
+      "sha256": "6b0d71ac4347817d208565d6cfc53b41c42a8fa2262e154dcc322b3d30fb44b1"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_错误语义目录_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_错误语义目录_模块契约_r0.1.json",
+      "sha256": "1bbeacadbd75029aaa41dfaa07f8cfc6b3292d2e64e6ce142d23d244df5cc8c5"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_非模型逐调用适用性判定_候选_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_SOURCE_CONNECTORS_LITERATURE_DISCOVERY_非模型逐调用适用性判定_候选_r0.1.md",
+      "sha256": "69a519c6d978448f3d71b86e9e072a9160693824626047bcf11cc2c24e67930c"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_BibliographicIdentity_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_BibliographicIdentity_模块契约_r0.1.schema.json",
+      "sha256": "dd0cbe463c3c416090fd5026e80b0a6a6e826ff62658567e6449852229ed7791"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_CandidateRecordIdentityProjection_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_CandidateRecordIdentityProjection_模块契约_r0.1.schema.json",
+      "sha256": "5061fbccc5cd288e735d861c81b6a96e6919f95518da88bdfaa5c67542256e0a"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_IdentityConflict_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_IdentityConflict_模块契约_r0.1.schema.json",
+      "sha256": "5ec41d1a73a2413867e11133cd8c46429d262c85401c02bb7c5476e15cbcf379"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_IdentityReviewQueueItem_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_IdentityReviewQueueItem_模块契约_r0.1.schema.json",
+      "sha256": "ca9281c0b74fe65160649dc1f9684e67e3c959bc765583d5f8b803d865d4762a"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_Manifestation_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_Manifestation_模块契约_r0.1.schema.json",
+      "sha256": "c036a5761852a326d02ac70aca9905ae32dbbb4c2ec32bfa4ff1fbcce078af18"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_WorkCluster_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_WorkCluster_模块契约_r0.1.schema.json",
+      "sha256": "9197a01c4a09f8d968d9aeaceea5d9268ab57c6733e3977f0b3daff40183e7d4"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_书目身份Schema清单_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_书目身份Schema清单_模块契约_r0.1.json",
+      "sha256": "d1286e82cd8703e9005f15b357794b5ce36c10d6582e0fc5f2587348d0aeb280"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_书目身份与版本聚类_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_书目身份与版本聚类_模块契约_r0.1.md",
+      "sha256": "6004b5fd68e9ab5a013d9467d1635679e5e094387496ab37a7d3d25908ee60a4"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_CandidateComparison_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_CandidateComparison_模块契约_r0.1.schema.json",
+      "sha256": "999fa3798b4138ca080bdccfff1ac64b2771fc740cdda7cfcd861d76e0c2fb4e"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_CandidateInputProjection_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_CandidateInputProjection_模块契约_r0.1.schema.json",
+      "sha256": "82d7ea10c5f0a3a558ad707e954a8c076c919d13e30ca09202ed0ce2d65b3a37"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_LibraryRelation_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_LibraryRelation_模块契约_r0.1.schema.json",
+      "sha256": "85aa9a3beb675b345454367849ccb10290d3a85c8e5594396f7a87fbb75268ef"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_LocalLibraryReadSnapshot_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_LocalLibraryReadSnapshot_模块契约_r0.1.schema.json",
+      "sha256": "247f8005050269a37e72727e99a145227c23d9bcc494f8fc2c17de4a742f5df8"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_NoveltyEvidence_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_NoveltyEvidence_模块契约_r0.1.schema.json",
+      "sha256": "7d3bd1c321fa9bd72d0c6c1cc94659d10108794931f3c5e6ecb8447d2e8830c9"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_合同Schema清单_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_合同Schema清单_模块契约_r0.1.json",
+      "sha256": "ca4000f96306b5119ce60fcd92e42bc06d937944c691d461dfbd1122986f4fff"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_本地关系与多维新颖性_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_NOVELTY_ASSESSMENT_LITERATURE_DISCOVERY_本地关系与多维新颖性_模块契约_r0.1.md",
+      "sha256": "18c3502f5394dea9b13f24818b23f8b875ffd5d9b7d0ba3c288772a7ac328bc4"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_CandidateCluster_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_CandidateCluster_模块契约_r0.1.schema.json",
+      "sha256": "754d7503f225e846d03b55d74df450a99033afe64ee6f9174c4eb5977d59ce6d"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_CoveragePolarizationReport_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_CoveragePolarizationReport_模块契约_r0.1.schema.json",
+      "sha256": "c1bd854b80c10eea2fd12930b4de7c999b6f8046b798cf7c7d61c7ef117fb72e"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_DiscoveryCandidateFact_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_DiscoveryCandidateFact_模块契约_r0.1.schema.json",
+      "sha256": "bb32bcf55bbe0077201f1382514651c9b431e619138c9a5c4af60d027b644dca"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_DiscoveryPlanDetail_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_DiscoveryPlanDetail_模块契约_r0.1.schema.json",
+      "sha256": "85d8c14c0e518ba7b3a7b31a9378206cc577d7d15549f1586b4aeecfa0096581"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_RecallChannelCandidate_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_RecallChannelCandidate_模块契约_r0.1.schema.json",
+      "sha256": "90f475f74e60b00e80be4de8d18a4e9491ac6a624b18636d569ba6d7c062fd8b"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_RecommendationSlateDetail_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_RecommendationSlateDetail_模块契约_r0.1.schema.json",
+      "sha256": "0c44c662bf88a9c3fc3ea560a9fc61998d7c40cc76d28f36615e522acc2efd65"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_ResearchContextDetail_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_ResearchContextDetail_模块契约_r0.1.schema.json",
+      "sha256": "fcdc5cc5fc86e13cd6dbf8156a4c0ef4bf8ba3b4c15a0d61a93547611c37e30c"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_合同Schema清单_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_合同Schema清单_模块契约_r0.1.json",
+      "sha256": "bc08bc9c5c86698202944b5ab22170adbebd2414491365d7f9c71cc1a0b37f64"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_多通道发现与有限Slate_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CHANNELS_CROSS_多通道发现与有限Slate_模块契约_r0.1.md",
+      "sha256": "67a3a3f747d317bcc478a52ef4e264a46ead4849bcea1a5bc31c347cc6120563"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_BehavioralInterestDigest_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_BehavioralInterestDigest_模块契约_r0.1.schema.json",
+      "sha256": "17f4155c6ba32880baeea3896bcb4ed2cac36c2c06d4ba2a473e080faa7f8d79"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ExposureLedger_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ExposureLedger_模块契约_r0.1.schema.json",
+      "sha256": "b6658af55d807939c0dbe8f368a7b3fd58db4c8bb407aca101fb899062985328"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ExposurePolicyChangeProposal_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ExposurePolicyChangeProposal_模块契约_r0.1.schema.json",
+      "sha256": "ea15696543d4dc092c4d14904bc57172ecb90325c5ee5f5c515a5ae574331334"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_FeedbackTaxonomy_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_FeedbackTaxonomy_模块契约_r0.1.schema.json",
+      "sha256": "25b5496460c031d2de1029a7a82434a9f5d142437bd63324ae253ee4181198b6"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ResearchInteractionEvidence_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ResearchInteractionEvidence_模块契约_r0.1.schema.json",
+      "sha256": "86324b148975e7d83de49edae3c2b96da99c2365dc71907c93a9c891b9e059c9"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ResurfacePolicy_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ResurfacePolicy_模块契约_r0.1.schema.json",
+      "sha256": "f37f641e25c2b90f62579a475d32a4a929e921062657655c5bc58a0d2e1d1731"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ScopedSuppressionRecord_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_ScopedSuppressionRecord_模块契约_r0.1.schema.json",
+      "sha256": "43b6faac2ae2c6e29e1bba99e5ee75f1b4a945baa0f998f04d64ca7cf4c3a1c3"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_冻结参数与路由_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_冻结参数与路由_模块契约_r0.1.json",
+      "sha256": "2cd4ea347531f45d60ce83885c49cbd19f8416ee9d42858d26cc46d134fdf91d"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_反馈曝光与弱信号_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_反馈曝光与弱信号_模块契约_r0.1.md",
+      "sha256": "3425ce87519fcdea26b66aed2955ef38c9d19eb84b1fa21a60e9ff431e1b8487"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_合同Schema清单_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_RECOMMENDATION_HISTORY_RESEARCH_RECOMMENDATIONS_合同Schema清单_模块契约_r0.1.json",
+      "sha256": "59de85617cbdb838e1da9fbac68820b6f846aaf59d46b30fab4bcd3147680baf"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateCardBundle_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateCardBundle_模块契约_r0.1.schema.json",
+      "sha256": "50d9d57a92372bd6092c07e43c3515eac6ed3dfd67dbf478743eff504b757263"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateCardSpace_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateCardSpace_模块契约_r0.1.md",
+      "sha256": "7115aa02966a6818996aa5608d27c7b32d6ef335b9f966943d7c36babaaa49eb"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateCardSpace配置_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateCardSpace配置_模块契约_r0.1.schema.json",
+      "sha256": "ace5416fdba78f01725e3830c9ff4bc1e5a3ab355bf1c3fe56c5ee46febc7365"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidatePaperIdentityReservation_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidatePaperIdentityReservation_模块契约_r0.1.md",
+      "sha256": "e50736a8df43c281da3e081fef51862352b21822335c0a5e7a812ded1c82a7ab"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidatePaperIdentityReservation_模块契约_r0.2.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidatePaperIdentityReservation_模块契约_r0.2.md",
+      "sha256": "eee309be08423b21f938b572f18394048dedfa2cd76e4923632ecfb2ce8b7437"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateReviewAction_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateReviewAction_模块契约_r0.1.schema.json",
+      "sha256": "f4d24697caf054b74a121148281ca737bebce0e38a53badb3623023cb90c21c9"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateReviewEnvelope_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateReviewEnvelope_模块契约_r0.1.schema.json",
+      "sha256": "eb9307f276289c3c7318f1c4a99afb827266891da3e6b9de62630fcf9ff9f754"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateReviewEnvelope_模块契约_r0.2.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_CandidateReviewEnvelope_模块契约_r0.2.schema.json",
+      "sha256": "99f9969f91ebd3d6f34e291a5af570d12f67cfd4e8b98be6301287072d090b24"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_FirstApprovalReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_FirstApprovalReceipt_模块契约_r0.1.schema.json",
+      "sha256": "8f0dddc02307e2ec111e0b4a0c25c06778ee42c5e1315341aea4ba6856b283e2"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_FirstApprovalReceipt_模块契约_r0.2.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_FirstApprovalReceipt_模块契约_r0.2.schema.json",
+      "sha256": "9c6743fd32d7c12d361b04ad5ac500f0ed50f1c0499f75bc7bed2dc85a0012e0"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_NoAnalysisIsolationPolicy_模块契约_r0.1.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_NoAnalysisIsolationPolicy_模块契约_r0.1.json",
+      "sha256": "179195120e0dbd488ef6268cb0faf7a7c07d14c3bac6d4aeb3cae0da7ed8829e"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_PaperIdentityReservationReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_PaperIdentityReservationReceipt_模块契约_r0.1.schema.json",
+      "sha256": "bfa910b59fae9e7a75cf151275948d56f9f17e9c125dea7cb42f9b508f484ac2"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_PaperIdentityReservationReceipt_模块契约_r0.2.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_PaperIdentityReservationReceipt_模块契约_r0.2.schema.json",
+      "sha256": "c1d56ca79912efc867617ed98219dca9971712ad9874a7f335aaa2bbc6ef6ddf"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_RightsVerificationReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_RightsVerificationReceipt_模块契约_r0.1.schema.json",
+      "sha256": "1596d23c398a5998b0aae34cd1aedc6b23262ff8d7cb425df09a508b553634d1"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_ShadowBAuthorizationReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_ShadowBAuthorizationReceipt_模块契约_r0.1.schema.json",
+      "sha256": "9b21936d8b343bf861c854d28d5c7e4c0a28de76602c14b5803c32f70b972627"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_StagingDecisionContract_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_CANDIDATE_REVIEW_CROSS_StagingDecisionContract_模块契约_r0.1.schema.json",
+      "sha256": "275dcfcac59f1b1802f0e6b532eef6054ad68134663fd2a53a44cb14dba94db6"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_CardPromotionIntent_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_CardPromotionIntent_模块契约_r0.1.schema.json",
+      "sha256": "189571c144444a7b127ced5a8a695511072c2cd43d76fa9261e295a35b19a2e5"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionFailureReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionFailureReceipt_模块契约_r0.1.schema.json",
+      "sha256": "1fef21defbfeee8f0366f733eface8dec18511ee98c6899da12ad31f78f9f1de"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionPreflight_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionPreflight_模块契约_r0.1.schema.json",
+      "sha256": "1f6722bc626776531548e5bcf698756154eb31f729fe1a30f452114cbf3775cb"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionReceipt_模块契约_r0.1.schema.json",
+      "sha256": "4ad00be3d78bf6ca5af95a5e75c57aeded8877573ee8c1f0fd428812cb0eda41"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionTransactionJournal_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_PromotionTransactionJournal_模块契约_r0.1.schema.json",
+      "sha256": "1027087bfc70eed78948280aa58d3b9ac932d9ce8483619784222771706aa1f0"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_SecondPromotionApprovalReceipt_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_SecondPromotionApprovalReceipt_模块契约_r0.1.schema.json",
+      "sha256": "da855955db6abcc08e1bbf87d495d6d1b08c2de37422ff128da2ae3699326e2b"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_原子晋升与补偿_模块契约_r0.1.md",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_KNOWLEDGE_PROMOTION_CROSS_原子晋升与补偿_模块契约_r0.1.md",
+      "sha256": "19300111442377d422666c750238d64aeb955665074a3d227c3cf20251f6083a"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_ACCEPTANCE_CROSS_InputManifest_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_ACCEPTANCE_CROSS_InputManifest_模块契约_r0.1.schema.json",
+      "sha256": "2914a22ada4e83223e8832867926d043124f84fa1a8237d9c992b4205acf04cc"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_ACCEPTANCE_CROSS_IntegratedResult_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_ACCEPTANCE_CROSS_IntegratedResult_模块契约_r0.1.schema.json",
+      "sha256": "b030966354d27a62bc8b462e192d5c1eeefa7623ef9a54f1890f5bf3074d91c4"
+    },
+    {
+      "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_ACCEPTANCE_CROSS_SyntheticSourceReplayBinding_模块契约_r0.1.schema.json",
+      "destination": "source/contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_ACCEPTANCE_CROSS_SyntheticSourceReplayBinding_模块契约_r0.1.schema.json",
+      "sha256": "b9b4240318dec25b9435b529692a7aa523c261274a0fb1f11c9dc0a6ce5606ac"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/license-privacy.md",
+      "destination": "help/zh-CN/license-privacy.md",
+      "sha256": "c06b939a83297a98a0d08528781c3e57036e8161ec3ebb52b8de7a87eeb8d174"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/license-privacy.html",
+      "destination": "help/zh-CN/license-privacy.html",
+      "sha256": "8e88620a4bd5866a81e44b81de9eb2c48641e1c8c859c10ede570e8a96de7d66"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/license-privacy.md",
+      "destination": "help/en-US/license-privacy.md",
+      "sha256": "949f2b2f7619bc0deb379e0572ecaa5f9232b7fb088be6a686ffd19d5cf3d364"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/license-privacy.html",
+      "destination": "help/en-US/license-privacy.html",
+      "sha256": "531265fac9a6f479df6d3e7aa0d3447f8cc8e369ac4ec4098b8219a78c78c4d9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/license-privacy.md",
+      "destination": "help/ja-JP/license-privacy.md",
+      "sha256": "0eaea1c823f7c858c7c0fae9fbead7e7c085cf6d57ce4455fbfd960e023bd0fe"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/license-privacy.html",
+      "destination": "help/ja-JP/license-privacy.html",
+      "sha256": "e9a6ae2d53b2b0e620208c2a7d2e951114086050c262252ea80ead5aa252d013"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/licenses/AGPL-3.0.txt",
+      "destination": "help/licenses/AGPL-3.0.txt",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-01.svg",
+      "destination": "help/en-US/assets/figure-01.svg",
+      "sha256": "9655cf2f4d8db1c3148241752889f0f6bb992b0f12033d4acec261838d58418a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-02.svg",
+      "destination": "help/en-US/assets/figure-02.svg",
+      "sha256": "2649035283ade63357e4dd86f7a56594560ec081762999e7252d5391b7491d51"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-03.svg",
+      "destination": "help/en-US/assets/figure-03.svg",
+      "sha256": "97894982c2f99bc195d33398861761a4ec44a27d155088dd16ca2dbff46bd864"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-04.svg",
+      "destination": "help/en-US/assets/figure-04.svg",
+      "sha256": "e41340b769dc96acc8a020add9226f3ca85da3775c476dbfb151add7e2bbab19"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-05.svg",
+      "destination": "help/en-US/assets/figure-05.svg",
+      "sha256": "14904ff010149cc4aca3df18f490e915e1bd9aab6490b1bcee4c46783d4374b4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-06.svg",
+      "destination": "help/en-US/assets/figure-06.svg",
+      "sha256": "7da6de63dd010df8cfc1c89f766d8b47c760e860417766b856ae938c5d60ed62"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-07.svg",
+      "destination": "help/en-US/assets/figure-07.svg",
+      "sha256": "c584343456462356017c4e94a46f529ac989ba5577a80ff67e5abd5219ea7c47"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-08.svg",
+      "destination": "help/en-US/assets/figure-08.svg",
+      "sha256": "c46e9b5b2127aa9db2f76f79255bed893ef44ab6f885112e6e3e9fa0635145fb"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-09.svg",
+      "destination": "help/en-US/assets/figure-09.svg",
+      "sha256": "afdcf098886e90a8de2dfce6c1a67f4411487b83618777015c14484e409d32d2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-10.svg",
+      "destination": "help/en-US/assets/figure-10.svg",
+      "sha256": "8875e1b14781c5c2a74cbaddf9d474ad78d2d589a6e5260925b9f5107e3986aa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-11.svg",
+      "destination": "help/en-US/assets/figure-11.svg",
+      "sha256": "16b8b596b551c81261038daf36eb2e3c3f5b0dfa03555ca1f284cdcfc48f8bb2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-12.svg",
+      "destination": "help/en-US/assets/figure-12.svg",
+      "sha256": "307c796c31d9a1fe882ee004e7799cabfe1834136ab3faf79d419429ba44596f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-13.svg",
+      "destination": "help/en-US/assets/figure-13.svg",
+      "sha256": "fc1aa87ec429e2b689850faa7727caeab0940ba79eeb3428f4cd26118aee5ce8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-14.svg",
+      "destination": "help/en-US/assets/figure-14.svg",
+      "sha256": "d1b3cd5887ca20c208e8fc8f750eda7d8ac3d278953f217d08cc2c9a80f9fdb1"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-15.svg",
+      "destination": "help/en-US/assets/figure-15.svg",
+      "sha256": "52211c1b5de4829185d80d370790b8a257308f23771465efb0d8d03d4afc10b0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-16.svg",
+      "destination": "help/en-US/assets/figure-16.svg",
+      "sha256": "aa5c7919b28c9b281fdd97b446590652c604c2c6e5ef70cdbfc38b4e3a072481"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-17.svg",
+      "destination": "help/en-US/assets/figure-17.svg",
+      "sha256": "758fa01e2f3baf4322cf9392e38a723103859564d4671c9c1cf81b8482bbe7ee"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/en-US/assets/figure-18.svg",
+      "destination": "help/en-US/assets/figure-18.svg",
+      "sha256": "1d6b102b465b649a4bac2cdfcee0a2da5eeef355e6f3409751d68e5ac13548db"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-01.svg",
+      "destination": "help/ja-JP/assets/figure-01.svg",
+      "sha256": "60de6a253e8fbd9e3266b08a07ec0ab76a44d15ea265625f2c07273b1a2149c5"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-02.svg",
+      "destination": "help/ja-JP/assets/figure-02.svg",
+      "sha256": "1879316ccab84e6b5d5bbc33f300f129af18afe8b9688d179e19380f3a46dd15"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-03.svg",
+      "destination": "help/ja-JP/assets/figure-03.svg",
+      "sha256": "d9ef51fca1186fe5fb1d699802a6c98be2cf53da886976017865f5487e6ac34a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-04.svg",
+      "destination": "help/ja-JP/assets/figure-04.svg",
+      "sha256": "0de3a04bcb5b80b5012a44b2ab6134a3d0a19f94fff4c84b05016976ffe0e48a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-05.svg",
+      "destination": "help/ja-JP/assets/figure-05.svg",
+      "sha256": "4daa88db1e14e316bec5e07167cee3d398fb6040b44aeeef175234273452f360"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-06.svg",
+      "destination": "help/ja-JP/assets/figure-06.svg",
+      "sha256": "3d6d548e0945831ccf5a301cfc7576b34ce2f5f98df419a797fa53c88b03c704"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-07.svg",
+      "destination": "help/ja-JP/assets/figure-07.svg",
+      "sha256": "50ae33a5bebed65467773cfdb58fc627f37ed33733b7a5d5f0e9429c041e0556"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-08.svg",
+      "destination": "help/ja-JP/assets/figure-08.svg",
+      "sha256": "8629d035039f2fb0d0880e3f1a50a8af730d441edcd12c0a2ccd88502aaaa917"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-09.svg",
+      "destination": "help/ja-JP/assets/figure-09.svg",
+      "sha256": "722bf7f1f0d1de08fe2e1fe01f3cf8ac7d4a76078f448bbbfbc80b6330634d00"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-10.svg",
+      "destination": "help/ja-JP/assets/figure-10.svg",
+      "sha256": "66a654f1ceb02aa9cbf80f00186e9efa380227127c5baaf6e89350683ce09915"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-11.svg",
+      "destination": "help/ja-JP/assets/figure-11.svg",
+      "sha256": "8cd006f1a918ccd42b557725dd5c4618d0feb3edced2914eb2b20755783abe1c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-12.svg",
+      "destination": "help/ja-JP/assets/figure-12.svg",
+      "sha256": "7428df950c41fd135066d3cf688263b35db99a897ecb0a6487684d2959700ac9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-13.svg",
+      "destination": "help/ja-JP/assets/figure-13.svg",
+      "sha256": "ede01de91335288c4eaefbbc3742451101a5166f31145bb50a2732c26adf91b0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-14.svg",
+      "destination": "help/ja-JP/assets/figure-14.svg",
+      "sha256": "ae6902029d1816b5169935c93c18a8bf70f83c574defbe4aa72ab227377fc82d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-15.svg",
+      "destination": "help/ja-JP/assets/figure-15.svg",
+      "sha256": "07b3f3bb7fbea4a8a84de0123b3eb96075ba28de1ae897d733a7a1d41bce800d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-16.svg",
+      "destination": "help/ja-JP/assets/figure-16.svg",
+      "sha256": "15b439275d598ffbea66f2382bd06a65dcb00a44b342a5cce777ddbe63fe14b0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-17.svg",
+      "destination": "help/ja-JP/assets/figure-17.svg",
+      "sha256": "bd24e0ea3053806097f96555db5a50838df857a24e958cd4db904b72391141db"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/ja-JP/assets/figure-18.svg",
+      "destination": "help/ja-JP/assets/figure-18.svg",
+      "sha256": "c148451dc0b631a19c65fbc2477c11ca1c14973683e0ebda03c6ffd22949f9aa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-01.svg",
+      "destination": "help/web/assets/en-US/figure-01.svg",
+      "sha256": "9655cf2f4d8db1c3148241752889f0f6bb992b0f12033d4acec261838d58418a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-02.svg",
+      "destination": "help/web/assets/en-US/figure-02.svg",
+      "sha256": "2649035283ade63357e4dd86f7a56594560ec081762999e7252d5391b7491d51"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-03.svg",
+      "destination": "help/web/assets/en-US/figure-03.svg",
+      "sha256": "97894982c2f99bc195d33398861761a4ec44a27d155088dd16ca2dbff46bd864"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-04.svg",
+      "destination": "help/web/assets/en-US/figure-04.svg",
+      "sha256": "e41340b769dc96acc8a020add9226f3ca85da3775c476dbfb151add7e2bbab19"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-05.svg",
+      "destination": "help/web/assets/en-US/figure-05.svg",
+      "sha256": "14904ff010149cc4aca3df18f490e915e1bd9aab6490b1bcee4c46783d4374b4"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-06.svg",
+      "destination": "help/web/assets/en-US/figure-06.svg",
+      "sha256": "7da6de63dd010df8cfc1c89f766d8b47c760e860417766b856ae938c5d60ed62"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-07.svg",
+      "destination": "help/web/assets/en-US/figure-07.svg",
+      "sha256": "c584343456462356017c4e94a46f529ac989ba5577a80ff67e5abd5219ea7c47"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-08.svg",
+      "destination": "help/web/assets/en-US/figure-08.svg",
+      "sha256": "c46e9b5b2127aa9db2f76f79255bed893ef44ab6f885112e6e3e9fa0635145fb"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-09.svg",
+      "destination": "help/web/assets/en-US/figure-09.svg",
+      "sha256": "afdcf098886e90a8de2dfce6c1a67f4411487b83618777015c14484e409d32d2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-10.svg",
+      "destination": "help/web/assets/en-US/figure-10.svg",
+      "sha256": "8875e1b14781c5c2a74cbaddf9d474ad78d2d589a6e5260925b9f5107e3986aa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-11.svg",
+      "destination": "help/web/assets/en-US/figure-11.svg",
+      "sha256": "16b8b596b551c81261038daf36eb2e3c3f5b0dfa03555ca1f284cdcfc48f8bb2"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-12.svg",
+      "destination": "help/web/assets/en-US/figure-12.svg",
+      "sha256": "307c796c31d9a1fe882ee004e7799cabfe1834136ab3faf79d419429ba44596f"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-13.svg",
+      "destination": "help/web/assets/en-US/figure-13.svg",
+      "sha256": "fc1aa87ec429e2b689850faa7727caeab0940ba79eeb3428f4cd26118aee5ce8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-14.svg",
+      "destination": "help/web/assets/en-US/figure-14.svg",
+      "sha256": "d1b3cd5887ca20c208e8fc8f750eda7d8ac3d278953f217d08cc2c9a80f9fdb1"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-15.svg",
+      "destination": "help/web/assets/en-US/figure-15.svg",
+      "sha256": "52211c1b5de4829185d80d370790b8a257308f23771465efb0d8d03d4afc10b0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-16.svg",
+      "destination": "help/web/assets/en-US/figure-16.svg",
+      "sha256": "aa5c7919b28c9b281fdd97b446590652c604c2c6e5ef70cdbfc38b4e3a072481"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-17.svg",
+      "destination": "help/web/assets/en-US/figure-17.svg",
+      "sha256": "758fa01e2f3baf4322cf9392e38a723103859564d4671c9c1cf81b8482bbe7ee"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/en-US/figure-18.svg",
+      "destination": "help/web/assets/en-US/figure-18.svg",
+      "sha256": "1d6b102b465b649a4bac2cdfcee0a2da5eeef355e6f3409751d68e5ac13548db"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-01.svg",
+      "destination": "help/web/assets/ja-JP/figure-01.svg",
+      "sha256": "60de6a253e8fbd9e3266b08a07ec0ab76a44d15ea265625f2c07273b1a2149c5"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-02.svg",
+      "destination": "help/web/assets/ja-JP/figure-02.svg",
+      "sha256": "1879316ccab84e6b5d5bbc33f300f129af18afe8b9688d179e19380f3a46dd15"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-03.svg",
+      "destination": "help/web/assets/ja-JP/figure-03.svg",
+      "sha256": "d9ef51fca1186fe5fb1d699802a6c98be2cf53da886976017865f5487e6ac34a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-04.svg",
+      "destination": "help/web/assets/ja-JP/figure-04.svg",
+      "sha256": "0de3a04bcb5b80b5012a44b2ab6134a3d0a19f94fff4c84b05016976ffe0e48a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-05.svg",
+      "destination": "help/web/assets/ja-JP/figure-05.svg",
+      "sha256": "4daa88db1e14e316bec5e07167cee3d398fb6040b44aeeef175234273452f360"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-06.svg",
+      "destination": "help/web/assets/ja-JP/figure-06.svg",
+      "sha256": "3d6d548e0945831ccf5a301cfc7576b34ce2f5f98df419a797fa53c88b03c704"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-07.svg",
+      "destination": "help/web/assets/ja-JP/figure-07.svg",
+      "sha256": "50ae33a5bebed65467773cfdb58fc627f37ed33733b7a5d5f0e9429c041e0556"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-08.svg",
+      "destination": "help/web/assets/ja-JP/figure-08.svg",
+      "sha256": "8629d035039f2fb0d0880e3f1a50a8af730d441edcd12c0a2ccd88502aaaa917"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-09.svg",
+      "destination": "help/web/assets/ja-JP/figure-09.svg",
+      "sha256": "722bf7f1f0d1de08fe2e1fe01f3cf8ac7d4a76078f448bbbfbc80b6330634d00"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-10.svg",
+      "destination": "help/web/assets/ja-JP/figure-10.svg",
+      "sha256": "66a654f1ceb02aa9cbf80f00186e9efa380227127c5baaf6e89350683ce09915"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-11.svg",
+      "destination": "help/web/assets/ja-JP/figure-11.svg",
+      "sha256": "8cd006f1a918ccd42b557725dd5c4618d0feb3edced2914eb2b20755783abe1c"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-12.svg",
+      "destination": "help/web/assets/ja-JP/figure-12.svg",
+      "sha256": "7428df950c41fd135066d3cf688263b35db99a897ecb0a6487684d2959700ac9"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-13.svg",
+      "destination": "help/web/assets/ja-JP/figure-13.svg",
+      "sha256": "ede01de91335288c4eaefbbc3742451101a5166f31145bb50a2732c26adf91b0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-14.svg",
+      "destination": "help/web/assets/ja-JP/figure-14.svg",
+      "sha256": "ae6902029d1816b5169935c93c18a8bf70f83c574defbe4aa72ab227377fc82d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-15.svg",
+      "destination": "help/web/assets/ja-JP/figure-15.svg",
+      "sha256": "07b3f3bb7fbea4a8a84de0123b3eb96075ba28de1ae897d733a7a1d41bce800d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-16.svg",
+      "destination": "help/web/assets/ja-JP/figure-16.svg",
+      "sha256": "15b439275d598ffbea66f2382bd06a65dcb00a44b342a5cce777ddbe63fe14b0"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-17.svg",
+      "destination": "help/web/assets/ja-JP/figure-17.svg",
+      "sha256": "bd24e0ea3053806097f96555db5a50838df857a24e958cd4db904b72391141db"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/ja-JP/figure-18.svg",
+      "destination": "help/web/assets/ja-JP/figure-18.svg",
+      "sha256": "c148451dc0b631a19c65fbc2477c11ca1c14973683e0ebda03c6ffd22949f9aa"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-01.svg",
+      "destination": "help/web/assets/zh-CN/figure-01.svg",
+      "sha256": "1dee0c02c17f570bcea5df1896c5e03e205518b389fa59debbb5e5ff2aa91633"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-02.svg",
+      "destination": "help/web/assets/zh-CN/figure-02.svg",
+      "sha256": "ecbc81a1794b78cf7489ad8add74b3f92156385cf26bc93cb39f9ae9bed8618a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-03.svg",
+      "destination": "help/web/assets/zh-CN/figure-03.svg",
+      "sha256": "a2a44aa7b9a93219878e106f3a1449a959af5492675b83f1fef65fb3e68a0091"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-04.svg",
+      "destination": "help/web/assets/zh-CN/figure-04.svg",
+      "sha256": "90bb00fb43e3d93ad33c759bd53b2245ab273fccc282295478545eb932d48912"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-05.svg",
+      "destination": "help/web/assets/zh-CN/figure-05.svg",
+      "sha256": "9145139fa69befe7e071f86859d07966d92ff382b96b4d1759f16d33f3aea404"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-06.svg",
+      "destination": "help/web/assets/zh-CN/figure-06.svg",
+      "sha256": "dc4a475773ef249fabe49d403846aa1406d3abdb4b484a113c4763b639e439ac"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-07.svg",
+      "destination": "help/web/assets/zh-CN/figure-07.svg",
+      "sha256": "001396c2c90146dd49ba321f492ec12820493b4c19c86491ea1066a6ffbe5242"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-08.svg",
+      "destination": "help/web/assets/zh-CN/figure-08.svg",
+      "sha256": "07be5102fdc5410edf4019f5d8e987efaa79c612026223660b43b2e009eba673"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-09.svg",
+      "destination": "help/web/assets/zh-CN/figure-09.svg",
+      "sha256": "8011e609910317f897f22102f0badd25714ebc3c59ed46e9209677df460f2968"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-10.svg",
+      "destination": "help/web/assets/zh-CN/figure-10.svg",
+      "sha256": "7004331e09db6ba025ddf25c996753aebed47ff9192274effec82797ebabacc7"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-11.svg",
+      "destination": "help/web/assets/zh-CN/figure-11.svg",
+      "sha256": "760d49bd30217af5d5858bc280692807f074d303c02094c724fa24a67efc3a31"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-12.svg",
+      "destination": "help/web/assets/zh-CN/figure-12.svg",
+      "sha256": "2990e910b967c9271e19c741f28731fe70e36f1d9edddd3835cdf6ce788faf3e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-13.svg",
+      "destination": "help/web/assets/zh-CN/figure-13.svg",
+      "sha256": "dbeca979add7de6a9aaa79596d85cc878cf0333fd26b3b380b78de9ebe441358"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-14.svg",
+      "destination": "help/web/assets/zh-CN/figure-14.svg",
+      "sha256": "26b7fa2b117b81c9a5cda354afc15b3c67cc35922ac524cae7f68248d574b46d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-15.svg",
+      "destination": "help/web/assets/zh-CN/figure-15.svg",
+      "sha256": "02bb4a0491a1119a88af2bfd267c3961f5a254338ad705233a7d94d566dfe47b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-16.svg",
+      "destination": "help/web/assets/zh-CN/figure-16.svg",
+      "sha256": "6854d850a173c716c2b20d902d675e20d6a55bcdf3803965d2b3fb028dffc3f6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-17.svg",
+      "destination": "help/web/assets/zh-CN/figure-17.svg",
+      "sha256": "dcf8f31f9f5da402f7898251e838a08a4d363e569d79c9d811a62057a272e418"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/web/assets/zh-CN/figure-18.svg",
+      "destination": "help/web/assets/zh-CN/figure-18.svg",
+      "sha256": "07f2d650bfc12e5b3186a2a82f0bdd2479ea67287104b837a7fd0b8ca2850def"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-01.svg",
+      "destination": "help/zh-CN/assets/figure-01.svg",
+      "sha256": "1dee0c02c17f570bcea5df1896c5e03e205518b389fa59debbb5e5ff2aa91633"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-02.svg",
+      "destination": "help/zh-CN/assets/figure-02.svg",
+      "sha256": "ecbc81a1794b78cf7489ad8add74b3f92156385cf26bc93cb39f9ae9bed8618a"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-03.svg",
+      "destination": "help/zh-CN/assets/figure-03.svg",
+      "sha256": "a2a44aa7b9a93219878e106f3a1449a959af5492675b83f1fef65fb3e68a0091"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-04.svg",
+      "destination": "help/zh-CN/assets/figure-04.svg",
+      "sha256": "90bb00fb43e3d93ad33c759bd53b2245ab273fccc282295478545eb932d48912"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-05.svg",
+      "destination": "help/zh-CN/assets/figure-05.svg",
+      "sha256": "9145139fa69befe7e071f86859d07966d92ff382b96b4d1759f16d33f3aea404"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-06.svg",
+      "destination": "help/zh-CN/assets/figure-06.svg",
+      "sha256": "dc4a475773ef249fabe49d403846aa1406d3abdb4b484a113c4763b639e439ac"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-07.svg",
+      "destination": "help/zh-CN/assets/figure-07.svg",
+      "sha256": "001396c2c90146dd49ba321f492ec12820493b4c19c86491ea1066a6ffbe5242"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-08.svg",
+      "destination": "help/zh-CN/assets/figure-08.svg",
+      "sha256": "07be5102fdc5410edf4019f5d8e987efaa79c612026223660b43b2e009eba673"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-09.svg",
+      "destination": "help/zh-CN/assets/figure-09.svg",
+      "sha256": "8011e609910317f897f22102f0badd25714ebc3c59ed46e9209677df460f2968"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-10.svg",
+      "destination": "help/zh-CN/assets/figure-10.svg",
+      "sha256": "7004331e09db6ba025ddf25c996753aebed47ff9192274effec82797ebabacc7"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-11.svg",
+      "destination": "help/zh-CN/assets/figure-11.svg",
+      "sha256": "760d49bd30217af5d5858bc280692807f074d303c02094c724fa24a67efc3a31"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-12.svg",
+      "destination": "help/zh-CN/assets/figure-12.svg",
+      "sha256": "2990e910b967c9271e19c741f28731fe70e36f1d9edddd3835cdf6ce788faf3e"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-13.svg",
+      "destination": "help/zh-CN/assets/figure-13.svg",
+      "sha256": "dbeca979add7de6a9aaa79596d85cc878cf0333fd26b3b380b78de9ebe441358"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-14.svg",
+      "destination": "help/zh-CN/assets/figure-14.svg",
+      "sha256": "26b7fa2b117b81c9a5cda354afc15b3c67cc35922ac524cae7f68248d574b46d"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-15.svg",
+      "destination": "help/zh-CN/assets/figure-15.svg",
+      "sha256": "02bb4a0491a1119a88af2bfd267c3961f5a254338ad705233a7d94d566dfe47b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-16.svg",
+      "destination": "help/zh-CN/assets/figure-16.svg",
+      "sha256": "6854d850a173c716c2b20d902d675e20d6a55bcdf3803965d2b3fb028dffc3f6"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-17.svg",
+      "destination": "help/zh-CN/assets/figure-17.svg",
+      "sha256": "dcf8f31f9f5da402f7898251e838a08a4d363e569d79c9d811a62057a272e418"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/help/zh-CN/assets/figure-18.svg",
+      "destination": "help/zh-CN/assets/figure-18.svg",
+      "sha256": "07f2d650bfc12e5b3186a2a82f0bdd2479ea67287104b837a7fd0b8ca2850def"
+    }
+  ],
+  "icon": {
+    "path": "memorive_desktop/product/desktop/assets/memorive.ico",
+    "sha256": "69323726708144b820e961eb8e203527b4fee798db7a5a67023fc5c9ab3f35b6"
+  },
+  "package_id": "v1.01"
+}

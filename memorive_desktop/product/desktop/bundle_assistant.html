@@ -1,0 +1,2836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;; script-src &#x27;self&#x27; &#x27;sha256-Z2sspOhpUpEhWcyHwU1dPZ5GqzZsIEAWlkl5zhrpuZg=&#x27; &#x27;sha256-zERae1eZ2tHUHkhpybuKye85+mSEIy48tT/XtFj6Dc4=&#x27; &#x27;sha256-AzVQh6HpFdzbGaG4fgVKfuYqOYILB5G1Dp5tWG6ZViI=&#x27; &#x27;sha256-DFPecsposyeqlSkNmHpvO1C5pJ/ISGs2k/aer1dF/aE=&#x27;; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
+<title>Memorive 桌面助手</title>
+<style>:root {
+  color-scheme: light dark;
+  background-color: var(
+    --background,
+    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
+  ) !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --color-background-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --card-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --popover: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255), rgb(45 45 45))
+  );
+  --popover-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --primary: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --primary-foreground: var(
+    --color-text-inverse,
+    light-dark(rgb(255 255 255), rgb(13 13 13))
+  );
+  --secondary: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
+  );
+  --secondary-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: var(
+    --color-text-secondary,
+    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
+  );
+  --accent: var(
+    --color-background-info,
+    light-dark(rgb(229 242 255), rgb(13 39 63))
+  );
+  --accent-foreground: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --destructive: var(
+    --color-text-warning,
+    light-dark(rgb(226 85 7), rgb(255 133 73))
+  );
+  --border: var(
+    --color-border-secondary,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+  --input: var(
+    --color-border-primary,
+    light-dark(
+      rgb(26 28 31 / 11.8%),
+      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+    )
+  );
+  --ring: var(
+    --color-ring-primary,
+    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
+  );
+  --font-size-base: var(--font-text-md-size, 14px);
+  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
+  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
+  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
+  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
+  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
+  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
+  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
+  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --radius: var(--border-radius-lg, 12.5px);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
+  --color-background-primary: var(
+    --background,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --color-text-primary: var(
+    --foreground,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --color-border-secondary: var(
+    --border,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+
+  margin: 0;
+  padding: 5px;
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans) !important;
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium, 500);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  corner-shape: superellipse(1.5);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-responsive > .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead th {
+  padding-block: 8px;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 6px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align="right"]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align="center"]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  corner-shape: superellipse(1.5);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget > :not(.card, .progress) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress {
+  display: flex;
+  height: 6px;
+  margin-block: calc((var(--line-height-normal, 1.5em) - 6px) / 2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+}
+
+.progress-bar {
+  height: 100%;
+  flex-shrink: 0;
+  border: 0;
+  background: var(--viz-series-1);
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: padding-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type="file"] {
+  padding: 0;
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control[type="file"]::file-selector-button {
+  min-height: 26px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+}
+
+.form-control[type="file"]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type="color"] {
+  width: 40px;
+  height: 28px;
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+  corner-shape: superellipse(1.5);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  corner-shape: superellipse(1.5);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+  [aria-pressed="true"],
+  [aria-selected="true"],
+  .is-selected
+) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+/* Model-authored chart rules can otherwise stretch icons after these styles load. */
+svg.lucide {
+  display: block;
+  width: 16px !important;
+  height: 16px !important;
+  flex: none;
+  margin: 0 !important;
+  stroke-width: 1.6;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+
+html>body{padding:0}</style>
+<style>:root,
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+#memorive-desktop-assistant-preview {
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+}
+
+#memorive-desktop-assistant-preview > .viz-controls,
+#memorive-desktop-assistant-preview .memorive-desktop-glow,
+#memorive-desktop-assistant-preview .memorive-desktop-document,
+#memorive-desktop-assistant-preview .memorive-desktop-shortcut,
+#memorive-desktop-assistant-preview .memorive-desktop-state-strip,
+#memorive-desktop-assistant-preview .memorive-desktop-state,
+#memorive-desktop-assistant-preview .memorive-taskbar,
+#memorive-desktop-assistant-preview .memorive-pet-event {
+  display: none !important;
+}
+
+#memorive-desktop-assistant-preview .memorive-desktop {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#memorive-desktop-assistant-preview .memorive-desktop::before,
+#memorive-desktop-assistant-preview .memorive-desktop::after {
+  display: none !important;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-anchor {
+  left: auto;
+  top: auto;
+  right: 10px;
+  bottom: 10px;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-sprite {
+  opacity: .96;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-menu {
+  box-sizing: border-box;
+  right: -2px;
+  bottom: 82px;
+  width: 196px;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  overflow: visible;
+  transform-origin: bottom right;
+}
+
+#memorive-desktop-assistant-preview .memorive-menu-title {
+  padding: 3px 7px 5px;
+  line-height: 1.25;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-menu button {
+  min-height: 29px;
+  padding: 4px 7px;
+}
+
+#memorive-desktop-assistant-preview .memorive-menu-separator {
+  margin: 3px;
+}
+
+#memorive-desktop-assistant-preview[data-reduced-motion="true"] *,
+#memorive-desktop-assistant-preview[data-reduced-motion="true"] *::before,
+#memorive-desktop-assistant-preview[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+#memorive-pet-menu [data-memorive-menu="codex"],
+#memorive-pet-menu [data-memorive-menu="claude-code"],
+#memorive-pet-menu [data-memorive-menu="cc-switch"] {
+  display: none !important;
+}</style>
+</head>
+<body data-desktop-product-page="assistant-runtime">
+<div id="memorive-desktop-assistant-preview">
+  <div class="viz-controls" aria-label="桌面助手情景模拟">
+    <button class="btn btn-primary" type="button" data-memorive-action="wake">唤醒</button>
+    <button class="btn" type="button" data-memorive-action="interaction">点击互动</button>
+    <button class="btn" type="button" data-memorive-action="blink">双眨眼</button>
+    <button class="btn" type="button" data-memorive-action="attention">待处理</button>
+    <button class="btn" type="button" data-memorive-action="working">进入施工</button>
+    <button class="btn" type="button" data-memorive-action="success">任务完成</button>
+    <button class="btn" type="button" data-memorive-action="error">任务异常</button>
+    <button class="btn btn-ghost" type="button" data-memorive-action="reset">恢复常驻</button>
+    <button class="btn btn-ghost" id="memorive-pet-visibility" type="button" data-memorive-action="visibility">暂时隐藏</button>
+    <label class="form-check form-switch" for="memorive-pet-privacy">
+      <input class="form-check-input" id="memorive-pet-privacy" type="checkbox">
+      <span class="form-check-label">隐私文案</span>
+    </label>
+  </div>
+
+  <section class="memorive-desktop" id="memorive-pet-desktop" aria-label="Memorive 桌面助手交互预览">
+    <div class="memorive-desktop-glow" aria-hidden="true"></div>
+    <div class="memorive-desktop-document" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="memorive-desktop-shortcut" aria-hidden="true">
+      <span class="memorive-shortcut-icon">PR</span>
+      <span>Memorive</span>
+    </div>
+
+    <div class="memorive-pet-anchor" id="memorive-pet-anchor">
+      <div class="memorive-pet-bubble" id="memorive-pet-bubble" data-tone="blue" hidden>
+        <button class="memorive-bubble-open" id="memorive-pet-bubble-open" type="button">
+          <strong id="memorive-pet-bubble-title">《论文 B》正在处理中</strong>
+          <span id="memorive-pet-bubble-copy">点击查看当前任务</span>
+        </button>
+        <button class="memorive-bubble-close" id="memorive-pet-bubble-close" type="button" aria-label="收起气泡">×</button>
+      </div>
+
+      <button
+        class="memorive-pet-window"
+        id="memorive-pet-window"
+        type="button"
+        data-frame="idle"
+        aria-label="Memorive 桌面助手，当前常驻"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        title="左键打开 Memorive 主界面；右键打开桌面助手设置与控制"
+      >
+        <span class="memorive-pet-sprite" aria-hidden="true"></span>
+        <span class="memorive-pet-status-dot" id="memorive-pet-status-dot" data-tone="none" data-spinner="false" aria-hidden="true"></span>
+      </button>
+
+      <div class="memorive-pet-menu" id="memorive-pet-menu" role="menu" aria-label="外部调整、设置与隐藏" hidden>
+        <div class="memorive-menu-title">桌面助手设置与控制</div>
+        <button type="button" role="menuitem" data-memorive-menu="open-desktop">打开 Memorive</button>
+        <div class="memorive-menu-separator" role="separator"></div>
+        <button type="button" role="menuitem" data-memorive-menu="codex">Codex <span>↗</span></button>
+        <button type="button" role="menuitem" data-memorive-menu="claude-code">Claude Code <span>↗</span></button>
+        <button type="button" role="menuitem" data-memorive-menu="cc-switch">CC Switch <span>↗</span></button>
+        <div class="memorive-menu-separator" role="separator"></div>
+        <button type="button" role="menuitem" data-memorive-menu="settings">桌面助手设置</button>
+        <button type="button" role="menuitem" data-memorive-menu="hide">暂时隐藏</button>
+      </div>
+    </div>
+
+    <div class="memorive-desktop-state" aria-hidden="true">
+      <span class="memorive-desktop-state-dot" id="memorive-desktop-state-dot" data-tone="none"></span>
+      <span id="memorive-desktop-state-label">可见 · 空闲</span>
+    </div>
+
+    <div class="memorive-taskbar" aria-hidden="true">
+      <span class="memorive-taskbar-start">PR</span>
+      <span class="memorive-taskbar-line"></span>
+      <span class="memorive-taskbar-clock">14:26</span>
+    </div>
+  </section>
+
+  <div class="memorive-pet-event" id="memorive-pet-event" aria-live="polite">
+    <span class="memorive-event-dot" id="memorive-pet-event-dot" data-tone="blue" aria-hidden="true"></span>
+    <span id="memorive-pet-event-text">桌面助手可见；左键打开 Memorive 主界面，可拖动角色，右键打开桌面助手设置与控制。</span>
+  </div>
+
+  <style>
+    #memorive-desktop-assistant-preview {
+      --memorive-pet-canvas: light-dark(rgb(234 241 237), rgb(24 34 36));
+      --memorive-pet-canvas-deep: light-dark(rgb(206 224 217), rgb(34 53 54));
+      --memorive-pet-surface: light-dark(rgb(255 253 249 / 96%), rgb(43 46 49 / 97%));
+      --memorive-pet-surface-solid: light-dark(rgb(255 253 249), rgb(43 46 49));
+      --memorive-pet-surface-hover: light-dark(rgb(244 240 232), rgb(57 61 64));
+      --memorive-pet-text: light-dark(rgb(42 39 35), rgb(241 239 235));
+      --memorive-pet-muted: light-dark(rgb(106 99 90), rgb(181 177 170));
+      --memorive-pet-border: light-dark(rgb(42 39 35 / 16%), rgb(255 255 255 / 16%));
+      --memorive-pet-shadow: light-dark(rgb(53 70 65 / 20%), rgb(0 0 0 / 42%));
+      --memorive-pet-blue: light-dark(rgb(73 126 179), rgb(113 171 225));
+      --memorive-pet-green: light-dark(rgb(48 139 93), rgb(92 196 137));
+      --memorive-pet-yellow: light-dark(rgb(186 135 40), rgb(231 185 88));
+      --memorive-pet-red: light-dark(rgb(183 70 70), rgb(231 111 111));
+      --memorive-pet-pink: light-dark(rgb(191 103 123), rgb(229 139 161));
+      --memorive-pet-sprite: url("assets/illustrations/sprite.svg");
+      width: 100%;
+      color-scheme: light dark;
+      color: var(--memorive-pet-text);
+    }
+
+    #memorive-desktop-assistant-preview * {
+      box-sizing: border-box;
+    }
+
+    #memorive-desktop-assistant-preview > .viz-controls {
+      margin-bottom: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop {
+      position: relative;
+      width: 100%;
+      height: clamp(360px, 56vw, 620px);
+      min-height: 360px;
+      overflow: hidden;
+      border: 1px solid var(--memorive-pet-border);
+      border-radius: 22px;
+      background:
+        linear-gradient(132deg, transparent 0 52%, color-mix(in srgb, var(--memorive-pet-canvas-deep) 42%, transparent) 52% 100%),
+        radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--memorive-pet-surface-solid) 64%, transparent), transparent 34%),
+        var(--memorive-pet-canvas);
+      box-shadow: 0 18px 46px var(--memorive-pet-shadow);
+      isolation: isolate;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-glow {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--memorive-pet-blue) 12%, transparent), transparent 28%),
+        radial-gradient(circle at 75% 70%, color-mix(in srgb, var(--memorive-pet-green) 10%, transparent), transparent 32%);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-document {
+      position: absolute;
+      top: 11%;
+      left: 14%;
+      width: min(32%, 310px);
+      height: min(46%, 240px);
+      padding: 26px 24px;
+      border: 1px solid color-mix(in srgb, var(--memorive-pet-border) 72%, transparent);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 56%, transparent);
+      opacity: .48;
+      transform: rotate(-2deg);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-document span {
+      display: block;
+      height: 7px;
+      margin-bottom: 15px;
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--memorive-pet-muted) 24%, transparent);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-document span:nth-child(2) { width: 76%; }
+    #memorive-desktop-assistant-preview .memorive-desktop-document span:nth-child(3) { width: 88%; }
+    #memorive-desktop-assistant-preview .memorive-desktop-document span:nth-child(4) { width: 58%; }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-shortcut {
+      position: absolute;
+      top: 26px;
+      right: 26px;
+      display: grid;
+      justify-items: center;
+      gap: 5px;
+      color: var(--memorive-pet-muted);
+      font-size: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-shortcut-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid var(--memorive-pet-border);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 72%, transparent);
+      color: var(--memorive-pet-text);
+      font-weight: 500;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-anchor {
+      position: absolute;
+      z-index: 12;
+      width: 104px;
+      height: 104px;
+      right: 24px;
+      bottom: 48px;
+      overflow: visible;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-anchor[hidden] {
+      display: none;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      width: 104px;
+      height: 104px;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: grab;
+      touch-action: none;
+      transform-origin: 52% 72%;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window:active {
+      cursor: grabbing;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window:disabled {
+      cursor: default;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window:focus-visible {
+      outline: 2px solid var(--memorive-pet-blue);
+      outline-offset: 2px;
+      border-radius: 20px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-sprite {
+      display: block;
+      width: 78px;
+      height: 78px;
+      background-image: var(--memorive-pet-sprite);
+      background-repeat: no-repeat;
+      background-size: 300% 200%;
+      filter: drop-shadow(0 7px 8px var(--memorive-pet-shadow));
+      image-rendering: auto;
+      pointer-events: none;
+      transform-origin: 52% 64%;
+      user-select: none;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="idle"] > .memorive-pet-sprite { background-position: 0% 0%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="blink-open"] > .memorive-pet-sprite { background-position: 50% 0%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="blink-closed"] > .memorive-pet-sprite { background-position: 100% 0%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="interaction"] > .memorive-pet-sprite { background-position: 0% 100%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="working"] > .memorive-pet-sprite { background-position: 50% 100%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="success"] > .memorive-pet-sprite { background-position: 100% 100%; }
+
+    #memorive-desktop-assistant-preview .memorive-pet-status-dot {
+      position: absolute;
+      right: 8px;
+      bottom: 13px;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--memorive-pet-surface-solid);
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: 0 2px 5px var(--memorive-pet-shadow);
+      opacity: 0;
+      transition: opacity 120ms ease, background-color 120ms ease;
+    }
+
+    #memorive-desktop-assistant-preview [data-tone="blue"] { --memorive-current-tone: var(--memorive-pet-blue); }
+    #memorive-desktop-assistant-preview [data-tone="green"] { --memorive-current-tone: var(--memorive-pet-green); }
+    #memorive-desktop-assistant-preview [data-tone="yellow"] { --memorive-current-tone: var(--memorive-pet-yellow); }
+    #memorive-desktop-assistant-preview [data-tone="red"] { --memorive-current-tone: var(--memorive-pet-red); }
+    #memorive-desktop-assistant-preview [data-tone="pink"] { --memorive-current-tone: var(--memorive-pet-pink); }
+
+    #memorive-desktop-assistant-preview .memorive-pet-status-dot:not([data-tone="none"]),
+    #memorive-desktop-assistant-preview .memorive-desktop-state-dot:not([data-tone="none"]) {
+      background: var(--memorive-current-tone);
+      opacity: 1;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-status-dot[data-spinner="true"] {
+      width: 11px;
+      height: 11px;
+      border: 2px solid color-mix(in srgb, var(--memorive-pet-muted) 46%, transparent);
+      border-top-color: var(--memorive-pet-blue);
+      background: transparent;
+      opacity: 1;
+      animation: memorive-pet-processing-spin .8s linear infinite;
+    }
+
+    @keyframes memorive-pet-processing-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble {
+      position: absolute;
+      right: 86px;
+      bottom: 42px;
+      z-index: 20;
+      width: clamp(220px, 32vw, 286px);
+      min-height: 76px;
+      border: 1px solid var(--memorive-pet-border);
+      border-left: 4px solid var(--memorive-current-tone);
+      border-radius: 14px;
+      background: var(--memorive-pet-surface-solid);
+      box-shadow: 0 14px 34px var(--memorive-pet-shadow);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble.memorive-bubble-right {
+      right: auto;
+      left: 86px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble::after {
+      content: "";
+      position: absolute;
+      right: -8px;
+      bottom: 20px;
+      width: 15px;
+      height: 15px;
+      border-top: 1px solid var(--memorive-pet-border);
+      border-right: 1px solid var(--memorive-pet-border);
+      background: var(--memorive-pet-surface-solid);
+      transform: rotate(45deg);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble.memorive-bubble-right::after {
+      right: auto;
+      left: -8px;
+      border: 0;
+      border-bottom: 1px solid var(--memorive-pet-border);
+      border-left: 1px solid var(--memorive-pet-border);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-open {
+      display: grid;
+      width: 100%;
+      min-height: 74px;
+      gap: 5px;
+      align-content: center;
+      padding: 13px 38px 13px 14px;
+      border: 0;
+      background: transparent;
+      color: var(--memorive-pet-text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-open strong {
+      overflow: hidden;
+      font-weight: 500;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-open span {
+      overflow: hidden;
+      color: var(--memorive-pet-muted);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--memorive-pet-muted);
+      cursor: pointer;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-close:hover,
+    #memorive-desktop-assistant-preview .memorive-bubble-close:focus-visible {
+      background: var(--memorive-pet-surface-hover);
+      color: var(--memorive-pet-text);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu {
+      position: absolute;
+      right: 10px;
+      bottom: 92px;
+      z-index: 30;
+      width: 210px;
+      padding: 7px;
+      border: 1px solid var(--memorive-pet-border);
+      border-radius: 12px;
+      background: var(--memorive-pet-surface-solid);
+      box-shadow: 0 16px 38px var(--memorive-pet-shadow);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu.memorive-menu-right {
+      right: auto;
+      left: 10px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-menu-title {
+      padding: 6px 9px 8px;
+      color: var(--memorive-pet-muted);
+      font-size: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu button {
+      display: flex;
+      width: 100%;
+      min-height: 32px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 9px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--memorive-pet-text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu button:hover,
+    #memorive-desktop-assistant-preview .memorive-pet-menu button:focus-visible {
+      background: var(--memorive-pet-surface-hover);
+      outline: none;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-menu-separator {
+      height: 1px;
+      margin: 5px 4px;
+      background: var(--memorive-pet-border);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-state {
+      position: absolute;
+      left: 18px;
+      bottom: 51px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 1px solid color-mix(in srgb, var(--memorive-pet-border) 72%, transparent);
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 72%, transparent);
+      color: var(--memorive-pet-muted);
+      font-size: 12px;
+      backdrop-filter: blur(6px);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-state-dot,
+    #memorive-desktop-assistant-preview .memorive-event-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--memorive-current-tone, var(--memorive-pet-blue));
+      opacity: .95;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-state-dot[data-tone="none"] {
+      background: var(--memorive-pet-muted);
+      opacity: .5;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      height: 38px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-top: 1px solid color-mix(in srgb, var(--memorive-pet-border) 74%, transparent);
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 78%, transparent);
+      color: var(--memorive-pet-muted);
+      backdrop-filter: blur(10px);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar-start {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border-radius: 7px;
+      background: color-mix(in srgb, var(--memorive-pet-blue) 18%, transparent);
+      color: var(--memorive-pet-text);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar-line {
+      width: 42px;
+      height: 5px;
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--memorive-pet-muted) 20%, transparent);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar-clock {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-event {
+      display: flex;
+      min-height: 30px;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--memorive-pet-muted);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite {
+      animation: memorive-pet-interaction-tilt 1100ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking {
+      animation: memorive-pet-wake 900ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-working {
+      animation: memorive-pet-working-shake 900ms cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-success {
+      animation: memorive-pet-success-shake 1100ms cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-error {
+      animation: memorive-pet-error-shake 900ms cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-anchor.memorive-is-dragging .memorive-pet-window {
+      transform: translateY(-5px) scale(1.04);
+    }
+
+    @keyframes memorive-pet-interaction-tilt {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      24% { transform: rotate(-9deg) translateY(1px); }
+      62% { transform: rotate(-9deg) translateY(1px); }
+      82% { transform: rotate(2deg) translateY(0); }
+    }
+
+    @keyframes memorive-pet-wake {
+      0% { transform: translateY(8px) scale(.9); opacity: .35; }
+      42% { transform: translateY(-4px) scale(1.04); opacity: 1; }
+      70% { transform: translateY(1px) scale(.99); }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes memorive-pet-working-shake {
+      0%, 100% { transform: translateX(0); }
+      12% { transform: translateX(-4px) rotate(-2deg); }
+      24% { transform: translateX(4px) rotate(2deg); }
+      36% { transform: translateX(-4px) rotate(-1.5deg); }
+      48% { transform: translateX(4px) rotate(1.5deg); }
+      62% { transform: translateX(-3px) rotate(-1deg); }
+      76% { transform: translateX(3px) rotate(1deg); }
+      90% { transform: translateX(-1px); }
+    }
+
+    @keyframes memorive-pet-success-shake {
+      0%, 100% { transform: translateX(0) scale(1); }
+      10% { transform: translateX(-5px) rotate(-3deg) scale(1.02); }
+      22% { transform: translateX(5px) rotate(3deg) scale(1.02); }
+      34% { transform: translateX(-4px) rotate(-2deg) scale(1.03); }
+      46% { transform: translateX(4px) rotate(2deg) scale(1.03); }
+      60% { transform: translateX(-3px) rotate(-1deg) scale(1.02); }
+      74% { transform: translateX(3px) rotate(1deg) scale(1.02); }
+      88% { transform: translateX(-1px) scale(1.01); }
+    }
+
+    @keyframes memorive-pet-error-shake {
+      0%, 100% { transform: translateX(0); }
+      16% { transform: translateX(-4px); }
+      32% { transform: translateX(4px); }
+      48% { transform: translateX(-3px); }
+      64% { transform: translateX(3px); }
+      82% { transform: translateX(-1px); }
+    }
+
+    @media (max-width: 560px) {
+      #memorive-desktop-assistant-preview .memorive-desktop {
+        height: 430px;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-desktop-document {
+        top: 14%;
+        left: 8%;
+        width: 52%;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-bubble {
+        width: min(220px, calc(100vw - 142px));
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-menu {
+        width: 190px;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-desktop-state {
+        max-width: calc(100% - 36px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-working,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-success,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-error {
+        animation: none;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-status-dot {
+        transition: none;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-status-dot[data-spinner="true"] {
+        border-color: var(--memorive-pet-blue);
+        border-right-color: transparent;
+        animation: none;
+      }
+    }
+  </style>
+
+  <script>
+    (() => {
+      const root = document.getElementById('memorive-desktop-assistant-preview');
+      if (!root || root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const desktop = document.getElementById('memorive-pet-desktop');
+      const anchor = document.getElementById('memorive-pet-anchor');
+      const pet = document.getElementById('memorive-pet-window');
+      const bubble = document.getElementById('memorive-pet-bubble');
+      const bubbleOpen = document.getElementById('memorive-pet-bubble-open');
+      const bubbleClose = document.getElementById('memorive-pet-bubble-close');
+      const bubbleTitle = document.getElementById('memorive-pet-bubble-title');
+      const bubbleCopy = document.getElementById('memorive-pet-bubble-copy');
+      const menu = document.getElementById('memorive-pet-menu');
+      const statusDot = document.getElementById('memorive-pet-status-dot');
+      const desktopStateDot = document.getElementById('memorive-desktop-state-dot');
+      const desktopStateLabel = document.getElementById('memorive-desktop-state-label');
+      const eventDot = document.getElementById('memorive-pet-event-dot');
+      const eventText = document.getElementById('memorive-pet-event-text');
+      const visibilityButton = document.getElementById('memorive-pet-visibility');
+      const privacyToggle = document.getElementById('memorive-pet-privacy');
+      const actionButtons = Array.from(root.querySelectorAll('[data-memorive-action]'));
+      const menuButtons = Array.from(root.querySelectorAll('[data-memorive-menu]'));
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const frameMeta = {
+        idle: '常驻',
+        'blink-open': '眨眼 01',
+        'blink-closed': '眨眼 02',
+        interaction: '互动',
+        working: '施工中',
+        success: '已完成'
+      };
+
+      const alerts = {
+        attention: {
+          tone: 'yellow',
+          title: '《论文 B》需要你的处理',
+          privateTitle: '有一项内容需要你的处理',
+          copy: '点击查看待处理详情'
+        },
+        working: {
+          tone: 'blue',
+          spinner: true,
+          title: '《论文 B》正在处理中',
+          privateTitle: '有一项任务正在处理中',
+          copy: '点击查看当前任务'
+        },
+        success: {
+          tone: 'green',
+          title: '《论文 A》已完成',
+          privateTitle: '有一项任务已完成',
+          copy: '点击查看生成结果'
+        },
+        error: {
+          tone: 'red',
+          title: '《论文 C》处理失败',
+          privateTitle: '有一项任务出现异常',
+          copy: '点击查看异常详情'
+        }
+      };
+
+      let visible = true;
+      let baseFrame = 'idle';
+      let attentionTone = 'none';
+      let currentAlert = null;
+      let displayState = 'IDLE';
+      let animationLocked = false;
+      let transient = null;
+      let transientTimer = 0;
+      let sequenceTimers = [];
+      let autoBlinkTimer = 0;
+      let bubbleDismissTimer = 0;
+      let drag = null;
+      let suppressClick = false;
+
+      function setEvent(message, tone = 'blue') {
+        eventText.textContent = message;
+        eventDot.dataset.tone = tone;
+      }
+
+      function clearMotion() {
+        pet.classList.remove(
+          'memorive-is-tilting',
+          'memorive-is-waking',
+          'memorive-is-shaking-working',
+          'memorive-is-shaking-success',
+          'memorive-is-shaking-error'
+        );
+      }
+
+      function clearSequence() {
+        sequenceTimers.forEach(window.clearTimeout);
+        sequenceTimers = [];
+      }
+
+      function setInteractionLock(locked) {
+        animationLocked = locked;
+        root.dataset.animationLocked = locked ? 'true' : 'false';
+        pet.disabled = locked;
+        actionButtons.forEach((button) => { button.disabled = locked; });
+        privacyToggle.disabled = locked;
+        bubbleOpen.disabled = locked;
+        bubbleClose.disabled = locked;
+      }
+
+      function updateStateLabel() {
+        const displayLabel = !visible ? '隐藏' : displayState === 'MENU_OPEN' ? '菜单打开' : displayState === 'DRAGGING' ? '拖动中' : displayState === 'NOTIFYING' ? '提醒中' : displayState === 'APPEARING' ? '正在唤醒' : '可见';
+        const frameLabel = frameMeta[pet.dataset.frame] || frameMeta.idle;
+        const attentionLabel = attentionTone === 'none' ? '' : ` · ${attentionTone === 'red' ? '红色异常' : attentionTone === 'yellow' ? '黄色待处理' : attentionTone === 'green' ? '绿色完成' : '蓝色处理中'}`;
+        desktopStateLabel.textContent = `${displayLabel} · ${frameLabel}${attentionLabel}`;
+        desktopStateDot.dataset.tone = attentionTone;
+        pet.setAttribute('aria-label', `Memorive 桌面助手，${displayLabel}，${frameLabel}${attentionLabel}。左键打开 Memorive 主界面；Shift+F10 打开桌面助手设置与控制。`);
+      }
+
+      function applyFrame(frame) {
+        pet.dataset.frame = frame;
+        root.dataset.frame = frame;
+        updateStateLabel();
+      }
+
+      function updateBubbleCopy() {
+        if (!currentAlert) return;
+        const content = alerts[currentAlert];
+        bubbleTitle.textContent = privacyToggle.checked ? content.privateTitle : content.title;
+        bubbleCopy.textContent = content.copy;
+      }
+
+      function updatePopupSide() {
+        const desktopRect = desktop.getBoundingClientRect();
+        const anchorRect = anchor.getBoundingClientRect();
+        const useRight = anchorRect.left - desktopRect.left < Math.min(310, desktopRect.width * .42);
+        bubble.classList.toggle('memorive-bubble-right', useRight);
+        menu.classList.toggle('memorive-menu-right', useRight);
+      }
+
+      function clearBubbleDismiss() {
+        if (bubbleDismissTimer) window.clearTimeout(bubbleDismissTimer);
+        bubbleDismissTimer = 0;
+      }
+
+      function scheduleBubbleDismiss() {
+        clearBubbleDismiss();
+        const alertAtSchedule = currentAlert;
+        bubbleDismissTimer = window.setTimeout(() => {
+          bubbleDismissTimer = 0;
+          if (!alertAtSchedule || currentAlert !== alertAtSchedule || bubble.hidden) return;
+          hideBubble({ clearTimer: false });
+          setEvent('状态气泡已在 8 秒后自动收起；右下状态标记继续保留。', attentionTone === 'none' ? 'blue' : attentionTone);
+        }, 8000);
+      }
+
+      function showBubble(kind) {
+        const content = alerts[kind];
+        if (!content) return false;
+        currentAlert = kind;
+        attentionTone = content.tone;
+        bubble.dataset.tone = content.tone;
+        statusDot.dataset.tone = content.tone;
+        statusDot.dataset.spinner = content.spinner ? 'true' : 'false';
+        updateBubbleCopy();
+        updatePopupSide();
+        bubble.hidden = false;
+        displayState = 'NOTIFYING';
+        updateStateLabel();
+        scheduleBubbleDismiss();
+        return true;
+      }
+
+      function hideBubble(options = {}) {
+        if (options.clearTimer !== false) clearBubbleDismiss();
+        bubble.hidden = true;
+        displayState = visible ? 'IDLE' : 'HIDDEN';
+        updateStateLabel();
+        scheduleAutoBlink();
+      }
+
+      function closeMenu(options = {}) {
+        if (menu.hidden) return;
+        menu.hidden = true;
+        pet.setAttribute('aria-expanded', 'false');
+        displayState = bubble.hidden ? 'IDLE' : 'NOTIFYING';
+        updateStateLabel();
+        if (options.focusPet) pet.focus();
+        scheduleAutoBlink();
+      }
+
+      function openMenu() {
+        if (animationLocked || !visible) {
+          setEvent('动画播放中；右键菜单暂不可用。', attentionTone === 'none' ? 'blue' : attentionTone);
+          return false;
+        }
+        if (autoBlinkTimer) window.clearTimeout(autoBlinkTimer);
+        autoBlinkTimer = 0;
+        clearBubbleDismiss();
+        bubble.hidden = true;
+        updatePopupSide();
+        menu.hidden = false;
+        pet.setAttribute('aria-expanded', 'true');
+        displayState = 'MENU_OPEN';
+        updateStateLabel();
+        menuButtons[0]?.focus();
+        return true;
+      }
+
+      function clearTransient(unlock = true) {
+        if (transientTimer) window.clearTimeout(transientTimer);
+        transientTimer = 0;
+        clearSequence();
+        clearMotion();
+        transient = null;
+        if (unlock) setInteractionLock(false);
+      }
+
+      function scheduleAutoBlink() {
+        if (autoBlinkTimer) window.clearTimeout(autoBlinkTimer);
+        autoBlinkTimer = 0;
+        if (
+          prefersReduced ||
+          document.hidden ||
+          !visible ||
+          baseFrame !== 'idle' ||
+          !bubble.hidden ||
+          !menu.hidden ||
+          animationLocked
+        ) return;
+        const delay = 8000 + Math.round(Math.random() * 10000);
+        autoBlinkTimer = window.setTimeout(() => playBlink('auto'), delay);
+      }
+
+      function restoreBase() {
+        const completed = transient;
+        transientTimer = 0;
+        clearSequence();
+        clearMotion();
+        transient = null;
+        setInteractionLock(false);
+        displayState = bubble.hidden ? 'IDLE' : 'NOTIFYING';
+        applyFrame(baseFrame);
+        if (completed?.endMessage) setEvent(completed.endMessage, completed.endTone || 'blue');
+        scheduleAutoBlink();
+      }
+
+      function beginTransient(frame, duration, message, tone, options = {}) {
+        if (animationLocked || !visible) return false;
+        closeMenu();
+        clearTransient(false);
+        if (autoBlinkTimer) window.clearTimeout(autoBlinkTimer);
+        autoBlinkTimer = 0;
+        transient = {
+          frame,
+          endMessage: options.endMessage || '动画结束；互动已恢复。',
+          endTone: options.endTone || tone
+        };
+        displayState = options.displayState || (bubble.hidden ? 'IDLE' : 'NOTIFYING');
+        setInteractionLock(true);
+        applyFrame(frame);
+        clearMotion();
+        if (options.motionClass && !prefersReduced) {
+          void pet.offsetWidth;
+          pet.classList.add(options.motionClass);
+        }
+        setEvent(message, tone);
+        transientTimer = window.setTimeout(restoreBase, duration);
+        return true;
+      }
+
+      function playInteraction(source = 'direct') {
+        if (animationLocked) {
+          if (source !== 'auto') setEvent('动画播放中；本次互动未执行。', attentionTone === 'none' ? 'pink' : attentionTone);
+          return false;
+        }
+        if (!visible) return wake();
+        return beginTransient(
+          'interaction',
+          prefersReduced ? 320 : 1100,
+          '桌面助手歪头回应中；动画期间其他互动已锁定。',
+          'pink',
+          { motionClass: 'memorive-is-tilting', endMessage: '点击回应结束；互动已恢复。', endTone: 'pink' }
+        );
+      }
+
+      function playBlink(source = 'manual') {
+        if (animationLocked || !visible) {
+          if (source !== 'auto') setEvent('当前不能播放眨眼。', 'blue');
+          return false;
+        }
+        if (prefersReduced) {
+          if (source !== 'auto') setEvent('系统已启用减少动态效果；眨眼保持静态降级。', 'blue');
+          return false;
+        }
+        if (baseFrame !== 'idle' || !bubble.hidden || !menu.hidden) {
+          if (source !== 'auto') setEvent('仅在空闲静态状态播放眨眼。', attentionTone === 'none' ? 'blue' : attentionTone);
+          scheduleAutoBlink();
+          return false;
+        }
+
+        clearTransient(false);
+        if (autoBlinkTimer) window.clearTimeout(autoBlinkTimer);
+        autoBlinkTimer = 0;
+        transient = { frame: 'blink-open', endMessage: '双眨眼结束；互动已恢复。', endTone: 'blue' };
+        setInteractionLock(true);
+        applyFrame('blink-open');
+        setEvent('播放一次双眨眼；第一次睁眼保持 1.2 秒，动画期间互动锁定。', 'blue');
+        sequenceTimers.push(window.setTimeout(() => applyFrame('blink-closed'), 1200));
+        sequenceTimers.push(window.setTimeout(() => applyFrame('blink-open'), 1650));
+        sequenceTimers.push(window.setTimeout(() => applyFrame('blink-closed'), 2250));
+        sequenceTimers.push(window.setTimeout(() => applyFrame('blink-open'), 2500));
+        sequenceTimers.push(window.setTimeout(restoreBase, 3000));
+        return true;
+      }
+
+      function wake() {
+        if (animationLocked) return false;
+        visible = true;
+        anchor.hidden = false;
+        visibilityButton.textContent = '暂时隐藏';
+        displayState = 'APPEARING';
+        applyFrame('interaction');
+        return beginTransient(
+          'interaction',
+          prefersReduced ? 320 : 900,
+          '桌面助手已显示；正在播放一次唤醒反馈。',
+          'pink',
+          { motionClass: 'memorive-is-waking', displayState: 'APPEARING', endMessage: '唤醒结束；桌面助手保持可见。', endTone: 'pink' }
+        );
+      }
+
+      function setVisible(next) {
+        if (animationLocked) return false;
+        if (next) return wake();
+        clearTransient();
+        closeMenu();
+        clearBubbleDismiss();
+        bubble.hidden = true;
+        anchor.hidden = true;
+        visible = false;
+        displayState = 'HIDDEN';
+        visibilityButton.textContent = '显示桌宠';
+        if (autoBlinkTimer) window.clearTimeout(autoBlinkTimer);
+        autoBlinkTimer = 0;
+        updateStateLabel();
+        setEvent('桌面助手已暂时隐藏；状态变化不会擅自重新显示它。', 'blue');
+        return true;
+      }
+
+      function clearAlert() {
+        clearBubbleDismiss();
+        currentAlert = null;
+        attentionTone = 'none';
+        statusDot.dataset.tone = 'none';
+        statusDot.dataset.spinner = 'false';
+        bubble.hidden = true;
+      }
+
+      function playAttention() {
+        if (animationLocked || !visible) return false;
+        showBubble('attention');
+        return beginTransient(
+          'interaction',
+          prefersReduced ? 520 : 1100,
+          '有一项内容需要处理；黄色提醒不会自动批准任务。',
+          'yellow',
+          { motionClass: 'memorive-is-tilting', displayState: 'NOTIFYING', endMessage: '待处理动画结束；气泡将在出现 8 秒后自动收起。' }
+        );
+      }
+
+      function playWorking() {
+        if (animationLocked || !visible) return false;
+        baseFrame = 'working';
+        showBubble('working');
+        if (prefersReduced) {
+          applyFrame('working');
+          setEvent('已进入施工状态；摇摆动画静态降级，蓝色处理标记保留。', 'blue');
+          return true;
+        }
+        return beginTransient(
+          'working',
+          900,
+          '进入施工：左右摇摆振动中；动画期间互动锁定。',
+          'blue',
+          { motionClass: 'memorive-is-shaking-working', displayState: 'NOTIFYING', endMessage: '施工入场动画结束；蓝色处理标记保留，气泡将在出现 8 秒后自动收起。', endTone: 'blue' }
+        );
+      }
+
+      function playSuccess() {
+        if (animationLocked || !visible) return false;
+        showBubble('success');
+        return beginTransient(
+          'success',
+          prefersReduced ? 700 : 1400,
+          '任务完整成功：左右摇摆振动中；气泡不抢焦点。',
+          'green',
+          { motionClass: 'memorive-is-shaking-success', displayState: 'NOTIFYING', endMessage: '完成反馈结束；气泡将在出现 8 秒后自动收起。', endTone: 'green' }
+        );
+      }
+
+      function playError() {
+        if (animationLocked || !visible) return false;
+        showBubble('error');
+        return beginTransient(
+          'idle',
+          prefersReduced ? 500 : 900,
+          '任务出现异常：播放一次短抖动；不持续闪烁。',
+          'red',
+          { motionClass: 'memorive-is-shaking-error', displayState: 'NOTIFYING', endMessage: '异常动画结束；气泡将在出现 8 秒后自动收起。', endTone: 'red' }
+        );
+      }
+
+      function defaultPosition() {
+        anchor.style.left = '';
+        anchor.style.top = '';
+        anchor.style.right = '24px';
+        anchor.style.bottom = '48px';
+        updatePopupSide();
+      }
+
+      function reset() {
+        if (animationLocked) return false;
+        clearTransient();
+        closeMenu();
+        clearAlert();
+        visible = true;
+        anchor.hidden = false;
+        visibilityButton.textContent = '暂时隐藏';
+        baseFrame = 'idle';
+        displayState = 'IDLE';
+        applyFrame('idle');
+        defaultPosition();
+        setEvent('已恢复常驻：无提醒、静态待机、默认右下位置。', 'blue');
+        scheduleAutoBlink();
+        return true;
+      }
+
+      function clampAnchor(left, top) {
+        const desktopRect = desktop.getBoundingClientRect();
+        const maxLeft = Math.max(8, desktopRect.width - anchor.offsetWidth - 8);
+        const maxTop = Math.max(8, desktopRect.height - anchor.offsetHeight - 46);
+        return {
+          left: Math.min(maxLeft, Math.max(8, left)),
+          top: Math.min(maxTop, Math.max(8, top))
+        };
+      }
+
+      function startDrag(event) {
+        if (animationLocked || !visible || !menu.hidden || event.button !== 0) return;
+        const desktopRect = desktop.getBoundingClientRect();
+        const anchorRect = anchor.getBoundingClientRect();
+        drag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          left: anchorRect.left - desktopRect.left,
+          top: anchorRect.top - desktopRect.top,
+          active: false
+        };
+        pet.setPointerCapture(event.pointerId);
+      }
+
+      function moveDrag(event) {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const deltaX = event.clientX - drag.startX;
+        const deltaY = event.clientY - drag.startY;
+        if (!drag.active && Math.hypot(deltaX, deltaY) < 6) return;
+        if (!drag.active) {
+          drag.active = true;
+          suppressClick = true;
+          clearBubbleDismiss();
+          bubble.hidden = true;
+          displayState = 'DRAGGING';
+          anchor.classList.add('memorive-is-dragging');
+          applyFrame('interaction');
+          setEvent('正在拖动桌面助手；松开后吸附最近安全边缘。', attentionTone === 'none' ? 'pink' : attentionTone);
+        }
+        const next = clampAnchor(drag.left + deltaX, drag.top + deltaY);
+        anchor.style.right = 'auto';
+        anchor.style.bottom = 'auto';
+        anchor.style.left = `${next.left}px`;
+        anchor.style.top = `${next.top}px`;
+        updatePopupSide();
+      }
+
+      function endDrag(event) {
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        if (pet.hasPointerCapture(event.pointerId)) pet.releasePointerCapture(event.pointerId);
+        const wasActive = drag.active;
+        drag = null;
+        if (!wasActive) return;
+        anchor.classList.remove('memorive-is-dragging');
+        const desktopRect = desktop.getBoundingClientRect();
+        const anchorRect = anchor.getBoundingClientRect();
+        const currentLeft = anchorRect.left - desktopRect.left;
+        const currentTop = anchorRect.top - desktopRect.top;
+        const snapLeft = currentLeft + anchorRect.width / 2 < desktopRect.width / 2 ? 10 : desktopRect.width - anchorRect.width - 10;
+        const next = clampAnchor(snapLeft, currentTop);
+        anchor.style.left = `${next.left}px`;
+        anchor.style.top = `${next.top}px`;
+        displayState = 'IDLE';
+        applyFrame(baseFrame);
+        updatePopupSide();
+        setEvent('拖动结束；已吸附最近安全边缘。', attentionTone === 'none' ? 'pink' : attentionTone);
+        window.setTimeout(() => { suppressClick = false; }, 0);
+        scheduleAutoBlink();
+      }
+
+      function handleAction(action) {
+        if (action === 'wake') wake();
+        else if (action === 'interaction') playInteraction('control');
+        else if (action === 'blink') playBlink('manual');
+        else if (action === 'attention') playAttention();
+        else if (action === 'working') playWorking();
+        else if (action === 'success') playSuccess();
+        else if (action === 'error') playError();
+        else if (action === 'reset') reset();
+        else if (action === 'visibility') setVisible(!visible);
+      }
+
+      actionButtons.forEach((button) => {
+        button.addEventListener('click', () => handleAction(button.dataset.prosAction));
+      });
+
+      pet.addEventListener('click', () => {
+        if (suppressClick || animationLocked) return;
+        closeMenu();
+        hideBubble();
+        setEvent('已受理激活 Memorive 主界面；不会创建第二实例。', 'blue');
+      });
+
+      pet.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        openMenu();
+      });
+
+      pet.addEventListener('keydown', (event) => {
+        if ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') {
+          event.preventDefault();
+          openMenu();
+        }
+      });
+
+      pet.addEventListener('pointerdown', startDrag);
+      pet.addEventListener('pointermove', moveDrag);
+      pet.addEventListener('pointerup', endDrag);
+      pet.addEventListener('pointercancel', endDrag);
+
+      bubbleOpen.addEventListener('click', () => {
+        if (animationLocked) return;
+        const routes = {
+          attention: '待处理详情',
+          working: '当前任务',
+          success: '生成结果',
+          error: '异常详情'
+        };
+        const route = routes[currentAlert] || '任务详情';
+        hideBubble();
+        setEvent(`将打开 Memorive ${route}；状态确认保持不变。`, attentionTone === 'none' ? 'blue' : attentionTone);
+      });
+
+      bubbleClose.addEventListener('click', () => {
+        if (animationLocked) return;
+        hideBubble();
+        setEvent('气泡已收起；这不等于确认、批准或完成任务。', attentionTone === 'none' ? 'blue' : attentionTone);
+      });
+
+      menuButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const action = button.dataset.prosMenu;
+          if (action === 'hide') {
+            closeMenu();
+            setVisible(false);
+            return;
+          }
+          const messages = {
+            codex: '预览：fake launcher 已受理 Codex；未启动真实外部应用。',
+            'claude-code': '预览：fake launcher 已受理 Claude Code；未读取账号或会话。',
+            'cc-switch': '预览：fake launcher 已受理 CC Switch；未传递任务内容。',
+            settings: '预览：将打开“设置 > 应用行为 > 桌面助手与快捷入口”。'
+          };
+          closeMenu({ focusPet: true });
+          setEvent(messages[action] || '预览操作已受理。', 'blue');
+        });
+      });
+
+      privacyToggle.addEventListener('change', () => {
+        updateBubbleCopy();
+        setEvent(privacyToggle.checked ? '隐私文案已开启；任务和文件名称已隐藏。' : '隐私文案已关闭；恢复安全显示名称。', 'blue');
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (!menu.hidden) closeMenu({ focusPet: true });
+        else if (!bubble.hidden && !animationLocked) {
+          hideBubble();
+          pet.focus();
+        }
+      });
+
+      document.addEventListener('pointerdown', (event) => {
+        if (!menu.hidden && !menu.contains(event.target) && event.target !== pet) closeMenu();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (autoBlinkTimer) window.clearTimeout(autoBlinkTimer);
+          autoBlinkTimer = 0;
+        } else {
+          scheduleAutoBlink();
+        }
+      });
+
+      const resizeObserver = new ResizeObserver(() => {
+        if (anchor.style.left) {
+          const next = clampAnchor(Number.parseFloat(anchor.style.left) || 0, Number.parseFloat(anchor.style.top) || 0);
+          anchor.style.left = `${next.left}px`;
+          anchor.style.top = `${next.top}px`;
+        }
+        updatePopupSide();
+      });
+      resizeObserver.observe(desktop);
+
+      setInteractionLock(false);
+      applyFrame('idle');
+      updatePopupSide();
+      scheduleAutoBlink();
+    })();
+  </script>
+</div>
+
+<script>
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+
+  const getTrigger = (target) =>
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest("[data-tooltip]")
+      : null;
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handleLeave = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    document.removeEventListener("pointerover", handlePointerOpen);
+    document.removeEventListener("pointerout", handleLeave);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", handleLeave);
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("contextmenu", handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener("pointerover", handlePointerOpen);
+  document.addEventListener("pointerout", handleLeave);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", handleLeave);
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script>
+(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+
+<script>(() => {
+  'use strict';
+  const root = document.querySelector('#memorive-desktop-assistant-preview');
+  const pet = document.querySelector('#memorive-pet-window');
+  const anchor = document.querySelector('#memorive-pet-anchor');
+  const bubble = document.querySelector('#memorive-pet-bubble');
+  const bubbleTitle = document.querySelector('#memorive-pet-bubble-title');
+  const bubbleCopy = document.querySelector('#memorive-pet-bubble-copy');
+  const bubbleOpen = document.querySelector('#memorive-pet-bubble-open');
+  const statusDot = document.querySelector('#memorive-pet-status-dot');
+  const menu = document.querySelector('#memorive-pet-menu');
+  const menuButtons = [...document.querySelectorAll('[data-memorive-menu]')];
+  if (!root || !pet || !anchor || !bubble || !bubbleTitle || !bubbleCopy || !statusDot || !menu) {
+    throw new Error('ASSISTANT_RUNTIME_DOM_MISSING');
+  }
+  [document.documentElement, document.body, root, root.querySelector('.memorive-desktop')]
+    .filter(Boolean)
+    .forEach((node) => {
+      node.style.setProperty('background', 'transparent', 'important');
+      node.style.setProperty('background-color', 'transparent', 'important');
+    });
+  pet.title = '左键打开 Memorive，右键更多';
+
+  let lastProjection = null;
+  let drag = null;
+  let movePending = false;
+  let primaryActivationCount = 0;
+  let lastPrimaryActivationReceipt = null;
+  let menuFitCount = 0;
+  let menuOutsideDismissCount = 0;
+  let menuBlurDismissCount = 0;
+  let lastMenuCloseReason = null;
+  let refreshTimer = null;
+
+  const api = (name, payload) => {
+    if (!window.pywebview || !window.pywebview.api || typeof window.pywebview.api[name] !== 'function') {
+      return Promise.reject(new Error('ASSISTANT_NATIVE_BRIDGE_UNAVAILABLE'));
+    }
+    return Promise.resolve(window.pywebview.api[name](payload));
+  };
+
+  const toneFor = (attention) => ({
+    INFO: 'blue',
+    SUCCESS: 'green',
+    WARNING: 'yellow',
+    ERROR: 'red',
+    NONE: 'none',
+  })[attention] || 'none';
+
+  const frameFor = (animation) => ({
+    STATIC: 'idle',
+    WAKE: 'interaction',
+    WORKING: 'working',
+    MESSAGE: 'interaction',
+    BLINK: 'idle',
+    ATTENTION: 'interaction',
+    SUCCESS: 'success',
+    ERROR: 'interaction',
+    DRAG: 'interaction',
+    SLEEP: 'blink-closed',
+  })[animation] || 'idle';
+
+  let visibleDeliveryId = null;
+  const applyProjection = (projection) => {
+    if (!projection || projection.schema_version !== 'DesktopAssistantAssistantRuntimeProjection-v1') {
+      throw new Error('ASSISTANT_RUNTIME_PROJECTION_INVALID');
+    }
+    lastProjection = projection;
+    const presentation = projection.presentation;
+    // The native renderer acknowledges after its actual completion. When it
+    // is absent, retain and animate this delivery in the existing HTML pet.
+    if (presentation.delivery_id && projection.native_presentation_status !== 'APPLIED'
+        && visibleDeliveryId !== presentation.delivery_id
+        && !['HIDDEN','DISABLED'].includes(presentation.display_state)) {
+      visibleDeliveryId = presentation.delivery_id;
+      const deliveryId = visibleDeliveryId;
+      const motion = presentation.animation_state === 'ERROR' ? 'memorive-is-shaking-error' : 'memorive-is-tilting';
+      pet.classList.remove('memorive-is-shaking-error', 'memorive-is-tilting');
+      void pet.offsetWidth;
+      const finish = () => {
+        pet.classList.remove(motion);
+        api('assistant_ack_delivery', {delivery_id:deliveryId}).catch(() => { visibleDeliveryId = null; });
+      };
+      if (presentation.reduced_motion) requestAnimationFrame(finish);
+      else {
+        pet.classList.add(motion);
+        pet.addEventListener('animationend', finish, {once:true});
+      }
+    }
+    root.dataset.reducedMotion = String(Boolean(presentation.reduced_motion));
+    pet.dataset.frame = frameFor(presentation.animation_state);
+    pet.setAttribute('aria-label', 'Memorive 桌面助手，' + presentation.safe_summary);
+    statusDot.dataset.tone = toneFor(presentation.attention_state);
+    statusDot.dataset.spinner = String(
+      ['JOB_RUNNING', 'MESSAGE_UPDATE'].includes(presentation.reason_code) && !presentation.reduced_motion
+    );
+    bubbleTitle.textContent = presentation.safe_summary;
+    bubbleCopy.textContent = presentation.display_state === 'NOTIFYING'
+      ? '点击打开 Memorive 主程序'
+      : presentation.reason_code === 'NO_ACTIVE_REAL_JOB'
+        ? '待命中'
+        : presentation.reason_code;
+    bubble.hidden = presentation.display_state !== 'NOTIFYING';
+    anchor.hidden = presentation.display_state === 'HIDDEN' || presentation.display_state === 'DISABLED';
+    document.body.dataset.assistantReady = 'true';
+  };
+
+  const applyPresentation = (presentation) => applyProjection({
+    ...(lastProjection || {}),
+    schema_version: 'DesktopAssistantAssistantRuntimeProjection-v1',
+    presentation,
+  });
+
+  const refresh = () => api('assistant_bootstrap', {}).then(applyProjection).catch(() => {
+    statusDot.dataset.tone = 'red';
+    statusDot.dataset.spinner = 'false';
+    bubbleTitle.textContent = '桌面助手已暂停';
+    bubbleCopy.textContent = '本地服务不可用';
+    bubble.hidden = false;
+  });
+
+  const setAutoRefreshEnabled = (enabled) => {
+    if (refreshTimer !== null) {
+      window.clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+    if (enabled) refreshTimer = window.setInterval(refresh, 3000);
+    return refreshTimer !== null;
+  };
+
+  const runShortcut = (actionId, locator = null) => api('assistant_shortcut', {
+    action_id: actionId,
+    locator,
+  }).then((receipt) => {
+    if (actionId === 'OPEN_Desktop_MAIN' && receipt?.main_window_focus?.status === 'PASS') {
+      primaryActivationCount += 1;
+      lastPrimaryActivationReceipt = receipt;
+    }
+    if (receipt && receipt.presentation) applyProjection(receipt.presentation);
+    return receipt;
+  });
+
+  const closeMenu = (reason = 'runtime') => {
+    const wasOpen = !menu.hidden;
+    menu.hidden = true;
+    menu.style.removeProperty('transform');
+    pet.setAttribute('aria-expanded', 'false');
+    if (wasOpen) {
+      lastMenuCloseReason = reason;
+      if (reason === 'outside-pointer') menuOutsideDismissCount += 1;
+      if (reason === 'window-blur' || reason === 'document-hidden') menuBlurDismissCount += 1;
+    }
+    return wasOpen;
+  };
+
+  const fitMenuToViewport = () => {
+    if (menu.hidden) return false;
+    menu.style.removeProperty('transform');
+    const margin = 8;
+    const rect = menu.getBoundingClientRect();
+    let translateX = 0;
+    let translateY = 0;
+    if (rect.left < margin) translateX += margin - rect.left;
+    if (rect.right > window.innerWidth - margin) translateX -= rect.right - (window.innerWidth - margin);
+    if (rect.top < margin) translateY += margin - rect.top;
+    if (rect.bottom > window.innerHeight - margin) translateY -= rect.bottom - (window.innerHeight - margin);
+    if (translateX || translateY) {
+      menu.style.transform = `translate(${Math.round(translateX)}px, ${Math.round(translateY)}px)`;
+    }
+    menuFitCount += 1;
+    return true;
+  };
+
+  const scheduleMenuFit = () => {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(fitMenuToViewport));
+  };
+
+  pet.addEventListener('contextmenu', scheduleMenuFit, true);
+  new MutationObserver(() => {
+    if (!menu.hidden) scheduleMenuFit();
+  }).observe(menu, { attributes: true, attributeFilter: ['hidden'] });
+  window.addEventListener('resize', scheduleMenuFit);
+  document.addEventListener('pointerdown', (event) => {
+    if (menu.hidden || menu.contains(event.target)) return;
+    closeMenu('outside-pointer');
+  }, true);
+  window.addEventListener('blur', () => closeMenu('window-blur'));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) closeMenu('document-hidden');
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) closeMenu('escape');
+  }, true);
+
+  pet.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    drag = {
+      pointerId: event.pointerId,
+      startX: event.screenX,
+      startY: event.screenY,
+      windowX: Math.round(window.screenX),
+      windowY: Math.round(window.screenY),
+      moved: false,
+      targetX: Math.round(window.screenX),
+      targetY: Math.round(window.screenY),
+    };
+    if (event.isTrusted) pet.setPointerCapture(event.pointerId);
+  }, true);
+
+  pet.addEventListener('pointermove', (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const dx = event.screenX - drag.startX;
+    const dy = event.screenY - drag.startY;
+    if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+    drag.moved = true;
+    drag.targetX = Math.round(drag.windowX + dx);
+    drag.targetY = Math.round(drag.windowY + dy);
+    if (movePending) return;
+    movePending = true;
+    api('assistant_move_window', { x: drag.targetX, y: drag.targetY, persist: false })
+      .finally(() => { movePending = false; });
+  }, true);
+
+  const finishPointer = (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (event.isTrusted && pet.hasPointerCapture(event.pointerId)) pet.releasePointerCapture(event.pointerId);
+    const completed = drag;
+    drag = null;
+    if (completed.moved) {
+      api('assistant_move_window', { x: completed.targetX, y: completed.targetY, persist: true })
+        .then(refresh)
+        .catch(refresh);
+    } else {
+      runShortcut('OPEN_Desktop_MAIN').catch(refresh);
+    }
+  };
+  pet.addEventListener('pointerup', finishPointer, true);
+  pet.addEventListener('pointercancel', finishPointer, true);
+  pet.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+
+  bubbleOpen?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const locator = lastProjection?.presentation?.locator || null;
+    const action = locator ? 'OPEN_MESSAGE_DETAIL' : 'OPEN_Desktop_MAIN';
+    runShortcut(action, locator).catch(refresh);
+  }, true);
+
+  menuButtons.forEach((button) => {
+    const action = button.dataset.prosMenu;
+    if (['codex', 'claude-code', 'cc-switch'].includes(action)) {
+      button.disabled = true;
+      button.title = '外部应用未启用';
+      return;
+    }
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeMenu('menu-action');
+      if (action === 'open-desktop') runShortcut('OPEN_Desktop_MAIN').catch(refresh);
+      else if (action === 'settings') runShortcut('OPEN_DESKTOP_ASSISTANT_SETTINGS').catch(refresh);
+      else if (action === 'hide') runShortcut('HIDE_DESKTOP_ASSISTANT').catch(refresh);
+    }, true);
+  });
+
+  window.__Desktop_ASSISTANT_RUNTIME__ = Object.freeze({
+    refresh,
+    setAutoRefreshEnabled,
+    applyPresentation,
+    closeMenu,
+    fitMenuToViewport,
+    inspect: () => {
+      const surface = root.querySelector('.memorive-desktop');
+      const transparencyNodes = [document.documentElement, document.body, root, surface].filter(Boolean);
+      const surfaceBackgrounds = transparencyNodes.map((node) => getComputedStyle(node).backgroundColor);
+      const petRect = pet.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      const visibleMenuButtons = menuButtons.filter((button) => getComputedStyle(button).display !== 'none');
+      const menuWithinViewport = menu.hidden || (
+        menuRect.left >= 7
+        && menuRect.top >= 7
+        && menuRect.right <= window.innerWidth - 7
+        && menuRect.bottom <= window.innerHeight - 7
+      );
+      return {
+        ready: document.body.dataset.assistantReady === 'true',
+        auto_refresh_enabled: refreshTimer !== null,
+        visible: !anchor.hidden,
+        frame: pet.dataset.frame,
+        tone: statusDot.dataset.tone,
+        bubble_visible: !bubble.hidden,
+        visible_debug_chrome_count: [...root.querySelectorAll('.memorive-desktop-state,.memorive-taskbar,.memorive-pet-event,.memorive-desktop-shortcut,.memorive-desktop-document')]
+          .filter((node) => getComputedStyle(node).display !== 'none').length,
+        pet_only_default: !anchor.hidden && bubble.hidden && statusDot.dataset.tone === 'none',
+        surface_backgrounds: surfaceBackgrounds,
+        transparent_surface_exact: surfaceBackgrounds.length === 4
+          && surfaceBackgrounds.every((value) => value === 'rgba(0, 0, 0, 0)'),
+        pet_sprite_opacity: Number.parseFloat(
+          getComputedStyle(root.querySelector('.memorive-pet-sprite') || pet).opacity
+        ),
+        pet_hit_point_css: {
+          x: petRect.left + petRect.width / 2,
+          y: petRect.top + petRect.height / 2,
+        },
+        device_pixel_ratio: Number(window.devicePixelRatio || 1),
+        viewport_size_css: {
+          width: Number(window.innerWidth || 0),
+          height: Number(window.innerHeight || 0),
+        },
+        primary_activation_count: primaryActivationCount,
+        last_primary_activation_receipt: lastPrimaryActivationReceipt,
+        menu: {
+          open: !menu.hidden,
+          rect: {
+            left: menuRect.left,
+            top: menuRect.top,
+            right: menuRect.right,
+            bottom: menuRect.bottom,
+            width: menuRect.width,
+            height: menuRect.height,
+          },
+          fully_within_viewport: menuWithinViewport,
+          content_fully_visible: menu.hidden || (
+            menu.scrollWidth <= menu.clientWidth + 1
+            && menu.scrollHeight <= menu.clientHeight + 1
+          ),
+          visible_button_count: visibleMenuButtons.length,
+          visible_actions: visibleMenuButtons.map((button) => button.dataset.prosMenu),
+          fit_count: menuFitCount,
+          outside_dismiss_count: menuOutsideDismissCount,
+          blur_dismiss_count: menuBlurDismissCount,
+          last_close_reason: lastMenuCloseReason,
+        },
+        exit_control_visible: false,
+        sample_job_consumed: Boolean(lastProjection?.sample_job_consumed),
+        presentation: lastProjection?.presentation || null,
+      };
+    },
+  });
+
+  const start = () => {
+    refresh();
+    setAutoRefreshEnabled(true);
+  };
+  if (window.pywebview?.api) start();
+  else window.addEventListener('pywebviewready', start, { once: true });
+})();</script>
+</body>
+</html>

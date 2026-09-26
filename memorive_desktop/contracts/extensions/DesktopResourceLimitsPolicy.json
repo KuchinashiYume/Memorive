@@ -1,0 +1,78 @@
+{
+  "schema_version": "DesktopResourceLimitsPolicy-v1",
+  "revision": "r1.0",
+  "effective_from_version": "1.01",
+  "authority": "USER_CAPACITY_ONLY_REQUEST_2026-09-04",
+  "workflow_changes_authorized": false,
+  "embedding_changes_authorized": false,
+  "settings_migration_authorized": false,
+  "legacy_evidence_mutation_authorized": false,
+  "resolution": {
+    "model_provider_service_runtime": "INTERSECTION_OF_KNOWN_CONSTRAINTS",
+    "unknown": "UNKNOWN_NOT_A_GUESSED_NUMBER",
+    "remaining_shared_context": "DEDUCT_CURRENT_INPUT_WHEN_A_RELIABLE_COUNT_IS_AVAILABLE",
+    "estimated_input": "ESTIMATE_NOT_PROVIDER_TOKENIZATION_PROOF",
+    "reasoning_tokens": "INCLUDED_IN_OUTPUT_DO_NOT_RESERVE_TWICE",
+    "local_num_ctx": "ONLY_WHEN_LOADED_OR_MACHINE_CONFIGURATION_IS_KNOWN",
+    "local_unknown_context": "OLLAMA_MANAGED_NO_FORCED_THEORETICAL_CONTEXT",
+    "cli_output_parameter": null,
+    "default_long_call_deadline_seconds": null,
+    "explicit_user_resource_limits": "PRESERVE",
+    "failure_then_double": false
+  },
+  "empirical_reference": {
+    "model": "claude-opus-5",
+    "thinking": "adaptive-max",
+    "completed_calls": 19,
+    "completion_tokens_including_reasoning": 155999,
+    "observed_peak": 17303,
+    "user_multiplier": 10,
+    "planning_reference_tokens": 173030,
+    "reference_is_quality_gate": false,
+    "complete_over_reference_answer_is_discarded": false,
+    "evidence_sha256_binding": "BA5116A3AF8F354477535F48F484FF2CE7959473F21A188A1502D6A21D4C0476"
+  },
+  "provider_sources": [
+    {
+      "provider": "Anthropic",
+      "verified_on": "2026-09-04",
+      "url": "https://platform.claude.com/docs/en/models/overview",
+      "normal_messages_only": true,
+      "batch_beta_not_applied": true
+    },
+    {
+      "provider": "DeepSeek",
+      "verified_on": "2026-09-04",
+      "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "runtime_registry": "source/model_gateway/model_capabilities.json"
+    }
+  ],
+  "transport": {
+    "reuse_existing_model_gateway_sse_parsers": true,
+    "heartbeat_is_content_progress": false,
+    "silence_proves_disconnect": false,
+    "client_interruption_proves_server_cancelled": false,
+    "automatic_retry_on_ambiguous_dispatch": false,
+    "physical_truncation_quality_assessment": "NOT_ASSESSED",
+    "preserve_visible_received_output_and_usage": true,
+    "authenticated_ipc_default_content_ceiling_bytes": null,
+    "unauthenticated_ipc_security_envelope_unchanged": true,
+    "wire_format_unchanged": "UINT32_LENGTH_PREFIX",
+    "cli_capture_default_ceiling_bytes": null
+  },
+  "exam_request_guard": "DERIVE_FROM_FROZEN_FORM_COUNTS_AND_EXISTING_REPAIR_RETRY_PATHS",
+  "unchanged": [
+    "workflow_nodes",
+    "node_order",
+    "model_choice",
+    "semantic_repair_rounds",
+    "user_retry_count",
+    "scoring",
+    "source_language_rules",
+    "admission",
+    "embedding",
+    "ui",
+    "desktop_pet",
+    "folder_management_policy"
+  ]
+}

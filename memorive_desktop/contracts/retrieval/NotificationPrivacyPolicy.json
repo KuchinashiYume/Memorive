@@ -1,0 +1,27 @@
+{
+  "schema_version": "memorive.desktop.retrieval.notification-privacy-policy.v1",
+  "bridge": "OFFLINE_DETERMINISTIC_SIMULATED_WINDOWS_BRIDGE",
+  "default_delivery": {
+    "RED": "IN_APP_AND_ONE_SYNTHETIC_TOAST",
+    "YELLOW": "IN_APP_AND_ONE_SYNTHETIC_TOAST",
+    "GREEN": "IN_APP_ONLY",
+    "BLUE": "IN_APP_ONLY"
+  },
+  "toast_title": "generic severity-level wording",
+  "toast_body": "打开应用查看详情。",
+  "lockscreen_detail": "GENERIC_SUMMARY_ONLY",
+  "forbidden_surfaces": [
+    "UI",
+    "TOAST",
+    "LOCKSCREEN",
+    "LOG",
+    "SCREENSHOT",
+    "SUPPORT_BUNDLE"
+  ],
+  "disabled_behavior": "in-app message remains and capability reason is exposed",
+  "quiet_behavior": "in-app message remains and toast is not emitted",
+  "os_notification_registration": false,
+  "global_protocol_registration": false,
+  "real_toast_history_read": false,
+  "private_payload_persisted": false
+}

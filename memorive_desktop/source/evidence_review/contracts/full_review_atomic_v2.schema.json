@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:card-review:full-review-atomic-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "coverage_complete",
+    "coverage",
+    "supported_atom_groups",
+    "atom_reviews",
+    "missing_claims",
+    "cross_field_conflicts"
+  ],
+  "properties": {
+    "coverage_complete": {
+      "type": "boolean",
+      "const": true
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "research_question",
+        "research_object",
+        "method",
+        "key_results",
+        "author_conclusion",
+        "boundary_conditions"
+      ],
+      "properties": {
+        "research_question": {
+          "$ref": "#/$defs/coverage_status"
+        },
+        "research_object": {
+          "$ref": "#/$defs/coverage_status"
+        },
+        "method": {
+          "$ref": "#/$defs/coverage_status"
+        },
+        "key_results": {
+          "$ref": "#/$defs/coverage_status"
+        },
+        "author_conclusion": {
+          "$ref": "#/$defs/coverage_status"
+        },
+        "boundary_conditions": {
+          "$ref": "#/$defs/coverage_status"
+        }
+      }
+    },
+    "supported_atom_groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/supported_atom_group"
+      }
+    },
+    "atom_reviews": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/atom_review"
+      }
+    },
+    "missing_claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/missing_claim"
+      }
+    },
+    "cross_field_conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conflict"
+      }
+    }
+  },
+  "$defs": {
+    "coverage_status": {
+      "type": "string",
+      "enum": [
+        "SUPPORTED",
+        "PARTIAL",
+        "MISSING",
+        "CONFLICT"
+      ]
+    },
+    "failed_atom_status": {
+      "type": "string",
+      "enum": [
+        "PARTIAL",
+        "UNSUPPORTED",
+        "CONFLICT"
+      ]
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supported_atom_group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atom_ids",
+        "evidence_chunk_ids"
+      ],
+      "properties": {
+        "atom_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence_chunk_ids": {
+          "$ref": "#/$defs/evidence_ids"
+        }
+      }
+    },
+    "atom_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "atom_id",
+        "status",
+        "evidence_chunk_ids",
+        "reason"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "atom_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/$defs/failed_atom_status"
+        },
+        "evidence_chunk_ids": {
+          "$ref": "#/$defs/evidence_ids"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "missing_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "target_path",
+        "issue_type",
+        "evidence_chunk_ids",
+        "description"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "enum": [
+            "research_question",
+            "research_object",
+            "method",
+            "key_results",
+            "author_conclusion",
+            "boundary_conditions"
+          ]
+        },
+        "target_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issue_type": {
+          "type": "string",
+          "enum": [
+            "CORE_OMISSION",
+            "METHOD_OMISSION",
+            "BOUNDARY_OMISSION",
+            "LIMITATION_OMISSION",
+            "OTHER_MATERIAL_OMISSION"
+          ]
+        },
+        "evidence_chunk_ids": {
+          "$ref": "#/$defs/evidence_ids"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fields",
+        "evidence_chunk_ids",
+        "description"
+      ],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_chunk_ids": {
+          "$ref": "#/$defs/evidence_ids"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": "DISCOVERY_CONTRACTS_CONTRACT_DESIGN_MANIFEST_V1",
+  "contract_revision": "discovery_contracts-common-contract-r0.1-candidate001",
+  "source_commit": "c9209f20b7984ead3c294ff1cd9d193d5589d071",
+  "deliverables": {
+    "D02": [
+      "authority_ownership_baseline.json",
+      "authority_ownership_baseline.md"
+    ],
+    "D03": [
+      "research_context_contract.schema.json",
+      "research_context_contract.md"
+    ],
+    "D04": [
+      "discovery_common_object_contract.schema.json",
+      "discovery_common_object_contract.md"
+    ],
+    "D05": [
+      "state_transition_contract.schema.json",
+      "state_transition_table.json",
+      "state_transition_contract.md"
+    ],
+    "D06": [
+      "error_semantics_catalog.json",
+      "error_semantics_catalog.md"
+    ],
+    "D07": [
+      "gate_profile_alignment_matrix.json",
+      "gate_profile_alignment_matrix.md",
+      "task_dependency_interface_matrix.json",
+      "task_dependency_interface_matrix.md"
+    ]
+  },
+  "fixture_files": [
+    "valid_research_context.json",
+    "valid_discovery_objects.json",
+    "valid_state_bundle.json",
+    "adversarial_cases.json"
+  ],
+  "formal_write_status": "NOT_AUTHORIZED_NOT_RUN",
+  "external_calls": 0,
+  "cost_cny": 0
+}

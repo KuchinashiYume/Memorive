@@ -1,0 +1,15 @@
+{
+  "branch_log_mutations": 0,
+  "central_log_mutations": 0,
+  "frozen_evidence_mutations": 0,
+  "runtime_log_mutations": 0,
+  "product_projection_is_authority": false,
+  "schema_version": "WorkLogWorkLogAuthoritySeparationContract-v1",
+  "source_access": "LOCATOR_AND_HASH_METADATA_ONLY",
+  "source_authorities": [
+    "BRANCH_LOG",
+    "CENTRAL_LOG",
+    "RUNTIME_LOG_LOG"
+  ],
+  "status": "PASS"
+}

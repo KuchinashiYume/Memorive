@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "memorive.discovery.analysis.promotion-receipt.v1",
+  "title": "PromotionReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "promotion_id",
+    "intent_hash",
+    "candidate_bundle_hash",
+    "approval_receipt_hash",
+    "target_namespace",
+    "paper_id",
+    "transaction_state",
+    "commit_marker_type",
+    "committed_at",
+    "artifact_id",
+    "formal_files",
+    "knowledge_admission",
+    "artifact_registry",
+    "formal_index",
+    "prestate_hash",
+    "poststate_hash",
+    "write_counts",
+    "compensation",
+    "external_effects",
+    "production_effects",
+    "visibility_contract",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "memorive.discovery.analysis.promotion-receipt.v1"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "promotion_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "candidate_bundle_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "approval_receipt_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "target_namespace": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "paper_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transaction_state": {
+      "const": "COMMITTED"
+    },
+    "commit_marker_type": {
+      "const": "PROMOTION_RECEIPT_LAST_VISIBILITY_MARKER"
+    },
+    "committed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^art_[0-9a-f]{32}$"
+    },
+    "formal_files": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relative_path",
+          "sha256",
+          "bytes"
+        ],
+        "properties": {
+          "relative_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "knowledge_admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_status",
+        "to_status",
+        "event_ref",
+        "head_hash"
+      ],
+      "properties": {
+        "from_status": {
+          "const": "pending"
+        },
+        "to_status": {
+          "const": "active"
+        },
+        "event_ref": {
+          "type": "string",
+          "pattern": "^knowledge_admission://.+/active$"
+        },
+        "head_hash": {
+          "type": "string",
+          "pattern": "^[0-9A-F]{64}$"
+        }
+      }
+    },
+    "artifact_registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "registration_result",
+        "head_hash",
+        "locator"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^art_[0-9a-f]{32}$"
+        },
+        "registration_result": {
+          "enum": [
+            "appended",
+            "idempotent"
+          ]
+        },
+        "head_hash": {
+          "type": "string",
+          "pattern": "^[0-9A-F]{64}$"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "formal_index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_key",
+        "head_hash"
+      ],
+      "properties": {
+        "entry_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "head_hash": {
+          "type": "string",
+          "pattern": "^[0-9A-F]{64}$"
+        }
+      }
+    },
+    "prestate_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "poststate_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "write_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formal_file_writes",
+        "knowledge_admission_appends",
+        "artifact_registry_appends",
+        "index_writes",
+        "receipt_writes"
+      ],
+      "properties": {
+        "formal_file_writes": {
+          "const": 5
+        },
+        "knowledge_admission_appends": {
+          "const": 1
+        },
+        "artifact_registry_appends": {
+          "const": 2
+        },
+        "index_writes": {
+          "const": 1
+        },
+        "receipt_writes": {
+          "const": 1
+        }
+      }
+    },
+    "compensation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "actions"
+      ],
+      "properties": {
+        "required": {
+          "const": false
+        },
+        "actions": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "external_effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "network_calls",
+        "model_calls",
+        "ocr_calls",
+        "embedding_calls",
+        "credential_reads",
+        "tokens",
+        "cost_cny"
+      ],
+      "properties": {
+        "network_calls": {
+          "const": 0
+        },
+        "model_calls": {
+          "const": 0
+        },
+        "ocr_calls": {
+          "const": 0
+        },
+        "embedding_calls": {
+          "const": 0
+        },
+        "credential_reads": {
+          "const": 0
+        },
+        "tokens": {
+          "const": 0
+        },
+        "cost_cny": {
+          "const": 0.0
+        }
+      }
+    },
+    "production_effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "writes",
+        "mutations",
+        "payload_reads"
+      ],
+      "properties": {
+        "writes": {
+          "const": 0
+        },
+        "mutations": {
+          "const": 0
+        },
+        "payload_reads": {
+          "const": 0
+        }
+      }
+    },
+    "visibility_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected",
+        "conditions"
+      ],
+      "properties": {
+        "expected": {
+          "const": "VISIBLE"
+        },
+        "conditions": {
+          "const": [
+            "valid_receipt_hash",
+            "transaction_committed",
+            "knowledge_admission_active",
+            "artifact_registry_locator_and_lineage_match",
+            "formal_index_match",
+            "formal_file_bytes_match"
+          ]
+        }
+      }
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    }
+  }
+}

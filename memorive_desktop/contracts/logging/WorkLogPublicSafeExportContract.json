@@ -1,0 +1,21 @@
+{
+  "absolute_paths_forbidden": true,
+  "atomic_directory_publish_required": true,
+  "destination": "Logging_DISPOSABLE_STATE_EXPORT_ROOT_ONLY",
+  "failure_partial_final_output_allowed": false,
+  "forbidden_keys": [
+    "authorization",
+    "cookie",
+    "credential",
+    "password",
+    "private_payload",
+    "raw_prompt",
+    "restricted_path",
+    "secret",
+    "token"
+  ],
+  "manifest_sha256_required": true,
+  "raw_authority_bytes_forbidden": true,
+  "schema_version": "WorkLogWorkLogPublicSafeExportContract-v1",
+  "status": "PASS"
+}

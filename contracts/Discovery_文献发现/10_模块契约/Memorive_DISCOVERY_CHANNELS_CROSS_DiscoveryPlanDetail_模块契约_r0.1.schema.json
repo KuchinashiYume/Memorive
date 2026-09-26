@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:discovery-channels:discovery-plan-detail:0.1",
+  "title": "Discovery Intake DiscoveryPlanDetail",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_type",
+    "plan_id",
+    "initialization_plan_ref",
+    "mode",
+    "frozen_as_of",
+    "context_hash",
+    "batch_size",
+    "channel_targets",
+    "whitespace_slots",
+    "concentration_caps",
+    "primary_channel_priority",
+    "tie_break",
+    "no_backfill",
+    "history_windows_days",
+    "is_synthetic",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "discovery.intake.discovery-plan-detail.0.1"
+    },
+    "object_type": {
+      "const": "DiscoveryPlanDetail"
+    },
+    "plan_id": {
+      "type": "string",
+      "pattern": "^DISCOVERY_PLAN:[A-Z0-9_-]+$"
+    },
+    "initialization_plan_ref": {
+      "const": "DiscoveryPlan"
+    },
+    "mode": {
+      "enum": [
+        "DEEP_DIVE",
+        "BALANCED_SCAN",
+        "HORIZON_SCAN",
+        "CITATION_WATCH",
+        "GAP_REPAIR"
+      ]
+    },
+    "frozen_as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "batch_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "channel_targets": {
+      "$ref": "#/$defs/channelTargets"
+    },
+    "whitespace_slots": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "concentration_caps": {
+      "$ref": "#/$defs/caps"
+    },
+    "primary_channel_priority": {
+      "const": [
+        "HORIZON",
+        "COVERAGE_REPAIR",
+        "BRIDGE",
+        "CORE",
+        "ADJACENT"
+      ]
+    },
+    "tie_break": {
+      "const": "CANONICAL_IDENTITY_ASC"
+    },
+    "no_backfill": {
+      "const": "CORE_SILENT_BACKFILL_FORBIDDEN"
+    },
+    "history_windows_days": {
+      "type": "array",
+      "const": [
+        30,
+        90
+      ]
+    },
+    "is_synthetic": {
+      "const": true
+    },
+    "content_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "channelTargets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CORE",
+        "ADJACENT",
+        "BRIDGE",
+        "HORIZON",
+        "COVERAGE_REPAIR"
+      ],
+      "properties": {
+        "CORE": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ADJACENT": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "BRIDGE": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "HORIZON": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "COVERAGE_REPAIR": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "author",
+        "institution",
+        "journal",
+        "source",
+        "direction"
+      ],
+      "properties": {
+        "author": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "institution": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "journal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "direction": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

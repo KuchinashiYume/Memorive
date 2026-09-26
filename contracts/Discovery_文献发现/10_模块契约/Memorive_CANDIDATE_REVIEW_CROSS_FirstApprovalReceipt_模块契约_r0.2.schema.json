@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:first-approval-receipt:r0.2",
+  "title": "FirstApprovalReceipt r0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "fixture_id",
+    "fixture_authority",
+    "candidate_id",
+    "work_cluster_id",
+    "manifestation_id",
+    "candidate_revision",
+    "source_revision",
+    "direction_id",
+    "approved_input_hash",
+    "approval_text_sha256",
+    "decided_by",
+    "authority_class",
+    "evidence_refs",
+    "decision_status",
+    "revoked",
+    "revoked_at",
+    "revocation_ref",
+    "issued_at",
+    "expires_at",
+    "approved_source_sha256",
+    "scope",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fixture_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fixture_authority": {
+      "const": "MEMORIVE_SELF_AUTHORED_PUBLIC_SAFE_SYNTHETIC"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_cluster_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifestation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "direction_id": {
+      "type": "string",
+      "pattern": "^DIRECTION:[A-Z0-9_-]+$"
+    },
+    "approved_input_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "approval_text_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "decided_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(fixture|formal)://"
+      }
+    },
+    "decision_status": {
+      "const": "APPROVED_FOR_CARD_STAGING"
+    },
+    "revoked": {
+      "type": "boolean"
+    },
+    "revoked_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "revocation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_source_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "scope": {
+      "const": "PURE_OFFLINE_A0_SYNTHETIC_CARD_STAGING_ONLY"
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "revoked": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "const": null
+          },
+          "revocation_ref": {
+            "const": null
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revocation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

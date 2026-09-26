@@ -1,0 +1,574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/AccountingPanelProjection-v3.schema.json",
+  "title": "AccountingPanelProjection-v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "refresh",
+    "filters",
+    "range",
+    "scope_capabilities",
+    "commerce_context",
+    "display_currency",
+    "display_currency_label",
+    "cost_display",
+    "native_cost_buckets",
+    "attempt_count",
+    "failed_attempt_count",
+    "unpriced_attempt_count",
+    "tokens",
+    "model_options",
+    "models",
+    "series",
+    "source_summary",
+    "raw_private_content_included"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "AccountingPanelProjection-v3"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "PARTIAL",
+        "NOT_ASSESSED"
+      ]
+    },
+    "refresh": {
+      "$ref": "#/$defs/refresh"
+    },
+    "filters": {
+      "$ref": "#/$defs/filters"
+    },
+    "range": {
+      "$ref": "#/$defs/range"
+    },
+    "scope_capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_job"
+      ],
+      "properties": {
+        "current_job": {
+          "$ref": "#/$defs/scopeCapability"
+        }
+      }
+    },
+    "commerce_context": {
+      "$ref": "SharedModelCommerceContext-v1.schema.json"
+    },
+    "display_currency": {
+      "enum": [
+        "USD",
+        "CNY",
+        "JPY"
+      ]
+    },
+    "display_currency_label": {
+      "enum": [
+        "USD",
+        "RMB",
+        "JPY"
+      ]
+    },
+    "cost_display": {
+      "$ref": "#/$defs/costDisplay"
+    },
+    "native_cost_buckets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/currencyBucket"
+      }
+    },
+    "attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unpriced_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tokens": {
+      "$ref": "#/$defs/tokens"
+    },
+    "model_options": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/model"
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/model"
+      }
+    },
+    "series": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/seriesBucket"
+      }
+    },
+    "source_summary": {
+      "$ref": "#/$defs/sourceSummary"
+    },
+    "raw_private_content_included": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+    },
+    "nullableDecimal": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/decimal"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "refresh": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "mode",
+        "external_network_calls"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "CURRENT",
+            "REFRESHED"
+          ]
+        },
+        "mode": {
+          "const": "LOCAL_SNAPSHOT"
+        },
+        "external_network_calls": {
+          "const": 0
+        }
+      }
+    },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "current_job_id",
+        "time_range",
+        "model_profile_ref",
+        "preferred_currency",
+        "group_by"
+      ],
+      "properties": {
+        "scope": {
+          "enum": [
+            "ALL",
+            "CURRENT_JOB"
+          ]
+        },
+        "current_job_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 192
+        },
+        "time_range": {
+          "enum": [
+            "7D",
+            "30D",
+            "MONTH"
+          ]
+        },
+        "model_profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "preferred_currency": {
+          "enum": [
+            "USD",
+            "CNY",
+            "JPY"
+          ]
+        },
+        "group_by": {
+          "const": "MODEL_PROFILE"
+        }
+      }
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preset",
+        "start_date",
+        "end_date",
+        "granularity",
+        "bucket_count"
+      ],
+      "properties": {
+        "preset": {
+          "enum": [
+            "7D",
+            "30D",
+            "MONTH"
+          ]
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "granularity": {
+          "const": "DAY"
+        },
+        "bucket_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 31
+        }
+      }
+    },
+    "scopeCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "eligible_attempt_count",
+        "bound_attempt_count",
+        "coverage_ratio",
+        "reason_codes"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "READY",
+            "NOT_READY"
+          ]
+        },
+        "eligible_attempt_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bound_attempt_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reasonCode"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "costDisplay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_cost",
+        "estimated_cost",
+        "assessable_cost",
+        "conversion_status",
+        "fx_snapshot_id"
+      ],
+      "properties": {
+        "actual_cost": {
+          "$ref": "#/$defs/nullableDecimal"
+        },
+        "estimated_cost": {
+          "$ref": "#/$defs/nullableDecimal"
+        },
+        "assessable_cost": {
+          "$ref": "#/$defs/nullableDecimal"
+        },
+        "conversion_status": {
+          "enum": [
+            "NATIVE",
+            "AVAILABLE",
+            "CACHED",
+            "EXPIRED",
+            "MISSING",
+            "INVALID",
+            "NOT_ASSESSED"
+          ]
+        },
+        "fx_snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        }
+      }
+    },
+    "currencyBucket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "actual_cost",
+        "estimated_cost",
+        "assessable_cost",
+        "unpriced_attempt_count"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "actual_cost": {
+          "$ref": "#/$defs/decimal"
+        },
+        "estimated_cost": {
+          "$ref": "#/$defs/decimal"
+        },
+        "assessable_cost": {
+          "$ref": "#/$defs/decimal"
+        },
+        "unpriced_attempt_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "output",
+        "reasoning_subset_of_output"
+      ],
+      "properties": {
+        "input": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reasoning_subset_of_output": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_ref",
+        "profile_kind",
+        "provider_label",
+        "model_label",
+        "model_id",
+        "availability",
+        "leaderboard_model_key",
+        "source_bindings",
+        "color"
+      ],
+      "properties": {
+        "profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "profile_kind": {
+          "enum": [
+            "API",
+            "CLI",
+            "LOCAL"
+          ]
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "model_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "availability": {
+          "enum": [
+            "AVAILABLE",
+            "DISABLED",
+            "UNAVAILABLE"
+          ]
+        },
+        "leaderboard_model_key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 192
+        },
+        "source_bindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "settings_profile_key",
+            "local_model_key"
+          ],
+          "properties": {
+            "settings_profile_key": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 192
+            },
+            "local_model_key": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 192
+            }
+          }
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        }
+      }
+    },
+    "measure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_ref",
+        "display_currency",
+        "display_actual_cost",
+        "display_estimated_cost",
+        "request_count",
+        "tokens_input",
+        "tokens_output"
+      ],
+      "properties": {
+        "profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "display_currency": {
+          "enum": [
+            "USD",
+            "CNY",
+            "JPY"
+          ]
+        },
+        "display_actual_cost": {
+          "$ref": "#/$defs/nullableDecimal"
+        },
+        "display_estimated_cost": {
+          "$ref": "#/$defs/nullableDecimal"
+        },
+        "request_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens_input": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens_output": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "seriesBucket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "measures"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "format": "date"
+        },
+        "measures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/measure"
+          }
+        }
+      }
+    },
+    "sourceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accounting_envelope_count",
+        "settlement_observation_count",
+        "legacy_record_count",
+        "reason_codes"
+      ],
+      "properties": {
+        "accounting_envelope_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "settlement_observation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "legacy_record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reasonCode"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "reasonCode": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_:-]+$"
+    }
+  }
+}

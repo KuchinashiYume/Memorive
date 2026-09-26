@@ -1,0 +1,25 @@
+{
+  "schema_version": "DesktopAssistant-AssistantWindowCapabilityContract-v1",
+  "stack": "pywebview-6.2.1/WebView2",
+  "capabilities": {
+    "transparent": true,
+    "frameless": true,
+    "topmost": true,
+    "taskbar_hidden": "NATIVE_ADAPTER_REQUIRED",
+    "drag": true,
+    "position_restore": true,
+    "multi_display_clamp": true,
+    "dpi_percent": [
+      100,
+      125,
+      150,
+      200
+    ],
+    "non_stealing_focus": true,
+    "reduced_motion": true,
+    "safe_close": true,
+    "crash_isolation": true
+  },
+  "production_or_system_mutation": false,
+  "status": "CONSTRUCTION_A_SPEC_NOT_NATIVE_QUALIFIED"
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/model_configuration/tier_policy_manifest_v1.schema.json",
+  "title": "Integration Analysis TierPolicyManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revision",
+    "observed_at",
+    "expires_at",
+    "roles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "MODEL_CONFIGURATION_TIER_POLICY_MANIFEST_V1"
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policy_sha256": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "roles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "economy",
+          "standard",
+          "high_quality",
+          "maximum"
+        ],
+        "properties": {
+          "economy": {
+            "$ref": "#/$defs/tierEntry"
+          },
+          "standard": {
+            "$ref": "#/$defs/tierEntry"
+          },
+          "high_quality": {
+            "$ref": "#/$defs/tierEntry"
+          },
+          "maximum": {
+            "$ref": "#/$defs/tierEntry"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tierEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_id",
+        "resolution_status",
+        "thinking_on_native_effort",
+        "thinking_off_native_effort",
+        "collapse_target",
+        "collapse_reason",
+        "reopen_condition",
+        "requires_explicit_selection",
+        "fallback_profile_ids",
+        "fallback_requires_user_confirmation"
+      ],
+      "properties": {
+        "profile_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolution_status": {
+          "enum": [
+            "RESOLVED_UNIQUE",
+            "UNAVAILABLE",
+            "COLLAPSED_DISCLOSED"
+          ]
+        },
+        "thinking_on_native_effort": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "thinking_off_native_effort": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collapse_target": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collapse_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reopen_condition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requires_explicit_selection": {
+          "type": "boolean"
+        },
+        "fallback_profile_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "fallback_requires_user_confirmation": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

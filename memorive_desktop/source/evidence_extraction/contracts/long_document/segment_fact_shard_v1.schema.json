@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/long_document/segment_fact_shard_v1.schema.json",
+  "title": "Capabilities Verification SegmentFactShard v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "paper_id",
+    "segment_id",
+    "attempt_id",
+    "source_manifest_hash",
+    "topology_hash",
+    "expected_core_chunk_ids",
+    "observed_source_ids",
+    "terminal_marker",
+    "facts",
+    "slot_observations",
+    "high_risk_tokens",
+    "local_conflicts",
+    "capacity_state",
+    "producer_receipt_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "long_document-segment-fact-shard-v1"
+    },
+    "artifact_kind": {
+      "const": "segment_fact_shard"
+    },
+    "paper_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "segment_id": {
+      "type": "string",
+      "pattern": "^SEG-[A-F0-9]{24}$"
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_manifest_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "topology_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "expected_core_chunk_ids": {
+      "$ref": "#/$defs/nonEmptyUniqueStrings"
+    },
+    "observed_source_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "terminal_marker": {
+      "const": "LONG_DOCUMENT_SEGMENT_COMPLETE"
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    },
+    "slot_observations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "high_risk_tokens": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/highRiskToken"
+      }
+    },
+    "local_conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "capacity_state": {
+      "enum": [
+        "complete",
+        "retryable",
+        "capacity_blocked"
+      ]
+    },
+    "producer_receipt_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "nonEmptyUniqueStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chunk_id",
+        "source_id",
+        "page_id",
+        "quote",
+        "start_offset",
+        "end_offset"
+      ],
+      "properties": {
+        "chunk_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page_id": {
+          "type": [
+            "string",
+            "integer",
+            "null"
+          ]
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start_offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_offset": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local_fact_id",
+        "claim_type",
+        "normalized_value_candidate",
+        "qualifiers",
+        "occurrences",
+        "source_refs",
+        "slot_refs",
+        "confidence_class"
+      ],
+      "properties": {
+        "local_fact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalized_value_candidate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "qualifiers": {
+          "type": "object"
+        },
+        "polarity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "uncertainty": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "formula_or_citation_identity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "occurrences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "slot_refs": {
+          "$ref": "#/$defs/nonEmptyUniqueStrings"
+        },
+        "confidence_class": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "needs_review"
+          ]
+        },
+        "composite": {
+          "type": "boolean"
+        },
+        "join_evidence": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "highRiskToken": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "value",
+        "source_ref"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "number",
+            "unit",
+            "doi",
+            "formula",
+            "quotation",
+            "p_value",
+            "confidence_interval",
+            "sample_size",
+            "dose",
+            "year"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "$ref": "#/$defs/sourceRef"
+        }
+      }
+    }
+  }
+}

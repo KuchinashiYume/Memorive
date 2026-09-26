@@ -1,0 +1,140 @@
+{
+  "$id": "urn:memorive:research:research-reports:source-snapshot-manifest:candidate002:2.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "data_classification": {
+      "const": "PUBLIC_SAFE_SYNTHETIC"
+    },
+    "files": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "line_ending": {
+            "const": "LF"
+          },
+          "path": {
+            "pattern": "^source_snapshot/(?!.*//)(?!.*(?:/\\.\\.?/|/\\.\\.?$))(?!.*[:?#\\\\])[A-Za-z0-9._/-]+\\.jsonl$",
+            "type": "string"
+          },
+          "record_count": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "record_hash_scope": {
+            "const": "UTF8_JSONL_LINE_BYTES_EXCLUDING_TERMINATING_LF"
+          },
+          "record_sha256": {
+            "items": {
+              "pattern": "^[A-F0-9]{64}$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "sha256": {
+            "pattern": "^[A-F0-9]{64}$",
+            "type": "string"
+          },
+          "source_system": {
+            "enum": [
+              "KNOWLEDGE_ADMISSION",
+              "RUNTIME_LOG",
+              "ARTIFACT_REGISTRY"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "source_system",
+          "required",
+          "sha256",
+          "bytes",
+          "record_count",
+          "line_ending",
+          "record_hash_scope",
+          "record_sha256"
+        ],
+        "type": "object"
+      },
+      "minItems": 3,
+      "type": "array"
+    },
+    "manifest_version": {
+      "const": "2.0"
+    },
+    "purpose": {
+      "const": "RESEARCH-REPORTS deterministic A and frozen Shadow B"
+    },
+    "required_source_systems": {
+      "const": [
+        "KNOWLEDGE_ADMISSION",
+        "RUNTIME_LOG",
+        "ARTIFACT_REGISTRY"
+      ]
+    },
+    "runtime_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "change_digest_primary": {
+          "const": "DISABLED"
+        },
+        "cost_cny": {
+          "const": 0,
+          "type": "integer"
+        },
+        "external_calls": {
+          "const": 0,
+          "type": "integer"
+        },
+        "external_tokens": {
+          "const": 0,
+          "type": "integer"
+        },
+        "provider": {
+          "const": "NONE"
+        },
+        "report_timezone": {
+          "const": "Asia/Shanghai"
+        }
+      },
+      "required": [
+        "provider",
+        "external_calls",
+        "external_tokens",
+        "cost_cny",
+        "change_digest_primary",
+        "report_timezone"
+      ],
+      "type": "object"
+    },
+    "snapshot_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "snapshot_observed_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "manifest_version",
+    "snapshot_id",
+    "snapshot_observed_at",
+    "data_classification",
+    "purpose",
+    "required_source_systems",
+    "runtime_policy",
+    "files"
+  ],
+  "title": "RESEARCH-REPORTS candidate002 strict public-safe source snapshot manifest",
+  "type": "object"
+}

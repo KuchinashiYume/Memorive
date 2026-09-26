@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:candidate-review-envelope:r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "candidate_id",
+    "work_cluster_id",
+    "manifestation_id",
+    "candidate_revision",
+    "source_revision",
+    "materialization_revision",
+    "card_revision",
+    "processing_status",
+    "decision_status",
+    "review_status",
+    "completion_status",
+    "promotion_status",
+    "semantic_verification",
+    "deterministic_checks",
+    "repair_of_bundle_sha256",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_cluster_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifestation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "materialization_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "card_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "processing_status": {
+      "enum": [
+        "REVIEW_READY",
+        "NEEDS_REPAIR"
+      ]
+    },
+    "decision_status": {
+      "enum": [
+        "APPROVED_FOR_CARD_STAGING",
+        "SNOOZED",
+        "REJECTED"
+      ]
+    },
+    "review_status": {
+      "const": "pending"
+    },
+    "completion_status": {
+      "const": "pending_review"
+    },
+    "promotion_status": {
+      "const": "NOT_ELIGIBLE"
+    },
+    "semantic_verification": {
+      "const": "NOT_PERFORMED"
+    },
+    "deterministic_checks": {
+      "type": "object"
+    },
+    "repair_of_bundle_sha256": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-F0-9]{64}$"
+        }
+      ]
+    },
+    "provenance": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "processing_status": {
+            "const": "REVIEW_READY"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "review_status": {
+            "const": "pending"
+          },
+          "completion_status": {
+            "const": "pending_review"
+          }
+        }
+      }
+    }
+  ]
+}

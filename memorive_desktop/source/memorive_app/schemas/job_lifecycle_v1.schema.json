@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:integration:application-facade:job-lifecycle:v1",
+  "title": "Memorive Job Lifecycle v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "contract_revision",
+    "job_id",
+    "attempt_id",
+    "job_control_state",
+    "verification_result",
+    "acceptance_verdict",
+    "technical_handoff_status",
+    "formalization_status",
+    "deployment_status",
+    "observed_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "JobStatus-v1"
+    },
+    "contract_revision": {
+      "const": "1.0"
+    },
+    "job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "job_control_state": {
+      "enum": [
+        "CREATED",
+        "PREFLIGHT",
+        "QUEUED",
+        "RUNNING",
+        "PAUSE_REQUESTED",
+        "PAUSED",
+        "RESUME_REQUESTED",
+        "CANCEL_REQUESTED",
+        "CANCELLED",
+        "RECOVERY_REQUIRED",
+        "RECOVERING",
+        "SUCCEEDED",
+        "FAILED",
+        "BLOCKED_BEFORE_START"
+      ]
+    },
+    "verification_result": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "ERROR",
+        "NOT_RUN",
+        "NOT_ASSESSED"
+      ]
+    },
+    "acceptance_verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_ASSESSED"
+      ]
+    },
+    "technical_handoff_status": {
+      "enum": [
+        "READY",
+        "NOT_READY",
+        "REVOKED"
+      ]
+    },
+    "formalization_status": {
+      "enum": [
+        "AUTHORIZED",
+        "NOT_AUTHORIZED",
+        "FORMALIZED"
+      ]
+    },
+    "deployment_status": {
+      "enum": [
+        "disabled",
+        "staged",
+        "active",
+        "rolled_back"
+      ]
+    },
+    "observed_version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": true
+}

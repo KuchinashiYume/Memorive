@@ -1,0 +1,82 @@
+{
+  "schema_version": "Memorive-DependencyProfiles-v1",
+  "base_profile": {
+    "name": "base-runtime",
+    "direct_requirements": "requirements.txt",
+    "transitive_lock": "requirements.lock",
+    "network_install_authorized": false,
+    "resolver_at_runtime": false
+  },
+  "profiles": {
+    "document_processing-marker": {
+      "state": "DECLARED_OPTIONAL_NOT_INSTALLED",
+      "requirements": [
+        "marker-pdf==1.10.2"
+      ],
+      "activation": "EXPLICIT_ENGINE_SELECTION_AND_QUALIFICATION_REQUIRED",
+      "rights": "Desktop_BUNDLING_BLOCKED"
+    },
+    "model_evaluation-embedding-exam": {
+      "state": "LOCAL_TOOLING_BOUND",
+      "requirements": [
+        "numpy==2.5.0",
+        "requests==2.34.2"
+      ],
+      "activation": "REFERENCE_EXAM_TOOL_ONLY"
+    },
+    "model_evaluation-exam-build": {
+      "state": "DECLARED_OPTIONAL_NOT_INSTALLED",
+      "requirements": [
+        "Pillow==12.2.0"
+      ],
+      "activation": "FROZEN_ASSET_BUILD_ONLY_NOT_RUNTIME_READ"
+    },
+    "capabilities-local-reranker": {
+      "state": "EXISTING_ISOLATED_RUNTIME_HASH_BOUND",
+      "requirements": [
+        "psutil==7.2.2",
+        "torch==2.12.1+cu130",
+        "transformers==4.57.6"
+      ],
+      "python": "3.12.13",
+      "dependency_lock_sha256": "EF35AD27682576B62240352A9D8E45FD909808FE88220C1B88E30108B6224EBB",
+      "runtime_sha256sums_sha256": "713FC870B68A7C7072A3E9638E0DFDC1C8A86EBB2B9E9724C0DFB35709B00534",
+      "activation": "EXISTING_EXACT_COMPATIBILITY_MANIFEST_ONLY_NO_NEW_MODEL_CALL"
+    }
+  },
+  "import_mappings": {
+    "marker": {
+      "distribution": "marker-pdf",
+      "profile": "document_processing-marker",
+      "import_mode": "LAZY_FAIL_CLOSED"
+    },
+    "numpy": {
+      "distribution": "numpy",
+      "profile": "model_evaluation-embedding-exam",
+      "import_mode": "REFERENCE_TOOL"
+    },
+    "psutil": {
+      "distribution": "psutil",
+      "profile": "capabilities-local-reranker",
+      "import_mode": "ISOLATED_WORKER"
+    },
+    "requests": {
+      "distribution": "requests",
+      "profile": "model_evaluation-embedding-exam",
+      "import_mode": "REFERENCE_TOOL"
+    },
+    "torch": {
+      "distribution": "torch",
+      "profile": "capabilities-local-reranker",
+      "import_mode": "ISOLATED_WORKER"
+    },
+    "transformers": {
+      "distribution": "transformers",
+      "profile": "capabilities-local-reranker",
+      "import_mode": "ISOLATED_WORKER"
+    }
+  },
+  "installation_authority": false,
+  "model_invocation_authority": false,
+  "distribution_authority": false
+}

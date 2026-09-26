@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:candidate-card-bundle:r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "adapter_version",
+    "run_id",
+    "candidate_id",
+    "paper_id",
+    "candidate_revision",
+    "source_revision",
+    "materialization_revision",
+    "card_revision",
+    "input_fingerprint",
+    "processing_status",
+    "review_status",
+    "completion_status",
+    "promotion_status",
+    "semantic_verification",
+    "repair_of_bundle_sha256",
+    "sealed_at",
+    "bindings",
+    "artifacts",
+    "bundle_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "adapter_version": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paper_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "materialization_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "card_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_fingerprint": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "processing_status": {
+      "enum": [
+        "REVIEW_READY",
+        "NEEDS_REPAIR"
+      ]
+    },
+    "review_status": {
+      "const": "pending"
+    },
+    "completion_status": {
+      "const": "pending_review"
+    },
+    "promotion_status": {
+      "const": "NOT_ELIGIBLE"
+    },
+    "semantic_verification": {
+      "const": "NOT_PERFORMED"
+    },
+    "repair_of_bundle_sha256": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^[A-F0-9]{64}$"
+        }
+      ]
+    },
+    "sealed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_sha256",
+        "first_approval_receipt_sha256",
+        "rights_receipt_sha256",
+        "paper_identity_reservation_receipt_sha256"
+      ],
+      "properties": {
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "first_approval_receipt_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "rights_receipt_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "paper_identity_reservation_receipt_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "card",
+        "chunks",
+        "envelope"
+      ],
+      "properties": {
+        "card": {
+          "$ref": "#/$defs/artifact"
+        },
+        "chunks": {
+          "$ref": "#/$defs/artifact"
+        },
+        "envelope": {
+          "$ref": "#/$defs/artifact"
+        }
+      }
+    },
+    "bundle_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relative_path",
+        "sha256"
+      ],
+      "properties": {
+        "relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^/\\\\]+$"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "processing_status": {
+            "const": "REVIEW_READY"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "review_status": {
+            "const": "pending"
+          },
+          "completion_status": {
+            "const": "pending_review"
+          }
+        }
+      }
+    }
+  ]
+}

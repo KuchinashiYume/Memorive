@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:integration:application-facade:doctor-report:v1",
+  "title": "Memorive Doctor Report v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "contract_revision",
+    "scope",
+    "mode",
+    "overall_status",
+    "checks",
+    "generated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "DoctorReport-v1"
+    },
+    "contract_revision": {
+      "const": "1.0"
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "const": "read_only"
+    },
+    "overall_status": {
+      "enum": [
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "check_version",
+          "status",
+          "capability_impact",
+          "job_impact",
+          "machine_detail",
+          "user_facing_summary",
+          "recovery_action",
+          "automatic_recovery",
+          "duration_ms",
+          "may_be_stale"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "check_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "WARN",
+              "FAIL",
+              "NOT_APPLICABLE",
+              "NOT_AUTHORIZED"
+            ]
+          },
+          "capability_impact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "job_impact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "machine_detail": {
+            "type": "string",
+            "minLength": 1
+          },
+          "user_facing_summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recovery_action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "automatic_recovery": {
+            "type": "boolean"
+          },
+          "evidence_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "may_be_stale": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": true
+}

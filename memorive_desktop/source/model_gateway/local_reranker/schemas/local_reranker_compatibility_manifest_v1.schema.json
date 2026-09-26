@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:capabilities:retrieval-calibration:local-reranker-compatibility-manifest:v1",
+  "title": "Capabilities Installation LocalRerankerCompatibilityManifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "model_id",
+    "canonical_revision",
+    "model_root",
+    "model_sha256sums_sha256",
+    "weights_exact_set_sha256",
+    "license",
+    "runtime",
+    "device",
+    "input_contract",
+    "score_contract",
+    "physical_starts_authorized",
+    "network_allowlist",
+    "cloud_fallback",
+    "qualification_offline_required",
+    "model_file_verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "RetrievalCalibrationLocalRerankerCompatibilityManifest-v1"
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_sha256sums_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "weights_exact_set_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "network_allowlist": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "cloud_fallback": {
+      "const": false
+    },
+    "qualification_offline_required": {
+      "const": true
+    },
+    "license": {
+      "type": "object",
+      "required": [
+        "identifier",
+        "license_file",
+        "license_file_sha256",
+        "local_evaluation_authorized",
+        "redistribution_in_this_task"
+      ],
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license_file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "local_evaluation_authorized": {
+          "const": true
+        },
+        "redistribution_in_this_task": {
+          "const": false
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "python_executable",
+        "dependency_lock_sha256",
+        "runtime_sha256sums_sha256",
+        "packages",
+        "offline_environment"
+      ],
+      "properties": {
+        "python_executable": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_lock_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runtime_sha256sums_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "packages": {
+          "type": "object"
+        },
+        "offline_environment": {
+          "type": "object"
+        }
+      }
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "kind",
+        "index",
+        "dtype",
+        "quantization",
+        "total_memory_bytes"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "cuda",
+            "cpu"
+          ]
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dtype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quantization": {
+          "type": "string",
+          "minLength": 1
+        },
+        "total_memory_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "input_contract": {
+      "type": "object",
+      "required": [
+        "instruction",
+        "batch_size",
+        "max_documents_per_query",
+        "max_input_tokens",
+        "truncation",
+        "candidate_order_must_match_snapshot"
+      ],
+      "properties": {
+        "instruction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "batch_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_documents_per_query": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_input_tokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "truncation": {
+          "const": "longest_first"
+        },
+        "candidate_order_must_match_snapshot": {
+          "const": true
+        }
+      }
+    },
+    "score_contract": {
+      "type": "object",
+      "required": [
+        "direction",
+        "range",
+        "finite_required",
+        "index_alignment",
+        "partial_batch_acceptance",
+        "document_mutation_allowed"
+      ],
+      "properties": {
+        "direction": {
+          "const": "higher_is_more_relevant"
+        },
+        "range": {
+          "const": [
+            0.0,
+            1.0
+          ]
+        },
+        "finite_required": {
+          "const": true
+        },
+        "index_alignment": {
+          "const": "EXACT_UNIQUE_ZERO_BASED"
+        },
+        "partial_batch_acceptance": {
+          "const": false
+        },
+        "document_mutation_allowed": {
+          "const": false
+        }
+      }
+    },
+    "physical_starts_authorized": {
+      "type": "object",
+      "required": [
+        "construction_a_max",
+        "validation_b_exact",
+        "retry_inside_b",
+        "task_total_max"
+      ],
+      "properties": {
+        "construction_a_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validation_b_exact": {
+          "const": 1
+        },
+        "retry_inside_b": {
+          "const": 0
+        },
+        "task_total_max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "model_file_verification": {
+      "type": "object",
+      "required": [
+        "members"
+      ],
+      "properties": {
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "bytes",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    }
+  }
+}

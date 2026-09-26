@@ -1,0 +1,1062 @@
+{
+  "schema": "MemoriveCompleteDependencySourceCollection-v1",
+  "python_dependencies": 114,
+  "additional": [
+    "CPython",
+    "MuPDF"
+  ],
+  "archives": [
+    {
+      "component": "aiohappyeyeballs",
+      "version": "2.6.2",
+      "file": "aiohappyeyeballs-2.6.2.tar.gz",
+      "sha256": "e202810ee718bd01fc6ef49e8ea53d023d5cb6b581076d7925aa499fa55dbe64",
+      "url": "https://files.pythonhosted.org/packages/33/c6/61a2d7b7572279226bb2e7f61d7a19ca7c90da0329c93fa0d560cbf288d8/aiohappyeyeballs-2.6.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 22591
+    },
+    {
+      "component": "aiohttp",
+      "version": "3.14.1",
+      "file": "aiohttp-3.14.1.tar.gz",
+      "sha256": "307f2cff90a764d329e77040603fa032db89c5c24fdad50c4c15334cba744035",
+      "url": "https://files.pythonhosted.org/packages/82/78/8ea7308cac6934de8c74a14f3d5f65d1c89287426688be79538d0e5c013d/aiohttp-3.14.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 7955794
+    },
+    {
+      "component": "aiosignal",
+      "version": "1.4.0",
+      "file": "aiosignal-1.4.0.tar.gz",
+      "sha256": "f47eecd9468083c2029cc99945502cb7708b082c232f9aca65da147157b251c7",
+      "url": "https://files.pythonhosted.org/packages/61/62/06741b579156360248d1ec624842ad0edf697050bbaf7c3e46394e106ad1/aiosignal-1.4.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 25007
+    },
+    {
+      "component": "altgraph",
+      "version": "0.17.5",
+      "file": "altgraph-0.17.5.tar.gz",
+      "sha256": "c87b395dd12fabde9c99573a9749d67da8d29ef9de0125c7f536699b4a9bc9e7",
+      "url": "https://files.pythonhosted.org/packages/7e/f8/97fdf103f38fed6792a1601dbc16cc8aac56e7459a9fff08c812d8ae177a/altgraph-0.17.5.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 48428
+    },
+    {
+      "component": "annotated-doc",
+      "version": "0.0.4",
+      "file": "annotated_doc-0.0.4.tar.gz",
+      "sha256": "fbcda96e87e9c92ad167c2e53839e57503ecfda18804ea28102353485033faa4",
+      "url": "https://files.pythonhosted.org/packages/57/ba/046ceea27344560984e26a590f90bc7f4a75b06701f653222458922b558c/annotated_doc-0.0.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 7288
+    },
+    {
+      "component": "annotated-types",
+      "version": "0.7.0",
+      "file": "annotated_types-0.7.0.tar.gz",
+      "sha256": "aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89",
+      "url": "https://files.pythonhosted.org/packages/ee/67/531ea369ba64dcff5ec9c3402f9f51bf748cec26dde048a2f973a4eea7f5/annotated_types-0.7.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 16081
+    },
+    {
+      "component": "anyio",
+      "version": "4.14.1",
+      "file": "anyio-4.14.1.tar.gz",
+      "sha256": "8d648a3544c1a700e3ff78615cd679e4c5c3f149904287e73687b2596963629e",
+      "url": "https://files.pythonhosted.org/packages/3b/72/5562aabb8dd7181e8e860622a38bea08d17842b99ecd4c91f84ac95251b0/anyio-4.14.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 254831
+    },
+    {
+      "component": "attrs",
+      "version": "26.1.0",
+      "file": "attrs-26.1.0.tar.gz",
+      "sha256": "d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32",
+      "url": "https://files.pythonhosted.org/packages/9a/8e/82a0fe20a541c03148528be8cac2408564a6c9a0cc7e9171802bc1d26985/attrs-26.1.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 952055
+    },
+    {
+      "component": "bcrypt",
+      "version": "5.0.0",
+      "file": "bcrypt-5.0.0.tar.gz",
+      "sha256": "f748f7c2d6fd375cc93d3fba7ef4a9e3a092421b8dbf34d8d4dc06be9492dfdd",
+      "url": "https://files.pythonhosted.org/packages/d4/36/3329e2518d70ad8e2e5817d5a4cac6bba05a47767ec416c7d020a965f408/bcrypt-5.0.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 25386
+    },
+    {
+      "component": "beautifulsoup4",
+      "version": "4.15.0",
+      "file": "beautifulsoup4-4.15.0.tar.gz",
+      "sha256": "288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7",
+      "url": "https://files.pythonhosted.org/packages/43/65/318323f98dbee45d42dff61d8f047181bc6f2268a9068cfad035a46be5af/beautifulsoup4-4.15.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 632571
+    },
+    {
+      "component": "bottle",
+      "version": "0.13.4",
+      "file": "bottle-0.13.4.tar.gz",
+      "sha256": "787e78327e12b227938de02248333d788cfe45987edca735f8f88e03472c3f47",
+      "url": "https://files.pythonhosted.org/packages/7a/71/cca6167c06d00c81375fd668719df245864076d284f7cb46a694cbeb5454/bottle-0.13.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 98717
+    },
+    {
+      "component": "build",
+      "version": "1.5.0",
+      "file": "build-1.5.0.tar.gz",
+      "sha256": "302c22c3ba2a0fd5f3911918651341ebb3896176cbdec15bd421f80b1afc7647",
+      "url": "https://files.pythonhosted.org/packages/78/e0/df5e171f685f82f37b12e1f208064e24244911079d7b767447d1af7e0d70/build-1.5.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 89796
+    },
+    {
+      "component": "certifi",
+      "version": "2026.6.17",
+      "file": "certifi-2026.6.17.tar.gz",
+      "sha256": "024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432",
+      "url": "https://files.pythonhosted.org/packages/c9/c7/424b75da314c1045981bd9777432fad05a9e0c69daa4ed7e308bbaffe405/certifi-2026.6.17.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 134594
+    },
+    {
+      "component": "cffi",
+      "version": "2.1.1",
+      "file": "cffi-2.1.1.tar.gz",
+      "sha256": "dd31f52ea1086513bb9df30f8fcee9b8918323ae067a3d5b78bc826a000712be",
+      "url": "https://files.pythonhosted.org/packages/9e/ef/008a1939e372c06329a3fce4279c02f328488f3526744906eeec3da7ad5f/cffi-2.1.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 530807
+    },
+    {
+      "component": "charset-normalizer",
+      "version": "3.4.7",
+      "file": "charset_normalizer-3.4.7.tar.gz",
+      "sha256": "ae89db9e5f98a11a4bf50407d4363e7b09b31e55bc117b4f7d80aab97ba009e5",
+      "url": "https://files.pythonhosted.org/packages/e7/a1/67fe25fac3c7642725500a3f6cfe5821ad557c3abb11c9d20d12c7008d3e/charset_normalizer-3.4.7.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 144271
+    },
+    {
+      "component": "chromadb",
+      "version": "1.5.9",
+      "file": "chromadb-1.5.9.tar.gz",
+      "sha256": "5c20e62a455c28bacac927f26116a73fd8e1799e0d908be8e8a4f02197a54731",
+      "url": "https://files.pythonhosted.org/packages/92/d1/5e33b26985f0c7046a0be1cee2158ada1748ee700d2545057fde1468d74d/chromadb-1.5.9.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 2595635
+    },
+    {
+      "component": "click",
+      "version": "8.4.2",
+      "file": "click-8.4.2.tar.gz",
+      "sha256": "9a6cea6e60b17ebe0a44c5cc636d94f09bd66142c1cd7d8b4cd731c4917a15f6",
+      "url": "https://files.pythonhosted.org/packages/76/d4/81420972a676e8ffea40450d8c8c92943e7218a78fe9b64359836cc9876b/click-8.4.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 338000
+    },
+    {
+      "component": "clr-loader",
+      "version": "0.2.10",
+      "file": "clr_loader-0.2.10.tar.gz",
+      "sha256": "81f114afbc5005bafc5efe5af1341d400e22137e275b042a8979f3feb9fc9446",
+      "url": "https://files.pythonhosted.org/packages/18/24/c12faf3f61614b3131b5c98d3bf0d376b49c7feaa73edca559aeb2aee080/clr_loader-0.2.10.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 83605
+    },
+    {
+      "component": "colorama",
+      "version": "0.4.6",
+      "file": "colorama-0.4.6.tar.gz",
+      "sha256": "08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44",
+      "url": "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 27697
+    },
+    {
+      "component": "coloredlogs",
+      "version": "15.0.1",
+      "file": "coloredlogs-15.0.1.tar.gz",
+      "sha256": "7c991aa71a4577af2f82600d8f8f3a89f936baeaf9b50a9c197da014e5bf16b0",
+      "url": "https://files.pythonhosted.org/packages/cc/c7/eed8f27100517e8c0e6b923d5f0845d0cb99763da6fdee00478f91db7325/coloredlogs-15.0.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 278520
+    },
+    {
+      "component": "defusedxml",
+      "version": "0.7.1",
+      "file": "defusedxml-0.7.1.tar.gz",
+      "sha256": "1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69",
+      "url": "https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 75520
+    },
+    {
+      "component": "distro",
+      "version": "1.9.0",
+      "file": "distro-1.9.0.tar.gz",
+      "sha256": "2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed",
+      "url": "https://files.pythonhosted.org/packages/fc/f8/98eea607f65de6527f8a2e8885fc8015d3e6f5775df186e443e0964a11c3/distro-1.9.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 60722
+    },
+    {
+      "component": "durationpy",
+      "version": "0.10",
+      "file": "durationpy-0.10.tar.gz",
+      "sha256": "1fa6893409a6e739c9c72334fc65cca1f355dbdd93405d30f726deb5bde42fba",
+      "url": "https://files.pythonhosted.org/packages/9d/a4/e44218c2b394e31a6dd0d6b095c4e1f32d0be54c2a4b250032d717647bab/durationpy-0.10.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 3335
+    },
+    {
+      "component": "filelock",
+      "version": "3.29.4",
+      "file": "filelock-3.29.4.tar.gz",
+      "sha256": "10cdb3656fc44541cdf30652a93fb10ec6b05325620eb316bd26893e4201538a",
+      "url": "https://files.pythonhosted.org/packages/e6/dc/be6cbe99670cd6e4ad387123647cb08e0c32975e223f82551e914c5568a6/filelock-3.29.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 63028
+    },
+    {
+      "component": "frozenlist",
+      "version": "1.8.0",
+      "file": "frozenlist-1.8.0.tar.gz",
+      "sha256": "3ede829ed8d842f6cd48fc7081d7a41001a56f1f38603f9d49bf3020d59a31ad",
+      "url": "https://files.pythonhosted.org/packages/2d/f5/c831fac6cc817d26fd54c7eaccd04ef7e0288806943f7cc5bbf69f3ac1f0/frozenlist-1.8.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 45875
+    },
+    {
+      "component": "fsspec",
+      "version": "2026.6.0",
+      "file": "fsspec-2026.6.0.tar.gz",
+      "sha256": "f5bac145310fe30e16e1471bd6840b2d990d609e872251d7e674241822abf01a",
+      "url": "https://files.pythonhosted.org/packages/10/a1/ae4e3e5003468d6391d2c77b6fa1cd73bd5d13511d81c642d7b28ac90ed4/fsspec-2026.6.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 313646
+    },
+    {
+      "component": "googleapis-common-protos",
+      "version": "1.75.0",
+      "file": "googleapis_common_protos-1.75.0.tar.gz",
+      "sha256": "53a062ff3c32552fbd62c11fe23768b78e4ddf0494d5e5fd97d3f4689c75fbbd",
+      "url": "https://files.pythonhosted.org/packages/b5/c8/f439cffde755cffa462bfbb156278fa6f9d09119719af9814b858fd4f81f/googleapis_common_protos-1.75.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 151035
+    },
+    {
+      "component": "grpcio",
+      "version": "1.81.1",
+      "file": "grpcio-1.81.1.tar.gz",
+      "sha256": "6fa10a767143a5e82e8eaab53918af0cd8909a57a27f8cb2288b80a613ac671b",
+      "url": "https://files.pythonhosted.org/packages/b0/b5/1ff353970a87eda4c98251e34d2dfd214abd4982dc89119c9252a2a482d2/grpcio-1.81.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 13026582
+    },
+    {
+      "component": "h11",
+      "version": "0.16.0",
+      "file": "h11-0.16.0.tar.gz",
+      "sha256": "4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1",
+      "url": "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 101250
+    },
+    {
+      "component": "hf-xet",
+      "version": "1.5.1",
+      "file": "hf_xet-1.5.1.tar.gz",
+      "sha256": "51ef4500dab3764b41135ee1381a4b62ce56fc54d4c92b719b59e597d6df5bf6",
+      "url": "https://files.pythonhosted.org/packages/4b/2d/57fd21d84d93efb4bd0b962383790e19dd1bc053501b4264c97903b4e83e/hf_xet-1.5.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 876636
+    },
+    {
+      "component": "httpcore",
+      "version": "1.0.9",
+      "file": "httpcore-1.0.9.tar.gz",
+      "sha256": "6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8",
+      "url": "https://files.pythonhosted.org/packages/06/94/82699a10bca87a5556c9c59b5963f2d039dbd239f25bc2a63907a05a14cb/httpcore-1.0.9.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 85484
+    },
+    {
+      "component": "httpx",
+      "version": "0.28.1",
+      "file": "httpx-0.28.1.tar.gz",
+      "sha256": "75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc",
+      "url": "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 141406
+    },
+    {
+      "component": "huggingface-hub",
+      "version": "1.21.0",
+      "file": "huggingface_hub-1.21.0.tar.gz",
+      "sha256": "a44f222cd8f2f7c2eade30b5e7a04cac984a3235fa61ea87a0a5a31db77d561f",
+      "url": "https://files.pythonhosted.org/packages/8f/77/ce3331f40cb2d021fe9b24c46c41e72faf74493621138e5eddac12bf5e1c/huggingface_hub-1.21.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 861572
+    },
+    {
+      "component": "humanfriendly",
+      "version": "10.0",
+      "file": "humanfriendly-10.0.tar.gz",
+      "sha256": "6b0b831ce8f15f7300721aa49829fc4e83921a9a301cc7f606be6686a2288ddc",
+      "url": "https://files.pythonhosted.org/packages/cc/3f/2c29224acb2e2df4d2046e4c73ee2662023c58ff5b113c4c1adac0886c43/humanfriendly-10.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 360702
+    },
+    {
+      "component": "idna",
+      "version": "3.18",
+      "file": "idna-3.18.tar.gz",
+      "sha256": "ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848",
+      "url": "https://files.pythonhosted.org/packages/cd/63/9496c57188a2ee585e0f1db071d75089a11e98aa86eb99d9d7618fc1edce/idna-3.18.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 196711
+    },
+    {
+      "component": "importlib-resources",
+      "version": "7.1.0",
+      "file": "importlib_resources-7.1.0.tar.gz",
+      "sha256": "0722d4c6212489c530f2a145a34c0a7a3b4721bc96a15fada5930e2a0b760708",
+      "url": "https://files.pythonhosted.org/packages/e4/06/b56dfa750b44e86157093bc8fca0ab81dccbf5260510de4eaf1cb69b5b99/importlib_resources-7.1.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 44985
+    },
+    {
+      "component": "jiter",
+      "version": "0.16.0",
+      "file": "jiter-0.16.0.tar.gz",
+      "sha256": "7b24c3492c5f4f84a37946ad9cf504910cf6a782d6a4e0689b6673c5894b4a1c",
+      "url": "https://files.pythonhosted.org/packages/1d/1f/10936e16d8860c70698a1aa939a46aa0224813b782bce4e000e637da0b2d/jiter-0.16.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 176431
+    },
+    {
+      "component": "jsonschema",
+      "version": "4.26.0",
+      "file": "jsonschema-4.26.0.tar.gz",
+      "sha256": "0c26707e2efad8aa1bfc5b7ce170f3fccc2e4918ff85989ba9ffa9facb2be326",
+      "url": "https://files.pythonhosted.org/packages/b3/fc/e067678238fa451312d4c62bf6e6cf5ec56375422aee02f9cb5f909b3047/jsonschema-4.26.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 366583
+    },
+    {
+      "component": "jsonschema-specifications",
+      "version": "2025.9.1",
+      "file": "jsonschema_specifications-2025.9.1.tar.gz",
+      "sha256": "b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d",
+      "url": "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 32855
+    },
+    {
+      "component": "kubernetes",
+      "version": "36.0.2",
+      "file": "kubernetes-36.0.2.tar.gz",
+      "sha256": "03551fcb49cae1f708f63624041e37403545b7aaed10cbf54e2b01a37a5438e3",
+      "url": "https://files.pythonhosted.org/packages/2f/57/8b538af5076bc3372949d76f70ba3449bdfe52f9e6488170fa5d4f7cbe70/kubernetes-36.0.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 2336738
+    },
+    {
+      "component": "lxml",
+      "version": "6.1.1",
+      "file": "lxml-6.1.1.tar.gz",
+      "sha256": "ba96ae44888e0185281e937633a743ea90d5a196c6000f82565ebb0580012d40",
+      "url": "https://files.pythonhosted.org/packages/05/3b/aab6728cae887456f409b4d75e8a01856e4f04bd510de38052a47768b680/lxml-6.1.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 4197430
+    },
+    {
+      "component": "magika",
+      "version": "0.6.3",
+      "file": "magika-0.6.3.tar.gz",
+      "sha256": "7cc52aa7359af861957043e2bf7265ed4741067251c104532765cd668c0c0cb1",
+      "url": "https://files.pythonhosted.org/packages/a3/f3/3d1dcdd7b9c41d589f5cff252d32ed91cdf86ba84391cfc81d9d8773571d/magika-0.6.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 3042784
+    },
+    {
+      "component": "markdown-it-py",
+      "version": "4.2.0",
+      "file": "markdown_it_py-4.2.0.tar.gz",
+      "sha256": "04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49",
+      "url": "https://files.pythonhosted.org/packages/06/ff/7841249c247aa650a76b9ee4bbaeae59370dc8bfd2f6c01f3630c35eb134/markdown_it_py-4.2.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 82454
+    },
+    {
+      "component": "markdownify",
+      "version": "1.2.3",
+      "file": "markdownify-1.2.3.tar.gz",
+      "sha256": "1a176f05522c8a2cb1dd3ab9d307dcdadbed5c26ae717855bfc42b3b6d38d937",
+      "url": "https://files.pythonhosted.org/packages/92/ab/d1297139c0e2ceb151ae564c8c4f57ac0155d8f1f8b4cbd5d6523c82ea36/markdownify-1.2.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 18852
+    },
+    {
+      "component": "markitdown",
+      "version": "0.1.6",
+      "file": "markitdown-0.1.6.tar.gz",
+      "sha256": "e5bdbaffd971b29598c7c39ef0e9afce2f08c0751fbfa4e4257678ebaf8cfc7e",
+      "url": "https://files.pythonhosted.org/packages/18/b7/91fe0e2df07107ab701a15c8ad3213135707e4d6206ae9bd8f457a7ad86a/markitdown-0.1.6.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 50795
+    },
+    {
+      "component": "mdurl",
+      "version": "0.1.2",
+      "file": "mdurl-0.1.2.tar.gz",
+      "sha256": "bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba",
+      "url": "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 8729
+    },
+    {
+      "component": "mmh3",
+      "version": "5.2.1",
+      "file": "mmh3-5.2.1.tar.gz",
+      "sha256": "bbea5b775f0ac84945191fb83f845a6fd9a21a03ea7f2e187defac7e401616ad",
+      "url": "https://files.pythonhosted.org/packages/91/1a/edb23803a168f070ded7a3014c6d706f63b90c84ccc024f89d794a3b7a6d/mmh3-5.2.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 33775
+    },
+    {
+      "component": "mpmath",
+      "version": "1.3.0",
+      "file": "mpmath-1.3.0.tar.gz",
+      "sha256": "7a28eb2a9774d00c7bc92411c19a89209d5da7c4c9a9e227be8330a23a25b91f",
+      "url": "https://files.pythonhosted.org/packages/e0/47/dd32fa426cc72114383ac549964eecb20ecfd886d1e5ccf5340b55b02f57/mpmath-1.3.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 508106
+    },
+    {
+      "component": "multidict",
+      "version": "6.7.1",
+      "file": "multidict-6.7.1.tar.gz",
+      "sha256": "ec6652a1bee61c53a3e5776b6049172c53b6aaba34f18c9ad04f82712bac623d",
+      "url": "https://files.pythonhosted.org/packages/1a/c2/c2d94cbe6ac1753f3fc980da97b3d930efe1da3af3c9f5125354436c073d/multidict-6.7.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 102010
+    },
+    {
+      "component": "networkx",
+      "version": "3.6.1",
+      "file": "networkx-3.6.1.tar.gz",
+      "sha256": "26b7c357accc0c8cde558ad486283728b65b6a95d85ee1cd66bafab4c8168509",
+      "url": "https://files.pythonhosted.org/packages/6a/51/63fe664f3908c97be9d2e4f1158eb633317598cfa6e1fc14af5383f17512/networkx-3.6.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 2517025
+    },
+    {
+      "component": "numpy",
+      "version": "2.5.0",
+      "file": "numpy-2.5.0.tar.gz",
+      "sha256": "5a129578019311b6e56bdd714250f19b518f7dceeeb8d1af5490f4942d3f891c",
+      "url": "https://files.pythonhosted.org/packages/e7/05/3d27272d30698dc0ecb7fdfaa41ad70303b444f81722bb99bce1d818638a/numpy-2.5.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 20652461
+    },
+    {
+      "component": "oauthlib",
+      "version": "3.3.1",
+      "file": "oauthlib-3.3.1.tar.gz",
+      "sha256": "0f0f8aa759826a193cf66c12ea1af1637f87b9b4622d46e866952bb022e538c9",
+      "url": "https://files.pythonhosted.org/packages/0b/5f/19930f824ffeb0ad4372da4812c50edbd1434f678c90c2733e1188edfc63/oauthlib-3.3.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 185918
+    },
+    {
+      "component": "openai",
+      "version": "2.44.0",
+      "file": "openai-2.44.0.tar.gz",
+      "sha256": "68a5a5ffad82b8ff7d451c437529fb64f7c3b8123aaf0c021966a882d9e3947d",
+      "url": "https://files.pythonhosted.org/packages/49/f5/7c7cb955305cb41f7f3c5fd7e0e38bf6bbf2658468863d4b7b868a5cb8df/openai-2.44.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 988753
+    },
+    {
+      "component": "opentelemetry-api",
+      "version": "1.43.0",
+      "file": "opentelemetry_api-1.43.0.tar.gz",
+      "sha256": "107d0d03857ea8fc7c5fcbbbd83f800c281f0d560553d61c1d675fccfd1761c1",
+      "url": "https://files.pythonhosted.org/packages/ae/cc/e4c9584181f86494df0f6bdec1a4f3280c50db44704dc2a407e994fc87bb/opentelemetry_api-1.43.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 73476
+    },
+    {
+      "component": "opentelemetry-exporter-otlp-proto-common",
+      "version": "1.43.0",
+      "file": "opentelemetry_exporter_otlp_proto_common-1.43.0.tar.gz",
+      "sha256": "c4e32ba6d6b13bdb2b8f6764c4fd28d00192826561aa04f6d14eedfce7ac076f",
+      "url": "https://files.pythonhosted.org/packages/55/c1/e8098490ab15abf116dcaf9fa89ededcb35547c7d08d4b5a62f573dc1e63/opentelemetry_exporter_otlp_proto_common-1.43.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 20197
+    },
+    {
+      "component": "opentelemetry-exporter-otlp-proto-grpc",
+      "version": "1.43.0",
+      "file": "opentelemetry_exporter_otlp_proto_grpc-1.43.0.tar.gz",
+      "sha256": "1b3e0627daa9bc21884d4a13946807c255eb558bfe5bdd543dffb6f4c9faee0d",
+      "url": "https://files.pythonhosted.org/packages/e2/1d/6336453716ca0a240d4417d19e6d5b77a5e7163e5670ec4f7ec4d3ede7bf/opentelemetry_exporter_otlp_proto_grpc-1.43.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 27213
+    },
+    {
+      "component": "opentelemetry-proto",
+      "version": "1.43.0",
+      "file": "opentelemetry_proto-1.43.0.tar.gz",
+      "sha256": "224778df17e1f3fafeaaa21d874236ca5f6ffc2f86e0899298ec7351aac27924",
+      "url": "https://files.pythonhosted.org/packages/e0/b9/d357faefb40bda1d4799913e6af611171ff22a2dedcb93576bc92242d056/opentelemetry_proto-1.43.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 46481
+    },
+    {
+      "component": "opentelemetry-sdk",
+      "version": "1.43.0",
+      "file": "opentelemetry_sdk-1.43.0.tar.gz",
+      "sha256": "d8187c81c162df9913e4003dd6485f7390d9a24fc17026ec7387b8b8218b08e9",
+      "url": "https://files.pythonhosted.org/packages/3e/eb/5041074274ac0956b03637cc039d434569112468e875eddfcc9a0674ce06/opentelemetry_sdk-1.43.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 254744
+    },
+    {
+      "component": "opentelemetry-semantic-conventions",
+      "version": "0.64b0",
+      "file": "opentelemetry_semantic_conventions-0.64b0.tar.gz",
+      "sha256": "72f76fb2d1582d9d033dd1fcd84532e961e6ff3d90d24ba6fabc72975a83864c",
+      "url": "https://files.pythonhosted.org/packages/5a/30/5f26df29509eccd86b99b481ac9ffa39da49ba9577cc69071c552ae30447/opentelemetry_semantic_conventions-0.64b0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 148340
+    },
+    {
+      "component": "orjson",
+      "version": "3.11.9",
+      "file": "orjson-3.11.9.tar.gz",
+      "sha256": "4fef17e1f8722c11587a6ef18e35902450221da0028e65dbaaa543619e68e48f",
+      "url": "https://files.pythonhosted.org/packages/7e/0c/964746fcafbd16f8ff53219ad9f6b412b34f345c75f384ad434ceaadb538/orjson-3.11.9.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 5599163
+    },
+    {
+      "component": "overrides",
+      "version": "7.7.0",
+      "file": "overrides-7.7.0.tar.gz",
+      "sha256": "55158fa3d93b98cc75299b1e67078ad9003ca27945c76162c1c0766d6f91820a",
+      "url": "https://files.pythonhosted.org/packages/36/86/b585f53236dec60aba864e050778b25045f857e17f6e5ea0ae95fe80edd2/overrides-7.7.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 22812
+    },
+    {
+      "component": "packaging",
+      "version": "26.3",
+      "file": "packaging-26.3.tar.gz",
+      "sha256": "94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79",
+      "url": "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 313412
+    },
+    {
+      "component": "pefile",
+      "version": "2024.8.26",
+      "file": "pefile-2024.8.26.tar.gz",
+      "sha256": "3ff6c5d8b43e8c37bb6e6dd5085658d658a7a0bdcd20b6a07b1fcfc1c4e9d632",
+      "url": "https://files.pythonhosted.org/packages/03/4f/2750f7f6f025a1507cd3b7218691671eecfd0bbebebe8b39aa0fe1d360b8/pefile-2024.8.26.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 76008
+    },
+    {
+      "component": "pillow",
+      "version": "12.3.0",
+      "file": "pillow-12.3.0.tar.gz",
+      "sha256": "3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce",
+      "url": "https://files.pythonhosted.org/packages/1c/3d/bb7fca845737cf9d7dbde16ed1843984665ff2e0a518f5db43e77ec540b9/pillow-12.3.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 47025035
+    },
+    {
+      "component": "propcache",
+      "version": "0.5.2",
+      "file": "propcache-0.5.2.tar.gz",
+      "sha256": "01c4fc7480cd0598bb4b57022df55b9ca296da7fc5a8760bd8451a7e63a7d427",
+      "url": "https://files.pythonhosted.org/packages/ec/44/c87281c333769159c50594f22610f77398a47ccbfbbf23074e744e86f87c/propcache-0.5.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 50208
+    },
+    {
+      "component": "protobuf",
+      "version": "7.35.1",
+      "file": "protobuf-7.35.1.tar.gz",
+      "sha256": "ce115a26fe0c39a2c29973d914d327e516a6455464489fe3cd1e51a1b354f81a",
+      "url": "https://files.pythonhosted.org/packages/da/01/9ef0afd7999eb9badb3a768b4aedd78c86d4c65cfaf1958ab276199e76b4/protobuf-7.35.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 458717
+    },
+    {
+      "component": "proxy-tools",
+      "version": "0.1.0",
+      "file": "proxy_tools-0.1.0.tar.gz",
+      "sha256": "ccb3751f529c047e2d8a58440d86b205303cf0fe8146f784d1cbcd94f0a28010",
+      "url": "https://files.pythonhosted.org/packages/f2/cf/77d3e19b7fabd03895caca7857ef51e4c409e0ca6b37ee6e9f7daa50b642/proxy_tools-0.1.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 2978
+    },
+    {
+      "component": "psutil",
+      "version": "7.2.2",
+      "file": "psutil-7.2.2.tar.gz",
+      "sha256": "0746f5f8d406af344fd547f1c8daa5f5c33dbc293bb8d6a16d80b4bb88f59372",
+      "url": "https://files.pythonhosted.org/packages/aa/c6/d1ddf4abb55e93cebc4f2ed8b5d6dbad109ecb8d63748dd2b20ab5e57ebe/psutil-7.2.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 493740
+    },
+    {
+      "component": "pybase64",
+      "version": "1.4.3",
+      "file": "pybase64-1.4.3.tar.gz",
+      "sha256": "c2ed274c9e0ba9c8f9c4083cfe265e66dd679126cd9c2027965d807352f3f053",
+      "url": "https://files.pythonhosted.org/packages/aa/b8/4ed5c7ad5ec15b08d35cc79ace6145d5c1ae426e46435f4987379439dfea/pybase64-1.4.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 137272
+    },
+    {
+      "component": "pycparser",
+      "version": "3.0",
+      "file": "pycparser-3.0.tar.gz",
+      "sha256": "600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29",
+      "url": "https://files.pythonhosted.org/packages/1b/7d/92392ff7815c21062bea51aa7b87d45576f649f16458d78b7cf94b9ab2e6/pycparser-3.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 103492
+    },
+    {
+      "component": "pydantic",
+      "version": "2.13.4",
+      "file": "pydantic-2.13.4.tar.gz",
+      "sha256": "c40756b57adaa8b1efeeced5c196f3f3b7c435f90e84ea7f443901bec8099ef6",
+      "url": "https://files.pythonhosted.org/packages/18/a5/b60d21ac674192f8ab0ba4e9fd860690f9b4a6e51ca5df118733b487d8d6/pydantic-2.13.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 844775
+    },
+    {
+      "component": "pydantic-core",
+      "version": "2.46.4",
+      "file": "pydantic_core-2.46.4.tar.gz",
+      "sha256": "62f875393d7f270851f20523dd2e29f082bcc82292d66db2b64ea71f64b6e1c1",
+      "url": "https://files.pythonhosted.org/packages/9d/56/921726b776ace8d8f5db44c4ef961006580d91dc52b803c489fafd1aa249/pydantic_core-2.46.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 471464
+    },
+    {
+      "component": "pydantic-settings",
+      "version": "2.14.2",
+      "file": "pydantic_settings-2.14.2.tar.gz",
+      "sha256": "c19dd64b19097f1de80184f0cc7b0272a13ae6e170cbf240a3e27e381ed14a5f",
+      "url": "https://files.pythonhosted.org/packages/5c/b5/8f48e906c3e0205276e8bd8cb7512217a87b2685304d64be27cad5b3019f/pydantic_settings-2.14.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 237700
+    },
+    {
+      "component": "pygments",
+      "version": "2.20.0",
+      "file": "pygments-2.20.0.tar.gz",
+      "sha256": "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f",
+      "url": "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 4955991
+    },
+    {
+      "component": "pyinstaller",
+      "version": "6.22.2",
+      "file": "pyinstaller-6.22.2.tar.gz",
+      "sha256": "89b65a3ad07d9dd5832253e37bc45f31872d10d7f9d5c9fd0fdd6088a83829dd",
+      "url": "https://files.pythonhosted.org/packages/cc/2b/836d9def811c02522e0921d8b8cdf0c16b0545a216e97e71041758057859/pyinstaller-6.22.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 4092631
+    },
+    {
+      "component": "pyinstaller-hooks-contrib",
+      "version": "2026.7",
+      "file": "pyinstaller_hooks_contrib-2026.7.tar.gz",
+      "sha256": "5fbcaacb22c4f4aac869a127dce283f67a4b4cfcc37d496f2446603e6d68aefa",
+      "url": "https://files.pythonhosted.org/packages/26/60/d881fa1ba8c160c18d8e6f782bb16ec4640c08bc08fc50f704c368ad4f9e/pyinstaller_hooks_contrib-2026.7.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 175992
+    },
+    {
+      "component": "pymupdf",
+      "version": "1.28.2",
+      "file": "pymupdf-1.28.2.tar.gz",
+      "sha256": "5e0be7908a715aa20333caddd73f1d6f01e4cd0c26e869fa2dd0b7f344da2249",
+      "url": "https://files.pythonhosted.org/packages/a3/fb/b6761fa2d5266f2cdb24c3b91f4023070ab7848381417678e7a289a1d52a/pymupdf-1.28.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 87903557
+    },
+    {
+      "component": "pymupdf4llm",
+      "version": "1.28.2",
+      "file": "pymupdf4llm-1.28.2.tar.gz",
+      "sha256": "02681698ef67bda9a2acd5d9e1115d4e88be0eb9c5d68926e5e3cd98cd351874",
+      "url": "https://files.pythonhosted.org/packages/31/be/6f78a076947529c13bd0660cbe9e61f0155c903aa0c17fd9751733dccc36/pymupdf4llm-1.28.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 2091728
+    },
+    {
+      "component": "pypika",
+      "version": "0.51.1",
+      "file": "pypika-0.51.1.tar.gz",
+      "sha256": "c30c7c1048fbf056fd3920c5a2b88b0c29dd190a9b2bee971fd17e4abe4d0ebe",
+      "url": "https://files.pythonhosted.org/packages/f8/78/cbaebba88e05e2dcda13ca203131b38d3640219f20ebb49676d26714861b/pypika-0.51.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 80919
+    },
+    {
+      "component": "pyproject-hooks",
+      "version": "1.2.0",
+      "file": "pyproject_hooks-1.2.0.tar.gz",
+      "sha256": "1e859bd5c40fae9448642dd871adf459e5e2084186e8d2c2a79a824c970da1f8",
+      "url": "https://files.pythonhosted.org/packages/e7/82/28175b2414effca1cdac8dc99f76d660e7a4fb0ceefa4b4ab8f5f6742925/pyproject_hooks-1.2.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 19228
+    },
+    {
+      "component": "pyreadline3",
+      "version": "3.5.6",
+      "file": "pyreadline3-3.5.6.tar.gz",
+      "sha256": "61e53218b99656091ddb077df9e71f25850e72e030b6183b39c9b7e6e4f4a9bf",
+      "url": "https://files.pythonhosted.org/packages/b6/6d/f94028646d7bbe6d9d873c47ee7c246f2d29129d253f0d96cb6fcab70733/pyreadline3-3.5.6.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 100368
+    },
+    {
+      "component": "python-dateutil",
+      "version": "2.9.0.post0",
+      "file": "python-dateutil-2.9.0.post0.tar.gz",
+      "sha256": "37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3",
+      "url": "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 342432
+    },
+    {
+      "component": "python-docx",
+      "version": "1.2.0",
+      "file": "python_docx-1.2.0.tar.gz",
+      "sha256": "7bc9d7b7d8a69c9c02ca09216118c86552704edc23bac179283f2e38f86220ce",
+      "url": "https://files.pythonhosted.org/packages/a9/f7/eddfe33871520adab45aaa1a71f0402a2252050c14c7e3009446c8f4701c/python_docx-1.2.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 5723256
+    },
+    {
+      "component": "python-dotenv",
+      "version": "1.2.2",
+      "file": "python_dotenv-1.2.2.tar.gz",
+      "sha256": "2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3",
+      "url": "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef3d94b6ec08bbcabd04a72018415dcb29e588514bba8/python_dotenv-1.2.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 50135
+    },
+    {
+      "component": "pythonnet",
+      "version": "3.0.5",
+      "file": "pythonnet-3.0.5.tar.gz",
+      "sha256": "48e43ca463941b3608b32b4e236db92d8d40db4c58a75ace902985f76dac21cf",
+      "url": "https://files.pythonhosted.org/packages/9a/d6/1afd75edd932306ae9bd2c2d961d603dc2b52fcec51b04afea464f1f6646/pythonnet-3.0.5.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 239212
+    },
+    {
+      "component": "pywebview",
+      "version": "6.2.1",
+      "file": "pywebview-6.2.1.tar.gz",
+      "sha256": "71b7136752e40824655304d938efb62014218d1a90bd8e87e1cbdb1ce9c466af",
+      "url": "https://files.pythonhosted.org/packages/59/4a/05307135dafba67778669d194bd1a3822a7685ec9ee8a6d7e70856c1a551/pywebview-6.2.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 513126
+    },
+    {
+      "component": "pywin32-ctypes",
+      "version": "0.2.3",
+      "file": "pywin32-ctypes-0.2.3.tar.gz",
+      "sha256": "d162dc04946d704503b2edc4d55f3dba5c1d539ead017afa00142c38b9885755",
+      "url": "https://files.pythonhosted.org/packages/85/9f/01a1a99704853cb63f253eea009390c88e7131c67e66a0a02099a8c917cb/pywin32-ctypes-0.2.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 29471
+    },
+    {
+      "component": "pyyaml",
+      "version": "6.0.3",
+      "file": "pyyaml-6.0.3.tar.gz",
+      "sha256": "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f",
+      "url": "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 130960
+    },
+    {
+      "component": "referencing",
+      "version": "0.37.0",
+      "file": "referencing-0.37.0.tar.gz",
+      "sha256": "44aefc3142c5b842538163acb373e24cce6632bd54bdb01b21ad5863489f50d8",
+      "url": "https://files.pythonhosted.org/packages/22/f5/df4e9027acead3ecc63e50fe1e36aca1523e1719559c499951bb4b53188f/referencing-0.37.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 78036
+    },
+    {
+      "component": "requests",
+      "version": "2.34.2",
+      "file": "requests-2.34.2.tar.gz",
+      "sha256": "f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed",
+      "url": "https://files.pythonhosted.org/packages/ac/c3/e2a2b89f2d3e2179abd6d00ebd70bff6273f37fb3e0cc209f48b39d00cbf/requests-2.34.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 142856
+    },
+    {
+      "component": "requests-oauthlib",
+      "version": "2.0.0",
+      "file": "requests-oauthlib-2.0.0.tar.gz",
+      "sha256": "b3dffaebd884d8cd778494369603a9e7b58d29111bf6b41bdc2dcd87203af4e9",
+      "url": "https://files.pythonhosted.org/packages/42/f2/05f29bc3913aea15eb670be136045bf5c5bbf4b99ecb839da9b422bb2c85/requests-oauthlib-2.0.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 55650
+    },
+    {
+      "component": "rich",
+      "version": "15.0.0",
+      "file": "rich-15.0.0.tar.gz",
+      "sha256": "edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36",
+      "url": "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 230680
+    },
+    {
+      "component": "rpds-py",
+      "version": "2026.6.3",
+      "file": "rpds_py-2026.6.3.tar.gz",
+      "sha256": "1cebd1337c242e4ec2293e541f712b2da849b29f48f0c293684b71c0632625d4",
+      "url": "https://files.pythonhosted.org/packages/aa/2a/9618a122aeb2a169a28b03889a2995fe297588964333d4a7d67bdf46e147/rpds_py-2026.6.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 64051
+    },
+    {
+      "component": "setuptools",
+      "version": "84.0.0",
+      "file": "setuptools-84.0.0.tar.gz",
+      "sha256": "f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73",
+      "url": "https://files.pythonhosted.org/packages/6d/44/f5da03a8ef95d369145c5bb53050e7877c9f3d312e128605fd9504829143/setuptools-84.0.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 1168449
+    },
+    {
+      "component": "shellingham",
+      "version": "1.5.4",
+      "file": "shellingham-1.5.4.tar.gz",
+      "sha256": "8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de",
+      "url": "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 10310
+    },
+    {
+      "component": "six",
+      "version": "1.17.0",
+      "file": "six-1.17.0.tar.gz",
+      "sha256": "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81",
+      "url": "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 34031
+    },
+    {
+      "component": "sniffio",
+      "version": "1.3.1",
+      "file": "sniffio-1.3.1.tar.gz",
+      "sha256": "f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc",
+      "url": "https://files.pythonhosted.org/packages/a2/87/a6771e1546d97e7e041b6ae58d80074f81b7d5121207425c964ddf5cfdbd/sniffio-1.3.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 20372
+    },
+    {
+      "component": "soupsieve",
+      "version": "2.8.4",
+      "file": "soupsieve-2.8.4.tar.gz",
+      "sha256": "e121fd02e975c695e4e9e8774a5ee35d74714b59307868dcc5319ad2d9e3328e",
+      "url": "https://files.pythonhosted.org/packages/47/2c/0a5f6f8ee0d5589e48c7640213ed5175d52cf540a06725b628cc1a45d6ce/soupsieve-2.8.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 121110
+    },
+    {
+      "component": "sympy",
+      "version": "1.14.0",
+      "file": "sympy-1.14.0.tar.gz",
+      "sha256": "d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517",
+      "url": "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 7793921
+    },
+    {
+      "component": "tabulate",
+      "version": "0.10.0",
+      "file": "tabulate-0.10.0.tar.gz",
+      "sha256": "e2cfde8f79420f6deeffdeda9aaec3b6bc5abce947655d17ac662b126e48a60d",
+      "url": "https://files.pythonhosted.org/packages/46/58/8c37dea7bbf769b20d58e7ace7e5edfe65b849442b00ffcdd56be88697c6/tabulate-0.10.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 91754
+    },
+    {
+      "component": "tenacity",
+      "version": "9.1.4",
+      "file": "tenacity-9.1.4.tar.gz",
+      "sha256": "adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a",
+      "url": "https://files.pythonhosted.org/packages/47/c6/ee486fd809e357697ee8a44d3d69222b344920433d3b6666ccd9b374630c/tenacity-9.1.4.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 49413
+    },
+    {
+      "component": "tokenizers",
+      "version": "0.23.1",
+      "file": "tokenizers-0.23.1.tar.gz",
+      "sha256": "1feeeadf865a7915adc25445dea30e9933e593c31bb96c277cee36de227c8bfa",
+      "url": "https://files.pythonhosted.org/packages/c1/60/21f715d9faba5f5407ff759472ade058ec4a507ad62bcea47cb847239a73/tokenizers-0.23.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 365748
+    },
+    {
+      "component": "tqdm",
+      "version": "4.68.3",
+      "file": "tqdm-4.68.3.tar.gz",
+      "sha256": "00dfa48452b6b6cfae3dd9885636c23d3422d1ec97c66d96818cbd5e0821d482",
+      "url": "https://files.pythonhosted.org/packages/87/d7/0535a28b1f5f24f6612fb3ff1e89fb1a8d160fee0f976e0aa6803862134b/tqdm-4.68.3.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 170596
+    },
+    {
+      "component": "typer",
+      "version": "0.25.1",
+      "file": "typer-0.25.1.tar.gz",
+      "sha256": "9616eb8853a09ffeabab1698952f33c6f29ffdbceb4eaeecf571880e8d7664cc",
+      "url": "https://files.pythonhosted.org/packages/e4/51/9aed62104cea109b820bbd6c14245af756112017d309da813ef107d42e7e/typer-0.25.1.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 122276
+    },
+    {
+      "component": "typing-extensions",
+      "version": "4.16.0",
+      "file": "typing_extensions-4.16.0.tar.gz",
+      "sha256": "dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5",
+      "url": "https://files.pythonhosted.org/packages/f6/cc/6253133b5bb138fc3306cebfbda2c520f545d36b5be2c7255cc528bb45d6/typing_extensions-4.16.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 113555
+    },
+    {
+      "component": "typing-inspection",
+      "version": "0.4.2",
+      "file": "typing_inspection-0.4.2.tar.gz",
+      "sha256": "ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464",
+      "url": "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac53367ae42139cf4b1ca5f36bb3dc6c9d33acdb43655/typing_inspection-0.4.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 75949
+    },
+    {
+      "component": "urllib3",
+      "version": "2.7.0",
+      "file": "urllib3-2.7.0.tar.gz",
+      "sha256": "231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c",
+      "url": "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e5ee11424ef85419ba0d8ba0b3138bf360be2ff56953/urllib3-2.7.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 433602
+    },
+    {
+      "component": "uvicorn",
+      "version": "0.49.0",
+      "file": "uvicorn-0.49.0.tar.gz",
+      "sha256": "ebf4271aa580d9de97f93192d4595176df6e91f9aae919ca73e4fc07df1e66a3",
+      "url": "https://files.pythonhosted.org/packages/c4/1f/fa18009dea8469069cca78a4e877a008ab78f08b064bfc9ab891579077ff/uvicorn-0.49.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 91284
+    },
+    {
+      "component": "websocket-client",
+      "version": "1.9.0",
+      "file": "websocket_client-1.9.0.tar.gz",
+      "sha256": "9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98",
+      "url": "https://files.pythonhosted.org/packages/2c/41/aa4bf9664e4cda14c3b39865b12251e8e7d239f4cd0e3cc1b6c2ccde25c1/websocket_client-1.9.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 70576
+    },
+    {
+      "component": "websockets",
+      "version": "16.0",
+      "file": "websockets-16.0.tar.gz",
+      "sha256": "5f6261a5e56e8d5c42a4497b364ea24d94d9563e8fbd44e78ac40879c60179b5",
+      "url": "https://files.pythonhosted.org/packages/04/24/4b2031d72e840ce4c1ccb255f693b15c334757fc50023e4db9537080b8c4/websockets-16.0.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 179346
+    },
+    {
+      "component": "yarl",
+      "version": "1.24.2",
+      "file": "yarl-1.24.2.tar.gz",
+      "sha256": "9ac374123c6fd7abf64d1fec93962b0bd4ee2c19751755a762a72dd96c0378f8",
+      "url": "https://files.pythonhosted.org/packages/79/12/1e8f37460ea0f7eb59c221fdaf0ed75e7ac43e97f8093b9c6f411df50a78/yarl-1.24.2.tar.gz",
+      "binding": "PYPI_EXACT_VERSION_DIGEST",
+      "bytes": 210798
+    },
+    {
+      "component": "flatbuffers",
+      "version": "25.12.19",
+      "file": "flatbuffers-7e163021e59cca4f8e1e35a7c828b5c6b7915953.tar.gz",
+      "sha256": "4236c5d22309abeac2384d3800febcc8d60423e8cb2f573abfa8f798352c4536",
+      "url": "https://codeload.github.com/google/flatbuffers/tar.gz/7e163021e59cca4f8e1e35a7c828b5c6b7915953",
+      "commit": "7e163021e59cca4f8e1e35a7c828b5c6b7915953",
+      "binding": "UPSTREAM_VERSION_TAG",
+      "bytes": 2359249
+    },
+    {
+      "component": "pymupdf-layout",
+      "version": "1.28.2",
+      "file": "pymupdf-layout-b6e83e8b55bf861c45e259762483f6863688ed16.tar.gz",
+      "sha256": "7f9bede6d6a13c3c9f4e44e6c6e6b6a6b669746acc11b9dca0ed0121489ce2eb",
+      "url": "https://codeload.github.com/ArtifexSoftware/pymupdf_layout/tar.gz/b6e83e8b55bf861c45e259762483f6863688ed16",
+      "commit": "b6e83e8b55bf861c45e259762483f6863688ed16",
+      "binding": "UPSTREAM_VERSION_TAG",
+      "bytes": 44947301
+    },
+    {
+      "component": "onnxruntime",
+      "version": "1.20.1",
+      "file": "onnxruntime-1.20.1-5c1b7ccbff7e5141c1da7a9d963d660e5741c319.tar.gz",
+      "sha256": "1c1bcd46f0a6e7e0ed8f3b7eb7f88efccdf5db3f070f2670f3880e75b5855db5",
+      "url": "https://codeload.github.com/microsoft/onnxruntime/tar.gz/5c1b7ccbff7e5141c1da7a9d963d660e5741c319",
+      "commit": "5c1b7ccbff7e5141c1da7a9d963d660e5741c319",
+      "binding": "UPSTREAM_VERSION_TAG",
+      "bytes": 240607833
+    },
+    {
+      "component": "CPython",
+      "version": "3.13.14",
+      "file": "Python-3.13.14.tar.xz",
+      "sha256": "639e43243c620a308f968213df9e00f2f8f62332f7adbaa7a7eeb9783057c690",
+      "url": "https://www.python.org/ftp/python/3.13.14/Python-3.13.14.tar.xz",
+      "commit": null,
+      "binding": "OFFICIAL_VERSION_SOURCE_DOWNLOAD",
+      "bytes": 23021880
+    },
+    {
+      "component": "mupdf",
+      "version": "1.28.2",
+      "file": "mupdf-1.28.2-source.tar.gz",
+      "url": "https://mupdf.com/downloads/archive/mupdf-1.28.2-source.tar.gz",
+      "sha256": "44075a84e329db55b9bef5f342a70fd26d69e48ad1d33cb89d9664581c641156",
+      "version_binding": "PyMuPDF 1.28.2 setup.py version_mupdf",
+      "pypi_hash_verified": false,
+      "binding": "OFFICIAL_VERSION_SOURCE_DOWNLOAD",
+      "bytes": 68898646
+    }
+  ],
+  "archive_execution": false,
+  "scope": "Exact published sources with upstream build instructions; third-party binary reproducibility and all transitive build inputs are not independently certified."
+}

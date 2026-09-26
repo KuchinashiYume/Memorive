@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:capabilities:page-recognition:page-family-qualification:v1",
+  "title": "Capabilities Retrieval PageFamilyQualification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "candidate_key",
+    "channel_kind",
+    "profile_id",
+    "requested_model",
+    "page_family",
+    "modifiers",
+    "output_lane",
+    "quality_verdict",
+    "identity_verdict",
+    "accounting_verdict",
+    "resource_verdict",
+    "role_eligibility",
+    "sample_denominator",
+    "metric_summary",
+    "threshold_contract_sha256",
+    "evidence_refs",
+    "limitation_codes",
+    "default_enabled",
+    "activation_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "PageRecognitionPageFamilyQualification-v1"
+    },
+    "candidate_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "channel_kind": {
+      "enum": [
+        "usage_based_api",
+        "subscription_cli",
+        "local_resource"
+      ]
+    },
+    "profile_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "requested_model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "page_family": {
+      "enum": [
+        "digital",
+        "clean_scan",
+        "degraded_scan",
+        "multicolumn",
+        "role_dense",
+        "formula",
+        "table_numeric",
+        "chart_mixed"
+      ]
+    },
+    "modifiers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "blur",
+          "skew",
+          "low_contrast",
+          "dense_symbols",
+          "small_font",
+          "rotated_region"
+        ]
+      }
+    },
+    "output_lane": {
+      "enum": [
+        "LITERAL_OCR",
+        "DOCUMENT_STRUCTURE",
+        "VISUAL_SEMANTICS_REVIEW"
+      ]
+    },
+    "quality_verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_ASSESSED"
+      ]
+    },
+    "identity_verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_ASSESSED",
+        "PROVIDER_NOT_EXPOSED"
+      ]
+    },
+    "accounting_verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_ASSESSED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "resource_verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_ASSESSED",
+        "NOT_CONFIGURED"
+      ]
+    },
+    "role_eligibility": {
+      "enum": [
+        "PRIMARY",
+        "RESCUE",
+        "REVIEW_ONLY",
+        "HUMAN_ONLY",
+        "KEEP_DISABLED",
+        "NOT_ASSESSED"
+      ]
+    },
+    "sample_denominator": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "metric_summary": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "integer",
+          "string",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "threshold_contract_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "limitation_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "default_enabled": {
+      "const": false
+    },
+    "activation_authorized": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    }
+  }
+}

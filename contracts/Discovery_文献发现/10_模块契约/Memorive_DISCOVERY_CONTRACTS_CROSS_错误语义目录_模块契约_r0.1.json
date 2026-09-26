@@ -1,0 +1,167 @@
+{
+  "schema_version": "DISCOVERY_CONTRACTS_ERROR_SEMANTICS_CATALOG_V1",
+  "contract_revision": "discovery_contracts-common-contract-r0.1-candidate001",
+  "error_count": 14,
+  "errors": [
+    {
+      "error_code": "PRECONDITION_BLOCKED",
+      "trigger": "required governance/upstream/authorization input missing",
+      "lifecycle_status": "aborted",
+      "verification_result": "NOT_RUN",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after blocker resolution",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "SCHEMA_REJECTED",
+      "trigger": "unknown field/enum/schema revision or malformed required field",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after directed fix",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "IDENTITY_CONFLICT",
+      "trigger": "multiple incompatible identity assertions",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after new evidence",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "RECEIPT_MISSING",
+      "trigger": "required external-source receipt absent",
+      "lifecycle_status": "aborted",
+      "verification_result": "NOT_RUN",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "only after new authorization and receipt readiness",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "SOURCE_UNAVAILABLE",
+      "trigger": "source observation cannot be obtained",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "task-specific",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "RIGHTS_UNKNOWN",
+      "trigger": "materialization rights not verified",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after rights evidence",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "ILLEGAL_TRANSITION",
+      "trigger": "state transition or cross-axis precondition invalid",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after directed fix",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "VALIDATOR_ERROR",
+      "trigger": "validator cannot evaluate frozen input",
+      "lifecycle_status": "completed",
+      "verification_result": "ERROR",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after validator successor",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "VERIFICATION_FAILED",
+      "trigger": "frozen assertion fails",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after directed fix",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "GOVERNANCE_NOT_ASSESSED",
+      "trigger": "method or reviewer capability insufficient",
+      "lifecycle_status": "completed",
+      "verification_result": "PASS",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "not a retry by itself",
+      "new_run_required": false,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "HASH_MISMATCH",
+      "trigger": "recorded content hash differs from canonical bytes",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after new immutable object revision",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "PARENT_NOT_FOUND",
+      "trigger": "parent or supersedes reference cannot be resolved",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after reference repair",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "DUPLICATE_IDENTITY",
+      "trigger": "object_id/revision or run_id reused",
+      "lifecycle_status": "completed",
+      "verification_result": "FAIL",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "after unique successor identity",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    },
+    {
+      "error_code": "FORBIDDEN_SIDE_EFFECT",
+      "trigger": "network/formal root/registry/pointer mutation attempted",
+      "lifecycle_status": "aborted",
+      "verification_result": "NOT_RUN",
+      "acceptance_verdict": "NOT_ASSESSED",
+      "retry_policy": "requires separate authorization, never in same run",
+      "new_run_required": true,
+      "retain_evidence": true,
+      "allowed_side_effects": 0
+    }
+  ],
+  "global_invariants": [
+    "NO_ERROR_MAY_DELETE_OR_OVERWRITE_PRIOR_EVIDENCE",
+    "NO_ERROR_AUTOMATICALLY_AUTHORIZES_RETRY_OR_EXTERNAL_CALL",
+    "COMPLETED_ASSERTION_FAILURE_IS_FAIL_NOT_INVALIDATED",
+    "NOT_ASSESSED_IS_NOT_ZERO_SCORE_OR_QUALITY_FAIL"
+  ]
+}

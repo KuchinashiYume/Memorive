@@ -1,5 +1,0 @@
-{
-  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"urn:pr-os:p05:t12:model-alias-binding:v1","type":"object","additionalProperties":false,
-  "required":["schema_version","logical_model_id","request_model_alias","alias_revision","endpoint_operator","claimed_upstream_provider","identity_threshold","fallback_aliases","pool_identity","selection_policy"],
-  "properties":{"schema_version":{"const":"P05_T12_MODEL_ALIAS_BINDING_V1"},"logical_model_id":{"type":"string","minLength":1},"request_model_alias":{"type":"string","minLength":1},"alias_revision":{"type":"string","minLength":1},"endpoint_operator":{"type":"string","minLength":1},"claimed_upstream_provider":{"type":"string","minLength":1},"identity_threshold":{"enum":["DIRECT_PROVIDER_VERIFIED","RELAY_BACKEND_VERIFIED","RELAY_REPORTED_UNVERIFIED","RELAY_REPORTED_CONFLICT","PROVIDER_NOT_EXPOSED"]},"fallback_aliases":{"type":"array","maxItems":0},"pool_identity":{"type":["string","null"]},"selection_policy":{"enum":["EXACT_MODEL","EXPLICIT_POOL"]}}
-}

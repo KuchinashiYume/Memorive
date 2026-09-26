@@ -1,0 +1,339 @@
+{
+  "schema_version": "DISCOVERY_CONTRACTS_AUTHORITY_OWNERSHIP_BASELINE_V1",
+  "contract_revision": "discovery_contracts-common-contract-r0.1-candidate001",
+  "source_commit": "c9209f20b7984ead3c294ff1cd9d193d5589d071",
+  "object_count": 18,
+  "objects": [
+    {
+      "object_type": "DirectionDefinition",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.DIRECTION_REGISTRY",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.DIRECTION_REGISTRY",
+      "consumers": [
+        "LITERATURE_DISCOVERY",
+        "RESEARCH_RECOMMENDATIONS",
+        "RECOMMENDATION_HISTORY",
+        "CANDIDATE_REVIEW",
+        "KNOWLEDGE_PROMOTION"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY",
+        "Research",
+        "M01",
+        "M08"
+      ],
+      "identity_key": "direction_id + revision + content_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ResearchInterestProfile",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.PROFILE_REGISTRY",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.PROFILE_REGISTRY",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.DISCOVERY_PLANNER",
+        "RESEARCH_RECOMMENDATIONS.EXPOSURE_CONTROLLER"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY",
+        "Research"
+      ],
+      "identity_key": "profile_id + revision + content_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ResearchExposurePolicy",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.EXPOSURE_POLICY_REGISTRY",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.EXPOSURE_POLICY_REGISTRY",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.EXPOSURE_CONTROLLER",
+        "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY",
+        "Research"
+      ],
+      "identity_key": "policy_id + revision + content_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "HorizonAnchor",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.HORIZON_REGISTRY",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.HORIZON_REGISTRY",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.DISCOVERY_PLANNER",
+        "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY"
+      ],
+      "identity_key": "anchor_id + direction_id + revision",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "SessionResearchContext",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.SESSION_CONTEXT_WRITER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.SESSION_CONTEXT_WRITER",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.DISCOVERY_PLANNER",
+        "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY"
+      ],
+      "identity_key": "session_context_id + revision + expires_at",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "DiscoveryPlan",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.DISCOVERY_PLANNER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.DISCOVERY_PLANNER",
+      "consumers": [
+        "LITERATURE_DISCOVERY.CONNECTOR_ORCHESTRATOR",
+        "RESEARCH_RECOMMENDATIONS.DISCOVERY_RUNNER"
+      ],
+      "read_only_consumers": [
+        "RUNTIME_LOG",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "plan_id + revision + plan_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "DiscoveryRun",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.DISCOVERY_RUNNER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.DISCOVERY_RUNNER",
+      "consumers": [
+        "LITERATURE_DISCOVERY",
+        "RESEARCH_RECOMMENDATIONS",
+        "RUNTIME_LOG",
+        "MODEL_EVALUATION"
+      ],
+      "read_only_consumers": [
+        "DECISION_LOG",
+        "ARTIFACT_REGISTRY"
+      ],
+      "identity_key": "run_id + plan_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "SourceObservation",
+      "defined_by_task": "DataContracts",
+      "producer": "LITERATURE_DISCOVERY.SOURCE_OBSERVATION_WRITER",
+      "single_writer": "LITERATURE_DISCOVERY.SOURCE_OBSERVATION_WRITER",
+      "consumers": [
+        "LITERATURE_DISCOVERY.IDENTITY_RESOLVER",
+        "LITERATURE_DISCOVERY.CANDIDATE_REGISTRY",
+        "RUNTIME_LOG"
+      ],
+      "read_only_consumers": [
+        "RESEARCH_RECOMMENDATIONS",
+        "ARTIFACT_REGISTRY",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "source_id + source_record_id + observation_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "CandidateRecord",
+      "defined_by_task": "ServiceContracts_Configuration_Intake",
+      "producer": "LITERATURE_DISCOVERY.CANDIDATE_REGISTRY",
+      "single_writer": "LITERATURE_DISCOVERY.CANDIDATE_REGISTRY",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER",
+        "CANDIDATE_REVIEW",
+        "KNOWLEDGE_PROMOTION"
+      ],
+      "read_only_consumers": [
+        "M01",
+        "M02",
+        "M06",
+        "M08",
+        "ARTIFACT_REGISTRY",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "candidate_id + revision + content_hash",
+      "initialization_scope": "COMMON_ENVELOPE_AND_STATUS_AXES_ONLY"
+    },
+    {
+      "object_type": "RecommendationSlate",
+      "defined_by_task": "Intake",
+      "producer": "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.EXPOSURE_LEDGER_WRITER",
+        "Discovery_UI"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "slate_id + run_id + slate_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "DiscoveryEvent",
+      "defined_by_task": "Intake_Verification",
+      "producer": "RESEARCH_RECOMMENDATIONS.DISCOVERY_RUNNER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.DISCOVERY_RUNNER",
+      "consumers": [
+        "RUNTIME_LOG",
+        "MODEL_EVALUATION"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY",
+        "RESEARCH_RECOMMENDATIONS"
+      ],
+      "identity_key": "event_id + revision + content_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ExposureLedger",
+      "defined_by_task": "Verification",
+      "producer": "RESEARCH_RECOMMENDATIONS.EXPOSURE_LEDGER_WRITER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.EXPOSURE_LEDGER_WRITER",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.SUPPRESSION_ENGINE",
+        "RESEARCH_RECOMMENDATIONS.BEHAVIOR_DIGEST"
+      ],
+      "read_only_consumers": [
+        "Research",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "exposure_id",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ScopedSuppressionRecord",
+      "defined_by_task": "Verification",
+      "producer": "RESEARCH_RECOMMENDATIONS.SUPPRESSION_ENGINE",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.SUPPRESSION_ENGINE",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "LITERATURE_DISCOVERY",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "work_cluster_id + direction_id + decision_revision",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "BehavioralInterestDigest",
+      "defined_by_task": "Verification",
+      "producer": "RESEARCH_RECOMMENDATIONS.BEHAVIOR_DIGEST_WRITER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.BEHAVIOR_DIGEST_WRITER",
+      "consumers": [
+        "RESEARCH_RECOMMENDATIONS.PROFILE_CHANGE_PROPOSAL_BUILDER"
+      ],
+      "read_only_consumers": [
+        "Research",
+        "LITERATURE_DISCOVERY"
+      ],
+      "identity_key": "window + direction_id + digest_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "CandidateCardBundle",
+      "defined_by_task": "Retrieval",
+      "producer": "CANDIDATE_REVIEW.CANDIDATE_CARD_BUNDLE_WRITER",
+      "single_writer": "CANDIDATE_REVIEW.CANDIDATE_CARD_BUNDLE_WRITER",
+      "consumers": [
+        "KNOWLEDGE_PROMOTION.PROMOTION_COORDINATOR",
+        "MODEL_EVALUATION"
+      ],
+      "read_only_consumers": [
+        "M01",
+        "M02",
+        "M06",
+        "LITERATURE_DISCOVERY",
+        "RESEARCH_RECOMMENDATIONS"
+      ],
+      "identity_key": "candidate_id + card_revision + bundle_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY_NO_CARD_GENERATION"
+    },
+    {
+      "object_type": "CardPromotionIntent",
+      "defined_by_task": "Analysis",
+      "producer": "KNOWLEDGE_PROMOTION.PROMOTION_COORDINATOR",
+      "single_writer": "KNOWLEDGE_PROMOTION.PROMOTION_COORDINATOR",
+      "consumers": [
+        "KNOWLEDGE_PROMOTION.ATOMIC_PROMOTION_WRITER"
+      ],
+      "read_only_consumers": [
+        "M01",
+        "M08",
+        "DECISION_LOG",
+        "ARTIFACT_REGISTRY",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "promotion_id + candidate_bundle_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY_NO_PROMOTION"
+    },
+    {
+      "object_type": "PromotionReceipt",
+      "defined_by_task": "Analysis",
+      "producer": "KNOWLEDGE_PROMOTION.ATOMIC_PROMOTION_WRITER",
+      "single_writer": "KNOWLEDGE_PROMOTION.ATOMIC_PROMOTION_WRITER",
+      "consumers": [
+        "M01",
+        "M08",
+        "DECISION_LOG",
+        "ARTIFACT_REGISTRY",
+        "LITERATURE_DISCOVERY",
+        "RESEARCH_RECOMMENDATIONS"
+      ],
+      "read_only_consumers": [
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "promotion_id + candidate_bundle_hash + receipt_hash",
+      "initialization_scope": "COMMON_ENVELOPE_ONLY_NO_PROMOTION"
+    },
+    {
+      "object_type": "ExposurePolicyChangeProposal",
+      "defined_by_task": "Verification",
+      "producer": "RESEARCH_RECOMMENDATIONS.PROFILE_CHANGE_PROPOSAL_BUILDER",
+      "single_writer": "RESEARCH_RECOMMENDATIONS.PROFILE_CHANGE_PROPOSAL_BUILDER",
+      "consumers": [
+        "HUMAN_RESEARCHER",
+        "RESEARCH_RECOMMENDATIONS.EXPOSURE_POLICY_REGISTRY"
+      ],
+      "read_only_consumers": [
+        "Research",
+        "MODEL_EVALUATION"
+      ],
+      "identity_key": "proposal_id + base_policy_revision + proposal_hash",
+      "initialization_scope": "COMMON_ENVELOPE_AND_HUMAN_CONFIRMATION_ONLY"
+    }
+  ],
+  "interface_boundaries": [
+    {
+      "boundary": "LITERATURE_DISCOVERY_TO_RESEARCH_RECOMMENDATIONS",
+      "rule": "LITERATURE_DISCOVERY owns source, identity, relationship and novelty facts; RESEARCH_RECOMMENDATIONS consumes them read-only for planning, slate and exposure decisions."
+    },
+    {
+      "boundary": "Research_TO_Discovery",
+      "rule": "Research supplies neutral interaction evidence; Discovery may form a decaying digest but cannot rewrite Research evidence."
+    },
+    {
+      "boundary": "Discovery_TO_CARD",
+      "rule": "Only Retrieval may create an isolated CandidateCardBundle after a first human approval; Initialization creates no Card or Analysis."
+    },
+    {
+      "boundary": "Discovery_TO_FORMAL_LIBRARY",
+      "rule": "Only Analysis may request the separately authorized atomic writer after a second human approval; Initialization has zero formal writes."
+    }
+  ],
+  "invariants": [
+    "ONE_SINGLE_WRITER_PER_COMMON_OBJECT",
+    "CONSUMERS_DO_NOT_REDEFINE_AUTHORITY",
+    "Initialization_DEFINES_ENVELOPES_NOT_DOWNSTREAM_ALGORITHMS",
+    "HUMAN_DECISIONS_ARE_NOT_INFERRED_FROM_BEHAVIOR",
+    "FORMAL_AND_PRODUCTION_SIDE_EFFECTS_ZERO_IN_Initialization"
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "schema_version": "memorive.desktop.retrieval.message-state-axes-contract.v1",
+  "message_state_axes": {
+    "read_state": [
+      "UNREAD",
+      "READ"
+    ],
+    "confirmation_state": [
+      "UNCONFIRMED",
+      "CONFIRMED_PENDING_HISTORY",
+      "CONFIRMED"
+    ],
+    "collection_state": [
+      "CURRENT",
+      "HISTORY"
+    ],
+    "starred": [
+      false,
+      true
+    ]
+  },
+  "orthogonal_status_axes": {
+    "lifecycle_status": [
+      "in_progress",
+      "completed",
+      "failed",
+      "blocked",
+      "paused",
+      "aborted",
+      "NOT_ASSESSED"
+    ],
+    "verification_result": [
+      "PASS",
+      "FAIL",
+      "ERROR",
+      "NOT_ASSESSED"
+    ],
+    "acceptance_verdict": [
+      "PASS",
+      "FAIL",
+      "NOT_ASSESSED"
+    ],
+    "capability_status": [
+      "AVAILABLE",
+      "BLOCKED",
+      "DISABLED",
+      "NOT_ASSESSED"
+    ]
+  },
+  "invariants": [
+    "READ_DOES_NOT_IMPLY_CONFIRMED",
+    "CONFIRMED_MESSAGE_DOES_NOT_MUTATE_TARGET",
+    "STAR_DOES_NOT_MUTATE_READ_CONFIRMATION_OR_COLLECTION",
+    "HISTORY_REQUIRES_CONFIRMED",
+    "CONFIRMED_PENDING_HISTORY_REMAINS_VISIBLE_UNTIL_REFRESH_REENTRY_OR_RESTART",
+    "RED_YELLOW_AND_REPORTS_ARE_EXCLUDED_FROM_BULK_READ_AND_CONFIRM",
+    "MACHINE_PASS_DOES_NOT_IMPLY_USER_ACCEPTANCE",
+    "CAPABILITY_BLOCKED_DOES_NOT_IMPLY_LIFECYCLE_FAILURE",
+    "DELETE_IS_NOT_AN_ACTION"
+  ],
+  "severity": [
+    "RED",
+    "YELLOW",
+    "GREEN",
+    "BLUE"
+  ],
+  "locator_types": [
+    "job",
+    "attempt",
+    "artifact",
+    "action",
+    "event"
+  ],
+  "message_field_count": 22,
+  "messages_checklist_ids": [
+    "MESSAGE-01",
+    "MESSAGE-02",
+    "MESSAGE-03",
+    "MESSAGE-04",
+    "MESSAGE-05",
+    "MESSAGE-06",
+    "MESSAGE-07",
+    "MESSAGE-08",
+    "MESSAGE-09",
+    "MESSAGE-10",
+    "MESSAGE-11",
+    "MESSAGE-12",
+    "MESSAGE-13",
+    "MESSAGE-14",
+    "MESSAGE-15",
+    "MESSAGE-16",
+    "MESSAGE-17",
+    "MESSAGE-18",
+    "MESSAGE-19",
+    "MESSAGE-20",
+    "MESSAGE-21",
+    "MESSAGE-22",
+    "MESSAGE-23",
+    "MESSAGE-24",
+    "MESSAGE-25",
+    "MESSAGE-26",
+    "MESSAGE-27",
+    "MESSAGE-28",
+    "MESSAGE-29",
+    "MESSAGE-30",
+    "MESSAGE-31",
+    "MESSAGE-32",
+    "MESSAGE-33",
+    "MESSAGE-34",
+    "MESSAGE-35",
+    "MESSAGE-36",
+    "MESSAGE-37",
+    "MESSAGE-38",
+    "MESSAGE-39",
+    "MESSAGE-40",
+    "MESSAGE-41",
+    "MESSAGE-42",
+    "MESSAGE-43",
+    "MESSAGE-44",
+    "MESSAGE-45",
+    "MESSAGE-46",
+    "MESSAGE-47",
+    "MESSAGE-48",
+    "MESSAGE-49",
+    "MESSAGE-50",
+    "MESSAGE-51",
+    "MESSAGE-52",
+    "MESSAGE-53",
+    "MESSAGE-54",
+    "MESSAGE-55"
+  ],
+  "acceptance_verdict": "NOT_ASSESSED"
+}

@@ -1,0 +1,55 @@
+{
+  "real_source_channels_assessed": 0,
+  "run_id": "SESSIONS_CROSS_html_baseline_session_management_replay_20260825_run001",
+  "schema_version": "SessionsSessionSourceCapabilityMatrix-v1",
+  "source_count": 5,
+  "sources": [
+    {
+      "blocked_reason": null,
+      "capture_allowed": true,
+      "channel": "synthetic_offline_d38",
+      "delete_remote_allowed": false,
+      "provider_id": "synthetic",
+      "real_source": false,
+      "status": "ELIGIBLE_AUTHORIZED_SYNTHETIC"
+    },
+    {
+      "blocked_reason": "SOURCE_ACCESS_ENVELOPE_ABSENT",
+      "capture_allowed": false,
+      "channel": "official_export",
+      "delete_remote_allowed": false,
+      "provider_id": "official-export",
+      "real_source": true,
+      "status": "DISABLED_NOT_ASSESSED"
+    },
+    {
+      "blocked_reason": "SOURCE_ACCESS_ENVELOPE_ABSENT",
+      "capture_allowed": false,
+      "channel": "formal_provider_api",
+      "delete_remote_allowed": false,
+      "provider_id": "provider-api",
+      "real_source": true,
+      "status": "DISABLED_NOT_ASSESSED"
+    },
+    {
+      "blocked_reason": "SOURCE_ACCESS_ENVELOPE_ABSENT",
+      "capture_allowed": false,
+      "channel": "existing_login_visible_ui",
+      "delete_remote_allowed": false,
+      "provider_id": "visible-ui",
+      "real_source": true,
+      "status": "DISABLED_NOT_ASSESSED"
+    },
+    {
+      "blocked_reason": "SOURCE_ACCESS_ENVELOPE_ABSENT",
+      "capture_allowed": false,
+      "channel": "exact_local_cli_session_root",
+      "delete_remote_allowed": false,
+      "provider_id": "local-cli",
+      "real_source": true,
+      "status": "DISABLED_NOT_ASSESSED"
+    }
+  ],
+  "status": "PASS_SYNTHETIC_ONLY_REAL_SOURCES_DISABLED_NOT_ASSESSED",
+  "synthetic_source_channels_eligible": 1
+}

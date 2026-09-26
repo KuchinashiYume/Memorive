@@ -1,0 +1,165 @@
+{
+  "action_count": 17,
+  "actions": [
+    {
+      "action": "open_detail",
+      "handler": "sessions.get",
+      "status": "BOUND",
+      "ui_binding": ".desktop-sessions-card"
+    },
+    {
+      "action": "close_detail",
+      "handler": "local visible-state adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-close"
+    },
+    {
+      "action": "search",
+      "handler": "sessions.list",
+      "status": "BOUND",
+      "ui_binding": "#sessions-search-toggle/#sessions-search"
+    },
+    {
+      "action": "filter_source",
+      "handler": "sessions.list",
+      "status": "BOUND",
+      "ui_binding": "#sessions-source"
+    },
+    {
+      "action": "refresh",
+      "handler": "sessions.refresh",
+      "status": "BOUND",
+      "ui_binding": "#sessions-refresh"
+    },
+    {
+      "action": "refine",
+      "handler": "sessions.refine",
+      "status": "BOUND",
+      "ui_binding": "#sessions-refine"
+    },
+    {
+      "action": "begin_delete",
+      "handler": "local confirmation adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-delete"
+    },
+    {
+      "action": "cancel_delete",
+      "handler": "local confirmation adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-delete-cancel"
+    },
+    {
+      "action": "commit_local_delete_or_block_remote",
+      "handler": "sessions.delete_local",
+      "status": "BOUND",
+      "ui_binding": "#sessions-delete-commit"
+    },
+    {
+      "action": "toggle_bulk",
+      "handler": "local visible-state adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-bulk"
+    },
+    {
+      "action": "select_visible",
+      "handler": "local visible-state adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-select-visible"
+    },
+    {
+      "action": "clear_selected",
+      "handler": "local visible-state adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-clear-selected"
+    },
+    {
+      "action": "begin_bulk_delete",
+      "handler": "local confirmation adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-batch-delete"
+    },
+    {
+      "action": "cancel_bulk_delete",
+      "handler": "local confirmation adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-batch-cancel"
+    },
+    {
+      "action": "commit_local_bulk_or_block_remote",
+      "handler": "sessions.bulk_delete_local",
+      "status": "BOUND",
+      "ui_binding": "#sessions-batch-commit"
+    },
+    {
+      "action": "resize_detail",
+      "handler": "local layout adapter",
+      "status": "BOUND",
+      "ui_binding": "#sessions-detail-resizer"
+    },
+    {
+      "action": "capture_intent",
+      "handler": "sessions.capture_intent",
+      "status": "BOUND",
+      "ui_binding": "synthetic capture API"
+    }
+  ],
+  "intentional_design_delta": [],
+  "schema_version": "SessionsSessionsSessionActionStateContract-v1",
+  "state_count": 13,
+  "states": [
+    {
+      "state": "normal",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "hover",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "focus-visible",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "active",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "selected",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "disabled",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "loading",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "waiting",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "working",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "recovering",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "success",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "error",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    },
+    {
+      "state": "offline",
+      "status": "BOUND_TO_ADOPTED_SESSIONS"
+    }
+  ],
+  "status": "PASS"
+}

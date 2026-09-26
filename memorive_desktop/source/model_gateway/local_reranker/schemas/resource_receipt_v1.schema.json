@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:capabilities:retrieval-calibration:local-reranker-resource-receipt:v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "job_id",
+    "attempt_id",
+    "model_id",
+    "canonical_revision",
+    "request_sha256",
+    "result_sha256",
+    "resources",
+    "accounting",
+    "side_effects",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "RetrievalCalibrationLocalRerankerResourceReceipt-v1"
+    },
+    "job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_sha256": {
+      "$ref": "#/$defs/sha"
+    },
+    "result_sha256": {
+      "$ref": "#/$defs/sha"
+    },
+    "resources": {
+      "type": "object",
+      "required": [
+        "cold_load_seconds",
+        "warm_query_seconds_p50",
+        "warm_query_seconds_p95",
+        "peak_rss_bytes_sampled",
+        "peak_vram_allocated_bytes",
+        "physical_starts",
+        "query_count",
+        "document_count",
+        "timeout_count",
+        "oom_count"
+      ],
+      "properties": {
+        "cold_load_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "warm_query_seconds_p50": {
+          "type": "number",
+          "minimum": 0
+        },
+        "warm_query_seconds_p95": {
+          "type": "number",
+          "minimum": 0
+        },
+        "peak_rss_bytes_sampled": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_vram_allocated_bytes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "physical_starts": {
+          "const": 1
+        },
+        "query_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "document_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "timeout_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oom_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "required": [
+        "evidence_class",
+        "provider_tokens",
+        "api_cost_cny",
+        "local_electricity_or_depreciation_cost"
+      ],
+      "properties": {
+        "evidence_class": {
+          "const": "local_compute"
+        },
+        "provider_tokens": {
+          "const": "N/A_LOCAL_COMPUTE"
+        },
+        "api_cost_cny": {
+          "const": 0.0
+        },
+        "local_electricity_or_depreciation_cost": {
+          "const": "NOT_MONETIZED"
+        }
+      }
+    },
+    "side_effects": {
+      "type": "object",
+      "required": [
+        "external_requests",
+        "network_connect_attempts",
+        "cloud_fallback_started",
+        "document_mutations",
+        "production_route_mutations",
+        "production_index_writes",
+        "formal_runtime_log_artifact_registry_writes"
+      ],
+      "properties": {
+        "external_requests": {
+          "const": 0
+        },
+        "network_connect_attempts": {
+          "const": 0
+        },
+        "cloud_fallback_started": {
+          "const": false
+        },
+        "document_mutations": {
+          "const": 0
+        },
+        "production_route_mutations": {
+          "const": 0
+        },
+        "production_index_writes": {
+          "const": 0
+        },
+        "formal_runtime_log_artifact_registry_writes": {
+          "const": 0
+        }
+      }
+    },
+    "receipt_sha256": {
+      "$ref": "#/$defs/sha"
+    }
+  },
+  "$defs": {
+    "sha": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    }
+  }
+}

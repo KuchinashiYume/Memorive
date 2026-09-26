@@ -1,0 +1,669 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:schema:external-model-call-evidence-record:1.0",
+  "title": "Memorive External Model Per-Call Evidence Record",
+  "description": "Machine-readable minimum shape for prospective strict call receipts and legacy best-effort recovery rows. Schema validity does not itself grant qualification eligibility.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "binding_mode",
+    "recorded_at",
+    "phase_id",
+    "task_id",
+    "run_id",
+    "attempt_id",
+    "call_id",
+    "role_family",
+    "evidence_class",
+    "request_disposition",
+    "evidence_status",
+    "qualification_eligibility",
+    "reason_codes",
+    "source_evidence_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_type": {
+      "enum": [
+        "call_binding_receipt",
+        "historical_recovery_row"
+      ]
+    },
+    "binding_mode": {
+      "enum": [
+        "PROSPECTIVE_STRICT",
+        "LEGACY_BEST_EFFORT"
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "phase_id": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "task_id": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "run_id": {
+      "$ref": "#/$defs/nullableNonEmptyString"
+    },
+    "attempt_id": {
+      "$ref": "#/$defs/nullableNonEmptyString"
+    },
+    "call_id": {
+      "$ref": "#/$defs/nullableNonEmptyString"
+    },
+    "retry_of_call_id": {
+      "$ref": "#/$defs/nullableNonEmptyString"
+    },
+    "historical_record_id": {
+      "$ref": "#/$defs/nullableNonEmptyString"
+    },
+    "role_family": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "evidence_class": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "request_disposition": {
+      "enum": [
+        "SENT",
+        "BLOCKED_BEFORE_SEND",
+        "HISTORICAL_OBSERVED"
+      ]
+    },
+    "profile_identity": {
+      "$ref": "#/$defs/profileIdentity"
+    },
+    "model_identity": {
+      "$ref": "#/$defs/modelIdentity"
+    },
+    "route_identity": {
+      "$ref": "#/$defs/routeIdentity"
+    },
+    "artifact_bindings": {
+      "$ref": "#/$defs/artifactBindings"
+    },
+    "accounting": {
+      "$ref": "#/$defs/accounting"
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcome"
+    },
+    "recovered_fields": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/recoveredField"
+      }
+    },
+    "join_keys_used": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "evidence_status": {
+      "enum": [
+        "EXACT_RECORDED",
+        "EXACT_JOINED",
+        "CHAT_LOCATOR_ONLY",
+        "UNKNOWN_HISTORICAL"
+      ]
+    },
+    "qualification_eligibility": {
+      "enum": [
+        "ELIGIBLE_FOR_QUALIFICATION",
+        "ADVISORY_ONLY",
+        "NOT_ELIGIBLE_FOR_QUALIFICATION",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "source_evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceEvidenceRef"
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "binding_mode": {
+            "const": "PROSPECTIVE_STRICT"
+          }
+        },
+        "required": [
+          "binding_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "record_type": {
+            "const": "call_binding_receipt"
+          },
+          "request_disposition": {
+            "enum": [
+              "SENT",
+              "BLOCKED_BEFORE_SEND"
+            ]
+          },
+          "evidence_status": {
+            "enum": [
+              "EXACT_RECORDED",
+              "EXACT_JOINED"
+            ]
+          }
+        },
+        "required": [
+          "profile_identity",
+          "model_identity",
+          "route_identity",
+          "artifact_bindings",
+          "accounting",
+          "outcome"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_mode": {
+            "const": "LEGACY_BEST_EFFORT"
+          }
+        },
+        "required": [
+          "binding_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "record_type": {
+            "const": "historical_recovery_row"
+          },
+          "request_disposition": {
+            "const": "HISTORICAL_OBSERVED"
+          },
+          "historical_record_id": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "required": [
+          "historical_record_id",
+          "recovered_fields",
+          "join_keys_used"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "request_disposition": {
+            "const": "SENT"
+          }
+        },
+        "required": [
+          "request_disposition"
+        ]
+      },
+      "then": {
+        "properties": {
+          "run_id": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "attempt_id": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "call_id": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "profile_identity": {
+            "$ref": "#/$defs/strictProfileIdentity"
+          },
+          "model_identity": {
+            "$ref": "#/$defs/strictPreflightModelIdentity"
+          },
+          "route_identity": {
+            "$ref": "#/$defs/strictRouteIdentity"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullableNonEmptyString": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "nullableSha256": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/sha256"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "identityStatus": {
+      "enum": [
+        "VERIFIED",
+        "RECORDED_UNVERIFIED",
+        "PROVIDER_NOT_EXPOSED",
+        "NOT_APPLICABLE",
+        "UNKNOWN",
+        "CONFLICT"
+      ]
+    },
+    "profileIdentity": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "profile_version",
+        "profile_hash",
+        "identity_status"
+      ],
+      "properties": {
+        "profile_id": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "profile_version": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "profile_hash": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "identity_status": {
+          "$ref": "#/$defs/identityStatus"
+        }
+      },
+      "additionalProperties": false
+    },
+    "strictProfileIdentity": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/profileIdentity"
+        },
+        {
+          "properties": {
+            "profile_id": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "profile_version": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "profile_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "identity_status": {
+              "enum": [
+                "VERIFIED",
+                "RECORDED_UNVERIFIED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "modelIdentity": {
+      "type": "object",
+      "required": [
+        "provider",
+        "requested_model",
+        "returned_model",
+        "returned_model_status",
+        "provider_request_id_hash"
+      ],
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "requested_model": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "returned_model": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "returned_model_status": {
+          "$ref": "#/$defs/identityStatus"
+        },
+        "provider_request_id_hash": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      },
+      "additionalProperties": false
+    },
+    "strictPreflightModelIdentity": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/modelIdentity"
+        },
+        {
+          "properties": {
+            "provider": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "requested_model": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        }
+      ]
+    },
+    "routeIdentity": {
+      "type": "object",
+      "required": [
+        "route_id",
+        "route_snapshot_id",
+        "provider_region",
+        "egress_identity",
+        "egress_identity_kind",
+        "egress_receipt_id",
+        "identity_status"
+      ],
+      "properties": {
+        "route_id": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "route_snapshot_id": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "provider_region": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "egress_identity": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "egress_identity_kind": {
+          "enum": [
+            "OPAQUE_LABEL",
+            "SHA256",
+            "NOT_APPLICABLE",
+            "UNKNOWN"
+          ]
+        },
+        "egress_receipt_id": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "identity_status": {
+          "$ref": "#/$defs/identityStatus"
+        }
+      },
+      "additionalProperties": false
+    },
+    "strictRouteIdentity": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/routeIdentity"
+        },
+        {
+          "properties": {
+            "route_id": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "route_snapshot_id": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "provider_region": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "egress_identity": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "egress_identity_kind": {
+              "enum": [
+                "OPAQUE_LABEL",
+                "SHA256"
+              ]
+            },
+            "egress_receipt_id": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "identity_status": {
+              "enum": [
+                "VERIFIED",
+                "RECORDED_UNVERIFIED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "artifactBindings": {
+      "type": "object",
+      "required": [
+        "source_snapshot_id",
+        "source_commit",
+        "source_tree_hash",
+        "runner_hash",
+        "prompt_hash",
+        "output_contract_hash",
+        "scorer_hash",
+        "input_manifest_hash",
+        "input_hash",
+        "output_hash",
+        "error_hash"
+      ],
+      "properties": {
+        "source_snapshot_id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "source_commit": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "source_tree_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runner_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "prompt_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "output_contract_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "scorer_hash": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "input_manifest_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "input_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "output_hash": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "error_hash": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      },
+      "additionalProperties": false
+    },
+    "accounting": {
+      "type": "object",
+      "required": [
+        "request_started_at",
+        "response_completed_at",
+        "latency_ms",
+        "input_tokens",
+        "output_tokens",
+        "reasoning_tokens",
+        "total_tokens",
+        "actual_cost",
+        "estimated_cost",
+        "currency",
+        "usage_status",
+        "pricing_status"
+      ],
+      "properties": {
+        "request_started_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "response_completed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "latency_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "input_tokens": {
+          "$ref": "#/$defs/nullableNonNegativeInteger"
+        },
+        "output_tokens": {
+          "$ref": "#/$defs/nullableNonNegativeInteger"
+        },
+        "reasoning_tokens": {
+          "$ref": "#/$defs/nullableNonNegativeInteger"
+        },
+        "total_tokens": {
+          "$ref": "#/$defs/nullableNonNegativeInteger"
+        },
+        "actual_cost": {
+          "$ref": "#/$defs/nullableNonNegativeNumber"
+        },
+        "estimated_cost": {
+          "$ref": "#/$defs/nullableNonNegativeNumber"
+        },
+        "currency": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        },
+        "usage_status": {
+          "$ref": "#/$defs/identityStatus"
+        },
+        "pricing_status": {
+          "$ref": "#/$defs/identityStatus"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "required": [
+        "call_status",
+        "error_code"
+      ],
+      "properties": {
+        "call_status": {
+          "enum": [
+            "SUCCESS",
+            "ERROR",
+            "TIMEOUT",
+            "CANCELLED",
+            "BLOCKED_BEFORE_SEND"
+          ]
+        },
+        "error_code": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "recoveredField": {
+      "type": "object",
+      "required": [
+        "value",
+        "evidence_status",
+        "source_ref"
+      ],
+      "properties": {
+        "value": true,
+        "evidence_status": {
+          "enum": [
+            "EXACT_RECORDED",
+            "EXACT_JOINED",
+            "CHAT_LOCATOR_ONLY",
+            "UNKNOWN_HISTORICAL"
+          ]
+        },
+        "source_ref": {
+          "$ref": "#/$defs/nullableNonEmptyString"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sourceEvidenceRef": {
+      "type": "object",
+      "required": [
+        "ref",
+        "sha256",
+        "evidence_status"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "evidence_status": {
+          "enum": [
+            "EXACT_RECORDED",
+            "EXACT_JOINED",
+            "CHAT_LOCATOR_ONLY",
+            "UNKNOWN_HISTORICAL"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "nullableNonNegativeInteger": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "nullableNonNegativeNumber": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:quality:fact-identity:absence-check-evidence:v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "content_hash",
+    "artifact_type",
+    "schema_version",
+    "sample_id",
+    "paper_id",
+    "template_contract_ref",
+    "slot_id",
+    "policy_ref",
+    "source_artifact_ref",
+    "source_content_hash",
+    "document_role_inventory",
+    "required_sections_or_roles",
+    "checked_sections_or_roles",
+    "checked_embedded_materials",
+    "unavailable_or_unreadable_materials",
+    "search_terms_or_rules",
+    "structural_probes_executed",
+    "method",
+    "coverage_complete",
+    "unresolved_present_candidates",
+    "checked_by",
+    "checked_at",
+    "evidence_refs"
+  ],
+  "properties": {
+    "artifact_id": {
+      "$ref": "#/$defs/artifactId"
+    },
+    "content_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "artifact_type": {
+      "const": "absence_check_evidence"
+    },
+    "schema_version": {
+      "const": "absence-check-evidence-v2"
+    },
+    "sample_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paper_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "template_contract_ref": {
+      "$ref": "#/$defs/fileRef"
+    },
+    "slot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_ref": {
+      "$ref": "#/$defs/fileRef"
+    },
+    "source_artifact_ref": {
+      "$ref": "#/$defs/artifactRef"
+    },
+    "source_content_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "document_role_inventory": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role_id",
+          "available",
+          "chunk_count"
+        ],
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "chunk_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "required_sections_or_roles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "checked_sections_or_roles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "checked_embedded_materials": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "unavailable_or_unreadable_materials": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "search_terms_or_rules": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "structural_probes_executed": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "method": {
+      "const": "independent_literal_and_structural_scan"
+    },
+    "coverage_complete": {
+      "type": "boolean"
+    },
+    "unresolved_present_candidates": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "checked_by": {
+      "const": "fact_identity-a3-blind-protocol"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifactId": {
+      "type": "string",
+      "pattern": "^art_[0-9a-f]{32}$"
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "content_hash"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/artifactId"
+        },
+        "content_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "fileRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "const": "r1.0"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

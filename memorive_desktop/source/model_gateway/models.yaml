@@ -1,0 +1,252 @@
+# ============================================================
+# MODEL_GATEWAY 模型网关 · 模型路由配置 (Model Router 出厂默认)
+# 用途: MODEL_GATEWAY Router 读本文件, 按 slot 查 provider/model/endpoint/key 发起调用;
+#       "改本文件即换模型"——业务代码不动 (承 D3 可插拔后端 / 配置驱动)。
+# 纪律: 本文件绝不写任何明文 key; key 一律以"环境变量名"引用。
+#
+# ── 三条硬约束 (务必遵守) ─────────────────────────────────
+# ① 换 embed_cloud / embed_local / vector_store 的后端 → 必须连带
+#    "整库重嵌 / 重建索引", 不能只静默改 model id (不同模型向量不兼容, 承 D3)。
+# ② flash 是 distill 槽的"可切换项、非默认"; flash 三档警告弹窗
+#    不在本配置范围 (属交互界面阶段, 承 D4)。
+# ③ analysis / verify 两槽的 manual/auto 执行模式状态机不在本配置、
+#    不在 Initialization (属 v6.3《分析槽自动化接入策略》+ 交互界面阶段)。
+# ============================================================
+schema_version: 1
+
+# ACCOUNTING-RECOVERY: prices live in an immutable dated catalog.  This file owns model
+# capability/route configuration and only carries the catalog identity.
+price_catalog:
+  schema_version: PriceCatalog-v1
+  snapshot_id: accounting_recovery-legacy-price-migration-candidate001
+  revision: candidate001-r1
+  path: accounting/pricing/price_catalog_v1.json
+  live_supplier_lookup: false
+
+slots:
+
+  # ── 六个 D 卡锁定槽 (已启用) ──────────────────────────────
+  distill:                                    # 蒸馏 (EVIDENCE_EXTRACTION / Configuration)
+    enabled: true
+    provider: deepseek
+    model_id: deepseek-v4-pro
+    price_profile_id: legacy-deepseek-v4-pro-cny
+    price_profile_revision: 2026-07-01-r1
+    endpoint: 'https://api.deepseek.com/chat/completions'   # OpenAI 兼容
+    api_key_env: DEEPSEEK_API_KEY
+    swap_granularity: 同引擎内换档 (Pro ↔ flash); 不换引擎 (承 D4)
+    on_swap: 无连带; 随时换、只影响之后产物 + 留痕另起
+    notes: 默认 Pro、整条不分工; flash 为可切换项非默认 (见硬约束②)
+
+  ocr:                                        # 页面级 OCR (DocumentConvert / Quality ServiceContracts)
+    enabled: true
+    provider: siliconflow
+    model_id: deepseek-ai/DeepSeek-OCR
+    endpoint: 'https://api.siliconflow.cn/v1/chat/completions'
+    api_key_env: SILICONFLOW_API_KEY
+    temperature: 0.0
+    timeout_seconds: 60
+    image_detail: high
+    max_tokens: 4096
+    prompt_version: 3                       # 生产 Markdown OCR 固定 v3；v4+ 为 Retrieval 资格提示词，不自动接管
+    swap_granularity: 页面级执行配置档；模型替换仍须保持单页输入与页号/源哈希回显契约
+    on_swap: 无整库重嵌连带；必须重跑 OCR 页面验收并保留双路校核留痕
+    notes: 仅 data_ownership=self 可调用；逐页 PNG，不接收整篇 PDF；受托数据在编码前挡下
+
+  embed_cloud:                                # 嵌入·云 (DocumentEmbed)
+    enabled: true
+    provider: siliconflow
+    model_id: BAAI/bge-m3                      # 1024 维、多语言、8K 上下文
+    endpoint: 'https://api.siliconflow.cn/v1/embeddings'
+    api_key_env: SILICONFLOW_API_KEY
+    swap_granularity: 可插拔后端 (换整个 provider)
+    on_swap: ⚠ 换后端必须整库重嵌 (硬约束①)
+    notes: 默认免费档; Pro 档同模型可临时切 (仅速度差)
+
+  embed_local:                                # 嵌入·本地 (DocumentEmbed)
+    enabled: true
+    provider: ollama
+    model_id: bge-m3                           # 与云端同模型, 保向量空间兼容
+    endpoint: 'http://localhost:11434/api/embed'           # 本地 Ollama; 官方当前 endpoint(旧 /api/embeddings 已被取代); 健康探测同主机 /api/tags
+    api_key_env: null                          # 本地、无 key
+    swap_granularity: 可插拔后端
+    on_swap: ⚠ 换后端必须整库重嵌 (硬约束①)
+    notes: 按归属须本地的数据走此; 本地未就绪→报错挡下、绝不静默上云
+           (安全阀承之七, MODEL_GATEWAY 给友好提示; 分流判断在 DocumentEmbed、非本配置)
+
+  rerank:                                     # 重排
+    enabled: true
+    provider: siliconflow
+    model_id: BAAI/bge-reranker-v2-m3          # ⚠ 须带 BAAI/ 前缀(承 embed 槽 BAAI/bge-m3 同规;裸名 siliconflow 回 400 code20012「Model does not exist」·A1b 真跑坐实);Pro/ 前缀同模型仅速度差
+    endpoint: 'https://api.siliconflow.cn/v1/rerank'
+    api_key_env: SILICONFLOW_API_KEY
+    swap_granularity: 可插拔后端
+    on_swap: 无整库重嵌连带 (重排不入库、检索时算)
+    notes: 检索三段中段——Chroma 粗筛 → 本槽精排 → RETRIEVAL_WEIGHTING 库外加权(默认免费档;Pro 档同模型可临时切)
+
+  vector_store:                               # 向量库
+    enabled: true
+    provider: chroma
+    model_id: null                            # 向量库非模型
+    endpoint: 'G:\Memorive-运维\向量库\'          # 库外、内嵌持久化、不进检索/嵌入
+    api_key_env: null                          # 本地、无 key
+    swap_granularity: 可插拔后端 (换库)
+    on_swap: ⚠ 换库必须迁移数据 / 重建索引 (硬约束①)
+    notes: 实体由 T 系列建, 本配置只定位
+
+  final_judgment:                             # 最终判断
+    enabled: true
+    provider: human                            # 红线: 不接任何模型
+    model_id: null
+    endpoint: null
+    api_key_env: null
+    swap_granularity: 不适用 (永远是人)
+    on_swap: 不适用
+    notes: 红线——最终判断永不交给模型
+
+  # ── 分析(RESEARCH_ANALYSIS)/ 校核(EVIDENCE_REVIEW)槽 (承 v6.3《分析槽自动化接入策略》; analysis 升 Anthropic Opus、verify 用 DeepSeek/GPT) ──
+  analysis:                                   # 分析 (RESEARCH_ANALYSIS) — B 实验后默认 Anthropic Sonnet 5
+    enabled: true                              # 目标默认档 Anthropic Sonnet 5（经 anthropic adapter · Messages API）
+    provider: anthropic
+    model_id: claude-sonnet-5                  # B 实验默认 Sonnet 5；人工升级 Opus 4.8，后备 DeepSeek-Pro
+    price_profile_id: legacy-claude-sonnet-5-promo-cny
+    price_profile_revision: 2026-07-07-r1
+    endpoint: 'https://api.anthropic.com/v1/messages'   # Anthropic Messages API(anthropic adapter; 非 OpenAI 兼容)
+    api_key_env: MEMORIVE_ANTHROPIC_KEY            # ⚠ 非 ANTHROPIC_API_KEY!Claude Code 用 OAuth、会从子进程剥离 ANTHROPIC_API_KEY, CC 内跑读不到; 故用非 ANTHROPIC_ 前缀别名
+    thinking_type: adaptive                     # B: Opus 4.8 须显式开启；Sonnet 5 同传，保证公平对比
+    effort: xhigh                               # B: 两模型固定 xhigh；实际请求放 output_config.effort
+    max_tokens: 65536                           # B: thinking + 最终文本共用硬上限；xhigh 首轮按官方建议从 64k 起
+    swap_granularity: 换 model id / provider, 带降档通道 (承 v6.3)
+    on_swap: 无整库重嵌连带
+    notes: >
+      默认档 = Anthropic Sonnet 5 (claude-sonnet-5)、经 anthropic adapter 走 Messages API；B 的 3 样本 xhigh 对照中，来源/相关性均达标且成本/质量比优于 Opus 4.8。人工升级档 = Opus 4.8；后备 = DeepSeek-Pro（承 v6.3 C2）。
+      ⚠ 境外 API: RESEARCH_ANALYSIS 发调用前必过区域预检门 region_preflight("analysis")(大陆挡、非陆放; geo 源 ip-api、两网实测、承 v6.4 之二)。B 起用 adaptive thinking + output_config.effort=xhigh；thinking token 是 output 的计费子集，RUNTIME_LOG 单列 reasoning 观测、不重复计费。
+      ⚠ key 用 MEMORIVE_ANTHROPIC_KEY(非 ANTHROPIC_API_KEY——Claude Code 剥离该变量、CC 子进程读不到); key 只进 env、绝不入库 / 日志。
+      成本: Opus $5/$25(≈ ¥36/¥180 per 1M、汇率 7.2)叠加计入 RESEARCH_ANALYSIS 分析 + EVIDENCE_REVIEW 校核同一条月度红线 ≤ 约 ¥200/月; 超出沿降档通道降档。manual/auto 执行状态机不在本配置 (硬约束③)。
+
+  conversation_refinement:                   # CONVERSATION-REFINEMENT 对话精炼 subject；用户可替换槽
+    enabled: true
+    provider: deepseek
+    model_id: deepseek-v4-pro                 # 用户 2026-08-18 选择的当前默认档；不是代码常量
+    endpoint: 'https://api.deepseek.com/chat/completions'
+    api_key_env: DEEPSEEK_API_KEY
+    thinking_type: enabled
+    effort: high
+    max_tokens: 8192
+    temperature: 0.0
+    timeout_seconds: 600
+    swap_granularity: 独立替换 provider/model/endpoint/reasoning；不连带改变 distill/analysis/verify
+    on_swap: 新行为 hash；低成本等价全链 rehearsal 与 Frozen B 资格全部失效，必须新建 candidate
+    notes: >
+      Extensions 只把已选择、已降密并经 source envelope 允许的精炼 subject 输入交给本槽；真实历史原文、
+      private attachment、credential、Gold/expected 永不发送。当前默认 DeepSeek V4 Pro；用户可通过
+      models.yaml 独立换档，业务代码只引用 logical slot=conversation_refinement，不硬编码厂商或模型。
+      生产知识写入、人工 ACCEPT、route activation 与本槽调用相互独立。
+
+  verify:                                     # 校核 (EVIDENCE_REVIEW) — Core Final 细校升 Anthropic Sonnet 5
+    enabled: true                              # Haiku 4.5 仍可作便宜档;当前细校默认 Sonnet 5
+    provider: anthropic
+    model_id: claude-sonnet-5                 # 与 deepseek 蒸馏错开供应商;Haiku live 校准召回/契约稳定性不足后按既有通道升档
+    price_profile_id: legacy-claude-sonnet-5-promo-cny
+    price_profile_revision: 2026-07-07-r1
+    endpoint: 'https://api.anthropic.com/v1/messages'   # Anthropic Messages API(anthropic adapter; 非 OpenAI 兼容)
+    api_key_env: MEMORIVE_ANTHROPIC_KEY           # ⚠ 非 ANTHROPIC_API_KEY!Claude Code 用 OAuth、会剥离 ANTHROPIC_API_KEY、CC 子进程读不到; 用非 ANTHROPIC_ 前缀别名(同 analysis 槽)
+    thinking_type: adaptive                    # Sonnet 5 细校启用自适应思考
+    effort: low                                # 整批首审+最终复查已提供双重审核；保留少量 adaptive thinking，避免 xhigh 吞尽 JSON 预算
+    max_tokens: 16384                          # thinking + 最终批量 JSON 共用；low 档保留充足结构化输出空间
+    swap_granularity: 换 model id / provider (同分析接入策略);细校 Sonnet 5，可人工升 Opus 4.8 或成本降 Haiku 4.5
+    on_swap: 无整库重嵌连带
+    notes: >
+      EVIDENCE_REVIEW 回原文复核判定源在 Core Final 细校升 Claude Sonnet 5(claude-sonnet-5、经 anthropic adapter 走 Messages API)。
+      ⚠ 真异源(承 Integration 第 1 步 / 防同源自检): 卡多由 deepseek-v4-pro 蒸馏、verify = anthropic → 供应商错开 = 异源;
+      EVIDENCE_REVIEW 校核报告 confidence 自动落 cross_source(不再「同源低置信」)、核心字段不再挂「升级异源待 Anthropic」。
+      异源 PASS→active 仍诚实(active ≠ 已校验:异源校验只是把关更强、非等同人工终判)。细校可人工升 Opus 4.8，成本压力可降 Haiku 4.5。
+      ⚠ 境外 API: EVIDENCE_REVIEW 发 verify 调用前必过区域预检门 region_preflight("verify")(大陆挡、非陆放; 复用 RESEARCH_ANALYSIS 同一套区域门;
+      block → DecisionError、auto_review 升级、卡留 pending 报人工,绝不硬撞 403); Sonnet 5 整批两阶段校核使用 adaptive thinking + low；xhigh 实测会吞尽 16384 输出预算而无法落 JSON。
+      ⚠ key 用 MEMORIVE_ANTHROPIC_KEY(非 ANTHROPIC_API_KEY——Claude Code 剥离、CC 子进程读不到); key 只进 env、绝不入库 / 日志。
+      成本: Sonnet 5 当前引入价 $2/$10(≈ ¥14.4/¥72 per 1M、汇率 7.2;到期按定价表更新)叠加计入 RESEARCH_ANALYSIS 分析 + EVIDENCE_REVIEW 校核同一条月度红线 ≤ 约 ¥200/月; 超出沿降档通道降 Haiku 4.5。
+      执行模式见 v6.3《分析槽自动化接入策略》。
+
+  verify_judgment:                            # 判断类校核 (EVIDENCE_REVIEW·异源定向证伪)
+    enabled: true                              # 2026-08-01 用户决定：默认档由 GPT-4.1-mini 改为 DS Pro
+    provider: deepseek
+    model_id: deepseek-v4-pro
+    price_profile_id: legacy-deepseek-v4-pro-cny
+    price_profile_revision: 2026-07-01-r1
+    endpoint: 'https://api.deepseek.com/chat/completions'
+    api_key_env: DEEPSEEK_API_KEY
+    swap_granularity: 换 model id / provider
+    on_swap: 无整库重嵌连带
+    notes: >
+      判断类异源定向证伪：审核者站在对立面检查依据是否足以支撑结论。
+      Analysis 后置 analysis_reviewer_primary 双卷考试中，DS Pro 两次独立复现总分为 88.590079 与 88.913492，双卷硬门均通过；
+      该证据支持角色选型，但考试参数不等同于 Core 的 4096-token 短裁决载荷，且不构成正式资格证明。
+      当 RESEARCH_ANALYSIS 生产者为 Anthropic 时本槽构成异源；当生产者为 DeepSeek 时，EVIDENCE_REVIEW 候选选择器必须排除本槽并转人工或其他异源候选，禁止同源自审。
+      成本与 RESEARCH_ANALYSIS 分析 / EVIDENCE_REVIEW 搬运叠加计入同一条月度红线 ≤ 约 ¥200/月、不另立预算。
+      判断类真实对象为 RESEARCH_ANALYSIS 分析结论；仍只发送结论与其引用的少量 chunk，不发送整篇或推理链。
+
+  # ── RESEARCH_REPORTS 周期简报 API 槽（RESEARCH-HANDOFF sandbox candidate）────────────────
+  # 三槽按周期独立调用；ChangeDigest 无 qualifying library change 时业务层零调用。
+  report_daily:
+    enabled: true
+    provider: deepseek
+    model_id: deepseek-v4-flash
+    price_profile_id: legacy-deepseek-v4-flash-cny
+    price_profile_revision: 2026-07-01-r1
+    endpoint: 'https://api.deepseek.com/chat/completions'
+    api_key_env: DEEPSEEK_API_KEY
+    thinking_type: disabled
+    max_tokens: 4096
+    timeout_seconds: 300
+    swap_granularity: 仅日报 narrative 槽；不得连带改变周报或月报
+    on_swap: 须重跑日报 exact-schema、event-ref 与 NO_CHANGE_NO_CALL 回归
+    notes: >
+      日报默认 Flash non-thinking；只生成固定模板前部 narrative，事实、计数、状态、详细记录与审计元数据仍由 RESEARCH_REPORTS 确定性生成。
+
+  report_weekly:
+    enabled: true
+    provider: deepseek
+    model_id: deepseek-v4-pro
+    price_profile_id: legacy-deepseek-v4-pro-cny
+    price_profile_revision: 2026-07-01-r1
+    endpoint: 'https://api.deepseek.com/chat/completions'
+    api_key_env: DEEPSEEK_API_KEY
+    thinking_type: enabled
+    effort: high
+    max_tokens: 8192
+    timeout_seconds: 600
+    swap_granularity: 仅周报 narrative 槽；不得连带改变日报或月报
+    on_swap: 须重跑周报 authority-tag、tension、event-ref 与 NO_CHANGE_NO_CALL 回归
+    notes: >
+      周报默认 DS Pro thinking/high；重要变化和潜在张力仍只能来自 RESEARCH_REPORTS 已承认的显式 authority，不允许模型自行升级普通文本。
+
+  report_monthly:
+    enabled: true
+    provider: anthropic
+    model_id: claude-sonnet-5
+    price_profile_id: legacy-claude-sonnet-5-promo-cny
+    price_profile_revision: 2026-07-07-r1
+    endpoint: 'https://api.anthropic.com/v1/messages'
+    api_key_env: MEMORIVE_ANTHROPIC_KEY
+    thinking_type: adaptive
+    effort: max
+    max_tokens: 65536
+    timeout_seconds: 1200
+    swap_granularity: 仅月报 narrative 槽；Opus 5 不在本候选自动兜底
+    on_swap: 须先完成精确档位低成本预跑、strict receipt 与月报 Schema 回归
+    notes: >
+      月报默认 Sonnet 5 adaptive/max；每月仅在该月存在 qualifying library change 时调用。模型不取得研究方向 authority、最终科研判断或生产 activation 权限。
+
+  verify_judgment_fallback:                   # 判断类异源核候选；默认关闭
+    enabled: false
+    provider: openai
+    model_id: gpt-4.1-mini
+    endpoint: 'https://api.openai.com/v1/chat/completions'
+    api_key_env: OPENAI_API_KEY
+    swap_granularity: 换 model id / provider
+    on_swap: 无整库重嵌连带
+    notes: >
+      GPT-4.1-mini 历史上完成过真实短裁决与端到端冒烟，但没有 Analysis 同类正式双卷质量分；
+      因证据等级不足，自 2026-08-01 起只保留为关闭候选，不自动兜底。
+      如未来完成精确档位双卷考试并由用户重新批准，可再启用；此前主槽不可用时，EVIDENCE_REVIEW 将代表句标为「未异源核·待核」、
+      记录 RUNTIME_LOG 与库外待办，不阻断 RESEARCH_ANALYSIS 建议，也不驱动 KNOWLEDGE_ADMISSION。

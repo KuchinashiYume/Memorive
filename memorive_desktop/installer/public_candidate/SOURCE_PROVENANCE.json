@@ -1,0 +1,58 @@
+{
+  "scope": "Public semantic version; legacy machine-specific VM test authorization code removed; production install, update and removal engine retained.",
+  "files": [
+    {
+      "path": "app.manifest",
+      "baseline_sha256": "e8a8cf5039896b7945271c8c3e6f40ed1a324b16562ab5353f56eabcfd071c50",
+      "candidate_sha256": "e8a8cf5039896b7945271c8c3e6f40ed1a324b16562ab5353f56eabcfd071c50"
+    },
+    {
+      "path": "html_host.cs",
+      "baseline_sha256": "2b26481dc24536835382e9472cd3184447e522ff8b968251fb6da11a04b7b88d",
+      "candidate_sha256": "fa0c54a478a9280ee912d7cdcade13b8a2d07781d6e5841b0dc6f4784515520f"
+    },
+    {
+      "path": "install.html",
+      "baseline_sha256": "deda0c5920f546496a190e1b9bb970ca3f56782b2fe356668e5ef87ac8e3f9f9",
+      "candidate_sha256": "164539931fd452e375e6c681e8fa3875e61d51fb0e3b8fd80f16ebdcbdb955c2"
+    },
+    {
+      "path": "install_bridge.js",
+      "baseline_sha256": "114506220a0402cc4c0b15a78c11d9ef14cbaec326a9ad7a29974353dabcf0b6",
+      "candidate_sha256": "114506220a0402cc4c0b15a78c11d9ef14cbaec326a9ad7a29974353dabcf0b6"
+    },
+    {
+      "path": "lifecycle.cs",
+      "baseline_sha256": "60f6f8dbead1e75d12a90a86a4596372d6e90045d29e2b3277f152cebf7ba5d9",
+      "candidate_sha256": "78db5cf497fe4c95d38e4d8157aca0f6ab1ce3a99a2a4e85a5ef0061bfca3cab"
+    },
+    {
+      "path": "installation_cross_setup.cs",
+      "baseline_sha256": "7fcc9a96793b650cc9b6cd356b82f9e7da7ddf746a9b3c42e0c31bffe136f04f",
+      "candidate_sha256": "21afbbc716c27303d67ee3806ca76491cbc3274d08df015264d57d7df0896f93"
+    },
+    {
+      "path": "release_metadata.cs",
+      "baseline_sha256": "ef138415a277600ba8d338d672d88f86bae207caa8228ed66abb12377c90fc25",
+      "candidate_sha256": "ef138415a277600ba8d338d672d88f86bae207caa8228ed66abb12377c90fc25"
+    },
+    {
+      "path": "uninstall.html",
+      "baseline_sha256": "3c8a97ed7a8b6d1c5ddefd98d6ff67459dedb90a8d41d144eaa7bedb2e6baa4f",
+      "candidate_sha256": "21f2082b0293385f79ecd48342e748f4156014205e2b592e7d4ed4a618645b87"
+    },
+    {
+      "path": "uninstall_bridge.js",
+      "baseline_sha256": "5d82dc77751096cb501ed13825556fa8c645645802c4de8cbc2efa502d3a2721",
+      "candidate_sha256": "5d82dc77751096cb501ed13825556fa8c645645802c4de8cbc2efa502d3a2721"
+    },
+    {
+      "path": "prerequisite_wizard.cs",
+      "candidate_sha256": "260418fe820213cb947dbea674bbfd817b6835e6a4ea08bcdd442ce543bf169d",
+      "origin": "installer-requirements native prerequisite welcome/check pages"
+    }
+  ],
+  "health_owner_protocol": "Memorive-INSTALLER-TRIAL-V1 retained to match existing install_health.py; this does not assert private capsule inclusion",
+  "public_prerequisites": "Official Microsoft user-installed WebView2 and Visual C++; no bundled runtime installer or host System32 DLL redistribution.",
+  "package_id": "v1.01"
+}

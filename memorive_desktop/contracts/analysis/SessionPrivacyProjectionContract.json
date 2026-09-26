@@ -1,0 +1,39 @@
+{
+  "external_model_send": "FORBIDDEN",
+  "forbidden_evidence_fields": [
+    "raw_content",
+    "credential",
+    "token",
+    "cookie",
+    "browser_storage"
+  ],
+  "git_admission": "RAW_PRIVATE_FORBIDDEN",
+  "privacy_classes": [
+    "PUBLIC_SAFE",
+    "SYNTHETIC_PRIVATE",
+    "PRIVATE_LOCAL_ONLY",
+    "RESTRICTED_NOT_CAPTURED"
+  ],
+  "public_safe_fields": [
+    "local_projection_id",
+    "provider_id",
+    "provider_session_id",
+    "source_name",
+    "title",
+    "summary",
+    "captured_at",
+    "local_dir",
+    "model",
+    "partial",
+    "delete_capability",
+    "refine_status",
+    "content_hash",
+    "privacy_class",
+    "lineage",
+    "stable_locator"
+  ],
+  "raw_private_default": "LOCAL_CUSTODY_ONLY",
+  "schema_version": "SessionsSessionPrivacyProjectionContract-v1",
+  "status": "FROZEN",
+  "support_bundle_raw_private": "FORBIDDEN"
+}

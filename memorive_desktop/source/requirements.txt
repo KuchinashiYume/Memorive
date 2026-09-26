@@ -1,0 +1,24 @@
+# Memorive 依赖清单(Core)
+# 直接依赖声明；可复现重放使用 requirements.lock 与经批准的离线 artifact inventory。
+# 纪律:清单内无任何密钥;运行时直接依赖用 == 精确锁定,便于跨机复现。
+# (标准库依赖 urllib/json/pathlib 等不列；transitive 依赖由 requirements.lock 冻结。)
+
+# ── 已就位(Initialization MODEL_GATEWAY 网关 / DataContracts RUNTIME_LOG 日志 / ServiceContracts 第1步 DocumentIngest+DocumentConvert 运行所需)────────
+PyYAML==6.0.3          # MODEL_GATEWAY 读 models.yaml + DOCUMENT_PROCESSING paper_id_registry.yaml
+pymupdf==1.28.0        # DocumentConvert 轻量沙盒引擎直接依赖(pymupdf4llm 连带装同版)
+pymupdf4llm==1.28.0    # DocumentConvert 轻量沙盒引擎:数字版 PDF→Markdown(非正式主力,仅沙盒/显式选用)
+markitdown==0.1.6      # DocumentConvert txt/office→Markdown 引擎
+
+# ── ServiceContracts 第3步 DocumentEmbed 嵌入运行所需(2026-07-01 装)────────
+chromadb==1.5.9        # DocumentEmbed 向量库:内嵌持久化 PersistentClient(Python 3.13 装通;本版未连带 onnxruntime)
+
+# ── Quality+ 运行时契约验证 ────────
+jsonschema==4.26.0     # 当前 Qualification clean-runtime profile；Draft 2020-12 契约回归
+
+# 构建期/重型/隔离运行时依赖不再混入 base runtime；见 requirements.optional.txt
+# 与 requirements.profiles.json。正式 pack 读取冻结 PNG 不需要 Pillow。
+
+# ── ServiceContracts 后续待装 ────────
+# marker-pdf           # 见 document_processing-marker optional profile；安装与打包权仍受 Desktop rights gate 阻断
+# 注:本地嵌入不需 pip 包——ollama adapter 走 urllib/HTTP(见 model_gateway/providers/ollama.py);
+#     Ollama 本体是系统级服务(用户自装 + `ollama pull bge-m3`),非 pip 依赖

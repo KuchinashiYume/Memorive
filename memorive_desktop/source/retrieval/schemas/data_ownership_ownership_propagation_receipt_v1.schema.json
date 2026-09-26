@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/data_ownership_ownership_propagation_receipt_v1.schema.json",
+  "title": "Memorive Capabilities Analysis Ownership Propagation Receipt V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_id",
+    "subject_chain",
+    "ownership_contract_version",
+    "effective_data_ownership",
+    "ownership_digest",
+    "checks",
+    "result",
+    "error_codes"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^OPR-[0-9a-f]{24}$"
+    },
+    "subject_chain": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "ownership_contract_version": {
+      "const": "DATA_OWNERSHIP_OWNERSHIP_V1"
+    },
+    "effective_data_ownership": {
+      "enum": [
+        "self",
+        "entrusted",
+        "unknown",
+        null
+      ]
+    },
+    "ownership_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "result": {
+      "enum": [
+        "PASS",
+        "BLOCKED"
+      ]
+    },
+    "error_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "result": {
+            "const": "PASS"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "effective_data_ownership": {
+            "enum": [
+              "self",
+              "entrusted",
+              "unknown"
+            ]
+          },
+          "ownership_digest": {
+            "type": "string"
+          },
+          "error_codes": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "effective_data_ownership": {
+            "const": null
+          },
+          "ownership_digest": {
+            "const": null
+          },
+          "error_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "DesktopAssistant-SafeShortcutRegistryContract-v1",
+  "fixed_internal_action_ids": [
+    "SHOW_DESKTOP_ASSISTANT",
+    "OPEN_Desktop_MAIN",
+    "OPEN_DESKTOP_ASSISTANT_SETTINGS",
+    "HIDE_DESKTOP_ASSISTANT",
+    "OPEN_MESSAGE_DETAIL",
+    "RESTORE_DEFAULT_PLACEMENT"
+  ],
+  "free_form_arguments_allowed": false,
+  "shell_command_allowed": false,
+  "cmd_or_powershell_allowed": false,
+  "arbitrary_url_allowed": false,
+  "external_launch_enabled": false,
+  "system_autostart_allowed": false,
+  "global_hook_allowed": false,
+  "status": "CONSTRUCTION_A_INTERNAL_ONLY"
+}

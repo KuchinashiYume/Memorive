@@ -1,0 +1,26 @@
+{
+  "acceptance_verdict": "NOT_ASSESSED",
+  "d36_actions": 2,
+  "d36_events": 2,
+  "d36_identities": 3,
+  "d36_queries": 3,
+  "d36_receipts": 2,
+  "dpi_values": [
+    100,
+    125,
+    150,
+    200
+  ],
+  "faults": 7,
+  "sessions_actions": 17,
+  "sessions_source_elements": 245,
+  "sessions_states": 13,
+  "real_source_channels_assessed": 0,
+  "required_changed_pixels": 0,
+  "required_sources": 5,
+  "schema_version": "SessionsSessionAcceptanceDenominator-v1",
+  "status": "FROZEN",
+  "synthetic_catalog_records": 5,
+  "visual_case_count": 56,
+  "visual_cases_per_dpi": 14
+}

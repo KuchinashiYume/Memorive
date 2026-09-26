@@ -1,0 +1,70 @@
+---
+template_id: Memorive-RESEARCH-HANDOFF-CROSS-CUSTOM-TOPIC-ANALYSIS-REQUEST
+template_revision: r1.0
+request_id: "{{request_id}}"
+request_kind: "{{custom_question | topic_analysis}}"
+request_status: "{{draft | frozen | superseded}}"
+created_at: "{{created_at}}"
+requester: "{{requester}}"
+---
+
+# 自定义问题 / 专题分析任务单
+
+> 仅在用户提出自定义问题或专题分析时建立。常规单篇 Card + Analysis 不创建本文件。
+
+## 0. 问题与用途
+
+- 核心问题：{{primary_question}}
+- 使用目的：{{intended_use}}
+- 需要支持的用户判断：{{decision_to_support}}
+- 明确不由系统代做的判断：{{prohibited_final_judgment}}
+- 展示语言：{{display_language}}
+- 原文分析语言：{{source_language}}
+
+## 1. 纳入范围
+
+- 主题：{{topic_scope}}
+- paper_id / Card / Analysis：{{included_artifact_refs}}
+- 时间范围：{{time_scope}}
+- 允许的数据状态：{{allowed_states}}
+
+## 2. 排除范围
+
+{{explicit_exclusions}}
+
+## 3. 输入快照与权属
+
+- input_snapshot_id：{{input_snapshot_id}}
+- input_manifest_sha256：{{input_manifest_sha256}}
+- data_ownership：{{self | entrusted}}
+- provider_visibility：{{provider_visibility}}
+- 已知输入缺口：{{known_missing_inputs | NONE}}
+
+## 4. 分析要求
+
+- 必查分面：{{required_facets}}
+- 必须保留的限定语或边界：{{qualifier_requirements}}
+- 必须检查的反例或替代解释：{{counterevidence_requirements}}
+- 输出结构：{{output_contract}}
+- 禁止输出：科研价值总分、赢家、未经来源支持的事实、替用户作出的最终结论。
+
+## 5. 停止条件
+
+- 输入 manifest 不匹配；
+- 关键来源、权属或可见范围不清楚；
+- 问题或纳入范围发生实质漂移；
+- 所需外部调用无法生成合规逐调用回执；
+- 当前证据只能给出 `coverage_limited` 或 `NOT_ASSESSED`。
+
+## 6. 冻结封印
+
+- request_revision：{{request_revision}}
+- request_content_sha256：{{request_content_sha256}}
+- frozen_at：{{frozen_at}}
+- supersedes_request_id：{{supersedes_request_id | NONE}}
+- user_authority_ref：{{user_authority_ref}}
+
+## 7. 执行边界
+
+- 本文件不自动触发模型调用、状态迁移、ARTIFACT_REGISTRY 注册、生产写入或激活。
+- 当前实现不提供自动 loader；执行者必须显式核对冻结字段并绑定到实际 run。

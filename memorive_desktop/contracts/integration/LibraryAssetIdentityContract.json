@@ -1,0 +1,13 @@
+{
+  "artifact_id_unique": true,
+  "display_name_unique": false,
+  "fuzzy_identity_binding": false,
+  "identity_fields": [
+    "artifact_id",
+    "view_snapshot_id",
+    "stable_locator"
+  ],
+  "schema_version": "LibraryLibraryAssetIdentityContract-v1",
+  "status": "PASS",
+  "synthetic_only": true
+}

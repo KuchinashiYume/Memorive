@@ -1,0 +1,38 @@
+{
+  "schema_version": "DesktopReleaseIdentityBinding-v1",
+  "profile_document_id": "memorive.product.identity",
+  "profile_revision": "1.1",
+  "profile_sha256": "989ded15c96014bf0317dfe086cb314af5d9e5414e22a9b9ff9f975cc7fda954",
+  "canonical_profile": "brand_profile.json",
+  "package_id": "v1.01",
+  "release_version": "1.01",
+  "channel": "SANDBOX_TEST_ONLY_UNSIGNED",
+  "arch": "x64",
+  "main_executable": "Memorive.exe",
+  "first_party_exe_inventory": [
+    "Memorive.exe"
+  ],
+  "authorization_locator": "local-source-candidate",
+  "source_exact_set_locator": "SOURCE_REVIEW_MANIFEST.json",
+  "compatibility": {
+    "data_subdirectory": "Memorive/desktop-review",
+    "credential_family": "Memorive",
+    "schema_and_env_unchanged": false,
+    "aumid": "Memorive.Desktop",
+    "production_installation_family": "UNRESOLVED",
+    "migration_performed": false,
+    "private_test_profile_schema": 1,
+    "private_test_profile_isolated_by_package": true,
+    "legacy_profile_auto_mounted": false,
+    "explicit_profile_migration_supported": true
+  },
+  "release_authorized": false,
+  "acceptance_verdict": "NOT_ASSESSED",
+  "display_version": "v1.01",
+  "windows_fixed_version": [
+    1,
+    1,
+    0,
+    0
+  ]
+}

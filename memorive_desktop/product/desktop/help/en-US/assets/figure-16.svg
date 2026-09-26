@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="260" viewBox="0 0 1180 260">
+<rect width="1180" height="260" rx="18" fill="#f4f0e8"/>
+<text x="28" y="42" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#574436">Research reports</text>
+<rect x="28" y="82" width="204" height="116" rx="14" fill="#fffdf8" stroke="#cbbfad" stroke-width="2"/>
+<text x="130" y="127.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">Research</text>
+<text x="130" y="157.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">events</text>
+<path d="M237 140 L250 140 M245 134 L252 140 L245 146" fill="none" stroke="#946347" stroke-width="3"/>
+<rect x="258" y="82" width="204" height="116" rx="14" fill="#fffdf8" stroke="#cbbfad" stroke-width="2"/>
+<text x="360" y="127.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">Group by</text>
+<text x="360" y="157.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">period</text>
+<path d="M467 140 L480 140 M475 134 L482 140 L475 146" fill="none" stroke="#946347" stroke-width="3"/>
+<rect x="488" y="82" width="204" height="116" rx="14" fill="#fffdf8" stroke="#cbbfad" stroke-width="2"/>
+<text x="590" y="142.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">Link sources</text>
+<path d="M697 140 L710 140 M705 134 L712 140 L705 146" fill="none" stroke="#946347" stroke-width="3"/>
+<rect x="718" y="82" width="204" height="116" rx="14" fill="#fffdf8" stroke="#cbbfad" stroke-width="2"/>
+<text x="820" y="127.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">List next</text>
+<text x="820" y="157.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">actions</text>
+<path d="M927 140 L940 140 M935 134 L942 140 L935 146" fill="none" stroke="#946347" stroke-width="3"/>
+<rect x="948" y="82" width="204" height="116" rx="14" fill="#fffdf8" stroke="#cbbfad" stroke-width="2"/>
+<text x="1050" y="127.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">Periodic</text>
+<text x="1050" y="157.0" text-anchor="middle" font-family="Arial,SimHei,Yu Gothic,sans-serif" font-size="25" fill="#342f28">reports</text>
+</svg>

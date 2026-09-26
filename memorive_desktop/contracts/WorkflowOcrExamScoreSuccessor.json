@@ -1,0 +1,101 @@
+{
+  "schema_version": "WorkflowOcrExamScoreSuccessor-v3",
+  "status": "SANDBOX_CANDIDATE",
+  "scoring_projection_revision": "Desktop_OCR_WORKFLOW_POSITION_RECOVERABILITY_V3",
+  "workflow_position": {
+    "node_id": "ingest",
+    "role_id": "OCR_PAGE",
+    "default_role": "PAGE_LEVEL_RESCUE_AND_DUAL_PATH_CHECK",
+    "not_a_final_scientific_judgment": true,
+    "normal_digital_page_primary": "LOCAL_TEXT_EXTRACTION",
+    "ocr_candidate_scope": [
+      "SCANNED_OR_EMPTY_PAGE",
+      "CORRUPT_TEXT_PAGE",
+      "COMPLEX_VISUAL_PAGE",
+      "CONTROLLED_DUAL_PATH_CHECK"
+    ],
+    "downstream_release_must_preserve_page_anchors": true
+  },
+  "score_axes": {
+    "first_pass_score": {
+      "kind": "MEASURED",
+      "meaning": "Frozen provider output before workflow recovery.",
+      "may_receive_unverified_recovery_credit": false
+    },
+    "deterministic_postprocess_score": {
+      "kind": "MEASURED",
+      "meaning": "Gold-free, semantics-preserving cleanup of presentation syntax only.",
+      "allowed_operations": [
+        "OUTER_MARKDOWN_FENCE_REMOVAL",
+        "MARKDOWN_CONTROL_LINE_REMOVAL",
+        "HTML_BR_TO_LINE_BREAK",
+        "NARROW_LATEX_TO_UNICODE_CANONICALIZATION",
+        "SCAN_INTRODUCED_HYPHEN_SPACE_NORMALIZATION"
+      ],
+      "forbidden_operations": [
+        "INFER_MISSING_TEXT",
+        "CORRECT_VALUE_SIGN_OR_UNIT",
+        "USE_GOLD_TO_GENERATE_CONTENT"
+      ]
+    },
+    "verified_recovery_score": {
+      "kind": "MEASURED_ONLY_WHEN_PRESENT",
+      "default": null,
+      "meaning": "A new frozen page-recovery output scored locally after a production-detectable recovery trigger.",
+      "required_before_credit": [
+        "NEW_OUTPUT_FROZEN",
+        "NO_GOLD_SENT_TO_MODEL",
+        "RECOVERY_ROUTE_AND_ATTEMPT_BOUND",
+        "LOCAL_SCORER_PASS"
+      ]
+    },
+    "unverified_recovery_ceiling": {
+      "kind": "COUNTERFACTUAL_UPPER_BOUND",
+      "meaning": "Maximum score if every coverage-only case were fully recovered.",
+      "is_achieved_score": false,
+      "cache_as_valid_score": false,
+      "display_requirement": "MUST_BE_LABELLED_UNVERIFIED_CEILING"
+    }
+  },
+  "residual_policy": {
+    "presentation": {
+      "workflow_action": "DETERMINISTIC_NORMALIZATION",
+      "blocks_release_after_successful_normalization": false
+    },
+    "coverage": {
+      "workflow_action": "BOUNDED_PAGE_RECOVERY",
+      "blocks_release_until_verified": true,
+      "eligible_for_unverified_ceiling_only": true
+    },
+    "structural": {
+      "workflow_action": "SOURCE_STRUCTURE_REVIEW",
+      "blocks_release_until_reviewed": true,
+      "eligible_for_automatic_recovery_credit": false
+    },
+    "material_safety": {
+      "workflow_action": "SOURCE_COMPARISON_GUARD",
+      "blocks_release_until_reviewed": true,
+      "eligible_for_automatic_recovery_credit": false
+    }
+  },
+  "workflow_dispositions": [
+    "READY",
+    "READY_AFTER_DETERMINISTIC_NORMALIZATION",
+    "PAGE_RECOVERY_REQUIRED_BEFORE_RELEASE",
+    "STRUCTURE_REVIEW_REQUIRED_BEFORE_RELEASE",
+    "SOURCE_COMPARISON_REQUIRED_BEFORE_RELEASE",
+    "DIAGNOSTIC_ONLY",
+    "MODEL_FAIL_ESTABLISHED"
+  ],
+  "model_fail_proof_rule": "deterministic_score_below_60_and_two_distinct_material_cases_or_three_generation_repeat_material_failure",
+  "downstream_repair_boundary": {
+    "card_or_analysis_may_detect_a_problem": true,
+    "card_or_analysis_detection_counts_as_verified_ocr_recovery": false,
+    "reason": "Downstream semantic review cannot reconstruct omitted source text or safely reverse a plausible silent numeric correction without source-bound evidence."
+  },
+  "comparison_policy": {
+    "same_category_cohort_scorer_and_identity_binding_only": true,
+    "cross_category_comparison_forbidden": true,
+    "global_ranking_forbidden": true
+  }
+}

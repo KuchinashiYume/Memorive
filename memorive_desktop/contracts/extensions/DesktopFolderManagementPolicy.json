@@ -1,0 +1,194 @@
+{
+  "schema_version": "DesktopFolderManagementPolicy-v1",
+  "policy_id": "Memorive-Desktop-FOLDER-MANAGEMENT",
+  "revision": "r1.0",
+  "effective_from_version": "1.01",
+  "authority_scope": {
+    "decision_source": "user_instructions_instruction",
+    "project_rules": [
+      "Memorive_SHARED_文件命名与阶段标识规则_r2.2",
+      "Memorive_SHARED_文件落点与目录创建规则_r1.6",
+      "Memorive_SHARED_资产归档隔离与删除规则_r1.2"
+    ],
+    "core_naming_implementation": "document_processing.naming"
+  },
+  "deletion_policy": "NEVER_AUTOMATIC",
+  "settings_policy": {
+    "protected_logical_directories": [
+      "SETTINGS",
+      "UI_STATE"
+    ],
+    "mutation_during_reorganization": "FORBIDDEN",
+    "migration_requires_explicit_schema_migrator": true,
+    "hash_before_after_required": true
+  },
+  "development_custody": {
+    "source_authority": "Memorive_SHARED_文件落点与目录创建规则_r1.6",
+    "portable_symbols_only": true,
+    "roots": [
+      {
+        "root_id": "REPOSITORY_ROOT",
+        "symbol": "<MEMORIVE_REPOSITORY_ROOT>",
+        "purpose": "versioned_code_contract_design_test_audit"
+      },
+      {
+        "root_id": "SANDBOX_ROOT",
+        "symbol": "<MEMORIVE_SANDBOX_ROOT>",
+        "purpose": "isolated_runs_and_frozen_evidence"
+      },
+      {
+        "root_id": "OPERATIONS_ROOT",
+        "symbol": "<MEMORIVE_OPERATIONS_ROOT>",
+        "purpose": "logs_cache_reports_and_operational_state"
+      },
+      {
+        "root_id": "ASCII_NATIVE_ROOT",
+        "symbol": "<MEMORIVE_ASCII_NATIVE_ROOT>",
+        "purpose": "ascii_path_sensitive_vector_and_native_assets"
+      }
+    ],
+    "unknown_top_level_directory": "FAIL_CLOSED",
+    "new_directory_requires_unique_long_lived_purpose": true,
+    "frozen_evidence_relocation": "FORBIDDEN"
+  },
+  "product_directory_roles": [
+    {
+      "role_id": "PROGRAM_ROOT",
+      "mutability": "READ_ONLY_AFTER_PACKAGE",
+      "persistence": "REPLACEABLE_BY_BUILD",
+      "owner": "packager"
+    },
+    {
+      "role_id": "CONFIG_ROOT",
+      "mutability": "SCHEMA_MIGRATOR_ONLY",
+      "persistence": "PERSISTENT",
+      "owner": "settings_service"
+    },
+    {
+      "role_id": "USER_DATA_ROOT",
+      "mutability": "CONTROLLED_WRITER",
+      "persistence": "PERSISTENT",
+      "owner": "application_service"
+    },
+    {
+      "role_id": "CACHE_ROOT",
+      "mutability": "CONTROLLED_WRITER",
+      "persistence": "REBUILDABLE",
+      "owner": "runtime"
+    },
+    {
+      "role_id": "LOG_ROOT",
+      "mutability": "APPEND_ONLY_OR_ROTATED",
+      "persistence": "PERSISTENT",
+      "owner": "logging_service"
+    },
+    {
+      "role_id": "JOB_TEMP_ROOT",
+      "mutability": "JOB_SINGLE_WRITER",
+      "persistence": "RECOVERABLE_TEMPORARY",
+      "owner": "job_worker"
+    },
+    {
+      "role_id": "VECTOR_STORE_ROOT",
+      "mutability": "SINGLE_WRITER_LOCKED",
+      "persistence": "PERSISTENT",
+      "owner": "embedding_runtime"
+    },
+    {
+      "role_id": "MODEL_STORE_ROOT",
+      "mutability": "MODEL_MANAGER_ONLY",
+      "persistence": "PERSISTENT",
+      "owner": "local_model_manager"
+    },
+    {
+      "role_id": "BACKUP_STAGING_ROOT",
+      "mutability": "MIGRATOR_ONLY",
+      "persistence": "RECOVERABLE_TEMPORARY",
+      "owner": "migration_service"
+    }
+  ],
+  "profile_directories": {
+    "ARTIFACTS": "artifacts",
+    "BROWSER_COMPANION": "browser_companion",
+    "INBOX": "inbox",
+    "INBOX_SOURCE": "inbox_source",
+    "MODEL_VALIDATION": "model_validation",
+    "Core_JOBS": "core_jobs",
+    "Core_RUNTIME": "core_runtime",
+    "Core_TASK_CONTROLS": "core_task_controls",
+    "SERVICE": "service",
+    "SETTINGS": "settings",
+    "UI_STATE": "ui",
+    "WORKSPACE": "workspace"
+  },
+  "document_artifacts": {
+    "layout": "ONE_PAPER_ONE_FOLDER_FLAT",
+    "naming_authority": "document_processing.naming",
+    "paper_id_policy": {
+      "preferred": "Core_CONFIRMED_SURNAME_YEAR_SUFFIX",
+      "unconfirmed_fallback_template": "DOC_{source_sha256_first_16_uppercase}",
+      "fallback_is_stable_not_bibliographic": true,
+      "phase_task_package_identifiers_forbidden": true,
+      "later_metadata_migration_requires_registry_and_binding_update": true
+    },
+    "folder_template": "[{paper_id}] {display_title}",
+    "file_template": "[{kind}][{paper_id}] {display_title}.{extension}",
+    "allowed_kinds": {
+      "PDF": "pdf",
+      "RawMD": "md",
+      "CleanMD": "md",
+      "Chunks": "jsonl",
+      "Card": "md",
+      "ContextPack": "json",
+      "Analysis": "md",
+      "Judgment": "json",
+      "HumanReview": "md",
+      "FolderManifest": "json"
+    },
+    "generic_stage_subdirectories_forbidden": [
+      "analysis",
+      "card",
+      "context",
+      "document",
+      "review",
+      "verification"
+    ],
+    "legacy_layout": {
+      "read_compatible": true,
+      "new_writes_forbidden": true,
+      "automatic_delete": false,
+      "automatic_move": false,
+      "migration_requires_inventory_hash_and_binding_update": true
+    },
+    "sort_order": "DOCUMENT_FOLDER_DISPLAY_TITLE_ORDINAL_THEN_KIND_ORDER",
+    "kind_order": [
+      "PDF",
+      "RawMD",
+      "CleanMD",
+      "Chunks",
+      "Card",
+      "ContextPack",
+      "Analysis",
+      "Judgment",
+      "HumanReview",
+      "FolderManifest"
+    ]
+  },
+  "build_outputs": {
+    "package_id_pattern": "^v[0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9a-f]{12})?$",
+    "revision_suffix_forbidden": true,
+    "current_and_previous_visible": 2,
+    "older_builds": "INDEXED_LEGACY_EVIDENCE_IN_PLACE",
+    "automatic_delete": false,
+    "automatic_move_of_frozen_evidence": false,
+    "next_build_must_load_this_policy": true,
+    "package_receipt_must_bind_policy_hash": true
+  },
+  "write_rules": {
+    "unknown_artifact_kind": "FAIL_CLOSED",
+    "path_traversal": "FAIL_CLOSED",
+    "overwrite_different_content": "ATOMIC_REPLACE_BY_OWNER_ONLY",
+    "new_top_level_directory": "POLICY_REVISION_REQUIRED",
+    "reorganization": "INVENTORY_HASH_MOVE_VERIFY_NO_DELETE"
+  }
+}

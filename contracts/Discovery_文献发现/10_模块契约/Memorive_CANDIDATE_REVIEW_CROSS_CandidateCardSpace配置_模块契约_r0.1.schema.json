@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:candidate-card-space-config:r0.1",
+  "title": "Memorive CANDIDATE-REVIEW CandidateCardSpace Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "logical_owner",
+    "production_file_root_locator",
+    "production_index_root_locator",
+    "production_index_namespace",
+    "environment_variable_names",
+    "production_creation_state",
+    "creation_authority",
+    "runtime_contents_git_policy",
+    "reader_policy",
+    "storage_layout",
+    "index_policy",
+    "retention_policy",
+    "rejected_snoozed_failed_policy",
+    "post_promotion_policy",
+    "retrieval_a_b_effect"
+  ],
+  "properties": {
+    "logical_owner": {
+      "const": "CANDIDATE_REVIEW.CANDIDATE_CARD_BUNDLE_WRITER"
+    },
+    "production_file_root_locator": {
+      "const": "G:\\Memorive-运维\\候选卡片空间"
+    },
+    "production_index_root_locator": {
+      "const": "G:\\Memorive-ops\\vector-store\\discovery-candidate-card-space-v1"
+    },
+    "production_index_namespace": {
+      "const": "memorive_discovery_candidate_cards_v1"
+    },
+    "environment_variable_names": {
+      "const": [
+        "MEMORIVE_Discovery_CANDIDATE_ROOT",
+        "MEMORIVE_Discovery_CANDIDATE_INDEX_ROOT",
+        "MEMORIVE_Discovery_CANDIDATE_COLLECTION"
+      ]
+    },
+    "production_creation_state": {
+      "const": "LOCATOR_APPROVED_NOT_CREATED"
+    },
+    "creation_authority": {
+      "const": "SEPARATE_CONTROLLED_ACTIVATION_REQUIRED"
+    },
+    "runtime_contents_git_policy": {
+      "const": "PERMANENTLY_FORBIDDEN"
+    },
+    "reader_policy": {
+      "const": "DEFAULT_DENY_EXCEPT_Retrieval_WRITER_AND_FUTURE_EXACT_Analysis_PROMOTION_WRITER"
+    },
+    "storage_layout": {
+      "const": [
+        "source/<candidate_id>/<source_revision>/",
+        "document_processing/<candidate_id>/<materialization_revision>/",
+        "cards/<candidate_id>/<card_revision>/",
+        "receipts/<candidate_id>/"
+      ]
+    },
+    "index_policy": {
+      "const": "SEPARATE_FROM_MEMORIVE_SANDBOX_AND_MEMORIVE_MAIN; Retrieval_A_B_USE_RUN_LOCAL_DETERMINISTIC_JSON_ONLY"
+    },
+    "retention_policy": {
+      "const": "RETAIN_UNTIL_EXPLICIT_DISPOSITION; NO_DATE_BASED_AUTOMATIC_DELETE"
+    },
+    "rejected_snoozed_failed_policy": {
+      "const": "SEAL_HISTORY_AND_REQUIRE_SEPARATE_BATCH_ID_FOR_QUARANTINE_OR_DELETE"
+    },
+    "post_promotion_policy": {
+      "const": "NO_AUTOMATIC_DELETE; KEEP_MANIFEST_AND_RECEIPTS; PAYLOAD_DISPOSITION_SEPARATELY_AUTHORIZED"
+    },
+    "retrieval_a_b_effect": {
+      "const": "ZERO_PRODUCTION_READS_AND_WRITES; USE_SANDBOX_SHADOW_MIRROR_ONLY"
+    }
+  }
+}

@@ -1,9 +1,0 @@
-{
-  "fuzzy_match_allowed": false,
-  "locator_prefix": "pr-os://artifact/",
-  "missing_behavior": "FAIL_CLOSED_VISIBLE",
-  "moved_behavior": "STALE_LOCATOR_VISIBLE_NO_AUTO_REBIND",
-  "orphan_behavior": "ORPHAN_VISIBLE_NO_AUTO_PARENT",
-  "schema_version": "P08T09LibraryLocatorFallbackContract-v1",
-  "status": "PASS"
-}

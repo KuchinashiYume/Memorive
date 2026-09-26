@@ -1,0 +1,21 @@
+{
+  "schema_version": "MemoriveBrandProfile-v1",
+  "document_id": "memorive.product.identity",
+  "revision": "1.1",
+  "product": {
+    "name": "Memorive",
+    "short_name": "memo",
+    "main_executable": "Memorive.exe",
+    "main_pe_product_name": "Memorive",
+    "main_pe_file_description": "Memorive",
+    "main_pe_original_filename": "Memorive.exe"
+  },
+  "artifact_naming": {
+    "installer": "Memorive-Setup-{release_version}-{arch}.exe",
+    "third_party_preserve_vendor_name_and_signature": true
+  },
+  "code_license": "AGPL-3.0-only",
+  "artwork_notice": "ASSET_NOTICE.md",
+  "release_authorized": false,
+  "distribution_status": "PRIVATE_PREVIEW"
+}
