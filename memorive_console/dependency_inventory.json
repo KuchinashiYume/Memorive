@@ -1,0 +1,152 @@
+{
+  "scope": "Console packaging environment; not every build tool is included in the executable",
+  "python": "3.13.14",
+  "dependencies": [
+    {
+      "name": "altgraph",
+      "version": "0.17.5",
+      "license": "MIT",
+      "files": [
+        "licenses/altgraph/altgraph-0.17.5.dist-info/LICENSE"
+      ]
+    },
+    {
+      "name": "bottle",
+      "version": "0.13.4",
+      "license": "MIT",
+      "files": [
+        "licenses/bottle/bottle-0.13.4.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "cffi",
+      "version": "2.1.1",
+      "license": "MIT-0",
+      "files": [
+        "licenses/cffi/cffi-2.1.1.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "clr_loader",
+      "version": "0.2.10",
+      "license": "MIT",
+      "files": [
+        "licenses/clr_loader/000-LICENSE"
+      ]
+    },
+    {
+      "name": "packaging",
+      "version": "26.3",
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "files": [
+        "licenses/packaging/packaging-26.3.dist-info/licenses/LICENSE",
+        "licenses/packaging/packaging-26.3.dist-info/licenses/LICENSE.APACHE",
+        "licenses/packaging/packaging-26.3.dist-info/licenses/LICENSE.BSD"
+      ]
+    },
+    {
+      "name": "pefile",
+      "version": "2023.2.7",
+      "license": "MIT",
+      "files": [
+        "licenses/pefile/pefile-2023.2.7.dist-info/LICENSE"
+      ]
+    },
+    {
+      "name": "pillow",
+      "version": "11.3.0",
+      "license": "MIT-CMU",
+      "files": [
+        "licenses/pillow/pillow-11.3.0.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "proxy_tools",
+      "version": "0.1.0",
+      "license": "MIT",
+      "files": [
+        "licenses/proxy_tools/LICENSE.txt"
+      ]
+    },
+    {
+      "name": "pycparser",
+      "version": "3.0",
+      "license": "BSD-3-Clause",
+      "files": [
+        "licenses/pycparser/pycparser-3.0.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "pyinstaller",
+      "version": "6.16.0",
+      "license": "See included license (including exceptions)",
+      "files": [
+        "licenses/pyinstaller/pyinstaller-6.16.0.dist-info/licenses/COPYING.txt"
+      ]
+    },
+    {
+      "name": "pyinstaller-hooks-contrib",
+      "version": "2026.7",
+      "license": "See included license",
+      "files": [
+        "licenses/pyinstaller-hooks-contrib/pyinstaller_hooks_contrib-2026.7.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "pythonnet",
+      "version": "3.0.5",
+      "license": "MIT",
+      "files": [
+        "licenses/pythonnet/000-LICENSE"
+      ]
+    },
+    {
+      "name": "pywebview",
+      "version": "6.2.1",
+      "license": "See included license (including exceptions)",
+      "files": [
+        "licenses/pywebview/pywebview-6.2.1.dist-info/licenses/LICENSE"
+      ]
+    },
+    {
+      "name": "pywin32-ctypes",
+      "version": "0.2.3",
+      "license": "BSD-3-Clause",
+      "files": [
+        "licenses/pywin32-ctypes/pywin32_ctypes-0.2.3.dist-info/LICENSE.txt"
+      ]
+    },
+    {
+      "name": "setuptools",
+      "version": "84.0.0",
+      "license": "MIT",
+      "files": [
+        "licenses/setuptools/setuptools-84.0.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/autocommand-2.2.2.dist-info/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/backports.tarfile-1.2.0.dist-info/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/importlib_metadata-8.7.1.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/jaraco.text-4.0.0.dist-info/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/jaraco_context-6.1.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/jaraco_functools-4.4.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/more_itertools-10.8.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE.APACHE",
+        "licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE.BSD",
+        "licenses/setuptools/setuptools/_vendor/platformdirs-4.4.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/tomli-2.4.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/_vendor/wheel-0.46.3.dist-info/licenses/LICENSE.txt",
+        "licenses/setuptools/setuptools/_vendor/zipp-3.23.0.dist-info/licenses/LICENSE",
+        "licenses/setuptools/setuptools/config/NOTICE",
+        "licenses/setuptools/setuptools/config/_validate_pyproject/NOTICE"
+      ]
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "license": "PSF-2.0",
+      "files": [
+        "licenses/typing_extensions/typing_extensions-4.16.0.dist-info/licenses/LICENSE"
+      ]
+    }
+  ]
+}

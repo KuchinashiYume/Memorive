@@ -1,0 +1,9 @@
+/build/
+/dist/
+/output/
+/evidence/
+/runtime/
+/source/sessions/
+/source/owned_sessions/
+/source/ui_profiles/
+/source/receipts/

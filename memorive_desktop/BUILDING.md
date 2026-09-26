@@ -53,3 +53,7 @@ The repository and release remain private/draft during this revision. The instal
 ## Companion packages
 
 The application build also creates `dist/Memorive/integrations/`, including the Obsidian plugin, Zotero XPI, SDKs and skills. Package them separately with `python memorive_desktop/tools/package_companions.py --output <new directory>`. The source manifest binds these inputs; no host profile or user data is read.
+
+## Offline fixture vector compatibility
+
+The deterministic, model-free fixture embedder now identifies itself as `fixture-hash-vector-v2` after removing an internal label from its domain separator. Older offline fixture vectors must be regenerated with the new profile; the validator rejects the older model identifier instead of silently mixing vector spaces. This does not change provider-backed embeddings or migrate a user's library automatically.

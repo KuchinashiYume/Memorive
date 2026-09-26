@@ -1,0 +1,1019 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:test-console:bridge:1.0",
+  "title": "Memorive Independent Test Console Bridge v1.0",
+  "description": "Implemented console contract. Future Memorive builds implement MEMORIVE_BUILD; reference peer is never product acceptance.",
+  "$defs": {
+    "buildManifest": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "protocol_version",
+        "build_id",
+        "launch_transport",
+        "session_mode"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "Memorive-ConsoleBuildCapabilities-v1"
+        },
+        "protocol_version": {
+          "const": "1.0"
+        },
+        "build_id": {
+          "type": "string"
+        },
+        "launch_transport": {
+          "const": "ENV_V1"
+        },
+        "session_mode": {
+          "const": "EPHEMERAL_ONLY"
+        }
+      },
+      "additionalProperties": false
+    },
+    "descriptor": {
+      "type": "object",
+      "required": [
+        "protocol_version",
+        "host",
+        "port",
+        "session_id",
+        "pid",
+        "implementation_kind",
+        "secret_value_recorded"
+      ],
+      "properties": {
+        "protocol_version": {
+          "const": "1.0"
+        },
+        "host": {
+          "const": "127.0.0.1"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "implementation_kind": {
+          "enum": [
+            "MEMORIVE_BUILD",
+            "REFERENCE_BRIDGE"
+          ]
+        },
+        "secret_value_recorded": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "sessionStart": {
+      "type": "object",
+      "required": [
+        "protocol_version",
+        "session_id",
+        "data_root",
+        "build_sha256",
+        "automatic_execution",
+        "close_policy"
+      ],
+      "properties": {
+        "protocol_version": {
+          "const": "1.0"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "data_root": {
+          "type": "string"
+        },
+        "build_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "automatic_execution": {
+          "const": false
+        },
+        "close_policy": {
+          "const": "DISCARD_ON_CLOSE"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sessionReady": {
+      "type": "object",
+      "required": [
+        "protocol_version",
+        "session_id",
+        "state",
+        "implementation_kind",
+        "build_sha256",
+        "data_root",
+        "automatic_execution",
+        "automatic_execution_locked",
+        "all_writes_inside_data_root",
+        "cleanup_supported",
+        "operations",
+        "console_access_required",
+        "console_access_enabled"
+      ],
+      "properties": {
+        "protocol_version": {
+          "const": "1.0"
+        },
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "state": {
+          "const": "READY"
+        },
+        "implementation_kind": {
+          "enum": [
+            "MEMORIVE_BUILD",
+            "REFERENCE_BRIDGE"
+          ]
+        },
+        "build_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "data_root": {
+          "type": "string"
+        },
+        "automatic_execution": {
+          "type": "boolean",
+          "const": false
+        },
+        "automatic_execution_locked": {
+          "type": "boolean",
+          "const": true
+        },
+        "all_writes_inside_data_root": {
+          "type": "boolean",
+          "const": true
+        },
+        "cleanup_supported": {
+          "type": "boolean",
+          "const": true
+        },
+        "operations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "message.test",
+              "event.inject",
+              "report.run",
+              "discovery.recommend",
+              "inbox.import",
+              "inbox.dispatch",
+              "task.pause",
+              "task.resume",
+              "task.cancel",
+              "task.retry",
+              "message.confirm",
+              "message.star",
+              "diagnostics",
+              "expression.trigger",
+              "expression.cancel",
+              "research.qa.simulate"
+            ]
+          }
+        },
+        "console_access_required": {
+          "type": "boolean"
+        },
+        "console_access_enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "command": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "request_id",
+        "operation",
+        "params",
+        "allow_model_calls"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+        },
+        "operation": {
+          "enum": [
+            "message.test",
+            "event.inject",
+            "report.run",
+            "discovery.recommend",
+            "inbox.import",
+            "inbox.dispatch",
+            "task.pause",
+            "task.resume",
+            "task.cancel",
+            "task.retry",
+            "message.confirm",
+            "message.star",
+            "diagnostics",
+            "expression.trigger",
+            "expression.cancel",
+            "research.qa.simulate"
+          ]
+        },
+        "params": {
+          "type": "object"
+        },
+        "allow_model_calls": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "message.test"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "title",
+                  "body"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "info",
+                      "success",
+                      "warning",
+                      "error",
+                      "daily",
+                      "weekly",
+                      "monthly",
+                      "report_failed",
+                      "discovery",
+                      "imported",
+                      "review",
+                      "cancelled",
+                      "stalled",
+                      "target_missing"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 180
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 3500
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "event.inject"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "event",
+                  "note"
+                ],
+                "properties": {
+                  "event": {
+                    "enum": [
+                      "import",
+                      "complete",
+                      "fail",
+                      "review",
+                      "cancel",
+                      "stall"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 3500
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "report.run"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "period"
+                ],
+                "properties": {
+                  "period": {
+                    "enum": [
+                      "daily",
+                      "weekly",
+                      "monthly"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "discovery.recommend"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "topic",
+                  "count"
+                ],
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 3500
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "inbox.import"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "paths"
+                ],
+                "properties": {
+                  "paths": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 32,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "inbox.dispatch"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "item_id"
+                ],
+                "properties": {
+                  "item_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "task.pause"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "task.resume"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "task.cancel"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "task.retry"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "job_id"
+                ],
+                "properties": {
+                  "job_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "message.confirm"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "message_id"
+                ],
+                "properties": {
+                  "message_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "message.star"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "message_id"
+                ],
+                "properties": {
+                  "message_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "diagnostics"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [],
+                "properties": {},
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "discovery.recommend",
+                  "inbox.dispatch",
+                  "task.resume",
+                  "task.retry"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "allow_model_calls": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "expression.trigger"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "event_id",
+                  "duration_ms"
+                ],
+                "properties": {
+                  "event_id": {
+                    "type": "string",
+                    "pattern": "^(?:asset|frame|motion|animation)\\.[a-z][a-z0-9-]*$"
+                  },
+                  "duration_ms": {
+                    "type": "integer",
+                    "minimum": 500,
+                    "maximum": 5000
+                  }
+                },
+                "additionalProperties": false
+              },
+              "allow_model_calls": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "expression.cancel"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [],
+                "properties": {},
+                "additionalProperties": false
+              },
+              "allow_model_calls": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "research.qa.simulate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "type": "object",
+                "required": [
+                  "question",
+                  "answer",
+                  "citations"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 3500
+                  },
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 3500
+                  },
+                  "citations": {
+                    "type": "string",
+                    "maxLength": 3500
+                  }
+                },
+                "additionalProperties": false
+              },
+              "allow_model_calls": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "commandReceipt": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "request_id",
+        "command_id",
+        "state"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+        },
+        "command_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$"
+        },
+        "state": {
+          "enum": [
+            "QUEUED",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELLED"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "observed_at",
+        "automatic_execution",
+        "automatic_execution_locked",
+        "messages",
+        "reports",
+        "jobs",
+        "inbox"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "observed_at": {
+          "type": "string"
+        },
+        "automatic_execution": {
+          "type": "boolean",
+          "const": false
+        },
+        "automatic_execution_locked": {
+          "type": "boolean",
+          "const": true
+        },
+        "messages": {
+          "type": "array"
+        },
+        "reports": {
+          "type": "array"
+        },
+        "jobs": {
+          "type": "array"
+        },
+        "inbox": {
+          "type": "array"
+        }
+      },
+      "additionalProperties": true
+    },
+    "eventBatch": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "events"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "required": [
+              "sequence",
+              "event_type",
+              "occurred_at"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "event_type": {
+                "type": "string"
+              },
+              "occurred_at": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "sessionEnd": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "close_policy"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "close_policy": {
+          "const": "DISCARD_ON_CLOSE"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sessionQuiesced": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "state",
+        "all_work_stopped"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "state": {
+          "const": "QUIESCED"
+        },
+        "all_work_stopped": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "expressionCatalog": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "schema_version",
+        "events",
+        "one_probe_at_a_time",
+        "model_calls_allowed",
+        "poll_interval_ms"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "schema_version": {
+          "const": "Memorive-ExpressionConsole-v1"
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "required": [
+              "event_id",
+              "group",
+              "animated",
+              "motion_ms"
+            ],
+            "properties": {
+              "event_id": {
+                "type": "string"
+              },
+              "group": {
+                "enum": [
+                  "static_asset",
+                  "native_pose",
+                  "native_animation",
+                  "web_animation"
+                ]
+              },
+              "animated": {
+                "type": "boolean"
+              },
+              "motion_ms": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "one_probe_at_a_time": {
+          "const": true
+        },
+        "model_calls_allowed": {
+          "const": false
+        },
+        "poll_interval_ms": {
+          "const": 250
+        }
+      },
+      "additionalProperties": true
+    },
+    "expressionState": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "schema_version",
+        "access_enabled",
+        "active",
+        "history",
+        "events",
+        "preview_only",
+        "business_event_injected"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^review-[0-9]{8}T[0-9]{6}-[a-f0-9]{12}$"
+        },
+        "schema_version": {
+          "const": "Memorive-ExpressionConsole-v1"
+        },
+        "access_enabled": {
+          "type": "boolean"
+        },
+        "active": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "history": {
+          "type": "array",
+          "maxItems": 64
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 128
+        },
+        "preview_only": {
+          "const": true
+        },
+        "business_event_injected": {
+          "const": false
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

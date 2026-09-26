@@ -2,7 +2,7 @@
 import re
 from urllib.parse import urlsplit
 
-def radar_markdown(topic, recommendations, failures):
+def discovery_markdown(topic, recommendations, failures):
     zh=bool(re.search(r'[\u3400-\u9fff]',topic))
     label=lambda cn,en:cn if zh else en
     lines=['# '+label('外部文献','External literature')+' · '+topic,'',

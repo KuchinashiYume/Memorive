@@ -1,0 +1,20 @@
+﻿Memorive 测试控制台 · 许可与隐私说明
+
+Memorive 鼓励使用者根据自己的学习与研究需求修改、扩展和优化项目。本工具提供临时测试、事件模拟与问题排查入口，帮助复现问题、检查功能行为并验证修改后的结果。测试结果仅反映所选版本、配置与场景的表现。
+
+自有代码：AGPL-3.0-only，完整文本见 LICENSE。第三方组件保留原许可。
+作者鼓励个人学习、研究与非商业使用；这是倡议，不限制代码许可证已授予的商业使用权。
+
+开发方式：项目代码由 OpenAI Codex 与 Anthropic Claude Code 生成、修改和迭代，项目发起者负责需求、设计与测试验收。
+
+图像：代码与角色素材分开声明，图像不纳入代码许可证。本控制台图标来自用户提供的 GRADIUS 插画（图片原署名 Pixiv: GRADIUS，X: @Riza2201），其处理副本并不因此取得原画或原角色权利。不得把该插画标成项目自有的 AI 原创图像。产品中预览的桌宠与表情由所连接的 Memorive 提供，按本体的角色素材声明处理。
+本项目为非官方项目，与 Nexon、Nexon Games、Yostar 无关联及直接官方授权关系。声明不是授权证明，不授予原角色权利；素材使用与分发适用官方规则及权利人条件。
+
+运行时：Windows 界面使用 pywebview 与 Microsoft WebView2。Evergreen Runtime 可能检查及安装更新；WebView2 默认启用的 Microsoft Defender SmartScreen 可能向 Microsoft 发送相关终端用户信息。相关处理遵循 Microsoft 隐私声明及组件自身条款，不适用本工具的代码许可证。本安装器不包含 WebView2 Runtime 安装程序。
+Microsoft 隐私声明：https://aka.ms/privacy
+WebView2 分发说明：https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution
+SmartScreen 说明：https://learn.microsoft.com/en-us/microsoft-edge/privacy-whitepaper#smartscreen
+
+测试数据：业务数据和复制的设置位于临时空间，结束会话或关闭窗口后清理。控制台保留不含业务正文的回执、诊断和审核索引，供后续排查；这不同于保留临时消息和报告。正式设置不被覆盖，收件箱自动执行保持关闭。
+
+此包是未签名的本地测试候选。此声明不代表已完成公开分发资格核验；不授权公开发布。

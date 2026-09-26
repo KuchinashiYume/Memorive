@@ -44,7 +44,8 @@ def deterministic_fixture_embedding(
         raise EmbeddingProfileError("fixture dimension must be an integer in [1, 65536]")
     if normalization not in {"none", "l2"}:
         raise EmbeddingProfileError("fixture normalization must be none or l2")
-    seed = b"Memorive:Research:T03:OFFLINE_FIXTURE_V1\x00" + text.encode("utf-8")
+    # The explicit fixture model version prevents mixing vectors from older seeds.
+    seed = b"Memorive:Research:OFFLINE_FIXTURE_V2\x00" + text.encode("utf-8")
     values: list[float] = []
     counter = 0
     while len(values) < dimension:

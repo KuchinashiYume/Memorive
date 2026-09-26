@@ -19,28 +19,28 @@
     },
     {
       "path": "LICENSING.md",
-      "sha256": "9fbf04760517b2c12284db7fa200c984bb118fd502f6d3858e0a9ccef6ae942b",
-      "bytes": 138
+      "sha256": "d626948c7cc9d3bfaa49c1fa92f1fc2fa7990916bbe3d03e82a96978a457e98b",
+      "bytes": 768
     },
     {
       "path": "README.en.md",
-      "sha256": "4095288bf703d682f4533b354adf5a4996f6b19b069dde10b9d78a1927e32f13",
-      "bytes": 10678
+      "sha256": "6f11b538e515dfd0f802cdcbb4f18afe1144d99ad42723a9cd9171b84514e1d5",
+      "bytes": 12177
     },
     {
       "path": "README.ja.md",
-      "sha256": "73055217a315a15b0a0a19fc413ca0f150710c90eab47143927b8765dc765740",
-      "bytes": 12533
+      "sha256": "8b073c9acb2c78adf94566b203b60e8e0b3303e158077bfa9a37c80b5fd770eb",
+      "bytes": 14279
     },
     {
       "path": "README.md",
-      "sha256": "7963ea7ef7f8fe600680280f70218d4e0e1453718d41857373399a8c1f485626",
-      "bytes": 9770
+      "sha256": "4dc64499bbdfdeb3fbda4d51dc646576176694bb2c95cdfd0bd00cdd2c0b649b",
+      "bytes": 11251
     },
     {
       "path": "SOURCE_VERSION.json",
-      "sha256": "db1f83ee5eb6dc3ca34d8b8dd4da31cedcb46d1f5d4e716b2db4f53b4c0f8a14",
-      "bytes": 831
+      "sha256": "27ba607611c839882c4eb5f0b0ecf4d55e792607f6491ed0ff36872b41df1acc",
+      "bytes": 935
     },
     {
       "path": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_BibliographicIdentity_模块契约_r0.1.schema.json",
@@ -483,6 +483,426 @@
       "bytes": 2263
     },
     {
+      "path": "memorive_console/.gitignore",
+      "sha256": "b83ea629b8377bcca58c29ec89eee4aad110cc2728a17e1ed11c149a83edb87b",
+      "bytes": 135
+    },
+    {
+      "path": "memorive_console/LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "bytes": 34523
+    },
+    {
+      "path": "memorive_console/NOTICE.txt",
+      "sha256": "c1ef43d041c5371a29ac33c7b63dd25fe036068bb16f0306ac55b37d9200ce57",
+      "bytes": 2403
+    },
+    {
+      "path": "memorive_console/README.en.md",
+      "sha256": "7d7637eb2696bd2d8cf47c30dbfa6be5c4ceac126298a269988ae3f792c63b97",
+      "bytes": 3292
+    },
+    {
+      "path": "memorive_console/README.ja.md",
+      "sha256": "fe4d4c38d8ffe7e4190a1db2c8689c806980c59bea41b6574c485398a5eba17e",
+      "bytes": 3835
+    },
+    {
+      "path": "memorive_console/README.md",
+      "sha256": "d2dbf107b8d141163c3ba95004dcbc51e44366c2a5ef10259f3baf4580d65948",
+      "bytes": 5724
+    },
+    {
+      "path": "memorive_console/README.txt",
+      "sha256": "68e6f67a431035d5b6b6c2fd8d2d4afd197782050018a1fcddb59af9be5becb5",
+      "bytes": 1258
+    },
+    {
+      "path": "memorive_console/THIRD_PARTY_NOTICES.md",
+      "sha256": "6701508ef047f6ac5cd104cd75d63b595a97a3a1caaa8409375a689c4e64d036",
+      "bytes": 2881
+    },
+    {
+      "path": "memorive_console/VERIFICATION.md",
+      "sha256": "c8a0ab47d1add6856afeeaf92a87f5f282b4677cc8a84e3bb537c9ad6e649db6",
+      "bytes": 1458
+    },
+    {
+      "path": "memorive_console/assets/memorive_test_console.ico",
+      "sha256": "497b35a0230a34890c8d31cfa95bdc4c231487c4689fa6031fea0f027e9bdacb",
+      "bytes": 106262
+    },
+    {
+      "path": "memorive_console/assets/memorive_test_console_icon.png",
+      "sha256": "0f886e3417097bcc5b49281620b134aeaa477f21fcd225380c9a1fd4d74cf2a8",
+      "bytes": 447452
+    },
+    {
+      "path": "memorive_console/build_requirements.lock",
+      "sha256": "eab8e1075b702adfcd97b64cbd1dda7b1e7f180ed349e60bc059f63a14c912ad",
+      "bytes": 316
+    },
+    {
+      "path": "memorive_console/console.spec",
+      "sha256": "fa64757eb73431e87b045da017027f4755949b787cca5d33599e0a2c3cadbb71",
+      "bytes": 1659
+    },
+    {
+      "path": "memorive_console/console_version_info.txt",
+      "sha256": "b797bd3be794357e5aa97b9955d87daa272ce980c0c8b8ed01272a67303beb87",
+      "bytes": 810
+    },
+    {
+      "path": "memorive_console/dependency_inventory.json",
+      "sha256": "c22a25149e0ebbf5bfa0548802e6f874573639fc9569d015c0ca35ad26160caa",
+      "bytes": 4851
+    },
+    {
+      "path": "memorive_console/installer.iss",
+      "sha256": "6fcf5d61bfedd483bb0af85d843e1f969d9a115ce6bacc0b982df94b3dad4805",
+      "bytes": 1850
+    },
+    {
+      "path": "memorive_console/licenses/CPython-LICENSE.txt",
+      "sha256": "62bec384df47b0328307db41455ff6ea2559e5546b394ac69148561b21703120",
+      "bytes": 33861
+    },
+    {
+      "path": "memorive_console/licenses/Inno-Setup-LICENSE.txt",
+      "sha256": "2e5346868c2a18434489824e11d65c3031620f792fefc415d05f19cd441abf5c",
+      "bytes": 1521
+    },
+    {
+      "path": "memorive_console/licenses/WebView2-LICENSE.txt",
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55",
+      "bytes": 1487
+    },
+    {
+      "path": "memorive_console/licenses/altgraph/altgraph-0.17.5.dist-info/LICENSE",
+      "sha256": "6c194d6db0c64d45535d10c95142b9b0cda7b7dcc7f1ddee302b3d536f3dbe46",
+      "bytes": 1002
+    },
+    {
+      "path": "memorive_console/licenses/bottle/bottle-0.13.4.dist-info/licenses/LICENSE",
+      "sha256": "af150257b1f7cce92b6207854f2e8f90ea9ae52d7cac758d13a47bd12e2a2443",
+      "bytes": 1066
+    },
+    {
+      "path": "memorive_console/licenses/cffi/cffi-2.1.1.dist-info/licenses/LICENSE",
+      "sha256": "5ba24ddc57067f9249add644c3afc41a5d6dc37e23433ef759d95df370b0af63",
+      "bytes": 1123
+    },
+    {
+      "path": "memorive_console/licenses/clr_loader/000-LICENSE",
+      "sha256": "b00f9a4b112b44f91276ad8388ed470ad36668ff80f56f15e1e6981c85e6d23d",
+      "bytes": 1079
+    },
+    {
+      "path": "memorive_console/licenses/packaging/packaging-26.3.dist-info/licenses/LICENSE",
+      "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+      "bytes": 197
+    },
+    {
+      "path": "memorive_console/licenses/packaging/packaging-26.3.dist-info/licenses/LICENSE.APACHE",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "bytes": 10174
+    },
+    {
+      "path": "memorive_console/licenses/packaging/packaging-26.3.dist-info/licenses/LICENSE.BSD",
+      "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5",
+      "bytes": 1344
+    },
+    {
+      "path": "memorive_console/licenses/pefile/pefile-2023.2.7.dist-info/LICENSE",
+      "sha256": "bfd4b5e4f8a99c961fd6f94d708e38396cc146bfe8fbc5d2a86e63aa29fb4208",
+      "bytes": 1083
+    },
+    {
+      "path": "memorive_console/licenses/pillow/pillow-11.3.0.dist-info/licenses/LICENSE",
+      "sha256": "19544bf53af689a3319a4fb5067370f0f0d68d2c5300a2157674f5ef8a4fd965",
+      "bytes": 76724
+    },
+    {
+      "path": "memorive_console/licenses/proxy_tools/LICENSE.txt",
+      "sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4",
+      "bytes": 1436
+    },
+    {
+      "path": "memorive_console/licenses/pycparser/pycparser-3.0.dist-info/licenses/LICENSE",
+      "sha256": "0c846399369ea76ddd7b5c44fe6d16497415fcf015f5cbb508c24bf98b81c5b1",
+      "bytes": 1543
+    },
+    {
+      "path": "memorive_console/licenses/pyinstaller-hooks-contrib/pyinstaller_hooks_contrib-2026.7.dist-info/licenses/LICENSE",
+      "sha256": "91d0baaff00773038e72c0a1fc9d5d2d38706b7a2b9c04f34296608f931b9cd0",
+      "bytes": 27666
+    },
+    {
+      "path": "memorive_console/licenses/pyinstaller/pyinstaller-6.16.0.dist-info/licenses/COPYING.txt",
+      "sha256": "dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245",
+      "bytes": 32138
+    },
+    {
+      "path": "memorive_console/licenses/pythonnet/000-LICENSE",
+      "sha256": "e1dc3a6ff017a6800dc27a7220500f512b95fbcd996d38ebbbff85c693245369",
+      "bytes": 1104
+    },
+    {
+      "path": "memorive_console/licenses/pywebview/pywebview-6.2.1.dist-info/licenses/LICENSE",
+      "sha256": "4a988dd3598832cd3653de20dc33cb677d0fb53ab5551c879ca31280ae653675",
+      "bytes": 1518
+    },
+    {
+      "path": "memorive_console/licenses/pywin32-ctypes/pywin32_ctypes-0.2.3.dist-info/LICENSE.txt",
+      "sha256": "dfa83b3e2709adfcdb838d9ad55823ca674abb780e60563d9dd9544ccbf785e9",
+      "bytes": 1644
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools-84.0.0.dist-info/licenses/LICENSE",
+      "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+      "bytes": 1023
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/autocommand-2.2.2.dist-info/LICENSE",
+      "sha256": "ade78d04982d69972d444a8e14a94f87a2334dd3855cc80348ea8e240aa0df2d",
+      "bytes": 7634
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/backports.tarfile-1.2.0.dist-info/LICENSE",
+      "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+      "bytes": 1023
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/importlib_metadata-8.7.1.dist-info/licenses/LICENSE",
+      "sha256": "458502e12d97bbf64438606a20044aa85eb05fb0a8a807bb35dbec253fd1fc04",
+      "bytes": 10278
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/jaraco.text-4.0.0.dist-info/LICENSE",
+      "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+      "bytes": 1023
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/jaraco_context-6.1.0.dist-info/licenses/LICENSE",
+      "sha256": "9755a18519666e5f0f4cae3daad3d7012bcae48a600b31237d75e9fe134e6683",
+      "bytes": 1076
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/jaraco_functools-4.4.0.dist-info/licenses/LICENSE",
+      "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d",
+      "bytes": 1076
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/more_itertools-10.8.0.dist-info/licenses/LICENSE",
+      "sha256": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46",
+      "bytes": 1053
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE",
+      "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+      "bytes": 197
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE.APACHE",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "bytes": 10174
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE.BSD",
+      "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5",
+      "bytes": 1344
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/platformdirs-4.4.0.dist-info/licenses/LICENSE",
+      "sha256": "29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6",
+      "bytes": 1089
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/tomli-2.4.0.dist-info/licenses/LICENSE",
+      "sha256": "b80816b0d530b8accb4c2211783790984a6e3b61922c2b5ee92f3372ab2742fe",
+      "bytes": 1072
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/wheel-0.46.3.dist-info/licenses/LICENSE.txt",
+      "sha256": "30c23618679108f3e8ea1d2a658c7ca417bdfc891c98ef1a89fa4ff0c9828654",
+      "bytes": 1107
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/_vendor/zipp-3.23.0.dist-info/licenses/LICENSE",
+      "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d",
+      "bytes": 1076
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/config/NOTICE",
+      "sha256": "2dddf08818297a3b89d43d95ff659d8da85741108c9136dfa3a4d856c0623bd8",
+      "bytes": 493
+    },
+    {
+      "path": "memorive_console/licenses/setuptools/setuptools/config/_validate_pyproject/NOTICE",
+      "sha256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7",
+      "bytes": 18737
+    },
+    {
+      "path": "memorive_console/licenses/typing_extensions/typing_extensions-4.16.0.dist-info/licenses/LICENSE",
+      "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "bytes": 13936
+    },
+    {
+      "path": "memorive_console/source/app.css",
+      "sha256": "dc61b5265d3da27880008ba940d692cc9a389423859cc85afae0cc8a3497fd35",
+      "bytes": 61600
+    },
+    {
+      "path": "memorive_console/source/app.js",
+      "sha256": "6bf68f274ee32660b2d7c4f9562abd3d669bb6d747a700a2376025a067c256d3",
+      "bytes": 61749
+    },
+    {
+      "path": "memorive_console/source/bridge.schema.json",
+      "sha256": "e5c5f7749b3cde0593953185a830253a918d5b1266823a0824a92226b382037c",
+      "bytes": 25278
+    },
+    {
+      "path": "memorive_console/source/bridge_client.py",
+      "sha256": "53b617095ea38f8f4a4b990f83c1d010db33915a77d4c4f0c0fd482e3fa21b72",
+      "bytes": 6082
+    },
+    {
+      "path": "memorive_console/source/build_drop.py",
+      "sha256": "9b46346640381bdcf4048f8a7cdadfd9c7b86dbc2950dbd7cbc1ce8967e88a9b",
+      "bytes": 2176
+    },
+    {
+      "path": "memorive_console/source/common.py",
+      "sha256": "5f636f69ba2e132fde8f9c1a4f47f9a30541a56f1eb36d758d088a8f90ad9821",
+      "bytes": 28961
+    },
+    {
+      "path": "memorive_console/source/index.html",
+      "sha256": "3a9ace4b2f9a129526d50c7c0ed5a4a94646e127402c69e885ca57562b8e8c57",
+      "bytes": 20726
+    },
+    {
+      "path": "memorive_console/source/main.py",
+      "sha256": "48ce85051b7ee06b32afd02a5ec5033cd10ce77cd7c61cdc6579e52ec1251ef8",
+      "bytes": 8229
+    },
+    {
+      "path": "memorive_console/source/manager.py",
+      "sha256": "4eff7e6e75656067131820de143d6aae25d63fd35cefec9e09e32b24505f2773",
+      "bytes": 77302
+    },
+    {
+      "path": "memorive_console/source/process_owner.py",
+      "sha256": "c68ac9c2c9a9759320bf5afdc1b533031deffb07556fe94656c41eab5b61013c",
+      "bytes": 7198
+    },
+    {
+      "path": "memorive_console/source/reference_bridge.py",
+      "sha256": "23d4ac4f10f665dbf3a36bf623517229a4bb93eda9df3a050092b473b2d0db8e",
+      "bytes": 15811
+    },
+    {
+      "path": "memorive_console/source/server.py",
+      "sha256": "097ee94be45a302762600844ee0ee39995ff1e8aed380abafdb0e4f54d49f686",
+      "bytes": 7913
+    },
+    {
+      "path": "memorive_console/source/test_auto_test_attachment.py",
+      "sha256": "352d482fd2f40dda92a6404da53467cc500c67598894f161f386eaafa7c83c2d",
+      "bytes": 3216
+    },
+    {
+      "path": "memorive_console/source/test_build_drop.py",
+      "sha256": "18478c29e4fd6035736fb729d5b57fcafe87e558935c3adc6e5a4822f58f1b91",
+      "bytes": 2473
+    },
+    {
+      "path": "memorive_console/source/test_cleanup_lifecycle_repair.py",
+      "sha256": "de7d0759f7c8fa6fcf606cb682375a9a70f37132918e6bbe7f6b91488e451101",
+      "bytes": 2842
+    },
+    {
+      "path": "memorive_console/source/test_close_cleanup.py",
+      "sha256": "4e3fb41764c80c1b22532f2acadd20045716b2b9e8eeaa630627e53ac8906e48",
+      "bytes": 7077
+    },
+    {
+      "path": "memorive_console/source/test_connection_observability_repair.py",
+      "sha256": "eca7bf8335e14af52933afc5528ddd030ce15a5767a6f16d3193c1fdbfae46b5",
+      "bytes": 6956
+    },
+    {
+      "path": "memorive_console/source/test_console.py",
+      "sha256": "e58e6e240d18784e468e5f52b5b88c4c054c2695e8e816bef54d779bce2b7b14",
+      "bytes": 12604
+    },
+    {
+      "path": "memorive_console/source/test_diagnostic_scenarios.py",
+      "sha256": "1cbc2c47f8982460cf2145f98215850e530e97c22f6b01777a789a00e6792c3d",
+      "bytes": 1871
+    },
+    {
+      "path": "memorive_console/source/test_expression_contract.py",
+      "sha256": "4bd102a0b4bba9b1528be7c18d7d009f0bfe5e842973f075f31547caa07d82fc",
+      "bytes": 9315
+    },
+    {
+      "path": "memorive_console/source/test_expression_preview_ui_repair.py",
+      "sha256": "fe2cd17c6bc01634614d763cde06646ec4dd72bffa87772fd7708fcc903aea5f",
+      "bytes": 2617
+    },
+    {
+      "path": "memorive_console/source/test_import_staging_path_repair.py",
+      "sha256": "e15edb16deb8fa3be3d959538cfda2fb9c2ce5e675d05f50a9c9cc082e2ce977",
+      "bytes": 7035
+    },
+    {
+      "path": "memorive_console/source/test_live_repair.py",
+      "sha256": "0cf7ed8ac508f1a65e14afcf5f6d866b3f7a6fa5211735948176145d1a56810e",
+      "bytes": 12275
+    },
+    {
+      "path": "memorive_console/source/test_local_profile_seed.py",
+      "sha256": "5b27eaccb97c87eb8fc84db3f0eade8180a69049774a2afdd2731b9433d196ea",
+      "bytes": 2077
+    },
+    {
+      "path": "memorive_console/source/test_memorive_build_identity.py",
+      "sha256": "70414cd74e9045b6ba93e74fc5c34d108d6810509ecf4735995cabc5af33f067",
+      "bytes": 4555
+    },
+    {
+      "path": "memorive_console/source/test_monitor_snapshot_atomicity.py",
+      "sha256": "4518f17f2ef49f604714fb9296640dba95c9cb7926004aedfd934ffe9dfbf0b5",
+      "bytes": 5169
+    },
+    {
+      "path": "memorive_console/source/test_release_contract.py",
+      "sha256": "c6cccc6be0aa6ca8e3053b81a8d53a753e6cf6a0c3acee744423a93fe9666aa4",
+      "bytes": 4125
+    },
+    {
+      "path": "memorive_console/source/test_suite_flow.py",
+      "sha256": "b34b49bb7696621581a909ea654a580fff2770554d08e39f1b349a768d65ff9b",
+      "bytes": 7397
+    },
+    {
+      "path": "memorive_console/source/test_vm_liveness_quiesce_repair.py",
+      "sha256": "9ad60266c86cf283b66a5b9a2d355f8bc4b330a687e80ab8ec2d52562c7317d4",
+      "bytes": 5822
+    },
+    {
+      "path": "memorive_console/source/window_lifecycle.py",
+      "sha256": "778eb980cbb3c37ac65350addd6dc38de98633d6d4c9611751dc98ead48ca7a8",
+      "bytes": 1463
+    },
+    {
+      "path": "memorive_console/verify_packaged_console.py",
+      "sha256": "30c0a2e4eca75502a5883648dc36111d78d90235ff94b2149eb4c4a495ed796b",
+      "bytes": 11256
+    },
+    {
       "path": "memorive_desktop/ARTWORK_RIGHTS.md",
       "sha256": "a66fc5ce7c8518c96ad6005dbe978dfad81067d8e6d9f1a5aa97229374eb50fb",
       "bytes": 7222
@@ -494,13 +914,13 @@
     },
     {
       "path": "memorive_desktop/BUILDING.md",
-      "sha256": "0e2bdff7679ee704b98e9aced478293a159fd39ea5b50b30e047763e2800cc13",
-      "bytes": 5401
+      "sha256": "f1194106249f96604c9163ca5ad3aa8f754be4e953bf8a82549842d418495fbd",
+      "bytes": 5858
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.public-candidate.json",
-      "sha256": "babc9ca9e8e77047a9a257391924cbc1bc18a23c38ed9dff557f810e092d11eb",
-      "bytes": 140961
+      "sha256": "ed32df3c35eaeb9dbbeba9e4f50087184e148cd135d32c45ad73c3d836b84d99",
+      "bytes": 138445
     },
     {
       "path": "memorive_desktop/GITHUB_FAN_PROJECTS.md",
@@ -569,8 +989,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
-      "sha256": "9b84d1fa8214e44313f7eadd9de66c207f51a205763c25cf44c89e9ef07505d0",
-      "bytes": 234078
+      "sha256": "d04f87c03799d6cd6c64e19b7828ab5434b7bce3fb197b507185a6390f0e0fef",
+      "bytes": 227926
     },
     {
       "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
@@ -5614,8 +6034,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_research_runtime/discovery.py",
-      "sha256": "2c60440de7e9302c371688aa16b3e6926ffa91118e7f92f36d5160ec2c9dd0a2",
-      "bytes": 15460
+      "sha256": "446c6e8469f1b3c37a809ad229bd44d29671fd9212144b1e9747a285c6bbac00",
+      "bytes": 15468
     },
     {
       "path": "memorive_desktop/source/memorive_research_runtime/feedback.py",
@@ -5644,8 +6064,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_research_runtime/readable.py",
-      "sha256": "cfa62dc24f4b1a535c2695fd39e80b28b34f9c48977cff60b2b7265baf3adb30",
-      "bytes": 2801
+      "sha256": "3b61e51563279c15250737037f1f81a52f040be3564c69484ba6ce7655ae2925",
+      "bytes": 2805
     },
     {
       "path": "memorive_desktop/source/memorive_research_runtime/recent_interest_adapter.py",
@@ -7784,8 +8204,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/contracts.py",
-      "sha256": "1ad4fe8480e52de2e4a1f72025a96c18ac58c6facdb494adc9f1c52e3efa7fde",
-      "bytes": 16365
+      "sha256": "98339fbf724e0d4321d580d3d40f479e8a6d6288559be1ca7ddc1a948feeab1d",
+      "bytes": 16407
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/counterevidence.py",
@@ -7814,8 +8234,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/field_vectors.py",
-      "sha256": "7ca776f87bec44a7c94977bb9bff01c2c5b5446092d19a4d79b6664489879761",
-      "bytes": 25316
+      "sha256": "362b94d1c26294aec3a8dc2fa19394b11e65c93be36d0fa286929959514d7cab",
+      "bytes": 25395
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/locator.py",
@@ -8109,6 +8529,6 @@
   "scan_scope": "Selected textual files; binary screenshots/PDF contents and all possible secrets are not covered",
   "status": "PRIVATE_SOURCE_SNAPSHOT",
   "source_tag": null,
-  "documentation_update": "Restore companion integrations, package sources and installation documentation",
-  "distribution_revision": "companion-integration-20260926"
+  "documentation_update": "Add optional test console, development guides, separate artwork notice and dependency inventory",
+  "distribution_revision": "console-integration-20260926"
 }

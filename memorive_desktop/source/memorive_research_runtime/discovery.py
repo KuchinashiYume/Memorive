@@ -155,8 +155,8 @@ def run(runtime,run_id,params):
     history=runtime.feedback.history([d['id'] for d in directions])
     result=slate.compose_projection(facts,context,plan,history)
     recommendations=[dict(display[x['candidate_id']],**x) for x in result['slate']['selected']]
-    from .readable import radar_markdown
-    markdown=radar_markdown(config['topic'] or ' / '.join(d['name'] for d in directions),recommendations,failures)
+    from .readable import discovery_markdown
+    markdown=discovery_markdown(config['topic'] or ' / '.join(d['name'] for d in directions),recommendations,failures)
     for name,body in {'identity':resolved,'observations':{'observations':list(observations.values())},
         'recent_interest':interest_snapshot,
         'slate':result,'context':{'context':context,'plan':plan,'facts':facts,'library_sha256':sha(library),

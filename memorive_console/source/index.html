@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Memorive 测试控制台</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand" aria-label="Memorive Test Console">
+        <img src="/memorive_test_console_icon.png" alt="">
+        <div><b>Memorive</b><small>测试控制台</small></div>
+      </div>
+      <nav class="workspace-nav" aria-label="控制台工作区">
+        
+        <button class="nav active" data-view="overview"><span>⌂</span><b>连接 memo</b></button>
+        <button class="nav" data-view="suite"><span>✓</span><b>一键回归</b></button>
+        
+        <button class="nav" data-view="events"><span>⌁</span><b>事件模拟</b></button>
+        <button class="nav" data-view="expressions"><span>◉</span><b>桌宠 / 组件</b></button>
+        
+        
+        <button class="nav" data-view="records"><span>≡</span><b>测试结果</b></button>
+        <details class="nav-more"><summary>开发工具</summary><button class="nav" data-view="manual"><span>⌘</span><b>单项验证</b></button><button class="nav" data-view="contract"><span>↗</span><b>接入详情</b></button></details>
+      </nav>
+      <div class="sidebar-foot">
+        <span><i class="status-dot"></i><b id="cleanup-label">无待清理数据</b></span>
+        <small id="cleanup-detail">只保留无正文回执</small>
+        <code>v1.01 · TEST ONLY</code>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="workspace-header">
+        <div class="header-copy">
+          <span class="eyebrow">VERSION REVIEW</span>
+          <h1 id="page-title">连接 memo</h1>
+          <p id="page-subtitle">连接、能力与安全边界</p>
+        </div>
+        <div class="header-actions">
+          <button id="connection" class="badge" data-jump="overview" title="查看连接" aria-label="查看连接状态">等待版本</button>
+          
+        </div>
+      </header>
+
+
+
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <main class="main-content">
+        <section id="access-gate" class="access-gate" hidden>
+          <div><b>等待控制台许可</b><span>在已启动的 memo 中开启“允许接入控制台”</span></div>
+          <button id="check-access" class="secondary">重新检查</button>
+        </section>
+
+        <section id="overview-view" class="view" data-view-panel="overview">
+          <details class="contract"><summary>关于开发与测试</summary><p>根据自己的需求修改和优化 Memorive，再用控制台复现问题、检查功能行为和验证修改。测试结果只覆盖所选版本、配置与场景。</p><p>代码由 <b>OpenAI Codex</b> 与 <b>Anthropic Claude Code</b> 开发，采用 AGPL-3.0-only；图标素材单独声明。详细许可与隐私说明见随附 NOTICE.txt。</p></details>
+      <section id="connection-panel" class="connection-bar" aria-label="Memorive 版本连接">
+        <div class="connection-heading"><h2>连接 memo</h2><span>仅接受 Memorive.exe</span></div>
+        <div id="drop-zone" class="drop-zone">
+          <span class="drop-icon" aria-hidden="true">↓</span>
+          <div><strong>拖入 Memorive.exe</strong><small id="drop-hint">验证版本身份并自动连接</small></div>
+        </div>
+        <div class="build-inputs">
+          <select id="builds" aria-label="检测到的 Memorive 版本"><option>检测中…</option></select>
+          <div class="path-row">
+            <input id="build-path" placeholder="Memorive.exe 完整路径" aria-label="Memorive 主程序路径">
+            <button id="pick" title="选择 EXE" aria-label="选择 EXE">…</button>
+          </div>
+        </div>
+        <div class="connection-actions">
+          <button id="connect" class="primary connect-button">连接</button>
+          <button id="reference" class="secondary reference-button">协议自测</button>
+        </div>
+        <details class="session-disclosure"><summary>会话与配置</summary><div class="session-compact">
+          <div><b id="session-label">未连接</b><span id="session-description">等待版本</span></div>
+          <code id="session-path">—</code>
+          <div class="session-guards">
+            <span class="pill">AUTO OFF</span>
+            <span class="pill">临时空间</span>
+            <span id="profile-seed" class="pill muted">本机设置待载入</span>
+          </div>
+        </div>
+        <div id="build-note" class="micro">等待选择 Memorive.exe</div></details>
+        <div class="connection-footer"><span>隔离测试 · 关闭即清理</span><button id="end" class="danger compact" disabled>结束并清理</button></div>
+      </section>
+          <div class="flow-rail" aria-label="测试流程" hidden>
+            <span id="flow-release" class="active"><i>1</i>选择版本</span>
+            <span id="flow-connect"><i>2</i>接入</span>
+            <span id="flow-run"><i>3</i>运行</span>
+            <span id="flow-review"><i>4</i>审核</span>
+            <span id="flow-clean"><i>5</i>清理</span>
+          </div>
+          <details class="session-details">
+            <summary>连接诊断与安全设置</summary>
+            <div class="overview-grid">
+              <section class="overview-card primary-card">
+                <div class="card-heading"><button id="refresh-capabilities" class="icon-button" title="刷新状态" aria-label="刷新状态">↻</button></div>
+                <h2 id="overview-build">等待版本</h2>
+                <p id="overview-state">拖入 Memorive.exe 后建立隔离审核会话。</p>
+                <dl class="status-list">
+                  <div><dt>通道</dt><dd id="overview-channel">—</dd></div>
+                  <div><dt>配置</dt><dd id="overview-profile">连接时载入本机设置</dd></div>
+                  <div><dt>接口</dt><dd id="overview-capabilities">等待握手</dd></div>
+                  <div><dt>回归</dt><dd id="overview-suite">尚未运行</dd></div>
+                </dl>
+              </section>
+              <section id="capability-status" class="overview-card capability-status">
+                <div class="capability-copy"><b id="capability-title">等待连接</b><span id="capability-description">—</span></div>
+                <div id="test-attachment-status" class="test-attachment"><b id="test-attachment-label">测试包待机</b><span id="test-attachment-detail">不会自动执行</span></div>
+                <details><summary>能力清单</summary><div id="capability-list" class="capability-list"></div></details>
+              </section>
+            </div>
+            <p class="safety-note">自动执行保持关闭；本机设置使用临时副本；关闭窗口后清理本轮测试数据。</p>
+          </details>
+          <div class="start-actions">
+            <button data-jump="events"><b>模拟一个事件 <span>→</span></b><span>消息、任务、研究问答与演示流程</span></button>
+            <button data-jump="suite"><b>运行一组测试 <span>→</span></b><span>批量回归，生成可审核的结果</span></button>
+          </div>
+        </section>
+
+        <section id="events-view" class="view" data-view-panel="events" hidden>
+          <article class="event-panel">
+            <div class="event-workspace">
+              <section class="event-browser">
+                <div class="panel-head"><div><span class="eyebrow">EVENT CATALOG</span><h2>选择事件</h2></div><span id="event-count-label">0 项</span></div>
+                <div class="event-groups" role="tablist" aria-label="事件分组">
+                  <button data-event-group="all">全部</button>
+                  <button class="selected" data-event-group="message">消息</button>
+                  <button data-event-group="task">任务</button>
+                  <button data-event-group="content">内容</button>
+                  <button data-event-group="scenario">诊断场景</button>
+                </div>
+                <label class="event-search-label" for="event-search">搜索场景</label><input id="event-search" type="search" placeholder="搜索消息、任务、问答…" autocomplete="off">
+                <div id="event-catalog" class="event-catalog"></div>
+              </section>
+
+              <section class="event-compose">
+                <div class="panel-head"><div><span class="eyebrow">DISPATCH</span><h2 id="event-selected-title">选择事件</h2></div><span id="event-operation" hidden>—</span></div>
+                <p id="event-description" class="panel-description">选择左侧事件后配置本次模拟。</p>
+                <div id="event-message-fields" class="event-fields" hidden>
+                  <label>标题<input id="event-title" value="memo 控制台测试"></label>
+                  <label>正文<textarea id="event-body">这条消息只属于当前临时测试会话。</textarea></label>
+                </div>
+                <div id="event-note-fields" class="event-fields" hidden>
+                  <label>事件说明<textarea id="event-note">用于检查桌宠、通知与相关组件的联动。</textarea></label>
+                </div>
+                <div id="event-report-fields" class="event-fields" hidden>
+                  <label>报告周期<select id="event-period"><option value="daily">日报</option><option value="weekly">周报</option><option value="monthly">月报</option></select></label>
+                </div>
+                <div id="event-qa-fields" class="event-fields" hidden>
+                  <label>问题<input id="event-question" value="这项研究为什么重要？"></label>
+                  <label>样例回答<textarea id="event-answer">这是用于排查研究问答卡片、消息和桌宠联动的临时样例回答。</textarea></label>
+                  <label>引用<input id="event-citations" value="Demo 2026 · console://temporary-source"></label>
+                </div>
+                <div class="expected-block">
+                  <span class="field-caption">检查位置</span>
+                  <div id="event-targets" class="target-chips"><span>—</span></div>
+                </div>
+                <div class="event-actions">
+                  <button id="event-run" class="primary" disabled>提交模拟</button>
+                  <span id="event-run-status">等待选择</span>
+                </div>
+              </section>
+
+              <aside class="event-observe">
+                <div class="panel-head"><div><span class="eyebrow">OBSERVATION</span><h2>实际回执</h2></div><span id="event-command-state">—</span></div>
+                <div class="observation-guide">
+                  <span><i></i>命令已送达</span>
+                  <span><i></i>观察 Memorive 原生投影</span>
+                  <span><i></i>由 Codex 读取记录</span>
+                </div>
+                <p id="event-result-summary" class="result-summary">选择场景并提交后，在这里查看执行状态。</p>
+                <details class="raw-receipt"><summary>展开详细回执</summary><pre id="event-observation">尚未提交事件。</pre></details>
+              </aside>
+            </div>
+          </article>
+        </section>
+
+        <section id="suite-view" class="view" data-view-panel="suite" hidden>
+          <article class="suite-panel">
+            <div class="suite-top">
+              <div><span class="eyebrow">SAFE TEST SUITE</span><h2>场景回归</h2><p id="suite-description">连接 Memorive 后运行整套安全回归</p></div>
+              <div class="suite-controls">
+                <label for="suite-preset">测试方案</label>
+                <select id="suite-preset" aria-label="测试方案"></select>
+                <button id="run-suite" class="primary" disabled>运行</button>
+                <button id="cancel-suite" class="danger" hidden>停止</button>
+              </div>
+              <span class="suite-safety">零模型调用 · 自动执行关闭</span>
+            </div>
+            <div class="suite-status">
+              <div class="suite-progress-copy"><b id="suite-state">待运行</b><span id="suite-current">—</span></div>
+              <div class="suite-progress-row">
+                <div class="progress-track" role="progressbar" aria-label="套件进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="suite-progress-fill"></i></div>
+                <span id="suite-progress-text">0 / 0</span>
+              </div>
+              <div class="suite-stats">
+                <span><b id="suite-pass">0</b> 通过</span>
+                <span><b id="suite-fail">0</b> 失败</span>
+                <span><b id="suite-skip">0</b> 跳过</span>
+              </div>
+            </div>
+            <div class="suite-readiness">
+              <div><span>可运行</span><b id="suite-ready-count">0</b></div>
+              <div><span>待接入</span><b id="suite-missing-count">0</b></div>
+              
+              
+            </div>
+            <div id="review-bundle" class="review-bundle" hidden><code id="review-path"></code><button id="copy-review" class="secondary">复制审核包路径</button></div>
+          </article>
+        </section>
+
+        <section id="expressions-view" class="view" data-view-panel="expressions" hidden>
+          <article class="expression-panel">
+            <div class="expression-toolbar">
+              <div><span class="eyebrow">EXPRESSION MONITOR</span><h2>桌宠与页面组件</h2></div>
+              <div class="expression-health"><i id="expression-health-dot"></i><b id="expression-health">未接入</b><span id="expression-lifecycle">—</span></div>
+            </div>
+            <div class="expression-workspace">
+              <div class="expression-catalog">
+                <div class="expression-groups" role="tablist" aria-label="表情分组">
+                  <button class="selected" data-expression-group="static_asset">素材</button>
+                  <button data-expression-group="native_pose">原生姿态</button>
+                  <button data-expression-group="native_animation">原生动画</button>
+                  <button data-expression-group="web_animation">页面动画</button>
+                </div>
+                <div id="expression-grid" class="expression-grid"><span class="empty-state">连接 Memorive 后读取目录</span></div>
+              </div>
+              <aside class="expression-preview">
+                <div id="expression-stage" class="expression-stage">
+                  <img id="expression-image" alt="">
+                  <span id="expression-placeholder">选择表情</span>
+                </div>
+                <div class="expression-preview-copy"><b id="expression-name">—</b><span id="expression-kind">—</span></div>
+                <div class="expression-controls">
+                  <label>时长（毫秒） <input id="expression-duration" type="number" min="500" max="5000" step="100" value="1800"></label>
+                  <button id="expression-trigger" class="primary" disabled>预览</button>
+                  <button id="expression-cancel" class="danger" disabled>停止并还原</button>
+                </div>
+                <div class="expression-proof">
+                  <span>显示 <b id="expression-displayed">—</b></span>
+                  <span>还原 <b id="expression-restored">—</b></span>
+                  <span>样本 <b id="expression-samples">0</b></span>
+                </div>
+              </aside>
+            </div>
+          </article>
+        </section>
+
+        <section id="manual-view" class="view" data-view-panel="manual" hidden>
+          <div class="manual-workspace">
+            <article class="operation-panel">
+              <div class="panel-head"><div><span class="eyebrow">DIRECT OPERATIONS</span><h2>单项操作</h2></div><span id="operation-note">未连接</span></div>
+              <details class="operation-shortcuts"><summary>常用操作</summary><div class="quick">
+                <button data-op="diagnostics" disabled>诊断</button>
+                <button data-op="message.test" disabled>消息</button>
+                <button data-op="event.inject" disabled>事件</button>
+                <button data-op="report.run" disabled>报告</button>
+                <button data-op="discovery.recommend" disabled>文献发现</button>
+                <button data-op="inbox.import" disabled>导入</button>
+                <button data-op="research.qa.simulate" disabled>研究问答</button>
+              </div>
+              </details><label for="operation">操作类型</label>
+              <select id="operation"></select>
+              <div id="fields"></div>
+              <details id="model-controls" class="advanced-controls" hidden><summary>高级权限</summary><label id="model-permission" class="check"><input id="allow-model" type="checkbox">仅允许本次模型调用</label></details>
+              <div class="submit-row"><button id="submit" class="primary" disabled>提交测试</button><button id="run-diagnostics" class="secondary" disabled>仅诊断</button></div>
+            </article>
+            <article class="result-panel"><div class="panel-head"><h2>结果</h2><span id="updated">等待观测</span></div><pre id="detail">等待测试结果。</pre></article>
+          </div>
+        </section>
+
+        <section id="records-view" class="view" data-view-panel="records" hidden>
+          <details class="record-statistics"><summary>记录统计</summary><div class="metrics">
+            <div><b id="suite-count">0</b><span>套件</span></div>
+            <div><b id="command-count">0</b><span>指令</span></div>
+            <div><b id="message-count">0</b><span>消息</span></div>
+            <div><b id="report-count">0</b><span>报告</span></div>
+            <div><b id="research-count">0</b><span>问答</span></div>
+            <div><b id="event-count">0</b><span>事件</span></div>
+          </div>
+          </details>
+          <article class="records-panel">
+            <div class="tabs">
+              <button class="selected" data-tab="suites">套件</button>
+              <button data-tab="commands">指令</button>
+              <button data-tab="jobs">任务</button>
+              <button data-tab="messages">消息</button>
+              <button data-tab="reports">报告</button>
+              <button data-tab="research_qa">问答</button>
+              <button data-tab="events">事件</button>
+            </div>
+            <div id="records" class="records">暂无记录</div>
+          </article>
+        </section>
+
+        <section id="contract-view" class="view" data-view-panel="contract" hidden>
+          <article class="contract">
+            <div class="panel-head"><div><span class="eyebrow">MEMORIVE INTERFACE</span><h2>版本接入详情</h2></div><button id="show-schema" class="secondary">兼容协议原文</button></div>
+            <div class="identity-grid">
+              <div><span>版本</span><b id="contract-version">未连接</b></div>
+              <div><span>发布通道</span><b id="contract-channel">—</b></div>
+              <div><span>协议</span><b id="contract-protocol">—</b></div>
+              <div><span>身份校验</span><b id="contract-identity">待检查</b></div>
+            </div>
+            <div id="contract-warning" class="compatibility-warning" hidden></div>
+            <code id="contract-manifest">memorive-console-capabilities.json</code>
+            <div class="contract-steps">
+              <div><b>ENV_V1</b><span>审核启动</span></div>
+              <div><b>EPHEMERAL_ONLY</b><span>临时数据</span></div>
+              <div><b>AUTO OFF</b><span>禁用自动执行</span></div>
+              <div><b>DISCARD</b><span>关闭清理</span></div>
+            </div>
+            <pre id="contract-detail" hidden></pre>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="record-dialog" aria-labelledby="record-title"><div class="panel-head"><h2 id="record-title">记录详情</h2><form method="dialog"><button aria-label="关闭记录详情">关闭</button></form></div><pre id="record-json"></pre></dialog>
+
+  <div id="drop-overlay" class="drop-overlay" hidden>
+    <div><span class="drop-icon" aria-hidden="true">↓</span><h2 id="drop-title">松开并连接</h2><p id="drop-description">仅接受带有效发布身份与测试接口的 Memorive.exe</p></div>
+  </div>
+</body>
+</html>

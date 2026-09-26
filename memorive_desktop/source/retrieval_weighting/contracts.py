@@ -304,8 +304,8 @@ def validate_embedding_profile(profile: Mapping[str, Any]) -> dict[str, Any]:
     _exact_keys(result, _PROFILE_KEYS, "profile")
     require_storage_token(result["embedding_profile_id"], "profile.embedding_profile_id")
     require_storage_token(result["embedding_model_id"], "profile.embedding_model_id")
-    if result["embedding_model_id"] != "fixture-hash-vector-v1":
-        raise EmbeddingProfileError("only fixture-hash-vector-v1 is allowed")
+    if result["embedding_model_id"] != "fixture-hash-vector-v2":
+        raise EmbeddingProfileError("only fixture-hash-vector-v2 is allowed; regenerate older offline fixture vectors")
     dimension = result["embedding_dimension"]
     if isinstance(dimension, bool) or not isinstance(dimension, int) or not 1 <= dimension <= 65536:
         raise EmbeddingProfileError("embedding_dimension must be an integer in [1, 65536]")

@@ -1,0 +1,29 @@
+# Memorive Test Console
+
+[中文](README.md) · [English](README.en.md) · [Memorive](../README.ja.md)
+
+自分の研究に合わせて Memorive を改良し、問題の再現、動作確認、変更後の検証に利用する補助ツールです。結果が示すのは選択したバージョン・設定・試験範囲での動作です。コードの編集と再ビルドには開発ツールを使用してください。
+
+## はじめに
+
+本リポジトリの Releases から `Memorive-Test-Console.exe` または Windows x64 用インストーラーを取得します。Microsoft WebView2 Runtime が必要です。配布物は未署名で、非公開期間のダウンロードにはアクセス権が必要です。
+
+まず内蔵のプロトコル自己テストを実行します。本体の検証には、完全なプログラムフォルダー内の `Memorive.exe` を接続画面へドラッグします。起動された一時 Memorive インスタンスのプライバシー設定でコンソール接続を許可し、簡易テストから始めてください。終了時はセッションを終了・清掃します。
+
+参考実装はシミュレーターです。現在の本体には15の操作があり、`research.qa.simulate` は未実装のため参考端のみで利用できます。模擬質問や成功・失敗イベントは、実際の論文処理やモデル回答の品質を証明しません。
+
+## 自分で変更した本体の接続
+
+[本体のビルド手順](../memorive_desktop/BUILDING.md)に従います。通常ファイルの `Memorive.exe` と、`DesktopReleaseIdentityBinding-v1`、`Memorive-ConsoleBuildCapabilities-v1` の各マニフェストが必要です。公式 EXE の固定ハッシュや署名は必須ではありません。マニフェストの形式確認は公式由来の証明ではありません。
+
+プロトコル1.0、ENV_V1、EPHEMERAL_ONLY、`/memorive/test-bridge/v1`、`MEMORIVE_TEST_CONSOLE_*`、`X-Memorive-Session` を維持します。実行ファイルの実際のハッシュ、セッション、一時ディレクトリを握手時に確認します。未実装の操作は利用不可として扱ってください。[プロトコル定義](source/bridge.schema.json)。
+
+## データ・費用・ライセンス
+
+許可リストの6設定ファイルだけを一時領域へ複製し、元設定は読み取り専用とします。文献庫や会話全体は自動取得しません。安全回帰と模擬操作ではモデルを呼び出しません。モデルを使う単項目操作には毎回の許可が必要で、費用が発生する場合があります。
+
+通常終了後は一時業務データと設定の複製を清掃し、診断用の記録を保持します。異常終了時は次回起動による清掃が必要になる場合があります。共有前にパス、エラー、画像を確認し、秘密情報や個人ワークスペース全体を公開しないでください。アンインストール時も診断記録は保持します。
+
+独自コードは [AGPL-3.0-only](LICENSE) で、**OpenAI Codex** と **Anthropic Claude Code** により開発されています。個人学習・研究・非商用利用の推奨は、ライセンス上の権利を制限しません。アイコン原画の表示は GRADIUS / @Riza2201 で、コードと別の[素材表示](NOTICE.txt)が適用されます。著作者表示は再配布許諾の証明ではありません。[第三者表示](THIRD_PARTY_NOTICES.md)。
+
+Windows x64、Python 3.13.14 と `build_requirements.lock` を使い、`console.spec` でビルドします。EXE を `output/` へコピー後、Inno Setup 6.7.3 の条件に従って `installer.iss` をコンパイルします。ソースの試験には `source/` で pytest 8.3.5 を実行します。

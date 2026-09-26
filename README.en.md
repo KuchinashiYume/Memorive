@@ -97,6 +97,20 @@ Cost records distinguish actual, estimated, and unknown amounts. Public list pri
 
 The current version is v1.01. Source and documentation are being refined; installers have not been made public again. The application and installer are unsigned. Releases is the authoritative place for downloadable versions.
 
+## Improve Memorive and verify your changes
+
+You can modify and extend Memorive for your own learning and research. The repository includes **Memorive Test Console**, an optional tool that starts a selected Memorive executable in a temporary data space, helps reproduce issues and check behavior, and records events, results, and cleanup receipts.
+
+1. Edit and build the application using your preferred development tools.
+2. Run the console's reference self-check, then connect your own executable and grant console access inside that temporary application instance. Real model calls require separate permission and may incur charges.
+3. Review results and diagnostics, then end the session to clear temporary business data. Some local settings can be copied into the session; the original data directory is not overwritten.
+
+Results apply only to the selected executable, configuration, and scenarios. Reference self-checks do not establish that the actual application works, and a passing test is not complete quality or security certification.
+
+[Console source and guide](memorive_console/README.en.md) · [中文](memorive_console/README.md) · [日本語](memorive_console/README.ja.md) · [Installer and portable package](https://github.com/KuchinashiYume/Memorive/releases)
+
+The console is optional for everyday use. Its code uses AGPL-3.0-only; its illustrated icon has separate artist attribution and rights limitations in the [console notice](memorive_console/NOTICE.txt).
+
 ## How this project is developed
 
 Memorive is an AI-developed project. Its project-specific code was generated, modified, and iterated by **OpenAI Codex** and **Anthropic Claude Code**. The project initiator defined requirements and product design and carried out testing and acceptance; they did not write the code themselves. Third-party components retain their authors' attribution and licenses.
