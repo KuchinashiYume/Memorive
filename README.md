@@ -1,126 +1,126 @@
 # Memorive
 
-从阅读资料，到可查证、可复用的研究记录。
+From reading materials to research records you can verify and reuse.
 
-Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面工作台。它把文献、网页和研究对话整理到同一条工作流程中：保留原始资料，提取有来源的信息，围绕证据提问与比较，再将人工确认的结论积累为可继续使用的知识。
+Memorive, or memo, is a Windows desktop workspace for personal learning and research. It connects papers, web pages, and research conversations in one workflow: retain the originals, organize information with its sources, ask questions and compare evidence, then keep the conclusions you have reviewed for future work.
 
-[中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
+[English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-[下载与版本](https://github.com/KuchinashiYume/Memorive/releases) · [使用指南](memorive_desktop/product/desktop/help/zh-CN/manual-text.md) · [设计文档](memorive_desktop/product/desktop/help/zh-CN/design.md) · [问题反馈](https://github.com/KuchinashiYume/Memorive/issues)
+[Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](memorive_desktop/product/desktop/help/en-US/manual-text.md) · [Design](memorive_desktop/product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
 
-## 可以做什么
+## What can you do?
 
-### 读：把文献、网页和对话带入研究
+### Read: bring documents, pages, and conversations into your research
 
-从收件箱导入资料，先检查文件、页数和预览，再安排处理。研究问答也支持直接添加 PDF、图片、Word、Markdown 或 TXT，不必先等文献卡片生成。会话管理可以整理本机 Codex、Claude Code 的记录以及浏览器采集、手动导入的内容；精炼后保留重点、决定、假设和待办，方便接着研究。
+Import materials through the Inbox, check their previews, and choose when to process them. Research Q&A also accepts PDF, images, Word, Markdown, and TXT directly; a document does not need a generated card before you can discuss it. Session Management brings together local Codex and Claude Code records, browser captures, and manual imports. Refinement turns a conversation into reviewable notes about ideas, decisions, assumptions, and next steps.
 
-### 理：把材料整理成能回查的证据
+### Organize: turn materials into evidence you can revisit
 
-资料处理保留原文，并生成文献卡片（Card）与分析报告（Analysis）。卡片用于整理研究对象、方法、关键数值、结果和局限；分析报告在这些材料上提出候选判断。你可以在资料库中对照原文阅读成品，也可以在当前任务中查看每一步使用的模型、输入输出及失败原因，从必要的步骤重试。
+Document processing preserves the original and produces a literature card (Card) and an analysis report (Analysis). Cards organize the research subject, methods, important numbers, findings, and limitations; analysis reports propose interpretations based on those materials. Read them beside the original in the Library. Current Tasks shows the model, inputs, outputs, and errors for each step, so you can retry from the relevant point.
 
-### 证：围绕资料提问，逐条查证引用
+### Verify: ask questions and check each citation
 
-在同一对话中选入多篇文献，比较方法、样本条件、结果与限制。默认从当前对话附件检索，也可以主动扩大到项目资料，并按研究目的调整检索权重。回答中的引用连接到相应来源及保存版本；打开原文片段、页码或行号，检查数字、比较和因果判断是否真的得到支持。引用数量和回答流畅度都不能替代这一步。
+Select several papers in one conversation to compare methods, sample conditions, results, and limitations. Retrieval starts with the conversation's attachments; you can extend it to project materials and adjust retrieval weights for your purpose. Citations point back to sources and their saved versions. Open the passage, page, or line and check whether it supports a number, comparison, or causal claim. A fluent answer or a long reference list is not a substitute for this check.
 
-### 存：让已确认的知识继续服务下一次研究
+### Retain: reuse knowledge you have reviewed
 
-研究问答产生的“可保存的结论”需要人工检查主张、适用范围、限制和引用，再确认加入知识。单篇文献的“确认复核”与结论的“确认加入知识”是两个独立动作。研究记录、历史版本、会话精炼及日报／周报／月报帮助你回看进展；以后继续提问时，可以按自己的选择复用已确认的研究背景。
+Before adding a suggested conclusion to your knowledge, review its claim, scope, limitations, and citations. Reviewing a document's outputs and confirming a derived conclusion are separate actions. Research records, previous versions, refined conversations, and daily, weekly, or monthly reports help you resume work. You choose whether confirmed research context is reused in later questions.
 
-### 按自己的模型和工作方式使用
+### Choose your models and working style
 
-| 能力 | 你可以怎样使用 |
+| Capability | How it helps |
 | --- | --- |
-| API、CLI 与本地模型 | 连接官方接口、OpenAI 兼容接口或中转服务，也可接入本机已登录的 CLI、Ollama 等本地服务。 |
-| 流程模型映射 | 为向量化、卡片生成、分析、审核及周期报告分别分配模型；新任务保存当时使用的配置。 |
-| 网页读取与浏览器组件 | 保存当前页面，或按来源实际支持的范围采集会话；在会话管理中核对完整性后再精炼。 |
-| 模型排行榜 | 对照公开能力指标、价格、来源和更新时间筛选候选模型，再用自己的任务验证。 |
-| 计费与用量 | 按时间和模型查看请求、输入／输出 Tokens、实际或估算费用；缺失费用信息保持未知。 |
+| APIs, CLIs, and local models | Connect official APIs, compatible endpoints, or relay services; use a locally authenticated CLI or a local service such as Ollama. |
+| Workflow model mapping | Assign models separately to embeddings, card generation, analysis, review, and periodic reports. New tasks record the configuration they use. |
+| Web reading and browser companion | Save the current page or capture conversations within a source's supported scope; inspect completeness before refinement. |
+| Model rankings | Compare public capability indicators, prices, sources, and update dates, then test candidates on your own materials. |
+| Billing and usage | Filter requests, input/output tokens, and actual or estimated costs by time and model. Missing cost information remains unknown. |
 
-## 安装与开始使用
+## Install and get started
 
-### 安装
+### Installation
 
-1. 系统需为 **Windows 10 22H2 或更新版本／Windows 11，x64**。从本项目的 Releases 获取安装包及同批 `SHA256SUMS.txt`。
-2. 如需校验文件，在 PowerShell 中运行 `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.01-x64.exe`，将结果与校验文件核对。
-3. 打开安装向导，在“系统检查”准备缺少的组件：.NET Framework 4.8、WebView2 Runtime、Visual C++ v14 **x64**（14.51.36247 或更新版本）。只按界面提示安装缺失项，再返回重新检查。程序自带 Python，日常使用无需另装。
-4. 分别选择程序目录和数据目录，完成安装。首次启动是空白配置；到“设置 → 文档与外部查看”核对工作区及生成产物的位置。
+1. Use **Windows 10 22H2 or later, or Windows 11, x64**. Obtain the installer and its matching `SHA256SUMS.txt` from this project's Releases.
+2. To check the download, run `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.01-x64.exe` in PowerShell and compare the result with the checksum file.
+3. In the installer's System Check, prepare any missing components: .NET Framework 4.8, WebView2 Runtime, and Visual C++ v14 **x64** (14.51.36247 or later). Install only the components requested, then check again. Python is bundled.
+4. Choose application and data directories and finish installation. The first launch has blank settings. In Settings → Documents and external viewing, check your workspace and generated-output locations.
 
-### 配置一条可用的模型通道
+### Configure one model connection
 
-- **API**：进入“设置 → 模型服务与 API”，按服务商提供的信息填写协议、地址、模型 ID，并在凭据栏安全保存 Key。先验证连接，再分配任务用途。
-- **CLI**：先在工具自己的终端完成安装、登录和模型确认，再到“设置 → CLI 接入”选择工具并验证。
-- **本地模型**：先启动本机模型服务、下载模型，再到“设置 → 本地模型”自动检测或填写本机地址，选择正确协议并读取模型列表。
+- **API:** in Settings → Model services and API, enter the provider's protocol, endpoint, and model ID, and save the key through the credential field. Verify the connection before assigning work.
+- **CLI:** install and sign in through the tool's own terminal, confirm the model works, then select and verify the tool in Settings → CLI integration.
+- **Local model:** start the local server and download the model first. In Settings → Local models, use detection or enter the local address, select the matching protocol, and load the model list.
 
-先配置你准备使用的一种方式即可。聊天、图像读取、向量化和审核的能力要求不同；模型出现在列表中，并不表示它适合所有步骤。云端服务或 CLI 订阅由你自行准备，memo 不附赠 API 额度。
+Start with the connection you need. Chat, image reading, embeddings, and review have different requirements; appearing in a list does not establish every capability. Supply your own cloud access or CLI subscription. Memo does not include API credits.
 
-### 完成第一次研究
+### Complete your first research task
 
-1. **设置处理流程**：在“当前流程模型映射”为需要的步骤选择模型。向量模型负责检索表示，生成与审核分别配置。
-2. **选一篇熟悉的资料试跑**：拖入收件箱，检查预览及自动执行开关；到当前任务查看处理进度。
-3. **回到原文核对成品**：在资料库打开原文、文献卡片和分析报告，检查关键数值、方法与结论，确认阅读的是同一份资料和版本。
-4. **开始研究问答**：选项目、新建对话，直接加附件或从本项目资料中选择，核对模型和检索范围后提问。
-5. **把问题问具体**：例如“比较这两篇文献的方法、样本条件与主要限制；分别给出来源，不可直接比较的地方请说明。”
-6. **查引用，再保存**：打开回答里的引用，核对原文及上下文；若准备保存结论，再检查适用范围和限制，完成独立的知识确认。
+1. **Map the workflow:** choose models for the required steps in Workflow model mapping. Configure embeddings, generation, and review according to their roles.
+2. **Try one familiar document:** add it to the Inbox, check its preview and automatic-execution setting, then follow it in Current Tasks.
+3. **Review the outputs:** open the original, Card, and Analysis in the Library. Check methods, key numbers, and conclusions against the same source and version.
+4. **Start a research conversation:** select a project, create a conversation, attach files or choose project materials, and check the model and retrieval scope.
+5. **Ask a focused question:** for example, “Compare the methods, sample conditions, and limitations in these two papers. Cite each source and explain where direct comparison is inappropriate.”
+6. **Check citations before retaining a conclusion:** open the references and surrounding text, then review the scope and limitations before confirming an addition to knowledge.
 
-日常继续使用时，可以同步新增会话、精炼研究记录、调整项目检索预设、查看报告和用量。任务失败先查看具体步骤的错误；更换向量模型前留意旧索引，变更资料路径前备份并确认文件位置。
+For ongoing work, sync new conversation records, refine notes, adjust project retrieval presets, and review reports and usage. Inspect the failed step before retrying a task. Changing embedding models may require rebuilding indexes; back up files before changing storage locations.
 
-完整图文教程在“设置 → 关于与版本 → 使用文档”，提供中文、英文和日文。也可阅读[安装与首次配置](memorive_desktop/INSTALL.md)和[纯文字使用指南](memorive_desktop/product/desktop/help/zh-CN/manual-text.md)。
+Illustrated guides in Chinese, English, and Japanese are available in Settings → About and version → User documentation. See also [installation and first setup](memorive_desktop/INSTALL.md) and the [text guide](memorive_desktop/product/desktop/help/en-US/manual-text.md).
 
-## 它怎样组织你的研究
+## How it fits together
 
 ```mermaid
 flowchart LR
-  sources[文献、网页、会话] --> processing[处理与整理]
-  processing --> library[原文与文献卡片]
-  library --> retrieval[按项目和问题检索]
-  retrieval --> answer[研究问答与比较分析]
-  answer --> check[引用回查与人工判断]
-  check --> knowledge[已确认的研究知识]
+  sources[Documents, pages, conversations] --> processing[Process and organize]
+  processing --> library[Originals and literature cards]
+  library --> retrieval[Retrieve for the project and question]
+  retrieval --> answer[Research Q&A and comparison]
+  answer --> check[Check citations and make a judgment]
+  check --> knowledge[Confirmed research knowledge]
   knowledge --> retrieval
 ```
 
-| 组成 | 职责 |
+| Part | Responsibility |
 | --- | --- |
-| 原始资料与版本 | 保存文件、会话快照和来源位置，便于回到当时使用的材料。 |
-| 处理与资料库 | 转换、整理、提取文献信息，并把原文、卡片和分析结果关联起来。 |
-| 检索与研究 | 根据项目范围和检索设置组织证据，支持问答、跨篇比较及引用检查。 |
-| 知识与研究记录 | 保存人工确认的结论、会话精炼和周期报告，供后续研究复用。 |
-| 共用支撑 | 模型通道、任务状态、用量记录及本地存储为上述过程提供支持。 |
+| Originals and versions | Preserve files, conversation snapshots, and source locations so you can revisit the material used. |
+| Processing and library | Convert and organize documents, extract information, and connect originals to cards and analyses. |
+| Retrieval and research | Assemble evidence within the selected project scope for questions, comparisons, and citation checks. |
+| Knowledge and records | Retain confirmed conclusions, refined conversations, and periodic reports for future research. |
+| Shared services | Provide model connections, task state, usage records, and local storage. |
 
-桌面界面通过应用服务调用 Python 业务层；模型连接集中管理，原始资料与派生结果分开保存。检索索引帮助找到内容，原文和对应版本仍是查证依据。更详细的数据关系与设计取舍见[设计文档](memorive_desktop/product/desktop/help/zh-CN/design.md)，源码构建见[构建说明](memorive_desktop/BUILDING.md)。
+The desktop interface calls a Python application layer through an application service. Model connections are managed centrally, while originals and derived results remain separate. Search indexes help locate content; the original and its version remain the basis for verification. See the [design document](memorive_desktop/product/desktop/help/en-US/design.md) for details and [build instructions](memorive_desktop/BUILDING.md) for source builds.
 
-## 数据、费用与当前状态
+## Data, costs, and current status
 
-资料和配置保存在本地。使用云端模型、网页读取或外部检索时，相关内容会发送到所选服务；请按资料性质选择通道。API Key 应通过专用凭据入口保存，不要放进 Issue、截图或导出的研究记录。
+Materials and settings are stored locally. Cloud models, web reading, and external retrieval send relevant requests to the selected services; choose connections that fit your materials. Store keys through the credential interface and keep them out of issues, screenshots, and research exports.
 
-费用面板区分实际、估算与未知值；公开榜单价格和订阅费用不能直接当作一次任务的实扣。模型回答与引用需要使用者核对。
+Cost records distinguish actual, estimated, and unknown amounts. Public list prices and subscriptions are not the same as the amount charged for one task. Check model answers and citations yourself.
 
-当前版本为 v1.01。源码与文档正在完善，安装包暂未重新公开。应用及安装器尚未进行作者数字签名；可下载的正式版本以 Releases 为准。
+The current version is v1.01. Installers and corresponding source are available from Releases. The application and installer are unsigned; verify downloads against the SHA256 checksums supplied with the release.
 
-## 自己优化 Memorive，并验证修改
+## Improve Memorive and verify your changes
 
-你可以根据自己的学习与研究需求修改、扩展 Memorive。仓库同时提供 **Memorive 测试控制台**：在临时数据空间启动你选择的 Memorive 程序，帮助复现问题、检查接口与功能行为，并查看测试事件、结果和清理回执。
+You can modify and extend Memorive for your own learning and research. The repository includes **Memorive Test Console**, an optional tool that starts a selected Memorive executable in a temporary data space, helps reproduce issues and check behavior, and records events, results, and cleanup receipts.
 
-- **修改代码**：使用你熟悉的编辑器或开发工具，再按构建说明生成程序；控制台负责连接和检查。
-- **验证修改**：先运行参考端自检，再连接你构建的 Memorive，在程序内允许控制台访问后选择测试。涉及真实模型调用的操作需要单独确认，可能产生费用。
-- **保留证据**：查看操作结果和诊断记录；结束会话会清理临时业务数据。部分本地设置可复制到临时空间，正式数据目录不会被覆盖。
+1. Edit and build the application using your preferred development tools.
+2. Run the console's reference self-check, then connect your own executable and grant console access inside that temporary application instance. Real model calls require separate permission and may incur charges.
+3. Review results and diagnostics, then end the session to clear temporary business data. Some local settings can be copied into the session; the original data directory is not overwritten.
 
-测试结果只反映所选版本、配置和场景。参考端自检不能证明实际程序功能全部正常，单次通过也不代表完整质量或安全认证。
+Results apply only to the selected executable, configuration, and scenarios. Reference self-checks do not establish that the actual application works, and a passing test is not complete quality or security certification.
 
-[控制台源码与中文使用说明](memorive_console/README.md) · [English](memorive_console/README.en.md) · [日本語](memorive_console/README.ja.md) · [安装包与便携包](https://github.com/KuchinashiYume/Memorive/releases)
+[Console source and guide](memorive_console/README.en.md) · [中文](memorive_console/README.md) · [日本語](memorive_console/README.ja.md) · [Installer and portable package](https://github.com/KuchinashiYume/Memorive/releases)
 
-控制台为可选开发工具，日常使用 Memorive 无需安装。代码沿用 AGPL-3.0-only；控制台图标另有原画作者署名与权利说明，见 [控制台声明](memorive_console/NOTICE.txt)。
+The console is optional for everyday use. Its code uses AGPL-3.0-only; its illustrated icon has separate artist attribution and rights limitations in the [console notice](memorive_console/NOTICE.txt).
 
-## 开发方式
+## How this project is developed
 
-Memorive 是由 AI 编程工具开发的项目。项目自身的代码由 **OpenAI Codex** 与 **Anthropic Claude Code** 生成、修改和迭代；项目发起者负责需求、产品设计与测试验收，未亲自编写代码。第三方组件保留其各自作者的署名与许可。
+Memorive is an AI-developed project. Its project-specific code was generated, modified, and iterated by **OpenAI Codex** and **Anthropic Claude Code**. The project initiator defined requirements and product design and carried out testing and acceptance; they did not write the code themselves. Third-party components retain their authors' attribution and licenses.
 
-## 许可与角色素材
+## License and character artwork
 
-项目自身代码采用 [AGPL-3.0-only](LICENSE)，适用范围见[许可说明](memorive_desktop/LICENSING.md)。作者鼓励个人学习、研究与非商业使用，这一倡议不增加代码许可证的限制。
+Project-specific code uses [AGPL-3.0-only](LICENSE); see the [licensing scope](memorive_desktop/LICENSING.md). The maintainer encourages personal learning, research, and non-commercial use. This preference adds no restrictions to the code license.
 
-部分角色图像是参考《Blue Archive》的 AI 辅助二次创作。Memorive 是非官方个人项目，与 Nexon、Nexon Games 或 Yostar 无关联；原角色、名称和标识的权利归各自权利人所有。桌宠、表情和角色图标单独适用[素材声明](memorive_desktop/ASSET_NOTICE.md)，第三方组件见[第三方说明](memorive_desktop/THIRD_PARTY_NOTICES.md)。
+Some character images are AI-assisted fan creations inspired by Blue Archive. Memorive is an unofficial personal project, unaffiliated with Nexon, Nexon Games, or Yostar. Underlying characters, names, and marks belong to their respective rights holders. Desktop-pet images, expressions, and character icons are covered separately by the [asset notice](memorive_desktop/ASSET_NOTICE.md). Dependencies are listed in the [third-party notices](memorive_desktop/THIRD_PARTY_NOTICES.md).
 
-## 配套插件
+## Companion plugins
 
-Obsidian 笔记与 Zotero 文献可通过配套插件连接 Memorive，支持预览导入、证据检索、问答及结果回写。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.md).
+Connect Obsidian notes and Zotero items to Memorive for previewed imports, evidence search, questions and managed note writeback. [Installation / 安装 / インストール](memorive_desktop/integrations/README.en.md).

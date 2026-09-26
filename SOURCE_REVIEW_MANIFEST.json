@@ -1,6 +1,6 @@
 {
   "schema": "MemoriveSourceExportReview-v1",
-  "public_release_authorized": false,
+  "public_release_authorized": true,
   "files": [
     {
       "path": ".gitattributes",
@@ -23,24 +23,34 @@
       "bytes": 768
     },
     {
+      "path": "PUBLIC_RELEASE.md",
+      "sha256": "6f95c22ee79b0b5af7ea4e3a4a2b229491172d3fe1e398c8131f5f05357b3c28",
+      "bytes": 1625
+    },
+    {
       "path": "README.en.md",
-      "sha256": "6f11b538e515dfd0f802cdcbb4f18afe1144d99ad42723a9cd9171b84514e1d5",
-      "bytes": 12177
+      "sha256": "40c17d6d8c3671e5adf608fd7efe2ceb7605fadbd1ae9ecc7018786443e852bd",
+      "bytes": 12167
     },
     {
       "path": "README.ja.md",
-      "sha256": "8b073c9acb2c78adf94566b203b60e8e0b3303e158077bfa9a37c80b5fd770eb",
-      "bytes": 14279
+      "sha256": "fe77cbeec005a41cf1590a757f95ecf6274eca154bab9eca9e8809a7d8fdfe17",
+      "bytes": 14296
     },
     {
       "path": "README.md",
-      "sha256": "4dc64499bbdfdeb3fbda4d51dc646576176694bb2c95cdfd0bd00cdd2c0b649b",
-      "bytes": 11251
+      "sha256": "40c17d6d8c3671e5adf608fd7efe2ceb7605fadbd1ae9ecc7018786443e852bd",
+      "bytes": 12167
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "4d6c42cf822a14911b4611e1089a06c821d2615e93509c7ff9cbc1e28418196c",
+      "bytes": 11115
     },
     {
       "path": "SOURCE_VERSION.json",
-      "sha256": "27ba607611c839882c4eb5f0b0ecf4d55e792607f6491ed0ff36872b41df1acc",
-      "bytes": 935
+      "sha256": "44d4136471b6cbdf68c225788eca5477ed8a65c5c0d2f0a10493e7ec48e3dd5a",
+      "bytes": 976
     },
     {
       "path": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_BibliographicIdentity_模块契约_r0.1.schema.json",
@@ -524,8 +534,8 @@
     },
     {
       "path": "memorive_console/VERIFICATION.md",
-      "sha256": "c8a0ab47d1add6856afeeaf92a87f5f282b4677cc8a84e3bb537c9ad6e649db6",
-      "bytes": 1458
+      "sha256": "196e05657175695a0eca0988d651d0b2dc24a9bff4d4b266689309fb1ba18012",
+      "bytes": 1523
     },
     {
       "path": "memorive_console/assets/memorive_test_console.ico",
@@ -914,8 +924,8 @@
     },
     {
       "path": "memorive_desktop/BUILDING.md",
-      "sha256": "f1194106249f96604c9163ca5ad3aa8f754be4e953bf8a82549842d418495fbd",
-      "bytes": 5858
+      "sha256": "326543ddb9d794ec7af44c5988709c260cdc18b248cd98e8da52eae6db086272",
+      "bytes": 5986
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.public-candidate.json",
@@ -969,8 +979,8 @@
     },
     {
       "path": "memorive_desktop/RELEASE_CHECKS.md",
-      "sha256": "9f119af665a4482333f21b3dfe76e4f8bb3e840db06abc996f44c0db5238a606",
-      "bytes": 3782
+      "sha256": "906ecb4318aef69ab3697816c5800d10792d9ee22efccacf72ae2f373d79f86c",
+      "bytes": 3831
     },
     {
       "path": "memorive_desktop/RELEASE_NOTES.md",
@@ -979,8 +989,8 @@
     },
     {
       "path": "memorive_desktop/RELEASE_PREPARATION.md",
-      "sha256": "5e415042b960171ced5addea4c53560ef4b91eb5a307913635eefa398806f35f",
-      "bytes": 722
+      "sha256": "2cbb5a74c18b012b012831b414d765e7a273863ca3297168beeb170c6512ba2d",
+      "bytes": 799
     },
     {
       "path": "memorive_desktop/SECURITY.md",
@@ -8527,8 +8537,8 @@
   ],
   "text_findings": [],
   "scan_scope": "Selected textual files; binary screenshots/PDF contents and all possible secrets are not covered",
-  "status": "PRIVATE_SOURCE_SNAPSHOT",
-  "source_tag": null,
-  "documentation_update": "Add optional test console, development guides, separate artwork notice and dependency inventory",
-  "distribution_revision": "console-integration-20260926"
+  "status": "PUBLIC_RELEASE_SOURCE",
+  "source_tag": "v1.01",
+  "documentation_update": "English GitHub homepage and release description; preserve Chinese and Japanese guides",
+  "distribution_revision": "english-homepage-release-20260926"
 }

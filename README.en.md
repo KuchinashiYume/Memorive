@@ -4,7 +4,7 @@ From reading materials to research records you can verify and reuse.
 
 Memorive, or memo, is a Windows desktop workspace for personal learning and research. It connects papers, web pages, and research conversations in one workflow: retain the originals, organize information with its sources, ask questions and compare evidence, then keep the conclusions you have reviewed for future work.
 
-[中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
+[English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
 [Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](memorive_desktop/product/desktop/help/en-US/manual-text.md) · [Design](memorive_desktop/product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
 
@@ -95,7 +95,7 @@ Materials and settings are stored locally. Cloud models, web reading, and extern
 
 Cost records distinguish actual, estimated, and unknown amounts. Public list prices and subscriptions are not the same as the amount charged for one task. Check model answers and citations yourself.
 
-The current version is v1.01. Source and documentation are being refined; installers have not been made public again. The application and installer are unsigned. Releases is the authoritative place for downloadable versions.
+The current version is v1.01. Installers and corresponding source are available from Releases. The application and installer are unsigned; verify downloads against the SHA256 checksums supplied with the release.
 
 ## Improve Memorive and verify your changes
 

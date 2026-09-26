@@ -4,7 +4,7 @@
 
 Memorive（略称 memo）は、個人の学習・研究向けの Windows デスクトップワークスペースです。文献、Web ページ、研究中の会話を一つの流れで扱います。原資料を残し、出典とともに情報を整理し、根拠に沿って質問・比較したうえで、自分で確認した結論を次の研究に活用できます。
 
-[中文](README.md) · [English](README.en.md) · [日本語](README.ja.md)
+[English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
 [ダウンロード](https://github.com/KuchinashiYume/Memorive/releases) · [利用ガイド](memorive_desktop/product/desktop/help/ja-JP/manual-text.md) · [設計文書](memorive_desktop/product/desktop/help/ja-JP/design.md) · [問題の報告](https://github.com/KuchinashiYume/Memorive/issues)
 
@@ -95,7 +95,7 @@ flowchart LR
 
 費用記録は実額・推定・不明を区別します。公開価格やサブスクリプション料金は、個々のタスクの請求額とは異なります。モデルの回答と引用は利用者自身で確認します。
 
-現在の版は v1.01 です。ソースと文書を改善中で、インストーラーはまだ再公開していません。アプリとインストーラーは未署名です。ダウンロード可能な版は Releases で確認してください。
+現在の版は v1.01 です。インストーラーと対応するソースは Releases から取得できます。アプリとインストーラーは未署名です。同じリリースの SHA256 チェックサムでダウンロードを確認してください。
 
 ## Memorive を改善し、変更を確かめる
 

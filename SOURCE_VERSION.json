@@ -2,16 +2,17 @@
   "product": "Memorive",
   "version": "1.01",
   "application_package_id": "v1.01",
-  "source_tag": null,
+  "source_tag": "v1.01",
   "code_license": "AGPL-3.0-only",
   "artwork_license": "See memorive_desktop/ASSET_NOTICE.md",
   "history_policy": "Independent release repository. Prior private commits are retained; the current tree contains the naming revision.",
-  "distribution_revision": "console-integration-20260926",
+  "distribution_revision": "english-homepage-release-20260926",
   "installer_sha256": "e4dc3a52040de27d2afab9b50e34672fbe32705a16bf18aaa96c7fbef18c04e4",
   "application_exe_sha256": "fd0810b290c9b38ab82dc8ab5f2f4dcadacd1213ad9c74718490ce30aa814dc1",
   "build_policy": "Public version v1.01; package contents and corresponding source are bound by SHA256. Internal application build counters are excluded.",
-  "status": "PRIVATE_SOURCE_SNAPSHOT",
+  "status": "PUBLIC_RELEASE_SOURCE",
   "companion_version": "1.0.0",
   "console_version": "1.01",
-  "console_exe_sha256": "f8452762381d0aa665ce3695d8b6d171286f652424bb8150b203f9d4123c64bf"
+  "console_exe_sha256": "f8452762381d0aa665ce3695d8b6d171286f652424bb8150b203f9d4123c64bf",
+  "default_github_language": "en"
 }
