@@ -49,3 +49,7 @@ Public names use functional responsibilities, such as `document_processing`, `mo
 `tools/export_source_candidate.py --output <new directory outside the repository>` produces a source review candidate from the declared inputs. Review the exact file set before upload. `SOURCE_REVIEW_MANIFEST.json` describes the current reviewed checkout; a Git commit and source archive identify a particular source version.
 
 The repository and release remain private/draft during this revision. The installation review must complete at least five rounds. Rounds one through three are mandatory; from round four, two consecutive clean rounds are required. A missed product name or internal identifier restarts the clean-round count after repair. Test installations are removed after review; the user's existing portable installation and personal data are retained.
+
+## Companion packages
+
+The application build also creates `dist/Memorive/integrations/`, including the Obsidian plugin, Zotero XPI, SDKs and skills. Package them separately with `python memorive_desktop/tools/package_companions.py --output <new directory>`. The source manifest binds these inputs; no host profile or user data is read.

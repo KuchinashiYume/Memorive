@@ -1,0 +1,14 @@
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml" onload="window.memoLoadPreferences()">
+  <groupbox>
+    <html:h2>Memorive 连接</html:h2>
+    <html:p>从 Memo 的“连接与同步”创建 Zotero 连接，然后复制以下路径。模型与会话由 Memo 管理。</html:p>
+    <html:label>Memorive.exe <html:input id="memo-pref-helper" type="text" style="width:100%"/></html:label>
+    <html:label>Memo 研究工作区 <html:input id="memo-pref-workspace" type="text" style="width:100%"/></html:label>
+    <html:label>项目 ID <html:input id="memo-pref-project" type="text"/></html:label>
+    <html:label>连接 <html:select id="memo-pref-connection"/></html:label>
+    <html:button id="memo-pref-detect">读取可用连接</html:button>
+    <html:button id="memo-pref-save">保存</html:button>
+    <html:p id="memo-pref-status" role="status"/>
+    <html:p>只读取主动选择的文献、附件与批注；回写创建该文献的专属子笔记。手动修改过的结果会提示另存。</html:p>
+  </groupbox>
+</vbox>

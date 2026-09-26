@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "Memorive Companion",
+  "version": "1.0.0",
+  "description": "将选中的文献与批注连接到 Memo，检索证据并回写研究结果。",
+  "applications": {
+    "zotero": {
+      "id": "memorive-companion@memorive",
+      "update_url": "https://raw.githubusercontent.com/KuchinashiYume/Memorive/main/memorive_desktop/integrations/zotero/memorive-companion/updates.json",
+      "strict_min_version": "10.0",
+      "strict_max_version": "10.0.*"
+    }
+  }
+}

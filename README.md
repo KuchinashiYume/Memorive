@@ -106,3 +106,7 @@ Memorive 是由 AI 编程工具开发的项目。项目自身的代码由 **Open
 项目自身代码采用 [AGPL-3.0-only](LICENSE)，适用范围见[许可说明](memorive_desktop/LICENSING.md)。作者鼓励个人学习、研究与非商业使用，这一倡议不增加代码许可证的限制。
 
 部分角色图像是参考《Blue Archive》的 AI 辅助二次创作。Memorive 是非官方个人项目，与 Nexon、Nexon Games 或 Yostar 无关联；原角色、名称和标识的权利归各自权利人所有。桌宠、表情和角色图标单独适用[素材声明](memorive_desktop/ASSET_NOTICE.md)，第三方组件见[第三方说明](memorive_desktop/THIRD_PARTY_NOTICES.md)。
+
+## 配套插件
+
+Obsidian 笔记与 Zotero 文献可通过配套插件连接 Memorive，支持预览导入、证据检索、问答及结果回写。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.md).

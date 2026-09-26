@@ -106,3 +106,7 @@ Memorive は AI コーディングツールで開発されたプロジェクト�
 プロジェクト独自のコードには [AGPL-3.0-only](LICENSE) を適用します。[適用範囲](memorive_desktop/LICENSING.md)をご確認ください。個人の学習・研究と非商用利用を推奨しますが、この方針はコードのライセンスに制限を追加するものではありません。
 
 一部のキャラクター画像は『ブルーアーカイブ』を参考に AI を用いて制作した二次創作です。Memorive は個人による非公式プロジェクトで、Nexon、Nexon Games、Yostar との関係はありません。原キャラクター、名称、標章などの権利は各権利者に帰属します。デスクトップペット、表情、キャラクターアイコンには[素材に関する声明](memorive_desktop/ASSET_NOTICE.md)を別途適用します。依存コンポーネントは[第三者に関する説明](memorive_desktop/THIRD_PARTY_NOTICES.md)をご覧ください。
+
+## 連携プラグイン
+
+Obsidian のノートと Zotero の文献を接続し、取り込みのプレビュー、根拠検索、質問、結果の書き戻しを利用できます。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.ja.md).

@@ -183,6 +183,9 @@ coll = COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='Memorive')
     exclusion_record=out/'excluded-system-runtime.json'
     if exclusion_record.exists():receipt['excluded_system_runtime']=json.loads(exclusion_record.read_text('utf8'))
     exe=out/'dist/Memorive/Memorive.exe'
+    if result.returncode == 0:
+        from package_companions import package
+        receipt['companion_files'] = len(package(out/'dist/Memorive/integrations'))
     if exe.exists():receipt['exe_sha256']=digest(exe)
     write_json(out/'build-receipt.json',receipt)
     print(json.dumps({'status':receipt['status'],'output':str(out),'previous_exe_used':False}))

@@ -1,0 +1,450 @@
+{
+  "api_version": "1.0.0",
+  "transport": "stdio",
+  "methods": {
+    "memo.capabilities": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "memo.projects": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "memo.connections": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "project"
+      ],
+      "additionalProperties": false
+    },
+    "memo.search": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "artifact_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24
+        }
+      },
+      "required": [
+        "query",
+        "project"
+      ],
+      "additionalProperties": false
+    },
+    "memo.read_evidence": {
+      "type": "object",
+      "properties": {
+        "evidence_id": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        },
+        "expected_hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "project"
+      ],
+      "additionalProperties": false
+    },
+    "memo.prepare_tension": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24
+        }
+      },
+      "required": [
+        "project",
+        "evidence_ids"
+      ],
+      "additionalProperties": false
+    },
+    "memo.submit_draft": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "claim": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "string"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24
+        }
+      },
+      "required": [
+        "project",
+        "title",
+        "claim",
+        "scope",
+        "limitations",
+        "evidence_ids"
+      ],
+      "additionalProperties": false
+    },
+    "memo.import_preview": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16000
+          },
+          "maxItems": 2000
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 2000
+        },
+        "bibliography": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "connection_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.import_commit": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "preview_hash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "selected_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16000
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "connection_id",
+        "preview_id",
+        "preview_hash"
+      ],
+      "additionalProperties": false
+    },
+    "memo.outputs": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "connection_id",
+        "source_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.export": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "output_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16000
+          },
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "connection_id",
+        "source_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.writeback_prepare": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "external_note_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "existing_text": {
+          "type": "string",
+          "maxLength": 2097152
+        },
+        "output_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16000
+          },
+          "maxItems": 2000
+        },
+        "format": {
+          "enum": [
+            "markdown",
+            "html"
+          ]
+        }
+      },
+      "required": [
+        "connection_id",
+        "source_id",
+        "external_note_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.writeback_ack": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "text_hash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "host_text": {
+          "type": "string",
+          "maxLength": 2097152
+        },
+        "host_note_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "connection_id",
+        "plan_id",
+        "text_hash"
+      ],
+      "additionalProperties": false
+    },
+    "memo.job_submit": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "kind": {
+          "enum": [
+            "ask",
+            "agent",
+            "process",
+            "process_retry"
+          ]
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "thread_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "connection_id",
+        "kind",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.job_status": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.job_cancel": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "additionalProperties": false
+    },
+    "memo.events": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "permissions": {
+    "memo.capabilities": "read",
+    "memo.projects": "read",
+    "memo.connections": "read",
+    "memo.search": "read",
+    "memo.read_evidence": "read",
+    "memo.prepare_tension": "read",
+    "memo.submit_draft": "draft",
+    "memo.import_preview": "import",
+    "memo.import_commit": "import",
+    "memo.outputs": "read",
+    "memo.export": "export",
+    "memo.writeback_prepare": "writeback",
+    "memo.writeback_ack": "writeback",
+    "memo.job_submit": "automation",
+    "memo.job_status": "read",
+    "memo.job_cancel": "automation",
+    "memo.events": "events"
+  },
+  "compatibility": "Public major API version is independent of desktop build. Legacy unscoped local companions remain compatible.",
+  "trust_boundary": "same local OS user; client IDs are grants, not credentials or process sandboxing",
+  "automation": {
+    "queue_owner": "Memorive desktop",
+    "offline_submission": "durable QUEUED; executes after desktop starts and grant is revalidated",
+    "events": "project scoped metadata, monotonic cursor, polling, no callback URLs",
+    "cancel": "queued jobs and dispatched research jobs; dispatched Phase1 jobs use current task controls",
+    "models": "explicit model grant; saved profiles, existing gateway/cache/receipts"
+  }
+}

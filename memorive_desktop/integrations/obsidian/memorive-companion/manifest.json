@@ -1,0 +1,9 @@
+{
+  "id": "memorive-companion",
+  "name": "Memorive Companion",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "资料导入、来源检索、共享问答和受保护的结果回写。",
+  "author": "Memorive",
+  "isDesktopOnly": true
+}

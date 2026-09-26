@@ -106,3 +106,7 @@ Memorive is an AI-developed project. Its project-specific code was generated, mo
 Project-specific code uses [AGPL-3.0-only](LICENSE); see the [licensing scope](memorive_desktop/LICENSING.md). The maintainer encourages personal learning, research, and non-commercial use. This preference adds no restrictions to the code license.
 
 Some character images are AI-assisted fan creations inspired by Blue Archive. Memorive is an unofficial personal project, unaffiliated with Nexon, Nexon Games, or Yostar. Underlying characters, names, and marks belong to their respective rights holders. Desktop-pet images, expressions, and character icons are covered separately by the [asset notice](memorive_desktop/ASSET_NOTICE.md). Dependencies are listed in the [third-party notices](memorive_desktop/THIRD_PARTY_NOTICES.md).
+
+## Companion plugins
+
+Connect Obsidian notes and Zotero items to Memorive for previewed imports, evidence search, questions and managed note writeback. [Installation / 安装 / インストール](memorive_desktop/integrations/README.en.md).

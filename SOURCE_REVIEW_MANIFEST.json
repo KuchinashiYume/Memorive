@@ -13,6 +13,36 @@
       "bytes": 151
     },
     {
+      "path": "LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "bytes": 34523
+    },
+    {
+      "path": "LICENSING.md",
+      "sha256": "9fbf04760517b2c12284db7fa200c984bb118fd502f6d3858e0a9ccef6ae942b",
+      "bytes": 138
+    },
+    {
+      "path": "README.en.md",
+      "sha256": "4095288bf703d682f4533b354adf5a4996f6b19b069dde10b9d78a1927e32f13",
+      "bytes": 10678
+    },
+    {
+      "path": "README.ja.md",
+      "sha256": "73055217a315a15b0a0a19fc413ca0f150710c90eab47143927b8765dc765740",
+      "bytes": 12533
+    },
+    {
+      "path": "README.md",
+      "sha256": "7963ea7ef7f8fe600680280f70218d4e0e1453718d41857373399a8c1f485626",
+      "bytes": 9770
+    },
+    {
+      "path": "SOURCE_VERSION.json",
+      "sha256": "b26d5aecaf777379b9b9b9d2c8a76f0e9673615ae9d6ba5056d37670d666ed24",
+      "bytes": 831
+    },
+    {
       "path": "contracts/Discovery_文献发现/10_模块契约/Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_BibliographicIdentity_模块契约_r0.1.schema.json",
       "sha256": "dd0cbe463c3c416090fd5026e80b0a6a6e826ff62658567e6449852229ed7791",
       "bytes": 3297
@@ -453,16 +483,6 @@
       "bytes": 2263
     },
     {
-      "path": "LICENSE",
-      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
-      "bytes": 34523
-    },
-    {
-      "path": "LICENSING.md",
-      "sha256": "9fbf04760517b2c12284db7fa200c984bb118fd502f6d3858e0a9ccef6ae942b",
-      "bytes": 138
-    },
-    {
       "path": "memorive_desktop/ARTWORK_RIGHTS.md",
       "sha256": "a66fc5ce7c8518c96ad6005dbe978dfad81067d8e6d9f1a5aa97229374eb50fb",
       "bytes": 7222
@@ -473,14 +493,139 @@
       "bytes": 6622
     },
     {
+      "path": "memorive_desktop/BUILDING.md",
+      "sha256": "0e2bdff7679ee704b98e9aced478293a159fd39ea5b50b30e047763e2800cc13",
+      "bytes": 5401
+    },
+    {
       "path": "memorive_desktop/BUILD_RESOURCES.public-candidate.json",
       "sha256": "babc9ca9e8e77047a9a257391924cbc1bc18a23c38ed9dff557f810e092d11eb",
       "bytes": 140961
     },
     {
-      "path": "memorive_desktop/BUILDING.md",
-      "sha256": "762f091890cf202c8deb77675e83be3cc87307da0daf7c17c1ecd5c9f60efa59",
-      "bytes": 5060
+      "path": "memorive_desktop/GITHUB_FAN_PROJECTS.md",
+      "sha256": "53320e0253a23483f01a37f529e953ccdb132f25b47fb359304c208b353b7d22",
+      "bytes": 14169
+    },
+    {
+      "path": "memorive_desktop/INSTALL.md",
+      "sha256": "fac9b81570e9a15c9fd800e7b5df463be36f1074e2a34756dc292f341c429c3d",
+      "bytes": 2231
+    },
+    {
+      "path": "memorive_desktop/LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "bytes": 34523
+    },
+    {
+      "path": "memorive_desktop/LICENSE_PROPOSAL.md",
+      "sha256": "d13ee41709192fb4ec18aa8dbb3950d327981f4dc23d798ed6e3ac3110d05fdd",
+      "bytes": 2907
+    },
+    {
+      "path": "memorive_desktop/LICENSING.md",
+      "sha256": "79557f830010b1afeb2864e4dd3090c9b422b6e78b345e8e1024a991aa119aae",
+      "bytes": 1532
+    },
+    {
+      "path": "memorive_desktop/PUBLISHING.md",
+      "sha256": "c263c533a29ffec3f7c404b98ceda1e130d2e8edbbbc46299feca6bf49e15e11",
+      "bytes": 2982
+    },
+    {
+      "path": "memorive_desktop/README_PUBLIC.en.md",
+      "sha256": "f101e521863b2a27a0aa6e7f60603168558423dbff9a7cba1f136c5bd55e3dd9",
+      "bytes": 10290
+    },
+    {
+      "path": "memorive_desktop/README_PUBLIC.ja.md",
+      "sha256": "1622c8f421db0d70c2b03104d9d23afd8d137131f9a27644ecde1fac841385e5",
+      "bytes": 12112
+    },
+    {
+      "path": "memorive_desktop/README_PUBLIC.md",
+      "sha256": "2a49b7f5ad833b1c508fce54c4260cd3c521c624fe8ecf6cc92bb8b0c1144632",
+      "bytes": 9388
+    },
+    {
+      "path": "memorive_desktop/RELEASE_CHECKS.md",
+      "sha256": "5f87eedc2fe457c7f297d380c2b65ec13ca822ca060bfdd583f1f92a08aa407f",
+      "bytes": 3781
+    },
+    {
+      "path": "memorive_desktop/RELEASE_NOTES.md",
+      "sha256": "465d3bf9a8278496f466819531696ac6690ebf9d065d2892ded53204431b055a",
+      "bytes": 2051
+    },
+    {
+      "path": "memorive_desktop/RELEASE_PREPARATION.md",
+      "sha256": "5e415042b960171ced5addea4c53560ef4b91eb5a307913635eefa398806f35f",
+      "bytes": 722
+    },
+    {
+      "path": "memorive_desktop/SECURITY.md",
+      "sha256": "fadacecec7fd4dc3772061580051ed9856f1497f5ad2e06f16a3ddc1d976f8c1",
+      "bytes": 670
+    },
+    {
+      "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
+      "sha256": "0594026cdc8baaea5d31c18afae920d98d2af6cc3145d964582736fe8e35936c",
+      "bytes": 234078
+    },
+    {
+      "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
+      "sha256": "27399b3a53993e62d556cbee3f2eabd5b6c88523f1816349eb29f5fd0ae9bca9",
+      "bytes": 4608
+    },
+    {
+      "path": "memorive_desktop/contracts/InboxImportContract.json",
+      "sha256": "eca08255c37b3b2e1a53729b20bb52a0883e034cee44eeaee18793eadc5dda61",
+      "bytes": 1475
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v1.json",
+      "sha256": "315ed854b00ac155692121cc86cbc80e52d2870fcefcebe2c0832c2bb0c62e8b",
+      "bytes": 1376
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v2.json",
+      "sha256": "2dd9e7b890193195e5a51aa326ffe67e57b0bc8904a3dbce88d048837918ebc0",
+      "bytes": 1420
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v3.json",
+      "sha256": "8d9eff4262035d073463662b50adcf78268d77e4d255b0bb1b3babaa3ee4c548",
+      "bytes": 2419
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v4.json",
+      "sha256": "46af0cb21e60a2b81fd60c1d0551620dbcdecc75ae8a2a1a9c0edc990653f6ec",
+      "bytes": 2925
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v1.schema.json",
+      "sha256": "1725d6e66e034fe01504df04195113b7bb8b1266ac9ac718e1a4d3dd6ac4f23f",
+      "bytes": 13747
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v2.schema.json",
+      "sha256": "4df717e453df0af56f9c653b6c46017ad299e271413b200d9a4d296b11ce2052",
+      "bytes": 17256
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v3.schema.json",
+      "sha256": "a66b42c75525f785164985dff92d763f1db87f0eb5f04083735c28f81fb5ad50",
+      "bytes": 18292
+    },
+    {
+      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v4.schema.json",
+      "sha256": "0e6ff07f57741162bee627b21ba6c168cb3dbca6201cc6a90551d1fd9598fe2c",
+      "bytes": 18292
+    },
+    {
+      "path": "memorive_desktop/contracts/WorkflowOcrExamScoreSuccessor.json",
+      "sha256": "b2c195e0941ab5a128d5f4a438d6b411e2175d272d52f81692cc4fd032cac24a",
+      "bytes": 3765
     },
     {
       "path": "memorive_desktop/contracts/accounting/AccountingPanelProductMethod-v3.json",
@@ -583,11 +728,6 @@
       "bytes": 591
     },
     {
-      "path": "memorive_desktop/contracts/InboxImportContract.json",
-      "sha256": "eca08255c37b3b2e1a53729b20bb52a0883e034cee44eeaee18793eadc5dda61",
-      "bytes": 1475
-    },
-    {
       "path": "memorive_desktop/contracts/integration/CanonicalArtifactRegistryReadOnlyBoundary.json",
       "sha256": "870a0c6faa1e9cb10f6db36b3b6c6efbf6be8e3c8657f51d1b2f7de82d0b2cfe",
       "bytes": 316
@@ -668,46 +808,6 @@
       "bytes": 2395
     },
     {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v1.json",
-      "sha256": "315ed854b00ac155692121cc86cbc80e52d2870fcefcebe2c0832c2bb0c62e8b",
-      "bytes": 1376
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v2.json",
-      "sha256": "2dd9e7b890193195e5a51aa326ffe67e57b0bc8904a3dbce88d048837918ebc0",
-      "bytes": 1420
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v3.json",
-      "sha256": "8d9eff4262035d073463662b50adcf78268d77e4d255b0bb1b3babaa3ee4c548",
-      "bytes": 2419
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProductMethods-v4.json",
-      "sha256": "46af0cb21e60a2b81fd60c1d0551620dbcdecc75ae8a2a1a9c0edc990653f6ec",
-      "bytes": 2925
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v1.schema.json",
-      "sha256": "1725d6e66e034fe01504df04195113b7bb8b1266ac9ac718e1a4d3dd6ac4f23f",
-      "bytes": 13747
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v2.schema.json",
-      "sha256": "4df717e453df0af56f9c653b6c46017ad299e271413b200d9a4d296b11ce2052",
-      "bytes": 17256
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v3.schema.json",
-      "sha256": "a66b42c75525f785164985dff92d763f1db87f0eb5f04083735c28f81fb5ad50",
-      "bytes": 18292
-    },
-    {
-      "path": "memorive_desktop/contracts/ModelLeaderboardProjection-v4.schema.json",
-      "sha256": "0e6ff07f57741162bee627b21ba6c168cb3dbca6201cc6a90551d1fd9598fe2c",
-      "bytes": 18292
-    },
-    {
       "path": "memorive_desktop/contracts/retrieval/LocatorRouteContract.json",
       "sha256": "88f1ea50ac5c23223ce75016f32011ab78ef81e5e0e00495e068b32e9e806b98",
       "bytes": 536
@@ -738,19 +838,9 @@
       "bytes": 1166
     },
     {
-      "path": "memorive_desktop/contracts/WorkflowOcrExamScoreSuccessor.json",
-      "sha256": "b2c195e0941ab5a128d5f4a438d6b411e2175d272d52f81692cc4fd032cac24a",
-      "bytes": 3765
-    },
-    {
-      "path": "memorive_desktop/GITHUB_FAN_PROJECTS.md",
-      "sha256": "53320e0253a23483f01a37f529e953ccdb132f25b47fb359304c208b353b7d22",
-      "bytes": 14169
-    },
-    {
-      "path": "memorive_desktop/INSTALL.md",
-      "sha256": "fac9b81570e9a15c9fd800e7b5df463be36f1074e2a34756dc292f341c429c3d",
-      "bytes": 2231
+      "path": "memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json",
+      "sha256": "973d45e8194c519e288e4e0d3d467ab5a27667663fc0647547c5517a5501b7df",
+      "bytes": 2888
     },
     {
       "path": "memorive_desktop/installer/public_candidate/app.manifest",
@@ -798,11 +888,6 @@
       "bytes": 324
     },
     {
-      "path": "memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json",
-      "sha256": "973d45e8194c519e288e4e0d3d467ab5a27667663fc0647547c5517a5501b7df",
-      "bytes": 2888
-    },
-    {
       "path": "memorive_desktop/installer/public_candidate/uninstall.html",
       "sha256": "21f2082b0293385f79ecd48342e748f4156014205e2b592e7d4ed4a618645b87",
       "bytes": 120153
@@ -813,19 +898,139 @@
       "bytes": 3367
     },
     {
-      "path": "memorive_desktop/LICENSE",
-      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
-      "bytes": 34523
+      "path": "memorive_desktop/integrations/NOTICE.md",
+      "sha256": "960ac5d9ef01735dccd86346e7df1377f8c51ec1631e3e5c1763e4f6f67df71c",
+      "bytes": 1426
     },
     {
-      "path": "memorive_desktop/LICENSE_PROPOSAL.md",
-      "sha256": "d13ee41709192fb4ec18aa8dbb3950d327981f4dc23d798ed6e3ac3110d05fdd",
-      "bytes": 2907
+      "path": "memorive_desktop/integrations/README.en.md",
+      "sha256": "28025a1ae126eca75188e626d70a6565f1adfcf30f846a2cdfd7626661e12d06",
+      "bytes": 2377
     },
     {
-      "path": "memorive_desktop/LICENSING.md",
-      "sha256": "79557f830010b1afeb2864e4dd3090c9b422b6e78b345e8e1024a991aa119aae",
-      "bytes": 1532
+      "path": "memorive_desktop/integrations/README.ja.md",
+      "sha256": "242c00540af638b31f3b16b970b86256c5846eae9d1161a3e6f4477a61cc5484",
+      "bytes": 2920
+    },
+    {
+      "path": "memorive_desktop/integrations/README.md",
+      "sha256": "39d7b3d2eda5b712d68800bd4655790a07a9e49db0ea1849a8efac694983efc0",
+      "bytes": 3773
+    },
+    {
+      "path": "memorive_desktop/integrations/developer/api-v1.schema.json",
+      "sha256": "5e986270c4a0d29a74f72d3a0a26dae62d54736a96ef27dfef43f118f35611c9",
+      "bytes": 10700
+    },
+    {
+      "path": "memorive_desktop/integrations/developer/examples/import_and_search.py",
+      "sha256": "f3a369ea41a95be35a13072aa0aa002cefab0335e7d07a04aee2b930c29e5d20",
+      "bytes": 1217
+    },
+    {
+      "path": "memorive_desktop/integrations/developer/examples/search.mjs",
+      "sha256": "5ad3aa0bf549a397f78619570937dc6eaf8a447431a02993fb8453140fa4c740",
+      "bytes": 404
+    },
+    {
+      "path": "memorive_desktop/integrations/developer/javascript/memorive.d.mts",
+      "sha256": "386fab1dddada7bacbd14bfbb238ff90a2843c30b1c2ed57576eb39f84e3f907",
+      "bytes": 1281
+    },
+    {
+      "path": "memorive_desktop/integrations/developer/javascript/memorive.mjs",
+      "sha256": "dcd3b9ba9372041a8c6b80fe5986601d5591528e673aad94c48754c6342c9218",
+      "bytes": 2101
+    },
+    {
+      "path": "memorive_desktop/integrations/developer/python/memorive.py",
+      "sha256": "94322c27268d9f29e2b3304e16089ce7075ff00091a9cd6c386cd9f87f70c038",
+      "bytes": 1669
+    },
+    {
+      "path": "memorive_desktop/integrations/obsidian/memorive-companion/companion.js",
+      "sha256": "6421581095408afe676a0ceb82c9d678faefecc12f5fb0e049af1af8b59c0e7d",
+      "bytes": 12724
+    },
+    {
+      "path": "memorive_desktop/integrations/obsidian/memorive-companion/main.js",
+      "sha256": "95447e4732209d85bb8437c7adddfb235d9611a2aa3e421dba0e34103ba8cf07",
+      "bytes": 20814
+    },
+    {
+      "path": "memorive_desktop/integrations/obsidian/memorive-companion/main.source.js",
+      "sha256": "b28ff6e1c74a7812e5981d1b430f7df351e2a3a46dabc86feefcd4f0785e26ff",
+      "bytes": 8035
+    },
+    {
+      "path": "memorive_desktop/integrations/obsidian/memorive-companion/manifest.json",
+      "sha256": "d3f3818d17ff072c866ce02ee8cda6aa7834545bd8bfabfaaaa7970a289e183f",
+      "bytes": 266
+    },
+    {
+      "path": "memorive_desktop/integrations/obsidian/memorive-companion/styles.css",
+      "sha256": "13305ee792de48d83e751c83ca662bd35ecf54a1dcdd120f190cdf6d63ed2db4",
+      "bytes": 1208
+    },
+    {
+      "path": "memorive_desktop/integrations/skills/memo-feedback/SKILL.md",
+      "sha256": "d7b82329f600a8a1357284eb0b812ba0b6f97a13dcb4c895413a80011052df3f",
+      "bytes": 826
+    },
+    {
+      "path": "memorive_desktop/integrations/skills/memo-research/SKILL.md",
+      "sha256": "121370b285edd74aae71fd79d3769395d3e4d7f4e28709db671e7b8e4a92290e",
+      "bytes": 1504
+    },
+    {
+      "path": "memorive_desktop/integrations/skills/memo-tension/SKILL.md",
+      "sha256": "05b0fd979df58fb5b4f2432343a17739e65c99b831e3e1b72dc4a2411a2ab48c",
+      "bytes": 945
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/bootstrap.js",
+      "sha256": "857ebb8cf735f96dc6cb19c383362a4dc45533ff161ac112420849a39cae0f4c",
+      "bytes": 693
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/main.js",
+      "sha256": "b49736c246ac8264dd8ca40bc3e72b3c45e14c1a3783fbc2a3881bc15f9ea84f",
+      "bytes": 15895
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/manifest.json",
+      "sha256": "8f43b035e222f1cd945478ab744c86810c9f3234ae9fdfab95dbdf2098bd24db",
+      "bytes": 515
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/preferences.js",
+      "sha256": "6973b9e16067b7ba7ccbba3784db6a55b7c1c8965f8e4ad1cbf2e77a1c0c6178",
+      "bytes": 1155
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/preferences.xhtml",
+      "sha256": "62b6fee771a44b101be639b1d32769abb74e302bed50efbd7484a03c3313f70d",
+      "bytes": 1114
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/style.css",
+      "sha256": "b93575d515b701f4714b426e5b08292024f3faa93df27932384625380bb97ce0",
+      "bytes": 1476
+    },
+    {
+      "path": "memorive_desktop/integrations/zotero/memorive-companion/updates.json",
+      "sha256": "01dbbc3f1d824b390e27a9107071219a0a8f820dc1cbf1a70b8fce4133d36fa8",
+      "bytes": 59
+    },
+    {
+      "path": "memorive_desktop/product/desktop/Memorive.manifest",
+      "sha256": "49d3692765ac3b27b85c59ecf34b577439b3efbf013ca9b66c559292cd153292",
+      "bytes": 1502
+    },
+    {
+      "path": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "bytes": 10174
     },
     {
       "path": "memorive_desktop/product/desktop/app.py",
@@ -1516,6 +1721,16 @@
       "path": "memorive_desktop/product/desktop/help/licenses/AGPL-3.0.txt",
       "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
       "bytes": 34523
+    },
+    {
+      "path": "memorive_desktop/product/desktop/help/web/README.md",
+      "sha256": "6fd3228e5e8689fd685af8eba83439f22cb349b0848b021aaa22d39cc6b4949a",
+      "bytes": 786
+    },
+    {
+      "path": "memorive_desktop/product/desktop/help/web/WEB_DESIGN.md",
+      "sha256": "43b27e9a038e74598cca118673b1661f8a7cd848940baf4ef73c512c4c49e89e",
+      "bytes": 6798
     },
     {
       "path": "memorive_desktop/product/desktop/help/web/app.css",
@@ -2423,16 +2638,6 @@
       "bytes": 4048
     },
     {
-      "path": "memorive_desktop/product/desktop/help/web/README.md",
-      "sha256": "6fd3228e5e8689fd685af8eba83439f22cb349b0848b021aaa22d39cc6b4949a",
-      "bytes": 786
-    },
-    {
-      "path": "memorive_desktop/product/desktop/help/web/WEB_DESIGN.md",
-      "sha256": "43b27e9a038e74598cca118673b1661f8a7cd848940baf4ef73c512c4c49e89e",
-      "bytes": 6798
-    },
-    {
       "path": "memorive_desktop/product/desktop/help/zh-CN/assets/billing.svg",
       "sha256": "5ee90f78420e3dd078279349cbe1a048a6dd06f49c1169dc1495a0ca9ec67f77",
       "bytes": 2088
@@ -2663,11 +2868,6 @@
       "bytes": 741
     },
     {
-      "path": "memorive_desktop/product/desktop/Memorive.manifest",
-      "sha256": "49d3692765ac3b27b85c59ecf34b577439b3efbf013ca9b66c559292cd153292",
-      "bytes": 1502
-    },
-    {
       "path": "memorive_desktop/product/desktop/network_diagnostics.py",
       "sha256": "f687502ea71ecd0352b255797eadd92115237db329277921b913e2d475c3075e",
       "bytes": 6584
@@ -2686,11 +2886,6 @@
       "path": "memorive_desktop/product/desktop/pdf_runtime.js",
       "sha256": "942bbf098a85ea1db00748b737c070f23173ef526c4e212c3bd78a368de19096",
       "bytes": 1674598
-    },
-    {
-      "path": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
-      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-      "bytes": 10174
     },
     {
       "path": "memorive_desktop/product/desktop/product_identity.py",
@@ -2743,31 +2938,6 @@
       "bytes": 285880
     },
     {
-      "path": "memorive_desktop/PUBLISHING.md",
-      "sha256": "c263c533a29ffec3f7c404b98ceda1e130d2e8edbbbc46299feca6bf49e15e11",
-      "bytes": 2982
-    },
-    {
-      "path": "memorive_desktop/README_PUBLIC.en.md",
-      "sha256": "f101e521863b2a27a0aa6e7f60603168558423dbff9a7cba1f136c5bd55e3dd9",
-      "bytes": 10290
-    },
-    {
-      "path": "memorive_desktop/README_PUBLIC.ja.md",
-      "sha256": "1622c8f421db0d70c2b03104d9d23afd8d137131f9a27644ecde1fac841385e5",
-      "bytes": 12112
-    },
-    {
-      "path": "memorive_desktop/README_PUBLIC.md",
-      "sha256": "2a49b7f5ad833b1c508fce54c4260cd3c521c624fe8ecf6cc92bb8b0c1144632",
-      "bytes": 9388
-    },
-    {
-      "path": "memorive_desktop/RELEASE_CHECKS.md",
-      "sha256": "b3e34e72945813b3265e943121c7ca64ff15f1ef3712fb0b32b9aeac8823f6e1",
-      "bytes": 2824
-    },
-    {
       "path": "memorive_desktop/release_materials/ARTWORK_RIGHTS.md",
       "sha256": "a66fc5ce7c8518c96ad6005dbe978dfad81067d8e6d9f1a5aa97229374eb50fb",
       "bytes": 7222
@@ -2781,6 +2951,76 @@
       "path": "memorive_desktop/release_materials/BUILDING.md",
       "sha256": "762f091890cf202c8deb77675e83be3cc87307da0daf7c17c1ecd5c9f60efa59",
       "bytes": 5060
+    },
+    {
+      "path": "memorive_desktop/release_materials/GITHUB_FAN_PROJECTS.md",
+      "sha256": "53320e0253a23483f01a37f529e953ccdb132f25b47fb359304c208b353b7d22",
+      "bytes": 14169
+    },
+    {
+      "path": "memorive_desktop/release_materials/INSTALL.md",
+      "sha256": "fac9b81570e9a15c9fd800e7b5df463be36f1074e2a34756dc292f341c429c3d",
+      "bytes": 2231
+    },
+    {
+      "path": "memorive_desktop/release_materials/LICENSE",
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "bytes": 34523
+    },
+    {
+      "path": "memorive_desktop/release_materials/LICENSE_PROPOSAL.md",
+      "sha256": "d13ee41709192fb4ec18aa8dbb3950d327981f4dc23d798ed6e3ac3110d05fdd",
+      "bytes": 2907
+    },
+    {
+      "path": "memorive_desktop/release_materials/LICENSING.md",
+      "sha256": "79557f830010b1afeb2864e4dd3090c9b422b6e78b345e8e1024a991aa119aae",
+      "bytes": 1532
+    },
+    {
+      "path": "memorive_desktop/release_materials/PUBLISHING.md",
+      "sha256": "c263c533a29ffec3f7c404b98ceda1e130d2e8edbbbc46299feca6bf49e15e11",
+      "bytes": 2982
+    },
+    {
+      "path": "memorive_desktop/release_materials/README_PUBLIC.en.md",
+      "sha256": "964932f9f92265d5267fe376d233cf010de2d43e024cb82ed5ba79aab7d3f96b",
+      "bytes": 10329
+    },
+    {
+      "path": "memorive_desktop/release_materials/README_PUBLIC.ja.md",
+      "sha256": "3e76d212a836e37988796e0b21b0d3c419c4bcf286e548471cb2ba3b1158dc12",
+      "bytes": 12151
+    },
+    {
+      "path": "memorive_desktop/release_materials/README_PUBLIC.md",
+      "sha256": "d3cdd921c7085f5d3360068871aa5a4d9f6d6d234f32f26bf9c4141c6ff983cd",
+      "bytes": 9427
+    },
+    {
+      "path": "memorive_desktop/release_materials/RELEASE_CHECKS.md",
+      "sha256": "b3e34e72945813b3265e943121c7ca64ff15f1ef3712fb0b32b9aeac8823f6e1",
+      "bytes": 2824
+    },
+    {
+      "path": "memorive_desktop/release_materials/RELEASE_NOTES.md",
+      "sha256": "465d3bf9a8278496f466819531696ac6690ebf9d065d2892ded53204431b055a",
+      "bytes": 2051
+    },
+    {
+      "path": "memorive_desktop/release_materials/RELEASE_PREPARATION.md",
+      "sha256": "5e415042b960171ced5addea4c53560ef4b91eb5a307913635eefa398806f35f",
+      "bytes": 722
+    },
+    {
+      "path": "memorive_desktop/release_materials/SECURITY.md",
+      "sha256": "fadacecec7fd4dc3772061580051ed9856f1497f5ad2e06f16a3ddc1d976f8c1",
+      "bytes": 670
+    },
+    {
+      "path": "memorive_desktop/release_materials/THIRD_PARTY_NOTICES.md",
+      "sha256": "18cfb18484a37d3edf8bca279a9b5ff1a4d1d5d39e74c3e4fa5ba3bf3ce54364",
+      "bytes": 4529
     },
     {
       "path": "memorive_desktop/release_materials/complete-source-collection.json",
@@ -2803,24 +3043,9 @@
       "bytes": 228295
     },
     {
-      "path": "memorive_desktop/release_materials/GITHUB_FAN_PROJECTS.md",
-      "sha256": "53320e0253a23483f01a37f529e953ccdb132f25b47fb359304c208b353b7d22",
-      "bytes": 14169
-    },
-    {
-      "path": "memorive_desktop/release_materials/INSTALL.md",
-      "sha256": "fac9b81570e9a15c9fd800e7b5df463be36f1074e2a34756dc292f341c429c3d",
-      "bytes": 2231
-    },
-    {
-      "path": "memorive_desktop/release_materials/LICENSE",
-      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
-      "bytes": 34523
-    },
-    {
-      "path": "memorive_desktop/release_materials/LICENSE_PROPOSAL.md",
-      "sha256": "d13ee41709192fb4ec18aa8dbb3950d327981f4dc23d798ed6e3ac3110d05fdd",
-      "bytes": 2907
+      "path": "memorive_desktop/release_materials/licenses/PDFJS-LICENSE.txt",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "bytes": 10174
     },
     {
       "path": "memorive_desktop/release_materials/licenses/aiohappyeyeballs/aiohappyeyeballs-2.6.2.dist-info/licenses/LICENSE",
@@ -3013,13 +3238,13 @@
       "bytes": 1112
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/jsonschema/jsonschema-4.26.0.dist-info/licenses/COPYING",
-      "sha256": "4f92a015a13c4d1a040bef018aa13430b4f1bc73b41b16bb846c346766de7439",
+      "path": "memorive_desktop/release_materials/licenses/jsonschema-specifications/jsonschema_specifications-2025.9.1.dist-info/licenses/COPYING",
+      "sha256": "42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c",
       "bytes": 1057
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/jsonschema-specifications/jsonschema_specifications-2025.9.1.dist-info/licenses/COPYING",
-      "sha256": "42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c",
+      "path": "memorive_desktop/release_materials/licenses/jsonschema/jsonschema-4.26.0.dist-info/licenses/COPYING",
+      "sha256": "4f92a015a13c4d1a040bef018aa13430b4f1bc73b41b16bb846c346766de7439",
       "bytes": 1057
     },
     {
@@ -3076,21 +3301,6 @@
       "path": "memorive_desktop/release_materials/licenses/networkx/networkx-3.6.1.dist-info/licenses/LICENSE.txt",
       "sha256": "3cf7c3a179d817b23b8b8568211769fefdf93797d207d984b8b2fa24d0220b33",
       "bytes": 1763
-    },
-    {
-      "path": "memorive_desktop/release_materials/licenses/numpy/numpy/_core/include/numpy/random/LICENSE.txt",
-      "sha256": "d544761558b510866c21f7e8a2d5716fca76e0b98117e3b6b86314db7244d150",
-      "bytes": 1039
-    },
-    {
-      "path": "memorive_desktop/release_materials/licenses/numpy/numpy/ma/LICENSE",
-      "sha256": "d78dbb208b80d92b4d333e41a4baae50d12444f46e53199fa7726a91de6e2da7",
-      "bytes": 1616
-    },
-    {
-      "path": "memorive_desktop/release_materials/licenses/numpy/numpy/random/LICENSE.md",
-      "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a",
-      "bytes": 3582
     },
     {
       "path": "memorive_desktop/release_materials/licenses/numpy/numpy-2.5.0.dist-info/licenses/LICENSE.txt",
@@ -3178,6 +3388,21 @@
       "bytes": 340
     },
     {
+      "path": "memorive_desktop/release_materials/licenses/numpy/numpy/_core/include/numpy/random/LICENSE.txt",
+      "sha256": "d544761558b510866c21f7e8a2d5716fca76e0b98117e3b6b86314db7244d150",
+      "bytes": 1039
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/numpy/numpy/ma/LICENSE",
+      "sha256": "d78dbb208b80d92b4d333e41a4baae50d12444f46e53199fa7726a91de6e2da7",
+      "bytes": 1616
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/numpy/numpy/random/LICENSE.md",
+      "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a",
+      "bytes": 3582
+    },
+    {
       "path": "memorive_desktop/release_materials/licenses/oauthlib/oauthlib-3.3.1.dist-info/licenses/LICENSE",
       "sha256": "0028aa4763a8a0b09ca4c68d585263474cf9aaa6ec69ffbef3a31a9eccdd3b91",
       "bytes": 1534
@@ -3258,11 +3483,6 @@
       "bytes": 1344
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/PDFJS-LICENSE.txt",
-      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
-      "bytes": 10174
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/pefile/pefile-2024.8.26.dist-info/LICENSE",
       "sha256": "b44409c067c6da52bfb54bb6624fb11a7b52157c3a13ae1400232f8196e86ad3",
       "bytes": 1083
@@ -3303,11 +3523,6 @@
       "bytes": 1543
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/pydantic/pydantic-2.13.4.dist-info/licenses/LICENSE",
-      "sha256": "a9e186f3ca16b5eef84318e7a701721351a00cb7b8ae3a4394b67b49e3529ef3",
-      "bytes": 1129
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/pydantic-core/pydantic_core-2.46.4.dist-info/licenses/LICENSE",
       "sha256": "fbe7f615f18d135c07000e5a86325db27f42c7729699ef166ac1f7a3f4586bf4",
       "bytes": 1101
@@ -3316,6 +3531,11 @@
       "path": "memorive_desktop/release_materials/licenses/pydantic-settings/pydantic_settings-2.14.2.dist-info/licenses/LICENSE",
       "sha256": "eb355a753e020346d33d83bf9769135b89fc610568ac531a01c295bcee7fd998",
       "bytes": 1103
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/pydantic/pydantic-2.13.4.dist-info/licenses/LICENSE",
+      "sha256": "a9e186f3ca16b5eef84318e7a701721351a00cb7b8ae3a4394b67b49e3529ef3",
+      "bytes": 1129
     },
     {
       "path": "memorive_desktop/release_materials/licenses/pygments/pygments-2.20.0.dist-info/licenses/AUTHORS",
@@ -3328,22 +3548,22 @@
       "bytes": 1331
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/pyinstaller/pyinstaller-6.22.2.dist-info/licenses/COPYING.txt",
-      "sha256": "dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245",
-      "bytes": 32138
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/pyinstaller-hooks-contrib/pyinstaller_hooks_contrib-2026.7.dist-info/licenses/LICENSE",
       "sha256": "91d0baaff00773038e72c0a1fc9d5d2d38706b7a2b9c04f34296608f931b9cd0",
       "bytes": 27666
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/pymupdf/pymupdf-1.28.2.dist-info/COPYING",
+      "path": "memorive_desktop/release_materials/licenses/pyinstaller/pyinstaller-6.22.2.dist-info/licenses/COPYING.txt",
+      "sha256": "dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245",
+      "bytes": 32138
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/pymupdf-layout/pymupdf_layout-1.28.2.dist-info/COPYING",
       "sha256": "40e60697600535eabfb5ae05f72829d88cfe8d02dd4792f5a754f6f51dabe55b",
       "bytes": 64
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/pymupdf-layout/pymupdf_layout-1.28.2.dist-info/COPYING",
+      "path": "memorive_desktop/release_materials/licenses/pymupdf/pymupdf-1.28.2.dist-info/COPYING",
       "sha256": "40e60697600535eabfb5ae05f72829d88cfe8d02dd4792f5a754f6f51dabe55b",
       "bytes": 64
     },
@@ -3403,6 +3623,11 @@
       "bytes": 1057
     },
     {
+      "path": "memorive_desktop/release_materials/licenses/requests-oauthlib/requests_oauthlib-2.0.0.dist-info/LICENSE",
+      "sha256": "ae01846afad8a8291fe6a08966f3015af9a8ff675d84b981f9793c122f7876e8",
+      "bytes": 745
+    },
+    {
       "path": "memorive_desktop/release_materials/licenses/requests/requests-2.34.2.dist-info/licenses/LICENSE",
       "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b",
       "bytes": 10142
@@ -3413,11 +3638,6 @@
       "bytes": 38
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/requests-oauthlib/requests_oauthlib-2.0.0.dist-info/LICENSE",
-      "sha256": "ae01846afad8a8291fe6a08966f3015af9a8ff675d84b981f9793c122f7876e8",
-      "bytes": 745
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/rich/rich-15.0.0.dist-info/licenses/LICENSE",
       "sha256": "deed7c17a4318158190a3ea239cc879a5a50271cebb98ae7025f48fbe58dca15",
       "bytes": 1056
@@ -3426,6 +3646,11 @@
       "path": "memorive_desktop/release_materials/licenses/rpds-py/rpds_py-2026.6.3.dist-info/licenses/LICENSE",
       "sha256": "8bcb72c82ea8ae74802293c41d93ad7d51434001b0ae45a603a5af0f507aee0a",
       "bytes": 1076
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/setuptools/setuptools-84.0.0.dist-info/licenses/LICENSE",
+      "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+      "bytes": 1023
     },
     {
       "path": "memorive_desktop/release_materials/licenses/setuptools/setuptools/_vendor/autocommand-2.2.2.dist-info/LICENSE",
@@ -3498,19 +3723,14 @@
       "bytes": 1076
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/setuptools/setuptools/config/_validate_pyproject/NOTICE",
-      "sha256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7",
-      "bytes": 18737
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/setuptools/setuptools/config/NOTICE",
       "sha256": "2dddf08818297a3b89d43d95ff659d8da85741108c9136dfa3a4d856c0623bd8",
       "bytes": 493
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/setuptools/setuptools-84.0.0.dist-info/licenses/LICENSE",
-      "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
-      "bytes": 1023
+      "path": "memorive_desktop/release_materials/licenses/setuptools/setuptools/config/_validate_pyproject/NOTICE",
+      "sha256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7",
+      "bytes": 18737
     },
     {
       "path": "memorive_desktop/release_materials/licenses/shellingham/shellingham-1.5.4.dist-info/LICENSE",
@@ -3568,14 +3788,14 @@
       "bytes": 1436
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/supplement/pymupdf/000-COPYING",
-      "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
-      "bytes": 34520
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/supplement/pymupdf-layout/LICENSE",
       "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
       "bytes": 34523
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/supplement/pymupdf/000-COPYING",
+      "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+      "bytes": 34520
     },
     {
       "path": "memorive_desktop/release_materials/licenses/supplement/pymupdf4llm/000-LICENSE",
@@ -3613,11 +3833,6 @@
       "bytes": 1487
     },
     {
-      "path": "memorive_desktop/release_materials/licenses/sympy/sympy/parsing/latex/LICENSE.txt",
-      "sha256": "007bc30a58fa40a996e772047120de4eaf31f5110e4f9c3b5f93fcdfbe2eaca1",
-      "bytes": 1075
-    },
-    {
       "path": "memorive_desktop/release_materials/licenses/sympy/sympy-1.14.0.dist-info/licenses/AUTHORS",
       "sha256": "82b1038521b0696c63c90b31ed4a0a2c9c4c16871c648b157b07ca44b6f18f8d",
       "bytes": 55779
@@ -3626,6 +3841,11 @@
       "path": "memorive_desktop/release_materials/licenses/sympy/sympy-1.14.0.dist-info/licenses/LICENSE",
       "sha256": "07a5e9819f727b4986ad2829c7a29a6320d42575f720eb24d71b7fef573a0286",
       "bytes": 7885
+    },
+    {
+      "path": "memorive_desktop/release_materials/licenses/sympy/sympy/parsing/latex/LICENSE.txt",
+      "sha256": "007bc30a58fa40a996e772047120de4eaf31f5110e4f9c3b5f93fcdfbe2eaca1",
+      "bytes": 1075
     },
     {
       "path": "memorive_desktop/release_materials/licenses/tabulate/tabulate-0.10.0.dist-info/licenses/LICENSE",
@@ -3688,59 +3908,14 @@
       "bytes": 609
     },
     {
-      "path": "memorive_desktop/release_materials/LICENSING.md",
-      "sha256": "79557f830010b1afeb2864e4dd3090c9b422b6e78b345e8e1024a991aa119aae",
-      "bytes": 1532
-    },
-    {
       "path": "memorive_desktop/release_materials/native-origin-review.json",
       "sha256": "13e5f772a75d64cd2cdb249e18dd486506cbe5c0cd4c0064adb707ad8062af0a",
       "bytes": 45111
     },
     {
-      "path": "memorive_desktop/release_materials/PUBLISHING.md",
-      "sha256": "c263c533a29ffec3f7c404b98ceda1e130d2e8edbbbc46299feca6bf49e15e11",
-      "bytes": 2982
-    },
-    {
-      "path": "memorive_desktop/release_materials/README_PUBLIC.en.md",
-      "sha256": "964932f9f92265d5267fe376d233cf010de2d43e024cb82ed5ba79aab7d3f96b",
-      "bytes": 10329
-    },
-    {
-      "path": "memorive_desktop/release_materials/README_PUBLIC.ja.md",
-      "sha256": "3e76d212a836e37988796e0b21b0d3c419c4bcf286e548471cb2ba3b1158dc12",
-      "bytes": 12151
-    },
-    {
-      "path": "memorive_desktop/release_materials/README_PUBLIC.md",
-      "sha256": "d3cdd921c7085f5d3360068871aa5a4d9f6d6d234f32f26bf9c4141c6ff983cd",
-      "bytes": 9427
-    },
-    {
-      "path": "memorive_desktop/release_materials/RELEASE_CHECKS.md",
-      "sha256": "b3e34e72945813b3265e943121c7ca64ff15f1ef3712fb0b32b9aeac8823f6e1",
-      "bytes": 2824
-    },
-    {
-      "path": "memorive_desktop/release_materials/RELEASE_NOTES.md",
-      "sha256": "465d3bf9a8278496f466819531696ac6690ebf9d065d2892ded53204431b055a",
-      "bytes": 2051
-    },
-    {
-      "path": "memorive_desktop/release_materials/RELEASE_PREPARATION.md",
-      "sha256": "5e415042b960171ced5addea4c53560ef4b91eb5a307913635eefa398806f35f",
-      "bytes": 722
-    },
-    {
       "path": "memorive_desktop/release_materials/requirements-wheelhouse.lock",
       "sha256": "6910bd3b8b8b2fc1a56e8c1b2b5d507de3653f15ee85b35395c867e60b8f8aad",
       "bytes": 11371
-    },
-    {
-      "path": "memorive_desktop/release_materials/SECURITY.md",
-      "sha256": "fadacecec7fd4dc3772061580051ed9856f1497f5ad2e06f16a3ddc1d976f8c1",
-      "bytes": 670
     },
     {
       "path": "memorive_desktop/release_materials/source-evidence.json",
@@ -3751,11 +3926,6 @@
       "path": "memorive_desktop/release_materials/supplemental-license-index.json",
       "sha256": "dd5766b43bf307ab65fdbd229e0483b546e96c2e0f87fac444b01750b42d0e35",
       "bytes": 5044
-    },
-    {
-      "path": "memorive_desktop/release_materials/THIRD_PARTY_NOTICES.md",
-      "sha256": "18cfb18484a37d3edf8bca279a9b5ff1a4d1d5d39e74c3e4fa5ba3bf3ce54364",
-      "bytes": 4529
     },
     {
       "path": "memorive_desktop/release_materials/upstream-source-supplement.json",
@@ -3773,16 +3943,6 @@
       "bytes": 26840
     },
     {
-      "path": "memorive_desktop/RELEASE_NOTES.md",
-      "sha256": "465d3bf9a8278496f466819531696ac6690ebf9d065d2892ded53204431b055a",
-      "bytes": 2051
-    },
-    {
-      "path": "memorive_desktop/RELEASE_PREPARATION.md",
-      "sha256": "5e415042b960171ced5addea4c53560ef4b91eb5a307913635eefa398806f35f",
-      "bytes": 722
-    },
-    {
       "path": "memorive_desktop/requirements-build-agpl-candidate.lock",
       "sha256": "4322709f7b8594a72e5a1f0bd87247b0a5a53bfd3b248d9ce0967b40df7f5fa2",
       "bytes": 2254
@@ -3791,11 +3951,6 @@
       "path": "memorive_desktop/requirements-build-baseline.lock",
       "sha256": "94e6189ccd52731b60c982a72be55a974611627f48176f2a62f675edf33fd35c",
       "bytes": 2229
-    },
-    {
-      "path": "memorive_desktop/SECURITY.md",
-      "sha256": "fadacecec7fd4dc3772061580051ed9856f1497f5ad2e06f16a3ddc1d976f8c1",
-      "bytes": 670
     },
     {
       "path": "memorive_desktop/source/artifact_registry/__init__.py",
@@ -4263,16 +4418,6 @@
       "bytes": 8738
     },
     {
-      "path": "memorive_desktop/source/evidence_extraction/contracts/fact_identity/anchor_normalization_policy.json",
-      "sha256": "1278af0c600cc88c2c06236b37b2d6b8ca84789a3bcf5e2e72691e18b705716b",
-      "bytes": 507
-    },
-    {
-      "path": "memorive_desktop/source/evidence_extraction/contracts/fact_identity/fact_fingerprint_policy.json",
-      "sha256": "b35982922c720c0c0e83d5ebfea511302835c9ff151cfa3671a37b747b21c060",
-      "bytes": 712
-    },
-    {
       "path": "memorive_desktop/source/evidence_extraction/contracts/fact_identity/FactIdentitySidecar.schema.json",
       "sha256": "10510cd43bab60d4a533e4815ef77a8a6cca16862b42321bf49ec291cca4ceb9",
       "bytes": 5129
@@ -4281,6 +4426,16 @@
       "path": "memorive_desktop/source/evidence_extraction/contracts/fact_identity/RequiredSlotTemplateContract.schema.json",
       "sha256": "4cc3ceb42104c9c908c183c9f3fce1631df3a4fd8af02ed1efa7041ce041d709",
       "bytes": 4989
+    },
+    {
+      "path": "memorive_desktop/source/evidence_extraction/contracts/fact_identity/anchor_normalization_policy.json",
+      "sha256": "1278af0c600cc88c2c06236b37b2d6b8ca84789a3bcf5e2e72691e18b705716b",
+      "bytes": 507
+    },
+    {
+      "path": "memorive_desktop/source/evidence_extraction/contracts/fact_identity/fact_fingerprint_policy.json",
+      "sha256": "b35982922c720c0c0e83d5ebfea511302835c9ff151cfa3671a37b747b21c060",
+      "bytes": 712
     },
     {
       "path": "memorive_desktop/source/evidence_extraction/contracts/long_document/card_assembly_manifest_v1.schema.json",
@@ -4963,6 +5118,11 @@
       "bytes": 2790
     },
     {
+      "path": "memorive_desktop/source/memorive_browser_companion/extension/README.txt",
+      "sha256": "be62b7d688140965a0adec3fd09d22c21b7eac52f80dc061e7cda085ce5cc056",
+      "bytes": 3491
+    },
+    {
       "path": "memorive_desktop/source/memorive_browser_companion/extension/background.js",
       "sha256": "5b7461643e02035196d82fcd45e7cbf46cfecc5f4c7f22d23d495121beb5abdc",
       "bytes": 28335
@@ -4996,11 +5156,6 @@
       "path": "memorive_desktop/source/memorive_browser_companion/extension/popup.js",
       "sha256": "d621f2284caadbdccb6a696b72c7b7f53176fcdd55f7a08f425e413837bfa8c0",
       "bytes": 6342
-    },
-    {
-      "path": "memorive_desktop/source/memorive_browser_companion/extension/README.txt",
-      "sha256": "be62b7d688140965a0adec3fd09d22c21b7eac52f80dc061e7cda085ce5cc056",
-      "bytes": 3491
     },
     {
       "path": "memorive_desktop/source/memorive_browser_companion/extension/recording.js",
@@ -6683,6 +6838,11 @@
       "bytes": 3265
     },
     {
+      "path": "memorive_desktop/source/model_gateway/prompts.py",
+      "sha256": "b438ac7b351517ae70178c353f113b6f11929d99b510b607b21be78871d468a9",
+      "bytes": 4047
+    },
+    {
       "path": "memorive_desktop/source/model_gateway/prompts/__init__.py",
       "sha256": "79193c1cdb981304a41004a808a5c1f36d89a0bc6f6aa317a06467c7a2bacc35",
       "bytes": 1047
@@ -7131,11 +7291,6 @@
       "path": "memorive_desktop/source/model_gateway/prompts/verify/v1.md",
       "sha256": "3f9fa77a65e22e6e3d8d0e3264ff4975b6c1b7953b07bdc9768b987645d199e4",
       "bytes": 372
-    },
-    {
-      "path": "memorive_desktop/source/model_gateway/prompts.py",
-      "sha256": "b438ac7b351517ae70178c353f113b6f11929d99b510b607b21be78871d468a9",
-      "bytes": 4047
     },
     {
       "path": "memorive_desktop/source/model_gateway/providers/__init__.py",
@@ -7844,8 +7999,8 @@
     },
     {
       "path": "memorive_desktop/source/runtime.py",
-      "sha256": "6e989d8c8916b8754dc86b5f2d8cffe59e896a96501b0c0ae636013694377058",
-      "bytes": 337857
+      "sha256": "45ae241b958e78c3554e5e3bee71e05cdce4a82d7e6b8cf40285f281e1ea79c9",
+      "bytes": 337848
     },
     {
       "path": "memorive_desktop/source/runtime_log/__init__.py",
@@ -7883,11 +8038,6 @@
       "bytes": 7724
     },
     {
-      "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
-      "sha256": "636d47f302e87edaccabc2cfafe4d2a279dffa44f9fd70959f90784d4cef55ab",
-      "bytes": 229308
-    },
-    {
       "path": "memorive_desktop/tests/test_desktop_route_contract.py",
       "sha256": "6ccb01202bdcdba8646c1ab0e16ba32c61d70c258e341a8a21a3767b655375f8",
       "bytes": 5134
@@ -7903,14 +8053,9 @@
       "bytes": 1131
     },
     {
-      "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
-      "sha256": "27399b3a53993e62d556cbee3f2eabd5b6c88523f1816349eb29f5fd0ae9bca9",
-      "bytes": 4608
-    },
-    {
       "path": "memorive_desktop/tools/build_memorive.py",
-      "sha256": "939c53a8b7893db9457ce4f61f679f8f8ff9dcf2c4199cbc1ac6dde84208f8c6",
-      "bytes": 13832
+      "sha256": "f8ba616e6a1fe3cff8f9efebd5aeccb9ee02da14c23c06591a3aca0d52faa3c8",
+      "bytes": 13994
     },
     {
       "path": "memorive_desktop/tools/collect_build_inventory.py",
@@ -7933,24 +8078,9 @@
       "bytes": 4253
     },
     {
-      "path": "README.en.md",
-      "sha256": "e0c80cca4766c3885a31cf4ae08e79f1588c9a10fedaad48bfeff402bf2af171",
-      "bytes": 10431
-    },
-    {
-      "path": "README.ja.md",
-      "sha256": "0312cf7df00e4742db8089b1feb298d9dceede5a90939a0089275f4b3dcfe69f",
-      "bytes": 12253
-    },
-    {
-      "path": "README.md",
-      "sha256": "3b8c1c15b0aa8f7138e3d9cb8a5ea447a721c6f36505f65dc0378b0cfafcf397",
-      "bytes": 9529
-    },
-    {
-      "path": "SOURCE_VERSION.json",
-      "sha256": "5891eac0d48366fc6eb75246ee48209157ee8defc1a08a4e335c41ce3044f8c4",
-      "bytes": 790
+      "path": "memorive_desktop/tools/package_companions.py",
+      "sha256": "c7d0fddc4e1e66303faabbc5e5947a12a89402c3994d081b8ceb4af77fdd4675",
+      "bytes": 2938
     }
   ],
   "excluded": [
@@ -7979,7 +8109,6 @@
   "scan_scope": "Selected textual files; binary screenshots/PDF contents and all possible secrets are not covered",
   "status": "PRIVATE_SOURCE_SNAPSHOT",
   "source_tag": null,
-  "release_source_commit": "ad2e0dbc72b14a29bd15d0a8adb97d678f1e498d",
-  "documentation_update": "AI development disclosure requested by project initiator; code and release artifacts unchanged",
-  "distribution_revision": "public-naming-20260926"
+  "documentation_update": "Restore companion integrations, package sources and installation documentation",
+  "distribution_revision": "companion-integration-20260926"
 }

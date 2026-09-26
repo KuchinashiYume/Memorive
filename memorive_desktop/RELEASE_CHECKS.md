@@ -23,3 +23,9 @@
 密钥检查覆盖已知格式、实际环境变量的精确及常见编码匹配、编译常量、PDF 文本与元数据、私人输入及数据库文件哈希。不读取 Windows 凭据管理器。空白启动验证用户内容与模型配置为空；公开包不包含私人配置、文献、会话或测试运行数据。
 
 静态检查和哈希核对有明确范围，不构成任意编码方式下绝对不存在秘密的数学证明。
+
+## Companion integration review
+
+Obsidian and Zotero companion sources and packages are included. Five naming/privacy review rounds passed with two consecutive clean final rounds. Checks covered source text, manifests, package contents, license notices, and correspondence between source and packaged JavaScript. Tests used isolated generated notes and metadata; no personal host configuration or API credentials were copied.
+
+The current EXE was called through both plugins' real transport code with test host adapters. Connection discovery, state, evidence search and error propagation passed. Source service checks covered preview, import, deduplication, citation reads, managed-note conflict protection and idempotent question queueing. No model was called. These are transport and service checks, not a new full Obsidian/Zotero GUI acceptance. The installer engine and installed plugin paths are checked separately in the local delivery record.

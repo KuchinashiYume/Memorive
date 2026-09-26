@@ -1,0 +1,12 @@
+.memorive-source{border:1px solid var(--background-modifier-border);padding:12px;border-radius:8px;margin:10px 0}
+.memorive-source p{white-space:pre-wrap;font-size:var(--font-smallest)}
+.memorive-source small{display:block;margin-bottom:8px;overflow-wrap:anywhere}
+.memorive-workbench{padding:16px;overflow:auto;font-size:var(--font-ui-small)}
+.memorive-workbench h3{font-size:var(--font-ui-medium);margin:0 0 14px}.memorive-workbench h4{margin:22px 0 10px}
+.memorive-workbench textarea,.memorive-workbench select{width:100%;margin:6px 0;box-sizing:border-box}
+.memorive-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.memorive-toolbar button{font-size:var(--font-ui-smaller)}
+.memorive-source{padding:12px;border:1px solid var(--background-modifier-border);border-radius:8px;margin:10px 0;overflow-wrap:anywhere}
+.memorive-source small{display:block;color:var(--text-muted);margin:4px 0}.memorive-source button{margin:3px}
+.memorive-choice{display:flex;gap:9px;align-items:center;margin:10px 0}
+.memorive-message{padding:12px;border-radius:8px;background:var(--background-secondary);margin:8px 0}.memorive-message p{white-space:pre-wrap}
+.memorive-status{color:var(--text-muted);min-height:2.5em}
