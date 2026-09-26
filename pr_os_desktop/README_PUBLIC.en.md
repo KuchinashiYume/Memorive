@@ -6,6 +6,10 @@
 
 Memorive is a desktop literature workspace for personal learning and research. It brings document organization, research questions, and source checking into one application.
 
+## AI development disclosure
+
+Memorive is an AI-developed project. Its project-specific code was generated, modified, and iterated by **OpenAI Codex and Anthropic Claude Code**. The project initiator defined requirements and product design and carried out testing and acceptance; **they did not write the code themselves**. Third-party components remain credited to their respective authors; see the third-party notices.
+
 ## Features
 
 - Import literature and web content, follow processing progress, and organize a library.
@@ -22,7 +26,7 @@ Requirements: Windows 10 22H2 or later, or Windows 11, x64; .NET Framework 4.8, 
 
 The installer checks these prerequisites and provides official Microsoft download links when a component is missing. Install the component, then return and check again. Preparing missing components may require internet access; application installation is offline once the prerequisites are present. See [third-party notices](THIRD_PARTY_NOTICES.md) for WebView2 updates, SmartScreen, and privacy information.
 
-1. Once published, obtain the installer and SHA256 checksums from this repository's Releases page.
+1. Obtain the installer and SHA256 checksums from this repository's Releases page.
 2. Choose separate application and data directories. The public build starts with blank settings and does not include the author's documents, conversations, or model credentials.
 3. Open Settings and configure a model service. Supply your own cloud service access, CLI subscription, or local model; this software does not provide free API credits.
 4. Import a document, ask a research question, and check its citations before expanding your library.

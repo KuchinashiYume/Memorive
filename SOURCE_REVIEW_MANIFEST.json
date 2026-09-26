@@ -1,6 +1,6 @@
 {
   "schema": "MemoriveSourceExportReview-v1",
-  "public_release_authorized": false,
+  "public_release_authorized": true,
   "files": [
     {
       "path": ".gitignore",
@@ -1759,23 +1759,23 @@
     },
     {
       "path": "pr_os_desktop/PUBLISHING.md",
-      "sha256": "a6041209243214f939acfc56fec9694a2471ec861f3dc7a346c4293d57bfa4a2",
-      "bytes": 2896
+      "sha256": "5c68871008971e2571c7c68ae53dc154e40397e20b2c8949a06c8c0cc1a63dc1",
+      "bytes": 2968
     },
     {
       "path": "pr_os_desktop/README_PUBLIC.en.md",
-      "sha256": "02351a38cd2bafbdcca3741bd926e6573e654596b7a98c5c4afb66682ce81d2d",
-      "bytes": 3783
+      "sha256": "473c7641b03550dcaf634ded4f16aa1a5a1c94903808efdacc0795304b798fee",
+      "bytes": 4189
     },
     {
       "path": "pr_os_desktop/README_PUBLIC.ja.md",
-      "sha256": "984331dfc6aa8177c2af4383d7739046e7ada252ed18c50bf6cafc27a10e97d7",
-      "bytes": 4914
+      "sha256": "854be820ad929ee6132a4a98b8413e45942ce6b6aac68acd8e015b86140a78ec",
+      "bytes": 5495
     },
     {
       "path": "pr_os_desktop/README_PUBLIC.md",
-      "sha256": "d1cf77402bf6cbac3e419b882f63f9264291a5c73336c6bf69ee0715ca135061",
-      "bytes": 3660
+      "sha256": "1338b90d2105ca3c05d1a9e405a5a2ae760ded30c38e0ca4e641ae17caebfade",
+      "bytes": 3962
     },
     {
       "path": "pr_os_desktop/RELEASE_CHECKS.md",
@@ -2714,33 +2714,33 @@
     },
     {
       "path": "pr_os_desktop/release_materials/PUBLISHING.md",
-      "sha256": "a6041209243214f939acfc56fec9694a2471ec861f3dc7a346c4293d57bfa4a2",
-      "bytes": 2896
+      "sha256": "5c68871008971e2571c7c68ae53dc154e40397e20b2c8949a06c8c0cc1a63dc1",
+      "bytes": 2968
     },
     {
       "path": "pr_os_desktop/release_materials/README_PUBLIC.en.md",
-      "sha256": "02351a38cd2bafbdcca3741bd926e6573e654596b7a98c5c4afb66682ce81d2d",
-      "bytes": 3783
+      "sha256": "473c7641b03550dcaf634ded4f16aa1a5a1c94903808efdacc0795304b798fee",
+      "bytes": 4189
     },
     {
       "path": "pr_os_desktop/release_materials/README_PUBLIC.ja.md",
-      "sha256": "984331dfc6aa8177c2af4383d7739046e7ada252ed18c50bf6cafc27a10e97d7",
-      "bytes": 4914
+      "sha256": "854be820ad929ee6132a4a98b8413e45942ce6b6aac68acd8e015b86140a78ec",
+      "bytes": 5495
     },
     {
       "path": "pr_os_desktop/release_materials/README_PUBLIC.md",
-      "sha256": "d1cf77402bf6cbac3e419b882f63f9264291a5c73336c6bf69ee0715ca135061",
-      "bytes": 3660
+      "sha256": "1338b90d2105ca3c05d1a9e405a5a2ae760ded30c38e0ca4e641ae17caebfade",
+      "bytes": 3962
     },
     {
       "path": "pr_os_desktop/release_materials/RELEASE_NOTES.md",
-      "sha256": "933f7bedb878ea7fdf145db84706d735f6574c042ca08062a8c48957a5ba7bb2",
-      "bytes": 1732
+      "sha256": "f22c260c535dc8ceef8599176850138cac18c81ebf1a46881415a738c674389b",
+      "bytes": 2082
     },
     {
       "path": "pr_os_desktop/release_materials/RELEASE_PREPARATION.md",
-      "sha256": "d8606df112955bebd98f119eb11610ae69b707f6418fe9eda3108e980b368762",
-      "bytes": 1449
+      "sha256": "3cdfaeecbec9382a80f6f60b78b0819c55c93eec87ac006c232dce0942ff05c7",
+      "bytes": 1613
     },
     {
       "path": "pr_os_desktop/release_materials/requirements-wheelhouse.lock",
@@ -2784,13 +2784,13 @@
     },
     {
       "path": "pr_os_desktop/RELEASE_NOTES.md",
-      "sha256": "933f7bedb878ea7fdf145db84706d735f6574c042ca08062a8c48957a5ba7bb2",
-      "bytes": 1732
+      "sha256": "f22c260c535dc8ceef8599176850138cac18c81ebf1a46881415a738c674389b",
+      "bytes": 2082
     },
     {
       "path": "pr_os_desktop/RELEASE_PREPARATION.md",
-      "sha256": "d8606df112955bebd98f119eb11610ae69b707f6418fe9eda3108e980b368762",
-      "bytes": 1449
+      "sha256": "3cdfaeecbec9382a80f6f60b78b0819c55c93eec87ac006c232dce0942ff05c7",
+      "bytes": 1613
     },
     {
       "path": "pr_os_desktop/requirements-build-agpl-candidate.lock",
@@ -6914,8 +6914,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "984485b5c04d712e4fa9340cd350ed32ab4ec3f736339490d4870af83f59b23a",
-      "bytes": 3860
+      "sha256": "4b0d6ec0c349dd8bc207c4e9e0fb9a6a58c284b3f148cf6262b3e5db6a8852bd",
+      "bytes": 4166
     },
     {
       "path": "项目文档/Phase04_外部雷达/10_模块契约/PR-OS_P04_T01_CROSS_任务依赖与接口矩阵_模块契约_r0.1.json",
@@ -7392,6 +7392,8 @@
   ],
   "text_findings": [],
   "scan_scope": "Selected textual files; binary screenshots/PDF contents and all possible secrets are not covered",
-  "status": "FORMAL_LOCAL_SOURCE_SNAPSHOT",
-  "source_tag": "v1.01-build139"
+  "status": "PUBLIC_SOURCE_WITH_DOCUMENTATION_UPDATE",
+  "source_tag": "v1.01-build139",
+  "release_source_commit": "ad2e0dbc72b14a29bd15d0a8adb97d678f1e498d",
+  "documentation_update": "AI development disclosure requested by project initiator; code and release artifacts unchanged"
 }

@@ -12,7 +12,7 @@
 
 ## 状态边界
 
-正式源码以独立 Git 提交及本地标签定位，分发附件以 `RELEASE_MANIFEST.json` 和 `SHA256SUMS.txt` 定位。当前准备过程不代表已经创建远端仓库或发布 Release。
+正式源码以独立 Git 提交及本地标签定位，分发附件以 `RELEASE_MANIFEST.json` 和 `SHA256SUMS.txt` 定位。2026-09-26 已公开项目仓库及 [v1.01 · build139 Release](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01-build139)，4 个附件的服务器 SHA256 与本地一致；未登录下载的安装包哈希也已核对。
 
 安装包沿用 build139 的程序与安装引擎。直接删除测试资料后，安装包整体哈希改变；旧包的哈希不得用于核对本次文件。上轮启动和桌面快捷方式的证据保留，新文件只补必要的内容核对与安装健康检查。
 

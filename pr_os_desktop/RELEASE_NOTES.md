@@ -2,6 +2,10 @@
 
 面向个人学习与研究的 Windows x64 桌面文献工作台。此源码版本保留已经确认的 build139 程序；公开文件清理以 SHA256 区分，不新增 build 编号。
 
+## AI 开发说明
+
+Memorive 是由 AI 编程工具开发的项目。本项目自身的代码由 **OpenAI Codex 与 Anthropic Claude Code** 生成、修改和迭代；项目发起者负责提出需求、产品设计与测试验收，**未亲自编写代码**。第三方组件仍归其各自作者，详见第三方声明。
+
 ## 本次内容
 
 - 文献处理、研究问答与引用查证、会话管理、网页读取、模型配置与用量记录。
@@ -20,4 +24,4 @@
 - 已有业务验收和作者确认按其实际范围保留；不声称所有硬件、文献和模型服务都通过测试。
 - 自有代码 AGPL-3.0-only；角色素材单独声明。详细范围见 [LICENSING.md](LICENSING.md) 和 [ASSET_NOTICE.md](ASSET_NOTICE.md)。
 
-远端是否已发布，以项目 Releases 页面为准。建立本地源码提交不等于 GitHub Release 已发布。
+本版本已于 2026-09-26 公开发布：[下载 v1.01 · build139](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01-build139)。

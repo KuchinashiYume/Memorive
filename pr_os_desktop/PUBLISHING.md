@@ -1,6 +1,6 @@
 # Memorive GitHub 发布操作说明
 
-本文件供作者审阅使用。现在尚未创建公开 Release，也没有向 GitHub 上传本轮内容。
+本版本已于 2026-09-26 公开发布：[v1.01 · build139](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01-build139)。下文保留发布流程与校验方法，供后续版本参考。
 
 ## 正式项目地址
 
@@ -10,7 +10,7 @@
 - 版本与下载：https://github.com/KuchinashiYume/Memorive/releases
 - 问题反馈：https://github.com/KuchinashiYume/Memorive/issues
 
-EXE 内的项目主页按钮从 `release_links.py` 读取地址。先创建空仓库，再按上述地址构建和检查正式 EXE，最后提交已审阅源码、建立标签并上传 Release 附件。地址不依赖安装包提前存在；当前已确认地址不表示远端仓库或 Release 已创建。
+EXE 内的项目主页按钮从 `release_links.py` 读取地址。先创建空仓库，再按上述地址构建和检查正式 EXE，最后提交已审阅源码、建立标签并上传 Release 附件。地址不依赖安装包提前存在；当前项目主页与 Release 均已公开。
 
 ## 发布材料如何组织
 
