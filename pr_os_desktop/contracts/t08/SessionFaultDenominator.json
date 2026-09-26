@@ -1,0 +1,16 @@
+{
+  "fault_count": 7,
+  "faults": [
+    "duplicate",
+    "partial",
+    "corrupt",
+    "revoked",
+    "expired",
+    "source_drift",
+    "interrupted_capture"
+  ],
+  "required_raw_private_exposure": 0,
+  "required_remote_session_mutations": 0,
+  "schema_version": "P08T08SessionFaultDenominator-v1",
+  "status": "FROZEN"
+}

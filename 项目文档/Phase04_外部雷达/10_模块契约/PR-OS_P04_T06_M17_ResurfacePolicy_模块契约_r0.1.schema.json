@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t06:resurface-policy:0.1",
+  "title": "P04 T06 ResurfacePolicy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "policy_revision", "allowed_triggers",
+    "forbidden_triggers", "authority_evidence_required", "history_disclosure_required",
+    "manual_restore_is_append_only", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t06.resurface-policy.0.1"},
+    "object_type": {"const": "ResurfacePolicy"},
+    "policy_revision": {"const": "T06_RESURFACE_POLICY:r0.1"},
+    "allowed_triggers": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "FORMAL_MAJOR_VERSION"},
+        {"const": "LEGAL_ACCESS_AVAILABLE"},
+        {"const": "CORRECTION_OR_RETRACTION"},
+        {"const": "IMPORTANT_CITATION_CHANGE"},
+        {"const": "NEW_STABLE_DIRECTION"},
+        {"const": "BRIDGE_ROLE_CHANGE"},
+        {"const": "MANUAL_RESTORE"}
+      ],
+      "items": false
+    },
+    "forbidden_triggers": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "TITLE_DRIFT"},
+        {"const": "ABSTRACT_FORMAT_DRIFT"},
+        {"const": "SOURCE_MIRROR_CHANGE"},
+        {"const": "MINOR_METADATA_DRIFT"}
+      ],
+      "items": false
+    },
+    "authority_evidence_required": {"const": true},
+    "history_disclosure_required": {"const": true},
+    "manual_restore_is_append_only": {"const": true},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"}
+  }
+}

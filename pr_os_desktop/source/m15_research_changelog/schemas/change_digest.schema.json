@@ -1,0 +1,552 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p03:t02:m15:change-digest:1.1-candidate002",
+  "title": "M15 ChangeDigest domain wrapper",
+  "type": "object",
+  "required": [
+    "object_type",
+    "schema_version",
+    "domain_contract_version",
+    "digest_id",
+    "revision",
+    "digest_kind",
+    "report_timezone",
+    "window_start",
+    "window_end",
+    "cutoff_at",
+    "input_manifest_sha256",
+    "generator_version",
+    "source_snapshot_refs",
+    "report_status",
+    "authority_status",
+    "sections",
+    "late_arrivals",
+    "conflicts",
+    "unparseable_events",
+    "not_assessed_dimensions",
+    "supersedes_digest_id",
+    "supersedes_binding",
+    "generated_at",
+    "external_calls",
+    "external_tokens",
+    "cost_cny",
+    "production_mutations",
+    "production_activation",
+    "report_payload_hash",
+    "common_object",
+    "content_hash"
+  ],
+  "properties": {
+    "object_type": {"const": "ChangeDigest"},
+    "schema_version": {"const": "2.0"},
+    "domain_contract_version": {"const": "1.1"},
+    "digest_id": {"type": "string", "pattern": "^CD-[A-F0-9]{32}$"},
+    "revision": {"type": "integer", "minimum": 1},
+    "digest_kind": {"enum": ["daily", "weekly", "monthly"]},
+    "report_timezone": {"const": "Asia/Shanghai"},
+    "window_start": {"type": "string", "format": "date-time"},
+    "window_end": {"type": "string", "format": "date-time"},
+    "cutoff_at": {"type": "string", "format": "date-time"},
+    "input_manifest_sha256": {"$ref": "#/$defs/upperSha256"},
+    "generator_version": {
+      "type": "string",
+      "pattern": "^m15-research-changelog/1\\.1\\.0\\+sha256\\.[A-F0-9]{16}$"
+    },
+    "source_snapshot_refs": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/sourceSnapshotMember"}
+    },
+    "report_status": {"enum": ["complete", "blocked_incomplete", "not_assessed"]},
+    "authority_status": {"const": "shadow_non_authoritative"},
+    "sections": {"type": "array"},
+    "late_arrivals": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/lateItem"}
+    },
+    "conflicts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/conflict"}
+    },
+    "unparseable_events": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/issue"}
+    },
+    "not_assessed_dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/notAssessed"}
+    },
+    "supersedes_digest_id": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "string", "minLength": 1, "maxLength": 256}
+      ]
+    },
+    "supersedes_binding": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/supersedesBinding"}
+      ]
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "external_calls": {"const": 0},
+    "external_tokens": {"const": 0},
+    "cost_cny": {"const": 0},
+    "production_mutations": {"const": 0},
+    "production_activation": {"const": false},
+    "report_payload_hash": {"$ref": "#/$defs/reportPayloadHash"},
+    "common_object": {"$ref": "#/$defs/commonChangeDigest"},
+    "content_hash": {"$ref": "#/$defs/typedHash"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"digest_kind": {"const": "daily"}}},
+      "then": {"properties": {"sections": {"$ref": "#/$defs/dailySections"}}}
+    },
+    {
+      "if": {"properties": {"digest_kind": {"const": "weekly"}}},
+      "then": {"properties": {"sections": {"$ref": "#/$defs/weeklySections"}}}
+    },
+    {
+      "if": {"properties": {"digest_kind": {"const": "monthly"}}},
+      "then": {"properties": {"sections": {"$ref": "#/$defs/monthlySections"}}}
+    },
+    {
+      "if": {"properties": {"revision": {"const": 1}}},
+      "then": {
+        "properties": {
+          "supersedes_digest_id": {"type": "null"},
+          "supersedes_binding": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "supersedes_digest_id": {"type": "string", "minLength": 1},
+          "supersedes_binding": {"$ref": "#/$defs/supersedesBinding"}
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "safeText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^[^\\r\\n\\t\\u0000-\\u001F\\u007F\\u2028\\u2029]+$"
+    },
+    "upperSha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "sourceRecordRef": {
+      "type": "string",
+      "pattern": "^(?!.*//)source_snapshot/(?!\\.\\.?/)(?!.*?/\\.\\.?/)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*\\.jsonl#line=[1-9][0-9]*$",
+      "maxLength": 512
+    },
+    "typedHash": {
+      "type": "object",
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/upperSha256"}
+      },
+      "additionalProperties": false
+    },
+    "reportPayloadHash": {
+      "type": "object",
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "REPORT_PAYLOAD"},
+        "value": {"$ref": "#/$defs/upperSha256"}
+      },
+      "additionalProperties": false
+    },
+    "sourceSnapshotMember": {
+      "type": "object",
+      "required": [
+        "path",
+        "source_system",
+        "required",
+        "sha256",
+        "bytes",
+        "record_count",
+        "line_ending",
+        "record_hash_scope",
+        "record_sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!.*//)source_snapshot/(?!\\.\\.?/)(?!.*?/\\.\\.?/)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*\\.jsonl$",
+          "maxLength": 512
+        },
+        "source_system": {"enum": ["M8", "M11", "M13"]},
+        "required": {"type": "boolean"},
+        "sha256": {"$ref": "#/$defs/upperSha256"},
+        "bytes": {"type": "integer", "minimum": 1},
+        "record_count": {"type": "integer", "minimum": 1},
+        "line_ending": {"const": "LF"},
+        "record_hash_scope": {"const": "UTF8_JSONL_LINE_BYTES_EXCLUDING_TERMINATING_LF"},
+        "record_sha256": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/upperSha256"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "reportItem": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "source_event_ref",
+        "source_record_ref",
+        "artifact_or_ledger_refs",
+        "occurred_at",
+        "observed_at",
+        "status_axis",
+        "status",
+        "verification_status",
+        "evidence_refs",
+        "text"
+      ],
+      "properties": {
+        "event_id": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+        "source_event_ref": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+        "source_record_ref": {"$ref": "#/$defs/sourceRecordRef"},
+        "artifact_or_ledger_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeText"}
+        },
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "status_axis": {"$ref": "#/$defs/safeText"},
+        "status": {"$ref": "#/$defs/safeText"},
+        "verification_status": {
+          "enum": ["verified_by_authoritative_m6_report", "unknown", "not_applicable"]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeText"}
+        },
+        "text": {"$ref": "#/$defs/safeText"}
+      },
+      "additionalProperties": false
+    },
+    "lateItem": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "source_event_ref",
+        "source_record_ref",
+        "artifact_or_ledger_refs",
+        "occurred_at",
+        "observed_at",
+        "status_axis",
+        "status",
+        "verification_status",
+        "evidence_refs",
+        "text",
+        "original_window_ref",
+        "original_cutoff_at",
+        "original_digest_id",
+        "original_digest_raw_sha256",
+        "original_common_payload_hash",
+        "late_authority_ref"
+      ],
+      "properties": {
+        "event_id": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+        "source_event_ref": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+        "source_record_ref": {"$ref": "#/$defs/sourceRecordRef"},
+        "artifact_or_ledger_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeText"}
+        },
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "status_axis": {"$ref": "#/$defs/safeText"},
+        "status": {"$ref": "#/$defs/safeText"},
+        "verification_status": {
+          "enum": ["verified_by_authoritative_m6_report", "unknown", "not_applicable"]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeText"}
+        },
+        "text": {"$ref": "#/$defs/safeText"},
+        "original_window_ref": {"$ref": "#/$defs/safeText"},
+        "original_cutoff_at": {"type": "string", "format": "date-time"},
+        "original_digest_id": {"$ref": "#/$defs/safeText"},
+        "original_digest_raw_sha256": {"$ref": "#/$defs/upperSha256"},
+        "original_common_payload_hash": {"$ref": "#/$defs/upperSha256"},
+        "late_authority_ref": {"$ref": "#/$defs/safeText"}
+      },
+      "additionalProperties": false
+    },
+    "conflict": {
+      "type": "object",
+      "required": ["event_id", "source_content_hashes", "source_record_refs", "resolution"],
+      "properties": {
+        "event_id": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+        "source_content_hashes": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/upperSha256"}
+        },
+        "source_record_refs": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/sourceRecordRef"}
+        },
+        "resolution": {"const": "NONE_FAIL_CLOSED"}
+      },
+      "additionalProperties": false
+    },
+    "issue": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "issue_id",
+        "error_code",
+        "source_record_ref",
+        "source_content_hash",
+        "observed_at",
+        "affected_window",
+        "blocking_status",
+        "evidence_ref",
+        "sanitized_error_context"
+      ],
+      "properties": {
+        "schema_version": {"const": "1.0"},
+        "issue_id": {"type": "string", "pattern": "^M15-ISSUE-[A-F0-9]{32}$"},
+        "error_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$"},
+        "source_record_ref": {"$ref": "#/$defs/sourceRecordRef"},
+        "source_content_hash": {"$ref": "#/$defs/upperSha256"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "affected_window": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "string",
+              "pattern": "^(daily|weekly|monthly):[^\\r\\n]+\\.\\.[^\\r\\n]+$",
+              "maxLength": 256
+            }
+          ]
+        },
+        "blocking_status": {"enum": ["blocking", "non_blocking"]},
+        "evidence_ref": {"$ref": "#/$defs/safeText"},
+        "sanitized_error_context": {
+          "type": "object",
+          "required": ["field_names", "payload_echoed"],
+          "properties": {
+            "field_names": {
+              "type": "array",
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9_.\\[\\]-]+$"
+              }
+            },
+            "payload_echoed": {"const": false}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "notAssessed": {
+      "type": "object",
+      "required": ["dimension", "status", "reason_code"],
+      "properties": {
+        "dimension": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,127}$"},
+        "status": {"const": "NOT_ASSESSED"},
+        "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$"}
+      },
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "required": ["section_id", "title", "items"],
+      "properties": {
+        "section_id": {"type": "string", "pattern": "^S[0-9]{2}$"},
+        "title": {"$ref": "#/$defs/safeText"},
+        "items": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/reportItem"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "dailySections": {
+      "type": "array",
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S01"}, "title": {"const": "新增"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S02"}, "title": {"const": "修改"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S03"}, "title": {"const": "待审"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S04"}, "title": {"const": "失败"}}}]}
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "weeklySections": {
+      "type": "array",
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S01"}, "title": {"const": "研究进展"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S02"}, "title": {"const": "明确标记的重要变化"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S03"}, "title": {"const": "未验证项"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S04"}, "title": {"const": "明确来源的潜在张力"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S05"}, "title": {"const": "风险与待办"}}}]}
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "monthlySections": {
+      "type": "array",
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S01"}, "title": {"const": "知识库结构变化"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S02"}, "title": {"const": "明确记录的研究方向变化"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S03"}, "title": {"const": "长期待办"}}}]},
+        {"allOf": [{"$ref": "#/$defs/section"}, {"properties": {"section_id": {"const": "S04"}, "title": {"const": "风险与未评估维度"}}}]}
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "supersedesBinding": {
+      "type": "object",
+      "required": ["digest_id", "revision", "raw_sha256", "common_payload_hash"],
+      "properties": {
+        "digest_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "revision": {"type": "integer", "minimum": 1},
+        "raw_sha256": {"$ref": "#/$defs/upperSha256"},
+        "common_payload_hash": {"$ref": "#/$defs/upperSha256"}
+      },
+      "additionalProperties": false
+    },
+    "commonChangeDigest": {
+      "type": "object",
+      "required": ["object_type", "payload"],
+      "properties": {
+        "object_type": {"const": "ChangeDigest"},
+        "payload": {
+          "type": "object",
+          "required": [
+            "object_id",
+            "schema_version",
+            "revision",
+            "content_hash",
+            "producer",
+            "consumers",
+            "state",
+            "parent_refs",
+            "provenance_refs",
+            "supersedes",
+            "immutable_fields",
+            "failure_semantics",
+            "change_scope",
+            "summary",
+            "evidence_refs"
+          ],
+          "properties": {
+            "object_id": {"type": "string", "pattern": "^CD-[A-F0-9]{32}$"},
+            "schema_version": {"const": "2.0"},
+            "revision": {"type": "integer", "minimum": 1},
+            "content_hash": {"$ref": "#/$defs/typedHash"},
+            "producer": {"const": "M15"},
+            "consumers": {"const": ["T07", "T08"]},
+            "state": {"enum": ["draft", "validated"]},
+            "parent_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/safeText"}
+            },
+            "provenance_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/safeText"}
+            },
+            "supersedes": {
+              "oneOf": [
+                {"type": "null"},
+                {"type": "string", "minLength": 1, "maxLength": 256}
+              ]
+            },
+            "immutable_fields": {
+              "const": [
+                "object_id",
+                "schema_version",
+                "revision",
+                "content_hash",
+                "producer",
+                "parent_refs",
+                "provenance_refs",
+                "supersedes"
+              ]
+            },
+            "failure_semantics": {
+              "const": {
+                "BLOCKED": "fail_closed",
+                "ERROR": "quarantined",
+                "FAIL": "fail_closed",
+                "NOT_ASSESSED": "no_eligibility"
+              }
+            },
+            "change_scope": {"const": ["M8", "M11", "M13"]},
+            "summary": {"$ref": "#/$defs/safeText"},
+            "evidence_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/safeText"}
+            }
+          },
+          "allOf": [
+            {
+              "if": {"properties": {"revision": {"const": 1}}},
+              "then": {
+                "properties": {
+                  "state": {"const": "draft"},
+                  "supersedes": {"type": "null"}
+                }
+              },
+              "else": {
+                "properties": {
+                  "state": {"const": "validated"},
+                  "supersedes": {"type": "string", "minLength": 1}
+                }
+              }
+            }
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

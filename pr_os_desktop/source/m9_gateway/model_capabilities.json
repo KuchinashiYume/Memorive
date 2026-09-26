@@ -1,0 +1,316 @@
+{
+  "schema_version": "m9-provider-capability-registry-1.0",
+  "providers": {
+    "deepseek": {
+      "deepseek-v4-flash": {
+        "verified_at": "2026-07-29",
+        "source_url": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 393216,
+        "capabilities": {
+          "thinking": true,
+          "reasoning_efforts": [
+            "low",
+            "high",
+            "max"
+          ],
+          "default_reasoning_effort": "high",
+          "structured_outputs": "json_object",
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.deepseek.com"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "deepseek"
+            ],
+            "thinking_mode": "OPTIONAL",
+            "thinking_wire": "thinking.type",
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [
+              "low",
+              "high",
+              "max"
+            ],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://api-docs.deepseek.com/guides/thinking_mode/",
+            "verified_at": "2026-09-15",
+            "default_effort": "high"
+          }
+        }
+      },
+      "deepseek-v4-pro": {
+        "verified_at": "2026-07-29",
+        "source_url": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 393216,
+        "capabilities": {
+          "thinking": true,
+          "reasoning_efforts": [
+            "low",
+            "high",
+            "max"
+          ],
+          "default_reasoning_effort": "high",
+          "structured_outputs": "json_object",
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.deepseek.com"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "deepseek"
+            ],
+            "thinking_mode": "OPTIONAL",
+            "thinking_wire": "thinking.type",
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [
+              "low",
+              "high",
+              "max"
+            ],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://api-docs.deepseek.com/guides/thinking_mode/",
+            "verified_at": "2026-09-15",
+            "default_effort": "high"
+          }
+        }
+      },
+      "deepseek-flash": {
+        "verified_at": "2026-07-29",
+        "source_url": "https://api-docs.deepseek.com/quick_start/pricing/",
+        "max_input_tokens": 1000000,
+        "max_output_tokens": 393216,
+        "capabilities": {
+          "thinking": true,
+          "reasoning_efforts": [
+            "low",
+            "high",
+            "max"
+          ],
+          "default_reasoning_effort": "high",
+          "structured_outputs": "json_object",
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.deepseek.com"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "deepseek"
+            ],
+            "thinking_mode": "OPTIONAL",
+            "thinking_wire": "thinking.type",
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [
+              "low",
+              "high",
+              "max"
+            ],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://api-docs.deepseek.com/guides/thinking_mode/",
+            "verified_at": "2026-09-15",
+            "default_effort": "high"
+          }
+        }
+      }
+    },
+    "kimi": {
+      "kimi-k3": {
+        "verified_at": "2026-09-15",
+        "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+        "capabilities": {
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.moonshot.cn",
+              "api.moonshot.ai"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "kimi",
+              "moonshot",
+              "月之暗面"
+            ],
+            "thinking_mode": "ALWAYS",
+            "thinking_wire": null,
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [
+              "low",
+              "high",
+              "max"
+            ],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_completion_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+            "verified_at": "2026-09-15",
+            "default_effort": "max"
+          }
+        }
+      },
+      "kimi-k2.6": {
+        "verified_at": "2026-09-15",
+        "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+        "capabilities": {
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.moonshot.cn",
+              "api.moonshot.ai"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "kimi",
+              "moonshot",
+              "月之暗面"
+            ],
+            "thinking_mode": "OPTIONAL",
+            "thinking_wire": "thinking.type",
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+            "verified_at": "2026-09-15"
+          }
+        }
+      },
+      "kimi-k2.7-code": {
+        "verified_at": "2026-09-15",
+        "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+        "capabilities": {
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.moonshot.cn",
+              "api.moonshot.ai"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "kimi",
+              "moonshot",
+              "月之暗面"
+            ],
+            "thinking_mode": "ALWAYS",
+            "thinking_wire": "thinking.type",
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+            "verified_at": "2026-09-15"
+          }
+        }
+      },
+      "kimi-k2.7-code-highspeed": {
+        "verified_at": "2026-09-15",
+        "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+        "capabilities": {
+          "streaming": true,
+          "reasoning_control": {
+            "schema_version": "MemoApiReasoningControl-v1",
+            "origins": [
+              "api.moonshot.cn",
+              "api.moonshot.ai"
+            ],
+            "protocols": [
+              "OPENAI_COMPATIBLE"
+            ],
+            "auto_provider_aliases": [
+              "kimi",
+              "moonshot",
+              "月之暗面"
+            ],
+            "thinking_mode": "ALWAYS",
+            "thinking_wire": "thinking.type",
+            "thinking_values": {
+              "on": "enabled",
+              "off": "disabled"
+            },
+            "effort_values": [],
+            "effort_wire": "reasoning_effort",
+            "default_thinking": true,
+            "output_field": "max_tokens",
+            "omit_sampling": [
+              "temperature"
+            ],
+            "streaming": true,
+            "source_url": "https://platform.kimi.com/docs/guide/use-thinking-models",
+            "verified_at": "2026-09-15"
+          }
+        }
+      }
+    }
+  }
+}

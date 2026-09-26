@@ -1,0 +1,1251 @@
+{
+  "components": [
+    {
+      "path": "_internal/81d243bd2c585b0f4821__mypyc.cp313-win_amd64.pyd",
+      "bytes": 218624,
+      "sha256": "ba7fc544994f126cb7485ce52d265d2f32e93c4f1ea1fcd6fcdee3918f271979",
+      "matched_distribution_sources": [
+        {
+          "component": "charset-normalizer",
+          "source": "81d243bd2c585b0f4821__mypyc.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "81d243bd2c585b0f4821__mypyc.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/_asyncio.pyd",
+      "bytes": 72928,
+      "sha256": "2d13fa4b5ef94464bb94e2ec613eceb5bbad70c8e7e05f0e8ef25f6078397cdc",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_asyncio.pyd"
+    },
+    {
+      "path": "_internal/_bz2.pyd",
+      "bytes": 86752,
+      "sha256": "76a33e2baa3880aa46290cc7d5810b3155c5e2f5a1cc7d3f7b751f6434144ada",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_bz2.pyd"
+    },
+    {
+      "path": "_internal/_cffi_backend.cp313-win_amd64.pyd",
+      "bytes": 180736,
+      "sha256": "21b7160d4a6da9590794fdb38718982060b5c92d56fb0e441fc8b62ee789be8d",
+      "matched_distribution_sources": [
+        {
+          "component": "cffi",
+          "source": "_cffi_backend.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_cffi_backend.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/_ctypes.pyd",
+      "bytes": 134368,
+      "sha256": "75687620596877b0dde462e74ae12140d695b3c78df3c6c099d55717768dde42",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_ctypes.pyd"
+    },
+    {
+      "path": "_internal/_decimal.pyd",
+      "bytes": 286432,
+      "sha256": "906964c01d04b360c316a2bb86d03d9ca9864e039baa01fa866815e6dce4a9b1",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_decimal.pyd"
+    },
+    {
+      "path": "_internal/_elementtree.pyd",
+      "bytes": 135904,
+      "sha256": "98474a51706eaff41ec303e0ae3b91605fbf9112daad837007793e53f482f1c9",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_elementtree.pyd"
+    },
+    {
+      "path": "_internal/_hashlib.pyd",
+      "bytes": 69344,
+      "sha256": "5eb4a2aa9e28b49cb2a4f6ecee21f3c2b629b43a0709bad1d7e6204bac74eac2",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_hashlib.pyd"
+    },
+    {
+      "path": "_internal/_lzma.pyd",
+      "bytes": 159456,
+      "sha256": "f221ed5f1c2789aa357f3c2dc4cd22af134b4b91acb3fb78f9fa5f7f9a7b62e4",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_lzma.pyd"
+    },
+    {
+      "path": "_internal/_multiprocessing.pyd",
+      "bytes": 38112,
+      "sha256": "c04d2822d62f675df86d748ee552918e6ef2de5659ad2ce91dda5e10ecf35fc7",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_multiprocessing.pyd"
+    },
+    {
+      "path": "_internal/_overlapped.pyd",
+      "bytes": 57568,
+      "sha256": "579438a55311bf39b32145b8dec7846bd6830dfa461345236a37cc0c833a4a51",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_overlapped.pyd"
+    },
+    {
+      "path": "_internal/_queue.pyd",
+      "bytes": 35552,
+      "sha256": "6d77d15d668cb5ddff53cff1479dffc97db5858451d4b98f6e60a23cfb529e01",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_queue.pyd"
+    },
+    {
+      "path": "_internal/_socket.pyd",
+      "bytes": 86752,
+      "sha256": "ba944001aa6b53350f8c64e93643742abf1a08dd07c7dbbc13996e7d4d8a9efa",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_socket.pyd"
+    },
+    {
+      "path": "_internal/_sqlite3.pyd",
+      "bytes": 131296,
+      "sha256": "ff76e7c20008fa59e8cd9c6bb8ec47f689a2cc2dc0c9b8ad9e19572b37b9d7db",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_sqlite3.pyd"
+    },
+    {
+      "path": "_internal/_ssl.pyd",
+      "bytes": 181984,
+      "sha256": "1cf939510359f5aa3c5f51a0ad994d9b819f5603dd100872cd30a1e25cd83f05",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_ssl.pyd"
+    },
+    {
+      "path": "_internal/_uuid.pyd",
+      "bytes": 27872,
+      "sha256": "e196b2a878b8a57976e9ab5d7610e35a85e2fe3043fd3952934a54b415bd2854",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_uuid.pyd"
+    },
+    {
+      "path": "_internal/_wmi.pyd",
+      "bytes": 39648,
+      "sha256": "ca38a50c27413a5acfd14b30b0433fcf80a64ad0020e41aceeb3666f8439aba4",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_wmi.pyd"
+    },
+    {
+      "path": "_internal/_zoneinfo.pyd",
+      "bytes": 50912,
+      "sha256": "ce3d9885aa50aed7e21a5ef90393d2bcad0f155999419fe9397a190180e39a0f",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_zoneinfo.pyd"
+    },
+    {
+      "path": "_internal/bcrypt/_bcrypt.pyd",
+      "bytes": 305152,
+      "sha256": "898d1fe05e287d66bd379f26eb49d27a260f14666c7dc8b1719dae8c489abff0",
+      "matched_distribution_sources": [
+        {
+          "component": "bcrypt",
+          "source": "bcrypt/_bcrypt.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_bcrypt.pyd"
+    },
+    {
+      "path": "_internal/charset_normalizer/cd.cp313-win_amd64.pyd",
+      "bytes": 10752,
+      "sha256": "2e9f5049b3c5db7ab78c6abb94dfbbfe035ebab8f40594320f8c92221f486f24",
+      "matched_distribution_sources": [
+        {
+          "component": "charset-normalizer",
+          "source": "charset_normalizer/cd.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "cd.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/charset_normalizer/md.cp313-win_amd64.pyd",
+      "bytes": 10752,
+      "sha256": "14d5840ea79b7690e50ae6b182c1b7605e02a6a8b8e34a3f9e09dbfb59468bd2",
+      "matched_distribution_sources": [
+        {
+          "component": "charset-normalizer",
+          "source": "charset_normalizer/md.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "md.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/chromadb_rust_bindings/chromadb_rust_bindings.pyd",
+      "bytes": 63397888,
+      "sha256": "43e00b2792bf31bac0eabc85b9bd7b06095db4c61c0cdac25246ed5852623dd5",
+      "matched_distribution_sources": [
+        {
+          "component": "chromadb",
+          "source": "chromadb_rust_bindings/chromadb_rust_bindings.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "chromadb_rust_bindings.pyd"
+    },
+    {
+      "path": "_internal/clr_loader/ffi/dlls/amd64/ClrLoader.dll",
+      "bytes": 10240,
+      "sha256": "e6cb8b51dbd5d5b5548696e6ddf17875af73b8abd99ca1572d32b1df98028591",
+      "matched_distribution_sources": [
+        {
+          "component": "clr_loader",
+          "source": "clr_loader/ffi/dlls/amd64/ClrLoader.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "ClrLoader.dll"
+    },
+    {
+      "path": "_internal/clr_loader/ffi/dlls/x86/ClrLoader.dll",
+      "bytes": 10240,
+      "sha256": "d7b659e28d18d0e2b1f709861d51b5cb3cd37bb12056feab5764cd03165a2c9d",
+      "matched_distribution_sources": [
+        {
+          "component": "clr_loader",
+          "source": "clr_loader/ffi/dlls/x86/ClrLoader.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "ClrLoader.dll"
+    },
+    {
+      "path": "_internal/google/_upb/_message.pyd",
+      "bytes": 728649,
+      "sha256": "0135f3c7d328e79b5ee468bb04d92c5c9a05f92ff7f076e41621822f24fdec05",
+      "matched_distribution_sources": [
+        {
+          "component": "protobuf",
+          "source": "google/_upb/_message.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_message.pyd"
+    },
+    {
+      "path": "_internal/grpc/_cython/cygrpc.cp313-win_amd64.pyd",
+      "bytes": 10927616,
+      "sha256": "e29caf14d3a874624769f54af724cfc1d76443385b78125bc75ead7499263063",
+      "matched_distribution_sources": [
+        {
+          "component": "grpcio",
+          "source": "grpc/_cython/cygrpc.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "cygrpc.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/jiter/jiter.cp313-win_amd64.pyd",
+      "bytes": 444928,
+      "sha256": "f4b14ba25315c6e28114639599734b0d43e182022883c363d34e6eb04ef39488",
+      "matched_distribution_sources": [
+        {
+          "component": "jiter",
+          "source": "jiter/jiter.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "jiter.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/libcrypto-3.dll",
+      "bytes": 5238520,
+      "sha256": "09499e186cf0e434ffa17ad153aa9a66d6048c54a2c03b823e2a06c49d9affe4",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "libcrypto-3.dll"
+    },
+    {
+      "path": "_internal/libffi-8.dll",
+      "bytes": 39696,
+      "sha256": "eff52743773eb550fcc6ce3efc37c85724502233b6b002a35496d828bd7b280a",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "libffi-8.dll"
+    },
+    {
+      "path": "_internal/libssl-3.dll",
+      "bytes": 794872,
+      "sha256": "28c395290279fa4f4f54a57b85cd66d853895f925fefb8f6fdebc0d8b1cdd07c",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "libssl-3.dll"
+    },
+    {
+      "path": "_internal/lxml/_elementpath.cp313-win_amd64.pyd",
+      "bytes": 144384,
+      "sha256": "6fe3eba4285106fd31f8988d1530135356f682645da87f8e7ac1052a5e96142e",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/_elementpath.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_elementpath.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/lxml/builder.cp313-win_amd64.pyd",
+      "bytes": 84992,
+      "sha256": "7f29cab4022b9ee87cd049e669a892e41a0e069f1ae7324e5d20df6a4d2c9e05",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/builder.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "builder.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/lxml/etree.cp313-win_amd64.pyd",
+      "bytes": 4031488,
+      "sha256": "39a86c59fd6b509975c4a85fb57eb68c86d4d7fa2a5d2152c152158121f01b62",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/etree.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "etree.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/lxml/html/_difflib.cp313-win_amd64.pyd",
+      "bytes": 361472,
+      "sha256": "3452cfe58b26f72067fb5be4aadb07adcc1fe065b9c063695be4becb2074efa6",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/html/_difflib.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_difflib.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/lxml/html/diff.cp313-win_amd64.pyd",
+      "bytes": 228352,
+      "sha256": "68fef4a57848ce9dcd8e42698dcff63e7c6a37029c0d0f6586eb5a025103d11e",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/html/diff.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "diff.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/lxml/objectify.cp313-win_amd64.pyd",
+      "bytes": 1743872,
+      "sha256": "1f48183b79a5d0fe83bfc7c030a52bc44d511274578d5f83ed2e7f9c4cf53d5c",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/objectify.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "objectify.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/lxml/sax.cp313-win_amd64.pyd",
+      "bytes": 116224,
+      "sha256": "410a68d3c11e7a950870aea649d2033e01799e03d24aa4355c28bdd8271bf636",
+      "matched_distribution_sources": [
+        {
+          "component": "lxml",
+          "source": "lxml/sax.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "sax.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/mmh3.cp313-win_amd64.pyd",
+      "bytes": 51200,
+      "sha256": "1cc7b0aa86a0fb90001590f9de65a4fc053816f4075f02ed1eaa75b7fcc8724a",
+      "matched_distribution_sources": [
+        {
+          "component": "mmh3",
+          "source": "mmh3.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "mmh3.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/_core/_multiarray_tests.cp313-win_amd64.pyd",
+      "bytes": 65024,
+      "sha256": "a047d3cd5462af05b9b88ac53a3ec06f1fe486c8ad5789a62695cf552cfccf90",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/_core/_multiarray_tests.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_multiarray_tests.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/_core/_multiarray_umath.cp313-win_amd64.pyd",
+      "bytes": 3890688,
+      "sha256": "aaf53c2acf2fbf04e7cef637bf2e3238c346d2bb77af1e5cbc192460d55dfe8f",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/_core/_multiarray_umath.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_multiarray_umath.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/fft/_pocketfft_umath.cp313-win_amd64.pyd",
+      "bytes": 276480,
+      "sha256": "27a968dc28c76ff10c78f6928bf5953e9832e6cd60a5a70cf584cd58bfd41ee6",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/fft/_pocketfft_umath.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_pocketfft_umath.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/linalg/_umath_linalg.cp313-win_amd64.pyd",
+      "bytes": 112128,
+      "sha256": "c2c2e5179418f75b3eff245f7654544e1bb7a851a89d9b67bf96961c817e1e4d",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/linalg/_umath_linalg.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_umath_linalg.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_bounded_integers.cp313-win_amd64.pyd",
+      "bytes": 206848,
+      "sha256": "87603e482b49579cf8b8b8c166d8a1872c714e38e911bfc35d7e04fa5508f0fb",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_bounded_integers.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_bounded_integers.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_common.cp313-win_amd64.pyd",
+      "bytes": 167936,
+      "sha256": "8e80054f1213ece9053372761dc0635161f86741014dc1ab95862fea0ca1f819",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_common.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_common.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_generator.cp313-win_amd64.pyd",
+      "bytes": 584704,
+      "sha256": "6604c784bffdfee7507b5db2db76ad0cd4aa9df4a14cc588d6e97eeaf453b723",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_generator.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_generator.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_mt19937.cp313-win_amd64.pyd",
+      "bytes": 83456,
+      "sha256": "d05b144500cc806a4ac5393e61c5e38c3e0a79629fa5d39edd5275bd182fa567",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_mt19937.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_mt19937.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_pcg64.cp313-win_amd64.pyd",
+      "bytes": 92672,
+      "sha256": "5a52b12b9348d036181f9a7fdf9763a78f00ef2c6e307f707e337e080a178b26",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_pcg64.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_pcg64.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_philox.cp313-win_amd64.pyd",
+      "bytes": 78336,
+      "sha256": "ae9fa09fb7a074e22d5c031b69f1e3e1fc55af2e9da2ea6c7ecd9a84825147f2",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_philox.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_philox.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/_sfc64.cp313-win_amd64.pyd",
+      "bytes": 58880,
+      "sha256": "0ff6190c90d421b73269bf2ddbe75e2293c95bd57a96db76c40cb71a8681a108",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/_sfc64.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_sfc64.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/bit_generator.cp313-win_amd64.pyd",
+      "bytes": 163840,
+      "sha256": "02079a32ad10f67e7fe3a9aaa9d08ce1d72de745440075e01e7b20c313162a22",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/bit_generator.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "bit_generator.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy/random/mtrand.cp313-win_amd64.pyd",
+      "bytes": 491520,
+      "sha256": "675155e77594258d82c3c0bbbc42009cc60f2327f39151380c88d49183e60ad8",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy/random/mtrand.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "mtrand.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/numpy.libs/libscipy_openblas64_-b788215d9d47792bcba3a2e2a7114320.dll",
+      "bytes": 20405760,
+      "sha256": "b788215d9d47792bcba3a2e2a71143205a57282828a483f1fb071ca2c159f616",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy.libs/libscipy_openblas64_-b788215d9d47792bcba3a2e2a7114320.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "libscipy_openblas64_-b788215d9d47792bcba3a2e2a7114320.dll"
+    },
+    {
+      "path": "_internal/numpy.libs/msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll",
+      "bytes": 575056,
+      "sha256": "a4c2229bdc2a2a630acdc095b4d86008e5c3e3bc7773174354f3da4f5beb9cde",
+      "matched_distribution_sources": [
+        {
+          "component": "numpy",
+          "source": "numpy.libs/msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll"
+    },
+    {
+      "path": "_internal/onnxruntime/capi/onnxruntime.dll",
+      "bytes": 13557816,
+      "sha256": "9a57bad0bf1c141d64f2cf735c7fbf2adac2d0e6567b5d5e3bdd8917e8e720c4",
+      "matched_distribution_sources": [
+        {
+          "component": "onnxruntime",
+          "source": "onnxruntime/capi/onnxruntime.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "onnxruntime.dll"
+    },
+    {
+      "path": "_internal/onnxruntime/capi/onnxruntime_providers_shared.dll",
+      "bytes": 22072,
+      "sha256": "5839c4718a980f20d44c38df2c3e2338639126613a80190e4ef692a60719addb",
+      "matched_distribution_sources": [
+        {
+          "component": "onnxruntime",
+          "source": "onnxruntime/capi/onnxruntime_providers_shared.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "onnxruntime_providers_shared.dll"
+    },
+    {
+      "path": "_internal/onnxruntime/capi/onnxruntime_pybind11_state.pyd",
+      "bytes": 15859256,
+      "sha256": "0437454b2555834378f601c52c7cc524c390a3062ab0f49eceeac0e5a3eaa020",
+      "matched_distribution_sources": [
+        {
+          "component": "onnxruntime",
+          "source": "onnxruntime/capi/onnxruntime_pybind11_state.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "onnxruntime_pybind11_state.pyd"
+    },
+    {
+      "path": "_internal/orjson/orjson.cp313-win_amd64.pyd",
+      "bytes": 223232,
+      "sha256": "ead891b62fbbbc3422ddbc953c9a409a3c00da85eac2d5c42948e7786ae19425",
+      "matched_distribution_sources": [
+        {
+          "component": "orjson",
+          "source": "orjson/orjson.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "orjson.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_avif.cp313-win_amd64.pyd",
+      "bytes": 7890944,
+      "sha256": "2e3e5cce3aea38c603680ca3da5d161fad123ce23a803bb692a56aff608989be",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_avif.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_avif.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_imaging.cp313-win_amd64.pyd",
+      "bytes": 2632704,
+      "sha256": "88756e8e0e3f6180e518da25d379597c861e2d20d716ef001894789b515c1777",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_imaging.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_imaging.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_imagingcms.cp313-win_amd64.pyd",
+      "bytes": 272384,
+      "sha256": "7ecb50b954d13d72b7a0ff565872332443cdbc83a36e58a56b2b949a56f32549",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_imagingcms.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_imagingcms.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_imagingft.cp313-win_amd64.pyd",
+      "bytes": 2174976,
+      "sha256": "e94673a471a0b6fd5e92e8b6cdbdfe16e2e91bcf5689e9e4c9b391ab43788d85",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_imagingft.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_imagingft.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_imagingmath.cp313-win_amd64.pyd",
+      "bytes": 21504,
+      "sha256": "9d5bbea6a877a48ed7995a0640ecb0a5567d9fad544a4a1fbf9f22d507029b57",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_imagingmath.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_imagingmath.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_imagingtk.cp313-win_amd64.pyd",
+      "bytes": 14848,
+      "sha256": "8ccd6128481d5a3a15993c2f8a69585694ff972652a6b06dcaee276fc65633a7",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_imagingtk.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_imagingtk.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/PIL/_webp.cp313-win_amd64.pyd",
+      "bytes": 416256,
+      "sha256": "9918faf8d90faa86e03e48479c6a62383be71da759254afded18591a406a92fe",
+      "matched_distribution_sources": [
+        {
+          "component": "pillow",
+          "source": "PIL/_webp.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_webp.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/psutil/_psutil_windows.pyd",
+      "bytes": 70656,
+      "sha256": "0035450801bd7d938e9e146c5ec28e619cb5a5f4a18cdc53ac7e9734c7f94f78",
+      "matched_distribution_sources": [
+        {
+          "component": "psutil",
+          "source": "psutil/_psutil_windows.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_psutil_windows.pyd"
+    },
+    {
+      "path": "_internal/pybase64/_pybase64.cp313-win_amd64.pyd",
+      "bytes": 54272,
+      "sha256": "a28afd6190faf1801fe938df1fb1acb2a460f78432709bf4fe71873bd1f62ace",
+      "matched_distribution_sources": [
+        {
+          "component": "pybase64",
+          "source": "pybase64/_pybase64.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_pybase64.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/pydantic_core/_pydantic_core.cp313-win_amd64.pyd",
+      "bytes": 5256192,
+      "sha256": "0c4e9ba0b8da2a7148ff6771f258f53edab4a848c43a8d36593dd4170f340507",
+      "matched_distribution_sources": [
+        {
+          "component": "pydantic_core",
+          "source": "pydantic_core/_pydantic_core.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_pydantic_core.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/pyexpat.pyd",
+      "bytes": 221920,
+      "sha256": "1037b8bfb0cd313119b09b4ee76ff85dffa49ba9a334f36013b8b871ad29d0e8",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "pyexpat.pyd"
+    },
+    {
+      "path": "_internal/pymupdf/_extra.pyd",
+      "bytes": 190976,
+      "sha256": "43292c50f18dafa1d92dec67e076d2340a361a24e510edb6ccfe8de7364b6b10",
+      "matched_distribution_sources": [
+        {
+          "component": "pymupdf",
+          "source": "pymupdf/_extra.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_extra.pyd"
+    },
+    {
+      "path": "_internal/pymupdf/_features.pyd",
+      "bytes": 197632,
+      "sha256": "76ea68daf4c3c87d5ca1ea91e9520a259124de5f1f6feedac721d1c47ab58aa5",
+      "matched_distribution_sources": [
+        {
+          "component": "pymupdf-layout",
+          "source": "pymupdf/_features.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_features.pyd"
+    },
+    {
+      "path": "_internal/pymupdf/_mupdf.pyd",
+      "bytes": 13063168,
+      "sha256": "8b0a0a990523eaecf695ec7f9bb5660047b11948649a7e89369141c03dc589d9",
+      "matched_distribution_sources": [
+        {
+          "component": "pymupdf",
+          "source": "pymupdf/_mupdf.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_mupdf.pyd"
+    },
+    {
+      "path": "_internal/pymupdf/_tgif.pyd",
+      "bytes": 742912,
+      "sha256": "04776523098df993e767bf61c01f74a662d63ceeb1cb6d62631f74927cca0dec",
+      "matched_distribution_sources": [
+        {
+          "component": "pymupdf-layout",
+          "source": "pymupdf/_tgif.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_tgif.pyd"
+    },
+    {
+      "path": "_internal/pymupdf/mupdfcpp64.dll",
+      "bytes": 26295808,
+      "sha256": "998184dce298f24a4c2b080a9173594c96c6f78796732bdd8e95ca0e557557cb",
+      "matched_distribution_sources": [
+        {
+          "component": "pymupdf",
+          "source": "pymupdf/mupdfcpp64.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "mupdfcpp64.dll"
+    },
+    {
+      "path": "_internal/python3.dll",
+      "bytes": 72416,
+      "sha256": "16f109e8411bc08341497c87704b7cf0d22a2678f1e3a7dca416ea7bff995469",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "python3.dll"
+    },
+    {
+      "path": "_internal/python313.dll",
+      "bytes": 6132448,
+      "sha256": "3a7a6170ea840bf2a2a76d05b687b946fcdc8d0cfedfe159012b38f1e8959a7c",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "python313.dll"
+    },
+    {
+      "path": "_internal/pythonnet/runtime/Python.Runtime.dll",
+      "bytes": 450048,
+      "sha256": "d204ad74dc18cd07320c8e665bd32ec6549b555ce97e61e4d3cf88437a64988e",
+      "matched_distribution_sources": [
+        {
+          "component": "pythonnet",
+          "source": "pythonnet/runtime/Python.Runtime.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "Python.Runtime.dll"
+    },
+    {
+      "path": "_internal/rpds/rpds.cp313-win_amd64.pyd",
+      "bytes": 550912,
+      "sha256": "cd1f93206867e3ce34b88ec8e2f8121b20c4c9e4ca22b26bd9e587af8d68dc26",
+      "matched_distribution_sources": [
+        {
+          "component": "rpds-py",
+          "source": "rpds/rpds.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "rpds.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/select.pyd",
+      "bytes": 32992,
+      "sha256": "a208997eb871b5c7785eb9bcc6a22ba8c43262255b59a3394fbe9912f38b4692",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "select.pyd"
+    },
+    {
+      "path": "_internal/sqlite3.dll",
+      "bytes": 1584864,
+      "sha256": "22d25619e7ccea3e6d1038b5d28bdae5761a88c19a6e228dd867d0a7d5cf2c45",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "sqlite3.dll"
+    },
+    {
+      "path": "_internal/unicodedata.pyd",
+      "bytes": 712928,
+      "sha256": "7f8d28574732959cdb1188127fe3494c3618b602eede69c0a71846f0b5cc8a15",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "unicodedata.pyd"
+    },
+    {
+      "path": "_internal/VCRUNTIME140.dll",
+      "bytes": 120400,
+      "sha256": "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "VCRUNTIME140.dll"
+    },
+    {
+      "path": "_internal/VCRUNTIME140_1.dll",
+      "bytes": 49776,
+      "sha256": "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "python-distribution",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "VCRUNTIME140_1.dll"
+    },
+    {
+      "path": "_internal/websockets/speedups.cp313-win_amd64.pyd",
+      "bytes": 11776,
+      "sha256": "dc38d5de91b62022b3bf46b909136076d227e712c2f857c6ce886df7020190da",
+      "matched_distribution_sources": [
+        {
+          "component": "websockets",
+          "source": "websockets/speedups.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "speedups.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "_internal/webview/lib/Microsoft.Web.WebView2.Core.dll",
+      "bytes": 649800,
+      "sha256": "8219a3135436c147f8eb02fb831e99596103eebc18b6d7b794ca93f4c67018a2",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/Microsoft.Web.WebView2.Core.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "Microsoft.Web.WebView2.Core.dll"
+    },
+    {
+      "path": "_internal/webview/lib/Microsoft.Web.WebView2.WinForms.dll",
+      "bytes": 39016,
+      "sha256": "c48f8d729dc531288d2c53a6241effe7922ed1b947850b2442008a945c098c48",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/Microsoft.Web.WebView2.WinForms.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "Microsoft.Web.WebView2.WinForms.dll"
+    },
+    {
+      "path": "_internal/webview/lib/runtimes/win-arm64/native/WebView2Loader.dll",
+      "bytes": 147016,
+      "sha256": "0937030efc718f3da77c5e0978fb5046e381d0bb7b01acaad31a535a1b588a33",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/runtimes/win-arm64/native/WebView2Loader.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "WebView2Loader.dll"
+    },
+    {
+      "path": "_internal/webview/lib/runtimes/win-x64/native/WebView2Loader.dll",
+      "bytes": 161864,
+      "sha256": "eb5335edeaa6f2122c044e82aab2351dc8c9b4e0fe5e578c71922fb61be285e7",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/runtimes/win-x64/native/WebView2Loader.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "WebView2Loader.dll"
+    },
+    {
+      "path": "_internal/webview/lib/runtimes/win-x86/native/WebView2Loader.dll",
+      "bytes": 121928,
+      "sha256": "04814b2c59314c6452d61b821a4a3a5c5f8e8577b55b985f6a7a4b59f8907ec5",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/runtimes/win-x86/native/WebView2Loader.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "WebView2Loader.dll"
+    },
+    {
+      "path": "_internal/webview/lib/WebBrowserInterop.x64.dll",
+      "bytes": 7168,
+      "sha256": "f6a646470f0e1058224a52e8e2e217501dca46939b30bfc9a5dd4dcdd43f088d",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/WebBrowserInterop.x64.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "WebBrowserInterop.x64.dll"
+    },
+    {
+      "path": "_internal/webview/lib/WebBrowserInterop.x86.dll",
+      "bytes": 7168,
+      "sha256": "4e527297fbea7c5a0419f3a6af307c2681787beb0bf0ef3fea849a7fd85a08dc",
+      "matched_distribution_sources": [
+        {
+          "component": "pywebview",
+          "source": "webview/lib/WebBrowserInterop.x86.dll"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "WebBrowserInterop.x86.dll"
+    },
+    {
+      "path": "_internal/yaml/_yaml.cp313-win_amd64.pyd",
+      "bytes": 253952,
+      "sha256": "8a747bb4bb166b3caf53c5ee91931eb1317cc3ad617f18dcd12dd8c181ced226",
+      "matched_distribution_sources": [
+        {
+          "component": "PyYAML",
+          "source": "yaml/_yaml.cp313-win_amd64.pyd"
+        }
+      ],
+      "review": "IDENTIFIED_DISTRIBUTION",
+      "source_family": "pypi-wheel",
+      "analysis_source_hash_verified": true,
+      "source_relative_name": "_yaml.cp313-win_amd64.pyd"
+    },
+    {
+      "path": "Memorive.exe",
+      "bytes": 24796570,
+      "sha256": "1f0b81a24469a32c362c9064a76902e19fcbd522591b54426996653446389f7e",
+      "matched_distribution_sources": [],
+      "review": "REQUIRES_NATIVE_PROVENANCE",
+      "source_family": "current-source-build",
+      "analysis_source_hash_verified": false,
+      "source_relative_name": null
+    }
+  ],
+  "unrelated_toolchain_sources": 0,
+  "license_review": "NOT_COMPLETE",
+  "excluded_host_runtime": [
+    "_internal/MSVCP140.dll",
+    "_internal/MSVCP140_1.dll"
+  ],
+  "build_id": "build136_r51_public_candidate01"
+}

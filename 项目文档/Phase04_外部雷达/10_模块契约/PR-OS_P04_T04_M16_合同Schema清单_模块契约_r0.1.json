@@ -1,0 +1,26 @@
+{
+  "schema_version": "p04.t04.contract-schema-manifest.0.1",
+  "authority": "formal-record",
+  "hash_domain": "SHA256_OF_FILE_BYTES",
+  "members": [
+    ["../40_验收与收尾/PR-OS_P04_T04_M16_离线验证证据_2026-08-11/PR-OS_P04_T04_M16_A0与Shadow结果_机器证据_r0.1.schema.json", "21FF820A683F6B7492DC74D68CB42A76D1C274A2507ABAF8FCB6DA599B2AE60B"],
+    ["PR-OS_P04_T04_M16_CandidateComparison_模块契约_r0.1.schema.json", "C2013C4E7B8CD8A602370276FB66E2CC911BCECA216360D91FE3C0CCFA77080F"],
+    ["PR-OS_P04_T04_M16_CandidateInputProjection_模块契约_r0.1.schema.json", "40E44628C0CACC351DD1B7F86E7B8EBD8C74CB9C84900309BC62DC08BB9ED28E"],
+    ["PR-OS_P04_T04_M16_LibraryRelation_模块契约_r0.1.schema.json", "218F62188556324905951CA10EAA284008B5764A44D338DEC9FA6E70979ED321"],
+    ["PR-OS_P04_T04_M16_LocalLibraryReadSnapshot_模块契约_r0.1.schema.json", "17CA3AB8021DFEF9EC9C8C7C207DE2480CF4B8F5099D1D512D5D74093D46D744"],
+    ["PR-OS_P04_T04_M16_NoveltyEvidence_模块契约_r0.1.schema.json", "84207405589EFA278AD02D2136B0862FE841A30DD71C143C4277A28C6DE26A84"],
+    ["PR-OS_P04_T04_M16_本地关系与多维新颖性_模块契约_r0.1.md", "001DC2BD128540607E418C1B6843A80C1426F663014C047506FD0CAF1464A138"]
+  ],
+  "object_types": [
+    "LocalLibraryReadSnapshot",
+    "T03-compatible Candidate Input Projection",
+    "LibraryRelation",
+    "NoveltyEvidence",
+    "CandidateComparison",
+    "A0/Shadow machine result"
+  ],
+  "additional_properties_policy": "FAIL_CLOSED",
+  "formalization_status": "FORMALIZED_AFTER_HUMAN_GATE_B",
+  "accepted_at": "2026-08-11T09:35:28.8229491+09:00",
+  "user_acceptance_sha256": "6BC7D0CAA66661449F534086AFC68D5E43A54369B422DE271C414E66D092AE4F"
+}

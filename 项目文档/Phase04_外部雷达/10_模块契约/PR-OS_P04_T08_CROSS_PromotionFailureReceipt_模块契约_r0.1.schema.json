@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pr-os.p04.t08.promotion-failure-receipt.v1",
+  "title": "PromotionFailureReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "receipt_id", "promotion_id", "intent_hash",
+    "transaction_state", "error_code", "error_message", "compensation_actions",
+    "prestate_hash", "observed_failure_state_hash", "post_compensation_state_hash",
+    "effective_projection", "remaining_differences", "journal_head_hash",
+    "original_error_evidence_hash", "compensation_error_evidence_hash",
+    "lock_disposition", "formal_reader_visibility", "automatic_retry",
+    "recorded_at", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "pr-os.p04.t08.promotion-failure-receipt.v1"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "promotion_id": {"type": "string", "minLength": 1},
+    "intent_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "transaction_state": {"enum": ["ROLLED_BACK", "COMPENSATION_REQUIRED"]},
+    "error_code": {"type": "string", "minLength": 1},
+    "error_message": {"type": "string"},
+    "compensation_actions": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "prestate_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "observed_failure_state_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "post_compensation_state_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "effective_projection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["formal_object", "m8_active", "m13_registration", "formal_index", "valid_commit_marker", "formal_reader_visibility"],
+      "properties": {
+        "formal_object": {"type": "boolean"},
+        "m8_active": {"type": "boolean"},
+        "m13_registration": {"type": "boolean"},
+        "formal_index": {"type": "boolean"},
+        "valid_commit_marker": {"type": "boolean"},
+        "formal_reader_visibility": {"const": false}
+      }
+    },
+    "remaining_differences": {
+      "type": "array", "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "journal_head_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "original_error_evidence_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "compensation_error_evidence_hash": {
+      "anyOf": [{"type": "null"}, {"type": "string", "pattern": "^[A-F0-9]{64}$"}]
+    },
+    "lock_disposition": {"enum": ["RELEASED_AFTER_ROLLBACK", "RETAINED_FOR_COMPENSATION", "NOT_ACQUIRED"]},
+    "formal_reader_visibility": {"const": false},
+    "automatic_retry": {"const": "DENIED"},
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "content_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"transaction_state": {"const": "ROLLED_BACK"}}},
+      "then": {
+        "properties": {
+          "remaining_differences": {"maxItems": 0},
+          "compensation_error_evidence_hash": {"const": null},
+          "lock_disposition": {"const": "RELEASED_AFTER_ROLLBACK"}
+        }
+      },
+      "else": {
+        "properties": {
+          "remaining_differences": {"minItems": 1},
+          "compensation_error_evidence_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+          "lock_disposition": {"const": "RETAINED_FOR_COMPENSATION"}
+        }
+      }
+    }
+  ]
+}

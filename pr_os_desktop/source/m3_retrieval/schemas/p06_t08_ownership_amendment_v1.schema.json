@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06_t08_ownership_amendment_v1.schema.json",
+  "title": "PR-OS P06 T08 Ownership Amendment Candidate V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ownership_amendment_id",
+    "subject_ref",
+    "previous_assertion_ref",
+    "previous_value",
+    "new_value",
+    "change_direction",
+    "reason_code",
+    "authority_ref",
+    "created_at",
+    "supersedes_ref",
+    "adopted"
+  ],
+  "properties": {
+    "ownership_amendment_id": {"type": "string", "pattern": "^OA-[0-9a-f]{24}$"},
+    "subject_ref": {"type": "string", "minLength": 1},
+    "previous_assertion_ref": {"type": "string", "minLength": 1},
+    "previous_value": {"enum": ["self", "entrusted", "unknown"]},
+    "new_value": {"enum": ["self", "entrusted", "unknown"]},
+    "change_direction": {"enum": ["same", "tightening", "relaxing"]},
+    "reason_code": {"type": "string", "minLength": 1},
+    "authority_ref": {"type": ["string", "null"], "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "supersedes_ref": {"type": "string", "minLength": 1},
+    "adopted": {"type": "boolean"}
+  }
+}

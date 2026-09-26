@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p07:t07:application-facade:v1",
+  "title": "PR-OS Application Facade v1",
+  "type": "object",
+  "required": [
+    "contract_revision",
+    "request_id",
+    "correlation_id",
+    "job_type",
+    "payload_ref",
+    "input_hashes",
+    "profile_snapshot",
+    "capabilities",
+    "pause_supported"
+  ],
+  "properties": {
+    "contract_revision": {"const": "1.0"},
+    "request_id": {"type": "string", "minLength": 1},
+    "correlation_id": {"type": "string", "minLength": 1},
+    "job_type": {"type": "string", "minLength": 1},
+    "payload_ref": {"type": "string", "minLength": 1},
+    "input_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string", "pattern": "^[0-9A-Fa-f]{64}$"}
+    },
+    "profile_snapshot": {"type": "object"},
+    "capabilities": {"type": "array", "items": {"type": "object"}},
+    "pause_supported": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

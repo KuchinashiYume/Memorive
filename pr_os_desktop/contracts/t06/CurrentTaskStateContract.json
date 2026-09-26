@@ -1,0 +1,81 @@
+{
+  "schema_version": "pr-os.p08.t06.current-task-state-contract.v1",
+  "authority_source": "ApplicationFacade via Application Service adapter",
+  "view_states": [
+    "LOADING",
+    "EMPTY",
+    "QUEUED",
+    "RUNNING",
+    "PAUSED",
+    "WAITING_HUMAN",
+    "CANCELING",
+    "CANCELED",
+    "FAILED",
+    "RECOVERING",
+    "COMPLETED"
+  ],
+  "control_state_mapping": {
+    "CREATED": "QUEUED",
+    "PREFLIGHT": "QUEUED",
+    "QUEUED": "QUEUED",
+    "BLOCKED_BEFORE_START": "FAILED",
+    "RUNNING": "RUNNING",
+    "PAUSE_REQUESTED": "RUNNING",
+    "PAUSED": "PAUSED",
+    "RESUME_REQUESTED": "RECOVERING",
+    "CANCEL_REQUESTED": "CANCELING",
+    "CANCELLED": "CANCELED",
+    "RECOVERY_REQUIRED": "RECOVERING",
+    "RECOVERING": "RECOVERING",
+    "FAILED": "FAILED",
+    "SUCCEEDED": "COMPLETED"
+  },
+  "pending_action_overlay": "WAITING_HUMAN_UNLESS_TERMINAL",
+  "orthogonal_axes": [
+    "job_control_state",
+    "verification_result",
+    "acceptance_verdict",
+    "technical_handoff_status",
+    "formalization_status",
+    "deployment_status"
+  ],
+  "progress": {
+    "known_denominator": "percent may be shown from completed_units / total_units",
+    "unknown_denominator": "indeterminate only; percent and ETA must be null",
+    "regression": "FAIL_CLOSED",
+    "stalled": "advisory from elapsed time without fabricated completion estimate",
+    "recovering": "separate recovery presentation"
+  },
+  "events": {
+    "duplicate_identical": "DEDUPE",
+    "same_sequence_conflict": "FAIL_CLOSED",
+    "out_of_order": "BUFFER_AND_ORDER",
+    "gap": "RECONNECT_REQUIRED",
+    "stale": "IGNORE_WITH_RECEIPT",
+    "cross_job_or_attempt": "FAIL_CLOSED",
+    "terminal_rollback": "FAIL_CLOSED"
+  },
+  "actions": {
+    "pause": {"requires": ["RUNNING", "pause_supported", "safe_checkpoint"], "confirmation": false},
+    "cancel": {"requires": ["cancel_eligible_state"], "confirmation": "SECOND_CLICK_WITHIN_10_SECONDS"},
+    "resume": {"requires": ["PAUSED", "frozen_inputs_equal_current_inputs"], "confirmation": false},
+    "retry": {"requires": ["FAILED_OR_CANCELLED"], "confirmation": false},
+    "respond_to_action": {"requires": ["PENDING_ACTION", "VALID_PUBLIC_SAFE_RESPONSE"], "confirmation": false}
+  },
+  "locators": {
+    "job": "pr-os://job/{job_id}",
+    "attempt": "pr-os://attempt/{attempt_id}",
+    "step": "pr-os-ui://step/{job_id}/{attempt_id}/{node_id}",
+    "event": "pr-os://event/{job_id}/{event_id}",
+    "action": "pr-os://action/{job_id}/{action_request_id}",
+    "artifact": "pr-os://artifact/{job_id}/{artifact_id}"
+  },
+  "external_effects": {
+    "production_job_access": 0,
+    "production_writes": 0,
+    "external_model_calls": 0,
+    "provider_calls": 0,
+    "real_credential_reads": 0,
+    "permanent_deletes": 0
+  }
+}

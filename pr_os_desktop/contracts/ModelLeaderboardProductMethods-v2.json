@@ -1,0 +1,44 @@
+{
+  "schema_version": "ModelLeaderboardProductMethods-v2",
+  "projection_schema": "ModelLeaderboardProjection-v2.schema.json",
+  "methods": [
+    {
+      "name": "settings.leaderboard_get",
+      "params": {},
+      "returns": "ModelLeaderboardProjection-v2",
+      "effects": "读取已配置来源的校验缓存及独立排行榜偏好；不发起网络请求"
+    },
+    {
+      "name": "settings.leaderboard_save",
+      "params": {
+        "expected_revision": "integer",
+        "changes": "partial preferences"
+      },
+      "returns": "ModelLeaderboardProjection-v2",
+      "effects": "独立偏好文件原子写入；冲突拒绝；不修改模型配置、考试、任务或账务"
+    },
+    {
+      "name": "settings.leaderboard_refresh",
+      "params": {},
+      "returns": "{status: RUNNING | BUSY}",
+      "effects": "后台串行复用来源 refresh；get 返回 RUNNING/PASS/PARTIAL/ERROR/NO_ENABLED_SOURCES；每个物理 GET 复用原始回执"
+    }
+  ],
+  "currency_display": [
+    "USD",
+    "RMB",
+    "JPY"
+  ],
+  "currency_storage": [
+    "USD",
+    "CNY",
+    "JPY"
+  ],
+  "default_scoring_sources": {
+    "artificial-analysis": 100,
+    "epoch-ai": 0
+  },
+  "product_api_binding": "ProductApi.call -> SettingsServiceAdapter -> SettingsController -> LeaderboardService",
+  "current_build_installation_authorized": false,
+  "paid_model_calls": 0
+}

@@ -1,0 +1,43 @@
+{
+  "review_contract_id": "card-review-claim-evidence-v3",
+  "input_schema_version": "claim-evidence-view-v3",
+  "card_schema_compatibility": "v6-sidecar",
+  "review_statuses": [
+    "SUPPORTED",
+    "PARTIAL",
+    "UNSUPPORTED",
+    "CONFLICT",
+    "NEEDS_REVIEW"
+  ],
+  "resolved_mapping_statuses": [
+    "explicit",
+    "exact",
+    "token_match",
+    "best_anchor_exact",
+    "best_anchor_scope_exact"
+  ],
+  "binding_requirements": {
+    "evidence_registered_once": true,
+    "atom_must_belong_to_claim": true,
+    "link_must_belong_to_claim": true,
+    "link_must_resolve_to_registered_evidence": true,
+    "evidence_chunk_must_exist": true,
+    "evidence_chunk_must_belong_to_paper": true,
+    "evidence_scope_must_match_claim": true,
+    "unresolved_mapping_cannot_support": true
+  },
+  "fact_verdicts": [
+    "verified",
+    "flagged",
+    "removed",
+    "not_reviewed"
+  ],
+  "dangerous_errors": [
+    "EVIDENCE_LINK_CLAIM_MISMATCH",
+    "EVIDENCE_LINK_NOT_ALLOWED_FOR_ATOM",
+    "EVIDENCE_SCOPE_MISMATCH",
+    "MAPPING_UNRESOLVED",
+    "EVIDENCE_CHUNK_NOT_FOUND",
+    "EVIDENCE_CROSS_PAPER"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t02:connector-capability-manifest:0.1",
+  "title": "P04 T02 Connector Capability Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "connector_id",
+    "connector_revision",
+    "provider_kind",
+    "implementation_status",
+    "operations",
+    "pagination",
+    "cache_policy",
+    "backoff_policy",
+    "authentication",
+    "data_scope",
+    "network_policy",
+    "single_writer"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t02.connector-capability.0.1"},
+    "connector_id": {"enum": ["ARXIV", "CROSSREF", "OPENALEX", "PMC_OA", "BIORXIV_MEDRXIV", "UNPAYWALL", "WEB_OF_SCIENCE", "ELSEVIER"]},
+    "connector_revision": {"type": "string", "pattern": "^r[0-9]+\\.[0-9]+$"},
+    "provider_kind": {"enum": ["NON_MODEL_SCHOLARLY_METADATA_API", "NON_MODEL_COMMERCIAL_SCHOLARLY_API"]},
+    "implementation_status": {"enum": ["OFFLINE_FIXTURE_READY", "NOT_CONFIGURED"]},
+    "operations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["search", "resolve", "get_open_locations", "healthcheck"]}
+    },
+    "pagination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "cursor_is_opaque", "invalid_cursor_behavior"],
+      "properties": {
+        "mode": {"enum": ["OFFSET", "CURSOR", "NOT_CONFIGURED"]},
+        "cursor_is_opaque": {"type": "boolean"},
+        "invalid_cursor_behavior": {"const": "FAIL_CLOSED"}
+      }
+    },
+    "cache_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_fields", "offline_only", "hash_algorithm"],
+      "properties": {
+        "key_fields": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {"enum": ["connector_id", "connector_revision", "query_hash", "cursor_hash", "snapshot_hash"]}
+        },
+        "offline_only": {"const": true},
+        "hash_algorithm": {"const": "SHA-256"}
+      }
+    },
+    "backoff_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "base_seconds", "cap_seconds", "sleeps_in_a0"],
+      "properties": {
+        "kind": {"const": "DETERMINISTIC_CAPPED_EXPONENTIAL_WITH_RETRY_AFTER"},
+        "base_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "cap_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "sleeps_in_a0": {"const": false}
+      }
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "credential_values_read"],
+      "properties": {
+        "mode": {"enum": ["NONE_FOR_A0", "NOT_CONFIGURED"]},
+        "credential_values_read": {"const": false}
+      }
+    },
+    "data_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metadata_only", "fulltext_materialization", "rights_claim"],
+      "properties": {
+        "metadata_only": {"const": true},
+        "fulltext_materialization": {"const": false},
+        "rights_claim": {"const": "NOT_INFERRED_FROM_LOCATION"}
+      }
+    },
+    "network_policy": {"enum": ["DISABLED_IN_A0", "NOT_CONFIGURED"]},
+    "single_writer": {"const": "P04/T02/M16"}
+  }
+}

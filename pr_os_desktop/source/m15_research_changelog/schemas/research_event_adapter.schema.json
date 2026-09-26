@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p03:t02:m15:research-event-adapter:1.1-candidate002",
+  "title": "M15 ResearchEvent domain wrapper",
+  "type": "object",
+  "required": [
+    "object_type",
+    "domain_contract_version",
+    "event_id",
+    "event_kind",
+    "occurred_at",
+    "observed_at",
+    "source_system",
+    "source_record_ref",
+    "source_content_hash",
+    "subject_refs",
+    "evidence_refs",
+    "status_axis",
+    "from_state",
+    "to_state",
+    "daily_category",
+    "weekly_categories",
+    "monthly_categories",
+    "explicit_tags",
+    "display_text",
+    "verification_status",
+    "source_details",
+    "projection_hash",
+    "common_object"
+  ],
+  "properties": {
+    "object_type": {"const": "ResearchEvent"},
+    "domain_contract_version": {"const": "1.1"},
+    "event_id": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+    "event_kind": {"$ref": "#/$defs/safeText"},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "source_system": {"enum": ["M8", "M11", "M13"]},
+    "source_record_ref": {"$ref": "#/$defs/sourceRecordRef"},
+    "source_content_hash": {"$ref": "#/$defs/upperSha256"},
+    "subject_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/safeText"}
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/safeText"}
+    },
+    "status_axis": {"$ref": "#/$defs/safeText"},
+    "from_state": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/safeText"}
+      ]
+    },
+    "to_state": {"$ref": "#/$defs/safeText"},
+    "daily_category": {"enum": ["新增", "修改", "待审", "失败"]},
+    "weekly_categories": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["研究进展", "明确标记的重要变化", "未验证项", "明确来源的潜在张力", "风险与待办"]
+      }
+    },
+    "monthly_categories": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["知识库结构变化", "明确记录的研究方向变化", "长期待办", "风险与未评估维度"]
+      }
+    },
+    "explicit_tags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/safeText"}
+    },
+    "display_text": {"$ref": "#/$defs/safeText"},
+    "verification_status": {
+      "enum": ["verified_by_authoritative_m6_report", "unknown", "not_applicable"]
+    },
+    "source_details": {
+      "oneOf": [
+        {"$ref": "#/$defs/m8Details"},
+        {"$ref": "#/$defs/m11LedgerDetails"},
+        {"$ref": "#/$defs/m11RunTerminalDetails"},
+        {"$ref": "#/$defs/m13Details"}
+      ]
+    },
+    "projection_hash": {"$ref": "#/$defs/projectionHash"},
+    "common_object": {"$ref": "#/$defs/commonResearchEvent"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"source_system": {"const": "M8"}}},
+      "then": {"properties": {"source_details": {"$ref": "#/$defs/m8Details"}}}
+    },
+    {
+      "if": {"properties": {"source_system": {"const": "M11"}}},
+      "then": {
+        "properties": {
+          "source_details": {
+            "oneOf": [
+              {"$ref": "#/$defs/m11LedgerDetails"},
+              {"$ref": "#/$defs/m11RunTerminalDetails"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"source_system": {"const": "M13"}}},
+      "then": {"properties": {"source_details": {"$ref": "#/$defs/m13Details"}}}
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "safeText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^[^\\r\\n\\t\\u0000-\\u001F\\u007F\\u2028\\u2029]+$"
+    },
+    "upperSha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "lowerSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sourceRecordRef": {
+      "type": "string",
+      "pattern": "^(?!.*//)source_snapshot/(?!\\.\\.?/)(?!.*?/\\.\\.?/)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*\\.jsonl#line=[1-9][0-9]*$",
+      "maxLength": 512
+    },
+    "typedHash": {
+      "type": "object",
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/upperSha256"}
+      },
+      "additionalProperties": false
+    },
+    "projectionHash": {
+      "type": "object",
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "DOMAIN_PROJECTION"},
+        "value": {"$ref": "#/$defs/upperSha256"}
+      },
+      "additionalProperties": false
+    },
+    "m8Details": {
+      "type": "object",
+      "required": ["wire", "trigger", "m6_report_id", "m6_authority_bound"],
+      "properties": {
+        "wire": {"const": "m8_reason_review_status"},
+        "trigger": {"$ref": "#/$defs/safeText"},
+        "m6_report_id": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/safeText"}
+          ]
+        },
+        "m6_authority_bound": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "m11LedgerDetails": {
+      "type": "object",
+      "required": ["record_type", "ledger_type", "record_kind"],
+      "properties": {
+        "record_type": {"const": "ledger_record"},
+        "ledger_type": {"enum": ["attempt", "paper_outcome", "publication"]},
+        "record_kind": {"enum": ["terminal", "amendment"]}
+      },
+      "additionalProperties": false
+    },
+    "m11RunTerminalDetails": {
+      "type": "object",
+      "required": ["record_type", "lifecycle_status", "acceptance_verdict"],
+      "properties": {
+        "record_type": {"const": "run_terminal_event"},
+        "lifecycle_status": {"enum": ["completed", "aborted", "invalidated"]},
+        "acceptance_verdict": {"enum": ["PASS", "FAIL", "NOT_ASSESSED"]}
+      },
+      "additionalProperties": false
+    },
+    "m13Locator": {
+      "type": "object",
+      "required": ["kind", "path", "canonical_hash"],
+      "properties": {
+        "kind": {"const": "opaque_registry_locator"},
+        "path": {"$ref": "#/$defs/safeText"},
+        "canonical_hash": {"type": "string", "pattern": "^sha256:opaque_utf8:[A-F0-9]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "m13EvidenceBasis": {
+      "type": "object",
+      "required": ["kind", "source_field", "evidence_ref", "details_present"],
+      "properties": {
+        "kind": {"$ref": "#/$defs/safeText"},
+        "source_field": {"$ref": "#/$defs/safeText"},
+        "evidence_ref": {"$ref": "#/$defs/safeText"},
+        "details_present": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "m13Parent": {
+      "type": "object",
+      "required": ["parent_artifact_id", "parent_content_hash", "relation", "evidence_basis"],
+      "properties": {
+        "parent_artifact_id": {"type": "string", "pattern": "^art_[a-f0-9]{32}$"},
+        "parent_content_hash": {"$ref": "#/$defs/lowerSha256"},
+        "relation": {"$ref": "#/$defs/safeText"},
+        "evidence_basis": {"$ref": "#/$defs/m13EvidenceBasis"}
+      },
+      "additionalProperties": false
+    },
+    "m13Unresolved": {
+      "type": "object",
+      "required": ["requirement", "reason_code", "evidence_refs", "candidate_artifact_ids", "search_hint_count"],
+      "properties": {
+        "requirement": {"$ref": "#/$defs/safeText"},
+        "reason_code": {"$ref": "#/$defs/safeText"},
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeText"}
+        },
+        "candidate_artifact_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^art_[a-f0-9]{32}$"}
+        },
+        "search_hint_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "m13Conflict": {
+      "type": "object",
+      "required": ["requirement", "reason_code", "candidate_artifact_ids", "evidence_refs"],
+      "properties": {
+        "requirement": {"$ref": "#/$defs/safeText"},
+        "reason_code": {"$ref": "#/$defs/safeText"},
+        "candidate_artifact_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^art_[a-f0-9]{32}$"}
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeText"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "m13LedgerRef": {
+      "type": "object",
+      "required": ["record_type", "ledger_type", "record_id", "run_id", "contract_ref"],
+      "properties": {
+        "record_type": {"enum": ["ledger_record", "run_terminal_event"]},
+        "ledger_type": {
+          "oneOf": [
+            {"type": "null"},
+            {"enum": ["attempt", "paper_outcome", "publication"]}
+          ]
+        },
+        "record_id": {"$ref": "#/$defs/safeText"},
+        "run_id": {"$ref": "#/$defs/safeText"},
+        "contract_ref": {"$ref": "#/$defs/safeText"}
+      },
+      "additionalProperties": false
+    },
+    "m13Details": {
+      "type": "object",
+      "required": [
+        "event_schema_version",
+        "registry_event_id",
+        "registry_event_type",
+        "artifact_type",
+        "artifact_content_hash",
+        "parent_artifacts",
+        "supersedes_artifact_ids",
+        "unresolved_parent_requirements",
+        "conflicting_candidates",
+        "ledger_record_refs",
+        "locator",
+        "prior_head_event_id"
+      ],
+      "properties": {
+        "event_schema_version": {"enum": ["m13-registry-event-v1", "m13-registry-event-v2"]},
+        "registry_event_id": {"type": "string", "pattern": "^evt_[a-f0-9]{32}$"},
+        "registry_event_type": {
+          "enum": [
+            "artifact_registered",
+            "lineage_resolution",
+            "locator_updated",
+            "state_transition_observed",
+            "lineage_resolution_event",
+            "artifact_location_event"
+          ]
+        },
+        "artifact_type": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/safeText"}
+          ]
+        },
+        "artifact_content_hash": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/lowerSha256"}
+          ]
+        },
+        "parent_artifacts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/m13Parent"}
+        },
+        "supersedes_artifact_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^art_[a-f0-9]{32}$"}
+        },
+        "unresolved_parent_requirements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/m13Unresolved"}
+        },
+        "conflicting_candidates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/m13Conflict"}
+        },
+        "ledger_record_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/m13LedgerRef"}
+        },
+        "locator": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/m13Locator"}
+          ]
+        },
+        "prior_head_event_id": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^evt_[a-f0-9]{32}$"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "commonResearchEvent": {
+      "type": "object",
+      "required": ["object_type", "payload"],
+      "properties": {
+        "object_type": {"const": "ResearchEvent"},
+        "payload": {
+          "type": "object",
+          "required": [
+            "object_id",
+            "schema_version",
+            "revision",
+            "content_hash",
+            "producer",
+            "consumers",
+            "state",
+            "parent_refs",
+            "provenance_refs",
+            "supersedes",
+            "immutable_fields",
+            "failure_semantics",
+            "event_kind",
+            "occurred_at",
+            "source_refs"
+          ],
+          "properties": {
+            "object_id": {"type": "string", "pattern": "^RE-[A-F0-9]{32}$"},
+            "schema_version": {"const": "2.0"},
+            "revision": {"const": 1},
+            "content_hash": {"$ref": "#/$defs/typedHash"},
+            "producer": {"const": "M15"},
+            "consumers": {"const": ["M15"]},
+            "state": {"const": "recorded"},
+            "parent_refs": {"const": []},
+            "provenance_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/safeText"},
+              "contains": {"$ref": "#/$defs/sourceRecordRef"},
+              "minContains": 1
+            },
+            "supersedes": {"type": "null"},
+            "immutable_fields": {
+              "const": [
+                "object_id",
+                "schema_version",
+                "revision",
+                "content_hash",
+                "producer",
+                "parent_refs",
+                "provenance_refs",
+                "supersedes"
+              ]
+            },
+            "failure_semantics": {
+              "const": {
+                "BLOCKED": "fail_closed",
+                "ERROR": "quarantined",
+                "FAIL": "fail_closed",
+                "NOT_ASSESSED": "no_eligibility"
+              }
+            },
+            "event_kind": {"$ref": "#/$defs/safeText"},
+            "occurred_at": {"type": "string", "format": "date-time"},
+            "source_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/safeText"},
+              "contains": {"$ref": "#/$defs/sourceRecordRef"},
+              "minContains": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

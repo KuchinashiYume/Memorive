@@ -1,0 +1,25 @@
+{
+  "schema_version": "PR-OS-ConsoleBuildCapabilities-v1",
+  "protocol_version": "1.0",
+  "build_id": "build117",
+  "launch_transport": "ENV_V1",
+  "session_mode": "EPHEMERAL_ONLY",
+  "authorization": {
+    "default_enabled": false,
+    "setting": "privacy.allow_console_access",
+    "scope": "CURRENT_PROFILE",
+    "native_consent_required": true,
+    "remote_enable_supported": false
+  },
+  "expression_console": {
+    "schema_version": "PR-OS-ExpressionConsole-v1",
+    "catalog_path": "/pr-os/test-bridge/v1/expressions/catalog",
+    "state_path": "/pr-os/test-bridge/v1/expressions/state",
+    "operations": [
+      "expression.trigger",
+      "expression.cancel"
+    ],
+    "preview_only": true,
+    "event_count": 33
+  }
+}

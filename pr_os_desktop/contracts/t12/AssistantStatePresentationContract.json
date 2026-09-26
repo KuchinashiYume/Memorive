@@ -1,0 +1,10 @@
+{
+  "schema_version": "P08T12-AssistantStatePresentationContract-v1",
+  "display_states": ["UNAVAILABLE", "DISABLED", "HIDDEN", "APPEARING", "IDLE", "NOTIFYING", "MENU_OPEN", "DRAGGING", "SUSPENDED", "CLOSING"],
+  "attention_states": ["NONE", "INFO", "SUCCESS", "WARNING", "ERROR"],
+  "animation_states": ["STATIC", "WAKE", "MESSAGE", "WORKING", "BLINK", "ATTENTION", "SUCCESS", "ERROR", "DRAG", "SLEEP"],
+  "unknown_or_contradictory_disposition": "SUSPENDED_ERROR_STATIC_FAIL_CLOSED",
+  "raw_private_payload_allowed": false,
+  "reduced_motion_animation": "STATIC",
+  "status": "CONSTRUCTION_A_NONVISUAL_CONTRACT"
+}

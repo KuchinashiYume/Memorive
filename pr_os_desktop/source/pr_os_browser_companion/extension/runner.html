@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memorive 三站会话同步</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Memorive · LOCAL READ ONLY</p>
+    <h1>三站会话库同步</h1>
+    <p class="copy">正在同步会话</p>
+    <p class="boundary"></p>
+    <div class="runner-progress" id="runner-progress-track" role="progressbar" aria-label="三站会话同步进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="runner-progress-fill"></span></div>
+    <p class="runner-progress-meta" id="runner-progress-meta">正在准备同步…</p>
+    <p id="runner-status" role="status">正在查找已打开且已登录的站点…</p>
+  </main>
+  <script src="site_profiles.js"></script>
+  <script src="browser_identity.js"></script>
+  <script src="runner.js"></script>
+</body>
+</html>

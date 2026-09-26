@@ -1,0 +1,52 @@
+{
+  "schema_version": "0.1",
+  "document_id": "PR-OS-P04-T07-CROSS-NO-ANALYSIS-ISOLATION-POLICY",
+  "revision": "r0.1",
+  "run_id": "P04_T07_CROSS_20260811_165122_candidate001",
+  "status": "FORMAL_ACCEPTED_PRODUCTION_DISABLED",
+  "allowed_execution": [
+    "m1_pipeline.m1a_ingest.ingest",
+    "m1_pipeline.m1b_convert.convert:passthrough",
+    "m1_pipeline.m1c_clean.clean",
+    "m1_pipeline.m1d_chunk.chunk",
+    "m2_distill.card.build_card",
+    "m2_distill.card.write_card",
+    "m6_verify.mechanical.mechanical_check",
+    "m6_verify.atomic_review.build_atomic_review_view",
+    "m6_verify.atomic_review.deterministic_precheck"
+  ],
+  "forbidden_execution": [
+    "m1_pipeline.pipeline.run_pipeline",
+    "m1_pipeline.m1e_embed",
+    "m2_distill.distill",
+    "model_m6",
+    "m4_analysis",
+    "AnalysisResult",
+    "m8_state_machine.transition",
+    "m13_artifact_registry",
+    "t08_promotion_writer",
+    "network",
+    "external_source",
+    "ocr",
+    "embedding",
+    "model_api"
+  ],
+  "forbidden_payload_keys": [
+    "analysis_result",
+    "quality_synthesis",
+    "cross_paper_synthesis",
+    "theory_synthesis",
+    "authority_weight",
+    "formal_weight",
+    "knowledge_feedback",
+    "knowledge_return"
+  ],
+  "formal_readers": "DEFAULT_DENY",
+  "production_candidate_card_space": "LOCATOR_APPROVED_NOT_CREATED_ZERO_READS_ZERO_WRITES",
+  "required_zero_counters": [
+    "external_source_calls", "network_calls", "model_api_calls", "ocr_calls",
+    "embedding_calls", "m8_calls", "m13_calls", "analysis_calls", "promotion_calls",
+    "t06_feedback_writes", "tokens", "actual_cost_cny", "credential_reads",
+    "production_reads", "production_writes", "production_mutations"
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "records": [
+    {
+      "name": "clr-loader",
+      "version": "0.2.10",
+      "path": "licenses/supplement/clr-loader/000-LICENSE",
+      "sha256": "b00f9a4b112b44f91276ad8388ed470ad36668ff80f56f15e1e6981c85e6d23d",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "clr_loader-0.2.10/LICENSE"
+    },
+    {
+      "name": "pymupdf",
+      "version": "1.28.2",
+      "path": "licenses/supplement/pymupdf/000-COPYING",
+      "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "pymupdf-1.28.2/COPYING"
+    },
+    {
+      "name": "pymupdf4llm",
+      "version": "1.28.2",
+      "path": "licenses/supplement/pymupdf4llm/000-LICENSE",
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "pymupdf4llm-1.28.2/LICENSE"
+    },
+    {
+      "name": "pymupdf4llm",
+      "version": "1.28.2",
+      "path": "licenses/supplement/pymupdf4llm/001-LICENSE",
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "pymupdf4llm-1.28.2/pdf4llm/LICENSE"
+    },
+    {
+      "name": "pymupdf4llm",
+      "version": "1.28.2",
+      "path": "licenses/supplement/pymupdf4llm/002-COPYING",
+      "sha256": "40e60697600535eabfb5ae05f72829d88cfe8d02dd4792f5a754f6f51dabe55b",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "pymupdf4llm-1.28.2/COPYING"
+    },
+    {
+      "name": "pythonnet",
+      "version": "3.0.5",
+      "path": "licenses/supplement/pythonnet/000-LICENSE",
+      "sha256": "e1dc3a6ff017a6800dc27a7220500f512b95fbcd996d38ebbbff85c693245369",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "pythonnet-3.0.5/LICENSE"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.23.1",
+      "path": "licenses/supplement/tokenizers/000-LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "origin": "exact PyPI source distribution",
+      "archive_member": "tokenizers-0.23.1/tokenizers/LICENSE"
+    },
+    {
+      "name": "flatbuffers",
+      "version": "25.12.19",
+      "path": "licenses/supplement/flatbuffers/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "origin": "https://raw.githubusercontent.com/google/flatbuffers/7e163021e59cca4f8e1e35a7c828b5c6b7915953/LICENSE",
+      "source_commit": "7e163021e59cca4f8e1e35a7c828b5c6b7915953",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "magika",
+      "version": "0.6.3",
+      "path": "licenses/supplement/magika/LICENSE",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "origin": "https://raw.githubusercontent.com/google/magika/a04562a9bb5d52c809a4424911ca8d07c0265767/LICENSE",
+      "source_commit": "a04562a9bb5d52c809a4424911ca8d07c0265767",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "markitdown",
+      "version": "0.1.6",
+      "path": "licenses/supplement/markitdown/LICENSE",
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "origin": "https://raw.githubusercontent.com/microsoft/markitdown/e144e0a2be95b34df17433bac904e635f2c5e551/LICENSE",
+      "source_commit": "e144e0a2be95b34df17433bac904e635f2c5e551",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "proxy-tools",
+      "version": "0.1.0",
+      "path": "licenses/supplement/proxy-tools/LICENSE.txt",
+      "sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4",
+      "origin": "https://raw.githubusercontent.com/jtushman/proxy_tools/db43f1e35d4f90a65c5a4d56d9e9af88212ec6e6/LICENSE.txt",
+      "source_commit": "db43f1e35d4f90a65c5a4d56d9e9af88212ec6e6",
+      "version_binding": "RUNTIME_PYTHON_MATCH"
+    },
+    {
+      "name": "pymupdf-layout",
+      "version": "1.28.2",
+      "path": "licenses/supplement/pymupdf-layout/LICENSE",
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "origin": "https://raw.githubusercontent.com/ArtifexSoftware/pymupdf_layout/b6e83e8b55bf861c45e259762483f6863688ed16/LICENSE",
+      "source_commit": "b6e83e8b55bf861c45e259762483f6863688ed16",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "python-3.13.14",
+      "path": "licenses/supplement/python-3.13.14/LICENSE.txt",
+      "sha256": "62bec384df47b0328307db41455ff6ea2559e5546b394ac69148561b21703120"
+    },
+    {
+      "name": "webview2-sdk-1.0.3856.49",
+      "path": "licenses/supplement/webview2-sdk-1.0.3856.49/LICENSE.txt",
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55"
+    }
+  ],
+  "legal_compatibility_review": "NOT_COMPLETE"
+}

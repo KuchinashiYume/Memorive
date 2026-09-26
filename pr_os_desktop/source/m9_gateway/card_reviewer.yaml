@@ -1,0 +1,44 @@
+schema_version: 1
+card_reviewer:
+  slot: verify
+  expected_provider: anthropic
+  expected_exact_model_id: claude-sonnet-5
+  enabled: false
+  review_contract_id: card-review-atomic-v2
+  full_prompt_version: card_review_atomic_full_v2
+  delta_prompt_version: card_review_atomic_delta_v2
+  full_schema_version: full-review-atomic-v2
+  delta_schema_version: delta-review-atomic-v2
+  full:
+    effort: low
+    thinking:
+      type: adaptive
+    max_tokens: 16384
+    output_format:
+      type: json_schema
+      schema_version: full-review-atomic-v2
+  high_risk_delta:
+    effort: low
+    thinking:
+      type: adaptive
+    max_tokens: 16384
+  low_risk_delta:
+    enabled: false
+    qualification_status: candidate_only
+    effort: low
+    thinking:
+      type: disabled
+    max_tokens: 16384
+  prompt_cache:
+    enabled: false
+    qualification_status: isolated_test_only
+    ttl: 5m
+  message_batch:
+    enabled: false
+    qualification_status: isolated_test_only
+    data_ownership: self
+  failure_policy:
+    model_id_mismatch: fail_current_call_and_keep_pending
+    model_unavailable: fail_current_call_and_keep_pending
+    silent_fallback: forbidden
+    skip_review: forbidden

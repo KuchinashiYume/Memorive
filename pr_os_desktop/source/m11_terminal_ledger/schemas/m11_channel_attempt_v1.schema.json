@@ -1,0 +1,348 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p05:t03:m11:channel-attempt:1.0",
+  "title": "PR-OS P05 T03 M11 Channel Attempt Record v1",
+  "oneOf": [
+    {"$ref": "#/$defs/terminalRecord"},
+    {"$ref": "#/$defs/accountingAmendment"}
+  ],
+  "$defs": {
+    "nonEmptyString": {"type": "string", "minLength": 1},
+    "nullableString": {
+      "anyOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {"type": "null"}
+      ]
+    },
+    "nullableDateTime": {
+      "anyOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/nonEmptyString"}
+    },
+    "evidenceClass": {
+      "enum": [
+        "api",
+        "subscription_cli",
+        "local_compute",
+        "non_model_local",
+        "human",
+        "blocked_before_start"
+      ]
+    },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "process_transport",
+        "inference_location",
+        "access_mode",
+        "billing_mode"
+      ],
+      "properties": {
+        "process_transport": {
+          "enum": ["api_sdk", "cli_process", "local_process", "human", "none"]
+        },
+        "inference_location": {
+          "enum": ["external_provider", "local_machine", "none", "unknown"]
+        },
+        "access_mode": {
+          "enum": ["api_key", "subscription_session", "local_runtime", "none", "unknown"]
+        },
+        "billing_mode": {
+          "enum": ["paygo_api", "subscription_entitlement", "local_compute", "none", "unknown"]
+        }
+      }
+    },
+    "tokenUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_tokens", "output_tokens", "reasoning_tokens", "total_tokens"],
+      "properties": {
+        "input_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "output_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "reasoning_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "total_tokens": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "usage_status",
+        "token_usage",
+        "cost_status",
+        "cost_value",
+        "currency",
+        "local_resource_status",
+        "local_resource_metrics"
+      ],
+      "properties": {
+        "usage_status": {"$ref": "#/$defs/nonEmptyString"},
+        "token_usage": {"$ref": "#/$defs/tokenUsage"},
+        "cost_status": {"$ref": "#/$defs/nonEmptyString"},
+        "cost_value": {"type": ["number", "null"], "minimum": 0},
+        "currency": {"$ref": "#/$defs/nullableString"},
+        "local_resource_status": {"$ref": "#/$defs/nonEmptyString"},
+        "local_resource_metrics": {
+          "type": "object",
+          "additionalProperties": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "value", "currency"],
+      "properties": {
+        "status": {"$ref": "#/$defs/nonEmptyString"},
+        "value": {"type": ["number", "null"], "minimum": 0},
+        "currency": {"$ref": "#/$defs/nullableString"}
+      }
+    },
+    "handoffIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "handoff_id", "events_sha256", "event_count"],
+      "properties": {
+        "schema_version": {"const": "P05_T02_T03_EVENT_HANDOFF_V1"},
+        "handoff_id": {"$ref": "#/$defs/nonEmptyString"},
+        "events_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "event_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "providerIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "requested_model", "returned_model", "model_identity_grade"],
+      "properties": {
+        "provider": {"$ref": "#/$defs/nullableString"},
+        "requested_model": {"$ref": "#/$defs/nullableString"},
+        "returned_model": {"$ref": "#/$defs/nullableString"},
+        "model_identity_grade": {"$ref": "#/$defs/nullableString"}
+      }
+    },
+    "processEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_id",
+        "argv_redacted",
+        "working_directory",
+        "started_at",
+        "ended_at",
+        "duration_ms",
+        "exit_code",
+        "timeout",
+        "killed",
+        "stdout_hash",
+        "stderr_hash",
+        "redaction_status",
+        "output_files",
+        "environment_names",
+        "error_code",
+        "raw_truncated"
+      ],
+      "properties": {
+        "adapter_id": {"$ref": "#/$defs/nullableString"},
+        "argv_redacted": {"$ref": "#/$defs/nullableString"},
+        "working_directory": {"$ref": "#/$defs/nullableString"},
+        "started_at": {"$ref": "#/$defs/nullableDateTime"},
+        "ended_at": {"$ref": "#/$defs/nullableDateTime"},
+        "duration_ms": {"type": ["number", "null"], "minimum": 0},
+        "exit_code": {"type": ["integer", "null"]},
+        "timeout": {"type": "boolean"},
+        "killed": {"type": "boolean"},
+        "stdout_hash": {"$ref": "#/$defs/nullableString"},
+        "stderr_hash": {"$ref": "#/$defs/nullableString"},
+        "redaction_status": {"$ref": "#/$defs/nullableString"},
+        "output_files": {"$ref": "#/$defs/stringArray"},
+        "environment_names": {"$ref": "#/$defs/stringArray"},
+        "error_code": {"$ref": "#/$defs/nullableString"},
+        "raw_truncated": {"type": "boolean"}
+      }
+    },
+    "channelEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "axes",
+        "evidence_class",
+        "handoff_ref",
+        "selection_ref",
+        "route_block_ref",
+        "process_receipt_ref",
+        "model_receipt_ref",
+        "terminal_ref",
+        "process_started",
+        "external_request_started",
+        "physical_process_start_count",
+        "external_request_start_count",
+        "route",
+        "region",
+        "egress",
+        "behavior_hash",
+        "input_hash",
+        "output_hash",
+        "latency_ms",
+        "terminal_state",
+        "execution_result",
+        "blocked_reason_codes"
+      ],
+      "properties": {
+        "axes": {"$ref": "#/$defs/axes"},
+        "evidence_class": {"$ref": "#/$defs/evidenceClass"},
+        "handoff_ref": {"$ref": "#/$defs/nonEmptyString"},
+        "selection_ref": {"$ref": "#/$defs/nonEmptyString"},
+        "route_block_ref": {"$ref": "#/$defs/nullableString"},
+        "process_receipt_ref": {"$ref": "#/$defs/nullableString"},
+        "model_receipt_ref": {"$ref": "#/$defs/nullableString"},
+        "terminal_ref": {"$ref": "#/$defs/nonEmptyString"},
+        "process_started": {"type": "boolean"},
+        "external_request_started": {"type": "boolean"},
+        "physical_process_start_count": {"type": "integer", "minimum": 0},
+        "external_request_start_count": {"type": "integer", "minimum": 0},
+        "route": {"$ref": "#/$defs/nullableString"},
+        "region": {"$ref": "#/$defs/nullableString"},
+        "egress": {"$ref": "#/$defs/nullableString"},
+        "behavior_hash": {"$ref": "#/$defs/nullableString"},
+        "input_hash": {"$ref": "#/$defs/nullableString"},
+        "output_hash": {"$ref": "#/$defs/nullableString"},
+        "latency_ms": {"type": ["number", "null"], "minimum": 0},
+        "terminal_state": {
+          "enum": ["BLOCKED", "COMPLETED", "ERROR", "TIMEOUT", "KILLED", "ABORTED"]
+        },
+        "execution_result": {"enum": ["NOT_RUN", "SUCCESS", "FAILED"]},
+        "blocked_reason_codes": {"$ref": "#/$defs/stringArray"}
+      }
+    },
+    "terminalRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "record_kind",
+        "record_id",
+        "run_id",
+        "created_at",
+        "source_evidence_refs",
+        "attempt_id",
+        "logical_operation_id",
+        "attempt_no",
+        "retry_of_attempt_id",
+        "task_id",
+        "stage",
+        "paper_id",
+        "profile_ref",
+        "attempt_started",
+        "started_at",
+        "finished_at",
+        "result_category",
+        "error_code",
+        "verification_result",
+        "acceptance_verdict",
+        "handoff_identity",
+        "provider_identity",
+        "process_evidence",
+        "channel_evidence",
+        "accounting",
+        "token_usage",
+        "cost"
+      ],
+      "properties": {
+        "schema_version": {"const": "P05_T03_CHANNEL_ATTEMPT_V1"},
+        "record_type": {"const": "channel_attempt_record"},
+        "record_kind": {"const": "terminal"},
+        "record_id": {"$ref": "#/$defs/nonEmptyString"},
+        "run_id": {"$ref": "#/$defs/nonEmptyString"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "source_evidence_refs": {
+          "allOf": [{"$ref": "#/$defs/stringArray"}, {"minItems": 1}]
+        },
+        "attempt_id": {"$ref": "#/$defs/nonEmptyString"},
+        "logical_operation_id": {"$ref": "#/$defs/nonEmptyString"},
+        "attempt_no": {"type": "integer", "minimum": 1},
+        "retry_of_attempt_id": {"$ref": "#/$defs/nullableString"},
+        "task_id": {"$ref": "#/$defs/nonEmptyString"},
+        "stage": {"$ref": "#/$defs/nonEmptyString"},
+        "paper_id": {"$ref": "#/$defs/nullableString"},
+        "profile_ref": {"$ref": "#/$defs/nullableString"},
+        "attempt_started": {"type": "boolean"},
+        "started_at": {"$ref": "#/$defs/nullableDateTime"},
+        "finished_at": {"type": "string", "format": "date-time"},
+        "result_category": {
+          "enum": ["success", "failure", "incomplete", "error", "cancelled", "not_assessed"]
+        },
+        "error_code": {"$ref": "#/$defs/nullableString"},
+        "verification_result": {"enum": ["NOT_ASSESSED", "PASS", "FAIL", "ERROR"]},
+        "acceptance_verdict": {"enum": ["NOT_ASSESSED", "PASS", "FAIL"]},
+        "handoff_identity": {"$ref": "#/$defs/handoffIdentity"},
+        "provider_identity": {"$ref": "#/$defs/providerIdentity"},
+        "process_evidence": {"$ref": "#/$defs/processEvidence"},
+        "channel_evidence": {"$ref": "#/$defs/channelEvidence"},
+        "accounting": {"$ref": "#/$defs/accounting"},
+        "token_usage": {"$ref": "#/$defs/tokenUsage"},
+        "cost": {"$ref": "#/$defs/cost"}
+      }
+    },
+    "amendmentFields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accounting", "token_usage", "cost"],
+      "properties": {
+        "accounting": {"$ref": "#/$defs/accounting"},
+        "token_usage": {"$ref": "#/$defs/tokenUsage"},
+        "cost": {"$ref": "#/$defs/cost"}
+      }
+    },
+    "accountingAmendment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_type",
+        "record_kind",
+        "record_id",
+        "run_id",
+        "created_at",
+        "source_evidence_refs",
+        "attempt_id",
+        "amends_attempt_id",
+        "logical_operation_id",
+        "attempt_no",
+        "retry_of_attempt_id",
+        "task_id",
+        "stage",
+        "paper_id",
+        "evidence_class",
+        "amendment_fields"
+      ],
+      "properties": {
+        "schema_version": {"const": "P05_T03_CHANNEL_ATTEMPT_V1"},
+        "record_type": {"const": "channel_attempt_record"},
+        "record_kind": {"const": "accounting_amendment"},
+        "record_id": {"$ref": "#/$defs/nonEmptyString"},
+        "run_id": {"$ref": "#/$defs/nonEmptyString"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "source_evidence_refs": {
+          "allOf": [{"$ref": "#/$defs/stringArray"}, {"minItems": 1}]
+        },
+        "attempt_id": {"$ref": "#/$defs/nonEmptyString"},
+        "amends_attempt_id": {"$ref": "#/$defs/nonEmptyString"},
+        "logical_operation_id": {"$ref": "#/$defs/nonEmptyString"},
+        "attempt_no": {"type": "integer", "minimum": 1},
+        "retry_of_attempt_id": {"$ref": "#/$defs/nullableString"},
+        "task_id": {"$ref": "#/$defs/nonEmptyString"},
+        "stage": {"$ref": "#/$defs/nonEmptyString"},
+        "paper_id": {"$ref": "#/$defs/nullableString"},
+        "evidence_class": {"$ref": "#/$defs/evidenceClass"},
+        "amendment_fields": {"$ref": "#/$defs/amendmentFields"}
+      }
+    }
+  }
+}

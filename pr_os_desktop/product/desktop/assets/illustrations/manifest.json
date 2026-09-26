@@ -1,0 +1,132 @@
+{
+  "build_id": "build110",
+  "authority": "表情映射.json",
+  "assets": [
+    {
+      "name": "常驻logo",
+      "reference_png": "常驻logo.png",
+      "svg": "常驻logo.svg",
+      "preview_png": "常驻logo.png",
+      "expression_and_props": "左侧 >、右侧短横线；无附加道具",
+      "previous_source": "原套件缺失；新增 >_ 常驻表情",
+      "reference_sha256": "eafb3c67db0f858c915138a3cee6dd71ad731468af73cf20d20563793f14b607",
+      "svg_sha256": "2254b0c9cc556419431c750dbdcb96e1215d83be08cdc97349f99b12a221e752",
+      "artwork_revision": "resident-aspect-r2-20260911"
+    },
+    {
+      "name": "眨眼logo01",
+      "reference_png": "眨眼logo01.png",
+      "svg": "眨眼logo01.svg",
+      "preview_png": "眨眼logo01.png",
+      "expression_and_props": "双眼睁开；无附加道具",
+      "previous_source": "01_neutral.svg",
+      "reference_sha256": "a0bbb76049a89373973df4fa50126907d46938b7607cd18446ad261ee1875390",
+      "svg_sha256": "0d274bab5b514e8c1ef6b26faf8dac09cfe17a06d1ce42a5f4b3600502e065ff"
+    },
+    {
+      "name": "眨眼logo02",
+      "reference_png": "眨眼logo02.png",
+      "svg": "眨眼logo02.svg",
+      "preview_png": "眨眼logo02.png",
+      "expression_and_props": "双眼闭合为短横线；右上思考圆泡",
+      "previous_source": "旧 master 内 variant-sleepy；原独立文件缺失",
+      "reference_sha256": "660cefc19f15c35d4bdd1d5909864c0fcc19f2f9854dfb5059553e28d4a13597",
+      "svg_sha256": "cbd382d13c53dce1a7433428a5f0a362a4a38f25aaadbbf71cf20cbe44168500"
+    },
+    {
+      "name": "互动logo",
+      "reference_png": "互动logo.png",
+      "svg": "互动logo.svg",
+      "preview_png": "互动logo.png",
+      "expression_and_props": "左眼睁开、右眼闭合；右上思考圆泡",
+      "previous_source": "04_wink.svg",
+      "reference_sha256": "c16835c16769e5749d6ae1fed6825024a8485c0a93f8ae49634168428c16540b",
+      "svg_sha256": "f1c5cf800d8e8c546c30f71e2ce169f319ae42b98fee46ad83226fd0947cc1f1"
+    },
+    {
+      "name": "疑问logo",
+      "reference_png": "疑问logo.png",
+      "svg": "疑问logo.svg",
+      "preview_png": "疑问logo.png",
+      "expression_and_props": "双眼睁开、疑惑眉毛；右上问号",
+      "previous_source": "旧 master 内 variant-question；原独立文件缺失",
+      "reference_sha256": "5335fe8a845771b6f74ac7a4ed7819310617e799d6ba5e3d189db3a452f8c73d",
+      "svg_sha256": "dc9fa4770357d11eda8b14766e671efc67a95260dcbf87fa888a0a48011d03e0"
+    },
+    {
+      "name": "施工logo",
+      "reference_png": "施工logo.png",
+      "svg": "施工logo.svg",
+      "preview_png": "施工logo.png",
+      "expression_and_props": "双侧尖括号 > <；持铲子",
+      "previous_source": "05_shovel.svg",
+      "reference_sha256": "b9fb83beb9781f662252245e71f97ee55f213e1613e2a860ff1836b307819e9e",
+      "svg_sha256": "c5391bcf12b85b11db7ed595799aa9a87defac0d4190c820c828c2315198f5ce"
+    },
+    {
+      "name": "完成logo",
+      "reference_png": "完成logo.png",
+      "svg": "完成logo.svg",
+      "preview_png": "完成logo.png",
+      "expression_and_props": "双眼睁开；本子、紫色笔、星光",
+      "previous_source": "02_writing.svg",
+      "reference_sha256": "20b218f3528a25d69ea1600cb533f8e8d42dddef72ba72f5c781b61006584ef4",
+      "svg_sha256": "c821d10023310bc1f04881b52016f2f596e6fe01f544fa8ee84b08bca0cd7d44"
+    },
+    {
+      "name": "确认logo",
+      "reference_png": "确认logo.png",
+      "svg": "确认logo.svg",
+      "preview_png": "确认logo.png",
+      "expression_and_props": "双侧尖括号 > <、腮红；绿色勾确认气泡",
+      "previous_source": "10_success.svg",
+      "reference_sha256": "fa1071290b1fc9aba71bd8157b089b00ce4a78323ad698a4a59d1ce46ccaa54d",
+      "svg_sha256": "4d9551526ebaa7320f1dc8829200d97973fc3b3010db2d92e8b1744ff6088827"
+    },
+    {
+      "name": "报错logo",
+      "reference_png": "报错logo.png",
+      "svg": "报错logo.svg",
+      "preview_png": "报错logo.png",
+      "expression_and_props": "双眼 X、腮红；绷带、星星及眩晕符号",
+      "previous_source": "07_injury.svg",
+      "reference_sha256": "1f123946c6676ca44ae6b67211c7eeb3b778ef0992c46e58d2581dbda4730d87",
+      "svg_sha256": "451271bd668ccf95f2a4c2a521989ee67e8b1b2cedc969269ed8913573df1232"
+    },
+    {
+      "name": "无文件logo",
+      "reference_png": "无文件logo.png",
+      "svg": "无文件logo.svg",
+      "preview_png": "无文件logo.png",
+      "expression_and_props": "低垂眼神；空文件夹及困惑符号",
+      "previous_source": "09_empty.svg",
+      "reference_sha256": "d06e51625b6a9bf479a1b696c254600b5bb083cc79737e836ef94067142e8106",
+      "svg_sha256": "1dfb25ee5024141ad008a9d14831a335c568efb21fa21cc91bf5a463c0014996"
+    }
+  ],
+  "default": "常驻logo.svg",
+  "artwork_revision": "resident-aspect-r2-20260911",
+  "native_frames": {
+    "idle": "常驻logo",
+    "blink-open": "眨眼logo01",
+    "blink-closed": "眨眼logo02",
+    "interaction": "互动logo",
+    "working": "施工logo",
+    "success": "完成logo",
+    "save-success": "确认logo",
+    "error": "报错logo"
+  },
+  "decorations": {
+    "home-interaction": "互动logo",
+    "home-question": "疑问logo",
+    "empty-state": "无文件logo",
+    "assistant-error": "报错logo",
+    "assistant-save-success": "确认logo"
+  },
+  "coordinate_policy": "1254 square unchanged; never trim or recenter individual expressions",
+  "runtime_animation_and_transparent_input_geometry_unchanged": true,
+  "excluded_from_active_bindings": [
+    "one_eye",
+    "wink default"
+  ]
+}

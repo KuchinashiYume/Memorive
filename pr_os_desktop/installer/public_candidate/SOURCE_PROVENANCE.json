@@ -1,0 +1,58 @@
+{
+  "scope": "build139 accepted code; direct content cleanup excludes development-result notices, no new build",
+  "files": [
+    {
+      "path": "app.manifest",
+      "r51_sha256": "e8a8cf5039896b7945271c8c3e6f40ed1a324b16562ab5353f56eabcfd071c50",
+      "candidate_sha256": "e8a8cf5039896b7945271c8c3e6f40ed1a324b16562ab5353f56eabcfd071c50"
+    },
+    {
+      "path": "html_host.cs",
+      "r51_sha256": "2b26481dc24536835382e9472cd3184447e522ff8b968251fb6da11a04b7b88d",
+      "candidate_sha256": "96273a74643d1572a2ad51388ba7fce0b760939c0479df90eab00730a5b27b39"
+    },
+    {
+      "path": "install.html",
+      "r51_sha256": "deda0c5920f546496a190e1b9bb970ca3f56782b2fe356668e5ef87ac8e3f9f9",
+      "candidate_sha256": "7dab453d6b1377b0660af10ed7d5112a957f74f85002182251a6bf65d8e649c8"
+    },
+    {
+      "path": "install_bridge.js",
+      "r51_sha256": "114506220a0402cc4c0b15a78c11d9ef14cbaec326a9ad7a29974353dabcf0b6",
+      "candidate_sha256": "114506220a0402cc4c0b15a78c11d9ef14cbaec326a9ad7a29974353dabcf0b6"
+    },
+    {
+      "path": "lifecycle.cs",
+      "r51_sha256": "60f6f8dbead1e75d12a90a86a4596372d6e90045d29e2b3277f152cebf7ba5d9",
+      "candidate_sha256": "60f6f8dbead1e75d12a90a86a4596372d6e90045d29e2b3277f152cebf7ba5d9"
+    },
+    {
+      "path": "p08_t13_cross_setup.cs",
+      "r51_sha256": "7fcc9a96793b650cc9b6cd356b82f9e7da7ddf746a9b3c42e0c31bffe136f04f",
+      "candidate_sha256": "f685d5cfc376c24b2f6cf32fbe33c7fecce2a8b6cc66a5e7cc19013f03eaa3f7"
+    },
+    {
+      "path": "release_metadata.cs",
+      "r51_sha256": "ef138415a277600ba8d338d672d88f86bae207caa8228ed66abb12377c90fc25",
+      "candidate_sha256": "ef138415a277600ba8d338d672d88f86bae207caa8228ed66abb12377c90fc25"
+    },
+    {
+      "path": "uninstall.html",
+      "r51_sha256": "3c8a97ed7a8b6d1c5ddefd98d6ff67459dedb90a8d41d144eaa7bedb2e6baa4f",
+      "candidate_sha256": "3c8a97ed7a8b6d1c5ddefd98d6ff67459dedb90a8d41d144eaa7bedb2e6baa4f"
+    },
+    {
+      "path": "uninstall_bridge.js",
+      "r51_sha256": "5d82dc77751096cb501ed13825556fa8c645645802c4de8cbc2efa502d3a2721",
+      "candidate_sha256": "5d82dc77751096cb501ed13825556fa8c645645802c4de8cbc2efa502d3a2721"
+    },
+    {
+      "path": "prerequisite_wizard.cs",
+      "candidate_sha256": "260418fe820213cb947dbea674bbfd817b6835e6a4ea08bcdd442ce543bf169d",
+      "origin": "build138 native prerequisite welcome/check pages"
+    }
+  ],
+  "health_owner_protocol": "PR-OS-INSTALLER-TRIAL-V1 retained to match existing install_health.py; this does not assert private capsule inclusion",
+  "public_prerequisites": "Official Microsoft user-installed WebView2 and Visual C++; no bundled runtime installer or host System32 DLL redistribution.",
+  "build_id": "build139"
+}

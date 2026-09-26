@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t03:work-cluster:0.1",
+  "title": "P04 T03 WorkCluster",
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "observationRef": {"type": "string", "pattern": "^source_observation_[a-f0-9]{24}$"},
+    "edge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["edge_id", "from_manifestation_id", "to_manifestation_id", "relation_type", "evidence_ref", "work_anchor"],
+      "properties": {
+        "edge_id": {"type": "string", "pattern": "^version_edge_[a-f0-9]{24}$"},
+        "from_manifestation_id": {"type": "string", "pattern": "^manifestation_(identity|claim)_[a-f0-9]{24}$"},
+        "to_manifestation_id": {"type": "string", "pattern": "^manifestation_(identity|claim)_[a-f0-9]{24}$"},
+        "relation_type": {"enum": ["ARXIV_VERSION_SUCCESSOR", "PREPRINT_TO_CONFERENCE", "PREPRINT_TO_VOR", "CONFERENCE_TO_VOR", "AAM_TO_VOR"]},
+        "evidence_ref": {"type": "string", "minLength": 3},
+        "work_anchor": {"type": "string", "minLength": 3}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "object_id", "work_cluster_id", "revision",
+    "content_hash", "producer", "single_writer", "consumers", "identity_status",
+    "cluster_basis", "stable_work_anchor", "manifestation_ids", "version_edges",
+    "source_observation_refs", "manifestations_preserved"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t03.work-cluster.0.1"},
+    "object_type": {"const": "WorkCluster"},
+    "object_id": {"type": "string", "pattern": "^work_cluster_[a-f0-9]{24}$"},
+    "work_cluster_id": {"type": "string", "pattern": "^work_cluster_[a-f0-9]{24}$"},
+    "revision": {"const": 1},
+    "content_hash": {"$ref": "#/$defs/sha256"},
+    "producer": {"const": "P04/T03/M16"},
+    "single_writer": {"const": "M16.IDENTITY_RESOLVER"},
+    "consumers": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["M16.CANDIDATE_REGISTRY", "P04/T04/CROSS"]}},
+    "identity_status": {"enum": ["VERIFIED", "CONFLICT", "UNRESOLVED"]},
+    "cluster_basis": {"enum": ["SINGLE_MANIFESTATION", "ARXIV_BASE_VERSION_CHAIN", "EXPLICIT_VERSION_EVIDENCE"]},
+    "stable_work_anchor": {"type": "string", "minLength": 3},
+    "manifestation_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^manifestation_(identity|claim)_[a-f0-9]{24}$"}},
+    "version_edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
+    "source_observation_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/observationRef"}},
+    "manifestations_preserved": {"const": true}
+  }
+}

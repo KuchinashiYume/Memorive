@@ -1,0 +1,16 @@
+__pycache__/
+*.db
+*.sqlite*
+*.jsonl
+*.log
+private-test/
+sandbox_profile/
+*.py[cod]
+.venv/
+.env
+.env.*
+/build/
+/dist/
+*.exe
+*.pfx
+*.p12

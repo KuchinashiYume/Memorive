@@ -1,0 +1,38 @@
+{
+  "archives": [
+    {
+      "component": "certifi",
+      "version": "2026.6.17",
+      "file": "certifi-2026.6.17.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/c9/c7/424b75da314c1045981bd9777432fad05a9e0c69daa4ed7e308bbaffe405/certifi-2026.6.17.tar.gz",
+      "sha256": "024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432",
+      "pypi_hash_verified": true
+    },
+    {
+      "component": "orjson",
+      "version": "3.11.9",
+      "file": "orjson-3.11.9.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/7e/0c/964746fcafbd16f8ff53219ad9f6b412b34f345c75f384ad434ceaadb538/orjson-3.11.9.tar.gz",
+      "sha256": "4fef17e1f8722c11587a6ef18e35902450221da0028e65dbaaa543619e68e48f",
+      "pypi_hash_verified": true
+    },
+    {
+      "component": "tqdm",
+      "version": "4.68.3",
+      "file": "tqdm-4.68.3.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/87/d7/0535a28b1f5f24f6612fb3ff1e89fb1a8d160fee0f976e0aa6803862134b/tqdm-4.68.3.tar.gz",
+      "sha256": "00dfa48452b6b6cfae3dd9885636c23d3422d1ec97c66d96818cbd5e0821d482",
+      "pypi_hash_verified": true
+    },
+    {
+      "component": "mupdf",
+      "version": "1.28.2",
+      "file": "mupdf-1.28.2-source.tar.gz",
+      "url": "https://mupdf.com/downloads/archive/mupdf-1.28.2-source.tar.gz",
+      "sha256": "44075a84e329db55b9bef5f342a70fd26d69e48ad1d33cb89d9664581c641156",
+      "version_binding": "PyMuPDF 1.28.2 setup.py version_mupdf",
+      "pypi_hash_verified": false
+    }
+  ],
+  "archive_execution": false
+}

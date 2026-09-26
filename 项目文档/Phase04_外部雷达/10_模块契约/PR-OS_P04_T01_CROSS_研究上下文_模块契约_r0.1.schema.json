@@ -1,0 +1,587 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t01:research-context-contract:r0.1",
+  "title": "P04/T01 Direction Profile Policy Session Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "objects"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "p04-t01-common-contract-r0.1-candidate001"
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "object_type",
+              "object_id",
+              "revision",
+              "content_hash",
+              "producer",
+              "consumers",
+              "single_writer",
+              "parents",
+              "supersedes",
+              "immutable_fields",
+              "direction_id",
+              "name",
+              "scope",
+              "aliases",
+              "lineage_action",
+              "human_confirmed"
+            ],
+            "properties": {
+              "object_type": {
+                "const": "DirectionDefinition"
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^[A-F0-9]{64}$"
+              },
+              "producer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "consumers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "single_writer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+                },
+                "uniqueItems": true
+              },
+              "supersedes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "immutable_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "direction_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "lineage_action": {
+                "enum": [
+                  "CREATE",
+                  "RENAME",
+                  "SPLIT",
+                  "MERGE",
+                  "NO_CHANGE"
+                ]
+              },
+              "human_confirmed": {
+                "const": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "object_type",
+              "object_id",
+              "revision",
+              "content_hash",
+              "producer",
+              "consumers",
+              "single_writer",
+              "parents",
+              "supersedes",
+              "immutable_fields",
+              "profile_id",
+              "direction_refs",
+              "explicit_user_source",
+              "behavior_direct_write_forbidden"
+            ],
+            "properties": {
+              "object_type": {
+                "const": "ResearchInterestProfile"
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^[A-F0-9]{64}$"
+              },
+              "producer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "consumers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "single_writer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+                },
+                "uniqueItems": true
+              },
+              "supersedes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "immutable_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "profile_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "direction_refs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "direction_id",
+                    "revision"
+                  ],
+                  "properties": {
+                    "direction_id": {
+                      "type": "string",
+                      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              },
+              "explicit_user_source": {
+                "const": true
+              },
+              "behavior_direct_write_forbidden": {
+                "const": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "object_type",
+              "object_id",
+              "revision",
+              "content_hash",
+              "producer",
+              "consumers",
+              "single_writer",
+              "parents",
+              "supersedes",
+              "immutable_fields",
+              "policy_id",
+              "channel_budgets",
+              "concentration_limit",
+              "whitespace_ratio",
+              "human_confirmed"
+            ],
+            "properties": {
+              "object_type": {
+                "const": "ResearchExposurePolicy"
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^[A-F0-9]{64}$"
+              },
+              "producer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "consumers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "single_writer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+                },
+                "uniqueItems": true
+              },
+              "supersedes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "immutable_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "policy_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "channel_budgets": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "CORE",
+                  "ADJACENT",
+                  "BRIDGE",
+                  "HORIZON",
+                  "COVERAGE_REPAIR"
+                ],
+                "properties": {
+                  "CORE": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "ADJACENT": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "BRIDGE": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "HORIZON": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "COVERAGE_REPAIR": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              "concentration_limit": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "whitespace_ratio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "human_confirmed": {
+                "const": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "object_type",
+              "object_id",
+              "revision",
+              "content_hash",
+              "producer",
+              "consumers",
+              "single_writer",
+              "parents",
+              "supersedes",
+              "immutable_fields",
+              "anchor_id",
+              "direction_id",
+              "description",
+              "independent_of_local_similarity",
+              "human_confirmed"
+            ],
+            "properties": {
+              "object_type": {
+                "const": "HorizonAnchor"
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^[A-F0-9]{64}$"
+              },
+              "producer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "consumers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "single_writer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+                },
+                "uniqueItems": true
+              },
+              "supersedes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "immutable_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "anchor_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "direction_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "independent_of_local_similarity": {
+                "const": true
+              },
+              "human_confirmed": {
+                "const": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "object_type",
+              "object_id",
+              "revision",
+              "content_hash",
+              "producer",
+              "consumers",
+              "single_writer",
+              "parents",
+              "supersedes",
+              "immutable_fields",
+              "session_context_id",
+              "intent",
+              "source",
+              "expires_at",
+              "ttl_seconds",
+              "long_term_profile_mutation",
+              "long_term_policy_mutation"
+            ],
+            "properties": {
+              "object_type": {
+                "const": "SessionResearchContext"
+              },
+              "object_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "content_hash": {
+                "type": "string",
+                "pattern": "^[A-F0-9]{64}$"
+              },
+              "producer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "consumers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "single_writer": {
+                "type": "string",
+                "minLength": 3
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+                },
+                "uniqueItems": true
+              },
+              "supersedes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "immutable_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "session_context_id": {
+                "type": "string",
+                "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$"
+              },
+              "intent": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "enum": [
+                  "EXPLICIT_USER_SESSION"
+                ]
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ttl_seconds": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "long_term_profile_mutation": {
+                "const": false
+              },
+              "long_term_policy_mutation": {
+                "const": false
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "x-pr-os-canonicalization": {
+    "algorithm": "RFC8785-LIKE_SORTED_JSON_UTF8_V1",
+    "implementation": "json.dumps(sort_keys=True,separators=(',',':'),ensure_ascii=False)",
+    "hash_exclusion": [
+      "content_hash"
+    ],
+    "digest": "SHA-256 uppercase hex"
+  }
+}

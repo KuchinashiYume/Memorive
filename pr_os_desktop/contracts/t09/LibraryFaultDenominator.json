@@ -1,0 +1,16 @@
+{
+  "fault_count": 8,
+  "faults": [
+    "duplicate_display_name",
+    "path_changed",
+    "orphan_lineage",
+    "rights_blocked",
+    "large_directory",
+    "missing",
+    "stale",
+    "unsupported"
+  ],
+  "restricted_effects_required": 0,
+  "schema_version": "P08T09LibraryFaultDenominator-v1",
+  "status": "PASS"
+}

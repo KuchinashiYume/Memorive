@@ -1,0 +1,734 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:ModelLeaderboardProjection-v2",
+  "title": "ModelLeaderboardProjection-v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revision",
+    "preferences",
+    "source_revision",
+    "projection_key",
+    "rows",
+    "sources",
+    "fx",
+    "algorithm",
+    "updated_at",
+    "observed_at",
+    "refresh",
+    "missing_star_count",
+    "qualification_eligible",
+    "catalog_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ModelLeaderboardProjection-v2"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "projection_key": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "preferences": {
+      "$ref": "#/$defs/preferences"
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/model"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "format",
+          "enabled",
+          "status",
+          "retrieved_at",
+          "snapshot_id",
+          "scored_count",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "DISABLED",
+              "NOT_FETCHED",
+              "CACHED",
+              "STALE",
+              "CACHE_INVALID"
+            ]
+          },
+          "retrieved_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "snapshot_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scored_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "role": {
+            "enum": [
+              "FX",
+              "PRICE",
+              "SCORE"
+            ]
+          }
+        }
+      }
+    },
+    "fx": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "source",
+            "fetchedAt",
+            "rateDate",
+            "unitsPerUsd",
+            "originalBase",
+            "originalRates",
+            "refreshFailed"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "fetchedAt": {
+              "type": "string"
+            },
+            "rateDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "unitsPerUsd": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "USD",
+                "CNY",
+                "JPY"
+              ],
+              "properties": {
+                "USD": {
+                  "const": 1
+                },
+                "CNY": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "JPY": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "originalBase": {
+              "const": "EUR"
+            },
+            "originalRates": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "USD",
+                "CNY",
+                "JPY"
+              ],
+              "properties": {
+                "USD": {
+                  "type": "string"
+                },
+                "CNY": {
+                  "type": "string"
+                },
+                "JPY": {
+                  "type": "string"
+                }
+              }
+            },
+            "refreshFailed": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "algorithm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "cohort_size",
+        "minimum_cohort",
+        "reference_cost_usd",
+        "cost_sample_size",
+        "weights",
+        "ability_weight",
+        "cost_weight",
+        "input_ratio",
+        "cohort_scope",
+        "currency_changes_rank",
+        "quality_scope",
+        "price_scope"
+      ],
+      "properties": {
+        "id": {
+          "const": "MIDRANK_GEOMETRIC_VALUE_V1"
+        },
+        "cohort_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_cohort": {
+          "const": 10
+        },
+        "reference_cost_usd": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "cost_sample_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "weights": {
+          "$ref": "#/$defs/weights"
+        },
+        "ability_weight": {
+          "type": "number"
+        },
+        "cost_weight": {
+          "type": "number"
+        },
+        "input_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "cohort_scope": {
+          "const": "FULL_CURRENT_CATALOG_BEFORE_UI_FILTERS"
+        },
+        "currency_changes_rank": {
+          "const": false
+        },
+        "quality_scope": {
+          "const": "EXACT_MODEL_AND_RECORDED_EFFORT"
+        },
+        "price_scope": {
+          "const": "TOKEN_UNIT_PRICE_NOT_ACTUAL_TASK_COST"
+        }
+      }
+    },
+    "updated_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "observed_at": {
+      "type": "string"
+    },
+    "refresh": {
+      "type": "object",
+      "required": [
+        "status",
+        "results"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "IDLE",
+            "RUNNING",
+            "PASS",
+            "PARTIAL",
+            "ERROR",
+            "NO_ENABLED_SOURCES"
+          ]
+        },
+        "results": {
+          "type": "array"
+        }
+      }
+    },
+    "missing_star_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "qualification_eligible": {
+      "const": false
+    },
+    "catalog_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "default_count",
+        "suppressed_count",
+        "starred_incomplete_visible"
+      ],
+      "properties": {
+        "id": {
+          "const": "COMPLETE_SCORE_PRICE_VENDOR_V1"
+        },
+        "default_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "suppressed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "starred_incomplete_visible": {
+          "const": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "weights": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1000
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "weights",
+        "preset",
+        "ability_weight",
+        "cost_weight",
+        "input_ratio",
+        "stars"
+      ],
+      "properties": {
+        "currency": {
+          "enum": [
+            "USD",
+            "CNY",
+            "JPY"
+          ]
+        },
+        "weights": {
+          "$ref": "#/$defs/weights"
+        },
+        "preset": {
+          "enum": [
+            "general",
+            "research",
+            "coding"
+          ]
+        },
+        "ability_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "cost_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "input_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stars": {
+          "type": "array",
+          "maxItems": 20000,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "base_model",
+        "version",
+        "effort",
+        "vendor_id",
+        "vendor",
+        "region",
+        "quality",
+        "details",
+        "price",
+        "availability",
+        "product",
+        "mixed_usd",
+        "ability",
+        "economy",
+        "value",
+        "starred",
+        "score_status",
+        "catalog_eligible",
+        "score_breakdown"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "base_model": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "effort": {
+          "enum": [
+            null,
+            "none",
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+          ]
+        },
+        "vendor_id": {
+          "type": "string"
+        },
+        "vendor": {
+          "type": "string"
+        },
+        "region": {
+          "enum": [
+            "国产",
+            "海外",
+            "未标注"
+          ]
+        },
+        "quality": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source_id",
+              "source_name",
+              "model_id",
+              "metrics",
+              "benchmark_effort",
+              "scope",
+              "benchmark_version",
+              "as_of",
+              "date_semantics",
+              "stale",
+              "score_eligible"
+            ],
+            "properties": {
+              "source_id": {
+                "type": "string"
+              },
+              "source_name": {
+                "type": "string"
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "metrics": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "benchmark_effort": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "scope": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "benchmark_version": {
+                "type": "string"
+              },
+              "as_of": {
+                "type": "string"
+              },
+              "date_semantics": {
+                "type": "string"
+              },
+              "stale": {
+                "type": "boolean"
+              },
+              "score_eligible": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "price": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "input",
+                "output",
+                "currency",
+                "unit",
+                "source_id",
+                "scope"
+              ],
+              "properties": {
+                "input": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "output": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "currency": {
+                  "const": "USD"
+                },
+                "unit": {
+                  "const": "PER_MILLION_TOKENS"
+                },
+                "source_id": {
+                  "type": "string"
+                },
+                "scope": {
+                  "const": "API_SKU_UNIT_PRICE_NOT_TASK_COST"
+                }
+              }
+            }
+          ]
+        },
+        "availability": {
+          "enum": [
+            "REFERENCE_ONLY",
+            "IN_CATALOG",
+            "STALE"
+          ]
+        },
+        "product": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "display_name": {
+              "type": "string"
+            },
+            "context_length": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "input_modalities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "supported_parameters": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "max_output_tokens": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "output_modalities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "capabilities": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "tools": {
+                  "type": "boolean"
+                },
+                "structured_output": {
+                  "type": "boolean"
+                },
+                "reasoning": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "mixed_usd": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ability": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "economy": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "starred": {
+          "type": "boolean"
+        },
+        "score_status": {
+          "enum": [
+            "ASSESSED",
+            "COHORT_TOO_SMALL",
+            "SOURCE_COVERAGE_MISSING"
+          ]
+        },
+        "catalog_eligible": {
+          "type": "boolean"
+        },
+        "score_breakdown": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "raw",
+              "percentile",
+              "weight_percent",
+              "contribution",
+              "status"
+            ],
+            "properties": {
+              "raw": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "percentile": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "weight_percent": {
+                "type": "number"
+              },
+              "contribution": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "INCLUDED",
+                  "NOT_SELECTED",
+                  "COHORT_TOO_SMALL",
+                  "SOURCE_COVERAGE_MISSING"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

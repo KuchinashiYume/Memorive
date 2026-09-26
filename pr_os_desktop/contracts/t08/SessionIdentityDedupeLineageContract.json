@@ -1,0 +1,27 @@
+{
+  "content_identity": "SHA256_CANONICAL_PUBLIC_SAFE_CAPTURE",
+  "dedupe_key": [
+    "provider_id",
+    "provider_session_id",
+    "content_hash"
+  ],
+  "fuzzy_match_allowed": false,
+  "identity_fields": [
+    "provider_id",
+    "provider_session_id",
+    "local_projection_id"
+  ],
+  "lineage_fields": [
+    "source_channel",
+    "capture_receipt_id",
+    "parent_projection_id",
+    "source_snapshot_hash"
+  ],
+  "order": [
+    "captured_at_desc",
+    "local_projection_id_asc"
+  ],
+  "schema_version": "P08T08SessionIdentityDedupeLineageContract-v1",
+  "stable_locator_template": "pr-os://session/{local_projection_id}",
+  "status": "FROZEN"
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t05:recommendation-slate-detail:0.1",
+  "title": "P04 T05 RecommendationSlateDetail and SlateDecisionEvidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "slate_id", "t01_slate_ref", "plan_id", "plan_hash",
+    "context_hash", "selected", "unselected", "channel_allocations", "caps", "no_backfill",
+    "whitespace_slots", "ordered", "input_hashes_before", "input_hashes_after", "side_effects",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t05.recommendation-slate-detail.0.1"},
+    "object_type": {"const": "RecommendationSlateDetail"},
+    "slate_id": {"type": "string", "pattern": "^T05_SLATE:[a-f0-9]{24}$"},
+    "t01_slate_ref": {"const": "RecommendationSlate"},
+    "plan_id": {"type": "string"},
+    "plan_hash": {"$ref": "#/$defs/sha256"},
+    "context_hash": {"$ref": "#/$defs/sha256"},
+    "selected": {
+      "type": "array", "uniqueItems": true,
+      "items": {"$ref": "#/$defs/selectedDecision"}
+    },
+    "unselected": {
+      "type": "array", "uniqueItems": true,
+      "items": {"$ref": "#/$defs/unselectedDecision"}
+    },
+    "channel_allocations": {
+      "type": "array", "minItems": 5, "maxItems": 5,
+      "items": {"$ref": "#/$defs/channelAllocation"}
+    },
+    "caps": {
+      "type": "object", "additionalProperties": false,
+      "required": ["limits", "observed_counts", "max_observed", "rejected_by_cap"],
+      "properties": {
+        "limits": {"$ref": "#/$defs/caps"},
+        "observed_counts": {
+          "type": "object", "additionalProperties": false,
+          "required": ["author", "institution", "journal", "source", "direction"],
+          "properties": {
+            "author": {"$ref": "#/$defs/countMap"},
+            "institution": {"$ref": "#/$defs/countMap"},
+            "journal": {"$ref": "#/$defs/countMap"},
+            "source": {"$ref": "#/$defs/countMap"},
+            "direction": {"$ref": "#/$defs/countMap"}
+          }
+        },
+        "max_observed": {
+          "type": "object", "additionalProperties": false,
+          "required": ["author", "institution", "journal", "source", "direction"],
+          "properties": {
+            "author": {"type": "integer", "minimum": 0},
+            "institution": {"type": "integer", "minimum": 0},
+            "journal": {"type": "integer", "minimum": 0},
+            "source": {"type": "integer", "minimum": 0},
+            "direction": {"type": "integer", "minimum": 0}
+          }
+        },
+        "rejected_by_cap": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "no_backfill": {"const": "CORE_SILENT_BACKFILL_FORBIDDEN"},
+    "whitespace_slots": {"type": "integer", "minimum": 0},
+    "ordered": {"const": true},
+    "input_hashes_before": {"$ref": "#/$defs/inputHashes"},
+    "input_hashes_after": {"$ref": "#/$defs/inputHashes"},
+    "side_effects": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile_writes", "policy_writes", "direction_writes", "library_writes", "m13_writes", "production_writes", "behavior_events_consumed"],
+      "properties": {
+        "profile_writes": {"const": 0},
+        "policy_writes": {"const": 0},
+        "direction_writes": {"const": 0},
+        "library_writes": {"const": 0},
+        "m13_writes": {"const": 0},
+        "production_writes": {"const": 0},
+        "behavior_events_consumed": {"const": 0}
+      }
+    },
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "channel": {"enum": ["CORE", "ADJACENT", "BRIDGE", "HORIZON", "COVERAGE_REPAIR"]},
+    "selectedDecision": {
+      "type": "object", "additionalProperties": false,
+      "required": ["position", "candidate_id", "work_cluster_id", "channel", "primary_direction_id", "reason_codes", "evidence_refs", "ranking_evidence_ref"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 1},
+        "candidate_id": {"type": "string"},
+        "work_cluster_id": {"type": "string"},
+        "channel": {"$ref": "#/$defs/channel"},
+        "primary_direction_id": {"type": "string"},
+        "reason_codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "ranking_evidence_ref": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "unselectedDecision": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_id", "work_cluster_id", "channel", "reason_codes"],
+      "properties": {
+        "candidate_id": {"type": "string"},
+        "work_cluster_id": {"type": "string"},
+        "channel": {"anyOf": [{"$ref": "#/$defs/channel"}, {"type": "null"}]},
+        "reason_codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "channelAllocation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["channel", "target", "selected", "gap", "unused_positions", "status"],
+      "properties": {
+        "channel": {"$ref": "#/$defs/channel"},
+        "target": {"type": "integer", "minimum": 0},
+        "selected": {"type": "integer", "minimum": 0},
+        "gap": {"type": "integer", "minimum": 0},
+        "unused_positions": {"type": "integer", "minimum": 0},
+        "status": {"enum": ["FILLED", "CHANNEL_UNDERFILLED"]}
+      }
+    },
+    "caps": {
+      "type": "object", "additionalProperties": false,
+      "required": ["author", "institution", "journal", "source", "direction"],
+      "properties": {
+        "author": {"type": "integer", "minimum": 1},
+        "institution": {"type": "integer", "minimum": 1},
+        "journal": {"type": "integer", "minimum": 1},
+        "source": {"type": "integer", "minimum": 1},
+        "direction": {"type": "integer", "minimum": 1}
+      }
+    },
+    "countMap": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "inputHashes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile", "policy", "directions", "plan"],
+      "properties": {
+        "profile": {"$ref": "#/$defs/sha256"},
+        "policy": {"$ref": "#/$defs/sha256"},
+        "directions": {"$ref": "#/$defs/sha256"},
+        "plan": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

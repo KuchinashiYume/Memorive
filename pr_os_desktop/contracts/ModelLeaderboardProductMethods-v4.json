@@ -1,0 +1,78 @@
+{
+  "schema_version": "ModelLeaderboardProductMethods-v4",
+  "projection_schema": "ModelLeaderboardProjection-v4.schema.json",
+  "methods": [
+    {
+      "name": "settings.leaderboard_get",
+      "params": {},
+      "returns": "ModelLeaderboardProjection-v4",
+      "effects": "读取已配置来源的校验缓存及独立排行榜偏好；不发起网络请求"
+    },
+    {
+      "name": "settings.leaderboard_save",
+      "params": {
+        "expected_revision": "integer",
+        "changes": "partial preferences"
+      },
+      "returns": "ModelLeaderboardProjection-v4",
+      "effects": "独立偏好文件原子写入；冲突拒绝；不修改模型配置、考试、任务或账务"
+    },
+    {
+      "name": "settings.leaderboard_refresh",
+      "params": {},
+      "returns": "{status: RUNNING | BUSY}",
+      "effects": "后台串行复用来源 refresh；get 返回 RUNNING/PASS/PARTIAL/ERROR/NO_ENABLED_SOURCES；每个物理 GET 复用原始回执"
+    },
+    {
+      "name": "settings.external_sources_refresh",
+      "params": {
+        "source_id": "configured FX source id",
+        "expected_revision": "source_revision from leaderboard_get"
+      },
+      "returns": "existing ExternalDataSources refresh receipt",
+      "effects": "复用既有公开元数据刷新。切换非USD且缺少有效汇率时单次请求；已启用全来源刷新时不重复请求。"
+    }
+  ],
+  "currency_display": [
+    "USD",
+    "RMB",
+    "JPY"
+  ],
+  "currency_storage": [
+    "USD",
+    "CNY",
+    "JPY"
+  ],
+  "default_scoring_sources": {
+    "artificial-analysis": 100,
+    "epoch-ai": 0
+  },
+  "product_api_binding": "ProductApi.call -> SettingsServiceAdapter -> SettingsController -> LeaderboardService",
+  "current_build_installation_authorized": false,
+  "paid_model_calls": 0,
+  "build_id": "build099_r3",
+  "installation_scope": "ISOLATED_CANDIDATE_AND_EXE_WITH_REQUIRED_CONSOLE_VERIFICATION",
+  "score_policy": {
+    "sample_scope": "per selected source before UI filters",
+    "minimum_samples": 10,
+    "missing_source": "renormalize available and disclose coverage",
+    "model_level_eci": "separate reference row; never inherit into specific thinking efforts",
+    "missing_price": "keep scored known-vendor row with blank value score"
+  },
+  "console": {
+    "protocol_version": "1.0",
+    "operations": [
+      "diagnostics"
+    ],
+    "read_only_leaderboard_summary": true,
+    "model_calls": 0,
+    "required_for_future_builds": true
+  },
+  "scoring_sources": {
+    "scope": "Enabled non-FX sources from Settings",
+    "score_weights": "Enabled SCORE sources only; default to first enabled score source when all saved selections are unavailable",
+    "price_sources": "Visible in the same source list without scoring weights",
+    "none_enabled": "Empty weights and zero selected coverage; no invented score",
+    "purpose": "General capability only; legacy preset field is read-compatible"
+  }
+}

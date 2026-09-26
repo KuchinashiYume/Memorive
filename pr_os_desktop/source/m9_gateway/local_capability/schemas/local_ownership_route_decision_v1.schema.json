@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p06:t11:local-ownership-route-decision:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision_id", "source_identity_id", "source_ownership", "provenance_sha256", "effective_ownership", "merge_reason", "selected_role", "selected_profile_id", "fail_closed_reason", "cloud_eligibility", "local_route_eligibility", "decision_policy_revision"],
+  "properties": {
+    "decision_id": {"type": "string", "minLength": 1},
+    "source_identity_id": {"type": "string", "minLength": 1},
+    "source_ownership": {"enum": ["self", "entrusted", "unknown", "mixed"]},
+    "provenance_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "effective_ownership": {"enum": ["self", "entrusted", "unknown", "mixed"]},
+    "merge_reason": {"type": "string", "minLength": 1},
+    "selected_role": {"enum": ["LOCAL_OCR", "LOCAL_DISTILL", "LOCAL_ANALYSIS", "LOCAL_VERIFY", "LOCAL_EMBED", "LOCAL_RETRIEVE"]},
+    "selected_profile_id": {"type": ["string", "null"]},
+    "fail_closed_reason": {"type": ["string", "null"]},
+    "cloud_eligibility": {"const": false},
+    "local_route_eligibility": {"type": "boolean"},
+    "decision_policy_revision": {"const": "P06_T11_OWNERSHIP_ROUTE_V1"}
+  }
+}

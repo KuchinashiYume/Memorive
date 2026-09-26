@@ -1,0 +1,13 @@
+{
+  "product": "Memorive",
+  "version": "1.01",
+  "application_build_id": "build139",
+  "source_tag": "v1.01-build139",
+  "code_license": "AGPL-3.0-only",
+  "artwork_license": "See pr_os_desktop/ASSET_NOTICE.md",
+  "history_policy": "Independent initial commit; no predecessor Git history",
+  "distribution_revision": "content-cleanup-20260926",
+  "installer_sha256": "74f0fd51aa29f018ac2e1a7d8bee0367eaf1893100390da230fd8e2cc7a96488",
+  "application_exe_sha256": "4232b02acc34c852c95d70a2ddb742d43d9b86b8962dc1c66c8f1fd282e50ab0",
+  "build_policy": "No new build adopted; existing program bytes retained, 82 data/report files omitted"
+}

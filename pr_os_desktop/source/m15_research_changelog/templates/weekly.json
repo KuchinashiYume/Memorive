@@ -1,0 +1,28 @@
+{
+  "template_id": "PR-OS-P03-T02-M15-WEEKLY-REPORT",
+  "template_revision": "r2.0",
+  "supersedes": "r1.0",
+  "digest_kind": "weekly",
+  "human_title": "研究变更日志 · 周报",
+  "source_file": "weekly.md.tmpl",
+  "front_purpose": "本周发生了什么以及下周先关注什么",
+  "sections": [
+    "研究进展",
+    "明确标记的重要变化",
+    "未验证项",
+    "明确来源的潜在张力",
+    "风险与待办"
+  ],
+  "required_placeholders": [
+    "human_title",
+    "attention_items",
+    "overview_table",
+    "explicit_importance",
+    "tension_summary",
+    "coverage_summary",
+    "detail_sections",
+    "data_quality",
+    "not_assessed",
+    "audit_metadata"
+  ]
+}

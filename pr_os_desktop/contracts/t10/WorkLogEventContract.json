@@ -1,0 +1,27 @@
+{
+  "identities": [
+    "log_entry_id",
+    "job_id",
+    "event_sequence"
+  ],
+  "raw_private_payload_visible": false,
+  "schema_version": "P08T10WorkLogEventContract-v1",
+  "severity_axes": [
+    "INFO",
+    "WARNING",
+    "ERROR"
+  ],
+  "source_axes": [
+    "branch",
+    "central",
+    "m11_metadata"
+  ],
+  "stable_ordering": "event_time_utc DESC,event_sequence DESC,log_entry_id DESC",
+  "status": "PASS",
+  "status_axes": [
+    "lifecycle_status",
+    "verification_result",
+    "acceptance_verdict"
+  ],
+  "unknown_fields_preserved_as_public_technical_detail": true
+}

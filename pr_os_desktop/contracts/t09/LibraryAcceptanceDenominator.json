@@ -1,0 +1,18 @@
+{
+  "acceptance_verdict": "NOT_ASSESSED",
+  "canonical_m13_actual_access_required": 0,
+  "dpi_percent": [
+    100,
+    125,
+    150,
+    200
+  ],
+  "part8_physical_parser_elements": 269,
+  "part8_source_elements": 266,
+  "required_changed_pixels": 0,
+  "required_intentional_design_delta_count": 0,
+  "required_visible_transplant_percent": 100,
+  "schema_version": "P08T09LibraryAcceptanceDenominator-v1",
+  "status": "PASS",
+  "visual_case_count": 56
+}

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t06:exposure-ledger:0.1",
+  "title": "P04 T06 ExposureLedger and append-only events",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "writer", "append_only", "canonical_order",
+    "events", "event_count", "exposure_count", "duplicate_replays_ignored",
+    "replay_fingerprint", "side_effects", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t06.exposure-ledger.0.1"},
+    "object_type": {"const": "ExposureLedger"},
+    "writer": {"const": "M17.EXPOSURE_LEDGER_WRITER"},
+    "append_only": {"const": true},
+    "canonical_order": {"const": "event_time+exposure_id+event_type_priority+revision+event_id"},
+    "events": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/event"}
+    },
+    "event_count": {"type": "integer", "minimum": 0},
+    "exposure_count": {"type": "integer", "minimum": 0},
+    "duplicate_replays_ignored": {"type": "integer", "minimum": 0},
+    "replay_fingerprint": {"$ref": "#/$defs/sha256"},
+    "side_effects": {"$ref": "#/$defs/zeroSideEffects"},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "eventId": {"type": "string", "pattern": "^EVENT:[a-f0-9]{24}$"},
+    "exposureId": {"type": "string", "pattern": "^EXPOSURE:[a-f0-9]{24}$"},
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "object_type", "event_type", "event_id", "exposure_id",
+        "event_time", "work_cluster_id", "direction_id", "direction_revision", "content_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "p04.t06.exposure-event.0.1"},
+        "object_type": {"const": "ExposureLedgerEvent"},
+        "event_type": {
+          "enum": [
+            "EXPOSURE_RECORDED", "DECISION_RECORDED", "DECISION_REVOKED",
+            "FEEDBACK_RESET", "MANUAL_RESTORE"
+          ]
+        },
+        "event_id": {"$ref": "#/$defs/eventId"},
+        "exposure_id": {"$ref": "#/$defs/exposureId"},
+        "event_time": {"type": "string", "format": "date-time"},
+        "slate_id": {"type": "string", "minLength": 1},
+        "slate_revision_or_hash": {"$ref": "#/$defs/sha256"},
+        "position": {"type": "integer", "minimum": 1},
+        "candidate_id": {"type": "string", "minLength": 1},
+        "work_cluster_id": {"type": "string", "minLength": 1},
+        "channel": {
+          "enum": ["CORE", "ADJACENT", "BRIDGE", "HORIZON", "COVERAGE_REPAIR"]
+        },
+        "direction_id": {"type": "string", "minLength": 1},
+        "direction_revision": {"type": "string", "minLength": 1},
+        "source_contract_hash": {"$ref": "#/$defs/sha256"},
+        "evidence_refs": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "decision_type": {
+          "enum": [
+            "NOT_FOR_THIS_DIRECTION", "GLOBALLY_USELESS", "ALREADY_READ", "IN_LIBRARY",
+            "SNOOZE", "NO_LEGAL_FULLTEXT", "CARD_ERROR", "MANIFESTATION_NOT_USEFUL"
+          ]
+        },
+        "decision_revision": {"type": "integer", "minimum": 1},
+        "reason_code": {
+          "enum": [
+            "NOT_FOR_THIS_DIRECTION", "GLOBALLY_USELESS", "ALREADY_READ", "IN_LIBRARY",
+            "SNOOZE", "NO_LEGAL_FULLTEXT", "CARD_ERROR", "MANIFESTATION_NOT_USEFUL"
+          ]
+        },
+        "cooldown_until": {"type": ["string", "null"], "format": "date-time"},
+        "global_confirmation": {"type": "boolean"},
+        "manifestation_id": {"type": ["string", "null"], "minLength": 1},
+        "candidate_card_ref": {"type": ["string", "null"], "minLength": 1},
+        "source_exposure_event_id": {"$ref": "#/$defs/eventId"},
+        "event_revision": {"type": "integer", "minimum": 1},
+        "target_event_id": {"type": ["string", "null"], "pattern": "^EVENT:[a-f0-9]{24}$"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"event_type": {"const": "EXPOSURE_RECORDED"}}},
+          "then": {
+            "required": [
+              "slate_id", "slate_revision_or_hash", "position", "candidate_id", "channel",
+              "source_contract_hash", "evidence_refs"
+            ]
+          }
+        },
+        {
+          "if": {"properties": {"event_type": {"const": "DECISION_RECORDED"}}},
+          "then": {
+            "required": [
+              "decision_type", "decision_revision", "reason_code", "cooldown_until",
+              "global_confirmation", "manifestation_id", "candidate_card_ref",
+              "source_exposure_event_id"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "event_type": {"enum": ["DECISION_REVOKED", "MANUAL_RESTORE"]}
+            }
+          },
+          "then": {"required": ["event_revision", "target_event_id", "source_exposure_event_id"]}
+        },
+        {
+          "if": {"properties": {"event_type": {"const": "FEEDBACK_RESET"}}},
+          "then": {"required": ["event_revision", "target_event_id", "source_exposure_event_id"]}
+        }
+      ]
+    },
+    "zeroSideEffects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "network_calls", "external_source_calls", "model_or_api_calls", "profile_writes",
+        "policy_writes", "direction_writes", "p03_reads", "p03_writes", "library_writes",
+        "m13_writes", "production_reads", "production_writes"
+      ],
+      "properties": {
+        "network_calls": {"const": 0},
+        "external_source_calls": {"const": 0},
+        "model_or_api_calls": {"const": 0},
+        "profile_writes": {"const": 0},
+        "policy_writes": {"const": 0},
+        "direction_writes": {"const": 0},
+        "p03_reads": {"const": 0},
+        "p03_writes": {"const": 0},
+        "library_writes": {"const": 0},
+        "m13_writes": {"const": 0},
+        "production_reads": {"const": 0},
+        "production_writes": {"const": 0}
+      }
+    }
+  }
+}

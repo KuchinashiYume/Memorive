@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memo 网页会话</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">MEMO</p>
+    <h1>录入网页会话</h1>
+    <p class="copy">开始后滚动页面，收集已加载的对话。</p>
+    <div class="capture-actions">
+      <button id="record-page" type="button" disabled>开始录制</button>
+      <button id="test-current-page" class="secondary" type="button" disabled>测试读取</button>
+    </div>
+    <p id="record-status" role="status" class="copy">停止即录入 · 10 分钟自动结束</p>
+    <p id="status" role="status"></p>
+    <details class="sync-options">
+      <summary>网站同步</summary>
+      <p id="enabled-sites" class="copy"></p>
+      <button id="sync-library" class="secondary" type="button">同步所选网站</button>
+    </details>
+  </main>
+  <script src="site_profiles.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

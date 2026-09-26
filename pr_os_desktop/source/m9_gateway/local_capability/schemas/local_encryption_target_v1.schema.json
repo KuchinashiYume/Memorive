@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p06:t11:local-encryption-target:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation_id",
+    "target_kind",
+    "encryption_profile",
+    "encryption_scope",
+    "encrypted_root",
+    "dataset_id",
+    "object_count",
+    "directory_count",
+    "source_set_sha256",
+    "encrypted_manifest",
+    "encrypted_object_set_sha256",
+    "round_trip_verdict",
+    "source_unchanged",
+    "source_overwrite",
+    "source_delete",
+    "plaintext_persisted_in_managed_root",
+    "opaque_object_names",
+    "key_exported",
+    "recovery_material_read",
+    "external_requests",
+    "provider_cost_cny"
+  ],
+  "properties": {
+    "schema_version": {"const": "P06T11LocalEncryptionTargetReceipt-v1"},
+    "operation_id": {"type": "string", "pattern": "^[0-9A-F]{32}$"},
+    "target_kind": {"enum": ["FILE", "DIRECTORY"]},
+    "encryption_profile": {"const": "WINDOWS_DPAPI_CURRENT_USER_CHUNKED_AUTHENTICATED_CONTAINER_V1"},
+    "encryption_scope": {"const": "WINDOWS_CURRENT_USER"},
+    "encrypted_root": {"type": "string", "minLength": 1},
+    "dataset_id": {"type": "string", "pattern": "^[0-9A-F]{32}$"},
+    "object_count": {"type": "integer", "minimum": 0},
+    "directory_count": {"type": "integer", "minimum": 0},
+    "source_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "encrypted_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "sha256", "bytes"],
+      "properties": {
+        "name": {"const": "manifest.p11m"},
+        "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "encrypted_object_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "round_trip_verdict": {"const": "PASS"},
+    "source_unchanged": {"const": true},
+    "source_overwrite": {"const": false},
+    "source_delete": {"const": false},
+    "plaintext_persisted_in_managed_root": {"const": false},
+    "opaque_object_names": {"const": true},
+    "key_exported": {"const": false},
+    "recovery_material_read": {"const": false},
+    "external_requests": {"const": 0},
+    "provider_cost_cny": {"const": "0"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"target_kind": {"const": "FILE"}}, "required": ["target_kind"]},
+      "then": {"properties": {"object_count": {"const": 1}, "directory_count": {"const": 0}}}
+    },
+    {
+      "if": {"properties": {"target_kind": {"const": "DIRECTORY"}}, "required": ["target_kind"]},
+      "then": {"properties": {"directory_count": {"minimum": 1}}}
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t02:connector-protocol:0.1",
+  "title": "P04 T02 Connector Protocol Objects",
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "nullableSha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "connector_id", "retryable", "coverage_impact"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "connector_id": {"type": "string", "minLength": 1},
+        "retryable": {"type": "boolean"},
+        "coverage_impact": {"enum": ["NONE", "PARTIAL", "TOTAL"]}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "connector_id",
+    "connector_revision",
+    "operation",
+    "run_id",
+    "query_hash",
+    "cursor",
+    "cursor_hash",
+    "observations",
+    "next_cursor",
+    "snapshot_id",
+    "cache_status",
+    "coverage_status",
+    "errors"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t02.source-observation-page.0.1"},
+    "connector_id": {"enum": ["ARXIV", "CROSSREF"]},
+    "connector_revision": {"const": "r0.1"},
+    "operation": {"const": "search"},
+    "run_id": {"type": "string", "minLength": 1},
+    "query_hash": {"$ref": "#/$defs/sha256"},
+    "cursor": {"type": ["string", "null"]},
+    "cursor_hash": {"$ref": "#/$defs/nullableSha256"},
+    "observations": {"type": "array", "items": {"type": "object"}},
+    "next_cursor": {"type": ["string", "null"]},
+    "snapshot_id": {"type": "string", "pattern": "^snapshot_[a-f0-9]{24}$"},
+    "cache_status": {"enum": ["MISS", "HIT"]},
+    "coverage_status": {"enum": ["COMPLETE", "PARTIAL", "FAILED"]},
+    "errors": {"type": "array", "items": {"$ref": "#/$defs/error"}}
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": "p04.t06.frozen-parameters-and-routing.0.1",
+  "interaction_mode": "NOT_CONFIGURED",
+  "feedback_routes": {
+    "NOT_FOR_THIS_DIRECTION": "SCOPED_DIRECTION_SUPPRESSION",
+    "GLOBALLY_USELESS": "SECOND_EXPLICIT_CONFIRMATION_REQUIRED",
+    "ALREADY_READ": "GLOBAL_DEDUPE",
+    "IN_LIBRARY": "GLOBAL_DEDUPE",
+    "SNOOZE": "TIME_BOUND_SNOOZE",
+    "NO_LEGAL_FULLTEXT": "ACCESS_CHANGE_WAIT",
+    "CARD_ERROR": "CARD_REPAIR",
+    "MANIFESTATION_NOT_USEFUL": "MANIFESTATION_SCOPE_SUPPRESSION",
+    "MANUAL_RESTORE": "APPEND_ONLY_CONTROL_EVENT"
+  },
+  "ignored_interactions": ["NO_CLICK", "TIMEOUT", "NO_DECISION"],
+  "direction_identity": {
+    "direction_id": "RecommendationSlateDetail.selected[*].primary_direction_id",
+    "direction_revision": "ResearchContextDetail.directions[direction_id].revision",
+    "fuzzy_text_vector_field_id_propagation": false
+  },
+  "behavior": {
+    "dedupe_scope": "direction_id+session_hash",
+    "origin_weights": {
+      "USER_INITIATED": "1.000000",
+      "P04_EXPOSURE_FOLLOWUP": "0.250000",
+      "SYSTEM_CLARIFICATION": "0.000000",
+      "RETRY_OR_REPHRASE": "0.000000"
+    },
+    "decay_windows_days": [
+      [30, "1.000000"],
+      [90, "0.500000"],
+      [180, "0.250000"]
+    ],
+    "older_factor": "0.000000",
+    "per_direction_cap": "1.000000",
+    "proposal_min_user_sessions": 3,
+    "proposal_min_active_dates": 2,
+    "tie_break_scope": "SAME_CHANNEL+IDENTICAL_PRE_TIE_RANK_KEY",
+    "epsilon": "0.000000",
+    "global_scalar_score": false
+  },
+  "resurface": {
+    "allowed_triggers": [
+      "FORMAL_MAJOR_VERSION", "LEGAL_ACCESS_AVAILABLE", "CORRECTION_OR_RETRACTION",
+      "IMPORTANT_CITATION_CHANGE", "NEW_STABLE_DIRECTION", "BRIDGE_ROLE_CHANGE",
+      "MANUAL_RESTORE"
+    ],
+    "forbidden_triggers": [
+      "TITLE_DRIFT", "ABSTRACT_FORMAT_DRIFT", "SOURCE_MIRROR_CHANGE", "MINOR_METADATA_DRIFT"
+    ],
+    "authority_evidence_required": true,
+    "history_disclosure_required": true
+  },
+  "runtime": {
+    "external_source_calls": 0,
+    "model_or_api_calls": 0,
+    "tokens": 0,
+    "cost_cny": 0,
+    "production_reads": 0,
+    "production_writes": 0,
+    "construction_a1": "NOT_APPLICABLE"
+  }
+}

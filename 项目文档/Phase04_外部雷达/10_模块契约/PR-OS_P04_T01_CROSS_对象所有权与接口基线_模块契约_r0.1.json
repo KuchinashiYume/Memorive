@@ -1,0 +1,339 @@
+{
+  "schema_version": "P04_T01_AUTHORITY_OWNERSHIP_BASELINE_V1",
+  "contract_revision": "p04-t01-common-contract-r0.1-candidate001",
+  "source_commit": "c9209f20b7984ead3c294ff1cd9d193d5589d071",
+  "object_count": 18,
+  "objects": [
+    {
+      "object_type": "DirectionDefinition",
+      "defined_by_task": "T05",
+      "producer": "M17.DIRECTION_REGISTRY",
+      "single_writer": "M17.DIRECTION_REGISTRY",
+      "consumers": [
+        "M16",
+        "M17",
+        "P04_T06",
+        "P04_T07",
+        "P04_T08"
+      ],
+      "read_only_consumers": [
+        "M16",
+        "P03",
+        "M01",
+        "M08"
+      ],
+      "identity_key": "direction_id + revision + content_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ResearchInterestProfile",
+      "defined_by_task": "T05",
+      "producer": "M17.PROFILE_REGISTRY",
+      "single_writer": "M17.PROFILE_REGISTRY",
+      "consumers": [
+        "M17.DISCOVERY_PLANNER",
+        "M17.EXPOSURE_CONTROLLER"
+      ],
+      "read_only_consumers": [
+        "M16",
+        "P03"
+      ],
+      "identity_key": "profile_id + revision + content_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ResearchExposurePolicy",
+      "defined_by_task": "T05",
+      "producer": "M17.EXPOSURE_POLICY_REGISTRY",
+      "single_writer": "M17.EXPOSURE_POLICY_REGISTRY",
+      "consumers": [
+        "M17.EXPOSURE_CONTROLLER",
+        "M17.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "M16",
+        "P03"
+      ],
+      "identity_key": "policy_id + revision + content_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "HorizonAnchor",
+      "defined_by_task": "T05",
+      "producer": "M17.HORIZON_REGISTRY",
+      "single_writer": "M17.HORIZON_REGISTRY",
+      "consumers": [
+        "M17.DISCOVERY_PLANNER",
+        "M17.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "M16"
+      ],
+      "identity_key": "anchor_id + direction_id + revision",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "SessionResearchContext",
+      "defined_by_task": "T05",
+      "producer": "M17.SESSION_CONTEXT_WRITER",
+      "single_writer": "M17.SESSION_CONTEXT_WRITER",
+      "consumers": [
+        "M17.DISCOVERY_PLANNER",
+        "M17.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "M16"
+      ],
+      "identity_key": "session_context_id + revision + expires_at",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "DiscoveryPlan",
+      "defined_by_task": "T05",
+      "producer": "M17.DISCOVERY_PLANNER",
+      "single_writer": "M17.DISCOVERY_PLANNER",
+      "consumers": [
+        "M16.CONNECTOR_ORCHESTRATOR",
+        "M17.DISCOVERY_RUNNER"
+      ],
+      "read_only_consumers": [
+        "M11",
+        "M14"
+      ],
+      "identity_key": "plan_id + revision + plan_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "DiscoveryRun",
+      "defined_by_task": "T05",
+      "producer": "M17.DISCOVERY_RUNNER",
+      "single_writer": "M17.DISCOVERY_RUNNER",
+      "consumers": [
+        "M16",
+        "M17",
+        "M11",
+        "M14"
+      ],
+      "read_only_consumers": [
+        "M12",
+        "M13"
+      ],
+      "identity_key": "run_id + plan_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "SourceObservation",
+      "defined_by_task": "T02",
+      "producer": "M16.SOURCE_OBSERVATION_WRITER",
+      "single_writer": "M16.SOURCE_OBSERVATION_WRITER",
+      "consumers": [
+        "M16.IDENTITY_RESOLVER",
+        "M16.CANDIDATE_REGISTRY",
+        "M11"
+      ],
+      "read_only_consumers": [
+        "M17",
+        "M13",
+        "M14"
+      ],
+      "identity_key": "source_id + source_record_id + observation_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "CandidateRecord",
+      "defined_by_task": "T03_T04_T05",
+      "producer": "M16.CANDIDATE_REGISTRY",
+      "single_writer": "M16.CANDIDATE_REGISTRY",
+      "consumers": [
+        "M17.SLATE_BUILDER",
+        "P04_T07",
+        "P04_T08"
+      ],
+      "read_only_consumers": [
+        "M01",
+        "M02",
+        "M06",
+        "M08",
+        "M13",
+        "M14"
+      ],
+      "identity_key": "candidate_id + revision + content_hash",
+      "t01_scope": "COMMON_ENVELOPE_AND_STATUS_AXES_ONLY"
+    },
+    {
+      "object_type": "RecommendationSlate",
+      "defined_by_task": "T05",
+      "producer": "M17.SLATE_BUILDER",
+      "single_writer": "M17.SLATE_BUILDER",
+      "consumers": [
+        "M17.EXPOSURE_LEDGER_WRITER",
+        "P04_UI"
+      ],
+      "read_only_consumers": [
+        "M16",
+        "M14"
+      ],
+      "identity_key": "slate_id + run_id + slate_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "DiscoveryEvent",
+      "defined_by_task": "T05_T06",
+      "producer": "M17.DISCOVERY_RUNNER",
+      "single_writer": "M17.DISCOVERY_RUNNER",
+      "consumers": [
+        "M11",
+        "M14"
+      ],
+      "read_only_consumers": [
+        "M16",
+        "M17"
+      ],
+      "identity_key": "event_id + revision + content_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ExposureLedger",
+      "defined_by_task": "T06",
+      "producer": "M17.EXPOSURE_LEDGER_WRITER",
+      "single_writer": "M17.EXPOSURE_LEDGER_WRITER",
+      "consumers": [
+        "M17.SUPPRESSION_ENGINE",
+        "M17.BEHAVIOR_DIGEST"
+      ],
+      "read_only_consumers": [
+        "P03",
+        "M14"
+      ],
+      "identity_key": "exposure_id",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "ScopedSuppressionRecord",
+      "defined_by_task": "T06",
+      "producer": "M17.SUPPRESSION_ENGINE",
+      "single_writer": "M17.SUPPRESSION_ENGINE",
+      "consumers": [
+        "M17.SLATE_BUILDER"
+      ],
+      "read_only_consumers": [
+        "M16",
+        "M14"
+      ],
+      "identity_key": "work_cluster_id + direction_id + decision_revision",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "BehavioralInterestDigest",
+      "defined_by_task": "T06",
+      "producer": "M17.BEHAVIOR_DIGEST_WRITER",
+      "single_writer": "M17.BEHAVIOR_DIGEST_WRITER",
+      "consumers": [
+        "M17.PROFILE_CHANGE_PROPOSAL_BUILDER"
+      ],
+      "read_only_consumers": [
+        "P03",
+        "M16"
+      ],
+      "identity_key": "window + direction_id + digest_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY"
+    },
+    {
+      "object_type": "CandidateCardBundle",
+      "defined_by_task": "T07",
+      "producer": "P04_T07.CANDIDATE_CARD_BUNDLE_WRITER",
+      "single_writer": "P04_T07.CANDIDATE_CARD_BUNDLE_WRITER",
+      "consumers": [
+        "P04_T08.PROMOTION_COORDINATOR",
+        "M14"
+      ],
+      "read_only_consumers": [
+        "M01",
+        "M02",
+        "M06",
+        "M16",
+        "M17"
+      ],
+      "identity_key": "candidate_id + card_revision + bundle_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY_NO_CARD_GENERATION"
+    },
+    {
+      "object_type": "CardPromotionIntent",
+      "defined_by_task": "T08",
+      "producer": "P04_T08.PROMOTION_COORDINATOR",
+      "single_writer": "P04_T08.PROMOTION_COORDINATOR",
+      "consumers": [
+        "P04_T08.ATOMIC_PROMOTION_WRITER"
+      ],
+      "read_only_consumers": [
+        "M01",
+        "M08",
+        "M12",
+        "M13",
+        "M14"
+      ],
+      "identity_key": "promotion_id + candidate_bundle_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY_NO_PROMOTION"
+    },
+    {
+      "object_type": "PromotionReceipt",
+      "defined_by_task": "T08",
+      "producer": "P04_T08.ATOMIC_PROMOTION_WRITER",
+      "single_writer": "P04_T08.ATOMIC_PROMOTION_WRITER",
+      "consumers": [
+        "M01",
+        "M08",
+        "M12",
+        "M13",
+        "M16",
+        "M17"
+      ],
+      "read_only_consumers": [
+        "M14"
+      ],
+      "identity_key": "promotion_id + candidate_bundle_hash + receipt_hash",
+      "t01_scope": "COMMON_ENVELOPE_ONLY_NO_PROMOTION"
+    },
+    {
+      "object_type": "ExposurePolicyChangeProposal",
+      "defined_by_task": "T06",
+      "producer": "M17.PROFILE_CHANGE_PROPOSAL_BUILDER",
+      "single_writer": "M17.PROFILE_CHANGE_PROPOSAL_BUILDER",
+      "consumers": [
+        "HUMAN_RESEARCHER",
+        "M17.EXPOSURE_POLICY_REGISTRY"
+      ],
+      "read_only_consumers": [
+        "P03",
+        "M14"
+      ],
+      "identity_key": "proposal_id + base_policy_revision + proposal_hash",
+      "t01_scope": "COMMON_ENVELOPE_AND_HUMAN_CONFIRMATION_ONLY"
+    }
+  ],
+  "interface_boundaries": [
+    {
+      "boundary": "M16_TO_M17",
+      "rule": "M16 owns source, identity, relationship and novelty facts; M17 consumes them read-only for planning, slate and exposure decisions."
+    },
+    {
+      "boundary": "P03_TO_P04",
+      "rule": "P03 supplies neutral interaction evidence; P04 may form a decaying digest but cannot rewrite P03 evidence."
+    },
+    {
+      "boundary": "P04_TO_CARD",
+      "rule": "Only T07 may create an isolated CandidateCardBundle after a first human approval; T01 creates no Card or Analysis."
+    },
+    {
+      "boundary": "P04_TO_FORMAL_LIBRARY",
+      "rule": "Only T08 may request the separately authorized atomic writer after a second human approval; T01 has zero formal writes."
+    }
+  ],
+  "invariants": [
+    "ONE_SINGLE_WRITER_PER_COMMON_OBJECT",
+    "CONSUMERS_DO_NOT_REDEFINE_AUTHORITY",
+    "T01_DEFINES_ENVELOPES_NOT_DOWNSTREAM_ALGORITHMS",
+    "HUMAN_DECISIONS_ARE_NOT_INFERRED_FROM_BEHAVIOR",
+    "FORMAL_AND_PRODUCTION_SIDE_EFFECTS_ZERO_IN_T01"
+  ]
+}

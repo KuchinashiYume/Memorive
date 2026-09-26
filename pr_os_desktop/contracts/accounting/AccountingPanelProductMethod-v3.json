@@ -1,0 +1,69 @@
+{
+  "schema_version": "AccountingPanelProductMethod-v3",
+  "transport": "window.pywebview.api.call",
+  "methods": {
+    "read": "accounting.get_projection_v3",
+    "refresh": "accounting.refresh_projection_v3",
+    "shared_model_context": "models.get_commerce_context_v1"
+  },
+  "kind": "LOCAL_READ_ONLY_PRODUCT_PROJECTION",
+  "params": {
+    "scope": ["ALL", "CURRENT_JOB"],
+    "current_job_id": "string|null",
+    "time_range": ["7D", "30D", "MONTH"],
+    "model_profile_ref": "ALL|exact profile_ref",
+    "preferred_currency": ["USD", "CNY", "JPY"],
+    "group_by": ["MODEL_PROFILE"]
+  },
+  "returns_schema": "AccountingPanelProjection-v3.schema.json",
+  "shared_model_context_schema": "SharedModelCommerceContext-v1.schema.json",
+  "model_context_inputs": [
+    "settings.get_state:settings.model_services",
+    "settings.get_state:settings.cli_services.models",
+    "local_models.bootstrap:recognized_models",
+    "settings.leaderboard_get:rows exact identity catalog",
+    "settings.leaderboard_get:fx dated ECB cross-rate snapshot"
+  ],
+  "model_identity_join": "exact profile_ref and explicit leaderboard_model_key only; fuzzy model/version/effort joins forbidden",
+  "consumers": ["ACCOUNTING_BOTTOM_PANEL", "MODEL_LEADERBOARD", "MODEL_SETTINGS"],
+  "currency_codes": {
+    "wire": ["USD", "CNY", "JPY"],
+    "display": ["USD", "RMB", "JPY"],
+    "rmb_wire_code": "CNY"
+  },
+  "client_chart_metrics": ["COST", "REQUESTS", "TOKENS"],
+  "metric_switch_requires_backend_roundtrip": false,
+  "time_range_switch_requires_backend_roundtrip": true,
+  "model_switch_requires_backend_roundtrip": true,
+  "currency_switch_requires_backend_roundtrip": true,
+  "refresh_contract": {
+    "mode": "LOCAL_SNAPSHOT",
+    "re_read": ["allowlisted accounting rows", "settings.get_state", "local_models.bootstrap", "settings.leaderboard_get cached rows and FX"],
+    "external_network_calls": 0,
+    "paid_model_calls": 0,
+    "does_not_force": ["remote leaderboard refresh", "remote FX refresh", "provider request"]
+  },
+  "events": {
+    "consume": ["p08:model-commerce-context-changed", "p08:display-currency-changed"],
+    "emit": ["p08:display-currency-changed"]
+  },
+  "mutation": false,
+  "network": false,
+  "credential_access": false,
+  "raw_private_content_included": false,
+  "current_job_gate": {
+    "eligible_when": "eligible_attempt_count > 0 AND bound_attempt_count == eligible_attempt_count AND current_job_id is present",
+    "otherwise": "ACCOUNTING_CURRENT_JOB_SCOPE_NOT_READY"
+  },
+  "invariants": [
+    "series contains every calendar day in the selected inclusive range",
+    "COST preserves actual and estimated values as separate fields",
+    "REQUESTS counts every sent attempt including failures and retries",
+    "TOKENS adds input plus output and never adds reasoning twice",
+    "API CLI and LOCAL profiles remain distinct even when model_id is identical",
+    "unpriced CLI or local attempts are NOT_ASSESSED and never presented as zero-cost",
+    "cross-currency display is produced only from an AVAILABLE or CACHED dated FX snapshot",
+    "missing invalid or expired FX fails closed without inventing a converted total",
+    "legacy rows without complete job binding do not silently enter CURRENT_JOB"
+  ]
+}

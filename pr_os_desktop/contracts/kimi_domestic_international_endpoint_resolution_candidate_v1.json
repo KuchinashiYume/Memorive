@@ -1,0 +1,75 @@
+{
+  "schema_version": "KimiDomesticInternationalEndpointResolutionCandidate-v1",
+  "status": "SANDBOX_CANDIDATE_NOT_PRODUCTION_ENABLED",
+  "provider_scope": [
+    "KIMI_API_KEY",
+    "MOONSHOT_API_KEY"
+  ],
+  "problem": "Moonshot domestic and international credentials are independent and key text is not a reliable platform discriminator",
+  "settings_interaction": {
+    "visible_control": "single compact platform selector shown only for Kimi",
+    "label": "站点",
+    "options": [
+      {
+        "value": "AUTO",
+        "label": "自动识别",
+        "description": "验证时只访问 Kimi 官方模型目录，不发送用户内容"
+      },
+      {
+        "value": "CN",
+        "label": "国内",
+        "api_base_url": "https://api.moonshot.cn/v1"
+      },
+      {
+        "value": "AI",
+        "label": "国际",
+        "api_base_url": "https://api.moonshot.ai/v1"
+      }
+    ],
+    "advanced_endpoint_text_input": false
+  },
+  "resolution_policy": {
+    "explicit_platform_precedence": true,
+    "auto_probe_order": [
+      "CN",
+      "AI"
+    ],
+    "cross_platform_fallback_only_after": "API_AUTHENTICATION_REJECTED",
+    "network_rate_limit_or_invalid_catalog_behavior": "FAIL_CLOSED_WITHOUT_CROSS_PLATFORM_PROBE",
+    "validation_endpoint_kind": "MODEL_CATALOG",
+    "external_model_calls": 0,
+    "exam_payload_included": false,
+    "answer_key_included": false,
+    "prompt_send_requires_resolution_status": "RESOLVED"
+  },
+  "cache_policy": {
+    "persist": [
+      "credential_ref",
+      "credential_revision",
+      "platform",
+      "api_base_url",
+      "requested_model",
+      "catalog_receipt_sha256"
+    ],
+    "forbid": [
+      "secret_value",
+      "secret_prefix",
+      "secret_hash"
+    ],
+    "invalidate_on": [
+      "credential replacement",
+      "credential revocation",
+      "provider change",
+      "model change",
+      "platform selection change"
+    ]
+  },
+  "failure_semantics": {
+    "both_platforms_authentication_rejected": "NOT_ASSESSED_CREDENTIAL_OR_PLATFORM_MISMATCH",
+    "network_or_rate_limit": "NOT_ASSESSED_CONNECTIVITY",
+    "model_not_listed_after_authenticated_catalog": "NOT_ASSESSED_MODEL_UNAVAILABLE",
+    "never_model_fail_from_endpoint_resolution": true
+  },
+  "implementation_asset": "construction/attempt001/tools/kimi_endpoint_resolution.py",
+  "test_asset": "construction/attempt001/tests/test_kimi_endpoint_resolution.py"
+}

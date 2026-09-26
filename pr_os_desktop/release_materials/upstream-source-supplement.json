@@ -1,0 +1,75 @@
+{
+  "records": [
+    {
+      "name": "flatbuffers",
+      "version": "25.12.19",
+      "repository": "https://github.com/google/flatbuffers",
+      "commit": "7e163021e59cca4f8e1e35a7c828b5c6b7915953",
+      "ref": "v25.12.19",
+      "license_file": "flatbuffers/LICENSE",
+      "license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "license_url": "https://raw.githubusercontent.com/google/flatbuffers/7e163021e59cca4f8e1e35a7c828b5c6b7915953/LICENSE",
+      "source_file": "flatbuffers-7e163021e59cca4f8e1e35a7c828b5c6b7915953.tar.gz",
+      "source_sha256": "4236c5d22309abeac2384d3800febcc8d60423e8cb2f573abfa8f798352c4536",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "magika",
+      "version": "0.6.3",
+      "repository": "https://github.com/google/magika",
+      "commit": "a04562a9bb5d52c809a4424911ca8d07c0265767",
+      "ref": "python-v0.6.3",
+      "license_url": "https://raw.githubusercontent.com/google/magika/a04562a9bb5d52c809a4424911ca8d07c0265767/LICENSE",
+      "license_file": "magika/LICENSE",
+      "license_sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "markitdown",
+      "version": "0.1.6",
+      "repository": "https://github.com/microsoft/markitdown",
+      "commit": "e144e0a2be95b34df17433bac904e635f2c5e551",
+      "ref": "v0.1.6",
+      "license_url": "https://raw.githubusercontent.com/microsoft/markitdown/e144e0a2be95b34df17433bac904e635f2c5e551/LICENSE",
+      "license_file": "markitdown/LICENSE",
+      "license_sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    },
+    {
+      "name": "proxy-tools",
+      "version": "0.1.0",
+      "repository": "https://github.com/jtushman/proxy_tools",
+      "commit": "db43f1e35d4f90a65c5a4d56d9e9af88212ec6e6",
+      "ref": "HEAD; no version tags",
+      "license_file": "proxy-tools/LICENSE.txt",
+      "license_sha256": "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4",
+      "license_url": "https://raw.githubusercontent.com/jtushman/proxy_tools/db43f1e35d4f90a65c5a4d56d9e9af88212ec6e6/LICENSE.txt",
+      "source_file": "proxy-tools-db43f1e35d4f90a65c5a4d56d9e9af88212ec6e6.tar.gz",
+      "source_sha256": "b4d1d008932b2bdafa8c3c83a3d8e34e8a8940351ebcbb219741cf3c4871ab76",
+      "version_binding": "RUNTIME_PYTHON_MATCH",
+      "sdist_python_match": {
+        "proxy_tools/__init__.py": true
+      }
+    },
+    {
+      "name": "pymupdf-layout",
+      "version": "1.28.2",
+      "repository": "https://github.com/ArtifexSoftware/pymupdf_layout",
+      "commit": "b6e83e8b55bf861c45e259762483f6863688ed16",
+      "ref": "1.28.2",
+      "license_url": "https://raw.githubusercontent.com/ArtifexSoftware/pymupdf_layout/b6e83e8b55bf861c45e259762483f6863688ed16/LICENSE",
+      "license_file": "pymupdf-layout/LICENSE",
+      "license_sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "source_url": "https://codeload.github.com/ArtifexSoftware/pymupdf_layout/tar.gz/b6e83e8b55bf861c45e259762483f6863688ed16",
+      "source_file": "pymupdf-layout-b6e83e8b55bf861c45e259762483f6863688ed16.tar.gz",
+      "source_sha256": "7f9bede6d6a13c3c9f4e44e6c6e6b6a6b669746acc11b9dca0ed0121489ce2eb",
+      "source_build_files": [
+        "README.md",
+        "pyproject.toml",
+        "setup.py"
+      ],
+      "version_binding": "UPSTREAM_VERSION_TAG"
+    }
+  ],
+  "archive_execution": false
+}

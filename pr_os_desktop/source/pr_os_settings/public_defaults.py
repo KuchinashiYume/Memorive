@@ -1,0 +1,5 @@
+"""General capability defaults; contains no personal state or exam results."""
+import json
+
+def capabilities():
+    return json.loads('{"schema_version":"CapabilityStateProjection-v1","revision":"p08-desktop-local-v1","capabilities":[{"capability_id":"model.analysis_primary","available":true,"enabled":false,"eligible":false,"blocked":true,"reason":"ROUTE_DISABLED_BY_CURRENT_AUTHORITY"},{"capability_id":"model.card_distillation","available":true,"enabled":false,"eligible":false,"blocked":true,"reason":"ROUTE_DISABLED_BY_CURRENT_AUTHORITY"},{"capability_id":"provider.external_connectivity","available":false,"enabled":false,"eligible":false,"blocked":true,"reason":"T04_EXTERNAL_PROVIDER_CALLS_FORBIDDEN"},{"capability_id":"credential.reference_store","available":true,"enabled":true,"eligible":true,"blocked":false,"reason":"WINDOWS_CREDENTIAL_MANAGER_REFERENCE_ONLY"},{"capability_id":"settings.atomic_persistence","available":true,"enabled":true,"eligible":true,"blocked":false,"reason":"LOCAL_PROFILE_ATOMIC_STORE"}]}')

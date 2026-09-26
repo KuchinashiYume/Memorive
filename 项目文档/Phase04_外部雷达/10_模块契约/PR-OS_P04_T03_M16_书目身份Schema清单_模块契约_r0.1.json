@@ -1,0 +1,16 @@
+{
+  "schema_version": "p04.t03.schema-manifest.0.1",
+  "contract_revision": "r0.1",
+  "schemas": [
+    {"object_type": "BibliographicIdentity", "file": "PR-OS_P04_T03_M16_BibliographicIdentity_模块契约_r0.1.schema.json"},
+    {"object_type": "Manifestation", "file": "PR-OS_P04_T03_M16_Manifestation_模块契约_r0.1.schema.json"},
+    {"object_type": "WorkCluster", "file": "PR-OS_P04_T03_M16_WorkCluster_模块契约_r0.1.schema.json"},
+    {"object_type": "IdentityConflict", "file": "PR-OS_P04_T03_M16_IdentityConflict_模块契约_r0.1.schema.json"},
+    {"object_type": "IdentityReviewQueueItem", "file": "PR-OS_P04_T03_M16_IdentityReviewQueueItem_模块契约_r0.1.schema.json"},
+    {"object_type": "CandidateRecordIdentityProjection", "file": "PR-OS_P04_T03_M16_CandidateRecordIdentityProjection_模块契约_r0.1.schema.json"}
+  ],
+  "hash_semantics": "T02_CANONICAL_JSON_SHA256_UPPERCASE_HEX_FOR_OBJECT_CONTENT_HASH",
+  "additional_properties_policy": "REJECT_UNKNOWN_FIELDS",
+  "external_calls": 0,
+  "formal_writes": 0
+}

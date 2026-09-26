@@ -1,0 +1,15 @@
+{
+  "schema_version": "pr-os.p08.t07.message-identity-dedupe-order-rules.v1",
+  "dedupe_identity_fields": ["job_id", "run_id", "node_id", "event_type", "root_cause", "report_period"],
+  "dedupe_hash": "SHA-256 over canonical UTF-8 JSON",
+  "same_event_replay": "ignore exact sequence and fingerprint duplicate",
+  "same_root_new_occurrence": "update original message, last_seen_at and occurrence_count",
+  "same_sequence_different_fingerprint": "fail closed",
+  "severity_upgrade": "update original card; RED is more severe than YELLOW, GREEN and BLUE",
+  "new_run_after_archive": "new run_id creates a new dedupe identity",
+  "ordinary_event_suppression": ["NODE_STARTED", "NODE_COMPLETED", "PROGRESS_UPDATED", "RETRY_SCHEDULED", "AUTO_RECOVERED", "TRANSIENT_DISCONNECT"],
+  "current_sort": ["severity RED/YELLOW/GREEN/BLUE", "last_seen_at descending", "message_id ascending"],
+  "star_changes_sort": false,
+  "fuzzy_identity_match": false,
+  "delete_on_duplicate": false
+}

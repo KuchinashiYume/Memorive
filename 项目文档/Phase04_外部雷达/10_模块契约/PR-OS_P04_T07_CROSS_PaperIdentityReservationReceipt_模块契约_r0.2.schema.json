@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pros:p04:t07:paper-identity-reservation-receipt:r0.2",
+  "title": "PR-OS P04/T07 Paper Identity Reservation Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "fixture_id",
+    "fixture_authority",
+    "reservation_status",
+    "candidate_id",
+    "work_cluster_id",
+    "manifestation_id",
+    "paper_id",
+    "surname",
+    "year",
+    "explicit_suffix",
+    "folder_key",
+    "first_approval_receipt_hash",
+    "rights_receipt_hash",
+    "candidate_registry_before_hash",
+    "candidate_registry_after_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.2"},
+    "fixture_id": {"type": "string", "minLength": 1},
+    "fixture_authority": {"const": "PR_OS_SELF_AUTHORED_PUBLIC_SAFE_SYNTHETIC"},
+    "reservation_status": {"const": "RESERVED_CANDIDATE"},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "work_cluster_id": {"type": "string", "minLength": 1},
+    "manifestation_id": {"type": "string", "minLength": 1},
+    "paper_id": {
+      "description": "Must equal the current M01 make_paper_id(surname, year, explicit_suffix) return value.",
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z'-]*[12][0-9]{3}[ab]?$",
+      "not": {"const": "RESERVED_CANDIDATE"}
+    },
+    "surname": {"type": "string", "pattern": "^[A-Za-z][A-Za-z'-]*$"},
+    "year": {"type": "integer", "minimum": 1000, "maximum": 2999},
+    "explicit_suffix": {"type": "string", "enum": ["", "a", "b"]},
+    "folder_key": {"type": "string", "minLength": 1},
+    "first_approval_receipt_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "rights_receipt_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "candidate_registry_before_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "candidate_registry_after_hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"}
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p07:t07:support-bundle-preview:v1",
+  "title": "PR-OS Support Bundle Preview v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "contract_revision",
+    "scope",
+    "redaction_profile",
+    "generated_at",
+    "members",
+    "projections",
+    "redaction_report",
+    "forbidden_scan_count",
+    "local_only",
+    "upload_performed",
+    "bundle_fingerprint"
+  ],
+  "properties": {
+    "schema_version": {"const": "SupportBundlePreview-v1"},
+    "contract_revision": {"const": "1.0"},
+    "scope": {"type": "string", "minLength": 1},
+    "redaction_profile": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "sha256", "bytes"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "bytes": {"type": "integer", "minimum": 0}
+        },
+        "additionalProperties": false
+      }
+    },
+    "projections": {"type": "object"},
+    "redaction_report": {
+      "type": "object",
+      "required": ["redacted_keys", "upload_authorized"],
+      "properties": {
+        "redacted_keys": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "upload_authorized": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "forbidden_scan_count": {"const": 0},
+    "local_only": {"const": true},
+    "upload_performed": {"const": false},
+    "bundle_fingerprint": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+  },
+  "additionalProperties": true
+}

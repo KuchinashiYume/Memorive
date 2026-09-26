@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t09:integrated-result:0.1",
+  "title": "P04 T09 IntegratedResult r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "runner_version", "renderer_version", "run_kind", "run_id",
+    "lifecycle_status", "verification_result", "acceptance_verdict",
+    "input_manifest_sha256", "candidate_pool", "recommendations", "hard_checks",
+    "assertion_evidence", "side_effects", "formalization_or_activation_performed",
+    "rendered_markdown_sha256", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t09.integrated-result.0.1"},
+    "runner_version": {"const": "p04.t09.cross-acceptance-runner.0.2"},
+    "renderer_version": {"type": "string", "minLength": 1},
+    "run_kind": {"enum": ["A0_SYNTHETIC", "SHADOW_B_FROZEN_A1"]},
+    "run_id": {"type": "string", "minLength": 1},
+    "lifecycle_status": {"const": "completed"},
+    "verification_result": {"enum": ["PASS", "FAIL"]},
+    "acceptance_verdict": {"const": "NOT_ASSESSED"},
+    "input_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "candidate_pool": {
+      "type": "object", "additionalProperties": false,
+      "required": ["observations", "unique_work_records", "eligible_records"],
+      "properties": {
+        "observations": {"type": "integer", "minimum": 0},
+        "unique_work_records": {"type": "integer", "minimum": 0},
+        "eligible_records": {"type": "integer", "minimum": 0}
+      }
+    },
+    "recommendations": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "object"}},
+    "hard_checks": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "ASSET_EXACT_SET_PASS", "FROZEN_FORMAL_CODE_ONLY_PASS",
+        "P03_SNAPSHOT_AUTHORITY_PASS", "SOURCE_REPLAY_PASS", "IDENTITY_DEDUP_PASS",
+        "LOCAL_RELATION_NOVELTY_PASS", "TWO_RECOMMENDATIONS_EXACT_PASS",
+        "ANTI_POLARIZATION_PASS", "DIRECTION_SCOPED_SUPPRESSION_PASS",
+        "WEAK_SIGNAL_BOUNDED_PASS", "RESURFACE_PASS", "TWO_GATE_DRY_RUN_PASS",
+        "FAILURE_RECOVERY_PASS", "PROTECTED_ROOTS_ZERO_DIFF_PASS",
+        "REPLAY_DETERMINISM_PASS", "EXTERNAL_ASSISTANCE_ZERO_PASS"
+      ],
+      "properties": {
+        "ASSET_EXACT_SET_PASS": {"type": "boolean"},
+        "FROZEN_FORMAL_CODE_ONLY_PASS": {"type": "boolean"},
+        "P03_SNAPSHOT_AUTHORITY_PASS": {"type": "boolean"},
+        "SOURCE_REPLAY_PASS": {"type": "boolean"},
+        "IDENTITY_DEDUP_PASS": {"type": "boolean"},
+        "LOCAL_RELATION_NOVELTY_PASS": {"type": "boolean"},
+        "TWO_RECOMMENDATIONS_EXACT_PASS": {"type": "boolean"},
+        "ANTI_POLARIZATION_PASS": {"type": "boolean"},
+        "DIRECTION_SCOPED_SUPPRESSION_PASS": {"type": "boolean"},
+        "WEAK_SIGNAL_BOUNDED_PASS": {"type": "boolean"},
+        "RESURFACE_PASS": {"type": "boolean"},
+        "TWO_GATE_DRY_RUN_PASS": {"type": "boolean"},
+        "FAILURE_RECOVERY_PASS": {"type": "boolean"},
+        "PROTECTED_ROOTS_ZERO_DIFF_PASS": {"type": "boolean"},
+        "REPLAY_DETERMINISM_PASS": {"type": "boolean"},
+        "EXTERNAL_ASSISTANCE_ZERO_PASS": {"type": "boolean"}
+      }
+    },
+    "assertion_evidence": {"type": "object"},
+    "side_effects": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "network_calls", "model_calls", "browser_calls", "agent_calls", "ocr_calls",
+        "embedding_calls", "reranker_calls", "manual_interventions", "production_writes"
+      ],
+      "properties": {
+        "network_calls": {"const": 0}, "model_calls": {"const": 0},
+        "browser_calls": {"const": 0}, "agent_calls": {"const": 0},
+        "ocr_calls": {"const": 0}, "embedding_calls": {"const": 0},
+        "reranker_calls": {"const": 0}, "manual_interventions": {"const": 0},
+        "production_writes": {"const": 0}
+      }
+    },
+    "formalization_or_activation_performed": {"const": false},
+    "rendered_markdown_sha256": {"$ref": "#/$defs/sha256"},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "fault_count": 8,
+  "faults": [
+    "duplicate",
+    "out_of_order",
+    "gap",
+    "clock_skew",
+    "large_stream",
+    "corrupt_event",
+    "missing_locator",
+    "export_write_failure"
+  ],
+  "restricted_effects_required": 0,
+  "schema_version": "P08T10WorkLogFaultDenominator-v1",
+  "status": "PASS"
+}

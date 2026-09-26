@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06/t09/review-job-event-v1",
+  "title": "P06 T09 ReviewJobEvent v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "event_id", "job_id", "event_ordinal", "event_type", "occurred_at",
+    "actor_kind", "actor_ref", "expected_previous_head_hash", "attempt_id",
+    "predecessor_attempt_ref", "reason_code", "evidence_refs", "payload_hash", "dedupe_key",
+    "request_fingerprint", "transition_guard", "review_verdict", "event_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "P06T09ReviewJobEvent-v1"},
+    "event_id": {"type": "string", "pattern": "^RJE-[0-9A-F]{32}$"},
+    "job_id": {"type": "string", "minLength": 1},
+    "event_ordinal": {"type": "integer", "minimum": 1},
+    "event_type": {"enum": ["JOB_CREATED", "RUN_CLAIMED", "PAUSE_REQUESTED", "CANCEL_REQUESTED", "RUN_PAUSED", "RUN_RESUMED", "RUN_REQUEUED", "RUN_BLOCKED", "RUN_COMPLETED", "RUN_FAILED", "RUN_ABORTED"]},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "actor_kind": {"enum": ["SYSTEM", "OPERATOR", "WORKER", "RECOVERY"]},
+    "actor_ref": {"type": "string", "minLength": 1},
+    "expected_previous_head_hash": {"oneOf": [{"const": "GENESIS"}, {"$ref": "#/$defs/sha256"}]},
+    "attempt_id": {"type": ["string", "null"], "minLength": 1},
+    "predecessor_attempt_ref": {"type": ["string", "null"], "minLength": 1},
+    "reason_code": {"type": "string", "minLength": 1},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "payload_hash": {"$ref": "#/$defs/sha256"},
+    "dedupe_key": {"type": "string", "minLength": 1},
+    "request_fingerprint": {"$ref": "#/$defs/sha256"},
+    "transition_guard": {"type": ["string", "null"], "minLength": 1},
+    "review_verdict": {"type": ["string", "null"], "enum": ["PASS", "PASS_WITH_OMISSIONS", "BLOCKED", "NOT_ASSESSED", null]},
+    "event_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}}
+}

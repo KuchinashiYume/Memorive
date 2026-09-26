@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06/t09/analysis-review-receipt-v1",
+  "title": "P06 T09 AnalysisReviewReceipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "job_id", "review_job_key", "job_state", "review_verdict",
+    "source_artifact_ref", "source_artifact_sha256", "final_artifact_ref", "final_artifact_sha256",
+    "immutable_predecessor_sha256", "attempt_refs", "finding_refs", "ownership_snapshot_ref",
+    "route_receipt_ref", "model_qualification_ref", "accounting_receipt_ref", "cost_cny",
+    "external_calls", "m8_mutation_count", "card_mutation_count",
+    "production_analysis_mutation_count", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "P06T09AnalysisReviewReceipt-v1"},
+    "job_id": {"type": "string", "minLength": 1},
+    "review_job_key": {"$ref": "#/$defs/sha256"},
+    "job_state": {"enum": ["BLOCKED", "COMPLETED", "FAILED", "ABORTED"]},
+    "review_verdict": {"enum": ["PASS", "PASS_WITH_OMISSIONS", "BLOCKED", "NOT_ASSESSED"]},
+    "source_artifact_ref": {"type": "string", "minLength": 1},
+    "source_artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "final_artifact_ref": {"type": "string", "minLength": 1},
+    "final_artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "immutable_predecessor_sha256": {"$ref": "#/$defs/sha256"},
+    "attempt_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "finding_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "ownership_snapshot_ref": {"type": "string", "minLength": 1},
+    "route_receipt_ref": {"type": "string", "minLength": 1},
+    "model_qualification_ref": {"type": "string", "minLength": 1},
+    "accounting_receipt_ref": {"type": "string", "minLength": 1},
+    "cost_cny": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+    "external_calls": {"type": "integer", "minimum": 0},
+    "m8_mutation_count": {"const": 0},
+    "card_mutation_count": {"const": 0},
+    "production_analysis_mutation_count": {"const": 0},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}}
+}

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p06:t07:page-subject-input:v1",
+  "title": "P06 T07 PageSubjectInput v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "pack_id", "attempt_id", "attempt_ordinal", "page_id",
+    "source_document_id", "source_page_number", "source_file_sha256",
+    "render_recipe_sha256", "source_image_sha256", "image_ref", "image",
+    "data_ownership", "rights_custody_verdict", "provider_visibility",
+    "page_family_primary", "modifiers", "semantic_task", "channel_wrapper",
+    "output_schema", "candidate", "visibility", "retry_count", "timeout_seconds",
+    "token_ceiling", "cash_cost_ceiling", "subscription_unit_ceiling",
+    "credential_env_name", "authorization_ref", "external_request_authorized"
+  ],
+  "properties": {
+    "schema_version": {"const": "P06T07PageSubjectInput-v1"},
+    "pack_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "attempt_ordinal": {"const": 1},
+    "page_id": {"type": "string", "minLength": 1},
+    "source_document_id": {"type": "string", "minLength": 1},
+    "source_page_number": {"type": "integer", "minimum": 1},
+    "source_file_sha256": {"$ref": "#/$defs/sha256"},
+    "render_recipe_sha256": {"$ref": "#/$defs/sha256"},
+    "source_image_sha256": {"$ref": "#/$defs/sha256"},
+    "image_ref": {"type": "string", "minLength": 1},
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mime_type", "width_px", "height_px", "dpi", "color_mode", "crop_box"],
+      "properties": {
+        "mime_type": {"enum": ["image/png", "image/jpeg"]},
+        "width_px": {"type": "integer", "minimum": 1},
+        "height_px": {"type": "integer", "minimum": 1},
+        "dpi": {"type": "integer", "minimum": 36, "maximum": 1200},
+        "color_mode": {"enum": ["RGB", "RGBA", "L", "CMYK"]},
+        "crop_box": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}}
+          ]
+        }
+      }
+    },
+    "data_ownership": {"enum": ["self", "public-safe", "entrusted", "unknown"]},
+    "rights_custody_verdict": {"enum": ["ALLOWED_SELF", "ALLOWED_PUBLIC_SAFE", "BLOCKED"]},
+    "provider_visibility": {"enum": ["SINGLE_PAGE_IMAGE_ONLY", "BLOCKED"]},
+    "page_family_primary": {
+      "enum": ["digital", "clean_scan", "degraded_scan", "multicolumn", "role_dense", "formula", "table_numeric", "chart_mixed"]
+    },
+    "modifiers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["blur", "skew", "low_contrast", "dense_symbols", "small_font", "rotated_region"]}
+    },
+    "semantic_task": {"$ref": "#/$defs/hashed_ref"},
+    "channel_wrapper": {"$ref": "#/$defs/hashed_ref"},
+    "output_schema": {"$ref": "#/$defs/hashed_ref"},
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_key", "channel_kind", "provider", "profile_id", "requested_model", "route", "region", "egress"],
+      "properties": {
+        "candidate_key": {"enum": ["deepseek_ocr_specialist_baseline", "claude_api_visual", "openai_api_visual", "openai_subscription_cli_visual", "local_visual_adapter"]},
+        "channel_kind": {"enum": ["usage_based_api", "subscription_cli", "local_resource"]},
+        "provider": {"type": "string", "minLength": 1},
+        "profile_id": {"type": ["string", "null"], "minLength": 1},
+        "requested_model": {"type": ["string", "null"], "minLength": 1},
+        "route": {"type": ["string", "null"], "minLength": 1},
+        "region": {"type": ["string", "null"], "minLength": 1},
+        "egress": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "visibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gold_visible", "other_candidate_outputs_visible", "hidden_text_visible", "whole_pdf_visible"],
+      "properties": {
+        "gold_visible": {"const": false},
+        "other_candidate_outputs_visible": {"const": false},
+        "hidden_text_visible": {"const": false},
+        "whole_pdf_visible": {"const": false}
+      }
+    },
+    "retry_count": {"const": 0},
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+    "token_ceiling": {"type": ["integer", "null"], "minimum": 0},
+    "cash_cost_ceiling": {"type": ["string", "null"], "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+    "subscription_unit_ceiling": {"type": ["integer", "null"], "minimum": 0},
+    "credential_env_name": {"type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]{2,127}$"},
+    "authorization_ref": {"type": ["string", "null"], "minLength": 1},
+    "external_request_authorized": {"type": "boolean"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "hashed_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "sha256"],
+      "properties": {
+        "ref": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

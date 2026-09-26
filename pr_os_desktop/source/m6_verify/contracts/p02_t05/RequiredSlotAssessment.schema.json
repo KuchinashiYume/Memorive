@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p02:t05:required-slot-assessment:v2",
+  "type": "object", "additionalProperties": false,
+  "required": [
+    "artifact_id", "content_hash", "artifact_type", "schema_version",
+    "sample_id", "paper_id", "template_contract_ref", "absence_check_policy_ref",
+    "card_artifact_ref", "source_artifact_ref", "assessment_build_status",
+    "block_reason_codes", "slots", "extraction_coverage", "producer_module",
+    "producer_version", "computed_at"
+  ],
+  "properties": {
+    "artifact_id": {"$ref": "#/$defs/artifactId"},
+    "content_hash": {"$ref": "#/$defs/sha256"},
+    "artifact_type": {"const": "required_slot_assessment"},
+    "schema_version": {"const": "required-slot-assessment-v2"},
+    "sample_id": {"type": "string", "minLength": 1},
+    "paper_id": {"type": "string", "minLength": 1},
+    "template_contract_ref": {"$ref": "#/$defs/fileRef"},
+    "absence_check_policy_ref": {"$ref": "#/$defs/fileRef"},
+    "card_artifact_ref": {"$ref": "#/$defs/artifactRef"},
+    "source_artifact_ref": {"$ref": "#/$defs/artifactRef"},
+    "assessment_build_status": {"enum": ["buildable", "blocked"]},
+    "block_reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "slots": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/slot"}
+    },
+    "extraction_coverage": {"enum": ["sufficient", "partial", "suspicious_gap", "not_assessed"]},
+    "producer_module": {"const": "M2"},
+    "producer_version": {"const": "p02-t05-a3"},
+    "computed_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "artifactId": {"type": "string", "pattern": "^art_[0-9a-f]{32}$"},
+    "artifactRef": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_id", "content_hash"],
+      "properties": {"artifact_id": {"$ref": "#/$defs/artifactId"}, "content_hash": {"$ref": "#/$defs/sha256"}}
+    },
+    "fileRef": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "version", "sha256"],
+      "properties": {"id": {"type": "string", "minLength": 1}, "version": {"const": "r1.0"}, "sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "anchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["paper_id", "chunk_id", "quote", "source_content_hash", "policy_version"],
+      "properties": {
+        "paper_id": {"type": "string", "minLength": 1},
+        "chunk_id": {"type": "string", "minLength": 1},
+        "quote": {"type": "string", "minLength": 1},
+        "source_content_hash": {"$ref": "#/$defs/sha256"},
+        "policy_version": {"const": "p02-t05-anchor-normalization-r0.4"}
+      }
+    },
+    "slot": {
+      "type": "object", "additionalProperties": false,
+      "required": ["slot_id", "slot_path", "state", "source_anchor_refs", "absence_check_ref", "not_applicable_rule_ref", "reason_codes"],
+      "properties": {
+        "slot_id": {"type": "string", "minLength": 1},
+        "slot_path": {"type": "string", "pattern": "^/"},
+        "state": {"enum": ["present", "absent_in_source", "not_applicable", "extraction_gap", "not_assessed"]},
+        "source_anchor_refs": {"type": "array", "items": {"$ref": "#/$defs/anchor"}},
+        "absence_check_ref": {"oneOf": [{"$ref": "#/$defs/artifactRef"}, {"type": "null"}]},
+        "not_applicable_rule_ref": {"type": ["string", "null"]},
+        "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

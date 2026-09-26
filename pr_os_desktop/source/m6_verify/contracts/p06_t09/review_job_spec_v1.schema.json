@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06/t09/review-job-spec-v1",
+  "title": "P06 T09 ReviewJobSpec v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "job_id", "review_job_key", "analysis_subject_key",
+    "analysis_artifact_ref", "analysis_artifact_sha256", "trigger_decision_ref", "policy_ref",
+    "review_contract_sha256", "stage_topology_sha256", "ownership_policy_sha256",
+    "ownership_snapshot_ref", "ownership_snapshot_sha256", "ownership_value",
+    "producer_role_ref", "reviewer_role_ref", "max_dispatch_attempts", "provider_retry_ceiling",
+    "stage_semantic_call_ceilings", "workspace_ref", "input_ref", "output_ref",
+    "predecessor_job_ref", "default_activation", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "P06T09ReviewJobSpec-v1"},
+    "job_id": {"type": "string", "pattern": "^RJOB-[0-9A-F]{32}$"},
+    "review_job_key": {"$ref": "#/$defs/sha256"},
+    "analysis_subject_key": {"$ref": "#/$defs/sha256"},
+    "analysis_artifact_ref": {"type": "string", "minLength": 1},
+    "analysis_artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "trigger_decision_ref": {"type": "string", "minLength": 1},
+    "policy_ref": {"type": "string", "minLength": 1},
+    "review_contract_sha256": {"$ref": "#/$defs/sha256"},
+    "stage_topology_sha256": {"$ref": "#/$defs/sha256"},
+    "ownership_policy_sha256": {"$ref": "#/$defs/sha256"},
+    "ownership_snapshot_ref": {"type": "string", "minLength": 1},
+    "ownership_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "ownership_value": {"enum": ["self", "entrusted", "unknown", "mixed"]},
+    "producer_role_ref": {"type": "string", "minLength": 1},
+    "reviewer_role_ref": {"type": "string", "minLength": 1},
+    "max_dispatch_attempts": {"const": 2},
+    "provider_retry_ceiling": {"const": 0},
+    "stage_semantic_call_ceilings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["FULL_REVIEW", "TARGETED_REPAIR", "DELTA_REVIEW"],
+      "properties": {"FULL_REVIEW": {"const": 1}, "TARGETED_REPAIR": {"const": 1}, "DELTA_REVIEW": {"const": 1}}
+    },
+    "workspace_ref": {"type": "string", "minLength": 1},
+    "input_ref": {"type": "string", "minLength": 1},
+    "output_ref": {"type": "string", "minLength": 1},
+    "predecessor_job_ref": {"type": ["string", "null"], "minLength": 1},
+    "default_activation": {"const": "DISABLED"},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}}
+}

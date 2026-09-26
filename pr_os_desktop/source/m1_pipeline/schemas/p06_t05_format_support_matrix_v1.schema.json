@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06_t05_format_support_matrix_v1.schema.json",
+  "title": "P06 T05 FormatSupportMatrix v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "matrix_id", "source_commit", "admitted_set_id", "runtime_profile_id", "formats"],
+  "properties": {
+    "schema_version": {"const": "P06T05FormatSupportMatrix-v1"},
+    "matrix_id": {"type": "string", "minLength": 1},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "admitted_set_id": {"type": "string", "minLength": 1},
+    "runtime_profile_id": {"type": "string", "minLength": 1},
+    "formats": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["format_key", "extensions", "family", "anchor_kind", "converter_profile_id", "engine", "engine_version", "config_hash", "format_verdict", "reason_codes", "evidence_refs"],
+        "properties": {
+          "format_key": {"enum": ["pdf", "md", "txt", "csv", "html", "docx", "pptx", "xlsx", "doc", "ppt", "xls", "jpeg", "png", "tiff"]},
+          "extensions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "family": {"type": "string"},
+          "anchor_kind": {"enum": ["page", "slide", "sheet", "block", "line", "row", "frame"]},
+          "converter_profile_id": {"type": "string"},
+          "engine": {"type": "string"},
+          "engine_version": {"type": "string"},
+          "config_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "format_verdict": {"enum": ["supported", "degraded", "unsupported"]},
+          "reason_codes": {"type": "array", "items": {"type": "string"}},
+          "evidence_refs": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "p04.t02.error-semantics.0.1",
+  "single_writer": "P04/T02/M16",
+  "errors": [
+    {"code": "BLOCKED_EXTERNAL_REQUEST_NOT_AUTHORIZED", "class": "AUTHORIZATION", "retryable": false, "new_request_authorization_required": true, "coverage_impact": "NONE"},
+    {"code": "BLOCKED_NON_MODEL_CALL_BINDING_COMPATIBILITY_UNRESOLVED", "class": "EVIDENCE", "retryable": false, "central_successor_required": true, "coverage_impact": "NONE"},
+    {"code": "BLOCKED_CURRENT_SOURCE_TERMS_NOT_CHECKED", "class": "RIGHTS", "retryable": false, "official_source_check_required": true, "coverage_impact": "NONE"},
+    {"code": "BLOCKED_ROUTE_IDENTITY_NOT_FROZEN", "class": "ROUTE", "retryable": false, "route_manifest_required": true, "coverage_impact": "NONE"},
+    {"code": "NETWORK_DISABLED_BY_CONTRACT", "class": "RED_LINE", "retryable": false, "coverage_impact": "NONE"},
+    {"code": "CONNECTOR_NOT_CONFIGURED", "class": "CAPABILITY", "retryable": false, "coverage_impact": "NONE"},
+    {"code": "INVALID_CURSOR", "class": "INPUT", "retryable": false, "coverage_impact": "TOTAL"},
+    {"code": "SOURCE_SCHEMA_DRIFT", "class": "SOURCE", "retryable": false, "coverage_impact": "TOTAL"},
+    {"code": "SOURCE_RATE_LIMITED", "class": "SOURCE", "retryable": true, "coverage_impact": "PARTIAL"},
+    {"code": "SOURCE_TRANSIENT_FAILURE", "class": "SOURCE", "retryable": true, "coverage_impact": "PARTIAL"},
+    {"code": "SOURCE_PERMANENT_FAILURE", "class": "SOURCE", "retryable": false, "coverage_impact": "PARTIAL"},
+    {"code": "SOURCE_IDENTIFIER_CONFLICT", "class": "IDENTITY", "retryable": false, "coverage_impact": "PARTIAL", "handoff": "P04/T03/M16"},
+    {"code": "SNAPSHOT_HASH_MISMATCH", "class": "EVIDENCE", "retryable": false, "coverage_impact": "TOTAL"},
+    {"code": "RECEIPT_MISSING_BEFORE_SEND", "class": "EVIDENCE", "retryable": false, "coverage_impact": "NONE"},
+    {"code": "DUPLICATE_REQUEST_ID", "class": "IDENTITY", "retryable": false, "coverage_impact": "NONE"},
+    {"code": "FULLTEXT_MATERIALIZATION_FORBIDDEN", "class": "RED_LINE", "retryable": false, "coverage_impact": "NONE"},
+    {"code": "FORMAL_WRITE_FORBIDDEN", "class": "RED_LINE", "retryable": false, "coverage_impact": "NONE"}
+  ]
+}

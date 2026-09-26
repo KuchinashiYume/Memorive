@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t02:source-observation:0.2",
+  "title": "P04 T02 Frozen Public Metadata SourceObservation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "object_id", "revision", "content_hash",
+    "producer", "single_writer", "consumers", "run_id", "source_connector",
+    "source_snapshot_id", "discovery_origin", "observed_at", "identifiers",
+    "bibliographic", "location_claims", "identity_status", "access_status",
+    "decision_status", "candidate_card_status", "promotion_status",
+    "source_evidence", "partial_fields", "errors"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t02.source-observation.0.2"},
+    "object_type": {"const": "SourceObservation"},
+    "object_id": {"type": "string", "pattern": "^source_observation_[a-f0-9]{24}$"},
+    "revision": {"const": 1},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "producer": {"const": "P04/T02/M16"},
+    "single_writer": {"const": "P04/T02/M16"},
+    "consumers": {"const": ["P04/T03/M16"]},
+    "run_id": {"type": "string", "minLength": 1},
+    "source_connector": {"enum": ["ARXIV", "CROSSREF"]},
+    "source_snapshot_id": {"type": "string", "pattern": "^snapshot_[a-f0-9]{24}$"},
+    "discovery_origin": {"const": "KEYWORD_SEARCH"},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "identifiers": {"type": "object"},
+    "bibliographic": {"type": "object"},
+    "location_claims": {"type": "array"},
+    "identity_status": {"enum": ["VERIFIED", "CONFLICT", "UNRESOLVED"]},
+    "access_status": {"const": "METADATA_ONLY"},
+    "decision_status": {"const": "PENDING"},
+    "candidate_card_status": {"const": "NOT_REQUESTED"},
+    "promotion_status": {"const": "NOT_ELIGIBLE"},
+    "source_evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["snapshot_sha256", "normalized_record_sha256", "fixture_classification", "network_used", "acquisition_request_id"],
+      "properties": {
+        "snapshot_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "normalized_record_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "fixture_classification": {"const": "FROZEN_PUBLIC_METADATA_A1"},
+        "network_used": {"const": false},
+        "acquisition_request_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "partial_fields": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "errors": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06/t09/review-trigger-decision-v1",
+  "title": "P06 T09 ReviewTriggerDecision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "subject_key", "policy_ref", "epoch_id", "eligibility_status",
+    "decision", "matched_rule_ids", "stratum_id", "sample_bucket", "rate_bps",
+    "review_job_key", "ownership_route_precheck", "reason_codes", "input_hashes", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "P06T09ReviewTriggerDecision-v1"},
+    "subject_key": {"$ref": "#/$defs/sha256"},
+    "policy_ref": {"type": "string", "minLength": 1},
+    "epoch_id": {"type": "string", "minLength": 1},
+    "eligibility_status": {"enum": ["ELIGIBLE", "INVALID"]},
+    "decision": {"enum": ["MUST_REVIEW", "SAMPLED_REVIEW", "NOT_SAMPLED", "POLICY_EXEMPT", "INVALID_EVENT"]},
+    "matched_rule_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "stratum_id": {"type": ["string", "null"], "minLength": 1},
+    "sample_bucket": {"type": ["integer", "null"], "minimum": 0, "maximum": 9999},
+    "rate_bps": {"type": ["integer", "null"], "minimum": 0, "maximum": 10000},
+    "review_job_key": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "ownership_route_precheck": {"enum": ["NOT_APPLICABLE", "SAFE_LOCAL_ROUTE_AVAILABLE", "BLOCKED_NO_SAFE_LOCAL_ROUTE", "BLOCKED_ROUTE_NOT_ACTIVATED"]},
+    "reason_codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "input_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}}
+}

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file:; script-src 'self'; style-src 'self'; img-src 'self' data: file:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>Memorive · Documentation</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand"><img class="brand-mark" src="assets/wink.svg" alt="" aria-hidden="true"><div><strong>Memorive</strong><small id="site-subtitle"></small></div></div>
+      <div class="top-actions">
+        <button id="open-nav" class="icon mobile-only" type="button" aria-label="Open navigation">☰</button>
+        <label class="language-label" for="language">Language</label>
+        <select id="language" aria-label="Language"><option value="zh-CN">简体中文</option><option value="en-US">English</option><option value="ja-JP">日本語</option></select>
+      </div>
+    </header>
+    <div class="workspace">
+      <aside class="left-panel" id="left-panel" aria-label="Articles">
+        <div class="nav-head">
+          <div class="document-switch" role="tablist" aria-label="Document type"><button id="tab-guide" type="button" role="tab" aria-selected="true"></button><button id="tab-design" type="button" role="tab" aria-selected="false"></button></div>
+          <label class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" autocomplete="off" aria-label="Search articles"><kbd>Ctrl K</kbd></label>
+        </div>
+        <div class="nav-caption" id="nav-caption"></div>
+        <nav id="article-nav"></nav>
+        <div class="nav-footer"><span class="status-dot"></span><span id="offline-status">Offline · local files</span></div>
+      </aside>
+      <main id="main" tabindex="-1">
+        <div class="article-toolbar">
+          <div class="breadcrumb"><span>Memorive</span><span aria-hidden="true">/</span><span id="breadcrumb-document"></span><span aria-hidden="true">/</span><span id="breadcrumb-article"></span></div>
+          <div class="article-actions">
+            <button id="smaller" class="icon" type="button" title="Smaller text" aria-label="Smaller text">A−</button>
+            <button id="larger" class="icon" type="button" title="Larger text" aria-label="Larger text">A+</button>
+            <button id="copy-link" class="icon" type="button" title="Copy link" aria-label="Copy link">↗</button>
+            <button id="print" class="icon" type="button" title="Print" aria-label="Print">⎙</button>
+          </div>
+        </div>
+        <article class="article" id="article"><div class="article-kicker" id="article-kicker"></div><h1 id="article-title"></h1><div class="article-source-note" id="source-note"></div><div id="feature-strip" class="feature-strip" hidden></div><div class="article-body" id="article-body"></div></article>
+        <div class="article-bottom"><button id="previous" type="button"></button><button id="next" type="button"></button></div>
+      </main>
+      <aside class="right-panel" aria-label="Article tools">
+        <div class="right-card"><div class="right-heading" id="toc-title"></div><nav id="on-page"></nav></div>
+        <div class="right-card"><div class="right-heading">Files</div><a id="pdf-link" class="file-link" download>PDF <span>↗</span></a><button id="download-md" class="file-link button-link" type="button"></button><button id="replace-md" class="file-link button-link" type="button"></button><button id="restore-md" class="file-link button-link" type="button"></button><input id="upload" type="file" accept=".md,text/markdown,text/plain" hidden></div>
+      </aside>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

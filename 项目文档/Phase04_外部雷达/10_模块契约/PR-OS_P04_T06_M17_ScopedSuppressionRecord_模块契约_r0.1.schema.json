@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t06:scoped-suppression-record:0.1",
+  "title": "P04 T06 ScopedSuppressionRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "record_id", "work_cluster_id", "direction_id",
+    "decision_revision", "direction_revision", "decision_event_id", "exposure_id",
+    "reason_code", "status", "cooldown_until", "fuzzy_propagation",
+    "field_id_propagation", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t06.scoped-suppression-record.0.1"},
+    "object_type": {"const": "ScopedSuppressionRecord"},
+    "record_id": {"type": "string", "pattern": "^SUPPRESSION:[a-f0-9]{24}$"},
+    "work_cluster_id": {"type": "string", "minLength": 1},
+    "direction_id": {"type": "string", "minLength": 1},
+    "decision_revision": {"type": "integer", "minimum": 1},
+    "direction_revision": {"type": "string", "minLength": 1},
+    "decision_event_id": {"type": "string", "pattern": "^EVENT:[a-f0-9]{24}$"},
+    "exposure_id": {"type": "string", "pattern": "^EXPOSURE:[a-f0-9]{24}$"},
+    "reason_code": {"const": "NOT_FOR_THIS_DIRECTION"},
+    "status": {"enum": ["ACTIVE", "RESTORED", "PENDING_DIRECTION_REMAP"]},
+    "cooldown_until": {"type": ["string", "null"], "format": "date-time"},
+    "fuzzy_propagation": {"const": false},
+    "field_id_propagation": {"const": false},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"}
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pr-os.p04.t08.card-promotion-intent.v1",
+  "title": "CardPromotionIntent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "promotion_id", "candidate_id", "card_revision", "paper_id",
+    "candidate_bundle_hash", "approval_receipt_hash", "preflight_hash",
+    "target_namespace", "target_prestate_hash", "write_set_hash", "expected_heads",
+    "writer", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "pr-os.p04.t08.card-promotion-intent.v1"},
+    "promotion_id": {"type": "string", "minLength": 1},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "card_revision": {"type": "string", "minLength": 1},
+    "paper_id": {"type": "string", "minLength": 1},
+    "candidate_bundle_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "approval_receipt_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "preflight_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "target_namespace": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+    "target_prestate_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "write_set_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "expected_heads": {
+      "type": "object", "additionalProperties": false,
+      "required": ["m8", "m13", "formal_index", "promotion_receipts"],
+      "properties": {
+        "m8": {"type": ["string", "null"]},
+        "m13": {"type": ["string", "null"]},
+        "formal_index": {"type": ["string", "null"]},
+        "promotion_receipts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "writer": {"const": "P04_T08.PROMOTION_COORDINATOR"},
+    "content_hash": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+  }
+}

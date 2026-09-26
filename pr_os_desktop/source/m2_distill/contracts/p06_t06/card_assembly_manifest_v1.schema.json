@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p06/t06/card_assembly_manifest_v1.schema.json",
+  "title": "P06 T06 CardAssemblyManifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "paper_id", "source_manifest_hash", "topology_hash",
+    "segment_completion_ledger_hash", "fact_merge_ledger_hash",
+    "field_candidate_hashes", "required_core_fields", "card_schema_sha256",
+    "prompt_revision", "profile_revision", "axes", "barrier_result",
+    "blocking_reasons", "card_candidate_visible", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p06-t06-card-assembly-manifest-v1"},
+    "paper_id": {"type": "string", "minLength": 1},
+    "source_manifest_hash": {"$ref": "#/$defs/hash"},
+    "topology_hash": {"$ref": "#/$defs/hash"},
+    "segment_completion_ledger_hash": {"$ref": "#/$defs/hash"},
+    "fact_merge_ledger_hash": {"$ref": "#/$defs/hash"},
+    "field_candidate_hashes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/hash"}},
+    "required_core_fields": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "card_schema_sha256": {"$ref": "#/$defs/hash"},
+    "prompt_revision": {"type": "string", "minLength": 1},
+    "profile_revision": {"type": "string", "minLength": 1},
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage", "conflict", "capacity"],
+      "properties": {
+        "coverage": {"enum": ["complete", "partial", "unresolved"]},
+        "conflict": {"enum": ["none", "resolved", "unresolved"]},
+        "capacity": {"enum": ["within_budget", "recovered_by_split", "capacity_blocked", "unresolved"]}
+      }
+    },
+    "barrier_result": {"enum": ["PASS", "BLOCK"]},
+    "blocking_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "card_candidate_visible": {"type": "boolean"},
+    "content_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[A-F0-9]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"barrier_result": {"const": "PASS"}}},
+      "then": {
+        "properties": {
+          "blocking_reasons": {"maxItems": 0},
+          "card_candidate_visible": {"const": true}
+        }
+      },
+      "else": {"properties": {"card_candidate_visible": {"const": false}}}
+    }
+  ]
+}

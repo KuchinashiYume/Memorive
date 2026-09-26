@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Memo 网页会话",
+  "version": "3.10.1",
+  "description": "录入常用 AI 官网当前可见的会话，或同步已配置的网站。",
+  "permissions": [
+    "activeTab",
+    "alarms",
+    "scripting",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://chat.deepseek.com/*",
+    "https://gemini.google.com/*",
+    "https://kimi.com/*",
+    "https://www.kimi.com/*",
+    "https://kimi.moonshot.cn/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "同步或录入到 Memo",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.deepseek.com/*",
+        "https://gemini.google.com/*",
+        "https://kimi.com/*",
+        "https://www.kimi.com/*",
+        "https://kimi.moonshot.cn/*"
+      ],
+      "js": [
+        "site_profiles.js",
+        "recording.js",
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}

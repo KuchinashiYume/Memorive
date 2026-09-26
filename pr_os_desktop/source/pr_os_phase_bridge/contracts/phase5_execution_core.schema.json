@@ -1,0 +1,1917 @@
+{
+  "$defs": {
+    "AdapterCapabilitySnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_manifest_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adapter_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "auth_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "capability_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "entitlement_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "image_support": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "install_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "json_schema_support": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model_identity_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "network_controls": {
+          "type": "array"
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "AdapterCapabilitySnapshot"
+        },
+        "observed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_modes": {
+          "type": "array"
+        },
+        "permission_modes": {
+          "type": "array"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "risk_flags": {
+          "type": "array"
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_controls": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "adapter_manifest_ref",
+        "adapter_version",
+        "observed_at",
+        "install_state",
+        "auth_state",
+        "entitlement_state",
+        "capability_state",
+        "model_identity_state",
+        "output_modes",
+        "permission_modes",
+        "json_schema_support",
+        "image_support",
+        "network_controls",
+        "workspace_controls",
+        "risk_flags"
+      ],
+      "type": "object"
+    },
+    "AdapterManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adapter_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "auth_discovery": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "capability_discovery": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "executable_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exit_code_mapping": {
+          "type": "array"
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "install_discovery": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model_discovery": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "network_flags": {
+          "type": "array"
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "AdapterManifest"
+        },
+        "output_modes": {
+          "type": "array"
+        },
+        "permission_flags": {
+          "type": "array"
+        },
+        "platforms": {
+          "type": "array"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "redaction_policy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "session_discovery": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timeout_kill_policy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version_discovery": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version_range": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_flags": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "adapter_id",
+        "adapter_type",
+        "executable_name",
+        "install_discovery",
+        "version_discovery",
+        "auth_discovery",
+        "session_discovery",
+        "model_discovery",
+        "capability_discovery",
+        "permission_flags",
+        "workspace_flags",
+        "network_flags",
+        "output_modes",
+        "exit_code_mapping",
+        "timeout_kill_policy",
+        "redaction_policy",
+        "version_range",
+        "platforms"
+      ],
+      "type": "object"
+    },
+    "ChannelSelectionDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "block_receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "blocked": {
+          "type": "boolean"
+        },
+        "candidate_profiles": {
+          "type": "array"
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "decision_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "fallback_rank": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "ChannelSelectionDecision"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "reason_codes": {
+          "type": "array"
+        },
+        "request_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "role_binding_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selected_profile_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "request_ref",
+        "role_binding_ref",
+        "candidate_profiles",
+        "selected_profile_ref",
+        "decision_code",
+        "reason_codes",
+        "decision_source",
+        "fallback_rank",
+        "blocked",
+        "block_receipt_ref"
+      ],
+      "type": "object"
+    },
+    "ExecutionProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "adapter_manifest_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "channel_axes": {
+          "type": "object"
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "credential_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "egress": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_class": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "network_policy": {
+          "type": "object"
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "ExecutionProfile"
+        },
+        "output_contract": {
+          "type": "object"
+        },
+        "permission_policy": {
+          "type": "object"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "profile_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "qualification_report_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requested_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retry_policy": {
+          "type": "object"
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "route": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_policy": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "profile_id",
+        "status",
+        "adapter_id",
+        "adapter_manifest_hash",
+        "channel_axes",
+        "evidence_class",
+        "provider",
+        "requested_model",
+        "credential_ref",
+        "route",
+        "region",
+        "egress",
+        "permission_policy",
+        "workspace_policy",
+        "network_policy",
+        "output_contract",
+        "retry_policy",
+        "qualification_report_ref"
+      ],
+      "type": "object"
+    },
+    "ExecutionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_egress_class": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attempt_no": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "caller_module": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "data_classification": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "idempotency_key": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_hashes": {
+          "type": "array"
+        },
+        "input_refs": {
+          "type": "array"
+        },
+        "logical_operation_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "logical_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "ExecutionRequest"
+        },
+        "output_schema_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "purpose_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "read_roots": {
+          "type": "array"
+        },
+        "requester": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "route_policy_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timeout_seconds": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "tool_policy": {
+          "type": "object"
+        },
+        "working_directory_policy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "write_roots": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "logical_operation_id",
+        "attempt_no",
+        "logical_role",
+        "purpose_code",
+        "caller_module",
+        "input_refs",
+        "input_hashes",
+        "output_schema_ref",
+        "data_classification",
+        "allowed_egress_class",
+        "route_policy_ref",
+        "working_directory_policy",
+        "read_roots",
+        "write_roots",
+        "tool_policy",
+        "timeout_seconds",
+        "idempotency_key",
+        "requester"
+      ],
+      "type": "object"
+    },
+    "JobWorkspaceManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "cleanup_policy": {
+          "type": "object"
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "environment_allowlist": {
+          "type": "array"
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "input_hashes": {
+          "type": "array"
+        },
+        "input_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "job_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "network_allowlist": {
+          "type": "array"
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "JobWorkspaceManifest"
+        },
+        "output_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "process_allowlist": {
+          "type": "array"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "read_allowlist": {
+          "type": "array"
+        },
+        "receipt_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retention_policy": {
+          "type": "object"
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "scratch_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "write_allowlist": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "job_id",
+        "workspace_root",
+        "input_root",
+        "output_root",
+        "receipt_root",
+        "scratch_root",
+        "read_allowlist",
+        "write_allowlist",
+        "network_allowlist",
+        "process_allowlist",
+        "environment_allowlist",
+        "cleanup_policy",
+        "retention_policy",
+        "input_hashes"
+      ],
+      "type": "object"
+    },
+    "LogicalRoleBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptable_evidence_classes": {
+          "type": "array"
+        },
+        "attempt_limit": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "candidate_profile_allowlist": {
+          "type": "array"
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "data_rules": {
+          "type": "object"
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "fallback_policy": {
+          "type": "object"
+        },
+        "input_schema_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "minimum_model_identity_grade": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "LogicalRoleBinding"
+        },
+        "output_schema_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "required_capabilities": {
+          "type": "array"
+        },
+        "retry_classes": {
+          "type": "array"
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "role_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timeout_seconds": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "role_id",
+        "input_schema_ref",
+        "output_schema_ref",
+        "acceptable_evidence_classes",
+        "minimum_model_identity_grade",
+        "required_capabilities",
+        "data_rules",
+        "timeout_seconds",
+        "attempt_limit",
+        "retry_classes",
+        "candidate_profile_allowlist",
+        "fallback_policy"
+      ],
+      "type": "object"
+    },
+    "ModelExecutionReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "behavior_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "cost_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cost_value": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "egress": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_class": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "external_request_started": {
+          "type": "boolean"
+        },
+        "finish_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "job_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latency_ms": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "model_identity_grade": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "ModelExecutionReceipt"
+        },
+        "output_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requested_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "returned_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "route": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "token_usage": {
+          "type": "object"
+        },
+        "usage_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "job_id",
+        "attempt_id",
+        "evidence_class",
+        "requested_model",
+        "returned_model",
+        "model_identity_grade",
+        "provider",
+        "route",
+        "region",
+        "egress",
+        "behavior_hash",
+        "input_hash",
+        "output_hash",
+        "usage_status",
+        "token_usage",
+        "cost_status",
+        "cost_value",
+        "currency",
+        "latency_ms",
+        "finish_status",
+        "external_request_started"
+      ],
+      "type": "object"
+    },
+    "NormalizedResult": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "error_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "job_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "logical_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "normalization_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "NormalizedResult"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "payload_schema_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload_schema_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload_valid": {
+          "type": "boolean"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "source_output_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "warnings": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "job_id",
+        "attempt_id",
+        "logical_role",
+        "payload",
+        "payload_schema_ref",
+        "payload_schema_hash",
+        "payload_valid",
+        "source_output_hash",
+        "normalization_version",
+        "warnings",
+        "error_code"
+      ],
+      "type": "object"
+    },
+    "ProcessExecutionReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "argv_redacted": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attempt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "ended_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "environment_names": {
+          "type": "array"
+        },
+        "error_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exit_code": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "job_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "killed": {
+          "type": "boolean"
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "ProcessExecutionReceipt"
+        },
+        "output_files": {
+          "type": "array"
+        },
+        "process_started": {
+          "type": "boolean"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "redaction_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stderr_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stdout_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timeout": {
+          "type": "boolean"
+        },
+        "working_directory": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "job_id",
+        "attempt_id",
+        "adapter_id",
+        "argv_redacted",
+        "working_directory",
+        "process_started",
+        "started_at",
+        "ended_at",
+        "duration_ms",
+        "exit_code",
+        "timeout",
+        "killed",
+        "stdout_hash",
+        "stderr_hash",
+        "redaction_status",
+        "output_files",
+        "environment_names",
+        "error_code"
+      ],
+      "type": "object"
+    },
+    "QualificationReport": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "evidence_refs": {
+          "type": "array"
+        },
+        "expires_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "known_gaps": {
+          "type": "array"
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "QualificationReport"
+        },
+        "pass_state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "platform_scope": {
+          "type": "array"
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "profile_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "qualification_level": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revocation_conditions": {
+          "type": "array"
+        },
+        "role_scope": {
+          "type": "array"
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "valid_from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified_capabilities": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "adapter_id",
+        "profile_ref",
+        "qualification_level",
+        "evidence_refs",
+        "verified_capabilities",
+        "known_gaps",
+        "valid_from",
+        "expires_at",
+        "role_scope",
+        "platform_scope",
+        "pass_state",
+        "revocation_conditions"
+      ],
+      "type": "object"
+    },
+    "RouteBlockReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "block_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "candidate_profiles": {
+          "type": "array"
+        },
+        "consumers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "cost_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "external_request_start_count": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "failed_gate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "logical_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "object_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "object_type": {
+          "const": "RouteBlockReceipt"
+        },
+        "observed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "physical_process_start_count": {
+          "type": [
+            "number",
+            "integer",
+            "null"
+          ]
+        },
+        "producer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "reason_codes": {
+          "type": "array"
+        },
+        "request_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolution_hint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "single_writer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "supersedes_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "token_status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "revision",
+        "producer",
+        "single_writer",
+        "consumers",
+        "created_at",
+        "supersedes_ref",
+        "source_evidence_refs",
+        "extensions",
+        "request_ref",
+        "logical_role",
+        "candidate_profiles",
+        "block_code",
+        "reason_codes",
+        "failed_gate",
+        "physical_process_start_count",
+        "external_request_start_count",
+        "token_status",
+        "cost_status",
+        "resolution_hint",
+        "observed_at"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://pr-os.local/schemas/p05/t01/candidate001/common-objects.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ExecutionRequest"
+    },
+    {
+      "$ref": "#/$defs/LogicalRoleBinding"
+    },
+    {
+      "$ref": "#/$defs/ExecutionProfile"
+    },
+    {
+      "$ref": "#/$defs/AdapterManifest"
+    },
+    {
+      "$ref": "#/$defs/AdapterCapabilitySnapshot"
+    },
+    {
+      "$ref": "#/$defs/ChannelSelectionDecision"
+    },
+    {
+      "$ref": "#/$defs/JobWorkspaceManifest"
+    },
+    {
+      "$ref": "#/$defs/ProcessExecutionReceipt"
+    },
+    {
+      "$ref": "#/$defs/ModelExecutionReceipt"
+    },
+    {
+      "$ref": "#/$defs/NormalizedResult"
+    },
+    {
+      "$ref": "#/$defs/RouteBlockReceipt"
+    },
+    {
+      "$ref": "#/$defs/QualificationReport"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p06:t13:fallback-receipt:v1",
+  "type": "object",
+  "required": ["schema_version", "status", "error_code", "snapshot_match", "cloud_requested", "cloud_fallback_started", "qualification_verdict", "result_sha256", "receipt_sha256"],
+  "properties": {
+    "schema_version": {"const": "P06T13FallbackReceipt-v1"},
+    "status": {"enum": ["DEGRADED_EXACT_SNAPSHOT", "FAIL_CLOSED"]},
+    "error_code": {"type": "string", "minLength": 1},
+    "source_error_code": {"type": "string", "minLength": 1},
+    "snapshot_match": {"type": "boolean"},
+    "snapshot_sha256": {"$ref": "#/$defs/nullableSha"},
+    "cloud_requested": {"type": "boolean"},
+    "cloud_fallback_started": {"const": false},
+    "qualification_verdict": {"const": "FAIL"},
+    "result_sha256": {"$ref": "#/$defs/nullableSha"},
+    "receipt_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "nullableSha": {"anyOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]}
+  }
+}

@@ -1,0 +1,297 @@
+{
+  "schema_version": "P04_T01_STATE_TRANSITION_TABLE_V1",
+  "contract_revision": "p04-t01-common-contract-r0.1-candidate001",
+  "axes": {
+    "maturity_axes": {
+      "design_status": [
+        "proposed",
+        "approved",
+        "superseded"
+      ],
+      "implementation_status": [
+        "not_started",
+        "partial",
+        "implemented"
+      ],
+      "verification_status": [
+        "untested",
+        "tested",
+        "qualified"
+      ],
+      "deployment_status": [
+        "disabled",
+        "pilot",
+        "active"
+      ]
+    },
+    "run_axes": {
+      "lifecycle_status": [
+        "completed",
+        "aborted",
+        "invalidated"
+      ],
+      "verification_result": [
+        "PASS",
+        "FAIL",
+        "ERROR",
+        "NOT_RUN"
+      ],
+      "acceptance_verdict": [
+        "PASS",
+        "FAIL",
+        "NOT_ASSESSED"
+      ]
+    },
+    "candidate_axes": {
+      "identity_status": [
+        "HINT_UNVERIFIED",
+        "RESOLVING",
+        "VERIFIED",
+        "CONFLICT",
+        "UNRESOLVED"
+      ],
+      "access_status": [
+        "METADATA_ONLY",
+        "OA_LOCATION_CLAIMED",
+        "RIGHTS_VERIFIED",
+        "MATERIALIZED",
+        "UNAVAILABLE",
+        "RESTRICTED"
+      ],
+      "decision_status": [
+        "PENDING",
+        "SNOOZED",
+        "APPROVED_FOR_CARD_STAGING",
+        "REJECTED"
+      ],
+      "candidate_card_status": [
+        "NOT_REQUESTED",
+        "BUILDING",
+        "REVIEW_READY",
+        "NEEDS_REPAIR",
+        "FAILED"
+      ],
+      "promotion_status": [
+        "NOT_ELIGIBLE",
+        "READY",
+        "PROMOTION_APPROVED",
+        "PROMOTED",
+        "FAILED"
+      ]
+    }
+  },
+  "allowed_transitions": {
+    "design_status": [
+      [
+        "proposed",
+        "approved"
+      ],
+      [
+        "approved",
+        "superseded"
+      ]
+    ],
+    "implementation_status": [
+      [
+        "not_started",
+        "partial"
+      ],
+      [
+        "partial",
+        "implemented"
+      ]
+    ],
+    "verification_status": [
+      [
+        "untested",
+        "tested"
+      ],
+      [
+        "tested",
+        "qualified"
+      ]
+    ],
+    "deployment_status": [
+      [
+        "disabled",
+        "pilot"
+      ],
+      [
+        "pilot",
+        "active"
+      ],
+      [
+        "active",
+        "disabled"
+      ]
+    ],
+    "identity_status": [
+      [
+        "HINT_UNVERIFIED",
+        "RESOLVING"
+      ],
+      [
+        "RESOLVING",
+        "VERIFIED"
+      ],
+      [
+        "RESOLVING",
+        "CONFLICT"
+      ],
+      [
+        "RESOLVING",
+        "UNRESOLVED"
+      ]
+    ],
+    "access_status": [
+      [
+        "METADATA_ONLY",
+        "OA_LOCATION_CLAIMED"
+      ],
+      [
+        "OA_LOCATION_CLAIMED",
+        "RIGHTS_VERIFIED"
+      ],
+      [
+        "RIGHTS_VERIFIED",
+        "MATERIALIZED"
+      ],
+      [
+        "METADATA_ONLY",
+        "UNAVAILABLE"
+      ],
+      [
+        "METADATA_ONLY",
+        "RESTRICTED"
+      ]
+    ],
+    "decision_status": [
+      [
+        "PENDING",
+        "SNOOZED"
+      ],
+      [
+        "PENDING",
+        "APPROVED_FOR_CARD_STAGING"
+      ],
+      [
+        "PENDING",
+        "REJECTED"
+      ],
+      [
+        "SNOOZED",
+        "PENDING"
+      ]
+    ],
+    "candidate_card_status": [
+      [
+        "NOT_REQUESTED",
+        "BUILDING"
+      ],
+      [
+        "BUILDING",
+        "REVIEW_READY"
+      ],
+      [
+        "BUILDING",
+        "NEEDS_REPAIR"
+      ],
+      [
+        "NEEDS_REPAIR",
+        "BUILDING"
+      ],
+      [
+        "BUILDING",
+        "FAILED"
+      ]
+    ],
+    "promotion_status": [
+      [
+        "NOT_ELIGIBLE",
+        "READY"
+      ],
+      [
+        "READY",
+        "PROMOTION_APPROVED"
+      ],
+      [
+        "PROMOTION_APPROVED",
+        "PROMOTED"
+      ],
+      [
+        "READY",
+        "FAILED"
+      ],
+      [
+        "PROMOTION_APPROVED",
+        "FAILED"
+      ]
+    ]
+  },
+  "cross_axis_preconditions": [
+    {
+      "target": "decision_status=APPROVED_FOR_CARD_STAGING",
+      "requires": [
+        "identity_status=VERIFIED"
+      ]
+    },
+    {
+      "target": "promotion_status=READY",
+      "requires": [
+        "identity_status=VERIFIED",
+        "access_status in RIGHTS_VERIFIED|MATERIALIZED",
+        "decision_status=APPROVED_FOR_CARD_STAGING",
+        "candidate_card_status=REVIEW_READY"
+      ]
+    },
+    {
+      "target": "promotion_status=PROMOTED",
+      "requires": [
+        "promotion_status predecessor=PROMOTION_APPROVED",
+        "second_human_approval=true",
+        "atomic_receipt=true"
+      ]
+    },
+    {
+      "target": "acceptance_verdict=PASS",
+      "requires": [
+        "lifecycle_status=completed",
+        "verification_result=PASS",
+        "human_acceptance=true"
+      ]
+    }
+  ],
+  "run_combination_rules": [
+    {
+      "when": "lifecycle_status=completed",
+      "verification_allowed": [
+        "PASS",
+        "FAIL",
+        "ERROR"
+      ]
+    },
+    {
+      "when": "lifecycle_status in aborted|invalidated",
+      "verification_allowed": [
+        "NOT_RUN"
+      ]
+    },
+    {
+      "when": "verification_result=FAIL",
+      "lifecycle_required": "completed"
+    },
+    {
+      "when": "machine validation only",
+      "acceptance_required": "NOT_ASSESSED"
+    }
+  ],
+  "forbidden_inferences": [
+    "approved design does not imply implemented",
+    "implemented does not imply tested",
+    "tested does not imply accepted or deployed",
+    "identity verified does not imply access rights",
+    "AI_HINT does not imply identity verified",
+    "rejected does not imply globally suppressed",
+    "invalidated cannot hide a completed assertion failure"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pr-os.local/schemas/p07/t08/ordinary_config_v1.schema.json",
+  "title": "P07 T08 OrdinaryConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "revision", "provider_preset_id", "credential_binding_id", "user_tier", "thinking_enabled", "updated_at"],
+  "properties": {
+    "schema_version": {"const": "P07_T08_ORDINARY_CONFIG_V1"},
+    "revision": {"type": "string", "minLength": 1},
+    "provider_preset_id": {"type": "string", "minLength": 1},
+    "credential_binding_id": {"type": "string", "minLength": 1},
+    "user_tier": {"enum": ["economy", "standard", "high_quality", "maximum"]},
+    "thinking_enabled": {"type": "boolean"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

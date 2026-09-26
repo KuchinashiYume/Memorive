@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p04:t06:behavioral-interest-digest:0.1",
+  "title": "P04 T06 BehavioralInterestDigest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "object_type", "interaction_mode", "source_kind", "as_of",
+    "directions", "input_event_count", "mapped_event_count", "unmapped_event_count",
+    "deduplicated_or_saturated_event_count", "real_adapter_read_count",
+    "real_digest_or_boost_count", "behavior_policy", "global_scalar_score",
+    "side_effects", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "p04.t06.behavioral-interest-digest.0.1"},
+    "object_type": {"const": "BehavioralInterestDigest"},
+    "interaction_mode": {"enum": ["FORMAL_CONTRACT_BOUND", "NOT_CONFIGURED"]},
+    "source_kind": {"enum": ["SYNTHETIC_TEST", "REAL_ADAPTER"]},
+    "as_of": {"type": "string", "format": "date-time"},
+    "directions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "direction_id", "unique_session_count", "user_initiated_session_count",
+          "active_date_count", "selected_event_count", "raw_weight", "bounded_weight",
+          "saturation_applied", "evidence_query_hashes"
+        ],
+        "properties": {
+          "direction_id": {"type": "string", "minLength": 1},
+          "unique_session_count": {"type": "integer", "minimum": 0},
+          "user_initiated_session_count": {"type": "integer", "minimum": 0},
+          "active_date_count": {"type": "integer", "minimum": 0},
+          "selected_event_count": {"type": "integer", "minimum": 0},
+          "raw_weight": {"$ref": "#/$defs/decimal"},
+          "bounded_weight": {"$ref": "#/$defs/decimal"},
+          "saturation_applied": {"type": "boolean"},
+          "evidence_query_hashes": {
+            "type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      }
+    },
+    "input_event_count": {"type": "integer", "minimum": 0},
+    "mapped_event_count": {"type": "integer", "minimum": 0},
+    "unmapped_event_count": {"type": "integer", "minimum": 0},
+    "deduplicated_or_saturated_event_count": {"type": "integer", "minimum": 0},
+    "real_adapter_read_count": {"type": "integer", "minimum": 0},
+    "real_digest_or_boost_count": {"type": "integer", "minimum": 0},
+    "behavior_policy": {"$ref": "#/$defs/behaviorPolicy"},
+    "global_scalar_score": {"type": "null"},
+    "side_effects": {"$ref": "#/$defs/zeroSideEffects"},
+    "content_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "decimal": {"type": "string", "pattern": "^[0-9]+\\.[0-9]{6}$"},
+    "behaviorPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dedupe_scope", "origin_weights", "decay_windows_days", "older_factor",
+        "per_direction_cap", "proposal_min_user_sessions", "proposal_min_active_dates",
+        "tie_break_scope", "epsilon", "global_scalar_score"
+      ],
+      "properties": {
+        "dedupe_scope": {"const": "direction_id+session_hash"},
+        "origin_weights": {
+          "type": "object", "additionalProperties": false,
+          "required": ["USER_INITIATED", "P04_EXPOSURE_FOLLOWUP", "SYSTEM_CLARIFICATION", "RETRY_OR_REPHRASE"],
+          "properties": {
+            "USER_INITIATED": {"const": "1.000000"},
+            "P04_EXPOSURE_FOLLOWUP": {"const": "0.250000"},
+            "SYSTEM_CLARIFICATION": {"const": "0.000000"},
+            "RETRY_OR_REPHRASE": {"const": "0.000000"}
+          }
+        },
+        "decay_windows_days": {
+          "type": "array", "minItems": 3, "maxItems": 3,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["max_age_days", "factor"],
+            "properties": {
+              "max_age_days": {"enum": [30, 90, 180]},
+              "factor": {"enum": ["1.000000", "0.500000", "0.250000"]}
+            }
+          }
+        },
+        "older_factor": {"const": "0.000000"},
+        "per_direction_cap": {"const": "1.000000"},
+        "proposal_min_user_sessions": {"const": 3},
+        "proposal_min_active_dates": {"const": 2},
+        "tie_break_scope": {"const": "SAME_CHANNEL+IDENTICAL_PRE_TIE_RANK_KEY"},
+        "epsilon": {"const": "0.000000"},
+        "global_scalar_score": {"const": false}
+      }
+    },
+    "zeroSideEffects": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "network_calls", "external_source_calls", "model_or_api_calls", "profile_writes",
+        "policy_writes", "direction_writes", "p03_reads", "p03_writes", "library_writes",
+        "m13_writes", "production_reads", "production_writes"
+      ],
+      "properties": {
+        "network_calls": {"const": 0}, "external_source_calls": {"const": 0},
+        "model_or_api_calls": {"const": 0}, "profile_writes": {"const": 0},
+        "policy_writes": {"const": 0}, "direction_writes": {"const": 0},
+        "p03_reads": {"const": 0}, "p03_writes": {"const": 0},
+        "library_writes": {"const": 0}, "m13_writes": {"const": 0},
+        "production_reads": {"const": 0}, "production_writes": {"const": 0}
+      }
+    }
+  }
+}

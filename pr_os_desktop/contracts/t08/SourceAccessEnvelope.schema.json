@@ -1,0 +1,55 @@
+{
+  "$id": "https://pr-os.local/schema/p08/t08/source-access-envelope-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "account_mutation_allowed": {
+      "const": false
+    },
+    "allowed_channels": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "credential_value_read_allowed": {
+      "const": false
+    },
+    "real_source_authority": {
+      "type": "boolean"
+    },
+    "remote_session_mutation_allowed": {
+      "const": false
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "P08T08SourceAccessEnvelope-v1"
+    },
+    "scope": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "ABSENT_NO_REAL_SOURCE_AUTHORITY",
+        "AUTHORIZED_EXACT_SCOPE"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "run_id",
+    "real_source_authority",
+    "allowed_channels",
+    "scope",
+    "credential_value_read_allowed",
+    "account_mutation_allowed",
+    "remote_session_mutation_allowed",
+    "status"
+  ],
+  "title": "P08/T08 SourceAccessEnvelope",
+  "type": "object"
+}

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Memorive · 模型排行榜</title>
+  <link rel="stylesheet" href="leaderboard_shell.css">
+<link rel="stylesheet" href="product_copy.css">
+<link rel="stylesheet" href="leaderboard_base.css">
+<link rel="stylesheet" href="leaderboard.css">
+  <link rel="stylesheet" href="accounting_panel.css">
+</head>
+<body data-p08-product-page="part9">
+<div id="p08-partleaderboard-preview" lang="zh-Hans">
+  <svg class="p08-icon-sprite" aria-hidden="true">
+    <symbol id="p08-icon-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></symbol>
+    <symbol id="p08-icon-panel-right" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path></symbol>
+    <symbol id="p08-icon-panel-bottom" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 15h18"></path></symbol>
+    <symbol id="p08-icon-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="m5.45 5.11 1.33-2A2 2 0 0 1 8.44 2h7.12a2 2 0 0 1 1.66 1.11l1.33 2L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z"></path></symbol>
+    <symbol id="p08-icon-list-checks" viewBox="0 0 24 24"><path d="m3 7 2 2 4-4"></path><path d="M11 6h10"></path><path d="m3 17 2 2 4-4"></path><path d="M11 18h10"></path></symbol>
+    <symbol id="p08-icon-message" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path></symbol>
+    <symbol id="p08-icon-messages" viewBox="0 0 24 24"><path d="M17 15a4 4 0 0 1-4 4H8l-5 3v-5a4 4 0 0 1-1-3V7a4 4 0 0 1 4-4h7a4 4 0 0 1 4 4Z"></path><path d="M17 7h1a4 4 0 0 1 4 4v8l-3-2"></path></symbol>
+    <symbol id="p08-icon-library" viewBox="0 0 24 24"><path d="M4 4v16"></path><path d="M8 6v14"></path><path d="M12 5v15"></path><path d="m16 6 4 14"></path></symbol>
+    <symbol id="p08-icon-notebook-pen" viewBox="0 0 24 24"><path d="M13.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.5"></path><path d="M2 6h4"></path><path d="M2 10h4"></path><path d="M2 14h4"></path><path d="M2 18h4"></path><path d="M21.4 5.6a1 1 0 0 0-3-3l-5 5a2 2 0 0 0-.5.9l-.9 2.9.6.6 2.9-.9a2 2 0 0 0 .9-.5Z"></path></symbol>
+    <symbol id="p08-icon-settings" viewBox="0 0 24 24"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4A2 2 0 0 0 4 9.9l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+    <symbol id="p08-icon-layout-top" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path></symbol>
+    <defs fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="p08-icon-accounting" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"></path><path d="M9 8h6M9 12h6M9 16h3"></path></symbol>
+    <symbol id="p08-icon-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"></circle><path d="M12 2v5M12 17v5M2 12h5M17 12h5M12 10v4M10 12h4"></path></symbol>
+    <symbol id="p08-icon-calendar-range" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 10h18M7 14h3M14 14h3M7 17h3"></path></symbol>
+    <symbol id="p08-icon-models" viewBox="0 0 24 24"><path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z"></path><path d="m4 12 8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"></path></symbol>
+    <symbol id="p08-icon-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"></path><path d="M6.1 8.2A7 7 0 0 1 18.7 7L20 12M4 12l1.3 5A7 7 0 0 0 17.9 15.8"></path></symbol>
+    <symbol id="p08-icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+    <symbol id="p08-icon-cost" viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5" ry="2.5"></ellipse><path d="M4 7v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V7M4 11v4c0 1.4 2.2 2.5 5 2.5 1 0 2-.2 2.8-.5"></path><path d="M14 13.5c0 1.4 2.2 2.5 5 2.5M14 13.5c0-1.4 2.2-2.5 5-2.5s5 1.1 5 2.5v4c0 1.4-2.2 2.5-5 2.5s-5-1.1-5-2.5v-4Z" transform="translate(-2)"></path></symbol>
+    <symbol id="p08-icon-requests" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"></path><path d="M22 2 11 13"></path></symbol>
+    <symbol id="p08-icon-tokens" viewBox="0 0 24 24"><path d="M8 4c-2 0-3 1-3 3v2c0 1-.7 2-2 2 1.3 0 2 1 2 2v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1 .7 2 2 2-1.3 0-2 1-2 2v2c0 2-1 3-3 3"></path></symbol>
+    <symbol id="p08-icon-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></symbol>
+  </defs>
+  </svg>
+
+  
+
+  <div class="p08-preview-stage" id="p08-preview-stage">
+    <section class="p08-window" id="p08-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 模型排行榜">
+      <header class="p08-global-bar">
+        <div class="p08-global-left">
+          <button class="p08-icon-button" id="p08-toggle-left" type="button" aria-label="切换边栏" aria-pressed="true" data-p08-tip="切换边栏  Ctrl+B" data-p08-placement="bottom">
+            <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-panel-left"></use></svg>
+          </button>
+          <span class="p08-app-title">Memorive</span>
+          <span class="p08-view-name" id="p08-view-name">主体界面</span>
+        </div>
+        <div class="p08-global-right">
+          <button class="p08-icon-button" id="p08-toggle-bottom" type="button" aria-label="切换底部面板显示" aria-pressed="false" data-p08-tip="切换底部面板显示  Ctrl+J" data-p08-placement="bottom">
+            <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-panel-bottom"></use></svg>
+          </button>
+          <button class="p08-icon-button" id="p08-toggle-right" type="button" aria-label="显示或隐藏侧边面板" aria-pressed="false" data-p08-tip="显示/隐藏侧边面板  Ctrl+Alt+B" data-p08-placement="bottom">
+            <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-panel-right"></use></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="p08-workspace">
+        <nav class="p08-navigation" aria-label="一级导航">
+          <button class="p08-logo" id="p08-logo" type="button" aria-label="播放标识动效">
+            <img class="p08-logo-image" src="assets/illustrations/常驻logo.svg" alt="Memorive 临时标识">
+          </button>
+          <div class="p08-nav-list">
+            <button class="p08-nav-item" type="button" data-page="收件箱" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-inbox"></use></svg><span>收件箱</span>
+            </button>
+            <button class="p08-nav-item" type="button" data-page="当前任务" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-list-checks"></use></svg><span>当前任务</span>
+            </button>
+            <button class="p08-nav-item" type="button" data-page="消息" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-message"></use></svg><span>消息</span>
+            </button>
+            <button class="p08-nav-item" type="button" data-page="会话管理" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-messages"></use></svg><span>会话管理</span>
+            </button>
+            <button class="p08-nav-item" type="button" data-page="资料库" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-library"></use></svg><span>资料库</span>
+            </button>
+            <button class="p08-nav-item" type="button" data-page="工作日志" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-notebook-pen"></use></svg><span>工作日志</span>
+            </button>
+            <button class="p08-nav-item" type="button" data-page="设置" aria-pressed="false">
+              <svg class="p08-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#p08-icon-settings"></use></svg><span>设置</span>
+            </button>
+          </div>
+        </nav>
+
+        <main class="p08-central" id="p08-central">
+          <div class="p08-page-view" id="p08-page-view" hidden>
+            <div class="lb-content page-shell" id="lb-primary">
+      <div class="lb-heading"><div class="lb-heading-title"><button class="icon-button p08-main-back" id="p08-return-main" type="button" aria-label="返回主界面" hidden>‹</button><h1 id="lb-page-title">模型排行榜</h1><button class="lb-updated" id="lb-updated" type="button" aria-label="上次更新与汇率" data-p08-placement="bottom"><time id="lb-updated-date">—</time></button></div><div class="lb-heading-tools" role="group" aria-label="排行榜操作"><button id="lb-starred-only" class="lb-icon-btn lb-star" type="button" aria-label="仅看星标" data-p08-tip="仅看星标" aria-pressed="false" aria-controls="lb-rows"><span data-lb-icon="star" aria-hidden="true"></span></button><button id="lb-currency" class="lb-icon-btn lb-currency-icon" type="button" aria-label="当前 USD，切换为 RMB" data-p08-tip="当前 USD，点击切换为 RMB">USD</button><button class="lb-icon-btn" type="button" id="lb-rule-toggle" aria-label="评分偏好" data-p08-tip="评分偏好" aria-expanded="false" aria-controls="lb-inspector"><span data-lb-icon="sliders-horizontal" aria-hidden="true"></span><span class="lb-draft-dot" id="lb-pref-dirty" aria-hidden="true" hidden></span></button><button class="lb-icon-btn" id="lb-refresh" type="button" aria-label="刷新排行榜" data-p08-tip="刷新排行榜"><span data-lb-icon="refresh-cw" aria-hidden="true"></span></button></div></div>
+      <section class="lb-page-body" id="lb-ranking-panel" aria-label="模型排名列表">
+      <div class="lb-meta"><div class="lb-meta-left"><span id="lb-context"></span></div><span class="lb-save-feedback" id="lb-save-feedback" hidden><span data-lb-icon="check" aria-hidden="true"></span>偏好已保存，排名已更新</span><button class="lb-link-btn" id="lb-clear-filters" type="button" hidden>清除筛选</button></div>
+      <div class="lb-table-wrap"><table class="lb-table" aria-label="模型排行榜"><colgroup id="lb-column-widths"></colgroup><thead><tr id="lb-headers"></tr></thead><tbody id="lb-rows"></tbody></table></div>
+      <div class="lb-foot"><span id="lb-price-caption"></span></div>
+      </section>
+    </div>
+          </div>
+          <div class="p08-blank-state" id="p08-blank-state"><div class="p08-home-prompt"><p class="p08-home-speech">想构建什么呢？</p><button class="p08-home-expression-button" type="button" data-expression="interaction" aria-label="播放疑问表情"><img class="p08-home-expression-image" src="assets/decorations/home-interaction.svg" alt="" draggable="false"></button></div></div>
+          <div class="p08-page-placeholder" id="p08-page-placeholder" hidden><div class="p08-page-symbol" aria-hidden="true"><svg class="p08-icon" viewBox="0 0 24 24"><use href="#p08-icon-layout-top"></use></svg></div><div class="p08-page-copy" id="p08-page-copy"><h1 id="p08-page-title">页面</h1><p>请打开对应 Part 的独立预览文件</p></div></div>
+        </main>
+
+        <aside class="p08-right-panel lb-inspector" id="p08-right-panel" aria-label="模型详情或评分偏好" aria-hidden="true" inert>
+      <div class="lb-inspector-inner">
+        <header class="lb-inspector-head"><button class="lb-icon-btn" id="lb-inspector-back" type="button" aria-label="返回排行榜，取消未保存修改" data-p08-tip="返回排行榜"><span data-lb-icon="back" aria-hidden="true"></span></button><h2 id="lb-inspector-title">模型详情</h2><div class="lb-inspector-actions"><button class="lb-icon-btn" id="lb-reset-weights" type="button" aria-label="恢复默认偏好" data-p08-tip="恢复默认偏好" hidden><span data-lb-icon="rotate-ccw" aria-hidden="true"></span></button><button class="lb-icon-btn lb-primary" id="lb-pref-apply" type="button" aria-label="保存偏好" data-p08-tip="保存偏好" disabled hidden><span data-lb-icon="save" aria-hidden="true"></span></button><button class="lb-icon-btn" id="lb-inspector-close" type="button" aria-label="关闭边栏" data-p08-tip="关闭边栏"><span data-lb-icon="x" aria-hidden="true"></span></button></div></header>
+        <section class="lb-inspector-content" id="lb-model-detail" aria-label="模型详情" hidden inert></section>
+        <section class="lb-inspector-content" id="lb-rules" aria-label="评分偏好" hidden inert>
+          <p class="lb-error" id="lb-pref-error" role="alert" hidden></p>
+          <div class="lb-pref-grid">
+            <section class="lb-pref-section" aria-labelledby="lb-source-title"><div class="lb-pref-section-head"><h3 id="lb-source-title">数据来源</h3></div><div class="lb-source-head" id="lb-source-head"><span>参与来源</span><span>评分权重</span><span>占比</span><span></span></div><div id="lb-source-rows"></div><p class="lb-small" id="lb-source-empty" hidden></p></section>
+            <section class="lb-pref-section" aria-labelledby="lb-value-title"><div class="lb-pref-section-head"><h3 id="lb-value-title">性价比偏好</h3></div><div class="lb-value-weights"><label class="lb-field"><span>能力权重 <output id="lb-ability-pct"></output></span><input class="lb-input lb-weight" id="lb-ability-weight" type="number" min="0" max="1000" step="any" required value="70"></label><label class="lb-field"><span>成本权重 <output id="lb-price-pct"></output></span><input class="lb-input lb-weight" id="lb-price-weight" type="number" min="0" max="1000" step="any" required value="30"></label></div><label class="lb-field"><span>输入 / 输出 Token 比例</span><select id="lb-ratio" class="lb-select"><option value="0.8">4 : 1</option><option value="0.5">1 : 1</option><option value="0.2">1 : 4</option></select></label></section>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+        <section class="p08-bottom-panel p08-accounting-panel" id="p08-bottom-panel" aria-label="计费与用量" aria-hidden="true" inert data-metric="COST" data-accounting-version="r0.6">
+  <div class="p08-accounting-toolbar">
+    <strong class="p08-accounting-title"><svg aria-hidden="true"><use href="#p08-icon-accounting"></use></svg><span>计费与用量</span></strong>
+    <label class="p08-accounting-filter p08-accounting-scope-filter">
+      <svg aria-hidden="true"><use href="#p08-icon-crosshair"></use></svg>
+      <span class="p08-sr-only">统计范围</span>
+      <select id="p08-accounting-scope" aria-label="统计范围">
+        <option value="ALL">全部记录</option>
+        <option value="CURRENT_JOB" disabled>本任务（归属未完整）</option>
+      </select>
+    </label>
+    <label class="p08-accounting-filter">
+      <svg aria-hidden="true"><use href="#p08-icon-calendar-range"></use></svg>
+      <span class="p08-sr-only">时间范围</span>
+      <select id="p08-accounting-range" aria-label="时间范围">
+        <option value="7D">近 7 天</option>
+        <option value="30D" selected>近 30 天</option>
+        <option value="MONTH">本月</option>
+      </select>
+    </label>
+    <label class="p08-accounting-filter p08-accounting-model-filter">
+      <svg aria-hidden="true"><use href="#p08-icon-models"></use></svg>
+      <span class="p08-sr-only">模型</span>
+      <select id="p08-accounting-model" aria-label="模型"><option value="ALL">全部模型</option></select>
+    </label>
+    <button class="p08-accounting-icon-button" id="p08-accounting-refresh" type="button" aria-label="立即刷新" title="立即刷新">
+      <svg aria-hidden="true"><use href="#p08-icon-refresh"></use></svg>
+    </button>
+    <span class="p08-accounting-sync" id="p08-accounting-sync" aria-live="polite">等待同步</span>
+    <button class="p08-accounting-icon-button" id="p08-accounting-close" type="button" aria-label="关闭底部面板" title="关闭">
+      <svg aria-hidden="true"><use href="#p08-icon-close"></use></svg>
+    </button>
+  </div>
+
+  <div class="p08-accounting-body">
+    <div class="p08-accounting-metrics" role="tablist" aria-label="选择图表指标">
+      <div class="p08-accounting-metric-row is-active" data-metric-row="COST">
+        <button class="p08-accounting-metric-leading p08-accounting-currency" id="p08-accounting-currency" type="button" aria-label="当前 USD，点击切换为 RMB" title="切换显示币种">
+          <svg aria-hidden="true"><use href="#p08-icon-cost"></use></svg><span id="p08-accounting-currency-code">USD</span>
+        </button>
+        <button class="p08-accounting-metric-main" id="p08-accounting-tab-cost" type="button" role="tab" aria-selected="true" aria-controls="p08-accounting-chart" data-metric="COST">
+          <span class="p08-accounting-metric-label">费用（含估算）</span>
+          <strong class="p08-accounting-metric-value" id="p08-accounting-cost">—</strong>
+          <span class="p08-accounting-metric-note" id="p08-accounting-cost-note">实际 — · 估算 —</span>
+        </button>
+      </div>
+      <div class="p08-accounting-metric-row" data-metric-row="REQUESTS">
+        <span class="p08-accounting-metric-leading" aria-hidden="true"><svg><use href="#p08-icon-requests"></use></svg></span>
+        <button class="p08-accounting-metric-main" id="p08-accounting-tab-requests" type="button" role="tab" aria-selected="false" aria-controls="p08-accounting-chart" data-metric="REQUESTS">
+          <span class="p08-accounting-metric-label">请求次数</span>
+          <strong class="p08-accounting-metric-value" id="p08-accounting-attempts">—</strong>
+          <span class="p08-accounting-metric-note" id="p08-accounting-attempt-note">失败与重试也计入</span>
+        </button>
+      </div>
+      <div class="p08-accounting-metric-row" data-metric-row="TOKENS">
+        <span class="p08-accounting-metric-leading" aria-hidden="true"><svg><use href="#p08-icon-tokens"></use></svg></span>
+        <button class="p08-accounting-metric-main" id="p08-accounting-tab-tokens" type="button" role="tab" aria-selected="false" aria-controls="p08-accounting-chart" data-metric="TOKENS">
+          <span class="p08-accounting-metric-label">Tokens</span>
+          <strong class="p08-accounting-metric-value" id="p08-accounting-tokens">—</strong>
+          <span class="p08-accounting-metric-note" id="p08-accounting-token-note">输入 — · 输出 —</span>
+        </button>
+      </div>
+    </div>
+
+    <figure class="p08-accounting-chart" id="p08-accounting-chart" role="tabpanel" aria-labelledby="p08-accounting-tab-cost">
+      <figcaption class="p08-accounting-chart-head">
+        <span class="p08-accounting-chart-heading"><svg aria-hidden="true"><use id="p08-accounting-chart-icon" href="#p08-icon-cost"></use></svg><span id="p08-accounting-chart-title">每日费用</span><small id="p08-accounting-chart-unit">USD</small></span>
+        <span class="p08-accounting-legend" id="p08-accounting-legend"></span>
+      </figcaption>
+      <div class="p08-accounting-plot" id="p08-accounting-plot">
+        <svg id="p08-accounting-svg" role="img" aria-labelledby="p08-accounting-svg-title p08-accounting-svg-desc" preserveAspectRatio="none">
+          <title id="p08-accounting-svg-title">近 30 天每日费用</title>
+          <desc id="p08-accounting-svg-desc">按已配置模型统计的每日费用柱状图。</desc>
+        </svg>
+        <div class="p08-accounting-tooltip" id="p08-accounting-tooltip" role="tooltip" hidden></div>
+        <div class="p08-accounting-empty" id="p08-accounting-empty" hidden>当前范围没有可显示数据</div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+        <button class="p08-resizer p08-right-resizer" id="p08-resize-right" type="button" role="separator" aria-label="调整一级列表与二级模型排行榜详情宽度，默认 60% / 40%" aria-controls="p08-right-panel" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="760" aria-valuenow="498" hidden></button>
+        <button class="p08-resizer p08-bottom-resizer" id="p08-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="p08-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
+      </div>
+
+      <div class="lb-menu" id="lb-column-menu" role="dialog" aria-label="排序与筛选" hidden inert></div>
+<div class="p08-tooltip" id="p08-tooltip" role="tooltip" hidden></div>
+      <p id="lb-status" class="lb-sr" aria-live="polite"></p><div class="sr-only" id="p08-live-state" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
+  <script src="ui_controls.js"></script>
+  <script src="accounting_panel.js"></script>
+  <script src="product_bridge.js"></script>
+<script src="leaderboard_shell.js"></script>
+<script src="leaderboard_currency.js"></script>
+<script src="leaderboard.js"></script>
+</body>
+</html>

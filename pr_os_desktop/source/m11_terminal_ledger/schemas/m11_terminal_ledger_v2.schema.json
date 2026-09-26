@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pr-os:p02:t02:m11:terminal-ledger:2.0",
+  "title": "PR-OS M11 Terminal Ledger Physical Stream Record v2",
+  "description": "One annual append-only stream containing three business ledger record types and the shared run_terminal_event support event.",
+  "oneOf": [
+    {"$ref": "#/$defs/ledgerRecord"},
+    {"$ref": "#/$defs/runTerminalEvent"}
+  ],
+  "$defs": {
+    "nonEmptyString": {"type": "string", "minLength": 1},
+    "nullableString": {
+      "anyOf": [
+        {"$ref": "#/$defs/nonEmptyString"},
+        {"type": "null"}
+      ]
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/nonEmptyString"}
+    },
+    "ledgerCommon": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_type",
+        "ledger_type",
+        "record_id",
+        "record_kind",
+        "run_id",
+        "created_at",
+        "source_evidence_refs"
+      ],
+      "properties": {
+        "schema_version": {"const": "2.0"},
+        "record_type": {"const": "ledger_record"},
+        "ledger_type": {
+          "enum": ["attempt", "paper_outcome", "publication"]
+        },
+        "record_id": {"$ref": "#/$defs/nonEmptyString"},
+        "record_kind": {"enum": ["terminal", "amendment"]},
+        "run_id": {"$ref": "#/$defs/nonEmptyString"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "source_evidence_refs": {
+          "allOf": [
+            {"$ref": "#/$defs/stringArray"},
+            {"minItems": 1}
+          ]
+        }
+      }
+    },
+    "ledgerRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/ledgerCommon"},
+        {
+          "oneOf": [
+            {"$ref": "#/$defs/attempt"},
+            {"$ref": "#/$defs/paperOutcome"},
+            {"$ref": "#/$defs/publication"}
+          ]
+        }
+      ]
+    },
+    "attempt": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "logical_operation_id",
+        "attempt_no",
+        "task_id",
+        "stage",
+        "paper_id",
+        "retry_of_attempt_id",
+        "business_repair_of",
+        "route_snapshot_id",
+        "execution_config_hash"
+      ],
+      "properties": {
+        "ledger_type": {"const": "attempt"},
+        "attempt_id": {"$ref": "#/$defs/nonEmptyString"},
+        "logical_operation_id": {"$ref": "#/$defs/nonEmptyString"},
+        "attempt_no": {"type": "integer", "minimum": 1},
+        "retry_of_attempt_id": {"$ref": "#/$defs/nullableString"},
+        "business_repair_of": {"$ref": "#/$defs/nullableString"},
+        "task_id": {"$ref": "#/$defs/nonEmptyString"},
+        "stage": {"$ref": "#/$defs/nonEmptyString"},
+        "paper_id": {"$ref": "#/$defs/nullableString"},
+        "route_snapshot_id": {"$ref": "#/$defs/nullableString"},
+        "execution_config_hash": {"$ref": "#/$defs/nullableString"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "finished_at": {"type": "string", "format": "date-time"},
+        "result_category": {
+          "enum": ["success", "failure", "incomplete", "error", "cancelled", "not_assessed"]
+        },
+        "error_code": {"$ref": "#/$defs/nullableString"},
+        "amends_attempt_id": {"$ref": "#/$defs/nonEmptyString"},
+        "amendment_fields": {"type": "object", "minProperties": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"record_kind": {"const": "terminal"}}},
+          "then": {"required": ["started_at", "finished_at", "result_category", "error_code"]},
+          "else": {"required": ["amends_attempt_id", "amendment_fields"]}
+        },
+        {
+          "not": {
+            "required": ["retry_of_attempt_id", "business_repair_of"],
+            "properties": {
+              "retry_of_attempt_id": {"type": "string"},
+              "business_repair_of": {"type": "string"}
+            }
+          }
+        }
+      ]
+    },
+    "paperOutcome": {
+      "type": "object",
+      "required": [
+        "outcome_id",
+        "paper_id",
+        "outcome_category",
+        "outcome_code",
+        "reason_codes",
+        "final_artifact_refs",
+        "supersedes_record_id",
+        "reprocesses_run_id"
+      ],
+      "properties": {
+        "ledger_type": {"const": "paper_outcome"},
+        "outcome_id": {"$ref": "#/$defs/nonEmptyString"},
+        "paper_id": {"$ref": "#/$defs/nonEmptyString"},
+        "outcome_category": {"enum": ["success", "failure", "partial", "not_run"]},
+        "outcome_code": {"$ref": "#/$defs/nonEmptyString"},
+        "reason_codes": {
+          "allOf": [
+            {"$ref": "#/$defs/stringArray"},
+            {"minItems": 1}
+          ]
+        },
+        "final_artifact_refs": {"$ref": "#/$defs/stringArray"},
+        "supersedes_record_id": {"$ref": "#/$defs/nullableString"},
+        "reprocesses_run_id": {"$ref": "#/$defs/nullableString"}
+      }
+    },
+    "publication": {
+      "type": "object",
+      "required": [
+        "publication_event_id",
+        "publication_status",
+        "manifest_ref",
+        "subject_artifact_refs",
+        "receipt_ref",
+        "supersedes_record_id"
+      ],
+      "properties": {
+        "ledger_type": {"const": "publication"},
+        "publication_event_id": {"$ref": "#/$defs/nonEmptyString"},
+        "publication_status": {
+          "enum": ["not_requested", "not_published", "published", "publication_failed"]
+        },
+        "manifest_ref": {"$ref": "#/$defs/nullableString"},
+        "subject_artifact_refs": {"$ref": "#/$defs/stringArray"},
+        "receipt_ref": {"$ref": "#/$defs/nullableString"},
+        "absence_reason": {
+          "anyOf": [
+            {"const": "NO_PUBLICATION_REQUEST"},
+            {"type": "null"}
+          ]
+        },
+        "supersedes_record_id": {"$ref": "#/$defs/nullableString"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"publication_status": {"const": "not_requested"}}},
+          "then": {
+            "required": ["absence_reason"],
+            "properties": {
+              "manifest_ref": {"type": "null"},
+              "receipt_ref": {"type": "null"},
+              "absence_reason": {"const": "NO_PUBLICATION_REQUEST"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"publication_status": {"const": "not_published"}}},
+          "then": {
+            "properties": {
+              "manifest_ref": {"$ref": "#/$defs/nonEmptyString"},
+              "receipt_ref": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"publication_status": {"const": "published"}}},
+          "then": {
+            "properties": {
+              "manifest_ref": {"$ref": "#/$defs/nonEmptyString"},
+              "receipt_ref": {"$ref": "#/$defs/nonEmptyString"},
+              "subject_artifact_refs": {"minItems": 1}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"publication_status": {"const": "publication_failed"}}},
+          "then": {
+            "properties": {
+              "manifest_ref": {"$ref": "#/$defs/nonEmptyString"}
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {"properties": {"publication_status": {"const": "not_requested"}}}
+          },
+          "then": {
+            "properties": {"absence_reason": {"type": "null"}}
+          }
+        }
+      ]
+    },
+    "runTerminalEvent": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_type",
+        "record_id",
+        "run_id",
+        "lifecycle_status",
+        "acceptance_verdict",
+        "terminal_at",
+        "source_evidence_refs",
+        "supersedes_record_id"
+      ],
+      "properties": {
+        "schema_version": {"const": "2.0"},
+        "record_type": {"const": "run_terminal_event"},
+        "ledger_type": {"type": "null"},
+        "record_id": {"$ref": "#/$defs/nonEmptyString"},
+        "run_id": {"$ref": "#/$defs/nonEmptyString"},
+        "lifecycle_status": {"enum": ["completed", "aborted", "invalidated"]},
+        "acceptance_verdict": {"enum": ["PASS", "FAIL", "NOT_ASSESSED"]},
+        "terminal_at": {"type": "string", "format": "date-time"},
+        "source_evidence_refs": {
+          "allOf": [
+            {"$ref": "#/$defs/stringArray"},
+            {"minItems": 1}
+          ]
+        },
+        "supersedes_record_id": {"$ref": "#/$defs/nullableString"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "lifecycle_status": {"enum": ["aborted", "invalidated"]}
+            }
+          },
+          "then": {
+            "properties": {"acceptance_verdict": {"const": "NOT_ASSESSED"}}
+          }
+        }
+      ]
+    }
+  }
+}

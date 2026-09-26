@@ -1,0 +1,44 @@
+{
+  "schema_version": "p04.t05.contract-schema-manifest.0.1",
+  "authority": "accepted-formal-public-safe",
+  "hash_domain": "SHA256_OF_CHECKOUT_FILE_BYTES",
+  "self_excluded": true,
+  "source_run_id": "P04_T05_CROSS_20260811_102625_candidate001",
+  "accepted_candidate": "candidate003",
+  "members": [
+    ["PR-OS_P04_T05_CROSS_CandidateCluster_模块契约_r0.1.schema.json", "D59B9D5AE6B0644860A6A50BF41E17F707EC22B2375B93082964A0B1ED28B6BD"],
+    ["PR-OS_P04_T05_CROSS_CoveragePolarizationReport_模块契约_r0.1.schema.json", "1DC279282C8F6B34C0F6379749E0F2641DEB5F6BDE9A6246E24391E908B7FEA0"],
+    ["PR-OS_P04_T05_CROSS_DiscoveryCandidateFact_模块契约_r0.1.schema.json", "2789E4E7A2A526A154EFF7365F8A50E4E65204C7BE7838FAA481C1F7DABE14AF"],
+    ["PR-OS_P04_T05_CROSS_DiscoveryPlanDetail_模块契约_r0.1.schema.json", "FAC8C9D7D47CA0A2AC725CF6F0DA1879BEE247CF53A2C58887445B3AB8565C6E"],
+    ["PR-OS_P04_T05_CROSS_RecallChannelCandidate_模块契约_r0.1.schema.json", "5ED2292E7D094DDBB4549BC29F5FBD881ADC7A75418FC572713844C41E6BFE5F"],
+    ["PR-OS_P04_T05_CROSS_RecommendationSlateDetail_模块契约_r0.1.schema.json", "2C15360AC115B16F53EEA4A75D5891EFE534E33A8EAAEF1464F0ABC752227208"],
+    ["PR-OS_P04_T05_CROSS_ResearchContextDetail_模块契约_r0.1.schema.json", "E920567DDD463EA17BD477C74995199A5BA276E91557196700082772888AAC84"],
+    ["PR-OS_P04_T05_CROSS_多通道发现与有限Slate_模块契约_r0.1.md", "BBE567D82F675D0B99312C8E254442958F862D1585EBD35AC6397F1FD1826F03"]
+  ],
+  "object_types": [
+    "ResearchContextDetail",
+    "DiscoveryPlanDetail",
+    "DiscoveryCandidateFact",
+    "RecallChannelCandidate",
+    "ChannelRankingEvidence",
+    "CandidateCluster",
+    "RecommendationSlateDetail",
+    "SlateDecisionEvidence",
+    "CoveragePolarizationReport"
+  ],
+  "machine_evidence_schema": {
+    "path": "../40_验收与收尾/PR-OS_P04_T05_CROSS_离线验证证据_2026-08-11/PR-OS_P04_T05_CROSS_A0与Shadow结果_机器证据_r0.1.schema.json",
+    "sha256": "CA4BB87416962066C019702FAFFF35213FD32AFBDC88DB44E097E673B3FB4398",
+    "classification": "PUBLIC_SAFE_MACHINE_EVIDENCE_NOT_MODULE_CONTRACT"
+  },
+  "additional_properties_policy": "FAIL_CLOSED",
+  "formalization_status": "ACCEPTED_PRODUCTION_DISABLED",
+  "production_activation": false,
+  "excluded_authority": [
+    "real profile or policy",
+    "external source or network",
+    "M13 or formal library",
+    "T06 behavior proposal writer",
+    "deployment or controlled activation"
+  ]
+}
