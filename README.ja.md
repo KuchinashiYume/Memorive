@@ -6,7 +6,13 @@ Memorive（略称 memo）は、個人の学習・研究向けの Windows デス�
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-[ダウンロード](https://github.com/KuchinashiYume/Memorive/releases) · [利用ガイド](memorive_desktop/product/desktop/help/ja-JP/manual-text.md) · [設計文書](memorive_desktop/product/desktop/help/ja-JP/design.md) · [問題の報告](https://github.com/KuchinashiYume/Memorive/issues)
+### [⬇ Memorive Windows 版をダウンロード](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Setup-1.01-x64.exe)
+
+**v1.01 · Windows 10 22H2 / Windows 11 · x64 · 約 190 MB**
+
+**初めて使う方は、上の本体インストーラーを選んでください。** プラグインとテストコンソールは、必要に応じて追加できます。
+
+[どのファイルを選べばよいですか？](#ダウンロードガイド) · [ダウンロード](https://github.com/KuchinashiYume/Memorive/releases) · [利用ガイド](memorive_desktop/product/desktop/help/ja-JP/manual-text.md) · [設計文書](memorive_desktop/product/desktop/help/ja-JP/design.md) · [問題の報告](https://github.com/KuchinashiYume/Memorive/issues)
 
 ## できること
 
@@ -37,6 +43,22 @@ Memorive（略称 memo）は、個人の学習・研究向けの Windows デス�
 | 料金・使用量 | 期間とモデルを指定し、リクエスト数、入出力トークン、実額・推定費用を確認できます。不明な費用は不明のまま表示します。 |
 
 ## インストールと使い始め方
+
+### ダウンロードガイド
+
+| 用途 | ダウンロード | 選ぶ目安 |
+| --- | --- | --- |
+| **Memorive 本体・おすすめ** | [Memorive-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Setup-1.01-x64.exe) | デスクトップアプリをインストールします。文献の閲覧、研究 Q&A、会話管理には、このファイルを選んでください。 |
+| ダウンロードの確認 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/SHA256SUMS.txt) | 取得したファイルの完全性を確認するための、小さなチェックサム一覧です。 |
+| Obsidian プラグイン・任意 | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | Obsidian のノートを連携します。Obsidian と Memorive が必要です。 |
+| Zotero プラグイン・任意 | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | Zotero の文献アイテムや注釈を連携します。Zotero と Memorive が必要です。 |
+| テストコンソール・インストール版（任意） | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | Memorive の改良、テスト、問題の調査に使うツールです。インストールして使いたい方はこちら。 |
+| テストコンソール・ポータブル版 | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | 同じツールをインストールせずに使えます。ガイドと権利表記を含む ZIP 全体を展開してください。インストール版との二者択一です。 |
+| テストコンソール・実行ファイルのみ | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | ガイドと権利表記をすでにお持ちの方向けです。初めての方にはインストール版かポータブル版をおすすめします。 |
+| プロジェクトのソース・開発用 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 本体、プラグイン、コンソールのソースコードです。閲覧や自分でのビルドに使用します。インストール済みアプリではありません。 |
+| 第三者コンポーネントのソース・開発/再配布用 | [Memorive-1.01-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-third-party-sources.zip) | 同梱する依存コンポーネントの対応ソースと索引（約 592 MB）です。通常のインストールや利用には不要です。 |
+
+GitHub が自動で追加する **Source code (zip)** と **Source code (tar.gz)** もソースのスナップショットです。通常の利用には **Memorive-Setup-1.01-x64.exe** を選んでください。
 
 ### インストール
 

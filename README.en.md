@@ -6,7 +6,13 @@ Memorive, or memo, is a Windows desktop workspace for personal learning and rese
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-[Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](memorive_desktop/product/desktop/help/en-US/manual-text.md) · [Design](memorive_desktop/product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
+### [⬇ Download Memorive for Windows](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Setup-1.01-x64.exe)
+
+**v1.01 · Windows 10 22H2 / Windows 11 · x64 · about 190 MB**
+
+**First time here? Choose the main app installer above.** It installs Memorive; plugins and the Test Console are optional extras.
+
+[Which file should I download?](#download-guide) · [Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](memorive_desktop/product/desktop/help/en-US/manual-text.md) · [Design](memorive_desktop/product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
 
 ## What can you do?
 
@@ -37,6 +43,22 @@ Before adding a suggested conclusion to your knowledge, review its claim, scope,
 | Billing and usage | Filter requests, input/output tokens, and actual or estimated costs by time and model. Missing cost information remains unknown. |
 
 ## Install and get started
+
+### Download guide
+
+| What you need | Download | When to choose it |
+| --- | --- | --- |
+| **Memorive — recommended** | [Memorive-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Setup-1.01-x64.exe) | The main desktop app. Start here for reading papers, research Q&A, and conversation management. |
+| Verify your download | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/SHA256SUMS.txt) | A small text file of checksums; use it to check that your downloaded file is intact. |
+| Obsidian companion — optional | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | Connect notes from your Obsidian vault. Requires Obsidian and Memorive. |
+| Zotero companion — optional | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | Connect Zotero items and annotations. Requires Zotero and Memorive. |
+| Test Console — optional installer | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | For users who want to modify, test, or diagnose Memorive. Choose this for an installed console. |
+| Test Console — portable alternative | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | For the same testing tool without installation. Extract the whole ZIP; guides and notices are included. Choose this OR the console installer. |
+| Test Console — executable only | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | For advanced use when you already have the guide and notices. The installer or portable ZIP is easier to start with. |
+| Project source — developers | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | Source for the application, companions, and console. Read or build the code; this is not a ready-to-run app. |
+| Third-party source — developers / redistribution | [Memorive-1.01-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-third-party-sources.zip) | Corresponding source and index for bundled dependencies (about 592 MB). Not needed to install or use Memorive. |
+
+GitHub also adds **Source code (zip)** and **Source code (tar.gz)** automatically. These are source snapshots, not Windows installers. For normal use, choose **Memorive-Setup-1.01-x64.exe**.
 
 ### Installation
 
