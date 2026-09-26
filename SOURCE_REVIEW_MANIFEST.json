@@ -39,7 +39,7 @@
     },
     {
       "path": "SOURCE_VERSION.json",
-      "sha256": "b26d5aecaf777379b9b9b9d2c8a76f0e9673615ae9d6ba5056d37670d666ed24",
+      "sha256": "db1f83ee5eb6dc3ca34d8b8dd4da31cedcb46d1f5d4e716b2db4f53b4c0f8a14",
       "bytes": 831
     },
     {
@@ -549,8 +549,8 @@
     },
     {
       "path": "memorive_desktop/RELEASE_CHECKS.md",
-      "sha256": "5f87eedc2fe457c7f297d380c2b65ec13ca822ca060bfdd583f1f92a08aa407f",
-      "bytes": 3781
+      "sha256": "9f119af665a4482333f21b3dfe76e4f8bb3e840db06abc996f44c0db5238a606",
+      "bytes": 3782
     },
     {
       "path": "memorive_desktop/RELEASE_NOTES.md",
@@ -569,7 +569,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
-      "sha256": "0594026cdc8baaea5d31c18afae920d98d2af6cc3145d964582736fe8e35936c",
+      "sha256": "9b84d1fa8214e44313f7eadd9de66c207f51a205763c25cf44c89e9ef07505d0",
       "bytes": 234078
     },
     {
@@ -2904,8 +2904,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/runtime.py",
-      "sha256": "6e989d8c8916b8754dc86b5f2d8cffe59e896a96501b0c0ae636013694377058",
-      "bytes": 337857
+      "sha256": "45ae241b958e78c3554e5e3bee71e05cdce4a82d7e6b8cf40285f281e1ea79c9",
+      "bytes": 337848
     },
     {
       "path": "memorive_desktop/product/desktop/window_chrome.py",

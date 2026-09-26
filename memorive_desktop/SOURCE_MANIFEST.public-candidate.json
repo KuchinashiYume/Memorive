@@ -2012,8 +2012,8 @@
     },
     {
       "path": "product/desktop/runtime.py",
-      "sha256": "6e989d8c8916b8754dc86b5f2d8cffe59e896a96501b0c0ae636013694377058",
-      "bytes": 337857
+      "sha256": "45ae241b958e78c3554e5e3bee71e05cdce4a82d7e6b8cf40285f281e1ea79c9",
+      "bytes": 337848
     },
     {
       "path": "product/desktop/window_chrome.py",

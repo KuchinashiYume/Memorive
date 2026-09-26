@@ -4137,7 +4137,7 @@ class ProductApi:
         toml='[mcp_servers.memo]\ncommand = '+json.dumps(str(helper),ensure_ascii=False)+'\nargs = '+json.dumps(args,ensure_ascii=False)+'\n'
         return {'mcpServers':{'memo':{'command':str(helper),'args':args}},'codex_config_toml':toml,
                 'obsidian_plugin':str(base/'integrations/obsidian/memorive-companion'),
-                'zotero_plugin':str(base/'integrations/zotero/memorive-companion-0.8.113.xpi'),
+                'zotero_plugin':str(base/'integrations/zotero/memorive-companion.xpi'),
                 'helper':str(helper),
                 'skills':str(base/'integrations/skills'),
                 'workspace':str(self._memo.store.root),

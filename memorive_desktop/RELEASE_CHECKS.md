@@ -26,6 +26,6 @@
 
 ## Companion integration review
 
-Obsidian and Zotero companion sources and packages are included. Five naming/privacy review rounds passed with two consecutive clean final rounds. Checks covered source text, manifests, package contents, license notices, and correspondence between source and packaged JavaScript. Tests used isolated generated notes and metadata; no personal host configuration or API credentials were copied.
+Obsidian and Zotero companion sources and packages are included. Seven naming/privacy review rounds passed with two consecutive clean final rounds. Checks covered source text, manifests, package contents, license notices, and correspondence between source and packaged JavaScript. Tests used isolated generated notes and metadata; no personal host configuration or API credentials were copied.
 
 The current EXE was called through both plugins' real transport code with test host adapters. Connection discovery, state, evidence search and error propagation passed. Source service checks covered preview, import, deduplication, citation reads, managed-note conflict protection and idempotent question queueing. No model was called. These are transport and service checks, not a new full Obsidian/Zotero GUI acceptance. The installer engine and installed plugin paths are checked separately in the local delivery record.
