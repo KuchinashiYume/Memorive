@@ -276,7 +276,7 @@
       'assistant.saved.toast': 'Desktop assistant settings saved and synchronized.',
       'assistant.action.shown': 'Desktop assistant shown.',
       'assistant.action.hidden': 'Desktop assistant hidden.',
-      'shortcut.name.placeholder': 'Keep it under 10 characters'
+      'shortcut.name.placeholder': 'Up to 20 characters'
     }),
     'ja-JP': Object.freeze({
       'category.api.help': 'サービス、モデル名、資格情報参照を保存します',
@@ -437,7 +437,7 @@
       'assistant.saved.toast': 'デスクトップ助手の設定を保存し、同期しました。',
       'assistant.action.shown': 'デスクトップ助手を表示しました。',
       'assistant.action.hidden': 'デスクトップ助手を非表示にしました。',
-      'shortcut.name.placeholder': '10 文字未満を推奨'
+      'shortcut.name.placeholder': '20 文字以内'
     })
   });
   const settingsLanguage = () => {
@@ -563,7 +563,7 @@
     setText('#settings-assistant-hide', 'assistant.hide', '隐藏');
     [1, 2, 3].forEach((index) => {
       const input = q(`#settings-assistant-shortcut-name-${index}`);
-      if (input) input.placeholder = uiText('shortcut.name.placeholder', '建议少于 10 个字符');
+      if (input) input.placeholder = uiText('shortcut.name.placeholder', '最多 20 个字符');
     });
     window.dispatchEvent(new CustomEvent('desktop:settings-locale-change', { detail: { language: settingsLanguage() } }));
   };
@@ -1900,7 +1900,17 @@
       const entry = entries[index] || {};
       const name = q(`#settings-assistant-shortcut-name-${index + 1}`);
       const target = q(`#settings-assistant-shortcut-target-${index + 1}`);
-      if (name) name.value = entry.name || '';
+      if (name) {
+        name.value = entry.name || '';
+        name.dataset.savedName = entry.name || '';
+        name.oninput = () => {
+          const value = name.value.trim();
+          const valid = Array.from(value).length <= 20 || value === name.dataset.savedName;
+          name.setCustomValidity(valid ? '' : saveIssueText('ASSISTANT_SHORTCUT_NAME_TOO_LONG'));
+          name.setAttribute('aria-invalid', String(!valid));
+        };
+        name.oninput();
+      }
       if (target) target.value = entry.target || '';
     }
     if (q('#settings-assistant-reminder-scope')) {
@@ -2376,7 +2386,16 @@
   };
 
   const saveAssistantPreferences = async (draft = assistantDraft(), options = {}) => {
+    for (const [index,entry] of draft.shortcut_entries.entries()) {
+      const input = q(`#settings-assistant-shortcut-name-${index+1}`);
+      if (Array.from(entry.name).length > 20 && entry.name !== input?.dataset.savedName)
+        throw new Error('ASSISTANT_SHORTCUT_NAME_TOO_LONG');
+    }
     const receipt = await call('assistant.preference_save', draft);
+    draft.shortcut_entries.forEach((entry,index)=>{
+      const input=q(`#settings-assistant-shortcut-name-${index+1}`);
+      if(input) { input.dataset.savedName=entry.name; input.setCustomValidity(''); }
+    });
     if (options.refreshAfter !== false) renderAssistantPreferences(receipt);
     if (options.announce !== false) showToast(uiText('assistant.saved.toast', '桌面助手设置已保存并联动。'));
     return receipt;
@@ -2679,6 +2698,52 @@
     return next;
   };
 
+  const saveIssueText = (code) => {
+    const locale = String(state?.settings?.preferences?.language || 'zh-CN');
+    const language = locale.startsWith('ja') ? 2 : locale.startsWith('en') ? 1 : 0;
+    const copy = {
+      DIRECTORY_OUTSIDE_ALLOWLIST:['目录尚未授权，请在文档目录设置中重新选择。','Choose the directory again in document settings to authorize it.','文書設定でフォルダーを選び直してください。'],
+      DIRECTORY_MISSING:['目录不存在或已离线，请检查文档目录设置。','The directory is missing or offline; check document settings.','フォルダーが存在しないかオフラインです。文書設定を確認してください。'],
+      ASSISTANT_SHORTCUT_NAME_TOO_LONG:['快捷入口名称最多 20 个字符。','Shortcut names can contain up to 20 characters.','ショートカット名は20文字以内です。']
+    };
+    return copy[code]?.[language] || code;
+  };
+
+  const saveIndependentSettings = async (draft, confirmed) => {
+    const baseline = structuredClone(state.settings);
+    const outcomes = [];
+    // Mode, proxy and model references are one atomic dependency group.
+    const connectionPreferences = ['proxy_mode','proxy_address','request_timeout_seconds'];
+    const groups = [
+      ['models', next => {
+        for (const key of ['mode','model_services','cli_services','workflow']) next[key]=structuredClone(draft[key]);
+        for (const key of connectionPreferences) next.preferences[key]=draft.preferences[key];
+      }],
+      ['directories', next => {next.directories=structuredClone(draft.directories);}],
+      ['preferences', next => {
+        for (const [key,value] of Object.entries(draft.preferences))
+          if (!connectionPreferences.includes(key)) next.preferences[key]=structuredClone(value);
+      }]
+    ];
+    let expectedRevision=state.revision;
+    for (const [scope,merge] of groups) {
+      const changed=structuredClone(baseline); merge(changed);
+      if (JSON.stringify(changed)===JSON.stringify(baseline)) continue;
+      try {
+        const fresh=await call('settings.get_state',{});
+        if (fresh.revision!==expectedRevision) throw new Error('EXPECTED_REVISION_CONFLICT');
+        const next=structuredClone(fresh.settings); merge(next);
+        const preview=await call('settings.preview',{settings:next,confirmed_risk_ids:confirmed});
+        if(preview.status!=='PASS')throw new Error((preview.errors||[]).concat(preview.pending_risks||[]).join(':')||'SETTINGS_SAVE_REJECTED');
+        const saved=await call('settings.save',{settings:next,expected_revision:expectedRevision,confirmed_risk_ids:confirmed});
+        if(saved.status!=='PASS' && saved.action!=='SAVE')throw new Error(saved.error_code||'SETTINGS_SAVE_REJECTED');
+        expectedRevision=saved.revision;
+        outcomes.push({scope,status:'PASS',error_code:null});
+      } catch(error) { outcomes.push({scope,status:'FAILED',error_code:saveErrorCode(error,'SAVE_FAILED')}); }
+    }
+    return {status:outcomes.length && outcomes.every(row=>row.status==='PASS')?'PASS':'PARTIAL',field_groups:outcomes};
+  };
+
   const saveSettings = async (
     settings,
     successMessage = '已保存',
@@ -2687,8 +2752,9 @@
     const confirmed = [...confirmedRiskIds].sort();
     const preview = await call('settings.preview', { settings, confirmed_risk_ids: confirmed });
     if (preview.status !== 'PASS') {
+      if (options.independentGroups) return await saveIndependentSettings(settings, confirmed);
       const reasons = [...(preview.errors || []), ...(preview.pending_risks || [])];
-      showToast(`设置未保存：${reasons.join(' · ') || '本地预检未通过'}`);
+      if (options.announce !== false) showToast(reasons.map(saveIssueText).join(' · ') || uiText('save.blocked', '设置未保存，请检查输入。'));
       return preview;
     }
     const receipt = await call('settings.save', {
@@ -2846,89 +2912,54 @@
       button.setAttribute('aria-busy', 'true');
     }
     try {
-      const settings = collectSettings();
-      const savedRefinementDraft = refinementDraft();
-      const savedAssistantDraft = assistantDraft();
-      if (settings.directories.external_library.enabled) await testLibrary();
-      let receipt;
-      try {
-        receipt = hasApiDraft()
-          ? await bindCredential(credentialDraftGeneration, {
-            settingsDraft:settings, refreshAfter:false, announce:false, returnReceipt:true
-          })
-          : await saveSettings(settings, '', { refreshAfter:false, announce:false });
-        if (!receipt) receipt = {status:'BLOCKED', error_code:'API_DRAFT_INVALID'};
-      } catch (error) {
-        stages.settings = {
-          status:'FAILED', error_code:saveErrorCode(error, 'SETTINGS_SAVE_FAILED'), revision:null
-        };
-        try {
-          await nativeAction('record_settings_save_receipt', {
-            overall_status:'FAILED', stages
-          });
-        } catch (_) {}
-        throw error;
-      }
-      if (receipt?.status !== 'PASS' && receipt?.action !== 'SAVE') {
-        stages.settings = {
-          status:'FAILED',
-          error_code:saveErrorCode(null, receipt?.error_code || receipt?.status || 'SETTINGS_SAVE_REJECTED'),
-          revision:Number.isInteger(receipt?.revision) ? receipt.revision : null
-        };
-        try {
-          await nativeAction('record_settings_save_receipt', {
-            overall_status:'FAILED', stages
-          });
-        } catch (_) {}
-        return receipt;
-      }
-      stages.settings = {
-        status:'PASS', error_code:null,
-        revision:Number.isInteger(receipt?.revision) ? receipt.revision : null
-      };
-      markClean();
-
-      const auxiliary = [
-        ['refinement', () => saveRefinementSettings(savedRefinementDraft, {
-          refreshAfter:false, announce:false
-        })],
-        ['assistant', () => saveAssistantPreferences(savedAssistantDraft, {
-          refreshAfter:false, announce:false
-        })],
-        ['refresh', () => refresh({ preserveDraft:false })]
+      // Each independent persistence participant is attempted, even if another
+      // one fails. Failed drafts must survive refresh and remain dirty.
+      let receipt = null;
+      const operations = [
+        ['settings', async () => {
+          const settings = collectSettings();
+          receipt = hasApiDraft()
+            ? await bindCredential(credentialDraftGeneration, {
+                settingsDraft:settings, refreshAfter:false, announce:false, returnReceipt:true
+              })
+            : await saveSettings(settings, '', { refreshAfter:false, announce:false, independentGroups:true });
+          if (!receipt || (receipt.status !== 'PASS' && receipt.action !== 'SAVE')) {
+            throw new Error((receipt?.errors || []).join(':') || receipt?.error_code || 'SETTINGS_SAVE_REJECTED');
+          }
+          return receipt;
+        }],
+        ['refinement', () => saveRefinementSettings(refinementDraft(), {refreshAfter:false, announce:false})],
+        ['assistant', () => saveAssistantPreferences(assistantDraft(), {refreshAfter:false, announce:false})]
       ];
-      for (const [name, operation] of auxiliary) {
+      for (const [name, operation] of operations) {
         try {
-          const auxiliaryReceipt = await operation();
-          stages[name] = {
-            status:'PASS', error_code:null,
-            revision:Number.isInteger(auxiliaryReceipt?.revision) ? auxiliaryReceipt.revision : null
-          };
+          const result = await operation();
+          if (result?.status === 'BLOCKED' || result?.status === 'FAILED' || result?.status === 'FAIL')
+            throw new Error(result.error_code || 'SAVE_REJECTED');
+          stages[name] = {status:'PASS', error_code:null, revision:Number.isInteger(result?.revision) ? result.revision : null};
         } catch (error) {
-          stages[name] = {
-            status:'WARNING', error_code:saveErrorCode(error, `${name}_REFRESH_DEFERRED`), revision:null
-          };
+          stages[name] = {status:'FAILED', error_code:saveErrorCode(error, 'SAVE_FAILED'), revision:null};
         }
       }
-      const warning = Object.values(stages).some((stage) => stage.status === 'WARNING');
-      let receiptPersisted = true;
+      const failed = Object.entries(stages).filter(([name,row]) => name !== 'refresh' && row.status === 'FAILED');
+      if (!failed.length) markClean();
+      else { generalDraftDirty = true; syncSaveState(); }
       try {
-        await nativeAction('record_settings_save_receipt', {
-          overall_status:warning ? 'WARNING' : 'PASS', stages
-        });
-      } catch (_) {
-        receiptPersisted = false;
+        // Refresh revisions after partial writes without replacing unsaved forms.
+        await refresh({apply:!failed.length, preserveDraft:Boolean(failed.length)});
+        stages.refresh = {status:'PASS', error_code:null, revision:null};
+      } catch (error) {
+        stages.refresh = {status:'WARNING', error_code:saveErrorCode(error, 'REFRESH_FAILED'), revision:null};
       }
-      const hasWarning = warning || !receiptPersisted;
-      showToast(hasWarning
-        ? '已保存，页面刷新失败'
-        : '设置已真实保存；运行中任务继续使用既有冻结快照。');
+      const anySaved = ['settings','refinement','assistant'].some(name=>stages[name].status==='PASS');
+      const overall = failed.length ? (anySaved ? 'WARNING' : 'FAILED') : (stages.refresh.status==='WARNING' ? 'WARNING' : 'PASS');
+      let receiptPersisted = true;
+      try { await nativeAction('record_settings_save_receipt', {overall_status:overall, stages}); }
+      catch (_) { receiptPersisted = false; }
       return {
-        ...receipt,
-        settings_persisted:true,
-        aggregate_status:hasWarning ? 'WARNING' : 'PASS',
-        stages,
-        diagnostic_receipt_persisted:receiptPersisted
+        ...(receipt || {}), status:overall==='PASS' ? 'PASS' : 'PARTIAL',
+        settings_persisted:stages.settings.status==='PASS', aggregate_status:overall,
+        stages, field_groups:receipt?.field_groups, diagnostic_receipt_persisted:receiptPersisted
       };
     } finally {
       settingsSaveInFlight = false;
@@ -2940,43 +2971,54 @@
   };
 
   const save = async () => {
-    if(aggregateSaveInFlight)return {status:'PENDING'};
-    const pending=[...saveParticipants.entries()].filter(([,part])=>part.isDirty());
-    if(pending.some(([,part])=>part.validate?.()===false))return {status:'BLOCKED',reason:'INVALID_SETTINGS_INPUT'};
-    const developer=Object.keys(developerEditorMetrics.dirty)
-      .filter(key=>developerEditorMetrics.dirty[key])
-      .map(scope=>[scope,parseDeveloperInput(scope)]);
-    aggregateSaveInFlight=true;
-    const controls=qa('input,select,textarea,button').map(node=>[node,node.disabled]);
+    if (aggregateSaveInFlight) return {status:'PENDING'};
+    const pending = [...saveParticipants.entries()].filter(([,part])=>part.isDirty());
+    const developer = Object.keys(developerEditorMetrics.dirty).filter(key=>developerEditorMetrics.dirty[key]);
+    aggregateSaveInFlight = true;
+    const controls = qa('input,select,textarea,button').map(node=>[node,node.disabled]);
     controls.forEach(([node])=>node.disabled=true);
     q('#settings-save')?.setAttribute('aria-busy','true');
-    const completed=[];
+    const completed = [], failures = [];
+    const attempt = async (name, operation) => {
+      try {
+        const result = await operation();
+        if (['BLOCKED','FAILED','FAIL','PARTIAL','PENDING'].includes(result?.status) || result?.aggregate_status==='WARNING') {
+          const failedStages = Object.entries(result?.stages || {}).filter(([,row])=>['FAILED','WARNING'].includes(row.status));
+          const passedStages = Object.entries(result?.stages || {}).filter(([key,row])=>key!=='refresh' && row.status==='PASS');
+          passedStages.forEach(([key])=>completed.push(key));
+          if (failedStages.length) failedStages.forEach(([key,row])=>{
+            if (key==='settings' && result?.field_groups?.length) {
+              result.field_groups.forEach(group=>group.status==='PASS' ? completed.push(group.scope) : failures.push(group));
+            } else failures.push({scope:key,error_code:row.error_code || 'SAVE_FAILED'});
+          });
+          else failures.push({scope:name,error_code:result?.error_code || 'SAVE_REJECTED'});
+          return;
+        }
+        completed.push(name);
+      } catch (error) { failures.push({scope:name,error_code:saveErrorCode(error,'SAVE_FAILED')}); }
+    };
     try {
-      if(generalDraftDirty || cliDraftDirty || hasApiDraft() || (!pending.length && !developer.length)){
-        const result=await savePrimary();
-        if(result?.status==='BLOCKED'||result?.status==='FAILED'||result?.aggregate_status==='WARNING')
-          return result;
-        completed.push('settings');
-      }
-      for(const [scope,documentValue] of developer){
-        const result=await saveDeveloper(scope,documentValue);
-        if(result?.status==='BLOCKED'||result?.status==='FAILED')throw new Error('开发者配置未保存');
-        completed.push(scope);
-      }
-      for(const [key,part] of pending){await part.save();completed.push(key);}
+      if (generalDraftDirty || cliDraftDirty || hasApiDraft() || (!pending.length && !developer.length))
+        await attempt('settings', savePrimary);
+      for (const scope of developer)
+        await attempt(scope, () => saveDeveloper(scope, parseDeveloperInput(scope)));
+      for (const [key,part] of pending) await attempt(key, async () => {
+        if (part.validate?.()===false) throw new Error('INVALID_SETTINGS_INPUT');
+        return await part.save();
+      });
       syncSaveState();
-      showToast('设置已保存');
-      return {status:'PASS',completed_scopes:completed};
-    } catch(error){
-      showToast((completed.length?'部分设置已保存；':'')+'其余修改尚未保存，请检查后重试');
-      throw error;
+      const lang=String(state?.settings?.preferences?.language || 'zh-CN');
+      const i=lang.startsWith('ja')?2:lang.startsWith('en')?1:0;
+      const labels={models:['模型与流程','Models and workflow','モデル・ワークフロー'],directories:['文档目录','Document directories','文書フォルダー'],preferences:['应用偏好','Preferences','環境設定'],settings:['常规与模型设置','General and models','一般・モデル'],refinement:['会话精炼','Refinement','セッション精錬'],assistant:['快捷入口','Shortcuts','ショートカット'],refresh:['页面刷新','Page refresh','画面更新']};
+      const prefix=failures.length
+        ? (completed.length ? ['部分设置已保存；以下项目未完成：','Some settings were saved; unfinished: ','一部の設定を保存しました。未完了：'] : ['设置未保存：','Settings were not saved: ','設定を保存できませんでした：'])
+        : ['设置已保存','Settings saved','設定を保存しました'];
+      showToast(prefix[i] + failures.map(row=>(labels[row.scope]?.[i] || row.scope)+' — '+saveIssueText(row.error_code)).join(' · '));
+      return {status:failures.length ? (completed.length?'PARTIAL':'FAILED'):'PASS',completed_scopes:completed,failed_scopes:failures};
     } finally {
       aggregateSaveInFlight=false;
       controls.forEach(([node,disabled])=>{if(node.isConnected)node.disabled=disabled;});
-      // Dependencies may have changed while the form was locked (for
-      // example enabling literature receiving enables its source refresh).
-      // Recompute those controls after releasing the temporary save lock.
-      for(const part of saveParticipants.values())part.afterUnlock?.();
+      for (const part of saveParticipants.values()) part.afterUnlock?.();
       q('#settings-save')?.removeAttribute('aria-busy');
       syncSaveState();
       window.__Desktop_SETTINGS_ICONS__?.applyActions();

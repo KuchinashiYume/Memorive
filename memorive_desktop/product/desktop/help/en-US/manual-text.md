@@ -2,13 +2,13 @@
 
 Follow this guide from your first source to a research judgment you can trace back to the original. Read it in order for setup, or go straight to the task at hand. Screens show empty states or synthetic examples; their answers and filenames illustrate controls, not research findings. Lists, prices, and connection states will reflect your own sources and settings.
 
-v1.02 pre-release documentation · 2026-09-29. This edition covers the agreed scope; installation and update instructions must be checked against the final delivery before release. A documentation version is not a release announcement. Existing illustrations explain common controls; use the actual page for new features.
+v1.02.01 documentation · 2026-09-30. Update identifier: 1.02.01; the feature scope remains v1.02. Earlier illustrations explain common controls. This revision does not claim a new full acceptance run.
 
 ## 01 Understand the workspace and where research material goes
 
 The left navigation shows where a source goes: Inbox receives it, Current Tasks tracks processing, and Library holds the source and its results. Research Chat lets you ask questions across sources. Settings controls models and retrieval; Messages and Work Log help you retrace what happened. Header buttons open and close the sidebars and bottom panel.
 
-Main window in an empty state; use it to locate navigation.
+![Main window in an empty state; use it to locate navigation.](assets/home.png)
 
 ### On the first launch
 
@@ -31,7 +31,7 @@ Latest developments focuses on recent publications in a research direction; rela
 
 Connect external models in **Settings → Model Services and API**. Whether you use a provider's official API, a compatible endpoint, or a relay, its protocol, address, model ID, and credential must describe the same working route. The display name is for you; the model ID is what the service receives.
 
-External API route diagram; open Model Services and API to inspect the actual fields.
+![External API route diagram; open Model Services and API to inspect the actual fields.](assets/api-route.svg)
 
 ### Configure the route
 
@@ -58,7 +58,7 @@ Do not put keys in documentation, screenshots, web exports, or ordinary logs. Gi
 
 If a CLI tool is installed and signed in on your computer, Memo can use it as an execution route. The tool still manages its own installation, sign-in, updates, and subscription access. Memo discovers the route and assigns usable models to task nodes. A subscription may have no meaningful per-call price.
 
-The tool owns installation and login; verify the actual route and node receipt in Memo.
+![The tool owns installation and login; verify the actual route and node receipt in Memo.](assets/cli.svg)
 
 ### Connect it
 
@@ -82,7 +82,7 @@ Custom integration requires a command that can receive requests and return resul
 
 Start the model service in its own application, then let Memo detect it. The current local endpoint uses `127.0.0.1` or `::1`. Appearing in the model list shows only that Memo found it; chat, image reading, embedding, and review each need their own check.
 
-Discovery is followed by protocol, model-load, and node-capability checks.
+![Discovery is followed by protocol, model-load, and node-capability checks.](assets/local.svg)
 
 ### Connect it
 
@@ -98,9 +98,11 @@ Use a small, nonprivate sample to check the relevant role. No provider API charg
 
 ## 05 Workflow Model Mapping and validation
 
+v1.02.01: independent settings are saved separately. If a section fails, the message identifies it and retains its unsaved draft. A stale saved directory no longer blocks an unrelated model change; correct the path before using that directory. Import rebases only profile defaults or missing historical defaults, preserving custom paths and reporting problems. New shortcut names accept up to 20 Unicode characters. Existing longer names can be retained unchanged; editing a name applies the new limit.
+
 Workflow Model Mapping chooses the route that each node in a new task will use. Embedding, Card extraction, Analysis, and review call for different abilities; daily, weekly, and monthly reports also have separate model choices. Template changes affect later tasks, while started nodes retain the configuration and records from their run.
 
-Nine-node path grouped into source, Card, and Analysis stages; 04 and 08 may be skipped.
+![Nine-node path grouped into source, Card, and Analysis stages; 04 and 08 may be skipped.](assets/flow.svg)
 
 ### Configure and check
 
@@ -125,7 +127,7 @@ After an edit, compare three things: the saved template, Inbox's executable-stat
 
 Inbox is the first stop for a new source. Check the file and preview before deciding when to process it. A place in the queue does not mean its text has been converted or its Card created. For a first run, choose a clear paper you know well enough to check.
 
-Empty Inbox: locate Add, Batch Management, and Auto Run.
+![Empty Inbox: locate Add, Batch Management, and Auto Run.](assets/inbox.png)
 
 ### Process one source
 
@@ -151,7 +153,7 @@ Discovery, Inbox and Library use the same identity checks. Prefer stable identif
 
 The task list shows how far processing has gone; open a node to see the input and model used in this run. The nine steps are 01 document conversion, 02 embedding, 03 Card generation, 04 Card review, 05 Card admission, 06 Analysis material assembly, 07 Analysis, 08 Analysis review, and 09 human decision.
 
-Current Tasks empty state; select a task, then a node.
+![Current Tasks empty state; select a task, then a node.](assets/tasks.png)
 
 ### Inspect the path
 
@@ -181,7 +183,7 @@ Progress follows node activity, processing, saving and terminal states. When a p
 
 After processing, read the original, Card, and Analysis together in Library. The Card gathers information extracted from the source; Analysis offers candidate judgments based on that evidence. Return to the original whenever a number, condition, or conclusion needs checking.
 
-Library entry in an empty state.
+![Library entry in an empty state.](assets/library.png)
 
 ### Review one paper
 
@@ -213,7 +215,7 @@ A stored location supports inspection, not a guarantee of perfect OCR or parsing
 
 Begin Research Chat by choosing a project and opening a conversation. By default, it searches attachments in that conversation. Choose a wider scope if you want it to find other project material. You can attach a file before it has produced a Card.
 
-Research Chat source selection diagram; examples are not research evidence.
+![Research Chat source selection diagram; examples are not research evidence.](assets/research.svg)
 
 ### Ask a first question
 
@@ -251,7 +253,7 @@ Archiving keeps text, knowledge, citations and answer versions. Viewing an archi
 
 Treat each research answer as an analysis to verify. For a number, comparison, or causal claim, find its citation and read the corresponding saved source with its surrounding context. Smooth prose, many citations, or a “saveable conclusion” cannot replace that check.
 
-Verification path: claim, citation, original context, decision.
+![Verification path: claim, citation, original context, decision.](assets/citation.svg)
 
 ### Check claim by claim
 
@@ -283,7 +285,7 @@ Before saving knowledge from a chat, check the question, selected answer version
 
 Use **Settings → Retrieval and Weights** when you want to change which sources appear first. Decide whether the settings apply to every project or one project, then choose a preset or adjust individual weights. Ranking cannot repair an incorrect source, and changing the embedding model may require a new index.
 
-Synthetic six-weight example; the total is 100%.
+![Synthetic six-weight example; the total is 100%.](assets/weights.png)
 
 ### Choose a mode
 
@@ -302,7 +304,7 @@ Preview with papers you know should appear. Watch how originals and derived know
 
 Session Management brings local Codex and Claude Code records, browser captures, and manual imports into one reading list. If you keep chatting in the source tool, sync again to bring in the new messages. Organization here affects Memo's saved copy.
 
-Session workflow without private conversation content.
+![Session workflow without private conversation content.](assets/sessions.svg)
 
 ### From source to artifact
 
@@ -328,7 +330,7 @@ Titles may repeat across sources or sessions; use source, time, and content to i
 
 To bring web content into Memo, prepare the browser companion in **Settings → Conversation Refinement**, then sign in on the target site yourself. Historical coverage depends on the site. Choose current-page capture, an initial full collection, or a later incremental update according to what you need.
 
-Browser collection sequence.
+![Browser collection sequence.](assets/web-reading.svg)
 
 ### Procedure
 
@@ -346,7 +348,7 @@ Site layout changes, network interruption, or lack of full-history support may l
 
 Use Model Rankings to narrow your shortlist: compare public capability and price information, then test promising candidates on your own work. Read the update date, metric definition, provider, currency, and unit together. A ranking score cannot stand in for a connection check or a task sample.
 
-Ranking source unavailable: a recognizable empty state.
+![Ranking source unavailable: a recognizable empty state.](assets/leaderboard.png)
 
 ### Compare carefully
 
@@ -363,7 +365,7 @@ An empty board does not prove a model does not exist. A high rank does not grant
 
 In the bottom **Usage and Cost** panel, choose the accounting scope and period before filtering models or switching metrics. Its totals, public prices in Model Rankings, and a receipt for one chat answer cover different records. Align those scopes before comparing costs.
 
-Filters in the Usage and Cost bottom panel.
+![Filters in the Usage and Cost bottom panel.](assets/billing.svg)
 
 ### Read the chart and details
 
@@ -388,7 +390,7 @@ When current-job attribution is unavailable, do not divide global spending by ta
 
 Daily, weekly, and monthly reports help you look back over a period of research. Messages surface work that needs attention, while Work Log preserves the trail of a run. To explain a judgment, follow those pointers back through the task, Card, Analysis, and original source.
 
-Messages entry; open one item to find its linked object.
+![Messages entry; open one item to find its linked object.](assets/messages.png)
 
 ### Reports and issues
 
@@ -454,6 +456,8 @@ Current Task shows execution status only. Completed logic nodes are green, inclu
 A finding applies only to the conditions and coverage stated in its report. Convert percentages and ratios according to the source meaning, without guessing missing conditions. Truncated formulas, ambiguous OCR and valid zero values need separate treatment. Checks do not rewrite the paper, and concerns or human explanations do not replace research judgment.
 
 ## 18 Installation, update checks and incremental upgrades
+
+v1.02.01 is a maintenance release of v1.02. For the first upgrade from v1.01 or v1.02, back up your data and use this installer or the complete portable package: the old updater does not recognize three-part versions. Do not manually overlay a delta ZIP. This release adds three-part version recognition for subsequent in-app updates.
 
 For a new installation, use the globe icon on the welcome page to choose Chinese, English or Japanese, then check prerequisites and the application and data folders. Language selection is also available in the native prerequisite wizard when WebView2 is missing. For a new profile, the choice becomes memo's initial language. An upgrade or reused data folder keeps existing settings.
 

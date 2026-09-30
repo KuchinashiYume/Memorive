@@ -25,7 +25,7 @@ def current_release_view(receipt, current_version, current_package):
     if not version or not package:
         return value
     def order(text):
-        if not isinstance(text, str) or re.fullmatch(r'(?:[0-9]+\.[0-9]{2,}|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', text) is None:
+        if not isinstance(text, str) or re.fullmatch(r'(?:[0-9]+\.[0-9]{2,}(?:\.[0-9]{2,})?|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', text) is None:
             raise ValueError('UPDATE_VERSION_INVALID')
         parts = tuple(map(int, text.split('.')))
         return parts + (0,) * (4 - len(parts))

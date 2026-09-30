@@ -2,13 +2,15 @@
 
 *Design notes for users and contributors · 29 September 2026*
 
-v1.02 pre-release documentation · 2026-09-29. This edition covers the agreed scope; installation and update instructions must be checked against the final delivery before release. A documentation version is not a release announcement. Existing illustrations explain common controls; use the actual page for new features.
+v1.02.01 documentation · 2026-09-30. Update identifier: 1.02.01; the feature scope remains v1.02. Earlier illustrations explain common controls. This revision does not claim a new full acceptance run.
 
 Memorive connects document processing, research Q&A, citation checking and knowledge reuse. These notes explain the data flow, module responsibilities and failure handling behind research records that can be traced to their sources. Researchers remain responsible for judgment and final writing.
 
 The document covers both the implemented core and constrained extension designs. Availability depends on the current interface, configuration and task receipts; revising this document does not authorize a release.
 
 ## 1. Positioning and Principles
+
+v1.02.01: independent settings are saved separately. If a section fails, the message identifies it and retains its unsaved draft. A stale saved directory no longer blocks an unrelated model change; correct the path before using that directory. Import rebases only profile defaults or missing historical defaults, preserving custom paths and reporting problems. New shortcut names accept up to 20 Unicode characters. Existing longer names can be retained unchanged; editing a name applies the new limit.
 
 Memorive is an auxiliary system for personal research workflows, supporting material acquisition, evidence organization, retrieval and analysis, research logging, and knowledge reuse. It is not bound to a single discipline. The system provides traceable materials and recommendations; researchers are responsible for judgment, decision-making, and final writing.
 
@@ -42,7 +44,7 @@ Originals and preprocessed intermediate artifacts may be saved first, without re
 
 M18 connects bounded numeric and internal-logic checks to the existing workflow without changing the scheduling of its data node and logic branch. M19 coordinates desktop installation and updates outside the research pipeline. The diagram retains the original research paths; the added responsibilities and dependencies are described in the module catalogue and Chapter 4.
 
-![Figure 1 · System overview](../../design-assets/en-US/figure-01.png)
+![Figure 1 · System overview](assets/figure-01.svg)
 
 *Figure 1 · System overview*
 
@@ -130,7 +132,7 @@ Disciplines only replace alias mappings; core fields remain unchanged. Evidence 
 
 ### M1 · Preprocessing Pipeline
 
-![Figure 2 · Document processing workflow](../../design-assets/en-US/figure-02.png)
+![Figure 2 · Document processing workflow](assets/figure-02.svg)
 
 *Figure 2 · Document processing workflow*
 
@@ -156,7 +158,7 @@ Scope of this version. Capabilities registers 14 canonical formats: 11 are suppo
 
 ### M2 · Distillation
 
-![Figure 3 · Evidence extraction workflow](../../design-assets/en-US/figure-03.png)
+![Figure 3 · Evidence extraction workflow](assets/figure-03.svg)
 
 *Figure 3 · Evidence extraction workflow*
 
@@ -184,7 +186,7 @@ Long-form Content. Capabilities segmented_distill has established mechanisms for
 
 ### M3 · Retrieval and Context Weighting
 
-![Figure 4 · Evidence retrieval workflow](../../design-assets/en-US/figure-04.png)
+![Figure 4 · Evidence retrieval workflow](assets/figure-04.svg)
 
 *Figure 4 · Evidence retrieval workflow*
 
@@ -202,7 +204,7 @@ The Context Pack aggregates the data_ownership of actually selected members to f
 
 ### M4 · Analysis
 
-![Figure 5 · Research analysis workflow](../../design-assets/en-US/figure-05.png)
+![Figure 5 · Research analysis workflow](assets/figure-05.svg)
 
 *Figure 5 · Research analysis workflow*
 
@@ -218,7 +220,7 @@ Research analysis provides opinion candidates, evidence arrangements, and analys
 
 ### M5 · Opportunity Analysis
 
-![Figure 6 · Research opportunities workflow](../../design-assets/en-US/figure-06.png)
+![Figure 6 · Research opportunities workflow](assets/figure-06.svg)
 
 *Figure 6 · Research opportunities workflow*
 
@@ -234,7 +236,7 @@ Research opportunities processes incrementally by topic, triggered by schedules,
 
 ### M6 · Verification
 
-![Figure 7 · Evidence review workflow](../../design-assets/en-US/figure-07.png)
+![Figure 7 · Evidence review workflow](assets/figure-07.svg)
 
 *Figure 7 · Evidence review workflow*
 
@@ -252,7 +254,7 @@ M18 supplies numeric and internal-logic findings; M6 continues to assess whether
 
 ### M7 · Weights
 
-![Figure 8 · Evidence retrieval weighting workflow](../../design-assets/en-US/figure-08.png)
+![Figure 8 · Evidence retrieval weighting workflow](assets/figure-08.svg)
 
 *Figure 8 · Evidence retrieval weighting workflow*
 
@@ -277,7 +279,7 @@ DerivedPenalty only reduces the authority score of derived entries; it does not 
 
 ### M8 · State Machine
 
-![Figure 9 · Knowledge admission workflow](../../design-assets/en-US/figure-09.png)
+![Figure 9 · Knowledge admission workflow](assets/figure-09.svg)
 
 *Figure 9 · Knowledge admission workflow*
 
@@ -289,7 +291,7 @@ Knowledge admission is not responsible for quality judgment, technical retries, 
 
 ### M9 · Model Gateway and Execution Channels
 
-![Figure 10 · Model services workflow](../../design-assets/en-US/figure-10.png)
+![Figure 10 · Model services workflow](assets/figure-10.svg)
 
 *Figure 10 · Model services workflow*
 
@@ -315,7 +317,7 @@ Prompt versions, caching capabilities, tiers, Thinking, and billing rules are ma
 
 ### M10 · Controlled Knowledge Feedback
 
-![Figure 11 · Knowledge feedback workflow](../../design-assets/en-US/figure-11.png)
+![Figure 11 · Knowledge feedback workflow](assets/figure-11.svg)
 
 *Figure 11 · Knowledge feedback workflow*
 
@@ -331,7 +333,7 @@ Knowledge feedback admission and derived down-weighting separately address "whet
 
 ### M11 · Logs and Terminal State Ledger
 
-![Figure 12 · Runtime records workflow](../../design-assets/en-US/figure-12.png)
+![Figure 12 · Runtime records workflow](assets/figure-12.svg)
 
 *Figure 12 · Runtime records workflow*
 
@@ -351,7 +353,7 @@ External calls are logged in phases: before sending, freeze request identity, ro
 
 ### M12 · Design Decision Log
 
-![Figure 13 · Decision records workflow](../../design-assets/en-US/figure-13.png)
+![Figure 13 · Decision records workflow](assets/figure-13.svg)
 
 *Figure 13 · Decision records workflow*
 
@@ -363,7 +365,7 @@ Applicable items include model acceptance, isolation, canary release, rollback, 
 
 ### M13 · Data Lifecycle
 
-![Figure 14 · Version and provenance workflow](../../design-assets/en-US/figure-14.png)
+![Figure 14 · Version and provenance workflow](assets/figure-14.svg)
 
 *Figure 14 · Version and provenance workflow*
 
@@ -389,7 +391,7 @@ M19 coordinates changes to application packages and installation locations. M13 
 
 ### M14 · Quality Assurance
 
-![Figure 15 · Quality evaluation workflow](../../design-assets/en-US/figure-15.png)
+![Figure 15 · Quality evaluation workflow](assets/figure-15.svg)
 
 *Figure 15 · Quality evaluation workflow*
 
@@ -421,7 +423,7 @@ M18 performs an individual bounded data and logic check. M14 aggregates its rece
 
 ### M15 · Research Change Log
 
-![Figure 16 · Research reports workflow](../../design-assets/en-US/figure-16.png)
+![Figure 16 · Research reports workflow](assets/figure-16.svg)
 
 *Figure 16 · Research reports workflow*
 
@@ -433,7 +435,7 @@ Daily reports focus on new, modified, pending review, and failed items; weekly r
 
 ### M16 · Literature Discovery and Research Radar
 
-![Figure 17 · Literature discovery workflow](../../design-assets/en-US/figure-17.png)
+![Figure 17 · Literature discovery workflow](assets/figure-17.svg)
 
 *Figure 17 · Literature discovery workflow*
 
@@ -449,7 +451,7 @@ Two human gates: The first approval only permits the isolated Document processin
 
 ### M17 · Proactive Knowledge Acquisition
 
-![Figure 18 · Research recommendations workflow](../../design-assets/en-US/figure-18.png)
+![Figure 18 · Research recommendations workflow](assets/figure-18.svg)
 
 *Figure 18 · Research recommendations workflow*
 

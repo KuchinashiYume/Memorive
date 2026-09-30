@@ -4,8 +4,8 @@
   "profile_revision": "1.1",
   "profile_sha256": "989ded15c96014bf0317dfe086cb314af5d9e5414e22a9b9ff9f975cc7fda954",
   "canonical_profile": "brand_profile.json",
-  "package_id": "Memorive-1.02-release001",
-  "release_version": "1.02",
+  "package_id": "Memorive-1.02-hotfix001",
+  "release_version": "1.02.01",
   "channel": "SANDBOX_TEST_ONLY_UNSIGNED",
   "arch": "x64",
   "main_executable": "Memorive.exe",
@@ -30,11 +30,11 @@
   },
   "release_authorized": false,
   "acceptance_verdict": "NOT_ASSESSED",
-  "display_version": "v1.02",
+  "display_version": "v1.02.01",
   "windows_fixed_version": [
     1,
     2,
-    0,
+    1,
     0
   ]
 }

@@ -29,7 +29,7 @@
     {
       "path": "installation_cross_setup.cs",
       "baseline_sha256": "7fcc9a96793b650cc9b6cd356b82f9e7da7ddf746a9b3c42e0c31bffe136f04f",
-      "candidate_sha256": "54b96360fa94f240de8b63dbcd16fc2b764b19e1a3bdd3bb88c7cf042ae09938"
+      "candidate_sha256": "c4c8bb774dd20759c02c7fd7a6fa94908264d176e2ef62f9491f346acd821dac"
     },
     {
       "path": "release_metadata.cs",

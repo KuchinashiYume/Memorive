@@ -2,7 +2,7 @@
 
 Follow this guide from your first source to a research judgment you can trace back to the original. Read it in order for setup, or go straight to the task at hand. Screens show empty states or synthetic examples; their answers and filenames illustrate controls, not research findings. Lists, prices, and connection states will reflect your own sources and settings.
 
-v1.02 pre-release documentation · 2026-09-29. This edition covers the agreed scope; installation and update instructions must be checked against the final delivery before release. A documentation version is not a release announcement. Existing illustrations explain common controls; use the actual page for new features.
+v1.02.01 documentation · 2026-09-30. Update identifier: 1.02.01; the feature scope remains v1.02. Earlier illustrations explain common controls. This revision does not claim a new full acceptance run.
 
 ## 01 Understand the workspace and where research material goes
 
@@ -97,6 +97,8 @@ Start the model service in its own application, then let Memo detect it. The cur
 Use a small, nonprivate sample to check the relevant role. No provider API charge does not mean no GPU, power, or time cost. A connection pass does not qualify every workflow node.
 
 ## 05 Workflow Model Mapping and validation
+
+v1.02.01: independent settings are saved separately. If a section fails, the message identifies it and retains its unsaved draft. A stale saved directory no longer blocks an unrelated model change; correct the path before using that directory. Import rebases only profile defaults or missing historical defaults, preserving custom paths and reporting problems. New shortcut names accept up to 20 Unicode characters. Existing longer names can be retained unchanged; editing a name applies the new limit.
 
 Workflow Model Mapping chooses the route that each node in a new task will use. Embedding, Card extraction, Analysis, and review call for different abilities; daily, weekly, and monthly reports also have separate model choices. Template changes affect later tasks, while started nodes retain the configuration and records from their run.
 
@@ -454,6 +456,8 @@ Current Task shows execution status only. Completed logic nodes are green, inclu
 A finding applies only to the conditions and coverage stated in its report. Convert percentages and ratios according to the source meaning, without guessing missing conditions. Truncated formulas, ambiguous OCR and valid zero values need separate treatment. Checks do not rewrite the paper, and concerns or human explanations do not replace research judgment.
 
 ## 18 Installation, update checks and incremental upgrades
+
+v1.02.01 is a maintenance release of v1.02. For the first upgrade from v1.01 or v1.02, back up your data and use this installer or the complete portable package: the old updater does not recognize three-part versions. Do not manually overlay a delta ZIP. This release adds three-part version recognition for subsequent in-app updates.
 
 For a new installation, use the globe icon on the welcome page to choose Chinese, English or Japanese, then check prerequisites and the application and data folders. Language selection is also available in the native prerequisite wizard when WebView2 is missing. For a new profile, the choice becomes memo's initial language. An upgrade or reused data folder keeps existing settings.
 

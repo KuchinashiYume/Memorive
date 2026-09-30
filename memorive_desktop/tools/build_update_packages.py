@@ -97,7 +97,9 @@ def main() -> None:
     args = parser.parse_args()
     identity = json.loads(args.identity.read_text('utf8'))
     version = identity['release_version']
-    if not re.fullmatch(r'\d+\.\d{2,}', version) or identity['version_tuple'] != [int(x) for x in version.split('.')] + [0, 0]:
+    parts = [int(x) for x in version.split('.')] if re.fullmatch(r'(?:[0-9]+\.[0-9]{2,}(?:\.[0-9]{2,})?|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', version) else []
+    expected = parts + [0] * (4 - len(parts))
+    if not parts or any(n > 65535 for n in parts) or identity['version_tuple'] != expected:
         raise ValueError('UPDATE_RELEASE_VERSION_INVALID')
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,63}', identity['package_id']):
         raise ValueError('UPDATE_PACKAGE_ID_INVALID')

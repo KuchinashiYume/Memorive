@@ -1,19 +1,19 @@
 {
   "schema_version": "MemoriveUpdateRelease-v1",
-  "release_version": "1.02",
-  "display_version": "v1.02",
+  "release_version": "1.02.01",
+  "display_version": "v1.02.01",
   "version_tuple": [
     1,
     2,
-    0,
+    1,
     0
   ],
-  "package_id": "Memorive-1.02-release001",
-  "source_commit": "SOURCE_ARCHIVE_v1.02_release001",
+  "package_id": "Memorive-1.02-hotfix001",
+  "source_commit": "SOURCE_ARCHIVE_v1.02.01_hotfix001",
   "release_authorized": false,
   "notes": {
-    "zh-CN": "研究问答、文献发现与来源核查、多语言内容，以及签名验证的文件级增量更新。v1.01用户请先安装v1.02。",
-    "en-US": "Research Q&A, literature discovery and source checks, multilingual content, and signature-verified file-level updates. Users of v1.01 should install v1.02 first.",
-    "ja-JP": "研究Q&A、文献発見と出典確認、多言語コンテンツ、署名検証付きファイル差分更新。v1.01からは最初にv1.02をインストールしてください。"
+    "zh-CN": "修复失效的已保存目录阻断模型保存，以及一个设置失败跳过其他设置的问题。改进旧设置导入；快捷入口新名称最多20个字符，保留既有长名称。",
+    "en-US": "Fixes stale saved directories blocking model changes and one failed setting skipping independent saves. Improves settings import; new shortcut names are limited to 20 characters while existing longer names are retained.",
+    "ja-JP": "保存済みの無効なディレクトリによってモデル変更が保存できない問題と、一つの設定エラーで他の保存が中断される問題を修正。設定の取り込みを改善し、新しいショートカット名は20文字までとします。既存の長い名前は保持します。"
   }
 }

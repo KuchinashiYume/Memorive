@@ -2,13 +2,15 @@
 
 *Design notes for users and contributors · 29 September 2026*
 
-v1.02 pre-release documentation · 2026-09-29. This edition covers the agreed scope; installation and update instructions must be checked against the final delivery before release. A documentation version is not a release announcement. Existing illustrations explain common controls; use the actual page for new features.
+v1.02.01 documentation · 2026-09-30. Update identifier: 1.02.01; the feature scope remains v1.02. Earlier illustrations explain common controls. This revision does not claim a new full acceptance run.
 
 Memorive connects document processing, research Q&A, citation checking and knowledge reuse. These notes explain the data flow, module responsibilities and failure handling behind research records that can be traced to their sources. Researchers remain responsible for judgment and final writing.
 
 The document covers both the implemented core and constrained extension designs. Availability depends on the current interface, configuration and task receipts; revising this document does not authorize a release.
 
 ## 1. Positioning and Principles
+
+v1.02.01: independent settings are saved separately. If a section fails, the message identifies it and retains its unsaved draft. A stale saved directory no longer blocks an unrelated model change; correct the path before using that directory. Import rebases only profile defaults or missing historical defaults, preserving custom paths and reporting problems. New shortcut names accept up to 20 Unicode characters. Existing longer names can be retained unchanged; editing a name applies the new limit.
 
 Memorive is an auxiliary system for personal research workflows, supporting material acquisition, evidence organization, retrieval and analysis, research logging, and knowledge reuse. It is not bound to a single discipline. The system provides traceable materials and recommendations; researchers are responsible for judgment, decision-making, and final writing.
 

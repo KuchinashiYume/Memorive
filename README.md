@@ -6,23 +6,29 @@ Memorive, or memo, is a Windows desktop workspace for personal learning and rese
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-### [⬇ Download Memorive for Windows](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-Setup-1.02-x64.exe)
+### [⬇ Download Memorive for Windows](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Setup-1.02.01-x64.exe)
 
-**v1.02 · Windows 10 22H2 / Windows 11 · x64 · about 205 MB**
+**v1.02.01 · Windows 10 22H2 / Windows 11 · x64 · about 205 MB**
 
 **First time here? Choose the main app installer above.** It installs Memorive; plugins and the Test Console are optional extras.
 
 [Which file should I download?](#download-guide) · [Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](memorive_desktop/product/desktop/help/en-US/manual-text.md) · [Design](memorive_desktop/product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
 
-## What changes in v1.02
+## What changes in v1.02.01
 
-This version extends the existing reading, organizing, verification and record-keeping workflow. Research Chat retains answer styles, retry branches and historical versions. Citation checks distinguish finding a source from establishing support for a claim. Conversations left unopened can be archived, while lists load metadata before full message bodies.
+### Feature updates: v1.01 → v1.02
 
-Discovery separates recent progress from highly related literature. It saves bibliographic details, DOI, source links, available abstracts and recommendation reasons, with shared duplicate handling. You still add the full text yourself. Home offers research shortcuts and AI Updates. Custom CLIs use their declared input and output contracts; the interface and newly generated content support Chinese, English and Japanese, while original documents and saved versions retain their language.
+v1.02 expanded the research workflow with claim-support and numerical checks, reusable research knowledge, answer styles, retry branches and version switching. Conversations unopened for 30 days can be archived, with lighter list loading and progress tied to actual task nodes.
 
-Parsing keeps more structural and citation-location information, and task progress reflects actual nodes. Installation and maintenance gain three-language controls, update checks and downloads of changed files. For the first upgrade from v1.01, use the v1.02 installer; v1.01 does not have the new updater. Consult the guide for operational limits and continue checking research outputs yourself.
+Literature discovery separates recent progress from closely related papers, deduplicates results and saves bibliographic details and source links. Home and AI Updates provide research entry points and source-linked reports. Custom CLI connections and Chinese, English and Japanese interfaces and generated content are supported; original materials and saved answers retain their language. Parsing preserves more source-location information. Three-language installation, update checks and signed file-level update downloads were added.
 
-For the first upgrade from v1.01, use the v1.02 installer and back up your data. v1.01 does not contain the new updater. The separately distributed Test Console remains v1.01; this release does not relabel it or claim a new console compatibility test.
+### Fixes: v1.02 → v1.02.01
+
+Fixes stale saved directories blocking model changes and one failed setting skipping independent saves. Improves settings import; new shortcut names are limited to 20 characters while existing longer names are retained.
+
+v1.02.01 is a maintenance release of v1.02. For the first upgrade from v1.01 or v1.02, back up your data and use this installer or the complete portable package: the old updater does not recognize three-part versions. Do not manually overlay a delta ZIP. This release adds three-part version recognition for subsequent in-app updates.
+
+17 targeted settings/import checks passed on the unchanged repair code. This release also updates version parsing and rebuilds the installer. Full regression, native settings-save UI acceptance and an end-to-end online upgrade were not rerun. The Test Console and companions keep their existing versions.
 
 ## Home at a glance
 
@@ -60,29 +66,29 @@ Before adding a suggested conclusion to your knowledge, review its claim, scope,
 
 ## Install and get started
 
-[Complete portable application](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-Portable-1.02-x64.zip) · [Three-language PDF, Markdown and local-page documentation](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-Documentation.zip) · [Corresponding v1.02 desktop source](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-desktop-source.zip). Extract the entire portable directory. The v1.01 source below remains available for the unchanged console and companions.
+[Complete portable application](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Portable-1.02.01-x64.zip) · [Three-language PDF, Markdown and local-page documentation](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-Documentation.zip) · [Corresponding v1.02.01 desktop source](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-desktop-source.zip). Extract the entire portable directory. The v1.01 source below remains available for the unchanged console and companions.
 
 ### Download guide
 
 | What you need | Download | When to choose it |
 | --- | --- | --- |
-| **Memorive — recommended** | [Memorive-Setup-1.02-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-Setup-1.02-x64.exe) | The main desktop app. Start here for reading papers, research Q&A, and conversation management. |
-| Verify your download | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/SHA256SUMS.txt) | A small text file of checksums; use it to check that your downloaded file is intact. |
+| **Memorive — recommended** | [Memorive-Setup-1.02.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Setup-1.02.01-x64.exe) | The main desktop app. Start here for reading papers, research Q&A, and conversation management. |
+| Verify your download | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/SHA256SUMS.txt) | A small text file of checksums; use it to check that your downloaded file is intact. |
 | Obsidian companion — optional | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | Connect notes from your Obsidian vault. Requires Obsidian and Memorive. |
 | Zotero companion — optional | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | Connect Zotero items and annotations. Requires Zotero and Memorive. |
 | Test Console — optional installer | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | For users who want to modify, test, or diagnose Memorive. Choose this for an installed console. |
 | Test Console — portable alternative | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | For the same testing tool without installation. Extract the whole ZIP; guides and notices are included. Choose this OR the console installer. |
 | Test Console — executable only | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | For advanced use when you already have the guide and notices. The installer or portable ZIP is easier to start with. |
-| Current desktop source — v1.02 | [Memorive-1.02-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-desktop-source.zip) | Corresponding source for the current desktop application; for reading or building, not installation. |
-| Historical project source — v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | Historical application, companion and Test Console sources. For the current desktop source, choose v1.02 above. |
+| Current desktop source — v1.02.01 | [Memorive-1.02.01-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-desktop-source.zip) | Corresponding source for the current desktop application; for reading or building, not installation. |
+| Historical project source — v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | Historical application, companion and Test Console sources. For the current desktop source, choose v1.02.01 above. |
 | Third-party source — developers / redistribution | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | Corresponding source and index for bundled dependencies (about 592 MB). Not needed to install or use Memorive. |
 
-GitHub also adds **Source code (zip)** and **Source code (tar.gz)** automatically. These are source snapshots, not Windows installers. For normal use, choose **Memorive-Setup-1.02-x64.exe**.
+GitHub also adds **Source code (zip)** and **Source code (tar.gz)** automatically. These are source snapshots, not Windows installers. For normal use, choose **Memorive-Setup-1.02.01-x64.exe**.
 
 ### Installation
 
 1. Use **Windows 10 22H2 or later, or Windows 11, x64**. Obtain the installer and its matching `SHA256SUMS.txt` from this project's Releases.
-2. To check the download, run `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.02-x64.exe` in PowerShell and compare the result with the checksum file.
+2. To check the download, run `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.02.01-x64.exe` in PowerShell and compare the result with the checksum file.
 3. In the installer's System Check, prepare any missing components: .NET Framework 4.8, WebView2 Runtime, and Visual C++ v14 **x64** (14.51.36247 or later). Install only the components requested, then check again. Python is bundled.
 4. Choose application and data directories and finish installation. The first launch has blank settings. In Settings → Documents and external viewing, check your workspace and generated-output locations.
 
@@ -136,7 +142,7 @@ Materials and settings are stored locally. Cloud models, web reading, and extern
 
 Cost records distinguish actual, estimated, and unknown amounts. Public list prices and subscriptions are not the same as the amount charged for one task. Check model answers and citations yourself.
 
-The current application version is v1.02. The update index is signed with the production RSA key; the application and installer do not have a Windows Authenticode certificate. Verify downloads against the release checksums. Final release preparation included source, package-identity and signature checks, not a new full regression round. OCR, model answers and citation support still require human review.
+The current application version is v1.02.01. The update index is signed with the production RSA key; the application and installer do not have a Windows Authenticode certificate. Verify downloads against the release checksums. Final release preparation included source, package-identity and signature checks, not a new full regression round. OCR, model answers and citation support still require human review.
 
 ## Improve Memorive and verify your changes
 
@@ -156,6 +162,10 @@ The console is optional for everyday use. Its code uses AGPL-3.0-only; its illus
 
 Memorive is an AI-developed project. Its project-specific code was generated, modified, and iterated by **OpenAI Codex** and **Anthropic Claude Code**. The project initiator defined requirements and product design and carried out testing and acceptance; they did not write the code themselves. Third-party components retain their authors' attribution and licenses.
 
+## Design reference and acknowledgements
+
+The document-structure work draws on [Marker](https://github.com/datalab-to/marker) by Datalab, particularly document blocks and preservation of table and layout structure. Thank you to its authors and contributors. Memorive also offers optional local Marker parsing; its runtime and model weights must be configured separately, under their own licenses.
+
 ## License and character artwork
 
 Project-specific code uses [AGPL-3.0-only](LICENSE); see the [licensing scope](memorive_desktop/LICENSING.md). The maintainer encourages personal learning, research, and non-commercial use. This preference adds no restrictions to the code license.
@@ -174,4 +184,6 @@ Connect Obsidian notes and Zotero items to Memorive for previewed imports, evide
 
 ## Version history
 
-**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 established the Windows research workspace: document processing, research Q&A, source-linked records, model connections and optional companions and Test Console. The original release remains available for historical reference. Choose v1.02 above for the current application.
+**[v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02)** — Added literature discovery, AI Updates, custom CLI connections, multilingual output, conversation archiving, and signed update support.
+
+**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 established the Windows research workspace: document processing, research Q&A, source-linked records, model connections and optional companions and Test Console. The original release remains available for historical reference. Choose v1.02.01 above for the current application.

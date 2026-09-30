@@ -219,8 +219,8 @@ static class Engine {
         if(VcRuntimeStatus()!=null)throw new Exception("VISUAL_CPP_X64_REQUIRED: "+VcRuntimeStatus()+" · "+VcDownloadUrl);
     }
     public static Version ReleaseOrder(string text) {
-        if(String.IsNullOrEmpty(text)||!System.Text.RegularExpressions.Regex.IsMatch(text,@"^(?:[0-9]+\.[0-9]{2,}|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$"))throw new Exception("RELEASE_VERSION_INVALID");
-        string[] p=text.Split('.');return new Version(Int32.Parse(p[0]),Int32.Parse(p[1]),p.Length==4?Int32.Parse(p[2]):0,p.Length==4?Int32.Parse(p[3]):0);
+        if(String.IsNullOrEmpty(text)||!System.Text.RegularExpressions.Regex.IsMatch(text,@"^(?:[0-9]+\.[0-9]{2,}(?:\.[0-9]{2,})?|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$"))throw new Exception("RELEASE_VERSION_INVALID");
+        string[] p=text.Split('.');return new Version(Int32.Parse(p[0]),Int32.Parse(p[1]),p.Length>=3?Int32.Parse(p[2]):0,p.Length==4?Int32.Parse(p[3]):0);
     }
     public static State Install(string package,string root,string data,bool desktop,bool sandbox,string fault,Action<int,string> progress) {
         root=RootPath(root);data=RootPath(data);if(sandbox){Sandbox(root);Sandbox(data);}else if(!String.IsNullOrEmpty(fault))throw new Exception("FAULT_TEST_ONLY");

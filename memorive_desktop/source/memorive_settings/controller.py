@@ -481,6 +481,21 @@ class SettingsController:
         try:
             accepted = validate_settings(settings)
             directory = self.directory_policy.inspect(accepted)
+            # Unchanged storage can be offline after moving a portable profile.
+            # Saving a model is not authorization to access or repair that path.
+            # Changed directories still require the complete preflight.
+            current_directories = self.store.load(recover_corruption=False)["settings"]["directories"]
+            directory["warnings"] = []
+            if accepted["directories"] == current_directories:
+                availability_errors = {
+                    "DIRECTORY_OUTSIDE_ALLOWLIST", "DIRECTORY_MISSING",
+                    "DIRECTORY_NOT_WRITABLE", "DISK_SPACE_INSUFFICIENT",
+                }
+                directory["warnings"] = [e for e in directory["errors"] if e in availability_errors]
+                directory["errors"] = [e for e in directory["errors"] if e not in availability_errors]
+                if directory["warnings"] and not directory["errors"]:
+                    directory["status"] = "WARNING"
+                directory["unchanged_directories"] = True
             risks = risk_ids(accepted)
             pending = [risk for risk in risks if risk not in confirmed]
             errors = list(directory["errors"])
