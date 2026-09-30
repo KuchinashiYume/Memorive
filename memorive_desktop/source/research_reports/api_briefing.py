@@ -380,7 +380,7 @@ def _event_aliases(digest):
         prefix += "_"
 
 
-def prepare_mapped_briefing(digest):
+def prepare_mapped_briefing(digest,language=None):
     """Provider-neutral input for desktop's explicitly selected execution profile."""
     value = _safe_digest(digest)
     if value.get('report_status') != 'complete' or value.get('conflicts'):
@@ -407,7 +407,11 @@ def prepare_mapped_briefing(digest):
             'model_may_change_counts_hashes_or_status': False,
             'model_may_make_scientific_judgment': False, 'details_remain_deterministic': True},
     }
-    return _render_prompt(value['digest_kind'], contract, schema), schema
+    from memorive_language import validate
+    if language is not None:contract['language_context']=validate(language)
+    prompt=_render_prompt(value['digest_kind'], contract, schema)
+    if language is not None:prompt+='\nFollow language_context.instruction for narrative prose. Section_title values are fixed schema labels; keep them unchanged.'
+    return prompt, schema
 
 
 def validate_mapped_narrative(raw, digest):

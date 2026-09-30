@@ -32,6 +32,7 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     for name in ('app', 'artifact-manifest', 'toolchain', 'notices', 'output'):
         ap.add_argument('--'+name, type=Path, required=True)
+    ap.add_argument('--update-test-trust',type=Path)
     a=ap.parse_args()
     out=a.output.resolve()
     if out.is_relative_to(ROOT.parents[1]) or out.exists():
@@ -65,20 +66,12 @@ def main():
         kernel=ctypes.windll.kernel32
         kernel.SetProcessAffinityMask(kernel.GetCurrentProcess(),3);kernel.SetPriorityClass(kernel.GetCurrentProcess(),0x4000)
     compiler=Path(os.environ['WINDIR'])/'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
+    import sys
+    sys.path.insert(0,str(ROOT.parents[1]/'tools'))
+    from build_update_helper import compile_engine
+    native_receipt=compile_engine(ROOT.parents[1],a.toolchain,work/'native',trust=a.update_test_trust)
     engine=work/'Memorive.SetupHost.exe'
-    icon=ROOT.parents[1]/'product/desktop/assets/memorive.ico'
-    cmd=[str(compiler),'/nologo','/utf8output','/target:winexe','/platform:x64','/optimize+',
-         '/out:'+str(engine),'/win32manifest:'+str(ROOT/'app.manifest'),'/win32icon:'+str(icon)]
-    cmd+=['/reference:'+s for s in ('System.Windows.Forms.dll','System.Drawing.dll','System.Web.Extensions.dll','System.IO.Compression.dll','System.IO.Compression.FileSystem.dll','Microsoft.CSharp.dll')]
-    cmd+=[str(ROOT/s) for s in ('installation_cross_setup.cs','lifecycle.cs','html_host.cs','prerequisite_wizard.cs','release_metadata.cs')]
-    for name in ('Microsoft.Web.WebView2.Core.dll','Microsoft.Web.WebView2.WinForms.dll'):
-        cmd+=['/reference:'+str(a.toolchain/name),'/resource:'+str(a.toolchain/name)+','+name]
-    cmd+=['/resource:'+str(icon)+',memorive.ico']
-    cmd+=['/resource:'+str(a.toolchain/'WebView2Loader.dll')+',WebView2Loader.dll']
-    cmd+=['/resource:'+str(ROOT/name)+','+name for name in ('install.html','uninstall.html')]
-    result=subprocess.run(cmd,capture_output=True,text=True,encoding='utf8',timeout=90,creationflags=subprocess.CREATE_NO_WINDOW)
-    (work/'compiler.log').write_text(result.stdout+result.stderr,encoding='utf8')
-    if result.returncode:raise RuntimeError('COMPILATION_FAILED; see compiler.log')
+    shutil.copyfile(work/'native/Memorive.Update.exe',engine)
     inputs=[(a.app/r['path'], 'app/'+r['path']) for r in inventory]
     notice_exclusions=[]
     for p in sorted(a.notices.rglob('*')):
@@ -90,7 +83,11 @@ def main():
         # Repository navigation and release-maintainer notes belong to the source
         # tree. User documentation is installed under _internal/help.
         if p.name in {'README_PUBLIC.md', 'README_PUBLIC.en.md', 'README_PUBLIC.ja.md'}:continue
-        inputs.append((p,'app/notices/'+p.relative_to(a.notices).as_posix()))
+        relative='notices/'+p.relative_to(a.notices).as_posix()
+        if relative in expected:
+            if sha(p)!=sha(a.app/relative):raise ValueError('NOTICE_PORTABLE_INSTALLER_DRIFT')
+        else:
+            raise ValueError('NOTICE_MUST_ALREADY_BE_IN_COMPLETE_TARGET:'+relative)
     members=[];payload=work/'payload.zip'
     with zipfile.ZipFile(payload,'x',compression=zipfile.ZIP_DEFLATED,compresslevel=6,allowZip64=True) as archive:
         for path,name in inputs:
@@ -103,15 +100,15 @@ def main():
               'health_phase':'v101-empty','app_exe':'Memorive.exe','release_version':binding['release_version'],
               'engine_sha256':sha(engine),'payload_sha256':sha(payload),'members':members,'required_files':required,
               'total_bytes':sum(m['size'] for m in members),'contains_authorized_private_capsule':False,
-              'public_distribution_qualified':False,'application_acceptance':'NOT_ASSESSED','installer_candidate_id':'v1.01','installer_package_id':'v1.01', 'microsoft_runtime_deployment':'USER_INSTALLED_OFFICIAL_PREREQUISITES'}
+              'public_distribution_qualified':False,'application_acceptance':'NOT_ASSESSED','installer_candidate_id':binding['package_id'],'installer_package_id':binding['release_version'], 'microsoft_runtime_deployment':'USER_INSTALLED_OFFICIAL_PREREQUISITES'}
     blob=json.dumps(manifest,ensure_ascii=False,separators=(',',':')).encode('utf8')
-    target=out/'Memorive-Setup-1.01-x64.exe'
+    target=out/('Memorive-Setup-'+binding['release_version']+'-x64.exe')
     with target.open('xb') as dst:
         for path in (engine,payload):
             with path.open('rb') as src:shutil.copyfileobj(src,dst,1024*1024)
         dst.write(blob);dst.write(struct.pack('<qqq',engine.stat().st_size,payload.stat().st_size,len(blob)));dst.write(b'MEMORIVESETUP001')
     write(out/'package-manifest.json',manifest)
-    receipt={'status':'BUILT_LOCAL_CANDIDATE','installer_package_id':'v1.01','application_package_id':binding['package_id'],'installer_sha256':sha(target),'bytes':target.stat().st_size,
+    receipt={'status':'BUILT_LOCAL_CANDIDATE','installer_package_id':binding['release_version'],'application_package_id':binding['package_id'],'installer_sha256':sha(target),'bytes':target.stat().st_size,
              'app_exe_sha256':sha(a.app/'Memorive.exe'),'artifact_manifest_sha256':sha(a.artifact_manifest),
              'builder_sha256':sha(Path(__file__)),'installer_source_manifest_sha256':sha(ROOT/'SOURCE_PROVENANCE.json'),
              'toolchain_source_sha256':sha(a.toolchain/'toolchain-source.json'),'compiler_sha256':sha(compiler),

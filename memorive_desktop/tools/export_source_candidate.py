@@ -49,7 +49,7 @@ def main():
     files=('INSTALL.md','SECURITY.md','RELEASE_CHECKS.md','LICENSE','LICENSING.md','BUILDING.md','PUBLISHING.md','RELEASE_PREPARATION.md','RELEASE_NOTES.md','LICENSE_PROPOSAL.md','ASSET_NOTICE.md',
            'ARTWORK_RIGHTS.md','THIRD_PARTY_NOTICES.md','GITHUB_FAN_PROJECTS.md','README_PUBLIC.md',
            'README_PUBLIC.en.md','README_PUBLIC.ja.md','requirements-build-baseline.lock','requirements-build-agpl-candidate.lock',
-           'tools/build_memorive.py','tools/collect_build_inventory.py','tools/collect_release_sources.py','tools/export_source_candidate.py')
+           'tools/build_memorive.py','tools/collect_build_inventory.py','tools/collect_release_sources.py','tools/export_source_candidate.py','tools/build_update_helper.py','tools/build_update_packages.py','tools/compile_installer_locales.py','tools/package_notices.py','tools/release_signer.cs','tools/import_local_settings.py')
     for name in files:copy(DESKTOP/name,Path('memorive_desktop')/name)
     for folder in ('installer/public_candidate','release_materials'):
         for p in sorted((DESKTOP/folder).rglob('*')):
@@ -64,7 +64,7 @@ def main():
         if Path(relative).name!='release_identity_binding.json':continue
         p=out/relative;obj=json.loads(p.read_text('utf8'))
         obj={k:v for k,v in obj.items() if not k.startswith('private_test_capsule')}
-        obj.update(package_id='v1.01',release_authorized=False,acceptance_verdict='NOT_ASSESSED',canonical_profile='brand_profile.json',
+        obj.update(release_authorized=False,acceptance_verdict='NOT_ASSESSED',canonical_profile='brand_profile.json',
                    authorization_locator='local-source-candidate',source_exact_set_locator='SOURCE_REVIEW_MANIFEST.json')
         write(p,obj);adaptations.append({'path':relative,'before':originals[relative],'after':sha(p),'reason':'clear private delivery identity metadata'})
     manifest['files']=[dict(row,sha256=sha(out/'memorive_desktop'/row['path']),bytes=(out/'memorive_desktop'/row['path']).stat().st_size)

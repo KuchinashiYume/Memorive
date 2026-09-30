@@ -1,26 +1,28 @@
 # Memorive
 
-## v1.02 · 发布准备中
-
-下方仍提供已发布的 v1.01。v1.02 已完成本地汇合，正在进行最后的代码与发行材料审核，尚未公开发布。
-
-本次准备的内容包括主张支持性与数字核查、研究知识更新、回答风格与重试分支、30 天未打开问答归档及列表加载优化、真实任务节点进度。文献发现区分最新进展与高度相关论文，统一查重，并保存题录、DOI、来源链接、可获得的摘要和推荐理由；全文仍由用户手动添加。首页与 AI 近况、自定义 CLI、中文／英文／日文生成内容和结构化来源追溯也已纳入。文献原文与已保存的回答版本保留原有语言。
-
-检查更新和文件级增量下载已经实现，但生产签名公钥与线上更新链尚未配置完成，未签名准备包不能作为正式更新包使用。本次收口不宣称重新执行了全量回归。OCR、模型回答和引用支持程度仍需人工核对。既有代码许可、角色素材和隐私声明保持不变。
-
 从阅读资料，到可查证、可复用的研究记录。
 
 Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面工作台。它把文献、网页和研究对话整理到同一条工作流程中：保留原始资料，提取有来源的信息，围绕证据提问与比较，再将人工确认的结论积累为可继续使用的知识。
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-### [⬇ 点击下载 Memorive Windows 版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Setup-1.01-x64.exe)
+### [⬇ 点击下载 Memorive Windows 版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-Setup-1.02-x64.exe)
 
-**v1.01 · Windows 10 22H2 / Windows 11 · x64 · 约 190 MB**
+**v1.02 · Windows 10 22H2 / Windows 11 · x64 · 约 205 MB**
 
 **第一次使用，下载上方的主程序安装包即可。** 它用于安装 Memorive；配套插件和测试控制台按需选择。
 
 [我应该下载哪个文件？](#下载选择指南) · [下载与版本](https://github.com/KuchinashiYume/Memorive/releases) · [使用指南](memorive_desktop/product/desktop/help/zh-CN/manual-text.md) · [设计文档](memorive_desktop/product/desktop/help/zh-CN/design.md) · [问题反馈](https://github.com/KuchinashiYume/Memorive/issues)
+
+## v1.02 的变化
+
+本版围绕已有的阅读、整理、查证和保存流程继续改进。问答保留回答风格、重试分支与历史版本，引用检查区分找到来源与来源是否支持主张；长期未打开的对话可以归档，列表先加载必要信息，按需读取正文。
+
+文献发现区分最新进展与高度相关内容，保存题录、DOI、来源链接、可取得的摘要和推荐理由，并统一处理重复记录。全文仍由你手动添加。首页提供研究入口和 AI 近况；自定义 CLI 可按其实际输入输出方式接入，界面与之后生成的内容支持中文、英文和日文，文献原始语言与历史版本保持不变。
+
+解析与引用位置保留更多结构信息，任务进度来自实际节点。安装和更新维护增加三语入口、版本检查及变化文件下载，旧版本首次通过同批更新助手接入。功能边界和操作说明见使用指南；输出仍需要人工核对。
+
+从 v1.01 首次升级请使用 v1.02 安装器，并先备份数据；v1.01 没有新版更新器。独立测试控制台仍为 v1.01，本次没有将其改称 v1.02，也不宣称新增了控制台兼容性实测。
 
 ## 可以做什么
 
@@ -52,26 +54,28 @@ Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面�
 
 ## 安装与开始使用
 
+[完整便携包](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-Portable-1.02-x64.zip) · [三语 PDF、Markdown 与本地网页文档](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-Documentation.zip) · [v1.02 桌面对应源码](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-desktop-source.zip)。便携版需要完整解压，不能只复制 EXE。下方 v1.01 项目源码仍用于查阅未改版的控制台与插件。
+
 ### 下载选择指南
 
 | 你的用途 | 下载文件 | 什么时候需要 |
 | --- | --- | --- |
-| **Memorive 主程序 · 推荐** | [Memorive-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Setup-1.01-x64.exe) | 用于安装桌面应用。阅读文献、研究问答、管理会话，从这个文件开始。 |
-| 校验下载文件 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/SHA256SUMS.txt) | 小型校验文本，用于核对下载文件是否完整。 |
+| **Memorive 主程序 · 推荐** | [Memorive-Setup-1.02-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-Setup-1.02-x64.exe) | 用于安装桌面应用。阅读文献、研究问答、管理会话，从这个文件开始。 |
+| 校验下载文件 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/SHA256SUMS.txt) | 小型校验文本，用于核对下载文件是否完整。 |
 | Obsidian 配套插件 · 可选 | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | 连接 Obsidian 笔记。需要同时安装 Obsidian 与 Memorive。 |
 | Zotero 配套插件 · 可选 | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | 连接 Zotero 文献条目与批注。需要同时安装 Zotero 与 Memorive。 |
 | 测试控制台安装版 · 可选 | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | 适合希望修改、测试或排查 Memorive 的用户，运行安装向导即可。 |
 | 测试控制台便携版 · 另一种选择 | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | 同一个测试工具，无需安装；完整解压后使用，内含指南与声明。与控制台安装版二选一。 |
 | 测试控制台单独 EXE | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | 适合已有指南和声明的进阶使用者；初次使用建议选安装版或便携版。 |
 | 项目源码 · 开发用途 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 本体、配套插件和控制台的源代码，用于阅读或自行构建；不能作为已安装的应用直接运行。 |
-| 第三方对应源码 · 开发/再分发用途 | [Memorive-1.01-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-third-party-sources.zip) | 打包依赖的对应源码与索引，约 592 MB。日常安装和使用 Memorive 无需下载。 |
+| 第三方对应源码 · 开发/再分发用途 | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | 打包依赖的对应源码与索引，约 592 MB。日常安装和使用 Memorive 无需下载。 |
 
-GitHub 还会自动列出 **Source code (zip)** 和 **Source code (tar.gz)**，它们是源码快照。普通用户请选择 **Memorive-Setup-1.01-x64.exe** 安装程序。
+GitHub 还会自动列出 **Source code (zip)** 和 **Source code (tar.gz)**，它们是源码快照。普通用户请选择 **Memorive-Setup-1.02-x64.exe** 安装程序。
 
 ### 安装
 
 1. 系统需为 **Windows 10 22H2 或更新版本／Windows 11，x64**。从本项目的 Releases 获取安装包及同批 `SHA256SUMS.txt`。
-2. 如需校验文件，在 PowerShell 中运行 `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.01-x64.exe`，将结果与校验文件核对。
+2. 如需校验文件，在 PowerShell 中运行 `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.02-x64.exe`，将结果与校验文件核对。
 3. 打开安装向导，在“系统检查”准备缺少的组件：.NET Framework 4.8、WebView2 Runtime、Visual C++ v14 **x64**（14.51.36247 或更新版本）。只按界面提示安装缺失项，再返回重新检查。程序自带 Python，日常使用无需另装。
 4. 分别选择程序目录和数据目录，完成安装。首次启动是空白配置；到“设置 → 文档与外部查看”核对工作区及生成产物的位置。
 
@@ -125,7 +129,7 @@ flowchart LR
 
 费用面板区分实际、估算与未知值；公开榜单价格和订阅费用不能直接当作一次任务的实扣。模型回答与引用需要使用者核对。
 
-当前版本为 v1.01，安装包与对应源码可从 Releases 获取。应用及安装器尚未进行作者数字签名；下载时请核对同批 SHA256 校验值。
+当前主程序版本为 v1.02。更新索引已使用生产密钥签名；程序和安装器仍没有 Windows Authenticode 证书，请核对发布校验值。本轮发布准备进行了代码、包身份与签名核对，没有重新执行全量回归。OCR、模型回答与引用支持程度仍需人工复核。
 
 ## 自己优化 Memorive，并验证修改
 
@@ -154,3 +158,7 @@ Memorive 是由 AI 编程工具开发的项目。项目自身的代码由 **Open
 ## 配套插件
 
 Obsidian 笔记与 Zotero 文献可通过配套插件连接 Memorive，支持预览导入、证据检索、问答及结果回写。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.md).
+
+## 历史版本简述
+
+**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 建立了文献处理、研究问答、来源记录和模型连接的桌面研究流程，并提供配套插件与可选测试控制台。原版本保留供历史查阅；当前主程序请使用上方的 v1.02。

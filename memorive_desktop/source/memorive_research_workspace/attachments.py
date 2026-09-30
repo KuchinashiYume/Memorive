@@ -148,7 +148,7 @@ class Attachments:
                 job_id='research-'+digest([job_id,artifact['id'],page])[:24])
             receipt=result.get('execution_receipt') or {}
             if result.get('status')!='PASS' or receipt.get('status')!='PASS':raise ValueError(result.get('reason') or 'ATTACHMENT_VISION_FAILED')
-            if not receipt.get('behavior_sha256') or not receipt.get('token_usage'):raise ValueError('ATTACHMENT_VISION_RECEIPT_REQUIRED')
+            if not __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt):raise ValueError('ATTACHMENT_VISION_RECEIPT_REQUIRED')
             receipts.append(receipt)
             return result['text']
         if suffix=='.pdf':
@@ -198,10 +198,10 @@ class Attachments:
             self.store.event('MATERIALS_REMOVED_FROM_THREAD',thread_id,{'artifact_ids':artifact_ids},db)
             return self.store.put('thread',thread_id,thread['project'],value,expected=expected_revision,db=db)
 
-    def scope_ids(self,thread):
+    def scope_ids(self,thread,*,db=None):
         selected=list(thread.get('artifact_ids',[]))
         if thread.get('include_project',thread.get('scope','project')=='project'):
-            selected+= [a['id'] for a in self.store.list('artifact',thread['project']) if a['state']=='active' and not a.get('temporary_thread')]
+            selected+= [a['id'] for a in self.store.list('artifact',thread['project'],db=db) if a['state']=='active' and not a.get('temporary_thread')]
         return list(dict.fromkeys(i for i in selected if i not in thread.get('excluded_artifact_ids',[])))
 
     def call(self,method,params):

@@ -4,9 +4,9 @@
 
 Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面工作台。它把文献、网页和研究对话整理到同一条工作流程中：保留原始资料，提取有来源的信息，围绕证据提问与比较，再将人工确认的结论积累为可继续使用的知识。
 
-[中文](../../README.md) · [English](../../README.en.md) · [日本語](../../README.ja.md)
+[中文](../README.md) · [English](../README.en.md) · [日本語](../README.ja.md)
 
-[下载与版本](https://github.com/KuchinashiYume/Memorive/releases) · [使用指南](../product/desktop/help/zh-CN/manual-text.md) · [设计文档](../product/desktop/help/zh-CN/design.md) · [问题反馈](https://github.com/KuchinashiYume/Memorive/issues)
+[下载与版本](https://github.com/KuchinashiYume/Memorive/releases) · [使用指南](product/desktop/help/zh-CN/manual-text.md) · [设计文档](product/desktop/help/zh-CN/design.md) · [问题反馈](https://github.com/KuchinashiYume/Memorive/issues)
 
 ## 可以做什么
 
@@ -36,6 +36,14 @@ Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面�
 | 模型排行榜 | 对照公开能力指标、价格、来源和更新时间筛选候选模型，再用自己的任务验证。 |
 | 计费与用量 | 按时间和模型查看请求、输入／输出 Tokens、实际或估算费用；缺失费用信息保持未知。 |
 
+## v1.02 的变化
+
+本版围绕已有的阅读、整理、查证和保存流程继续改进。问答保留回答风格、重试分支与历史版本，引用检查区分找到来源与来源是否支持主张；长期未打开的对话可以归档，列表先加载必要信息，按需读取正文。
+
+文献发现区分最新进展与高度相关内容，保存题录、DOI、来源链接、可取得的摘要和推荐理由，并统一处理重复记录。全文仍由你手动添加。首页提供研究入口和 AI 近况；自定义 CLI 可按其实际输入输出方式接入，界面与之后生成的内容支持中文、英文和日文，文献原始语言与历史版本保持不变。
+
+解析与引用位置保留更多结构信息，任务进度来自实际节点。安装和更新维护增加三语入口、版本检查及变化文件下载，旧版本首次通过同批更新助手接入。功能边界和操作说明见使用指南；输出仍需要人工核对。
+
 ## 安装与开始使用
 
 ### 安装
@@ -64,7 +72,7 @@ Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面�
 
 日常继续使用时，可以同步新增会话、精炼研究记录、调整项目检索预设、查看报告和用量。任务失败先查看具体步骤的错误；更换向量模型前留意旧索引，变更资料路径前备份并确认文件位置。
 
-完整图文教程在“设置 → 关于与版本 → 使用文档”，提供中文、英文和日文。也可阅读[安装与首次配置](../INSTALL.md)和[纯文字使用指南](../product/desktop/help/zh-CN/manual-text.md)。
+完整图文教程在“设置 → 关于与版本 → 使用文档”，提供中文、英文和日文。也可阅读[安装与首次配置](INSTALL.md)和[纯文字使用指南](product/desktop/help/zh-CN/manual-text.md)。
 
 ## 它怎样组织你的研究
 
@@ -87,7 +95,7 @@ flowchart LR
 | 知识与研究记录 | 保存人工确认的结论、会话精炼和周期报告，供后续研究复用。 |
 | 共用支撑 | 模型通道、任务状态、用量记录及本地存储为上述过程提供支持。 |
 
-桌面界面通过应用服务调用 Python 业务层；模型连接集中管理，原始资料与派生结果分开保存。检索索引帮助找到内容，原文和对应版本仍是查证依据。更详细的数据关系与设计取舍见[设计文档](../product/desktop/help/zh-CN/design.md)，源码构建见[构建说明](../BUILDING.md)。
+桌面界面通过应用服务调用 Python 业务层；模型连接集中管理，原始资料与派生结果分开保存。检索索引帮助找到内容，原文和对应版本仍是查证依据。更详细的数据关系与设计取舍见[设计文档](product/desktop/help/zh-CN/design.md)，源码构建见[构建说明](BUILDING.md)。
 
 ## 数据、费用与当前状态
 
@@ -95,7 +103,7 @@ flowchart LR
 
 费用面板区分实际、估算与未知值；公开榜单价格和订阅费用不能直接当作一次任务的实扣。模型回答与引用需要使用者核对。
 
-当前版本为 v1.01。源码与文档正在完善，安装包暂未重新公开。应用及安装器尚未进行作者数字签名；可下载的正式版本以 Releases 为准。
+本文为 v1.02 发布前修订。最终更新流程、安装器、程序与对应源码完成验收并绑定后再发布；公开可用文件以 Releases 为准。更新清单签名与 Windows Authenticode 是两种不同的校验，具体文件签名状态随最终交付说明。
 
 ## 开发方式
 
@@ -103,6 +111,6 @@ Memorive 是由 AI 编程工具开发的项目。项目自身的代码由 **Open
 
 ## 许可与角色素材
 
-项目自身代码采用 [AGPL-3.0-only](../../LICENSE)，适用范围见[许可说明](../LICENSING.md)。作者鼓励个人学习、研究与非商业使用，这一倡议不增加代码许可证的限制。
+项目自身代码采用 [AGPL-3.0-only](../LICENSE)，适用范围见[许可说明](LICENSING.md)。作者鼓励个人学习、研究与非商业使用，这一倡议不增加代码许可证的限制。
 
-部分角色图像是参考《Blue Archive》的 AI 辅助二次创作。Memorive 是非官方个人项目，与 Nexon、Nexon Games 或 Yostar 无关联；原角色、名称和标识的权利归各自权利人所有。桌宠、表情和角色图标单独适用[素材声明](../ASSET_NOTICE.md)，第三方组件见[第三方说明](../THIRD_PARTY_NOTICES.md)。
+部分角色图像是参考《Blue Archive》的 AI 辅助二次创作。Memorive 是非官方个人项目，与 Nexon、Nexon Games 或 Yostar 无关联；原角色、名称和标识的权利归各自权利人所有。桌宠、表情和角色图标单独适用[素材声明](ASSET_NOTICE.md)，第三方组件见[第三方说明](THIRD_PARTY_NOTICES.md)。

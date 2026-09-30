@@ -7,6 +7,7 @@ from .contracts import InboxError, immutable
 
 
 INBOX_METHODS = (
+    "inbox.set_logic_review", "inbox.set_data_bindings",
     "inbox.get_contract",
     "inbox.import_paths",
     "inbox.enqueue_session_refinement",

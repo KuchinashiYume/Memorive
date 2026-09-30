@@ -4,9 +4,9 @@ From reading materials to research records you can verify and reuse.
 
 Memorive, or memo, is a Windows desktop workspace for personal learning and research. It connects papers, web pages, and research conversations in one workflow: retain the originals, organize information with its sources, ask questions and compare evidence, then keep the conclusions you have reviewed for future work.
 
-[中文](../../README.md) · [English](../../README.en.md) · [日本語](../../README.ja.md)
+[中文](../README.md) · [English](../README.en.md) · [日本語](../README.ja.md)
 
-[Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](../product/desktop/help/en-US/manual-text.md) · [Design](../product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
+[Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](product/desktop/help/en-US/manual-text.md) · [Design](product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
 
 ## What can you do?
 
@@ -36,6 +36,14 @@ Before adding a suggested conclusion to your knowledge, review its claim, scope,
 | Model rankings | Compare public capability indicators, prices, sources, and update dates, then test candidates on your own materials. |
 | Billing and usage | Filter requests, input/output tokens, and actual or estimated costs by time and model. Missing cost information remains unknown. |
 
+## What changes in v1.02
+
+This version extends the existing reading, organizing, verification and record-keeping workflow. Research Chat retains answer styles, retry branches and historical versions. Citation checks distinguish finding a source from establishing support for a claim. Conversations left unopened can be archived, while lists load metadata before full message bodies.
+
+Discovery separates recent progress from highly related literature. It saves bibliographic details, DOI, source links, available abstracts and recommendation reasons, with shared duplicate handling. You still add the full text yourself. Home offers research shortcuts and AI Updates. Custom CLIs use their declared input and output contracts; the interface and newly generated content support Chinese, English and Japanese, while original documents and saved versions retain their language.
+
+Parsing keeps more structural and citation-location information, and task progress reflects actual nodes. Installation and maintenance gain three-language controls, update checks and downloads of changed files. Older versions use the matching update helper for their first upgrade. Consult the guide for operational limits and continue checking research outputs yourself.
+
 ## Install and get started
 
 ### Installation
@@ -64,7 +72,7 @@ Start with the connection you need. Chat, image reading, embeddings, and review 
 
 For ongoing work, sync new conversation records, refine notes, adjust project retrieval presets, and review reports and usage. Inspect the failed step before retrying a task. Changing embedding models may require rebuilding indexes; back up files before changing storage locations.
 
-Illustrated guides in Chinese, English, and Japanese are available in Settings → About and version → User documentation. See also [installation and first setup](../INSTALL.md) and the [text guide](../product/desktop/help/en-US/manual-text.md).
+Illustrated guides in Chinese, English, and Japanese are available in Settings → About and version → User documentation. See also [installation and first setup](INSTALL.md) and the [text guide](product/desktop/help/en-US/manual-text.md).
 
 ## How it fits together
 
@@ -87,7 +95,7 @@ flowchart LR
 | Knowledge and records | Retain confirmed conclusions, refined conversations, and periodic reports for future research. |
 | Shared services | Provide model connections, task state, usage records, and local storage. |
 
-The desktop interface calls a Python application layer through an application service. Model connections are managed centrally, while originals and derived results remain separate. Search indexes help locate content; the original and its version remain the basis for verification. See the [design document](../product/desktop/help/en-US/design.md) for details and [build instructions](../BUILDING.md) for source builds.
+The desktop interface calls a Python application layer through an application service. Model connections are managed centrally, while originals and derived results remain separate. Search indexes help locate content; the original and its version remain the basis for verification. See the [design document](product/desktop/help/en-US/design.md) for details and [build instructions](BUILDING.md) for source builds.
 
 ## Data, costs, and current status
 
@@ -95,7 +103,7 @@ Materials and settings are stored locally. Cloud models, web reading, and extern
 
 Cost records distinguish actual, estimated, and unknown amounts. Public list prices and subscriptions are not the same as the amount charged for one task. Check model answers and citations yourself.
 
-The current version is v1.01. Source and documentation are being refined; installers have not been made public again. The application and installer are unsigned. Releases is the authoritative place for downloadable versions.
+This is a pre-release revision for v1.02. The final update flow, installer, application and corresponding source must be accepted and bound before release. Releases remains the source of publicly available files. An update-index signature and Windows Authenticode are separate checks; final delivery notes state each file’s signing status.
 
 ## How this project is developed
 
@@ -103,6 +111,6 @@ Memorive is an AI-developed project. Its project-specific code was generated, mo
 
 ## License and character artwork
 
-Project-specific code uses [AGPL-3.0-only](../../LICENSE); see the [licensing scope](../LICENSING.md). The maintainer encourages personal learning, research, and non-commercial use. This preference adds no restrictions to the code license.
+Project-specific code uses [AGPL-3.0-only](../LICENSE); see the [licensing scope](LICENSING.md). The maintainer encourages personal learning, research, and non-commercial use. This preference adds no restrictions to the code license.
 
-Some character images are AI-assisted fan creations inspired by Blue Archive. Memorive is an unofficial personal project, unaffiliated with Nexon, Nexon Games, or Yostar. Underlying characters, names, and marks belong to their respective rights holders. Desktop-pet images, expressions, and character icons are covered separately by the [asset notice](../ASSET_NOTICE.md). Dependencies are listed in the [third-party notices](../THIRD_PARTY_NOTICES.md).
+Some character images are AI-assisted fan creations inspired by Blue Archive. Memorive is an unofficial personal project, unaffiliated with Nexon, Nexon Games, or Yostar. Underlying characters, names, and marks belong to their respective rights holders. Desktop-pet images, expressions, and character icons are covered separately by the [asset notice](ASSET_NOTICE.md). Dependencies are listed in the [third-party notices](THIRD_PARTY_NOTICES.md).

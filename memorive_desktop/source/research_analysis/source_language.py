@@ -40,13 +40,11 @@ def normalize_source_language(value: str | None) -> str:
     """Return the supported language code; unknown languages use neutral English UI."""
 
     folded = str(value or "").strip().casefold().replace("_", "-")
-    return _LANGUAGE_ALIASES.get(folded, "en")
+    return _LANGUAGE_ALIASES.get(folded, "mul" if folded == "mul" else "und")
 
 
 def language_display_name(value: str | None) -> str:
-    return {"zh": "Chinese", "ja": "Japanese", "en": "English"}[
-        normalize_source_language(value)
-    ]
+    return {"zh": "Chinese", "ja": "Japanese", "en": "English"}.get(normalize_source_language(value), "the original source language (undetermined or mixed; preserve each passage, do not translate it)")
 
 
 def _join_text(value: str | Iterable[object]) -> str:
@@ -58,14 +56,8 @@ def _join_text(value: str | Iterable[object]) -> str:
 def detect_source_language(value: str | Iterable[object]) -> str:
     """Detect zh/ja/en from source content, never from a model response or filename."""
 
-    text = _join_text(value)
-    if _KANA_RE.search(text):
-        return "ja"
-    units = [char for char in text if not char.isspace()]
-    if not units:
-        return "en"
-    han_ratio = len(_HAN_CHAR_RE.findall(text)) / len(units)
-    return "zh" if han_ratio >= _SOURCE_HAN_MAIN_RATIO else "en"
+    from memorive_language.source import describe
+    return describe(_join_text(value))['language']
 
 
 def validate_generated_language(

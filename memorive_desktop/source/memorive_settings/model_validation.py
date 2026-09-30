@@ -1549,6 +1549,19 @@ class _SpecializedModelExecutionMixin:
             )
         ):
             raise ValueError("OCR_IMAGE_REQUEST_INVALID")
+        if profile_kind=='CLI' and service.get('adapter_id')=='command_template':
+            from .cli_template_execution import execute
+            result=execute(self,service,model,prompt,purpose=purpose,timeout=timeout_seconds,image=image_bytes)
+            result['schema_version']='SettingsOcrImageRunnerResult-v1'
+            text=result.pop('response','')
+            result.update(text=text,raw_text=text,normalization_revision='IDENTITY',normalization_applied=False,finish_reason='unknown',
+                physical_model_calls=result['external_model_calls'],external_budget_calls=result['external_model_calls'],local_model_calls=0,local_metadata_calls=0)
+            receipt=result['execution_receipt'];receipt.update(schema_version='SettingsOcrImageExecutionReceipt-v1',
+                image_sha256=hashlib.sha256(image_bytes).hexdigest().upper(),raw_text_sha256=hashlib.sha256(text.encode('utf8')).hexdigest().upper(),
+                normalized_text_sha256=hashlib.sha256(text.encode('utf8')).hexdigest().upper(),normalization_revision='IDENTITY',normalization_applied=False,
+                model_identity_grade='CLI_REPORTED_MODEL' if receipt['returned_model'] else 'REQUEST_BOUND_RETURNED_UNKNOWN',
+                provider_event_model_identity_grade='EXACT_RETURNED' if receipt['returned_model'] else 'UNAVAILABLE')
+            return result
         behavior_sha256 = hashlib.sha256(
             json.dumps(
                 {
@@ -2685,6 +2698,11 @@ class BoundedSubprocessTransport:
     def run_verification(self, **kwargs):
         from .cli_verification_transport import run_verification
         return run_verification(self, **kwargs)
+
+    def run_template(self, *, capture_quota_bytes, **kwargs):
+        from .cli_verification_transport import run_verification
+        transport=BoundedSubprocessTransport(capture_quota_bytes=capture_quota_bytes)
+        return run_verification(transport, template_mode=True, **kwargs)
 
     def _read_bounded(self, path: Path) -> tuple[bytes, bool, int]:
         total = path.stat().st_size
@@ -5522,6 +5540,10 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         cli_service: Mapping[str, Any],
         model: Mapping[str, Any],
     ) -> Mapping[str, Any]:
+        from .cli_templates import is_custom
+        if is_custom(cli_service):
+            from .cli_template_execution import verify
+            return verify(self,cli_service,model)
         requested_model = model.get("model_name")
         result = self._base("CLI", status="INVALID", reason="CLI_VALIDATION_FAILED")
         if isinstance(requested_model, str):
@@ -5643,7 +5665,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 "conversation_refinement",
                 "workflow_model_exam",
                 "core_document_processing",
-                "report_daily", "report_weekly", "report_monthly", "research_chat",
+                "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
             }
         ):
             raise ValueError("STRUCTURED_CHAT_REQUEST_INVALID")
@@ -5666,6 +5688,10 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         ):
             raise ValueError("STRUCTURED_CHAT_TIMEOUT_INVALID")
         prompt_bytes = _structured_prompt(prompt, response_schema)
+        from .cli_templates import is_custom
+        if profile_kind=='CLI' and is_custom(service):
+            from .cli_template_execution import execute
+            return execute(self,service,model,prompt_bytes.decode('utf8'),schema=response_schema,purpose=purpose,timeout=timeout_seconds)
         behavior_hash = hashlib.sha256(prompt_bytes).hexdigest().upper()
         started_at = time.monotonic()
 
@@ -6049,7 +6075,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     elif purpose in {
                         "workflow_model_exam",
                         "core_document_processing",
-                        "report_daily", "report_weekly", "report_monthly", "research_chat",
+                        "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
                     }:
                         (
                             transport_schema,
@@ -6222,7 +6248,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 if execution_error is not None and purpose in {
                     "workflow_model_exam", "conversation_refinement",
                     "core_document_processing",
-                    "report_daily", "report_weekly", "report_monthly", "research_chat",
+                    "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
                 }:
                     return failed_attempt(
                         execution_error,
@@ -6334,7 +6360,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     egress="CODEX_CLI",
                 )
             if (
-                purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat"}
+                purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
                 and not reported
                 and adapter_id != "codex_cli"
             ):
@@ -6503,7 +6529,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             )
         token_usage = _normalise_token_usage(usage)
         if (
-            purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat"}
+            purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
             and not token_usage
         ):
             return failed_attempt(
@@ -6677,6 +6703,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             recorded = self._exam_score_history.recover_completed_embedding(node, target, active_executor_refs)
         if recorded is not None:
             return recorded
+        if target.get("adapter_id")=="command_template":return None
 
         def reusable(candidate: Mapping[str, Any]) -> bool:
             if candidate.get(

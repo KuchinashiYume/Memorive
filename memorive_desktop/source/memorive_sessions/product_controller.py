@@ -692,6 +692,7 @@ class SessionsProductController:
                 source_snapshot_sha256=str(payload["source_snapshot_sha256"]),
                 selected_profile_ref=str(payload["selected_profile_ref"]),
                 message_count=int(payload["message_count"]),
+                language_context=payload.get("language_context"),
             )
             self._metrics["refinement_tasks_created"] += 1
             return task
@@ -828,6 +829,7 @@ class SessionsProductController:
                 "item_id": detail["item_id"],
                 "local_projection_id": detail["local_projection_id"],
                 "display_name": detail["name"],
+                "language_context": detail.get("language_context"),
                 "source_snapshot_sha256": detail["source_snapshot_sha256"],
                 "selected_profile_ref": detail["selected_profile_ref"],
                 "message_count": detail["message_count"],
@@ -3383,6 +3385,7 @@ class SessionsProductController:
                 raise SessionProductError("SESSION_REFINEMENT_CHANNEL_UNAVAILABLE")
             request = {
                 "task_id": job_id,
+                **({"language_context":current_task["language_context"]} if current_task.get("language_context") is not None else {}),
                 "logical_slot": "conversation_refinement",
                 "profile_ref": settings["profile_ref"],
                 "explicit_user_action": True,
@@ -3411,6 +3414,7 @@ class SessionsProductController:
             draft_id = f"refinement-{job_id.removeprefix('refinement-')[:32]}"
             draft = {
                 "schema_version": "DesktopSessionRefinementDraft-v3",
+                **({"language_context":current_task["language_context"]} if current_task.get("language_context") is not None else {}),
                 "draft_id": draft_id,
                 "task_id": job_id,
                 "display_name": current_task["display_name"],
@@ -3562,7 +3566,10 @@ class SessionsProductController:
                     "operation_id": "refinement-retry-retire-" + uuid.uuid4().hex,
                 },
             )
-        display_name = f"精炼对话 · {_text(row.get('title'), 120) or projection_id}"
+        from memorive_language import from_settings
+        from memorive_language.text import choose
+        language_context=from_settings(self.service)
+        display_name = choose(language_context,'精炼对话','Conversation refinement','会話の精錬')+' · '+(_text(row.get('title'),120) or projection_id)
         # An active Inbox item is the duplicate guard.  A fresh key permits a
         # user-requested retry after a failed/cancelled card has been removed.
         queue_key = "refinement-" + uuid.uuid4().hex
@@ -3576,6 +3583,7 @@ class SessionsProductController:
                     "selected_profile_ref": str(settings["profile_ref"]),
                     "message_count": len(messages),
                     "idempotency_key": queue_key,
+                    "language_context": language_context,
                 },
             )
         except (AssertionError, AttributeError):
@@ -3588,6 +3596,7 @@ class SessionsProductController:
             # freezes execution. Previously there was no task during this
             # window, making the existing model selector unreachable.
             task = self._ensure_refinement_queue_task({
+                "language_context": language_context,
                 "display_name": display_name,
                 "local_projection_id": projection_id,
                 "source_snapshot_sha256": snapshot_sha256,
@@ -3624,6 +3633,7 @@ class SessionsProductController:
             source_snapshot_sha256=snapshot_sha256,
             selected_profile_ref=str(settings["profile_ref"]),
             message_count=len(messages),
+            language_context=language_context,
         )
         job_id = str(task["job_id"])
         self._metrics["refinement_tasks_created"] += 1

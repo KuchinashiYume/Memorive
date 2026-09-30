@@ -14,7 +14,7 @@ from .exam_successor import cumulative_category_repair_penalty
 
 REVISION = "Quality_NEW_NESTED_COVERAGE_AND_UNIFORM_TWO_REPAIRS_V1"
 TIERS = {"LIGHT": (0.2, "轻度"), "HALF": (0.5, "半额"), "FULL": (1.0, "全量")}
-ROLE_BY_NODE = {"ingest": "OCR_PAGE", "chunk_embedding": "EMBEDDING_TEXT",
+ROLE_BY_NODE = {"logic_review":"DATA_ANOMALY_FALSE_POSITIVE_CONTROL", "ingest": "OCR_PAGE", "chunk_embedding": "EMBEDDING_TEXT",
                 "card_distill": "CARD_DISTILLER", "transport_review": "CARD_REVIEWER",
                 "context_pack": "RERANKER_TEXT", "analysis": "ANALYSIS_PRIMARY",
                 "judgment_review": "ANALYSIS_REVIEWER"}

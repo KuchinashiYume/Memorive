@@ -272,6 +272,7 @@ def verify_source_observation(
     if observation.get("schema_version") not in {
         "discovery.data_contracts.source-observation.0.1",
         "desktop.desktop.source-observation.1",
+        "desktop.source-observation.e6.1",
     }:
         raise IdentityResolutionError("SOURCE_OBSERVATION_SCHEMA_MISMATCH", [object_id])
     if observation.get("object_type") != "SourceObservation":
@@ -394,7 +395,7 @@ def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
         key=lambda item: (item["kind"], item["value"]),
     )
     authors_value = bibliographic.get("authors")
-    if not isinstance(authors_value, list) or not authors_value:
+    if not isinstance(authors_value, list) or (not authors_value and observation.get('schema_version')!='desktop.source-observation.e6.1'):
         raise IdentityResolutionError("BIBLIOGRAPHIC_AUTHORS_MISSING", [str(observation.get("object_id"))])
     authors = []
     for author in authors_value:
@@ -415,6 +416,7 @@ def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
         "identifier_tokens": sorted(_identifier_token(item) for item in normalized_identifiers),
         "invalid_identifier_kinds": sorted(set(invalid_kinds)),
         "metadata_signature": metadata_signature,
+        "optional_metadata": observation.get("schema_version") == "desktop.source-observation.e6.1",
         "bibliographic_claim": {
             "observation_ref": observation["object_id"],
             "title": title.strip(),
@@ -483,7 +485,11 @@ def resolve_identity_batch(
         if len(token_claims) < 2:
             continue
         signatures = {canonical_json(claim["metadata_signature"]) for claim in token_claims}
-        if len(signatures) > 1:
+        optional=all(claim.get("optional_metadata") for claim in token_claims)
+        conflicting=len(signatures)>1
+        if optional:
+            conflicting=any(len({canonical_json(c["metadata_signature"][k]) for c in token_claims if c["metadata_signature"][k] not in (None,[],"")})>1 for k in ("title","authors","published_year"))
+        if conflicting:
             conflict_specs.append({
                 "reason_code": "EXACT_IDENTIFIER_METADATA_CONFLICT",
                 "source_observation_refs": [claim["observation_ref"] for claim in token_claims],

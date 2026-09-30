@@ -84,17 +84,23 @@ def render(runtime, run_id, params):
     window=params['report_window'];period=window['period'];progress=params['material_progress']
     validate_window(period,window['start'],window['end'],params['report_cutoff'])
     if not progress:raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
+    from memorive_workflow.node_progress import scope
     events=[]
-    for item in progress:
-        key=sha(item);stamp=item['updated_at'];paper=item['material_kind']=='PAPER'
-        text=item['display_name'] + (' · 文献处理完成，成果待人工复核' if paper else ' · 对话精炼完成，成果待人工复核')
-        events.append({'event_id':'RE-'+key[:32].upper(),'event_kind':'MATERIAL_OUTPUT_READY',
-            'occurred_at':stamp,'observed_at':stamp,'source_system':'Desktop_MATERIAL_OUTPUT',
-            'source_record_ref':item['stable_locator'],'source_content_hash':key.upper(),
-            'subject_refs':[item['stable_locator']],'evidence_refs':[key.upper()],
-            'status_axis':'artifact_registry','to_state':'RESULT_AVAILABLE','verification_status':'not_applicable',
-            'display_text':text,'daily_category':'新增','weekly_categories':['研究进展'],
-            'monthly_categories':['知识库结构变化'],'explicit_tags':[]})
+    with scope('REPORT_ITEMS', [sha(item) for item in progress], 'PROCESSED_ITEMS') as item_units:
+        for item in progress:
+            key=sha(item);stamp=item['updated_at'];paper=item['material_kind']=='PAPER'
+            from memorive_language.text import choose
+            language=params.get('language_context')
+            suffix=choose(language,' · 文献处理完成，成果待人工复核',' · Paper processing complete; human review required',' · 文献処理が完了し、人による確認が必要です') if paper else choose(language,' · 对话精炼完成，成果待人工复核',' · Conversation refinement complete; human review required',' · 会話の精錬が完了し、人による確認が必要です')
+            text=item['display_name'] + suffix
+            events.append({'event_id':'RE-'+key[:32].upper(),'event_kind':'MATERIAL_OUTPUT_READY',
+                'occurred_at':stamp,'observed_at':stamp,'source_system':'Desktop_MATERIAL_OUTPUT',
+                'source_record_ref':item['stable_locator'],'source_content_hash':key.upper(),
+                'subject_refs':[item['stable_locator']],'evidence_refs':[key.upper()],
+                'status_axis':'artifact_registry','to_state':'RESULT_AVAILABLE','verification_status':'not_applicable',
+                'display_text':text,'daily_category':'新增','weekly_categories':['研究进展'],
+                'monthly_categories':['知识库结构变化'],'explicit_tags':[]})
+            item_units.complete(key)
     members=[{'source_system':'Desktop_MATERIAL_OUTPUT','source_ref':r['stable_locator'],'sha256':sha(r).upper()} for r in progress]
     snapshot={'events':events,'members':members,'manifest_sha256':sha({'members':members,'events':events}).upper(),'issues':[],'conflicts':[]}
     write(runtime._run_path(run_id)/'source_snapshot.json',sealed(snapshot))
@@ -102,5 +108,5 @@ def render(runtime, run_id, params):
     digest=build_digest(snapshot,digest_kind=period,window_start=window['start'],window_end=window['end'],cutoff_at=params['report_cutoff'])
     return {'schema_version':'DesktopPeriodicReport-v1','period':period,'window_start':window['start'],
         'window_end':window['end'],'source_event_count':len(events),'material_progress_count':len(progress),
-        'digest':digest,'markdown':render_markdown(digest),'source_scope':['COMPLETED_PAPERS','REFINED_CONVERSATIONS'],
+        'digest':digest,'language_context':params.get('language_context'),'markdown':render_markdown(digest,language=params.get('language_context')),'source_scope':['COMPLETED_PAPERS','REFINED_CONVERSATIONS'],
         'status':'SUCCEEDED','engine':'Desktop RESEARCH_REPORTS material-progress successor','paid_model_calls':0}

@@ -1,44 +1,31 @@
-# Memorive GitHub 发布操作说明
+# Memorive v1.02 — publishing notes / 发布说明 / 公開手順
 
-本版本正在私有仓库中复核，Release 保持草稿。完成检查后再执行下列发布流程。
+Project: https://github.com/KuchinashiYume/Memorive
 
-## 正式项目地址
+Releases: https://github.com/KuchinashiYume/Memorive/releases
 
-作者已确认公开仓库使用 **KuchinashiYume/Memorive**。
+Issues: https://github.com/KuchinashiYume/Memorive/issues
 
-- 项目主页：https://github.com/KuchinashiYume/Memorive
-- 版本与下载：https://github.com/KuchinashiYume/Memorive/releases
-- 问题反馈：https://github.com/KuchinashiYume/Memorive/issues
+## 中文
 
-EXE 内的项目主页按钮从 `release_links.py` 读取地址。先创建空仓库，再按上述地址构建和检查正式 EXE，最后提交已审阅源码、建立标签并上传 Release 附件。地址不依赖安装包提前存在；当前项目主页与 Release 均已公开。
+这是发布前操作说明，不执行上传。保留已存在仓库与旧版本历史，在已核对的公共源码树上提交本次明确的源文件，不把整个私有工作区、沙盒或运行记录导入。拟用正式标签 v1.02；实际标签、提交和文件须在最后核对。README 默认英文，并保留中文和日文入口；许可与角色素材范围沿用原声明。
 
-## 发布材料如何组织
+Release 分别列安装器、完整便携包、更新助手、更新索引与分离签名、适配旧版的一跳差分、源码和必要第三方对应源码、SHA256SUMS。实际文件名以冻结发行清单为准。插件、扩展与测试控制台按自身兼容与身份列明，不因主程序版本变化强改它们的版本。更新索引只能引用已核对资产，签名私钥不进入源码、包或日志。
 
-- **源码仓库**：以独立导出并核对的源文件集合建立，避免把整个历史工作区、沙盒或本机配置上传。源码中保留构建入口、依赖版本、必要合同与资源。
-- **README**：提供中文、英文、日文版本。中文入口使用 `README_PUBLIC.md` 的内容。
-- **代码许可证**：作者已确认 AGPL-3.0-only，标准全文见 LICENSE，适用范围见 LICENSING.md。角色素材继续单独声明。
-- **Release 附件**：安装器、源码归档、需提供的第三方对应源码归档、SHA256SUMS；不把大安装器作为普通 Git 文件提交。
-- **发布说明**：记录实际产品版本、绑定的源码提交、安装器哈希、未签名情况和已知限制。
+2026 年 10 月 1 日前不通过 CLI 重试 GitHub。恢复访问后先核对仓库、已有声明与远端状态；完成最终验收、脱敏、签名和授权后才建立新的发行与上传。上传后按真实下载地址重新获取并核对哈希，再判断是否完整公开。旧资产不覆盖；草稿或本地候选不写成已发布。
 
-## 最后一次审阅应看到什么
+## English
 
-1. 最终源码文件列表、差异与哈希；安装器须与该源码构建记录对应。
-2. 最终代码许可证、角色素材声明、第三方许可证与来源材料。
-3. 安装／启动／卸载结果及其适用范围；明确旧字体 PDF 的支持范围和未签名状态。
-4. 已检查私有配置、文献、会话、凭据、截图与内嵌图像的最终交付集合。
+These are preparatory instructions, not an upload. Keep the existing repository and release history. Commit the reviewed public-source delta without importing private workspace history, sandboxes or run records. The proposed tag is v1.02; bind the actual tag, commit and files at final review. English remains the default README, with Chinese and Japanese entry points. Existing code and artwork licensing boundaries remain in force.
 
-正式发布时先在选定的 Memorive 仓库导入已审阅源码，绑定提交与版本标签，再上传附件并核对 GitHub 上下载文件的 SHA256。当前文件中的候选状态应根据实际结论更新后再发布，不能把准备稿直接当作正式完成声明。
+List the installer, full portable package, update helper, update index and detached signature, supported one-hop delta, project and required third-party source, and SHA256SUMS separately. Exact names come from the frozen release manifest. Companion plugins, extensions and the test console keep their own compatibility and identity; do not change their versions merely to match the application. The signed index references verified assets. Signing secrets must never enter source, packages or logs.
 
-## 下载者如何核对安装器
+Do not retry GitHub through CLI before 1 October 2026. Once access resumes, check the repository, notices and remote state. Create a release and upload only after acceptance, privacy review, signing and authorization. Download the actual published assets and compare hashes before recording publication as complete. Do not replace old assets or describe drafts and local candidates as public releases.
 
-在 PowerShell 中对下载的文件运行：
+## 日本語
 
-```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath '.\Memorive-Setup-1.01-x64.exe'
-```
+これは準備用の手順で、アップロードは行いません。既存のリポジトリと公開履歴を保持し、確認した公開ソースの差分だけを追加します。私的な作業履歴、沙盒、実行記録は取り込みません。予定タグは v1.02 とし、実際のタグ・コミット・ファイルを最終確認で結び付けます。README は英語を既定とし、中国語・日本語の入口と既存のコード・素材の許諾範囲を維持します。
 
-将输出与同一 Release 的 SHA256SUMS 中对应文件逐字核对。正式文件名以最终 Release 为准；校验值证明文件一致性，不代替作者数字签名。
+インストーラー、完全ポータブル版、更新ヘルパー、更新情報と分離署名、対応する一段の差分、自作コードと必要な第三者ソース、SHA256SUMS を分けて掲載します。ファイル名は凍結済みの配布一覧に従います。連携プラグイン、拡張、テストコンソールは固有の互換性と版を保持します。署名対象は確認済み資産だけとし、秘密鍵をソース、配布物、ログに含めません。
 
-## 本地源码版本
-
-使用独立导出目录创建单一初始提交，不导入 Memorive 历史。正式版本使用 `v1.01`；对应标签与源码提交在发布时绑定。分发文件的内容清理以正式版本号和文件校验值标识，差异由 SHA256 与发布清单记录。最终源码归档、对应第三方源码和安装器一起作为 Release 附件。
+2026 年 10 月 1 日より前は CLI で GitHub を再試行しません。接続再開後にリポジトリ、声明と遠隔状態を確認し、受入れ、個人情報確認、署名、公開許可を終えてから新しいリリースを作ります。実際のダウンロード URL から再取得して照合してから完了と記録します。旧資産は上書きせず、草稿やローカル候補を公開済みとしません。

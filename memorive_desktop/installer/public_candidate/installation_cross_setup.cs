@@ -25,10 +25,11 @@ static class LongFile {
     public static bool Exists(string p){return System.IO.File.Exists(N(p));}
     public static FileAttributes GetAttributes(string p){return System.IO.File.GetAttributes(N(p));}
     public static FileStream OpenRead(string p){return System.IO.File.OpenRead(N(p));}
-    public static string ReadAllText(string p,Encoding e){return System.IO.File.ReadAllText(N(p),e);}
+    public static string ReadAllText(string p,Encoding e){using(var file=new FileStream(N(p),FileMode.Open,FileAccess.Read,FileShare.Read|FileShare.Delete))using(var reader=new StreamReader(file,e,true)){return reader.ReadToEnd();}}
     public static void WriteAllBytes(string p,byte[] b){System.IO.File.WriteAllBytes(N(p),b);}
     public static void Delete(string p){System.IO.File.Delete(N(p));}
     public static void Copy(string a,string b){System.IO.File.Copy(N(a),N(b));}
+    public static void Copy(string a,string b,bool overwrite){System.IO.File.Copy(N(a),N(b),overwrite);}
     public static void Move(string a,string b){System.IO.File.Move(N(a),N(b));}
     public static void Replace(string a,string b,string c){System.IO.File.Replace(N(a),N(b),c==null?null:N(c));}
 }
@@ -137,8 +138,8 @@ static class NativePaths {
 }
 
 static class Engine {
-    public static readonly string TestRoot=Path.Combine(Path.GetTempPath(),"Memorive-Installer-Tests");
-    public static readonly string TestWebViewRoot=Path.Combine(Path.GetTempPath(),"Memorive-Installer-WV");
+    public static string TestRoot {get{var trust=UpdateProtocol.Trust;if(trust.test_only){if(String.IsNullOrEmpty(trust.test_root)||Path.GetFileName(trust.test_root)!="Memorive-Installer-Tests")throw new UpdateError("UPDATE_TEST_ROOT_INVALID");return RootPath(trust.test_root);}return Path.Combine(Path.GetTempPath(),"Memorive-Installer-Tests");}}
+    public static string TestWebViewRoot {get{return Path.Combine(Path.GetDirectoryName(TestRoot),"Memorive-Installer-WV");}}
     public const string Owner="Memorive-INSTALLER-TRIAL-V1";
     public const string RegPath=@"Software\Microsoft\Windows\CurrentVersion\Uninstall\Memorive";
     public static JavaScriptSerializer Json=new JavaScriptSerializer{MaxJsonLength=16*1024*1024};
@@ -154,7 +155,7 @@ static class Engine {
     }
     public static string Hash(string file) {using(var f=File.OpenRead(file)) using(var h=SHA256.Create()) return BitConverter.ToString(h.ComputeHash(f)).Replace("-","");}
     public static string HashRange(Stream f,long start,long count) { f.Position=start; using(var h=SHA256.Create()) {byte[] b=new byte[1024*1024];while(count>0){int n=f.Read(b,0,(int)Math.Min(b.Length,count));if(n==0)throw new EndOfStreamException();h.TransformBlock(b,0,n,null,0);count-=n;}h.TransformFinalBlock(new byte[0],0,0);return BitConverter.ToString(h.Hash).Replace("-","");} }
-    public static void Save(string path,object value) {Directory.CreateDirectory(Path.GetDirectoryName(path));string tmp=Path.Combine(Path.GetDirectoryName(path),"."+Guid.NewGuid().ToString("N")+".tmp");try{using(var f=new FileStream(LongFile.N(tmp),FileMode.CreateNew,FileAccess.Write,FileShare.None)){byte[] bytes=Encoding.UTF8.GetBytes(Json.Serialize(value));f.Write(bytes,0,bytes.Length);f.Flush(true);}if(File.Exists(path))File.Replace(tmp,path,null);else File.Move(tmp,path);}finally{if(File.Exists(tmp))File.Delete(tmp);}}
+    public static void Save(string path,object value) {Directory.CreateDirectory(Path.GetDirectoryName(path));string tmp=Path.Combine(Path.GetDirectoryName(path),"."+Guid.NewGuid().ToString("N")+".tmp");try{using(var f=new FileStream(LongFile.N(tmp),FileMode.CreateNew,FileAccess.Write,FileShare.None)){byte[] bytes=Encoding.UTF8.GetBytes(Json.Serialize(value));f.Write(bytes,0,bytes.Length);f.Flush(true);}for(int attempt=0;;attempt++){try{if(File.Exists(path))File.Replace(tmp,path,null);else File.Move(tmp,path);break;}catch(IOException ex){int code=ex.HResult&0xffff;if(attempt>=19||(code!=32&&code!=33))throw;Thread.Sleep(50);}}}finally{if(File.Exists(tmp))File.Delete(tmp);}}
     public static T Load<T>(string path) {return Json.Deserialize<T>(File.ReadAllText(path,Encoding.UTF8));}
     public static void Relative(string path) {if(String.IsNullOrWhiteSpace(path)||path.StartsWith("/")||path.Contains("\\")||path.Contains(":")||path.IndexOf('\0')>=0)throw new Exception("UNSAFE_MEMBER_PATH");foreach(string p in path.Split('/'))if(p==""||p=="."||p==".."||p.TrimEnd(' ','.')!=p||System.Text.RegularExpressions.Regex.IsMatch(p,@"\A(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)",System.Text.RegularExpressions.RegexOptions.IgnoreCase))throw new Exception("UNSAFE_MEMBER_COMPONENT");}
     public static string Under(string root,string relative) {Relative(relative);string full=Path.GetFullPath(Path.Combine(root,relative.Replace('/',Path.DirectorySeparatorChar)));if(!Within(full,root))throw new Exception("PATH_ESCAPE");NoReparse(full);return full;}
@@ -166,7 +167,7 @@ static class Engine {
     static void CheckOwner(string dir,string marker) {if(!Directory.Exists(dir))return;string m=Path.Combine(dir,marker);if(File.Exists(m)){var x=Load<Dictionary<string,object>>(m);if(!x.ContainsKey("owner")||Convert.ToString(x["owner"])!=Owner)throw new Exception("OWNER_CONFLICT");}else if(Directory.EnumerateFileSystemEntries(dir).Any())throw new Exception("EXISTING_UNOWNED_DIRECTORY");}
     public static void Sandbox(string root) {string current=RootPath(root);if(!current.StartsWith(TestRoot+"\\",StringComparison.OrdinalIgnoreCase)&&!NativePaths.Physical(current).StartsWith(NativePaths.Physical(TestRoot)+"\\",StringComparison.OrdinalIgnoreCase))throw new Exception("AUTOMATION_REQUIRES_EXACT_SANDBOX");}
     public static void VmTest(string root,string data) {throw new Exception("VM_TEST_NOT_INCLUDED_IN_THIS_CANDIDATE");}
-    public static string WebViewVersion() {foreach(var hive in new[]{RegistryHive.CurrentUser,RegistryHive.LocalMachine})foreach(var view in new[]{RegistryView.Registry32,RegistryView.Registry64})using(var b=RegistryKey.OpenBaseKey(hive,view))using(var k=b.OpenSubKey(@"Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}")){if(k!=null){string v=Convert.ToString(k.GetValue("pv"));Version n;if(Version.TryParse(v,out n)&&n>new Version(0,0,0,0))return v;}}return null;}
+    public static string WebViewVersion() {if(UiBootstrap.TestMissingWebView)return null;foreach(var hive in new[]{RegistryHive.CurrentUser,RegistryHive.LocalMachine})foreach(var view in new[]{RegistryView.Registry32,RegistryView.Registry64})using(var b=RegistryKey.OpenBaseKey(hive,view))using(var k=b.OpenSubKey(@"Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}")){if(k!=null){string v=Convert.ToString(k.GetValue("pv"));Version n;if(Version.TryParse(v,out n)&&n>new Version(0,0,0,0))return v;}}return null;}
     public const string VcDownloadUrl="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist";
     public const string WebViewDownloadUrl="https://developer.microsoft.com/en-us/microsoft-edge/webview2/";
     public static bool VcVersionSupported(Version version){return version!=null&&version>=new Version(14,51,36247,0);}
@@ -235,6 +236,8 @@ static class Engine {
             Directory.CreateDirectory(root);Directory.CreateDirectory(data);
             if(!File.Exists(Path.Combine(root,"install-owner.json")))Save(Path.Combine(root,"install-owner.json"),new{owner=Owner,root=root,created=DateTime.UtcNow.ToString("o")});
             if(!File.Exists(Path.Combine(data,"data-owner.json")))Save(Path.Combine(data,"data-owner.json"),new{owner=Owner,data_root=data});
+            InstallerLocale.Remember(root);
+            if(old==null&&!File.Exists(Path.Combine(data,"installer-default-language.json")))Save(Path.Combine(data,"installer-default-language.json"),new{owner=Owner,data_root=data,language=InstallerLocale.Current});
             using(var transaction=new FileStream(LongFile.N(Path.Combine(root,"transaction.lock")),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)) {
                 if(File.Exists(Path.Combine(root,"current.json"))?(old==null||ReadState(root).version!=old.version):old!=null)throw new Exception("ACTIVE_VERSION_CHANGED_DURING_PREFLIGHT");
                 string id=b.manifest.package_id+"-"+Guid.NewGuid().ToString("N").Substring(0,12);
@@ -248,12 +251,17 @@ static class Engine {
                     if(fault=="before-activate")throw new Exception("INJECTED_BEFORE_ACTIVATE");
                     string host=Under(root,"Memorive.Manager-"+b.manifest.engine_sha256.Substring(0,12)+".exe");
                     if(!File.Exists(host))b.HostCopy(host);if(Hash(host)!=b.manifest.engine_sha256)throw new Exception("MANAGER_HASH_MISMATCH");
+                    if(old!=null){
+                        State upgraded=UpdateEngine.CommitInstallerUpgrade(root,data,version,b.manifest,sandbox,fault,progress);
+                        Save(receipt,new{status="PASS",package_id=upgraded.package_id,version=version,previous=old.version,data_root=data,user_data_migrated=true,shared_update_engine=true,acceptance_verdict="NOT_ASSESSED"});
+                        return upgraded;
+                    }
                     var next=new State{program_root=root,data_root=data,webview_root=WebViewPath(data,true),version=version,previous=old==null?null:old.version,package_id=b.manifest.package_id,contract=b.manifest.contract,sandbox_only=sandbox,registered=!sandbox,desktop_shortcut=desktop};
                     Save(Path.Combine(version,"version-state.json"),next);
                     progress(94,"激活已验证版本并保存安装回执");
                     if(fault=="activation-crash")throw new Exception("INJECTED_ACTIVATION_ABORT");
                     Save(Path.Combine(root,"current.json"),next);
-                    try {if(fault=="after-activate")throw new Exception("INJECTED_AFTER_ACTIVATE");if(!sandbox)Register(next,host);}catch{if(old!=null)Save(Path.Combine(root,"current.json"),old);else File.Delete(Path.Combine(root,"current.json"));throw;}
+                    try {if(fault=="after-activate")throw new Exception("INJECTED_AFTER_ACTIVATE");UpdateEngine.InstallInitialEntry(next,b.manifest);if(!sandbox)Register(next,host);}catch{if(old!=null)Save(Path.Combine(root,"current.json"),old);else File.Delete(Path.Combine(root,"current.json"));throw;}
                     Save(receipt,new{status="PASS",package_id=next.package_id,version=version,previous=next.previous,data_root=data,health="PASS",user_data_migrated=false,system_registration=!sandbox,created=DateTime.UtcNow.ToString("o"),acceptance_verdict="NOT_ASSESSED"});
                     progress(100,"安装完成");return next;
                 } catch(Exception e) {Save(receipt,new{status="FAIL",error=e.Message,active_version_preserved=old==null?null:old.version,failed_version_retained=version,created=DateTime.UtcNow.ToString("o")});throw;}
@@ -273,16 +281,16 @@ static class Engine {
         }
         if(Directory.Exists(menu)&&!Directory.EnumerateFileSystemEntries(menu).Any())Directory.Delete(menu);
     }
-    static void Register(State s,string host) {
+    public static void Register(State s,string host) {
         string menu=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs),"Memorive");Directory.CreateDirectory(menu);
         Shortcut(Path.Combine(menu,"Memorive.lnk"),host,"--launch --root "+Quote(s.program_root),s.program_root);
         Shortcut(Path.Combine(menu,"维护 Memorive.lnk"),host,"--manage --root "+Quote(s.program_root),s.program_root);
         if(s.desktop_shortcut)Shortcut(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),"Memorive.lnk"),host,"--launch --root "+Quote(s.program_root),s.program_root);
-        using(var k=Registry.CurrentUser.CreateSubKey(RegPath)){k.SetValue("DisplayName","Memorive");k.SetValue("DisplayVersion",s.package_id);k.SetValue("Publisher","Memorive");k.SetValue("InstallLocation",s.program_root);k.SetValue("UninstallString",Quote(host)+" --uninstall --root "+Quote(s.program_root));k.SetValue("NoModify",1);k.SetValue("NoRepair",0);}
+        using(var k=Registry.CurrentUser.CreateSubKey(RegPath)){k.SetValue("DisplayName","Memorive");k.SetValue("DisplayVersion",Load<Manifest>(Path.Combine(s.version,"manifest.json")).release_version);k.SetValue("Publisher","Memorive");k.SetValue("InstallLocation",s.program_root);k.SetValue("UninstallString",Quote(host)+" --uninstall --root "+Quote(s.program_root));k.SetValue("NoModify",1);k.SetValue("NoRepair",0);}
         RemoveLegacyShortcuts(s.program_root);
     }
     public static void Launch(string root) {State s=ReadState(root);RequirePlatform();if(WebViewVersion()==null)throw new Exception("WEBVIEW2_REQUIRED");Manifest m=Load<Manifest>(Path.Combine(s.version,"manifest.json"));ValidateInstalled(s.version,m);Process.Start(AppStart(s.version,s.data_root,false,m));}
-    public static State Rollback(string root,Action<int,string> progress) {root=RootPath(root);CheckRunning(root);using(var l=new FileStream(LongFile.N(Path.Combine(root,"transaction.lock")),FileMode.Open,FileAccess.ReadWrite,FileShare.None)){State old=ReadState(root);root=old.program_root;if(String.IsNullOrEmpty(old.previous)||!Within(old.previous,root))throw new Exception("NO_ROLLBACK_VERSION");State prev=Load<State>(Path.Combine(old.previous,"version-state.json"));if(!NativePaths.Same(prev.data_root,old.data_root)||prev.contract!=old.contract)throw new Exception("ROLLBACK_DATA_CONTRACT_BLOCKED");Manifest m=Load<Manifest>(Path.Combine(old.previous,"manifest.json"));ValidateInstalled(old.previous,m);Health(old.previous,HealthProbePaths.Prepare(root,old.previous,m,old.sandbox_only),m,progress);prev.previous=old.version;Save(Path.Combine(root,"current.json"),prev);Save(Under(root,"receipts/rollback-"+Guid.NewGuid().ToString("N")+".json"),new{status="PASS",from=old.version,to=prev.version,user_data_modified=false});return prev;}}
+    public static State Rollback(string root,Action<int,string> progress) {root=RootPath(root);if(File.Exists(Path.Combine(root,"updates/active-profile.json")))throw new UpdateError("UPDATE_ROLLBACK_REQUIRES_RECOVERY_ASSISTANT");CheckRunning(root);using(var l=new FileStream(LongFile.N(Path.Combine(root,"transaction.lock")),FileMode.Open,FileAccess.ReadWrite,FileShare.None)){State old=ReadState(root);root=old.program_root;if(String.IsNullOrEmpty(old.previous)||!Within(old.previous,root))throw new Exception("NO_ROLLBACK_VERSION");State prev=Load<State>(Path.Combine(old.previous,"version-state.json"));if(!NativePaths.Same(prev.data_root,old.data_root)||prev.contract!=old.contract)throw new Exception("ROLLBACK_DATA_CONTRACT_BLOCKED");Manifest m=Load<Manifest>(Path.Combine(old.previous,"manifest.json"));ValidateInstalled(old.previous,m);Health(old.previous,HealthProbePaths.Prepare(root,old.previous,m,old.sandbox_only),m,progress);prev.previous=old.version;Save(Path.Combine(root,"current.json"),prev);Save(Under(root,"receipts/rollback-"+Guid.NewGuid().ToString("N")+".json"),new{status="PASS",from=old.version,to=prev.version,user_data_modified=false});return prev;}}
     public static void Remove(string root,bool sandbox) {
         Lifecycle.Remove(root,sandbox,false,null,(p,t,c)=>{},()=>false);
     }
@@ -325,6 +333,12 @@ static class Trust {
 
 static class Program {
     [STAThread] static int Main(string[] args){AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling",false);AppContext.SetSwitch("Switch.System.IO.BlockLongPaths",false);Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);string result=Get(args,"--result");try{
+        string executableName=Path.GetFileName(Engine.Self);
+        if(executableName.Equals("Memorive.exe",StringComparison.OrdinalIgnoreCase))return StableLaunch.Run(args);
+        bool update=executableName.Equals("Memorive.Update.exe",StringComparison.OrdinalIgnoreCase)||args.Contains("--update");
+        bool noninteractive=args.Contains("--json")||args.Contains("--install")||args.Contains("--inspect")||args.Contains("--signature")||args.Contains("--rollback")||args.Contains("--remove")||args.Contains("--launch");
+        InstallerLocale.Select(args,!noninteractive);
+        if(update)return UpdateEntry.Run(args);
         if(args.Contains("--vm-authorization")||args.Contains("--vm-authorization-sha256"))throw new Exception("NEW_CANDIDATE_VM_AUTHORIZATION_REQUIRED");
         string root=Get(args,"--root");bool sandbox=args.Contains("--sandbox");
         if(args.Contains("--inspect")){using(var b=new Bundle(Get(args,"--package")??Engine.Self)){b.Verify();Engine.Save(result,new{status="PASS",package_id=b.manifest.package_id,members=b.manifest.members.Length,system_check=Engine.SystemCheck()});}return 0;}
@@ -337,9 +351,13 @@ static class Program {
         UiBootstrap.Configure(args);if(args.Contains("--manage")||args.Contains("--uninstall")){UiBootstrap.UninstallWorker(args);return 0;}
         bool created=false;
         using(var mutex=new Mutex(true,@"Local\Memorive.v1.01.Installer",out created)){
-            if(!created){MessageBox.Show("Memorive 安装向导已经打开。请完成或关闭现有窗口后再试。","Memorive 安装器",MessageBoxButtons.OK,MessageBoxIcon.Information);return 0;}
+            if(!created){NativeNoticeWindow.Run("notice.alreadyOpen",null,args);return 0;}
             UiBootstrap.Run(false);return 0;
         }
-    }catch(Exception ex){if(result!=null)Engine.Save(result,new{status="FAIL",error=ex.Message,details=ex.ToString()});else MessageBox.Show("Memorive 操作未完成："+ex.Message,"Memorive 安装器",MessageBoxButtons.OK,MessageBoxIcon.Warning);return 1;}}
+    }catch(Exception ex){
+        if(result!=null)Engine.Save(result,new{status="FAIL",error=ex.Message,details=ex.ToString()});
+        else if(args.Contains("--json"))using(var output=new StreamWriter(Console.OpenStandardOutput(),new UTF8Encoding(false))){output.WriteLine(Engine.Json.Serialize(new{schema="MemoriveUpdateIPC-v1",status="FAIL",error=ex is UpdateError?ex.Message:"UPDATE_OPERATION_FAILED",diagnostic_type=ex.GetType().Name}));}
+        else if(args.Any(x=>x.StartsWith("--memo-agent",StringComparison.Ordinal)))using(var output=new StreamWriter(Console.OpenStandardError(),new UTF8Encoding(false))){output.WriteLine(ex is UpdateError?ex.Message:"UPDATE_LAUNCH_FAILED");}
+        else NativeNoticeWindow.Run("error.generic",ex,args);return 1;}}
     static string Get(string[] a,string key){int i=Array.IndexOf(a,key);return i>=0&&i+1<a.Length?a[i+1]:null;}
 }

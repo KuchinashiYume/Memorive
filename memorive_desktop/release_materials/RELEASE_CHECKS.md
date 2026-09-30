@@ -1,25 +1,15 @@
-# Memorive v1.01 核对范围
+# Memorive v1.02 — release checks / 发布核对 / 公開前確認
 
-本版本使用正式版本号和文件 SHA256 标识。源码、安装载荷、文档与扩展按同一清单核对。GitHub 仓库保持私有，Release 保持草稿。
+This checklist records required evidence, not a completed test report. / 本清单是待核对范围，不是已通过报告。 / この一覧は確認範囲であり、合格報告ではありません。
 
-## 功能测试
+| 范围 / Scope / 範囲 | Required evidence / 所需证据 / 必要な証拠 |
+| --- | --- |
+| 程序与源码 / Program and source / プログラムとソース | Same final source commit, runtime manifest, package identity and build inputs; exact documentation overlay. 同批源码、运行清单、包身份和构建输入及本文档增量。対応するソース、実行一覧、配布物、構築入力と本文書。 |
+| 更新 / Updates / 更新 | Original public installation → target; accepted portable instance; subsequent update; mismatch fallback; tampering rejection; cancellation, interruption, rollback and data compatibility. 旧安装、便携、后续更新、回退、篡改拒绝、中断与资料兼容。旧版・ポータブル・後続更新、改ざん拒否、中断・復帰とデータ互換性。 |
+| 三语 / Languages / 三言語 | Chinese, English and Japanese in installer, missing-runtime bootstrap, updater, maintenance and offline docs; language survives elevation/recovery without resetting data choices. 三语及提权、恢复和缺运行库界面；选择不重置路径。昇格・復旧・前提不足を含め、言語変更で保存先を初期化しない。 |
+| 既有能力 / Existing functions / 既存機能 | Research data, retrieval, sources, branch/version history, archiving, model settings, reports and progress remain intact. 原资料、问答版本、归档、模型、报告及进度完整。元資料、会話の分岐・版、アーカイブ、モデル、報告、進捗を保持。 |
+| 科研与解析限制 / Scientific and parsing limits / 研究・解析の制約 | Preserve original quality failures, missing coverage and OCR limits separately from engineering PASS. 不以工程通过替代科研资格。工学的な合格と研究品質を分ける。 |
+| 许可与隐私 / Rights and privacy / 権利とプライバシー | AGPL scope; character-artwork exclusions; unchanged attribution and AI development disclosure; updated dependency/source inventory; no private libraries, credentials or histories. 许可证、素材排除、AI 开发、依赖源码与隐私。許諾、素材の除外、AI 開発、依存ソース、私的データ除外。 |
+| 发行资产 / Release assets / 配布資産 | Real sizes, SHA256, update signature and independent Authenticode status; public/test trust separation; download readback after authorized publication. 真实身份、测试与正式信任根隔离、授权发布后下载回验。実際の識別、試験用と公開用の鍵の分離、公開後の再取得照合。 |
 
-已在隔离的本机用户目录，使用安装后的产品服务和历史模型配置处理两篇真实 PDF。两篇均完成文献处理、卡片生成与复核、检索、分析、判定复核及人工审核包生成；四份卡片／分析结果可列出并加入研究资料库。人工审核包的生成不代表人工科研审核通过。
-
-用户实际录制的浏览器扩展导出文件经过导入、重复导入、四条消息顺序与内容对照；不完整录制标识保留。对话精炼覆盖全部消息，AI 陈述仍标为待核实。三组研究问答覆盖单篇提问、两篇比较与无证据的泛化主张；24 条保存的引用按原文、PDF 页码和文件哈希读回一致。
-
-计费记录包含本地嵌入、模型调用及失败尝试。部分用量尚无价格或完整 token 信息，费用估算不等于实际账单。检索回答基于选中片段，不能替代完整文献的人工评审。
-
-## 最终封装
-
-功能测试期间产品文件保持冻结。随后清理注释、版本溯源字段、策略生效版本和不可使用的旧机器专属测试代码；处理文献、会话精炼和研究问答的实现及提示词保持原测试内容。策略加载检查、错误版本拒绝检查和三项回归检查通过。最终安装文件另作安装、空白状态与命名完整性核对。
-
-统一命名后发现的页面根容器高度和动态路由查找问题已修复；九个页面通过浏览器实际切换及尺寸核对，用户确认本机安装版首页与设置正文正常。内置证书恢复为原始字节并加入打包完整性门禁；公开元数据刷新已取回排行榜记录，个别上游限流按服务返回的时间等待。当前主机原生截图接口不可用，因此不声称已完成全部原生窗口的自动截图或新的虚拟机验收。
-
-## 命名与隐私核对
-
-检查文件名、文本、PDF、第一方编译代码对象、安装包成员及落盘哈希。首三轮为必查；后续必须连续两轮没有真实命名遗漏才能结束。协议／文档版本、外部模型名称及原始第三方版权通知按各自语义保留。
-
-密钥检查覆盖已知格式、实际环境变量的精确及常见编码匹配、编译常量、PDF 文本与元数据、私人输入及数据库文件哈希。不读取 Windows 凭据管理器。空白启动验证用户内容与模型配置为空；公开包不包含私人配置、文献、会话或测试运行数据。
-
-静态检查和哈希核对有明确范围，不构成任意编码方式下绝对不存在秘密的数学证明。
+Old release checks remain historical evidence; they are not new v1.02 results. / 旧版结果只保留为历史，不作本版新结果。 / 旧版の結果を本版の新しい結果に置き換えません。

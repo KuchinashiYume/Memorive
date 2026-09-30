@@ -1,0 +1,222 @@
+{
+  "schema_version": "DataAnomalyAnswerKey-v3-weighted-feasibility",
+  "answers": [
+    {
+      "case_id": "exact_pct",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "bad_pct",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "weighted_pct",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "weights"
+      ]
+    },
+    {
+      "case_id": "rounded_small",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "impossible_grid",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "unknown_grid",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "step",
+        "weights"
+      ]
+    },
+    {
+      "case_id": "pooled_n",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "experimental_unit",
+        "model"
+      ]
+    },
+    {
+      "case_id": "sd_se_ok",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "sd_se_bad",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "cluster_se",
+      "assessment": "NOT_APPLICABLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "digit_repeat",
+      "assessment": "NOT_APPLICABLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "overlap_sum",
+      "assessment": "NOT_APPLICABLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "exclusive_sum",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "confounded_cause",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "PRIORITY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "association_only",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "welch_df",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "missing_card",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "source_methods"
+      ]
+    },
+    {
+      "case_id": "rounded_cross",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "multiple_tests",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "df",
+        "adjustment"
+      ]
+    },
+    {
+      "case_id": "ocr_error",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "source_image"
+      ]
+    }
+  ],
+  "accepted_variants": {
+    "weighted_pct": [
+      {
+        "assessment": "NOT_APPLICABLE",
+        "severity": "NONE",
+        "missing_fields": [
+          "weights"
+        ],
+        "optional_missing_fields": [],
+        "rationale": "The ordinary unweighted percentage test is inapplicable; weights remain necessary to reproduce the weighted estimate."
+      },
+      {
+        "assessment": "COMPATIBLE",
+        "severity": "NONE",
+        "missing_fields": [
+          "weights"
+        ],
+        "optional_missing_fields": [],
+        "rationale": "Mathematical feasibility, not verification of actual weights: assigning weight 3.5 to each of 8 outcome cases and weight 1 to each of 12 others gives 28/(28+12)=70%. Missing weights must still be acknowledged."
+      }
+    ],
+    "overlap_sum": [
+      {
+        "assessment": "COMPATIBLE",
+        "severity": "NONE",
+        "missing_fields": [],
+        "optional_missing_fields": [],
+        "rationale": "An overlap of at least 30 people makes both symptom counts feasible."
+      }
+    ],
+    "pooled_n": [
+      {
+        "assessment": "NOT_APPLICABLE",
+        "severity": "NONE",
+        "missing_fields": [],
+        "optional_missing_fields": [
+          "experimental_unit",
+          "model"
+        ],
+        "rationale": "An adjusted repeated-measures mean is not constrained by a raw independent integer-mean grid; model details only support reproduction."
+      }
+    ],
+    "association_only": [
+      {
+        "assessment": "NOT_APPLICABLE",
+        "severity": "NONE",
+        "missing_fields": [],
+        "optional_missing_fields": [],
+        "rationale": "The causal-overclaim rule does not apply to the explicitly bounded association."
+      }
+    ],
+    "welch_df": [
+      {
+        "assessment": "NOT_APPLICABLE",
+        "severity": "NONE",
+        "missing_fields": [],
+        "optional_missing_fields": [],
+        "rationale": "An integer-degrees-of-freedom rule does not apply to Welch degrees of freedom."
+      }
+    ],
+    "digit_repeat": [
+      {
+        "assessment": "COMPATIBLE",
+        "severity": "NONE",
+        "missing_fields": [],
+        "optional_missing_fields": [],
+        "rationale": "Repeated values are compatible with the explicitly coarse measurement resolution."
+      }
+    ],
+    "cluster_se": [
+      {
+        "assessment": "NOT_APPLICABLE",
+        "severity": "NONE",
+        "missing_fields": [],
+        "optional_missing_fields": [
+          "experimental_unit",
+          "model"
+        ],
+        "rationale": "The iid sample-mean SE formula is inapplicable; cluster/unit/model details can be requested only for reproducing the robust SE."
+      }
+    ]
+  }
+}

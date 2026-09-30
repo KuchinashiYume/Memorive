@@ -56,11 +56,18 @@ class FeedbackStore:
             return engine.make_control_event(exposure,'DECISION_REVOKED',len(state['events'])+1,now(),target_event_id=decision_event_id)
         return self._append(request_id,sha({'revoke':decision_event_id}),make)
 
-    def eligibility(self,item,state=None,as_of=None):
+    def eligibility(self,item,state=None,as_of=None,work_cluster_ids=None):
         state=state or self.snapshot();stamp=as_of or now();ledger=engine.build_exposure_ledger(state['events'])
-        return engine.evaluate_candidate({'candidate_id':item['candidate_id'],'work_cluster_id':item['work_cluster_id'],
+        suppressions=engine.derive_scoped_suppressions(ledger,stamp)
+        from .work_index import canonical_manifestation
+        canonical=canonical_manifestation(item['manifestation_id'])
+        variants={canonical,item['manifestation_id']}|{e['manifestation_id'] for e in state['events']
+            if e.get('manifestation_id') and canonical_manifestation(e['manifestation_id'])==canonical}
+        results=[engine.evaluate_candidate({'candidate_id':item['candidate_id'],'work_cluster_id':wid,
             'direction_id':item['primary_direction_id'],'direction_revision':str(item['direction_revision']),
-            'manifestation_id':item['manifestation_id']},ledger,engine.derive_scoped_suppressions(ledger,stamp),stamp)
+            'manifestation_id':variant},ledger,suppressions,stamp)
+            for wid in sorted(set(work_cluster_ids or [item['work_cluster_id']])) for variant in sorted(variants)]
+        return next((r for r in results if r['eligibility']!='ELIGIBLE'),results[0])
 
     def history(self,direction_ids):
         state=self.snapshot();events=[{'event_id':e['event_id'],'occurred_at':e['event_time'],

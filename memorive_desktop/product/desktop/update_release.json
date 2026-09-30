@@ -1,0 +1,19 @@
+{
+  "schema_version": "MemoriveUpdateRelease-v1",
+  "release_version": "1.02",
+  "display_version": "v1.02",
+  "version_tuple": [
+    1,
+    2,
+    0,
+    0
+  ],
+  "package_id": "Memorive-1.02-release001",
+  "source_commit": "SOURCE_ARCHIVE_v1.02_release001",
+  "release_authorized": false,
+  "notes": {
+    "zh-CN": "研究问答、文献发现与来源核查、多语言内容，以及签名验证的文件级增量更新。v1.01用户请先安装v1.02。",
+    "en-US": "Research Q&A, literature discovery and source checks, multilingual content, and signature-verified file-level updates. Users of v1.01 should install v1.02 first.",
+    "ja-JP": "研究Q&A、文献発見と出典確認、多言語コンテンツ、署名検証付きファイル差分更新。v1.01からは最初にv1.02をインストールしてください。"
+  }
+}

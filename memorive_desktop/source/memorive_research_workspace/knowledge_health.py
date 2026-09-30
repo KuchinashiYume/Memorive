@@ -30,4 +30,4 @@ def revise(workspace,identity,expected_revision,changes,evidence_ids=None):
         value={k:changes.get(k,old.get(k,'synthesis')) for k in allowed}
         parents=evidence_ids or [r['id'] for r in old['parents']]
         # A revision is a new pending proposal. Accepted artifacts and their citations stay immutable.
-        return workspace.feedback.propose(project=old['project'],**value,evidence_ids=parents,origin='desktop_revision',predecessor=identity,db=db)
+        return workspace.feedback.propose(project=old['project'],**value,evidence_ids=parents,origin='desktop_revision',predecessor=identity,language_context=old.get('language_context'),db=db)

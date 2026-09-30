@@ -2830,6 +2830,10 @@ class QualityCardDistillerExamExecutor:
             or not receipt.get("egress")
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_CALL_RECEIPT_INVALID")
+        from .cli_templates import receipt_model_bound
+        if is_cli and receipt_model_bound(receipt,requested_model):
+            if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
+            return receipt
         usage = receipt.get("token_usage")
         if not isinstance(usage, Mapping):
             raise ValueError("WORKFLOW_MODEL_EXAM_TOKEN_EVIDENCE_MISSING")
@@ -2921,17 +2925,17 @@ class QualityCardDistillerExamExecutor:
             "route": (
                 "EXISTING_SETTINGS_API_TRANSPORT"
                 if is_api
-                else ("OLLAMA_LOOPBACK" if is_local else "CODEX_CLI_SUBSCRIPTION")
+                else ("OLLAMA_LOOPBACK" if is_local else "DECLARATIVE_COMMAND_TEMPLATE" if target.get("adapter_id")=="command_template" else "CODEX_CLI_SUBSCRIPTION")
             ),
             "region": (
                 "PROVIDER_MANAGED_UNDISCLOSED"
                 if is_api
-                else ("LOCAL_MACHINE" if is_local else "OPENAI_MANAGED_UNDISCLOSED")
+                else ("LOCAL_MACHINE" if is_local else "PROVIDER_MANAGED_UNDISCLOSED" if target.get("adapter_id")=="command_template" else "OPENAI_MANAGED_UNDISCLOSED")
             ),
             "egress": (
                 "PROVIDER_API"
                 if is_api
-                else ("LOOPBACK_ONLY" if is_local else "CODEX_CLI")
+                else ("LOOPBACK_ONLY" if is_local else "CLI_PROVIDER_MANAGED" if target.get("adapter_id")=="command_template" else "CODEX_CLI")
             ),
             "behavior_sha256": prompt_sha256,
             "response_schema_sha256": _sha256(response_schema),
@@ -3700,7 +3704,7 @@ class QualityCardDistillerExamExecutor:
                     "EXISTING_SETTINGS_API_TRANSPORT"
                     if profile_kind == "API"
                     else (
-                        "CODEX_CLI_SUBSCRIPTION"
+                        ("DECLARATIVE_COMMAND_TEMPLATE" if target.get("adapter_id")=="command_template" else "CODEX_CLI_SUBSCRIPTION")
                         if profile_kind == "CLI"
                         else "OLLAMA_LOOPBACK"
                     )
@@ -3708,7 +3712,7 @@ class QualityCardDistillerExamExecutor:
                 "egress": (
                     "PROVIDER_API"
                     if profile_kind == "API"
-                    else ("CODEX_CLI" if profile_kind == "CLI" else "LOOPBACK_ONLY")
+                    else (("CLI_PROVIDER_MANAGED" if target.get("adapter_id")=="command_template" else "CODEX_CLI") if profile_kind == "CLI" else "LOOPBACK_ONLY")
                 ),
                 "parent_contract_sha256": contract.get("contract_sha256"),
                 "parent_package_sha256": package.get("package_sha256"),
@@ -4380,7 +4384,7 @@ class QualityCardDistillerExamExecutor:
                 "executor_ref": EXECUTOR_REF,
                 "executor_sha256": _file_sha256(Path(__file__)),
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "score": int(round(float(high["score"]))),
                 "failed_exam_item_count": high["failed_exam_item_count"],
                 "low_cost_chain_status": low["chain_status"],
@@ -4405,7 +4409,7 @@ class QualityCardDistillerExamExecutor:
                 "score": int(round(float(high["score"]))),
                 "reason": "Quality_REFERENCE_REGRESSION_COMPLETED",
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "duration_ms": 0,
                 "external_network_calls": state["external_network_calls"],
                 "provider_calls": state["provider_calls"],
@@ -4489,6 +4493,8 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
+        from .cli_templates import is_custom,exam_eligible
+        if is_custom(target):return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
         if kind == "API":
             if QualityCardDistillerExamExecutor._eligible_target(
@@ -4842,7 +4848,7 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
                 "FROZEN_PROFILE_ESTIMATE_CAP"
                 if profile_kind == "API"
                 else (
-                    "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
+                    ("CLI_MANAGED_UNKNOWN" if target.get("adapter_id")=="command_template" else "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE")
                     if profile_kind == "CLI"
                     else "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
                 )
@@ -5034,7 +5040,7 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
                 "executor_ref": self.EXECUTOR_REF,
                 "executor_sha256": _file_sha256(Path(__file__)),
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "score": score,
                 "execution_outcome": ExecutionOutcome.COMPLETED.value,
                 "scorability": Scorability.SCOREABLE.value,
@@ -6359,6 +6365,8 @@ class QualityCardReviewerExamExecutor:
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
+        from .cli_templates import is_custom,exam_eligible
+        if is_custom(target):return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
         if kind == "API":
             if (
@@ -6495,7 +6503,7 @@ class QualityCardReviewerExamExecutor:
                 "FROZEN_PROFILE_ESTIMATE_CAP"
                 if profile_kind == "API"
                 else (
-                    "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
+                    ("CLI_MANAGED_UNKNOWN" if target.get("adapter_id")=="command_template" else "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE")
                     if profile_kind == "CLI"
                     else "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
                 )
@@ -6587,6 +6595,10 @@ class QualityCardReviewerExamExecutor:
             )
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_CALL_RECEIPT_INVALID")
+        from .cli_templates import receipt_model_bound
+        if is_cli and receipt_model_bound(receipt,requested_model):
+            if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
+            return receipt
         usage = receipt.get("token_usage")
         if not isinstance(usage, Mapping):
             raise ValueError("WORKFLOW_MODEL_EXAM_TOKEN_EVIDENCE_MISSING")
@@ -6685,17 +6697,17 @@ class QualityCardReviewerExamExecutor:
             "route": (
                 "EXISTING_SETTINGS_API_TRANSPORT"
                 if is_api
-                else ("OLLAMA_LOOPBACK" if is_local else "CODEX_CLI_SUBSCRIPTION")
+                else ("OLLAMA_LOOPBACK" if is_local else "DECLARATIVE_COMMAND_TEMPLATE" if target.get("adapter_id")=="command_template" else "CODEX_CLI_SUBSCRIPTION")
             ),
             "region": (
                 "PROVIDER_MANAGED_UNDISCLOSED"
                 if is_api
-                else ("LOCAL_MACHINE" if is_local else "OPENAI_MANAGED_UNDISCLOSED")
+                else ("LOCAL_MACHINE" if is_local else "PROVIDER_MANAGED_UNDISCLOSED" if target.get("adapter_id")=="command_template" else "OPENAI_MANAGED_UNDISCLOSED")
             ),
             "egress": (
                 "PROVIDER_API"
                 if is_api
-                else ("LOOPBACK_ONLY" if is_local else "CODEX_CLI")
+                else ("LOOPBACK_ONLY" if is_local else "CLI_PROVIDER_MANAGED" if target.get("adapter_id")=="command_template" else "CODEX_CLI")
             ),
             "behavior_sha256": prompt_sha256,
             "response_schema_sha256": _sha256(response_schema),
@@ -6780,7 +6792,7 @@ class QualityCardReviewerExamExecutor:
                 for field in ("prompt_tokens", "completion_tokens"):
                     value = usage.get(field)
                     if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
-                        state["token_usage"][field] += value
+                        state["token_usage"][field] = state["token_usage"][field] + value if state["token_usage"][field] is not None else None
             reason = result.get("reason")
             raise ValueError(
                 reason if isinstance(reason, str) and reason else "WORKFLOW_MODEL_EXAM_CALL_FAILED"
@@ -6816,12 +6828,9 @@ class QualityCardReviewerExamExecutor:
         estimate = receipt.get("estimated_cost_cny")
         if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
             state["estimated_cost_cny"] += float(estimate)
-        state["token_usage"]["prompt_tokens"] += int(
-            receipt["token_usage"]["prompt_tokens"]
-        )
-        state["token_usage"]["completion_tokens"] += int(
-            receipt["token_usage"]["completion_tokens"]
-        )
+        from .cli_templates import accumulate_usage
+        accumulate_usage(state,receipt.get("token_usage"))
+        state["returned_model"]=receipt.get("returned_model")
         return response
 
     def _stable_provider_call(
@@ -7537,7 +7546,7 @@ class QualityCardReviewerExamExecutor:
                 "executor_ref": self.EXECUTOR_REF,
                 "executor_binding_sha256": _file_sha256(Path(__file__)),
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "score": int(round(score)),
                 "score_exact": round(score, 6),
                 "execution_outcome": ExecutionOutcome.COMPLETED.value,
@@ -7756,7 +7765,7 @@ class QualityCardReviewerExamExecutor:
                 ],
                 "reason": "Quality_REFERENCE_REGRESSION_COMPLETED",
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "duration_ms": duration_ms,
                 "external_network_calls": state["external_network_calls"],
                 "provider_calls": state["provider_calls"],
@@ -8806,6 +8815,8 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
+        from .cli_templates import is_custom,exam_eligible
+        if is_custom(target):return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
         if kind == "API":
             if (
@@ -9553,7 +9564,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                     "FROZEN_PROFILE_ESTIMATE_CAP"
                     if profile_kind == "API"
                     else (
-                        "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
+                        ("CLI_MANAGED_UNKNOWN" if target.get("adapter_id")=="command_template" else "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE")
                         if profile_kind == "CLI"
                         else "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
                     )
@@ -11107,7 +11118,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                     ),
                     "sample_slot": plan["sample_slot"],
                     "requested_model": requested_model,
-                    "returned_model": requested_model,
+                    "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                     "reuse_actions": deepcopy(
                         state["analysis_preloaded_initial_rows"]
                     ),
@@ -11953,7 +11964,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                 "run_id": run_id,
                 "plan_sha256": plan["plan_sha256"],
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "score": score,
                 "first_pass_role_ability_score": first_pass_role_ability_score,
                 "executor_ref": self.EXECUTOR_REF,
@@ -12549,7 +12560,7 @@ class QualityEmbeddingExamExecutor:
                             for field in ("prompt_tokens", "completion_tokens"):
                                 value = usage.get(field)
                                 if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
-                                    state["token_usage"][field] += value
+                                    state["token_usage"][field] = state["token_usage"][field] + value if state["token_usage"][field] is not None else None
                     if result.get("status") != "PASS":
                         raise ValueError(
                             str(result.get("reason") or "EMBEDDING_CALL_FAILED")
@@ -12655,7 +12666,7 @@ class QualityEmbeddingExamExecutor:
                 "run_id": run_id,
                 "plan_sha256": plan["plan_sha256"],
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "score": score,
                 "score_exact": round(mean, 6),
                 "quality_verdict": "NOT_ASSESSED",
@@ -13648,7 +13659,7 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
                             for field in ("prompt_tokens", "completion_tokens"):
                                 value = usage.get(field)
                                 if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
-                                    state["token_usage"][field] += value
+                                    state["token_usage"][field] = state["token_usage"][field] + value if state["token_usage"][field] is not None else None
                     if result.get("status") != "PASS":
                         raise ValueError(str(result.get("reason") or "EMBEDDING_CALL_FAILED"))
                     if int(result.get("external_model_calls") or 0) != 1:

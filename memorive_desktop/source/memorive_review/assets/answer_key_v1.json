@@ -1,0 +1,140 @@
+{
+  "schema_version": "DataAnomalyGold-v1",
+  "answers": [
+    {
+      "case_id": "exact_pct",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "bad_pct",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "weighted_pct",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "weights"
+      ]
+    },
+    {
+      "case_id": "rounded_small",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "impossible_grid",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "unknown_grid",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "step",
+        "weights"
+      ]
+    },
+    {
+      "case_id": "pooled_n",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "experimental_unit",
+        "model"
+      ]
+    },
+    {
+      "case_id": "sd_se_ok",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "sd_se_bad",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "cluster_se",
+      "assessment": "NOT_APPLICABLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "digit_repeat",
+      "assessment": "NOT_APPLICABLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "overlap_sum",
+      "assessment": "NOT_APPLICABLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "exclusive_sum",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "CLARIFY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "confounded_cause",
+      "assessment": "CONDITIONAL_INCONSISTENT",
+      "severity": "PRIORITY",
+      "missing_fields": []
+    },
+    {
+      "case_id": "association_only",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "welch_df",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "missing_card",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "source_methods"
+      ]
+    },
+    {
+      "case_id": "rounded_cross",
+      "assessment": "COMPATIBLE",
+      "severity": "NONE",
+      "missing_fields": []
+    },
+    {
+      "case_id": "multiple_tests",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "df",
+        "adjustment"
+      ]
+    },
+    {
+      "case_id": "ocr_error",
+      "assessment": "INSUFFICIENT_INFORMATION",
+      "severity": "NONE",
+      "missing_fields": [
+        "source_image"
+      ]
+    }
+  ]
+}

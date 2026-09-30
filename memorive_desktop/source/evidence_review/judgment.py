@@ -362,7 +362,7 @@ def _deferred_ruling(
         "zh": "未异源核·待核",
         "en": "cross-model review pending",
         "ja": "異種モデル検証待ち",
-    }[language]
+    }.get(language, "cross-model review pending")
     return {
         "i": index,
         "stage": "cross_source_pending",
@@ -480,6 +480,7 @@ def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownersh
     # by the immutable Analysis ownership/content binding above.
     conclusions = [conclusion_from_claim(c) for c in claims]
     trace = []
+    from memorive_workflow.node_progress import scope
     for i, c in enumerate(claims):
         sid = getattr(c, "source_id", None) or {}
         cid = sid.get("chunk_id")
@@ -492,37 +493,41 @@ def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownersh
                       "resolved": resolved})
     picked, rulings, deferred, failures = [], [], [], []
     active_candidates = list(candidates)
-    for i, c in enumerate(claims):
-        if len(picked) >= max_gpt:
-            break
-        if selected_indexes is not None and i not in selected_indexes:
-            continue
-        if trace[i]["resolved"] and (selected_indexes is not None or _has_number_or_causal(getattr(c, "text", ""))):
-            picked.append(i)
-            if active_candidates:
-                res, selected, attempt_failures = _verify_with_candidates(
-                    conclusions[i], chunk_texts, active_candidates,
-                    data_ownership=effective_ownership, gpt_call=gpt_call,
-                    verifier_call=verifier_call, region_check=region_check,
-                    output_language=output_language,
-                    force_review=selected_indexes is not None,
-                )
-                failures.extend(attempt_failures)
-            else:
-                res, selected = None, None
-            if res is not None:
-                rulings.append({"i": i, **res})
-                active_candidates = active_candidates[active_candidates.index(selected):]
-            else:
-                reason = ("producer provider is unknown; cannot prove verifier is cross-source"
-                          if producer_provider is None else
-                          "all eligible cross-source verifiers are unavailable")
-                pending = _deferred_ruling(
-                    i, c, reason, failures, output_language=output_language
-                )
-                deferred.append(pending)
-                rulings.append(pending)
-                active_candidates = []
+    selected_units = [i for i,c in enumerate(claims) if (selected_indexes is None or i in selected_indexes) and trace[i]["resolved"] and (selected_indexes is not None or _has_number_or_causal(getattr(c,"text","")))][:max_gpt]
+    with scope('JUDGMENT_REVIEW', selected_units) as node_units:
+        for i, c in enumerate(claims):
+            if len(picked) >= max_gpt:
+                break
+            if selected_indexes is not None and i not in selected_indexes:
+                continue
+            if trace[i]["resolved"] and (selected_indexes is not None or _has_number_or_causal(getattr(c, "text", ""))):
+                picked.append(i)
+                if active_candidates:
+                    res, selected, attempt_failures = _verify_with_candidates(
+                        conclusions[i], chunk_texts, active_candidates,
+                        data_ownership=effective_ownership, gpt_call=gpt_call,
+                        verifier_call=verifier_call, region_check=region_check,
+                        output_language=output_language,
+                        force_review=selected_indexes is not None,
+                    )
+                    failures.extend(attempt_failures)
+                else:
+                    res, selected = None, None
+                if res is not None:
+                    rulings.append({"i": i, **res})
+                    if res.get("gpt_sent"):
+                        node_units.complete(i)
+                    active_candidates = active_candidates[active_candidates.index(selected):]
+                else:
+                    reason = ("producer provider is unknown; cannot prove verifier is cross-source"
+                              if producer_provider is None else
+                              "all eligible cross-source verifiers are unavailable")
+                    pending = _deferred_ruling(
+                        i, c, reason, failures, output_language=output_language
+                    )
+                    deferred.append(pending)
+                    rulings.append(pending)
+                    active_candidates = []
     target_info = target or {"kind": "research_analysis", "question": getattr(analysis_result, "question", None),
                              "analysis_model": producer_model}
     debt = None

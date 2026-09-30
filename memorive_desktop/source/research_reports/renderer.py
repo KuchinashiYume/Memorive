@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import string
+from memorive_language.reports import tr, localized, template as localized_template, HEADING_FIELDS
 from collections import Counter
 from pathlib import Path
 
@@ -79,6 +80,7 @@ _TEMPLATE_CONTRACTS = {
 
 
 def _plain(value: object, field: str) -> str:
+    if field in HEADING_FIELDS:value=tr(str(value))
     text = require_safe_text(str(value), field, allow_empty=True)
     hit = forbidden_phrase(text)
     if hit:
@@ -96,11 +98,7 @@ def _line(item: dict) -> str:
     refs = _joined(item["artifact_or_ledger_refs"], "artifact_or_ledger_ref")
     evidence = _joined(item["evidence_refs"], "evidence_ref")
     return (
-        f"- event {_plain(item['event_id'], 'event_id')} · source event "
-        f"{_plain(item['source_event_ref'], 'source_event_ref')} · "
-        f"{_plain(item['occurred_at'], 'occurred_at')} · {_plain(item['text'], 'text')} · "
-        f"状态轴 {_plain(item['status_axis'], 'status_axis')}={_plain(item['status'], 'status')} · "
-        f"对象 {refs} · 来源 {_plain(item['source_record_ref'], 'source_record_ref')} · 证据 {evidence}"
+        tr('- event {v0} · source event {v1} · {v2} · {v3} · 状态轴 {v4}={v5} · 对象 {v6} · 来源 {v7} · 证据 {v8}', _plain(item['event_id'], 'event_id'), _plain(item['source_event_ref'], 'source_event_ref'), _plain(item['occurred_at'], 'occurred_at'), _plain(item['text'], 'text'), _plain(item['status_axis'], 'status_axis'), _plain(item['status'], 'status'), refs, _plain(item['source_record_ref'], 'source_record_ref'), evidence)
     )
 
 
@@ -153,7 +151,7 @@ def _load_template(kind: str) -> tuple[dict, str]:
         count != 1 for count in Counter(tokens).values()
     ):
         raise ValueError(f"{kind} template placeholder contract mismatch")
-    return sidecar, template
+    return sidecar, localized_template(template)
 
 
 def _section_map(digest: dict, sidecar: dict) -> dict[str, list[dict]]:
@@ -174,12 +172,7 @@ def _section_map(digest: dict, sidecar: dict) -> dict[str, list[dict]]:
 
 def _event_summary(item: dict, section_title: str) -> str:
     return (
-        f"- [{_plain(section_title, 'attention_section')}] event "
-        f"{_plain(item['event_id'], 'attention_event_id')} · "
-        f"{_plain(item['text'], 'attention_text')} · "
-        f"{_plain(item['status_axis'], 'attention_status_axis')}="
-        f"{_plain(item['status'], 'attention_status')} · 来源 "
-        f"{_plain(item['source_record_ref'], 'attention_source_record_ref')}"
+        tr('- [{v0}] event {v1} · {v2} · {v3}={v4} · 来源 {v5}', _plain(section_title, 'attention_section'), _plain(item['event_id'], 'attention_event_id'), _plain(item['text'], 'attention_text'), _plain(item['status_axis'], 'attention_status_axis'), _plain(item['status'], 'attention_status'), _plain(item['source_record_ref'], 'attention_source_record_ref'))
     )
 
 
@@ -214,43 +207,40 @@ def _attention_items(
     lines: list[str] = []
     for conflict in digest["conflicts"]:
         lines.append(
-            f"- [冲突] event {_plain(conflict['event_id'], 'attention_conflict_event_id')} · "
-            "未自动择一 · 来源 "
+            tr('- [冲突] event {v0} · 未自动择一 · 来源 ', _plain(conflict['event_id'], 'attention_conflict_event_id'))
             + _joined(conflict["source_record_refs"], "attention_conflict_source_ref")
         )
     for issue in digest["unparseable_events"]:
         if issue["blocking_status"] == "blocking":
             lines.append(
-                f"- [阻断] {_plain(issue['issue_id'], 'attention_issue_id')} · "
-                f"{_plain(issue['error_code'], 'attention_error_code')} · 来源 "
-                f"{_plain(issue['source_record_ref'], 'attention_issue_source_ref')}"
+                tr('- [阻断] {v0} · {v1} · 来源 {v2}', _plain(issue['issue_id'], 'attention_issue_id'), _plain(issue['error_code'], 'attention_error_code'), _plain(issue['source_record_ref'], 'attention_issue_source_ref'))
             )
     lines.extend(
         _event_summary(item, title)
         for title, item in _unique_section_items(section_map, focus_sections)
     )
     if not lines:
-        return "- 当前窗口没有来源支持的需优先处理记录。"
+        return tr('- 当前窗口没有来源支持的需优先处理记录。')
     visible_limit = 10
     if len(lines) <= visible_limit:
         return "\n".join(lines)
     hidden = len(lines) - visible_limit
-    return "\n".join(lines[:visible_limit] + [f"- 另有 {hidden} 项，见详细记录。"])
+    return "\n".join(lines[:visible_limit] + [tr('- 另有 {v0} 项，见详细记录。', hidden)])
 
 
 def _overview_table(
     digest: dict, section_map: dict[str, list[dict]], sidecar: dict
 ) -> str:
-    rows = ["| 类别 | 数量 |", "|---|---:|"]
+    rows = [tr('| 类别 | 数量 |'), "|---|---:|"]
     rows.extend(
         f"| {_plain(title, 'overview_section')} | {len(section_map[title])} |"
         for title in sidecar["sections"]
     )
     rows.extend(
         (
-            f"| 迟到事件 | {len(digest['late_arrivals'])} |",
-            f"| 冲突 | {len(digest['conflicts'])} |",
-            f"| 不可解析 | {len(digest['unparseable_events'])} |",
+            tr('| 迟到事件 | {v0} |', len(digest['late_arrivals'])),
+            tr('| 冲突 | {v0} |', len(digest['conflicts'])),
+            tr('| 不可解析 | {v0} |', len(digest['unparseable_events'])),
         )
     )
     return "\n".join(rows)
@@ -276,7 +266,7 @@ def _coverage_summary(digest: dict) -> str:
 
 def _section_summary(items: list[dict], title: str) -> str:
     if not items:
-        return "- 无来源支持的记录。"
+        return tr('- 无来源支持的记录。')
     return "\n".join(_event_summary(item, title) for item in items)
 
 
@@ -287,7 +277,7 @@ def _detail_sections(digest: dict) -> str:
         title = section["title"]
         lines.extend((f"### 1.{index} {_plain(title, 'section_title')}", ""))
         if not section["items"]:
-            lines.append("- 无来源支持的记录。")
+            lines.append(tr('- 无来源支持的记录。'))
         for item in section["items"]:
             event_id = item["event_id"]
             prior = seen.get(event_id)
@@ -299,53 +289,48 @@ def _detail_sections(digest: dict) -> str:
                 if first_item != item:
                     raise ValueError(f"duplicate event payload mismatch: {event_id}")
                 lines.append(
-                    f"- event {_plain(event_id, 'cross_reference_event_id')} → 交叉引用："
-                    f"首次完整记录见「{_plain(first_title, 'cross_reference_section')}」。"
+                    tr('- event {v0} → 交叉引用：首次完整记录见「{v1}」。', _plain(event_id, 'cross_reference_event_id'), _plain(first_title, 'cross_reference_section'))
                 )
         lines.append("")
     return "\n".join(lines).rstrip()
 
 
 def _data_quality(digest: dict) -> str:
-    lines = ["### 2.1 迟到事件", ""]
+    lines = [tr('### 2.1 迟到事件'), ""]
     if digest["late_arrivals"]:
         for item in digest["late_arrivals"]:
             lines.append(
                 _line(item)
-                + " · 原窗口 "
+                + tr(' · 原窗口 ')
                 + _plain(item["original_window_ref"], "original_window_ref")
-                + " · 原截止 "
+                + tr(' · 原截止 ')
                 + _plain(item["original_cutoff_at"], "original_cutoff_at")
             )
     else:
-        lines.append("- 无。")
-    lines.extend(("", "### 2.2 冲突", ""))
+        lines.append(tr('- 无。'))
+    lines.extend(("", tr('### 2.2 冲突'), ""))
     if digest["conflicts"]:
         for conflict in digest["conflicts"]:
             lines.append(
-                f"- {_plain(conflict['event_id'], 'conflict_event_id')} 存在内容冲突；"
-                "未自动择一；来源 "
+                tr('- {v0} 存在内容冲突；未自动择一；来源 ', _plain(conflict['event_id'], 'conflict_event_id'))
                 + _joined(conflict["source_record_refs"], "conflict_source_ref")
             )
     else:
-        lines.append("- 无。")
-    lines.extend(("", "### 2.3 不可解析", ""))
+        lines.append(tr('- 无。'))
+    lines.extend(("", tr('### 2.3 不可解析'), ""))
     if digest["unparseable_events"]:
         for issue in digest["unparseable_events"]:
             lines.append(
-                f"- {_plain(issue['issue_id'], 'issue_id')} · "
-                f"{_plain(issue['error_code'], 'error_code')} · "
-                f"{_plain(issue['blocking_status'], 'blocking_status')} · 来源 "
-                f"{_plain(issue['source_record_ref'], 'issue_source_record_ref')}"
+                tr('- {v0} · {v1} · {v2} · 来源 {v3}', _plain(issue['issue_id'], 'issue_id'), _plain(issue['error_code'], 'error_code'), _plain(issue['blocking_status'], 'blocking_status'), _plain(issue['source_record_ref'], 'issue_source_record_ref'))
             )
     else:
-        lines.append("- 无。")
+        lines.append(tr('- 无。'))
     return "\n".join(lines)
 
 
 def _not_assessed(digest: dict) -> str:
     if not digest["not_assessed_dimensions"]:
-        return "- 无。"
+        return tr('- 无。')
     return "\n".join(
         f"- {_plain(value['dimension'], 'dimension')} = "
         f"{_plain(value.get('status', 'NOT_ASSESSED'), 'not_assessed_status')} · "
@@ -365,8 +350,7 @@ def _audit_metadata(digest: dict, sidecar: dict) -> str:
             f"- template_revision: {_plain(sidecar['template_revision'], 'template_revision')}",
             f"- digest_id: {_plain(digest['digest_id'], 'digest_id')}",
             f"- revision: {_plain(digest['revision'], 'revision')}",
-            f"- window: {_plain(digest['window_start'], 'window_start')} 至 "
-            f"{_plain(digest['window_end'], 'window_end')}（左闭右开）",
+            tr('- window: {v0} 至 {v1}（左闭右开）', _plain(digest['window_start'], 'window_start'), _plain(digest['window_end'], 'window_end')),
             f"- cutoff_at: {_plain(digest['cutoff_at'], 'cutoff_at')}",
             f"- generated_at: {_plain(digest.get('generated_at', 'NOT_RECORDED'), 'generated_at')}",
             f"- input_manifest_sha256: {_plain(digest['input_manifest_sha256'], 'input_manifest_sha256')}",
@@ -384,7 +368,7 @@ def _audit_metadata(digest: dict, sidecar: dict) -> str:
 
 def _api_narrative_lines(rows: list[dict], label: str) -> str:
     if not rows:
-        return "- 无来源支持的记录。"
+        return tr('- 无来源支持的记录。')
     return "\n".join(
         f"- [API narrative · {_plain(label, 'api_narrative_label')}] "
         f"{_plain(row['text'], 'api_narrative_text')} · events "
@@ -400,7 +384,7 @@ def _api_section_summary(narrative: dict, title: str) -> str:
         if item["section_title"] == title
     )
     if row["text"] == "NONE":
-        return "- 无来源支持的记录。"
+        return tr('- 无来源支持的记录。')
     return _api_narrative_lines(
         [{"text": row["text"], "event_ids": row["event_ids"]}],
         title,
@@ -439,6 +423,7 @@ def _fill_template(template: str, values: dict[str, str], sidecar: dict) -> str:
     return rendered.rstrip() + "\n"
 
 
+@localized
 def render_markdown(digest: dict) -> str:
     kind = digest.get("digest_kind")
     sidecar, template = _load_template(kind)
@@ -474,6 +459,7 @@ def render_markdown(digest: dict) -> str:
     return _fill_template(template, values, sidecar)
 
 
+@localized
 def render_markdown_with_narrative(
     digest: dict,
     narrative: dict,

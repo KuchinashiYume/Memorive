@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import threading
 import time
 import uuid
 
@@ -150,26 +151,27 @@ def result_reason(process):
     if not terminal or not message:return transient_error or 'CLI_RESPONSE_INCOMPLETE'
     return None
 
-def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_seconds,shell):
+def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_seconds,shell,
+                     template_mode=False,result_paths=()):
     from .model_validation import ProcessResult
     from model_gateway.execution_core.runner import _TreeController
     if shell is not False:raise ValueError('CLI_VALIDATION_SHELL_FORBIDDEN')
     progress,cancelled=_context.get();workspace=Path(cwd)
     stdout_path=workspace/'stdout.bin';stderr_path=workspace/'stderr.bin'
     start=time.monotonic();last_activity=start;last_publish=0.;stage='STARTING';pending=b''
-    observed_types=set();process=None;stopped=False;quota_hit=False;tree=_TreeController()
-    diagnostic={'hard_timeout_seconds':None,'cancelled':False,'last_stage':stage,'event_types':[]}
+    observed_types=set();process=None;stopped=False;quota_hit=False;timed_out=False;tree=_TreeController();writer=None
+    diagnostic={'hard_timeout_seconds':timeout_seconds if template_mode else None,'cancelled':False,'last_stage':stage,'event_types':[]}
     attempt_path=workspace.parent/('cli-verification-'+uuid.uuid4().hex+'.json')
     stamp=lambda:datetime.now(timezone.utc).isoformat()
     command_hash=hashlib.sha256(json.dumps(list(argv),ensure_ascii=False).encode()).hexdigest().upper()
-    requested=argv[argv.index('--model')+1] if '--model' in argv else None
+    requested=argv[argv.index('--model')+1] if not template_mode and '--model' in argv else None
     evidence={'schema_version':'CliVerificationAttempt-v1','attempt_id':attempt_path.stem,'status':'PREPARED',
         'started_at':stamp(),'requested_model':requested,'returned_model':None,
         'command_sha256':command_hash,'behavior_sha256':hashlib.sha256(stdin_bytes or b'').hexdigest().upper(),
         'executable_sha256':hashlib.sha256(Path(argv[0]).read_bytes()).hexdigest().upper(),
         'process_transport':'local_process','access_mode':'CLI_MANAGED_AUTH','billing_mode':'CLI_MANAGED_UNKNOWN',
         'route':'CLI_PROVIDER_MANAGED','region':'NOT_EXPOSED','egress':'CUSTOM_PROXY' if environment.get('HTTPS_PROXY') else 'SYSTEM_OR_DIRECT',
-        'actual_cost':None,'token_usage':None,'hard_timeout_seconds':None,'acceptance_verdict':'NOT_ASSESSED'}
+        'actual_cost':None,'token_usage':None,'hard_timeout_seconds':diagnostic['hard_timeout_seconds'],'acceptance_verdict':'NOT_ASSESSED'}
     with attempt_path.open('x',encoding='utf8') as out:json.dump(evidence,out,indent=2)
     diagnostic['attempt_id']=evidence['attempt_id']
     def publish(force=False):
@@ -181,24 +183,36 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
                 'slow_response':now-last_activity>=timeout_seconds,'attempt_id':evidence['attempt_id']})
     try:
         publish(True)
+        if template_mode:
+            from .call_ledger import execution_checkpoint
+            execution_checkpoint()
         if cancelled():
             stopped=True
             stage='STOPPING'
             raise OSError('CLI_VERIFICATION_CANCELLED_BEFORE_START')
         with stdout_path.open('xb') as stdout,stderr_path.open('xb') as stderr:
-            process=subprocess.Popen(list(argv),cwd=cwd,env=dict(environment),stdin=subprocess.PIPE if stdin_bytes is not None else subprocess.DEVNULL,
+            from .windows_cli import native_process_path
+            process=subprocess.Popen(list(argv),cwd=native_process_path(cwd),env=dict(environment),stdin=subprocess.PIPE if stdin_bytes is not None else subprocess.DEVNULL,
                 stdout=stdout,stderr=stderr,shell=False,
                 creationflags=(subprocess.CREATE_NEW_PROCESS_GROUP|subprocess.CREATE_NO_WINDOW|4) if os.name=='nt' else 0,
                 start_new_session=os.name!='nt')
             tree.attach(process)
             resume_owned_process(process)
             if stdin_bytes is not None:
-                try:process.stdin.write(stdin_bytes);process.stdin.close()
-                except BrokenPipeError:pass
+                def send_input():
+                    try:process.stdin.write(stdin_bytes);process.stdin.close()
+                    except (BrokenPipeError,OSError,ValueError):pass
+                writer=threading.Thread(target=send_input,daemon=True);writer.start()
             stage='WAITING_RESPONSE';publish(True)
             with stdout_path.open('rb') as reader:
                 stderr_size=0
                 while process.poll() is None:
+                    if template_mode:
+                        from .call_ledger import execution_interrupt_callback
+                        interrupt=execution_interrupt_callback()
+                        if interrupt is not None:interrupt()
+                        if time.monotonic()-start>=timeout_seconds:
+                            timed_out=True;stage='TIMED_OUT';stop_owned_tree(tree,process);break
                     chunk=reader.read()
                     new_stderr_size=stderr_path.stat().st_size
                     if chunk or new_stderr_size!=stderr_size:last_activity=time.monotonic()
@@ -207,6 +221,8 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
                         pending+=chunk;parts=pending.split(b'\n');pending=parts.pop()
                         for row in events(b'\n'.join(parts)):
                             kind=row.get('type')
+                            if template_mode:
+                                stage='RECEIVING';continue
                             if kind in {'thread.started','turn.started','turn.completed','turn.failed','item.started','item.completed','error'}:
                                 observed_types.add(kind)
                             if kind=='item.completed':stage='RECEIVING'
@@ -214,31 +230,33 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
                     if cancelled():
                         stopped=True;stage='STOPPING';publish(True);stop_owned_tree(tree,process);break
                     quota=transport.capture_quota_bytes
-                    if quota is not None and (stdout_path.stat().st_size>quota or stderr_size>quota):
+                    if quota is not None and (stdout_path.stat().st_size>quota or stderr_size>quota or any(p.exists() and p.stat().st_size>quota for p in result_paths)):
                         quota_hit=True;stop_owned_tree(tree,process);break
                     publish();time.sleep(.1)
                 process.wait()
+                if template_mode:stop_owned_tree(tree,process)
         stdout,out_truncated,out_size=transport._read_bounded(stdout_path)
         stderr,err_truncated,err_size=transport._read_bounded(stderr_path)
         result=ProcessResult(started=True,returncode=process.returncode,stdout=stdout,stderr=stderr,
-            output_truncated=quota_hit or out_truncated or err_truncated,duration_ms=round((time.monotonic()-start)*1000),
+            timed_out=timed_out,output_truncated=quota_hit or out_truncated or err_truncated,duration_ms=round((time.monotonic()-start)*1000),
             stdout_total_bytes=out_size,stderr_total_bytes=err_size,capture_quota_bytes=transport.capture_quota_bytes)
     except (FileNotFoundError,PermissionError,OSError):
         result=ProcessResult(started=process is not None,returncode=process.poll() if process else None,stdout=b'',stderr=b'',duration_ms=round((time.monotonic()-start)*1000))
     finally:
         if process is not None:stop_owned_tree(tree,process)
+        if writer is not None:writer.join(timeout=5)
         tree.close(process)
         wait_output_release((stdout_path,stderr_path),publish)
     diagnostic.update(cancelled=stopped,last_stage=stage,event_types=sorted(observed_types))
-    observed_types.update(str(row['type']) for row in events(result.stdout)
+    observed_types.update(str(row['type']) for row in ([] if template_mode else events(result.stdout))
                           if row.get('type') in {'thread.started','turn.started','turn.completed','turn.failed','item.started','item.completed','error'})
     diagnostic['event_types']=sorted(observed_types)
     from .model_validation import _reported_models, _normalise_token_usage, _usage_from_cli_output
-    reported=_reported_models(result.stdout)
+    reported=set() if template_mode else _reported_models(result.stdout)
     evidence.update(status='CANCELLED' if stopped else 'FINISHED',finished_at=stamp(),duration_ms=result.duration_ms,
         returncode=result.returncode,returned_model=requested if requested in reported else None,
         stdout_sha256=hashlib.sha256(result.stdout).hexdigest().upper(),stderr_sha256=hashlib.sha256(result.stderr).hexdigest().upper(),
-        token_usage=_normalise_token_usage(_usage_from_cli_output(result.stdout) or {}),event_types=sorted(observed_types))
+        token_usage=None if template_mode else _normalise_token_usage(_usage_from_cli_output(result.stdout) or {}),event_types=sorted(observed_types))
     # A sibling terminal record preserves the pre-send binding unchanged.
     with attempt_path.with_suffix('.result.json').open('x',encoding='utf8') as out:json.dump(evidence,out,indent=2)
     return result,diagnostic

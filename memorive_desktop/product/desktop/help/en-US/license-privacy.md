@@ -1,6 +1,6 @@
 # License and Privacy
 
-Updated 2026-09-26 · v1.01 · runtime-prerequisites
+Updated 2026-09-29 · v1.02
 
 Code licensing, character artwork, and data use in Memorive.
 
@@ -27,6 +27,12 @@ WebView2, Visual C++, Python, and other dependencies retain their own licenses. 
 Sources, sessions, and task outputs may contain your research material. Cloud models, embedding, retrieval, web reading, or CLI services may send relevant inputs to the configured provider or website. Check the endpoint, material scope, and provider’s data policy before use.
 
 A local model’s network activity depends on the service and its configuration. Logs, session exports, screenshots, and feedback may contain source material, paths, or conversations. Review them before sharing. This notice does not guarantee that third-party services collect no data.
+
+## Literature discovery, AI Updates and update checks
+
+Literature discovery sends search terms and necessary query conditions to selected sources and stores metadata, source links and available abstracts. You add the full text yourself. AI Updates reads public material and sends relevant content to the selected model when generating a report. Feature settings determine automatic receipt, model choice and permitted material.
+
+Version checking in v1.02 contacts the project's GitHub release and download services, which can receive your IP address, request time and necessary request information. Automatic checks can be disabled; download and application are separate choices. Normal update checking does not require uploading papers, conversations, credentials or a complete library. Local migration backups do not introduce a cloud-backup service. Availability still depends on your network and the external service.
 
 ## Offline reading and contact
 

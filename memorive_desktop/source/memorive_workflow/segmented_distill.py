@@ -709,107 +709,110 @@ class CoreSegmentedDistiller:
         )
         cards = []
         segment_receipts = []
-        for segment in topology["segments"]:
-            sequence = int(segment["sequence_index"])
-            segment_root = self.evidence_root / "segments" / f"{sequence:03d}_{segment['segment_id']}"
-            paper_root = segment_root / "paper"
-            paper_root.mkdir(parents=True, exist_ok=True)
-            segment_rows = _segment_records(records, manifest, segment)
-            segment_clean = paper_root / cleanmd.name
-            segment_chunks = paper_root / chunks_path.name
-            _atomic_text(segment_clean, cleanmd.read_text(encoding="utf-8"))
-            _atomic_text(
-                segment_chunks,
-                "".join(
-                    json.dumps(row, ensure_ascii=False, allow_nan=False, sort_keys=True) + "\n"
-                    for row in segment_rows
-                ),
-            )
-            input_identity = {
-                "source_manifest_hash": manifest["source_manifest_hash"],
-                "topology_hash": topology["topology_hash"],
-                "segment_id": segment["segment_id"],
-                "execution_profile_hash": _sha256(self.workflow_config["nodes"]["03_CARD_DISTILL"]),
-                "clean_sha256": _file_sha256(segment_clean),
-                "chunks_sha256": _file_sha256(segment_chunks),
-            }
-            receipt_path = segment_root / "segment_receipt.json"
-            existing_cards = sorted(paper_root.glob("[[]Card[]]*.md"))
-            if receipt_path.is_file() and len(existing_cards) == 1:
-                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-                if receipt.get("input_identity") != input_identity or receipt.get("card_sha256") != _file_sha256(existing_cards[0]):
-                    raise RuntimeError(f"Capabilities_SEGMENT_REPLAY_CONFLICT:{segment['segment_id']}")
-                card_path = existing_cards[0]
-            else:
-                if existing_cards or receipt_path.exists():
-                    raise RuntimeError(f"Capabilities_SEGMENT_PARTIAL_REPLAY_STATE:{segment['segment_id']}")
-                segment_parameters = signature(legacy_distill).parameters
-                segment_kwargs = {"target": target, "overwrite": False}
-                if "max_tokens" in segment_parameters and profile is not None:
-                    segment_kwargs["max_tokens"] = profile.max_output_tokens
-                if "route_large_input" in segment_parameters:
-                    segment_kwargs["route_large_input"] = True
-                if "segment_handoff_on_length" in segment_parameters:
-                    segment_kwargs["segment_handoff_on_length"] = True
-                child_root = segment_root/'subsegments'
-                if (child_root/'adaptive_segment_fallback.json').is_file():
-                    result = CoreSegmentedDistiller(workflow_config=self.workflow_config,
-                        evidence_root=child_root, _split_depth=self._split_depth+1).distill(
-                            paper_root, target=target, legacy_distill=legacy_distill)
-                else:
-                    result = legacy_distill(paper_root, **segment_kwargs)
-                if _is_output_truncation(result):
-                    if self._split_depth >= topology['max_split_depth']:
-                        raise RuntimeError('Capabilities_SEGMENT_CAPACITY_UNRESOLVED:MAX_SPLIT_DEPTH')
-                    # Reuse this adapter on the failed segment only. The prior
-                    # response becomes its persisted handoff; never send that
-                    # unchanged segment again before dividing it.
-                    child = CoreSegmentedDistiller(workflow_config=self.workflow_config,
-                        evidence_root=child_root, _split_depth=self._split_depth+1)
-                    result = child.distill(paper_root, target=target,
-                        legacy_distill=legacy_distill, _prior_truncation=result)
-                if result.status != "completed" or not result.card_path:
-                    raise RuntimeError(
-                        f"Capabilities_SEGMENT_Core_DISTILL_FAILED:{segment['segment_id']}:{result.error_type}:{result.error_message}"
-                    )
-                card_path = Path(result.card_path)
-                receipt = {
-                    "schema_version": "DesktopLongDocumentSegmentReceipt-v1",
-                    "input_identity": input_identity,
-                    "card_sha256": _file_sha256(card_path),
-                    "distill_model": result.distill_model,
-                    "chunk_ids": [row["chunk_id"] for row in segment_rows],
-                    "producer": "Core_EVIDENCE_EXTRACTION_DISTILL_REUSED",
+        from memorive_workflow.node_progress import scope
+        with scope('CARD_SEGMENTS', [v['segment_id'] for v in topology['segments']] if self._split_depth == 0 and len(topology['segments']) > 1 else []) as node_units:
+            for segment in topology["segments"]:
+                sequence = int(segment["sequence_index"])
+                segment_root = self.evidence_root / "segments" / f"{sequence:03d}_{segment['segment_id']}"
+                paper_root = segment_root / "paper"
+                paper_root.mkdir(parents=True, exist_ok=True)
+                segment_rows = _segment_records(records, manifest, segment)
+                segment_clean = paper_root / cleanmd.name
+                segment_chunks = paper_root / chunks_path.name
+                _atomic_text(segment_clean, cleanmd.read_text(encoding="utf-8"))
+                _atomic_text(
+                    segment_chunks,
+                    "".join(
+                        json.dumps(row, ensure_ascii=False, allow_nan=False, sort_keys=True) + "\n"
+                        for row in segment_rows
+                    ),
+                )
+                input_identity = {
+                    "source_manifest_hash": manifest["source_manifest_hash"],
+                    "topology_hash": topology["topology_hash"],
+                    "segment_id": segment["segment_id"],
+                    "execution_profile_hash": _sha256(self.workflow_config["nodes"]["03_CARD_DISTILL"]),
+                    "clean_sha256": _file_sha256(segment_clean),
+                    "chunks_sha256": _file_sha256(segment_chunks),
                 }
-                _atomic_json(receipt_path, receipt)
-            raw_shard = {
-                "schema_version": "long_document-segment-fact-shard-v1",
-                "artifact_kind": "segment_fact_shard",
-                "paper_id": manifest["paper_id"],
-                "segment_id": segment["segment_id"],
-                "attempt_id": f"core-card-{sequence:03d}",
-                "source_manifest_hash": manifest["source_manifest_hash"],
-                "topology_hash": topology["topology_hash"],
-                "expected_core_chunk_ids": segment["core_chunk_ids"],
-                "observed_source_ids": [],
-                "terminal_marker": "LONG_DOCUMENT_SEGMENT_COMPLETE",
-                "facts": [],
-                "slot_observations": [],
-                "high_risk_tokens": [],
-                "local_conflicts": [],
-                "capacity_state": "complete",
-                "producer_receipt_ref": f"sha256:{receipt['card_sha256']}",
-            }
-            shard = validator.validate(raw_shard, provider_receipt={"finish_reason": "stop"})
-            ledger.record_attempt(
-                segment_id=segment["segment_id"],
-                attempt_id=raw_shard["attempt_id"],
-                state="terminal",
-                receipt_ref=raw_shard["producer_receipt_ref"],
-            )
-            ledger.admit(shard)
-            cards.append(_frontmatter(card_path))
-            segment_receipts.append(receipt)
+                receipt_path = segment_root / "segment_receipt.json"
+                existing_cards = sorted(paper_root.glob("[[]Card[]]*.md"))
+                if receipt_path.is_file() and len(existing_cards) == 1:
+                    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                    if receipt.get("input_identity") != input_identity or receipt.get("card_sha256") != _file_sha256(existing_cards[0]):
+                        raise RuntimeError(f"Capabilities_SEGMENT_REPLAY_CONFLICT:{segment['segment_id']}")
+                    card_path = existing_cards[0]
+                else:
+                    if existing_cards or receipt_path.exists():
+                        raise RuntimeError(f"Capabilities_SEGMENT_PARTIAL_REPLAY_STATE:{segment['segment_id']}")
+                    segment_parameters = signature(legacy_distill).parameters
+                    segment_kwargs = {"target": target, "overwrite": False}
+                    if "max_tokens" in segment_parameters and profile is not None:
+                        segment_kwargs["max_tokens"] = profile.max_output_tokens
+                    if "route_large_input" in segment_parameters:
+                        segment_kwargs["route_large_input"] = True
+                    if "segment_handoff_on_length" in segment_parameters:
+                        segment_kwargs["segment_handoff_on_length"] = True
+                    child_root = segment_root/'subsegments'
+                    if (child_root/'adaptive_segment_fallback.json').is_file():
+                        result = CoreSegmentedDistiller(workflow_config=self.workflow_config,
+                            evidence_root=child_root, _split_depth=self._split_depth+1).distill(
+                                paper_root, target=target, legacy_distill=legacy_distill)
+                    else:
+                        result = legacy_distill(paper_root, **segment_kwargs)
+                    if _is_output_truncation(result):
+                        if self._split_depth >= topology['max_split_depth']:
+                            raise RuntimeError('Capabilities_SEGMENT_CAPACITY_UNRESOLVED:MAX_SPLIT_DEPTH')
+                        # Reuse this adapter on the failed segment only. The prior
+                        # response becomes its persisted handoff; never send that
+                        # unchanged segment again before dividing it.
+                        child = CoreSegmentedDistiller(workflow_config=self.workflow_config,
+                            evidence_root=child_root, _split_depth=self._split_depth+1)
+                        result = child.distill(paper_root, target=target,
+                            legacy_distill=legacy_distill, _prior_truncation=result)
+                    if result.status != "completed" or not result.card_path:
+                        raise RuntimeError(
+                            f"Capabilities_SEGMENT_Core_DISTILL_FAILED:{segment['segment_id']}:{result.error_type}:{result.error_message}"
+                        )
+                    card_path = Path(result.card_path)
+                    receipt = {
+                        "schema_version": "DesktopLongDocumentSegmentReceipt-v1",
+                        "input_identity": input_identity,
+                        "card_sha256": _file_sha256(card_path),
+                        "distill_model": result.distill_model,
+                        "chunk_ids": [row["chunk_id"] for row in segment_rows],
+                        "producer": "Core_EVIDENCE_EXTRACTION_DISTILL_REUSED",
+                    }
+                    _atomic_json(receipt_path, receipt)
+                raw_shard = {
+                    "schema_version": "long_document-segment-fact-shard-v1",
+                    "artifact_kind": "segment_fact_shard",
+                    "paper_id": manifest["paper_id"],
+                    "segment_id": segment["segment_id"],
+                    "attempt_id": f"core-card-{sequence:03d}",
+                    "source_manifest_hash": manifest["source_manifest_hash"],
+                    "topology_hash": topology["topology_hash"],
+                    "expected_core_chunk_ids": segment["core_chunk_ids"],
+                    "observed_source_ids": [],
+                    "terminal_marker": "LONG_DOCUMENT_SEGMENT_COMPLETE",
+                    "facts": [],
+                    "slot_observations": [],
+                    "high_risk_tokens": [],
+                    "local_conflicts": [],
+                    "capacity_state": "complete",
+                    "producer_receipt_ref": f"sha256:{receipt['card_sha256']}",
+                }
+                shard = validator.validate(raw_shard, provider_receipt={"finish_reason": "stop"})
+                ledger.record_attempt(
+                    segment_id=segment["segment_id"],
+                    attempt_id=raw_shard["attempt_id"],
+                    state="terminal",
+                    receipt_ref=raw_shard["producer_receipt_ref"],
+                )
+                ledger.admit(shard)
+                cards.append(_frontmatter(card_path))
+                segment_receipts.append(receipt)
+                node_units.complete(segment["segment_id"])
 
         completion = ledger.snapshot()
         _atomic_json(self.evidence_root / "segment_completion_ledger.json", completion)

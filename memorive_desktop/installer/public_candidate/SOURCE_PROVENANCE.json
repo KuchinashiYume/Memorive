@@ -1,5 +1,5 @@
 {
-  "scope": "Public semantic version; legacy machine-specific VM test authorization code removed; production install, update and removal engine retained.",
+  "scope": "E11 shared update engine and three-language construction; not tested or released",
   "files": [
     {
       "path": "app.manifest",
@@ -9,27 +9,27 @@
     {
       "path": "html_host.cs",
       "baseline_sha256": "2b26481dc24536835382e9472cd3184447e522ff8b968251fb6da11a04b7b88d",
-      "candidate_sha256": "fa0c54a478a9280ee912d7cdcade13b8a2d07781d6e5841b0dc6f4784515520f"
+      "candidate_sha256": "df5bd57bc8e941b035f79adf78c29680719e6f1a7367631985d5751aeaf9a54d"
     },
     {
       "path": "install.html",
       "baseline_sha256": "deda0c5920f546496a190e1b9bb970ca3f56782b2fe356668e5ef87ac8e3f9f9",
-      "candidate_sha256": "164539931fd452e375e6c681e8fa3875e61d51fb0e3b8fd80f16ebdcbdb955c2"
+      "candidate_sha256": "9b2172b8a1aacd06774f9c813595c581bfa0d3dd16123568e82933e76d72352f"
     },
     {
       "path": "install_bridge.js",
       "baseline_sha256": "114506220a0402cc4c0b15a78c11d9ef14cbaec326a9ad7a29974353dabcf0b6",
-      "candidate_sha256": "114506220a0402cc4c0b15a78c11d9ef14cbaec326a9ad7a29974353dabcf0b6"
+      "candidate_sha256": "a8d2628b1a5782fa7bff2e011088975fc16adf64261fdd342a4908f98e17a7b3"
     },
     {
       "path": "lifecycle.cs",
       "baseline_sha256": "60f6f8dbead1e75d12a90a86a4596372d6e90045d29e2b3277f152cebf7ba5d9",
-      "candidate_sha256": "78db5cf497fe4c95d38e4d8157aca0f6ab1ce3a99a2a4e85a5ef0061bfca3cab"
+      "candidate_sha256": "3be3686ce7195bf6c5f5705881fc5af168bbeeac1e943f095d75c1c686aab765"
     },
     {
       "path": "installation_cross_setup.cs",
       "baseline_sha256": "7fcc9a96793b650cc9b6cd356b82f9e7da7ddf746a9b3c42e0c31bffe136f04f",
-      "candidate_sha256": "21afbbc716c27303d67ee3806ca76491cbc3274d08df015264d57d7df0896f93"
+      "candidate_sha256": "54b96360fa94f240de8b63dbcd16fc2b764b19e1a3bdd3bb88c7cf042ae09938"
     },
     {
       "path": "release_metadata.cs",
@@ -39,7 +39,7 @@
     {
       "path": "uninstall.html",
       "baseline_sha256": "3c8a97ed7a8b6d1c5ddefd98d6ff67459dedb90a8d41d144eaa7bedb2e6baa4f",
-      "candidate_sha256": "21f2082b0293385f79ecd48342e748f4156014205e2b592e7d4ed4a618645b87"
+      "candidate_sha256": "a05c4279370107c62c12b1add12499e6efd6da83fd5029b8ba6471d51163d4ad"
     },
     {
       "path": "uninstall_bridge.js",
@@ -48,11 +48,46 @@
     },
     {
       "path": "prerequisite_wizard.cs",
-      "candidate_sha256": "260418fe820213cb947dbea674bbfd817b6835e6a4ea08bcdd442ce543bf169d",
+      "candidate_sha256": "5dfea048988651fc031ce23747ca4796c53a88b4af191744afa0320a8e26fdf9",
       "origin": "installer-requirements native prerequisite welcome/check pages"
+    },
+    {
+      "path": "update_protocol.cs",
+      "origin": "E11 construction",
+      "candidate_sha256": "e616f3b3a394d86674da8e23f37e11cdfb4180daf735135e28dbd400a85465e9"
+    },
+    {
+      "path": "update_download.cs",
+      "origin": "E11 construction",
+      "candidate_sha256": "25628f15133eda6daaee0ff7c38feed5417e5a33d41f02ccaa4cd8b654f9c8d7"
+    },
+    {
+      "path": "update_transaction.cs",
+      "origin": "E11 construction",
+      "candidate_sha256": "53ad6bf6b874b7c203dd893971d2483a10f4cc78dd1bfff41baae3110f4d1e6f"
+    },
+    {
+      "path": "update_entry.cs",
+      "origin": "E11 construction",
+      "candidate_sha256": "0019283132e5bf8fdceeaccf2d7e1af31a15e157e5f638ce8aafd061277b92dd"
+    },
+    {
+      "path": "installer_locale.cs",
+      "origin": "E11 construction",
+      "candidate_sha256": "485e7efbbfdf7e1db9029899b406136d991647bdeb8a495f43e473afd9cb4732"
+    },
+    {
+      "path": "installer-catalog.json",
+      "origin": "E11 construction",
+      "candidate_sha256": "cb37d08606d87c2933c5a3b19dc189452476a99596c16a5ab780e864b4d64938"
+    },
+    {
+      "path": "update_trust.json",
+      "origin": "E11 construction",
+      "candidate_sha256": "da97407424548f19f2999d15332bbaf2cc4e69a22529f5c02404f095d1e63f78"
     }
   ],
   "health_owner_protocol": "Memorive-INSTALLER-TRIAL-V1 retained to match existing install_health.py; this does not assert private capsule inclusion",
   "public_prerequisites": "Official Microsoft user-installed WebView2 and Visual C++; no bundled runtime installer or host System32 DLL redistribution.",
-  "package_id": "v1.01"
+  "package_id": "EVO-E11-build001"
 }

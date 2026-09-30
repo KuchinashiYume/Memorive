@@ -257,6 +257,8 @@ class AccountingProductController:
                 yield 1, path, self.settings_root, 'ACCOUNTING_ENVELOPE', None
         exam_base = self.exam_root / "workflow_exams"
         if exam_base.is_dir():
+            for path in exam_base.glob('*/round-*.result.json'):
+                yield 0, path, self.exam_root, 'ACCOUNTING_ENVELOPE', path.parent.name
             for folder, priority in (("attempts", 0), ("receipts", 1)):
                 for path in exam_base.glob(f"**/{folder}/*.json"):
                     if not path.name.startswith("logical_"):
@@ -264,6 +266,8 @@ class AccountingProductController:
         if self.core_root.is_dir():
             for path in self.core_root.glob("*/model_calls/call-*.post.json"):
                 yield 0, path, self.core_root, "ACCOUNTING_ENVELOPE", path.parent.parent.name
+            for path in self.core_root.glob('*/logic_calls/call-*.post.json'):
+                yield 0, path, self.core_root, 'ACCOUNTING_ENVELOPE', path.parent.parent.name
 
     def _receipt(self,path,root):
         wrapper=self._read(path,root)
@@ -290,6 +294,7 @@ class AccountingProductController:
                     diagnostics["unknown"] += 1
                     continue
                 physical = _clean(wrapper.get("physical_call_id") or wrapper.get("call_id") or wrapper.get("physical_index") or wrapper.get("sequence") or pre.get("sequence") or path.stem)
+                if path.parent.name=='logic_calls':physical='logic:'+physical
                 run_key = str(path.parents[1].resolve(strict=False))
                 execution_id = receipt.get('execution_id') or wrapper.get('execution_id')
                 identity = ('native', str(execution_id)) if execution_id else (run_key, physical)
@@ -345,6 +350,20 @@ class AccountingProductController:
                 projection["status"] = "PARTIAL"
             # Unrelated legacy omissions do not hide a known current task.
         return projection
+
+    def job_call_counts(self) -> dict[str, dict[str, Any]]:
+        """Use the same deduplicated receipts as the accounting panel."""
+        attempts, diagnostics = self._attempts(self.commerce_context())
+        result: dict[str, dict[str, Any]] = {}
+        for attempt in attempts:
+            job_id = attempt.get('job_id')
+            if not job_id:
+                continue
+            row = result.setdefault(job_id, {'model_calls':0, 'external_model_calls':0,
+                'model_call_counts_complete':not any(diagnostics[k] for k in ('unreadable','unbound','unknown'))})
+            row['model_calls'] += 1
+            row['external_model_calls'] += int(attempt['profile_kind'] in {'API','CLI'})
+        return result
 
     def projection(self, params: Mapping[str, Any], *, refreshed: bool) -> dict[str, Any]:
         context = self.commerce_context()

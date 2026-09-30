@@ -131,6 +131,9 @@ class SessionRefinementTaskStore:
                 raise RefinementTaskError("REFINEMENT_TASK_WORKFLOW_KIND_INVALID")
             if task.get("control_state") not in {"QUEUED", "RUNNING", *_TERMINAL_STATES}:
                 raise RefinementTaskError("REFINEMENT_TASK_CONTROL_STATE_INVALID")
+            if task.get("language_context") is not None:
+                from memorive_language import validate
+                validate(task["language_context"])
             nodes = task.get("nodes")
             if not isinstance(nodes, list) or [row.get("node_id") for row in nodes if isinstance(row, Mapping)] != list(REFINEMENT_NODE_IDS):
                 raise RefinementTaskError("REFINEMENT_TASK_NODES_INVALID")
@@ -162,7 +165,10 @@ class SessionRefinementTaskStore:
         source_snapshot_sha256: str,
         selected_profile_ref: str,
         message_count: int,
+        language_context: dict | None = None,
     ) -> dict[str, Any]:
+        from memorive_language import validate
+        if language_context is not None:language_context=validate(language_context)
         accepted_name = _safe_text(display_name, 160)
         projection_id = _safe_text(local_projection_id, 192)
         profile_ref = _safe_text(selected_profile_ref, 192)
@@ -196,6 +202,7 @@ class SessionRefinementTaskStore:
             )
             nodes.append(node)
         task = {
+            **({"language_context":language_context} if language_context is not None else {}),
             "schema_version": "DesktopSessionRefinementTask-v1",
             "job_id": job_id,
             "attempt_id": attempt_id,

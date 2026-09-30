@@ -4,13 +4,15 @@
   "profile_revision": "1.1",
   "profile_sha256": "989ded15c96014bf0317dfe086cb314af5d9e5414e22a9b9ff9f975cc7fda954",
   "canonical_profile": "brand_profile.json",
-  "package_id": "v1.01",
-  "release_version": "1.01",
+  "package_id": "Memorive-1.02-release001",
+  "release_version": "1.02",
   "channel": "SANDBOX_TEST_ONLY_UNSIGNED",
   "arch": "x64",
   "main_executable": "Memorive.exe",
   "first_party_exe_inventory": [
-    "Memorive.exe"
+    "Memorive.exe",
+    "_internal/update/Memorive.Update.exe",
+    "_internal/update/Memorive.Launcher.exe"
   ],
   "authorization_locator": "local-source-candidate",
   "source_exact_set_locator": "SOURCE_REVIEW_MANIFEST.json",
@@ -28,10 +30,10 @@
   },
   "release_authorized": false,
   "acceptance_verdict": "NOT_ASSESSED",
-  "display_version": "v1.01",
+  "display_version": "v1.02",
   "windows_fixed_version": [
     1,
-    1,
+    2,
     0,
     0
   ]

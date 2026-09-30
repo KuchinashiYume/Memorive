@@ -1,5 +1,5 @@
 """Durable native call evidence. Never stores prompts, headers, outputs or secrets."""
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from functools import wraps
@@ -86,7 +86,11 @@ def recorded_execution(fn):
         execution_checkpoint()
         ledger=getattr(self,'_call_ledger',None)
         if ledger is None:return fn(self,*args,**kwargs)
-        values=signature.bind(self,*args,**kwargs).arguments
+        from copy import deepcopy
+        bound=signature.bind(self,*args,**kwargs)
+        for key in ('service','cli_service','model'):
+            if key in bound.arguments:bound.arguments[key]=deepcopy(bound.arguments[key])
+        args=bound.args[1:];kwargs=bound.kwargs;values=bound.arguments
         service=values.get('service') or values.get('cli_service') or {}
         model=values.get('model') or service
         profile=(_scope.get().get('profile_ref') or model.get('profile_ref') or service.get('config_id') or service.get('profile_ref'))
@@ -107,7 +111,9 @@ def recorded_execution(fn):
         state={'ledger':ledger,'pre':pre,'physical_call_ids':[],'observed_usage':{}}
         token=_execution.set(state);started=time.monotonic()
         try:
-            result=dict(fn(self,*args,**kwargs))
+            from .task_scheduling import CLI_RESOURCES
+            with CLI_RESOURCES.enter(self,service) if kind=='CLI' else nullcontext():
+                result=dict(fn(self,*args,**kwargs))
             receipt=dict(result.get('execution_receipt') or {})
             from .provider_catalog_aliases import catalog_alias
             alias=catalog_alias(service, model.get('model_name'), [result.get('returned_model')]) if kind=='API' else None
@@ -167,6 +173,7 @@ class RecordingTransport:
     def __getattr__(self,name):return getattr(self.delegate,name)
     def request(self,**kwargs):return self._run('request',kwargs)
     def run(self,**kwargs):return self._run('run',kwargs)
+    def run_template(self,**kwargs):return self._run('run_template',kwargs)
     def run_verification(self, **kwargs):
         if callable(getattr(self.delegate, 'run_verification', None)):
             return self._run('run_verification', kwargs)
@@ -176,7 +183,7 @@ class RecordingTransport:
         state=_execution.get()
         if state is None:return getattr(self.delegate,method)(**kwargs)
         identity='call-'+uuid4().hex;state['physical_call_ids'].append(identity)
-        pre={**state['pre'],'call_id':identity,'recorded_at':now(),'transport':'run' if method=='run_verification' else method,'status':'PREPARED'}
+        pre={**state['pre'],'call_id':identity,'recorded_at':now(),'transport':'run' if method in {'run_verification','run_template'} else method,'status':'PREPARED'}
         if method=='request':
             url=urlsplit(kwargs['url'])
             pre.update(http_method=kwargs['method'],endpoint_origin=url.scheme+'://'+url.hostname,
@@ -188,7 +195,7 @@ class RecordingTransport:
         started=time.monotonic()
         try:
             result=getattr(self.delegate,method)(**kwargs)
-            observed = result[0] if method=='run_verification' else result
+            observed = result[0] if method in {'run_verification','run_template'} else result
             raw=observed.body if method=='request' else observed.stdout
             post={**pre,'recorded_at':now(),'status':'RETURNED','response_sha256':digest(raw),
                   'response_bytes':len(raw),'duration_ms':round((time.monotonic()-started)*1000)}

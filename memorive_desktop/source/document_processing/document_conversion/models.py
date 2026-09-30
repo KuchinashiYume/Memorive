@@ -290,6 +290,8 @@ class ConversionResult:
     original_path: Path
     receipt_path: Path
     receipt: ConversionReceipt
+    structure_path: Path | None = None
+    structure_receipt_path: Path | None = None
 
     @property
     def pdf_path(self) -> Path | None:

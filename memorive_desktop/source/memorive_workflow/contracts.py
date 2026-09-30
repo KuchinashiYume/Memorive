@@ -18,6 +18,19 @@ Core_NODE_IDS = (
 )
 
 
+# New tasks have their own topology; old durable nine-node prefixes keep their IDs.
+DATA_NODE = 'E2_DATA_REVIEW'
+LOGIC_NODE = 'E2_LOGIC_REVIEW'
+E2_NODE_IDS = (Core_NODE_IDS[0], DATA_NODE, *Core_NODE_IDS[1:])
+CORE_WORKER_CAPACITY = 9
+
+def node_ids_for(definition):
+    ids = tuple(row['node_id'] for row in definition.get('nodes', []))
+    if ids not in (Core_NODE_IDS, E2_NODE_IDS):
+        raise ValueError('CORE_WORKFLOW_TOPOLOGY_UNSUPPORTED')
+    return ids
+
+
 @dataclass(frozen=True)
 class CoreArtifact:
     artifact_id: str

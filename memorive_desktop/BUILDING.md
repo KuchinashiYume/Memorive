@@ -6,13 +6,14 @@ This repository contains the declared Windows application source, runtime contra
 
 Use Windows x64 and CPython **3.13.14** in a separate virtual environment. Install the exact versions from `requirements-build-agpl-candidate.lock`; the build refuses unexpected dependency versions or extra packages other than pip.
 
-Run from the repository root, selecting an output directory outside this checkout that does not already exist:
+Prepare the verified WebView2 SDK directory described below at `G:\Memorive-verified-sdk` (or substitute your own path). Run from the repository root, selecting an output directory outside this checkout that does not already exist:
 
 ```powershell
 py -3.13 -m venv G:\Memorive-build-env
 G:\Memorive-build-env\Scripts\python.exe -m pip install -r .\memorive_desktop\requirements-build-agpl-candidate.lock
 G:\Memorive-build-env\Scripts\python.exe -m pip check
-G:\Memorive-build-env\Scripts\python.exe -X utf8 .\memorive_desktop\tools\build_memorive.py --output G:\Memorive-build-output
+$candidateId = (Get-Content .\memorive_desktop\product\desktop\update_release.json -Raw | ConvertFrom-Json).package_id
+G:\Memorive-build-env\Scripts\python.exe -X utf8 .\memorive_desktop\tools\build_memorive.py --output G:\Memorive-build-output --candidate-id $candidateId --installer-toolchain G:\Memorive-verified-sdk
 ```
 
 `py -3.13` must resolve to the required patch version. `SOURCE_MANIFEST.public-candidate.json` binds source and resource bytes; `BUILD_RESOURCES.public-candidate.json` maps repository-relative inputs into the package. Keep the `contracts/` directory. `--stage-only` validates and stages inputs without compiling an EXE.
@@ -38,7 +39,7 @@ The installer checks missing Microsoft prerequisites in System Check, including 
 
 ## Revision and verification
 
-This naming revision retains **v1.01**. Changed imports, identifiers, resources and namespace bindings require a corresponding recompilation and installation check. Earlier binaries do not represent these source changes. Build receipts identify the exact bytes under review; they do not assert acceptance on every Windows machine or byte-for-byte reproducibility.
+This source targets **v1.02**. Build receipts identify the exact source, resources and output bytes under review. Earlier binaries do not represent changed inputs. Historical execution evidence remains tied to its original candidate; a static review or successful build does not establish new runtime acceptance, acceptance on every Windows machine or byte-for-byte reproducibility.
 
 Public names use functional responsibilities, such as `document_processing`, `model_gateway`, `retrieval`, `evidence_review` and `memorive_research_workspace`. Original third-party implementation bytes and licenses are preserved. Configurations store opaque credential references; new bindings use the Memorive namespace.
 
@@ -48,7 +49,7 @@ Public names use functional responsibilities, such as `document_processing`, `mo
 
 `tools/export_source_candidate.py --output <new directory outside the repository>` produces a source review candidate from the declared inputs. Review the exact file set before upload. `SOURCE_REVIEW_MANIFEST.json` describes the current reviewed checkout; a Git commit and source archive identify a particular source version.
 
-The maintainer has authorized publication of the reviewed revision. Local build records retain their build-time candidate status; the GitHub Release identifies published artifacts. The installation review must complete at least five rounds. Rounds one through three are mandatory; from round four, two consecutive clean rounds are required. A missed product name or internal identifier restarts the clean-round count after repair. Test installations are removed after review; the user's existing portable installation and personal data are retained.
+This revision is prepared for local delivery and has not been authorized for public upload. Local build records retain their candidate status. Follow PUBLISHING.md and RELEASE_CHECKS.md before publication; do not treat historical publication authorization or installation results as acceptance of this revision. The current final review is limited to code and static identity checks, with necessary builds and packaging. Retain recorded failures and unverified runtime items. Production update-key binding and the online distribution chain remain pending. Do not substitute test trust for production trust, alter the existing installation or library, or remove retained test files as part of a build.
 
 ## Companion packages
 

@@ -370,50 +370,55 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
     )
     reused_checkpoint_count = 0
     new_embedding_count = 0
-    for index, r in enumerate(recs):
-        checkpoint_path = _spool_record_path(spool_root, index, r["chunk_id"])
-        recovered = _load_spooled_vector(checkpoint_path, r)
-        if recovered is not None:
-            vector, provider_id = recovered
-            vectors.append(vector)
-            models_seen.add(CANON_EMBED_MODEL)
+    from memorive_workflow.node_progress import scope
+    with scope('VECTOR_GENERATION', chunk_ids) as node_units:
+        for index, r in enumerate(recs):
+            checkpoint_path = _spool_record_path(spool_root, index, r["chunk_id"])
+            recovered = _load_spooled_vector(checkpoint_path, r)
+            if recovered is not None:
+                vector, provider_id = recovered
+                vectors.append(vector)
+                models_seen.add(CANON_EMBED_MODEL)
+                provider_ids.add(provider_id)
+                reused_checkpoint_count += 1
+                node_units.complete(r["chunk_id"])
+                continue
+            res = model_gateway_embed(slot, [r["text"]])            # MODEL_GATEWAY 已校验单条返回==1、已归一化 embedding_model
+            embs = res.get("embeddings") or []
+            if len(embs) != 1:                            # 双保险(MODEL_GATEWAY 已保证)
+                log_error("M1e", "单块嵌入返回数量异常", context={
+                    "step": "embed/累积", "paper_id": str(paper_id), "chunk_id": r["chunk_id"],
+                    "error": f"chunk {r['chunk_id']} 返回 {len(embs)} 条(期望 1);零写入。"})
+                raise VectorWriteVerifyError(f"[{r['chunk_id']}] 单块返回数量异常;零写入。")
+            v = embs[0]                                   # 畸形向量(空/None/非数值)校验(承对抗审查 #5)
+            if not (isinstance(v, (list, tuple)) and v
+                    and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v)):
+                log_error("M1e", "嵌入向量畸形,挡下", context={
+                    "step": "embed/累积", "paper_id": str(paper_id), "chunk_id": r["chunk_id"],
+                    "error": f"chunk {r['chunk_id']} 返回向量非空数值列表(len={len(v) if hasattr(v,'__len__') else '?'});零写入。"})
+                raise VectorWriteVerifyError(f"[{r['chunk_id']}] 嵌入向量畸形;零写入。")
+            accepted_vector = [float(item) for item in v]
+            vectors.append(accepted_vector)
+            models_seen.add(res.get("embedding_model"))
+            provider_id = str(res.get("provider_model_id") or CANON_EMBED_MODEL)
             provider_ids.add(provider_id)
-            reused_checkpoint_count += 1
-            continue
-        res = model_gateway_embed(slot, [r["text"]])            # MODEL_GATEWAY 已校验单条返回==1、已归一化 embedding_model
-        embs = res.get("embeddings") or []
-        if len(embs) != 1:                            # 双保险(MODEL_GATEWAY 已保证)
-            log_error("M1e", "单块嵌入返回数量异常", context={
-                "step": "embed/累积", "paper_id": str(paper_id), "chunk_id": r["chunk_id"],
-                "error": f"chunk {r['chunk_id']} 返回 {len(embs)} 条(期望 1);零写入。"})
-            raise VectorWriteVerifyError(f"[{r['chunk_id']}] 单块返回数量异常;零写入。")
-        v = embs[0]                                   # 畸形向量(空/None/非数值)校验(承对抗审查 #5)
-        if not (isinstance(v, (list, tuple)) and v
-                and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v)):
-            log_error("M1e", "嵌入向量畸形,挡下", context={
-                "step": "embed/累积", "paper_id": str(paper_id), "chunk_id": r["chunk_id"],
-                "error": f"chunk {r['chunk_id']} 返回向量非空数值列表(len={len(v) if hasattr(v,'__len__') else '?'});零写入。"})
-            raise VectorWriteVerifyError(f"[{r['chunk_id']}] 嵌入向量畸形;零写入。")
-        accepted_vector = [float(item) for item in v]
-        vectors.append(accepted_vector)
-        models_seen.add(res.get("embedding_model"))
-        provider_id = str(res.get("provider_model_id") or CANON_EMBED_MODEL)
-        provider_ids.add(provider_id)
-        _atomic_json(
-            checkpoint_path,
-            {
-                "schema_version": "DesktopEmbeddingChunkCheckpoint-v1",
-                "chunk_id": r["chunk_id"],
-                "text_sha256": hashlib.sha256(
-                    r["text"].encode("utf-8")
-                ).hexdigest().upper(),
-                "embedding_model": CANON_EMBED_MODEL,
-                "provider_model_id": provider_id,
-                "vector": accepted_vector,
-                "raw_text_recorded": False,
-            },
-        )
-        new_embedding_count += 1
+            _atomic_json(
+                checkpoint_path,
+                {
+                    "schema_version": "DesktopEmbeddingChunkCheckpoint-v1",
+                    "chunk_id": r["chunk_id"],
+                    "text_sha256": hashlib.sha256(
+                        r["text"].encode("utf-8")
+                    ).hexdigest().upper(),
+                    "embedding_model": CANON_EMBED_MODEL,
+                    "provider_model_id": provider_id,
+                    "vector": accepted_vector,
+                    "raw_text_recorded": False,
+                },
+            )
+            new_embedding_count += 1
+            if res.get("embedding_model") == CANON_EMBED_MODEL:
+                node_units.complete(r["chunk_id"])
 
     if len(vectors) != len(recs):                     # 总数校验(纵深)
         raise VectorWriteVerifyError(f"[{paper_id}] 累积向量数 {len(vectors)} ≠ chunk 数 {len(recs)};零写入。")

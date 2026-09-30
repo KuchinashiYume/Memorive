@@ -392,6 +392,25 @@ class SettingsStore:
         )
         return migrated
 
+    def _migrate_v6(self, value):
+        if set(value) != {'schema_version','revision','template_id','updated_at','settings','settings_sha256'}:
+            raise SettingsCorrupt('SETTINGS_V6_FIELDS_INVALID')
+        settings=value.get('settings')
+        if not isinstance(settings, Mapping) or settings.get('schema_version')!='SettingsTemplate-v6':
+            raise SettingsCorrupt('SETTINGS_V6_TEMPLATE_INVALID')
+        if value['settings_sha256']!=canonical_sha256(settings):
+            raise SettingsCorrupt('SETTINGS_V6_CHECKSUM_MISMATCH')
+        upgraded=deepcopy(settings);upgraded['schema_version']=SETTINGS_SCHEMA_VERSION
+        self._upgrade_current_shape(upgraded)
+        migrated=self._envelope(upgraded,int(value['revision'])+1)
+        self._atomic_write(self.path,migrated)
+        self._atomic_write(self.migration_receipt_path,{
+            'schema_version':'SettingsMigrationReceipt-v7','from_schema':'SettingsTemplate-v6',
+            'to_schema':SETTINGS_SCHEMA_VERSION,'result_revision':migrated['revision'],
+            'settings_sha256':migrated['settings_sha256'],'added_nodes':['data_review','logic_review'],
+            'old_task_snapshots_modified':False,'status':'PASS'})
+        return migrated
+
     def _recover(self, raw: bytes, reason: str) -> dict[str, Any]:
         digest = hashlib.sha256(raw).hexdigest().upper()
         quarantine = self.profile_root / f"settings.corrupt.{digest[:16]}.json"
@@ -425,6 +444,8 @@ class SettingsStore:
         raw = self.path.read_bytes()
         try:
             value = json.loads(raw.decode("utf-8"))
+            if isinstance(value, Mapping) and value.get("schema_version")=="SettingsStoreEnvelope-v6":
+                return deepcopy(self._migrate_v6(value))
             if (
                 isinstance(value, Mapping)
                 and value.get("schema_version") == "SettingsTemplate-v1"

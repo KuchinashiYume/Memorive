@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; script-src &#x27;sha256-CL99najol4diJutykG7jUnb4OfGu95w/A3a7F8JdfZ8=&#x27;; style-src &#x27;unsafe-inline&#x27;; img-src &#x27;self&#x27; data:; connect-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;"><title>Memorive · install · TEST_ONLY_UNSIGNED</title><style>
+<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; script-src &#x27;sha256-u4W3NLnm4R/6zGztylhzWU9ZULktXr0LoDPeFymTXiI=&#x27;; style-src &#x27;unsafe-inline&#x27;; img-src &#x27;self&#x27; data:; connect-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;"><title>Memorive · install · TEST_ONLY_UNSIGNED</title><style>
     :root {
       /* Desktop 配色系统 r0.4：原值逐项保留 */
       --canvas: #F5F2EC;
@@ -1628,7 +1628,20 @@
 .ready-row{font-size:12px;line-height:1.55}.ready-row code,.ready-row strong{font-size:12px;font-weight:500;white-space:normal;overflow-wrap:anywhere;overflow:visible}.ready-row strong{font-family:inherit}
 .install-step-title,.install-step-state,.progress-copy,.result-hero p{font-size:12px;line-height:1.6}
 @container(max-height:590px){.sidebar-brand{margin-block:9px;padding-bottom:10px}.sidebar-brand-mark{width:42px;height:42px;flex-basis:42px}.step-item{min-height:46px}.wizard-page-header{padding-top:12px;padding-bottom:12px}.wizard-page-body{padding-top:16px;padding-bottom:16px}}
-</style><style>#installerWindow{border:0;border-radius:0;box-shadow:none}</style></head><body><svg class="icon-sprite" aria-hidden="true">
+</style><style>#installerWindow{border:0;border-radius:0;box-shadow:none}</style>
+<style id="installer-language-style">
+.window-actions{align-items:center;gap:6px}
+.language-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:32px;padding:6px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer}
+.language-toggle:hover,.language-toggle[aria-expanded="true"]{background:var(--brand-subtle);color:var(--action-primary)}
+.language-toggle:focus-visible,.language-options button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.language-toggle svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.5}
+.language-toggle{order:2}.language-options{display:inline-flex;align-items:center;gap:4px;order:1}.window-close{order:3}
+.language-options[hidden]{display:none}
+.language-options button{padding:5px 8px;border:1px solid var(--border-default);border-radius:7px;background:var(--surface-raised);color:var(--text-primary);font:inherit;font-size:12px;white-space:nowrap;cursor:pointer}
+.language-options button[aria-pressed="true"]{border-color:var(--border-selected);background:var(--brand-subtle);color:var(--action-primary)}
+.language-toggle:disabled,.language-options button:disabled{cursor:default;opacity:.55}
+</style>
+</head><body><svg class="icon-sprite" aria-hidden="true">
     <symbol id="i-box" viewBox="0 0 24 24"><path d="m21 8-9 5-9-5"></path><path d="M3 8l9-5 9 5v8l-9 5-9-5Z"></path><path d="M12 13v8"></path></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
     <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.6 2.6L16.5 8.7"></path></symbol>
@@ -1655,7 +1668,7 @@
             <span class="window-view-name" id="windowViewName">安装向导 · 欢迎</span>
           </div>
           <div class="window-title-right">
-            <div class="window-actions"><button class="window-close" id="closeInstallerWindow" type="button" aria-label="关闭安装向导" title="关闭">×</button></div>
+            <div class="window-actions"><button class="language-toggle" id="switchLanguage" type="button" aria-label="切换界面语言" title="切换界面语言" aria-expanded="false" aria-controls="languageOptions"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></button><span class="language-options" id="languageOptions" role="group" aria-label="切换界面语言" hidden><button type="button" data-installer-language="zh-CN" lang="zh-CN">简体中文</button><button type="button" data-installer-language="en-US" lang="en-US">English</button><button type="button" data-installer-language="ja-JP" lang="ja-JP">日本語</button></span><button class="window-close" id="closeInstallerWindow" type="button" aria-label="关闭安装向导" title="关闭">×</button></div>
           </div>
         </header>
 
@@ -1686,7 +1699,7 @@
                 <div class="compact-stage">
                   <article class="welcome-compact">
                     <div class="welcome-symbol"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-box"></use></svg></div>
-                    <h3>准备安装 Memorive</h3>
+                    <h3>准备安装 Memorive <span data-install-version>v1.01</span></h3>
                     <p>建议先关闭其他应用，然后点击“下一步”继续。</p>
                     <div class="license-notice-entry" style="display:flex;justify-content:center;width:100%;margin-top:12px"><button class="link-button" type="button" data-dialog="licenses">许可与隐私说明</button></div>
                   </article>
@@ -1793,7 +1806,7 @@
               <div class="wizard-page-body">
                 <div class="compact-stage">
                   <article class="summary-card ready-card">
-                    <div class="ready-hero"><div class="ready-symbol"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-box"></use></svg></div><div><h3>即将安装 Memorive</h3><p>请确认以下设置。</p></div></div>
+                    <div class="ready-hero"><div class="ready-symbol"><svg class="icon icon-lg" aria-hidden="true"><use href="#i-box"></use></svg></div><div><h3>即将安装 Memorive <span data-install-version>v1.01</span></h3><p>请确认以下设置。</p></div></div>
                     <div class="ready-list">
                       <div class="ready-row"><span>程序位置</span><code id="planProgramPath"></code></div>
                       <div class="ready-row"><span>用户数据</span><code id="planDataPath"></code></div>
@@ -2252,6 +2265,37 @@
   $$('[data-browse]').forEach(b=>b.addEventListener('click',async()=>{if(b.disabled)return;const id=b.dataset.browse==='program'?'programPath':'dataPath';b.disabled=true;try{const path=await call('browse',{kind:b.dataset.browse,current:$('#'+id).value});if(path){$('#'+id).value=path;validatePaths();invalidatePlan();call('uiState',{page:state.page,stage:'browse-selection',kind:b.dataset.browse}).catch(()=>{});}}catch(e){showToast(e.message);}finally{b.disabled=Boolean(facts.existing);$('#'+id).focus();}}));
   $('#closeInstallerWindow').addEventListener('click',openCancelDialog);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]'))openCancelDialog();});
-  call('init').then(f=>{facts=f;applyPaths(f);state.shortcut=f.desktop;$('#desktopShortcut').checked=f.desktop;const note=document.createElement('span');note.className='footer-note';note.textContent='Memorive · v1.01';$('.wizard-page[data-page="1"] .footer-left').append(note);validatePaths();setPage(f.initial_page===2?2:1);}).catch(e=>{failureMessage=e.message;state.installMode='rolledback';setPage(6);});
+  call('init').then(f=>{facts=f;applyPaths(f);state.shortcut=f.desktop;$('#desktopShortcut').checked=f.desktop;const note=document.createElement('span');note.className='footer-note';note.textContent='Memorive · v1.01';$('.wizard-page[data-page="1"] .footer-left').append(note);if(f.locale_snapshot){const saved=f.locale_snapshot;Object.assign(state,saved.state||{});failureMessage=saved.failureMessage||'';$('#programPath').value=state.programPath;$('#dataPath').value=state.dataPath;$('#desktopShortcut').checked=state.shortcut;validatePaths();setPage(state.page);}else{validatePaths();setPage(f.initial_page===2?2:1);}}).catch(e=>{failureMessage=e.message;state.installMode='rolledback';setPage(6);});
+
+  // Only the visual caption is draggable; inline language/close controls stay clickable.
+  document.querySelector('.window-titlebar').addEventListener('pointerdown',event=>{
+    if(event.button!==0||!event.isPrimary||event.target.closest('button,a,input,select,textarea,[role="button"]'))return;
+    event.preventDefault();
+    call('moveWindow').catch(()=>{});
+  });
+  const languageToggle=document.getElementById('switchLanguage'),languageOptions=document.getElementById('languageOptions');
+  const languageChoices=Array.from(languageOptions.querySelectorAll('button'));
+  languageChoices.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.installerLanguage===document.documentElement.lang)));
+  function collapseLanguage(){languageOptions.hidden=true;languageToggle.setAttribute('aria-expanded','false');}
+  languageToggle.addEventListener('click',()=>{
+    if(busy)return;
+    languageOptions.hidden=!languageOptions.hidden;languageToggle.setAttribute('aria-expanded',String(!languageOptions.hidden));
+    if(!languageOptions.hidden)(languageChoices.find(button=>button.getAttribute('aria-pressed')==='true')||languageChoices[0]).focus();
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!languageOptions.hidden){event.preventDefault();event.stopImmediatePropagation();collapseLanguage();languageToggle.focus();}
+  },true);
+  languageChoices.forEach(button=>button.addEventListener('click',async()=>{
+    if(busy)return;
+    if(button.dataset.installerLanguage===document.documentElement.lang){collapseLanguage();languageToggle.focus();return;}
+    const snapshot={state:{...state,programPath:document.getElementById('programPath').value,dataPath:document.getElementById('dataPath').value},failureMessage};
+    try{await call('switchLanguage',{language:button.dataset.installerLanguage,snapshot});}
+    catch(error){showToast(error.message);}
+  }));
+  new MutationObserver(()=>{
+    if(languageToggle.disabled!==busy)languageToggle.disabled=busy;
+    languageChoices.forEach(button=>{if(button.disabled!==busy)button.disabled=busy;});
+  }).observe(app,{subtree:true,childList:true,attributes:true});
+
 })();
 </script></body></html>

@@ -57,9 +57,9 @@ def compose(runtime,run_id,params,result):
     from research_reports.api_briefing import BriefingApiError,prepare_mapped_briefing,validate_mapped_narrative
     from research_reports.renderer import render_markdown,render_markdown_with_narrative
     frozen=params['report_model'];digest=result['digest']
-    prompt,schema=prepare_mapped_briefing(digest)
+    prompt,schema=prepare_mapped_briefing(digest,language=params.get('language_context'))
     language=params['report_language']
-    prompt+='\nWrite narrative text in '+{'zh-CN':'Simplified Chinese','en-US':'English','ja-JP':'Japanese'}.get(language,'Simplified Chinese')+'. Preserve identifiers and schema field names exactly.'
+    # Language requirements are already frozen inside the original prompt contract.
     if runtime.stop.is_set():raise ValueError('RESEARCH_CANCELLED')
     claim=sealed({'snapshot_id':frozen['snapshot_id'],'profile_ref':frozen['profile_ref'],
                   'profile_kind':frozen['profile_kind'],'model':frozen['model_name'],
@@ -78,7 +78,7 @@ def compose(runtime,run_id,params,result):
         raise ValueError('REPORT_MODEL_EXECUTION_FAILED')
     if response.get('requested_model')!=frozen['model_name'] or not matches_result_model(response, frozen['model_name']):
         raise ValueError('REPORT_MODEL_IDENTITY_MISMATCH')
-    if not receipt.get('behavior_sha256') or not receipt.get('token_usage'):
+    if not __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt):
         raise ValueError('REPORT_MODEL_RECEIPT_INCOMPLETE')
     try:
         narrative=validate_mapped_narrative(response.get('response'),digest)
@@ -90,18 +90,18 @@ def compose(runtime,run_id,params,result):
         notice={'zh-CN':'辅助摘要未通过来源核对，已保留完整资料变更清单。',
                 'en-US':'The optional summary failed source checks. The complete change record is preserved.',
                 'ja-JP':'補助要約の出典を確認できなかったため、変更記録の全文を保存しました。'}.get(language,'辅助摘要未通过来源核对，已保留完整资料变更清单。')
-        heading,_,body=render_markdown(digest).partition('\n')
+        heading,_,body=render_markdown(digest,language=params.get('language_context')).partition('\n')
         result.update(markdown=heading+'\n\n'+notice+'\n'+body,narrative=None,
             narrative_status='OMITTED_INVALID',narrative_error_code=code,
             report_model=frozen,model_calls=call_count,paid_model_calls=paid_count,
             execution_receipt=receipt,engine='Desktop source-bound deterministic report')
         runtime._state(run_id,narrative_status='OMITTED_INVALID',narrative_error_code=code)
         return result
-    usage=receipt['token_usage']
+    usage=receipt.get('token_usage') or {}
     metadata={'slot':'report_'+params['period'],'provider':frozen['profile_kind'],'model':frozen['model_name'],
               'response_sha256':sha(response['response']),'input_tokens':usage.get('prompt_tokens',usage.get('input_tokens')),
               'output_tokens':usage.get('completion_tokens',usage.get('output_tokens')),'reasoning_tokens':usage.get('reasoning_tokens')}
-    result.update(markdown=render_markdown_with_narrative(digest,narrative,metadata),narrative=narrative,
+    result.update(markdown=render_markdown_with_narrative(digest,narrative,metadata,language=params.get('language_context')),narrative=narrative,
                   report_model=frozen,model_calls=call_count,execution_receipt=receipt,
                   paid_model_calls=paid_count,narrative_status='VALIDATED',engine='Desktop source-bound RESEARCH_REPORTS model report')
     return result

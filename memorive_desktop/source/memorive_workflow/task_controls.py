@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from contextlib import contextmanager
 import hashlib
 import json
 from pathlib import Path
 import re
 import sqlite3
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
 import uuid
 
 from memorive_app.contracts import utc_now
 
-from .contracts import Core_NODE_IDS
+from .contracts import Core_NODE_IDS, E2_NODE_IDS, node_ids_for
 
 
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$")
@@ -49,7 +50,7 @@ def _identifier(value: Any, field: str) -> str:
 
 def _node_id(value: Any) -> str:
     rendered = str(value or "")
-    if rendered not in Core_NODE_IDS:
+    if rendered not in E2_NODE_IDS:
         raise ValueError("TASK_CONTROL_NODE_INVALID")
     return rendered
 
@@ -116,18 +117,25 @@ class TaskControlStore:
         self.path = self.root / "core_task_controls.sqlite3"
         self._initialize()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.path, timeout=15.0)
-        connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys=ON")
-        connection.execute("PRAGMA busy_timeout=15000")
-        return connection
+        try:
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA foreign_keys=ON")
+            connection.execute("PRAGMA busy_timeout=15000")
+            with connection:
+                yield connection
+        finally:
+            # sqlite3's transaction context commits/rolls back but does not close.
+            connection.close()
 
     def _initialize(self) -> None:
         with self._connect() as connection:
             connection.execute("PRAGMA journal_mode=WAL")
             connection.executescript(
                 """
+                CREATE TABLE IF NOT EXISTS task_topologies (job_id TEXT PRIMARY KEY, nodes_json TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS node_pause_points (
                     job_id TEXT PRIMARY KEY,
                     node_id TEXT NOT NULL,
@@ -304,6 +312,18 @@ class TaskControlStore:
             connection.execute("DELETE FROM node_pause_points WHERE job_id=?", (job_id,))
         return {"job_id":job_id,"status":"PAUSE_CLEARED"}
 
+    def bind_topology(self, job_id, definition):
+        nodes=node_ids_for(definition)
+        with self._connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            old=db.execute('SELECT nodes_json FROM task_topologies WHERE job_id=?',(job_id,)).fetchone()
+            if old and tuple(json.loads(old['nodes_json']))!=nodes:
+                raise ValueError('TASK_CONTROL_TOPOLOGY_IMMUTABLE')
+            existing=db.execute('SELECT started_nodes_json FROM task_controls WHERE job_id=?',(job_id,)).fetchone()
+            started=json.loads(existing[0]) if existing else []
+            if started!=list(nodes[:len(started)]):raise ValueError('TASK_CONTROL_TOPOLOGY_PREFIX_CONFLICT')
+            db.execute('INSERT OR IGNORE INTO task_topologies VALUES(?,?)',(job_id,_json(nodes)))
+
     def mark_started(self, job_id: str, node_id: str, *, pause_callback=None) -> dict[str, Any]:
         accepted_job = _identifier(job_id, "job_id")
         accepted_node = _node_id(node_id)
@@ -320,7 +340,9 @@ class TaskControlStore:
                     if pause_callback is not None:
                         pause_callback()
                     return {"job_id":accepted_job,"node_id":accepted_node,"status":"PAUSED"}
-                expected = Core_NODE_IDS[len(started)] if len(started) < len(Core_NODE_IDS) else None
+                topology=connection.execute("SELECT nodes_json FROM task_topologies WHERE job_id=?",(accepted_job,)).fetchone()
+                nodes=tuple(json.loads(topology[0])) if topology else Core_NODE_IDS
+                expected = nodes[len(started)] if len(started) < len(nodes) else None
                 if accepted_node != expected:
                     raise ValueError(
                         f"TASK_CONTROL_NODE_START_ORDER_INVALID:{accepted_node}:{expected}"

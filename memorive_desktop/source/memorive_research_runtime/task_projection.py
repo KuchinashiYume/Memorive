@@ -6,10 +6,14 @@ STEPS=(('WAITING','冻结研究设置'),('COLLECTING','检索文献来源'),('RE
 REPORT_STEPS=(('WAITING','确认报告周期'),('COLLECTING','汇总已完成成果'),('COMPOSING','生成报告'),
               ('PUBLISHING','保存至资料库'),('NOTIFYING','发送报告提醒'),('COMPLETE','结果可用'))
 
+AI_STEPS=(('WAITING','确认日期与模型'),('COLLECTING','读取公开来源'),('COMPOSING','整理 AI 近况'),('VALIDATING','核对引用来源'),('PUBLISHING','保存至资料库'),('NOTIFYING','发送提醒'),('COMPLETE','结果可用'))
+
 def steps_for(item):
+    if item.get('kind')=='ai_briefing':return AI_STEPS
     return REPORT_STEPS if item.get('kind')=='report' else STEPS
 
 def bindings(runtime):
+    from memorive_workflow.node_progress import project,is_live
     rows=[]
     for item in runtime.task_list()['rows']:
         steps=steps_for(item)
@@ -22,12 +26,15 @@ def bindings(runtime):
             state='COMPLETED' if success or i<index else ('FAILED' if item['status']=='FAILED' else 'CANCELLED') if terminal and i==index else 'RUNNING' if i==index and item['status']=='RUNNING' else 'NOT_STARTED'
             if key=='NOTIFYING' and item.get('notification_error'):state='FAILED'
             model='本地生成 · 不调用模型' if item['kind']=='report' else '元数据与本地规则 · 不调用模型'
-            if item['kind']=='report' and key=='COMPOSING' and item.get('report_model'):
+            if item['kind'] in {'report','ai_briefing'} and key=='COMPOSING' and item.get('report_model'):
                 frozen=item['report_model']
                 model=frozen.get('display_name') or frozen['model_name']
             nodes.append({'node_id':key,'number':str(i+1).zfill(2),'name':name,'purpose':name,'model':model,
                 'state':state,'model_change_eligible':False,'retry_change_eligible':False,'enable_toggle_eligible':False,
-                'rollback_eligible':False,'optional':False,'configuration_source':'RESEARCH_FROZEN_SNAPSHOT'})
+                'rollback_eligible':False,'optional':False,'configuration_source':'RESEARCH_FROZEN_SNAPSHOT',
+                'node_progress':project(item.get('node_progress',{}),key,job_id=item['run_id'],attempt_id=item['run_id'],
+                    active=state=='RUNNING' and not item.get('progress_cancelled'),
+                    live=is_live(item,key))})
         rows.append({'run':item['run_id'],'job_id':item['run_id'],'attempt_id':item['run_id'],
             'display_name':('外部文献·' if item['kind']=='discovery' else '')+item['title'],
             'control_state':'SUCCEEDED' if success else item['status'],'workflow_kind':item['workflow_kind'],
@@ -55,7 +62,7 @@ def log_rows(runtime):
         local=stamp.astimezone();run=item['run_id']
         status={'SUCCEEDED':'已完成','PARTIAL':'部分完成','FAILED':'失败','CANCELLED':'已取消','INTERRUPTED':'已中断','RUNNING':'运行中','QUEUED':'等待中'}[item['status']]
         rows.append({'log_entry_id':'activity-'+run,'job_id':run,'title':('外部文献·' if item['kind']=='discovery' else '')+item['title'],
-            'summary':status+' · '+labels.get(item.get('stage'),'已停止'),'type_label':'外部文献' if item['kind']=='discovery' else '周期报告',
+            'summary':status+' · '+labels.get(item.get('stage'),'已停止'),'type_label':{'discovery':'外部文献','report':'周期报告','ai_briefing':'AI 近况'}[item['kind']],
             'event_time_utc':stamp.isoformat(),'event_sequence':1,'date':local.date().isoformat(),
             'age_bucket':runtime.api._work_log._age_bucket(stamp),'ledger_type':'branch','parse_status':'ready',
             'source_locator':'memorive://ledger/branch/'+run,'job_locator':'memorive://job/'+run,

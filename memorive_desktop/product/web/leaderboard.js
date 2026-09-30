@@ -264,6 +264,7 @@
     });
     qa('#lb-headers th').forEach(th=>th.setAttribute('aria-sort',sort===th.dataset.col?
       direction==='asc'?'ascending':'descending':'none'));
+    q('#lb-value-help').setAttribute('aria-label',uiText('性价比计算规则'));
     q('#lb-value-help').dataset.desktopTip=formulaTip();
     const fragment = document.createDocumentFragment();
     rows.forEach((m,i) => {
@@ -351,7 +352,7 @@
     });
     menu.append(sorts);
     const f=filters[key]||{},form=el('form'), fields=[];
-    const candidates=data.rows.filter(m=>(starredOnly?m.starred:m.catalog_eligible)&&matchesFilters(m,key));
+    const candidates=data.rows.filter(m=>(starredOnly?m.starred:(m.catalog_visible??m.catalog_eligible))&&matchesFilters(m,key));
     if(key==='model') {
       const input=el('input');input.type='search';input.value=f.query||'';input.placeholder=uiText('搜索模型名称');input.setAttribute('aria-label',uiText('搜索模型名称'));form.append(input);fields.push(input);
       const label=el('label',uiText('思考档位'),'lb-menu-field'),select=el('select');select.setAttribute('aria-label',uiText('思考档位'));
@@ -366,9 +367,9 @@
       [[uiText('全选'),true],[uiText('清空'),false]].forEach(([title,on])=>{const b=el('button',title,'lb-link-btn');b.type='button';b.addEventListener('click',()=>fields.filter(n=>!n.parentElement.hidden).forEach(n=>n.checked=on));bulk.append(b);});form.append(bulk);
       values.forEach(value=>{
         const label=el('label',null,'lb-check'),input=el('input');input.type='checkbox';input.value=value;input.checked=!f.choices||f.choices.includes(value);
-        label.append(input,el('span',value),el('small',String(counts.get(value)||0),'lb-small'));list.append(label);fields.push(input);
+        label.append(input,el('span',key==='region'?uiText(value):value),el('small',String(counts.get(value)||0),'lb-small'));list.append(label);fields.push(input);
       });form.append(list);
-      search.addEventListener('input',()=>fields.forEach(n=>n.parentElement.hidden=!n.value.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())));
+      search.addEventListener('input',()=>fields.forEach(n=>n.parentElement.hidden=!(key==='region'?uiText(n.value):n.value).toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())));
     } else {
       const currency=moneyKeys.has(key)?displayCode():null;
       if(currency) form.append(el('p',codeLabel(currency)+' / M','lb-small'));
@@ -445,7 +446,7 @@
     const info=section(uiText('产品资料'));
     const modes=values=>values?.map(x=>({text:uiText('文本'),image:uiText('图像'),audio:uiText('音频'),video:uiText('视频'),file:uiText('文件')}[x]||x)).join('、')||null;
     const count=v=>typeof v==='number'?v.toLocaleString()+' Token':null;
-    specs(info,[[uiText('供应商'),m.vendor],[uiText('归属'),m.region],[uiText('模型版本'),m.version],[uiText('思考档位'),effortLabel(m.effort)],
+    specs(info,[[uiText('供应商'),m.vendor],[uiText('归属'),uiText(m.region)],[uiText('模型版本'),m.version],[uiText('思考档位'),effortLabel(m.effort)],
       [uiText('上下文窗口'),count(product.context_length)],[uiText('最大输出'),count(product.max_output_tokens)],
       [uiText('输入类型'),modes(product.input_modalities)],[uiText('输出类型'),modes(product.output_modalities)]]);
     if(m.official_release)specs(info,[[uiText('官方发布'),m.official_release.released_on],

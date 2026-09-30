@@ -1,5 +1,15 @@
 """Structured bibliographic matches. Free-text mentions are never identity evidence."""
-from literature_discovery.source_connectors_literature_discovery_connector_framework import normalize_doi, normalize_arxiv_id
+from literature_discovery.source_connectors_literature_discovery_connector_framework import normalize_doi, normalize_arxiv_id, ConnectorError
+import re
+
+def canonical_doi(value):
+    """The same spelling boundary for work aliases and DOI manifestations."""
+    token=value.strip()
+    while True:
+        stripped=re.sub(r'^(?:https?://(?:dx\.)?doi\.org/|doi:)\s*','',token,flags=re.I).strip()
+        if stripped==token:break
+        token=stripped
+    return normalize_doi(token)
 
 def identity_keys(identifiers):
     keys=set()
@@ -8,8 +18,8 @@ def identity_keys(identifiers):
         value=identifiers.get(name)
         if not isinstance(value,str) or not value.strip():continue
         try:
-            normalized=normalize_doi(value) if name=='doi' else normalize_arxiv_id(value)[0] if name=='arxiv_id' else value.strip().upper()
-        except (ValueError,TypeError):continue
+            normalized=canonical_doi(value) if name=='doi' else normalize_arxiv_id(value.strip())[0] if name=='arxiv_id' else value.strip().upper()
+        except (ValueError,TypeError,ConnectorError):continue
         if normalized:keys.add(name+':'+normalized)
     return keys
 

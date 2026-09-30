@@ -98,6 +98,8 @@ class SettingsController:
         self.local_profile_resolver = local_profile_resolver
         from .report_execution import ReportProfileExecution
         self.report_execution = ReportProfileExecution(self)
+        from .ai_briefing_execution import AIBriefingExecution
+        self.ai_briefing_execution = AIBriefingExecution(self)
         from .research_chat_execution import ResearchChatExecution
         self.research_chat_execution = ResearchChatExecution(self)
         self.external_data_sources = external_data_sources or ExternalDataSources(
@@ -160,7 +162,7 @@ class SettingsController:
             "schema_version": "SettingsStateProjection-v1",
             "revision": envelope["revision"],
             "template_id": envelope["template_id"],
-            "settings": envelope["settings"],
+            "settings": __import__("memorive_settings.cli_template_management",fromlist=["projection"]).projection(envelope["settings"]),
             "settings_sha256": envelope["settings_sha256"],
             "capabilities": self.capabilities.snapshot(),
             "workflow_exam_score_catalog": catalog,
@@ -210,7 +212,11 @@ class SettingsController:
                 semantic_changed=any(old[k]!=direction[k] for k in ('query','keywords','seed_ids'))
                 expected=old['revision']+int(semantic_changed)
                 if direction['revision']!=expected:raise ValueError('RESEARCH_DIRECTION_REVISION_CONFLICT')
-            value=sealed({'schema_version':'ResearchPreferences-v1','revision':current['revision']+1,'config':accepted})
+            ids=[d['id'] for d in accepted['directions']]
+            changed=[d['id'] for d in accepted['directions'] if d!=prior.get(d['id'])]
+            previous_order=current.get('direction_recency',list(reversed(prior)))
+            order=list(dict.fromkeys(list(reversed(changed))+[key for key in previous_order if key in ids]+list(reversed(ids))))
+            value=sealed({'schema_version':'ResearchPreferences-v1','revision':current['revision']+1,'config':accepted,'direction_recency':order})
             self.store._atomic_write(self.store.profile_root/'research_preferences.json',value)
         return value
 
@@ -275,13 +281,16 @@ class SettingsController:
                 None,
             )
             if model is not None:
+                from .cli_templates import is_custom,configuration_identity
                 return {
+                    **{k:deepcopy(v) for k,v in cli_service.items() if k not in {'models','display_name','connection_status'}},
                     "kind": "CLI",
                     "adapter_id": cli_service["adapter_id"],
                     "config_id": cli_service["config_id"],
                     "enabled": cli_service.get("enabled"),
                     "executable": cli_service.get("executable"),
                     **model,
+                    **({'configuration_sha256':configuration_identity(cli_service,model)} if is_custom(cli_service) else {}),
                 }
         if isinstance(profile_ref, str) and profile_ref.startswith("local:") and self.local_profile_resolver is not None:
             try:
@@ -410,7 +419,7 @@ class SettingsController:
         for node in accepted["workflow"]["nodes"]:
             profile_ref = node.get("profile_ref")
             if (
-                node.get("node_id") in {"card_admission", "human_judgment"}
+                node.get("node_id") in {"card_admission", "human_judgment", "data_review"}
                 or not isinstance(profile_ref, str)
                 or profile_ref == "AUTO_HETEROGENEOUS"
             ):
@@ -531,6 +540,8 @@ class SettingsController:
             for row in accepted["workflow"]["nodes"]
             if row["node_id"] == "chunk_embedding"
         )
+        from .cli_template_management import protect_references
+        protect_references(self,current['settings'],accepted)
         accepted = invalidate_changed_targets(current['settings'], accepted)
         saved = self.store.save(accepted, expected_revision=expected_revision)
         if not self.capabilities.assert_unchanged(capability_before):
@@ -542,6 +553,10 @@ class SettingsController:
             credentials_preserved=True,
             embedding_binding_changed=before_embedding_ref != after_embedding_ref,
         )
+
+    def cli_template_prepare(self, *, action, payload=None, config_id=None):
+        from .cli_template_management import prepare
+        return prepare(self,action=action,payload=payload,config_id=config_id)
 
     def save_cli_services(
         self,
@@ -574,6 +589,8 @@ class SettingsController:
         settings["cli_services"] = deepcopy(cli_services)
         try:
             accepted = validate_settings(settings)
+            from .cli_template_management import protect_references
+            protect_references(self,current['settings'],accepted)
             accepted = invalidate_changed_targets(current['settings'], accepted)
             saved = self.store.save(accepted, expected_revision=expected_revision)
         except (KeyError, TypeError, ValueError) as exc:
@@ -658,6 +675,13 @@ class SettingsController:
             "credential_values_included": False,
             "extensions": extensions(self),
         }
+        payload['settings']=deepcopy(payload['settings'])
+        from .cli_templates import is_custom,export_service
+        for service in payload['settings']['cli_services']:
+            if not is_custom(service):continue
+            portable=export_service(service)
+            service.update(executable='',interpreter='',environment={},concurrency_group='',enabled=False,connection_status='UNVERIFIED',template=portable['template'])
+            for model in service['models']:model.update(connection_status='UNVERIFIED',verification=None)
         scan_sensitive(payload)
         payload["export_sha256"] = canonical_sha256(payload)
         return immutable(payload)
@@ -687,6 +711,12 @@ class SettingsController:
         if payload.get("credential_values_included") is not False:
             raise ValueError("SETTINGS_IMPORT_CREDENTIAL_VALUE_REJECTED")
         scan_sensitive(payload)
+        if payload.get('settings',{}).get('schema_version')=='SettingsTemplate-v6':
+            payload=deepcopy(dict(payload));original_hash=payload['export_sha256']
+            upgraded=deepcopy(payload['settings']);upgraded['schema_version']='SettingsTemplate-v7'
+            self.store._upgrade_current_shape(upgraded);payload['settings']=upgraded
+            payload['export_sha256']=canonical_sha256({k:v for k,v in payload.items() if k!='export_sha256'})
+            self.store._atomic_write(self.store.profile_root/('import_migration_'+original_hash+'.json'),{'schema_version':'E2ImportedSettingsMigration-v1','source_export_sha256':original_hash,'converted_export_sha256':payload['export_sha256']})
         settings = validate_settings(payload["settings"])
         current = self.store.load(recover_corruption=False)
         if (
@@ -1415,7 +1445,7 @@ class SettingsController:
         if self._cli_target_hash(target_service, target_model) != identity:
             raise ValueError('CLI_VERIFICATION_TARGET_CHANGED')
         resolved_executable = result.get("resolved_executable")
-        if resolved_executable is not None:
+        if resolved_executable is not None and target_service.get("adapter_id")!="command_template":
             if (
                 not isinstance(resolved_executable, str)
                 or not resolved_executable
@@ -1426,6 +1456,10 @@ class SettingsController:
                 raise ValueError("CLI_RESOLVED_EXECUTABLE_INVALID")
             target_service["executable"] = resolved_executable
         target_model["connection_status"] = status
+        from .cli_templates import is_custom,configuration_identity,PARSER
+        if is_custom(target_service):
+            target_model['verification']=(dict(configuration_sha256=configuration_identity(target_service,target_model),
+                capabilities=list(result.get('verified_capabilities',[])),parser_version=PARSER) if status=='AVAILABLE' else None)
         target_service["connection_status"] = (
             "AVAILABLE"
             if any(row["connection_status"] == "AVAILABLE" for row in target_service["models"])
@@ -1457,6 +1491,15 @@ class SettingsController:
 
     def research_chat_execute(self, *, snapshot_id, prompt, response_schema):
         return self.research_chat_execution.execute(snapshot_id=snapshot_id,prompt=prompt,response_schema=response_schema)
+
+    def ai_briefing_freeze(self, *, run_id, profile_ref):
+        return self.ai_briefing_execution.freeze(run_id=run_id,period='briefing',profile_ref=profile_ref)
+
+    def ai_briefing_cancel(self, *, snapshot_id):
+        return self.ai_briefing_execution.cancel(snapshot_id)
+
+    def ai_briefing_execute(self, *, snapshot_id, prompt, response_schema):
+        return self.ai_briefing_execution.execute(snapshot_id=snapshot_id,prompt=prompt,response_schema=response_schema)
 
     def report_profile_freeze(self, *, run_id, period, profile_ref):
         return self.report_execution.freeze(run_id=run_id, period=period, profile_ref=profile_ref)
@@ -1637,7 +1680,7 @@ class SettingsController:
         )
         if node is None:
             raise ValueError("WORKFLOW_NODE_NOT_FOUND")
-        if node_id in {"card_admission", "human_judgment"}:
+        if node_id in {"card_admission", "human_judgment", "data_review"}:
             raise ValueError("WORKFLOW_NODE_MODEL_TEST_NOT_APPLICABLE")
         profile_ref = node["profile_ref"]
         if profile_ref is None or profile_ref == "AUTO_HETEROGENEOUS":

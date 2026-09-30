@@ -19,10 +19,11 @@ def window_key(window):
     return (window['period'],datetime.fromisoformat(window['start']).astimezone(ZONE).isoformat(),
             datetime.fromisoformat(window['end']).astimezone(ZONE).isoformat())
 
-def title(window,revision=1):
+def title(window,revision=1,language=None):
+    from memorive_language.messages import period_name
     start=datetime.fromisoformat(window['start']).astimezone(ZONE).date().isoformat()
     end=(datetime.fromisoformat(window['end']).astimezone(ZONE)-timedelta(days=1)).date().isoformat()
-    return LABELS[window['period']]+' · '+start+(' — '+end if window['period']!='daily' else '')+(' · v'+str(revision) if revision>1 else '')
+    return period_name(window['period'],language)+' · '+start+(' — '+end if window['period']!='daily' else '')+(' · v'+str(revision) if revision>1 else '')
 
 def project(root,items=None):
     if items is None:items=[read(p) for p in (root/'runs').glob('*/state.json')]
@@ -44,7 +45,7 @@ def project(root,items=None):
             explicit=item.get('report_revision')
             revision=explicit if type(explicit) is int and explicit>0 else number+1
             if produced:number=max(number,revision)
-            item['report_revision']=revision;item['title']=title(item['report_window'],revision)
+            item['report_revision']=revision;item['title']=title(item['report_window'],revision,item.get('language_context'))
     return result
 
 def next_revision(root,window):

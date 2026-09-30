@@ -8,6 +8,11 @@ import uuid
 from .contracts import canonical_sha256
 from .store import SettingsStore
 
+def target_identity(target):
+    from .cli_templates import is_custom,configuration_identity
+    if is_custom(target):return canonical_sha256({'kind':'CLI','configuration':configuration_identity(target,target)})
+    return canonical_sha256(dict(target))
+
 class ExamScoreHistory:
     def __init__(self, root: Path):
         self.root = Path(root)
@@ -33,7 +38,7 @@ class ExamScoreHistory:
         return rows
 
     def lookup(self, node, target, active_executors):
-        identity = canonical_sha256(dict(target))
+        identity = target_identity(target)
         return next((r for r in self.rows() if r["node_id"] == node.get("node_id")
                      and r["target_sha256"] == identity and r["executor_ref"] in active_executors), None)
 
@@ -102,7 +107,7 @@ class ExamScoreHistory:
                 or result.get("executor_ref") not in active_executors):
             return False
         row = dict(schema_version="LocalFullExamScore-v1", node_id=node["node_id"],
-                   target_sha256=canonical_sha256(dict(target)), profile_kind=target["kind"],
+                   target_sha256=target_identity(target), profile_kind=target["kind"],
                    model_name=target.get("model_name"), score=score, verdict=result["status"],
                    executor_ref=result["executor_ref"], evidence_sha256=canonical_sha256(dict(result)),
                    recorded_at=datetime.now(timezone.utc).isoformat(),

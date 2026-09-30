@@ -1,6 +1,8 @@
 # Memorive System Design
 
-*Design notes for users and contributors · 26 September 2026*
+*Design notes for users and contributors · 29 September 2026*
+
+v1.02 pre-release documentation · 2026-09-29. This edition covers the agreed scope; installation and update instructions must be checked against the final delivery before release. A documentation version is not a release announcement. Existing illustrations explain common controls; use the actual page for new features.
 
 Memorive connects document processing, research Q&A, citation checking and knowledge reuse. These notes explain the data flow, module responsibilities and failure handling behind research records that can be traced to their sources. Researchers remain responsible for judgment and final writing.
 
@@ -34,15 +36,19 @@ Research Analysis: Question → Evidence retrieval Evidence retrieval and Contex
 
 Knowledge Reuse: Accepted materials → Research opportunities Opportunity Analysis; user-selected reusable results → Knowledge feedback knowledge-feedback candidate → user confirms destination and acceptance → Knowledge admission/Version and provenance execution status and version handling.
 
-External Discovery: Literature discovery acquires candidates, Research recommendations organizes recommendations → isolated processing after first manual approval → formal promotion after second manual approval. Candidate exploration and formal ingestion are not the same action.
+External discovery: M16 obtains metadata candidates and M17 organizes recommendations. An explicit search or enabled automatic receipt may save metadata and source links to the library and notify the user; the user adds full text. Metadata receipt is separate from full-text processing and knowledge admission, which retain their respective review and approval rules.
 
 Originals and preprocessed intermediate artifacts may be saved first, without requiring the Card to be active; materials entering normal analysis must satisfy their acceptance contract. Research reports generates research change reports from multi-source events and is not a mandatory step in the main workflow described above.
+
+M18 connects bounded numeric and internal-logic checks to the existing workflow without changing the scheduling of its data node and logic branch. M19 coordinates desktop installation and updates outside the research pipeline. The diagram retains the original research paths; the added responsibilities and dependencies are described in the module catalogue and Chapter 4.
 
 ![Figure 1 · System overview](assets/figure-01.svg)
 
 *Figure 1 · System overview*
 
 ### 2.2 Module Responsibilities
+
+The design preserves the M1–M17 identifiers and their core responsibilities, and adds M18 Data and Logic Checking and M19 Application Updates and Maintenance. M18 is a checking service; M19 belongs to desktop maintenance. Home, language and conversation controls remain coordinated by the application layer. These identifiers describe responsibilities, not new screens or evidence of implementation and acceptance.
 
 | Layer | Module | Responsibility |
 | --- | --- | --- |
@@ -52,7 +58,32 @@ Originals and preprocessed intermediate artifacts may be saved first, without re
 | Logging and Feedback | Knowledge feedback Feedback Loop; Runtime records Logging | Form controlled feedback candidates and record operational facts and final states |
 | Long-term Governance | Decision records Decision Log; Version and provenance Lifecycle; Quality evaluation Quality Assurance | Preserve decision rationale, immutable provenance, and continuous quality evidence |
 | Research Operations | Research reports Change Log; Literature discovery Intelligence discovery; Research recommendations Active Acquisition | Report changes, discover candidates, and organize recommendations |
+| Checking Services | M18 Data and Logic Checking | Check numeric relationships and internal logic, retaining conditions, grounds and coverage |
+| Desktop Maintenance | M19 Application Updates and Maintenance | Coordinate version checks, downloads, installation, updates and recovery |
 | Application and Execution | ApplicationFacade, Application Service, Control Store, ExecutionCore, JobRunner | Connect desktop, business modules, persistent runtime state, and execution channels; do not add new business module numbers |
+
+
+| ID | Module |
+| --- | --- |
+| M1 | Preprocessing Pipeline |
+| M2 | Distillation |
+| M3 | Retrieval and Context Weighting |
+| M4 | Analysis |
+| M5 | Opportunity Analysis |
+| M6 | Verification |
+| M7 | Weights |
+| M8 | State Machine |
+| M9 | Model Gateway and Execution Channels |
+| M10 | Controlled Knowledge Feedback |
+| M11 | Logs and Terminal State Ledger |
+| M12 | Design Decision Log |
+| M13 | Data Lifecycle |
+| M14 | Quality Assurance |
+| M15 | Research Change Log |
+| M16 | Literature Discovery and Research Radar |
+| M17 | Proactive Knowledge Acquisition |
+| M18 | Data and Logic Checking |
+| M19 | Application Updates and Maintenance |
 
 ### 2.3 Responsibility Boundaries
 
@@ -78,7 +109,7 @@ Literature uses a stable paper_id; persisted artifacts store artifact ID, conten
 
 High-risk Card information stores both a readable distillation and a source_anchor: {chunk_id, quote}. The quote must be verifiable within the corresponding chunk of the same document; the authenticity of the original quote does not imply that the distillation is semantically valid, and review is still required. Historical missing identity, structure, or lineage is marked as unknown / not_assessed, and must not be guessed or filled in based on file names, timestamps, or similar text.
 
-RawMD, CleanMD, Card, analysis, and opportunity comparisons retain the original language. Interface language does not change data language; displayed translations must allow review of the original text and anchors, and are not written back as new evidence. Mixed-language granularity and output translation remain within the unresolved scope defined in Chapter 9.
+RawMD, CleanMD, Card and document processing retain source language. Interface text, system messages and newly generated chat answers, research suggestions and reports follow the current content-language setting; original text, citations, metadata and historical versions are not rewritten. A generation fixes its language and prompt version, with language-separated caches. A displayed translation does not become new primary evidence.
 
 ### 3.3 General Comparison Context
 
@@ -97,7 +128,7 @@ Disciplines only replace alias mappings; core fields remain unchanged. Evidence 
 
 ## 4. Module Design
 
-### Document processing Preprocessing Pipeline
+### M1 · Preprocessing Pipeline
 
 ![Figure 2 · Document processing workflow](assets/figure-02.svg)
 
@@ -123,7 +154,7 @@ Vector consistency and recovery. The same model name does not guarantee the same
 
 Scope of this version. Capabilities registers 14 canonical formats: 11 are supported, while JPEG/PNG/TIFF are degraded and used only for frame probing, not representing image OCR. PDFs retain the [PDF] marker, while other originals are preserved as original bytes with the [Original] marker; typed anchors are projected to chunk_schema_version=3. The Office legacy bridge covers only the frozen Office16 scope, prohibiting macros and link updates. See Chapters 8 and 9 for the actual eligibility of OCR, Marker, and local chains.
 
-### Evidence extraction Distillation
+### M2 · Distillation
 
 ![Figure 3 · Evidence extraction workflow](assets/figure-03.svg)
 
@@ -151,7 +182,7 @@ Post-Full repairs follow the Evidence review contract: a single Card cascade all
 
 Long-form Content. Capabilities segmented_distill has established mechanisms for capacity probing, segmentation, segment anchoring, hierarchical merging, capped revision, and atomic visibility of complete files. Complete file visibility and Knowledge admission acceptance are distinct; if review is incomplete, the status remains pending. The module contract and sample eligibility do not guarantee desktop integration.
 
-### Evidence retrieval Evidence retrieval Weighting
+### M3 · Retrieval and Context Weighting
 
 ![Figure 4 · Evidence retrieval workflow](assets/figure-04.svg)
 
@@ -169,7 +200,7 @@ Evidence retrieval records covered/missing question facets; Research analysis ge
 
 The Context Pack aggregates the data_ownership of actually selected members to form an immutable snapshot including effective_data_ownership, mixed status, contributing sources, summaries, and parsing receipts, which is passed along Evidence retrieval→Research analysis→Evidence review. Unknown or conflicting permissions halt external transmission per the permission contract. If reranking is enabled, only authorized modes may be used; if the resulting identity set is invalid, revert to the original distance order. Evidence retrieval sub-dialog refinement for complex questions is not yet integrated.
 
-### Research analysis Analysis
+### M4 · Analysis
 
 ![Figure 5 · Research analysis workflow](assets/figure-05.svg)
 
@@ -185,7 +216,7 @@ Research analysis performs deterministic source checks only: source_id must exis
 
 Research analysis provides opinion candidates, evidence arrangements, and analysis structure; it does not produce final paper conclusions ready for direct submission. Review comments are handled by the user and do not retroactively change the Card's acceptance status.
 
-### Research opportunities Opportunity Analysis
+### M5 · Opportunity Analysis
 
 ![Figure 6 · Research opportunities workflow](assets/figure-06.svg)
 
@@ -201,7 +232,7 @@ Output is categorized as A: High-comparability tensions; B: Condition or method 
 
 Research opportunities processes incrementally by topic, triggered by schedules, user actions, or affected feedback, rather than performing pairwise comparisons across the entire library. The user determines comparability and research value; if the ignore rate is abnormal, Quality evaluation checks condition extraction and false positives.
 
-### Evidence review Verification
+### M6 · Verification
 
 ![Figure 7 · Evidence review workflow](assets/figure-07.svg)
 
@@ -217,7 +248,9 @@ Review expands by atomic claim and conservative single-document fact identity; c
 
 Analysis workflow: Review is determined by risk, MUST/EXEMPT, and sampling contracts; skipping requires a reason or pending verification item. The reviewer only receives claims and cited evidence for targeted falsification, not the generator's reasoning process. Sent requests with unknown results cannot be faked as successful via restart or blind resending. See Chapter 6 for desktop limited revision and objection deletion rules.
 
-### Evidence retrieval weighting Weights
+M18 supplies numeric and internal-logic findings; M6 continues to assess whether cited evidence supports an extracted or generated claim. A contradiction may be faithfully extracted from the source, so extraction fidelity and internal consistency can have different outcomes. The two results are retained separately.
+
+### M7 · Weights
 
 ![Figure 8 · Evidence retrieval weighting workflow](assets/figure-08.svg)
 
@@ -242,7 +275,7 @@ Coefficients are adjustable configurations, not optimal constants for all discip
 
 DerivedPenalty only reduces the authority score of derived entries; it does not penalize true relevance. Cross-document synthesis carries the heaviest penalty, conceptual relationships are moderate, and original annotations are the lightest. Reversal requires documented rationale and cannot be achieved by increasing ManualWeight to substitute credibility. Quality evaluation monitors drift by tracking the frequency with which derived entries displace their original sources in the top-k results; ratios and review dates serve only as auxiliary metrics. Field credibility and coverage status remain independently displayed and are not automatically converted into global weights.
 
-### Knowledge admission State Machine
+### M8 · State Machine
 
 ![Figure 9 · Knowledge admission workflow](assets/figure-09.svg)
 
@@ -254,7 +287,7 @@ The review_status of a Card is pending, active, or quarantined. Objects that hav
 
 Knowledge admission is not responsible for quality judgment, technical retries, business rework, or operational recovery. It generates immutable state_transition_event, which Runtime records appends and persists, and Version and provenance associates with version and lineage. Lifecycle heat, version status, Card completion, and release status are not written into the Card's three states. Validation evidence must reference the Evidence review receipt and the basis for the current transition; it cannot rely solely on the active label.
 
-### Model services Model Gateway and Execution Channels
+### M9 · Model Gateway and Execution Channels
 
 ![Figure 10 · Model services workflow](assets/figure-10.svg)
 
@@ -280,7 +313,7 @@ Regional policy. The design requires each provider to bind a valid supported-reg
 
 Prompt versions, caching capabilities, tiers, Thinking, and billing rules are managed by controlled configuration. The maximum tier must be explicitly selected; optional tiers do not prove that the corresponding model has passed qualification. Shared constraints on ownership, billing, and caching are detailed in Chapter 5.
 
-### Knowledge feedback Controlled Knowledge Feedback
+### M10 · Controlled Knowledge Feedback
 
 ![Figure 11 · Knowledge feedback workflow](assets/figure-11.svg)
 
@@ -296,7 +329,7 @@ The workflow is: user selects object → forms candidate, source, and rationale 
 
 Knowledge feedback admission and derived down-weighting separately address "whether it can be used" and "what the ranking weight is." A confirmed summary remains a secondary artifact and does not automatically acquire the authority of original literature due to human confirmation.
 
-### Runtime records Logs and Terminal State Ledger
+### M11 · Logs and Terminal State Ledger
 
 ![Figure 12 · Runtime records workflow](assets/figure-12.svg)
 
@@ -316,7 +349,7 @@ Attempt success, paper processing pass, and publication success are tracked sepa
 
 External calls are logged in phases: before sending, freeze request identity, route/region, behavior hash, permissions, and budget; after sending, record actual return identity, usage, cost basis, latency, and result. Fields for which old data cannot be recovered are marked as unknown; do not guess values or automatically rerun paid requests to supplement evidence. Recovery and concurrent writes are declared according to the ledger contract and actual test scope.
 
-### Decision records Design Decision Log
+### M12 · Design Decision Log
 
 ![Figure 13 · Decision records workflow](assets/figure-13.svg)
 
@@ -328,7 +361,7 @@ Record context, primary alternatives, final choice, reasons for rejection, affec
 
 Applicable items include model acceptance, isolation, canary release, rollback, re-embedding, OCR preparation, lineage exceptions, feedback basis, canonical pointer movement, and publication/withdrawal. Actual events are recorded by Runtime records/Version and provenance; Decision records references events and explains the trade-offs. Decision changes establish a successor, preserving the original decision and its rationale at the time.
 
-### Version and provenance Data Lifecycle
+### M13 · Data Lifecycle
 
 ![Figure 14 · Version and provenance workflow](assets/figure-14.svg)
 
@@ -352,7 +385,9 @@ Compatibility and Publication. Determine compatible/stale status based on exact 
 
 The Registry, compatibility engine, Analysis request construction, and publication dry-run for Quality belong to different construction scopes; the dry-run did not execute a formal publication. Capabilities has established historical migration and combination query capabilities, but has not authorized real historical batch migration, production index switching, or pointer moves.
 
-### Quality evaluation Quality Assurance
+M19 coordinates changes to application packages and installation locations. M13 retains responsibility for research-data versions, provenance and compatibility rules. M19 invokes the applicable migration mechanism and records maintenance outcomes; a software update does not move knowledge-admission pointers or rewrite historical reviews.
+
+### M14 · Quality Assurance
 
 ![Figure 15 · Quality evaluation workflow](assets/figure-15.svg)
 
@@ -382,7 +417,9 @@ Reference packs are tracked by ownership: only precisely declassified REFERENCE_
 
 Knowledge base health metrics retain indicators for unreviewed, failed, expired, broken links, and derivative displacement. The alternative task completion gate for original QUALITY-ASSURANCE did not convert original B ERROR or 12 five-axis not_assessed items into quality passes.
 
-### Research reports Research Change Log
+M18 performs an individual bounded data and logic check. M14 aggregates its receipts to assess false positives, missed findings, coverage and degradation. The numeric quality axes do not create a duplicate production engine or turn successful execution into scientific qualification.
+
+### M15 · Research Change Log
 
 ![Figure 16 · Research reports workflow](assets/figure-16.svg)
 
@@ -394,7 +431,7 @@ Normalize and deduplicate from sources such as Runtime records/Knowledge admissi
 
 Daily reports focus on new, modified, pending review, and failed items; weekly reports focus on significant progress, literature, incomplete reviews, and potential tensions; monthly reports focus on structural changes and long-term pending items. Research reports reports only changes, risks, and pending items, does not form final research conclusions, and does not alter knowledge acceptance status.
 
-### Literature discovery Research Intelligence discovery
+### M16 · Literature Discovery and Research Radar
 
 ![Figure 17 · Literature discovery workflow](assets/figure-17.svg)
 
@@ -410,7 +447,7 @@ Novelty is recorded as TRUE/FALSE/UNKNOWN across four axes: publication, first-s
 
 Two human gates: The first approval only permits the isolated Document processing→Evidence extraction→Evidence review pipeline to generate a pending Candidate Card, without generating an Analysis; the second approval is required to formally promote the exact set. Promotion uses an idempotent, WAL-based, dual-lock, compensation, and receipt-last protocol; failures must not leave a success receipt. Offline synthesis tests do not indicate that a real promotion has occurred.
 
-### Research recommendations Active Knowledge Acquisition
+### M17 · Proactive Knowledge Acquisition
 
 ![Figure 18 · Research recommendations workflow](assets/figure-18.svg)
 
@@ -422,7 +459,35 @@ Research recommendations builds on Literature discovery, organizing a finite Sla
 
 Exposure, suppression, and re-emergence are written to an append-only Exposure Ledger. Suppression is bound to work_cluster_id, direction_id, and direction_revision, and does not propagate to similar text, vector neighbors, or other directions; re-emergence requires new evidence. Weak signals reaching a threshold only generate a policy proposal pending human confirmation and not yet applied.
 
-Research recommendations can discover and recommend, but does not automatically import, assign high weights, change strategies, or release; it does not handle writing, file output, or publication execution. The desktop's recent interest auto-recommendation still has unresolved implementation gaps.
+Research recommendations can discover and recommend, but does not automatically import, assign high weights, change strategies, or release; it does not handle writing, file output, or publication execution. v1.02 provides metadata discovery and related recommendations for user-configured directions. This does not admit primary evidence automatically or establish long-term recommendation quality.
+
+### M18 · Data and Logic Checking
+
+Input → Output: Loaded document text, tables, source locations and checking configuration → Data or logic reports with original locations, rule or model grounds, applicable conditions and coverage.
+
+Dependencies: M1 supplies traceable parsed content and conversion-quality information. Model-based judgments use the selected channel through M9. M11 records execution and usage, M13 links reports to input versions, and M14 receives quality signals. M6 continues to assess whether cited evidence supports extracted or generated claims. Checks do not require a successful Card, alter current node scheduling or create an additional mandatory gate for every research analysis.
+
+Deterministic checks preserve the original expression and establish the meaning of percentages, ratios, units and statistical quantities before checking explicit equations, ranges and numeric relationships. Conversions retain their grounds. Missing conditions do not justify guessing a denominator, group or weight; truncated compound equations are not complete formulas, and valid zero values of nonnegative statistics are not automatically errors. Missing conditions, parsing ambiguity and incomparable values remain pending, input issues or limited coverage.
+
+Model-based logic checking proposes concerns grounded in the source and records the inspected context, coverage and unresolved relationships. Rule findings, model concerns and human dispositions remain separate. A model suspicion is not a confirmed error. Task completion, reported concerns and scientific validity are distinct; unrun or uncovered work cannot count as passed.
+
+Reports bind input, rule, prompt and language versions. Explanations use the content language fixed for that generation, while original quotations, values, units and historical versions remain unchanged. A rerun creates a successor report and retains previous failures and explanations. A local check is not a whole-document check, and generation is not repeated without bounds to obtain a preferred conclusion.
+
+M18 does not modify sources, judge author intent, prove research correct by finding no anomaly or perform knowledge admission on behalf of M8. Supported rules, material limits and model eligibility follow the current implementation and checking contract. A module identifier does not expand coverage or authorize additional calls.
+
+### M19 · Application Updates and Maintenance
+
+Input → Output: Current installation identity, target-version manifest, full or incremental package and user actions → Update-check results, verified installation state and traceable maintenance records.
+
+Dependencies: The application layer supplies the version entry and user actions. A shared installation engine and independent assistant maintain the program. M13 supplies research-data compatibility and migration rules, M11 records facts, and M14 provides validation evidence for the corresponding version. M19 belongs to desktop maintenance, not the research pipeline, and does not call models or upload research material.
+
+Checking, downloading and applying an update are separate operations. Automatic checking obtains stable-release information only; a failed check must not report that the application is up to date. Download follows the user's review of the version, notes and size. A delta is tied to the exact old package, and its assembled output must match the target full package. A legitimate base mismatch may use a full package after confirmation; signature, source or identity verification failures stop the operation.
+
+After download verification, choose “Update after exit” to open the native assistant, then exit the current instance normally. The assistant waits for that instance to finish tasks, save and exit. It neither force-terminates the application nor promises an automatic restart. Reopen the application afterward and check its version, data location and existing settings. The original v1.01 uses the assistant distributed with the target release for its first upgrade; uninstalling first is not required.
+
+Program files, configuration and research data are handled separately. Preserve recovery conditions before activation and handle failure according to transaction state. Once the new version accepts writes, do not automatically replace new data with an old backup or pass a new database to an arbitrary older application. Append interruption, recovery and outcome records. Updating the program does not rewrite historical research judgments.
+
+Installation, updating, prerequisite guidance and errors use shared Chinese, English and Japanese resources. A new profile may inherit the installation language; existing settings remain. The assistant inherits the exact instance's language, and a temporary display change does not overwrite content language. New installation, first upgrade, incremental updating and recovery require separate validation. Successful installation or package verification does not establish full functional acceptance. Source, documents, full packages, deltas and signatures must identify the same delivery; public publication requires its own release decision.
 
 ## V. Shared Rules
 
@@ -532,7 +597,7 @@ Users explicitly select Edge, Chrome, or Brave, and the browser, extension versi
 
 After collection, same-file deduplication and full or incremental refinement are performed, forming 11 types of refinement candidates and 5 types of controlled destination selections. Users can ACCEPT, EDIT, REJECT, or DEFER; collection authorization does not automatically authorize external transmission or pool entry. Conversation content is not a source of literature facts, and entering the knowledge pool still requires the corresponding destination contract and review.
 
-Built-in operational documentation uses independent HTML/CSS/JS and replaceable Markdown; the prototype contains 6 chapters and 24 articles, loads offline, and restricts external resources. Prototype check passing does not imply integration into Memorive.exe; “Confirm Review” only indicates that it has been read/reviewed and does not directly change authority, formal pool entry, or publication.
+Bundled documentation provides offline Chinese, English and Japanese guides, design notes and notices. The application opens the resource for its selected language. Reading or replacing local help does not approve data admission or publication.
 
 ### 6.6 Native Interaction, Leaderboards, and Installation Entry
 
@@ -562,11 +627,35 @@ System Check in the installer explains missing components, while application and
 
 ## 8. Available Capabilities and Extension Designs
 
-Document processing, direct attachment Q&A, citation inspection, session refinement, model connections, model rankings and usage reporting are the principal desktop entry points. Literature discovery and proactive recommendations are extension designs with separate conditions, rather than automatically enabled background services.
+Document processing, direct attachment Q&A, citation inspection, session refinement, model connections, model rankings and usage reporting are the principal desktop entry points. Metadata discovery and related recommendations in v1.02 follow directions and receipt settings enabled by the user. Primary-evidence admission and broader proactive strategies retain separate conditions.
 
 The actual OCR, reranking and review routes depend on adapters and model capabilities. A setting does not establish support for every document or execution route. Browser capture also has a source and a specific captured range. Complete, partial and failed capture must be distinguished; one successful capture does not establish access to all conversation history.
 
-Quality sampling, migration of real historical data and long-term recommendation effectiveness each have their own verification scope. Runtime records, bounded checks and full installation acceptance are recorded separately. This naming and documentation revision remains under private review; earlier installers do not automatically represent the revised source. Public distribution requires a separate release decision.
+Quality sampling, migration of real historical data and long-term recommendation effectiveness each have their own verification scope. Runtime records, bounded checks and full installation acceptance are recorded separately. v1.01 has a separate release record. This is a pre-release revision for v1.02; the final source, packages and update index must identify the same delivery.
+
+## 9. Research workflows and update maintenance in v1.02
+
+### Claims, sources and answer versions · M3, M4, M6, M10, M13
+
+Locating a citation and establishing support for a claim are recorded separately. Support checks distinguish full or partial support, missing evidence and conflict; coverage explains what was actually checked. Neither approves knowledge automatically. Questions, research background and knowledge confirmation refer to an identified answer version, sources and conditions. Later suggestions add records instead of overwriting earlier judgments.
+
+Style is a snapshot of generation settings. A normal retry keeps the original style and creates a branch; later replies on the old branch remain stored but stay out of the new context. Copying, version selection and draft restoration make no model request. Archiving after more than 30 unopened days or over 100 saved messages changes lifecycle state only, with pinned, busy and multi-window protections. Access watermarks and restoration grace are persistent data, not disposable caches. Lists page through metadata before loading bodies on demand.
+
+### Discovery, parsing and real progress · M1, M11, M16, M17, M18
+
+Home exposes separate latest and related actions using the same research directions, identity checks, batch records and notifications. Metadata and links enter Library under the user's receipt settings; the user supplies full text. This is separate from document processing and the approval boundaries for evidence admission. Recommendation reasons do not establish scientific quality.
+
+Parsing retains paragraphs, tables, superscripts, page or line anchors and version identity. Deterministic value checks and model-based logic analysis retain separate inputs, conditions and reports; main and branch tasks retain separate states. Progress comes from node events and measurable work, not elapsed-time percentages. OCR, semantic judgment and cross-paper attribution can still fail. Traceability is not a guarantee of correctness.
+
+### Execution channels and language · M9 and the application layer
+
+A custom CLI supplies executable, arguments, input/output rules and model mappings to the shared consumers while retaining process exit, cancellation and unknown-cost states. It does not make all interactive CLIs compatible. AI Updates and personal research reports have different source scopes and generation entry points. Each task fixes its language for generation and caching; original documents and historical versions remain unchanged.
+
+### Updating without replacing research data · M19, M13 and the application layer
+
+The v1.02 scope includes update checks and incremental upgrades. M19 coordinates discovery, download and “Update after exit”. One independent assistant waits for the current instance to exit normally, then reuses the installation engine to assemble a new version slot. A delta is tied to an exact base, and its complete output must match the full package. A legitimate base mismatch may use the full package; signature or identity failures stop the update. Updating the program is not a new library import.
+
+Installation, update, maintenance and uninstall share Chinese, English and Japanese resources, including the native prerequisite wizard. A new profile can inherit the installer language; existing settings stay intact. The helper uses the selected instance's language. Maintenance waits for tasks and writes, then backs up, migrates and validates. A failure before activation can restore the old state, but an older backup must not overwrite new data after the updated application accepts writes. Source, resources, full and delta packages and signatures must belong to one release; documentation does not establish release acceptance.
 
 ## 10. Model leaderboard and public sources
 

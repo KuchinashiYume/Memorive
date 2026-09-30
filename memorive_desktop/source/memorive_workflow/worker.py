@@ -21,7 +21,7 @@ from memorive_folder_management import ProfileFolderManager
 from memorive_app.contracts import canonical_sha256, utc_now
 
 from .contracts import (
-    Core_NODE_IDS,
+    Core_NODE_IDS, E2_NODE_IDS, DATA_NODE, node_ids_for, CORE_WORKER_CAPACITY,
     CoreArtifact,
     CoreExecutionContext,
     CoreExecutionResult,
@@ -65,26 +65,28 @@ def _atomic_json(path: Path, value: Mapping[str, Any]) -> None:
 
 
 class _CheckpointStore:
-    def __init__(self, run_root: Path):
+    def __init__(self, run_root: Path, node_ids=Core_NODE_IDS):
+        self.node_ids=tuple(node_ids)
+        self.schema="DesktopCoreCheckpoint-v2" if self.node_ids==E2_NODE_IDS else "DesktopCoreCheckpoint-v1"
         self.path = run_root / "core_checkpoint.json"
 
     def load(self) -> dict[str, Any]:
         if not self.path.is_file():
             return {
-                "schema_version": "DesktopCoreCheckpoint-v1",
+                "schema_version": self.schema,
                 "completed_node_ids": [],
                 "updated_at": None,
             }
         value = json.loads(self.path.read_text(encoding="utf-8"))
         completed = value.get("completed_node_ids") if isinstance(value, Mapping) else None
         if (
-            value.get("schema_version") != "DesktopCoreCheckpoint-v1"
+            value.get("schema_version") != self.schema
             or not isinstance(completed, list)
-            or any(node_id not in Core_NODE_IDS for node_id in completed)
+            or any(node_id not in self.node_ids for node_id in completed)
             or completed != list(dict.fromkeys(completed))
         ):
             raise ValueError("Core_CHECKPOINT_INVALID")
-        expected_prefix = list(Core_NODE_IDS[: len(completed)])
+        expected_prefix = list(self.node_ids[: len(completed)])
         if completed != expected_prefix:
             raise ValueError("Core_CHECKPOINT_NON_PREFIX")
         return deepcopy(dict(value))
@@ -92,14 +94,14 @@ class _CheckpointStore:
     def complete(self, node_id: str) -> dict[str, Any]:
         current = self.load()
         completed = list(current["completed_node_ids"])
-        expected = Core_NODE_IDS[len(completed)] if len(completed) < len(Core_NODE_IDS) else None
+        expected = self.node_ids[len(completed)] if len(completed) < len(self.node_ids) else None
         if node_id != expected:
             if node_id in completed:
                 return current
             raise ValueError(f"Core_CHECKPOINT_ORDER_INVALID:{node_id}:{expected}")
         completed.append(node_id)
         updated = {
-            "schema_version": "DesktopCoreCheckpoint-v1",
+            "schema_version": self.schema,
             "completed_node_ids": completed,
             "updated_at": utc_now(),
         }
@@ -107,7 +109,7 @@ class _CheckpointStore:
         return updated
 
     def initialize_prefix(self, completed_node_ids: tuple[str, ...]) -> dict[str, Any]:
-        expected = tuple(Core_NODE_IDS[: len(completed_node_ids)])
+        expected = tuple(self.node_ids[: len(completed_node_ids)])
         if completed_node_ids != expected:
             raise ValueError("Core_CHECKPOINT_PREFIX_INVALID")
         current = self.load()
@@ -117,7 +119,7 @@ class _CheckpointStore:
                 raise ValueError("Core_CHECKPOINT_PREFIX_CONFLICT")
             return current
         updated = {
-            "schema_version": "DesktopCoreCheckpoint-v1",
+            "schema_version": self.schema,
             "completed_node_ids": list(completed_node_ids),
             "updated_at": utc_now(),
         }
@@ -147,6 +149,7 @@ class CoreVerticalWorker:
         self._stop_event = None
         self.run_root = ProfileFolderManager(self.profile_root).path_for("Core_JOBS")
         self.run_root.mkdir(parents=True, exist_ok=True)
+        self.review_service = None
 
     def _execution_interrupt(self, job_id: str) -> None:
         if self._stop_event is not None and self._stop_event.is_set():
@@ -156,10 +159,13 @@ class CoreVerticalWorker:
             raise ExecutionControlSignal(state)
 
     def _execution_checkpoint(self, job_id: str) -> None:
+        from . import node_progress
         while True:
             if self._stop_event is not None and self._stop_event.is_set():
                 raise ExecutionControlSignal('STOPPED')
-            state = self.facade.get_job(job_id)['control_state']
+            observed = self.facade.get_job(job_id)
+            state = observed['control_state']
+            node_progress.control(observed)
             if state == 'RUNNING':
                 return
             if state in {'PAUSED', 'PAUSE_REQUESTED', 'RESUME_REQUESTED', 'CANCEL_REQUESTED'}:
@@ -167,12 +173,13 @@ class CoreVerticalWorker:
                 continue
             raise ExecutionControlSignal(state)
 
-    def _cancelled_receipt(self, job_id, item, intent, checkpoint):
+    def _cancelled_receipt(self, job_id, item, intent, checkpoint, *, mainline_result=None):
         receipt = {'schema_version':'DesktopCoreExecutionControl-v1',
                    'status':'CANCELLED','job_id':job_id,'item_id':item['item_id'],
                    'completed_node_ids':checkpoint.load()['completed_node_ids'],
-                   'artifact_ids':[], 'updated_at':utc_now(),
-                   'production_ingestion_performed':False,
+                   'artifact_ids':[a.artifact_id for a in mainline_result.artifacts] if mainline_result is not None else [], 'updated_at':utc_now(),
+                   'production_ingestion_performed':mainline_result is not None,
+                   'mainline_complete':mainline_result is not None,
                    'partial_stage_evidence_preserved':True}
         cancelled, _ = self.inbox.store.update_intent(intent['idempotency_key'], 'CANCELLED', receipt)
         self.inbox.reconcile_core_cancellation(cancelled)
@@ -215,15 +222,16 @@ class CoreVerticalWorker:
             predecessor = self.facade.get_job(predecessor_job_id)
             if predecessor["control_state"] not in {"FAILED", "SUCCEEDED", "CANCELLED"}:
                 raise ValueError("Core_ROLLBACK_PREDECESSOR_NOT_TERMINAL")
+            node_ids=node_ids_for(predecessor["snapshots"]["workflow_definition"]["content"])
             resume_from = str(request["resume_from_node_id"])
             predecessor_checkpoint = _CheckpointStore(
-                self.run_root / predecessor_job_id
+                self.run_root / predecessor_job_id, node_ids
             ).load()
             completed = tuple(predecessor_checkpoint["completed_node_ids"])
             # A failed node is necessarily absent from the completed prefix.
             # Permit that exact next node on FAILED jobs; rollback of completed
             # nodes keeps its previous behavior, and forward skipping is rejected.
-            next_node = Core_NODE_IDS[len(completed)] if len(completed) < len(Core_NODE_IDS) else None
+            next_node = node_ids[len(completed)] if len(completed) < len(node_ids) else None
             retry_failed_node = predecessor['control_state'] == 'FAILED' and resume_from == next_node
             if resume_from not in completed and not retry_failed_node:
                 raise ValueError("Core_ROLLBACK_NODE_NOT_COMPLETED")
@@ -257,6 +265,8 @@ class CoreVerticalWorker:
                 idempotency_key=f"core-rollback-{request_id}",
                 expected_current_job_id=head_id,
             )
+            if self.review_service and self.review_service.store.get(predecessor_job_id):
+                self.review_service.store.update(predecessor_job_id,'SUPERSEDED',{'stale':True,'successor_job_id':successor_job_id})
             self.task_control_store.update_rollback(
                 request_id,
                 status="DISPATCHED",
@@ -297,13 +307,14 @@ class CoreVerticalWorker:
         checkpoint: _CheckpointStore,
         run_root: Path,
     ) -> tuple[tuple[str, ...], dict[str, Any] | None]:
+        node_ids=node_ids_for(job["snapshots"]["workflow_definition"]["content"])
         retry = job.get("request", {}).get("core_retry")
         if not isinstance(retry, Mapping):
             return tuple(checkpoint.load()["completed_node_ids"]), None
         resume_from = str(retry.get("resume_from_node_id") or "")
-        if resume_from not in Core_NODE_IDS:
+        if resume_from not in node_ids:
             raise ValueError("Core_ROLLBACK_RESUME_NODE_INVALID")
-        prefix = tuple(Core_NODE_IDS[: Core_NODE_IDS.index(resume_from)])
+        prefix = tuple(node_ids[: node_ids.index(resume_from)])
         observed = tuple(checkpoint.load()['completed_node_ids'])
         if observed:
             if observed[:len(prefix)] != prefix:
@@ -315,10 +326,10 @@ class CoreVerticalWorker:
         predecessor_stage = self.run_root / predecessor_job_id / "core_stages"
         successor_stage = run_root / "core_stages"
         required: list[str] = []
-        resume_index = Core_NODE_IDS.index(resume_from)
-        if resume_index > Core_NODE_IDS.index('03_CARD_DISTILL'):
+        resume_index = node_ids.index(resume_from)
+        if resume_index > node_ids.index('03_CARD_DISTILL'):
             predecessor = self.facade.get_job(predecessor_job_id)
-            admitted = resume_index > Core_NODE_IDS.index('05_CARD_ADMISSION')
+            admitted = resume_index > node_ids.index('05_CARD_ADMISSION')
             seed_name = '05_admitted_card' if admitted else '03_card_seed'
             original_seed = predecessor_stage / (seed_name + '.md')
             source = None
@@ -369,11 +380,11 @@ class CoreVerticalWorker:
                 _atomic_json(successor_stage / (seed_name + '_binding.json'), {
                     'sha256':expected_hash, 'predecessor_job_id':predecessor_job_id,
                     'source_sha256':job['request']['input_hashes']['input']})
-        if resume_index > Core_NODE_IDS.index("06_CONTEXT_PACK"):
+        if resume_index > node_ids.index("06_CONTEXT_PACK"):
             required.extend(["06_context_pack.pkl", "06_context_pack.json"])
-        if resume_index > Core_NODE_IDS.index("07_ANALYSIS"):
+        if resume_index > node_ids.index("07_ANALYSIS"):
             required.extend(["07_analysis.pkl", "07_analysis.json", "07_analysis.md"])
-        if resume_index > Core_NODE_IDS.index("08_JUDGMENT_CROSS_CHECK"):
+        if resume_index > node_ids.index("08_JUDGMENT_CROSS_CHECK"):
             required.append("08_judgment.json")
         if resume_from == '05_CARD_ADMISSION':
             # Node 04 already completed. Carry its source-bound private review
@@ -503,24 +514,20 @@ class CoreVerticalWorker:
         if observed != artifact.sha256.upper() or not _SHA256.fullmatch(observed):
             raise ValueError("Core_ARTIFACT_HASH_MISMATCH")
         relative = path.relative_to(root).as_posix()
-        job = self.facade.get_job(context.job_id)
-        existing = {
-            row["artifact_id"]: row
-            for row in job.get("artifact_bindings", [])
-        }
         locator = f"core-artifact:{context.job_id}:{relative}"
-        if artifact.artifact_id in existing:
-            row = existing[artifact.artifact_id]
-            if row.get("sha256") != observed or row.get("locator") != locator:
-                raise ValueError("Core_ARTIFACT_REPLAY_CONFLICT")
-            return
-        self.facade.bind_artifact(
-            context.job_id,
-            expected_version=job["version"],
-            artifact_id=artifact.artifact_id,
-            locator=locator,
-            sha256=observed,
-        )
+        for attempt in range(12):
+            job=self.facade.get_job(context.job_id)
+            existing={row['artifact_id']:row for row in job.get('artifact_bindings',[])}
+            if artifact.artifact_id in existing:
+                row=existing[artifact.artifact_id]
+                if row.get('sha256')!=observed or row.get('locator')!=locator:raise ValueError('Core_ARTIFACT_REPLAY_CONFLICT')
+                return
+            try:
+                self.facade.bind_artifact(context.job_id,expected_version=job['version'],artifact_id=artifact.artifact_id,locator=locator,sha256=observed)
+                return
+            except VersionConflict:
+                if attempt==11:raise
+
 
     def _terminal_failure(self, job_id: str, reason_code: str) -> None:
         job = self.facade.get_job(job_id)
@@ -543,6 +550,9 @@ class CoreVerticalWorker:
         return {'lock': threading.Lock(), 'intents': set(), 'sources': set()}
 
     def run_pending_once(self) -> dict[str, Any]:
+        if self.review_service:
+            review_job=self.review_service.claim()
+            if review_job:return self.review_service.run_claimed(review_job)
         with self._dispatch_state['lock']:
             claimed = self._claim_pending_intent()
         if isinstance(claimed, dict):
@@ -592,6 +602,8 @@ class CoreVerticalWorker:
             ):
                 skipped_non_core += 1
                 continue
+            if self.review_service and item.get('job_id') and self.review_service.blocks_main_claim(item['job_id']):
+                continue
             identity = str(intent['intent_id'])
             source = str(item.get('content_sha256') or item['item_id'])
             if identity not in self._dispatch_state['intents'] and source not in self._dispatch_state['sources']:
@@ -636,7 +648,22 @@ class CoreVerticalWorker:
             job_id = str(intent_params.get("successor_job_id") or "")
             job = self.facade.get_job(job_id)
         else:
-            snapshot = dict(self.workflow_snapshot_provider())
+            frozen=intent_params.get('workflow_snapshot')
+            if frozen is None:
+                # Legacy intents bind once; restart uses the facade's prior snapshots.
+                try:
+                    prior=self.facade.lookup_start_by_idempotency_key(intent['idempotency_key'])
+                except ValueError:
+                    prior=None
+                if prior:
+                    previous=self.facade.get_job(prior['job_id'])
+                    frozen={**self.workflow_snapshot_provider(), 'configuration_ready':True,
+                        'workflow_definition':previous['snapshots']['workflow_definition']['content'],
+                        'workflow_config':previous['snapshots']['workflow_config']['content']}
+                    frozen['settings_sha256']=previous['request']['profile_snapshot']['config_sha256']
+            snapshot = deepcopy(dict(frozen or self.workflow_snapshot_provider()))
+            if intent_params.get('literature_review') is not None:
+                snapshot['workflow_config']['literature_review']=deepcopy(intent_params['literature_review'])
             request = self._request(item, snapshot)
             handle = self.facade.start_job(request, intent["idempotency_key"])
             job_id = str(handle["job_id"])
@@ -657,7 +684,10 @@ class CoreVerticalWorker:
         run_root = self.run_root / job_id
         artifact_root = run_root / "artifacts"
         artifact_root.mkdir(parents=True, exist_ok=True)
-        checkpoint = _CheckpointStore(run_root)
+        definition=job['snapshots']['workflow_definition']['content']
+        node_ids=node_ids_for(definition)
+        checkpoint = _CheckpointStore(run_root,node_ids)
+        if self.task_control_store is not None:self.task_control_store.bind_topology(job_id,definition)
         if job['control_state'] == 'CANCELLED':
             return self._cancelled_receipt(job_id, item, intent, checkpoint)
         completed, retry_metadata = self._prepare_successor_run(
@@ -681,6 +711,8 @@ class CoreVerticalWorker:
             workflow_config=job["snapshots"]["workflow_config"]["content"],
         )
 
+        if self.review_service and DATA_NODE in node_ids:self.review_service.register(context)
+
         def on_activity(state: str, node_id: str | None = None) -> None:
             # PAUSED_BEFORE runs under the pause-point transaction. Never wait
             # for resume there: the resume operation needs the same lock.
@@ -689,9 +721,11 @@ class CoreVerticalWorker:
             else:
                 self._execution_interrupt(job_id)
             done = len(checkpoint.load()['completed_node_ids'])
-            current = node_id or Core_NODE_IDS[min(done, len(Core_NODE_IDS)-1)]
+            current = node_id or node_ids[min(done, len(node_ids)-1)]
+            from . import node_progress
+            node_progress.activity(state, current)
             if state == 'PAUSED_BEFORE':
-                self.facade.record_progress(job_id,completed_units=done,total_units=len(Core_NODE_IDS),
+                self.facade.record_progress(job_id,completed_units=done,total_units=len(node_ids),
                     phase_code='WAITING_'+current,phase_label=current,
                     last_checkpoint_ref=f'core-checkpoint:{job_id}')
                 for attempt in range(3):
@@ -707,7 +741,7 @@ class CoreVerticalWorker:
                             raise
                 return
             self.facade.record_progress(
-                job_id, completed_units=done, total_units=len(Core_NODE_IDS),
+                job_id, completed_units=done, total_units=len(node_ids),
                 phase_code=('WAITING_' if state == 'WAITING' else '') + current,
                 phase_label=current, last_checkpoint_ref=f'core-checkpoint:{job_id}',
             )
@@ -716,18 +750,20 @@ class CoreVerticalWorker:
 
         def on_node_completed(node_id: str, completed_units: int) -> None:
             self._execution_checkpoint(job_id)
-            if node_id not in Core_NODE_IDS:
+            if node_id not in node_ids:
                 raise ValueError("Core_PROGRESS_NODE_UNKNOWN")
-            expected_units = Core_NODE_IDS.index(node_id) + 1
+            expected_units = node_ids.index(node_id) + 1
             if completed_units != expected_units:
                 raise ValueError("Core_PROGRESS_UNIT_MISMATCH")
             if self.task_control_store is not None:
                 self.task_control_store.mark_started(job_id, node_id)
             state = checkpoint.complete(node_id)
+            from . import node_progress
+            node_progress.activity('CLOSED', node_id)
             self.facade.record_progress(
                 job_id,
                 completed_units=len(state["completed_node_ids"]),
-                total_units=len(Core_NODE_IDS),
+                total_units=len(node_ids),
                 phase_code=node_id,
                 phase_label=node_id,
                 last_checkpoint_ref=f"core-checkpoint:{job_id}",
@@ -735,25 +771,34 @@ class CoreVerticalWorker:
 
         try:
             from memorive_settings.task_scheduling import activity_scope
+            from .node_progress import session_scope, facade_session
             with execution_control(lambda: self._execution_checkpoint(job_id),
-                                   interrupt=lambda: self._execution_interrupt(job_id)), activity_scope(on_activity):
+                                   interrupt=lambda: self._execution_interrupt(job_id)), activity_scope(on_activity), session_scope(facade_session(self.facade, job_id, job['attempt_id'])):
                 on_activity('WAITING')
                 self._execution_checkpoint(job_id)
-                result = self.executor.execute(
-                    context,
-                    completed_node_ids=completed,
-                    on_node_completed=on_node_completed,
-                )
+                result = self.review_service.restore_result(job_id) if self.review_service else None
+                if result is None:
+                    result = self.executor.execute(
+                        context, completed_node_ids=completed, on_node_completed=on_node_completed,
+                    )
             self._execution_checkpoint(job_id)
             if not isinstance(result, CoreExecutionResult):
                 raise ValueError("Core_EXECUTOR_RESULT_INVALID")
             final_checkpoint = checkpoint.load()
-            if tuple(final_checkpoint["completed_node_ids"]) != Core_NODE_IDS:
+            if tuple(final_checkpoint["completed_node_ids"]) != node_ids:
                 raise ValueError("Core_EXECUTOR_INCOMPLETE")
             for artifact in result.artifacts:
                 self._execution_checkpoint(job_id)
                 self._bind_artifact(context, artifact)
             self._execution_checkpoint(job_id)
+            if self.review_service and DATA_NODE in node_ids:
+                if not self.review_service.mainline_done(context,result):
+                    return {'status':'WAITING_REVIEW','job_id':job_id,'mainline_complete':True,'production_ingestion_performed':True}
+                review=self.review_service.store.get(job_id)
+                if review['logic_state']=='CANCELLED':
+                    current=self.facade.get_job(job_id)
+                    self.facade.cancel_job(job_id,expected_version=current['version'],idempotency_key='review-cancel:'+job_id)
+                    return self._cancelled_receipt(job_id,item,intent,checkpoint,mainline_result=result)
             job = self.facade.get_job(job_id)
             if job["control_state"] != "SUCCEEDED":
                 self.facade._transition(
@@ -815,13 +860,13 @@ class CoreVerticalWorker:
             if self.facade.get_job(job_id)['control_state'] == 'CANCELLED':
                 return self._cancelled_receipt(job_id, item, intent, checkpoint)
             failed_completed = tuple(failed_checkpoint["completed_node_ids"])
-            failed_node_id = Core_NODE_IDS[
-                min(len(failed_completed), len(Core_NODE_IDS) - 1)
+            failed_node_id = node_ids[
+                min(len(failed_completed), len(node_ids) - 1)
             ]
             self.facade.record_progress(
                 job_id,
                 completed_units=len(failed_completed),
-                total_units=len(Core_NODE_IDS),
+                total_units=len(node_ids),
                 phase_code=failed_node_id,
                 phase_label=failed_node_id,
                 last_checkpoint_ref=f"core-checkpoint:{job_id}",
@@ -874,7 +919,7 @@ class CoreVerticalWorker:
         self._dispatch_state  # initialize before entering pool threads
         if hasattr(self, "task_control_store"):
             self._reconcile_rollback_lifecycle()
-        pool = ThreadPoolExecutor(max_workers=len(Core_NODE_IDS), thread_name_prefix='MemoCore')
+        pool = ThreadPoolExecutor(max_workers=CORE_WORKER_CAPACITY, thread_name_prefix='MemoCore')
         active = set()
         try:
             while not stop_event.is_set():
@@ -892,7 +937,7 @@ class CoreVerticalWorker:
                         _atomic_json(self.run_root / ('scheduler_failure_'+uuid.uuid4().hex+'.json'),
                                      {'error_type':type(error).__name__, 'updated_at':utc_now(),
                                       'reason_code':'Core_SCHEDULER_ITERATION_FAILED'})
-                if len(active) < len(Core_NODE_IDS):
+                if len(active) < CORE_WORKER_CAPACITY:
                     active.add(pool.submit(self.run_pending_once))
                 try:
                     await asyncio.wait_for(stop_event.wait(), timeout=idle_seconds)

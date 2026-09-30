@@ -36,6 +36,14 @@ Before adding a suggested conclusion to your knowledge, review its claim, scope,
 | Model rankings | Compare public capability indicators, prices, sources, and update dates, then test candidates on your own materials. |
 | Billing and usage | Filter requests, input/output tokens, and actual or estimated costs by time and model. Missing cost information remains unknown. |
 
+## What changes in v1.02
+
+This version extends the existing reading, organizing, verification and record-keeping workflow. Research Chat retains answer styles, retry branches and historical versions. Citation checks distinguish finding a source from establishing support for a claim. Conversations left unopened can be archived, while lists load metadata before full message bodies.
+
+Discovery separates recent progress from highly related literature. It saves bibliographic details, DOI, source links, available abstracts and recommendation reasons, with shared duplicate handling. You still add the full text yourself. Home offers research shortcuts and AI Updates. Custom CLIs use their declared input and output contracts; the interface and newly generated content support Chinese, English and Japanese, while original documents and saved versions retain their language.
+
+Parsing keeps more structural and citation-location information, and task progress reflects actual nodes. Installation and maintenance gain three-language controls, update checks and downloads of changed files. Older versions use the matching update helper for their first upgrade. Consult the guide for operational limits and continue checking research outputs yourself.
+
 ## Install and get started
 
 ### Installation
@@ -95,7 +103,7 @@ Materials and settings are stored locally. Cloud models, web reading, and extern
 
 Cost records distinguish actual, estimated, and unknown amounts. Public list prices and subscriptions are not the same as the amount charged for one task. Check model answers and citations yourself.
 
-The current version is v1.01. Source and documentation are being refined; installers have not been made public again. The application and installer are unsigned. Releases is the authoritative place for downloadable versions.
+This is a pre-release revision for v1.02. The final update flow, installer, application and corresponding source must be accepted and bound before release. Releases remains the source of publicly available files. An update-index signature and Windows Authenticode are separate checks; final delivery notes state each file’s signing status.
 
 ## How this project is developed
 

@@ -18,6 +18,20 @@ def copy_checked(source,target,expected):
     if digest(source)!=expected:raise ValueError('BUILD_INPUT_CHANGED:'+str(source))
     target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
 
+def stamp_release_views(stage, display_version):
+    # app.resource_root() serves the root alias. Keep its declared source copy
+    # identical so a successful source-only stamp cannot hide a stale runtime UI.
+    paths=[stage/'bundle_integrated.html',stage/'product/desktop/bundle_integrated.html']
+    for path in paths:
+        text,count=re.subn(r'(<strong\b[^>]*\bdata-memo-release-version[^>]*>)[^<]*',
+                           lambda m:m[1]+display_version,path.read_text('utf8'))
+        if count!=1:raise ValueError('RELEASE_VERSION_LABEL_MISSING:'+str(path))
+        path.write_text(text,encoding='utf8',newline='\n')
+    if paths[0].read_bytes()!=paths[1].read_bytes():
+        raise ValueError('RELEASE_UI_RESOURCES_DIVERGED')
+    return [{'path':str(p.relative_to(stage)).replace('\\','/'),'sha256':digest(p),
+             'display_version':display_version} for p in paths]
+
 def check_public_roots(source):
     """Treat certificate encoding as immutable data, independent of product naming."""
     settings=source/'memorive_settings'
@@ -69,13 +83,30 @@ def check_inline_script_policy(path):
         checked+=1
     return {'path':path.name,'inline_scripts':checked,'status':'PASS'}
 
+def check_source_identity(manifest, release, candidate_id):
+    if (manifest.get('revision') != candidate_id or
+            manifest.get('candidate_revision') != candidate_id or
+            manifest.get('product_version') != release['release_version'] or
+            release.get('package_id') != candidate_id):
+        raise ValueError('SOURCE_CANDIDATE_IDENTITY_MISMATCH')
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--output',type=Path,required=True)
     ap.add_argument('--stage-only',action='store_true')
+    ap.add_argument('--candidate-id','--package-id',dest='candidate_id',default='EVO-E11-build001')
+    ap.add_argument('--installer-toolchain',type=Path,required=True)
+    ap.add_argument('--update-test-trust',type=Path)
     ap.add_argument('--dependency-lock',type=Path,default=DESKTOP/'requirements-build-agpl-candidate.lock')
     ap.add_argument('--source-manifest',type=Path,default=DESKTOP/'SOURCE_MANIFEST.public-candidate.json')
     a=ap.parse_args();out=a.output.resolve()
+    release=json.loads((DESKTOP/'product/desktop/update_release.json').read_text('utf8'))
+    if release['package_id']!=a.candidate_id or release['release_authorized'] is not False:
+        raise ValueError('UPDATE_RELEASE_IDENTITY_MISMATCH')
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,127}',a.candidate_id):raise ValueError('CANDIDATE_ID_INVALID')
+    source_manifest=json.loads(a.source_manifest.read_text('utf8'))
+    check_source_identity(source_manifest, release, a.candidate_id)
     roots_check=check_public_roots(DESKTOP/'source')
     normal=lambda s:re.sub(r'[-_.]+','-',s).lower()
     installed={normal(d.metadata['Name']):d.version for d in md.distributions() if d.metadata['Name']}
@@ -92,7 +123,6 @@ def main():
     if out==REPO or out.is_relative_to(DESKTOP):raise ValueError('Build outputs must be outside the source tree')
     out.mkdir(parents=True);stage=out/'inputs';stage.mkdir()
     write_json(out/'public-roots-integrity.json',roots_check)
-    source_manifest=json.loads(a.source_manifest.read_text('utf8'))
     resources=json.loads((DESKTOP/'BUILD_RESOURCES.public-candidate.json').read_text('utf8'))
     for row in source_manifest['files']:
         if row['path'] in EXCLUDE:continue
@@ -100,6 +130,7 @@ def main():
     for row in resources['files']:
         copy_checked(REPO/row['source'],stage/row['destination'],row['sha256'])
     copy_checked(REPO/resources['icon']['path'],stage/'Memorive.ico',resources['icon']['sha256'])
+    release_views=stamp_release_views(stage,release['display_version'])
     ui_policy=[check_inline_script_policy(stage/'product/desktop'/name) for name in ('bundle_integrated.html','bundle_assistant.html')]
     write_json(out/'ui-script-policy.json',ui_policy)
     # The private deliverable imports a private capsule during ordinary startup.
@@ -116,7 +147,7 @@ def main():
     for path in (stage/'release_identity_binding.json',stage/'product/desktop/release_identity_binding.json'):
         binding=json.loads(path.read_text('utf8'))
         binding={k:v for k,v in binding.items() if not k.startswith('private_test_capsule')}
-        binding.update(package_id='v1.01',release_authorized=False,acceptance_verdict='NOT_ASSESSED',canonical_profile='brand_profile.json',authorization_locator='local-source-build',source_exact_set_locator='build-receipt.json')
+        binding.update(package_id=a.candidate_id,release_version=release['release_version'],display_version=release['display_version'],release_authorized=False,acceptance_verdict='NOT_ASSESSED',canonical_profile='brand_profile.json',authorization_locator='local-source-build',source_exact_set_locator='build-receipt.json')
         write_json(path,binding)
     # Build paths and data are all explicit; neither tests nor a private capsule
     # are copied from the repository or a previous installation.
@@ -128,9 +159,11 @@ def main():
         rel=p.relative_to(stage/'source').with_suffix('').as_posix().replace('/','.')
         hidden.add(rel.removesuffix('.__init__'))
     hidden.update(['assistant_alpha','assistant_native_motion','console_expressions','console_permission','install_health','integrated_agent','notification_runtime','offline_help','product_identity','runtime','window_chrome','network_diagnostics','clr','pythonnet','fitz','docx','websockets','sqlite3.dbapi2'])
+    hidden.update(['update_maintenance','update_startup','update_service'])
     spec=out/'Memorive.spec'
     version=out/'version.txt'
     version.write_text("VSVersionInfo(ffi=FixedFileInfo(filevers=(1,1,0,0),prodvers=(1,1,0,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('040904B0',[StringStruct('FileDescription','Memorive local source candidate'),StringStruct('ProductName','Memorive'),StringStruct('FileVersion','1.01'),StringStruct('ProductVersion','1.01'),StringStruct('OriginalFilename','Memorive.exe')])]),VarFileInfo([VarStruct('Translation',[1033,1200])])])",encoding='utf8')
+    version.write_text(version.read_text('utf8').replace('(1,1,0,0)',repr(tuple(release['version_tuple']))).replace("'1.01'",repr(release['release_version'])),encoding='utf8')
     spec.write_text('''from PyInstaller.utils.hooks import collect_all, copy_metadata
 datas = '''+repr(data)+'''
 binaries = []
@@ -162,6 +195,8 @@ coll = COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='Memorive')
 ''',encoding='utf8')
     lock={d.metadata['Name']:d.version for d in md.distributions() if d.metadata['Name']}
     receipt={'schema':'MemoriveSourceBuild-v1','package_id':'v1.01','source_manifest_sha256':digest(a.source_manifest),'source_manifest':a.source_manifest.name,'resource_map_sha256':digest(DESKTOP/'BUILD_RESOURCES.public-candidate.json'),'dependency_lock_sha256':digest(a.dependency_lock),'dependency_lock':a.dependency_lock.name,'builder_sha256':digest(Path(__file__)),'python':sys.version,'dependencies':lock,'adaptations':adaptations,'private_capsule_included':False,'previous_exe_used':False,'public_release_authorized':False,'status':'STAGED'}
+    receipt['package_id']=a.candidate_id
+    receipt['release_ui_resources']=release_views
     write_json(out/'build-receipt.json',receipt)
     if a.stage_only:return 0
     if os.name=='nt':
@@ -184,8 +219,19 @@ coll = COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='Memorive')
     if exclusion_record.exists():receipt['excluded_system_runtime']=json.loads(exclusion_record.read_text('utf8'))
     exe=out/'dist/Memorive/Memorive.exe'
     if result.returncode == 0:
+        for row in release_views:
+            path=out/'dist/Memorive/_internal'/row['path']
+            if not path.is_file() or digest(path)!=row['sha256']:
+                raise ValueError('PACKAGED_RELEASE_UI_MISMATCH:'+row['path'])
         from package_companions import package
         receipt['companion_files'] = len(package(out/'dist/Memorive/integrations'))
+        from package_notices import package as package_notices
+        receipt['notice_files']=package_notices(DESKTOP/'release_materials',out/'dist/Memorive/notices')
+        from build_update_helper import compile_engine
+        receipt['update_helper']=compile_engine(DESKTOP,a.installer_toolchain,out/'native-helper',trust=a.update_test_trust)
+        update=out/'dist/Memorive/_internal/update';update.mkdir()
+        for name in ('Memorive.Update.exe','Memorive.Launcher.exe','helper-identity.json'):
+            shutil.copyfile(out/'native-helper'/name,update/name)
     if exe.exists():receipt['exe_sha256']=digest(exe)
     write_json(out/'build-receipt.json',receipt)
     print(json.dumps({'status':receipt['status'],'output':str(out),'previous_exe_used':False}))

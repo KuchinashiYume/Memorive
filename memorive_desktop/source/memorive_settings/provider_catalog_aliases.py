@@ -22,6 +22,8 @@ def matches_result_model(result, requested):
     returned=result.get('returned_model')
     if returned == requested:return isinstance(requested,str) and bool(requested)
     receipt=result.get('execution_receipt',result)
+    from .cli_templates import receipt_model_bound
+    if receipt_model_bound(receipt,requested):return True
     if not isinstance(receipt,Mapping) or receipt.get('profile_kind')!='API':return False
     alias=receipt.get('provider_model_alias')
     return isinstance(alias,Mapping) and bool(FLASH_ALIASES.get(requested)) and alias.get('requested_compatibility_model')==requested and alias.get('canonical_model')==returned==FLASH_ALIASES[requested] and alias.get('source')==SOURCE and alias.get('endpoint_origin')=='https://api.deepseek.com'

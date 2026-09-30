@@ -823,7 +823,7 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
                 "PROSPECTIVE_PRICE_SNAPSHOT_WORST_CASE_CAP"
                 if profile_kind == "API"
                 else (
-                    "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
+                    ("CLI_MANAGED_UNKNOWN" if target.get("adapter_id")=="command_template" else "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE")
                     if profile_kind == "CLI"
                     else "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
                 )
@@ -1244,7 +1244,7 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
                 "executor_ref": self.EXECUTOR_REF,
                 "executor_sha256": _file_sha256(Path(__file__)),
                 "requested_model": requested_model,
-                "returned_model": requested_model,
+                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
                 "score": round(score_exact),
                 "score_exact": score_exact,
                 "score_semantics": "POST_REPAIR_A4_NONLINEAR_SCORE_WITH_CUMULATIVE_CATEGORY_BURDEN",

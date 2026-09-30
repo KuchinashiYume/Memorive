@@ -79,7 +79,7 @@ class _SpecializedExamBase:
             return "WORKFLOW_MODEL_EXAM_COST_CAP_MISMATCH"
         subscription_without_per_call_price = (
             plan.get("cost_semantics")
-            == "CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT"
+            in {"CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT", "CLI_MANAGED_UNKNOWN"}
         )
         if (
             authorization.get("acknowledged_subscription_no_per_call_price")
@@ -143,12 +143,8 @@ class _SpecializedExamBase:
         estimate = receipt.get("estimated_cost_cny")
         if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
             state["estimated_cost_cny"] += float(estimate)
-        usage = receipt.get("token_usage")
-        if isinstance(usage, Mapping):
-            for field in ("prompt_tokens", "completion_tokens"):
-                value = usage.get(field)
-                if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
-                    state["token_usage"][field] += value
+        from .cli_templates import accumulate_usage
+        accumulate_usage(state,receipt.get("token_usage"))
 
     @staticmethod
     def _failure(
@@ -683,9 +679,13 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
+        from .cli_templates import is_custom,exam_eligible
+        if is_custom(target):return "CLI" if exam_eligible(target,"images") else None
         inherited = _QualityOcrPageExamExecutorV1._profile_kind(target)
         if inherited is not None:
             return inherited
+        from .cli_templates import is_custom,exam_eligible
+        if is_custom(target):return "CLI" if exam_eligible(target) else None
         if target.get("kind") != "CLI":
             return None
         return (
@@ -819,7 +819,7 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
             cost_semantics = "FROZEN_Quality_OCR_ZERO_PRICE_PROFILE_2026-07-31"
         elif profile_kind == "CLI":
             budget_cap_cny = None
-            cost_semantics = "CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT"
+            cost_semantics = "CLI_MANAGED_UNKNOWN" if target.get("adapter_id")=="command_template" else "CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT"
         else:
             budget_cap_cny = None
             cost_semantics = "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
@@ -1013,7 +1013,7 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
                         "profile_kind": plan["profile_kind"],
                         "profile_ref": plan["profile_ref"],
                         "purpose": "workflow_model_exam",
-                        "route": self._route(str(plan["profile_kind"])),
+                        "route": ("DECLARATIVE_COMMAND_TEMPLATE" if target.get("adapter_id")=="command_template" else self._route(str(plan["profile_kind"]))),
                         "requested_model": requested_model,
                         "model_digest": target.get("model_digest"),
                         "thinking_mode": target.get("thinking_mode"),
@@ -1147,7 +1147,9 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
                         )
                     )
                 )
-                if returned != requested_model and not recorded_unverified:
+                from .cli_templates import receipt_model_bound
+                generic_bound=target.get("adapter_id")=="command_template" and receipt_model_bound(execution_receipt,requested_model)
+                if returned != requested_model and not recorded_unverified and not generic_bound:
                     raise ValueError("OCR_MODEL_IDENTITY_MISMATCH")
                 returned_model_evidence.append(
                     returned if isinstance(returned, str) else None
@@ -1336,11 +1338,8 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
                 and all(value == requested_model for value in returned_model_evidence)
                 else None
             )
-            aggregate_identity_grade = (
-                "RECORDED_UNVERIFIED"
-                if "RECORDED_UNVERIFIED" in identity_grades
-                else "VERIFIED"
-            )
+            aggregate_identity_grade = ('REQUEST_BOUND_RETURNED_UNKNOWN' if 'REQUEST_BOUND_RETURNED_UNKNOWN' in identity_grades
+                else 'RECORDED_UNVERIFIED' if 'RECORDED_UNVERIFIED' in identity_grades else 'VERIFIED')
             public_result = {
                 "schema_version": "WorkflowModelExamRunResult-v3",
                 "status": quality_verdict,
@@ -1860,14 +1859,14 @@ class QualityRerankerTextExamExecutor(_SpecializedExamBase):
                             str(plan["profile_kind"]), target
                         ),
                         "region": (
-                            "OPENAI_MANAGED_UNDISCLOSED"
+                            ("PROVIDER_MANAGED_UNDISCLOSED" if target.get("adapter_id")=="command_template" else "OPENAI_MANAGED_UNDISCLOSED")
                             if plan["profile_kind"] == "CLI"
                             else "LOCAL_MACHINE"
                             if plan["profile_kind"] == "LOCAL"
                             else "PROVIDER_MANAGED_UNDISCLOSED"
                         ),
                         "egress": (
-                            "CODEX_CLI"
+                            ("CLI_PROVIDER_MANAGED" if target.get("adapter_id")=="command_template" else "CODEX_CLI")
                             if plan["profile_kind"] == "CLI"
                             else "LOOPBACK_ONLY"
                             if plan["profile_kind"] == "LOCAL"
@@ -2204,6 +2203,8 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
                 and bool(target.get("config_id"))
                 else None
             )
+        from .cli_templates import is_custom,exam_eligible
+        if is_custom(target):return "CLI" if exam_eligible(target) else None
         if target.get("kind") != "CLI":
             return None
         return (
@@ -2245,6 +2246,7 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
         profile_kind: str,
         target: Mapping[str, Any],
     ) -> str:
+        if target.get("adapter_id")=="command_template":return "DECLARATIVE_COMMAND_TEMPLATE"
         if self._uses_local_general_adapter(target):
             return "OLLAMA_STRUCTURED_CHAT_GENERAL_MODEL_RERANK"
         return self._claim_route(profile_kind)
@@ -2304,14 +2306,14 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
         plan.update(
             budget_cap_cny=None,
             cost_semantics=(
-                "CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT"
+                ("CLI_MANAGED_UNKNOWN" if target.get("adapter_id")=="command_template" else "CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT")
                 if is_cli
                 else "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
             ),
             reranker_adapter_kind="GENERAL_MODEL_STRUCTURED_ORDER_V1",
             exam_input_modality="TEXT",
             target_model_modalities=(
-                ["TEXT", "IMAGE_INPUT"] if is_cli else ["TEXT"]
+                ["TEXT", "IMAGE_INPUT"] if is_cli and (target.get("adapter_id")!="command_template" or target.get("template",{}).get("capabilities",{}).get("images")) else ["TEXT"]
             ),
             multimodal_capability_examined=False,
             multimodal_bonus_applied=False,
@@ -2448,7 +2450,9 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
             bool(SHA256.fullmatch(str(receipt.get("response_sha256") or ""))),
             "RESPONSE_HASH",
         )
-        require(isinstance(receipt.get("token_usage"), Mapping), "TOKEN_USAGE")
+        from .cli_templates import receipt_model_bound
+        custom_bound=target.get("adapter_id")=="command_template" and receipt_model_bound(receipt,requested_model)
+        require(custom_bound or isinstance(receipt.get("token_usage"), Mapping), "TOKEN_USAGE")
         require(isinstance(response, Mapping), "RESPONSE_OBJECT")
         require(
             isinstance(response, Mapping)
@@ -2456,7 +2460,11 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
             == "QualityNewLlmRerankResponse-v2",
             "RESPONSE_SCHEMA",
         )
-        if is_cli:
+        if is_cli and target.get("adapter_id")=="command_template":
+            require(custom_bound,"CLI_TEMPLATE_BINDING")
+            require(receipt.get("configuration_sha256")==target.get("configuration_sha256"),"CLI_TEMPLATE_CONFIGURATION")
+            require(result.get("external_process_launches")==1,"CLI_PROCESS_COUNT")
+        elif is_cli:
             require(result.get("external_process_launches") == 1, "CLI_PROCESS_COUNT")
             require(receipt.get("route") == "CODEX_CLI_SUBSCRIPTION", "CLI_ROUTE")
             require(receipt.get("region") == "OPENAI_MANAGED_UNDISCLOSED", "CLI_REGION")

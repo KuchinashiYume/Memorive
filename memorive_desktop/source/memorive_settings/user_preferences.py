@@ -8,6 +8,7 @@ import unicodedata
 from pathlib import Path
 from threading import RLock
 from memorive_research_runtime.common import read, write, sealed
+from .answer_styles import DEFAULT_STYLE,validate_style
 
 _LOCK = RLock()
 AVATAR_BYTES = 384 * 1024  # base64 + envelope remains below the 1 MiB IPC frame.
@@ -61,7 +62,7 @@ def normalize_avatar(value):
         raise ValueError('USER_AVATAR_FORMAT_INVALID') from exc
 
 def validate(config):
-    if not isinstance(config, dict) or set(config) != {'username', 'avatar_png', 'hide_expressions'}:
+    if not isinstance(config, dict) or set(config) != {'username', 'avatar_png', 'hide_expressions','answer_style'}:
         raise ValueError('USER_PREFERENCES_FIELDS_INVALID')
     name = config['username']
     if not isinstance(name, str) or len(name) > 64 or any(unicodedata.category(c).startswith('C') for c in name):
@@ -70,7 +71,7 @@ def validate(config):
         raise ValueError('USER_PREFERENCES_INVALID')
     return dict(username=unicodedata.normalize('NFC', name).strip(),
                 avatar_png=normalize_avatar(config['avatar_png']),
-                hide_expressions=config['hide_expressions'])
+                hide_expressions=config['hide_expressions'],answer_style=validate_style(config['answer_style']))
 
 class UserPreferences:
     def __init__(self, root):
@@ -79,19 +80,30 @@ class UserPreferences:
     def get(self):
         with _LOCK:
             if not self.path.exists():
-                return dict(schema_version='LocalUserPreferences-v1', revision=0,
-                            config=dict(username='', avatar_png='', hide_expressions=False))
+                return dict(schema_version='LocalUserPreferences-v2', revision=0,
+                            config=dict(username='', avatar_png='', hide_expressions=False,answer_style=DEFAULT_STYLE))
             value = read(self.path)
+            if value.get('schema_version')=='LocalUserPreferences-v1':
+                if set(value.get('config',{}))!={'username','avatar_png','hide_expressions'}:
+                    raise ValueError('USER_PREFERENCES_FIELDS_INVALID')
+                value=sealed(dict(schema_version='LocalUserPreferences-v2',revision=value['revision'],
+                    config={**value['config'],'answer_style':DEFAULT_STYLE}))
+            elif value.get('schema_version')!='LocalUserPreferences-v2':raise ValueError('USER_PREFERENCES_SCHEMA_UNSUPPORTED')
+            if type(value.get('revision')) is not int or value['revision']<0:raise ValueError('USER_PREFERENCES_REVISION_INVALID')
             validate(value['config'])
             return value
 
     def save(self, *, config, expected_revision):
-        accepted = validate(config)
         with _LOCK:
             current = self.get()
+            # A v1 client may still edit the avatar/name. Preserve the saved
+            # style instead of resetting it when that old field set is used.
+            if isinstance(config,dict) and set(config)=={'username','avatar_png','hide_expressions'}:
+                config={**config,'answer_style':current['config']['answer_style']}
+            accepted = validate(config)
             if type(expected_revision) is not int or expected_revision != current['revision']:
                 raise ValueError('USER_PREFERENCES_REVISION_CONFLICT')
-            value = sealed(dict(schema_version='LocalUserPreferences-v1',
+            value = sealed(dict(schema_version='LocalUserPreferences-v2',
                                 revision=current['revision']+1, config=accepted))
             write(self.path, value)
             return value

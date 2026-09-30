@@ -8,6 +8,8 @@ Gold scoring.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from contextlib import contextmanager
+from contextvars import ContextVar
 import hashlib
 import json
 import re
@@ -23,8 +25,56 @@ from jsonschema import Draft202012Validator
 _HEX64 = re.compile(r"^[A-Fa-f0-9]{64}$")
 _LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
 _FORBIDDEN_SUBJECT_MARKERS = re.compile(
-    r"(?i)(?:\bgold\b|\bscorer\b|\banswer[_ -]?key\b|\bexpected[_ -]?answer\b)"
+    r"(?i)(?:\bgold\b|\bscorer\b|\banswer[_ -]?key\b|\bexpected[_ -]?answer\b|REVIEWER_ONLY_[A-Z0-9_]+)"
 )
+_RESEARCH_SOURCE_SCOPE = ContextVar('local_research_source_scope', default=None)
+
+
+@contextmanager
+def _research_source_scope(prompt: str, snapshot_id: str):
+    """Internal execution capability, minted after a research snapshot is claimed.
+
+    The research executor, not prompt text or a caller-supplied purpose, owns
+    this scope. It is bound to one exact prompt and restored after each attempt.
+    Exam/report executors never enter it.
+    """
+    if not isinstance(snapshot_id, str) or not _HEX64.fullmatch(snapshot_id):
+        raise ValueError('RESEARCH_SOURCE_SNAPSHOT_INVALID')
+    token = _RESEARCH_SOURCE_SCOPE.set((hashlib.sha256(prompt.encode('utf-8')).hexdigest(), snapshot_id))
+    try:
+        yield
+    finally:
+        _RESEARCH_SOURCE_SCOPE.reset(token)
+
+
+def _subject_marker_scan(prompt: str, purpose: str) -> str:
+    """Inspect research source text without confusing a gold electrode with Gold.
+
+    Only this precise material noun inside a source-bound evidence text receives
+    the lexical exception. Questions, headings, keys, metadata, malformed packs
+    and all exam purposes retain the strict marker scan. The actual model prompt
+    is never transformed.
+    """
+    scope = _RESEARCH_SOURCE_SCOPE.get()
+    if (purpose != 'research_chat' or scope is None
+            or scope[0] != hashlib.sha256(prompt.encode('utf-8')).hexdigest()):
+        return prompt
+    try:
+        prefix, body = prompt.split('\n<SOURCE_CONTEXT>\n', 1)
+        source, suffix = body.split('\n</SOURCE_CONTEXT>', 1)
+        value = json.loads(source)
+        if not isinstance(value, dict) or not isinstance(value.get('evidence'), list):
+            return prompt
+        for item in value['evidence']:
+            if (not isinstance(item, dict) or not isinstance(item.get('text'), str)
+                    or not isinstance(item.get('id'), str) or not isinstance(item.get('artifact_id'), str)
+                    or not _HEX64.fullmatch(str(item.get('content_hash', '')))):
+                return prompt
+            item['text'] = re.sub(r'\bgold(?=\s+elec(?:-\s*)?trodes?\b)',
+                                  'metal', item['text'], flags=re.I)
+        return prefix+'\n<SOURCE_CONTEXT>\n'+json.dumps(value, ensure_ascii=False)+'\n</SOURCE_CONTEXT>'+suffix
+    except (ValueError, TypeError):
+        return prompt
 
 
 class LocalStructuredChatViolation(ValueError):
@@ -214,7 +264,7 @@ class LocalStructuredChatAdapter:
             accepted_binding = validate_binding(binding)
             if not isinstance(prompt, str) or not prompt.strip():
                 raise LocalStructuredChatViolation("PROMPT_INVALID")
-            if _FORBIDDEN_SUBJECT_MARKERS.search(prompt):
+            if _FORBIDDEN_SUBJECT_MARKERS.search(_subject_marker_scan(prompt, purpose)):
                 raise LocalStructuredChatViolation("EVALUATOR_DATA_MARKER_FORBIDDEN")
             if not isinstance(schema, Mapping):
                 raise LocalStructuredChatViolation("SCHEMA_OBJECT_REQUIRED")

@@ -2,6 +2,71 @@
 import os,re,shutil
 from pathlib import Path
 
+def resolve_template_entry(value):
+    """Explicit path or PATH lookup; custom IDs never select a vendor resolver."""
+    if not isinstance(value,str) or not value or any(ord(c)<32 for c in value):return None
+    path=Path(value)
+    located=str(path) if path.is_absolute() and path.is_file() else shutil.which(value)
+    return str(Path(located).resolve()) if located and Path(located).is_file() else None
+
+def template_command(executable,arguments,*,interpreter='',interpreter_arguments=()):
+    """Never put a prompt into cmd /c. Npm shims resolve to Node's script entry."""
+    path=Path(executable)
+    if interpreter:
+        resolved=resolve_template_entry(interpreter)
+        if not resolved:raise ValueError('CLI_TEMPLATE_INTERPRETER_NOT_FOUND')
+        if Path(resolved).stem.lower() in {'cmd','command'}:raise ValueError('CLI_TEMPLATE_SHELL_INTERPRETER_FORBIDDEN')
+        if any(v.lower() in {'-c','/c','-command','-encodedcommand','-e','--eval'} for v in interpreter_arguments):
+            raise ValueError('CLI_TEMPLATE_EVALUATION_FORBIDDEN')
+        return [resolved,*interpreter_arguments,native_process_path(executable),*arguments]
+    if path.suffix.lower() in {'.cmd','.bat'}:
+        if path.stat().st_size>16384:raise ValueError('CLI_TEMPLATE_SHIM_UNSUPPORTED')
+        text=path.read_text(encoding='utf-8-sig')
+        # These wrappers contain one Node target and a literal %* pass-through.
+        targets=re.findall(r'"%(?:dp0|~dp0)%?([^"\r\n]+\.(?:js|cjs|mjs))"\s+%\*',text,re.I)
+        if len(set(targets))!=1 or not re.search(r'node(?:\.exe)?',text,re.I):raise ValueError('CLI_TEMPLATE_SHIM_UNSUPPORTED')
+        script=(path.parent/targets[0].lstrip('\\/')).resolve()
+        if not script.is_relative_to(path.parent.resolve()) or not script.is_file():raise ValueError('CLI_TEMPLATE_SHIM_TARGET_INVALID')
+        node=path.parent/'node.exe'
+        runtime=str(node.resolve()) if node.is_file() else resolve_template_entry('node')
+        if not runtime:raise ValueError('CLI_TEMPLATE_INTERPRETER_NOT_FOUND')
+        return [runtime,native_process_path(script),*arguments]
+    if path.suffix.lower()=='.ps1':
+        runtime=resolve_template_entry('pwsh') or resolve_template_entry('powershell.exe')
+        if not runtime:raise ValueError('CLI_TEMPLATE_INTERPRETER_NOT_FOUND')
+        return [runtime,'-NoLogo','-NoProfile','-NonInteractive','-File',native_process_path(path),*arguments]
+    stem=path.stem.lower()
+    if stem in {'cmd','command','sh','bash'}:raise ValueError('CLI_TEMPLATE_SHELL_INTERPRETER_FORBIDDEN')
+    forbidden={'powershell':{'-command','-encodedcommand','-c','-e'},'pwsh':{'-command','-encodedcommand','-c','-e'},'python':{'-c'},'python3':{'-c'},'node':{'-e','--eval'}}.get(stem,set())
+    if any(a.lower() in forbidden for a in arguments):raise ValueError('CLI_TEMPLATE_EVALUATION_FORBIDDEN')
+    return [native_process_path(path),*arguments]
+
+
+def template_launch_files(executable,arguments,*,interpreter='',interpreter_arguments=()):
+    """Bind only executable/known script entry files, never arbitrary data argv."""
+    command=template_command(executable,[],interpreter=interpreter,interpreter_arguments=interpreter_arguments)
+    path=Path(executable);files=[str(Path(command[0]).resolve())]
+    if interpreter or path.suffix.lower()=='.ps1':
+        files.append(str(path.resolve()))
+        return list(dict.fromkeys(files))
+    if path.suffix.lower() in {'.cmd','.bat'}:
+        files.append(str(Path(command[1]).resolve()))
+    elif path.suffix.lower()!='.ps1':
+        stem=path.stem.casefold()
+        python=re.fullmatch(r'(?:pythonw?|pypy)(?:[23](?:\.\d+)*)?',stem)
+        node=stem in {'node','nodejs'}
+        if python or node:
+            first=arguments[0] if arguments else ''
+            suffixes={'.py','.pyw'} if python else {'.js','.cjs','.mjs'}
+            entry=Path(first)
+            if '{{' in first or not entry.is_absolute() or entry.suffix.casefold() not in suffixes or not entry.is_file():
+                raise ValueError('CLI_TEMPLATE_EXPLICIT_SCRIPT_REQUIRED')
+            files.append(str(entry.resolve()))
+        elif stem in {'py','pyw','powershell','pwsh'}:
+            raise ValueError('CLI_TEMPLATE_EXPLICIT_SCRIPT_REQUIRED')
+    return list(dict.fromkeys(files))
+
+
 def native_process_path(value):
     """Keep the same file identity while satisfying CreateProcess MAX_PATH."""
     text=str(value)

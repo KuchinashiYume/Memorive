@@ -322,6 +322,8 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
             ),
             None,
         )
+    from memorive_review.exam import DataAnomalyExamExecutor
+    exam_executors=(*exam_executors,DataAnomalyExamExecutor(exam_scratch))
     validation_runner = LiveModelValidationRunner(
         credential_resolver=credentials.resolve_for_validation,
         preferences_loader=lambda: store.load(recover_corruption=False)["settings"][
@@ -364,6 +366,8 @@ def build_inbox_controller(
         minimum_free_bytes=256,
         include_sample_projection=include_sample_track,
     )
+    from memorive_research_runtime.work_index import WorkIndex
+    controller.work_index = WorkIndex(folders.path_for("WORKSPACE") / "research")
     if not include_sample_track:
         return controller
     fixture_paths = [
@@ -503,6 +507,9 @@ async def run(
     inbox_controller.job_state_provider = facade.get_job
     inbox_controller.recover()
 
+    from document_processing.document_structure.desktop import StructureDesktop
+    structure_controller=StructureDesktop(folders.path_for('Core_JOBS'))
+
     def core_workflow_snapshot() -> Mapping[str, object]:
         state = settings_controller.get_state()
         settings = state.get("settings") if isinstance(state, Mapping) else None
@@ -515,12 +522,15 @@ async def run(
         local_profiles = local_projection.get("recognized_models")
         if not isinstance(local_profiles, list):
             local_profiles = []
-        return build_core_execution_snapshot(
+        snapshot = build_core_execution_snapshot(
             settings,
             settings_revision=revision,
             local_model_profiles=local_profiles,
+            document_structure_config=structure_controller.snapshot(),
         )
+        return snapshot
 
+    inbox_controller.workflow_snapshot_provider = core_workflow_snapshot
     core_task_controls = TaskControlStore(folders.path_for("Core_TASK_CONTROLS"))
     inbox_controller.job_state_provider = lambda job_id: {
         **facade.get_job(job_id), "pause_node_id":core_task_controls.pause_point(job_id)}
@@ -539,10 +549,16 @@ async def run(
         ),
         task_control_store=core_task_controls,
     )
+    from memorive_review.service import ReviewService
+    reviews=ReviewService(core_worker,settings_controller.model_validation_runner)
+    reviews.structure=structure_controller
+    core_worker.review_service=reviews
+    core_worker.executor.review_service=reviews
     product_adapter = CompositeServiceAdapter(
             RealFacadeAdapter(facade),
             SettingsServiceAdapter(settings_controller),
             InboxServiceAdapter(inbox_controller),
+            reviews=reviews,
         )
     if os.environ.get("MEMORIVE_TEST_CONSOLE_AUTO_EXECUTION") == "DISABLED":
         from memorive_test_console_bridge.service_adapter import ConsoleServiceAdapter

@@ -9,7 +9,7 @@
     'settings.get_contract', 'settings.get_state', 'settings.register_directory',
     'settings.external_sources_get', 'settings.external_sources_save',
     'settings.external_sources_refresh', 'settings.external_model_reference',
-    'settings.preview', 'settings.save', 'settings.save_cli_services', 'settings.revert', 'settings.reset_scope',
+    'settings.cli_template_prepare', 'settings.preview', 'settings.save', 'settings.save_cli_services', 'settings.revert', 'settings.reset_scope',
     'settings.export_redacted', 'settings.import_redacted', 'settings.capability_state',
     'settings.credential_create', 'settings.credential_replace',
     'settings.credential_status', 'settings.credential_delete', 'settings.model_service_remove',
@@ -29,7 +29,7 @@
   const RESETTABLE_SCOPES = new Set(['viewer', 'notice', 'behavior', 'network', 'privacy', 'appearance']);
   const RESET_COUNTDOWN_SECONDS = 10;
   const nodeByStep = new Map([
-    ['ingest', 'ingest'], ['embedding', 'chunk_embedding'], ['card', 'card_distill'],
+    ['data-review','data_review'], ['logic-review','logic_review'], ['ingest', 'ingest'], ['embedding', 'chunk_embedding'], ['card', 'card_distill'],
     ['card-review', 'transport_review'], ['admission', 'card_admission'],
     ['context', 'context_pack'], ['analysis', 'analysis'],
     ['judgment-review', 'judgment_review'], ['human', 'human_judgment']
@@ -72,6 +72,7 @@
   let toastTimer = 0;
   let applyingState = false;
   let cliDraftDirty = false;
+  let cliDraftServices = null, cliImportPreview = null;
   let cliSaveInFlight = false;
   let settingsSaveInFlight = false;
   let cliValidationInFlight = false;
@@ -80,6 +81,8 @@
   let replacingConfigId = null;
   let credentialDraftGeneration = 0;
   let settingsAppliedOnce = false;
+  // Scoped display changes are not an instruction to downgrade global settings.
+  let settingsModeDraft = null;
   let activeResetScope = 'none';
   let resetArmedScope = null;
   let resetArmedRevision = null;
@@ -112,6 +115,7 @@
   const persistedSettingsMode = (mode) => (
     mode === 'developer' ? 'DEVELOPER' : mode === 'advanced' ? 'ADVANCED' : 'NORMAL'
   );
+  const settingsDraftMode = () => settingsModeDraft ?? state?.settings?.mode ?? 'NORMAL';
   const SETTINGS_TRANSLATIONS = Object.freeze({
     'en-US': Object.freeze({
       'category.api.help': 'Save providers, model names, and credential references',
@@ -733,7 +737,7 @@
   const riskIds = (settings) => {
     const ids = [];
     for (const node of settings?.workflow?.nodes || []) {
-      if (node.node_id === 'card_admission' || node.node_id === 'human_judgment') continue;
+      if (['card_admission','human_judgment','data_review'].includes(node.node_id)) continue;
       if (node.retry_count <= 1) ids.push(`RETRY_LOW:${node.node_id}:${node.retry_count}`);
       else if (node.retry_count > 5) ids.push(`RETRY_HIGH:${node.node_id}:${node.retry_count}`);
     }
@@ -912,18 +916,19 @@
       .flatMap((service) => (service.models || []).map((model) => ({
         profileRef: model.profile_ref,
         model: model.display_name || model.model_name,
-        modelKey: [model.model_name, service.adapter_id, model.thinking_mode || '']
+        modelKey: [model.model_name, service.adapter_id, model.thinking_mode || '',...(service.adapter_id==='command_template'?[service.config_id,model.verification?.configuration_sha256||'unverified']:[])]
           .map((value) => String(value).trim().normalize('NFKC').toLowerCase())
           .join('|'),
         examIdentity: {
           profile_kind: 'CLI',
+          ...(service.adapter_id==='command_template'?{config_id:service.config_id,configuration_sha256:model.verification?.configuration_sha256||null}:{}),
           adapter_id: service.adapter_id,
           model_name: model.model_name,
           thinking_mode: model.thinking_mode || ''
         },
-        capabilities: ['CHAT'],
+        capabilities: service.adapter_id==='command_template' ? [...(service.template?.capabilities?.structured_output?['CHAT']:[]),...(service.template?.capabilities?.images?['OCR']:[])] : ['CHAT'],
         embeddingEligible: false,
-        rerankerEligible: service.adapter_id === 'codex_cli' && model.connection_status === 'AVAILABLE',
+        rerankerEligible: (service.adapter_id === 'codex_cli' || service.adapter_id==='command_template' && service.template?.capabilities?.structured_output) && model.connection_status === 'AVAILABLE',
         state: model.connection_status === 'AVAILABLE'
           ? 'green' : model.connection_status === 'INVALID' ? 'red' : 'yellow',
         note: `CLI · ${service.display_name} · ${model.model_name}`
@@ -1391,11 +1396,17 @@
       validationCopy,
       validate
     );
+    if(service.adapter_id==='command_template') {
+      const labels={structured_output:'结构化输出',images:'图像',usage:'用量'};
+      const text=Object.entries(service.template.capabilities).map(([key,declared])=>`${labels[key]}：${!declared?'未支持':model.connection_status==='INVALID'?'已失效':model.verification?.capabilities?.includes(key)?'已验证':'待测'}`).join(' · ');
+      validationCard.append(create('small','',text));
+    }
     row.append(head, grid, validationCard);
     return row;
   };
 
   const renderCliServices = (settings) => {
+    cliDraftServices = structuredClone(settings.cli_services || []);
     const list = q('#settings-cli-list');
     if (!list) return;
     const openConfigIds = new Set(
@@ -1443,6 +1454,22 @@
       executableInput.dataset.cliExecutable = '';
       executable.append(executableInput);
       commandCard.append(executable, create('small', 'desktop-settings-cli-field-help', '配置命令位置与模型'));
+      if (service.adapter_id === 'command_template') {
+        commandCard.prepend(createCliField('显示名称',service.display_name,'cliServiceDisplay',{mono:false,maxLength:80}));
+        const actions=create('div','desktop-settings-code-actions');
+        for(const [key,label] of [['copy','复制'],['export','导出模板'],['delete','删除']]) {
+          const button=create('button','text-button',label);button.type='button';button.dataset.cliTemplateAction=key;button.dataset.cliConfigId=service.config_id;actions.append(button);
+        }
+        const advanced=create('details','desktop-settings-local-model-advanced');
+        advanced.append(create('summary','desktop-settings-disclosure','接入模板与高级设置'));
+        const fields=create('div','desktop-settings-form-stack');
+        fields.append(createCliField('解释器（脚本使用）',service.interpreter||'','cliInterpreter',{maxLength:260}),createCliField('共享并发组（可选）',service.concurrency_group||'','cliConcurrencyGroup',{maxLength:64}));
+        for(const [key,label,value] of [['template','模板 JSON',service.template],['environment','环境变量引用 JSON',service.environment||{}]]) {
+          const field=create('label','field-label',label),input=create('textarea','field mono');
+          input.dataset[key==='template'?'cliTemplate':'cliEnvironment']='';input.rows=key==='template'?16:3;input.spellcheck=false;input.value=JSON.stringify(value,null,2);field.append(input);fields.append(field);
+        }
+        advanced.append(fields);commandCard.append(actions,advanced);
+      }
       const models = create('div', 'desktop-settings-cli-models');
       models.dataset.cliModels = '';
       for (const model of service.models) models.append(createCliModelRow(service, model));
@@ -2363,7 +2390,7 @@
     try {
       const shell = q('.desktop-settings-shell');
       const persistedMode = settings.mode === 'DEVELOPER' ? 'developer' : settings.mode === 'ADVANCED' ? 'advanced' : 'normal';
-      const activeMode = settingsAppliedOnce ? activeSettingsMode() : persistedMode;
+      const activeMode = settingsAppliedOnce && settingsModeDraft === null ? activeSettingsMode() : persistedMode;
       const mode = shell?.dataset.modeScope === 'workflow' && activeMode === 'advanced'
         ? 'normal' : activeMode;
       if (window.__Desktop_SETTINGS_UI__?.applySettingsMode) {
@@ -2447,6 +2474,7 @@
     } finally {
       applyingState = false;
       settingsAppliedOnce = true;
+      settingsModeDraft = null;
       window.requestAnimationFrame(markClean);
     }
   };
@@ -2506,7 +2534,7 @@
       .some(id => Boolean(q(`#${id}`)?.value.trim()))
   );
 
-  const collectCliServices = (baseline = state?.settings?.cli_services || []) => (
+  const collectCliServices = (baseline = cliDraftServices || state?.settings?.cli_services || []) => (
     structuredClone(baseline).map((service) => {
       const card = q(`[data-cli-config-id="${CSS.escape(service.config_id)}"]`);
       if (!card) return service;
@@ -2514,6 +2542,12 @@
       const executable = card.querySelector('[data-cli-executable]')?.value.trim() ?? '';
       const executableUnchanged = executable === service.executable;
       service.executable = executable;
+      if(service.adapter_id==='command_template') {
+        service.display_name=card.querySelector('[data-cli-service-display]').value.trim();
+        service.interpreter=card.querySelector('[data-cli-interpreter]').value.trim();
+        service.concurrency_group=card.querySelector('[data-cli-concurrency-group]').value.trim();
+        try{service.template=JSON.parse(card.querySelector('[data-cli-template]').value);service.environment=JSON.parse(card.querySelector('[data-cli-environment]').value);}catch(_){throw new Error('接入模板或环境变量引用 JSON 格式不正确。');}
+      }
       const previousByRef = new Map(service.models.map((model) => [model.profile_ref, model]));
       service.models = [...card.querySelectorAll('[data-cli-profile-ref]')].map((row) => {
         const profileRef = row.dataset.cliProfileRef;
@@ -2528,7 +2562,8 @@
           display_name: row.querySelector('[data-cli-model-display]')?.value.trim() || '',
           model_name: modelName,
           thinking_mode: thinkingMode,
-          connection_status: unchanged ? previous.connection_status : 'UNVERIFIED'
+          connection_status: unchanged ? previous.connection_status : 'UNVERIFIED',
+          ...(service.adapter_id==='command_template'?{verification:unchanged?previous?.verification||null:null}:{})
         };
       });
       const pending = pendingCliModel(card, service,
@@ -2551,8 +2586,7 @@
       'settings-cache-limit', 'settings-language', 'settings-font-size'
     ].forEach(control);
     const next = structuredClone(state.settings);
-    const mode = q('#settings-mode button[aria-pressed="true"]')?.dataset.mode || 'normal';
-    next.mode = mode === 'developer' ? 'DEVELOPER' : mode === 'advanced' ? 'ADVANCED' : 'NORMAL';
+    next.mode = settingsDraftMode();
 
     next.directories.workspace_root = q('#settings-workspace-root').value.trim();
     next.directories.artifact_root = q('#settings-artifact-root').value.trim();
@@ -2641,7 +2675,7 @@
       }
     }
     (next.model_services || []).forEach(applyKimiAutoDetection);
-    next.cli_services = collectCliServices(next.cli_services || []);
+    next.cli_services = collectCliServices();
     return next;
   };
 
@@ -2708,7 +2742,7 @@
         settings_persisted: true
       };
     }
-    const mode = options.mode || activeSettingsMode();
+    const mode = options.mode || settingsDraftMode();
     const persistedMode = mode === 'developer' || mode === 'DEVELOPER' ? 'DEVELOPER' : 'ADVANCED';
     const cliServices = options.cliServices
       ? structuredClone(options.cliServices)
@@ -3045,6 +3079,7 @@
           display_name: service.display_name,
           executable: service.executable,
           enabled: service.enabled,
+          ...(service.adapter_id==='command_template'?{template:service.template,interpreter:service.interpreter||'',environment:service.environment||{},concurrency_group:service.concurrency_group||''}:{}),
           models: service.models.map((model) => ({
             profile_ref: model.profile_ref,
             display_name: model.display_name,
@@ -3132,18 +3167,18 @@
       if (value.schema_version !== developerSchemas.cli) throw developerError('DEVELOPER_SCHEMA_VERSION_INVALID');
       if (!Array.isArray(value.cli_services)) throw developerError('DEVELOPER_CLI_SERVICES_ARRAY_REQUIRED');
       const currentById = new Map(state.settings.cli_services.map((service) => [service.config_id, service]));
-      if (value.cli_services.length !== currentById.size) throw developerError('DEVELOPER_CLI_SERVICE_SET_MISMATCH');
+      if (value.cli_services.length < 7 || value.cli_services.length>71) throw developerError('DEVELOPER_CLI_SERVICE_SET_MISMATCH');
       const seenProfiles = new Set();
       value.cli_services.forEach((service, index) => {
         const path = `$.cli_services[${index}]`;
         assertDeveloperObjectKeys(service, [
-          'config_id', 'adapter_id', 'display_name', 'executable', 'enabled', 'models'
+          'config_id', 'adapter_id', 'display_name', 'executable', 'enabled', 'models',...(service.adapter_id==='command_template'?['template','interpreter','environment','concurrency_group']:[])
         ], path);
         const current = currentById.get(service.config_id);
-        if (!current || current.adapter_id !== service.adapter_id || current.display_name !== service.display_name) {
+        if (service.adapter_id!=='command_template' && (!current || current.adapter_id !== service.adapter_id || current.display_name !== service.display_name)) {
           throw developerError('DEVELOPER_CLI_IDENTITY_IMMUTABLE', path);
         }
-        if (typeof service.executable !== 'string' || !service.executable.trim()
+        if (typeof service.executable !== 'string' || (!service.executable.trim() && (service.enabled || service.adapter_id!=='command_template'))
             || service.executable.length > 260 || /[\u0000-\u001f\u007f]/.test(service.executable)) {
           throw developerError('DEVELOPER_CLI_EXECUTABLE_INVALID', path);
         }
@@ -3178,7 +3213,7 @@
           }
         });
       });
-      if ([...currentById.keys()].some((configId) => !value.cli_services.some((row) => row.config_id === configId))) {
+      if ([...currentById.values()].filter(row=>row.adapter_id!=='command_template').some((item) => !value.cli_services.some((row) => row.config_id === item.config_id))) {
         throw developerError('DEVELOPER_CLI_SERVICE_SET_MISMATCH');
       }
       return value;
@@ -3213,10 +3248,9 @@
       if (node.node_id === 'ingest' && node.fallback_profile_ref != null && (!configuredRefs.has(node.fallback_profile_ref) || node.fallback_profile_ref === node.profile_ref)) throw developerError('DEVELOPER_PROFILE_REFERENCE_UNKNOWN', path);
       const reference = node.profile_ref === null ? '' : node.profile_ref;
       if (!configuredRefs.has(reference)) throw developerError('DEVELOPER_PROFILE_REFERENCE_UNKNOWN', path);
-      const optional = node.node_id === 'transport_review' || node.node_id === 'judgment_review';
+      const optional = ['transport_review','judgment_review','data_review','logic_review'].includes(node.node_id);
       if (!optional && node.enabled !== current.enabled) throw developerError('DEVELOPER_NODE_ENABLEMENT_LOCKED', path);
-      const profileLocked = node.node_id === 'card_admission'
-        || node.node_id === 'human_judgment';
+      const profileLocked = ['card_admission','human_judgment','data_review'].includes(node.node_id);
       if (profileLocked && node.profile_ref !== current.profile_ref) {
         throw developerError('DEVELOPER_PROFILE_REFERENCE_LOCKED', path);
       }
@@ -3543,7 +3577,7 @@
       const currentById = new Map(state.settings.cli_services.map((service) => [service.config_id, service]));
       const cliServices = documentValue.cli_services.map((entry) => {
         const current = currentById.get(entry.config_id);
-        const currentModels = new Map(current.models.map((model) => [model.profile_ref, model]));
+        const currentModels = new Map((current?.models||[]).map((model) => [model.profile_ref, model]));
         const models = entry.models.map((model) => {
           const prior = currentModels.get(model.profile_ref);
           const unchanged = prior?.model_name === model.model_name.trim()
@@ -3553,11 +3587,13 @@
             display_name: model.display_name.trim(),
             model_name: model.model_name.trim(),
             thinking_mode: model.thinking_mode.trim(),
-            connection_status: unchanged ? prior.connection_status : 'UNVERIFIED'
+            connection_status: unchanged ? prior.connection_status : 'UNVERIFIED',
+            ...(entry.adapter_id==='command_template'?{verification:unchanged?prior?.verification||null:null}:{})
           };
         });
         return {
           ...current,
+          ...entry,
           executable: entry.executable.trim(),
           enabled: entry.enabled,
           models,
@@ -3898,7 +3934,7 @@
 
     const next = structuredClone(options.settingsDraft || state.settings);
     next.credential_references = structuredClone(state.settings.credential_references);
-    next.mode = persistedSettingsMode(activeSettingsMode());
+    next.mode = settingsDraftMode();
     let service = configIdAtStart
       ? next.model_services.find((row) => row.config_id === configIdAtStart)
       : null;
@@ -4310,7 +4346,7 @@
     try {
       service.model_name = modelId;
       service.connection_status = 'UNVERIFIED';
-      next.mode = persistedSettingsMode(activeSettingsMode());
+      next.mode = settingsDraftMode();
       const receipt = await saveSettings(
         next,
         `模型 ID 已更新为“${modelId}”；请再次验证确认。`
@@ -4589,7 +4625,7 @@
     const modelInput = card?.querySelector('[data-cli-add-model]');
     const thinkingInput = card?.querySelector('[data-cli-add-thinking]');
     const used = new Set(qa('[data-cli-profile-ref]').map((row) => row.dataset.cliProfileRef));
-    const service = state.settings.cli_services.find((row) => row.config_id === configId);
+    const service = (cliDraftServices || state.settings.cli_services).find((row) => row.config_id === configId);
     let model;
     try { model = pendingCliModel(card, service, used); }
     catch (error) { showToast(error.message); return; }
@@ -4762,6 +4798,21 @@
     return receipt;
   };
 
+  const installCliDraft = (services) => {renderCliServices({cli_services:services});setCliDraftDirty(true);};
+  const cliTemplateAction = async (action,configId) => {
+    await bootstrap();const draft=collectCliServices();
+    if(action==='delete') {installCliDraft(draft.filter(s=>s.config_id!==configId));showToast('已从草稿移除；保存时检查模型引用。');return;}
+    // Copy/export use the current draft through the same validated portable contract.
+    const result=await call('settings.cli_template_prepare',{action,config_id:configId||null,...(['copy','export'].includes(action)?{payload:draft.find(s=>s.config_id===configId)}:{})});
+    if(action==='export') {
+      const receipt=await nativeAction('export_cli_template_file',draft.find(s=>s.config_id===configId));if(receipt.status==='EXPORTED')showToast('已导出当前模板；本机路径、凭据与验证记录不包含在内。');
+    } else {installCliDraft([...draft,result.service]);showToast('已加入草稿；填写命令与模型后保存。');}
+  };
+  q('#settings-cli-import-file')?.addEventListener('change',async event=>{
+    const file=event.target.files?.[0];event.target.value='';if(!file)return;
+    try{if(file.size>262144)throw new Error('模板文件过大。');const result=await call('settings.cli_template_prepare',{action:'import',payload:JSON.parse(await file.text())});cliImportPreview=result.service;const panel=q('#settings-cli-import-preview');panel.querySelector('[data-cli-import-copy]').textContent=`${result.preview.name} · ${result.preview.model_count} 个模型 · ${result.preview.input} → ${result.preview.output} · 本机路径待填写，验证待测`;panel.hidden=false;}catch(error){showToast(error.message);}
+  });
+
   const stopOriginal = (event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -4772,7 +4823,11 @@
     if (!target || !root.contains(target)) return;
     const fail = (prefix) => (error) => showToast(`${prefix}：${error.message}`);
 
-    if (target.id === 'settings-save') {
+    if(target.id==='settings-cli-add'||target.dataset.cliTemplateAction){stopOriginal(event);void cliTemplateAction(target.dataset.cliTemplateAction||'new',target.dataset.cliConfigId).catch(fail('模板操作失败'));
+    } else if(target.id==='settings-cli-import'){stopOriginal(event);q('#settings-cli-import-file').click();
+    } else if(target.id==='settings-cli-import-cancel'){stopOriginal(event);cliImportPreview=null;q('#settings-cli-import-preview').hidden=true;
+    } else if(target.id==='settings-cli-import-accept'){stopOriginal(event);if(cliImportPreview){installCliDraft([...collectCliServices(),cliImportPreview]);cliImportPreview=null;}q('#settings-cli-import-preview').hidden=true;
+    } else if (target.id === 'settings-save') {
       stopOriginal(event);
       void save().catch(fail('设置保存失败'));
     } else if (target.id === 'settings-revert') {
@@ -4965,6 +5020,12 @@
     }
   });
   root.addEventListener('click', (event) => {
+    const modeButton = event.target.closest('#settings-mode button[data-mode]');
+    const modeScope = q('.desktop-settings-shell')?.dataset.modeScope;
+    if (modeButton && !modeButton.hidden && !modeButton.disabled
+      && ['api', 'cli', 'workflow'].includes(modeScope)) {
+      settingsModeDraft = persistedSettingsMode(modeButton.dataset.mode);
+    }
     if((event.target.closest('#settings-mode') && root.querySelector('.desktop-settings-shell')?.dataset.modeScope==='refinement') || event.target.closest('#memo-weights-page, #memo-settings-page') ||
       (event.target.closest('#settings-mode') && root.querySelector('.desktop-settings-shell')?.dataset.modeScope==='research-weights')){
       syncSaveState();return;

@@ -38,6 +38,8 @@ class ReportProfileExecution:
                 raise ValueError('REPORT_MODEL_UNAVAILABLE')
         if not service or not model or model.get('connection_status')!='AVAILABLE':
             raise ValueError('REPORT_MODEL_UNAVAILABLE')
+        from .cli_templates import is_custom,exam_eligible,configuration_identity
+        if kind=='CLI' and is_custom(service) and not exam_eligible({**service,**model,'configuration_sha256':configuration_identity(service,model)}):raise ValueError('CLI_TEMPLATE_CAPABILITY_NOT_VERIFIED')
         if kind=='API' and infer_api_model_capability(service['provider'],model['model_name'])!=self.capability:
             raise ValueError('REPORT_MODEL_CAPABILITY_INVALID')
         binding={'run_id':run_id,'period':period,'profile_ref':profile_ref,'profile_kind':kind,

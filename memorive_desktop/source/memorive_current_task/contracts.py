@@ -167,6 +167,10 @@ def default_nodes(
         if "02_CHUNK_EMBEDDING" in configured_ids or not configured_ids
         else LEGACY_FIXED_NODES
     )
+    if 'E2_DATA_REVIEW' in configured_ids:
+        topology=(topology[0], {'node_id':'E2_DATA_REVIEW','number':'D','name':'数据分析',
+            'purpose':'本地数值处理与明确参数核查','model':'本地统计程序','optional':True,
+            'model_change':False,'locked':False}, *topology[1:])
     return deepcopy(list(topology))
 
 

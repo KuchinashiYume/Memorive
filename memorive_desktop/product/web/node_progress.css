@@ -1,0 +1,6 @@
+.memo-node-progress { width:18px; height:18px; flex:0 0 18px; display:inline-block; vertical-align:middle; pointer-events:none; overflow:visible; }
+.memo-node-progress-track { stroke:#d4d4d4; }
+.memo-node-progress-arc { stroke:#777; transition:stroke-dashoffset .16s ease-out; }
+[data-theme="dark"] .memo-node-progress-track { stroke:#515151; }
+[data-theme="dark"] .memo-node-progress-arc { stroke:#aaa; }
+@media (prefers-reduced-motion:reduce) { .memo-node-progress-arc { transition:none; } }

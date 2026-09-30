@@ -1879,30 +1879,34 @@ def transcription_verify(
             ]
             for subject in batch_input["subjects"]
         }
-        initial_rows, _ = _run_batch_stage_with_one_contract_retry(
-            _build_batch_initial_prompt(batch_input),
-            stage="initial review",
-            expected_locations=expected_locations,
-            expected_items=expected_items,
-            subjects_by_location=subjects_by_location,
-            chunk_texts=chunk_texts,
-            call=call,
-            retry_call=technical_retry_call,
-        )
-        final_rows, final_problems = _run_batch_stage_with_one_contract_retry(
-            _build_batch_review_prompt(
-                batch_input,
-                initial_rows,
-            ),
-            stage="final review",
-            expected_locations=expected_locations,
-            expected_items=expected_items,
-            subjects_by_location=subjects_by_location,
-            chunk_texts=chunk_texts,
-            call=call,
-            retry_call=technical_retry_call,
-        )
-        problems.extend(final_problems)
+        from memorive_workflow.node_progress import scope
+        with scope('CARD_REVIEW', ['initial', 'final']) as node_units:
+            initial_rows, _ = _run_batch_stage_with_one_contract_retry(
+                _build_batch_initial_prompt(batch_input),
+                stage="initial review",
+                expected_locations=expected_locations,
+                expected_items=expected_items,
+                subjects_by_location=subjects_by_location,
+                chunk_texts=chunk_texts,
+                call=call,
+                retry_call=technical_retry_call,
+            )
+            node_units.complete("initial")
+            final_rows, final_problems = _run_batch_stage_with_one_contract_retry(
+                _build_batch_review_prompt(
+                    batch_input,
+                    initial_rows,
+                ),
+                stage="final review",
+                expected_locations=expected_locations,
+                expected_items=expected_items,
+                subjects_by_location=subjects_by_location,
+                chunk_texts=chunk_texts,
+                call=call,
+                retry_call=technical_retry_call,
+            )
+            node_units.complete("final")
+            problems.extend(final_problems)
 
     # 精确相同的已验证 direct conflict 可在共享锚点字段间本地传播，不产生额外 API 调用。
     problems = _propagate_literal_direct_conflicts(

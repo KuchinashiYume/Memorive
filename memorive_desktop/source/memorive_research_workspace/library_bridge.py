@@ -22,7 +22,10 @@ def bind(workspace,library):
             try:
                 row=workspace.index.add_library_file(project,path=path,root=entry['artifact_root'],external_id=identity,
                     expected_hash=item['content_hash'],title=item['title'],
-                    document_id='doc_'+entry.get('source_content_sha256',entry['content_sha256']))
+                    document_id='doc_'+entry.get('source_content_sha256',entry['content_sha256']),
+                    material_layer={'CORE_CARD':'card','CORE_ANALYSIS':'analysis','CORE_RAW_DOCUMENT':'original','CORE_CLEAN_DOCUMENT':'cleaned'}[entry['artifact_kind']],
+                    source_content_hash=entry.get('source_content_sha256',entry['content_sha256']),
+                    structure_bundle=(Path(path).parent/'structure') if entry['artifact_kind']=='CORE_RAW_DOCUMENT' and (Path(path).parent/'structure/bundle.json').is_file() else None)
                 rows.append({'id':row['id'],'title':row['title']})
             except (ValueError,OSError) as exc:failures.append({'id':identity,'code':str(exc)[:120]})
         return {'status':'PARTIAL' if failures else 'PASS','indexed':len(rows),'items':rows,'failures':failures}

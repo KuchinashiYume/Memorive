@@ -12,11 +12,11 @@
 
 ## 已收集的依赖材料
 
-- [候选构建依赖清单](dependency-inventory.json)：114 项包名、版本与已有的许可证据。
-- [许可正文副本目录](licenses/)：保留收集到的第三方原文，不以本说明替代原文。
-- [补充许可来源](supplemental-license-index.json)：已补齐 clr-loader、flatbuffers、magika、markitdown、proxy-tools、pythonnet、tokenizers 七项缺失的许可正文；另收集 Python 与 WebView2 SDK 的许可。proxy-tools 以运行时代码与 0.1.0 源码包逐字节匹配确认版本关联。
-- [原生库来源核对](native-origin-review.json)：新版候选共 94 个原生文件，已按包／Python／Windows 系统／生成 EXE 识别来源；不将来源识别等同于完整再分发条件审核。
-- [PDF.js 许可原文](licenses/PDFJS-LICENSE.txt)：Apache-2.0。
+- [候选构建依赖清单](release_materials/dependency-inventory.json)：114 项包名、版本与已有的许可证据。
+- [许可正文副本目录](release_materials/licenses/)：保留收集到的第三方原文，不以本说明替代原文。
+- [补充许可来源](release_materials/supplemental-license-index.json)：已补齐 clr-loader、flatbuffers、magika、markitdown、proxy-tools、pythonnet、tokenizers 七项缺失的许可正文；另收集 Python 与 WebView2 SDK 的许可。proxy-tools 以运行时代码与 0.1.0 源码包逐字节匹配确认版本关联。
+- [原生库来源核对](release_materials/native-origin-review.json)：新版候选共 94 个原生文件，已按包／Python／Windows 系统／生成 EXE 识别来源；不将来源识别等同于完整再分发条件审核。
+- [PDF.js 许可原文](product/desktop/PDFJS-LICENSE.txt)：Apache-2.0。
 - 原始 历史基线版本 依赖与拟公开候选的 PyMuPDF 系列版本不同；具体版本、许可变化和验证范围见 [LICENSE_PROPOSAL.md](LICENSE_PROPOSAL.md)。
 
 这些材料绑定本地候选，尚不能代表最终发布包的完整第三方声明。最终构建若改变依赖或资源，需随实际版本更新清单与对应源码材料。已登记的缺项及后续工作见 [RELEASE_PREPARATION.md](RELEASE_PREPARATION.md)。

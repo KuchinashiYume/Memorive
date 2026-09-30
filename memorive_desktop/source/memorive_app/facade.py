@@ -74,6 +74,7 @@ class ApplicationFacade:
         workflow_provider: Any | None = None,
     ):
         self.store = store
+        self._node_progress_live = {}
         self.directory_layout = directory_layout
         self.schema_root = schema_root or Path(__file__).with_name("schemas")
         self.workflow_provider = workflow_provider
@@ -297,7 +298,43 @@ class ApplicationFacade:
         }
 
     def get_job(self, job_id: str) -> dict[str, Any]:
-        return immutable_copy(self.store.read_job(job_id))
+        job = immutable_copy(self.store.read_job(job_id))
+        job['node_progress_live'] = dict(self._node_progress_live.get(job_id, {}))
+        return job
+
+    def suppress_node_progress(self, job_id, executions):
+        leases = self._node_progress_live.get(job_id, {})
+        for node, execution in executions.items():
+            if leases.get(node) == execution:
+                leases.pop(node, None)
+
+    def record_node_progress(self, job_id, event):
+        from memorive_workflow.node_progress import apply_event
+        from .errors import VersionConflict
+        for observation_attempt in range(3):
+            current = self.store.read_job(job_id)
+            rows = apply_event(current.get('node_progress', {}), event,
+                job_id=job_id, attempt_id=current['attempt_id'], control_state=current['control_state'])
+            if rows == current.get('node_progress', {}):
+                return
+            try:
+                self.store.update_job(job_id, expected_version=current['version'],
+                    event_type='NODE_PROGRESS_RECORDED',
+                    mutator=lambda job: dict(job, node_progress=rows))
+                if event['action'] == 'BEGIN':
+                    self._node_progress_live.setdefault(job_id, {})[event['node_id']] = event['node_execution_id']
+                return
+            except VersionConflict:
+                if observation_attempt == 2:
+                    raise
+
+    @staticmethod
+    def _suspend_node_progress(job):
+        rows=job.get('node_progress', {})
+        for row in rows.values() if isinstance(rows,dict) else ():
+            if isinstance(row,dict) and row.get('activity') != 'CLOSED':
+                row['activity'] = 'SUSPENDED'
+        return job
 
     def get_attempt(self, attempt_id: str) -> dict[str, Any]:
         accepted = require_text(attempt_id, "attempt_id")
@@ -544,6 +581,8 @@ class ApplicationFacade:
         def mutate(job: dict[str, Any]) -> dict[str, Any]:
             job["control_state"] = apply_transition(job["control_state"], target)
             job["state_history"].append(target)
+            if target != 'RUNNING':
+                self._suspend_node_progress(job)
             return job
 
         return self.store.update_job(job_id, expected_version=expected_version, event_type=event_type, mutator=mutate)
@@ -582,7 +621,7 @@ class ApplicationFacade:
             idempotency_key=key,
             payload_sha256=payload_sha256,
             event_type=f"{action.upper()}_CONTROL_APPLIED",
-            mutator=mutator,
+            mutator=lambda job: self._suspend_node_progress(mutator(job)),
             result_factory=lambda job: self._control_receipt(job, action=action, idempotency_key=key),
         )
         return result

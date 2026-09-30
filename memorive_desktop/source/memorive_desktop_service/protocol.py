@@ -18,7 +18,7 @@ AUTH_RESPONSE_SCHEMA = "DesktopIPCAuthResponse-v1"
 AUTH_ACK_SCHEMA = "DesktopIPCAuthAck-v1"
 DEFAULT_MAX_FRAME_BYTES = 1024 * 1024
 MODEL_EXECUTION_METHODS = frozenset({
-    "settings.execute_structured_chat", "settings.report_profile_execute",
+    "settings.execute_structured_chat", "settings.report_profile_execute", "settings.ai_briefing_execute",
     "settings.research_chat_execute", "settings.research_image_execute",
     "settings.research_embedding_execute",
 })

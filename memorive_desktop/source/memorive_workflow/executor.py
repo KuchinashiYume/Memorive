@@ -15,7 +15,7 @@ from typing import Any, Callable, Mapping
 import uuid
 
 from .contracts import (
-    Core_NODE_IDS,
+    Core_NODE_IDS, DATA_NODE, node_ids_for,
     CoreArtifact,
     CoreExecutionContext,
     CoreExecutionResult,
@@ -231,7 +231,7 @@ def _review_labels(source_language: str) -> dict[str, str]:
             "boundary_text": "自動処理は提案、証拠アンカー、異種モデルの確認記録のみを生成し、利用者の最終的な科学判断に代わるものではありません。",
             "synthetic": "入力が合成資料と明記されている場合、そのデータを実在する科学的証拠として扱ってはいけません。",
         },
-    }[language]
+    }.get(language, {"title":"Human final review package","input_sha":"Input SHA256","question":"Question","model":"Analysis model","trace":"Citation trace","rulings":"Cross-model rulings","pending":"Items requiring human review","draft":"Analysis draft","boundary":"Boundary","boundary_text":"Suggestions and evidence anchors do not replace scientific judgment.","synthetic":"Synthetic inputs are not real scientific evidence."})
 
 
 def render_human_review(
@@ -306,6 +306,7 @@ class CorePipelineExecutor:
         self.validation_runner = validation_runner
         self.task_control_store = task_control_store
         self.interaction_sink = interaction_sink
+        self.review_service = None
         self.runtime_root = Path(runtime_root).resolve(strict=False)
         self.folder_management_policy = load_folder_management_policy()
         self.sandbox_root = self.runtime_root / "sandbox"
@@ -611,6 +612,7 @@ class CorePipelineExecutor:
         with PIPELINE_LANES.paper((str(self.runtime_root), context.source_sha256)):
             execution_checkpoint()
             completed = set(completed_node_ids)
+            node_ids=node_ids_for(context.workflow_definition)
             paper_id = self._paper_id(context)
             title = Path(context.source_name).stem
             stage_root = context.run_root / "core_stages"
@@ -645,7 +647,7 @@ class CorePipelineExecutor:
                 execution_checkpoint()
                 if node_id in completed:
                     return
-                on_node_completed(node_id, Core_NODE_IDS.index(node_id) + 1)
+                on_node_completed(node_id, node_ids.index(node_id) + 1)
                 completed.add(node_id)
                 if node_id in held_lanes:
                     PIPELINE_LANES.leave(node_id, held_lanes.pop(node_id))
@@ -693,6 +695,8 @@ class CorePipelineExecutor:
                             )
                     if not self._document_processing_document_complete(paper_id):
                         raise RuntimeError("DOCUMENT_PROCESSING_OUTPUT_VERIFICATION_FAILED")
+                    if self.review_service is not None:
+                        self.review_service.structure.prepare(context,self._paper_folder(paper_id))
                     mark("01_DOCUMENT_INGEST")
 
                 if not self._document_processing_document_complete(paper_id):
@@ -700,9 +704,22 @@ class CorePipelineExecutor:
 
                 folder = self._paper_folder(paper_id)
                 assert folder is not None
+                if DATA_NODE in node_ids:
+                    if self.review_service is None:raise RuntimeError('REVIEW_SERVICE_REQUIRED')
+                    self.review_service.prepare_raw(context,self._one(folder,'[RawMD]','.md'))
+                    if DATA_NODE not in completed:
+                        start(DATA_NODE)
+                        effective=context.workflow_config['nodes'][DATA_NODE].copy()
+                        if self.task_control_store:effective.update(self.task_control_store.overrides(context.job_id).get(DATA_NODE,{}))
+                        self.review_service.data(context,enabled=effective.get('enabled',True))
+                        mark(DATA_NODE)
+                    elif self.review_service.store.get(context.job_id)['data_state']=='WAITING_INPUT':
+                        self.review_service.data(context,enabled=context.workflow_config['nodes'][DATA_NODE].get('enabled',True))
                 source_rows, source_chunk_texts = self._load_chunks(folder, paper_id)
                 source_text = "\n".join(source_chunk_texts.values())
-                source_language = detect_source_language(source_text)
+                from memorive_language.source import describe
+                source_language_evidence = describe(source_text)
+                source_language = source_language_evidence['language']
                 question = self._question(context, source_language)
                 validate_generated_language(
                     source_text=source_text,
@@ -808,6 +825,8 @@ class CorePipelineExecutor:
                     mark("05_CARD_ADMISSION")
 
                 pack_pickle = stage_root / "06_context_pack.pkl"
+                if DATA_NODE in node_ids and self.review_service:
+                    self.review_service.card_ready(context,card_path,source_rows=source_rows)
                 pack_json = stage_root / "06_context_pack.json"
                 if "06_CONTEXT_PACK" not in completed:
                     start("06_CONTEXT_PACK")
@@ -908,6 +927,7 @@ class CorePipelineExecutor:
                     context_pack_artifact = {
                             "question": question,
                             "source_language": source_language,
+                    "source_language_evidence": source_language_evidence,
                             "understanding": understood,
                             "candidates": candidates,
                             "pack": pack,
@@ -1226,6 +1246,11 @@ class CorePipelineExecutor:
                         "人工最终复核包",
                     ),
                 )
+                # E10 candidates retain their own source-bound, verifiable bundle.
+                structure_root=context.run_root/'structure-candidate'
+                if (structure_root/'bundle.json').is_file():
+                    from document_processing.document_structure.bundle import publication_specs
+                    artifact_specs += publication_specs(structure_root,managed_folder/'structure')
                 # The source-language rule is a persistence boundary, not only a
                 # prompt hint.  Recheck every textual Core mainline artifact
                 # immediately before it enters the product library.  RawMD is the
@@ -1238,7 +1263,7 @@ class CorePipelineExecutor:
                     _target_path,
                     _display_name,
                 ) in artifact_specs:
-                    if artifact_kind == "CORE_SOURCE_DOCUMENT":
+                    if artifact_kind in {"CORE_SOURCE_DOCUMENT","CORE_STRUCTURE_CANDIDATE"}:
                         continue
                     _validate_artifact_language(
                         source_path,
@@ -1287,6 +1312,7 @@ class CorePipelineExecutor:
                             }
                             for artifact_id, artifact_kind, target_path, _display_name
                             in copied_artifacts
+                            if artifact_kind != "CORE_STRUCTURE_CANDIDATE"
                         ],
                         "legacy_files_deleted": 0,
                         "settings_files_touched": 0,
@@ -1314,6 +1340,7 @@ class CorePipelineExecutor:
                     "paper_id": paper_id,
                     "question": question,
                     "source_language": source_language,
+                    "source_language_evidence": source_language_evidence,
                     "core_modules_reused": ["M01", "M02", "M03", "M04", "M06", "M08", "M09", "RUNTIME_LOG"],
                     "capabilities_successors_reused": ["LONG_DOCUMENT_SEGMENTED_DISTILLATION"],
                     "folder_management_policy": {

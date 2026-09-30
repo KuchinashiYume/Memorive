@@ -282,7 +282,10 @@ class LibraryProductController:
             projection_status = str(raw.get("projection_status") or "READY")
             source_error_code = str(raw.get("source_error_code") or "")[:120]
             source_file_exists = bool(raw.get("source_file_exists", True))
-            file_state = "文献文件"
+            file_state = ({'CANCELLED':'任务已取消；核查报告已保存',
+                'FAILED':'任务失败；核查报告已保存', 'PAUSED':'任务已暂停；核查报告已保存'}
+                .get(raw.get('source_task_state'),'任务进行中；核查报告已保存')
+                if raw.get('partial_result') else "文献文件")
             if context_pack is not None and context_pack.get("truncated") is True:
                 file_state = (
                     "整理分析材料 已按 Analysis 容量取舍："
@@ -314,6 +317,8 @@ class LibraryProductController:
                 "product_files": deepcopy(product_files),
                 "external_target": "",
                 "task": job_id,
+                "literature_review":deepcopy(raw.get("literature_review")),
+                "partial_result":bool(raw.get('partial_result')),
                 "updated_at": updated_at,
                 "size_bytes": size_bytes,
             }
@@ -342,6 +347,7 @@ class LibraryProductController:
         document_rows: dict[str, dict[str, Any]] = {}
         aliases: dict[str, str] = {}
         visible_kinds = {
+            "CORE_DATA_REVIEW":(5,"数据分析摘要.md"), "CORE_LOGIC_REVIEW":(6,"逻辑分析报告.md"),
             "CORE_CARD": (0, "Card.md"),
             "CORE_ANALYSIS": (1, "Analysis.md"),
             "CORE_RAW_DOCUMENT": (2, "RawMD.md"),
@@ -389,6 +395,7 @@ class LibraryProductController:
                         "kind": entry["row"]["kind"],
                         "file_name": Path(entry["private_path"]).name,
                         "display_name": display_label,
+                        "literature_review":deepcopy(entry["row"].get("literature_review")),
                         "divider_before": False,
                         "role": "product",
                         "_order": order,
@@ -426,7 +433,7 @@ class LibraryProductController:
                 (
                     str(entry["row"].get("file_state"))
                     for _child_id, entry in selected
-                    if str(entry["row"].get("file_state") or "").startswith("整理分析材料")
+                    if str(entry["row"].get("file_state") or "").startswith("整理分析材料") or entry['row'].get('partial_result')
                 ),
                 "文献文件",
             )
@@ -1074,7 +1081,23 @@ class LibraryProductController:
                     "raw_private_content_included": False,
                 }
             )
-        return rows
+        files = []
+        for row in rows:
+            folder = self._rows_by_id[row['artifact_id']]
+            products = folder.get('product_files') or []
+            if not products:
+                files.append(row)
+            for product in products:
+                artifact_id = product['artifact_id']
+                entry = self._core_entries_by_artifact_id.get(artifact_id, {})
+                files.append({**row, 'artifact_id':artifact_id,
+                    'stable_locator':f'memorive://artifact/{artifact_id}',
+                    'display_name':product['file_name'],
+                    'kind':product.get('kind', row['kind']),
+                    'source_artifact_id':entry.get('source_artifact_id', artifact_id),
+                    'content_sha256':entry.get('content_sha256'),
+                    'source_file_exists':entry.get('row',{}).get('source_file_exists',row['source_file_exists'])})
+        return files
 
     def refinement_activity_rows(self) -> list[dict[str, Any]]:
         """Return metadata-only rows for cross-page lifecycle projection."""

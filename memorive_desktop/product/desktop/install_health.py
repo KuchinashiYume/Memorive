@@ -54,7 +54,7 @@ def main(root):
         raise RuntimeError('INSTALL_HEALTH_REQUIRES_FRESH_STATE')
     from runtime import ProductApi
     api = None
-    result = {'status':'FAIL', 'kind':'EMPTY_OFFLINE_RUNTIME', 'release_version':'1.01'}
+    result = {'status':'FAIL', 'kind':'EMPTY_OFFLINE_RUNTIME', 'release_version':json.loads((root/'release_identity_binding.json').read_text('utf8'))['release_version']}
     try:
         # Generated here from generic text; never a distributed PDF or user's document.
         import pymupdf

@@ -8,6 +8,23 @@
     "resolver_at_runtime": false
   },
   "profiles": {
+    "document_processing-marker2-e10": {
+      "state": "PRIVATE_LOCAL_RUNTIME_INSTALLED_VALIDATION_PENDING",
+      "requirements": [
+        "marker-pdf==2.0.0"
+      ],
+      "top_level_wheel_sha256": "aa31f6a31990a6b7ac277aaea0df486b9314a9c1cd6fe0c1262dc162ed3f8e72",
+      "transitive_lock": "external-runtime/RUNTIME_LOCK.json",
+      "model_manifest": "external-runtime/RUNTIME_LOCK.json",
+      "activation": "EXPLICIT_LOCAL_CANDIDATE_ENHANCEMENT_ONLY",
+      "rights": "CODE_AND_MODEL_REVIEW_SEPARATE_DESKTOP_BUNDLING_NOT_CLEARED",
+      "runtime_install": false,
+      "automatic_download": false,
+      "use_llm": false,
+      "runtime_lock_sha256": "5269e2f2fbab8adeb0c6764ea39201aa139eca11c24e474a4175d6e5017f2df9",
+      "ocr_qualification": "NOT_QUALIFIED_FOR_AUTOMATIC_TRANSCRIPTION",
+      "bundled_in_desktop": false
+    },
     "document_processing-marker": {
       "state": "DECLARED_OPTIONAL_NOT_INSTALLED",
       "requirements": [

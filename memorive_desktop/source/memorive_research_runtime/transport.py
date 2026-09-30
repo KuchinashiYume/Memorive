@@ -11,8 +11,8 @@ from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHand
 from urllib.error import HTTPError
 
 TERMS={
- 'ARXIV':{'url':'https://info.arxiv.org/help/api/tou.html','reviewed_at':'2026-09-07','policy':'CC0 descriptive metadata; single connection, >=3 seconds; no PDF acquisition'},
- 'CROSSREF':{'url':'https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/','reviewed_at':'2026-09-07','policy':'Public metadata API; no credentials; single connection; cache results; fail on 429'},
+ 'ARXIV':{'url':'https://info.arxiv.org/help/api/tou.html','reviewed_at':'2026-09-28','policy':'CC0 descriptive metadata; single connection, >=3 seconds; no PDF acquisition'},
+ 'CROSSREF':{'url':'https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/','reviewed_at':'2026-09-28','policy':'Public metadata API; no credentials; single connection; cache results; fail on 429'},
  'WEB-OF-SCIENCE':{'url':'https://developer.clarivate.com/apis/wos-starter','reviewed_at':'2026-09-07','policy':'Starter API subscription/key required; local private metadata only; no full text or redistribution'},
 }
 _lock=threading.Lock()
@@ -61,7 +61,7 @@ class MetadataClient:
         self.transport=transport or BoundedMetadataTransport()
         self.source_config=source_config
 
-    def fetch(self,provider,topic,count,run_id,call_id,stop,*,cursor=None,source_snapshot=None,exact_doi=None):
+    def fetch(self,provider,topic,count,run_id,call_id,stop,*,cursor=None,source_snapshot=None,exact_doi=None,exact_arxiv=None):
         from memorive_settings.literature_sources import PRESETS
         from . import wos
         if provider.lower() not in PRESETS:raise ValueError('LITERATURE_PROVIDER_UNSUPPORTED')
@@ -74,22 +74,37 @@ class MetadataClient:
         if '\r' in credential or '\n' in credential:raise ValueError('LITERATURE_CREDENTIAL_INVALID')
         if type(count) is not int or not 1<=count<=PAGE_LIMITS[provider]:raise ValueError('SOURCE_PAGE_SIZE_INVALID')
         policy=TransportPolicy(max_records=PAGE_LIMITS[provider],user_agent='Memorive/0.8.103 (desktop scholarly metadata)')
-        query=({'search_query':'all:'+topic,'start':int(cursor or 0),'max_results':count,'sortBy':'relevance','sortOrder':'descending'} if provider=='ARXIV' else {'query':topic,'rows':count,'cursor':cursor or '*'})
+        spec=topic if isinstance(topic,dict) else {'text':topic}
+        text=spec.get('text','');window=spec.get('publication_window')
+        query=({'search_query':spec.get('arxiv_query') or 'all:'+text,'start':int(cursor or 0),'max_results':count,'sortBy':'submittedDate' if spec.get('objective')=='latest' else 'relevance','sortOrder':'descending'} if provider=='ARXIV' else {'query':text,'rows':count,'cursor':cursor or '*','sort':'score','order':'desc'})
+        if provider=='ARXIV' and window:
+            query['search_query']='('+query['search_query']+') AND submittedDate:['+window['from'].replace('-','')+'0000 TO '+window['until'].replace('-','')+'2359]'
+        if provider=='CROSSREF' and spec.get('objective')=='latest':
+            # The live Crossref API rejects publication sorting with cursors.
+            # Bounded latest queries need at most 40 raw rows, below offset's 10k ceiling.
+            offset=int(cursor or 0)
+            if not 0<=offset<=10000:raise ValueError('SOURCE_OFFSET_LIMIT_REACHED')
+            query.pop('cursor',None)
+            query.update(offset=offset,sort='published',order='desc',filter='from-pub-date:'+window['from']+',until-pub-date:'+window['until'])
         if exact_doi is not None:
             if provider!='CROSSREF' or count!=1 or cursor is not None or not isinstance(exact_doi,str) or not re.fullmatch(r'10\.\d{4,9}/[^\s<>]+',exact_doi):raise ValueError('EXACT_DOI_REQUEST_INVALID')
             query={'filter':'doi:'+exact_doi,'rows':1}
             url=endpoint+'?'+urlencode(query)
-        elif provider=='WEB-OF-SCIENCE':
-            query={'q':'TS=('+topic+')','db':'WOS','limit':count,'page':int(cursor or 1)}
+        elif exact_arxiv is not None:
+            if provider!='ARXIV' or not re.fullmatch(r'(?:[a-z.-]+/)?[0-9.]+(?:v[0-9]+)?',exact_arxiv):raise ValueError('EXACT_ARXIV_REQUEST_INVALID')
+            query={'id_list':exact_arxiv,'max_results':count}
             url=endpoint+'?'+urlencode(query)
-        else:url=build_url(provider,query,policy)
+        elif provider=='WEB-OF-SCIENCE':
+            query={'q':'TS=('+text+')','db':'WOS','limit':count,'page':int(cursor or 1)}
+            url=endpoint+'?'+urlencode(query)
+        else:url=endpoint+'?'+urlencode(query)
         headers={'Accept':'application/atom+xml' if provider=='ARXIV' else 'application/json','User-Agent':policy.user_agent}
         if credential:headers['X-ApiKey']=credential
         pref=self.preferences()
         profile={'id':'Desktop_DESKTOP_PUBLIC_METADATA_V2','version':'2','provider':provider,'terms':TERMS[provider], 'max_records':count,'provider_page_limit':PAGE_LIMITS[provider],'max_bytes':2000000,'timeout':30,'retry_limit':0}
         route={'id':'settings-network','proxy_mode':pref.get('proxy_mode','SYSTEM'),'proxy_address_sha256':sha(pref.get('proxy_address','')),'provider_region':None,'egress_region':None,'observation_status':'NOT_EXPOSED_BY_TRANSPORT'}
         profile.update(endpoint=endpoint,credential_env=credential_env)
-        key=sha({'provider':provider,'query':query,'endpoint':endpoint,'credential_env':credential_env})
+        key=sha({'provider':provider,'query':query,'endpoint':endpoint,'credential_env':credential_env,'normalizer':'E6NormalizedMetadata-v1'})
         cache=self.root/'cache'/(key+'.json')
         if cache.exists():
             cached=read(cache)
@@ -111,25 +126,34 @@ class MetadataClient:
             try:
                 response=self.transport.request(method='GET',url=url,headers=headers,body=None,timeout_seconds=30,proxy_mode=pref.get('proxy_mode','SYSTEM'),proxy_address=pref.get('proxy_address',''),max_response_bytes=2000000)
                 terminal.update(http_status=response.status_code,response_sha256=sha(response.body),response_bytes=len(response.body))
+                rawpath=request_dir/(call_id+'.response');rawpath.write_bytes(response.body)
                 if response.status_code!=200:raise ValueError('SOURCE_HTTP_'+str(response.status_code))
                 if stop.is_set():raise ValueError('RESEARCH_CANCELLED')
-                parsed=wos.parse(response.body) if provider=='WEB-OF-SCIENCE' else (ArxivOfflineConnector if provider=='ARXIV' else CrossrefOfflineConnector)({})._parse(response.body)
+                from .metadata_v3 import parse_arxiv,parse_crossref
+                parsed=wos.parse(response.body) if provider=='WEB-OF-SCIENCE' else (parse_arxiv if provider=='ARXIV' else parse_crossref)(response.body)
                 if len(parsed['records'])>count:raise ValueError('SOURCE_RECORD_ENVELOPE_EXCEEDED')
                 rawpath=request_dir/(call_id+'.response');rawpath.write_bytes(response.body)
                 result={'schema_version':'DesktopDesktopMetadataResult-v1','provider':provider,'captured_at':now(),'records':parsed['records'],'skipped_records':parsed.get('skipped_records',[]),'response_sha256':sha(response.body),'request_id':call_id,'cache_hit':False,'external_call_performed':True,'source_schema':'ARXIV_ATOM_API' if provider=='ARXIV' else 'CROSSREF_REST_WORKS_JSON'}
-                terminal.update(status='SUCCEEDED',record_count=len(parsed['records']))
+                result.update(raw_count=parsed.get('raw_count',len(parsed['records'])),normalization_schema='E6NormalizedMetadata-v1',effective_query=query)
+                terminal.update(status='SUCCEEDED',record_count=len(parsed['records']),raw_record_count=result['raw_count'])
                 if provider=='WEB-OF-SCIENCE':result['source_schema']='WOS_STARTER_DOCUMENTS_JSON'
                 if provider=='CROSSREF':
                     document=json.loads(response.body);message=document.get('message',{})
-                    result['next_cursor']=message.get('next-cursor') if len(parsed['records'])>=count else None
                     result['total_results']=message.get('total-results')
+                    if spec.get('objective')=='latest' and exact_doi is None:
+                        following=int(cursor or 0)+result['raw_count'];total=result['total_results']
+                        result['next_cursor']=following if result['raw_count'] and following<=10000 and (total is None or following<total) else None
+                        result['pagination_mode']='BOUNDED_OFFSET_FOR_PUBLICATION_SORT'
+                    else:
+                        result['next_cursor']=message.get('next-cursor') if result['raw_count'] else None
+                        result['pagination_mode']='CURSOR'
                 elif provider=='ARXIV':
                     from defusedxml import ElementTree
                     feed=ElementTree.fromstring(response.body)
                     total=feed.findtext('{http://a9.com/-/spec/opensearch/1.1/}totalResults')
                     result['total_results']=int(total) if total else None
-                    following=int(cursor or 0)+count
-                    result['next_cursor']=following if len(parsed['records'])>=count and (not total or following<int(total)) else None
+                    following=int(cursor or 0)+result['raw_count']
+                    result['next_cursor']=following if result['raw_count'] and (not total or following<int(total)) else None
                 else:
                     document=json.loads(response.body);total=document.get('metadata',{}).get('total')
                     result['total_results']=total;following=int(cursor or 1)+1

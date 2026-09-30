@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from typing import Any, Mapping
 
 from .contracts import (
-    FIXED_NODES,
     TERMINAL_CONTROL_STATES,
     ContractError,
     default_nodes,
@@ -166,22 +165,23 @@ class CurrentTaskProjector:
             if isinstance(row, Mapping)
         }
         configured_ids = set(configured_by_id)
+        frozen_nodes = default_nodes(definition if isinstance(definition, Mapping) else None)
         is_core = job_type in {"memorive-core", "core_document", "core-document"} or (
-            "02_CHUNK_EMBEDDING" in configured_ids and total == len(FIXED_NODES)
+            "02_CHUNK_EMBEDDING" in configured_ids and total == len(frozen_nodes)
         )
-        if is_core and control_state != "SUCCEEDED" and completed < len(FIXED_NODES):
+        if is_core and control_state != "SUCCEEDED" and completed < len(frozen_nodes):
             reported_index = next(
                 (
                     index
-                    for index, row in enumerate(FIXED_NODES)
+                    for index, row in enumerate(frozen_nodes)
                     if row["node_id"] == phase_code
                 ),
                 None,
             )
             current = (
-                FIXED_NODES[reported_index]
+                frozen_nodes[reported_index]
                 if reported_index is not None and reported_index >= completed
-                else FIXED_NODES[max(0, completed)]
+                else frozen_nodes[max(0, completed)]
             )
             phase_code = current["node_id"]
             configured_current = configured_by_id.get(phase_code, {})
@@ -334,6 +334,12 @@ class CurrentTaskProjector:
                     ),
                 }
             )
+        from memorive_workflow.node_progress import project as node_progress_projection, is_live
+        for node in nodes:
+            node['node_progress'] = node_progress_projection(job.get('node_progress', {}), node['node_id'],
+                job_id=job_id, attempt_id=attempt_id,
+                active=node['state']=='RUNNING' and control_state in {'RUNNING','PAUSE_REQUESTED'} and not progress.get('waiting'),
+                live=is_live(job,node['node_id']))
         node_ids = {row["node_id"] for row in nodes}
         selection_removed = selected_node_id is not None and selected_node_id not in node_ids
         accepted_selection = None if selection_removed else selected_node_id

@@ -89,9 +89,12 @@ def _normalized_identity(value: str) -> str:
 
 
 def _validate_request(value: Mapping[str, Any]) -> dict[str, Any]:
-    if not isinstance(value, Mapping) or set(value) != _REQUEST_FIELDS:
+    if not isinstance(value, Mapping) or not _REQUEST_FIELDS <= set(value) or set(value) - _REQUEST_FIELDS - {"language_context"}:
         raise ConversationRefinementBridgeError("REFINEMENT_REQUEST_FIELDS_INVALID")
     request = _json_copy(dict(value))
+    if request.get("language_context") is not None:
+        from memorive_language import validate
+        request["language_context"]=validate(request["language_context"])
     task_id = _require_text(request["task_id"], "REFINEMENT_TASK_ID_INVALID", 128)
     if not _SAFE_IDENTIFIER.fullmatch(task_id):
         raise ConversationRefinementBridgeError("REFINEMENT_TASK_ID_INVALID")
@@ -277,9 +280,10 @@ def _formal_subject_output(
 
 
 def _render_prompt(
-    template: str, graph: Mapping[str, Any], message_ids: Sequence[str]
+    template: str, graph: Mapping[str, Any], message_ids: Sequence[str], language_context=None
 ) -> str:
     payload = {
+        **({"language_context":language_context} if language_context is not None else {}),
         "pack_id": graph["graph_id"].removeprefix("graph:"),
         "graph_hash": graph["content_hash"],
         "selected_message_ids": list(message_ids),
@@ -329,7 +333,7 @@ class ExistingConversationRefinementChannel:
                 / "model_gateway"
                 / "prompts"
                 / "conversation_refinement"
-                / "v2.md"
+                / "v3.md"
             )
         ).resolve()
 
@@ -413,7 +417,7 @@ class ExistingConversationRefinementChannel:
 
         graph, message_ids = _build_graph(request)
         schema = _response_schema(message_ids=message_ids)
-        prompt = _render_prompt(template, graph, message_ids)
+        prompt = _render_prompt(template, graph, message_ids,request.get("language_context"))
         if not _LOCAL_PROFILE.fullmatch(request["profile_ref"]) or self._profile_executor is not None:
             caller = getattr(self._profile_executor, "call", None)
             if not callable(caller):

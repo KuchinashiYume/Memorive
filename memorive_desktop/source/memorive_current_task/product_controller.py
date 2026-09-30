@@ -48,6 +48,7 @@ CURRENT_TASK_METHODS = frozenset({
 })
 
 NODE_BY_UI = {
+    "data-review": "E2_DATA_REVIEW",
     "ingest": "01_DOCUMENT_INGEST",
     "embedding": "02_CHUNK_EMBEDDING",
     "card": "03_CARD_DISTILL",
@@ -580,6 +581,23 @@ class CurrentTaskProductController:
         control_state = job.get('control_state')
         started = controls.started_node_ids(job_id) if controls else ()
         result['pause_node_id'] = point
+        if (self._core_run_root/'literature_review.sqlite3').is_file():
+            from memorive_review.store import ReviewStore
+            review=ReviewStore(self._core_run_root).public(job_id)
+            if review:
+                from memorive_workflow.node_progress import project as node_progress_projection, is_live
+                review['node_progress']=node_progress_projection(job.get('node_progress',{}),'E2_LOGIC_REVIEW',
+                    job_id=job_id,attempt_id=job['attempt_id'],
+                    active=review['logic_state'] in {'RUNNING','SENDING'} and not review.get('paused') and not review.get('cancel_requested') and control_state in {'RUNNING','PAUSE_REQUESTED'},
+                    live=is_live(job,'E2_LOGIC_REVIEW'))
+            result['literature_review']=review
+            result['graph']['supplemental_nodes']=[{'node_id':'E2_LOGIC_REVIEW','name':'逻辑分析',
+                'state':review['logic_state'],'independent':True,'progress':{'completed':review.get('completed_segments',0),'total':review.get('segment_count',0)},
+                'review':review}] if review and review['logic_selected'] else []
+            if review and review['mainline_complete'] and review['logic_state'] in {'FAILED','UNCERTAIN','PUBLICATION_FAILED'}:
+                result['attention_required']=True
+            if controls and 'E2_DATA_REVIEW' in config.get('nodes',{}):
+                controls.bind_topology(job_id,job['snapshots']['workflow_definition']['content'])
         for node in result['graph']['workflow_nodes']:
             original_state = node['state']
             scheduled = node['node_id'] == point
@@ -590,7 +608,7 @@ class CurrentTaskProductController:
             node['resume_eligible'] = bool(controls and not conflict and (
                 scheduled or (control_state == 'PAUSED' and original_state == 'PAUSED')))
             if scheduled:
-                node['state'] = 'PAUSED'
+                node['state'] = 'PAUSED' if control_state == 'PAUSED' else 'PAUSE_SCHEDULED'
                 node['enable_toggle_eligible'] = False
                 node['summary'] = '已设置暂停点；执行到此节点前停止。' if control_state != 'PAUSED' else '任务已暂停，点击继续后从此处接续。'
             if original_state == 'COMPLETED' and control_state in {'RUNNING','PAUSED'}:
@@ -600,7 +618,13 @@ class CurrentTaskProductController:
                 node['fallback_profile_ref'] = ingest.get('fallback_profile_ref')
                 node['fallback_model'] = (ingest.get('fallback_profile') or {}).get('model')
                 node['retry_scope'] = 'PAGE' 
+            if node['node_id']=='E2_DATA_REVIEW' and result.get('literature_review'):
+                data_state=result['literature_review']['data_state']
+                if data_state=='SKIPPED':node.update(state='DISABLED',summary='已跳过；没有核查结论')
+                elif data_state=='FAILED':node.update(state='FAILED',summary=result['literature_review'].get('data_reason_code','数据处理失败'))
             node['retry_eligible']=node['state']=='FAILED' and conflict is None
+            if node['state']!='RUNNING' or conflict:
+                node['node_progress']=None
             if conflict:
                 node['rollback_eligible']=False
                 node['retry_change_eligible']=False
@@ -918,6 +942,7 @@ class CurrentTaskProductController:
                     "predecessor_job_id": (job.get("request",{}).get("core_retry") or {}).get("predecessor_job_id"),
                     "recovery_request": task_projection.get("recovery_request"),
                     "workflow_nodes": workflow_nodes,
+                    "literature_review":deepcopy(task_projection.get("literature_review")),
                     "context_pack": deepcopy(context_pack_summary),
                     "progress": deepcopy(task_projection["progress"]),
                     "artifact_count": len(task_projection["artifacts"]["rows"]),

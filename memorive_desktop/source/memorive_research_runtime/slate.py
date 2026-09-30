@@ -243,7 +243,7 @@ def validate_plan(plan: Mapping[str, Any], context: Mapping[str, Any]) -> None:
 def _eligible_channels(fact: Mapping[str, Any], context: Mapping[str, Any]) -> tuple[list[str], list[str]]:
     metadata = fact["ranking_metadata"]
     reasons: list[str] = []
-    if fact["state_axes"]["identity_status"] != "VERIFIED":
+    if fact["state_axes"]["identity_status"] != "VERIFIED" and not (fact.get('metadata_candidate_only') and metadata.get('source_record_verified')):
         reasons.append("IDENTITY_NOT_VERIFIED")
     if metadata["source_available"] is not True:
         reasons.append("SOURCE_UNAVAILABLE")
@@ -262,8 +262,12 @@ def _eligible_channels(fact: Mapping[str, Any], context: Mapping[str, Any]) -> t
         channels={e["channel"] for e in metadata["query_recall_evidence"]
             if e.get("direction_id") in registered and e.get("query_sha256") and e.get("evidence_ref")}
         if metadata.get("feedback_eligible") is not True:return [],["USER_FEEDBACK_EXCLUDED"]
+        if 'e6_relations' in metadata:
+            supported={k for k,v in metadata['e6_relations'].items() if v['supported'] and v['publication_eligible']} & {e['direction_id'] for e in metadata['query_recall_evidence']}
+            channels={e['channel'] for e in metadata['query_recall_evidence'] if e['direction_id'] in supported}
+            if len(supported)<2: channels.discard('BRIDGE')
         ordered=[c for c in PRIMARY_CHANNEL_PRIORITY if c in channels]
-        return ordered,["EXPLICIT_QUERY_RECALL_NOT_SEMANTIC_PROOF"] if ordered else ["NO_CHANNEL_EVIDENCE"]
+        return ordered,["METADATA_RELATION_EVIDENCE_NOT_MECHANISM_PROOF" if 'e6_relations' in metadata else "EXPLICIT_QUERY_RECALL_NOT_SEMANTIC_PROOF"] if ordered else ["NO_CHANNEL_EVIDENCE"]
 
     profile_directions = set(context["profile"]["direction_refs"])
     direction_ids = {item["direction_id"] for item in context["directions"]}
@@ -333,7 +337,7 @@ def _ranking_evidence(
     return {
         "channel": primary_channel,
         "components": components,
-        "comparison_key": [
+        "comparison_key": ([metadata['timeliness'],metadata.get('e6_relation_rank',0)] if metadata.get('e6_objective')=='latest' else [metadata.get('e6_relation_rank',0)] if metadata.get('e6_objective')=='related' else []) + [
             components["direction_match"],
             components["evidence_completeness"],
             components["library_novelty"],

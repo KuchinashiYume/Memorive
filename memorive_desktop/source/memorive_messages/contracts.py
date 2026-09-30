@@ -199,8 +199,11 @@ class MessageRecord:
     notification_state: str
     source_event_ref: dict[str, Any]
     status_axes: StatusAxes
+    message_content: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
+        from memorive_language.messages import validate
+        validate(self.message_content)
         require_identifier(self.message_id, "id")
         if not isinstance(self.dedupe_key, str) or not _SHA256.fullmatch(self.dedupe_key):
             raise MessageContractError("MESSAGE_DEDUPE_KEY_INVALID")
@@ -277,11 +280,12 @@ class MessageRecord:
             "source_event_ref",
             "status_axes",
         }
-        if not isinstance(value, Mapping) or set(value) != required:
+        if not isinstance(value, Mapping) or not required <= set(value) or set(value) - required - {"message_content"}:
             raise MessageContractError("MESSAGE_RECORD_FIELDS_INVALID")
         if value["schema_version"] != MESSAGE_SCHEMA_VERSION:
             raise MessageContractError("MESSAGE_SCHEMA_VERSION_INVALID")
         return cls(
+            message_content=value.get("message_content"),
             message_id=value["message_id"],
             dedupe_key=value["dedupe_key"],
             severity=value["severity"],
@@ -309,6 +313,7 @@ class MessageRecord:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **({"message_content": self.message_content} if self.message_content is not None else {}),
             "schema_version": MESSAGE_SCHEMA_VERSION,
             "message_id": self.message_id,
             "dedupe_key": self.dedupe_key,

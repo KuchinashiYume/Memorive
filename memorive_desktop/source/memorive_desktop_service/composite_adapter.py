@@ -7,6 +7,7 @@ from memorive_settings.service_adapter import SETTINGS_METHODS, SettingsServiceA
 
 from .adapters import RealFacadeAdapter
 from .errors import ProtocolViolation
+from memorive_review.service import REVIEW_METHODS
 
 
 CURRENT_TASK_FIXTURE_METHODS = ("current_task.fixture_transition",)
@@ -20,10 +21,12 @@ class CompositeServiceAdapter:
         application: RealFacadeAdapter,
         settings: SettingsServiceAdapter,
         inbox: InboxServiceAdapter,
+        reviews=None,
     ):
         self.application = application
         self.settings = settings
         self.inbox = inbox
+        self.reviews = reviews
         self.facade = application.facade
 
     def _fixture_transition(self, params: Mapping[str, Any]) -> Any:
@@ -59,6 +62,7 @@ class CompositeServiceAdapter:
         }
 
     def call(self, method: str, params: Mapping[str, Any]) -> Any:
+        if method in REVIEW_METHODS and self.reviews is not None:return self.reviews.call(method,params)
         if method in SETTINGS_METHODS:
             return self.settings.call(method, params)
         if method in INBOX_METHODS:
@@ -82,6 +86,7 @@ class CompositeServiceAdapter:
                 *application["allowed_methods"],
                 *SETTINGS_METHODS,
                 *INBOX_METHODS,
+                *(REVIEW_METHODS if self.reviews is not None else ()),
                 *CURRENT_TASK_FIXTURE_METHODS,
             ],
             "application": application,
@@ -90,7 +95,8 @@ class CompositeServiceAdapter:
             "settings_method_count": len(SETTINGS_METHODS),
             "inbox_method_count": len(INBOX_METHODS),
             "current_task_fixture_method_count": len(CURRENT_TASK_FIXTURE_METHODS),
-            "total_required_product_methods": len(application["required_methods"]) + len(SETTINGS_METHODS) + len(INBOX_METHODS) + 16,
+            "review_method_count": len(REVIEW_METHODS) if self.reviews is not None else 0,
+            "total_required_product_methods": len(application["required_methods"]) + len(SETTINGS_METHODS) + len(INBOX_METHODS) + len(CURRENT_TASK_FIXTURE_METHODS) + (len(REVIEW_METHODS) if self.reviews is not None else 0),
             "credential_value_reads": 0,
             "provider_calls": 0,
             "external_model_calls": 0,

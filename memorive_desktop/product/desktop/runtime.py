@@ -47,6 +47,7 @@ SETTINGS_METHODS = frozenset({
     "settings.external_sources_get", "settings.external_sources_save",
     "settings.external_sources_refresh", "settings.external_model_reference",
     "settings.get_contract", "settings.get_state", "settings.register_directory", "settings.preview", "settings.save",
+    "settings.cli_template_prepare",
     "settings.save_cli_services",
     "settings.revert", "settings.reset_scope", "settings.export_redacted", "settings.import_redacted",
     "settings.capability_state", "settings.credential_create", "settings.credential_replace",
@@ -65,7 +66,11 @@ ACCOUNTING_METHODS = frozenset({
     "models.get_commerce_context_v1",
 })
 
+from memorive_review.service import REVIEW_METHODS as _REVIEW_METHODS
+REVIEW_METHODS=frozenset(_REVIEW_METHODS)
+
 INBOX_METHODS = frozenset({
+    "inbox.set_logic_review", "inbox.set_data_bindings",
     "inbox.get_contract", "inbox.import_paths", "inbox.enqueue_session_refinement",
     "inbox.find_session_refinement", "inbox.begin_session_refinement",
     "inbox.complete_session_refinement", "inbox.get_auto_run",
@@ -1124,7 +1129,7 @@ class ProductApi:
                 include_synthetic_projection=test_fixture_mode,
                 refinement_task_provider=self._refinement_queue_tasks.list_jobs,
                 refinement_product_provider=self._library.refinement_activity_rows,
-                core_job_provider=self._core_job_rows,
+                core_job_provider=self._work_log_core_job_rows,
                 core_product_provider=self._library.core_activity_rows,
             )
             assistant_module = importlib.import_module("memorive_desktop_assistant")
@@ -1208,6 +1213,14 @@ class ProductApi:
         if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,159}", rendered):
             return f"memorive://job/{rendered}"
         return None
+
+    def _work_log_core_job_rows(self) -> list[dict[str, Any]]:
+        rows = self._core_job_rows(include_history=True)
+        counts = self._accounting.job_call_counts()
+        for row in rows:
+            row.update(counts.get(row['job_id'], {'model_calls':None,
+                'external_model_calls':None, 'model_call_counts_complete':False}))
+        return rows
 
     def _core_job_rows(self, *, include_history: bool = False) -> list[dict[str, Any]]:
         """Return public-safe metadata for real Core jobs only."""
@@ -1307,13 +1320,16 @@ class ProductApi:
                 raise RuntimeError("Core_JOB_ID_INVALID")
             job = self._service.call("get_job", {"job_id": job_id})
             bindings = job.get("artifact_bindings") or []
-            # Persisting a binding is not final delivery. In particular, never
-            # run legacy folder projection against a live worker's partial set.
-            # Cancelled/failed stages remain available through task history.
-            if str(job.get("control_state") or "").upper() != "SUCCEEDED":
-                continue
             if not isinstance(bindings, list) or not bindings:
                 continue
+            completed = str(job.get("control_state") or "").upper() == "SUCCEEDED"
+            has_review = any(isinstance(binding, Mapping) and
+                str(binding.get('artifact_id') or '').startswith(('core-data-review-','core-logic-review-'))
+                for binding in bindings)
+            if not completed and not has_review:
+                continue
+            # An E2 report is independently published. Incomplete jobs expose
+            # only those immutable reports, never legacy partial folder output.
             resolved = (
                 job.get("snapshots", {})
                 .get("resolved_task_input", {})
@@ -1344,6 +1360,7 @@ class ProductApi:
                     "updated_at": job.get("updated_at") or status.get("updated_at"),
                     "artifact_count": len(bindings),
                     "context_pack": None,
+                    "review_only": not completed,
                     "raw_private_content_included": False,
                 }
             )
@@ -1623,8 +1640,11 @@ class ProductApi:
         self, core_jobs: list[Mapping[str, Any]]
     ) -> list[dict[str, Any]]:
         """Resolve selected Core bindings to verified controlled files."""
+        from memorive_inbox.contracts import IMPORTABLE_EXTENSIONS
 
         kind_names = {
+            "CORE_DATA_REVIEW":"数据分析摘要", "CORE_LOGIC_REVIEW":"逻辑分析报告",
+            "CORE_DATA_REVIEW_RECORD":"数据核查记录", "CORE_LOGIC_REVIEW_RECORD":"逻辑核查记录",
             "CORE_SOURCE_DOCUMENT": "原始文献",
             "CORE_RAW_DOCUMENT": "原始转换文档",
             "CORE_CLEAN_DOCUMENT": "清洗文档",
@@ -1639,6 +1659,8 @@ class ProductApi:
         rows: list[dict[str, Any]] = []
         for core_job in core_jobs:
             job_id = core_job["job_id"]
+            review_only = core_job.get('review_only') is True
+            review_prefixes = ('core-data-review-', 'core-logic-review-')
             job = self._service.call("get_job", {"job_id": job_id})
             artifact_root = (
                 self._profile_path("Core_JOBS")
@@ -1701,7 +1723,7 @@ class ProductApi:
                                 )
                                 or not source_target.is_relative_to(inbox_root)
                                 or not source_target.is_file()
-                                or source_target.suffix.casefold() != ".pdf"
+                                or source_target.suffix.casefold() not in (IMPORTABLE_EXTENSIONS if review_only else {'.pdf'})
                             ):
                                 legacy_source_error_code = "Core_LIBRARY_SOURCE_PATH_INVALID"
                             else:
@@ -1721,6 +1743,8 @@ class ProductApi:
                 if not isinstance(binding, Mapping):
                     continue
                 source_artifact_id = str(binding.get("artifact_id") or "")
+                if review_only and not source_artifact_id.startswith(review_prefixes) and source_artifact_id != 'core-source-document':
+                    continue
                 locator = str(binding.get("locator") or "")
                 prefix = f"core-artifact:{job_id}:"
                 if not locator.startswith(prefix):
@@ -1760,7 +1784,7 @@ class ProductApi:
                 "analysis", "card", "context", "document", "review", "verification"
             }
             projection: dict[str, Any] | None = None
-            if verified_bindings and (
+            if not review_only and verified_bindings and (
                 source_document is not None
                 or any(
                 str(row["relative_path"]).split("/", 1)[0] in legacy_stage_directories
@@ -1798,6 +1822,9 @@ class ProductApi:
                             "sha256": row["sha256"],
                         }
                         for row in verified_bindings
+                        # E2 supplements have their own immutable registry. They
+                        # do not rewrite the completed mainline folder manifest.
+                        if not str(row['artifact_id']).startswith(('core-data-review-','core-logic-review-'))
                     ],
                 )
 
@@ -1837,10 +1864,17 @@ class ProductApi:
                     if expected_source and expected_source != source_content_sha256:
                         raise RuntimeError("Core_LIBRARY_SOURCE_HASH_MISMATCH")
 
+            source_root = root
+            if review_only and source_target is None and source_document is not None:
+                source_target = Path(source_document['private_path'])
+                source_content_sha256 = source_document['sha256']
+                source_root = Path(source_document['source_root'])
             job_rows: list[dict[str, Any]] = []
             for verified in verified_bindings:
                 binding = verified["binding"]
                 source_artifact_id = str(verified["artifact_id"])
+                if review_only and not source_artifact_id.startswith(review_prefixes):
+                    continue
                 relative = str(verified["relative_path"])
                 target = Path(verified["target"])
                 observed = str(verified["sha256"])
@@ -1864,11 +1898,33 @@ class ProductApi:
                     f"{job_id}\0{source_artifact_id}".encode("utf-8")
                 ).hexdigest()[:24]
                 artifact_kind = source_artifact_id.replace("core-", "Core_").replace("-", "_").upper()
+                review_meta=None
+                review_unpublished=False
+                for prefix,kind in [('core-data-review-record-','CORE_DATA_REVIEW_RECORD'),('core-logic-review-record-','CORE_LOGIC_REVIEW_RECORD'),
+                                    ('core-data-review-','CORE_DATA_REVIEW'),('core-logic-review-','CORE_LOGIC_REVIEW')]:
+                    if source_artifact_id.startswith(prefix):
+                        artifact_kind=kind
+                        from memorive_review.store import ReviewStore
+                        reviews=ReviewStore(self._profile_path('Core_JOBS'))
+                        report_id=source_artifact_id[len(prefix):]
+                        try:report=reviews.report(report_id)
+                        except ValueError as error:
+                            if str(error)=="REVIEW_REPORT_NOT_PUBLISHED":
+                                review_unpublished=True;break
+                            raise
+                        review_meta={k:report.get(k) for k in ('report_id','kind','status','color','scope','report_sha256')}
+                        state=reviews.get(job_id) or {}
+                        review_meta.update(reviews.source_status(report),derived_opinion=True,raw_evidence_eligible=False)
+                        break
+                if review_unpublished:continue
                 display_name = kind_names.get(artifact_kind, source_artifact_id or target.stem)
                 job_rows.append(
                     {
                         "artifact_id": artifact_id,
                         "source_artifact_id": source_artifact_id,
+                        "literature_review":review_meta,
+                        "partial_result":review_only,
+                        "source_task_state":str(job.get('control_state') or 'UNKNOWN'),
                         "artifact_kind": artifact_kind,
                         "job_id": job_id,
                         "display_name": f"{core_job['display_name']} · {display_name}",
@@ -1902,7 +1958,7 @@ class ProductApi:
                         {
                             "source_file_name": source_target.name,
                             "source_private_path": str(source_target),
-                            "source_root": str(root),
+                            "source_root": str(source_root),
                             "source_content_sha256": source_content_sha256,
                             "source_file_exists": True,
                         }
@@ -2350,6 +2406,13 @@ class ProductApi:
             return result
 
     def call(self, method: str, params: dict[str, Any] | None = None) -> Any:
+        from update_service import METHODS as UPDATE_METHODS
+        if method in UPDATE_METHODS:
+            with self._lock:
+                if not hasattr(self, '_updates'):
+                    from update_service import UpdateService
+                    self._updates = UpdateService(self)
+            return self._updates.call(method, dict(params or {}))
         from memorive_research_workspace.service import DESKTOP_METHODS
         if method in DESKTOP_METHODS:
             with self._lock:
@@ -2396,7 +2459,7 @@ class ProductApi:
             row = self._library._get(run_id + '/result')
             return {'status':'PASS','research_run_id':run_id,'route':'library','view':row['mode'],
                     'artifact_id':row['artifact_id'],'result_sha256':row['result_sha256'],'target_locator':row['stable_locator']}
-        if not isinstance(method, str) or method not in SETTINGS_METHODS | ACCOUNTING_METHODS | INBOX_METHODS | CURRENT_TASK_METHODS | MESSAGES_METHODS | SESSIONS_METHODS | LOCAL_MODEL_METHODS | ASSISTANT_PREFERENCE_METHODS | LIBRARY_METHODS | WORK_LOG_METHODS:
+        if not isinstance(method, str) or method not in REVIEW_METHODS | SETTINGS_METHODS | ACCOUNTING_METHODS | INBOX_METHODS | CURRENT_TASK_METHODS | MESSAGES_METHODS | SESSIONS_METHODS | LOCAL_MODEL_METHODS | ASSISTANT_PREFERENCE_METHODS | LIBRARY_METHODS | WORK_LOG_METHODS:
             raise ValueError("product method is not allowlisted")
         accepted = deepcopy(dict(params or {}))
         if any(str(key).startswith("_") for key in accepted):
@@ -2407,6 +2470,7 @@ class ProductApi:
             # long-running task request guarded by the product-wide lock.
             return self._service.call(method, accepted)
         with self._product_call_lock:
+            if method in REVIEW_METHODS:return self._service.call(method,accepted)
             if method in CURRENT_TASK_METHODS:
                 return self._current_task.call(method, accepted)
             if method in MESSAGES_METHODS:
@@ -4105,14 +4169,11 @@ class ProductApi:
 
     def memo_desktop_handoff_action(self,request):
         self.call('memo.capabilities',{})
-        from memorive_research_workspace.store import digest
         row=self._memo.store.get('desktop_handoff',request.get('id',''))
         if not row:raise ValueError('HANDOFF_NOT_FOUND')
-        folder=Path(row['path']);manifest=folder/'manifest.json'
-        if digest(manifest.read_bytes())!=row['manifest_hash']:raise ValueError('HANDOFF_CHANGED')
-        for name,meta in row['files'].items():
-            p=folder/name
-            if not p.resolve().is_relative_to(folder.resolve()) or digest(p.read_bytes())!=meta['sha256']:raise ValueError('HANDOFF_CHANGED')
+        ready=self._memo.handoffs.validate_desktop(row)
+        if request.get('action')=='validate':return ready
+        folder=Path(row['path'])
         if request.get('action')=='folder':os.startfile(str(folder));return {'status':'OPEN_REQUESTED'}
         if request.get('action')!='launch':raise ValueError('HANDOFF_ACTION_INVALID')
         path=row.get('app_path','')
@@ -4805,6 +4866,11 @@ class ProductApi:
             "sha256": hashlib.sha256(destination_io.read_bytes()).hexdigest().upper(),
             "status": "EXPORTED",
         }
+
+    def export_cli_template_file(self, service: dict[str, Any]) -> dict[str, Any]:
+        prepared = self._service.call("settings.cli_template_prepare", {"action": "export", "payload": service})
+        receipt = self._save_json_dialog(prepared["payload"], "Memorive-CLI-template.json")
+        return {"schema_version": "DesktopCLITemplateExportReceipt-v1", **receipt}
 
     def export_redacted_settings_file(self) -> dict[str, Any]:
         payload = self._service.call("settings.export_redacted", {})

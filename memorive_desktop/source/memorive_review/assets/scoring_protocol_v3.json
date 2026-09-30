@@ -1,0 +1,20 @@
+{
+  "schema_version": "DataAnomalyScorer-v3-weighted-feasibility",
+  "category_revision": "DATA_ANOMALY_FALSE_POSITIVE_CONTROL-v3",
+  "name": "异常数据检出与误报控制",
+  "axes": {
+    "assessment": 40,
+    "false_positive_control": 25,
+    "source_alignment": 15,
+    "scope_and_severity": 10,
+    "missing_parameters": 10
+  },
+  "directed_repair_limit": 2,
+  "repair_penalty_formula": "4*r1**1.4 + 8*r2**1.4; r is fraction of selected cases requiring correction",
+  "coefficient_status": "NEW_CATEGORY_REFERENCE_CALIBRATION_PROVISIONAL",
+  "cross_category_comparison": false,
+  "formal_qualification": false,
+  "accepted_variants": "Only case-specific, documented interpretation variants; required and optional missing fields belong to that variant. Positive findings and impact thresholds remain strict.",
+  "semantic_explanations": "Exact quotes and nonempty explanations are checked automatically; scientific justification still requires human audit. No truth/authenticity qualification.",
+  "weighted_feasibility": "Conditional feasibility is accepted with weights still missing; it never verifies the unknown actual survey weights."
+}

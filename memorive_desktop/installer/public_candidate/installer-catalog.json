@@ -1,0 +1,2153 @@
+{
+  "assistant.choose": {
+    "zh-CN": "选择要更新的 Memorive 程序目录或安装目录",
+    "en-US": "Choose the Memorive program or installation folder to update",
+    "ja-JP": "更新する Memorive のプログラムまたはインストール先フォルダーを選択"
+  },
+  "assistant.browse": {
+    "zh-CN": "选择目录",
+    "en-US": "Choose folder",
+    "ja-JP": "フォルダーを選択"
+  },
+  "assistant.fullConsent": {
+    "zh-CN": "我已确认显示的大小，同意下载完整更新包",
+    "en-US": "I have reviewed the size and agree to download the full package",
+    "ja-JP": "表示されたサイズを確認し、完全パッケージのダウンロードに同意します"
+  },
+  "assistant.check": {
+    "zh-CN": "检查更新",
+    "en-US": "Check for updates",
+    "ja-JP": "更新を確認"
+  },
+  "assistant.download": {
+    "zh-CN": "准备并下载",
+    "en-US": "Prepare and download",
+    "ja-JP": "準備してダウンロード"
+  },
+  "assistant.apply": {
+    "zh-CN": "退出后更新",
+    "en-US": "Update after exit",
+    "ja-JP": "終了後に更新"
+  },
+  "assistant.recover": {
+    "zh-CN": "恢复未完成的更新",
+    "en-US": "Recover interrupted update",
+    "ja-JP": "中断した更新を復元"
+  },
+  "assistant.cancel": {
+    "zh-CN": "取消",
+    "en-US": "Cancel",
+    "ja-JP": "キャンセル"
+  },
+  "assistant.fullRequired": {
+    "zh-CN": "当前版本需要完整更新包，请确认下载大小。",
+    "en-US": "This version requires the full package. Confirm the download size.",
+    "ja-JP": "このバージョンには完全パッケージが必要です。ダウンロードサイズを確認してください。"
+  },
+  "assistant.ready": {
+    "zh-CN": "已绑定此实例，可检查正式版本更新。",
+    "en-US": "This instance is selected. You can check stable releases.",
+    "ja-JP": "このインスタンスを選択しました。正式リリースの更新を確認できます。"
+  },
+  "state.UP_TO_DATE": {
+    "zh-CN": "当前已是最新正式版本。",
+    "en-US": "You have the latest stable release.",
+    "ja-JP": "最新の正式リリースです。"
+  },
+  "state.AVAILABLE": {
+    "zh-CN": "发现可用更新。",
+    "en-US": "An update is available.",
+    "ja-JP": "利用可能な更新があります。"
+  },
+  "state.NO_COMPATIBLE_UPDATE": {
+    "zh-CN": "当前发布尚无兼容更新包。",
+    "en-US": "This release has no compatible update package.",
+    "ja-JP": "このリリースには互換性のある更新パッケージがありません。"
+  },
+  "stage.VERIFIED": {
+    "zh-CN": "下载已验证，可以启动更新。",
+    "en-US": "Download verified. You can start the update.",
+    "ja-JP": "ダウンロードを検証しました。更新を開始できます。"
+  },
+  "stage.AVAILABLE": {
+    "zh-CN": "更新包已选定。",
+    "en-US": "Update package selected.",
+    "ja-JP": "更新パッケージを選択しました。"
+  },
+  "stage.WAITING_FULL_CONSENT": {
+    "zh-CN": "等待确认完整包的下载大小。",
+    "en-US": "Waiting for full download confirmation.",
+    "ja-JP": "完全パッケージのダウンロード確認を待っています。"
+  },
+  "stage.ROLLED_BACK": {
+    "zh-CN": "已恢复更新前的版本和数据。",
+    "en-US": "The previous version and data have been restored.",
+    "ja-JP": "更新前のバージョンとデータを復元しました。"
+  },
+  "stage.CANCELLED": {
+    "zh-CN": "本次下载已取消。",
+    "en-US": "This download was cancelled.",
+    "ja-JP": "ダウンロードをキャンセルしました。"
+  },
+  "stage.DOWNLOAD_FAILED": {
+    "zh-CN": "下载未完成，原版本仍保留。",
+    "en-US": "Download incomplete. The previous version is retained.",
+    "ja-JP": "ダウンロードが完了しませんでした。以前のバージョンは保持されています。"
+  },
+  "common.details": {
+    "zh-CN": "查看诊断详情",
+    "en-US": "Show diagnostic details",
+    "ja-JP": "診断の詳細を表示"
+  },
+  "common.close": {
+    "zh-CN": "关闭",
+    "en-US": "Close",
+    "ja-JP": "閉じる"
+  },
+  "update.title": {
+    "zh-CN": "Memorive 更新助手",
+    "en-US": "Memorive Update Assistant",
+    "ja-JP": "Memorive 更新アシスタント"
+  },
+  "update.preparing": {
+    "zh-CN": "正在准备更新…",
+    "en-US": "Preparing the update…",
+    "ja-JP": "更新を準備しています…"
+  },
+  "update.finished": {
+    "zh-CN": "操作已完成。",
+    "en-US": "The operation is complete.",
+    "ja-JP": "処理が完了しました。"
+  },
+  "error.generic": {
+    "zh-CN": "操作未完成，请查看诊断详情。",
+    "en-US": "The operation could not be completed. See diagnostic details.",
+    "ja-JP": "処理を完了できませんでした。診断の詳細を確認してください。"
+  },
+  "stage.VERIFYING_BASE": {
+    "zh-CN": "正在验证当前版本的文件…",
+    "en-US": "Verifying current version files…",
+    "ja-JP": "現在のバージョンのファイルを検証しています…"
+  },
+  "stage.DOWNLOADING": {
+    "zh-CN": "正在下载更新，可以继续使用 Memorive。",
+    "en-US": "Downloading the update. You can keep using Memorive.",
+    "ja-JP": "更新をダウンロードしています。Memorive は引き続き使用できます。"
+  },
+  "stage.WAITING_IDLE": {
+    "zh-CN": "等待此实例完成任务并退出，更新尚未写入用户数据。",
+    "en-US": "Waiting for this instance to finish its tasks and exit. Your data has not been changed.",
+    "ja-JP": "このインスタンスのタスク完了と終了を待っています。データはまだ変更されていません。"
+  },
+  "stage.APPLYING": {
+    "zh-CN": "正在组装并验证新版本…",
+    "en-US": "Assembling and verifying the new version…",
+    "ja-JP": "新しいバージョンを構成して検証しています…"
+  },
+  "stage.BACKING_UP": {
+    "zh-CN": "正在备份当前数据…",
+    "en-US": "Backing up existing data…",
+    "ja-JP": "現在のデータをバックアップしています…"
+  },
+  "stage.BACKED_UP": {
+    "zh-CN": "数据备份完成。",
+    "en-US": "Data backup complete.",
+    "ja-JP": "データのバックアップが完了しました。"
+  },
+  "stage.MIGRATING": {
+    "zh-CN": "正在升级数据结构，请勿关闭更新助手。",
+    "en-US": "Upgrading data structures. Keep the update assistant open.",
+    "ja-JP": "データ構造を更新しています。更新アシスタントを閉じないでください。"
+  },
+  "stage.MIGRATED": {
+    "zh-CN": "数据结构升级完成。",
+    "en-US": "Data structure upgrade complete.",
+    "ja-JP": "データ構造の更新が完了しました。"
+  },
+  "stage.VERIFYING_START": {
+    "zh-CN": "正在进行离线启动前检查…",
+    "en-US": "Running offline pre-start checks…",
+    "ja-JP": "オフラインで起動前の確認を実行しています…"
+  },
+  "stage.ACTIVATING": {
+    "zh-CN": "正在启用已验证的新版本…",
+    "en-US": "Activating the verified version…",
+    "ja-JP": "検証済みのバージョンを有効にしています…"
+  },
+  "stage.COMPLETE": {
+    "zh-CN": "更新完成。",
+    "en-US": "Update complete.",
+    "ja-JP": "更新が完了しました。"
+  },
+  "stage.RECOVERY_REQUIRED": {
+    "zh-CN": "更新中断，已保留恢复材料。",
+    "en-US": "The update was interrupted. Recovery files have been retained.",
+    "ja-JP": "更新が中断されました。復元用ファイルは保持されています。"
+  },
+  "error.UPDATE_RELEASE_TRUST_NOT_CONFIGURED": {
+    "zh-CN": "此候选尚未绑定正式发布签名，暂不能验证线上更新。",
+    "en-US": "This candidate has no production signing key yet and cannot verify online updates.",
+    "ja-JP": "この候補には正式リリースの署名鍵が未設定のため、オンライン更新を検証できません。"
+  },
+  "error.UPDATE_NEW_WRITES_BLOCK_RECOVERY": {
+    "zh-CN": "新版本已开始写入数据，不能恢复旧备份。",
+    "en-US": "The new version has started writing data. Restoring the old backup is blocked.",
+    "ja-JP": "新しいバージョンでデータの書き込みが開始されています。古いバックアップには戻せません。"
+  },
+  "error.UPDATE_RECOVERY_REQUIRED": {
+    "zh-CN": "此实例有未完成的更新，请先在更新助手中恢复。",
+    "en-US": "This instance has an unfinished update. Recover it in the update assistant first.",
+    "ja-JP": "このインスタンスには未完了の更新があります。更新アシスタントで先に復元してください。"
+  },
+  "legacy.77da5e608842": {
+    "source_token": ".NET 4.8 官网",
+    "zh-CN": ".NET 4.8 官网",
+    "en-US": ".NET 4.8 website",
+    "ja-JP": ".NET 4.8 公式サイト"
+  },
+  "legacy.38095f9f66d5": {
+    "source_token": "4 已发现 · 4 未发现",
+    "zh-CN": "4 已发现 · 4 未发现",
+    "en-US": "4 found · 4 not found",
+    "ja-JP": "4 件検出 · 4 件未検出"
+  },
+  "legacy.7c79e29b41f4": {
+    "source_token": "AGPL 许可全文",
+    "zh-CN": "AGPL 许可全文",
+    "en-US": "Full AGPL license",
+    "ja-JP": "AGPL ライセンス全文"
+  },
+  "legacy.1074412337e5": {
+    "source_token": "Edge 与 SmartScreen 隐私说明",
+    "zh-CN": "Edge 与 SmartScreen 隐私说明",
+    "en-US": "Edge and SmartScreen privacy",
+    "ja-JP": "Edge と SmartScreen のプライバシー"
+  },
+  "legacy.f00ba3045348": {
+    "source_token": "Git、系统 Python、Node.js/npm、Rust、SDK、Ollama 和各家 CLI。",
+    "zh-CN": "Git、系统 Python、Node.js/npm、Rust、SDK、Ollama 和各家 CLI。",
+    "en-US": "Git, system Python, Node.js/npm, Rust, SDKs, Ollama and vendor CLIs.",
+    "ja-JP": "Git、システムの Python、Node.js/npm、Rust、SDK、Ollama、各社の CLI。"
+  },
+  "legacy.cdcf38b6962c": {
+    "source_token": "Memorive Windows 安装向导",
+    "zh-CN": "Memorive Windows 安装向导",
+    "en-US": "Memorive Windows Setup",
+    "ja-JP": "Memorive Windows セットアップ"
+  },
+  "legacy.e9e4c37f0c35": {
+    "source_token": "Memorive 与 Microsoft 组件分别适用其许可",
+    "zh-CN": "Memorive 与 Microsoft 组件分别适用其许可",
+    "en-US": "Memorive and Microsoft components retain their respective licenses",
+    "ja-JP": "Memorive と Microsoft の各コンポーネントにはそれぞれのライセンスが適用されます"
+  },
+  "legacy.0cfd715a62fc": {
+    "source_token": "Memorive 已安装",
+    "zh-CN": "Memorive 已安装",
+    "en-US": "Memorive is installed",
+    "ja-JP": "Memorive をインストールしました"
+  },
+  "legacy.6b7489761cd4": {
+    "source_token": "Memorive 已成功安装。",
+    "zh-CN": "Memorive 已成功安装。",
+    "en-US": "Memorive was installed successfully.",
+    "ja-JP": "Memorive のインストールが完了しました。"
+  },
+  "legacy.9ebbb8d718bd": {
+    "source_token": "Memorive 已适配 CLI",
+    "zh-CN": "Memorive 已适配 CLI",
+    "en-US": "CLIs supported by Memorive",
+    "ja-JP": "Memorive 対応 CLI"
+  },
+  "legacy.6ee2fa59f364": {
+    "source_token": "Memorive 核心、私有 CPython 与依赖、本地 UI、卸载程序。",
+    "zh-CN": "Memorive 核心、私有 CPython 与依赖、本地 UI、卸载程序。",
+    "en-US": "Memorive core, bundled CPython and dependencies, local UI and uninstaller.",
+    "ja-JP": "Memorive 本体、同梱の CPython と依存関係、ローカル UI、アンインストーラー。"
+  },
+  "legacy.7b8c2d4620aa": {
+    "source_token": "Memorive 核心与自带运行环境",
+    "zh-CN": "Memorive 核心与自带运行环境",
+    "en-US": "Memorive core and bundled runtime",
+    "ja-JP": "Memorive 本体と同梱ランタイム"
+  },
+  "legacy.19bc74a568cb": {
+    "source_token": "Memorive 核心程序、私有 CPython 与依赖、本地 UI 和卸载程序。",
+    "zh-CN": "Memorive 核心程序、私有 CPython 与依赖、本地 UI 和卸载程序。",
+    "en-US": "Memorive core, bundled CPython and dependencies, local UI and uninstaller.",
+    "ja-JP": "Memorive 本体、同梱の CPython と依存関係、ローカル UI、アンインストーラー。"
+  },
+  "legacy.cb4e31f555f0": {
+    "source_token": "Microsoft WebView2 Evergreen 会自动更新；Visual C++ 运行库用于原生组件。二者保留 Microsoft 许可，不改按 AGPL 授权。缺少时请从 Microsoft 官方网站安装。",
+    "zh-CN": "Microsoft WebView2 Evergreen 会自动更新；Visual C++ 运行库用于原生组件。二者保留 Microsoft 许可，不改按 AGPL 授权。缺少时请从 Microsoft 官方网站安装。",
+    "en-US": "Microsoft WebView2 Evergreen updates automatically. Visual C++ supports native components. Both retain Microsoft licenses and are not relicensed under AGPL. Install missing components from Microsoft.",
+    "ja-JP": "Microsoft WebView2 Evergreen は自動更新されます。Visual C++ はネイティブコンポーネントに必要です。いずれも Microsoft のライセンスが適用され、AGPL には変更されません。不足する場合は Microsoft 公式サイトからインストールしてください。"
+  },
+  "legacy.6cb345ae265f": {
+    "source_token": "Microsoft 官方运行库已满足",
+    "zh-CN": "Microsoft 官方运行库已满足",
+    "en-US": "Microsoft runtime requirements met",
+    "ja-JP": "Microsoft ランタイムの要件を満たしています"
+  },
+  "legacy.7321a805d8fa": {
+    "source_token": "Microsoft 组件",
+    "zh-CN": "Microsoft 组件",
+    "en-US": "Microsoft components",
+    "ja-JP": "Microsoft コンポーネント"
+  },
+  "legacy.ea773ea1a89a": {
+    "source_token": "Microsoft 隐私声明",
+    "zh-CN": "Microsoft 隐私声明",
+    "en-US": "Microsoft Privacy Statement",
+    "ja-JP": "Microsoft プライバシーステートメント"
+  },
+  "legacy.cdf15ca4ec3b": {
+    "source_token": "Visual C++ 下载与条款",
+    "zh-CN": "Visual C++ 下载与条款",
+    "en-US": "Visual C++ download and terms",
+    "ja-JP": "Visual C++ のダウンロードと利用条件"
+  },
+  "legacy.bce126ccc3eb": {
+    "source_token": "Visual C++ 请确认安装窗口显示 (x64)，x86 不能替代。",
+    "zh-CN": "Visual C++ 请确认安装窗口显示 (x64)，x86 不能替代。",
+    "en-US": "Ensure the Visual C++ installer shows (x64). The x86 version is not a substitute.",
+    "ja-JP": "Visual C++ のインストール画面に (x64) と表示されていることを確認してください。x86 版では代用できません。"
+  },
+  "legacy.7f72ac0e1705": {
+    "source_token": "WebView2 与条款",
+    "zh-CN": "WebView2 与条款",
+    "en-US": "WebView2 and terms",
+    "ja-JP": "WebView2 と利用条件"
+  },
+  "legacy.acd225acbfea": {
+    "source_token": "WebView2 包含 Microsoft Defender SmartScreen，会按 Microsoft 隐私声明收集并向 Microsoft 发送相关信息，用于安全检查；详见下列官方说明。",
+    "zh-CN": "WebView2 包含 Microsoft Defender SmartScreen，会按 Microsoft 隐私声明收集并向 Microsoft 发送相关信息，用于安全检查；详见下列官方说明。",
+    "en-US": "WebView2 includes Microsoft Defender SmartScreen, which collects and sends information to Microsoft for security checks under the Microsoft Privacy Statement. See the official documentation below.",
+    "ja-JP": "WebView2 には Microsoft Defender SmartScreen が含まれます。セキュリティ確認のため、Microsoft のプライバシーステートメントに従って情報を収集し Microsoft に送信します。詳細は以下の公式資料をご確認ください。"
+  },
+  "legacy.90d48ded2557": {
+    "source_token": "WebView2 官网",
+    "zh-CN": "WebView2 官网",
+    "en-US": "WebView2 website",
+    "ja-JP": "WebView2 公式サイト"
+  },
+  "legacy.347c1d0a525e": {
+    "source_token": "Windows 安装向导",
+    "zh-CN": "Windows 安装向导",
+    "en-US": "Windows Setup",
+    "ja-JP": "Windows セットアップ"
+  },
+  "legacy.45e315073271": {
+    "source_token": "“已发现”只表示命令存在，不代表已登录、配置、启用或可由 Memorive 调用。",
+    "zh-CN": "“已发现”只表示命令存在，不代表已登录、配置、启用或可由 Memorive 调用。",
+    "en-US": "Found means the command exists. It does not indicate sign-in, configuration, activation or availability to Memorive.",
+    "ja-JP": "「検出」はコマンドの存在のみを示します。ログイン、設定、有効化、Memorive からの呼び出し可否は確認していません。"
+  },
+  "legacy.da336fdc0dbd": {
+    "source_token": "上一步",
+    "zh-CN": "上一步",
+    "en-US": "Back",
+    "ja-JP": "戻る"
+  },
+  "legacy.acfc4e74a650": {
+    "source_token": "下一步",
+    "zh-CN": "下一步",
+    "en-US": "Next",
+    "ja-JP": "次へ"
+  },
+  "legacy.c24a57602704": {
+    "source_token": "下载 Visual C++ x64",
+    "zh-CN": "下载 Visual C++ x64",
+    "en-US": "Download Visual C++ x64",
+    "ja-JP": "Visual C++ x64 をダウンロード"
+  },
+  "legacy.8ff1bf325ce7": {
+    "source_token": "不会安装或修改",
+    "zh-CN": "不会安装或修改",
+    "en-US": "Not installed or changed",
+    "ja-JP": "インストール・変更しないもの"
+  },
+  "legacy.a5922bbaabc2": {
+    "source_token": "不修改外部账号、代理、防火墙、Defender 或浏览器设置。",
+    "zh-CN": "不修改外部账号、代理、防火墙、Defender 或浏览器设置。",
+    "en-US": "External accounts, proxy, firewall, Defender and browser settings remain unchanged.",
+    "ja-JP": "外部アカウント、プロキシ、ファイアウォール、Defender、ブラウザーの設定は変更しません。"
+  },
+  "legacy.e8dde32128ec": {
+    "source_token": "不创建",
+    "zh-CN": "不创建",
+    "en-US": "Do not create",
+    "ja-JP": "作成しない"
+  },
+  "legacy.7fe6d4f5f6bb": {
+    "source_token": "不删除既有 Card、Analysis 和用户工作数据。",
+    "zh-CN": "不删除既有 Card、Analysis 和用户工作数据。",
+    "en-US": "Existing Card, Analysis and user work data are retained.",
+    "ja-JP": "既存の Card、Analysis、ユーザーの作業データは保持します。"
+  },
+  "legacy.82a896e97897": {
+    "source_token": "不安装 Git、系统 Python、Node.js/npm、Rust、SDK 或编译工具。",
+    "zh-CN": "不安装 Git、系统 Python、Node.js/npm、Rust、SDK 或编译工具。",
+    "en-US": "Git, system Python, Node.js/npm, Rust, SDKs and compilers are not installed.",
+    "ja-JP": "Git、システムの Python、Node.js/npm、Rust、SDK、コンパイラーはインストールしません。"
+  },
+  "legacy.eb63488854b2": {
+    "source_token": "不安装、更新、登录或配置 Ollama 与任何厂商 CLI。",
+    "zh-CN": "不安装、更新、登录或配置 Ollama 与任何厂商 CLI。",
+    "en-US": "Ollama and vendor CLIs are not installed, updated, signed into or configured.",
+    "ja-JP": "Ollama や各社 CLI のインストール、更新、ログイン、設定は行いません。"
+  },
+  "legacy.c1950ebc83b8": {
+    "source_token": "仅检测，不安装或修改",
+    "zh-CN": "仅检测，不安装或修改",
+    "en-US": "Detect only; no installation or changes",
+    "ja-JP": "検出のみ。インストールや変更は行いません"
+  },
+  "legacy.e08e8f6422e6": {
+    "source_token": "从 Microsoft 官方来源安装缺少的组件，然后点击“重新检查”。",
+    "zh-CN": "从 Microsoft 官方来源安装缺少的组件，然后点击“重新检查”。",
+    "en-US": "Install missing components from Microsoft, then select Recheck.",
+    "ja-JP": "不足するコンポーネントを Microsoft 公式サイトからインストールし、「再確認」を選択してください。"
+  },
+  "legacy.462cf8e45307": {
+    "source_token": "代码采用 AGPL-3.0，角色素材单独声明。WebView2 会自动更新，并使用 Microsoft SmartScreen 服务。",
+    "zh-CN": "代码采用 AGPL-3.0，角色素材单独声明。WebView2 会自动更新，并使用 Microsoft SmartScreen 服务。",
+    "en-US": "Code is licensed under AGPL-3.0. Character assets have separate notices. WebView2 updates automatically and uses Microsoft SmartScreen.",
+    "ja-JP": "コードには AGPL-3.0 が適用されます。キャラクター素材は別途表記しています。WebView2 は自動更新され、Microsoft SmartScreen を使用します。"
+  },
+  "legacy.be433cfbc39e": {
+    "source_token": "例如：My CLI",
+    "zh-CN": "例如：My CLI",
+    "en-US": "Example: My CLI",
+    "ja-JP": "例: My CLI"
+  },
+  "legacy.73e8f3efa0ab": {
+    "source_token": "例如：mycli 或 D:\\Tools\\mycli.exe",
+    "zh-CN": "例如：mycli 或 D:\\Tools\\mycli.exe",
+    "en-US": "Example: mycli or D:\\Tools\\mycli.exe",
+    "ja-JP": "例: mycli または D:\\Tools\\mycli.exe"
+  },
+  "legacy.3fd47edce45b": {
+    "source_token": "关闭",
+    "zh-CN": "关闭",
+    "en-US": "Close",
+    "ja-JP": "閉じる"
+  },
+  "legacy.3a597aa72d78": {
+    "source_token": "关闭安装向导",
+    "zh-CN": "关闭安装向导",
+    "en-US": "Close setup",
+    "ja-JP": "セットアップを閉じる"
+  },
+  "legacy.97de515e6a46": {
+    "source_token": "其他 CLI（用户指定）",
+    "zh-CN": "其他 CLI（用户指定）",
+    "en-US": "Other CLI (user specified)",
+    "ja-JP": "その他の CLI（ユーザー指定）"
+  },
+  "legacy.adf67c505c0e": {
+    "source_token": "准备安装",
+    "zh-CN": "准备安装",
+    "en-US": "Ready to install",
+    "ja-JP": "インストールの準備"
+  },
+  "legacy.00d271399ea8": {
+    "source_token": "准备安装 Memorive",
+    "zh-CN": "准备安装 Memorive",
+    "en-US": "Ready to install Memorive",
+    "ja-JP": "Memorive のインストール準備"
+  },
+  "legacy.cde2cd071d25": {
+    "source_token": "创建",
+    "zh-CN": "创建",
+    "en-US": "Create",
+    "ja-JP": "作成"
+  },
+  "legacy.4d0d53c7dc0a": {
+    "source_token": "创建已选择的快捷方式和 Windows 卸载入口。",
+    "zh-CN": "创建已选择的快捷方式和 Windows 卸载入口。",
+    "en-US": "Create the selected shortcuts and Windows uninstall entry.",
+    "ja-JP": "選択したショートカットと Windows のアンインストール項目を作成します。"
+  },
+  "legacy.ccd029d11c20": {
+    "source_token": "创建桌面快捷方式",
+    "zh-CN": "创建桌面快捷方式",
+    "en-US": "Create a desktop shortcut",
+    "ja-JP": "デスクトップにショートカットを作成"
+  },
+  "legacy.f1f571e477cc": {
+    "source_token": "创建系统入口",
+    "zh-CN": "创建系统入口",
+    "en-US": "Create system entries",
+    "ja-JP": "システムの起動項目を作成"
+  },
+  "legacy.2c7e84275bbf": {
+    "source_token": "即将安装 Memorive",
+    "zh-CN": "即将安装 Memorive",
+    "en-US": "Memorive is ready to install",
+    "ja-JP": "Memorive をインストールします"
+  },
+  "legacy.4d22e2be51b2": {
+    "source_token": "即将完成",
+    "zh-CN": "即将完成",
+    "en-US": "Almost finished",
+    "ja-JP": "まもなく完了します"
+  },
+  "legacy.0cb3fb5b86d7": {
+    "source_token": "发生错误",
+    "zh-CN": "发生错误",
+    "en-US": "An error occurred",
+    "ja-JP": "エラーが発生しました"
+  },
+  "legacy.2cd0f3be8738": {
+    "source_token": "取消",
+    "zh-CN": "取消",
+    "en-US": "Cancel",
+    "ja-JP": "キャンセル"
+  },
+  "legacy.0427848e3caf": {
+    "source_token": "只增加一个本机检测项，不会安装或运行该工具。",
+    "zh-CN": "只增加一个本机检测项，不会安装或运行该工具。",
+    "en-US": "Add a local detection entry. The tool will not be installed or run.",
+    "ja-JP": "ローカルの検出項目を追加します。ツールのインストールや実行は行いません。"
+  },
+  "legacy.8ed5cacb6f1e": {
+    "source_token": "只检查用户指定的命令或路径是否存在，不会运行工具。自定义 CLI 即使被发现，也会标记为“未适配”。",
+    "zh-CN": "只检查用户指定的命令或路径是否存在，不会运行工具。自定义 CLI 即使被发现，也会标记为“未适配”。",
+    "en-US": "Only checks whether the specified command or path exists; it does not run the tool. Custom CLIs remain marked unsupported even when found.",
+    "ja-JP": "指定したコマンドやパスの存在だけを確認し、ツールは実行しません。カスタム CLI は検出されても「未対応」と表示されます。"
+  },
+  "legacy.d1c12c4b7843": {
+    "source_token": "只读检测本机已有工具，不下载、不安装、不配置。",
+    "zh-CN": "只读检测本机已有工具，不下载、不安装、不配置。",
+    "en-US": "Read-only detection of existing tools. No downloads, installation or configuration.",
+    "ja-JP": "既存のツールを読み取り専用で検出します。ダウンロード、インストール、設定は行いません。"
+  },
+  "legacy.c27694a3d132": {
+    "source_token": "可选检测",
+    "zh-CN": "可选检测",
+    "en-US": "Optional detection",
+    "ja-JP": "任意の検出"
+  },
+  "legacy.933d115a7ccb": {
+    "source_token": "命令名或可执行文件路径",
+    "zh-CN": "命令名或可执行文件路径",
+    "en-US": "Command name or executable path",
+    "ja-JP": "コマンド名または実行ファイルのパス"
+  },
+  "legacy.edcda68e3b05": {
+    "source_token": "复检已有的 Microsoft Edge WebView2 Runtime，不新增系统组件。",
+    "zh-CN": "复检已有的 Microsoft Edge WebView2 Runtime，不新增系统组件。",
+    "en-US": "Recheck the existing Microsoft Edge WebView2 Runtime without adding system components.",
+    "ja-JP": "既存の Microsoft Edge WebView2 Runtime を再確認します。システムコンポーネントは追加しません。"
+  },
+  "legacy.b4306b9e13c6": {
+    "source_token": "复检已有的 Microsoft WebView2 和 Visual C++ 运行库。",
+    "zh-CN": "复检已有的 Microsoft WebView2 和 Visual C++ 运行库。",
+    "en-US": "Recheck existing Microsoft WebView2 and Visual C++ runtimes.",
+    "ja-JP": "既存の Microsoft WebView2 と Visual C++ ランタイムを再確認します。"
+  },
+  "legacy.8a1f89814052": {
+    "source_token": "复检已有的 Microsoft 官方运行库",
+    "zh-CN": "复检已有的 Microsoft 官方运行库",
+    "en-US": "Recheck existing Microsoft runtimes",
+    "ja-JP": "既存の Microsoft ランタイムを再確認"
+  },
+  "legacy.27dc94c43b29": {
+    "source_token": "复检必要组件",
+    "zh-CN": "复检必要组件",
+    "en-US": "Recheck required components",
+    "ja-JP": "必要なコンポーネントを再確認"
+  },
+  "legacy.39213ec38c4e": {
+    "source_token": "外部工具",
+    "zh-CN": "外部工具",
+    "en-US": "External tools",
+    "ja-JP": "外部ツール"
+  },
+  "legacy.28384d7afd2e": {
+    "source_token": "失败",
+    "zh-CN": "失败",
+    "en-US": "Failed",
+    "ja-JP": "失敗"
+  },
+  "legacy.bee296b8c665": {
+    "source_token": "安装 Memorive",
+    "zh-CN": "安装 Memorive",
+    "en-US": "Install Memorive",
+    "ja-JP": "Memorive をインストール"
+  },
+  "legacy.b73a2a099d7c": {
+    "source_token": "安装与完成",
+    "zh-CN": "安装与完成",
+    "en-US": "Install and finish",
+    "ja-JP": "インストールと完了"
+  },
+  "legacy.3eb9bc4af774": {
+    "source_token": "安装位置",
+    "zh-CN": "安装位置",
+    "en-US": "Installation location",
+    "ja-JP": "インストール先"
+  },
+  "legacy.a3b703154298": {
+    "source_token": "安装内容",
+    "zh-CN": "安装内容",
+    "en-US": "Installation contents",
+    "ja-JP": "インストール内容"
+  },
+  "legacy.f9e8fd3ca573": {
+    "source_token": "安装出现问题",
+    "zh-CN": "安装出现问题",
+    "en-US": "Installation encountered a problem",
+    "ja-JP": "インストール中に問題が発生しました"
+  },
+  "legacy.dc28dab0ce61": {
+    "source_token": "安装前可复核的明确范围",
+    "zh-CN": "安装前可复核的明确范围",
+    "en-US": "Review the installation scope",
+    "ja-JP": "インストール対象を確認"
+  },
+  "legacy.daa5926a1ebe": {
+    "source_token": "安装包自带",
+    "zh-CN": "安装包自带",
+    "en-US": "Included in the package",
+    "ja-JP": "パッケージに同梱"
+  },
+  "legacy.7b0111c45101": {
+    "source_token": "安装向导",
+    "zh-CN": "安装向导",
+    "en-US": "Setup",
+    "ja-JP": "セットアップ"
+  },
+  "legacy.2b1ea8423e68": {
+    "source_token": "安装向导 · 准备安装",
+    "zh-CN": "安装向导 · 准备安装",
+    "en-US": "Setup · Ready to install",
+    "ja-JP": "セットアップ · インストールの準備"
+  },
+  "legacy.d55ad3521b66": {
+    "source_token": "安装向导 · 外部工具检测",
+    "zh-CN": "安装向导 · 外部工具检测",
+    "en-US": "Setup · External tools",
+    "ja-JP": "セットアップ · 外部ツールの検出"
+  },
+  "legacy.fa1b015f32b4": {
+    "source_token": "安装向导 · 安装与完成",
+    "zh-CN": "安装向导 · 安装与完成",
+    "en-US": "Setup · Install and finish",
+    "ja-JP": "セットアップ · インストールと完了"
+  },
+  "legacy.e6284ddda87d": {
+    "source_token": "安装向导 · 安装位置",
+    "zh-CN": "安装向导 · 安装位置",
+    "en-US": "Setup · Installation location",
+    "ja-JP": "セットアップ · インストール先"
+  },
+  "legacy.00d95fcb88e2": {
+    "source_token": "安装向导 · 欢迎",
+    "zh-CN": "安装向导 · 欢迎",
+    "en-US": "Setup · Welcome",
+    "ja-JP": "セットアップ · ようこそ"
+  },
+  "legacy.333d7f0a6d04": {
+    "source_token": "安装向导 · 系统检查",
+    "zh-CN": "安装向导 · 系统检查",
+    "en-US": "Setup · System check",
+    "ja-JP": "セットアップ · システム確認"
+  },
+  "legacy.562fe92bddb2": {
+    "source_token": "安装器未及时响应，请重试；若仍无响应，请关闭并重新打开安装器。",
+    "zh-CN": "安装器未及时响应，请重试；若仍无响应，请关闭并重新打开安装器。",
+    "en-US": "Setup did not respond in time. Retry; if it still does not respond, close and reopen it.",
+    "ja-JP": "セットアップが時間内に応答しませんでした。再試行し、応答しない場合は閉じて再度開いてください。"
+  },
+  "legacy.57cf47f232a8": {
+    "source_token": "安装完成",
+    "zh-CN": "安装完成",
+    "en-US": "Installation complete",
+    "ja-JP": "インストール完了"
+  },
+  "legacy.dac3cc0f7c99": {
+    "source_token": "安装已成功完成。",
+    "zh-CN": "安装已成功完成。",
+    "en-US": "Installation completed successfully.",
+    "ja-JP": "インストールが完了しました。"
+  },
+  "legacy.24ae4005170c": {
+    "source_token": "安装未完成",
+    "zh-CN": "安装未完成",
+    "en-US": "Installation incomplete",
+    "ja-JP": "インストール未完了"
+  },
+  "legacy.a26572571152": {
+    "source_token": "安装步骤",
+    "zh-CN": "安装步骤",
+    "en-US": "Installation steps",
+    "ja-JP": "インストール手順"
+  },
+  "legacy.fe0d890ac872": {
+    "source_token": "安装过程中请不要关闭此窗口",
+    "zh-CN": "安装过程中请不要关闭此窗口",
+    "en-US": "Keep this window open during installation",
+    "ja-JP": "インストール中はこのウィンドウを閉じないでください"
+  },
+  "legacy.421f0e796c87": {
+    "source_token": "安装进度",
+    "zh-CN": "安装进度",
+    "en-US": "Installation progress",
+    "ja-JP": "インストールの進行状況"
+  },
+  "legacy.c0b3fbff51cc": {
+    "source_token": "完成",
+    "zh-CN": "完成",
+    "en-US": "Finish",
+    "ja-JP": "完了"
+  },
+  "legacy.59941b678943": {
+    "source_token": "完成后启动 Memorive",
+    "zh-CN": "完成后启动 Memorive",
+    "en-US": "Launch Memorive when finished",
+    "ja-JP": "完了後に Memorive を起動"
+  },
+  "legacy.990b41c3f036": {
+    "source_token": "将在当前安全步骤结束后停止；保留诊断记录。",
+    "zh-CN": "将在当前安全步骤结束后停止；保留诊断记录。",
+    "en-US": "Stop after the current safe step. Diagnostic records will be retained.",
+    "ja-JP": "現在の安全な処理が終わってから停止します。診断記録は保持されます。"
+  },
+  "legacy.80a0fab127b9": {
+    "source_token": "将安装或创建",
+    "zh-CN": "将安装或创建",
+    "en-US": "Will install or create",
+    "ja-JP": "インストール・作成するもの"
+  },
+  "legacy.c76a6277965b": {
+    "source_token": "尚未完成检查",
+    "zh-CN": "尚未完成检查",
+    "en-US": "Checks are not complete",
+    "ja-JP": "確認が完了していません"
+  },
+  "legacy.cc4f95807889": {
+    "source_token": "已发现",
+    "zh-CN": "已发现",
+    "en-US": "Found",
+    "ja-JP": "検出済み"
+  },
+  "legacy.f28461bb49c8": {
+    "source_token": "已完成",
+    "zh-CN": "已完成",
+    "en-US": "Complete",
+    "ja-JP": "完了"
+  },
+  "legacy.434203a723b4": {
+    "source_token": "已更新",
+    "zh-CN": "已更新",
+    "en-US": "Updated",
+    "ja-JP": "更新済み"
+  },
+  "legacy.d0c706f62372": {
+    "source_token": "已移除自定义检测项",
+    "zh-CN": "已移除自定义检测项",
+    "en-US": "Custom detection entry removed",
+    "ja-JP": "カスタム検出項目を削除しました"
+  },
+  "legacy.18165e41bd49": {
+    "source_token": "已经存在同名检测项。",
+    "zh-CN": "已经存在同名检测项。",
+    "en-US": "A detection entry with this name already exists.",
+    "ja-JP": "同じ名前の検出項目が既に存在します。"
+  },
+  "legacy.4b523c685246": {
+    "source_token": "已适配",
+    "zh-CN": "已适配",
+    "en-US": "Supported",
+    "ja-JP": "対応済み"
+  },
+  "legacy.74ab0a056ed0": {
+    "source_token": "建议先关闭其他应用，然后点击“下一步”继续。",
+    "zh-CN": "建议先关闭其他应用，然后点击“下一步”继续。",
+    "en-US": "Close other applications, then select Next to continue.",
+    "ja-JP": "ほかのアプリを閉じてから「次へ」を選択してください。"
+  },
+  "legacy.e7154dda6e7d": {
+    "source_token": "开始安装",
+    "zh-CN": "开始安装",
+    "en-US": "Start installation",
+    "ja-JP": "インストールを開始"
+  },
+  "legacy.9cd8450b0a65": {
+    "source_token": "当前程序版本未切换；诊断记录已保留。",
+    "zh-CN": "当前程序版本未切换；诊断记录已保留。",
+    "en-US": "The active version was not changed. Diagnostic records were retained.",
+    "ja-JP": "使用中のバージョンは変更されていません。診断記録は保持されています。"
+  },
+  "legacy.09adcab76148": {
+    "source_token": "必要系统运行环境已满足，可以继续安装。",
+    "zh-CN": "必要系统运行环境已满足，可以继续安装。",
+    "en-US": "Runtime requirements are met. You can continue installation.",
+    "ja-JP": "必要なランタイムの要件を満たしています。インストールを続行できます。"
+  },
+  "legacy.5998e9ad5d52": {
+    "source_token": "所需空间",
+    "zh-CN": "所需空间",
+    "en-US": "Required space",
+    "ja-JP": "必要な容量"
+  },
+  "legacy.72e216741054": {
+    "source_token": "执行首次启动健康检查。",
+    "zh-CN": "执行首次启动健康检查。",
+    "en-US": "Run the first-start health check.",
+    "ja-JP": "初回起動の正常性を確認します。"
+  },
+  "legacy.3468f6e9ad0e": {
+    "source_token": "无需准备",
+    "zh-CN": "无需准备",
+    "en-US": "No preparation needed",
+    "ja-JP": "準備は不要です"
+  },
+  "legacy.a98585871c53": {
+    "source_token": "显示名称",
+    "zh-CN": "显示名称",
+    "en-US": "Display name",
+    "ja-JP": "表示名"
+  },
+  "legacy.4d3b8e2a8731": {
+    "source_token": "暂无可显示内容。",
+    "zh-CN": "暂无可显示内容。",
+    "en-US": "Nothing to display yet.",
+    "ja-JP": "表示する内容はまだありません。"
+  },
+  "legacy.12876e31ef6d": {
+    "source_token": "未发现",
+    "zh-CN": "未发现",
+    "en-US": "Not found",
+    "ja-JP": "未検出"
+  },
+  "legacy.91a60bf6eed8": {
+    "source_token": "未开始安装时不会修改程序或用户数据。",
+    "zh-CN": "未开始安装时不会修改程序或用户数据。",
+    "en-US": "No program or user data changes occur before installation starts.",
+    "ja-JP": "インストール開始前にプログラムやユーザーデータを変更することはありません。"
+  },
+  "legacy.58a7ae7ac4ee": {
+    "source_token": "未开始安装时不会修改系统。",
+    "zh-CN": "未开始安装时不会修改系统。",
+    "en-US": "No system changes occur before installation starts.",
+    "ja-JP": "インストール開始前にシステムを変更することはありません。"
+  },
+  "legacy.451a805775b5": {
+    "source_token": "未检查",
+    "zh-CN": "未检查",
+    "en-US": "Not checked",
+    "ja-JP": "未確認"
+  },
+  "legacy.0cf194f97e1a": {
+    "source_token": "未适配",
+    "zh-CN": "未适配",
+    "en-US": "Unsupported",
+    "ja-JP": "未対応"
+  },
+  "legacy.52cdeb2c7806": {
+    "source_token": "本地模型运行时",
+    "zh-CN": "本地模型运行时",
+    "en-US": "Local model runtime",
+    "ja-JP": "ローカルモデルのランタイム"
+  },
+  "legacy.42b64d9e4656": {
+    "source_token": "本地运行时",
+    "zh-CN": "本地运行时",
+    "en-US": "Local runtime",
+    "ja-JP": "ローカルランタイム"
+  },
+  "legacy.6c1214b64994": {
+    "source_token": "查看安装内容",
+    "zh-CN": "查看安装内容",
+    "en-US": "View installation contents",
+    "ja-JP": "インストール内容を表示"
+  },
+  "legacy.e6a2170edb6e": {
+    "source_token": "查看运行环境说明",
+    "zh-CN": "查看运行环境说明",
+    "en-US": "View runtime information",
+    "ja-JP": "ランタイムの説明を表示"
+  },
+  "legacy.ea72fd900b08": {
+    "source_token": "桌面快捷方式",
+    "zh-CN": "桌面快捷方式",
+    "en-US": "Desktop shortcut",
+    "ja-JP": "デスクトップのショートカット"
+  },
+  "legacy.6960e6c6ce04": {
+    "source_token": "检查未完成",
+    "zh-CN": "检查未完成",
+    "en-US": "Checks incomplete",
+    "ja-JP": "確認未完了"
+  },
+  "legacy.7c5569c38a3c": {
+    "source_token": "检查结果",
+    "zh-CN": "检查结果",
+    "en-US": "Check results",
+    "ja-JP": "確認結果"
+  },
+  "legacy.b5aeebc2816f": {
+    "source_token": "检查通过",
+    "zh-CN": "检查通过",
+    "en-US": "Checks passed",
+    "ja-JP": "確認完了"
+  },
+  "legacy.06c895c66764": {
+    "source_token": "检测到已有安装，本次更新或修复沿用原位置。更换程序位置须先卸载并保留数据，再重新安装并选择原数据目录；此安装器暂不支持数据迁移。",
+    "zh-CN": "检测到已有安装，本次更新或修复沿用原位置。更换程序位置须先卸载并保留数据，再重新安装并选择原数据目录；此安装器暂不支持数据迁移。",
+    "en-US": "An existing installation was found. Update or repair uses its current locations. To move the program, uninstall while keeping data, then reinstall using the existing data folder. This installer does not relocate data.",
+    "ja-JP": "既存のインストールが見つかりました。更新・修復では現在の場所を使用します。プログラムの場所を変更するにはデータを保持してアンインストールし、既存のデータフォルダーを指定して再インストールしてください。このインストーラーではデータの移動はできません。"
+  },
+  "legacy.84d381225566": {
+    "source_token": "检测异常",
+    "zh-CN": "检测异常",
+    "en-US": "Detection error",
+    "ja-JP": "検出エラー"
+  },
+  "legacy.a63cd6a7f26f": {
+    "source_token": "检测结果",
+    "zh-CN": "检测结果",
+    "en-US": "Detection results",
+    "ja-JP": "検出結果"
+  },
+  "legacy.1f647a24dff6": {
+    "source_token": "检测项",
+    "zh-CN": "检测项",
+    "en-US": "Detection entry",
+    "ja-JP": "検出項目"
+  },
+  "legacy.960d96a6920e": {
+    "source_token": "欢迎",
+    "zh-CN": "欢迎",
+    "en-US": "Welcome",
+    "ja-JP": "ようこそ"
+  },
+  "legacy.57b64e2b1f64": {
+    "source_token": "欢迎使用 Memorive",
+    "zh-CN": "欢迎使用 Memorive",
+    "en-US": "Welcome to Memorive",
+    "ja-JP": "Memorive へようこそ"
+  },
+  "legacy.cb5dec4ecfa1": {
+    "source_token": "正在处理安装错误",
+    "zh-CN": "正在处理安装错误",
+    "en-US": "Handling an installation error",
+    "ja-JP": "インストールエラーを処理しています"
+  },
+  "legacy.0f3bb1ca74fe": {
+    "source_token": "正在安全结束安装",
+    "zh-CN": "正在安全结束安装",
+    "en-US": "Finishing installation safely",
+    "ja-JP": "インストールを安全に終了しています"
+  },
+  "legacy.afa17e72aea8": {
+    "source_token": "正在安装",
+    "zh-CN": "正在安装",
+    "en-US": "Installing",
+    "ja-JP": "インストール中"
+  },
+  "legacy.dea0bfe22d6e": {
+    "source_token": "正在撤销",
+    "zh-CN": "正在撤销",
+    "en-US": "Reverting",
+    "ja-JP": "元に戻しています"
+  },
+  "legacy.ccc92c31a999": {
+    "source_token": "正在撤销更改",
+    "zh-CN": "正在撤销更改",
+    "en-US": "Reverting changes",
+    "ja-JP": "変更を元に戻しています"
+  },
+  "legacy.da770f643483": {
+    "source_token": "正在撤销本次安装",
+    "zh-CN": "正在撤销本次安装",
+    "en-US": "Reverting this installation",
+    "ja-JP": "今回のインストールを元に戻しています"
+  },
+  "legacy.e6d8a2cca450": {
+    "source_token": "正在撤销本次更改",
+    "zh-CN": "正在撤销本次更改",
+    "en-US": "Reverting these changes",
+    "ja-JP": "今回の変更を元に戻しています"
+  },
+  "legacy.83b8f5067e29": {
+    "source_token": "正在撤销本次更改。",
+    "zh-CN": "正在撤销本次更改。",
+    "en-US": "Reverting these changes.",
+    "ja-JP": "今回の変更を元に戻しています。"
+  },
+  "legacy.d1c1632c9fd9": {
+    "source_token": "正在读取安装清单",
+    "zh-CN": "正在读取安装清单",
+    "en-US": "Reading the installation manifest",
+    "ja-JP": "インストール一覧を読み込んでいます"
+  },
+  "legacy.2d225fb9b2ff": {
+    "source_token": "此向导将帮助你完成 Memorive 安装。",
+    "zh-CN": "此向导将帮助你完成 Memorive 安装。",
+    "en-US": "This wizard will help you install Memorive.",
+    "ja-JP": "このウィザードで Memorive をインストールできます。"
+  },
+  "legacy.a8c81f93f2e0": {
+    "source_token": "浏览",
+    "zh-CN": "浏览",
+    "en-US": "Browse",
+    "ja-JP": "参照"
+  },
+  "legacy.a10ec6e2b647": {
+    "source_token": "添加其他 CLI",
+    "zh-CN": "添加其他 CLI",
+    "en-US": "Add another CLI",
+    "ja-JP": "ほかの CLI を追加"
+  },
+  "legacy.34bfa9b6ef30": {
+    "source_token": "添加检测项",
+    "zh-CN": "添加检测项",
+    "en-US": "Add detection entry",
+    "ja-JP": "検出項目を追加"
+  },
+  "legacy.59c0357a6cca": {
+    "source_token": "用户数据",
+    "zh-CN": "用户数据",
+    "en-US": "User data",
+    "ja-JP": "ユーザーデータ"
+  },
+  "legacy.1cc53ee82286": {
+    "source_token": "用户数据位置",
+    "zh-CN": "用户数据位置",
+    "en-US": "User data location",
+    "ja-JP": "ユーザーデータの保存先"
+  },
+  "legacy.8616e5c8d5bd": {
+    "source_token": "确定要停止安装吗？",
+    "zh-CN": "确定要停止安装吗？",
+    "en-US": "Stop the installation?",
+    "ja-JP": "インストールを停止しますか？"
+  },
+  "legacy.d2e8b5e05634": {
+    "source_token": "确定要退出安装向导吗？",
+    "zh-CN": "确定要退出安装向导吗？",
+    "en-US": "Exit setup?",
+    "ja-JP": "セットアップを終了しますか？"
+  },
+  "legacy.62a6a5463e4c": {
+    "source_token": "确认可以安装",
+    "zh-CN": "确认可以安装",
+    "en-US": "Confirm installation readiness",
+    "ja-JP": "インストール可能か確認"
+  },
+  "legacy.5e8635b623f9": {
+    "source_token": "确认此电脑可以安装 Memorive。",
+    "zh-CN": "确认此电脑可以安装 Memorive。",
+    "en-US": "Check that this computer can install Memorive.",
+    "ja-JP": "このコンピューターに Memorive をインストールできるか確認します。"
+  },
+  "legacy.bddcf5e774c7": {
+    "source_token": "确认设置",
+    "zh-CN": "确认设置",
+    "en-US": "Confirm settings",
+    "ja-JP": "設定を確認"
+  },
+  "legacy.56d8a3b69ca9": {
+    "source_token": "确认设置后开始安装。",
+    "zh-CN": "确认设置后开始安装。",
+    "en-US": "Review the settings before starting installation.",
+    "ja-JP": "設定を確認してからインストールを開始します。"
+  },
+  "legacy.c39e6f509255": {
+    "source_token": "移除 $",
+    "zh-CN": "移除 $",
+    "en-US": "Remove $",
+    "ja-JP": "削除 $"
+  },
+  "legacy.4f304acce14b": {
+    "source_token": "程序与数据",
+    "zh-CN": "程序与数据",
+    "en-US": "Program and data",
+    "ja-JP": "プログラムとデータ"
+  },
+  "legacy.c2625e247c12": {
+    "source_token": "程序与用户数据分开保存；卸载时默认保留用户数据。",
+    "zh-CN": "程序与用户数据分开保存；卸载时默认保留用户数据。",
+    "en-US": "Program files and user data are stored separately. Uninstall keeps user data by default.",
+    "ja-JP": "プログラムとユーザーデータは別々に保存します。アンインストール時は既定でユーザーデータを保持します。"
+  },
+  "legacy.c412d5770909": {
+    "source_token": "程序位置",
+    "zh-CN": "程序位置",
+    "en-US": "Program location",
+    "ja-JP": "プログラムの保存先"
+  },
+  "legacy.b51c56c6e096": {
+    "source_token": "程序位置和用户数据位置均不能为空。",
+    "zh-CN": "程序位置和用户数据位置均不能为空。",
+    "en-US": "Both program and user data locations are required.",
+    "ja-JP": "プログラムとユーザーデータの保存先を両方指定してください。"
+  },
+  "legacy.53b3d631d83e": {
+    "source_token": "程序组件",
+    "zh-CN": "程序组件",
+    "en-US": "Program components",
+    "ja-JP": "プログラムのコンポーネント"
+  },
+  "legacy.ab1d70bcd193": {
+    "source_token": "程序路径与用户数据路径不得相同或互为父子。",
+    "zh-CN": "程序路径与用户数据路径不得相同或互为父子。",
+    "en-US": "Program and user data paths must be separate, with neither containing the other.",
+    "ja-JP": "プログラムとユーザーデータのパスは分離し、親子関係にしないでください。"
+  },
+  "legacy.251bc40e7027": {
+    "source_token": "等待",
+    "zh-CN": "等待",
+    "en-US": "Waiting",
+    "ja-JP": "待機中"
+  },
+  "legacy.2add516aa3c3": {
+    "source_token": "系统检查",
+    "zh-CN": "系统检查",
+    "en-US": "System check",
+    "ja-JP": "システム確認"
+  },
+  "legacy.778a76f49d6f": {
+    "source_token": "系统组件",
+    "zh-CN": "系统组件",
+    "en-US": "System components",
+    "ja-JP": "システムコンポーネント"
+  },
+  "legacy.f4460df1f3db": {
+    "source_token": "系统运行库",
+    "zh-CN": "系统运行库",
+    "en-US": "System runtimes",
+    "ja-JP": "システムランタイム"
+  },
+  "legacy.dbbe9c07b235": {
+    "source_token": "约 610 MB",
+    "zh-CN": "约 610 MB",
+    "en-US": "About 610 MB",
+    "ja-JP": "約 610 MB"
+  },
+  "legacy.38aae3d68198": {
+    "source_token": "自有程序代码采用 GNU AGPL-3.0。作者鼓励个人学习、研究与非商业使用；这一倡议不限制许可证授予的权利。桌宠、表情和头像是受 Blue Archive 启发的非官方二创，素材单独声明。项目与 Nexon、Nexon Games、Yostar 无直接授权或隶属关系。",
+    "zh-CN": "自有程序代码采用 GNU AGPL-3.0。作者鼓励个人学习、研究与非商业使用；这一倡议不限制许可证授予的权利。桌宠、表情和头像是受 Blue Archive 启发的非官方二创，素材单独声明。项目与 Nexon、Nexon Games、Yostar 无直接授权或隶属关系。",
+    "en-US": "Project code is licensed under GNU AGPL-3.0. The author encourages personal learning, research and noncommercial use; this does not restrict rights granted by the license. Desktop pets, expressions and avatars are unofficial Blue Archive-inspired fan works with separate asset notices. The project has no direct authorization from or affiliation with Nexon, Nexon Games or Yostar.",
+    "ja-JP": "独自のプログラムコードには GNU AGPL-3.0 が適用されます。作者は個人学習、研究、非商用利用を推奨しますが、ライセンスで認められた権利を制限するものではありません。デスクトップペット、表情、アバターは Blue Archive に着想を得た非公式の二次創作であり、素材は別途表記しています。本プロジェクトは Nexon、Nexon Games、Yostar から直接の許諾を得たものではなく、提携関係もありません。"
+  },
+  "legacy.e9f185f080ce": {
+    "source_token": "补齐运行库",
+    "zh-CN": "补齐运行库",
+    "en-US": "Install missing runtimes",
+    "ja-JP": "不足するランタイムを導入"
+  },
+  "legacy.33b03c83e8d1": {
+    "source_token": "许可与隐私说明",
+    "zh-CN": "许可与隐私说明",
+    "en-US": "Licenses and privacy",
+    "ja-JP": "ライセンスとプライバシー"
+  },
+  "legacy.979a332955c8": {
+    "source_token": "详情",
+    "zh-CN": "详情",
+    "en-US": "Details",
+    "ja-JP": "詳細"
+  },
+  "legacy.00bef9c893c2": {
+    "source_token": "请先从 Microsoft 官网准备运行库",
+    "zh-CN": "请先从 Microsoft 官网准备运行库",
+    "en-US": "Install runtimes from Microsoft first",
+    "ja-JP": "先に Microsoft 公式サイトからランタイムを導入してください"
+  },
+  "legacy.701f7a543810": {
+    "source_token": "请先从 Microsoft 官网安装所缺组件，再重新检查。",
+    "zh-CN": "请先从 Microsoft 官网安装所缺组件，再重新检查。",
+    "en-US": "Install missing components from Microsoft, then recheck.",
+    "ja-JP": "不足するコンポーネントを Microsoft 公式サイトからインストールし、再確認してください。"
+  },
+  "legacy.8b0a28a1d2ec": {
+    "source_token": "请填写名称和命令或路径。",
+    "zh-CN": "请填写名称和命令或路径。",
+    "en-US": "Enter a name and a command or path.",
+    "ja-JP": "名前とコマンドまたはパスを入力してください。"
+  },
+  "legacy.eb9e69de7581": {
+    "source_token": "请处理上方检查项，然后重新检查；完成前不会开始安装。",
+    "zh-CN": "请处理上方检查项，然后重新检查；完成前不会开始安装。",
+    "en-US": "Resolve the checks above, then recheck. Installation will not begin until they pass.",
+    "ja-JP": "上の確認項目を解決してから再確認してください。完了するまでインストールは開始しません。"
+  },
+  "legacy.9397cc158c27": {
+    "source_token": "请确认以下设置。",
+    "zh-CN": "请确认以下设置。",
+    "en-US": "Review the following settings.",
+    "ja-JP": "以下の設定を確認してください。"
+  },
+  "legacy.043bd055d879": {
+    "source_token": "请稍候。",
+    "zh-CN": "请稍候。",
+    "en-US": "Please wait.",
+    "ja-JP": "お待ちください。"
+  },
+  "legacy.bb5e49e9fd70": {
+    "source_token": "请稍候，不要关闭此窗口。",
+    "zh-CN": "请稍候，不要关闭此窗口。",
+    "en-US": "Please wait and keep this window open.",
+    "ja-JP": "このウィンドウを閉じずにお待ちください。"
+  },
+  "legacy.0c79d826cfa2": {
+    "source_token": "请输入本机固定磁盘上的完整文件夹路径。",
+    "zh-CN": "请输入本机固定磁盘上的完整文件夹路径。",
+    "en-US": "Enter an absolute folder path on a local fixed drive.",
+    "ja-JP": "ローカルの固定ドライブ上のフォルダーを絶対パスで入力してください。"
+  },
+  "legacy.866e2d1b587c": {
+    "source_token": "返回准备安装",
+    "zh-CN": "返回准备安装",
+    "en-US": "Return to installation review",
+    "ja-JP": "インストールの確認に戻る"
+  },
+  "legacy.77fb39f298fc": {
+    "source_token": "返回向导",
+    "zh-CN": "返回向导",
+    "en-US": "Return to setup",
+    "ja-JP": "セットアップに戻る"
+  },
+  "legacy.73a872010b12": {
+    "source_token": "退出向导",
+    "zh-CN": "退出向导",
+    "en-US": "Exit setup",
+    "ja-JP": "セットアップを終了"
+  },
+  "legacy.87ed2ae7680c": {
+    "source_token": "退出安装向导？",
+    "zh-CN": "退出安装向导？",
+    "en-US": "Exit setup?",
+    "ja-JP": "セットアップを終了しますか？"
+  },
+  "legacy.b39fb47b55e0": {
+    "source_token": "退出未完成：",
+    "zh-CN": "退出未完成：",
+    "en-US": "Could not exit: ",
+    "ja-JP": "終了できませんでした: "
+  },
+  "legacy.ce32b77f493e": {
+    "source_token": "选择安装位置",
+    "zh-CN": "选择安装位置",
+    "en-US": "Choose installation locations",
+    "ja-JP": "インストール先を選択"
+  },
+  "legacy.95ebe1d6bd66": {
+    "source_token": "选择程序和用户数据的保存位置。",
+    "zh-CN": "选择程序和用户数据的保存位置。",
+    "en-US": "Choose where to store the program and user data.",
+    "ja-JP": "プログラムとユーザーデータの保存先を選択してください。"
+  },
+  "legacy.c25fb86b1e96": {
+    "source_token": "重新检查",
+    "zh-CN": "重新检查",
+    "en-US": "Recheck",
+    "ja-JP": "再確認"
+  },
+  "legacy.a13550662fea": {
+    "source_token": "重新检测",
+    "zh-CN": "重新检测",
+    "en-US": "Detect again",
+    "ja-JP": "再検出"
+  },
+  "legacy.ca24fd364e0d": {
+    "source_token": "随安装程序附带的 notices 目录保存代码许可证、素材声明和第三方许可副本。",
+    "zh-CN": "随安装程序附带的 notices 目录保存代码许可证、素材声明和第三方许可副本。",
+    "en-US": "The notices folder included with setup contains code licenses, asset notices and third-party license copies.",
+    "ja-JP": "インストーラーに同梱の notices フォルダーには、コードのライセンス、素材の表記、第三者ライセンスの写しが保存されています。"
+  },
+  "legacy.f7084067c9d7": {
+    "source_token": "需要 Microsoft WebView2 与 Visual C++ v14 x64；其余程序环境由安装包自带。",
+    "zh-CN": "需要 Microsoft WebView2 与 Visual C++ v14 x64；其余程序环境由安装包自带。",
+    "en-US": "Microsoft WebView2 and Visual C++ v14 x64 are required. Other runtime components are bundled.",
+    "ja-JP": "Microsoft WebView2 と Visual C++ v14 x64 が必要です。その他の実行環境は同梱されています。"
+  },
+  "legacy.5d30828eec46": {
+    "source_token": "需要 WebView2、.NET Framework 4.8 和 Visual C++ v14 x64；缺少时从 Microsoft 官网准备。",
+    "zh-CN": "需要 WebView2、.NET Framework 4.8 和 Visual C++ v14 x64；缺少时从 Microsoft 官网准备。",
+    "en-US": "Requires WebView2, .NET Framework 4.8 and Visual C++ v14 x64. Obtain missing components from Microsoft.",
+    "ja-JP": "WebView2、.NET Framework 4.8、Visual C++ v14 x64 が必要です。不足する場合は Microsoft 公式サイトから導入してください。"
+  },
+  "legacy.b7e3e715f18b": {
+    "source_token": "需要处理",
+    "zh-CN": "需要处理",
+    "en-US": "Action required",
+    "ja-JP": "対応が必要"
+  },
+  "legacy.f460c73c0f8a": {
+    "source_token": "需要补充 1 项",
+    "zh-CN": "需要补充 1 项",
+    "en-US": "1 missing component",
+    "ja-JP": "不足する項目 1 件"
+  },
+  "legacy.49ccde43a154": {
+    "source_token": "项",
+    "zh-CN": "项",
+    "en-US": "items",
+    "ja-JP": "件"
+  },
+  "legacy.dcc7e060e66d": {
+    "source_token": "项目源码与素材声明",
+    "zh-CN": "项目源码与素材声明",
+    "en-US": "Project source and asset notices",
+    "ja-JP": "プロジェクトのソースと素材の表記"
+  },
+  "legacy.50beefeeccc4": {
+    "source_token": "首次启动检查",
+    "zh-CN": "首次启动检查",
+    "en-US": "First-start check",
+    "ja-JP": "初回起動の確認"
+  },
+  "legacy.d65058f414de": {
+    "source_token": "首次安装：可输入完整路径，或浏览选择最终文件夹。程序与数据分开保存，卸载时默认保留数据。",
+    "zh-CN": "首次安装：可输入完整路径，或浏览选择最终文件夹。程序与数据分开保存，卸载时默认保留数据。",
+    "en-US": "First installation: enter an absolute path or browse to the final folder. Program and data are separate; uninstall keeps data by default.",
+    "ja-JP": "初回インストール: 絶対パスを入力するか、参照して保存先を選択してください。プログラムとデータは分離され、アンインストール時は既定でデータを保持します。"
+  },
+  "legacy.7d0404adf3d4": {
+    "source_token": "验证安装文件",
+    "zh-CN": "验证安装文件",
+    "en-US": "Verify installation files",
+    "ja-JP": "インストールファイルを検証"
+  },
+  "legacy.dc0823ace10c": {
+    "source_token": "Memorive Windows 卸载向导",
+    "zh-CN": "Memorive Windows 卸载向导",
+    "en-US": "Memorive Windows Uninstall",
+    "ja-JP": "Memorive Windows アンインストール"
+  },
+  "legacy.87c3c41c48b8": {
+    "source_token": "Memorive 将从此电脑中卸载。",
+    "zh-CN": "Memorive 将从此电脑中卸载。",
+    "en-US": "Memorive will be removed from this computer.",
+    "ja-JP": "このコンピューターから Memorive を削除します。"
+  },
+  "legacy.b8822fab2ecc": {
+    "source_token": "Memorive 已卸载",
+    "zh-CN": "Memorive 已卸载",
+    "en-US": "Memorive is uninstalled",
+    "ja-JP": "Memorive をアンインストールしました"
+  },
+  "legacy.345a87d8515a": {
+    "source_token": "Memorive 已成功从此电脑中卸载。",
+    "zh-CN": "Memorive 已成功从此电脑中卸载。",
+    "en-US": "Memorive was successfully removed from this computer.",
+    "ja-JP": "このコンピューターから Memorive を削除しました。"
+  },
+  "legacy.bbf5a22bb022": {
+    "source_token": "Memorive 未能完全卸载。",
+    "zh-CN": "Memorive 未能完全卸载。",
+    "en-US": "Memorive could not be fully uninstalled.",
+    "ja-JP": "Memorive を完全にアンインストールできませんでした。"
+  },
+  "legacy.83825f5617de": {
+    "source_token": "个人数据选择",
+    "zh-CN": "个人数据选择",
+    "en-US": "Personal data options",
+    "ja-JP": "個人データの選択"
+  },
+  "legacy.4162979321eb": {
+    "source_token": "仅在卸载成功后删除您选择的个人数据。",
+    "zh-CN": "仅在卸载成功后删除您选择的个人数据。",
+    "en-US": "Selected personal data is deleted only after successful uninstallation.",
+    "ja-JP": "選択した個人データはアンインストールの成功後にのみ削除されます。"
+  },
+  "legacy.6c681a569b56": {
+    "source_token": "保留个人数据（推荐）",
+    "zh-CN": "保留个人数据（推荐）",
+    "en-US": "Keep personal data (recommended)",
+    "ja-JP": "個人データを保持（推奨）"
+  },
+  "legacy.42dc9249d820": {
+    "source_token": "保留您的数据",
+    "zh-CN": "保留您的数据",
+    "en-US": "Keep your data",
+    "ja-JP": "データを保持"
+  },
+  "legacy.dbf892c98af8": {
+    "source_token": "保留设置、项目资料和工作记录。以后重新安装 Memorive 后仍可使用。",
+    "zh-CN": "保留设置、项目资料和工作记录。以后重新安装 Memorive 后仍可使用。",
+    "en-US": "Keep settings, project materials and work history for future reinstallation.",
+    "ja-JP": "設定、プロジェクト資料、作業記録を保持し、再インストール後も使用できます。"
+  },
+  "legacy.65941196bec1": {
+    "source_token": "关闭卸载向导",
+    "zh-CN": "关闭卸载向导",
+    "en-US": "Close uninstaller",
+    "ja-JP": "アンインストーラーを閉じる"
+  },
+  "legacy.870302493c3f": {
+    "source_token": "删除个人数据",
+    "zh-CN": "删除个人数据",
+    "en-US": "Delete personal data",
+    "ja-JP": "個人データを削除"
+  },
+  "legacy.aa88bb3a1641": {
+    "source_token": "即将完成，请稍候。",
+    "zh-CN": "即将完成，请稍候。",
+    "en-US": "Almost finished. Please wait.",
+    "ja-JP": "まもなく完了します。お待ちください。"
+  },
+  "legacy.4f3a37c51742": {
+    "source_token": "卸载 Memorive",
+    "zh-CN": "卸载 Memorive",
+    "en-US": "Uninstall Memorive",
+    "ja-JP": "Memorive をアンインストール"
+  },
+  "legacy.554f9f03810e": {
+    "source_token": "卸载 Memorive 时，您可以选择是否保留个人数据。",
+    "zh-CN": "卸载 Memorive 时，您可以选择是否保留个人数据。",
+    "en-US": "You can choose whether to keep personal data when uninstalling Memorive.",
+    "ja-JP": "Memorive のアンインストール時に個人データを保持するか選択できます。"
+  },
+  "legacy.04de30dad91b": {
+    "source_token": "卸载向导",
+    "zh-CN": "卸载向导",
+    "en-US": "Uninstall",
+    "ja-JP": "アンインストール"
+  },
+  "legacy.caa61a1470e1": {
+    "source_token": "卸载完成",
+    "zh-CN": "卸载完成",
+    "en-US": "Uninstall complete",
+    "ja-JP": "アンインストール完了"
+  },
+  "legacy.871dbfedb363": {
+    "source_token": "卸载已取消，程序和个人数据均未更改。",
+    "zh-CN": "卸载已取消，程序和个人数据均未更改。",
+    "en-US": "Uninstallation cancelled. Program and personal data are unchanged.",
+    "ja-JP": "アンインストールをキャンセルしました。プログラムと個人データは変更されていません。"
+  },
+  "legacy.17e22e9bbb74": {
+    "source_token": "卸载未完成",
+    "zh-CN": "卸载未完成",
+    "en-US": "Uninstall incomplete",
+    "ja-JP": "アンインストール未完了"
+  },
+  "legacy.55e252eb3a91": {
+    "source_token": "卸载说明",
+    "zh-CN": "卸载说明",
+    "en-US": "Uninstall information",
+    "ja-JP": "アンインストールの説明"
+  },
+  "legacy.df2a87830c64": {
+    "source_token": "卸载进度",
+    "zh-CN": "卸载进度",
+    "en-US": "Uninstall progress",
+    "ja-JP": "アンインストールの進行状況"
+  },
+  "legacy.4e73a290d01d": {
+    "source_token": "同时删除 Memorive 保存的个人数据。此操作无法恢复。",
+    "zh-CN": "同时删除 Memorive 保存的个人数据。此操作无法恢复。",
+    "en-US": "Also delete personal data stored by Memorive. This cannot be undone.",
+    "ja-JP": "Memorive が保存した個人データも削除します。この操作は元に戻せません。"
+  },
+  "legacy.7bb274f7fcf8": {
+    "source_token": "已保护您的个人数据，您可以稍后重试。",
+    "zh-CN": "已保护您的个人数据，您可以稍后重试。",
+    "en-US": "Your personal data is protected. You can retry later.",
+    "ja-JP": "個人データは保護されています。後で再試行できます。"
+  },
+  "legacy.b616577c5d14": {
+    "source_token": "开始卸载",
+    "zh-CN": "开始卸载",
+    "en-US": "Start uninstall",
+    "ja-JP": "アンインストールを開始"
+  },
+  "legacy.a50d0acaacfa": {
+    "source_token": "您的个人数据不会因卸载而自动删除。",
+    "zh-CN": "您的个人数据不会因卸载而自动删除。",
+    "en-US": "Uninstalling does not automatically delete your personal data.",
+    "ja-JP": "アンインストールによって個人データが自動削除されることはありません。"
+  },
+  "legacy.f844aea30aa1": {
+    "source_token": "您的个人数据将被保留。",
+    "zh-CN": "您的个人数据将被保留。",
+    "en-US": "Your personal data will be kept.",
+    "ja-JP": "個人データは保持されます。"
+  },
+  "legacy.73ac522e5cc2": {
+    "source_token": "您的个人数据已保留。",
+    "zh-CN": "您的个人数据已保留。",
+    "en-US": "Your personal data has been kept.",
+    "ja-JP": "個人データを保持しました。"
+  },
+  "legacy.7754b350d688": {
+    "source_token": "您的程序和个人数据将保持不变。",
+    "zh-CN": "您的程序和个人数据将保持不变。",
+    "en-US": "Your program and personal data will remain unchanged.",
+    "ja-JP": "プログラムと個人データは変更されません。"
+  },
+  "legacy.484b9455e8b8": {
+    "source_token": "您选择的个人数据已删除。",
+    "zh-CN": "您选择的个人数据已删除。",
+    "en-US": "The selected personal data has been deleted.",
+    "ja-JP": "選択した個人データを削除しました。"
+  },
+  "legacy.165e2108334a": {
+    "source_token": "无法开始卸载",
+    "zh-CN": "无法开始卸载",
+    "en-US": "Cannot start uninstall",
+    "ja-JP": "アンインストールを開始できません"
+  },
+  "legacy.02ece3319c0d": {
+    "source_token": "是否保留个人数据",
+    "zh-CN": "是否保留个人数据",
+    "en-US": "Keep personal data?",
+    "ja-JP": "個人データを保持しますか"
+  },
+  "legacy.36fbcdb123fa": {
+    "source_token": "未确认删除；个人数据将保留。",
+    "zh-CN": "未确认删除；个人数据将保留。",
+    "en-US": "Deletion was not confirmed. Personal data will be kept.",
+    "ja-JP": "削除が確認されていないため、個人データを保持します。"
+  },
+  "legacy.fb11aa6f2982": {
+    "source_token": "检查中…",
+    "zh-CN": "检查中…",
+    "en-US": "Checking…",
+    "ja-JP": "確認中…"
+  },
+  "legacy.af48159f380f": {
+    "source_token": "正在停止",
+    "zh-CN": "正在停止",
+    "en-US": "Stopping",
+    "ja-JP": "停止中"
+  },
+  "legacy.e2a20f44d846": {
+    "source_token": "正在停止卸载",
+    "zh-CN": "正在停止卸载",
+    "en-US": "Stopping uninstall",
+    "ja-JP": "アンインストールを停止しています"
+  },
+  "legacy.e557ffc741fd": {
+    "source_token": "正在卸载",
+    "zh-CN": "正在卸载",
+    "en-US": "Uninstalling",
+    "ja-JP": "アンインストール中"
+  },
+  "legacy.3a7d6f58257d": {
+    "source_token": "正在卸载 Memorive",
+    "zh-CN": "正在卸载 Memorive",
+    "en-US": "Uninstalling Memorive",
+    "ja-JP": "Memorive をアンインストールしています"
+  },
+  "legacy.c0c6f661e811": {
+    "source_token": "正在安全停止",
+    "zh-CN": "正在安全停止",
+    "en-US": "Stopping safely",
+    "ja-JP": "安全に停止しています"
+  },
+  "legacy.4bbc137727a6": {
+    "source_token": "正在完成卸载",
+    "zh-CN": "正在完成卸载",
+    "en-US": "Finishing uninstall",
+    "ja-JP": "アンインストールを完了しています"
+  },
+  "legacy.52da7ac203d8": {
+    "source_token": "步，共 3 步",
+    "zh-CN": "步，共 3 步",
+    "en-US": " of 3",
+    "ja-JP": " / 3"
+  },
+  "legacy.df43ca3d1780": {
+    "source_token": "点击“开始卸载”后，需核对清单并再次确认永久删除。",
+    "zh-CN": "点击“开始卸载”后，需核对清单并再次确认永久删除。",
+    "en-US": "After selecting Start uninstall, review the file list and confirm permanent deletion.",
+    "ja-JP": "「アンインストールを開始」を選択後、一覧を確認して完全削除を再確認します。"
+  },
+  "legacy.b847f9d9b5e2": {
+    "source_token": "程序文件与个人数据分开保存。",
+    "zh-CN": "程序文件与个人数据分开保存。",
+    "en-US": "Program files and personal data are stored separately.",
+    "ja-JP": "プログラムファイルと個人データは別々に保存されています。"
+  },
+  "legacy.2b409aeea804": {
+    "source_token": "第 $",
+    "zh-CN": "第 $",
+    "en-US": "Step $",
+    "ja-JP": "手順 $"
+  },
+  "legacy.e916460b1525": {
+    "source_token": "第 1 步，共 3 步",
+    "zh-CN": "第 1 步，共 3 步",
+    "en-US": "Step 1 of 3",
+    "ja-JP": "手順 1 / 3"
+  },
+  "legacy.19be5652cd63": {
+    "source_token": "请先关闭 Memorive，然后重试。",
+    "zh-CN": "请先关闭 Memorive，然后重试。",
+    "en-US": "Close Memorive, then retry.",
+    "ja-JP": "Memorive を閉じてから再試行してください。"
+  },
+  "legacy.b8784c8dd563": {
+    "source_token": "重试",
+    "zh-CN": "重试",
+    "en-US": "Retry",
+    "ja-JP": "再試行"
+  },
+  "legacy.46e072c7696a": {
+    "source_token": "4.8 或更高 · 已具备",
+    "zh-CN": "4.8 或更高 · 已具备",
+    "en-US": "4.8 or later · available",
+    "ja-JP": "4.8 以降 · 導入済み"
+  },
+  "legacy.a9b1c278c281": {
+    "source_token": "Memorive 安装向导已经打开。请完成或关闭现有窗口后再试。",
+    "zh-CN": "Memorive 安装向导已经打开。请完成或关闭现有窗口后再试。",
+    "en-US": "Memorive Setup is already open. Finish or close that window before trying again.",
+    "ja-JP": "Memorive のセットアップは既に開いています。既存のウィンドウを完了または閉じてから再試行してください。"
+  },
+  "legacy.c9c54627f1c8": {
+    "source_token": "Memorive 安装器",
+    "zh-CN": "Memorive 安装器",
+    "en-US": "Memorive Setup",
+    "ja-JP": "Memorive セットアップ"
+  },
+  "legacy.011e471a4401": {
+    "source_token": "Memorive 操作未完成：",
+    "zh-CN": "Memorive 操作未完成：",
+    "en-US": "Memorive could not complete the operation: ",
+    "ja-JP": "Memorive の処理を完了できませんでした: "
+  },
+  "legacy.573092d5b92f": {
+    "source_token": "WEBVIEW2_REQUIRED: 请先从 Microsoft 官网安装运行库 ·",
+    "zh-CN": "WEBVIEW2_REQUIRED: 请先从 Microsoft 官网安装运行库 ·",
+    "en-US": "WEBVIEW2_REQUIRED: Install the runtime from Microsoft first ·",
+    "ja-JP": "WEBVIEW2_REQUIRED: 先に Microsoft 公式サイトからランタイムをインストールしてください ·"
+  },
+  "legacy.2854ff57ff38": {
+    "source_token": "\\r\\n\\r\\nPython 3.13  ·  随程序携带；Visual C++ v14 x64  ·  使用官方系统组件\\r\\n\\r\\n目标范围  Windows 10 22H2 / Windows 11 x64\\r\\n清洁系统兼容性资格仍待独立验证。",
+    "zh-CN": "\r\n\r\nPython 3.13  ·  随程序携带；Visual C++ v14 x64  ·  使用官方系统组件\r\n\r\n目标范围  Windows 10 22H2 / Windows 11 x64\r\n清洁系统兼容性资格仍待独立验证。",
+    "en-US": "\r\n\r\nPython 3.13 · bundled; Visual C++ v14 x64 · official system component\r\n\r\nTarget: Windows 10 22H2 / Windows 11 x64\r\nClean-system compatibility still requires independent validation.",
+    "ja-JP": "\r\n\r\nPython 3.13 · 同梱; Visual C++ v14 x64 · 公式システムコンポーネント\r\n\r\n対象: Windows 10 22H2 / Windows 11 x64\r\nクリーンな環境との互換性は別途検証が必要です。"
+  },
+  "legacy.a8e819a651cb": {
+    "source_token": "\\r\\n\\r\\n仅检查命令入口；不代表已登录或模型可用。",
+    "zh-CN": "\r\n\r\n仅检查命令入口；不代表已登录或模型可用。",
+    "en-US": "\r\n\r\nOnly command availability is checked, not sign-in or model readiness.",
+    "ja-JP": "\r\n\r\nコマンドの存在のみを確認します。ログインやモデルの利用可否は確認していません。"
+  },
+  "legacy.c0a01b4d9c54": {
+    "source_token": "不支持的架构",
+    "zh-CN": "不支持的架构",
+    "en-US": "Unsupported architecture",
+    "ja-JP": "非対応のアーキテクチャ"
+  },
+  "legacy.9bafda2381a9": {
+    "source_token": "安装程序与自带运行时",
+    "zh-CN": "安装程序与自带运行时",
+    "en-US": "Install the program and bundled runtime",
+    "ja-JP": "プログラムと同梱ランタイムをインストール"
+  },
+  "legacy.e5ed962ab414": {
+    "source_token": "已检测到入口",
+    "zh-CN": "已检测到入口",
+    "en-US": "Command found",
+    "ja-JP": "コマンドを検出"
+  },
+  "legacy.156219aa0cfe": {
+    "source_token": "未检测到",
+    "zh-CN": "未检测到",
+    "en-US": "Not detected",
+    "ja-JP": "未検出"
+  },
+  "legacy.49625d19fb1a": {
+    "source_token": "未检测到 · 请先从 Microsoft 官网安装",
+    "zh-CN": "未检测到 · 请先从 Microsoft 官网安装",
+    "en-US": "Not detected · install from Microsoft first",
+    "ja-JP": "未検出 · 先に Microsoft 公式サイトからインストールしてください"
+  },
+  "legacy.a11854e9c1ae": {
+    "source_token": "未满足 4.8，安装阻断",
+    "zh-CN": "未满足 4.8，安装阻断",
+    "en-US": "4.8 is required; installation blocked",
+    "ja-JP": "4.8 が必要なためインストールできません"
+  },
+  "legacy.4527fb9aea99": {
+    "source_token": "校验安装包完整性",
+    "zh-CN": "校验安装包完整性",
+    "en-US": "Verify package integrity",
+    "ja-JP": "パッケージの整合性を検証"
+  },
+  "legacy.642ab1962d21": {
+    "source_token": "正在检查运行环境和首次启动",
+    "zh-CN": "正在检查运行环境和首次启动",
+    "en-US": "Checking the runtime and first start",
+    "ja-JP": "ランタイムと初回起動を確認しています"
+  },
+  "legacy.f6582746f40a": {
+    "source_token": "激活已验证版本并保存安装回执",
+    "zh-CN": "激活已验证版本并保存安装回执",
+    "en-US": "Activate the verified version and save the installation receipt",
+    "ja-JP": "検証済みのバージョンを有効にし、インストール記録を保存"
+  },
+  "legacy.c056dd22fdd1": {
+    "source_token": "缺少 Microsoft Visual C++ v14 x64 运行库",
+    "zh-CN": "缺少 Microsoft Visual C++ v14 x64 运行库",
+    "en-US": "Microsoft Visual C++ v14 x64 runtime is missing",
+    "ja-JP": "Microsoft Visual C++ v14 x64 ランタイムがありません"
+  },
+  "legacy.c3d358b6c2dd": {
+    "source_token": "需要 Microsoft Visual C++ v14 x64 14.51.36247 或更新版本",
+    "zh-CN": "需要 Microsoft Visual C++ v14 x64 14.51.36247 或更新版本",
+    "en-US": "Microsoft Visual C++ v14 x64 14.51.36247 or later is required",
+    "ja-JP": "Microsoft Visual C++ v14 x64 14.51.36247 以降が必要です"
+  },
+  "legacy.c83c0fcd7623": {
+    "source_token": "DATA_OWNERSHIP_MANIFEST_REQUIRED：缺少逐项数据归属清单，个人数据将保留。",
+    "zh-CN": "DATA_OWNERSHIP_MANIFEST_REQUIRED：缺少逐项数据归属清单，个人数据将保留。",
+    "en-US": "DATA_OWNERSHIP_MANIFEST_REQUIRED: The data ownership manifest is missing. Personal data will be retained.",
+    "ja-JP": "DATA_OWNERSHIP_MANIFEST_REQUIRED: データの所有範囲を示す一覧がないため、個人データは保持されます。"
+  },
+  "legacy.7d8225632cda": {
+    "source_token": "UNCLASSIFIED_DATA_BLOCKER：存在未登记的数据，不能完全删除。",
+    "zh-CN": "UNCLASSIFIED_DATA_BLOCKER：存在未登记的数据，不能完全删除。",
+    "en-US": "UNCLASSIFIED_DATA_BLOCKER: Unregistered data prevents complete deletion.",
+    "ja-JP": "UNCLASSIFIED_DATA_BLOCKER: 未登録のデータがあるため完全削除はできません。"
+  },
+  "legacy.b1e3c9397d71": {
+    "source_token": "正在删除已确认的个人数据",
+    "zh-CN": "正在删除已确认的个人数据",
+    "en-US": "Deleting confirmed personal data",
+    "ja-JP": "確認済みの個人データを削除しています"
+  },
+  "legacy.391eb1d9d9ea": {
+    "source_token": "正在核对已确认的数据清单",
+    "zh-CN": "正在核对已确认的数据清单",
+    "en-US": "Verifying the confirmed data list",
+    "ja-JP": "確認済みのデータ一覧を検証しています"
+  },
+  "legacy.63cf2fe67b08": {
+    "source_token": "正在核对程序文件清单",
+    "zh-CN": "正在核对程序文件清单",
+    "en-US": "Verifying the program file list",
+    "ja-JP": "プログラムファイル一覧を検証しています"
+  },
+  "legacy.fd52f7e216e5": {
+    "source_token": "正在移除程序文件",
+    "zh-CN": "正在移除程序文件",
+    "en-US": "Removing program files",
+    "ja-JP": "プログラムファイルを削除しています"
+  },
+  "legacy.cd5ebffe9166": {
+    "source_token": "14.51.36247 或更高",
+    "zh-CN": "14.51.36247 或更高",
+    "en-US": "14.51.36247 or later",
+    "ja-JP": "14.51.36247 以降"
+  },
+  "legacy.8071d461dddc": {
+    "source_token": "4.8 或更高",
+    "zh-CN": "4.8 或更高",
+    "en-US": "4.8 or later",
+    "ja-JP": "4.8 以降"
+  },
+  "legacy.e6848859e744": {
+    "source_token": "GB 可用",
+    "zh-CN": "GB 可用",
+    "en-US": "GB available",
+    "ja-JP": "GB の空き容量"
+  },
+  "legacy.27cab908a2e1": {
+    "source_token": "MB（另需校验与回退空间）",
+    "zh-CN": "MB（另需校验与回退空间）",
+    "en-US": "MB (additional verification and rollback space required)",
+    "ja-JP": "MB（検証と復元には追加の容量が必要です）"
+  },
+  "legacy.ce0cc6744b61": {
+    "source_token": "Memorive · 卸载向导 · v1.01",
+    "zh-CN": "Memorive · 卸载向导 · v1.01",
+    "en-US": "Memorive · Uninstall · v1.01",
+    "ja-JP": "Memorive · アンインストール · v1.01"
+  },
+  "legacy.c16bdb9a3db0": {
+    "source_token": "Memorive · 安装向导 · v1.01",
+    "zh-CN": "Memorive · 安装向导 · v1.01",
+    "en-US": "Memorive · Setup · v1.01",
+    "ja-JP": "Memorive · セットアップ · v1.01"
+  },
+  "legacy.4f9c82fb6721": {
+    "source_token": "Memorive · 确认永久删除",
+    "zh-CN": "Memorive · 确认永久删除",
+    "en-US": "Memorive · Confirm permanent deletion",
+    "ja-JP": "Memorive · 完全削除の確認"
+  },
+  "legacy.927c3cd85177": {
+    "source_token": "不能使用链接或重定向文件夹，请选择本机实际目录。",
+    "zh-CN": "不能使用链接或重定向文件夹，请选择本机实际目录。",
+    "en-US": "Links and redirected folders are not supported. Choose a physical local folder.",
+    "ja-JP": "リンクやリダイレクトされたフォルダーは使用できません。ローカルの実際のフォルダーを選択してください。"
+  },
+  "legacy.aa4379696466": {
+    "source_token": "个文件 /",
+    "zh-CN": "个文件 /",
+    "en-US": "files /",
+    "ja-JP": "ファイル /"
+  },
+  "legacy.abefbf69cce9": {
+    "source_token": "仅删除以下逐项归属已核验的数据。此操作无法恢复。\\r\\n\\r\\n",
+    "zh-CN": "仅删除以下逐项归属已核验的数据。此操作无法恢复。\r\n\r\n",
+    "en-US": "Only the ownership-verified files below will be deleted. This cannot be undone.\r\n\r\n",
+    "ja-JP": "以下の所有範囲が確認済みのデータのみを削除します。この操作は元に戻せません。\r\n\r\n"
+  },
+  "legacy.cdfd0b34e491": {
+    "source_token": "使用",
+    "zh-CN": "使用",
+    "en-US": "Use",
+    "ja-JP": "使用"
+  },
+  "legacy.b1c5e73e1471": {
+    "source_token": "字节",
+    "zh-CN": "字节",
+    "en-US": "bytes",
+    "ja-JP": "バイト"
+  },
+  "legacy.6efa8316f505": {
+    "source_token": "安装已取消；当前程序版本未切换，诊断记录已保留。",
+    "zh-CN": "安装已取消；当前程序版本未切换，诊断记录已保留。",
+    "en-US": "Installation cancelled. The active version is unchanged and diagnostic records are retained.",
+    "ja-JP": "インストールをキャンセルしました。使用中のバージョンは変更せず、診断記録は保持しています。"
+  },
+  "legacy.ec230f59f42e": {
+    "source_token": "安装范围",
+    "zh-CN": "安装范围",
+    "en-US": "Installation scope",
+    "ja-JP": "インストールの範囲"
+  },
+  "legacy.5b72d489bd6c": {
+    "source_token": "已有安装记录与磁盘状态不一致。请关闭向导，检查原安装记录后重试；数据未迁移。",
+    "zh-CN": "已有安装记录与磁盘状态不一致。请关闭向导，检查原安装记录后重试；数据未迁移。",
+    "en-US": "The installation record does not match the disk. Close setup, check the existing record, then retry. Data was not migrated.",
+    "ja-JP": "インストール記録とディスクの状態が一致しません。ウィザードを閉じ、既存の記録を確認してから再試行してください。データは移行していません。"
+  },
+  "legacy.27cfc911c109": {
+    "source_token": "已有安装须沿用原程序与数据位置。本安装器不支持直接迁移；请返回安装位置核对。",
+    "zh-CN": "已有安装须沿用原程序与数据位置。本安装器不支持直接迁移；请返回安装位置核对。",
+    "en-US": "Existing installations must keep their program and data locations. This installer cannot relocate them. Return to the location page to review.",
+    "ja-JP": "既存のインストールでは元のプログラムとデータの保存先を使用してください。このインストーラーでは移動できません。保存先の画面に戻って確認してください。"
+  },
+  "legacy.27b61db0e601": {
+    "source_token": "当前 Windows 用户",
+    "zh-CN": "当前 Windows 用户",
+    "en-US": "Current Windows user",
+    "ja-JP": "現在の Windows ユーザー"
+  },
+  "legacy.be2a8d92b1e2": {
+    "source_token": "当前事务正在执行，请稍候。",
+    "zh-CN": "当前事务正在执行，请稍候。",
+    "en-US": "An operation is in progress. Please wait.",
+    "ja-JP": "処理を実行中です。お待ちください。"
+  },
+  "legacy.c366992f074d": {
+    "source_token": "数据清单已变化或包含未登记文件，已停止卸载。请重新检查并保留这些文件。",
+    "zh-CN": "数据清单已变化或包含未登记文件，已停止卸载。请重新检查并保留这些文件。",
+    "en-US": "The data list changed or contains unregistered files. Uninstall stopped. Recheck and retain these files.",
+    "ja-JP": "データ一覧が変更されたか、未登録のファイルがあるためアンインストールを停止しました。再確認し、これらのファイルを保持してください。"
+  },
+  "legacy.f3a4dcde1bb7": {
+    "source_token": "文件正在使用中；请关闭 Memorive 后重试。",
+    "zh-CN": "文件正在使用中；请关闭 Memorive 后重试。",
+    "en-US": "Files are in use. Close Memorive and retry.",
+    "ja-JP": "ファイルが使用中です。Memorive を閉じて再試行してください。"
+  },
+  "legacy.263df594a160": {
+    "source_token": "无法确认全部个人数据的归属，已停止卸载。请选择保留个人数据。",
+    "zh-CN": "无法确认全部个人数据的归属，已停止卸载。请选择保留个人数据。",
+    "en-US": "Data ownership could not be fully verified. Uninstall stopped. Choose to keep personal data.",
+    "ja-JP": "個人データの所有範囲をすべて確認できないため、アンインストールを停止しました。個人データの保持を選択してください。"
+  },
+  "legacy.c114d02a6a6f": {
+    "source_token": "无法读取目标卷",
+    "zh-CN": "无法读取目标卷",
+    "en-US": "Cannot read the target volume",
+    "ja-JP": "対象のボリュームを読み取れません"
+  },
+  "legacy.454765bd0f96": {
+    "source_token": "未检测到；请先从 Microsoft 官网安装",
+    "zh-CN": "未检测到；请先从 Microsoft 官网安装",
+    "en-US": "Not detected; install from Microsoft first",
+    "ja-JP": "未検出です。先に Microsoft 公式サイトからインストールしてください"
+  },
+  "legacy.9fb6c1db09fe": {
+    "source_token": "核对清单后输入“永久删除”：",
+    "zh-CN": "核对清单后输入“永久删除”：",
+    "en-US": "Review the list, then type “DELETE PERMANENTLY”:",
+    "ja-JP": "一覧を確認し「完全削除」と入力してください:"
+  },
+  "legacy.4e01a4d26a03": {
+    "source_token": "永久删除",
+    "zh-CN": "永久删除",
+    "en-US": "DELETE PERMANENTLY",
+    "ja-JP": "完全削除"
+  },
+  "legacy.a24c9b0c0bc2": {
+    "source_token": "永久删除已列数据",
+    "zh-CN": "永久删除已列数据",
+    "en-US": "Permanently delete listed data",
+    "ja-JP": "一覧のデータを完全に削除"
+  },
+  "legacy.ce3d39adcf1e": {
+    "source_token": "界面运行环境未就绪：",
+    "zh-CN": "界面运行环境未就绪：",
+    "en-US": "The UI runtime is not ready: ",
+    "ja-JP": "UI ランタイムの準備ができていません: "
+  },
+  "legacy.ba142d17d862": {
+    "source_token": "磁盘空间",
+    "zh-CN": "磁盘空间",
+    "en-US": "Disk space",
+    "ja-JP": "ディスク容量"
+  },
+  "legacy.fb926a8e8dd3": {
+    "source_token": "程序与用户数据目录不能相同，也不能互为父子目录。",
+    "zh-CN": "程序与用户数据目录不能相同，也不能互为父子目录。",
+    "en-US": "Program and user data folders must be separate, with neither containing the other.",
+    "ja-JP": "プログラムとユーザーデータのフォルダーは分離し、親子関係にしないでください。"
+  },
+  "legacy.a43e9a61768a": {
+    "source_token": "程序目录中存在无法确认归属的文件，已停止卸载。请保留目录并检查之前的安装记录。",
+    "zh-CN": "程序目录中存在无法确认归属的文件，已停止卸载。请保留目录并检查之前的安装记录。",
+    "en-US": "The program folder contains files of unknown ownership. Uninstall stopped. Retain the folder and check prior installation records.",
+    "ja-JP": "プログラムフォルダーに所有範囲を確認できないファイルがあるため、アンインストールを停止しました。フォルダーを保持して以前のインストール記録を確認してください。"
+  },
+  "legacy.3e7698c84512": {
+    "source_token": "系统架构",
+    "zh-CN": "系统架构",
+    "en-US": "System architecture",
+    "ja-JP": "システムアーキテクチャ"
+  },
+  "legacy.5890c084b931": {
+    "source_token": "约",
+    "zh-CN": "约",
+    "en-US": "About",
+    "ja-JP": "約"
+  },
+  "legacy.d6f59f044f9f": {
+    "source_token": "该位置不是有效的文件夹路径。请检查名称，勿选择文件或保留名称。",
+    "zh-CN": "该位置不是有效的文件夹路径。请检查名称，勿选择文件或保留名称。",
+    "en-US": "This is not a valid folder path. Check its name; do not select a file or reserved name.",
+    "ja-JP": "有効なフォルダーパスではありません。名前を確認し、ファイルや予約名を選ばないでください。"
+  },
+  "legacy.9677bee63079": {
+    "source_token": "该文件夹含有其他文件或无法确认归属。请选择空文件夹或 Memorive 原有的对应目录。",
+    "zh-CN": "该文件夹含有其他文件或无法确认归属。请选择空文件夹或 Memorive 原有的对应目录。",
+    "en-US": "This folder contains other files or its ownership is unknown. Choose an empty folder or the corresponding existing Memorive folder.",
+    "ja-JP": "このフォルダーにはほかのファイルがあるか、所有範囲を確認できません。空のフォルダーか、既存の Memorive の対応するフォルダーを選択してください。"
+  },
+  "legacy.3e9559de74e4": {
+    "source_token": "该目录属于项目、系统或共享数据的受保护范围，不能删除。请选择保留个人数据。",
+    "zh-CN": "该目录属于项目、系统或共享数据的受保护范围，不能删除。请选择保留个人数据。",
+    "en-US": "This folder is protected project, system or shared data and cannot be deleted. Choose to keep personal data.",
+    "ja-JP": "このフォルダーは保護対象のプロジェクト、システム、共有データに含まれるため削除できません。個人データの保持を選択してください。"
+  },
+  "legacy.303e344f9024": {
+    "source_token": "请输入一个命令名或完整可执行文件路径，不接受命令参数。",
+    "zh-CN": "请输入一个命令名或完整可执行文件路径，不接受命令参数。",
+    "en-US": "Enter a command name or absolute executable path without arguments.",
+    "ja-JP": "引数を含めずにコマンド名または実行ファイルの絶対パスを入力してください。"
+  },
+  "legacy.ceb9690499e7": {
+    "source_token": "请输入本机固定磁盘上的完整文件夹路径，例如 D:\\\\Memorive。",
+    "zh-CN": "请输入本机固定磁盘上的完整文件夹路径，例如 D:\\Memorive。",
+    "en-US": "Enter an absolute folder path on a local fixed drive, such as D:\\Memorive.",
+    "ja-JP": "ローカルの固定ドライブ上のフォルダーを絶対パスで入力してください。例: D:\\Memorive。"
+  },
+  "legacy.70bb1c749975": {
+    "source_token": "返回并保留数据",
+    "zh-CN": "返回并保留数据",
+    "en-US": "Go back and keep data",
+    "ja-JP": "戻ってデータを保持"
+  },
+  "legacy.667bcc0ca398": {
+    "source_token": "选择最终用户数据文件夹（不再追加子目录）",
+    "zh-CN": "选择最终用户数据文件夹（不再追加子目录）",
+    "en-US": "Choose the final user data folder (no subfolder will be added)",
+    "ja-JP": "ユーザーデータの保存先を選択（サブフォルダーは追加しません）"
+  },
+  "legacy.c841a81f9df5": {
+    "source_token": "选择最终程序文件夹（不再追加子目录）",
+    "zh-CN": "选择最终程序文件夹（不再追加子目录）",
+    "en-US": "Choose the final program folder (no subfolder will be added)",
+    "ja-JP": "プログラムの保存先を選択（サブフォルダーは追加しません）"
+  },
+  "legacy.6527206e86bf": {
+    "source_token": "需要 .NET Framework 4.8",
+    "zh-CN": "需要 .NET Framework 4.8",
+    "en-US": ".NET Framework 4.8 is required",
+    "ja-JP": ".NET Framework 4.8 が必要です"
+  },
+  "legacy.a18d7e12de8d": {
+    "source_token": ".NET 官方下载",
+    "zh-CN": ".NET 官方下载",
+    "en-US": "Official .NET download",
+    "ja-JP": ".NET 公式ダウンロード"
+  },
+  "legacy.3f9c28ac013b": {
+    "source_token": "Memorive\\nWindows 安装向导",
+    "zh-CN": "Memorive\nWindows 安装向导",
+    "en-US": "Memorive\nWindows Setup",
+    "ja-JP": "Memorive\nWindows セットアップ"
+  },
+  "legacy.c043c07c0996": {
+    "source_token": "Microsoft 组件适用其原有许可。SmartScreen 按 Microsoft 隐私声明收集并向 Microsoft 发送相关信息，用于安全检查。",
+    "zh-CN": "Microsoft 组件适用其原有许可。SmartScreen 按 Microsoft 隐私声明收集并向 Microsoft 发送相关信息，用于安全检查。",
+    "en-US": "Microsoft components retain their original licenses. SmartScreen collects and sends information to Microsoft for security checks under the Microsoft Privacy Statement.",
+    "ja-JP": "Microsoft のコンポーネントには元のライセンスが適用されます。SmartScreen はセキュリティ確認のため、Microsoft のプライバシーステートメントに従って情報を収集し Microsoft に送信します。"
+  },
+  "legacy.b4da313c7fed": {
+    "source_token": "下载 x64 运行库",
+    "zh-CN": "下载 x64 运行库",
+    "en-US": "Download x64 runtime",
+    "ja-JP": "x64 ランタイムをダウンロード"
+  },
+  "legacy.c10f803e3e74": {
+    "source_token": "从 Microsoft 官方来源安装组件后返回此页；若安装程序要求重启，请先重启，再打开本向导。",
+    "zh-CN": "从 Microsoft 官方来源安装组件后返回此页；若安装程序要求重启，请先重启，再打开本向导。",
+    "en-US": "Return here after installing components from Microsoft. If a restart is requested, restart Windows before reopening this wizard.",
+    "ja-JP": "Microsoft 公式サイトからコンポーネントをインストールしてからこのページに戻ってください。再起動を求められた場合は Windows を再起動し、このウィザードを開き直してください。"
+  },
+  "legacy.220c4048f7c4": {
+    "source_token": "代码与素材声明",
+    "zh-CN": "代码与素材声明",
+    "en-US": "Code and asset notices",
+    "ja-JP": "コードと素材の表記"
+  },
+  "legacy.2ba0ba98d1ef": {
+    "source_token": "作者鼓励个人学习、研究与非商业使用，此倡议不限制 AGPL 授予的权利。角色素材为受 Blue Archive 启发的非官方二创，与 Nexon、Nexon Games、Yostar 无直接授权或隶属关系。",
+    "zh-CN": "作者鼓励个人学习、研究与非商业使用，此倡议不限制 AGPL 授予的权利。角色素材为受 Blue Archive 启发的非官方二创，与 Nexon、Nexon Games、Yostar 无直接授权或隶属关系。",
+    "en-US": "The author encourages personal learning, research and noncommercial use without limiting AGPL rights. Character assets are unofficial Blue Archive-inspired fan works with no direct authorization from or affiliation with Nexon, Nexon Games or Yostar.",
+    "ja-JP": "作者は個人学習、研究、非商用利用を推奨しますが、AGPL で認められた権利を制限しません。キャラクター素材は Blue Archive に着想を得た非公式の二次創作であり、Nexon、Nexon Games、Yostar から直接の許諾を得たものではなく、提携関係もありません。"
+  },
+  "legacy.9e20f66502f1": {
+    "source_token": "卸载程序并保留个人数据",
+    "zh-CN": "卸载程序并保留个人数据",
+    "en-US": "Uninstall the program and keep personal data",
+    "ja-JP": "プログラムを削除し個人データを保持"
+  },
+  "legacy.4a337395d6eb": {
+    "source_token": "尚未安装 · 选择 Evergreen x64 运行库",
+    "zh-CN": "尚未安装 · 选择 Evergreen x64 运行库",
+    "en-US": "Not installed · choose Evergreen x64 runtime",
+    "ja-JP": "未インストール · Evergreen x64 ランタイムを選択"
+  },
+  "legacy.dd8290ec072d": {
+    "source_token": "已满足 · 14.51.36247 或更高",
+    "zh-CN": "已满足 · 14.51.36247 或更高",
+    "en-US": "Available · 14.51.36247 or later",
+    "ja-JP": "導入済み · 14.51.36247 以降"
+  },
+  "legacy.5a813a49d5b3": {
+    "source_token": "已满足 · 4.8 或更高",
+    "zh-CN": "已满足 · 4.8 或更高",
+    "en-US": "Available · 4.8 or later",
+    "ja-JP": "導入済み · 4.8 以降"
+  },
+  "legacy.07ea70f7a100": {
+    "source_token": "无法打开官网：",
+    "zh-CN": "无法打开官网：",
+    "en-US": "Cannot open the official website: ",
+    "ja-JP": "公式サイトを開けません: "
+  },
+  "legacy.5bd1bc284bd9": {
+    "source_token": "程序已卸载，个人数据已保留。",
+    "zh-CN": "程序已卸载，个人数据已保留。",
+    "en-US": "The program is uninstalled and personal data has been kept.",
+    "ja-JP": "プログラムをアンインストールし、個人データを保持しました。"
+  },
+  "legacy.b80b97d6351b": {
+    "source_token": "继续安装",
+    "zh-CN": "继续安装",
+    "en-US": "Continue installation",
+    "ja-JP": "インストールを続行"
+  },
+  "legacy.08e690552df0": {
+    "source_token": "补齐下列组件后，点击“重新检查”继续。",
+    "zh-CN": "补齐下列组件后，点击“重新检查”继续。",
+    "en-US": "Install the components below, then select Recheck to continue.",
+    "ja-JP": "以下のコンポーネントを導入し、「再確認」を選択して続行してください。"
+  },
+  "legacy.5428a70b676c": {
+    "source_token": "请安装 vc_redist.x64.exe；x86 不能替代 x64。",
+    "zh-CN": "请安装 vc_redist.x64.exe；x86 不能替代 x64。",
+    "en-US": "Install vc_redist.x64.exe. The x86 version cannot replace x64.",
+    "ja-JP": "vc_redist.x64.exe をインストールしてください。x86 版では x64 版を代用できません。"
+  },
+  "legacy.b0232db54156": {
+    "source_token": "需要 .NET Framework 4.8 Runtime",
+    "zh-CN": "需要 .NET Framework 4.8 Runtime",
+    "en-US": ".NET Framework 4.8 Runtime is required",
+    "ja-JP": ".NET Framework 4.8 Runtime が必要です"
+  },
+  "legacy.889b8ad38a88": {
+    "source_token": "需要 Windows 10 22H2 / Windows 11 x64。",
+    "zh-CN": "需要 Windows 10 22H2 / Windows 11 x64。",
+    "en-US": "Windows 10 22H2 / Windows 11 x64 is required.",
+    "ja-JP": "Windows 10 22H2 / Windows 11 x64 が必要です。"
+  },
+  "language.switch": {
+    "source_token": "切换界面语言",
+    "zh-CN": "切换界面语言",
+    "en-US": "Change interface language",
+    "ja-JP": "表示言語を切り替え"
+  },
+  "notice.title": {
+    "zh-CN": "Memorive 安装向导 · v1.01",
+    "en-US": "Memorive Setup · v1.01",
+    "ja-JP": "Memorive セットアップ · v1.01"
+  },
+  "notice.alreadyOpen": {
+    "zh-CN": "安装向导已经打开。请完成或关闭现有安装窗口后再试。",
+    "en-US": "Setup is already open. Finish or close the existing setup window, then try again.",
+    "ja-JP": "セットアップは既に開いています。既存のセットアップ画面を完了するか閉じてから、もう一度お試しください。"
+  },
+  "notice.copyDetails": {
+    "zh-CN": "复制诊断详情",
+    "en-US": "Copy diagnostics",
+    "ja-JP": "診断情報をコピー"
+  },
+  "notice.copied": {
+    "zh-CN": "已复制",
+    "en-US": "Copied",
+    "ja-JP": "コピーしました"
+  },
+  "assistant.instance": {
+    "zh-CN": "安装实例",
+    "en-US": "Installation",
+    "ja-JP": "インストール先"
+  },
+  "assistant.none": {
+    "zh-CN": "尚未选择安装位置",
+    "en-US": "No installation selected",
+    "ja-JP": "インストール先が未選択です"
+  },
+  "assistant.closeHint": {
+    "zh-CN": "操作已完成。可以关闭此窗口。",
+    "en-US": "Finished. You can close this window.",
+    "ja-JP": "処理が完了しました。このウィンドウを閉じてください。"
+  },
+  "assistant.recoveryHint": {
+    "zh-CN": "上次更新未完成。恢复后将保留原有版本与数据。",
+    "en-US": "The last update was interrupted. Recover to restore the previous version and data.",
+    "ja-JP": "更新が中断されました。復元すると以前のバージョンとデータに戻ります。"
+  },
+  "assistant.workingHint": {
+    "zh-CN": "正在处理，请保持此窗口打开。",
+    "en-US": "Working. Please keep this window open.",
+    "ja-JP": "処理中です。このウィンドウを開いたままお待ちください。"
+  },
+  "assistant.failureHint": {
+    "zh-CN": "未能完成操作。可在本页查看诊断详情。",
+    "en-US": "The operation could not finish. View diagnostic details on this page.",
+    "ja-JP": "処理を完了できませんでした。このページで診断の詳細を確認できます。"
+  },
+  "assistant.idleHint": {
+    "zh-CN": "仅在你确认后下载并安装更新。",
+    "en-US": "Updates are downloaded and installed only after you choose to proceed.",
+    "ja-JP": "確認するまで更新のダウンロードやインストールは行いません。"
+  }
+}

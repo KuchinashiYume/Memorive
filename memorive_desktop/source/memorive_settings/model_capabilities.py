@@ -62,6 +62,7 @@ def workflow_node_accepts_capability(node_id: object, capability: object) -> boo
         "analysis",
         "judgment_review",
         "context_pack",
+        "logic_review",
     }
 
 

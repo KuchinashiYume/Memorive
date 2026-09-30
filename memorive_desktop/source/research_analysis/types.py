@@ -91,12 +91,12 @@ def disclaimer_for(language: str | None) -> str:
     """Return the system disclaimer in the source language."""
 
     key = "zh" if language is None else normalize_source_language(language)
-    return _LOCALIZED_TEXT[key]["disclaimer"]
+    return _LOCALIZED_TEXT.get(key, _LOCALIZED_TEXT["en"])["disclaimer"]
 
 
 def _localized(language: str | None) -> dict[str, str]:
     key = "zh" if language is None else normalize_source_language(language)
-    return _LOCALIZED_TEXT[key]
+    return _LOCALIZED_TEXT.get(key, _LOCALIZED_TEXT["en"])
 
 
 @dataclass(frozen=True)

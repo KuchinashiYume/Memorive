@@ -148,9 +148,16 @@ class MessagesProductController:
             synthetic_only=self.include_synthetic_projection,
         )
         self.bridge = SyntheticWindowsBridge()
-        self.notifications = NotificationPlanner(self.store, self.bridge)
+        self.notifications = NotificationPlanner(self.store, self.bridge, language_get=self._language)
         if self.include_synthetic_projection:
             self._seed_if_empty()
+
+    def _language(self):
+        return self.service.call("settings.get_state", {})["settings"]["preferences"]["language"]
+
+    def _localized(self, record):
+        from memorive_language.messages import project
+        return project(record, self._language())
 
     @staticmethod
     def _require_keys(params: Mapping[str, Any], required: set[str], optional: set[str] | None = None) -> None:
@@ -192,10 +199,14 @@ class MessagesProductController:
     def _records(self, mode: str | None = None, search: str = "") -> list[dict[str, Any]]:
         self._sync_core_messages()
         self._migrate_public_failure_copy()
-        rows = stable_message_sort(self.store.records()) if mode is None else self.controller.list_messages(mode, search=search)
+        rows = stable_message_sort(self.store.records()) if mode is None else self.controller.list_messages(mode)
+        from memorive_language.messages import project
+        language=self._language()
+        query=search.casefold().strip()
         projected: list[dict[str, Any]] = []
         for row in rows:
-            accepted = row.to_dict()
+            accepted = project(row.to_dict(), language)
+            if query and query not in (accepted["title"]+"\n"+accepted["summary"]).casefold():continue
             source = accepted["source_event_ref"]
             target_node_id = source.get("node_id")
             target_available = source.get("target_unavailable_at") is None
@@ -255,24 +266,12 @@ class MessagesProductController:
             if node_label == "文献处理流程" and any(needle in marker for needle in needles):
                 node_label = label
                 break
-        length_exhausted = any(
-            needle in marker
-            for needle in (
-                "FINISH_REASON_LENGTH",
-                "FINISH_REASON=Length".upper(),
-                "OUTPUT_TRUNCAT",
-                "仍被截断",
-                "8192_TO_16384",
-            )
-        )
-        local_embedding_capacity = any(
-            needle in marker
-            for needle in ("PHYSICAL BATCH SIZE", "INPUT_TOO_LARGE", "TOO LARGE TO PROCESS")
-        )
-        if length_exhausted:
+        from memorive_language.messages import runtime_failure_kind
+        failure_kind=runtime_failure_kind(error_code,failed_node_id)
+        if failure_kind=='length':
             problem = "输出不完整"
             next_action = "重新处理时将分段生成，可先调整模型"
-        elif local_embedding_capacity:
+        elif failure_kind=='capacity':
             problem = "向量处理容量不足"
             next_action = "重新处理时将分段处理，可先更换向量模型"
         else:
@@ -485,7 +484,10 @@ class MessagesProductController:
                         f"丢弃 {int(context_pack.get('dropped_evidence_block_count') or 0)} 个证据块。"
                         "可在资料库查看 整理分析材料；如需更多证据，可更换更大上下文模型后从该节点重新执行。"
                     )
+            from memorive_language.messages import runtime_content
+            message_content=runtime_content(event,core=core,state=control_state,failed_node_id=failed_node_id,raw_error=raw_error)
             projected = {
+                "message_content": message_content,
                 "sequence": sequence,
                 "event_id": f"runtime-{uuid.uuid4().hex}",
                 "event_type": event_type,
@@ -623,18 +625,18 @@ class MessagesProductController:
             return {"schema_version": "MessagesMessageModeReceipt-v1", **self.controller.switch_mode(str(accepted["mode"])), "status": "PASS"}
         if method == "messages.open_detail":
             self._require_keys(accepted, {"message_id"})
-            return self.controller.open_detail(str(accepted["message_id"])).to_dict()
+            return self._localized(self.controller.open_detail(str(accepted["message_id"])).to_dict())
         if method == "messages.close_detail":
             self._require_keys(accepted, set())
             return {"schema_version": "MessagesMessageDetailCloseReceipt-v1", **self.controller.close_detail(), "status": "PASS"}
         if method == "messages.toggle_star":
             self._require_keys(accepted, {"message_id"})
-            return self.controller.toggle_star(str(accepted["message_id"])).to_dict()
+            return self._localized(self.controller.toggle_star(str(accepted["message_id"])).to_dict())
         if method == "messages.confirm":
             self._require_keys(accepted, {"message_id"}, {"from_detail"})
-            return self.controller.confirm(
+            return self._localized(self.controller.confirm(
                 str(accepted["message_id"]), from_detail=bool(accepted.get("from_detail", False))
-            ).to_dict()
+            ).to_dict())
         if method == "messages.archive_confirmed":
             self._require_keys(accepted, {"message_id"})
             return self.controller.archive_confirmed(str(accepted["message_id"]))

@@ -1,0 +1,17 @@
+{
+  "schema_version": "DataAnomalyManifest-v3",
+  "members": {
+    "answer_key_v3.json": "B4C037BD6094D1904C60C25B1FEF42230F184394DCF04521BEBFB1F2881DD3B9",
+    "reference_pack_v1.json": "FAB37A9BEEC2C525A39815C3677D3625B30DC160B45C2C096FCA37E4129341C5",
+    "scoring_protocol_v3.json": "F2CBD30BBC414FE30963D567DFA9F79158282A70C07B6886B7B0B096E27AE687"
+  },
+  "required_controls": [
+    "weighted_pct",
+    "rounded_small",
+    "cluster_se",
+    "unknown_grid",
+    "confounded_cause",
+    "exact_pct"
+  ],
+  "old_m14_materials_modified": false
+}

@@ -56,6 +56,7 @@ def bind(workspace,api):
     def pump():
         while not workspace.connector_stop.is_set():
             try:
+                workspace.conversations.maintain()
                 workspace.connections.pump()
                 for d in workspace.store.list('connector_document'):
                     if d.get('processing'):

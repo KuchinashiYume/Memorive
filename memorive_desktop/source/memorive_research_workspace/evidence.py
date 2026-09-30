@@ -7,6 +7,24 @@ from memorive_folder_management.policy import windows_io_path
 
 DENY_DIRS={'.git','.obsidian','.codex','.claude','node_modules','__pycache__','.venv','venv'}
 EXTENSIONS={'.md','.txt','.json','.pdf'}
+
+def material_layer(artifact):
+    layer=artifact.get('material_layer')
+    if layer in {'original','cleaned','card','analysis','confirmed_knowledge'}:return layer
+    if artifact.get('kind')=='preprocessed_full_test':return 'original'
+    if artifact.get('kind') in {'source','attachment'} and Path(artifact.get('path','')).suffix.lower()=='.pdf':return 'original'
+    if artifact.get('kind')=='derived':return 'confirmed_knowledge'
+    return 'unknown'
+
+def source_document_hash(artifact):
+    """Use recorded lineage, never infer parentage from a title or shared words."""
+    value=artifact.get('source_content_hash')
+    if not value and material_layer(artifact)=='original' and Path(artifact.get('path','')).suffix.lower()=='.pdf':value=artifact.get('content_hash')
+    # Earlier library bridge versions encoded the verified source hash here.
+    if not value and artifact.get('kind')=='library':
+        match=re.fullmatch(r'doc_([a-fA-F0-9]{64})',artifact.get('document_id',''))
+        if match:value=match.group(1)
+    return value.lower() if isinstance(value,str) and re.fullmatch(r'[a-fA-F0-9]{64}',value) else None
 def safe_path(root,path):
     root=Path(root).resolve(strict=False);path=Path(path)
     if not windows_io_path(root).is_dir():raise ValueError('SOURCE_ROOT_UNAVAILABLE')
@@ -45,10 +63,20 @@ def read_document(path):
 class EvidenceIndex:
     def __init__(self,store):self.store=store;self.rank_model=None;self.embed_model=None;self.profile_identity=None
 
-    def add_library_file(self,project,*,path,root,external_id,expected_hash,title,document_id=None):
+    def add_library_file(self,project,*,path,root,external_id,expected_hash,title,document_id=None,material_layer='unknown',source_content_hash=None,structure_bundle=None):
         if not self.store.get('project',project):raise ValueError('PROJECT_NOT_FOUND')
+        if material_layer not in {'original','cleaned','card','analysis','unknown'}:raise ValueError('LIBRARY_MATERIAL_LAYER_INVALID')
+        if source_content_hash is not None and (not isinstance(source_content_hash,str) or not re.fullmatch(r'[a-fA-F0-9]{64}',source_content_hash)):raise ValueError('LIBRARY_SOURCE_LINEAGE_INVALID')
         path=safe_path(root,path);raw,pages=read_document(path)
         if digest(raw).lower()!=expected_hash.lower():raise ValueError('LIBRARY_SOURCE_HASH_MISMATCH')
+        structure_binding=None
+        if structure_bundle is not None:
+            from document_processing.document_structure.bundle import load as load_structure
+            structure_path=safe_path(root,Path(structure_bundle)/'bundle.json').parent
+            receipt,structure=load_structure(structure_path)
+            if structure['rawmd_sha256'].lower()!=expected_hash.lower() or structure['source_sha256'].lower()!=str(source_content_hash).lower():raise ValueError('LIBRARY_STRUCTURE_BINDING_MISMATCH')
+            structure_binding={'path':str(structure_path),'root':str(Path(root).resolve()),'structure_id':structure['structure_id'],
+                               'source_sha256':structure['source_sha256'],'rawmd_sha256':structure['rawmd_sha256']}
         snapshot_root=self.store.root/'library_snapshots';windows_io_path(snapshot_root).mkdir(exist_ok=True)
         snapshot=snapshot_root/(digest(raw)+path.suffix.lower());snapshot_io=windows_io_path(snapshot)
         if not snapshot_io.exists():
@@ -67,7 +95,9 @@ class EvidenceIndex:
         with self.store.tx() as db:
             row=self.store.put('artifact',identity,project,{'project':project,'title':title,'path':str(path),
                 'root':str(Path(root).resolve()),'content_hash':digest(raw),'state':'active','kind':'library',
-                'indexed_at':now(),'chunks':len(chunks),'external_id':external_id,'document_id':document_id or 'doc_'+digest(raw),'selection':'EXPLICIT_DESKTOP_USER'},db=db)
+                'indexed_at':now(),'chunks':len(chunks),'external_id':external_id,'document_id':document_id or 'doc_'+digest(raw),
+                'material_layer':material_layer,'source_content_hash':source_content_hash.lower() if source_content_hash else None,'selection':'EXPLICIT_DESKTOP_USER',
+                **({'structure_binding':structure_binding} if structure_binding else {})},db=db)
             db.execute('DELETE FROM chunks WHERE artifact_id=?',(identity,))
             db.executemany('INSERT INTO chunks VALUES(?,?,?,?,?,?,?,?)',chunks)
         return row
@@ -150,10 +180,52 @@ class EvidenceIndex:
             uri='obsidian://open?vault='+quote(binding['vault_name'],safe='')+'&file='+quote(binding['relative_path'].replace('\\','/'),safe='')
         field=self.store.get('research_field',evidence_id,db=db)
         if field and (field['content_hash']!=artifact['content_hash'] or field['text_hash']!=row['hash']):raise ValueError('EVIDENCE_STALE')
+        review={}
+        if artifact['kind']=='derived' and artifact.get('feedback_id'):
+            proposal=self.store.get('feedback',artifact['feedback_id'],db=db)
+            if proposal and proposal.get('artifact_id')==artifact['id']:
+                review={'knowledge_review':{'feedback_id':proposal['id'],'admission_state':proposal['state'],
+                    'human_confirmed':proposal['human_confirmed'],'revision':proposal['revision'],
+                    'notice':'Current admission metadata. Draft wording inside the saved title or text is historical content. Admission does not establish scientific correctness.'}}
+        structure_refs=[]
+        if artifact.get('structure_binding'):
+            from document_processing.document_structure.bundle import load as load_structure
+            link=artifact['structure_binding'];folder=safe_path(link['root'],Path(link['path'])/'bundle.json').parent
+            receipt,structure=load_structure(folder)
+            if structure['structure_id']!=link['structure_id']:raise ValueError('EVIDENCE_STRUCTURE_STALE')
+            for block in structure['blocks']:
+                quote=block['text']
+                if 12<=len(quote)<=len(row['text']) and row['text'].count(quote)==1:
+                    structure_refs.append({'structure_id':structure['structure_id'],'block_id':block['block_id'],
+                        'source_sha256':structure['source_sha256'],'source_location':block.get('source_location'),
+                        'character_start':row['text'].index(quote),'character_count':len(quote),
+                        'status':'EXACT_RAWMD_TEXT_LOCATION_CANDIDATE'})
+                    if len(structure_refs)==16:break
         return {'id':evidence_id,'artifact_id':artifact['id'],'title':artifact['title']+(' · '+field['field_label'] if field else ''),'text':row['text'],'card_field':field,
             'content_hash':artifact['content_hash'],'chunk_hash':row['hash'],'path':artifact['path'],
             'line_start':row['line_start'],'line_end':row['line_end'],'page':row['page'],'kind':artifact['kind'],'project':project,
-            'document_id':binding.get('document_id',artifact.get('document_id',artifact['id'])),'source_uri':uri,'source_binding':binding}
+            'document_id':binding.get('document_id',artifact.get('document_id',artifact['id'])),'source_uri':uri,'source_binding':binding,
+            'material_layer':material_layer(artifact),'source_content_hash':source_document_hash(artifact),**review,
+            **({'structure_refs':structure_refs} if structure_refs else {})}
+
+    def unavailable_derived(self,project,artifact_ids=None,*,db=None):
+        """Report unusable knowledge without changing its human review state."""
+        if db is None:
+            with self.store.tx() as conn:return self.unavailable_derived(project,artifact_ids,db=conn)
+        unavailable={}
+        for artifact in self.store.list('artifact',project,db=db):
+            if artifact['kind']!='derived' or artifact['state']!='active':continue
+            if artifact_ids is not None and artifact['id'] not in artifact_ids:continue
+            try:
+                first=db.execute('SELECT id FROM chunks WHERE artifact_id=? LIMIT 1',(artifact['id'],)).fetchone()
+                if first is None:raise ValueError('EVIDENCE_NOT_FOUND')
+                self.read(first['id'],project,expected_hash=artifact['content_hash'],db=db)
+            except ValueError as error:
+                if str(error) not in {'EVIDENCE_NOT_FOUND','EVIDENCE_INACTIVE','EVIDENCE_STALE','EVIDENCE_VERSION_CONFLICT','SOURCE_ROOT_UNAVAILABLE'}:raise
+                unavailable[artifact['id']]={'content_hash':artifact['content_hash'],'reason':str(error)}
+            except FileNotFoundError:
+                unavailable[artifact['id']]={'content_hash':artifact['content_hash'],'reason':'SOURCE_UNAVAILABLE'}
+        return unavailable
 
     def search(self,query,project,limit=8,artifact_ids=None,policy_config=None,record=True):
         from retrieval_weighting.research_ranking import search

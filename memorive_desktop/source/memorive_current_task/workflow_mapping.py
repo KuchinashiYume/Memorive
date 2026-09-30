@@ -10,6 +10,7 @@ from memorive_workflow.capacity import describe_capacity
 
 Core_NODES = (
     ("ingest", "01_DOCUMENT_INGEST", "文档处理", "转换、清洗、切块、内容理解与复杂版面/OCR"),
+    ("data_review", "E2_DATA_REVIEW", "数据分析", "原样数值提取、描述及明确参数下的本地核查"),
     ("chunk_embedding", "02_CHUNK_EMBEDDING", "向量化", "为 chunk 生成可检索的向量嵌入"),
     ("card_distill", "03_CARD_DISTILL", "生成卡片", "忠实抽取并生成待处理 Card"),
     ("transport_review", "04_CARD_CROSS_CHECK", "核对卡片", "回到原文核对字段、来源与搬运准确性"),
@@ -18,6 +19,7 @@ Core_NODES = (
     ("analysis", "07_ANALYSIS", "分析", "基于已选材料生成分析建议"),
     ("judgment_review", "08_JUDGMENT_CROSS_CHECK", "核对分析", "核对分析结论与引用证据"),
     ("human_judgment", "09_HUMAN_FINAL", "人工判断", "完成最终判断与写作"),
+    ("logic_review", "E2_LOGIC_REVIEW", "逻辑分析", "按文献选择的独立云端核查"),
 )
 
 BUILTIN_MODELS = {
@@ -46,6 +48,7 @@ def _model_descriptor(service: Mapping[str, Any]) -> str:
 def build_core_execution_snapshot(
     settings: Mapping[str, Any], *, settings_revision: int,
     local_model_profiles: Sequence[Mapping[str, Any]] | None = None,
+    document_structure_config: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Translate saved Settings v5 into the immutable Core nine-node job shape.
 
@@ -98,6 +101,8 @@ def build_core_execution_snapshot(
         for row in accepted["model_services"]
     ]
     cli_service_enabled: dict[str, bool] = {}
+    from memorive_settings.cli_template_management import projection
+    accepted=projection(accepted)
     for cli_service in accepted["cli_services"]:
         for model in cli_service["models"]:
             services[model["profile_ref"]] = {
@@ -120,7 +125,7 @@ def build_core_execution_snapshot(
                         "model": model["display_name"] or model["model_name"],
                         "connection_status": model["connection_status"],
                         "credential_reference_stored": True,
-                        "capability": "CHAT",
+                        "capability": ("CHAT" if cli_service.get("template",{}).get("capabilities",{}).get("structured_output") else "OCR" if cli_service.get("template",{}).get("capabilities",{}).get("images") else "CLI_TEXT_ONLY") if cli_service.get("adapter_id")=="command_template" else "CHAT",
                         "embedding_eligible": False,
                     }
                 )
@@ -296,6 +301,7 @@ def build_core_execution_snapshot(
         execution_nodes["06_CONTEXT_PACK"][
             "retrieval_embedding_profile_source_node_id"
         ] = "02_CHUNK_EMBEDDING"
+    definitions = [row for row in definitions if row["node_id"] != "E2_LOGIC_REVIEW"]
     configured_models.sort(key=lambda row: row["profile_ref"])
     profile_catalog = []
     for option in configured_models:
@@ -327,16 +333,16 @@ def build_core_execution_snapshot(
         row["credential_reference_stored"] for row in configured_models
     )
     payload = {
-        "schema_version": "MemoriveCoreExecutionSnapshot-v1",
+        "schema_version": "MemoriveCoreExecutionSnapshot-v2",
         "settings_revision": settings_revision,
         "settings_sha256": canonical_sha256(accepted),
         "workflow_definition": {
-            "schema_version": "MemoriveCoreWorkflowDefinition-v1",
-            "workflow_id": "memorive-core-nine-node",
+            "schema_version": "MemoriveCoreWorkflowDefinition-v2",
+            "workflow_id": "memorive-core-e2",
             "nodes": definitions,
         },
         "workflow_config": {
-            "schema_version": "MemoriveCoreWorkflowConfig-v1",
+            "schema_version": "MemoriveCoreWorkflowConfig-v2",
             "nodes": execution_nodes,
         },
         "configured_models": configured_models,
@@ -349,6 +355,9 @@ def build_core_execution_snapshot(
         "credential_values_read": 0,
         "external_model_calls": 0,
     }
+    if document_structure_config is not None:
+        from document_processing.document_structure.bundle import normalize_config
+        payload["workflow_config"]["document_structure"] = normalize_config(deepcopy(dict(document_structure_config)))
     payload["snapshot_sha256"] = canonical_sha256(payload)
     return payload
 

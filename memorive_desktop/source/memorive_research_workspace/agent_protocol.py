@@ -17,14 +17,14 @@ SCHEMAS={
     'memo.job_status':schema({'job_id':TEXT},['job_id']),
 }
 for method in ('memo.propose_feedback','memo.submit_draft'):
-    SCHEMAS[method]=schema({k:TEXT for k in ('project','title','claim','scope','limitations')}|{'evidence_ids':IDS},['project','title','claim','scope','limitations','evidence_ids'])
+    SCHEMAS[method]=schema({k:TEXT for k in ('project','title','claim','scope','limitations','handoff_id','handoff_hash','request_id')}|{'evidence_ids':IDS},['project','title','claim','scope','limitations','evidence_ids'])
 DESCRIPTIONS={
     'memo.capabilities':'List Memo research tools and available project IDs.',
     'memo.search':'Search one selected project using the saved Memo retrieval weights and configured models, which may call a provider. Returns versioned citations. No permission to transmit results to other destinations is implied.',
     'memo.read_evidence':'Read an exact evidence excerpt and verify that its source remains unchanged.',
     'memo.prepare_tension':'Prepare source-bound RESEARCH_OPPORTUNITIES comparison facets for at least two papers. Scientific interpretation remains unassessed.',
     'memo.propose_feedback':'Propose cited knowledge with scope and limitations. This cannot approve or activate it.',
-    'memo.submit_draft':'Return an agent research draft to the human review queue in Memorive.',
+    'memo.submit_draft':'Return a research draft for human review. When returning a handoff, include its handoff_id and handoff_hash plus a stable request_id. Stale bindings are rejected; exact repeats do not create another proposal.',
     'memo.job_status':'Read the status of a known job; does not start or retry any call.',
 }
 

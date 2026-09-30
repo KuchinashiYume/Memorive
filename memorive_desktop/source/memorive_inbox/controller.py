@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+import threading
+from functools import wraps
 from typing import Any, Mapping, Sequence
 
 from memorive_app.import_binding import FileImportBinder
@@ -28,6 +30,14 @@ from .workload import workload_projection
 
 class SimulatedCrash(RuntimeError):
     pass
+
+
+def _freeze_selection(method):
+    @wraps(method)
+    def locked(self,*args,**kwargs):
+        with self._dispatch_lock:
+            return method(self,*args,**kwargs)
+    return locked
 
 
 class InboxController:
@@ -64,6 +74,36 @@ class InboxController:
         self.binder = FileImportBinder(self.bound_root)
         self.include_sample_projection = bool(include_sample_projection)
         self.job_state_provider = job_state_provider
+        self._dispatch_lock = threading.RLock()
+        self.work_index = None
+
+    @property
+    def work_index(self):
+        return self._work_index
+
+    @work_index.setter
+    def work_index(self,value):
+        self._work_index=value
+        self.store.change_listener=self._synchronize_work_index
+
+    def _synchronize_work_index(self,row):
+        if self.work_index and row.get('bibliographic_identity') and row.get('content_sha256'):
+            self.work_index.synchronize_file(row,row['bibliographic_identity'])
+
+    def _accessible_duplicate(self,item_id):
+        try:
+            row=self.store.read_item(item_id)
+            if row['state'] in {'TRASHED','DELETED','DEDUPLICATED'} or not row.get('bound_locator'):return None
+            return row if windows_io_path(self._path(row['bound_locator'])).is_file() else None
+        except InboxError:return None
+
+    def _trash_custody(self,item_id,source,target,content_sha):
+        # Undo plus reimport can create two live references to the same bound bytes.
+        # Moving one reference to trash must not remove the other reference's file.
+        shared=any(row.get('bound_locator')==self._locator(source)
+            for row in self.store.active_content_items(content_sha,exclude_item_id=item_id))
+        if shared:shutil.copy2(windows_io_path(source),windows_io_path(target))
+        else:os.replace(windows_io_path(source),windows_io_path(target))
 
     @staticmethod
     def get_contract() -> dict[str, Any]:
@@ -121,7 +161,13 @@ class InboxController:
         bound_path = Path(str(binding["bound_path"]))
         locator = self._locator(bound_path)
         content_sha = str(binding["sha256"])
-        duplicate = self.store.find_by_content(content_sha, exclude_item_id=item_id)
+        from memorive_research_runtime.work_index import own_file_metadata
+        identity = own_file_metadata(bound_path)
+        work_binding = self.work_index.bind_file({'item_id':item_id,'content_sha256':content_sha,'state':'QUEUED'},identity,target_resolver=self._accessible_duplicate) if self.work_index else None
+        duplicate = (self._accessible_duplicate(work_binding['duplicate_item_id']) if work_binding and work_binding.get('duplicate_item_id') else None)
+        if duplicate is None:
+            duplicate=next((row for row in self.store.active_content_items(content_sha,exclude_item_id=item_id)
+                if self._accessible_duplicate(row['item_id'])),None)
         if duplicate is not None:
             return self.store.update_item(
                 item_id,
@@ -129,6 +175,7 @@ class InboxController:
                 lambda row: row.update(
                     {
                         "state": "DEDUPLICATED",
+                        "bibliographic_identity": identity, "work_binding": work_binding,
                         "content_sha256": content_sha,
                         "bound_locator": locator,
                         "duplicate_of": duplicate["item_id"],
@@ -158,6 +205,7 @@ class InboxController:
             lambda row: row.update(
                 {
                     "state": "QUEUED",
+                    "bibliographic_identity": identity, "work_binding": work_binding,
                     "content_sha256": content_sha,
                     "bound_locator": locator,
                     "bytes": int(binding["bytes"]),
@@ -173,6 +221,7 @@ class InboxController:
             ),
         )
 
+    @_freeze_selection
     def _bind_item(
         self,
         item_id: str,
@@ -338,7 +387,10 @@ class InboxController:
         selected_profile_ref: str,
         message_count: int,
         idempotency_key: str,
+        language_context: dict | None = None,
     ) -> dict[str, Any]:
+        from memorive_language import validate
+        if language_context is not None:language_context=validate(language_context)
         projection_id = require_identifier(
             local_projection_id, "local_projection_id"
         )
@@ -369,6 +421,7 @@ class InboxController:
         fingerprint = canonical_sha256(
             {
                 "local_projection_id": projection_id,
+                **({"language_context":language_context} if language_context is not None else {}),
                 "source_snapshot_sha256": source_snapshot_sha256.upper(),
                 "selected_profile_ref": selected_profile_ref.strip(),
             }
@@ -398,6 +451,7 @@ class InboxController:
                 "source_name": display_name.strip(),
                 "source_kind": "session_refinement",
                 "local_projection_id": projection_id,
+                **({"language_context":language_context} if language_context is not None else {}),
                 "source_snapshot_sha256": source_snapshot_sha256.upper(),
                 "selected_profile_ref": selected_profile_ref.strip(),
                 "message_count": message_count,
@@ -706,6 +760,7 @@ class InboxController:
         self.store.update_item(item["item_id"], "Core_CANCELLATION_RECONCILED", close_current)
         return True
 
+    @_freeze_selection
     def dispatch(self, item_id: str, *, idempotency_key: str, failpoint: str | None = None) -> dict[str, Any]:
         key = require_identifier(idempotency_key, "idempotency_key")
         item = self.store.read_item(item_id)
@@ -713,6 +768,11 @@ class InboxController:
             raise InboxError("INBOX_DISPATCH_STATE_NOT_ALLOWED")
         if not item.get("content_sha256") or not item.get("bound_locator"):
             raise InboxError("INBOX_DISPATCH_INPUT_NOT_BOUND")
+        # Existing idempotency keys always replay the original frozen request.
+        for prior in self.store.list_intents():
+            if prior['idempotency_key']==key:
+                if prior['item_id']!=item_id:raise InboxError('INBOX_IDEMPOTENCY_CONFLICT')
+                return {'schema_version':'InboxDispatchEnqueueReceipt-v1','intent':prior,'replayed':True}
         params = {
             "contract_revision": CONTRACT_REVISION,
             "item_id": item_id,
@@ -723,6 +783,12 @@ class InboxController:
             "effect": "START_JOB_INTENT",
             "production_ingestion_performed": False,
         }
+        if item.get('item_kind')!='SESSION_REFINEMENT' and item.get('source_kind') in {'picker','drop'}:
+            provider=getattr(self,'workflow_snapshot_provider',None)
+            if provider:
+                params['workflow_snapshot']=provider()
+                params['literature_review']={'logic_selected':bool(item.get('logic_review_selected',False)),
+                    'data_bindings':item.get('data_review_bindings',[]),'source_sha256':item['content_sha256']}
         params_sha = canonical_sha256(params)
         intent_id = "intent_" + hashlib.sha256(f"{key}\0{params_sha}".encode("utf-8")).hexdigest()[:24]
         intent, replayed = self.store.enqueue_intent(
@@ -750,6 +816,28 @@ class InboxController:
                 lambda row: row.update({"state": "QUEUED", "display_state": "已排队", "error": None}),
             )
         return {"schema_version": "InboxDispatchEnqueueReceipt-v1", "intent": intent, "replayed": replayed}
+
+    @_freeze_selection
+    def set_logic_review(self, item_id: str, *, selected: bool) -> dict[str, Any]:
+        if not isinstance(selected,bool):raise InboxError('INBOX_LOGIC_SELECTION_INVALID')
+        def change(row):
+            if row.get('item_kind')=='SESSION_REFINEMENT' or row.get('state') not in {'QUEUED','ERROR'} or row.get('job_id'):
+                raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
+            if any(i['item_id']==item_id and i['state']=='PENDING' for i in self.store.list_intents()):
+                raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
+            row['logic_review_selected']=selected
+        return self.store.update_item(item_id,'LOGIC_REVIEW_SELECTION',change)
+
+    @_freeze_selection
+    def set_data_bindings(self, item_id: str, *, bindings: list) -> dict[str, Any]:
+        from memorive_review.engine import MAX_RULES
+        if not isinstance(bindings,list) or len(bindings)>MAX_RULES or any(not isinstance(r,dict) for r in bindings):
+            raise InboxError('INBOX_DATA_BINDINGS_INVALID')
+        def change(row):
+            if row.get('job_id') or row.get('state') not in {'QUEUED','ERROR'} or any(i['item_id']==item_id and i['state']=='PENDING' for i in self.store.list_intents()):
+                raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
+            row['data_review_bindings']=immutable(bindings)
+        return self.store.update_item(item_id,'DATA_REVIEW_BINDINGS',change)
 
     def bind_core_job(self, item_id: str, *, job_id: str) -> dict[str, Any]:
         """Bind the durable Core job created for one pending dispatch intent."""
@@ -960,6 +1048,7 @@ class InboxController:
             raise InboxError("INBOX_STAR_STATE_NOT_ALLOWED")
         return self.store.update_item(item_id, "STAR_CHANGED", lambda row: row.update({"starred": starred}))
 
+    @_freeze_selection
     def soft_delete(self, item_ids: Sequence[str], *, operation_id: str) -> dict[str, Any]:
         require_identifier(operation_id, "operation_id")
         if not item_ids:
@@ -1017,7 +1106,7 @@ class InboxController:
                     io_target = windows_io_path(target)
                     if io_target.exists():
                         raise InboxError("INBOX_TRASH_COLLISION")
-                    os.replace(io_source, io_target)
+                    self._trash_custody(item_id,source,target,item.get('content_sha256'))
                     trash_locator = self._locator(target)
             self.store.update_item(
                 item_id,
@@ -1059,6 +1148,7 @@ class InboxController:
             "replayed": False,
         }
 
+    @_freeze_selection
     def undo(self) -> dict[str, Any]:
         operation = self.store.latest_operation("APPLIED", include_internal=False)
         if operation is None:
@@ -1073,6 +1163,10 @@ class InboxController:
                     observed = hashlib.sha256(io_target.read_bytes()).hexdigest().upper()
                     if observed != entry["content_sha256"]:
                         raise InboxError("INBOX_UNDO_BOUND_CONFLICT")
+                    if io_source.exists():
+                        if not io_source.is_file() or hashlib.sha256(io_source.read_bytes()).hexdigest().upper()!=entry["content_sha256"]:
+                            raise InboxError("INBOX_UNDO_BOUND_CONFLICT")
+                        io_source.unlink()  # Verified redundant session-trash copy; live custody remains.
                 elif io_source.exists():
                     os.replace(io_source, io_target)
             self.store.update_item(
@@ -1084,6 +1178,7 @@ class InboxController:
         self.store.update_operation(operation["operation_id"], "UNDONE")
         return {"schema_version": "InboxUndoReceipt-v1", "operation_id": operation["operation_id"], "restored_item_ids": restored}
 
+    @_freeze_selection
     def redo(self) -> dict[str, Any]:
         operation = self.store.latest_operation(
             "UNDONE", include_internal=False, redo_order=True
@@ -1097,7 +1192,7 @@ class InboxController:
                 target = self._path(entry["trash_locator"])
                 io_source = windows_io_path(source); io_target = windows_io_path(target)
                 if io_source.exists():
-                    os.replace(io_source, io_target)
+                    self._trash_custody(entry['item_id'],source,target,entry.get('content_sha256'))
             self.store.update_item(
                 entry["item_id"],
                 "ITEM_SOFT_DELETE_REDONE",
@@ -1140,8 +1235,10 @@ class InboxController:
                 return {"display_state": "已暂停" if control == "PAUSED" else "暂停中",
                         "execution_state": control}
             if control in {"RUNNING","QUEUED"} and job.get("pause_node_id"):
-                return {"display_state":"处理中 · 待暂停","execution_state":"PAUSE_SCHEDULED",
-                        "pause_node_id":job["pause_node_id"]}
+                from memorive_current_task.workflow_mapping import Core_NODES
+                names={row[1]:row[2] for row in Core_NODES}
+                return {"display_state":"已设置暂停点","execution_state":"PAUSE_SCHEDULED",
+                        "pause_node_id":job["pause_node_id"],"pause_node_name":names.get(job['pause_node_id'],'指定节点')}
         visible = "QUEUED" if state == "PROCESSING" and item.get("execution_waiting") else state
         return {"display_state": DISPLAY_STATES.get(visible), "execution_state": visible}
 
@@ -1252,9 +1349,13 @@ class InboxController:
             "item_kind": item.get("item_kind", "FILE"),
             "local_projection_id": item.get("local_projection_id"),
             "source_snapshot_sha256": item.get("source_snapshot_sha256"),
+            "language_context": item.get("language_context"),
             "selected_profile_ref": item.get("selected_profile_ref"),
             "message_count": item.get("message_count"),
             "job_id": item.get("job_id"),
+            "logic_review_selected":bool(item.get('logic_review_selected',False)),
+            "review_choice_frozen":bool(item.get('job_id') or any(i['item_id']==item_id and i['state']=='PENDING' for i in self.store.list_intents())),
+            "data_review_bindings":immutable(item.get('data_review_bindings',[])),
             "error": immutable(item.get("error")),
             "sample": item.get("source_kind") == "sample",
             "created_at": item.get("created_at"),

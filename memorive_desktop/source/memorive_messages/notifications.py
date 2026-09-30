@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
+from memorive_language.text import choose
 
 from .contracts import MessageRecord, canonical_sha256
 from .navigation import MessageNavigator
@@ -34,7 +35,7 @@ class SyntheticWindowsBridge:
         self.os_api_calls = 0
         self.registration_calls = 0
 
-    def emit(self, message: MessageRecord) -> dict[str, Any]:
+    def emit(self, message: MessageRecord, *, language='zh-CN') -> dict[str, Any]:
         if message.message_id in self.sent:
             return {
                 "schema_version": "MessagesSyntheticToastReceipt-v1",
@@ -46,7 +47,8 @@ class SyntheticWindowsBridge:
         title = "Memorive 需要注意" if message.severity == "RED" else "Memorive 等待处理"
         if message.severity in {"GREEN", "BLUE"}:
             title = "Memorive 有新消息"
-        body = "打开应用查看详情。"
+        title = choose(language, title, "Memorive needs attention" if message.severity == "RED" else "Memorive has a new message", "Memorive の確認が必要です" if message.severity == "RED" else "Memorive に新しいメッセージがあります")
+        body = choose(language, "打开应用查看详情。", "Open the app for details.", "アプリで詳細を確認してください。")
         self.redaction_policy.assert_public_safe({"title": title, "body": body})
         receipt = {
             "schema_version": "MessagesSyntheticToastReceipt-v1",
@@ -73,7 +75,9 @@ class NotificationPlanner:
         bridge: SyntheticWindowsBridge,
         *,
         preferences: NotificationPreferences | None = None,
+        language_get=None,
     ):
+        self.language_get = language_get or (lambda: 'zh-CN')
         self.store = store
         self.bridge = bridge
         self.preferences = preferences or NotificationPreferences()
@@ -106,7 +110,7 @@ class NotificationPlanner:
         elif self.preferences.capability_status != "AVAILABLE":
             state = "BLOCKED_UNAVAILABLE"
         else:
-            toast = self.bridge.emit(message)
+            toast = self.bridge.emit(message, language=self.language_get())
             state = "TOAST_SENT" if toast["status"] == "SYNTHETIC_TOAST_EMITTED" else "TOAST_SENT"
         updated = self.store.update_record(
             message_id,

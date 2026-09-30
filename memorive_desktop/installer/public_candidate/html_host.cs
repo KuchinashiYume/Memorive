@@ -21,10 +21,15 @@ using Directory=LongDirectory;
 class UiRequest {public int id;public string action;public Dictionary<string,object> args;}
 static class UiBootstrap {
     public static int InitialPage=1; public static bool Sandbox;public static string Root,Data,Package,Evidence,Fault; public static string Cache;
+    public static bool TestMissingWebView;
     [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern IntPtr LoadLibraryEx(string path,IntPtr reserved,uint flags);
-    public static byte[] Resource(string name){using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)){if(s==null)throw new Exception("UI_RESOURCE_MISSING: "+name);using(var m=new MemoryStream()){s.CopyTo(m);return m.ToArray();}}}
+    public static byte[] Resource(string name){if(name=="install.html"||name=="uninstall.html")name=Path.GetFileNameWithoutExtension(name)+"."+InstallerLocale.Current+".html";using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)){if(s==null)throw new Exception("UI_RESOURCE_MISSING: "+name);using(var m=new MemoryStream()){s.CopyTo(m);return m.ToArray();}}}
     public static void Configure(string[] args){
         Sandbox=args.Contains("--ui-sandbox")||args.Contains("--sandbox");Root=Get(args,"--root");Data=Get(args,"--data");Package=Get(args,"--package")??Engine.Self;Evidence=Get(args,"--ui-evidence");Fault=Get(args,"--fault");
+        if(args.Contains("--test-missing-webview")){
+            UpdateProtocol.Require(Sandbox&&UpdateProtocol.Trust.test_only,"UPDATE_FAULT_TEST_ONLY");
+            Engine.Sandbox(Root);TestMissingWebView=true;
+        }
         if(Sandbox){if(Root==null||Data==null){if(Root!=null&&File.Exists(Path.Combine(Root,"current.json")))Data=Engine.ReadState(Root).data_root;else throw new Exception("UI_SANDBOX_ROOTS_REQUIRED");}Engine.Sandbox(Root);Engine.Sandbox(Data);}
         if(Evidence!=null){Engine.Sandbox(Evidence);if(!Evidence.StartsWith(Engine.TestRoot+@"\evidence\",StringComparison.OrdinalIgnoreCase))throw new Exception("UI_EVIDENCE_SCOPE_INVALID");Directory.CreateDirectory(Evidence);}
         if(!Sandbox&&Fault!=null)throw new Exception("UI_FAULT_REQUIRES_EXACT_SANDBOX");
@@ -37,7 +42,7 @@ static class UiBootstrap {
         if(!File.Exists(path))File.WriteAllBytes(path,b);if(Engine.Hash(path)!=hash)throw new Exception("UI_LOADER_HASH_MISMATCH");
         if(LoadLibraryEx(path,IntPtr.Zero,0x00000100|0x00001000)==IntPtr.Zero)throw new Exception("UI_LOADER_LOAD_FAILED_"+Marshal.GetLastWin32Error());
     }
-    public static string Profile(){string basis=Sandbox?Engine.TestRoot:Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Memorive-Installer-UI");string path=Engine.WebViewPath(basis,true);return path;}
+    public static string Profile(){string basis=Sandbox?Engine.TestRoot:Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Memorive-Installer-UI",Engine.Owner);string path=Engine.WebViewPath(basis,true);return path;}
     public static void OpenOfficial(string name){
         string url;
         switch(name){
@@ -66,7 +71,7 @@ static class UiBootstrap {
     public static void UninstallWorker(string[] args){
         string root=Root;if(!Engine.Within(Engine.Self,root)){Run(true);return;}
         string parent=Sandbox?Path.Combine(Engine.TestRoot,"test_runtime","uninstall-workers"):Path.Combine(Path.GetTempPath(),"Memorive-Uninstall");Engine.NoReparse(parent);string tmp=Path.Combine(parent,Guid.NewGuid().ToString("N"));Directory.CreateDirectory(tmp);string exe=Path.Combine(tmp,"Memorive.Uninstall.exe");File.Copy(Engine.Self,exe);if(Engine.Hash(exe)!=Engine.Hash(Engine.Self))throw new Exception("UNINSTALL_WORKER_HASH_MISMATCH");
-        string extra=Sandbox?" --ui-sandbox --data "+Engine.Quote(Data):"";if(Evidence!=null)extra+=" --ui-evidence "+Engine.Quote(Evidence);Process.Start(new ProcessStartInfo(exe,"--uninstall --root "+Engine.Quote(root)+extra){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden});
+        string extra=" --language "+InstallerLocale.Current+(Sandbox?" --ui-sandbox --data "+Engine.Quote(Data):"");if(Evidence!=null)extra+=" --ui-evidence "+Engine.Quote(Evidence);Process.Start(new ProcessStartInfo(exe,"--uninstall --root "+Engine.Quote(root)+extra){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden});
     }
 }
 
@@ -114,9 +119,21 @@ static class WindowLayout {
     public static Rectangle Fit(Rectangle work,int dpi,Size logical,Rectangle current,bool preferred,bool center){var a=Available(work,dpi);var min=Minimum(work,dpi);int w=Math.Max(min.Width,Math.Min(a.Width,preferred?Pixels(logical.Width,dpi):current.Width)),h=Math.Max(min.Height,Math.Min(a.Height,preferred?Pixels(logical.Height,dpi):current.Height));int x=center?a.Left+(a.Width-w)/2:Math.Max(a.Left,Math.Min(current.Left,a.Right-w)),y=center?a.Top+(a.Height-h)/2:Math.Max(a.Top,Math.Min(current.Top,a.Bottom-h));return new Rectangle(x,y,w,h);}
 }
 class HtmlWizard:Form {
+    Dictionary<string,object> localeSnapshot;
     WebView2 web;bool uninstall,busy,closing,critical,embeddedNavigation;volatile bool cancelled;string root,data,package,trustedDocument,embeddedHtml;State installed;RemovalPlan plan;string confirmed;int shot;
     bool compactWindow,applyingWindowBounds,windowBoundsReady,embeddedNavigationPending;InstallPathPolicy pathPolicy;
     [DllImport("user32.dll")] static extern uint GetDpiForWindow(IntPtr hwnd);
+    [DllImport("user32.dll")] static extern bool ReleaseCapture();
+    [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hwnd,int message,IntPtr wParam,IntPtr lParam);
+    [DllImport("user32.dll")] static extern short GetAsyncKeyState(int key);
+    void BeginTitlebarMove(){
+        // A delayed WebView message must never begin moving after mouse-up.
+        if((GetAsyncKeyState(1)&0x8000)==0||WindowState!=FormWindowState.Normal)return;
+        Rectangle before=Bounds;
+        ReleaseCapture();
+        SendMessage(Handle,0x00A1,new IntPtr(2),IntPtr.Zero); // WM_NCLBUTTONDOWN / HTCAPTION
+        if(UiBootstrap.Evidence!=null)Engine.Save(Path.Combine(UiBootstrap.Evidence,"window-move-"+DateTime.UtcNow.Ticks+".json"),new{before=new{before.X,before.Y,before.Width,before.Height},after=new{Bounds.X,Bounds.Y,Bounds.Width,Bounds.Height}});
+    }
     int WindowDpi {get{uint dpi=GetDpiForWindow(Handle);return dpi==0?96:(int)dpi;}}
     void ConstrainWindow(bool center,bool preferred){if(!windowBoundsReady||applyingWindowBounds||WindowState==FormWindowState.Minimized)return;applyingWindowBounds=true;try{var work=Screen.FromControl(this).WorkingArea;int dpi=WindowDpi;var desired=compactWindow?new Size(720,480):uninstall?new Size(944,608):new Size(1180,760);var bounds=WindowLayout.Fit(work,dpi,desired,Bounds,preferred,center);MinimumSize=Size.Empty;MaximumSize=Size.Empty;MinimumSize=WindowLayout.Minimum(work,dpi);MaximumSize=WindowLayout.Available(work,dpi).Size;if(Bounds!=bounds)Bounds=bounds;}finally{applyingWindowBounds=false;}}
     [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr hwnd,int attribute,ref int value,int size);
@@ -175,13 +192,26 @@ class HtmlWizard:Form {
         if(ex.Message=="EXISTING_UNOWNED_DIRECTORY"||ex.Message=="OWNER_CONFLICT")return "该文件夹含有其他文件或无法确认归属。请选择空文件夹或 Memorive 原有的对应目录。";
         if(ex.Message=="REPARSE_POINT_BLOCKED")return "不能使用链接或重定向文件夹，请选择本机实际目录。";
 if(ex.Message=="APPLICATION_RUNNING_CLOSE_FIRST")return "请先关闭 Memorive，然后重试。";if(ex.Message=="PROTECTED_DATA_ROOT"||ex.Message=="SHARED_PARENT_BLOCKED")return "该目录属于项目、系统或共享数据的受保护范围，不能删除。请选择保留个人数据。";if(ex.Message.StartsWith("DATA_OWNERSHIP_MANIFEST_REQUIRED")||ex.Message=="DATA_PROFILE_OWNER_MISMATCH")return "无法确认全部个人数据的归属，已停止卸载。请选择保留个人数据。";if(ex.Message.StartsWith("UNCLASSIFIED_DATA")||ex.Message=="DATA_OWNERSHIP_INVENTORY_DRIFT"||ex.Message=="REMOVAL_PLAN_CHANGED_CONFIRM_AGAIN")return "数据清单已变化或包含未登记文件，已停止卸载。请重新检查并保留这些文件。";if(ex.Message=="FAILED_STAGING_REQUIRES_REVIEW"||ex.Message=="EMPTY_VERSION_OWNERSHIP_UNVERIFIED"||ex.Message=="UNKNOWN_PROGRAM_FILE_REQUIRES_REVIEW")return "程序目录中存在无法确认归属的文件，已停止卸载。请保留目录并检查之前的安装记录。";if(ex is IOException&&ex.Message.Contains("使用"))return "文件正在使用中；请关闭 Memorive 后重试。";return ex.Message;}
-    object Facts(){using(var b=new Bundle(package)){var f=Checks(root);f["initial_page"]=UiBootstrap.InitialPage;f["root"]=root;f["data"]=data;f["existing"]=pathPolicy.initial.existing;f["desktop"]=!UiBootstrap.Sandbox;f["build"]="v"+b.manifest.release_version+" · "+b.manifest.package_id;f["space"]="约 "+Math.Ceiling(b.manifest.total_bytes/1024d/1024d).ToString("0")+" MB（另需校验与回退空间）";return f;}}
+    object Facts(){using(var b=new Bundle(package)){var f=Checks(root);f["locale_snapshot"]=localeSnapshot;f["initial_page"]=UiBootstrap.InitialPage;f["root"]=root;f["data"]=data;f["existing"]=pathPolicy.initial.existing;f["desktop"]=!UiBootstrap.Sandbox;f["build"]="v"+b.manifest.release_version+" · "+b.manifest.package_id;f["space"]="约 "+Math.Ceiling(b.manifest.total_bytes/1024d/1024d).ToString("0")+" MB（另需校验与回退空间）";return f;}}
     Dictionary<string,object> Checks(string path){var rows=new List<string[]>();int build=Environment.OSVersion.Version.Build;bool platform=Environment.Is64BitOperatingSystem&&build>=19045;rows.Add(new[]{platform?"pass":"error","Windows",(build>=22000?"Windows 11":"Windows 10")+" / "+build});rows.Add(new[]{Environment.Is64BitOperatingSystem?"pass":"error","系统架构",Environment.Is64BitOperatingSystem?"x64":"不支持的架构"});try{var drive=new DriveInfo(Path.GetPathRoot(Path.GetFullPath(path)));rows.Add(new[]{drive.AvailableFreeSpace>2L*1024*1024*1024?"pass":"error","磁盘空间",(drive.AvailableFreeSpace/1024d/1024d/1024d).ToString("0.0")+" GB 可用"});}catch{rows.Add(new[]{"error","磁盘空间","无法读取目标卷"});}rows.Add(new[]{Engine.NetRelease()>=528040?"pass":"error",".NET Framework",Engine.NetRelease()>=528040?"4.8 或更高":"需要 .NET Framework 4.8"});rows.Add(new[]{"pass","安装范围","当前 Windows 用户"});string vc=Engine.VcRuntimeStatus();rows.Add(new[]{vc==null?"pass":"error","Microsoft Visual C++ v14 x64",vc??"14.51.36247 或更高"});string w=Engine.WebViewVersion();rows.Add(new[]{w!=null?"pass":"error","Microsoft Edge WebView2",w??"未检测到；请先从 Microsoft 官网安装"});return new Dictionary<string,object>{{"checks",rows},{"webview",w!=null}};}
     object Tool(string id,string name,string command,string support,string group){bool found=false,error=false;try{if(Path.IsPathRooted(command)){Engine.NoReparse(command);found=File.Exists(command);}else{if(command.IndexOfAny(new[]{' ','\t','&','|','>','<','"',';','\\','/'})>=0)throw new Exception("请输入一个命令名或完整可执行文件路径，不接受命令参数。");foreach(string dir in (Environment.GetEnvironmentVariable("PATH")??"").Split(';'))if(!String.IsNullOrWhiteSpace(dir))foreach(string ext in new[]{".exe",".cmd",".bat"})try{if(File.Exists(Path.Combine(dir.Trim('"'),command+ext)))found=true;}catch{error=true;}}}catch(Exception ex){if(support=="CUSTOM")throw new Exception(ex.Message);error=true;}return new{id=id,name=name,command=command,support=support,group=group,normalStatus=found?"DETECTED":error?"DETECTION_ERROR":"NOT_DETECTED"};}
     async Task<object> Dispatch(UiRequest r){
-        if(busy&&!new[]{"cancel","uiState"}.Contains(r.action))throw new Exception("当前事务正在执行，请稍候。");
+        if(busy&&!new[]{"cancel","uiState","moveWindow"}.Contains(r.action))throw new Exception("当前事务正在执行，请稍候。");
         switch(r.action){
-            case "init":if(uninstall){Engine.ReadState(root);return new{root=root};}return Facts();
+            case "init":if(uninstall){if(localeSnapshot==null)Engine.ReadState(root);return new{root=root,locale_snapshot=localeSnapshot};}return Facts();
+            case "moveWindow":BeginTitlebarMove();return true;
+            case "switchLanguage":
+                string language=InstallerLocale.Normalize(Arg(r,"language"));
+                if(language==null||!r.args.ContainsKey("snapshot"))throw new UpdateError("INSTALLER_LANGUAGE_INVALID");
+                var snapshot=r.args["snapshot"] as Dictionary<string,object>;
+                if(snapshot==null||Engine.Json.Serialize(snapshot).Length>65536)throw new UpdateError("INSTALLER_LANGUAGE_STATE_INVALID");
+                localeSnapshot=snapshot;InstallerLocale.Current=language;confirmed=null;
+                BeginInvoke((Action)(()=>{
+                    Text=uninstall?"Memorive · 卸载向导 · v1.01":"Memorive · 安装向导 · v1.01";
+                    embeddedNavigation=false;embeddedHtml=Encoding.UTF8.GetString(UiBootstrap.Resource(uninstall?"uninstall.html":"install.html"));
+                    embeddedNavigationPending=true;web.CoreWebView2.NavigateToString(embeddedHtml);
+                }));
+                return true;
             case "openOfficial":UiBootstrap.OpenOfficial(Arg(r,"name"));return true;
             case "checks":return Checks(Arg(r,"root")??root);
             case "paths":if(uninstall)throw new Exception("UI_MODE_MISMATCH");var selection=pathPolicy.Validate(Arg(r,"root"),Arg(r,"data"));pathPolicy.Pin(selection);return selection;

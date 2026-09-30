@@ -31,12 +31,20 @@ class ResearchChatExecution(ReportProfileExecution):
         from .call_ledger import execution_checkpoint
         from .contracts import scan_sensitive
         from memorive_workflow.model_bridge import CoreModelBridge
+        from model_gateway.local_structured_chat import _research_source_scope
+        from .model_validation import _structured_prompt
+        if binding.get('period') != 'chat':
+            raise ValueError('RESEARCH_SOURCE_PURPOSE_INVALID')
         attempts = []
         for attempt in range(self.transient_retries + 1):
             execution_checkpoint()
             if attempt:
                 CoreModelBridge._wait_before_retry(attempt - 1)
-            result = super()._execute_model(binding, snapshot_id, prompt, response_schema, output_tokens)
+            # The local gateway appends the unchanged JSON schema instructions.
+            # Bind that exact wire form, including schema, instead of a prefix.
+            wire_prompt = _structured_prompt(prompt, response_schema).decode('utf-8')
+            with _research_source_scope(wire_prompt, snapshot_id):
+                result = super()._execute_model(binding, snapshot_id, prompt, response_schema, output_tokens)
             scan_sensitive(result)
             path = self.root / (snapshot_id + '.attempt-' + str(attempt + 1) + '.result.json')
             self.controller.store._atomic_write(path, result)

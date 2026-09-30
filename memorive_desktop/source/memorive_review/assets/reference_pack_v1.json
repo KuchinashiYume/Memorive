@@ -1,0 +1,126 @@
+{
+  "schema_version": "DataAnomalyReferencePack-v1",
+  "classification": "SYNTHETIC_REFERENCE_ONLY",
+  "cases": [
+    {
+      "case_id": "exact_pct",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "A table reports an unweighted count of 8 out of 20 and 40.0%, rounded to one decimal."
+    },
+    {
+      "case_id": "bad_pct",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "A table reports an unweighted count of 8 out of 20 and 70.0%, rounded to one decimal."
+    },
+    {
+      "case_id": "weighted_pct",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "The raw count is 8 of 20. The reported survey-weighted percentage is 70.0%. Individual survey weights are not supplied."
+    },
+    {
+      "case_id": "rounded_small",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "Three integer measurements on the unit grid have unweighted mean 1.33, rounded to two decimals."
+    },
+    {
+      "case_id": "impossible_grid",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "Three integer measurements on the unit grid have unweighted mean 1.50, rounded to two decimals."
+    },
+    {
+      "case_id": "unknown_grid",
+      "family": "boundary",
+      "difficulty": "hard",
+      "text": "Three measured values have mean 1.50. Measurement resolution and individual weights are not stated."
+    },
+    {
+      "case_id": "pooled_n",
+      "family": "boundary",
+      "difficulty": "hard",
+      "text": "Three groups contain 10 participants each. A repeated-measures model reports an adjusted mean 2.17. Participants have three time points."
+    },
+    {
+      "case_id": "sd_se_ok",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "For an independent equal-weight arithmetic mean with n=25, SD=10.0 and SE=2.0 are rounded to one decimal."
+    },
+    {
+      "case_id": "sd_se_bad",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "For an independent equal-weight arithmetic mean with n=25, SD=10.0 and SE=5.0 are rounded to one decimal."
+    },
+    {
+      "case_id": "cluster_se",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "A clustered regression reports a robust standard error of 5.0. The descriptive outcome SD is 10.0 for 25 observations."
+    },
+    {
+      "case_id": "digit_repeat",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "Four independent samples have means 2.00, 2.00, 3.00 and 3.00. Instrument resolution is one unit."
+    },
+    {
+      "case_id": "overlap_sum",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "Out of 100 participants, 70 have symptom A and 60 have symptom B. Participants may have both symptoms."
+    },
+    {
+      "case_id": "exclusive_sum",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "Exactly 100 participants are assigned to mutually exclusive and exhaustive groups A and B. A has 70 and B has 60."
+    },
+    {
+      "case_id": "confounded_cause",
+      "family": "logic",
+      "difficulty": "medium",
+      "text": "All treated patients are from hospital A and all untreated patients are from hospital B. The nonrandomized comparison is unadjusted. The primary conclusion says treatment alone caused lower mortality. No site sensitivity analysis was performed."
+    },
+    {
+      "case_id": "association_only",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "This observational study reports an adjusted association with uncertainty intervals. The authors explicitly state that unmeasured confounding prevents a causal conclusion."
+    },
+    {
+      "case_id": "welch_df",
+      "family": "negative_control",
+      "difficulty": "hard",
+      "text": "A Welch t test reports df=17.6. Unequal variances were allowed."
+    },
+    {
+      "case_id": "missing_card",
+      "family": "boundary",
+      "difficulty": "hard",
+      "text": "The derivative Card omits the sample size. The supplied source excerpt does not cover participants or methods."
+    },
+    {
+      "case_id": "rounded_cross",
+      "family": "numeric",
+      "difficulty": "medium",
+      "text": "The same quantity is reported as 1.2 (nearest tenth) in the text and 1.24 (nearest hundredth) in the table."
+    },
+    {
+      "case_id": "multiple_tests",
+      "family": "boundary",
+      "difficulty": "hard",
+      "text": "A paper reports t=3.0 and an adjusted p=0.08. Degrees of freedom and the multiplicity adjustment are not supplied."
+    },
+    {
+      "case_id": "ocr_error",
+      "family": "boundary",
+      "difficulty": "hard",
+      "text": "OCR reads the numeric token as 1.O5. The underlying table image is unavailable in the supplied material."
+    }
+  ]
+}

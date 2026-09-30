@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, time as clock_time
 import re
 from typing import Any, Mapping
+from memorive_language.text import choose
 
 
 NOTIFICATION_KINDS = frozenset({"COMPLETE", "ERROR", "APPROVAL", "WEEKLY","LITERATURE"})
@@ -94,7 +95,21 @@ def plan_windows_notification(
     elif quiet:
         status = "BLOCKED_QUIET"
         reason_code = "DO_NOT_DISTURB_ACTIVE"
-    title, body = _KIND_COPY[normalized]
+    english = {
+        'COMPLETE': ('Memorive task complete', 'Open Memorive to view the result.'),
+        'ERROR': ('Memorive needs attention', 'Open Memorive for error details.'),
+        'APPROVAL': ('Memorive awaits confirmation', 'Open Memorive to review the pending item.'),
+        'WEEKLY': ('Memorive weekly report ready', 'Open Memorive to read the report.'),
+        'LITERATURE': ('Memorive literature recommendations ready', 'Open Memorive to view the recommendations.'),
+    }
+    japanese = {
+        'COMPLETE': ('Memorive のタスクが完了しました', 'Memorive で結果を確認してください。'),
+        'ERROR': ('Memorive の確認が必要です', 'Memorive でエラーの詳細を確認してください。'),
+        'APPROVAL': ('Memorive で確認をお待ちしています', 'Memorive で確認事項を開いてください。'),
+        'WEEKLY': ('Memorive の週報ができました', 'Memorive で週報をご覧ください。'),
+        'LITERATURE': ('Memorive の文献推薦ができました', 'Memorive で文献の推薦を確認してください。'),
+    }
+    title, body = choose(preferences.get('language'), _KIND_COPY[normalized], english[normalized], japanese[normalized])
     click_opens_task = bool(preferences["notification_open_task"] and locator)
     return {
         "schema_version": "DesktopWindowsNotificationPlan-v1",

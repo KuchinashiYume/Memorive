@@ -8,6 +8,7 @@ import platform
 import re
 import shutil
 import uuid
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -124,7 +125,12 @@ class DocumentConversionFacade:
         target_root: str | Path,
         data_ownership: str | None = None,
         document_profile: str = "literature",
+        structure_mode: str = "none",
+        marker_chunks_path: str | Path | None = None,
     ) -> ConversionResult:
+        from ..document_structure import validate_options, write_structure
+
+        validate_options(structure_mode, marker_chunks_path)
         paper_id = _safe_paper_id(paper_id)
         source_path = Path(source.path if hasattr(source, "path") else source)
         source_meta = getattr(source, "meta", None)
@@ -133,6 +139,8 @@ class DocumentConversionFacade:
             raise DocumentConversionError("DATA_OWNERSHIP_REQUIRED", "data_ownership must be self or entrusted")
         target = self._guard_target(target_root)
         probe = probe_document(source_path).require_match()
+        if structure_mode != "none" and probe.detected_format != "pdf":
+            raise DocumentConversionError("STRUCTURE_FORMAT_UNSUPPORTED", "E10-A structure supports PDF only")
         final_root = target / paper_id
         if final_root.exists():
             raise DocumentConversionError("TARGET_ALREADY_EXISTS", f"refuse to overwrite candidate: {final_root}")
@@ -146,7 +154,8 @@ class DocumentConversionFacade:
             if _sha256(original) != probe.source_sha256:
                 raise DocumentConversionError("ORIGINAL_COPY_HASH_MISMATCH", "preserved original hash mismatch")
 
-            payload = adapt_document(probe, workdir=temporary)
+            # Body and structure read the same hash-checked preserved original.
+            payload = adapt_document(replace(probe, path=original), workdir=temporary)
             if payload.hard_failures:
                 raise DocumentConversionError(
                     "ADAPTER_HARD_FAILURE",
@@ -162,6 +171,8 @@ class DocumentConversionFacade:
                 "network": "DENY_ALL",
                 "fallback_limit": 1,
             }
+            if structure_mode != "none":
+                config_projection["structure_mode"] = structure_mode
             config_hash = hashlib.sha256(canonical_json(config_projection).encode("utf-8")).hexdigest().upper()
             receipt_id = stable_identifier(
                 "IntakeR-",
@@ -195,6 +206,21 @@ class DocumentConversionFacade:
                 encoding="utf-8",
             )
             rawmd_sha = _sha256(rawmd)
+            structure = None
+            evidence_refs = (f"source:{probe.source_sha256}", f"profile:{self.profile_id}")
+            if structure_mode != "none":
+                structure = write_structure(
+                    source=original, source_sha256=probe.source_sha256, rawmd=rawmd,
+                    paper_id=paper_id, conversion_receipt_id=receipt_id,
+                    mode=structure_mode,
+                    marker_chunks_path=Path(marker_chunks_path) if marker_chunks_path is not None else None,
+                )
+                evidence_refs += (
+                    f"structure:{structure['structure_sha256']}",
+                    f"structure_receipt:{structure['receipt_sha256']}",
+                )
+            if _sha256(original) != probe.source_sha256:
+                raise DocumentConversionError("ORIGINAL_COPY_HASH_MISMATCH", "preserved original changed during conversion")
             receipt = ConversionReceipt(
                 receipt_id=receipt_id,
                 created_at=now_iso(),
@@ -246,7 +272,7 @@ class DocumentConversionFacade:
                 legacy_bridge_receipt=payload.legacy_bridge_receipt,
                 image_frame_manifest=(payload.image_frame_manifest.to_dict() if payload.image_frame_manifest else None),
                 nondeterminism_class=payload.nondeterminism_class,
-                evidence_refs=(f"source:{probe.source_sha256}", f"profile:{self.profile_id}"),
+                evidence_refs=evidence_refs,
             )
             receipt_path = temporary / f"[ConversionReceipt] {paper_id}.json"
             receipt_path.write_text(json.dumps(receipt.to_dict(), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -282,6 +308,8 @@ class DocumentConversionFacade:
             original_path=final_root / original.name,
             receipt_path=final_root / receipt_path.name,
             receipt=receipt,
+            structure_path=final_root / structure["structure_path"].name if structure else None,
+            structure_receipt_path=final_root / structure["receipt_path"].name if structure else None,
         )
 
     def diagnose_conversion(self, result: ConversionResult) -> dict[str, Any]:

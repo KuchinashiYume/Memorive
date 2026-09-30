@@ -586,7 +586,7 @@ def analyze(context_pack, question: str, constraints=None, *,
             ))
 
     analysis_model = (resp or {}).get("model") or (
-        "(unknown)" if language == "en" else "(未知)"
+        {"zh":"(未知)","ja":"(不明)"}.get(language, "(unknown)")
     )
     mode = "manual" if model_call is not None else "auto"   # 双档由路径定:注入 model_call=手动订阅/合成(不经 MODEL_GATEWAY 不记账);默认=自动 API 档(经 MODEL_GATEWAY 记账)。「manual:」前缀仅作 analysis_model 命名规范
     analyzed_at = datetime.now().astimezone().isoformat(timespec="minutes")

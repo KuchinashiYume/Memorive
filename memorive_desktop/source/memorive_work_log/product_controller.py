@@ -679,8 +679,9 @@ class WorkLogProductController:
                 "public_payload": {
                     "control_state": control_state,
                     "error_code": str(task.get("error_code") or "")[:120],
-                    "model_calls": int(task.get("model_calls") or 0),
-                    "external_model_calls": int(task.get("external_model_calls") or 0),
+                    "model_calls": task.get("model_calls"),
+                    "external_model_calls": task.get("external_model_calls"),
+                    "model_call_counts_complete": task.get("model_call_counts_complete", False),
                     "workflow_kind": workflow_kind,
                     "completed_units": int(progress.get("completed_units") or 0),
                     "total_units": int(progress.get("total_units") or (9 if workflow_kind == "CORE_DOCUMENT" else 4)),

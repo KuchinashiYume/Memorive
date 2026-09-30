@@ -225,85 +225,89 @@ def rescue_pdf_pages(
     unresolved = False
     attempted = False
     try:
-        for page_number, reasons, is_forced in candidates:
-            attempted = True
-            primary = pages[page_number]
-            primary_unusable = _primary_is_unusable(
-                reasons,
-                forced=is_forced,
-            )
-            detail = {
-                "page_number": page_number,
-                "ocr_reasons": reasons + (["forced_dual_check"] if is_forced else []),
-                "source_sha256": source_sha256,
-                "primary_sha256": _sha256_text(primary),
-                "selected_engine": report.engine,
-            }
-            try:
-                image_bytes = actual_renderer(raw.path, page_number)
-                response = actual_ocr(
-                    "ocr",
-                    image_bytes,
-                    mime_type="image/png",
-                    page_number=page_number,
-                    source_sha256=source_sha256,
-                    data_ownership=raw.meta.data_ownership,
+        from memorive_workflow.node_progress import scope
+        with scope('OCR_RESCUE', [row[0] for row in candidates]) as node_units:
+            for page_number, reasons, is_forced in candidates:
+                attempted = True
+                primary = pages[page_number]
+                primary_unusable = _primary_is_unusable(
+                    reasons,
+                    forced=is_forced,
                 )
-                ocr_text = response["text"].strip()
-                ocr_error = _ocr_text_error(ocr_text)
-                if ocr_error is not None:
-                    raise ValueError(f"OCR text invalid:{ocr_error}")
-                comparison, primary_only, ocr_only = _comparison(
-                    primary,
-                    ocr_text,
-                )
-                detail.update({
-                    "ocr_text_sha256": _sha256_text(ocr_text),
-                    "ocr_response_sha256": response["response_sha256"],
-                    "ocr_request_id": response.get("request_id"),
-                    "comparison": comparison,
-                    "primary_only_tokens": primary_only,
-                    "ocr_only_tokens": ocr_only,
-                })
-                if primary_unusable:
-                    pages[page_number] = ocr_text
-                    failed.discard(page_number)
-                    detail["selected_engine"] = response.get('model') or _OCR_ENGINE
-                    detail["selection_reason"] = "primary_unusable_ocr_valid"
-                else:
-                    detail["selection_reason"] = "usable_primary_retained"
-                log("DocumentConvert", "OCR 页面校核完成", data={
+                detail = {
                     "page_number": page_number,
-                    "comparison": comparison,
-                    "selected_engine": detail["selected_engine"],
-                    "selection_reason": detail["selection_reason"],
+                    "ocr_reasons": reasons + (["forced_dual_check"] if is_forced else []),
                     "source_sha256": source_sha256,
-                    "primary_sha256": detail["primary_sha256"],
-                    "ocr_text_sha256": detail["ocr_text_sha256"],
-                    "ocr_response_sha256": detail["ocr_response_sha256"],
-                })
-            except Exception as exc:
-                detail.update({
-                    "comparison": "unavailable",
-                    "selection_reason": "ocr_failed",
-                    "error_type": type(exc).__name__,
-                })
-                warnings.append(
-                    f"ocr_page_failed:{page_number}:{type(exc).__name__}"
-                )
-                if primary_unusable:
-                    failed.add(page_number)
-                    unresolved = True
-                log_error("DocumentConvert", "OCR 页面失败，已保留其他页面", context={
-                    "step": f"ocr_page_rescue/page_{page_number}",
-                    "error": (
-                        f"{type(exc).__name__};正文不入日志；"
-                        f"primary_unusable={primary_unusable}"
-                    ),
-                    "page_number": str(page_number),
-                    "source_sha256": source_sha256,
-                })
-            details.append(detail)
+                    "primary_sha256": _sha256_text(primary),
+                    "selected_engine": report.engine,
+                }
+                try:
+                    image_bytes = actual_renderer(raw.path, page_number)
+                    response = actual_ocr(
+                        "ocr",
+                        image_bytes,
+                        mime_type="image/png",
+                        page_number=page_number,
+                        source_sha256=source_sha256,
+                        data_ownership=raw.meta.data_ownership,
+                    )
+                    ocr_text = response["text"].strip()
+                    ocr_error = _ocr_text_error(ocr_text)
+                    if ocr_error is not None:
+                        raise ValueError(f"OCR text invalid:{ocr_error}")
+                    comparison, primary_only, ocr_only = _comparison(
+                        primary,
+                        ocr_text,
+                    )
+                    detail.update({
+                        "ocr_text_sha256": _sha256_text(ocr_text),
+                        "ocr_response_sha256": response["response_sha256"],
+                        "ocr_request_id": response.get("request_id"),
+                        "comparison": comparison,
+                        "primary_only_tokens": primary_only,
+                        "ocr_only_tokens": ocr_only,
+                    })
+                    if primary_unusable:
+                        pages[page_number] = ocr_text
+                        failed.discard(page_number)
+                        detail["selected_engine"] = response.get('model') or _OCR_ENGINE
+                        detail["selection_reason"] = "primary_unusable_ocr_valid"
+                    else:
+                        detail["selection_reason"] = "usable_primary_retained"
+                    log("DocumentConvert", "OCR 页面校核完成", data={
+                        "page_number": page_number,
+                        "comparison": comparison,
+                        "selected_engine": detail["selected_engine"],
+                        "selection_reason": detail["selection_reason"],
+                        "source_sha256": source_sha256,
+                        "primary_sha256": detail["primary_sha256"],
+                        "ocr_text_sha256": detail["ocr_text_sha256"],
+                        "ocr_response_sha256": detail["ocr_response_sha256"],
+                    })
+                except Exception as exc:
+                    detail.update({
+                        "comparison": "unavailable",
+                        "selection_reason": "ocr_failed",
+                        "error_type": type(exc).__name__,
+                    })
+                    warnings.append(
+                        f"ocr_page_failed:{page_number}:{type(exc).__name__}"
+                    )
+                    if primary_unusable:
+                        failed.add(page_number)
+                        unresolved = True
+                    log_error("DocumentConvert", "OCR 页面失败，已保留其他页面", context={
+                        "step": f"ocr_page_rescue/page_{page_number}",
+                        "error": (
+                            f"{type(exc).__name__};正文不入日志；"
+                            f"primary_unusable={primary_unusable}"
+                        ),
+                        "page_number": str(page_number),
+                        "source_sha256": source_sha256,
+                    })
+                details.append(detail)
+                if detail.get("comparison") != "unavailable":
+                    node_units.complete(page_number)
     finally:
         if renderer_owner is not None:
             renderer_owner.close()

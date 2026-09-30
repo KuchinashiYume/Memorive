@@ -18,6 +18,7 @@ class InboxStore:
 
     def __init__(self, database_path: Path | str):
         self.database_path = Path(database_path)
+        self.change_listener = None
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with closing(self._connect()) as connection:
@@ -166,7 +167,7 @@ class InboxStore:
     def find_by_content(self, content_sha256: str, *, exclude_item_id: str | None = None) -> dict[str, Any] | None:
         query = (
             "SELECT record_json FROM items WHERE content_sha256=? "
-            "AND state IN ('IMPORTING','QUEUED','PROCESSING','ERROR')"
+            "AND state NOT IN ('TRASHED','DELETED','DEDUPLICATED')"
         )
         parameters: list[Any] = [content_sha256]
         if exclude_item_id is not None:
@@ -176,6 +177,11 @@ class InboxStore:
         with closing(self._connect()) as connection:
             row = connection.execute(query, parameters).fetchone()
         return None if row is None else deepcopy(self._decode(row["record_json"]))
+
+    def active_content_items(self, content_sha256: str, *, exclude_item_id: str) -> list[dict[str, Any]]:
+        with closing(self._connect()) as connection:
+            rows=connection.execute("SELECT record_json FROM items WHERE content_sha256=? AND item_id!=? AND state NOT IN ('TRASHED','DELETED','DEDUPLICATED') ORDER BY item_id",(content_sha256,exclude_item_id)).fetchall()
+        return [deepcopy(self._decode(row['record_json'])) for row in rows]
 
     def update_item(self, item_id: str, event_type: str, mutator: Mutator) -> dict[str, Any]:
         with closing(self._connect()) as connection:
@@ -193,6 +199,9 @@ class InboxStore:
             )
             self._event(connection, event_type, item_id, record)
             connection.commit()
+        if self.change_listener:
+            try:self.change_listener(deepcopy(record))
+            except Exception as exc:self.index_sync_error=type(exc).__name__
         return deepcopy(record)
 
     def enqueue_intent(self, record: Mapping[str, Any]) -> tuple[dict[str, Any], bool]:

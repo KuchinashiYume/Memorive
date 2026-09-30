@@ -1,0 +1,16 @@
+{
+  "schema_version": "MemoriveUpdateTrust-v1",
+  "algorithm": "RSA3072-SHA256-PKCS1-v1_5",
+  "updater_version": 1,
+  "test_only": false,
+  "public_key_xml": "<RSAKeyValue><Modulus>r83rxOt0c/g4q6gAAeuW95Pqyv4AhWhSWua6qdkPklTBaOk+NoWwJlTkpg5TV+ZtlbCzp3whpoFFrkbb7xI+lTW81RZafwUigL+qJzUIFiHPz54FTzEE5GeH2LHcv15Ybjki6CCnSyLugX43rEbzilDVOO2rwmYrQCodk2jKqcDSfLCiAUOpSjlqDm6BTen7cK1DMFQJanLNAXcjNsDqmSv/AonHRkNqQrwOgPA3dlyj87/To17YMj9VUUoUaZJSycpng8L8u+nVJzUIJGiCTy1CPL4yc1htcBLZTgEj7LC6j2JXaaIgRD32f+Ratrl2B+jXdDHAUP9q5xQlXkPUkV4hnCf82My/ZpkN14VLYWbibz6F/xV8O8u9Q2iD9NEk4OQ03lzIO5HKw7G4UGUW/lHCaHh/jedHP782osJnD66xgkhwxlnJfJ8jAR/v4nxr4BncG5Ith8nYGQ88lN76QFXHBRMC/v232BuzIP02/RMDNXAj111DXXuYb3Y21tlJ</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>",
+  "latest_url": "https://api.github.com/repos/KuchinashiYume/Memorive/releases/latest",
+  "index_asset": "memorive-update.json",
+  "signature_asset": "memorive-update.sig",
+  "max_index_bytes": 262144,
+  "max_manifest_bytes": 8388608,
+  "max_archive_bytes": 4294967296,
+  "max_expanded_bytes": 8589934592,
+  "max_files": 20000,
+  "release_trust_status": "PRODUCTION_KEY_BOUND"
+}

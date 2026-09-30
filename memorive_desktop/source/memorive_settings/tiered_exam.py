@@ -183,6 +183,7 @@ def _analysis_reviewer_sample(self, base, tier, context):
 
 def tier_executor(executor: Any, context: Mapping[str, Any]) -> Any:
     """Return a new invocation-local view; never mutate a shared executor."""
+    if getattr(executor,"native_coverage_plan",False):return executor
     if "workflow_exam_tier" not in context:
         return executor
     tier = validate_tier(context["workflow_exam_tier"])

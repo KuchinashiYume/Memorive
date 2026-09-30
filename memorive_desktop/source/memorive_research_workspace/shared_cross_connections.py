@@ -1,5 +1,7 @@
 """Project-scoped desktop companions, resumable intake and managed note exchange."""
 import copy,html,json,os,re,time
+from memorive_language import freeze
+from memorive_language.text import choose
 from pathlib import Path
 from urllib.parse import quote,urlparse,unquote
 from .store import digest,uid,now,packed
@@ -250,7 +252,8 @@ class Connections:
         c=self.connection(connection_id);d=self.document(c,source_id)
         if d['state']!='active':raise ValueError('DOCUMENT_SOURCE_CHANGED')
         if d['path'] and digest(self._path(c,d['path']).read_bytes())!=d['file_hash']:raise ValueError('DOCUMENT_SOURCE_CHANGED')
-        items=[{'id':'source-summary','title':'书目与来源','kind':'SOURCE_SUMMARY','markdown':'# '+d['title']+'\n\n'+d['abstract']+'\n\nDOI: '+d['doi']+'\n\n资料已索引；此条为来源说明。'}]
+        language=freeze(self.ws.language_settings_get())
+        items=[{'id':'source-summary','title':choose(language,'书目与来源','Bibliography and source','書誌と出典'),'kind':'SOURCE_SUMMARY','markdown':'# '+d['title']+'\n\n'+d['abstract']+'\n\nDOI: '+d['doi']+'\n\n'+choose(language,'资料已索引；此条为来源说明。','The material is indexed; this entry describes the source.','資料は索引に登録済みです。この項目は出典の説明です。')}]
         if self.processing_status:
             status=self.processing_status(d)
             if status:
@@ -263,16 +266,16 @@ class Connections:
             if r.get('state') in {'retracted','RETRACTED'}:continue
             refs=r.get('parents',[])
             if any(ref.get('artifact_id') in d['artifact_ids'] for ref in refs):
-                items.append({'id':r['id'],'title':r.get('title','研究草稿'),'kind':'KNOWLEDGE_'+str(r.get('state','DRAFT')),'markdown':r.get('claim','')+'\n\n适用范围：'+r.get('scope','')+'\n\n局限：'+r.get('limitations','')})
-        return {'document':d,'items':items}
+                items.append({'id':r['id'],'title':r.get('title','研究草稿'),'kind':'KNOWLEDGE_'+str(r.get('state','DRAFT')),'markdown':r.get('claim','')+'\n\n'+choose(r.get('language_context') or language,'适用范围：','Scope: ','適用範囲：')+r.get('scope','')+'\n\n'+choose(r.get('language_context') or language,'局限：','Limitations: ','限界：')+r.get('limitations','')})
+        return {'document':d,'items':items,'language_context':language}
 
     def _body(self,c,source_id,output_ids):
         result=self.outputs(c['id'],source_id);d=result['document'];wanted=set(output_ids or ['source-summary'])
         items=[i for i in result['items'] if i['id'] in wanted]
         if not items or wanted-{i['id'] for i in items}:raise ValueError('OUTPUT_SELECTION_INVALID')
         body='\n\n'.join('## '+i['title']+' · '+i['kind']+'\n\n'+i['markdown'] for i in items)
-        body+='\n\n来源版本：'+str(d['file_hash'] or d['fingerprint'])+'\n'
-        if c['provider']=='zotero' and d.get('attachment_key'):body+='\n[打开原文](zotero://open-pdf/library/items/'+d['attachment_key']+')\n'
+        body+='\n\n'+choose(result['language_context'],'来源版本：','Source version: ','出典のバージョン：')+str(d['file_hash'] or d['fingerprint'])+'\n'
+        if c['provider']=='zotero' and d.get('attachment_key'):body+='\n['+choose(result['language_context'],'打开原文','Open source','原文を開く')+'](zotero://open-pdf/library/items/'+d['attachment_key']+')\n'
         body=re.sub(r'<!--\s*memo:', '<!-- quoted-memo:',body,flags=re.I)
         return d,body
 

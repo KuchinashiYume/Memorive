@@ -132,6 +132,10 @@ class MessageProjectionEngine:
         locator = event.get("target_locator")
         if severity in {"RED", "YELLOW"} and locator is None:
             raise ProjectionIntegrityError("ACTIONABLE_MESSAGE_LOCATOR_REQUIRED")
+        from memorive_language.messages import content, validate
+        message_content=validate(event.get("message_content"))
+        if message_content is None and not any(event.get(k) for k in ("safe_title","safe_summary","safe_body")):
+            message_content=content("system",severity=severity)
         fallback_title = _GENERIC_TITLE[severity]
         title = self.redaction_policy.sanitize(event.get("safe_title"), fallback=fallback_title, maximum=180)
         summary = self.redaction_policy.sanitize(
@@ -158,6 +162,7 @@ class MessageProjectionEngine:
             if message_id in state["messages"]:
                 raise ProjectionIntegrityError("MESSAGE_ID_COLLISION")
             record = MessageRecord(
+                message_content=message_content,
                 message_id=message_id,
                 dedupe_key=dedupe_key,
                 severity=severity,
@@ -228,6 +233,7 @@ class MessageProjectionEngine:
                         "collection_state": "CURRENT",
                     }
                 )
+        if message_content is not None:raw["message_content"]=message_content
         updated = MessageRecord.from_mapping(raw)
         accepted = updated.to_dict()
         self.redaction_policy.assert_public_safe(accepted)

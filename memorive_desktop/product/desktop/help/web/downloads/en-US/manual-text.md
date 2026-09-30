@@ -2,9 +2,13 @@
 
 Follow this guide from your first source to a research judgment you can trace back to the original. Read it in order for setup, or go straight to the task at hand. Screens show empty states or synthetic examples; their answers and filenames illustrate controls, not research findings. Lists, prices, and connection states will reflect your own sources and settings.
 
+v1.02 pre-release documentation · 2026-09-29. This edition covers the agreed scope; installation and update instructions must be checked against the final delivery before release. A documentation version is not a release announcement. Existing illustrations explain common controls; use the actual page for new features.
+
 ## 01 Understand the workspace and where research material goes
 
 The left navigation shows where a source goes: Inbox receives it, Current Tasks tracks processing, and Library holds the source and its results. Research Chat lets you ask questions across sources. Settings controls models and retrieval; Messages and Work Log help you retrace what happened. Header buttons open and close the sidebars and bottom panel.
+
+Main window in an empty state; use it to locate navigation.
 
 ### On the first launch
 
@@ -17,9 +21,17 @@ The left navigation shows where a source goes: Inbox receives it, Current Tasks 
 
 An open page shows that the interface loaded. A connection test shows whether that route can be called. A node capability check asks whether it fits a particular role. A completed task still needs human review. If a list is empty, first check whether that workspace actually contains the expected material or task.
 
+### Continue your research from Home
+
+Home brings recent research and useful entry points together. Click the bubble or the area around the expression to change the prompt. Clicking the expression also plays an action. Their positions remain stable, with a short interval between accepted clicks. The button below a prompt opens the corresponding feature.
+
+Latest developments focuses on recent publications in a research direction; related material focuses on relevance. These are separate searches. The related entry uses the most recent research direction without another selector on Home. If no direction exists, add one in external-literature settings. AI Updates is a separate news view, not your research evidence library.
+
 ## 02 Model Services and API: three common configuration modes
 
 Connect external models in **Settings → Model Services and API**. Whether you use a provider's official API, a compatible endpoint, or a relay, its protocol, address, model ID, and credential must describe the same working route. The display name is for you; the model ID is what the service receives.
+
+External API route diagram; open Model Services and API to inspect the actual fields.
 
 ### Configure the route
 
@@ -46,6 +58,8 @@ Do not put keys in documentation, screenshots, web exports, or ordinary logs. Gi
 
 If a CLI tool is installed and signed in on your computer, Memo can use it as an execution route. The tool still manages its own installation, sign-in, updates, and subscription access. Memo discovers the route and assigns usable models to task nodes. A subscription may have no meaningful per-call price.
 
+The tool owns installation and login; verify the actual route and node receipt in Memo.
+
 ### Connect it
 
 1. In the tool's own terminal, verify that its executable starts, the account is signed in, and the intended model is available. Note the tool version and command path.
@@ -58,9 +72,17 @@ If a CLI tool is installed and signed in on your computer, Memo can use it as an
 
 When a subscription CLI has no per-call price, usage cost stays unknown rather than zero. Recheck after an account, model, or tool-version change; old tasks retain their recorded identities and pricing basis.
 
+### Add your own CLI
+
+Alongside existing adapters, a custom CLI service lets you specify a local executable, arguments, input method and output-reading rules, then configure its models. Validate the service first and select it in the chat or workflow node that will actually use it. A familiar display name does not prove which tool ran; inspect the recorded service and model.
+
+Custom integration requires a command that can receive requests and return results through the configured interface. It does not make every interactive tool compatible. Keep timeout, cancellation and output errors visible; starting a process is not a successful answer. CodeBuddy Code keeps its name. WorkBuddy is a different product and is not supported merely by renaming an entry.
+
 ## 04 Local models: service, protocol, and ability
 
 Start the model service in its own application, then let Memo detect it. The current local endpoint uses `127.0.0.1` or `::1`. Appearing in the model list shows only that Memo found it; chat, image reading, embedding, and review each need their own check.
+
+Discovery is followed by protocol, model-load, and node-capability checks.
 
 ### Connect it
 
@@ -77,6 +99,8 @@ Use a small, nonprivate sample to check the relevant role. No provider API charg
 ## 05 Workflow Model Mapping and validation
 
 Workflow Model Mapping chooses the route that each node in a new task will use. Embedding, Card extraction, Analysis, and review call for different abilities; daily, weekly, and monthly reports also have separate model choices. Template changes affect later tasks, while started nodes retain the configuration and records from their run.
+
+Nine-node path grouped into source, Card, and Analysis stages; 04 and 08 may be skipped.
 
 ### Configure and check
 
@@ -101,6 +125,8 @@ After an edit, compare three things: the saved template, Inbox's executable-stat
 
 Inbox is the first stop for a new source. Check the file and preview before deciding when to process it. A place in the queue does not mean its text has been converted or its Card created. For a first run, choose a clear paper you know well enough to check.
 
+Empty Inbox: locate Add, Batch Management, and Auto Run.
+
 ### Process one source
 
 1. Add a file or drag it into the page. Check its name, type, page count, and preview. Acceptance of PDF, Office, or images does not prove full extraction or analysis.
@@ -113,9 +139,19 @@ Inbox is the first stop for a new source. Check the file and preview before deci
 
 Check Auto Run, mapping, and the UI message. If a task exists but stalls, diagnose its node rather than importing the entire batch again.
 
+### Receive recent and closely related papers
+
+In external-literature settings, choose research directions, the search interval and the expected batch size. Automatic receipt runs only when enabled; a Home action can explicitly request one search. Read the batch counts for new, duplicate, skipped and failed items. No new entries does not by itself mean a source failed.
+
+Discovered entries contain bibliographic metadata and source links: title, authors, year, DOI and, where available, an abstract and a reason for the recommendation. That reason explains relevance, not what a full reading would establish. Messages announce new entries. Missing abstracts remain missing. Add the full text yourself; receipt does not bypass login or copyright restrictions and does not mean a PDF has been downloaded or processed.
+
+Discovery, Inbox and Library use the same identity checks. Prefer stable identifiers such as DOI. When identifiers are absent or conflict, review title, authors and source before deciding. A preprint and a published version may belong to the same work while remaining distinct versions. Similar titles alone are not enough to merge them. Retrying a batch should not create duplicate entries or notifications.
+
 ## 07 Current Tasks: nine nodes, states, and targeted retries
 
 The task list shows how far processing has gone; open a node to see the input and model used in this run. The nine steps are 01 document conversion, 02 embedding, 03 Card generation, 04 Card review, 05 Card admission, 06 Analysis material assembly, 07 Analysis, 08 Analysis review, and 09 human decision.
+
+Current Tasks empty state; select a task, then a node.
 
 ### Inspect the path
 
@@ -137,9 +173,15 @@ If 07 Analysis fails, first check whether 01–06 finished with usable input, th
 
 After retry, compare both runs' input versions, models, times, and results. The earlier failure remains evidence even after a later success.
 
+### Read the ring as actual node progress
+
+Progress follows node activity, processing, saving and terminal states. When a percentage cannot be measured, the task keeps a meaningful stage instead of simulating progress with a timer. Inspect a completed main path and an active logic-analysis branch separately. Paused, retried and concurrent tasks retain their own state. A download or a single node at 100% does not mean the whole research task is complete.
+
 ## 08 Library: review the Card and Analysis against the original
 
 After processing, read the original, Card, and Analysis together in Library. The Card gathers information extracted from the source; Analysis offers candidate judgments based on that evidence. Return to the original whenever a number, condition, or conclusion needs checking.
+
+Library entry in an empty state.
 
 ### Review one paper
 
@@ -161,9 +203,17 @@ Card: Is the population correct? Are sample sizes, units, intervals, method, com
 
 Analysis: Which Card fields and source passages support each judgment? Did it turn correlation into causation, generalize beyond the sample, or turn an untested hypothesis into fact? Are compared papers genuinely comparable? Record disagreements with reasons and source locations. Confirming review records that this specific version was read; it does not automatically endorse every claim.
 
+### Tables, values and source locations
+
+Document processing retains structured paragraphs, table cells and page or line locations so checks and citations can return to the same source. Compare superscripts, units, headers and tables across pages against the original PDF. Empty-text pages can receive bounded OCR recovery when configured; unreadable content stays failed or missing rather than becoming a plausible invented value.
+
+A stored location supports inspection, not a guarantee of perfect OCR or parsing. Reprocessing creates a new version. Earlier answers remain linked to the version they used rather than silently adopting new paragraph locations.
+
 ## 09 Research Chat: choose the project, sources, and model
 
 Begin Research Chat by choosing a project and opening a conversation. By default, it searches attachments in that conversation. Choose a wider scope if you want it to find other project material. You can attach a file before it has produced a Card.
+
+Research Chat source selection diagram; examples are not research evidence.
 
 ### Ask a first question
 
@@ -185,9 +235,23 @@ Composer chips are the sources explicitly selected for this turn; the Materials 
 
 When a paper is reprocessed, an old conversation should still be traceable to the saved source version it cited. A Library display window is not proof that historical citations disappeared.
 
+### Answer style, retry and branches
+
+Global preferences provide four styles: professional and reliable, candid, efficient and practical, and exploratory. Inherit global settings uses those preferences; saved answers retain the style used to generate them. The copy icon copies the answer. The single retry icon generates another version using the original answer's style. Change preferences in Settings; there is no separate style menu beside each reply.
+
+Retrying an earlier step creates a new answer version. The old answer and its later replies remain on their original branch and are excluded from the new branch's context. Switch back to inspect the earlier path. A failed retry should not erase a saved answer. Copying or switching versions makes no model request.
+
+### Automatic archiving and reopening
+
+A chat may be archived after more than 30 days without a successful deliberate open, or when saved user and assistant messages exceed 100. Exactly 30 days or 100 messages does not trigger it. Retained hidden answer versions count as messages, so this is not a count of conversation turns. Pinned chats, busy tasks, attachment processing and chats open in any window are protected while that condition applies.
+
+Archiving keeps text, knowledge, citations and answer versions. Viewing an archived chat does not restore it automatically. Manual restoration gives another 30-day grace period and records the current message count to prevent an immediate repeat. Lists load summaries and necessary metadata first; a chat's body is read when opened. Search still reaches saved content.
+
 ## 10 Citation verification and knowledge confirmation
 
 Treat each research answer as an analysis to verify. For a number, comparison, or causal claim, find its citation and read the corresponding saved source with its surrounding context. Smooth prose, many citations, or a “saveable conclusion” cannot replace that check.
+
+Verification path: claim, citation, original context, decision.
 
 ### Check claim by claim
 
@@ -209,9 +273,17 @@ Suppose an answer says “Method A increased the measure by 20%” and cites two
 
 A Knowledge item also needs scope, limitations, and a review date. When a source is corrected or withdrawn, follow its dependency to affected items and review them again.
 
+### Separate a located citation from support for a claim
+
+Opening a citation shows that a source was located. Check whether it supports this particular claim and to what extent. The chat distinguishes supported, partly supported, unsupported and conflicting material, and points out gaps in evidence coverage. These signals help prioritize review; they do not approve a research conclusion for you.
+
+Before saving knowledge from a chat, check the question, selected answer version, conditions and sources. Research background, refinement suggestions and later updates retain their relationships rather than overwriting earlier records. Semantic diagnostics can still miss issues or raise false alarms. Cross-paper attribution and inference need particular care.
+
 ## 11 Retrieval and Weights: how ranking changes
 
 Use **Settings → Retrieval and Weights** when you want to change which sources appear first. Decide whether the settings apply to every project or one project, then choose a preset or adjust individual weights. Ranking cannot repair an incorrect source, and changing the embedding model may require a new index.
+
+Synthetic six-weight example; the total is 100%.
 
 ### Choose a mode
 
@@ -229,6 +301,8 @@ Preview with papers you know should appear. Watch how originals and derived know
 ## 12 Session Management: sync, filter, refine, and remove
 
 Session Management brings local Codex and Claude Code records, browser captures, and manual imports into one reading list. If you keep chatting in the source tool, sync again to bring in the new messages. Organization here affects Memo's saved copy.
+
+Session workflow without private conversation content.
 
 ### From source to artifact
 
@@ -254,6 +328,8 @@ Titles may repeat across sources or sessions; use source, time, and content to i
 
 To bring web content into Memo, prepare the browser companion in **Settings → Conversation Refinement**, then sign in on the target site yourself. Historical coverage depends on the site. Choose current-page capture, an initial full collection, or a later incremental update according to what you need.
 
+Browser collection sequence.
+
 ### Procedure
 
 1. Find the companion entry in Settings and follow its instructions to load it in the browser extension manager. Reload the extension after an update.
@@ -270,6 +346,8 @@ Site layout changes, network interruption, or lack of full-history support may l
 
 Use Model Rankings to narrow your shortlist: compare public capability and price information, then test promising candidates on your own work. Read the update date, metric definition, provider, currency, and unit together. A ranking score cannot stand in for a connection check or a task sample.
 
+Ranking source unavailable: a recognizable empty state.
+
 ### Compare carefully
 
 1. Check source and data date, then filter by model, provider, or favorites. If the source fails, refresh or retry later.
@@ -284,6 +362,8 @@ An empty board does not prove a model does not exist. A high rank does not grant
 ## 15 Usage and Cost bottom panel: scope, cost, and unknowns
 
 In the bottom **Usage and Cost** panel, choose the accounting scope and period before filtering models or switching metrics. Its totals, public prices in Model Rankings, and a receipt for one chat answer cover different records. Align those scopes before comparing costs.
+
+Filters in the Usage and Cost bottom panel.
 
 ### Read the chart and details
 
@@ -308,6 +388,8 @@ When current-job attribution is unavailable, do not divide global spending by ta
 
 Daily, weekly, and monthly reports help you look back over a period of research. Messages surface work that needs attention, while Work Log preserves the trail of a run. To explain a judgment, follow those pointers back through the task, Card, Analysis, and original source.
 
+Messages entry; open one item to find its linked object.
+
 ### Reports and issues
 
 1. Map report-generation models separately for daily, weekly, and monthly flows. Mapping one period does not map the others.
@@ -319,3 +401,75 @@ Daily, weekly, and monthly reports help you look back over a period of research.
 ### Maintenance
 
 Back up originals, generated artifacts, annotations, research conclusions, configuration, and needed records. Locate old files before changing a directory field; a field change does not migrate them. Sample an original, Card, Analysis, and refined session after backup. Public-release and formal acceptance status require their own version-specific records.
+
+### AI Updates and content language
+
+AI Updates organizes changes and source links from public material within the selected period. Choose an available model in Research Chat and Connections, or inherit the chat model as configured, then explicitly start generation. This is separate from daily, weekly and monthly reports about your research records. A message announces an event; it is not the report itself.
+
+After selecting Chinese, English or Japanese, the interface, system messages and newly generated chat answers and memo reports follow the current language settings. Existing answers and reports keep their language and version. Document processing follows the source language; titles, DOI, quotations and source excerpts are not rewritten when the interface changes. Caches distinguish languages so an old-language result is not presented as new generation.
+
+## 17 literature data and logic review
+
+memo provides local numeric analysis and optional cloud logic review per document. Reports give scoped review opinions. A color cannot establish a paper's authenticity or its authors' intentions.
+
+### Start a review
+
+1. Open Current Workflow Models in Settings. Data analysis is enabled by default, uses no model, and runs after RawMD is available. The separate logic node below the main workflow requires a verified cloud API or subscription CLI profile. Local models and automatic fallback are unavailable for this node.
+2. In the inbox detail panel, below file location controls, select Logic review beside the brain icon. It is off by default. Turn off automatic dispatch first if you need to change pending document options. Dispatch freezes the source identity, rules and model configuration.
+3. Open Numeric check rules to bind a proportion, sum, SD/SE relationship, cross-check, discrete mean, statistic/p value or raw-value summary. Supply exact numeric text, a uniquely locating source quote, explicit conditions and their basis. Unknown weights, independence, denominator, tail or adjustment remain insufficient information.
+4. When a check lacks a numeric input and an actual Card omission anchors the same explicit source relationship, the program associates the omission, original quote and current chunk page locator automatically. It uses RawMD first, then bounded PDF assistance when needed. Removed Card values are never reused or restored. Ambiguous associations remain unresolved. Advanced Card locators are optional additions, not a prerequisite.
+
+### Progress and recovery
+
+The local data node is part of the main workflow, works without a successful Card, and can be skipped before it begins. Selected logic work may continue after the main workflow finishes. The whole task completes only after the selected report is saved and registered. The separate node offers state-appropriate pause, resume, cancel, skip and retry. Retrying logic does not rerun successful main processing.
+
+Pause or cancel cannot recall an already sent provider request. Usage and returned results are retained. An uncertain request outcome is never retried automatically; an explicit retry acknowledges possible additional calls and charges. Publication failures retry saved results first. Reports retain versions and show when the source or a successor result has made them historical.
+
+### Read reports and record a disposition
+
+Open the document detail in the library, then its data or logic report. Review checked and excluded scope, source locations, formulas, conditions and results. More numeric records can be loaded. Missing conditions, ambiguous OCR and unresolved source locations are kept as limitations or input issues.
+
+Green means no important concerns in the checked scope; yellow means clarification is needed; red indicates evidenced important concerns that deserve priority review. Limited coverage may have no risk color. Finding counts, repeated digits and small samples do not alone establish high risk. Detailed calculations remain available in an expandable record.
+
+Record Explained, Confirmed report issue, Needs material, Deferred or Reopened against a finding, with a reason and evidence when explaining it. Dispositions are appended separately; the machine report and color remain unchanged. Review reports are excluded from original-paper evidence candidates.
+
+### Exams, cost and limits
+
+The model exam is in the logic node's Current Workflow settings. The independent anomaly-detection and false-positive-control category uses nested LIGHT, HALF and FULL sets of 6, 10 and 20 synthetic cases. Every tier allows two directed repairs with a provisional category-specific nonlinear penalty. Subset results do not overwrite full scores. This reference exam does not establish blind-test validity, formal qualification or cross-category comparability. Field and quote checks do not prove semantic justification.
+
+Data analysis and local PDF assistance make no model calls. Selected logic review and model exams use the configured cloud channel and existing authorization, capacity and accounting controls. API exam plans show a cost cap. Missing cost evidence stops automatic paid repairs. A subscription CLI's unknown per-call price remains unknown. Logic review sends the loaded text as a whole or in capacity-bounded segments to the selected cloud channel; confirm that the material is appropriate to send before selecting it.
+
+The deterministic engine uses loaded RawMD and explicit bindings. PDF assistance is limited to two pages, 64 MB and five seconds. Main numeric processing is bounded to 4 MB of RawMD, 20,000 numeric records and 200 rules; exceeding a limit stops with a reason. Distribution tail probabilities are numeric approximations. Unloaded supplements, image forensics and author-intent judgments are outside coverage.
+
+### Default processing and global relationship coverage
+
+Without manual rules, the engine extracts numbers, written precision, repetition, literal table-column summaries and plus/minus pairs. Supported checks include explicit arithmetic equations, n/N (%) within one cell, named p-value/SD/SE numeric domains and the expressly stated SE = SD / sqrt(n) relation. A column is not assumed to be one research sample; a plus/minus pair is not inferred to mean SD or SE. Generic count/percent columns do not establish a denominator, weighting or group. Formula and precision checks remain conditional, not authenticity judgments.
+
+If capacity permits, logic review checks the whole source in one request. Longer texts have grounded method/result/conclusion/limitation inventories followed by a separate cross-segment pass using original source excerpts. Reports show the global stage and its citations. Local completion alone, oversized global material, incomplete inventories or unresolved relationships cannot produce an overall completed green verdict. These calls remain part of the manually selected cloud task and share scheduling, pause, accounting and uncertain-request recovery.
+
+Automatically recognized rules are limited to 200, including advanced rules. Omitted automatic checks are explicitly marked as limited coverage. Unloaded material, unsupported formats and ungrounded Card-gap associations are not treated as passed checks.
+
+Current Task shows execution status only. Completed logic nodes are green, including reports with findings or limited coverage. Click a node for status and controls, without a logic progress bar in the existing right sidebar; closing and reopening keeps the selected node. There is no saved-result expander or report popup. Data and logic reports open inline in Library document details. Report colors describe findings within the checked scope separately. Library status labels fit their text and wrap onto another row in narrow lists.
+
+A finding applies only to the conditions and coverage stated in its report. Convert percentages and ratios according to the source meaning, without guessing missing conditions. Truncated formulas, ambiguous OCR and valid zero values need separate treatment. Checks do not rewrite the paper, and concerns or human explanations do not replace research judgment.
+
+## 18 Installation, update checks and incremental upgrades
+
+For a new installation, use the globe icon on the welcome page to choose Chinese, English or Japanese, then check prerequisites and the application and data folders. Language selection is also available in the native prerequisite wizard when WebView2 is missing. For a new profile, the choice becomes memo's initial language. An upgrade or reused data folder keeps existing settings.
+
+Automatic checking is enabled by default for stable releases and can be turned off in settings. It starts after a delay once the application is ready, with a 24-hour cooldown for automatic checks. It does not download or install automatically. Investigate a failed manual check rather than treating it as an up-to-date result.
+
+### Start from v1.01
+
+The old v1.01 does not have the complete in-app incremental-update flow. For its first upgrade, use Memorive.Update.exe distributed with the target release and identify the existing application and data folders. Finish tasks and back up important data first. Do not uninstall first or overwrite the data folder. A new empty profile does not mean the old data was lost. Keep a portable distribution complete instead of copying only its main executable.
+
+### Update subsequent versions
+
+1. Check for updates under Settings → About and Version. Automatic checking controls discovery of versions, not automatic installation.
+2. Review the version, notes and download size. A matching delta transfers changed files; otherwise the same flow can offer a full package with its reason and size. A failed check does not mean you are up to date.
+3. After download verification, choose “Update after exit” to open the update assistant. Let tasks and saves finish, then exit this instance normally. The assistant continues the update without force-terminating the application or automatically restarting it for you.
+4. Reopen memo after the assistant finishes and check the version, data folder, model settings and recent chats. The helper inherits the application language; a temporary display change does not overwrite existing content-language settings.
+
+### Keep evidence when something fails
+
+Signature, integrity or compatibility failures stop application of the update and preserve the old program and diagnostics. Application files and research data are handled separately. New answers created after upgrading must not be overwritten automatically by an older backup. Follow the recovery instructions for this upgrade; do not give an upgraded database to an arbitrary older application. Remove private content and paths before sharing diagnostics.

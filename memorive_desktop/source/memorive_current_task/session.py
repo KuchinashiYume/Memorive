@@ -6,6 +6,7 @@ from memorive_desktop_service.locator import StableLocator
 
 from .actions import ActionController
 from .contracts import FIXED_NODE_IDS, LEGACY_FIXED_NODE_IDS
+from memorive_workflow.contracts import DATA_NODE
 from .projection import CurrentTaskProjector
 from .refinement_tasks import REFINEMENT_NODE_IDS
 
@@ -59,7 +60,7 @@ class CurrentTaskSession:
         return self.view()
 
     def select_node(self, node_id: str) -> dict[str, Any]:
-        if node_id not in (*FIXED_NODE_IDS, *LEGACY_FIXED_NODE_IDS, *REFINEMENT_NODE_IDS):
+        if node_id not in (DATA_NODE, *FIXED_NODE_IDS, *LEGACY_FIXED_NODE_IDS, *REFINEMENT_NODE_IDS):
             raise SessionError("CURRENT_TASK_NODE_UNKNOWN")
         current = self.view()
         if current["job_id"] is None:
@@ -91,7 +92,7 @@ class CurrentTaskSession:
     def overrides(self) -> dict[str, dict[str, Any]]:
         state = self.control_store.load()["state"]
         result: dict[str, dict[str, Any]] = {}
-        for node_id in dict.fromkeys((*FIXED_NODE_IDS, *LEGACY_FIXED_NODE_IDS)):
+        for node_id in dict.fromkeys((DATA_NODE, *FIXED_NODE_IDS, *LEGACY_FIXED_NODE_IDS)):
             enabled_key, model_key, profile_key = self._override_keys(node_id)
             row: dict[str, Any] = {}
             if enabled_key in state["filters"]:

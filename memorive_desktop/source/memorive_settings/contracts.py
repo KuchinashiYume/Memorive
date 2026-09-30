@@ -17,8 +17,8 @@ from .model_capabilities import (
 from .kimi_endpoint import KIMI_ENDPOINTS, is_kimi_service
 
 
-SETTINGS_SCHEMA_VERSION = "SettingsTemplate-v6"
-STORE_SCHEMA_VERSION = "SettingsStoreEnvelope-v6"
+SETTINGS_SCHEMA_VERSION = "SettingsTemplate-v7"
+STORE_SCHEMA_VERSION = "SettingsStoreEnvelope-v7"
 MODES = frozenset({"NORMAL", "ADVANCED", "DEVELOPER"})
 PLANS = frozenset({"ECONOMY", "STANDARD", "HIGH_QUALITY", "MAXIMUM"})
 CONNECTION_STATES = frozenset({"UNVERIFIED", "AVAILABLE", "INVALID"})
@@ -52,6 +52,7 @@ SENSITIVE_VALUE = (
 
 WORKFLOW_DEFINITIONS = (
     ("ingest", "文档处理与内容理解", True, True, "PARSER_PROFILE"),
+    ("data_review", "数据分析", False, False, None),
     ("chunk_embedding", "Chunk Embedding", True, True, None),
     ("card_distill", "Card 蒸馏", True, True, "DISTILLATION_PROFILE"),
     ("transport_review", "Card 搬运类校核", False, True, "AUTO_HETEROGENEOUS"),
@@ -60,6 +61,7 @@ WORKFLOW_DEFINITIONS = (
     ("analysis", "Analysis 分析", True, True, "ANALYSIS_PROFILE"),
     ("judgment_review", "判断类异源核对", False, True, "AUTO_HETEROGENEOUS"),
     ("human_judgment", "人类最终判断", True, False, None),
+    ("logic_review", "逻辑分析（按文献选择）", False, True, None),
 )
 WORKFLOW_IDS = tuple(row[0] for row in WORKFLOW_DEFINITIONS)
 DEFAULT_PROFILE_BY_NODE = {row[0]: row[4] for row in WORKFLOW_DEFINITIONS}
@@ -85,8 +87,8 @@ EXCLUSIVE_BUILTIN_PROFILE_OWNERS = {
 LOCKED_ENABLED_IDS = frozenset(
     row[0] for row in WORKFLOW_DEFINITIONS if row[2]
 )
-OPTIONAL_IDS = frozenset({"transport_review", "judgment_review"})
-NO_MODEL_IDS = frozenset({"card_admission", "human_judgment"})
+OPTIONAL_IDS = frozenset({"transport_review", "judgment_review", "data_review", "logic_review"})
+NO_MODEL_IDS = frozenset({"card_admission", "human_judgment", "data_review"})
 DERIVED_PROFILE_IDS = frozenset(PROFILE_SOURCE_BY_NODE)
 
 CLI_DEFINITIONS = (
@@ -583,7 +585,8 @@ def _validate_model_services(value: Any) -> list[dict[str, Any]]:
 
 
 def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
-    if not isinstance(value, list) or len(value) != len(CLI_DEFINITIONS):
+    from .cli_templates import ADAPTER, ID, LOCAL_FIELDS, validate_local_fields, CAPABILITIES, PARSER
+    if not isinstance(value, list) or not len(CLI_DEFINITIONS) <= len(value) <= 71:
         raise ValueError("CLI_SERVICES_INVALID")
     rows_by_id: dict[str, Mapping[str, Any]] = {}
     for row in value:
@@ -599,23 +602,29 @@ def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
                 "enabled",
                 "connection_status",
                 "models",
-            },
+            } | (set(row) & LOCAL_FIELDS if row.get('adapter_id') == ADAPTER else set()),
             "CLI_SERVICE",
         )
         config_id = _text(row["config_id"], "CLI_CONFIG_ID", 128)
-        if config_id in rows_by_id:
+        if config_id in rows_by_id or ID.fullmatch(config_id) is None:
             raise ValueError("CLI_CONFIG_ID_INVALID")
         rows_by_id[config_id] = row
-    if set(rows_by_id) != set(CLI_CONFIG_IDS):
+    if not set(CLI_CONFIG_IDS) <= set(rows_by_id):
         raise ValueError("CLI_ADAPTER_SET_MISMATCH")
 
     accepted: list[dict[str, Any]] = []
     seen_profile_refs: set[str] = set()
-    for config_id, adapter_id, display_name, default_executable in CLI_DEFINITIONS:
+    definitions=list(CLI_DEFINITIONS)
+    for config_id,row in rows_by_id.items():
+        if config_id in CLI_CONFIG_IDS:continue
+        if row['adapter_id'] != ADAPTER or 'template' not in row:raise ValueError('CLI_CUSTOM_TEMPLATE_REQUIRED')
+        definitions.append((config_id,ADAPTER,_text(row['display_name'],'CLI_DISPLAY_NAME',80),''))
+    for config_id, adapter_id, display_name, default_executable in definitions:
         row = rows_by_id[config_id]
         if row["adapter_id"] != adapter_id or row["display_name"] != display_name:
             raise ValueError("CLI_ADAPTER_IDENTITY_DRIFT")
-        executable = _text(row["executable"], "CLI_EXECUTABLE", 260)
+        executable = '' if adapter_id==ADAPTER and row['executable']=='' and row['enabled'] is False else _text(row["executable"], "CLI_EXECUTABLE", 260)
+        local=validate_local_fields(row) if adapter_id==ADAPTER else {}
         if any(ord(character) < 32 or ord(character) == 127 for character in executable):
             raise ValueError("CLI_EXECUTABLE_INVALID")
         if not isinstance(row["enabled"], bool):
@@ -638,7 +647,7 @@ def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
                     "model_name",
                     "thinking_mode",
                     "connection_status",
-                },
+                } | ({'verification'} if adapter_id==ADAPTER and 'verification' in model else set()),
                 "CLI_MODEL",
             )
             profile_ref = _text(model["profile_ref"], "CLI_MODEL_PROFILE_REF", 128)
@@ -673,6 +682,14 @@ def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
                     "connection_status": model["connection_status"],
                 }
             )
+            if adapter_id==ADAPTER:
+                verification=model.get('verification')
+                if verification is not None:
+                    if (not isinstance(verification,Mapping) or set(verification)!={'configuration_sha256','capabilities','parser_version'}
+                        or not re.fullmatch(r'[A-F0-9]{64}',str(verification['configuration_sha256']))
+                        or verification['parser_version']!=PARSER or not isinstance(verification['capabilities'],list)
+                        or set(verification['capabilities'])-CAPABILITIES):raise ValueError('CLI_TEMPLATE_VERIFICATION_INVALID')
+                accepted_models[-1]['verification']=deepcopy(verification)
         accepted.append(
             {
                 "config_id": config_id,
@@ -682,6 +699,7 @@ def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
                 "enabled": row["enabled"],
                 "connection_status": row["connection_status"],
                 "models": sorted(accepted_models, key=lambda item: item["profile_ref"]),
+                **local,
             }
         )
     return accepted
@@ -773,6 +791,8 @@ def _validate_workflow(value: Any) -> dict[str, Any]:
             or not IDENTIFIER.fullmatch(profile_ref)
         ):
             raise ValueError("WORKFLOW_PROFILE_REFERENCE_INVALID")
+        if node_id == "logic_review" and str(profile_ref or "").startswith("local:"):
+            raise ValueError("LOGIC_CLOUD_PROFILE_REQUIRED")
         fallback_ref = row.get("fallback_profile_ref")
         if fallback_ref is not None and (
             node_id != "ingest" or not isinstance(fallback_ref, str)

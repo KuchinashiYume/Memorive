@@ -6,6 +6,10 @@ ANSWER_SCHEMA={'type':'object','properties':{'answer':{'type':'string'},'citatio
 ANSWER_SCHEMA['properties']['knowledge_draft']={'anyOf':[{'type':'null'},{'type':'object','properties':{
     'title':{'type':'string'},'claim':{'type':'string'},'scope':{'type':'string'},'limitations':{'type':'string'},
     'evidence_ids':{'type':'array','items':{'type':'string'}}},'required':['title','claim','scope','limitations','evidence_ids'],'additionalProperties':False}]}
+ANSWER_SCHEMA['properties']['research_notes']={'type':'array','maxItems':8,'items':{'type':'object','properties':{
+    'kind':{'type':'string','enum':['question','hypothesis','judgment','open_question','next_step']},
+    'quote':{'type':'string'},'evidence_ids':{'type':'array','items':{'type':'string'}}},
+    'required':['kind','quote','evidence_ids'],'additionalProperties':False}}
 
 def create(api):
     def interest_get():
@@ -29,7 +33,9 @@ def create(api):
         return api._service.call('settings.research_image_execute',{'snapshot_id':snap['snapshot_id'],
             'image_base64':base64.b64encode(image_bytes).decode('ascii'),'mime_type':mime_type})
     workspace=ResearchWorkspace(api._profile_path('WORKSPACE')/'research_workspace',model=model,catalog=catalog,recover=True,
-        interest_get=interest_get,interest_set=interest_set,vision=vision)
+        interest_get=interest_get,interest_set=interest_set,vision=vision,
+        user_preferences_get=lambda:api._service.call('settings.user_get',{}),
+        language_settings_get=lambda:api._service.call('settings.get_state',{}))
     def embedding_catalog():
         from memorive_research_runtime.report_models import catalog as report_catalog
         return [r for r in report_catalog(api._research,'EMBEDDING') if r['profile_kind'] in {'API','LOCAL'}]

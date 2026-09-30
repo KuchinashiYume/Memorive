@@ -47,6 +47,15 @@ static class Lifecycle {
             progress(6+Math.Min(8,files.Count/300),"正在核对程序文件清单",false);
         }
         files.AddRange(managers.Where(p=>!Equal(p,Engine.Self)));
+        string stable=Path.Combine(root,"Memorive.exe");
+        if(File.Exists(stable)){
+            var active=Engine.Load<Manifest>(Path.Combine(s.version,"manifest.json"));var entry=active.members.SingleOrDefault(x=>x.path=="app/_internal/update/Memorive.Launcher.exe");
+            if(entry==null||!String.Equals(Engine.Hash(stable),entry.sha256,StringComparison.OrdinalIgnoreCase))throw new UpdateError("UPDATE_STABLE_ENTRY_OWNERSHIP_INVALID");
+            files.Add(stable);
+        }
+        if(deleteData&&Directory.Exists(Path.Combine(root,"updates")))foreach(string operation in Directory.GetDirectories(Path.Combine(root,"updates"))){
+            if(File.Exists(Path.Combine(operation,"data-backup.json")))throw new UpdateError("UPDATE_BACKUPS_REQUIRE_EXPLICIT_REVIEW");
+        }
         var plan=new RemovalPlan{root=root,data_root=s.data_root,version=s.version,policy=deleteData?"delete":"keep",sandbox=sandbox,program_files=files.Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),program_dirs=dirs.OrderByDescending(p=>p.Length).ToArray(),legacy_empty_versions=legacy.ToArray(),data_files=new string[0],data_dirs=new string[0],data_inventory=new Member[0]};
         if(deleteData)PrepareData(plan);
         plan.hash=HashPlan(plan);return plan;

@@ -123,8 +123,8 @@ class WorkflowExamJobs:
                 if self._read(job_id)['cancel_requested']:
                     raise RuntimeError('WORKFLOW_EXAM_CANCELLED_BEFORE_NEXT_CALL')
             with TASK_CATEGORIES.enter('MODEL_EXAM', checkpoint=checkpoint):
-                from .call_ledger import call_scope
-                with observe_calls(progress), call_scope(job_id=job_id, node_id=params['node_id']):
+                from .call_ledger import call_scope,execution_control
+                with observe_calls(progress), call_scope(job_id=job_id, node_id=params['node_id']), execution_control(checkpoint):
                     # Do not run a plan against a different model/settings snapshot.
                     row = self._read(job_id)
                     if self.store.load(recover_corruption=False)["settings_sha256"] != row["settings_sha256"]:

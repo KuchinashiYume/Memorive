@@ -56,7 +56,9 @@ def detect_card_lang(field_values) -> str:
     for v in field_values:
         parts.extend(v if isinstance(v, list) else [v])
     s = "".join(str(x) for x in parts)
-    if not s or _KANA_RE.search(s):
+    if _KANA_RE.search(s):
+        return "ja"
+    if not s:
         return "en"
     return "zh" if len(_HAN_RE.findall(s)) / len(s) >= 0.20 else "en"
 
@@ -67,6 +69,7 @@ def detect_card_lang(field_values) -> str:
 KEY_DATA_SAMPLE_SLOTS = ("group", "phase_time", "subprocess", "comparator")
 KEY_DATA_STAT_SLOTS = ("stat_type", "n", "significance")
 _KEY_DATA_LABELS = {
+    "ja": {"group":"標本/対照群","phase_time":"段階/時点","subprocess":"部分過程","comparator":"比較対象","stat_type":"統計量の種類","n":"n","significance":"有意性","not_given":"記載なし"},
     "zh": {"group": "样本/对照组", "phase_time": "阶段·时段", "subprocess": "子过程",
            "comparator": "对照", "stat_type": "统计类型", "n": "n", "significance": "显著性",
            "not_given": "未给"},
@@ -83,6 +86,7 @@ def key_data_labels(lang: str) -> dict:
 
 # 正文区占位注释(随卡片语言;承之七:系统标签不残留异语)。系统生成、非文献内容。
 _BODY_COMMENT = {
+    "ja": "<!-- 本文: 原文に忠実な要約。構造化フィールド、key_data、比較・限界・用語の補助情報は frontmatter に保存。個人的な分析は KNOWLEDGE_FEEDBACK に属します。 -->\n",
     "zh": ("<!-- 正文区:纯人读忠实提要(结构化字段 + key_data + 三附属[比较上下文/局限展望/术语引用] 均在 frontmatter;"
            "三附属 Core 只抽存不投入使用)。个人分析归 KNOWLEDGE_FEEDBACK、不入卡。 -->\n"),
     "en": ("<!-- Body: human-readable faithful summary (structured fields + key_data + 3 auxiliaries "
@@ -116,9 +120,13 @@ def build_card(*, paper_id: str, title: str, data_ownership: str,
       · aux=dict(成功)→ 四块按 card_schema §三②③④ 落(某块空列表也落);
       · aux=None(整体失败)→ 四块**全不落**(不带 aux 的 pending 卡,承决策:低风险不拖垮核心+key_data)。
       (RUNTIME_LOG 另有 aux_call/aux_finished/aux_failed 区分「未运行 / 失败 / 成功但空」。)"""
-    chinese = detect_card_lang(fields.get(f) for f in CONTENT_FIELDS) == "zh"
+    card_language = detect_card_lang(fields.get(f) for f in CONTENT_FIELDS)
+    chinese = card_language == "zh"
     unknown_number = DANGER_UNKNOWN_KD if chinese else "Unverified value; check the source before citing."
     unknown_field = DANGER_UNKNOWN_FIELD if chinese else "Unverified field; check the source before citing."
+    if card_language == 'ja':
+        unknown_number = '未検証の数値です。引用前に原文を確認してください。'
+        unknown_field = '未検証の項目です。引用前に原文を確認してください。'
     fm: dict = {"title": title}
     for f in CONTENT_FIELDS:                       # 6 内容字段(D1 类型)
         fm[f] = fields[f]
