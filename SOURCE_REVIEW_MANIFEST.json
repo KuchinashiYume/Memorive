@@ -8950,28 +8950,43 @@
     },
     {
       "path": "README.en.md",
-      "sha256": "079ecd89caa78179e3fd5eec70f05b88e875cf3c15d197ae5a82f7f60e15834b",
-      "bytes": 18762
+      "sha256": "c954f4c1330e276cae0e111a962f3487bbdca3d104fd5b9a922855c4caa8e5c8",
+      "bytes": 18932
     },
     {
       "path": "README.ja.md",
-      "sha256": "6b1def2dcd199dc1088df0794c305131b12523ea8755318b2b9bb76078b67912",
-      "bytes": 22013
+      "sha256": "5af8e185ce9d6ae61c764f57e4bbbc1520126e52d87078d48c1e259c0e737e3f",
+      "bytes": 22189
     },
     {
       "path": "README.md",
-      "sha256": "079ecd89caa78179e3fd5eec70f05b88e875cf3c15d197ae5a82f7f60e15834b",
-      "bytes": 18762
+      "sha256": "c954f4c1330e276cae0e111a962f3487bbdca3d104fd5b9a922855c4caa8e5c8",
+      "bytes": 18932
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "c4c3af3efd19fd330251c6a4afa2e731b8ade9d2cc45c694f38b761d623d2de0",
-      "bytes": 17211
+      "sha256": "09e2165784ef612dd6e0e0e1f13e8057e8a1641f0dcb670051a2cda28b571497",
+      "bytes": 17365
     },
     {
       "path": "SOURCE_VERSION.json",
       "sha256": "d416e8c49c24da387712f9af4cb749647098505f4eac89ef35967ab0886e6d33",
       "bytes": 1162
+    },
+    {
+      "path": "docs/images/memorive-home-v1.02-en.png",
+      "sha256": "38fa2ada3ec4f295fed1c93af461b6ab37cfe9894dd4f2c8038c0ad1933969f9",
+      "bytes": 157150
+    },
+    {
+      "path": "docs/images/memorive-home-v1.02-ja.png",
+      "sha256": "86557f9f3dfb91e7585c61e3c6809737b902735a92f228af12e598e07a8a068b",
+      "bytes": 149685
+    },
+    {
+      "path": "docs/images/memorive-home-v1.02-zh-CN.png",
+      "sha256": "4ad2ec92ea9881b216652f52f3999337fe0e1bd60b20b4ea0525bfea96b19916",
+      "bytes": 154833
     }
   ]
 }

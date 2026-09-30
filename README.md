@@ -24,6 +24,12 @@ Parsing keeps more structural and citation-location information, and task progre
 
 For the first upgrade from v1.01, use the v1.02 installer and back up your data. v1.01 does not contain the new updater. The separately distributed Test Console remains v1.01; this release does not relabel it or claim a new console compatibility test.
 
+## Home at a glance
+
+![Memorive v1.02 Home — English interface](docs/images/memorive-home-v1.02-en.png)
+
+Memorive v1.02, shown in English with default settings.
+
 ## What can you do?
 
 ### Read: bring documents, pages, and conversations into your research
