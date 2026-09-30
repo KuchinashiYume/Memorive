@@ -1,5 +1,13 @@
 # Memorive
 
+## v1.02 — release preparation
+
+v1.01 remains the published download below. v1.02 has been assembled locally and is undergoing final code and release-material review; it has not been published.
+
+The prepared version adds claim-support and numerical checks, research knowledge updates, answer styles and retry branches, 30-day conversation archiving with lighter list loading, and task-node progress. Literature discovery separates recent progress from related papers, handles duplicates, and saves bibliographic details and available abstracts; full texts are added manually. Home and AI Updates, custom CLI connections, generated-content language support in Chinese, English and Japanese, and structured source tracking are also included. Original documents and saved answer versions retain their language.
+
+Update checks and file-level delta downloads are implemented, but the production signing key and online update chain are not yet configured. Do not use unsigned preparation archives as update packages. No new full regression round is claimed for this final review. OCR, model answers and citation support still require human review. Existing code, artwork and privacy statements remain unchanged.
+
 From reading materials to research records you can verify and reuse.
 
 Memorive, or memo, is a Windows desktop workspace for personal learning and research. It connects papers, web pages, and research conversations in one workflow: retain the originals, organize information with its sources, ask questions and compare evidence, then keep the conclusions you have reviewed for future work.
