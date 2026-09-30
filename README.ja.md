@@ -67,7 +67,8 @@ v1.01 からの最初の更新には v1.02 インストーラーを使用し、�
 | テストコンソール・インストール版（任意） | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | Memorive の改良、テスト、問題の調査に使うツールです。インストールして使いたい方はこちら。 |
 | テストコンソール・ポータブル版 | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | 同じツールをインストールせずに使えます。ガイドと権利表記を含む ZIP 全体を展開してください。インストール版との二者択一です。 |
 | テストコンソール・実行ファイルのみ | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | ガイドと権利表記をすでにお持ちの方向けです。初めての方にはインストール版かポータブル版をおすすめします。 |
-| プロジェクトのソース・開発用 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 本体、プラグイン、コンソールのソースコードです。閲覧や自分でのビルドに使用します。インストール済みアプリではありません。 |
+| 現在のデスクトップソース・v1.02 | [Memorive-1.02-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-desktop-source.zip) | 現在のデスクトップ版に対応するソースです。閲覧・ビルド用で、インストーラーではありません。 |
+| 過去のプロジェクトソース・v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 過去の本体、連携ツール、独立した Test Console のソースです。現在のデスクトップ版には上記 v1.02 を選んでください。 |
 | 第三者コンポーネントのソース・開発/再配布用 | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | 同梱する依存コンポーネントの対応ソースと索引（約 592 MB）です。通常のインストールや利用には不要です。 |
 
 GitHub が自動で追加する **Source code (zip)** と **Source code (tar.gz)** もソースのスナップショットです。通常の利用には **Memorive-Setup-1.02-x64.exe** を選んでください。
@@ -154,6 +155,12 @@ Memorive は AI コーディングツールで開発されたプロジェクト�
 プロジェクト独自のコードには [AGPL-3.0-only](LICENSE) を適用します。[適用範囲](memorive_desktop/LICENSING.md)をご確認ください。個人の学習・研究と非商用利用を推奨しますが、この方針はコードのライセンスに制限を追加するものではありません。
 
 一部のキャラクター画像は『ブルーアーカイブ』を参考に AI を用いて制作した二次創作です。Memorive は個人による非公式プロジェクトで、Nexon、Nexon Games、Yostar との関係はありません。原キャラクター、名称、標章などの権利は各権利者に帰属します。デスクトップペット、表情、キャラクターアイコンには[素材に関する声明](memorive_desktop/ASSET_NOTICE.md)を別途適用します。依存コンポーネントは[第三者に関する説明](memorive_desktop/THIRD_PARTY_NOTICES.md)をご覧ください。
+
+## フィードバック・お問い合わせ
+
+使い方の質問、不具合、機能の提案は [GitHub Issues](https://github.com/KuchinashiYume/Memorive/issues) にお寄せください。非公開のご連絡、セキュリティや素材の権利に関するお問い合わせは、プロジェクト用メール [kuchinashiyume01@Gmail.com](mailto:kuchinashiyume01@Gmail.com) で受け付けます。
+
+不具合の報告には Memorive のバージョンと再現手順を添えてください。スクリーンショットやログから API キーと個人の研究内容を除いてください。
 
 ## 連携プラグイン
 

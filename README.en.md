@@ -67,7 +67,8 @@ Before adding a suggested conclusion to your knowledge, review its claim, scope,
 | Test Console — optional installer | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | For users who want to modify, test, or diagnose Memorive. Choose this for an installed console. |
 | Test Console — portable alternative | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | For the same testing tool without installation. Extract the whole ZIP; guides and notices are included. Choose this OR the console installer. |
 | Test Console — executable only | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | For advanced use when you already have the guide and notices. The installer or portable ZIP is easier to start with. |
-| Project source — developers | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | Source for the application, companions, and console. Read or build the code; this is not a ready-to-run app. |
+| Current desktop source — v1.02 | [Memorive-1.02-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-desktop-source.zip) | Corresponding source for the current desktop application; for reading or building, not installation. |
+| Historical project source — v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | Historical application, companion and Test Console sources. For the current desktop source, choose v1.02 above. |
 | Third-party source — developers / redistribution | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | Corresponding source and index for bundled dependencies (about 592 MB). Not needed to install or use Memorive. |
 
 GitHub also adds **Source code (zip)** and **Source code (tar.gz)** automatically. These are source snapshots, not Windows installers. For normal use, choose **Memorive-Setup-1.02-x64.exe**.
@@ -154,6 +155,12 @@ Memorive is an AI-developed project. Its project-specific code was generated, mo
 Project-specific code uses [AGPL-3.0-only](LICENSE); see the [licensing scope](memorive_desktop/LICENSING.md). The maintainer encourages personal learning, research, and non-commercial use. This preference adds no restrictions to the code license.
 
 Some character images are AI-assisted fan creations inspired by Blue Archive. Memorive is an unofficial personal project, unaffiliated with Nexon, Nexon Games, or Yostar. Underlying characters, names, and marks belong to their respective rights holders. Desktop-pet images, expressions, and character icons are covered separately by the [asset notice](memorive_desktop/ASSET_NOTICE.md). Dependencies are listed in the [third-party notices](memorive_desktop/THIRD_PARTY_NOTICES.md).
+
+## Feedback and contact
+
+For usage questions, bugs and feature ideas, please use [GitHub Issues](https://github.com/KuchinashiYume/Memorive/issues). For private feedback, security concerns or artwork-rights questions, contact the project maintainer at [kuchinashiyume01@Gmail.com](mailto:kuchinashiyume01@Gmail.com).
+
+Include your Memorive version and steps to reproduce when reporting a problem. Please remove API keys and private research content from screenshots and logs.
 
 ## Companion plugins
 

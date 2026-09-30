@@ -67,7 +67,8 @@ Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面�
 | 测试控制台安装版 · 可选 | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | 适合希望修改、测试或排查 Memorive 的用户，运行安装向导即可。 |
 | 测试控制台便携版 · 另一种选择 | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | 同一个测试工具，无需安装；完整解压后使用，内含指南与声明。与控制台安装版二选一。 |
 | 测试控制台单独 EXE | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | 适合已有指南和声明的进阶使用者；初次使用建议选安装版或便携版。 |
-| 项目源码 · 开发用途 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 本体、配套插件和控制台的源代码，用于阅读或自行构建；不能作为已安装的应用直接运行。 |
+| 当前桌面源码 · v1.02 | [Memorive-1.02-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-desktop-source.zip) | 当前桌面程序的对应源码，用于阅读或自行构建，不是安装包。 |
+| 历史项目源码 · v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 历史主程序、配套插件与独立控制台源码；当前桌面源码请选择上方 v1.02。 |
 | 第三方对应源码 · 开发/再分发用途 | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | 打包依赖的对应源码与索引，约 592 MB。日常安装和使用 Memorive 无需下载。 |
 
 GitHub 还会自动列出 **Source code (zip)** 和 **Source code (tar.gz)**，它们是源码快照。普通用户请选择 **Memorive-Setup-1.02-x64.exe** 安装程序。
@@ -154,6 +155,12 @@ Memorive 是由 AI 编程工具开发的项目。项目自身的代码由 **Open
 项目自身代码采用 [AGPL-3.0-only](LICENSE)，适用范围见[许可说明](memorive_desktop/LICENSING.md)。作者鼓励个人学习、研究与非商业使用，这一倡议不增加代码许可证的限制。
 
 部分角色图像是参考《Blue Archive》的 AI 辅助二次创作。Memorive 是非官方个人项目，与 Nexon、Nexon Games 或 Yostar 无关联；原角色、名称和标识的权利归各自权利人所有。桌宠、表情和角色图标单独适用[素材声明](memorive_desktop/ASSET_NOTICE.md)，第三方组件见[第三方说明](memorive_desktop/THIRD_PARTY_NOTICES.md)。
+
+## 反馈与联系
+
+使用问题、错误报告和功能建议，请提交至 [GitHub Issues](https://github.com/KuchinashiYume/Memorive/issues)。私密反馈、安全问题或素材权利相关事宜，可通过项目邮箱联系维护者：[kuchinashiyume01@Gmail.com](mailto:kuchinashiyume01@Gmail.com)。
+
+反馈问题时请注明 Memorive 版本和复现步骤；截图与日志中请去除 API 密钥及私人研究内容。
 
 ## 配套插件
 

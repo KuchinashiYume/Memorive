@@ -8950,23 +8950,23 @@
     },
     {
       "path": "README.en.md",
-      "sha256": "ace191f3919e6833a89cd4a0248b780d9f3d27eedd2b353eb817af56a0605552",
-      "bytes": 17991
+      "sha256": "079ecd89caa78179e3fd5eec70f05b88e875cf3c15d197ae5a82f7f60e15834b",
+      "bytes": 18762
     },
     {
       "path": "README.ja.md",
-      "sha256": "22949bcb0d198e8d94da0c18d59434ca20690ce0edf4f953b13ad7850181e7f9",
-      "bytes": 21090
+      "sha256": "6b1def2dcd199dc1088df0794c305131b12523ea8755318b2b9bb76078b67912",
+      "bytes": 22013
     },
     {
       "path": "README.md",
-      "sha256": "ace191f3919e6833a89cd4a0248b780d9f3d27eedd2b353eb817af56a0605552",
-      "bytes": 17991
+      "sha256": "079ecd89caa78179e3fd5eec70f05b88e875cf3c15d197ae5a82f7f60e15834b",
+      "bytes": 18762
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "2dc3b897aa180081f640405c216afa9fd660c324203a3328713541f8cb399b06",
-      "bytes": 16539
+      "sha256": "c4c3af3efd19fd330251c6a4afa2e731b8ade9d2cc45c694f38b761d623d2de0",
+      "bytes": 17211
     },
     {
       "path": "SOURCE_VERSION.json",
