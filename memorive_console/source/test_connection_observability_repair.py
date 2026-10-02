@@ -158,7 +158,11 @@ def test_ui_marks_retained_suite_result_as_historical_until_session_is_live():
     start = source.index("function suiteSessionView")
     end = source.index("\nfunction selectedPreset", start)
     function = source[start:end]
+    helper = (Path(__file__).parent / "i18n.js").read_text(encoding="utf-8").split("function tr(", 1)[1].split("function localizeInitialPage", 1)[0]
+    translator = "function tr(" + helper
     script = f"""
+const window={{CONSOLE_I18N:{{messages:{{}}}}}};
+{translator}
 {function}
 const suite={{state:'COMPLETED',verdict:'PASS',session_id:'session-a'}};
 const values=[

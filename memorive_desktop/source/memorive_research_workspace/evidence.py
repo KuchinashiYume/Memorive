@@ -168,6 +168,9 @@ class EvidenceIndex:
             if not path.is_relative_to(self.store.root) or not windows_io_path(path).is_file():raise ValueError('EVIDENCE_OUTSIDE_WORKSPACE')
             for ref in artifact.get('parents',[]):self.read(ref['id'],project,expected_hash=ref['content_hash'],db=db,seen=seen)
         if digest(windows_io_path(path).read_bytes())!=artifact['content_hash']:raise ValueError('EVIDENCE_STALE')
+        if artifact.get('source_original_path'):
+            original=safe_path(artifact['root'],artifact['source_original_path'])
+            if digest(windows_io_path(original).read_bytes())!=artifact['source_content_hash']:raise ValueError('EVIDENCE_STALE')
         if artifact.get('extraction_path'):
             extraction=Path(artifact['extraction_path']).resolve(strict=False)
             if not extraction.is_relative_to(self.store.root) or not windows_io_path(extraction).is_file() or digest(windows_io_path(extraction).read_bytes())!=artifact['extraction_hash']:raise ValueError('EVIDENCE_STALE')
@@ -206,6 +209,7 @@ class EvidenceIndex:
             'line_start':row['line_start'],'line_end':row['line_end'],'page':row['page'],'kind':artifact['kind'],'project':project,
             'document_id':binding.get('document_id',artifact.get('document_id',artifact['id'])),'source_uri':uri,'source_binding':binding,
             'material_layer':material_layer(artifact),'source_content_hash':source_document_hash(artifact),**review,
+            **({'line_basis':'rawmd_global','source_warnings':artifact['skill_source']['warnings']} if artifact.get('skill_source') else {}),
             **({'structure_refs':structure_refs} if structure_refs else {})}
 
     def unavailable_derived(self,project,artifact_ids=None,*,db=None):

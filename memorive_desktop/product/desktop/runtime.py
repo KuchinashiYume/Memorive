@@ -3741,6 +3741,24 @@ class ProductApi:
             }
         return self.stage_inbox_paths([str(path) for path in selected])
 
+    def pick_research_files(self) -> dict[str, Any]:
+        """Keep source bundles together; research attachments own durable copying."""
+        if self._window is None:
+            raise RuntimeError("PRODUCT_WINDOW_NOT_ATTACHED")
+        from webview import FileDialog
+        selected = self._window.create_file_dialog(
+            FileDialog.OPEN,
+            directory=str(self._effective_directory("workspace_root")),
+            allow_multiple=True,
+            file_types=(
+                "Research attachments (*.pdf;*.md;*.txt;*.json;*.docx;*.png;*.jpg;*.jpeg;*.webp)",
+                "All files (*.*)",
+            ),
+        )
+        paths = [str(path) for path in selected] if selected else []
+        return {"paths": paths, "path_count": len(paths),
+                "status": "SELECTED" if paths else "CANCELLED"}
+
     @staticmethod
     def _is_reparse_point(path: Path) -> bool:
         attributes = getattr(path.lstat(), "st_file_attributes", 0)

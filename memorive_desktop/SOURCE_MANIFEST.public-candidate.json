@@ -1,15 +1,55 @@
 {
   "schema": "MemoriveDesktopSourceSnapshot-v1",
-  "revision": "Memorive-1.02-hotfix001",
-  "product_version": "1.02.01",
-  "candidate_revision": "Memorive-1.02-hotfix001",
+  "revision": "Memorive-1.03-release002",
+  "product_version": "1.03",
+  "candidate_revision": "Memorive-1.03-release002",
   "source_executable_sha256": null,
-  "repo_base_commit": "ee60ab680488810252ec3536fc04d0add725f4f1",
-  "status": "AUTHORIZED_HOTFIX_BUILD_INPUT",
+  "repo_base_commit": "49e2b36158cf3b888ee64a0d5329a064522bdf50",
+  "status": "AUTHORIZED_RELEASE_PREPARATION_INPUT",
   "selected_build_root": "memorive_desktop",
   "root_module_authority_effect": "Only the declared memorive_desktop source and mapped contracts are build inputs",
   "historical_manifest": "FORMAL_SOURCE_MANIFEST.json",
   "files": [
+    {
+      "path": "INSTALL.md",
+      "sha256": "d44a506ecb9ff51dd3b3490270579f7ee11a49b346383c5a9d49491f460938bf",
+      "bytes": 7798
+    },
+    {
+      "path": "PUBLISHING.md",
+      "sha256": "d9231496ec82dad09df59da9782592dd7b4b75343e79e07933c7ee1a7fc54175",
+      "bytes": 4718
+    },
+    {
+      "path": "README_PUBLIC.en.md",
+      "sha256": "fe7536c3a41d7ff261c33d6575a110702d896c832558f7897786327b44f6e2bc",
+      "bytes": 11921
+    },
+    {
+      "path": "README_PUBLIC.ja.md",
+      "sha256": "510fed4ccdb4f8fe57a53a159af9aacbb21ad29104917aa0f4733e01248ef064",
+      "bytes": 13940
+    },
+    {
+      "path": "README_PUBLIC.md",
+      "sha256": "67b5e88a83b715a64071c7b7bca0af1ce45f054016815c75fbfa432bf52daf55",
+      "bytes": 10737
+    },
+    {
+      "path": "RELEASE_CHECKS.md",
+      "sha256": "7875bd59b90c6fee48d33c3e60dd94e895e02482885a4077619a6439cdedd74c",
+      "bytes": 488
+    },
+    {
+      "path": "RELEASE_NOTES.md",
+      "sha256": "6ae11c5cc50ef83bc47007028ceafe90d423108f1f8b41bbe15f52782d269690",
+      "bytes": 6192
+    },
+    {
+      "path": "RELEASE_PREPARATION.md",
+      "sha256": "2053f11b1aa07cbb81f04a5853869685c6b1217089c402de46bd4b1bf37a0d98",
+      "bytes": 422
+    },
     {
       "path": "integrations/NOTICE.md",
       "sha256": "960ac5d9ef01735dccd86346e7df1377f8c51ec1631e3e5c1763e4f6f67df71c",
@@ -92,8 +132,38 @@
     },
     {
       "path": "integrations/skills/memo-research/SKILL.md",
-      "sha256": "121370b285edd74aae71fd79d3769395d3e4d7f4e28709db671e7b8e4a92290e",
-      "bytes": 1504
+      "sha256": "b6faef7b691e9e5969b2058203a77db7cb659b83cb0ee2d28a4f25bb82a609d7",
+      "bytes": 8380
+    },
+    {
+      "path": "integrations/skills/memo-research/agents/openai.yaml",
+      "sha256": "c5683cfba09d9a5824ad02d8bc46db31d308a9f9e66405e02f43037ba1d00e9b",
+      "bytes": 342
+    },
+    {
+      "path": "integrations/skills/memo-research/references/memo-bridge.md",
+      "sha256": "3670d6accb6e7882e3e8449b02a5d5f2af9a080d13c6a6343b7d9f24d7bea1b4",
+      "bytes": 6139
+    },
+    {
+      "path": "integrations/skills/memo-research/references/source-tools.md",
+      "sha256": "8e428e33fb10f391e4d09ff3da8a293960f7df8cc4defa57da3eaa7106467da1",
+      "bytes": 4045
+    },
+    {
+      "path": "integrations/skills/memo-research/scripts/memo_bridge.py",
+      "sha256": "443f9b4e1fca43f3c5e600aee5f7cb37a51d71cc67aae2c017242cf93509433e",
+      "bytes": 6998
+    },
+    {
+      "path": "integrations/skills/memo-research/scripts/requirements-pdf.txt",
+      "sha256": "9b1716818e2f306289287c0279dc63584c7f3aec0686cfee51b3c4a126ba97f6",
+      "bytes": 36
+    },
+    {
+      "path": "integrations/skills/memo-research/scripts/sources.py",
+      "sha256": "f1b2e1f449036ed19bc413f6132c187579e0224a0a2ccf394fc220d33426bca3",
+      "bytes": 9839
     },
     {
       "path": "integrations/skills/memo-tension/SKILL.md",
@@ -372,8 +442,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "33221d874c0165731244eed32730cdfe31b5c908d12a864f5123c33ab8b06d1e",
-      "bytes": 3307618
+      "sha256": "eb45d838e488dfae2140c167fda18493f2e1d426a25340d9647b5f5db992ebdc",
+      "bytes": 3355683
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -567,13 +637,13 @@
     },
     {
       "path": "product/desktop/help/en-US/design.md",
-      "sha256": "a1989122904c0b74966cdcafcc11f310553be55ac154c2cf798001042f0e7963",
-      "bytes": 84619
+      "sha256": "31eba152ea8ffdc875471ac26d0c6960610ab660ed9ee8f5ebd444f9c54eda50",
+      "bytes": 85448
     },
     {
       "path": "product/desktop/help/en-US/design.pdf",
-      "sha256": "7e2be135d849c8c4240946289ef72de893cb10387d4d032b008d6c30e197d6dc",
-      "bytes": 637283
+      "sha256": "724e8e59e78ae49b732e68d59030b770bef04fa53afe2055ca150fd99c7f04bd",
+      "bytes": 637734
     },
     {
       "path": "product/desktop/help/en-US/index.html",
@@ -592,18 +662,18 @@
     },
     {
       "path": "product/desktop/help/en-US/manual-text.md",
-      "sha256": "837153b82578f18cec8360afc99435efe2684df225100869ab5619612a556bcc",
-      "bytes": 48709
+      "sha256": "9b1eecc523f5f7135c5016e6701d726b8d524ad11b95a5244d43dfeec3fd895a",
+      "bytes": 49706
     },
     {
       "path": "product/desktop/help/en-US/manual.md",
-      "sha256": "837153b82578f18cec8360afc99435efe2684df225100869ab5619612a556bcc",
-      "bytes": 48709
+      "sha256": "9b1eecc523f5f7135c5016e6701d726b8d524ad11b95a5244d43dfeec3fd895a",
+      "bytes": 49706
     },
     {
       "path": "product/desktop/help/en-US/manual.pdf",
-      "sha256": "0fc559ceb9b2471064d0f265c3322f7ff57af2bc738bd573a47d8293d442353f",
-      "bytes": 739194
+      "sha256": "9a5a8094e3a8495728010460e2e59455305ad4f7f816a80fca261219afe46898",
+      "bytes": 739732
     },
     {
       "path": "product/desktop/help/ja-JP/assets/api-route.svg",
@@ -787,13 +857,13 @@
     },
     {
       "path": "product/desktop/help/ja-JP/design.md",
-      "sha256": "3a312e48ec2056effc3276dee5f7e7c0e9a867236830ad44821f95628b1fa1ed",
-      "bytes": 98748
+      "sha256": "a4c3cd0090cabb60318a3391f9cfde745358abbcf3caa11c4678b08d53054654",
+      "bytes": 99646
     },
     {
       "path": "product/desktop/help/ja-JP/design.pdf",
-      "sha256": "ea6a27e695e5ed5afda1fa6d30b573b3d6e1402b83c163055209c1c808cbca30",
-      "bytes": 1124856
+      "sha256": "91814f71bb6991679f8ae5db0b3673af1b6850a7ac6d6d2aca7199f7960806b5",
+      "bytes": 1127661
     },
     {
       "path": "product/desktop/help/ja-JP/index.html",
@@ -812,18 +882,18 @@
     },
     {
       "path": "product/desktop/help/ja-JP/manual-text.md",
-      "sha256": "e3a7a645ae35613414799d903d016ed758cac84bc8d5418b887d8e8233f42892",
-      "bytes": 55391
+      "sha256": "f159dc2615b4ec44d87709993cbdeecca11cab68bb5b91ba71cbb2b2ced3dbd7",
+      "bytes": 56545
     },
     {
       "path": "product/desktop/help/ja-JP/manual.md",
-      "sha256": "e3a7a645ae35613414799d903d016ed758cac84bc8d5418b887d8e8233f42892",
-      "bytes": 55391
+      "sha256": "f159dc2615b4ec44d87709993cbdeecca11cab68bb5b91ba71cbb2b2ced3dbd7",
+      "bytes": 56545
     },
     {
       "path": "product/desktop/help/ja-JP/manual.pdf",
-      "sha256": "89bbcb11090f5bef4b183992c7f37bef0e51415b95d614ff425acb39e7428b46",
-      "bytes": 1164311
+      "sha256": "6d7d8aabe0e3fd434f5c16f81bd0f798a94952f8425a66d708e23107bb22c63d",
+      "bytes": 1168421
     },
     {
       "path": "product/desktop/help/licenses/AGPL-3.0.txt",
@@ -1392,8 +1462,8 @@
     },
     {
       "path": "product/desktop/help/web/content.js",
-      "sha256": "c51a999682c4cc8f9066fdf37c8b61ec131af6f11d29262f9fca8d24201a3801",
-      "bytes": 841456
+      "sha256": "ace836a2b6d92065365ca4bea46500ead99dfddaa552bd696aa5d0ce8d7234fc",
+      "bytes": 851732
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-01.png",
@@ -1667,13 +1737,13 @@
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/design.md",
-      "sha256": "a1989122904c0b74966cdcafcc11f310553be55ac154c2cf798001042f0e7963",
-      "bytes": 84619
+      "sha256": "31eba152ea8ffdc875471ac26d0c6960610ab660ed9ee8f5ebd444f9c54eda50",
+      "bytes": 85448
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/design.pdf",
-      "sha256": "7e2be135d849c8c4240946289ef72de893cb10387d4d032b008d6c30e197d6dc",
-      "bytes": 637283
+      "sha256": "724e8e59e78ae49b732e68d59030b770bef04fa53afe2055ca150fd99c7f04bd",
+      "bytes": 637734
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/manual-text.md",
@@ -1682,23 +1752,23 @@
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/manual.md",
-      "sha256": "837153b82578f18cec8360afc99435efe2684df225100869ab5619612a556bcc",
-      "bytes": 48709
+      "sha256": "9b1eecc523f5f7135c5016e6701d726b8d524ad11b95a5244d43dfeec3fd895a",
+      "bytes": 49706
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/manual.pdf",
-      "sha256": "0fc559ceb9b2471064d0f265c3322f7ff57af2bc738bd573a47d8293d442353f",
-      "bytes": 739194
+      "sha256": "9a5a8094e3a8495728010460e2e59455305ad4f7f816a80fca261219afe46898",
+      "bytes": 739732
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/design.md",
-      "sha256": "3a312e48ec2056effc3276dee5f7e7c0e9a867236830ad44821f95628b1fa1ed",
-      "bytes": 98748
+      "sha256": "a4c3cd0090cabb60318a3391f9cfde745358abbcf3caa11c4678b08d53054654",
+      "bytes": 99646
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/design.pdf",
-      "sha256": "ea6a27e695e5ed5afda1fa6d30b573b3d6e1402b83c163055209c1c808cbca30",
-      "bytes": 1124856
+      "sha256": "91814f71bb6991679f8ae5db0b3673af1b6850a7ac6d6d2aca7199f7960806b5",
+      "bytes": 1127661
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/manual-text.md",
@@ -1707,23 +1777,23 @@
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/manual.md",
-      "sha256": "e3a7a645ae35613414799d903d016ed758cac84bc8d5418b887d8e8233f42892",
-      "bytes": 55391
+      "sha256": "f159dc2615b4ec44d87709993cbdeecca11cab68bb5b91ba71cbb2b2ced3dbd7",
+      "bytes": 56545
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/manual.pdf",
-      "sha256": "89bbcb11090f5bef4b183992c7f37bef0e51415b95d614ff425acb39e7428b46",
-      "bytes": 1164311
+      "sha256": "6d7d8aabe0e3fd434f5c16f81bd0f798a94952f8425a66d708e23107bb22c63d",
+      "bytes": 1168421
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/design.md",
-      "sha256": "35bcd58fac767dcd4cfc6d5f0a71680b50eb2fcf50232733a4305fffb7de2478",
-      "bytes": 65372
+      "sha256": "a1757f19fc4a4c16b365dc8fc9029cc8baab3fc1d5cee1250d1c96f5945cf5d0",
+      "bytes": 66117
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/design.pdf",
-      "sha256": "cfe1828754031910957a42998c0d47aadbeb1c4293c01be4e957a81fd8052167",
-      "bytes": 955235
+      "sha256": "ab2ad3ec1d7ffccf8a5eebf209926242b5785912378937e88ce190a98501d63b",
+      "bytes": 956654
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/manual-text.md",
@@ -1732,13 +1802,13 @@
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/manual.md",
-      "sha256": "56d802f0c97bedc79c93c08c06634c2010748a5a1a4f5287b0d908f77349613b",
-      "bytes": 45850
+      "sha256": "271771eb0dbc05866e6471d8c831ea489cf8f3d77468047ad99b4af213c95ca8",
+      "bytes": 46800
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/manual.pdf",
-      "sha256": "5169fc70c6f6cd14de76620cd631fefce59c2e5eeef36462f9ec37ff80b90050",
-      "bytes": 1239411
+      "sha256": "8e867c658b25859b691be57e3c9a367f322e39f557b86a2ff4d4cd4ed1f07170",
+      "bytes": 1241144
     },
     {
       "path": "product/desktop/help/web/index.html",
@@ -1922,13 +1992,13 @@
     },
     {
       "path": "product/desktop/help/zh-CN/design.md",
-      "sha256": "35bcd58fac767dcd4cfc6d5f0a71680b50eb2fcf50232733a4305fffb7de2478",
-      "bytes": 65372
+      "sha256": "a1757f19fc4a4c16b365dc8fc9029cc8baab3fc1d5cee1250d1c96f5945cf5d0",
+      "bytes": 66117
     },
     {
       "path": "product/desktop/help/zh-CN/design.pdf",
-      "sha256": "cfe1828754031910957a42998c0d47aadbeb1c4293c01be4e957a81fd8052167",
-      "bytes": 955235
+      "sha256": "ab2ad3ec1d7ffccf8a5eebf209926242b5785912378937e88ce190a98501d63b",
+      "bytes": 956654
     },
     {
       "path": "product/desktop/help/zh-CN/index.html",
@@ -1947,18 +2017,18 @@
     },
     {
       "path": "product/desktop/help/zh-CN/manual-text.md",
-      "sha256": "56d802f0c97bedc79c93c08c06634c2010748a5a1a4f5287b0d908f77349613b",
-      "bytes": 45850
+      "sha256": "271771eb0dbc05866e6471d8c831ea489cf8f3d77468047ad99b4af213c95ca8",
+      "bytes": 46800
     },
     {
       "path": "product/desktop/help/zh-CN/manual.md",
-      "sha256": "56d802f0c97bedc79c93c08c06634c2010748a5a1a4f5287b0d908f77349613b",
-      "bytes": 45850
+      "sha256": "271771eb0dbc05866e6471d8c831ea489cf8f3d77468047ad99b4af213c95ca8",
+      "bytes": 46800
     },
     {
       "path": "product/desktop/help/zh-CN/manual.pdf",
-      "sha256": "5169fc70c6f6cd14de76620cd631fefce59c2e5eeef36462f9ec37ff80b90050",
-      "bytes": 1239411
+      "sha256": "8e867c658b25859b691be57e3c9a367f322e39f557b86a2ff4d4cd4ed1f07170",
+      "bytes": 1241144
     },
     {
       "path": "product/desktop/install_health.py",
@@ -1972,8 +2042,8 @@
     },
     {
       "path": "product/desktop/memorive-console-capabilities.json",
-      "sha256": "3d91ae593bb768b25d5d2482d15e8bce19cd82bdde0b27d209f4330f3da501f6",
-      "bytes": 741
+      "sha256": "9590de08d50bcdc6fc5e504985214de0d589f6fad3c8ab09dd3ca42dafe933dc",
+      "bytes": 785
     },
     {
       "path": "product/desktop/network_diagnostics.py",
@@ -2002,8 +2072,8 @@
     },
     {
       "path": "product/desktop/release_identity_binding.json",
-      "sha256": "d456f7a4724957db2fa9ea5a115569ac88b9851d431fd767c9d5b5919ff3a76f",
-      "bytes": 1369
+      "sha256": "0a1d89bd0b3e1191bd2ed9aa9a5935d14937187163b2aa25b48ddf8de51eb793",
+      "bytes": 1364
     },
     {
       "path": "product/desktop/release_links.py",
@@ -2012,8 +2082,8 @@
     },
     {
       "path": "product/desktop/runtime.py",
-      "sha256": "1adaf2a3c5fcebf4ec110df592e4354006eccaae8138bb3c99aefd5db2d68ee7",
-      "bytes": 335531
+      "sha256": "fc9ab88b7840ea70cbcfd4b2e39a9b3893771bae35aed5512a924c3bde1a120c",
+      "bytes": 343419
     },
     {
       "path": "product/desktop/update_maintenance.py",
@@ -2022,8 +2092,8 @@
     },
     {
       "path": "product/desktop/update_release.json",
-      "sha256": "4a5f19731e511efa93a94a1f98dbcc985731787bca3f8eb5beb38f78c4088f20",
-      "bytes": 1119
+      "sha256": "596980b7621ab81cc0007476e4d408546f95bd13b5420778d2395691c8e80043",
+      "bytes": 1526
     },
     {
       "path": "product/desktop/update_service.py",
@@ -2089,6 +2159,51 @@
       "path": "product/web/update_bridge.js",
       "sha256": "7034afea55b33d7cdf44aaea430ad485a5da6795427ca2fa5aff7056d9eca11a",
       "bytes": 11050
+    },
+    {
+      "path": "release_materials/INSTALL.md",
+      "sha256": "d44a506ecb9ff51dd3b3490270579f7ee11a49b346383c5a9d49491f460938bf",
+      "bytes": 7798
+    },
+    {
+      "path": "release_materials/PUBLISHING.md",
+      "sha256": "5a25683efd928ad45c6c574cd26dd40423d99ea455e2b342475f3bb4a68b614f",
+      "bytes": 4282
+    },
+    {
+      "path": "release_materials/README_PUBLIC.en.md",
+      "sha256": "fe7536c3a41d7ff261c33d6575a110702d896c832558f7897786327b44f6e2bc",
+      "bytes": 11921
+    },
+    {
+      "path": "release_materials/README_PUBLIC.ja.md",
+      "sha256": "510fed4ccdb4f8fe57a53a159af9aacbb21ad29104917aa0f4733e01248ef064",
+      "bytes": 13940
+    },
+    {
+      "path": "release_materials/README_PUBLIC.md",
+      "sha256": "67b5e88a83b715a64071c7b7bca0af1ce45f054016815c75fbfa432bf52daf55",
+      "bytes": 10737
+    },
+    {
+      "path": "release_materials/RELEASE_CHECKS.md",
+      "sha256": "7875bd59b90c6fee48d33c3e60dd94e895e02482885a4077619a6439cdedd74c",
+      "bytes": 488
+    },
+    {
+      "path": "release_materials/RELEASE_NOTES.md",
+      "sha256": "6ae11c5cc50ef83bc47007028ceafe90d423108f1f8b41bbe15f52782d269690",
+      "bytes": 6192
+    },
+    {
+      "path": "release_materials/RELEASE_PREPARATION.md",
+      "sha256": "2053f11b1aa07cbb81f04a5853869685c6b1217089c402de46bd4b1bf37a0d98",
+      "bytes": 422
+    },
+    {
+      "path": "release_materials/THIRD_PARTY_NOTICES.md",
+      "sha256": "27399b3a53993e62d556cbee3f2eabd5b6c88523f1816349eb29f5fd0ae9bca9",
+      "bytes": 4608
     },
     {
       "path": "source/artifact_registry/__init__.py",
@@ -3622,8 +3737,8 @@
     },
     {
       "path": "source/memorive_language/handoff.py",
-      "sha256": "c6932f2f516c2d3c9d41e01da50937124689974a695b3ea388a42f248452a3fe",
-      "bytes": 5184
+      "sha256": "dd19c2639855dbd322e6a37e53b4d7f33f9156311592884e15aa4519dcb990e5",
+      "bytes": 6704
     },
     {
       "path": "source/memorive_language/messages.py",
@@ -4012,8 +4127,8 @@
     },
     {
       "path": "source/memorive_research_workspace/agent_protocol.py",
-      "sha256": "75a8db034f97fc8209529194d77d5d7048ccb6ca20da6f121a20f30f1b89bfd4",
-      "bytes": 6376
+      "sha256": "bf3ce205548452691402a766693a77b622f29e76b58d81082f0d36996ec06bb5",
+      "bytes": 7191
     },
     {
       "path": "source/memorive_research_workspace/answer_conversation.py",
@@ -4042,8 +4157,8 @@
     },
     {
       "path": "source/memorive_research_workspace/attachments.py",
-      "sha256": "5eb482260bc97bc2f2ecd114fdc683f34a1fabef115b6d5531a886a49de16ba5",
-      "bytes": 14612
+      "sha256": "fb0b253c1202a395c6b612f1c83f6d1d1007122f5f2741fea2afae21b1591137",
+      "bytes": 15973
     },
     {
       "path": "source/memorive_research_workspace/context_selection.py",
@@ -4077,8 +4192,8 @@
     },
     {
       "path": "source/memorive_research_workspace/developer_api.py",
-      "sha256": "698c15c4159635f3fd8da683f1a93d391c73c080a4cf070a4b0a5a0217aad746",
-      "bytes": 14222
+      "sha256": "8e8238e8d09db205fda897d9e4ab9be85482f14bf08804449d5f2e1d8bc77474",
+      "bytes": 14338
     },
     {
       "path": "source/memorive_research_workspace/developer_protocol.py",
@@ -4087,8 +4202,8 @@
     },
     {
       "path": "source/memorive_research_workspace/evidence.py",
-      "sha256": "1c0ee1c8f2e4b0a1693e134e3b2bdad8910aec6d30c8ac1b282ee96e665d97b8",
-      "bytes": 19038
+      "sha256": "d1fd87d4c4f55e7ae4d0173dd3798df0045b42dfd58b6cf743ec270d38cd2d04",
+      "bytes": 19441
     },
     {
       "path": "source/memorive_research_workspace/handoffs.py",
@@ -4122,8 +4237,8 @@
     },
     {
       "path": "source/memorive_research_workspace/service.py",
-      "sha256": "7bc960936c8ceb66f01a797133a3ae6000983e1252c634e744f3d2feb727a629",
-      "bytes": 61580
+      "sha256": "3905a5b994e7a93af5d55267e31a4142bd74be2a9d6952e9fdacdfc1e9ba3ba5",
+      "bytes": 63113
     },
     {
       "path": "source/memorive_research_workspace/shared_cross_bibliography.py",
@@ -4139,6 +4254,16 @@
       "path": "source/memorive_research_workspace/shared_cross_desktop_connections.py",
       "sha256": "081294ff422d489d03ca0fa24cf167baa12d8cd09140b33a4cbc2dc537625806",
       "bytes": 4615
+    },
+    {
+      "path": "source/memorive_research_workspace/skill_bridge.py",
+      "sha256": "9e0a58caea844694eaf9f487f4fc7a95be948471f0b5a953c3fcc715d2645978",
+      "bytes": 17856
+    },
+    {
+      "path": "source/memorive_research_workspace/skill_contract.py",
+      "sha256": "3989140e2417d8e469ea6c6e584df6f1b43c7de35f36bfc3a66eeb60b05ace99",
+      "bytes": 1516
     },
     {
       "path": "source/memorive_research_workspace/store.py",
@@ -6497,8 +6622,8 @@
     },
     {
       "path": "source/runtime.py",
-      "sha256": "05b1bc994f4880c3e0fccbf2a65422871f68e53db390be4f64deba68b089d93e",
-      "bytes": 343238
+      "sha256": "6005740a07afc1c6b14506e09daa26ce0204c583cda53157c6e8fd01ba422dfb",
+      "bytes": 344091
     },
     {
       "path": "source/runtime_log/__init__.py",
@@ -6539,91 +6664,6 @@
       "path": "tools/package_companions.py",
       "sha256": "da77c05a8e9ea13690b2a67ccdcf10f42701506df16c2fdfa983c373811f07be",
       "bytes": 2996
-    },
-    {
-      "path": "INSTALL.md",
-      "sha256": "d44a506ecb9ff51dd3b3490270579f7ee11a49b346383c5a9d49491f460938bf",
-      "bytes": 7798
-    },
-    {
-      "path": "PUBLISHING.md",
-      "sha256": "97ac88a6cb10eb6153fd285fd6165fc71c3c91aedce959f11787a89b41eb6f89",
-      "bytes": 4535
-    },
-    {
-      "path": "README_PUBLIC.en.md",
-      "sha256": "152c0df8d4976dc326bf78e5f4b0cc982ab01bb93a2232262a9e5a64206c8a55",
-      "bytes": 11664
-    },
-    {
-      "path": "README_PUBLIC.ja.md",
-      "sha256": "008ce7adb0e0af20a39d10c81b0588e9c534c2dae2aab497f2230dce1c9cebbc",
-      "bytes": 13683
-    },
-    {
-      "path": "README_PUBLIC.md",
-      "sha256": "14785b0ea87ecbf3b4c261e61673034e385fc3d476663adc1f5ff9fe98c9a32b",
-      "bytes": 10480
-    },
-    {
-      "path": "RELEASE_CHECKS.md",
-      "sha256": "84904f6b7602e5320a946cee6d15185be35cfa499152164d1ba9319c2f25b5a0",
-      "bytes": 3102
-    },
-    {
-      "path": "release_materials/INSTALL.md",
-      "sha256": "d44a506ecb9ff51dd3b3490270579f7ee11a49b346383c5a9d49491f460938bf",
-      "bytes": 7798
-    },
-    {
-      "path": "release_materials/PUBLISHING.md",
-      "sha256": "5a25683efd928ad45c6c574cd26dd40423d99ea455e2b342475f3bb4a68b614f",
-      "bytes": 4282
-    },
-    {
-      "path": "release_materials/README_PUBLIC.en.md",
-      "sha256": "152c0df8d4976dc326bf78e5f4b0cc982ab01bb93a2232262a9e5a64206c8a55",
-      "bytes": 11664
-    },
-    {
-      "path": "release_materials/README_PUBLIC.ja.md",
-      "sha256": "008ce7adb0e0af20a39d10c81b0588e9c534c2dae2aab497f2230dce1c9cebbc",
-      "bytes": 13683
-    },
-    {
-      "path": "release_materials/README_PUBLIC.md",
-      "sha256": "14785b0ea87ecbf3b4c261e61673034e385fc3d476663adc1f5ff9fe98c9a32b",
-      "bytes": 10480
-    },
-    {
-      "path": "release_materials/RELEASE_CHECKS.md",
-      "sha256": "84904f6b7602e5320a946cee6d15185be35cfa499152164d1ba9319c2f25b5a0",
-      "bytes": 3102
-    },
-    {
-      "path": "release_materials/RELEASE_NOTES.md",
-      "sha256": "01a36b421a3c56d8bb8e4268a8bed6a337e0592cc1f8dd030aceb1a0ab89f9e0",
-      "bytes": 7585
-    },
-    {
-      "path": "release_materials/RELEASE_PREPARATION.md",
-      "sha256": "4d13c77ec037cb379e3e7061620b69dce3462b4ec965e9b80d3db74e773b87a3",
-      "bytes": 4006
-    },
-    {
-      "path": "release_materials/THIRD_PARTY_NOTICES.md",
-      "sha256": "27399b3a53993e62d556cbee3f2eabd5b6c88523f1816349eb29f5fd0ae9bca9",
-      "bytes": 4608
-    },
-    {
-      "path": "RELEASE_NOTES.md",
-      "sha256": "01a36b421a3c56d8bb8e4268a8bed6a337e0592cc1f8dd030aceb1a0ab89f9e0",
-      "bytes": 7585
-    },
-    {
-      "path": "RELEASE_PREPARATION.md",
-      "sha256": "4d13c77ec037cb379e3e7061620b69dce3462b4ec965e9b80d3db74e773b87a3",
-      "bytes": 4006
     }
   ],
   "source_bytecode_review": "see Desktop baseline source reconciliation report; on-disk source has import priority after configure_resource_imports",

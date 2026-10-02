@@ -6,29 +6,23 @@ Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面�
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-### [⬇ 点击下载 Memorive Windows 版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Setup-1.02.01-x64.exe)
+### [⬇ 点击下载 Memorive Windows 版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe)
 
-**v1.02.01 · Windows 10 22H2 / Windows 11 · x64 · 约 205 MB**
+**v1.03 · Windows 10 22H2 / Windows 11 · x64 · 约 205 MB（以下载资产为准）**
 
 **第一次使用，下载上方的主程序安装包即可。** 它用于安装 Memorive；配套插件和测试控制台按需选择。
 
 [我应该下载哪个文件？](#下载选择指南) · [下载与版本](https://github.com/KuchinashiYume/Memorive/releases) · [使用指南](memorive_desktop/product/desktop/help/zh-CN/manual-text.md) · [设计文档](memorive_desktop/product/desktop/help/zh-CN/design.md) · [问题反馈](https://github.com/KuchinashiYume/Memorive/issues)
 
-## v1.02.01 的更新内容
+## v1.03 的更新内容
 
-### 功能更新：v1.01 → v1.02
+### 功能更新：v1.02.01 → v1.03
 
-v1.02 完善了主张支持性与数值核查、研究知识复用、回答风格、重试分支和版本切换。30 天未打开的问答可以归档，列表先加载必要信息，任务进度对应实际处理节点。
+研究问答现可复用 memo-research Skill 的原件与转换文本，围绕当前问题读取、比较和回查引用；经过来源与范围核对的回答可回到原对话继续追问。Skill 可独立处理单篇或由 Agent 组织多篇比较。测试控制台补齐三语界面、审核与结果页面及可分享摘要。
 
-文献发现区分最新进展与高度相关文献，统一查重并保存题录和来源链接；首页与 AI 近况提供研究入口和带来源的报告。新增自定义 CLI 接入，界面与生成内容支持中、英、日三语，原始文献和已有回答保持原语言。解析保留更完整的来源位置，并加入三语安装、检查更新与签名验证的文件级增量下载。
+本版保留 1.02.01 的设置保存与三级版本识别修复。研究 Skill 是按问题阅读与来源复用的补充，尚无低延迟或取代全量流程的性能结论。来源级集成检查和两轮真实 Agent 回流已有记录；发布包检查另行记录，不代表科研质量、全量业务、干净机器或在线升级全链路已验收。
 
-### 本次修复：v1.02 → v1.02.01
-
-修复失效的已保存目录阻断模型保存，以及一个设置失败跳过其他设置的问题。改进旧设置导入；快捷入口新名称最多20个字符，保留既有长名称。
-
-v1.02.01 是 v1.02 的小修复版本。首次从 v1.01 或 v1.02 升级时，请备份数据并使用本版安装器或完整便携包；旧更新器不识别三级版本号。不要将增量 ZIP 手动覆盖到安装目录。本版加入三级版本识别，供后续修复使用应用内更新。
-
-原修复代码的 17 项设置与导入定向检查通过，本版另补三级版本识别并重建安装器；没有重跑全量实验，也未完成新 EXE 界面保存和线上升级全过程验收。测试控制台及配套插件沿用既有版本。
+升级前请备份资料与设置，使用安装器或完整便携包；不要手动覆盖增量 ZIP。控制台独立安装或完整解压，首次连接仍需在 Memo 中授权；切换控制台语言不会改变 Memo 的语言，也不会恢复模型调用许可。
 
 ## 主页一览
 
@@ -66,29 +60,29 @@ Memorive v1.02 的中文主页，使用默认设置。
 
 ## 安装与开始使用
 
-[完整便携包](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Portable-1.02.01-x64.zip) · [三语 PDF、Markdown 与本地网页文档](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-Documentation.zip) · [v1.02.01 桌面对应源码](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-desktop-source.zip)。便携版需要完整解压，不能只复制 EXE。下方 v1.01 项目源码仍用于查阅未改版的控制台与插件。
+[完整便携包](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Portable-1.03-x64.zip) · [三语 PDF、Markdown 与本地网页文档](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-Documentation.zip) · [v1.03 桌面对应源码](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip)。便携版需要完整解压，不能只复制 EXE。当前源码包同时包含 1.03 控制台与研究 Skill；历史 v1.01 源码保留供查阅。
 
 ### 下载选择指南
 
 | 你的用途 | 下载文件 | 什么时候需要 |
 | --- | --- | --- |
-| **Memorive 主程序 · 推荐** | [Memorive-Setup-1.02.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Setup-1.02.01-x64.exe) | 用于安装桌面应用。阅读文献、研究问答、管理会话，从这个文件开始。 |
-| 校验下载文件 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/SHA256SUMS.txt) | 小型校验文本，用于核对下载文件是否完整。 |
+| **Memorive 主程序 · 推荐** | [Memorive-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe) | 用于安装桌面应用。阅读文献、研究问答、管理会话，从这个文件开始。 |
+| 校验下载文件 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/SHA256SUMS.txt) | 小型校验文本，用于核对下载文件是否完整。 |
 | Obsidian 配套插件 · 可选 | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | 连接 Obsidian 笔记。需要同时安装 Obsidian 与 Memorive。 |
 | Zotero 配套插件 · 可选 | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | 连接 Zotero 文献条目与批注。需要同时安装 Zotero 与 Memorive。 |
-| 测试控制台安装版 · 可选 | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | 适合希望修改、测试或排查 Memorive 的用户，运行安装向导即可。 |
-| 测试控制台便携版 · 另一种选择 | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | 同一个测试工具，无需安装；完整解压后使用，内含指南与声明。与控制台安装版二选一。 |
-| 测试控制台单独 EXE | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | 适合已有指南和声明的进阶使用者；初次使用建议选安装版或便携版。 |
-| 当前桌面源码 · v1.02 | [Memorive-1.02.01-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-desktop-source.zip) | 当前桌面程序的对应源码，用于阅读或自行构建，不是安装包。 |
-| 历史项目源码 · v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 历史主程序、配套插件与独立控制台源码；当前桌面源码请选择上方 v1.02。 |
+| 测试控制台安装版 · 可选 | [Memorive-Test-Console-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Setup-1.03-x64.exe) | 适合希望修改、测试或排查 Memorive 的用户，运行安装向导即可。 |
+| 测试控制台便携版 · 另一种选择 | [Memorive-Test-Console-Portable-1.03-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Portable-1.03-x64.zip) | 同一个测试工具，无需安装；完整解压后使用，内含指南与声明。与控制台安装版二选一。 |
+| 测试控制台单独 EXE | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console.exe) | 适合已有指南和声明的进阶使用者；初次使用建议选安装版或便携版。 |
+| 当前桌面源码 · v1.03 | [Memorive-1.03-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip) | 当前桌面程序的对应源码，用于阅读或自行构建，不是安装包。 |
+| 历史项目源码 · v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 历史主程序、配套插件与独立控制台源码；当前桌面源码请选择上方 v1.03。 |
 | 第三方对应源码 · 开发/再分发用途 | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | 打包依赖的对应源码与索引，约 592 MB。日常安装和使用 Memorive 无需下载。 |
 
-GitHub 还会自动列出 **Source code (zip)** 和 **Source code (tar.gz)**，它们是源码快照。普通用户请选择 **Memorive-Setup-1.02.01-x64.exe** 安装程序。
+GitHub 还会自动列出 **Source code (zip)** 和 **Source code (tar.gz)**，它们是源码快照。普通用户请选择 **Memorive-Setup-1.03-x64.exe** 安装程序。
 
 ### 安装
 
 1. 系统需为 **Windows 10 22H2 或更新版本／Windows 11，x64**。从本项目的 Releases 获取安装包及同批 `SHA256SUMS.txt`。
-2. 如需校验文件，在 PowerShell 中运行 `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.02.01-x64.exe`，将结果与校验文件核对。
+2. 如需校验文件，在 PowerShell 中运行 `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.03-x64.exe`，将结果与校验文件核对。
 3. 打开安装向导，在“系统检查”准备缺少的组件：.NET Framework 4.8、WebView2 Runtime、Visual C++ v14 **x64**（14.51.36247 或更新版本）。只按界面提示安装缺失项，再返回重新检查。程序自带 Python，日常使用无需另装。
 4. 分别选择程序目录和数据目录，完成安装。首次启动是空白配置；到“设置 → 文档与外部查看”核对工作区及生成产物的位置。
 
@@ -142,7 +136,7 @@ flowchart LR
 
 费用面板区分实际、估算与未知值；公开榜单价格和订阅费用不能直接当作一次任务的实扣。模型回答与引用需要使用者核对。
 
-当前主程序版本为 v1.02.01。更新索引已使用生产密钥签名；程序和安装器仍没有 Windows Authenticode 证书，请核对发布校验值。本轮发布准备进行了代码、包身份与签名核对，没有重新执行全量回归。OCR、模型回答与引用支持程度仍需人工复核。
+当前主程序版本为 v1.03。更新索引已使用生产密钥签名；程序和安装器仍没有 Windows Authenticode 证书，请核对发布校验值。本轮发布准备进行了代码、包身份与签名核对，没有重新执行全量回归。OCR、模型回答与引用支持程度仍需人工复核。
 
 ## 自己优化 Memorive，并验证修改
 
@@ -180,10 +174,14 @@ Memorive 是由 AI 编程工具开发的项目。项目自身的代码由 **Open
 
 ## 配套插件
 
+[memo-research Skill v0.2.0](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Research-Skill-0.2.0.zip) · [Test Console 1.03 source](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Source-1.03.zip)
+
 Obsidian 笔记与 Zotero 文献可通过配套插件连接 Memorive，支持预览导入、证据检索、问答及结果回写。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.md).
 
 ## 历史版本简述
 
+**[v1.02.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02.01)** — 设置保存与版本识别修复。
+
 **[v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02)** — 加入文献发现、AI近况、自定义CLI、多语言生成、问答归档及签名更新支持。
 
-**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 建立了文献处理、研究问答、来源记录和模型连接的桌面研究流程，并提供配套插件与可选测试控制台。原版本保留供历史查阅；当前主程序请使用上方的 v1.02.01。
+**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 建立了文献处理、研究问答、来源记录和模型连接的桌面研究流程，并提供配套插件与可选测试控制台。原版本保留供历史查阅；当前主程序请使用上方的 v1.03。

@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 from common import (HEADER, OPERATIONS, MESSAGE_KINDS, EVENT_KINDS, TEST_PACK_ID,
     build_suite_catalog, encode, identifier, safe_test_cases)
 from manager import build_info, discover_builds
+from localization import RESOURCES
 
 
 def make_server(manager, port=8877, show_window=None, close_window=None):
@@ -48,8 +49,17 @@ def make_server(manager, port=8877, show_window=None, close_window=None):
             if route in assets:
                 path, mime = assets[route]
                 return self.send(200, path.read_bytes(), mime)
+            if route == '/review_ui.js':
+                return self.send(200, (root / 'review_ui.js').read_bytes(), 'text/javascript; charset=utf-8')
+            if route == '/i18n.js':
+                return self.send(200, (root / 'i18n.js').read_bytes(), 'text/javascript; charset=utf-8')
+            if route == '/i18n-data.js':
+                value = {'locale': manager.language, 'messages': RESOURCES[manager.language]}
+                return self.send(200, ('window.CONSOLE_I18N=' + json.dumps(value, ensure_ascii=True) + ';').encode(), 'text/javascript; charset=utf-8')
             if route == '/api/snapshot':
                 return self.send(200, manager.snapshot())
+            if route == '/api/review':
+                return self.send(200, manager.release_review())
             if route == '/api/catalog':
                 return self.send(200, {'builds': discover_builds(), 'operations': OPERATIONS,
                     'message_kinds': MESSAGE_KINDS, 'event_kinds': EVENT_KINDS,
@@ -111,6 +121,12 @@ def make_server(manager, port=8877, show_window=None, close_window=None):
                     if value:
                         raise ValueError('END_FIELDS_INVALID')
                     result = manager.end()
+                elif self.path == '/api/review/check':
+                    result = manager.update_review_check(value)
+                elif self.path == '/api/review/export':
+                    result = manager.export_review(value)
+                elif self.path == '/api/preferences':
+                    result = manager.set_preferences(value)
                 elif self.path == '/api/commands':
                     result = manager.submit(value)
                 elif self.path == '/api/suites':

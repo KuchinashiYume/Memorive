@@ -40,7 +40,7 @@ def _vm_shaped_data_root(tmp_path: Path) -> Path:
         / "profile"
         / "inbox_source"
         / "console-staged"
-        / ".console-import-0000000000000000-00000000.tmp"
+        / "console-import-0000000000000000-00000000"
         / "00"
         / FIXTURE_NAME
     )
@@ -55,7 +55,7 @@ def _vm_shaped_data_root(tmp_path: Path) -> Path:
             / "profile"
             / "inbox_source"
             / "console-staged"
-            / ".console-import-0000000000000000-00000000.tmp"
+            / "console-import-0000000000000000-00000000"
             / "00"
             / FIXTURE_NAME
         )

@@ -60,7 +60,22 @@ class Attachments:
                 if io_path.stat().st_size>64*1024*1024:raise ValueError('SOURCE_TOO_LARGE')
                 raw=io_path.read_bytes()
                 if not raw:raise ValueError('ATTACHMENT_EMPTY')
+                if path.suffix.lower()=='.json':
+                    candidate=json.loads(raw.decode('utf-8-sig'))
+                    schema=candidate.get('schema','') if isinstance(candidate,dict) else ''
+                    if isinstance(schema,str) and schema.startswith('memo-source/'):
+                        result=self.w.skill.import_source(thread_id,path)
+                        items.append(dict({k:result[k] for k in ('id','status','reused','source_sha256','conversion_called','warnings')},name=path.name));continue
+                    if isinstance(schema,str) and schema.startswith('memo-research-answer/'):
+                        if schema!='memo-research-answer/1':raise ValueError('SKILL_ANSWER_SCHEMA_UNSUPPORTED')
+                        binding=self.store.get('handoff',candidate.get('handoff_id',''))
+                        if not binding or binding['thread_id']!=thread_id:raise ValueError('HANDOFF_THREAD_MISMATCH')
+                        result=self.w.skill.answer(**{k:v for k,v in candidate.items() if k!='schema'})
+                        items.append(dict(name=path.name,status='READY',answer_return=result));continue
                 content_hash=digest(raw);identity='art_'+digest([thread['project'],'attachment',thread_id if thread['temporary'] else '',content_hash])[:32]
+                reused=self.w.skill.reuse_original(thread_id,content_hash)
+                if reused:
+                    items.append(dict(reused,name=path.name));continue
                 dest=self.root/(content_hash+path.suffix.lower())
                 io_dest=windows_io_path(dest)
                 if io_dest.exists():
@@ -81,7 +96,7 @@ class Attachments:
                     if len(ids)>32:raise ValueError('ATTACHMENT_SCOPE_LIMIT')
                     self.store.put('thread',thread_id,thread['project'],dict(fresh,artifact_ids=ids,excluded_artifact_ids=[i for i in fresh.get('excluded_artifact_ids',[]) if i!=identity]),db=db)
                 items.append({'id':identity,'name':path.name,'status':'READY' if reusable else 'QUEUED','reused':reusable})
-            except (ValueError,OSError) as exc:
+            except (ValueError,OSError,TypeError,UnicodeError) as exc:
                 items.append({'name':Path(str(value)).name,'status':'ERROR','error':str(exc)[:140]})
         job=self.store.put('attachment_job',job_id,thread['project'],{'thread_id':thread_id,'project':thread['project'],
             'profile_ref':ref,'status':'QUEUED','items':items,'created_at':now()})

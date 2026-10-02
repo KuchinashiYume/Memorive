@@ -20,6 +20,8 @@ from common import (EXPRESSION_EVENT_IDS, OPERATIONS, PROTOCOL, build_suite_cata
     build_test_attachment, cleanup_failure, delete_session, digest, encode,
     identifier, now, read_json, validate_command, write_json)
 from process_owner import OwnedProcess, process_identity
+from release_review import CHECKS, STATUSES, review_document, closed_review, markdown
+from localization import LANGUAGES, default_language, translate
 
 DISCONNECT_FAILURE_THRESHOLD = 3
 RECOVERY_SUCCESS_THRESHOLD = 2
@@ -259,6 +261,11 @@ def discover_builds():
 class Manager:
     def __init__(self, root):
         self.root = Path(root).resolve()
+        try:
+            saved = read_json(self.root / 'console-preferences.json').get('language')
+        except (OSError, ValueError, AttributeError):
+            saved = None
+        self.language = saved if saved in LANGUAGES else default_language()
         for name in ['sessions', 'owned_sessions', 'receipts', 'monitor']:
             (self.root / name).mkdir(parents=True, exist_ok=True)
         self.lock = threading.RLock()
@@ -284,6 +291,9 @@ class Manager:
         self.suites = {}
         self.active_suite_id = None
         self.latest_review_bundle = None
+        self.review_checks = {}
+        self.review_archive = None
+        self.review_export_error = None
         self.event_cursor = 0
         self.epoch = 0
         self._next_bridge_probe_at = 0.0
@@ -340,7 +350,68 @@ class Manager:
                 'last_cleanup': self.last_cleanup, 'cleanup_error': self.cleanup_error,
                 'connection_monitor': self.connection_monitor,
                 'native_projection_monitor': self.native_projection_monitor,
-                'monitor_read_only': True})
+                'monitor_read_only': True, 'release_review': self.release_review(),
+                'review_export_error': self.review_export_error})
+
+    def release_review(self):
+        with self.lock:
+            if not self.session and self.review_archive:
+                return closed_review(self.review_archive, self.last_cleanup, self.state)
+            report = review_document({'session': self.session, 'state': self.state,
+                'supported_operations': self.capabilities,
+                'business_operations_enabled': bool(self.session) and
+                    (not self.console_access_required or self.console_access_enabled),
+                'suites': list(self.suites.values()), 'commands': list(self.commands.values())}, self.review_checks)
+            if self.state == 'CLEANUP_FAILED':
+                report['cleanup_status'] = 'CLEANUP_FAILED'
+            return report
+
+    def set_preferences(self, value):
+        if set(value) != {'language'} or value.get('language') not in LANGUAGES:
+            raise ValueError('CONSOLE_LANGUAGE_INVALID')
+        with self.lock:
+            write_json(self.root / 'console-preferences.json', {'language': value['language']})
+            self.language = value['language']
+            return {'language': self.language}
+
+    def update_review_check(self, value):
+        with self.lock:
+            if (set(value) != {'session_id', 'check_id', 'status'}
+                    or value.get('check_id') not in {row[0] for row in CHECKS}
+                    or value.get('status') not in STATUSES):
+                raise ValueError('REVIEW_FIELDS_INVALID')
+            report = self.release_review()
+            if not report['manual_editable'] or value['session_id'] != report['session_id']:
+                raise ValueError('REVIEW_SESSION_NOT_EDITABLE')
+            previous = self.review_checks.copy()
+            self.review_checks[value['check_id']] = value['status']
+            try:
+                self.export_review({})
+            except Exception:
+                self.review_checks = previous
+                raise
+            return self.release_review()
+
+    def export_review(self, value):
+        if value:
+            raise ValueError('REVIEW_EXPORT_FIELDS_INVALID')
+        with self.lock:
+            report = self.release_review()
+            if not report['session_id']:
+                raise ValueError('REVIEW_SESSION_REQUIRED')
+            report['report_language'] = self.language
+            for row in report['manual_checks']:
+                for key in ('title', 'instruction'):
+                    row[key] = translate(row[key], self.language)
+            report['limits'] = [translate(value, self.language) for value in report['limits']]
+            directory = self.root / 'receipts' / 'reviews'
+            directory.mkdir(parents=True, exist_ok=True)
+            stem = report['session_id']
+            json_path, md_path = directory / (stem + '.json'), directory / (stem + '.md')
+            write_json(json_path, report)
+            md_path.write_text(markdown(report, self.language), encoding='utf-8')
+            self.review_export_error = None
+            return {'json_path': str(json_path), 'markdown_path': str(md_path), 'report': report}
 
     @staticmethod
     def _error_code(error):
@@ -703,6 +774,7 @@ class Manager:
                 self.test_attachment = build_test_attachment()
                 self.suites, self.active_suite_id = {}, None
                 self.latest_review_bundle = None
+                self.review_checks, self.review_archive, self.review_export_error = {}, None, None
                 session_id = 'review-' + datetime.now().strftime('%Y%m%dT%H%M%S') + '-' + uuid.uuid4().hex[:12]
                 data_root = self.root / 'sessions' / session_id
                 data_root.mkdir(exist_ok=False)
@@ -928,6 +1000,8 @@ class Manager:
                 'session_id': self.session['session_id'],
                 'build_label': self.session['build']['label'],
                 'build_sha256': self.session['build_sha256'],
+                'reference_only': self.session['mode'] == 'reference',
+                'evidence_scope': 'REFERENCE_PROTOCOL' if self.session['mode'] == 'reference' else 'APPLICATION_BRIDGE',
                 'created_at': now(),
                 'automatic_execution': False,
                 'model_calls_allowed': False,
@@ -1082,6 +1156,9 @@ class Manager:
             'automatic_execution': False,
             'model_calls_allowed': False,
             'business_content_recorded': False,
+            'reference_only': suite.get('reference_only', True),
+            'evidence_scope': suite.get('evidence_scope', 'UNKNOWN'),
+            'release_verdict': 'NOT_ASSESSED',
             'summary': deepcopy(suite['summary']),
             'cases': deepcopy(suite['cases']),
             'cleanup': deepcopy(suite.get('cleanup', {'status': 'PENDING_SESSION_CLOSE'})),
@@ -1091,6 +1168,7 @@ class Manager:
             f"- Suite: `{receipt['suite_id']}` / `{receipt['preset_id']}`",
             f"- Build: `{receipt['build_label']}` / `{receipt['build_sha256']}`",
             f"- Verdict: **{receipt['verdict']}**",
+            f"- Evidence scope: `{receipt['evidence_scope']}`; release acceptance: `NOT_ASSESSED`",
             f"- Cases: {receipt['summary']['passed']} PASS / {receipt['summary']['failed']} FAIL / {receipt['summary']['skipped']} SKIP / {receipt['summary']['total']} TOTAL",
             '- Model calls: `DISABLED`', '- Inbox automatic execution: `DISABLED`',
             f"- Cleanup: `{receipt['cleanup']['status']}`", '',
@@ -1461,6 +1539,7 @@ class Manager:
                         self._write_suite_review(suite)
                     self.active_suite_id = None
                     self.last_cleanup = receipt
+                    self.review_archive = self.release_review()
                     self.session, self.native, self.commands, self.events, self.capabilities = None, {}, {}, [], []
                     self.expression_catalog, self.expression_state = {}, {}
                     self.console_access_required = False
@@ -1472,6 +1551,10 @@ class Manager:
                     self._reset_native_projection_monitor('NOT_CONNECTED')
                     self._reset_expression_monitor('NOT_CONNECTED')
                     self.cleanup_error = None
+                    try:
+                        self.export_review({})
+                    except Exception as export_error:
+                        self.review_export_error = self._error_code(export_error)
                     self.publish()
                 return receipt
             except Exception as error:
@@ -1487,6 +1570,10 @@ class Manager:
                         if suite['session_id'] == session['session_id']:
                             suite['cleanup'] = {'status': 'CLEANUP_FAILED', **self.cleanup_error}
                             self._write_suite_review(suite)
+                    try:
+                        self.export_review({})
+                    except Exception as export_error:
+                        self.review_export_error = self._error_code(export_error)
                     self.publish()
                 raise RuntimeError('CLEANUP_FAILED') from error
 

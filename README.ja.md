@@ -6,29 +6,23 @@ Memorive（略称 memo）は、個人の学習・研究向けの Windows デス�
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-### [⬇ Memorive Windows 版をダウンロード](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Setup-1.02.01-x64.exe)
+### [⬇ Memorive Windows 版をダウンロード](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe)
 
-**v1.02.01 · Windows 10 22H2 / Windows 11 · x64 · 約 205 MB**
+**v1.03 · Windows 10 22H2 / Windows 11 · x64 · 約 205 MB**
 
 **初めて使う方は、上の本体インストーラーを選んでください。** プラグインとテストコンソールは、必要に応じて追加できます。
 
 [どのファイルを選べばよいですか？](#ダウンロードガイド) · [ダウンロード](https://github.com/KuchinashiYume/Memorive/releases) · [利用ガイド](memorive_desktop/product/desktop/help/ja-JP/manual-text.md) · [設計文書](memorive_desktop/product/desktop/help/ja-JP/design.md) · [問題の報告](https://github.com/KuchinashiYume/Memorive/issues)
 
-## v1.02.01 の更新内容
+## v1.03 の更新内容
 
-### 機能の更新：v1.01 → v1.02
+### 機能更新：v1.02.01 → v1.03
 
-v1.02 では主張の裏付けと数値の確認、研究知識の再利用、回答スタイル、再試行の分岐、版の切り替えを改善しました。30日間開かれていない会話をアーカイブでき、一覧は必要な情報から読み込み、進捗は実際の処理ノードに対応します。
+研究Q&Aで memo-research Skill が準備した原本と変換テキストを再利用し、現在の質問に沿った読解・比較・引用確認を行えます。出典と範囲を確認した回答を元の会話へ戻し、追加質問を続けられます。Skill単体の読解やAgentによる複数文献の比較にも対応。テストコンソールには三言語、レビュー・結果画面、共有用要約を追加しました。
 
-文献探索は最新の進展と関連性の高い文献を分け、重複を処理し、書誌情報と出典リンクを保存します。ホームと AI 近況に研究への入口と出典付きレポートを用意しました。カスタム CLI 接続、中国語・英語・日本語の画面と生成内容に対応し、原資料と保存済み回答の言語は保持します。解析の出典位置情報を充実させ、3言語のインストール、更新確認、署名検証付きファイル単位の差分ダウンロードを追加しました。
+1.02.01の設定保存と三段階版番号の修正を継承します。研究Skillは質問に沿った読解と出典再利用を補助するもので、低遅延や全処理の代替性能は未確認です。ソース統合の確認と実Agentによる2回の返却を記録しています。配布物の確認は別途記録し、科学的品質・全機能・クリーン環境・オンライン更新の全経路の合格を意味しません。
 
-### 今回の修正：v1.02 → v1.02.01
-
-保存済みの無効なディレクトリによってモデル変更が保存できない問題と、一つの設定エラーで他の保存が中断される問題を修正。設定の取り込みを改善し、新しいショートカット名は20文字までとします。既存の長い名前は保持します。
-
-v1.02.01 は v1.02 の修正版です。v1.01 または v1.02 から初めて更新する際は、データをバックアップし、本版のインストーラーまたは完全なポータブル版を使用してください。旧アップデーターは3段の版番号を認識しません。差分 ZIP を手動で上書きしないでください。本版は今後のアプリ内更新に向けて3段の版番号に対応します。
-
-変更のない修正コードについて、設定・取り込みの17項目の確認が成功しました。本版では版番号の解析を追加し、インストーラーを再構築しています。全回帰テスト、新 EXE の設定保存画面、オンライン更新の全経路は再検証していません。Test Console と連携ツールの版は変更しません。
+更新前に資料と設定をバックアップし、インストーラーまたは完全なポータブル版を使用してください。差分ZIPを手動で上書きしないでください。コンソールは別途インストールまたは完全に展開し、初回接続はMemo側の許可が必要です。コンソールの言語変更はMemoの言語やモデル呼出し許可を変更しません。
 
 ## ホーム画面
 
@@ -66,29 +60,29 @@ v1.02.01 は v1.02 の修正版です。v1.01 または v1.02 から初めて更
 
 ## インストールと使い始め方
 
-[完全なポータブル版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Portable-1.02.01-x64.zip) · [3 言語の PDF・Markdown・ローカルページ](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-Documentation.zip) · [v1.02.01 デスクトップ対応ソース](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-desktop-source.zip)。ポータブル版はフォルダー全体を展開してください。下記の v1.01 プロジェクトソースには変更のないコンソールと連携ツールが含まれます。
+[完全なポータブル版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Portable-1.03-x64.zip) · [3 言語の PDF・Markdown・ローカルページ](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-Documentation.zip) · [v1.03 デスクトップ対応ソース](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip)。ポータブル版はフォルダー全体を展開してください。現在のソースには Test Console 1.03 と研究 Skill が含まれます。v1.01 は過去の参照用に保持します。
 
 ### ダウンロードガイド
 
 | 用途 | ダウンロード | 選ぶ目安 |
 | --- | --- | --- |
-| **Memorive 本体・おすすめ** | [Memorive-Setup-1.02.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-Setup-1.02.01-x64.exe) | デスクトップアプリをインストールします。文献の閲覧、研究 Q&A、会話管理には、このファイルを選んでください。 |
-| ダウンロードの確認 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/SHA256SUMS.txt) | 取得したファイルの完全性を確認するための、小さなチェックサム一覧です。 |
+| **Memorive 本体・おすすめ** | [Memorive-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe) | デスクトップアプリをインストールします。文献の閲覧、研究 Q&A、会話管理には、このファイルを選んでください。 |
+| ダウンロードの確認 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/SHA256SUMS.txt) | 取得したファイルの完全性を確認するための、小さなチェックサム一覧です。 |
 | Obsidian プラグイン・任意 | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | Obsidian のノートを連携します。Obsidian と Memorive が必要です。 |
 | Zotero プラグイン・任意 | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | Zotero の文献アイテムや注釈を連携します。Zotero と Memorive が必要です。 |
-| テストコンソール・インストール版（任意） | [Memorive-Test-Console-Setup-1.01-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Setup-1.01-x64.exe) | Memorive の改良、テスト、問題の調査に使うツールです。インストールして使いたい方はこちら。 |
-| テストコンソール・ポータブル版 | [Memorive-Test-Console-Portable-1.01-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console-Portable-1.01-x64.zip) | 同じツールをインストールせずに使えます。ガイドと権利表記を含む ZIP 全体を展開してください。インストール版との二者択一です。 |
-| テストコンソール・実行ファイルのみ | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Test-Console.exe) | ガイドと権利表記をすでにお持ちの方向けです。初めての方にはインストール版かポータブル版をおすすめします。 |
-| 現在のデスクトップソース・v1.02 | [Memorive-1.02.01-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02.01/Memorive-1.02.01-desktop-source.zip) | 現在のデスクトップ版に対応するソースです。閲覧・ビルド用で、インストーラーではありません。 |
-| 過去のプロジェクトソース・v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 過去の本体、連携ツール、独立した Test Console のソースです。現在のデスクトップ版には上記 v1.02 を選んでください。 |
+| テストコンソール・インストール版（任意） | [Memorive-Test-Console-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Setup-1.03-x64.exe) | Memorive の改良、テスト、問題の調査に使うツールです。インストールして使いたい方はこちら。 |
+| テストコンソール・ポータブル版 | [Memorive-Test-Console-Portable-1.03-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Portable-1.03-x64.zip) | 同じツールをインストールせずに使えます。ガイドと権利表記を含む ZIP 全体を展開してください。インストール版との二者択一です。 |
+| テストコンソール・実行ファイルのみ | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console.exe) | ガイドと権利表記をすでにお持ちの方向けです。初めての方にはインストール版かポータブル版をおすすめします。 |
+| 現在のデスクトップソース・v1.03 | [Memorive-1.03-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip) | 現在のデスクトップ版に対応するソースです。閲覧・ビルド用で、インストーラーではありません。 |
+| 過去のプロジェクトソース・v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 過去の本体、連携ツール、独立した Test Console のソースです。現在のデスクトップ版には上記 v1.03 を選んでください。 |
 | 第三者コンポーネントのソース・開発/再配布用 | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | 同梱する依存コンポーネントの対応ソースと索引（約 592 MB）です。通常のインストールや利用には不要です。 |
 
-GitHub が自動で追加する **Source code (zip)** と **Source code (tar.gz)** もソースのスナップショットです。通常の利用には **Memorive-Setup-1.02.01-x64.exe** を選んでください。
+GitHub が自動で追加する **Source code (zip)** と **Source code (tar.gz)** もソースのスナップショットです。通常の利用には **Memorive-Setup-1.03-x64.exe** を選んでください。
 
 ### インストール
 
 1. **Windows 10 22H2 以降、または Windows 11（x64）**が対象です。本プロジェクトの Releases からインストーラーと同じ配布版の `SHA256SUMS.txt` を取得します。
-2. ファイルを確認する場合は PowerShell で `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.02.01-x64.exe` を実行し、チェックサムと照合します。
+2. ファイルを確認する場合は PowerShell で `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.03-x64.exe` を実行し、チェックサムと照合します。
 3. インストーラーのシステムチェックで、不足している .NET Framework 4.8、WebView2 Runtime、Visual C++ v14 **x64**（14.51.36247 以降）を準備し、再確認します。必要と表示された項目に従ってください。Python は同梱されています。
 4. プログラムとデータの保存先を選んでインストールします。初回は空の設定で始まるので、「設定 → 文書と外部表示」で作業場所と生成物の保存先を確認します。
 
@@ -142,7 +136,7 @@ flowchart LR
 
 費用記録は実額・推定・不明を区別します。公開価格やサブスクリプション料金は、個々のタスクの請求額とは異なります。モデルの回答と引用は利用者自身で確認します。
 
-現在のアプリは v1.02.01 です。更新インデックスには正式配布用鍵による署名がありますが、アプリとインストーラーには Windows Authenticode 証明書がありません。配布チェックサムをご確認ください。今回の公開準備ではコード・パッケージの同一性・署名を確認しましたが、全回帰テストは再実行していません。OCR、モデルの回答と引用の裏付けは引き続き人による確認が必要です。
+現在のアプリは v1.03 です。更新インデックスには正式配布用鍵による署名がありますが、アプリとインストーラーには Windows Authenticode 証明書がありません。配布チェックサムをご確認ください。今回の公開準備ではコード・パッケージの同一性・署名を確認しましたが、全回帰テストは再実行していません。OCR、モデルの回答と引用の裏付けは引き続き人による確認が必要です。
 
 ## Memorive を改善し、変更を確かめる
 
@@ -180,10 +174,14 @@ Memorive は AI コーディングツールで開発されたプロジェクト�
 
 ## 連携プラグイン
 
+[memo-research Skill v0.2.0](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Research-Skill-0.2.0.zip) · [Test Console 1.03 source](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Source-1.03.zip)
+
 Obsidian のノートと Zotero の文献を接続し、取り込みのプレビュー、根拠検索、質問、結果の書き戻しを利用できます。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.ja.md).
 
 ## 過去のバージョン
 
+**[v1.02.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02.01)** — 設定保存と版番号認識の修正。
+
 **[v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02)** — 文献探索、AI近況、カスタムCLI、多言語生成、会話アーカイブ、署名付き更新に対応しました。
 
-**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 は文献処理、研究 Q&A、出典付き記録、モデル接続を中心とするデスクトップ研究環境と任意の連携ツール・Test Console を提供しました。過去の記録として公開を継続しています。現在のアプリには上記の v1.02.01 をお使いください。
+**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 は文献処理、研究 Q&A、出典付き記録、モデル接続を中心とするデスクトップ研究環境と任意の連携ツール・Test Console を提供しました。過去の記録として公開を継続しています。現在のアプリには上記の v1.03 をお使いください。

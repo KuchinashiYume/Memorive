@@ -107,7 +107,7 @@ def _suite_definitions():
         + ['task-pause-imported', 'task-cancel-stalled', 'report-daily', 'report-weekly', 'report-monthly', 'inbox-import'])
     return {
         'full_safe': {
-            'title': '一键全量回归',
+            'title': '安全接口回归',
             'description': '消息、事件、报告、导入、状态操作与诊断',
             'case_ids': full,
             'recommended': True,

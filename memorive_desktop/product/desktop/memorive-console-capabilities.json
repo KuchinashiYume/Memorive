@@ -1,7 +1,7 @@
 {
   "schema_version": "Memorive-ConsoleBuildCapabilities-v1",
   "protocol_version": "1.0",
-  "package_id": "v1.01",
+  "package_id": "Memorive-1.03-release002",
   "launch_transport": "ENV_V1",
   "session_mode": "EPHEMERAL_ONLY",
   "authorization": {

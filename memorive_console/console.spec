@@ -8,6 +8,9 @@ clr_datas, clr_binaries, clr_hidden = collect_all('clr_loader')
 datas = [
     ('source/index.html', '.'),
     ('source/app.js', '.'),
+    ('source/review_ui.js', '.'),
+    ('source/i18n.js', '.'),
+    ('source/locales.json', '.'),
     ('source/app.css', '.'),
     ('source/bridge.schema.json', '.'),
     ('assets/memorive_test_console_icon.png', '.'),

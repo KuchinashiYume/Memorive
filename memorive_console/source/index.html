@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Memorive 测试控制台</title>
   <link rel="stylesheet" href="/app.css">
+  <script src="/i18n-data.js" defer></script>
+  <script src="/i18n.js" defer></script>
   <script src="/app.js" defer></script>
+  <script src="/review_ui.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -23,13 +26,13 @@
         <button class="nav" data-view="expressions"><span>◉</span><b>桌宠 / 组件</b></button>
         
         
-        <button class="nav" data-view="records"><span>≡</span><b>测试结果</b></button>
+        <button class="nav" data-view="records"><span>≡</span><b>审核与结果</b></button>
         <details class="nav-more"><summary>开发工具</summary><button class="nav" data-view="manual"><span>⌘</span><b>单项验证</b></button><button class="nav" data-view="contract"><span>↗</span><b>接入详情</b></button></details>
       </nav>
       <div class="sidebar-foot">
         <span><i class="status-dot"></i><b id="cleanup-label">无待清理数据</b></span>
         <small id="cleanup-detail">只保留无正文回执</small>
-        <code>v1.01 · TEST ONLY</code>
+        <code>v1.02 · TEST CONSOLE</code>
       </div>
     </aside>
 
@@ -41,6 +44,14 @@
           <p id="page-subtitle">连接、能力与安全边界</p>
         </div>
         <div class="header-actions">
+          <div class="language-control">
+            <div id="languageOptions" class="language-options" role="group" aria-label="切换界面语言" hidden data-no-translate>
+              <button data-console-language="zh-CN" lang="zh-CN">简体中文</button>
+              <button data-console-language="en-US" lang="en-US">English</button>
+              <button data-console-language="ja-JP" lang="ja-JP">日本語</button>
+            </div>
+            <button id="switchLanguage" class="language-toggle" aria-label="切换界面语言" title="切换界面语言" aria-expanded="false" aria-controls="languageOptions"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></button>
+          </div>
           <button id="connection" class="badge" data-jump="overview" title="查看连接" aria-label="查看连接状态">等待版本</button>
           
         </div>
@@ -275,6 +286,17 @@
         </section>
 
         <section id="records-view" class="view" data-view-panel="records" hidden>
+          <article class="release-review-panel">
+            <div class="panel-head"><div><span class="eyebrow">VERSION REVIEW</span><h2>本轮审核</h2></div><button id="export-review" class="primary" disabled>导出审核摘要</button></div>
+            <p id="review-source" class="panel-description">连接版本后记录本轮检查。</p>
+            <div class="review-overview">
+              <div><span>自动接口测试</span><b id="review-auto-summary">尚未运行</b><small>消息、任务事件、报告与导入</small></div>
+              <div><span>人工界面检查</span><b id="review-manual-summary">0 / 9 项已检查</b><small>单独记录，不计入接口通过率</small></div>
+            </div>
+            <details class="review-checklist"><summary>检查新版功能与界面 <span id="review-manual-gate">等待连接</span></summary><div id="review-checks"></div></details>
+            <p class="review-boundary">接口通过只代表对应指令回执通过。发布结论仍需人工审核。</p>
+            <div id="review-export-result" hidden><label for="review-export-path">审核文件路径（可交给 Codex）</label><input id="review-export-path" readonly><button id="copy-release-review" class="secondary">复制路径</button></div>
+          </article>
           <details class="record-statistics"><summary>记录统计</summary><div class="metrics">
             <div><b id="suite-count">0</b><span>套件</span></div>
             <div><b id="command-count">0</b><span>指令</span></div>

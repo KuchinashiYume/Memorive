@@ -20,7 +20,7 @@ SCHEMAS={
     'memo.capabilities':spec({}),
     'memo.projects':spec({}),
     'memo.connections':spec({'project':TEXT},['project']),
-    **{k:v for k,v in RESEARCH_SCHEMAS.items() if k in {'memo.search','memo.read_evidence','memo.prepare_tension','memo.submit_draft'}},
+    **{k:v for k,v in RESEARCH_SCHEMAS.items() if k in {'memo.search','memo.read_evidence','memo.prepare_tension','memo.submit_draft','memo.skill_context','memo.skill_answer'}},
     'memo.import_preview':spec({'connection_id':TEXT,'paths':IDS,'items':{'type':'array','items':{'type':'object'},'maxItems':2000},'bibliography':TEXT}),
     'memo.import_commit':spec({'connection_id':TEXT,'preview_id':TEXT,'preview_hash':TEXT,'selected_ids':IDS},['connection_id','preview_id','preview_hash']),
     'memo.outputs':spec({'connection_id':TEXT,'source_id':TEXT},['connection_id','source_id']),
@@ -35,6 +35,7 @@ SCHEMAS={
 SCHEMAS['memo.import_preview']['required']=['connection_id']
 METHOD_SCOPE={m:'read' for m in SCHEMAS}
 METHOD_SCOPE.update({'memo.events':'events','memo.import_preview':'import','memo.import_commit':'import',
+    'memo.skill_answer':'draft',
     'memo.submit_draft':'draft','memo.export':'export','memo.writeback_prepare':'writeback',
     'memo.writeback_ack':'writeback','memo.job_submit':'automation','memo.job_cancel':'automation'})
 
@@ -166,7 +167,7 @@ class DeveloperAPI:
                 config=copy.deepcopy(self.ws.weights.settings(p['project'])['config'])
                 config.update(semantic_enabled=False,semantic_profile_ref=None,embedding_profile_ref=None,rule_enrichment=False)
             return self.ws.index.search(**p,policy_config=config)
-        if method in {'memo.read_evidence','memo.prepare_tension','memo.submit_draft'}:return self.ws.call(method,p)
+        if method in {'memo.read_evidence','memo.prepare_tension','memo.submit_draft','memo.skill_context','memo.skill_answer'}:return self.ws.call(method,p)
         if method=='memo.events':return self.events(c,**p)
         if method in {'memo.job_status','memo.job_cancel'}:
             a=self.own_job(c,p['job_id'])

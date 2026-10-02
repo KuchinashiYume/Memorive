@@ -2,7 +2,7 @@
 
 Follow this guide from your first source to a research judgment you can trace back to the original. Read it in order for setup, or go straight to the task at hand. Screens show empty states or synthetic examples; their answers and filenames illustrate controls, not research findings. Lists, prices, and connection states will reflect your own sources and settings.
 
-v1.02.01 documentation · 2026-09-30. Update identifier: 1.02.01; the feature scope remains v1.02. Earlier illustrations explain common controls. This revision does not claim a new full acceptance run.
+v1.03 documentation · 2026-10-02. Adds the research Skill and Q&A integration. Existing screenshots retain their actual version; see release notes for validation scope.
 
 ## 01 Understand the workspace and where research material goes
 
@@ -212,6 +212,8 @@ Document processing retains structured paragraphs, table cells and page or line 
 A stored location supports inspection, not a guarantee of perfect OCR or parsing. Reprocessing creates a new version. Earlier answers remain linked to the version they used rather than silently adopting new paragraph locations.
 
 ## 09 Research Chat: choose the project, sources, and model
+
+Research Skill: ask an agent to use the bundled memo-research Skill when an unfamiliar paper is needed for the current question. Read and draft an answer, then check the source passages supporting key claims; revise unsupported claims or state uncertainty. Independent runs retain the original, RawMD and source.json. Add source.json through the existing Q&A attachment picker to validate and reuse sources without conversion. Continue through the current conversation handoff or scoped developer interface. Import a memo-research-answer/1 receipt in that same conversation; online returns also bind the question and source versions. A returned answer does not admit knowledge automatically. Explain related concepts when useful, without default recommendations of similar papers. Existing full-workflow node controls and retrieval weights remain unchanged.
 
 Begin Research Chat by choosing a project and opening a conversation. By default, it searches attachments in that conversation. Choose a wider scope if you want it to find other project material. You can attach a file before it has produced a Card.
 
@@ -457,7 +459,7 @@ A finding applies only to the conditions and coverage stated in its report. Conv
 
 ## 18 Installation, update checks and incremental upgrades
 
-v1.02.01 is a maintenance release of v1.02. For the first upgrade from v1.01 or v1.02, back up your data and use this installer or the complete portable package: the old updater does not recognize three-part versions. Do not manually overlay a delta ZIP. This release adds three-part version recognition for subsequent in-app updates.
+v1.02.01: independent settings are saved separately. If a section fails, the message identifies it and retains its unsaved draft. A stale saved directory no longer blocks an unrelated model change; correct the path before using that directory. Import rebases only profile defaults or missing historical defaults, preserving custom paths and reporting problems. New shortcut names accept up to 20 Unicode characters. Existing longer names can be retained unchanged; editing a name applies the new limit.
 
 For a new installation, use the globe icon on the welcome page to choose Chinese, English or Japanese, then check prerequisites and the application and data folders. Language selection is also available in the native prerequisite wizard when WebView2 is missing. For a new profile, the choice becomes memo's initial language. An upgrade or reused data folder keeps existing settings.
 

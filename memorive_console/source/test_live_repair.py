@@ -230,7 +230,11 @@ def test_connection_ui_keeps_degraded_and_recovering_states_explicit():
     start = source.index("function connectionView")
     end = source.index("\nfunction syncCapabilities", start)
     function = source[start:end]
+    helper = (Path(__file__).parent / "i18n.js").read_text(encoding="utf-8").split("function tr(", 1)[1].split("function localizeInitialPage", 1)[0]
+    translator = "function tr(" + helper
     script = f"""
+const window={{CONSOLE_I18N:{{messages:{{}}}}}};
+{translator}
 const names={{CONNECTED:'connected',REFERENCE_ONLY:'reference',DISCONNECTED:'disconnected',CLEANUP_FAILED:'cleanup'}};
 {function}
 const info={{diagnosticsOnly:false,supported:['diagnostics'],missing:[]}};

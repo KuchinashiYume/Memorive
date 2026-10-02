@@ -18,6 +18,8 @@ SCHEMAS={
 }
 for method in ('memo.propose_feedback','memo.submit_draft'):
     SCHEMAS[method]=schema({k:TEXT for k in ('project','title','claim','scope','limitations','handoff_id','handoff_hash','request_id')}|{'evidence_ids':IDS},['project','title','claim','scope','limitations','evidence_ids'])
+from .skill_contract import ANSWER as SKILL_ANSWER, CONTEXT as SKILL_CONTEXT
+SCHEMAS.update({'memo.skill_context':SKILL_CONTEXT,'memo.skill_answer':SKILL_ANSWER})
 DESCRIPTIONS={
     'memo.capabilities':'List Memo research tools and available project IDs.',
     'memo.search':'Search one selected project using the saved Memo retrieval weights and configured models, which may call a provider. Returns versioned citations. No permission to transmit results to other destinations is implied.',
@@ -26,14 +28,21 @@ DESCRIPTIONS={
     'memo.propose_feedback':'Propose cited knowledge with scope and limitations. This cannot approve or activate it.',
     'memo.submit_draft':'Return a research draft for human review. When returning a handoff, include its handoff_id and handoff_hash plus a stable request_id. Stale bindings are rejected; exact repeats do not create another proposal.',
     'memo.job_status':'Read the status of a known job; does not start or retry any call.',
+    'memo.skill_context':'Read existing source excerpts in a version-bound research handoff, with paging. Reuse these conversions; no model is called.',
+    'memo.skill_answer':'Return a cited answer to the handoff conversation. Checks freshness, source scope and quotes; does not approve scientific claims or admit knowledge. Exact request repeats are idempotent.',
 }
 
 def tools_list():
     return [{'name':m.replace('.','_'),'description':DESCRIPTIONS[m],'inputSchema':SCHEMAS[m],
-        'annotations':{'readOnlyHint':m not in {'memo.propose_feedback','memo.submit_draft'},'destructiveHint':False,
+        'annotations':{'readOnlyHint':m not in {'memo.propose_feedback','memo.submit_draft','memo.skill_answer'},'destructiveHint':False,
                        'idempotentHint':m not in {'memo.propose_feedback','memo.submit_draft'},'openWorldHint':m=='memo.search'}} for m in sorted(PUBLIC_METHODS)]
 
 def validate_arguments(method,args):
+    if method in {'memo.skill_context','memo.skill_answer'}:
+        import jsonschema
+        try:jsonschema.validate(args,SCHEMAS[method])
+        except jsonschema.ValidationError:raise ValueError('TOOL_ARGUMENTS_INVALID') from None
+        return args
     spec=SCHEMAS[method]
     if not isinstance(args,dict) or set(args)-set(spec['properties']) or set(spec['required'])-set(args):raise ValueError('TOOL_ARGUMENTS_INVALID')
     for name,value in args.items():

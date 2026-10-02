@@ -2,7 +2,7 @@
 
 *Design notes for users and contributors · 29 September 2026*
 
-v1.02.01 documentation · 2026-09-30. Update identifier: 1.02.01; the feature scope remains v1.02. Earlier illustrations explain common controls. This revision does not claim a new full acceptance run.
+v1.03 documentation · 2026-10-02. Adds the research Skill and Q&A integration. Existing screenshots retain their actual version; see release notes for validation scope.
 
 Memorive connects document processing, research Q&A, citation checking and knowledge reuse. These notes explain the data flow, module responsibilities and failure handling behind research records that can be traced to their sources. Researchers remain responsible for judgment and final writing.
 
@@ -636,6 +636,8 @@ The actual OCR, reranking and review routes depend on adapters and model capabil
 Quality sampling, migration of real historical data and long-term recommendation effectiveness each have their own verification scope. Runtime records, bounded checks and full installation acceptance are recorded separately. v1.01 has a separate release record. This is a pre-release revision for v1.02; the final source, packages and update index must identify the same delivery.
 
 ## 9. Research workflows and update maintenance in v1.02
+
+Research Skill: ask an agent to use the bundled memo-research Skill when an unfamiliar paper is needed for the current question. Read and draft an answer, then check the source passages supporting key claims; revise unsupported claims or state uncertainty. Independent runs retain the original, RawMD and source.json. Add source.json through the existing Q&A attachment picker to validate and reuse sources without conversion. Continue through the current conversation handoff or scoped developer interface. Import a memo-research-answer/1 receipt in that same conversation; online returns also bind the question and source versions. A returned answer does not admit knowledge automatically. Explain related concepts when useful, without default recommendations of similar papers. Existing full-workflow node controls and retrieval weights remain unchanged.
 
 ### Claims, sources and answer versions · M3, M4, M6, M10, M13
 

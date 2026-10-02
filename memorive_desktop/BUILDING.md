@@ -1,3 +1,7 @@
+# v1.03 release preparation
+
+See PUBLIC_RELEASE.md and RELEASE_NOTES.md for current identity, assets and validation. Publication is pending.
+
 # Build Memorive from source
 
 This repository contains the declared Windows application source, runtime contracts and build tools. Local builds are unsigned review candidates. Published artifacts are identified by their GitHub Release and SHA256 checksums.

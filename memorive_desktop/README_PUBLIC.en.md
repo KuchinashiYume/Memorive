@@ -1,3 +1,7 @@
+# Memorive v1.03
+
+Current application, Test Console and research Skill information is in the repository project page and RELEASE_NOTES.md. Download the matching installer or complete portable package. The build and licensing context below is retained.
+
 # Memorive
 
 From reading materials to research records you can verify and reuse.

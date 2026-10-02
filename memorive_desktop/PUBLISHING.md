@@ -1,3 +1,7 @@
+# v1.03 release preparation
+
+See PUBLIC_RELEASE.md and RELEASE_NOTES.md for current identity, assets and validation. Publication is pending.
+
 # v1.02 release authorization
 
 The maintainer authorized publication on 2026-09-30. This source binds the production update public key. Build-stage flags remain conservative clean-candidate metadata; publication and uploaded asset identities are recorded by the separate release receipt. Private keys are never included.

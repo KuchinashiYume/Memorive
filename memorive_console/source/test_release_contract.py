@@ -27,7 +27,7 @@ def test_public_identity_and_version_are_memorive_only():
         text = path.read_text(encoding="utf-8")
         assert "Memorive" in text, path.name
         assert "Memorive" in text, path.name
-    assert '#define AppVersion "1.01"' in (ROOT / "installer.iss").read_text(encoding="utf-8")
+    assert '#define AppVersion "1.02"' in (ROOT / "installer.iss").read_text(encoding="utf-8")
     assert "Memorive-Test-Console.exe" in (ROOT / "installer.iss").read_text(encoding="utf-8")
     assert "Memorive-Test-Console-Setup-{#AppVersion}-x64" in (ROOT / "installer.iss").read_text(encoding="utf-8")
 

@@ -18,7 +18,7 @@ from memorive_language import freeze as freeze_language, locale as output_locale
 from memorive_language.text import choose
 
 PUBLIC_METHODS=frozenset({'memo.capabilities','memo.search','memo.read_evidence','memo.prepare_tension',
-    'memo.propose_feedback','memo.submit_draft','memo.job_status'})
+    'memo.propose_feedback','memo.submit_draft','memo.job_status','memo.skill_context','memo.skill_answer'})
 DESKTOP_METHODS=frozenset({'memo.developer_state','memo.developer_save','memo.automation_save','memo.developer_config'})|PUBLIC_METHODS|frozenset({'memo.state','memo.settings_save','memo.project_save','memo.index_refresh',
     'memo.thread_create','memo.thread_get','memo.thread_forget','memo.ask','memo.cancel','memo.memory_save','memo.memory_forget','memo.topic_change',
     'memo.agent_dispatch','memo.knowledge_health','memo.feedback_revise','memo.interests','memo.interest_remove','memo.weight_settings','memo.weight_save','memo.weight_preview','memo.material_metadata','memo.material_metadata_save','memo.feedback_review','memo.feedback_retract','memo.handoff','memo.export_handoff','memo.library_list','memo.library_add'})|CONNECTION_METHODS|CONVERSATION_METHODS|ATTACHMENT_METHODS|ANSWER_EVIDENCE_METHODS
@@ -42,6 +42,8 @@ class ResearchWorkspace:
         self.topic=Topic(self)
         from .handoffs import Handoffs
         self.handoffs=Handoffs(self)
+        from .skill_bridge import ResearchSkill
+        self.skill=ResearchSkill(self)
         self.feedback.handoff_validate=self.handoffs.validate_review
         self.pool=ThreadPoolExecutor(max_workers=2,thread_name_prefix='memo-research');self.closed=False
         self.lock=threading.RLock();self.futures={};self.owns_desktop_state=recover;self.temporary_threads=set()
@@ -180,7 +182,7 @@ class ResearchWorkspace:
                     self.store.put('artifact',a['id'],row['project'],dict(a,state='unavailable'),db=db)
             db.execute("DELETE FROM objects WHERE kind='thread' AND id=?",(thread_id,))
             self.topic.forget_thread(thread_id,row['project'],db)
-            for kind in ('answer_history','answer_review','coverage_probe','answer_feedback','answer_draft','handoff','desktop_handoff','agent_return'):
+            for kind in ('answer_history','answer_review','coverage_probe','answer_feedback','answer_draft','handoff','desktop_handoff','agent_return','skill_return'):
                 for record in self.store.list(kind,row['project'],db=db):
                     if record.get('thread_id')==thread_id:db.execute('DELETE FROM objects WHERE kind=? AND id=?',(kind,record['id']))
             self.store.event('THREAD_FORGOTTEN',thread_id,{},db)
@@ -279,7 +281,7 @@ class ResearchWorkspace:
         payload={'_thread_scope':digest(thread['id']),'_temporary':thread['temporary'],'confirmed_memory':[{'id':m['id'],'revision':m['revision'],'text':m['text']} for m in memories[:12]],
             'extractive_summary':summary,'recent_messages':[{'message_id':m['id'],'role':m['role'],'text':m['text']} for m in messages[-keep:]],
             'evidence':[{**{k:r.get(k) for k in ('id','artifact_id','document_id','title','text','content_hash','page','line_start','line_end')},
-                         **{k:r[k] for k in ('material_layer','source_content_hash','knowledge_review','structure_refs') if k in r}} for r in refs],'question':question,
+                         **{k:r[k] for k in ('material_layer','source_content_hash','knowledge_review','structure_refs','line_basis','source_warnings') if k in r}} for r in refs],'question':question,
             'withheld_history_ids':withheld_history}
         # Count the whole request envelope before topic allocation and optional trimming.
         payload.update(copy.deepcopy(request_context or {}))
@@ -437,7 +439,8 @@ class ResearchWorkspace:
                 self.versions.validate_context(job,context,refs)
                 checkpoint()
                 from model_gateway.research_prompt_cache import research_prompt,CHAT_RULES
-                prompt=research_prompt(CHAT_RULES,context)
+                from .skill_bridge import METHOD_RULES
+                prompt=research_prompt(CHAT_RULES+'\n'+METHOD_RULES,context)
                 value={}
                 usage={};engine='evidence_only';citations=[r['id'] for r in refs]
                 # Discussion depth is not an execution requirement. Only a
@@ -447,7 +450,7 @@ class ResearchWorkspace:
                     if not (self.agent_model if job.get('kind')=='agent' else self.model):raise ValueError('CHAT_MODEL_RUNNER_UNAVAILABLE')
                     if job.get('kind')=='agent':
                         from research_opportunities.research_opportunities import schema,instructions
-                        prompt=research_prompt(instructions(),context)
+                        prompt=research_prompt(instructions()+'\n'+METHOD_RULES,context)
                         pack={'schema_version':'MemoAgentHandoff-v2','project':thread['project'],'thread_id':thread['id'],'question':question,
                             'agent':settings['agent'],'evidence':refs,'conversation_summary':[{'role':m['role'],'text':m.get('text',m.get('excerpt',''))} for m in context['extractive_summary']+context['recent_messages']],
                             'instructions':instructions(),'language_context':copy.deepcopy(request_context['language_context']),'expression_preference':job['answer_style'],'expression_scope':'User preference only; does not replace receiving agent permissions or task instructions','created_at':now(),'external_transmission':True,'artifact_ids':artifact_ids,'profile_ref':settings['profile_ref']}
@@ -564,7 +567,9 @@ class ResearchWorkspace:
             text+=choose(value.get('language_context'),'回传绑定：','Return binding: ','返却時の識別情報：')+'handoff_id='+value['id']+'; handoff_hash='+value['content_hash']+'\n\n'
             for r in value['evidence']:text+='## '+r['id']+' · '+r['title']+'\n\n'+r['text']+'\n\n'+choose(value.get('language_context'),'来源哈希：','Source hash: ','出典のハッシュ：')+r['content_hash']+'\n\n'
             text+='## '+choose(value.get('language_context'),'会话上下文','Conversation context','会話のコンテキスト')+'\n\n'+ '\n\n'.join(m['role']+': '+m['text'] for m in value['conversation_summary'])
-            for name,data in [('handoff.json',packed(value)),('START_HERE.md',text)]:
+            from .skill_bridge import transport
+            text+='\n\nUse memo-research with memo.skill_context and memo.skill_answer. The local transport command is in transport.json; append --call <method> and send JSON on stdin.\n'
+            for name,data in [('handoff.json',packed(value)),('START_HERE.md',text),('transport.json',packed(transport(self)))]:
                 path=root/name
                 if path.exists() and path.read_text(encoding='utf-8')!=data:raise ValueError('HANDOFF_EXPORT_CONFLICT')
                 if not path.exists():path.write_text(data,encoding='utf-8')
@@ -588,6 +593,8 @@ class ResearchWorkspace:
         if method in CONVERSATION_METHODS:return self.conversations.call(method,p)
         if method in ATTACHMENT_METHODS:return self.attachments.call(method,p)
         if method in CONNECTION_METHODS:return self.connections.desktop(method,p)
+        if method=='memo.skill_context':return self.skill.context(**p)
+        if method=='memo.skill_answer':return self.skill.answer(**p)
         routes={'memo.agent_dispatch':self.agent_dispatch,'memo.knowledge_health':self.knowledge_health,'memo.feedback_revise':self.feedback_revise,'memo.interests':self.interests,'memo.interest_remove':self.interest_remove,'memo.weight_settings':self.weights.settings,'memo.weight_save':self.weights.save,'memo.weight_preview':self.weight_preview,'memo.material_metadata':self.weights.metadata,'memo.material_metadata_save':self.weights.metadata_save,'memo.state':self.state,'memo.settings_save':self.settings_save,'memo.project_save':self.project_save,
             'memo.topic_change':self.topic.change,
             'memo.index_refresh':self.index.refresh,'memo.thread_create':self.thread_create,'memo.thread_get':self.thread_get,
@@ -600,9 +607,11 @@ class ResearchWorkspace:
             handler=getattr(self,method.split('.')[1],None)
             if handler is None:raise ValueError('DESKTOP_LIBRARY_REQUIRED')
             return handler(**p)
-        if method=='memo.capabilities':return {'schema_version':'MemoCapabilities-v1','tools':sorted(PUBLIC_METHODS),
-            'search':'shared weighted source-bound; configured model calls and metadata lookup may occur','approval':'trusted desktop only','agent_transmission':'explicit handoff',
-            'projects':[{'id':r['id'],'name':r['name']} for r in self.store.list('project')]}
+        if method=='memo.capabilities':
+            from .agent_protocol import SCHEMAS
+            return {'schema_version':'MemoCapabilities-v1','tools':sorted(PUBLIC_METHODS),'methods':SCHEMAS,
+                'search':'shared weighted source-bound; configured model calls and metadata lookup may occur','approval':'trusted desktop only','agent_transmission':'explicit handoff',
+                'projects':[{'id':r['id'],'name':r['name']} for r in self.store.list('project')]}
         if method=='memo.propose_feedback' and desktop:return self.feedback.propose(**p,origin='desktop')
         return routes[method](**p)
 
@@ -659,6 +668,8 @@ def desktop_handoff(workspace,thread_id,question,root):
     ident=uid('')[:12];folder=Path(root)/ident;folder.mkdir(parents=True,exist_ok=False)
     material=folder/'materials';material.mkdir();warnings=list(pack.get('unavailable_sources',[]));sources=[];messages=pack['conversation_summary']
     (folder/'handoff.json').write_text(packed(pack),encoding='utf8')
+    from .skill_bridge import transport
+    (folder/'transport.json').write_text(packed(transport(workspace)),encoding='utf8')
     # Reuse the source- and topic-bound history, including withheld-message rules.
     cited={r['id']:r for m in messages for r in m.get('citations',[]) if isinstance(r,dict) and r.get('id')}
     admitted={a['id'] for a in artifacts}
@@ -677,6 +688,13 @@ def desktop_handoff(workspace,thread_id,question,root):
             text='\n\n'.join(f"[{c['id']}] page={c['page']} lines={c['line_start']}-{c['line_end']}\n{c['text']}" for c in chunks)
             extracted=material/f'{n:03d}-text.md';extracted.write_text(text,encoding='utf8')
             row['files'].append(extracted.relative_to(folder).as_posix());row['chunks']=len(chunks)
+            if a.get('source_original_path'):
+                original=safe_path(a['root'],a['source_original_path'])
+                if digest(original.read_bytes())!=a['source_content_hash']:raise ValueError('EVIDENCE_STALE')
+                preserved=material/(f'{n:03d}-original'+original.suffix.lower())
+                shutil.copyfile(original,preserved);row['files'].append(preserved.relative_to(folder).as_posix())
+            row.update(material_layer=material_layer(a),source_content_hash=source_document_hash(a),
+                       line_basis='rawmd_global' if a.get('skill_source') else 'page_local')
         except (OSError,ValueError) as error:
             row['issue']=str(error) if isinstance(error,ValueError) else 'SOURCE_UNAVAILABLE'
             warnings.append({'artifact_id':a['id'],'reason':row['issue']})

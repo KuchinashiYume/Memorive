@@ -69,8 +69,8 @@ def close_window_for_pid(pid: int):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exe", type=Path, default=ROOT / "dist" / "Memorive-Test-Console.exe")
-    parser.add_argument("--runtime", type=Path, default=EVIDENCE / "portable_gui_runtime_v101")
-    parser.add_argument("--output", type=Path, default=EVIDENCE / "packaged_console_verification_v101.json")
+    parser.add_argument("--runtime", type=Path, default=EVIDENCE / "portable_gui_runtime_v102")
+    parser.add_argument("--output", type=Path, default=EVIDENCE / "packaged_console_verification_v102.json")
     parser.add_argument("--default-state", action="store_true")
     args = parser.parse_args()
     exe = args.exe.resolve()
@@ -188,6 +188,17 @@ def main():
         result["checks"]["full_suite_pass"] = suite.get("verdict") == "PASS" and suite.get("summary") == {
             "total": 29, "passed": 29, "failed": 0, "skipped": 0}
         result["checks"]["suite_model_calls_disabled"] = suite.get("model_calls_allowed") is False
+        result["checks"]["reference_suite_marked"] = suite.get("evidence_scope") == "REFERENCE_PROTOCOL"
+        for language in ['zh-CN', 'en-US', 'ja-JP']:
+            request(base, '/api/preferences', {'language': language})
+            resource = urllib.request.urlopen(base + '/i18n-data.js', timeout=10).read().decode('utf-8')
+            payload = json.loads(resource.removeprefix('window.CONSOLE_I18N=').removesuffix(';'))
+            review = request(base, '/api/review/export', {})['report']
+            current = request(base, '/api/snapshot')
+            result['checks']['locale_' + language] = (payload['locale'] == language and len(payload['messages']) >= 550
+                and current['session']['session_id'] == session_id and review['report_language'] == language
+                and review['release_verdict'] == 'NOT_ASSESSED' and review['evidence_scope'] == 'REFERENCE_PROTOCOL')
+        result['checks']['reference_manual_checks_disabled'] = not request(base, '/api/review')['manual_editable']
 
         result["window_count_closed"] = close_window_for_pid(endpoint["pid"])
         process.wait(timeout=45)
@@ -203,6 +214,9 @@ def main():
         result["checks"]["session_removed"] = not (runtime / "sessions" / session_id).exists()
         result["checks"]["cleanup_clean"] = receipt.get("status") == "CLEANED" and receipt.get("remaining_entries") == 0
         result["checks"]["business_content_removed"] = receipt.get("business_content_retained") is False
+        review = read_json(runtime / 'receipts' / 'reviews' / (session_id + '.json'))
+        result['checks']['review_cleanup_updated'] = (review and review['cleanup_status'] == 'CLEANED'
+            and review['evidence_scope'] == 'REFERENCE_PROTOCOL' and not review['manual_editable'])
         ui_registries = [read_json(path) for path in (runtime / "ui_profiles").glob("Memorive-Console-*.json")]
         result["checks"]["ui_profiles_removed"] = all(row and row.get("status") == "CLEANED"
             and not Path(row["data_root"]).exists() for row in ui_registries)

@@ -4,9 +4,16 @@
 
 Modify, extend and improve Memorive for your own research, then use this companion to reproduce issues, inspect behavior and check changes. Results apply to the selected version, configuration and scenarios. The console provides tests and diagnostics; editing and rebuilding the application requires your development tools.
 
+## 1.03: language and review
+
+Use the globe button at the top right for Simplified Chinese, English or Japanese, following the Memorive installer interaction. Switching preserves the page, edited forms and backend session, and remembers the selection. It never changes the application language or restores model permission after reload.
+
+Review and results separates bridge evidence from nine groups of manual checks. Record observations only after connecting the application and enabling access. Export Markdown and JSON summaries with version, EXE hash, command states, observations and cleanup status. Bodies, settings, paths and tokens are excluded from this summary; raw diagnostics are separate. Reference results are labeled and never imply release acceptance.
+
+
 ## Get started
 
-Download the portable `Memorive-Test-Console.exe` or its Windows x64 installer from this repository's Releases. Microsoft WebView2 Runtime is required. Packages are unsigned, and private downloads require repository access.
+Download the portable `Memorive-Test-Console.exe` or its Windows x64 installer from this repository's Releases. Microsoft WebView2 Runtime is required. Packages are unsigned.
 
 Start with the built-in protocol self-test. To test the application, drag its `Memorive.exe` into the connection page, retaining its complete application directory. In the temporary Memorive instance launched by the console, enable console access in privacy settings. Run a smoke test, inspect receipts, then select relevant scenarios. End and clean the session when finished.
 

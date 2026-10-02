@@ -1,5 +1,5 @@
 #define AppName "Memorive 测试控制台"
-#define AppVersion "1.01"
+#define AppVersion "1.03"
 #define AppExeName "Memorive-Test-Console.exe"
 
 [Setup]
@@ -25,7 +25,7 @@ CloseApplications=yes
 RestartApplications=no
 ChangesAssociations=no
 ChangesEnvironment=no
-VersionInfoVersion=1.1.0.0
+VersionInfoVersion=1.3.0.0
 VersionInfoCompany=Memorive
 VersionInfoDescription=Memorive Test Console Installer
 VersionInfoProductName={#AppName}
@@ -34,6 +34,10 @@ VersionInfoProductVersion={#AppVersion}
 [Files]
 Source: "output\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "README.en.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "README.ja.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "RELEASE_NOTES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "NOTICE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion

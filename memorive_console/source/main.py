@@ -106,7 +106,8 @@ def main():
                     selected = window.create_file_dialog(webview.FileDialog.OPEN, allow_multiple=False, file_types=('Memorive main program (Memorive.exe)',))
                     return str(selected[0]) if selected else None
 
-            window = webview.create_window('Memorive 测试控制台', f'http://127.0.0.1:{server.server_port}', js_api=WindowApi(), width=1440, height=900, min_size=(720, 620), background_color='#F4F5F1')
+            from localization import translate
+            window = webview.create_window(translate('Memorive 测试控制台', manager.language), f'http://127.0.0.1:{server.server_port}', js_api=WindowApi(), width=1440, height=900, min_size=(720, 620), background_color='#F4F5F1')
             close_controller = WindowCloseController(manager, window)
             window.events.closing += close_controller.closing
             import faulthandler
@@ -115,6 +116,7 @@ def main():
             drop_runtime = {}
             def loaded():
                 faulthandler.cancel_dump_traceback_later()
+                window.set_title(translate('Memorive 测试控制台', manager.language))
                 window.show()
                 try:
                     drop_runtime.update(attach_build_drop_handler(window))

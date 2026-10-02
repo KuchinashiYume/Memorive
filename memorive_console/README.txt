@@ -1,4 +1,4 @@
-Memorive Test Console v1.01
+Memorive Test Console v1.03
 
 用于自行改进 Memorive 时复现问题、检查功能行为并验证修改。控制台不自动修改代码；请在开发工具中编辑和重新构建。
 
@@ -14,3 +14,5 @@ Memorive Test Console v1.01
 https://github.com/KuchinashiYume/Memorive/tree/main/memorive_console
 
 一键安全回归不调用模型，模型单项测试需逐次允许，可能产生费用。设置副本和临时业务内容在正常结束后清理；诊断记录保留，分享前请脱敏。安装包与 EXE 未签名。
+
+1.03：右上角地球图标切换中文 / English / 日本語。审核与结果提供九类人工检查和 Markdown / JSON 摘要。完整三语使用说明随包附带。
