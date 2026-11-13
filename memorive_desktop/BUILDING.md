@@ -24,6 +24,16 @@ G:\Memorive-build-env\Scripts\python.exe -X utf8 .\memorive_desktop\tools\build_
 
 The output is `dist/Memorive/Memorive.exe` together with its required `_internal/` directory. The receipt records input hashes, dependency versions and the EXE hash. The build reads no user profile and includes no private test capsule. It uses only the selected Python and Windows directories for native dependency lookup. Windows Visual C++ runtime libraries are prerequisites; unrelated DLLs from developer tools are not build inputs.
 
+## After changing files
+
+The build copies only the files that the manifests list, and stops with `BUILD_INPUT_CHANGED` when a file differs from its recorded sha256. After you change, add or delete files, update the manifests with one command and build again:
+
+```powershell
+python .\memorive_desktop\tools\sync_manifests.py
+```
+
+It refreshes the hashes of changed files, drops deleted files, and adds new files under `source/`, `product/`, `integrations/` and `memorive_console/` to the four manifests. `--check` reports what is out of date without changing anything. The app loads images, web pages and other resources from the destination that `BUILD_RESOURCES.public-candidate.json` gives, so add an entry there for a new non-Python file under `product/desktop/`; the tool lists such files.
+
 ## Inventory and installer
 
 Run `memorive_desktop/tools/collect_build_inventory.py --build <build directory> --wheelhouse <wheel directory> --output <new inventory directory>` with the same interpreter. It records dependency metadata, licenses, installed artifacts and hashes. Third-party source archives and license notices must accompany the selected distribution as required by their licenses.

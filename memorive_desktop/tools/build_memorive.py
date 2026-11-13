@@ -15,7 +15,7 @@ EXCLUDE={'source/private_test_bootstrap.py','source/automated_acceptance.py','pr
 def digest(p):return sha256(p.read_bytes()).hexdigest()
 def write_json(p,v):p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 def copy_checked(source,target,expected):
-    if digest(source)!=expected:raise ValueError('BUILD_INPUT_CHANGED:'+str(source))
+    if digest(source)!=expected:raise ValueError('BUILD_INPUT_CHANGED:'+str(source)+' (after changing files run memorive_desktop/tools/sync_manifests.py)')
     target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
 
 def stamp_release_views(stage, display_version):

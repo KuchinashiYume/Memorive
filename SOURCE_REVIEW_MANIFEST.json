@@ -966,8 +966,8 @@
     },
     {
       "path": "memorive_desktop/BUILDING.md",
-      "sha256": "3e9339bb1bd698f87705628a220cb5141ff18ba13fce1e1166dd63f7232dc2df",
-      "bytes": 6618
+      "sha256": "5d717cdb48c4923ec00d7b8625501982aa460ef8d1d8fdf66d6a26b2f0d95d9e",
+      "bytes": 7423
     },
     {
       "path": "memorive_desktop/contracts/accounting/AccountingPanelProductMethod-v3.json",
@@ -8146,8 +8146,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_memorive.py",
-      "sha256": "8ef82ae86bd8831f38662c513c65718aeb4cc01255f112ab2cc78a60adc97dd0",
-      "bytes": 18390
+      "sha256": "b1cf1510fed987117c4758a4d6384fd1c6c9f40a55670e41adee59746a5d9f06",
+      "bytes": 18461
     },
     {
       "path": "memorive_desktop/tools/build_update_helper.py",
@@ -8198,6 +8198,11 @@
       "path": "memorive_desktop/tools/release_signer.cs",
       "sha256": "7598b84a53cd27a4eb255850a8e9e6ab0e8add76de8026a30fbc024618297050",
       "bytes": 2092
+    },
+    {
+      "path": "memorive_desktop/tools/sync_manifests.py",
+      "sha256": "a0513cd6ad35007f072e3a469b100c9e1a8a2df99f6cc0b10f705827224d6293",
+      "bytes": 10868
     },
     {
       "path": "PUBLIC_RELEASE.md",
