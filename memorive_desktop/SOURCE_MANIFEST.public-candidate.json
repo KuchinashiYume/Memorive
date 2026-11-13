@@ -2221,16 +2221,6 @@
       "bytes": 1211
     },
     {
-      "path": "source/artifact_registry/conversation_refinement_adapter.py",
-      "sha256": "3eca1d4dc329bb91ea1bca7673b310f7fd4017ab024f7778daaa2dffe0dfc953",
-      "bytes": 4147
-    },
-    {
-      "path": "source/artifact_registry/data_lifecycle.py",
-      "sha256": "7a60149d8587714028621eb75dc01b89a7f1469dd0c01bce308c92323fb0255a",
-      "bytes": 25648
-    },
-    {
       "path": "source/artifact_registry/errors.py",
       "sha256": "0b890b19d7a6b2964712595fa822705b1ab6651c80449aedfdaf0bf639e429b4",
       "bytes": 2070
@@ -2239,31 +2229,6 @@
       "path": "source/artifact_registry/knowledge_feedback_adapter.py",
       "sha256": "d4c826e9553feb50d04e7f5fedcd9f9f2c26a50e57093320f60e3031948666fc",
       "bytes": 6206
-    },
-    {
-      "path": "source/artifact_registry/maintenance.py",
-      "sha256": "41c2b5c153f17a0c86ce3cce10c0b718b3c51008dbbb2907ff98764b34186046",
-      "bytes": 9853
-    },
-    {
-      "path": "source/artifact_registry/migration.py",
-      "sha256": "83526d6a5c21cf39e2ea59708f9efa0ed8b9115093f4befc2173983ab4008c8a",
-      "bytes": 39016
-    },
-    {
-      "path": "source/artifact_registry/migration_contracts.py",
-      "sha256": "3b78da017686bd45f4e4f436e696e800ec7c8842dfe114deadfa0f263116a92e",
-      "bytes": 19791
-    },
-    {
-      "path": "source/artifact_registry/query_projection.py",
-      "sha256": "b872a60d4d6dcd7c0338ec7235b244960cc2a5f19c2a4dd3b92f0cf38b5c986f",
-      "bytes": 39203
-    },
-    {
-      "path": "source/artifact_registry/registry.py",
-      "sha256": "30120728698c62e159537b025fad655d175c0af85fb14bae20d819bf773d48d7",
-      "bytes": 22175
     },
     {
       "path": "source/artifact_registry/registry_v2.py",
@@ -5926,59 +5891,9 @@
       "bytes": 561
     },
     {
-      "path": "source/run_ledger/accounting_projection.py",
-      "sha256": "dc20b08f0cdedf3ec1f98513e9114f719bc8ecab07e54e6661c38aa7a7862d11",
-      "bytes": 3708
-    },
-    {
-      "path": "source/run_ledger/analysis_admission_runtime_log_publication_preview.py",
-      "sha256": "9d421c810b3d31145a568461c2533832e7e065cc1453945d42c408f4a95bd0d5",
-      "bytes": 10311
-    },
-    {
-      "path": "source/run_ledger/channel_evidence.py",
-      "sha256": "676ef4ddc8ad4088c21c0589d50a88bf19d6cf2e2f14679316438fa15d35e399",
-      "bytes": 39799
-    },
-    {
-      "path": "source/run_ledger/channel_store.py",
-      "sha256": "4276960ce2a2c18412ebff2eb50b38b324e586c5f51f864be3a1c0d5b38f1113",
-      "bytes": 8701
-    },
-    {
-      "path": "source/run_ledger/closure.py",
-      "sha256": "5b55ed0f910bea9c0a9b95a8154d0c4440bea4fa96c82c19f2ac9562b447361a",
-      "bytes": 2860
-    },
-    {
-      "path": "source/run_ledger/core_adapter.py",
-      "sha256": "8544480301dcda792f9df90afc4f388ca111fcf73900e561f71a8dd6077057a7",
-      "bytes": 17954
-    },
-    {
-      "path": "source/run_ledger/cost_routing_advisory_ledger.py",
-      "sha256": "e77c0e6760db995af2d4c7214fe6fc582e99f9cab2c0d9da9b330ab38a62e7f9",
-      "bytes": 7293
-    },
-    {
-      "path": "source/run_ledger/cost_routing_historical_recovery.py",
-      "sha256": "c4bd045f3de4bb125229a2a6cf05c4307f0cd3ee5081c9704ef5c427b547f28b",
-      "bytes": 9603
-    },
-    {
       "path": "source/run_ledger/errors.py",
       "sha256": "2c3db7c99f94dbfc126574d9ea7864cc18b0f7dcb0b3e9546f2abae1b4c838ef",
       "bytes": 2378
-    },
-    {
-      "path": "source/run_ledger/lifecycle.py",
-      "sha256": "f1b669fd8f6aa36514a58aded2ae76cc98da707f83813f224d057c32a1ef34f7",
-      "bytes": 4044
-    },
-    {
-      "path": "source/run_ledger/recovery.py",
-      "sha256": "b20cd2dfb9d6a814c051ceb67409741feff37e93104eb813d21bcfa84ab6ca0f",
-      "bytes": 14601
     },
     {
       "path": "source/run_ledger/schema.py",
@@ -5999,11 +5914,6 @@
       "path": "source/run_ledger/schemas/runtime_log_channel_attempt_v1.schema.json",
       "sha256": "84dc30398731497c5856e6e1d7446e5605f410a995130599146e8265e400e462",
       "bytes": 16321
-    },
-    {
-      "path": "source/run_ledger/store.py",
-      "sha256": "a8d9a2f3b1afdd9ff5712d2265270cdcd2607cfd86579188682777e03744abfa",
-      "bytes": 13080
     },
     {
       "path": "source/run_ledger/writer_lock.py",
