@@ -1,28 +1,28 @@
 # Memorive
 
-从阅读资料，到可查证、可复用的研究记录。
+用 AI 读文献，每条引用都能回到原文核对。
 
-Memorive（简称 memo）是一款面向个人学习与研究的 Windows 桌面工作台。它把文献、网页和研究对话整理到同一条工作流程中：保留原始资料，提取有来源的信息，围绕证据提问与比较，再将人工确认的结论积累为可继续使用的知识。
+Memorive（简称 memo）是一款面向学生和研究者的 Windows 桌面应用。把论文、网页和 AI 对话导入进来，它会保留原件，并为每篇论文整理一张文献卡片，记下研究方法、关键数据、主要发现和局限。你可以同时向几篇文献提问，点开回答里的任意一条引用，就能跳到原文对应的页和段落。核对过的结论存进知识库，之后提问时可以接着用。
+
+模型可以接云端 API、本机已登录的 Codex / Claude Code 等命令行工具，或者 Ollama 这类本地模型。资料和设置都保存在你自己的电脑上。
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
 ### [⬇ 点击下载 Memorive Windows 版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe)
 
-**v1.03 · Windows 10 22H2 / Windows 11 · x64 · 约 205 MB（以下载资产为准）**
+**v1.03 · Windows 10 22H2 / Windows 11 · x64 · 约 205 MB**
 
-**第一次使用，下载上方的主程序安装包即可。** 它用于安装 Memorive；配套插件和测试控制台按需选择。
+**第一次使用，下载上方的安装包就行。** 配套插件和测试控制台可以按需另装。
 
 [我应该下载哪个文件？](#下载选择指南) · [下载与版本](https://github.com/KuchinashiYume/Memorive/releases) · [使用指南](memorive_desktop/product/desktop/help/zh-CN/manual-text.md) · [设计文档](memorive_desktop/product/desktop/help/zh-CN/design.md) · [问题反馈](https://github.com/KuchinashiYume/Memorive/issues)
 
-## v1.03 的更新内容
+## v1.03 新内容
 
-### 功能更新：v1.02.01 → v1.03
+- **和 AI Agent 一起读文献**：随程序附带 memo-research Skill。Codex、Claude Code 等 Agent 转换好的论文，可以直接加进研究问答，省去重新处理。也可以把当前问题交给 Agent 继续读，它带引用的回答会回到原来的对话，你接着追问就行。Skill 也能单独使用，读一篇论文或比较几篇都可以。
+- **测试控制台**：支持中文、英文和日文，新增审核与结果页面，可以生成用于分享的摘要。
+- 包含 v1.02.01 的设置保存修复。
 
-研究问答现可复用 memo-research Skill 的原件与转换文本，围绕当前问题读取、比较和回查引用；经过来源与范围核对的回答可回到原对话继续追问。Skill 可独立处理单篇或由 Agent 组织多篇比较。测试控制台补齐三语界面、审核与结果页面及可分享摘要。
-
-本版保留 1.02.01 的设置保存与三级版本识别修复。研究 Skill 是按问题阅读与来源复用的补充，尚无低延迟或取代全量流程的性能结论。来源级集成检查和两轮真实 Agent 回流已有记录；发布包检查另行记录，不代表科研质量、全量业务、干净机器或在线升级全链路已验收。
-
-升级前请备份资料与设置，使用安装器或完整便携包；不要手动覆盖增量 ZIP。控制台独立安装或完整解压，首次连接仍需在 Memo 中授权；切换控制台语言不会改变 Memo 的语言，也不会恢复模型调用许可。
+升级前请先备份资料和设置，再用安装包或完整便携包升级。
 
 ## 主页一览
 

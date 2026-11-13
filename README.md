@@ -1,8 +1,10 @@
 # Memorive
 
-From reading materials to research records you can verify and reuse.
+Read papers with AI, and check every citation against the original.
 
-Memorive, or memo, is a Windows desktop workspace for personal learning and research. It connects papers, web pages, and research conversations in one workflow: retain the originals, organize information with its sources, ask questions and compare evidence, then keep the conclusions you have reviewed for future work.
+Memorive (memo for short) is a Windows desktop app for students and researchers who work with papers. Import papers, web pages and AI chat logs: Memorive keeps the originals and builds a literature card for each paper with its methods, key numbers, findings and limitations. Ask questions across several papers at once, then open any citation in the answer to jump to the page and passage it came from. Conclusions you have checked go into your knowledge base, ready for later questions.
+
+Connect a cloud model API, a command-line tool you are already signed in to (such as Codex or Claude Code), or a local model through Ollama. Your library and settings are stored on your own computer.
 
 [English](README.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
@@ -10,19 +12,17 @@ Memorive, or memo, is a Windows desktop workspace for personal learning and rese
 
 **v1.03 · Windows 10 22H2 / Windows 11 · x64 · about 205 MB**
 
-**First time here? Choose the main app installer above.** It installs Memorive; plugins and the Test Console are optional extras.
+**First time here? Download the installer above.** Plugins and the Test Console are optional extras.
 
 [Which file should I download?](#download-guide) · [Downloads](https://github.com/KuchinashiYume/Memorive/releases) · [User guide](memorive_desktop/product/desktop/help/en-US/manual-text.md) · [Design](memorive_desktop/product/desktop/help/en-US/design.md) · [Issues](https://github.com/KuchinashiYume/Memorive/issues)
 
-## What changes in v1.03
+## New in v1.03
 
-### Feature update: v1.02.01 → v1.03
+- **Read papers together with an AI agent.** Memorive now ships with the memo-research Skill. Papers that an agent such as Codex or Claude Code has already converted can go straight into Research Q&A without being processed again. You can also hand the current question to an agent to keep reading; its cited answer comes back to the same conversation, where you can carry on asking. The Skill also works on its own, for reading one paper or comparing several.
+- **Test Console in English, Chinese and Japanese**, with a new review-and-results view and shareable summaries.
+- Includes the settings-save fix from v1.02.01.
 
-Research Q&A can reuse originals and converted text prepared by the memo-research Skill, read and compare sources for the current question, and return source-checked answers to the same conversation. The Skill also works independently for one paper or agent-led comparisons. The Test Console adds three languages, a review-and-results view, and shareable summaries.
-
-This version retains the settings-save and three-part version fixes from 1.02.01. The research Skill complements question-led reading and source reuse; no low-latency or full-workflow replacement claim is made. Source integration checks and two real agent returns are recorded separately from package checks; they do not establish scientific quality, full business regression, clean-machine or online-upgrade acceptance.
-
-Back up data and settings before upgrading with the installer or complete portable package; never manually overlay a delta ZIP. Install or fully extract the console separately. First access still requires permission in Memo; changing the console language neither changes Memo language nor restores model-call permission.
+Before upgrading, back up your data and settings, then upgrade with the installer or the complete portable package.
 
 ## Home at a glance
 
