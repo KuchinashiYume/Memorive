@@ -76,6 +76,66 @@ RESET_SCOPE_PREFERENCE_FIELDS = {
 }
 
 
+def _is_text(value: Any, limit: int) -> bool:
+    return isinstance(value, str) and bool(value) and len(value) <= limit
+
+
+def _is_count(value: Any) -> bool:
+    return not isinstance(value, bool) and isinstance(value, int) and value >= 0
+
+
+def _is_number(value: Any) -> bool:
+    return not isinstance(value, bool) and isinstance(value, (int, float))
+
+
+def _is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(c in "0123456789ABCDEF" for c in value)
+
+
+# Optional exam fields that a validation result may carry into its receipt.
+# They are checked and added in this order.
+_VERDICTS = frozenset({"PASS", "FAIL", "DISQUALIFIED"})
+_RECEIPT_TEXT_FIELDS = (
+    "exam_mode", "exam_run_id", "cost_semantics", "score_semantics", "qualification_verdict",
+    "quality_exact_repair_qualification_verdict", "operational_eligibility_verdict",
+    "operational_safety_gate", "operational_policy_revision", "core_lifecycle_revision",
+    "core_closure_verdict", "repair_prompt_projection_revision", "scoring_system_revision",
+    "scoring_projection_revision", "exam_category_id", "role_id", "reference_pack_id",
+    "reference_pack_revision", "scoring_protocol_revision", "comparison_cohort_id",
+    "sample_revision", "output_limit_policy",
+)
+_RECEIPT_CHOICES = (
+    ("qualification_verdict", _VERDICTS),
+    ("quality_exact_repair_qualification_verdict", _VERDICTS),
+    ("operational_eligibility_verdict", frozenset({
+        "SUITABLE", "SUITABLE_WITH_CALIBRATION", "SUITABLE_WITH_GOVERNED_DISPOSITION",
+        "NOT_RECOMMENDED", "REJECT", "NOT_ASSESSED",
+    })),
+    ("operational_safety_gate", frozenset({"PASS", "FAIL", "NOT_ASSESSED"})),
+)
+_RECEIPT_SCORE_FIELDS = (  # field, upper bound
+    ("score_exact", 100.0), ("repair_outcome_score", 100.0), ("core_closure_score", 100.0),
+    ("repair_completion_rate", 1.0), ("exact_case_repair_rate", 1.0),
+    ("case_score_deficit_recovery_rate", 1.0), ("collision_adjusted_repair_diagnostic_rate", 1.0),
+)
+_RECEIPT_SHA256_FIELDS = (
+    "exam_evidence_sha256", "reference_pack_sha256", "scoring_protocol_sha256",
+    "comparison_binding_sha256", "sample_manifest_sha256",
+)
+_RECEIPT_COUNT_FIELDS = (
+    "failed_exam_item_count", "repair_rounds", "semantic_repair_rounds", "structural_repair_turns",
+    "governed_disposition_case_count", "sample_slot", "initial_total_effective_prompt_chars",
+    "safety_blocking_residual_count", "calibration_residual_count",
+    "repair_metadata_collision_suspect_count",
+)
+_RECEIPT_FLAG_FIELDS = (
+    "reference_regression_only", "blind_holdout_eligible", "qualification_eligible",
+    "provider_received_answer_key", "horizontal_comparison_eligible",
+    "horizontal_comparison_allowed_only_with_same_cohort", "cross_category_comparison_forbidden",
+    "global_ranking_forbidden",
+)
+
+
 class SettingsController:
     def __init__(
         self,
@@ -969,29 +1029,19 @@ class SettingsController:
         persistent_mutation: bool,
     ) -> dict[str, Any]:
         reason = result.get("reason", "NONE")
-        if not isinstance(reason, str) or not reason or len(reason) > 256:
+        if not _is_text(reason, 256):
             raise ValueError("MODEL_VALIDATION_REASON_INVALID")
         requested_model = result.get("requested_model")
         returned_model = result.get("returned_model")
         for value in (requested_model, returned_model):
-            if value is not None and (
-                not isinstance(value, str) or not value or len(value) > 256
-            ):
+            if value is not None and not _is_text(value, 256):
                 raise ValueError("MODEL_VALIDATION_MODEL_IDENTITY_INVALID")
         available_models = result.get("available_models", [])
-        if (
-            not isinstance(available_models, (list, tuple))
-            or len(available_models) > 50
-        ):
+        if not isinstance(available_models, (list, tuple)) or len(available_models) > 50:
             raise ValueError("MODEL_VALIDATION_AVAILABLE_MODELS_INVALID")
         normalized_available_models: list[str] = []
         for model_id in available_models:
-            if (
-                not isinstance(model_id, str)
-                or not model_id
-                or len(model_id) > 128
-                or model_id in normalized_available_models
-            ):
+            if not _is_text(model_id, 128) or model_id in normalized_available_models:
                 raise ValueError("MODEL_VALIDATION_AVAILABLE_MODELS_INVALID")
             normalized_available_models.append(model_id)
         suggested_model = result.get("suggested_model")
@@ -1001,217 +1051,71 @@ class SettingsController:
         ):
             raise ValueError("MODEL_VALIDATION_SUGGESTED_MODEL_INVALID")
         model_capability = result.get("model_capability")
-        if model_capability is not None and model_capability not in {
-            "CHAT",
-            "EMBEDDING",
-            "VISION_OCR",
-        }:
+        if model_capability is not None and model_capability not in {"CHAT", "EMBEDDING", "VISION_OCR"}:
             raise ValueError("MODEL_VALIDATION_CAPABILITY_INVALID")
         validation_endpoint_kind = result.get("validation_endpoint_kind")
         if validation_endpoint_kind is not None and validation_endpoint_kind != "MODEL_CATALOG":
             raise ValueError("MODEL_VALIDATION_ENDPOINT_KIND_INVALID")
         duration_ms = result.get("duration_ms", 0)
-        if (
-            isinstance(duration_ms, bool)
-            or not isinstance(duration_ms, int)
-            or duration_ms < 0
-        ):
+        if not _is_count(duration_ms):
             raise ValueError("MODEL_VALIDATION_DURATION_INVALID")
+
+        metadata_invalid = ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
         exam_fields: dict[str, Any] = {}
-        for field in ("exam_mode", "exam_run_id", "cost_semantics"):
+        for field in _RECEIPT_TEXT_FIELDS:
             value = result.get(field)
             if value is not None:
-                if not isinstance(value, str) or not value or len(value) > 160:
-                    raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
+                if not _is_text(value, 160):
+                    raise metadata_invalid
                 exam_fields[field] = value
-        for field in (
-            "score_semantics",
-            "qualification_verdict",
-            "quality_exact_repair_qualification_verdict",
-            "operational_eligibility_verdict",
-            "operational_safety_gate",
-            "operational_policy_revision",
-            "core_lifecycle_revision",
-            "core_closure_verdict",
-            "repair_prompt_projection_revision",
-            "scoring_system_revision",
-            "scoring_projection_revision",
-            "exam_category_id",
-            "role_id",
-            "reference_pack_id",
-            "reference_pack_revision",
-            "scoring_protocol_revision",
-            "comparison_cohort_id",
-            "sample_revision",
-            "output_limit_policy",
-        ):
+        for field, allowed in _RECEIPT_CHOICES:
+            if field in exam_fields and exam_fields[field] not in allowed:
+                raise metadata_invalid
+        for field, maximum in _RECEIPT_SCORE_FIELDS:
             value = result.get(field)
             if value is not None:
-                if not isinstance(value, str) or not value or len(value) > 160:
-                    raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
-                exam_fields[field] = value
-        qualification_verdict = exam_fields.get("qualification_verdict")
-        if qualification_verdict is not None and qualification_verdict not in {
-            "PASS",
-            "FAIL",
-            "DISQUALIFIED",
-        }:
-            raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
-        quality_qualification = exam_fields.get(
-            "quality_exact_repair_qualification_verdict"
-        )
-        if quality_qualification is not None and quality_qualification not in {
-            "PASS",
-            "FAIL",
-            "DISQUALIFIED",
-        }:
-            raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
-        operational_verdict = exam_fields.get(
-            "operational_eligibility_verdict"
-        )
-        if operational_verdict is not None and operational_verdict not in {
-            "SUITABLE",
-            "SUITABLE_WITH_CALIBRATION",
-            "SUITABLE_WITH_GOVERNED_DISPOSITION",
-            "NOT_RECOMMENDED",
-            "REJECT",
-            "NOT_ASSESSED",
-        }:
-            raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
-        operational_safety_gate = exam_fields.get("operational_safety_gate")
-        if operational_safety_gate is not None and operational_safety_gate not in {
-            "PASS",
-            "FAIL",
-            "NOT_ASSESSED",
-        }:
-            raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
-        for field in (
-            "score_exact",
-            "repair_outcome_score",
-            "core_closure_score",
-            "repair_completion_rate",
-            "exact_case_repair_rate",
-            "case_score_deficit_recovery_rate",
-            "collision_adjusted_repair_diagnostic_rate",
-        ):
-            value = result.get(field)
-            if value is not None:
-                maximum = (
-                    1.0
-                    if field
-                    in {
-                        "repair_completion_rate",
-                        "exact_case_repair_rate",
-                        "case_score_deficit_recovery_rate",
-                        "collision_adjusted_repair_diagnostic_rate",
-                    }
-                    else 100.0
-                )
-                if (
-                    isinstance(value, bool)
-                    or not isinstance(value, (int, float))
-                    or not 0.0 <= float(value) <= maximum
-                ):
-                    raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
+                if not _is_number(value) or not 0.0 <= float(value) <= maximum:
+                    raise metadata_invalid
                 exam_fields[field] = float(value)
-        evidence_sha256 = result.get("exam_evidence_sha256")
-        if evidence_sha256 is not None:
-            if (
-                not isinstance(evidence_sha256, str)
-                or len(evidence_sha256) != 64
-                or any(character not in "0123456789ABCDEF" for character in evidence_sha256)
-            ):
-                raise ValueError("MODEL_VALIDATION_EXAM_EVIDENCE_INVALID")
-            exam_fields["exam_evidence_sha256"] = evidence_sha256
-        for field in (
-            "reference_pack_sha256",
-            "scoring_protocol_sha256",
-            "comparison_binding_sha256",
-            "sample_manifest_sha256",
-        ):
+        for field in _RECEIPT_SHA256_FIELDS:
             value = result.get(field)
             if value is not None:
-                if (
-                    not isinstance(value, str)
-                    or len(value) != 64
-                    or any(
-                        character not in "0123456789ABCDEF"
-                        for character in value
-                    )
-                ):
+                if not _is_sha256(value):
                     raise ValueError("MODEL_VALIDATION_EXAM_EVIDENCE_INVALID")
                 exam_fields[field] = value
-        for field in (
-            "failed_exam_item_count",
-            "repair_rounds",
-            "semantic_repair_rounds",
-            "structural_repair_turns",
-            "governed_disposition_case_count",
-            "sample_slot",
-            "initial_total_effective_prompt_chars",
-            "safety_blocking_residual_count",
-            "calibration_residual_count",
-            "repair_metadata_collision_suspect_count",
-        ):
+        for field in _RECEIPT_COUNT_FIELDS:
             value = result.get(field)
             if value is not None:
-                if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-                    raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
+                if not _is_count(value):
+                    raise metadata_invalid
                 exam_fields[field] = value
-        diagnostic_only = result.get(
-            "collision_adjusted_repair_diagnostic_only"
-        )
-        if diagnostic_only is not None:
-            if diagnostic_only is not True:
-                raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
-            exam_fields[
-                "collision_adjusted_repair_diagnostic_only"
-            ] = True
+        if result.get("collision_adjusted_repair_diagnostic_only") is not None:
+            if result["collision_adjusted_repair_diagnostic_only"] is not True:
+                raise metadata_invalid
+            exam_fields["collision_adjusted_repair_diagnostic_only"] = True
         estimated_cost_cny = result.get("estimated_cost_cny")
         if estimated_cost_cny is not None:
-            if (
-                isinstance(estimated_cost_cny, bool)
-                or not isinstance(estimated_cost_cny, (int, float))
-                or estimated_cost_cny < 0
-            ):
+            if not _is_number(estimated_cost_cny) or estimated_cost_cny < 0:
                 raise ValueError("MODEL_VALIDATION_EXAM_COST_INVALID")
             exam_fields["estimated_cost_cny"] = float(estimated_cost_cny)
         if "actual_cost" in result:
-            actual_cost = result.get("actual_cost")
-            if actual_cost is not None:
+            if result.get("actual_cost") is not None:
                 raise ValueError("MODEL_VALIDATION_EXAM_ACTUAL_COST_INVALID")
             exam_fields["actual_cost"] = None
-        for field in (
-            "reference_regression_only",
-            "blind_holdout_eligible",
-            "qualification_eligible",
-            "provider_received_answer_key",
-            "horizontal_comparison_eligible",
-            "horizontal_comparison_allowed_only_with_same_cohort",
-            "cross_category_comparison_forbidden",
-            "global_ranking_forbidden",
-        ):
+        for field in _RECEIPT_FLAG_FIELDS:
             value = result.get(field)
             if value is not None:
                 if not isinstance(value, bool):
-                    raise ValueError("MODEL_VALIDATION_EXAM_METADATA_INVALID")
+                    raise metadata_invalid
                 exam_fields[field] = value
         token_usage = result.get("token_usage")
         if token_usage is not None:
             if not isinstance(token_usage, Mapping):
                 raise ValueError("MODEL_VALIDATION_TOKEN_USAGE_INVALID")
-            normalized_usage: dict[str, int] = {}
             for key, value in token_usage.items():
-                if (
-                    not isinstance(key, str)
-                    or not key
-                    or isinstance(value, bool)
-                    or not isinstance(value, int)
-                    or value < 0
-                ):
+                if not isinstance(key, str) or not key or not _is_count(value):
                     raise ValueError("MODEL_VALIDATION_TOKEN_USAGE_INVALID")
-                normalized_usage[key] = value
-            exam_fields["token_usage"] = normalized_usage
+            exam_fields["token_usage"] = dict(token_usage)
         api_platform = result.get("api_platform")
         if api_platform is not None:
             if api_platform not in KIMI_ENDPOINTS:
@@ -1220,11 +1124,7 @@ class SettingsController:
             if resolved_api_base_url != KIMI_ENDPOINTS[api_platform]:
                 raise ValueError("MODEL_VALIDATION_API_PLATFORM_INVALID")
             platform_probe_count = result.get("platform_probe_count")
-            if (
-                isinstance(platform_probe_count, bool)
-                or not isinstance(platform_probe_count, int)
-                or platform_probe_count not in {1, 2}
-            ):
+            if not _is_count(platform_probe_count) or platform_probe_count not in {1, 2}:
                 raise ValueError("MODEL_VALIDATION_API_PLATFORM_INVALID")
             if (
                 result.get("key_text_inspected") is not False
