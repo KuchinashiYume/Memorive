@@ -637,13 +637,13 @@
     },
     {
       "path": "product/desktop/help/en-US/design.md",
-      "sha256": "31eba152ea8ffdc875471ac26d0c6960610ab660ed9ee8f5ebd444f9c54eda50",
-      "bytes": 85448
+      "sha256": "a4cbe37baaeb72d58daf8c9e2a24fd67ba28ff60f1fe9c2dcc4a4228915a8c80",
+      "bytes": 40521
     },
     {
       "path": "product/desktop/help/en-US/design.pdf",
-      "sha256": "724e8e59e78ae49b732e68d59030b770bef04fa53afe2055ca150fd99c7f04bd",
-      "bytes": 637734
+      "sha256": "884da0e3b85ffb9678524bc217edff3ec8d86424340206aff2fb0d23303896d9",
+      "bytes": 388503
     },
     {
       "path": "product/desktop/help/en-US/index.html",
@@ -857,13 +857,13 @@
     },
     {
       "path": "product/desktop/help/ja-JP/design.md",
-      "sha256": "a4c3cd0090cabb60318a3391f9cfde745358abbcf3caa11c4678b08d53054654",
-      "bytes": 99646
+      "sha256": "5f6fb4d0be65ef28bbf867bd674ed8b18d32db20a74950faa11c483b5e3e7cdf",
+      "bytes": 47670
     },
     {
       "path": "product/desktop/help/ja-JP/design.pdf",
-      "sha256": "91814f71bb6991679f8ae5db0b3673af1b6850a7ac6d6d2aca7199f7960806b5",
-      "bytes": 1127661
+      "sha256": "3e13848e88e86dbd03ac9cbc1d22aed61133a2ecdb1dae0a8dd5dcc84b0b08b6",
+      "bytes": 734961
     },
     {
       "path": "product/desktop/help/ja-JP/index.html",
@@ -1462,288 +1462,288 @@
     },
     {
       "path": "product/desktop/help/web/content.js",
-      "sha256": "ace836a2b6d92065365ca4bea46500ead99dfddaa552bd696aa5d0ce8d7234fc",
-      "bytes": 851732
+      "sha256": "0aaa651adc390f431e0b946a2b447b624446bea885f4f6db371b9d9d449a3c8b",
+      "bytes": 587750
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-01.png",
-      "sha256": "b3c9d8bc1a8bac4d7ad27e3d93eeda58f93a9110c10cadfc1715857a52cb50d8",
-      "bytes": 57023
+      "sha256": "77c0d9db1a2ba66892046471ae9f832265256a318e9b338d4cae77b497de4e83",
+      "bytes": 39117
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-02.png",
-      "sha256": "11c50f6bc27d68e9f5ef0cf8acbfac3aeb933fbb1365a2a2d6a796331c8ac3fd",
-      "bytes": 20151
+      "sha256": "5eaa3021baa050584bb3210d553dd25e8104f32e6807415fd944291aeb7c3d3f",
+      "bytes": 39417
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-03.png",
-      "sha256": "e8ae19955bb8ebd9f62ee79c97dcdd8a871225eb34a97e478f39bacd26964cea",
-      "bytes": 21055
+      "sha256": "bc70cf27107e9e3ce91f46ed7d6808173b7e234a177a1b3861684a0dcfb4db86",
+      "bytes": 35674
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-04.png",
-      "sha256": "575be0ff36d9c539df7b9bfacafb5eac6b87887a42632a2798f2edfac2247464",
-      "bytes": 17461
+      "sha256": "564f5b75c9c82baa50d54df126a793a0872a0974836078b1c8c3169956e6f3ca",
+      "bytes": 42588
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-05.png",
-      "sha256": "f8a20c12f1fd868a932fba4cb35bc70a02352ce14935e83b4810a724462c9988",
-      "bytes": 17849
+      "sha256": "3cbf6d89b724241414acc0179352e0f85d9be88d84d4ec8189598c26bc6c117d",
+      "bytes": 33503
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-06.png",
-      "sha256": "a571de188539767e7227ae3cc4e68460bdd94aa86afcc5226fa0d91afad0e568",
-      "bytes": 23045
+      "sha256": "a96f2772ca25a2303c45b38a31d6e3f0867608ea6372d20e64967b922d1eadd3",
+      "bytes": 40203
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-07.png",
-      "sha256": "aa73ea602c01191711498d6c05e389ac2626bcebd37e117e34b781211ec550e2",
-      "bytes": 20890
+      "sha256": "e57aa1da50f9595166f354c4a34a491461986394c8e1dc176097b1968800ac4f",
+      "bytes": 39896
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-08.png",
-      "sha256": "060e37b62ce70beaaa9e4e2e83581d60efb0dd063e870e5deed2f1a658062041",
-      "bytes": 19204
+      "sha256": "a82a55c3032511687e05f06f1a9e47ed9330ef963f7a27a77992aad3bcafdaf8",
+      "bytes": 41243
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-09.png",
-      "sha256": "396bcfd81576fa35b1937e8d7b6c707eab55f69082025d4d3fc055d8c475a58a",
-      "bytes": 18475
+      "sha256": "343c5db516778983761c36f3c84d7cc92c2a9657747295b585e48af55123669c",
+      "bytes": 42100
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-10.png",
-      "sha256": "525016dda23a9103ece9920fabb75c7da635f447a66ebb353eefc00e6aef7f2a",
-      "bytes": 18483
+      "sha256": "f80fb16b41b8b9c8aff62b717f8f1e46731f2f861f876b3a65de6348965e7797",
+      "bytes": 39644
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-11.png",
-      "sha256": "adbb5bc4fe66eef3ff03613e7b770900706ca78e36373fb64969c0badda5150d",
-      "bytes": 21138
+      "sha256": "3e1cf2d2b5fb0d7fad61f2e32dce50c10fb3c6538b790db1d58c77d05cc1ba5e",
+      "bytes": 43373
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-12.png",
-      "sha256": "baadf25adec436e842982c294099279a2ff54c7f0606e29c4cdc48e7a6712005",
-      "bytes": 17902
+      "sha256": "c78a77621ac949552d0a944e40aec65293bd316cf914326f2bbb2f661823a39a",
+      "bytes": 38862
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-13.png",
-      "sha256": "8b81aea087111c03ac2d7c783c3a967a3fa81b63f884e51271c8c4ec99078b6c",
-      "bytes": 20646
+      "sha256": "ff3356e17a2dcf209fec53a06277fc22d87e09bee3f3ba50a7e61539e0b3c7f7",
+      "bytes": 38053
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-14.png",
-      "sha256": "e2f8b8541ff152ed9eea0d978b01adb21069faf0f647c5d9f8e07c371ebba89e",
-      "bytes": 17249
+      "sha256": "934353f2689f59f3b48a3132b05d792b4683869a1448026e09401dc903c525b5",
+      "bytes": 42331
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-15.png",
-      "sha256": "ea1682ac56ec72e7383b2ec9e43231ec86dc73dffa5830d5b038cd97972f0c63",
-      "bytes": 19214
+      "sha256": "f1ddd4ef3a63ffb2deb189e97acdbd162f308e8c3e1ed4bacd1d56f251850234",
+      "bytes": 43245
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-16.png",
-      "sha256": "8001bff8242b7d247a905ce68cc7eed7db5300cbd6f34b68b615482865c2b086",
-      "bytes": 27368
+      "sha256": "ed8dfe6f7caee2d2ba27b39db5a8c85f3a96cd579937906c6e23fdec3f877377",
+      "bytes": 41732
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-17.png",
-      "sha256": "f6785a0885b20b1f79528523fafac2a0442eea913aa0eac22d2fcf5f741f2d6c",
-      "bytes": 25215
+      "sha256": "28748376c7332534d60b0b243ac41acc26eab45f0618d747ca7b831375f12384",
+      "bytes": 42103
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-18.png",
-      "sha256": "0871ff89b53216c048e35291fabf242bb9d0ad937460a64ee319b1ba14d6851f",
-      "bytes": 24024
+      "sha256": "cbcc119d2f2194f0c54a51845f43780e9660b8c5fe987bf3e3fc538fac6d3918",
+      "bytes": 44545
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-01.png",
-      "sha256": "04258184dd6f8ab4d0420058b3489964c029dc1974aafb4535b889ca0ad50778",
-      "bytes": 52936
+      "sha256": "8fef2fbe8ae5b5719f977daca1b9f635c82ed10473857d1e66c7e20576ac4c5f",
+      "bytes": 42712
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-02.png",
-      "sha256": "3b393f072742bfb940f05c5e6f8c584471eb1a55cf10444c862f9d446328bfd4",
-      "bytes": 19472
+      "sha256": "20397f2488f6b6160346ba1e77a5e49a8c2c6cd7df5c2e87549b91fc00621fba",
+      "bytes": 40256
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-03.png",
-      "sha256": "dfb8a6e1e3eff236b82d1ed31f49b97744b4dc7f1022c81e141300e84458cf98",
-      "bytes": 24359
+      "sha256": "cb1dc8adb5911235544b1594bef5e7db797cb0f092a886fe68f2ff27f8a578cc",
+      "bytes": 37164
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-04.png",
-      "sha256": "0c15b232d4af5cc05a7bf89f7cfd5c1422c500f63e4a9f8fe2f5095a978b1081",
-      "bytes": 24352
+      "sha256": "f417778fc944ad61c96b9cadf6042e154412336f50db1e99f1b59f2d2ceb0ac3",
+      "bytes": 39235
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-05.png",
-      "sha256": "fa2b5c9b45ef4960caa976c32252ae75e1c42307ef853a46fa451dc8b633585f",
-      "bytes": 22235
+      "sha256": "120337aa22f734429416c9a8ed769a7399ac551aefe4e5bda0433303e8b7d3df",
+      "bytes": 36357
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-06.png",
-      "sha256": "f0bd4dec190cbc9c3df3e04a49d376fceb12799dda2810266288cef495f35d23",
-      "bytes": 27032
+      "sha256": "a0a2493e9fbad1fa8e199620dfd6402115a841d4dafde8dc2f3fc93408c24e98",
+      "bytes": 43724
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-07.png",
-      "sha256": "de5af4563b3f7aa875f0c2c89fe6b4cbf3a5981af810736726ecea88acc636a6",
-      "bytes": 21945
+      "sha256": "01c78d8744709233e930bbf2a950ed9255f146b54893e8fcc24073d16f2f89f1",
+      "bytes": 36016
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-08.png",
-      "sha256": "5dd157075525b1d8ba51c284a25e06f6324ff7e5586f4ded4b8875b19811f0c2",
-      "bytes": 25614
+      "sha256": "08f7a75d2337b9f953975bce28babf1eb42b7e456b4ba93190ac2b26828586e6",
+      "bytes": 40871
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-09.png",
-      "sha256": "dd34669efd967698d44185ce94fbbb64f8288eaaa0987b9abe6979ce76d4be89",
-      "bytes": 29321
+      "sha256": "c2d95bbeaacf199270d97d1fff337d221ee91f43ef546cc19dcb45ff66b7ed11",
+      "bytes": 42571
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-10.png",
-      "sha256": "1cefc6570986fe987a2f6944a29d41bba01184fadcfb60c383bb8c18d5c4c66e",
-      "bytes": 29285
+      "sha256": "079e28960953c218febf1a3459aab00ac3268d91507e7035ad8a49bd78be278f",
+      "bytes": 37645
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-11.png",
-      "sha256": "dae8e0be13eea2d064c9b311506749c32320ffeff6e8639cb3a7b1b912a775ef",
-      "bytes": 27300
+      "sha256": "0b18ae4f4b42bf9d7de03ee02ecbd276a610dedf2e8875f71279a1ae550e88c1",
+      "bytes": 44965
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-12.png",
-      "sha256": "6cdfe4a4296756e66cf10b1651e424954ed042930635d44e34d0c3f501c0b7a6",
-      "bytes": 25609
+      "sha256": "43bfb049ba3e67c2f83ad16ec90066cde4c125aa608d4e8b67ebb43a03ccc246",
+      "bytes": 40113
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-13.png",
-      "sha256": "0a7f9230169cc6d69df5a05c92286f93255744f1f42bf9216a6031ca6a9243c6",
-      "bytes": 24808
+      "sha256": "203c3d61782eeaf2a9c98f4484ce07b7ed2ce77233684d764ec1ffd53cbce796",
+      "bytes": 41750
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-14.png",
-      "sha256": "04dcb3fb4441105083259b2c852ae319b2dc12216375aae5c3274f33c3f9cf77",
-      "bytes": 30509
+      "sha256": "4e91f358d17fc23b878f29286147748d21244a5f3ad0e454d02b3e0b82bc629b",
+      "bytes": 43550
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-15.png",
-      "sha256": "05027427140c9393f404a0ccf5fc0eaeac91ef8f9e7180a7213dc2bbc5b07326",
-      "bytes": 21148
+      "sha256": "f02621036db20992b4bf27f82bfcdda788cd0c493c5511a6bc0213b8d43fa0d1",
+      "bytes": 39203
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-16.png",
-      "sha256": "6eda38009c77275244b9388c24daff5b3c1be32414863360b9358a292a093ce6",
-      "bytes": 26992
+      "sha256": "328998b13fcf564ccf424a3dc5a27c3903e0027bd97da686927c6c7cf6b9b67a",
+      "bytes": 39257
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-17.png",
-      "sha256": "19d2bbeaf11816c5650cdc26a24518fb3915d182a897bbc814cc0871289ae37a",
-      "bytes": 31303
+      "sha256": "0ec8aaadbd2ebe95c0978e53c175d3cd50a25dab2c82c06af3c14584048e00ed",
+      "bytes": 40558
     },
     {
       "path": "product/desktop/help/web/design-assets/ja-JP/figure-18.png",
-      "sha256": "2cf4aa7ad7f494ff63ec1412ee41259a4c3009e8c59049c10dd8442317bae548",
-      "bytes": 23667
+      "sha256": "d4108d7ed6ec53e2ccd695e49e0b5cc78978769447163e14090a7527d53233d9",
+      "bytes": 44721
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-01.png",
-      "sha256": "78b122ae7ab7f77d84ab34e6642139a1ba2d37ccab4bd63f882a60f94da5dde5",
-      "bytes": 61741
+      "sha256": "5ad25eea7446cfab5cc313d650c3c4bafada6fd7e759179fcd824357f7590935",
+      "bytes": 35960
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-02.png",
-      "sha256": "4ac526f915e77c8c0eebbc4b2ded91640a24757247fbd9ba6d92f3eecb817409",
-      "bytes": 22343
+      "sha256": "98f77f112537b724a146285bc0a9a8c7bfa5b5d488abc1c396ee1e273351465f",
+      "bytes": 37188
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-03.png",
-      "sha256": "69df2c52b2704263cd5e4d6ef8bd6fbbdd0db3ce8202e1929bf674581bc68e3e",
-      "bytes": 26254
+      "sha256": "6f2f3296efd996d823b63111e999e8fa48baa7f06b7cf00abea5a1be0cf04c88",
+      "bytes": 38247
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-04.png",
-      "sha256": "6ad5db235a58536e57e4fdafd8e10da92b21104341499f6e51f50fba19e2e0aa",
-      "bytes": 25678
+      "sha256": "9934ebd1a4c570004f0af66a032100f06d9c60cf2440b04d9dc369e60eddb732",
+      "bytes": 32861
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-05.png",
-      "sha256": "0f7aadfdd80d5309530843dd17a27c6a6e902ba3723a93a0e132315c75e276ff",
-      "bytes": 28568
+      "sha256": "5982ea79a4463ad9dc70c24b7cf396e15d5d0c6228ba789df4fdc60e9b4c544a",
+      "bytes": 37397
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-06.png",
-      "sha256": "55ae4625897058b7ffd54df4a58ef12c0d91f4bdb7a58a74c75d8905601a22f1",
-      "bytes": 28022
+      "sha256": "fa85fc55098c0ab13348bfab4491557e3188a5d66729343ffcc24e120a8f3922",
+      "bytes": 39403
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-07.png",
-      "sha256": "0bae6e777cf4b92692eb120d5fed50440cedcfb65a38fa654cfbc1fe53d4ab04",
-      "bytes": 24114
+      "sha256": "2cd0b63c70c8e76bf5599928dff9197209a3304ad038779d6d43833bca15e177",
+      "bytes": 34939
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-08.png",
-      "sha256": "efc28ef1f4d79134222ca97419305646c3b2f7bf81f758d9f45fa09b8a348877",
-      "bytes": 25368
+      "sha256": "0ebf8e4b751e9158abbd3555f665afa8b4f6f3c5e3983383cec664e029de0db9",
+      "bytes": 36248
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-09.png",
-      "sha256": "b0a2eaffaae5e07062ab0d4ff6b38374e5e2684533cdd5b02e30e4a0a894bc11",
-      "bytes": 28240
+      "sha256": "3208b861c64df9e054c819a31d1b6d308156d4c91d8b06c954a3798c037a8121",
+      "bytes": 38255
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-10.png",
-      "sha256": "0b3b1df4cdd34cfaf90e9aab61f6d77357950b90f51329ee70144d1237516a3f",
-      "bytes": 28890
+      "sha256": "9e8cce9a38a7657f98c885a3f8d384539262f996ef6c61361be9e21da288ee7f",
+      "bytes": 38007
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-11.png",
-      "sha256": "73ce30c9269b3d45e65b8e78a7a23fe70b18b5ee104bc347ff87894457706e24",
-      "bytes": 25359
+      "sha256": "7024e4765cf06524a82219c90845f325f07ad96352e5d0db81e44e845d01581c",
+      "bytes": 36514
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-12.png",
-      "sha256": "2421bede87a6442ed1fc26d27a4fa25e7636791abf9d470fef51945f3a194305",
-      "bytes": 25444
+      "sha256": "4108b5e286859ba93805ea154313b94f403762add3508f6e354f7e9a04b4a0c9",
+      "bytes": 35890
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-13.png",
-      "sha256": "c1b1a38cd2c55074abbb5e8a5b5d8237d21a1178cf1e7ca90d5baa0e4810a6c9",
-      "bytes": 27624
+      "sha256": "ab5ba10a32655e49f8b31a2f2f53a02f012587febb53f1528887f9f0406c2c80",
+      "bytes": 34955
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-14.png",
-      "sha256": "5405b9fc0fc3d41445f2785a4db4cfe8e09580f961e45f068fa802ff0a76bc5e",
-      "bytes": 29753
+      "sha256": "49dfa3b9b811962da80cb3e737e91fdc41ece16828d044a8fafcad37c6b365f9",
+      "bytes": 40399
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-15.png",
-      "sha256": "1195595ef542453c7826f5576c754b8976befcc42cc15ebb304878afa2b95ebb",
-      "bytes": 23865
+      "sha256": "34087d413e65e07a2617f753d48c9735ad128c13febfb0f7b79c7daf5c522948",
+      "bytes": 37533
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-16.png",
-      "sha256": "387d87394519b0b7326b8a01bc6a73241f224f14b163ef51490ebbed9590cff9",
-      "bytes": 25478
+      "sha256": "0490a8ab8ddc5a09336d2f0ca158292f055b2cffb3b7d22a7f3cb87188e052d5",
+      "bytes": 34707
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-17.png",
-      "sha256": "d9ec7e09fdd9b1f73d16c25b1dfd64cd386b5d70b2ea9fa009531efb99cdbf24",
-      "bytes": 30737
+      "sha256": "c64d0a91e6064a2d771619967a1dc3c86a5ad57dea924febc4eb9048ab6bc44f",
+      "bytes": 39833
     },
     {
       "path": "product/desktop/help/web/design-assets/zh-CN/figure-18.png",
-      "sha256": "c9c9f6166017163173fa1e3a77301c1e98407dc6c29d18f6358cac67f50edc3b",
-      "bytes": 25294
+      "sha256": "950bd12deead17a214695a954e24936b37965fddabd7c9702c89cf65c7ff23dd",
+      "bytes": 36963
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/design.md",
-      "sha256": "31eba152ea8ffdc875471ac26d0c6960610ab660ed9ee8f5ebd444f9c54eda50",
-      "bytes": 85448
+      "sha256": "a4cbe37baaeb72d58daf8c9e2a24fd67ba28ff60f1fe9c2dcc4a4228915a8c80",
+      "bytes": 40521
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/design.pdf",
-      "sha256": "724e8e59e78ae49b732e68d59030b770bef04fa53afe2055ca150fd99c7f04bd",
-      "bytes": 637734
+      "sha256": "884da0e3b85ffb9678524bc217edff3ec8d86424340206aff2fb0d23303896d9",
+      "bytes": 388503
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/manual-text.md",
@@ -1762,13 +1762,13 @@
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/design.md",
-      "sha256": "a4c3cd0090cabb60318a3391f9cfde745358abbcf3caa11c4678b08d53054654",
-      "bytes": 99646
+      "sha256": "5f6fb4d0be65ef28bbf867bd674ed8b18d32db20a74950faa11c483b5e3e7cdf",
+      "bytes": 47670
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/design.pdf",
-      "sha256": "91814f71bb6991679f8ae5db0b3673af1b6850a7ac6d6d2aca7199f7960806b5",
-      "bytes": 1127661
+      "sha256": "3e13848e88e86dbd03ac9cbc1d22aed61133a2ecdb1dae0a8dd5dcc84b0b08b6",
+      "bytes": 734961
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/manual-text.md",
@@ -1787,13 +1787,13 @@
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/design.md",
-      "sha256": "a1757f19fc4a4c16b365dc8fc9029cc8baab3fc1d5cee1250d1c96f5945cf5d0",
-      "bytes": 66117
+      "sha256": "0b0d88650c97851fb7b4b965eda63efa445ede9fa190ae6085e005aeebb316ad",
+      "bytes": 33547
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/design.pdf",
-      "sha256": "ab2ad3ec1d7ffccf8a5eebf209926242b5785912378937e88ce190a98501d63b",
-      "bytes": 956654
+      "sha256": "8ee938d9f37f1f21457fa3aa0cef0d977b6c79ad43142d8613ee32f1a21bc856",
+      "bytes": 759934
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/manual-text.md",
@@ -1992,13 +1992,13 @@
     },
     {
       "path": "product/desktop/help/zh-CN/design.md",
-      "sha256": "a1757f19fc4a4c16b365dc8fc9029cc8baab3fc1d5cee1250d1c96f5945cf5d0",
-      "bytes": 66117
+      "sha256": "0b0d88650c97851fb7b4b965eda63efa445ede9fa190ae6085e005aeebb316ad",
+      "bytes": 33547
     },
     {
       "path": "product/desktop/help/zh-CN/design.pdf",
-      "sha256": "ab2ad3ec1d7ffccf8a5eebf209926242b5785912378937e88ce190a98501d63b",
-      "bytes": 956654
+      "sha256": "8ee938d9f37f1f21457fa3aa0cef0d977b6c79ad43142d8613ee32f1a21bc856",
+      "bytes": 759934
     },
     {
       "path": "product/desktop/help/zh-CN/index.html",
