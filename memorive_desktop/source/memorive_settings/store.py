@@ -31,6 +31,36 @@ class SettingsCorrupt(RuntimeError):
 
 _LOCKS_GUARD = Lock()
 _PROFILE_LOCKS: dict[str, Any] = {}
+_ENVELOPE_FIELDS = frozenset(
+    {"schema_version", "revision", "template_id", "updated_at", "settings", "settings_sha256"}
+)
+
+# Files written by earlier releases, keyed by the "schema_version" at the top of
+# the file: file version, receipt version, whether missing preferences and the
+# external library provider are filled in, and the receipt fields of that step.
+_OLD_FILES = {
+    "SettingsTemplate-v1": (1, "v1", True, lambda shape: {}),
+    "SettingsStoreEnvelope-v2": (2, "v2", True, lambda shape: {}),
+    "SettingsStoreEnvelope-v3": (
+        3, "v3", True, lambda shape: {"external_library_provider_migrated": True},
+    ),
+    "SettingsStoreEnvelope-v4": (4, "v5", False, lambda shape: {
+        "embedding_profile_moved": shape["embedding_profile_moved"],
+        "legacy_context_profile_ref": shape["legacy_context_profile_ref"],
+        "context_pack_independent_profile": True,
+        "reranker_profile_preserved": shape["reranker_profile_preserved"],
+    }),
+    "SettingsStoreEnvelope-v5": (5, "v6", False, lambda shape: {
+        "embedding_profile_preserved": shape["embedding_profile_moved"],
+        "legacy_derived_context_binding_removed": True,
+        "context_pack_profile_ref": None,
+        "profile_source_node_id": None,
+    }),
+    "SettingsStoreEnvelope-v6": (6, "v7", False, lambda shape: {
+        "added_nodes": ["data_review", "logic_review"],
+        "old_task_snapshots_modified": False,
+    }),
+}
 
 
 class SettingsStore:
@@ -99,15 +129,7 @@ class SettingsStore:
     def _validate_envelope(self, value: Any) -> dict[str, Any]:
         if not isinstance(value, Mapping):
             raise SettingsCorrupt("SETTINGS_ENVELOPE_TYPE_INVALID")
-        required = {
-            "schema_version",
-            "revision",
-            "template_id",
-            "updated_at",
-            "settings",
-            "settings_sha256",
-        }
-        if set(value) != required:
+        if set(value) != _ENVELOPE_FIELDS:
             raise SettingsCorrupt("SETTINGS_ENVELOPE_FIELDS_INVALID")
         if value["schema_version"] != STORE_SCHEMA_VERSION:
             raise SettingsCorrupt("SETTINGS_STORE_SCHEMA_UNSUPPORTED")
@@ -119,63 +141,46 @@ class SettingsStore:
             raise SettingsCorrupt("SETTINGS_CHECKSUM_MISMATCH")
         return {**dict(value), "settings": accepted}
 
-    def _migrate_v1(self, value: Mapping[str, Any]) -> dict[str, Any]:
-        if set(value) != {"schema_version", "revision", "settings"}:
-            raise SettingsCorrupt("SETTINGS_V1_FIELDS_INVALID")
-        settings = deepcopy(value["settings"])
+    def _migrate(self, value: Mapping[str, Any]) -> dict[str, Any]:
+        version, receipt, fill_defaults, receipt_fields = _OLD_FILES[value["schema_version"]]
+        if version == 1:
+            # v1 has no envelope and no checksum: the template plus a revision.
+            if set(value) != {"schema_version", "revision", "settings"}:
+                raise SettingsCorrupt("SETTINGS_V1_FIELDS_INVALID")
+            settings = deepcopy(value["settings"])
+        else:
+            if set(value) != _ENVELOPE_FIELDS:
+                raise SettingsCorrupt(f"SETTINGS_V{version}_FIELDS_INVALID")
+            settings = value["settings"]
+            if (
+                not isinstance(settings, Mapping)
+                or settings.get("schema_version") != f"SettingsTemplate-v{version}"
+            ):
+                raise SettingsCorrupt(f"SETTINGS_V{version}_TEMPLATE_INVALID")
+            if value["settings_sha256"] != canonical_sha256(settings):
+                raise SettingsCorrupt(f"SETTINGS_V{version}_CHECKSUM_MISMATCH")
+            settings = deepcopy(settings)
         settings["schema_version"] = SETTINGS_SCHEMA_VERSION
-        settings.setdefault("credential_references", [])
-        defaults = self.default_factory()
-        preferences = settings.setdefault("preferences", {})
-        for key, default in defaults["preferences"].items():
-            preferences.setdefault(key, deepcopy(default))
-        self._upgrade_external_library(settings)
-        self._upgrade_current_shape(settings)
+        if version == 1:
+            settings.setdefault("credential_references", [])
+        if fill_defaults:
+            defaults = self.default_factory()
+            preferences = settings.setdefault("preferences", {})
+            for key, default in defaults["preferences"].items():
+                preferences.setdefault(key, deepcopy(default))
+            self._upgrade_external_library(settings)
+        shape = self._upgrade_current_shape(settings)
         migrated = self._envelope(settings, int(value["revision"]) + 1)
         self._atomic_write(self.path, migrated)
         self._atomic_write(
             self.migration_receipt_path,
             {
-                "schema_version": "SettingsMigrationReceipt-v1",
-                "from_schema": "SettingsTemplate-v1",
+                "schema_version": f"SettingsMigrationReceipt-{receipt}",
+                "from_schema": f"SettingsTemplate-v{version}",
                 "to_schema": SETTINGS_SCHEMA_VERSION,
                 "result_revision": migrated["revision"],
                 "settings_sha256": migrated["settings_sha256"],
-                "status": "PASS",
-            },
-        )
-        return migrated
-
-    def _migrate_v2(self, value: Mapping[str, Any]) -> dict[str, Any]:
-        required = {
-            "schema_version", "revision", "template_id", "updated_at",
-            "settings", "settings_sha256",
-        }
-        if set(value) != required or value.get("schema_version") != "SettingsStoreEnvelope-v2":
-            raise SettingsCorrupt("SETTINGS_V2_FIELDS_INVALID")
-        settings = deepcopy(value["settings"])
-        if not isinstance(settings, Mapping) or settings.get("schema_version") != "SettingsTemplate-v2":
-            raise SettingsCorrupt("SETTINGS_V2_TEMPLATE_INVALID")
-        if value.get("settings_sha256") != canonical_sha256(settings):
-            raise SettingsCorrupt("SETTINGS_V2_CHECKSUM_MISMATCH")
-        defaults = self.default_factory()
-        settings = deepcopy(settings)
-        settings["schema_version"] = SETTINGS_SCHEMA_VERSION
-        preferences = settings.setdefault("preferences", {})
-        for key, default in defaults["preferences"].items():
-            preferences.setdefault(key, deepcopy(default))
-        self._upgrade_external_library(settings)
-        self._upgrade_current_shape(settings)
-        migrated = self._envelope(settings, int(value["revision"]) + 1)
-        self._atomic_write(self.path, migrated)
-        self._atomic_write(
-            self.migration_receipt_path,
-            {
-                "schema_version": "SettingsMigrationReceipt-v2",
-                "from_schema": "SettingsTemplate-v2",
-                "to_schema": SETTINGS_SCHEMA_VERSION,
-                "result_revision": migrated["revision"],
-                "settings_sha256": migrated["settings_sha256"],
+                **receipt_fields(shape),
                 "status": "PASS",
             },
         )
@@ -278,139 +283,6 @@ class SettingsStore:
             ),
         }
 
-    def _migrate_v3(self, value: Mapping[str, Any]) -> dict[str, Any]:
-        required = {
-            "schema_version", "revision", "template_id", "updated_at",
-            "settings", "settings_sha256",
-        }
-        if set(value) != required or value.get("schema_version") != "SettingsStoreEnvelope-v3":
-            raise SettingsCorrupt("SETTINGS_V3_FIELDS_INVALID")
-        settings = value.get("settings")
-        if not isinstance(settings, Mapping) or settings.get("schema_version") != "SettingsTemplate-v3":
-            raise SettingsCorrupt("SETTINGS_V3_TEMPLATE_INVALID")
-        if value.get("settings_sha256") != canonical_sha256(settings):
-            raise SettingsCorrupt("SETTINGS_V3_CHECKSUM_MISMATCH")
-        upgraded = deepcopy(settings)
-        upgraded["schema_version"] = SETTINGS_SCHEMA_VERSION
-        self._upgrade_external_library(upgraded)
-        defaults = self.default_factory()
-        preferences = upgraded.setdefault("preferences", {})
-        for key, default in defaults["preferences"].items():
-            preferences.setdefault(key, deepcopy(default))
-        self._upgrade_current_shape(upgraded)
-        migrated = self._envelope(upgraded, int(value["revision"]) + 1)
-        self._atomic_write(self.path, migrated)
-        self._atomic_write(
-            self.migration_receipt_path,
-            {
-                "schema_version": "SettingsMigrationReceipt-v3",
-                "from_schema": "SettingsTemplate-v3",
-                "to_schema": SETTINGS_SCHEMA_VERSION,
-                "result_revision": migrated["revision"],
-                "settings_sha256": migrated["settings_sha256"],
-                "external_library_provider_migrated": True,
-                "status": "PASS",
-            },
-        )
-        return migrated
-
-    def _migrate_v4(self, value: Mapping[str, Any]) -> dict[str, Any]:
-        required = {
-            "schema_version", "revision", "template_id", "updated_at",
-            "settings", "settings_sha256",
-        }
-        if set(value) != required or value.get("schema_version") != "SettingsStoreEnvelope-v4":
-            raise SettingsCorrupt("SETTINGS_V4_FIELDS_INVALID")
-        settings = value.get("settings")
-        if not isinstance(settings, Mapping) or settings.get("schema_version") != "SettingsTemplate-v4":
-            raise SettingsCorrupt("SETTINGS_V4_TEMPLATE_INVALID")
-        if value.get("settings_sha256") != canonical_sha256(settings):
-            raise SettingsCorrupt("SETTINGS_V4_CHECKSUM_MISMATCH")
-        upgraded = deepcopy(settings)
-        upgraded["schema_version"] = SETTINGS_SCHEMA_VERSION
-        metadata = self._upgrade_current_shape(upgraded)
-        migrated = self._envelope(upgraded, int(value["revision"]) + 1)
-        self._atomic_write(self.path, migrated)
-        self._atomic_write(
-            self.migration_receipt_path,
-            {
-                "schema_version": "SettingsMigrationReceipt-v5",
-                "from_schema": "SettingsTemplate-v4",
-                "to_schema": SETTINGS_SCHEMA_VERSION,
-                "result_revision": migrated["revision"],
-                "settings_sha256": migrated["settings_sha256"],
-                "embedding_profile_moved": metadata["embedding_profile_moved"],
-                "legacy_context_profile_ref": metadata["legacy_context_profile_ref"],
-                "context_pack_independent_profile": True,
-                "reranker_profile_preserved": metadata[
-                    "reranker_profile_preserved"
-                ],
-                "status": "PASS",
-            },
-        )
-        return migrated
-
-    def _migrate_v5(self, value: Mapping[str, Any]) -> dict[str, Any]:
-        required = {
-            "schema_version", "revision", "template_id", "updated_at",
-            "settings", "settings_sha256",
-        }
-        if (
-            set(value) != required
-            or value.get("schema_version") != "SettingsStoreEnvelope-v5"
-        ):
-            raise SettingsCorrupt("SETTINGS_V5_FIELDS_INVALID")
-        settings = value.get("settings")
-        if (
-            not isinstance(settings, Mapping)
-            or settings.get("schema_version") != "SettingsTemplate-v5"
-        ):
-            raise SettingsCorrupt("SETTINGS_V5_TEMPLATE_INVALID")
-        if value.get("settings_sha256") != canonical_sha256(settings):
-            raise SettingsCorrupt("SETTINGS_V5_CHECKSUM_MISMATCH")
-        upgraded = deepcopy(settings)
-        upgraded["schema_version"] = SETTINGS_SCHEMA_VERSION
-        metadata = self._upgrade_current_shape(upgraded)
-        migrated = self._envelope(upgraded, int(value["revision"]) + 1)
-        self._atomic_write(self.path, migrated)
-        self._atomic_write(
-            self.migration_receipt_path,
-            {
-                "schema_version": "SettingsMigrationReceipt-v6",
-                "from_schema": "SettingsTemplate-v5",
-                "to_schema": SETTINGS_SCHEMA_VERSION,
-                "result_revision": migrated["revision"],
-                "settings_sha256": migrated["settings_sha256"],
-                "embedding_profile_preserved": (
-                    metadata["embedding_profile_moved"]
-                ),
-                "legacy_derived_context_binding_removed": True,
-                "context_pack_profile_ref": None,
-                "profile_source_node_id": None,
-                "status": "PASS",
-            },
-        )
-        return migrated
-
-    def _migrate_v6(self, value):
-        if set(value) != {'schema_version','revision','template_id','updated_at','settings','settings_sha256'}:
-            raise SettingsCorrupt('SETTINGS_V6_FIELDS_INVALID')
-        settings=value.get('settings')
-        if not isinstance(settings, Mapping) or settings.get('schema_version')!='SettingsTemplate-v6':
-            raise SettingsCorrupt('SETTINGS_V6_TEMPLATE_INVALID')
-        if value['settings_sha256']!=canonical_sha256(settings):
-            raise SettingsCorrupt('SETTINGS_V6_CHECKSUM_MISMATCH')
-        upgraded=deepcopy(settings);upgraded['schema_version']=SETTINGS_SCHEMA_VERSION
-        self._upgrade_current_shape(upgraded)
-        migrated=self._envelope(upgraded,int(value['revision'])+1)
-        self._atomic_write(self.path,migrated)
-        self._atomic_write(self.migration_receipt_path,{
-            'schema_version':'SettingsMigrationReceipt-v7','from_schema':'SettingsTemplate-v6',
-            'to_schema':SETTINGS_SCHEMA_VERSION,'result_revision':migrated['revision'],
-            'settings_sha256':migrated['settings_sha256'],'added_nodes':['data_review','logic_review'],
-            'old_task_snapshots_modified':False,'status':'PASS'})
-        return migrated
-
     def _recover(self, raw: bytes, reason: str) -> dict[str, Any]:
         digest = hashlib.sha256(raw).hexdigest().upper()
         quarantine = self.profile_root / f"settings.corrupt.{digest[:16]}.json"
@@ -444,33 +316,9 @@ class SettingsStore:
         raw = self.path.read_bytes()
         try:
             value = json.loads(raw.decode("utf-8"))
-            if isinstance(value, Mapping) and value.get("schema_version")=="SettingsStoreEnvelope-v6":
-                return deepcopy(self._migrate_v6(value))
-            if (
-                isinstance(value, Mapping)
-                and value.get("schema_version") == "SettingsTemplate-v1"
-            ):
-                return deepcopy(self._migrate_v1(value))
-            if (
-                isinstance(value, Mapping)
-                and value.get("schema_version") == "SettingsStoreEnvelope-v2"
-            ):
-                return deepcopy(self._migrate_v2(value))
-            if (
-                isinstance(value, Mapping)
-                and value.get("schema_version") == "SettingsStoreEnvelope-v3"
-            ):
-                return deepcopy(self._migrate_v3(value))
-            if (
-                isinstance(value, Mapping)
-                and value.get("schema_version") == "SettingsStoreEnvelope-v4"
-            ):
-                return deepcopy(self._migrate_v4(value))
-            if (
-                isinstance(value, Mapping)
-                and value.get("schema_version") == "SettingsStoreEnvelope-v5"
-            ):
-                return deepcopy(self._migrate_v5(value))
+            schema = value.get("schema_version") if isinstance(value, Mapping) else None
+            if isinstance(schema, str) and schema in _OLD_FILES:
+                return deepcopy(self._migrate(value))
             return deepcopy(self._validate_envelope(value))
         except OSError:
             # A failed migration write is an I/O failure, not corrupt settings.
