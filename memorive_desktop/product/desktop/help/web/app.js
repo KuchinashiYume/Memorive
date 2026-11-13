@@ -70,7 +70,7 @@
     $("tab-guide").setAttribute("aria-selected",String(state.doc==="manual"));$("tab-design").setAttribute("aria-selected",String(state.doc==="design"));
     $("search").placeholder=u.search;$("nav-caption").textContent=u.all;$("offline-status").textContent=t.offline;
     $("breadcrumb-document").textContent=state.doc==="manual"?u.guide:u.design;$("toc-title").textContent=u.contents;
-    $("source-note").textContent=u.reference;
+    const sourceNote=$("source-note");sourceNote.textContent=u.reference||"";sourceNote.hidden=!u.reference;
     $("smaller").title=u.small;$("smaller").setAttribute("aria-label",u.small);$("larger").title=u.large;$("larger").setAttribute("aria-label",u.large);
     $("print").title=u.print;$("print").setAttribute("aria-label",u.print);$("copy-link").title=u.copy;$("copy-link").setAttribute("aria-label",u.copy);
     $("download-md").textContent=state.doc==="manual"?u.download:t.designMd;$("replace-md").textContent=u.replace;$("restore-md").textContent=u.restore;

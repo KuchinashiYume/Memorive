@@ -917,8 +917,8 @@
     },
     {
       "path": "product/desktop/help/web/app.js",
-      "sha256": "cdaaaccfa9ba3ea628f1d6860f323376e50718f1e4a236579400ab6b1c182a83",
-      "bytes": 13814
+      "sha256": "731e586aeb6abbdbfd3fad725ca847eac1902672a34d010cdc8222ea8baddac6",
+      "bytes": 13877
     },
     {
       "path": "product/desktop/help/web/assets/en-US/api-route.svg",
@@ -1462,8 +1462,8 @@
     },
     {
       "path": "product/desktop/help/web/content.js",
-      "sha256": "0aaa651adc390f431e0b946a2b447b624446bea885f4f6db371b9d9d449a3c8b",
-      "bytes": 587750
+      "sha256": "ebce5acf3050e37f2831cc0dc89d3d85e4a6d413761f91eabf7a4f4149a9de03",
+      "bytes": 587503
     },
     {
       "path": "product/desktop/help/web/design-assets/en-US/figure-01.png",

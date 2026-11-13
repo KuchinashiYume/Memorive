@@ -165,12 +165,12 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/app.js",
       "destination": "help/web/app.js",
-      "sha256": "cdaaaccfa9ba3ea628f1d6860f323376e50718f1e4a236579400ab6b1c182a83"
+      "sha256": "731e586aeb6abbdbfd3fad725ca847eac1902672a34d010cdc8222ea8baddac6"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/content.js",
       "destination": "help/web/content.js",
-      "sha256": "0aaa651adc390f431e0b946a2b447b624446bea885f4f6db371b9d9d449a3c8b"
+      "sha256": "ebce5acf3050e37f2831cc0dc89d3d85e4a6d413761f91eabf7a4f4149a9de03"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/index.html",
