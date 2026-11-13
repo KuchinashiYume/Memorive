@@ -42,8 +42,8 @@
     },
     {
       "path": "RELEASE_NOTES.md",
-      "sha256": "6ae11c5cc50ef83bc47007028ceafe90d423108f1f8b41bbe15f52782d269690",
-      "bytes": 6192
+      "sha256": "51745897a9549ccb30316f9d91d5249fbe6e7528c93a1a1556e0023da1dcdb2e",
+      "bytes": 4569
     },
     {
       "path": "RELEASE_PREPARATION.md",
@@ -2192,8 +2192,8 @@
     },
     {
       "path": "release_materials/RELEASE_NOTES.md",
-      "sha256": "6ae11c5cc50ef83bc47007028ceafe90d423108f1f8b41bbe15f52782d269690",
-      "bytes": 6192
+      "sha256": "51745897a9549ccb30316f9d91d5249fbe6e7528c93a1a1556e0023da1dcdb2e",
+      "bytes": 4569
     },
     {
       "path": "release_materials/RELEASE_PREPARATION.md",
