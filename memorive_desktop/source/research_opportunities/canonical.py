@@ -106,37 +106,3 @@ def typed_payload_hash(value: Mapping[str, Any]) -> dict[str, str]:
         "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
         "value": sha256_bytes(canonical_json_bytes(payload)),
     }
-
-
-def with_content_hash(value: Mapping[str, Any]) -> dict[str, Any]:
-    result = deepcopy(dict(value))
-    result.pop("content_hash", None)
-    result["content_hash"] = typed_payload_hash(result)
-    return result
-
-
-def content_hash_matches(value: Mapping[str, Any]) -> bool:
-    supplied = value.get("content_hash")
-    return isinstance(supplied, dict) and supplied == typed_payload_hash(value)
-
-
-def external_hash_is_valid(value: Any) -> bool:
-    return (
-        isinstance(value, dict)
-        and set(value) == {"algorithm", "hash_kind", "scope", "value"}
-        and value.get("algorithm") == "sha256"
-        and isinstance(value.get("hash_kind"), str)
-        and bool(value["hash_kind"].strip())
-        and isinstance(value.get("scope"), str)
-        and bool(value["scope"].strip())
-        and isinstance(value.get("value"), str)
-        and bool(_SHA256_RE.fullmatch(value["value"]))
-    )
-
-
-def typed_hash_is_valid(value: Any) -> bool:
-    return (
-        external_hash_is_valid(value)
-        and value["hash_kind"] == "rfc8785_jcs_sha256"
-        and value["scope"] == "PAYLOAD_EXCLUDING_CONTENT_HASH"
-    )

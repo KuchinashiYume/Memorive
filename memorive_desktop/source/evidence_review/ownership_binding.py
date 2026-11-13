@@ -32,17 +32,6 @@ class OwnershipReviewTask:
     ownership_propagation_receipt: dict
 
 
-def compute_analysis_binding_hash(analysis_result: Any) -> str:
-    raw = getattr(analysis_result, "ownership_snapshot", None)
-    if not isinstance(raw, Mapping):
-        raise OwnershipContractError(
-            OWNERSHIP_BINDING_MISMATCH,
-            "AnalysisResult lacks an immutable ownership snapshot",
-        )
-    snapshot = OwnershipGuard.validate(OwnershipSnapshot.from_dict(raw))
-    return stable_sha256(analysis_binding_payload(analysis_result, snapshot=snapshot))
-
-
 def build_ownership_review_task(
     analysis_result: Any,
     *,
@@ -188,5 +177,4 @@ def build_ownership_review_task(
 __all__ = [
     "OwnershipReviewTask",
     "build_ownership_review_task",
-    "compute_analysis_binding_hash",
 ]

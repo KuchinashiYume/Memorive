@@ -201,10 +201,6 @@ def webview_storage_selection(state_dir: Path) -> dict[str, Any]:
     }
 
 
-def webview_storage_path(state_dir: Path) -> Path:
-    return Path(webview_storage_selection(state_dir)["storage_path"])
-
-
 def install_webview_diagnostics(
     evidence_dir: Path, selection: dict[str, Any]
 ) -> tuple[logging.Handler, Path]:
@@ -649,18 +645,6 @@ def capture_packaged_visual_qa(
         "settings": settings_result,
         "status": "PASS" if all(value == "PASS" for value in statuses) else "FAIL",
     }
-
-
-def capture_visual_qa_compatibility(
-    window: webview.Window, evidence_dir: Path, phase: str
-) -> dict[str, Any]:
-    """Compatibility wrapper for frozen visual-check test callers."""
-    return capture_packaged_visual_qa(
-        window,
-        evidence_dir,
-        phase,
-        evidence_prefix="visual-check_visual",
-    )
 
 
 def configure_assistant_native(
@@ -2304,37 +2288,6 @@ def invoke_assistant_native_auto_blink(window: webview.Window) -> dict[str, Any]
         **holder,
         "status": "PASS",
     }
-
-
-def invoke_assistant_native_primary_click(window: webview.Window) -> dict[str, Any]:
-    from ctypes import wintypes
-
-    ready_deadline = time.monotonic() + 4.0
-    before = inspect_assistant_native_interaction(window)
-    while before["animation_locked"] and time.monotonic() < ready_deadline:
-        time.sleep(0.05)
-        before = inspect_assistant_native_interaction(window)
-    if before["animation_locked"]:
-        raise RuntimeError("ASSISTANT_NATIVE_PRIMARY_CLICK_LOCKED")
-    handle = int(before["picture_handle"])
-    user32 = ctypes.windll.user32
-    user32.SendMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
-    user32.SendMessageW.restype = wintypes.LPARAM
-    # Client coordinates are only used to construct a normal WinForms mouse
-    # event; the native handler determines click-versus-drag from cursor delta.
-    coordinate = (24 << 16) | 24
-    user32.SendMessageW(handle, 0x0201, 0x0001, coordinate)  # WM_LBUTTONDOWN
-    user32.SendMessageW(handle, 0x0202, 0x0000, coordinate)  # WM_LBUTTONUP
-    deadline = time.monotonic() + 5.0
-    while time.monotonic() < deadline:
-        after = inspect_assistant_native_interaction(window)
-        if (
-            after["primary_activation_count"] == before["primary_activation_count"] + 1
-            and after["interaction_animation_count"] == before["interaction_animation_count"] + 1
-        ):
-            return {"before": before, "after": after, "status": "PASS"}
-        time.sleep(0.05)
-    raise RuntimeError("ASSISTANT_NATIVE_PRIMARY_CLICK_TIMEOUT")
 
 
 def invoke_assistant_physical_primary_click(window: webview.Window) -> dict[str, Any]:

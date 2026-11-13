@@ -11,8 +11,6 @@ from typing import Any, Mapping, Sequence
 from .canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from .errors import (
     ContractViolation,
-    EmbeddingProfileError,
-    SourceEligibilityError,
     SourceSnapshotDriftError,
 )
 
@@ -74,43 +72,12 @@ def require_non_empty_string(value: Any, field_name: str) -> str:
     return value
 
 
-def require_storage_token(value: Any, field_name: str) -> str:
-    """Validate a path-independent token allowed by the normative storage-key grammar."""
-
-    token = require_non_empty_string(value, field_name)
-    if len(token) > 256 or not _STORAGE_TOKEN_RE.fullmatch(token):
-        raise ContractViolation(f"{field_name} is not a valid storage identity token")
-    return token
-
-
 def require_sha256(value: Any, field_name: str) -> str:
     """Validate one uppercase 64-character SHA-256 hexadecimal digest."""
 
     if not isinstance(value, str) or not _SHA256_RE.fullmatch(value):
         raise ContractViolation(f"{field_name} must be uppercase SHA-256 hex")
     return value
-
-
-def require_vector_id(value: Any, field_name: str = "vector_id") -> str:
-    """Validate the normative ``fv1_`` plus lowercase SHA-256 vector identity."""
-
-    if not isinstance(value, str) or not _VECTOR_ID_RE.fullmatch(value):
-        raise ContractViolation(f"{field_name} must match ^fv1_[a-f0-9]{{64}}$")
-    return value
-
-
-def require_utc_timestamp(value: Any, field_name: str) -> str:
-    """Validate a timezone-aware ISO-8601 timestamp whose explicit offset is UTC."""
-
-    text = require_non_empty_string(value, field_name)
-    normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
-    try:
-        parsed = datetime.fromisoformat(normalized)
-    except ValueError as exc:
-        raise ContractViolation(f"{field_name} must be ISO-8601") from exc
-    if parsed.tzinfo is None or parsed.utcoffset() != timedelta(0):
-        raise ContractViolation(f"{field_name} must carry an explicit UTC offset")
-    return text
 
 
 def require_non_empty_refs(value: Any, field_name: str) -> list[str]:
@@ -139,13 +106,6 @@ def validate_hash_descriptor(value: Any, field_name: str) -> dict[str, str]:
         )
     require_sha256(descriptor["value"], f"{field_name}.value")
     return descriptor
-
-
-def make_vector_id(identity_payload: Mapping[str, Any]) -> str:
-    """Derive the normative lowercase ``fv1_`` vector ID from exact identity fields."""
-
-    payload = deepcopy(dict(_mapping(identity_payload, "identity_payload")))
-    return "fv1_" + sha256_bytes(canonical_json_bytes(payload)).lower()
 
 
 def make_value_hash(canonical_value: str) -> dict[str, str]:
@@ -181,74 +141,3 @@ def verify_hashed_payload(
             context={"expected": expected["value"], "observed": supplied["value"]},
         )
     return value
-
-
-def validate_embedding_profile(profile: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate the normative offline fixture profile without accepting provider routes."""
-
-    result = deepcopy(dict(_mapping(profile, "profile")))
-    _exact_keys(result, _PROFILE_KEYS, "profile")
-    require_storage_token(result["embedding_profile_id"], "profile.embedding_profile_id")
-    require_storage_token(result["embedding_model_id"], "profile.embedding_model_id")
-    if result["embedding_model_id"] != "fixture-hash-vector-v2":
-        raise EmbeddingProfileError("only fixture-hash-vector-v2 is allowed; regenerate older offline fixture vectors")
-    dimension = result["embedding_dimension"]
-    if isinstance(dimension, bool) or not isinstance(dimension, int) or not 1 <= dimension <= 65536:
-        raise EmbeddingProfileError("embedding_dimension must be an integer in [1, 65536]")
-    if result["embedding_normalization"] not in {"none", "l2"}:
-        raise EmbeddingProfileError("embedding_normalization must be none or l2")
-    version = result["index_version"]
-    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
-        raise EmbeddingProfileError("profile.index_version must be a positive integer")
-    profile_id = result["embedding_profile_id"]
-    if not (profile_id.startswith("offline:") or profile_id.startswith("local-only:")):
-        raise EmbeddingProfileError("fixture profile must be offline: or local-only:")
-    return result
-
-
-def validate_ownership_partition(
-    ownership: str,
-    profile: Mapping[str, Any],
-    index_id: str,
-    collection_id: str,
-) -> None:
-    """Enforce self versus entrusted profile/index/collection separation."""
-
-    if ownership not in {"self", "entrusted"}:
-        raise SourceEligibilityError("DATA_OWNERSHIP_UNKNOWN")
-    checked_profile = validate_embedding_profile(profile)
-    checked_index_id = require_storage_token(index_id, "index_id")
-    checked_collection = require_storage_token(collection_id, "collection_id")
-    profile_local = checked_profile["embedding_profile_id"].startswith("local-only:")
-    index_local = checked_index_id.startswith("local-only:")
-    collection_local = checked_collection.startswith("local-only:")
-    if ownership == "entrusted" and not (profile_local and index_local and collection_local):
-        raise EmbeddingProfileError(
-            "entrusted requires local-only: profile, index and collection"
-        )
-    if ownership == "self" and (profile_local or index_local or collection_local):
-        raise EmbeddingProfileError("self data must not enter a local-only: partition")
-
-
-def validate_index_identity(index_identity: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate a typed, non-production card-field candidate index identity."""
-
-    result = deepcopy(dict(_mapping(index_identity, "index_identity")))
-    _exact_keys(result, _INDEX_KEYS, "index_identity")
-    verify_hashed_payload(result, "index_identity")
-    require_storage_token(result["index_id"], "index_identity.index_id")
-    require_storage_token(result["collection_id"], "index_identity.collection_id")
-    version = result["version"]
-    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
-        raise ContractViolation("index_identity.version must be a positive integer")
-    require_utc_timestamp(result["build_cutoff_at"], "index_identity.build_cutoff_at")
-    if result["vector_type"] != "card_field":
-        raise ContractViolation("index_identity.vector_type must be card_field")
-    require_non_empty_string(result["field_registry_id"], "index_identity.field_registry_id")
-    registry_version = result["field_registry_version"]
-    if isinstance(registry_version, bool) or not isinstance(registry_version, int) or registry_version < 1:
-        raise ContractViolation("field_registry_version must be a positive integer")
-    require_sha256(result["field_registry_hash"], "index_identity.field_registry_hash")
-    if result["production_eligible"] is not False:
-        raise ContractViolation("candidate index must have production_eligible=false")
-    return result

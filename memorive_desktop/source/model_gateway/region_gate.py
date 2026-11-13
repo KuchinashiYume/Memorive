@@ -191,10 +191,6 @@ def _route_context(slot) -> dict:
     }
 
 
-def _route_binding(slot) -> str:
-    return _route_context(slot)["route_binding"]
-
-
 def _default_probe(slot) -> dict:
     """查出口 IP 国家码并返回 route-bound evidence dict。
 

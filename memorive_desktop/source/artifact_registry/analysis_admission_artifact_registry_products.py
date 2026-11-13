@@ -19,14 +19,6 @@ class ArtifactProduct:
     envelope: dict[str, Any]
 
 
-def artifact_ref(envelope: Mapping[str, Any]) -> dict[str, str]:
-    return {
-        "artifact_id": str(envelope["artifact_id"]),
-        "artifact_type": str(envelope["artifact_type"]),
-        "content_hash": str(envelope["content_hash"]["value"]),
-    }
-
-
 def stable_identifier(prefix: str, values: Iterable[str]) -> str:
     seed = "|".join(str(item) for item in values)
     return prefix + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:32]

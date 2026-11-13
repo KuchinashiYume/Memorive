@@ -279,7 +279,3 @@ def ensure_chroma_writable(target: str = "sandbox") -> dict[str, Any]:
     _atomic_json(receipt_path, receipt)
     _SESSION_WRITABLE_ROOTS.add(str(store).casefold())
     return {"action": "QUARANTINED", "state": state, "receipt": str(receipt_path)}
-
-
-def forget_session_state_for_test() -> None:
-    _SESSION_WRITABLE_ROOTS.clear()

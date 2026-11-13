@@ -1,5 +1,5 @@
 from .actions import ActionController, ActionError, CommandDisabled, ConfirmationError
-from .events import EventIntegrityError, TimelineReconciler, WatchRecoveryController
+from .events import EventIntegrityError, TimelineReconciler
 from .locators import CurrentTaskLocator, LocatorError
 from .projection import CurrentTaskProjector, ProjectionError
 from .session import CurrentTaskSession, SessionError
@@ -34,6 +34,5 @@ __all__ = [
     "ProjectionError",
     "SessionError",
     "TimelineReconciler",
-    "WatchRecoveryController",
     "build_core_execution_snapshot",
 ]

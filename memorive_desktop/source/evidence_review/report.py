@@ -89,8 +89,3 @@ def resolve_report(report_id: str) -> Path:
     if not p.exists():
         raise FileNotFoundError(f"EVIDENCE_REVIEW 校核报告未找到: {report_id}({p})")
     return p
-
-
-def read_report(report_id: str) -> dict:
-    """读回报告 dict(校核视图)。"""
-    return json.loads(resolve_report(report_id).read_text(encoding="utf-8"))

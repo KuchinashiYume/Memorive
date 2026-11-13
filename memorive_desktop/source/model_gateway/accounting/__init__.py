@@ -14,18 +14,15 @@ from .contracts import (
 )
 from .kernel import AccountingKernel
 from .pricing.catalog import PriceCatalog, PriceResolution
-from .reconciliation import DiscrepancyQueue, reconcile_observations
 
 __all__ = [
     "AccountingContractError",
     "AccountingEnvelope",
     "AccountingKernel",
     "DecimalCalculator",
-    "DiscrepancyQueue",
     "PriceCatalog",
     "PriceQuery",
     "PriceResolution",
     "SettlementObservation",
     "UsageObservation",
-    "reconcile_observations",
 ]

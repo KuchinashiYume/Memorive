@@ -195,65 +195,6 @@ def _render_prompt(kind: str, contract: Mapping[str, Any], schema=None) -> str:
     return rendered
 
 
-def _payload(
-    digest: dict[str, Any],
-    allowed_event_ids: tuple[str, ...],
-    profile: BriefProfile,
-) -> dict[str, Any]:
-    contract = {
-        "schema_version": "memorive.research.research_reports.brief-input.v1",
-        "digest": copy.deepcopy(digest),
-        "allowed_event_ids": sorted(_event_map(digest)),
-        "qualifying_library_change_ids": list(allowed_event_ids),
-        "narrative_boundary": {
-            "fact_authority": "ChangeDigest only",
-            "model_may_change_counts_hashes_or_status": False,
-            "model_may_make_scientific_judgment": False,
-            "details_remain_deterministic": True,
-        },
-    }
-    prompt = _render_prompt(digest["digest_kind"], contract)
-    payload: dict[str, Any] = {
-        "messages": [{"role": "user", "content": prompt}],
-        "thinking": copy.deepcopy(profile.thinking),
-        "max_tokens": profile.max_tokens,
-        "stream": True,
-        "timeout": profile.timeout_seconds,
-        "wall_clock_deadline_seconds": profile.timeout_seconds,
-        "memorive_contract": {
-            **copy.deepcopy(contract),
-            "schema": copy.deepcopy(NARRATIVE_SCHEMA),
-            "profile": {
-                "slot": profile.slot,
-                "provider": profile.provider,
-                "model": profile.model,
-                "thinking": copy.deepcopy(profile.thinking),
-                "effort": profile.effort,
-                "max_tokens": profile.max_tokens,
-            },
-            "prompt_sha256": _hash_text(prompt),
-        },
-    }
-    if profile.provider == "deepseek":
-        payload["response_format"] = {"type": "json_object"}
-        if profile.effort is not None:
-            payload["reasoning_effort"] = profile.effort
-    elif profile.provider == "anthropic":
-        if profile.effort not in {"low", "medium", "high", "xhigh", "max"}:
-            raise BriefingApiError("ANTHROPIC_BRIEF_EFFORT_INVALID")
-        payload["effort"] = profile.effort
-        # Keep the nested narrative schema in the prompt and validate locally;
-        # native grammar compilation may reject this complex shape before the
-        # model is invoked.
-        payload["output_config"] = {"effort": profile.effort}
-        payload["memorive_contract"]["structured_output_mode"] = (
-            "PROMPT_JSON_PLUS_LOCAL_SCHEMA"
-        )
-    else:
-        raise BriefingApiError("BRIEF_PROVIDER_UNSUPPORTED")
-    return payload
-
-
 def _parse_json(raw: Any) -> dict[str, Any]:
     if not isinstance(raw, str):
         raise BriefingApiError("MODEL_OUTPUT_TEXT_MISSING")
@@ -418,74 +359,6 @@ def validate_mapped_narrative(raw, digest):
     return _validate_narrative(raw, _safe_digest(digest))
 
 
-def run_api_briefing(
-    *,
-    digest: Mapping[str, Any],
-    model_call: BriefModelCall | None = None,
-    profile_override: BriefProfile | None = None,
-) -> ApiBriefingResult:
-    """Generate one due period brief, or return a zero-call skip/block receipt.
-
-    ``profile_override`` is an explicit governed-run seam.  Normal production
-    calls omit it and retain the period-specific defaults in ``PROFILES``.
-    """
-
-    value = _safe_digest(digest)
-    kind = value["digest_kind"]
-    digest_id = value["digest_id"]
-    qualifying = qualifying_library_change_ids(value)
-    if value.get("report_status") != "complete" or value.get("conflicts"):
-        return ApiBriefingResult(
-            status=BLOCKED_INPUT_INCOMPLETE,
-            digest_id=digest_id,
-            digest_kind=kind,
-            slot=None,
-            qualifying_change_ids=qualifying,
-            model_call_count=0,
-            narrative=None,
-            markdown_text=None,
-            markdown_sha256=None,
-            model_metadata=None,
-            reason_codes=("CHANGE_STATUS_NOT_COMPLETE",),
-        )
-    if not qualifying:
-        return ApiBriefingResult(
-            status=SKIPPED_NO_LIBRARY_CHANGE,
-            digest_id=digest_id,
-            digest_kind=kind,
-            slot=None,
-            qualifying_change_ids=(),
-            model_call_count=0,
-            narrative=None,
-            markdown_text=None,
-            markdown_sha256=None,
-            model_metadata=None,
-            reason_codes=("NO_QUALIFYING_LIBRARY_CHANGE_IN_WINDOW",),
-        )
-    if model_call is None:
-        raise BriefingApiError("STRICT_MODEL_CALL_BINDING_REQUIRED")
-    if profile_override is not None and not isinstance(profile_override, BriefProfile):
-        raise BriefingApiError("BRIEF_PROFILE_OVERRIDE_INVALID")
-    profile = profile_override or PROFILES[kind]
-    payload = _payload(value, qualifying, profile)
-    raw, metadata = _call(profile=profile, payload=payload, model_call=model_call)
-    narrative = _validate_narrative(raw, value)
-    markdown = render_markdown_with_narrative(value, narrative, metadata)
-    return ApiBriefingResult(
-        status=GENERATED,
-        digest_id=digest_id,
-        digest_kind=kind,
-        slot=profile.slot,
-        qualifying_change_ids=qualifying,
-        model_call_count=1,
-        narrative=narrative,
-        markdown_text=markdown,
-        markdown_sha256=_hash_text(markdown),
-        model_metadata=metadata,
-        reason_codes=("QUALIFYING_LIBRARY_CHANGE_PRESENT", "NARRATIVE_SCHEMA_AND_REF_PASS"),
-    )
-
-
 _NARRATIVE_ITEM = {
     "type": "object",
     "additionalProperties": False,
@@ -541,7 +414,13 @@ NARRATIVE_SCHEMA = {
 
 
 __all__ = [
-    "GENERATED", "SKIPPED_NO_LIBRARY_CHANGE", "BLOCKED_INPUT_INCOMPLETE",
-    "BriefingApiError", "BriefProfile", "ApiBriefingResult", "PROFILES",
-    "NARRATIVE_SCHEMA", "qualifying_library_change_ids", "run_api_briefing",
+    "GENERATED",
+    "SKIPPED_NO_LIBRARY_CHANGE",
+    "BLOCKED_INPUT_INCOMPLETE",
+    "BriefingApiError",
+    "BriefProfile",
+    "ApiBriefingResult",
+    "PROFILES",
+    "NARRATIVE_SCHEMA",
+    "qualifying_library_change_ids",
 ]

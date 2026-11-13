@@ -3,7 +3,7 @@ from copy import deepcopy
 import json
 import sqlite3
 from pathlib import Path
-from .cli_templates import import_service,export_service,new_service,is_custom,configuration_identity,capability_projection
+from .cli_templates import import_service, export_service, new_service, is_custom, configuration_identity
 
 def projection(settings):
     settings=deepcopy(settings)

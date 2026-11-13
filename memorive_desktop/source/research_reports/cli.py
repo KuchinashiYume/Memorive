@@ -228,17 +228,6 @@ def _load_run_context(
     return value, successor_root, target
 
 
-def validate_output_dir(
-    output_dir: str | Path,
-    *,
-    run_context: str | Path,
-    source_manifest: str | Path,
-) -> Path:
-    return _load_run_context(
-        run_context, output_dir=output_dir, source_manifest=source_manifest
-    )[2]
-
-
 def _jsonl_bytes(values: list[dict]) -> bytes:
     return b"".join(canonical_json_bytes(value) + b"\n" for value in values)
 

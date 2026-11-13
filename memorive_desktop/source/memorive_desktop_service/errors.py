@@ -45,12 +45,6 @@ class ConnectionLost(DesktopServiceError, ConnectionError):
     retryable = True
 
 
-class BackpressureExceeded(DesktopServiceError):
-    code = "IPC_BACKPRESSURE_EXCEEDED"
-    category = "transport"
-    retryable = True
-
-
 class ControlStoreCorrupt(DesktopServiceError):
     code = "CONTROL_STORE_CORRUPT"
     category = "recovery"
@@ -61,19 +55,11 @@ class SensitivePersistenceRejected(DesktopServiceError):
     category = "security"
 
 
-class InstanceAlreadyActive(DesktopServiceError):
-    code = "DESKTOP_INSTANCE_ALREADY_ACTIVE"
-    category = "concurrency"
-    retryable = True
-
-
 __all__ = [
     "AuthenticationRejected",
-    "BackpressureExceeded",
     "ConnectionLost",
     "ControlStoreCorrupt",
     "DesktopServiceError",
-    "InstanceAlreadyActive",
     "ProtocolViolation",
     "RequestCancelled",
     "RequestTimeout",

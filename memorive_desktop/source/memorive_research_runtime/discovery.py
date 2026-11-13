@@ -4,7 +4,6 @@ import re
 from inspect import signature,Parameter
 from .common import CHANNELS,sha,now,read,write,sealed
 from .directions import effective_directions,channel_targets
-from .relations import metadata_comparison
 from .transport import PAGE_LIMITS
 from memorive_workflow.node_progress import scope
 

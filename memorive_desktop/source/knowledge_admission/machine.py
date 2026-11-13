@@ -91,13 +91,3 @@ def apply_verdict(card_path: Path, verdict: Verdict, *, trigger: Trigger, reason
         raise IllegalTransitionError(f"apply_verdict 只作用 pending 卡,当前 {current}: {card_path}")
     to_status = ACTIVE if verdict is Verdict.PASS else QUARANTINED
     return transition(card_path, to_status, trigger=trigger, reason=reason)
-
-
-def manual_approve(card_path: Path, *, reason: str) -> str:
-    """人工入口:我确认通过 → pending 转 active(trigger=我手动)。"""
-    return apply_verdict(card_path, Verdict.PASS, trigger=Trigger.MANUAL, reason=reason)
-
-
-def manual_reject(card_path: Path, *, reason: str) -> str:
-    """人工入口:我确认不通过 → pending 转 quarantined(trigger=我手动)。"""
-    return apply_verdict(card_path, Verdict.FAIL, trigger=Trigger.MANUAL, reason=reason)

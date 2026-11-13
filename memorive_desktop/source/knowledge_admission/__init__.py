@@ -20,20 +20,49 @@ placeholder 判定源仅离线自测用、**不在本入口导出**(守 active�
 """
 from .states import PENDING, ACTIVE, QUARANTINED, STATES, is_legal, is_core_enabled
 from .card_io import read_status, read_data_id
-from .machine import (transition, apply_verdict, manual_approve, manual_reject,
-                      Trigger, Verdict)
+from .machine import (
+    transition,
+    apply_verdict,
+    Trigger,
+    Verdict,
+)
 from .knowledge_admission_log import read_records
 from .dispatch import auto_review, AutoResult, ReviewDecision
-from .errors import (KnowledgeAdmissionError, IllegalTransitionError, TransitionNotEnabledError,
-                      TriggerNotAcceptedError, MissingBasisError, CardStateError,
-                      KnowledgeAdmissionLogAppendError, DecisionError, DecisionContractError,
-                      AdmissionBlocked, RealStateTransitionForbidden)
+from .errors import (
+    KnowledgeAdmissionError,
+    IllegalTransitionError,
+    TransitionNotEnabledError,
+    TriggerNotAcceptedError,
+    MissingBasisError,
+    CardStateError,
+    KnowledgeAdmissionLogAppendError,
+    DecisionError,
+    DecisionContractError,
+)
 __all__ = [
-    "PENDING", "ACTIVE", "QUARANTINED", "STATES", "is_legal", "is_core_enabled",
-    "read_status", "read_data_id", "transition", "apply_verdict", "manual_approve", "manual_reject",
-    "auto_review", "AutoResult", "ReviewDecision", "Trigger", "Verdict", "read_records",
-    "KnowledgeAdmissionError", "IllegalTransitionError", "TransitionNotEnabledError",
-    "TriggerNotAcceptedError", "MissingBasisError", "CardStateError", "KnowledgeAdmissionLogAppendError",
-    "DecisionError", "DecisionContractError",
-    "AdmissionBlocked", "RealStateTransitionForbidden",
+    "PENDING",
+    "ACTIVE",
+    "QUARANTINED",
+    "STATES",
+    "is_legal",
+    "is_core_enabled",
+    "read_status",
+    "read_data_id",
+    "transition",
+    "apply_verdict",
+    "auto_review",
+    "AutoResult",
+    "ReviewDecision",
+    "Trigger",
+    "Verdict",
+    "read_records",
+    "KnowledgeAdmissionError",
+    "IllegalTransitionError",
+    "TransitionNotEnabledError",
+    "TriggerNotAcceptedError",
+    "MissingBasisError",
+    "CardStateError",
+    "KnowledgeAdmissionLogAppendError",
+    "DecisionError",
+    "DecisionContractError",
 ]

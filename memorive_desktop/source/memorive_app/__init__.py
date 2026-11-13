@@ -9,7 +9,6 @@ from .facade import ApplicationFacade
 from .import_binding import FileImportBinder
 from .ipc_auth import LoopbackPeerAuthenticator
 from .support_bundle import SupportBundleBuilder
-from .workflow import WorkflowDefinitionProvider
 
 
 __all__ = [
@@ -21,7 +20,6 @@ __all__ = [
     "LoopbackPeerAuthenticator",
     "SupportBundleBuilder",
     "WindowsCredentialStore",
-    "WorkflowDefinitionProvider",
     "build_capability_snapshot",
     "evaluate_preflight",
 ]

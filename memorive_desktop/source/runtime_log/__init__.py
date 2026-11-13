@@ -11,7 +11,6 @@ contracts/Core_最小可用闭环/10_模块契约/Memorive_RUNTIME_LOG_RUNTIME_L
  需要注入路径的测试可 from runtime_log.logger import Logger。)
 """
 from .logger import log, log_error
-from .reader import extract_module_logs
 from .records import log_accounting, log_reason
 
-__all__ = ["log", "log_error", "extract_module_logs", "log_accounting", "log_reason"]
+__all__ = ["log", "log_error", "log_accounting", "log_reason"]

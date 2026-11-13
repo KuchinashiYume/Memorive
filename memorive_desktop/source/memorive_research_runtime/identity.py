@@ -230,20 +230,6 @@ def normalize_pmid_identifier(value: Any) -> dict[str, Any]:
     )
 
 
-def normalize_identifier(kind: str, value: Any) -> dict[str, Any]:
-    normalized_kind = kind.strip().upper() if isinstance(kind, str) else ""
-    if normalized_kind == "DOI":
-        return normalize_doi_identifier(value)
-    if normalized_kind == "ARXIV":
-        return normalize_arxiv_identifier(value)
-    if normalized_kind == "PMID":
-        return normalize_pmid_identifier(value)
-    return _normalization_result(
-        normalized_kind or "UNKNOWN", value, valid=False, canonical_value=None,
-        base_value=None, version=None, error_code="UNSUPPORTED_IDENTIFIER_KIND"
-    )
-
-
 def _canonical_identifier(result: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "kind": result["kind"],
@@ -1027,26 +1013,11 @@ def resolve_identity_batch(
     return result
 
 
-def initialization_candidate_base_projection(projection: Mapping[str, Any]) -> dict[str, Any]:
-    """Return the exact Initialization base fields for compatibility validation."""
-
-    fields = {
-        "object_type", "object_id", "revision", "content_hash", "producer",
-        "consumers", "single_writer", "parents", "supersedes", "immutable_fields",
-        "candidate_id", "source_observation_refs", "discovery_origin",
-        "identity_status", "access_status", "decision_status",
-        "candidate_card_status", "promotion_status", "is_synthetic",
-    }
-    return {key: copy.deepcopy(projection[key]) for key in sorted(fields)}
-
-
 __all__ = [
     "IdentityResolutionError",
-    "normalize_identifier",
     "normalize_doi_identifier",
     "normalize_arxiv_identifier",
     "normalize_pmid_identifier",
     "resolve_identity_batch",
-    "initialization_candidate_base_projection",
     "verify_source_observation",
 ]

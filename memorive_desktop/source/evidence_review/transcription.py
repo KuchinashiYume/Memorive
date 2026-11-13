@@ -249,19 +249,6 @@ def _prompt_template(*, recovery_mode: bool = False) -> str:
     return cached
 
 
-def _build_prompt(
-    field_name: str,
-    value_text: str,
-    chunk_text: str,
-    *,
-    recovery_mode: bool = False,
-) -> str:
-    return (_prompt_template(recovery_mode=recovery_mode)
-            .replace("__FIELD_NAME__", field_name)
-            .replace("__FIELD_VALUE__", value_text)
-            .replace("__CHUNK_TEXT__", chunk_text))
-
-
 _CROSS_FIELD_PROMPT_CACHE = None
 _DIRECT_SEED_PROMPT_CACHE = None
 _DIRECT_SEED_CARD_PROMPT_CACHE = None
@@ -1421,26 +1408,3 @@ def transcription_verify(
         checked_count=len(checked_locations), checked_locations=checked_locations)
     _report.write_report(rep)
     return rep
-
-
-def make_evidence_review_source(*, call_verify=None, region_check=None):
-    """把搬运类校核包成 auto_review 的 decision_source:Callable[[Path], ReviewDecision]。"""
-    def evidence_review_transcription_source(card_path):
-        rep = transcription_verify(card_path, call_verify=call_verify, region_check=region_check)
-        verdict = Verdict.PASS if rep.verdict == "PASS" else Verdict.FAIL
-        rules = sorted({p.kind for p in rep.problems if p.kind in _VALID_RULES})
-        return ReviewDecision(verdict, reason_summary=(",".join(rules) or None), report_id=rep.report_id)
-    return evidence_review_transcription_source
-
-
-def verify_and_drive(card_path, *, call_verify=None, region_check=None, escalate_after=2) -> AutoResult:
-    """搬运类校核 → 经 auto_review(trigger=Trigger.EVIDENCE_REVIEW_VERDICT)驱动 KNOWLEDGE_ADMISSION。
-    PASS→active / FAIL→quarantined;MODEL_GATEWAY / 解析 / 区域门失败→DecisionError→重跑、连错 2 次→escalated(卡留 pending)。
-    **KNOWLEDGE_ADMISSION 不改**(2a 已激活 EVIDENCE_REVIEW_VERDICT + 认 ReviewDecision)。
-
-    ⚠ **v6.4 之四·上半起 = 旧整卡-verdict 路径,非分级信任准入**:它 FAIL→整卡 quarantine(正是分级信任要替代的行为)、
-    **不落 per-entry 信用档**。**分级信任准入统一走 `evidence_review.grade_and_admit`**(EVIDENCE_REVIEW 判→per-field 信用档→带档进 active、
-    不整卡 quarantine)。本函数保留仅供「整卡 verdict」旧用途 / Verification 测试;分级信任管线**勿用它准入**(会绕过信用档标)。
-    〔跨路径安全兜底:build_card 从建卡起给 unknown 落 ⚠未核标,故即便误经本路径进 active 也不会「unknown 却无标」。〕"""
-    return auto_review(Path(card_path), make_evidence_review_source(call_verify=call_verify, region_check=region_check),
-                       trigger=Trigger.EVIDENCE_REVIEW_VERDICT, escalate_after=escalate_after)

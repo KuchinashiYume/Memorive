@@ -44,11 +44,6 @@ CLASS_TRANSIENT_EXHAUSTED = "transient_exhausted"       # ④(耗尽)
 FORBIDDEN_FALLBACK = frozenset({("embed_local", "embed_cloud")})
 
 
-def is_fallback_forbidden(src: str, dst: str) -> bool:
-    """换备用是否被红线禁止(embed_local→embed_cloud = 他人数据偷偷上云,永远禁)。"""
-    return (src, dst) in FORBIDDEN_FALLBACK
-
-
 def ownership_local_message(task_type: str, slot, reason: str) -> str:
     """归属保护友好文案(四要素:哪个模块 + 哪个依赖 + 什么错 + 怎么处理);明写不上云。
     DocumentEmbed 见 ready:false 挡下时,经 RUNTIME_LOG detail 记它(不含任何 chunk 文本 / 凭据)。"""

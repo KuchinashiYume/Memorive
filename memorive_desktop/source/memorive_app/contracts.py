@@ -136,41 +136,6 @@ def resolved_profile_snapshot(
     return payload
 
 
-def error_envelope(
-    *,
-    code: str,
-    category: str,
-    severity: str,
-    retryable: bool,
-    user_action: str,
-    technical_summary: str,
-    correlation_id: str,
-    job_id: str | None = None,
-    attempt_id: str | None = None,
-    retry_after: str | None = None,
-    cause_ref: str | None = None,
-    support_bundle_recommended: bool = False,
-) -> dict[str, Any]:
-    if not isinstance(retryable, bool) or not isinstance(support_bundle_recommended, bool):
-        raise ContractViolation("ERROR_BOOLEAN_INVALID")
-    return {
-        "schema_version": "ErrorEnvelope-v1",
-        "contract_revision": CONTRACT_REVISION,
-        "error_code": require_text(code, "error_code"),
-        "category": require_text(category, "category"),
-        "severity": require_text(severity, "severity"),
-        "retryable": retryable,
-        "retry_after": retry_after,
-        "user_action": require_text(user_action, "user_action"),
-        "technical_summary": require_text(technical_summary, "technical_summary"),
-        "correlation_id": require_text(correlation_id, "correlation_id"),
-        "job_id": job_id,
-        "attempt_id": attempt_id,
-        "cause_ref": cause_ref,
-        "support_bundle_recommended": support_bundle_recommended,
-    }
-
-
 __all__ = [
     "ACCEPTANCE_VERDICTS",
     "CONTRACT_REVISION",
@@ -182,7 +147,6 @@ __all__ = [
     "VERIFICATION_RESULTS",
     "canonical_json_bytes",
     "canonical_sha256",
-    "error_envelope",
     "immutable_copy",
     "resolved_profile_snapshot",
     "utc_now",

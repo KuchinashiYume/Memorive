@@ -54,12 +54,6 @@ def record_type_of(record: dict[str, Any]) -> str | None:
     return record.get("record_type")
 
 
-def record_year(record: dict[str, Any]) -> int:
-    """Return the timezone-aware creation year after validating the timestamp."""
-    field = "terminal_at" if record_type_of(record) == "run_terminal_event" else "created_at"
-    return _parse_datetime(record.get(field), field).year
-
-
 def validate_record(record: dict[str, Any]) -> None:
     """Validate one record without coercion or inference."""
     if not isinstance(record, dict):

@@ -13,13 +13,7 @@ from .analysis import (
     build_payload,
     parse_analysis,
 )
-from .cost_query import RED_LINE_CNY, cost_summary
-from .retrieval_quality_research_analysis_quality_artifacts import (
-    AnalysisQualityValidationError,
-    build_analysis_quality_assessment,
-    project_coverage_onto_analysis,
-    validate_analysis_source_ids,
-)
+from .cost_query import RED_LINE_CNY
 from .types import (
     DISCLAIMER,
     LABEL_AI_GENERAL,
@@ -37,14 +31,25 @@ from .types import (
 )
 
 __all__ = [
-    "analyze", "build_payload", "parse_analysis", "build_analysis_request_envelope",
-    "AnalysisError", "OwnershipFailClosed", "RegionBlocked",
-    "cost_summary", "RED_LINE_CNY",
-    "AnalysisRequestEnvelope", "AnalysisResult", "LiteratureClaim", "FlaggedClaim", "DISCLAIMER",
+    "analyze",
+    "build_payload",
+    "parse_analysis",
+    "build_analysis_request_envelope",
+    "AnalysisError",
+    "OwnershipFailClosed",
+    "RegionBlocked",
+    "RED_LINE_CNY",
+    "AnalysisRequestEnvelope",
+    "AnalysisResult",
+    "LiteratureClaim",
+    "FlaggedClaim",
+    "DISCLAIMER",
     "disclaimer_for",
-    "LABEL_LITERATURE", "LABEL_AI_GENERAL", "LABEL_RISKS", "LABEL_RECHECK", "LABEL_FLAGGED",
-    "LABEL_RETRIEVAL_LIMITATIONS", "LABEL_SOURCE_INCONSISTENCIES",
-    # RETRIEVAL-QUALITY immutable governance layer
-    "AnalysisQualityValidationError", "build_analysis_quality_assessment",
-    "project_coverage_onto_analysis", "validate_analysis_source_ids",
+    "LABEL_LITERATURE",
+    "LABEL_AI_GENERAL",
+    "LABEL_RISKS",
+    "LABEL_RECHECK",
+    "LABEL_FLAGGED",
+    "LABEL_RETRIEVAL_LIMITATIONS",
+    "LABEL_SOURCE_INCONSISTENCIES",
 ]

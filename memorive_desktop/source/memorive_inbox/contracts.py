@@ -54,12 +54,6 @@ def require_identifier(value: Any, field: str) -> str:
     return value
 
 
-def require_item_state(value: Any) -> str:
-    if value not in INTERNAL_STATES:
-        raise InboxError("INBOX_ITEM_STATE_INVALID")
-    return str(value)
-
-
 def item_id_for(request_id: str, item_index: int, source_name: str) -> str:
     digest = hashlib.sha256(f"{request_id}\0{item_index}\0{source_name}".encode("utf-8")).hexdigest()
     return f"inbox_{digest[:24]}"
@@ -82,6 +76,5 @@ __all__ = [
     "immutable",
     "item_id_for",
     "require_identifier",
-    "require_item_state",
     "utc_now",
 ]

@@ -110,32 +110,9 @@ class RealFacadeAdapter(FacadeAdapter):
         )
 
 
-class FakeFacadeAdapter(FacadeAdapter):
-    adapter_kind = "synthetic_fake_facade"
-
-    def __init__(self, facade: Any, *, watch_batch_max: int = 64):
-        super().__init__(facade, allowed_methods=REQUIRED_D38_METHODS, watch_batch_max=watch_batch_max)
-
-    def call(self, method: str, params: Mapping[str, Any]) -> Any:
-        accepted = super().call(method, params)
-        if method in {"get_job", "get_attempt"} and isinstance(accepted, dict):
-            accepted.setdefault("schema_version", "ApplicationJobRecord-v1")
-        return accepted
-
-
-def load_d38_contract(contract_path: Path | str) -> dict[str, Any]:
-    value = json.loads(Path(contract_path).read_text(encoding="utf-8"))
-    observed = tuple(value.get("projected_required_facade_methods", []))
-    if observed != REQUIRED_D38_METHODS:
-        raise ProtocolViolation("D38_METHOD_DENOMINATOR_DRIFT")
-    return _immutable(value)
-
-
 __all__ = [
     "FacadeAdapter",
-    "FakeFacadeAdapter",
     "REAL_ADDITIONAL_METHODS",
     "REQUIRED_D38_METHODS",
     "RealFacadeAdapter",
-    "load_d38_contract",
 ]
