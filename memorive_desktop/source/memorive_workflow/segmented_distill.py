@@ -168,39 +168,6 @@ def _one(folder: Path, prefix: str, suffix: str) -> Path:
     return matches[0]
 
 
-def _first_positive_integer(values: Sequence[Any]) -> int | None:
-    for value in values:
-        if isinstance(value, int) and not isinstance(value, bool) and value > 0:
-            return value
-    return None
-
-
-def _capacity_from_registry(model_name: str) -> tuple[int | None, int | None, str | None]:
-    try:
-        import model_gateway.capabilities as capability_module
-
-        path = Path(capability_module.DEFAULT_REGISTRY_PATH)
-        raw = json.loads(path.read_text(encoding="utf-8"))
-        providers = raw.get("providers") if isinstance(raw, Mapping) else None
-        if not isinstance(providers, Mapping):
-            return None, None, None
-        matches = []
-        for provider, models in providers.items():
-            if isinstance(models, Mapping) and isinstance(models.get(model_name), Mapping):
-                value = models[model_name].get("max_input_tokens")
-                if isinstance(value, int) and not isinstance(value, bool) and value > 0:
-                    output = models[model_name].get("max_output_tokens")
-                    if not isinstance(output, int) or isinstance(output, bool) or output <= 0:
-                        return None, None, None
-                    matches.append((provider, value, output))
-        if len(matches) != 1:
-            return None, None, None
-        provider, value, output = matches[0]
-        return value, output, f"model_gateway.model_capabilities:{provider}:{_file_sha256(path)}"
-    except Exception:
-        return None, None, None
-
-
 def _resolve_capacity_profile(
     workflow_config: Mapping[str, Any],
 ) -> tuple[CapacityProfile | None, dict[str, Any]]:

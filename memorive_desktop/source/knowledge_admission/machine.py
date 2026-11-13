@@ -101,11 +101,3 @@ def manual_approve(card_path: Path, *, reason: str) -> str:
 def manual_reject(card_path: Path, *, reason: str) -> str:
     """人工入口:我确认不通过 → pending 转 quarantined(trigger=我手动)。"""
     return apply_verdict(card_path, Verdict.FAIL, trigger=Trigger.MANUAL, reason=reason)
-
-
-def placeholder_pass_verdict(card_path: Path) -> Verdict:
-    """⚠ **仅离线自测用**:固定返回 PASS,让 Core 跑通状态流转的形状。
-    **绝非正式放行通道、绝非默认判定源**——正式放行 = 手动(manual_*)或将来 EVIDENCE_REVIEW;固定 PASS 会无条件
-    放行任何卡,误当默认即破「active ≠ 已校验」。故:命名带 placeholder 自证、**不进 __init__ 公共入口**、
-    配 Trigger.PLACEHOLDER(亦仅自测)。"""
-    return Verdict.PASS

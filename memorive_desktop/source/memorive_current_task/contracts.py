@@ -172,9 +172,3 @@ def default_nodes(
             'purpose':'本地数值处理与明确参数核查','model':'本地统计程序','optional':True,
             'model_change':False,'locked':False}, *topology[1:])
     return deepcopy(list(topology))
-
-
-def assert_zero_effects(effects: Mapping[str, Any]) -> None:
-    nonzero = {key: effects.get(key) for key in ZERO_EFFECT_KEYS if effects.get(key, 0) != 0}
-    if nonzero:
-        raise ContractError("EXTERNAL_EFFECT_FORBIDDEN:" + ",".join(sorted(nonzero)))
