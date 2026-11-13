@@ -8,7 +8,7 @@ from retrieval.context_pack import validate_context_pack_binding
 from retrieval.ownership import OwnershipSnapshot, propagation_receipt, stable_sha256
 from evidence_review.ownership_binding import build_ownership_review_task
 from model_gateway import call
-from .source_language import validate_generated_language
+from memorive_source_language import validate_generated_language
 from .analysis import (analysis_binding_payload, build_payload, build_analysis_request_envelope,
     _default_region_check, _block_origin, _block_facets, _analysis_quality_metrics)
 from .types import LiteratureClaim

@@ -7736,13 +7736,8 @@
     },
     {
       "path": "memorive_desktop/source/research_analysis/revision.py",
-      "sha256": "92a9ada3e68515fb115374709315b5b788f379abd3fdb724a90412923b2ddb5d",
-      "bytes": 6763
-    },
-    {
-      "path": "memorive_desktop/source/research_analysis/source_language.py",
-      "sha256": "3753af93c82de6cd18f0aad75f0dd28e2d3533b4fd2e765aba4a326cde8404ee",
-      "bytes": 3683
+      "sha256": "14f56eeaa638197c03b458de8c37fcd67b70db1afed90ee61c933782399ccba7",
+      "bytes": 6771
     },
     {
       "path": "memorive_desktop/source/research_analysis/templates/custom_topic_analysis_request.md.tmpl",
@@ -8141,8 +8136,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
-      "sha256": "e1fc0769a858a07eeff1eb60732d91f8fba8832730f97277bfbf06a9eb33fd2d",
-      "bytes": 220874
+      "sha256": "4f8743213d7b54394ae8fef604a5e3a5a384b6bb3bbe0d48c117d512b46ca5e3",
+      "bytes": 220691
     },
     {
       "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
