@@ -5886,51 +5886,6 @@
       "bytes": 7431
     },
     {
-      "path": "source/retrieval/retrieval_calibration/__init__.py",
-      "sha256": "e574343effa83745183e2689acd7749e915da5274f73557042a468c421a1076a",
-      "bytes": 1207
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/candidate_features.py",
-      "sha256": "149e7384566e80e1ea9133f78a50d39016275e6932c49f84aa9c417d9c4396d4",
-      "bytes": 11010
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/candidate_trace.py",
-      "sha256": "e1e3ac6d3496ea452bf7ae01c4d52f7136741f6370156ee60e022786cede24d8",
-      "bytes": 2964
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/candidate_union_adapter.py",
-      "sha256": "73412684164dd27a561f49b9f771da7b85d9567f31820059e4fbf3b36ba816d4",
-      "bytes": 3167
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/cli.py",
-      "sha256": "7882bb126f0f59d8916bc7b0704691c029c14da1c818ae76a2fdd9a69a1e1d57",
-      "bytes": 1864
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/fallback.py",
-      "sha256": "349da26094d7b303419135959e2587c780060276e8a13d8252cdd4c6e15a59f7",
-      "bytes": 2686
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/pre_rerank_snapshot.py",
-      "sha256": "d643528bab066cfb2e0cec0dbc2248535d4b0ae67c9bca2082e8a9205ac25bf9",
-      "bytes": 3033
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/profile_compare.py",
-      "sha256": "35c28de4c2d4c68d767bd367fd51dab2d3ceaa14ac055671e552507cd405b487",
-      "bytes": 7514
-    },
-    {
-      "path": "source/retrieval/retrieval_calibration/qualification.py",
-      "sha256": "17214239f3f66405041a6ac530d796f744754e6cc1b23f7a7fff0010fc37334d",
-      "bytes": 11095
-    },
-    {
       "path": "source/retrieval/retrieval_quality_retrieval_coverage_artifacts.py",
       "sha256": "5a7eb0877604503472a98b92796d711f76393f369fc8285513d9e4bdece9725b",
       "bytes": 78558
@@ -5956,11 +5911,6 @@
       "bytes": 4643
     },
     {
-      "path": "source/retrieval/shadow_seam.py",
-      "sha256": "0111ab27cd27ded7b00095710a459562bb46ae68d4d12e55cd91525bd2e904ea",
-      "bytes": 7300
-    },
-    {
       "path": "source/retrieval/structured_context.py",
       "sha256": "d8f7724478c49fcf931b92b86c9c8bba38256fcbaef5e7ca218c2e6d6e5bf76a",
       "bytes": 52895
@@ -5976,24 +5926,9 @@
       "bytes": 946
     },
     {
-      "path": "source/retrieval_weighting/__main__.py",
-      "sha256": "d979d19474b85494e56b58b9e9c5a743034fef9ba7398dbac2984787f188663e",
-      "bytes": 167
-    },
-    {
-      "path": "source/retrieval_weighting/aggregation.py",
-      "sha256": "6fb5beaebe58b16bdcfbc59c352eaac11b8821a8eb6ccc71c823190cfb5f7d97",
-      "bytes": 18631
-    },
-    {
       "path": "source/retrieval_weighting/candidate_index.py",
       "sha256": "ae40f00e22fa2bcb60bbbcd689fb7a91916b83c9413193259b161084772d84a3",
       "bytes": 35855
-    },
-    {
-      "path": "source/retrieval_weighting/candidate_union.py",
-      "sha256": "3e86fcc5dbe35d25992bf5b0623444e7ffc5ab3bf1c0c71b625d1f10b8650e33",
-      "bytes": 14261
     },
     {
       "path": "source/retrieval_weighting/canonical.py",
@@ -6001,19 +5936,9 @@
       "bytes": 3651
     },
     {
-      "path": "source/retrieval_weighting/cli.py",
-      "sha256": "a65e05a27a0eacc5dba3d59bbfcbae81099e5a71990c859a240260ed38bf87bc",
-      "bytes": 9618
-    },
-    {
       "path": "source/retrieval_weighting/contracts.py",
       "sha256": "5dd712d7179f606c44e8ce902421255e3f92b9c939e7178848b38116ad5ef3c8",
       "bytes": 16775
-    },
-    {
-      "path": "source/retrieval_weighting/counterevidence.py",
-      "sha256": "98ed31f5b889199812ff3e714fa1fd1dfe77d2f71f299dfb6e3bdcd61d1f2c8a",
-      "bytes": 15997
     },
     {
       "path": "source/retrieval_weighting/derived_penalty.py",
@@ -6029,11 +5954,6 @@
       "path": "source/retrieval_weighting/field_registry.py",
       "sha256": "46a2a756a68629f10c9bf48e76eb64f5e67d7192f4fdef7b2e664f95ba9f6f49",
       "bytes": 14925
-    },
-    {
-      "path": "source/retrieval_weighting/field_search.py",
-      "sha256": "adebd37302386d83e2297891a1d2423a321baeb01b19937cb2499747185a2545",
-      "bytes": 6885
     },
     {
       "path": "source/retrieval_weighting/field_vectors.py",
@@ -6091,44 +6011,9 @@
       "bytes": 6914
     },
     {
-      "path": "source/retrieval_weighting/retrieval_calibration_block_role_calibration.py",
-      "sha256": "476c88f967baff099f33b6a599e64aaf8ac1283240c0b8dd383ba57a8379a6a7",
-      "bytes": 6042
-    },
-    {
-      "path": "source/retrieval_weighting/retrieval_calibration_route_profile.py",
-      "sha256": "50e834bebb0eecb6db61ad471fd455253fb83c26cec3ae0962022317959b6256",
-      "bytes": 3119
-    },
-    {
-      "path": "source/retrieval_weighting/semantic_field_profiles.py",
-      "sha256": "53afbcc0e77ecbb71927178eea7d13061f3db68010e7ee5a9dc859a5e80adce6",
-      "bytes": 22451
-    },
-    {
-      "path": "source/retrieval_weighting/semantic_field_search.py",
-      "sha256": "f4d7d3ce6b0216a46da0475570d1b6612daba4020c54c761f08d5492f599ef01",
-      "bytes": 6116
-    },
-    {
-      "path": "source/retrieval_weighting/semantic_shadow_contracts.py",
-      "sha256": "d8fd5ac064505588fc1db37e093333498ea646fc5be91c62060321337b72c3c8",
-      "bytes": 16766
-    },
-    {
       "path": "source/retrieval_weighting/shadow_contracts.py",
       "sha256": "6d7ff0df2e269d3a17d28c3c5036dd340d32179de5f47e199b0cd7de7cdb5670",
       "bytes": 28900
-    },
-    {
-      "path": "source/retrieval_weighting/source_snapshot.py",
-      "sha256": "3b3054c647297b10fe2fbbcb0063e465b5ae56ad98f5823f2f2cba3523d4ee9a",
-      "bytes": 10268
-    },
-    {
-      "path": "source/retrieval_weighting/structural_candidate.py",
-      "sha256": "3522fd774c23eb1d4b15acedfb1a5478f7b819c947051959569032c47243fab5",
-      "bytes": 11427
     },
     {
       "path": "source/run_ledger/__init__.py",
