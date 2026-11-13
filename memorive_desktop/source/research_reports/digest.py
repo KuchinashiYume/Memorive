@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from pathlib import Path
+from dataclasses import dataclass
 from typing import Any
 
 from .adapters import FAILURE_SEMANTICS, IMMUTABLE_FIELDS
@@ -13,29 +13,21 @@ from .issues import make_issue
 from .policy import REPORT_TIMEZONE, SECTION_TITLES, original_window_ref, validate_window
 
 
-def _generator_version() -> str:
-    package_root = Path(__file__).resolve().parent
-    members = []
-    for path in sorted(
-        (
-            value
-            for value in package_root.rglob("*")
-            if value.is_file()
-            and value.suffix in {".py", ".json", ".tmpl"}
-            and "__pycache__" not in value.parts
-        ),
-        key=lambda value: value.relative_to(package_root).as_posix(),
-    ):
-        members.append(
-            {
-                "path": path.relative_to(package_root).as_posix(),
-                "sha256": sha256_bytes(path.read_bytes()),
-            }
-        )
-    return "research_reports-research-changelog/1.1.0+sha256." + sha256_bytes(canonical_json_bytes(members))[:16]
+@dataclass(frozen=True)
+class DigestIdentity:
+    """Who built a digest. It is written into the digest and decides nothing."""
+
+    generator_version: str
+    producer: str
+    change_scope: tuple[str, ...]
 
 
-GENERATOR_VERSION = _generator_version()
+IDENTITY = DigestIdentity(
+    generator_version="research_reports-research-changelog/1.1.0",
+    producer="RESEARCH_REPORTS",
+    change_scope=("KNOWLEDGE_ADMISSION", "RUNTIME_LOG", "ARTIFACT_REGISTRY"),
+)
+GENERATOR_VERSION = IDENTITY.generator_version
 
 
 class DigestAuthorityError(ResearchReportsError):
@@ -148,12 +140,13 @@ def _common_change_digest(
     kind: str,
     revision: int,
     supersedes_digest_id: str | None,
+    builder: DigestIdentity,
 ) -> dict[str, Any]:
     payload = {
         "object_id": digest_id,
         "schema_version": "2.0",
         "revision": revision,
-        "producer": "RESEARCH_REPORTS",
+        "producer": builder.producer,
         "consumers": ["Retrieval", "Analysis"],
         "state": "draft" if revision == 1 else "validated",
         "parent_refs": parent_refs,
@@ -161,7 +154,7 @@ def _common_change_digest(
         "supersedes": supersedes_digest_id,
         "immutable_fields": IMMUTABLE_FIELDS,
         "failure_semantics": FAILURE_SEMANTICS,
-        "change_scope": ["KNOWLEDGE_ADMISSION", "RUNTIME_LOG", "ARTIFACT_REGISTRY"],
+        "change_scope": list(builder.change_scope),
         "summary": f"Deterministic RESEARCH_REPORTS {kind} change log; domain details are source-backed.",
         "evidence_refs": evidence_refs,
     }
@@ -293,6 +286,7 @@ def build_digest(
     supersedes_digest_id: str | None = None,
     prior_digest: dict[str, Any] | None = None,
     historical_authority: dict[str, dict[str, Any]] | None = None,
+    builder: DigestIdentity = IDENTITY,
 ) -> dict[str, Any]:
     start, end, cutoff = validate_window(digest_kind, window_start, window_end, cutoff_at)
     prior_id, prior_binding = _validate_prior(
@@ -365,7 +359,7 @@ def build_digest(
         "window_end": end.isoformat(),
         "cutoff_at": cutoff.isoformat(),
         "input_manifest_sha256": snapshot["manifest_sha256"],
-        "generator_version": GENERATOR_VERSION,
+        "generator_version": builder.generator_version,
         "revision": revision,
         "prior_binding": prior_binding,
     }
@@ -391,7 +385,7 @@ def build_digest(
         "window_end": end.isoformat(),
         "cutoff_at": cutoff.isoformat(),
         "input_manifest_sha256": snapshot["manifest_sha256"],
-        "generator_version": GENERATOR_VERSION,
+        "generator_version": builder.generator_version,
         "source_snapshot_refs": snapshot["members"],
         "report_status": report_status,
         "authority_status": "shadow_non_authoritative",
@@ -425,6 +419,7 @@ def build_digest(
             kind=digest_kind,
             revision=revision,
             supersedes_digest_id=prior_id,
+            builder=builder,
         ),
     }
     digest["content_hash"] = typed_payload_hash(digest)

@@ -3757,8 +3757,8 @@
     },
     {
       "path": "source/memorive_research_runtime/digest.py",
-      "sha256": "aaf340f9f290ae7a74738b0c2f2d8add9202c90d2b7e5257a261a9e6e2aa53fc",
-      "bytes": 18268
+      "sha256": "faf1cb02b7214153280894691e17d1f572f6a74e9edac0f771468bc0c9c35e5b",
+      "bytes": 565
     },
     {
       "path": "source/memorive_research_runtime/directions.py",
@@ -5507,8 +5507,8 @@
     },
     {
       "path": "source/research_reports/digest.py",
-      "sha256": "dbc2a17dce2257df6053e4e8eecfd60f788d9e6134c26c3d84f29145a686cc83",
-      "bytes": 18165
+      "sha256": "ca8fca3dff5be60182c21f057bf31c3defac179c91bf7796ce98c1a450b97636",
+      "bytes": 17938
     },
     {
       "path": "source/research_reports/errors.py",
@@ -5537,8 +5537,8 @@
     },
     {
       "path": "source/research_reports/schemas/change_digest.schema.json",
-      "sha256": "f4dab5249296eca4792425fd91dcee767e880e3af638693deb8e80d5d83218ca",
-      "bytes": 26435
+      "sha256": "43b4a6187f064a0c90563b3153c409085897d6b52f9856d16fe0e93f19410c18",
+      "bytes": 26438
     },
     {
       "path": "source/research_reports/schemas/change_digest_issue.schema.json",

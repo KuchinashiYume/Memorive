@@ -81,7 +81,7 @@
     },
     "generator_version": {
       "type": "string",
-      "pattern": "^research_reports-research-changelog/1\\.1\\.0\\+sha256\\.[A-F0-9]{16}$"
+      "pattern": "^research_reports-research-changelog/1\\.1\\.0(\\+sha256\\.[A-F0-9]{16})?$"
     },
     "source_snapshot_refs": {
       "type": "array",
