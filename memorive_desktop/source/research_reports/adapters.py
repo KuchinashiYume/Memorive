@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import importlib
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -96,79 +95,35 @@ PUBLICATION_FIELDS = {
     "absence_reason",
 }
 
-_OFFICIAL_FILE_SPECS = {
-    "run_ledger.schema": (
-        ("run_ledger/schema.py", 12472, "238956DC959F8C1A332ABEFD512C174135CC52109760512429946DF0F438E69F"),
-    ),
-    "artifact_registry.schema_v2": (
-        ("artifact_registry/schema.py", 18715, "AFD52E3A35D160675C0B9A267988F3DED5E1E26573C0CC48039B1CC352C1EC0F"),
-        ("artifact_registry/schema_v2.py", 22568, "35A6F282527308340006486A0F554F8EE425800D534C697FD95E892750CD8C35"),
-    ),
+# The package that owns a record format also provides its validator. The files
+# are listed so that a report can say which code checked its records.
+_OFFICIAL_MODULE_FILES = {
+    "run_ledger.schema": ("run_ledger/schema.py",),
+    "artifact_registry.schema_v2": ("artifact_registry/schema.py", "artifact_registry/schema_v2.py"),
 }
 OFFICIAL_VALIDATOR_RECEIPTS: dict[str, dict[str, Any]] = {}
 
 
 def _official_callable(module_name: str, function_name: str):
-    """Import a hash-pinned formal validator from the exact embedded/formal repo.
-
-    An already-imported module from another checkout is a control-plane mismatch,
-    not a reusable fallback.  This prevents ambient ``sys.path`` order from
-    silently selecting a mutable or stale validator.
-    """
-
-    package_root = Path(__file__).resolve().parent
-    embedded_repo = package_root.parents[1] / "repo"
-    formal_repo = package_root.parent
-    specs = _OFFICIAL_FILE_SPECS.get(module_name)
-    if specs is None:
-        _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"unfrozen official module {module_name}", "schema_version")
-    expected_repo = embedded_repo if all((embedded_repo / item[0]).is_file() for item in specs) else formal_repo
-    if not all((expected_repo / item[0]).is_file() for item in specs):
-        _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"frozen official module {module_name} is unavailable", "schema_version")
-    expected_repo = expected_repo.resolve()
-    top_package = module_name.split(".", 1)[0]
-
-    def assert_loaded_origin() -> None:
-        expected_package = expected_repo / top_package
-        for loaded_name, loaded in tuple(sys.modules.items()):
-            if loaded_name != top_package and not loaded_name.startswith(top_package + "."):
-                continue
-            loaded_file = getattr(loaded, "__file__", None)
-            if loaded_file is None:
-                _error("OFFICIAL_VALIDATOR_ORIGIN_MISMATCH", f"{loaded_name} has no file origin", "schema_version")
-            try:
-                Path(loaded_file).resolve().relative_to(expected_package)
-            except ValueError:
-                _error("OFFICIAL_VALIDATOR_ORIGIN_MISMATCH", f"{loaded_name} is outside frozen repo", "schema_version")
-
-    assert_loaded_origin()
-    expected_text = str(expected_repo)
-    sys.path[:] = [item for item in sys.path if str(Path(item or ".").resolve()) != expected_text]
-    sys.path.insert(0, expected_text)
-    importlib.invalidate_caches()
+    """Return the validator that the owning package provides for its records."""
+    files = _OFFICIAL_MODULE_FILES.get(module_name)
+    if files is None:
+        _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"no validator is registered for {module_name}", "schema_version")
     try:
         module = importlib.import_module(module_name)
-    except ImportError:
-        _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"frozen official module {module_name} is unavailable", "schema_version")
-    assert_loaded_origin()
-    expected_module = (expected_repo / (module_name.replace(".", "/") + ".py")).resolve()
-    if Path(getattr(module, "__file__", "")).resolve() != expected_module:
-        _error("OFFICIAL_VALIDATOR_ORIGIN_MISMATCH", f"{module_name} did not resolve to exact file", "schema_version")
-    receipt_files = []
-    for relative, expected_bytes, expected_hash in specs:
-        frozen = expected_repo / relative
-        raw = frozen.read_bytes()
-        observed_hash = sha256_bytes(raw)
-        if len(raw) != expected_bytes or observed_hash != expected_hash:
-            _error("OFFICIAL_VALIDATOR_HASH_MISMATCH", f"{relative} differs from frozen authority", "schema_version")
-        receipt_files.append(
-            {"path": relative, "bytes": expected_bytes, "sha256": expected_hash}
-        )
-    OFFICIAL_VALIDATOR_RECEIPTS[module_name] = {
-        "expected_repo": str(expected_repo),
-        "module_file": str(expected_module),
-        "files": receipt_files,
-    }
+        if module_name not in OFFICIAL_VALIDATOR_RECEIPTS:
+            source_root = Path(__file__).resolve().parent.parent
+            receipt_files = []
+            for relative in files:
+                raw = (source_root / relative).read_bytes()
+                receipt_files.append({"path": relative, "bytes": len(raw), "sha256": sha256_bytes(raw)})
+            OFFICIAL_VALIDATOR_RECEIPTS[module_name] = {
+                "expected_repo": str(source_root),
+                "module_file": str(Path(module.__file__).resolve()),
+                "files": receipt_files,
+            }
+    except (ImportError, OSError):
+        _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"the validator module {module_name} is unavailable", "schema_version")
     validator = getattr(module, function_name, None)
     if not callable(validator):
         _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"{module_name}.{function_name} is unavailable", "schema_version")

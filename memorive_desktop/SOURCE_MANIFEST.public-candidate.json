@@ -5477,8 +5477,8 @@
     },
     {
       "path": "source/research_reports/adapters.py",
-      "sha256": "01a15c245ff49f1127d804907ff1bad095daccd55fd0f008d25adba56ef4a05d",
-      "bytes": 37418
+      "sha256": "8a3109b2dfe71302724f2198f01dfadbe4de2434f95846769ebea5ad31ba8137",
+      "bytes": 35118
     },
     {
       "path": "source/research_reports/api_briefing.py",
