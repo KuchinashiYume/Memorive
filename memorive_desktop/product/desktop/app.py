@@ -6212,6 +6212,9 @@ def main() -> int:
     if frozen and BINDING.get('package_id')=='EVO-E2-build009':
         os.environ.setdefault('MEMORIVE_SESSION_SOURCE_MODE','ISOLATED_SANDBOX')
     configure_resource_imports(root)
+    if not frozen:
+        # Source checkout: load the same modules the packaged build loads.
+        configure_resource_imports(root.parents[1])
     from memorive_test_console_bridge import ConsoleBridge, ConsoleLaunch
 
     console_launch = ConsoleLaunch.from_environment(Path(sys.executable))

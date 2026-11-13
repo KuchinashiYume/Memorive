@@ -149,6 +149,19 @@ def main():
         binding={k:v for k,v in binding.items() if not k.startswith('private_test_capsule')}
         binding.update(package_id=a.candidate_id,release_version=release['release_version'],display_version=release['display_version'],release_authorized=False,acceptance_verdict='NOT_ASSESSED',canonical_profile='brand_profile.json',authorization_locator='local-source-build',source_exact_set_locator='build-receipt.json')
         write_json(path,binding)
+    # A module name must resolve to one file. The packaged app searches source/
+    # before product/desktop/; a source checkout searches the script folder first.
+    def top_level(folder):
+        return {p.stem if p.is_file() else p.name for p in (stage/folder).iterdir()
+                if p.is_dir() or p.suffix=='.py'}
+    shadowed=sorted(top_level('source')&top_level('product/desktop'))
+    if shadowed:raise ValueError('DUPLICATE_TOP_LEVEL_MODULES:'+','.join(shadowed))
+    # The packaged app imports source/ from files. Ship bytecode that is checked
+    # against each source file, so modules are not recompiled at every start.
+    import compileall, py_compile
+    if not compileall.compile_dir(str(stage/'source'),ddir='source',quiet=1,workers=1,
+                                  invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH):
+        raise ValueError('SOURCE_PRECOMPILE_FAILED')
     # Build paths and data are all explicit; neither tests nor a private capsule
     # are copied from the repository or a previous installation.
     data=[]

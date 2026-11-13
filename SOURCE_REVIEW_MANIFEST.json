@@ -1506,8 +1506,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/app.py",
-      "sha256": "b04c79d1a920433a7d71b76d30d0314f8b5e5b938365d46836a924c34cff3078",
-      "bytes": 370988
+      "sha256": "966067100a1dc146df6e3e5ff644b653808b8a3582895ba8aeb4cf78c6fc4b6b",
+      "bytes": 371137
     },
     {
       "path": "memorive_desktop/product/desktop/application_behavior.py",
@@ -3378,16 +3378,6 @@
       "path": "memorive_desktop/product/desktop/release_identity_binding.json",
       "sha256": "0a1d89bd0b3e1191bd2ed9aa9a5935d14937187163b2aa25b48ddf8de51eb793",
       "bytes": 1364
-    },
-    {
-      "path": "memorive_desktop/product/desktop/release_links.py",
-      "sha256": "dd6ec3120b522fb27c5f95073a49d90cb069597a3bc255d38bf43bb2754df8d9",
-      "bytes": 210
-    },
-    {
-      "path": "memorive_desktop/product/desktop/runtime.py",
-      "sha256": "fc9ab88b7840ea70cbcfd4b2e39a9b3893771bae35aed5512a924c3bde1a120c",
-      "bytes": 343419
     },
     {
       "path": "memorive_desktop/product/desktop/update_maintenance.py",
@@ -8936,8 +8926,8 @@
     },
     {
       "path": "memorive_desktop/source/runtime.py",
-      "sha256": "6005740a07afc1c6b14506e09daa26ce0204c583cda53157c6e8fd01ba422dfb",
-      "bytes": 344091
+      "sha256": "74cd1266923023cd8b6ef602f0556dbea464f5ef9755101b0d3983dd419d0b0a",
+      "bytes": 344723
     },
     {
       "path": "memorive_desktop/source/runtime_log/__init__.py",
@@ -8976,8 +8966,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
-      "sha256": "048e9d8132419e369e223567d154e2deda29cf6824fe9d778fa1eb2e6882473e",
-      "bytes": 253850
+      "sha256": "2a5848763bd053ff7ba80509743e89555757e1b246b69117d9f718f1f15273a8",
+      "bytes": 253511
     },
     {
       "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
@@ -8986,8 +8976,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_memorive.py",
-      "sha256": "32fa2b2c700b4634fd7493537ec6af9f7d0fdb7c114a7192c93b9fa2948122d1",
-      "bytes": 17468
+      "sha256": "8ef82ae86bd8831f38662c513c65718aeb4cc01255f112ab2cc78a60adc97dd0",
+      "bytes": 18390
     },
     {
       "path": "memorive_desktop/tools/build_update_helper.py",

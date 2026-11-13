@@ -3411,6 +3411,16 @@ class ProductApi:
         }:
             raise ValueError("ASSISTANT_REMINDER_SCOPE_INVALID")
         try:
+            current_entries = self._load_assistant_preferences()["shortcut_entries"]
+        except RuntimeError:
+            # No readable file yet: there are no earlier names to retain.
+            current_entries = []
+        for index, entry in enumerate(candidate["shortcut_entries"]):
+            # Retain existing 21-40 character labels; apply the new limit on edit.
+            existing = current_entries[index]["name"] if index < len(current_entries) else None
+            if len(entry["name"]) > 20 and entry["name"] != existing:
+                raise ValueError("ASSISTANT_SHORTCUT_NAME_TOO_LONG")
+        try:
             current_visible = self._assistant_window_is_visible()
         except (AttributeError, RuntimeError):
             current_visible = bool(

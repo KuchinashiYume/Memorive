@@ -217,8 +217,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "b04c79d1a920433a7d71b76d30d0314f8b5e5b938365d46836a924c34cff3078",
-      "bytes": 370988
+      "sha256": "966067100a1dc146df6e3e5ff644b653808b8a3582895ba8aeb4cf78c6fc4b6b",
+      "bytes": 371137
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -2074,16 +2074,6 @@
       "path": "product/desktop/release_identity_binding.json",
       "sha256": "0a1d89bd0b3e1191bd2ed9aa9a5935d14937187163b2aa25b48ddf8de51eb793",
       "bytes": 1364
-    },
-    {
-      "path": "product/desktop/release_links.py",
-      "sha256": "dd6ec3120b522fb27c5f95073a49d90cb069597a3bc255d38bf43bb2754df8d9",
-      "bytes": 210
-    },
-    {
-      "path": "product/desktop/runtime.py",
-      "sha256": "fc9ab88b7840ea70cbcfd4b2e39a9b3893771bae35aed5512a924c3bde1a120c",
-      "bytes": 343419
     },
     {
       "path": "product/desktop/update_maintenance.py",
@@ -6622,8 +6612,8 @@
     },
     {
       "path": "source/runtime.py",
-      "sha256": "6005740a07afc1c6b14506e09daa26ce0204c583cda53157c6e8fd01ba422dfb",
-      "bytes": 344091
+      "sha256": "74cd1266923023cd8b6ef602f0556dbea464f5ef9755101b0d3983dd419d0b0a",
+      "bytes": 344723
     },
     {
       "path": "source/runtime_log/__init__.py",
