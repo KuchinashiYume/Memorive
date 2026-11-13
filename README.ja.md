@@ -18,96 +18,92 @@ Memorive（略称 memo）は、学生や研究者のための Windows デスク�
 
 ## v1.03 の新機能
 
-- **AI エージェントと一緒に文献を読む**：memo-research Skill を同梱しました。Codex や Claude Code などのエージェントが変換した論文は、そのまま研究Q&Aに追加でき、処理し直す手間が省けます。いまの質問をエージェントに渡して読み進めてもらうこともでき、引用付きの回答は元の会話に戻るので、そのまま質問を続けられます。Skill は単体でも使え、1 本の論文を読むことも、複数の論文を比べることもできます。
-- **テストコンソール**：日本語・英語・中国語に対応し、レビュー・結果画面と共有用の要約を追加しました。
+- **AI エージェントと一緒に文献を読む**：memo-research Skill を追加しました。Codex や Claude Code などのエージェントが処理した論文を、研究 Q&A にそのまま追加できます。いまの質問をエージェントに渡すと、引用付きの回答が元の会話に戻ってきます。Skill は単体でも使えます。
+- **テストコンソール**が日本語・英語・中国語に対応し、レビュー・結果画面と共有用の要約を追加しました。
 - v1.02.01 の設定保存の修正を含みます。
 
-更新する前に資料と設定をバックアップし、インストーラーまたは完全なポータブル版で更新してください。
+更新の前に資料と設定をバックアップし、インストーラーまたは完全なポータブル版で更新してください。
 
 ## ホーム画面
 
 ![Memorive v1.02 日本語ホーム画面](docs/images/memorive-home-v1.02-ja.png)
 
-初期設定の Memorive v1.02 ホーム画面（日本語）。
-
 ## できること
 
-### 読む：文献・Web ページ・会話を研究に取り込む
+### 読む：資料を取り込む
 
-受信箱に資料を追加し、プレビューを確認してから処理を進めます。研究 Q&A には PDF、画像、Word、Markdown、TXT を直接添付でき、文献カードの作成を待つ必要はありません。会話管理では、ローカルの Codex・Claude Code の記録、ブラウザーで取得した内容、手動で取り込んだ会話を整理できます。会話を精錬すると、考え、決定、仮定、次の作業を確認しやすくなります。
+資料は受信箱から取り込み、プレビューを確認してから処理するタイミングを決めます。研究 Q&A には PDF、画像、Word、Markdown、TXT を直接追加でき、すぐに質問できます。ローカルの Codex・Claude Code の記録やブラウザーで取得した会話は、会話管理でまとめて扱い、要点・決定・次の作業に精錬できます。
 
-### 整理する：原文に戻れる形で根拠をまとめる
+### 整理する：原文に戻れる根拠にする
 
-資料処理は原文を残し、文献カード（Card）と分析レポート（Analysis）を作成します。カードには研究対象、方法、重要な数値、結果、限界を整理し、分析レポートにはそれらに基づく判断の候補を示します。ライブラリで原文と照合して読めます。現在のタスクでは、各処理のモデル、入出力、エラーを確認し、必要な箇所から再試行できます。
+資料を処理すると、文献カードと分析レポートができます。カードには研究対象、方法、重要な数値、結果、限界をまとめ、分析レポートはそれをもとに解釈を示します。どちらもライブラリで原文と並べて読めます。処理の途中で失敗したら、そのステップから再試行できます。
 
-### 確かめる：資料について質問し、引用を一つずつ確認する
+### 確かめる：質問し、引用を一つずつ確認する
 
-一つの会話に複数の文献を選び、方法、標本条件、結果、限界を比較できます。検索対象は基本的に会話の添付資料です。必要に応じてプロジェクト内の資料へ広げ、目的に合わせて検索の重みを調整します。回答の引用から出典と保存された版に戻り、該当箇所、ページ、行を確認できます。数値や因果関係が原文に支えられているかは、文章の読みやすさや引用数とは別に確かめます。
+一つの会話に複数の文献を選び、方法、標本条件、結果、限界を比較できます。検索は会話の添付資料から始まり、必要に応じてプロジェクト全体へ広げられます。回答の引用を開くと原文の該当箇所、ページ、行が表示され、数値や結論に裏付けがあるかをすぐに確かめられます。
 
-### 残す：確認した知識を次の研究に生かす
+### 残す：確認した知識を次に生かす
 
-保存候補の結論は、主張、適用範囲、限界、引用を確認してから知識に追加します。単独の文献の成果物を確認する操作と、派生した結論を知識に追加する操作は独立しています。過去の版、会話の整理結果、日次・週次・月次レポートを使って研究を再開し、確認済みの背景知識を後の質問で使うかどうかも選べます。
+研究 Q&A は保存する価値のある結論を提案します。主張、適用範囲、引用を確認してから知識に追加すると、後の質問で活用できます。研究記録、会話の精錬結果、日次・週次・月次レポートで進み具合を振り返れます。
 
-### 自分のモデルと作業方法に合わせる
+### モデルとツール
 
-| 機能 | 利用方法 |
+| 機能 | 内容 |
 | --- | --- |
-| API・CLI・ローカルモデル | 公式 API、互換エンドポイント、中継サービスのほか、ログイン済みの CLI や Ollama などのローカルサービスを接続できます。 |
-| 処理ごとのモデル設定 | ベクトル化、カード生成、分析、検証、定期レポートに別々のモデルを指定し、新しいタスクは実行時の設定を記録します。 |
-| Web 取得・ブラウザー拡張 | 現在のページや対応範囲内の会話を取得し、内容の完全性を確認してから整理します。 |
-| モデルランキング | 公開指標、価格、出典、更新日時で候補を絞り、自分の資料でも検証できます。 |
-| 料金・使用量 | 期間とモデルを指定し、リクエスト数、入出力トークン、実額・推定費用を確認できます。不明な費用は不明のまま表示します。 |
+| モデル接続 | 公式 API、OpenAI 互換エンドポイント、中継サービス、ログイン済みの CLI、Ollama などのローカルサービス。 |
+| 処理ごとのモデル | ベクトル化、カード生成、分析、検証、定期レポートにそれぞれ別のモデルを使えます。 |
+| ブラウザー拡張 | Web ページを保存したり、対応サイトの AI との会話を取得したりできます。 |
+| Obsidian・Zotero | ノートや文献アイテムを Memorive につなぎ、検索や質問をして、結果をノートに書き戻せます。 |
+| モデルランキング | 公開されている性能指標、価格、更新日時で候補を比べ、自分の資料で試せます。 |
+| 使用量と費用 | 期間とモデルごとにリクエスト、トークン、費用を確認できます。費用は実額・推定・不明で表示します。 |
 
-## インストールと使い始め方
-
-[完全なポータブル版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Portable-1.03-x64.zip) · [3 言語の PDF・Markdown・ローカルページ](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-Documentation.zip) · [v1.03 デスクトップ対応ソース](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip)。ポータブル版はフォルダー全体を展開してください。現在のソースには Test Console 1.03 と研究 Skill が含まれます。v1.01 は過去の参照用に保持します。
+## ダウンロードとインストール
 
 ### ダウンロードガイド
 
-| 用途 | ダウンロード | 選ぶ目安 |
-| --- | --- | --- |
-| **Memorive 本体・おすすめ** | [Memorive-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe) | デスクトップアプリをインストールします。文献の閲覧、研究 Q&A、会話管理には、このファイルを選んでください。 |
-| ダウンロードの確認 | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/SHA256SUMS.txt) | 取得したファイルの完全性を確認するための、小さなチェックサム一覧です。 |
-| Obsidian プラグイン・任意 | [Memorive-Obsidian-Companion.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) | Obsidian のノートを連携します。Obsidian と Memorive が必要です。 |
-| Zotero プラグイン・任意 | [Memorive-Zotero-Companion.xpi](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) | Zotero の文献アイテムや注釈を連携します。Zotero と Memorive が必要です。 |
-| テストコンソール・インストール版（任意） | [Memorive-Test-Console-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Setup-1.03-x64.exe) | Memorive の改良、テスト、問題の調査に使うツールです。インストールして使いたい方はこちら。 |
-| テストコンソール・ポータブル版 | [Memorive-Test-Console-Portable-1.03-x64.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Portable-1.03-x64.zip) | 同じツールをインストールせずに使えます。ガイドと権利表記を含む ZIP 全体を展開してください。インストール版との二者択一です。 |
-| テストコンソール・実行ファイルのみ | [Memorive-Test-Console.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console.exe) | ガイドと権利表記をすでにお持ちの方向けです。初めての方にはインストール版かポータブル版をおすすめします。 |
-| 現在のデスクトップソース・v1.03 | [Memorive-1.03-desktop-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip) | 現在のデスクトップ版に対応するソースです。閲覧・ビルド用で、インストーラーではありません。 |
-| 過去のプロジェクトソース・v1.01 | [Memorive-1.01-source.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-1.01-source.zip) | 過去の本体、連携ツール、独立した Test Console のソースです。現在のデスクトップ版には上記 v1.03 を選んでください。 |
-| 第三者コンポーネントのソース・開発/再配布用 | [Memorive-1.02-third-party-sources.zip](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip) | 同梱する依存コンポーネントの対応ソースと索引（約 592 MB）です。通常のインストールや利用には不要です。 |
+| 用途 | ダウンロード |
+| --- | --- |
+| **Memorive をインストール（おすすめ）** | [Memorive-Setup-1.03-x64.exe](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Setup-1.03-x64.exe) |
+| インストールせずに使う | [完全なポータブル版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Portable-1.03-x64.zip)（フォルダー全体を展開） |
+| 利用ガイド | [3 言語の PDF・Markdown・Web 版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-Documentation.zip) |
+| Obsidian / Zotero プラグイン | [Obsidian](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Obsidian-Companion.zip) · [Zotero](https://github.com/KuchinashiYume/Memorive/releases/download/v1.01/Memorive-Zotero-Companion.xpi) · [インストール方法](memorive_desktop/integrations/README.ja.md) |
+| 研究 Skill（単体利用） | [memo-research Skill v0.2.0](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Research-Skill-0.2.0.zip) |
+| テストコンソール（開発者向け） | [インストール版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Setup-1.03-x64.exe) · [ポータブル版](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Portable-1.03-x64.zip) |
+| ソースコード | [v1.03 デスクトップソース](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-1.03-desktop-source.zip)（テストコンソールと研究 Skill を含む） · [第三者コンポーネントのソース](https://github.com/KuchinashiYume/Memorive/releases/download/v1.02/Memorive-1.02-third-party-sources.zip)（約 592 MB） |
+| チェックサム | [SHA256SUMS.txt](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/SHA256SUMS.txt) |
 
-GitHub が自動で追加する **Source code (zip)** と **Source code (tar.gz)** もソースのスナップショットです。通常の利用には **Memorive-Setup-1.03-x64.exe** を選んでください。
+そのほかのファイルや過去の版は [Releases ページ](https://github.com/KuchinashiYume/Memorive/releases)にあります。GitHub が自動で付ける Source code のアーカイブはソースのみなので、インストールには上のインストーラーをお使いください。
 
 ### インストール
 
-1. **Windows 10 22H2 以降、または Windows 11（x64）**が対象です。本プロジェクトの Releases からインストーラーと同じ配布版の `SHA256SUMS.txt` を取得します。
-2. ファイルを確認する場合は PowerShell で `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.03-x64.exe` を実行し、チェックサムと照合します。
-3. インストーラーのシステムチェックで、不足している .NET Framework 4.8、WebView2 Runtime、Visual C++ v14 **x64**（14.51.36247 以降）を準備し、再確認します。必要と表示された項目に従ってください。Python は同梱されています。
-4. プログラムとデータの保存先を選んでインストールします。初回は空の設定で始まるので、「設定 → 文書と外部表示」で作業場所と生成物の保存先を確認します。
+1. **Windows 10 22H2 以降、または Windows 11（x64）**が必要です。
+2. インストーラーを実行します。コード署名がないため、Windows のセキュリティ警告が表示されることがあります。ファイルを確認するには、PowerShell で `Get-FileHash -Algorithm SHA256 .\Memorive-Setup-1.03-x64.exe` を実行し、`SHA256SUMS.txt` の値と比べてください。
+3. システムチェックで不足しているコンポーネント（.NET Framework 4.8、WebView2 Runtime、Visual C++ v14 x64）が表示されたら、案内に従って入れてください。Python は同梱されています。
+4. プログラムとデータの保存先を選びます。初回起動後、「設定 → 文書と外部表示」で資料の保存先を確認してください。
 
-### まず一つのモデル接続を設定する
+### モデルを接続する
 
-- **API**：「設定 → モデルサービスと API」で提供元のプロトコル、アドレス、モデル ID を設定し、認証情報欄からキーを保存します。接続を検証してから処理に割り当てます。
-- **CLI**：そのツールのターミナルでインストール、ログイン、モデル確認を済ませ、「設定 → CLI 接続」で選択して検証します。
-- **ローカルモデル**：先にローカルサーバーを起動し、モデルを用意します。「設定 → ローカルモデル」で自動検出するか本機のアドレスを入力し、対応するプロトコルでモデル一覧を取得します。
+まずは一つ接続すれば始められます。
 
-最初は使いたい接続方式だけで構いません。チャット、画像の読み取り、ベクトル化、検証では必要な能力が異なります。一覧に表示されるだけで、すべての処理に対応するとは限りません。クラウド利用枠や CLI の契約は各自で用意してください。memo に無料の API 利用枠は付属しません。
+- **API**：「設定 → モデルサービスと API」で提供元のプロトコル、アドレス、モデル ID、キーを入力し、接続を検証してから処理に割り当てます。
+- **CLI**：ターミナルでツールをインストールしてログインし、「設定 → CLI 接続」で選択して検証します。
+- **ローカルモデル**：ローカルのモデルサーバーを起動し、「設定 → ローカルモデル」で自動検出するかアドレスを入力して、モデル一覧を読み込みます。
 
-### 最初の研究を進める
+処理によって必要な能力は異なります。たとえば画像の読み取りには、画像に対応したモデルが必要です。API の利用枠や CLI の契約はご自身でご用意ください。
 
-1. **処理にモデルを割り当てる**：「現在の処理フローのモデル設定」で、必要な処理のモデルを選びます。検索用のベクトル化、生成、検証は役割ごとに設定します。
-2. **よく知る資料を一つ試す**：受信箱に追加してプレビューと自動実行を確認し、現在のタスクで進捗を追います。
-3. **原文と成果物を照合する**：ライブラリで原文、Card、Analysis を開き、同じ資料・版の方法、数値、結論を確認します。
-4. **研究 Q&A を始める**：プロジェクトと会話を選び、ファイルを添付するか既存資料を選択し、モデルと検索範囲を確認します。
-5. **具体的に質問する**：例えば「この二つの文献の方法、標本条件、主な限界を比較してください。それぞれの出典を示し、直接比較できない点を説明してください」と尋ねます。
-6. **引用を確認してから保存する**：原文と前後の文脈に戻り、適用範囲と限界を確かめたうえで、知識への追加を個別に確認します。
+### はじめての使い方
 
-日常の作業では、新しい会話の同期、記録の整理、検索プリセットの調整、レポートや使用量の確認を行えます。失敗時は該当処理のエラーを確認してください。ベクトルモデルの変更には索引の再構築が必要な場合があります。保存先を変える前にバックアップとファイルの位置を確認します。
+1. 「現在の処理フローのモデル設定」で、各処理のモデルを選びます。
+2. よく知っている論文を受信箱に追加し、「現在のタスク」で進み具合を見ます。
+3. ライブラリで、文献カードと分析レポートを原文と見比べます。
+4. 研究の会話を作って論文を追加し、具体的に質問します。例：「この二つの論文の方法、標本条件、主な限界を、出典を示して比較してください」。
+5. 引用を開いて原文と照らし合わせ、問題がなければ結論を知識に追加します。
 
-中国語・英語・日本語の図解ガイドは「設定 → バージョン情報 → 利用文書」から開けます。[インストールと初期設定](memorive_desktop/INSTALL.md)、[テキスト版ガイド](memorive_desktop/product/desktop/help/ja-JP/manual-text.md)も参照できます。
+タスクが失敗したときは、失敗したステップのエラーを確認してください。ベクトルモデルを変えると、索引の再構築が必要になることがあります。データの保存先を移す前には、バックアップを取ってください。
 
-## 研究を支える構成
+図解ガイドは「設定 → バージョン情報 → 利用文書」から開けます。[インストールと初期設定](memorive_desktop/INSTALL.md)と[テキスト版ガイド](memorive_desktop/product/desktop/help/ja-JP/manual-text.md)もご覧ください。
+
+## 仕組み
 
 ```mermaid
 flowchart LR
@@ -120,68 +116,40 @@ flowchart LR
   knowledge --> retrieval
 ```
 
-| 構成 | 役割 |
-| --- | --- |
-| 原資料と版 | ファイル、会話のスナップショット、出典の位置を保存し、使用した時点の資料へ戻れるようにします。 |
-| 処理とライブラリ | 資料の変換、整理、情報抽出を行い、原文とカード・分析を関連づけます。 |
-| 検索と研究 | 選んだプロジェクトの範囲から根拠を組み立て、質問、比較、引用確認を支えます。 |
-| 知識と研究記録 | 確認した結論、会話の整理結果、定期レポートを次の研究へ引き継ぎます。 |
-| 共通サービス | モデル接続、タスクの状態、使用量記録、ローカル保存を提供します。 |
+原文、版、生成した結果は分けて保存します。索引は内容を探すために使い、確認するときは原文を基準にします。詳しくは[設計文書](memorive_desktop/product/desktop/help/ja-JP/design.md)、ソースからのビルドは[ビルド手順](memorive_desktop/BUILDING.md)をご覧ください。
 
-デスクトップ画面はアプリケーションサービスを介して Python の処理層を呼び出します。モデル接続はまとめて管理し、原資料と派生成果物は分けて保存します。索引は内容を探すためのもので、確認の根拠は原文とその版です。詳細は[設計文書](memorive_desktop/product/desktop/help/ja-JP/design.md)、ソースからの構築は[ビルド手順](memorive_desktop/BUILDING.md)をご覧ください。
+## データと費用
 
-## データ・費用・現在の状態
+資料と設定はローカルに保存されます。クラウドモデル、Web 取得、外部検索を使うと、関連する内容が選んだサービスへ送信されます。機密性の高い資料には、ローカルモデルを使ってください。API キーは認証情報欄に保存し、スクリーンショット、ログ、エクスポートを共有する前に、キーが含まれていないか確認してください。
 
-資料と設定はローカルに保存します。クラウドモデル、Web 取得、外部検索では、関連するリクエストを選択したサービスへ送信します。資料の性質に合う接続先を選び、キーは専用の認証情報欄で保存してください。Issue、画面画像、研究記録のエクスポートには含めないでください。
+費用は実額・推定・不明に分けて記録します。実際の支払額は、提供元の請求書でご確認ください。OCR の結果、モデルの回答、引用は、原文と照らし合わせてご自身で確認してください。
 
-費用記録は実額・推定・不明を区別します。公開価格やサブスクリプション料金は、個々のタスクの請求額とは異なります。モデルの回答と引用は利用者自身で確認します。
+## 改良とテスト
 
-現在のアプリは v1.03 です。更新インデックスには正式配布用鍵による署名がありますが、アプリとインストーラーには Windows Authenticode 証明書がありません。配布チェックサムをご確認ください。今回の公開準備ではコード・パッケージの同一性・署名を確認しましたが、全回帰テストは再実行していません。OCR、モデルの回答と引用の裏付けは引き続き人による確認が必要です。
+Memorive のコードは自由に変更できます。付属の**テストコンソール**は、自分でビルドした Memorive を一時データ領域で起動し、不具合の再現や動作の確認に使えます。終了すると一時データは削除され、普段のデータはそのまま残ります。実際にモデルを呼び出すテストは事前に許可を求め、費用が発生することがあります。
 
-## Memorive を改善し、変更を確かめる
-
-学習や研究の進め方に合わせて Memorive を変更・拡張できます。同梱の **Memorive テストコンソール**は、選択した実行ファイルを一時データ領域で起動し、不具合の再現、動作の確認、イベント・結果・終了時のクリーンアップ記録の確認を支援します。
-
-1. 普段使っている開発ツールでコードを変更し、アプリをビルドします。
-2. 参照実装のセルフチェック後、自分で作成した実行ファイルを接続し、一時起動したアプリ内でコンソールへのアクセスを許可します。実際のモデル呼び出しには個別の許可が必要で、費用が発生する場合があります。
-3. 結果と診断を確認してセッションを終了すると、一時的な業務データが削除されます。一部の設定はコピーできますが、元のデータ領域は上書きしません。
-
-結果は、選択したバージョン・設定・シナリオの範囲に限られます。参照実装の成功は実際のアプリ全体の動作確認を意味せず、テストの成功は包括的な品質・安全性の認証ではありません。
-
-[ソースと使い方](memorive_console/README.ja.md) · [中文](memorive_console/README.md) · [English](memorive_console/README.en.md) · [インストーラー・ポータブル版](https://github.com/KuchinashiYume/Memorive/releases)
-
-日常の利用ではコンソールのインストールは不要です。コードは AGPL-3.0-only、アイコンの作者表記と権利上の条件は[別の声明](memorive_console/NOTICE.txt)で説明しています。
+[コンソールの使い方](memorive_console/README.ja.md) · [中文](memorive_console/README.md) · [English](memorive_console/README.en.md)。コンソールのコードも AGPL-3.0-only です。アイコンの権利については[コンソールの声明](memorive_console/NOTICE.txt)をご覧ください。
 
 ## 開発について
 
-Memorive は AI コーディングツールで開発されたプロジェクトです。独自のコードは **OpenAI Codex** と **Anthropic Claude Code** によって生成・修正され、改善が重ねられています。企画者は要件定義、製品設計、テストと受け入れ確認を担当しており、コードを直接書いてはいません。第三者のコンポーネントは、それぞれの作者の表記とライセンスを保持しています。
+プロジェクト独自のコードは、すべて **OpenAI Codex** と **Anthropic Claude Code** が書き、改良を重ねてきました。企画者は要件定義、製品設計、テストと受け入れ確認を担当しています。
 
-## 設計の参考と謝辞
+## 謝辞
 
-文献の構造解析では、Datalab の [Marker](https://github.com/datalab-to/marker)、特に文書のブロック分割と表・レイアウト構造を保持する考え方を参考にしました。作者と貢献者の皆様に感謝します。Memorive は任意のローカル Marker 解析にも対応しています。実行環境とモデルの重みは別途用意し、それぞれのライセンスに従ってください。
+文献の構造解析では、Datalab の [Marker](https://github.com/datalab-to/marker)、特に文書のブロック分割と、表やレイアウトの構造を保つ考え方を参考にしました。作者と貢献者の皆様に感謝します。Memorive では Marker によるローカル解析も選べます。実行環境とモデルの重みは別途用意し、それぞれのライセンスに従ってください。
 
 ## ライセンスとキャラクター素材
 
-プロジェクト独自のコードには [AGPL-3.0-only](LICENSE) を適用します。[適用範囲](memorive_desktop/LICENSING.md)をご確認ください。個人の学習・研究と非商用利用を推奨しますが、この方針はコードのライセンスに制限を追加するものではありません。
+プロジェクトのコードには [AGPL-3.0-only](LICENSE) を適用します。[適用範囲](memorive_desktop/LICENSING.md)をご確認ください。作者は、個人の学習・研究と非商用での利用を願っています。これはお願いであり、ライセンスの条件はそのままです。
 
 一部のキャラクター画像は『ブルーアーカイブ』を参考に AI を用いて制作した二次創作です。Memorive は個人による非公式プロジェクトで、Nexon、Nexon Games、Yostar との関係はありません。原キャラクター、名称、標章などの権利は各権利者に帰属します。デスクトップペット、表情、キャラクターアイコンには[素材に関する声明](memorive_desktop/ASSET_NOTICE.md)を別途適用します。依存コンポーネントは[第三者に関する説明](memorive_desktop/THIRD_PARTY_NOTICES.md)をご覧ください。
 
 ## フィードバック・お問い合わせ
 
-使い方の質問、不具合、機能の提案は [GitHub Issues](https://github.com/KuchinashiYume/Memorive/issues) にお寄せください。非公開のご連絡、セキュリティや素材の権利に関するお問い合わせは、プロジェクト用メール [kuchinashiyume01@Gmail.com](mailto:kuchinashiyume01@Gmail.com) で受け付けます。
-
-不具合の報告には Memorive のバージョンと再現手順を添えてください。スクリーンショットやログから API キーと個人の研究内容を除いてください。
-
-## 連携プラグイン
-
-[memo-research Skill v0.2.0](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Research-Skill-0.2.0.zip) · [Test Console 1.03 source](https://github.com/KuchinashiYume/Memorive/releases/download/v1.03/Memorive-Test-Console-Source-1.03.zip)
-
-Obsidian のノートと Zotero の文献を接続し、取り込みのプレビュー、根拠検索、質問、結果の書き戻しを利用できます。 [Installation / 安装 / インストール](memorive_desktop/integrations/README.ja.md).
+使い方の質問、不具合、機能の提案は [GitHub Issues](https://github.com/KuchinashiYume/Memorive/issues) へお寄せください。Memorive のバージョンと再現手順を添え、スクリーンショットやログからは API キーと個人的な内容を取り除いてください。非公開のご連絡、セキュリティや素材の権利に関するお問い合わせは、[kuchinashiyume01@Gmail.com](mailto:kuchinashiyume01@Gmail.com) までお送りください。
 
 ## 過去のバージョン
 
-**[v1.02.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02.01)** — 設定保存と版番号認識の修正。
-
-**[v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02)** — 文献探索、AI近況、カスタムCLI、多言語生成、会話アーカイブ、署名付き更新に対応しました。
-
-**[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)** — v1.01 は文献処理、研究 Q&A、出典付き記録、モデル接続を中心とするデスクトップ研究環境と任意の連携ツール・Test Console を提供しました。過去の記録として公開を継続しています。現在のアプリには上記の v1.03 をお使いください。
+- **[v1.02.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02.01)**：設定保存と版番号認識の修正。
+- **[v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02)**：文献探索、AI近況、カスタム CLI、多言語生成、会話アーカイブ、署名付き更新。
+- **[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)**：最初の公開版。文献処理、研究 Q&A、モデル接続を提供。
