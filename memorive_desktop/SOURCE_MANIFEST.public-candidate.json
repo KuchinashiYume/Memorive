@@ -3172,8 +3172,8 @@
     },
     {
       "path": "source/memorive_current_task/product_controller.py",
-      "sha256": "3e4fdaec3b4947794b5a195b0738a6279a3dc0d308e956414bf71f87563fda58",
-      "bytes": 84279
+      "sha256": "c1c197b1ae2159b6ff2f053f6c4464cbcabfddff03fa87670e068dc376eb0382",
+      "bytes": 80912
     },
     {
       "path": "source/memorive_current_task/projection.py",
