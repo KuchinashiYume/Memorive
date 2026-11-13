@@ -3422,13 +3422,13 @@
     },
     {
       "path": "source/memorive_browser_companion/extension/README.txt",
-      "sha256": "be62b7d688140965a0adec3fd09d22c21b7eac52f80dc061e7cda085ce5cc056",
-      "bytes": 3491
+      "sha256": "b0e96c7bbfedffaad4712e709b48ddab8a8cab340ac22f5764e96dd446bcb79e",
+      "bytes": 2274
     },
     {
       "path": "source/memorive_browser_companion/extension/background.js",
-      "sha256": "5b7461643e02035196d82fcd45e7cbf46cfecc5f4c7f22d23d495121beb5abdc",
-      "bytes": 28335
+      "sha256": "dc9c599c377a188f45b8ec77ef02fc8331d8587c25a51d5367d3bb4812d4df08",
+      "bytes": 27964
     },
     {
       "path": "source/memorive_browser_companion/extension/browser_identity.js",
@@ -3437,12 +3437,12 @@
     },
     {
       "path": "source/memorive_browser_companion/extension/content.js",
-      "sha256": "25a61a1d06cd6f275ba0964582e05e12dcbdae1d0a99eef9d9762a782b22c27a",
-      "bytes": 56024
+      "sha256": "fbea6dd95930b9088eb08a7a9e8a91d45f82aa8ec8bc7b8107f59bf3e5aa67cd",
+      "bytes": 55976
     },
     {
       "path": "source/memorive_browser_companion/extension/manifest.json",
-      "sha256": "e934e54c6b6f994549d7645e067614c31b2210d4aae89c95810f14023dad2c46",
+      "sha256": "1f7ed5be5e573df9f02c990c59b1b6ccd6c1c354d4335ebffa1d9a776bbcbeb0",
       "bytes": 1036
     },
     {
@@ -3457,13 +3457,13 @@
     },
     {
       "path": "source/memorive_browser_companion/extension/popup.js",
-      "sha256": "3c61fa12ecf0bb42fe7b6266999e2678c8aa8d98734bcb1327f7ae9e5b0a2dde",
-      "bytes": 6358
+      "sha256": "c1e98afcc69791ce0e32c1700030e40d2f9185641536dc124e35d1f7fdcbd0fa",
+      "bytes": 6478
     },
     {
       "path": "source/memorive_browser_companion/extension/recording.js",
-      "sha256": "95020e443efc681655ec23e84e0f6a1978b5b2c8694c0d079bfe6f077f11a80c",
-      "bytes": 6063
+      "sha256": "3e736bbf0700ee55e3fd8d8e892512b8014f1142b10f6d25ad0b1cf5633ba76f",
+      "bytes": 6392
     },
     {
       "path": "source/memorive_browser_companion/extension/runner.html",
@@ -3472,8 +3472,8 @@
     },
     {
       "path": "source/memorive_browser_companion/extension/runner.js",
-      "sha256": "c3bdff4add760c13b3b67c128a4916c4aad1025484de86dc15c93479e2c20ea7",
-      "bytes": 43275
+      "sha256": "f6ec715f577c7dc572b34d45dd1ea23afcafd40b5d90b05e13242743b1bd5d51",
+      "bytes": 42849
     },
     {
       "path": "source/memorive_browser_companion/extension/site_profiles.js",

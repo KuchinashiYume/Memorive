@@ -62,8 +62,12 @@
     };
   };
 
+  // Scroll events can fire dozens of times a second, and each sample walks the
+  // whole conversation DOM. Unthrottled, long conversations stuttered while
+  // recording. The 250 ms timer still samples whatever the scroll skipped.
+  const MIN_SCROLL_SAMPLE_GAP_MS = 100;
   const createRecorder = ({capture,validate,finish,now=()=>Date.now(),schedule=setInterval,cancel=clearInterval}) => {
-    let state = null, timer = null, merger = null, base = null, lastPosition = 0;
+    let state = null, timer = null, merger = null, base = null, lastSampleAt = 0;
     const status = () => state ? {...state, message_count:merger.get().length,
       remaining_seconds:Math.max(0,Math.ceil((state.deadline-now())/1000))} : {status:"IDLE",message_count:0};
     const stop = async (reason="USER_STOP") => {
@@ -82,14 +86,16 @@
       } catch(e) { state.status="ERROR";state.error_code=String(e?.message || "RECORDING_SAVE_FAILED"); }
       return status();
     };
-    const sample = (position=lastPosition) => {
+    const sample = (force=false) => {
       if (state?.status !== "RECORDING") return;
       if (now()>=state.deadline) { void stop("TIME_LIMIT");return; }
+      if (force!==true && now()-lastSampleAt<MIN_SCROLL_SAMPLE_GAP_MS) return;
+      lastSampleAt=now();
       try {
         validate(base.source_url);
         const page=capture();
         if (page.source_url!==base.source_url) { void stop("PAGE_CHANGED");return; }
-        merger.add(page.messages,position<lastPosition?-1:1);lastPosition=position;
+        merger.add(page.messages);
       } catch(e) {
         const code=String(e?.message || "");
         if (code==="CURRENT_PAGE_CONVERSATION_NOT_FOUND") return;
@@ -106,7 +112,7 @@
         validate();
         base=capture();merger=createMerger();merger.add(base.messages);
         state={status:"RECORDING",token,deadline:Math.min(Number(deadline),now()+600000),started_at:now()};
-        timer=schedule(()=>sample(),250);
+        timer=schedule(()=>sample(true),250);
         return status();
       },sample,stop,status
     };

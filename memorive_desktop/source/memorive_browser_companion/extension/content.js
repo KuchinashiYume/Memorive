@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const BRIDGE_VERSION = "3.10.1";
+  const BRIDGE_VERSION = "3.10.2";
   const SITE_CONFIG = globalThis.MEMORIVE_SITE_PROFILES;
   if (!SITE_CONFIG) return;
   const bridgeIdentity = BRIDGE_VERSION + ':' + SITE_CONFIG.sha256 + ':history-ready-v2';
@@ -993,7 +993,7 @@
     },
     finish: (conversation,token) => chrome.runtime.sendMessage({type:"MEMORIVE_RECORDING_FINISH",token,conversation})
   });
-  const onRecordingScroll = event => recorder.sample(Number(event.target?.scrollTop ?? window.scrollY));
+  const onRecordingScroll = () => recorder.sample();
   document.addEventListener("scroll",onRecordingScroll,true);
   const onRecordingExit = () => void recorder.stop("PAGE_CLOSED");
   window.addEventListener("pagehide",onRecordingExit);
@@ -1012,7 +1012,7 @@
       }
       if (message?.type === "MEMORIVE_RECORDING_STOP") {
         if (message.token && message.token!==recorder.status().token) throw Error("RECORDING_TOKEN_MISMATCH");
-        recorder.sample();
+        recorder.sample(true);
         return {ok:true,state:await recorder.stop(message.reason || "USER_STOP")};
       }
       if (message?.type === "MEMORIVE_CAPTURE_CURRENT_PAGE_GENERIC") {

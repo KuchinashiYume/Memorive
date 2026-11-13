@@ -3,7 +3,6 @@
 const SITE_CONFIG = globalThis.MEMORIVE_SITE_PROFILES;
 const ACTIVE_SITES = SITE_CONFIG.sites.filter(row=>row.enabled);
 const PROVIDER_ORDER = ACTIVE_SITES.map(row=>row.provider_id);
-const APPROVED_URL_PATTERNS = ACTIVE_SITES.flatMap(row=>row.hosts.map(host=>`https://${host}/*`));
 const APPROVED_HOSTS = new Set(ACTIVE_SITES.flatMap(row=>row.hosts));
 const PROVIDER_ENTRY_URLS = Object.fromEntries(ACTIVE_SITES.map(row=>[row.provider_id,row.url]));
 // Render one provider at a time in an extension-owned visible window.
@@ -20,11 +19,13 @@ const CAPTURE_RETRY_COOLDOWN_MS = {
   gemini: 30000,
   kimi: 5000
 };
-const CAPTURE_HEARTBEAT_INTERVAL_MS = 60 * 1000;
+// Chromium stops an idle extension service worker after about 30 seconds, and
+// the worker keeps the sync state only in memory. The runner sends its state
+// every 20 seconds for the whole run, which keeps the worker running and its
+// watchdog armed. A stopped worker used to report IDLE in the popup and accept
+// a second sync request while this run was still going.
+const KEEPALIVE_INTERVAL_MS = 20 * 1000;
 const MAX_CONSECUTIVE_FAILED_CONVERSATIONS = 3;
-const AUTOMATED_NAVIGATION_ALLOWED = Object.fromEntries(ACTIVE_SITES.map(row=>[row.provider_id,true]));
-// Retained only so visual-check can identify and migrate prior downloaded bundles.
-const LEGACY_LIBRARY_SCHEMA = "MEMORIVE_BROWSER_SESSION_LIBRARY_V3";
 const TAB_LOAD_TIMEOUT_MS = 12000;
 const DOWNLOAD_TIMEOUT_MS = 60000;
 // PREFLIGHT and incremental runs remain tightly bounded. FULL is a deliberate,
@@ -71,12 +72,15 @@ const requestedProviders = (runnerUrl.searchParams.get("providers") || "")
   .split(",")
   .map((value) => value.trim().toLowerCase())
   .filter(Boolean);
-if (runnerUrl.searchParams.has("providers") && (!requestedProviders.length ||
-    !requestedProviders.every((value,index,values)=>PROVIDER_ORDER.includes(value) && values.indexOf(value)===index))) {
-  throw new Error("SYNC_PROVIDER_SCOPE_INVALID");
-}
-const ACTIVE_PROVIDER_ORDER = requestedProviders.length ? requestedProviders : PROVIDER_ORDER;
-if (!ACTIVE_PROVIDER_ORDER.length) throw new Error('BROWSER_NO_ENABLED_SITES');
+const providerScopeValid = !runnerUrl.searchParams.has("providers") || (requestedProviders.length > 0 &&
+  requestedProviders.every((value,index,values)=>PROVIDER_ORDER.includes(value) && values.indexOf(value)===index));
+const ACTIVE_PROVIDER_ORDER = !providerScopeValid ? [] : (requestedProviders.length ? requestedProviders : PROVIDER_ORDER);
+// Problems with the request are raised when the run starts, so they reach the
+// popup, the desktop app and the report. Thrown here, they stopped the page
+// silently and left the extension "running" until the 5-minute watchdog.
+let startupError = !providerScopeValid
+  ? new Error("SYNC_PROVIDER_SCOPE_INVALID")
+  : (ACTIVE_PROVIDER_ORDER.length ? null : new Error("BROWSER_NO_ENABLED_SITES"));
 const ACTIVE_SYNC_LABEL = `${ACTIVE_PROVIDER_ORDER.length} 来源同步`;
 let runnerWindowId = null;
 const establishRunnerWindowOwnership = async () => {
@@ -135,7 +139,14 @@ const parseIncrementalCursor = (rawValue) => {
   return { providers: normalizedProviders };
 };
 const INCREMENTAL_CURSOR_TOKEN = runnerUrl.searchParams.get("cursor") || "";
-const INCREMENTAL_CURSOR = parseIncrementalCursor(INCREMENTAL_CURSOR_TOKEN);
+let INCREMENTAL_CURSOR = null;
+if (!startupError) {
+  try {
+    INCREMENTAL_CURSOR = parseIncrementalCursor(INCREMENTAL_CURSOR_TOKEN);
+  } catch (error) {
+    startupError = error;
+  }
+}
 const browserFamily = MEMORIVE_BROWSER_IDENTITY.detect();
 
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -225,7 +236,7 @@ const recordCompletedProviderResult = (row) => {
   });
 };
 
-const partialProviderRowsForTimeout = () => ACTIVE_PROVIDER_ORDER.map((providerId) => {
+const partialProviderRows = (errorCode) => ACTIVE_PROVIDER_ORDER.map((providerId) => {
   const completed = completedProviderResults.find((row) => row.provider_id === providerId);
   if (completed) return completed;
   const progress = liveProviderProgress.get(providerId) || {};
@@ -240,7 +251,7 @@ const partialProviderRowsForTimeout = () => ACTIVE_PROVIDER_ORDER.map((providerI
     unchanged_count: Number(progress.unchanged) || 0,
     failed_count: Number(progress.failed) || 0,
     skipped_candidate_count: Number(progress.skipped) || 0,
-    error_code: "SYNC_HARD_TIMEOUT",
+    error_code: errorCode,
     skipped_error_codes: [],
     safe_diagnostic: null
   };
@@ -304,13 +315,21 @@ const reportProviderProgress = async (providerId, providerIndex, patch = {}) => 
   document.title = `Memorive ${ACTIVE_SYNC_LABEL} · ${current}/${total || "?"}`;
 };
 
-const startCaptureHeartbeat = (providerId, providerIndex, progress) => setInterval(() => {
-  if (syncAborted) return;
-  void reportProviderProgress(providerId, providerIndex, {
-    ...progress(),
-    heartbeat: true
-  }).catch(() => {});
-}, CAPTURE_HEARTBEAT_INTERVAL_MS);
+let keepAliveHandle = null;
+const startKeepAlive = () => {
+  keepAliveHandle = setInterval(() => {
+    chrome.runtime.sendMessage({
+      type: "MEMORIVE_SYNC_ALL_PROGRESS",
+      state: { ...aggregateState }
+    }).catch(() => {});
+  }, KEEPALIVE_INTERVAL_MS);
+};
+// Stop before the final COMPLETE/ERROR message; a later tick would mark the
+// finished run as running again.
+const stopKeepAlive = () => {
+  if (keepAliveHandle !== null) clearInterval(keepAliveHandle);
+  keepAliveHandle = null;
+};
 
 const waitForTabComplete = (tabId) => new Promise((resolve, reject) => {
   let finished = false;
@@ -443,12 +462,19 @@ const openProviderEntryTab = async (providerId) => {
     active: false
   });
   if (typeof tab.id !== "number") throw new Error("PROVIDER_ENTRY_TAB_CREATE_FAILED");
-  await prepareTabForVisibleUiRead(tab.id);
-  const loadedTab = await chrome.tabs.get(tab.id);
-  if (!loadedTab?.url || providerForUrl(loadedTab.url) !== providerId) {
-    throw new Error("PROVIDER_ENTRY_TAB_LOAD_FAILED");
+  try {
+    await prepareTabForVisibleUiRead(tab.id);
+    const loadedTab = await chrome.tabs.get(tab.id);
+    if (!loadedTab?.url || providerForUrl(loadedTab.url) !== providerId) {
+      throw new Error("PROVIDER_ENTRY_TAB_LOAD_FAILED");
+    }
+    return { ...loadedTab, memorive_owned: true };
+  } catch (error) {
+    // For example a sign-in redirect. Without this the tab stayed in the sync
+    // window after the run, because only the runner tab is closed at the end.
+    await chrome.tabs.remove(tab.id).catch(() => {});
+    throw error;
   }
-  return { ...loadedTab, memorive_owned: true };
 };
 
 const discoverProviderTabs = async () => {
@@ -473,7 +499,6 @@ const indexRecentConversations = async (providerId, sourceTabs) => {
     }
     canonicalUrl(sourceTab.url, providerId);
     await prepareTabForVisibleUiRead(sourceTab.id);
-    await ensureContentScript(sourceTab.id).catch(() => {});
     const response = await sendToTabWithRetry(sourceTab.id, {
       type: "MEMORIVE_INDEX_RECENT_14_DAYS_OR_30_CONVERSATIONS",
       safety_ceiling: INDEX_DISCOVERY_CEILING
@@ -514,35 +539,6 @@ const closeOwnedSourceTabs = async (sourceTabs) => {
     .filter((tab) => tab?.memorive_owned && typeof tab.id === "number")
     .map((tab) => tab.id);
   if (tabIds.length) await chrome.tabs.remove(tabIds).catch(() => {});
-};
-
-const contentBridgeVersion = async (tabId) => {
-  const rows = await chrome.scripting.executeScript({
-    target: { tabId },
-    func: () => globalThis.__MEMORIVE_SESSION_LIBRARY_BRIDGE_VERSION__ || ""
-  }).catch(() => []);
-  return String(rows?.[0]?.result || "");
-};
-
-const currentBridgeSessionTab = async (providerId, rawUrl) => {
-  const expected = canonicalUrl(rawUrl, providerId);
-  if (typeof runnerWindowId !== "number") return null;
-  const tabs = await chrome.tabs.query({
-    windowId: runnerWindowId,
-    url: APPROVED_URL_PATTERNS
-  });
-  for (const tab of tabs) {
-    if (typeof tab.id !== "number" || !tab.url) continue;
-    try {
-      if (
-        canonicalUrl(tab.url, providerId) === expected &&
-        await contentBridgeVersion(tab.id) === "3.7.0:" + SITE_CONFIG.sha256
-      ) return tab;
-    } catch (_error) {
-      // Keep looking; stale or mismatched tabs are never reused.
-    }
-  }
-  return null;
 };
 
 const failedConversation = (descriptor, error) => ({
@@ -636,31 +632,28 @@ const capturePlanFor = async (providerId, indexedSessions) => {
 };
 
 const captureFromTab = async (providerId, descriptor, tabId) => {
-  await ensureContentScript(tabId).catch(() => {});
-    const response = await sendToTabWithRetry(tabId, {
-      type: "MEMORIVE_CAPTURE_INDEXED_CONVERSATION",
-      descriptor: { ...descriptor, source_url: canonicalUrl(descriptor.source_url, providerId) }
-    });
-    if (!response?.ok || !response.conversation) {
-      throw responseError(response, "CONVERSATION_CAPTURE_FAILED");
-    }
-    if (
-      response.conversation.provider_id !== providerId ||
-      response.conversation.provider_session_id !== descriptor.provider_session_id
-    ) {
-      throw new Error("CAPTURED_SESSION_IDENTITY_MISMATCH");
-    }
-    return response.conversation;
+  // navigateCaptureWorker has already loaded the page scripts; the retry
+  // below injects them again if the page has none.
+  const response = await sendToTabWithRetry(tabId, {
+    type: "MEMORIVE_CAPTURE_INDEXED_CONVERSATION",
+    descriptor: { ...descriptor, source_url: canonicalUrl(descriptor.source_url, providerId) }
+  });
+  if (!response?.ok || !response.conversation) {
+    throw responseError(response, "CONVERSATION_CAPTURE_FAILED");
+  }
+  if (
+    response.conversation.provider_id !== providerId ||
+    response.conversation.provider_session_id !== descriptor.provider_session_id
+  ) {
+    throw new Error("CAPTURED_SESSION_IDENTITY_MISMATCH");
+  }
+  return response.conversation;
 };
 
+// Each conversation is opened in the provider's own worker tab. (An earlier
+// shortcut looked for a tab already showing the conversation, but it compared
+// the page script against version 3.7.0 and never matched.)
 const captureIndexedConversation = async (providerId, descriptor, captureWorker) => {
-  const currentTab = await currentBridgeSessionTab(providerId, descriptor.source_url);
-  if (typeof currentTab?.id === "number") {
-    return captureFromTab(providerId, descriptor, currentTab.id);
-  }
-  if (!AUTOMATED_NAVIGATION_ALLOWED[providerId]) {
-    throw new Error("FULL_BODY_REQUIRES_VISIBLE_OPEN_TAB_OR_OFFICIAL_EXPORT");
-  }
   let captureUrl = descriptor.source_url;
   if (providerId === "kimi") {
     const parsed = new URL(captureUrl);
@@ -766,18 +759,10 @@ const syncProvider = async (providerId, sourceTabs, providerIndex) => {
       index += 1
     ) {
       assertSyncActive();
-      if (index > 0 && AUTOMATED_NAVIGATION_ALLOWED[providerId]) {
+      if (index > 0) {
         await delay(CAPTURE_NAVIGATION_COOLDOWN_MS[providerId] ?? 3500);
       }
       const descriptor = sessions[index];
-      const captureHeartbeatHandle = startCaptureHeartbeat(providerId, providerIndex, () => ({
-        status: "CAPTURING",
-        current: SYNC_MODE === "INCREMENTAL" ? attempted : Math.min(captured, captureTarget),
-        total: captureTarget,
-        attempted,
-        skipped: skippedCandidates.length,
-        unchanged
-      }));
       try {
         const archived = await finalizeArchivedConversation(
           await captureIndexedConversation(providerId, descriptor, captureWorker)
@@ -809,8 +794,6 @@ const syncProvider = async (providerId, sourceTabs, providerIndex) => {
           failureBurstDetected = true;
           captureErrorCodes.add("PROVIDER_CAPTURE_ABORTED_AFTER_FAILURE_BURST");
         }
-      } finally {
-        clearInterval(captureHeartbeatHandle);
       }
       attempted += 1;
       await reportProviderProgress(providerId, providerIndex, {
@@ -943,6 +926,8 @@ const closeRunnerSoon = () => setTimeout(async () => {
 }, 1500);
 
 const executeSync = async () => {
+  if (startupError) throw startupError;
+  startKeepAlive();
   await establishRunnerWindowOwnership();
   aggregateState = { ...aggregateState, dedicated_window_id: runnerWindowId };
   await reportProgress({ status: "DISCOVERING", provider_index: 0 });
@@ -1010,6 +995,7 @@ const hardTimeout = new Promise((_, reject) => {
 
 Promise.race([executeSync(), hardTimeout]).then(async ({ results, completed, finalStatus }) => {
   if (hardTimeoutHandle) clearTimeout(hardTimeoutHandle);
+  stopKeepAlive();
   aggregateState = {
     ...aggregateState,
     running: false,
@@ -1033,15 +1019,17 @@ Promise.race([executeSync(), hardTimeout]).then(async ({ results, completed, fin
   closeRunnerSoon();
 }).catch(async (error) => {
   if (hardTimeoutHandle) clearTimeout(hardTimeoutHandle);
+  stopKeepAlive();
   syncAborted = true;
+  const errorCode = safeErrorCode(error);
   aggregateState = {
     ...aggregateState,
     running: false,
     status: "ERROR",
-    error_code: safeErrorCode(error)
+    error_code: errorCode
   };
   await closeAllCaptureWorkers();
-  const partialRows = partialProviderRowsForTimeout();
+  const partialRows = partialProviderRows(errorCode);
   aggregateState.providers = partialRows;
   const timeoutMinutes = Math.round(SYNC_HARD_TIMEOUT_MS / 60000);
   statusNode.textContent = aggregateState.error_code === "SYNC_HARD_TIMEOUT"
@@ -1058,9 +1046,10 @@ Promise.race([executeSync(), hardTimeout]).then(async ({ results, completed, fin
   }).catch(() => {});
   let terminalReportWritten = false;
   try {
+    // The report used to say SYNC_HARD_TIMEOUT for every failure.
     await writeSyncReport(partialRows, "ERROR", {
       allowAfterAbort: true,
-      errorCode: "SYNC_HARD_TIMEOUT"
+      errorCode
     });
     terminalReportWritten = true;
   } catch (reportError) {

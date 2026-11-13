@@ -141,12 +141,6 @@ const writeWatchdogSyncReport = async () => {
   });
 };
 
-const existingRunnerTab = async () => {
-  if (!syncState.running || typeof runnerTabId !== "number") return null;
-  const tab = await chrome.tabs.get(runnerTabId).catch(() => null);
-  return tab?.url?.startsWith(chrome.runtime.getURL("runner.html")) ? tab : null;
-};
-
 const runnerUrlFor = (trigger, options = {}) => {
   const url = new URL(chrome.runtime.getURL("runner.html"));
   url.searchParams.set("trigger", trigger || "MANUAL");
@@ -173,34 +167,6 @@ const createSyncRunner = async (trigger, options = {}) => {
   if (syncState.running) throw new Error('BROWSER_SYNC_ALREADY_RUNNING');
   options.providers = Array.isArray(options.providers) && options.providers.length ? options.providers : ACTIVE_IDS;
   if (!options.providers.every(id=>ACTIVE_IDS.includes(id))) throw new Error('BROWSER_SITE_DISABLED');
-  const existing = await existingRunnerTab();
-  if (existing?.id) {
-    runnerTabId = existing.id;
-    runnerWindowId = existing.windowId;
-    syncState = { ...syncState, running: true, trigger, status: "RUNNER_STARTING", error_code: "" };
-    await armRunnerWatchdog();
-    try {
-      await chrome.tabs.update(existing.id, { url: runnerUrlFor(trigger, options).href });
-    } catch (error) {
-      clearRunnerWatchdog();
-      syncState = {
-        ...syncState,
-        running: false,
-        status: "ERROR",
-        error_code: safeErrorCode(error)
-      };
-      throw error;
-    }
-    broadcast("MEMORIVE_SYNC_ALL_PROGRESS");
-    return {
-      ok: true,
-      reused: true,
-      window_mode: "DEDICATED_VISIBLE",
-      dedicated_window_id: runnerWindowId,
-      user_tab_reused: false,
-      state: { ...syncState }
-    };
-  }
   const url = runnerUrlFor(trigger, options);
   const created = await chrome.windows.create({
     url: url.href,
@@ -239,7 +205,6 @@ const createSyncRunner = async (trigger, options = {}) => {
   broadcast("MEMORIVE_SYNC_ALL_PROGRESS");
   return {
     ok: true,
-    reused: false,
     window_mode: "DEDICATED_VISIBLE",
     dedicated_window_id: runnerWindowId,
     user_tab_reused: false,
@@ -389,13 +354,23 @@ const RECORD_PREFIX="memorive-record:";
 const completedRecordings=new Map();
 const recordGrants=async()=> (await chrome.alarms.getAll()).filter(a=>a.name.startsWith(RECORD_PREFIX))
   .map(a=>{try{return {...JSON.parse(decodeURIComponent(a.name.slice(RECORD_PREFIX.length))),name:a.name};}catch{return null;}}).filter(Boolean);
+// The popup asks for the recording status every second. The manifest already
+// loads the page scripts on the enabled sites, so inject them only when the
+// page has no listener yet (other official sites, or a tab opened before the
+// extension was loaded).
+const recordingStatus=async(tabId,sourceUrl)=>{
+  const ask=()=>chrome.tabs.sendMessage(tabId,{type:"MEMORIVE_RECORDING_STATUS"});
+  const reply=await ask().catch(()=>null);
+  if (reply?.ok) return reply;
+  await chrome.scripting.executeScript({target:{tabId},files:["site_profiles.js","recording.js","content.js"]});
+  if (sanitizedHttpsPageUrl((await chrome.tabs.get(tabId)).url)!==sourceUrl) throw Error("CURRENT_PAGE_ORIGIN_OR_SESSION_CHANGED");
+  return ask();
+};
 const recordingCommand=async(message,sender)=>{
   if (!popupSenderApproved(sender)) throw Error("RECORDING_SENDER_NOT_APPROVED");
   const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
   const sourceUrl=sanitizedHttpsPageUrl(tab?.url);
-  await chrome.scripting.executeScript({target:{tabId:tab.id},files:["site_profiles.js","recording.js","content.js"]});
-  if (sanitizedHttpsPageUrl((await chrome.tabs.get(tab.id)).url)!==sourceUrl) throw Error("CURRENT_PAGE_ORIGIN_OR_SESSION_CHANGED");
-  const state=await chrome.tabs.sendMessage(tab.id,{type:"MEMORIVE_RECORDING_STATUS"});
+  const state=await recordingStatus(tab.id,sourceUrl);
   if (message.type==="MEMORIVE_RECORD_ACTIVE_STATUS") return state;
   if (message.type==="MEMORIVE_RECORD_ACTIVE_STOP")
     return chrome.tabs.sendMessage(tab.id,{type:"MEMORIVE_RECORDING_STOP",token:state?.state?.token});
@@ -432,10 +407,14 @@ const finishRecording=async(message,sender)=>{
 chrome.alarms.onAlarm.addListener(alarm=>{
   if (!alarm.name.startsWith(RECORD_PREFIX)) return;
   void (async()=>{
-    // One-shot alarms may already be removed when the callback fires.
-    let grant;try {grant=JSON.parse(decodeURIComponent(alarm.name.slice(RECORD_PREFIX.length)));} catch{return;}
-    try { await chrome.tabs.sendMessage(grant.tabId,{type:"MEMORIVE_RECORDING_STOP",token:grant.token,reason:"TIME_LIMIT"}); }
-    catch { await chrome.alarms.clear(alarm.name); }
+    // The grant alarm repeats so that finishRecording can still find it after
+    // the deadline. The tab saves through MEMORIVE_RECORDING_FINISH before it
+    // answers this stop request, so the grant is no longer needed afterwards.
+    // Clearing it here also ends recordings that stopped with an error and
+    // never reached finishRecording; before, those alarms fired every minute.
+    let grant;try {grant=JSON.parse(decodeURIComponent(alarm.name.slice(RECORD_PREFIX.length)));} catch{grant=null;}
+    if (grant) await chrome.tabs.sendMessage(grant.tabId,{type:"MEMORIVE_RECORDING_STOP",token:grant.token,reason:"TIME_LIMIT"}).catch(()=>{});
+    await chrome.alarms.clear(alarm.name);
   })();
 });
 

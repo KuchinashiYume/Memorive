@@ -59,12 +59,13 @@ syncButton.addEventListener("click", async () => {
   }
 });
 
-const readError = code => code?.includes('RECORDING_ORDER_') ? '消息顺序无法确认，请刷新页面后重新录制'
+// String() so a missing code shows the generic message instead of throwing.
+const readError = raw => { const code = String(raw || ''); return code.includes('RECORDING_ORDER_') ? '消息顺序无法确认，请刷新页面后重新录制'
   : code.includes('NOT_VERIFIED_OFFICIAL') ? '仅支持 AI 官网会话页面'
   : code.includes('HUMAN_VERIFICATION') ? '请先在网页完成验证，再重试'
   : code.includes('CONVERSATION_NOT_FOUND') ? '未找到可见的对话，请先打开一段会话'
   : code.includes('ORIGIN_OR_SESSION_CHANGED') ? '页面已切换，请重试'
-  : '读取失败，请刷新当前网页后重试';
+  : '读取失败，请刷新当前网页后重试'; };
 testButton.addEventListener('click', async()=>{
   testBusy=true;testButton.disabled=true;statusNode.textContent='正在读取当前页面…';
   try {
