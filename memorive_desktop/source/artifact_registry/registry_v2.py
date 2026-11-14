@@ -30,6 +30,7 @@ from .schema_v2 import (
     content_hash_value,
     new_event_id,
     resolved_parent_links,
+    sha256_file,
     validate_envelope,
     validate_event,
     validate_readable_envelope,
@@ -170,6 +171,135 @@ class ArtifactRegistry:
 
     def get(self, artifact_id: str, *, effective: bool = True) -> dict[str, Any]:
         return self._get_from_events(self.read_events(), artifact_id, effective=effective)
+
+    def append_lineage_resolution(
+        self,
+        artifact_id: str,
+        *,
+        parent_artifacts: list[Mapping[str, Any]],
+        resolved_requirements: list[str],
+        evidence_refs: list[str],
+    ) -> str:
+        """Append a new Envelope head; the base and prior heads remain immutable."""
+
+        if not parent_artifacts:
+            raise EnvelopeValidationError("lineage resolution requires parent_artifacts")
+        self.root.mkdir(parents=True, exist_ok=True)
+        with self._single_writer_lock():
+            events = self.read_events()
+            current, prior_head_event_id = self._lineage_head(events, artifact_id)
+            if current["schema_version"] != ENVELOPE_SCHEMA_VERSION:
+                raise AppendOnlyViolation("legacy v1 Envelope is read-only; migrate before v2 events")
+            supplied = [copy.deepcopy(dict(link)) for link in parent_artifacts]
+            existing_keys = {canonical_json(link) for link in current["parent_artifacts"]}
+            supplied_keys = {canonical_json(link) for link in supplied}
+            current_requirements = {
+                value["requirement"]
+                for value in current["unresolved_parent_requirements"]
+            } | {
+                value["requirement"] for value in current["conflicting_candidates"]
+            }
+            requested = set(resolved_requirements)
+            if supplied_keys <= existing_keys and not (requested & current_requirements):
+                return "noop"
+            missing = requested - current_requirements
+            if missing:
+                raise EnvelopeValidationError(
+                    "lineage resolution names requirements not currently unresolved/conflicted: "
+                    + ", ".join(sorted(missing))
+                )
+            new_envelope = copy.deepcopy(current)
+            for link in supplied:
+                if canonical_json(link) not in existing_keys:
+                    new_envelope["parent_artifacts"].append(link)
+                    existing_keys.add(canonical_json(link))
+            new_envelope["unresolved_parent_requirements"] = [
+                value
+                for value in new_envelope["unresolved_parent_requirements"]
+                if value["requirement"] not in requested
+            ]
+            new_envelope["conflicting_candidates"] = [
+                value
+                for value in new_envelope["conflicting_candidates"]
+                if value["requirement"] not in requested
+            ]
+            for link in supplied:
+                parent_id = link["parent_artifact_id"]
+                if parent_id not in new_envelope["source_scope"]["source_artifact_ids"]:
+                    new_envelope["source_scope"]["source_artifact_ids"].append(parent_id)
+            validate_envelope(new_envelope)
+            registered = self._artifact_map(events, include_locations=False)
+            self._validate_parent_targets(new_envelope, registered)
+            projected = copy.deepcopy(registered)
+            projected[artifact_id] = new_envelope
+            if self._find_cycles(projected):
+                raise EnvelopeValidationError("lineage resolution would create a cycle")
+            event = self._make_event(
+                "lineage_resolution_event",
+                {
+                    "artifact_id": artifact_id,
+                    "prior_head_event_id": prior_head_event_id,
+                    "new_envelope": new_envelope,
+                    "resolved_requirements": list(resolved_requirements),
+                    "evidence_refs": list(evidence_refs),
+                },
+            )
+            self._append_event_locked(event)
+        return "appended"
+
+    def append_artifact_location_event(
+        self,
+        artifact_id: str,
+        *,
+        new_path: Path | str,
+        evidence_refs: list[str],
+    ) -> str:
+        """Append a location observation without changing any Envelope head."""
+
+        path = Path(new_path)
+        if not path.is_file():
+            raise ArtifactConflictError(f"new locator is not a file: {path}")
+        self.root.mkdir(parents=True, exist_ok=True)
+        with self._single_writer_lock():
+            events = self.read_events()
+            current = self._get_from_events(events, artifact_id, effective=True)
+            if current["schema_version"] != ENVELOPE_SCHEMA_VERSION:
+                raise AppendOnlyViolation("legacy v1 Envelope is read-only; migrate before v2 events")
+            expected_hash = content_hash_value(current)
+            actual_hash = sha256_file(path)
+            if actual_hash != expected_hash:
+                raise ArtifactConflictError(
+                    "new locator bytes do not match registered artifact: "
+                    f"expected={expected_hash}, actual={actual_hash}"
+                )
+            payload = {
+                "artifact_id": artifact_id,
+                "content_hash": expected_hash,
+                "locator": {"path": str(path)},
+                "evidence_refs": list(evidence_refs),
+            }
+            for existing in events:
+                if existing["event_type"] == "artifact_location_event" and canonical_json(
+                    existing["payload"]
+                ) == canonical_json(payload):
+                    return "noop"
+            self._append_event_locked(self._make_event("artifact_location_event", payload))
+        return "appended"
+
+    def append_locator_update(
+        self,
+        artifact_id: str,
+        *,
+        new_path: Path | str,
+        evidence_refs: list[str],
+    ) -> str:
+        """Compatibility method name; persistence uses artifact_location_event."""
+
+        return self.append_artifact_location_event(
+            artifact_id,
+            new_path=new_path,
+            evidence_refs=evidence_refs,
+        )
 
     def overwrite(self, *_args: Any, **_kwargs: Any) -> NoReturn:
         raise AppendOnlyViolation("overwrite is forbidden; append a registry event")

@@ -71,6 +71,23 @@ class GatewayConfig:
                 f"未知 task_type/槽位: {task_type!r};已知: {sorted(self._slots)}"
             ) from None
 
+    def task_types(self) -> list[str]:
+        return sorted(self._slots)
+
+    def price_for(self, model_id: str | None):
+        """Deprecated non-dated projection; exact callers use AccountingKernel.
+
+        A catalog cannot be selected safely from model_id alone because date,
+        region, service tier and alias-binding evidence are required.  Legacy
+        callers therefore receive unknown rather than a guessed numeric cost.
+        """
+        if self.price_catalog_path is not None:
+            return None, None
+        m = (self.pricing.get("models") or {}).get(model_id or "")
+        if not isinstance(m, dict):
+            return None, None
+        return m.get("input"), m.get("output")
+
     def pricing_status(self) -> str:
         if self.price_catalog_path is not None:
             return "VERSIONED_PRICE_CATALOG_EXACT_CONTEXT_REQUIRED"

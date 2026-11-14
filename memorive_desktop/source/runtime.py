@@ -6415,6 +6415,11 @@ class ProductApi:
         receipt["full_sync_gate"] = full_sync_gate
         return receipt
 
+    def restart_browser_companion(self) -> dict[str, Any]:
+        """Compatibility alias; reload only the unpacked extension service worker."""
+
+        return self.reload_browser_companion()
+
     def api_call_readiness(self) -> dict[str, Any]:
         """Project pre-send readiness without resolving a credential or sending a request."""
 

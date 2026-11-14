@@ -2227,8 +2227,8 @@
     },
     {
       "path": "source/artifact_registry/registry_v2.py",
-      "sha256": "ee636705cca47bce8316df055e278d6ac11b8f6f98440226e63b8d3a051e46ef",
-      "bytes": 19596
+      "sha256": "5db8603ef2c149ff0b521666d7e121045313ce4e0c04d28790305277da004b5e",
+      "bytes": 25574
     },
     {
       "path": "source/artifact_registry/schema.py",
@@ -3172,8 +3172,8 @@
     },
     {
       "path": "source/memorive_current_task/product_controller.py",
-      "sha256": "865fe34e7a2bba5471c8364f05d6c4fd4d196c12709ba3f316fe1e5f647b1cf6",
-      "bytes": 80586
+      "sha256": "82b436f2334a662d43160bc8eafa460b8450c2541956ccdecee1dc71dcd9806c",
+      "bytes": 80831
     },
     {
       "path": "source/memorive_current_task/projection.py",
@@ -4017,13 +4017,13 @@
     },
     {
       "path": "source/memorive_sessions/edge_visible_ui.py",
-      "sha256": "69daffb9770a0d84f2c2b84817ad31553c168851d1da1b541cc737cccd12279f",
-      "bytes": 25577
+      "sha256": "27e16da2758b036789a72770d4633cb057ef306b06c5795822d87391399a7ef7",
+      "bytes": 25816
     },
     {
       "path": "source/memorive_sessions/product_controller.py",
-      "sha256": "d7171358f1c22dcfcb3ba681f5b05ad3218aaab04bcd2f4d6ce699f110de8dcf",
-      "bytes": 188605
+      "sha256": "b19481acc7c4b8c1667b56dcb1166d8f0dbe61195ba4b6f53911d8f20a7f0170",
+      "bytes": 192248
     },
     {
       "path": "source/memorive_settings/__init__.py",
@@ -4477,8 +4477,8 @@
     },
     {
       "path": "source/model_gateway/accounting/calculator.py",
-      "sha256": "56019d1bb8439a899d42333e6493194ca976ff2b02467eaf4423f6e00f487205",
-      "bytes": 5920
+      "sha256": "b7ebfc0580e4b4f329e0daa3a0975d01b852dabc00ebf503422f96c45a7fa877",
+      "bytes": 6755
     },
     {
       "path": "source/model_gateway/accounting/contracts.py",
@@ -4532,8 +4532,8 @@
     },
     {
       "path": "source/model_gateway/config.py",
-      "sha256": "9e75eb890a0b96022fb90402e74f826f8b4dc0461f5e42496f22a21d6c3483f8",
-      "bytes": 3444
+      "sha256": "8d9e5fa411f5539f5e5028720b4be2b2edd4f42fba6c95b2acb9323412f2edb3",
+      "bytes": 4169
     },
     {
       "path": "source/model_gateway/cost.py",
@@ -5567,8 +5567,8 @@
     },
     {
       "path": "source/runtime.py",
-      "sha256": "68fdd2964f4a0b35b6de630f7ee00a8c7ac09bac7f70fcdfe6962bf64faba005",
-      "bytes": 338282
+      "sha256": "c7439b3d940f4ed0f691a0d7b303741d96636f1d847ce1a99063313a09cd8239",
+      "bytes": 338481
     },
     {
       "path": "source/runtime_log/__init__.py",
