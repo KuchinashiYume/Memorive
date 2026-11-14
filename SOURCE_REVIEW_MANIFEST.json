@@ -4361,8 +4361,8 @@
     },
     {
       "path": "memorive_desktop/source/evidence_extraction/card.py",
-      "sha256": "45f798072a54bc26b4d6932bf785f0c0c9ea83f014b3368b2a9f34f7e461f8a7",
-      "bytes": 23791
+      "sha256": "8e0139fed50a338aeac937f7f8121c632fe7e6740ee288c0a9c2be3a5e87eb12",
+      "bytes": 23798
     },
     {
       "path": "memorive_desktop/source/evidence_extraction/config.py",
@@ -7516,7 +7516,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "4d8b56c4ced63804f88e3c9bc43d867d002376bdc210f0f875b374ebbabad6cf",
+      "sha256": "dffbd94ad410fad15ea5b65120ee47bdb04991cfe9a03db718c3f552ddf0b434",
       "bytes": 216399
     },
     {

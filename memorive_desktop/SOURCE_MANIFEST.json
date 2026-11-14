@@ -2582,8 +2582,8 @@
     },
     {
       "path": "source/evidence_extraction/card.py",
-      "sha256": "45f798072a54bc26b4d6932bf785f0c0c9ea83f014b3368b2a9f34f7e461f8a7",
-      "bytes": 23791
+      "sha256": "8e0139fed50a338aeac937f7f8121c632fe7e6740ee288c0a9c2be3a5e87eb12",
+      "bytes": 23798
     },
     {
       "path": "source/evidence_extraction/config.py",

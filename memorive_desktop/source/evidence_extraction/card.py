@@ -196,7 +196,7 @@ def read_field_credibility(fm: dict) -> dict:
     fc = fm.get("field_credibility")
     if isinstance(fc, dict):
         return fc
-    return {f: {"credibility": CRED_UNKNOWN, "note": None, "danger": unknown_field} for f in CONTENT_FIELDS}
+    return {f: {"credibility": CRED_UNKNOWN, "note": None, "danger": DANGER_UNKNOWN_FIELD} for f in CONTENT_FIELDS}
 
 
 def apply_field_credibility(card_path: Path, field_cred: dict, key_data_cred: list) -> Path:
