@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "137ea17e1372a8e5309fb21031d37b502e47e412985ee4e0c8436d50a517ec62",
-      "bytes": 3067107
+      "sha256": "99381246de9d952f4dbfc55f6107de8fa0f7d8d01857d6bc19b63510bdfe0fb1",
+      "bytes": 3068491
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -2876,13 +2876,13 @@
     },
     {
       "path": "memorive_desktop/product/web/document_structure.js",
-      "sha256": "e359fbebac7255ced7f1b41c02835ee5b15beffd53864255037e080aacfb8d89",
-      "bytes": 35886
+      "sha256": "d7af0e709fde9e1c45b2367b3f4656b7cba9136aa387315c1c1e77b43b0f3974",
+      "bytes": 36120
     },
     {
       "path": "memorive_desktop/product/web/evidence_check.js",
-      "sha256": "fbd5645f3f067ef33ed9d0edb422bdd32ee4495166ed1a856170960c7cf76623",
-      "bytes": 4309
+      "sha256": "2294c32f336355a773d742a11f2d973dd4165906b7baad5ede3cb2d5df0c3339",
+      "bytes": 4333
     },
     {
       "path": "memorive_desktop/product/web/leaderboard.css",
@@ -2906,8 +2906,8 @@
     },
     {
       "path": "memorive_desktop/product/web/node_progress.js",
-      "sha256": "4b6dff845b208f29687d7ec0a1d9cec8ef416b21c7c0f798ba7d23dda9411a6b",
-      "bytes": 7650
+      "sha256": "c7725e05ea28310a717cd5d52479e362be58d71f24280581a4d594e07d109287",
+      "bytes": 7660
     },
     {
       "path": "memorive_desktop/product/web/settings_bridge.js",
@@ -7441,13 +7441,13 @@
     },
     {
       "path": "memorive_desktop/tools/check_internal_codes.py",
-      "sha256": "f99388b1339705c343b0a8c2ce86b10af9e59c231ce1e12e20dbad9a02de66a2",
-      "bytes": 7763
+      "sha256": "901e2ead94856772d227d7d2b0853ed3dace2a9624cbf27430df2e38b4d140c6",
+      "bytes": 8040
     },
     {
       "path": "memorive_desktop/tools/historical_names.json",
-      "sha256": "053ad052a5a570ab77a65b0c5bc84cd7275fb08ad263f5bdcdbbcc53290b4c44",
-      "bytes": 3983
+      "sha256": "a86956330f92bd0a62b4742e1b169d4ecd82301654a691b3cbd7807999f6d9c3",
+      "bytes": 4318
     },
     {
       "path": "PUBLIC_RELEASE.md",
@@ -7491,12 +7491,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "580b34d82bcd2a64de8b79f2a7f67e02d6a2470bba4de7bad8ffe3a71c764372",
+      "sha256": "f6b62b331bdf4eefa0835f005e54460cca1e6d9c1f366a9cd42f00f35199b6f5",
       "bytes": 102975
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "01efa275abac6fe635d1b0e9b34469d10b9b03594f226c324856b273828263cb",
+      "sha256": "f36af110b13200c77fd21e3fa3bd6e1469ecc4b126bae28104a13704114f9873",
       "bytes": 210822
     },
     {

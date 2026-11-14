@@ -80,6 +80,14 @@
     {
       "name": "channel_contracts/candidate001/common-objects.schema.json",
       "kept_because": "Id of a data format description. Saved objects and the other format descriptions refer to it."
+    },
+    {
+      "name": "desktop-evo-e2-local-v1",
+      "kept_because": "Revision of the default capability list. It is saved with the settings."
+    },
+    {
+      "name": "E11-existing-schemas-v1",
+      "kept_because": "Id of the data migration in the update protocol. Installed updaters check it in an update package."
     }
   ],
   "files": [

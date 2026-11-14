@@ -62,7 +62,7 @@
       return;
     }
     if(p.completed_units===0){clear(node);return;}
-    const logic=node.classList.contains('e2-logic-node');
+    const logic=node.classList.contains('paper-review-logic-node');
     const slot=node.querySelector(logic?'.desktop-tasks-node-index':'.desktop-tasks-node-status');
     if(!slot)return;
     const previous=saved.get(node);

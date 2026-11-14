@@ -40,6 +40,9 @@ PATTERNS = [(kind, re.compile(pattern)) for kind, pattern in (
     ("module number", B + r"M(?:[1-9]|1[0-9])" + E),
     ("build or stage id", r"EVO-E[0-9]|" + B + r"[Bb]uild[0-9]{2,3}" + E + "|" + B + r"E[0-9]{1,2}_[A-Z]|"
      + B + r"[Dd][0-9]{2}" + E + r"|Round[0-9]"),
+    # e2-review-dialog, memo-e7-pane, desktop-evo-e2-local-v1; e10Alt, memoE1Result; __MEMO_E7__
+    ("stage number inside a name", B + r"(?:[A-Za-z]+-)*[eE](?:[1-9]|1[0-9])-[a-z]|"
+     + r"(?<![A-Za-z0-9_])(?:[a-z]+E|e)(?:[1-9]|1[0-9])[A-Z][a-z]|__[A-Z]+_E[0-9]{1,2}__"),
     ("candidate or run id", r"(?:candidate|successor)[0-9]{3}|_20[0-9]{6}_[0-9]{4,6}|"
      r"_CROSS_(?=[a-z0-9]|[A-Z][a-z]|[^\x00-\x7f])"),
     ("doubled word left by renaming", r"Desktop_DESKTOP|DesktopDesktop|desktop-desktop|Desktop_Desktop|Desktop_Core|"

@@ -14,8 +14,8 @@
       try {
         const check=await call('memo.answer_check',{thread_id:threadId,answer_id:message.id});
         if(!details.isConnected||!details.open||ticket!==sequence)return;
-        details.querySelectorAll('[data-memo-e1-result]').forEach(n=>n.remove());
-        const add=(tag,text)=>{const node=create(tag,text);node.dataset.memoE1Result='';details.append(node);};
+        details.querySelectorAll('[data-memo-evidence-result]').forEach(n=>n.remove());
+        const add=(tag,text)=>{const node=create(tag,text);node.dataset.memoEvidenceResult='';details.append(node);};
         for(const source of check.coverage.sources){
           const count=check.retained_evidence.filter(r=>r.artifact_id===source.id).length;
           add('p',source.title+' · '+t(layers[source.material_layer]||'材料层未确认')+' · '+t('已加载片段')+' '+(source.read_ranges||[]).length+' · '+t('本次上下文')+' '+count);
@@ -36,8 +36,8 @@
         for(const old of check.history||[])add('pre','v'+old.version+'\n'+old.text);
       } catch(error){
         if(details.isConnected&&details.open&&ticket===sequence){
-          details.querySelectorAll('[data-memo-e1-result]').forEach(n=>n.remove());
-          const node=create('p',String(error.message||error));node.dataset.memoE1Result='';details.append(node);
+          details.querySelectorAll('[data-memo-evidence-result]').forEach(n=>n.remove());
+          const node=create('p',String(error.message||error));node.dataset.memoEvidenceResult='';details.append(node);
         }
       }
     });
