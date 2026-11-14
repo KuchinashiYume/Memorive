@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import sqlite3
+import threading
 import uuid
 from .engine import digest
 
@@ -27,6 +28,7 @@ class ReviewStore:
     def __init__(self,core_root):
         self.root=Path(core_root).resolve();self.root.mkdir(parents=True,exist_ok=True)
         self.path=self.root/'literature_review.sqlite3'
+        self._states={};self._states_lock=threading.Lock()
         with self.connect() as db:
             db.execute('PRAGMA journal_mode=WAL')
             db.executescript('''CREATE TABLE IF NOT EXISTS review_jobs(job_id TEXT PRIMARY KEY,revision INTEGER NOT NULL,payload TEXT NOT NULL);
@@ -65,6 +67,19 @@ class ReviewStore:
     def jobs(self):
         with self.connect() as db:rows=db.execute('SELECT payload FROM review_jobs ORDER BY rowid').fetchall()
         return [json.loads(r['payload']) for r in rows]
+    def states(self):
+        """Every job, in the order of jobs(), for the scheduler that asks several times a second.
+
+        A payload is read and decoded only when its stored revision differs from the one seen last time
+        (every update raises it). The values are shared between calls: read them, never change them.
+        """
+        with self._states_lock,self.connect() as db:
+            rows=db.execute('SELECT job_id,revision FROM review_jobs ORDER BY rowid').fetchall()
+            for row in rows:
+                if self._states.get(row['job_id'],(None,None))[0]!=row['revision']:
+                    fresh=db.execute('SELECT revision,payload FROM review_jobs WHERE job_id=?',(row['job_id'],)).fetchone()
+                    self._states[row['job_id']]=(fresh['revision'],json.loads(fresh['payload']))
+            return [self._states[row['job_id']][1] for row in rows]
     def update(self,job_id,event,changes,*,expected_revision=None):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE');row=db.execute('SELECT payload FROM review_jobs WHERE job_id=?',(job_id,)).fetchone()

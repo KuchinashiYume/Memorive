@@ -43,7 +43,9 @@ class ReviewService:
         """Stop orphaned pending work; retain reports and uncertain call outcomes."""
         pending={'WAITING_INPUT','QUEUED','RUNNING','SENDING','PUBLISHING'}
         with self.lock:
-            for state in self.store.jobs():
+            for state in self.store.states():
+                # Only a review that is still open can be changed below.
+                if state['data_state'] not in {'WAITING_INPUT','RUNNING'} and state['logic_state'] not in pending:continue
                 job_id=state['job_id'];owner=self.worker.facade.get_job(job_id)['control_state']
                 if owner not in {'CANCELLED','FAILED'}:continue
                 reason='MAIN_TASK_'+owner;changes={}
@@ -126,7 +128,7 @@ class ReviewService:
     def claim(self):
         with self.lock:
             self.reconcile_terminal_owners()
-            for state in self.store.jobs():
+            for state in self.store.states():
                 job_id=state['job_id']
                 if state['logic_state'] not in {'QUEUED','PUBLISHING'} or state.get('paused') or job_id in self.active:continue
                 if state['data_state'] not in FINISHED:continue

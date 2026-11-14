@@ -589,9 +589,7 @@ class CoreVerticalWorker:
             return rollback_preparation
         pending: list[tuple[Mapping[str, Any], Mapping[str, Any]]] = []
         skipped_non_core = 0
-        for intent in self.inbox.store.list_intents():
-            if intent.get("state") != "PENDING":
-                continue
+        for intent in self.inbox.store.list_intents("PENDING"):
             item = self.inbox.store.read_item(str(intent.get("item_id") or ""))
             # The Inbox outbox is shared with session refinement and historical
             # fixture samples.  The document worker must never consume either

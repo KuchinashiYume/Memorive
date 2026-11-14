@@ -269,10 +269,19 @@ class InboxStore:
             connection.commit()
         return deepcopy(record), False
 
-    def list_intents(self) -> list[dict[str, Any]]:
+    def list_intents(self, state: str | None = None) -> list[dict[str, Any]]:
+        """Dispatch intents in intent order; with state, only those in that state."""
+        query = "SELECT record_json FROM outbox" + (" WHERE state=?" if state else "") + " ORDER BY intent_id"
         with closing(self._connect()) as connection:
-            rows = connection.execute("SELECT record_json FROM outbox ORDER BY intent_id").fetchall()
+            rows = connection.execute(query, (state,) if state else ()).fetchall()
         return [deepcopy(self._decode(row["record_json"])) for row in rows]
+
+    def has_pending_intent(self, item_id: str) -> bool:
+        with closing(self._connect()) as connection:
+            row = connection.execute(
+                "SELECT 1 FROM outbox WHERE item_id=? AND state='PENDING' LIMIT 1", (item_id,)
+            ).fetchone()
+        return row is not None
 
     def create_operation(self, record: Mapping[str, Any]) -> dict[str, Any]:
         accepted = deepcopy(dict(record))

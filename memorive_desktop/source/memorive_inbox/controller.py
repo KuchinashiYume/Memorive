@@ -823,7 +823,7 @@ class InboxController:
         def change(row):
             if row.get('item_kind')=='SESSION_REFINEMENT' or row.get('state') not in {'QUEUED','ERROR'} or row.get('job_id'):
                 raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
-            if any(i['item_id']==item_id and i['state']=='PENDING' for i in self.store.list_intents()):
+            if self.store.has_pending_intent(item_id):
                 raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
             row['logic_review_selected']=selected
         return self.store.update_item(item_id,'LOGIC_REVIEW_SELECTION',change)
@@ -834,7 +834,7 @@ class InboxController:
         if not isinstance(bindings,list) or len(bindings)>MAX_RULES or any(not isinstance(r,dict) for r in bindings):
             raise InboxError('INBOX_DATA_BINDINGS_INVALID')
         def change(row):
-            if row.get('job_id') or row.get('state') not in {'QUEUED','ERROR'} or any(i['item_id']==item_id and i['state']=='PENDING' for i in self.store.list_intents()):
+            if row.get('job_id') or row.get('state') not in {'QUEUED','ERROR'} or self.store.has_pending_intent(item_id):
                 raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
             row['data_review_bindings']=immutable(bindings)
         return self.store.update_item(item_id,'DATA_REVIEW_BINDINGS',change)
@@ -1083,7 +1083,7 @@ class InboxController:
                 skipped.append({"item_id": item_id, "reason": f"STATE_{item['state']}_INELIGIBLE"})
                 continue
             cancelled_intent_ids = []
-            for intent in self.store.list_intents():
+            for intent in self.store.list_intents("PENDING"):
                 if intent.get("item_id") != item_id or intent.get("state") != "PENDING":
                     continue
                 cancelled, _ = self.store.update_intent(
@@ -1354,7 +1354,7 @@ class InboxController:
             "message_count": item.get("message_count"),
             "job_id": item.get("job_id"),
             "logic_review_selected":bool(item.get('logic_review_selected',False)),
-            "review_choice_frozen":bool(item.get('job_id') or any(i['item_id']==item_id and i['state']=='PENDING' for i in self.store.list_intents())),
+            "review_choice_frozen":bool(item.get('job_id') or self.store.has_pending_intent(item_id)),
             "data_review_bindings":immutable(item.get('data_review_bindings',[])),
             "error": immutable(item.get("error")),
             "sample": item.get("source_kind") == "sample",
