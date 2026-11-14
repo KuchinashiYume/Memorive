@@ -84,10 +84,6 @@
   ],
   "files": [
     {
-      "path": "memorive_desktop/source/research_reports",
-      "set_aside_because": "The report request format is shared with the Test Console, which is installed separately. Its names change together with a console release."
-    },
-    {
       "path": "memorive_desktop/source/memorive_review/exam.py",
       "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
     },

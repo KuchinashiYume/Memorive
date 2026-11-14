@@ -19,9 +19,6 @@ class ProductConsoleAdapter:
             raise ValueError('PRODUCT_PROFILE_OUTSIDE_SESSION')
         self.api, self.launch, self.stop = api, launch, stop
         self.lock = threading.RLock()
-        self.root = Path(api._state_dir) / 'console-research'
-        self.root.mkdir(exist_ok=True)
-        self.reports = []
         self.api.call('inbox.set_auto_run', {'enabled':False})
 
     def snapshot(self):
@@ -111,51 +108,3 @@ class ProductConsoleAdapter:
         if operation=='discovery.recommend':
             return {'discovery':self.api._research.run_sync('discovery',request_id,topic=params['topic'],count=params['count'])}
         raise ValueError('OPERATION_NOT_SUPPORTED')
-
-    def _bound_input(self, name):
-        p=self.launch.data_root/'research-inputs'/name
-        if not p.is_file():
-            raise ValueError('RESEARCH_INPUT_BINDING_REQUIRED')
-        resolved=p.resolve()
-        if not resolved.is_relative_to(self.launch.data_root):
-            raise ValueError('RESEARCH_INPUT_OUTSIDE_SESSION')
-        return resolved, json.loads(resolved.read_text(encoding='utf8'))
-
-    def _report(self, period, request_id):
-        # The frozen RESEARCH_REPORTS CLI performs all source/authority/hash checks and calls
-        # the original digest builder, domain validator and fixed renderer.
-        from research_reports.cli import run
-        from argparse import Namespace
-        path,binding=self._bound_input('report-'+period+'.json')
-        if binding.get('digest_kind')!=period:
-            raise ValueError('REPORT_PERIOD_BINDING_MISMATCH')
-        for key in ('run_context','source_manifest','output_dir'):
-            if not Path(binding[key]).resolve().is_relative_to(self.launch.data_root):
-                raise ValueError('RESEARCH_INPUT_OUTSIDE_SESSION')
-        result=run(Namespace(**binding))
-        out=Path(binding['output_dir'])
-        markdown=(out/'research_change_log.md').read_text(encoding='utf8')
-        report={'report_id':'report-'+request_id,'period':period,'created_at':now(), 'native_receipt':result,
-                'body':markdown,'source_binding_sha256':hashlib.sha256(path.read_bytes()).hexdigest().upper(),
-                'output_dir':str(out.relative_to(self.launch.data_root)), 'engine':'research_reports.cli.run'}
-        with self.lock:self.reports.append(report)
-        self._message(period,'周期报告 · '+period,markdown[:3900],request_id,report_period=period)
-        return {'report':report}
-
-    def _discovery(self, params, request_id):
-        from scripts.discovery_acceptance_cross_acceptance_runner import run
-        from scripts.discovery_acceptance_fixed_renderer import render
-        path,binding=self._bound_input('discovery.json')
-        if params['topic']!=binding.get('topic') or params['count']!=binding.get('count'):
-            raise ValueError('DISCOVERY_SCOPE_BINDING_MISMATCH')
-        for key in ('manifest','input_root'):
-            if not Path(binding[key]).resolve().is_relative_to(self.launch.data_root):
-                raise ValueError('RESEARCH_INPUT_OUTSIDE_SESSION')
-        out=self.root/request_id
-        out.mkdir(exist_ok=False)
-        result=run(Path(binding['manifest']),Path(binding['input_root']),work_root=out/'work')
-        markdown=render(result['recommendations'])
-        (out/'integrated_result.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
-        (out/'recommendations.md').write_text(markdown,encoding='utf8')
-        self._message('discovery','文献发现推荐',markdown[:3900],request_id)
-        return {'discovery':result,'engine':'scripts.discovery_acceptance_cross_acceptance_runner.run', 'mode':'FROZEN_SOURCE_REPLAY', 'live_fetch_performed':False}

@@ -48,17 +48,3 @@ def make_issue(
             "payload_echoed": False,
         },
     }
-
-
-def to_runtime_log_error_candidate(issue: dict) -> dict:
-    return {
-        "schema_version": "1.0",
-        "record_type": "runtime_log_error_candidate",
-        "authority": "sandbox_only_non_authoritative",
-        "candidate_id": "RUNTIME_LOG-CAND-" + issue["issue_id"].split("RESEARCH_REPORTS-ISSUE-", 1)[-1],
-        "source_issue_ref": issue["issue_id"],
-        "error_code": issue["error_code"],
-        "observed_at": issue["observed_at"],
-        "source_evidence_refs": [issue["evidence_ref"]],
-        "formal_runtime_log_append_authorized": False,
-    }

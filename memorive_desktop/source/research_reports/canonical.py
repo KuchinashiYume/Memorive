@@ -91,22 +91,6 @@ def canonical_json_bytes(value: Any) -> bytes:
     return jcs_serialize(value).encode("utf-8")
 
 
-def pretty_json_bytes(value: Any) -> bytes:
-    # Validate the complete value against the same I-JSON domain before using
-    # the human-readable serializer.
-    jcs_serialize(value)
-    return (
-        json.dumps(
-            value,
-            ensure_ascii=False,
-            allow_nan=False,
-            sort_keys=True,
-            indent=2,
-        )
-        + "\n"
-    ).encode("utf-8")
-
-
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest().upper()
 
@@ -164,28 +148,6 @@ def forbidden_phrase(value: str) -> str | None:
     return None
 
 
-def validate_source_value(value: Any, field_name: str = "record") -> None:
-    """Recursively reject dangerous strings and conclusion-language inputs."""
-
-    if isinstance(value, str):
-        require_safe_text(value, field_name, allow_empty=True)
-        hit = forbidden_phrase(value)
-        if hit:
-            raise ValueError(f"{field_name} contains forbidden semantic phrase {hit!r}")
-        return
-    if isinstance(value, list):
-        for index, item in enumerate(value):
-            validate_source_value(item, f"{field_name}[{index}]")
-        return
-    if isinstance(value, dict):
-        for key, item in value.items():
-            require_safe_text(key, f"{field_name} key")
-            hit = forbidden_phrase(key)
-            if hit:
-                raise ValueError(f"{field_name} key contains forbidden semantic phrase")
-            validate_source_value(item, f"{field_name}.{key}")
-
-
 def typed_payload_hash(value: dict[str, Any]) -> dict[str, str]:
     payload = deepcopy(value)
     payload.pop("content_hash", None)
@@ -195,13 +157,3 @@ def typed_payload_hash(value: dict[str, Any]) -> dict[str, str]:
         "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
         "value": sha256_bytes(canonical_json_bytes(payload)),
     }
-
-
-def write_new_bytes(path: Path, data: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("xb") as stream:
-        stream.write(data)
-
-
-def write_new_json(path: Path, value: Any) -> None:
-    write_new_bytes(path, pretty_json_bytes(value))
