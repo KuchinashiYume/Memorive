@@ -23,6 +23,9 @@ from .contracts import (
 )
 
 
+UrlOpen = Callable[..., Any]
+
+
 @dataclass(frozen=True)
 class LocalMultimodalRankerOutcome:
     success: bool
@@ -140,8 +143,8 @@ def _read_json_response(response: Any) -> dict[str, Any]:
 
 
 class LocalMultimodalRankerAdapter:
-    def __init__(self, *, clock: Callable[[], float] | None = None):
-        self._urlopen = _default_open
+    def __init__(self, *, urlopen: UrlOpen | None = None, clock: Callable[[], float] | None = None):
+        self._urlopen = urlopen or _default_open
         self._clock = clock or time.perf_counter
 
     def execute(

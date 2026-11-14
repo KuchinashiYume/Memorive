@@ -4967,8 +4967,8 @@
     },
     {
       "path": "source/model_gateway/local_multimodal_ranker/adapter.py",
-      "sha256": "1832d55eba56b00e6279b87e855322de0958c06bb74f508928582840064ea3ec",
-      "bytes": 11431
+      "sha256": "87440cfe1dc2c8f16b3a6cd122c738fc5453c6eba30590df9a43c7096c6e6d3e",
+      "bytes": 11508
     },
     {
       "path": "source/model_gateway/local_multimodal_ranker/contracts.py",

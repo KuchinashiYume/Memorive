@@ -6471,8 +6471,8 @@
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_multimodal_ranker/adapter.py",
-      "sha256": "1832d55eba56b00e6279b87e855322de0958c06bb74f508928582840064ea3ec",
-      "bytes": 11431
+      "sha256": "87440cfe1dc2c8f16b3a6cd122c738fc5453c6eba30590df9a43c7096c6e6d3e",
+      "bytes": 11508
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_multimodal_ranker/contracts.py",
@@ -7581,7 +7581,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "78998cec8fc3e452aa3a5e6ccdd70b07fa4fdc737cba42544c561bde9ab189e0",
+      "sha256": "867c5c5ab9af7082c39d8f4fe0f5e79c2bfc21355363fadbad8ee4b6e2a09b43",
       "bytes": 232417
     },
     {
