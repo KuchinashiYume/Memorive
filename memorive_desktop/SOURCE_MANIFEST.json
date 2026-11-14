@@ -4552,18 +4552,18 @@
     },
     {
       "path": "source/model_gateway/execution_core/adapters/__init__.py",
-      "sha256": "947d814e9a9b817f0596dece7da33463d199b777d8af28cc90415053b7fe3c79",
-      "bytes": 1485
+      "sha256": "6b3d152f70c92e9e5289e47de1b0ef049b253ae59dc2283540d6e17e37799279",
+      "bytes": 1793
     },
     {
       "path": "source/model_gateway/execution_core/adapters/claude_code.py",
-      "sha256": "dfd175b413b617c33d2cfab5c81d17534b2c481d3a075cdde5adf564da0b063c",
-      "bytes": 6462
+      "sha256": "b1eae8c86fa025a9df23d127bbd7779aa69905004c8bab0b10825c04a38802b1",
+      "bytes": 35934
     },
     {
       "path": "source/model_gateway/execution_core/adapters/codebuddy_code.py",
-      "sha256": "886140be812906565dc9218097be9759071ab38f7c01a6a14c0f90cfb5f3888c",
-      "bytes": 6828
+      "sha256": "94946d786ba0fc4bd935e84442390839fdd0891ea215b572d300a36e72c937e1",
+      "bytes": 42636
     },
     {
       "path": "source/model_gateway/execution_core/adapters/codex_cli.py",
@@ -4572,23 +4572,23 @@
     },
     {
       "path": "source/model_gateway/execution_core/adapters/gemini_cli.py",
-      "sha256": "8e2365f3da37ae59e9bc5fce1d03521353c3d365ebe4808e348b8ae6c7a3b822",
-      "bytes": 7377
+      "sha256": "3b5c7ce469559b852a333347d2de5e3f60717c0968fc7efb5d1b4eb7574074f0",
+      "bytes": 38438
     },
     {
       "path": "source/model_gateway/execution_core/adapters/github_copilot_cli.py",
-      "sha256": "b0111fb6c40c00a6321fb69473af2a67cef443200b8ec1a4cd395f8484650362",
-      "bytes": 7068
+      "sha256": "58740d472dbfcbc67efe7cdd9766d5dd7a3294a732ff506d1631818caea77185",
+      "bytes": 42296
     },
     {
       "path": "source/model_gateway/execution_core/adapters/kimi_code.py",
-      "sha256": "2d2123438426a4c503a71705bf117f1bd74499d1540fe6ae264ddd1b9fe5852b",
-      "bytes": 7833
+      "sha256": "6e0450d5253740f8545fb4e44a1ab30d9b999390b4c932c21f863dd34c936bb6",
+      "bytes": 36346
     },
     {
       "path": "source/model_gateway/execution_core/adapters/qwen_code.py",
-      "sha256": "ccd80916859615cfba64d719a8ef2b2933aeea6b368c3543c218bffef0be5217",
-      "bytes": 7347
+      "sha256": "263ad0f64f6fe536ddbd254c98eb14aa3fd2e7730c8c801e001977987bde088c",
+      "bytes": 38969
     },
     {
       "path": "source/model_gateway/execution_core/component_binding.py",
