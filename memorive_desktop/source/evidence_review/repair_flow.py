@@ -73,12 +73,6 @@ class RepairAdmitResult:
     failure_reason: str | None = None
     root_reason_code: str | None = None
 
-    @property
-    def sonnet_calls(self):
-        """Deprecated Python alias; persisted receipts use verify_calls."""
-        return self.verify_calls
-
-
 def _failure_projection(error):
     current=error;seen=set()
     while id(current) not in seen:

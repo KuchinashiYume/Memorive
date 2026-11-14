@@ -150,14 +150,6 @@ class CurrentTaskSession:
         self.control_store.update(mutate)
         return {"schema_version": "CurrentTaskNodeOverrideResetReceipt-v1", "node_id": node_id, "restored": True, "scope": "TASK_ONLY"}
 
-    def persist_cursor(self, job_id: str, sequence: int) -> dict[str, Any]:
-        if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence < 0:
-            raise SessionError("CURRENT_TASK_CURSOR_INVALID")
-        def mutate(state: dict[str, Any]) -> None:
-            state["event_cursor_by_job"][job_id] = sequence
-        self.control_store.update(mutate)
-        return self.view()
-
     def refresh(self) -> dict[str, Any]:
         current = self.view()
         if current["job_id"] is None:

@@ -83,15 +83,6 @@ class ConnectorError(RuntimeError):
         self.retryable = retryable
         self.coverage_impact = coverage_impact
 
-    def as_record(self) -> dict[str, Any]:
-        return {
-            "code": self.code,
-            "connector_id": self.connector_id,
-            "retryable": self.retryable,
-            "coverage_impact": self.coverage_impact,
-        }
-
-
 @dataclass(frozen=True)
 class SearchResult:
     page: dict[str, Any]

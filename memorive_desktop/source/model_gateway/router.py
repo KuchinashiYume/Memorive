@@ -30,13 +30,3 @@ class Router:
         if capability == "ocr":                          # 3a3) 页面级 OCR；所有权闸门在 Gateway 先行
             return adapter.ocr(slot, payload)
         return adapter.invoke(slot, payload)             # 3b) 对话:交给 adapter 发起真实调用
-
-    def preflight_model(self, task_type: str, *, timeout: int = 30) -> dict:
-        """Run one provider-specific metadata probe through a common contract."""
-        slot = self.config.slot(task_type)
-        if slot.provider == "human":
-            raise HumanSlot(f"[{task_type}] 最终判断由人做,无模型能力可探测。")
-        if not slot.enabled:
-            raise SlotDisabled(f"[{task_type}] 槽位未启用(enabled=false);不发起能力预检。")
-        adapter = providers.get_adapter(slot.provider)
-        return adapter.probe_model_capabilities(slot, timeout=timeout)

@@ -27,9 +27,6 @@ from memorive_session_archive.models import (
     BROWSER_CAPTURE_SOURCE_ACTIVE_TAB_V1,
     BROWSER_CAPTURE_SOURCE_KINDS,
     ImportBatch,
-    ImportFailure,
-    NormalizedConversation,
-    NormalizedMessage,
 )
 from memorive_current_task.refinement_tasks import (
     REFINEMENT_NODE_IDS,
@@ -1866,80 +1863,6 @@ class SessionsProductController:
             )
         return normalized
 
-    @staticmethod
-    def _archive_source_kind(schema_version: str) -> str:
-        return {
-            "MEMORIVE_BROWSER_SESSION_BUNDLE_V1": "BROWSER_VISIBLE_DOM_COMPLETE_BUNDLE_V1",
-            "MEMORIVE_BROWSER_SESSION_BUNDLE_V2": "BROWSER_VISIBLE_DOM_COMPLETE_BUNDLE_V2",
-            "MEMORIVE_BROWSER_SESSION_LIBRARY_V3": "BROWSER_COMPANION_VISIBLE_UI_LIBRARY_V3_MIGRATED",
-        }[schema_version]
-
-    @classmethod
-    def _archive_batches_from_legacy_bundle(
-        cls,
-        normalized: Mapping[str, Any],
-        raw_bytes: bytes,
-    ) -> list[ImportBatch]:
-        grouped: dict[str, list[Mapping[str, Any]]] = {
-            provider: [] for provider in _VISIBLE_UI_PROFILES
-        }
-        for conversation in normalized["conversations"]:
-            grouped[str(conversation["provider_id"])].append(conversation)
-        batches: list[ImportBatch] = []
-        source_kind = cls._archive_source_kind(str(normalized["schema_version"]))
-        for provider, values in grouped.items():
-            if not values:
-                continue
-            conversations: list[NormalizedConversation] = []
-            failures: list[ImportFailure] = []
-            for value in values:
-                conversation_id = str(value["provider_session_id"])
-                if value.get("capture_status") == "ERROR":
-                    failures.append(
-                        ImportFailure(
-                            provider_conversation_id=conversation_id,
-                            title=str(value["title"]),
-                            error_code=str(value.get("error_code") or "CAPTURE_FAILED"),
-                        )
-                    )
-                    continue
-                conversation_at = str(value.get("conversation_at") or "UNKNOWN")
-                messages = tuple(
-                    NormalizedMessage(
-                        message_id=str(message["message_id"]),
-                        role=str(message["role"]),
-                        content_kind="text",
-                        content=str(message["text"]),
-                        occurred_at=conversation_at,
-                    )
-                    for message in value["messages"]
-                )
-                conversations.append(
-                    NormalizedConversation(
-                        provider=provider,
-                        provider_conversation_id=conversation_id,
-                        title=str(value["title"]),
-                        created_at=conversation_at,
-                        updated_at=conversation_at,
-                        messages=messages,
-                        completeness="COMPLETE",
-                        source_locator=str(value["source_url"]),
-                    )
-                )
-            batches.append(
-                ImportBatch(
-                    provider=provider,
-                    source_kind=source_kind,
-                    generated_at=str(normalized["generated_at"]),
-                    expected_count=len(values),
-                    conversations=tuple(conversations),
-                    failures=tuple(failures),
-                    source_path=Path(f"{provider}-{normalized['schema_version']}.json"),
-                    raw_bytes=raw_bytes,
-                )
-            )
-        return batches
-
     def _ingest_archive_batch(self, batch: ImportBatch) -> dict[str, Any]:
         receipt = self._session_archive.ingest(batch)
         if receipt.get("verification_status") == "REJECTED_CORRUPT":
@@ -2455,10 +2378,6 @@ class SessionsProductController:
                 "status": "VISIBLE_UI_READ_FAILED",
                 "error_code": error_text or type(error).__name__,
             }
-
-    def _scan_deepseek(self) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-        """Compatibility wrapper for visible-chat/chat-archive tests."""
-        return self._scan_visible_ui("deepseek")
 
     def _refresh(self) -> dict[str, Any]:
         state = self._load()

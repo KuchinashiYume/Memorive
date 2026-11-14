@@ -41,10 +41,6 @@ class SyntheticDiscardCredentialBackend:
     def exists(self, target: str) -> bool:
         return self.has(target)
 
-    def drop_for_test(self, target: str) -> None:
-        self._present.discard(target)
-
-
 class CredentialReferenceManager:
     def __init__(
         self,

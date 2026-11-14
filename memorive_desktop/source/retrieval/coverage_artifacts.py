@@ -216,24 +216,6 @@ class FrozenArtifactRecord:
     def content_hash(self) -> str:
         return self.envelope["content_hash"]["value"]
 
-    def as_pointer(
-        self,
-        *,
-        authority: str = "verification-sandbox-candidate",
-        frozen: bool = True,
-        approved: bool = False,
-        fixture_only: bool = False,
-    ) -> ArtifactPointer:
-        return ArtifactPointer(
-            artifact_id=self.artifact_id,
-            content_hash=self.content_hash,
-            artifact_type=self.artifact_type,
-            authority=authority,
-            frozen=frozen,
-            approved=approved,
-            fixture_only=fixture_only,
-        )
-
     def write(self, payload_path: Path | str, envelope_path: Path | str) -> None:
         """Write exact canonical bytes to an already approved sandbox location."""
 

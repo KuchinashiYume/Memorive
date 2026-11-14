@@ -2385,28 +2385,6 @@ class ProductApi:
                 handle.write("\n")
             return receipt
 
-    def invoke_facade(self, request: dict[str, Any]) -> Any:
-        if not isinstance(request, dict) or sorted(request) != ["args", "kwargs", "method", "request_id"]:
-            raise ValueError("facade request key set mismatch")
-        method = request["method"]
-        if method not in self._facade_methods:
-            raise ValueError("facade method is not allowlisted")
-        args = request["args"]
-        kwargs = request["kwargs"]
-        if not isinstance(args, list) or not isinstance(kwargs, dict):
-            raise ValueError("facade args/kwargs invalid")
-        if any(str(key).startswith("_") for key in kwargs):
-            raise ValueError("private facade kwarg forbidden")
-        params = self._params(method, args, kwargs)
-        with self._lock:
-            if method in QUERY_METHODS:
-                return self._service.call(method, params)
-            idempotency_key = str(params.get("idempotency_key") or request["request_id"])
-            self._outbox.enqueue(idempotency_key=idempotency_key, method=method, params=params)
-            result = self._service.call(method, params)
-            self._outbox.complete(idempotency_key, result, succeeded=True)
-            return result
-
     def call(self, method: str, params: dict[str, Any] | None = None) -> Any:
         from update_service import METHODS as UPDATE_METHODS
         if method in UPDATE_METHODS:
@@ -4159,13 +4137,6 @@ class ProductApi:
         os.startfile(ref['path'])
         return {'status':'OPENED','artifact_id':ref['artifact_id']}
 
-    def memo_open_handoff(self, request):
-        self.call('memo.capabilities',{})
-        value=self._memo.export_handoff(request['handoff_id'])
-        os.startfile(value['path'])
-        return {'status':'OPENED'}
-
-
     def memo_desktop_apps(self):
         import subprocess,json,time
         cached=getattr(self,'_memo_desktop_apps_cache',None)
@@ -4238,38 +4209,6 @@ class ProductApi:
                 'workspace':str(self._memo.store.root),
                 'permissions':'Search and draft submission; human approval stays in Memorive'}
 
-    def open_library_sample_artifact(self, artifact_id: str) -> dict[str, Any]:
-        if not isinstance(artifact_id, str) or not artifact_id:
-            raise ValueError("LIBRARY_SAMPLE_ARTIFACT_ID_INVALID")
-        validation = self._library.call("library.validate_external_view", {"artifact_id": artifact_id})
-        if validation.get("status") != "PASS_VALIDATED_NOT_LAUNCHED":
-            raise RuntimeError(f"LIBRARY_SAMPLE_OPEN_BLOCKED:{validation.get('rejection_reason') or 'VALIDATION_FAILED'}")
-        projection = self._library.call("library.get_artifact", {"artifact_id": artifact_id})
-        artifact = projection.get("artifact")
-        if not isinstance(artifact, dict):
-            raise RuntimeError("LIBRARY_SAMPLE_ARTIFACT_PROJECTION_INVALID")
-        relative = str(artifact.get("relative_path") or "").replace("\\", "/")
-        relative_path = Path(relative)
-        if not relative or relative_path.is_absolute() or any(part in {"", ".", ".."} for part in relative_path.parts):
-            raise RuntimeError("LIBRARY_SAMPLE_RELATIVE_PATH_INVALID")
-        fixture_root = (self._source_root.parent / "fixtures_integration" / "files").resolve(strict=True)
-        target = fixture_root.joinpath(*relative_path.parts).resolve(strict=True)
-        if not target.is_relative_to(fixture_root):
-            raise RuntimeError("LIBRARY_SAMPLE_PATH_ESCAPE")
-        if not target.is_file() or target.is_symlink() or self._is_reparse_point(target):
-            raise RuntimeError("LIBRARY_SAMPLE_FILE_INVALID")
-        observed_sha256 = hashlib.sha256(target.read_bytes()).hexdigest().upper()
-        os.startfile(target, "open")
-        return {
-            "schema_version": "DesktopAssistantLibrarySampleOpenReceipt-v1",
-            "artifact_id": artifact_id,
-            "sample": True,
-            "controlled_fixture": True,
-            "content_sha256": observed_sha256,
-            "opened_by_windows_default_application": True,
-            "status": "OPENED",
-        }
-
     def locate_library_refinement_artifact(self, artifact_id: str) -> dict[str, Any]:
         if not isinstance(artifact_id, str) or not artifact_id:
             raise ValueError("LIBRARY_REFINEMENT_ARTIFACT_ID_INVALID")
@@ -4308,23 +4247,6 @@ class ProductApi:
             "review_open_recorded": True,
             "opened_at": review_receipt["opened_at"],
             "verified_draft_sha256": review_receipt["verified_draft_sha256"],
-            "status": "OPENED",
-        }
-
-    def locate_library_core_artifact(self, artifact_id: str) -> dict[str, Any]:
-        if not isinstance(artifact_id, str) or not artifact_id:
-            raise ValueError("LIBRARY_Core_ARTIFACT_ID_INVALID")
-        target = self._library.resolve_core_private_artifact(artifact_id)
-        process = subprocess.Popen(
-            ["explorer.exe", "/select,", str(target)],
-            shell=False,
-            close_fds=True,
-        )
-        return {
-            "schema_version": "DesktopCoreArtifactLocateReceipt-v1",
-            "artifact_id": artifact_id,
-            "process_id": process.pid,
-            "selected_controlled_core_artifact": True,
             "status": "OPENED",
         }
 
@@ -4428,18 +4350,6 @@ class ProductApi:
             "selected_controlled_projection": True,
             "process_id": process.pid,
             "status": "OPENED",
-        }
-
-    def get_inbox_fixture_paths(self) -> dict[str, Any]:
-        paths = [self._fixture_root / "sample.docx", self._fixture_root / "sample.png"]
-        if not all(path.is_file() and path.resolve().is_relative_to(self._fixture_root.resolve()) for path in paths):
-            raise RuntimeError("SYNTHETIC_INBOX_FIXTURE_MISSING")
-        return {
-            "schema_version": "WorkLogSyntheticFixtureLocatorProjection-v1",
-            "paths": [str(path.resolve()) for path in paths],
-            "sha256s": [hashlib.sha256(path.read_bytes()).hexdigest().upper() for path in paths],
-            "synthetic_only": True,
-            "status": "PASS",
         }
 
     def pick_settings_directory(self, role: str) -> dict[str, Any]:
@@ -6272,14 +6182,6 @@ class ProductApi:
             ),
         }
 
-    def confirm_browser_companion_setup(self) -> dict[str, Any]:
-        status = self.browser_companion_status()
-        if not status["prepared"]:
-            raise RuntimeError("BROWSER_COMPANION_NOT_PREPARED")
-        if not status["extension_connected"]:
-            raise RuntimeError("BROWSER_COMPANION_HANDSHAKE_NOT_FOUND")
-        return {**status, "schema_version": "DesktopBrowserCompanionConfirmationReceipt-v2"}
-
     def reload_browser_companion(self) -> dict[str, Any]:
         """Reload the unpacked bridge without starting any provider sync."""
 
@@ -6526,11 +6428,6 @@ class ProductApi:
         receipt["preflight_gate_passed"] = True
         receipt["full_sync_gate"] = full_sync_gate
         return receipt
-
-    def restart_browser_companion(self) -> dict[str, Any]:
-        """Compatibility alias; reload only the unpacked extension service worker."""
-
-        return self.reload_browser_companion()
 
     def api_call_readiness(self) -> dict[str, Any]:
         """Project pre-send readiness without resolving a credential or sending a request."""

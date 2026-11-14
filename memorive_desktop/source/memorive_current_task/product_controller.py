@@ -1089,12 +1089,6 @@ class CurrentTaskProductController:
             (history if row["collection_state"] == "HISTORY" else current).append(row)
         return current, history
 
-    def _visible_refinement_bindings(self) -> list[dict[str, Any]]:
-        """Compatibility helper retained for callers that only need Current."""
-
-        current, _history = self._partition_refinement_bindings()
-        return current
-
     def _is_legacy_visual_fixture(
         self, job_id: str, list_snapshot: Mapping[str, Any] | None = None
     ) -> bool:

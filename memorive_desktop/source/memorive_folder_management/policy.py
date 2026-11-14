@@ -160,10 +160,3 @@ class ProfileFolderManager:
         if logical_directory in {"Core_RUNTIME", "Core_JOBS", "Core_TASK_CONTROLS"}:
             return windows_io_path(target)
         return target
-
-    def is_reorganization_protected(self, path: Path | str) -> bool:
-        target = Path(path).resolve(strict=False)
-        return any(
-            target == root or target.is_relative_to(root)
-            for root in (self.path_for(identifier) for identifier in self._protected_ids)
-        )

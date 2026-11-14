@@ -85,16 +85,3 @@ class CurrentTaskLocator:
             values.append(self.attempt_id)
         if not all(value.startswith(PUBLIC_SAFE_PREFIXES) or value[:2].isdigit() for value in values):
             raise LocatorError("PRODUCTION_LOCATOR_FORBIDDEN")
-
-    def assert_context(self, *, job_id: str, attempt_id: str | None = None) -> None:
-        expected_job = _id(job_id, "expected_job_id")
-        if self.kind in {"event", "action", "artifact", "step"} and self.job_id != expected_job:
-            raise LocatorError("LOCATOR_WRONG_JOB")
-        if self.kind == "job" and self.object_id != expected_job:
-            raise LocatorError("LOCATOR_WRONG_JOB")
-        if attempt_id is not None:
-            expected_attempt = _id(attempt_id, "expected_attempt_id")
-            if self.kind == "step" and self.attempt_id != expected_attempt:
-                raise LocatorError("LOCATOR_WRONG_ATTEMPT")
-            if self.kind == "attempt" and self.object_id != expected_attempt:
-                raise LocatorError("LOCATOR_WRONG_ATTEMPT")

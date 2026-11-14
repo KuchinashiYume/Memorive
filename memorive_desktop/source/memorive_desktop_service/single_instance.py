@@ -8,7 +8,6 @@ import sqlite3
 from typing import Any
 import uuid
 
-from .locator import StableLocator
 from .protocol import canonical_json_bytes
 
 
@@ -109,68 +108,6 @@ class SingleInstanceCoordinator:
         )
         os.replace(temporary, self.descriptor_path)
         return True
-
-    def forward_activation(self, locator: str, *, activation_id: str | None = None) -> dict[str, Any]:
-        accepted_locator = StableLocator.parse(locator).render()
-        accepted_id = activation_id or f"activation-{uuid.uuid4().hex}"
-        if not isinstance(accepted_id, str) or not accepted_id.startswith("activation-") or len(accepted_id) > 128:
-            raise ValueError("ACTIVATION_ID_INVALID")
-        with closing(sqlite3.connect(self.queue_path, timeout=10.0)) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            existing = connection.execute(
-                "SELECT sequence, locator, state FROM activations WHERE activation_id=?", (accepted_id,)
-            ).fetchone()
-            if existing is not None:
-                if existing[1] != accepted_locator:
-                    raise ValueError("ACTIVATION_ID_CONFLICT")
-                connection.commit()
-                return {
-                    "schema_version": "DesktopActivationReceipt-v1",
-                    "activation_id": accepted_id,
-                    "sequence": existing[0],
-                    "state": existing[2],
-                    "replayed": True,
-                }
-            cursor = connection.execute(
-                "INSERT INTO activations(activation_id, locator, state, created_by_pid) VALUES(?, ?, 'PENDING', ?)",
-                (accepted_id, accepted_locator, os.getpid()),
-            )
-            connection.commit()
-            return {
-                "schema_version": "DesktopActivationReceipt-v1",
-                "activation_id": accepted_id,
-                "sequence": cursor.lastrowid,
-                "state": "PENDING",
-                "replayed": False,
-            }
-
-    def drain_activations(self, *, limit: int = 64) -> list[dict[str, Any]]:
-        if not self._primary:
-            raise RuntimeError("PRIMARY_INSTANCE_REQUIRED")
-        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 256:
-            raise ValueError("ACTIVATION_LIMIT_INVALID")
-        with closing(sqlite3.connect(self.queue_path, timeout=10.0)) as connection:
-            connection.row_factory = sqlite3.Row
-            connection.execute("BEGIN IMMEDIATE")
-            rows = connection.execute(
-                "SELECT sequence, activation_id, locator FROM activations WHERE state='PENDING' ORDER BY sequence LIMIT ?",
-                (limit,),
-            ).fetchall()
-            if rows:
-                connection.executemany(
-                    "UPDATE activations SET state='DELIVERED' WHERE sequence=?",
-                    [(row["sequence"],) for row in rows],
-                )
-            connection.commit()
-        return [
-            {
-                "schema_version": "DesktopActivation-v1",
-                "sequence": row["sequence"],
-                "activation_id": row["activation_id"],
-                "locator": row["locator"],
-            }
-            for row in rows
-        ]
 
     def release(self) -> None:
         if self._stream is None:

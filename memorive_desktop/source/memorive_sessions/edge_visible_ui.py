@@ -198,11 +198,6 @@ class EdgeDeepSeekVisibleUIReader:
                 return candidate
         return ""
 
-    @classmethod
-    def _verified_deepseek_url(cls, window: Any, api: dict[str, Any]) -> str:
-        """Compatibility alias retained for the chat-archive DeepSeek contract."""
-        return cls._verified_provider_url(window, api)
-
     @staticmethod
     def _window_title(window: Any) -> str:
         try:

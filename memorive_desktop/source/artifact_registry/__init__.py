@@ -8,7 +8,6 @@ from .errors import (
     AppendOnlyViolation,
     ArtifactConflictError,
     ConcurrentWriterError,
-    ContractValidationError,
     CorruptRegistryError,
     EnvelopeValidationError,
     SandboxBoundaryViolation,
@@ -23,7 +22,6 @@ from .analysis_products import (
     ANALYSIS_ADMISSION_IMPLEMENTATION_VERSION,
     ArtifactProduct,
     stable_identifier,
-    unique_text,
 )
 from .registry_v2 import ArtifactRegistry
 from .schema_v2 import (
@@ -49,7 +47,6 @@ __all__ = [
     "ArtifactRegistry",
     "CompatibilityPolicy",
     "ConcurrentWriterError",
-    "ContractValidationError",
     "CorruptRegistryError",
     "ENVELOPE_SCHEMA_VERSION",
     "EVENT_SCHEMA_VERSION",
@@ -67,7 +64,6 @@ __all__ = [
     "sha256_file",
     "sha256_bytes",
     "stable_identifier",
-    "unique_text",
     "validate_envelope",
     "validate_readable_envelope",
 ]

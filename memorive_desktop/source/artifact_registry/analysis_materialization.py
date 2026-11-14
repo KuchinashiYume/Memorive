@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-from .errors import ContractValidationError, SandboxBoundaryViolation
+from .errors import SandboxBoundaryViolation
 from .registry_v2 import ArtifactRegistry
 from .schema_v2 import build_envelope, canonical_json, parent_link, sha256_file
 
@@ -91,16 +91,3 @@ class SandboxBoundary:
             protected_roots=supplied,
             _allow_test_temp_root=allow_test_temp_root,
         )
-
-    def require_write_path(self, path: Path | str) -> Path:
-        target = Path(path).resolve(strict=False)
-        if not _contains(self.sandbox_root, target):
-            raise SandboxBoundaryViolation(
-                f"write target is outside Configuration sandbox: {target}"
-            )
-        for protected in self.protected_roots:
-            if _contains(protected, target) or target == protected:
-                raise SandboxBoundaryViolation(
-                    f"write target intersects protected root: {target}"
-                )
-        return target

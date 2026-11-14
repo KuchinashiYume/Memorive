@@ -65,10 +65,6 @@ class IdentityResolutionError(RuntimeError):
         self.code = code
         self.evidence_refs = sorted(set(evidence_refs))
 
-    def as_record(self) -> dict[str, Any]:
-        return {"code": self.code, "evidence_refs": self.evidence_refs}
-
-
 class _DisjointSet:
     def __init__(self, values: Iterable[str]) -> None:
         self.parent = {value: value for value in values}

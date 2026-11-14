@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Iterable
 
 from .calculator import DecimalCalculator
@@ -14,10 +13,6 @@ class AccountingKernel:
     def __init__(self, catalog: PriceCatalog, *, calculator: DecimalCalculator | None = None):
         self.catalog = catalog
         self.calculator = calculator or DecimalCalculator()
-
-    @classmethod
-    def from_catalog_path(cls, path: Path | str) -> "AccountingKernel":
-        return cls(PriceCatalog.load(path))
 
     def quote(
         self,

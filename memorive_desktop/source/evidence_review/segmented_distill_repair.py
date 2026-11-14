@@ -80,38 +80,6 @@ class BoundedRepairLedger:
                 "PRODUCER_REVIEWER_FAMILY_MUST_DIFFER", "heterogeneous review is required"
             )
 
-    def record_full(self, receipt: Mapping[str, Any]) -> str:
-        if self.events:
-            raise SegmentedRepairContractError("SECOND_OR_LATE_FULL_REVIEW_FORBIDDEN", "Full must be first and once")
-        if receipt.get("review_type") != "FULL" or receipt.get("finish_reason") != "stop":
-            raise SegmentedRepairContractError("FULL_REVIEW_RECEIPT_INVALID", repr(receipt))
-        verdict = receipt.get("verdict")
-        if verdict not in {"PASS", "REPAIRABLE", "FAIL", "NOT_ASSESSED"}:
-            raise SegmentedRepairContractError("FULL_REVIEW_VERDICT_INVALID", repr(verdict))
-        self.events.append({"stage": "FULL", "receipt_hash": canonical_hash(receipt), "verdict": verdict})
-        if verdict == "PASS":
-            self.terminal_state = "PASS"
-        elif verdict in {"FAIL", "NOT_ASSESSED"}:
-            self.terminal_state = verdict
-        return verdict
-
-    def record_repair(self, application_receipt: Mapping[str, Any]) -> None:
-        if self.terminal_state is not None or [item["stage"] for item in self.events] != ["FULL"] or self.events[0]["verdict"] != "REPAIRABLE":
-            raise SegmentedRepairContractError("SECOND_OR_OUT_OF_ORDER_REPAIR_FORBIDDEN", "one repair follows one repairable Full")
-        self.events.append({"stage": "REPAIR", "receipt_hash": canonical_hash(application_receipt)})
-
-    def record_delta(self, receipt: Mapping[str, Any]) -> str:
-        if self.terminal_state is not None or [item["stage"] for item in self.events] != ["FULL", "REPAIR"]:
-            raise SegmentedRepairContractError("SECOND_OR_OUT_OF_ORDER_DELTA_FORBIDDEN", "one Delta follows one repair")
-        if receipt.get("review_type") != "DELTA" or receipt.get("finish_reason") != "stop":
-            raise SegmentedRepairContractError("DELTA_REVIEW_RECEIPT_INVALID", repr(receipt))
-        verdict = receipt.get("verdict")
-        if verdict not in {"PASS", "FAIL", "NOT_ASSESSED"}:
-            raise SegmentedRepairContractError("DELTA_REVIEW_VERDICT_INVALID", repr(verdict))
-        self.events.append({"stage": "DELTA", "receipt_hash": canonical_hash(receipt), "verdict": verdict})
-        self.terminal_state = verdict
-        return verdict
-
     def snapshot(self) -> dict[str, Any]:
         return {
             "schema_version": "long_document-bounded-repair-ledger-v1",

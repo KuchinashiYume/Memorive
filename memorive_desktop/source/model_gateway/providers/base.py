@@ -7,15 +7,6 @@ from __future__ import annotations
 
 
 class ProviderAdapter:
-    def probe_model_capabilities(self, slot, *, timeout: int = 30) -> dict:
-        """Make a metadata-only live request and return normalized capabilities.
-
-        The request must not send user content.  Provider adapters decide which
-        metadata endpoint and, if required, which frozen capability registry to
-        use.  This makes the startup contract provider-neutral at Router level.
-        """
-        raise NotImplementedError
-
     def invoke(self, slot, payload: dict) -> dict:
         """[chat] 按 slot + payload 发起一次对话调用,
         返回归一化 dict: {task_type, provider, model, text, usage, raw}。"""

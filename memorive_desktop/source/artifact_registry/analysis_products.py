@@ -21,7 +21,3 @@ class ArtifactProduct:
 def stable_identifier(prefix: str, values: Iterable[str]) -> str:
     seed = "|".join(str(item) for item in values)
     return prefix + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:32]
-
-
-def unique_text(values: Iterable[str]) -> list[str]:
-    return sorted({str(value) for value in values if str(value).strip()})

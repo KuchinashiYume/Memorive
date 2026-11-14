@@ -152,20 +152,3 @@ class DecimalCalculator:
             price_binding=price_binding,
             evidence_refs=evidence_refs,
         )
-
-    def direct_components(
-        self,
-        *,
-        counts: dict[str, int],
-        rates_per_million: dict[str, str],
-        multiplier: str = "1",
-    ) -> str:
-        """Compatibility helper; still delegates to the one Decimal formula."""
-        subtotal = Decimal("0")
-        for component, count in counts.items():
-            if isinstance(count, bool) or not isinstance(count, int) or count < 0:
-                raise AccountingContractError(f"invalid token count for {component}")
-            rate = decimal_value(rates_per_million[component], field_name=f"rate.{component}")
-            subtotal += Decimal(count) * rate / PER_MILLION
-        subtotal *= decimal_value(multiplier, field_name="multiplier")
-        return decimal_string(subtotal.quantize(TOTAL_QUANTUM, rounding=ROUND_HALF_EVEN))

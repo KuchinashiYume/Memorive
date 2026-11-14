@@ -675,15 +675,6 @@ class ApplicationFacade:
 
         return self._apply_control(job_id, expected_version=expected_version, action="resume", idempotency_key=idempotency_key, mutator=mutate)
 
-    def simulate_input_drift(self, job_id: str, *, expected_version: int) -> dict[str, Any]:
-        def mutate(job: dict[str, Any]) -> dict[str, Any]:
-            job["current_input_hashes"] = dict(job["current_input_hashes"])
-            key = sorted(job["current_input_hashes"])[0]
-            job["current_input_hashes"][key] = "F" * 64
-            return job
-
-        return self._status(self.store.update_job(job_id, expected_version=expected_version, event_type="INPUT_DRIFT_OBSERVED", mutator=mutate))
-
     def record_progress(
         self,
         job_id: str,

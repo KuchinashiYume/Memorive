@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 import json
 import re
 from dataclasses import dataclass
@@ -36,13 +35,6 @@ _TYPES = {
 class AdaptationResult:
     envelopes: tuple[dict[str, Any], ...]
     mapping_summary: dict[str, Any]
-
-    def by_type(self, artifact_type: str) -> dict[str, Any]:
-        hits = [x for x in self.envelopes if x["artifact_type"] == artifact_type]
-        if len(hits) != 1:
-            raise KeyError(f"expected one {artifact_type!r} envelope, found {len(hits)}")
-        return copy.deepcopy(hits[0])
-
 
 def _read_chunks(path: Path, *, expected_paper_id: str) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
