@@ -7,7 +7,7 @@ from .metadata_v3 import links
 from .relations import identity_keys
 
 def collect(runtime,run_id,params,directions,targets):
-    from literature_discovery.source_connectors_literature_discovery_connector_framework import sha256_json
+    from literature_discovery.connector_framework import sha256_json
     from memorive_workflow.node_progress import scope
     options=params['discovery_options'];limits=options['limits'];started=time.monotonic()
     fetched=[];failures=[];observations={};records={};memberships={};seed_map={};seed_evidence=[];plan_rows=[]

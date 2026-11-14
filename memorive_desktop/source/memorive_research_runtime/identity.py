@@ -13,7 +13,7 @@ import unicodedata
 from collections import defaultdict
 from typing import Any, Iterable, Mapping, Sequence
 
-from literature_discovery.source_connectors_literature_discovery_connector_framework import (
+from literature_discovery.connector_framework import (
     ConnectorError,
     canonical_json,
     normalize_arxiv_id,

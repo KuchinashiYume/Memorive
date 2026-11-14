@@ -9,7 +9,7 @@ from memorive_workflow.node_progress import scope
 
 def run(runtime,run_id,params):
     from . import identity,slate
-    from literature_discovery.source_connectors_literature_discovery_connector_framework import sha256_json
+    from literature_discovery.connector_framework import sha256_json
     config=params['config'];directions=effective_directions(config);targets=channel_targets(config,directions)
     from .acquisition import collect,resolve
     from .query_plan import assess

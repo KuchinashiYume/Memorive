@@ -24,7 +24,7 @@ from .ownership import (
     OwnershipPropagationReceipt,
     OwnershipSnapshot,
 )
-from .retrieval_quality_retrieval_coverage_artifacts import (
+from .coverage_artifacts import (
     ArtifactPointer,
     ChunkSnapshot,
     FacetCoverageInput,

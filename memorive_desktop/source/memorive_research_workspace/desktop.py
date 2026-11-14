@@ -53,6 +53,6 @@ def create(api):
     (workspace.store.root/'desktop_binding.json').write_text(json.dumps({'profile_root':str(api._profile_root)},ensure_ascii=False),encoding='utf-8')
     from .library_bridge import bind
     bind(workspace,api._library)
-    from .shared_cross_desktop_connections import bind as bind_connections
+    from .desktop_connections import bind as bind_connections
     bind_connections(workspace,api)
     return workspace

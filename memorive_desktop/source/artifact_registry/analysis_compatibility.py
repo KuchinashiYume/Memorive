@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .errors import ContractValidationError, EnvelopeValidationError
-from .analysis_admission_artifact_registry_products import (
+from .analysis_products import (
     ArtifactProduct,
     stable_identifier,
     unique_text,

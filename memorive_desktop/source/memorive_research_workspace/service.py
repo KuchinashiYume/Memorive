@@ -10,7 +10,7 @@ from .store import Store,digest,uid,now,packed
 from .evidence import EvidenceIndex,material_layer,source_document_hash
 from .attachments import Attachments,METHODS as ATTACHMENT_METHODS
 from .conversations import Conversations,METHODS as CONVERSATION_METHODS
-from .shared_cross_connections import Connections,DESKTOP as CONNECTION_METHODS
+from .connections import Connections,DESKTOP as CONNECTION_METHODS
 from .answer_evidence import AnswerEvidence,METHODS as ANSWER_EVIDENCE_METHODS
 from . import answer_coverage
 from . import answer_versions

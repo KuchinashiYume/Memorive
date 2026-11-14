@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import quote,urlparse,unquote
 from .store import digest,uid,now,packed
 from .evidence import safe_path,read_document,DENY_DIRS
-from .shared_cross_bibliography import parse
+from .bibliography import parse
 
 PROVIDERS={'obsidian','zotero','folder','bibliography'}
 FORMATS={'.pdf','.md','.txt'}

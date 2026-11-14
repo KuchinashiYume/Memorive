@@ -7,7 +7,7 @@ model, source expansion or Card reconstruction occurs here.
 import hashlib,re,math,collections
 from .store import digest
 from .evidence import tokens,material_layer,source_document_hash
-from retrieval.retrieval_quality_retrieval_coverage_artifacts import (
+from retrieval.coverage_artifacts import (
     ArtifactPointer,ChunkSnapshot,FacetSpec,derive_facet_coverage_inputs,
 )
 

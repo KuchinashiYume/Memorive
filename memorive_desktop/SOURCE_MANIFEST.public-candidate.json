@@ -2192,8 +2192,8 @@
     },
     {
       "path": "source/artifact_registry/__init__.py",
-      "sha256": "7a400b8a2aa22bd11bf60f4a05498b7709a13097a61feb9ac91828f8175b7052",
-      "bytes": 2030
+      "sha256": "4cd3d2c184b3b7f21e16381a3dc9f44a7120b13bac4ec043a94f0094499d8a5e",
+      "bytes": 1946
     },
     {
       "path": "source/artifact_registry/adapters.py",
@@ -2201,17 +2201,17 @@
       "bytes": 2620
     },
     {
-      "path": "source/artifact_registry/analysis_admission_artifact_registry_compatibility.py",
-      "sha256": "e2fae8aea2d22125909c5bc499e0e2b5a0000023387eecef4bd7e02e86af7600",
-      "bytes": 4512
+      "path": "source/artifact_registry/analysis_compatibility.py",
+      "sha256": "5544d5e310635b9807221fe81e616b9c12320821815dde7abc88928c550ac192",
+      "bytes": 4484
     },
     {
-      "path": "source/artifact_registry/analysis_admission_artifact_registry_materialization.py",
+      "path": "source/artifact_registry/analysis_materialization.py",
       "sha256": "b96c9ee897d5731a8456241a03ec68f856d3fc925918825591efa4e742638330",
       "bytes": 3761
     },
     {
-      "path": "source/artifact_registry/analysis_admission_artifact_registry_products.py",
+      "path": "source/artifact_registry/analysis_products.py",
       "sha256": "4dafe1b539d97526594011b38d2fc5c2ad50d8078b0e099c885c062045c2125d",
       "bytes": 943
     },
@@ -2921,12 +2921,12 @@
       "bytes": 12735
     },
     {
-      "path": "source/literature_discovery/source_connectors_literature_discovery_connector_framework.py",
+      "path": "source/literature_discovery/connector_framework.py",
       "sha256": "9e05a92b4b5a1599b3738ea45e3da6eab6383b4f8c6e908d7b7e231b4f0beafa",
       "bytes": 3079
     },
     {
-      "path": "source/literature_discovery/source_connectors_literature_discovery_live_metadata_transport.py",
+      "path": "source/literature_discovery/live_metadata_transport.py",
       "sha256": "45707aac11abbeb8d846eb574e8356a24a68b71a48af139feb6c25f04d5720c3",
       "bytes": 4690
     },
@@ -3587,8 +3587,8 @@
     },
     {
       "path": "source/memorive_research_runtime/acquisition.py",
-      "sha256": "b4a607685f88e9855d3c5ae77ca7717b065c4e984c919f32e9d133dbcd62e75f",
-      "bytes": 10241
+      "sha256": "613bb000ef22a805327d4f127eaa1e75ea3bfe150f85b0dd5068cc0e35439962",
+      "bytes": 10202
     },
     {
       "path": "source/memorive_research_runtime/ai_briefing.py",
@@ -3627,13 +3627,13 @@
     },
     {
       "path": "source/memorive_research_runtime/discovery.py",
-      "sha256": "7994a37d701383beff9f0739c048cd130b19673dc8c4a8ca02474eba2421059e",
-      "bytes": 16262
+      "sha256": "d9e7fbe6cd2f76189ad033515fbdbbc729c4db868c7481ee3197930db999f6fc",
+      "bytes": 16223
     },
     {
       "path": "source/memorive_research_runtime/feedback.py",
-      "sha256": "b98ba0f7b67045c3d89756a65f393557638dddc45b1e90a69c2b205a816ec130",
-      "bytes": 5898
+      "sha256": "2019c62a2138625c025859296cef6fad8a26d1c51bab1eadd8cc1cf423923262",
+      "bytes": 5850
     },
     {
       "path": "source/memorive_research_runtime/home.py",
@@ -3642,8 +3642,8 @@
     },
     {
       "path": "source/memorive_research_runtime/identity.py",
-      "sha256": "f4dbc5c5968ea49d877a540c1fce74b3662878f1627c1a879ccd30f71766af6c",
-      "bytes": 47868
+      "sha256": "7018e403d08827f9d028dc0bc85478142cf1ec2d77ab3c4b90b0097c47ed18af",
+      "bytes": 47829
     },
     {
       "path": "source/memorive_research_runtime/indexing.py",
@@ -3652,8 +3652,8 @@
     },
     {
       "path": "source/memorive_research_runtime/interactions.py",
-      "sha256": "5903a43e91d63e32b0b2240810ceeb39aa6bc2cb41ce24c190a2f6e4bcc18a25",
-      "bytes": 3041
+      "sha256": "377074549d224783f645ba04b3ffaea8427d89a93c2ed0cc77eb4ff38c276da2",
+      "bytes": 2993
     },
     {
       "path": "source/memorive_research_runtime/library_projection.py",
@@ -3662,8 +3662,8 @@
     },
     {
       "path": "source/memorive_research_runtime/metadata_v3.py",
-      "sha256": "b3c0227e729ddc2151e810f52ee784c9b4f756412951a4cfac37a83c07e00c9f",
-      "bytes": 8841
+      "sha256": "02d6622721d209c6a1b9249ab7539088529e3d8637c13b39baa273e27a496c36",
+      "bytes": 8802
     },
     {
       "path": "source/memorive_research_runtime/periodic.py",
@@ -3687,8 +3687,8 @@
     },
     {
       "path": "source/memorive_research_runtime/relations.py",
-      "sha256": "38b0f6bec77550ad161508bb1048e5532fe2040e4dbd404f0e2a3ef6b535e238",
-      "bytes": 1466
+      "sha256": "84cdc95a63e428e1c89ea6b4fc513946f02404b3b8787818e9cd0b36063048c8",
+      "bytes": 1427
     },
     {
       "path": "source/memorive_research_runtime/report_identity.py",
@@ -3722,8 +3722,8 @@
     },
     {
       "path": "source/memorive_research_runtime/transport.py",
-      "sha256": "0e8d73e9d51975ac6d2d74836ed0303be1a20e78deed6ee20b32326e6fb2f97a",
-      "bytes": 16174
+      "sha256": "f03a5fb5ec819e12ffb3c076b7e78f98206ba59b1e9066550a50fc52626f6744",
+      "bytes": 16135
     },
     {
       "path": "source/memorive_research_runtime/work_index.py",
@@ -3757,8 +3757,8 @@
     },
     {
       "path": "source/memorive_research_workspace/answer_coverage.py",
-      "sha256": "351daebba376822a75fb28151163d2e5ddac2cafd4a1a0c355b2ab3f112b2771",
-      "bytes": 12683
+      "sha256": "e7b19ea67478b1e60c218fa46c18a06a8be1c78d5c21bad11729c501b3478875",
+      "bytes": 12655
     },
     {
       "path": "source/memorive_research_workspace/answer_evidence.py",
@@ -3779,6 +3779,16 @@
       "path": "source/memorive_research_workspace/attachments.py",
       "sha256": "fb0b253c1202a395c6b612f1c83f6d1d1007122f5f2741fea2afae21b1591137",
       "bytes": 15973
+    },
+    {
+      "path": "source/memorive_research_workspace/bibliography.py",
+      "sha256": "bb2a480b64d6d4418c02a87151ce0dd878da4e9640a45dfc4f319b0fadd143ee",
+      "bytes": 5993
+    },
+    {
+      "path": "source/memorive_research_workspace/connections.py",
+      "sha256": "ec8625dd22c500978f1dbfea0650ec5b6b6af6a337c8e79f8ff7d267005fe266",
+      "bytes": 33724
     },
     {
       "path": "source/memorive_research_workspace/context_selection.py",
@@ -3807,8 +3817,13 @@
     },
     {
       "path": "source/memorive_research_workspace/desktop.py",
-      "sha256": "d2f5383c8c96de9b5feb05d4de71b7fbbe51a6fd6c17958ac9798f90846d773d",
-      "bytes": 4416
+      "sha256": "b52ade90e7539ff08418dc3faf7044665f9da859d3351e4fa031d5c29af92f1d",
+      "bytes": 4403
+    },
+    {
+      "path": "source/memorive_research_workspace/desktop_connections.py",
+      "sha256": "081294ff422d489d03ca0fa24cf167baa12d8cd09140b33a4cbc2dc537625806",
+      "bytes": 4615
     },
     {
       "path": "source/memorive_research_workspace/developer_api.py",
@@ -3857,23 +3872,8 @@
     },
     {
       "path": "source/memorive_research_workspace/service.py",
-      "sha256": "3905a5b994e7a93af5d55267e31a4142bd74be2a9d6952e9fdacdfc1e9ba3ba5",
-      "bytes": 63113
-    },
-    {
-      "path": "source/memorive_research_workspace/shared_cross_bibliography.py",
-      "sha256": "bb2a480b64d6d4418c02a87151ce0dd878da4e9640a45dfc4f319b0fadd143ee",
-      "bytes": 5993
-    },
-    {
-      "path": "source/memorive_research_workspace/shared_cross_connections.py",
-      "sha256": "a400b52e7f8180fa09f9f4399ee15f08cf277e247e738273913705558c81f3d9",
-      "bytes": 33737
-    },
-    {
-      "path": "source/memorive_research_workspace/shared_cross_desktop_connections.py",
-      "sha256": "081294ff422d489d03ca0fa24cf167baa12d8cd09140b33a4cbc2dc537625806",
-      "bytes": 4615
+      "sha256": "039a100ba3ccd78c5c8e2180b1612a90a7594dd180e7d2f4e9333692fa8fd28a",
+      "bytes": 63100
     },
     {
       "path": "source/memorive_research_workspace/skill_bridge.py",
@@ -5316,7 +5316,7 @@
       "bytes": 65
     },
     {
-      "path": "source/research_recommendations/recommendation_history_research_recommendations_exposure_feedback.py",
+      "path": "source/research_recommendations/exposure_feedback.py",
       "sha256": "39ea358daaf8f3bca4c456e2006eab01cc40ddae6d22b7db536d65c2e6ecbb77",
       "bytes": 30517
     },
@@ -5442,8 +5442,8 @@
     },
     {
       "path": "source/retrieval/__init__.py",
-      "sha256": "73cd7cb9976d749a4323bca6e851f52b5bf91009dc200103eac0e5f165d03e15",
-      "bytes": 2893
+      "sha256": "2043731551a33396bb2cf2559ee0d2f7d7b4befeb5336ddb7b2675fa68ef10d3",
+      "bytes": 2865
     },
     {
       "path": "source/retrieval/candidate_retrieval.py",
@@ -5454,6 +5454,11 @@
       "path": "source/retrieval/context_pack.py",
       "sha256": "30bf6eeabc6b9926df041d905ff89cbbc22b8c2225e577ef6d05d5b11b3ff0f2",
       "bytes": 20359
+    },
+    {
+      "path": "source/retrieval/coverage_artifacts.py",
+      "sha256": "995b7d26d4e637ffa9dca38c10afe43557f98be38769e1d00f5e0a3118eff335",
+      "bytes": 39008
     },
     {
       "path": "source/retrieval/document_context.py",
@@ -5469,11 +5474,6 @@
       "path": "source/retrieval/query_understanding.py",
       "sha256": "52d892dbca04ad07ba62850ff0a929c321394d50dfcf99ff9ab46a4c73eb4027",
       "bytes": 7431
-    },
-    {
-      "path": "source/retrieval/retrieval_quality_retrieval_coverage_artifacts.py",
-      "sha256": "995b7d26d4e637ffa9dca38c10afe43557f98be38769e1d00f5e0a3118eff335",
-      "bytes": 39008
     },
     {
       "path": "source/retrieval/review_qualifications.py",

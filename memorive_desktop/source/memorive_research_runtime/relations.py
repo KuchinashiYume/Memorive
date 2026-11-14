@@ -1,5 +1,5 @@
 """Structured bibliographic matches. Free-text mentions are never identity evidence."""
-from literature_discovery.source_connectors_literature_discovery_connector_framework import normalize_doi, normalize_arxiv_id, ConnectorError
+from literature_discovery.connector_framework import normalize_doi, normalize_arxiv_id, ConnectorError
 import re
 
 def canonical_doi(value):

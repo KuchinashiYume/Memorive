@@ -2,7 +2,7 @@
 from pathlib import Path
 from threading import RLock
 from .common import sha,now,read,write,sealed
-from research_recommendations import recommendation_history_research_recommendations_exposure_feedback as discovery
+from research_recommendations import exposure_feedback as discovery
 _LOCK=RLock()
 
 def record_analysis(root,config,context,analysis):

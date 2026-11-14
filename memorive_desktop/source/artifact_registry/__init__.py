@@ -15,11 +15,11 @@ from .errors import (
     TruncatedRegistryError,
     UnknownArtifactError,
 )
-from .analysis_admission_artifact_registry_compatibility import (
+from .analysis_compatibility import (
     CompatibilityPolicy,
 )
-from .analysis_admission_artifact_registry_materialization import sha256_bytes
-from .analysis_admission_artifact_registry_products import (
+from .analysis_materialization import sha256_bytes
+from .analysis_products import (
     ANALYSIS_ADMISSION_CONTRACT_REF,
     ANALYSIS_ADMISSION_IMPLEMENTATION_VERSION,
     ArtifactProduct,
