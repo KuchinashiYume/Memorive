@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import hashlib
-import json
 import re
 import uuid
 from datetime import datetime
@@ -12,6 +11,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from .errors import EnvelopeValidationError
+from .schema_v2 import canonical_json
 
 ENVELOPE_SCHEMA_VERSION = "artifact-envelope-v1"
 EVENT_SCHEMA_VERSION = "artifact_registry-registry-event-v1"
@@ -21,12 +21,6 @@ _ARTIFACT_ID = re.compile(r"^art_[0-9a-f]{32}$")
 _EVENT_ID = re.compile(r"^evt_[0-9a-f]{32}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _LEGACY_NAMESPACE = uuid.UUID("9e2847e3-04f8-4aa9-aa14-b9f8360bd571")
-
-
-def canonical_json(value: Mapping[str, Any]) -> str:
-    """Return the stable byte-comparison representation used by the registry."""
-
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def sha256_file(path: Path | str) -> str:

@@ -6,7 +6,6 @@ this module.  A caller must provide both a locator and the run-owned root.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import stat
@@ -96,10 +95,6 @@ class LocatorError(FieldVectorError):
 
 class PathBoundaryError(LocatorError):
     """A path is outside the explicitly supplied owned root."""
-
-
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest().upper()
 
 
 def _is_reparse_point(path: Path) -> bool:

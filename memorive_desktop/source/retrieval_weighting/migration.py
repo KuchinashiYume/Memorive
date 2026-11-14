@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import hashlib
 import os
 import shutil
 from copy import deepcopy
@@ -26,10 +25,6 @@ FAIL_POINTS = frozenset(
         "before_finalize",
     }
 )
-
-
-def _sha256(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest().upper()
 
 
 __all__ = [

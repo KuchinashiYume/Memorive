@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Iterator
 
 from .errors import ConcurrentWriterError
+from .schema import canonical_json
 
 
 LOCK_FILENAME = ".writer.lock"
@@ -32,10 +33,6 @@ def utc_now() -> str:
 
 def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
-
-
-def canonical_json(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def host_id_hash() -> str:
