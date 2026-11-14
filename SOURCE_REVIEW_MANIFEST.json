@@ -6321,18 +6321,48 @@
     },
     {
       "path": "memorive_desktop/source/model_gateway/execution_core/adapters/__init__.py",
-      "sha256": "43cb01993cb763befa3361ecc65c370b58b34ea459dc8db3c15ea96558c8f5ae",
-      "bytes": 322
+      "sha256": "947d814e9a9b817f0596dece7da33463d199b777d8af28cc90415053b7fe3c79",
+      "bytes": 1485
     },
     {
       "path": "memorive_desktop/source/model_gateway/execution_core/adapters/codex_cli.py",
-      "sha256": "35280567641867c41253bb0d77b22cdaf4d7b374abe3fd535709f74b8a1e7f9a",
-      "bytes": 21130
+      "sha256": "3224c18fefa74551325382868c6578132e789b81566159f8aafd1d76abeef18d",
+      "bytes": 50480
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/execution_core/adapters/claude_code.py",
+      "sha256": "dfd175b413b617c33d2cfab5c81d17534b2c481d3a075cdde5adf564da0b063c",
+      "bytes": 6462
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/execution_core/adapters/codebuddy_code.py",
+      "sha256": "886140be812906565dc9218097be9759071ab38f7c01a6a14c0f90cfb5f3888c",
+      "bytes": 6828
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/execution_core/adapters/gemini_cli.py",
+      "sha256": "8e2365f3da37ae59e9bc5fce1d03521353c3d365ebe4808e348b8ae6c7a3b822",
+      "bytes": 7377
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/execution_core/adapters/github_copilot_cli.py",
+      "sha256": "b0111fb6c40c00a6321fb69473af2a67cef443200b8ec1a4cd395f8484650362",
+      "bytes": 7068
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/execution_core/adapters/kimi_code.py",
+      "sha256": "2d2123438426a4c503a71705bf117f1bd74499d1540fe6ae264ddd1b9fe5852b",
+      "bytes": 7833
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/execution_core/adapters/qwen_code.py",
+      "sha256": "ccd80916859615cfba64d719a8ef2b2933aeea6b368c3543c218bffef0be5217",
+      "bytes": 7347
     },
     {
       "path": "memorive_desktop/source/model_gateway/execution_core/component_binding.py",
-      "sha256": "6eecb18ff3d1aea78c89ad3e663060f9acebb88bf141e6e67726e4391f268292",
-      "bytes": 910
+      "sha256": "20271e2e02bf90dd98dbb931560d098423d162e943ed82ce334ba282db9c2058",
+      "bytes": 2104
     },
     {
       "path": "memorive_desktop/source/model_gateway/execution_core/contracts.py",
@@ -7461,8 +7491,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "a18975b2579004d17026f935d937fbe6cfb6c35835e861f0c3e7e8f8ca8ee730",
-      "bytes": 209429
+      "sha256": "63bd73e1c57df314dc791e8dc69f17b88ad7ae14cfaa8b42c515be19566bcab3",
+      "bytes": 210630
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",

@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 from pathlib import Path
-from typing import Sequence
+import re
+from typing import Any, Mapping, Sequence
+
+
+SHA256_RE = re.compile(r"^[0-9A-F]{64}$")
 
 
 @dataclass(frozen=True)
@@ -11,6 +15,30 @@ class ComponentBinding:
     name: str
     path: str
     expected_sha256: str
+
+
+class ComponentBindingViolation(ValueError):
+    def __init__(self, code: str, component: str | None = None):
+        super().__init__(code if component is None else f"{code}:{component}")
+        self.code = code
+        self.component = component
+
+
+def bindings_from_policy(policy: Any, hash_fields: Sequence[str]) -> tuple[ComponentBinding, ...]:
+    paths = getattr(policy, "component_paths", None)
+    if not isinstance(paths, Mapping):
+        raise ComponentBindingViolation("COMPONENT_PATH_MANIFEST_MISSING")
+    expected_names = tuple(hash_fields)
+    if set(paths) != set(expected_names):
+        raise ComponentBindingViolation("COMPONENT_PATH_MANIFEST_EXACT_SET_MISMATCH")
+    bindings: list[ComponentBinding] = []
+    for name in expected_names:
+        path = Path(str(paths[name]))
+        digest = str(getattr(policy, name, "")).upper()
+        if not path.is_absolute() or not SHA256_RE.fullmatch(digest):
+            raise ComponentBindingViolation("COMPONENT_BINDING_INVALID", name)
+        bindings.append(ComponentBinding(name, str(path), digest))
+    return tuple(bindings)
 
 
 def verify_component_bindings(bindings: Sequence[ComponentBinding]) -> str | None:
