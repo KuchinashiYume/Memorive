@@ -1,4 +1,4 @@
-"""KNOWLEDGE_ADMISSION 三态与合法转移表(逐字承 contracts/Core_最小可用闭环/10_模块契约/Memorive_KNOWLEDGE_ADMISSION_KNOWLEDGE_ADMISSION_模块契约与骨架设计.md §一;严格对齐 card_schema review_status)。
+"""KNOWLEDGE_ADMISSION 三态与合法转移表(严格对齐 card_schema review_status)。
 
 只做 review_status 这一根轴的三态。archive 属 ARTIFACT_REGISTRY Usage 另一轴、不在本枚举(守卫当非法挡)。
 """

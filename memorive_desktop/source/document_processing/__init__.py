@@ -1,14 +1,15 @@
-"""Memorive DOCUMENT-PROCESSING/DOCUMENT_PROCESSING · DOCUMENT_PROCESSING 预处理流水线。
+"""Memorive 文档预处理流水线。
 
 传送带五段:DocumentIngest 导入 → DocumentConvert 转换/OCR → DocumentClean 清洗 → DocumentChunk 切块 → DocumentEmbed 嵌入。
 
-对外分段入口(第 1 步已实现 DocumentIngest/DocumentConvert;整线 run_pipeline 待第 4 步串联):
+分段入口:
     from document_processing import ingest, convert
     raw = ingest(pdf_path, data_ownership="self", doc_type="literature")
     result = convert(raw, paper_id="Smith2020", title="...", target="sandbox")
 
-调模型经 MODEL_GATEWAY(不直连 SDK)、每步留痕经 RUNTIME_LOG。契约见
-contracts/Core_最小可用闭环/10_模块契约/Memorive_DOCUMENT_PROCESSING_DOCUMENT_PROCESSING_模块契约与骨架设计.md。
+整线入口在 pipeline.py:run_document_processing 跑到切块为止,embed_from_chunks 对切好的块做嵌入。
+
+调模型经 MODEL_GATEWAY(不直连 SDK)、每步留痕经 RUNTIME_LOG。
 """
 from .document_ingest_ingest import ingest
 from .document_convert_convert import convert

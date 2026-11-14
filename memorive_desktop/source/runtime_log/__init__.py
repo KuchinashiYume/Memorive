@@ -4,8 +4,6 @@
 业务写入: from runtime_log import log[, log_error]。
 排错抽取: from runtime_log import extract_module_logs(按模块名抽出一段日志)。
 两契约:   from runtime_log import log_accounting(记账·契约①) / log_reason(原因记录·契约②)。
-格式与契约见
-contracts/Core_最小可用闭环/10_模块契约/Memorive_RUNTIME_LOG_RUNTIME_LOG_日志设计.md。
 
 (Logger 类属内部 / 测试注入用,不在公共入口;业务模块勿直接实例化——
  需要注入路径的测试可 from runtime_log.logger import Logger。)
