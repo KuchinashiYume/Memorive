@@ -2,7 +2,6 @@
 
 from .adapters import RealFacadeAdapter, REQUIRED_FACADE_METHODS
 from .client import ApplicationServiceClient
-from .command_outbox import DesktopCommandOutbox
 from .control_store import ControlStore
 from .locator import StableLocator, StableLocatorResolver
 from .service import ApplicationServiceHost
@@ -13,7 +12,6 @@ __all__ = [
     "ApplicationServiceClient",
     "ApplicationServiceHost",
     "ControlStore",
-    "DesktopCommandOutbox",
     "REQUIRED_FACADE_METHODS",
     "RealFacadeAdapter",
     "SingleInstanceCoordinator",

@@ -5006,8 +5006,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/__init__.py",
-      "sha256": "fc4092937ee3246eec0ad5c6218a92e5458b4586fe719266e65c60b099d40acf",
-      "bytes": 733
+      "sha256": "407f91b6e1bf63c14e41508b746c95c8ca01399d399bd22db21f21417d4577ac",
+      "bytes": 654
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/__main__.py",
@@ -5023,11 +5023,6 @@
       "path": "memorive_desktop/source/memorive_desktop_service/client.py",
       "sha256": "d0eb272ccd2b50ba4355a07fdb259b0b6c1a9e7f1b4e8a9580ab8af3ee2bfc78",
       "bytes": 11298
-    },
-    {
-      "path": "memorive_desktop/source/memorive_desktop_service/command_outbox.py",
-      "sha256": "cd5e19e89a894a35d9461c8e5781a7384b89e29b99516c0c029ad0d00c7418a9",
-      "bytes": 6474
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/composite_adapter.py",
@@ -7311,8 +7306,8 @@
     },
     {
       "path": "memorive_desktop/source/runtime.py",
-      "sha256": "1b0e7e6b08c673517976bd0b711f8ee3e48566d39c7d13bd0f44b1b26d9ef863",
-      "bytes": 339203
+      "sha256": "3eb71e9ee775c3d8a373fc5cc7ba897c92e2181d322f81f15f09030a378b4d56",
+      "bytes": 338564
     },
     {
       "path": "memorive_desktop/source/runtime_log/__init__.py",
@@ -7466,8 +7461,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "75c63b4912ef432d1609df5f3f941a62d105679248df4e07ce77056f21b1e532",
-      "bytes": 209619
+      "sha256": "fcc2e756298429b7515212a919290f30872dbc1956fe7a7b3ba908b79018f7a0",
+      "bytes": 209430
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",

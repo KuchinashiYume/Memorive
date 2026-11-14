@@ -929,10 +929,7 @@ class ProductApi:
         # A presenter can synchronously write a receipt through ``self._lock``
         # on the UI thread; sharing that lock here creates a cross-thread cycle.
         self._product_call_lock = threading.RLock()
-        event_root = self._state_dir / "events"
-        event_root.mkdir(parents=True, exist_ok=True)
-        self._event_root = event_root
-        self._sequence = len(list(event_root.glob("event-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].json")))
+        self._sequence = 0  # numbers the UI event receipts of this run
         profile_root = self._state_dir / "profile"
         self._profile_root = profile_root
         folder_module = importlib.import_module("memorive_folder_management")
@@ -1012,11 +1009,9 @@ class ProductApi:
         else:
             self._seed_blank_assistant_shortcut_file(self._assistant_preferences_path)
         control_module = importlib.import_module("memorive_desktop_service.control_store")
-        outbox_module = importlib.import_module("memorive_desktop_service.command_outbox")
         instance_module = importlib.import_module("memorive_desktop_service.single_instance")
         self._control_store = control_module.ControlStore(ui_root)
         self._control_envelope = self._control_store.load()
-        self._outbox = outbox_module.DesktopCommandOutbox(ui_root / "command_outbox.sqlite3")
         self._single_instance = instance_module.SingleInstanceCoordinator(ui_root)
         if not self._single_instance.acquire_primary():
             raise RuntimeError("DESKTOP_INSTANCE_ALREADY_ACTIVE")
@@ -2379,10 +2374,6 @@ class ProductApi:
                 "control_store_revision": self._control_envelope["revision"],
                 "business_state_mutated": False,
             }
-            destination = self._event_root / f"event-{self._sequence:08d}.json"
-            with destination.open("x", encoding="utf-8", newline="\n") as handle:
-                json.dump(receipt, handle, ensure_ascii=False, indent=2)
-                handle.write("\n")
             return receipt
 
     def call(self, method: str, params: dict[str, Any] | None = None) -> Any:
