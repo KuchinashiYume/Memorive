@@ -340,13 +340,6 @@ class CorePipelineExecutor:
             "MEMORIVE_RETRIEVAL_RERANK_ENABLED": "false",
             "MEMORIVE_DOCUMENT_PROCESSING_OCR_VIA_MODEL_GATEWAY_READY": "false",
         }
-        conflicts = {
-            key: (os.environ.get(key), expected)
-            for key, expected in values.items()
-            if os.environ.get(key) not in {None, expected}
-        }
-        if conflicts:
-            raise RuntimeError(f"Core_RUNTIME_ENVIRONMENT_CONFLICT:{sorted(conflicts)}")
         os.environ.update(values)
 
         # Core intentionally resolves its four roots when its config module is
