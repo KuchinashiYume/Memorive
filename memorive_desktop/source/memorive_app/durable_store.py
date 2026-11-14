@@ -4,7 +4,6 @@ from contextlib import closing
 from copy import deepcopy
 import json
 from pathlib import Path
-import re
 import sqlite3
 from typing import Any, Callable
 
@@ -14,19 +13,6 @@ from .errors import CorruptEventLog, IdempotencyConflict, JobNotFound, VersionCo
 
 Mutator = Callable[[dict[str, Any]], dict[str, Any]]
 ResultFactory = Callable[[dict[str, Any]], dict[str, Any]]
-_SENSITIVE_FIELD = re.compile(r"(^|_)(api[_-]?key|password|secret|token|credential[_-]?value)($|_)", re.IGNORECASE)
-
-
-def _require_secret_free(value: Any, path: str = "payload") -> None:
-    if isinstance(value, dict):
-        for key, child in value.items():
-            rendered = str(key)
-            if _SENSITIVE_FIELD.search(rendered):
-                raise ValueError(f"SENSITIVE_OUTBOX_FIELD_FORBIDDEN:{path}.{rendered}")
-            _require_secret_free(child, f"{path}.{rendered}")
-    elif isinstance(value, list):
-        for index, child in enumerate(value):
-            _require_secret_free(child, f"{path}[{index}]")
 
 
 class DurableJobStore:

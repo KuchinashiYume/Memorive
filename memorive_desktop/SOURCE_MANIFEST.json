@@ -2997,8 +2997,8 @@
     },
     {
       "path": "source/memorive_app/durable_store.py",
-      "sha256": "90bf2e0cb79cc2d0f3a50b2bb5f59f252ffa0e49e09651d2be51f9a1a8beab5c",
-      "bytes": 15097
+      "sha256": "bd20b15f0e0a7357afa616a5c26d7529530fdb780a4ebd1f6e018b21da4be989",
+      "bytes": 14441
     },
     {
       "path": "source/memorive_app/errors.py",
