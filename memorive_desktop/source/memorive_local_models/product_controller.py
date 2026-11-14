@@ -5,9 +5,12 @@ from datetime import datetime, timezone
 import hashlib
 import ipaddress
 import json
+import os
 from pathlib import Path
 import re
 import shutil
+import threading
+import time
 from typing import Any, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit, urlunsplit
@@ -27,6 +30,27 @@ LOCAL_MODEL_METHODS = frozenset(
         "local_models.effect_metrics",
     }
 )
+
+# shutil.which walks every PATH folder for every PATHEXT extension, and the pages ask for the
+# local tools on every refresh. Keep each answer for a minute; a changed PATH or PATHEXT is a
+# new lookup.
+_TOOL_LOOKUP_SECONDS = 60.0
+_tool_lookup_lock = threading.Lock()
+_tool_lookup: dict[tuple[str, str, str], tuple[float, bool]] = {}
+
+
+def _executable_found(tool: str) -> bool:
+    key = (tool, os.environ.get("PATH", ""), os.environ.get("PATHEXT", ""))
+    now = time.monotonic()
+    with _tool_lookup_lock:
+        cached = _tool_lookup.get(key)
+        if cached is not None and now - cached[0] < _TOOL_LOOKUP_SECONDS:
+            return cached[1]
+    found = bool(shutil.which(tool))
+    with _tool_lookup_lock:
+        _tool_lookup[key] = (now, found)
+    return found
+
 
 _KIND_ADAPTERS = {
     "ollama": {
@@ -261,7 +285,7 @@ class LocalModelProductController:
             {
                 "tool": tool,
                 "display_name": display_name,
-                "executable_found": bool(shutil.which(tool)),
+                "executable_found": _executable_found(tool),
                 "executable_path_exposed": False,
             }
             for tool, display_name in candidates

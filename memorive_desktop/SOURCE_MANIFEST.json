@@ -3442,8 +3442,8 @@
     },
     {
       "path": "source/memorive_local_models/product_controller.py",
-      "sha256": "178a4aee7d6e482d1cc30695ddb02dc9b30be4d240ea04ac1275ea8ab523aa28",
-      "bytes": 20305
+      "sha256": "845b691e6b71a2f5b3190887edb3dedcdf1d3a5bf66487a452a02adfe9c605c3",
+      "bytes": 21142
     },
     {
       "path": "source/memorive_messages/__init__.py",
