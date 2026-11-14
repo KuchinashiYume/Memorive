@@ -266,7 +266,7 @@ class ResearchSkill:
             user = {'id': uid('msg_'), 'role': 'user', 'text': pack['question'], 'created_at': now(),
                     'artifact_ids': sorted(admitted), 'parent_answer_id': path[-1]['id'] if path else None}
             plan = answer_coverage.plan(pack['question'], sorted(admitted))
-            cov = answer_coverage.snapshot(self.store, project, plan, refs, refs, refs)
+            cov = answer_coverage.snapshot(self.store, plan, refs, refs, refs)
             message = {'id': uid('msg_'), 'role': 'assistant', 'text': answer, 'created_at': now(),
                 'citations': refs, 'engine': 'memo-research-skill', 'answer_version': 1,
                 'language_context': pack.get('language_context'), 'artifact_ids': sorted(admitted),

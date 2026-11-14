@@ -155,7 +155,7 @@ class AnswerEvidence:
             question=next((m['text'] for m in reversed(thread['messages'][:position]) if m['role']=='user'),'')
             scope=message.get('artifact_ids') or None
             refs=message.get('citations',[])
-            cov=coverage.snapshot(self.ws.store,thread['project'],coverage.plan(question,scope),refs,refs,refs,recorded=False)
+            cov=coverage.snapshot(self.ws.store,coverage.plan(question,scope),refs,refs,refs,recorded=False)
         freshness={}
         for r in refs:
             try:self.ws.index.read(r['id'],thread['project'],expected_hash=r['content_hash']);freshness[r['id']]='CURRENT'

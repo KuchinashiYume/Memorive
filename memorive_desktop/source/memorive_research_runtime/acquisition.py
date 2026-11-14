@@ -62,7 +62,7 @@ def collect(runtime,run_id,params,directions,targets):
                 for plan in [p for p in plan_rows if p['direction_id']==direction['id']]:
                     cursor=None;visited=set();seen_cursors=set();stop_reason='PAGE_LIMIT'
                     for page in range(limits['max_pages_per_query']):
-                        try: batch=fetch(source,source_query(source,plan,options),limits['page_size'],cursor=cursor)
+                        try: batch=fetch(source,source_query(plan,options),limits['page_size'],cursor=cursor)
                         except ValueError as exc:
                             stop_reason=str(exc)
                             if stop_reason in {'SOURCE_REQUEST_LIMIT_REACHED','SOURCE_TIME_LIMIT_REACHED'}:

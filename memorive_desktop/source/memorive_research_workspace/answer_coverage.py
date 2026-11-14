@@ -89,7 +89,7 @@ def pack_order(refs,question=None):
         if r['id'] not in seen:out.append(r);seen.add(r['id'])
     return out
 
-def local_candidates(index,question,scope_ids,initial,coverage_plan):
+def local_candidates(index,scope_ids,initial,coverage_plan):
     """One bounded local pass per facet, strictly in the selected materials."""
     if not scope_ids:return list(initial)
     refs=list(initial);seen={r['id'] for r in refs}
@@ -121,7 +121,7 @@ def _facet_matches(facets,refs):
             by_id[r['id']][f['id']]={'matched_terms':terms,'basis':'strict_span_candidate' if exact and exact.matched_terms else 'local_keyword_candidate'}
     return by_id
 
-def snapshot(store,project,coverage_plan,retrieved,read,retained,*,recorded=True):
+def snapshot(store,coverage_plan,retrieved,read,retained,*,recorded=True):
     scope_ids=coverage_plan.get('scope_ids')
     source_ids=list(dict.fromkeys(scope_ids if scope_ids is not None else [r['artifact_id'] for r in read]))
     sets={name:{r['artifact_id'] for r in refs} for name,refs in [('retrieved',retrieved),('read',read),('retained',retained)]}

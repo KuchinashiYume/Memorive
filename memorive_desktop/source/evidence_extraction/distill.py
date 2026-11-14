@@ -1502,7 +1502,6 @@ def distill(source, *, target: str = "sandbox", max_tokens: int | None = None,
     try:
         return _distill(
             source,
-            target=target,
             max_tokens=max_tokens,
             overwrite=overwrite,
             segment_handoff_on_length=segment_handoff_on_length,
@@ -1514,7 +1513,7 @@ def distill(source, *, target: str = "sandbox", max_tokens: int | None = None,
         return DistillResult(status="failed", error_type=type(exc).__name__, error_message=str(exc))
 
 
-def _distill(source, *, target, max_tokens, overwrite,
+def _distill(source, *, max_tokens, overwrite,
              segment_handoff_on_length=False,
              route_large_input=False) -> DistillResult:
     folder, cleanmd, chunks_path = _locate(source)

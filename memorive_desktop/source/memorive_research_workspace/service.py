@@ -351,7 +351,7 @@ class ResearchWorkspace:
                     refs=copy.deepcopy(prior['refs']);search=copy.deepcopy(prior['search']);intent=prior['intent']
                     coverage_snapshot=copy.deepcopy(prior['coverage_snapshot']);evidence_context=copy.deepcopy(prior['evidence_context'])
                     admitted={r['id'] for r in refs}
-                    self.versions.validate_retry_topic(job,prior,thread,context)
+                    self.versions.validate_retry_topic(job,prior,context)
                     context.update(request_context,task_intent=intent)
                 else:
                     coverage_plan=answer_coverage.plan(question,artifact_ids)
@@ -359,7 +359,7 @@ class ResearchWorkspace:
                     if unavailable:coverage_plan['unavailable_sources']=[dict(artifact_id=aid,**value) for aid,value in sorted(unavailable.items())]
                     coverage_plan['project']=thread['project'];coverage_plan['hash']=digest({k:v for k,v in coverage_plan.items() if k!='hash'})
                     search=self.index.search(question,thread['project'],limit=8,artifact_ids=artifact_ids,policy_config=(job.get('weight_policy') or {}).get('config'));refs=search['results']
-                    refs=answer_coverage.local_candidates(self.index,question,artifact_ids,refs,coverage_plan)
+                    refs=answer_coverage.local_candidates(self.index,artifact_ids,refs,coverage_plan)
                     retrieved_refs=list(refs)
                     # Short follow-ups may omit the original topic. Reuse only fresh citations
                     # from this thread, within any explicit document selection.
@@ -403,7 +403,7 @@ class ResearchWorkspace:
                         # the context's actual character budget has been applied.
                         refs=answer_coverage.pack_order(balanced,question)
                     if unavailable and not refs:
-                        coverage=answer_coverage.snapshot(self.store,thread['project'],coverage_plan,retrieved_refs,read_refs,refs)
+                        coverage=answer_coverage.snapshot(self.store,coverage_plan,retrieved_refs,read_refs,refs)
                         self.store.put('job',identity,job['project'],dict(self.job_status(identity),evidence_coverage=coverage))
                         raise ValueError('EVIDENCE_NO_CURRENT_SOURCE')
                     comparison=bool(re.search(r'比较|对比|异同|差异|张力|矛盾|冲突|compare|comparison|differ|tension|conflict',question,re.I))
@@ -417,7 +417,7 @@ class ResearchWorkspace:
                     context,summary=self._context(thread,question,refs,settings,coverage_plan,job.get('topic_snapshot'),
                         request_context=dict(request_context,task_intent='agent' if job.get('kind')=='agent' else intent))
                     admitted={e['id'] for e in context['evidence']};refs=[r for r in refs if r['id'] in admitted]
-                    coverage_snapshot=answer_coverage.snapshot(self.store,thread['project'],coverage_plan,retrieved_refs,read_refs,refs)
+                    coverage_snapshot=answer_coverage.snapshot(self.store,coverage_plan,retrieved_refs,read_refs,refs)
                     evidence_context={'question':question,'coverage':coverage_snapshot,'retained':refs,'read':read_refs}
                     checkpoint()
                     if cross_document and len({answer_coverage.document_key(r) for r in refs})<2:raise ValueError('COMPARISON_CONTEXT_TOO_SMALL')

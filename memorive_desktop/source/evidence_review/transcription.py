@@ -341,7 +341,7 @@ def _build_batch_input(subjects: list, chunk_texts: dict) -> dict:
     }
 
 
-def _wire_batch_input(batch_input: dict, source_context: dict) -> dict:
+def _wire_batch_input(batch_input: dict) -> dict:
     """Compress repeated full-source ID lists without changing review scope.
 
     The validator retains the original subject IDs. Only the prompt projection
@@ -443,7 +443,7 @@ def _source_bound_batch_prompt(template: str, batch_input: dict, *, prior_source
     ):
         sources = prior_source_context
     task = template[len(policy):].lstrip().replace("__BATCH_INPUT_JSON__", json.dumps(
-        _wire_batch_input(batch_input, sources), ensure_ascii=False, indent=2))
+        _wire_batch_input(batch_input), ensure_ascii=False, indent=2))
     coverage = {
         "checked_locations": [row["location"] for row in batch_input["subjects"]],
         "checked_items": [{"location": row["location"],

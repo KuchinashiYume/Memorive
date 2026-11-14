@@ -220,7 +220,7 @@ class AnswerVersions:
             selected=job.get('artifact_ids')
             if scope is not None and (selected is None or any(i not in scope for i in selected)):raise ValueError('RETRY_MATERIAL_SCOPE_CHANGED')
 
-    def validate_retry_topic(self,job,prior,thread,context):
+    def validate_retry_topic(self,job,prior,context):
         """Keep frozen retries, but do not revive changed/deleted topic inputs.
 
         A commit advances the topic revision/position even if no input changed.

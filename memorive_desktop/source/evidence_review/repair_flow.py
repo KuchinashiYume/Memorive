@@ -264,7 +264,6 @@ def _protected_clauses(value, problem_rows):
 def _build_repair_bundle(
     fm: dict,
     rows: list[dict],
-    subjects_by_location: dict,
     chunk_texts: dict[str, str],
 ) -> dict:
     actual_subjects_by_location = {
@@ -1110,7 +1109,7 @@ def repair_and_admit(
     final_review_batch_failures = []
 
     if repair_rows:
-        bundle = _build_repair_bundle(fm, repair_rows, subjects_by_location, chunk_texts)
+        bundle = _build_repair_bundle(fm, repair_rows, chunk_texts)
         batches = _partition_repair_bundle(bundle)
         repair_batch_count = len(batches)
         failed_targets = set()

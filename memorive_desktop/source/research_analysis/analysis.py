@@ -449,7 +449,7 @@ def _default_region_check() -> None:
     raise RegionBlocked(msg)
 
 
-def analyze(context_pack, question: str, constraints=None, *,
+def analyze(context_pack, question: str, *,
             data_ownership=None, legacy_data_ownership=None,
             model_call=None,
             region_check=None, output_language: str | None = None) -> AnalysisResult:

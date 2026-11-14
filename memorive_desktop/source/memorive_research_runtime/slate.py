@@ -391,7 +391,7 @@ def build_recall_candidates(
     return sorted(results, key=lambda item: item["candidate_id"])
 
 
-def _representative_key(recall: Mapping[str, Any], fact: Mapping[str, Any]) -> tuple[Any, ...]:
+def _representative_key(fact: Mapping[str, Any]) -> tuple[Any, ...]:
     metadata = fact["ranking_metadata"]
     return (
         -int(fact["state_axes"]["identity_status"] == "VERIFIED"),
@@ -414,9 +414,7 @@ def build_candidate_clusters(
     for work_cluster_id, members in sorted(groups.items()):
         ordered = sorted(
             members,
-            key=lambda candidate_id: _representative_key(
-                recall_by_id[candidate_id], fact_by_id[candidate_id]
-            ),
+            key=lambda candidate_id: _representative_key(fact_by_id[candidate_id]),
         )
         representative = ordered[0]
         cluster_seed = {"work_cluster_id": work_cluster_id, "members": sorted(members)}

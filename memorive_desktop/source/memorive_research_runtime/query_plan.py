@@ -57,7 +57,7 @@ def arxiv_query(query):
     if not previous and result: result.pop()
     return ' '.join(result)
 
-def source_query(provider,plan,options):
+def source_query(plan,options):
     return {'text':plan['query'],'arxiv_query':plan.get('arxiv_query') or arxiv_query(plan['query']),
         'objective':options['objective'],'publication_window':options['publication_window']}
 
