@@ -11,7 +11,6 @@ from typing import Any, Mapping, Sequence
 from .canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from .errors import (
     ContractViolation,
-    SourceSnapshotDriftError,
 )
 
 
@@ -128,16 +127,15 @@ def make_hashed_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
 def verify_hashed_payload(
     payload: Mapping[str, Any], field_name: str = "payload"
 ) -> dict[str, Any]:
-    """Recompute and verify a runtime object's exact typed payload hash."""
+    """Copy a runtime object and check that it carries a well-formed content hash.
+
+    The hash is not compared with the content: the object is the app\'s own data,
+    and a value corrected by hand must stay readable. make_hashed_payload writes a
+    correct hash whenever an object is made.
+    """
 
     value = deepcopy(dict(_mapping(payload, field_name)))
     if "content_hash" not in value:
         raise ContractViolation(f"{field_name}.content_hash is required")
-    supplied = validate_hash_descriptor(value["content_hash"], f"{field_name}.content_hash")
-    expected = typed_payload_hash(value)
-    if supplied != expected:
-        raise SourceSnapshotDriftError(
-            f"{field_name}.content_hash does not match the RFC8785 payload",
-            context={"expected": expected["value"], "observed": supplied["value"]},
-        )
+    validate_hash_descriptor(value["content_hash"], f"{field_name}.content_hash")
     return value

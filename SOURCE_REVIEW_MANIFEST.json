@@ -7241,8 +7241,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/contracts.py",
-      "sha256": "56932099a3ce49d905460378aec888ba1810266461d5f917bdc7be3e91414e98",
-      "bytes": 5496
+      "sha256": "d3dde05d07ec5e13c25ce28c7ac8b830ef8eafba33cf7fc2ba609394d0db6ffb",
+      "bytes": 5398
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/errors.py",
@@ -7496,7 +7496,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "2817e007b29b6ec86b2d8ba0626805ad71a7863575c81388fe7ca0f14677c437",
+      "sha256": "2c0e3891f6a736c5edcd96ee21f6b88dde6192bae69ed7d9dddb15a5802b9008",
       "bytes": 210822
     },
     {

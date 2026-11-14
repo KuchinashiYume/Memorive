@@ -5472,8 +5472,8 @@
     },
     {
       "path": "source/retrieval_weighting/contracts.py",
-      "sha256": "56932099a3ce49d905460378aec888ba1810266461d5f917bdc7be3e91414e98",
-      "bytes": 5496
+      "sha256": "d3dde05d07ec5e13c25ce28c7ac8b830ef8eafba33cf7fc2ba609394d0db6ffb",
+      "bytes": 5398
     },
     {
       "path": "source/retrieval_weighting/errors.py",
