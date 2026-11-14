@@ -20,7 +20,7 @@ $candidateId = (Get-Content .\memorive_desktop\product\desktop\update_release.js
 G:\Memorive-build-env\Scripts\python.exe -X utf8 .\memorive_desktop\tools\build_memorive.py --output G:\Memorive-build-output --candidate-id $candidateId --installer-toolchain G:\Memorive-verified-sdk
 ```
 
-`py -3.13` must resolve to the required patch version. `SOURCE_MANIFEST.public-candidate.json` binds source and resource bytes; `BUILD_RESOURCES.public-candidate.json` maps repository-relative inputs into the package. Keep the `contracts/` directory. `--stage-only` validates and stages inputs without compiling an EXE.
+`py -3.13` must resolve to the required patch version. `SOURCE_MANIFEST.json` binds source and resource bytes; `BUILD_RESOURCES.json` maps repository-relative inputs into the package. Keep the `contracts/` directory. `--stage-only` validates and stages inputs without compiling an EXE.
 
 The output is `dist/Memorive/Memorive.exe` together with its required `_internal/` directory. The receipt records input hashes, dependency versions and the EXE hash. The build reads no user profile and includes no private test capsule. It uses only the selected Python and Windows directories for native dependency lookup. Windows Visual C++ runtime libraries are prerequisites; unrelated DLLs from developer tools are not build inputs.
 
@@ -32,16 +32,16 @@ The build copies only the files that the manifests list, and stops with `BUILD_I
 python .\memorive_desktop\tools\sync_manifests.py
 ```
 
-It refreshes the hashes of changed files, drops deleted files, and adds new files under `source/`, `product/`, `integrations/` and `memorive_console/` to the manifests. It also refreshes the hash list that the installer builder checks its own sources against. `--check` reports what is out of date without changing anything. The app loads images, web pages and other resources from the destination that `BUILD_RESOURCES.public-candidate.json` gives, so add an entry there for a new non-Python file under `product/desktop/`; the tool lists such files.
+It refreshes the hashes of changed files, drops deleted files, and adds new files under `source/`, `product/`, `integrations/` and `memorive_console/` to the manifests. It also refreshes the hash list that the installer builder checks its own sources against. `--check` reports what is out of date without changing anything. The app loads images, web pages and other resources from the destination that `BUILD_RESOURCES.json` gives, so add an entry there for a new non-Python file under `product/desktop/`; the tool lists such files.
 
 ## Inventory and installer
 
 Run `memorive_desktop/tools/collect_build_inventory.py --build <build directory> --wheelhouse <wheel directory> --output <new inventory directory>` with the same interpreter. It records dependency metadata, licenses, installed artifacts and hashes. Third-party source archives and license notices must accompany the selected distribution as required by their licenses.
 
-The installer is built from `memorive_desktop/installer/public_candidate/` using the Windows .NET Framework compiler and WebView2 SDK **1.0.3856.49**. Toolchain member sources and hashes are in `release_materials/webview2-toolchain-source.json`. Supply the declared SDK DLLs, loader and `toolchain-source.json` explicitly:
+The installer is built from `memorive_desktop/installer/windows/` using the Windows .NET Framework compiler and WebView2 SDK **1.0.3856.49**. Toolchain member sources and hashes are in `release_materials/webview2-toolchain-source.json`. Supply the declared SDK DLLs, loader and `toolchain-source.json` explicitly:
 
 ```text
-python memorive_desktop/installer/public_candidate/build_installer.py
+python memorive_desktop/installer/windows/build_installer.py
   --app <build output>/dist/Memorive
   --artifact-manifest <inventory>/artifact-manifest.json
   --toolchain <verified SDK directory>

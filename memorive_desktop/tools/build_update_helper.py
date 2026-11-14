@@ -48,7 +48,7 @@ def compile_engine(source, toolchain, output, *, trust=None):
     source,toolchain,output=map(Path,(source,toolchain,output))
     if output.exists():
         raise FileExistsError('NEW_NATIVE_OUTPUT_REQUIRED')
-    installer=source/'installer/public_candidate'
+    installer=source/'installer/windows'
     identity=json.loads((source/'product/desktop/update_release.json').read_text('utf8'))
     version=identity['version_tuple']
     if len(version)!=4 or any(type(n)!=int or not 0<=n<=65535 for n in version) or identity['release_authorized'] is not False:

@@ -12,12 +12,12 @@ What it does to each manifest:
   * removes files that no longer exist
   * adds new files:
       SOURCE_REVIEW_MANIFEST.json                             every file in the repository
-      memorive_desktop/SOURCE_MANIFEST.public-candidate.json  files under source/, product/ and integrations/
+      memorive_desktop/SOURCE_MANIFEST.json  files under source/, product/ and integrations/
       memorive_console/SOURCE_MANIFEST.json                   files under memorive_console/
-      memorive_desktop/BUILD_RESOURCES.public-candidate.json  nothing; it says where in the package each
+      memorive_desktop/BUILD_RESOURCES.json  nothing; it says where in the package each
                                                               resource goes, so new non-Python files under
                                                               product/desktop/ are reported for you to add
-      memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json
+      memorive_desktop/installer/windows/SOURCE_PROVENANCE.json
                                                               nothing; the installer builder checks the
                                                               installer sources against this list
 
@@ -40,15 +40,15 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 ROOT_MANIFEST = "SOURCE_REVIEW_MANIFEST.json"
-DESKTOP_MANIFEST = "memorive_desktop/SOURCE_MANIFEST.public-candidate.json"
-RESOURCE_MANIFEST = "memorive_desktop/BUILD_RESOURCES.public-candidate.json"
+DESKTOP_MANIFEST = "memorive_desktop/SOURCE_MANIFEST.json"
+RESOURCE_MANIFEST = "memorive_desktop/BUILD_RESOURCES.json"
 CONSOLE_MANIFEST = "memorive_console/SOURCE_MANIFEST.json"
-INSTALLER_SOURCES = "memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json"
+INSTALLER_SOURCES = "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json"
 
 # manifest -> (key that names the file, prefix its paths are relative to, folders whose new files it takes in,
 #              key that holds the hash)
 MANIFESTS = {
-    INSTALLER_SOURCES: ("path", "memorive_desktop/installer/public_candidate/", (), "candidate_sha256"),
+    INSTALLER_SOURCES: ("path", "memorive_desktop/installer/windows/", (), "candidate_sha256"),
     DESKTOP_MANIFEST: ("path", "memorive_desktop/", (
         "memorive_desktop/source/", "memorive_desktop/product/", "memorive_desktop/integrations/"), "sha256"),
     RESOURCE_MANIFEST: ("source", "", (), "sha256"),

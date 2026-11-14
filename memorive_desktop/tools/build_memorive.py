@@ -99,7 +99,7 @@ def main():
     ap.add_argument('--installer-toolchain',type=Path,required=True)
     ap.add_argument('--update-test-trust',type=Path)
     ap.add_argument('--dependency-lock',type=Path,default=DESKTOP/'requirements-build-agpl-candidate.lock')
-    ap.add_argument('--source-manifest',type=Path,default=DESKTOP/'SOURCE_MANIFEST.public-candidate.json')
+    ap.add_argument('--source-manifest',type=Path,default=DESKTOP/'SOURCE_MANIFEST.json')
     a=ap.parse_args();out=a.output.resolve()
     release=json.loads((DESKTOP/'product/desktop/update_release.json').read_text('utf8'))
     if release['package_id']!=a.candidate_id or release['release_authorized'] is not False:
@@ -123,7 +123,7 @@ def main():
     if out==REPO or out.is_relative_to(DESKTOP):raise ValueError('Build outputs must be outside the source tree')
     out.mkdir(parents=True);stage=out/'inputs';stage.mkdir()
     write_json(out/'public-roots-integrity.json',roots_check)
-    resources=json.loads((DESKTOP/'BUILD_RESOURCES.public-candidate.json').read_text('utf8'))
+    resources=json.loads((DESKTOP/'BUILD_RESOURCES.json').read_text('utf8'))
     for row in source_manifest['files']:
         if row['path'] in EXCLUDE:continue
         copy_checked(DESKTOP/row['path'],stage/row['path'],row['sha256'])
@@ -207,7 +207,7 @@ exe = EXE(pyz,a.scripts,[],exclude_binaries=True,name='Memorive',debug=False,boo
 coll = COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='Memorive')
 ''',encoding='utf8')
     lock={d.metadata['Name']:d.version for d in md.distributions() if d.metadata['Name']}
-    receipt={'schema':'MemoriveSourceBuild-v1','package_id':'v1.01','source_manifest_sha256':digest(a.source_manifest),'source_manifest':a.source_manifest.name,'resource_map_sha256':digest(DESKTOP/'BUILD_RESOURCES.public-candidate.json'),'dependency_lock_sha256':digest(a.dependency_lock),'dependency_lock':a.dependency_lock.name,'builder_sha256':digest(Path(__file__)),'python':sys.version,'dependencies':lock,'adaptations':adaptations,'private_capsule_included':False,'previous_exe_used':False,'public_release_authorized':False,'status':'STAGED'}
+    receipt={'schema':'MemoriveSourceBuild-v1','package_id':'v1.01','source_manifest_sha256':digest(a.source_manifest),'source_manifest':a.source_manifest.name,'resource_map_sha256':digest(DESKTOP/'BUILD_RESOURCES.json'),'dependency_lock_sha256':digest(a.dependency_lock),'dependency_lock':a.dependency_lock.name,'builder_sha256':digest(Path(__file__)),'python':sys.version,'dependencies':lock,'adaptations':adaptations,'private_capsule_included':False,'previous_exe_used':False,'public_release_authorized':False,'status':'STAGED'}
     receipt['package_id']=a.candidate_id
     receipt['release_ui_resources']=release_views
     write_json(out/'build-receipt.json',receipt)

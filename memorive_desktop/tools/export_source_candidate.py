@@ -38,8 +38,8 @@ def main():
             return
         target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
         originals[relative.as_posix()]=digest
-    manifest=json.loads((DESKTOP/'SOURCE_MANIFEST.public-candidate.json').read_text('utf8'))
-    resources=json.loads((DESKTOP/'BUILD_RESOURCES.public-candidate.json').read_text('utf8'))
+    manifest=json.loads((DESKTOP/'SOURCE_MANIFEST.json').read_text('utf8'))
+    resources=json.loads((DESKTOP/'BUILD_RESOURCES.json').read_text('utf8'))
     for row in manifest['files']:
         if row['path'] in EXCLUDE:excluded.append(row['path']);continue
         copy(DESKTOP/row['path'],Path('memorive_desktop')/row['path'],row['sha256'])
@@ -51,7 +51,7 @@ def main():
            'README_PUBLIC.en.md','README_PUBLIC.ja.md','requirements-build-baseline.lock','requirements-build-agpl-candidate.lock',
            'tools/build_memorive.py','tools/collect_build_inventory.py','tools/collect_release_sources.py','tools/export_source_candidate.py','tools/build_update_helper.py','tools/build_update_packages.py','tools/compile_installer_locales.py','tools/package_notices.py','tools/release_signer.cs','tools/import_local_settings.py')
     for name in files:copy(DESKTOP/name,Path('memorive_desktop')/name)
-    for folder in ('installer/public_candidate','release_materials'):
+    for folder in ('installer/windows','release_materials'):
         for p in sorted((DESKTOP/folder).rglob('*')):
             if not p.is_file():continue
             if '__pycache__' in p.parts or p.suffix in ('.pyc','.pyo') or (folder=='release_materials' and p.suffix=='.py'):
@@ -70,8 +70,8 @@ def main():
     manifest['files']=[dict(row,sha256=sha(out/'memorive_desktop'/row['path']),bytes=(out/'memorive_desktop'/row['path']).stat().st_size)
                        for row in manifest['files'] if row['path'] not in EXCLUDE]
     for row in resources['files']:row['sha256']=sha(out/row['source'])
-    write(out/'memorive_desktop/SOURCE_MANIFEST.public-candidate.json',manifest)
-    write(out/'memorive_desktop/BUILD_RESOURCES.public-candidate.json',resources)
+    write(out/'memorive_desktop/SOURCE_MANIFEST.json',manifest)
+    write(out/'memorive_desktop/BUILD_RESOURCES.json',resources)
     readme=(DESKTOP/'README_PUBLIC.md').read_text('utf8')
     readme=re.sub(r'\]\((?!https?://)([^)]+)\)',lambda m:'](memorive_desktop/'+m[1]+')',readme)
     (out/'README.md').write_text(readme,encoding='utf8')
