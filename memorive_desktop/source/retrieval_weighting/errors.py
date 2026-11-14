@@ -21,6 +21,12 @@ class ContractViolation(FieldVectorError):
     code = "BLOCKED_FIELD_CONTRACT_CONFLICT"
 
 
+class SourceEligibilityError(FieldVectorError):
+    """Raised when a Card or source metadata is ineligible for a snapshot."""
+
+    code = "BLOCKED_SOURCE_INELIGIBLE"
+
+
 class SourceSnapshotDriftError(FieldVectorError):
     """Raised when supplied authority hashes do not match frozen source bytes."""
 
@@ -31,3 +37,9 @@ class IdentityConflict(FieldVectorError):
     """Raised for duplicate or contradictory field/vector identities."""
 
     code = "FIELD_VECTOR_IDENTITY_CONFLICT"
+
+
+class EmbeddingProfileError(FieldVectorError):
+    """Raised when a profile could call a model or masquerade as production."""
+
+    code = "BLOCKED_EMBEDDING_PROFILE"

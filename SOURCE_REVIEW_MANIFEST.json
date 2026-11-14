@@ -3981,13 +3981,13 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/adapters.py",
-      "sha256": "d4487edaa2d67eb9b3743b69041daea7d1de9ef6750f4a344e56cf1422ced2e4",
-      "bytes": 2300
+      "sha256": "f3ac3e9f49e4b32f8fdc99b0f3d23e5b31fb03c2635c499c0a213c790d72139c",
+      "bytes": 24278
     },
     {
       "path": "memorive_desktop/source/artifact_registry/errors.py",
-      "sha256": "716334d2cd42a1e34515744ab1b281960fb6aad1c63d0310f25670e15a7b96a7",
-      "bytes": 1802
+      "sha256": "371da6ef398d87db6d338637ab9443d629003d55c0d10c4c11ff1fc53ea39fa0",
+      "bytes": 1918
     },
     {
       "path": "memorive_desktop/source/artifact_registry/registry_v2.py",
@@ -3996,13 +3996,13 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schema.py",
-      "sha256": "722d177e73bdf12bd473076854e65c9daf5cd74effc7e3f12db7306f633005c9",
-      "bytes": 16876
+      "sha256": "68b28f638c213628a78b7a063391c5a75c8f643bf02d1c59adc1794d2228267b",
+      "bytes": 17749
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schema_v2.py",
-      "sha256": "70eb61dec89b5bddf7e67df28a45f3a961b10ebcba564ac06819df76ca67ca90",
-      "bytes": 21115
+      "sha256": "e58dd77cceb70a00df0e7fa604b72988e2dd8944c27783d37a7d0b648fba0c75",
+      "bytes": 23273
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schemas/artifact_envelope_v1.schema.json",
@@ -4048,6 +4048,31 @@
       "path": "memorive_desktop/source/artifact_registry/analysis_products.py",
       "sha256": "34a728d6718990163da3f8dd7f3edb2b13b2e7351f1568aa527cd4590d9f58b7",
       "bytes": 721
+    },
+    {
+      "path": "memorive_desktop/source/artifact_registry/data_lifecycle.py",
+      "sha256": "7a60149d8587714028621eb75dc01b89a7f1469dd0c01bce308c92323fb0255a",
+      "bytes": 25648
+    },
+    {
+      "path": "memorive_desktop/source/artifact_registry/maintenance.py",
+      "sha256": "41c2b5c153f17a0c86ce3cce10c0b718b3c51008dbbb2907ff98764b34186046",
+      "bytes": 9853
+    },
+    {
+      "path": "memorive_desktop/source/artifact_registry/migration.py",
+      "sha256": "83526d6a5c21cf39e2ea59708f9efa0ed8b9115093f4befc2173983ab4008c8a",
+      "bytes": 39016
+    },
+    {
+      "path": "memorive_desktop/source/artifact_registry/migration_contracts.py",
+      "sha256": "3b78da017686bd45f4e4f436e696e800ec7c8842dfe114deadfa0f263116a92e",
+      "bytes": 19791
+    },
+    {
+      "path": "memorive_desktop/source/artifact_registry/query_projection.py",
+      "sha256": "b872a60d4d6dcd7c0338ec7235b244960cc2a5f19c2a4dd3b92f0cf38b5c986f",
+      "bytes": 39203
     },
     {
       "path": "memorive_desktop/source/document_processing/__init__.py",
@@ -4221,8 +4246,8 @@
     },
     {
       "path": "memorive_desktop/source/document_processing/engines/legacy_cfont.py",
-      "sha256": "288877ad0c666205d31114355d1bb4ac480523ba4c9b1e09a6a2fed75b382c26",
-      "bytes": 15586
+      "sha256": "3df47e7914ee26763a07c7ffb0eeff26c7e5cc77998309efacee0d988abe6125",
+      "bytes": 16031
     },
     {
       "path": "memorive_desktop/source/document_processing/engines/legacy_cfont_layout.py",
@@ -4696,8 +4721,8 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_feedback/conversation_refinement/contracts.py",
-      "sha256": "a2a249587ac23036ac27db16defb8b088c987763ad6c54ea34a47c292fb030c2",
-      "bytes": 10457
+      "sha256": "78150fd3bd666e4ae16e8e168b5485485c78aec56c7171a1ba4c33d654f85d27",
+      "bytes": 15775
     },
     {
       "path": "memorive_desktop/source/knowledge_feedback/conversation_refinement/graph.py",
@@ -4706,8 +4731,8 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_feedback/conversation_refinement/provider_adapter.py",
-      "sha256": "ea690e3557ade6f005bed2350d905c088663aaa9ba9daef522aabffbfceb6a07",
-      "bytes": 5175
+      "sha256": "f35ef2b778d98132c4f39fece06275eee4e57adf9d73cf0714d95b150a975590",
+      "bytes": 21851
     },
     {
       "path": "memorive_desktop/source/knowledge_feedback/conversation_refinement/redaction.py",
@@ -4718,6 +4743,11 @@
       "path": "memorive_desktop/source/knowledge_feedback/conversation_refinement/refinement.py",
       "sha256": "f2fb42acf0810f3143825c1b99092dbfafce8bbf2ba85a9044d89752cc95c9aa",
       "bytes": 11127
+    },
+    {
+      "path": "memorive_desktop/source/knowledge_feedback/conversation_refinement/destination.py",
+      "sha256": "ecd2ae6800eb8aaa8979f62e70fef27765c30cb0f96f7aaef6aa929ad0fc58df",
+      "bytes": 5811
     },
     {
       "path": "memorive_desktop/source/knowledge_feedback/research_ingest.py",
@@ -4771,8 +4801,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_app/contracts.py",
-      "sha256": "a41c140c8a67e4f49509967194e82249cb1b9e918eb47898b91708486f69304d",
-      "bytes": 5545
+      "sha256": "90cfc511e4af7a883b5879f315139dbd0015625cb535cec4e4848781e1658316",
+      "bytes": 6839
     },
     {
       "path": "memorive_desktop/source/memorive_app/credentials.py",
@@ -7185,6 +7215,11 @@
       "bytes": 586
     },
     {
+      "path": "memorive_desktop/source/research_reports/artifact_registry_wire.py",
+      "sha256": "1f91e886d2bbbcdc01877d6e501c80dd4a3bf29613737ef9353fdeb1f5642296",
+      "bytes": 23442
+    },
+    {
       "path": "memorive_desktop/source/retrieval/__init__.py",
       "sha256": "2043731551a33396bb2cf2559ee0d2f7d7b4befeb5336ddb7b2675fa68ef10d3",
       "bytes": 2865
@@ -7261,13 +7296,13 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/contracts.py",
-      "sha256": "d3dde05d07ec5e13c25ce28c7ac8b830ef8eafba33cf7fc2ba609394d0db6ffb",
-      "bytes": 5398
+      "sha256": "46edf757627b22e38c2451bd2c16c6f8d100afd04db9f56d330690ff5989d716",
+      "bytes": 11329
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/errors.py",
-      "sha256": "2aea888cb359c24dc2de035234c99a5e6c5addf3d412edebebec407db9bb4b63",
-      "bytes": 1027
+      "sha256": "f7d8b2e0f67fb0f0cc1e60cef9fa1d6adfc3e737250127f15255b37cf3865d6c",
+      "bytes": 1376
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/field_registry.py",
@@ -7276,13 +7311,13 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/locator.py",
-      "sha256": "f487718e89b41d5a229ec40ea204e12263614e874de1e89182b41f38df7ed1d0",
-      "bytes": 3519
+      "sha256": "abbb9276c034d48a21aebbfc8ca56fae89375c361788a8e2062c002b6ef37d37",
+      "bytes": 32147
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/migration.py",
-      "sha256": "5d55cb4e62f7d1df2d9ae434104e9be9de248c984cbe2d25db57a26f2459eca2",
-      "bytes": 672
+      "sha256": "82870e25a3ac36351f9c60f9fbef38828c8de830372aa477d5f5d85abc0579dd",
+      "bytes": 21290
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/query_dimensions.py",
@@ -7325,19 +7360,29 @@
       "bytes": 6977
     },
     {
+      "path": "memorive_desktop/source/retrieval_weighting/candidate_index.py",
+      "sha256": "ae40f00e22fa2bcb60bbbcd689fb7a91916b83c9413193259b161084772d84a3",
+      "bytes": 35855
+    },
+    {
+      "path": "memorive_desktop/source/retrieval_weighting/field_vectors.py",
+      "sha256": "100aac5bf253a13e2c01ff5de1072d4ff0ea07d4db5e28ac62ec8f022f424069",
+      "bytes": 25983
+    },
+    {
       "path": "memorive_desktop/source/run_ledger/__init__.py",
       "sha256": "8a26dff47664fb0c059e2079efdaeb6fd3f465d50d2806852ff32b507dff3f4d",
       "bytes": 561
     },
     {
       "path": "memorive_desktop/source/run_ledger/errors.py",
-      "sha256": "24af99746e0c10efe7063af604c444cb35f0671a55e7e0f2e6d8f43d6b51443d",
-      "bytes": 583
+      "sha256": "ef899244fbae7ae86ff0d306f41c92e3d134b5bd710ab84b3ebfeb528b22c544",
+      "bytes": 1215
     },
     {
       "path": "memorive_desktop/source/run_ledger/schema.py",
-      "sha256": "470abe59337816fb9114c67e70c95ef75b9b38eb90c69fa9816ccf18ddc5a3e0",
-      "bytes": 2536
+      "sha256": "7fe69240f1e8c050d77a3bb351df8f0abd10839ba91bea1a24bbc632e21fb2ee",
+      "bytes": 12463
     },
     {
       "path": "memorive_desktop/source/run_ledger/schemas/run_ledger_v1.schema.json",
@@ -7358,6 +7403,21 @@
       "path": "memorive_desktop/source/run_ledger/writer_lock.py",
       "sha256": "08876b33b31c8dc8385128fe41ca856f8984a2dca3a9fa166d8480c1c307f004",
       "bytes": 13851
+    },
+    {
+      "path": "memorive_desktop/source/run_ledger/closure.py",
+      "sha256": "5b55ed0f910bea9c0a9b95a8154d0c4440bea4fa96c82c19f2ac9562b447361a",
+      "bytes": 2860
+    },
+    {
+      "path": "memorive_desktop/source/run_ledger/core_adapter.py",
+      "sha256": "b1376da7cfbe3998fe7b8a1a6050bd316eef75863c62002849c7ee7d30efa02f",
+      "bytes": 17963
+    },
+    {
+      "path": "memorive_desktop/source/run_ledger/lifecycle.py",
+      "sha256": "f1b669fd8f6aa36514a58aded2ae76cc98da707f83813f224d057c32a1ef34f7",
+      "bytes": 4044
     },
     {
       "path": "memorive_desktop/source/runtime.py",
@@ -7388,6 +7448,11 @@
       "path": "memorive_desktop/source/runtime_log/records.py",
       "sha256": "962a512ed759deb8d547f849e94e0ff8ad4d740c922c28b1429fcc1a128bb914",
       "bytes": 7725
+    },
+    {
+      "path": "memorive_desktop/source/runtime_log/product_paths.py",
+      "sha256": "b3001dafc9b5770275367d448f4c0e6a430a4f7443bf0c48f0f0ea583b0a5ce5",
+      "bytes": 12049
     },
     {
       "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
@@ -7516,8 +7581,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "dffbd94ad410fad15ea5b65120ee47bdb04991cfe9a03db718c3f552ddf0b434",
-      "bytes": 216399
+      "sha256": "b9790f5c8460169391539d5adaee716e70efe5ef038ba0f1a2853877512f0162",
+      "bytes": 232416
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -7733,6 +7798,346 @@
       "path": "memorive_desktop/source/model_gateway/vision_qualification/wrappers.py",
       "sha256": "53ff5b91a40c9d81b7d32e1f8ae7bb0197d0c00fb92a055c4a5deed0b01dc31d",
       "bytes": 13460
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/__init__.py",
+      "sha256": "1eef299d19f6f097b11f5148b9fb9d42e6013856db11bf3b7b3d082c999137f9",
+      "bytes": 1826
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/baseline.py",
+      "sha256": "e41e3ff2f02297c7e02cf0adfc6ddec30d6ed342b779c201eb579b8935f61dab",
+      "bytes": 5322
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/conversation_refinement_decision.py",
+      "sha256": "18c021ef2bd267d0366f8990d463df7efb042dbb3f8d6a8fae5573d9d61bda17",
+      "bytes": 6168
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/fact_identity_decision_log_decision_adapter.py",
+      "sha256": "aee6afb6508c581362c0e0663b56b46cd394035227b24a5c338a548307c0a50a",
+      "bytes": 4476
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/knowledge_decision.py",
+      "sha256": "f8cfca373c398e9fe80c328b4d448becfdc8b0c11437e2803a65ee0056e54822",
+      "bytes": 8399
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/routing_decision_preview.py",
+      "sha256": "63bb548da960a1057460710f5783db7c437fe7582a423a69cb8838b9d9028ac4",
+      "bytes": 4425
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/schema.py",
+      "sha256": "3169adce8e9cac362322856bb634950a866787d5b94137ee90f16a3fb74c928c",
+      "bytes": 8970
+    },
+    {
+      "path": "memorive_desktop/source/decision_log/store.py",
+      "sha256": "c04d724be30720067d41d0e4567cf335d30c11e4fc6ee558b660da2236610877",
+      "bytes": 7907
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/__init__.py",
+      "sha256": "9e2693c8b5a33b460c3b08ba0b81e5c4c21a6adb72897796e333492649955d7e",
+      "bytes": 1246
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/contracts.py",
+      "sha256": "7af9b9adc088d9af6fe03d4d178cd0f1846f19634c67e83708b1276979cff92a",
+      "bytes": 9741
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/diagnostic.py",
+      "sha256": "fcfa6fc84c248bf8b689fb46e376cf4c1e574b53718f84227fb299596db49671",
+      "bytes": 7246
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/normalization.py",
+      "sha256": "6f675fce00138d1677bb975df9ee927f1362c95072035a88196f5a73c51ed48a",
+      "bytes": 10942
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/reporting.py",
+      "sha256": "6eb9428f908dc53851eb8e9c563fa767afa5c8ab105f2e408afe44bd4c5fae5c",
+      "bytes": 5328
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/routing.py",
+      "sha256": "a3ee4eb4fb69183eeda729b7b117c5b7c9b90bc14069fb3ff9cabc70ce52c777",
+      "bytes": 4608
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/ocr_qualification/scoring.py",
+      "sha256": "766d4470ac1499b19c25e55dbcca0528336fd9e7b691a9acd43e93dd544460d7",
+      "bytes": 25363
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/vector_generation.py",
+      "sha256": "a3a65dd5763282f74d200c6d1e9b6f02b40ee6b70495560ecb8a5c7e9eb10385",
+      "bytes": 20921
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/accounting/adapters/__init__.py",
+      "sha256": "565d502f858450e39339fe28fe324f57e8883e57a967eafc21d0b62e6e93fe62",
+      "bytes": 187
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/accounting/adapters/local_files.py",
+      "sha256": "62092fed8b1ed14210652879b5addf168568a40de9209b713cee5d2cb0e947eb",
+      "bytes": 2016
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/__init__.py",
+      "sha256": "e67d950ee8eccea551fff328123c6b8991eab3106c4dfcf91578665deb878134",
+      "bytes": 1716
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/__main__.py",
+      "sha256": "8279603b7ac0a72145c81bbf35e1776f3f081081c446622b3f826f4fd9d5c1bf",
+      "bytes": 1356
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/__init__.py",
+      "sha256": "5e761aec7655a949c4883009cad86795ff1b0089a162d066f1b2eb923610f611",
+      "bytes": 1927
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/analysis.py",
+      "sha256": "02bfc0941d6083ec3925609031edd1e6d7d6952e7e0ea63c1e900adb7fec8ebc",
+      "bytes": 2385
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/distill.py",
+      "sha256": "adc9e293c27299a74c3f0ff1558ac9f40b341c1ebf499f11e1242550f51d1464",
+      "bytes": 1026
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/embedding.py",
+      "sha256": "913fccb4c8f24b867f9479d77805ec12a02b081e208ea8f77fb0f2f1eeca6280",
+      "bytes": 1527
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/ocr.py",
+      "sha256": "ca4cb93717226ce57e37e0dd0573ddb7951a2077ffe341972d01fd448ead57c3",
+      "bytes": 1048
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/retrieval.py",
+      "sha256": "7f8cacfacb15d0890aa6bc98aadd513766742464d970da7c11e735cb82e71766",
+      "bytes": 5021
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/adapters/verify.py",
+      "sha256": "5d6c22d100cb274e0b04b913b33871dd88728d051973b5ac3196bdc3a5ad5286",
+      "bytes": 1131
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/broker.py",
+      "sha256": "2b6f00b7b3b9bf2cecdbb9ef371ddaf70494e37d7a18786175599f03fe13c33c",
+      "bytes": 14634
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/contracts.py",
+      "sha256": "288eec45d0d6ed50830f1fda11b5c495d913f4057a92e309d98b611360871416",
+      "bytes": 9120
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/diagnostics.py",
+      "sha256": "e4bdaff64a0c3893c8b8f441694308e924a8f7c0b4e7c2fc380167dde5c2bfc3",
+      "bytes": 5159
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/egress.py",
+      "sha256": "3a047a425b38f70c157c39558f1979d482199ccc71aa697edda0a9cd0223ab17",
+      "bytes": 1857
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/errors.py",
+      "sha256": "ee74468221cf06833b9162024de22d21ac9d3cbd38c38cb877135c7212108843",
+      "bytes": 2111
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/identity.py",
+      "sha256": "69839ff4c787b8a1ac13eda840d36b1c35b2c6c5111c8b8f8a91b7a0fc8adb82",
+      "bytes": 2563
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/installation_retrieval.py",
+      "sha256": "7175c6abb754830712b7a395d6ffcf8af13328ae9224d0000f79af8b8bae1944",
+      "bytes": 4309
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/ownership.py",
+      "sha256": "d53d226ba43af6a3dcd3f24b9ca6ca06384adeb6d77e2b4fe430c459f77fcd18",
+      "bytes": 3631
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/receipts.py",
+      "sha256": "61b3b72ac7a40978b757fa1ce57fc20cce0cb92e4bd4d182c1bb5062f44d3ae5",
+      "bytes": 1349
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/resource.py",
+      "sha256": "37e05ec4d99c3c8af1738535bd42caf1b7843d50a88b456425f638a273bde5c2",
+      "bytes": 2299
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/combined_local_chain_verdict_v1.schema.json",
+      "sha256": "fa3e509a793472a3a284d7fa1552d8344eeea506e72ae7723fe7f09d9ed881fe",
+      "bytes": 3034
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_egress_evidence_v1.schema.json",
+      "sha256": "1c5033a131acbc8b408ce0efb8825e19d4726151ae58d1d499899a3a34247b17",
+      "bytes": 2304
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_encryption_target_v1.schema.json",
+      "sha256": "de9c73d062d3ed0ba3e839c357d0aea1d54834701fb3897f47145177a150bc39",
+      "bytes": 3472
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_execution_envelope_v1.schema.json",
+      "sha256": "623d14d9a0991810c12e7120cdb19ee5d43105f5422f8f07e8c75cae8280a396",
+      "bytes": 2305
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_execution_receipt_v1.schema.json",
+      "sha256": "e2f8d6c93c694043fbf14e971346cef8ea8644a83c87af6265c53d7616aa2b7d",
+      "bytes": 2901
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_ownership_route_decision_v1.schema.json",
+      "sha256": "34e1f5de06ffd3aff4ff50a13105967b78e9ac7ea3681465ba143b88b8274bb4",
+      "bytes": 1725
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_resource_envelope_v1.schema.json",
+      "sha256": "81b0d2b8a96cc82d939486c5264df27d39f51c70d4cc6bc89415fd26b5407c2d",
+      "bytes": 1874
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_role_profile_v1.schema.json",
+      "sha256": "dd298bc2aecbae1a119c94c86d29055d8cd764c149c5d393bc1fc09013c51bbe",
+      "bytes": 2092
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_role_qualification_verdict_v1.schema.json",
+      "sha256": "cd40b01825dd9db2685ec4f5074afdaf6ca6640cab9fb6f2ce087bca24a29c8f",
+      "bytes": 1669
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/schemas/local_runtime_asset_manifest_v1.schema.json",
+      "sha256": "0d1329c26ef0564ca8a9652b46b8417ace185f95c6e894bdb52a35baa89839f7",
+      "bytes": 2968
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/secure_storage.py",
+      "sha256": "b051d76e3623e1a008f7720fb6e804308dbdf8bd96df6d3c4607c2ef1065d9ec",
+      "bytes": 32079
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_capability/types.py",
+      "sha256": "1405cf534c72ba23a0085cb4dd773401d7b1fd945af940533f349d52d789bdfa",
+      "bytes": 8249
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/__init__.py",
+      "sha256": "2d88ae677f44d0b86c7082eff733c7911f2d3236fd8523e2f33c44120c1d224d",
+      "bytes": 1402
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/config_merge.py",
+      "sha256": "d4e9119c170e8f7470a20ce48da9136a76beb8c1ef4aa41d7ee6b579760fb268",
+      "bytes": 6686
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/connection.py",
+      "sha256": "b2d50ce5b686506ff76158a5c1939cbb85ffe593b729041078cd1ca682f01f06",
+      "bytes": 4012
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/contracts.py",
+      "sha256": "62d29e4ca2675cd04ae31155fb1b6f47efc97d77080296efddb0c1778cb83b51",
+      "bytes": 22222
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/credential.py",
+      "sha256": "4200f3bd1f780bbf9f1b1841d57a4963488ddb91fb5bba05ce78afc454e62537",
+      "bytes": 4813
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/errors.py",
+      "sha256": "56b934651dd0fb21dbfee5285ad6685a9fbc585154c0b772af039a47139ffa47",
+      "bytes": 2948
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/fixtures.py",
+      "sha256": "ef734306f9f84e3baf35502f02fbc0d9024b7c5c64bdd96ed88adcb4f0e8883a",
+      "bytes": 7595
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/legacy.py",
+      "sha256": "4cd32cce3102c049842c3bd0b7b1ad536684b7ba29e0cca5d160a204fc2a8c5c",
+      "bytes": 984
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/redaction.py",
+      "sha256": "a6d3852ce06e9f2be02f36a3b29b6c019d298d6c6a3f546b5a2b90fd0872e2f0",
+      "bytes": 1409
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/resolver.py",
+      "sha256": "4ee1901aa3a2a4603031c43d92a0b3b1ba55b85273a6f0cba3af6f3eb444c2cb",
+      "bytes": 7456
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/advanced_config_boundary_v1.schema.json",
+      "sha256": "ec2153bd412c3860776cb9e6840594a2ef0d6d4aa889b49de9a276f203b3c33c",
+      "bytes": 2050
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/connection_check_receipt_v1.schema.json",
+      "sha256": "e2744ab2354df301cb21da2a3800bdb082b52baf6d5f143012255c6c073e1ee1",
+      "bytes": 1850
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/credential_binding_v1.schema.json",
+      "sha256": "d2ab02b896826c066eb399a2ee8f444b03db040f3a213c67b14174013671e0f8",
+      "bytes": 1980
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/legacy_env_reference_v1.schema.json",
+      "sha256": "654adc00527f8f1573b4f3bfe6a580758e9e2d648f8e82b89e8f9527d306eb7b",
+      "bytes": 1086
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/model_profile_capability_v1.schema.json",
+      "sha256": "335549468686705f63766d1beed9bb87949c08c60756a6f32ec63fc33022a9cd",
+      "bytes": 4075
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/ordinary_config_v1.schema.json",
+      "sha256": "0a7f1a37ba12c6fbf47ba844c2491249d5ebc21312a16d794d25308d2b2e7955",
+      "bytes": 1042
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/provider_preset_v1.schema.json",
+      "sha256": "e2e9f7aba1fa118fabafbc5c50bf1aa998cb81fd5614197c89c9be7f1bf95b1c",
+      "bytes": 3143
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/tier_policy_manifest_v1.schema.json",
+      "sha256": "426734e61314a2db5adafc3046e91f92eb8f98639099aad8eaec94794b818b9a",
+      "bytes": 3160
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_configuration/schemas/tier_resolution_v1.schema.json",
+      "sha256": "c4bcfdd002b74929c4eed3468cd4e7e033072d79468a480b8cdab794df44159f",
+      "bytes": 2743
     }
   ]
 }

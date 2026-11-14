@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/model_configuration/legacy_env_reference_v1.schema.json",
+  "title": "Integration Analysis Legacy Environment Name Reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "credential_ref",
+    "env_name",
+    "secret_value_read",
+    "resolvable_in_analysis",
+    "migration_status",
+    "projection_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "MODEL_CONFIGURATION_LEGACY_ENV_REFERENCE_V1"
+    },
+    "credential_ref": {
+      "type": "string",
+      "pattern": "^REF:LEGACY_ENV:[A-Z][A-Z0-9_]{2,127}$"
+    },
+    "env_name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{2,127}$"
+    },
+    "secret_value_read": {
+      "const": false
+    },
+    "resolvable_in_analysis": {
+      "const": false
+    },
+    "migration_status": {
+      "const": "REFERENCE_ONLY_REAL_BACKEND_NOT_ASSESSED"
+    },
+    "projection_sha256": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    }
+  }
+}

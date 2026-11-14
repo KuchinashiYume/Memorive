@@ -99,6 +99,12 @@ def _timestamp(value: Any, field: str) -> str:
     return text
 
 
+def _non_negative_int(value: Any, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ConversationContractError(f"{field.upper()}_MUST_BE_NON_NEGATIVE_INT")
+    return value
+
+
 def _positive_int(value: Any, field: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 1:
         raise ConversationContractError(f"{field.upper()}_MUST_BE_POSITIVE_INT")
@@ -166,6 +172,38 @@ _CEILING_KEYS = {
 }
 
 
+def validate_source_access_envelope(value: Mapping[str, Any]) -> dict[str, Any]:
+    result = _verify(value, "source_access_envelope")
+    _exact(result, _ENVELOPE_KEYS, "source_access_envelope")
+    if result["schema_version"] != "CONVERSATION_REFINEMENT_SOURCE_ACCESS_ENVELOPE_V1":
+        raise ConversationContractError("SOURCE_ACCESS_ENVELOPE_SCHEMA_UNSUPPORTED")
+    for field in ("source_id", "provider", "surface", "locator", "ownership", "classification", "retention"):
+        _text(result[field], field)
+    if result["access_mode"] not in ACCESS_MODES:
+        raise ConversationContractError("SOURCE_ACCESS_MODE_INVALID")
+    if result["scope_mode"] not in SCOPE_MODES:
+        raise ConversationContractError("SOURCE_SCOPE_MODE_INVALID")
+    ceiling = _mapping(result["ceiling"], "ceiling")
+    _exact(ceiling, _CEILING_KEYS, "ceiling")
+    for field, item in ceiling.items():
+        _non_negative_int(item, f"ceiling.{field}")
+    if ceiling["conversations"] < 1 or ceiling["messages"] < 1 or ceiling["content_bytes"] < 1:
+        raise ConversationContractError("SOURCE_CEILING_MUST_ALLOW_BOUNDED_CONTENT")
+    if ceiling["attachment_body_reads"] != 0 or result["attachment_body_allowed"] is not False:
+        raise ConversationContractError("ATTACHMENT_BODY_MUST_REMAIN_DISABLED")
+    for field in (
+        "raw_payload_git_eligible",
+        "private_payload_external_model_allowed",
+        "credential_cookie_storage_reads_allowed",
+        "source_mutation_allowed",
+        "formal_ingest_authorized",
+    ):
+        if result[field] is not False:
+            raise ConversationContractError(f"{field.upper()}_MUST_REMAIN_FALSE")
+    _timestamp(result["created_at"], "created_at")
+    return result
+
+
 _SNAPSHOT_KEYS = {
     "schema_version",
     "snapshot_id",
@@ -186,6 +224,74 @@ _SNAPSHOT_KEYS = {
     "synthetic_fixture",
     "content_hash",
 }
+
+
+def validate_export_snapshot(value: Mapping[str, Any]) -> dict[str, Any]:
+    result = _verify(value, "conversation_export_snapshot")
+    _exact(result, _SNAPSHOT_KEYS, "conversation_export_snapshot")
+    if result["schema_version"] != "CONVERSATION_REFINEMENT_CONVERSATION_EXPORT_SNAPSHOT_V1":
+        raise ConversationContractError("EXPORT_SNAPSHOT_SCHEMA_UNSUPPORTED")
+    for field in ("snapshot_id", "source_id", "provider_profile"):
+        _text(result[field], field)
+    _positive_int(result["revision"], "revision")
+    for field in ("source_envelope_hash", "adapter_behavior_hash", "source_payload_hash"):
+        validate_hash_descriptor(result[field], field)
+    _non_negative_int(result["source_payload_bytes"], "source_payload_bytes")
+    _non_negative_int(result["conversation_count"], "conversation_count")
+    _non_negative_int(result["message_count"], "message_count")
+    _non_negative_int(result["attachment_count"], "attachment_count")
+    members = result["archive_members"]
+    if isinstance(members, (str, bytes)) or not isinstance(members, Sequence):
+        raise ConversationContractError("ARCHIVE_MEMBERS_MUST_BE_ARRAY")
+    if list(members) != sorted(set(members)):
+        raise ConversationContractError("ARCHIVE_MEMBERS_MUST_BE_SORTED_UNIQUE")
+    if result["immutable"] is not True or result["raw_payload_git_eligible"] is not False:
+        raise ConversationContractError("EXPORT_SNAPSHOT_IMMUTABILITY_BOUNDARY_INVALID")
+    if not isinstance(result["synthetic_fixture"], bool):
+        raise ConversationContractError("SYNTHETIC_FIXTURE_MUST_BE_BOOLEAN")
+    _timestamp(result["captured_at"], "captured_at")
+    return result
+
+
+def make_export_snapshot(
+    *,
+    snapshot_id: str,
+    envelope: Mapping[str, Any],
+    provider_profile: str,
+    adapter_behavior: Mapping[str, Any],
+    payload: Mapping[str, Any],
+    payload_bytes: int,
+    archive_members: Sequence[str],
+    conversation_count: int,
+    message_count: int,
+    attachment_count: int,
+    captured_at: str,
+    synthetic_fixture: bool,
+) -> dict[str, Any]:
+    checked_envelope = validate_source_access_envelope(envelope)
+    return validate_export_snapshot(
+        make_hashed_payload(
+            {
+                "schema_version": "CONVERSATION_REFINEMENT_CONVERSATION_EXPORT_SNAPSHOT_V1",
+                "snapshot_id": snapshot_id,
+                "revision": 1,
+                "source_id": checked_envelope["source_id"],
+                "source_envelope_hash": deepcopy(checked_envelope["content_hash"]),
+                "provider_profile": provider_profile,
+                "adapter_behavior_hash": typed_payload_hash(deepcopy(dict(adapter_behavior))),
+                "source_payload_hash": typed_payload_hash(deepcopy(dict(payload))),
+                "source_payload_bytes": payload_bytes,
+                "archive_members": sorted(set(archive_members)),
+                "conversation_count": conversation_count,
+                "message_count": message_count,
+                "attachment_count": attachment_count,
+                "immutable": True,
+                "raw_payload_git_eligible": False,
+                "captured_at": captured_at,
+                "synthetic_fixture": synthetic_fixture,
+            }
+        )
+    )
 
 
 _CAPTURE_RECEIPT_KEYS = {

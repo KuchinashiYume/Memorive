@@ -48,8 +48,32 @@ def sha256_file(path: Path | str) -> str:
     return digest.hexdigest()
 
 
+def new_artifact_id() -> str:
+    return f"art_{uuid.uuid4().hex}"
+
+
 def new_event_id() -> str:
     return f"evt_{uuid.uuid4().hex}"
+
+
+def legacy_artifact_id(
+    *,
+    run_ref: str,
+    artifact_type: str,
+    content_hash: str,
+    identity_scope: str,
+) -> str:
+    """Create a stable legacy-import identity without using a locator."""
+
+    for field, value in (
+        ("run_ref", run_ref),
+        ("artifact_type", artifact_type),
+        ("identity_scope", identity_scope),
+    ):
+        _require_text(value, field)
+    _require_hash(content_hash, "content_hash")
+    name = "|".join(("Memorive", "ARTIFACT_REGISTRY", run_ref, identity_scope, artifact_type, content_hash))
+    return f"art_{uuid.uuid5(_LEGACY_NAMESPACE, name).hex}"
 
 
 def parent_link(
@@ -76,6 +100,27 @@ def parent_link(
         },
     }
     _validate_parent_link(value)
+    return value
+
+
+def unresolved_requirement(
+    requirement: str,
+    reason_code: str,
+    *,
+    evidence_refs: Iterable[str],
+    candidate_artifact_ids: Iterable[str] = (),
+    search_hints: Iterable[str] = (),
+) -> dict[str, Any]:
+    """Describe a required relationship without inventing a parent."""
+
+    value = {
+        "requirement": requirement,
+        "reason_code": reason_code,
+        "evidence_refs": list(evidence_refs),
+        "candidate_artifact_ids": list(candidate_artifact_ids),
+        "search_hints": list(search_hints),
+    }
+    _validate_unresolved(value)
     return value
 
 
@@ -288,6 +333,29 @@ def resolved_parent_links(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
     if envelope["schema_version"] == ENVELOPE_SCHEMA_VERSION:
         return copy.deepcopy(envelope["parent_artifacts"])
     return copy.deepcopy(envelope["lineage"]["resolved_parent_links"])
+
+
+def lineage_status(envelope: Mapping[str, Any]) -> str:
+    """Derive display state from the authoritative lineage fields."""
+
+    validate_readable_envelope(envelope)
+    if envelope["schema_version"] == ENVELOPE_SCHEMA_VERSION:
+        parents = envelope["parent_artifacts"]
+        unresolved = envelope["unresolved_parent_requirements"]
+        conflicts = envelope["conflicting_candidates"]
+    else:
+        parents = envelope["lineage"]["resolved_parent_links"]
+        unresolved = envelope["lineage"]["unresolved_parent_requirements"]
+        conflicts = envelope["lineage"]["conflicting_candidates"]
+    if conflicts:
+        return "conflicted"
+    if parents and unresolved:
+        return "partial"
+    if parents:
+        return "complete"
+    if unresolved:
+        return "unknown"
+    return "complete"
 
 
 def content_hash_value(envelope: Mapping[str, Any]) -> str:

@@ -21,6 +21,10 @@ class AdapterError(ArtifactRegistryRegistryError):
     """A legacy file cannot be adapted without guessing or coercion."""
 
 
+class FrontmatterParseError(AdapterError):
+    """A Markdown file has missing or invalid YAML frontmatter."""
+
+
 class ArtifactConflictError(ArtifactRegistryRegistryError):
     """One immutable artifact ID was presented with conflicting facts."""
 

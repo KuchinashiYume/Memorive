@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/model_configuration/model_profile_capability_v1.schema.json",
+  "title": "Integration Analysis Model Profile Capability",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "revision",
+    "provider_id",
+    "role",
+    "model_alias",
+    "required_capability",
+    "qualification_status",
+    "behavior_hash",
+    "thinking_supported",
+    "thinking_can_be_disabled",
+    "supported_native_efforts",
+    "native_effort_order",
+    "native_default_effort",
+    "native_effort_projections",
+    "price_status",
+    "price_currency",
+    "price_unit",
+    "price_input",
+    "price_output",
+    "price_source",
+    "price_observed_at",
+    "price_expires_at",
+    "latency_class",
+    "resource_class",
+    "capability_source",
+    "capability_observed_at",
+    "capability_expires_at",
+    "allowed_data_classes",
+    "region",
+    "egress_class",
+    "credential_binding_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "MODEL_CONFIGURATION_MODEL_PROFILE_CAPABILITY_V1"
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "qualification_status": {
+      "enum": [
+        "QUALIFIED_DISABLED",
+        "NOT_ASSESSED",
+        "BLOCKED"
+      ]
+    },
+    "behavior_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "thinking_supported": {
+      "type": "boolean"
+    },
+    "thinking_can_be_disabled": {
+      "type": "boolean"
+    },
+    "supported_native_efforts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "native_effort_order": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "native_default_effort": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "native_effort_projections": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 1
+      }
+    },
+    "price_status": {
+      "enum": [
+        "KNOWN",
+        "UNKNOWN"
+      ]
+    },
+    "price_currency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "price_unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "price_input": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "price_output": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "price_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "price_observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "price_expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "latency_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "capability_expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "allowed_data_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "egress_class": {
+      "enum": [
+        "external",
+        "local"
+      ]
+    },
+    "credential_binding_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

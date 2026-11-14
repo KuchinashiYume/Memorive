@@ -33,6 +33,31 @@ def sha256_file(path: Path | str) -> str:
     return digest.hexdigest()
 
 
+def legacy_artifact_id(
+    *,
+    run_ref: str,
+    artifact_type: str,
+    content_hash: str,
+    identity_scope: str,
+) -> str:
+    """Create a stable legacy-import ID without using the mutable locator.
+
+    The import authority/run, semantic artifact slot, source scope and exact
+    bytes participate.  A different run or changed bytes therefore yields a
+    different artifact ID, while moving the same registered file does not.
+    """
+
+    for field, value in (
+        ("run_ref", run_ref),
+        ("artifact_type", artifact_type),
+        ("identity_scope", identity_scope),
+    ):
+        _require_text(value, field)
+    _require_hash(content_hash, "content_hash")
+    name = "|".join(("Memorive", "ARTIFACT_REGISTRY", run_ref, identity_scope, artifact_type, content_hash))
+    return f"art_{uuid.uuid5(_LEGACY_NAMESPACE, name).hex}"
+
+
 def new_event_id() -> str:
     return f"evt_{uuid.uuid4().hex}"
 

@@ -450,3 +450,19 @@ def _recover_document(
             markdown.encode("utf-8")
         ).hexdigest(),
     )
+
+
+def recover_legacy_c_number_pdf(
+    path: Path,
+) -> LegacyCFontRecovery | None:
+    """只读尝试恢复审计过的 Adv* C<number> PDF；不适用时返回 None。"""
+    import pymupdf
+
+    document = pymupdf.open(path)
+    try:
+        font_maps = _build_font_maps(document)
+        if font_maps is None:
+            return None
+        return _recover_document(document, font_maps)
+    finally:
+        document.close()

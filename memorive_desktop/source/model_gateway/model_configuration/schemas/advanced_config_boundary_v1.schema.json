@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/model_configuration/advanced_config_boundary_v1.schema.json",
+  "title": "Integration Analysis AdvancedConfigBoundary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revision",
+    "exact_model_overrides",
+    "custom_endpoint_overrides",
+    "role_mapping",
+    "fallback_profile_ids",
+    "budget",
+    "per_role_thinking",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "MODEL_CONFIGURATION_ADVANCED_CONFIG_BOUNDARY_V1"
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exact_model_overrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "custom_endpoint_overrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^https://"
+      }
+    },
+    "role_mapping": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "fallback_profile_ids": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "soft_limit",
+        "hard_limit"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "soft_limit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "hard_limit": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "per_role_thinking": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
