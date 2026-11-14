@@ -6081,8 +6081,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/store.py",
-      "sha256": "d8764ebb8e39499fb0e7ff37421a2c67cf2f794cbe310120de21772f1e2633da",
-      "bytes": 17843
+      "sha256": "cfd0308052448082143d2c802f227bd2b73cc5fffa27ca94d9e4bc0ad0957b68",
+      "bytes": 18365
     },
     {
       "path": "memorive_desktop/source/memorive_settings/task_scheduling.py",
@@ -7496,7 +7496,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "e4fd608653555fad39f720d284201eb0cf39368d60b0efa7ee0f807bc319b097",
+      "sha256": "db7f66b5dac2e95f22eea0ab18436b55dce543d263309ce40252d4d05e6657dc",
       "bytes": 210822
     },
     {

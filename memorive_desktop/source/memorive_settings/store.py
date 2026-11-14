@@ -98,6 +98,8 @@ class SettingsStore:
         self.migration_receipt_path = self.profile_root / "settings_migration.json"
         self.default_factory = default_factory
         self.fault_injector = fault_injector
+        self._checked_bytes: bytes | None = None  # file content checked last, and what the check returned
+        self._checked: dict[str, Any] | None = None
         identity = os.path.normcase(str(self.path.resolve()))
         with _LOCKS_GUARD:
             self._thread_lock = _PROFILE_LOCKS.setdefault(identity, RLock())
@@ -356,13 +358,19 @@ class SettingsStore:
             self._atomic_write(self.path, initial)
             return deepcopy(initial)
         raw = self.path.read_bytes()
+        if raw == self._checked_bytes:
+            return deepcopy(self._checked)
         try:
             value = json.loads(raw.decode("utf-8"))
             schema = value.get("schema_version") if isinstance(value, Mapping) else None
             if isinstance(schema, str) and schema in _OLD_FILES:
                 return deepcopy(self._migrate(value))
             if _store_version(schema) <= _store_version(STORE_SCHEMA_VERSION):
-                return deepcopy(self._validate_envelope(value))
+                checked = self._validate_envelope(value)
+                if value.get("updated_at") and value.get("template_id"):
+                    # Otherwise the result carries the time of this read and differs next time.
+                    self._checked_bytes, self._checked = raw, checked
+                return deepcopy(checked)
         except OSError:
             # A failed migration write is an I/O failure, not corrupt settings.
             # Never replace valid user settings with defaults in this case.
