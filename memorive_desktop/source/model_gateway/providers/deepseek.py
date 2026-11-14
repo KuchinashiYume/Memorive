@@ -13,6 +13,7 @@ import math
 import os
 import time
 import urllib.request
+from urllib.parse import urlsplit, urlunsplit
 
 from . import register
 from .base import ProviderAdapter
@@ -184,6 +185,46 @@ def _read_sse_response(
 
 @register("deepseek")
 class DeepSeekAdapter(ProviderAdapter):
+    def probe_model_capabilities(self, slot, *, timeout: int = 30) -> dict:
+        key = os.environ.get(slot.api_key_env or "")
+        if not key:
+            raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
+
+        parsed = urlsplit(slot.endpoint)
+        endpoint = urlunsplit((parsed.scheme, parsed.netloc, "/models", "", ""))
+        req = urllib.request.Request(endpoint, method="GET")
+        req.add_header("Authorization", f"Bearer {key}")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            headers = getattr(resp, "headers", None)
+            request_id = None
+            if headers is not None:
+                request_id = headers.get("x-request-id") or headers.get("request-id")
+
+        models = data.get("data") if isinstance(data, dict) else None
+        if not isinstance(models, list):
+            raise ValueError("DeepSeek /models response missing data list")
+        match = next(
+            (item for item in models if isinstance(item, dict) and item.get("id") == slot.model_id),
+            None,
+        )
+        if match is None:
+            raise ValueError(f"DeepSeek live API did not return requested model {slot.model_id}")
+        frozen = registry_capabilities("deepseek", slot.model_id)
+        return {
+            "provider": "deepseek",
+            "requested_model_id": slot.model_id,
+            "resolved_model_id": match.get("id"),
+            "available": True,
+            "max_output_tokens": frozen["max_output_tokens"],
+            "max_input_tokens": frozen["max_input_tokens"],
+            "capability_source": "provider_api_plus_frozen_registry",
+            "registry_source_url": frozen.get("source_url"),
+            "registry_verified_at": frozen.get("verified_at"),
+            "capabilities": frozen["capabilities"],
+            "request_id": request_id,
+        }
+
     def invoke(self, slot, payload: dict) -> dict:
         key = os.environ.get(slot.api_key_env or "")       # 按配置里的"环境变量名"取 key
         if not key:

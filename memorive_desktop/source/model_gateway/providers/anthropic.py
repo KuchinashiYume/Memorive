@@ -22,6 +22,7 @@ import os
 import time
 import urllib.request
 from urllib.error import HTTPError
+from urllib.parse import quote, urlsplit, urlunsplit
 from http.client import IncompleteRead
 from copy import deepcopy
 
@@ -342,6 +343,62 @@ def _system(payload: dict):
 
 @register("anthropic")
 class AnthropicAdapter(ProviderAdapter):
+    def probe_model_capabilities(self, slot, *, timeout: int = 30) -> dict:
+        key = os.environ.get(slot.api_key_env or "")
+        if not key:
+            raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
+
+        parsed = urlsplit(slot.endpoint)
+        path = parsed.path.rstrip("/")
+        if path.endswith("/messages"):
+            path = path[: -len("/messages")]
+        endpoint = urlunsplit(
+            (parsed.scheme, parsed.netloc, f"{path}/models/{quote(slot.model_id, safe='')}", "", "")
+        )
+        req = urllib.request.Request(endpoint, method="GET")
+        req.add_header("x-api-key", key)
+        req.add_header("anthropic-version", _ANTHROPIC_VERSION)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            headers = getattr(resp, "headers", None)
+            request_id = headers.get("request-id") if headers is not None else None
+
+        max_output_tokens = _positive_int(data.get("max_tokens"), "Models API max_tokens")
+        max_input_tokens = data.get("max_input_tokens")
+        if max_input_tokens is not None:
+            max_input_tokens = _positive_int(max_input_tokens, "Models API max_input_tokens")
+        caps = data.get("capabilities") if isinstance(data.get("capabilities"), dict) else {}
+        effort = caps.get("effort") if isinstance(caps.get("effort"), dict) else {}
+        xhigh = effort.get("xhigh") if isinstance(effort.get("xhigh"), dict) else {}
+        thinking = caps.get("thinking") if isinstance(caps.get("thinking"), dict) else {}
+        thinking_types = thinking.get("types") if isinstance(thinking.get("types"), dict) else {}
+        adaptive = (
+            thinking_types.get("adaptive")
+            if isinstance(thinking_types.get("adaptive"), dict)
+            else {}
+        )
+        structured = (
+            caps.get("structured_outputs")
+            if isinstance(caps.get("structured_outputs"), dict)
+            else {}
+        )
+        return {
+            "provider": "anthropic",
+            "requested_model_id": slot.model_id,
+            "resolved_model_id": data.get("id") or slot.model_id,
+            "available": True,
+            "max_output_tokens": max_output_tokens,
+            "max_input_tokens": max_input_tokens,
+            "capability_source": "provider_api",
+            "capabilities": {
+                "effort_xhigh": xhigh.get("supported") is True,
+                "adaptive_thinking": adaptive.get("supported") is True,
+                "structured_outputs": structured.get("supported") is True,
+                "streaming": True,
+            },
+            "request_id": request_id,
+        }
+
     def invoke(self, slot, payload: dict) -> dict:
         key = os.environ.get(slot.api_key_env or "")       # 按配置里的"环境变量名"取 key
         if not key:

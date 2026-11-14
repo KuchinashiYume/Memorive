@@ -5177,18 +5177,18 @@
     },
     {
       "path": "source/model_gateway/providers/anthropic.py",
-      "sha256": "76ce84e2e8c8157bae944f322947d5eae9c326414be7bf37dc7c6a349f96cba8",
-      "bytes": 19613
+      "sha256": "9a62b4754e42f3fa9a3b28b37ac1dc6bd88bcaebb6334b1adc2b4a638a7d6ad4",
+      "bytes": 22434
     },
     {
       "path": "source/model_gateway/providers/base.py",
-      "sha256": "dabb5358538c2cf96dfe9adb7fa73361a9fa83dab9f2739bce733810040eeed9",
-      "bytes": 2096
+      "sha256": "3ff398ffff85fd3e168c1a0406a8a134a371c254516fdf39495e80ef13ffbf28",
+      "bytes": 2550
     },
     {
       "path": "source/model_gateway/providers/deepseek.py",
-      "sha256": "c5e349e9f782eb4240adf3d08f89d8ea70f4fb94cea0a593deceb1a9ed131bb8",
-      "bytes": 10830
+      "sha256": "0ce6335bf1d1f477fa78146cc7f8d1a95028c77122d564e57a0be997ce82d980",
+      "bytes": 12850
     },
     {
       "path": "source/model_gateway/providers/ollama.py",
@@ -5222,8 +5222,8 @@
     },
     {
       "path": "source/model_gateway/router.py",
-      "sha256": "c6b9c1f68635a70f07e445d6355eb410fb2fae001b271a4502b1e2c3240b2a39",
-      "bytes": 1884
+      "sha256": "30a775640aa7dfa3774d21632370d474641358b1821c08acbc3635bcacfab016",
+      "bytes": 2490
     },
     {
       "path": "source/release_links.py",
