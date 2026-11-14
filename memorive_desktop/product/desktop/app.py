@@ -6137,10 +6137,6 @@ def main() -> int:
         configure_resource_imports(root)
         from update_maintenance import main as update_maintenance_main
         return update_maintenance_main()
-    if '--evo-e2-health' in sys.argv:
-        root=resource_root();configure_resource_imports(root)
-        from memorive_review.health import main as e2_health
-        return e2_health(root)
     if "--memo-install-health" in sys.argv:
         root = resource_root()
         configure_resource_imports(root)
@@ -6162,8 +6158,6 @@ def main() -> int:
     args = parser.parse_args()
     root = resource_root()
     frozen = bool(getattr(sys, "frozen", False))
-    if frozen and BINDING.get('package_id')=='EVO-E2-build009':
-        os.environ.setdefault('MEMORIVE_SESSION_SOURCE_MODE','ISOLATED_SANDBOX')
     configure_resource_imports(root)
     if not frozen:
         # Source checkout: load the same modules the packaged build loads.
@@ -6666,7 +6660,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    if not any(value in sys.argv for value in ('--memo-update-maintenance', '--memo-install-health', '--evo-e2-health')):
+    if not any(value in sys.argv for value in ('--memo-update-maintenance', '--memo-install-health')):
         from update_startup import acquire as acquire_update_instance
         acquire_update_instance()
     if '--memo-native-pdf' in sys.argv:

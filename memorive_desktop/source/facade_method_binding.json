@@ -1,7 +1,4 @@
 {
-  "facade_source": "G:\\Memorive-沙盒\\Desktop_桌面封装与安装包\\DESKTOP_SERVICE_CROSS_html_baseline_service_replay_20260825_run001\\worktree\\memorive_app\\facade.py",
-  "facade_source_bytes": 31631,
-  "facade_source_sha256": "ECF40F4FAE8743BAAAB74EA67354659728DD7D23994316DA1606CB445942CDEC",
   "method_count": 12,
   "methods": {
     "get_artifact_bindings": {
@@ -132,7 +129,6 @@
     "resolve_job_locator",
     "lookup_start_by_idempotency_key"
   ],
-  "run_id": "DESKTOP_SERVICE_CROSS_html_baseline_service_replay_20260825_run001",
   "schema_version": "DesktopServiceFacadeMethodBinding-v1",
   "status": "PASS",
   "transport_parameter_style": "DesktopIPCRequest-v1 params object"

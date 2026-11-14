@@ -8,7 +8,6 @@ from typing import Any, Iterable, Mapping
 
 
 ANALYSIS_ADMISSION_IMPLEMENTATION_VERSION = "analysis_admission-sandbox-v1"
-ANALYSIS_ADMISSION_CONTRACT_REF = "Memorive_ANALYSIS_ADMISSION_CROSS_操作手册_r0.7"
 
 
 @dataclass(frozen=True)

@@ -340,7 +340,7 @@ class AnswerEvidence:
                 atoms=_claim_atoms(claim['id'],claim['review_text'])
                 c=_claim_scope(claim['id'],claim['review_text'],atoms)
                 # A contextual quote need not support every numeric atom.
-                # Bind atoms only to quotes passing the unchanged M6 scope
+                # Bind atoms only to quotes passing the unchanged scope
                 # predicate; preserve every exact quote in the review result.
                 scoped_ids=[link['link_id'] for link,record in zip(links,records) if _scope_compatibility(c,record['quote'])['ok'] and _volume_units_match(claim['review_text'],record['quote'])]
                 for atom in atoms:atom['allowed_link_ids']=scoped_ids

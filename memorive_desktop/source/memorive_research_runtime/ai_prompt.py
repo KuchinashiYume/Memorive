@@ -1,4 +1,4 @@
-"""Production prompt: P08 editorial baseline, adapted to source-ID-bound output."""
+"""Production prompt: the editorial baseline, adapted to source-ID-bound output."""
 import json
 from .common import sha
 from memorive_settings.answer_styles import from_snapshot, effective_override

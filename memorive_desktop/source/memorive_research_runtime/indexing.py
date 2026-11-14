@@ -31,7 +31,7 @@ def backfill(runtime):
     if database.exists():
         def bound(locator):
             path=(root/locator).resolve()
-            if not path.is_relative_to(root.resolve()): raise ValueError('E6_INBOX_PATH_ESCAPE')
+            if not path.is_relative_to(root.resolve()): raise ValueError('INBOX_PATH_ESCAPE')
             return path
         runtime.work_index.backfill_inbox(SimpleNamespace(store=InboxStore(database),_path=bound),limit=32)
     else: runtime.work_index.set_cursor('inbox_coverage',{'status':'COMPLETE','records':0})

@@ -247,6 +247,6 @@
       for(const e of document.querySelectorAll('[data-e10-alt]'))e.alt=t(e.dataset.e10Alt);
     }).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   }
-  window.__E10_STRUCTURE_UI__=Object.freeze({refreshSettings:loadSettings});
+  window.__MEMORIVE_STRUCTURE_UI__=Object.freeze({refreshSettings:loadSettings});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();

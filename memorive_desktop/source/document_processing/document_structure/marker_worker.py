@@ -37,7 +37,7 @@ def server(command, port, name, work):
     raise TimeoutError(name+'_SERVER_STARTUP_TIMEOUT')
 
 def start(rt, work, profile):
-    if os.environ.get('E10_LOCAL_WORKER') != '1':
+    if os.environ.get('MEMORIVE_LOCAL_WORKER') != '1':
         raise RuntimeError('OFFLINE_GUARD_REQUIRED')
     for name,version in [('marker-pdf','2.0.0'),('surya-ocr','0.22.1')]:
         if importlib.metadata.version(name)!=version:

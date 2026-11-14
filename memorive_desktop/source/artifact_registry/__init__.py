@@ -20,7 +20,6 @@ from .analysis_compatibility import (
 )
 from .analysis_materialization import sha256_bytes
 from .analysis_products import (
-    ANALYSIS_ADMISSION_CONTRACT_REF,
     ANALYSIS_ADMISSION_IMPLEMENTATION_VERSION,
     ArtifactProduct,
     stable_identifier,
@@ -55,7 +54,6 @@ __all__ = [
     "ENVELOPE_SCHEMA_VERSION",
     "EVENT_SCHEMA_VERSION",
     "EnvelopeValidationError",
-    "ANALYSIS_ADMISSION_CONTRACT_REF",
     "ANALYSIS_ADMISSION_IMPLEMENTATION_VERSION",
     "SandboxBoundaryViolation",
     "TruncatedRegistryError",

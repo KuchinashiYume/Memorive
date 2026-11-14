@@ -9,7 +9,7 @@ from .errors import ProtocolViolation
 from .protocol import canonical_json_bytes
 
 
-REQUIRED_D38_METHODS = (
+REQUIRED_FACADE_METHODS = (
     "list_jobs",
     "get_job",
     "get_attempt",
@@ -92,9 +92,9 @@ class FacadeAdapter:
         return {
             "schema_version": "FacadeAdapterParityProjection-v1",
             "adapter_kind": self.adapter_kind,
-            "required_methods": list(REQUIRED_D38_METHODS),
-            "present_methods": [name for name in REQUIRED_D38_METHODS if callable(getattr(self.facade, name, None))],
-            "missing_methods": [name for name in REQUIRED_D38_METHODS if not callable(getattr(self.facade, name, None))],
+            "required_methods": list(REQUIRED_FACADE_METHODS),
+            "present_methods": [name for name in REQUIRED_FACADE_METHODS if callable(getattr(self.facade, name, None))],
+            "missing_methods": [name for name in REQUIRED_FACADE_METHODS if not callable(getattr(self.facade, name, None))],
             "allowed_methods": list(self.allowed_methods),
         }
 
@@ -105,7 +105,7 @@ class RealFacadeAdapter(FacadeAdapter):
     def __init__(self, facade: Any, *, watch_batch_max: int = 64):
         super().__init__(
             facade,
-            allowed_methods=REQUIRED_D38_METHODS + REAL_ADDITIONAL_METHODS,
+            allowed_methods=REQUIRED_FACADE_METHODS + REAL_ADDITIONAL_METHODS,
             watch_batch_max=watch_batch_max,
         )
 
@@ -113,6 +113,6 @@ class RealFacadeAdapter(FacadeAdapter):
 __all__ = [
     "FacadeAdapter",
     "REAL_ADDITIONAL_METHODS",
-    "REQUIRED_D38_METHODS",
+    "REQUIRED_FACADE_METHODS",
     "RealFacadeAdapter",
 ]

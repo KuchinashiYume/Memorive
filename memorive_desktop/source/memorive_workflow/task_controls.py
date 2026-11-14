@@ -12,7 +12,7 @@ import uuid
 
 from memorive_app.contracts import utc_now
 
-from .contracts import Core_NODE_IDS, E2_NODE_IDS, node_ids_for
+from .contracts import Core_NODE_IDS, DATA_REVIEW_NODE_IDS, node_ids_for
 
 
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$")
@@ -50,7 +50,7 @@ def _identifier(value: Any, field: str) -> str:
 
 def _node_id(value: Any) -> str:
     rendered = str(value or "")
-    if rendered not in E2_NODE_IDS:
+    if rendered not in DATA_REVIEW_NODE_IDS:
         raise ValueError("TASK_CONTROL_NODE_INVALID")
     return rendered
 

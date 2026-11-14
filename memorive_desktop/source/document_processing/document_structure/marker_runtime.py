@@ -59,7 +59,7 @@ class MarkerSession:
             env={k:v for k,v in os.environ.items() if k.upper() in keep}
             guard=worker_resource('worker_guard/sitecustomize.py').parent
             env.update(PYTHONPATH=str(guard),PYTHONUTF8='1',PYTHONDONTWRITEBYTECODE='1',
-                       E10_LOCAL_WORKER='1',E10_NETWORK_DENIAL_LOG=str(self.work/'network-denials.log'),
+                       MEMORIVE_LOCAL_WORKER='1',MEMORIVE_NETWORK_DENIAL_LOG=str(self.work/'network-denials.log'),
                        HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',HF_HUB_DISABLE_TELEMETRY='1',
                        DO_NOT_TRACK='1',NO_PROXY='*',HTTP_PROXY='',HTTPS_PROXY='',ALL_PROXY='')
             self.log=(self.work/'worker.log').open('ab')

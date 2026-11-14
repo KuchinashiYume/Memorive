@@ -212,8 +212,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "9c07b8f0826cd80e26b1066fc39b4ef18a726ed89c7b55f7c2701884e757ec22",
-      "bytes": 369065
+      "sha256": "263528630d2706161a7e8eb9b23d423487f3a6ecf50815edc9584ca4142fe198",
+      "bytes": 368703
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -437,8 +437,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "eb45d838e488dfae2140c167fda18493f2e1d426a25340d9647b5f5db992ebdc",
-      "bytes": 3355683
+      "sha256": "dac0215af40a22533eb6fcf534fcdde2e34b59d696095aeff2e0e3b794da85b9",
+      "bytes": 3351541
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -2102,8 +2102,8 @@
     },
     {
       "path": "product/web/document_structure.js",
-      "sha256": "1f9fab8e592233b42688cee0d4591786405f497ed8faef1d836aff31bc6603c3",
-      "bytes": 35881
+      "sha256": "e359fbebac7255ced7f1b41c02835ee5b15beffd53864255037e080aacfb8d89",
+      "bytes": 35886
     },
     {
       "path": "product/web/evidence_check.js",
@@ -2192,8 +2192,8 @@
     },
     {
       "path": "source/artifact_registry/__init__.py",
-      "sha256": "4cd3d2c184b3b7f21e16381a3dc9f44a7120b13bac4ec043a94f0094499d8a5e",
-      "bytes": 1946
+      "sha256": "98a921544cb81e64625e32e97ae06959c57ea15508c1d038241d9782af60ad7e",
+      "bytes": 1868
     },
     {
       "path": "source/artifact_registry/adapters.py",
@@ -2212,8 +2212,8 @@
     },
     {
       "path": "source/artifact_registry/analysis_products.py",
-      "sha256": "4dafe1b539d97526594011b38d2fc5c2ad50d8078b0e099c885c062045c2125d",
-      "bytes": 943
+      "sha256": "2caf529cfc7a836c64c345102646efd1b3c26ecfcdb0068f3327f2083a0ea45a",
+      "bytes": 854
     },
     {
       "path": "source/artifact_registry/errors.py",
@@ -2367,13 +2367,13 @@
     },
     {
       "path": "source/document_processing/document_structure/marker_runtime.py",
-      "sha256": "3c68aa9dd887d649227d0e49a41af68f0e0a26c007fbfbef0176144298cda59d",
-      "bytes": 7839
+      "sha256": "99e45bb0b18c0b6f3f502ab1280875740d9a855b52f64b3799ae7ca58e7a63a6",
+      "bytes": 7849
     },
     {
       "path": "source/document_processing/document_structure/marker_worker.py",
-      "sha256": "707a04f2da26255ddcb037b38ec75042cdf1c936e763b9826717103516018b5b",
-      "bytes": 10972
+      "sha256": "4314936642f8f27d75fdb61b13320053627dfbe8c390421a3416f906343e08f0",
+      "bytes": 10977
     },
     {
       "path": "source/document_processing/document_structure/office.py",
@@ -2392,8 +2392,8 @@
     },
     {
       "path": "source/document_processing/document_structure/worker_guard/sitecustomize.py",
-      "sha256": "04fa06766b169e86ac90919389c46c8cf7d7939e107c1acd437a915c85b0923b",
-      "bytes": 962
+      "sha256": "c2e92f8dcfa2ed7661c31340d47d0363f9b205a9a2cdd784f3d13e3e9ea1c3e4",
+      "bytes": 968
     },
     {
       "path": "source/document_processing/engines/__init__.py",
@@ -2832,8 +2832,8 @@
     },
     {
       "path": "source/facade_method_binding.json",
-      "sha256": "62daf21a339bcb29bbf2af8035bfbd20fa8d971e0487fdbc20b5807375fd7c80",
-      "bytes": 3772
+      "sha256": "2bf62f1728453821efe80b0608615d95e11326ae28201507813eeb6b1f0c1a34",
+      "bytes": 3385
     },
     {
       "path": "source/knowledge_admission/__init__.py",
@@ -3167,8 +3167,8 @@
     },
     {
       "path": "source/memorive_current_task/product_controller.py",
-      "sha256": "c1c197b1ae2159b6ff2f053f6c4464cbcabfddff03fa87670e068dc376eb0382",
-      "bytes": 80912
+      "sha256": "82b436f2334a662d43160bc8eafa460b8450c2541956ccdecee1dc71dcd9806c",
+      "bytes": 80831
     },
     {
       "path": "source/memorive_current_task/projection.py",
@@ -3232,8 +3232,8 @@
     },
     {
       "path": "source/memorive_desktop_service/__init__.py",
-      "sha256": "8e6196aeec1a5544688e52b5dc11ddec4d74fc86233a4e1931b0f42084fa4d59",
-      "bytes": 727
+      "sha256": "fc4092937ee3246eec0ad5c6218a92e5458b4586fe719266e65c60b099d40acf",
+      "bytes": 733
     },
     {
       "path": "source/memorive_desktop_service/__main__.py",
@@ -3242,8 +3242,8 @@
     },
     {
       "path": "source/memorive_desktop_service/adapters.py",
-      "sha256": "7e74d92b27175416fbf3e2f6a6f42cf10fee6ff609c60940b6a44485d9110fb0",
-      "bytes": 4142
+      "sha256": "3dfcbd5995f07d28bd05db5534db98dd625a411718816e97e6f022c1426675fb",
+      "bytes": 4160
     },
     {
       "path": "source/memorive_desktop_service/client.py",
@@ -3597,13 +3597,13 @@
     },
     {
       "path": "source/memorive_research_runtime/ai_prompt.py",
-      "sha256": "2d5887abf7fcd5ec9143ede0c777d3d53ce7ae87343f272e0999338a47e2e3af",
+      "sha256": "936537027c58e2e4820f13a1bd60e55f69280975cb069af10a2f88a134d9bdb6",
       "bytes": 5748
     },
     {
       "path": "source/memorive_research_runtime/ai_prompt_locales.py",
-      "sha256": "8352ffa8ad3679fb04619f4423ed7413b05fc3d36bb72043bc969235bd483df5",
-      "bytes": 12713
+      "sha256": "4c6e1f3b1ce96b62bfcd21ec2514a5cad4800a933978e3ddaf2643a3ba4bd9a4",
+      "bytes": 12709
     },
     {
       "path": "source/memorive_research_runtime/ai_sources.py",
@@ -3647,8 +3647,8 @@
     },
     {
       "path": "source/memorive_research_runtime/indexing.py",
-      "sha256": "784118f9a200f31d3705e837295592cac60659d7f9f95e4e0f66bb463f339313",
-      "bytes": 5384
+      "sha256": "94846728aaf0bd5b3a0ed0deb194ab787674e5295c1b9c45169332256c0f6f77",
+      "bytes": 5381
     },
     {
       "path": "source/memorive_research_runtime/interactions.py",
@@ -3762,8 +3762,8 @@
     },
     {
       "path": "source/memorive_research_workspace/answer_evidence.py",
-      "sha256": "c8e7aa7aa60e965fbf1f649a39a6fe030ba615ba3f6935f984c24f8845187e90",
-      "bytes": 33513
+      "sha256": "eefcd899552aaaa95d859026bbedf9ab3bbfe13500b04192687cc7533f052925",
+      "bytes": 33510
     },
     {
       "path": "source/memorive_research_workspace/answer_intents.py",
@@ -3969,11 +3969,6 @@
       "path": "source/memorive_review/gaps.py",
       "sha256": "1bfdf4aac2edef5ac4d3eeebb11418a2253c500c9e78bd43c48b2d1747b69d19",
       "bytes": 3035
-    },
-    {
-      "path": "source/memorive_review/health.py",
-      "sha256": "f6d2c9d7ac33f82676eec033d02b12f1cce635e92b226326e7d25632897458ce",
-      "bytes": 7262
     },
     {
       "path": "source/memorive_review/logic.py",
@@ -4412,8 +4407,8 @@
     },
     {
       "path": "source/memorive_workflow/contracts.py",
-      "sha256": "0c86ad6d6d5a79b6d75c6a755708e9866922142adaef1184a402b1bbfaa15087",
-      "bytes": 1653
+      "sha256": "6a88d57b4d7afe0d8bdec7a17c3237a1696bfcf7408c1644eb23bb9577733663",
+      "bytes": 1671
     },
     {
       "path": "source/memorive_workflow/executor.py",
@@ -4442,13 +4437,13 @@
     },
     {
       "path": "source/memorive_workflow/task_controls.py",
-      "sha256": "b0c3a3b985dca0ffb0b73ff3faf4a8a924020e5f3fe2b4bb4852adef477060bd",
-      "bytes": 24754
+      "sha256": "ae59db0e829f6ae330ae054c291aadb51460cb938b2950a2d13a702121275f07",
+      "bytes": 24772
     },
     {
       "path": "source/memorive_workflow/worker.py",
-      "sha256": "0d24b8eb6dd5a4cd5648440968ce99f53a0a5e4d503a70af6009671bf654346e",
-      "bytes": 49225
+      "sha256": "3152c2a5c0c2c33138ae3e4bd8d6061dd6396d04c22fefd194017634e14eb932",
+      "bytes": 49243
     },
     {
       "path": "source/memorive_workflow_bridge/__init__.py",

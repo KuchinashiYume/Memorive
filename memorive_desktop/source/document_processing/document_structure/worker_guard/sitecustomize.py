@@ -17,11 +17,11 @@ def _audit(event, args):
     except ValueError:
         allowed = False
     if not allowed:
-        path = os.environ.get('E10_NETWORK_DENIAL_LOG')
+        path = os.environ.get('MEMORIVE_NETWORK_DENIAL_LOG')
         if path:
             with open(path, 'a', encoding='utf-8') as stream:
                 stream.write(event + ':non_loopback_denied\n')
-        raise PermissionError('E10_WORKER_NON_LOOPBACK_NETWORK_DENIED')
+        raise PermissionError('WORKER_NON_LOOPBACK_NETWORK_DENIED')
 
-if os.environ.get('E10_LOCAL_WORKER') == '1':
+if os.environ.get('MEMORIVE_LOCAL_WORKER') == '1':
     sys.addaudithook(_audit)

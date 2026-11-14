@@ -1,6 +1,6 @@
 """DESKTOP-SERVICE desktop Application Service, IPC, locator and Control Store layer."""
 
-from .adapters import RealFacadeAdapter, REQUIRED_D38_METHODS
+from .adapters import RealFacadeAdapter, REQUIRED_FACADE_METHODS
 from .client import ApplicationServiceClient
 from .command_outbox import DesktopCommandOutbox
 from .control_store import ControlStore
@@ -14,7 +14,7 @@ __all__ = [
     "ApplicationServiceHost",
     "ControlStore",
     "DesktopCommandOutbox",
-    "REQUIRED_D38_METHODS",
+    "REQUIRED_FACADE_METHODS",
     "RealFacadeAdapter",
     "SingleInstanceCoordinator",
     "StableLocator",

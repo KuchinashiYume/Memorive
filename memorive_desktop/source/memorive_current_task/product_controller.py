@@ -21,7 +21,6 @@ from memorive_workflow.task_controls import TaskControlStore
 from memorive_desktop_service.client import RemoteCallError
 
 
-RUN_ID = "CURRENT_TASK_CROSS_html_baseline_current_task_replay_20260825_run001"
 CURRENT_TASK_METHODS = frozenset({
     "current_task.get_contract",
     "current_task.list",

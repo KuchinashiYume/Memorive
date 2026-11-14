@@ -79,7 +79,7 @@ def check_inline_script_policy(path):
         if 'src' in script['attrs'] or script['attrs'].get('type','').lower() not in ('','text/javascript','application/javascript','module'):continue
         if not script['text'].strip():continue
         token="'sha256-"+base64.b64encode(sha256(script['text'].encode()).digest()).decode()+"'"
-        if any(token not in sources for sources in allowed):raise ValueError('UI_CSP_SCRIPT_HASH_MISMATCH:'+path.name+':'+str(index))
+        if any(token not in sources for sources in allowed):raise ValueError('UI_CSP_SCRIPT_HASH_MISMATCH:'+path.name+':'+str(index)+' (after editing a page script run memorive_desktop/tools/sync_page_hashes.py)')
         checked+=1
     return {'path':path.name,'inline_scripts':checked,'status':'PASS'}
 
@@ -95,13 +95,14 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--output',type=Path,required=True)
     ap.add_argument('--stage-only',action='store_true')
-    ap.add_argument('--candidate-id','--package-id',dest='candidate_id',default='EVO-E11-build001')
+    ap.add_argument('--candidate-id','--package-id',dest='candidate_id')
     ap.add_argument('--installer-toolchain',type=Path,required=True)
     ap.add_argument('--update-test-trust',type=Path)
     ap.add_argument('--dependency-lock',type=Path,default=DESKTOP/'requirements-build-agpl-candidate.lock')
     ap.add_argument('--source-manifest',type=Path,default=DESKTOP/'SOURCE_MANIFEST.json')
     a=ap.parse_args();out=a.output.resolve()
     release=json.loads((DESKTOP/'product/desktop/update_release.json').read_text('utf8'))
+    if a.candidate_id is None:a.candidate_id=release['package_id']
     if release['package_id']!=a.candidate_id or release['release_authorized'] is not False:
         raise ValueError('UPDATE_RELEASE_IDENTITY_MISMATCH')
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,127}',a.candidate_id):raise ValueError('CANDIDATE_ID_INVALID')

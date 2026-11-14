@@ -21,7 +21,7 @@ from memorive_folder_management import ProfileFolderManager
 from memorive_app.contracts import canonical_sha256, utc_now
 
 from .contracts import (
-    Core_NODE_IDS, E2_NODE_IDS, DATA_NODE, node_ids_for, CORE_WORKER_CAPACITY,
+    Core_NODE_IDS, DATA_REVIEW_NODE_IDS, DATA_NODE, node_ids_for, CORE_WORKER_CAPACITY,
     CoreArtifact,
     CoreExecutionContext,
     CoreExecutionResult,
@@ -67,7 +67,7 @@ def _atomic_json(path: Path, value: Mapping[str, Any]) -> None:
 class _CheckpointStore:
     def __init__(self, run_root: Path, node_ids=Core_NODE_IDS):
         self.node_ids=tuple(node_ids)
-        self.schema="DesktopCoreCheckpoint-v2" if self.node_ids==E2_NODE_IDS else "DesktopCoreCheckpoint-v1"
+        self.schema="DesktopCoreCheckpoint-v2" if self.node_ids==DATA_REVIEW_NODE_IDS else "DesktopCoreCheckpoint-v1"
         self.path = run_root / "core_checkpoint.json"
 
     def load(self) -> dict[str, Any]:
