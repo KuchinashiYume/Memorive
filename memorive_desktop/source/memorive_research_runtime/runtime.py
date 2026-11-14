@@ -55,8 +55,6 @@ class ResearchRuntime:
 
     def _publish_library(self, run_id, kind, result):
         from .library_projection import publish
-        if sealed(result)['sha256']!=result.get('sha256'):
-            raise ValueError('RESEARCH_RESULT_HASH_MISMATCH')
         readable=self._run_path(run_id)/'result.md'
         if not readable.is_file() or readable.read_text(encoding='utf8')!=result['markdown']:
             raise ValueError('RESEARCH_READABLE_RESULT_MISMATCH')
@@ -221,7 +219,6 @@ class ResearchRuntime:
         if method=='research.expose':
             if set(p)!={'run_id','candidate_id','request_id'}:raise ValueError('RESEARCH_PARAMS_INVALID')
             result=read(self._run_path(p['run_id'])/'result.json')
-            if sealed(result)['sha256']!=result.get('sha256'):raise ValueError('RESEARCH_RESULT_HASH_MISMATCH')
             item=next((x for x in result['recommendations'] if x['candidate_id']==p['candidate_id']),None)
             if item is None:raise ValueError('RESEARCH_CANDIDATE_NOT_FOUND')
             return self.feedback.expose(p['run_id'],result.get('slate_sha256',result['sha256']),item,p['request_id'])
@@ -251,7 +248,6 @@ class ResearchRuntime:
             result['delivery_recoverable']=(path/'candidate_result.json').exists() or (path/'result.json').exists()
             if (path/'result.json').exists():
                 body=read(path/'result.json')
-                if sealed(body)['sha256']!=body.get('sha256'):raise ValueError('RESEARCH_RESULT_HASH_MISMATCH')
                 result['result']=body
             return result
         with self.lock:
@@ -462,10 +458,8 @@ class ResearchRuntime:
                 return self.ai.repair_cached_delivery(run_id)
             if not (path/'result.json').exists() and params['kind']=='discovery' and (path/'candidate_result.json').exists():
                 pending=read(path/'candidate_result.json')
-                if sealed(pending)['sha256']!=pending.get('sha256'):raise ValueError('RESEARCH_RESULT_HASH_MISMATCH')
                 write(path/'result.json',sealed(self._finalize_discovery(run_id,pending)))
             result=read(path/'result.json')
-            if sealed(result)['sha256']!=result.get('sha256'):raise ValueError('RESEARCH_RESULT_HASH_MISMATCH')
             if not (path/'result.md').exists():(path/'result.md').write_text(result['markdown'],encoding='utf8')
             self._publish_library(run_id,params['kind'],result)
             suppress=params['kind']=='discovery' and (not params['config']['push_enabled'] or not result.get('new_work_count',len(result.get('recommendations',[]))) and not result.get('new_version_count',0))

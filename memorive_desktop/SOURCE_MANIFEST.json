@@ -3617,8 +3617,8 @@
     },
     {
       "path": "source/memorive_research_runtime/common.py",
-      "sha256": "f4759d816d8a37c2d8569795616e0ad1ff3453f2297784d5585312e552e1dc11",
-      "bytes": 6427
+      "sha256": "41bf104d7a3c74e10966726c254cd6b5580b8305c0a3b00d7bca5a249da5ae36",
+      "bytes": 6446
     },
     {
       "path": "source/memorive_research_runtime/digest.py",
@@ -3712,8 +3712,8 @@
     },
     {
       "path": "source/memorive_research_runtime/runtime.py",
-      "sha256": "1725e1a6ed870370f90eb952d2350deec6dc94d10e991d73a47b53f67ea752d7",
-      "bytes": 46725
+      "sha256": "9691255fa3df5cd2f88fe933edf38be5f12f47ec4417f2a4f825e507f42ee155",
+      "bytes": 46144
     },
     {
       "path": "source/memorive_research_runtime/slate.py",
@@ -3727,8 +3727,8 @@
     },
     {
       "path": "source/memorive_research_runtime/transport.py",
-      "sha256": "f03a5fb5ec819e12ffb3c076b7e78f98206ba59b1e9066550a50fc52626f6744",
-      "bytes": 16135
+      "sha256": "f7a6b0377dea870ea38b964f25043f23682f27b8485e5d29ef85f4b136cac02e",
+      "bytes": 16013
     },
     {
       "path": "source/memorive_research_runtime/work_index.py",

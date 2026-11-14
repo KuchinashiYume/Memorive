@@ -30,11 +30,10 @@ def sealed(value):
     return dict(value,sha256=sha(value))
 
 def read(path):
+    # The record is the user's: one corrected by hand is read as it is. Its sha256 field is not compared;
+    # sealed() writes the field again whenever the record is saved.
     with _FILE_IO_LOCK:
-        value=json.loads(Path(path).read_text(encoding='utf8'))
-    if value.get('sha256')!=sha({k:v for k,v in value.items() if k!='sha256'}):
-        raise ValueError('RESEARCH_RECORD_HASH_MISMATCH')
-    return value
+        return json.loads(Path(path).read_text(encoding='utf8'))
 
 CHANNELS=('CORE','ADJACENT','BRIDGE','HORIZON','COVERAGE_REPAIR')
 def defaults():
