@@ -1,5 +1,5 @@
 {
-  "scope": "E11 shared update engine and three-language construction; not tested or released",
+  "scope": "Installer and update engine sources",
   "files": [
     {
       "path": "app.manifest",
@@ -53,41 +53,33 @@
     },
     {
       "path": "update_protocol.cs",
-      "origin": "E11 construction",
       "candidate_sha256": "e616f3b3a394d86674da8e23f37e11cdfb4180daf735135e28dbd400a85465e9"
     },
     {
       "path": "update_download.cs",
-      "origin": "E11 construction",
       "candidate_sha256": "25628f15133eda6daaee0ff7c38feed5417e5a33d41f02ccaa4cd8b654f9c8d7"
     },
     {
       "path": "update_transaction.cs",
-      "origin": "E11 construction",
       "candidate_sha256": "53ad6bf6b874b7c203dd893971d2483a10f4cc78dd1bfff41baae3110f4d1e6f"
     },
     {
       "path": "update_entry.cs",
-      "origin": "E11 construction",
       "candidate_sha256": "0019283132e5bf8fdceeaccf2d7e1af31a15e157e5f638ce8aafd061277b92dd"
     },
     {
       "path": "installer_locale.cs",
-      "origin": "E11 construction",
       "candidate_sha256": "485e7efbbfdf7e1db9029899b406136d991647bdeb8a495f43e473afd9cb4732"
     },
     {
       "path": "installer-catalog.json",
-      "origin": "E11 construction",
       "candidate_sha256": "cb37d08606d87c2933c5a3b19dc189452476a99596c16a5ab780e864b4d64938"
     },
     {
       "path": "update_trust.json",
-      "origin": "E11 construction",
       "candidate_sha256": "da97407424548f19f2999d15332bbaf2cc4e69a22529f5c02404f095d1e63f78"
     }
   ],
-  "health_owner_protocol": "Memorive-INSTALLER-TRIAL-V1 retained to match existing install_health.py; this does not assert private capsule inclusion",
-  "public_prerequisites": "Official Microsoft user-installed WebView2 and Visual C++; no bundled runtime installer or host System32 DLL redistribution.",
-  "package_id": "EVO-E11-build001"
+  "health_owner_protocol": "Memorive-INSTALLER-TRIAL-V1, the protocol name install_health.py expects",
+  "public_prerequisites": "Official Microsoft user-installed WebView2 and Visual C++; no bundled runtime installer or host System32 DLL redistribution."
 }

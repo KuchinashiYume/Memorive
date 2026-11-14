@@ -69,7 +69,6 @@ def main():
         write(p,obj);adaptations.append({'path':relative,'before':originals[relative],'after':sha(p),'reason':'clear private delivery identity metadata'})
     manifest['files']=[dict(row,sha256=sha(out/'memorive_desktop'/row['path']),bytes=(out/'memorive_desktop'/row['path']).stat().st_size)
                        for row in manifest['files'] if row['path'] not in EXCLUDE]
-    manifest['export_scope']='Public source review candidate; private test source omitted; original baseline retained in canonical repository'
     for row in resources['files']:row['sha256']=sha(out/row['source'])
     write(out/'memorive_desktop/SOURCE_MANIFEST.public-candidate.json',manifest)
     write(out/'memorive_desktop/BUILD_RESOURCES.public-candidate.json',resources)

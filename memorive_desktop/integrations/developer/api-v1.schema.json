@@ -444,7 +444,7 @@
     "queue_owner": "Memorive desktop",
     "offline_submission": "durable QUEUED; executes after desktop starts and grant is revalidated",
     "events": "project scoped metadata, monotonic cursor, polling, no callback URLs",
-    "cancel": "queued jobs and dispatched research jobs; dispatched Phase1 jobs use current task controls",
+    "cancel": "queued jobs and dispatched research jobs; dispatched document-processing jobs use current task controls",
     "models": "explicit model grant; saved profiles, existing gateway/cache/receipts"
   }
 }

@@ -1,4 +1,4 @@
-"""Bring the four source manifests in line with the files in this checkout.
+"""Bring the source manifests in line with the files in this checkout.
 
     python memorive_desktop/tools/sync_manifests.py           update the manifests
     python memorive_desktop/tools/sync_manifests.py --check   only report; exit 1 if they are out of date
@@ -17,6 +17,9 @@ What it does to each manifest:
       memorive_desktop/BUILD_RESOURCES.public-candidate.json  nothing; it says where in the package each
                                                               resource goes, so new non-Python files under
                                                               product/desktop/ are reported for you to add
+      memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json
+                                                              nothing; the installer builder checks the
+                                                              installer sources against this list
 
 A file counts as new when SOURCE_REVIEW_MANIFEST.json does not list it yet.
 Files that Git ignores are left out. Without Git (a downloaded archive, or a
@@ -40,14 +43,17 @@ ROOT_MANIFEST = "SOURCE_REVIEW_MANIFEST.json"
 DESKTOP_MANIFEST = "memorive_desktop/SOURCE_MANIFEST.public-candidate.json"
 RESOURCE_MANIFEST = "memorive_desktop/BUILD_RESOURCES.public-candidate.json"
 CONSOLE_MANIFEST = "memorive_console/SOURCE_MANIFEST.json"
+INSTALLER_SOURCES = "memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json"
 
-# manifest -> (key that names the file, prefix its paths are relative to, folders whose new files it takes in)
+# manifest -> (key that names the file, prefix its paths are relative to, folders whose new files it takes in,
+#              key that holds the hash)
 MANIFESTS = {
+    INSTALLER_SOURCES: ("path", "memorive_desktop/installer/public_candidate/", (), "candidate_sha256"),
     DESKTOP_MANIFEST: ("path", "memorive_desktop/", (
-        "memorive_desktop/source/", "memorive_desktop/product/", "memorive_desktop/integrations/")),
-    RESOURCE_MANIFEST: ("source", "", ()),
-    CONSOLE_MANIFEST: ("path", "memorive_console/", ("memorive_console/",)),
-    ROOT_MANIFEST: ("path", "", ("",)),  # last: it also records the three manifests above
+        "memorive_desktop/source/", "memorive_desktop/product/", "memorive_desktop/integrations/"), "sha256"),
+    RESOURCE_MANIFEST: ("source", "", (), "sha256"),
+    CONSOLE_MANIFEST: ("path", "memorive_console/", ("memorive_console/",), "sha256"),
+    ROOT_MANIFEST: ("path", "", ("",), "sha256"),  # last: it also records the manifests above
 }
 SCANNED_WITHOUT_GIT = ("memorive_desktop/source", "memorive_desktop/product", "memorive_desktop/integrations",
                        "memorive_console")
@@ -94,7 +100,7 @@ def render(entry: dict, template: str) -> str:
 
 
 def sync(manifest: str, current: set[str], new_files: set[str], write: bool) -> dict[str, list[str]]:
-    key, prefix, intake = MANIFESTS[manifest]
+    key, prefix, intake, hash_key = MANIFESTS[manifest]
     path = REPO / manifest
     text = path.read_bytes().decode("utf-8")
     start = text.index("[", text.index('"files"'))
@@ -106,7 +112,7 @@ def sync(manifest: str, current: set[str], new_files: set[str], write: bool) -> 
     lead = text[start + 1:text.index(blocks[0], start)]
     tail = text[text.rindex(blocks[-1], start, end) + len(blocks[-1]):end - 1]
     has_bytes = "bytes" in entries[0]
-    upper = entries[0]["sha256"].isupper()
+    upper = entries[0][hash_key].isupper()
     report = {"updated": [], "removed": [], "added": []}
 
     kept: list[tuple[str, str]] = []  # (repository path, entry text)
@@ -117,8 +123,8 @@ def sync(manifest: str, current: set[str], new_files: set[str], write: bool) -> 
             continue
         digest, size = file_facts(relative)
         digest = digest.upper() if upper else digest
-        if entry["sha256"] != digest or (has_bytes and entry["bytes"] != size):
-            block = re.sub(r'("sha256": ")[0-9A-Fa-f]{64}(")', rf"\g<1>{digest}\g<2>", block)
+        if entry[hash_key] != digest or (has_bytes and entry["bytes"] != size):
+            block = re.sub(rf'("{hash_key}": ")[0-9A-Fa-f]{{64}}(")', rf"\g<1>{digest}\g<2>", block)
             block = re.sub(r'("bytes": )\d+', rf"\g<1>{size}", block)
             report["updated"].append(relative)
         kept.append((relative, block))
@@ -132,7 +138,7 @@ def sync(manifest: str, current: set[str], new_files: set[str], write: bool) -> 
             continue
         digest, size = file_facts(relative)
         entry = {name: None for name in entries[0]}
-        entry.update({key: relative[len(prefix):], "sha256": digest.upper() if upper else digest})
+        entry.update({key: relative[len(prefix):], hash_key: digest.upper() if upper else digest})
         if has_bytes:
             entry["bytes"] = size
         block = render(entry, blocks[0])

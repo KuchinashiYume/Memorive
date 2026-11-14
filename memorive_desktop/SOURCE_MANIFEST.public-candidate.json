@@ -3,12 +3,7 @@
   "revision": "Memorive-1.03-release002",
   "product_version": "1.03",
   "candidate_revision": "Memorive-1.03-release002",
-  "source_executable_sha256": null,
-  "repo_base_commit": "49e2b36158cf3b888ee64a0d5329a064522bdf50",
-  "status": "AUTHORIZED_RELEASE_PREPARATION_INPUT",
   "selected_build_root": "memorive_desktop",
-  "root_module_authority_effect": "Only the declared memorive_desktop source and mapped contracts are build inputs",
-  "historical_manifest": "FORMAL_SOURCE_MANIFEST.json",
   "files": [
     {
       "path": "INSTALL.md",
@@ -72,8 +67,8 @@
     },
     {
       "path": "integrations/developer/api-v1.schema.json",
-      "sha256": "5e986270c4a0d29a74f72d3a0a26dae62d54736a96ef27dfef43f118f35611c9",
-      "bytes": 10700
+      "sha256": "8a73eff522c22664c41caacd25ef200a4c83756c265a8d3303a7b723b75e7f34",
+      "bytes": 10713
     },
     {
       "path": "integrations/developer/examples/import_and_search.py",
@@ -167,8 +162,8 @@
     },
     {
       "path": "integrations/skills/memo-tension/SKILL.md",
-      "sha256": "05b0fd979df58fb5b4f2432343a17739e65c99b831e3e1b72dc4a2411a2ab48c",
-      "bytes": 945
+      "sha256": "43715db29246ead831c6dc72a5f17cace78e9fcb74e784ebf0ba6e11f1c01b14",
+      "bytes": 939
     },
     {
       "path": "integrations/zotero/memorive-companion/bootstrap.js",
@@ -5656,23 +5651,6 @@
       "bytes": 2996
     }
   ],
-  "source_bytecode_review": "see Desktop baseline source reconciliation report; on-disk source has import priority after configure_resource_imports",
-  "excluded_categories": [
-    "source/项目文档 duplicate contract projection",
-    "private-test capsule",
-    "user profiles, conversations and documents",
-    "native dependencies, Python caches, EXE and generated installers"
-  ],
-  "public_export_status": "PENDING_RIGHTS_AND_RELEASE_PROFILE_REVIEW",
   "public_repository": "https://github.com/KuchinashiYume/Memorive",
-  "export_scope": "Public source review candidate; private test source omitted; original baseline retained in canonical repository",
-  "namespace": "Memorive",
-  "common_ancestor_manifest_sha256": "272e194baf8a161b336118e5f71b5fc6c481a752abb49191f6d2b8f51d4d3fef",
-  "package_id": "EVO-E1-E11-build001",
-  "direct_parent": "EVO-E11-build023",
-  "parent_candidate": "EVO-E11-build023",
-  "engine_parent_candidate": "EVO-E11-build023",
-  "parent_manifest_sha256": "2a3220092b9a39e76e4187beecb305ebd555d1a96abf399deca83dfaa6a05fc9",
-  "common_ancestor": "EVO-E1-E10-build006",
-  "common_ancestor_candidate": "EVO-E1-E10-build006"
+  "namespace": "Memorive"
 }

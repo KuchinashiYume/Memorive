@@ -526,8 +526,8 @@
     },
     {
       "path": "memorive_desktop/BUILDING.md",
-      "sha256": "5d717cdb48c4923ec00d7b8625501982aa460ef8d1d8fdf66d6a26b2f0d95d9e",
-      "bytes": 7423
+      "sha256": "f1269f005c599dca669d8908d1919f7538d971e645773a2f3bdfebdf102f638a",
+      "bytes": 7509
     },
     {
       "path": "memorive_desktop/contracts/accounting/AccountingPanelProductMethod-v3.json",
@@ -856,8 +856,8 @@
     },
     {
       "path": "memorive_desktop/installer/public_candidate/SOURCE_PROVENANCE.json",
-      "sha256": "696654487553743748fc4859bbfa7c27515a67d4f05cea07fb16b4840c3bcdb3",
-      "bytes": 4124
+      "sha256": "b4dec8c7b4bb155b261e0c82b9adc2820d5d9179fdc0b5614e5a73661ea59c62",
+      "bytes": 3735
     },
     {
       "path": "memorive_desktop/installer/public_candidate/uninstall.html",
@@ -896,8 +896,8 @@
     },
     {
       "path": "memorive_desktop/integrations/developer/api-v1.schema.json",
-      "sha256": "5e986270c4a0d29a74f72d3a0a26dae62d54736a96ef27dfef43f118f35611c9",
-      "bytes": 10700
+      "sha256": "8a73eff522c22664c41caacd25ef200a4c83756c265a8d3303a7b723b75e7f34",
+      "bytes": 10713
     },
     {
       "path": "memorive_desktop/integrations/developer/examples/import_and_search.py",
@@ -1011,8 +1011,8 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-tension/SKILL.md",
-      "sha256": "05b0fd979df58fb5b4f2432343a17739e65c99b831e3e1b72dc4a2411a2ab48c",
-      "bytes": 945
+      "sha256": "43715db29246ead831c6dc72a5f17cace78e9fcb74e784ebf0ba6e11f1c01b14",
+      "bytes": 939
     },
     {
       "path": "memorive_desktop/integrations/zotero/memorive-companion/bootstrap.js",
@@ -7526,8 +7526,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.public-candidate.json",
-      "sha256": "68b7314d86842379de45b2f46f931924017e59cd8b1b7825fcbeeca95c092476",
-      "bytes": 214237
+      "sha256": "146f94e30d99484184514db5016dc850d8012302004ac2a61c59167d94228d3f",
+      "bytes": 212828
     },
     {
       "path": "memorive_desktop/THIRD_PARTY_NOTICES.md",
@@ -7566,8 +7566,8 @@
     },
     {
       "path": "memorive_desktop/tools/export_source_candidate.py",
-      "sha256": "b29ee07fe9366a8e5ced8afabe867651d3e383fa76cda0b32eb95231f147c3b7",
-      "bytes": 7054
+      "sha256": "b42a913e6a0b18cfd53883390c9bafa062cc502d10530f35a5005d418cac98f9",
+      "bytes": 6910
     },
     {
       "path": "memorive_desktop/tools/import_local_settings.py",
@@ -7591,8 +7591,8 @@
     },
     {
       "path": "memorive_desktop/tools/sync_manifests.py",
-      "sha256": "a0513cd6ad35007f072e3a469b100c9e1a8a2df99f6cc0b10f705827224d6293",
-      "bytes": 10868
+      "sha256": "fc7444feece38fd0d0bc6050548e93a42a13f83975368eee14327fb4c44e8591",
+      "bytes": 11429
     },
     {
       "path": "PUBLIC_RELEASE.md",

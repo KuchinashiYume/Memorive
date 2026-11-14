@@ -32,7 +32,7 @@ The build copies only the files that the manifests list, and stops with `BUILD_I
 python .\memorive_desktop\tools\sync_manifests.py
 ```
 
-It refreshes the hashes of changed files, drops deleted files, and adds new files under `source/`, `product/`, `integrations/` and `memorive_console/` to the four manifests. `--check` reports what is out of date without changing anything. The app loads images, web pages and other resources from the destination that `BUILD_RESOURCES.public-candidate.json` gives, so add an entry there for a new non-Python file under `product/desktop/`; the tool lists such files.
+It refreshes the hashes of changed files, drops deleted files, and adds new files under `source/`, `product/`, `integrations/` and `memorive_console/` to the manifests. It also refreshes the hash list that the installer builder checks its own sources against. `--check` reports what is out of date without changing anything. The app loads images, web pages and other resources from the destination that `BUILD_RESOURCES.public-candidate.json` gives, so add an entry there for a new non-Python file under `product/desktop/`; the tool lists such files.
 
 ## Inventory and installer
 
