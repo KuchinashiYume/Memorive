@@ -15,10 +15,19 @@ from .document_convert_convert import convert
 from .document_clean_clean import clean
 from .document_chunk_chunk import chunk
 from .document_embed_embed import embed
-from .pipeline import (PipelineResult, embed_from_chunks, re_embed_from_rawmd,
-                       resume_after_note_review, run_document_processing,
-                       run_pipeline)
+from .pipeline import (
+    PipelineResult,
+    embed_from_chunks,
+    run_document_processing,
+)
 
-__all__ = ["ingest", "convert", "clean", "chunk", "embed",
-           "run_pipeline", "run_document_processing", "embed_from_chunks",
-           "resume_after_note_review", "re_embed_from_rawmd", "PipelineResult"]
+__all__ = [
+    "ingest",
+    "convert",
+    "clean",
+    "chunk",
+    "embed",
+    "run_document_processing",
+    "embed_from_chunks",
+    "PipelineResult",
+]

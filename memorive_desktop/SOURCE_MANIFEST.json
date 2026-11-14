@@ -2207,8 +2207,8 @@
     },
     {
       "path": "source/artifact_registry/analysis_compatibility.py",
-      "sha256": "5544d5e310635b9807221fe81e616b9c12320821815dde7abc88928c550ac192",
-      "bytes": 4484
+      "sha256": "e7e68a31e9774be582761778f6e496558af67fc399e70428bf8e9f3f81984535",
+      "bytes": 4294
     },
     {
       "path": "source/artifact_registry/analysis_materialization.py",
@@ -2272,8 +2272,8 @@
     },
     {
       "path": "source/document_processing/__init__.py",
-      "sha256": "927877f1fb5fa6903981d839d636510229111d054c7e392f42847a40ac11e3f5",
-      "bytes": 1420
+      "sha256": "9a4fe9bc420e50bcf418424fec6029200486643e1f2fb1484bc54b6d3b3249d5",
+      "bytes": 1283
     },
     {
       "path": "source/document_processing/chinese_structure.py",
@@ -2492,8 +2492,8 @@
     },
     {
       "path": "source/document_processing/naming.py",
-      "sha256": "af58f8401dd4e23c20d0629760009822f55e5015775731a89ac487e7c3339c1a",
-      "bytes": 3893
+      "sha256": "1f463c4088e3cdfb35c1edeef9a87d9e68947d18722ec7f63398587d833851f4",
+      "bytes": 3652
     },
     {
       "path": "source/document_processing/native_section_alignment.py",
@@ -2507,8 +2507,8 @@
     },
     {
       "path": "source/document_processing/pipeline.py",
-      "sha256": "59903343feb4e7ef7f9120507470bc7a74a3b4d1be0a14f59dcac8f7fed14377",
-      "bytes": 26789
+      "sha256": "8ea6e775bc1ad2dcd01168a77ffc1ee8b37ec1630e8127dc830a039b881b084a",
+      "bytes": 11344
     },
     {
       "path": "source/document_processing/schemas/document_formats_conversion_amendment_v1.schema.json",
@@ -2667,8 +2667,8 @@
     },
     {
       "path": "source/evidence_review/__init__.py",
-      "sha256": "3d15ec9e65fb5cabe80cd78d45dc959c34580993c2a2676d6bca95d669206150",
-      "bytes": 3054
+      "sha256": "1f5c5351c4855a0e6a9c5f73c5c8da8a79a9095c8950150981bb87d16e98afb3",
+      "bytes": 2491
     },
     {
       "path": "source/evidence_review/analysis_omission.py",
@@ -2682,18 +2682,18 @@
     },
     {
       "path": "source/evidence_review/atomic_repair.py",
-      "sha256": "849bfece62b7929c664bb20b71dc437873035d7655908f294ae4d7bdbb533e13",
-      "bytes": 6227
+      "sha256": "5440bcb5ab9989e658fd8ea7caf1ea92ddd9a18c6be47fd7accd3d9bcadfb7bc",
+      "bytes": 6177
     },
     {
       "path": "source/evidence_review/atomic_review.py",
-      "sha256": "292c23e494dae7e974fbae13b7db9cd3cba2fc13359cc07c66d0fc0ab2bef0df",
-      "bytes": 16227
+      "sha256": "a0d5154ec0240d6022822509e772dcc066b4a66c9041a9468acf64e1d2db4dbd",
+      "bytes": 3080
     },
     {
       "path": "source/evidence_review/claim_evidence.py",
-      "sha256": "59753112e65e3e3e4f22d615714d366d3a4331aab065cba907ebd844a5413e4b",
-      "bytes": 17586
+      "sha256": "8f0b589d01e456d77dd93e0917489c7f96a49211caa444f64d3f0c40f4aaf1a8",
+      "bytes": 16838
     },
     {
       "path": "source/evidence_review/contracts/card_review_atomic_v2.json",
@@ -2777,8 +2777,8 @@
     },
     {
       "path": "source/evidence_review/mechanical.py",
-      "sha256": "7606db50eb7428bf405bfa3cd288dbd1122832bdb579e5417a037efb51d29b5d",
-      "bytes": 7945
+      "sha256": "8b1e8976c362b57c0a92858dce9e622e55420bb3cde7723183b82208e977d510",
+      "bytes": 1243
     },
     {
       "path": "source/evidence_review/ownership_binding.py",
@@ -5547,8 +5547,8 @@
     },
     {
       "path": "source/run_ledger/schema.py",
-      "sha256": "626001c1edcf87c8136e83e11b4086a7c46af3622ab5a418417a207a84f08828",
-      "bytes": 12463
+      "sha256": "470abe59337816fb9114c67e70c95ef75b9b38eb90c69fa9816ccf18ddc5a3e0",
+      "bytes": 2536
     },
     {
       "path": "source/run_ledger/schemas/run_ledger_v1.schema.json",

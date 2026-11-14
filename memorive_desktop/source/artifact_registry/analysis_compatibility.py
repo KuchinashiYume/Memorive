@@ -115,8 +115,3 @@ def _axis(status: str, reason: str, evidence_refs: Sequence[str]) -> dict[str, A
         "evidence_refs": unique_text(evidence_refs),
         "adapter_required": False,
     }
-
-
-def _parents(envelope: Mapping[str, Any]) -> list[Mapping[str, Any]]:
-    parents = envelope.get("parent_artifacts", [])
-    return list(parents) if isinstance(parents, list) else []

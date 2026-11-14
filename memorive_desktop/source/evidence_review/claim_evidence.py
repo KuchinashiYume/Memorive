@@ -99,20 +99,6 @@ def _number_tokens(value: Any) -> tuple[str, ...]:
     return tuple(dict.fromkeys(item.replace(" ", "") for item in _NUMBER.findall(str(value or ""))))
 
 
-def _labeled_value(text: Any, *labels: str) -> str | None:
-    source = str(text or "")
-    for label in labels:
-        match = re.search(
-            rf"(?:^|\|)\s*{re.escape(label)}\s*[:：]\s*([^|]+)",
-            source,
-            flags=re.I,
-        )
-        if match:
-            value = match.group(1).strip()
-            return None if _normalise_text(value) in _SCOPE_PLACEHOLDERS else value
-    return None
-
-
 def _scope_identity_tokens(value: Any) -> set[str]:
     tokens = set()
     for token in _SCOPE_TOKEN.findall(_normalise_text(value)):
@@ -182,12 +168,6 @@ def _normalise_anchors(value: Any) -> list[dict[str, Any]]:
         if isinstance(value.get("chunk_id"), str):
             return [dict(value)]
     return []
-
-
-def _field_anchors(card: dict[str, Any], field: str) -> list[dict[str, Any]]:
-    source_anchor = card.get("source_anchor")
-    by_field = source_anchor.get("by_field") if isinstance(source_anchor, dict) else None
-    return _normalise_anchors(by_field.get(field)) if isinstance(by_field, dict) else []
 
 
 def _claim_atoms(claim_id: str, text: str) -> list[dict[str, Any]]:

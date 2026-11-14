@@ -1,15 +1,5 @@
-"""Memorive EVIDENCE-REVIEW/EVIDENCE_REVIEW · EVIDENCE_REVIEW 校核。
-
-Verification 第 1 步:机械层引用 ID 校验(只校形式、纯规则、零额度)。
-
-    from evidence_review import mechanical_check
-    result = mechanical_check(card_path)   # → MechanicalResult{ok, problems, checked, resolved, broken, malformed}
-
-只校形式(chunk_id resolve)、不校内容(内容留第 2 步 R1–R9 搬运类 / 第 3 步 GPT 异源)。
-系统性错误(卡不可读 / YAML 解析失败 / chunk 库不可读)raise EvidenceReviewError;锚点级问题进 result.problems。
-"""
+"""Memorive 证据复核：卡片的转写核对、判断复核、评分入库和修复。"""
 from .errors import CardParseError, CardUnreadable, ChunkStoreError, EvidenceReviewError, OwnershipFailClosed
-from .mechanical import mechanical_check
 from .parser import parse_violations
 from .problems import MechanicalResult, Problem
 from .report import EvidenceReviewReport, resolve_report, write_report
@@ -44,7 +34,6 @@ from .ownership_binding import (
 grade_and_admit = repair_and_admit
 
 __all__ = [
-    "mechanical_check",
     "MechanicalResult",
     "Problem",
     "EvidenceReviewError",
