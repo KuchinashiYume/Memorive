@@ -1,4 +1,4 @@
-"""Fail-closed exceptions for the RESEARCH-OPPORTUNITIES successor003 candidate."""
+"""Fail-closed exceptions for research opportunities."""
 
 
 class OpportunityAnalysisError(ValueError):

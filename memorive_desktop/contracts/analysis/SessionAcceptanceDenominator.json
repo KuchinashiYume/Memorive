@@ -1,10 +1,10 @@
 {
   "acceptance_verdict": "NOT_ASSESSED",
-  "d36_actions": 2,
-  "d36_events": 2,
-  "d36_identities": 3,
-  "d36_queries": 3,
-  "d36_receipts": 2,
+  "actions": 2,
+  "events": 2,
+  "identities": 3,
+  "queries": 3,
+  "receipts": 2,
   "dpi_values": [
     100,
     125,

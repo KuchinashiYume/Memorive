@@ -1,0 +1,99 @@
+{
+  "about": "Names that look like internal development codes but have to stay, and files whose cleanup is planned separately. check_internal_codes.py accepts a hit only when this file covers it. Add a name here only with the reason it cannot be renamed.",
+  "names": [
+    {
+      "name": "desktop-desktop-review-v1",
+      "kept_because": "Installed copies check this value in an update package. With another value they would refuse the update."
+    },
+    {
+      "name": "E2_DATA_REVIEW",
+      "kept_because": "Id of the data review step. It is saved in settings and in task records, and the pages and the service both use it."
+    },
+    {
+      "name": "E2_LOGIC_REVIEW",
+      "kept_because": "Id of the logic review step. It is saved in settings and in task records, and the pages and the service both use it."
+    },
+    {
+      "name": "synthetic_offline_d38",
+      "kept_because": "Name of the offline sample capture channel. It is saved in the session state."
+    },
+    {
+      "name": "E6_IDENTITY_INDEXED",
+      "kept_because": "Event name saved in the research work index."
+    },
+    {
+      "name": "Desktop_DESKTOP_METADATA",
+      "kept_because": "Producer name saved in metadata acquisition records."
+    },
+    {
+      "name": "Desktop_DESKTOP_RESEARCH_REPORTS_SUCCESSOR",
+      "kept_because": "Producer name inside saved report digests. The digest id is a hash over it, so a new name would change the id of every digest."
+    },
+    {
+      "name": "desktop-desktop-research_reports/1.0",
+      "kept_because": "Generator version inside saved report digests. The digest id is a hash over it."
+    },
+    {
+      "name": "Desktop_DESKTOP_PUBLIC_METADATA_V2",
+      "kept_because": "Profile id saved in metadata request records."
+    },
+    {
+      "name": "Desktop_DESKTOP_USER_REQUEST",
+      "kept_because": "Evidence class saved in metadata request records."
+    },
+    {
+      "name": "DesktopDesktopMetadataAttempt-v1",
+      "kept_because": "Format name of saved metadata request records."
+    },
+    {
+      "name": "DesktopDesktopMetadataResult-v1",
+      "kept_because": "Format name of saved metadata result records."
+    },
+    {
+      "name": "Desktop_Core_VERTICAL_Capabilities_SUCCESSOR_V2",
+      "kept_because": "Capability revision saved in the settings snapshot of each task."
+    },
+    {
+      "name": "Desktop_DESKTOP_Core_BRIDGE",
+      "kept_because": "Execution channel saved in the settings snapshot of each task."
+    },
+    {
+      "name": "desktop-desktop-local-v1",
+      "kept_because": "Revision of the default capability list saved with the settings."
+    },
+    {
+      "name": "accounting_recovery-legacy-price-migration-candidate001",
+      "kept_because": "Id of the price list. It is saved with every cost record."
+    },
+    {
+      "name": "candidate001-r1",
+      "kept_because": "Revision of the price list. It is saved with every cost record."
+    },
+    {
+      "name": "\"revision\": \"candidate001\"",
+      "kept_because": "Revision written into the hand-over objects of model calls, which are saved in task records."
+    },
+    {
+      "name": "@candidate001",
+      "kept_because": "Part of the object ids of saved model-call results."
+    },
+    {
+      "name": "channel_contracts/candidate001/common-objects.schema.json",
+      "kept_because": "Id of a data format description. Saved objects and the other format descriptions refer to it."
+    }
+  ],
+  "files": [
+    {
+      "path": "memorive_desktop/source/research_reports",
+      "set_aside_because": "The report request format is shared with the Test Console, which is installed separately. Its names change together with a console release."
+    },
+    {
+      "path": "memorive_desktop/source/memorive_review/exam.py",
+      "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",
+      "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
+    }
+  ]
+}

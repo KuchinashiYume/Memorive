@@ -32,8 +32,8 @@
     },
     {
       "path": "RELEASE_CHECKS.md",
-      "sha256": "7875bd59b90c6fee48d33c3e60dd94e895e02482885a4077619a6439cdedd74c",
-      "bytes": 488
+      "sha256": "3ad686684d8dc05215247d4cac613c0c21149361d48be0ba21f8fa9e9af27a2b",
+      "bytes": 1853
     },
     {
       "path": "RELEASE_NOTES.md",
@@ -212,8 +212,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "263528630d2706161a7e8eb9b23d423487f3a6ecf50815edc9584ca4142fe198",
-      "bytes": 368703
+      "sha256": "c906caaa4cc11752b333f6f32d1e40465fdc69ecbb8b3db6eca5c123a96448d2",
+      "bytes": 368580
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -897,13 +897,13 @@
     },
     {
       "path": "product/desktop/help/web/README.md",
-      "sha256": "f5a3081d712dd2319d7910c6954520a98153de663888487b445aa692d70cf8bc",
-      "bytes": 1295
+      "sha256": "9eee64c9b1341f71aa29d5f4c514f18ccc275110fd519d911f4b579e82e0a2b9",
+      "bytes": 1401
     },
     {
       "path": "product/desktop/help/web/WEB_DESIGN.md",
-      "sha256": "8f6e49ff76fa7fba0f45639d9f13faf8623f954f7531eedd3b77c067deb61d0c",
-      "bytes": 7405
+      "sha256": "4c2d33cc26e8c2e864c2da0f16e9302dae5609e6f3cd9a9f918ccc324695527e",
+      "bytes": 7484
     },
     {
       "path": "product/desktop/help/web/app.css",
@@ -2922,8 +2922,8 @@
     },
     {
       "path": "source/literature_discovery/connector_framework.py",
-      "sha256": "9e05a92b4b5a1599b3738ea45e3da6eab6383b4f8c6e908d7b7e231b4f0beafa",
-      "bytes": 3079
+      "sha256": "cfca4e2719c90c959c6d8de9314d4c858357448d82918ea0fc9c764bbefe6263",
+      "bytes": 2999
     },
     {
       "path": "source/literature_discovery/live_metadata_transport.py",
@@ -3422,8 +3422,8 @@
     },
     {
       "path": "source/memorive_library/product_controller.py",
-      "sha256": "92064124c943be312e08ff04547d23400846b838c6b0a0ded7a493641017e295",
-      "bytes": 72242
+      "sha256": "c109b37ece7ab53b7750ac259a758723b8fafeb3784deb365e6083c2ed1bac6a",
+      "bytes": 72222
     },
     {
       "path": "source/memorive_library/refinement_markdown.py",
@@ -4022,8 +4022,8 @@
     },
     {
       "path": "source/memorive_sessions/product_controller.py",
-      "sha256": "c8c2ea57ca0466f5dcb3b159b4c34bcb1712251f1300b7bcb86f4bb814b2fbb6",
-      "bytes": 192256
+      "sha256": "b19481acc7c4b8c1667b56dcb1166d8f0dbe61195ba4b6f53911d8f20a7f0170",
+      "bytes": 192248
     },
     {
       "path": "source/memorive_settings/__init__.py",
@@ -4377,8 +4377,8 @@
     },
     {
       "path": "source/memorive_work_log/product_controller.py",
-      "sha256": "334912b81f5a881740110eb88860fb5b3d84d58ea7715da328ff16e2adc3f017",
-      "bytes": 58822
+      "sha256": "1ad4f4d110cc118169d859b8281c9b4823b1d2bab8bb06875513f7b076af68b0",
+      "bytes": 58802
     },
     {
       "path": "source/memorive_workflow/__init__.py",
@@ -5282,8 +5282,8 @@
     },
     {
       "path": "source/research_opportunities/__init__.py",
-      "sha256": "052776fd8554b562dd50b1b8afcdbb0f9976a0e606a14b23dfe295fcc0187f76",
-      "bytes": 575
+      "sha256": "91bd5803a617795bed28223c5e73e72ef4eb515ce30dbf207056ae05d45244e1",
+      "bytes": 540
     },
     {
       "path": "source/research_opportunities/canonical.py",
@@ -5297,8 +5297,8 @@
     },
     {
       "path": "source/research_opportunities/errors.py",
-      "sha256": "f78dfc52728d45745b08123bf80e5c90838120de6ae3f29c65000fc8bac805c0",
-      "bytes": 433
+      "sha256": "a9d25c373192d5ccf68f79d621c7176d5cdf9f0c660236f5859192b90c94b300",
+      "bytes": 406
     },
     {
       "path": "source/research_opportunities/research_opportunities.py",

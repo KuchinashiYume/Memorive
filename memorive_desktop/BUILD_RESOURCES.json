@@ -180,12 +180,12 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/README.md",
       "destination": "help/web/README.md",
-      "sha256": "f5a3081d712dd2319d7910c6954520a98153de663888487b445aa692d70cf8bc"
+      "sha256": "9eee64c9b1341f71aa29d5f4c514f18ccc275110fd519d911f4b579e82e0a2b9"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/WEB_DESIGN.md",
       "destination": "help/web/WEB_DESIGN.md",
-      "sha256": "8f6e49ff76fa7fba0f45639d9f13faf8623f954f7531eedd3b77c067deb61d0c"
+      "sha256": "4c2d33cc26e8c2e864c2da0f16e9302dae5609e6f3cd9a9f918ccc324695527e"
     },
     {
       "source": "memorive_desktop/product/desktop/help/zh-CN/design.md",
@@ -1150,7 +1150,7 @@
     {
       "source": "memorive_desktop/contracts/analysis/FrozenSourceAccessEnvelope.json",
       "destination": "contracts/analysis/FrozenSourceAccessEnvelope.json",
-      "sha256": "b815e82c99f85b91f9a94a568d1ce9e25310314a6e630595ae83fbecad0faefd"
+      "sha256": "c5d76efbbf9ca7080682d1284885dcc221f1b8cea4a1781da666e0d9888cc7ea"
     },
     {
       "source": "memorive_desktop/contracts/analysis/SessionsSessionActionStateContract.json",
@@ -1160,7 +1160,7 @@
     {
       "source": "memorive_desktop/contracts/analysis/SessionAcceptanceDenominator.json",
       "destination": "contracts/analysis/SessionAcceptanceDenominator.json",
-      "sha256": "0dd1d198c26bbd1b6fa9deebd0d15ff8019d5dc9013c1824c50c4526263b4455"
+      "sha256": "119bde3c33dde57a8d996e36468ef0f5c8632d3b16994e9a19e6cfdf5e0615ba"
     },
     {
       "source": "memorive_desktop/contracts/analysis/SessionCaptureWorkflowContract.json",
@@ -1185,7 +1185,7 @@
     {
       "source": "memorive_desktop/contracts/analysis/SessionSourceCapabilityMatrix.json",
       "destination": "contracts/analysis/SessionSourceCapabilityMatrix.json",
-      "sha256": "4360220bbf2ad0e51f96d24893244f77c599c609da82a30b6981eb900185f5ce"
+      "sha256": "fe20e3872a5fda98163386644c4c6cab86df3f7311bca7db8a36798026b3fc18"
     },
     {
       "source": "memorive_desktop/contracts/analysis/SourceAccessEnvelope.schema.json",

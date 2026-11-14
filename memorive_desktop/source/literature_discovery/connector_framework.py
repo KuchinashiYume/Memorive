@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 
-RUN_ID = "SOURCE_CONNECTORS_LITERATURE_DISCOVERY_20260810_190016_candidate002"
 FIXED_OBSERVED_AT = "2026-08-10T00:00:00Z"
 CONNECTOR_REVISION = "r0.1"
 

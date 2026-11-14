@@ -8,7 +8,6 @@
   "credential_value_read_allowed": false,
   "real_source_authority": true,
   "remote_session_mutation_allowed": false,
-  "run_id": "SESSIONS_CROSS_visible-ui-check_real_visible_ui_acceptance_20260828_run001",
   "schema_version": "SessionsSourceAccessEnvelope-v1",
   "scope": {
     "provider_accounts": [

@@ -1,4 +1,4 @@
-"""RESEARCH-OPPORTUNITIES RESEARCH_OPPORTUNITIES successor003 public API."""
+"""Research opportunities: public API."""
 
 from .canonical import (
     canonical_json_bytes,

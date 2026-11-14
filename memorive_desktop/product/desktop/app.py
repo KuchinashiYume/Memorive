@@ -3601,7 +3601,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             };
           };
           const accessibleBackIcon = (button) => Boolean(
-            button?.querySelector('svg.desktop-symbol path')?.getAttribute('d') === 'research_reports 6-6 6 6 6'
+            button?.querySelector('svg.desktop-symbol path')?.getAttribute('d') === 'm15 6-6 6 6 6'
             && button.getAttribute('aria-label')
             && button.getBoundingClientRect().width >= 30
             && button.getBoundingClientRect().height >= 30
@@ -5973,7 +5973,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             "visible_placeholder_zero": inspect["integrated"]["visible_placeholder_count"] == 0,
             "preview_controls_zero": inspect["previewControlCount"] == 0,
             "typed_navigation": typed["transport_status"] == "LOCAL_PYWEBVIEW_DISPATCHED",
-            "contract_d36_exact": contract["d36_actions"] == ['filter','export_redacted_view'] and contract["d36_queries"] == ['list_log_entries','resolve_job_locator'],
+            "contract_exact": contract["actions"] == ['filter','export_redacted_view'] and contract["queries"] == ['list_log_entries','resolve_job_locator'],
             "synthetic_stream_exact": all_rows["row_count"] == 7 and branch["row_count"] == 4 and central["row_count"] == 3,
             "search_exact": searched["row_count"] == 1 and searched["rows"][0]["parse_status"] == "partial",
             "detail_public_safe": detail["entry"]["public_safe_projection"] is True and detail["entry"]["absolute_path_included"] is False,
@@ -6000,7 +6000,6 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         }
         receipt = {
             "schema_version": "DesktopAssistant-IntegratedStandaloneProductReceipt-v1",
-            "run_id": "DESKTOP_ASSISTANT_CROSS_integrated_standalone_successor_20260826_run001",
             "phase": phase,
             "webview_startup": startup_diagnostics,
             "versions": {"python": sys.version, "pywebview": "6.2.1", "webview2": browser_version(window)},

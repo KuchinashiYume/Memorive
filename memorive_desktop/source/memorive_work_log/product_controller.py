@@ -736,11 +736,11 @@ class WorkLogProductController:
             "method_count": len(WORK_LOG_METHODS),
             "methods": sorted(WORK_LOG_METHODS),
             "contracts": contracts,
-            "d36_actions": ["filter", "export_redacted_view"],
-            "d36_queries": ["list_log_entries", "resolve_job_locator"],
-            "d36_events": ["log_projection_refreshed"],
-            "d36_receipts": ["redacted_export_receipt"],
-            "d36_identities": ["log_entry_id", "job_id", "event_sequence"],
+            "actions": ["filter", "export_redacted_view"],
+            "queries": ["list_log_entries", "resolve_job_locator"],
+            "events": ["log_projection_refreshed"],
+            "receipts": ["redacted_export_receipt"],
+            "identities": ["log_entry_id", "job_id", "event_sequence"],
             "source_authority_access": "HASH_METADATA_ONLY_NO_RAW_BYTES",
             "construction_mode": (
                 "SYNTHETIC_OFFLINE"
