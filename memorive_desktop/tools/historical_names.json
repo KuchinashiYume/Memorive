@@ -74,6 +74,10 @@
       "kept_because": "Revision written into the hand-over objects of model calls, which are saved in task records."
     },
     {
+      "name": "\"adapter_manifest_revision\": \"candidate001\"",
+      "kept_because": "Revision written into the hand-over objects of the local embedding adapter. Changing it changes the identity of those objects."
+    },
+    {
       "name": "@candidate001",
       "kept_because": "Part of the object ids of saved model-call results."
     },

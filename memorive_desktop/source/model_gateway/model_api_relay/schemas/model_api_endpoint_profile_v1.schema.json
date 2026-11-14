@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:execution:model-api-relay:model-api-endpoint-profile:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "revision",
+    "status",
+    "transport_kind",
+    "relay_mode",
+    "access_mode",
+    "protocol_family",
+    "protocol_revision",
+    "capabilities",
+    "allowed_roles",
+    "endpoint_operator",
+    "claimed_upstream_provider",
+    "scheme",
+    "origin",
+    "path_template",
+    "allowed_query_keys",
+    "redirect_policy",
+    "allowed_origins",
+    "credential_binding_id",
+    "credential_binding_revision",
+    "credential_ref",
+    "auth_scheme",
+    "header_name",
+    "logical_model_id",
+    "request_model_alias",
+    "alias_revision",
+    "route_id",
+    "region",
+    "egress",
+    "dns_proxy_profile",
+    "billing_mode",
+    "usage_source",
+    "cost_source",
+    "currency",
+    "behavior_hash",
+    "request_contract_hash",
+    "output_contract_hash",
+    "qualification_report_ref",
+    "valid_from",
+    "expires_at",
+    "revocation_conditions",
+    "expected_embedding_dimension",
+    "rerank_score_range"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "MODEL_API_RELAY_MODEL_API_ENDPOINT_PROFILE_V1"
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "CANDIDATE",
+        "QUALIFIED_DISABLED",
+        "ACTIVE",
+        "DISABLED",
+        "REVOKED"
+      ]
+    },
+    "transport_kind": {
+      "enum": [
+        "DIRECT_PROVIDER",
+        "MODEL_API_RELAY",
+        "SELF_HOSTED_LOOPBACK_RELAY"
+      ]
+    },
+    "relay_mode": {
+      "enum": [
+        "PROTOCOL_PRESERVING",
+        "PROTOCOL_TRANSLATING",
+        "MODEL_ALIAS_ROUTER"
+      ]
+    },
+    "access_mode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_family": {
+      "enum": [
+        "OPENAI_CHAT_COMPLETIONS",
+        "OPENAI_RESPONSES",
+        "ANTHROPIC_MESSAGES",
+        "GEMINI_GENERATE_CONTENT",
+        "OPENAI_EMBEDDINGS",
+        "PROVIDER_RERANK"
+      ]
+    },
+    "protocol_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "allowed_roles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "endpoint_operator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claimed_upstream_provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scheme": {
+      "enum": [
+        "https",
+        "http"
+      ]
+    },
+    "origin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "path_template": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "allowed_query_keys": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "redirect_policy": {
+      "const": "DENY"
+    },
+    "allowed_origins": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "credential_binding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credential_binding_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credential_ref": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{2,127}$"
+    },
+    "auth_scheme": {
+      "enum": [
+        "Bearer",
+        "x-api-key",
+        "x-goog-api-key"
+      ]
+    },
+    "header_name": {
+      "enum": [
+        "Authorization",
+        "x-api-key",
+        "x-goog-api-key"
+      ]
+    },
+    "logical_model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_model_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alias_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "route_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "egress": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dns_proxy_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "billing_mode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "usage_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cost_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "currency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "behavior_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "request_contract_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "output_contract_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "qualification_report_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revocation_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "expected_embedding_dimension": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "rerank_score_range": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number"
+      }
+    }
+  }
+}

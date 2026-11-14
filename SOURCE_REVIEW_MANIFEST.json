@@ -4081,18 +4081,18 @@
     },
     {
       "path": "memorive_desktop/source/document_processing/document_conversion/__init__.py",
-      "sha256": "23284b8ee8e203ca9710c9b942005301b5419d5742d1cb4155ff89ffa716cb03",
-      "bytes": 586
+      "sha256": "52a5c456d499cedf34232cb29995b1a6e65235e6b86c8f7d641e8fbc2d3a39a6",
+      "bytes": 931
     },
     {
       "path": "memorive_desktop/source/document_processing/document_conversion/diagnostics.py",
-      "sha256": "b95ab7e1316ac1946890ba2ec5b0c4ee1016fb6c5687a681133f8063bee2cafb",
-      "bytes": 1044
+      "sha256": "45f4e75e4ccdb0edf4f9a91dcdf870d8cf47220c2f8f09aaba7e913bb93cf39b",
+      "bytes": 2753
     },
     {
       "path": "memorive_desktop/source/document_processing/document_conversion/models.py",
-      "sha256": "b89083956be451c0ac0c3ae1e2120c5814670356181524d4d41443565b79407d",
-      "bytes": 7670
+      "sha256": "30c3350b21b0407016982c12ee274f01c8cf216f32beeb2539a2c3094a401f15",
+      "bytes": 10189
     },
     {
       "path": "memorive_desktop/source/document_processing/document_conversion/office_legacy_bridge.ps1",
@@ -4101,8 +4101,28 @@
     },
     {
       "path": "memorive_desktop/source/document_processing/document_conversion/registry.py",
-      "sha256": "1524fb7d6778567387ee1148c3d9f0daf360da0f750246b811b84599688c2e61",
-      "bytes": 1763
+      "sha256": "d425b387b6c6e1ac33605268bc6d3ec36e4580179b99bc7de8cf082e84889ae3",
+      "bytes": 9007
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/document_conversion/adapters.py",
+      "sha256": "05a357c00e6c08c38a40a20c2e84bfcef89f1b012986b6610af924e5b4087bfd",
+      "bytes": 19946
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/document_conversion/cli.py",
+      "sha256": "c2fa4d36b1180e5da773f8e48dd5df537a77a8f86dcd2d78403e1d374eb43029",
+      "bytes": 2495
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/document_conversion/facade.py",
+      "sha256": "9570d5863b2ac80aa872da95aa418dd09f736c0887463415d207ec6e9bf2ce83",
+      "bytes": 16010
+    },
+    {
+      "path": "memorive_desktop/source/document_processing/document_conversion/office_legacy_bridge.py",
+      "sha256": "023c4c9cca16247c1977f93f04a8c84ff1c6a970bf89b68d485d23308047eb83",
+      "bytes": 2606
     },
     {
       "path": "memorive_desktop/source/document_processing/document_convert_convert.py",
@@ -4341,8 +4361,8 @@
     },
     {
       "path": "memorive_desktop/source/evidence_extraction/card.py",
-      "sha256": "7b0899b952e6cda609edfda0306514afbbf9f2fa4583e6ea3ad3af64d8cd67c0",
-      "bytes": 23329
+      "sha256": "45f798072a54bc26b4d6932bf785f0c0c9ea83f014b3368b2a9f34f7e461f8a7",
+      "bytes": 23791
     },
     {
       "path": "memorive_desktop/source/evidence_extraction/config.py",
@@ -6431,18 +6451,18 @@
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_reranker/__init__.py",
-      "sha256": "1d70b4fb73b2389ae6f2b1660f16c987d3a6fe601d1b3df0201af2650502c1ca",
-      "bytes": 442
+      "sha256": "3bcf0c52b204fe206a1ef8486ae0d72073a2936169444b4848c5d603cb5fd1ba",
+      "bytes": 493
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_reranker/adapter.py",
-      "sha256": "e23c9c5c33cd4e7c113e108c2b875b4f1239d473e84bc790d6e1a8cf51d20f4a",
-      "bytes": 11513
+      "sha256": "37d5b7169ef841060aa2f91cb8283c7373a970a8e2ff1fe46a9775ecb92c50c4",
+      "bytes": 20708
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_reranker/contracts.py",
-      "sha256": "9ff48fedc3c7a0064e7d007641f928f44e5d3851682e28e013f0f842e9ee81c7",
-      "bytes": 19642
+      "sha256": "e40a93aa0ce3e67a98ca9d6b3427b16bd6217de2b4bff979e9811eb70fbe9bd1",
+      "bytes": 19923
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_reranker/schemas/fallback_receipt_v1.schema.json",
@@ -6458,6 +6478,11 @@
       "path": "memorive_desktop/source/model_gateway/local_reranker/schemas/resource_receipt_v1.schema.json",
       "sha256": "e319bafc3af021daa477f7fe918ec86dc772d62731bf2663b21ff6a0374d7469",
       "bytes": 3940
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_reranker/doctor.py",
+      "sha256": "432742c6eb38f347f860dc1a9849e83eb7fb9c96b1a846985c0f09b6433c5669",
+      "bytes": 3720
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_structured_chat.py",
@@ -7441,8 +7466,8 @@
     },
     {
       "path": "memorive_desktop/tools/historical_names.json",
-      "sha256": "a86956330f92bd0a62b4742e1b169d4ecd82301654a691b3cbd7807999f6d9c3",
-      "bytes": 4318
+      "sha256": "4e146b7bd870ec94901b7a14cec710a502e014f39c7d6235beda9fbbadc7a4a4",
+      "bytes": 4551
     },
     {
       "path": "PUBLIC_RELEASE.md",
@@ -7491,8 +7516,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "2fb0fce083d89f6e0f1f2823023244a894a70c85a01efa557171ca13988297cf",
-      "bytes": 210636
+      "sha256": "4d8b56c4ced63804f88e3c9bc43d867d002376bdc210f0f875b374ebbabad6cf",
+      "bytes": 216399
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -7588,6 +7613,126 @@
       "path": "memorive_desktop/installer/windows/update_trust.json",
       "sha256": "da97407424548f19f2999d15332bbaf2cc4e69a22529f5c02404f095d1e63f78",
       "bytes": 1124
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_embedding/__init__.py",
+      "sha256": "0c03dfc28d3e2cc2c627ebf88f85c210b6a3923678da3e7974dca670640bd898",
+      "bytes": 594
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_embedding/schemas/local_retrieval_local_seam_compatibility_v1.schema.json",
+      "sha256": "3513e1a9cdfbfb2a757312c7be1fd17a7f149011b9bbe2ff07fba8ab0764b017",
+      "bytes": 6480
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_embedding/seam.py",
+      "sha256": "45e34a0307079194fbeaa4eb94f796b0b59fb1ab287fdfce5dd2170dc5b0754a",
+      "bytes": 43638
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/local_embedding/worker.py",
+      "sha256": "5f7ef282caf2d7a386321f9a9672f0267ec87b6ca0601c25fd638e8a109959b1",
+      "bytes": 12987
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/__init__.py",
+      "sha256": "2e79ab426fe1af30429f4ba80380e799d688fd4dce363206ce4b2221c675a63c",
+      "bytes": 1792
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/client.py",
+      "sha256": "097aee1d7b7cf06e6e2981377d345eaaec79a97f1de3f477ee035fd17665a8d7",
+      "bytes": 9509
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/contracts.py",
+      "sha256": "c82273dd66c43d0282b6209ed936907b447782e35e221cc93fbb45825779c91a",
+      "bytes": 23012
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/evidence.py",
+      "sha256": "bb7cb77cc9326a14f9cd9bd4950f22e655981eaa927e7a8ace181fc53252598f",
+      "bytes": 13200
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/media.py",
+      "sha256": "745b1a93dacd9ea113beb9db6b712a8b9b4659951d9b67b4e09da955c42866e2",
+      "bytes": 3118
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/protocols.py",
+      "sha256": "49eec59f3bd384ba76aa18f3e8623c44c214194af277c0b5beb5065a0b2d1119",
+      "bytes": 33222
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/qualification.py",
+      "sha256": "8a06df48b04f36bb2d2af124489e31da617dd935c39534cc31176bc1f56c82de",
+      "bytes": 9763
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/routing.py",
+      "sha256": "0fc474fea7f97b5218b3cb45f2ba3562de11fa360006f1bfa0e00a20b14beed5",
+      "bytes": 4861
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/schemas/credential_endpoint_binding_v1.schema.json",
+      "sha256": "b3b0ee1ba954300c5fd63dd20ef200742651846deb85e8ae7d893d04fbfac6ef",
+      "bytes": 1298
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/schemas/model_alias_binding_v1.schema.json",
+      "sha256": "bbf6b19ed22b6b62e7c71411f45de4e91c591e5d0bf1d0d9f1e54220b20c1ed7",
+      "bytes": 1468
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/schemas/model_api_endpoint_profile_v1.schema.json",
+      "sha256": "1f5861912448ecaf2c8279bf9614633a121986658afff595b0770f460294bd82",
+      "bytes": 5746
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/schemas/protocol_adapter_manifest_v1.schema.json",
+      "sha256": "bf358c29f0f892dd8568a6d9a5c26635fa4d4fde02dc9c13c1f06bddb913efc9",
+      "bytes": 1794
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/schemas/relay_attempt_evidence_v1.schema.json",
+      "sha256": "5f93679d90bece1f7aac67554993d05db3b0f36bce827c2463f711a8dcd681bf",
+      "bytes": 6075
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/model_api_relay/schemas/relay_compatibility_report_v1.schema.json",
+      "sha256": "a40b26b0e6aadcd9c9b01149b87aa835322ddbc61a49905925619f5c7cfc6563",
+      "bytes": 1032
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/reviewer_batch.py",
+      "sha256": "ed250521206e9b0c067c0027fb754137df4911b461c368a6ca0bf6b822af9888",
+      "bytes": 7413
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/reviewer_binding.py",
+      "sha256": "f35da6d7f7956254ac8c664401f25d9e6bf23466d890b220df793ec0a0cdcaff",
+      "bytes": 6884
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/reviewer_budget.py",
+      "sha256": "9cc7635b8b2541fdc19d31547fe24627fa022aeccc929dc2fc1861eecb9f800c",
+      "bytes": 4872
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/vision_qualification/__init__.py",
+      "sha256": "fa02d2590526b11af11699154e4eff0331e9761ca206f97f3a97338907474815",
+      "bytes": 897
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/vision_qualification/request_contracts.py",
+      "sha256": "75621db1f6dc1e5be8fd5773c018c0f7cddd66e86463583f0806de5353456508",
+      "bytes": 16441
+    },
+    {
+      "path": "memorive_desktop/source/model_gateway/vision_qualification/wrappers.py",
+      "sha256": "53ff5b91a40c9d81b7d32e1f8ae7bb0197d0c00fb92a055c4a5deed0b01dc31d",
+      "bytes": 13460
     }
   ]
 }

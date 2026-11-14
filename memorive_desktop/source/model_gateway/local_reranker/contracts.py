@@ -79,6 +79,14 @@ def bytes_sha256(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest().upper()
 
 
+def file_sha256(path: str | Path, *, chunk_size: int = 8 * 1024 * 1024) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        while chunk := handle.read(chunk_size):
+            digest.update(chunk)
+    return digest.hexdigest().upper()
+
+
 def _require_sha(value: Any, code: str) -> str:
     if not isinstance(value, str) or not SHA256_RE.fullmatch(value):
         raise LocalRerankerViolation(code)

@@ -190,6 +190,15 @@ def write_card(card_path: Path, fm: dict, *, overwrite: bool = False) -> Path:
     return card_path
 
 
+def read_field_credibility(fm: dict) -> dict:
+    """读端兼容:取顶层 field_credibility;旧 v1–v4 卡缺该键 → 6 核心字段全 `unknown`(不臆断已校验、也不报错)。
+    承 v5 分级信任「旧卡缺 credibility 当 unknown」。"""
+    fc = fm.get("field_credibility")
+    if isinstance(fc, dict):
+        return fc
+    return {f: {"credibility": CRED_UNKNOWN, "note": None, "danger": unknown_field} for f in CONTENT_FIELDS}
+
+
 def apply_field_credibility(card_path: Path, field_cred: dict, key_data_cred: list) -> Path:
     """把 EVIDENCE_REVIEW 分级信任档写进**已有卡**(grade_and_admit 调):更新顶层 field_credibility + 每条 key_data 的
     credibility/credibility_note/danger;**其余 frontmatter 与正文逐字保留**(读 yaml 改档再同款 _CardDumper 重转、

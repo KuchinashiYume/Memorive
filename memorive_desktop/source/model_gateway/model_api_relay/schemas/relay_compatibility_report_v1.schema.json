@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:execution:model-api-relay:relay-compatibility-report:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_id",
+    "required_units",
+    "entries",
+    "evidence_refs",
+    "report_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "MODEL_API_RELAY_RELAY_COMPATIBILITY_REPORT_V1"
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_units": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object"
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "report_sha256": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    }
+  }
+}

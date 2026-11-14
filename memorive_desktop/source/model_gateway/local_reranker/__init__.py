@@ -1,6 +1,6 @@
 """RETRIEVAL-CALIBRATION local-only reranker qualification seam."""
 
-from .adapter import LocalRerankerOutcome
+from .adapter import LocalRerankerAdapter, LocalRerankerOutcome
 from .contracts import (
     LocalRerankerViolation,
     build_request,
@@ -9,6 +9,7 @@ from .contracts import (
 )
 
 __all__ = [
+    "LocalRerankerAdapter",
     "LocalRerankerOutcome",
     "LocalRerankerViolation",
     "build_request",

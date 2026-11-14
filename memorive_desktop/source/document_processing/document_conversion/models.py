@@ -4,6 +4,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import platform
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -14,6 +15,18 @@ from typing import Any
 class _ValueEnum(str, Enum):
     def __str__(self) -> str:
         return self.value
+
+
+class ExecutionStatus(_ValueEnum):
+    COMPLETED = "completed"
+    FAILED = "failed"
+    BLOCKED = "blocked"
+
+
+class FormatVerdict(_ValueEnum):
+    SUPPORTED = "supported"
+    DEGRADED = "degraded"
+    UNSUPPORTED = "unsupported"
 
 
 class SelectionStatus(_ValueEnum):
@@ -77,6 +90,16 @@ class DocumentProbe:
             "error_code": self.error_code,
             "diagnostics": list(self.diagnostics),
         }
+
+    def require_match(self) -> "DocumentProbe":
+        if self.status != "match":
+            raise DocumentConversionError(
+                self.error_code or "FORMAT_PROBE_FAILED",
+                f"document probe did not match: {self.status}",
+                details=self.to_dict(),
+            )
+        return self
+
 
 @dataclass(frozen=True)
 class ImageFrameManifest:
@@ -160,6 +183,53 @@ class ConversionReceipt:
         for key in ("anchor_map", "hard_failures", "degradation_signals", "warnings", "evidence_refs"):
             value[key] = list(value[key])
         return value
+
+    @classmethod
+    def minimal_for_test(cls, *, source_sha256: str, output_sha256: str, detected_format: str) -> "ConversionReceipt":
+        identity = {
+            "source_sha256": source_sha256,
+            "output_sha256": output_sha256,
+            "detected_format": detected_format,
+            "profile": "test-v1",
+        }
+        return cls(
+            receipt_id=stable_identifier("IntakeR-", identity),
+            created_at="1970-01-01T00:00:00+00:00",
+            source_path_projection="fixture",
+            source_sha256=source_sha256,
+            source_size=1,
+            detected_format=detected_format,
+            declared_extension=f".{detected_format}",
+            signature_match=True,
+            data_ownership="self",
+            document_profile="test",
+            converter_profile_id="test-v1",
+            engine="test",
+            engine_version="1",
+            runtime_version=platform.python_version(),
+            config_hash="3" * 64,
+            execution_status=ExecutionStatus.COMPLETED.value,
+            format_verdict=FormatVerdict.SUPPORTED.value,
+            selection_status=SelectionStatus.PRIMARY_SELECTED.value,
+            recognition_status=RecognitionStatus.NOT_APPLICABLE.value,
+            output_sha256=output_sha256,
+            rawmd_sha256=output_sha256,
+            cleanmd_sha256=None,
+            anchor_kind="line",
+            anchor_count=1,
+            anchor_map=({"kind": "line", "ordinal": 1},),
+            hard_failures=(),
+            degradation_signals=(),
+            warnings=(),
+            primary_receipt_id=None,
+            fallback_receipt_id=None,
+            selection_reason="test primary",
+            legacy_bridge_receipt=None,
+            image_frame_manifest=None,
+            nondeterminism_class="DETERMINISTIC_SEMANTIC_OUTPUT",
+            evidence_refs=("test",),
+        )
+
 
 @dataclass(frozen=True)
 class ConversionAmendment:
