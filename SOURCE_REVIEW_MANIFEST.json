@@ -4566,8 +4566,8 @@
     },
     {
       "path": "memorive_desktop/source/evidence_review/parser.py",
-      "sha256": "71a4cbaf6ef843410c262f2025e559681896f0a01fdb0d1091213ee4d948bae9",
-      "bytes": 9183
+      "sha256": "559ebaa958703838d50b8fff9be7f6bdf5ba1e6d967eb7ceb1a7dc4f1d81e92f",
+      "bytes": 9126
     },
     {
       "path": "memorive_desktop/source/evidence_review/problems.py",
@@ -4611,8 +4611,8 @@
     },
     {
       "path": "memorive_desktop/source/evidence_review/transcription.py",
-      "sha256": "13f63198d03ef7e79d987d5092396d0554404ec632526a523c3f60933ab9fd1f",
-      "bytes": 62398
+      "sha256": "165ee760dfee738644569e8e5b32bfaaf63d1961c0637929bddc58dcd58d5d7e",
+      "bytes": 62175
     },
     {
       "path": "memorive_desktop/source/facade_method_binding.json",
@@ -4621,8 +4621,8 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/__init__.py",
-      "sha256": "c4ff01de72a47e2af6cee64e6ddae60f4af9eb1234747d7309960301ccd1fa88",
-      "bytes": 2912
+      "sha256": "f18f92aa4540cfdfbce821dc1aa25e5c40843e6ba46a4973208b8c04a01ac357",
+      "bytes": 2256
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/card_io.py",
@@ -4631,13 +4631,13 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/dispatch.py",
-      "sha256": "5f24b67becc7b288cff0982779bc018caf5a9861a511e962bd41c6f28697e945",
-      "bytes": 8392
+      "sha256": "ff03e83ce55065cad6354945db7442e07cf820fed47473865be8950d612a3ca6",
+      "bytes": 882
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/errors.py",
-      "sha256": "993fa3dead98c630467b4500e2e7dcdf7f4791eb658018c390623af80208bb40",
-      "bytes": 3708
+      "sha256": "a38e5b4484942cc4f3c7bc8d9928b639ba01384a55354a1cc283149eaf61d6bf",
+      "bytes": 3331
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/knowledge_admission_log.py",
@@ -4646,8 +4646,8 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/machine.py",
-      "sha256": "adf26fd1d5085013b1aef719710e4b2a87026262d9298ecd6eaadf37b5ee744b",
-      "bytes": 7603
+      "sha256": "5313dfa004e5f4d9a15d1e5870f333538a4f23f799e5921d24b477b805d88eb2",
+      "bytes": 6317
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/research_feedback.py",
@@ -7461,8 +7461,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "0ec46366f44e3cf44b55571d14fc6749a237ee744b99c0028502922783aa1d40",
-      "bytes": 209430
+      "sha256": "461abe1d4c5987b497d286cac871fc305b82e7c79f1383cc5226ac9090874964",
+      "bytes": 209429
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
