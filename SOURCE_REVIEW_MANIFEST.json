@@ -3991,8 +3991,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/registry_v2.py",
-      "sha256": "5db8603ef2c149ff0b521666d7e121045313ce4e0c04d28790305277da004b5e",
-      "bytes": 25574
+      "sha256": "d3749c19edea341b02c86101969c3f7a379febad16d57edc5cd72d782622ef4f",
+      "bytes": 30018
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schema.py",
@@ -7581,7 +7581,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "867c5c5ab9af7082c39d8f4fe0f5e79c2bfc21355363fadbad8ee4b6e2a09b43",
+      "sha256": "d0c003ff66cfda58d7fd5cf2b57866cc102a61a465f2215c51ad0b2029af360e",
       "bytes": 232417
     },
     {

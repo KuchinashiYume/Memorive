@@ -301,6 +301,105 @@ class ArtifactRegistry:
             evidence_refs=evidence_refs,
         )
 
+    def observe_knowledge_admission_state_transition(
+        self,
+        artifact_id: str,
+        *,
+        event_ref: str,
+        from_status: str,
+        to_status: str,
+    ) -> str:
+        """Reference an KNOWLEDGE_ADMISSION-owned event without changing Card bytes or Envelope."""
+
+        self.root.mkdir(parents=True, exist_ok=True)
+        with self._single_writer_lock():
+            events = self.read_events()
+            self._get_from_events(events, artifact_id, effective=False)
+            payload = {
+                "artifact_id": artifact_id,
+                "state_owner": "KNOWLEDGE_ADMISSION",
+                "event_ref": event_ref,
+                "from_status": from_status,
+                "to_status": to_status,
+            }
+            for existing in events:
+                if existing["event_type"] == "state_transition_observed" and canonical_json(
+                    existing["payload"]
+                ) == canonical_json(payload):
+                    return "noop"
+            self._append_event_locked(self._make_event("state_transition_observed", payload))
+        return "appended"
+
+    def state_events(self, artifact_id: str) -> list[dict[str, Any]]:
+        events = self.read_events()
+        self._get_from_events(events, artifact_id, effective=False)
+        return [
+            copy.deepcopy(event)
+            for event in events
+            if event["event_type"] == "state_transition_observed"
+            and event["payload"]["artifact_id"] == artifact_id
+        ]
+
+    def events_through(self, last_record_id: str) -> list[dict[str, Any]]:
+        """Return the exact logical prefix ending at one event ID."""
+
+        events = self.read_events()
+        for index, event in enumerate(events):
+            if event["event_id"] == last_record_id:
+                return copy.deepcopy(events[: index + 1])
+        raise UnknownArtifactError(f"unknown registry record/event id: {last_record_id}")
+
+    @staticmethod
+    def normalized_prefix_bytes(events: list[Mapping[str, Any]]) -> bytes:
+        """Canonical JSONL bytes used by registry_snapshot hashes."""
+
+        return b"".join((canonical_json(event) + "\n").encode("utf-8") for event in events)
+
+    def audit_integrity(self) -> list[dict[str, Any]]:
+        artifacts = {item["artifact_id"]: item for item in self.artifacts(effective=True)}
+        issues: list[dict[str, Any]] = []
+        for artifact_id, envelope in artifacts.items():
+            path = Path(envelope["locator"]["path"])
+            if not path.is_file():
+                issues.append(
+                    {"code": "ARTIFACT_FILE_MISSING", "artifact_id": artifact_id, "locator": str(path)}
+                )
+            else:
+                actual_hash = sha256_file(path)
+                expected_hash = content_hash_value(envelope)
+                if actual_hash != expected_hash:
+                    issues.append(
+                        {
+                            "code": "ARTIFACT_HASH_MISMATCH",
+                            "artifact_id": artifact_id,
+                            "expected": expected_hash,
+                            "actual": actual_hash,
+                        }
+                    )
+            for link in resolved_parent_links(envelope):
+                parent_id = link["parent_artifact_id"]
+                if parent_id == artifact_id:
+                    issues.append({"code": "SELF_PARENT", "artifact_id": artifact_id})
+                elif parent_id not in artifacts:
+                    issues.append(
+                        {
+                            "code": "PARENT_NOT_REGISTERED",
+                            "artifact_id": artifact_id,
+                            "parent_artifact_id": parent_id,
+                        }
+                    )
+                elif content_hash_value(artifacts[parent_id]) != link["parent_content_hash"]:
+                    issues.append(
+                        {
+                            "code": "PARENT_HASH_MISMATCH",
+                            "artifact_id": artifact_id,
+                            "parent_artifact_id": parent_id,
+                        }
+                    )
+        for cycle in self._find_cycles(artifacts):
+            issues.append({"code": "LINEAGE_CYCLE", "artifact_ids": cycle})
+        return sorted(issues, key=canonical_json)
+
     def overwrite(self, *_args: Any, **_kwargs: Any) -> NoReturn:
         raise AppendOnlyViolation("overwrite is forbidden; append a registry event")
 
