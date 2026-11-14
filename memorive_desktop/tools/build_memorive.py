@@ -173,7 +173,7 @@ def main():
         rel=p.relative_to(stage/'source').with_suffix('').as_posix().replace('/','.')
         hidden.add(rel.removesuffix('.__init__'))
     hidden.update(['assistant_alpha','assistant_native_motion','console_expressions','console_permission','install_health','integrated_agent','notification_runtime','offline_help','product_identity','runtime','window_chrome','network_diagnostics','clr','pythonnet','fitz','docx','websockets','sqlite3.dbapi2'])
-    hidden.update(['update_maintenance','update_startup','update_service'])
+    hidden.update(['update_maintenance','update_startup','update_service','startup_notice'])
     spec=out/'Memorive.spec'
     version=out/'version.txt'
     version.write_text("VSVersionInfo(ffi=FixedFileInfo(filevers=(1,1,0,0),prodvers=(1,1,0,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('040904B0',[StringStruct('FileDescription','Memorive local source candidate'),StringStruct('ProductName','Memorive'),StringStruct('FileVersion','1.01'),StringStruct('ProductVersion','1.01'),StringStruct('OriginalFilename','Memorive.exe')])]),VarFileInfo([VarStruct('Translation',[1033,1200])])])",encoding='utf8')

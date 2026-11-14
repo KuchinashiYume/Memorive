@@ -966,8 +966,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/app.py",
-      "sha256": "c906caaa4cc11752b333f6f32d1e40465fdc69ecbb8b3db6eca5c123a96448d2",
-      "bytes": 368580
+      "sha256": "c01308867ca67db54d1afa876ed58bb2e1fccb933e31efadc81db53045087ab6",
+      "bytes": 369688
     },
     {
       "path": "memorive_desktop/product/desktop/application_behavior.py",
@@ -2863,6 +2863,11 @@
       "path": "memorive_desktop/product/desktop/window_chrome.py",
       "sha256": "37d45490aa76873897109ebd06a8ca33c667d84fb5de8929fed75816db7c55ca",
       "bytes": 18550
+    },
+    {
+      "path": "memorive_desktop/product/desktop/startup_notice.py",
+      "sha256": "ce5c36bf1b8bfea7613a4bf587eab4cf1b7d680e9bb1522ba4476785f639b392",
+      "bytes": 11213
     },
     {
       "path": "memorive_desktop/product/web/assets/assistant/adopted_inline_001.png",
@@ -6076,8 +6081,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/store.py",
-      "sha256": "216122567c313ae661bd5276ae4b869ba18173303fbade2f44ea86329bf46037",
-      "bytes": 17374
+      "sha256": "d8764ebb8e39499fb0e7ff37421a2c67cf2f794cbe310120de21772f1e2633da",
+      "bytes": 17843
     },
     {
       "path": "memorive_desktop/source/memorive_settings/task_scheduling.py",
@@ -7371,8 +7376,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_memorive.py",
-      "sha256": "d22bccfeffcf66ad817bc3a73124b9bcc847c5629e60f091e81435248ff0ce27",
-      "bytes": 18531
+      "sha256": "a5d217390d2314155e7a67566469eae805e1598acac8ef3fdc367d000f86294d",
+      "bytes": 18548
     },
     {
       "path": "memorive_desktop/tools/build_update_helper.py",
@@ -7491,8 +7496,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "a9e08b3a7540c5978fef99fe58437780f8101043b28970fdbb262184821791a3",
-      "bytes": 210650
+      "sha256": "681fb4eee3dd254e918fa3c1a84d7a4eda3aca9500cd2e897f82fe3685f23cdd",
+      "bytes": 210824
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",

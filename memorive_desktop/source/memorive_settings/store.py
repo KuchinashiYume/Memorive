@@ -39,6 +39,16 @@ def _store_version(schema: Any) -> int:
     return int(match.group(1)) if match else 0
 
 
+def file_from_newer_version(path: Path | str) -> bool:
+    """True when the settings file at path was written by a newer version of the app."""
+    try:
+        value = json.loads(Path(path).read_bytes().decode("utf-8"))
+    except (OSError, ValueError):
+        return False
+    schema = value.get("schema_version") if isinstance(value, Mapping) else None
+    return _store_version(schema) > _store_version(STORE_SCHEMA_VERSION)
+
+
 _LOCKS_GUARD = Lock()
 _PROFILE_LOCKS: dict[str, Any] = {}
 _ENVELOPE_FIELDS = frozenset(
@@ -381,4 +391,4 @@ class SettingsStore:
             return deepcopy(accepted)
 
 
-__all__ = ["SettingsCorrupt", "SettingsFromNewerVersion", "SettingsStore"]
+__all__ = ["SettingsCorrupt", "SettingsFromNewerVersion", "SettingsStore", "file_from_newer_version"]

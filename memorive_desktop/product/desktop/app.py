@@ -6363,6 +6363,23 @@ def main() -> int:
         from private_test_bootstrap import apply as prepare_private_test
         private_test_receipt = prepare_private_test(state_dir, Path(sys.executable).parent / 'private-test',
             BINDING.get('private_test_capsule_sha256'))
+    if console_launch is None and not args.desktop_test_mode:
+        # A settings file from a newer version stops the service before it is ready.
+        # Say so in the app's own dialog instead of ending without a word.
+        from memorive_folder_management import ProfileFolderManager
+        from memorive_settings.store import file_from_newer_version
+        settings_file = ProfileFolderManager(state_dir / "profile").path_for("SETTINGS") / "settings.json"
+        if file_from_newer_version(settings_file):
+            from startup_notice import show_settings_from_newer_version
+            try:
+                notice_storage = Path(webview_storage_selection(state_dir)["storage_path"])
+            except Exception:
+                notice_storage = None  # the notice then uses a temporary browser profile
+            return show_settings_from_newer_version(
+                webview, bundle=bundle, settings_file=settings_file,
+                page_file=state_dir / "profile" / "ui" / "startup_notice.html",
+                storage_path=notice_storage, brand=BRAND,
+            )
     from runtime import ProductApi
     try:
         session_source_roots = None
