@@ -11,9 +11,9 @@ from pathlib import Path
 
 from . import knowledge_admission_log
 from .card_io import read_data_id, read_status, write_status
-from .errors import (IllegalTransitionError, MissingBasisError,
+from .errors import (IllegalTransitionError, KnowledgeAdmissionError, MissingBasisError,
                      TransitionNotEnabledError, TriggerNotAcceptedError)
-from .states import is_legal, is_core_enabled
+from .states import ACTIVE, PENDING, QUARANTINED, is_legal, is_core_enabled
 
 
 class Trigger(str, Enum):
@@ -77,3 +77,17 @@ def transition(card_path: Path, to_status: str, *, trigger: Trigger, reason: str
 
 
 # ── 判定接口(占位/手动)—— 真实 R1–R9 判定归 EVIDENCE_REVIEW(Verification);此处只「拿到通过/未通过就据此转移」──
+
+def apply_verdict(card_path: Path, verdict: Verdict, *, trigger: Trigger, reason: str) -> str:
+    """把一个「通过/未通过」判定作用到一张 **pending** 卡:PASS→active、FAIL→quarantined。
+    (KNOWLEDGE_ADMISSION 只据判定结论转移、不关心判定是谁算的;非 pending 卡 → IllegalTransitionError。)"""
+    # 类型守卫:verdict 非 Verdict 成员(如字符串 "pass")→ 受控挡下、状态不变、不碰卡。
+    # (否则 `verdict is Verdict.PASS` 对 "pass" 为假 → 误走 FAIL → 卡被 quarantined、反向放错。)
+    # 用受控基类 KnowledgeAdmissionError(本步只动 card_io/machine、不新增 errors 类型;可后续加专用 InvalidVerdictError)。
+    if not isinstance(verdict, Verdict):
+        raise KnowledgeAdmissionError(f"判定结论须为 Verdict 成员(得到 {verdict!r}),受控挡下、状态不变、不碰卡: {card_path}")
+    current = read_status(card_path)
+    if current != PENDING:
+        raise IllegalTransitionError(f"apply_verdict 只作用 pending 卡,当前 {current}: {card_path}")
+    to_status = ACTIVE if verdict is Verdict.PASS else QUARANTINED
+    return transition(card_path, to_status, trigger=trigger, reason=reason)

@@ -3,11 +3,11 @@
 流程:收集校核对象(`key_data.needs_review=true` 切入 + 遍历 by_field 实际字段)→ 全部对象与去重锚定
 原文整批首审一次 → 同批最终复查一次 → parser + 本地逐字证据门 → 汇总 verdict(任一 R1–R9
 违规→FAIL,否则 PASS)+ 命中 R 条 → 组 EvidenceReviewReport(含同源置信)
-+ ReviewDecision 交给 KNOWLEDGE_ADMISSION。
++ ReviewDecision → `auto_review(trigger=Trigger.EVIDENCE_REVIEW_VERDICT)` 驱动 KNOWLEDGE_ADMISSION。
 
 守边界:**经 MODEL_GATEWAY 不直连**;**只蒸馏级、不为转换级单开**;**绝不自检**(回原文=独立异源子对话、非蒸馏模型自查);
 **防同源自检**(卡 distill_model 供应商 vs verify 槽供应商同 → 同源低置信、核心字段升级异源待 Anthropic);
-**坏响应 / 调用失败 = DecisionError**,**绝不当无违规=PASS**;
+**坏响应 / 调用失败 = DecisionError**(auto_review 重跑、连错 2 次升级、卡留 pending),**绝不当无违规=PASS**;
 粒度 = 每张 Card 固定两次(整批首审 + 整批最终复查);无字段值 / 无 chunk 的对象跳过并记 malformed、不发空 subject。
 """
 from __future__ import annotations
@@ -20,7 +20,8 @@ from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
 
-from knowledge_admission import DecisionError, ReviewDecision, Trigger, Verdict
+from knowledge_admission import (AutoResult, DecisionError, ReviewDecision, Trigger, Verdict,
+                              auto_review)
 from model_gateway.errors import GatewayError
 from runtime_log import log_reason
 
@@ -1049,7 +1050,7 @@ def _default_call_verify(prompt: str, *, bypass_cache: bool = False) -> str:
 
 # ── 区域门(承 RESEARCH_ANALYSIS §六 / v6.4 之二;升 Anthropic verify 后境外,发 verify 前必过)──────────
 # 白名单放行:仅「非 gated 且 reason ∈ {domestic_skip, region_ok}」放行;gated / region_unknown /
-# 将来新增未知 reason 一律默认挡(绝不静默放行)。挡下 → DecisionError,绝不硬撞 403。
+# 将来新增未知 reason 一律默认挡(绝不静默放行)。挡下 → DecisionError:auto_review 升级、卡留 pending 报人工、绝不硬撞 403。
 _REGION_PASS_REASONS = ("domestic_skip", "region_ok")
 
 

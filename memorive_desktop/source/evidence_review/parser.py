@@ -7,7 +7,7 @@
   启用；旧 mock 默认仍兼容 legacy schema。
 - **well-formed 且 violations 为空列表 = 无违规**(交由上层判 PASS)。
 - **坏响应绝不静默当「无违规=PASS」**:非 str / 坏 JSON / 缺 violations / 元素非法 / rule 不在 R1–R9 /
-  detail 空 → **DecisionError**(可重跑环节失败)。
+  detail 空 → **DecisionError**(可重跑环节失败;auto_review 重跑、连错 2 次升级、卡留 pending)。
 - parser 只校 schema；生产 evidence 的 literal substring 门由 transcription 对真实卡值 / chunk 执行。
 """
 from __future__ import annotations

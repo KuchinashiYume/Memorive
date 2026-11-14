@@ -48,7 +48,11 @@ class KnowledgeAdmissionLogAppendError(KnowledgeAdmissionError):
 
 class DecisionError(KnowledgeAdmissionError):
     """判定源「环节失败」信号(**可重跑**):判定过程本身失败(瞬时错 / 模型调用炸 / 异常),**不是**「判定说未通过」。
-    调用方收到它可以重跑当前环节。(判定说 FAIL 是正常结论 → quarantined、非重跑。)
+    auto_review 收到它才重跑当前环节;连错达阈值升级人工。(判定说 FAIL 是正常结论 → quarantined、非重跑。)
     只有判定源**显式 raise 本类**才算可重跑环节失败;其他异常一律上抛不吞不重跑(防真 bug 伪装成瞬时错)。"""
 
 
+class DecisionContractError(KnowledgeAdmissionError):
+    """判定源**违约**(当 bug 立即暴露、不吞):decision_source 返回了非 Verdict 的东西。
+    不重跑、不隔离、不转移 —— 违约是 bug、上抛;绝不让非 Verdict 走到 PASS/FAIL 分支
+    (防 Step 1 apply_verdict("pass") 那类同型反向放错)。"""
