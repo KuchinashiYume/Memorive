@@ -200,8 +200,26 @@ def import_service(value):
         service['models'].append(dict(row,profile_ref='cli:'+service['config_id']+':'+uuid.uuid4().hex[:12],connection_status='UNVERIFIED'))
     return service
 
+def stable_configuration_identity(service,model=None):
+    """What a verification belongs to: the configured program, template and model.
+
+    The program's files are not part of it, so a command-line tool that updates itself keeps its verification."""
+    fields=('config_id','adapter_id','executable','interpreter','environment','concurrency_group','template')
+    data={k:service.get(k) for k in fields}
+    if model is not None:data['model']={k:model.get(k) for k in ('profile_ref','model_name','thinking_mode')}
+    return digest(data)
+
+def verification_current(binding,service,model):
+    """Does a saved verification belong to this configuration?
+
+    Earlier versions saved configuration_identity(); such a value counts while the program's files are the ones verified then."""
+    saved=(binding or {}).get('configuration_sha256')
+    return bool(saved) and (saved==stable_configuration_identity(service,model) or saved==configuration_identity(service,model))
+
 def configuration_identity(service,model=None):
-    """Stable across labels and enable toggles; exact across execution changes."""
+    """stable_configuration_identity plus the sha256 of the program and of every file it starts.
+
+    Earlier versions saved this value with a verification, and the exam score cache is keyed by it."""
     fields=('config_id','adapter_id','executable','interpreter','environment','concurrency_group','template')
     data={k:service.get(k) for k in fields}
     if model is not None:data['model']={k:model.get(k) for k in ('profile_ref','model_name','thinking_mode')}
@@ -229,9 +247,9 @@ def exam_eligible(target,capability='structured_output'):
     try:template=validate_template(target['template'])
     except (ValueError,KeyError):return False
     binding=target.get('verification') or {}
-    current=configuration_identity(target,target)
+    current=stable_configuration_identity(target,target)
     return bool(template['capabilities'].get(capability) and any('{{model}}' in a for a in template['argv']) and all(template['permissions'].values())
-                and target.get('configuration_sha256',current)==current and binding.get('configuration_sha256')==current
+                and target.get('configuration_sha256',current)==current and verification_current(binding,target,target)
                 and (capability=='images' or capability in binding.get('capabilities',[])))
 
 def receipt_model_bound(receipt,requested):

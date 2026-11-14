@@ -4092,18 +4092,18 @@
     },
     {
       "path": "source/memorive_settings/cli_template_execution.py",
-      "sha256": "4aea98f053d785d9f667be09437d80d24f0bfe0eb294dfc95a77534af6168f37",
-      "bytes": 12500
+      "sha256": "40a2f9bb0303183ff78ab21fab21d1a0d3097c708931272f5b758f8640738086",
+      "bytes": 12434
     },
     {
       "path": "source/memorive_settings/cli_template_management.py",
-      "sha256": "727449c24469cb2fdc9281b43db28961396a19abb71b8aee0dfe440480600097",
-      "bytes": 5517
+      "sha256": "928eb4681f0684ecffd9b32b49079616ef70eff2e323c925afddac7a1bef0039",
+      "bytes": 5471
     },
     {
       "path": "source/memorive_settings/cli_templates.py",
-      "sha256": "8141cc7224fb4f73e84d35aff1a54578ef076df8ba790251ed7e52ff390c7670",
-      "bytes": 21147
+      "sha256": "170122e5bfa784c43b8bb50a3ead762e137721ebb31c17a0d1300597ac677f95",
+      "bytes": 22258
     },
     {
       "path": "source/memorive_settings/cli_verification_jobs.py",
@@ -4122,8 +4122,8 @@
     },
     {
       "path": "source/memorive_settings/controller.py",
-      "sha256": "ff449156722b3e676ff2a640d86f6f09d4cf63fc8fc3a322fa8ae97f2ffc2433",
-      "bytes": 86677
+      "sha256": "d3343e1b91441a88bf6aa6c6b103f3a15ad039e932ae03719eb607c31ec2ee7f",
+      "bytes": 86994
     },
     {
       "path": "source/memorive_settings/credentials.py",
@@ -4282,8 +4282,8 @@
     },
     {
       "path": "source/memorive_settings/report_execution.py",
-      "sha256": "88d21b9c47c413351bec740294ddf23ab5fad7a6d9819fe4967b1ad7d488cebc",
-      "bytes": 6380
+      "sha256": "154031f3e006f38361bc8c4ecba506a24db6e0aff7570e49b3f4cfd35378eac7",
+      "bytes": 6394
     },
     {
       "path": "source/memorive_settings/research_chat_execution.py",
@@ -4327,8 +4327,8 @@
     },
     {
       "path": "source/memorive_settings/verification_state.py",
-      "sha256": "df9e012a3d0da5919ac89049b937ccece838870b133efd12af5dc6f0d2ab4ab7",
-      "bytes": 3031
+      "sha256": "5f73da6388d6af19486f4a1e8020826eff3bb0539f183d95811dfc5ca802d5d3",
+      "bytes": 4361
     },
     {
       "path": "source/memorive_settings/windows_cli.py",

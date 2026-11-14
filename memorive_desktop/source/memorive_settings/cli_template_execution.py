@@ -10,8 +10,8 @@ import tempfile
 import time
 from collections.abc import Mapping
 
-from .cli_templates import (PARSER, TOKEN, configuration_identity, digest, parse_output,
-                            validate_local_fields)
+from .cli_templates import (PARSER, TOKEN, digest, parse_output, stable_configuration_identity,
+                            validate_local_fields, verification_current)
 from .call_ledger import execution_checkpoint
 from .windows_cli import resolve_template_entry, template_command, template_launch_files, native_process_path
 
@@ -24,7 +24,7 @@ def execute(runner,service,model,prompt,*,schema=None,purpose='cli_verification'
     service=deepcopy(dict(service));model=deepcopy(dict(model))
     started=time.monotonic();workspace=None;launched=0;parsed={};reason=None;diagnostic={};binding={};usage=None
     requested=model.get('model_name');wire=prompt.encode('utf8');response=None
-    configuration=configuration_identity(service,model)
+    configuration=stable_configuration_identity(service,model)
     receipt=dict(schema_version='SettingsStructuredChatExecutionReceipt-v2',profile_kind='CLI',purpose=purpose,
         route='DECLARATIVE_COMMAND_TEMPLATE',region='PROVIDER_MANAGED_UNDISCLOSED',egress='CLI_PROVIDER_MANAGED',
         requested_model=requested,returned_model=None,behavior_sha256=hashlib.sha256(wire).hexdigest().upper(),
@@ -34,7 +34,7 @@ def execute(runner,service,model,prompt,*,schema=None,purpose='cli_verification'
         permissions_enforcement='CLI_CONFIGURATION_NOT_OS_SANDBOX')
     try:
         local=validate_local_fields(service);template=local['template']
-        if purpose!='cli_verification' and (model.get('verification') or {}).get('configuration_sha256')!=configuration:raise ValueError('CLI_TEMPLATE_QUALIFICATION_INVALIDATED')
+        if purpose!='cli_verification' and not verification_current(model.get('verification'),service,model):raise ValueError('CLI_TEMPLATE_QUALIFICATION_INVALIDATED')
         receipt.update(template_sha256=digest(template),template_revision=template['revision'])
         if not isinstance(requested,str) or not requested:raise ValueError('CLI_MODEL_NOT_CONFIGURED')
         if len(wire)>template['max_input_bytes']:raise ValueError('CLI_INPUT_TOO_LARGE')
@@ -69,9 +69,8 @@ def execute(runner,service,model,prompt,*,schema=None,purpose='cli_verification'
                 value=runner._credential_resolver(ref).decode('utf8',errors='strict')
             if '\x00' in value:raise ValueError('CLI_TEMPLATE_ENVIRONMENT_INVALID:'+name)
             environment[name]=value
-        # Recheck binaries after queue wait, before committing the attempt.
         execution_checkpoint()
-        if configuration_identity(service,model)!=configuration:raise ValueError('CLI_TEMPLATE_EXECUTABLE_CHANGED')
+        # The files about to run are hashed into the receipt; a tool that has updated itself may run.
         identities=[]
         for path in dict.fromkeys([executable,*template_launch_files(executable,template['argv'],interpreter=local['interpreter'],interpreter_arguments=template['interpreter_argv'])]):
             identities.append(dict(path=path,sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()))

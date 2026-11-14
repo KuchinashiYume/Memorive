@@ -3,7 +3,7 @@ from copy import deepcopy
 import json
 import sqlite3
 from pathlib import Path
-from .cli_templates import import_service, export_service, new_service, is_custom, configuration_identity
+from .cli_templates import import_service, export_service, new_service, is_custom, verification_current
 
 def projection(settings):
     settings=deepcopy(settings)
@@ -11,7 +11,7 @@ def projection(settings):
         if not is_custom(service):continue
         for model in service['models']:
             binding=model.get('verification')
-            if model['connection_status']=='AVAILABLE' and (not binding or binding.get('configuration_sha256')!=configuration_identity(service,model)):
+            if model['connection_status']=='AVAILABLE' and not verification_current(binding,service,model):
                 model['connection_status']='INVALID'
         service['connection_status']='AVAILABLE' if any(m['connection_status']=='AVAILABLE' for m in service['models']) else 'INVALID' if any(m['connection_status']=='INVALID' for m in service['models']) else 'UNVERIFIED'
     return settings

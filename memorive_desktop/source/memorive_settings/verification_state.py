@@ -17,13 +17,38 @@ def api_identity(settings, service):
 
 
 def cli_identity(settings, service, model):
-    from .cli_templates import is_custom,configuration_identity
+    from .cli_templates import is_custom,stable_configuration_identity
     if is_custom(service):
-        return canonical_sha256({'configuration':configuration_identity(service,model),'network':network_identity(settings)})
+        return canonical_sha256({'configuration':stable_configuration_identity(service,model),'network':network_identity(settings)})
     return canonical_sha256({'service':{k:v for k,v in service.items()
         if k not in {'models','connection_status','display_name'}},
         'model':{k:v for k,v in model.items() if k not in {'connection_status','display_name'}},
         'network':network_identity(settings)})
+
+
+def adopt_saved_verifications(store):
+    """Rewrite verifications that an earlier version saved, and return how many.
+
+    Earlier versions bound a verification to the sha256 of the tool's files. While those
+    files are still the ones verified, the value is replaced by the current form, which
+    does not depend on them; the tool can then update itself without losing it.
+    """
+    from .cli_templates import is_custom,stable_configuration_identity,verification_current
+    envelope = store.load()
+    settings = deepcopy(envelope['settings'])
+    rewritten = 0
+    for service in settings['cli_services']:
+        if not is_custom(service):
+            continue
+        for model in service['models']:
+            binding = model.get('verification')
+            current = stable_configuration_identity(service,model)
+            if binding and binding.get('configuration_sha256') != current and verification_current(binding,service,model):
+                binding['configuration_sha256'] = current
+                rewritten += 1
+    if rewritten:
+        store.save(settings, expected_revision=envelope['revision'])
+    return rewritten
 
 
 def invalidate_changed_targets(previous, proposed):
@@ -43,9 +68,10 @@ def invalidate_changed_targets(previous, proposed):
             row['connection_status'] = before['connection_status'] if same and row['connection_status'] != 'UNVERIFIED' else 'UNVERIFIED'
             from .cli_templates import is_custom
             if is_custom(service):
-                from .cli_templates import configuration_identity
-                valid=same and (before.get('verification') or {}).get('configuration_sha256')==configuration_identity(service,row)
-                row['verification']=deepcopy(before.get('verification')) if valid else None
+                from .cli_templates import stable_configuration_identity,verification_current
+                valid=same and verification_current(before.get('verification'),service,row)
+                # A value saved by an earlier version is rewritten in the current form.
+                row['verification']=dict(deepcopy(before['verification']),configuration_sha256=stable_configuration_identity(service,row)) if valid else None
                 row['connection_status']=before['connection_status'] if valid else 'UNVERIFIED'  # Server binding wins over a stale UI draft.
         states = {r['connection_status'] for r in service['models']}
         service['connection_status'] = 'AVAILABLE' if 'AVAILABLE' in states else 'INVALID' if 'INVALID' in states else 'UNVERIFIED'

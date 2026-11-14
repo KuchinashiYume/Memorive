@@ -28,7 +28,7 @@ from .model_validation import FailClosedModelValidationRunner, ModelValidationRu
 from .model_capabilities import infer_api_model_capability
 from .store import SettingsStore
 from .external_sources import ExternalDataSources
-from .verification_state import api_identity, cli_identity, invalidate_changed_targets
+from .verification_state import adopt_saved_verifications, api_identity, cli_identity, invalidate_changed_targets
 
 
 RESET_SCOPE_PREFERENCE_FIELDS = {
@@ -184,6 +184,12 @@ class SettingsController:
         }
         # One refresh coordinator shared by the background worker and all views.
         self._leaderboard_service()
+        try:
+            adopt_saved_verifications(store)
+        except Exception:
+            # Optional: the saved values stay valid as they are, and a settings file
+            # that cannot be read reports its error on the first real load.
+            pass
 
     def get_contract(self) -> dict[str, Any]:
         return settings_field_contract()
@@ -341,7 +347,7 @@ class SettingsController:
                 None,
             )
             if model is not None:
-                from .cli_templates import is_custom,configuration_identity
+                from .cli_templates import is_custom,stable_configuration_identity
                 return {
                     **{k:deepcopy(v) for k,v in cli_service.items() if k not in {'models','display_name','connection_status'}},
                     "kind": "CLI",
@@ -350,7 +356,7 @@ class SettingsController:
                     "enabled": cli_service.get("enabled"),
                     "executable": cli_service.get("executable"),
                     **model,
-                    **({'configuration_sha256':configuration_identity(cli_service,model)} if is_custom(cli_service) else {}),
+                    **({'configuration_sha256':stable_configuration_identity(cli_service,model)} if is_custom(cli_service) else {}),
                 }
         if isinstance(profile_ref, str) and profile_ref.startswith("local:") and self.local_profile_resolver is not None:
             try:
@@ -1371,9 +1377,9 @@ class SettingsController:
                 raise ValueError("CLI_RESOLVED_EXECUTABLE_INVALID")
             target_service["executable"] = resolved_executable
         target_model["connection_status"] = status
-        from .cli_templates import is_custom,configuration_identity,PARSER
+        from .cli_templates import is_custom,stable_configuration_identity,PARSER
         if is_custom(target_service):
-            target_model['verification']=(dict(configuration_sha256=configuration_identity(target_service,target_model),
+            target_model['verification']=(dict(configuration_sha256=stable_configuration_identity(target_service,target_model),
                 capabilities=list(result.get('verified_capabilities',[])),parser_version=PARSER) if status=='AVAILABLE' else None)
         target_service["connection_status"] = (
             "AVAILABLE"
