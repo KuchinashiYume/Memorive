@@ -4196,8 +4196,8 @@
     },
     {
       "path": "memorive_desktop/source/document_processing/engines/legacy_cfont.py",
-      "sha256": "458fac01b277d7ce58398a38b238ff46649ecd6b45e4134d3f38ef8f7425edb2",
-      "bytes": 15601
+      "sha256": "288877ad0c666205d31114355d1bb4ac480523ba4c9b1e09a6a2fed75b382c26",
+      "bytes": 15586
     },
     {
       "path": "memorive_desktop/source/document_processing/engines/legacy_cfont_layout.py",
@@ -7536,7 +7536,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "30afb21a3339c4550763f532e2b7962c262280061ec297921860282f2a1ceee8",
+      "sha256": "d2b6331d4351c5e95b04f189b8df1c4f7d66983bc1d73ef5c53d3a03777e7c9b",
       "bytes": 212380
     },
     {

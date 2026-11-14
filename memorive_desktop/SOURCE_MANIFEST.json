@@ -2417,8 +2417,8 @@
     },
     {
       "path": "source/document_processing/engines/legacy_cfont.py",
-      "sha256": "458fac01b277d7ce58398a38b238ff46649ecd6b45e4134d3f38ef8f7425edb2",
-      "bytes": 15601
+      "sha256": "288877ad0c666205d31114355d1bb4ac480523ba4c9b1e09a6a2fed75b382c26",
+      "bytes": 15586
     },
     {
       "path": "source/document_processing/engines/legacy_cfont_layout.py",
