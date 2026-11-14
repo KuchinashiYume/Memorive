@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 from threading import Lock, RLock
 from typing import Any, Callable, Mapping
 import uuid
@@ -27,6 +28,15 @@ from .model_capabilities import EMBEDDING, RERANKER, infer_api_model_capability
 
 class SettingsCorrupt(RuntimeError):
     pass
+
+
+class SettingsFromNewerVersion(SettingsCorrupt):
+    """The file was written by a newer version of the app. It is left as it is."""
+
+
+def _store_version(schema: Any) -> int:
+    match = re.fullmatch(r"SettingsStoreEnvelope-v(\d+)", schema) if isinstance(schema, str) else None
+    return int(match.group(1)) if match else 0
 
 
 _LOCKS_GUARD = Lock()
@@ -127,19 +137,43 @@ class SettingsStore:
         os.replace(temporary, path)
 
     def _validate_envelope(self, value: Any) -> dict[str, Any]:
+        """Read a file of the current version.
+
+        The file is the user's: a value changed by hand or a field written by a
+        newer version is not damage. Unknown fields are left out, missing sections
+        and preferences get their defaults, and the checksum is not compared. It
+        is recomputed here and written again by the next save.
+        """
         if not isinstance(value, Mapping):
             raise SettingsCorrupt("SETTINGS_ENVELOPE_TYPE_INVALID")
-        if set(value) != _ENVELOPE_FIELDS:
+        if not {"schema_version", "revision", "settings"} <= set(value):
             raise SettingsCorrupt("SETTINGS_ENVELOPE_FIELDS_INVALID")
         if value["schema_version"] != STORE_SCHEMA_VERSION:
             raise SettingsCorrupt("SETTINGS_STORE_SCHEMA_UNSUPPORTED")
         revision = value["revision"]
         if isinstance(revision, bool) or not isinstance(revision, int) or revision < 0:
             raise SettingsCorrupt("SETTINGS_REVISION_INVALID")
-        accepted = validate_settings(value["settings"])
-        if value["settings_sha256"] != canonical_sha256(accepted):
-            raise SettingsCorrupt("SETTINGS_CHECKSUM_MISMATCH")
-        return {**dict(value), "settings": accepted}
+        settings = value["settings"]
+        try:
+            accepted = validate_settings(settings, drop_unknown_fields=True)
+        except ValueError as error:
+            if "_MISSING_FIELD" not in str(error) or not isinstance(settings, dict):
+                raise
+            defaults = self.default_factory()
+            for key, default in defaults.items():
+                settings.setdefault(key, deepcopy(default))
+            if isinstance(settings["preferences"], dict):
+                for key, default in defaults["preferences"].items():
+                    settings["preferences"].setdefault(key, deepcopy(default))
+            accepted = validate_settings(settings, drop_unknown_fields=True)
+        return {
+            "schema_version": STORE_SCHEMA_VERSION,
+            "revision": revision,
+            "template_id": value.get("template_id") or f"settings-template-{revision:06d}",
+            "updated_at": value.get("updated_at") or utc_now(),
+            "settings": accepted,
+            "settings_sha256": canonical_sha256(accepted),
+        }
 
     def _migrate(self, value: Mapping[str, Any]) -> dict[str, Any]:
         version, receipt, fill_defaults, receipt_fields = _OLD_FILES[value["schema_version"]]
@@ -157,8 +191,6 @@ class SettingsStore:
                 or settings.get("schema_version") != f"SettingsTemplate-v{version}"
             ):
                 raise SettingsCorrupt(f"SETTINGS_V{version}_TEMPLATE_INVALID")
-            if value["settings_sha256"] != canonical_sha256(settings):
-                raise SettingsCorrupt(f"SETTINGS_V{version}_CHECKSUM_MISMATCH")
             settings = deepcopy(settings)
         settings["schema_version"] = SETTINGS_SCHEMA_VERSION
         if version == 1:
@@ -319,7 +351,8 @@ class SettingsStore:
             schema = value.get("schema_version") if isinstance(value, Mapping) else None
             if isinstance(schema, str) and schema in _OLD_FILES:
                 return deepcopy(self._migrate(value))
-            return deepcopy(self._validate_envelope(value))
+            if _store_version(schema) <= _store_version(STORE_SCHEMA_VERSION):
+                return deepcopy(self._validate_envelope(value))
         except OSError:
             # A failed migration write is an I/O failure, not corrupt settings.
             # Never replace valid user settings with defaults in this case.
@@ -330,6 +363,9 @@ class SettingsStore:
                     raise
                 raise SettingsCorrupt("SETTINGS_DECODE_FAILED") from exc
             return deepcopy(self._recover(raw, str(exc).split(":")[0]))
+        # Written by a newer version of the app. Resetting it would throw away the
+        # settings of someone who went back to an older version, so it stays as it is.
+        raise SettingsFromNewerVersion(f"SETTINGS_STORE_SCHEMA_NEWER:{schema}")
 
     def save(
         self, settings: Mapping[str, Any], *, expected_revision: int
@@ -345,4 +381,4 @@ class SettingsStore:
             return deepcopy(accepted)
 
 
-__all__ = ["SettingsCorrupt", "SettingsStore"]
+__all__ = ["SettingsCorrupt", "SettingsFromNewerVersion", "SettingsStore"]

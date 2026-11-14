@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextvars import ContextVar
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
@@ -142,6 +143,11 @@ def scan_sensitive(value: Any, path: str = "root") -> None:
             raise ValueError(f"SENSITIVE_VALUE_REJECTED:{path}")
 
 
+# True while a settings file is being read: fields this version does not know are
+# left out instead of making the file unreadable (see validate_settings).
+_DROP_UNKNOWN_FIELDS: ContextVar[bool] = ContextVar("drop_unknown_settings_fields", default=False)
+
+
 def _exact_fields(
     value: Mapping[str, Any], required: set[str], label: str
 ) -> None:
@@ -149,7 +155,10 @@ def _exact_fields(
     unknown = sorted(set(value) - required)
     if missing:
         raise ValueError(f"{label}_MISSING_FIELD:{','.join(missing)}")
-    if unknown:
+    if unknown and _DROP_UNKNOWN_FIELDS.get() and isinstance(value, dict):
+        for key in unknown:
+            del value[key]
+    elif unknown:
         raise ValueError(f"{label}_UNKNOWN_FIELD:{','.join(unknown)}")
 
 
@@ -301,7 +310,21 @@ def default_settings(
     }
 
 
-def validate_settings(value: Any) -> dict[str, Any]:
+def validate_settings(value: Any, *, drop_unknown_fields: bool = False) -> dict[str, Any]:
+    """Check settings and return them in normal form.
+
+    With drop_unknown_fields, fields this version does not know are removed from
+    value itself instead of being an error. The store reads files this way, so a
+    file written by a newer version stays readable.
+    """
+    token = _DROP_UNKNOWN_FIELDS.set(drop_unknown_fields)
+    try:
+        return _validate_settings(value)
+    finally:
+        _DROP_UNKNOWN_FIELDS.reset(token)
+
+
+def _validate_settings(value: Any) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise ValueError("SETTINGS_TYPE_INVALID")
     _exact_fields(
@@ -480,7 +503,10 @@ def _validate_model_services(value: Any) -> list[dict[str, Any]]:
         )
         if missing:
             raise ValueError(f"MODEL_SERVICE_MISSING_FIELD:{','.join(missing)}")
-        if unknown:
+        if unknown and _DROP_UNKNOWN_FIELDS.get() and isinstance(row, dict):
+            for key in unknown:
+                del row[key]
+        elif unknown:
             raise ValueError(f"MODEL_SERVICE_UNKNOWN_FIELD:{','.join(unknown)}")
         config_id = _text(row["config_id"], "MODEL_CONFIG_ID", 128)
         if not IDENTIFIER.fullmatch(config_id) or config_id in seen:

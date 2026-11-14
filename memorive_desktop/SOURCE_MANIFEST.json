@@ -4117,8 +4117,8 @@
     },
     {
       "path": "source/memorive_settings/contracts.py",
-      "sha256": "20b979fd3028b0f4249941850595e85d9cbb12024cd5d77c721dcfa178e14d88",
-      "bytes": 51863
+      "sha256": "b6c3822eda024e00c6d732fb389e7451a39bac95397478a5de49ee9c6be3b4a2",
+      "bytes": 52987
     },
     {
       "path": "source/memorive_settings/controller.py",
@@ -4307,8 +4307,8 @@
     },
     {
       "path": "source/memorive_settings/store.py",
-      "sha256": "030d8a0cb9d0a636a6156074f8fb0e07c4ed72a35402ddb55750a467db61f01e",
-      "bytes": 15564
+      "sha256": "216122567c313ae661bd5276ae4b869ba18173303fbade2f44ea86329bf46037",
+      "bytes": 17374
     },
     {
       "path": "source/memorive_settings/task_scheduling.py",
