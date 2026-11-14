@@ -206,8 +206,8 @@ def atomic_write_lease(root: Path, lease: LockLease) -> bytes:
     return encoded
 
 
-def archive_lease(root: Path, raw: bytes, *, evidence_dir_name: str = "_lock_evidence") -> Path:
-    evidence_root = root / evidence_dir_name
+def archive_lease(root: Path, raw: bytes) -> Path:
+    evidence_root = root / "_lock_evidence"
     evidence_root.mkdir(parents=True, exist_ok=True)
     digest = sha256_bytes(raw)
     target = evidence_root / f"lease-{digest}.json"

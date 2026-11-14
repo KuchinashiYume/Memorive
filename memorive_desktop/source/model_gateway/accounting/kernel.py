@@ -10,9 +10,9 @@ from .pricing.catalog import PriceCatalog
 
 
 class AccountingKernel:
-    def __init__(self, catalog: PriceCatalog, *, calculator: DecimalCalculator | None = None):
+    def __init__(self, catalog: PriceCatalog):
         self.catalog = catalog
-        self.calculator = calculator or DecimalCalculator()
+        self.calculator = DecimalCalculator()
 
     def quote(
         self,

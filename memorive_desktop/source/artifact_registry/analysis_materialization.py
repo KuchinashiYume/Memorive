@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import re
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -45,7 +44,6 @@ class SandboxBoundary:
 
     sandbox_root: Path
     protected_roots: tuple[Path, ...]
-    _allow_test_temp_root: bool = False
 
     def __post_init__(self) -> None:
         root = Path(self.sandbox_root).resolve(strict=False)
@@ -61,16 +59,8 @@ class SandboxBoundary:
                 "sandbox_root must be disjoint from every protected root"
             )
         canonical_sandbox = _CANONICAL_SANDBOX_ROOT.resolve(strict=False)
-        test_temp = Path(tempfile.gettempdir()).resolve(strict=False)
-        canonical_root = _contains(canonical_sandbox, root)
-        authorized_test_root = self._allow_test_temp_root and _contains(
-            test_temp, root
-        )
-        if not canonical_root and not authorized_test_root:
-            raise SandboxBoundaryViolation(
-                "sandbox_root must be under G:\\Memorive-沙盒; only an explicit "
-                "test-only temporary root is permitted outside it"
-            )
+        if not _contains(canonical_sandbox, root):
+            raise SandboxBoundaryViolation("sandbox_root must be under G:\\Memorive-沙盒")
         object.__setattr__(self, "sandbox_root", root)
         object.__setattr__(self, "protected_roots", protected)
 
@@ -79,8 +69,6 @@ class SandboxBoundary:
         cls,
         sandbox_root: Path | str,
         protected_roots: Iterable[Path | str],
-        *,
-        allow_test_temp_root: bool = False,
     ) -> "SandboxBoundary":
         root = Path(sandbox_root).resolve(strict=False)
         supplied = tuple(
@@ -89,5 +77,4 @@ class SandboxBoundary:
         return cls(
             sandbox_root=root,
             protected_roots=supplied,
-            _allow_test_temp_root=allow_test_temp_root,
         )

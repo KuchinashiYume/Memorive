@@ -451,7 +451,7 @@ def _default_region_check() -> None:
 
 def analyze(context_pack, question: str, constraints=None, *,
             data_ownership=None, legacy_data_ownership=None,
-            ownership_route_profile=None, model_call=None,
+            model_call=None,
             region_check=None, output_language: str | None = None) -> AnalysisResult:
     """RESEARCH_ANALYSIS 主入口:Context Pack + 问题 → 固定四段分析建议(建议性、非结论)。
 
@@ -482,7 +482,6 @@ def analyze(context_pack, question: str, constraints=None, *,
         ownership_envelope = build_analysis_request_envelope(
             context_pack,
             legacy_data_ownership=legacy_value,
-            route_profile=ownership_route_profile,
         )
     except OwnershipContractError as exc:
         _raise_ownership_fail_closed(exc, stage="request_envelope")

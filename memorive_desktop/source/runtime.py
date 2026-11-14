@@ -775,24 +775,21 @@ class ProductApi:
     def _default_assistant_shortcut_entries(
         *,
         home: Path | None = None,
-        workspace_candidates: tuple[Path, ...] | None = None,
     ) -> list[dict[str, str]]:
         """Seed useful first-run shortcuts without hard-coding another PC's paths."""
 
         resolved_home = (home or Path.home()).resolve(strict=False)
-        candidates = workspace_candidates
-        if candidates is None:
-            candidates = tuple(
-                candidate
-                for candidate in (
-                    Path(os.environ["MEMORIVE_WORKSPACE_ROOT"])
-                    if os.environ.get("MEMORIVE_WORKSPACE_ROOT")
-                    else None,
-                    Path("G:/Memorive"),
-                    Path.cwd(),
-                )
-                if candidate is not None
+        candidates = tuple(
+            candidate
+            for candidate in (
+                Path(os.environ["MEMORIVE_WORKSPACE_ROOT"])
+                if os.environ.get("MEMORIVE_WORKSPACE_ROOT")
+                else None,
+                Path("G:/Memorive"),
+                Path.cwd(),
             )
+            if candidate is not None
+        )
         workspace = next(
             (
                 candidate.resolve(strict=False)
@@ -863,7 +860,6 @@ class ProductApi:
         source_root: Path,
         method_binding_path: Path,
         *,
-        network_runner: Any = run_network_diagnostic,
         system_effects_enabled: bool = False,
         autostart_manager: WindowsAutostartManager | None = None,
         session_source_roots: Mapping[str, Path] | None = None,
@@ -911,7 +907,6 @@ class ProductApi:
         self._core_event_previous_snapshot: dict[str, Any] | None = None
         self._core_event_last_receipt: dict[str, Any] | None = None
         self._exit_requested = False
-        self._network_runner = network_runner
         self._network_test_count = 0
         self._system_effects_enabled = bool(system_effects_enabled)
         self._autostart_manager = autostart_manager or WindowsAutostartManager()
@@ -3923,7 +3918,7 @@ class ProductApi:
         timeout_seconds = accepted.get("timeout_seconds", preferences["request_timeout_seconds"])
         self._network_test_count += 1
         try:
-            receipt = self._network_runner(
+            receipt = run_network_diagnostic(
                 proxy_mode=proxy_mode,
                 proxy_address=proxy_address,
                 timeout_seconds=timeout_seconds,

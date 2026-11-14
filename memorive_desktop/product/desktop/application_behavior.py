@@ -56,13 +56,11 @@ class WindowsAutostartManager:
     def __init__(
         self,
         executable: Path | str | None = None,
-        *,
-        registry: Any | None = None,
-        platform_name: str | None = None,
     ) -> None:
         self.executable = Path(executable or sys.executable).resolve()
-        self.platform_name = platform_name or os.name
-        if registry is None and self.platform_name == "nt":
+        self.platform_name = os.name
+        registry = None
+        if self.platform_name == "nt":
             import winreg
 
             registry = winreg

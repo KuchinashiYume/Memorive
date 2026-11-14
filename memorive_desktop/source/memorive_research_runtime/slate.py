@@ -481,16 +481,9 @@ def compose_slate(
     facts: Sequence[Mapping[str, Any]],
     context: Mapping[str, Any],
     plan: Mapping[str, Any],
-    *,
-    behavior_events: Sequence[Mapping[str, Any]] | None = None,
-    production_write_target: str | None = None,
 ) -> dict[str, Any]:
     """Compose a deterministic finite slate without any cross-channel backfill."""
 
-    if behavior_events:
-        raise SlateCompositionError("BEHAVIOR_INPUT_NOT_ACCEPTED_IN_Intake")
-    if production_write_target is not None:
-        raise SlateCompositionError("PRODUCTION_WRITE_FORBIDDEN_Intake")
     context_before = canonical_json(context)
     plan_before = canonical_json(plan)
     facts_before = canonical_json(facts)

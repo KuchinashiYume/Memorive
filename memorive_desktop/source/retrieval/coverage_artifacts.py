@@ -665,7 +665,6 @@ def derive_facet_coverage_inputs(
     token_pattern: str = r"[A-Za-z0-9_]+",
     minimum_token_length: int = 3,
     stopwords: Iterable[str] = (),
-    covered_min_distinct_matches: int = 2,
     uncovered_status: str = "missing",
 ) -> tuple[FacetCoverageInput, ...]:
     """Derive conservative facet coverage from minimal discriminative ranges.
@@ -678,8 +677,6 @@ def derive_facet_coverage_inputs(
 
     if not facets or not members:
         return ()
-    if covered_min_distinct_matches < 1:
-        raise EvidenceArtifactValidationError("covered_min_distinct_matches must be positive")
     if uncovered_status not in {"missing", "not_assessed"}:
         raise EvidenceArtifactValidationError("uncovered_status must be missing or not_assessed")
     normalized_stopwords = {_facet_token(item) for item in _DEFAULT_FACET_STOPWORDS}
@@ -828,7 +825,7 @@ def derive_facet_coverage_inputs(
 
         distinct_count = len({item[2] for item in distinctive_matches})
         total_count = len({item[2] for item in matches})
-        if distinct_count >= 1 and total_count >= covered_min_distinct_matches and support:
+        if distinct_count >= 1 and total_count >= 2 and support:
             status = "covered"
             reasons = ("DISCRIMINATIVE_ANCHOR_AND_MINIMUM_MATCHES",)
         else:

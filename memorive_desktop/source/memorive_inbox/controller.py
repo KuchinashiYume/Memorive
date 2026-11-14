@@ -52,7 +52,6 @@ class InboxController:
         minimum_free_bytes: int = 1024 * 1024,
         probe_overrides: Mapping[str, Mapping[str, Any]] | None = None,
         include_sample_projection: bool = True,
-        job_state_provider=None,
     ):
         self.data_root = Path(data_root).resolve(strict=False)
         windows_io_path(self.data_root).mkdir(parents=True, exist_ok=True)
@@ -73,7 +72,7 @@ class InboxController:
         self.store = InboxStore(self.data_root / "inbox_store.sqlite3")
         self.binder = FileImportBinder(self.bound_root)
         self.include_sample_projection = bool(include_sample_projection)
-        self.job_state_provider = job_state_provider
+        self.job_state_provider = None
         self._dispatch_lock = threading.RLock()
         self.work_index = None
 

@@ -97,9 +97,9 @@ def _read_frontmatter(rawmd_path) -> dict:
     return fm
 
 
-def _failed(stage, paper_id, doc_type, target, exc, *, extra_hint="", **paths) -> PipelineResult:
+def _failed(stage, paper_id, doc_type, target, exc, **paths) -> PipelineResult:
     """受控错误 → 统一 failed 结果 + RUNTIME_LOG pipeline_failed(该段自身已写 detail;此处记编排级归位)。"""
-    msg = str(exc) + extra_hint
+    msg = str(exc)
     log_error(_MODULE, f"pipeline_failed@{stage}", context={
         "step": f"pipeline/{stage}", "error": f"{type(exc).__name__}: {exc}",
         "paper_id": str(paper_id), "stopped_at": stage})

@@ -71,13 +71,11 @@ class ApplicationFacade:
         *,
         directory_layout: Any | None = None,
         schema_root: Path | None = None,
-        workflow_provider: Any | None = None,
     ):
         self.store = store
         self._node_progress_live = {}
         self.directory_layout = directory_layout
         self.schema_root = schema_root or Path(__file__).with_name("schemas")
-        self.workflow_provider = workflow_provider
         self._last_capability_snapshot: dict[str, Any] = {
             "schema_version": "CapabilitySnapshot-v1",
             "status": "READY",
@@ -139,11 +137,9 @@ class ApplicationFacade:
         workflow_config = accepted.get("workflow_config") or {}
         workflow_id = accepted.get("workflow_definition_id")
         if workflow_id is not None:
-            if self.workflow_provider is None:
-                raise ContractViolation("WORKFLOW_DEFINITION_PROVIDER_REQUIRED")
-            workflow_definition: Any = self.workflow_provider.resolve(workflow_id)
-        elif "workflow_definition" in accepted:
-            workflow_definition = accepted["workflow_definition"]
+            raise ContractViolation("WORKFLOW_DEFINITION_PROVIDER_REQUIRED")
+        if "workflow_definition" in accepted:
+            workflow_definition: Any = accepted["workflow_definition"]
         else:
             workflow_definition = {
                 "schema_version": "WorkflowDefinitionSnapshot-v1",

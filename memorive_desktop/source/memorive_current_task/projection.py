@@ -32,9 +32,9 @@ def _parse_time(value: Any) -> datetime | None:
 class CurrentTaskProjector:
     """Read-only DTO projection. Every business read goes through a facade adapter."""
 
-    def __init__(self, adapter: Any, *, stalled_after_seconds: int = 120):
+    def __init__(self, adapter: Any):
         self.adapter = adapter
-        self.stalled_after_seconds = stalled_after_seconds
+        self.stalled_after_seconds = 120
 
     def _call(self, method: str, **params: Any) -> Any:
         return self.adapter.call(method, params)

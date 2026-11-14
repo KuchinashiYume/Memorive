@@ -367,7 +367,7 @@ def evaluate(rule: Mapping[str,Any], records: dict[str,dict], *, checkpoint:Call
     return result
 
 def analyze(text:str, *, source_id:str, source_sha256:str|None=None, rules:list|None=None, supplemental_records:list|None=None,
-            checkpoint:Callable[[],None]=lambda:None, max_seconds:float=20) -> dict:
+            checkpoint:Callable[[],None]=lambda:None) -> dict:
     if not isinstance(text,str):raise ValueError('RAW_MD_TEXT_REQUIRED')
     raw=text.encode('utf-8');actual=digest(raw)
     if source_sha256 and source_sha256.upper()!=actual:raise ValueError('RAW_MD_HASH_MISMATCH')
@@ -376,7 +376,7 @@ def analyze(text:str, *, source_id:str, source_sha256:str|None=None, rules:list|
     start=time.monotonic()
     def check():
         checkpoint()
-        if time.monotonic()-start>max_seconds:raise TimeoutError('DATA_COMPUTE_TIME_BUDGET_EXCEEDED')
+        if time.monotonic()-start>20:raise TimeoutError('DATA_COMPUTE_TIME_BUDGET_EXCEEDED')
     parsed=extract(text,source_sha256=actual,checkpoint=check)
     from .formats import discover
     formats=discover(text,parsed)

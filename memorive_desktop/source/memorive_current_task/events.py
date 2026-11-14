@@ -13,15 +13,13 @@ class EventIntegrityError(ValueError):
 class TimelineReconciler:
     """Fail-closed event ordering for one selected job attempt."""
 
-    def __init__(self, job_id: str, attempt_id: str, *, after_sequence: int = 0, max_buffer: int = 256):
+    def __init__(self, job_id: str, attempt_id: str, *, after_sequence: int = 0):
         self.job_id = require_identifier(job_id, "job_id")
         self.attempt_id = require_identifier(attempt_id, "attempt_id")
         if isinstance(after_sequence, bool) or not isinstance(after_sequence, int) or after_sequence < 0:
             raise EventIntegrityError("EVENT_CURSOR_INVALID")
-        if isinstance(max_buffer, bool) or not isinstance(max_buffer, int) or max_buffer <= 0:
-            raise EventIntegrityError("EVENT_BUFFER_INVALID")
         self.cursor = after_sequence
-        self.max_buffer = max_buffer
+        self.max_buffer = 256
         self._fingerprints: dict[int, str] = {}
         self._pending: dict[int, dict[str, Any]] = {}
         self._accepted: list[dict[str, Any]] = []
