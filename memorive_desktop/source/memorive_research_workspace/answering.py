@@ -8,7 +8,8 @@ Where a question goes:
                                                      hands the job to the workspace's worker pool
   answer_job()                   this file           what the worker runs, in this order:
     AnswerJob.start                  the job becomes RUNNING, unless it was cancelled or the workspace is closing
-    AnswerJob.gather_evidence        search the selected material and build the model context
+    AnswerJob.gather_evidence        search the selected material and build the model context; each source file
+                                     is hashed once while doing so (evidence.checking_each_file_once)
       or reuse_evidence_of_retried_answer: answering again uses the evidence frozen with that answer
     AnswerJob.build_request          bind the answer schema to the excerpt ids, check that the context still
                                      fits and is unchanged, build the prompt
@@ -35,6 +36,7 @@ from memorive_language import freeze as freeze_language
 from memorive_language.text import choose
 
 from . import answer_coverage, answer_versions
+from .evidence import checking_each_file_once
 from .store import digest, now, packed, uid
 
 # What the question asks for. A comparison may draw on one paper (methods or results inside it);
@@ -112,7 +114,8 @@ class AnswerJob:
                 if self.job.get('retry_snapshot'):
                     self.reuse_evidence_of_retried_answer()
                 else:
-                    self.gather_evidence()
+                    with checking_each_file_once():  # a source file is hashed once, not once per excerpt
+                        self.gather_evidence()
                 self.build_request()
                 self.ask_model()
                 self.save_answer()

@@ -1,6 +1,7 @@
 """Answer branches in the existing thread object, independent of E1 revisions."""
 import copy,re
 from .store import digest,uid,now,packed
+from .evidence import checking_each_file_once
 from memorive_settings import answer_styles
 from memorive_language import freeze as freeze_language
 
@@ -210,7 +211,9 @@ class AnswerVersions:
         for m in context['confirmed_memory']:
             fresh=self.store.get('memory',m['id'],db=db)
             if not fresh or not fresh['active'] or fresh['revision']!=m['revision']:raise ValueError('MEMORY_CHANGED_DURING_REQUEST')
-        for r in refs:self.ws.index.read(r['id'],job['project'],expected_hash=r['content_hash'],db=db)
+        # The excerpts' files must still be the ones read; each file is hashed once, however many excerpts it gave.
+        with checking_each_file_once():
+            for r in refs:self.ws.index.read(r['id'],job['project'],expected_hash=r['content_hash'],db=db)
         binding=job.get('model_binding')
         if binding:
             current=next((r for r in self.ws.catalog() if r['profile_ref']==binding['profile_ref'] and r.get('eligible')),None)

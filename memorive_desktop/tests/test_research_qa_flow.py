@@ -173,6 +173,21 @@ def test_answering_again_calls_the_model_again_and_keeps_both_versions(setup):
     assert job["answer_id"] in {m["id"] for m in versions}
 
 
+def test_an_answer_is_not_saved_when_its_file_changed_while_the_model_ran(setup):
+    class ChangesTheFile(Model):
+        def __call__(self, **request):
+            for snapshot in (self.workspace.store.root / "library_snapshots").iterdir():
+                snapshot.write_bytes(b"changed while the model was answering")
+            return super().__call__(**request)
+
+    model = ChangesTheFile()
+    workspace, thread_id, material_id = setup(model)
+    model.workspace = workspace
+    job = workspace.job_status(_ask(workspace, thread_id, material_id))
+    # The excerpts are checked again before saving, after the model has answered.
+    assert (job["status"], job["error"]) == ("ERROR", "EVIDENCE_STALE")
+    assert _answers(workspace, thread_id) == []
+
 AGENT = {"profile_ref": "cli:codex", "eligible": True, "profile_kind": "CLI", "adapter_id": "codex_cli",
          "binding_hash": "agent", "model_name": "agent-model"}
 

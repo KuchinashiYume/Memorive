@@ -5751,8 +5751,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_research_workspace/answer_versions.py",
-      "sha256": "64c6f55836910016999348a14573a8276c4d73278f7730704a44912b3012b5f7",
-      "bytes": 20239
+      "sha256": "64741b2533bdc9ee722aa7a11d28fdb26a414dce357615adacd772cf70a3ef0e",
+      "bytes": 20448
     },
     {
       "path": "memorive_desktop/source/memorive_research_workspace/attachments.py",
@@ -5801,8 +5801,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_research_workspace/evidence.py",
-      "sha256": "d1fd87d4c4f55e7ae4d0173dd3798df0045b42dfd58b6cf743ec270d38cd2d04",
-      "bytes": 19441
+      "sha256": "509d271c9a873d2cd64eae93921edf144e0a89acd498095e481be95e33ed8c5f",
+      "bytes": 24686
     },
     {
       "path": "memorive_desktop/source/memorive_research_workspace/handoffs.py",
@@ -5876,8 +5876,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_research_workspace/answering.py",
-      "sha256": "57e883233efbe0e3ef7d2275f08d19f09bdf34a5182177a3454bedcd5ab154c1",
-      "bytes": 37456
+      "sha256": "0e66b3a3031ad0351b85a7f269649a918a80d1b37a8744ae0f968c5632b05b9f",
+      "bytes": 37735
     },
     {
       "path": "memorive_desktop/source/memorive_review/__init__.py",
@@ -7936,7 +7936,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "5565c638fd502a190a56c1b6df5842e7475adf9126eb6b37e2582206ce8e4f54",
+      "sha256": "e84d8638615c600e2a95a03333c171d2f848194a4ead9a774762dd4b73b852b8",
       "bytes": 252326
     },
     {
@@ -9576,8 +9576,8 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "0fccef2680da71d0889c87d0f9068625e4a0f6145a96044e9923d73d7736600b",
-      "bytes": 8063
+      "sha256": "0eceade197430193c5b07fcfb52848c72a4a92f155d94a2ebdfcb383afa1e8d6",
+      "bytes": 8385
     }
   ]
 }
