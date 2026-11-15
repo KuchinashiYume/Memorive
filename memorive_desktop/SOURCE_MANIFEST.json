@@ -6507,8 +6507,8 @@
     },
     {
       "path": "source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "c1434371e8793307c887553bd6c293f88045fd97eccb7006e8bcded07d753282",
-      "bytes": 9594
+      "sha256": "17bbe4727390a383d17b82f25c304dbbcb62e445ba410da8eff5ffb7019917fc",
+      "bytes": 8776
     },
     {
       "path": "source/retrieval_weighting/source_snapshot.py",

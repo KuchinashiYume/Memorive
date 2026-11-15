@@ -7561,8 +7561,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "c1434371e8793307c887553bd6c293f88045fd97eccb7006e8bcded07d753282",
-      "bytes": 9594
+      "sha256": "17bbe4727390a383d17b82f25c304dbbcb62e445ba410da8eff5ffb7019917fc",
+      "bytes": 8776
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/candidate_index.py",
@@ -7936,7 +7936,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "e84d8638615c600e2a95a03333c171d2f848194a4ead9a774762dd4b73b852b8",
+      "sha256": "b969818d5c375bac52d414faf7acc8c9da91381900b6e3635533dc5b6f6f9955",
       "bytes": 252326
     },
     {
