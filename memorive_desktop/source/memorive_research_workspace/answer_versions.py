@@ -339,9 +339,7 @@ class AnswerVersions:
                 or (explicit and len(selected) > MAX_SELECTED_MATERIAL)):
             raise ValueError('MATERIAL_SELECTION_INVALID')
         for artifact_id in selected:
-            artifact = self.store.get('artifact', artifact_id, db=db)
-            if not artifact or artifact['project'] != thread['project']:
-                raise ValueError('MATERIAL_OUTSIDE_PROJECT')
+            artifact = self.ws.attachments.material(thread['project'], artifact_id, db=db)
             if artifact['state'] != 'active':
                 raise ValueError('MATERIAL_NOT_READY')
 

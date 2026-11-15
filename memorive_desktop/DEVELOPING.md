@@ -83,6 +83,7 @@ returns, `save_answer` discards the answer and keeps the call's usage on the job
 | What is saved with an answer, answer versions | `AnswerJob.save_answer`, `answer_versions.py` | `test_research_qa_flow.py`, `test_workspace_answer_context.py` |
 | How a document becomes numbered, searchable excerpts | `excerpts_of` and `EvidenceIndex` in `memorive_research_workspace/evidence.py` | `test_evidence_index.py`, `test_research_qa_flow.py` |
 | When an excerpt counts as stale, and how often its files are hashed | `EvidenceIndex.read` and `checking_each_file_once` in `evidence.py`; the blocks are opened in `AnswerJob.run` and `AnswerVersions.validate_context` | `test_evidence_index.py`, `test_research_qa_flow.py` |
+| Which material a conversation draws on; files added in the window | `scope_ids`, `configure`, `attach` in `memorive_research_workspace/attachments.py` | `test_attachments.py`, `test_workspace_vision_and_handoffs.py` |
 | Which processed papers can be added to a research project | `memorive_research_workspace/library_bridge.py` | `test_library_for_research.py` |
 | What a connected device is shown when its document is processed | `job_results` in `memorive_research_workspace/desktop_connections.py` | `test_library_for_research.py` |
 

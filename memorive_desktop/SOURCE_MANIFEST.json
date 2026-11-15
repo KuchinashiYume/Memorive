@@ -4157,8 +4157,8 @@
     },
     {
       "path": "source/memorive_research_workspace/answer_versions.py",
-      "sha256": "3415e1e2c9c72cbd5237b59ae1f8f1545bb1294000e8886e0e718e2ac938dcc0",
-      "bytes": 27134
+      "sha256": "f062490c03ecd6b640e40c77675ac125ba29a2302a449e12e90d759b41a832ab",
+      "bytes": 27019
     },
     {
       "path": "source/memorive_research_workspace/answering.py",
@@ -4167,8 +4167,8 @@
     },
     {
       "path": "source/memorive_research_workspace/attachments.py",
-      "sha256": "fb0b253c1202a395c6b612f1c83f6d1d1007122f5f2741fea2afae21b1591137",
-      "bytes": 15973
+      "sha256": "5abc26ff43d3b71724c2cc47c25eb83161d797afc262648ace56235c6c05847c",
+      "bytes": 20191
     },
     {
       "path": "source/memorive_research_workspace/bibliography.py",
