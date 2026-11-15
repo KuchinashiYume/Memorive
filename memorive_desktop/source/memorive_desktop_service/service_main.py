@@ -604,7 +604,6 @@ async def run(
 
     async def keep_logs_within_retention() -> None:
         """Apply the log retention chosen in Settings at start and once a day."""
-        from runtime_log.config import get_log_path
         from runtime_log.retention import apply as apply_log_retention
 
         while not stop.is_set():
@@ -613,7 +612,7 @@ async def run(
                 await asyncio.to_thread(
                     apply_log_retention,
                     days,
-                    log_path=get_log_path(),
+                    log_path=core_worker.executor.ops_root / "runtime_log" / "log.txt",
                     launch_folder=endpoint_file.parent,
                     running_launch=endpoint_file.name.removesuffix(".endpoint.json"),
                     startup_log_folder=profile_root.parent.parent / "evidence",

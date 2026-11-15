@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -82,16 +83,23 @@ class Logger:
     def _append(self, line: str) -> None:
         """唯一落盘点。硬编码 append 模式,不提供任何覆盖 / 截断路径 (append-only 核心)。"""
         self.log_path.parent.mkdir(parents=True, exist_ok=True)   # 确保运维目录在
+        before = self.log_path.stat().st_size if self.log_path.exists() else 0
         with open(self.log_path, "a", encoding="utf-8") as f:     # ← 唯一写路径、硬编码 "a"、无覆盖入口
-            before = f.tell()                                     # 以打开后的文件位置为准(日志保留清理可能刚替换过文件)
             f.write(line)
-            f.flush()
-            after = f.tell()
         # 部分防呆 (非完整证明): 文件只增不减,写后变小即疑截断 / 覆盖 → 抛。
         # 抓不到"w 覆盖但更长"的情形;完整历史不被改写靠"结构性无覆盖 API + 前缀不变测试"。
-        if after < before:
+        after = self.log_path.stat().st_size
+        if after < before and not self._retention_just_ran():
             raise AppendOnlyViolation(
                 f"append-only 被破坏: 写后文件变小 ({before}→{after} 字节),疑覆盖 / 截断")
+
+    def _retention_just_ran(self) -> bool:
+        """日志保留 (runtime_log.retention) 替换文件前会更新标记文件;十秒内的变小属于它,不算破坏。"""
+        marker = self.log_path.with_name(self.log_path.name + ".retention")
+        try:
+            return time.time() - marker.stat().st_mtime < 10
+        except OSError:
+            return False
 
 
 # ── 模块级唯一入口 (镜像 model_gateway.call 的用法) ──────────────

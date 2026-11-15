@@ -22,6 +22,7 @@ PRUNED_RECORD_TYPES = frozenset({"event", "reason"})
 SERVICE_LAUNCH_FILES = ("service-*.stdout.log", "service-*.stderr.log", "service-*.endpoint.json",
                         "service-*.stop.json", "service-*.shutdown_order.json")
 STARTUP_LOG_FILES = ("webview_startup_*.log",)
+MARKER_SUFFIX = ".retention"      # touched right before a log is replaced; the logger looks at it
 
 
 def _entry_time(line: bytes) -> tuple[datetime | None, object]:
@@ -57,11 +58,12 @@ def prune_log(log_path: Path | str, keep_days: int, *, now: datetime | None = No
     try:
         with open(temporary, "wb") as handle:
             handle.writelines(kept)
-            with open(path, "rb") as current:      # lines another process appended meanwhile
+            handle.flush()
+            os.fsync(handle.fileno())              # the slow part first
+            with open(path, "rb") as current:      # then what another process appended meanwhile
                 current.seek(len(raw))
                 handle.write(current.read())
-            handle.flush()
-            os.fsync(handle.fileno())
+        path.with_name(path.name + MARKER_SUFFIX).write_bytes(b"")
         os.replace(temporary, path)
     except OSError:
         # The log is in use; it is left as it is and tried again next time.
