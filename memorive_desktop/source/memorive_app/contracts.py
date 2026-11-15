@@ -186,3 +186,6 @@ __all__ = [
     "resolved_profile_snapshot",
     "utc_now",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'error_envelope']

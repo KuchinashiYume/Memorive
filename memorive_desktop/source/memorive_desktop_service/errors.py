@@ -78,3 +78,6 @@ __all__ = [
     "SchemaIncompatible",
     "SensitivePersistenceRejected",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'BackpressureExceeded', 'InstanceAlreadyActive']

@@ -189,3 +189,6 @@ __all__ = [
     "OwnershipReviewTask",
     "build_ownership_review_task",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'compute_analysis_binding_hash']

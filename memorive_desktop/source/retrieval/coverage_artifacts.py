@@ -1723,3 +1723,6 @@ __all__ = [
     "derive_facet_coverage_inputs",
     "validate_verification_payload",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'admit_chunk_snapshots', 'build_facet_definition_artifact', 'build_logical_span_artifact', 'build_references_bias_policy', 'build_retrieval_coverage_assessment', 'build_source_role_assessment', 'build_source_role_policy', 'build_span_assembly_policy', 'build_verification_artifact_record', 'legacy_analysis_projection', 'pointer_from_payload', 'resolved_parent_link', 'validate_artifact_graph', 'validate_holdout_public_manifest']

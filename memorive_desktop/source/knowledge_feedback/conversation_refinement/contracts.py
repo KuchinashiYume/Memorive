@@ -724,3 +724,6 @@ __all__ = [
     "object_ref",
     "validate_context_capsule",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'make_capture_attempt_receipt', 'make_export_snapshot', 'make_selection_receipt', 'make_source_access_envelope', 'payload_identity', 'validate_capture_attempt_receipt', 'validate_export_snapshot', 'validate_selection_receipt', 'validate_source_access_envelope']

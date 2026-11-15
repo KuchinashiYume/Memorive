@@ -804,3 +804,6 @@ __all__ = [
     "resolve_identity_batch",
     "verify_source_observation",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'normalize_identifier', 'initialization_candidate_base_projection']

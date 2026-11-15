@@ -525,3 +525,6 @@ def migrate_candidate(
 __all__ = [
     "FAIL_POINTS",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'MigrationFailure', 'migrate_candidate']

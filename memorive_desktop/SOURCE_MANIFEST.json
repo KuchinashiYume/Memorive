@@ -2812,13 +2812,13 @@
     },
     {
       "path": "source/evidence_extraction/segmented_distill/contracts.py",
-      "sha256": "f3352668301764d23ff5b7f990ee7b433fc539565b341c7598a8ef7313da4a05",
-      "bytes": 5930
+      "sha256": "299bfdf029e87628fcba765e809aabc0970cdc355505cb7ea751850a53be9a47",
+      "bytes": 6088
     },
     {
       "path": "source/evidence_extraction/segmented_distill/merge.py",
-      "sha256": "c6f48f5378dca2610e3c335cb1760888728d80f4e4af087abb3ae1922ca0f1f5",
-      "bytes": 7717
+      "sha256": "e70482aa93e73659c9f4f02e1527132ac3c24f5d676981463a31d81aeb50bd19",
+      "bytes": 7830
     },
     {
       "path": "source/evidence_extraction/segmented_distill/publish.py",
@@ -2832,8 +2832,8 @@
     },
     {
       "path": "source/evidence_extraction/segmented_distill/topology.py",
-      "sha256": "65b2be8359c1f03358dc7322ed2a3f9b16a5344bbff0579401b92d9247a25336",
-      "bytes": 13942
+      "sha256": "94e62b9e512656c3d017def3bfcdd7a865d76ce0c849911791126ed052f479c4",
+      "bytes": 14070
     },
     {
       "path": "source/evidence_review/__init__.py",
@@ -2967,8 +2967,8 @@
     },
     {
       "path": "source/evidence_review/ownership_binding.py",
-      "sha256": "a14d6d6b0adec9c0d8105ba39958b58fcf378529785bbfd0938d253e56081258",
-      "bytes": 8395
+      "sha256": "bac07005267e56bf44c0ed993d32089f65138c08aa129414f4d4eafbb7d78443",
+      "bytes": 8526
     },
     {
       "path": "source/evidence_review/parser.py",
@@ -3052,8 +3052,8 @@
     },
     {
       "path": "source/evidence_review/segmented_distill_repair.py",
-      "sha256": "d74af80131cd335818b277d37aac8790833aab6d76ac2e28b21bd43b1ad70e89",
-      "bytes": 11447
+      "sha256": "5b231f940e9ee30f5788077fa00770899914990d30ba8880d5373eb1626f7081",
+      "bytes": 11603
     },
     {
       "path": "source/evidence_review/source_units.py",
@@ -3162,8 +3162,8 @@
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/contracts.py",
-      "sha256": "fef8e583a0ed1cc5bf427c8c6b68c11808328ae73a4a29dee49e6a257e26924c",
-      "bytes": 28469
+      "sha256": "53825aaa5b9ad5dd980a1a004d4e5e2134d33921735c75a8c3305b04803d6753",
+      "bytes": 28829
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/destination.py",
@@ -3172,8 +3172,8 @@
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/graph.py",
-      "sha256": "4ec60ad30fca234e5b33497a5e03f63d30b6b38614f9924912b4f20ccff126b0",
-      "bytes": 9636
+      "sha256": "44e32208355c3c20da942ca472f441cc2fe0e6d63da732f49d4e24afea15c0fd",
+      "bytes": 9760
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/knowledge_feedback_adapter.py",
@@ -3182,8 +3182,8 @@
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/provider_adapter.py",
-      "sha256": "00fa138036848ed928cf372cd53d94073958b3bd3af5a90e6132c9d3d79cb15c",
-      "bytes": 33145
+      "sha256": "655f777541058012c070f4ef6125f936900bbec210827c834771d7092e835eca",
+      "bytes": 33465
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/redaction.py",
@@ -3192,8 +3192,8 @@
     },
     {
       "path": "source/knowledge_feedback/conversation_refinement/refinement.py",
-      "sha256": "8605cd27786c65a3d7ad0b9fe8e030d733071f1bb2da5157b40afffdaa50ffa1",
-      "bytes": 21213
+      "sha256": "f831f84b005fc184114afcfb50a5fd9dcb79dc81fcd40fd6bbeb1f87638eb173",
+      "bytes": 21427
     },
     {
       "path": "source/knowledge_feedback/eligibility.py",
@@ -3237,8 +3237,8 @@
     },
     {
       "path": "source/literature_discovery/live_metadata_transport.py",
-      "sha256": "873ef90d2f352956586767e2c272f4b4d76c42b7819db85467b36a13cdd6f7c3",
-      "bytes": 26379
+      "sha256": "04fb82c1afe17f4baebc426f8ccaa0cd8e25c9614dd72f6c54c5cc9ee036098d",
+      "bytes": 26572
     },
     {
       "path": "source/literature_discovery/novelty_assessment_literature_discovery_library_relation_novelty.py",
@@ -3297,8 +3297,8 @@
     },
     {
       "path": "source/memorive_app/contracts.py",
-      "sha256": "90cfc511e4af7a883b5879f315139dbd0015625cb535cec4e4848781e1658316",
-      "bytes": 6839
+      "sha256": "ded23e8030f2b0330b2c8c2dcede8b5c0e06a0cea311dedb18eae2e119ce1bdd",
+      "bytes": 6955
     },
     {
       "path": "source/memorive_app/credentials.py",
@@ -3592,8 +3592,8 @@
     },
     {
       "path": "source/memorive_desktop_service/adapters.py",
-      "sha256": "a7fe95dc7bb07e127ad6af639029934e69471dd98e8f0c528a446e890fb54011",
-      "bytes": 5098
+      "sha256": "7e7ef48f6d27940a417dc6d69d7aba264666ea2d17a3dbf06aac030932b1cfbd",
+      "bytes": 5217
     },
     {
       "path": "source/memorive_desktop_service/client.py",
@@ -3612,8 +3612,8 @@
     },
     {
       "path": "source/memorive_desktop_service/errors.py",
-      "sha256": "d87f52cc5dc73bac3e3e37cde5e74023b1fb819fe35a0f757d40ce50598a2125",
-      "bytes": 1933
+      "sha256": "f2ac10941b3d1f6edb107ef4d6235f598994171d8429ac15e78b1d551e8312ed",
+      "bytes": 2080
     },
     {
       "path": "source/memorive_desktop_service/locator.py",
@@ -3682,8 +3682,8 @@
     },
     {
       "path": "source/memorive_inbox/contracts.py",
-      "sha256": "3efb7bb5fdf2ee03068881ec94382cba0cac10184ab8c17739e390e066a7447a",
-      "bytes": 2423
+      "sha256": "35bef727f67acffc7f2670041bd894ba62bc2611d53d90028060765de592b0dc",
+      "bytes": 2543
     },
     {
       "path": "source/memorive_inbox/controller.py",
@@ -4012,8 +4012,8 @@
     },
     {
       "path": "source/memorive_research_runtime/identity.py",
-      "sha256": "36fd3d1912f8fe276f0d1959059dd11e2161489f0394eb77521e7b28dec0983c",
-      "bytes": 40065
+      "sha256": "db73670424751c55aa0b358d6d334cb9159d77082b925c91dae5c35f3f73b24a",
+      "bytes": 40231
     },
     {
       "path": "source/memorive_research_runtime/indexing.py",
@@ -6132,8 +6132,8 @@
     },
     {
       "path": "source/research_reports/api_briefing.py",
-      "sha256": "d4caebd08c31504a9651efc044eb794cd3ed885ade55d7bf5729b83a0532dcd0",
-      "bytes": 21808
+      "sha256": "ff71253f477e9732ee12d850215c4b553c4793d9ba70c1b27e2228a1a957847d",
+      "bytes": 21926
     },
     {
       "path": "source/research_reports/artifact_registry_wire.py",
@@ -6257,8 +6257,8 @@
     },
     {
       "path": "source/retrieval/coverage_artifacts.py",
-      "sha256": "df73777291db4dfae7d8bdb0561afe4cb1dab7353f4ccff4fb2d90745af2bf84",
-      "bytes": 78082
+      "sha256": "e6fc4e5e57abeba73cbd4f6af01d4a61f7df2ba828b37c0d28a0f7cf1da5a490",
+      "bytes": 78611
     },
     {
       "path": "source/retrieval/document_context.py",
@@ -6267,8 +6267,8 @@
     },
     {
       "path": "source/retrieval/ownership.py",
-      "sha256": "796081dbc60ccfed7c260068a40e12a55494fa14d0c6d7143a146cd1bd5fe398",
-      "bytes": 38183
+      "sha256": "b67d880e5f6a6f28d42d38ac0b6b825b590e8db07aa402e8762edb8437cd746c",
+      "bytes": 38342
     },
     {
       "path": "source/retrieval/query_understanding.py",
@@ -6427,13 +6427,13 @@
     },
     {
       "path": "source/retrieval_weighting/locator.py",
-      "sha256": "43a13a4f0c98b0c196ee195b8bf28457a70f12ea861a19251ca9e6d319eb4f74",
-      "bytes": 32526
+      "sha256": "5a19a66376073acd7104b6bd5115f5666d5e7add86a33ee5f9816d06b14c5bfe",
+      "bytes": 32764
     },
     {
       "path": "source/retrieval_weighting/migration.py",
-      "sha256": "82870e25a3ac36351f9c60f9fbef38828c8de830372aa477d5f5d85abc0579dd",
-      "bytes": 21290
+      "sha256": "e172921338ff9077d5c3bac0032e59c0ed6baa1db2a80287e3f68eea3dcc3230",
+      "bytes": 21429
     },
     {
       "path": "source/retrieval_weighting/providers.py",
@@ -6502,8 +6502,8 @@
     },
     {
       "path": "source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "fb4248bf99b87f47a64c79112e25807207d66f256497cb7e35135039476b5164",
-      "bytes": 28811
+      "sha256": "41e9aefb7666e9289dc8095c58e7d632e6a0c088198abff0d426041aa0e3d280",
+      "bytes": 29001
     },
     {
       "path": "source/retrieval_weighting/source_snapshot.py",

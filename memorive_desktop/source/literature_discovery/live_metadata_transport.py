@@ -558,3 +558,6 @@ __all__ = [
     "canonical_sha256",
     "sha256_bytes",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'ReceiptValidator', 'build_pre_send_receipt', 'build_url', 'execute_get', 'with_content_hash']

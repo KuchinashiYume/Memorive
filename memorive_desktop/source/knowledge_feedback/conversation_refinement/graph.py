@@ -221,3 +221,6 @@ def message_text(node: Mapping[str, Any]) -> str:
 
 
 __all__ = ["message_text", "validate_normalized_graph"]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'build_normalized_graph']

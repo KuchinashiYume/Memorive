@@ -177,3 +177,6 @@ def merge_facts(
 
 
 __all__ = ["SLOT_STATES"]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'merge_facts']

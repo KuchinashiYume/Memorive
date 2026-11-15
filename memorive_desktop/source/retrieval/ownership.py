@@ -937,3 +937,6 @@ __all__ = [
     "snapshot_fields",
     "block_contributor",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'render_snapshot_frontmatter', 'parse_snapshot_frontmatter']

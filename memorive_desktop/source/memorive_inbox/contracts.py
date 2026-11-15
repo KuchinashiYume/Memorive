@@ -84,3 +84,6 @@ __all__ = [
     "require_identifier",
     "utc_now",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'require_item_state']

@@ -520,3 +520,6 @@ __all__ = [
     "make_model_typed_refinement_item",
     "validate_typed_refinement_item",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'deterministic_refine_graph', 'make_conflict_set', 'make_refinement_subject_binding', 'make_typed_refinement_item']

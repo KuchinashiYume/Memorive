@@ -348,3 +348,6 @@ __all__ = [
     "build_topology",
     "segment_exact_set",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'plan_bounded_segment_split']

@@ -256,3 +256,6 @@ __all__ = [
     "BoundedRepairLedger",
     "SegmentedRepairContractError",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'apply_targeted_repair', 'freeze_targeted_repair_bundle']

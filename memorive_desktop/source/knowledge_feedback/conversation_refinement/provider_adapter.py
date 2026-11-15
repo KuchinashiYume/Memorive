@@ -769,3 +769,6 @@ __all__ = [
     "THREAD_BRIDGE_BEHAVIOR",
     "VISIBLE_UI_BRIDGE_BEHAVIORS",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'build_readonly_thread_bridge_snapshot', 'build_visible_ui_thread_bridge_snapshot', 'build_synthetic_snapshot', 'capture_local_jsonl_snapshot', 'profile_admission', 'validate_provider_export', 'validate_synthetic_export']

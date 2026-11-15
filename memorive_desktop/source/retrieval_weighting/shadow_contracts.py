@@ -682,3 +682,6 @@ __all__ = [
     "require_finite_number",
     "require_string_list",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'require_boolean', 'validate_derived_penalty_policy', 'validate_retrieval_policy_snapshot']

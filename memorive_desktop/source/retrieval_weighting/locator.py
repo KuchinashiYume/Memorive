@@ -725,3 +725,6 @@ __all__ = [
     "LocatorError",
     "PathBoundaryError",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'ensure_owned_path', 'load_and_validate_locator', 'load_json_file', 'make_locator', 'tree_sha256', 'validate_locator', 'validate_run_root']

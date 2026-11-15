@@ -551,3 +551,6 @@ __all__ = [
     "NARRATIVE_SCHEMA",
     "qualifying_library_change_ids",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'run_api_briefing']

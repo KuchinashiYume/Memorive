@@ -177,3 +177,6 @@ __all__ = [
     "exact_keys",
     "text",
 ]
+
+# Names this module exported before; restored with the code behind them.
+__all__ = [*__all__, 'dispatch_artifact_validation', 'validate_field_candidate']
