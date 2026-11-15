@@ -362,7 +362,7 @@ def _build_batch_input(subjects: list, chunk_texts: dict) -> dict:
     }
 
 
-def _wire_batch_input(batch_input: dict) -> dict:
+def _wire_batch_input(batch_input: dict, source_context: dict) -> dict:
     """Compress repeated full-source ID lists without changing review scope.
 
     The validator retains the original subject IDs. Only the prompt projection
@@ -373,6 +373,23 @@ def _wire_batch_input(batch_input: dict) -> dict:
         "subjects": batch_input["subjects"],
         "sources": "Use the source-id-to-text mapping in SOURCE_CONTEXT; each subject remains limited to its own chunk_ids.",
     }
+    catalog_ids = set(source_context)
+    projected = []
+    for subject in batch_input["subjects"]:
+        row = dict(subject)
+        if catalog_ids and set(row["chunk_ids"]) == catalog_ids:
+            row.pop("chunk_ids")
+            row["source_scope_ref"] = "ALL_SOURCE_CONTEXT"
+        projected.append(row)
+    candidate = {
+        "subjects": projected,
+        "sources": "Resolve each subject's chunk_ids or source_scope_ref against SOURCE_CONTEXT. Do not widen its scope.",
+        "source_scopes": {
+            "ALL_SOURCE_CONTEXT": "Exactly all source IDs in the SOURCE_CONTEXT map; no omitted or external sources."
+        },
+    }
+    encoded = lambda value: json.dumps(value, ensure_ascii=False, indent=2)
+    return candidate if len(encoded(candidate)) < len(encoded(payload)) else payload
 
 
 def _partition_batch_subjects(
@@ -440,23 +457,6 @@ def _partition_batch_subjects(
     if current:
         batches.append(current)
     return batches
-    catalog_ids = set(source_context)
-    projected = []
-    for subject in batch_input["subjects"]:
-        row = dict(subject)
-        if catalog_ids and set(row["chunk_ids"]) == catalog_ids:
-            row.pop("chunk_ids")
-            row["source_scope_ref"] = "ALL_SOURCE_CONTEXT"
-        projected.append(row)
-    candidate = {
-        "subjects": projected,
-        "sources": "Resolve each subject's chunk_ids or source_scope_ref against SOURCE_CONTEXT. Do not widen its scope.",
-        "source_scopes": {
-            "ALL_SOURCE_CONTEXT": "Exactly all source IDs in the SOURCE_CONTEXT map; no omitted or external sources."
-        },
-    }
-    encoded = lambda value: json.dumps(value, ensure_ascii=False, indent=2)
-    return candidate if len(encoded(candidate)) < len(encoded(payload)) else payload
 
 
 def _source_bound_batch_prompt(template: str, batch_input: dict, *, prior_source_context=None) -> str:
@@ -473,7 +473,7 @@ def _source_bound_batch_prompt(template: str, batch_input: dict, *, prior_source
     ):
         sources = prior_source_context
     task = template[len(policy):].lstrip().replace("__BATCH_INPUT_JSON__", json.dumps(
-        _wire_batch_input(batch_input), ensure_ascii=False, indent=2))
+        _wire_batch_input(batch_input, sources), ensure_ascii=False, indent=2))
     coverage = {
         "checked_locations": [row["location"] for row in batch_input["subjects"]],
         "checked_items": [{"location": row["location"],
