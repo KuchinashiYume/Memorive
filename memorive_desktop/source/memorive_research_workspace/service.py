@@ -70,11 +70,10 @@ class ResearchWorkspace:
         self.interest_set = interest_set
         self.vision = vision
         self.agent_model = None
-        self.feedback = ResearchFeedback(self.store, self.index)
-        self.topic = Topic(self)
         self.handoffs = Handoffs(self)
+        self.feedback = ResearchFeedback(self.store, self.index, self.handoffs.validate_review)
+        self.topic = Topic(self)
         self.skill = ResearchSkill(self)
-        self.feedback.handoff_validate = self.handoffs.validate_review
         self.pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix='memo-research')
         self.closed = False
         self.lock = threading.RLock()

@@ -3126,11 +3126,6 @@
       "bytes": 18234
     },
     {
-      "path": "source/knowledge_admission/research_feedback.py",
-      "sha256": "3ee500a61076d1fcaf449143d8b7867e518061f6bd44026eb638aa2177cc03fc",
-      "bytes": 803
-    },
-    {
       "path": "source/knowledge_admission/states.py",
       "sha256": "4e429c182aeb1b5dd0edc51c17add59e2c68cf06fb10a9c816c401077e25291b",
       "bytes": 2021
@@ -3217,8 +3212,8 @@
     },
     {
       "path": "source/knowledge_feedback/research_ingest.py",
-      "sha256": "a4c194db5cbb836b6f9e22f5eb4c7f64837654f12910090caf0bbe8374a8db50",
-      "bytes": 12735
+      "sha256": "6dc020caece734f78a7caf62bd52d84ae3426153240cbd08c19f080c3a4e66db",
+      "bytes": 15223
     },
     {
       "path": "source/literature_discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py",
@@ -4267,8 +4262,8 @@
     },
     {
       "path": "source/memorive_research_workspace/service.py",
-      "sha256": "9a5f515cf62d64fe5caaf3322f979e60e464e524138939bbda649389022ba035",
-      "bytes": 33050
+      "sha256": "d183ff60fe5bdc9e812ea6abae7dddcd99ca6fa4057251f11d7a75dbf0b11819",
+      "bytes": 33009
     },
     {
       "path": "source/memorive_research_workspace/skill_bridge.py",
