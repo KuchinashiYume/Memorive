@@ -2212,13 +2212,13 @@
     },
     {
       "path": "source/artifact_registry/analysis_materialization.py",
-      "sha256": "56be0773ec89ab66669ec83898799a02125540a583e17d8b49aeaa220fa56f53",
-      "bytes": 2605
+      "sha256": "037ec9df33e0a402d98a102d8a61500e40ac90f38cb074f624382f99af93b4f9",
+      "bytes": 9224
     },
     {
       "path": "source/artifact_registry/analysis_products.py",
-      "sha256": "34a728d6718990163da3f8dd7f3edb2b13b2e7351f1568aa527cd4590d9f58b7",
-      "bytes": 721
+      "sha256": "332cbc288fb087b742a4f45d6dc455bc1358098f9aeb1c6a2ebfd3e9b4cbf304",
+      "bytes": 1122
     },
     {
       "path": "source/artifact_registry/data_lifecycle.py",
@@ -2227,8 +2227,8 @@
     },
     {
       "path": "source/artifact_registry/errors.py",
-      "sha256": "371da6ef398d87db6d338637ab9443d629003d55c0d10c4c11ff1fc53ea39fa0",
-      "bytes": 1918
+      "sha256": "0b890b19d7a6b2964712595fa822705b1ab6651c80449aedfdaf0bf639e429b4",
+      "bytes": 2070
     },
     {
       "path": "source/artifact_registry/maintenance.py",
@@ -2294,6 +2294,11 @@
       "path": "source/artifact_registry/schemas/asset_migration_query_result_v1.schema.json",
       "sha256": "364e6846a0fadf6fa8d8597f8322b329024043ec03365593f84fb8d3bc24105e",
       "bytes": 2676
+    },
+    {
+      "path": "source/artifact_registry/snapshots.py",
+      "sha256": "7d0234336a2e4e791df7065c64af29335446978fca2e65a72fc323becc65b7dc",
+      "bytes": 9095
     },
     {
       "path": "source/decision_log/__init__.py",
@@ -2971,6 +2976,11 @@
       "bytes": 2912
     },
     {
+      "path": "source/knowledge_admission/analysis_admission_knowledge_admission_analysis_admission.py",
+      "sha256": "0ce65bc912e1878370354b7bf6876dd8f3cf44f1c1def6a2cc05b087b4a5fc52",
+      "bytes": 7597
+    },
+    {
       "path": "source/knowledge_admission/card_io.py",
       "sha256": "f6848eb8574303309bf0fdd29a3118115d4477317112f8dc84bff389235b9410",
       "bytes": 6128
@@ -2982,8 +2992,8 @@
     },
     {
       "path": "source/knowledge_admission/errors.py",
-      "sha256": "993fa3dead98c630467b4500e2e7dcdf7f4791eb658018c390623af80208bb40",
-      "bytes": 3708
+      "sha256": "b765ac4425603684ec73de53fee1e47c030857e4d040b5d76a9abb72ac37dae9",
+      "bytes": 4021
     },
     {
       "path": "source/knowledge_admission/knowledge_admission_log.py",
@@ -3709,6 +3719,11 @@
       "path": "source/memorive_model_evaluation/reranker_text_exam.py",
       "sha256": "6103570e6ba09ed61c437fbb67055b6b2aba30f1c2446d6074c156022edcf8ec",
       "bytes": 45966
+    },
+    {
+      "path": "source/memorive_model_evaluation/retrieval_metrics.py",
+      "sha256": "4567b61450422b4be90770ec4ae6b35fa17b6881e5c76b14d6a1bfac806f9254",
+      "bytes": 13390
     },
     {
       "path": "source/memorive_research_runtime/__init__.py",
@@ -5946,6 +5961,51 @@
       "bytes": 7431
     },
     {
+      "path": "source/retrieval/retrieval_calibration/__init__.py",
+      "sha256": "e574343effa83745183e2689acd7749e915da5274f73557042a468c421a1076a",
+      "bytes": 1207
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/candidate_features.py",
+      "sha256": "149e7384566e80e1ea9133f78a50d39016275e6932c49f84aa9c417d9c4396d4",
+      "bytes": 11010
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/candidate_trace.py",
+      "sha256": "e1e3ac6d3496ea452bf7ae01c4d52f7136741f6370156ee60e022786cede24d8",
+      "bytes": 2964
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/candidate_union_adapter.py",
+      "sha256": "73412684164dd27a561f49b9f771da7b85d9567f31820059e4fbf3b36ba816d4",
+      "bytes": 3167
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/cli.py",
+      "sha256": "7882bb126f0f59d8916bc7b0704691c029c14da1c818ae76a2fdd9a69a1e1d57",
+      "bytes": 1864
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/fallback.py",
+      "sha256": "349da26094d7b303419135959e2587c780060276e8a13d8252cdd4c6e15a59f7",
+      "bytes": 2686
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/pre_rerank_snapshot.py",
+      "sha256": "d643528bab066cfb2e0cec0dbc2248535d4b0ae67c9bca2082e8a9205ac25bf9",
+      "bytes": 3033
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/profile_compare.py",
+      "sha256": "35c28de4c2d4c68d767bd367fd51dab2d3ceaa14ac055671e552507cd405b487",
+      "bytes": 7514
+    },
+    {
+      "path": "source/retrieval/retrieval_calibration/qualification.py",
+      "sha256": "17214239f3f66405041a6ac530d796f744754e6cc1b23f7a7fff0010fc37334d",
+      "bytes": 11095
+    },
+    {
       "path": "source/retrieval/review_qualifications.py",
       "sha256": "56e3783d2aa231540ab3928d68477f636eca954cc7ddd44a0a544eba5dca6382",
       "bytes": 3555
@@ -5992,8 +6052,8 @@
     },
     {
       "path": "source/retrieval_weighting/contracts.py",
-      "sha256": "46edf757627b22e38c2451bd2c16c6f8d100afd04db9f56d330690ff5989d716",
-      "bytes": 11329
+      "sha256": "5b421637a5f18ff84ba26b7a7e64bf52bf7a4055835fb9a37a00bdf0113c81a0",
+      "bytes": 11684
     },
     {
       "path": "source/retrieval_weighting/errors.py",
@@ -6056,6 +6116,16 @@
       "bytes": 6914
     },
     {
+      "path": "source/retrieval_weighting/retrieval_calibration_block_role_calibration.py",
+      "sha256": "476c88f967baff099f33b6a599e64aaf8ac1283240c0b8dd383ba57a8379a6a7",
+      "bytes": 6042
+    },
+    {
+      "path": "source/retrieval_weighting/retrieval_calibration_route_profile.py",
+      "sha256": "50e834bebb0eecb6db61ad471fd455253fb83c26cec3ae0962022317959b6256",
+      "bytes": 3119
+    },
+    {
       "path": "source/retrieval_weighting/shadow_contracts.py",
       "sha256": "17f02de199a651c0cd2c1125f0b46f06a306eda5165b9e24556987619535ba02",
       "bytes": 6977
@@ -6064,6 +6134,26 @@
       "path": "source/run_ledger/__init__.py",
       "sha256": "8a26dff47664fb0c059e2079efdaeb6fd3f465d50d2806852ff32b507dff3f4d",
       "bytes": 561
+    },
+    {
+      "path": "source/run_ledger/accounting_projection.py",
+      "sha256": "dc20b08f0cdedf3ec1f98513e9114f719bc8ecab07e54e6661c38aa7a7862d11",
+      "bytes": 3708
+    },
+    {
+      "path": "source/run_ledger/analysis_admission_runtime_log_publication_preview.py",
+      "sha256": "478fb4c1593461defda71f4508c8cc2d26e193aa2b4c7e45d455fe953f6a912e",
+      "bytes": 10255
+    },
+    {
+      "path": "source/run_ledger/channel_evidence.py",
+      "sha256": "676ef4ddc8ad4088c21c0589d50a88bf19d6cf2e2f14679316438fa15d35e399",
+      "bytes": 39799
+    },
+    {
+      "path": "source/run_ledger/channel_store.py",
+      "sha256": "4276960ce2a2c18412ebff2eb50b38b324e586c5f51f864be3a1c0d5b38f1113",
+      "bytes": 8701
     },
     {
       "path": "source/run_ledger/closure.py",
@@ -6076,9 +6166,19 @@
       "bytes": 17963
     },
     {
+      "path": "source/run_ledger/cost_routing_advisory_ledger.py",
+      "sha256": "e77c0e6760db995af2d4c7214fe6fc582e99f9cab2c0d9da9b330ab38a62e7f9",
+      "bytes": 7293
+    },
+    {
+      "path": "source/run_ledger/cost_routing_historical_recovery.py",
+      "sha256": "c4bd045f3de4bb125229a2a6cf05c4307f0cd3ee5081c9704ef5c427b547f28b",
+      "bytes": 9603
+    },
+    {
       "path": "source/run_ledger/errors.py",
-      "sha256": "ef899244fbae7ae86ff0d306f41c92e3d134b5bd710ab84b3ebfeb528b22c544",
-      "bytes": 1215
+      "sha256": "2c3db7c99f94dbfc126574d9ea7864cc18b0f7dcb0b3e9546f2abae1b4c838ef",
+      "bytes": 2378
     },
     {
       "path": "source/run_ledger/lifecycle.py",
@@ -6086,9 +6186,14 @@
       "bytes": 4044
     },
     {
+      "path": "source/run_ledger/recovery.py",
+      "sha256": "b20cd2dfb9d6a814c051ceb67409741feff37e93104eb813d21bcfa84ab6ca0f",
+      "bytes": 14601
+    },
+    {
       "path": "source/run_ledger/schema.py",
-      "sha256": "7fe69240f1e8c050d77a3bb351df8f0abd10839ba91bea1a24bbc632e21fb2ee",
-      "bytes": 12463
+      "sha256": "1a01e770355e3ad6b27be34a46371429dcd444a7a8996f8e2e2531fc6a4c75bb",
+      "bytes": 12753
     },
     {
       "path": "source/run_ledger/schemas/run_ledger_v1.schema.json",
@@ -6104,6 +6209,11 @@
       "path": "source/run_ledger/schemas/runtime_log_channel_attempt_v1.schema.json",
       "sha256": "84dc30398731497c5856e6e1d7446e5605f410a995130599146e8265e400e462",
       "bytes": 16321
+    },
+    {
+      "path": "source/run_ledger/store.py",
+      "sha256": "a8d9a2f3b1afdd9ff5712d2265270cdcd2607cfd86579188682777e03744abfa",
+      "bytes": 13080
     },
     {
       "path": "source/run_ledger/writer_lock.py",

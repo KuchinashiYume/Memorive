@@ -140,6 +140,14 @@ def validate_hash_descriptor(value: Any, field_name: str) -> dict[str, str]:
     return descriptor
 
 
+def make_stable_id(prefix: str, identity_payload: Mapping[str, Any]) -> str:
+    """Derive a general stable identifier from an RFC8785 identity payload."""
+
+    require_non_empty_string(prefix, "prefix")
+    payload = deepcopy(dict(_mapping(identity_payload, "identity_payload")))
+    return prefix + sha256_bytes(canonical_json_bytes(payload))
+
+
 def make_vector_id(identity_payload: Mapping[str, Any]) -> str:
     """Derive the normative lowercase ``fv1_`` vector ID from exact identity fields."""
 

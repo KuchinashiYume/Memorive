@@ -9,6 +9,10 @@ class ArtifactRegistryRegistryError(RuntimeError):
     """Base error for candidate registry operations."""
 
 
+class ContractValidationError(ArtifactRegistryRegistryError):
+    """A ANALYSIS-ADMISSION compatibility artifact violates its closed contract."""
+
+
 class SandboxBoundaryViolation(ArtifactRegistryRegistryError):
     """A ANALYSIS-ADMISSION materialization write would escape its sandbox."""
 

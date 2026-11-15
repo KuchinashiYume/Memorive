@@ -9,6 +9,14 @@ class KnowledgeAdmissionError(Exception):
     """KNOWLEDGE_ADMISSION 状态机通用受控错误。"""
 
 
+class AdmissionBlocked(KnowledgeAdmissionError):
+    """ANALYSIS-ADMISSION Analysis 准入请求未满足 fail-closed 条件。"""
+
+
+class RealStateTransitionForbidden(KnowledgeAdmissionError):
+    """ANALYSIS-ADMISSION build-only adapter 被误用来执行真实 KNOWLEDGE_ADMISSION 状态迁移。"""
+
+
 class IllegalTransitionError(KnowledgeAdmissionError):
     """**根本非法**的转移 —— 守卫挡下、状态不被改动,绝不默默执行:
     未经 pending 直接 active、从 active 无依据跳回 pending、目标态不在 review_status 三态枚举
