@@ -4731,18 +4731,18 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/__init__.py",
-      "sha256": "96ed912ec8fea4ffe3dfa251bd9b4fe47f15854deb43e41bad2e7eebc20cc930",
-      "bytes": 3257
+      "sha256": "dc965fd77c92c2c6784a876ef931ad6a7d1d697fa9578b15e2a8705188c66713",
+      "bytes": 2381
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/card_io.py",
-      "sha256": "f6848eb8574303309bf0fdd29a3118115d4477317112f8dc84bff389235b9410",
-      "bytes": 6128
+      "sha256": "fabfa6591a5f8fcb3e9e784361df1229feb63558378d4d5a533878cd1bdd097a",
+      "bytes": 4231
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/dispatch.py",
-      "sha256": "5f24b67becc7b288cff0982779bc018caf5a9861a511e962bd41c6f28697e945",
-      "bytes": 8392
+      "sha256": "35b36389555168b6b3c56e3f81a22e54c3e6344a4e87297e0e3c0dca666a90a4",
+      "bytes": 4408
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/errors.py",
@@ -4751,18 +4751,18 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/knowledge_admission_log.py",
-      "sha256": "4f998e0b072f42e5cfd4bb5db6b0791c0b6fcdf0e1a743ee202a6ee362a8a7ac",
-      "bytes": 6266
+      "sha256": "e079db07afe62976c8ad7b5b65b28563161e2794ef1563984f825dcd5d7dd098",
+      "bytes": 3132
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/machine.py",
-      "sha256": "8bf7c84704b6eb3c4173e32192abd1609dca1680ed7ec613a84852b6a0f9375f",
-      "bytes": 8604
+      "sha256": "64418f2b3fd015033a7c5289a6a7f57de1ff15ded62542ab71517e8ea87814e9",
+      "bytes": 4962
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/states.py",
-      "sha256": "4e429c182aeb1b5dd0edc51c17add59e2c68cf06fb10a9c816c401077e25291b",
-      "bytes": 2021
+      "sha256": "b7ecba87a838adef88591b2b2cd64bf5d070bc53e3bf43af1974b322493f7363",
+      "bytes": 1355
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/analysis_admission_knowledge_admission_analysis_admission.py",
@@ -7296,8 +7296,8 @@
     },
     {
       "path": "memorive_desktop/source/research_opportunities/research_opportunities.py",
-      "sha256": "ca5dbf98147dcba665c406e8294db109fb8eb97dec71ddce58078f6e4f00ef22",
-      "bytes": 2895
+      "sha256": "9f3eb236c2e97bfde5dbe5c26e00d35c8d9f72535a225e9766034133b7a16107",
+      "bytes": 3266
     },
     {
       "path": "memorive_desktop/source/research_recommendations/__init__.py",
@@ -7936,7 +7936,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "e743847d7ff0f6c863d0a3740aaf21d4ed90676bfea6f7f37ea8da2b311b476d",
+      "sha256": "05abbb07adb8a126dd5456654ed0f6bf86e0e77690677c8159229fc02bf4d703",
       "bytes": 252325
     },
     {
@@ -9576,8 +9576,8 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "dec05c56212584f364f9faee97d23d7823ef331f6d0593c0a45fdd9b6c2aa695",
-      "bytes": 9220
+      "sha256": "aee6a6262b98720b5134b2cdf5106c63cfbfe8e94a2a2d3417cf9debe25f7d32",
+      "bytes": 9851
     }
   ]
 }

@@ -89,6 +89,9 @@ returns, `save_answer` discards the answer and keeps the call's usage on the job
 | Which processed papers can be added to a research project | `memorive_research_workspace/library_bridge.py` | `test_library_for_research.py` |
 | Connected apps: bringing papers in, outputs, note write-back, the companion's calls | `memorive_research_workspace/connections.py` | `test_connections.py` |
 | What a connected device is shown when its document is processed | `job_results` in `memorive_research_workspace/desktop_connections.py` | `test_library_for_research.py` |
+| Knowledge drafts from answers: proposing, reviewing, retracting, revisions, the note written on acceptance | `knowledge_feedback/research_ingest.py` | `test_knowledge_drafts.py` |
+| Session refinement: what the model must answer, the typed items made from it | `memorive_workflow_bridge/conversation_refinement.py`, `knowledge_feedback/conversation_refinement/refinement.py` | `test_refinement_model_output.py` |
+| Card review states (pending, active, quarantined), automatic review, the admission log | `knowledge_admission/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
 
 Run the whole suite before you finish; the files above are the quick check while you work.
 
