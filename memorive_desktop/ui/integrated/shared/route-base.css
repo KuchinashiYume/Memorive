@@ -3,7 +3,8 @@
    :is(#desktop-<route>-preview, ...) { ... }, where & is the route's root element. A rule that only
    one route has keeps its #desktop-<route>-preview prefix. Rules apply in file order: to change one
    route only, edit its own rule or add one for it after the shared rule.
-   @scope blocks hold the rules that the routes scope to their root; @keyframes are at the end. */
+   @scope blocks hold the rules that the routes scope to their root, with the @media and @keyframes
+   rules written inside them; the top-level @keyframes are at the end. */
 
 :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
   & .desktop-icon-sprite {
@@ -830,7 +831,7 @@
     & .page-header { align-items: flex-start; flex-direction: column; }
     & .toolbar-group { flex-wrap: wrap; }
     & .two-column,
-    & .three-column { grid-template-columns: 1fr; }
+        & .three-column { grid-template-columns: 1fr; }
   }
 }
 
@@ -1541,10 +1542,6 @@
   @keyframes desktop-settings-toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; transition-duration: .01ms; }
-}
-
 @scope (#desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
   .toast .text-button { color: #F2C3A9; }
 }
@@ -1553,40 +1550,26 @@
   @keyframes desktop-inbox-toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; transition-duration: .01ms; }
-}
-
 @scope (#desktop-messages-preview) {
   @keyframes desktop-messages-toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; transition-duration: .01ms; }
 }
 
 @scope (#desktop-sessions-preview) {
   @keyframes desktop-sessions-toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; transition-duration: .01ms; }
-}
-
 @scope (#desktop-library-preview) {
   @keyframes desktop-library-toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; transition-duration: .01ms; }
 }
 
 @scope (#desktop-worklog-preview) {
   @keyframes desktop-worklog-toast-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; transition-duration: .01ms; }
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
+  @media (prefers-reduced-motion: reduce) {
+    .toast { animation: none; transition-duration: .01ms; }
+  }
 }
 
 @scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
@@ -1604,80 +1587,39 @@
   [hidden] { display: none !important; }
 }
 
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
+  @media (max-width: 1180px) {
+    .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
+    .sidebar-inner { padding-inline: 8px; }
+    .two-column, .three-column { grid-template-columns: 1fr; }
+    .preview-note { display: none; }
+  }
 }
 
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
+  @media (max-width: 920px) {
+    .desktop-app { --sidebar-size: 158px; }
+    .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
+    .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
+    .page-header { align-items: flex-start; flex-direction: column; }
+  }
 }
 
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
+  @media (max-height: 760px) {
+    .preview-page { padding-top: 10px; }
+    .preview-heading { min-height: 42px; padding-bottom: 8px; }
+    .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
+    .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
+    .nav-list { gap: 1px; }
+    .nav-link { min-height: 35px; padding-block: 6px; }
+  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
-}
-
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
-}
-
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
 }
 
 @scope (#desktop-settings-preview, #desktop-sessions-preview) {
@@ -1706,10 +1648,11 @@
   .settings-panel[hidden] { display: none; }
 }
 
-@media (max-width: 1180px) {
-  .settings-grid { grid-template-columns: 1fr; }
-
-  .desktop-app { --inspector-size: 350px; }
+@scope (#desktop-settings-preview) {
+  @media (max-width: 1180px) {
+    .settings-grid { grid-template-columns: 1fr; }
+    .desktop-app { --inspector-size: 350px; }
+  }
 }
 
 #desktop-settings-preview .desktop-settings-shell {
@@ -1724,44 +1667,6 @@
   grid-template-rows:auto minmax(0,1fr);
   font-size:13px;
   font-weight:var(--desktop-settings-weight-value);
-}
-
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
-}
-
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
-}
-
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 @scope (#desktop-inbox-preview) {
@@ -1790,8 +1695,10 @@
   .file-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 }
 
-@media (max-width: 1050px) {
-  .queue-card { grid-template-columns: 32px minmax(0,1fr) 80px 32px; }
+@scope (#desktop-inbox-preview) {
+  @media (max-width: 1050px) {
+    .queue-card { grid-template-columns: 32px minmax(0,1fr) 80px 32px; }
+  }
 }
 
 #desktop-inbox-preview .desktop-inbox-shell {
@@ -1808,82 +1715,6 @@
   font-family:inherit;
   font-size:13px;
   font-weight:var(--desktop-inbox-weight-value);
-}
-
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
-}
-
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
-}
-
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
-}
-
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
-}
-
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 @scope (#desktop-tasks-preview, #desktop-messages-preview) {
@@ -1923,14 +1754,17 @@
   .action-countdown { font-family: var(--font-mono); }
 }
 
-@media (max-width: 1320px) {
-  .task-workspace { grid-template-columns: minmax(160px,190px) minmax(330px,1fr); }
-
-  .flow-row { grid-template-columns: 1fr 20px 1fr 20px 1fr; }
+@scope (#desktop-tasks-preview) {
+  @media (max-width: 1320px) {
+    .task-workspace { grid-template-columns: minmax(160px,190px) minmax(330px,1fr); }
+    .flow-row { grid-template-columns: 1fr 20px 1fr 20px 1fr; }
+  }
 }
 
-@media (max-width: 1180px) {
-  .task-workspace { grid-template-columns: minmax(150px,180px) minmax(310px,1fr); }
+@scope (#desktop-tasks-preview) {
+  @media (max-width: 1180px) {
+    .task-workspace { grid-template-columns: minmax(150px,180px) minmax(310px,1fr); }
+  }
 }
 
 #desktop-tasks-preview .desktop-tasks-shell {
@@ -2032,10 +1866,11 @@
   .source-health { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
 }
 
-@media (max-width: 1150px) {
-  .search-wrap { width: 190px; }
-
-  .desktop-app { --inspector-size: 355px; }
+@scope (#desktop-sessions-preview) {
+  @media (max-width: 1150px) {
+    .search-wrap { width: 190px; }
+    .desktop-app { --inspector-size: 355px; }
+  }
 }
 
 #desktop-sessions-preview .desktop-sessions-shell { grid-template-rows:auto auto minmax(0,1fr); }
@@ -2074,44 +1909,6 @@
 #desktop-sessions-preview #sessions-refresh.is-spinning .desktop-sessions-refresh-glyph { animation:desktop-sessions-refresh-spin 720ms linear infinite; }
 
 #desktop-sessions-preview .desktop-sessions-searchbox { position:relative; }
-
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
-}
-
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
-}
-
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
 
 @scope (#desktop-worklog-preview) {
   .desktop-app { --inspector-size: 390px; }
@@ -3808,44 +3605,6 @@
   #desktop-sessions-preview .desktop-sessions-card, #desktop-sessions-preview .desktop-sessions-stage, #desktop-sessions-preview .desktop-sessions-detail, #desktop-sessions-preview .desktop-sessions-detail-resizer, #desktop-sessions-preview .desktop-sessions-detail-resizer::after, #desktop-sessions-preview .desktop-sessions-list { transition-duration:.01ms !important; }
 
   #desktop-sessions-preview .desktop-sessions-list.is-source-entering, #desktop-sessions-preview .desktop-sessions-batch.desktop-batch-entering, #desktop-sessions-preview .desktop-sessions-batch.desktop-batch-leaving { animation-duration:.01ms !important; }
-}
-
-@media (max-width: 1180px) {
-  .desktop-app { --sidebar-size: 170px; --inspector-size: 292px; }
-
-  .sidebar-inner { padding-inline: 8px; }
-
-  .two-column, .three-column { grid-template-columns: 1fr; }
-
-  .preview-note { display: none; }
-}
-
-@media (max-width: 920px) {
-  .desktop-app { --sidebar-size: 158px; }
-
-  .desktop-app:not(.inspector-force) .app-workspace { grid-template-columns: var(--sidebar-size) minmax(0, 1fr) 0; }
-
-  .desktop-app:not(.inspector-force) .app-inspector { pointer-events: none; border-left-color: transparent; opacity: 0; }
-
-  .page-header { align-items: flex-start; flex-direction: column; }
-}
-
-@media (max-height: 760px) {
-  .preview-page { padding-top: 10px; }
-
-  .preview-heading { min-height: 42px; padding-bottom: 8px; }
-
-  .desktop-app { min-height: 590px; height: calc(100vh - 72px); }
-
-  .brand-button { width: 52px; height: 52px; margin-bottom: 10px; }
-
-  .nav-list { gap: 1px; }
-
-  .nav-link { min-height: 35px; padding-block: 6px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 @scope (#desktop-library-preview) {
