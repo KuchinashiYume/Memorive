@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import math
 import unittest
 
@@ -267,6 +268,16 @@ class AggregationTests(unittest.TestCase):
     def test_frozen_provider_weights_are_exactly_six_and_sum_to_one(self) -> None:
         self.assertEqual(tuple(PROVIDER_WEIGHTS), PROVIDERS)
         self.assertEqual(math.fsum(PROVIDER_WEIGHTS.values()), 1.0)
+
+    def test_snapshot_must_carry_the_weights_and_authority_mass_the_formulas_use(self) -> None:
+        weights = copy.deepcopy(SNAPSHOT)
+        weights["provider_policy"]["weights"]["Similarity"] = 0.44
+        weights["provider_policy"]["weights"]["Semantic"] = 0.21
+        mass = copy.deepcopy(SNAPSHOT)
+        mass["aggregation_policy"]["authority_mass_cap"] = 0.34
+        for snapshot, message in ((weights, "provider weights differ"), (mass, "authority mass differs")):
+            with self.assertRaisesRegex(ContractViolation, message):
+                aggregate_availability_aware(_records(), _penalty(), policy_snapshot=snapshot)
 
 
 if __name__ == "__main__":

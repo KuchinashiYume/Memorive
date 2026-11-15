@@ -7571,8 +7571,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "41e9aefb7666e9289dc8095c58e7d632e6a0c088198abff0d426041aa0e3d280",
-      "bytes": 29001
+      "sha256": "406f250fdee4ae5c5af298597cd9483b58fccf00bb972d2ec2f7b13cf4a4d213",
+      "bytes": 8635
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/candidate_index.py",
@@ -7601,8 +7601,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/aggregation.py",
-      "sha256": "6fb5beaebe58b16bdcfbc59c352eaac11b8821a8eb6ccc71c823190cfb5f7d97",
-      "bytes": 18631
+      "sha256": "a18b24bec6e73e2d2821cbe7b1c7114fed542b90360a14697cd9566501590192",
+      "bytes": 18415
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/candidate_union.py",
@@ -7946,8 +7946,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "62a2925b9855c05bbac0eee5dcb32bb72255835b8d9e8b36ee1dde4c300df6c6",
-      "bytes": 252154
+      "sha256": "2ff94ff5686f96080fbf3fcf424728a37254aa79ef4080335e0a1ed831fdf68f",
+      "bytes": 252153
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",

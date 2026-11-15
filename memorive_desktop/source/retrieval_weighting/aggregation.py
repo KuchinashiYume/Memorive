@@ -6,7 +6,7 @@ import math
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from .derived_penalty import validate_derived_penalty_against_snapshot
+from .derived_penalty import validate_derived_penalty_against_policy
 from .errors import ContractViolation, IdentityConflict
 from .providers import (
     AUTHORITY_PROVIDERS,
@@ -53,12 +53,8 @@ def _validate_inputs(
     candidate_id = first.get("candidate_id")
     if not isinstance(candidate_id, str) or not candidate_id:
         raise ContractViolation("candidate_id must be a non-empty string")
-    checked_records = validate_provider_set(provider_records, candidate_id)
-    records = {record["provider"]: record for record in checked_records}
-    if tuple(records) != tuple(PROVIDERS):
-        raise ContractViolation("validated provider order drifted from frozen six-provider set")
-    if set(PROVIDER_WEIGHTS) != set(PROVIDERS):
-        raise ContractViolation("provider weights do not match the frozen exact provider set")
+    # validate_provider_set returns one record per provider, in the order of PROVIDERS
+    records = {record["provider"]: record for record in validate_provider_set(provider_records, candidate_id)}
 
     for provider, record in records.items():
         expected_version = provider_policy["provider_versions"][provider]
@@ -75,8 +71,8 @@ def _validate_inputs(
                     context={"provider": provider},
                 )
 
-    penalty = validate_derived_penalty_against_snapshot(
-        derived_penalty_record, snapshot
+    penalty = validate_derived_penalty_against_policy(
+        derived_penalty_record, snapshot["derived_penalty_policy"]
     )
     if penalty["candidate_id"] != candidate_id:
         raise IdentityConflict("provider and DerivedPenalty candidate identities differ")

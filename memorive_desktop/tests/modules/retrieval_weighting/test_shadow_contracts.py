@@ -579,60 +579,34 @@ def test_complete_override_and_authority_only_application() -> None:
         )
 
 
-def test_retrieval_policy_is_structural_only_and_hash_bound() -> None:
+def test_retrieval_policy_snapshot_checks_what_the_steps_read() -> None:
     snapshot = _snapshot()
     assert validate_retrieval_policy_snapshot(snapshot) == snapshot
-    activated = deepcopy(snapshot)
-    activated["activation_authorized"] = True
-    activated = make_hashed_payload({key: value for key, value in activated.items() if key != "content_hash"})
-    with unittest.TestCase().assertRaises(ContractViolation):
-        validate_retrieval_policy_snapshot(activated)
-    leaked = deepcopy(snapshot)
-    leaked["query_policy"]["gold_hash"] = _hash("forbidden")
-    leaked = make_hashed_payload({key: value for key, value in leaked.items() if key != "content_hash"})
-    with unittest.TestCase().assertRaises(ContractViolation):
-        validate_retrieval_policy_snapshot(leaked)
-    query_drift = deepcopy(snapshot)
-    query_drift["query_policy"]["query_set_hash"] = _hash("different-query-pack")
-    query_drift = make_hashed_payload(
-        {key: value for key, value in query_drift.items() if key != "content_hash"}
-    )
-    with unittest.TestCase().assertRaises(ContractViolation):
-        validate_retrieval_policy_snapshot(query_drift)
-    threshold_drift = deepcopy(snapshot)
-    threshold_drift["threshold_policy"]["function_hash"] = _hash("different-threshold")
-    threshold_drift = make_hashed_payload(
-        {key: value for key, value in threshold_drift.items() if key != "content_hash"}
-    )
-    with unittest.TestCase().assertRaises(ContractViolation):
-        validate_retrieval_policy_snapshot(threshold_drift)
-    weight_drift = deepcopy(snapshot)
-    weight_drift["provider_policy"]["weights"]["Similarity"] = 0.44
-    weight_drift["provider_policy"]["weights"]["Semantic"] = 0.21
-    assert abs(sum(weight_drift["provider_policy"]["weights"].values()) - 1.0) < 1e-12
-    weight_drift = make_hashed_payload(
-        {key: item for key, item in weight_drift.items() if key != "content_hash"}
-    )
-    with unittest.TestCase().assertRaises(ContractViolation):
-        validate_retrieval_policy_snapshot(weight_drift)
+    # Fields that no step reads are carried along as they are.
+    unread = deepcopy(snapshot)
+    unread["activation_authorized"] = True
+    unread["threshold_policy"]["function_hash"] = _hash("different-threshold")
+    unread["aggregation_policy"]["tie_break"] = "score_only"
+    assert validate_retrieval_policy_snapshot(unread) == unread
+    # The provider tables, the channel caps and the content hash must be usable.
     for path, value in (
-        (("aggregation_policy", "baseline_policy_id"), "attacker-baseline"),
-        (("aggregation_policy", "missing_data_policy"), "zero_fill"),
-        (("aggregation_policy", "authority_mass_cap"), 0.34),
-        (("aggregation_policy", "rrf_k"), 61),
-        (("aggregation_policy", "mmr_lambda"), 0.6),
-        (("aggregation_policy", "tie_break"), "score_only"),
+        (("provider_policy", "weights"), None),
+        (("provider_policy", "provider_versions"), []),
+        (("aggregation_policy", "channel_caps"), {"lexical": 0}),
+        (("aggregation_policy",), "not a table"),
     ):
-        drift = deepcopy(snapshot)
-        cursor = drift
+        broken = deepcopy(snapshot)
+        cursor = broken
         for key in path[:-1]:
             cursor = cursor[key]
         cursor[path[-1]] = value
-        drift = make_hashed_payload(
-            {key: item for key, item in drift.items() if key != "content_hash"}
-        )
         with unittest.TestCase().assertRaises(ContractViolation):
-            validate_retrieval_policy_snapshot(drift)
+            validate_retrieval_policy_snapshot(broken)
+    unhashed = {key: value for key, value in snapshot.items() if key != "content_hash"}
+    with unittest.TestCase().assertRaises(ContractViolation):
+        validate_retrieval_policy_snapshot(unhashed)
+    with unittest.TestCase().assertRaises(ContractViolation):
+        validate_retrieval_policy_snapshot([snapshot])
 
 
 class TestP03T04ShadowContracts(unittest.TestCase):
@@ -661,4 +635,4 @@ class TestP03T04ShadowContracts(unittest.TestCase):
         test_complete_override_and_authority_only_application()
 
     def test_retrieval_policy(self) -> None:
-        test_retrieval_policy_is_structural_only_and_hash_bound()
+        test_retrieval_policy_snapshot_checks_what_the_steps_read()

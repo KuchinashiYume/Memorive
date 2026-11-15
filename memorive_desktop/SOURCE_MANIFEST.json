@@ -6367,8 +6367,8 @@
     },
     {
       "path": "source/retrieval_weighting/aggregation.py",
-      "sha256": "6fb5beaebe58b16bdcfbc59c352eaac11b8821a8eb6ccc71c823190cfb5f7d97",
-      "bytes": 18631
+      "sha256": "a18b24bec6e73e2d2821cbe7b1c7114fed542b90360a14697cd9566501590192",
+      "bytes": 18415
     },
     {
       "path": "source/retrieval_weighting/candidate_index.py",
@@ -6502,8 +6502,8 @@
     },
     {
       "path": "source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "41e9aefb7666e9289dc8095c58e7d632e6a0c088198abff0d426041aa0e3d280",
-      "bytes": 29001
+      "sha256": "406f250fdee4ae5c5af298597cd9483b58fccf00bb972d2ec2f7b13cf4a4d213",
+      "bytes": 8635
     },
     {
       "path": "source/retrieval_weighting/source_snapshot.py",
