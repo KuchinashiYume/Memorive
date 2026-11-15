@@ -31,9 +31,9 @@ def limit(root: Path | str, limit_mb: int, *, now: float | None = None) -> dict[
     moment = time.time() if now is None else now
     batches = []
     for child in folder.iterdir():
-        if not child.is_dir() or child.is_symlink():
-            continue
-        try:
+        try:    # a link or junction is not a batch this program staged: never measured through, never removed
+            if not child.is_dir() or child.is_symlink() or getattr(child.lstat(), "st_file_attributes", 0) & 0x400:
+                continue
             size = sum(path.stat().st_size for path in child.rglob("*") if path.is_file())
             batches.append((child.stat().st_mtime, size, child))
         except OSError:
