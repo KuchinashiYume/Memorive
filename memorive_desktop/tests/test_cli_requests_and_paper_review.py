@@ -102,7 +102,7 @@ def paper(tmp_path):
     children=list(entries);entries[document]=dict(entries[children[0]],artifact_kind='CORE_DOCUMENT')
     lib=SimpleNamespace(state_root=tmp_path,_core_entries_by_artifact_id=entries,
         _core_row_aliases={key:document for key in children},_utc_now=lambda:'2026-09-08T00:00:00Z',
-        _resolve_core_entry_file=LibraryProductController._resolve_core_entry_file)
+        _read_core_entry_file=LibraryProductController._read_core_entry_file)
     return PaperReview(lib),document,children,original
 
 

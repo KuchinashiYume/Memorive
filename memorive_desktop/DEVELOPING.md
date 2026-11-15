@@ -89,6 +89,8 @@ The library controller (`memorive_library/product_controller.py`) keeps the file
 processing produced. Other packages use only its public methods:
 
 - `core_artifacts()`: every product file by id, with its kind, job, hashes and library row;
+- `read_core_artifact(artifact_id)`: the path and content of a product file, read once; the content
+  is checked against the hash the job recorded, so it can be handed on as it is;
 - `resolve_core_private_artifact(artifact_id)`: the path of a product file, after checking that the
   file is still the one the job recorded;
 - `get_artifact(artifact_id)`: one row as the library page shows it;

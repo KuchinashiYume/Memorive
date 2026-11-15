@@ -484,14 +484,16 @@ class LibraryProductController:
                 self._rows_by_id[artifact_id] = deepcopy(row)
 
     @staticmethod
-    def _resolve_core_entry_file(
+    def _read_core_entry_file(
         entry: Mapping[str, Any],
         *,
         root_field: str,
         path_field: str,
         sha256_field: str,
         error_scope: str,
-    ) -> Path:
+    ) -> tuple[Path, bytes]:
+        """Read a file the job recorded: it must lie inside its root, be no link, and still have the
+        recorded sha256. The content returned is the content that was checked."""
         root = Path(str(entry[root_field]))
         candidate = Path(str(entry[path_field]))
         try:
@@ -510,10 +512,10 @@ class LibraryProductController:
             or not target.is_file()
         ):
             raise LibraryProductError(f"LIBRARY_Core_{error_scope}_PATH_INVALID")
-        observed = hashlib.sha256(target.read_bytes()).hexdigest().upper()
-        if observed != entry[sha256_field]:
+        data = target.read_bytes()
+        if hashlib.sha256(data).hexdigest().upper() != entry[sha256_field]:
             raise LibraryProductError(f"LIBRARY_Core_{error_scope}_HASH_MISMATCH")
-        return target
+        return target, data
 
     def core_artifacts(self) -> dict[str, dict[str, Any]]:
         """Every file that document processing produced, by artifact id, read fresh from the jobs.
@@ -523,37 +525,43 @@ class LibraryProductController:
         artifact_kind (CORE_CARD, CORE_ANALYSIS, CORE_RAW_DOCUMENT, CORE_CLEAN_DOCUMENT, ...; one
         CORE_DOCUMENT record stands for each source document), job_id, content_sha256,
         source_content_sha256, private_path, artifact_root and row, the library row shown for it
-        (display_name, status, ...). The records are shared: read them, do not change them.
+        (display_name, status, ...). The records are copies; changing them changes nothing in the library.
         """
         self._sync_core_artifacts()
-        return dict(self._core_entries_by_artifact_id)
+        return deepcopy(self._core_entries_by_artifact_id)
 
-    def resolve_core_private_artifact(self, artifact_id: str) -> Path:
-        """The file of a product, after checking it is still the file the job recorded."""
+    def _core_entry(self, artifact_id: str) -> Mapping[str, Any]:
         self._sync_core_artifacts()
         entry = self._core_entries_by_artifact_id.get(str(artifact_id or ""))
         if entry is None:
             raise LibraryProductError("LIBRARY_Core_ARTIFACT_NOT_FOUND")
-        return self._resolve_core_entry_file(
-            entry,
+        return entry
+
+    def read_core_artifact(self, artifact_id: str) -> tuple[Path, bytes]:
+        """The path and content of a product file, read once. The content is checked against the
+        sha256 the job recorded, so it can be handed on as it is."""
+        return self._read_core_entry_file(
+            self._core_entry(artifact_id),
             root_field="artifact_root",
             path_field="private_path",
             sha256_field="content_sha256",
             error_scope="ARTIFACT",
         )
 
+    def resolve_core_private_artifact(self, artifact_id: str) -> Path:
+        """The path of a product file, after checking that it is still the file the job recorded."""
+        return self.read_core_artifact(artifact_id)[0]
+
     def resolve_core_private_source(self, artifact_id: str) -> Path:
-        self._sync_core_artifacts()
-        entry = self._core_entries_by_artifact_id.get(str(artifact_id or ""))
-        if entry is None:
-            raise LibraryProductError("LIBRARY_Core_ARTIFACT_NOT_FOUND")
-        return self._resolve_core_entry_file(
-            entry,
+        """The path of the source document a product was made from, checked the same way."""
+        path, _content = self._read_core_entry_file(
+            self._core_entry(artifact_id),
             root_field="source_root",
             path_field="source_private_path",
             sha256_field="source_content_sha256",
             error_scope="SOURCE",
         )
+        return path
 
     @staticmethod
     def _validate_refinement_catalog(value: Mapping[str, Any]) -> dict[str, Any]:

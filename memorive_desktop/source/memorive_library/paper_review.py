@@ -46,10 +46,10 @@ class PaperReview:
         manifest = {'source_sha256':entry['source_content_sha256'], 'job_id':entry['job_id'], 'files':files}
         digest = hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()
         if verify:
-            lib._resolve_core_entry_file(entry,root_field='source_root',path_field='source_private_path',
+            lib._read_core_entry_file(entry,root_field='source_root',path_field='source_private_path',
                 sha256_field='source_content_sha256',error_scope='SOURCE')
             for child in children.values():
-                lib._resolve_core_entry_file(child,root_field='artifact_root',path_field='private_path',
+                lib._read_core_entry_file(child,root_field='artifact_root',path_field='private_path',
                     sha256_field='content_sha256',error_scope='ARTIFACT')
         return logical, digest, manifest, required, kinds == {'CORE_CARD','CORE_ANALYSIS'}
 

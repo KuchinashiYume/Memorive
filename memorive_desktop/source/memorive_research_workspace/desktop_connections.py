@@ -25,8 +25,8 @@ def job_results(library, job_id):
     for artifact_id, record in library.core_artifacts().items():
         if record['job_id'] != job_id or record['artifact_kind'] not in RESULT_KINDS:
             continue
-        path = library.resolve_core_private_artifact(artifact_id)  # checks the file is the one the job recorded
-        raw = path.read_bytes()
+        # Read once; the library checks these bytes against the hash the job recorded.
+        path, raw = library.read_core_artifact(artifact_id)
         text = raw.decode('utf-8-sig')
         if path.suffix.lower() == '.json':
             text = '```json\n' + json.dumps(json.loads(text), ensure_ascii=False, indent=2) + '\n```'

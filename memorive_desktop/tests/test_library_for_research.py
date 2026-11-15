@@ -162,6 +162,13 @@ def test_a_connected_device_gets_the_card_and_analysis_of_its_job(library, paper
     assert job_results(library, "another-job") == []
 
 
+def test_a_connected_device_is_never_given_a_changed_file(library, paper):
+    # What is handed on is the content whose hash was checked, read once.
+    (paper.root / "card.md").write_bytes(b"replaced after the job finished")
+    with pytest.raises(ValueError, match="HASH_MISMATCH"):
+        job_results(library, JOB)
+
+
 def test_a_connected_device_follows_its_job_until_the_results_are_ready(tmp_path, library):
     store = Store(tmp_path / "workspace")
     store.put("connector_action", "action-1", "project-1", {"status": "RUNNING", "project": "project-1"})
