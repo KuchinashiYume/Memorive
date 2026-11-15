@@ -16,6 +16,7 @@ import json
 import re
 
 from knowledge_admission import DecisionError   # 坏响应 = 可重跑环节失败(复用 KNOWLEDGE_ADMISSION 连错升级)
+from evidence_extraction.distill import _first_json_object  # one copy, kept there
 
 _VALID_RULES = frozenset(f"R{i}" for i in range(1, 10))          # R1..R9
 _EVIDENCE_RELATIONS = frozenset({
@@ -24,33 +25,6 @@ _EVIDENCE_RELATIONS = frozenset({
     "missing_from_given_chunks",
 })
 _FENCE_RE = re.compile(r"\A\s*```(?:json)?\s*|\s*```\s*\Z", re.I)  # 容错 markdown ```json 围栏
-
-
-def _first_json_object(s: str):
-    """从第一个 '{' 起括号配平(跳过字符串内的括号),返回首个完整 JSON 对象文本;无 '{' → None。
-    与 EVIDENCE_EXTRACTION/RESEARCH_ANALYSIS 同款——容忍模型(如 Anthropic Haiku 4.5)在 JSON 对象后追加散文说明:只取首个配平对象、忽略尾随。"""
-    start = s.find("{")
-    if start < 0:
-        return None
-    depth, instr, esc = 0, False, False
-    for i in range(start, len(s)):
-        c = s[i]
-        if instr:
-            if esc:
-                esc = False
-            elif c == "\\":
-                esc = True
-            elif c == '"':
-                instr = False
-        elif c == '"':
-            instr = True
-        elif c == "{":
-            depth += 1
-        elif c == "}":
-            depth -= 1
-            if depth == 0:
-                return s[start:i + 1]
-    return None
 
 
 def _reject_dup_keys(pairs):

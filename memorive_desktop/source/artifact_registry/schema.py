@@ -3,15 +3,25 @@
 from __future__ import annotations
 
 import copy
-import hashlib
 import re
 import uuid
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from .errors import EnvelopeValidationError
-from .schema_v2 import canonical_json
+from .schema_v2 import (  # the code both versions share; one copy is kept there
+    canonical_json,
+    sha256_file,
+    new_artifact_id,
+    new_event_id,
+    _require_text,
+    _require_optional_text,
+    _require_pattern,
+    _require_hash,
+    _require_text_list,
+    _require_datetime,
+    _require_optional_datetime,
+)
 
 ENVELOPE_SCHEMA_VERSION = "artifact-envelope-v1"
 EVENT_SCHEMA_VERSION = "artifact_registry-registry-event-v1"
@@ -19,24 +29,7 @@ HASH_ALGORITHM = "sha256"
 
 _ARTIFACT_ID = re.compile(r"^art_[0-9a-f]{32}$")
 _EVENT_ID = re.compile(r"^evt_[0-9a-f]{32}$")
-_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _LEGACY_NAMESPACE = uuid.UUID("9e2847e3-04f8-4aa9-aa14-b9f8360bd571")
-
-
-def sha256_file(path: Path | str) -> str:
-    """Hash exact file bytes; no semantic normalization is performed."""
-
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def new_artifact_id() -> str:
-    """Create a new opaque identity for one persistent artifact instance."""
-
-    return f"art_{uuid.uuid4().hex}"
 
 
 def legacy_artifact_id(
@@ -62,10 +55,6 @@ def legacy_artifact_id(
     _require_hash(content_hash, "content_hash")
     name = "|".join(("Memorive", "ARTIFACT_REGISTRY", run_ref, identity_scope, artifact_type, content_hash))
     return f"art_{uuid.uuid5(_LEGACY_NAMESPACE, name).hex}"
-
-
-def new_event_id() -> str:
-    return f"evt_{uuid.uuid4().hex}"
 
 
 def parent_link(
@@ -428,56 +417,3 @@ def _require_exact_fields(value: Mapping[str, Any], expected: set[str], label: s
         raise EnvelopeValidationError(f"{label} fields mismatch")
 
 
-def _require_text(value: Any, field: str) -> None:
-    if not isinstance(value, str) or not value.strip():
-        raise EnvelopeValidationError(f"{field} must be a non-empty string")
-
-
-def _require_optional_text(value: Any, field: str) -> None:
-    if value is not None:
-        _require_text(value, field)
-
-
-def _require_pattern(value: Any, pattern: re.Pattern[str], field: str) -> None:
-    _require_text(value, field)
-    if not pattern.fullmatch(value):
-        raise EnvelopeValidationError(f"{field} has an invalid format")
-
-
-def _require_hash(value: Any, field: str) -> None:
-    _require_pattern(value, _SHA256, field)
-
-
-def _require_text_list(
-    value: Any,
-    field: str,
-    *,
-    allow_empty: bool = True,
-    unique: bool = False,
-    pattern: re.Pattern[str] | None = None,
-) -> None:
-    if not isinstance(value, list):
-        raise EnvelopeValidationError(f"{field} must be a list")
-    if not allow_empty and not value:
-        raise EnvelopeValidationError(f"{field} must not be empty")
-    for item in value:
-        _require_text(item, f"{field} entry")
-        if pattern is not None and not pattern.fullmatch(item):
-            raise EnvelopeValidationError(f"{field} entry has an invalid format")
-    if unique and len(value) != len(set(value)):
-        raise EnvelopeValidationError(f"{field} entries must be unique")
-
-
-def _require_datetime(value: Any, field: str) -> None:
-    _require_text(value, field)
-    try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise EnvelopeValidationError(f"{field} must be ISO 8601") from exc
-    if parsed.tzinfo is None or parsed.utcoffset() is None:
-        raise EnvelopeValidationError(f"{field} must include a timezone")
-
-
-def _require_optional_datetime(value: Any, field: str) -> None:
-    if value is not None:
-        _require_datetime(value, field)

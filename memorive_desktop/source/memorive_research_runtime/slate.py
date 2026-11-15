@@ -3,12 +3,21 @@
 from __future__ import annotations
 
 import copy
-import hashlib
-import json
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from datetime import datetime, timedelta
 from typing import Any
+
+from research_recommendations.discovery_channels_research_recommendations_multichannel_slate import (  # the code both modules share; one copy is kept there
+    SlateCompositionError,
+    canonical_json,
+    sha256_json,
+    seal_object,
+    _assert_sealed,
+    _parse_aware_datetime,
+    _input_hashes,
+    _rank_sort_key,
+)
 
 
 CHANNELS = ("CORE", "ADJACENT", "BRIDGE", "HORIZON", "COVERAGE_REPAIR")
@@ -31,64 +40,6 @@ ZERO_SIDE_EFFECTS = {
     "production_writes": 0,
     "behavior_events_consumed": 0,
 }
-
-
-class SlateCompositionError(ValueError):
-    """Fail-closed Intake composition error carrying a stable code."""
-
-    def __init__(self, code: str, detail: str = "") -> None:
-        super().__init__(code if not detail else f"{code}: {detail}")
-        self.code = code
-        self.detail = detail
-
-
-def canonical_json(value: Any) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        allow_nan=False,
-    ).encode("utf-8")
-
-
-def sha256_json(value: Any) -> str:
-    return hashlib.sha256(canonical_json(value)).hexdigest().upper()
-
-
-def seal_object(value: Mapping[str, Any]) -> dict[str, Any]:
-    body = copy.deepcopy(dict(value))
-    body.pop("content_hash", None)
-    body["content_hash"] = sha256_json(body)
-    return body
-
-
-def _assert_sealed(value: Mapping[str, Any], code: str) -> None:
-    body = copy.deepcopy(dict(value))
-    recorded = body.pop("content_hash", None)
-    if not isinstance(recorded, str) or recorded != sha256_json(body):
-        raise SlateCompositionError(code, "content_hash mismatch")
-
-
-def _parse_aware_datetime(value: Any, code: str) -> datetime:
-    if not isinstance(value, str):
-        raise SlateCompositionError(code)
-    try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise SlateCompositionError(code) from exc
-    if parsed.tzinfo is None or parsed.utcoffset() is None:
-        raise SlateCompositionError(code, "timezone required")
-    return parsed
-
-
-def _input_hashes(context: Mapping[str, Any], plan: Mapping[str, Any]) -> dict[str, str]:
-    return {
-        "profile": sha256_json(context["profile"]),
-        "policy": sha256_json(context["policy"]),
-        "directions": sha256_json(context["directions"]),
-        "plan": plan["content_hash"],
-    }
 
 
 def validate_context(context: Mapping[str, Any]) -> None:
@@ -447,11 +398,6 @@ def build_candidate_clusters(
             )
         )
     return clusters
-
-
-def _rank_sort_key(recall: Mapping[str, Any]) -> tuple[Any, ...]:
-    evidence = recall["ranking_evidence"]
-    return tuple(-value for value in evidence["comparison_key"]) + (evidence["tie_break_identity"],)
 
 
 def _cap_values(fact: Mapping[str, Any]) -> dict[str, list[str]]:

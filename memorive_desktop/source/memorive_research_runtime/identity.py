@@ -9,16 +9,29 @@ from __future__ import annotations
 
 import copy
 import re
-import unicodedata
 from collections import defaultdict
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
-from literature_discovery.connector_framework import (
-    ConnectorError,
-    canonical_json,
-    normalize_arxiv_id,
-    normalize_doi,
-    sha256_json,
+from literature_discovery.connector_framework import canonical_json, sha256_json
+from literature_discovery.bibliographic_identity_literature_discovery_bibliographic_identity import (  # the code both modules share; one copy is kept there
+    IdentityResolutionError,
+    _DisjointSet,
+    _stable_id,
+    _finalize_content_hash,
+    _normalized_text,
+    _published_year,
+    _normalization_result,
+    normalize_doi_identifier,
+    normalize_arxiv_identifier,
+    normalize_pmid_identifier,
+    normalize_identifier,
+    _canonical_identifier,
+    _identifier_token,
+    _observation_alias,
+    _manifestation_role,
+    _role_from_claims,
+    _dedupe_conflict_specs,
+    initialization_candidate_base_projection,
 )
 
 
@@ -55,212 +68,6 @@ PROHIBITED_REVIEW_ACTIONS = [
     "AUTO_SELECT",
     "CANDIDATE_CARD_ELIGIBILITY",
 ]
-
-
-class IdentityResolutionError(RuntimeError):
-    """Fail-closed error with a stable machine code and evidence references."""
-
-    def __init__(self, code: str, evidence_refs: Iterable[str] = ()) -> None:
-        super().__init__(code)
-        self.code = code
-        self.evidence_refs = sorted(set(evidence_refs))
-
-    def as_record(self) -> dict[str, Any]:
-        return {"code": self.code, "evidence_refs": self.evidence_refs}
-
-class _DisjointSet:
-    def __init__(self, values: Iterable[str]) -> None:
-        self.parent = {value: value for value in values}
-
-    def find(self, value: str) -> str:
-        parent = self.parent[value]
-        if parent != value:
-            self.parent[value] = self.find(parent)
-        return self.parent[value]
-
-    def union(self, left: str, right: str) -> None:
-        left_root = self.find(left)
-        right_root = self.find(right)
-        if left_root == right_root:
-            return
-        first, second = sorted((left_root, right_root))
-        self.parent[second] = first
-
-    def groups(self) -> list[list[str]]:
-        grouped: dict[str, list[str]] = defaultdict(list)
-        for value in sorted(self.parent):
-            grouped[self.find(value)].append(value)
-        return sorted((sorted(values) for values in grouped.values()), key=lambda values: values[0])
-
-
-def _stable_id(prefix: str, payload: Any) -> str:
-    return prefix + sha256_json(payload)[:24]
-
-
-def _finalize_content_hash(value: Mapping[str, Any]) -> dict[str, Any]:
-    result = copy.deepcopy(dict(value))
-    result.pop("content_hash", None)
-    result["content_hash"] = sha256_json(result).upper()
-    return result
-
-
-def _normalized_text(value: str) -> str:
-    normalized = unicodedata.normalize("NFKC", value).casefold()
-    tokens: list[str] = []
-    current: list[str] = []
-    for character in normalized:
-        if character.isalnum():
-            current.append(character)
-        elif current:
-            tokens.append("".join(current))
-            current = []
-    if current:
-        tokens.append("".join(current))
-    return " ".join(tokens)
-
-
-def _published_year(value: Any) -> int | None:
-    if not isinstance(value, str):
-        return None
-    match = re.match(r"^(\d{4})", value)
-    return int(match.group(1)) if match else None
-
-
-def _normalization_result(
-    kind: str,
-    input_value: Any,
-    *,
-    valid: bool,
-    canonical_value: str | None,
-    base_value: str | None,
-    version: int | None,
-    error_code: str | None,
-) -> dict[str, Any]:
-    return {
-        "kind": kind,
-        "input": input_value,
-        "valid": valid,
-        "canonical_value": canonical_value,
-        "base_value": base_value,
-        "version": version,
-        "error_code": error_code,
-        "existence_verified": False,
-    }
-
-
-def normalize_doi_identifier(value: Any) -> dict[str, Any]:
-    if not isinstance(value, str) or not value.strip():
-        return _normalization_result(
-            "DOI", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_DOI"
-        )
-    try:
-        canonical = normalize_doi(value)
-    except ConnectorError:
-        canonical = None
-    if canonical is None:
-        return _normalization_result(
-            "DOI", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_DOI"
-        )
-    return _normalization_result(
-        "DOI", value, valid=True, canonical_value=canonical, base_value=None,
-        version=None, error_code=None
-    )
-
-
-def normalize_arxiv_identifier(value: Any) -> dict[str, Any]:
-    if not isinstance(value, str) or not value.strip():
-        return _normalization_result(
-            "ARXIV", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_ARXIV_ID"
-        )
-    try:
-        base_value, canonical = normalize_arxiv_id(value.strip())
-    except ConnectorError:
-        return _normalization_result(
-            "ARXIV", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_ARXIV_ID"
-        )
-    match = re.fullmatch(r"\d{4}\.\d{4,5}(?:v(\d+))?", canonical)
-    version = int(match.group(1)) if match and match.group(1) else None
-    if match is None or version == 0:
-        return _normalization_result(
-            "ARXIV", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_ARXIV_ID"
-        )
-    return _normalization_result(
-        "ARXIV", value, valid=True, canonical_value=canonical,
-        base_value=base_value, version=version, error_code=None
-    )
-
-
-def normalize_pmid_identifier(value: Any) -> dict[str, Any]:
-    if not isinstance(value, str) or not value.strip():
-        return _normalization_result(
-            "PMID", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_PMID"
-        )
-    token = value.strip()
-    prefix_match = re.fullmatch(r"(?i)pmid\s*:\s*([0-9]+)", token)
-    url_match = re.fullmatch(
-        r"(?i)https?://pubmed\.ncbi\.nlm\.nih\.gov/([0-9]+)/?", token
-    )
-    if prefix_match:
-        digits = prefix_match.group(1)
-    elif url_match:
-        digits = url_match.group(1)
-    else:
-        digits = token
-    if not re.fullmatch(r"[0-9]+", digits) or len(digits) > 12:
-        return _normalization_result(
-            "PMID", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_PMID"
-        )
-    canonical = digits.lstrip("0")
-    if not canonical or len(canonical) > 9:
-        return _normalization_result(
-            "PMID", value, valid=False, canonical_value=None, base_value=None,
-            version=None, error_code="INVALID_PMID"
-        )
-    return _normalization_result(
-        "PMID", value, valid=True, canonical_value=canonical,
-        base_value=None, version=None, error_code=None
-    )
-
-
-def normalize_identifier(kind: str, value: Any) -> dict[str, Any]:
-    normalized_kind = kind.strip().upper() if isinstance(kind, str) else ""
-    if normalized_kind == "DOI":
-        return normalize_doi_identifier(value)
-    if normalized_kind == "ARXIV":
-        return normalize_arxiv_identifier(value)
-    if normalized_kind == "PMID":
-        return normalize_pmid_identifier(value)
-    return _normalization_result(
-        normalized_kind or "UNKNOWN", value, valid=False, canonical_value=None,
-        base_value=None, version=None, error_code="UNSUPPORTED_IDENTIFIER_KIND"
-    )
-
-
-def _canonical_identifier(result: Mapping[str, Any]) -> dict[str, Any]:
-    return {
-        "kind": result["kind"],
-        "value": result["canonical_value"],
-        "base_value": result["base_value"],
-        "version": result["version"],
-    }
-
-
-def _identifier_token(identifier: Mapping[str, Any]) -> str:
-    return f"{identifier['kind']}:{identifier['value']}"
-
-
-def _observation_alias(observation_ref: str) -> str:
-    match = re.fullmatch(r"source_observation_([a-f0-9]{24})", observation_ref)
-    if not match:
-        raise IdentityResolutionError("INVALID_SOURCE_OBSERVATION_ID", [observation_ref])
-    return "SOURCE_OBSERVATION:" + match.group(1).upper()
 
 
 def verify_source_observation(
@@ -335,31 +142,6 @@ def verify_source_observation(
         raise IdentityResolutionError("SOURCE_EVIDENCE_SCHEMA_MISMATCH", [object_id])
 
 
-def _manifestation_role(record_type: Any) -> str:
-    normalized = _normalized_text(str(record_type or ""))
-    if "arxiv" in normalized or "preprint" in normalized:
-        return "PREPRINT"
-    if "proceedings" in normalized or "conference" in normalized:
-        return "CONFERENCE"
-    if "accepted" in normalized or normalized == "aam":
-        return "AUTHOR_ACCEPTED_MANUSCRIPT"
-    if "journal" in normalized or "version of record" in normalized or normalized == "vor":
-        return "VERSION_OF_RECORD"
-    return "UNKNOWN"
-
-
-def _role_from_claims(claims: Sequence[Mapping[str, Any]]) -> str:
-    priority = {
-        "UNKNOWN": 0,
-        "PREPRINT": 1,
-        "CONFERENCE": 2,
-        "AUTHOR_ACCEPTED_MANUSCRIPT": 3,
-        "VERSION_OF_RECORD": 4,
-    }
-    roles = [_manifestation_role(claim["record_type"]) for claim in claims]
-    return max(roles, key=lambda role: (priority[role], role))
-
-
 def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
     identifiers = observation.get("identifiers")
     bibliographic = observation.get("bibliographic")
@@ -428,18 +210,6 @@ def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
         "discovery_origin": str(observation.get("discovery_origin") or "SYNTHETIC_A0_REPLAY"),
         "evidence_hash": str(observation["source_evidence"]["normalized_record_sha256"]),
     }
-
-
-def _dedupe_conflict_specs(specs: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    unique: dict[bytes, dict[str, Any]] = {}
-    for spec in specs:
-        normalized = {
-            "reason_code": spec["reason_code"],
-            "source_observation_refs": sorted(set(spec["source_observation_refs"])),
-            "identifier_claims": sorted(set(spec.get("identifier_claims", []))),
-        }
-        unique[canonical_json(normalized)] = normalized
-    return sorted(unique.values(), key=lambda item: canonical_json(item))
 
 
 def resolve_identity_batch(
@@ -1024,19 +794,6 @@ def resolve_identity_batch(
     }
     result["replay_fingerprint"] = sha256_json(result).upper()
     return result
-
-
-def initialization_candidate_base_projection(projection: Mapping[str, Any]) -> dict[str, Any]:
-    """Return the exact Initialization base fields for compatibility validation."""
-
-    fields = {
-        "object_type", "object_id", "revision", "content_hash", "producer",
-        "consumers", "single_writer", "parents", "supersedes", "immutable_fields",
-        "candidate_id", "source_observation_refs", "discovery_origin",
-        "identity_status", "access_status", "decision_status",
-        "candidate_card_status", "promotion_status", "is_synthetic",
-    }
-    return {key: copy.deepcopy(projection[key]) for key in sorted(fields)}
 
 
 __all__ = [
