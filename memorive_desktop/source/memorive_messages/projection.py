@@ -112,11 +112,14 @@ class MessageProjectionEngine:
         *,
         redaction_policy: RedactionPolicy | None = None,
         synthetic_only: bool = True,
+        max_buffer: int = 256,
     ):
+        if isinstance(max_buffer, bool) or not isinstance(max_buffer, int) or max_buffer <= 0:
+            raise ProjectionIntegrityError("MESSAGE_EVENT_BUFFER_INVALID")
         self.store = store
         self.redaction_policy = redaction_policy or store.redaction_policy
         self.synthetic_only = synthetic_only
-        self.max_buffer = 256
+        self.max_buffer = max_buffer
         self._pending: dict[int, dict[str, Any]] = {}
         self._pending_fingerprints: dict[int, str] = {}
 

@@ -35,6 +35,21 @@ CONFLICT_REASON_CODES = {
     "VERSION_EVIDENCE_CONFLICT",
 }
 
+VERSION_RELATION_TYPES = {
+    "ARXIV_VERSION_SUCCESSOR",
+    "PREPRINT_TO_CONFERENCE",
+    "PREPRINT_TO_VOR",
+    "CONFERENCE_TO_VOR",
+    "AAM_TO_VOR",
+}
+
+VERSION_RELATION_ROLE_PAIRS = {
+    "PREPRINT_TO_CONFERENCE": ("PREPRINT", "CONFERENCE"),
+    "PREPRINT_TO_VOR": ("PREPRINT", "VERSION_OF_RECORD"),
+    "CONFERENCE_TO_VOR": ("CONFERENCE", "VERSION_OF_RECORD"),
+    "AAM_TO_VOR": ("AUTHOR_ACCEPTED_MANUSCRIPT", "VERSION_OF_RECORD"),
+}
+
 PROHIBITED_REVIEW_ACTIONS = [
     "AUTO_MERGE",
     "AUTO_SELECT",
@@ -430,6 +445,9 @@ def _dedupe_conflict_specs(specs: Iterable[Mapping[str, Any]]) -> list[dict[str,
 def resolve_identity_batch(
     observations: Sequence[Mapping[str, Any]],
     evidence_registry: Mapping[str, Mapping[str, Any]],
+    *,
+    version_links: Sequence[Mapping[str, Any]] = (),
+    hints: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     """Resolve one deterministic offline batch without performing any I/O."""
 
@@ -612,7 +630,74 @@ def resolve_identity_batch(
                 edge_keys.add(key)
                 version_edges.append(edge)
 
-    conflict_specs = _dedupe_conflict_specs(list(conflict_specs))
+    explicit_anchor_members: dict[str, set[str]] = defaultdict(set)
+    version_conflict_specs: list[dict[str, Any]] = []
+    for link in sorted((copy.deepcopy(dict(item)) for item in version_links), key=canonical_json):
+        from_ref = str(link.get("from_observation_ref", ""))
+        to_ref = str(link.get("to_observation_ref", ""))
+        relation_type = str(link.get("relation_type", ""))
+        evidence_ref = str(link.get("evidence_ref", ""))
+        work_anchor = str(link.get("work_anchor", ""))
+        known_refs = [ref for ref in (from_ref, to_ref) if ref in observation_to_manifestation]
+        from_manifestation = observation_to_manifestation.get(from_ref)
+        to_manifestation = observation_to_manifestation.get(to_ref)
+        expected_roles = VERSION_RELATION_ROLE_PAIRS.get(relation_type)
+        actual_roles = None
+        if from_manifestation is not None and to_manifestation is not None:
+            actual_roles = (
+                _role_from_claims(manifestation_interim[from_manifestation]["bibliographic_claims"]),
+                _role_from_claims(manifestation_interim[to_manifestation]["bibliographic_claims"]),
+            )
+        invalid = (
+            len(known_refs) != 2
+            or from_ref == to_ref
+            or relation_type not in VERSION_RELATION_TYPES - {"ARXIV_VERSION_SUCCESSOR"}
+            or len(evidence_ref.strip()) < 3
+            or len(work_anchor.strip()) < 3
+            or expected_roles is None
+            or actual_roles != expected_roles
+        )
+        if invalid:
+            if not known_refs:
+                raise IdentityResolutionError("VERSION_EVIDENCE_ENDPOINT_MISSING", [from_ref, to_ref])
+            version_conflict_specs.append({
+                "reason_code": "VERSION_EVIDENCE_CONFLICT",
+                "source_observation_refs": known_refs,
+                "identifier_claims": [relation_type or "MISSING_RELATION", work_anchor or "MISSING_ANCHOR"],
+            })
+            continue
+        from_manifestation = observation_to_manifestation[from_ref]
+        to_manifestation = observation_to_manifestation[to_ref]
+        if (
+            from_manifestation == to_manifestation
+            or manifestation_interim[from_manifestation]["identity_status"] != "VERIFIED"
+            or manifestation_interim[to_manifestation]["identity_status"] != "VERIFIED"
+        ):
+            version_conflict_specs.append({
+                "reason_code": "VERSION_EVIDENCE_CONFLICT",
+                "source_observation_refs": [from_ref, to_ref],
+                "identifier_claims": [relation_type, work_anchor],
+            })
+            continue
+        work_dsu.union(from_manifestation, to_manifestation)
+        explicit_anchor_members[work_anchor].update((from_manifestation, to_manifestation))
+        edge = {
+            "from_manifestation_id": from_manifestation,
+            "to_manifestation_id": to_manifestation,
+            "relation_type": relation_type,
+            "evidence_ref": evidence_ref,
+            "work_anchor": work_anchor,
+        }
+        edge["edge_id"] = _stable_id("version_edge_", edge)
+        key = canonical_json(edge)
+        if key not in edge_keys:
+            edge_keys.add(key)
+            version_edges.append(edge)
+    for members in explicit_anchor_members.values():
+        ordered = sorted(members)
+        for member in ordered[1:]:
+            work_dsu.union(ordered[0], member)
+    conflict_specs = _dedupe_conflict_specs([*conflict_specs, *version_conflict_specs])
 
     component_by_manifestation: dict[str, list[str]] = {}
     for component in work_dsu.groups():
@@ -629,6 +714,8 @@ def resolve_identity_batch(
     work_clusters: list[dict[str, Any]] = []
     manifestation_to_cluster: dict[str, str] = {}
     cluster_conflicted_refs: set[str] = set()
+    for spec in version_conflict_specs:
+        cluster_conflicted_refs.update(spec["source_observation_refs"])
     for component in work_dsu.groups():
         root = work_dsu.find(component[0])
         edges = edges_by_component.get(root, [])
@@ -887,6 +974,20 @@ def resolve_identity_batch(
         candidate_projections.append(projection)
 
     hint_decisions: list[dict[str, Any]] = []
+    for hint in sorted((copy.deepcopy(dict(item)) for item in hints), key=canonical_json):
+        hint_id = str(hint.get("hint_id", ""))
+        origin = str(hint.get("discovery_origin", ""))
+        if not hint_id or origin not in {"AI_HINT", "TITLE_AUTHOR_YEAR_HINT"}:
+            raise IdentityResolutionError("HINT_SCHEMA_REJECTED", [hint_id])
+        hint_decisions.append({
+            "hint_id": hint_id,
+            "discovery_origin": origin,
+            "identity_status": "HINT_UNVERIFIED",
+            "candidate_record_created": False,
+            "configuration_input_eligible": False,
+            "candidate_card_eligible": False,
+            "reason_code": "EXACT_SOURCE_OBSERVATION_REQUIRED",
+        })
 
     result: dict[str, Any] = {
         "schema_version": "discovery.service_contracts.identity-resolution-batch.0.1",

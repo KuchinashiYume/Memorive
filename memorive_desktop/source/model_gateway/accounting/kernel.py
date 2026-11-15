@@ -11,9 +11,9 @@ from pathlib import Path
 
 
 class AccountingKernel:
-    def __init__(self, catalog: PriceCatalog):
+    def __init__(self, catalog: PriceCatalog, *, calculator: DecimalCalculator | None = None):
         self.catalog = catalog
-        self.calculator = DecimalCalculator()
+        self.calculator = calculator or DecimalCalculator()
 
     @classmethod
     def from_catalog_path(cls, path: Path | str) -> "AccountingKernel":

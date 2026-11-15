@@ -416,6 +416,7 @@ def _controlled_neighbor_candidates(
     chunks: list[dict[str, Any]],
     *,
     document_is_review: bool,
+    token_limit: int = LOGICAL_NEIGHBOR_TOKEN_LIMIT,
 ) -> tuple[Candidate, ...]:
     """Fetch only strict structural neighbors from an explicitly supplied full chunk index."""
     seeds = tuple(candidates)
@@ -446,7 +447,7 @@ def _controlled_neighbor_candidates(
         if item.chunk_id in existing_ids or item.chunk_id in added:
             return True
         cost = _logical_span_tokens((item,))
-        if used_tokens + cost > LOGICAL_NEIGHBOR_TOKEN_LIMIT:
+        if used_tokens + cost > token_limit:
             return False
         added[item.chunk_id] = item
         used_tokens += cost

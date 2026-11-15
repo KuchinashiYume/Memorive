@@ -222,7 +222,7 @@ def validate_context_pack_binding(context_pack):
     return recomputed
 
 
-def build_context_pack(candidate_set, strategy=None, *,
+def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
                        retrieval_mode: str | None = None,
                        token_hard_limit: int | None = None,
                        card_review_qualifications=()) -> ContextPack:
@@ -248,7 +248,7 @@ def build_context_pack(candidate_set, strategy=None, *,
     if review_tokens > hard:
         raise ValueError("CONTEXT_PACK_REVIEW_QUALIFICATIONS_EXCEED_CAPACITY")
     cands = list(getattr(candidate_set, "candidates", ()) or ())
-    wf = _default_weight
+    wf = weight_fn or _default_weight
 
     # 名额:找反例类放大(承口径⑦);≤ 候选数。
     single_paper = retrieval_mode == "single_paper_extraction"

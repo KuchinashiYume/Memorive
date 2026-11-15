@@ -76,13 +76,14 @@ class AccountingProductController:
         leaderboard_provider: Callable[[], Mapping[str, Any]],
         exam_root: Path,
         core_root: Path,
+        settings_root: Path | None = None,
     ) -> None:
         self.settings_provider = settings_provider
         self.local_model_registry = local_model_registry
         self.leaderboard_provider = leaderboard_provider
         self.exam_root = Path(exam_root).resolve(strict=False)
         self.core_root = Path(core_root).resolve(strict=False)
-        self.settings_root = Path(self.exam_root.parent / 'settings').resolve(strict=False)
+        self.settings_root = Path(settings_root or self.exam_root.parent / 'settings').resolve(strict=False)
         self.lock = RLock()
 
     @staticmethod

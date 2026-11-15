@@ -218,12 +218,12 @@ def _verify_slot():
     return s.provider, s.model_id
 
 
-_PROMPT_CACHE: str | None = None
+_PROMPT_CACHE = {False: None, True: None}
 
 
-def _prompt_template() -> str:
-    global _PROMPT_CACHE
-    if _PROMPT_CACHE is None:
+def _prompt_template(*, recovery_mode: bool = False) -> str:
+    cached = _PROMPT_CACHE[recovery_mode]
+    if cached is None:
         parts = [_PROMPT_BASE_PATH.read_text(encoding="utf-8")]
         parts.extend(
             path.read_text(encoding="utf-8")
@@ -235,10 +235,18 @@ def _prompt_template() -> str:
             or combined.count(_RECOVERY_END) != 1
         ):
             raise RuntimeError("EVIDENCE_REVIEW prompt recovery markers must each appear once")
-        start = combined.index(_RECOVERY_START)
-        end = combined.index(_RECOVERY_END) + len(_RECOVERY_END)
-        _PROMPT_CACHE = (combined[:start] + combined[end:]).strip() + "\n"
-    return _PROMPT_CACHE
+        if recovery_mode:
+            combined = combined.replace(_RECOVERY_START, "").replace(
+                _RECOVERY_END,
+                "",
+            )
+        else:
+            start = combined.index(_RECOVERY_START)
+            end = combined.index(_RECOVERY_END) + len(_RECOVERY_END)
+            combined = combined[:start] + combined[end:]
+        cached = combined.strip() + "\n"
+        _PROMPT_CACHE[recovery_mode] = cached
+    return cached
 
 
 def _build_prompt(
@@ -367,7 +375,14 @@ def _wire_batch_input(batch_input: dict) -> dict:
     }
 
 
-def _partition_batch_subjects(subjects: list, chunk_texts: dict) -> list[list]:
+def _partition_batch_subjects(
+    subjects: list,
+    chunk_texts: dict,
+    *,
+    max_source_chars: int = NODE04_BATCH_MAX_SOURCE_CHARS,
+    max_subjects: int = NODE04_BATCH_MAX_SUBJECTS,
+    max_items: int = NODE04_BATCH_MAX_ITEMS,
+) -> list[list]:
     """Create deterministic, source-bounded review batches.
 
     A subject whose authorized source set exceeds the limit is reviewed in
@@ -375,12 +390,14 @@ def _partition_batch_subjects(subjects: list, chunk_texts: dict) -> list[list]:
     retained. This keeps whole-document absence checks fail-closed without one
     long connection carrying the full document.
     """
+    if min(max_source_chars, max_subjects, max_items) < 1:
+        raise ValueError("EVIDENCE_REVIEW_NODE04_BATCH_LIMIT_INVALID")
     per_subject_units = []
     for subject in subjects:
         shards, current, current_chars = [], [], 0
         for chunk_id in subject.chunk_ids:
             size = len(str(chunk_texts.get(chunk_id, "")))
-            if current and current_chars + size > NODE04_BATCH_MAX_SOURCE_CHARS:
+            if current and current_chars + size > max_source_chars:
                 shards.append(current)
                 current, current_chars = [], 0
             current.append(chunk_id)
@@ -411,9 +428,9 @@ def _partition_batch_subjects(subjects: list, chunk_texts: dict) -> list[list]:
         item_count = sum(len(row["card_items"]) for row in candidate_input["subjects"])
         duplicate_location = any(row.location == subject.location for row in current)
         if current and (
-            len(candidate) > NODE04_BATCH_MAX_SUBJECTS
-            or item_count > NODE04_BATCH_MAX_ITEMS
-            or source_chars > NODE04_BATCH_MAX_SOURCE_CHARS
+            len(candidate) > max_subjects
+            or item_count > max_items
+            or source_chars > max_source_chars
             or duplicate_location
         ):
             batches.append(current)

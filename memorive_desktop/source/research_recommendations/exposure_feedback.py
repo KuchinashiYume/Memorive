@@ -45,6 +45,7 @@ ALLOWED_RESURFACE_TRIGGERS = (
     "BRIDGE_ROLE_CHANGE",
     "MANUAL_RESTORE",
 )
+DIRECTION_TRANSITIONS = ("NONE", "SPLIT", "MERGE", "MAJOR_REVISION")
 FORBIDDEN_PAYLOAD_KEYS = {
     "raw_query",
     "query_text",
@@ -750,9 +751,13 @@ def evaluate_candidate(
     ledger: Mapping[str, Any],
     suppressions: Sequence[Mapping[str, Any]],
     as_of: str,
+    *,
+    direction_transition: str = "NONE",
 ) -> dict[str, Any]:
     _scan_forbidden_keys(candidate)
     cutoff = _parse_time(as_of)
+    if direction_transition not in DIRECTION_TRANSITIONS:
+        raise ExposureFeedbackError("DIRECTION_TRANSITION_INVALID")
     for field in ("candidate_id", "work_cluster_id", "direction_id", "direction_revision", "manifestation_id"):
         if not isinstance(candidate.get(field), str) or not candidate[field]:
             raise ExposureFeedbackError("CANDIDATE_FIELD_INVALID", field)
@@ -799,11 +804,13 @@ def evaluate_candidate(
         for record in same_work:
             assert_sealed(record, "SUPPRESSION_RECORD_HASH_DRIFT")
             if record["direction_id"] == candidate["direction_id"]:
-                if record["direction_revision"] != candidate["direction_revision"]:
+                if direction_transition != "NONE" or record["direction_revision"] != candidate["direction_revision"]:
                     result, reason = "INELIGIBLE", "PENDING_DIRECTION_REMAP"
                 else:
                     result, reason = "INELIGIBLE", "SUPPRESSED_EXACT_WORK_DIRECTION"
                 break
+        if result == "ELIGIBLE" and direction_transition != "NONE" and same_work:
+            result, reason = "INELIGIBLE", "PENDING_DIRECTION_REMAP"
         if result == "ELIGIBLE" and same_work:
             active_cooldowns = [
                 record["cooldown_until"]

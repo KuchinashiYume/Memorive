@@ -131,13 +131,13 @@ def _verify(value: Mapping[str, Any], field: str) -> dict[str, Any]:
         raise ConversationContractError(f"{field.upper()}_HASH_INVALID") from exc
 
 
-def object_ref(value: Mapping[str, Any], *, id_field: str) -> str:
+def object_ref(value: Mapping[str, Any], *, id_field: str, revision_field: str = "revision") -> str:
     checked = _mapping(value, "object")
     _text(checked[id_field], id_field)
-    _positive_int(checked["revision"], "revision")
+    _positive_int(checked[revision_field], revision_field)
     validate_hash_descriptor(checked["content_hash"], "content_hash")
     return (
-        f"{checked[id_field]}@revision:{checked['revision']}"
+        f"{checked[id_field]}@revision:{checked[revision_field]}"
         f"#sha256:{checked['content_hash']['value']}"
     )
 

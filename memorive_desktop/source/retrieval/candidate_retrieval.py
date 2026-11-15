@@ -542,7 +542,9 @@ def _count_for_scope(col, where: dict | None) -> int:
 
 
 def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox",
-                        require_verified: bool = False, embed_fn=None,
+                        require_verified: bool = False, embed_task_type: str = "embed_cloud",
+                        rerank_task_type: str = "rerank", embed_fn=None, rerank_fn=None,
+                        multimodal_rank_fn=None,
                         collection=None, lib_root=None,
                         paper_id: str | None = None) -> CandidateSet:
     """CandidateRetrieval 主入口:问题 → CandidateSet(chunk 单层召回 + active-only 回读活卡 + rerank + 归并回卡片)。
@@ -574,7 +576,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
         lib_root = library_root(target)
     lib_root = Path(lib_root)
 
-    qvec = (embed_fn or (lambda q: _default_embed(q, "embed_cloud")))(question)
+    qvec = (embed_fn or (lambda q: _default_embed(q, embed_task_type)))(question)
     col = collection if collection is not None else _open_collection(target)
     count = _count_for_scope(col, scope_where)
 
@@ -644,9 +646,10 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
                 active.sort(key=lambda h: h["distance"])
             else:
                 from .context_pack import _is_counterexample
+                rf = rerank_fn or (lambda q, txts: _default_rerank(q, txts, rerank_task_type))
                 scores = None
                 try:
-                    raw_scores = _default_rerank(question, [h["text"] for h in active], "rerank")
+                    raw_scores = rf(question, [h["text"] for h in active])
                     if (isinstance(raw_scores, (list, tuple)) and len(raw_scores) == len(active)
                             and all(isinstance(score, (int, float)) and not isinstance(score, bool)
                                     and math.isfinite(score) for score in raw_scores)):
@@ -678,11 +681,12 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
         else:
             # This route is local-only, so entrusted content remains inside the
             # loopback boundary. No dedicated reranker or cloud fallback exists.
+            ranker = multimodal_rank_fn or _default_multimodal_rank
             documents = _rank_documents(active)
             query_intent = getattr(getattr(strategy, "qtype", None), "value", None) or "unknown"
             ranked_ids = None
             try:
-                rank_result = _default_multimodal_rank(question, documents, query_intent)
+                rank_result = ranker(question, documents, query_intent)
                 if isinstance(rank_result, dict):
                     raw_ids = rank_result.get("candidate_ids")
                     receipt = rank_result.get("receipt")

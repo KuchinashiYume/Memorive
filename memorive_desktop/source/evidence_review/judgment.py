@@ -405,7 +405,7 @@ def conclusion_from_claim(claim, *, will_publish=False, manual_override=False) -
 
 
 def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownership=None,
-                       legacy_data_ownership=None,
+                       legacy_data_ownership=None, ownership_route_profile=None,
                        target=None, max_gpt: int = 2, gpt_call=None,
                        verifier_call=None, region_check=None,
                        candidate_resolver=None,
@@ -433,6 +433,7 @@ def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownersh
         ownership_task = build_ownership_review_task(
             analysis_result,
             legacy_data_ownership=legacy_value,
+            route_profile=ownership_route_profile,
         )
     except OwnershipContractError as exc:
         log_reason(

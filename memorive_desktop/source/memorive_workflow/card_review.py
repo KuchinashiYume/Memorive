@@ -26,7 +26,7 @@ class CardAdmissionError(RuntimeError):
         super().__init__(message)
 
 
-def review_card_revision(card_path, source_folder, stage_root, *, before_publish=None):
+def review_card_revision(card_path, source_folder, stage_root, *, reviewer=None, before_publish=None):
     from evidence_review import grade_and_admit
     from knowledge_admission.card_io import read_status, write_status
     card_path,source_folder,stage_root=map(Path,(card_path,source_folder,stage_root))
@@ -48,7 +48,7 @@ def review_card_revision(card_path, source_folder, stage_root, *, before_publish
         shutil.copy2(seed,draft)
         shutil.copy2(chunks[0],root/chunks[0].name)
         write_status(draft,'pending')
-        result=grade_and_admit(draft,bypass_cache=True)
+        result=(reviewer or grade_and_admit)(draft,bypass_cache=True)
         if result.outcome!='active' or read_status(draft)!='active':
             raise CardAdmissionError(result)
         receipt={**asdict(result),'input_binding':binding,'card_sha256':_hash(draft),

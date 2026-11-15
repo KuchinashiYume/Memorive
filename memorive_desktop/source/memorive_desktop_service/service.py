@@ -102,12 +102,13 @@ class ApplicationServiceHost:
         port: int = 0,
         max_frame_bytes: int | None = None,
         request_timeout_seconds: float = 5.0,
+        auth_timeout_seconds: float = 3.0,
     ):
         if not ipaddress.ip_address(host).is_loopback:
             raise ValueError("IPC_BIND_HOST_NOT_LOOPBACK")
         if isinstance(port, bool) or not isinstance(port, int) or not 0 <= port <= 65535:
             raise ValueError("IPC_PORT_INVALID")
-        if request_timeout_seconds <= 0:
+        if request_timeout_seconds <= 0 or auth_timeout_seconds <= 0:
             raise ValueError("IPC_TIMEOUT_INVALID")
         self.adapter = adapter
         self.authenticator = LoopbackPeerAuthenticator(secret, ttl_seconds=30)
@@ -115,7 +116,7 @@ class ApplicationServiceHost:
         self.port = port
         self.max_frame_bytes = max_frame_bytes
         self.request_timeout_seconds = request_timeout_seconds
-        self.auth_timeout_seconds = 3.0
+        self.auth_timeout_seconds = auth_timeout_seconds
         self._server: asyncio.AbstractServer | None = None
         self._connections: set[asyncio.StreamWriter] = set()
         self._request_count = 0

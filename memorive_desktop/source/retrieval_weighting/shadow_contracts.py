@@ -146,6 +146,7 @@ def require_string_list(
     field_name: str,
     *,
     allow_empty: bool,
+    sorted_required: bool = True,
 ) -> list[str]:
     """Validate a duplicate-free deterministic list of exact references."""
 
@@ -156,7 +157,7 @@ def require_string_list(
         raise ContractViolation(f"{field_name} must not be empty")
     if len(result) != len(set(result)):
         raise ContractViolation(f"{field_name} must not contain duplicates")
-    if result != sorted(result):
+    if sorted_required and result != sorted(result):
         raise ContractViolation(f"{field_name} must use canonical ascending order")
     return result
 

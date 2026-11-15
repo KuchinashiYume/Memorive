@@ -839,8 +839,9 @@ class SessionArchive:
         self,
         *,
         provider: str | None = None,
+        include_hidden: bool = False,
     ) -> list[dict[str, Any]]:
-        clauses = ["hidden = 0", "NOT EXISTS (SELECT 1 FROM capture_aliases a WHERE a.provider = conversations.provider AND a.alias_id = conversations.provider_conversation_id)"]
+        clauses = ["1 = 1"] if include_hidden else ["hidden = 0", "NOT EXISTS (SELECT 1 FROM capture_aliases a WHERE a.provider = conversations.provider AND a.alias_id = conversations.provider_conversation_id)"]
         parameters: list[Any] = []
         if provider is not None:
             clauses.append("provider = ?")

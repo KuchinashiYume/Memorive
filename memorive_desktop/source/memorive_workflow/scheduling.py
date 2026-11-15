@@ -7,8 +7,8 @@ from memorive_settings.call_ledger import execution_checkpoint
 
 
 class PipelineLanes:
-    def __init__(self):
-        self.card_release_seconds = 15.0
+    def __init__(self, *, card_release_seconds: float = 15.0):
+        self.card_release_seconds = max(0.0, float(card_release_seconds))
         self._guard = threading.Lock()
         self._changed = threading.Condition(self._guard)
         self._queues = {}

@@ -97,16 +97,21 @@ _PROMPTS_ROOT = Path(__file__).with_name("prompts")       # Prompt 模板库(第
 
 
 class ModelGateway:
-    def __init__(self, config_path: Path = _CONFIG_PATH, prompts_root: Path = _PROMPTS_ROOT):
+    def __init__(self, config_path: Path = _CONFIG_PATH, prompts_root: Path = _PROMPTS_ROOT, *, region_probe=None):
         self.config = GatewayConfig(config_path)
         self.router = Router(self.config)
         self.prompts = PromptRegistry(prompts_root)   # 第2步:Prompt Registry
         self.cache = CacheLayer()                     # 第3步:Cache Layer (文件缓存、库外)
         self.cost = CostManager(self.config)          # 第3步:Cost & Quota Manager (记账写 RUNTIME_LOG)
         self.fallback = FallbackPolicy()              # 第4步:Fallback + 四类报错
+        self._region_probe = region_probe
 
     def _require_region_authorization(self, task_type: str, slot) -> dict:
-        receipt = region_gate.preflight_for_slot(slot, probe=None)
+        # Some established offline tests construct a minimal gateway via __new__.
+        # Absence of the injected probe must still use the default fail-closed path.
+        receipt = region_gate.preflight_for_slot(
+            slot, probe=getattr(self, "_region_probe", None)
+        )
         if not receipt.get("ok") or receipt.get("gated"):
             raise GatewayError(receipt.get("message") or f"[{task_type}] 区域证据未获授权；请求已在发送前挡下。")
         return receipt
@@ -304,7 +309,9 @@ class ModelGateway:
         两条前提见 region_gate 模块 docstring:仅 TUN 全局代理下成立、区域通过 ≠ key 有效。
         国内 / 本地 / human / 占位槽自动 skipped 放行(不查 geo)。probe 可注入(离线测)。"""
         slot = self.config.slot(task_type)    # 未知 task_type → UnknownTaskType(归 MODEL_GATEWAY 错误体系)
-        return region_gate.preflight_for_slot(slot, probe=probe)
+        return region_gate.preflight_for_slot(
+            slot, probe=probe or getattr(self, "_region_probe", None)
+        )
 
 
 from contextvars import ContextVar

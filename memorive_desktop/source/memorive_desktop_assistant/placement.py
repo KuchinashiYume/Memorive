@@ -120,8 +120,8 @@ def restore_default_placement(
     areas: tuple[WorkArea, ...],
     *,
     dpi_percent: int | None = None,
+    margin: int = 24,
 ) -> AssistantWindowPlacement:
-    margin = 24
     area = _select_area(None, areas)
     width, height = 90, 90
     effective_dpi = area.dpi_percent if dpi_percent is None else dpi_percent
@@ -147,13 +147,17 @@ def restore_default_placement(
 def clamp_placement(
     placement: AssistantWindowPlacement,
     areas: tuple[WorkArea, ...],
+    *,
+    margin: int = 0,
 ) -> AssistantWindowPlacement:
+    if isinstance(margin, bool) or not isinstance(margin, int) or margin < 0:
+        raise ValueError("ASSISTANT_PLACEMENT_MARGIN_INVALID")
     area = _select_visible_area(placement, areas)
     visible_left, visible_top, visible_width, visible_height = visible_bounds(placement)
-    minimum_x = area.left - visible_left
-    minimum_y = area.top - visible_top
-    maximum_x = max(minimum_x, area.right - visible_left - visible_width)
-    maximum_y = max(minimum_y, area.bottom - visible_top - visible_height)
+    minimum_x = area.left + margin - visible_left
+    minimum_y = area.top + margin - visible_top
+    maximum_x = max(minimum_x, area.right - margin - visible_left - visible_width)
+    maximum_y = max(minimum_y, area.bottom - margin - visible_top - visible_height)
     return AssistantWindowPlacement(
         monitor_id=area.monitor_id,
         x=min(max(placement.x, minimum_x), maximum_x),

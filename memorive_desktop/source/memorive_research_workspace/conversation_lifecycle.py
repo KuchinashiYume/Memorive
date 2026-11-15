@@ -183,15 +183,15 @@ class ConversationLifecycle:
             rows.append(value)
         return rows,last if len(raw)>limit else None
 
-    def maintain(self):
+    def maintain(self,*,force=False):
         if self.workspace.closed:return {'status':'CLOSED','migration_complete':False}
-        if not self.ready or time.monotonic()<self.foreground_until:return {'status':'YIELDED','migration_complete':False}
+        if not force and (not self.ready or time.monotonic()<self.foreground_until):return {'status':'YIELDED','migration_complete':False}
         started=time.monotonic();count=0;read_bytes=0;rewritten=0;archived=0
         with self.store.read() as db:
             state=db.execute('SELECT * FROM conversation_migration WHERE id=1').fetchone()
             pending=[] if state['complete'] else db.execute("SELECT rowid,id,kind,project,revision,length(CAST(body AS BLOB)) AS bytes FROM objects WHERE kind IN ('thread','job','attachment_job') AND rowid>? AND rowid<=? ORDER BY rowid LIMIT ?",(state['cursor'],state['boundary'],cs.BATCH_SIZE)).fetchall()
         for r in pending:
-            if self.workspace.closed or time.monotonic()<self.foreground_until:break
+            if self.workspace.closed or (not force and time.monotonic()<self.foreground_until):break
             if count>=cs.BATCH_SIZE or (count and time.monotonic()-started>=cs.TIME_BUDGET):break
             if r['kind']=='thread' and r['bytes']>cs.BYTE_BUDGET:
                 from .conversation_backfill import step
@@ -250,7 +250,7 @@ class ConversationLifecycle:
                  AND NOT EXISTS(SELECT 1 FROM conversation_views v WHERE v.thread_id=c.id AND v.expires_monotonic>? AND v.expires_monotonic<=?)
                  ORDER BY a.eligible_at,c.id LIMIT ?''',(self.clock()-cs.DAYS_30,self.clock(),self.clock()-cs.DAYS_30,mono,mono+91,cs.BATCH_SIZE-count)).fetchall()
             for candidate in candidates:
-                if self.workspace.closed or time.monotonic()-started>=cs.TIME_BUDGET or time.monotonic()<self.foreground_until:break
+                if self.workspace.closed or time.monotonic()-started>=cs.TIME_BUDGET or (not force and time.monotonic()<self.foreground_until):break
                 if self.before_archive_commit:self.before_archive_commit(dict(candidate))
                 try:
                     with self.store.tx() as db:archived+=bool(self.set_archive(db,candidate['id'],True,source='AUTO',candidate=candidate))

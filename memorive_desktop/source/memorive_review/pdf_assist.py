@@ -4,7 +4,7 @@ import re
 import time
 from .engine import digest,extract
 
-def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=2):
+def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=2,max_seconds=5):
     required=('rule_id','parameter','card_omission_id','reason','pages','label','source_sha256')
     if not isinstance(gap,dict) or any(k not in gap for k in required):return {'status':'NOT_APPLICABLE','reason':'NO_BOUND_RELEVANT_CARD_GAP'}
     if gap.get('access_excluded') is True:return {'status':'BLOCKED','reason':'SOURCE_ACCESS_EXCLUDED'}
@@ -28,10 +28,10 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
             with scope('PDF_ASSIST', sorted(set(pages))) as node_units:
                 for page in sorted(set(pages)):
                     checkpoint()
-                    if time.monotonic()-start>5:raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
+                    if time.monotonic()-start>max_seconds:raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
                     if page>pdf.page_count:raise ValueError('PDF_PAGE_OUT_OF_RANGE')
                     text=pdf[page-1].get_text();read.append(page)
-                    if time.monotonic()-start>5:raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
+                    if time.monotonic()-start>max_seconds:raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
                     if gap.get('automatic'):
                         # The page locator alone is not a parameter/group binding.
                         # Require the same exact source formula context, then inspect

@@ -331,13 +331,19 @@ def _build_repair_bundle(
     }
 
 
-def _partition_repair_bundle(bundle: dict) -> list[dict]:
+def _partition_repair_bundle(
+    bundle: dict,
+    *,
+    max_targets: int = REPAIR_BATCH_MAX_TARGETS,
+) -> list[dict]:
     """Partition repairs by identical source scope, then by bounded target count.
 
     Identical source scopes stay adjacent so each batch has the same canonical
     SOURCE_CONTEXT prefix. This keeps provider prompt-cache reuse possible while
     bounding the response size for every repair request.
     """
+    if not isinstance(max_targets, int) or isinstance(max_targets, bool) or max_targets <= 0:
+        raise ValueError("EVIDENCE_REVIEW_REPAIR_BATCH_MAX_TARGETS_INVALID")
     base = {key: copy.deepcopy(value) for key, value in bundle.items() if key != "targets"}
     targets = list(bundle.get("targets", []))
     signatures = []
@@ -366,8 +372,8 @@ def _partition_repair_bundle(bundle: dict) -> list[dict]:
         grouped.setdefault(group_key, []).append(copy.deepcopy(target))
     batches = []
     for targets in grouped.values():
-        for start in range(0, len(targets), REPAIR_BATCH_MAX_TARGETS):
-            batch_targets = copy.deepcopy(targets[start:start + REPAIR_BATCH_MAX_TARGETS])
+        for start in range(0, len(targets), max_targets):
+            batch_targets = copy.deepcopy(targets[start:start + max_targets])
             source_by_id = {}
             for target in batch_targets:
                 for row in target["candidate_sources"]:
