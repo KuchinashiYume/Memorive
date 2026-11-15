@@ -8,6 +8,10 @@ derived_penalty checks the derived-penalty policy. Other fields of a snapshot ar
 
 The require_* helpers and reject_scorer_or_oracle_fields() are used by the other modules of the
 package.
+
+Switches such as activation_authorized or production_writes_allowed in a snapshot are declarations
+only: nothing here acts on them. If the shadow ranking is ever wired into the product, the check
+belongs where the product decides to use its result.
 """
 
 from __future__ import annotations
@@ -170,17 +174,26 @@ def validate_derived_penalty_policy(value: Any) -> dict[str, Any]:
 
 
 def validate_retrieval_policy_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
-    """A copy of a retrieval policy snapshot; its provider tables, channel caps and content_hash are checked."""
+    """A copy of a retrieval policy snapshot, after checking what the steps read without checking it
+    themselves: a version, a normalization profile and a weight for every provider, the channel caps,
+    the authority mass cap, the derived-penalty policy (an object), and the content_hash."""
+    from .providers import PROVIDERS  # imported here: providers.py imports this module
 
     result = _mapping(snapshot, "retrieval_policy_snapshot")
     providers = _mapping(result.get("provider_policy"), "provider_policy")
     for table in ("provider_versions", "normalization_profiles", "weights"):
-        _mapping(providers.get(table), f"provider_policy.{table}")
+        entries = _mapping(providers.get(table), f"provider_policy.{table}")
+        missing = [provider for provider in PROVIDERS if provider not in entries]
+        if missing:
+            raise ContractViolation(f"provider_policy.{table} has no entry for " + ", ".join(missing))
     aggregation = _mapping(result.get("aggregation_policy"), "aggregation_policy")
     channel_caps = _mapping(aggregation.get("channel_caps"), "aggregation_policy.channel_caps")
     for channel, cap in channel_caps.items():
         if isinstance(cap, bool) or not isinstance(cap, int) or cap < 1:
             raise ContractViolation("aggregation_policy channel caps must be positive integers")
+    if "authority_mass_cap" not in aggregation:
+        raise ContractViolation("aggregation_policy.authority_mass_cap is required")
+    _mapping(result.get("derived_penalty_policy"), "derived_penalty_policy")
     return verify_hashed_payload(result, "retrieval_policy_snapshot")
 
 

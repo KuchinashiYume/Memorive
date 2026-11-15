@@ -331,7 +331,10 @@ def validate_readable_envelope(envelope: Mapping[str, Any]) -> None:
 
 
 def resolved_parent_links(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """Return a derived read-only alias; never persist this result separately."""
+    """Return a derived read-only alias; never persist this result separately.
+
+    The envelope must be checked already (validate_readable_envelope, or read from the registry, or
+    made by build_envelope); an unchecked bad one raises TypeError or KeyError."""
 
     if envelope["schema_version"] == ENVELOPE_SCHEMA_VERSION:
         return copy.deepcopy(envelope["parent_artifacts"])
@@ -339,7 +342,9 @@ def resolved_parent_links(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 
 def lineage_status(envelope: Mapping[str, Any]) -> str:
-    """Derive display state from the authoritative lineage fields."""
+    """Derive display state from the authoritative lineage fields.
+
+    The envelope must be checked already, as for resolved_parent_links."""
 
     if envelope["schema_version"] == ENVELOPE_SCHEMA_VERSION:
         parents = envelope["parent_artifacts"]
@@ -361,6 +366,7 @@ def lineage_status(envelope: Mapping[str, Any]) -> str:
 
 
 def content_hash_value(envelope: Mapping[str, Any]) -> str:
+    """The envelope's content hash. The envelope must be checked already, as for resolved_parent_links."""
     return str(envelope["content_hash"]["value"])
 
 

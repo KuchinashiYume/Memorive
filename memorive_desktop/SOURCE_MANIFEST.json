@@ -2282,8 +2282,8 @@
     },
     {
       "path": "source/artifact_registry/schema_v2.py",
-      "sha256": "583fe4e09029a6317555c0a610b5886a704d90cc3ccb5a3f21d03bc8e0274b17",
-      "bytes": 23331
+      "sha256": "01b9d23d22647971e32f7c750f567c26001233a4d69c250cb591970432af8c15",
+      "bytes": 23698
     },
     {
       "path": "source/artifact_registry/schemas/artifact_envelope_v1.schema.json",
@@ -6507,8 +6507,8 @@
     },
     {
       "path": "source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "406f250fdee4ae5c5af298597cd9483b58fccf00bb972d2ec2f7b13cf4a4d213",
-      "bytes": 8635
+      "sha256": "c1434371e8793307c887553bd6c293f88045fd97eccb7006e8bcded07d753282",
+      "bytes": 9594
     },
     {
       "path": "source/retrieval_weighting/source_snapshot.py",

@@ -4001,8 +4001,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schema_v2.py",
-      "sha256": "583fe4e09029a6317555c0a610b5886a704d90cc3ccb5a3f21d03bc8e0274b17",
-      "bytes": 23331
+      "sha256": "01b9d23d22647971e32f7c750f567c26001233a4d69c250cb591970432af8c15",
+      "bytes": 23698
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schemas/artifact_envelope_v1.schema.json",
@@ -7561,8 +7561,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/shadow_contracts.py",
-      "sha256": "406f250fdee4ae5c5af298597cd9483b58fccf00bb972d2ec2f7b13cf4a4d213",
-      "bytes": 8635
+      "sha256": "c1434371e8793307c887553bd6c293f88045fd97eccb7006e8bcded07d753282",
+      "bytes": 9594
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/candidate_index.py",
@@ -7936,7 +7936,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "24fbee5c7a397c8e8e473a3b75f9c427bf6a44dc0d84b5d309e3a57ca3ff53b2",
+      "sha256": "5565c638fd502a190a56c1b6df5842e7475adf9126eb6b37e2582206ce8e4f54",
       "bytes": 252326
     },
     {
