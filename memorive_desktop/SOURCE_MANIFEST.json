@@ -6626,9 +6626,14 @@
       "bytes": 838
     },
     {
+      "path": "source/runtime_log/lock.py",
+      "sha256": "de35197df7f5cf62a8d6ceeb2cf5948861f111257eef7c894b4b3125286f07c0",
+      "bytes": 1623
+    },
+    {
       "path": "source/runtime_log/logger.py",
-      "sha256": "941cd9c1a51852bbb33ff679c2c8bff4e4708563676409819bfa764279bbd2dd",
-      "bytes": 9088
+      "sha256": "c39484a047f24899ce9ab570b28626fce59abca32a8086e1effdd3f834648166",
+      "bytes": 8883
     },
     {
       "path": "source/runtime_log/product_paths.py",
@@ -6647,8 +6652,8 @@
     },
     {
       "path": "source/runtime_log/retention.py",
-      "sha256": "26975e74125e7dbee8a00e3a92ba4baee4401fa018f72e519b02e52394232955",
-      "bytes": 5005
+      "sha256": "5f22df367a87c9cea76ba1ba9bec387b5340f068957a1c58dd25f7f574cb5754",
+      "bytes": 6798
     },
     {
       "path": "tools/package_companions.py",

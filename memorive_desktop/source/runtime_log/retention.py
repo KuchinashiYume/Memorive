@@ -13,16 +13,20 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
 
+from .lock import log_lock
+
 PRUNED_RECORD_TYPES = frozenset({"event", "reason"})
 SERVICE_LAUNCH_FILES = ("service-*.stdout.log", "service-*.stderr.log", "service-*.endpoint.json",
                         "service-*.stop.json", "service-*.shutdown_order.json")
 STARTUP_LOG_FILES = ("webview_startup_*.log",)
-MARKER_SUFFIX = ".retention"      # touched right before a log is replaced; the logger looks at it
+TEMPORARY_SUFFIX = ".retention.tmp"
+STALE_TEMPORARY_SECONDS = 60 * 60   # a temporary file this old belongs to a pass that was interrupted
 
 
 def _entry_time(line: bytes) -> tuple[datetime | None, object]:
@@ -37,13 +41,21 @@ def _entry_time(line: bytes) -> tuple[datetime | None, object]:
 
 
 def prune_log(log_path: Path | str, keep_days: int, *, now: datetime | None = None) -> dict[str, int]:
-    """Drop the event and reason entries of a runtime log that are older than keep_days."""
+    """Drop the event and reason entries of a runtime log that are older than keep_days.
+
+    The slow part (reading, filtering, writing and syncing the new file) runs without the log's lock. Under
+    the lock the pass checks that the log is still the file it read, copies what was appended since and
+    replaces the log; appenders hold the same lock, so no entry can fall in between. When the log cannot be
+    replaced it is left as it is and nothing counts as removed.
+    """
     path = Path(log_path)
     result = {"kept": 0, "removed": 0}
     if not path.is_file():
         return result
     limit = (now or datetime.now(timezone.utc)) - timedelta(days=keep_days)
-    raw = path.read_bytes()
+    with open(path, "rb") as source:
+        identity = _identity(os.fstat(source.fileno()))
+        raw = source.read()
     kept = []
     for line in raw.splitlines(keepends=True):
         stamp, kind = _entry_time(line)
@@ -54,25 +66,53 @@ def prune_log(log_path: Path | str, keep_days: int, *, now: datetime | None = No
             result["kept"] += 1
     if not result["removed"]:
         return result
-    temporary = path.with_name(path.name + ".retention.tmp")
+    unchanged = {"kept": result["kept"] + result["removed"], "removed": 0}
+    temporary = None
     try:
-        with open(temporary, "wb") as handle:
+        descriptor, name = tempfile.mkstemp(prefix=path.name + ".", suffix=TEMPORARY_SUFFIX, dir=path.parent)
+        temporary = Path(name)
+        with open(descriptor, "wb") as handle:
             handle.writelines(kept)
             handle.flush()
-            os.fsync(handle.fileno())              # the slow part first
-            with open(path, "rb") as current:      # then what another process appended meanwhile
-                current.seek(len(raw))
-                handle.write(current.read())
-        path.with_name(path.name + MARKER_SUFFIX).write_bytes(b"")
-        os.replace(temporary, path)
+            os.fsync(handle.fileno())
+            with log_lock(path):
+                _remove_stale_temporaries(path, keep=temporary)
+                with open(path, "rb") as current:
+                    state = os.fstat(current.fileno())
+                    if _identity(state) != identity or state.st_size < len(raw):
+                        return unchanged          # another pass replaced the log meanwhile
+                    current.seek(len(raw))
+                    handle.write(current.read())  # what was appended since the read above
+                handle.flush()
+                os.fsync(handle.fileno())
+                handle.close()
+                os.replace(temporary, path)
+                temporary = None
     except OSError:
-        # The log is in use; it is left as it is and tried again next time.
-        try:
-            temporary.unlink()
-        except OSError:
-            pass
-        return {"kept": result["kept"] + result["removed"], "removed": 0}
+        return unchanged                          # the log is in use; it is tried again next time
+    finally:
+        if temporary is not None:
+            try:
+                temporary.unlink()
+            except OSError:
+                pass
     return result
+
+
+def _identity(state: os.stat_result) -> tuple[int, int]:
+    """The file itself, not its name: replacing the log gives a different identity."""
+    return state.st_dev, state.st_ino
+
+
+def _remove_stale_temporaries(path: Path, *, keep: Path) -> None:
+    """Remove temporary files that an interrupted earlier pass left next to the log."""
+    limit = time.time() - STALE_TEMPORARY_SECONDS
+    for leftover in path.parent.glob(path.name + ".*" + TEMPORARY_SUFFIX):
+        try:
+            if leftover != keep and leftover.stat().st_mtime < limit:
+                leftover.unlink()
+        except OSError:
+            continue
 
 
 def prune_files(folder: Path | str, patterns: Iterable[str], keep_days: int, *,
