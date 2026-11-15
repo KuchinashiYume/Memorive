@@ -9563,6 +9563,11 @@
       "path": "memorive_desktop/ui/integrated/shared/route-base.css",
       "sha256": "276f609bda60bd8a608f6621e492dd5ecd654c9ab59042e0976e78de1c9b9fab",
       "bytes": 274593
+    },
+    {
+      "path": "memorive_desktop/examples/research_qa.py",
+      "sha256": "3b069f4c3868e1f4970d178c07e64e755a305720975428096e0eeda6dda7e09d",
+      "bytes": 5889
     }
   ]
 }
