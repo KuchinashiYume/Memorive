@@ -58,6 +58,12 @@
 
 
 <style>
+/* Base styles of seven routes of the main window: settings, inbox, tasks, messages, sessions,
+   library and worklog. A rule that several routes share is written once, inside
+   :is(#desktop-<route>-preview, ...) { ... }, where & is the route's root element. A rule that only
+   one route has keeps its #desktop-<route>-preview prefix. Rules apply in file order: to change one
+   route only, edit its own rule or add one for it after the shared rule.
+   @scope blocks hold the rules that the routes scope to their root; @keyframes are at the end. */
 
 :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
   & .desktop-icon-sprite {
