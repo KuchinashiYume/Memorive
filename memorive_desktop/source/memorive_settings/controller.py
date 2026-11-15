@@ -297,13 +297,15 @@ class SettingsController:
         self.metrics["external_network_calls"] += int(result.get("external_network_calls") or 0)
         return result
 
-    def external_model_reference(self, *, node_id: str,
+    def external_model_reference(self, *, node_id: str, expected_profile_ref: str | None = None,
                                  preview_profile_ref: str | None = None) -> dict[str, Any]:
         from .exam_tiers import ROLE_BY_NODE
         settings = self.store.load(recover_corruption=False)["settings"]
         node = next((r for r in settings["workflow"]["nodes"] if r["node_id"] == node_id), None)
         if node is None or node_id not in ROLE_BY_NODE:
             raise ValueError("WORKFLOW_NODE_MODEL_TEST_NOT_APPLICABLE")
+        if expected_profile_ref is not None and expected_profile_ref != node["profile_ref"]:
+            raise ValueError("EXTERNAL_REFERENCE_REQUIRES_SAVED_MODEL_MAPPING")
         profile_ref = preview_profile_ref if preview_profile_ref is not None else node["profile_ref"]
         target = self._workflow_model_target(settings, profile_ref)
         if preview_profile_ref is not None and target.get("kind") not in {"API", "CLI", "LOCAL"}:

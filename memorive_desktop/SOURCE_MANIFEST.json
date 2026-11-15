@@ -4492,8 +4492,8 @@
     },
     {
       "path": "source/memorive_settings/controller.py",
-      "sha256": "3edccf5e076d25611ad4f34cfae4f332b887d233392d31e77d7afc4f80cd0537",
-      "bytes": 86780
+      "sha256": "d3343e1b91441a88bf6aa6c6b103f3a15ad039e932ae03719eb607c31ec2ee7f",
+      "bytes": 86994
     },
     {
       "path": "source/memorive_settings/credentials.py",
