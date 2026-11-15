@@ -1,32 +1,74 @@
-"""Select exact existing mainline products; never scan profile or operations roots."""
+"""Adding processed papers from the library to a research project.
+
+Document processing leaves a card, an analysis, the original and the cleaned text of each paper in
+the library. library_list shows those files; library_add puts the chosen ones into the project's
+search index (workspace.index.add_library_file). The files come from the library controller
+(memorive_library/product_controller.py: core_artifacts and resolve_core_private_artifact); no
+folder is scanned.
+"""
 from pathlib import Path
 
-def bind(workspace,library):
-    def candidates():
-        library._sync_core_artifacts()
-        rows=[]
-        for identity,entry in library._core_entries_by_artifact_id.items():
-            if Path(entry['private_path']).suffix.lower() not in {'.md','.txt','.pdf','.json'}:continue
-            if entry.get('artifact_kind') not in {'CORE_CARD','CORE_ANALYSIS','CORE_RAW_DOCUMENT','CORE_CLEAN_DOCUMENT'}:continue
-            rows.append({'id':identity,'title':entry['row']['display_name'],'kind':entry['artifact_kind'],
-                'content_hash':entry['content_sha256'],'state':entry['row']['status'],'document_id':'doc_'+entry.get('source_content_sha256',entry['content_sha256'])})
-        return {'items':rows,'source':'EXISTING_Core_BOUND_ARTIFACTS'}
-    def add(project,artifacts):
-        if not isinstance(artifacts,list) or not 1<=len(artifacts)<=32:raise ValueError('LIBRARY_SELECTION_REQUIRED')
-        available={r['id']:r for r in candidates()['items']};rows=[];failures=[]
-        for request in artifacts:
-            identity=request['id'];item=available.get(identity)
-            if not item or request.get('content_hash')!=item['content_hash']:raise ValueError('LIBRARY_SELECTION_STALE')
-            path=library.resolve_core_private_artifact(identity)
-            entry=library._core_entries_by_artifact_id[identity]
+# The products offered as research material, and what each is called in the index.
+MATERIAL_LAYERS = {'CORE_CARD': 'card', 'CORE_ANALYSIS': 'analysis', 'CORE_RAW_DOCUMENT': 'original',
+                   'CORE_CLEAN_DOCUMENT': 'cleaned'}
+READABLE_SUFFIXES = {'.md', '.txt', '.pdf', '.json'}
+MAX_FILES_PER_ADD = 32
+
+
+def bind(workspace, library):
+    """Give the workspace library_list and library_add."""
+
+    def offered_files():
+        return {artifact_id: record for artifact_id, record in library.core_artifacts().items()
+                if record['artifact_kind'] in MATERIAL_LAYERS
+                and Path(record['private_path']).suffix.lower() in READABLE_SUFFIXES}
+
+    def library_list():
+        items = [{'id': artifact_id, 'title': record['row']['display_name'], 'kind': record['artifact_kind'],
+                  'content_hash': record['content_sha256'], 'state': record['row']['status'],
+                  'document_id': 'doc_' + document_hash(record)}
+                 for artifact_id, record in offered_files().items()]
+        return {'items': items, 'source': 'EXISTING_Core_BOUND_ARTIFACTS'}
+
+    def library_add(project, artifacts):
+        """Add the chosen files. Each choice names a file id and the content hash shown in the list."""
+        if not isinstance(artifacts, list) or not 1 <= len(artifacts) <= MAX_FILES_PER_ADD:
+            raise ValueError('LIBRARY_SELECTION_REQUIRED')
+        offered = offered_files()
+        added, failures = [], []
+        for choice in artifacts:
+            artifact_id = choice['id']
+            record = offered.get(artifact_id)
+            # The file changed or went away after the list was shown: the user chooses again.
+            if record is None or choice.get('content_hash') != record['content_sha256']:
+                raise ValueError('LIBRARY_SELECTION_STALE')
+            path = library.resolve_core_private_artifact(artifact_id)
             try:
-                row=workspace.index.add_library_file(project,path=path,root=entry['artifact_root'],external_id=identity,
-                    expected_hash=item['content_hash'],title=item['title'],
-                    document_id='doc_'+entry.get('source_content_sha256',entry['content_sha256']),
-                    material_layer={'CORE_CARD':'card','CORE_ANALYSIS':'analysis','CORE_RAW_DOCUMENT':'original','CORE_CLEAN_DOCUMENT':'cleaned'}[entry['artifact_kind']],
-                    source_content_hash=entry.get('source_content_sha256',entry['content_sha256']),
-                    structure_bundle=(Path(path).parent/'structure') if entry['artifact_kind']=='CORE_RAW_DOCUMENT' and (Path(path).parent/'structure/bundle.json').is_file() else None)
-                rows.append({'id':row['id'],'title':row['title']})
-            except (ValueError,OSError) as exc:failures.append({'id':identity,'code':str(exc)[:120]})
-        return {'status':'PARTIAL' if failures else 'PASS','indexed':len(rows),'items':rows,'failures':failures}
-    workspace.library_list=candidates;workspace.library_add=add
+                row = workspace.index.add_library_file(
+                    project, path=path, root=record['artifact_root'], external_id=artifact_id,
+                    expected_hash=record['content_sha256'], title=record['row']['display_name'],
+                    document_id='doc_' + document_hash(record), source_content_hash=document_hash(record),
+                    material_layer=MATERIAL_LAYERS[record['artifact_kind']],
+                    structure_bundle=page_layout(record, path))
+            except (ValueError, OSError) as exc:
+                failures.append({'id': artifact_id, 'code': str(exc)[:120]})
+                continue
+            added.append({'id': row['id'], 'title': row['title']})
+        return {'status': 'PARTIAL' if failures else 'PASS', 'indexed': len(added), 'items': added,
+                'failures': failures}
+
+    workspace.library_list = library_list
+    workspace.library_add = library_add
+
+
+def document_hash(record):
+    """The hash of the paper a file was made from; it groups a paper's files into one document."""
+    return record.get('source_content_sha256', record['content_sha256'])
+
+
+def page_layout(record, path):
+    """The page layout saved next to an original document; the index uses it to cite pages."""
+    folder = Path(path).parent / 'structure'
+    if record['artifact_kind'] == 'CORE_RAW_DOCUMENT' and (folder / 'bundle.json').is_file():
+        return folder
+    return None

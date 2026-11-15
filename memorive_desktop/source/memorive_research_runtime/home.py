@@ -10,9 +10,8 @@ def summaries(api):
         with sqlite3.connect(workspace.as_uri()+'?mode=ro',uri=True) as db:
             row=db.execute("SELECT id,project,json_extract(body,'$.title'),updated FROM objects WHERE kind='thread' AND coalesce(json_extract(body,'$.temporary'),0)=0 AND coalesce(json_extract(body,'$.archived'),0)=0 ORDER BY updated DESC,id LIMIT 1").fetchone()
             if row:result['thread']={'id':row[0],'project':row[1],'title':row[2],'updated_at':row[3]}
-    # The cached projection is already owned by the existing library. Do not refresh its index here.
-    rows=getattr(api._library,'_rows_by_id',{})
-    candidates=[r for r in rows.values() if r.get('file_exists') is not False and r.get('artifact_id')]
+    # The home page shows the library rows as last refreshed; asking the jobs again would slow it down.
+    candidates=[r for r in api._library.cached_rows() if r.get('file_exists') is not False and r.get('artifact_id')]
     if candidates:
         row=max(candidates,key=lambda r:str(r.get('updated_at','')))
         result['material']={k:row.get(k) for k in ('artifact_id','display_name','updated_at','mode','research_run_id')}
@@ -44,7 +43,7 @@ def call(api,method,params):
         return {'available':bool(row),'route':'chat','thread_id':row[0] if row else None}
     if kind=='material':
         try:
-            row=api._library._get(target)
+            row=api._library.get_artifact(target)
             if not row.get('file_exists'):raise ValueError('UNAVAILABLE')
             return {'available':True,'route':'library',**{k:row.get(k) for k in ('artifact_id','mode','research_run_id')}}
         except (ValueError,KeyError):return {'available':False,'route':'library'}

@@ -515,7 +515,21 @@ class LibraryProductController:
             raise LibraryProductError(f"LIBRARY_Core_{error_scope}_HASH_MISMATCH")
         return target
 
+    def core_artifacts(self) -> dict[str, dict[str, Any]]:
+        """Every file that document processing produced, by artifact id, read fresh from the jobs.
+
+        Other parts of the app (the research workspace) read the products through this method and
+        resolve_core_private_artifact, not through the controller's own fields. Each record has
+        artifact_kind (CORE_CARD, CORE_ANALYSIS, CORE_RAW_DOCUMENT, CORE_CLEAN_DOCUMENT, ...; one
+        CORE_DOCUMENT record stands for each source document), job_id, content_sha256,
+        source_content_sha256, private_path, artifact_root and row, the library row shown for it
+        (display_name, status, ...). The records are shared: read them, do not change them.
+        """
+        self._sync_core_artifacts()
+        return dict(self._core_entries_by_artifact_id)
+
     def resolve_core_private_artifact(self, artifact_id: str) -> Path:
+        """The file of a product, after checking it is still the file the job recorded."""
         self._sync_core_artifacts()
         entry = self._core_entries_by_artifact_id.get(str(artifact_id or ""))
         if entry is None:
@@ -1124,7 +1138,9 @@ class LibraryProductController:
             )
         return rows
 
-    def _get(self, artifact_id: str) -> dict[str, Any]:
+    def get_artifact(self, artifact_id: str) -> dict[str, Any]:
+        """One library row as the library page shows it. The id of a product file gives the row of
+        its document, with the file's own kind and hash."""
         self._sync_research_artifacts()
         self._sync_core_artifacts()
         resolved_id = self._core_row_aliases.get(artifact_id, artifact_id)
@@ -1180,7 +1196,8 @@ class LibraryProductController:
             "status": "PASS",
         }
 
-    def _catalog_rows_snapshot(self) -> list[dict[str, Any]]:
+    def cached_rows(self) -> list[dict[str, Any]]:
+        """A copy of the library rows as last refreshed, without asking the jobs again."""
         # Publishers replace several entries together. Readers consume one
         # generation without holding the lock during sorting or UI projection.
         with self._core_lock:
@@ -1203,7 +1220,7 @@ class LibraryProductController:
             raise LibraryProductError("LIBRARY_PAGING_INVALID")
         term = search.strip().casefold()
         rows = []
-        for row in self._catalog_rows_snapshot():
+        for row in self.cached_rows():
             if row["mode"] != view:
                 continue
             public = self._public(row)
@@ -1335,11 +1352,11 @@ class LibraryProductController:
             return self._list(accepted)
         if method == "library.get_artifact":
             self._require_keys(accepted, {"artifact_id"})
-            return {"schema_version": "LibraryLibraryDetailProjection-v1", "artifact": self._get(str(accepted["artifact_id"])), "status": "PASS"}
+            return {"schema_version": "LibraryLibraryDetailProjection-v1", "artifact": self.get_artifact(str(accepted["artifact_id"])), "status": "PASS"}
         if method == "library.get_artifact_bindings":
             self._require_keys(accepted, set(), {"artifact_id"})
             artifact_id = accepted.get("artifact_id")
-            rows = [row for row in self._catalog_rows_snapshot() if artifact_id is None or row["artifact_id"] == artifact_id]
+            rows = [row for row in self.cached_rows() if artifact_id is None or row["artifact_id"] == artifact_id]
             return {
                 "schema_version": "LibraryArtifactBindingProjection-v1",
                 "bindings": [
@@ -1358,12 +1375,12 @@ class LibraryProductController:
             }
         if method == "library.get_lineage":
             self._require_keys(accepted, {"artifact_id"})
-            row = self._get(str(accepted["artifact_id"]))
+            row = self.get_artifact(str(accepted["artifact_id"]))
             return {"schema_version": "LibraryArtifactLineageProjection-v1", "artifact_id": row["artifact_id"], "lineage": row["lineage"], "orphan": not bool(row["lineage"]), "status": "PASS"}
         if method == "library.get_status_counts":
             self._require_keys(accepted, set(), {"view"})
             view = str(accepted.get("view", "literature"))
-            rows = [row for row in self._catalog_rows_snapshot() if row["mode"] == view]
+            rows = [row for row in self.cached_rows() if row["mode"] == view]
             counts: dict[str, int] = {}
             for row in rows:
                 status = self._public(row)["status"]
@@ -1380,7 +1397,7 @@ class LibraryProductController:
         if method == "library.select":
             self._require_keys(accepted, {"artifact_id"})
             requested_id = str(accepted["artifact_id"])
-            selected = self._get(requested_id)
+            selected = self.get_artifact(requested_id)
             artifact_id = str(selected["artifact_id"])
             state = self._load()
             state["selected_artifact_id"] = artifact_id
@@ -1393,7 +1410,7 @@ class LibraryProductController:
             if not locator.startswith(prefix):
                 raise LibraryProductError("LIBRARY_LOCATOR_INVALID")
             requested_id = locator[len(prefix) :]
-            selected = self._get(requested_id)
+            selected = self.get_artifact(requested_id)
             artifact_id = str(selected["artifact_id"])
             locator = str(selected["stable_locator"])
             state = self._load()

@@ -2453,7 +2453,7 @@ class ProductApi:
                 raise ValueError('RESEARCH_MESSAGE_TARGET_MISMATCH')
             result=self._research.call('research.get',{'run_id':run_id})
             if result['status'] not in {'SUCCEEDED','PARTIAL'}:raise ValueError('RESEARCH_RESULT_UNAVAILABLE')
-            row = self._library._get(run_id + '/result')
+            row = self._library.get_artifact(run_id + '/result')
             return {'status':'PASS','research_run_id':run_id,'route':'library','view':row['mode'],
                     'artifact_id':row['artifact_id'],'result_sha256':row['result_sha256'],'target_locator':row['stable_locator']}
         if not isinstance(method, str) or method not in REVIEW_METHODS | SETTINGS_METHODS | ACCOUNTING_METHODS | INBOX_METHODS | CURRENT_TASK_METHODS | MESSAGES_METHODS | SESSIONS_METHODS | LOCAL_MODEL_METHODS | ASSISTANT_PREFERENCE_METHODS | LIBRARY_METHODS | WORK_LOG_METHODS:
