@@ -9,9 +9,9 @@ from pathlib import Path
 import re
 from typing import Any, Callable, Mapping, Sequence
 import uuid
-import time
 
 from model_gateway.errors import GatewayError, InvalidHealthcheckTarget, OcrResultInvalid
+from memorive_model_execution import retry
 
 from .capacity import describe_capacity
 
@@ -318,82 +318,9 @@ class CoreModelBridge:
             raise GatewayError(f"Core_NODE_EXECUTION_PROFILE_INVALID:{node_id}")
         return node
 
-    @staticmethod
-    def _transient_retry_eligible(result: Mapping[str, Any]) -> bool:
-        if result.get("status") == "PASS":
-            return False
-        receipt = result.get("execution_receipt")
-        diagnostic = receipt.get("transport_diagnostic") if isinstance(receipt, Mapping) else None
-        if isinstance(diagnostic, Mapping) and str(diagnostic.get("finish_reason") or "").lower() == "length":
-            return False
-        reason = str(result.get("reason") or "").upper()
-        if reason == 'API_RESPONSE_INCOMPLETE_REMOTE_STATE_UNKNOWN':
-            # The inference transport is already closed. A fresh generation
-            # may incur a second charge; it does not replay a tool action.
-            # Preserve the uncertain attempt receipt and use only the saved
-            # node retry budget. Never consume partial output as a success.
-            return (result.get('status') == 'FAILED' and isinstance(diagnostic, Mapping)
-                    and diagnostic.get('stream') is True and diagnostic.get('complete') is False
-                    and diagnostic.get('exception_type') in {
-                        'IncompleteRead', 'ConnectionResetError', 'RemoteDisconnected',
-                        'ConnectionAbortedError', 'BrokenPipeError'})
-        classification = (
-            str(diagnostic.get("classification") or "").upper()
-            if isinstance(diagnostic, Mapping)
-            else ""
-        )
-        http_status = diagnostic.get("http_status") if isinstance(diagnostic, Mapping) else None
-        if isinstance(http_status, str) and http_status.isascii() and http_status.isdecimal():
-            http_status = int(http_status)
-        if isinstance(http_status, int) and not isinstance(http_status, bool) and 400 <= http_status <= 599:
-            if http_status == 400 and classification == "UNCLASSIFIED_RETRYABLE":
-                return True
-            # Structured transport evidence takes precedence over wrapper text.
-            return http_status in {408, 429, 500, 502, 503, 504}
-        if classification == "UNCLASSIFIED_RETRYABLE":
-            return True
-        if result.get("status") == "FAILED" and reason in {
-            "STRUCTURED_CHAT_RESPONSE_INVALID", "STRUCTURED_CHAT_RESPONSE_EMPTY",
-        }:
-            # A finished generation can still contain malformed JSON. It has
-            # produced no admitted artifact; regenerate within the user's saved
-            # budget. Authentication/configuration and length handling above
-            # remain authoritative, and every attempt keeps its own receipt.
-            return True
-        if result.get("status") == "FAILED" and reason == "API_RESPONSE_STATUS_UNKNOWN":
-            return isinstance(diagnostic, Mapping) and diagnostic.get("exception_type") in {
-                "RemoteDisconnected", "ConnectionResetError", "ConnectionAbortedError",
-                "BrokenPipeError", "TimeoutError",
-            }
-        if any(marker in reason for marker in ("JSON_TRUNCATED", "RESPONSE_EMPTY", "SCHEMA", "PARSE")):
-            return False
-        return any(
-            marker in reason
-            for marker in (
-                "TIMEOUT",
-                "TEMPORAR",
-                "CONNECTION",
-                "NETWORK",
-                "RATE_LIMIT",
-                "HTTP_429",
-                "HTTP_500",
-                "HTTP_502",
-                "HTTP_503",
-                "HTTP_504",
-                "HTTP_400_UNCLASSIFIED_RETRYABLE",
-            )
-        )
-
-    @staticmethod
-    def _wait_before_retry(retry_index: int) -> None:
-        # Back off between attempts; remain responsive to pause/cancel/shutdown.
-        deadline = time.monotonic() + min(2 ** retry_index, 30)
-        while True:
-            execution_checkpoint()
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                return
-            time.sleep(min(remaining, 0.1))
+    # Which failures are tried again, and the wait in between: memorive_model_execution/retry.py.
+    _transient_retry_eligible = staticmethod(retry.is_temporary_failure)
+    _wait_before_retry = staticmethod(retry.wait_before_retry)
 
     def select_judgment_candidates(self, producer_model: str | None):
         """Project the saved node-08 profile into Core's verifier selector.

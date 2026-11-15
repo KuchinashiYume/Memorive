@@ -156,11 +156,10 @@ class SettingsController:
             model_validation_runner or FailClosedModelValidationRunner()
         )
         self.local_profile_resolver = local_profile_resolver
-        from .report_execution import ReportProfileExecution
+        # Model runs for reports, the AI briefing and research Q&A (memorive_model_execution).
+        from memorive_model_execution import AIBriefingExecution, ReportProfileExecution, ResearchChatExecution
         self.report_execution = ReportProfileExecution(self)
-        from .ai_briefing_execution import AIBriefingExecution
         self.ai_briefing_execution = AIBriefingExecution(self)
-        from .research_chat_execution import ResearchChatExecution
         self.research_chat_execution = ResearchChatExecution(self)
         self.external_data_sources = external_data_sources or ExternalDataSources(
             store.profile_root / "external_data"
@@ -1397,11 +1396,11 @@ class SettingsController:
         )
 
     def research_embedding_freeze(self, *, run_id, profile_ref):
-        from .research_chat_execution import ResearchEmbeddingExecution
+        from memorive_model_execution import ResearchEmbeddingExecution
         return ResearchEmbeddingExecution(self).freeze(run_id=run_id,period='embedding',profile_ref=profile_ref)
 
     def research_embedding_execute(self, *, snapshot_id, inputs):
-        from .research_chat_execution import ResearchEmbeddingExecution
+        from memorive_model_execution import ResearchEmbeddingExecution
         return ResearchEmbeddingExecution(self).execute(snapshot_id=snapshot_id,inputs=inputs)
 
     def research_chat_freeze(self, *, run_id, profile_ref):
