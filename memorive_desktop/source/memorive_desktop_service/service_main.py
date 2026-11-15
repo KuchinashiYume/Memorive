@@ -602,6 +602,31 @@ async def run(
         else asyncio.create_task(weekly_external_refresh(settings_controller, stop))
     )
 
+    async def keep_logs_within_retention() -> None:
+        """Apply the log retention chosen in Settings at start and once a day."""
+        from runtime_log.config import get_log_path
+        from runtime_log.retention import apply as apply_log_retention
+
+        while not stop.is_set():
+            try:
+                days = settings_controller.get_state()["settings"]["preferences"]["retention_days"]
+                await asyncio.to_thread(
+                    apply_log_retention,
+                    days,
+                    log_path=get_log_path(),
+                    launch_folder=endpoint_file.parent,
+                    running_launch=endpoint_file.name.removesuffix(".endpoint.json"),
+                    startup_log_folder=profile_root.parent.parent / "evidence",
+                )
+            except (OSError, KeyError, TypeError, ValueError):
+                pass  # housekeeping only; the next pass tries again
+            try:
+                await asyncio.wait_for(stop.wait(), timeout=24 * 60 * 60)
+            except asyncio.TimeoutError:
+                pass
+
+    retention_task = asyncio.create_task(keep_logs_within_retention())
+
     def request_stop() -> None:
         stop.set()
 
@@ -615,6 +640,8 @@ async def run(
         await stop.wait()
     finally:
         parent_monitor.cancel()
+        retention_task.cancel()
+        await asyncio.gather(retention_task, return_exceptions=True)
         if core_worker_task is not None:
             core_worker_task.cancel()
         if reference_worker_task is not None:

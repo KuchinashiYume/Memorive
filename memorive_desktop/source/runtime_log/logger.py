@@ -82,12 +82,13 @@ class Logger:
     def _append(self, line: str) -> None:
         """唯一落盘点。硬编码 append 模式,不提供任何覆盖 / 截断路径 (append-only 核心)。"""
         self.log_path.parent.mkdir(parents=True, exist_ok=True)   # 确保运维目录在
-        before = self.log_path.stat().st_size if self.log_path.exists() else 0
         with open(self.log_path, "a", encoding="utf-8") as f:     # ← 唯一写路径、硬编码 "a"、无覆盖入口
+            before = f.tell()                                     # 以打开后的文件位置为准(日志保留清理可能刚替换过文件)
             f.write(line)
+            f.flush()
+            after = f.tell()
         # 部分防呆 (非完整证明): 文件只增不减,写后变小即疑截断 / 覆盖 → 抛。
         # 抓不到"w 覆盖但更长"的情形;完整历史不被改写靠"结构性无覆盖 API + 前缀不变测试"。
-        after = self.log_path.stat().st_size
         if after < before:
             raise AppendOnlyViolation(
                 f"append-only 被破坏: 写后文件变小 ({before}→{after} 字节),疑覆盖 / 截断")

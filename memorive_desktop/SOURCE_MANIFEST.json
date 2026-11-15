@@ -3432,8 +3432,8 @@
     },
     {
       "path": "source/memorive_desktop_service/service_main.py",
-      "sha256": "56f379f9ab823e0efaa3a1f86eca2ef36fd540c2c901ad927f322bd3a82fe5fa",
-      "bytes": 26414
+      "sha256": "b1d95e867f9fb0d9357d89815f567039670e942baee7f155c9fd49a878cd9537",
+      "bytes": 27674
     },
     {
       "path": "source/memorive_desktop_service/single_instance.py",
@@ -6242,8 +6242,8 @@
     },
     {
       "path": "source/runtime_log/logger.py",
-      "sha256": "9b0ec7ac604fcb95e22dce67c3a16ff78a38f41cc4580898bf8aa3d297b95ba0",
-      "bytes": 8657
+      "sha256": "eb2ce37d1b8a8378d950b41595d7265c65eaffcf47f3130bbf43ebd9bca6f51b",
+      "bytes": 8731
     },
     {
       "path": "source/runtime_log/product_paths.py",
@@ -6254,6 +6254,11 @@
       "path": "source/runtime_log/records.py",
       "sha256": "962a512ed759deb8d547f849e94e0ff8ad4d740c922c28b1429fcc1a128bb914",
       "bytes": 7725
+    },
+    {
+      "path": "source/runtime_log/retention.py",
+      "sha256": "f7350102877bc1cfb5b072251bc8a77a0a2b1558fecf8c1352098187ebdffaa5",
+      "bytes": 4798
     },
     {
       "path": "tools/package_companions.py",
