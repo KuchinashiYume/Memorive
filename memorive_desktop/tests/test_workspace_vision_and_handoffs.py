@@ -8,6 +8,7 @@ makes the handoff invalid instead of handing over different material.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 from PIL import Image
@@ -157,6 +158,18 @@ def test_a_handoff_pack_names_the_hash_its_sources_had(ws, sourced):
     stale["source_versions"][0]["content_hash"] = "0" * 64
     with pytest.raises(ValueError, match="HANDOFF_SOURCE_CHANGED"):
         _validate(ws, stale)
+
+
+def test_a_handoff_pack_is_exported_as_files_once(ws, sourced):
+    pack = ws.handoffs.create(sourced["id"], "What changed?")
+    result = ws.export_handoff(pack["id"])
+    start = Path(result["path"])
+    assert start.name == "START_HERE.md" and "What changed?" in start.read_text(encoding="utf-8")
+    assert {p.name for p in start.parent.iterdir()} == {"START_HERE.md", "handoff.json", "transport.json"}
+    assert ws.export_handoff(pack["id"])["path"] == result["path"]  # exporting again finds the same files
+    start.write_text("edited", encoding="utf-8")
+    with pytest.raises(ValueError, match="HANDOFF_EXPORT_CONFLICT"):
+        ws.export_handoff(pack["id"])
 
 
 # Desktop handoff folders

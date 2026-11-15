@@ -4183,7 +4183,7 @@ class ProductApi:
 
     def memo_prepare_desktop_handoff(self,request):
         self.call('memo.capabilities',{})
-        from memorive_research_workspace.service import desktop_handoff
+        from memorive_research_workspace.agents import desktop_handoff
         # GetFolderPath uses the Windows account path, not the packaged private profile override.
         import ctypes
         buffer=ctypes.create_unicode_buffer(32768)
