@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:paper-identity-reservation-receipt:r0.1",
+  "title": "Memorive CANDIDATE-REVIEW Paper Identity Reservation Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "reservation_status",
+    "candidate_id",
+    "work_cluster_id",
+    "manifestation_id",
+    "paper_id",
+    "surname",
+    "year",
+    "explicit_suffix",
+    "first_approval_receipt_hash",
+    "rights_receipt_hash",
+    "candidate_registry_before_hash",
+    "candidate_registry_after_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "reservation_status": {
+      "const": "RESERVED_CANDIDATE"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_cluster_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifestation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paper_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9-]*_[12][0-9]{3}[a-z]?$",
+      "not": {
+        "const": "RESERVED_CANDIDATE"
+      }
+    },
+    "surname": {
+      "type": "string",
+      "minLength": 1
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 2999
+    },
+    "explicit_suffix": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "a",
+        "b"
+      ]
+    },
+    "first_approval_receipt_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "rights_receipt_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "candidate_registry_before_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "candidate_registry_after_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    }
+  }
+}

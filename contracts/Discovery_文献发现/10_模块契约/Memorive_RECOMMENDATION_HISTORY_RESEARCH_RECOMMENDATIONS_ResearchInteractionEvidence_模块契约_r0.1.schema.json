@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:recommendation-history:research-interaction-evidence-consumer:0.1",
+  "title": "Discovery Verification ResearchInteractionEvidence consumer-side projection",
+  "description": "Synthetic consumer guard only while Research_INTERACTION_MODE=NOT_CONFIGURED.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_type",
+    "query_hash",
+    "event_time",
+    "session_hash",
+    "field_dimension",
+    "cited_work_id",
+    "completion_state",
+    "origin",
+    "exposure_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "discovery.verification.research-interaction-evidence.0.1"
+    },
+    "object_type": {
+      "const": "ResearchInteractionEvidence"
+    },
+    "query_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "field_dimension": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cited_work_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "completion_state": {
+      "enum": [
+        "COMPLETED",
+        "PARTIAL",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    "origin": {
+      "enum": [
+        "USER_INITIATED",
+        "Discovery_EXPOSURE_FOLLOWUP",
+        "SYSTEM_CLARIFICATION",
+        "RETRY_OR_REPHRASE"
+      ]
+    },
+    "exposure_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^EXPOSURE:[a-f0-9]{24}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "origin": {
+            "const": "Discovery_EXPOSURE_FOLLOWUP"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "exposure_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    }
+  }
+}

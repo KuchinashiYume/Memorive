@@ -166,6 +166,10 @@
     {
       "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",
       "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
+    },
+    {
+      "path": "contracts",
+      "set_aside_because": "The contract documents and schemas of the discovery features, restored in full on 2026-11-15 as they were published. Their file names and texts carry the ids of the time they were written. They are to be sorted into current contracts, earlier versions and superseded ones and labelled or archived; their internal codes are cleaned separately, keeping the contract contents and the references between them."
     }
   ]
 }

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:rights-verification-receipt:r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "fixture_id",
+    "fixture_authority",
+    "candidate_id",
+    "work_cluster_id",
+    "manifestation_id",
+    "source_revision",
+    "access_status",
+    "rights_basis",
+    "source_sha256",
+    "external_retrieval_required",
+    "verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "fixture_id": {
+      "type": "string"
+    },
+    "fixture_authority": {
+      "const": "MEMORIVE_SELF_AUTHORED_PUBLIC_SAFE_SYNTHETIC"
+    },
+    "candidate_id": {
+      "type": "string"
+    },
+    "work_cluster_id": {
+      "type": "string"
+    },
+    "manifestation_id": {
+      "type": "string"
+    },
+    "source_revision": {
+      "type": "string"
+    },
+    "access_status": {
+      "const": "RIGHTS_VERIFIED"
+    },
+    "rights_basis": {
+      "const": "MEMORIVE_SELF_AUTHORED_PUBLIC_SAFE_SYNTHETIC"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "external_retrieval_required": {
+      "const": false
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

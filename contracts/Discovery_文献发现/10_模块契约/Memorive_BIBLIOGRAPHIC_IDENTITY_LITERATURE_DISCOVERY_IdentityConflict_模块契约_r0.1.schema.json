@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:bibliographic-identity:identity-conflict:0.1",
+  "title": "Discovery ServiceContracts IdentityConflict",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "observationRef": {
+      "type": "string",
+      "pattern": "^source_observation_[a-f0-9]{24}$"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "object_type",
+    "object_id",
+    "conflict_id",
+    "revision",
+    "content_hash",
+    "producer",
+    "single_writer",
+    "consumers",
+    "reason_code",
+    "identifier_claims",
+    "source_observation_refs",
+    "manifestation_claim_refs",
+    "resolution_status",
+    "review_queue_item_id",
+    "prohibited_actions",
+    "auto_resolved"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "discovery.service_contracts.identity-conflict.0.1"
+    },
+    "object_type": {
+      "const": "IdentityConflict"
+    },
+    "object_id": {
+      "type": "string",
+      "pattern": "^identity_conflict_[a-f0-9]{24}$"
+    },
+    "conflict_id": {
+      "type": "string",
+      "pattern": "^identity_conflict_[a-f0-9]{24}$"
+    },
+    "revision": {
+      "const": 1
+    },
+    "content_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "producer": {
+      "const": "BIBLIOGRAPHIC-IDENTITY/LITERATURE_DISCOVERY"
+    },
+    "single_writer": {
+      "const": "LITERATURE_DISCOVERY.IDENTITY_RESOLVER"
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "LITERATURE_DISCOVERY.CANDIDATE_REGISTRY",
+          "HUMAN_IDENTITY_REVIEW"
+        ]
+      }
+    },
+    "reason_code": {
+      "enum": [
+        "EXACT_IDENTIFIER_METADATA_CONFLICT",
+        "CROSS_IDENTIFIER_CONFLICT",
+        "UPSTREAM_IDENTITY_CONFLICT",
+        "INVALID_IDENTIFIER",
+        "VERSION_EVIDENCE_CONFLICT"
+      ]
+    },
+    "identifier_claims": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "source_observation_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/observationRef"
+      }
+    },
+    "manifestation_claim_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^manifestation_(identity|claim)_[a-f0-9]{24}$"
+      }
+    },
+    "resolution_status": {
+      "const": "OPEN"
+    },
+    "review_queue_item_id": {
+      "type": "string",
+      "pattern": "^identity_review_[a-f0-9]{24}$"
+    },
+    "prohibited_actions": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "AUTO_MERGE",
+          "AUTO_SELECT",
+          "CANDIDATE_CARD_ELIGIBILITY"
+        ]
+      }
+    },
+    "auto_resolved": {
+      "const": false
+    }
+  }
+}

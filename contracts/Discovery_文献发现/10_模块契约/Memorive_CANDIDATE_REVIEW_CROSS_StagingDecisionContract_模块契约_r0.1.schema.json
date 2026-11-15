@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:staging-decision-contract:r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "fixture_id",
+    "event_time",
+    "candidate_id",
+    "work_cluster_id",
+    "manifestation_id",
+    "candidate_revision",
+    "source_revision",
+    "materialization_revision",
+    "card_revision",
+    "identity_status",
+    "paper_identity",
+    "source_fixture",
+    "first_approval_fixture",
+    "rights_fixture",
+    "reservation_fixture",
+    "card_draft_fixture",
+    "expected_output"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "fixture_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_cluster_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifestation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "materialization_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "card_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity_status": {
+      "const": "VERIFIED"
+    },
+    "paper_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper_id",
+        "surname",
+        "year",
+        "explicit_suffix",
+        "folder_key"
+      ],
+      "properties": {
+        "paper_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z'-]*[12][0-9]{3}[ab]?$"
+        },
+        "surname": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z'-]*$"
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 2999
+        },
+        "explicit_suffix": {
+          "type": "string",
+          "enum": [
+            "",
+            "a",
+            "b"
+          ]
+        },
+        "folder_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "source_fixture": {
+      "$ref": "#/$defs/fixture_descriptor"
+    },
+    "first_approval_fixture": {
+      "$ref": "#/$defs/fixture_descriptor"
+    },
+    "rights_fixture": {
+      "$ref": "#/$defs/fixture_descriptor"
+    },
+    "reservation_fixture": {
+      "$ref": "#/$defs/fixture_descriptor"
+    },
+    "card_draft_fixture": {
+      "$ref": "#/$defs/fixture_descriptor"
+    },
+    "expected_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "processing_status",
+        "review_status",
+        "completion_status",
+        "promotion_status",
+        "semantic_verification"
+      ],
+      "properties": {
+        "processing_status": {
+          "const": "REVIEW_READY"
+        },
+        "review_status": {
+          "const": "pending"
+        },
+        "completion_status": {
+          "const": "pending_review"
+        },
+        "promotion_status": {
+          "const": "NOT_ELIGIBLE"
+        },
+        "semantic_verification": {
+          "const": "NOT_PERFORMED"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "fixture_descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relative_path",
+        "sha256"
+      ],
+      "properties": {
+        "relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^/\\\\]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[A-F0-9]{64}$"
+        }
+      }
+    }
+  }
+}

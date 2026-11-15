@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:source-connectors:source-snapshot:0.1",
+  "title": "Discovery DataContracts SourceSnapshot",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "connector_id",
+    "connector_revision",
+    "endpoint_family",
+    "source_schema_revision",
+    "captured_at",
+    "request_id",
+    "fixture_classification",
+    "raw_media_type",
+    "raw_bytes_sha256",
+    "normalized_payload_sha256",
+    "byte_length",
+    "payload_locator",
+    "rights_status",
+    "materialized_fulltext",
+    "network_used"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "discovery.data_contracts.source-snapshot.0.1"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "pattern": "^snapshot_[a-f0-9]{24}$"
+    },
+    "connector_id": {
+      "enum": [
+        "ARXIV",
+        "CROSSREF"
+      ]
+    },
+    "connector_revision": {
+      "const": "r0.1"
+    },
+    "endpoint_family": {
+      "enum": [
+        "ARXIV_QUERY_A0_FIXTURE",
+        "CROSSREF_WORKS_A0_FIXTURE"
+      ]
+    },
+    "source_schema_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "request_id": {
+      "type": "null"
+    },
+    "fixture_classification": {
+      "const": "SYNTHETIC_PUBLIC_SAFE_A0"
+    },
+    "raw_media_type": {
+      "enum": [
+        "application/atom+xml",
+        "application/json"
+      ]
+    },
+    "raw_bytes_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "normalized_payload_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "byte_length": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "payload_locator": {
+      "type": "string",
+      "pattern": "^fixtures/[^/]+$"
+    },
+    "rights_status": {
+      "const": "SYNTHETIC_SELF_OWNED"
+    },
+    "materialized_fulltext": {
+      "const": false
+    },
+    "network_used": {
+      "const": false
+    }
+  }
+}

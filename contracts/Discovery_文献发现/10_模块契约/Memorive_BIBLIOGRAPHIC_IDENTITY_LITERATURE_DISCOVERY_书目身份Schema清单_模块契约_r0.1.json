@@ -1,0 +1,34 @@
+{
+  "schema_version": "discovery.service_contracts.schema-manifest.0.1",
+  "contract_revision": "r0.1",
+  "schemas": [
+    {
+      "object_type": "BibliographicIdentity",
+      "file": "Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_BibliographicIdentity_模块契约_r0.1.schema.json"
+    },
+    {
+      "object_type": "Manifestation",
+      "file": "Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_Manifestation_模块契约_r0.1.schema.json"
+    },
+    {
+      "object_type": "WorkCluster",
+      "file": "Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_WorkCluster_模块契约_r0.1.schema.json"
+    },
+    {
+      "object_type": "IdentityConflict",
+      "file": "Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_IdentityConflict_模块契约_r0.1.schema.json"
+    },
+    {
+      "object_type": "IdentityReviewQueueItem",
+      "file": "Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_IdentityReviewQueueItem_模块契约_r0.1.schema.json"
+    },
+    {
+      "object_type": "CandidateRecordIdentityProjection",
+      "file": "Memorive_BIBLIOGRAPHIC_IDENTITY_LITERATURE_DISCOVERY_CandidateRecordIdentityProjection_模块契约_r0.1.schema.json"
+    }
+  ],
+  "hash_semantics": "DataContracts_CANONICAL_JSON_SHA256_UPPERCASE_HEX_FOR_OBJECT_CONTENT_HASH",
+  "additional_properties_policy": "REJECT_UNKNOWN_FIELDS",
+  "external_calls": 0,
+  "formal_writes": 0
+}

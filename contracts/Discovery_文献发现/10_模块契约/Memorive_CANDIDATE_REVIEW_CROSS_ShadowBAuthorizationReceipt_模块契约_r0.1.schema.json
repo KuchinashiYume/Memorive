@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:shadow-b-authorization-receipt:r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "shadow_b_run_id",
+    "authorization_status",
+    "authorized_at",
+    "scope",
+    "manifest_sha256",
+    "aggregate_sha256",
+    "user_message"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "run_id": {
+      "const": "CANDIDATE_REVIEW_CROSS_20260811_165122_candidate001"
+    },
+    "shadow_b_run_id": {
+      "const": "CANDIDATE_REVIEW_CROSS_SHADOWB_run_001"
+    },
+    "authorization_status": {
+      "const": "AUTHORIZED_ONCE"
+    },
+    "authorized_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "const": "PURE_OFFLINE_ZERO_INTERVENTION_SINGLE_SHADOW_B_RUN"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "aggregate_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "user_message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "utf8_bytes",
+        "sha256"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "utf8_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[A-F0-9]{64}$"
+        }
+      }
+    }
+  }
+}

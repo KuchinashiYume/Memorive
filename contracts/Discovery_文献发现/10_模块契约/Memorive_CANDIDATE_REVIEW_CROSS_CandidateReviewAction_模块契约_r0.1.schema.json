@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:discovery:candidate-review:candidate-review-action:r0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate_id",
+    "bundle_sha256",
+    "action",
+    "requested_at"
+  ],
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bundle_sha256": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "action": {
+      "enum": [
+        "SNOOZE",
+        "REJECT",
+        "MARK_NEEDS_REPAIR",
+        "KEEP_REVIEW_READY"
+      ]
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "not": {
+        "properties": {
+          "action": {
+            "enum": [
+              "PROMOTE",
+              "ACTIVATE",
+              "WRITE_FORMAL"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

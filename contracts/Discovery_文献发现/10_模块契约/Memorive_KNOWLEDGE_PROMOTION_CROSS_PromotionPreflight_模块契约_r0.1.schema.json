@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "memorive.discovery.analysis.promotion-preflight.v1",
+  "title": "PromotionPreflight",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preflight_id",
+    "promotion_id",
+    "candidate_bundle_hash",
+    "approval_receipt_hash",
+    "target_namespace",
+    "paper_id",
+    "checks",
+    "expected_heads",
+    "target_prestate_hash",
+    "target_effective_hash",
+    "write_set",
+    "write_set_hash",
+    "status",
+    "generated_at",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "memorive.discovery.analysis.promotion-preflight.v1"
+    },
+    "preflight_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "promotion_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_bundle_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "approval_receipt_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "target_namespace": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "paper_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check_id",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "const": "PASS"
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "expected_heads": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "knowledge_admission",
+        "artifact_registry",
+        "formal_index",
+        "promotion_receipts"
+      ],
+      "properties": {
+        "knowledge_admission": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "artifact_registry": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "formal_index": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "promotion_receipts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "target_prestate_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "target_effective_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "write_set": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "write_set_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    },
+    "status": {
+      "const": "PASS"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{64}$"
+    }
+  }
+}
