@@ -2786,8 +2786,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/install_health.py",
-      "sha256": "bb76a1256c22cbd989c149fd8d4512fd67a4a0e31ab57fd6e6d8f5fab17c06c7",
-      "bytes": 4630
+      "sha256": "95bff5f0773b104108e9ced9f644b1f6495254c0aed497e3d10c1ee37a048bd6",
+      "bytes": 4692
     },
     {
       "path": "memorive_desktop/product/desktop/integrated_agent.py",
@@ -2841,8 +2841,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/update_maintenance.py",
-      "sha256": "caffeaba7de90052b972abfad536d4a9c908f70a663a1990c3fccee1e013eaf5",
-      "bytes": 17068
+      "sha256": "83ca6003790db25173aea566b9e802b07a4588af6cc54f1797158082017f7baf",
+      "bytes": 17237
     },
     {
       "path": "memorive_desktop/product/desktop/update_release.json",
@@ -4196,8 +4196,8 @@
     },
     {
       "path": "memorive_desktop/source/document_processing/document_structure/bundle.py",
-      "sha256": "bc080a9c80693866346d02065a92c081c461800f4c9c2a1c595f6d8e3b2e53c5",
-      "bytes": 18908
+      "sha256": "24244c66b12eb59d7981a341ad486328d1065442ae5093453c971a73f192ccca",
+      "bytes": 18941
     },
     {
       "path": "memorive_desktop/source/document_processing/document_structure/contract.py",
@@ -7936,7 +7936,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "1f1caeb0d1f04c4dd5d6a2055d38d27ad7d20531f7af25d1bb4ca2509dc2eb90",
+      "sha256": "e54613f3f25fe8ff57c6c20bdadf53771bb534250a30eb1f9c3e922945d10343",
       "bytes": 251989
     },
     {

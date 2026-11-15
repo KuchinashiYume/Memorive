@@ -20,7 +20,11 @@ def digest(path: Path) -> str:
 def owned_path(path: str | Path) -> Path:
     value = Path(path).absolute()
     for p in [value, *value.parents]:
-        if p.exists() and (p.is_symlink() or getattr(p.stat(), 'st_file_attributes', 0) & 0x400):
+        try:    # lstat: a junction's own attributes, as the installer reads them; stat would follow it
+            attributes = getattr(p.lstat(), 'st_file_attributes', 0)
+        except OSError:
+            continue
+        if p.is_symlink() or attributes & 0x400:
             raise ValueError('UPDATE_DATA_REPARSE_FORBIDDEN')
     return value.resolve()
 

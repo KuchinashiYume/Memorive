@@ -38,7 +38,7 @@ def main(root):
         or json.loads((program/'install-owner.json').read_text())['owner'] != owner):
         raise RuntimeError('INSTALL_HEALTH_OWNERSHIP_INVALID')
     for p in [probe, version, program, *probe.parents]:
-        if getattr(p.stat(), 'st_file_attributes', 0) & 0x400:
+        if getattr(p.lstat(), 'st_file_attributes', 0) & 0x400:   # a junction's own attributes, as the installer reads them
             raise RuntimeError('INSTALL_HEALTH_REPARSE_FORBIDDEN')
     manifest_bytes = (version/'manifest.json').read_bytes()
     if hashlib.sha256(manifest_bytes).hexdigest().upper() != marker['manifest_sha256'].upper():

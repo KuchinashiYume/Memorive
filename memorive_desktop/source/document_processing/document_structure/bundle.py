@@ -133,7 +133,7 @@ def _member(folder,name):
     try:
         for part in name.split('/'):
             candidate=candidate/part
-            if candidate.is_symlink() or getattr(candidate.stat(),'st_file_attributes',0)&0x400:
+            if candidate.is_symlink() or getattr(candidate.lstat(),'st_file_attributes',0)&0x400:  # lstat: see a junction itself
                 raise ValueError('STRUCTURE_BUNDLE_STALE:REPARSE_MEMBER')
         resolved=candidate.resolve(strict=True)
         if not resolved.is_relative_to(folder) or not resolved.is_file():
