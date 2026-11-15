@@ -1,0 +1,424 @@
+{
+ "blank_text": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_CANDIDATE_TEXT_REQUIRED"
+ },
+ "duplicate": {
+  "error": "ConversationContractError",
+  "message": "MODEL_REFINEMENT_MESSAGE_REFS_INVALID"
+ },
+ "extra_field": {
+  "error": "ConversationContractError",
+  "message": "MODEL_REFINEMENT_PROPOSAL_FIELDS_INVALID"
+ },
+ "graph_not_resealed": {
+  "result": [
+   {
+    "candidate_text": "Cite page numbers in every answer.",
+    "candidate_text_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "classification": "PRIVATE_USER_CONVERSATION",
+    "context_capsule_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "context_capsule_ref": "capsule:graph:other:message-00000000@revision:1#sha256:<sha256>",
+    "conversation_id": "conversation:64d20ae149363508ee4a498d",
+    "evidence_state": "UNVERIFIED_CLAIM",
+    "graph_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "graph_ref": "graph:other@revision:1#sha256:<sha256>",
+    "item_id": "item:graph:other:message-00000000",
+    "limitations": [],
+    "message_refs": [
+     "message-00000000"
+    ],
+    "ownership": "self",
+    "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+    "redaction_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "refinement_type": "CONSTRAINT_OR_PREFERENCE",
+    "revision": 1,
+    "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+    "scope": "SELECTED_CONVERSATIONS",
+    "selected_scope_verified": true,
+    "truth_decided_by_refiner": false
+   }
+  ]
+ },
+ "none": {
+  "error": "ConversationContractError",
+  "message": "MODEL_REFINEMENT_MESSAGE_REFS_INVALID"
+ },
+ "one": {
+  "result": [
+   {
+    "candidate_text": "Cite page numbers in every answer.",
+    "candidate_text_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "classification": "PRIVATE_USER_CONVERSATION",
+    "context_capsule_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "context_capsule_ref": "capsule:graph:task-characterize:message-00000000@revision:1#sha256:<sha256>",
+    "conversation_id": "conversation:64d20ae149363508ee4a498d",
+    "evidence_state": "UNVERIFIED_CLAIM",
+    "graph_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "graph_ref": "graph:task-characterize@revision:1#sha256:<sha256>",
+    "item_id": "item:graph:task-characterize:message-00000000",
+    "limitations": [],
+    "message_refs": [
+     "message-00000000"
+    ],
+    "ownership": "self",
+    "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+    "redaction_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "refinement_type": "CONSTRAINT_OR_PREFERENCE",
+    "revision": 1,
+    "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+    "scope": "SELECTED_CONVERSATIONS",
+    "selected_scope_verified": true,
+    "truth_decided_by_refiner": false
+   }
+  ]
+ },
+ "provenance_only": {
+  "result": [
+   {
+    "candidate_text": "Cite page numbers in every answer.",
+    "candidate_text_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "classification": "PRIVATE_USER_CONVERSATION",
+    "context_capsule_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "context_capsule_ref": "capsule:graph:task-characterize:message-00000001@revision:1#sha256:<sha256>",
+    "conversation_id": "conversation:64d20ae149363508ee4a498d",
+    "evidence_state": "PROVENANCE_ONLY",
+    "graph_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "graph_ref": "graph:task-characterize@revision:1#sha256:<sha256>",
+    "item_id": "item:graph:task-characterize:message-00000001",
+    "limitations": [
+     "CONTEXT_INSUFFICIENT"
+    ],
+    "message_refs": [
+     "message-00000001"
+    ],
+    "ownership": "self",
+    "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+    "redaction_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "refinement_type": "PROVENANCE_ONLY",
+    "revision": 1,
+    "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+    "scope": "ALL_HISTORY_BOUNDED",
+    "selected_scope_verified": true,
+    "truth_decided_by_refiner": false
+   }
+  ]
+ },
+ "text_only_secret": {
+  "result": [
+   {
+    "candidate_text": "[REDACTED:OPENAI_STYLE_KEY]",
+    "candidate_text_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "classification": "PRIVATE_USER_CONVERSATION",
+    "context_capsule_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "context_capsule_ref": "capsule:graph:task-characterize:message-00000000@revision:1#sha256:<sha256>",
+    "conversation_id": "conversation:64d20ae149363508ee4a498d",
+    "evidence_state": "UNVERIFIED_CLAIM",
+    "graph_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "graph_ref": "graph:task-characterize@revision:1#sha256:<sha256>",
+    "item_id": "item:graph:task-characterize:message-00000000",
+    "limitations": [],
+    "message_refs": [
+     "message-00000000"
+    ],
+    "ownership": "self",
+    "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+    "redaction_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "refinement_type": "CONSTRAINT_OR_PREFERENCE",
+    "revision": 1,
+    "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+    "scope": "SELECTED_CONVERSATIONS",
+    "selected_scope_verified": true,
+    "truth_decided_by_refiner": false
+   }
+  ]
+ },
+ "two_sorted": {
+  "result": [
+   {
+    "candidate_text": "Cite page numbers in every answer.",
+    "candidate_text_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "classification": "PRIVATE_USER_CONVERSATION",
+    "context_capsule_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "context_capsule_ref": "capsule:graph:task-characterize:message-00000000@revision:1#sha256:<sha256>",
+    "conversation_id": "conversation:64d20ae149363508ee4a498d",
+    "evidence_state": "UNVERIFIED_CLAIM",
+    "graph_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "graph_ref": "graph:task-characterize@revision:1#sha256:<sha256>",
+    "item_id": "item:graph:task-characterize:message-00000000",
+    "limitations": [],
+    "message_refs": [
+     "message-00000000"
+    ],
+    "ownership": "self",
+    "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+    "redaction_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "refinement_type": "CONSTRAINT_OR_PREFERENCE",
+    "revision": 1,
+    "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+    "scope": "SELECTED_CONVERSATIONS",
+    "selected_scope_verified": true,
+    "truth_decided_by_refiner": false
+   },
+   {
+    "candidate_text": "Reach me at [REDACTED:EMAIL]",
+    "candidate_text_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "classification": "PRIVATE_USER_CONVERSATION",
+    "context_capsule_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "context_capsule_ref": "capsule:graph:task-characterize:message-00000002@revision:1#sha256:<sha256>",
+    "conversation_id": "conversation:64d20ae149363508ee4a498d",
+    "evidence_state": "UNVERIFIED_CLAIM",
+    "graph_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "graph_ref": "graph:task-characterize@revision:1#sha256:<sha256>",
+    "item_id": "item:graph:task-characterize:message-00000002",
+    "limitations": [
+     "CONTEXT_INSUFFICIENT",
+     "REQUIRES_INDEPENDENT_EVIDENCE_OR_USER_DECISION"
+    ],
+    "message_refs": [
+     "message-00000002"
+    ],
+    "ownership": "self",
+    "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+    "redaction_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "<sha256>"
+    },
+    "refinement_type": "AI_SUGGESTION",
+    "revision": 1,
+    "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+    "scope": "SELECTED_CONVERSATIONS",
+    "selected_scope_verified": true,
+    "truth_decided_by_refiner": false
+   }
+  ]
+ },
+ "unknown_message": {
+  "error": "ConversationContractError",
+  "message": "MODEL_REFINEMENT_MESSAGE_REF_INVALID"
+ },
+ "unknown_type": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_TYPE_INVALID"
+ },
+ "unsorted": {
+  "error": "ConversationContractError",
+  "message": "MODEL_REFINEMENT_MESSAGE_REFS_INVALID"
+ },
+ "validate_empty_candidate": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_CANDIDATE_TEXT_INVALID"
+ },
+ "validate_empty_item_id": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_ITEM_ID_INVALID"
+ },
+ "validate_evidence_state_other": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_EVIDENCE_STATE_INVALID"
+ },
+ "validate_extra_key": {
+  "error": "ConversationContractError",
+  "message": "TYPED_REFINEMENT_ITEM_EXACT_KEYS_MISMATCH"
+ },
+ "validate_graph_hash_text": {
+  "error": "ContractViolation",
+  "message": "graph_hash must be an object"
+ },
+ "validate_limitations_unsorted": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_LIMITATIONS_INVALID"
+ },
+ "validate_message_refs_empty": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_MESSAGE_REFS_INVALID"
+ },
+ "validate_message_refs_unsorted": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_MESSAGE_REFS_INVALID"
+ },
+ "validate_other_schema": {
+  "error": "ConversationContractError",
+  "message": "TYPED_REFINEMENT_ITEM_SCHEMA_UNSUPPORTED"
+ },
+ "validate_revision_2": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_REVISION_INVALID"
+ },
+ "validate_scope_not_verified": {
+  "error": "ConversationContractError",
+  "message": "SELECTION_SCOPE_MUST_BE_VERIFIED"
+ },
+ "validate_text_changed_not_resealed": {
+  "result": {
+   "candidate_text": "changed",
+   "candidate_text_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "classification": "PRIVATE_USER_CONVERSATION",
+   "context_capsule_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "context_capsule_ref": "capsule:graph:task-characterize:message-00000000@revision:1#sha256:<sha256>",
+   "conversation_id": "conversation:64d20ae149363508ee4a498d",
+   "evidence_state": "UNVERIFIED_CLAIM",
+   "graph_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "graph_ref": "graph:task-characterize@revision:1#sha256:<sha256>",
+   "item_id": "item:graph:task-characterize:message-00000000",
+   "limitations": [],
+   "message_refs": [
+    "message-00000000"
+   ],
+   "ownership": "self",
+   "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
+   "redaction_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "refinement_type": "CONSTRAINT_OR_PREFERENCE",
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+   "scope": "SELECTED_CONVERSATIONS",
+   "selected_scope_verified": true,
+   "truth_decided_by_refiner": false
+  }
+ },
+ "validate_truth_decided": {
+  "error": "ConversationContractError",
+  "message": "REFINER_MUST_NOT_DECIDE_TRUTH"
+ },
+ "validate_type_unknown": {
+  "error": "ConversationContractError",
+  "message": "TYPED_ITEM_TYPE_INVALID"
+ }
+}

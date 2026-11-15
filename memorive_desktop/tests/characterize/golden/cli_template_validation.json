@@ -1,0 +1,206 @@
+{
+ "bad_event_operation": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_EVENT_OPERATION_INVALID"
+ },
+ "bad_match_value": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_MATCH_VALUE_INVALID:termination.success"
+ },
+ "default": {
+  "result": {
+   "argv": [
+    "{{prompt}}"
+   ],
+   "capabilities": {
+    "images": false,
+    "structured_output": false,
+    "usage": false
+   },
+   "effort_map": {},
+   "input": "argument",
+   "interpreter_argv": [],
+   "max_input_bytes": 8388608,
+   "max_output_bytes": 16777216,
+   "model_map": {},
+   "output": {
+    "mode": "text"
+   },
+   "permissions": {
+    "read_only": true,
+    "tools_disabled": true
+   },
+   "revision": 1,
+   "schema_version": "CLIConnectionTemplate-v1",
+   "termination": {
+    "failure": [],
+    "success": []
+   },
+   "timeout_seconds": 300,
+   "working_directory": "attempt"
+  }
+ },
+ "dynamic_interpreter_argument": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_INTERPRETER_ARGUMENT_DYNAMIC"
+ },
+ "extra_field": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_FIELDS_INVALID:template"
+ },
+ "file_input_with_slot": {
+  "result": {
+   "argv": [
+    "--in",
+    "{{prompt_file}}"
+   ],
+   "capabilities": {
+    "images": false,
+    "structured_output": false,
+    "usage": false
+   },
+   "effort_map": {},
+   "input": "file",
+   "interpreter_argv": [],
+   "max_input_bytes": 8388608,
+   "max_output_bytes": 16777216,
+   "model_map": {},
+   "output": {
+    "mode": "text"
+   },
+   "permissions": {
+    "read_only": true,
+    "tools_disabled": true
+   },
+   "revision": 1,
+   "schema_version": "CLIConnectionTemplate-v1",
+   "termination": {
+    "failure": [],
+    "success": []
+   },
+   "timeout_seconds": 300,
+   "working_directory": "attempt"
+  }
+ },
+ "file_input_without_slot": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_INPUT_SLOT_MISSING"
+ },
+ "file_text_with_path": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_OUTPUT_FIELDS_UNSUPPORTED:file.path"
+ },
+ "file_without_response_slot": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_RESULT_FILE_INVALID"
+ },
+ "image_slot_without_capability": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_IMAGE_SLOT_CONFLICT"
+ },
+ "images_without_slot": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_IMAGE_SLOT_CONFLICT"
+ },
+ "jsonl_without_events": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_JSONL_FINAL_RULE_REQUIRED"
+ },
+ "jsonl_without_final_rule": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_JSONL_FINAL_RULE_REQUIRED"
+ },
+ "long_model_name": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_STRING_INVALID:model_map"
+ },
+ "other_schema": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_SCHEMA_UNSUPPORTED"
+ },
+ "prompt_inside_other_text": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_PROMPT_MUST_BE_SINGLE_ARGUMENT"
+ },
+ "recursive_model_map": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_RECURSIVE_MAPPING"
+ },
+ "revision_zero": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_REVISION_INVALID"
+ },
+ "secret_argument": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_SECRET_ARGUMENT_FORBIDDEN"
+ },
+ "stdin_with_prompt_slot": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_PROMPT_SLOT_CONFLICT"
+ },
+ "stdin_without_slot": {
+  "result": {
+   "argv": [
+    "--quiet"
+   ],
+   "capabilities": {
+    "images": false,
+    "structured_output": false,
+    "usage": false
+   },
+   "effort_map": {},
+   "input": "stdin",
+   "interpreter_argv": [],
+   "max_input_bytes": 8388608,
+   "max_output_bytes": 16777216,
+   "model_map": {},
+   "output": {
+    "mode": "text"
+   },
+   "permissions": {
+    "read_only": true,
+    "tools_disabled": true
+   },
+   "revision": 1,
+   "schema_version": "CLIConnectionTemplate-v1",
+   "termination": {
+    "failure": [],
+    "success": []
+   },
+   "timeout_seconds": 300,
+   "working_directory": "attempt"
+  }
+ },
+ "text_with_metadata": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_TEXT_RULES_UNSUPPORTED"
+ },
+ "text_with_unsupported_field": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_OUTPUT_FIELDS_UNSUPPORTED:text"
+ },
+ "timeout_bool": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_LIMIT_INVALID:timeout_seconds"
+ },
+ "timeout_zero": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_LIMIT_INVALID:timeout_seconds"
+ },
+ "unbalanced_braces": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_PLACEHOLDER_INVALID:argv"
+ },
+ "unknown_placeholder": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_PLACEHOLDER_INVALID:argv"
+ },
+ "usage_without_paths": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_USAGE_DECLARATION_CONFLICT"
+ },
+ "working_directory_other": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_WORKING_DIRECTORY_INVALID"
+ }
+}

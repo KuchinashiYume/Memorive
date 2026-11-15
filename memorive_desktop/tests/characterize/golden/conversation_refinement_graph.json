@@ -1,0 +1,488 @@
+{
+ "as_built": {
+  "result": {
+   "conversation_ids": [
+    "conversation:64d20ae149363508ee4a498d"
+   ],
+   "deterministic": true,
+   "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
+   "graph_id": "graph:task-characterize",
+   "nodes": [
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Please always cite the page number.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000000",
+     "edit_of": null,
+     "message_id": "message-00000000",
+     "parent_id": null,
+     "provider_sequence": 0,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Understood, I will cite page numbers.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000001",
+     "edit_of": null,
+     "message_id": "message-00000001",
+     "parent_id": "message-00000000",
+     "provider_sequence": 1,
+     "regeneration_group": null,
+     "role": "assistant",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "My email is someone@example.org, token=abcdef123456",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000002",
+     "edit_of": null,
+     "message_id": "message-00000002",
+     "parent_id": "message-00000001",
+     "provider_sequence": 2,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    }
+   ],
+   "orphan_message_ids": [],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+   "snapshot_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "snapshot_ref": "desktop-session-snapshot:task-characterize@1"
+  }
+ },
+ "block_extra_key": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_BLOCK_EXACT_KEYS_MISMATCH"
+ },
+ "block_metadata_list": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_BLOCK_METADATA_INVALID"
+ },
+ "block_text_none": {
+  "result": {
+   "conversation_ids": [
+    "conversation:64d20ae149363508ee4a498d"
+   ],
+   "deterministic": true,
+   "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
+   "graph_id": "graph:task-characterize",
+   "nodes": [
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": null,
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000000",
+     "edit_of": null,
+     "message_id": "message-00000000",
+     "parent_id": null,
+     "provider_sequence": 0,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Understood, I will cite page numbers.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000001",
+     "edit_of": null,
+     "message_id": "message-00000001",
+     "parent_id": "message-00000000",
+     "provider_sequence": 1,
+     "regeneration_group": null,
+     "role": "assistant",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "My email is someone@example.org, token=abcdef123456",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000002",
+     "edit_of": null,
+     "message_id": "message-00000002",
+     "parent_id": "message-00000001",
+     "provider_sequence": 2,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    }
+   ],
+   "orphan_message_ids": [],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+   "snapshot_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "snapshot_ref": "desktop-session-snapshot:task-characterize@1"
+  }
+ },
+ "block_text_number": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_BLOCK_TEXT_INVALID"
+ },
+ "block_type_unknown": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_BLOCK_TYPE_INVALID"
+ },
+ "conversation_ids_drift": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_CONVERSATION_PROJECTION_DRIFT"
+ },
+ "cycle": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_CYCLE"
+ },
+ "edge_policy_other": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_EDGE_POLICY_DRIFT"
+ },
+ "empty_graph_id": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_ID_INVALID"
+ },
+ "empty_snapshot_ref": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_SNAPSHOT_REF_INVALID"
+ },
+ "extra_key": {
+  "error": "ConversationContractError",
+  "message": "NORMALIZED_GRAPH_EXACT_KEYS_MISMATCH"
+ },
+ "no_envelope_not_resealed": {
+  "error": "ConversationContractError",
+  "message": "NORMALIZED_GRAPH_HASH_INVALID"
+ },
+ "node_blocks_text": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_BLOCKS_REQUIRED"
+ },
+ "node_empty_message_id": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_MESSAGE_ID_INVALID"
+ },
+ "node_empty_parent": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_PARENT_ID_INVALID"
+ },
+ "node_extra_key": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_EXACT_KEYS_MISMATCH"
+ },
+ "node_no_blocks": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_BLOCKS_REQUIRED"
+ },
+ "node_role_unknown": {
+  "result": {
+   "conversation_ids": [
+    "conversation:64d20ae149363508ee4a498d"
+   ],
+   "deterministic": true,
+   "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
+   "graph_id": "graph:task-characterize",
+   "nodes": [
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Please always cite the page number.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000000",
+     "edit_of": null,
+     "message_id": "message-00000000",
+     "parent_id": null,
+     "provider_sequence": 0,
+     "regeneration_group": null,
+     "role": "unknown",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Understood, I will cite page numbers.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000001",
+     "edit_of": null,
+     "message_id": "message-00000001",
+     "parent_id": "message-00000000",
+     "provider_sequence": 1,
+     "regeneration_group": null,
+     "role": "assistant",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "My email is someone@example.org, token=abcdef123456",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000002",
+     "edit_of": null,
+     "message_id": "message-00000002",
+     "parent_id": "message-00000001",
+     "provider_sequence": 2,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    }
+   ],
+   "orphan_message_ids": [],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+   "snapshot_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "snapshot_ref": "desktop-session-snapshot:task-characterize@1"
+  }
+ },
+ "node_role_unknown_word": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_ROLE_INVALID"
+ },
+ "node_sequence_bool": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_SEQUENCE_INVALID"
+ },
+ "node_sequence_negative": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_NODE_SEQUENCE_INVALID"
+ },
+ "nodes_duplicate": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_MESSAGE_IDS_MUST_BE_SORTED_UNIQUE"
+ },
+ "nodes_unsorted": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_MESSAGE_IDS_MUST_BE_SORTED_UNIQUE"
+ },
+ "not_deterministic": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_DETERMINISM_REQUIRED"
+ },
+ "orphan_listed": {
+  "result": {
+   "conversation_ids": [
+    "conversation:64d20ae149363508ee4a498d"
+   ],
+   "deterministic": true,
+   "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
+   "graph_id": "graph:task-characterize",
+   "nodes": [
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Please always cite the page number.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000000",
+     "edit_of": null,
+     "message_id": "message-00000000",
+     "parent_id": "message-missing",
+     "provider_sequence": 0,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Understood, I will cite page numbers.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000001",
+     "edit_of": null,
+     "message_id": "message-00000001",
+     "parent_id": "message-00000000",
+     "provider_sequence": 1,
+     "regeneration_group": null,
+     "role": "assistant",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "My email is someone@example.org, token=abcdef123456",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000002",
+     "edit_of": null,
+     "message_id": "message-00000002",
+     "parent_id": "message-00000001",
+     "provider_sequence": 2,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    }
+   ],
+   "orphan_message_ids": [
+    "message-00000000"
+   ],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+   "snapshot_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "snapshot_ref": "desktop-session-snapshot:task-characterize@1"
+  }
+ },
+ "orphan_not_listed": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_ORPHAN_PROJECTION_DRIFT"
+ },
+ "other_schema": {
+  "error": "ConversationContractError",
+  "message": "NORMALIZED_GRAPH_SCHEMA_UNSUPPORTED"
+ },
+ "revision_2": {
+  "error": "ConversationContractError",
+  "message": "GRAPH_REVISION_INVALID"
+ },
+ "snapshot_hash_not_descriptor": {
+  "error": "ContractViolation",
+  "message": "snapshot_hash must be an object"
+ },
+ "text_changed_not_resealed": {
+  "result": {
+   "conversation_ids": [
+    "conversation:64d20ae149363508ee4a498d"
+   ],
+   "deterministic": true,
+   "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
+   "graph_id": "graph:task-characterize",
+   "nodes": [
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "changed afterwards",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000000",
+     "edit_of": null,
+     "message_id": "message-00000000",
+     "parent_id": null,
+     "provider_sequence": 0,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "Understood, I will cite page numbers.",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000001",
+     "edit_of": null,
+     "message_id": "message-00000001",
+     "parent_id": "message-00000000",
+     "provider_sequence": 1,
+     "regeneration_group": null,
+     "role": "assistant",
+     "status": "VISIBLE_COMPLETE"
+    },
+    {
+     "blocks": [
+      {
+       "metadata": {},
+       "text": "My email is someone@example.org, token=abcdef123456",
+       "type": "text"
+      }
+     ],
+     "conversation_id": "conversation:64d20ae149363508ee4a498d",
+     "created_at": "SEQUENCE:00000002",
+     "edit_of": null,
+     "message_id": "message-00000002",
+     "parent_id": "message-00000001",
+     "provider_sequence": 2,
+     "regeneration_group": null,
+     "role": "user",
+     "status": "VISIBLE_COMPLETE"
+    }
+   ],
+   "orphan_message_ids": [],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+   "snapshot_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "<sha256>"
+   },
+   "snapshot_ref": "desktop-session-snapshot:task-characterize@1"
+  }
+ }
+}

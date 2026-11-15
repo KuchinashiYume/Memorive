@@ -1,0 +1,32 @@
+{
+ "save_over_hand_edit": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 2,
+  "loaded_is_defaults": false,
+  "loaded_language": null,
+  "loaded_revision": null,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "saved_fields": [
+  "revision",
+  "schema_version",
+  "settings",
+  "settings_sha256",
+  "template_id",
+  "updated_at"
+ ],
+ "saved_revision": 2,
+ "stale_revision": "SETTINGS_REVISION_CONFLICT:0:1"
+}

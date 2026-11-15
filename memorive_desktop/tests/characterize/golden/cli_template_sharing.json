@@ -1,0 +1,126 @@
+{
+ "export_builtin_service": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_CUSTOM_SERVICE_REQUIRED"
+ },
+ "exported": {
+  "display_name": "Fake CLI",
+  "local_configuration_required": [
+   "executable",
+   "interpreter",
+   "environment",
+   "concurrency_group",
+   "argv.0",
+   "argv.2",
+   "argv.3"
+  ],
+  "models": [
+   {
+    "display_name": "Fast",
+    "model_name": "m-fast",
+    "thinking_mode": "low"
+   }
+  ],
+  "schema_version": "CLIConnectionExport-v1",
+  "template": {
+   "argv": [
+    "",
+    "--url=https://example.org/x",
+    "",
+    "",
+    "--model",
+    "{{model}}",
+    "{{prompt}}"
+   ],
+   "capabilities": {
+    "images": false,
+    "structured_output": false,
+    "usage": false
+   },
+   "effort_map": {},
+   "input": "argument",
+   "interpreter_argv": [],
+   "max_input_bytes": 8388608,
+   "max_output_bytes": 16777216,
+   "model_map": {},
+   "output": {
+    "mode": "text"
+   },
+   "permissions": {
+    "read_only": true,
+    "tools_disabled": true
+   },
+   "revision": 1,
+   "schema_version": "CLIConnectionTemplate-v1",
+   "termination": {
+    "failure": [],
+    "success": []
+   },
+   "timeout_seconds": 300,
+   "working_directory": "attempt"
+  }
+ },
+ "import_extra_field": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_FIELDS_INVALID:import"
+ },
+ "import_other_schema": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_IMPORT_SCHEMA_UNSUPPORTED"
+ },
+ "imported": {
+  "adapter_id": "command_template",
+  "concurrency_group": "",
+  "connection_status": "UNVERIFIED",
+  "display_name": "Fake CLI",
+  "enabled": false,
+  "environment": {},
+  "executable": "",
+  "interpreter": "",
+  "models": [
+   {
+    "connection_status": "UNVERIFIED",
+    "display_name": "Fast",
+    "model_name": "m-fast",
+    "thinking_mode": "low"
+   }
+  ],
+  "template": {
+   "argv": [
+    "",
+    "--url=https://example.org/x",
+    "",
+    "",
+    "--model",
+    "{{model}}",
+    "{{prompt}}"
+   ],
+   "capabilities": {
+    "images": false,
+    "structured_output": false,
+    "usage": false
+   },
+   "effort_map": {},
+   "input": "argument",
+   "interpreter_argv": [],
+   "max_input_bytes": 8388608,
+   "max_output_bytes": 16777216,
+   "model_map": {},
+   "output": {
+    "mode": "text"
+   },
+   "permissions": {
+    "read_only": true,
+    "tools_disabled": true
+   },
+   "revision": 1,
+   "schema_version": "CLIConnectionTemplate-v1",
+   "termination": {
+    "failure": [],
+    "success": []
+   },
+   "timeout_seconds": 300,
+   "working_directory": "attempt"
+  }
+ }
+}

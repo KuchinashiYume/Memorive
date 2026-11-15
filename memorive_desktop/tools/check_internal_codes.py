@@ -11,8 +11,9 @@ for, and they get in the way of anyone who continues the work.
 
 The check reads the name and the text of every file listed in
 SOURCE_REVIEW_MANIFEST.json (run sync_manifests.py first so that new files are
-listed). A hit is accepted only when historical_names.json, next to this file,
-covers it:
+listed), and of the tests that Git tracks under memorive_desktop/tests/, which the
+manifests leave out because they are not part of a release. A hit is accepted only
+when historical_names.json, next to this file, covers it:
   "names"  exact strings that are saved in users' data or exchanged with copies
            already installed; they can only change together with a data upgrade
   "files"  files or folders whose cleanup is planned separately
@@ -27,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -95,6 +97,12 @@ def main() -> int:
 
     files = [entry["path"] for entry in json.loads((REPO / ROOT_MANIFEST).read_text("utf-8"))["files"]]
     files.append(ROOT_MANIFEST)
+    try:
+        tracked = subprocess.run(["git", "-C", str(REPO), "ls-files", "-z", "memorive_desktop/tests"],
+                                 capture_output=True, check=True).stdout.decode("utf-8").split("\0")
+        files.extend(name for name in tracked if name)
+    except (OSError, subprocess.CalledProcessError):
+        pass  # no Git (a downloaded archive): the archive carries no tests
     open_hits: list[str] = []
     accepted: list[str] = []
     used_names: set[str] = set()

@@ -1,0 +1,46 @@
+{
+ "body": {
+  "error": "ValueError",
+  "message": "METADATA_GET_REQUIRED"
+ },
+ "clarivate_without_key": {
+  "error": "ValueError",
+  "message": "METADATA_GET_REQUIRED"
+ },
+ "extra_header": {
+  "error": "ValueError",
+  "message": "METADATA_GET_REQUIRED"
+ },
+ "header_newline": {
+  "error": "ValueError",
+  "message": "METADATA_HEADER_INVALID"
+ },
+ "http_scheme": {
+  "error": "ValueError",
+  "message": "METADATA_ENDPOINT_NOT_ALLOWED"
+ },
+ "missing_header": {
+  "error": "ValueError",
+  "message": "METADATA_GET_REQUIRED"
+ },
+ "openalex_fragment": {
+  "error": "ValueError",
+  "message": "METADATA_CREDENTIAL_MUST_USE_HEADER"
+ },
+ "openalex_key_in_query": {
+  "error": "ValueError",
+  "message": "METADATA_CREDENTIAL_MUST_USE_HEADER"
+ },
+ "other_host": {
+  "error": "ValueError",
+  "message": "METADATA_ENDPOINT_NOT_ALLOWED"
+ },
+ "other_path": {
+  "error": "ValueError",
+  "message": "METADATA_ENDPOINT_NOT_ALLOWED"
+ },
+ "post": {
+  "error": "ValueError",
+  "message": "METADATA_GET_REQUIRED"
+ }
+}

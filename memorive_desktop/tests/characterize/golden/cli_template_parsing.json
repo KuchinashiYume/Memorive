@@ -1,0 +1,115 @@
+{
+ "file_json": {
+  "result": {
+   "event_count": 0,
+   "returned_model": null,
+   "terminal_observed": false,
+   "text": "{\"k\": \"v\"}",
+   "token_usage": null
+  }
+ },
+ "file_missing": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_RESULT_FILE_MISSING"
+ },
+ "file_text": {
+  "result": {
+   "event_count": 0,
+   "returned_model": null,
+   "terminal_observed": false,
+   "text": "from the file",
+   "token_usage": null
+  }
+ },
+ "json_invalid": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_JSON_INVALID"
+ },
+ "json_missing_path": {
+  "error": "ValueError",
+  "message": "CLI_RESPONSE_EMPTY"
+ },
+ "json_object_value": {
+  "result": {
+   "event_count": 1,
+   "returned_model": null,
+   "terminal_observed": false,
+   "text": "{\"b\": 1}",
+   "token_usage": null
+  }
+ },
+ "json_path": {
+  "result": {
+   "event_count": 1,
+   "returned_model": null,
+   "terminal_observed": false,
+   "text": "deep",
+   "token_usage": null
+  }
+ },
+ "jsonl_complete": {
+  "result": {
+   "event_count": 3,
+   "returned_model": "m1",
+   "terminal_observed": true,
+   "text": "Hello",
+   "token_usage": {
+    "total_tokens": 9
+   }
+  }
+ },
+ "jsonl_delta_after_final": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_DELTA_AFTER_FINAL"
+ },
+ "jsonl_error_event": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_ERROR_EVENT"
+ },
+ "jsonl_final_replaces": {
+  "result": {
+   "event_count": 3,
+   "returned_model": null,
+   "terminal_observed": true,
+   "text": "Final",
+   "token_usage": null
+  }
+ },
+ "jsonl_id_conflict": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_EVENT_ID_CONFLICT"
+ },
+ "jsonl_model_conflict": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_MODEL_CONFLICT"
+ },
+ "jsonl_negative_usage": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_USAGE_INVALID"
+ },
+ "jsonl_no_terminal": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_TERMINAL_EVENT_MISSING"
+ },
+ "jsonl_not_json": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_JSONL_INVALID"
+ },
+ "text": {
+  "result": {
+   "event_count": 0,
+   "returned_model": null,
+   "terminal_observed": false,
+   "text": "plain answer\n",
+   "token_usage": null
+  }
+ },
+ "text_empty": {
+  "error": "ValueError",
+  "message": "CLI_RESPONSE_EMPTY"
+ },
+ "text_not_utf8": {
+  "error": "ValueError",
+  "message": "CLI_TEMPLATE_UTF8_INVALID"
+ }
+}

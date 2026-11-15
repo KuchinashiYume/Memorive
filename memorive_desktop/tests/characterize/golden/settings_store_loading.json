@@ -1,0 +1,276 @@
+{
+ "a_list": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": true,
+  "file_revision": 0,
+  "loaded_is_defaults": true,
+  "loaded_language": "zh-CN",
+  "loaded_revision": 0,
+  "other_files": [
+   ".settings-write.lock",
+   "<quarantine>"
+  ],
+  "recovery": {
+   "raw_content_in_receipt": false,
+   "reason_code": "SETTINGS_ENVELOPE_TYPE_INVALID",
+   "status": "RECOVERED_TO_SAFE_DEFAULT"
+  }
+ },
+ "checksum_lowercase": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": "en-US",
+  "loaded_revision": 1,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "empty_file": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": true,
+  "file_revision": 0,
+  "loaded_is_defaults": true,
+  "loaded_language": "zh-CN",
+  "loaded_revision": 0,
+  "other_files": [
+   ".settings-write.lock",
+   "<quarantine>"
+  ],
+  "recovery": {
+   "raw_content_in_receipt": false,
+   "reason_code": "Expecting value",
+   "status": "RECOVERED_TO_SAFE_DEFAULT"
+  }
+ },
+ "field_added_by_newer_version": {
+  "error": null,
+  "file_fields": [
+   "new_field",
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": "en-US",
+  "loaded_revision": 1,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "first_start": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": true,
+  "file_revision": 0,
+  "loaded_is_defaults": true,
+  "loaded_language": "zh-CN",
+  "loaded_revision": 0,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "hand_edited_strict": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": "ja-JP",
+  "loaded_revision": 1,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "hand_edited_value": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": "ja-JP",
+  "loaded_revision": 1,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "newer_store_version": {
+  "error": "SettingsFromNewerVersion: SETTINGS_STORE_SCHEMA_NEWER:SettingsStoreEnvelope-v8",
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": null,
+  "loaded_revision": null,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "not_json": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": true,
+  "file_revision": 0,
+  "loaded_is_defaults": true,
+  "loaded_language": "zh-CN",
+  "loaded_revision": 0,
+  "other_files": [
+   ".settings-write.lock",
+   "<quarantine>"
+  ],
+  "recovery": {
+   "raw_content_in_receipt": false,
+   "reason_code": "Expecting property name enclosed in double quotes",
+   "status": "RECOVERED_TO_SAFE_DEFAULT"
+  }
+ },
+ "not_json_strict": {
+  "error": "SettingsCorrupt: SETTINGS_DECODE_FAILED",
+  "file_fields": null,
+  "file_is_defaults": false,
+  "file_revision": null,
+  "loaded_is_defaults": false,
+  "loaded_language": null,
+  "loaded_revision": null,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "revision_negative": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": true,
+  "file_revision": 0,
+  "loaded_is_defaults": true,
+  "loaded_language": "zh-CN",
+  "loaded_revision": 0,
+  "other_files": [
+   ".settings-write.lock",
+   "<quarantine>"
+  ],
+  "recovery": {
+   "raw_content_in_receipt": false,
+   "reason_code": "SETTINGS_REVISION_INVALID",
+   "status": "RECOVERED_TO_SAFE_DEFAULT"
+  }
+ },
+ "saved_then_loaded": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": "en-US",
+  "loaded_revision": 1,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ },
+ "settings_field_added": {
+  "error": null,
+  "file_fields": [
+   "revision",
+   "schema_version",
+   "settings",
+   "settings_sha256",
+   "template_id",
+   "updated_at"
+  ],
+  "file_is_defaults": false,
+  "file_revision": 1,
+  "loaded_is_defaults": false,
+  "loaded_language": "en-US",
+  "loaded_revision": 1,
+  "other_files": [
+   ".settings-write.lock"
+  ],
+  "recovery": null
+ }
+}

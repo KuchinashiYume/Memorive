@@ -1,0 +1,132 @@
+{
+ "hash_descriptor_extra_key": {
+  "error": "ContractViolation",
+  "message": "field keys must match the frozen exact set"
+ },
+ "hash_descriptor_lower": {
+  "error": "ContractViolation",
+  "message": "field.value must be uppercase SHA-256 hex"
+ },
+ "hash_descriptor_missing_value": {
+  "error": "ContractViolation",
+  "message": "field keys must match the frozen exact set"
+ },
+ "hash_descriptor_not_mapping": {
+  "error": "ContractViolation",
+  "message": "field must be an object"
+ },
+ "hash_descriptor_typed": {
+  "result": {
+   "algorithm": "sha256",
+   "hash_kind": "rfc8785_jcs_sha256",
+   "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+   "value": "A6FD5C0647F98D41B530AFC568C19C50E78C6D4CA21559E0AB43749AF6F41437"
+  }
+ },
+ "hash_descriptor_upper": {
+  "result": {
+   "algorithm": "sha256",
+   "hash_kind": "rfc8785_jcs_sha256",
+   "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+   "value": "A6FD5C0647F98D41B530AFC568C19C50E78C6D4CA21559E0AB43749AF6F41437"
+  }
+ },
+ "non_empty_string_'  '": {
+  "error": "ContractViolation",
+  "message": "field must not have edge whitespace"
+ },
+ "non_empty_string_''": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty string"
+ },
+ "non_empty_string_'text'": {
+  "result": "text"
+ },
+ "non_empty_string_3": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty string"
+ },
+ "non_empty_string_None": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty string"
+ },
+ "non_empty_string_['x']": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty string"
+ },
+ "refs_'a'": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty reference list"
+ },
+ "refs_None": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty reference list"
+ },
+ "refs_['a', '']": {
+  "error": "ContractViolation",
+  "message": "field[] must be a non-empty string"
+ },
+ "refs_['a', 'a']": {
+  "error": "ContractViolation",
+  "message": "field must not contain duplicate references"
+ },
+ "refs_['a', 'b']": {
+  "result": [
+   "a",
+   "b"
+  ]
+ },
+ "refs_['b', 'a']": {
+  "result": [
+   "a",
+   "b"
+  ]
+ },
+ "refs_[]": {
+  "error": "ContractViolation",
+  "message": "field must be a non-empty reference list"
+ },
+ "sha_'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'": {
+  "error": "ContractViolation",
+  "message": "field must be uppercase SHA-256 hex"
+ },
+ "sha_'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'": {
+  "result": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+ },
+ "sha_'GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG'": {
+  "error": "ContractViolation",
+  "message": "field must be uppercase SHA-256 hex"
+ },
+ "sha_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'": {
+  "error": "ContractViolation",
+  "message": "field must be uppercase SHA-256 hex"
+ },
+ "sha_None": {
+  "error": "ContractViolation",
+  "message": "field must be uppercase SHA-256 hex"
+ },
+ "value_hash_'text'": {
+  "result": {
+   "algorithm": "sha256",
+   "hash_kind": "rfc8785_jcs_sha256",
+   "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+   "value": "D81EA6082332682B03AC817FA7C3478F9B08F2791E99E5BF955942B8E443A60C"
+  }
+ },
+ "value_hash_0": {
+  "error": "ContractViolation",
+  "message": "canonical_value must be a non-empty string"
+ },
+ "value_hash_None": {
+  "error": "ContractViolation",
+  "message": "canonical_value must be a non-empty string"
+ },
+ "value_hash_[]": {
+  "error": "ContractViolation",
+  "message": "canonical_value must be a non-empty string"
+ },
+ "value_hash_{'b': 1, 'a': [1, 2.5, None]}": {
+  "error": "ContractViolation",
+  "message": "canonical_value must be a non-empty string"
+ }
+}

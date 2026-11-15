@@ -1,0 +1,48 @@
+{
+ "dot_dot": {
+  "error": "ValueError",
+  "message": "SOURCE_PRIVATE_DIRECTORY"
+ },
+ "empty_file": {
+  "result": "<tmp>/root/empty.md"
+ },
+ "junction_itself": {
+  "error": "ValueError",
+  "message": "SOURCE_OUTSIDE_VAULT"
+ },
+ "missing_file": {
+  "error": "FileNotFoundError"
+ },
+ "node_modules": {
+  "error": "ValueError",
+  "message": "SOURCE_PRIVATE_DIRECTORY"
+ },
+ "outside_root": {
+  "error": "ValueError",
+  "message": "SOURCE_OUTSIDE_VAULT"
+ },
+ "plain_file": {
+  "result": "<tmp>/root/docs/a.md"
+ },
+ "private_git_folder": {
+  "error": "ValueError",
+  "message": "SOURCE_PRIVATE_DIRECTORY"
+ },
+ "reserved_name": {
+  "error": "FileNotFoundError"
+ },
+ "root_missing": {
+  "error": "ValueError",
+  "message": "SOURCE_ROOT_UNAVAILABLE"
+ },
+ "through_junction_inside": {
+  "result": "<tmp>/root/docs/a.md"
+ },
+ "through_junction_to_outside": {
+  "error": "ValueError",
+  "message": "SOURCE_OUTSIDE_VAULT"
+ },
+ "unsupported_type": {
+  "result": "<tmp>/root/tool.exe"
+ }
+}

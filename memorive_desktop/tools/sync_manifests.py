@@ -22,6 +22,7 @@ What it does to each manifest:
                                                               installer sources against this list
 
 A file counts as new when SOURCE_REVIEW_MANIFEST.json does not list it yet.
+memorive_desktop/tests/ is never listed: the tests are not part of a release.
 Files that Git ignores are left out. Without Git (a downloaded archive, or a
 copy placed inside another repository), only the folders named above are
 scanned for new files. Everything else in the manifests (header fields,
@@ -57,6 +58,7 @@ MANIFESTS = {
 }
 SCANNED_WITHOUT_GIT = ("memorive_desktop/source", "memorive_desktop/product", "memorive_desktop/integrations",
                        "memorive_console")
+NOT_RELEASED = "memorive_desktop/tests/"
 SKIPPED_WITHOUT_GIT = re.compile(r"(^|/)(__pycache__|private-test|sandbox_profile|\.venv)(/|$)|\.py[cod]$|\.log$")
 ENTRY = re.compile(r"\{[^{}]*\}")
 
@@ -79,7 +81,8 @@ def repository_files(known: set[str]) -> tuple[set[str], bool]:
             ["git", "-C", str(REPO), "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
             capture_output=True, check=True,
         ).stdout.decode("utf-8").split("\0")
-        return {name for name in listed if name and (REPO / name).is_file()}, True
+        return {name for name in listed
+                if name and not name.startswith(NOT_RELEASED) and (REPO / name).is_file()}, True
     except (OSError, subprocess.CalledProcessError):
         found = {name for name in known if (REPO / name).is_file()}
         for folder in SCANNED_WITHOUT_GIT:

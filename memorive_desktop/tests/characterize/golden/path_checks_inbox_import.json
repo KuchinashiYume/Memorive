@@ -1,0 +1,118 @@
+{
+ "allowlist_includes_outside": {
+  "result": {
+   "bytes": 5,
+   "extension": ".md",
+   "injected_changed": false,
+   "injected_copy_interrupt": false,
+   "inside_allowlist": true,
+   "regular_file": true,
+   "schema_version": "InboxPathPreflightReceipt-v1",
+   "source_name": "d.md",
+   "source_path": "<tmp>/outside/d.md",
+   "source_root": "<tmp>/outside",
+   "status": "PASS",
+   "symlink_or_reparse": false
+  }
+ },
+ "device_path": {
+  "error": "InboxError",
+  "message": "IMPORT_DEVICE_PATH_REJECTED"
+ },
+ "dot_dot": {
+  "error": "InboxError",
+  "message": "IMPORT_PATH_TRAVERSAL_REJECTED"
+ },
+ "empty_file": {
+  "error": "InboxError",
+  "message": "IMPORT_EMPTY_FILE"
+ },
+ "junction_itself": {
+  "error": "InboxError",
+  "message": "IMPORT_SOURCE_NOT_REGULAR_FILE"
+ },
+ "missing_file": {
+  "error": "InboxError",
+  "message": "IMPORT_SOURCE_NOT_FOUND"
+ },
+ "node_modules": {
+  "result": {
+   "bytes": 8,
+   "extension": ".md",
+   "injected_changed": false,
+   "injected_copy_interrupt": false,
+   "inside_allowlist": true,
+   "regular_file": true,
+   "schema_version": "InboxPathPreflightReceipt-v1",
+   "source_name": "c.md",
+   "source_path": "<tmp>/root/node_modules/c.md",
+   "source_root": "<tmp>/root",
+   "status": "PASS",
+   "symlink_or_reparse": false
+  }
+ },
+ "outside_root": {
+  "error": "InboxError",
+  "message": "IMPORT_SOURCE_OUTSIDE_ALLOWLIST"
+ },
+ "plain_file": {
+  "result": {
+   "bytes": 5,
+   "extension": ".md",
+   "injected_changed": false,
+   "injected_copy_interrupt": false,
+   "inside_allowlist": true,
+   "regular_file": true,
+   "schema_version": "InboxPathPreflightReceipt-v1",
+   "source_name": "a.md",
+   "source_path": "<tmp>/root/docs/a.md",
+   "source_root": "<tmp>/root",
+   "status": "PASS",
+   "symlink_or_reparse": false
+  }
+ },
+ "private_git_folder": {
+  "result": {
+   "bytes": 7,
+   "extension": ".md",
+   "injected_changed": false,
+   "injected_copy_interrupt": false,
+   "inside_allowlist": true,
+   "regular_file": true,
+   "schema_version": "InboxPathPreflightReceipt-v1",
+   "source_name": "b.md",
+   "source_path": "<tmp>/root/.git/b.md",
+   "source_root": "<tmp>/root",
+   "status": "PASS",
+   "symlink_or_reparse": false
+  }
+ },
+ "reserved_name": {
+  "error": "InboxError",
+  "message": "IMPORT_SOURCE_NOT_FOUND"
+ },
+ "through_junction_inside": {
+  "result": {
+   "bytes": 5,
+   "extension": ".md",
+   "injected_changed": false,
+   "injected_copy_interrupt": false,
+   "inside_allowlist": true,
+   "regular_file": true,
+   "schema_version": "InboxPathPreflightReceipt-v1",
+   "source_name": "a.md",
+   "source_path": "<tmp>/root/docs/a.md",
+   "source_root": "<tmp>/root",
+   "status": "PASS",
+   "symlink_or_reparse": false
+  }
+ },
+ "through_junction_to_outside": {
+  "error": "InboxError",
+  "message": "IMPORT_SOURCE_OUTSIDE_ALLOWLIST"
+ },
+ "unsupported_type": {
+  "error": "InboxError",
+  "message": "IMPORT_FORMAT_UNSUPPORTED"
+ }
+}

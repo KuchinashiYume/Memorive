@@ -1,0 +1,1153 @@
+{
+ "canonical_'  Mixed '": {
+  "result": "Mixed spacing and lines"
+ },
+ "canonical_''": {
+  "error": "ContractViolation",
+  "message": "summary must be a non-empty string"
+ },
+ "canonical_'xxx'": {
+  "result": "xxx"
+ },
+ "canonical_'全角\\u3000空格与标点'": {
+  "result": "全角 空格与标点,"
+ },
+ "expand_FX-ACTIVE-ENTRUSTED-NOTE-R1": {
+  "result": [
+   {
+    "canonical_value": "公开受托作者结论",
+    "field_path": "author_conclusion",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_author_conclusion"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "AF7C92FC1885D607F327B7392CC7C4D4A85F6898920F93C7742C78130405C313"
+    },
+    "value_locator": "/author_conclusion"
+   },
+   {
+    "canonical_value": "公开受托作者自陈局限",
+    "field_path": "author_limitations_outlook/limitations/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_limitation_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "E638FC254E9C823E4FDAFFB9C2FD1995BB7E265843DC195AE588181DD303BBD3"
+    },
+    "value_locator": "/author_limitations_outlook/limitations/0/quote"
+   },
+   {
+    "canonical_value": "公开受托作者展望",
+    "field_path": "author_limitations_outlook/outlook/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_outlook_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "62AB2F9C97BF9FD974B4B4F21DD8FF2453BF6710A2B4679CC496FCE110A9711D"
+    },
+    "value_locator": "/author_limitations_outlook/outlook/0/quote"
+   },
+   {
+    "canonical_value": "公开受托边界条件",
+    "field_path": "boundary_conditions/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_boundary_conditions"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "9452BE676C1D24FC0BB678155EA348F09C151E3DAE385A9485DD2CF57A350EFA"
+    },
+    "value_locator": "/boundary_conditions/0"
+   },
+   {
+    "canonical_value": "公开受托适用边界",
+    "field_path": "comparison_context/applicability",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "B8469EA5C7DB294800D84820E07F601988E259576090764A472C832DE5FA2699"
+    },
+    "value_locator": "/comparison_context/applicability"
+   },
+   {
+    "canonical_value": "公开受托干预条件",
+    "field_path": "comparison_context/condition",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "BFAEA57D923275A869B1F3FFC4D24A88302B247D84AF2393FC3B9DC04F1727F8"
+    },
+    "value_locator": "/comparison_context/condition"
+   },
+   {
+    "canonical_value": "公开受托实验组",
+    "field_path": "comparison_context/groups/0",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "075ECE4ADEC5B4EDC7D7135A2738E202B6315637CAC4007746D03441CF56A6EC"
+    },
+    "value_locator": "/comparison_context/groups/0"
+   },
+   {
+    "canonical_value": "公开受托对照组",
+    "field_path": "comparison_context/groups/1",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "9A7548802C205FC4BAC1B28523AAD27E2523012AE2D1979185A9F918D97FF647"
+    },
+    "value_locator": "/comparison_context/groups/1"
+   },
+   {
+    "canonical_value": "公开受托比较对象",
+    "field_path": "comparison_context/object",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "0CB7D02A713AFC3C4ED1D3D359550D85AAE3F35F197C7617B3AE0DAEF6796E31"
+    },
+    "value_locator": "/comparison_context/object"
+   },
+   {
+    "canonical_value": "公开受托尺度",
+    "field_path": "comparison_context/scale",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "CC01F579FABC5C2760CCE8FE9F102E4F173B2DF7F00E50CD5725CCA700F4F3EE"
+    },
+    "value_locator": "/comparison_context/scale"
+   },
+   {
+    "canonical_value": "公开受托场景",
+    "field_path": "comparison_context/scenario",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "131101BF752D5C6622E37CBCB1EA2993166D370CC3ED07D9C8C106508BB4665D"
+    },
+    "value_locator": "/comparison_context/scenario"
+   },
+   {
+    "canonical_value": "公开受托时段",
+    "field_path": "comparison_context/time",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-002@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "594B22F9840317DDB05864851C17055041A19B52844F731096D2705BE592156F"
+    },
+    "value_locator": "/comparison_context/time"
+   },
+   {
+    "canonical_value": "公开受托指标",
+    "field_path": "key_data/0/metric",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_key_data_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "563BA20236D51F542AF320EF8C69B207A89A49C7A47E739DF4ED5919A5FDD365"
+    },
+    "value_locator": "/key_data/0/metric"
+   },
+   {
+    "canonical_value": "公开受托关键结果",
+    "field_path": "key_results",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_key_results"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "26456FDB4307A93E5FFE691CC5519768AA204F225934BF23F4CE242165E880CD"
+    },
+    "value_locator": "/key_results"
+   },
+   {
+    "canonical_value": "公开受托研究方法",
+    "field_path": "method/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_method"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "76C3069591CF2DA67FB4E6AF77EAFF12E33AE0CDC7F655E67563F5D983ED3D43"
+    },
+    "value_locator": "/method/0"
+   },
+   {
+    "canonical_value": "公开受托研究对象",
+    "field_path": "research_object/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_research_object"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "26DC87AB29B802768FBCBE2F29645DC43374E4A6242B04287168F7521A8F692F"
+    },
+    "value_locator": "/research_object/0"
+   },
+   {
+    "canonical_value": "公开受托研究问题",
+    "field_path": "research_question",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureEntrusted001_chunk_research_question"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "C4E1DD7CDBEA9B5182CA40BF53F84C88BDB7C29E9671A4597AC6C509BABFAE08"
+    },
+    "value_locator": "/research_question"
+   }
+  ]
+ },
+ "expand_FX-ACTIVE-SELF-LITERATURE-R1": {
+  "result": [
+   {
+    "canonical_value": "公开自有作者结论",
+    "field_path": "author_conclusion",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_author_conclusion"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "FB997C3037A0829540CCD3D497C07E4B4F73511F2829C857A38052CD3559D0CA"
+    },
+    "value_locator": "/author_conclusion"
+   },
+   {
+    "canonical_value": "公开自有作者自陈局限",
+    "field_path": "author_limitations_outlook/limitations/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_limitation_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "AB048A46C76DC59BB99C00D16C8661C76828ECC99D0759C923004F7FA880AD60"
+    },
+    "value_locator": "/author_limitations_outlook/limitations/0/quote"
+   },
+   {
+    "canonical_value": "公开自有作者展望",
+    "field_path": "author_limitations_outlook/outlook/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_outlook_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "FD61F083883C88DB03403B704B495963D9FEE2B9D6423BBC73AE674E9FE0F7FB"
+    },
+    "value_locator": "/author_limitations_outlook/outlook/0/quote"
+   },
+   {
+    "canonical_value": "公开自有边界条件",
+    "field_path": "boundary_conditions/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_boundary_conditions"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "BA55EAE23C8FD1901A36A11E5187BC63108684796071212D36D2608D4A968E6A"
+    },
+    "value_locator": "/boundary_conditions/0"
+   },
+   {
+    "canonical_value": "公开自有适用边界",
+    "field_path": "comparison_context/applicability",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "4E3A2B3E433011BAF2A754727702CA03C1DE7CCFED80068927E6E09F39FAD142"
+    },
+    "value_locator": "/comparison_context/applicability"
+   },
+   {
+    "canonical_value": "公开自有干预条件",
+    "field_path": "comparison_context/condition",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "96B1F5B885E427556A0F042F75CBFD2464E949B167C1AA62D9C921F9A87D1D41"
+    },
+    "value_locator": "/comparison_context/condition"
+   },
+   {
+    "canonical_value": "公开自有实验组",
+    "field_path": "comparison_context/groups/0",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "2F58E94CF5F68D785FAEFB4455728BE6100536F73A89A6D5632F09F9650D9F06"
+    },
+    "value_locator": "/comparison_context/groups/0"
+   },
+   {
+    "canonical_value": "公开自有对照组",
+    "field_path": "comparison_context/groups/1",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "A26EF11B62855BF5B4FE436053AE9C298FFE5292C9D3242F7D3EA976E904C799"
+    },
+    "value_locator": "/comparison_context/groups/1"
+   },
+   {
+    "canonical_value": "公开自有比较对象",
+    "field_path": "comparison_context/object",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "ED164740D38E7416B64BF47587B8A855D02D82693407D50D8EBC9472EA384D63"
+    },
+    "value_locator": "/comparison_context/object"
+   },
+   {
+    "canonical_value": "公开自有尺度",
+    "field_path": "comparison_context/scale",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "908B1F72CD791393C4920BE4284409A2F09CFD37BA0436BC77FC6BF583E5090A"
+    },
+    "value_locator": "/comparison_context/scale"
+   },
+   {
+    "canonical_value": "公开自有场景",
+    "field_path": "comparison_context/scenario",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "5DD42E8A4AC0C002165136648E8CF0B2C6F58F7C256A3AB783B42A14DF5BFBF3"
+    },
+    "value_locator": "/comparison_context/scenario"
+   },
+   {
+    "canonical_value": "公开自有时段",
+    "field_path": "comparison_context/time",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-001@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "D99F062E4F6DD6AF8922915B42D0F9D6F34C091A6B9447327596EAABDF633167"
+    },
+    "value_locator": "/comparison_context/time"
+   },
+   {
+    "canonical_value": "公开自有指标",
+    "field_path": "key_data/0/metric",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_key_data_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "5536BBFF830BC8D122935799C4CFB149BE2CB49EFC5CC22B8DA9CA0733DF89DF"
+    },
+    "value_locator": "/key_data/0/metric"
+   },
+   {
+    "canonical_value": "公开自有关键结果",
+    "field_path": "key_results",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_key_results"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "3D69195B35174E39C6B03745B53DBAEB567373FC5F9CC68FDC9E3F8BDEE0C7A1"
+    },
+    "value_locator": "/key_results"
+   },
+   {
+    "canonical_value": "公开自有研究方法",
+    "field_path": "method/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_method"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "12EAE935380E1A725DCED6FB352C4729501CD060D6A3F24A33D9A5CD94EF7BB4"
+    },
+    "value_locator": "/method/0"
+   },
+   {
+    "canonical_value": "公开自有研究对象",
+    "field_path": "research_object/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_research_object"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "0149306AE85249BD24307639938717DC0EA12F1C3F0E65770F9A784114AF2ED7"
+    },
+    "value_locator": "/research_object/0"
+   },
+   {
+    "canonical_value": "公开自有研究问题",
+    "field_path": "research_question",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_research_question"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "0E14CB5EF012BF330E70EE7BA43CBCA5C5D50D458A806FB2DDC950E029D1A552"
+    },
+    "value_locator": "/research_question"
+   }
+  ]
+ },
+ "expand_FX-ACTIVE-SELF-LITERATURE-R2-SUCCESSOR": {
+  "result": [
+   {
+    "canonical_value": "公开自有作者结论修订",
+    "field_path": "author_conclusion",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_author_conclusion"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "83E65D02B88D054CB1FC0431AF8995FA1106E733A7194F58AAC355E96E788AD0"
+    },
+    "value_locator": "/author_conclusion"
+   },
+   {
+    "canonical_value": "公开自有作者自陈局限",
+    "field_path": "author_limitations_outlook/limitations/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_limitation_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "AB048A46C76DC59BB99C00D16C8661C76828ECC99D0759C923004F7FA880AD60"
+    },
+    "value_locator": "/author_limitations_outlook/limitations/0/quote"
+   },
+   {
+    "canonical_value": "公开自有作者展望",
+    "field_path": "author_limitations_outlook/outlook/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_outlook_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "FD61F083883C88DB03403B704B495963D9FEE2B9D6423BBC73AE674E9FE0F7FB"
+    },
+    "value_locator": "/author_limitations_outlook/outlook/0/quote"
+   },
+   {
+    "canonical_value": "公开自有边界条件修订",
+    "field_path": "boundary_conditions/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_boundary_conditions"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "093926354EAF3E08BB10858232ACC4EAC9C78AB5ED894AD1D0AB5FA32F57F88D"
+    },
+    "value_locator": "/boundary_conditions/0"
+   },
+   {
+    "canonical_value": "公开自有适用边界",
+    "field_path": "comparison_context/applicability",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "4E3A2B3E433011BAF2A754727702CA03C1DE7CCFED80068927E6E09F39FAD142"
+    },
+    "value_locator": "/comparison_context/applicability"
+   },
+   {
+    "canonical_value": "公开自有干预条件修订",
+    "field_path": "comparison_context/condition",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "E9084DDE2ADFC8EDEF0A9069B63CB87F59175F18328934B3AE5395A15626F10A"
+    },
+    "value_locator": "/comparison_context/condition"
+   },
+   {
+    "canonical_value": "公开自有实验组",
+    "field_path": "comparison_context/groups/0",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "2F58E94CF5F68D785FAEFB4455728BE6100536F73A89A6D5632F09F9650D9F06"
+    },
+    "value_locator": "/comparison_context/groups/0"
+   },
+   {
+    "canonical_value": "公开自有对照组",
+    "field_path": "comparison_context/groups/1",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "A26EF11B62855BF5B4FE436053AE9C298FFE5292C9D3242F7D3EA976E904C799"
+    },
+    "value_locator": "/comparison_context/groups/1"
+   },
+   {
+    "canonical_value": "公开自有比较对象",
+    "field_path": "comparison_context/object",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "ED164740D38E7416B64BF47587B8A855D02D82693407D50D8EBC9472EA384D63"
+    },
+    "value_locator": "/comparison_context/object"
+   },
+   {
+    "canonical_value": "公开自有尺度",
+    "field_path": "comparison_context/scale",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "908B1F72CD791393C4920BE4284409A2F09CFD37BA0436BC77FC6BF583E5090A"
+    },
+    "value_locator": "/comparison_context/scale"
+   },
+   {
+    "canonical_value": "公开自有场景",
+    "field_path": "comparison_context/scenario",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "5DD42E8A4AC0C002165136648E8CF0B2C6F58F7C256A3AB783B42A14DF5BFBF3"
+    },
+    "value_locator": "/comparison_context/scenario"
+   },
+   {
+    "canonical_value": "公开自有时段",
+    "field_path": "comparison_context/time",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-008@2"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "D99F062E4F6DD6AF8922915B42D0F9D6F34C091A6B9447327596EAABDF633167"
+    },
+    "value_locator": "/comparison_context/time"
+   },
+   {
+    "canonical_value": "公开自有指标",
+    "field_path": "key_data/0/metric",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_key_data_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "5536BBFF830BC8D122935799C4CFB149BE2CB49EFC5CC22B8DA9CA0733DF89DF"
+    },
+    "value_locator": "/key_data/0/metric"
+   },
+   {
+    "canonical_value": "公开自有关键结果修订",
+    "field_path": "key_results",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_key_results"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "63B4E4598D3714EFE4B971BC77C0DCB3992FB16A2B853CD02F11C7733F3F76DE"
+    },
+    "value_locator": "/key_results"
+   },
+   {
+    "canonical_value": "公开自有研究方法",
+    "field_path": "method/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_method"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "12EAE935380E1A725DCED6FB352C4729501CD060D6A3F24A33D9A5CD94EF7BB4"
+    },
+    "value_locator": "/method/0"
+   },
+   {
+    "canonical_value": "公开自有研究对象",
+    "field_path": "research_object/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_research_object"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "0149306AE85249BD24307639938717DC0EA12F1C3F0E65770F9A784114AF2ED7"
+    },
+    "value_locator": "/research_object/0"
+   },
+   {
+    "canonical_value": "公开自有研究问题修订",
+    "field_path": "research_question",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixtureSelf001_chunk_research_question"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "45EA769033347F7B21F10622D56790D3C6EE52374DFC0B3D191C1B66102DED40"
+    },
+    "value_locator": "/research_question"
+   }
+  ]
+ },
+ "expand_FX-PENDING-SELF-LITERATURE-R1": {
+  "result": [
+   {
+    "canonical_value": "公开待审作者结论",
+    "field_path": "author_conclusion",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_author_conclusion"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "6E8A01C070CCD039BA7E498EF94E525D8510E22AD585E3D6F39353F0DEA58D67"
+    },
+    "value_locator": "/author_conclusion"
+   },
+   {
+    "canonical_value": "公开待审作者自陈局限",
+    "field_path": "author_limitations_outlook/limitations/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_limitation_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "39B8D996DA84EF8453FE36636791818CC83E7B53A2FE6F72E41AB6161BCDC577"
+    },
+    "value_locator": "/author_limitations_outlook/limitations/0/quote"
+   },
+   {
+    "canonical_value": "公开待审作者展望",
+    "field_path": "author_limitations_outlook/outlook/0/quote",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_outlook_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "58D8883815BAAE6B833B14F214A0B65EB01AD33EE1188363594973E30BDAD590"
+    },
+    "value_locator": "/author_limitations_outlook/outlook/0/quote"
+   },
+   {
+    "canonical_value": "公开待审边界条件",
+    "field_path": "boundary_conditions/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_boundary_conditions"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "B09E0EFD4D66C42DA8FF87CB29E9BC46B335F67483A7D9F04775CEDAE7A40FEE"
+    },
+    "value_locator": "/boundary_conditions/0"
+   },
+   {
+    "canonical_value": "公开待审适用边界",
+    "field_path": "comparison_context/applicability",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "F1984BED1DE717DD57917636C264321CFFB9532C2939F9BA98254B6A39B3A9D6"
+    },
+    "value_locator": "/comparison_context/applicability"
+   },
+   {
+    "canonical_value": "公开待审干预条件",
+    "field_path": "comparison_context/condition",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "2C19CF642C9116BE236402E259502ED39A77546BDC616586EA8613FEC90DC3A7"
+    },
+    "value_locator": "/comparison_context/condition"
+   },
+   {
+    "canonical_value": "公开待审实验组",
+    "field_path": "comparison_context/groups/0",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "44ED61AFCD7F0A66526F7527D9AEC365CC71DB4652C08CE6AE027CCEFA2A08EF"
+    },
+    "value_locator": "/comparison_context/groups/0"
+   },
+   {
+    "canonical_value": "公开待审对照组",
+    "field_path": "comparison_context/groups/1",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "4491DF397CA038B45D0A265932FF3E4D152505F060E234AB515676A136C1EE7C"
+    },
+    "value_locator": "/comparison_context/groups/1"
+   },
+   {
+    "canonical_value": "公开待审比较对象",
+    "field_path": "comparison_context/object",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "B9E39C34BCE2F373D11653C1E871C1F770466C1236F9F96FF938F3C60367F24B"
+    },
+    "value_locator": "/comparison_context/object"
+   },
+   {
+    "canonical_value": "公开待审尺度",
+    "field_path": "comparison_context/scale",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "30E4421CC3E62C1D16D1D07847DF5D169BC1F68E5AF9931AE2F1E89910D4BE8C"
+    },
+    "value_locator": "/comparison_context/scale"
+   },
+   {
+    "canonical_value": "公开待审场景",
+    "field_path": "comparison_context/scenario",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "C9C6DB9DADA5CB85310268188A107A604B6C71AACC4D57E807377A86E35628CB"
+    },
+    "value_locator": "/comparison_context/scenario"
+   },
+   {
+    "canonical_value": "公开待审时段",
+    "field_path": "comparison_context/time",
+    "source_coverage": "artifact_level_no_dedicated_anchor",
+    "source_refs": [
+     "artifact://fixture/ART-FIX-003@1"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "80BCCAECB71A43FC3CECF40A37F64E9208E0A5937D4F809948749CFA2A440FAC"
+    },
+    "value_locator": "/comparison_context/time"
+   },
+   {
+    "canonical_value": "公开待审指标",
+    "field_path": "key_data/0/metric",
+    "source_coverage": "item_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_key_data_0"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "72365D369680C71F49B079F909F7F491F706B7F05E31A6216B866D79850B4A0B"
+    },
+    "value_locator": "/key_data/0/metric"
+   },
+   {
+    "canonical_value": "公开待审关键结果",
+    "field_path": "key_results",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_key_results"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "1DCA216C702CE333EB9D6500393B268D0AB63AA80954A131328C89CFE13BAD08"
+    },
+    "value_locator": "/key_results"
+   },
+   {
+    "canonical_value": "公开待审研究方法",
+    "field_path": "method/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_method"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "CCAF09891DA346E0890AE9FB5C5EF6221DAE7B9ECB2A2A0B86DF5F40AF57043B"
+    },
+    "value_locator": "/method/0"
+   },
+   {
+    "canonical_value": "公开待审研究对象",
+    "field_path": "research_object/0",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_research_object"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "4F0B1C5CD15BCFE5D142AAC982814B3C2D81E5E13982FCAD14AB597FBEB74CBC"
+    },
+    "value_locator": "/research_object/0"
+   },
+   {
+    "canonical_value": "公开待审研究问题",
+    "field_path": "research_question",
+    "source_coverage": "field_anchor",
+    "source_refs": [
+     "FixturePending001_chunk_research_question"
+    ],
+    "value_hash": {
+     "algorithm": "sha256",
+     "hash_kind": "rfc8785_jcs_sha256",
+     "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+     "value": "797E6D3C38F9A5892F5024397A46AE469FA9A7BF8C585D18189F187F970BB86C"
+    },
+    "value_locator": "/research_question"
+   }
+  ]
+ },
+ "expand_card_missing_first_key": {
+  "error": "ContractViolation",
+  "message": "required core field author_conclusion is absent"
+ },
+ "registry": {
+  "result": {
+   "active_is_not_verified": true,
+   "allowed_doc_types": [
+    "literature",
+    "note"
+   ],
+   "canonicalization": "unicode_nfkc_then_whitespace_collapse_v1",
+   "card_schema_version": 6,
+   "claim_type_persisted": false,
+   "fields": [
+    {
+     "field_path_template": "research_question",
+     "source_rule": "core_by_field_anchor",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "research_object/{item}",
+     "source_rule": "core_by_field_anchor",
+     "value_kind": "string_list_item"
+    },
+    {
+     "field_path_template": "method/{item}",
+     "source_rule": "core_by_field_anchor",
+     "value_kind": "string_list_item"
+    },
+    {
+     "field_path_template": "key_results",
+     "source_rule": "core_by_field_anchor",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "author_conclusion",
+     "source_rule": "core_by_field_anchor",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "boundary_conditions/{item}",
+     "source_rule": "core_by_field_anchor",
+     "value_kind": "string_list_item"
+    },
+    {
+     "field_path_template": "comparison_context/object",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "comparison_context/condition",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "comparison_context/groups/{item}",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string_list_item"
+    },
+    {
+     "field_path_template": "comparison_context/time",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "comparison_context/scale",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "comparison_context/scenario",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "comparison_context/applicability",
+     "source_rule": "card_artifact_level",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "key_data/{item}/metric",
+     "source_rule": "key_data_item_anchor",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "author_limitations_outlook/limitations/{item}/quote",
+     "source_rule": "supplemental_item_anchor",
+     "value_kind": "string"
+    },
+    {
+     "field_path_template": "author_limitations_outlook/outlook/{item}/quote",
+     "source_rule": "supplemental_item_anchor",
+     "value_kind": "string"
+    }
+   ],
+   "object_type": "FieldRegistry",
+   "registry_id": "field_vectors_card_schema_v6_field_registry",
+   "revision": 1,
+   "schema_version": "1.0"
+  }
+ }
+}

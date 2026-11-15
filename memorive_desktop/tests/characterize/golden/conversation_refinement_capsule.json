@@ -1,0 +1,144 @@
+{
+ "complete_not_bool": {
+  "error": "ConversationContractError",
+  "message": "CONTEXT_COMPLETE_MUST_BE_BOOLEAN"
+ },
+ "empty_id": {
+  "error": "ConversationContractError",
+  "message": "CAPSULE_ID_MUST_BE_EXACT_TEXT"
+ },
+ "empty_ref": {
+  "error": "ConversationContractError",
+  "message": "REQUIRED_MESSAGE_REFS[]_MUST_BE_EXACT_TEXT"
+ },
+ "empty_scope": {
+  "error": "ConversationContractError",
+  "message": "SCOPE_MUST_BE_EXACT_TEXT"
+ },
+ "full": {
+  "result": {
+   "capsule_id": "capsule-2",
+   "condition_refs": [
+    "m-3"
+   ],
+   "context_complete": false,
+   "correction_refs": [
+    "m-5"
+   ],
+   "failure_refs": [
+    "m-6"
+   ],
+   "limitations": [
+    "A",
+    "B"
+   ],
+   "negation_refs": [
+    "m-4"
+   ],
+   "required_message_refs": [
+    "m-1"
+   ],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_CONTEXT_CAPSULE_V1",
+   "scope": "ALL_HISTORY_BOUNDED"
+  }
+ },
+ "minimal": {
+  "result": {
+   "capsule_id": "capsule-1",
+   "condition_refs": [],
+   "context_complete": true,
+   "correction_refs": [],
+   "failure_refs": [],
+   "limitations": [],
+   "negation_refs": [],
+   "required_message_refs": [
+    "m-1",
+    "m-2"
+   ],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_CONTEXT_CAPSULE_V1",
+   "scope": "SELECTED_CONVERSATIONS"
+  }
+ },
+ "no_required_refs": {
+  "error": "ConversationContractError",
+  "message": "REQUIRED_MESSAGE_REFS_MUST_NOT_BE_EMPTY"
+ },
+ "validate_extra_key": {
+  "error": "ConversationContractError",
+  "message": "CONTEXT_CAPSULE_EXACT_KEYS_MISMATCH:missing=[],extra=['extra']"
+ },
+ "validate_limitations_text": {
+  "error": "ConversationContractError",
+  "message": "LIMITATIONS_MUST_BE_ARRAY"
+ },
+ "validate_limitations_unsorted": {
+  "error": "ConversationContractError",
+  "message": "LIMITATIONS_MUST_BE_SORTED_UNIQUE"
+ },
+ "validate_missing_key": {
+  "error": "ConversationContractError",
+  "message": "CONTEXT_CAPSULE_EXACT_KEYS_MISMATCH:missing=['failure_refs'],extra=[]"
+ },
+ "validate_other_schema": {
+  "error": "ConversationContractError",
+  "message": "CONTEXT_CAPSULE_SCHEMA_UNSUPPORTED"
+ },
+ "validate_refs_duplicate": {
+  "error": "ConversationContractError",
+  "message": "REQUIRED_MESSAGE_REFS_MUST_BE_SORTED_UNIQUE"
+ },
+ "validate_refs_text": {
+  "error": "ConversationContractError",
+  "message": "CONDITION_REFS_MUST_BE_ARRAY"
+ },
+ "validate_refs_unsorted": {
+  "error": "ConversationContractError",
+  "message": "REQUIRED_MESSAGE_REFS_MUST_BE_SORTED_UNIQUE"
+ },
+ "validate_revision_0": {
+  "error": "ConversationContractError",
+  "message": "REVISION_MUST_BE_POSITIVE_INT"
+ },
+ "validate_revision_3": {
+  "result": {
+   "capsule_id": "capsule-1",
+   "condition_refs": [],
+   "context_complete": true,
+   "correction_refs": [],
+   "failure_refs": [],
+   "limitations": [],
+   "negation_refs": [],
+   "required_message_refs": [
+    "m-1",
+    "m-2"
+   ],
+   "revision": 3,
+   "schema_version": "CONVERSATION_REFINEMENT_CONTEXT_CAPSULE_V1",
+   "scope": "SELECTED_CONVERSATIONS"
+  }
+ },
+ "validate_revision_bool": {
+  "error": "ConversationContractError",
+  "message": "REVISION_MUST_BE_POSITIVE_INT"
+ },
+ "validate_scope_changed_not_resealed": {
+  "result": {
+   "capsule_id": "capsule-1",
+   "condition_refs": [],
+   "context_complete": true,
+   "correction_refs": [],
+   "failure_refs": [],
+   "limitations": [],
+   "negation_refs": [],
+   "required_message_refs": [
+    "m-1",
+    "m-2"
+   ],
+   "revision": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_CONTEXT_CAPSULE_V1",
+   "scope": "ALL_HISTORY_BOUNDED"
+  }
+ }
+}

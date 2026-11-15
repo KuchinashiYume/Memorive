@@ -1,0 +1,146 @@
+{
+ "bearer": {
+  "result": {
+   "categories": [
+    "BEARER_TOKEN"
+   ],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "Authorization: [REDACTED:BEARER_TOKEN]",
+   "redaction_count": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "cookie": {
+  "result": {
+   "categories": [
+    "COOKIE_ASSIGNMENT"
+   ],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "[REDACTED:COOKIE_ASSIGNMENT]; [REDACTED:COOKIE_ASSIGNMENT]",
+   "redaction_count": 2,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "email": {
+  "result": {
+   "categories": [
+    "EMAIL"
+   ],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "write to [REDACTED:EMAIL] or [REDACTED:EMAIL]",
+   "redaction_count": 2,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "empty": {
+  "result": {
+   "categories": [],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "",
+   "redaction_count": 0,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "not_text": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_INPUT_MUST_BE_TEXT"
+ },
+ "openai_key": {
+  "result": {
+   "categories": [
+    "OPENAI_STYLE_KEY"
+   ],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "use [REDACTED:OPENAI_STYLE_KEY] please",
+   "redaction_count": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "plain": {
+  "result": {
+   "categories": [],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "Nothing secret here.",
+   "redaction_count": 0,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "several": {
+  "result": {
+   "categories": [
+    "COOKIE_ASSIGNMENT",
+    "EMAIL",
+    "OPENAI_STYLE_KEY"
+   ],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "[REDACTED:OPENAI_STYLE_KEY] and [REDACTED:EMAIL] and [REDACTED:COOKIE_ASSIGNMENT]",
+   "redaction_count": 3,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "short_key": {
+  "result": {
+   "categories": [],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "sk-short",
+   "redaction_count": 0,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "validate_categories_duplicate": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_CATEGORIES_INVALID"
+ },
+ "validate_categories_unsorted": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_CATEGORIES_INVALID"
+ },
+ "validate_count_bool": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_COUNT_INVALID"
+ },
+ "validate_count_negative": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_COUNT_INVALID"
+ },
+ "validate_credentials_retained": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_RETENTION_BOUNDARY_INVALID"
+ },
+ "validate_extra_key": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_RESULT_EXACT_KEYS_MISMATCH"
+ },
+ "validate_original_retained": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_RETENTION_BOUNDARY_INVALID"
+ },
+ "validate_other_schema": {
+  "error": "ConversationContractError",
+  "message": "REDACTION_RESULT_SCHEMA_UNSUPPORTED"
+ },
+ "validate_text_changed_not_resealed": {
+  "result": {
+   "categories": [
+    "EMAIL"
+   ],
+   "credential_cookie_storage_value_retained": false,
+   "original_text_retained": false,
+   "redacted_text": "someone@example.org",
+   "redaction_count": 1,
+   "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1"
+  }
+ },
+ "validate_text_not_string": {
+  "error": "ConversationContractError",
+  "message": "REDACTED_TEXT_INVALID"
+ }
+}

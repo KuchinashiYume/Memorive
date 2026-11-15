@@ -1,0 +1,122 @@
+{
+ "nothing_preset": {
+  "environment": {
+   "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT": "<runtime>/vector-store",
+   "MEMORIVE_DOCUMENT_PROCESSING_OCR_VIA_MODEL_GATEWAY_READY": "false",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_CHROMA_DIR": "<runtime>/vector-store/chroma-sandbox-v2",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT": "<runtime>/sandbox",
+   "MEMORIVE_DOCUMENT_PROCESSING_VAULT_ROOT": "<runtime>/vault-disabled",
+   "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR": "<runtime>/ops/evidence_review_judgment_debt",
+   "MEMORIVE_EVIDENCE_REVIEW_REPAIR_DIR": "<runtime>/ops/evidence_review_repairs",
+   "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR": "<runtime>/ops/evidence_review_reports",
+   "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR": "<runtime>/ops/knowledge_admission",
+   "MEMORIVE_MODEL_GATEWAY_CACHE_DIR": "<runtime>/ops/model_gateway_cache",
+   "MEMORIVE_OPS_ROOT": "<runtime>/ops",
+   "MEMORIVE_RETRIEVAL_RERANK_ENABLED": "false",
+   "MEMORIVE_RUNTIME_LOG_LOG_DIR": "<runtime>/ops/runtime_log",
+   "MEMORIVE_VAULT_ROOT": "<runtime>/vault-disabled"
+  },
+  "processing_config": {
+   "CHROMA_ROOT": "<runtime>/vector-store",
+   "OPS_ROOT": "<runtime>/ops",
+   "SANDBOX_ROOT": "<runtime>/sandbox",
+   "VAULT_ROOT": "<runtime>/vault-disabled"
+  }
+ },
+ "other_ops_folder_preset": {
+  "environment": {
+   "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT": "<runtime>/vector-store",
+   "MEMORIVE_DOCUMENT_PROCESSING_OCR_VIA_MODEL_GATEWAY_READY": "false",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_CHROMA_DIR": "<runtime>/vector-store/chroma-sandbox-v2",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT": "<runtime>/sandbox",
+   "MEMORIVE_DOCUMENT_PROCESSING_VAULT_ROOT": "<runtime>/vault-disabled",
+   "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR": "<runtime>/ops/evidence_review_judgment_debt",
+   "MEMORIVE_EVIDENCE_REVIEW_REPAIR_DIR": "<runtime>/ops/evidence_review_repairs",
+   "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR": "<runtime>/ops/evidence_review_reports",
+   "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR": "<runtime>/ops/knowledge_admission",
+   "MEMORIVE_MODEL_GATEWAY_CACHE_DIR": "<runtime>/ops/model_gateway_cache",
+   "MEMORIVE_OPS_ROOT": "<runtime>/ops",
+   "MEMORIVE_RETRIEVAL_RERANK_ENABLED": "false",
+   "MEMORIVE_RUNTIME_LOG_LOG_DIR": "<runtime>/ops/runtime_log",
+   "MEMORIVE_VAULT_ROOT": "<runtime>/vault-disabled"
+  },
+  "processing_config": {
+   "CHROMA_ROOT": "<runtime>/vector-store",
+   "OPS_ROOT": "<runtime>/ops",
+   "SANDBOX_ROOT": "<runtime>/sandbox",
+   "VAULT_ROOT": "<runtime>/vault-disabled"
+  }
+ },
+ "rerank_enabled_preset": {
+  "environment": {
+   "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT": "<runtime>/vector-store",
+   "MEMORIVE_DOCUMENT_PROCESSING_OCR_VIA_MODEL_GATEWAY_READY": "false",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_CHROMA_DIR": "<runtime>/vector-store/chroma-sandbox-v2",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT": "<runtime>/sandbox",
+   "MEMORIVE_DOCUMENT_PROCESSING_VAULT_ROOT": "<runtime>/vault-disabled",
+   "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR": "<runtime>/ops/evidence_review_judgment_debt",
+   "MEMORIVE_EVIDENCE_REVIEW_REPAIR_DIR": "<runtime>/ops/evidence_review_repairs",
+   "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR": "<runtime>/ops/evidence_review_reports",
+   "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR": "<runtime>/ops/knowledge_admission",
+   "MEMORIVE_MODEL_GATEWAY_CACHE_DIR": "<runtime>/ops/model_gateway_cache",
+   "MEMORIVE_OPS_ROOT": "<runtime>/ops",
+   "MEMORIVE_RETRIEVAL_RERANK_ENABLED": "false",
+   "MEMORIVE_RUNTIME_LOG_LOG_DIR": "<runtime>/ops/runtime_log",
+   "MEMORIVE_VAULT_ROOT": "<runtime>/vault-disabled"
+  },
+  "processing_config": {
+   "CHROMA_ROOT": "<runtime>/vector-store",
+   "OPS_ROOT": "<runtime>/ops",
+   "SANDBOX_ROOT": "<runtime>/sandbox",
+   "VAULT_ROOT": "<runtime>/vault-disabled"
+  }
+ },
+ "same_values_preset": {
+  "environment": {
+   "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT": "<runtime>/vector-store",
+   "MEMORIVE_DOCUMENT_PROCESSING_OCR_VIA_MODEL_GATEWAY_READY": "false",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_CHROMA_DIR": "<runtime>/vector-store/chroma-sandbox-v2",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT": "<runtime>/sandbox",
+   "MEMORIVE_DOCUMENT_PROCESSING_VAULT_ROOT": "<runtime>/vault-disabled",
+   "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR": "<runtime>/ops/evidence_review_judgment_debt",
+   "MEMORIVE_EVIDENCE_REVIEW_REPAIR_DIR": "<runtime>/ops/evidence_review_repairs",
+   "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR": "<runtime>/ops/evidence_review_reports",
+   "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR": "<runtime>/ops/knowledge_admission",
+   "MEMORIVE_MODEL_GATEWAY_CACHE_DIR": "<runtime>/ops/model_gateway_cache",
+   "MEMORIVE_OPS_ROOT": "<runtime>/ops",
+   "MEMORIVE_RETRIEVAL_RERANK_ENABLED": "false",
+   "MEMORIVE_RUNTIME_LOG_LOG_DIR": "<runtime>/ops/runtime_log",
+   "MEMORIVE_VAULT_ROOT": "<runtime>/vault-disabled"
+  },
+  "processing_config": {
+   "CHROMA_ROOT": "<runtime>/vector-store",
+   "OPS_ROOT": "<runtime>/ops",
+   "SANDBOX_ROOT": "<runtime>/sandbox",
+   "VAULT_ROOT": "<runtime>/vault-disabled"
+  }
+ },
+ "unrelated_variable_preset": {
+  "environment": {
+   "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT": "<runtime>/vector-store",
+   "MEMORIVE_DOCUMENT_PROCESSING_OCR_VIA_MODEL_GATEWAY_READY": "false",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_CHROMA_DIR": "<runtime>/vector-store/chroma-sandbox-v2",
+   "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT": "<runtime>/sandbox",
+   "MEMORIVE_DOCUMENT_PROCESSING_VAULT_ROOT": "<runtime>/vault-disabled",
+   "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR": "<runtime>/ops/evidence_review_judgment_debt",
+   "MEMORIVE_EVIDENCE_REVIEW_REPAIR_DIR": "<runtime>/ops/evidence_review_repairs",
+   "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR": "<runtime>/ops/evidence_review_reports",
+   "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR": "<runtime>/ops/knowledge_admission",
+   "MEMORIVE_MODEL_GATEWAY_CACHE_DIR": "<runtime>/ops/model_gateway_cache",
+   "MEMORIVE_OPS_ROOT": "<runtime>/ops",
+   "MEMORIVE_RETRIEVAL_RERANK_ENABLED": "false",
+   "MEMORIVE_RUNTIME_LOG_LOG_DIR": "<runtime>/ops/runtime_log",
+   "MEMORIVE_VAULT_ROOT": "<runtime>/vault-disabled"
+  },
+  "processing_config": {
+   "CHROMA_ROOT": "<runtime>/vector-store",
+   "OPS_ROOT": "<runtime>/ops",
+   "SANDBOX_ROOT": "<runtime>/sandbox",
+   "VAULT_ROOT": "<runtime>/vault-disabled"
+  }
+ }
+}

@@ -6,8 +6,8 @@
   "files": [
     {
       "path": ".gitattributes",
-      "sha256": "8b9c3028d6467ff3be7c793141927841d70f47f52d0590677438f488ca154992",
-      "bytes": 9
+      "sha256": "35d277f346e95a716f4eee958b1b3e8aba17c40052a8747f034b10874ceccd7d",
+      "bytes": 48
     },
     {
       "path": ".gitignore",
@@ -7861,8 +7861,8 @@
     },
     {
       "path": "memorive_desktop/tools/sync_manifests.py",
-      "sha256": "21950b181f8dcb089f874129f535d0fc5ed48155259726ef0c60b566f21aa80e",
-      "bytes": 11334
+      "sha256": "e8906445bf44ad97e85d75f4496dc56eff93f07a2aad753d3d7d555a3ba2450b",
+      "bytes": 11510
     },
     {
       "path": "memorive_desktop/tools/sync_page_hashes.py",
@@ -7871,8 +7871,8 @@
     },
     {
       "path": "memorive_desktop/tools/check_internal_codes.py",
-      "sha256": "901e2ead94856772d227d7d2b0853ed3dace2a9624cbf27430df2e38b4d140c6",
-      "bytes": 8040
+      "sha256": "cfffdb8a487ea5ab012ae743d9db4cbdd99483738a33cdb66f0dc5cc2c76703b",
+      "bytes": 8597
     },
     {
       "path": "memorive_desktop/tools/historical_names.json",

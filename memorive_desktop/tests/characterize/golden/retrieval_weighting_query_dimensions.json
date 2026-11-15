@@ -1,0 +1,178 @@
+{
+ "allocations_not_summing": {
+  "error": "ContractViolation",
+  "message": "query_dimension_profile allocations must sum deterministically"
+ },
+ "as_built": {
+  "result": {
+   "allocation_method": "frozen_keyword_soft_allocation_v1",
+   "allocations": [
+    {
+     "allocation": 0.4,
+     "evidence_ref": "fixture://query/1#conclusion",
+     "field_id": "author_conclusion",
+     "reason_code": "CONCLUSION_INTENT"
+    },
+    {
+     "allocation": 0.6,
+     "evidence_ref": "fixture://query/1#method",
+     "field_id": "method/{item}",
+     "reason_code": "METHOD_INTENT"
+    }
+   ],
+   "fallback_floor": 0.0,
+   "field_registry_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "6D6E5F1E875CE25382E5C805384D58B68EEBB2FD27230816170E7335AEEA2D15"
+   },
+   "missing_fields": [
+    "author_limitations_outlook/limitations/{item}/quote"
+   ],
+   "policy_version": "query-policy-v1",
+   "query_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "8C358351EAA9BB0067D034536CF3FB865D729204E7C2A41EE587CFABE4CF134F"
+   },
+   "reason_codes": [
+    "CONCLUSION_INTENT",
+    "METHOD_INTENT"
+   ]
+  }
+ },
+ "duplicate_field": {
+  "error": "ContractViolation",
+  "message": "query_dimension_profile.allocations has duplicate field_id"
+ },
+ "empty_policy_version": {
+  "error": "ContractViolation",
+  "message": "query_dimension_profile.policy_version must be a non-empty string"
+ },
+ "field_allocated_and_missing": {
+  "error": "ContractViolation",
+  "message": "one field cannot be both allocated and missing"
+ },
+ "floor_above_allocation": {
+  "error": "ContractViolation",
+  "message": "fallback_floor exceeds an observed allocation"
+ },
+ "negative_allocation": {
+  "error": "ContractViolation",
+  "message": "allocations[0].allocation must be >= 0.0"
+ },
+ "no_allocation_no_missing": {
+  "error": "ContractViolation",
+  "message": "empty allocation requires explicit missing_fields"
+ },
+ "no_allocation_with_missing": {
+  "result": {
+   "allocation_method": "frozen_keyword_soft_allocation_v1",
+   "allocations": [],
+   "fallback_floor": 0.0,
+   "field_registry_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "6D6E5F1E875CE25382E5C805384D58B68EEBB2FD27230816170E7335AEEA2D15"
+   },
+   "missing_fields": [
+    "author_limitations_outlook/limitations/{item}/quote"
+   ],
+   "policy_version": "query-policy-v1",
+   "query_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "8C358351EAA9BB0067D034536CF3FB865D729204E7C2A41EE587CFABE4CF134F"
+   },
+   "reason_codes": []
+  }
+ },
+ "other_registry_hash": {
+  "error": "ContractViolation"
+ },
+ "reason_code_omitted": {
+  "error": "ContractViolation",
+  "message": "query_dimension_profile.reason_codes omits an allocation reason"
+ },
+ "single_allocation": {
+  "result": {
+   "allocation_method": "frozen_keyword_soft_allocation_v1",
+   "allocations": [
+    {
+     "allocation": 1.0,
+     "evidence_ref": "fixture://query/1#conclusion",
+     "field_id": "author_conclusion",
+     "reason_code": "CONCLUSION_INTENT"
+    }
+   ],
+   "fallback_floor": 0.0,
+   "field_registry_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "6D6E5F1E875CE25382E5C805384D58B68EEBB2FD27230816170E7335AEEA2D15"
+   },
+   "missing_fields": [
+    "author_limitations_outlook/limitations/{item}/quote"
+   ],
+   "policy_version": "query-policy-v1",
+   "query_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "8C358351EAA9BB0067D034536CF3FB865D729204E7C2A41EE587CFABE4CF134F"
+   },
+   "reason_codes": [
+    "CONCLUSION_INTENT"
+   ]
+  }
+ },
+ "unknown_field": {
+  "error": "ContractViolation",
+  "message": "query_dimension_profile contains an unknown registry field"
+ },
+ "validate_as_built": {
+  "result": {
+   "allocation_method": "frozen_keyword_soft_allocation_v1",
+   "allocations": [
+    {
+     "allocation": 0.4,
+     "evidence_ref": "fixture://query/1#conclusion",
+     "field_id": "author_conclusion",
+     "reason_code": "CONCLUSION_INTENT"
+    },
+    {
+     "allocation": 0.6,
+     "evidence_ref": "fixture://query/1#method",
+     "field_id": "method/{item}",
+     "reason_code": "METHOD_INTENT"
+    }
+   ],
+   "fallback_floor": 0.0,
+   "field_registry_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "6D6E5F1E875CE25382E5C805384D58B68EEBB2FD27230816170E7335AEEA2D15"
+   },
+   "missing_fields": [
+    "author_limitations_outlook/limitations/{item}/quote"
+   ],
+   "policy_version": "query-policy-v1",
+   "query_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "8C358351EAA9BB0067D034536CF3FB865D729204E7C2A41EE587CFABE4CF134F"
+   },
+   "reason_codes": [
+    "CONCLUSION_INTENT",
+    "METHOD_INTENT"
+   ]
+  }
+ }
+}
