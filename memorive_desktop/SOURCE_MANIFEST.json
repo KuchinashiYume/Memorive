@@ -3632,13 +3632,13 @@
     },
     {
       "path": "source/memorive_desktop_service/service.py",
-      "sha256": "d2a3a17d9f834e9409c3f811f21db92413a4444689a3f0dee449dd5cb54ee66c",
-      "bytes": 15090
+      "sha256": "39869d46f94756fa0bf7dd11d01e0a6c5ff77bb0b021554feca65ae008f2c687",
+      "bytes": 15451
     },
     {
       "path": "source/memorive_desktop_service/service_main.py",
-      "sha256": "f3671e5418a04ff0ffa7f4239f9babd0029c32b6919440ac82c3c10af99a616d",
-      "bytes": 27665
+      "sha256": "acd48f76624051e171af5087ab6bf2dcd749d5184cfa4b97cdb5ef708f74fe39",
+      "bytes": 28444
     },
     {
       "path": "source/memorive_desktop_service/single_instance.py",
@@ -3649,6 +3649,11 @@
       "path": "source/memorive_desktop_service/sync_client.py",
       "sha256": "af0b7dc2f7cb03072dba3255b902baa0c91190c667d3da5e02409dd66d4d7026",
       "bytes": 4157
+    },
+    {
+      "path": "source/memorive_desktop_service/temporary_cache.py",
+      "sha256": "3c4f167606446350fc34f395a0d8d9043e9b8f5caec8e1021852228c76c4ad30",
+      "bytes": 2226
     },
     {
       "path": "source/memorive_desktop_service/watch.py",

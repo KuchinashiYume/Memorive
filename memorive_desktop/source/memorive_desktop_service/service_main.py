@@ -7,6 +7,7 @@ import hashlib
 import hmac
 from importlib.util import find_spec
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -500,6 +501,16 @@ async def run(
     store.root = service_root
     facade = ApplicationFacade(store)
     settings_controller = build_settings_controller(profile_root)
+    # Settings > log level: what this process writes to its log, the stderr file of this start.
+    # Normal keeps warnings and errors; detailed adds one line per request. Read once, at start.
+    logging.basicConfig(
+        level=(
+            logging.INFO
+            if settings_controller.get_state()["settings"]["preferences"]["log_level"] == "DETAILED"
+            else logging.WARNING
+        ),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
     inbox_controller = build_inbox_controller(
         profile_root,
         include_sample_track=os.environ.get("MEMORIVE_Desktop_TEST_FIXTURE_MODE") == "1",
@@ -602,16 +613,20 @@ async def run(
         else asyncio.create_task(weekly_external_refresh(settings_controller, stop))
     )
 
-    async def keep_logs_within_retention() -> None:
-        """Apply the log retention chosen in Settings at start and once a day."""
+    async def keep_logs_and_cache_within_settings() -> None:
+        """Apply the log retention and the maximum cache chosen in Settings, at start and once a day."""
         from runtime_log.retention import apply as apply_log_retention
+        from .temporary_cache import limit as limit_temporary_cache
 
         while not stop.is_set():
             try:
-                days = settings_controller.get_state()["settings"]["preferences"]["retention_days"]
+                preferences = settings_controller.get_state()["settings"]["preferences"]
+                await asyncio.to_thread(
+                    limit_temporary_cache, folders.path_for("INBOX_SOURCE"), preferences["cache_limit_mb"]
+                )
                 await asyncio.to_thread(
                     apply_log_retention,
-                    days,
+                    preferences["retention_days"],
                     log_path=core_worker.executor.ops_root / "runtime_log" / "log.txt",
                     launch_folder=endpoint_file.parent,
                     running_launch=endpoint_file.name.removesuffix(".endpoint.json"),
@@ -624,7 +639,7 @@ async def run(
             except asyncio.TimeoutError:
                 pass
 
-    retention_task = asyncio.create_task(keep_logs_within_retention())
+    retention_task = asyncio.create_task(keep_logs_and_cache_within_settings())
 
     def request_stop() -> None:
         stop.set()

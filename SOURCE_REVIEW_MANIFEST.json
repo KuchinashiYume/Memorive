@@ -5241,13 +5241,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/service.py",
-      "sha256": "d2a3a17d9f834e9409c3f811f21db92413a4444689a3f0dee449dd5cb54ee66c",
-      "bytes": 15090
+      "sha256": "39869d46f94756fa0bf7dd11d01e0a6c5ff77bb0b021554feca65ae008f2c687",
+      "bytes": 15451
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/service_main.py",
-      "sha256": "f3671e5418a04ff0ffa7f4239f9babd0029c32b6919440ac82c3c10af99a616d",
-      "bytes": 27665
+      "sha256": "acd48f76624051e171af5087ab6bf2dcd749d5184cfa4b97cdb5ef708f74fe39",
+      "bytes": 28444
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/single_instance.py",
@@ -5263,6 +5263,11 @@
       "path": "memorive_desktop/source/memorive_desktop_service/watch.py",
       "sha256": "259ad5e0a175a10c9d5c322386644f35d916da35d58832bd347d84ee6797bd68",
       "bytes": 3359
+    },
+    {
+      "path": "memorive_desktop/source/memorive_desktop_service/temporary_cache.py",
+      "sha256": "3c4f167606446350fc34f395a0d8d9043e9b8f5caec8e1021852228c76c4ad30",
+      "bytes": 2226
     },
     {
       "path": "memorive_desktop/source/memorive_folder_management/__init__.py",
@@ -7931,8 +7936,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "ea2088c1d373b23164f6149e65691f82cb32f1df8efe0f3fa3eee951ec42565e",
-      "bytes": 251799
+      "sha256": "105e6c98993f01848538ecf6c2203320508482019de986bba787928fd5e74a40",
+      "bytes": 251989
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",

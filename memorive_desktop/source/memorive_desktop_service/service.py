@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import ipaddress
+import logging
 import time
 from typing import Any, Mapping
 
@@ -30,6 +31,7 @@ from .protocol import (
 )
 
 
+_LOG = logging.getLogger(__name__)     # request lines are written only when the log level is detailed
 CANCEL_ACK_SCHEMA = "DesktopIPCCancelAck-v1"
 CANCELLABLE_METHODS = frozenset(
     {
@@ -200,6 +202,7 @@ class ApplicationServiceHost:
         request: Mapping[str, Any],
         send: Any,
     ) -> None:
+        started = time.monotonic()
         try:
             # Model execution owns its provider/user resource policy. An IPC
             # read deadline must not abort a healthy in-flight model response.
@@ -215,11 +218,13 @@ class ApplicationServiceHost:
                 timeout=timeout,
             )
             self._request_count += 1
+            _LOG.info("%s ok %.0f ms", request["method"], (time.monotonic() - started) * 1000)
             await send(success_response(request, result))
         except asyncio.CancelledError:
             raise
         except BaseException as exc:
             code, category, retryable, message = _safe_error(exc)
+            _LOG.info("%s failed %s %.0f ms", request["method"], code, (time.monotonic() - started) * 1000)
             await send(
                 error_response(
                     request["request_id"],
