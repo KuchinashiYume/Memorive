@@ -44,8 +44,5 @@ class CapabilityProjection:
             "route_or_profile_mutations": 0,
         }
 
-    def assert_unchanged(self, prior: Mapping[str, Any]) -> bool:
-        return self.snapshot() == dict(prior)
-
 
 __all__ = ["AXES", "CapabilityProjection"]

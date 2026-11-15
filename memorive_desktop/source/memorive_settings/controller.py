@@ -136,6 +136,18 @@ _RECEIPT_FLAG_FIELDS = (
 )
 
 
+def _blocked_preview(error: Exception) -> dict[str, Any]:
+    return {
+        "schema_version": "SettingsPreview-v1",
+        "status": "BLOCKED",
+        "errors": [str(error)],
+        "pending_risks": [],
+        "restart_required": False,
+        "network_requests": 0,
+        "credential_value_reads": 0,
+    }
+
+
 class SettingsController:
     def __init__(
         self,
@@ -542,9 +554,22 @@ class SettingsController:
         settings: Mapping[str, Any],
         confirmed_risk_ids: Sequence[str] | None = None,
     ) -> dict[str, Any]:
-        confirmed = set(confirmed_risk_ids or [])
+        """Check settings from the window without saving them."""
         try:
             accepted = validate_settings(settings)
+        except Exception as exc:
+            return _blocked_preview(exc)
+        return self._preview(accepted, confirmed_risk_ids)
+
+    def _preview(
+        self,
+        accepted: Mapping[str, Any],
+        confirmed_risk_ids: Sequence[str] | None,
+    ) -> dict[str, Any]:
+        """The preview of settings validate_settings has accepted: folders, model bindings and
+        the risks still to be confirmed."""
+        confirmed = set(confirmed_risk_ids or [])
+        try:
             directory = self.directory_policy.inspect(accepted)
             # Unchanged storage can be offline after moving a portable profile.
             # Saving a model is not authorization to access or repair that path.
@@ -567,15 +592,7 @@ class SettingsController:
             errors.extend(self._embedding_binding_errors(accepted))
             errors.extend(self._reranker_binding_errors(accepted))
         except Exception as exc:
-            return {
-                "schema_version": "SettingsPreview-v1",
-                "status": "BLOCKED",
-                "errors": [str(exc)],
-                "pending_risks": [],
-                "restart_required": False,
-                "network_requests": 0,
-                "credential_value_reads": 0,
-            }
+            return _blocked_preview(exc)
         return {
             "schema_version": "SettingsPreview-v1",
             "status": "PASS" if not errors and not pending else "BLOCKED",
@@ -603,13 +620,12 @@ class SettingsController:
         ):
             raise ValueError("CREDENTIAL_REFERENCES_MUTATION_REQUIRES_DEDICATED_FLOW")
         accepted = self._hydrate_frozen_workflow_scores(accepted)
-        preview = self.preview(accepted, confirmed_risk_ids)
+        preview = self._preview(accepted, confirmed_risk_ids)
         if preview["status"] != "PASS":
             raise ValueError(
                 "SETTINGS_PREVIEW_BLOCKED:"
                 + ",".join(preview["errors"] + preview["pending_risks"])
             )
-        capability_before = self.capabilities.snapshot()
         before_embedding_ref = next(
             row["profile_ref"]
             for row in current["settings"]["workflow"]["nodes"]
@@ -624,8 +640,6 @@ class SettingsController:
         protect_references(self,current['settings'],accepted)
         accepted = invalidate_changed_targets(current['settings'], accepted)
         saved = self.store.save(accepted, expected_revision=expected_revision)
-        if not self.capabilities.assert_unchanged(capability_before):
-            raise RuntimeError("CAPABILITY_PROJECTION_MUTATED_BY_SAVE")
         return self._mutation_receipt(
             "SAVE",
             saved,

@@ -1039,9 +1039,10 @@ def _validate_preferences(value: Any, mode: str) -> dict[str, Any]:
 
 
 def risk_ids(settings: Mapping[str, Any]) -> list[str]:
-    accepted = validate_settings(settings)
+    """What a person must confirm before saving settings validate_settings has accepted: a
+    retry count of 0-1 or above 5 for a step that calls a model."""
     risks = []
-    for node in accepted["workflow"]["nodes"]:
+    for node in settings["workflow"]["nodes"]:
         if node["node_id"] in NO_MODEL_IDS:
             continue
         retry = node["retry_count"]
