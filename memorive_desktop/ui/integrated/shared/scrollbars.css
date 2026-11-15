@@ -1,0 +1,22 @@
+/* memo-scrollbars-134 */
+/* Fixed track geometry: only the painted thumb changes near an edge. */
+[data-memo-scroll] { scrollbar-gutter:stable!important; }
+html body, html body * {
+  scrollbar-width:auto!important; scrollbar-color:auto!important;
+  --memo-scroll-thumb:rgba(119,109,94,.25); --memo-scroll-inset:4px;
+}
+[data-memo-scroll-active], [data-memo-scroll]:focus-visible {
+  --memo-scroll-thumb:rgba(119,109,94,.72); --memo-scroll-inset:2px;
+}
+::-webkit-scrollbar { width:12px; height:12px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background:transparent; }
+::-webkit-scrollbar-button { display:none; width:0; height:0; }
+::-webkit-scrollbar-thumb {
+  background:var(--memo-scroll-thumb); background-clip:padding-box;
+  border:var(--memo-scroll-inset) solid transparent; border-radius:12px; min-height:28px;
+}
+@media (forced-colors:active) {
+  ::-webkit-scrollbar-thumb { background-color:CanvasText; }
+  [data-memo-scroll-active]::-webkit-scrollbar-thumb { background-color:Highlight; }
+}
+

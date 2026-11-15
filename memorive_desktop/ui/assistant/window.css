@@ -1,0 +1,92 @@
+:root,
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+#memorive-desktop-assistant-preview {
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+}
+
+#memorive-desktop-assistant-preview > .viz-controls,
+#memorive-desktop-assistant-preview .memorive-desktop-glow,
+#memorive-desktop-assistant-preview .memorive-desktop-document,
+#memorive-desktop-assistant-preview .memorive-desktop-shortcut,
+#memorive-desktop-assistant-preview .memorive-desktop-state-strip,
+#memorive-desktop-assistant-preview .memorive-desktop-state,
+#memorive-desktop-assistant-preview .memorive-taskbar,
+#memorive-desktop-assistant-preview .memorive-pet-event {
+  display: none !important;
+}
+
+#memorive-desktop-assistant-preview .memorive-desktop {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#memorive-desktop-assistant-preview .memorive-desktop::before,
+#memorive-desktop-assistant-preview .memorive-desktop::after {
+  display: none !important;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-anchor {
+  left: auto;
+  top: auto;
+  right: 10px;
+  bottom: 10px;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-sprite {
+  opacity: .96;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-menu {
+  box-sizing: border-box;
+  right: -2px;
+  bottom: 82px;
+  width: 196px;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  overflow: visible;
+  transform-origin: bottom right;
+}
+
+#memorive-desktop-assistant-preview .memorive-menu-title {
+  padding: 3px 7px 5px;
+  line-height: 1.25;
+}
+
+#memorive-desktop-assistant-preview .memorive-pet-menu button {
+  min-height: 29px;
+  padding: 4px 7px;
+}
+
+#memorive-desktop-assistant-preview .memorive-menu-separator {
+  margin: 3px;
+}
+
+#memorive-desktop-assistant-preview[data-reduced-motion="true"] *,
+#memorive-desktop-assistant-preview[data-reduced-motion="true"] *::before,
+#memorive-desktop-assistant-preview[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+#memorive-pet-menu [data-memorive-menu="codex"],
+#memorive-pet-menu [data-memorive-menu="claude-code"],
+#memorive-pet-menu [data-memorive-menu="cc-switch"] {
+  display: none !important;
+}

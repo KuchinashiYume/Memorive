@@ -9,12 +9,12 @@ New package checks are recorded in the release candidate evidence and delivery r
 Run these from the repository root. Each one prints what is wrong and how to fix it.
 
 ```powershell
-python .\memorive_desktop\tools\sync_page_hashes.py --check
+python .\memorive_desktop\tools\build_pages.py --check
 python .\memorive_desktop\tools\sync_manifests.py --check
 python .\memorive_desktop\tools\check_internal_codes.py
 ```
 
-The first two confirm that the script hashes in the UI pages and the file hashes in the manifests match the files. The build stops when they do not.
+The first two confirm that the UI pages are what their sources under `ui/` generate, script hashes included, and that the file hashes in the manifests match the files. The build stops when they do not.
 
 The third enforces a rule: a release carries no internal development codes. Phase, task and module numbers, build, candidate and run ids, feature codenames and the working name of the project mean nothing to a reader and get in the way of anyone who continues the work. The check reads the name and the text of every published file.
 

@@ -1,0 +1,229 @@
+/* desktop-accounting-css-start */
+.desktop-accounting-panel {
+  --desktop-accounting-bg: #F3F0EA;
+  --desktop-accounting-surface: #FBF9F5;
+  --desktop-accounting-surface-strong: #FFFDF9;
+  --desktop-accounting-selected: #EEE8DE;
+  --desktop-accounting-text: #2A2723;
+  --desktop-accounting-muted: #746D64;
+  --desktop-accounting-border: #DDD6CB;
+  --desktop-accounting-border-strong: #B9B0A4;
+  --desktop-accounting-accent: #C8704F;
+  --desktop-accounting-blue: #557C9E;
+  --desktop-accounting-green: #4E7E65;
+  --desktop-accounting-amber: #B58732;
+  --desktop-accounting-danger: #A54B3D;
+  display: grid;
+  grid-template-rows: 44px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  color: var(--desktop-accounting-text);
+  background: var(--desktop-accounting-bg);
+  border-top: 1px solid var(--desktop-accounting-border-strong);
+  container: desktop-accounting / size;
+  font-family: "Times New Roman", "SimSun", "宋体", "Yu Mincho", serif;
+}
+
+/* The drawer overlays the workspace; the inspector remains above it. */
+.desktop-page-root .desktop-workspace {
+  grid-template-rows:minmax(0,1fr) 0!important;
+  padding-bottom:0!important;
+  isolation:isolate;
+}
+.desktop-page-root .desktop-bottom-panel.desktop-accounting-panel {
+  position:absolute;left:var(--desktop-live-left);right:var(--desktop-live-right);bottom:0;
+  grid-column:1 / -1!important;grid-row:1 / -1!important;height:var(--desktop-bottom-size);
+  padding:0!important;
+  z-index:10;box-shadow:0 -5px 18px #2a272312;
+}
+.desktop-page-root .desktop-right-panel {position:relative;z-index:20;}
+.desktop-page-root [id="desktop-resize-right"] {z-index:21;}
+.desktop-page-root [id="desktop-resize-bottom"] {z-index:11;}
+
+/* The reviewed panel owns its internal spacing; host drawer padding would
+   shrink the 346 px height contract and double-pad the toolbar/chart. */
+#desktop-bottom-panel.desktop-accounting-panel { padding: 0; }
+
+.desktop-accounting-panel[aria-hidden="true"] { display: none; }
+.desktop-accounting-panel * { box-sizing: border-box; }
+.desktop-accounting-panel button,
+.desktop-accounting-panel select { font: inherit; color: inherit; }
+.desktop-accounting-panel button { cursor: pointer; }
+.desktop-accounting-panel button:disabled { cursor: default; opacity: .52; }
+.desktop-accounting-panel svg { display: block; width: 18px; height: 18px; fill: none; }
+.desktop-accounting-panel svg:not([role="img"]) { stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.desktop-accounting-panel .desktop-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.desktop-accounting-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 10px;
+  background: var(--desktop-accounting-surface-strong);
+  border-bottom: 1px solid var(--desktop-accounting-border);
+}
+.desktop-accounting-title { display: inline-flex; align-items: center; gap: 7px; flex: none; font-weight: 500; white-space: nowrap; }
+.desktop-accounting-title svg { color: var(--desktop-accounting-accent); }
+.desktop-accounting-filter {
+  display: inline-grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 7px;
+  border: 1px solid var(--desktop-accounting-border);
+  border-radius: 9px;
+  background: var(--desktop-accounting-surface);
+}
+.desktop-accounting-filter svg { color: var(--desktop-accounting-muted); }
+.desktop-accounting-filter select { min-width: 0; height: 28px; border: 0; outline: 0; background: transparent; }
+.desktop-accounting-scope-filter { width: 174px; }
+.desktop-accounting-model-filter { width: 244px; }
+.desktop-accounting-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--desktop-accounting-muted);
+}
+.desktop-accounting-icon-button:hover { border-color: var(--desktop-accounting-border); background: var(--desktop-accounting-selected); color: var(--desktop-accounting-text); }
+.desktop-accounting-icon-button[aria-busy="true"] svg { animation: desktop-accounting-spin .75s linear infinite; }
+.desktop-accounting-sync { margin-left: auto; color: var(--desktop-accounting-muted); font-size: 12px; white-space: nowrap; }
+
+.desktop-accounting-body {
+  display: grid;
+  grid-template-columns: minmax(218px, 3fr) minmax(0, 7fr);
+  gap: 9px;
+  min-width: 0;
+  min-height: 0;
+  padding: 9px 10px 10px;
+}
+.desktop-accounting-metrics {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+}
+.desktop-accounting-metric-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--desktop-accounting-border);
+  border-radius: 11px;
+  background: var(--desktop-accounting-surface-strong);
+}
+.desktop-accounting-metric-row::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: transparent; }
+.desktop-accounting-metric-row.is-active { background: var(--desktop-accounting-selected); border-color: var(--desktop-accounting-border-strong); }
+.desktop-accounting-metric-row.is-active::before { background: var(--desktop-accounting-accent); }
+.desktop-accounting-metric-row[data-metric-row="REQUESTS"].is-active::before { background: var(--desktop-accounting-blue); }
+.desktop-accounting-metric-row[data-metric-row="TOKENS"].is-active::before { background: var(--desktop-accounting-green); }
+.desktop-accounting-metric-leading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  border: 0;
+  border-right: 1px solid var(--desktop-accounting-border);
+  background: transparent;
+  color: var(--desktop-accounting-muted);
+  font-size: 11px;
+}
+.desktop-accounting-currency:hover { background: rgba(200, 112, 79, .08); color: var(--desktop-accounting-accent); }
+.desktop-accounting-currency svg { color: var(--desktop-accounting-accent); }
+.desktop-accounting-metric-row[data-metric-row="REQUESTS"] .desktop-accounting-metric-leading svg { color: var(--desktop-accounting-blue); }
+.desktop-accounting-metric-row[data-metric-row="TOKENS"] .desktop-accounting-metric-leading svg { color: var(--desktop-accounting-green); }
+.desktop-accounting-metric-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  gap: 1px 8px;
+  min-width: 0;
+  padding: 7px 10px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+}
+.desktop-accounting-metric-main:hover { background: rgba(42, 39, 35, .035); }
+.desktop-accounting-metric-label { grid-column: 1; color: var(--desktop-accounting-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desktop-accounting-metric-value { grid-column: 1; font-size: 23px; line-height: 1.05; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.desktop-accounting-metric-note { grid-column: 2; grid-row: 1 / span 2; align-self: center; max-width: 116px; color: var(--desktop-accounting-muted); font-size: 11px; line-height: 1.35; text-align: right; }
+
+.desktop-accounting-chart {
+  display: grid;
+  grid-template-rows: 26px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0 8px 4px;
+  border: 1px solid var(--desktop-accounting-border);
+  border-radius: 11px;
+  background: var(--desktop-accounting-surface);
+}
+.desktop-accounting-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.desktop-accounting-chart-heading { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+.desktop-accounting-chart-heading svg { width: 15px; height: 15px; color: var(--desktop-accounting-accent); }
+.desktop-accounting-chart-heading small { color: var(--desktop-accounting-muted); font-size: 11px; }
+.desktop-accounting-legend { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; overflow: hidden; color: var(--desktop-accounting-muted); font-size: 11px; white-space: nowrap; }
+.desktop-accounting-legend-item { display: inline-flex; align-items: center; gap: 4px; }
+.desktop-accounting-legend-swatch { width: 7px; height: 7px; border-radius: 2px; flex: none; }
+.desktop-accounting-plot { position: relative; min-width: 0; min-height: 0; }
+.desktop-accounting-plot > svg { width: 100%; height: 100%; overflow: visible; }
+.desktop-accounting-grid-line { stroke: var(--desktop-accounting-border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.desktop-accounting-axis-label { fill: var(--desktop-accounting-muted); font-size: 10px; font-family: inherit; }
+.desktop-accounting-bar { shape-rendering: geometricPrecision; }
+.desktop-accounting-hit { fill: transparent; pointer-events: all; }
+.desktop-accounting-tooltip { position: absolute; z-index: 4; max-width: 320px; padding: 7px 9px; border: 1px solid var(--desktop-accounting-border-strong); border-radius: 8px; background: var(--desktop-accounting-surface-strong); color: var(--desktop-accounting-text); box-shadow: 0 8px 22px rgba(42, 39, 35, .14); font-size: 11px; line-height: 1.45; pointer-events: none; white-space: pre-line; }
+.desktop-accounting-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--desktop-accounting-muted); font-size: 12px; }
+.desktop-accounting-empty[hidden] { display: none; }
+
+@keyframes desktop-accounting-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .desktop-accounting-icon-button[aria-busy="true"] svg { animation: none; } }
+@container desktop-accounting (max-width: 920px) {
+  .desktop-accounting-metric-row { grid-template-columns: 44px minmax(0, 1fr); }
+  .desktop-accounting-metric-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; align-content: center; padding: 5px 8px; }
+  .desktop-accounting-metric-label { grid-column: 1; grid-row: 1; }
+  .desktop-accounting-metric-value { grid-column: 1; grid-row: 2; }
+  .desktop-accounting-metric-note { grid-column: 1; grid-row: 3; align-self: auto; max-width: none; font-size: 10px; line-height: 1.2; text-align: left; white-space: normal; }
+}
+@container desktop-accounting (max-width: 790px) {
+  .desktop-accounting-model-filter { width: min(210px, 28vw); }
+  .desktop-accounting-scope-filter { width: 156px; }
+  .desktop-accounting-sync { display: none; }
+  .desktop-accounting-metric-main { grid-template-columns: 1fr; }
+  .desktop-accounting-metric-note { display: none; }
+}
+@container desktop-accounting (max-width: 640px) {
+  .desktop-accounting-title { display: none; }
+  .desktop-accounting-scope-filter { width: 148px; }
+  .desktop-accounting-model-filter { flex: 1; width: auto; }
+  .desktop-accounting-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 76px minmax(0, 1fr); }
+  .desktop-accounting-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
+  .desktop-accounting-metric-row { grid-template-columns: 38px minmax(0, 1fr); }
+  .desktop-accounting-metric-value { font-size: 17px; }
+  .desktop-accounting-metric-main { padding: 6px; }
+}
+@container desktop-accounting (max-height: 270px) {
+  .desktop-accounting-panel { grid-template-rows: 40px minmax(0, 1fr); }
+  .desktop-accounting-toolbar { padding-block: 3px; }
+  .desktop-accounting-body { padding-block: 6px; }
+  .desktop-accounting-metric-note { display: none; }
+  .desktop-accounting-metric-main { grid-template-columns: 1fr; padding-block: 4px; }
+  .desktop-accounting-metric-value { font-size: 18px; }
+}
+
+/* desktop-accounting-css-end */

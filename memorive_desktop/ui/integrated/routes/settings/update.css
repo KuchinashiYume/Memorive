@@ -1,0 +1,4 @@
+#desktop-settings-preview [data-panel="update"] [hidden]{display:none!important}
+#desktop-settings-preview [data-panel="update"] details.desktop-settings-control-row{display:block}
+#desktop-settings-preview [data-panel="update"] [data-update-diagnostics]{white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:0}
+#desktop-settings-preview [data-panel="update"] [data-update-progress]{width:100%}

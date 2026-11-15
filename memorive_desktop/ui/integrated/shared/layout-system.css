@@ -1,0 +1,111 @@
+/* desktop-layout-system */
+/* Shared page rhythm. Existing fonts, artwork, shell and card layouts are retained. */
+.desktop-route-surface {
+  --memo-page-gutter:16px;
+  --memo-page-inset:12px;
+  --memo-list-gap:8px;
+}
+.desktop-page-root :is(.page-shell,.lb-content,.memo-page) {
+  font-size:var(--desktop-ui-body,14px);
+  line-height:1.45;
+}
+:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-partchat-preview) .desktop-central .page-header {
+  /* Supersede the preserved bundle's older important header font guard. */
+  padding:10px 24px!important;
+  min-height:76px;
+  box-sizing:border-box;
+  align-items:center;
+}
+:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-partchat-preview) .desktop-central .page-header h2 {margin:0;line-height:1.2;}
+#desktop-inbox-preview .desktop-inbox-body,
+#desktop-messages-preview .desktop-messages-body,
+#desktop-library-preview .desktop-library-body,
+#desktop-worklog-preview .desktop-worklog-body,
+#desktop-tasks-preview .desktop-tasks-list,
+#desktop-sessions-preview .desktop-sessions-stage,
+#desktop-partleaderboard-preview .lb-page-body {
+  padding:var(--memo-page-inset) var(--memo-page-gutter);
+}
+#desktop-sessions-preview .desktop-sessions-listpane {border:0;background:transparent;border-radius:0;}
+#desktop-sessions-preview .desktop-sessions-list {padding:0;}
+.desktop-page-root :is(.desktop-inbox-list,.desktop-tasks-list,.desktop-messages-list,.desktop-sessions-list,.desktop-library-list,.desktop-worklog-list) {gap:var(--memo-list-gap);}
+:is(#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview) .desktop-central :is(.desktop-inbox-card,.desktop-tasks-task,.desktop-messages-card,.desktop-sessions-card,.desktop-library-card,.desktop-worklog-card) {
+  min-height:76px;
+  line-height:1.45;
+  font-size:var(--desktop-ui-body,14px);
+}
+:is(#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview) .desktop-central :is(.desktop-inbox-card,.desktop-tasks-task,.desktop-messages-copy,.desktop-sessions-card,.desktop-library-card,.desktop-worklog-card) strong {
+  font-size:calc(var(--desktop-ui-body,14px) * 1.0714285714);
+  line-height:1.4;
+  font-weight:400;
+}
+:is(#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview) .desktop-central :is(.desktop-inbox-card,.desktop-tasks-task,.desktop-messages-copy,.desktop-sessions-card,.desktop-library-card,.desktop-worklog-card) small {
+  margin-top:4px;
+  font-size:var(--desktop-ui-helper,12px);
+  line-height:1.4;
+}
+#desktop-worklog-preview .desktop-worklog-mark > svg {width:18px;height:18px;}
+#memo-chat-page .memo-conversations {left:var(--memo-page-gutter);}
+#memo-chat-page .memo-chat {margin-inline-start:calc(var(--memo-history-width) + var(--memo-page-gutter) * 2);}
+#memo-chat-page .memo-layout[data-history=false] .memo-chat {margin-inline-start:0;}
+#desktop-settings-preview :is(.memo-settings,.memo-weights-panel) {line-height:1.45;}
+#desktop-settings-preview :is(.memo-field,.memo-settings-field) {gap:8px;margin-block:12px;}
+#desktop-settings-preview .desktop-settings-workarea:not(.has-node) .desktop-settings-categories {
+  padding:var(--memo-page-inset) var(--memo-page-gutter);gap:var(--memo-list-gap);
+}
+#desktop-settings-preview .desktop-settings-category-copy strong {font-size:15px;line-height:1.4;}
+#desktop-partleaderboard-preview .lb-heading {min-height:76px;padding:10px 24px!important;box-sizing:border-box;align-items:center;}
+
+/* Keep the existing summary/chart split; align typography within each cell. */
+.desktop-accounting-panel .desktop-accounting-metric-main {gap:4px 10px;padding:10px 12px;}
+.desktop-accounting-panel .desktop-accounting-metric-label {font-size:12px;line-height:1.4;}
+.desktop-accounting-panel .desktop-accounting-metric-value {font-size:20px;line-height:1.2;}
+.desktop-accounting-panel .desktop-accounting-metric-note {font-size:12px;line-height:1.5;max-width:none;font-variant-numeric:tabular-nums;}
+/* Dynamic children need an unscaled baseline even when the previous note
+   already received the user's font scale before a projection refresh. */
+.desktop-accounting-metric-note > span {display:block;white-space:nowrap;font-size:12px;}
+.desktop-accounting-legend-wrap {position:relative;display:inline-flex;flex:none;}
+.desktop-accounting-panel .desktop-accounting-legend-button {
+  display:grid;place-items:center;width:26px;height:24px;padding:3px;
+  color:var(--desktop-accounting-muted);border:0;border-radius:6px;background:transparent;
+}
+.desktop-accounting-legend-button:hover,
+.desktop-accounting-legend-button[aria-expanded="true"] {background:var(--desktop-accounting-selected);}
+.desktop-accounting-panel .desktop-accounting-legend {
+  position:absolute;z-index:5;top:calc(100% + 6px);right:0;
+  display:grid;justify-content:stretch;align-content:start;gap:10px;
+  width:min(340px,60vw);max-height:min(210px,35vh);overflow:auto;
+  padding:12px;border:1px solid var(--desktop-accounting-border);border-radius:10px;
+  box-shadow:0 6px 18px #2a272318;background:var(--desktop-accounting-surface-strong);
+  font-size:12px;line-height:1.4;white-space:normal;
+}
+.desktop-accounting-panel .desktop-accounting-legend[hidden] {display:none;}
+.desktop-accounting-panel .desktop-accounting-legend-item {display:flex;align-items:baseline;gap:8px;min-width:0;}
+.desktop-accounting-legend-item > span:last-child {overflow-wrap:anywhere;}
+.desktop-accounting-legend-swatch {min-width:7px;}
+
+/* application-service: retain page layout and assets; align the newly reported rows. */
+#desktop-sessions-preview .desktop-sessions-setup-required {margin:0 0 var(--memo-list-gap);}
+#desktop-messages-preview .desktop-central .desktop-messages-card {min-height:64px;padding:8px 11px;}
+#desktop-messages-preview .desktop-messages-card .desktop-messages-copy {padding:0 4px;}
+#desktop-messages-preview .desktop-messages-card .desktop-messages-copy small {
+  min-height:1.4em;line-height:1.4;white-space:nowrap;display:block;
+  overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:1;
+}
+#desktop-tasks-preview #tasks-retry-row {
+  display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;
+  align-items:center;column-gap:8px;row-gap:6px;
+}
+#desktop-tasks-preview #tasks-retry-row[hidden] {display:none;}
+#desktop-tasks-preview #tasks-retry-row > span:first-child,
+#desktop-tasks-preview #tasks-retry-row .desktop-tasks-retry-wrap {display:contents;}
+#desktop-tasks-preview #tasks-retry-row > span:first-child strong {white-space:nowrap;line-height:1.4;}
+#desktop-tasks-preview #tasks-retry-copy {margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4;}
+#desktop-tasks-preview #tasks-retry-row .desktop-tasks-retry-stepper {grid-template-columns:28px 20px 28px;gap:4px;}
+#desktop-tasks-preview #tasks-retry-row .desktop-tasks-retry-stepper .soft-button {width:28px;min-width:28px;height:28px;padding:2px;}
+#desktop-tasks-preview #tasks-retry-summary {grid-column:1/-1;justify-self:end;line-height:1.4;}
+
+#desktop-sessions-preview .desktop-sessions-list {gap:var(--memo-list-gap);}
+
+.desktop-settings-browser-choice{display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap}.desktop-settings-browser-choice .select{width:240px;max-width:100%}
+

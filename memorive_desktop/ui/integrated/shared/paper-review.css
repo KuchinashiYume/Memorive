@@ -1,0 +1,43 @@
+#desktop-library-preview .desktop-library-files button.paper-review-report-risk {display:inline-flex;align-items:center;gap:6px;}
+.paper-review-report-risk .status-dot {display:inline-block;vertical-align:middle;}
+#desktop-settings-preview #settings-flow-list [data-step="human"]::before,#desktop-settings-preview #settings-flow-list [data-step="human"]::after {display:none!important;content:none!important;}
+#desktop-tasks-preview .paper-review-logic-task {padding:0;margin:32px 0 16px;width:100%;box-sizing:border-box;border:0;background:none;}
+#desktop-tasks-preview .paper-review-logic-node {grid-template-columns:38px minmax(0,1fr);}
+#desktop-tasks-preview .paper-review-logic-node svg {width:18px;height:18px;}
+#desktop-tasks-preview .desktop-tasks-stage.has-inspector .desktop-tasks-flow {min-width:400px;box-sizing:border-box;}
+#desktop-tasks-preview .paper-review-task-controls .toolbar-group {display:flex;flex-wrap:wrap;gap:8px;}
+#desktop-library-preview .desktop-library-list {container-type:inline-size;container-name:paper-review-library-list;min-width:0;grid-template-columns:minmax(0,1fr);}
+@container paper-review-library-list (max-width:520px) {
+  #desktop-library-preview .desktop-library-card {grid-template-columns:minmax(0,1fr) max-content 14px;}
+  #desktop-library-preview .desktop-library-card-copy {grid-column:1 / 3;grid-row:1;}
+  #desktop-library-preview .desktop-library-card time {grid-column:1;grid-row:2;text-align:left;}
+  #desktop-library-preview .desktop-library-card .badge {grid-column:2;grid-row:2;}
+  #desktop-library-preview .desktop-library-card > span:last-child {grid-column:3;grid-row:1 / 3;}
+}
+@container paper-review-library-list (max-width:340px) {
+  #desktop-library-preview .desktop-library-card time {grid-column:1 / 3;}
+  #desktop-library-preview .desktop-library-card .badge {grid-column:1 / 3;grid-row:3;justify-self:start;}
+}
+.paper-review-panel {padding-top:16px;border-top:1px solid var(--border-default);min-width:0;max-width:100%;overflow-wrap:anywhere;scroll-margin-top:90px;}
+#desktop-tasks-preview .desktop-tasks-node-status {min-width:0;max-width:140px;white-space:normal;flex-wrap:wrap;justify-content:flex-end;}
+#desktop-tasks-preview .desktop-tasks-node-status .paper-review-pause-hint {order:-1;max-width:112px;overflow-wrap:anywhere;text-align:right;}
+#desktop-inbox-preview .desktop-inbox-card:has(.has-pause-hint) {grid-template-columns:44px minmax(0,1fr) minmax(128px,38%) 44px;}
+#desktop-inbox-preview .desktop-inbox-state.has-pause-hint {display:grid;grid-template-columns:minmax(0,1fr) 12px max-content;min-width:0;white-space:normal;}
+#desktop-inbox-preview .desktop-inbox-state.has-pause-hint::before {grid-column:2;grid-row:1;}
+#desktop-inbox-preview .desktop-inbox-state.has-pause-hint .paper-review-pause-hint {grid-column:1;grid-row:1;text-align:right;overflow-wrap:anywhere;}
+#desktop-inbox-preview .desktop-inbox-state.has-pause-hint > span:last-child {grid-column:3;grid-row:1;overflow-wrap:anywhere;}
+#desktop-tasks-preview .paper-review-logic-task p {margin:8px 0;font-size:12px;}
+:is(.paper-review-dialog,.paper-review-panel) {box-sizing:border-box;font:inherit;line-height:1.65;background:var(--surface-primary,#fffdfa);color:var(--text-primary,#322f2a);}
+:is(.paper-review-dialog,.paper-review-panel)>.toolbar-group {display:flex;align-items:center;justify-content:space-between;gap:16px;}
+:is(.paper-review-dialog,.paper-review-panel) h4 {margin:18px 0 8px;}
+:is(.paper-review-dialog,.paper-review-panel) select {max-width:100%;background:var(--surface-primary,#fffdfa);color:inherit;}
+:is(.paper-review-dialog,.paper-review-panel) details {margin:12px 0;}
+:is(.paper-review-dialog,.paper-review-panel) summary {cursor:pointer;}
+:is(.paper-review-dialog,.paper-review-panel) blockquote {margin:8px 0;padding:8px 12px;border-left:2px solid var(--border-subtle,#d8d2c7);background:var(--surface-secondary,#f1eee7);}
+:is(.paper-review-dialog,.paper-review-panel) .paper-review-facts {display:grid;grid-template-columns:auto 1fr;gap:5px 20px;}
+:is(.paper-review-dialog,.paper-review-panel) .paper-review-facts dd {margin:0;}
+:is(.paper-review-dialog,.paper-review-panel) fieldset {border:1px solid var(--border-subtle,#d8d2c7);border-radius:8px;margin:14px 0;padding:12px;min-width:0;}
+:is(.paper-review-dialog,.paper-review-panel) .paper-review-field {display:grid;gap:6px;margin:10px 0;}
+:is(.paper-review-dialog,.paper-review-panel) input,:is(.paper-review-dialog,.paper-review-panel) textarea {box-sizing:border-box;width:100%;border-radius:7px;padding:8px;font:inherit;}
+:is(.paper-review-dialog,.paper-review-panel) form>button {margin:10px 8px 0 0;}
+:is(.paper-review-dialog,.paper-review-panel) .paper-review-source {white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;}

@@ -7,6 +7,8 @@ from pathlib import Path
 from hashlib import sha256
 import argparse, json, os, shutil, subprocess, sys, importlib.metadata as md, re, base64, ast, ssl
 from html.parser import HTMLParser
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+import build_pages
 
 DESKTOP=Path(__file__).resolve().parents[1]
 REPO=DESKTOP.parent
@@ -79,7 +81,7 @@ def check_inline_script_policy(path):
         if 'src' in script['attrs'] or script['attrs'].get('type','').lower() not in ('','text/javascript','application/javascript','module'):continue
         if not script['text'].strip():continue
         token="'sha256-"+base64.b64encode(sha256(script['text'].encode()).digest()).decode()+"'"
-        if any(token not in sources for sources in allowed):raise ValueError('UI_CSP_SCRIPT_HASH_MISMATCH:'+path.name+':'+str(index)+' (after editing a page script run memorive_desktop/tools/sync_page_hashes.py)')
+        if any(token not in sources for sources in allowed):raise ValueError('UI_CSP_SCRIPT_HASH_MISMATCH:'+path.name+':'+str(index)+' (after editing files under memorive_desktop/ui run memorive_desktop/tools/build_pages.py)')
         checked+=1
     return {'path':path.name,'inline_scripts':checked,'status':'PASS'}
 
@@ -109,6 +111,8 @@ def main():
     source_manifest=json.loads(a.source_manifest.read_text('utf8'))
     check_source_identity(source_manifest, release, a.candidate_id)
     roots_check=check_public_roots(DESKTOP/'source')
+    stale_pages=build_pages.stale_pages()
+    if stale_pages:raise ValueError('UI_PAGE_NOT_GENERATED:'+','.join(stale_pages)+' (after editing files under memorive_desktop/ui run memorive_desktop/tools/build_pages.py)')
     normal=lambda s:re.sub(r'[-_.]+','-',s).lower()
     installed={normal(d.metadata['Name']):d.version for d in md.distributions() if d.metadata['Name']}
     required={}

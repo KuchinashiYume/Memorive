@@ -49,9 +49,9 @@ def main():
     files=('INSTALL.md','SECURITY.md','RELEASE_CHECKS.md','LICENSE','LICENSING.md','BUILDING.md','PUBLISHING.md','RELEASE_PREPARATION.md','RELEASE_NOTES.md','LICENSE_PROPOSAL.md','ASSET_NOTICE.md',
            'ARTWORK_RIGHTS.md','THIRD_PARTY_NOTICES.md','GITHUB_FAN_PROJECTS.md','README_PUBLIC.md',
            'README_PUBLIC.en.md','README_PUBLIC.ja.md','requirements-build-baseline.lock','requirements-build-agpl-candidate.lock',
-           'tools/build_memorive.py','tools/collect_build_inventory.py','tools/collect_release_sources.py','tools/export_source_candidate.py','tools/build_update_helper.py','tools/build_update_packages.py','tools/compile_installer_locales.py','tools/package_notices.py','tools/release_signer.cs','tools/import_local_settings.py')
+           'tools/build_memorive.py','tools/collect_build_inventory.py','tools/collect_release_sources.py','tools/export_source_candidate.py','tools/build_update_helper.py','tools/build_update_packages.py','tools/compile_installer_locales.py','tools/package_notices.py','tools/release_signer.cs','tools/import_local_settings.py','tools/build_pages.py')
     for name in files:copy(DESKTOP/name,Path('memorive_desktop')/name)
-    for folder in ('installer/windows','release_materials'):
+    for folder in ('installer/windows','release_materials','ui'):
         for p in sorted((DESKTOP/folder).rglob('*')):
             if not p.is_file():continue
             if '__pycache__' in p.parts or p.suffix in ('.pyc','.pyo') or (folder=='release_materials' and p.suffix=='.py'):

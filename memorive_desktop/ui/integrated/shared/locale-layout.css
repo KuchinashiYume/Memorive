@@ -1,0 +1,47 @@
+/* Preserve the adopted type scale; let enlarged localized labels wrap. */
+.desktop-page-root .desktop-nav-list { grid-auto-rows:max-content!important; }
+.desktop-page-root .desktop-nav-item { height:auto!important; min-height:38px; }
+.desktop-page-root .desktop-nav-item > span:not(.desktop-status-dot) { white-space:normal!important; overflow:visible!important; text-overflow:clip!important; overflow-wrap:normal; line-height:1.35; }
+#desktop-settings-preview .desktop-settings-category { height:auto; min-height:60px; padding-top:10px; padding-bottom:10px; }
+#desktop-settings-preview .desktop-settings-category > span { min-width:0; overflow-wrap:anywhere; }
+#desktop-partleaderboard-preview .lb-table { min-width:calc(880px * var(--desktop-font-factor,1)); }
+#desktop-partleaderboard-preview[data-lb-compact="true"] .lb-table { min-width:calc(660px * var(--desktop-font-factor,1)); }
+#desktop-partleaderboard-preview .lb-th-btn span, #desktop-partleaderboard-preview .lb-table td[data-col="region"] { overflow-wrap:normal; word-break:normal; }
+#desktop-partleaderboard-preview .lb-price-pair>span:not(.lb-price-divider) { min-width:0; white-space:normal; overflow-wrap:normal; }
+
+
+/* reuse API draft cards for Agent and connection editors. */
+#desktop-settings-preview #memo-settings-page .memo-inline-editor,#memo-handoff-inline { padding:18px; display:grid; gap:18px; min-width:0; }
+#desktop-settings-preview #memo-settings-page .memo-inline-editor[hidden],#memo-handoff-inline[hidden] { display:none!important; }
+.memo-inline-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; min-width:0; }
+.memo-inline-heading strong { font-size:inherit; font-weight:500; }
+.memo-inline-editor footer.memo-actions { justify-content:flex-end; margin:0; }
+#desktop-settings-preview #memo-settings-page .memo-path-control { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:8px; }
+#desktop-settings-preview #memo-settings-page .memo-path-control>span { grid-column:1/-1; }
+#memo-connections-open { display:flex!important; align-items:center; justify-content:flex-start!important; gap:10px; }
+#memo-connections-help { display:inline-flex; margin-left:auto; }
+#memo-connections-help .desktop-setting-help { flex-shrink:0; }
+#desktop-settings-preview #memo-settings-page .memo-connections-toolbar { display:flex; justify-content:flex-end; }
+#desktop-settings-preview #memo-settings-page .memo-connection-sidebar[hidden] { display:none!important; }
+#desktop-settings-preview #memo-settings-page .memo-connection-tabs button { display:inline-flex; align-items:center; gap:8px; white-space:normal; }
+#desktop-settings-preview #memo-settings-page .memo-tab-count { color:var(--text-secondary); font-variant-numeric:tabular-nums; font-size:.85em; }
+#desktop-settings-preview #memo-settings-page .memo-connection-empty { display:flex; align-items:center; justify-content:center; min-height:150px; text-align:center; }
+#desktop-settings-preview #memo-settings-page .memo-connection-path,#desktop-settings-preview #memo-settings-page .memo-connection-row { overflow-wrap:anywhere; }
+#desktop-settings-preview #memo-settings-page .memo-connection-row h4 { font-size:var(--desktop-settings-font-body); }
+#desktop-settings-preview #memo-settings-page .memo-inline-editor .memo-status:empty,#memo-connection-status:empty { display:none; }
+#memo-handoff-inline { margin:12px 0; max-height:55vh; overflow:auto; flex-shrink:0; }
+
+/* custom Agent uses the existing disclosure and the page save participant. */
+#desktop-settings-preview #memo-settings-page #memo-agent-editor[hidden],#desktop-settings-preview #memo-settings-page #memo-built-in-models[hidden] { display:none!important; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor > .memo-settings-disclosure-body { display:grid; gap:14px; padding:0 18px 18px; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor .field-label { display:grid; gap:6px; margin:0; padding:0; border:0; background:none; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor .memo-settings-context-fields { gap:14px; padding:0; border:0; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor .desktop-settings-model-setting { padding:0; border:0; background:none; box-shadow:none; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor #memo-desktop-fields { display:grid; gap:14px; padding:0; margin:0; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor #memo-desktop-fields[hidden] { display:none!important; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor .desktop-settings-form-group { margin:0; padding:0; border:0; background:none; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor summary { gap:10px; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor summary .desktop-settings-disclosure-icon { margin-left:auto; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor #memo-remove-agent { margin-left:auto; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor #memo-remove-agent:not([hidden]) + .desktop-settings-disclosure-icon { margin-left:0; }
+#desktop-settings-preview #memo-settings-page #memo-agent-editor #memo-custom-error { margin:0; }

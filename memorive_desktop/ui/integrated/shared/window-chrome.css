@@ -1,0 +1,126 @@
+/* desktop-window-css */
+/* Reuse the adopted node-panel tokens. Scope strictly to settings secondary panels. */
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) {
+  --desktop-setting-group-gap:16px;
+}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) .desktop-settings-form-stack {
+  gap:var(--desktop-setting-group-gap);
+}
+#desktop-settings-preview .desktop-settings-form-group {
+  display:grid;gap:14px;min-width:0;padding:14px 16px;border:1px solid var(--border-subtle);
+  border-radius:10px;background:var(--surface);
+}
+#desktop-settings-preview .desktop-settings-form-group > .field-label,
+#desktop-settings-preview .desktop-settings-form-group .desktop-settings-two > .field-label {
+  margin:0;padding:0;border:0;
+}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) :is(.desktop-settings-form-stack > .control-row,.desktop-settings-form-stack > .desktop-settings-control-row,.desktop-settings-form-stack > .switch-row,.desktop-settings-form-stack > .desktop-settings-link-row,.desktop-settings-assistant-link) {
+  padding:12px 16px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface);
+}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) .switch-row {gap:16px;}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) .switch-copy {min-width:0;flex:1;}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) .switch {flex-shrink:0;}
+#desktop-settings-preview .desktop-settings-model-profile-grid {padding:12px;gap:12px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:10px;}
+#desktop-settings-preview .desktop-settings-model-profile-grid :is(.field,.select) {font-family:inherit;}
+#desktop-settings-preview .desktop-settings-status-card .desktop-settings-text-action {min-width:max-content;}
+#desktop-settings-preview .desktop-settings-local-model-advanced {padding:12px 16px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface);}
+#desktop-settings-preview .desktop-settings-local-model-advanced[open] > summary {margin-bottom:14px;}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) .desktop-settings-refinement-section {border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface);}
+#desktop-settings-preview .desktop-settings-panel:not([data-panel="workflow"]) .desktop-settings-api-card > .desktop-settings-refinement-section {border:0;background:none;}
+#desktop-settings-preview .desktop-user-form {padding:15px;}
+#desktop-settings-preview .desktop-user-avatar-row {padding:16px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface);}
+#desktop-settings-preview .desktop-research-preferences {font-family:inherit;}
+#desktop-settings-preview .desktop-research-preferences > .switch-row {padding:12px 16px;margin:0 0 16px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface);}
+#desktop-settings-preview .desktop-research-preference-fields {gap:16px;}
+#desktop-settings-preview .desktop-research-preference-fields > .desktop-research-grid,
+#desktop-settings-preview .desktop-research-direction-list,
+#desktop-settings-preview .desktop-research-preferences .desktop-research-advanced {
+  box-sizing:border-box;min-width:0;margin:0;padding:14px 16px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface);
+}
+#desktop-settings-preview .desktop-research-preferences .desktop-research-advanced > summary {font:inherit;line-height:1.5;}
+#desktop-settings-preview .desktop-research-preferences .desktop-research-advanced[open] > summary {margin-bottom:16px;}
+#desktop-settings-preview .desktop-research-preferences .field-label {padding:0;border:0;}
+#desktop-settings-preview .desktop-research-preferences .desktop-research-advanced .desktop-research-advanced {margin:14px 0 0;padding:14px 0 0;border:0;border-top:1px solid var(--border-subtle);border-radius:0;background:transparent;}
+#desktop-settings-preview .desktop-research-direction .desktop-research-advanced {padding:12px 0 0;border:0;border-top:1px solid var(--border-subtle);border-radius:0;background:transparent;}
+#desktop-settings-preview .desktop-research-preferences .desktop-research-check {padding:10px 0;}
+#desktop-settings-preview .desktop-research-section-head {margin:0 0 12px;}
+#desktop-settings-preview .desktop-research-section-head h4 {margin:0;font:inherit;}
+#desktop-settings-preview .desktop-research-direction {margin:10px 0 0;background:var(--surface-raised);}
+#desktop-settings-preview .desktop-research-direction > summary {padding:12px 14px;}
+#desktop-settings-preview .desktop-research-direction > .desktop-research-preference-fields {padding:0 14px 14px;}
+#desktop-settings-preview .desktop-research-direction[open] > summary {margin-bottom:14px;}
+/* User identity stays separate from the project/assistant logo. */
+.desktop-reminder-scope-row > span {flex:1;min-width:0;}
+#desktop-settings-preview .desktop-reminder-scope-row > .desktop-settings-select-shell {width:250px;max-width:48%;flex:0 0 250px;}
+#desktop-settings-preview .desktop-reminder-scope-row .select {width:100%;}
+@container (max-width:460px) {#desktop-settings-preview .desktop-reminder-scope-row {flex-wrap:wrap;}#desktop-settings-preview .desktop-reminder-scope-row > .desktop-settings-select-shell {max-width:100%;}}
+[data-desktop-route] .desktop-navigation {display:flex!important;flex-direction:column;min-height:0;}
+[data-desktop-route] .desktop-navigation > .desktop-logo {flex-shrink:0;}
+[data-desktop-route] .desktop-navigation > .desktop-nav-list {flex:1;min-height:0;overflow:auto;align-content:start;}
+.desktop-nav-user {display:flex;align-items:center;gap:10px;min-height:60px;margin:12px 12px 14px;padding:10px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--desktop-text-primary,#302d26);font:inherit;text-align:left;cursor:pointer;flex:none;min-width:0;}
+.desktop-nav-user:hover {background:var(--desktop-surface-hover,#eae5db);border-color:var(--desktop-border-default,#dfd9cf);}
+.desktop-nav-user:focus-visible {outline:2px solid var(--desktop-accent,#955b3e);outline-offset:2px;}
+.desktop-nav-avatar {display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:50%;background:var(--desktop-surface-raised,#fffdf9);overflow:hidden;}
+.desktop-nav-avatar img {width:100%;height:100%;object-fit:cover;}
+.desktop-nav-avatar svg {width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.5;}
+.desktop-nav-avatar [hidden] {display:none;}
+.desktop-nav-username {font-family:"Times New Roman",serif;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.desktop-refinement-label {display:flex!important;align-items:center;gap:8px;min-width:0;width:100%;}
+.desktop-refinement-label > strong {display:block;min-width:0;}
+.desktop-refinement-label > .desktop-refinement-help {flex:0 0 auto;margin:0 0 0 auto;}
+.desktop-report-schedule {border:1px solid var(--border-subtle);border-radius:12px;background:var(--surface);padding:16px;min-width:0;}
+.desktop-report-schedule-head,.desktop-report-schedule-head > strong {display:flex;align-items:center;gap:8px;}
+.desktop-report-schedule-head {justify-content:space-between;padding-bottom:10px;}
+.desktop-report-schedule-head > small {color:var(--text-secondary);white-space:nowrap;}
+.desktop-report-schedule-row {display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:64px;border-top:1px solid var(--border-subtle);padding:10px 0;}
+.desktop-report-schedule-row:last-of-type {padding-bottom:0;}
+.desktop-report-schedule-controls {display:flex;align-items:center;gap:10px;min-width:0;}
+#desktop-settings-preview .desktop-report-schedule-controls > .desktop-settings-select-shell {width:148px;flex:0 0 148px;}
+.desktop-report-schedule-controls > input {flex:0 0 126px;}
+.desktop-report-schedule-row input.field {width:126px;min-width:0;font:inherit;}
+.desktop-report-schedule-row select.select {width:148px;min-width:0;font:inherit;}
+.desktop-report-month-picker {position:relative;min-width:148px;max-width:100%;}
+.desktop-report-month-picker > summary {display:flex;justify-content:space-between;align-items:center;gap:8px;list-style:none;cursor:pointer;font:inherit;}
+.desktop-report-month-picker > summary::-webkit-details-marker {display:none;}
+.desktop-report-month-picker svg {width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;}
+.desktop-report-calendar {position:absolute;z-index:20;right:0;top:calc(100% + 6px);display:grid;grid-template-columns:repeat(7,1fr);gap:4px;width:266px;padding:10px;background:var(--surface-main,#fffdf9);border:1px solid var(--border-subtle);border-radius:12px;box-shadow:0 4px 18px #0002;}
+.desktop-report-day {width:30px;height:30px;border:1px solid transparent;border-radius:7px;background:none;color:var(--text-primary);font:inherit;cursor:pointer;}
+.desktop-report-day[aria-pressed="true"] {background:var(--desktop-brand,#A2603F);color:white;}
+.desktop-report-day:hover,.desktop-report-day:focus-visible {border-color:var(--desktop-brand,#A2603F);}
+#settings-report-schedule-status:empty {display:none;}
+@container (max-width:480px) {.desktop-report-schedule-controls {gap:6px;}.desktop-report-schedule-row {flex-wrap:wrap;}.desktop-report-calendar {right:0;width:246px;}}
+
+/* Main window only. The assistant remains an independent native surface. */
+.desktop-window-controls {display:none;}
+.desktop-native-chrome .desktop-window-controls {display:flex;align-items:center;gap:2px;margin-left:6px;border:0;flex:none;}
+.desktop-native-chrome .desktop-global-bar .desktop-global-right {flex:none;}
+.desktop-native-chrome .desktop-global-bar .desktop-global-left {overflow:hidden;flex:1;}
+.desktop-native-chrome .desktop-global-bar .desktop-global-left > button {flex:none;}
+.desktop-native-chrome .desktop-window-control {display:grid;place-items:center;width:40px;height:36px;flex:none;border:0;border-radius:9px;padding:10px;background:transparent;color:var(--desktop-text-secondary,#797368);cursor:default;}
+.desktop-native-chrome .desktop-window-control:hover {background:var(--desktop-surface-subtle,#f0ede6);color:var(--desktop-text-primary,#302d26);}
+.desktop-native-chrome .desktop-window-control[data-window-action="close"]:hover {background:#f7e8e1;color:#a04732;}
+.desktop-window-control svg,.desktop-close-x svg {width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.desktop-window-control:focus-visible,.desktop-close-dialog button:focus-visible {outline:2px solid #9b6041;outline-offset:2px;}
+.desktop-close-dialog {box-sizing:border-box;width:max-content;min-width:380px;max-width:calc(100vw - 32px);margin:auto;padding:22px 24px;border:1px solid #dfd9cf;border-radius:18px;background:#fffdf9;color:#302d26;box-shadow:0 18px 64px #332e2826;font:16px/1.6 "Times New Roman","SimSun","Yu Mincho",serif;}
+.desktop-close-dialog::backdrop {background:#302c2429;}
+.desktop-close-header {display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 22px;}
+.desktop-close-header h2 {margin:0;font:inherit;font-size:21px;font-weight:500;}
+.desktop-close-x {display:grid;place-items:center;width:30px;height:30px;padding:5px;flex:none;border:0;border-radius:8px;background:transparent;color:#81796d;cursor:pointer;}
+.desktop-close-x:hover {background:#f0ede6;color:#302d26;}
+.desktop-close-notice {max-width:430px;margin:0 0 20px;color:#81715b;font-size:14px;}
+.desktop-close-notice[hidden],.desktop-close-dialog button[hidden] {display:none;}
+.desktop-close-actions,.desktop-close-choices {display:flex;align-items:center;gap:8px;}
+.desktop-close-actions {justify-content:space-between;gap:22px;}
+.desktop-close-button {padding:8px 15px;min-height:42px;white-space:nowrap;border:1px solid #dfd9cf;border-radius:11px;background:#fffdf9;color:inherit;font:inherit;cursor:pointer;}
+.desktop-close-button:hover {background:#f0ede6;}
+.desktop-close-button:disabled {opacity:.45;cursor:default;}
+.desktop-close-primary {background:#955b3e;border-color:#955b3e;color:#fffdf9;}
+.desktop-close-primary:hover {background:#834d32;}
+@media(max-width:550px) {
+  .desktop-close-dialog {min-width:0;width:calc(100vw - 32px);padding:18px;}
+  .desktop-close-actions {align-items:stretch;gap:10px;flex-direction:column-reverse;}
+  .desktop-close-choices {justify-content:flex-end;flex-wrap:wrap;}
+  .desktop-native-chrome .desktop-window-controls {gap:0;margin-left:0;}
+  .desktop-native-chrome .desktop-window-control {width:32px;}
+}
+

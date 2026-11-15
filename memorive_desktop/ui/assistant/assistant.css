@@ -1,0 +1,542 @@
+    #memorive-desktop-assistant-preview {
+      --memorive-pet-canvas: light-dark(rgb(234 241 237), rgb(24 34 36));
+      --memorive-pet-canvas-deep: light-dark(rgb(206 224 217), rgb(34 53 54));
+      --memorive-pet-surface: light-dark(rgb(255 253 249 / 96%), rgb(43 46 49 / 97%));
+      --memorive-pet-surface-solid: light-dark(rgb(255 253 249), rgb(43 46 49));
+      --memorive-pet-surface-hover: light-dark(rgb(244 240 232), rgb(57 61 64));
+      --memorive-pet-text: light-dark(rgb(42 39 35), rgb(241 239 235));
+      --memorive-pet-muted: light-dark(rgb(106 99 90), rgb(181 177 170));
+      --memorive-pet-border: light-dark(rgb(42 39 35 / 16%), rgb(255 255 255 / 16%));
+      --memorive-pet-shadow: light-dark(rgb(53 70 65 / 20%), rgb(0 0 0 / 42%));
+      --memorive-pet-blue: light-dark(rgb(73 126 179), rgb(113 171 225));
+      --memorive-pet-green: light-dark(rgb(48 139 93), rgb(92 196 137));
+      --memorive-pet-yellow: light-dark(rgb(186 135 40), rgb(231 185 88));
+      --memorive-pet-red: light-dark(rgb(183 70 70), rgb(231 111 111));
+      --memorive-pet-pink: light-dark(rgb(191 103 123), rgb(229 139 161));
+      --memorive-pet-sprite: url("assets/illustrations/sprite.svg");
+      width: 100%;
+      color-scheme: light dark;
+      color: var(--memorive-pet-text);
+    }
+
+    #memorive-desktop-assistant-preview * {
+      box-sizing: border-box;
+    }
+
+    #memorive-desktop-assistant-preview > .viz-controls {
+      margin-bottom: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop {
+      position: relative;
+      width: 100%;
+      height: clamp(360px, 56vw, 620px);
+      min-height: 360px;
+      overflow: hidden;
+      border: 1px solid var(--memorive-pet-border);
+      border-radius: 22px;
+      background:
+        linear-gradient(132deg, transparent 0 52%, color-mix(in srgb, var(--memorive-pet-canvas-deep) 42%, transparent) 52% 100%),
+        radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--memorive-pet-surface-solid) 64%, transparent), transparent 34%),
+        var(--memorive-pet-canvas);
+      box-shadow: 0 18px 46px var(--memorive-pet-shadow);
+      isolation: isolate;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-glow {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--memorive-pet-blue) 12%, transparent), transparent 28%),
+        radial-gradient(circle at 75% 70%, color-mix(in srgb, var(--memorive-pet-green) 10%, transparent), transparent 32%);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-document {
+      position: absolute;
+      top: 11%;
+      left: 14%;
+      width: min(32%, 310px);
+      height: min(46%, 240px);
+      padding: 26px 24px;
+      border: 1px solid color-mix(in srgb, var(--memorive-pet-border) 72%, transparent);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 56%, transparent);
+      opacity: .48;
+      transform: rotate(-2deg);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-document span {
+      display: block;
+      height: 7px;
+      margin-bottom: 15px;
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--memorive-pet-muted) 24%, transparent);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-document span:nth-child(2) { width: 76%; }
+    #memorive-desktop-assistant-preview .memorive-desktop-document span:nth-child(3) { width: 88%; }
+    #memorive-desktop-assistant-preview .memorive-desktop-document span:nth-child(4) { width: 58%; }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-shortcut {
+      position: absolute;
+      top: 26px;
+      right: 26px;
+      display: grid;
+      justify-items: center;
+      gap: 5px;
+      color: var(--memorive-pet-muted);
+      font-size: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-shortcut-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid var(--memorive-pet-border);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 72%, transparent);
+      color: var(--memorive-pet-text);
+      font-weight: 500;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-anchor {
+      position: absolute;
+      z-index: 12;
+      width: 104px;
+      height: 104px;
+      right: 24px;
+      bottom: 48px;
+      overflow: visible;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-anchor[hidden] {
+      display: none;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      width: 104px;
+      height: 104px;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: grab;
+      touch-action: none;
+      transform-origin: 52% 72%;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window:active {
+      cursor: grabbing;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window:disabled {
+      cursor: default;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window:focus-visible {
+      outline: 2px solid var(--memorive-pet-blue);
+      outline-offset: 2px;
+      border-radius: 20px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-sprite {
+      display: block;
+      width: 78px;
+      height: 78px;
+      background-image: var(--memorive-pet-sprite);
+      background-repeat: no-repeat;
+      background-size: 300% 200%;
+      filter: drop-shadow(0 7px 8px var(--memorive-pet-shadow));
+      image-rendering: auto;
+      pointer-events: none;
+      transform-origin: 52% 64%;
+      user-select: none;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="idle"] > .memorive-pet-sprite { background-position: 0% 0%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="blink-open"] > .memorive-pet-sprite { background-position: 50% 0%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="blink-closed"] > .memorive-pet-sprite { background-position: 100% 0%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="interaction"] > .memorive-pet-sprite { background-position: 0% 100%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="working"] > .memorive-pet-sprite { background-position: 50% 100%; }
+    #memorive-desktop-assistant-preview .memorive-pet-window[data-frame="success"] > .memorive-pet-sprite { background-position: 100% 100%; }
+
+    #memorive-desktop-assistant-preview .memorive-pet-status-dot {
+      position: absolute;
+      right: 8px;
+      bottom: 13px;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--memorive-pet-surface-solid);
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: 0 2px 5px var(--memorive-pet-shadow);
+      opacity: 0;
+      transition: opacity 120ms ease, background-color 120ms ease;
+    }
+
+    #memorive-desktop-assistant-preview [data-tone="blue"] { --memorive-current-tone: var(--memorive-pet-blue); }
+    #memorive-desktop-assistant-preview [data-tone="green"] { --memorive-current-tone: var(--memorive-pet-green); }
+    #memorive-desktop-assistant-preview [data-tone="yellow"] { --memorive-current-tone: var(--memorive-pet-yellow); }
+    #memorive-desktop-assistant-preview [data-tone="red"] { --memorive-current-tone: var(--memorive-pet-red); }
+    #memorive-desktop-assistant-preview [data-tone="pink"] { --memorive-current-tone: var(--memorive-pet-pink); }
+
+    #memorive-desktop-assistant-preview .memorive-pet-status-dot:not([data-tone="none"]),
+    #memorive-desktop-assistant-preview .memorive-desktop-state-dot:not([data-tone="none"]) {
+      background: var(--memorive-current-tone);
+      opacity: 1;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-status-dot[data-spinner="true"] {
+      width: 11px;
+      height: 11px;
+      border: 2px solid color-mix(in srgb, var(--memorive-pet-muted) 46%, transparent);
+      border-top-color: var(--memorive-pet-blue);
+      background: transparent;
+      opacity: 1;
+      animation: memorive-pet-processing-spin .8s linear infinite;
+    }
+
+    @keyframes memorive-pet-processing-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble {
+      position: absolute;
+      right: 86px;
+      bottom: 42px;
+      z-index: 20;
+      width: clamp(220px, 32vw, 286px);
+      min-height: 76px;
+      border: 1px solid var(--memorive-pet-border);
+      border-left: 4px solid var(--memorive-current-tone);
+      border-radius: 14px;
+      background: var(--memorive-pet-surface-solid);
+      box-shadow: 0 14px 34px var(--memorive-pet-shadow);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble.memorive-bubble-right {
+      right: auto;
+      left: 86px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble::after {
+      content: "";
+      position: absolute;
+      right: -8px;
+      bottom: 20px;
+      width: 15px;
+      height: 15px;
+      border-top: 1px solid var(--memorive-pet-border);
+      border-right: 1px solid var(--memorive-pet-border);
+      background: var(--memorive-pet-surface-solid);
+      transform: rotate(45deg);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-bubble.memorive-bubble-right::after {
+      right: auto;
+      left: -8px;
+      border: 0;
+      border-bottom: 1px solid var(--memorive-pet-border);
+      border-left: 1px solid var(--memorive-pet-border);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-open {
+      display: grid;
+      width: 100%;
+      min-height: 74px;
+      gap: 5px;
+      align-content: center;
+      padding: 13px 38px 13px 14px;
+      border: 0;
+      background: transparent;
+      color: var(--memorive-pet-text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-open strong {
+      overflow: hidden;
+      font-weight: 500;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-open span {
+      overflow: hidden;
+      color: var(--memorive-pet-muted);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--memorive-pet-muted);
+      cursor: pointer;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-bubble-close:hover,
+    #memorive-desktop-assistant-preview .memorive-bubble-close:focus-visible {
+      background: var(--memorive-pet-surface-hover);
+      color: var(--memorive-pet-text);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu {
+      position: absolute;
+      right: 10px;
+      bottom: 92px;
+      z-index: 30;
+      width: 210px;
+      padding: 7px;
+      border: 1px solid var(--memorive-pet-border);
+      border-radius: 12px;
+      background: var(--memorive-pet-surface-solid);
+      box-shadow: 0 16px 38px var(--memorive-pet-shadow);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu.memorive-menu-right {
+      right: auto;
+      left: 10px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-menu-title {
+      padding: 6px 9px 8px;
+      color: var(--memorive-pet-muted);
+      font-size: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu button {
+      display: flex;
+      width: 100%;
+      min-height: 32px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 9px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--memorive-pet-text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-menu button:hover,
+    #memorive-desktop-assistant-preview .memorive-pet-menu button:focus-visible {
+      background: var(--memorive-pet-surface-hover);
+      outline: none;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-menu-separator {
+      height: 1px;
+      margin: 5px 4px;
+      background: var(--memorive-pet-border);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-state {
+      position: absolute;
+      left: 18px;
+      bottom: 51px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 1px solid color-mix(in srgb, var(--memorive-pet-border) 72%, transparent);
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 72%, transparent);
+      color: var(--memorive-pet-muted);
+      font-size: 12px;
+      backdrop-filter: blur(6px);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-state-dot,
+    #memorive-desktop-assistant-preview .memorive-event-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--memorive-current-tone, var(--memorive-pet-blue));
+      opacity: .95;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-desktop-state-dot[data-tone="none"] {
+      background: var(--memorive-pet-muted);
+      opacity: .5;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      height: 38px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-top: 1px solid color-mix(in srgb, var(--memorive-pet-border) 74%, transparent);
+      background: color-mix(in srgb, var(--memorive-pet-surface-solid) 78%, transparent);
+      color: var(--memorive-pet-muted);
+      backdrop-filter: blur(10px);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar-start {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border-radius: 7px;
+      background: color-mix(in srgb, var(--memorive-pet-blue) 18%, transparent);
+      color: var(--memorive-pet-text);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar-line {
+      width: 42px;
+      height: 5px;
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--memorive-pet-muted) 20%, transparent);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-taskbar-clock {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-event {
+      display: flex;
+      min-height: 30px;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--memorive-pet-muted);
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite {
+      animation: memorive-pet-interaction-tilt 1100ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking {
+      animation: memorive-pet-wake 900ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-working {
+      animation: memorive-pet-working-shake 900ms cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-success {
+      animation: memorive-pet-success-shake 1100ms cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-error {
+      animation: memorive-pet-error-shake 900ms cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    #memorive-desktop-assistant-preview .memorive-pet-anchor.memorive-is-dragging .memorive-pet-window {
+      transform: translateY(-5px) scale(1.04);
+    }
+
+    @keyframes memorive-pet-interaction-tilt {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      24% { transform: rotate(-9deg) translateY(1px); }
+      62% { transform: rotate(-9deg) translateY(1px); }
+      82% { transform: rotate(2deg) translateY(0); }
+    }
+
+    @keyframes memorive-pet-wake {
+      0% { transform: translateY(8px) scale(.9); opacity: .35; }
+      42% { transform: translateY(-4px) scale(1.04); opacity: 1; }
+      70% { transform: translateY(1px) scale(.99); }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes memorive-pet-working-shake {
+      0%, 100% { transform: translateX(0); }
+      12% { transform: translateX(-4px) rotate(-2deg); }
+      24% { transform: translateX(4px) rotate(2deg); }
+      36% { transform: translateX(-4px) rotate(-1.5deg); }
+      48% { transform: translateX(4px) rotate(1.5deg); }
+      62% { transform: translateX(-3px) rotate(-1deg); }
+      76% { transform: translateX(3px) rotate(1deg); }
+      90% { transform: translateX(-1px); }
+    }
+
+    @keyframes memorive-pet-success-shake {
+      0%, 100% { transform: translateX(0) scale(1); }
+      10% { transform: translateX(-5px) rotate(-3deg) scale(1.02); }
+      22% { transform: translateX(5px) rotate(3deg) scale(1.02); }
+      34% { transform: translateX(-4px) rotate(-2deg) scale(1.03); }
+      46% { transform: translateX(4px) rotate(2deg) scale(1.03); }
+      60% { transform: translateX(-3px) rotate(-1deg) scale(1.02); }
+      74% { transform: translateX(3px) rotate(1deg) scale(1.02); }
+      88% { transform: translateX(-1px) scale(1.01); }
+    }
+
+    @keyframes memorive-pet-error-shake {
+      0%, 100% { transform: translateX(0); }
+      16% { transform: translateX(-4px); }
+      32% { transform: translateX(4px); }
+      48% { transform: translateX(-3px); }
+      64% { transform: translateX(3px); }
+      82% { transform: translateX(-1px); }
+    }
+
+    @media (max-width: 560px) {
+      #memorive-desktop-assistant-preview .memorive-desktop {
+        height: 430px;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-desktop-document {
+        top: 14%;
+        left: 8%;
+        width: 52%;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-bubble {
+        width: min(220px, calc(100vw - 142px));
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-menu {
+        width: 190px;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-desktop-state {
+        max-width: calc(100% - 36px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-working,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-success,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-error {
+        animation: none;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-status-dot {
+        transition: none;
+      }
+
+      #memorive-desktop-assistant-preview .memorive-pet-status-dot[data-spinner="true"] {
+        border-color: var(--memorive-pet-blue);
+        border-right-color: transparent;
+        animation: none;
+      }
+    }

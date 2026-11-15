@@ -1,0 +1,55 @@
+/* E7 uses the inherited home art, warm controls and research sidepanel. */
+#desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region{box-sizing:border-box;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:16px;height:260px;flex-shrink:0;padding:24px 16px;width:620px;max-width:100%;cursor:pointer}
+#desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region>.memo-research-home-copy{position:relative;justify-self:end;align-items:flex-end;width:100%;transition:opacity 140ms ease,transform 140ms ease}
+#desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region>.memo-research-home-copy.memo-research-changing{opacity:0;transform:translateY(4px)}
+#desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region>.desktop-home-expression-button{grid-column:2;grid-row:1;justify-self:start}
+.desktop-hide-expressions #desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region{grid-template-columns:minmax(0,1fr)}
+@media(max-width:600px){#desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:20px 12px}}
+
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-copy{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0;max-width:100%}
+#desktop-inbox-preview #desktop-blank-state .memo-research-bubble{cursor:pointer;white-space:normal;text-align:center;max-width:100%;font-family:inherit}
+#desktop-inbox-preview #desktop-blank-state .memo-research-bubble::after{right:-6px;left:auto;top:calc(50% - 6px);transform:rotate(45deg)}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-context{position:absolute;right:0;top:calc(100% + 10px);max-width:100%}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-controls{position:relative;width:620px;max-width:100%;height:110px;flex-shrink:0}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-controls>.memo-research-home-action{position:absolute;left:50%;top:24px;transform:translateX(-50%);margin:0;white-space:nowrap}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-controls>.memo-research-home-status{position:absolute;top:calc(24px + 3.6em);left:0;right:0;margin:0 auto;overflow-wrap:anywhere}
+#desktop-inbox-preview #desktop-blank-state .memo-research-bubble:focus{outline:none;box-shadow:none}
+#desktop-inbox-preview #desktop-blank-state .memo-research-bubble:focus-visible{outline:none;box-shadow:none;text-decoration:underline;text-underline-offset:5px}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-action{min-height:32px;max-width:100%}
+.memo-research-home-context{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary);font-weight:400}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-status{min-height:1.5em;max-width:430px;font-size:13px;text-align:center;margin:12px 0 0;color:var(--text-secondary)}
+.memo-research-direction{display:flex;gap:12px;align-items:end;margin-top:12px;max-width:100%}
+.memo-research-ai-controls{display:grid;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--border-default)}
+.memo-research-ai-dates{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:0}
+.memo-research-ai-dates input{width:100%;min-width:0;box-sizing:border-box}
+.memo-research-back{display:grid;width:30px;min-width:30px;height:30px;place-items:center;padding:0 0 2px;border-radius:9px;font-size:22px;font-weight:400;line-height:1;background:transparent;color:var(--text-secondary);box-shadow:none}
+.memo-research-ai-pane .desktop-research-actions{display:flex;gap:8px;flex-wrap:wrap}
+.memo-research-ai-pane .desktop-research-paper{overflow-wrap:anywhere}
+.memo-research-ai-pane .desktop-research-paper a{color:var(--brand);display:block;margin-top:10px}
+.memo-research-source-time{display:block;color:var(--text-muted);line-height:1.6;margin-top:5px}
+.memo-research-mainline{line-height:1.8}
+.memo-research-ai-pane .memo-research-mainline a{color:var(--brand)}
+#memo-ai-sources .switch-row{padding:12px 0}
+@media(max-width:600px){.memo-research-ai-dates{grid-template-columns:1fr}.memo-research-direction{flex-wrap:wrap}.memo-research-home-context{max-width:200px}}
+@media(prefers-reduced-motion:reduce){.memo-research-ai-pane,.memo-research-home-copy{transition:none!important;animation:none!important}}
+
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-action{align-self:center;margin-top:24px}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-action:focus{outline:none;box-shadow:none}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-action:focus-visible{text-decoration:underline;text-underline-offset:4px}
+#desktop-inbox-preview #desktop-blank-state .desktop-home-expression-button:focus{outline:none;box-shadow:none}
+#desktop-inbox-preview #desktop-blank-state .desktop-home-expression-button:focus-visible .desktop-home-expression-image{opacity:1}
+#desktop-inbox-preview #desktop-blank-state .memo-research-home-copy{margin-bottom:0}
+.desktop-hide-expressions #desktop-inbox-preview #desktop-blank-state .desktop-home-prompt{flex-direction:column;gap:8px}
+.desktop-hide-expressions #desktop-inbox-preview #desktop-blank-state .memo-research-home-copy{margin-bottom:0}
+#memo-ai-date-fields[hidden]{display:none}
+.desktop-action-ai-updates{--desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%2216%22%20height%3D%2218%22%20rx%3D%223%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M8%207h8M8%2010h5M7%2016h2l2-3%202%205%202-3h2%22%2F%3E%0A%3C%2Fsvg%3E%0A");}
+
+/* AI updates participate in the native right inspector, including its resizer. */
+#desktop-partleaderboard-preview .memo-research-ai-pane{display:flex;flex-direction:column;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;background:var(--surface-raised,#fffdf9);color:var(--text-primary,#2a2723);font:inherit}
+#desktop-partleaderboard-preview .lb-inspector-inner[hidden]{display:none!important}
+#desktop-partleaderboard-preview .memo-research-ai-pane .desktop-research-head{flex-shrink:0}
+#desktop-partleaderboard-preview .memo-research-ai-pane .desktop-research-body{flex:1;min-width:0}
+@container lb-table (min-width:480px){
+ #desktop-partleaderboard-preview[data-lb-compact="true"]:has(.memo-research-ai-pane) .lb-table{min-width:0}
+}
+

@@ -2,8 +2,8 @@
 
 - check_internal_codes.py: no unregistered internal development code in the published files
   (it reads SOURCE_REVIEW_MANIFEST.json at the repository root, so it needs the whole repository);
-- sync_page_hashes.py --check: the script hashes in the two UI pages match their inline scripts
-  (after editing a script inside a page, run the tool without --check).
+- build_pages.py --check: the two UI pages are what their sources under ui/ generate, script hashes included
+  (after editing a file under ui/, run the tool without --check); sync_page_hashes.py is its earlier name.
 Each tool runs in its own isolated Python, the way a release does it.
 """
 import subprocess
@@ -32,6 +32,11 @@ def test_no_unregistered_internal_codes():
     assert code == 0, output
 
 
-def test_page_script_hashes_are_current():
+def test_pages_match_their_sources():
+    code, output = _run("build_pages.py", "--check")
+    assert code == 0, output
+
+
+def test_earlier_tool_name_still_checks_the_pages():
     code, output = _run("sync_page_hashes.py", "--check")
     assert code == 0, output

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;; script-src &#x27;self&#x27; %SCRIPT_HASHES%; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
+<title>Memorive 桌面助手</title>
+<style><!-- include: theme.css --></style>
+<style><!-- include: window.css --></style>
+</head>
+<body data-desktop-product-page="assistant-runtime">
+<div id="memorive-desktop-assistant-preview">
+  <div class="viz-controls" aria-label="桌面助手情景模拟">
+    <button class="btn btn-primary" type="button" data-memorive-action="wake">唤醒</button>
+    <button class="btn" type="button" data-memorive-action="interaction">点击互动</button>
+    <button class="btn" type="button" data-memorive-action="blink">双眨眼</button>
+    <button class="btn" type="button" data-memorive-action="attention">待处理</button>
+    <button class="btn" type="button" data-memorive-action="working">进入施工</button>
+    <button class="btn" type="button" data-memorive-action="success">任务完成</button>
+    <button class="btn" type="button" data-memorive-action="error">任务异常</button>
+    <button class="btn btn-ghost" type="button" data-memorive-action="reset">恢复常驻</button>
+    <button class="btn btn-ghost" id="memorive-pet-visibility" type="button" data-memorive-action="visibility">暂时隐藏</button>
+    <label class="form-check form-switch" for="memorive-pet-privacy">
+      <input class="form-check-input" id="memorive-pet-privacy" type="checkbox">
+      <span class="form-check-label">隐私文案</span>
+    </label>
+  </div>
+
+  <section class="memorive-desktop" id="memorive-pet-desktop" aria-label="Memorive 桌面助手交互预览">
+    <div class="memorive-desktop-glow" aria-hidden="true"></div>
+    <div class="memorive-desktop-document" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="memorive-desktop-shortcut" aria-hidden="true">
+      <span class="memorive-shortcut-icon">PR</span>
+      <span>Memorive</span>
+    </div>
+
+    <div class="memorive-pet-anchor" id="memorive-pet-anchor">
+      <div class="memorive-pet-bubble" id="memorive-pet-bubble" data-tone="blue" hidden>
+        <button class="memorive-bubble-open" id="memorive-pet-bubble-open" type="button">
+          <strong id="memorive-pet-bubble-title">《论文 B》正在处理中</strong>
+          <span id="memorive-pet-bubble-copy">点击查看当前任务</span>
+        </button>
+        <button class="memorive-bubble-close" id="memorive-pet-bubble-close" type="button" aria-label="收起气泡">×</button>
+      </div>
+
+      <button
+        class="memorive-pet-window"
+        id="memorive-pet-window"
+        type="button"
+        data-frame="idle"
+        aria-label="Memorive 桌面助手，当前常驻"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        title="左键打开 Memorive 主界面；右键打开桌面助手设置与控制"
+      >
+        <span class="memorive-pet-sprite" aria-hidden="true"></span>
+        <span class="memorive-pet-status-dot" id="memorive-pet-status-dot" data-tone="none" data-spinner="false" aria-hidden="true"></span>
+      </button>
+
+      <div class="memorive-pet-menu" id="memorive-pet-menu" role="menu" aria-label="外部调整、设置与隐藏" hidden>
+        <div class="memorive-menu-title">桌面助手设置与控制</div>
+        <button type="button" role="menuitem" data-memorive-menu="open-desktop">打开 Memorive</button>
+        <div class="memorive-menu-separator" role="separator"></div>
+        <button type="button" role="menuitem" data-memorive-menu="codex">Codex <span>↗</span></button>
+        <button type="button" role="menuitem" data-memorive-menu="claude-code">Claude Code <span>↗</span></button>
+        <button type="button" role="menuitem" data-memorive-menu="cc-switch">CC Switch <span>↗</span></button>
+        <div class="memorive-menu-separator" role="separator"></div>
+        <button type="button" role="menuitem" data-memorive-menu="settings">桌面助手设置</button>
+        <button type="button" role="menuitem" data-memorive-menu="hide">暂时隐藏</button>
+      </div>
+    </div>
+
+    <div class="memorive-desktop-state" aria-hidden="true">
+      <span class="memorive-desktop-state-dot" id="memorive-desktop-state-dot" data-tone="none"></span>
+      <span id="memorive-desktop-state-label">可见 · 空闲</span>
+    </div>
+
+    <div class="memorive-taskbar" aria-hidden="true">
+      <span class="memorive-taskbar-start">PR</span>
+      <span class="memorive-taskbar-line"></span>
+      <span class="memorive-taskbar-clock">14:26</span>
+    </div>
+  </section>
+
+  <div class="memorive-pet-event" id="memorive-pet-event" aria-live="polite">
+    <span class="memorive-event-dot" id="memorive-pet-event-dot" data-tone="blue" aria-hidden="true"></span>
+    <span id="memorive-pet-event-text">桌面助手可见；左键打开 Memorive 主界面，可拖动角色，右键打开桌面助手设置与控制。</span>
+  </div>
+
+  <style>
+<!-- include: assistant.css -->
+  </style>
+
+  <script>
+<!-- include: pet-motion.js -->
+  </script>
+</div>
+
+<script>
+<!-- include: tooltips.js -->
+</script>
+<script>
+<!-- include: icons.js -->
+</script>
+
+<script><!-- include: runtime-bridge.js --></script>
+</body>
+</html>

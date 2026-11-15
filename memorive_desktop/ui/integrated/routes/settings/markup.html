@@ -1,0 +1,716 @@
+<section class="desktop-route-surface" data-desktop-route="settings" aria-label="设置" hidden>
+<div id="desktop-settings-preview" class="desktop-page-root" lang="zh-Hans">
+  <svg class="desktop-icon-sprite" aria-hidden="true">
+    <symbol id="desktop-icon-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></symbol>
+    <symbol id="desktop-icon-panel-right" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path></symbol>
+    <symbol id="desktop-icon-panel-bottom" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 15h18"></path></symbol>
+    <symbol id="desktop-icon-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="m5.45 5.11 1.33-2A2 2 0 0 1 8.44 2h7.12a2 2 0 0 1 1.66 1.11l1.33 2L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z"></path></symbol>
+    <symbol id="desktop-icon-list-checks" viewBox="0 0 24 24"><path d="m3 7 2 2 4-4"></path><path d="M11 6h10"></path><path d="m3 17 2 2 4-4"></path><path d="M11 18h10"></path></symbol>
+    <symbol id="desktop-icon-message" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path></symbol>
+    <symbol id="desktop-icon-messages" viewBox="0 0 24 24"><path d="M17 15a4 4 0 0 1-4 4H8l-5 3v-5a4 4 0 0 1-1-3V7a4 4 0 0 1 4-4h7a4 4 0 0 1 4 4Z"></path><path d="M17 7h1a4 4 0 0 1 4 4v8l-3-2"></path></symbol>
+    <symbol id="desktop-icon-library" viewBox="0 0 24 24"><path d="M4 4v16"></path><path d="M8 6v14"></path><path d="M12 5v15"></path><path d="m16 6 4 14"></path></symbol>
+    <symbol id="desktop-icon-notebook-pen" viewBox="0 0 24 24"><path d="M13.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.5"></path><path d="M2 6h4"></path><path d="M2 10h4"></path><path d="M2 14h4"></path><path d="M2 18h4"></path><path d="M21.4 5.6a1 1 0 0 0-3-3l-5 5a2 2 0 0 0-.5.9l-.9 2.9.6.6 2.9-.9a2 2 0 0 0 .9-.5Z"></path></symbol>
+    <symbol id="desktop-icon-settings" viewBox="0 0 24 24"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4A2 2 0 0 0 4 9.9l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+    <symbol id="desktop-icon-layout-top" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path></symbol>
+    <defs fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="desktop-icon-accounting" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"></path><path d="M9 8h6M9 12h6M9 16h3"></path></symbol>
+    <symbol id="desktop-icon-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"></circle><path d="M12 2v5M12 17v5M2 12h5M17 12h5M12 10v4M10 12h4"></path></symbol>
+    <symbol id="desktop-icon-calendar-range" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 10h18M7 14h3M14 14h3M7 17h3"></path></symbol>
+    <symbol id="desktop-icon-models" viewBox="0 0 24 24"><path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z"></path><path d="m4 12 8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"></path></symbol>
+    <symbol id="desktop-icon-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"></path><path d="M6.1 8.2A7 7 0 0 1 18.7 7L20 12M4 12l1.3 5A7 7 0 0 0 17.9 15.8"></path></symbol>
+    <symbol id="desktop-icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+    <symbol id="desktop-icon-cost" viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5" ry="2.5"></ellipse><path d="M4 7v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V7M4 11v4c0 1.4 2.2 2.5 5 2.5 1 0 2-.2 2.8-.5"></path><path d="M14 13.5c0 1.4 2.2 2.5 5 2.5M14 13.5c0-1.4 2.2-2.5 5-2.5s5 1.1 5 2.5v4c0 1.4-2.2 2.5-5 2.5s-5-1.1-5-2.5v-4Z" transform="translate(-2)"></path></symbol>
+    <symbol id="desktop-icon-requests" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"></path><path d="M22 2 11 13"></path></symbol>
+    <symbol id="desktop-icon-tokens" viewBox="0 0 24 24"><path d="M8 4c-2 0-3 1-3 3v2c0 1-.7 2-2 2 1.3 0 2 1 2 2v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1 .7 2 2 2-1.3 0-2 1-2 2v2c0 2-1 3-3 3"></path></symbol>
+    <symbol id="desktop-icon-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></symbol>
+  </defs>
+  </svg>
+
+  
+
+  <div class="desktop-preview-stage" id="desktop-preview-stage">
+    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 设置">
+      <header class="desktop-global-bar">
+        <div class="desktop-global-left">
+          <button class="desktop-icon-button" id="desktop-toggle-left" type="button" aria-label="切换边栏" aria-pressed="true" data-desktop-tip="切换边栏  Ctrl+B" data-desktop-placement="bottom">
+            <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-panel-left"></use></svg>
+          </button>
+          <span class="desktop-app-title">Memorive</span>
+          <span class="desktop-view-name" id="desktop-view-name">主体界面</span>
+        </div>
+        <div class="desktop-global-right">
+          <button class="desktop-icon-button" id="desktop-toggle-bottom" type="button" aria-label="切换底部面板显示" aria-pressed="false" data-desktop-tip="切换底部面板显示  Ctrl+J" data-desktop-placement="bottom">
+            <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-panel-bottom"></use></svg>
+          </button>
+          <button class="desktop-icon-button" id="desktop-toggle-right" type="button" aria-label="显示或隐藏侧边面板" aria-pressed="false" data-desktop-tip="显示/隐藏侧边面板  Ctrl+Alt+B" data-desktop-placement="bottom">
+            <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-panel-right"></use></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="desktop-workspace">
+        <nav class="desktop-navigation" aria-label="一级导航">
+          <button class="desktop-logo" id="desktop-logo" type="button" aria-label="播放标识动效">
+            <img class="desktop-logo-image" src="assets/illustrations/常驻logo.svg" alt="Memorive">
+          </button>
+          <div class="desktop-nav-list"><button class="desktop-nav-item" type="button" data-page="研究问答" aria-pressed="false"><svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-9l-5 3v-3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path><path d="M7 9h10M7 13h6"></path></svg><span>研究问答</span></button>
+            <button class="desktop-nav-item" type="button" data-page="收件箱" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-inbox"></use></svg><span>收件箱</span>
+            </button>
+            <button class="desktop-nav-item" type="button" data-page="当前任务" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-list-checks"></use></svg><span>当前任务</span>
+            </button>
+            <button class="desktop-nav-item" type="button" data-page="消息" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-message"></use></svg><span>消息</span>
+            </button>
+            <button class="desktop-nav-item" type="button" data-page="会话管理" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-messages"></use></svg><span>会话管理</span>
+            </button>
+            <button class="desktop-nav-item" type="button" data-page="资料库" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-library"></use></svg><span>资料库</span>
+            </button>
+            <button class="desktop-nav-item" type="button" data-page="工作日志" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-notebook-pen"></use></svg><span>工作日志</span>
+            </button>
+            <button class="desktop-nav-item" type="button" data-page="模型排行榜" aria-pressed="false"><svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true" data-desktop-shared-icon="leaderboard"><path d="M5 21v-6M12 21V9M19 21V3"></path></svg><span>模型排行榜</span></button>
+<button class="desktop-nav-item" type="button" data-page="设置" aria-pressed="false">
+              <svg class="desktop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#desktop-icon-settings"></use></svg><span>设置</span>
+            </button>
+          </div>
+        </nav>
+
+        <main class="desktop-central" id="desktop-central">
+          <div class="desktop-page-view" id="desktop-page-view" hidden>
+            <div class="page-shell desktop-settings-shell" data-settings-mode="normal">
+              <header class="page-header desktop-settings-header">
+                <div class="desktop-page-heading-with-back"><button class="icon-button desktop-main-back" id="desktop-return-main" type="button" aria-label="返回主界面" data-desktop-tip="返回主界面" data-desktop-placement="right" hidden>‹</button><div class="page-heading"><p class="page-eyebrow" hidden></p><h2>设置</h2></div></div>
+                <div class="toolbar-group">
+                  <div class="segmented desktop-icon-segmented" id="settings-mode" aria-label="设置模式" hidden>
+                    <button class="desktop-toolbar-icon desktop-toolbar-ghost desktop-action-sliders" type="button" data-mode="normal" aria-pressed="true" aria-label="普通模式" data-desktop-tip="普通模式">普通模式</button>
+                    <button class="desktop-toolbar-icon desktop-toolbar-ghost desktop-action-workflow" type="button" data-mode="advanced" aria-pressed="false" aria-label="高级配置" data-desktop-tip="高级配置">高级配置</button>
+                    <button class="desktop-toolbar-icon desktop-toolbar-ghost desktop-action-code" type="button" data-mode="developer" aria-pressed="false" aria-label="开发者模式" data-desktop-tip="开发者模式">开发者模式</button>
+                  </div>
+                  <button class="soft-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-restore" id="settings-revert" type="button" aria-label="恢复已保存" data-desktop-tip="恢复已保存" disabled>恢复已保存</button>
+                  <button class="soft-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-reset" id="settings-reset" type="button" hidden aria-label="恢复当前项默认" data-desktop-tip="恢复当前项默认">恢复当前项默认</button>
+                  <button class="primary-button desktop-toolbar-icon desktop-toolbar-primary desktop-action-save" id="settings-save" type="button" aria-label="保存" disabled data-desktop-tip="无待保存修改" data-desktop-placement="bottom">保存</button>
+                </div>
+              </header>
+              <div class="desktop-settings-workarea" id="settings-workarea">
+                <div class="desktop-settings-categories" role="listbox" aria-label="设置一级目录">
+                  <button class="desktop-settings-category" type="button" data-category="user" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true"></span><span class="desktop-settings-category-copy"><strong>用户</strong><small>本机用户名与头像</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="api" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">API</span><span class="desktop-settings-category-copy"><strong>模型服务与 API</strong><small>保存服务、模型名称与凭据引用</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="cli" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">CLI</span><span class="desktop-settings-category-copy"><strong>CLI 接入</strong><small>配置命令行工具与可用模型</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="local-models" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">LM</span><span class="desktop-settings-category-copy"><strong>本地模型</strong><small>发现本机服务并验证可用模型列表</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="workflow" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">WF</span><span class="desktop-settings-category-copy"><strong>当前流程模型映射</strong><small>配置流程节点使用的模型与校核关系</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button id="memo-settings-category" class="desktop-settings-category" type="button" data-category="research-workspace" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true"><svg class="desktop-settings-icon" viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-9l-5 3v-3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path><path d="M7 9h10M7 13h6"></path></svg></span><span class="desktop-settings-category-copy"><strong>研究问答与连接</strong><small>问答、记忆与文献库连接</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button><button id="memo-weights-category" class="desktop-settings-category" type="button" data-category="research-weights" role="option" aria-selected="false"><span class="desktop-settings-cat-icon desktop-action-sliders" aria-hidden="true"></span><span class="desktop-settings-category-copy"><strong>检索与权重</strong><small>排序与研究偏好</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+<button class="desktop-settings-category" type="button" data-category="refinement" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">CR</span><span class="desktop-settings-category-copy"><strong>对话精炼设置</strong><small>选择精炼模型与草稿保留规则</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="viewer" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">DOC</span><span class="desktop-settings-category-copy"><strong>文档与外部查看</strong><small>设置工作区、产物目录与外部查看器</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="external-data" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">DATA</span><span class="desktop-settings-category-copy"><strong>外部数据来源</strong><small>能力参考、来源与手动更新</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="literature" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true"></span><span class="desktop-settings-category-copy"><strong>接收外部文献</strong><small>研究方向与推荐偏好</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="notice" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">N</span><span class="desktop-settings-category-copy"><strong>通知与提醒</strong><small>配置完成、异常与勿扰提醒</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="behavior" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">APP</span><span class="desktop-settings-category-copy"><strong>应用行为</strong><small>设置启动、关闭确认与界面恢复行为</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="network" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">NET</span><span class="desktop-settings-category-copy"><strong>网络与代理</strong><small>配置代理并检查本地与出口网络</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="privacy" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">LOG</span><span class="desktop-settings-category-copy"><strong>隐私、日志与存储</strong><small>调整日志保留、存储位置与诊断导出</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="appearance" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">Aa</span><span class="desktop-settings-category-copy"><strong>外观与辅助功能</strong><small>设置语言、字体、提示与桌宠行为</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                  <button class="desktop-settings-category" type="button" data-category="update" role="option" aria-selected="false"><span class="desktop-settings-cat-icon" aria-hidden="true">UP</span><span class="desktop-settings-category-copy"><strong>关于与版本</strong><small>版本与项目页</small></span><span class="desktop-settings-category-chevron" aria-hidden="true">›</span></button>
+                </div>
+
+                <button class="desktop-settings-pane-resizer" id="settings-resize-primary" type="button" role="separator" aria-label="调整设置详情边栏宽度" aria-controls="settings-primary" aria-orientation="vertical" aria-valuemin="360" aria-valuemax="760" aria-valuenow="620" hidden></button>
+
+                <section class="desktop-settings-primary" id="settings-primary" aria-label="二级设置详情" aria-hidden="true" hidden>
+<div class="desktop-settings-panel" data-panel="research-workspace" id="memo-settings-page" hidden>
+  <div class="desktop-settings-panel-head">
+    <div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" id="memo-back-settings" type="button" aria-label="返回设置目录">‹</button><h3>研究问答与连接</h3></div>
+  </div>
+  <button id="memo-save-settings" type="button" hidden>保存设置</button>
+  <div class="memo-status memo-settings-save-status" id="memo-settings-status" role="status" aria-live="polite"></div>
+  <div class="memo-settings-scroll">
+    <nav class="memo-settings-tabs-wrap" aria-label="研究问答设置分组"><div class="segmented memo-settings-tabs">
+      <button type="button" data-memo-settings-category="models" aria-controls="memo-settings-models" aria-current="page" aria-pressed="true">模型与对话</button>
+      <button type="button" data-memo-settings-category="memory" aria-controls="memo-settings-memory" aria-pressed="false">记忆</button>
+      <button type="button" data-memo-settings-category="agent" aria-controls="memo-settings-agent" aria-pressed="false">Agent 与连接</button>
+    </div></nav>
+    <div class="memo-settings-detail">
+      <section id="memo-settings-models" data-memo-settings-panel="models" aria-labelledby="memo-settings-models-title">
+        <div class="memo-settings-section-heading"><h3 id="memo-settings-models-title" tabindex="-1">模型与对话</h3></div>
+        <div class="desktop-settings-form-stack">
+          <div class="desktop-settings-model-setting">
+            <span class="desktop-settings-model-heading" id="memo-model-heading">问答模型</span>
+            <select id="memo-model" aria-labelledby="memo-model-heading" hidden></select>
+            <div class="desktop-settings-model-choice"><span class="status-dot yellow" id="memo-model-dot" aria-hidden="true"></span><strong id="memo-current-model">—</strong><button class="soft-button" id="memo-adjust-model" type="button" aria-label="调整问答模型" aria-haspopup="menu" aria-controls="memo-model-menu" aria-expanded="false">调整</button></div>
+            <div class="desktop-settings-model-menu" id="memo-model-menu" role="menu" aria-labelledby="memo-model-heading" aria-hidden="true" data-open="false"></div>
+          </div>
+          <label class="switch-row" for="memo-memory-enabled"><span class="switch-copy"><strong>使用已确认的记忆</strong><span>回答时参考保存的偏好和项目背景。</span></span><input class="switch memo-settings-toggle" role="switch" type="checkbox" id="memo-memory-enabled"></label>
+          <label class="switch-row" for="memo-interest-enabled"><span class="switch-copy"><strong>近期研究兴趣</strong><span>将主动提问用于更新近期研究兴趣。</span></span><input class="switch memo-settings-toggle" role="switch" type="checkbox" id="memo-interest-enabled"></label>
+          <details class="desktop-settings-local-model-advanced memo-settings-details" id="memo-context-settings">
+            <summary class="desktop-settings-disclosure"><span>上下文设置</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary>
+            <div class="memo-settings-disclosure-body"><div class="memo-settings-context-fields"><label class="field-label" for="memo-context"><span>上下文字符预算</span><input class="field" id="memo-context" type="number" min="8000" max="64000" step="1000" inputmode="numeric"></label><label class="field-label" for="memo-recent"><span>最近消息条数</span><input class="field" id="memo-recent" type="number" min="2" max="24" inputmode="numeric"></label></div><p class="memo-settings-note">较早的消息会整理为保留来源的摘要；完整对话仍在，切换模型后可继续提问。</p></div>
+          </details>
+        </div>
+      </section>
+      <section id="memo-settings-memory" data-memo-settings-panel="memory" aria-labelledby="memo-settings-memory-title" hidden>
+        <div class="memo-settings-section-heading"><h3 id="memo-settings-memory-title" tabindex="-1">记忆</h3><p>保存偏好和项目背景；文献结论请提交到知识审核并保留证据。</p></div>
+        <div class="desktop-settings-form-stack">
+          <div class="desktop-settings-form-group"><label class="field-label" for="memo-memory-text"><span>添加记忆</span><textarea class="field" id="memo-memory-text" rows="3" maxlength="4000" placeholder="例如：回答使用 SI 单位，并保留英文术语。"></textarea></label><label class="field-label" for="memo-memory-scope"><span>生效范围</span><select class="select" id="memo-memory-scope"></select></label></div>
+          <div class="memo-settings-saved-head"><h4>已保存的记忆</h4><small>可编辑或遗忘</small></div><p class="memo-settings-note" id="memo-settings-memory-empty">尚未保存记忆。添加一条偏好，或补充项目背景。</p><div id="memo-memory-list" aria-label="已保存的记忆"></div>
+        </div>
+      </section>
+      <section id="memo-settings-agent" data-memo-settings-panel="agent" aria-labelledby="memo-settings-agent-title" hidden>
+        <div class="memo-settings-section-heading"><h3 id="memo-settings-agent-title" tabindex="-1">Agent 与连接</h3></div>
+        <div class="desktop-settings-form-stack">
+          <div class="desktop-settings-form-group"><label class="field-label" for="memo-agent"><span>常用 Agent</span><select class="select" id="memo-agent"><option value="codex">Codex CLI</option><option value="claude-code">Claude Code CLI</option><option value="codex-desktop">Codex Desktop</option><option value="claude-desktop">Claude Code Desktop</option><option value="other">其他 Agent</option></select></label></div>
+          <div id="memo-built-in-models">
+          <div class="desktop-settings-model-setting"><span class="desktop-settings-model-heading">Agent 模型</span><select id="memo-agent-model" hidden></select><div class="desktop-settings-model-choice"><span class="status-dot" id="memo-agent-model-dot"></span><strong id="memo-agent-model-label">—</strong><button class="soft-button" id="memo-agent-model-adjust" type="button" aria-label="调整 Agent 模型" aria-haspopup="menu" aria-expanded="false">调整</button></div><div class="desktop-settings-model-menu" id="memo-agent-model-menu" role="menu" data-open="false"></div></div>
+          <div id="memo-desktop-fields" class="desktop-settings-form-stack" hidden>
+            <label class="field-label"><span>Agent 模型</span><input id="memo-desktop-model" class="field" maxlength="160" placeholder="填写桌面端使用的模型" data-desktop-tip="交接时提示使用此模型，实际模型由桌面端选择"></label>
+            <div class="desktop-settings-form-group"><label class="field-label"><span>桌面应用</span><input id="memo-desktop-path" class="field" placeholder="自动识别，也可选择应用" readonly></label><button id="memo-pick-agent" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-folder-open" type="button" aria-label="选择桌面应用" data-desktop-tip="选择桌面应用"></button><button id="memo-detect-agent" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-refresh" type="button" aria-label="自动识别" data-desktop-tip="自动识别"></button></div>
+          </div>
+          </div>
+          <input id="memo-custom-agents" type="hidden" value="[]"><input id="memo-desktop-agents" type="hidden" value="{}">
+          <details id="memo-agent-editor" class="desktop-settings-local-model-advanced memo-settings-details" hidden>
+            <summary class="desktop-settings-disclosure"><span id="memo-agent-editor-title">添加自定义 Agent</span><button id="memo-remove-agent" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-trash" type="button" aria-label="删除自定义 Agent" data-desktop-tip="删除自定义 Agent" hidden></button><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary>
+            <div class="memo-settings-disclosure-body">
+              <div class="memo-settings-context-fields">
+                <label class="field-label" for="memo-custom-name"><span>名称</span><input id="memo-custom-name" class="field" maxlength="60" autocomplete="off"></label>
+                <label class="field-label" for="memo-custom-kind"><span>运行方式</span><select id="memo-custom-kind" class="select"><option value="desktop">桌面应用</option><option value="cli">CLI</option></select></label>
+              </div>
+              <div id="memo-custom-models"></div>
+              <p id="memo-custom-error" class="memo-status" role="alert" hidden></p>
+            </div>
+          </details>
+          <details class="desktop-settings-local-model-advanced memo-settings-details" id="memo-agent-config-details">
+            <summary class="desktop-settings-disclosure"><span>接入配置与插件</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary>
+            <div class="memo-settings-disclosure-body"><section data-memo-developer="clients" aria-label="开发者接入">
+<div class="memo-dev-heading"><strong>开发者接入</strong><span class="desktop-settings-inline"><button id="memo-dev-refresh" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-refresh" type="button" aria-label="刷新接入" data-desktop-tip="刷新接入"></button><button id="memo-dev-add" class="icon-button" type="button" aria-label="添加接入" data-desktop-tip="添加接入">＋</button></span></div>
+<div id="memo-dev-clients"></div>
+<div id="memo-dev-editor" class="desktop-settings-form-stack" hidden>
+<div class="memo-dev-heading"><strong>接入权限</strong><button id="memo-dev-cancel" class="icon-button" type="button" aria-label="取消编辑" data-desktop-tip="取消编辑">×</button></div>
+<label class="field-label"><span>接入名称</span><input class="field" id="memo-dev-name" maxlength="100" autocomplete="off"></label>
+<div class="field-label"><span>允许的项目</span><div class="memo-dev-grid" id="memo-dev-projects"></div></div>
+<div class="field-label"><span>允许的资料连接</span><div class="memo-dev-grid" id="memo-dev-connections"></div></div>
+<div class="field-label"><span>允许的操作</span><div class="memo-dev-grid" id="memo-dev-scopes"></div></div>
+</div>
+<pre id="memo-dev-config" class="memo-code" data-desktop-no-translate hidden></pre><p id="memo-dev-status" role="status" hidden></p>
+</section><pre class="memo-code" id="memo-agent-info" aria-live="polite"></pre></div>
+          </details>
+          <details class="desktop-settings-local-model-advanced memo-settings-details" id="memo-connections-details"><summary class="desktop-settings-disclosure" id="memo-connections-open"><span>连接与同步</span><span id="memo-connections-help"></span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="memo-settings-disclosure-body"><section class="memo-connections desktop-settings-form-stack" id="memo-connections-panel" aria-label="连接与同步">
+  <div class="memo-connections-toolbar"><button type="button" class="icon-button" id="memo-connection-new" aria-label="添加连接" data-desktop-tip="添加连接">＋</button></div>
+  <article id="memo-connection-editor" class="desktop-settings-api-card desktop-settings-draft memo-inline-editor" hidden></article>
+  <div class="memo-connections-layout">
+    <section class="desktop-settings-form-group memo-connection-sidebar" aria-label="已连接的资料来源"><span class="field-label">资料连接</span><div id="memo-connections-list"></div></section>
+    <div class="memo-connection-main">
+      <div id="memo-connection-detail"></div>
+      <div class="memo-actions" id="memo-connection-actions" hidden><button type="button" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-import" id="memo-connection-import" aria-label="选择材料并预览" data-desktop-tip="选择材料并预览"></button><button type="button" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-refresh" id="memo-connection-refresh" aria-label="检查来源更新" data-desktop-tip="检查来源更新"></button><button type="button" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-code" id="memo-connection-setup" aria-label="插件接入" data-desktop-tip="插件接入"></button></div>
+      <div class="memo-status" id="memo-connection-status" role="status" aria-live="polite"></div>
+      <div class="memo-connection-tabs"><div class="segmented" role="tablist" aria-label="连接内容"><button type="button" id="memo-show-documents" role="tab" aria-selected="true" aria-controls="memo-connection-documents" aria-pressed="true">资料与结果 <span class="memo-tab-count" data-count="documents">0</span></button><button type="button" id="memo-show-sync-jobs" role="tab" aria-selected="false" aria-controls="memo-connection-jobs" aria-pressed="false" tabindex="-1">导入与任务 <span class="memo-tab-count" data-count="jobs">0</span></button></div></div>
+      <div id="memo-connection-documents" role="tabpanel" aria-labelledby="memo-show-documents"></div><div id="memo-connection-jobs" role="tabpanel" aria-labelledby="memo-show-sync-jobs" hidden></div>
+    </div>
+  </div>
+</section>
+</div></details>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="desktop-settings-panel" data-panel="research-weights" id="memo-weights-page" hidden>
+ <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录">‹</button><h3>检索与权重</h3></div></div>
+ <div class="memo-status" id="memo-weights-status" role="status" aria-live="polite" hidden></div>
+ <div class="memo-settings-scroll"><div class="desktop-settings-form-stack">
+  <div class="desktop-settings-form-group memo-weight-scope"><label class="field-label"><span>生效范围</span><select class="select" id="memo-weight-project"></select></label><label class="switch-row" id="memo-weight-inherit-row" hidden><span class="switch-copy"><strong>继承全局设置</strong></span><input class="switch memo-settings-toggle" type="checkbox" role="switch" id="memo-weight-inherit"></label></div>
+  <fieldset id="memo-weight-editable">
+   <section data-weight-mode="normal" aria-label="权重预设"><div id="memo-weight-presets"></div><p class="memo-settings-note" id="memo-weight-custom" hidden>正在使用自定义配置</p></section>
+   <section data-weight-mode="advanced" hidden>
+    <div class="desktop-settings-form-group"><div class="memo-settings-saved-head"><h4>排序权重</h4><button class="soft-button" id="memo-weight-reset" type="button">恢复默认</button></div><div id="memo-weight-sliders"></div><p class="memo-settings-note" id="memo-weight-total" aria-live="polite"></p></div>
+    <details class="desktop-settings-local-model-advanced memo-settings-details"><summary class="desktop-settings-disclosure"><span>检索模型</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="memo-settings-disclosure-body" id="memo-weight-models"></div></details>
+    <details class="desktop-settings-local-model-advanced memo-settings-details"><summary class="desktop-settings-disclosure"><span>衍生知识</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="memo-settings-disclosure-body"><div id="memo-weight-penalties"></div><label class="field-label"><span>复核间隔（天）</span><input class="field" type="number" min="7" max="730" id="memo-weight-review"></label><label class="switch-row"><span class="switch-copy"><strong>保留相关的反面证据</strong></span><input class="switch memo-settings-toggle" type="checkbox" role="switch" id="memo-weight-counter"></label></div></details>
+    <details class="desktop-settings-local-model-advanced memo-settings-details"><summary class="desktop-settings-disclosure"><span>文献指标</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="memo-settings-disclosure-body"><label class="switch-row"><span class="switch-copy"><strong>补充期刊与作者指标</strong></span><input class="switch memo-settings-toggle" type="checkbox" role="switch" id="memo-weight-enrichment"></label><label class="field-label"><span>OpenAlex 凭据变量名（可选）</span><input class="field" id="memo-weight-metric-env" spellcheck="false" autocomplete="off" maxlength="100" data-desktop-no-translate></label></div></details>
+    <details class="desktop-settings-local-model-advanced memo-settings-details"><summary class="desktop-settings-disclosure"><span>近期研究兴趣</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="memo-settings-disclosure-body"><div class="memo-settings-context-fields"><label class="field-label"><span>参考最近（天）</span><input class="field" type="number" min="7" max="90" id="memo-weight-interest-days"></label><label class="field-label"><span>影响减半（天）</span><input class="field" type="number" min="1" max="60" id="memo-weight-interest-half"></label></div><label class="field-label"><span class="memo-weight-label"><span>兴趣加成上限</span><output id="memo-weight-interest-value"></output></span><span class="memo-weight-track"><small>0%</small><input class="form-range" type="range" min="0" max="20" step="1" id="memo-weight-interest-boost"><small>20%</small></span></label><div id="memo-interest-list"></div></div></details>
+    <details class="desktop-settings-local-model-advanced memo-settings-details"><summary class="desktop-settings-disclosure"><span>预览排序</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="memo-settings-disclosure-body"><label class="field-label"><span>问题</span><input class="field" id="memo-weight-query" maxlength="8000"></label><button class="soft-button" id="memo-weight-preview" type="button">预览</button><div id="memo-weight-preview-result" aria-live="polite"></div></div></details>
+   </section>
+   <section data-weight-mode="developer" hidden>
+    <div class="desktop-settings-code-workbench" aria-label="权重结构化配置编辑器">
+     <header class="desktop-settings-code-head"><div><strong>结构化配置编辑器</strong><small>保存前校验上下限和合计。</small></div><span class="badge">JSON</span></header>
+     <div class="desktop-settings-code-editor"><pre class="desktop-settings-code-line-numbers" id="memo-weight-code-lines" aria-hidden="true">1</pre><div class="desktop-settings-code-stage"><pre class="desktop-settings-code-highlight" id="memo-weight-code-highlight" aria-hidden="true"></pre><textarea class="desktop-settings-code-input" id="memo-weight-code" aria-label="检索权重 JSON" data-desktop-no-translate spellcheck="false" autocomplete="off" wrap="off" maxlength="16000"></textarea></div></div>
+     <div class="memo-actions"><button class="soft-button" type="button" id="memo-weight-code-format">格式化</button><button class="soft-button" type="button" id="memo-weight-code-diff">查看修改</button></div>
+     <div id="memo-weight-code-diff-body" class="desktop-settings-code-diff" hidden></div>
+    </div>
+   </section>
+  </fieldset>
+ </div></div>
+</div>
+
+
+                  <div class="desktop-settings-panel" data-panel="user" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录">‹</button><h3>用户</h3></div></div>
+                    <div class="desktop-settings-form-stack desktop-user-form">
+                      <label class="field-label"><span class="desktop-setting-label" id="settings-username-label">用户名</span><input class="field" id="settings-username" type="text" autocomplete="off" placeholder="Memorive" disabled></label>
+                      <div class="desktop-user-avatar-row"><div class="desktop-user-avatar" id="settings-avatar-preview" aria-label="头像预览"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20v-1.5a7.5 7.5 0 0 1 15 0V20Z"/></svg><img alt="" hidden></div>
+                        <div class="desktop-user-avatar-copy"><span class="desktop-setting-label" id="settings-avatar-label">头像</span><small>PNG / JPEG / WebP · 最大 5 MB</small><div class="desktop-user-avatar-actions"><button class="soft-button" type="button" id="settings-avatar-upload" disabled>上传头像</button><button class="soft-button" type="button" id="settings-avatar-remove" disabled>移除头像</button></div><input id="settings-avatar-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></div>
+                      </div>
+                      <fieldset class="desktop-answer-styles"><legend>回答风格</legend><div><label><input type="radio" name="answer-style" value="professional" disabled><span>专业可靠</span></label><label><input type="radio" name="answer-style" value="candid" disabled><span>直言不讳</span></label><label><input type="radio" name="answer-style" value="efficient" disabled><span>高效务实</span></label><label><input type="radio" name="answer-style" value="expansive" disabled><span>思维拓展</span></label></div></fieldset>
+                      <p class="desktop-user-status" id="settings-user-status" role="status"></p>
+                    </div>
+                  </div>
+                  <div class="desktop-settings-panel" data-panel="api" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>模型服务与 API</h3></div></div><button class="soft-button" id="settings-add-api" type="button">＋ 添加</button></div>
+                    <div class="desktop-settings-mode-strip mode-advanced" hidden><strong>高级字段</strong><span>模型 ID · 接口格式 · API 地址 · 档位 · 思考模式</span></div>
+                    <section class="desktop-settings-code-workbench mode-developer" id="settings-api-code-workbench" data-developer-scope="api" aria-label="模型服务结构化代码编辑器" hidden>
+                      <header class="desktop-settings-code-head"><div><strong>结构化配置编辑器</strong><small>api_key 留空保留现有凭据；填写新值以替换。新增配置的 credential_ref 留空，由系统生成。</small></div><span class="badge">JSON</span></header>
+                      <div class="desktop-settings-code-editor"><pre class="desktop-settings-code-line-numbers" id="settings-api-code-lines" aria-hidden="true">1</pre><div class="desktop-settings-code-stage"><pre class="desktop-settings-code-highlight" id="settings-api-code-highlight" aria-hidden="true"></pre><textarea class="desktop-settings-code-input" id="settings-api-code" aria-label="模型服务 JSON" data-desktop-no-translate spellcheck="false" autocomplete="off" wrap="off"></textarea></div></div>
+                      <section class="desktop-settings-code-diff" id="settings-api-code-diff" aria-label="模型服务配置差异" hidden><header><strong>与已保存配置的差异</strong><span><i class="desktop-settings-diff-swatch removed"></i>删除 <i class="desktop-settings-diff-swatch added"></i>新增</span></header><div class="desktop-settings-code-diff-rows" id="settings-api-code-diff-rows"></div></section>
+                      <p class="desktop-settings-code-status" aria-live="polite"><span class="status-dot green" id="settings-api-code-dot"></span><span id="settings-api-code-status">已生成</span></p>
+                      <section class="desktop-settings-readiness" id="settings-api-readiness" aria-live="polite"><strong>调用准备检查</strong><span id="settings-api-readiness-copy">尚未检查</span></section>
+                      <footer class="desktop-settings-code-actions"><button class="soft-button" id="settings-api-code-cancel" type="button">取消</button><button class="soft-button" id="settings-api-code-format" type="button">格式化</button><button class="soft-button" id="settings-api-code-diff-toggle" type="button" aria-expanded="false" aria-controls="settings-api-code-diff">查看差异</button><button class="soft-button" id="settings-api-readiness-check" type="button">检查调用准备</button><button class="primary-button" id="settings-api-code-save" type="button">保存</button></footer>
+                    </section>
+                    <div class="desktop-settings-api-list" id="settings-api-list">
+                      <article class="desktop-settings-api-card desktop-settings-draft" id="settings-api-draft" hidden>
+                        <div class="desktop-settings-draft-head"><strong>添加模型 API</strong><button class="icon-button" id="settings-cancel-api" type="button" aria-label="取消未保存草稿">×</button></div>
+                        <div class="desktop-settings-form-grid">
+                          <label class="field-label">服务商<input class="field" id="settings-provider" type="text" maxlength="64" autocomplete="organization" placeholder="例如 OpenAI、Anthropic 或自定义服务名"></label>
+                          <label class="field-label">API Key<span class="desktop-settings-inline"><input class="field mono" id="settings-api-key" type="password" value="" placeholder="••••••••••••••••" autocomplete="off"><button class="soft-button" id="settings-validate-draft" type="button">安全保存</button></span></label>
+                          <label class="field-label">接口格式<select class="select" id="settings-api-protocol"><option value="AUTO">官方接口（自动）</option><option value="OPENAI_COMPATIBLE">OpenAI 兼容 / 中转站</option><option value="ANTHROPIC">Anthropic 兼容</option><option value="GEMINI">Gemini 兼容</option></select></label>
+                          <label class="field-label">API 地址<input class="field mono" id="settings-api-base-url" type="url" maxlength="512" autocomplete="url" placeholder="https:&#47;&#47;relay.example.com/v1" disabled></label>
+                        </div>
+                        <div><small>陌生厂商或中转站请选择兼容格式并填写 HTTPS 地址。</small></div>
+                        <div class="desktop-settings-statusline"><span class="status-dot yellow" id="settings-draft-dot"></span><span id="settings-draft-status">未保存</span></div>
+                        <div class="desktop-settings-model-profile-editor desktop-settings-draft-model-profile" id="settings-model-profile-editor">
+                          <div class="desktop-settings-model-profile-grid">
+                            <label class="field-label">模型 ID<input class="field mono" id="settings-model-name" maxlength="128" autocomplete="off" placeholder="以接口模型目录返回值为准"></label>
+                            <label class="field-label mode-advanced" hidden>档位<input class="field mono" id="settings-model-tier" maxlength="80" autocomplete="off" placeholder="例如 max 或 flash"></label>
+                          </div>
+                          <fieldset class="desktop-settings-plan-picker mode-normal" id="settings-model-plan"><legend>模型档位</legend><div class="segmented" role="radiogroup" aria-label="普通模式模型档位"><button type="button" role="radio" aria-checked="false" data-model-plan="ECONOMY">经济</button><button type="button" role="radio" aria-checked="true" data-model-plan="STANDARD">标准</button><button type="button" role="radio" aria-checked="false" data-model-plan="HIGH_QUALITY">高质量</button><button type="button" role="radio" aria-checked="false" data-model-plan="MAXIMUM">最高</button></div></fieldset>
+                          <div class="switch-row desktop-settings-thinking-row mode-advanced" hidden><span class="switch-copy"><strong>深度思考</strong><span></span></span><button class="switch" id="settings-thinking-enabled" type="button" role="switch" aria-checked="false"></button></div>
+                          <div class="mode-advanced desktop-settings-model-examples" aria-label="模型 ID 提示" hidden><small>使用服务商提供的模型 ID</small></div>
+                          <div class="desktop-settings-statusline" id="settings-model-capability-hint" aria-live="polite"><span class="status-dot yellow"></span><span>填写模型 ID 后显示可用的流程节点。</span></div>
+                        </div>
+                      </article>
+                      <div class="desktop-settings-status-card desktop-settings-api-empty-card yellow" id="settings-api-empty"><div class="desktop-settings-api-empty-mark" aria-hidden="true">API</div><div class="desktop-settings-api-empty-copy"><strong>尚未添加模型</strong><span></span></div></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="cli" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>CLI 接入</h3></div></div><div class="desktop-settings-cli-toolbar" role="group" aria-label="CLI 模板操作"><button class="soft-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-import" id="settings-cli-import" type="button" aria-label="导入模板" data-desktop-tip="导入模板">导入模板</button><button class="soft-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-cli-add" id="settings-cli-add" type="button" aria-label="添加自定义 CLI" data-desktop-tip="添加自定义 CLI">添加自定义 CLI</button><input id="settings-cli-import-file" type="file" accept="application/json,.json" hidden></div></div>
+                    <section class="desktop-settings-status-card neutral" id="settings-cli-import-preview" hidden><strong>模板预览</strong><span data-cli-import-copy></span><div><button class="soft-button" id="settings-cli-import-accept" type="button">加入草稿</button><button class="text-button" id="settings-cli-import-cancel" type="button">取消</button></div></section>
+                    <section class="desktop-settings-code-workbench mode-developer" id="settings-cli-code-workbench" data-developer-scope="cli" aria-label="CLI 结构化代码编辑器" hidden>
+                      <header class="desktop-settings-code-head"><div><strong>CLI 配置编辑器</strong><small>配置命令位置与模型</small></div><span class="badge">JSON</span></header>
+                      <div class="desktop-settings-code-editor"><pre class="desktop-settings-code-line-numbers" id="settings-cli-code-lines" aria-hidden="true">1</pre><div class="desktop-settings-code-stage"><pre class="desktop-settings-code-highlight" id="settings-cli-code-highlight" aria-hidden="true"></pre><textarea class="desktop-settings-code-input" id="settings-cli-code" aria-label="CLI 配置 JSON" data-desktop-no-translate spellcheck="false" autocomplete="off" wrap="off"></textarea></div></div>
+                      <section class="desktop-settings-code-diff" id="settings-cli-code-diff" aria-label="CLI 配置差异" hidden><header><strong>与已保存配置的差异</strong><span><i class="desktop-settings-diff-swatch removed"></i>删除 <i class="desktop-settings-diff-swatch added"></i>新增</span></header><div class="desktop-settings-code-diff-rows" id="settings-cli-code-diff-rows"></div></section>
+                      <p class="desktop-settings-code-status" aria-live="polite"><span class="status-dot green" id="settings-cli-code-dot"></span><span id="settings-cli-code-status">已生成</span></p>
+                      <footer class="desktop-settings-code-actions"><button class="soft-button" id="settings-cli-code-cancel" type="button">取消</button><button class="soft-button" id="settings-cli-code-format" type="button">格式化</button><button class="soft-button" id="settings-cli-code-diff-toggle" type="button" aria-expanded="false" aria-controls="settings-cli-code-diff">查看差异</button><button class="primary-button" id="settings-cli-code-save" type="button">保存</button></footer>
+                    </section>
+                    <div class="desktop-settings-api-list desktop-settings-cli-list" id="settings-cli-list" aria-live="polite"></div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="local-models" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>本地模型</h3></div></div><button class="soft-button" id="settings-local-model-refresh" type="button" aria-busy="false"><span data-local-model-refresh-label>发现模型</span><span class="desktop-settings-button-spinner" aria-hidden="true"></span></button></div>
+                    <div class="desktop-settings-form-stack">
+                      <details class="desktop-settings-local-model-advanced"><summary class="desktop-settings-disclosure"><span class="desktop-settings-help-wrap"><span id="settings-local-model-custom-title">添加其他本机服务</span><span class="desktop-settings-help-trigger" id="settings-local-model-protocol-help" role="button" tabindex="0" aria-label="查看支持的本机模型服务协议" aria-expanded="false" aria-describedby="settings-local-model-protocol-tip">?</span><span class="desktop-settings-help-tooltip" id="settings-local-model-protocol-tip" role="tooltip">自动检测常见的本机模型服务。界面提供三个预设，但实际适配两类模型列表协议：Ollama 原生与 OpenAI 兼容；llama.cpp 是 OpenAI 兼容协议的独立预设，并不限于三个软件品牌。</span></span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary><div class="desktop-settings-local-model-fields"><label class="field-label"><span class="desktop-settings-field-name" id="settings-local-model-name-label">显示名称</span><input class="field" id="settings-local-model-name" maxlength="80" placeholder="例如 我的 LM Studio"></label><label class="field-label"><span class="desktop-settings-field-name" id="settings-local-model-kind-label">服务类型</span><select class="select" id="settings-local-model-kind"><option value="ollama">Ollama（原生 API）</option><option value="openai_compatible">OpenAI 兼容（LM Studio、vLLM、LocalAI、Jan 等）</option><option value="llama_cpp">llama.cpp Server（OpenAI 兼容预设）</option></select></label><label class="field-label desktop-settings-local-model-endpoint"><span class="desktop-settings-field-name" id="settings-local-model-endpoint-label">本机服务地址</span><input class="field mono" id="settings-local-model-endpoint" value="http://127.0.0.1:11434" placeholder="http://127.0.0.1:11434"></label><div class="desktop-settings-local-model-submit"><small id="settings-local-model-endpoint-help">Ollama 使用 /api/tags；其余两类使用 /v1/models。仅接受 127.0.0.1 或 ::1。</small><button class="soft-button" id="settings-local-model-add" type="button">添加</button></div></div></details>
+                      <div class="desktop-settings-statusline" aria-live="polite"><span class="status-dot yellow" id="settings-local-model-dot"></span><span id="settings-local-model-status">等待检测。</span></div>
+                      <div class="desktop-settings-api-list" id="settings-local-model-list" aria-live="polite"></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="workflow" hidden>
+<div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><div class="desktop-settings-workflow-title-line"><h3>当前流程模型映射</h3><span id="settings-workflow-view-label">· 文献处理流程</span></div></div></div><div class="desktop-settings-flow-head-actions"><button class="icon-button desktop-settings-workflow-kind" id="settings-workflow-kind" type="button" data-workflow-view="document" aria-label="切换到会话精炼流程" data-desktop-tip="切换到会话精炼流程" data-desktop-placement="bottom"><svg class="desktop-icon" data-report-cycle viewBox="0 0 24 24" aria-hidden="true"><path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4m14-1v2a3 3 0 0 1-3 3H3"></path></svg></button><span class="badge green" id="settings-flow-score" aria-live="polite">6 / 6</span></div></div>
+                    <div class="desktop-settings-mode-strip mode-advanced" hidden><strong>高级映射</strong><span>已配置 API 引用 · 节点模型 · 重试策略</span></div>
+                    <section class="desktop-settings-code-workbench mode-developer" id="settings-workflow-code-workbench" data-developer-scope="workflow" aria-label="流程模型映射结构化代码编辑器" hidden>
+                      <header class="desktop-settings-code-head"><div><strong>流程映射代码编辑器</strong><small>编辑节点开关、重试次数与已保存模型引用；保存前执行完整本地校验。</small></div><span class="badge">JSON</span></header>
+                      <div class="desktop-settings-code-editor"><pre class="desktop-settings-code-line-numbers" id="settings-workflow-code-lines" aria-hidden="true">1</pre><div class="desktop-settings-code-stage"><pre class="desktop-settings-code-highlight" id="settings-workflow-code-highlight" aria-hidden="true"></pre><textarea class="desktop-settings-code-input" id="settings-workflow-code" aria-label="流程模型映射 JSON" data-desktop-no-translate spellcheck="false" autocomplete="off" wrap="off"></textarea></div></div>
+                      <section class="desktop-settings-code-diff" id="settings-workflow-code-diff" aria-label="流程模型映射配置差异" hidden><header><strong>与已保存配置的差异</strong><span><i class="desktop-settings-diff-swatch removed"></i>删除 <i class="desktop-settings-diff-swatch added"></i>新增</span></header><div class="desktop-settings-code-diff-rows" id="settings-workflow-code-diff-rows"></div></section>
+                      <p class="desktop-settings-code-status" aria-live="polite"><span class="status-dot green" id="settings-workflow-code-dot"></span><span id="settings-workflow-code-status">已生成</span></p>
+                      <footer class="desktop-settings-code-actions"><button class="soft-button" id="settings-workflow-code-cancel" type="button">取消</button><button class="soft-button" id="settings-workflow-code-format" type="button">格式化</button><button class="soft-button" id="settings-workflow-code-diff-toggle" type="button" aria-expanded="false" aria-controls="settings-workflow-code-diff">查看差异</button><button class="primary-button" id="settings-workflow-code-save" type="button">保存</button></footer>
+                    </section>
+                    <div class="desktop-settings-flow-legend" aria-label="配置颜色说明"><span><i class="status-dot green" aria-hidden="true"></i>就绪</span><span><i class="status-dot yellow" aria-hidden="true"></i>待设置</span><span><i class="status-dot red" aria-hidden="true"></i>设置有误</span><span><i class="desktop-settings-legend-disabled" aria-hidden="true"></i>已跳过</span></div>
+                    <p class="desktop-settings-route-status" id="settings-route-status" aria-live="polite"><span class="status-dot green" aria-hidden="true"></span><strong>当前路径</strong><span id="settings-route-copy">01 → 02 → 03 → 04 → 05 → 06 → 07 → 09 · 绕过 08</span></p>
+                    <div class="desktop-settings-flow" id="settings-workflow-flow" aria-label="文献处理九节点纵向流程；02 选择向量嵌入模型，06 使用相同的嵌入空间整理分析材料；两个异源核对节点可受控绕过">
+                      <div class="desktop-settings-flow-stage" id="settings-flow-stage">
+                        <svg class="desktop-settings-bypass-layer is-active" id="settings-bypass-layer" role="img" aria-label="当前从 07 Analysis 绕过 08 核对分析，进入 09 人工判断">
+                          <title id="settings-bypass-title">当前从 07 Analysis 绕过 08 核对分析，进入 09 人工判断</title>
+                          <defs>
+                            <linearGradient id="settings-bypass-gradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0" stop-color="var(--border-strong)"></stop>
+                              <stop offset="0.48" stop-color="var(--green-indicator)"></stop>
+                              <stop offset="1" stop-color="var(--green-text)"></stop>
+                            </linearGradient>
+                            <marker id="settings-bypass-arrow" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L7,4 L0,8 Z"></path></marker>
+                          </defs>
+                          <g class="desktop-settings-bypass-route" data-bypass-route="card-review" aria-hidden="true">
+                            <path class="desktop-settings-bypass-path desktop-settings-bypass-base"></path>
+                            <path class="desktop-settings-bypass-path desktop-settings-bypass-sweep"></path>
+                            <text class="desktop-settings-bypass-label">绕过准入前校核</text>
+                          </g>
+                          <g class="desktop-settings-bypass-route is-active" data-bypass-route="judgment-review">
+                            <path class="desktop-settings-bypass-path desktop-settings-bypass-base"></path>
+                            <path class="desktop-settings-bypass-path desktop-settings-bypass-sweep"></path>
+                            <text class="desktop-settings-bypass-label">绕过判断类核对</text>
+                          </g>
+                        </svg>
+                        <ol class="desktop-settings-flow-list is-judgment-review-disabled" id="settings-flow-list">
+                          <li class="desktop-settings-flow-step state-green link-green" data-step="ingest">
+                            <button class="desktop-settings-node" type="button" data-step="ingest" data-node="文档处理" data-purpose="转换、清洗、切块、内容理解与复杂版面/OCR" data-retries="2" data-model="[默认] 本地解析" data-profile-ref="PARSER_PROFILE" data-model-copy="可切换为已保存的 API、CLI 或本地模型，用于内容理解与复杂版面/OCR" data-toggle-locked="true" data-model-exclusive="true" data-independent="false">
+                              <span class="desktop-settings-node-index">01</span><span class="desktop-settings-node-copy"><strong>文档处理</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>转换、清洗、切块、内容理解与复杂版面/OCR</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前模型</span><span data-node-model>[默认] 本地解析</span></small></span><span class="desktop-settings-node-status"><span class="status-dot green"></span><span data-flow-state>就绪</span></span>
+                            </button>
+                          </li>
+<li class="desktop-settings-flow-step state-green" data-step="data-review"><button class="desktop-settings-node" type="button" data-step="data-review" data-node="数据分析" data-purpose="原样数值提取、描述及明确参数下的核查" data-model="本地统计程序" data-profile-ref="" data-retries="0" data-enabled="true" data-optional="true" data-model-locked="true" data-retry-locked="true" data-scoreable="false"><span class="desktop-settings-node-index">D</span><span class="desktop-settings-node-copy"><strong>数据分析</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>原样数值提取、描述及明确参数下的核查</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">执行方式</span><span data-node-model>本地统计程序</span></small></span><span class="desktop-settings-node-status"><span class="status-dot green"></span><span data-flow-state>就绪</span></span></button></li>
+                          <li class="desktop-settings-flow-step state-yellow link-yellow" data-step="embedding">
+                            <button class="desktop-settings-node" type="button" data-step="embedding" data-node="向量化" data-purpose="为 chunk 生成可检索的向量嵌入" data-retries="2" data-model="尚未选择向量嵌入模型" data-profile-ref="" data-model-copy="选择已验证的向量模型" data-toggle-locked="true" data-independent="false">
+                              <span class="desktop-settings-node-index">02</span><span class="desktop-settings-node-copy"><strong>向量化</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>为 chunk 生成可检索的向量嵌入</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前模型</span><span data-node-model>尚未选择向量嵌入模型</span></small></span><span class="desktop-settings-node-status"><span class="status-dot yellow"></span><span data-flow-state>待设置</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-green link-green" data-step="card">
+                            <button class="desktop-settings-node" type="button" data-step="card" data-node="生成卡片" data-purpose="忠实抽取并生成待处理 Card" data-retries="3" data-model="尚未映射已配置 API" data-profile-ref="DISTILLATION_PROFILE" data-model-copy="选择已保存的模型" data-toggle-locked="true" data-independent="false">
+                              <span class="desktop-settings-node-index">03</span><span class="desktop-settings-node-copy"><strong>生成卡片</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>忠实抽取并生成待处理 Card</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前模型</span><span data-node-model>尚未映射已配置 API</span></small></span><span class="desktop-settings-node-status"><span class="status-dot yellow"></span><span data-flow-state>待设置</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-yellow link-yellow" data-step="card-review">
+                            <button class="desktop-settings-node" type="button" data-step="card-review" data-node="核对卡片" data-purpose="回到原文核对字段、来源与搬运准确性 · 可禁用" data-retries="2" data-model="按蒸馏模型自动选择异源校核者" data-profile-ref="AUTO_HETEROGENEOUS" data-model-copy="可从已保存配置中选择；生成卡片正在使用的模型会保持禁用" data-enabled="true" data-optional="true" data-independent="true">
+                              <span class="desktop-settings-node-index">04</span><span class="desktop-settings-node-copy"><strong>核对卡片</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>回到原文核对字段、来源与搬运准确性 · 可禁用</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前模型</span><span data-node-model>按蒸馏模型自动选择异源校核者</span></small></span><span class="desktop-settings-node-status"><span class="status-dot yellow"></span><span data-flow-state>待设置</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-green link-green" data-step="admission">
+                            <button class="desktop-settings-node" type="button" data-step="admission" data-node="卡片准入" data-purpose="根据准入规则形成可用或隔离状态 · 必经" data-retries="0" data-model="确定性状态机 / 不调用模型" data-profile-ref="" data-model-copy="形成 active 或 quarantined；准入与是否已经校核是两根独立轴" data-toggle-locked="true" data-retry-locked="true" data-model-locked="true" data-model-action="只读" data-model-tooltip="卡片准入是确定性状态机，不在此选择模型" data-scoreable="false" data-independent="false">
+                              <span class="desktop-settings-node-index">05</span><span class="desktop-settings-node-copy"><strong>卡片准入</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>根据准入规则形成可用或隔离状态 · 必经</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">执行方式</span><span data-node-model>确定性状态机 / 不调用模型</span></small></span><span class="desktop-settings-node-status"><span class="status-dot green"></span><span data-flow-state>就绪</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-yellow link-yellow" data-step="context">
+                            <button class="desktop-settings-node" type="button" data-step="context" data-node="整理分析材料" data-purpose="在向量检索候选上独立重排并组装分析材料" data-retries="2" data-model="尚未选择重排模型" data-profile-ref="" data-model-copy="选择已验证的本地、CLI 或 API 重排模型" data-toggle-locked="true" data-independent="false">
+                              <span class="desktop-settings-node-index">06</span><span class="desktop-settings-node-copy"><strong>整理分析材料</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>在向量检索候选上独立重排并组装分析材料</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前重排器</span><span data-node-model>尚未选择重排模型</span></small></span><span class="desktop-settings-node-status"><span class="status-dot yellow"></span><span data-flow-state>待设置</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-green link-green" data-step="analysis">
+                            <button class="desktop-settings-node" type="button" data-step="analysis" data-node="分析" data-purpose="基于已选材料生成分析建议" data-retries="3" data-model="尚未映射已配置 API" data-profile-ref="ANALYSIS_PROFILE" data-model-copy="选择已保存的模型" data-toggle-locked="true" data-independent="false">
+                              <span class="desktop-settings-node-index">07</span><span class="desktop-settings-node-copy"><strong>分析</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>基于已选材料生成分析建议</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前模型</span><span data-node-model>尚未映射已配置 API</span></small></span><span class="desktop-settings-node-status"><span class="status-dot yellow"></span><span data-flow-state>待设置</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-yellow link-yellow" data-step="judgment-review">
+                            <button class="desktop-settings-node" type="button" data-step="judgment-review" data-node="核对分析" data-purpose="核对分析结论与引用证据 · 可禁用" data-retries="2" data-model="按 Analysis 生产者自动选择异源校核者" data-profile-ref="AUTO_HETEROGENEOUS" data-model-copy="可从已保存配置中选择；Analysis 正在使用的模型会保持禁用" data-enabled="true" data-optional="true" data-independent="true">
+                              <span class="desktop-settings-node-index">08</span><span class="desktop-settings-node-copy"><strong>核对分析</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>核对分析结论与引用证据 · 可禁用</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">当前模型</span><span data-node-model>按 Analysis 生产者自动选择异源校核者</span></small></span><span class="desktop-settings-node-status"><span class="status-dot yellow"></span><span data-flow-state>待设置</span></span>
+                            </button>
+                          </li>
+                          <li class="desktop-settings-flow-step state-green" data-step="human">
+                            <button class="desktop-settings-node" type="button" data-step="human" data-node="人工判断" data-purpose="完成最终判断与写作 · 人工终点" data-retries="0" data-model="人类判断 / 不调用模型" data-profile-ref="" data-model-copy="系统输出仅作为分析与校核材料；最终判断和写作由用户完成" data-toggle-locked="true" data-retry-locked="true" data-model-locked="true" data-model-action="只读" data-model-tooltip="最终判断由用户完成，不在此选择模型" data-scoreable="false" data-independent="false">
+                              <span class="desktop-settings-node-index">09</span><span class="desktop-settings-node-copy"><strong>人工判断</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>完成最终判断与写作 · 人工终点</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">执行者</span><span data-node-model>用户 · 不调用模型</span></small></span><span class="desktop-settings-node-status"><span class="status-dot green"></span><span data-flow-state>就绪</span></span>
+                            </button>
+                          </li>
+<li class="desktop-settings-flow-step state-green" data-step="logic-review"><button class="desktop-settings-node" type="button" data-step="logic-review" data-node="逻辑分析" data-purpose="按文献选择，原文就绪后独立排队" data-model="请选择云端模型" data-profile-ref="" data-retries="0" data-enabled="true" data-optional="true" data-independent="true"><span class="desktop-settings-node-index">L</span><span class="desktop-settings-node-copy"><strong>逻辑分析</strong><small class="desktop-settings-node-purpose"><span class="desktop-settings-node-meta-label">作用</span><span data-node-purpose>按文献选择，原文就绪后独立排队</span></small><small class="desktop-settings-node-model"><span class="desktop-settings-node-meta-label">执行方式</span><span data-node-model>请选择云端模型</span></small></span><span class="desktop-settings-node-status"><span class="status-dot green"></span><span data-flow-state>就绪</span></span></button></li>
+                        </ol>
+                      </div>
+                    </div>
+                    <p class="muted desktop-settings-flow-note" id="settings-flow-note"></p>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="refinement" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>对话精炼设置</h3></div></div></div>
+                    <div class="desktop-settings-form-stack desktop-settings-refinement-stack">
+                      <section class="desktop-settings-refinement-section" id="settings-refinement-model-section" aria-labelledby="settings-refinement-model-title"><header><div><strong id="settings-refinement-model-title">精炼模型</strong><small>请先添加可用模型</small></div><span class="desktop-settings-statusline"><span class="status-dot green" id="settings-refinement-dot"></span><span id="settings-refinement-status">—</span></span></header><label class="field-label"><select class="select" id="settings-refinement-model" aria-label="精炼模型"><option value="">未配置模型</option></select></label></section>
+                      <section class="desktop-settings-refinement-section desktop-settings-browser-setup" aria-labelledby="settings-browser-companion-title">
+                        <header class="desktop-settings-refinement-section-head"><span class="desktop-settings-help-wrap desktop-settings-browser-help-wrap"><strong id="settings-browser-companion-title">网页会话库</strong><span class="desktop-settings-help-trigger" id="settings-browser-companion-help" role="button" tabindex="0" aria-label="查看网页会话库说明" aria-expanded="false" aria-describedby="settings-browser-companion-tip">?</span><span class="desktop-settings-help-tooltip" id="settings-browser-companion-tip" role="tooltip">首次在扩展页开启开发者模式，加载插件文件夹；完成后会自动检查连接。只读取已开启网站的可见会话。</span></span><span class="badge" id="settings-browser-companion-badge">未配置</span></header>
+                        <label class="field-label desktop-settings-browser-choice"><span>使用浏览器</span><select class="select" id="settings-browser-companion-browser" aria-label="使用浏览器"><option value="">正在检查浏览器</option></select></label>
+                        <div class="desktop-settings-browser-primary-actions"><button class="primary-button" id="settings-browser-companion-setup" type="button">连接浏览器</button><button class="soft-button" id="settings-browser-companion-test" type="button" data-desktop-tip="每站 2 条" disabled>测试读取</button><button class="soft-button" id="settings-browser-companion-sync" type="button" data-desktop-tip="每站最多 10 条" disabled>增量同步</button><button class="soft-button" id="settings-browser-companion-full-sync" type="button" disabled>完整同步</button><button class="soft-button" id="settings-browser-companion-reload" type="button" disabled>重新连接</button></div>
+
+                        <div id="memo-bridge-setup-guide" class="desktop-settings-browser-primary-actions" hidden role="group" aria-label="插件连接操作">
+                          <input id="memo-bridge-folder" type="hidden">
+                          <button id="memo-bridge-copy-folder" class="soft-button" type="button">复制插件路径</button>
+                          <button id="memo-bridge-open-folder" class="soft-button" type="button">打开插件文件夹</button>
+                          <button id="memo-bridge-check" class="soft-button" type="button">检查插件连接</button>
+                        </div>
+                        
+                        <details class="desktop-settings-browser-disclosure" id="settings-browser-companion-details">
+                          <summary>
+                            <span class="desktop-settings-browser-progress-copy"><strong>连接状态</strong><small id="settings-browser-progress-label">尚未连接</small><span class="desktop-settings-browser-read-progress" id="settings-browser-read-progress" role="progressbar" aria-label="读取等待" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></span></span>
+                          </summary>
+                          <div class="desktop-settings-browser-disclosure-body">
+                            <div class="desktop-settings-browser-stage-grid" aria-label="网页会话库配置进度"><span id="settings-browser-companion-prepared"><i class="status-dot yellow"></i><small>组件已准备</small></span><span id="settings-browser-companion-connected"><i class="status-dot yellow"></i><small>浏览器已连接</small></span><span id="settings-browser-companion-synced"><i class="status-dot yellow"></i><small>会话已同步</small></span></div>
+                            <div class="desktop-settings-browser-provider-grid" aria-label="网页会话来源安全状态"><span id="settings-browser-provider-deepseek"><strong>DeepSeek</strong><small>等待试读</small></span><span id="settings-browser-provider-gemini"><strong>Gemini</strong><small>等待试读</small></span><span id="settings-browser-provider-kimi"><strong>Kimi</strong><small>等待试读</small></span></div>
+                            <div class="desktop-settings-statusline"><span class="status-dot yellow" id="settings-browser-full-gate-dot"></span><span id="settings-browser-full-gate-status">完成已启用网站的试读后检查完整同步资格。</span></div>
+                          </div>
+                        </details>
+                      </section>
+                      <section class="desktop-settings-refinement-section" id="settings-refinement-content-section" aria-labelledby="settings-refinement-content-title"><header><div><strong id="settings-refinement-content-title">精炼内容</strong><small></small></div></header><div class="switch-row"><span class="switch-copy"><strong>提取待办</strong><span></span></span><button class="switch" id="settings-refinement-tasks" type="button" role="switch" aria-checked="true"></button></div><div class="switch-row"><span class="switch-copy"><strong>提取风险</strong><span></span></span><button class="switch" id="settings-refinement-risks" type="button" role="switch" aria-checked="true"></button></div></section>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="viewer" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>文档与外部查看</h3></div></div></div>
+                    <div class="desktop-settings-form-stack">
+                      <label class="field-label"><span class="desktop-settings-field-name">默认工作区</span><span class="desktop-settings-inline"><input class="field mono" id="settings-workspace-root"><button class="soft-button" id="settings-workspace-browse" type="button">…</button></span></label>
+                      <label class="field-label"><span class="desktop-settings-field-name">生成产物目录</span><span class="desktop-settings-inline"><input class="field mono" id="settings-artifact-root"><button class="soft-button" id="settings-artifact-browse" type="button">…</button></span></label>
+                      <div class="desktop-settings-two">
+                        <label class="field-label"><span class="desktop-settings-field-name">生成完成后</span><select class="select" id="settings-auto-open-preview"><option value="true">自动打开内置预览</option><option value="false">不自动打开</option></select></label>
+                        <label class="field-label"><span class="desktop-settings-field-name">默认查看方式</span><select class="select" id="settings-document-viewer"><option value="INTERNAL">内置预览</option><option value="FOLDER">打开所在文件夹</option><option value="EXTERNAL_LIBRARY">用已配置外部资料库打开</option></select></label>
+                      </div>
+                      <label class="field-label"><span class="desktop-settings-field-name">默认外部资料库</span><select class="select" id="settings-library-provider"><option value="NONE">尚未配置</option><option value="OBSIDIAN">Obsidian</option><option value="LOGSEQ">Logseq</option><option value="ZOTERO">Zotero</option><option value="CUSTOM">自定义打开方式</option></select></label>
+                      <div class="desktop-settings-two">
+                        <label class="field-label desktop-settings-library-field"><span class="desktop-settings-field-name">显示名称</span><input class="field" id="settings-library-name" placeholder="研究资料库" disabled></label>
+                        <label class="field-label desktop-settings-library-field"><span class="desktop-settings-field-name">资料库根目录</span><span class="desktop-settings-inline desktop-settings-library-input-row"><input class="field" id="settings-library-root" value="" placeholder="请选择资料库根目录" disabled><button class="soft-button" id="settings-library-browse" type="button" disabled>…</button></span><small id="settings-library-root-help">选择 Obsidian 时，请选择包含 .obsidian 文件夹的 Vault 根目录。</small></label>
+                      </div>
+                      <div class="desktop-settings-control-row"><span><strong>可用状态</strong><small id="settings-library-copy">尚未配置</small></span><span class="desktop-settings-inline"><span class="status-dot yellow" id="settings-library-dot"></span><span id="settings-library-status">未检测</span><button class="soft-button" id="settings-library-test" type="button" disabled>检测</button></span></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>同步外部修改</strong><span>重新读取文件内容</span></span><button class="switch" id="settings-external-refresh" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="notice" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>通知与提醒</h3></div></div></div>
+                    <div class="desktop-settings-form-stack">
+                      <section class="desktop-report-schedule" id="settings-report-schedule">
+                        <div class="desktop-report-schedule-head"><strong id="settings-report-schedule-label">报告生成时间</strong><small>UTC+08:00</small></div>
+                        <div class="desktop-report-schedule-row"><label for="settings-report-daily">日报</label><input id="settings-report-daily" class="field" type="time" step="60" data-report-field="daily_time" aria-label="日报生成时间" disabled></div>
+                        <div class="desktop-report-schedule-row"><label for="settings-report-weekly">周报</label><div class="desktop-report-schedule-controls"><select id="settings-report-weekday" class="select" data-report-field="weekly_day" aria-label="周报生成日" disabled><option value="0">星期一</option><option value="1">星期二</option><option value="2">星期三</option><option value="3">星期四</option><option value="4">星期五</option><option value="5">星期六</option><option value="6">星期日</option></select><input id="settings-report-weekly" class="field" type="time" step="60" data-report-field="weekly_time" aria-label="周报生成时间" disabled></div></div>
+                        <div class="desktop-report-schedule-row"><label for="settings-report-monthly">月报</label><div class="desktop-report-schedule-controls"><details id="settings-report-month-picker" class="desktop-report-month-picker"><summary class="soft-button" aria-label="月报生成日"><span id="settings-report-month-label" data-desktop-no-translate="true">每月 1 日</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg></summary><div id="settings-report-calendar" class="desktop-report-calendar" role="group" aria-label="每月日期"></div></details><input id="settings-report-monthly" class="field" type="time" step="60" data-report-field="monthly_time" aria-label="月报生成时间" disabled></div></div>
+                        <p id="settings-report-schedule-status" role="status"></p>
+                      </section>
+                      <div class="switch-row"><span class="switch-copy"><strong>任务完成通知</strong><span></span></span><button class="switch" id="settings-notify-complete" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>任务报错通知</strong><span></span></span><button class="switch" id="settings-notify-error" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>等待批准通知</strong><span></span></span><button class="switch" id="settings-notify-approval" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>周报生成提醒</strong><span></span></span><button class="switch" id="settings-notify-weekly" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>外部文献获取通知</strong><span>关闭后仍保存至资料库</span></span><button class="switch" id="settings-notify-literature" type="button" role="switch" aria-label="外部文献获取通知" aria-checked="true" disabled></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>提示音</strong><span>桌面通知提示音</span></span><button class="switch" id="settings-notify-sound" type="button" role="switch" aria-checked="false" data-local-switch></button></div>
+                      <div class="desktop-settings-control-row"><span><strong>勿扰时间</strong><small>时段内暂停弹窗</small></span><span class="desktop-settings-time"><input class="field" id="settings-dnd-start" type="time" value="22:00"><span>—</span><input class="field" id="settings-dnd-end" type="time" value="08:00"></span></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>点击通知后打开任务</strong><span></span></span><button class="switch" id="settings-notify-open-task" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="desktop-settings-control-row desktop-reminder-scope-row"><span><strong>桌面助手提醒</strong><small>与现有通知类型和勿扰时间共同生效</small></span><select class="select" id="settings-assistant-reminder-scope"><option value="IMPORTANT_ONLY">仅重要消息</option><option value="IMPORTANT_AND_COMPLETE">重要消息与完成</option><option value="INCLUDE_ORDINARY">包含普通消息</option></select></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>隐藏文件名和任务名</strong><span>同时作用于 Windows 通知与桌面助手气泡</span></span><button class="switch" id="settings-assistant-hide-names" type="button" role="switch" aria-checked="false"></button></div>
+                      <div class="desktop-settings-control-row"><span><strong>测试 Windows 通知</strong><small id="settings-notification-test-copy"></small></span><span class="desktop-settings-inline"><select class="select" id="settings-notification-test-kind"><option value="COMPLETE">任务完成</option><option value="ERROR">任务报错</option><option value="APPROVAL">等待批准</option><option value="WEEKLY">周报生成</option></select><button class="soft-button" id="settings-notification-test" type="button">保存并发送测试通知</button></span></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="behavior" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>应用行为</h3></div></div></div>
+                    <div class="desktop-settings-form-stack"><details class="desktop-settings-local-model-advanced memo-settings-details" id="memo-automation-details">
+<summary class="desktop-settings-disclosure"><span>自动化工具</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></summary>
+<div class="memo-settings-disclosure-body desktop-settings-form-stack" data-memo-developer="automation">
+<div class="switch-row"><span class="switch-copy"><strong>允许自动化提交任务</strong><span>使用已授权的接入与模型设置</span></span><button class="switch" id="memo-auto-enabled" type="button" role="switch" aria-label="允许自动化提交任务" aria-checked="false"></button></div>
+<label class="desktop-settings-control-row"><span>每个接入的排队上限</span><input id="memo-auto-limit" class="field" type="number" min="1" max="100" value="20"></label>
+<div class="memo-dev-heading"><strong>自动化任务</strong><button id="memo-auto-refresh" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-refresh" type="button" aria-label="刷新任务" data-desktop-tip="刷新任务"></button></div>
+<div id="memo-auto-jobs"></div><p id="memo-auto-status" role="status" hidden></p></div></details>
+                      <article class="desktop-settings-api-card">
+                        <div hidden><span class="switch-copy"><strong>启用桌面助手</strong><span></span></span><button class="switch" id="settings-assistant-enabled" type="button" role="switch" aria-checked="true"></button></div>
+                      <section class="desktop-settings-refinement-section desktop-settings-assistant-appearance" aria-labelledby="settings-assistant-appearance-title"><header><div><strong id="settings-assistant-appearance-title">桌面助手</strong><small id="settings-assistant-appearance-help" hidden></small></div><div class="desktop-settings-assistant-header-actions"><span class="desktop-settings-statusline desktop-settings-assistant-statusline" aria-live="polite"><span class="status-dot green" id="settings-assistant-appearance-dot"></span><span id="settings-assistant-appearance-status">已启用</span></span><button class="switch" id="settings-assistant-enabled-appearance" type="button" role="switch" aria-checked="true" aria-label="启用桌面助手"></button></div></header><div class="desktop-settings-action-row"><button class="soft-button" id="settings-assistant-show" type="button">显示</button><button class="soft-button" id="settings-assistant-hide" type="button">隐藏</button></div></section>
+                        <div class="desktop-settings-form-stack desktop-settings-shortcut-list">
+                          <strong>快捷入口</strong>
+                          <fieldset class="desktop-settings-shortcut-entry"><legend>快捷方式 1</legend><div class="desktop-settings-form-grid"><label class="field-label">名称<input class="field" id="settings-assistant-shortcut-name-1" maxlength="40" autocomplete="off" placeholder="最多 20 个字符"></label><label class="field-label">打开位置<input class="field mono" id="settings-assistant-shortcut-target-1" maxlength="2048" autocomplete="off" placeholder="文件、程序或网址"></label></div></fieldset>
+                          <fieldset class="desktop-settings-shortcut-entry"><legend>快捷方式 2</legend><div class="desktop-settings-form-grid"><label class="field-label">名称<input class="field" id="settings-assistant-shortcut-name-2" maxlength="40" autocomplete="off" placeholder="最多 20 个字符"></label><label class="field-label">打开位置<input class="field mono" id="settings-assistant-shortcut-target-2" maxlength="2048" autocomplete="off" placeholder="文件、程序或网址"></label></div></fieldset>
+                          <fieldset class="desktop-settings-shortcut-entry"><legend>快捷方式 3</legend><div class="desktop-settings-form-grid"><label class="field-label">名称<input class="field" id="settings-assistant-shortcut-name-3" maxlength="40" autocomplete="off" placeholder="最多 20 个字符"></label><label class="field-label">打开位置<input class="field mono" id="settings-assistant-shortcut-target-3" maxlength="2048" autocomplete="off" placeholder="文件、程序或网址"></label></div></fieldset>
+                        </div>
+                      </article>
+                      <div class="switch-row"><span class="switch-copy"><strong>启动时恢复上次界面</strong><span></span></span><button class="switch" id="settings-restore-view" type="button" role="switch" aria-checked="false" data-local-switch></button></div>
+                      <label class="field-label">关闭窗口时<select class="select" id="settings-close-behavior"><option value="ASK">每次询问</option><option value="EXIT">退出</option><option value="TRAY">最小化到托盘</option></select></label>
+                      <div class="switch-row"><span class="switch-copy"><strong>任务运行时关闭警告</strong><span></span></span><button class="switch" id="settings-warn-close" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>开机启动</strong><span></span></span><button class="switch" id="settings-launch-startup" type="button" role="switch" aria-checked="false" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>后台继续运行任务</strong><span></span></span><button class="switch" id="settings-background-tasks" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>记住面板开合状态</strong><span></span></span><button class="switch" id="settings-remember-panels" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="external-data" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>外部数据来源</h3></div></div><button class="icon-button desktop-toolbar-icon desktop-toolbar-ghost desktop-action-refresh" id="settings-external-refresh-all" type="button" aria-label="刷新外部数据" data-desktop-tip="立即刷新 · 每周自动更新">⟳</button></div>
+                    <div id="settings-external-sources" class="desktop-settings-form-stack" aria-live="polite"></div>
+                    <p id="settings-external-status" class="desktop-settings-external-status" role="status"></p>
+                  </div>
+                  <div class="desktop-settings-panel" data-panel="literature" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录">‹</button><h3>接收外部文献</h3></div></div>
+                    <div id="settings-literature-sources" class="desktop-settings-form-stack" aria-live="polite"></div>
+                    <p id="settings-literature-status" class="desktop-settings-external-status" role="status"></p>
+                  </div>
+                  <div class="desktop-settings-panel" data-panel="network" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>网络与代理</h3></div></div></div>
+                    <div class="desktop-settings-form-stack">
+                      <label class="field-label">代理模式<select class="select" id="settings-proxy-mode"><option value="system">跟随系统代理</option><option value="none">不使用代理</option><option value="custom">自定义代理</option></select></label>
+                      <div class="desktop-settings-control-row"><span><strong>当前状态</strong><small id="settings-network-copy">检查本地与出口网络</small></span><span class="desktop-settings-inline"><span class="status-dot yellow" id="settings-network-dot"></span><span id="settings-network-status">尚未检测</span><button class="soft-button" id="settings-network-test" type="button">检查网络</button></span></div>
+                      <div class="desktop-settings-network-results" id="settings-network-results" aria-live="polite">
+                        <span><small>本地 IP</small><strong class="mono" id="settings-local-ip">—</strong></span>
+                        <span><small>出口 IP</small><strong class="mono" id="settings-egress-ip">—</strong></span>
+                        <span><small>出口位置</small><strong class="mono" id="settings-egress-location">—</strong></span>
+                      </div>
+                      <div class="desktop-settings-advanced-grid" id="settings-custom-proxy-fields" hidden><label class="field-label">自定义代理地址<input class="field mono" id="settings-proxy-address" placeholder="代理主机与端口"></label><label class="field-label">请求超时<input class="field" id="settings-request-timeout" type="number" min="1" max="600" value="60"></label></div>
+                      <div class="warning-banner" id="settings-network-error" hidden><span class="status-dot red"></span><span>代理地址格式有误。</span></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="privacy" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>隐私、日志与存储</h3></div></div></div>
+                    <div class="desktop-settings-form-stack">
+                      <div class="desktop-settings-three"><label class="field-label">日志级别<select class="select" id="settings-log-level"><option value="NORMAL">普通</option><option value="DETAILED">详细</option></select></label><label class="field-label">日志保留<select class="select" id="settings-retention-days"><option value="30">30 天</option><option value="7">7 天</option><option value="90">90 天</option></select></label><label class="field-label">最大缓存<select class="select" id="settings-cache-limit"><option value="5120">5 GB</option><option value="1024">1 GB</option><option value="10240">10 GB</option></select></label></div>
+                      <div class="desktop-settings-action-grid"><button class="soft-button" id="settings-open-log" type="button">打开日志目录</button><button class="soft-button" id="settings-export-support" type="button">导出诊断包</button><button class="danger-button" id="settings-clear-cache" type="button">清理临时缓存</button></div>
+                      <div class="warning-banner" id="settings-cache-confirm" hidden><span class="status-dot yellow"></span><span>清理临时缓存？用户文件将保留。</span><button class="soft-button" id="settings-clear-confirm" type="button">确认清理</button></div>
+                      <div class="desktop-settings-control-row"><span><strong>用户配置</strong><small>凭据不随配置导出</small></span><span class="desktop-settings-inline"><button class="soft-button" id="settings-export-settings" type="button">导出</button><button class="soft-button" id="settings-import-settings" type="button">导入</button></span></div>
+                      <div class="desktop-settings-control-row" id="settings-console-connection">
+                        <span><strong>允许接入控制台</strong></span>
+                        <span class="desktop-settings-inline"><span id="settings-console-status" role="status">未连接</span><button class="switch" id="settings-console-access" type="button" role="switch" aria-label="允许接入控制台" aria-checked="false" disabled></button></span>
+                      </div>
+                      <!-- Compatibility value only: no sender exists, and upgrading must not rewrite saved preferences. -->
+                      <button hidden class="switch" id="settings-telemetry" type="button" role="switch" aria-checked="false" data-local-switch></button>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="appearance" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>外观与辅助功能</h3></div></div></div>
+                    <div class="desktop-settings-form-stack">
+                      <label class="field-label">界面语言<select class="select" id="settings-language" data-desktop-no-translate><option value="zh-CN">简体中文</option><option value="en-US">English</option><option value="ja-JP">日本語</option></select></label>
+                      <div class="desktop-settings-control-row"><span><strong>字体大小</strong><small></small></span><div class="desktop-settings-stepper"><button type="button" data-font-step="-10">－</button><output id="settings-font-size">100%</output><button type="button" data-font-step="10">＋</button></div></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>完整悬停提示</strong><span>显示动作、快捷键与状态原因</span></span><button class="switch" id="settings-full-tooltips" type="button" role="switch" aria-checked="true" data-local-switch></button></div>
+                      <div class="switch-row"><span class="switch-copy"><strong>隐藏所有表情</strong><span>保留文字和功能图标</span></span><button class="switch" id="settings-hide-expressions" type="button" role="switch" aria-label="隐藏所有表情" aria-checked="false" disabled></button></div>
+                      <button class="text-button desktop-settings-assistant-link" id="settings-assistant-settings-link" type="button"><span>桌面助手</span><span class="desktop-settings-disclosure-icon" aria-hidden="true">›</span></button>
+                      <div class="desktop-settings-action-grid"><button class="soft-button" id="settings-reset-layout" type="button">恢复默认布局</button><button class="soft-button" id="settings-shortcuts" type="button" aria-expanded="false">查看快捷键</button></div>
+                      <div class="desktop-settings-popover" id="settings-shortcut-popover" data-open="false" aria-hidden="true"><strong>固定快捷键</strong><dl><dt>Ctrl+B</dt><dd>切换左侧导航栏</dd><dt>Ctrl+Alt+B</dt><dd>显示/隐藏右侧面板</dd><dt>Ctrl+J</dt><dd>切换底部面板显示</dd></dl></div>
+                    </div>
+                  </div>
+
+                  <div class="desktop-settings-panel" data-panel="update" hidden>
+                    <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录" data-desktop-tip="返回设置目录" data-desktop-placement="right">‹</button><div><p class="page-eyebrow" hidden></p><h3>关于与版本</h3></div></div></div>
+                    <div class="desktop-settings-form-stack"><div class="desktop-settings-control-row" data-about-advanced hidden><span><strong>开发者接口</strong><small data-desktop-no-translate>API 1.0.0 · MCP / stdio</small></span><span class="desktop-settings-inline"><button id="memo-api-sdk" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-external" type="button" aria-label="打开接口目录" data-desktop-tip="打开接口目录"></button><button id="memo-api-clients-link" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-code" type="button" aria-label="开发者接入" data-desktop-tip="开发者接入"></button><button id="memo-api-automation-link" class="icon-button desktop-toolbar-icon desktop-toolbar-soft desktop-action-auto" type="button" aria-label="自动化工具" data-desktop-tip="自动化工具"></button></span></div>
+                      <div class="desktop-settings-control-row"><span><strong>当前版本</strong><small></small></span><strong class="mono" data-memo-release-version data-desktop-no-translate>—</strong></div>
+                      <div class="desktop-settings-control-row"><span><strong>GitHub 项目页</strong><small></small></span><button class="soft-button" id="settings-project-page" type="button">在浏览器中打开 ↗</button></div>
+                      <div class="desktop-settings-control-row"><span><strong>本地网页</strong><small>无需联网</small></span><button class="soft-button" data-local-help="web" type="button">打开网页</button></div>
+                      <div class="desktop-settings-control-row"><span><strong>使用文档</strong><small>使用方法与功能说明</small></span><div class="desktop-user-avatar-actions"><button class="soft-button" data-local-help="pdf" type="button">PDF</button><button class="soft-button" data-local-help="markdown" type="button">Markdown</button></div></div>
+                      <div class="desktop-settings-control-row"><span><strong>设计文档</strong><small>架构与设计说明</small></span><div class="desktop-user-avatar-actions"><button class="soft-button" data-local-help="design-pdf" type="button">PDF</button><button class="soft-button" data-local-help="design-markdown" type="button">Markdown</button></div></div>
+                      <div class="desktop-settings-control-row"><span><strong>许可与隐私说明</strong><small>代码许可、角色素材与数据使用</small></span><div class="desktop-user-avatar-actions"><button class="soft-button" data-local-help="license-html" type="button">HTML</button><button class="soft-button" data-local-help="license-markdown" type="button">Markdown</button></div></div>
+                    </div>
+                  </div>
+                </section>
+
+              </div>
+              <div class="toast desktop-settings-toast" id="settings-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span>已保存</span><button class="text-button" id="settings-toast-close" type="button">关闭</button></div>
+            </div>
+          </div>
+          <div class="desktop-blank-state" id="desktop-blank-state"><div class="desktop-home-prompt"><p class="desktop-home-speech">想构建什么呢？</p><button class="desktop-home-expression-button" type="button" data-expression="interaction" aria-label="播放疑问表情"><img class="desktop-home-expression-image" src="assets/decorations/home-interaction.svg" alt="" draggable="false"></button></div></div>
+          <div class="desktop-page-placeholder" id="desktop-page-placeholder" hidden>
+            <div class="desktop-page-symbol" aria-hidden="true"><svg class="desktop-icon" viewBox="0 0 24 24"><use href="#desktop-icon-layout-top"></use></svg></div>
+            <div class="desktop-page-copy" id="desktop-page-copy"><h1 id="desktop-page-title">页面</h1><p>请打开对应 Part 的独立预览文件</p></div>
+          </div>
+        </main>
+
+        <aside class="desktop-right-panel" id="desktop-right-panel" aria-label="第三级节点设置边栏" aria-hidden="true">
+          <div class="desktop-settings-node-settings" id="settings-node-settings" aria-label="节点设置" aria-hidden="true" hidden>
+            <div class="desktop-settings-node-head"><div><p class="page-eyebrow" hidden></p><h3 id="settings-node-title">节点</h3></div><div class="desktop-settings-node-actions"><button class="icon-button" id="settings-node-close" type="button" aria-label="关闭节点设置">×</button></div></div>
+            <div class="desktop-settings-node-body"><small id="settings-node-purpose"></small>
+              <div class="switch-row" id="settings-node-toggle-row"><span class="switch-copy"><strong id="settings-node-toggle-label">启用节点</strong><span id="settings-node-toggle-copy">搬运类校核与核对分析允许受控禁用</span></span><button class="switch" id="settings-node-toggle" type="button" role="switch" aria-checked="true"></button></div>
+              <div class="warning-banner desktop-settings-bypass-warning" id="settings-node-bypass-warning" hidden><span class="status-dot yellow"></span><span id="settings-node-bypass-copy">禁用后将显示绕过分支线；运行中任务仍使用冻结快照。</span></div>
+              <div class="desktop-settings-control-row"><span><strong>重试次数</strong><small id="settings-retry-copy"></small></span><div class="desktop-settings-stepper"><button id="settings-retry-minus" type="button">－</button><input id="settings-retries" type="number" min="0" value="2" inputmode="numeric"><button id="settings-retry-plus" type="button">＋</button></div></div>
+              <div class="warning-banner desktop-settings-risk" id="settings-retry-risk" hidden><span class="status-dot yellow"></span><span id="settings-retry-risk-copy">风险说明</span><button class="soft-button" id="settings-confirm-retry" type="button">仍然使用</button><strong id="settings-retry-count">10 秒</strong></div>
+              <div class="desktop-settings-model-setting">
+                <strong class="desktop-settings-model-heading" id="settings-model-heading">模型</strong>
+                <small class="desktop-settings-model-description" id="settings-model-copy">只引用“模型服务与 API”中已保存的配置</small>
+                <div class="desktop-settings-model-choice"><span class="status-dot yellow" id="settings-model-dot"></span><strong id="settings-current-model">—</strong><button class="soft-button" id="settings-adjust-model" type="button" aria-expanded="false">调整</button></div>
+              </div>
+              <div class="desktop-settings-model-menu" id="settings-model-menu" role="menu" data-open="false" aria-hidden="true"></div>
+              <div class="desktop-settings-model-setting" id="settings-fallback-setting" hidden>
+                <strong class="desktop-settings-model-heading">备用模型 · 可选</strong>
+                <small class="desktop-settings-model-description">当前页失败时使用，消耗该页 1 次重试；未设置则继续使用主模型。</small>
+                <div class="desktop-settings-model-choice"><span class="status-dot yellow" id="settings-fallback-dot"></span><strong id="settings-current-fallback">未设置</strong><button class="soft-button" id="settings-adjust-fallback" type="button" aria-expanded="false">调整</button></div>
+              </div>
+              <div class="desktop-settings-model-menu" id="settings-fallback-menu" role="menu" data-open="false" aria-hidden="true"></div>
+              <div class="warning-banner desktop-settings-risk" id="settings-model-risk" hidden><span class="status-dot yellow"></span><span>与生成模型相同，可能遗漏相同错误。</span><button class="soft-button" id="settings-confirm-model" type="button">仍然使用</button><strong id="settings-model-count">10 秒</strong></div>
+              <details class="desktop-settings-exam-panel" id="settings-node-test-row">
+                <summary><strong>模型测试</strong><span class="desktop-settings-exam-core"><i class="status-dot yellow" id="settings-exam-core-dot" aria-hidden="true"></i><output id="settings-exam-core-score" aria-label="Epoch AI 参考分数">—</output><span class="desktop-settings-exam-chevron" aria-hidden="true">⌄</span></span></summary>
+                <div class="desktop-settings-exam-content">
+                  <dl class="desktop-settings-exam-scores" aria-label="当前模型的四项分数">
+                    <div><dt>当前节点考试</dt><dd><output id="settings-node-test-score" aria-label="岗位实考分数">—</output></dd></div>
+                    <div><dt>Epoch AI</dt><dd><output id="settings-exam-epoch">—</output></dd></div>
+                    <div><dt id="settings-exam-secondary-source">LiveBench</dt><dd><output id="settings-exam-aa">—</output></dd></div>
+                    <div><dt>OpenRouter</dt><dd><output id="settings-exam-openrouter">—</output></dd></div>
+                  </dl>
+                  <small id="settings-exam-source-note">仅供参考 · 不同来源不可横向比较</small>
+                  <div class="desktop-settings-exam-actions"><select id="settings-exam-tier" class="select" aria-label="考试体量"><option value="LIGHT">轻度 · 20%</option><option value="HALF">半额 · 50%</option><option value="FULL" selected>全量 · 100%</option></select><button class="soft-button" id="settings-node-test" type="button" title="开始考试">测试</button></div>
+                  <div class="desktop-settings-exam-confirm" id="settings-exam-confirm" hidden><small id="settings-exam-plan-copy"></small><div class="desktop-settings-exam-actions"><button class="soft-button" id="settings-exam-plan-cancel" type="button">取消</button><button class="primary-button" id="settings-exam-plan-start" type="button">开始</button></div></div>
+                  <div class="desktop-settings-exam-progress" id="settings-exam-progress" hidden><progress aria-label="考试调用进度（含修复预留）"></progress><small id="settings-exam-progress-copy" role="status" aria-live="polite"></small><button class="soft-button" id="settings-exam-stop" type="button" hidden>停止</button></div>
+                  <p id="settings-tier-result" class="desktop-settings-external-note" aria-live="polite"></p>
+                  <details class="desktop-settings-external-reference" id="settings-external-reference"><summary>来源详情 <span id="settings-reference-summary">—</span></summary><div id="settings-reference-details"></div></details>
+                </div>
+              </details>
+              <div class="warning-banner" id="settings-node-error" hidden><span class="status-dot red"></span><span>数值非法或依赖冲突；当前节点不能保存。</span></div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="desktop-bottom-panel desktop-accounting-panel" id="desktop-bottom-panel" aria-label="计费与用量" aria-hidden="true" inert data-metric="COST" data-accounting-version="r0.6">
+  <div class="desktop-accounting-toolbar">
+    <strong class="desktop-accounting-title"><svg aria-hidden="true"><use href="#desktop-icon-accounting"></use></svg><span>计费与用量</span></strong>
+    <label class="desktop-accounting-filter desktop-accounting-scope-filter">
+      <svg aria-hidden="true"><use href="#desktop-icon-crosshair"></use></svg>
+      <span class="desktop-sr-only">统计范围</span>
+      <select id="desktop-accounting-scope" aria-label="统计范围">
+        <option value="ALL">全部记录</option>
+        <option value="CURRENT_JOB" disabled>本任务（归属未完整）</option>
+      </select>
+    </label>
+    <label class="desktop-accounting-filter">
+      <svg aria-hidden="true"><use href="#desktop-icon-calendar-range"></use></svg>
+      <span class="desktop-sr-only">时间范围</span>
+      <select id="desktop-accounting-range" aria-label="时间范围">
+        <option value="7D">近 7 天</option>
+        <option value="30D" selected>近 30 天</option>
+        <option value="MONTH">本月</option>
+      </select>
+    </label>
+    <label class="desktop-accounting-filter desktop-accounting-model-filter">
+      <svg aria-hidden="true"><use href="#desktop-icon-models"></use></svg>
+      <span class="desktop-sr-only">模型</span>
+      <select id="desktop-accounting-model" aria-label="模型"><option value="ALL">全部模型</option></select>
+    </label>
+    <button class="desktop-accounting-icon-button" id="desktop-accounting-refresh" type="button" aria-label="立即刷新" title="立即刷新">
+      <svg aria-hidden="true"><use href="#desktop-icon-refresh"></use></svg>
+    </button>
+    <span class="desktop-accounting-sync" id="desktop-accounting-sync" aria-live="polite">等待同步</span>
+    <button class="desktop-accounting-icon-button" id="desktop-accounting-close" type="button" aria-label="关闭底部面板" title="关闭">
+      <svg aria-hidden="true"><use href="#desktop-icon-close"></use></svg>
+    </button>
+  </div>
+
+  <div class="desktop-accounting-body">
+    <div class="desktop-accounting-metrics" role="tablist" aria-label="选择图表指标">
+      <div class="desktop-accounting-metric-row is-active" data-metric-row="COST">
+        <button class="desktop-accounting-metric-leading desktop-accounting-currency" id="desktop-accounting-currency" type="button" aria-label="当前 USD，点击切换为 RMB" title="切换显示币种">
+          <svg aria-hidden="true"><use href="#desktop-icon-cost"></use></svg><span id="desktop-accounting-currency-code">USD</span>
+        </button>
+        <button class="desktop-accounting-metric-main" id="desktop-accounting-tab-cost" type="button" role="tab" aria-selected="true" aria-controls="desktop-accounting-chart" data-metric="COST">
+          <span class="desktop-accounting-metric-label">费用（含估算）</span>
+          <strong class="desktop-accounting-metric-value" id="desktop-accounting-cost">—</strong>
+          <span class="desktop-accounting-metric-note" id="desktop-accounting-cost-note">实际 — · 估算 —</span>
+        </button>
+      </div>
+      <div class="desktop-accounting-metric-row" data-metric-row="REQUESTS">
+        <span class="desktop-accounting-metric-leading" aria-hidden="true"><svg><use href="#desktop-icon-requests"></use></svg></span>
+        <button class="desktop-accounting-metric-main" id="desktop-accounting-tab-requests" type="button" role="tab" aria-selected="false" aria-controls="desktop-accounting-chart" data-metric="REQUESTS">
+          <span class="desktop-accounting-metric-label">请求次数</span>
+          <strong class="desktop-accounting-metric-value" id="desktop-accounting-attempts">—</strong>
+          <span class="desktop-accounting-metric-note" id="desktop-accounting-attempt-note">失败与重试也计入</span>
+        </button>
+      </div>
+      <div class="desktop-accounting-metric-row" data-metric-row="TOKENS">
+        <span class="desktop-accounting-metric-leading" aria-hidden="true"><svg><use href="#desktop-icon-tokens"></use></svg></span>
+        <button class="desktop-accounting-metric-main" id="desktop-accounting-tab-tokens" type="button" role="tab" aria-selected="false" aria-controls="desktop-accounting-chart" data-metric="TOKENS">
+          <span class="desktop-accounting-metric-label">Tokens</span>
+          <strong class="desktop-accounting-metric-value" id="desktop-accounting-tokens">—</strong>
+          <span class="desktop-accounting-metric-note" id="desktop-accounting-token-note">输入 — · 输出 —</span>
+        </button>
+      </div>
+    </div>
+
+    <figure class="desktop-accounting-chart" id="desktop-accounting-chart" role="tabpanel" aria-labelledby="desktop-accounting-tab-cost">
+      <figcaption class="desktop-accounting-chart-head">
+        <span class="desktop-accounting-chart-heading"><svg aria-hidden="true"><use id="desktop-accounting-chart-icon" href="#desktop-icon-cost"></use></svg><span id="desktop-accounting-chart-title">每日费用</span><small id="desktop-accounting-chart-unit">USD</small></span>
+        <span class="desktop-accounting-legend" id="desktop-accounting-legend"></span>
+      </figcaption>
+      <div class="desktop-accounting-plot" id="desktop-accounting-plot">
+        <svg id="desktop-accounting-svg" role="img" aria-labelledby="desktop-accounting-svg-title desktop-accounting-svg-desc" preserveAspectRatio="none">
+          <title id="desktop-accounting-svg-title">近 30 天每日费用</title>
+          <desc id="desktop-accounting-svg-desc">按已配置模型统计的每日费用柱状图。</desc>
+        </svg>
+        <div class="desktop-accounting-tooltip" id="desktop-accounting-tooltip" role="tooltip" hidden></div>
+        <div class="desktop-accounting-empty" id="desktop-accounting-empty" hidden>当前范围没有可显示数据</div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+        <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整节点设置边栏宽度" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="320" aria-valuemax="620" aria-valuenow="480" hidden></button>
+        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
+      </div>
+
+      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
+      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
+</section>

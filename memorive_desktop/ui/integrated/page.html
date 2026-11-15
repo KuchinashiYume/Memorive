@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="zh-Hans" class="desktop-user-loading">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;;script-src &#x27;strict-dynamic&#x27; %SCRIPT_HASHES%; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
+  <title>Memorive</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+<!-- include: routes/settings/base.css -->
+<!-- include: routes/inbox/base.css -->
+<!-- include: routes/tasks/base.css -->
+<!-- include: routes/messages/base.css -->
+<!-- include: routes/sessions/base.css -->
+<!-- include: routes/library/base.css -->
+<!-- include: routes/worklog/base.css -->
+<!-- include: shared/cross-route.css -->
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style><!-- include: shared/accounting.css --></style>
+<style><!-- include: shared/research.css --></style>
+<style><!-- include: shared/local-user.css --></style>
+<style><!-- include: shared/window-chrome.css --></style>
+<style><!-- include: routes/leaderboard/base.css --></style>
+<style><!-- include: routes/chat/workspace.css --></style>
+<style><!-- include: routes/chat/shell.css --></style>
+<style><!-- include: shared/layout-system.css --></style>
+<style><!-- include: shared/scrollbars.css --></style>
+<style id="desktop-locale-layout-fix">
+<!-- include: shared/locale-layout.css -->
+</style>
+<style id="memo-typography">
+<!-- include: shared/typography.css -->
+</style>
+
+<style>
+<!-- include: routes/settings/logic-review.css -->
+</style>
+<style id="paper-review-layout-refinement">
+<!-- include: shared/paper-review.css -->
+</style>
+<!-- E5 node progress style -->
+<style>
+<!-- include: shared/node-progress.css -->
+</style>
+<!-- E5 node progress script -->
+<script id="memo-content-language-v1">
+<!-- include: shared/content-language.js -->
+</script>
+<script>
+<!-- include: shared/node-progress.js -->
+</script>
+<style id="memo-answer-style-css">
+<!-- include: routes/chat/answer-styles.css -->
+</style>
+<style>
+<!-- include: routes/inbox/research-home.css -->
+</style>
+
+<style id="desktop-update-layout">
+<!-- include: routes/settings/update.css -->
+</style>
+</head>
+<body data-desktop-product-page="integrated">
+<!-- include: routes/settings/markup.html -->
+<!-- include: routes/inbox/markup.html -->
+<!-- include: routes/tasks/markup.html -->
+<!-- include: routes/messages/markup.html -->
+<!-- include: routes/sessions/markup.html -->
+<!-- include: routes/library/markup.html -->
+<!-- include: routes/worklog/markup.html -->
+<!-- include: routes/leaderboard/markup.html -->
+<!-- include: routes/chat/markup.html -->
+<script id="memo-evidence-check-script">
+<!-- include: routes/chat/evidence-check.js -->
+</script>
+<script>
+<!-- include: shared/app.js -->
+</script>
+<script>
+<!-- include: shared/pdf-loader.js -->
+</script>
+<script>
+<!-- include: shared/controls.js -->
+</script>
+<script>
+<!-- include: shared/accounting.js -->
+</script>
+<script>
+<!-- include: routes/settings/icons.js -->
+</script>
+<script>
+<!-- include: shared/product-bridge.js -->
+</script>
+<script>
+<!-- include: routes/settings/controls.js -->
+</script>
+<script>
+<!-- include: shared/local-user.js -->
+</script>
+<script>
+<!-- include: routes/settings/form-groups.js -->
+</script>
+<script>
+<!-- include: shared/window-chrome.js -->
+</script>
+<script>
+<!-- include: shared/decorations.js -->
+</script>
+<script>
+<!-- include: routes/settings/preview.js -->
+</script>
+<script>
+<!-- include: routes/settings/model-picker.js -->
+</script>
+<script>
+<!-- include: routes/settings/settings.js -->
+</script>
+<script>
+<!-- include: routes/settings/external-sources.js -->
+</script>
+<script>
+<!-- include: routes/settings/browser-sites.js -->
+</script>
+<script>
+<!-- include: routes/settings/exam-panel.js -->
+</script>
+<script>
+<!-- include: shared/research.js -->
+</script>
+<script>
+<!-- include: shared/reports.js -->
+</script>
+<script>
+<!-- include: shared/report-workflow.js -->
+</script>
+<script>
+<!-- include: routes/inbox/preview.js -->
+</script>
+<script>
+<!-- include: routes/inbox/view.js -->
+</script>
+<script>
+<!-- include: routes/inbox/bridge.js -->
+</script>
+<script>
+<!-- include: routes/tasks/preview.js -->
+</script>
+<script>
+<!-- include: routes/tasks/view.js -->
+</script>
+<script>
+<!-- include: routes/tasks/bridge.js -->
+</script>
+<script>
+<!-- include: routes/messages/preview.js -->
+</script>
+<script>
+<!-- include: routes/messages/view.js -->
+</script>
+<script>
+<!-- include: routes/messages/bridge.js -->
+</script>
+<script>
+<!-- include: routes/sessions/preview.js -->
+</script>
+<script>
+<!-- include: routes/sessions/view.js -->
+</script>
+<script>
+<!-- include: routes/sessions/bridge.js -->
+</script>
+<script>
+<!-- include: routes/library/preview.js -->
+</script>
+<script>
+<!-- include: routes/library/view.js -->
+</script>
+<script>
+<!-- include: routes/library/bridge.js -->
+</script>
+<script>
+<!-- include: routes/worklog/preview.js -->
+</script>
+<script>
+<!-- include: routes/worklog/view.js -->
+</script>
+<script>
+<!-- include: routes/worklog/bridge.js -->
+</script>
+<!-- desktop-leaderboard-start --><script>
+<!-- include: routes/leaderboard/preview.js -->
+</script>
+<script>
+<!-- include: routes/leaderboard/currency.js -->
+</script>
+<script>
+<!-- include: routes/leaderboard/view.js -->
+</script><!-- desktop-leaderboard-end -->
+<script>
+<!-- include: routes/chat/preview.js -->
+</script>
+<script>
+<!-- include: routes/chat/workspace.js -->
+</script>
+<script>
+<!-- include: routes/settings/research-connections.js -->
+</script>
+<script>
+<!-- include: routes/settings/research-navigation.js -->
+</script>
+<script>
+<!-- include: routes/settings/weight-controls.js -->
+</script>
+<script>
+<!-- include: routes/settings/research-weights.js -->
+</script>
+<script>
+<!-- include: routes/settings/developer-clients.js -->
+</script>
+<script>
+<!-- include: shared/scrollbars.js -->
+</script>
+<script>
+<!-- include: shared/review.js -->
+</script>
+<script>
+<!-- include: routes/inbox/research-home.js -->
+</script>
+<script>
+<!-- include: shared/structure-review.js -->
+</script>
+<script id="desktop-update-bridge">
+<!-- include: routes/settings/update.js -->
+</script>
+</body>
+</html>
