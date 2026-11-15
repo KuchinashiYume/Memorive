@@ -3607,8 +3607,8 @@
     },
     {
       "path": "source/memorive_desktop_service/control_store.py",
-      "sha256": "2dfc4c84fb34b291111026deef7d5ebdafc3f5e61ed01b5334268545caf81626",
-      "bytes": 9671
+      "sha256": "f282f52903a69e8a188cede19732b5c916615907dbdcef48af651a592754db07",
+      "bytes": 10509
     },
     {
       "path": "source/memorive_desktop_service/errors.py",

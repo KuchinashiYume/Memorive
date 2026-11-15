@@ -32,6 +32,7 @@ SCHEMA_VERSION = "DesktopControlStore-v2"
 ALLOWED_ROUTES = frozenset({"home", "settings", "inbox", "current-task", "messages", "sessions", "library",
                             "work-log", "leaderboard", "assistant", "chat", "research-settings"})
 WINDOW_LIMITS = {"x": (-32768, 32768), "y": (-32768, 32768), "width": (640, 7680), "height": (480, 4320)}
+PANELS = ("left", "right", "bottom")
 _LOCKS_GUARD = threading.Lock()
 _LOCKS: dict[str, threading.RLock] = {}
 
@@ -43,32 +44,45 @@ def default_state() -> dict[str, Any]:
             "filters": {}, "selected_locator": None, "event_cursor_by_job": {}, "pending_outbox_command_metadata": {}}
 
 
-def _in(value: Any, low: int, high: int) -> bool:
-    return not isinstance(value, bool) and isinstance(value, int) and low <= value <= high
+def _int_between(value: Any, low: int, high: int) -> bool:
+    """An int from low to high, both included; True and False do not count as numbers here."""
+    return isinstance(value, int) and not isinstance(value, bool) and low <= value <= high
 
 
 def validate_state(value: Any) -> dict[str, Any]:
-    """The stored form of a state: known fields only, defaults for missing ones."""
+    """The stored form of a state: known fields only, defaults for missing ones.
+
+    Raises ValueError("CONTROL_STORE_STATE_INVALID:<field>") for the first field that is wrong.
+    """
     if not isinstance(value, Mapping):
         raise ValueError("CONTROL_STORE_STATE_INVALID")
-    state = {**default_state(), **{key: value[key] for key in default_state() if key in value}}
-    window, panels, cursors = state["window_bounds"], state["panel_dimensions"], state["event_cursor_by_job"]
-    for field, ok in (
-            ("route", isinstance(state["route"], str) and state["route"] in ALLOWED_ROUTES),
-            ("window_bounds", isinstance(window, Mapping) and isinstance(window.get("maximized"), bool)
-             and all(_in(window.get(name), *limits) for name, limits in WINDOW_LIMITS.items())),
-            ("panel_dimensions", isinstance(panels, Mapping)
-             and all(_in(panels.get(name), 0, 2000) for name in ("left", "right", "bottom"))),
-            ("event_cursor_by_job", isinstance(cursors, Mapping)
-             and all(isinstance(job, str) and _in(at, 0, 2**63 - 1) for job, at in cursors.items())),
-            ("filters", isinstance(state["filters"], Mapping)),
-            ("pending_outbox_command_metadata", isinstance(state["pending_outbox_command_metadata"], Mapping))):
-        if not ok:
-            raise ValueError("CONTROL_STORE_STATE_INVALID:" + field)
+    state = default_state()
+    state.update({key: value[key] for key in state if key in value})
+
+    def invalid(field: str) -> ValueError:
+        return ValueError("CONTROL_STORE_STATE_INVALID:" + field)
+
+    route, window, panels, cursors = (state["route"], state["window_bounds"], state["panel_dimensions"],
+                                      state["event_cursor_by_job"])
+    if not (isinstance(route, str) and route in ALLOWED_ROUTES):
+        raise invalid("route")
+    if not (isinstance(window, Mapping) and isinstance(window.get("maximized"), bool)
+            and all(_int_between(window.get(name), *limits) for name, limits in WINDOW_LIMITS.items())):
+        raise invalid("window_bounds")
+    if not (isinstance(panels, Mapping) and all(_int_between(panels.get(name), 0, 2000) for name in PANELS)):
+        raise invalid("panel_dimensions")
+    if not (isinstance(cursors, Mapping)
+            and all(isinstance(job, str) and _int_between(at, 0, 2**63 - 1) for job, at in cursors.items())):
+        raise invalid("event_cursor_by_job")
+    for field in ("filters", "pending_outbox_command_metadata"):
+        if not isinstance(state[field], Mapping):
+            raise invalid(field)
     if state["selected_locator"] is not None:
         StableLocator.parse(state["selected_locator"])
+
+    # Only the known keys are kept. Mappings come back sorted by key, as earlier versions returned them.
     state["window_bounds"] = {name: window[name] for name in (*WINDOW_LIMITS, "maximized")}
-    state["panel_dimensions"] = {name: panels[name] for name in ("bottom", "left", "right")}
+    state["panel_dimensions"] = {name: panels[name] for name in sorted(PANELS)}
     state["event_cursor_by_job"] = dict(sorted(cursors.items()))
     state["pending_outbox_command_metadata"] = dict(sorted(state["pending_outbox_command_metadata"].items()))
     return deepcopy(state)
@@ -127,19 +141,25 @@ class ControlStore:
         return envelope
 
     def _read(self, value: Any) -> dict[str, Any]:
+        """The envelope read from the file, its state checked. A first-version file is converted first."""
         if not isinstance(value, Mapping):
             raise ControlStoreCorrupt("CONTROL_STORE_ENVELOPE_INVALID")
         if value.get("schema_version") == "DesktopControlStore-v1":
-            state = default_state()
-            for old, new in (("current_route", "route"), ("window", "window_bounds"), ("panels", "panel_dimensions"),
-                             ("filters", "filters"), ("selected_locator", "selected_locator")):
-                state[new] = value.get(old, state[new])
-            return self._write_state(state, int(value.get("revision", 0)) + 1)
+            return self._convert_first_version(value)
         if value.get("schema_version") != SCHEMA_VERSION:
             raise ControlStoreCorrupt("CONTROL_STORE_SCHEMA_UNSUPPORTED")
-        if not _in(value.get("revision"), 0, 2**63 - 1):
+        if not _int_between(value.get("revision"), 0, 2**63 - 1):
             raise ControlStoreCorrupt("CONTROL_STORE_REVISION_INVALID")
         return {**value, "state": validate_state(value.get("state"))}
+
+    def _convert_first_version(self, value: Mapping[str, Any]) -> dict[str, Any]:
+        """Take the fields of a DesktopControlStore-v1 file under their current names and write the file
+        in the current form, one revision later."""
+        state = default_state()
+        for old, new in (("current_route", "route"), ("window", "window_bounds"), ("panels", "panel_dimensions"),
+                         ("filters", "filters"), ("selected_locator", "selected_locator")):
+            state[new] = value.get(old, state[new])
+        return self._write_state(state, int(value.get("revision", 0)) + 1)
 
     def _recover(self, raw: bytes, reason: str) -> dict[str, Any]:
         digest = hashlib.sha256(raw).hexdigest().upper()
