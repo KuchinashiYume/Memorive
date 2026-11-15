@@ -287,7 +287,7 @@ def load_source_snapshot(
     schema_path = Path(manifest_schema_path).resolve()
     schema_bytes = schema_path.read_bytes()
     if len(schema_bytes) != SOURCE_MANIFEST_SCHEMA_BYTES or sha256_bytes(schema_bytes) != SOURCE_MANIFEST_SCHEMA_SHA256:
-        raise ManifestIntegrityError("source manifest schema differs from the frozen candidate002 schema")
+        raise ManifestIntegrityError("source manifest schema differs from the frozen schema")
     schema = _parse_json_object(schema_bytes, "source manifest schema")
     try:
         Draft202012Validator.check_schema(schema)

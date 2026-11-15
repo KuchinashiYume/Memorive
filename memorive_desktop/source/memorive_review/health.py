@@ -3,8 +3,8 @@ from pathlib import Path
 import argparse,hashlib,json,logging,os,sys,threading,time,traceback
 
 def main(root):
-    p=argparse.ArgumentParser();p.add_argument('--evo-e2-health',type=Path,required=True);args=p.parse_args()
-    target=args.evo_e2_health.resolve();target.mkdir(parents=True,exist_ok=False)
+    p=argparse.ArgumentParser();p.add_argument('--local-health',type=Path,required=True);args=p.parse_args()
+    target=args.local_health.resolve();target.mkdir(parents=True,exist_ok=False)
     result={'schema_version':'EVO-E2-ExecutableHealth-v1','status':'RUNNING','exe_sha256':hashlib.sha256(Path(sys.executable).read_bytes()).hexdigest(),
         'scope':'AUTHOR_MACHINE_EMPTY_PROFILE_REAL_IPC_AND_WEBVIEW2','model_semantic_quality':'NOT_ASSESSED','vm_validation':'NOT_RUN'}
     api=None;window=None;complete=threading.Event();result_path=target/'result.json';bridge_errors=[]
@@ -15,9 +15,9 @@ def main(root):
     def save():result_path.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     try:
         from product_identity import BINDING
-        if BINDING.get('package_id')!='EVO-E2-build009':raise ValueError('E2_HEALTH_PACKAGE_ID_MISMATCH')
+        if BINDING.get('package_id')!='EVO-E2-build009':raise ValueError('HEALTH_PACKAGE_ID_MISMATCH')
         import uuid
-        webview_storage=Path(os.environ.get('TEMP') or str(target)) / ('evo-e2-wv-'+uuid.uuid4().hex[:10]);webview_storage.mkdir()
+        webview_storage=Path(os.environ.get('TEMP') or str(target)) / ('memorive-health-wv-'+uuid.uuid4().hex[:10]);webview_storage.mkdir()
         result['webview_storage']=str(webview_storage)
         for key,folder in [('APPDATA','appdata'),('LOCALAPPDATA','localappdata'),('TEMP','temp'),('TMP','temp')]:
             path=target/folder;path.mkdir(exist_ok=True);os.environ[key]=str(path)
@@ -44,7 +44,7 @@ def main(root):
         result.update(packaged_numeric_engine='PASS',packaged_distribution_runtime='PASS',packaged_exam_members='HASH_VERIFIED_20_CASES')
         import webview
         webview.settings['OPEN_EXTERNAL_LINKS_IN_BROWSER']=False
-        window=webview.create_window('Memorive EVO-E2 local health',url=(root/'bundle_integrated.html').as_uri(),js_api=api,hidden=True,width=1600,height=1000,text_select=True)
+        window=webview.create_window('Memorive local health',url=(root/'bundle_integrated.html').as_uri(),js_api=api,hidden=True,width=1600,height=1000,text_select=True)
         api.attach_window(window)
         from window_chrome import MainWindowChrome
         api._main_chrome=MainWindowChrome(window,api)
@@ -57,15 +57,15 @@ def main(root):
                     if value and value.get('ready'):break
                     time.sleep(.2)
                 assert value and value['ready'] and value['data'] and value['logic'],value
-                window.evaluate_js("""window.__E2_NATIVE_HEALTH__={status:'RUNNING'};(async()=>{
+                window.evaluate_js("""window.__NATIVE_HEALTH__={status:'RUNNING'};(async()=>{
                     const pages=[['settings','__Desktop_SETTINGS_BRIDGE__'],['inbox','__Desktop_INBOX_BRIDGE__'],['current-task','__Desktop_CURRENT_TASK_BRIDGE__'],['library','__Desktop_LIBRARY_BRIDGE__']];
                     for(const [route,bridge] of pages){window.__Desktop_INTEGRATED_APP__.activate(route);await window[bridge].bootstrap();}
                     const frame=await window.pywebview.api.get_window_state();
-                    window.__E2_NATIVE_HEALTH__={status:'PASS',pages:pages.map(p=>p[0]),frame};
-                })().catch(error=>{window.__E2_NATIVE_HEALTH__={status:'FAIL',error:String(error?.stack||error)};});void 0;""")
+                    window.__NATIVE_HEALTH__={status:'PASS',pages:pages.map(p=>p[0]),frame};
+                })().catch(error=>{window.__NATIVE_HEALTH__={status:'FAIL',error:String(error?.stack||error)};});void 0;""")
                 deadline=time.monotonic()+45
                 while time.monotonic()<deadline:
-                    page_result=window.evaluate_js('window.__E2_NATIVE_HEALTH__')
+                    page_result=window.evaluate_js('window.__NATIVE_HEALTH__')
                     if page_result and page_result.get('status')!='RUNNING':break
                     time.sleep(.2)
                 assert page_result and page_result.get('status')=='PASS',page_result
@@ -76,7 +76,7 @@ def main(root):
             except BaseException:result.update(status='FAIL',error=traceback.format_exc())
             finally:save();complete.set();window.destroy()
         save();webview.start(verify,gui='edgechromium',debug=False,http_server=False,private_mode=True,storage_path=str(webview_storage))
-        if not complete.is_set():raise RuntimeError('E2_HEALTH_WINDOW_CLOSED_BEFORE_VERIFICATION')
+        if not complete.is_set():raise RuntimeError('HEALTH_WINDOW_CLOSED_BEFORE_VERIFICATION')
     except BaseException:result.update(status='FAIL',error=traceback.format_exc())
     finally:
         if api is not None:

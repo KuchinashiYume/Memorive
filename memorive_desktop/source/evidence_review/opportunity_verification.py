@@ -1,4 +1,4 @@
-"""Role-separated semantic recomputation for RESEARCH-OPPORTUNITIES successor003.
+"""Role-separated semantic recomputation for research opportunities.
 
 This module deliberately imports only the shared canonical byte primitive.  It
 does not import RESEARCH_OPPORTUNITIES source, projection, gap, comparison, tension, or candidate

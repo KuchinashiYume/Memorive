@@ -96,6 +96,66 @@
     {
       "name": "SOURCE_CONNECTORS_LITERATURE_DISCOVERY_20260810_190016_candidate002",
       "kept_because": "Run id constant of the literature connector framework, restored unchanged with the code that was removed in this round."
+    },
+    {
+      "name": "EVO-E2-ExecutableHealth-v1",
+      "kept_because": "Format id written into the result file of the earlier executable health check."
+    },
+    {
+      "name": "EVO-E2-build009",
+      "kept_because": "Id of the one build the earlier executable health check was made for; it compares the running build with it."
+    },
+    {
+      "name": "\"candidate002\"",
+      "kept_because": "Read by the report command line from a frozen evidence package made during development. The name is part of that package, so it changes only together with the package."
+    },
+    {
+      "name": "source_snapshot_manifest_candidate002.schema.json",
+      "kept_because": "Read by the report command line from a frozen evidence package made during development. The name is part of that package, so it changes only together with the package. The schema file is pinned by size and hash."
+    },
+    {
+      "name": "authority_candidate002.json",
+      "kept_because": "Read by the report command line from a frozen evidence package made during development. The name is part of that package, so it changes only together with the package."
+    },
+    {
+      "name": "Memorive_RESEARCH_CONTRACTS_CROSS_common_object_contract_v2.schema.json",
+      "kept_because": "Read by the report command line from a frozen evidence package made during development. The name is part of that package, so it changes only together with the package."
+    },
+    {
+      "name": "research_reports_research_reports_v1_successor002_20260802_1620",
+      "kept_because": "Read by the report command line from a frozen evidence package made during development. The name is part of that package, so it changes only together with the package."
+    },
+    {
+      "name": "1.1-candidate002",
+      "kept_because": "Part of the \"$id\" of the report schemas; records made with them name it."
+    },
+    {
+      "name": "source-snapshot-manifest:candidate002:2.0",
+      "kept_because": "The \"$id\" of the source manifest schema, which is pinned by size and hash."
+    },
+    {
+      "name": "RESEARCH-REPORTS candidate002 strict public-safe source snapshot manifest",
+      "kept_because": "Title inside the source manifest schema, which is pinned by size and hash."
+    },
+    {
+      "name": "Memorive_KNOWLEDGE_PROMOTION_CROSS_",
+      "kept_because": "Start of the file names of the card promotion contract schemas, which the promotion code looks up by name."
+    },
+    {
+      "name": "_schema_candidate001.json",
+      "kept_because": "End of the file names of the card promotion contract schemas, which the promotion code looks up by name."
+    },
+    {
+      "name": "CANDIDATE_REVIEW_CROSS_20260811_165122_candidate001",
+      "kept_because": "Run id written into candidate card staging records."
+    },
+    {
+      "name": "APPLICATION_RUNTIME_CROSS_real_application_facade_cross_page_e2e_20260826_run001",
+      "kept_because": "Run id written into the receipt of the application facade story run."
+    },
+    {
+      "name": "d38_contract",
+      "kept_because": "Folder name inside the fixture set the application facade story run reads."
     }
   ],
   "files": [
@@ -106,38 +166,6 @@
     {
       "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",
       "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
-    },
-    {
-      "path": "memorive_desktop/source/memorive_review/health.py",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/research_reports/cli.py",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/research_reports/source.py",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/research_reports/schemas",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/memorive_application",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/research_recommendations/knowledge_promotion_cross_atomic_card_promotion.py",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/research_recommendations/candidate_review_cross_candidate_card_staging.py",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
-    },
-    {
-      "path": "memorive_desktop/source/evidence_review/opportunity_verification.py",
-      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
     }
   ]
 }

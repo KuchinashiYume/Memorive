@@ -113,10 +113,10 @@ def _write_json_new(path: Path, value: Any) -> None:
         stream.write((json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
 
 
-def _load_fake_class(d38_root: Path) -> type:
-    spec = importlib.util.spec_from_file_location("application_runtime_d38_fake", d38_root / "fake_facade.py")
+def _load_fake_class(contract_root: Path) -> type:
+    spec = importlib.util.spec_from_file_location("application_runtime_contract_fake", contract_root / "fake_facade.py")
     if spec is None or spec.loader is None:
-        raise RuntimeError("Runtime_D38_FAKE_IMPORT_FAILED")
+        raise RuntimeError("Runtime_FACADE_FAKE_IMPORT_FAILED")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.FakeApplicationFacade
@@ -262,11 +262,11 @@ async def run_construction_story(
     store = DurableJobStore(fixture.database_path, owner_id="application_runtime-construction-a")
     facade = ApplicationFacade(store)
     real_adapter = RealFacadeAdapter(facade)
-    d38_root = attempt / "fixtures_runtime" / "d38_contract"
-    case_payload = json.loads((d38_root / "consumer_cases.json").read_text(encoding="utf-8"))
+    contract_root = attempt / "fixtures_runtime" / "d38_contract"
+    case_payload = json.loads((contract_root / "consumer_cases.json").read_text(encoding="utf-8"))
     case_ids = [row["case_id"] for row in case_payload["cases"]]
     if case_ids != list(PAGE_DIMENSIONS):
-        raise AssertionError("Runtime_D38_CASE_DENOMINATOR_DRIFT")
+        raise AssertionError("Runtime_FACADE_CASE_DENOMINATOR_DRIFT")
 
     performance: list[dict[str, Any]] = []
     parity_rows: list[dict[str, Any]] = []
@@ -354,7 +354,7 @@ async def run_construction_story(
             },
         )
 
-        # Freeze one pre-response state and project the same frozen D38 fake
+        # Freeze one pre-response state and project the same frozen contract fake
         # against the real adapter.  Only documented cross-implementation
         # fields are compared; fake-only hashes are not elevated to authority.
         real_job_pre_response = facade.get_job(job_id)
@@ -370,7 +370,7 @@ async def run_construction_story(
             "model_calls": 0,
             "credential_value_reads": 0,
         }
-        fake_adapter = FakeFacadeAdapter(_load_fake_class(d38_root)(fake_state))
+        fake_adapter = FakeFacadeAdapter(_load_fake_class(contract_root)(fake_state))
         read_calls = {
             "list_jobs": {},
             "get_job": {"job_id": job_id},

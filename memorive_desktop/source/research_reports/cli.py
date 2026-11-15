@@ -142,7 +142,7 @@ def _anchor_path(successor_root: Path, entry: object, role: str) -> Path:
 def _candidate_successor_root(value: object) -> Path:
     root = _canonical_absolute(value, "successor_root")
     if root.name != EXACT_SUCCESSOR_ROOT_NAME:
-        raise OutputBoundaryError("candidate package is outside the exact successor002 root")
+        raise OutputBoundaryError("candidate package is outside the exact successor root")
     if not root.is_dir() or _is_reparse(root):
         raise OutputBoundaryError("successor_root must be an existing plain directory")
     _assert_existing_chain_plain(root, root)

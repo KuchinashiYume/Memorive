@@ -2962,8 +2962,8 @@
     },
     {
       "path": "source/evidence_review/opportunity_verification.py",
-      "sha256": "e64df7dc84ecf0523f1575361187339e1567ef34ca88c51ff16a2f74d4e11b4f",
-      "bytes": 66424
+      "sha256": "7d8e2a5efdd46dfe92ca9997879bb26e005ab3310cdc17c159a3c6f508965021",
+      "bytes": 66411
     },
     {
       "path": "source/evidence_review/ownership_binding.py",
@@ -3402,8 +3402,8 @@
     },
     {
       "path": "source/memorive_application/orchestrator.py",
-      "sha256": "c76af79fa19cfd88381c48cbd01977df70cfa024b2b4bcc9a46b98883d031d04",
-      "bytes": 27238
+      "sha256": "a3b56cf2d399dda6eee44da585b2f4e613e9251b39087a6b4794b9e8782d5499",
+      "bytes": 27279
     },
     {
       "path": "source/memorive_application/transport.py",
@@ -4337,8 +4337,8 @@
     },
     {
       "path": "source/memorive_review/health.py",
-      "sha256": "999c5447af7fa8b17c50ba362e375a1057d9131dc87728e06122686c3ae617f5",
-      "bytes": 7268
+      "sha256": "2c671dc61d6d4ef672049de176d13864e7c77373372760e14b8c50f457ed2387",
+      "bytes": 7250
     },
     {
       "path": "source/memorive_review/logic.py",
@@ -6147,8 +6147,8 @@
     },
     {
       "path": "source/research_reports/cli.py",
-      "sha256": "dd6913238c43d9b720afd6a3c046a1fe57e2abbeaf0a52b147fcfe8eb32ef76e",
-      "bytes": 18578
+      "sha256": "27423abf51b8ce000df7587570fc9916adaa644b144d07d082f25cba783f53b6",
+      "bytes": 18575
     },
     {
       "path": "source/research_reports/digest.py",
@@ -6202,8 +6202,8 @@
     },
     {
       "path": "source/research_reports/source.py",
-      "sha256": "6d8cf8cc88bb860ad0350110b8b3eec5e1bf8a83b596a13500ee177e0f13c0b9",
-      "bytes": 17223
+      "sha256": "4b227d7dc43e73a93f4abaac05f09d2513caaa405d8381f22dfc20a732e413d4",
+      "bytes": 17210
     },
     {
       "path": "source/research_reports/templates/daily.json",
