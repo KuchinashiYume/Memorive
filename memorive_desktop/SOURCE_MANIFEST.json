@@ -4611,9 +4611,14 @@
       "bytes": 11158
     },
     {
+      "path": "source/memorive_settings/model_endpoints.py",
+      "sha256": "99c8b72fbc0fd4681be2d9ab77e44e9333763f8477fde4c5b5f8054adbf30f6e",
+      "bytes": 4743
+    },
+    {
       "path": "source/memorive_settings/model_validation.py",
-      "sha256": "e2b081bcff6200011a04f5ee84b492bc94b64e6e2513dd6a8982d5d6359a0eb6",
-      "bytes": 319673
+      "sha256": "4df635d3b0cdc306e4e805a9076b93ca293609a68e014284327833b58ddc212d",
+      "bytes": 225076
     },
     {
       "path": "source/memorive_settings/network_compat.py",
@@ -4719,6 +4724,11 @@
       "path": "source/memorive_settings/workflow_exam.py",
       "sha256": "77c078847f435046a634f7c3a0b3002fd3354b9868c8a6be283db3e2fb4c495d",
       "bytes": 627732
+    },
+    {
+      "path": "source/memorive_settings/workflow_exam_runner.py",
+      "sha256": "7f7d78da634b0b94ac3c0dedd3531d7972ae713708a40f6f48103dac3f5b2ef2",
+      "bytes": 91381
     },
     {
       "path": "source/memorive_source_language.py",
