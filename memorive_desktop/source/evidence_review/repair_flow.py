@@ -79,11 +79,13 @@ class RepairAdmitResult:
     root_reason_code: str | None = None
 
 def _failure_projection(error):
-    current=error;seen=set()
+    current=error
+    seen=set()
     while id(current) not in seen:
         seen.add(id(current))
         following=current.__cause__ or current.__context__
-        if following is None:break
+        if following is None:
+            break
         current=following
     message=(str(current) or type(current).__name__)[:500]
     winerror=getattr(current,'winerror',None)

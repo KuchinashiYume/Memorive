@@ -122,8 +122,10 @@ def _run_tail(rawmd_path, target, paper_id, doc_type, *, finished_event="pipelin
     cleanp = chunksp = None
     stage = "M1c"
     try:
-        cleanp = clean(rawmd_path, target=target); stage = "DocumentChunk"
-        chunksp = chunk(cleanp, target=target); stage = "M1e"
+        cleanp = clean(rawmd_path, target=target)
+        stage = "DocumentChunk"
+        chunksp = chunk(cleanp, target=target)
+        stage = "M1e"
         summary = embed(chunksp, target=target)
     except (DocumentProcessingError, GatewayError) as exc:
         hint = ""
@@ -384,7 +386,8 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
     # 1) 先 clean→chunk:确认新产物能出(产不出就早失败,此刻还没碰旧向量)
     stage = "DocumentClean(重嵌前置)"
     try:
-        cleanp = clean(rawmd_path, target=target); stage = "DocumentChunk(重嵌前置)"
+        cleanp = clean(rawmd_path, target=target)
+        stage = "DocumentChunk(重嵌前置)"
         chunksp = chunk(cleanp, target=target)
     except (DocumentProcessingError, GatewayError) as exc:
         return _failed(stage, paper_id, doc_type, target, exc, rawmd_path=str(rawmd_path))
@@ -405,7 +408,8 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
                 "documents": list(snap.get("documents") or [])}
 
     # 3) ★快照落盘(非纯内存:进程崩了也能手工恢复)+ RUNTIME_LOG re_embed_purge_planned
-    bdir = _backup_dir(target); bdir.mkdir(parents=True, exist_ok=True)
+    bdir = _backup_dir(target)
+    bdir.mkdir(parents=True, exist_ok=True)
     snap_path = bdir / f"{paper_id}_{run_id}.json"
     snap_path.write_text(json.dumps(snap_obj, ensure_ascii=False), encoding="utf-8")
     log(_MODULE, "re_embed_purge_planned", data={

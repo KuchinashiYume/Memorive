@@ -732,7 +732,8 @@ class ServiceProcessManager:
                 # its own configured transport deadline governs that drain.
                 process.wait()
                 observation['exit_code'] = process.returncode
-                if process.returncode != 0:raise RuntimeError('SERVICE_GRACEFUL_SHUTDOWN_FAILED')
+                if process.returncode != 0:
+                    raise RuntimeError('SERVICE_GRACEFUL_SHUTDOWN_FAILED')
             else:
                 process.terminate()
                 try:
@@ -1893,7 +1894,8 @@ class ProductApi:
                     f"{job_id}\0{source_artifact_id}".encode("utf-8")
                 ).hexdigest()[:24]
                 # E10 sidecars are reviewed through the source-bound structure dialog.
-                if source_artifact_id.startswith('core-structure-'):continue
+                if source_artifact_id.startswith('core-structure-'):
+                    continue
                 artifact_kind = source_artifact_id.replace("core-", "Core_").replace("-", "_").upper()
                 review_meta=None
                 review_unpublished=False
@@ -1904,16 +1906,19 @@ class ProductApi:
                         from memorive_review.store import ReviewStore
                         reviews=ReviewStore(self._profile_path('Core_JOBS'))
                         report_id=source_artifact_id[len(prefix):]
-                        try:report=reviews.report(report_id)
+                        try:
+                            report=reviews.report(report_id)
                         except ValueError as error:
                             if str(error)=="REVIEW_REPORT_NOT_PUBLISHED":
-                                review_unpublished=True;break
+                                review_unpublished=True
+                                break
                             raise
                         review_meta={k:report.get(k) for k in ('report_id','kind','status','color','scope','report_sha256')}
                         state=reviews.get(job_id) or {}
                         review_meta.update(reviews.source_status(report),derived_opinion=True,raw_evidence_eligible=False)
                         break
-                if review_unpublished:continue
+                if review_unpublished:
+                    continue
                 display_name = kind_names.get(artifact_kind, source_artifact_id or target.stem)
                 job_rows.append(
                     {
@@ -2408,8 +2413,10 @@ class ProductApi:
             return self._updates.call(method, dict(params or {}))
         from memorive_research_runtime.home import METHODS as HOME_METHODS, call as home_call
         from memorive_research_runtime.ai_briefing import METHODS as AI_METHODS
-        if method in HOME_METHODS:return home_call(self,method,dict(params or {}))
-        if method in AI_METHODS:return self._research.ai.call(method,dict(params or {}))
+        if method in HOME_METHODS:
+            return home_call(self,method,dict(params or {}))
+        if method in AI_METHODS:
+            return self._research.ai.call(method,dict(params or {}))
         from memorive_research_workspace.service import DESKTOP_METHODS
         if method in DESKTOP_METHODS:
             with self._lock:
@@ -2421,7 +2428,8 @@ class ProductApi:
         if method in RESEARCH_METHODS:
             return self._research.call(method,dict(params or {}))
         if method=='messages.navigate' and str((params or {}).get('locator','')).startswith('memorive://job/research-'):
-            locator=params['locator'];run=locator.split('/')[-1]
+            locator=params['locator']
+            run=locator.split('/')[-1]
             if params.get('message_id') and self._messages.store.get(params['message_id']).target_locator!=locator:
                 raise ValueError('RESEARCH_MESSAGE_TARGET_MISMATCH')
             self._research.call('research.get',{'run_id':run})
@@ -2447,12 +2455,14 @@ class ProductApi:
         if method == 'messages.navigate' and str((params or {}).get('locator','')).startswith('memorive://artifact/research-'):
             from memorive_desktop_service.locator import StableLocator
             locator=StableLocator.parse(params['locator'])
-            if locator.object_id != 'result':raise ValueError('RESEARCH_ARTIFACT_INVALID')
+            if locator.object_id != 'result':
+                raise ValueError('RESEARCH_ARTIFACT_INVALID')
             run_id=locator.job_id
             if params.get('message_id') and self._messages.store.get(params['message_id']).target_locator!=params['locator']:
                 raise ValueError('RESEARCH_MESSAGE_TARGET_MISMATCH')
             result=self._research.call('research.get',{'run_id':run_id})
-            if result['status'] not in {'SUCCEEDED','PARTIAL'}:raise ValueError('RESEARCH_RESULT_UNAVAILABLE')
+            if result['status'] not in {'SUCCEEDED','PARTIAL'}:
+                raise ValueError('RESEARCH_RESULT_UNAVAILABLE')
             row = self._library.get_artifact(run_id + '/result')
             return {'status':'PASS','research_run_id':run_id,'route':'library','view':row['mode'],
                     'artifact_id':row['artifact_id'],'result_sha256':row['result_sha256'],'target_locator':row['stable_locator']}
@@ -2467,7 +2477,8 @@ class ProductApi:
             # long-running task request guarded by the product-wide lock.
             return self._service.call(method, accepted)
         with self._product_call_lock:
-            if method in REVIEW_METHODS:return self._service.call(method,accepted)
+            if method in REVIEW_METHODS:
+                return self._service.call(method,accepted)
             if method in CURRENT_TASK_METHODS:
                 return self._current_task.call(method, accepted)
             if method in MESSAGES_METHODS:
@@ -2495,7 +2506,8 @@ class ProductApi:
                     if str(message.target_locator or '').startswith('memorive://artifact/research-'):
                         run=str(message.target_locator).split('/')[3]
                         state=self._research.call('research.get',{'run_id':run})
-                        if state['kind']=='discovery':kind='LITERATURE'
+                        if state['kind']=='discovery':
+                            kind='LITERATURE'
                     delivery = self._deliver_windows_notification(
                         kind=kind,
                         locator=message.target_locator,
@@ -4132,13 +4144,15 @@ class ProductApi:
         }
 
     def memo_pick_vault(self):
-        if self._window is None: return {'path':None}
+        if self._window is None:
+            return {'path':None}
         import webview
         value=self._window.create_file_dialog(webview.FileDialog.FOLDER)
         return {'path':str(value[0]) if value else None}
 
     def memo_pick_materials(self):
-        if self._window is None:return {'paths':[]}
+        if self._window is None:
+            return {'paths':[]}
         import webview
         value=self._window.create_file_dialog(webview.FileDialog.OPEN,allow_multiple=True,
             file_types=('Research materials (*.pdf;*.md;*.txt;*.ris;*.bib;*.bibtex;*.xml)',))
@@ -4159,24 +4173,30 @@ class ProductApi:
     def memo_desktop_apps(self):
         import subprocess,json,time
         cached=getattr(self,'_memo_desktop_apps_cache',None)
-        if cached and time.monotonic()-cached[0]<60:return cached[1]
+        if cached and time.monotonic()-cached[0]<60:
+            return cached[1]
         cmd="Get-StartApps | Where-Object { ($_.Name -match '^(Codex|Claude)( |$)') -or ($_.AppID -match '^OpenAI.Codex_') } | Select-Object Name,AppID | ConvertTo-Json -Compress"
         try:
             result=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',cmd],capture_output=True,timeout=12,creationflags=subprocess.CREATE_NO_WINDOW)
             rows=json.loads(result.stdout.decode('utf-8-sig',errors='replace') or '[]')
-            if isinstance(rows,dict):rows=[rows]
-        except (OSError,ValueError,subprocess.TimeoutExpired):rows=[]
+            if isinstance(rows,dict):
+                rows=[rows]
+        except (OSError,ValueError,subprocess.TimeoutExpired):
+            rows=[]
         apps={}
         for row in rows:
-            name=str(row.get('Name',''));appid=str(row.get('AppID',''))
-            if not appid or any(c in appid for c in '\r\n\x00'):continue
+            name=str(row.get('Name',''))
+            appid=str(row.get('AppID',''))
+            if not appid or any(c in appid for c in '\r\n\x00'):
+                continue
             key='codex-desktop' if name.lower().startswith('codex') or appid.startswith('OpenAI.Codex_') else 'claude-desktop'
             apps.setdefault(key,{'name':name,'app_id':appid})
         self._memo_desktop_apps_cache=(time.monotonic(),apps)
         return apps
 
     def memo_pick_agent_app(self):
-        if self._window is None:return {'path':None}
+        if self._window is None:
+            return {'path':None}
         import webview
         value=self._window.create_file_dialog(webview.FileDialog.OPEN,allow_multiple=False,file_types=('Application (*.exe)',))
         return {'path':str(value[0]) if value else None}
@@ -4187,27 +4207,35 @@ class ProductApi:
         # GetFolderPath uses the Windows account path, not the packaged private profile override.
         import ctypes
         buffer=ctypes.create_unicode_buffer(32768)
-        if ctypes.windll.shell32.SHGetFolderPathW(None,28,None,0,buffer)!=0:raise ValueError('HANDOFF_DIRECTORY_UNAVAILABLE')
+        if ctypes.windll.shell32.SHGetFolderPathW(None,28,None,0,buffer)!=0:
+            raise ValueError('HANDOFF_DIRECTORY_UNAVAILABLE')
         root=Path(buffer.value)/'Memorive'/'Handoff'
         return desktop_handoff(self._memo,request['thread_id'],request.get('question',''),root)
 
     def memo_desktop_handoff_action(self,request):
         self.call('memo.capabilities',{})
         row=self._memo.store.get('desktop_handoff',request.get('id',''))
-        if not row:raise ValueError('HANDOFF_NOT_FOUND')
+        if not row:
+            raise ValueError('HANDOFF_NOT_FOUND')
         ready=self._memo.handoffs.validate_desktop(row)
-        if request.get('action')=='validate':return ready
+        if request.get('action')=='validate':
+            return ready
         folder=Path(row['path'])
-        if request.get('action')=='folder':os.startfile(str(folder));return {'status':'OPEN_REQUESTED'}
-        if request.get('action')!='launch':raise ValueError('HANDOFF_ACTION_INVALID')
+        if request.get('action')=='folder':
+            os.startfile(str(folder))
+            return {'status':'OPEN_REQUESTED'}
+        if request.get('action')!='launch':
+            raise ValueError('HANDOFF_ACTION_INVALID')
         path=row.get('app_path','')
         if path:
             p=Path(path)
-            if not p.is_absolute() or not p.is_file() or p.suffix.lower()!='.exe' or str(p).startswith(('\\\\','//')) or p.name.lower() in {'cmd.exe','powershell.exe','pwsh.exe','wscript.exe','cscript.exe','mshta.exe','rundll32.exe'}:raise ValueError('AGENT_APP_PATH_INVALID')
+            if not p.is_absolute() or not p.is_file() or p.suffix.lower()!='.exe' or str(p).startswith(('\\\\','//')) or p.name.lower() in {'cmd.exe','powershell.exe','pwsh.exe','wscript.exe','cscript.exe','mshta.exe','rundll32.exe'}:
+                raise ValueError('AGENT_APP_PATH_INVALID')
             os.startfile(str(p))
         else:
             app=self.memo_desktop_apps().get(row['agent'])
-            if not app:raise ValueError('AGENT_DESKTOP_NOT_FOUND')
+            if not app:
+                raise ValueError('AGENT_DESKTOP_NOT_FOUND')
             # App identity comes only from the local registered Start menu inventory.
             os.startfile('shell:AppsFolder\\'+app['app_id'])
         return {'status':'OPEN_REQUESTED','model_called':False,'task_started':False}
@@ -4218,7 +4246,8 @@ class ProductApi:
         helper=Path(sys.executable) if getattr(sys,'frozen',False) else base/'Memorive.exe'
         args=['--memo-agent','--workspace',str(self._memo.store.root),'--mcp']
         if not helper.exists():
-            helper=Path(sys.executable);args=[str(self._source_root/'memorive_research_workspace/agent_entry.py'),*[v for v in args if v!='--memo-agent']]
+            helper=Path(sys.executable)
+            args=[str(self._source_root/'memorive_research_workspace/agent_entry.py'),*[v for v in args if v!='--memo-agent']]
         toml='[mcp_servers.memo]\ncommand = '+json.dumps(str(helper),ensure_ascii=False)+'\nargs = '+json.dumps(args,ensure_ascii=False)+'\n'
         return {'mcpServers':{'memo':{'command':str(helper),'args':args}},'codex_config_toml':toml,
                 'obsidian_plugin':str(base/'integrations/obsidian/memorive-companion'),
@@ -4285,7 +4314,8 @@ class ProductApi:
         try:
             os.startfile(target, "open")
         except OSError as error:
-            if getattr(error, "winerror", None) not in {31, 1155}: raise
+            if getattr(error, "winerror", None) not in {31, 1155}:
+                raise
             # No Markdown association: open this same controlled .md in the
             # system text viewer, never fall back to exposing the JSON.
             viewer = Path(os.environ.get("WINDIR", "C:/Windows")) / "System32/notepad.exe"
@@ -4383,10 +4413,13 @@ class ProductApi:
         if not isinstance(request,dict) or set(request)!={'enabled'} or type(request['enabled']) is not bool:
             raise ValueError('CONSOLE_ACCESS_BOOLEAN_REQUIRED')
         bridge=getattr(self,'_console_bridge',None)
-        if bridge is not None and bridge._closing:raise ValueError('CONSOLE_SESSION_CLOSING')
+        if bridge is not None and bridge._closing:
+            raise ValueError('CONSOLE_SESSION_CLOSING')
         from console_permission import write_permission
-        with self._lock:write_permission(self._state_dir,request['enabled'])
-        if bridge is not None:bridge.set_access(request['enabled'])
+        with self._lock:
+            write_permission(self._state_dir,request['enabled'])
+        if bridge is not None:
+            bridge.set_access(request['enabled'])
         return self.get_console_connection()
 
     def open_work_log_sample_directory(self) -> dict[str, Any]:
@@ -5862,7 +5895,8 @@ class ProductApi:
                 not current_report_sha256
                 or current_report_sha256 == previous_report_sha256
             ):
-                if state['sync_requested_mode']=='PREFLIGHT': preflight_status = "RUNNING"
+                if state['sync_requested_mode']=='PREFLIGHT':
+                    preflight_status = "RUNNING"
             else:
                 state.pop("sync_requested_mode", None)
                 state.pop("sync_requested_at_unix", None)
@@ -6410,7 +6444,8 @@ class ProductApi:
 
     def _browser_sync_trigger(self, suffix):
         rows = self._browser_enabled_sites()
-        if not rows: raise ValueError('BROWSER_NO_ENABLED_SITES')
+        if not rows:
+            raise ValueError('BROWSER_NO_ENABLED_SITES')
         entry = next((row['url'] for row in rows if row['provider_id']=='gemini'), rows[0]['url'])
         # No disabled provider page is opened even as a one-shot trigger.
         return entry + '?memorive_bridge_sync=v1#' + suffix
@@ -6975,7 +7010,8 @@ class ProductApi:
     def open_developer_sdk(self) -> dict[str, Any]:
         import sys,os
         root=(Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).resolve().parents[2])/'integrations/developer'
-        if not (root/'api-v1.schema.json').is_file():raise ValueError('DEVELOPER_SDK_MISSING')
+        if not (root/'api-v1.schema.json').is_file():
+            raise ValueError('DEVELOPER_SDK_MISSING')
         os.startfile(str(root))
         return {'status':'OPENED','api_version':'1.0.0'}
 

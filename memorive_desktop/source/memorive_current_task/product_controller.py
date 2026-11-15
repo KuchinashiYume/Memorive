@@ -552,10 +552,12 @@ class CurrentTaskProductController:
         return result
 
     def _recovery_conflict(self, job_id: str) -> dict[str, Any] | None:
-        if self._core_task_controls is None:return None
+        if self._core_task_controls is None:
+            return None
         job=self.adapter.call('get_job',{'job_id':job_id})
         item=job.get('snapshots',{}).get('resolved_task_input',{}).get('content',{}).get('item_id')
-        if not item:return None
+        if not item:
+            return None
         for row in reversed(self._core_task_controls.recovery_requests(item)):
             status=self._recovery_status(row)
             if status.get('successor_job_id')==job_id:
@@ -566,8 +568,10 @@ class CurrentTaskProductController:
 
     def _project(self, job_id: str, **kwargs: Any) -> dict[str, Any]:
         result=self.projector.project(job_id,**kwargs)
-        if self._core_run_root is None:return result
-        if not hasattr(self,'_retry_receipt_cache'):self._retry_receipt_cache={}
+        if self._core_run_root is None:
+            return result
+        if not hasattr(self,'_retry_receipt_cache'):
+            self._retry_receipt_cache={}
         counters=retry_counters(self._core_run_root,job_id,self._retry_receipt_cache)
         conflict=self._recovery_conflict(job_id)
         result['recovery_request']=conflict
@@ -619,8 +623,10 @@ class CurrentTaskProductController:
                 node['retry_scope'] = 'PAGE' 
             if node['node_id']=='E2_DATA_REVIEW' and result.get('literature_review'):
                 data_state=result['literature_review']['data_state']
-                if data_state=='SKIPPED':node.update(state='DISABLED',summary='已跳过；没有核查结论')
-                elif data_state=='FAILED':node.update(state='FAILED',summary=result['literature_review'].get('data_reason_code','数据处理失败'))
+                if data_state=='SKIPPED':
+                    node.update(state='DISABLED',summary='已跳过；没有核查结论')
+                elif data_state=='FAILED':
+                    node.update(state='FAILED',summary=result['literature_review'].get('data_reason_code','数据处理失败'))
             node['retry_eligible']=node['state']=='FAILED' and conflict is None
             if node['state']!='RUNNING' or conflict:
                 node['node_progress']=None
@@ -854,7 +860,8 @@ class CurrentTaskProductController:
             ]
         console_bindings=[]
         for row in projection['tasks']:
-            if row.get('job_type')!='memorive-console-simulation':continue
+            if row.get('job_type')!='memorive-console-simulation':
+                continue
             self._jobs_by_run[row['job_id']]=row['job_id']
             job=self.adapter.call('get_job',{'job_id':row['job_id']})
             detail=self._project(row['job_id'])

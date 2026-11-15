@@ -9,7 +9,8 @@ REPORT_STEPS=(('WAITING','确认报告周期'),('COLLECTING','汇总已完成成
 AI_STEPS=(('WAITING','确认日期与模型'),('COLLECTING','读取公开来源'),('COMPOSING','整理 AI 近况'),('VALIDATING','核对引用来源'),('PUBLISHING','保存至资料库'),('NOTIFYING','发送提醒'),('COMPLETE','结果可用'))
 
 def steps_for(item):
-    if item.get('kind')=='ai_briefing':return AI_STEPS
+    if item.get('kind')=='ai_briefing':
+        return AI_STEPS
     return REPORT_STEPS if item.get('kind')=='report' else STEPS
 
 def bindings(runtime):
@@ -24,7 +25,8 @@ def bindings(runtime):
         nodes=[]
         for i,(key,name) in enumerate(steps):
             state='COMPLETED' if success or i<index else ('FAILED' if item['status']=='FAILED' else 'CANCELLED') if terminal and i==index else 'RUNNING' if i==index and item['status']=='RUNNING' else 'NOT_STARTED'
-            if key=='NOTIFYING' and item.get('notification_error'):state='FAILED'
+            if key=='NOTIFYING' and item.get('notification_error'):
+                state='FAILED'
             model='本地生成 · 不调用模型' if item['kind']=='report' else '元数据与本地规则 · 不调用模型'
             if item['kind'] in {'report','ai_briefing'} and key=='COMPOSING' and item.get('report_model'):
                 frozen=item['report_model']
@@ -49,7 +51,8 @@ def bindings(runtime):
 
 def view(runtime,run_id):
     row=next((r for r in bindings(runtime) if r['run']==run_id),None)
-    if row is None:raise ValueError('RESEARCH_TASK_NOT_FOUND')
+    if row is None:
+        raise ValueError('RESEARCH_TASK_NOT_FOUND')
     return {'status':'PASS','projection':{'workflow_kind':row['workflow_kind'],'display_name':row['display_name'],
         'attempt_id':run_id,'state_axes':{'job_control_state':row['control_state']},
         'graph':{'workflow_nodes':row['workflow_nodes']},'progress':row['progress']}}
@@ -59,7 +62,8 @@ def log_rows(runtime):
     for item in runtime.task_list()['rows']:
         labels=dict(steps_for(item))
         stamp=datetime.fromisoformat((item.get('finished_at') or item['created_at']).replace('Z','+00:00'))
-        local=stamp.astimezone();run=item['run_id']
+        local=stamp.astimezone()
+        run=item['run_id']
         status={'SUCCEEDED':'已完成','PARTIAL':'部分完成','FAILED':'失败','CANCELLED':'已取消','INTERRUPTED':'已中断','RUNNING':'运行中','QUEUED':'等待中'}[item['status']]
         rows.append({'log_entry_id':'activity-'+run,'job_id':run,'title':('外部文献·' if item['kind']=='discovery' else '')+item['title'],
             'summary':status+' · '+labels.get(item.get('stage'),'已停止'),'type_label':{'discovery':'外部文献','report':'周期报告','ai_briefing':'AI 近况'}[item['kind']],

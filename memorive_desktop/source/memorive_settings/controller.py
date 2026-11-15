@@ -271,7 +271,8 @@ class SettingsController:
     def research_get(self):
         from memorive_research_runtime.common import read, defaults, sealed
         path=self.store.profile_root/'research_preferences.json'
-        if not path.exists():return {'schema_version':'ResearchPreferences-v1','revision':0,'config':defaults()}
+        if not path.exists():
+            return {'schema_version':'ResearchPreferences-v1','revision':0,'config':defaults()}
         saved=read(path)
         # Read-compatible migration; unrelated settings are not rewritten.
         return sealed(dict(saved,config=dict(defaults(),**saved['config'])))
@@ -280,15 +281,18 @@ class SettingsController:
         from memorive_research_runtime.common import validate_config_edit, sealed
         with self.external_data_sources._write_lock():
             current=self.research_get()
-            if type(expected_revision) is not int or expected_revision!=current['revision']:raise ValueError('RESEARCH_REVISION_CONFLICT')
+            if type(expected_revision) is not int or expected_revision!=current['revision']:
+                raise ValueError('RESEARCH_REVISION_CONFLICT')
             accepted=validate_config_edit(config,current['config'])
             prior={d['id']:d for d in current['config'].get('directions',[])}
             for direction in accepted['directions']:
                 old=prior.get(direction['id'])
-                if old is None:continue
+                if old is None:
+                    continue
                 semantic_changed=any(old[k]!=direction[k] for k in ('query','keywords','seed_ids'))
                 expected=old['revision']+int(semantic_changed)
-                if direction['revision']!=expected:raise ValueError('RESEARCH_DIRECTION_REVISION_CONFLICT')
+                if direction['revision']!=expected:
+                    raise ValueError('RESEARCH_DIRECTION_REVISION_CONFLICT')
             ids=[d['id'] for d in accepted['directions']]
             changed=[d['id'] for d in accepted['directions'] if d!=prior.get(d['id'])]
             previous_order=current.get('direction_recency',list(reversed(prior)))
@@ -772,10 +776,12 @@ class SettingsController:
         payload['settings']=deepcopy(payload['settings'])
         from .cli_templates import is_custom,export_service
         for service in payload['settings']['cli_services']:
-            if not is_custom(service):continue
+            if not is_custom(service):
+                continue
             portable=export_service(service)
             service.update(executable='',interpreter='',environment={},concurrency_group='',enabled=False,connection_status='UNVERIFIED',template=portable['template'])
-            for model in service['models']:model.update(connection_status='UNVERIFIED',verification=None)
+            for model in service['models']:
+                model.update(connection_status='UNVERIFIED',verification=None)
         scan_sensitive(payload)
         payload["export_sha256"] = canonical_sha256(payload)
         return immutable(payload)
@@ -806,9 +812,12 @@ class SettingsController:
             raise ValueError("SETTINGS_IMPORT_CREDENTIAL_VALUE_REJECTED")
         scan_sensitive(payload)
         if payload.get('settings',{}).get('schema_version')=='SettingsTemplate-v6':
-            payload=deepcopy(dict(payload));original_hash=payload['export_sha256']
-            upgraded=deepcopy(payload['settings']);upgraded['schema_version']='SettingsTemplate-v7'
-            self.store._upgrade_current_shape(upgraded);payload['settings']=upgraded
+            payload=deepcopy(dict(payload))
+            original_hash=payload['export_sha256']
+            upgraded=deepcopy(payload['settings'])
+            upgraded['schema_version']='SettingsTemplate-v7'
+            self.store._upgrade_current_shape(upgraded)
+            payload['settings']=upgraded
             payload['export_sha256']=canonical_sha256({k:v for k,v in payload.items() if k!='export_sha256'})
             self.store._atomic_write(self.store.profile_root/('import_migration_'+original_hash+'.json'),{'schema_version':'E2ImportedSettingsMigration-v1','source_export_sha256':original_hash,'converted_export_sha256':payload['export_sha256']})
         settings = validate_settings(payload["settings"])
@@ -1195,17 +1204,20 @@ class SettingsController:
         current = self.store.load(recover_corruption=False)
         settings = deepcopy(current['settings'])
         service = next((r for r in settings['model_services'] if r['config_id'] == config_id), None)
-        if service is None: raise ValueError('MODEL_SERVICE_NOT_FOUND')
+        if service is None:
+            raise ValueError('MODEL_SERVICE_NOT_FOUND')
         if target_sha256 is not None and api_identity(settings, service) != target_sha256:
             raise ValueError('API_VERIFICATION_TARGET_CHANGED')
-        if service['connection_status'] == 'UNVERIFIED': return current
+        if service['connection_status'] == 'UNVERIFIED':
+            return current
         service['connection_status'] = 'UNVERIFIED'
         return self.store.save(settings, expected_revision=current['revision'])
 
     def start_api_verification(self, *, config_id, idempotency_key):
         current = self.store.load(recover_corruption=False)
         service = next((r for r in current['settings']['model_services'] if r['config_id'] == config_id), None)
-        if service is None: raise ValueError('MODEL_SERVICE_NOT_FOUND')
+        if service is None:
+            raise ValueError('MODEL_SERVICE_NOT_FOUND')
         return self.api_verification_jobs.start(params={'config_id':config_id,
             'target_sha256':api_identity(current['settings'],service)}, idempotency_key=idempotency_key)
 
@@ -1324,7 +1336,8 @@ class SettingsController:
         model=next(row for row in service['models'] if row['profile_ref']==profile_ref)
         if target_sha256 is not None and self._cli_target_hash(service,model)!=target_sha256:
             raise ValueError('CLI_VERIFICATION_TARGET_CHANGED')
-        if model['connection_status']=='UNVERIFIED':return current
+        if model['connection_status']=='UNVERIFIED':
+            return current
         model['connection_status']='UNVERIFIED'
         service['connection_status']='AVAILABLE' if any(row['connection_status']=='AVAILABLE' for row in service['models']) else 'UNVERIFIED'
         return self.store.save(settings,expected_revision=current['revision'])

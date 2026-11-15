@@ -199,9 +199,11 @@ class CoreVerticalWorker:
         for projection in self.facade.list_jobs()['jobs']:
             job = self.facade.get_job(projection['job_id'])
             retry = job.get('request', {}).get('core_retry')
-            if not isinstance(retry, Mapping): continue
+            if not isinstance(retry, Mapping):
+                continue
             request = requests.get(retry.get('rollback_request_id'))
-            if not request: continue
+            if not request:
+                continue
             state = job['control_state']
             if state in {'CANCELLED', 'SUCCEEDED', 'FAILED'} and request['status'] == 'DISPATCHED':
                 self.task_control_store.update_rollback(request['request_id'],
@@ -374,7 +376,8 @@ class CoreVerticalWorker:
                     raise ValueError('Core_ROLLBACK_CARD_HASH_MISMATCH')
                 successor_stage.mkdir(parents=True,exist_ok=True)
                 seed = successor_stage / (seed_name + '.md')
-                if not seed.exists(): shutil.copy2(source,seed)
+                if not seed.exists():
+                    shutil.copy2(source,seed)
                 if hashlib.sha256(seed.read_bytes()).hexdigest().upper() != expected_hash:
                     raise ValueError('Core_ROLLBACK_CARD_SEED_MISMATCH')
                 _atomic_json(successor_stage / (seed_name + '_binding.json'), {
@@ -520,13 +523,15 @@ class CoreVerticalWorker:
             existing={row['artifact_id']:row for row in job.get('artifact_bindings',[])}
             if artifact.artifact_id in existing:
                 row=existing[artifact.artifact_id]
-                if row.get('sha256')!=observed or row.get('locator')!=locator:raise ValueError('Core_ARTIFACT_REPLAY_CONFLICT')
+                if row.get('sha256')!=observed or row.get('locator')!=locator:
+                    raise ValueError('Core_ARTIFACT_REPLAY_CONFLICT')
                 return
             try:
                 self.facade.bind_artifact(context.job_id,expected_version=job['version'],artifact_id=artifact.artifact_id,locator=locator,sha256=observed)
                 return
             except VersionConflict:
-                if attempt==11:raise
+                if attempt==11:
+                    raise
 
 
     def _terminal_failure(self, job_id: str, reason_code: str) -> None:
@@ -552,7 +557,8 @@ class CoreVerticalWorker:
     def run_pending_once(self) -> dict[str, Any]:
         if self.review_service:
             review_job=self.review_service.claim()
-            if review_job:return self.review_service.run_claimed(review_job)
+            if review_job:
+                return self.review_service.run_claimed(review_job)
         with self._dispatch_state['lock']:
             claimed = self._claim_pending_intent()
         if isinstance(claimed, dict):
@@ -685,7 +691,8 @@ class CoreVerticalWorker:
         definition=job['snapshots']['workflow_definition']['content']
         node_ids=node_ids_for(definition)
         checkpoint = _CheckpointStore(run_root,node_ids)
-        if self.task_control_store is not None:self.task_control_store.bind_topology(job_id,definition)
+        if self.task_control_store is not None:
+            self.task_control_store.bind_topology(job_id,definition)
         if job['control_state'] == 'CANCELLED':
             return self._cancelled_receipt(job_id, item, intent, checkpoint)
         completed, retry_metadata = self._prepare_successor_run(
@@ -709,7 +716,8 @@ class CoreVerticalWorker:
             workflow_config=job["snapshots"]["workflow_config"]["content"],
         )
 
-        if self.review_service and DATA_NODE in node_ids:self.review_service.register(context)
+        if self.review_service and DATA_NODE in node_ids:
+            self.review_service.register(context)
 
         def on_activity(state: str, node_id: str | None = None) -> None:
             # PAUSED_BEFORE runs under the pause-point transaction. Never wait

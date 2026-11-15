@@ -29,7 +29,9 @@ def system_auto_proxy(url):
     api.WinHttpCloseHandle.argtypes=[ctypes.c_void_p]
     kernel.GlobalFree.argtypes=[ctypes.c_void_p]
     kernel.GlobalFree.restype=ctypes.c_void_p
-    config=Config();handle=None;result=Proxy()
+    config=Config()
+    handle=None
+    result=Proxy()
     try:
         if not api.WinHttpGetIEProxyConfigForCurrentUser(ctypes.byref(config)):
             return None
@@ -56,13 +58,16 @@ def system_auto_proxy(url):
                 return entry.split('=',1)[1]
         return next((s for s in entries if '=' not in s), '')
     finally:
-        if handle:api.WinHttpCloseHandle(handle)
+        if handle:
+            api.WinHttpCloseHandle(handle)
         for pointer in (config.pac,config.proxy,config.bypass,result.proxy,result.bypass):
-            if pointer:kernel.GlobalFree(pointer)
+            if pointer:
+                kernel.GlobalFree(pointer)
 
 
 def resolve_proxy(url, mode, address):
-    if mode=='NONE':return ''
+    if mode=='NONE':
+        return ''
     if mode=='SYSTEM':
         host=urlsplit(url).hostname
         explicit=getproxies_environment().get('https','')
@@ -78,8 +83,10 @@ def resolve_proxy(url, mode, address):
                 address='' if proxy_bypass(host) else getproxies().get('https','')
     elif mode!='CUSTOM':
         raise ValueError('API_VALIDATION_PROXY_MODE_INVALID')
-    if not address:return ''
-    if '://' not in address:address='http://'+address
+    if not address:
+        return ''
+    if '://' not in address:
+        address='http://'+address
     parts=urlsplit(address)
     if parts.scheme not in ('http','https') or not parts.hostname or parts.query or parts.fragment:
         raise ValueError('API_VALIDATION_PROXY_INVALID')
@@ -95,11 +102,16 @@ def tls_context():
 
 def error_code(error):
     cause=getattr(error,'reason',error)
-    if isinstance(cause,ssl.SSLCertVerificationError):return 'API_TLS_CERTIFICATE_FAILED'
-    if isinstance(cause,ssl.SSLError):return 'API_TLS_CONNECTION_FAILED'
-    if isinstance(cause,socket.gaierror):return 'API_DNS_FAILED'
-    if isinstance(cause,TimeoutError):return 'API_CONNECTION_TIMEOUT'
-    if isinstance(cause,ConnectionRefusedError):return 'API_CONNECTION_REFUSED'
+    if isinstance(cause,ssl.SSLCertVerificationError):
+        return 'API_TLS_CERTIFICATE_FAILED'
+    if isinstance(cause,ssl.SSLError):
+        return 'API_TLS_CONNECTION_FAILED'
+    if isinstance(cause,socket.gaierror):
+        return 'API_DNS_FAILED'
+    if isinstance(cause,TimeoutError):
+        return 'API_CONNECTION_TIMEOUT'
+    if isinstance(cause,ConnectionRefusedError):
+        return 'API_CONNECTION_REFUSED'
     if isinstance(error,ValueError) and str(error).startswith(('API_SYSTEM_PROXY_','API_VALIDATION_PROXY_')):
         return str(error)
     return 'API_NETWORK_OR_RESPONSE_FAILURE'

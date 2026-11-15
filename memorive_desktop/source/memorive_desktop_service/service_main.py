@@ -87,12 +87,15 @@ def _stop_requested(endpoint_file, secret, parent_pid, pid):
     path=endpoint_file.with_name(endpoint_file.name.replace('.endpoint.json','.stop.json'))
     try:
         item=json.loads(path.read_text(encoding='utf8'))
-        if set(item)!={'parent_pid','pid','action','hmac_sha256'}:return False
+        if set(item)!={'parent_pid','pid','action','hmac_sha256'}:
+            return False
         payload={k:item[k] for k in ('parent_pid','pid','action')}
-        if payload!={'parent_pid':parent_pid,'pid':pid,'action':'STOP'}:return False
+        if payload!={'parent_pid':parent_pid,'pid':pid,'action':'STOP'}:
+            return False
         expected=hmac.new(secret,json.dumps(payload,sort_keys=True,separators=(',',':')).encode(),hashlib.sha256).hexdigest()
         return isinstance(item['hmac_sha256'],str) and hmac.compare_digest(item['hmac_sha256'],expected)
-    except (OSError,ValueError,TypeError):return False
+    except (OSError,ValueError,TypeError):
+        return False
 
 
 def _quality_exam_package() -> tuple[str, Path] | None:
@@ -598,7 +601,8 @@ async def run(
 
     async def monitor_parent() -> None:
         while _parent_process_alive(parent_pid):
-            if _stop_requested(endpoint_file,secret,parent_pid,os.getpid()):break
+            if _stop_requested(endpoint_file,secret,parent_pid,os.getpid()):
+                break
             await asyncio.sleep(0.25)
         stop.set()
 

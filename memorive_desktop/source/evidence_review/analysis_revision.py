@@ -12,13 +12,16 @@ def complete_analysis_revision(analysis,pack,review,chunks,*,bridge,evidence_roo
         model_call=None, region_check=None, verifier_call=None):
     from research_analysis.revision import revise_analysis
     from evidence_review import verify_research_analysis
-    root=Path(evidence_root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(evidence_root)
+    root.mkdir(parents=True,exist_ok=True)
     digest=hashlib.sha256(json.dumps(review,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
     identity={'base_analysis_hash':analysis.analysis_hash,'context_pack_hash':pack.context_pack_hash,'review_sha256':digest}
-    completed=root/'completed.json';dispatch=root/'dispatch.json'
+    completed=root/'completed.json'
+    dispatch=root/'dispatch.json'
     if completed.exists():
         result=json.loads(completed.read_text(encoding='utf-8'))
-        if result['identity']!=identity:raise RuntimeError('ANALYSIS_REVISION_CHECKPOINT_MISMATCH')
+        if result['identity']!=identity:
+            raise RuntimeError('ANALYSIS_REVISION_CHECKPOINT_MISMATCH')
         payload=(root/'analysis.pkl').read_bytes()
         if hashlib.sha256(payload).hexdigest()!=result['analysis_pickle_sha256']:
             raise RuntimeError('ANALYSIS_REVISION_CHECKPOINT_TAMPERED')
@@ -29,7 +32,8 @@ def complete_analysis_revision(analysis,pack,review,chunks,*,bridge,evidence_roo
     if dispatch.exists():
         raise RuntimeError('ANALYSIS_REVISION_INCOMPLETE_ATTEMPT_REQUIRES_RECEIPT_RECONCILIATION')
     targets=[r for r in review.get('rulings',[]) if r.get('gpt_sent') is True and r.get('agrees') is False]
-    if not targets:return analysis,review
+    if not targets:
+        return analysis,review
     _write(dispatch,{'identity':identity,'state':'BOUND_BEFORE_REVISION_SEND'})
     _write(root/'initial_review.json',review)
     revised,receipt=revise_analysis(analysis,pack,review,output_language=output_language,
@@ -47,7 +51,8 @@ def complete_analysis_revision(analysis,pack,review,chunks,*,bridge,evidence_roo
     _write(root/'tombstones.json',tombstones)
     _write(root/'analysis.json',asdict(revised))
     payload=pickle.dumps(revised)
-    with (root/'analysis.pkl').open('xb') as stream:stream.write(payload)
+    with (root/'analysis.pkl').open('xb') as stream:
+        stream.write(payload)
     with (root/'analysis.md').open('x',encoding='utf-8') as stream:
         from inspect import signature
         rendered = revised.render(language=output_language) if 'language' in signature(revised.render).parameters else revised.render()

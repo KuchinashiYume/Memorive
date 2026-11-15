@@ -17,12 +17,15 @@ TIME_BUDGET=.030
 
 def timestamp(value):
     try:
-        if not isinstance(value,str):return None
+        if not isinstance(value,str):
+            return None
         parsed=datetime.fromisoformat(value.replace('Z','+00:00'))
-        if parsed.tzinfo is None:return None
+        if parsed.tzinfo is None:
+            return None
         number=parsed.astimezone(timezone.utc).timestamp()
         return number if number>=0 else None
-    except (ValueError,OverflowError,OSError):return None
+    except (ValueError,OverflowError,OSError):
+        return None
 
 def bootstrap(db,clock):
     statements=[
@@ -66,11 +69,13 @@ def bootstrap(db,clock):
         DELETE FROM conversation_jobs WHERE kind=OLD.kind AND id=OLD.id;
        END''',
     ]
-    for sql in statements:db.execute(sql)
+    for sql in statements:
+        db.execute(sql)
     from .conversation_backfill import schema
     schema(db)
     previous=db.execute('SELECT version FROM conversation_migration WHERE id=1').fetchone()
-    if previous and previous['version']!=VERSION:raise ValueError('CONVERSATION_FORMAT_UNSUPPORTED')
+    if previous and previous['version']!=VERSION:
+        raise ValueError('CONVERSATION_FORMAT_UNSUPPORTED')
     boundary=db.execute('SELECT coalesce(max(rowid),0) FROM objects').fetchone()[0]
     complete=not db.execute("SELECT 1 FROM objects WHERE kind IN ('thread','job','attachment_job') LIMIT 1").fetchone()
     db.execute('INSERT OR IGNORE INTO conversation_migration(id,version,cursor,boundary,complete,started_at,last_clock) VALUES(1,?,0,?,?,?,?)',(VERSION,boundary,complete,clock,clock))
@@ -78,8 +83,10 @@ def bootstrap(db,clock):
 def overlay(db,identity,value):
     row=db.execute('SELECT archived_override,state_revision FROM conversation_access WHERE id=?',(identity,)).fetchone()
     if row is not None:
-        if row['archived_override'] is not None:value['archived']=bool(row['archived_override'])
-        if row['state_revision']:value['revision']=max(value.get('revision',0),row['state_revision'])
+        if row['archived_override'] is not None:
+            value['archived']=bool(row['archived_override'])
+        if row['state_revision']:
+            value['revision']=max(value.get('revision',0),row['state_revision'])
     return value
 
 def sync(db,kind,identity,project,body,revision,body_bytes,*,new,clock):
@@ -87,10 +94,14 @@ def sync(db,kind,identity,project,body,revision,body_bytes,*,new,clock):
         db.execute('INSERT INTO conversation_jobs VALUES(?,?,?,?,?) ON CONFLICT(kind,id) DO UPDATE SET thread_id=excluded.thread_id,status=excluded.status,project=excluded.project',
                    (kind,identity,body.get('thread_id'),body.get('status',''),project))
         return
-    if kind!='thread':return
+    if kind!='thread':
+        return
     old=db.execute('SELECT archived,body_revision FROM conversation_catalog WHERE id=?',(identity,)).fetchone()
-    if old is not None and old['body_revision']>revision:return
-    messages=body.get('messages',[]);effective=overlay(db,identity,dict(archived=body.get('archived',False)));archived=bool(effective['archived'])
+    if old is not None and old['body_revision']>revision:
+        return
+    messages=body.get('messages',[])
+    effective=overlay(db,identity,dict(archived=body.get('archived',False)))
+    archived=bool(effective['archived'])
     state=db.execute('SELECT state_revision FROM conversation_access WHERE id=?',(identity,)).fetchone()
     public_revision=max(revision,state['state_revision'] if state else 0)
     sort_at=body.get('updated_at') or (messages[-1].get('created_at') if messages else None) or body.get('created_at') or ''

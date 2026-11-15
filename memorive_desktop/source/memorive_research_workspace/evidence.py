@@ -31,34 +31,48 @@ _checked=contextvars.ContextVar('evidence_files_checked',default=None)
 
 def material_layer(artifact):
     layer=artifact.get('material_layer')
-    if layer in {'original','cleaned','card','analysis','confirmed_knowledge'}:return layer
-    if artifact.get('kind')=='preprocessed_full_test':return 'original'
-    if artifact.get('kind') in {'source','attachment'} and Path(artifact.get('path','')).suffix.lower()=='.pdf':return 'original'
-    if artifact.get('kind')=='derived':return 'confirmed_knowledge'
+    if layer in {'original','cleaned','card','analysis','confirmed_knowledge'}:
+        return layer
+    if artifact.get('kind')=='preprocessed_full_test':
+        return 'original'
+    if artifact.get('kind') in {'source','attachment'} and Path(artifact.get('path','')).suffix.lower()=='.pdf':
+        return 'original'
+    if artifact.get('kind')=='derived':
+        return 'confirmed_knowledge'
     return 'unknown'
 
 def source_document_hash(artifact):
     """Use recorded lineage, never infer parentage from a title or shared words."""
     value=artifact.get('source_content_hash')
-    if not value and material_layer(artifact)=='original' and Path(artifact.get('path','')).suffix.lower()=='.pdf':value=artifact.get('content_hash')
+    if not value and material_layer(artifact)=='original' and Path(artifact.get('path','')).suffix.lower()=='.pdf':
+        value=artifact.get('content_hash')
     # Earlier library bridge versions encoded the verified source hash here.
     if not value and artifact.get('kind')=='library':
         match=re.fullmatch(r'doc_([a-fA-F0-9]{64})',artifact.get('document_id',''))
-        if match:value=match.group(1)
+        if match:
+            value=match.group(1)
     return value.lower() if isinstance(value,str) and re.fullmatch(r'[a-fA-F0-9]{64}',value) else None
 def safe_path(root,path):
-    root=Path(root).resolve(strict=False);path=Path(path)
-    if not windows_io_path(root).is_dir():raise ValueError('SOURCE_ROOT_UNAVAILABLE')
-    try:rel=path.absolute().relative_to(root)
-    except ValueError:raise ValueError('SOURCE_OUTSIDE_VAULT')
+    root=Path(root).resolve(strict=False)
+    path=Path(path)
+    if not windows_io_path(root).is_dir():
+        raise ValueError('SOURCE_ROOT_UNAVAILABLE')
+    try:
+        rel=path.absolute().relative_to(root)
+    except ValueError:
+        raise ValueError('SOURCE_OUTSIDE_VAULT')
     cur=root
     for part in rel.parts:
-        if part.startswith('.') or part in DENY_DIRS:raise ValueError('SOURCE_PRIVATE_DIRECTORY')
+        if part.startswith('.') or part in DENY_DIRS:
+            raise ValueError('SOURCE_PRIVATE_DIRECTORY')
         cur/=part
-        cur_io=windows_io_path(cur);info=cur_io.lstat()
-        if cur.is_symlink() or cur_io.is_symlink() or getattr(info,'st_file_attributes',0)&getattr(stat,'FILE_ATTRIBUTE_REPARSE_POINT',0x400):raise ValueError('SOURCE_LINK_REJECTED')
+        cur_io=windows_io_path(cur)
+        info=cur_io.lstat()
+        if cur.is_symlink() or cur_io.is_symlink() or getattr(info,'st_file_attributes',0)&getattr(stat,'FILE_ATTRIBUTE_REPARSE_POINT',0x400):
+            raise ValueError('SOURCE_LINK_REJECTED')
     resolved=path.resolve(strict=False)
-    if not resolved.is_relative_to(root) or not windows_io_path(resolved).is_file():raise ValueError('SOURCE_OUTSIDE_VAULT')
+    if not resolved.is_relative_to(root) or not windows_io_path(resolved).is_file():
+        raise ValueError('SOURCE_OUTSIDE_VAULT')
     return resolved
 
 def tokens(text):
@@ -67,7 +81,8 @@ def tokens(text):
 
 def read_document(path):
     path_io=windows_io_path(path)
-    if path_io.stat().st_size>24*1024*1024:raise ValueError('SOURCE_TOO_LARGE')
+    if path_io.stat().st_size>24*1024*1024:
+        raise ValueError('SOURCE_TOO_LARGE')
     raw=path_io.read_bytes()
     if path.suffix.lower()=='.pdf':
         try:
@@ -76,9 +91,12 @@ def read_document(path):
                 pages=[(p.number+1,p.get_text()) for p in doc]
         except ImportError:
             import pypdf,io
-            doc=pypdf.PdfReader(io.BytesIO(raw));pages=[(i+1,p.extract_text() or '') for i,p in enumerate(doc.pages)]
-        if not any(t.strip() for _,t in pages):raise ValueError('SOURCE_REQUIRES_EXISTING_OCR')
-    else:pages=[(None,raw.decode('utf-8-sig'))]
+            doc=pypdf.PdfReader(io.BytesIO(raw))
+            pages=[(i+1,p.extract_text() or '') for i,p in enumerate(doc.pages)]
+        if not any(t.strip() for _,t in pages):
+            raise ValueError('SOURCE_REQUIRES_EXISTING_OCR')
+    else:
+        pages=[(None,raw.decode('utf-8-sig'))]
     return raw,pages
 
 
@@ -354,17 +372,22 @@ class EvidenceIndex:
     def unavailable_derived(self,project,artifact_ids=None,*,db=None):
         """Report unusable knowledge without changing its human review state."""
         if db is None:
-            with self.store.tx() as conn:return self.unavailable_derived(project,artifact_ids,db=conn)
+            with self.store.tx() as conn:
+                return self.unavailable_derived(project,artifact_ids,db=conn)
         unavailable={}
         for artifact in self.store.list('artifact',project,db=db):
-            if artifact['kind']!='derived' or artifact['state']!='active':continue
-            if artifact_ids is not None and artifact['id'] not in artifact_ids:continue
+            if artifact['kind']!='derived' or artifact['state']!='active':
+                continue
+            if artifact_ids is not None and artifact['id'] not in artifact_ids:
+                continue
             try:
                 first=db.execute('SELECT id FROM chunks WHERE artifact_id=? LIMIT 1',(artifact['id'],)).fetchone()
-                if first is None:raise ValueError('EVIDENCE_NOT_FOUND')
+                if first is None:
+                    raise ValueError('EVIDENCE_NOT_FOUND')
                 self.read(first['id'],project,expected_hash=artifact['content_hash'],db=db)
             except ValueError as error:
-                if str(error) not in {'EVIDENCE_NOT_FOUND','EVIDENCE_INACTIVE','EVIDENCE_STALE','EVIDENCE_VERSION_CONFLICT','SOURCE_ROOT_UNAVAILABLE'}:raise
+                if str(error) not in {'EVIDENCE_NOT_FOUND','EVIDENCE_INACTIVE','EVIDENCE_STALE','EVIDENCE_VERSION_CONFLICT','SOURCE_ROOT_UNAVAILABLE'}:
+                    raise
                 unavailable[artifact['id']]={'content_hash':artifact['content_hash'],'reason':str(error)}
             except FileNotFoundError:
                 unavailable[artifact['id']]={'content_hash':artifact['content_hash'],'reason':'SOURCE_UNAVAILABLE'}
@@ -375,26 +398,37 @@ class EvidenceIndex:
         return search(self,query,project,limit,artifact_ids,policy_config,record)
 
     def legacy_lexical_search(self,query,project,limit=8,artifact_ids=None):
-        if not isinstance(query,str) or not query.strip() or len(query)>8000:raise ValueError('QUERY_INVALID')
+        if not isinstance(query,str) or not query.strip() or len(query)>8000:
+            raise ValueError('QUERY_INVALID')
         terms=set(tokens(query))
-        if not terms:return {'results':[],'engine':'local lexical retrieval','stale_excluded':0}
-        limit=max(1,min(int(limit),24));selected=None if artifact_ids is None else set(artifact_ids)
+        if not terms:
+            return {'results':[],'engine':'local lexical retrieval','stale_excluded':0}
+        limit=max(1,min(int(limit),24))
+        selected=None if artifact_ids is None else set(artifact_ids)
         with self.store.tx() as db:
             chunks=[dict(r) for r in db.execute('SELECT * FROM chunks WHERE project=?',(project,)) if selected is None or r['artifact_id'] in selected]
             temporary={a['id'] for a in self.store.list('artifact',project,db=db) if a.get('temporary_thread')}
             chunks=[c for c in chunks if c['artifact_id'] not in temporary or selected is not None and c['artifact_id'] in selected]
             counts=[collections.Counter(tokens(c['text'])) for c in chunks]
             frequency={w:sum(w in c for c in counts) for w in terms}
-            n=len(chunks);avg=sum(sum(c.values()) for c in counts)/max(n,1)
+            n=len(chunks)
+            avg=sum(sum(c.values()) for c in counts)/max(n,1)
             scored=[]
             for c,words in zip(chunks,counts):
-                length=sum(words.values());score=sum(math.log(1+(n-frequency[w]+.5)/(frequency[w]+.5))*words[w]*2.2/(words[w]+1.2*(.25+.75*length/max(avg,1))) for w in terms if words[w])
-                if score>0:scored.append((score,c))
-            result=[];stale=0
+                length=sum(words.values())
+                score=sum(math.log(1+(n-frequency[w]+.5)/(frequency[w]+.5))*words[w]*2.2/(words[w]+1.2*(.25+.75*length/max(avg,1))) for w in terms if words[w])
+                if score>0:
+                    scored.append((score,c))
+            result=[]
+            stale=0
             for score,c in sorted(scored,key=lambda x:(-x[0],x[1]['id'])):
                 try:
                     ref=self.read(c['id'],project,db=db)
-                    ref['score']=round(score*(.7 if ref['kind']=='derived' else 1),5);result.append(ref)
-                except (OSError,ValueError):stale+=1;continue
-                if len(result)>=limit*2:break
+                    ref['score']=round(score*(.7 if ref['kind']=='derived' else 1),5)
+                    result.append(ref)
+                except (OSError,ValueError):
+                    stale+=1
+                    continue
+                if len(result)>=limit*2:
+                    break
         return {'results':sorted(result,key=lambda r:-r['score'])[:limit],'engine':'local lexical retrieval','stale_excluded':stale}

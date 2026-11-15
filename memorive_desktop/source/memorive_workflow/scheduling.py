@@ -33,14 +33,18 @@ class PipelineLanes:
             self._papers[identity] = (lock, count + 1)
         acquired = False
         try:
-            self.acquire(lock); acquired = True
+            self.acquire(lock)
+            acquired = True
             yield
         finally:
-            if acquired: lock.release()
+            if acquired:
+                lock.release()
             with self._guard:
                 _, count = self._papers[identity]
-                if count == 1: self._papers.pop(identity)
-                else: self._papers[identity] = (lock, count - 1)
+                if count == 1:
+                    self._papers.pop(identity)
+                else:
+                    self._papers[identity] = (lock, count - 1)
 
     def enter(self, node_id):
         # Register before a cooperative checkpoint: a paused or descheduled

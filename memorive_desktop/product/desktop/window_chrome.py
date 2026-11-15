@@ -39,19 +39,30 @@ def hit_test(x, y, width, height, border, maximized, regions):
     if not maximized:
         left, right = x < 0, x >= width
         top, bottom = y < 0, y >= height
-        if top and left: return 13
-        if top and right: return 14
-        if bottom and left: return 16
-        if bottom and right: return 17
-        if left: return 10
-        if right: return 11
-        if top: return 12
-        if bottom: return 15
+        if top and left:
+            return 13
+        if top and right:
+            return 14
+        if bottom and left:
+            return 16
+        if bottom and right:
+            return 17
+        if left:
+            return 10
+        if right:
+            return 11
+        if top:
+            return 12
+        if bottom:
+            return 15
     def inside(rect):
         return rect[0] <= x < rect[2] and rect[1] <= y < rect[3]
-    if any(inside(r) for r in regions.get('maximize', [])): return 9
-    if any(inside(r) for r in regions.get('exclude', [])): return 1
-    if any(inside(r) for r in regions.get('drag', [])): return 2
+    if any(inside(r) for r in regions.get('maximize', [])):
+        return 9
+    if any(inside(r) for r in regions.get('exclude', [])):
+        return 1
+    if any(inside(r) for r in regions.get('drag', [])):
+        return 2
     return 1
 
 
@@ -90,14 +101,16 @@ class MainWindowChrome:
         return view
 
     def cancel_close(self):
-        with self._gate: self._ticket = None
+        with self._gate:
+            self._ticket = None
         return {'status': 'CANCELLED'}
 
     def commit_close(self, request):
         if not isinstance(request, dict) or set(request) != {'ticket', 'choice', 'edit'}:
             raise ValueError('WINDOW_CLOSE_REQUEST_INVALID')
         choice = request['choice']
-        if choice not in {'EXIT', 'HIDE'}: raise ValueError('WINDOW_CLOSE_CHOICE_INVALID')
+        if choice not in {'EXIT', 'HIDE'}:
+            raise ValueError('WINDOW_CLOSE_CHOICE_INVALID')
         edit = validate_edit_state(request['edit'])
         with self._gate:
             ticket = self._ticket
@@ -121,9 +134,11 @@ class MainWindowChrome:
 
     def request_close(self, *, force_ask=False):
         # FormClosing runs on the UI thread. Never wait there for WebView/IPC.
-        if self._session_query_pending: return False
+        if self._session_query_pending:
+            return False
         with self._gate:
-            if self._request_inflight: return False
+            if self._request_inflight:
+                return False
             self._request_inflight = True
         def request():
             try:
@@ -131,31 +146,38 @@ class MainWindowChrome:
                     'Boolean(window.__Desktop_WINDOW_CHROME__ && '
                     'window.__Desktop_WINDOW_CHROME__.requestClose('
                     + ('true' if force_ask else 'false') + '))')
-                if result is not True: self.fallback()
+                if result is not True:
+                    self.fallback()
             except Exception as error:
                 self.last_error = type(error).__name__
                 self.fallback()
             finally:
-                with self._gate: self._request_inflight = False
+                with self._gate:
+                    self._request_inflight = False
         threading.Thread(target=request, daemon=True, name='Memorive-close-intent').start()
         return False
 
     def fallback(self):
         # Only a failed frontend uses native recovery; unknown state is not idle.
-        if self._session_query_pending: return
+        if self._session_query_pending:
+            return
         from System import Action
         from System.Windows.Forms import MessageBox, MessageBoxButtons, MessageBoxIcon
-        try: lang = self.api._current_preferences().get('language', 'zh-CN')
-        except Exception: lang = 'zh-CN'
+        try:
+            lang = self.api._current_preferences().get('language', 'zh-CN')
+        except Exception:
+            lang = 'zh-CN'
         text = {
             'en-US': ('Close window', 'The window is not responding. Exit? Unsaved changes and running tasks may be lost.'),
             'ja-JP': ('ウィンドウを閉じる', '画面が応答していません。終了しますか？未保存の変更や実行中の処理は失われる場合があります。'),
         }.get(lang, ('关闭窗口', '界面暂时无响应。仍要退出？未保存修改和运行中任务可能丢失。'))
         def show():
-            if self._session_query_pending: return
+            if self._session_query_pending:
+                return
             result = MessageBox.Show(self.window.native, text[1], text[0],
                                      MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
-            if str(result) == 'Yes': self.api.exit_application({})
+            if str(result) == 'Yes':
+                self.api.exit_application({})
         self.window.native.BeginInvoke(Action(show))
 
     def update_regions(self, value):
@@ -167,20 +189,23 @@ class MainWindowChrome:
         result = {}
         for name in ('drag', 'exclude', 'maximize'):
             rows = value[name]
-            if not isinstance(rows, list): raise ValueError('WINDOW_REGIONS_INVALID')
+            if not isinstance(rows, list):
+                raise ValueError('WINDOW_REGIONS_INVALID')
             result[name] = []
             for rect in rows:
                 if not isinstance(rect, list) or len(rect) != 4 or any(
                     isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x)
                     for x in rect
                 ): raise ValueError('WINDOW_REGIONS_INVALID')
-                if rect[2] < rect[0] or rect[3] < rect[1]: raise ValueError('WINDOW_REGIONS_INVALID')
+                if rect[2] < rect[0] or rect[3] < rect[1]:
+                    raise ValueError('WINDOW_REGIONS_INVALID')
                 result[name].append(tuple(x * scale for x in rect))
         self.regions = result
         return self.state()
 
     def state(self):
-        if not self.installed: return {'status': 'NATIVE_FRAME', 'maximized': False}
+        if not self.installed:
+            return {'status': 'NATIVE_FRAME', 'maximized': False}
         rect = wintypes.RECT()
         self.user.GetClientRect(self.hwnd, ctypes.byref(rect))
         return {'status': 'READY', 'maximized': bool(self.user.IsZoomed(self.hwnd)),
@@ -196,10 +221,12 @@ class MainWindowChrome:
     def command(self, action):
         if action not in {'MINIMIZE', 'MAXIMIZE', 'DRAG', 'MAXIMIZE_HOVER', 'SYSTEM_MENU'}:
             raise ValueError('WINDOW_ACTION_INVALID')
-        if not self.installed: raise RuntimeError('WINDOW_CHROME_NOT_READY')
+        if not self.installed:
+            raise RuntimeError('WINDOW_CHROME_NOT_READY')
         from System import Action
         def run():
-            if action == 'MINIMIZE': self.user.SendMessageW(self.hwnd, 0x112, 0xF020, 0)
+            if action == 'MINIMIZE':
+                self.user.SendMessageW(self.hwnd, 0x112, 0xF020, 0)
             elif action == 'MAXIMIZE':
                 self.user.SendMessageW(self.hwnd, 0x112, 0xF120 if self.user.IsZoomed(self.hwnd) else 0xF030, 0)
             elif action == 'DRAG':
@@ -207,19 +234,23 @@ class MainWindowChrome:
                 # Windows owns move/restore/Snap. No Python mouse-follow loop.
                 self.user.SendMessageW(self.hwnd, 0xA1, 2, 0)
             elif action == 'MAXIMIZE_HOVER':
-                point = wintypes.POINT(); self.user.GetCursorPos(ctypes.byref(point))
+                point = wintypes.POINT()
+                self.user.GetCursorPos(ctypes.byref(point))
                 self.user.SendMessageW(self.hwnd, 0xA0, 9, (point.x & 65535) | ((point.y & 65535) << 16))
             elif action == 'SYSTEM_MENU':
-                point = wintypes.POINT(); self.user.GetCursorPos(ctypes.byref(point))
+                point = wintypes.POINT()
+                self.user.GetCursorPos(ctypes.byref(point))
                 menu = self.user.GetSystemMenu(self.hwnd, False)
                 chosen = self.user.TrackPopupMenu(menu, 0x100, point.x, point.y, 0, self.hwnd, None)
-                if chosen: self.user.PostMessageW(self.hwnd, 0x112, chosen, 0)
+                if chosen:
+                    self.user.PostMessageW(self.hwnd, 0x112, chosen, 0)
         self.window.native.BeginInvoke(Action(run))
         return {'status': 'QUEUED', 'action': action}
 
     def install(self):
         """Called synchronously at before_show; keep WS_THICKFRAME and system menu."""
-        if self.installed: return
+        if self.installed:
+            return
         user = self.user = ctypes.WinDLL('user32', use_last_error=True)
         comctl = self.comctl = ctypes.WinDLL('comctl32', use_last_error=True)
         hwnd = self.hwnd = int(self.window.native.Handle.ToInt64())
@@ -243,7 +274,8 @@ class MainWindowChrome:
         user.SendMessageW.restype = pointer
         user.PostMessageW.argtypes = user.SendMessageW.argtypes
         user.SetWindowPos.argtypes = [wintypes.HWND,wintypes.HWND,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.c_int,wintypes.UINT]
-        user.GetSystemMenu.argtypes = [wintypes.HWND,wintypes.BOOL];user.GetSystemMenu.restype = wintypes.HMENU
+        user.GetSystemMenu.argtypes = [wintypes.HWND,wintypes.BOOL]
+        user.GetSystemMenu.restype = wintypes.HMENU
         user.TrackPopupMenu.argtypes = [wintypes.HMENU,wintypes.UINT,ctypes.c_int,ctypes.c_int,ctypes.c_int,wintypes.HWND,ctypes.c_void_p]
         def border():
             dpi = user.GetDpiForWindow(hwnd)
@@ -261,7 +293,8 @@ class MainWindowChrome:
                 if msg == 0x112:  # WM_SYSCOMMAND; native menu/keyboard/buttons share this path.
                     command = wp & 0xFFF0
                     if command in (0xF020, 0xF030) and not user.IsZoomed(handle) and not user.IsIconic(handle):
-                        bounds=wintypes.RECT();user.GetWindowRect(handle,ctypes.byref(bounds))
+                        bounds=wintypes.RECT()
+                        user.GetWindowRect(handle,ctypes.byref(bounds))
                         self._normal_extent=(bounds.right-bounds.left,bounds.bottom-bounds.top,user.GetDpiForWindow(handle))
                     result=comctl.DefSubclassProc(handle,msg,wp,lp)
                     if command == 0xF120 and self._normal_extent and not user.IsZoomed(handle) and not user.IsIconic(handle):
@@ -277,16 +310,20 @@ class MainWindowChrome:
                 if msg == 0x83 and wp:  # WM_NCCALCSIZE: first RECT is new window bounds.
                     rect = ctypes.cast(lp,ctypes.POINTER(wintypes.RECT)).contents
                     edge = border()
-                    rect.left += edge;rect.right -= edge;rect.bottom -= edge
+                    rect.left += edge
+                    rect.right -= edge
+                    rect.bottom -= edge
                     # A normal window must let the WebView paint the whole top:
                     # reserving a partial native caption exposes a DWM color band.
                     # Maximized resize margins are outside the monitor work area.
-                    if user.IsZoomed(handle):rect.top += edge
+                    if user.IsZoomed(handle):
+                        rect.top += edge
                     return 0
                 if msg == 0x84:
                     point=wintypes.POINT(ctypes.c_short(lp & 65535).value,ctypes.c_short((lp>>16)&65535).value)
                     user.ScreenToClient(handle,ctypes.byref(point))
-                    rect=wintypes.RECT();user.GetClientRect(handle,ctypes.byref(rect))
+                    rect=wintypes.RECT()
+                    user.GetClientRect(handle,ctypes.byref(rect))
                     return hit_test(point.x,point.y,rect.right,rect.bottom,border(),
                                     bool(user.IsZoomed(handle)),self.regions)
                 if msg == 0x82:  # WM_NCDESTROY; lifetime pinned by controller until process exit.
@@ -312,11 +349,13 @@ class MainWindowChrome:
             # replace an OS-selected Snap extent or an arbitrary user's resize.
             from System import Action
             def repair():
-                if not self.installed or not self._normal_extent or user.IsZoomed(hwnd) or user.IsIconic(hwnd): return
+                if not self.installed or not self._normal_extent or user.IsZoomed(hwnd) or user.IsIconic(hwnd):
+                    return
                 width,height,dpi=self._normal_extent
                 current_dpi=user.GetDpiForWindow(hwnd)
                 expected_width,expected_height=round(width*current_dpi/dpi),round(height*current_dpi/dpi)
-                bounds=wintypes.RECT();user.GetWindowRect(hwnd,ctypes.byref(bounds))
+                bounds=wintypes.RECT()
+                user.GetWindowRect(hwnd,ctypes.byref(bounds))
                 if (bounds.right-bounds.left==expected_width and
                     bounds.bottom-bounds.top==expected_height+user.GetSystemMetricsForDpi(4,current_dpi)):
                     user.SetWindowPos(hwnd,None,0,0,expected_width,expected_height,0x16)

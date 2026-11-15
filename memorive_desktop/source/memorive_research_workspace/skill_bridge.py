@@ -133,15 +133,20 @@ class ResearchSkill:
             old = self.store.get('artifact', identity, db=db)
             chunks = []
             for page in value['pages']:
-                start = page['line_start']; buf = []; size = 0
+                start = page['line_start']
+                buf = []
+                size = 0
                 for end in range(start, page['line_end'] + 1):
-                    buf.append(lines[end-1]); size += len(lines[end-1]) + 1
+                    buf.append(lines[end-1])
+                    size += len(lines[end-1]) + 1
                     if size >= 1800 or end == page['line_end']:
                         text = '\n'.join(buf)
                         if text.strip():
                             eid = 'ev_' + digest([identity, page['page'], start, end, digest(text)])[:32]
                             chunks.append((eid, identity, thread['project'], text, start, end, page['page'], digest(text)))
-                        buf = []; size = 0; start = end + 1
+                        buf = []
+                        size = 0
+                        start = end + 1
             self._select(thread, identity, db)
             if not old:
                 title = Path(value.get('input_path') or files['original'][0].name).name
@@ -199,7 +204,8 @@ class ResearchSkill:
                 a = self.store.get('artifact', identity, db=db)
                 sources.append({k: a.get(k) for k in ('id', 'title', 'document_id', 'content_hash',
                     'source_content_hash', 'material_layer', 'chunks', 'page_count', 'skill_source')})
-            refs = []; total = 0
+            refs = []
+            total = 0
             selected = [artifact_id] if artifact_id else admitted
             for identity in selected:
                 rows = db.execute('SELECT id FROM chunks WHERE artifact_id=? ORDER BY page,line_start,id', (identity,)).fetchall()
@@ -241,7 +247,8 @@ class ResearchSkill:
             if any(r['status'] in {'partial', 'unread'} and not r['gaps'].strip() for r in coverage):
                 raise ValueError('SKILL_COVERAGE_GAP_REQUIRED')
             statuses = {r['artifact_id']: r['status'] for r in coverage}
-            refs = {}; verified = []
+            refs = {}
+            verified = []
             for claim in claims:
                 if claim['text'] not in answer:
                     raise ValueError('SKILL_CLAIM_NOT_IN_ANSWER')

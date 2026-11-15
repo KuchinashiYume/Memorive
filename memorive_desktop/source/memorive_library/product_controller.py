@@ -757,7 +757,9 @@ class LibraryProductController:
                 import os, uuid
                 temporary = target.with_name("." + uuid.uuid4().hex + ".next")
                 with temporary.open("xb") as stream:
-                    stream.write(content); stream.flush(); os.fsync(stream.fileno())
+                    stream.write(content)
+                    stream.flush()
+                    os.fsync(stream.fileno())
                 # Same-directory atomic rename; never replace an existing user file.
                 temporary.rename(target)
             return target

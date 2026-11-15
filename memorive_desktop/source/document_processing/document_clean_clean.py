@@ -189,7 +189,8 @@ def clean(rawmd_path, *, target: str = "sandbox") -> Path:
                     p.search(l) for p in _WHOLE_LINE_BOILERPLATE
                 )
             ):
-                removed["publisher_boilerplate"].append(s); continue
+                removed["publisher_boilerplate"].append(s)
+                continue
             l, removed_suffix = _strip_publisher_boilerplate(l)
             if removed_suffix is not None:
                 removed["publisher_boilerplate"].append(
@@ -207,7 +208,8 @@ def clean(rawmd_path, *, target: str = "sandbox") -> Path:
                 is_repeated=_norm(l) in repeated,
             )
             if noise_kind is not None:
-                removed[noise_kind].append(s); continue
+                removed[noise_kind].append(s)
+                continue
         kept.append(l)
 
     # ── 去连字符 + 保守段内断行合并(不跨页标记/结构)──
@@ -229,7 +231,8 @@ def clean(rawmd_path, *, target: str = "sandbox") -> Path:
     }
 
     # ── 落 [CleanMD](frontmatter 承 RawMD + cleaned_at + clean_report)──
-    paper_id = fm["paper_id"]; title = fm["title"]
+    paper_id = fm["paper_id"]
+    title = fm["title"]
     disp = display_title(title)
     folder = library_root(target) / folder_name(paper_id, disp)
     out = folder / file_name("CleanMD", paper_id, disp, "md")
@@ -275,11 +278,15 @@ def _dehyphenate_join(lines: list) -> list:
             if j < len(lines) and joinable(lines[j]):
                 nxt = lines[j].lstrip()
                 if s.endswith("-") and s[-2:-1].isalpha():        # 连字符续词
-                    out.append(s[:-1] + nxt); i = j + 1; continue
+                    out.append(s[:-1] + nxt)
+                    i = j + 1
+                    continue
                 # 句中断裂续行:上行须以**字母**结尾(是被折断的词),避免把 URL / 符号结尾行
                 # (如 https:// 、E = )误接一个空格毁掉内容(对抗审查 line_merge 加固)。
                 if not s.endswith(_SENT_END) and s[-1:].isalpha() and nxt[:1].islower():
-                    out.append(s + " " + nxt); i = j + 1; continue
+                    out.append(s + " " + nxt)
+                    i = j + 1
+                    continue
         out.append(cur)
         i += 1
     return out

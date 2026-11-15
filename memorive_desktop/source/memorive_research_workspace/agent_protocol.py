@@ -8,7 +8,8 @@ from .service import PUBLIC_METHODS
 
 def schema(properties,required):
     return {'type':'object','properties':properties,'required':required,'additionalProperties':False}
-TEXT={'type':'string'};IDS={'type':'array','items':TEXT,'maxItems':24}
+TEXT={'type':'string'}
+IDS={'type':'array','items':TEXT,'maxItems':24}
 SCHEMAS={
     'memo.capabilities':schema({},[]),
     'memo.search':schema({'query':TEXT,'project':TEXT,'limit':{'type':'integer','minimum':1,'maximum':24},'artifact_ids':IDS},['query','project']),
@@ -40,55 +41,81 @@ def tools_list():
 def validate_arguments(method,args):
     if method in {'memo.skill_context','memo.skill_answer'}:
         import jsonschema
-        try:jsonschema.validate(args,SCHEMAS[method])
-        except jsonschema.ValidationError:raise ValueError('TOOL_ARGUMENTS_INVALID') from None
+        try:
+            jsonschema.validate(args,SCHEMAS[method])
+        except jsonschema.ValidationError:
+            raise ValueError('TOOL_ARGUMENTS_INVALID') from None
         return args
     spec=SCHEMAS[method]
-    if not isinstance(args,dict) or set(args)-set(spec['properties']) or set(spec['required'])-set(args):raise ValueError('TOOL_ARGUMENTS_INVALID')
+    if not isinstance(args,dict) or set(args)-set(spec['properties']) or set(spec['required'])-set(args):
+        raise ValueError('TOOL_ARGUMENTS_INVALID')
     for name,value in args.items():
-        s=spec['properties'][name];kind=s['type']
-        if kind=='string' and (not isinstance(value,str) or not value or len(value)>16000):raise ValueError('TOOL_ARGUMENT_INVALID')
-        if kind=='integer' and (type(value) is not int or not s['minimum']<=value<=s['maximum']):raise ValueError('TOOL_ARGUMENT_INVALID')
-        if kind=='array' and (not isinstance(value,list) or len(value)>s['maxItems'] or any(not isinstance(x,str) or len(x)>200 for x in value)):raise ValueError('TOOL_ARGUMENT_INVALID')
+        s=spec['properties'][name]
+        kind=s['type']
+        if kind=='string' and (not isinstance(value,str) or not value or len(value)>16000):
+            raise ValueError('TOOL_ARGUMENT_INVALID')
+        if kind=='integer' and (type(value) is not int or not s['minimum']<=value<=s['maximum']):
+            raise ValueError('TOOL_ARGUMENT_INVALID')
+        if kind=='array' and (not isinstance(value,list) or len(value)>s['maxItems'] or any(not isinstance(x,str) or len(x)>200 for x in value)):
+            raise ValueError('TOOL_ARGUMENT_INVALID')
     return args
 
 class Protocol:
     def __init__(self,workspace):self.workspace=workspace;self.initialized=False
     def handle(self,request):
-        if not isinstance(request,dict) or request.get('jsonrpc')!='2.0':return {'jsonrpc':'2.0','id':None,'error':{'code':-32600,'message':'Invalid Request'}}
-        identity=request.get('id');method=request.get('method');params=request.get('params',{})
+        if not isinstance(request,dict) or request.get('jsonrpc')!='2.0':
+            return {'jsonrpc':'2.0','id':None,'error':{'code':-32600,'message':'Invalid Request'}}
+        identity=request.get('id')
+        method=request.get('method')
+        params=request.get('params',{})
         if identity is None:
-            if method=='notifications/initialized':self.initialized=True
+            if method=='notifications/initialized':
+                self.initialized=True
             return None
         try:
             if method=='initialize':
                 version=params.get('protocolVersion')
-                if version not in {'2024-11-05','2025-03-26','2025-06-18','2025-11-25'}:version='2025-11-25'
+                if version not in {'2024-11-05','2025-03-26','2025-06-18','2025-11-25'}:
+                    version='2025-11-25'
                 result={'protocolVersion':version,'capabilities':{'tools':{'listChanged':False}},
                     'serverInfo':{'name':'memorive-research','version':'0.8.116'},'instructions':'Use project-scoped evidence. Scientific conclusions require human review in Memorive; these tools cannot approve.'}
-            elif method=='ping':result={}
-            elif not self.initialized:raise ValueError('INITIALIZE_FIRST')
-            elif method=='tools/list':result={'tools':tools_list()}
+            elif method=='ping':
+                result={}
+            elif not self.initialized:
+                raise ValueError('INITIALIZE_FIRST')
+            elif method=='tools/list':
+                result={'tools':tools_list()}
             elif method=='tools/call':
-                name=params.get('name','');mapping={m.replace('.','_'):m for m in PUBLIC_METHODS}
-                if name not in mapping:raise ValueError('METHOD_NOT_ALLOWED')
+                name=params.get('name','')
+                mapping={m.replace('.','_'):m for m in PUBLIC_METHODS}
+                if name not in mapping:
+                    raise ValueError('METHOD_NOT_ALLOWED')
                 target=mapping[name]
                 try:
                     output=self.workspace.call(target,validate_arguments(target,params.get('arguments',{})))
                     result={'content':[{'type':'text','text':json.dumps(output,ensure_ascii=False)}],'isError':False}
                 except (ValueError,TypeError,OSError) as exc:
                     result={'content':[{'type':'text','text':str(exc)[:180]}],'isError':True}
-            else:return {'jsonrpc':'2.0','id':identity,'error':{'code':-32601,'message':'Method not found'}}
+            else:
+                return {'jsonrpc':'2.0','id':identity,'error':{'code':-32601,'message':'Method not found'}}
             return {'jsonrpc':'2.0','id':identity,'result':result}
         except (ValueError,TypeError,KeyError,AttributeError) as exc:
             return {'jsonrpc':'2.0','id':identity,'error':{'code':-32602,'message':str(exc)[:180]}}
 
 def serve(workspace,stdin=None,stdout=None):
-    input_stream=stdin or sys.stdin;output_stream=stdout or sys.stdout;protocol=Protocol(workspace)
+    input_stream=stdin or sys.stdin
+    output_stream=stdout or sys.stdout
+    protocol=Protocol(workspace)
     while True:
         line=input_stream.readline(1024*1024+1)
-        if not line:break
-        if len(line)>1024*1024:raise ValueError('MCP_MESSAGE_TOO_LARGE')
-        try:response=protocol.handle(json.loads(line))
-        except json.JSONDecodeError:response={'jsonrpc':'2.0','id':None,'error':{'code':-32700,'message':'Parse error'}}
-        if response is not None:output_stream.write(json.dumps(response,ensure_ascii=False)+'\n');output_stream.flush()
+        if not line:
+            break
+        if len(line)>1024*1024:
+            raise ValueError('MCP_MESSAGE_TOO_LARGE')
+        try:
+            response=protocol.handle(json.loads(line))
+        except json.JSONDecodeError:
+            response={'jsonrpc':'2.0','id':None,'error':{'code':-32700,'message':'Parse error'}}
+        if response is not None:
+            output_stream.write(json.dumps(response,ensure_ascii=False)+'\n')
+            output_stream.flush()

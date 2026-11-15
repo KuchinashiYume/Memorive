@@ -9,18 +9,23 @@ from .office import OFFICE_SCHEMA,office_structure
 BUNDLE='MemoriveStructureBundle-v1'
 def _json(path,value):
     data=canonical(value)+b'\n'
-    if len(data)>32*1024*1024:fail('STRUCTURE_OUTPUT_TOO_LARGE','Structure output exceeds 32 MiB')
+    if len(data)>32*1024*1024:
+        fail('STRUCTURE_OUTPUT_TOO_LARGE','Structure output exceeds 32 MiB')
     path.write_bytes(data)
 
 def normalize_config(value,*,verify_runtime=True):
-    if not isinstance(value,dict):raise ValueError('STRUCTURE_CONFIG_INVALID')
+    if not isinstance(value,dict):
+        raise ValueError('STRUCTURE_CONFIG_INVALID')
     allowed={'mode','profile','runtime_path','timeout_seconds','runtime_lock_sha256'}
-    if set(value)-allowed:raise ValueError('STRUCTURE_CONFIG_UNKNOWN_FIELDS')
+    if set(value)-allowed:
+        raise ValueError('STRUCTURE_CONFIG_UNKNOWN_FIELDS')
     out={'mode':'off','profile':'fast_no_ocr','runtime_path':'','timeout_seconds':600,'runtime_lock_sha256':None,**value}
     if out['mode'] not in {'off','native','marker'} or out['profile'] not in {'fast_no_ocr','fast_ocr','balanced_ocr'}:
         raise ValueError('STRUCTURE_CONFIG_INVALID')
-    if type(out['timeout_seconds']) is not int or not 1<=out['timeout_seconds']<=3600:raise ValueError('STRUCTURE_TIMEOUT_INVALID')
-    if not isinstance(out['runtime_path'],str):raise ValueError('STRUCTURE_RUNTIME_PATH_INVALID')
+    if type(out['timeout_seconds']) is not int or not 1<=out['timeout_seconds']<=3600:
+        raise ValueError('STRUCTURE_TIMEOUT_INVALID')
+    if not isinstance(out['runtime_path'],str):
+        raise ValueError('STRUCTURE_RUNTIME_PATH_INVALID')
     if out['mode']=='marker' and verify_runtime:
         from .marker_runtime import inspect_runtime
         identity=inspect_runtime(out['runtime_path'])
@@ -34,19 +39,25 @@ def _calibrate(value,source):
     import pymupdf
     with pymupdf.open(source) as doc:
         for page in value['pages']:
-            native=doc[page['page_index']]; box=page['bbox']; w=box[2]-box[0];h=box[3]-box[1]
+            native=doc[page['page_index']]
+            box=page['bbox']
+            w=box[2]-box[0]
+            h=box[3]-box[1]
             ratio=native.rect.width/native.rect.height
             supported=abs(w/h-ratio)<max(.002,ratio*.002)
-            page['pdf_display_bbox']=list(native.rect);page['pdf_rotation']=native.rotation
+            page['pdf_display_bbox']=list(native.rect)
+            page['pdf_rotation']=native.rotation
             page['overlay_status']='CALIBRATED_DISPLAY_POINTS' if supported else 'PAGE_ONLY'
             for block in value['blocks']:
-                if block['page_index']!=page['page_index']:continue
+                if block['page_index']!=page['page_index']:
+                    continue
                 block_supported=supported and block.get('coordinate_status')!='PAGE_ONLY_OUTSIDE_PAGE'
                 if block_supported:
                     a,b,c,d=block['bbox']
                     block['pdf_display_bbox']=[(a-box[0])*native.rect.width/w,(b-box[1])*native.rect.height/h,
                                                (c-box[0])*native.rect.width/w,(d-box[1])*native.rect.height/h]
-                else:block.pop('pdf_display_bbox',None)
+                else:
+                    block.pop('pdf_display_bbox',None)
                 block['source_location']={'kind':'pdf','physical_page':page['physical_page'],
                                           'bbox':block.get('pdf_display_bbox'),'coordinate_system':'pdf_display_points' if block_supported else 'page_only'}
     value['warnings']=[w for w in value['warnings'] if w!='MARKER_COORDINATES_REQUIRE_CALIBRATION_FOR_PDF_OVERLAY']
@@ -55,33 +66,46 @@ def _calibrate(value,source):
 def build_bundle(source,rawmd,destination,config,*,interrupt=None,progress=None):
     source,rawmd,destination=map(lambda p:Path(p).resolve(),(source,rawmd,destination))
     config=normalize_config(config)
-    if config['mode']=='off':raise ValueError('STRUCTURE_DISABLED')
-    source_sha=file_sha(source);raw_sha=file_sha(rawmd)
+    if config['mode']=='off':
+        raise ValueError('STRUCTURE_DISABLED')
+    source_sha=file_sha(source)
+    raw_sha=file_sha(rawmd)
     binding={'source_sha256':source_sha,'rawmd_sha256':raw_sha,'config':config}
     if destination.exists():
         old=verify(destination)
-        if old['binding']!=binding:raise ValueError('STRUCTURE_DESTINATION_CONFLICT')
+        if old['binding']!=binding:
+            raise ValueError('STRUCTURE_DESTINATION_CONFLICT')
         return old
     destination.parent.mkdir(parents=True,exist_ok=True)
-    temp=destination.with_name('.'+destination.name+'-'+uuid.uuid4().hex+'.pending');temp.mkdir()
+    temp=destination.with_name('.'+destination.name+'-'+uuid.uuid4().hex+'.pending')
+    temp.mkdir()
     try:
-        if interrupt:interrupt()
-        if progress:progress('probe',{'format':source.suffix.lower()})
-        original=temp/('Original'+source.suffix.lower());raw=temp/'RawMD.md'
-        shutil.copyfile(source,original);shutil.copyfile(rawmd,raw)
-        if file_sha(original)!=source_sha or file_sha(raw)!=raw_sha:raise ValueError('STRUCTURE_COPY_CHANGED')
-        if progress:progress('parse',{'format':source.suffix.lower(),'profile':config['profile'] if config['mode']=='marker' else 'native'})
+        if interrupt:
+            interrupt()
+        if progress:
+            progress('probe',{'format':source.suffix.lower()})
+        original=temp/('Original'+source.suffix.lower())
+        raw=temp/'RawMD.md'
+        shutil.copyfile(source,original)
+        shutil.copyfile(rawmd,raw)
+        if file_sha(original)!=source_sha or file_sha(raw)!=raw_sha:
+            raise ValueError('STRUCTURE_COPY_CHANGED')
+        if progress:
+            progress('parse',{'format':source.suffix.lower(),'profile':config['profile'] if config['mode']=='marker' else 'native'})
         execution=None
         if source.suffix.lower() in {'.xlsx','.docx','.pptx'}:
-            value=office_structure(original,raw);_json(temp/'structure.json',value)
+            value=office_structure(original,raw)
+            _json(temp/'structure.json',value)
         elif source.suffix.lower()=='.pdf':
-            mode='native_pdf';candidate=None
+            mode='native_pdf'
+            candidate=None
             if config['mode']=='marker':
                 from .marker_runtime import MarkerSession
                 with MarkerSession(config['runtime_path'],temp/'worker',config['profile'],
                                    timeout=config['timeout_seconds'],interrupt=interrupt) as session:
                     execution=session.convert(original,temp/'marker')
-                candidate=temp/'marker/chunks.json';mode='marker_chunks'
+                candidate=temp/'marker/chunks.json'
+                mode='marker_chunks'
             paths=write_structure(source=original,source_sha256=source_sha,rawmd=raw,paper_id='E10',
                                   conversion_receipt_id='E10-'+digest(canonical(binding))[:24],mode=mode,marker_chunks_path=candidate,allow_marker_page_fallback=True)
             value,_=read_json(paths['structure_path'])
@@ -91,18 +115,25 @@ def build_bundle(source,rawmd,destination,config,*,interrupt=None,progress=None)
                 value['warnings']=[w for w in value['warnings'] if w!='EXTERNAL_MARKER_EXECUTION_NOT_VERIFIED']
                 value['capabilities']['ocr']=not execution['config']['disable_ocr']
             else:
-                for page in value['pages']:page['overlay_status']='CALIBRATED_UNROTATED_POINTS'
+                for page in value['pages']:
+                    page['overlay_status']='CALIBRATED_UNROTATED_POINTS'
                 for block in value['blocks']:
                     block['source_location']={'kind':'pdf','physical_page':block['physical_page'],
                         'bbox':block['bbox'],'coordinate_system':'pdf_unrotated_points'}
-            value['structure_id']=structure_id(value);validate_structure(value)
+            value['structure_id']=structure_id(value)
+            validate_structure(value)
             _json(temp/'structure.json',value)
-        else:raise ValueError('STRUCTURE_FORMAT_UNSUPPORTED')
-        if progress:progress('validate',{'blocks':len(value['blocks']),'tables':sum(len(b['tables']) for b in value['blocks'])})
-        if interrupt:interrupt()
-        if file_sha(source)!=source_sha or file_sha(rawmd)!=raw_sha:raise ValueError('STRUCTURE_INPUT_CHANGED')
+        else:
+            raise ValueError('STRUCTURE_FORMAT_UNSUPPORTED')
+        if progress:
+            progress('validate',{'blocks':len(value['blocks']),'tables':sum(len(b['tables']) for b in value['blocks'])})
+        if interrupt:
+            interrupt()
+        if file_sha(source)!=source_sha or file_sha(rawmd)!=raw_sha:
+            raise ValueError('STRUCTURE_INPUT_CHANGED')
         selected=[original,raw,temp/'structure.json']
-        if execution:selected += [temp/'marker/chunks.json',temp/'marker/candidate.md',temp/'marker/execution.json']
+        if execution:
+            selected += [temp/'marker/chunks.json',temp/'marker/candidate.md',temp/'marker/execution.json']
         receipt={'schema_version':BUNDLE,'binding':binding,'structure_id':value['structure_id'],
                  'files':{p.relative_to(temp).as_posix():file_sha(p) for p in selected},
                  'source_file':original.name,'rawmd_file':raw.name,'structure_file':'structure.json',
@@ -110,8 +141,10 @@ def build_bundle(source,rawmd,destination,config,*,interrupt=None,progress=None)
         receipt['quality_policy']={'automatic_rawmd_replacement':False,'automatic_fact_admission':False,
                                    'recognition_accuracy':'NOT_GUARANTEED','review_required':True}
         _json(temp/'bundle.json',receipt)
-        verify(temp);os.replace(temp,destination)
-        if progress:progress('review',{'status':'CANDIDATE_NOT_ADMITTED'})
+        verify(temp)
+        os.replace(temp,destination)
+        if progress:
+            progress('review',{'status':'CANDIDATE_NOT_ADMITTED'})
         return receipt
     except BaseException as error:
         _json(temp/'FAILED.json',{'status':'FAIL','error_type':type(error).__name__,'error':str(error)[:2000]})
@@ -144,7 +177,8 @@ def _member(folder,name):
 
 def _verified(folder):
     folder=Path(folder).resolve(strict=True)
-    manifest=_member(folder,'bundle.json');receipt,_=read_json(manifest)
+    manifest=_member(folder,'bundle.json')
+    receipt,_=read_json(manifest)
     fields={'schema_version','binding','structure_id','files','source_file','rawmd_file',
             'structure_file','execution','status','external_cloud_calls','quality_policy'}
     if (set(receipt)!=fields or receipt.get('schema_version')!=BUNDLE
@@ -165,7 +199,8 @@ def _verified(folder):
     config=normalize_config(binding['config'],verify_runtime=False)
     if config!=binding['config'] or config['mode']=='off':
         raise ValueError('STRUCTURE_BUNDLE_BINDING_MISMATCH')
-    if config['runtime_lock_sha256'] is not None:_sha(config['runtime_lock_sha256'])
+    if config['runtime_lock_sha256'] is not None:
+        _sha(config['runtime_lock_sha256'])
     if config['mode']=='marker' and (not config['runtime_path'] or config['runtime_lock_sha256'] is None):
         raise ValueError('STRUCTURE_BUNDLE_BINDING_MISMATCH')
     files=receipt['files']
@@ -178,24 +213,29 @@ def _verified(folder):
         raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
     members={name:_member(folder,name) for name in files}
     identities=[(members[name].stat().st_dev,members[name].stat().st_ino) for name in roles]
-    if len(set(identities))!=3:raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
+    if len(set(identities))!=3:
+        raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
     # Parse the exact structure bytes whose digest was checked. load/preview
     # consume this object, never a second unchecked selector read.
     value,structure_bytes=read_json(members[receipt['structure_file']])
     observed={}
     for name,path in members.items():
         observed[name]=digest(structure_bytes) if name==receipt['structure_file'] else file_sha(path)
-        if observed[name]!=_sha(files[name]):raise ValueError('STRUCTURE_BUNDLE_STALE:MEMBER_HASH')
+        if observed[name]!=_sha(files[name]):
+            raise ValueError('STRUCTURE_BUNDLE_STALE:MEMBER_HASH')
     if observed[receipt['source_file']]!=source_sha or observed[receipt['rawmd_file']]!=raw_sha:
         raise ValueError('STRUCTURE_BUNDLE_BINDING_MISMATCH')
     suffix=members[receipt['source_file']].suffix.lower()
     if members[receipt['rawmd_file']].suffix.lower()!='.md' or members[receipt['structure_file']].suffix.lower()!='.json':
         raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
     if value.get('schema_version')==OFFICE_SCHEMA:
-        if suffix not in {'.docx','.xlsx','.pptx'}:raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
-        if value.get('structure_id')!=structure_id(value):raise ValueError('STRUCTURE_ID_MISMATCH')
+        if suffix not in {'.docx','.xlsx','.pptx'}:
+            raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
+        if value.get('structure_id')!=structure_id(value):
+            raise ValueError('STRUCTURE_ID_MISMATCH')
     else:
-        if suffix!='.pdf':raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
+        if suffix!='.pdf':
+            raise ValueError('STRUCTURE_BUNDLE_ROLE_INVALID')
         validate_structure(value)
     if value['structure_id']!=receipt['structure_id'] or _sha(value['source_sha256'])!=source_sha or _sha(value['rawmd_sha256'])!=raw_sha:
         raise ValueError('STRUCTURE_BUNDLE_BINDING_MISMATCH')
@@ -221,8 +261,10 @@ def _verified(folder):
                 or chunks.get('source_sha256')!=source_sha or chunks.get('config')!=expected_config
                 or chunks.get('engine')!='marker' or chunks.get('engine_version')!='2.0.0'):
             raise ValueError('STRUCTURE_BUNDLE_MARKER_EXECUTION_INVALID')
-        _sha(execution.get('worker_sha256'));_sha(execution.get('guard_sha256'))
-    elif execution is not None:raise ValueError('STRUCTURE_BUNDLE_MARKER_EXECUTION_INVALID')
+        _sha(execution.get('worker_sha256'))
+        _sha(execution.get('guard_sha256'))
+    elif execution is not None:
+        raise ValueError('STRUCTURE_BUNDLE_MARKER_EXECUTION_INVALID')
     members['bundle.json']=manifest
     return receipt,value,members
 
@@ -230,45 +272,57 @@ def verify(folder):
     return _verified(folder)[0]
 
 def load(folder):
-    receipt,value,_=_verified(folder);return receipt,value
+    receipt,value,_=_verified(folder)
+    return receipt,value
 
 def preview(folder,block_id):
-    receipt,value,members=_verified(folder);block=next((b for b in value['blocks'] if b['block_id']==block_id),None)
-    if block is None:raise ValueError('STRUCTURE_BLOCK_NOT_FOUND')
+    receipt,value,members=_verified(folder)
+    block=next((b for b in value['blocks'] if b['block_id']==block_id),None)
+    if block is None:
+        raise ValueError('STRUCTURE_BLOCK_NOT_FOUND')
     locator=block.get('source_location',{})
     result={'structure_id':value['structure_id'],'block_id':block_id,'source_sha256':value['source_sha256'],
             'source_location':locator,'text':block['text'],'tables':block['tables']}
     if locator.get('kind')=='pdf':
         import pymupdf
         source_bytes=members[receipt['source_file']].read_bytes()
-        if digest(source_bytes)!=_sha(receipt['binding']['source_sha256']):raise ValueError('STRUCTURE_BUNDLE_STALE:PREVIEW_SOURCE')
+        if digest(source_bytes)!=_sha(receipt['binding']['source_sha256']):
+            raise ValueError('STRUCTURE_BUNDLE_STALE:PREVIEW_SOURCE')
         with pymupdf.open(stream=source_bytes,filetype='pdf') as doc:
             page=doc[locator['physical_page']-1]
             # The original page is rendered. Overlay is data separately, never drawn into the source.
             pix=page.get_pixmap(matrix=pymupdf.Matrix(min(1.5,1200/page.rect.width),min(1.5,1200/page.rect.width)),alpha=False)
             result['page_image']='data:image/png;base64,'+base64.b64encode(pix.tobytes('png')).decode('ascii')
-            result['page_width']=page.rect.width;result['page_height']=page.rect.height
+            result['page_width']=page.rect.width
+            result['page_height']=page.rect.height
             box=locator.get('bbox')
-            if box and locator['coordinate_system']=='pdf_unrotated_points':box=list(pymupdf.Rect(box)*page.rotation_matrix)
+            if box and locator['coordinate_system']=='pdf_unrotated_points':
+                box=list(pymupdf.Rect(box)*page.rotation_matrix)
             result['overlay_bbox']=box
     return result
 
 def context_pack(folder,confirmed,*,budget):
     receipt,value=load(folder)
-    if type(budget) is not int or not 256<=budget<=100000:raise ValueError('STRUCTURE_CONTEXT_BUDGET_INVALID')
+    if type(budget) is not int or not 256<=budget<=100000:
+        raise ValueError('STRUCTURE_CONTEXT_BUDGET_INVALID')
     wanted=set(confirmed)
-    if len(wanted)!=len(confirmed):raise ValueError('STRUCTURE_DUPLICATE_SELECTION')
+    if len(wanted)!=len(confirmed):
+        raise ValueError('STRUCTURE_DUPLICATE_SELECTION')
     blocks={b['block_id']:b for b in value['blocks']}
-    if wanted-set(blocks):raise ValueError('STRUCTURE_BLOCK_NOT_FOUND')
+    if wanted-set(blocks):
+        raise ValueError('STRUCTURE_BLOCK_NOT_FOUND')
     out={'schema_version':'MemoriveStructuredContext-v1','source_sha256':value['source_sha256'],
          'structure_id':value['structure_id'],'fragments':[],'omitted_block_ids':sorted(wanted),'truncated':bool(wanted)}
-    if len(canonical(out).decode('utf-8'))>budget:raise ValueError('STRUCTURE_CONTEXT_BUDGET_TOO_SMALL')
+    if len(canonical(out).decode('utf-8'))>budget:
+        raise ValueError('STRUCTURE_CONTEXT_BUDGET_TOO_SMALL')
     for key in confirmed:
-        b=blocks[key];entry={'block_id':key,'source_location':b.get('source_location'), 'text':b['text'],'tables':b['tables']}
+        b=blocks[key]
+        entry={'block_id':key,'source_location':b.get('source_location'), 'text':b['text'],'tables':b['tables']}
         candidate={**out,'fragments':[*out['fragments'],entry],
                    'omitted_block_ids':[k for k in out['omitted_block_ids'] if k!=key]}
         candidate['truncated']=bool(candidate['omitted_block_ids'])
-        if len(canonical(candidate).decode('utf-8'))<=budget:out=candidate
+        if len(canonical(candidate).decode('utf-8'))<=budget:
+            out=candidate
     return out
 
 

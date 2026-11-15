@@ -30,13 +30,15 @@ def render(report):
         'completed_checks':('已完成核查','Completed checks','完了した確認'),
         'planned_checks':('计划核查','Planned checks','計画した確認'),
     }.items():
-        if key in scope:lines+=['- '+t(*names)+': '+str(scope[key])]
+        if key in scope:
+            lines+=['- '+t(*names)+': '+str(scope[key])]
     if report.get('descriptions'):
         d=report['descriptions'];lines+=['','## '+t('数值描述','Numeric descriptions','数値の記述'),'',
           t('数值对象：','Numeric objects: ','数値項目：')+str(d['record_count'])+'; '+t('表格：','Tables: ','表：')+str(d['table_count']),
           t('最小值：','Minimum: ','最小値：')+str(d['minimum'])+'; '+t('最大值：','Maximum: ','最大値：')+str(d['maximum']),
           generated(d['interpretation']),'','| '+t('原样数值 | 原文位置 | 单位字面值','Exact value | Source location | Literal unit','原表記の数値 | 原文位置 | 単位の原表記')+' |','| --- | --- | --- |']
-        for r in report['records']:lines.append(f'| {r["raw"]} | L{r["source"]["line"]}:C{r["source"]["column"]} | {r["unit_literal"]} |')
+        for r in report['records']:
+            lines.append(f'| {r["raw"]} | L{r["source"]["line"]}:C{r["source"]["column"]} | {r["unit_literal"]} |')
     if report.get('numeric_blocks'):
         lines+=['','## '+t('数值列与格式摘要','Numeric columns and formats','数値列と形式の要約'),'']
         for c in report['numeric_blocks']['table_columns']:
@@ -47,18 +49,25 @@ def render(report):
         lines+=['','## '+t('跨章节关系检查','Cross-section relationship review','章をまたぐ関係の確認'),'',global_review['status'],'']
         for relation in global_review.get('checks',[]):
             lines += [relation['relation'],relation['reasoning'],'']
-            for c in relation['citations']:lines+=['> L'+str(c['line'])+': '+c['quote'],'']
+            for c in relation['citations']:
+                lines+=['> L'+str(c['line'])+': '+c['quote'],'']
     labels={'COMPATIBLE':('给定条件下相容','Compatible under the conditions','条件下で整合'),'INCONSISTENT':('给定条件下不相容','Inconsistent under the conditions','条件下で不整合'),'INSUFFICIENT_INFORMATION':('信息不足','Insufficient information','情報不足'),'INPUT_ERROR':('输入问题','Input issue','入力問題'),'NOT_APPLICABLE':('不适用','Not applicable','適用外')}
     for check in report.get('checks',[]):
         lines+=['','### '+check['rule_id']+' · '+t(*labels[check['status']]),'']
-        if check.get('calculation',{}).get('formula'):lines += [t('计算：','Calculation: ','計算：')+check['calculation']['formula']]
-        if check.get('missing'):lines += [t('缺少参数：','Missing parameters: ','不足する条件：')+', '.join(check['missing'])]
-        if check.get('reason'):lines += [generated(check['reason'])]
+        if check.get('calculation',{}).get('formula'):
+            lines += [t('计算：','Calculation: ','計算：')+check['calculation']['formula']]
+        if check.get('missing'):
+            lines += [t('缺少参数：','Missing parameters: ','不足する条件：')+', '.join(check['missing'])]
+        if check.get('reason'):
+            lines += [generated(check['reason'])]
     for f in report.get('findings',[]):
         lines+=['','### '+(f.get('claim') or f['finding_id']),'',generated(f.get('reasoning') or f.get('statement','')),'']
-        if f.get('alternative_explanation'):lines += [t('解释与反例：','Explanations and counterevidence: ','説明と反証：')+generated(f['alternative_explanation'])]
-        if f.get('escalation_limited'):lines += [t('分级受限说明：','Classification limit: ','区分の制限：')+f['escalation_limited']]
-        for r in f.get('citations',[]):lines+=['> L'+str(r['line'])+': '+r['quote'],'']
+        if f.get('alternative_explanation'):
+            lines += [t('解释与反例：','Explanations and counterevidence: ','説明と反証：')+generated(f['alternative_explanation'])]
+        if f.get('escalation_limited'):
+            lines += [t('分级受限说明：','Classification limit: ','区分の制限：')+f['escalation_limited']]
+        for r in f.get('citations',[]):
+            lines+=['> L'+str(r['line'])+': '+r['quote'],'']
     # Full records, machine reasons, formula definitions and provenance stay literal.
     lines+=['','## '+t('原始计算与范围记录','Calculation and scope records','計算と確認範囲の記録'),'','```json',json.dumps(report,ensure_ascii=False,sort_keys=True,indent=2),'```','']
     return '\n'.join(lines)

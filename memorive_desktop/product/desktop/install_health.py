@@ -58,12 +58,17 @@ def main(root):
     try:
         # Generated here from generic text; never a distributed PDF or user's document.
         import pymupdf
-        doc = pymupdf.open(); page=doc.new_page(); page.insert_text((36,36),'Memorive offline health')
-        pdf = probe/'synthetic-health.pdf'; doc.save(str(pdf)); doc.close()
+        doc = pymupdf.open()
+        page=doc.new_page()
+        page.insert_text((36,36),'Memorive offline health')
+        pdf = probe/'synthetic-health.pdf'
+        doc.save(str(pdf))
+        doc.close()
         with pymupdf.open(str(pdf)) as check:
             result['pdf_runtime_ok'] = 'Memorive offline health' in check[0].get_text()
         roots={k:probe/'session-sources'/k for k in ('codex_home','claude_home')}
-        for p in roots.values():p.mkdir(parents=True)
+        for p in roots.values():
+            p.mkdir(parents=True)
         api=ProductApi(state,root/'source',root/'source/facade_method_binding.json',
                        system_effects_enabled=False,session_source_roots=roots,
                        session_visible_ui_reader={},test_fixture_mode=False)
@@ -72,7 +77,8 @@ def main(root):
             result['username_empty'] and result['avatar_empty'] and
             result['model_calls']==result['credential_reads']==0) else 'FAIL'
     finally:
-        if api is not None:api.close()
+        if api is not None:
+            api.close()
         out=probe/'localappdata/Memorive/desktop-review/evidence'
         out.mkdir(parents=True,exist_ok=True)
         (out/'v101_health.json').write_text(json.dumps(result,indent=2),encoding='utf8')

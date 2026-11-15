@@ -18,48 +18,65 @@ def source_rule(ident,kind,inputs,parameters,line,quote,**extra):
 
 def discover(text,parsed):
     by_line={}
-    for r in parsed['records']:by_line.setdefault(r['source']['line'],[]).append(r)
+    for r in parsed['records']:
+        by_line.setdefault(r['source']['line'],[]).append(r)
     bad={x['line'] for x in parsed['input_issues']}
-    lines=text.splitlines();rules=[];pairs=[];blocks=[];missing=[]
+    lines=text.splitlines()
+    rules=[]
+    pairs=[]
+    blocks=[]
+    missing=[]
     def record(line,column):
         return next((r['record_id'] for r in by_line.get(line,[]) if r['source']['column']==column+1),None)
     for number,line in enumerate(lines,1):
-        if number in bad:continue
+        if number in bad:
+            continue
         # Literal p-value spelling or conventional explicitly marked p notation.
         # A bare variable p is deliberately not classified as a probability.
         probability=re.compile(r'(?:\bp[- ]value\b|p值|_p_|\$p\$)\s*(?:<=|>=|<|>|≤|≥|=)\s*('+NUM+r')(?!\w|\.\d)',re.I)
         for m in probability.finditer(line):
             identity=record(number,m.start(1))
-            if identity:rules.append(source_rule(f'probability-{number}-{m.start()}','numeric_domain',dict(value=identity),dict(lower='0',upper='1',domain_label='Explicitly marked p-value',unit_basis='PROBABILITY'),number,line))
+            if identity:
+                rules.append(source_rule(f'probability-{number}-{m.start()}','numeric_domain',dict(value=identity),dict(lower='0',upper='1',domain_label='Explicitly marked p-value',unit_basis='PROBABILITY'),number,line))
         for m in EXPR.finditer(line):
             # Do not take a suffix of a longer expression as a complete equation.
-            before=line[:m.start()].rstrip();after=line[m.end():].lstrip()
-            if (before and before[-1] in '+-−*/×÷=^') or (after and after[0] in '+-−*/×÷=^('):continue
+            before=line[:m.start()].rstrip()
+            after=line[m.end():].lstrip()
+            if (before and before[-1] in '+-−*/×÷=^') or (after and after[0] in '+-−*/×÷=^('):
+                continue
             ids=[record(number,m.start(i)) for i in (1,3,4)]
             if all(ids):
                 rules.append(source_rule(f'expr-{number}-{m.start()}','literal_arithmetic',dict(zip(('left','right','reported'),ids)),
                     dict(operation=m.group(2),percent_result=bool(m.group(5)),rounding='display_precision_envelope'),number,line))
         for m in PAIR.finditer(line):
             ids=[record(number,m.start(i)) for i in (1,2)]
-            if all(ids):pairs.append(dict(line=number,quote=m.group(),record_ids=ids,interpretation='Literal plus/minus pair; spread type and experimental unit are not inferred.'))
+            if all(ids):
+                pairs.append(dict(line=number,quote=m.group(),record_ids=ids,interpretation='Literal plus/minus pair; spread type and experimental unit are not inferred.'))
         formula=FORMULA.search(line)
         if formula:
             # A bounded paragraph is an explicit syntactic unit, not a guessed study group.
             lo=number-1
-            while lo>0 and lines[lo-1].strip() and number-lo<12:lo-=1
+            while lo>0 and lines[lo-1].strip() and number-lo<12:
+                lo-=1
             hi=number
-            while hi<len(lines) and lines[hi].strip() and hi-number<12:hi+=1
-            inputs={};ambiguous=[]
+            while hi<len(lines) and lines[hi].strip() and hi-number<12:
+                hi+=1
+            inputs={}
+            ambiguous=[]
             for key,label in [('sd','SD'),('se','SE'),('n','n')]:
                 found=[]
                 pattern=re.compile(r'(?<!\w)'+label+r'\s*=\s*('+NUM+r')(?!\w|\.\d)',re.I)
                 for i in range(lo,hi):
-                    if i+1 in bad:continue
+                    if i+1 in bad:
+                        continue
                     for m in pattern.finditer(lines[i]):
                         identity=record(i+1,m.start(1))
-                        if identity:found.append(identity)
-                if len(found)==1:inputs[key]=found[0]
-                elif len(found)>1:ambiguous.append(key)
+                        if identity:
+                            found.append(identity)
+                if len(found)==1:
+                    inputs[key]=found[0]
+                elif len(found)>1:
+                    ambiguous.append(key)
             rules.append(source_rule(f'formula-se-{number}','sd_se',inputs,
                 dict(definition='explicit_SE_equals_SD_over_sqrt_n',rounding='display_precision_envelope'),number,line,
                 input_labels=dict(sd='SD',se='SE',n='n'),block_start=lo+1,block_end=hi,ambiguous_labels=ambiguous))

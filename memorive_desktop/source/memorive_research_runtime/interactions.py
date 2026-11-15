@@ -6,7 +6,8 @@ from research_recommendations import exposure_feedback as discovery
 _LOCK=RLock()
 
 def record_analysis(root,config,context,analysis):
-    if not config.get('use_recent_interests'):return {'status':'DISABLED_BY_USER','events_written':0}
+    if not config.get('use_recent_interests'):
+        return {'status':'DISABLED_BY_USER','events_written':0}
     # This is the automatic PDF workflow, not an unsolicited user question.
     # It is observable but cannot masquerade as a positive interest signal.
     events=[]
@@ -23,10 +24,12 @@ def record_analysis(root,config,context,analysis):
     path=Path(root)/'analysis_interactions.json'
     with _LOCK:
         state=read(path) if path.exists() else {'events':[]}
-        known={r['event_id'] for r in state['events']};added=[e for e in events if e['event_id'] not in known]
+        known={r['event_id'] for r in state['events']}
+        added=[e for e in events if e['event_id'] not in known]
         unique={r['event_id']:r for r in added}
         state['events'].extend(unique.values())
-        if unique:write(path,sealed(state))
+        if unique:
+            write(path,sealed(state))
     return {'status':'OBSERVATIONAL_ONLY','events_written':len(unique),'raw_query_persisted':False,'raw_session_read':False,
         'automatic_analysis_is_not_user_interest':True}
 

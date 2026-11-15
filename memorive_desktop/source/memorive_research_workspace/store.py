@@ -11,7 +11,8 @@ def digest(value): return hashlib.sha256((value if isinstance(value,bytes) else 
 
 class Store:
     def __init__(self,root,*,lifecycle_clock=None):
-        self.root=Path(root).resolve();self.root.mkdir(parents=True,exist_ok=True)
+        self.root=Path(root).resolve()
+        self.root.mkdir(parents=True,exist_ok=True)
         self.path=self.root/'research_workspace_v1.sqlite3'
         self.lifecycle_clock=lifecycle_clock or time.time
         with self.tx() as db:
@@ -40,24 +41,38 @@ class Store:
     def tx(self):
         db=sqlite3.connect(self.path,timeout=15,isolation_level=None)
         db.row_factory=sqlite3.Row
-        db.execute('PRAGMA busy_timeout=15000');db.execute('PRAGMA journal_mode=WAL')
+        db.execute('PRAGMA busy_timeout=15000')
+        db.execute('PRAGMA journal_mode=WAL')
         db.execute('BEGIN IMMEDIATE')
-        try:yield db;db.commit()
-        except BaseException:db.rollback();raise
-        finally:db.close()
+        try:
+            yield db
+            db.commit()
+        except BaseException:
+            db.rollback()
+            raise
+        finally:
+            db.close()
 
     @contextmanager
     def read(self):
         # Readers neither request the writer reservation nor change journal mode.
         db=sqlite3.connect(self.path,timeout=15,isolation_level=None)
-        db.row_factory=sqlite3.Row;db.execute('PRAGMA busy_timeout=15000');db.execute('BEGIN')
-        try:yield db;db.commit()
-        except BaseException:db.rollback();raise
-        finally:db.close()
+        db.row_factory=sqlite3.Row
+        db.execute('PRAGMA busy_timeout=15000')
+        db.execute('BEGIN')
+        try:
+            yield db
+            db.commit()
+        except BaseException:
+            db.rollback()
+            raise
+        finally:
+            db.close()
 
     def get(self,kind,identity,*,db=None):
         if db is None:
-            with self.read() as conn:return self.get(kind,identity,db=conn)
+            with self.read() as conn:
+                return self.get(kind,identity,db=conn)
         row=db.execute('SELECT body,revision FROM objects WHERE kind=? AND id=?',(kind,identity)).fetchone()
         value=dict(json.loads(row['body']),id=identity,revision=row['revision']) if row else None
         if value is not None and kind=='thread':
@@ -69,14 +84,20 @@ class Store:
 
     def list(self,kind,project=None,*,db=None):
         if db is None:
-            with self.read() as conn:return self.list(kind,project,db=conn)
-        query='SELECT id,body,revision FROM objects WHERE kind=?';args=[kind]
-        if project is not None:query+=' AND project=?';args.append(project)
+            with self.read() as conn:
+                return self.list(kind,project,db=conn)
+        query='SELECT id,body,revision FROM objects WHERE kind=?'
+        args=[kind]
+        if project is not None:
+            query+=' AND project=?'
+            args.append(project)
         rows=[dict(json.loads(r['body']),id=r['id'],revision=r['revision']) for r in db.execute(query+' ORDER BY updated DESC,id',args)]
         if kind=='thread':
             from .conversation_storage import overlay
             from .answer_versions import normalize
-            for row in rows:overlay(db,row['id'],row);normalize(row)
+            for row in rows:
+                overlay(db,row['id'],row)
+                normalize(row)
         return rows
 
     def recoverable_jobs(self,kind,db):
@@ -98,9 +119,11 @@ class Store:
 
     def put(self,kind,identity,project,value,*,expected=None,db=None):
         if db is None:
-            with self.tx() as conn:return self.put(kind,identity,project,value,expected=expected,db=conn)
+            with self.tx() as conn:
+                return self.put(kind,identity,project,value,expected=expected,db=conn)
         old=self.get(kind,identity,db=db)
-        if expected is not None and (old or {}).get('revision',0)!=expected:raise ValueError('REVISION_CONFLICT')
+        if expected is not None and (old or {}).get('revision',0)!=expected:
+            raise ValueError('REVISION_CONFLICT')
         rev=(old or {}).get('revision',0)+1
         body={k:v for k,v in value.items() if k not in {'id','revision'}}
         serialized=packed(body)

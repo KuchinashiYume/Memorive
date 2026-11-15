@@ -28,14 +28,16 @@ class ExecutionControlSignal(BaseException):
 def execution_control(checkpoint, *, interrupt=None):
     token=_control.set(checkpoint)
     interrupt_token=_interrupt.set(interrupt or checkpoint)
-    try:yield
+    try:
+        yield
     finally:
         _interrupt.reset(interrupt_token)
         _control.reset(token)
 
 def execution_checkpoint():
     checkpoint=_control.get()
-    if checkpoint is not None:checkpoint()
+    if checkpoint is not None:
+        checkpoint()
 
 def execution_interrupt_callback():
     """Return the current task stop callback without changing checkpoint policy."""
@@ -43,9 +45,12 @@ def execution_interrupt_callback():
 
 def _observed_usage(raw):
     # Retain numeric accounting only, including interrupted embedding batches.
-    try:value=json.loads(raw)
-    except (ValueError,TypeError):return {}
-    if not isinstance(value,dict):return {}
+    try:
+        value=json.loads(raw)
+    except (ValueError,TypeError):
+        return {}
+    if not isinstance(value,dict):
+        return {}
     usage=value.get('usage')
     if not isinstance(usage,dict):
         usage={'prompt_tokens':value.get('prompt_eval_count'),'completion_tokens':value.get('eval_count')}
@@ -66,8 +71,10 @@ def call_scope(**fields):
     if set(fields)-allowed or any(v is not None and (not isinstance(v,str) or not v or len(v)>192) for v in fields.values()):
         raise ValueError('MODEL_CALL_SCOPE_INVALID')
     token=_scope.set({**_scope.get(),**{k:v for k,v in fields.items() if v is not None}})
-    try:yield
-    finally:_scope.reset(token)
+    try:
+        yield
+    finally:
+        _scope.reset(token)
 
 class CallLedger:
     def __init__(self,root):self.root=Path(root)
@@ -77,7 +84,8 @@ class CallLedger:
         # Creation and fsync happen before dispatch; storage failure prevents send.
         with (target/(identity+'.'+phase+'.json')).open('x',encoding='utf-8') as f:
             json.dump(value,f,ensure_ascii=False,sort_keys=True,allow_nan=False)
-            f.flush();os.fsync(f.fileno())
+            f.flush()
+            os.fsync(f.fileno())
 
 def recorded_execution(fn):
     signature=inspect.signature(fn)
@@ -85,12 +93,16 @@ def recorded_execution(fn):
     def run(self,*args,**kwargs):
         execution_checkpoint()
         ledger=getattr(self,'_call_ledger',None)
-        if ledger is None:return fn(self,*args,**kwargs)
+        if ledger is None:
+            return fn(self,*args,**kwargs)
         from copy import deepcopy
         bound=signature.bind(self,*args,**kwargs)
         for key in ('service','cli_service','model'):
-            if key in bound.arguments:bound.arguments[key]=deepcopy(bound.arguments[key])
-        args=bound.args[1:];kwargs=bound.kwargs;values=bound.arguments
+            if key in bound.arguments:
+                bound.arguments[key]=deepcopy(bound.arguments[key])
+        args=bound.args[1:]
+        kwargs=bound.kwargs
+        values=bound.arguments
         service=values.get('service') or values.get('cli_service') or {}
         model=values.get('model') or service
         profile=(_scope.get().get('profile_ref') or model.get('profile_ref') or service.get('config_id') or service.get('profile_ref'))
@@ -109,7 +121,8 @@ def recorded_execution(fn):
             pre['price_snapshot'] = price
         ledger.write('executions',identity,'pre',pre)
         state={'ledger':ledger,'pre':pre,'physical_call_ids':[],'observed_usage':{}}
-        token=_execution.set(state);started=time.monotonic()
+        token=_execution.set(state)
+        started=time.monotonic()
         try:
             from .task_scheduling import CLI_RESOURCES
             with CLI_RESOURCES.enter(self,service) if kind=='CLI' else nullcontext():
@@ -153,7 +166,8 @@ def recorded_execution(fn):
                          'physical_call_ids':list(state['physical_call_ids']),
                          'token_usage':dict(state['observed_usage']) or None,
                          'usage_scope':'COMPLETED_PHYSICAL_RESPONSES','actual_cost_cny':None}
-                if kind=='LOCAL':receipt.update(actual_cost_cny=0,cost_scope='PROVIDER_API_FEE_ONLY')
+                if kind=='LOCAL':
+                    receipt.update(actual_cost_cny=0,cost_scope='PROVIDER_API_FEE_ONLY')
                 if price is not None:
                     receipt['price_snapshot']=price
                     cost=estimate(price,receipt['token_usage'])
@@ -163,9 +177,11 @@ def recorded_execution(fn):
                                         'cost_evidence':price.get('price_basis') or 'PROJECT_PRICE_ESTIMATE'})
                 error.execution_receipt=receipt
                 post.update(status=error.state,execution_receipt=receipt)
-            if not (ledger.root/'executions'/(identity+'.post.json')).exists():ledger.write('executions',identity,'post',post)
+            if not (ledger.root/'executions'/(identity+'.post.json')).exists():
+                ledger.write('executions',identity,'post',post)
             raise
-        finally:_execution.reset(token)
+        finally:
+            _execution.reset(token)
     return run
 
 class RecordingTransport:
@@ -181,8 +197,10 @@ class RecordingTransport:
     def _run(self,method,kwargs):
         execution_checkpoint()
         state=_execution.get()
-        if state is None:return getattr(self.delegate,method)(**kwargs)
-        identity='call-'+uuid4().hex;state['physical_call_ids'].append(identity)
+        if state is None:
+            return getattr(self.delegate,method)(**kwargs)
+        identity='call-'+uuid4().hex
+        state['physical_call_ids'].append(identity)
         pre={**state['pre'],'call_id':identity,'recorded_at':now(),'transport':'run' if method in {'run_verification','run_template'} else method,'status':'PREPARED'}
         if method=='request':
             url=urlsplit(kwargs['url'])
@@ -199,12 +217,15 @@ class RecordingTransport:
             raw=observed.body if method=='request' else observed.stdout
             post={**pre,'recorded_at':now(),'status':'RETURNED','response_sha256':digest(raw),
                   'response_bytes':len(raw),'duration_ms':round((time.monotonic()-started)*1000)}
-            if method=='request':post['http_status']=result.status_code
-            else:post.update(returncode=observed.returncode,started=observed.started,timed_out=observed.timed_out)
+            if method=='request':
+                post['http_status']=result.status_code
+            else:
+                post.update(returncode=observed.returncode,started=observed.started,timed_out=observed.timed_out)
             usage=_observed_usage(raw)
             if usage:
                 post['token_usage']=usage
-                for key,value in usage.items():state['observed_usage'][key]=state['observed_usage'].get(key,0)+value
+                for key,value in usage.items():
+                    state['observed_usage'][key]=state['observed_usage'].get(key,0)+value
             state['ledger'].write('transport',identity,'post',post)
             return result
         except BaseException as error:

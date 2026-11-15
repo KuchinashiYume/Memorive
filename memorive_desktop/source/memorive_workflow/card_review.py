@@ -11,18 +11,22 @@ def _publish(source, destination):
     temporary=destination.with_name('.'+destination.name+'.'+uuid.uuid4().hex+'.tmp')
     try:
         with temporary.open('xb') as stream:
-            stream.write(Path(source).read_bytes());stream.flush();os.fsync(stream.fileno())
+            stream.write(Path(source).read_bytes())
+            stream.flush()
+            os.fsync(stream.fileno())
         execution_checkpoint()
         os.replace(temporary,destination)
     finally:
-        if temporary.exists():temporary.unlink()
+        if temporary.exists():
+            temporary.unlink()
 
 class CardAdmissionError(RuntimeError):
     def __init__(self,result):
         self.root_reason_code=getattr(result,'root_reason_code',None)
         self.caused_by=getattr(result,'failure_reason',None)
         message='CORE_CARD_ADMISSION_FAILED:'+str(result.outcome)
-        if self.root_reason_code:message+=':'+str(self.root_reason_code)
+        if self.root_reason_code:
+            message+=':'+str(self.root_reason_code)
         super().__init__(message)
 
 
@@ -30,11 +34,14 @@ def review_card_revision(card_path, source_folder, stage_root, *, reviewer=None,
     from evidence_review import grade_and_admit
     from knowledge_admission.card_io import read_status, write_status
     card_path,source_folder,stage_root=map(Path,(card_path,source_folder,stage_root))
-    root=stage_root/'04_card_revision';root.mkdir(parents=True,exist_ok=True)
+    root=stage_root/'04_card_revision'
+    root.mkdir(parents=True,exist_ok=True)
     seed=root/'card_input.snapshot'
-    if not seed.exists():shutil.copy2(card_path,seed)
+    if not seed.exists():
+        shutil.copy2(card_path,seed)
     chunks=sorted(source_folder.glob('[[]Chunks]*.jsonl'))
-    if len(chunks)!=1:raise ValueError('CARD_REVIEW_CHUNKS_CARDINALITY')
+    if len(chunks)!=1:
+        raise ValueError('CARD_REVIEW_CHUNKS_CARDINALITY')
     binding={'card_input_sha256':_hash(seed),'chunks_sha256':_hash(chunks[0])}
     draft=root/card_path.name
     receipt_path=stage_root/'04_05_review_admission.json'
@@ -55,12 +62,15 @@ def review_card_revision(card_path, source_folder, stage_root, *, reviewer=None,
                  'schema_version':'MemoCardReviewRevision-v1'}
         tmp=receipt_path.with_suffix('.'+uuid.uuid4().hex+'.tmp')
         with tmp.open('x',encoding='utf8') as stream:
-            json.dump(receipt,stream,ensure_ascii=False,sort_keys=True);stream.flush();os.fsync(stream.fileno())
+            json.dump(receipt,stream,ensure_ascii=False,sort_keys=True)
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(tmp,receipt_path)
     if before_publish is not None:
         before_publish()
     destinations=list(source_folder.glob('[[]Card]*.md'))
-    if len(destinations)>1:raise ValueError('CARD_REVIEW_PUBLICATION_TARGET_AMBIGUOUS')
+    if len(destinations)>1:
+        raise ValueError('CARD_REVIEW_PUBLICATION_TARGET_AMBIGUOUS')
     destination=destinations[0] if destinations else source_folder/card_path.name
     _publish(draft,destination)
     return draft

@@ -3345,7 +3345,8 @@ class SessionsProductController:
         gate = TASK_CATEGORIES.enter('REFINEMENT', checkpoint=lambda: self._refinement_wait_checkpoint(job_id))
         admitted = False
         try:
-            gate.__enter__(); admitted = True
+            gate.__enter__()
+            admitted = True
             item = self._find_inbox_refinement(projection_id)
             if item:
                 self._inbox_refinement_call('inbox.begin_session_refinement', {'item_id': item['item_id'], 'job_id': job_id})
@@ -3477,7 +3478,8 @@ class SessionsProductController:
             except Exception:
                 pass
         finally:
-            if admitted: gate.__exit__(None, None, None)
+            if admitted:
+                gate.__exit__(None, None, None)
             with self._refinement_lock:
                 self._refinement_workers.pop(job_id, None)
 

@@ -51,9 +51,11 @@ def revise_analysis(previous, context_pack, review, *, output_language='en', mod
             i=row.get('i')
             if type(i) is not int or not 0<=i<len(previous.literature_support) or i in targets:
                 raise ValueError('ANALYSIS_REVISION_TARGET_INVALID')
-            if not row.get('disputes'): raise ValueError('ANALYSIS_REVISION_EVIDENCE_MISSING')
+            if not row.get('disputes'):
+                raise ValueError('ANALYSIS_REVISION_EVIDENCE_MISSING')
             targets[i]={'index':i,'before':asdict(previous.literature_support[i]),'disputes':row['disputes']}
-    if not targets: raise ValueError('ANALYSIS_REVISION_NO_TARGETS')
+    if not targets:
+        raise ValueError('ANALYSIS_REVISION_NO_TARGETS')
     if envelope.required_route_class!='cloud_allowed' and envelope.required_route_class!='cloud_eligible':
         # Authoritative ownership remains the source of permission; accept the
         # actual self route via the existing preflight instead of guessing it.
@@ -70,14 +72,17 @@ def revise_analysis(previous, context_pack, review, *, output_language='en', mod
     raw=json.loads(response.get('text') or '')
     import jsonschema
     jsonschema.validate(raw,REPAIR_SCHEMA)
-    repairs=raw['repairs'];indexes=[row['index'] for row in repairs]
+    repairs=raw['repairs']
+    indexes=[row['index'] for row in repairs]
     if len(indexes)!=len(set(indexes)) or set(indexes)!=set(targets):
         raise ValueError('ANALYSIS_REVISION_EXACT_SET_MISMATCH')
     blocks={b.source['chunk_id']:b for b in context_pack.blocks}
     claims=list(previous.literature_support)
     for row in repairs:
-        cid=row['source_chunk_id'];text=row['text'].strip()
-        if cid not in blocks or not text: raise ValueError('ANALYSIS_REVISION_SOURCE_INVALID')
+        cid=row['source_chunk_id']
+        text=row['text'].strip()
+        if cid not in blocks or not text:
+            raise ValueError('ANALYSIS_REVISION_SOURCE_INVALID')
         block=blocks[cid]
         validate_generated_language(source_text='\n'.join(b.content for b in context_pack.blocks),
             generated_text=text,source_language=output_language,artifact_name='Analysis revision')

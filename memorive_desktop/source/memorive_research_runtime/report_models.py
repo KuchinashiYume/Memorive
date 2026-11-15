@@ -6,7 +6,8 @@ PERIODS=('daily','weekly','monthly')
 
 def config(root):
     path=root/'report_workflow.json'
-    if not path.exists():return {'revision':0,'config':{p:None for p in PERIODS}}
+    if not path.exists():
+        return {'revision':0,'config':{p:None for p in PERIODS}}
     value=read(path)
     if (value.get('schema_version')!='DesktopReportWorkflow-v1' or type(value.get('revision')) is not int
         or value['revision']<1 or not isinstance(value.get('config'),dict)
@@ -50,13 +51,15 @@ def projection(runtime):
     return dict(value,model_options=catalog(runtime),steps=[{'key':key,'name':name} for key,name in REPORT_STEPS])
 
 def save(runtime,*,config:dict,expected_revision):
-    if not isinstance(config,dict) or set(config)!=set(PERIODS):raise ValueError('REPORT_WORKFLOW_INVALID')
+    if not isinstance(config,dict) or set(config)!=set(PERIODS):
+        raise ValueError('REPORT_WORKFLOW_INVALID')
     options={r['profile_ref']:r for r in catalog(runtime)}
     for ref in config.values():
         if ref is not None and (not isinstance(ref,str) or ref not in options or not options[ref]['eligible']):
             raise ValueError('REPORT_MODEL_UNAVAILABLE')
     with runtime.lock:
-        if runtime.closed:raise ValueError('RESEARCH_CLOSED')
+        if runtime.closed:
+            raise ValueError('RESEARCH_CLOSED')
         current=globals()['config'](runtime.root)
         if type(expected_revision) is not int or expected_revision!=current['revision']:
             raise ValueError('REPORT_WORKFLOW_REVISION_CONFLICT')
@@ -65,8 +68,10 @@ def save(runtime,*,config:dict,expected_revision):
     return projection(runtime)
 
 def freeze(runtime,run_id,period):
-    value=config(runtime.root);ref=value['config'][period]
-    if not ref:raise ValueError('REPORT_MODEL_REQUIRED')
+    value=config(runtime.root)
+    ref=value['config'][period]
+    if not ref:
+        raise ValueError('REPORT_MODEL_REQUIRED')
     frozen=runtime.api._service.call('settings.report_profile_freeze',{'run_id':run_id,'period':period,'profile_ref':ref})
     frozen['workflow_revision']=value['revision']
     return frozen
@@ -74,11 +79,13 @@ def freeze(runtime,run_id,period):
 def compose(runtime,run_id,params,result):
     from research_reports.api_briefing import BriefingApiError,prepare_mapped_briefing,validate_mapped_narrative
     from research_reports.renderer import render_markdown,render_markdown_with_narrative
-    frozen=params['report_model'];digest=result['digest']
+    frozen=params['report_model']
+    digest=result['digest']
     prompt,schema=prepare_mapped_briefing(digest,language=params.get('language_context'))
     language=params['report_language']
     # Language requirements are already frozen inside the original prompt contract.
-    if runtime.stop.is_set():raise ValueError('RESEARCH_CANCELLED')
+    if runtime.stop.is_set():
+        raise ValueError('RESEARCH_CANCELLED')
     claim=sealed({'snapshot_id':frozen['snapshot_id'],'profile_ref':frozen['profile_ref'],
                   'profile_kind':frozen['profile_kind'],'model':frozen['model_name'],
                   'behavior_sha256':sha({'prompt':prompt,'schema':schema})})

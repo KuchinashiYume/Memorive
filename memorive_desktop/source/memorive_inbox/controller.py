@@ -93,17 +93,21 @@ class InboxController:
     def _accessible_duplicate(self,item_id):
         try:
             row=self.store.read_item(item_id)
-            if row['state'] in {'TRASHED','DELETED','DEDUPLICATED'} or not row.get('bound_locator'):return None
+            if row['state'] in {'TRASHED','DELETED','DEDUPLICATED'} or not row.get('bound_locator'):
+                return None
             return row if windows_io_path(self._path(row['bound_locator'])).is_file() else None
-        except InboxError:return None
+        except InboxError:
+            return None
 
     def _trash_custody(self,item_id,source,target,content_sha):
         # Undo plus reimport can create two live references to the same bound bytes.
         # Moving one reference to trash must not remove the other reference's file.
         shared=any(row.get('bound_locator')==self._locator(source)
             for row in self.store.active_content_items(content_sha,exclude_item_id=item_id))
-        if shared:shutil.copy2(windows_io_path(source),windows_io_path(target))
-        else:os.replace(windows_io_path(source),windows_io_path(target))
+        if shared:
+            shutil.copy2(windows_io_path(source),windows_io_path(target))
+        else:
+            os.replace(windows_io_path(source),windows_io_path(target))
 
     @staticmethod
     def get_contract() -> dict[str, Any]:
@@ -390,7 +394,8 @@ class InboxController:
         language_context: dict | None = None,
     ) -> dict[str, Any]:
         from memorive_language import validate
-        if language_context is not None:language_context=validate(language_context)
+        if language_context is not None:
+            language_context=validate(language_context)
         projection_id = require_identifier(
             local_projection_id, "local_projection_id"
         )
@@ -771,7 +776,8 @@ class InboxController:
         # Existing idempotency keys always replay the original frozen request.
         for prior in self.store.list_intents():
             if prior['idempotency_key']==key:
-                if prior['item_id']!=item_id:raise InboxError('INBOX_IDEMPOTENCY_CONFLICT')
+                if prior['item_id']!=item_id:
+                    raise InboxError('INBOX_IDEMPOTENCY_CONFLICT')
                 return {'schema_version':'InboxDispatchEnqueueReceipt-v1','intent':prior,'replayed':True}
         params = {
             "contract_revision": CONTRACT_REVISION,
@@ -819,7 +825,8 @@ class InboxController:
 
     @_freeze_selection
     def set_logic_review(self, item_id: str, *, selected: bool) -> dict[str, Any]:
-        if not isinstance(selected,bool):raise InboxError('INBOX_LOGIC_SELECTION_INVALID')
+        if not isinstance(selected,bool):
+            raise InboxError('INBOX_LOGIC_SELECTION_INVALID')
         def change(row):
             if row.get('item_kind')=='SESSION_REFINEMENT' or row.get('state') not in {'QUEUED','ERROR'} or row.get('job_id'):
                 raise InboxError('INBOX_REVIEW_ALREADY_DISPATCHED')
@@ -1158,7 +1165,8 @@ class InboxController:
             if entry["trash_locator"]:
                 source = self._path(entry["trash_locator"])
                 target = self._path(entry["bound_locator"])
-                io_source = windows_io_path(source); io_target = windows_io_path(target)
+                io_source = windows_io_path(source)
+                io_target = windows_io_path(target)
                 if io_target.exists():
                     observed = hashlib.sha256(io_target.read_bytes()).hexdigest().upper()
                     if observed != entry["content_sha256"]:
@@ -1190,7 +1198,8 @@ class InboxController:
             if entry["bound_locator"]:
                 source = self._path(entry["bound_locator"])
                 target = self._path(entry["trash_locator"])
-                io_source = windows_io_path(source); io_target = windows_io_path(target)
+                io_source = windows_io_path(source)
+                io_target = windows_io_path(target)
                 if io_source.exists():
                     self._trash_custody(entry['item_id'],source,target,entry.get('content_sha256'))
             self.store.update_item(

@@ -67,41 +67,52 @@ def default_sites():
             for n,(key,(label,url,_hosts)) in enumerate(BUILTINS.items(),1)]
 
 def normalize_sites(rows):
-    if not isinstance(rows,list) or len(rows)>12: raise ValueError('BROWSER_SITES_COUNT_INVALID')
-    accepted=[]; hosts_seen=set()
+    if not isinstance(rows,list) or len(rows)>12:
+        raise ValueError('BROWSER_SITES_COUNT_INVALID')
+    accepted=[]
+    hosts_seen=set()
     for n,row in enumerate(rows,1):
         if not isinstance(row,dict) or row.get('slot')!=n or type(row.get('enabled')) is not bool:
             raise ValueError('BROWSER_SITE_FIELDS_INVALID')
         adapter=row.get('adapter')
-        if adapter not in {*BUILTINS,'generic'}: raise ValueError('BROWSER_SITE_ADAPTER_INVALID')
+        if adapter not in {*BUILTINS,'generic'}:
+            raise ValueError('BROWSER_SITE_ADAPTER_INVALID')
         name=str(row.get('name','')).strip()
-        if not name or len(name)>60 or any(ord(c)<32 for c in name): raise ValueError('BROWSER_SITE_NAME_INVALID')
+        if not name or len(name)>60 or any(ord(c)<32 for c in name):
+            raise ValueError('BROWSER_SITE_NAME_INVALID')
         raw=str(row.get('url','')).strip()
         if any(ord(c)<33 or ord(c)==127 for c in raw):
             raise ValueError('BROWSER_SITE_HTTPS_PUBLIC_HOST_REQUIRED')
-        url=urlsplit(raw); host=(url.hostname or '').lower()
+        url=urlsplit(raw)
+        host=(url.hostname or '').lower()
         if (url.scheme!='https' or not host or url.username or url.password
                 or ((url.query or url.fragment) and not official_web_identity(raw))
                 or url.port not in (None,443) or '\\' in raw or '%' in url.netloc or host.endswith('.')
                 or not re.fullmatch(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}',host)
                 or host.endswith(('.local','.localhost','.internal','.lan','.home','.test','.invalid'))):
             raise ValueError('BROWSER_SITE_HTTPS_PUBLIC_HOST_REQUIRED')
-        try: ipaddress.ip_address(host)
-        except ValueError: pass
-        else: raise ValueError('BROWSER_SITE_IP_ADDRESS_FORBIDDEN')
+        try:
+            ipaddress.ip_address(host)
+        except ValueError:
+            pass
+        else:
+            raise ValueError('BROWSER_SITE_IP_ADDRESS_FORBIDDEN')
         if adapter in BUILTINS:
             hosts=BUILTINS[adapter][2]
-            if host not in hosts: raise ValueError('BROWSER_SITE_ADAPTER_ORIGIN_MISMATCH')
+            if host not in hosts:
+                raise ValueError('BROWSER_SITE_ADAPTER_ORIGIN_MISMATCH')
             provider_id=adapter
         else:
             if any(host in item[2] for item in BUILTINS.values()):
                 raise ValueError('BROWSER_SITE_USE_BUILTIN_ADAPTER')
             hosts=[host]
             provider_id='web-'+hashlib.sha256(host.encode()).hexdigest()[:16]
-        if hosts_seen.intersection(hosts): raise ValueError('BROWSER_SITE_DUPLICATE_ORIGIN')
+        if hosts_seen.intersection(hosts):
+            raise ValueError('BROWSER_SITE_DUPLICATE_ORIGIN')
         hosts_seen.update(hosts)
         selectors={**GENERIC,**(row.get('selectors') or {})}
-        if set(selectors)!=set(GENERIC): raise ValueError('BROWSER_SITE_SELECTORS_INVALID')
+        if set(selectors)!=set(GENERIC):
+            raise ValueError('BROWSER_SITE_SELECTORS_INVALID')
         for key,value in selectors.items():
             if not isinstance(value,str) or not value.strip() or len(value)>1024 or any(ord(c)<32 for c in value):
                 raise ValueError('BROWSER_SITE_SELECTORS_INVALID')
@@ -140,7 +151,9 @@ class SiteProfiles:
         self.root.mkdir(parents=True,exist_ok=True)
         with (self.root/'sites.lock').open('a+b') as stream:
             stream.seek(0)
-            if not stream.read(1): stream.write(b'0'); stream.flush()
+            if not stream.read(1):
+                stream.write(b'0')
+                stream.flush()
             stream.seek(0)
             try:
                 if os.name=='nt':
@@ -149,12 +162,16 @@ class SiteProfiles:
                 else:
                     import fcntl
                     fcntl.flock(stream.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
-            except OSError as error: raise ValueError('BROWSER_SITES_BUSY') from error
-            try: yield
+            except OSError as error:
+                raise ValueError('BROWSER_SITES_BUSY') from error
+            try:
+                yield
             finally:
                 stream.seek(0)
-                if os.name=='nt': msvcrt.locking(stream.fileno(),msvcrt.LK_UNLCK,1)
-                else: fcntl.flock(stream.fileno(),fcntl.LOCK_UN)
+                if os.name=='nt':
+                    msvcrt.locking(stream.fileno(),msvcrt.LK_UNLCK,1)
+                else:
+                    fcntl.flock(stream.fileno(),fcntl.LOCK_UN)
     def save(self,rows,expected_revision):
         accepted=normalize_sites(rows)
         if any(row["enabled"] and not verified_site(row) for row in accepted):
@@ -163,7 +180,8 @@ class SiteProfiles:
             current=self.get()
             if type(expected_revision) is not int or expected_revision!=current['revision']:
                 raise ValueError('BROWSER_SITES_REVISION_CONFLICT')
-            if accepted==current['sites']: return current
+            if accepted==current['sites']:
+                return current
             state=dict(schema_version='DesktopBrowserSites-v1',revision=current['revision']+1,
                        sites=accepted,profile_sha256=profile_hash(accepted))
             writer=SettingsStore(self.root)
@@ -203,7 +221,8 @@ def extension_profile_script(rows):
 
 def configured_extension(source, destination, rows):
     """Derive a reloadable package with only explicitly configured origins."""
-    source=Path(source); destination=Path(destination)
+    source=Path(source)
+    destination=Path(destination)
     manifest=json.loads((source/'manifest.json').read_text(encoding='utf-8'))
     patterns=[f'https://{host}/*' for row in active_sites(rows) for host in row['hosts']]
     manifest['host_permissions']=patterns
@@ -217,7 +236,9 @@ def configured_extension(source, destination, rows):
     for name,body in material.items():
         path=target/name
         if path.exists():
-            if path.read_bytes()!=body: raise ValueError('BROWSER_PACKAGE_CANDIDATE_CHANGED')
+            if path.read_bytes()!=body:
+                raise ValueError('BROWSER_PACKAGE_CANDIDATE_CHANGED')
         else:
-            with path.open('xb') as out: out.write(body)
+            with path.open('xb') as out:
+                out.write(body)
     return target

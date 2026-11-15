@@ -24,8 +24,10 @@ class ConsoleServiceAdapter:
         return job
 
     def _execute_pending(self):
-        try:self.manual_receipt=self.worker.run_pending_once()
-        except Exception as exc:self.manual_receipt={'status':'FAILED','error_code':getattr(exc,'code','Core_EXECUTION_FAILED')}
+        try:
+            self.manual_receipt=self.worker.run_pending_once()
+        except Exception as exc:
+            self.manual_receipt={'status':'FAILED','error_code':getattr(exc,'code','Core_EXECUTION_FAILED')}
 
     def call(self, method, p):
         if method=='inbox.set_auto_run' and p.get('enabled') is not False:
@@ -36,8 +38,10 @@ class ConsoleServiceAdapter:
             if method=='console.worker_status':
                 return {'active':bool(self.thread and self.thread.is_alive()),'receipt':self.manual_receipt}
             if method=='console.execute_pending':
-                if p != {'allow_model_calls':True}:raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
-                if self.thread and self.thread.is_alive():raise ValueError('MANUAL_TASK_ALREADY_RUNNING')
+                if p != {'allow_model_calls':True}:
+                    raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
+                if self.thread and self.thread.is_alive():
+                    raise ValueError('MANUAL_TASK_ALREADY_RUNNING')
                 self.manual_receipt=None
                 self.thread=threading.Thread(target=self._execute_pending,name='console-manual-core',daemon=True)
                 self.thread.start()
@@ -56,14 +60,16 @@ class ConsoleServiceAdapter:
                 request['profile_snapshot']['source_hashes']=request['input_hashes']
                 request['profile_snapshot']['created_at']=utc_now()
                 handle=self.facade.start_job(request,idempotency_key='console:'+p['request_id'])
-                jid=handle['job_id'];self.owned_jobs.add(jid)
+                jid=handle['job_id']
+                self.owned_jobs.add(jid)
                 job=self._job(jid)
                 if job['control_state']=='QUEUED':
                     status=self.facade.mark_running(jid,expected_version=job['version'])
                     status=self.facade.set_safe_checkpoint(jid,expected_version=status['observed_version'],safe=True)
                     version=status['observed_version']
                     target={'complete':'SUCCEEDED','fail':'FAILED','review':'WAITING_HUMAN','cancel':'CANCELLED'}.get(p['event'])
-                    if target=='CANCELLED':self.facade.cancel_job(jid,expected_version=version,idempotency_key='console-cancel:'+p['request_id'])
+                    if target=='CANCELLED':
+                        self.facade.cancel_job(jid,expected_version=version,idempotency_key='console-cancel:'+p['request_id'])
                     elif target:
                         if target=='WAITING_HUMAN':
                             row=self.facade.record_action_request(jid,expected_version=version,action_request_id='console-action-'+p['request_id'],action='REVIEW_CONSOLE_EVENT',payload={'test_data':True})
@@ -74,31 +80,39 @@ class ConsoleServiceAdapter:
             if method=='console.dispatch':
                 if set(p)!={'item_id','request_id','allow_model_calls'} or p['allow_model_calls'] is not True:
                     raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
-                if self.thread and self.thread.is_alive():raise ValueError('MANUAL_TASK_ALREADY_RUNNING')
+                if self.thread and self.thread.is_alive():
+                    raise ValueError('MANUAL_TASK_ALREADY_RUNNING')
                 # Never pick an unrelated pending item through the worker's FIFO.
                 pending=[x for x in self.worker.inbox.store.list_intents() if x.get('state')=='PENDING']
-                if any(x['item_id']!=p['item_id'] for x in pending):raise ValueError('UNRELATED_PENDING_DISPATCH')
+                if any(x['item_id']!=p['item_id'] for x in pending):
+                    raise ValueError('UNRELATED_PENDING_DISPATCH')
                 result=self.worker.inbox.dispatch(p['item_id'],idempotency_key='console:'+p['request_id'])
                 self.manual_receipt=None
                 self.thread=threading.Thread(target=self._execute_pending,name='console-manual-core',daemon=True)
                 self.thread.start()
                 return {'dispatch_receipt':result,'execution_state':'RUNNING','business_job_complete':False}
             if method=='console.control_task':
-                if set(p)!={'job_id','action','request_id','allow_model_calls'}:raise ValueError('CONTROL_FIELDS_INVALID')
-                action=p['action'];job=self._job(p['job_id'])
-                if action not in {'pause','resume','cancel','retry'}:raise ValueError('CONTROL_ACTION_INVALID')
+                if set(p)!={'job_id','action','request_id','allow_model_calls'}:
+                    raise ValueError('CONTROL_FIELDS_INVALID')
+                action=p['action']
+                job=self._job(p['job_id'])
+                if action not in {'pause','resume','cancel','retry'}:
+                    raise ValueError('CONTROL_ACTION_INVALID')
                 if action == 'cancel':
                     prior = self.facade.store.lookup_idempotency('control:cancel', 'console:'+p['request_id'])
                     if prior is not None:
-                        if prior['job_id'] != p['job_id']:raise ValueError('CONTROL_IDEMPOTENCY_CONFLICT')
+                        if prior['job_id'] != p['job_id']:
+                            raise ValueError('CONTROL_IDEMPOTENCY_CONFLICT')
                         return {'action_receipt':prior,'business_job_complete':False,
                                 'test_data':job.get('request',{}).get('job_type')=='memorive-console-simulation'}
-                if action in {'resume','retry'} and p['allow_model_calls'] is not True:raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
+                if action in {'resume','retry'} and p['allow_model_calls'] is not True:
+                    raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
                 if action=='retry':
                     if job.get('request',{}).get('job_type')!='memorive-console-simulation':
                         raise ValueError('PRODUCTION_RETRY_REQUIRES_WORKFLOW_CONTROLLER')
                     receipt=self.facade.retry_job(p['job_id'],retry_policy={'request_id':'retry-'+p['request_id'],'correlation_id':self.session_id},idempotency_key='console:'+p['request_id'])
-                    if p['job_id'] in self.owned_jobs:self.owned_jobs.add(receipt['job_id'])
+                    if p['job_id'] in self.owned_jobs:
+                        self.owned_jobs.add(receipt['job_id'])
                     if job.get('request',{}).get('job_type')=='memorive-console-simulation':
                         started=self.facade.mark_running(receipt['job_id'],expected_version=receipt['observed_version'])
                         self.facade._transition(receipt['job_id'],started['observed_version'],'SUCCEEDED','CONSOLE_SIMULATION_REPLAY_COMPLETED')

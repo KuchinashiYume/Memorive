@@ -38,12 +38,14 @@ def ranking_projection(catalog, history, external):
     groups = {}
     def group(identity, **props):
         gid = key(identity)
-        if gid not in groups: groups[gid] = dict(id=gid, rows=[], **props)
+        if gid not in groups:
+            groups[gid] = dict(id=gid, rows=[], **props)
         return groups[gid]
     for origin, entries in (("考试", catalog.get("entries", [])), ("本地实考", history)):
         for item in entries:
             score = number(item.get("score_exact", item.get("score")))
-            if score is None or score > 100: continue
+            if score is None or score > 100:
+                continue
             role = text(item.get("node_id") or item.get("role_id"))
             cohort = text(item.get("comparison_cohort_id"), 1024)
             eligible = bool(cohort and item.get("horizontal_comparison_eligible") is True and origin == "考试")
@@ -64,7 +66,8 @@ def ranking_projection(catalog, history, external):
         for metric, label in METRICS.items():
             raw = item.get("metrics", {}).get(metric)
             score = raw.get("value") if isinstance(raw, Mapping) else raw
-            if type(score) not in (int, float) or not math.isfinite(score): continue
+            if type(score) not in (int, float) or not math.isfinite(score):
+                continue
             percent = _reference_percentiles(item, external).get(metric, {}).get("value")
             identity = ("external", item.get("source_id"), item.get("upstream_source"), metric,
                         item.get("version"), item.get("snapshot_sha256"))
@@ -79,7 +82,8 @@ def ranking_projection(catalog, history, external):
         # Only exact duplicate projections collapse. Different execution profiles
         # remain separate, and conflicting duplicate scores are never "best picked".
         distinct = {}
-        for row in g["rows"]: distinct.setdefault(key(row), row)
+        for row in g["rows"]:
+            distinct.setdefault(key(row), row)
         g["rows"] = list(distinct.values())
         conflicts = defaultdict(set)
         for row in g["rows"]:
@@ -89,14 +93,17 @@ def ranking_projection(catalog, history, external):
         g["rows"].sort(key=lambda row: (-row["raw_score"] if g["ranked"] and not row["conflict"] else 0, row["model"], row["thinking"]))
         ranked = [row for row in g["rows"] if not row["conflict"]]
         for row in ranked:
-            if g["ranked"]: row["rank"] = 1 + sum(x["raw_score"] > row["raw_score"] for x in ranked)
+            if g["ranked"]:
+                row["rank"] = 1 + sum(x["raw_score"] > row["raw_score"] for x in ranked)
     return dict(groups=list(groups.values()), reference_only=True, cross_source_comparison_forbidden=True,
                 cross_role_comparison_forbidden=True, external_model_calls=0)
 
 def _read(path, base):
-    if not path.resolve().is_relative_to(base.resolve()): raise ValueError("OUTSIDE_RECEIPT_ROOT")
+    if not path.resolve().is_relative_to(base.resolve()):
+        raise ValueError("OUTSIDE_RECEIPT_ROOT")
     value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict): raise ValueError("NOT_OBJECT")
+    if not isinstance(value, dict):
+        raise ValueError("NOT_OBJECT")
     return value
 
 def _amount(receipt):
@@ -110,7 +117,8 @@ def _amount(receipt):
         return cost, currency, "ACTUAL"
     for field, unit in (("estimated_cost_cny", "CNY"), ("estimated_cost_usd", "USD")):
         cost = number(receipt.get(field))
-        if cost is not None: return cost, unit, "ESTIMATED"
+        if cost is not None:
+            return cost, unit, "ESTIMATED"
     return None, "", "UNKNOWN"
 
 def billing_projection(exam_root, core_root):
@@ -135,12 +143,14 @@ def billing_projection(exam_root, core_root):
             pre = {}
             if origin == "文献":
                 pre_path = path.with_name(path.name.replace(".post.json", ".pre.json"))
-                if pre_path.is_file(): pre = _read(pre_path, base)
+                if pre_path.is_file():
+                    pre = _read(pre_path, base)
             model = text(receipt.get("requested_model") or wrapper.get("requested_model") or pre.get("requested_model")
                          or receipt.get("returned_model") or wrapper.get("returned_model"))
             channel = text(receipt.get("profile_kind") or wrapper.get("profile_kind") or pre.get("profile_kind")).upper()
             usage = receipt.get("token_usage") or receipt.get("usage") or {}
-            if not isinstance(usage, Mapping): usage = {}
+            if not isinstance(usage, Mapping):
+                usage = {}
             cost, currency, kind = _amount(receipt)
             physical = wrapper.get("physical_index") or wrapper.get("call_id") or path.stem
             binding = text(wrapper.get("pre_send_claim_sha256") or receipt.get("pre_send_claim_sha256"))
@@ -166,7 +176,8 @@ def billing_projection(exam_root, core_root):
     rows = sorted(slots.values(), key=lambda row: row["recorded_at"] or row["observed_at"], reverse=True)
     totals = {}
     for row in rows:
-        if row["cost"] is None: continue
+        if row["cost"] is None:
+            continue
         total = totals.setdefault(row["currency"], dict(currency=row["currency"],actual=None,estimated=None))
         field = "actual" if row["cost_kind"] == "ACTUAL" else "estimated"
         total[field] = float(Decimal(str(total[field] or 0)) + Decimal(str(row["cost"])))

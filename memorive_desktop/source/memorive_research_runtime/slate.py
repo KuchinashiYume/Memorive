@@ -212,11 +212,13 @@ def _eligible_channels(fact: Mapping[str, Any], context: Mapping[str, Any]) -> t
         registered={d["direction_id"] for d in context["directions"]}
         channels={e["channel"] for e in metadata["query_recall_evidence"]
             if e.get("direction_id") in registered and e.get("query_sha256") and e.get("evidence_ref")}
-        if metadata.get("feedback_eligible") is not True:return [],["USER_FEEDBACK_EXCLUDED"]
+        if metadata.get("feedback_eligible") is not True:
+            return [],["USER_FEEDBACK_EXCLUDED"]
         if 'e6_relations' in metadata:
             supported={k for k,v in metadata['e6_relations'].items() if v['supported'] and v['publication_eligible']} & {e['direction_id'] for e in metadata['query_recall_evidence']}
             channels={e['channel'] for e in metadata['query_recall_evidence'] if e['direction_id'] in supported}
-            if len(supported)<2: channels.discard('BRIDGE')
+            if len(supported)<2:
+                channels.discard('BRIDGE')
         ordered=[c for c in PRIMARY_CHANNEL_PRIORITY if c in channels]
         return ordered,["METADATA_RELATION_EVIDENCE_NOT_MECHANISM_PROOF" if 'e6_relations' in metadata else "EXPLICIT_QUERY_RECALL_NOT_SEMANTIC_PROOF"] if ordered else ["NO_CHANNEL_EVIDENCE"]
 

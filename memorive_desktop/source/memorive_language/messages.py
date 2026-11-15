@@ -20,12 +20,14 @@ PARAMS = {
 }
 
 def validate(value):
-    if value is None: return None
+    if value is None:
+        return None
     if not isinstance(value, dict) or set(value) != {'catalog_version','message_key','parameters'}:
         raise ValueError('MESSAGE_CONTENT_FIELDS_INVALID')
     if value['catalog_version'] != VERSION or value['message_key'] not in PARAMS:
         raise ValueError('MESSAGE_CONTENT_VERSION_INVALID')
-    params = value['parameters']; shape = PARAMS[value['message_key']]
+    params = value['parameters']
+    shape = PARAMS[value['message_key']]
     if not isinstance(params, dict) or params.keys() != shape.keys():
         raise ValueError('MESSAGE_PARAMETERS_INVALID')
     for key, typ in shape.items():
@@ -39,7 +41,9 @@ def period_name(period, language):
                   {'daily':'日報','weekly':'週報','monthly':'月報'}).get(period, period)
 
 def render(value, language):
-    validate(value); p=value['parameters']; key=value['message_key']
+    validate(value)
+    p=value['parameters']
+    key=value['message_key']
     def t(zh,en,ja): return choose(language,zh,en,ja)
     if key == 'system':
         title=t({'RED':'任务需要注意','YELLOW':'任务等待处理','GREEN':'任务已完成','BLUE':'有新的应用内消息'},
@@ -63,7 +67,8 @@ def render(value, language):
         else:
             body={'length':t('输出不完整。重新处理时将分段生成，可先调整模型。','The output is incomplete. Processing will be split on retry; you can change the model first.','出力が不完全です。再実行時は分割して生成します。先にモデルを変更できます。'),
                   'capacity':t('向量处理容量不足。可更换向量模型后分段重试。','Embedding capacity was exceeded. Change the embedding model and retry in segments.','ベクトル処理の容量を超えました。モデルを変更して分割再実行できます。')}.get(p['failure_kind'],t('未生成有效结果。请查看任务，可调整模型后重试。','No valid result was produced. Open the task for details; you can change the model and retry.','有効な結果を生成できませんでした。タスクの詳細を確認し、モデルを変更して再実行できます。'))
-            if p['node']:body=t('出错节点：','Failed node: ','失敗したノード：')+p['node']+'。 '+body
+            if p['node']:
+                body=t('出错节点：','Failed node: ','失敗したノード：')+p['node']+'。 '+body
     elif key=='discovery.ready':
         title=t('外部文献','External literature','外部文献')+' · '+p['topic']
         body=t('检索完成，保存 {works} 篇新增题录、{versions} 个新版本、{relations} 个新方向关联。请前往资料库查看正文。',
@@ -75,7 +80,8 @@ def render(value, language):
     elif key=='ai.ready':
         title=t('AI 近况','AI updates','AI の近況')+' · '+p['start']+' — '+p['end']
         body=t('AI 近况已生成并保存。请前往资料库查看正文。','AI updates are saved. Read the report in the library.','AI の近況を生成して保存しました。本文はライブラリで確認できます。')
-        if p['partial']:body+=' '+t('部分来源未能读取。','Some sources could not be read.','一部のソースを読み取れませんでした。')
+        if p['partial']:
+            body+=' '+t('部分来源未能读取。','Some sources could not be read.','一部のソースを読み取れませんでした。')
     elif key=='research.failed':
         title=t('任务需要注意','Task needs attention','タスクの確認が必要です')+' · '+p['title']
         body=t('结果已生成，但投递未完成。请修复投递，无需重新生成。','The result is ready, but delivery is incomplete. Repair delivery without regenerating.','結果は生成済みですが、配信が完了していません。再生成せずに配信を修復してください。') if p['stage']=='PUBLISHING' else t('未生成有效结果。请查看任务及来源配置后重试。','No valid result was produced. Check the task and source configuration before retrying.','有効な結果を生成できませんでした。タスクとソース設定を確認してから再実行してください。')
@@ -84,14 +90,17 @@ def render(value, language):
 
 def project(record, language):
     result=dict(record)
-    if record.get('message_content'):result.update(render(record['message_content'],language))
+    if record.get('message_content'):
+        result.update(render(record['message_content'],language))
     return result
 
 def runtime_failure_kind(error_code, failed_node_id=''):
     # Shared by legacy safe copy and localized projection: preserve the original aliases.
     marker=f'{failed_node_id} {error_code}'.upper()
-    if any(needle in marker for needle in ('FINISH_REASON_LENGTH','FINISH_REASON=LENGTH','OUTPUT_TRUNCAT','仍被截断','8192_TO_16384','LENGTH_EXHAUSTED')):return 'length'
-    if any(needle in marker for needle in ('PHYSICAL BATCH SIZE','INPUT_TOO_LARGE','TOO LARGE TO PROCESS')):return 'capacity'
+    if any(needle in marker for needle in ('FINISH_REASON_LENGTH','FINISH_REASON=LENGTH','OUTPUT_TRUNCAT','仍被截断','8192_TO_16384','LENGTH_EXHAUSTED')):
+        return 'length'
+    if any(needle in marker for needle in ('PHYSICAL BATCH SIZE','INPUT_TOO_LARGE','TOO LARGE TO PROCESS')):
+        return 'capacity'
     return 'unknown'
 
 def runtime_content(event, *, core, state, failed_node_id, raw_error):

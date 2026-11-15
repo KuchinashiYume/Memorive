@@ -51,8 +51,10 @@ def _scoring_text(text):
 def signals(refs, question):
     """Return bounded selection hints with section state confined to one source."""
     groups = collections.defaultdict(list)
-    for ref in refs:groups[document_key(ref)].append(ref)
-    sections = {};preamble=set()
+    for ref in refs:
+        groups[document_key(ref)].append(ref)
+    sections = {}
+    preamble=set()
     for rows in groups.values():
         section = 'unknown'
         # Without page/line metadata, do not invent order or propagate headings.
@@ -61,23 +63,32 @@ def signals(refs, question):
         def compact(text):return re.sub(r'\W+','',unicodedata.normalize('NFKC',text)).lower()
         title_starts=[i for i,r in enumerate(ordered) if len(compact(r.get('title','')))>24
                       and compact(r['title']) in compact(r['text'])]
-        if located and title_starts:preamble.update(r['id'] for r in ordered[:title_starts[0]])
+        if located and title_starts:
+            preamble.update(r['id'] for r in ordered[:title_starts[0]])
         for i,ref in enumerate(ordered):
-            if i in title_starts:section='unknown'
+            if i in title_starts:
+                section='unknown'
             headings = []
-            title=compact(ref.get('title',''));prefix=''
+            title=compact(ref.get('title',''))
+            prefix=''
             for line in ref['text'].splitlines():
                 prefix=(prefix+compact(line))[-max(len(title)*2,200):]
                 if len(title)>24 and title in prefix:
                     # A bound document title after a preceding article's
                     # references resets section state inside a mixed PDF.
-                    section='unknown';headings=[];prefix=''
-                if (m := HEADING.fullmatch(unicodedata.normalize('NFKC',line))):headings.append(m.group(1).lower())
-            if not located:section = 'unknown'
+                    section='unknown'
+                    headings=[]
+                    prefix=''
+                if (m := HEADING.fullmatch(unicodedata.normalize('NFKC',line))):
+                    headings.append(m.group(1).lower())
+            if not located:
+                section = 'unknown'
             result_here = any(h.startswith(('result','结果')) for h in headings)
-            if headings:section = headings[-1]
+            if headings:
+                section = headings[-1]
             sections[ref['id']] = 'results' if result_here else section
-    terms = set(tokens(question));vocab = {r['id']:set(tokens(r['text'])) for r in refs}
+    terms = set(tokens(question))
+    vocab = {r['id']:set(tokens(r['text'])) for r in refs}
     frequency = collections.Counter(t for words in vocab.values() for t in words & terms)
     lexical = {r['id']:sum(math.log(1+len(refs)/(1+frequency[t])) for t in vocab[r['id']] & terms) for r in refs}
     method_focus = bool(METHOD_QUESTION.search(question) and not OUTCOME_QUESTION.search(question))
@@ -88,7 +99,8 @@ def signals(refs, question):
         affinity = {r['id']:len(vocab[r['id']] & title_terms) for r in rows}
         title_max = max(affinity.values(),default=0)
         for ref in rows:
-            text = _scoring_text(ref['text']);section = sections[ref['id']]
+            text = _scoring_text(ref['text'])
+            section = sections[ref['id']]
             results = section.startswith(('result','结果'))
             backmatter = section.startswith(('references','acknowledg','author contributions','参考文献'))
             methods = section.startswith(('material','method','材料','方法'))
@@ -112,15 +124,22 @@ def signals(refs, question):
                 primary -= 8 if backmatter else 3 if methods else 2 if background else 0
             # Use title affinity only to demote a complete focus miss. Rewarding
             # repeated title words would again prefer introductions over results.
-            if title_max and not affinity[ref['id']]:primary-=2
-            if ref['id'] in preamble:primary-=8
+            if title_max and not affinity[ref['id']]:
+                primary-=2
+            if ref['id'] in preamble:
+                primary-=8
             constraint = 2*qualification + min(1,outcome) + min(1,quantified) + relevance if qualification else 0
-            if not constraint and GENERIC_CONTRAST.search(text):constraint = .25
-            if backmatter:constraint = 0
-            if methods or background:constraint = max(0,constraint-2)
-            if ref['id'] in preamble:constraint=0
+            if not constraint and GENERIC_CONTRAST.search(text):
+                constraint = .25
+            if backmatter:
+                constraint = 0
+            if methods or background:
+                constraint = max(0,constraint-2)
+            if ref['id'] in preamble:
+                constraint=0
             design = sum(bool(pattern.search(text)) for pattern in DESIGN_CONTEXT)
-            if backmatter or ref['id'] in preamble:design=0
+            if backmatter or ref['id'] in preamble:
+                design=0
             out[ref['id']] = dict(primary=primary,focus=focus,constraint=constraint,section=section,design=design)
     return out
 
@@ -134,19 +153,27 @@ def select(refs, question, fits):
     Remaining evidence uses page diversity. This is deliberately a bounded
     heuristic; missing coverage remains visible in the normal record.
     """
-    ordered = pack_order(refs,question);hints = signals(ordered,question)
+    ordered = pack_order(refs,question)
+    hints = signals(ordered,question)
     groups = {}
-    for ref in ordered:groups.setdefault(document_key(ref),[]).append(ref)
+    for ref in ordered:
+        groups.setdefault(document_key(ref),[]).append(ref)
     for key, rows in groups.items():
         groups[key] = sorted(rows,key=lambda r:-hints[r['id']]['primary'])
-    chosen=[];seen=set()
+    chosen=[]
+    seen=set()
     def admit(ref):
-        if ref['id'] in seen:return False
-        if not fits(chosen+[ref]):return False
-        chosen.append(ref);seen.add(ref['id']);return True
+        if ref['id'] in seen:
+            return False
+        if not fits(chosen+[ref]):
+            return False
+        chosen.append(ref)
+        seen.add(ref['id'])
+        return True
     for rows in groups.values():
         for ref in rows:
-            if admit(ref):break
+            if admit(ref):
+                break
     # One strongest remaining qualification per source is considered before
     # generic contrasts and repeated result pages. A matched word is no verdict.
     constraints=[]
@@ -154,7 +181,8 @@ def select(refs, question, fits):
         candidates=[r for r in rows if r['id'] not in seen and hints[r['id']]['constraint']>0]
         if candidates:
             constraints.append(max(candidates,key=lambda r:(hints[r['id']]['constraint'],hints[r['id']]['primary'])))
-    for ref in sorted(constraints,key=lambda r:(-hints[r['id']]['constraint'],-hints[r['id']]['primary'])):admit(ref)
+    for ref in sorted(constraints,key=lambda r:(-hints[r['id']]['constraint'],-hints[r['id']]['primary'])):
+        admit(ref)
     # Greedy source heads can fill the budget with positive findings only.
     # A complete qualification from the same source can replace one head;
     # never lose source coverage, replace the sole primary, or do this for a
@@ -164,17 +192,22 @@ def select(refs, question, fits):
     if len(chosen)>1 and not method_focus and not any(hints[r['id']]['constraint']>.25 for r in chosen):
         exchanges=[]
         for ref in ordered:
-            if ref['id'] in seen or hints[ref['id']]['constraint']<=.25:continue
+            if ref['id'] in seen or hints[ref['id']]['constraint']<=.25:
+                continue
             key=document_key(ref)
-            if not any(document_key(r)!=key and hints[r['id']]['primary']>0 for r in chosen):continue
+            if not any(document_key(r)!=key and hints[r['id']]['primary']>0 for r in chosen):
+                continue
             for i,old in enumerate(chosen):
-                if document_key(old)!=key:continue
+                if document_key(old)!=key:
+                    continue
                 trial=chosen[:i]+[ref]+chosen[i+1:]
                 if fits(trial):
                     exchanges.append((ref,i,hints[old['id']]['primary']-hints[ref['id']]['primary']))
         if exchanges:
             ref,i,_=min(exchanges,key=lambda item:(-hints[item[0]['id']]['constraint'],item[2],-hints[item[0]['id']]['primary']))
-            seen.remove(chosen[i]['id']);chosen[i]=ref;seen.add(ref['id'])
+            seen.remove(chosen[i]['id'])
+            chosen[i]=ref
+            seen.add(ref['id'])
     # A result-only excerpt can lose the experimental system/control while
     # keeping an impressive number. Prefer one intact source-local design
     # companion before repeated result pages. Lexical hints do not establish
@@ -182,21 +215,30 @@ def select(refs, question, fits):
     if len(groups)>1 or METHOD_QUESTION.search(question):
         for key,rows in groups.items():
             source_chosen=[r for r in chosen if document_key(r)==key]
-            if not source_chosen or any(hints[r['id']]['design']>=2 for r in source_chosen):continue
+            if not source_chosen or any(hints[r['id']]['design']>=2 for r in source_chosen):
+                continue
             companions=[r for r in rows if r['id'] not in seen and hints[r['id']]['design']>=2]
             for ref in sorted(companions,key=lambda r:(-hints[r['id']]['design'],-hints[r['id']]['primary'])):
-                if admit(ref):break
+                if admit(ref):
+                    break
     used_pages={(document_key(r),r.get('page')) for r in chosen if r.get('page') is not None}
     remaining=[]
     for key,rows in groups.items():
-        fresh=[];repeat=[]
+        fresh=[]
+        repeat=[]
         for ref in rows:
-            if ref['id'] in seen:continue
-            page=ref.get('page');place=(key,page)
-            if page is None or place not in used_pages:fresh.append(ref);used_pages.add(place)
-            else:repeat.append(ref)
+            if ref['id'] in seen:
+                continue
+            page=ref.get('page')
+            place=(key,page)
+            if page is None or place not in used_pages:
+                fresh.append(ref)
+                used_pages.add(place)
+            else:
+                repeat.append(ref)
         remaining.append(fresh+repeat)
     for i in range(max((len(rows) for rows in remaining),default=0)):
         for rows in remaining:
-            if i<len(rows):admit(rows[i])
+            if i<len(rows):
+                admit(rows[i])
     return chosen

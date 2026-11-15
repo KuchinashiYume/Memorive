@@ -9,8 +9,10 @@ def localized(function):
     @wraps(function)
     def call(*args, language=None, **kwargs):
         token=_LANGUAGE.set(locale(language))
-        try:return function(*args,**kwargs)
-        finally:_LANGUAGE.reset(token)
+        try:
+            return function(*args,**kwargs)
+        finally:
+            _LANGUAGE.reset(token)
     return call
 
 COPY={
@@ -70,7 +72,8 @@ COPY={
 }
 
 def tr(key, *values):
-    lang=_LANGUAGE.get(); pair=COPY.get(key)
+    lang=_LANGUAGE.get()
+    pair=COPY.get(key)
     template=key if lang=='zh-CN' or pair is None else pair[0 if lang=='en-US' else 1]
     return template.format(**{'v'+str(i):v for i,v in enumerate(values)}) if values else template
 

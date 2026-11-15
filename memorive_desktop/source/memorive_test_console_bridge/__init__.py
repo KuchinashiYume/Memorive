@@ -235,12 +235,15 @@ class ConsoleBridge:
 
     def set_access(self, enabled: bool) -> dict[str, Any]:
         """Native settings only. Remote console commands cannot enable access."""
-        if type(enabled) is not bool:raise ValueError("CONSOLE_ACCESS_BOOLEAN_REQUIRED")
+        if type(enabled) is not bool:
+            raise ValueError("CONSOLE_ACCESS_BOOLEAN_REQUIRED")
         with self._lock:
-            if self._closing:raise ValueError("CONSOLE_SESSION_CLOSING")
+            if self._closing:
+                raise ValueError("CONSOLE_SESSION_CLOSING")
             self._access_enabled = enabled
             self._event("MEMORIVE_CONSOLE_ACCESS_CHANGED",access_enabled=enabled)
-        if not enabled:self._expressions.cancel()
+        if not enabled:
+            self._expressions.cancel()
         return {"access_enabled":enabled,"scope":"CURRENT_ISOLATED_SESSION",
                 "running_business_tasks_cancelled":False}
 
@@ -471,8 +474,10 @@ class ConsoleBridge:
         # These cached reads deliberately never acquire the heavy snapshot lock.
         # HTTP authentication/owner session validation still happens in _handler.
         if route in {"/expressions/catalog", "/expressions/state"}:
-            if parsed.query:return self._error("EXPRESSION_QUERY_INVALID")
-            if not self._started:return self._error("SESSION_NOT_STARTED",409)
+            if parsed.query:
+                return self._error("EXPRESSION_QUERY_INVALID")
+            if not self._started:
+                return self._error("SESSION_NOT_STARTED",409)
             if route.endswith("/catalog"):
                 from .expressions import catalog
                 return 200, {"session_id":self.launch.session_id, **catalog()}

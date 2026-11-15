@@ -703,7 +703,8 @@ class WorkLogProductController:
             projected[row["log_entry_id"]] = row
         self._rows_by_id = projected
         if callable(getattr(self,"research_provider",None)):
-            for row in self.research_provider():self._rows_by_id[row["log_entry_id"]]=row
+            for row in self.research_provider():
+                self._rows_by_id[row["log_entry_id"]]=row
 
     def _get(self, log_entry_id: str) -> dict[str, Any]:
         self._sync_runtime_rows()

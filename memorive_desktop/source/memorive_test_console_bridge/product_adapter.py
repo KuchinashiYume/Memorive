@@ -54,7 +54,8 @@ class ProductConsoleAdapter:
             # A control must not first enumerate reports/messages/inbox.
             # The verified service is already confined to this console DATA_ROOT.
             job = self.api._service.call('get_job', {'job_id': value})
-            if job.get('job_id') != value:raise ValueError('TARGET_NOT_IN_SESSION')
+            if job.get('job_id') != value:
+                raise ValueError('TARGET_NOT_IN_SESSION')
             return
         key={'messages':'message_id','inbox':'item_id','jobs':'job_id'}[category]
         if not any(row[key]==value for row in self.snapshot()[category]):
@@ -83,9 +84,11 @@ class ProductConsoleAdapter:
             if operation=='task.retry':
                 job=self.api._service.call('get_job',{'job_id':params['job_id']})
                 if job.get('request',{}).get('job_type')!='memorive-console-simulation':
-                    if allow_model_calls is not True:raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
+                    if allow_model_calls is not True:
+                        raise ValueError('MANUAL_MODEL_PERMISSION_REQUIRED')
                     worker=self.api._service.call('console.worker_status',{})
-                    if worker['active']:raise ValueError('MANUAL_TASK_ALREADY_RUNNING')
+                    if worker['active']:
+                        raise ValueError('MANUAL_TASK_ALREADY_RUNNING')
                     receipt=self.api.call('current_task.retry',{'job_id':params['job_id'],'request_id':request_id})
                     execution=self.api._service.call('console.execute_pending',{'allow_model_calls':True})
                     return {'retry_receipt':receipt,**execution}
@@ -135,7 +138,8 @@ class ProductConsoleAdapter:
         report={'report_id':'report-'+request_id,'period':period,'created_at':now(), 'native_receipt':result,
                 'body':markdown,'source_binding_sha256':hashlib.sha256(path.read_bytes()).hexdigest().upper(),
                 'output_dir':str(out.relative_to(self.launch.data_root)), 'engine':'research_reports.cli.run'}
-        with self.lock:self.reports.append(report)
+        with self.lock:
+            self.reports.append(report)
         self._message(period,'周期报告 · '+period,markdown[:3900],request_id,report_period=period)
         return {'report':report}
 

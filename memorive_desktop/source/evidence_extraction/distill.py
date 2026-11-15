@@ -1365,14 +1365,16 @@ def _validate_aux(obj, real_ids: set, paper_id, card_lang: str) -> dict:
     cc = []
     for e in (obj.get("comparison_context") or []):
         if not isinstance(e, dict):
-            drop("comparison_context", "非对象"); continue
+            drop("comparison_context", "非对象")
+            continue
         g = e.get("groups")
         groups = [x.strip() for x in g if isinstance(x, str) and x.strip()] if isinstance(g, list) else []
         entry = {"object": _cc_slot(e, "object", ng), "condition": _cc_slot(e, "condition", ng),
                  "groups": groups, "scale": _cc_slot(e, "scale", ng), "time": _cc_slot(e, "time", ng),
                  "scenario": _cc_slot(e, "scenario", ng), "applicability": _cc_slot(e, "applicability", ng)}
         if not groups and all(entry[k] == ng for k in _CC):
-            drop("comparison_context", "全空壳"); continue
+            drop("comparison_context", "全空壳")
+            continue
         cc.append(entry)
 
     # ② author_limitations_outlook(补丁①严判)
@@ -1382,19 +1384,25 @@ def _validate_aux(obj, real_ids: set, paper_id, card_lang: str) -> dict:
         for kind in ("limitations", "outlook"):
             for e in (src.get(kind) or []):
                 if not isinstance(e, dict):
-                    drop(f"alo/{kind}", "非对象"); continue
+                    drop(f"alo/{kind}", "非对象")
+                    continue
                 if set(e.keys()) != {"quote", "chunk_id"}:               # 多/少任何字段(含判断字段)→ 丢
-                    drop(f"alo/{kind}", f"字段集非{{quote,chunk_id}}:{sorted(e.keys())}"); continue
+                    drop(f"alo/{kind}", f"字段集非{{quote,chunk_id}}:{sorted(e.keys())}")
+                    continue
                 q, c = e.get("quote"), e.get("chunk_id")
                 if not _is_content(q):                                   # 补丁④:quote 不许空/占位
-                    drop(f"alo/{kind}", "quote 空/占位"); continue
+                    drop(f"alo/{kind}", "quote 空/占位")
+                    continue
                 if not (isinstance(c, str) and c.strip()):
-                    drop(f"alo/{kind}", "chunk_id 空"); continue
+                    drop(f"alo/{kind}", "chunk_id 空")
+                    continue
                 if c not in real_ids:                                    # 杜撰锚点 → 丢该条(不 fail-closed 整卡)
-                    drop(f"alo/{kind}", f"chunk_id 杜撰:{c}"); continue
+                    drop(f"alo/{kind}", f"chunk_id 杜撰:{c}")
+                    continue
                 sig = _LIMIT_SIGNALS if kind == "limitations" else _OUTLOOK_SIGNALS   # L1 信号词门槛(落实 L1、backstop)
                 if not any(w in q.lower() for w in sig):                 # 无信号词=疑方法对照/组装句(如 c0293)→ 丢
-                    drop(f"alo/{kind}", "无信号词(疑方法对照/组装句,非自陈局限·展望)"); continue
+                    drop(f"alo/{kind}", "无信号词(疑方法对照/组装句,非自陈局限·展望)")
+                    continue
                 alo[kind].append({"quote": q.strip(), "chunk_id": c})
 
     # ③ terms(补丁②无 definition 不抽 / 补丁④占位不准)

@@ -206,7 +206,8 @@ class MessagesProductController:
         projected: list[dict[str, Any]] = []
         for row in rows:
             accepted = project(row.to_dict(), language)
-            if query and query not in (accepted["title"]+"\n"+accepted["summary"]).casefold():continue
+            if query and query not in (accepted["title"]+"\n"+accepted["summary"]).casefold():
+                continue
             source = accepted["source_event_ref"]
             target_node_id = source.get("node_id")
             target_available = source.get("target_unavailable_at") is None

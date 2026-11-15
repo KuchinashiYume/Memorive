@@ -7,12 +7,16 @@ LABELS={'daily':'日报','weekly':'周报','monthly':'月报'}
 
 def previous_window(period,current):
     end=current.astimezone(ZONE).replace(hour=0,minute=0,second=0,microsecond=0)
-    if period=='daily':start=end-timedelta(days=1)
+    if period=='daily':
+        start=end-timedelta(days=1)
     elif period=='weekly':
-        end-=timedelta(days=end.weekday());start=end-timedelta(days=7)
+        end-=timedelta(days=end.weekday())
+        start=end-timedelta(days=7)
     elif period=='monthly':
-        end=end.replace(day=1);start=(end-timedelta(days=1)).replace(day=1)
-    else:raise ValueError('RESEARCH_PERIOD_INVALID')
+        end=end.replace(day=1)
+        start=(end-timedelta(days=1)).replace(day=1)
+    else:
+        raise ValueError('RESEARCH_PERIOD_INVALID')
     return {'period':period,'start':start.isoformat(),'end':end.isoformat()}
 
 def window_key(window):
@@ -26,16 +30,23 @@ def title(window,revision=1,language=None):
     return period_name(window['period'],language)+' · '+start+(' — '+end if window['period']!='daily' else '')+(' · v'+str(revision) if revision>1 else '')
 
 def project(root,items=None):
-    if items is None:items=[read(p) for p in (root/'runs').glob('*/state.json')]
-    result=[dict(item) for item in items];groups={}
+    if items is None:
+        items=[read(p) for p in (root/'runs').glob('*/state.json')]
+    result=[dict(item) for item in items]
+    groups={}
     for item in result:
-        if item.get('kind')!='report':continue
-        path=root/'runs'/item['run_id'];window=item.get('report_window')
-        try:body=read(path/'result.json') if (path/'result.json').exists() else None
-        except (OSError,ValueError):body=None
+        if item.get('kind')!='report':
+            continue
+        path=root/'runs'/item['run_id']
+        window=item.get('report_window')
+        try:
+            body=read(path/'result.json') if (path/'result.json').exists() else None
+        except (OSError,ValueError):
+            body=None
         if body and body.get('window_start') and body.get('window_end'):
             window={'period':body['period'],'start':body['window_start'],'end':body['window_end']}
-        if not window:continue
+        if not window:
+            continue
         validate_window(window['period'],window['start'],window['end'],window['end'])
         item['report_window']=window
         groups.setdefault(window_key(window),[]).append((item,body is not None))
@@ -44,8 +55,10 @@ def project(root,items=None):
         for item,produced in sorted(rows,key=lambda pair:(pair[0]['created_at'],pair[0]['run_id'])):
             explicit=item.get('report_revision')
             revision=explicit if type(explicit) is int and explicit>0 else number+1
-            if produced:number=max(number,revision)
-            item['report_revision']=revision;item['title']=title(item['report_window'],revision,item.get('language_context'))
+            if produced:
+                number=max(number,revision)
+            item['report_revision']=revision
+            item['title']=title(item['report_window'],revision,item.get('language_context'))
     return result
 
 def next_revision(root,window):

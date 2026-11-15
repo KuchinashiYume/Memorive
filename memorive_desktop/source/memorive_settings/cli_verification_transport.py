@@ -20,7 +20,8 @@ _context=ContextVar('cli_verification_context',default=(lambda value:None,lambda
 
 def resume_owned_process(process):
     """Resume only the newly created suspended child after job ownership is set."""
-    if os.name!='nt':return
+    if os.name!='nt':
+        return
     import ctypes
     from ctypes import wintypes
     class ThreadEntry(ctypes.Structure):
@@ -40,23 +41,31 @@ def resume_owned_process(process):
     kernel.CloseHandle.argtypes=[wintypes.HANDLE]
     kernel.CloseHandle.restype=wintypes.BOOL
     snapshot=kernel.CreateToolhelp32Snapshot(4,0)
-    if snapshot==wintypes.HANDLE(-1).value:raise ctypes.WinError(ctypes.get_last_error())
+    if snapshot==wintypes.HANDLE(-1).value:
+        raise ctypes.WinError(ctypes.get_last_error())
     ids=[]
     try:
-        entry=ThreadEntry();entry.size=ctypes.sizeof(entry)
+        entry=ThreadEntry()
+        entry.size=ctypes.sizeof(entry)
         more=kernel.Thread32First(snapshot,ctypes.byref(entry))
         while more:
-            if entry.pid==process.pid:ids.append(entry.tid)
+            if entry.pid==process.pid:
+                ids.append(entry.tid)
             entry.size=ctypes.sizeof(entry)
             more=kernel.Thread32Next(snapshot,ctypes.byref(entry))
-    finally:kernel.CloseHandle(snapshot)
+    finally:
+        kernel.CloseHandle(snapshot)
     # Before primary-thread execution, the new process has exactly one thread.
-    if len(ids)!=1:raise OSError('CLI_SUSPENDED_PRIMARY_THREAD_NOT_UNIQUE')
+    if len(ids)!=1:
+        raise OSError('CLI_SUSPENDED_PRIMARY_THREAD_NOT_UNIQUE')
     thread=kernel.OpenThread(2,False,ids[0])
-    if not thread:raise ctypes.WinError(ctypes.get_last_error())
+    if not thread:
+        raise ctypes.WinError(ctypes.get_last_error())
     try:
-        if kernel.ResumeThread(thread)==0xffffffff:raise ctypes.WinError(ctypes.get_last_error())
-    finally:kernel.CloseHandle(thread)
+        if kernel.ResumeThread(thread)==0xffffffff:
+            raise ctypes.WinError(ctypes.get_last_error())
+    finally:
+        kernel.CloseHandle(thread)
 
 def stop_owned_tree(tree, process):
     """Wait for this Windows job's actual process exit, not a guessed grace delay."""
@@ -81,12 +90,14 @@ def stop_owned_tree(tree, process):
         info=Accounting()
         if not kernel.QueryInformationJobObject(tree._job_handle,1,ctypes.byref(info),ctypes.sizeof(info),None):
             raise ctypes.WinError(ctypes.get_last_error())
-        if info.active==0:return
+        if info.active==0:
+            return
         time.sleep(.01)
 
 def wait_output_release(paths, progress):
     """Windows can report zero job processes before inherited file handles close."""
-    if os.name!='nt':return
+    if os.name!='nt':
+        return
     import ctypes
     from ctypes import wintypes
     kernel=ctypes.WinDLL('kernel32',use_last_error=True)
@@ -102,64 +113,101 @@ def wait_output_release(paths, progress):
                 kernel.CloseHandle(handle)
                 break
             error=ctypes.get_last_error()
-            if error not in (32,33):raise ctypes.WinError(error)
+            if error not in (32,33):
+                raise ctypes.WinError(error)
             progress()
             time.sleep(.01)
 
 @contextmanager
 def verification_context(progress, cancelled):
     token=_context.set((progress,cancelled))
-    try:yield
-    finally:_context.reset(token)
+    try:
+        yield
+    finally:
+        _context.reset(token)
 
 def events(data):
     for line in data.splitlines():
-        try:value=json.loads(line)
-        except (ValueError,UnicodeDecodeError):continue
-        if isinstance(value,dict):yield value
+        try:
+            value=json.loads(line)
+        except (ValueError,UnicodeDecodeError):
+            continue
+        if isinstance(value,dict):
+            yield value
 
 def failure_reason(data):
     # Never return provider output, URLs, environment values, or credentials.
     text=data.decode('utf8','replace').lower() if isinstance(data,bytes) else str(data).lower()
-    if 'input_too_large' in text or 'input exceeds the maximum length' in text:return 'CLI_INPUT_TOO_LARGE'
-    if any(s in text for s in ('401','unauthorized','not logged in','authentication required','invalid authentication','token expired')):return 'CLI_AUTH_REQUIRED'
-    if any(s in text for s in ('429','usage limit','rate limit','quota exceeded','insufficient_quota')):return 'CLI_RATE_LIMITED'
-    if 'model' in text and any(s in text for s in ('not found','does not exist','not supported','unsupported','not available','access to')):return 'CLI_MODEL_UNAVAILABLE'
-    if any(s in text for s in ('unexpected argument','unrecognized','unknown variant','invalid value','invalid config')):return 'CLI_COMMAND_UNSUPPORTED'
-    if any(s in text for s in ('connection refused','connection reset','dns','certificate','network','failed to connect','error sending request','transport error','stream disconnected')):return 'CLI_NETWORK_FAILED'
+    if 'input_too_large' in text or 'input exceeds the maximum length' in text:
+        return 'CLI_INPUT_TOO_LARGE'
+    if any(s in text for s in ('401','unauthorized','not logged in','authentication required','invalid authentication','token expired')):
+        return 'CLI_AUTH_REQUIRED'
+    if any(s in text for s in ('429','usage limit','rate limit','quota exceeded','insufficient_quota')):
+        return 'CLI_RATE_LIMITED'
+    if 'model' in text and any(s in text for s in ('not found','does not exist','not supported','unsupported','not available','access to')):
+        return 'CLI_MODEL_UNAVAILABLE'
+    if any(s in text for s in ('unexpected argument','unrecognized','unknown variant','invalid value','invalid config')):
+        return 'CLI_COMMAND_UNSUPPORTED'
+    if any(s in text for s in ('connection refused','connection reset','dns','certificate','network','failed to connect','error sending request','transport error','stream disconnected')):
+        return 'CLI_NETWORK_FAILED'
     return 'CLI_AUTH_OR_MODEL_REQUEST_FAILED'
 
 def result_reason(process):
-    rows=list(events(process.stdout));terminal=False;message=False;transient_error=None
+    rows=list(events(process.stdout))
+    terminal=False
+    message=False
+    transient_error=None
     for row in rows:
         kind=row.get('type')
         if kind=='turn.failed' or row.get('is_error') is True:
             return failure_reason(json.dumps(row,ensure_ascii=False))
-        if kind=='error':transient_error=failure_reason(json.dumps(row,ensure_ascii=False))
-        if kind=='turn.completed':terminal=True
+        if kind=='error':
+            transient_error=failure_reason(json.dumps(row,ensure_ascii=False))
+        if kind=='turn.completed':
+            terminal=True
         item=row.get('item')
         if isinstance(item,dict) and kind=='item.completed' and item.get('type')=='agent_message':
             message=message or bool(str(item.get('text','')).strip())
         # Supported older/generic CLI terminal result envelope.
         if kind=='result' and row.get('status') not in {'error','failed'}:
             value=row.get('result',row.get('response'))
-            if isinstance(value,str) and value.strip():terminal=True;message=True
-        if kind=='message' and row.get('role')=='assistant' and str(row.get('content','')).strip():message=True
-        if kind=='result' and row.get('status')=='success':terminal=True
-    if process.returncode!=0:return failure_reason(process.stderr or process.stdout)
-    if not process.stdout.strip():return 'CLI_RESPONSE_EMPTY'
-    if not terminal or not message:return transient_error or 'CLI_RESPONSE_INCOMPLETE'
+            if isinstance(value,str) and value.strip():
+                terminal=True
+                message=True
+        if kind=='message' and row.get('role')=='assistant' and str(row.get('content','')).strip():
+            message=True
+        if kind=='result' and row.get('status')=='success':
+            terminal=True
+    if process.returncode!=0:
+        return failure_reason(process.stderr or process.stdout)
+    if not process.stdout.strip():
+        return 'CLI_RESPONSE_EMPTY'
+    if not terminal or not message:
+        return transient_error or 'CLI_RESPONSE_INCOMPLETE'
     return None
 
 def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_seconds,shell,
                      template_mode=False,result_paths=()):
     from .model_validation import ProcessResult
     from model_gateway.execution_core.runner import _TreeController
-    if shell is not False:raise ValueError('CLI_VALIDATION_SHELL_FORBIDDEN')
-    progress,cancelled=_context.get();workspace=Path(cwd)
-    stdout_path=workspace/'stdout.bin';stderr_path=workspace/'stderr.bin'
-    start=time.monotonic();last_activity=start;last_publish=0.;stage='STARTING';pending=b''
-    observed_types=set();process=None;stopped=False;quota_hit=False;timed_out=False;tree=_TreeController();writer=None
+    if shell is not False:
+        raise ValueError('CLI_VALIDATION_SHELL_FORBIDDEN')
+    progress,cancelled=_context.get()
+    workspace=Path(cwd)
+    stdout_path=workspace/'stdout.bin'
+    stderr_path=workspace/'stderr.bin'
+    start=time.monotonic()
+    last_activity=start
+    last_publish=0.
+    stage='STARTING'
+    pending=b''
+    observed_types=set()
+    process=None
+    stopped=False
+    quota_hit=False
+    timed_out=False
+    tree=_TreeController()
+    writer=None
     diagnostic={'hard_timeout_seconds':timeout_seconds if template_mode else None,'cancelled':False,'last_stage':stage,'event_types':[]}
     attempt_path=workspace.parent/('cli-verification-'+uuid.uuid4().hex+'.json')
     stamp=lambda:datetime.now(timezone.utc).isoformat()
@@ -172,7 +220,8 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
         'process_transport':'local_process','access_mode':'CLI_MANAGED_AUTH','billing_mode':'CLI_MANAGED_UNKNOWN',
         'route':'CLI_PROVIDER_MANAGED','region':'NOT_EXPOSED','egress':'CUSTOM_PROXY' if environment.get('HTTPS_PROXY') else 'SYSTEM_OR_DIRECT',
         'actual_cost':None,'token_usage':None,'hard_timeout_seconds':diagnostic['hard_timeout_seconds'],'acceptance_verdict':'NOT_ASSESSED'}
-    with attempt_path.open('x',encoding='utf8') as out:json.dump(evidence,out,indent=2)
+    with attempt_path.open('x',encoding='utf8') as out:
+        json.dump(evidence,out,indent=2)
     diagnostic['attempt_id']=evidence['attempt_id']
     def publish(force=False):
         nonlocal last_publish
@@ -200,41 +249,64 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
             resume_owned_process(process)
             if stdin_bytes is not None:
                 def send_input():
-                    try:process.stdin.write(stdin_bytes);process.stdin.close()
-                    except (BrokenPipeError,OSError,ValueError):pass
-                writer=threading.Thread(target=send_input,daemon=True);writer.start()
-            stage='WAITING_RESPONSE';publish(True)
+                    try:
+                        process.stdin.write(stdin_bytes)
+                        process.stdin.close()
+                    except (BrokenPipeError,OSError,ValueError):
+                        pass
+                writer=threading.Thread(target=send_input,daemon=True)
+                writer.start()
+            stage='WAITING_RESPONSE'
+            publish(True)
             with stdout_path.open('rb') as reader:
                 stderr_size=0
                 while process.poll() is None:
                     if template_mode:
                         from .call_ledger import execution_interrupt_callback
                         interrupt=execution_interrupt_callback()
-                        if interrupt is not None:interrupt()
+                        if interrupt is not None:
+                            interrupt()
                         if time.monotonic()-start>=timeout_seconds:
-                            timed_out=True;stage='TIMED_OUT';stop_owned_tree(tree,process);break
+                            timed_out=True
+                            stage='TIMED_OUT'
+                            stop_owned_tree(tree,process)
+                            break
                     chunk=reader.read()
                     new_stderr_size=stderr_path.stat().st_size
-                    if chunk or new_stderr_size!=stderr_size:last_activity=time.monotonic()
+                    if chunk or new_stderr_size!=stderr_size:
+                        last_activity=time.monotonic()
                     stderr_size=new_stderr_size
                     if chunk:
-                        pending+=chunk;parts=pending.split(b'\n');pending=parts.pop()
+                        pending+=chunk
+                        parts=pending.split(b'\n')
+                        pending=parts.pop()
                         for row in events(b'\n'.join(parts)):
                             kind=row.get('type')
                             if template_mode:
-                                stage='RECEIVING';continue
+                                stage='RECEIVING'
+                                continue
                             if kind in {'thread.started','turn.started','turn.completed','turn.failed','item.started','item.completed','error'}:
                                 observed_types.add(kind)
-                            if kind=='item.completed':stage='RECEIVING'
-                            if kind=='error':stage='RECONNECTING'
+                            if kind=='item.completed':
+                                stage='RECEIVING'
+                            if kind=='error':
+                                stage='RECONNECTING'
                     if cancelled():
-                        stopped=True;stage='STOPPING';publish(True);stop_owned_tree(tree,process);break
+                        stopped=True
+                        stage='STOPPING'
+                        publish(True)
+                        stop_owned_tree(tree,process)
+                        break
                     quota=transport.capture_quota_bytes
                     if quota is not None and (stdout_path.stat().st_size>quota or stderr_size>quota or any(p.exists() and p.stat().st_size>quota for p in result_paths)):
-                        quota_hit=True;stop_owned_tree(tree,process);break
-                    publish();time.sleep(.1)
+                        quota_hit=True
+                        stop_owned_tree(tree,process)
+                        break
+                    publish()
+                    time.sleep(.1)
                 process.wait()
-                if template_mode:stop_owned_tree(tree,process)
+                if template_mode:
+                    stop_owned_tree(tree,process)
         stdout,out_truncated,out_size=transport._read_bounded(stdout_path)
         stderr,err_truncated,err_size=transport._read_bounded(stderr_path)
         result=ProcessResult(started=True,returncode=process.returncode,stdout=stdout,stderr=stderr,
@@ -243,8 +315,10 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
     except (FileNotFoundError,PermissionError,OSError):
         result=ProcessResult(started=process is not None,returncode=process.poll() if process else None,stdout=b'',stderr=b'',duration_ms=round((time.monotonic()-start)*1000))
     finally:
-        if process is not None:stop_owned_tree(tree,process)
-        if writer is not None:writer.join(timeout=5)
+        if process is not None:
+            stop_owned_tree(tree,process)
+        if writer is not None:
+            writer.join(timeout=5)
         tree.close(process)
         wait_output_release((stdout_path,stderr_path),publish)
     diagnostic.update(cancelled=stopped,last_stage=stage,event_types=sorted(observed_types))
@@ -258,5 +332,6 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
         stdout_sha256=hashlib.sha256(result.stdout).hexdigest().upper(),stderr_sha256=hashlib.sha256(result.stderr).hexdigest().upper(),
         token_usage=None if template_mode else _normalise_token_usage(_usage_from_cli_output(result.stdout) or {}),event_types=sorted(observed_types))
     # A sibling terminal record preserves the pre-send binding unchanged.
-    with attempt_path.with_suffix('.result.json').open('x',encoding='utf8') as out:json.dump(evidence,out,indent=2)
+    with attempt_path.with_suffix('.result.json').open('x',encoding='utf8') as out:
+        json.dump(evidence,out,indent=2)
     return result,diagnostic

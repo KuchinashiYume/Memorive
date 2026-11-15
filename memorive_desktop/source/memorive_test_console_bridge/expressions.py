@@ -72,7 +72,8 @@ class ExpressionController:
         self.sequence=0
     def bind(self,renderer):
         with self.lock:
-            if self.renderer is not None:raise ValueError('EXPRESSION_RENDERER_ALREADY_BOUND')
+            if self.renderer is not None:
+                raise ValueError('EXPRESSION_RENDERER_ALREADY_BOUND')
             self.renderer=renderer
     def _event(self,state):
         self.sequence+=1
@@ -87,9 +88,12 @@ class ExpressionController:
     def trigger(self,params,request_id):
         event=BY_ID[params['event_id']]
         with self.lock:
-            if self.stop.is_set():raise ValueError('EXPRESSION_SESSION_CLOSING')
-            if self.renderer is None:raise ValueError('EXPRESSION_RENDERER_NOT_READY')
-            if self.active is not None:raise ValueError('EXPRESSION_BUSY')
+            if self.stop.is_set():
+                raise ValueError('EXPRESSION_SESSION_CLOSING')
+            if self.renderer is None:
+                raise ValueError('EXPRESSION_RENDERER_NOT_READY')
+            if self.active is not None:
+                raise ValueError('EXPRESSION_BUSY')
             self.cancel_event=threading.Event()
             self.active={'probe_id':'expression-'+uuid.uuid4().hex,'request_id':request_id,
                 'event_id':event['event_id'],'target':event['target'],'state':'ACCEPTED',
@@ -108,38 +112,57 @@ class ExpressionController:
     def close(self,timeout=4.0):
         self.cancel()
         worker=self.worker
-        if worker and worker is not threading.current_thread():worker.join(timeout)
+        if worker and worker is not threading.current_thread():
+            worker.join(timeout)
         return not (worker and worker.is_alive())
     def _run(self,event):
-        terminal='COMPLETED';error=None;lease=None;restored=False
+        terminal='COMPLETED'
+        error=None
+        lease=None
+        restored=False
         try:
-            if self.cancel_event.is_set() or self.stop.is_set():terminal='CANCELLED';return
+            if self.cancel_event.is_set() or self.stop.is_set():
+                terminal='CANCELLED'
+                return
             lease=self.renderer.begin(event,self.cancel_event)
             sample=self.renderer.observe(lease)
-            if not sample.get('visible'):raise ValueError('EXPRESSION_NOT_VISIBLE')
+            if not sample.get('visible'):
+                raise ValueError('EXPRESSION_NOT_VISIBLE')
             with self.lock:
                 self.active.update(state='DISPLAYED',displayed=True,displayed_at=utc())
-                self.active['samples'].append(sample);self._event('DISPLAYED')
+                self.active['samples'].append(sample)
+                self._event('DISPLAYED')
                 duration=self.active['duration_ms']/1000
             until=time.monotonic()+duration
             while time.monotonic()<until:
                 if self.cancel_event.wait(min(.1,max(0,until-time.monotonic()))) or self.stop.is_set():
-                    terminal='CANCELLED';break
+                    terminal='CANCELLED'
+                    break
                 sample=self.renderer.observe(lease)
                 with self.lock:
-                    if len(self.active['samples'])<64:self.active['samples'].append(sample)
+                    if len(self.active['samples'])<64:
+                        self.active['samples'].append(sample)
         except Exception as exc:
             error=safe_code(exc)
             if error=='EXPRESSION_CANCELLED_BEFORE_RENDER' and self.cancel_event.is_set():
-                terminal='CANCELLED';error=None
-            else:terminal='FAILED'
+                terminal='CANCELLED'
+                error=None
+            else:
+                terminal='FAILED'
         finally:
-            with self.lock:self.active['state']='RESTORING';self._event('RESTORING')
+            with self.lock:
+                self.active['state']='RESTORING'
+                self._event('RESTORING')
             try:
                 restored=(error!='EXPRESSION_RESTORE_FAILED') if lease is None else self.renderer.end(lease)
-                if not restored:terminal='FAILED';error='EXPRESSION_RESTORE_FAILED'
+                if not restored:
+                    terminal='FAILED'
+                    error='EXPRESSION_RESTORE_FAILED'
             except Exception:
-                terminal='FAILED';error='EXPRESSION_RESTORE_FAILED'
+                terminal='FAILED'
+                error='EXPRESSION_RESTORE_FAILED'
             with self.lock:
                 self.active.update(state=terminal,restored=restored,completed_at=utc(),error_code=error)
-                self._event(terminal);self.history.append(deepcopy(self.active));self.active=None
+                self._event(terminal)
+                self.history.append(deepcopy(self.active))
+                self.active=None

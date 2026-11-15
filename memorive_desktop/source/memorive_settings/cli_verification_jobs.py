@@ -48,7 +48,8 @@ class CliVerificationJobs:
             except (OSError, RuntimeError) as error:
                 raise ValueError('CLI_VERIFICATION_ALREADY_RUNNING') from error
             try:
-                if self.prepare is not None:self.prepare(**params)
+                if self.prepare is not None:
+                    self.prepare(**params)
                 row = dict(schema_version='CliVerificationJob-v1', job_id=job_id,
                            request_sha256=request_hash, config_id=params['config_id'],
                            profile_ref=params['profile_ref'], target_sha256=params['target_sha256'],
@@ -69,14 +70,17 @@ class CliVerificationJobs:
                 with self._mutex:
                     current=self._read(job_id)
                     current.update({k:v for k,v in update.items() if k in {'stage','elapsed_ms','silent_ms','slow_response','attempt_id'}})
-                    if current.get('cancel_requested'):current['stage']='STOPPING'
+                    if current.get('cancel_requested'):
+                        current['stage']='STOPPING'
                     current['updated_at']=utc_now()
                     self._write(current)
             def cancelled():
-                with self._mutex:return self._read(job_id).get('cancel_requested') is True
+                with self._mutex:
+                    return self._read(job_id).get('cancel_requested') is True
             from .task_scheduling import TASK_CATEGORIES
             def checkpoint():
-                if cancelled():raise ValueError('CLI_VERIFICATION_CANCELLED')
+                if cancelled():
+                    raise ValueError('CLI_VERIFICATION_CANCELLED')
             progress({'stage':'QUEUED_TASK_CATEGORY'})
             with TASK_CATEGORIES.enter('MODEL_VERIFICATION', checkpoint=checkpoint), verification_context(progress,cancelled):
                 receipt = self.execute(**params)
@@ -105,11 +109,13 @@ class CliVerificationJobs:
     def status(self, *, job_id=None, profile_ref=None, idempotency_key=None):
         with self._mutex:
             if idempotency_key is not None:
-                if job_id is not None or profile_ref is not None: raise ValueError('CLI_VERIFICATION_LOOKUP_AMBIGUOUS')
+                if job_id is not None or profile_ref is not None:
+                    raise ValueError('CLI_VERIFICATION_LOOKUP_AMBIGUOUS')
                 if not isinstance(idempotency_key,str) or not re.fullmatch(r'[A-Za-z0-9-]{16,80}',idempotency_key):
                     raise ValueError('CLI_VERIFICATION_IDEMPOTENCY_KEY_INVALID')
                 job_id = canonical_sha256(idempotency_key)[:32].lower()
-                if not self._path(job_id).exists(): return {'state':'IDLE'}
+                if not self._path(job_id).exists():
+                    return {'state':'IDLE'}
             if job_id is None:
                 rows = [json.loads(p.read_text(encoding='utf-8')) for p in self.root.glob('*.json')]
                 rows = [r for r in rows if profile_ref is None or r['profile_ref'] == profile_ref]

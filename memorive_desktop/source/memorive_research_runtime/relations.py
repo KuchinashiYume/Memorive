@@ -7,20 +7,25 @@ def canonical_doi(value):
     token=value.strip()
     while True:
         stripped=re.sub(r'^(?:https?://(?:dx\.)?doi\.org/|doi:)\s*','',token,flags=re.I).strip()
-        if stripped==token:break
+        if stripped==token:
+            break
         token=stripped
     return normalize_doi(token)
 
 def identity_keys(identifiers):
     keys=set()
-    if not isinstance(identifiers,dict):return keys
+    if not isinstance(identifiers,dict):
+        return keys
     for name in ('doi','arxiv_id','wos_uid'):
         value=identifiers.get(name)
-        if not isinstance(value,str) or not value.strip():continue
+        if not isinstance(value,str) or not value.strip():
+            continue
         try:
             normalized=canonical_doi(value) if name=='doi' else normalize_arxiv_id(value.strip())[0] if name=='arxiv_id' else value.strip().upper()
-        except (ValueError,TypeError,ConnectorError):continue
-        if normalized:keys.add(name+':'+normalized)
+        except (ValueError,TypeError,ConnectorError):
+            continue
+        if normalized:
+            keys.add(name+':'+normalized)
     return keys
 
 def record_identifiers(record):
@@ -28,7 +33,8 @@ def record_identifiers(record):
     result=dict(raw) if isinstance(raw,dict) else {}
     for box in (record,record.get('metadata') or {},record.get('bibliographic') or {}):
         for key in ('doi','arxiv_id','wos_uid'):
-            if box.get(key):result[key]=box[key]
+            if box.get(key):
+                result[key]=box[key]
     return result
 
 
@@ -42,16 +48,19 @@ def metadata_comparison(candidate,records):
     """Discovery relation renderer, explicit metadata-only successor; no fake vectors."""
     from literature_discovery import novelty_assessment_literature_discovery_library_relation_novelty as original
     from .common import sha
-    relations=[];unidentified=0
+    relations=[]
+    unidentified=0
     candidate_keys=identity_keys(candidate['identifiers'])
     c={'candidate_id':candidate['candidate_id'],'content_hash':sha(candidate).upper()}
     for record in records:
         local_keys=identity_keys(record_identifiers(record))
-        if not local_keys:unidentified+=1
+        if not local_keys:
+            unidentified+=1
         overlap=candidate_keys & local_keys
         title=record.get('title') or record.get('display_name') or ''
         same_title=bool(title and original._normalized_text(title)==original._normalized_text(candidate['title']))
-        if not overlap and not same_title:continue
+        if not overlap and not same_title:
+            continue
         local={'paper_id':str(record.get('artifact_id') or record.get('paper_id')),
             'title':title,'content_hash':sha(record).upper()}
         relations.append(original._make_relation(c,local,'EXACT_SAME_WORK' if overlap else 'POSSIBLE_DUPLICATE',

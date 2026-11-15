@@ -62,7 +62,8 @@ class CompositeServiceAdapter:
         }
 
     def call(self, method: str, params: Mapping[str, Any]) -> Any:
-        if method in REVIEW_METHODS and self.reviews is not None:return self.reviews.call(method,params)
+        if method in REVIEW_METHODS and self.reviews is not None:
+            return self.reviews.call(method,params)
         if method in SETTINGS_METHODS:
             return self.settings.call(method, params)
         if method in INBOX_METHODS:

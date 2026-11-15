@@ -156,12 +156,14 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
     for line in body.splitlines():
         if _PAGE_RE.match(line) or parse_source_marker(line) is not None:
             if cur:
-                raw.append(cur); cur = []
+                raw.append(cur)
+                cur = []
             raw.append([line])
             continue
         if line.strip() == "":
             if cur:
-                raw.append(cur); cur = []
+                raw.append(cur)
+                cur = []
         else:
             cur.append(line)
     if cur:
@@ -193,9 +195,11 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
     for lines in raw:
         t = _blocktype(lines)
         if t == "pagemarker":
-            page = int(_PAGE_RE.match(lines[0]).group(1)); continue
+            page = int(_PAGE_RE.match(lines[0]).group(1))
+            continue
         if t == "sourcemarker":
-            source_anchor = parse_source_marker(lines[0]); continue
+            source_anchor = parse_source_marker(lines[0])
+            continue
         if t == "heading":
             htext = _strip(lines[0].lstrip("#").strip(), keep_br=False).strip()
             htext = re.sub(r"[*_]", "", htext).strip()             # 剥 markdown 强调符(承 _norm 同一 idiom):**2.2.1 AnMBR** → 2.2.1 AnMBR,否则编号正则被行首 * 挡住
@@ -206,13 +210,15 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
                 num = m.group(1)
                 while num_stack and not _is_anc(num_stack[-1][0], num):
                     num_stack.pop()
-                num_stack.append((num, htext)); named = None
+                num_stack.append((num, htext))
+                named = None
                 if num in chinese_titles:
                     parts_num = num.split('.')
                     prefixes = ['.'.join(parts_num[:n]) for n in range(1,len(parts_num)+1)]
                     num_stack = [(n,chinese_titles[n]) for n in prefixes if n in chinese_titles]
             elif _NAMED_SECTION.match(htext) or _NAMED_SECTION_ZH.match(htext):   # ② 白名单无编号学术章节(英文 + 中文前后置)
-                named = htext; num_stack = []
+                named = htext
+                num_stack = []
             # ③ 其余未识别标题(封面/声明/作者/单位/第X章行)→ 不当章节,section_path 保持(Front Matter / 上一章节)
             continue
         blocks.append({
@@ -243,8 +249,10 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
                                "section": b["section"],
                                "source_anchor": b.get("source_anchor")})
                 spans.append({"page_start": b["page"], "page_end": nb["page_end"], "section": b["section"]})
-                i += 2; continue
-        merged.append(b); i += 1
+                i += 2
+                continue
+        merged.append(b)
+        i += 1
 
     for sp in spans:                                                # 不静默:每次保护合并写 RUNTIME_LOG detail
         log("DocumentChunk", "检测到跨页结构、保护合并", is_error=True, context={

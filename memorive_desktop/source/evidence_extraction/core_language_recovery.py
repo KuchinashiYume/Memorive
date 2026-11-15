@@ -37,7 +37,8 @@ def recover_core_language(fields, recs, paper_id, *, validate, call, parse,
     log('EVIDENCE_EXTRACTION','core_language_recovery_call',data={'paper_id':paper_id,'span_count':len(issues),
         'before_sha256':hashlib.sha256(json.dumps(fields,sort_keys=True,ensure_ascii=False).encode()).hexdigest()})
     response = call(prompt,max_tokens)
-    if truncated(response):raise error_type('CORE_LANGUAGE_RECOVERY_TRUNCATED')
+    if truncated(response):
+        raise error_type('CORE_LANGUAGE_RECOVERY_TRUNCATED')
     obj = parse(response.get('text') or '',paper_id)
     if not isinstance(obj,dict) or set(obj)!={'repairs'} or not isinstance(obj['repairs'],list):
         raise error_type('CORE_LANGUAGE_RECOVERY_INVALID_SHAPE')
@@ -45,7 +46,8 @@ def recover_core_language(fields, recs, paper_id, *, validate, call, parse,
     for item in obj['repairs']:
         if not isinstance(item,dict) or set(item)!={'id','replacement'}:
             raise error_type('CORE_LANGUAGE_RECOVERY_INVALID_ITEM')
-        ident=item['id'];value=item['replacement']
+        ident=item['id']
+        value=item['replacement']
         if type(ident) is not int or ident not in range(len(issues)) or ident in repairs:
             raise error_type('CORE_LANGUAGE_RECOVERY_INVALID_ID')
         if not isinstance(value,str) or not value.strip() or '\n' in value or '\r' in value:
@@ -55,14 +57,19 @@ def recover_core_language(fields, recs, paper_id, *, validate, call, parse,
         if re.search(r'[\d<>\[\]{}]|chunk_id|DOC_',value):
             raise error_type('CORE_LANGUAGE_RECOVERY_ADDED_SOURCE_FACTS')
         repairs[ident]=value.strip()
-    if set(repairs)!=set(range(len(issues))):raise error_type('CORE_LANGUAGE_RECOVERY_MISSING_SPANS')
+    if set(repairs)!=set(range(len(issues))):
+        raise error_type('CORE_LANGUAGE_RECOVERY_MISSING_SPANS')
     result=copy.deepcopy(fields)
     for issue in reversed(issues):
-        key=issue['field'];idx=issue['index'];value=result[key]
+        key=issue['field']
+        idx=issue['index']
+        value=result[key]
         original=value[idx] if isinstance(value,list) else value
         fixed=original[:issue['start']]+repairs[issue['id']]+original[issue['end']:]
-        if isinstance(value,list):value[idx]=fixed
-        else:result[key]=fixed
+        if isinstance(value,list):
+            value[idx]=fixed
+        else:
+            result[key]=fixed
     validate(result,recs,paper_id)
     log('EVIDENCE_EXTRACTION','core_language_recovery_finished',data={'paper_id':paper_id,'span_count':len(issues),
         'after_sha256':hashlib.sha256(json.dumps(result,sort_keys=True,ensure_ascii=False).encode()).hexdigest(),

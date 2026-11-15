@@ -11,15 +11,20 @@ def describe(value):
     latin=len(re.findall(r'[A-Za-z]',probe))
     english=len(re.findall(r'\b(?:the|and|of|in|was|were|this|with|for|that|is|are|study|results|data|method|samples)\b',probe,re.I))
     total=han+kana+latin
-    lang='und';basis='INSUFFICIENT_OR_UNSUPPORTED_TEXT'
+    lang='und'
+    basis='INSUFFICIENT_OR_UNSUPPORTED_TEXT'
     if kana>=2 and han+kana>=latin/2:
-        lang='ja';basis='KANA_AND_SOURCE_SCRIPT_RATIO'
+        lang='ja'
+        basis='KANA_AND_SOURCE_SCRIPT_RATIO'
     elif han>=8 and not kana and han>=latin/2:
-        lang='zh';basis='HAN_AND_SOURCE_SCRIPT_RATIO'
+        lang='zh'
+        basis='HAN_AND_SOURCE_SCRIPT_RATIO'
     elif latin>=24 and english>=2 and latin>4*(han+kana):
-        lang='en';basis='LATIN_AND_ENGLISH_WORD_EVIDENCE'
+        lang='en'
+        basis='LATIN_AND_ENGLISH_WORD_EVIDENCE'
     elif total>=40 and latin>=20 and han+kana>=10:
-        lang='mul';basis='MIXED_SOURCE_SCRIPTS'
+        lang='mul'
+        basis='MIXED_SOURCE_SCRIPTS'
     return {'language':lang,'basis':basis,'method_version':'SourceEvidence-v1',
             'script_counts':{'han':han,'kana':kana,'latin':latin},'english_word_count':english}
 

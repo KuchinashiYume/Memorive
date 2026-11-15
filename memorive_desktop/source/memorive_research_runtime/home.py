@@ -9,7 +9,8 @@ def summaries(api):
     if workspace.is_file():
         with sqlite3.connect(workspace.as_uri()+'?mode=ro',uri=True) as db:
             row=db.execute("SELECT id,project,json_extract(body,'$.title'),updated FROM objects WHERE kind='thread' AND coalesce(json_extract(body,'$.temporary'),0)=0 AND coalesce(json_extract(body,'$.archived'),0)=0 ORDER BY updated DESC,id LIMIT 1").fetchone()
-            if row:result['thread']={'id':row[0],'project':row[1],'title':row[2],'updated_at':row[3]}
+            if row:
+                result['thread']={'id':row[0],'project':row[1],'title':row[2],'updated_at':row[3]}
     # The home page shows the library rows as last refreshed; asking the jobs again would slow it down.
     candidates=[r for r in api._library.cached_rows() if r.get('file_exists') is not False and r.get('artifact_id')]
     if candidates:
@@ -22,7 +23,8 @@ def summaries(api):
     preferences=api._service.call('settings.research_get',{})
     config=preferences['config']
     result['directions']=[{'id':d['id'],'name':d['name']} for d in config.get('directions',[])]
-    if not result['directions'] and config.get('topic','').strip():result['directions']=[{'id':None,'name':config['topic']}]
+    if not result['directions'] and config.get('topic','').strip():
+        result['directions']=[{'id':None,'name':config['topic']}]
     by_id={d['id']:d for d in result['directions']}
     result['latest_direction']=next((by_id[key] for key in preferences.get('direction_recency',[]) if key in by_id),result['directions'][-1] if result['directions'] else None)
     result['literature_available']=bool(result['directions'] and api._service.call('settings.external_sources_get',{})['literature']['selected'])
@@ -30,10 +32,13 @@ def summaries(api):
 
 def call(api,method,params):
     if method=='home.summary':
-        if params:raise ValueError('HOME_PARAMS_INVALID')
+        if params:
+            raise ValueError('HOME_PARAMS_INVALID')
         return summaries(api)
-    if set(params)!={'kind','target'}:raise ValueError('HOME_PARAMS_INVALID')
-    kind=params['kind'];target=params['target']
+    if set(params)!={'kind','target'}:
+        raise ValueError('HOME_PARAMS_INVALID')
+    kind=params['kind']
+    target=params['target']
     if kind=='thread':
         path=api._profile_path('WORKSPACE')/'research_workspace/research_workspace_v1.sqlite3'
         row=None
@@ -44,8 +49,11 @@ def call(api,method,params):
     if kind=='material':
         try:
             row=api._library.get_artifact(target)
-            if not row.get('file_exists'):raise ValueError('UNAVAILABLE')
+            if not row.get('file_exists'):
+                raise ValueError('UNAVAILABLE')
             return {'available':True,'route':'library',**{k:row.get(k) for k in ('artifact_id','mode','research_run_id')}}
-        except (ValueError,KeyError):return {'available':False,'route':'library'}
-    if kind=='inbox':return {'available':summaries(api)['inbox_count']>0,'route':'inbox'}
+        except (ValueError,KeyError):
+            return {'available':False,'route':'library'}
+    if kind=='inbox':
+        return {'available':summaries(api)['inbox_count']>0,'route':'inbox'}
     raise ValueError('HOME_PARAMS_INVALID')

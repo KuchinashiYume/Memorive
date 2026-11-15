@@ -115,12 +115,15 @@ _activity = ContextVar('memo_execution_activity', default=None)
 @contextmanager
 def activity_scope(observer):
     token = _activity.set(observer)
-    try: yield
-    finally: _activity.reset(token)
+    try:
+        yield
+    finally:
+        _activity.reset(token)
 
 def execution_activity(state, node_id=None):
     observer = _activity.get()
-    if observer is not None: observer(state, node_id)
+    if observer is not None:
+        observer(state, node_id)
 
 TASK_CATEGORIES = TaskCategories()
 
@@ -135,7 +138,8 @@ class CLIResources:
     @contextmanager
     def enter(self,runner,service):
         if self.scope.get():
-            yield;return
+            yield
+            return
         from .cli_templates import is_custom,digest
         from .windows_cli import resolve_template_entry,template_command
         from .cli_verification_transport import _context
@@ -144,7 +148,8 @@ class CLIResources:
         import hashlib,json
         def checkpoint():
             execution_checkpoint()
-            if _context.get()[1]():raise ValueError('CLI_VERIFICATION_CANCELLED')
+            if _context.get()[1]():
+                raise ValueError('CLI_VERIFICATION_CANCELLED')
         resolver=resolve_template_entry if is_custom(service) else runner._executable_resolver
         path=resolver(service.get('executable',''))
         keys=[]
@@ -153,11 +158,14 @@ class CLIResources:
             if is_custom(service):
                 runtime=template_command(path,[],interpreter=service.get('interpreter',''),interpreter_arguments=service.get('template',{}).get('interpreter_argv',[]))[0]
                 keys.append('executable:'+hashlib.sha256(Path(runtime).read_bytes()).hexdigest())
-        else:keys.append('unresolved:'+digest(service.get('executable','')))
-        if service.get('concurrency_group'):keys.append('account:'+service['concurrency_group'])
+        else:
+            keys.append('unresolved:'+digest(service.get('executable','')))
+        if service.get('concurrency_group'):
+            keys.append('account:'+service['concurrency_group'])
         keys=sorted(set(keys))
         root=TASK_CATEGORIES.root or runner._scratch_root/'scheduler'
-        root.mkdir(parents=True,exist_ok=True);path=root/'cli_resources.sqlite3'
+        root.mkdir(parents=True,exist_ok=True)
+        path=root/'cli_resources.sqlite3'
         with sqlite3.connect(path,timeout=30) as db:
             db.execute('CREATE TABLE IF NOT EXISTS requests (id INTEGER PRIMARY KEY AUTOINCREMENT, keys TEXT, pid INTEGER, marker TEXT, active INTEGER DEFAULT 0)')
             ticket=db.execute('INSERT INTO requests(keys,pid,marker) VALUES (?,?,?)',(json.dumps(keys),os.getpid(),process_start_marker(os.getpid()))).lastrowid
@@ -166,20 +174,30 @@ class CLIResources:
             while True:
                 checkpoint()
                 with sqlite3.connect(path,timeout=30) as db:
-                    db.execute('BEGIN IMMEDIATE');rows=db.execute('SELECT id,keys,pid,marker,active FROM requests ORDER BY id').fetchall();live=[]
+                    db.execute('BEGIN IMMEDIATE')
+                    rows=db.execute('SELECT id,keys,pid,marker,active FROM requests ORDER BY id').fetchall()
+                    live=[]
                     for row in rows:
-                        if row[2]!=os.getpid() and process_identity_status(row[2],row[3]) in {'DEAD','PID_REUSED'}:db.execute('DELETE FROM requests WHERE id=?',(row[0],))
-                        else:live.append(row)
+                        if row[2]!=os.getpid() and process_identity_status(row[2],row[3]) in {'DEAD','PID_REUSED'}:
+                            db.execute('DELETE FROM requests WHERE id=?',(row[0],))
+                        else:
+                            live.append(row)
                     owners=[r for r in live if r[4]]
                     blockers=[r for r in live if r[0]!=ticket and (r[4] or r[0]<ticket) and set(json.loads(r[1]))&set(keys)]
                     ready=not blockers and len(owners)<CORE_WORKER_CAPACITY
-                    if ready:db.execute('UPDATE requests SET active=1 WHERE id=?',(ticket,))
-                if ready:break
+                    if ready:
+                        db.execute('UPDATE requests SET active=1 WHERE id=?',(ticket,))
+                if ready:
+                    break
                 time.sleep(.05)
-            token=self.scope.set(True);checkpoint();yield
+            token=self.scope.set(True)
+            checkpoint()
+            yield
         finally:
-            if token is not None:self.scope.reset(token)
-            with sqlite3.connect(path,timeout=30) as db:db.execute('DELETE FROM requests WHERE id=?',(ticket,))
+            if token is not None:
+                self.scope.reset(token)
+            with sqlite3.connect(path,timeout=30) as db:
+                db.execute('DELETE FROM requests WHERE id=?',(ticket,))
 
 CLI_RESOURCES=CLIResources()
 

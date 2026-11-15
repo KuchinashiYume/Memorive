@@ -38,11 +38,14 @@ class ApiVerificationJobs:
         with self._mutex:
             if self._path(job_id).exists():
                 row = self._read(job_id)
-                if row['request_sha256'] != request_hash: raise ValueError('API_VERIFICATION_IDEMPOTENCY_CONFLICT')
+                if row['request_sha256'] != request_hash:
+                    raise ValueError('API_VERIFICATION_IDEMPOTENCY_CONFLICT')
                 return self.status(job_id=job_id)
             lock = self._lock()
-            try: lock.acquire()
-            except (OSError,RuntimeError) as exc: raise ValueError('API_VERIFICATION_ALREADY_RUNNING') from exc
+            try:
+                lock.acquire()
+            except (OSError,RuntimeError) as exc:
+                raise ValueError('API_VERIFICATION_ALREADY_RUNNING') from exc
             try:
                 self.prepare(**params)
                 row = dict(schema_version='ApiVerificationJob-v1', job_id=job_id,
@@ -54,7 +57,8 @@ class ApiVerificationJobs:
                     name='api-verification-'+job_id,daemon=True).start()
                 return deepcopy(row)
             except BaseException:
-                lock.release(); raise
+                lock.release()
+                raise
 
     def _run(self, job_id, params, lock):
         try:
@@ -77,29 +81,37 @@ class ApiVerificationJobs:
                     error_type=type(exc).__name__,error_sha256=hashlib.sha256(str(exc).encode()).hexdigest(),
                     updated_at=utc_now(),finished_at=utc_now())
                 self._write(row)
-        finally: lock.release()
+        finally:
+            lock.release()
 
     def status(self, *, job_id=None, config_id=None, idempotency_key=None):
         with self._mutex:
             if idempotency_key is not None:
-                if job_id is not None or config_id is not None: raise ValueError('API_VERIFICATION_LOOKUP_AMBIGUOUS')
+                if job_id is not None or config_id is not None:
+                    raise ValueError('API_VERIFICATION_LOOKUP_AMBIGUOUS')
                 if not isinstance(idempotency_key,str) or not re.fullmatch(r'[A-Za-z0-9-]{16,80}',idempotency_key):
                     raise ValueError('API_VERIFICATION_IDEMPOTENCY_KEY_INVALID')
                 job_id = canonical_sha256(idempotency_key)[:32].lower()
-                if not self._path(job_id).exists(): return {'state':'IDLE'}
+                if not self._path(job_id).exists():
+                    return {'state':'IDLE'}
             if job_id is None:
                 rows = [json.loads(p.read_text(encoding='utf8')) for p in self.root.glob('*.json')]
                 rows = [r for r in rows if config_id is None or r['config_id'] == config_id]
-                if not rows: return {'state':'IDLE'}
+                if not rows:
+                    return {'state':'IDLE'}
                 row = max(rows,key=lambda r:(r['state']=='RUNNING',r['started_at']))
-            else: row = self._read(job_id)
+            else:
+                row = self._read(job_id)
             if row['state'] == 'RUNNING':
                 lock = self._lock()
-                try: lock.acquire()
-                except (OSError,RuntimeError): pass
+                try:
+                    lock.acquire()
+                except (OSError,RuntimeError):
+                    pass
                 else:
                     try:
                         row.update(state='INTERRUPTED',stage='FINISHED',reason='API_VERIFICATION_WORKER_LOST',updated_at=utc_now())
                         self._write(row)
-                    finally: lock.release()
+                    finally:
+                        lock.release()
             return deepcopy(row)

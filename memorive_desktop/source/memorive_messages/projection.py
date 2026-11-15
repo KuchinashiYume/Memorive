@@ -233,7 +233,8 @@ class MessageProjectionEngine:
                         "collection_state": "CURRENT",
                     }
                 )
-        if message_content is not None:raw["message_content"]=message_content
+        if message_content is not None:
+            raw["message_content"]=message_content
         updated = MessageRecord.from_mapping(raw)
         accepted = updated.to_dict()
         self.redaction_policy.assert_public_safe(accepted)

@@ -29,34 +29,49 @@ def recover_pua_ligatures(path: Path, pages: list[dict]) -> PuaLigatureRecovery 
     if not any(any(0xE000 <= ord(c) <= 0xF8FF for c in p.get('text','')) for p in pages):
         return None
     import pymupdf
-    result=[];total=0;used=set()
+    result=[]
+    total=0
+    used=set()
     with pymupdf.open(path) as doc:
-        if len(doc)!=len(pages): raise ValueError('PUA_RECOVERY_PAGE_COUNT_MISMATCH')
+        if len(doc)!=len(pages):
+            raise ValueError('PUA_RECOVERY_PAGE_COUNT_MISMATCH')
         for page, markdown in zip(doc,pages):
             fonts=defaultdict(set)
             for row in page.get_fonts(full=True):
-                name=row[3];program=doc.extract_font(row[0])[3]
+                name=row[3]
+                program=doc.extract_font(row[0])[3]
                 digest=hashlib.sha256(program).hexdigest()
                 fonts[name].add(digest)
-                if len(name)>7 and name[6]=='+': fonts[name[7:]].add(digest)
-            bindings=defaultdict(set);counts=Counter()
+                if len(name)>7 and name[6]=='+':
+                    fonts[name[7:]].add(digest)
+            bindings=defaultdict(set)
+            counts=Counter()
             for span in page.get_texttrace():
                 hashes=fonts.get(span['font'],set())
                 for cp,gid,*_ in span['chars']:
-                    if not 0xE000<=cp<=0xF8FF:continue
+                    if not 0xE000<=cp<=0xF8FF:
+                        continue
                     replacement=None
                     if len(hashes)==1:
-                        digest=next(iter(hashes));rules=_RULES.get(digest)
+                        digest=next(iter(hashes))
+                        rules=_RULES.get(digest)
                         if rules is not None:
-                            if (cp,gid) not in rules:raise ValueError('PUA_RECOVERY_UNKNOWN_GLYPH')
-                            replacement=rules[cp,gid];used.add(digest)
-                    bindings[chr(cp)].add(replacement);counts[chr(cp)]+=1
+                            if (cp,gid) not in rules:
+                                raise ValueError('PUA_RECOVERY_UNKNOWN_GLYPH')
+                            replacement=rules[cp,gid]
+                            used.add(digest)
+                    bindings[chr(cp)].add(replacement)
+                    counts[chr(cp)]+=1
             text=markdown.get('text','')
             for char,values in bindings.items():
-                if values=={None}:continue
-                if len(values)!=1 or None in values:raise ValueError('PUA_RECOVERY_AMBIGUOUS_FONT')
+                if values=={None}:
+                    continue
+                if len(values)!=1 or None in values:
+                    raise ValueError('PUA_RECOVERY_AMBIGUOUS_FONT')
                 count=text.count(char)
-                if count>counts[char]:raise ValueError('PUA_RECOVERY_COUNT_MISMATCH')
-                text=text.replace(char,next(iter(values)));total+=count
+                if count>counts[char]:
+                    raise ValueError('PUA_RECOVERY_COUNT_MISMATCH')
+                text=text.replace(char,next(iter(values)))
+                total+=count
             result.append({**markdown,'text':text})
     return PuaLigatureRecovery(result,total,tuple(sorted(used))) if total else None

@@ -4,16 +4,21 @@ from pathlib import Path
 
 def bind(workspace):
     path=workspace.store.root/'desktop_binding.json'
-    if not path.exists():return
-    binding=json.loads(path.read_text(encoding='utf-8'));profile=Path(binding['profile_root']).resolve(strict=True)
+    if not path.exists():
+        return
+    binding=json.loads(path.read_text(encoding='utf-8'))
+    profile=Path(binding['profile_root']).resolve(strict=True)
     from memorive_folder_management.policy import ProfileFolderManager
     folders=ProfileFolderManager(profile)
-    if (folders.path_for('WORKSPACE')/'research_workspace').resolve()!=workspace.store.root:raise ValueError('MEMO_PROFILE_BINDING_MISMATCH')
-    if not folders.path_for('SETTINGS').is_dir():raise ValueError('MEMO_PROFILE_NOT_INITIALIZED')
+    if (folders.path_for('WORKSPACE')/'research_workspace').resolve()!=workspace.store.root:
+        raise ValueError('MEMO_PROFILE_BINDING_MISMATCH')
+    if not folders.path_for('SETTINGS').is_dir():
+        raise ValueError('MEMO_PROFILE_NOT_INITIALIZED')
     from memorive_desktop_service.service_main import build_settings_controller,LocalModelProductController
     from memorive_settings.service_adapter import SettingsServiceAdapter
     from memorive_research_runtime.report_models import profile_options
-    controller=build_settings_controller(profile);service=SettingsServiceAdapter(controller)
+    controller=build_settings_controller(profile)
+    service=SettingsServiceAdapter(controller)
     local_models=LocalModelProductController(profile.parent/'local_models')
     def catalog(capability='CHAT'):
         # The same saved settings and local models the desktop reads, without the desktop host.
@@ -31,5 +36,6 @@ def bind(workspace):
     workspace.embedding_catalog=lambda:catalog('EMBEDDING')
     from retrieval_weighting.research_rule import bind as bind_rules
     bind_rules(workspace,service)
-    workspace.index.rank_model=execute;workspace.index.embed_model=embed
+    workspace.index.rank_model=execute
+    workspace.index.embed_model=embed
     workspace.index.profile_identity=lambda ref:next((r['binding_hash'] for r in workspace.catalog()+workspace.embedding_catalog() if r['profile_ref']==ref and r['eligible']),None)

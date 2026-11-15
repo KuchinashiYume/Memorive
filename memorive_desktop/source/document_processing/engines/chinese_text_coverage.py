@@ -164,10 +164,12 @@ def recover_chinese_text(path, markdown, *, excluded_pages=(), include_short_run
                 for index in missing:
                     j = index - 1
                     while j >= 0 and not _han(lines[j]):
-                        indexes.add(j); j -= 1
+                        indexes.add(j)
+                        j -= 1
                     j = index + 1
                     while j < len(lines) and not _han(lines[j]):
-                        indexes.add(j); j += 1
+                        indexes.add(j)
+                        j += 1
                 restored = '\n'.join(lines[i] for i in sorted(indexes)).strip()
                 if not restored or '\ufffd' in restored:
                     continue  # Existing undecodable-glyph gate remains authoritative.

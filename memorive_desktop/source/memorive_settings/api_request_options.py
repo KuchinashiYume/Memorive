@@ -33,7 +33,8 @@ def _control_points(control):
     return points or [{}]
 
 def project_reasoning_control(control):
-    value=deepcopy(control); points=_control_points(value)
+    value=deepcopy(control)
+    points=_control_points(value)
     # Normal presets express increasing investment. Duplicate outcomes are
     # collapsed by the UI. Never invent a provider enum or a numeric token cap.
     value['points']=points
@@ -56,18 +57,22 @@ def reasoning_profile(model, url, protocol):
     from urllib.parse import urlsplit
     host=(urlsplit(url).hostname or '').lower()
     matches=[v for v in reasoning_profiles().get(model,[]) if host in v.get('origins',[]) and protocol in v.get('protocols',[])]
-    if len(matches)>1:raise ValueError('API_REASONING_CAPABILITY_AMBIGUOUS')
+    if len(matches)>1:
+        raise ValueError('API_REASONING_CAPABILITY_AMBIGUOUS')
     return matches[0] if matches else None
 
 def _wire_set(body, path, value):
     if path not in {'thinking.type','thinking.budget_tokens','reasoning_effort','output_config.effort','generationConfig.thinkingConfig.thinkingBudget'}:
         raise ValueError('API_REASONING_WIRE_FIELD_INVALID')
-    keys=path.split('.');target=body
-    for key in keys[:-1]:target=target.setdefault(key,{})
+    keys=path.split('.')
+    target=body
+    for key in keys[:-1]:
+        target=target.setdefault(key,{})
     target[keys[-1]]=value
 
 def resolve_reasoning_options(control, config):
-    if control is None:return None
+    if control is None:
+        return None
     control=project_reasoning_control(control)
     tier=str(config.get('tier') or '').strip()
     plan=_TIER_PLANS.get(tier)
@@ -78,9 +83,12 @@ def resolve_reasoning_options(control, config):
         point=dict(control['points'][control['plan_indices'][plan]])
     else:
         point={'thinking': True if mode=='ALWAYS' else bool(config.get('thinking', control.get('default_thinking',True)))} if mode!='NONE' else {}
-        if control['effort_values'] and (tier in control['effort_values'] or tier in EFFORTS):point['effort']=tier
-    if explicit is not None:point['effort']=explicit
-    if budget is not None:point['budget_tokens']=budget
+        if control['effort_values'] and (tier in control['effort_values'] or tier in EFFORTS):
+            point['effort']=tier
+    if explicit is not None:
+        point['effort']=explicit
+    if budget is not None:
+        point['budget_tokens']=budget
     if point.get('effort') is not None and point['effort'] not in control['effort_values']:
         raise ValueError('API_REASONING_EFFORT_UNSUPPORTED')
     if 'budget_tokens' in point:
@@ -89,12 +97,15 @@ def resolve_reasoning_options(control, config):
             raise ValueError('API_REASONING_BUDGET_UNSUPPORTED')
     # An explicit advanced effort enables an optional reasoning mode. A stale
     # false checkbox must not silently discard a selected effort.
-    if point.get('effort') is not None or 'budget_tokens' in point:point['thinking']=True
+    if point.get('effort') is not None or 'budget_tokens' in point:
+        point['thinking']=True
     result={}
     if control.get('thinking_wire') and mode!='NONE':
         _wire_set(result,control['thinking_wire'],control['thinking_values']['on' if point.get('thinking') else 'off'])
-    if point.get('thinking') and 'effort' in point:_wire_set(result,control['effort_wire'],point['effort'])
-    if point.get('thinking') and 'budget_tokens' in point:_wire_set(result,control['budget_wire'],point['budget_tokens'])
+    if point.get('thinking') and 'effort' in point:
+        _wire_set(result,control['effort_wire'],point['effort'])
+    if point.get('thinking') and 'budget_tokens' in point:
+        _wire_set(result,control['budget_wire'],point['budget_tokens'])
     return result
 
 
@@ -150,12 +161,15 @@ def safe_error_details(value: Mapping[str, Any]) -> dict[str, Any]:
     if isinstance(request_id,str) and request_id:
         result['provider_request_id_sha256'] = hashlib.sha256(request_id.encode()).hexdigest()
     error=value.get('error')
-    if not isinstance(error,Mapping):return result
+    if not isinstance(error,Mapping):
+        return result
     for key in ('type','code'):
         code=error.get(key)
-        if isinstance(code,str) and code in ERROR_TYPES:result['provider_error_'+key]=code
+        if isinstance(code,str) and code in ERROR_TYPES:
+            result['provider_error_'+key]=code
     field=error.get('param') or error.get('field')
-    if isinstance(field,str) and field in ERROR_FIELDS:result['provider_error_field']=field
+    if isinstance(field,str) and field in ERROR_FIELDS:
+        result['provider_error_field']=field
     message=error.get('message')
     if isinstance(message,str):
         result['provider_error_message_sha256']=hashlib.sha256(message.encode()).hexdigest()

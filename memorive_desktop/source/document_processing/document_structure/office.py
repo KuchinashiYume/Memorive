@@ -19,62 +19,88 @@ def word_text(node):
 
 class Archive:
     def __init__(self,path):
-        if path.stat().st_size>128*1024*1024:fail('OFFICE_INPUT_LIMIT','Office file exceeds 128 MiB')
-        self.z=zipfile.ZipFile(path); names=set(); total=0
+        if path.stat().st_size>128*1024*1024:
+            fail('OFFICE_INPUT_LIMIT','Office file exceeds 128 MiB')
+        self.z=zipfile.ZipFile(path)
+        names=set()
+        total=0
         for i in self.z.infolist():
             if i.filename in names or i.filename.startswith('/') or '..' in PurePosixPath(i.filename).parts or '\\' in i.filename:
-                self.z.close();fail('OFFICE_ARCHIVE_INVALID','Duplicate or unsafe archive path')
-            names.add(i.filename);total+=i.file_size
+                self.z.close()
+                fail('OFFICE_ARCHIVE_INVALID','Duplicate or unsafe archive path')
+            names.add(i.filename)
+            total+=i.file_size
             if i.flag_bits&1 or i.file_size>32*1024*1024 or total>256*1024*1024 or len(names)>10000:
-                self.z.close();fail('OFFICE_ARCHIVE_LIMIT','Encrypted or oversized archive')
+                self.z.close()
+                fail('OFFICE_ARCHIVE_LIMIT','Encrypted or oversized archive')
     def xml(self,name):
         raw=self.z.read(name)
-        if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():fail('OFFICE_XML_UNSAFE','Entity declarations rejected')
+        if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():
+            fail('OFFICE_XML_UNSAFE','Entity declarations rejected')
         return ET.fromstring(raw)
     def relations(self,part):
         name=posixpath.join(posixpath.dirname(part),'_rels',posixpath.basename(part)+'.rels')
-        if name not in self.z.namelist():return {}
+        if name not in self.z.namelist():
+            return {}
         result={}
         for n in self.xml(name):
-            if n.get('TargetMode')=='External':continue
+            if n.get('TargetMode')=='External':
+                continue
             target=posixpath.normpath(posixpath.join(posixpath.dirname(part),n.get('Target',''))).lstrip('/')
-            if target.startswith('../'):fail('OFFICE_RELATION_INVALID','Relationship leaves package')
-            if n.get('Id') in result:fail('OFFICE_RELATION_INVALID','Duplicate relationship ID')
+            if target.startswith('../'):
+                fail('OFFICE_RELATION_INVALID','Relationship leaves package')
+            if n.get('Id') in result:
+                fail('OFFICE_RELATION_INVALID','Duplicate relationship ID')
             result[n.get('Id')]=target
         return result
 
 def _xlsx(z):
-    book=z.xml('xl/workbook.xml'); rel=z.relations('xl/workbook.xml')
+    book=z.xml('xl/workbook.xml')
+    rel=z.relations('xl/workbook.xml')
     shared=[]
-    if 'xl/sharedStrings.xml' in z.z.namelist():shared=[text(n,'s') for n in z.xml('xl/sharedStrings.xml')]
-    formats={};styles=[0]
+    if 'xl/sharedStrings.xml' in z.z.namelist():
+        shared=[text(n,'s') for n in z.xml('xl/sharedStrings.xml')]
+    formats={}
+    styles=[0]
     if 'xl/styles.xml' in z.z.namelist():
         style_root=z.xml('xl/styles.xml')
         for n in style_root.findall('s:numFmts/s:numFmt',NS):
             formats[int(n.get('numFmtId'))]=n.get('formatCode','')
         styles=[int(n.get('numFmtId','0')) for n in style_root.findall('s:cellXfs/s:xf',NS)] or [0]
-    blocks=[];units=[]
+    blocks=[]
+    units=[]
     for sheet in book.findall('s:sheets/s:sheet',NS):
-        name=sheet.get('name');part=rel[sheet.get(tag('r','id'))];xml=z.xml(part)
-        cells=[];seen=set()
+        name=sheet.get('name')
+        part=rel[sheet.get(tag('r','id'))]
+        xml=z.xml(part)
+        cells=[]
+        seen=set()
         for c in xml.findall('s:sheetData/s:row/s:c',NS):
             addr=c.get('r','')
-            if not re.fullmatch(r'[A-Z]{1,3}[1-9][0-9]{0,6}',addr) or addr in seen:fail('OFFICE_CELL_INVALID','Cell reference missing or duplicated')
-            seen.add(addr); f=c.find('s:f',NS);v=c.find('s:v',NS);kind=c.get('t','n')
+            if not re.fullmatch(r'[A-Z]{1,3}[1-9][0-9]{0,6}',addr) or addr in seen:
+                fail('OFFICE_CELL_INVALID','Cell reference missing or duplicated')
+            seen.add(addr)
+            f=c.find('s:f',NS)
+            v=c.find('s:v',NS)
+            kind=c.get('t','n')
             raw=v.text if v is not None else None
             display=text(c,'s') if kind=='inlineStr' else raw
             if kind=='s':
-                if raw is None or not raw.isdecimal() or int(raw)>=len(shared):fail('OFFICE_SHARED_STRING_INVALID','Invalid shared string index')
+                if raw is None or not raw.isdecimal() or int(raw)>=len(shared):
+                    fail('OFFICE_SHARED_STRING_INVALID','Invalid shared string index')
                 display=shared[int(raw)]
             style=int(c.get('s','0'))
-            if not 0<=style<len(styles):fail('OFFICE_STYLE_INVALID','Cell style index is out of range')
+            if not 0<=style<len(styles):
+                fail('OFFICE_STYLE_INVALID','Cell style index is out of range')
             number_format_id=styles[style]
             # Scientific review uses only literal, unformatted numeric cells.
             # Boolean/date/percentage-formatted values retain raw data, never
             # silently acquire the semantics of the underlying Excel serial.
             numeric_eligible = kind in {'s','inlineStr','str'} or (kind=='n' and number_format_id==0)
-            letters=re.match('[A-Z]+',addr)[0];column=0
-            for ch in letters:column=column*26+ord(ch)-64
+            letters=re.match('[A-Z]+',addr)[0]
+            column=0
+            for ch in letters:
+                column=column*26+ord(ch)-64
             cells.append({'row':int(addr[len(letters):])-1,'column':column-1,'rowspan':1,'colspan':1,
                           'header':False,'text':display or '', 'address':addr,'cell_type':kind,
                           'raw_value':raw,'formula':f.text if f is not None else None,
@@ -84,7 +110,8 @@ def _xlsx(z):
                           'style_index':c.get('s'),'number_format_id':number_format_id,
                           'number_format_code':formats.get(number_format_id),'numeric_review_eligible':numeric_eligible,
                           'source_location':{'kind':'sheet_cell','sheet':name,'cell':addr}})
-            if len(cells)>200000:fail('OFFICE_CELL_LIMIT','Too many cells')
+            if len(cells)>200000:
+                fail('OFFICE_CELL_LIMIT','Too many cells')
         merged=[n.get('ref') for n in xml.findall('s:mergeCells/s:mergeCell',NS)]
         table={'table_index':0,'cells':cells,'merged_ranges':merged,
                'rows':max((c['row']+1 for c in cells),default=0),'columns':max((c['column']+1 for c in cells),default=0)}
@@ -94,20 +121,26 @@ def _xlsx(z):
     return units,blocks,['FORMULAS_PRESERVED_NOT_CALCULATED','CACHE_MAY_BE_STALE','FORMATTED_DISPLAY_NOT_RECONSTRUCTED']
 
 def _docx(z):
-    body=z.xml('word/document.xml').find('w:body',NS);blocks=[]
-    if body is None:fail('OFFICE_BODY_MISSING','DOCX body missing')
+    body=z.xml('word/document.xml').find('w:body',NS)
+    blocks=[]
+    if body is None:
+        fail('OFFICE_BODY_MISSING','DOCX body missing')
     for index,n in enumerate(body):
-        if n.tag not in {tag('w','p'),tag('w','tbl')}:continue
+        if n.tag not in {tag('w','p'),tag('w','tbl')}:
+            continue
         location={'kind':'docx_body','part':'word/document.xml','body_index':index}
         cells=[]
         if n.tag==tag('w','tbl'):
-            if n.findall('.//w:tc/w:tbl',NS):fail('OFFICE_NESTED_TABLE_REVIEW_REQUIRED','Nested tables need explicit review')
+            if n.findall('.//w:tc/w:tbl',NS):
+                fail('OFFICE_NESTED_TABLE_REVIEW_REQUIRED','Nested tables need explicit review')
             for row,tr in enumerate(n.findall('w:tr',NS)):
                 column=0
                 for tc in tr.findall('w:tc',NS):
-                    span=tc.find('w:tcPr/w:gridSpan',NS);vm=tc.find('w:tcPr/w:vMerge',NS)
+                    span=tc.find('w:tcPr/w:gridSpan',NS)
+                    vm=tc.find('w:tcPr/w:vMerge',NS)
                     colspan=int(span.get(tag('w','val'),'1')) if span is not None else 1
-                    if not 1<=colspan<=512:fail('OFFICE_TABLE_SPAN_INVALID','Invalid table span')
+                    if not 1<=colspan<=512:
+                        fail('OFFICE_TABLE_SPAN_INVALID','Invalid table span')
                     cells.append({'row':row,'column':column,'rowspan':1,'colspan':colspan,'header':False,
                                   'text':'\n'.join(word_text(p) for p in tc.findall('w:p',NS)),
                                   'vertical_merge':vm.get(tag('w','val'),'continue') if vm is not None else None,
@@ -121,13 +154,20 @@ def _docx(z):
     return [{'kind':'document_body','name':'word/document.xml'}],blocks,['DOCX_PAGINATION_UNAVAILABLE','DOCX_VERTICAL_MERGE_RECORDED_NOT_INFERRED']
 
 def _pptx(z):
-    presentation=z.xml('ppt/presentation.xml');rel=z.relations('ppt/presentation.xml');blocks=[];units=[]
+    presentation=z.xml('ppt/presentation.xml')
+    rel=z.relations('ppt/presentation.xml')
+    blocks=[]
+    units=[]
     for slide_index,ref in enumerate(presentation.findall('p:sldIdLst/p:sldId',NS),1):
-        part=rel[ref.get(tag('r','id'))];xml=z.xml(part);units.append({'kind':'slide','number':slide_index,'package_part':part})
+        part=rel[ref.get(tag('r','id'))]
+        xml=z.xml(part)
+        units.append({'kind':'slide','number':slide_index,'package_part':part})
         tree=xml.find('p:cSld/p:spTree',NS)
-        if tree is None:continue
+        if tree is None:
+            continue
         for index,shape in enumerate(tree):
-            if shape.tag in {tag('p','nvGrpSpPr'),tag('p','grpSpPr')}:continue
+            if shape.tag in {tag('p','nvGrpSpPr'),tag('p','grpSpPr')}:
+                continue
             props=next(iter(shape.iter(tag('p','cNvPr'))),None)
             location={'kind':'slide_shape','slide':slide_index,'shape_index':index,
                       'shape_id':props.get('id') if props is not None else None,'part':part}
@@ -148,11 +188,16 @@ def _pptx(z):
     return units,blocks,['SLIDE_ORDER_IS_PRESENTATION_ORDER','GROUP_TRANSFORMS_RETAINED_OVERLAY_NOT_CALIBRATED','NOTES_AND_CHART_VALUES_NOT_EXTRACTED']
 
 def office_structure(source,rawmd):
-    source,rawmd=Path(source),Path(rawmd);suffix=source.suffix.lower();parsers={'.xlsx':_xlsx,'.docx':_docx,'.pptx':_pptx}
-    if suffix not in parsers:fail('OFFICE_FORMAT_UNSUPPORTED','Structure supports XLSX, DOCX and PPTX')
+    source,rawmd=Path(source),Path(rawmd)
+    suffix=source.suffix.lower()
+    parsers={'.xlsx':_xlsx,'.docx':_docx,'.pptx':_pptx}
+    if suffix not in parsers:
+        fail('OFFICE_FORMAT_UNSUPPORTED','Structure supports XLSX, DOCX and PPTX')
     z=Archive(source)
-    try:units,blocks,warnings=parsers[suffix](z)
-    finally:z.z.close()
+    try:
+        units,blocks,warnings=parsers[suffix](z)
+    finally:
+        z.z.close()
     source_sha=file_sha(source)
     for i,b in enumerate(blocks):
         b.update(reading_order=i,block_id='Block-'+digest(canonical([source_sha,b['source_location']]))[:32])

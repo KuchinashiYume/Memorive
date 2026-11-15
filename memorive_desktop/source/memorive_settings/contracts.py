@@ -642,8 +642,10 @@ def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
     seen_profile_refs: set[str] = set()
     definitions=list(CLI_DEFINITIONS)
     for config_id,row in rows_by_id.items():
-        if config_id in CLI_CONFIG_IDS:continue
-        if row['adapter_id'] != ADAPTER or 'template' not in row:raise ValueError('CLI_CUSTOM_TEMPLATE_REQUIRED')
+        if config_id in CLI_CONFIG_IDS:
+            continue
+        if row['adapter_id'] != ADAPTER or 'template' not in row:
+            raise ValueError('CLI_CUSTOM_TEMPLATE_REQUIRED')
         definitions.append((config_id,ADAPTER,_text(row['display_name'],'CLI_DISPLAY_NAME',80),''))
     for config_id, adapter_id, display_name, default_executable in definitions:
         row = rows_by_id[config_id]

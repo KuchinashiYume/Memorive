@@ -32,7 +32,8 @@ def get(root):
 
 def save(runtime,config,expected_revision):
     with runtime.lock:
-        if runtime.closed:raise ValueError('RESEARCH_CLOSED')
+        if runtime.closed:
+            raise ValueError('RESEARCH_CLOSED')
         current=get(runtime.root)
         if type(expected_revision) is not int or expected_revision!=current['revision']:
             raise ValueError('REPORT_SCHEDULE_REVISION_CONFLICT')
@@ -49,6 +50,7 @@ def due_at(window,config):
         end+=timedelta(days=(config['weekly_day']-end.weekday())%7)
     elif period=='monthly':
         end=end.replace(day=min(config['monthly_day'],monthrange(end.year,end.month)[1]))
-    elif period!='daily':raise ValueError('RESEARCH_PERIOD_INVALID')
+    elif period!='daily':
+        raise ValueError('RESEARCH_PERIOD_INVALID')
     hour,minute=map(int,config[period+'_time'].split(':'))
     return end.replace(hour=hour,minute=minute,second=0,microsecond=0)

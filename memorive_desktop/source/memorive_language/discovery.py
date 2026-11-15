@@ -16,7 +16,8 @@ def label(language, zh, en):
     return choose(language,zh,en,JA[zh])
 
 def reason(row, language):
-    relation=row['relation_evidence']; terms=relation['matched_keywords'] or relation['matched_query_terms']
+    relation=row['relation_evidence']
+    terms=relation['matched_keywords'] or relation['matched_query_terms']
     scope=choose(language,'标题与摘要' if row.get('abstract') else '标题','title and abstract' if row.get('abstract') else 'title','題名と要旨' if row.get('abstract') else '題名')
     text=choose(language,'与「{name}」在{scope}中共有主题词：{terms}。','Shares topic terms with “{name}” in the {scope}: {terms}.','「{name}」と{scope}に共通する主題語：{terms}。').format(name=row.get('direction_name',''),scope=scope,terms=', '.join(terms[:6]) or choose(language,'证据不足','insufficient evidence','証拠不足'))
     if relation['seed_comparisons']:

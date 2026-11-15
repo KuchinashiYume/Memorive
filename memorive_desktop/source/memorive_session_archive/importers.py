@@ -474,7 +474,8 @@ class BrowserLibraryImporter:
         if provider.startswith('web-'):
             # Provider-controlled payloads never grant themselves a new origin.
             from memorive_browser_companion.site_profiles import normalize_sites, profile_hash, active_sites
-            if not allowed_site_settings: raise ArchiveInputError('BROWSER_CUSTOM_SITE_NOT_CONFIGURED')
+            if not allowed_site_settings:
+                raise ArchiveInputError('BROWSER_CUSTOM_SITE_NOT_CONFIGURED')
             sites=normalize_sites(allowed_site_settings['sites'])
             if payload.get('site_profile_sha256') != profile_hash(sites):
                 raise ArchiveInputError('BROWSER_SITE_PROFILE_MISMATCH')

@@ -284,7 +284,8 @@ def normalize_payload(source: Mapping[str, Any], payload: Any) -> list[dict[str,
                      model_id="USD", model_name="USD/CNY/JPY", metrics={}, reference_only=True,
                      qualification_eligible=False, fx=fx)]
     if source['format']=='LIVEBENCH_RELEASE':
-        if not isinstance(payload,Mapping): raise ValueError('LIVEBENCH_BUNDLE_REQUIRED')
+        if not isinstance(payload,Mapping):
+            raise ValueError('LIVEBENCH_BUNDLE_REQUIRED')
         result=[]
         for item in livebench_rows(payload):
             row=_record(source,item['model'],item['model'],item['metrics'],upstream_source='livebench',
@@ -910,7 +911,8 @@ class ExternalDataSources:
                 query = [(k,v) for k,v in parse_qsl(split.query) if k != 'page']
                 page_url = source["endpoint"] if page == 1 else urlunsplit(
                     (split.scheme, split.netloc, split.path, urlencode(query + [('page',str(page))]), ''))
-                if live_urls: page_url=live_urls[page-1]
+                if live_urls:
+                    page_url=live_urls[page-1]
                 github_path = None
                 if github_live:
                     if page == 1:
@@ -980,24 +982,29 @@ class ExternalDataSources:
                             github_paths = ['src/lib/constants.js'] + [u.split('/main/',1)[1] for u in canonical_urls[1:]]
                         else:
                             live_urls = canonical_urls
-                    if len(live_documents)<3: page+=1;continue
+                    if len(live_documents)<3:
+                        page+=1
+                        continue
                     rows=normalize_payload(source,dict(release=live_release,
                         categories=json.loads(live_documents[1].decode('utf-8-sig')),
                         table_csv=live_documents[2].decode('utf-8-sig')))
                 else:
                     rows = normalize_payload(source, response.body)
                 records.extend(rows)
-                if source['format'] != 'ARTIFICIAL_ANALYSIS': break
+                if source['format'] != 'ARTIFICIAL_ANALYSIS':
+                    break
                 payload = json.loads(response.body.decode('utf-8-sig'))
                 pagination = payload.get('pagination')
                 if pagination is None and page == 1: break  # documented legacy API
-                if not isinstance(pagination,dict): raise ValueError('EXTERNAL_METADATA_PAGINATION_INVALID')
+                if not isinstance(pagination,dict):
+                    raise ValueError('EXTERNAL_METADATA_PAGINATION_INVALID')
                 count = pagination.get('total_pages')
                 if (type(count) is not int or not 1 <= count <= 100 or pagination.get('page') != page
                         or type(pagination.get('has_more')) is not bool or pagination['has_more'] != (page < count)
                         or not payload.get('data')):
                     raise ValueError('EXTERNAL_METADATA_PAGINATION_INVALID')
-                if page == 1: total_pages, index_version = count, payload.get('intelligence_index_version')
+                if page == 1:
+                    total_pages, index_version = count, payload.get('intelligence_index_version')
                 if count != total_pages or payload.get('intelligence_index_version') != index_version:
                     raise ValueError('EXTERNAL_METADATA_CHANGED_DURING_PAGINATION')
                 for item in payload['data']:
@@ -1005,8 +1012,10 @@ class ExternalDataSources:
                     if not identity or identity in model_ids:
                         raise ValueError('EXTERNAL_METADATA_DUPLICATE_PAGE_MODEL')
                     model_ids.add(identity)
-                if len(records) > 20000: raise ValueError('EXTERNAL_RESPONSE_ITEM_ENVELOPE_EXCEEDED')
-                if page == total_pages: break
+                if len(records) > 20000:
+                    raise ValueError('EXTERNAL_RESPONSE_ITEM_ENVELOPE_EXCEEDED')
+                if page == total_pages:
+                    break
                 page += 1
             if not records:
                 raise ValueError("EXTERNAL_METADATA_EMPTY")
@@ -1037,8 +1046,10 @@ class ExternalDataSources:
                             proxy_address=pref.get('proxy_address',''),max_response_bytes=32*1024*1024)
                         physical.update(status='RECEIVED',http_status=response.status_code,
                             body_sha256=hashlib.sha256(response.body).hexdigest().upper())
-                        if hasattr(response,'transport_evidence'):physical['transport']=response.transport_evidence
-                        if response.status_code!=200:raise ValueError(f'EXTERNAL_METADATA_HTTP_{response.status_code}')
+                        if hasattr(response,'transport_evidence'):
+                            physical['transport']=response.transport_evidence
+                        if response.status_code!=200:
+                            raise ValueError(f'EXTERNAL_METADATA_HTTP_{response.status_code}')
                         return json.loads(response.body),dict(endpoint_url=endpoint,body_sha256=physical['body_sha256'],
                             retrieved_at=physical['requested_at'],request_id=physical['request_id'])
                     except Exception as error:

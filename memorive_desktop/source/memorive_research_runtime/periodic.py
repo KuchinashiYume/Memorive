@@ -39,9 +39,12 @@ def tick(runtime, current=None):
         return {'status':'PAUSED_BY_CONSOLE'}
     current = current or (runtime.report_clock() if runtime.report_clock else datetime.now(ZONE))
     with runtime.lock:
-        if runtime.closed:return {'status':'CLOSED'}
-        if getattr(runtime,'scheduler_stop',None) and runtime.scheduler_stop.is_set():return {'status':'CLOSED'}
-        if runtime._has_active_run():return {'status':'BUSY'}
+        if runtime.closed:
+            return {'status':'CLOSED'}
+        if getattr(runtime,'scheduler_stop',None) and runtime.scheduler_stop.is_set():
+            return {'status':'CLOSED'}
+        if runtime._has_active_run():
+            return {'status':'BUSY'}
         from .report_schedule import get,due_at
         from .report_identity import project,window_key
         schedule=get(runtime.root)['config']
@@ -53,8 +56,10 @@ def tick(runtime, current=None):
         progress = material_progress(runtime.api)
         for candidate in windows(progress,current):
             window = candidate['window']
-            if mapping[window['period']] not in available:continue
-            if current.astimezone(ZONE)<due_at(window,schedule) or window_key(window) in produced:continue
+            if mapping[window['period']] not in available:
+                continue
+            if current.astimezone(ZONE)<due_at(window,schedule) or window_key(window) in produced:
+                continue
             base_id = 'periodic-v1-' + sha(window)
             attempt=0
             while True:
@@ -71,8 +76,10 @@ def tick(runtime, current=None):
                         trigger='PASSIVE_MATERIAL_PROGRESS',report_window=window,
                         material_progress=candidate['progress'], report_cutoff=current.isoformat())
                 prior=read(path/'state.json')
-                if (path/'model_request.json').exists():break
-                if prior['status'] not in {'FAILED','INTERRUPTED'}:break
+                if (path/'model_request.json').exists():
+                    break
+                if prior['status'] not in {'FAILED','INTERRUPTED'}:
+                    break
                 # This path is the local deterministic material renderer, not
                 # a provider/model call. Preserve failed attempts, mint a new
                 # identity, and hold runtime.lock across selection and claim.
@@ -81,14 +88,19 @@ def tick(runtime, current=None):
 
 
 def render(runtime, run_id, params):
-    window=params['report_window'];period=window['period'];progress=params['material_progress']
+    window=params['report_window']
+    period=window['period']
+    progress=params['material_progress']
     validate_window(period,window['start'],window['end'],params['report_cutoff'])
-    if not progress:raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
+    if not progress:
+        raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
     from memorive_workflow.node_progress import scope
     events=[]
     with scope('REPORT_ITEMS', [sha(item) for item in progress], 'PROCESSED_ITEMS') as item_units:
         for item in progress:
-            key=sha(item);stamp=item['updated_at'];paper=item['material_kind']=='PAPER'
+            key=sha(item)
+            stamp=item['updated_at']
+            paper=item['material_kind']=='PAPER'
             from memorive_language.text import choose
             language=params.get('language_context')
             suffix=choose(language,' · 文献处理完成，成果待人工复核',' · Paper processing complete; human review required',' · 文献処理が完了し、人による確認が必要です') if paper else choose(language,' · 对话精炼完成，成果待人工复核',' · Conversation refinement complete; human review required',' · 会話の精錬が完了し、人による確認が必要です')

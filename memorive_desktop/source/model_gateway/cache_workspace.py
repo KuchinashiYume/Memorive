@@ -41,7 +41,8 @@ def _short_cache_roots(original_root, digest):
     ).hexdigest()[:16]
     explicit=os.environ.get('MEMORIVE_CLI_CACHE_ROOT')
     preferred=[]
-    if explicit:preferred.append(Path(explicit))
+    if explicit:
+        preferred.append(Path(explicit))
     user_profile=os.environ.get('USERPROFILE')
     if user_profile:
         preferred.append(Path(user_profile)/'AppData'/'Local'/'Memorive'/'cli-cache')
@@ -49,13 +50,18 @@ def _short_cache_roots(original_root, digest):
     if local_app_data:
         preferred.append(Path(local_app_data)/'Memorive'/'cli-cache')
     preferred.append(Path(tempfile.gettempdir())/'memorive-cli-cache')
-    unique=[];seen=set()
+    unique=[]
+    seen=set()
     for base in preferred:
-        try:resolved=base.resolve(strict=False)
-        except OSError:continue
+        try:
+            resolved=base.resolve(strict=False)
+        except OSError:
+            continue
         key=str(resolved).casefold()
-        if key in seen:continue
-        seen.add(key);unique.append(resolved)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(resolved)
     explicit_root=unique[:1] if explicit and unique else []
     remaining=unique[len(explicit_root):]
     ordered=explicit_root+sorted(remaining,key=lambda value:(len(str(value)),str(value).casefold()))
@@ -96,10 +102,13 @@ def structured_chat_workspace(scratch_root, *, profile_kind, service, model, pur
             digest=hashlib.sha256(str(temporary_root).encode('utf-8')).hexdigest()
             temporary_root=next((root for root in _short_cache_roots(temporary_root,digest)
                 if _fits_workspace(root/('memorive-structured-chat-'+'0'*8))),None)
-            if temporary_root is None:raise ValueError('CACHE_WORKSPACE_PATH_BUDGET_EXCEEDED')
+            if temporary_root is None:
+                raise ValueError('CACHE_WORKSPACE_PATH_BUDGET_EXCEEDED')
         with tempfile.TemporaryDirectory(prefix='memorive-structured-chat-',dir=temporary_root,
                 ignore_cleanup_errors=True) as temporary:
-            workspace=Path(temporary).resolve();_mark_internal(workspace,purpose);yield workspace
+            workspace=Path(temporary).resolve()
+            _mark_internal(workspace,purpose)
+            yield workspace
         return
     identity={'scope':scope,'model':model,'service':service,'purpose':purpose}
     digest=hashlib.sha256(json.dumps(identity,sort_keys=True,separators=(',',':')).encode()).hexdigest()
@@ -115,22 +124,30 @@ def structured_chat_workspace(scratch_root, *, profile_kind, service, model, pur
             if workspace is not None:
                 root=fallback_root
                 break
-    if workspace is None:raise ValueError('CACHE_WORKSPACE_PATH_BUDGET_EXCEEDED')
-    if not workspace.resolve().is_relative_to(root): raise ValueError('CACHE_WORKSPACE_PATH_ESCAPE')
+    if workspace is None:
+        raise ValueError('CACHE_WORKSPACE_PATH_BUDGET_EXCEEDED')
+    if not workspace.resolve().is_relative_to(root):
+        raise ValueError('CACHE_WORKSPACE_PATH_ESCAPE')
     workspace.mkdir(parents=True,exist_ok=True)
     _mark_internal(workspace,purpose)
     lock=workspace/'.exclusive-call.lock'
     # Concurrent calls fail closed rather than sharing a mutable schema or history.
     try:
-        with lock.open('xb'):pass
+        with lock.open('xb'):
+            pass
     except FileExistsError:
-        if purpose!='research_chat':raise
+        if purpose!='research_chat':
+            raise
         # Concurrent or interrupted lanes must not block another conversation.
         with tempfile.TemporaryDirectory(prefix='research-parallel-',dir=root,ignore_cleanup_errors=True) as temporary:
-            workspace=Path(temporary).resolve();_mark_internal(workspace,purpose);yield workspace
+            workspace=Path(temporary).resolve()
+            _mark_internal(workspace,purpose)
+            yield workspace
         return
-    try: yield workspace
-    finally: lock.unlink()
+    try:
+        yield workspace
+    finally:
+        lock.unlink()
 
 
 def write_response_schema(workspace, payload: bytes) -> Path:
@@ -144,7 +161,9 @@ def write_response_schema(workspace, payload: bytes) -> Path:
     if path is None:
         raise ValueError('CACHE_SCHEMA_PATH_BUDGET_EXCEEDED')
     if path.exists():
-        if path.read_bytes()!=payload: raise ValueError('CACHE_SCHEMA_HASH_MISMATCH')
+        if path.read_bytes()!=payload:
+            raise ValueError('CACHE_SCHEMA_HASH_MISMATCH')
     else:
-        with path.open('xb') as stream: stream.write(payload)
+        with path.open('xb') as stream:
+            stream.write(payload)
     return path

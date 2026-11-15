@@ -6,9 +6,12 @@ from .engine import digest,extract
 
 def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=2,max_seconds=5):
     required=('rule_id','parameter','card_omission_id','reason','pages','label','source_sha256')
-    if not isinstance(gap,dict) or any(k not in gap for k in required):return {'status':'NOT_APPLICABLE','reason':'NO_BOUND_RELEVANT_CARD_GAP'}
-    if gap.get('access_excluded') is True:return {'status':'BLOCKED','reason':'SOURCE_ACCESS_EXCLUDED'}
-    if gap['source_sha256'].upper()!=source_sha256.upper():return {'status':'UNRESOLVED','reason':'SOURCE_VERSION_MISMATCH'}
+    if not isinstance(gap,dict) or any(k not in gap for k in required):
+        return {'status':'NOT_APPLICABLE','reason':'NO_BOUND_RELEVANT_CARD_GAP'}
+    if gap.get('access_excluded') is True:
+        return {'status':'BLOCKED','reason':'SOURCE_ACCESS_EXCLUDED'}
+    if gap['source_sha256'].upper()!=source_sha256.upper():
+        return {'status':'UNRESOLVED','reason':'SOURCE_VERSION_MISMATCH'}
     if not gap['card_omission_id'] or gap['reason'] not in {'MISSING','REMOVED','INVALID_ANCHOR','MISSING_QUALIFIER'}:
         return {'status':'NOT_APPLICABLE','reason':'NO_BOUND_RELEVANT_CARD_GAP'}
     pages=gap['pages']
@@ -16,11 +19,15 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
         return {'status':'UNRESOLVED','reason':'LOCAL_PAGE_BUDGET_OR_LOCATOR_INVALID'}
     key=digest({'kind':'RawPDFAssist-v3','source_sha256':source_sha256,'gap':gap,'max_pages':max_pages})
     saved=cache(key)
-    if saved:return {**saved,'cache_reused':True}
-    start=time.monotonic();checkpoint();path=Path(path)
+    if saved:
+        return {**saved,'cache_reused':True}
+    start=time.monotonic()
+    checkpoint()
+    path=Path(path)
     if path.suffix.casefold()!='.pdf' or path.stat().st_size>64*1024*1024 or digest(path.read_bytes())!=source_sha256.upper():
         return {'status':'UNRESOLVED','reason':'PDF_SOURCE_HASH_MISMATCH'}
-    matches=[];read=[]
+    matches=[]
+    read=[]
     try:
         import fitz
         with fitz.open(path) as pdf:
@@ -28,10 +35,14 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
             with scope('PDF_ASSIST', sorted(set(pages))) as node_units:
                 for page in sorted(set(pages)):
                     checkpoint()
-                    if time.monotonic()-start>max_seconds:raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
-                    if page>pdf.page_count:raise ValueError('PDF_PAGE_OUT_OF_RANGE')
-                    text=pdf[page-1].get_text();read.append(page)
-                    if time.monotonic()-start>max_seconds:raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
+                    if time.monotonic()-start>max_seconds:
+                        raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
+                    if page>pdf.page_count:
+                        raise ValueError('PDF_PAGE_OUT_OF_RANGE')
+                    text=pdf[page-1].get_text()
+                    read.append(page)
+                    if time.monotonic()-start>max_seconds:
+                        raise TimeoutError('PDF_LOCAL_TIME_BUDGET_EXCEEDED')
                     if gap.get('automatic'):
                         # The page locator alone is not a parameter/group binding.
                         # Require the same exact source formula context, then inspect
@@ -44,7 +55,8 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
                         offset=normalized.index(context)
                         text=normalized[max(0,offset-160):offset+len(context)+240]
                     label=str(gap['label'])
-                    if len(label)>80 or not label:raise ValueError('PDF_LABEL_INVALID')
+                    if len(label)>80 or not label:
+                        raise ValueError('PDF_LABEL_INVALID')
                     pattern=re.compile(r'(?<!\w)'+re.escape(label)+r'\s*[:=]\s*([+−-]?(?:\d+(?:\.\d+)?|\.\d+))(?!\w|\.\d)')
                     for line_no,line in enumerate(text.splitlines(),1):
                         for match in pattern.finditer(line):
@@ -59,6 +71,8 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
                 'gap':gap,'card_written':False,'external_model_calls':0,'whole_document_absence_claim':False}
     except Exception as error:
         from memorive_settings.call_ledger import ExecutionControlSignal
-        if isinstance(error,ExecutionControlSignal):raise
+        if isinstance(error,ExecutionControlSignal):
+            raise
         result={'status':'UNRESOLVED','reason':type(error).__name__,'pages_read':read,'source_sha256':source_sha256,'card_written':False,'external_model_calls':0}
-    cache(key,result);return result
+    cache(key,result)
+    return result

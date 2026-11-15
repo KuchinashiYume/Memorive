@@ -9,7 +9,8 @@ def bitmap_alpha_rows(bitmap):
         raise ValueError('ASSISTANT_ALPHA_FORMAT_INVALID')
     bits=bitmap.LockBits(Rectangle(0,0,width,height),ImageLockMode.ReadOnly,PixelFormat.Format32bppArgb)
     try:
-        stride=int(bits.Stride);address=int(bits.Scan0.ToInt64())
+        stride=int(bits.Stride)
+        address=int(bits.Scan0.ToInt64())
         if not address or abs(stride)<width*4 or int(bits.Width)!=width or int(bits.Height)!=height:
             raise ValueError('ASSISTANT_ALPHA_BUFFER_INVALID')
         # Scan0 is the first logical row; retain the signed stride for bottom-up storage.

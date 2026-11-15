@@ -19,7 +19,8 @@ COPY={
  '仅在本次选定材料中进行本地补查。新片段尚未进入原回答；缺口不因检索命中自动消失。':('This local search uses only the selected materials. New excerpts have not entered the original answer; a search hit does not automatically close an evidence gap.','今回選択した資料だけをローカルで追加検索しました。新しい断片は元の回答に未反映です。検索結果が得られても証拠の不足が自動的に解消するわけではありません。'),
 }
 def generated(value,language):
-    if value in COPY:return choose(language,value,*COPY[value])
+    if value in COPY:
+        return choose(language,value,*COPY[value])
     prefix='审核给出的支持关系未通过原文绑定或限定检查：'
     if value.startswith(prefix):
         return choose(language,prefix,'The proposed support failed source binding or scope checks: ','提示された支持関係は原文との対応または範囲の確認を通過しませんでした：')+value[len(prefix):]

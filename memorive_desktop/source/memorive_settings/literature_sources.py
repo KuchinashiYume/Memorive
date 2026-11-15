@@ -55,7 +55,8 @@ def load(root: Path):
     if version=='LiteratureSourceSelection-v3':
         if set(value)!={'schema_version','revision','selected','slots'} or len(value['slots'])!=3:
             raise ValueError('LITERATURE_SOURCE_SETTINGS_INVALID')
-        for i,row in enumerate(value['slots']):_validate_slot(row,i)
+        for i,row in enumerate(value['slots']):
+            _validate_slot(row,i)
         providers=[r['provider'] for r in value['slots'] if r['provider']]
         if len(set(providers))!=len(providers) or value['selected']!=_selected(value['slots']):
             raise ValueError('LITERATURE_SOURCE_SETTINGS_INVALID')
@@ -94,7 +95,8 @@ def projection(root: Path):
             selected=p in selected,selectable=True,engine=engine) for p,name,purpose,status,engine in CATALOG])
 
 def save(owner, source, expected_revision):
-    if not isinstance(source,dict):raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
+    if not isinstance(source,dict):
+        raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
     with owner._write_lock():
         state=load(owner.root)
         if type(expected_revision) is not int or expected_revision!=state['revision']:
@@ -107,11 +109,14 @@ def save(owner, source, expected_revision):
             row=next((r for r in slots if r['provider']==provider),None)
             if row is None and source['selected']:
                 row=next((r for r in slots if r['provider'] is None),None)
-                if row is None:raise ValueError('LITERATURE_SLOTS_FULL')
+                if row is None:
+                    raise ValueError('LITERATURE_SLOTS_FULL')
                 row.update(configured_slot(row['slot_id'],provider))
-            if row is not None:row['enabled']=source['selected']
+            if row is not None:
+                row['enabled']=source['selected']
         elif set(source) in ({'slot_id','provider'},FIELDS):
-            if source['slot_id'] not in SLOT_IDS:raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
+            if source['slot_id'] not in SLOT_IDS:
+                raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
             i=SLOT_IDS.index(source['slot_id'])
             row=(configured_slot(source['slot_id'],source['provider'],bool(source['provider']))
                  if set(source)=={'slot_id','provider'} else dict(source))
@@ -120,9 +125,12 @@ def save(owner, source, expected_revision):
             # retaining source preferences without duplicate providers.
             other=next((r for r in slots if r['slot_id']!=row['slot_id'] and r['provider'] and r['provider']==row['provider']),None)
             if other is not None:
-                previous=dict(slots[i]);previous['slot_id']=other['slot_id'];other.update(previous)
+                previous=dict(slots[i])
+                previous['slot_id']=other['slot_id']
+                other.update(previous)
             slots[i]=row
-        else:raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
+        else:
+            raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
         state.update(selected=_selected(slots),revision=state['revision']+1)
         state['sha256']=canonical_sha256(state)
         owner.writer._atomic_write(owner.root/'literature_sources.json',state)

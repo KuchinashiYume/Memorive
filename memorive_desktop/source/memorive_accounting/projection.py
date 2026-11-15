@@ -28,7 +28,8 @@ def _decimal(value: Any, code: str) -> Decimal:
 
 def _decimal_text(value: Decimal) -> str:
     rendered = format(value, "f")
-    if '.' in rendered: rendered = rendered.rstrip("0").rstrip(".")
+    if '.' in rendered:
+        rendered = rendered.rstrip("0").rstrip(".")
     return rendered or "0"
 
 

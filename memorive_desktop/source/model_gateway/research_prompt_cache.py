@@ -99,7 +99,8 @@ def research_prompt(rules,context):
     stable={}
     for key in ('evidence','confirmed_memory'):
         stable[key]=[json.loads(canonical(r)) for r in sorted(context.get(key,[]),key=lambda r:r.get('id',''))]
-    stable['scope']=context.get('_thread_scope');stable['temporary']=context.get('_temporary',True)
+    stable['scope']=context.get('_thread_scope')
+    stable['temporary']=context.get('_temporary',True)
     if 'answer_style' in context:
         from memorive_settings.answer_styles import from_snapshot
         rules=rules.rstrip()+'\n\n<ANSWER_EXPRESSION>\n'+from_snapshot(context['answer_style'])+'\n</ANSWER_EXPRESSION>'
@@ -107,12 +108,17 @@ def research_prompt(rules,context):
     if 'language_context' in context:
         from memorive_language import validate
         stable['language_context']=validate(context['language_context'])
-    if '_answer_path' in context:stable['answer_path']=copy.deepcopy(context['_answer_path'])
-    if 'source_scope' in context:stable['source_scope']=copy.deepcopy(context['source_scope'])
-    if 'research_topic' in context:stable['research_topic']=copy.deepcopy(context['research_topic'])
+    if '_answer_path' in context:
+        stable['answer_path']=copy.deepcopy(context['_answer_path'])
+    if 'source_scope' in context:
+        stable['source_scope']=copy.deepcopy(context['source_scope'])
+    if 'research_topic' in context:
+        stable['research_topic']=copy.deepcopy(context['research_topic'])
     dynamic={k:context.get(k,[]) for k in ('extractive_summary','recent_messages')}
-    dynamic['task_intent']=context.get('task_intent','question');dynamic['question']=context['question']
-    if 'withheld_history_ids' in context:dynamic['withheld_history_ids']=context['withheld_history_ids']
+    dynamic['task_intent']=context.get('task_intent','question')
+    dynamic['question']=context['question']
+    if 'withheld_history_ids' in context:
+        dynamic['withheld_history_ids']=context['withheld_history_ids']
     return rules.strip()+'\n<SOURCE_CONTEXT>\n'+canonical(stable)+'\n</SOURCE_CONTEXT>\nDATA\n'+canonical(dynamic)
 
 def prefix_parts(prompt):
@@ -125,13 +131,16 @@ def decode_research_prompt(prompt):
     if '<SOURCE_CONTEXT>\n' in prompt:
         stable=json.loads(prompt.split('<SOURCE_CONTEXT>\n',1)[1].split('\n</SOURCE_CONTEXT>',1)[0])
         data.update({k:stable[k] for k in ('evidence','confirmed_memory')})
-        if 'source_scope' in stable:data['source_scope']=stable['source_scope']
-        if 'research_topic' in stable:data['research_topic']=stable['research_topic']
+        if 'source_scope' in stable:
+            data['source_scope']=stable['source_scope']
+        if 'research_topic' in stable:
+            data['research_topic']=stable['research_topic']
     return data
 
 
 def model_binding(model,prompt,schema,allow_session=False):
-    value=copy.deepcopy(model);parts=prefix_parts(prompt)
+    value=copy.deepcopy(model)
+    parts=prefix_parts(prompt)
     if parts:
         value['prompt_cache_layout']=REVISION
         value['prompt_cache_scope']=sha(canonical([REVISION,sha(parts[0]),schema]))

@@ -198,7 +198,8 @@ class AccountingProductController:
                         'model_label':model[:96],'model_id':model,'availability':'UNAVAILABLE','leaderboard_model_key':None,
                         'settings_profile_key':ref if kind!='LOCAL' else None,'local_model_key':ref if kind=='LOCAL' else None})
                     known.add(ref)
-            except (OSError,ValueError,TypeError,KeyError):pass
+            except (OSError,ValueError,TypeError,KeyError):
+                pass
         currency = str((leaderboard.get("preferences") or {}).get("currency") or "USD").upper()
         if currency == "RMB":
             currency = "CNY"
@@ -294,7 +295,8 @@ class AccountingProductController:
                     diagnostics["unknown"] += 1
                     continue
                 physical = _clean(wrapper.get("physical_call_id") or wrapper.get("call_id") or wrapper.get("physical_index") or wrapper.get("sequence") or pre.get("sequence") or path.stem)
-                if path.parent.name=='logic_calls':physical='logic:'+physical
+                if path.parent.name=='logic_calls':
+                    physical='logic:'+physical
                 run_key = str(path.parents[1].resolve(strict=False))
                 execution_id = receipt.get('execution_id') or wrapper.get('execution_id')
                 identity = ('native', str(execution_id)) if execution_id else (run_key, physical)
@@ -303,7 +305,8 @@ class AccountingProductController:
                 usage = receipt.get("token_usage") or receipt.get("usage") or {}
                 if not isinstance(usage, Mapping):
                     usage = {}
-                if not usage: diagnostics['usage_unknown'] += 1
+                if not usage:
+                    diagnostics['usage_unknown'] += 1
                 output = _integer(usage.get("completion_tokens", usage.get("output_tokens")))
                 reasoning = _integer(usage.get("reasoning_tokens", usage.get("reasoning_token_count")))
                 if reasoning > output:

@@ -10,7 +10,9 @@ from memorive_workflow.node_progress import scope
 def run(runtime,run_id,params):
     from . import identity,slate
     from literature_discovery.connector_framework import sha256_json
-    config=params['config'];directions=effective_directions(config);targets=channel_targets(config,directions)
+    config=params['config']
+    directions=effective_directions(config)
+    targets=channel_targets(config,directions)
     from .acquisition import collect,resolve
     from .query_plan import assess
     from .metadata_v3 import links,date_bounds
@@ -50,7 +52,10 @@ def run(runtime,run_id,params):
         'history_windows_days':[30,90],'frozen_as_of':now()})
     from .recent_interest_adapter import frozen as freeze_interests,ranking as interest_ranking
     interest_snapshot=freeze_interests(runtime,config)
-    facts=[];display={};comparisons=[];suppressed=[]
+    facts=[]
+    display={}
+    comparisons=[]
+    suppressed=[]
     with scope('CANDIDATE_RELATIONS', [r['candidate_id'] for r in resolved['candidate_identity_projections']], 'PROCESSED_ITEMS') as candidate_units:
         for base_candidate in resolved['candidate_identity_projections']:
             # Evaluate each actual manifestation before choosing one row per work.
@@ -61,7 +66,10 @@ def run(runtime,run_id,params):
             variant_options=[]
             for variant_refs in groups.values():
                 candidate=dict(base_candidate)
-                refs=variant_refs;record=max((record_by_id[r] for r in refs),key=lambda r:(bool(r['bibliographic'].get('abstract')),len(r['bibliographic'].get('authors',[])),sha(r)));bib=record['bibliographic'];ids=record['identifiers']
+                refs=variant_refs
+                record=max((record_by_id[r] for r in refs),key=lambda r:(bool(r['bibliographic'].get('abstract')),len(r['bibliographic'].get('authors',[])),sha(r)))
+                bib=record['bibliographic']
+                ids=record['identifiers']
                 matches={key:value for ref in refs for key,value in memberships[ref].items()}
                 evidence=[observations[x]['source_evidence']['normalized_record_sha256'] for x in refs]
                 key=ids.get('doi') or ids.get('arxiv_id') or ids.get('wos_uid') or record['source_record_id']
@@ -81,7 +89,8 @@ def run(runtime,run_id,params):
                     relation=assess(record,direction,seed_map.get(direction['id'],[]),options)
                     relation_assessments[direction['id']]=relation
                     if not relation['supported'] or not relation['publication_eligible']:
-                        suppressed.append({'candidate_id':candidate['candidate_id'],'direction_id':direction['id'],'reason':'RELATION_EVIDENCE_INSUFFICIENT' if not relation['supported'] else 'PUBLICATION_OUTSIDE_EXACT_WINDOW','assessment':relation});continue
+                        suppressed.append({'candidate_id':candidate['candidate_id'],'direction_id':direction['id'],'reason':'RELATION_EVIDENCE_INSUFFICIENT' if not relation['supported'] else 'PUBLICATION_OUTSIDE_EXACT_WINDOW','assessment':relation})
+                        continue
                     item={'candidate_id':candidate['candidate_id'],'work_cluster_id':candidate['work_cluster_id'],
                         'primary_direction_id':direction['id'],'direction_revision':str(direction['revision']),
                         'manifestation_id':manifestation(record)}
@@ -95,10 +104,13 @@ def run(runtime,run_id,params):
                     already_delivered=any(r['direction_id']==direction['id'] and r['manifestation']==manifestation(record) for r in indexed['delivered'])
                     if outcome['eligibility']=='ELIGIBLE' and not indexed['has_fulltext'] and (config['include_seen'] or not already_delivered or restored):
                         eligible.append((match,item,outcome))
-                    else:suppressed.append(dict(outcome,manifestation_id=item['manifestation_id'],already_delivered=already_delivered,has_fulltext=indexed['has_fulltext']))
-                if not eligible:continue
+                    else:
+                        suppressed.append(dict(outcome,manifestation_id=item['manifestation_id'],already_delivered=already_delivered,has_fulltext=indexed['has_fulltext']))
+                if not eligible:
+                    continue
                 eligible.sort(key=lambda row:(min(slate.PRIMARY_CHANNEL_PRIORITY.index(c) for c in row[0]['channels']),row[1]['primary_direction_id']))
-                match,item,outcome=eligible[0];direction=match['direction']
+                match,item,outcome=eligible[0]
+                direction=match['direction']
                 query_evidence=[{'channel':c,'direction_id':d[0]['direction']['id'],'query_sha256':d[0]['query_sha256'],
                     'evidence_ref':evidence[0]} for d in eligible for c in d[0]['channels']]
                 metadata={'source_id':observations[refs[0]]['source_connector'],'source_available':True,
@@ -114,8 +126,10 @@ def run(runtime,run_id,params):
                 metadata['recent_interest']=interest_ranking(interest_snapshot,bib['title'],bib.get('abstract'))
                 pub=bib.get('published_date')
                 if pub:
-                    try:metadata['timeliness']=date_bounds(pub)[0].toordinal()
-                    except ValueError:pass
+                    try:
+                        metadata['timeliness']=date_bounds(pub)[0].toordinal()
+                    except ValueError:
+                        pass
                 fact=slate.seal_object({'candidate_id':candidate['candidate_id'],'work_cluster_id':candidate['work_cluster_id'],
                     'canonical_identity':key,'state_axes':{'identity_status':candidate['identity_status']},
                     'novelty_axes':{'library_new':comparison['library_new'],'first_seen_new':'TRUE'},'metadata_candidate_only':True,
@@ -139,7 +153,8 @@ def run(runtime,run_id,params):
                 variant_options.append((rank,fact,display_row))
             if variant_options:
                 _,fact,row=max(variant_options,key=lambda value:value[0])
-                facts.append(fact);display[fact['candidate_id']]=row
+                facts.append(fact)
+                display[fact['candidate_id']]=row
             candidate_units.complete(base_candidate['candidate_id'])
     runtime._state(run_id,stage='COMPOSING')
     history=runtime.feedback.history([d['id'] for d in directions])

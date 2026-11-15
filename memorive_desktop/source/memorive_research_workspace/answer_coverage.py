@@ -25,7 +25,8 @@ def plan(question,scope_ids):
     rows=list(FACETS) if comparative else [('question','本次问题',question),FACETS[-1]]
     value={'revision':1,'question':question,'scope_ids':scope_ids,'origin':'question_facet_proposal',
            'facets':[{'id':key,'label':label,'query':query,'required':True} for key,label,query in rows]}
-    value['hash']=digest(value);return value
+    value['hash']=digest(value)
+    return value
 
 def constraint_candidate(ref):
     return ref.get('counterevidence_candidate') is True or bool(CONSTRAINT_HINT.search(ref['text']))
@@ -43,20 +44,24 @@ def pack_order(refs,question=None):
         # Query relevance precedes generic negative words and PDF page headers.
         # Preserve one relevant hit and one constraint per document, then fill
         # round-robin. Loaded-but-trimmed ranges remain in the coverage record.
-        terms=set(tokens(question));vocab={r['id']:set(tokens(r['text'])) for r in refs}
+        terms=set(tokens(question))
+        vocab={r['id']:set(tokens(r['text'])) for r in refs}
         frequency=collections.Counter(t for words in vocab.values() for t in words & terms)
         ranked=sorted(refs,key=lambda r:-sum(math.log(1+len(refs)/(1+frequency[t])) for t in vocab[r['id']] & terms))
         groups={}
-        for r in ranked:groups.setdefault(document_key(r),[]).append(r)
+        for r in ranked:
+            groups.setdefault(document_key(r),[]).append(r)
         head=ranked[:1]
         first_key=document_key(head[0]) if head else None
         constraint=next((r for r in ranked if document_key(r)!=first_key and CONSTRAINT_HINT.search(r['text'])),None)
-        if constraint is not None:head.append(constraint)
+        if constraint is not None:
+            head.append(constraint)
         represented={document_key(r) for r in head}
         head += [rows[0] for key,rows in groups.items() if key not in represented]
         for rows in groups.values():
             constraint=next((r for r in rows if CONSTRAINT_HINT.search(r['text'])),None)
-            if constraint is not None:head.append(constraint)
+            if constraint is not None:
+                head.append(constraint)
         # Several lexical hits can come from the same introductory page.
         # After protecting relevant/constraint heads, admit other observed
         # pages before those repeats. This is a coverage heuristic, not a
@@ -65,39 +70,56 @@ def pack_order(refs,question=None):
             return ('page',r['page']) if r.get('page') is not None else ('chunk',r['id'])
         used_ids={r['id'] for r in head}
         used_pages={(document_key(r),location(r)) for r in head}
-        page_groups=[];repeat_groups=[]
+        page_groups=[]
+        repeat_groups=[]
         for key,rows in groups.items():
-            pages=[];repeats=[]
+            pages=[]
+            repeats=[]
             for r in rows:
-                if r['id'] in used_ids:continue
+                if r['id'] in used_ids:
+                    continue
                 place=(key,location(r))
-                if place in used_pages:repeats.append(r)
-                else:pages.append(r);used_pages.add(place)
-            page_groups.append(pages);repeat_groups.append(repeats)
+                if place in used_pages:
+                    repeats.append(r)
+                else:
+                    pages.append(r)
+                    used_pages.add(place)
+            page_groups.append(pages)
+            repeat_groups.append(repeats)
         def round_robin(rows):
             return [group[i] for i in range(max((len(g) for g in rows),default=0)) for group in rows if i<len(group)]
         tail=round_robin(page_groups)+round_robin(repeat_groups)
-        seen=set();out=[]
+        seen=set()
+        out=[]
         for r in head+tail:
-            if r['id'] not in seen:out.append(r);seen.add(r['id'])
+            if r['id'] not in seen:
+                out.append(r)
+                seen.add(r['id'])
         return out
     preferred=[r for r in refs if constraint_candidate(r)]
     first={}
-    for r in preferred+refs:first.setdefault(document_key(r),r)
-    out=[];seen=set()
+    for r in preferred+refs:
+        first.setdefault(document_key(r),r)
+    out=[]
+    seen=set()
     for r in list(first.values())+preferred+refs:
-        if r['id'] not in seen:out.append(r);seen.add(r['id'])
+        if r['id'] not in seen:
+            out.append(r)
+            seen.add(r['id'])
     return out
 
 def local_candidates(index,scope_ids,initial,coverage_plan):
     """One bounded local pass per facet, strictly in the selected materials."""
-    if not scope_ids:return list(initial)
-    refs=list(initial);seen={r['id'] for r in refs}
+    if not scope_ids:
+        return list(initial)
+    refs=list(initial)
+    seen={r['id'] for r in refs}
     for f in coverage_plan['facets']:
         result=index.legacy_lexical_search(f['query'],coverage_plan['project'],limit=6,artifact_ids=scope_ids)
         for r in result['results']:
             if r['id'] not in seen and len(refs)<36:
-                refs.append(dict(r,selection='selected_scope_facet',facet_hint=f['id']));seen.add(r['id'])
+                refs.append(dict(r,selection='selected_scope_facet',facet_hint=f['id']))
+                seen.add(r['id'])
     return refs
 
 def _facet_matches(facets,refs):
@@ -105,15 +127,19 @@ def _facet_matches(facets,refs):
     vocab={f['id']:set(tokens(f['query'])) for f in facets}
     by_id={}
     for r in refs:
-        if not r.get('text','').strip():continue
+        if not r.get('text','').strip():
+            continue
         h=hashlib.sha256(r['text'].replace('\r\n','\n').replace('\r','\n').encode()).hexdigest()
         pointer=ArtifactPointer('art_'+digest([r['id'],h])[:32],h,'chunk','memo_answer_snapshot',True,False)
         member=ChunkSnapshot.from_content(chunk_ref=pointer,chunk_id=r['id'],paper_id=r.get('document_id',r['artifact_id']),
             content=r['text'],section_path=None,block_type=None,page_start=r.get('page'),page_end=r.get('page'),sequence_index=0)
         matches=derive_facet_coverage_inputs(specs,[member],token_pattern=r'[A-Za-z0-9_]+|[\u3400-\u9fff]{2,}',minimum_token_length=2,uncovered_status='not_assessed')
-        strict={m.facet_id:m for m in matches};candidate_tokens=set(tokens(r['text']));by_id[r['id']]={}
+        strict={m.facet_id:m for m in matches}
+        candidate_tokens=set(tokens(r['text']))
+        by_id[r['id']]={}
         for f in facets:
-            exact=strict.get(f['id']);siblings=set().union(*(v for k,v in vocab.items() if k!=f['id']))
+            exact=strict.get(f['id'])
+            siblings=set().union(*(v for k,v in vocab.items() if k!=f['id']))
             lexical=sorted((vocab[f['id']]-siblings)&candidate_tokens)
             # Generic retrieval hints do not satisfy the strict span predicate.
             # Keep them visibly as candidates, never promote them to covered.
@@ -125,18 +151,22 @@ def snapshot(store,coverage_plan,retrieved,read,retained,*,recorded=True):
     scope_ids=coverage_plan.get('scope_ids')
     source_ids=list(dict.fromkeys(scope_ids if scope_ids is not None else [r['artifact_id'] for r in read]))
     sets={name:{r['artifact_id'] for r in refs} for name,refs in [('retrieved',retrieved),('read',read),('retained',retained)]}
-    retained_ids={r['id'] for r in retained};sources=[]
+    retained_ids={r['id'] for r in retained}
+    sources=[]
     for aid in source_ids:
-        a=store.get('artifact',aid) or {};state=a.get('state','unavailable')
+        a=store.get('artifact',aid) or {}
+        state=a.get('state','unavailable')
         s={'id':aid,'title':a.get('title',aid),'state':state,'source_kind':a.get('kind','unknown'),
            'content_hash':a.get('content_hash'),'document_id':(a.get('source_binding') or {}).get('document_id',a.get('document_id',aid)),
            'material_layer':material_layer(a),'source_content_hash':source_document_hash(a),
            'acquired':'yes' if state=='active' else 'failed' if state=='error' else 'unavailable',
            'parsed':'yes' if state=='active' and a.get('chunks',0)>0 else 'failed' if state=='error' else 'unknown',
            'read_ranges':[{'id':r['id'],'page':r.get('page'),'line_start':r.get('line_start'),'line_end':r.get('line_end'),'content_hash':r['content_hash']} for r in read if r['artifact_id']==aid]}
-        for key in sets:s[key]=('yes' if aid in sets[key] else 'no') if recorded else 'unknown'
+        for key in sets:
+            s[key]=('yes' if aid in sets[key] else 'no') if recorded else 'unknown'
         unavailable=next((r for r in coverage_plan.get('unavailable_sources',[]) if r['artifact_id']==aid),None)
-        if unavailable:s.update(unavailable_reason=unavailable['reason'],freshness_notice='该知识的来源版本当前不可用；保留既有审核状态，等待核对。')
+        if unavailable:
+            s.update(unavailable_reason=unavailable['reason'],freshness_notice='该知识的来源版本当前不可用；保留既有审核状态，等待核对。')
         if not recorded:
             s.update(acquired='unknown',parsed='unknown',read_ranges=[])
         sources.append(s)
@@ -149,8 +179,10 @@ def snapshot(store,coverage_plan,retrieved,read,retained,*,recorded=True):
             kept=[i for i in matched if i in retained_ids]
             status='partial' if kept else 'missing' if matched else 'not_assessed'
             notice='候选线索已保留；相关性与内容是否足够仍需核查' if kept else '候选线索被裁剪，当前回答仍有缺口' if matched else '已读范围未定位到此方面，不能判为原文未报告'
-            if not recorded:notice='旧回答没有记录该处理阶段'
-            elif s.get('unavailable_reason'):notice=s['freshness_notice']
+            if not recorded:
+                notice='旧回答没有记录该处理阶段'
+            elif s.get('unavailable_reason'):
+                notice=s['freshness_notice']
             cells.append({'source_id':s['id'],'title':s['title'],'status':status,'notice':notice,'matched_ids':matched,'retained_ids':kept,
                 'candidate_basis':{i:matches[i][f['id']] for i in matched},'semantic_relevance':'not_assessed'})
         facets.append({'id':f['id'],'label':f['label'],'query':f['query'],'required':f['required'],'sources':cells,
@@ -160,11 +192,16 @@ def snapshot(store,coverage_plan,retrieved,read,retained,*,recorded=True):
     groups=[]
     for s in sources:
         keys={('document',s['document_id'])}
-        if s['source_content_hash']:keys.add(('source',s['source_content_hash']))
-        if s['content_hash']:keys.add(('content',s['content_hash']))
+        if s['source_content_hash']:
+            keys.add(('source',s['source_content_hash']))
+        if s['content_hash']:
+            keys.add(('content',s['content_hash']))
         overlapping=[g for g in groups if g['keys']&keys]
         merged={'keys':set(keys),'ids':[s['id']]}
-        for g in overlapping:merged['keys'].update(g['keys']);merged['ids']+=g['ids'];groups.remove(g)
+        for g in overlapping:
+            merged['keys'].update(g['keys'])
+            merged['ids']+=g['ids']
+            groups.remove(g)
         groups.append(merged)
     duplicate_groups=[sorted(g['ids']) for g in groups if len(g['ids'])>1]
     value={'schema_version':'MemoAnswerCoverage-v1','scope_ids':scope_ids,'explicit_scope':scope_ids is not None and bool(scope_ids),'plan':coverage_plan,
@@ -176,4 +213,5 @@ def snapshot(store,coverage_plan,retrieved,read,retained,*,recorded=True):
         'scientific_sufficiency':'not_assessed','recorded':recorded,
         'constraint_candidate_ids':[r['id'] for r in read if constraint_candidate(r)],
         'retained_constraint_ids':[r['id'] for r in retained if constraint_candidate(r)]}
-    value['hash']=digest(value);return value
+    value['hash']=digest(value)
+    return value

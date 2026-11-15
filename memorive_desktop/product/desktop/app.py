@@ -6451,7 +6451,8 @@ def main() -> int:
                     raise RuntimeError('PRODUCT_PROFILE_BINDING_REQUIRED')
                 local_session_sources=product_profile_root/'session_sources'
                 session_source_roots={'codex_home':local_session_sources/'codex','claude_home':local_session_sources/'claude'}
-                for session_source in session_source_roots.values():session_source.mkdir(parents=True,exist_ok=True)
+                for session_source in session_source_roots.values():
+                    session_source.mkdir(parents=True,exist_ok=True)
             elif session_mode!='REAL_LOCAL':
                 raise RuntimeError('SESSION_SOURCE_MODE_INVALID')
         api = ProductApi(
@@ -6734,8 +6735,10 @@ if __name__ == "__main__":
         from document_processing.engines.isolated_pdf import main as native_pdf_main
         raise SystemExit(native_pdf_main([v for v in sys.argv[1:] if v != '--memo-native-pdf']))
     if '--memo-agent' in sys.argv or ('--workspace' in sys.argv and any(v in sys.argv for v in ('--mcp','--call','--connector-call'))):
-        root=resource_root();configure_resource_imports(root)
-        if not getattr(sys,'frozen',False):configure_resource_imports(root.parents[1])
+        root=resource_root()
+        configure_resource_imports(root)
+        if not getattr(sys,'frozen',False):
+            configure_resource_imports(root.parents[1])
         from integrated_agent import main as agent_main
         raise SystemExit(agent_main())
     if SERVICE_MODE_ARG in sys.argv:

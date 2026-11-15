@@ -295,14 +295,17 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
         elif total + r["tok"] > hard:                      # 硬顶已紧,该反例放不下 → underfill(试下一个更小的)
             ce_token_dropped.append(r["c"].chunk_id)
         else:
-            selected.append(r); total += r["tok"]; ce_filled += 1
+            selected.append(r)
+            total += r["tok"]
+            ce_filled += 1
     for r in main_pool:                                    # 3b 再放主流(紧时先砍主流、绝不挤已选反例)
         if r["tok"] > hard:
             single_over.append(r["c"].chunk_id)
         elif total + r["tok"] > hard:
             main_truncated.append(r["c"].chunk_id)
         else:
-            selected.append(r); total += r["tok"]
+            selected.append(r)
+            total += r["tok"]
 
     # 4. 产物:按 weight 排序输出(反例已在 selected 中受保护)。
     blocks = tuple(_ownership_block(row) for row in sorted(selected, key=_key))

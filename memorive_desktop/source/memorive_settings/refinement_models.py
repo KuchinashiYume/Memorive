@@ -5,7 +5,8 @@ from typing import Any, Mapping
 from .model_capabilities import infer_api_model_capability
 
 def _text(value: Any, limit: int = 320) -> str:
-    if value is None: return ""
+    if value is None:
+        return ""
     rendered = " ".join(str(value).replace("\x00", " ").split())
     return rendered if len(rendered) <= limit else rendered[:max(1,limit-1)].rstrip()+"…"
 

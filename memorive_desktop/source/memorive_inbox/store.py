@@ -200,8 +200,10 @@ class InboxStore:
             self._event(connection, event_type, item_id, record)
             connection.commit()
         if self.change_listener:
-            try:self.change_listener(deepcopy(record))
-            except Exception as exc:self.index_sync_error=type(exc).__name__
+            try:
+                self.change_listener(deepcopy(record))
+            except Exception as exc:
+                self.index_sync_error=type(exc).__name__
         return deepcopy(record)
 
     def enqueue_intent(self, record: Mapping[str, Any]) -> tuple[dict[str, Any], bool]:

@@ -29,7 +29,8 @@ class PaperReview:
         temporary = self.path.with_suffix('.' + uuid.uuid4().hex + '.tmp')
         with temporary.open('x', encoding='utf-8') as stream:
             json.dump(state, stream, ensure_ascii=False, indent=2, sort_keys=True)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, self.path)
 
     def snapshot(self, artifact_id, verify=False):
@@ -59,8 +60,10 @@ class PaperReview:
             row = self._load()['versions'].get(logical + ':' + digest, {})
             valid = True
             if row:
-                try: self.snapshot(artifact_id, verify=True)
-                except (OSError, ValueError): valid = False
+                try:
+                    self.snapshot(artifact_id, verify=True)
+                except (OSError, ValueError):
+                    valid = False
             opened = valid and complete and required.issubset(set(row.get('opened_files',{})))
             confirmed = opened and bool(row.get('confirmed_at'))
             return {'review_opened':opened, 'review_confirmed':confirmed,
@@ -73,7 +76,8 @@ class PaperReview:
         # Native caller invokes only after a successful external file open.
         with self.lock:
             logical,digest,manifest,required,complete = self.snapshot(artifact_id, verify=True)
-            state = self._load(); key = logical + ':' + digest
+            state = self._load()
+            key = logical + ':' + digest
             row = state['versions'].setdefault(key, {'artifact_id':logical,'manifest':manifest,'opened_files':{}})
             if artifact_id in manifest['files']:
                 row['opened_files'][artifact_id] = manifest['files'][artifact_id]
@@ -84,7 +88,8 @@ class PaperReview:
     def confirm(self, artifact_id):
         with self.lock:
             logical,digest,manifest,required,complete = self.snapshot(artifact_id, verify=True)
-            state = self._load(); row = state['versions'].get(logical + ':' + digest)
+            state = self._load()
+            row = state['versions'].get(logical + ':' + digest)
             if not complete or not row or not required.issubset(set(row['opened_files'])):
                 raise ValueError('PAPER_REVIEW_OPEN_CURRENT_CARD_AND_ANALYSIS_REQUIRED')
             row.setdefault('confirmed_at', self.library._utc_now())

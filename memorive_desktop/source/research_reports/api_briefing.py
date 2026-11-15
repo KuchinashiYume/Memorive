@@ -408,9 +408,11 @@ def prepare_mapped_briefing(digest,language=None):
             'model_may_make_scientific_judgment': False, 'details_remain_deterministic': True},
     }
     from memorive_language import validate
-    if language is not None:contract['language_context']=validate(language)
+    if language is not None:
+        contract['language_context']=validate(language)
     prompt=_render_prompt(value['digest_kind'], contract, schema)
-    if language is not None:prompt+='\nFollow language_context.instruction for narrative prose. Section_title values are fixed schema labels; keep them unchanged.'
+    if language is not None:
+        prompt+='\nFollow language_context.instruction for narrative prose. Section_title values are fixed schema labels; keep them unchanged.'
     return prompt, schema
 
 

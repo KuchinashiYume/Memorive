@@ -7,9 +7,11 @@ ROOT=Path(getattr(sys,'_MEIPASS',Path(__file__).resolve().parent))
 def load():
     binding=json.loads((ROOT/'release_identity_binding.json').read_text(encoding='utf-8'))
     raw=(ROOT/'brand_profile.json').read_bytes()
-    if hashlib.sha256(raw).hexdigest()!=binding['profile_sha256']:raise ValueError('BRAND_PROFILE_HASH_MISMATCH')
+    if hashlib.sha256(raw).hexdigest()!=binding['profile_sha256']:
+        raise ValueError('BRAND_PROFILE_HASH_MISMATCH')
     profile=json.loads(raw)
-    if profile['document_id']!=binding['profile_document_id'] or profile['revision']!=binding['profile_revision']:raise ValueError('BRAND_PROFILE_IDENTITY_MISMATCH')
+    if profile['document_id']!=binding['profile_document_id'] or profile['revision']!=binding['profile_revision']:
+        raise ValueError('BRAND_PROFILE_IDENTITY_MISMATCH')
     return profile['product'],binding
 
 PRODUCT,BINDING=load()
@@ -21,7 +23,8 @@ PRIVATE_PROFILE_SCHEMA=1
 
 
 def _atomic_json(path,payload):
-    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
+    path=Path(path)
+    path.parent.mkdir(parents=True,exist_ok=True)
     temporary=path.with_suffix(path.suffix+'.next')
     if temporary.exists():
         raise FileExistsError('PRIVATE_TEST_PROFILE_MANIFEST_TEMP_COLLISION')
@@ -47,8 +50,10 @@ def _read_private_profile_identity(state_root,expected_package=None):
     }
     if not required.issubset(value) or value.get('channel')!='PRIVATE_TEST':
         raise ValueError('PRIVATE_TEST_PROFILE_IDENTITY_INVALID')
-    try:uuid.UUID(str(value['profile_instance_id']))
-    except (ValueError,AttributeError) as error:raise ValueError('PRIVATE_TEST_PROFILE_INSTANCE_ID_INVALID') from error
+    try:
+        uuid.UUID(str(value['profile_instance_id']))
+    except (ValueError,AttributeError) as error:
+        raise ValueError('PRIVATE_TEST_PROFILE_INSTANCE_ID_INVALID') from error
     schema=value.get('data_schema_version')
     if not isinstance(schema,int) or isinstance(schema,bool) or schema<1:
         raise ValueError('PRIVATE_TEST_PROFILE_SCHEMA_INVALID')
@@ -65,7 +70,8 @@ def _read_private_profile_identity(state_root,expected_package=None):
 
 def _private_profile_tree_safe(root):
     root=_owned_path(root)
-    if not root.is_dir():raise NotADirectoryError(root)
+    if not root.is_dir():
+        raise NotADirectoryError(root)
     reparse_mask=0x400
     for path in (root,*root.rglob('*')):
         info=path.lstat()
@@ -80,7 +86,8 @@ def select_private_test_state(data_root,package_id,*,migrate_from=None,reset_cur
     state or clearing the current one requires an explicit launch option and
     creates a complete backup before the target is changed.
     """
-    data_root=_owned_path(data_root);package_id=_private_profile_package_id(package_id)
+    data_root=_owned_path(data_root)
+    package_id=_private_profile_package_id(package_id)
     profiles=_owned_path(data_root/'state'/'private-profiles')
     profiles.mkdir(parents=True,exist_ok=True)
     target=_owned_path(profiles/package_id)
@@ -90,8 +97,10 @@ def select_private_test_state(data_root,package_id,*,migrate_from=None,reset_cur
     prior_identity=None
     if migrate_from is not None:
         source_package=_private_profile_package_id(migrate_from)
-        if source_package==package_id:raise ValueError('PRIVATE_TEST_PROFILE_MIGRATION_SELF_FORBIDDEN')
-        if target.exists():raise FileExistsError('PRIVATE_TEST_PROFILE_MIGRATION_TARGET_EXISTS')
+        if source_package==package_id:
+            raise ValueError('PRIVATE_TEST_PROFILE_MIGRATION_SELF_FORBIDDEN')
+        if target.exists():
+            raise FileExistsError('PRIVATE_TEST_PROFILE_MIGRATION_TARGET_EXISTS')
         source=_owned_path(profiles/source_package)
         prior_identity=_read_private_profile_identity(source,source_package)
         _private_profile_tree_safe(source)
@@ -180,10 +189,13 @@ def _same_path(value,path):
 
 def _webview_owner_present(webview,data):
     marker=webview/'data-owner.json'
-    if not webview.exists():return False
-    if not webview.is_dir():raise ValueError('INSTALL_PROFILE_WEBVIEW_DIRECTORY_REQUIRED')
+    if not webview.exists():
+        return False
+    if not webview.is_dir():
+        raise ValueError('INSTALL_PROFILE_WEBVIEW_DIRECTORY_REQUIRED')
     if not marker.exists():
-        if any(webview.iterdir()):raise ValueError('INSTALL_PROFILE_WEBVIEW_UNOWNED_CONTENT')
+        if any(webview.iterdir()):
+            raise ValueError('INSTALL_PROFILE_WEBVIEW_UNOWNED_CONTENT')
         return False
     owner=_binding_json(marker)
     if (owner.get('owner')!=INSTALL_OWNER or owner.get('role')!='WEBVIEW2_PROFILE'
@@ -194,16 +206,19 @@ def _webview_owner_present(webview,data):
 def _restore_webview_cache_owner(webview,data):
     # private_mode removes browser storage on normal exit. Ownership remains
     # bound by the durable installation records, verified before this call.
-    if _webview_owner_present(webview,data):return
+    if _webview_owner_present(webview,data):
+        return
     webview.mkdir(parents=True,exist_ok=True)
     _owned_path(webview)
-    if _webview_owner_present(webview,data):return
+    if _webview_owner_present(webview,data):
+        return
     marker=webview/'data-owner.json'
     try:
         with marker.open('x',encoding='utf-8') as stream:
             json.dump({'owner':INSTALL_OWNER,'data_root':str(data),'role':'WEBVIEW2_PROFILE'},stream,ensure_ascii=False)
     except FileExistsError:
-        if not _webview_owner_present(webview,data):raise ValueError('INSTALL_PROFILE_WEBVIEW_OWNER_MISMATCH')
+        if not _webview_owner_present(webview,data):
+            raise ValueError('INSTALL_PROFILE_WEBVIEW_OWNER_MISMATCH')
 
 def installed_environment(executable,environ):
     """Consume the existing installer ownership contract, also on direct launch."""
@@ -211,7 +226,8 @@ def installed_environment(executable,environ):
     if original.parent.name.lower()!='app' or original.parent.parent.parent.name.lower()!='versions':
         return None
     exe=_owned_path(original)
-    version=exe.parent.parent;program=version.parent.parent
+    version=exe.parent.parent
+    program=version.parent.parent
     owner=_binding_json(program/'install-owner.json')
     current=_binding_json(program/'current.json')
     state=_binding_json(version/'version-state.json')
@@ -252,7 +268,8 @@ def installed_environment(executable,environ):
     members=[row for row in manifest['members'] if isinstance(row,dict) and row.get('path')=='app/'+exe.name]
     if len(members)!=1 or not exe.is_file() or members[0].get('size')!=exe.stat().st_size:
         raise ValueError('INSTALL_PROFILE_EXECUTABLE_BINDING_MISMATCH')
-    with exe.open('rb') as stream:digest=hashlib.file_digest(stream,'sha256').hexdigest()
+    with exe.open('rb') as stream:
+        digest=hashlib.file_digest(stream,'sha256').hexdigest()
     if str(members[0].get('sha256','')).lower()!=digest:
         raise ValueError('INSTALL_PROFILE_EXECUTABLE_HASH_MISMATCH')
     private_hash=BINDING.get('private_test_capsule_sha256')
@@ -274,7 +291,8 @@ def installed_environment(executable,environ):
         'APPDATA':'appdata','LOCALAPPDATA':'localappdata','TEMP':'temp','TMP':'temp',
         'MEMORIVE_WORKSPACE_ROOT':'workspace'}.items()}
     _restore_webview_cache_owner(webview,data)
-    for path in paths.values():path.mkdir(parents=True,exist_ok=True)
+    for path in paths.values():
+        path.mkdir(parents=True,exist_ok=True)
     _clear_inherited_runtime_paths(environ)
     environ.update({name:str(path) for name,path in paths.items()})
     environ['MEMORIVE_WEBVIEW2_STORAGE_PATH']=str(webview)
@@ -304,9 +322,12 @@ def sandbox_environment(executable,environ,profile_namespace=None):
     original_temp=Path(environ.get('TEMP') or environ.get('TMP') or str(base/'temp'))
     for name,child in {'APPDATA':'appdata','LOCALAPPDATA':'localappdata','TEMP':'temp','TMP':'temp',
         'MEMORIVE_WORKSPACE_ROOT':'workspace'}.items():
-        path=base/child;path.mkdir(parents=True,exist_ok=True);environ[name]=str(path)
+        path=base/child
+        path.mkdir(parents=True,exist_ok=True)
+        environ[name]=str(path)
     # The existing executor derives these from the isolated profile and validates them.
     _clear_inherited_runtime_paths(environ)
     short=original_temp/('memorive-wv-'+hashlib.sha256(str(base).encode()).hexdigest()[:10])
-    short.mkdir(parents=True,exist_ok=True);environ['MEMORIVE_WEBVIEW2_STORAGE_PATH']=str(short)
+    short.mkdir(parents=True,exist_ok=True)
+    environ['MEMORIVE_WEBVIEW2_STORAGE_PATH']=str(short)
     return base

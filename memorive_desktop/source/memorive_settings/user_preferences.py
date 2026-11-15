@@ -27,16 +27,22 @@ def normalize_avatar(value):
         width,height=struct.unpack('>II',data[16:24])
         if not (1<=width<=256 and 1<=height<=256):
             raise ValueError('USER_AVATAR_DIMENSIONS_INVALID')
-        pos=8;ended=False
+        pos=8
+        ended=False
         while pos+12<=len(data):
-            length=struct.unpack('>I',data[pos:pos+4])[0];end=pos+12+length
-            if end>len(data):raise ValueError('USER_AVATAR_FORMAT_INVALID')
+            length=struct.unpack('>I',data[pos:pos+4])[0]
+            end=pos+12+length
+            if end>len(data):
+                raise ValueError('USER_AVATAR_FORMAT_INVALID')
             kind=data[pos+4:pos+8]
             if kind==b'acTL' or zlib.crc32(data[pos+4:end-4])!=struct.unpack('>I',data[end-4:end])[0]:
                 raise ValueError('USER_AVATAR_FORMAT_INVALID')
             pos=end
-            if kind==b'IEND':ended=True;break
-        if not ended or pos!=len(data):raise ValueError('USER_AVATAR_FORMAT_INVALID')
+            if kind==b'IEND':
+                ended=True
+                break
+        if not ended or pos!=len(data):
+            raise ValueError('USER_AVATAR_FORMAT_INVALID')
         # Reuse the Windows image decoder already shipped with the desktop.
         import clr
         clr.AddReference('System.Drawing')
@@ -44,18 +50,21 @@ def normalize_avatar(value):
         from System.IO import MemoryStream
         from System.Drawing import Image, Bitmap, Graphics, Color
         from System.Drawing.Imaging import ImageFormat, PixelFormat
-        source=MemoryStream(Array[Byte](data));output=MemoryStream()
+        source=MemoryStream(Array[Byte](data))
+        output=MemoryStream()
         image=clean=graphics=None
         try:
             image=Image.FromStream(source,False,True)
             clean=Bitmap(width,height,PixelFormat.Format32bppArgb)
-            graphics=Graphics.FromImage(clean);graphics.Clear(Color.Transparent)
+            graphics=Graphics.FromImage(clean)
+            graphics.Clear(Color.Transparent)
             graphics.DrawImageUnscaled(image,0,0)
             clean.Save(output,ImageFormat.Png)
             return base64.b64encode(bytes(output.ToArray())).decode('ascii')
         finally:
             for resource in (graphics,clean,image,output,source):
-                if resource is not None:resource.Dispose()
+                if resource is not None:
+                    resource.Dispose()
     except ValueError:
         raise
     except Exception as exc:
@@ -88,8 +97,10 @@ class UserPreferences:
                     raise ValueError('USER_PREFERENCES_FIELDS_INVALID')
                 value=sealed(dict(schema_version='LocalUserPreferences-v2',revision=value['revision'],
                     config={**value['config'],'answer_style':DEFAULT_STYLE}))
-            elif value.get('schema_version')!='LocalUserPreferences-v2':raise ValueError('USER_PREFERENCES_SCHEMA_UNSUPPORTED')
-            if type(value.get('revision')) is not int or value['revision']<0:raise ValueError('USER_PREFERENCES_REVISION_INVALID')
+            elif value.get('schema_version')!='LocalUserPreferences-v2':
+                raise ValueError('USER_PREFERENCES_SCHEMA_UNSUPPORTED')
+            if type(value.get('revision')) is not int or value['revision']<0:
+                raise ValueError('USER_PREFERENCES_REVISION_INVALID')
             validate(value['config'])
             return value
 

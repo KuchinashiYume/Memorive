@@ -168,7 +168,8 @@ class SessionRefinementTaskStore:
         language_context: dict | None = None,
     ) -> dict[str, Any]:
         from memorive_language import validate
-        if language_context is not None:language_context=validate(language_context)
+        if language_context is not None:
+            language_context=validate(language_context)
         accepted_name = _safe_text(display_name, 160)
         projection_id = _safe_text(local_projection_id, 192)
         profile_ref = _safe_text(selected_profile_ref, 192)

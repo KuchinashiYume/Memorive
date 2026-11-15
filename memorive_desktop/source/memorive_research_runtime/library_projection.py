@@ -4,7 +4,8 @@ from .common import read, sealed, write, sha
 def current_row(row):
     row=dict(row)
     if row.get('kind') in {'文献发现','外部文献'}:
-        row['kind']='外部文献';row['mode']='memorive'
+        row['kind']='外部文献'
+        row['mode']='memorive'
         from memorive_language.text import choose
         prefix=choose(row.get('language_context'),'外部文献','External literature','外部文献')+'·'
         if not row['display_name'].startswith(prefix):
@@ -31,7 +32,8 @@ def publish(root, run_id, kind, title, result, created_at):
         'product_kind': 'AI_BRIEFING' if kind=='ai_briefing' else 'RESEARCH_RESULT', 'report_period': result.get('period'),
         'canonical_registry_row_included': False,
     }
-    if result.get('language_context') is not None:row['language_context']=result['language_context']
+    if result.get('language_context') is not None:
+        row['language_context']=result['language_context']
     row=current_row(row)
     path = root / 'runs' / run_id / 'library.json'
     if path.exists():

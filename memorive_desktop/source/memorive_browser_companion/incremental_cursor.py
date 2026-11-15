@@ -79,7 +79,8 @@ def build_incremental_cursor(
     """
 
     order = tuple(PROVIDER_ORDER if providers is None else providers)
-    if not order or len(order)>3 or len(set(order))!=len(order): return None
+    if not order or len(order)>3 or len(set(order))!=len(order):
+        return None
     if any(not re.fullmatch(r'(?:deepseek|gemini|kimi|web-[a-f0-9]{16})',x) for x in order):
         raise IncrementalCursorError('INCREMENTAL_CURSOR_PROVIDER_SCOPE_INVALID')
     providers: dict[str, dict[str, Any]] = {}

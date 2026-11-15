@@ -32,7 +32,8 @@ def bind_saved_cli_identity(service, executable, *, process, environment, root):
         import os
         with (root / (identity + '.' + phase + '.json')).open('x', encoding='utf8') as f:
             json.dump(value, f, ensure_ascii=False, sort_keys=True)
-            f.flush(); os.fsync(f.fileno())
+            f.flush()
+            os.fsync(f.fileno())
     write('pre', pre)
     workspace = root / identity
     workspace.mkdir(exist_ok=False)

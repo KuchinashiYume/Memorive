@@ -698,12 +698,14 @@ class CorePipelineExecutor:
                 folder = self._paper_folder(paper_id)
                 assert folder is not None
                 if DATA_NODE in node_ids:
-                    if self.review_service is None:raise RuntimeError('REVIEW_SERVICE_REQUIRED')
+                    if self.review_service is None:
+                        raise RuntimeError('REVIEW_SERVICE_REQUIRED')
                     self.review_service.prepare_raw(context,self._one(folder,'[RawMD]','.md'))
                     if DATA_NODE not in completed:
                         start(DATA_NODE)
                         effective=context.workflow_config['nodes'][DATA_NODE].copy()
-                        if self.task_control_store:effective.update(self.task_control_store.overrides(context.job_id).get(DATA_NODE,{}))
+                        if self.task_control_store:
+                            effective.update(self.task_control_store.overrides(context.job_id).get(DATA_NODE,{}))
                         self.review_service.data(context,enabled=effective.get('enabled',True))
                         mark(DATA_NODE)
                     elif self.review_service.store.get(context.job_id)['data_state']=='WAITING_INPUT':
@@ -784,7 +786,8 @@ class CorePipelineExecutor:
                         )
                     card_path = Path(result.card_path)
                     seed = stage_root / "03_card_seed.md"
-                    if not seed.exists(): shutil.copy2(card_path, seed)
+                    if not seed.exists():
+                        shutil.copy2(card_path, seed)
                     _atomic_json(stage_root / "03_card_seed_binding.json", {
                         "sha256": _sha256_file(seed), "source_sha256": context.source_sha256,
                         "node_id": "03_CARD_DISTILL", "job_id": context.job_id})
@@ -799,7 +802,8 @@ class CorePipelineExecutor:
                     # Keep the original Card basename for the core readers.
                     if seed.is_file():
                         named_seed = stage_root / card_path.name
-                        if not named_seed.exists(): shutil.copy2(seed, named_seed)
+                        if not named_seed.exists():
+                            shutil.copy2(seed, named_seed)
                         review_input = named_seed
                     def before_admission():
                         mark("04_CARD_CROSS_CHECK")
@@ -1019,7 +1023,8 @@ class CorePipelineExecutor:
                     except Exception:
                         observation={"status":"OBSERVATION_DELIVERY_FAILED","model_retry_required":False}
                     if observation.get("status")!="DISABLED_BY_USER":
-                        try:_atomic_json(stage_root / "research_interaction_receipt.json",observation)
+                        try:
+                            _atomic_json(stage_root / "research_interaction_receipt.json",observation)
                         except OSError:pass  # Observational persistence is not a model failure.
                 validate_generated_language(
                     source_text=source_text,

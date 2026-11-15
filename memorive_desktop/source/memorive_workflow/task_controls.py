@@ -93,7 +93,8 @@ def _override(value: Mapping[str, Any]) -> dict[str, Any]:
             raise ValueError('TASK_CONTROL_FALLBACK_INCOMPLETE')
         ref, profile = accepted['fallback_profile_ref'], accepted['fallback_profile']
         if ref is None:
-            if profile is not None: raise ValueError('TASK_CONTROL_FALLBACK_INVALID')
+            if profile is not None:
+                raise ValueError('TASK_CONTROL_FALLBACK_INVALID')
         elif (not isinstance(profile, Mapping) or profile.get('profile_ref') != ref):
             raise ValueError('TASK_CONTROL_FALLBACK_INVALID')
         else:
@@ -321,7 +322,8 @@ class TaskControlStore:
                 raise ValueError('TASK_CONTROL_TOPOLOGY_IMMUTABLE')
             existing=db.execute('SELECT started_nodes_json FROM task_controls WHERE job_id=?',(job_id,)).fetchone()
             started=json.loads(existing[0]) if existing else []
-            if started!=list(nodes[:len(started)]):raise ValueError('TASK_CONTROL_TOPOLOGY_PREFIX_CONFLICT')
+            if started!=list(nodes[:len(started)]):
+                raise ValueError('TASK_CONTROL_TOPOLOGY_PREFIX_CONFLICT')
             db.execute('INSERT OR IGNORE INTO task_topologies VALUES(?,?)',(job_id,_json(nodes)))
 
     def mark_started(self, job_id: str, node_id: str, *, pause_callback=None) -> dict[str, Any]:

@@ -16,26 +16,37 @@ class ConsoleExpressionRenderer:
     def _ui(self,fn):
         from System import Action
         form=self.assistant.native
-        done=threading.Event();expired=threading.Event();result={}
+        done=threading.Event()
+        expired=threading.Event()
+        result={}
         def action():
-            if expired.is_set():done.set();return
-            try:result['value']=fn()
-            except Exception as exc:result['error']=exc
-            finally:done.set()
+            if expired.is_set():
+                done.set()
+                return
+            try:
+                result['value']=fn()
+            except Exception as exc:
+                result['error']=exc
+            finally:
+                done.set()
         form.BeginInvoke(Action(action))
         if not done.wait(2.5):
             expired.set()
             raise ValueError('EXPRESSION_UI_TIMEOUT')
-        if 'error' in result:raise result['error']
+        if 'error' in result:
+            raise result['error']
         return result.get('value')
     def _overlay(self):
         value=self.overlays.get(int(self.assistant.native.Handle.ToInt64()))
-        if not value:raise ValueError('EXPRESSION_RENDERER_NOT_READY')
+        if not value:
+            raise ValueError('EXPRESSION_RENDERER_NOT_READY')
         return value
     def begin(self,event,cancel):
-        if cancel.is_set():raise ValueError('EXPRESSION_CANCELLED_BEFORE_RENDER')
+        if cancel.is_set():
+            raise ValueError('EXPRESSION_CANCELLED_BEFORE_RENDER')
         hidden=self.window.evaluate_js("document.documentElement.classList.contains('desktop-hide-expressions')")
-        if hidden:raise ValueError('EXPRESSION_HIDDEN_BY_PREFERENCE')
+        if hidden:
+            raise ValueError('EXPRESSION_HIDDEN_BY_PREFERENCE')
         lease={'event':event,'id':'preview-'+uuid.uuid4().hex,'native':event['target'].startswith('native')}
         try:
             if not lease['native']:
@@ -66,16 +77,20 @@ class ConsoleExpressionRenderer:
                     later(()=>{visual.style.animation='desktop-logo-shake 360ms ease-out';},120);
                   }
                   return true;})()""")
-                if result is not True:raise ValueError('EXPRESSION_PREVIEW_BUSY')
+                if result is not True:
+                    raise ValueError('EXPRESSION_PREVIEW_BUSY')
                 lease['web_created']=True
                 deadline=time.monotonic()+2
                 while time.monotonic()<deadline:
-                    if cancel.is_set():raise ValueError('EXPRESSION_CANCELLED_BEFORE_RENDER')
-                    if self.observe(lease)['visible']:return lease
+                    if cancel.is_set():
+                        raise ValueError('EXPRESSION_CANCELLED_BEFORE_RENDER')
+                    if self.observe(lease)['visible']:
+                        return lease
                     time.sleep(.05)
                 raise ValueError('EXPRESSION_ASSET_DECODE_TIMEOUT')
             prefs=self.api.call('assistant.preference_get',{})['preferences']
-            if not prefs.get('enabled',True):raise ValueError('EXPRESSION_ASSISTANT_DISABLED')
+            if not prefs.get('enabled',True):
+                raise ValueError('EXPRESSION_ASSISTANT_DISABLED')
             runtime=self.assistant.evaluate_js('window.__Desktop_ASSISTANT_RUNTIME__?.inspect()')
             # The native overlay may be ready before the web business bootstrap.
             # Only the timer API is needed here; actual native readiness is
@@ -87,7 +102,8 @@ class ConsoleExpressionRenderer:
             lease['refresh_paused']=True
             def start():
                 state=self._overlay()
-                if not self.assistant.native.Visible:raise ValueError('EXPRESSION_ASSISTANT_NOT_VISIBLE')
+                if not self.assistant.native.Visible:
+                    raise ValueError('EXPRESSION_ASSISTANT_NOT_VISIBLE')
                 if state['animation_locked'] or state['presentation_queue'] or state.get('drag') or state.get('menu_open'):
                     raise ValueError('EXPRESSION_NATIVE_BUSY')
                 keys=('base_frame','animation_state','animation_source','animation_sequence','reduced_motion',
@@ -110,9 +126,12 @@ class ConsoleExpressionRenderer:
             self._ui(start)
             return lease
         except Exception:
-            try:restored=self.end(lease)
-            except Exception:raise ValueError('EXPRESSION_RESTORE_FAILED') from None
-            if not restored:raise ValueError('EXPRESSION_RESTORE_FAILED')
+            try:
+                restored=self.end(lease)
+            except Exception:
+                raise ValueError('EXPRESSION_RESTORE_FAILED') from None
+            if not restored:
+                raise ValueError('EXPRESSION_RESTORE_FAILED')
             raise
     def observe(self,lease):
         if not lease['native']:
@@ -143,12 +162,16 @@ class ConsoleExpressionRenderer:
                 # A real incoming presentation takes precedence; never replay or
                 # overwrite its delivery state while ending a synthetic preview.
                 if state['last_presentation_signature']==lease['before']['last_presentation_signature']:
-                    state['animation_timer'].Stop();state['auto_blink_timer'].Stop()
-                    state.update(lease['before']);state['animation_locked']=False
+                    state['animation_timer'].Stop()
+                    state['auto_blink_timer'].Stop()
+                    state.update(lease['before'])
+                    state['animation_locked']=False
                     state['set_frame'](lease['before']['current_frame'])
-                    if lease['auto_enabled']:state['schedule_auto_blink']()
+                    if lease['auto_enabled']:
+                        state['schedule_auto_blink']()
                 return True
-            try:restored=bool(self._ui(restore)) and restored
+            try:
+                restored=bool(self._ui(restore)) and restored
             finally:
                 if lease.get('refresh_paused'):
                     self.assistant.evaluate_js('window.__Desktop_ASSISTANT_RUNTIME__.setAutoRefreshEnabled('+json.dumps(lease['refresh'])+')')

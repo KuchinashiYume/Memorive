@@ -2476,8 +2476,10 @@ def _cli_argv(
 ) -> tuple[tuple[str, ...], bytes | None]:
     from .windows_cli import native_process_path
     cwd=native_process_path(cwd)
-    if output_schema_path:output_schema_path=native_process_path(output_schema_path)
-    if image_path:image_path=native_process_path(image_path)
+    if output_schema_path:
+        output_schema_path=native_process_path(output_schema_path)
+    if image_path:
+        image_path=native_process_path(image_path)
     if not SAFE_MODEL.fullmatch(model):
         raise ValueError("CLI_MODEL_NAME_INVALID")
     if thinking_mode and not SAFE_THINKING.fullmatch(thinking_mode):

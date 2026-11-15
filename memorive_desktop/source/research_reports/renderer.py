@@ -80,7 +80,8 @@ _TEMPLATE_CONTRACTS = {
 
 
 def _plain(value: object, field: str) -> str:
-    if field in HEADING_FIELDS:value=tr(str(value))
+    if field in HEADING_FIELDS:
+        value=tr(str(value))
     text = require_safe_text(str(value), field, allow_empty=True)
     hit = forbidden_phrase(text)
     if hit:

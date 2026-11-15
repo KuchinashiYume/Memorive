@@ -28,11 +28,13 @@ MODES={
 _MODE_VERSIONS={'MemoAnswerStyle-v1':_MODES_V1,'MemoAnswerStyle-v2':_MODES_V2,MODE_VERSION:MODES}
 
 def _modes(version):
-    if not isinstance(version,str) or version not in _MODE_VERSIONS:raise ValueError('ANSWER_STYLE_VERSION_INVALID')
+    if not isinstance(version,str) or version not in _MODE_VERSIONS:
+        raise ValueError('ANSWER_STYLE_VERSION_INVALID')
     return _MODE_VERSIONS[version]
 
 def validate_style(style):
-    if not isinstance(style,str) or style not in MODES:raise ValueError('ANSWER_STYLE_INVALID')
+    if not isinstance(style,str) or style not in MODES:
+        raise ValueError('ANSWER_STYLE_INVALID')
     return style
 
 def instructions(style,*,override=False,mode_version=MODE_VERSION):
@@ -42,16 +44,20 @@ def instructions(style,*,override=False,mode_version=MODE_VERSION):
 
 def effective_override(value):
     source=value.get('source','SAVED_DEFAULT')
-    if source not in {'SAVED_DEFAULT','RETRY_ORIGINAL','RETRY_SELECTION'}:raise ValueError('ANSWER_STYLE_SOURCE_INVALID')
+    if source not in {'SAVED_DEFAULT','RETRY_ORIGINAL','RETRY_SELECTION'}:
+        raise ValueError('ANSWER_STYLE_SOURCE_INVALID')
     override=value.get('overrides_question_style',source=='RETRY_SELECTION')
-    if type(override) is not bool:raise ValueError('ANSWER_STYLE_PRIORITY_INVALID')
-    if (source=='SAVED_DEFAULT' and override) or (source=='RETRY_SELECTION' and not override):raise ValueError('ANSWER_STYLE_PRIORITY_INVALID')
+    if type(override) is not bool:
+        raise ValueError('ANSWER_STYLE_PRIORITY_INVALID')
+    if (source=='SAVED_DEFAULT' and override) or (source=='RETRY_SELECTION' and not override):
+        raise ValueError('ANSWER_STYLE_PRIORITY_INVALID')
     return override
 
 def snapshot(style=DEFAULT_STYLE,*,preference_revision=0,source='SAVED_DEFAULT',overrides_question_style=None,mode_version=MODE_VERSION):
     validate_style(style)
     value={'source':source}
-    if overrides_question_style is not None:value['overrides_question_style']=overrides_question_style
+    if overrides_question_style is not None:
+        value['overrides_question_style']=overrides_question_style
     override=effective_override(value)
     text=instructions(style,override=override,mode_version=mode_version)
     return dict(style_id=style,label=MODES[style][0],common_version=COMMON_VERSION,mode_version=mode_version,
@@ -59,12 +65,15 @@ def snapshot(style=DEFAULT_STYLE,*,preference_revision=0,source='SAVED_DEFAULT',
                 overrides_question_style=override,instruction_sha256=hashlib.sha256(text.encode()).hexdigest())
 
 def from_snapshot(value):
-    if not isinstance(value,dict):raise ValueError('ANSWER_STYLE_SNAPSHOT_INVALID')
+    if not isinstance(value,dict):
+        raise ValueError('ANSWER_STYLE_SNAPSHOT_INVALID')
     override=effective_override(value)
     expected=snapshot(value.get('style_id'),preference_revision=value.get('preference_revision',0),source=value.get('source','SAVED_DEFAULT'),overrides_question_style=override,mode_version=value.get('mode_version'))
     # Existing queued snapshots retain their original instruction identity.
     # Only new retries inherit corrected priority; history is never rewritten.
     if 'priority_version' not in value and 'overrides_question_style' not in value:
-        expected.pop('priority_version');expected.pop('overrides_question_style')
-    if value!=expected:raise ValueError('ANSWER_STYLE_SNAPSHOT_INVALID')
+        expected.pop('priority_version')
+        expected.pop('overrides_question_style')
+    if value!=expected:
+        raise ValueError('ANSWER_STYLE_SNAPSHOT_INVALID')
     return instructions(value['style_id'],override=override,mode_version=value['mode_version'])
