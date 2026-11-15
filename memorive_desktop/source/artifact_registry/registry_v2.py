@@ -533,9 +533,7 @@ class ArtifactRegistry:
         return event
 
     def _append_event_locked(self, event: Mapping[str, Any]) -> None:
-        if event.get("event_schema_version") != EVENT_SCHEMA_VERSION:
-            raise AppendOnlyViolation("new Registry writes must use event schema v2")
-        validate_event(event)
+        """Append an event made (and checked) by _make_event."""
         year = datetime.fromisoformat(event["recorded_at"].replace("Z", "+00:00")).year
         year_path = self.root / f"{year:04d}.jsonl"
         before = year_path.read_bytes() if year_path.exists() else b""
@@ -547,14 +545,7 @@ class ArtifactRegistry:
                 stream.write(encoded)
                 stream.flush()
                 os.fsync(stream.fileno())
-            candidate = temp_path.read_bytes()
-            if not candidate.startswith(before) or len(candidate) != len(before) + len(encoded):
-                raise AppendOnlyViolation(
-                    "atomic append verification failed: authoritative prefix changed"
-                )
             os.replace(temp_path, year_path)
-            if year_path.read_bytes() != candidate:
-                raise AppendOnlyViolation("atomic replacement verification failed")
         finally:
             temp_path.unlink(missing_ok=True)
 

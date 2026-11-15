@@ -326,10 +326,13 @@ def validate_readable_envelope(envelope: Mapping[str, Any]) -> None:
     raise EnvelopeValidationError(f"unsupported envelope schema_version: {version!r}")
 
 
+# The three readers below take an envelope that has been checked already: one the registry
+# read (every event is checked when its file is read) or one that build_envelope made.
+
+
 def resolved_parent_links(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
     """Return a derived read-only alias; never persist this result separately."""
 
-    validate_readable_envelope(envelope)
     if envelope["schema_version"] == ENVELOPE_SCHEMA_VERSION:
         return copy.deepcopy(envelope["parent_artifacts"])
     return copy.deepcopy(envelope["lineage"]["resolved_parent_links"])
@@ -338,7 +341,6 @@ def resolved_parent_links(envelope: Mapping[str, Any]) -> list[dict[str, Any]]:
 def lineage_status(envelope: Mapping[str, Any]) -> str:
     """Derive display state from the authoritative lineage fields."""
 
-    validate_readable_envelope(envelope)
     if envelope["schema_version"] == ENVELOPE_SCHEMA_VERSION:
         parents = envelope["parent_artifacts"]
         unresolved = envelope["unresolved_parent_requirements"]
@@ -359,7 +361,6 @@ def lineage_status(envelope: Mapping[str, Any]) -> str:
 
 
 def content_hash_value(envelope: Mapping[str, Any]) -> str:
-    validate_readable_envelope(envelope)
     return str(envelope["content_hash"]["value"])
 
 

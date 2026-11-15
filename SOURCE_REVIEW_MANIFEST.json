@@ -3991,8 +3991,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/registry_v2.py",
-      "sha256": "d3749c19edea341b02c86101969c3f7a379febad16d57edc5cd72d782622ef4f",
-      "bytes": 30018
+      "sha256": "fbbcbd46a91913052ef58d7e5bd39cff0bf6631c56c61dc7bbd67ac06e519748",
+      "bytes": 29461
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schema.py",
@@ -4001,8 +4001,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schema_v2.py",
-      "sha256": "e58dd77cceb70a00df0e7fa604b72988e2dd8944c27783d37a7d0b648fba0c75",
-      "bytes": 23273
+      "sha256": "583fe4e09029a6317555c0a610b5886a704d90cc3ccb5a3f21d03bc8e0274b17",
+      "bytes": 23331
     },
     {
       "path": "memorive_desktop/source/artifact_registry/schemas/artifact_envelope_v1.schema.json",
@@ -4036,8 +4036,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/analysis_compatibility.py",
-      "sha256": "cd73c764fe9e0578595d917be045a4e02e65580db2f4435036a0aa6e33394762",
-      "bytes": 17625
+      "sha256": "2977424301ab79a157312b1aad9c3662f426edb706da1a5f323a88235013ef99",
+      "bytes": 17695
     },
     {
       "path": "memorive_desktop/source/artifact_registry/analysis_materialization.py",
@@ -7946,7 +7946,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "2ff94ff5686f96080fbf3fcf424728a37254aa79ef4080335e0a1ed831fdf68f",
+      "sha256": "6d1366a45cd9f78c04167589e3279e01b327bbabe5f7c158b8766af1307e9e97",
       "bytes": 252153
     },
     {

@@ -14,7 +14,7 @@ from .analysis_materialization import ArtifactFactory
 from .errors import ContractValidationError
 from typing import Mapping
 from .analysis_products import artifact_ref
-from .schema_v2 import lineage_status
+from .schema_v2 import lineage_status, validate_readable_envelope
 from .analysis_products import unique_text
 from typing import Sequence
 from pathlib import Path
@@ -144,9 +144,10 @@ def _has_conflicts(envelope: Mapping[str, Any]) -> bool:
 
 def _safe_lineage_status(envelope: Mapping[str, Any]) -> str:
     try:
-        return lineage_status(envelope)
+        validate_readable_envelope(envelope)
     except EnvelopeValidationError:
         return "invalid"
+    return lineage_status(envelope)
 
 
 def _matches(link: Mapping[str, Any], envelope: Mapping[str, Any]) -> bool:
