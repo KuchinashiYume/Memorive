@@ -76,6 +76,7 @@ returns, `save_answer` discards the answer and keeps the call's usage on the job
 | --- | --- | --- |
 | When a failed model call is tried again, how often, how long to wait | `memorive_model_execution/retry.py` | `test_model_execution.py` |
 | How a model profile is frozen and a call is sent once | `memorive_model_execution/execution.py` | `test_model_execution.py` |
+| Which model profiles research may choose | `profile_options` in `memorive_research_runtime/report_models.py`; the desktop supplies its data in `catalog()`, the window-less process in `memorive_research_workspace/headless_models.py` | `test_research_model_catalog.py` |
 | The instructions the model is given | `CHAT_RULES` in `model_gateway/research_prompt_cache.py`; for an agent job `instructions()` in `research_opportunities/research_opportunities.py`; `AnswerJob.build_request` chooses between them | `test_research_qa_flow.py` |
 | The answer format the model must return | `ANSWER_SCHEMA` in `memorive_research_workspace/desktop.py`; `AnswerJob.build_request` ties it to the excerpt ids | `test_research_qa_flow.py` |
 | Which excerpts go into the prompt | `AnswerJob.gather_evidence` and `AnswerJob.model_context` in `answering.py`; `context_selection.py` | `test_research_qa_flow.py` |

@@ -15,17 +15,35 @@ def config(root):
         raise ValueError('REPORT_WORKFLOW_INVALID')
     return value
 
-def catalog(runtime,capability='CHAT'):
+def profile_options(settings_state, local_models, capability='CHAT'):
+    """The model profiles of one capability (CHAT, EMBEDDING ...) that research can choose, from the
+    saved settings (as settings.get_state returns them) and the recognized local models. A profile is
+    eligible when it is connected and its credential is stored; a local model must also be eligible to
+    run and have an exact identity."""
     from memorive_current_task.workflow_mapping import build_core_execution_snapshot
-    state=runtime.api._service.call('settings.get_state',{})
-    registry=getattr(runtime.api,'_local_models',None)
-    local=registry.call('local_models.list',{}).get('recognized_models',[]) if registry else []
-    snap=build_core_execution_snapshot(state['settings'],settings_revision=state['revision'],local_model_profiles=local)
-    return [dict(profile_ref=r['profile_ref'],model=r['model'],profile_kind=r['profile_kind'],
-        model_name=r['execution_profile']['model']['model_name'],display_name=r['model'],binding_hash=sha(r['execution_profile']),adapter_id=r['execution_profile']['service'].get('adapter_id'),
-        eligible=r['connection_status']=='AVAILABLE' and r['credential_reference_stored'] and
-          (r['profile_kind']!='LOCAL' or (r['execution_profile']['service'].get('execution_eligible') is True and r['execution_profile']['service'].get('exact_identity_available') is True)))
-        for r in snap['profile_catalog'] if r.get('capability')==capability]
+    snapshot = build_core_execution_snapshot(settings_state['settings'], settings_revision=settings_state['revision'],
+                                             local_model_profiles=local_models)
+    options = []
+    for row in snapshot['profile_catalog']:
+        if row.get('capability') != capability:
+            continue
+        service = row['execution_profile']['service']
+        eligible = (row['connection_status'] == 'AVAILABLE' and row['credential_reference_stored']
+                    and (row['profile_kind'] != 'LOCAL'
+                         or (service.get('execution_eligible') is True and service.get('exact_identity_available') is True)))
+        options.append(dict(profile_ref=row['profile_ref'], model=row['model'], profile_kind=row['profile_kind'],
+                            model_name=row['execution_profile']['model']['model_name'], display_name=row['model'],
+                            binding_hash=sha(row['execution_profile']), adapter_id=service.get('adapter_id'), eligible=eligible))
+    return options
+
+
+def catalog(runtime, capability='CHAT'):
+    """profile_options for the desktop research runtime. The one place here that reads the desktop
+    host: its settings service and its local model registry."""
+    state = runtime.api._service.call('settings.get_state', {})
+    registry = getattr(runtime.api, '_local_models', None)
+    local = registry.call('local_models.list', {}).get('recognized_models', []) if registry else []
+    return profile_options(state, local, capability)
 
 def projection(runtime):
     value=config(runtime.root)

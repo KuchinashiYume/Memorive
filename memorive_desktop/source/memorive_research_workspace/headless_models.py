@@ -1,7 +1,6 @@
 """Bind the same saved profiles to the integrated stdio process without opening a window."""
 import json
 from pathlib import Path
-from types import SimpleNamespace
 
 def bind(workspace):
     path=workspace.store.root/'desktop_binding.json'
@@ -13,10 +12,13 @@ def bind(workspace):
     if not folders.path_for('SETTINGS').is_dir():raise ValueError('MEMO_PROFILE_NOT_INITIALIZED')
     from memorive_desktop_service.service_main import build_settings_controller,LocalModelProductController
     from memorive_settings.service_adapter import SettingsServiceAdapter
-    from memorive_research_runtime.report_models import catalog
+    from memorive_research_runtime.report_models import profile_options
     controller=build_settings_controller(profile);service=SettingsServiceAdapter(controller)
-    api=SimpleNamespace(_service=service,_local_models=LocalModelProductController(profile.parent/'local_models'))
-    runtime=SimpleNamespace(api=api)
+    local_models=LocalModelProductController(profile.parent/'local_models')
+    def catalog(capability='CHAT'):
+        # The same saved settings and local models the desktop reads, without the desktop host.
+        local=local_models.call('local_models.list',{}).get('recognized_models',[])
+        return profile_options(service.call('settings.get_state',{}),local,capability)
     def execute(*,profile_ref,prompt,job_id,response_schema):
         snap=service.call('settings.research_chat_freeze',{'run_id':job_id,'profile_ref':profile_ref})
         result=service.call('settings.research_chat_execute',{'snapshot_id':snap['snapshot_id'],'prompt':prompt,'response_schema':response_schema})
@@ -25,8 +27,8 @@ def bind(workspace):
     def embed(*,profile_ref,inputs,job_id):
         snap=service.call('settings.research_embedding_freeze',{'run_id':job_id,'profile_ref':profile_ref})
         return service.call('settings.research_embedding_execute',{'snapshot_id':snap['snapshot_id'],'inputs':inputs})
-    workspace.catalog=lambda:catalog(runtime)
-    workspace.embedding_catalog=lambda:catalog(runtime,'EMBEDDING')
+    workspace.catalog=lambda:catalog()
+    workspace.embedding_catalog=lambda:catalog('EMBEDDING')
     from retrieval_weighting.research_rule import bind as bind_rules
     bind_rules(workspace,service)
     workspace.index.rank_model=execute;workspace.index.embed_model=embed
