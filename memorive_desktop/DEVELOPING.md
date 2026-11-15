@@ -15,6 +15,9 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 
 ## Running the tests
 
+The tests are in the Git repository only: source archives (the ZIP that GitHub offers and the
+release source packages) leave `memorive_desktop/tests` out, so clone the repository to run them.
+
 Use a Python 3.13 environment with the packages from `requirements-build-agpl-candidate.lock` plus
 `pytest` (`pytest-timeout` is optional). Keep it apart from the build environment of BUILDING.md,
 which refuses extra packages. Run from the repository root:
