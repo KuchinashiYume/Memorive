@@ -243,6 +243,170 @@ def _scan_forbidden_keys(value: Any, path: str = "$") -> None:
             _scan_forbidden_keys(child, f"{path}[{index}]")
 
 
+def assert_business_io_forbidden(operation: str) -> None:
+    codes = {
+        "NETWORK": "NETWORK_FORBIDDEN",
+        "EXTERNAL_SOURCE": "EXTERNAL_SOURCE_FORBIDDEN",
+        "MODEL_OR_API": "MODEL_OR_API_FORBIDDEN",
+        "REAL_Research_READ": "Research_REAL_ADAPTER_NOT_CONFIGURED",
+        "PROFILE_READ": "PRODUCTION_PROFILE_READ_FORBIDDEN",
+        "PROFILE_WRITE": "PRODUCTION_PROFILE_WRITE_FORBIDDEN",
+        "POLICY_WRITE": "PRODUCTION_POLICY_WRITE_FORBIDDEN",
+        "ARTIFACT_REGISTRY_WRITE": "ARTIFACT_REGISTRY_WRITE_FORBIDDEN",
+        "FORMAL_LIBRARY_WRITE": "FORMAL_LIBRARY_WRITE_FORBIDDEN",
+        "PRODUCTION_WRITE": "PRODUCTION_WRITE_FORBIDDEN",
+    }
+    if operation not in codes:
+        raise ExposureFeedbackError("UNKNOWN_BUSINESS_IO_OPERATION", operation)
+    raise ExposureFeedbackError(codes[operation])
+
+
+def feedback_taxonomy_object() -> dict[str, Any]:
+    return seal_object(
+        {
+            "schema_version": "discovery.verification.feedback-taxonomy.0.1",
+            "object_type": "FeedbackTaxonomy",
+            "taxonomy_revision": "Verification_FEEDBACK_TAXONOMY:r0.1",
+            "reasons": [
+                {"reason_code": code, **copy.deepcopy(FEEDBACK_TAXONOMY[code])}
+                for code in sorted(FEEDBACK_TAXONOMY)
+            ],
+            "ignored_interactions": list(IGNORED_INTERACTIONS),
+            "fuzzy_direction_propagation": False,
+            "field_id_direction_substitution": False,
+            "no_click_negative_feedback": False,
+        }
+    )
+
+
+def resurface_policy_object() -> dict[str, Any]:
+    return seal_object(
+        {
+            "schema_version": "discovery.verification.resurface-policy.0.1",
+            "object_type": "ResurfacePolicy",
+            "policy_revision": "Verification_RESURFACE_POLICY:r0.1",
+            **copy.deepcopy(RESURFACE_POLICY),
+        }
+    )
+
+
+def validate_slate_context(
+    slate: Mapping[str, Any],
+    context: Mapping[str, Any],
+    source_contract_hash: str,
+) -> dict[str, str]:
+    _scan_forbidden_keys(slate)
+    _scan_forbidden_keys(context)
+    assert_sealed(slate, "SLATE_HASH_DRIFT")
+    assert_sealed(context, "CONTEXT_HASH_DRIFT")
+    _require_sha256(source_contract_hash, "SOURCE_CONTRACT_HASH_INVALID")
+    if slate.get("schema_version") != "discovery.intake.recommendation-slate-detail.0.1":
+        raise ExposureFeedbackError("SLATE_SCHEMA_VERSION_UNSUPPORTED")
+    if context.get("schema_version") != "discovery.intake.research-context-detail.0.1":
+        raise ExposureFeedbackError("CONTEXT_SCHEMA_VERSION_UNSUPPORTED")
+    if slate.get("context_hash") != context.get("content_hash"):
+        raise ExposureFeedbackError("SLATE_CONTEXT_BINDING_MISMATCH")
+    directions = context.get("directions")
+    if not isinstance(directions, list) or not directions:
+        raise ExposureFeedbackError("DIRECTION_REGISTRY_INVALID")
+    direction_map: dict[str, str] = {}
+    for direction in directions:
+        direction_id = direction.get("direction_id")
+        revision = direction.get("revision")
+        if (
+            not isinstance(direction_id, str)
+            or not direction_id
+            or not isinstance(revision, str)
+            or not revision
+            or direction_id in direction_map
+        ):
+            raise ExposureFeedbackError("DIRECTION_REGISTRY_INVALID")
+        direction_map[direction_id] = revision
+    selected = slate.get("selected")
+    if not isinstance(selected, list):
+        raise ExposureFeedbackError("SLATE_SELECTED_INVALID")
+    seen_positions: set[int] = set()
+    seen_candidates: set[str] = set()
+    seen_works: set[str] = set()
+    for item in selected:
+        position = item.get("position")
+        candidate_id = item.get("candidate_id")
+        work_cluster_id = item.get("work_cluster_id")
+        direction_id = item.get("primary_direction_id")
+        if (
+            type(position) is not int
+            or position < 1
+            or position in seen_positions
+            or not isinstance(candidate_id, str)
+            or not candidate_id
+            or candidate_id in seen_candidates
+            or not isinstance(work_cluster_id, str)
+            or not work_cluster_id
+            or work_cluster_id in seen_works
+            or direction_id not in direction_map
+            or not isinstance(item.get("channel"), str)
+            or not isinstance(item.get("evidence_refs"), list)
+            or not item["evidence_refs"]
+            or any(
+                not isinstance(reference, str) or not reference
+                for reference in item["evidence_refs"]
+            )
+            or len(set(item["evidence_refs"])) != len(item["evidence_refs"])
+        ):
+            raise ExposureFeedbackError("SLATE_SELECTED_INVALID")
+        seen_positions.add(position)
+        seen_candidates.add(candidate_id)
+        seen_works.add(work_cluster_id)
+    return direction_map
+
+
+def exposure_events_from_slate(
+    slate: Mapping[str, Any],
+    context: Mapping[str, Any],
+    shown_at: str,
+    source_contract_hash: str,
+) -> list[dict[str, Any]]:
+    direction_map = validate_slate_context(slate, context, source_contract_hash)
+    _parse_time(shown_at)
+    events: list[dict[str, Any]] = []
+    for selected in sorted(slate["selected"], key=lambda item: item["position"]):
+        direction_id = selected["primary_direction_id"]
+        identity = {
+            "slate_id": slate["slate_id"],
+            "slate_hash": slate["content_hash"],
+            "position": selected["position"],
+            "work_cluster_id": selected["work_cluster_id"],
+            "direction_id": direction_id,
+            "direction_revision": direction_map[direction_id],
+            "shown_at": shown_at,
+        }
+        exposure_id = stable_id("EXPOSURE:", identity)
+        event_id = stable_id("EVENT:", {"event_type": "EXPOSURE_RECORDED", **identity})
+        events.append(
+            seal_object(
+                {
+                    "schema_version": "discovery.verification.exposure-event.0.1",
+                    "object_type": "ExposureLedgerEvent",
+                    "event_type": "EXPOSURE_RECORDED",
+                    "event_id": event_id,
+                    "exposure_id": exposure_id,
+                    "event_time": shown_at,
+                    "slate_id": slate["slate_id"],
+                    "slate_revision_or_hash": slate["content_hash"],
+                    "position": selected["position"],
+                    "candidate_id": selected["candidate_id"],
+                    "work_cluster_id": selected["work_cluster_id"],
+                    "channel": selected["channel"],
+                    "direction_id": direction_id,
+                    "direction_revision": direction_map[direction_id],
+                    "source_contract_hash": source_contract_hash,
+                    "evidence_refs": sorted(set(selected["evidence_refs"])),
+                }
+            )
+        )
+    return events
+
+
 def make_feedback_event(
     exposure_event: Mapping[str, Any],
     decision_type: str,
@@ -668,6 +832,86 @@ def evaluate_candidate(
     )
 
 
+def evaluate_resurface(
+    previous_decision: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    trigger_fact: Mapping[str, Any],
+    as_of: str,
+) -> dict[str, Any]:
+    assert_sealed(previous_decision, "PREVIOUS_DECISION_HASH_DRIFT")
+    _scan_forbidden_keys(trigger_fact)
+    _parse_time(as_of)
+    for field in ("candidate_id", "work_cluster_id", "manifestation_id"):
+        if not isinstance(candidate.get(field), str) or not candidate[field]:
+            raise ExposureFeedbackError("RESURFACE_POLICY_BREACH", field)
+    if candidate["work_cluster_id"] != previous_decision.get("work_cluster_id"):
+        raise ExposureFeedbackError(
+            "RESURFACE_POLICY_BREACH", "previous decision work mismatch"
+        )
+    trigger = trigger_fact.get("trigger")
+    evidence_ref = trigger_fact.get("authority_evidence_ref")
+    allowed = trigger in ALLOWED_RESURFACE_TRIGGERS and isinstance(evidence_ref, str) and bool(evidence_ref)
+    reason = "TRIGGER_NOT_ALLOWED_OR_EVIDENCE_MISSING"
+    if allowed and trigger == "FORMAL_MAJOR_VERSION":
+        new_manifestation_id = trigger_fact.get("new_manifestation_id")
+        allowed = (
+            trigger_fact.get("major_change") is True
+            and isinstance(new_manifestation_id, str)
+            and bool(new_manifestation_id)
+            and new_manifestation_id == candidate["manifestation_id"]
+            and new_manifestation_id != previous_decision.get("manifestation_id")
+        )
+        reason = "FORMAL_MAJOR_VERSION" if allowed else "MAJOR_VERSION_EVIDENCE_INVALID"
+    elif allowed and trigger == "LEGAL_ACCESS_AVAILABLE":
+        allowed = (
+            previous_decision.get("decision_type") == "NO_LEGAL_FULLTEXT"
+            and trigger_fact.get("access_before") in {"METADATA_ONLY", "UNAVAILABLE", "RESTRICTED"}
+            and trigger_fact.get("access_after") in {"RIGHTS_VERIFIED", "MATERIALIZED"}
+        )
+        reason = "LEGAL_ACCESS_AVAILABLE" if allowed else "LEGAL_ACCESS_CHANGE_INVALID"
+    elif allowed and trigger == "CORRECTION_OR_RETRACTION":
+        allowed = trigger_fact.get("official_notice") is True
+        reason = "CORRECTION_OR_RETRACTION" if allowed else "OFFICIAL_NOTICE_REQUIRED"
+    elif allowed and trigger == "IMPORTANT_CITATION_CHANGE":
+        allowed = trigger_fact.get("important_relation") is True
+        reason = "IMPORTANT_CITATION_CHANGE" if allowed else "IMPORTANT_RELATION_REQUIRED"
+    elif allowed and trigger == "NEW_STABLE_DIRECTION":
+        allowed = (
+            trigger_fact.get("human_confirmed") is True
+            and trigger_fact.get("new_direction_id") == candidate.get("direction_id")
+            and candidate.get("direction_id") != previous_decision.get("direction_id")
+        )
+        reason = "NEW_STABLE_DIRECTION" if allowed else "NEW_DIRECTION_BINDING_INVALID"
+    elif allowed and trigger == "BRIDGE_ROLE_CHANGE":
+        allowed = trigger_fact.get("bridge_role_changed") is True
+        reason = "BRIDGE_ROLE_CHANGE" if allowed else "BRIDGE_ROLE_CHANGE_INVALID"
+    elif allowed and trigger == "MANUAL_RESTORE":
+        allowed = isinstance(trigger_fact.get("restore_event_id"), str) and trigger_fact["restore_event_id"].startswith("EVENT:")
+        reason = "MANUAL_RESTORE" if allowed else "RESTORE_EVENT_REQUIRED"
+    elif trigger in RESURFACE_POLICY["forbidden_triggers"]:
+        allowed = False
+        reason = "MINOR_OR_PRESENTATIONAL_DRIFT_FORBIDDEN"
+    if allowed and previous_decision.get("cooldown_until") and trigger not in {"CORRECTION_OR_RETRACTION", "MANUAL_RESTORE"}:
+        if _parse_time(as_of) < _parse_time(previous_decision["cooldown_until"]):
+            allowed = False
+            reason = "COOLDOWN_ACTIVE"
+    return seal_object(
+        {
+            "schema_version": "discovery.verification.resurface-evaluation.0.1",
+            "object_type": "ResurfaceEvaluation",
+            "candidate_id": candidate.get("candidate_id"),
+            "work_cluster_id": candidate.get("work_cluster_id"),
+            "previous_decision_event_id": previous_decision["event_id"],
+            "trigger": trigger,
+            "authority_evidence_ref": evidence_ref,
+            "status": "ELIGIBLE_RESURFACE" if allowed else "RESURFACE_BLOCKED",
+            "reason_code": reason,
+            "previous_decision_disclosed": True,
+            "history_mutated": False,
+        }
+    )
+
+
 def validate_research_interaction_event(event: Mapping[str, Any]) -> None:
     _scan_forbidden_keys(event)
     exact_fields = {
@@ -710,5 +954,249 @@ def validate_research_interaction_event(event: Mapping[str, Any]) -> None:
         raise ExposureFeedbackError("Research_EXPOSURE_ID_INVALID")
 
 
+def _decay_factor(age_days: int) -> Decimal:
+    if age_days < 0:
+        raise ExposureFeedbackError("INTERACTION_FROM_FUTURE")
+    for item in BEHAVIOR_POLICY["decay_windows_days"]:
+        if age_days <= item["max_age_days"]:
+            return Decimal(item["factor"])
+    return Decimal(BEHAVIOR_POLICY["older_factor"])
+
+
 def _decimal_text(value: Decimal) -> str:
     return str(value.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP))
+
+
+def build_behavioral_digest(
+    events: Sequence[Mapping[str, Any]],
+    direction_bindings: Mapping[str, Mapping[str, Any]],
+    interaction_mode: str,
+    as_of: str,
+    *,
+    source_kind: str,
+    exposure_ledger: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    if interaction_mode not in Research_INTERACTION_MODES:
+        raise ExposureFeedbackError("Research_INTERACTION_MODE_INVALID")
+    if source_kind not in {"SYNTHETIC_TEST", "REAL_ADAPTER"}:
+        raise ExposureFeedbackError("Research_SOURCE_KIND_INVALID")
+    if source_kind == "REAL_ADAPTER":
+        raise ExposureFeedbackError("Research_REAL_ADAPTER_NOT_CONFIGURED")
+    cutoff = _parse_time(as_of)
+    exposure_by_id: dict[str, Mapping[str, Any]] = {}
+    if exposure_ledger is not None:
+        assert_sealed(exposure_ledger, "LEDGER_HASH_DRIFT")
+        exposure_by_id = {
+            event["exposure_id"]: event
+            for event in exposure_ledger.get("events", [])
+            if event.get("event_type") == "EXPOSURE_RECORDED"
+        }
+    session_best: dict[tuple[str, str], dict[str, Any]] = {}
+    unmapped = 0
+    mapped_event_count = 0
+    for raw_event in events:
+        event = copy.deepcopy(dict(raw_event))
+        validate_research_interaction_event(event)
+        if (
+            event["origin"] == "Discovery_EXPOSURE_FOLLOWUP"
+            and event.get("exposure_id") not in exposure_by_id
+        ):
+            raise ExposureFeedbackError("Discovery_FOLLOWUP_EXPOSURE_REQUIRED")
+        binding = direction_bindings.get(event["query_hash"])
+        if (
+            not isinstance(binding, Mapping)
+            or binding.get("mapping_status") != "EXACT_SYNTHETIC"
+            or not isinstance(binding.get("direction_id"), str)
+            or not binding["direction_id"]
+        ):
+            unmapped += 1
+            continue
+        mapped_event_count += 1
+        direction_id = binding["direction_id"]
+        if (
+            event["origin"] == "Discovery_EXPOSURE_FOLLOWUP"
+            and exposure_by_id[event["exposure_id"]].get("direction_id")
+            != direction_id
+        ):
+            raise ExposureFeedbackError("Discovery_FOLLOWUP_EXPOSURE_REQUIRED")
+        origin_weight = Decimal(BEHAVIOR_POLICY["origin_weights"][event["origin"]])
+        age_days = (cutoff - _parse_time(event["event_time"])).days
+        weight = origin_weight * _decay_factor(age_days)
+        key = (direction_id, event["session_hash"])
+        enriched = {**event, "direction_id": direction_id, "event_weight": weight}
+        existing = session_best.get(key)
+        if existing is None or (weight, event["query_hash"], event["event_time"]) > (
+            existing["event_weight"], existing["query_hash"], existing["event_time"]
+        ):
+            session_best[key] = enriched
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for (direction_id, _), event in session_best.items():
+        grouped[direction_id].append(event)
+    direction_digests: list[dict[str, Any]] = []
+    for direction_id in sorted(grouped):
+        selected = sorted(grouped[direction_id], key=lambda item: (item["event_time"], item["session_hash"], item["query_hash"]))
+        raw_weight = sum((item["event_weight"] for item in selected), Decimal("0"))
+        cap = Decimal(BEHAVIOR_POLICY["per_direction_cap"])
+        bounded = min(raw_weight, cap)
+        user_sessions = {item["session_hash"] for item in selected if item["origin"] == "USER_INITIATED" and item["event_weight"] > 0}
+        active_dates = {item["event_time"][:10] for item in selected if item["event_weight"] > 0}
+        direction_digests.append(
+            {
+                "direction_id": direction_id,
+                "unique_session_count": len({item["session_hash"] for item in selected}),
+                "user_initiated_session_count": len(user_sessions),
+                "active_date_count": len(active_dates),
+                "selected_event_count": len(selected),
+                "raw_weight": _decimal_text(raw_weight),
+                "bounded_weight": _decimal_text(bounded),
+                "saturation_applied": raw_weight > cap,
+                "evidence_query_hashes": sorted({item["query_hash"] for item in selected}),
+            }
+        )
+    deduplicated = mapped_event_count - len(session_best)
+    return seal_object(
+        {
+            "schema_version": "discovery.verification.behavioral-interest-digest.0.1",
+            "object_type": "BehavioralInterestDigest",
+            "interaction_mode": interaction_mode,
+            "source_kind": source_kind,
+            "as_of": as_of,
+            "directions": direction_digests,
+            "input_event_count": len(events),
+            "mapped_event_count": mapped_event_count,
+            "unmapped_event_count": unmapped,
+            "deduplicated_or_saturated_event_count": deduplicated,
+            "real_adapter_read_count": 0 if source_kind == "SYNTHETIC_TEST" else len(events),
+            "real_digest_or_boost_count": 0 if source_kind == "SYNTHETIC_TEST" else len(direction_digests),
+            "behavior_policy": copy.deepcopy(BEHAVIOR_POLICY),
+            "global_scalar_score": None,
+            "side_effects": copy.deepcopy(ZERO_SIDE_EFFECTS),
+        }
+    )
+
+
+def apply_behavioral_tiebreak(
+    candidates: Sequence[Mapping[str, Any]],
+    digest: Mapping[str, Any],
+) -> dict[str, Any]:
+    assert_sealed(digest, "BEHAVIOR_DIGEST_HASH_DRIFT")
+    weights = {item["direction_id"]: Decimal(item["bounded_weight"]) for item in digest["directions"]}
+    output = [copy.deepcopy(dict(candidate)) for candidate in candidates]
+    required = {"candidate_id", "channel", "direction_id", "pre_tie_rank_key", "eligible"}
+    for candidate in output:
+        if set(candidate) != required or candidate["eligible"] is not True:
+            raise ExposureFeedbackError("TIEBREAK_CANDIDATE_INVALID")
+    groups: dict[tuple[str, bytes], list[int]] = defaultdict(list)
+    for index, candidate in enumerate(output):
+        groups[(candidate["channel"], canonical_json(candidate["pre_tie_rank_key"]))].append(index)
+    changed_groups: list[dict[str, Any]] = []
+    for (channel, pre_tie_key), indices in sorted(groups.items(), key=lambda item: (item[0][0], item[0][1])):
+        if len(indices) < 2:
+            continue
+        before = [output[index]["candidate_id"] for index in indices]
+        ranked = sorted(
+            (output[index] for index in indices),
+            key=lambda item: (-weights.get(item["direction_id"], Decimal("0")), item["candidate_id"]),
+        )
+        for index, candidate in zip(indices, ranked, strict=True):
+            output[index] = candidate
+        after = [output[index]["candidate_id"] for index in indices]
+        if before != after:
+            changed_groups.append(
+                {
+                    "channel": channel,
+                    "pre_tie_rank_key_sha256": hashlib.sha256(pre_tie_key).hexdigest().upper(),
+                    "before": before,
+                    "after": after,
+                }
+            )
+    before_channels = [candidate["channel"] for candidate in candidates]
+    after_channels = [candidate["channel"] for candidate in output]
+    before_ids = sorted(candidate["candidate_id"] for candidate in candidates)
+    after_ids = sorted(candidate["candidate_id"] for candidate in output)
+    return seal_object(
+        {
+            "schema_version": "discovery.verification.behavioral-tiebreak.0.1",
+            "object_type": "BehavioralTieBreakProjection",
+            "ordered_candidates": output,
+            "changed_groups": changed_groups,
+            "scope": BEHAVIOR_POLICY["tie_break_scope"],
+            "epsilon": BEHAVIOR_POLICY["epsilon"],
+            "channel_positions_unchanged": before_channels == after_channels,
+            "candidate_exact_set_unchanged": before_ids == after_ids,
+            "channel_quotas_before": dict(sorted(Counter(before_channels).items())),
+            "channel_quotas_after": dict(sorted(Counter(after_channels).items())),
+            "eligibility_mutations": 0,
+            "cap_mutations": 0,
+            "no_backfill_mutations": 0,
+            "profile_or_policy_mutations": 0,
+            "global_scalar_score": None,
+        }
+    )
+
+
+def build_policy_change_proposal(
+    digest: Mapping[str, Any],
+    base_policy_revision: str,
+    evidence_refs: Sequence[str],
+) -> dict[str, Any] | None:
+    assert_sealed(digest, "BEHAVIOR_DIGEST_HASH_DRIFT")
+    qualifying = [
+        item
+        for item in digest["directions"]
+        if item["user_initiated_session_count"] >= BEHAVIOR_POLICY["proposal_min_user_sessions"]
+        and item["active_date_count"] >= BEHAVIOR_POLICY["proposal_min_active_dates"]
+    ]
+    if not qualifying:
+        return None
+    if not isinstance(base_policy_revision, str) or not base_policy_revision:
+        raise ExposureFeedbackError("BASE_POLICY_REVISION_INVALID")
+    if not evidence_refs or any(not isinstance(item, str) or not item for item in evidence_refs):
+        raise ExposureFeedbackError("PROPOSAL_EVIDENCE_REFS_INVALID")
+    proposal_seed = {
+        "base_policy_revision": base_policy_revision,
+        "digest_hash": digest["content_hash"],
+        "directions": [item["direction_id"] for item in qualifying],
+    }
+    proposal_id = stable_id("PROPOSAL:", proposal_seed)
+    body = {
+        "schema_version": "discovery.verification.exposure-policy-change-proposal.0.1",
+        "object_type": "ExposurePolicyChangeProposal",
+        "proposal_id": proposal_id,
+        "base_policy_revision": base_policy_revision,
+        "target_revision": "UNASSIGNED_UNTIL_HUMAN_CONFIRMATION",
+        "status": "PENDING_HUMAN_CONFIRMATION",
+        "direction_ids": sorted(item["direction_id"] for item in qualifying),
+        "digest_hash": digest["content_hash"],
+        "evidence_refs": sorted(set(evidence_refs)),
+        "proposed_change": "REVIEW_EXPOSURE_BUDGET_ONLY",
+        "applied": False,
+        "profile_writes": 0,
+        "policy_writes": 0,
+    }
+    body["proposal_hash"] = sha256_json(body)
+    return seal_object(body)
+
+
+def state_immutability_proof(
+    before: Mapping[str, Any],
+    after: Mapping[str, Any],
+) -> dict[str, Any]:
+    required = {"profile", "policy", "directions", "intake_slate"}
+    if set(before) != required or set(after) != required:
+        raise ExposureFeedbackError("IMMUTABILITY_INPUT_SET_INVALID")
+    before_hashes = {key: sha256_json(before[key]) for key in sorted(required)}
+    after_hashes = {key: sha256_json(after[key]) for key in sorted(required)}
+    result = {
+        "before_hashes": before_hashes,
+        "after_hashes": after_hashes,
+        "unchanged": before_hashes == after_hashes,
+        "changed_keys": [key for key in sorted(required) if before_hashes[key] != after_hashes[key]],
+        "side_effects": copy.deepcopy(ZERO_SIDE_EFFECTS),
+    }
+    if not result["unchanged"]:
+        raise ExposureFeedbackError(
+            "LONG_TERM_STATE_MUTATION_BREACH",
+            ",".join(result["changed_keys"]),
+        )
+    return result

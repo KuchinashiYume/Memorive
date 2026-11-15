@@ -23,3 +23,7 @@ __all__ = [
     "build_capability_snapshot",
     "evaluate_preflight",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .workflow import WorkflowDefinitionProvider
+__all__ = [*__all__, 'WorkflowDefinitionProvider']

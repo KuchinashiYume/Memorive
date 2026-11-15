@@ -246,6 +246,26 @@ class SessionRefinementTaskStore:
             values = list(self._read_state()["tasks"].values())
         return sorted((deepcopy(row) for row in values), key=lambda row: row["created_at"], reverse=True)
 
+    def remove_tasks(self, job_ids: list[str] | tuple[str, ...]) -> dict[str, Any]:
+        accepted = tuple(dict.fromkeys(_safe_text(value, 160) for value in job_ids))
+        if not accepted or any(not value for value in accepted):
+            raise RefinementTaskError("REFINEMENT_TASK_REMOVAL_IDS_INVALID")
+
+        def mutate(state: dict[str, Any]) -> dict[str, Any]:
+            missing = [job_id for job_id in accepted if job_id not in state["tasks"]]
+            if missing:
+                raise RefinementTaskError("REFINEMENT_TASK_REMOVAL_TARGET_MISSING")
+            removed = [deepcopy(state["tasks"].pop(job_id)) for job_id in accepted]
+            return {
+                "schema_version": "SessionRefinementTaskRemovalReceipt-v1",
+                "removed_job_ids": list(accepted),
+                "removed_count": len(removed),
+                "remaining_count": len(state["tasks"]),
+                "status": "PASS",
+            }
+
+        return self._mutate(mutate)
+
     # Sessions owns the refinement queue.  These aliases preserve the existing
     # execution protocol without routing queue records through Current Task.
     def create_session_refinement_task(self, **params: Any) -> dict[str, Any]:

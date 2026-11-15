@@ -18,3 +18,9 @@ __all__ = [
     "StableLocator",
     "StableLocatorResolver",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .adapters import FakeFacadeAdapter
+from .adapters import REQUIRED_FACADE_METHODS
+from .watch import EventCursorReconciler
+__all__ = [*__all__, 'EventCursorReconciler', 'FakeFacadeAdapter', 'REQUIRED_FACADE_METHODS']

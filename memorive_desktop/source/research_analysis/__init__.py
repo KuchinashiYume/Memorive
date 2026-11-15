@@ -53,3 +53,11 @@ __all__ = [
     "LABEL_RETRIEVAL_LIMITATIONS",
     "LABEL_SOURCE_INCONSISTENCIES",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .cost_query import cost_summary
+from .retrieval_quality_research_analysis_quality_artifacts import AnalysisQualityValidationError
+from .retrieval_quality_research_analysis_quality_artifacts import build_analysis_quality_assessment
+from .retrieval_quality_research_analysis_quality_artifacts import project_coverage_onto_analysis
+from .retrieval_quality_research_analysis_quality_artifacts import validate_analysis_source_ids
+__all__ = [*__all__, 'cost_summary', 'AnalysisQualityValidationError', 'build_analysis_quality_assessment', 'project_coverage_onto_analysis', 'validate_analysis_source_ids']

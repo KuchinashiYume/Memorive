@@ -252,6 +252,14 @@ def exam_eligible(target,capability='structured_output'):
                 and target.get('configuration_sha256',current)==current and verification_current(binding,target,target)
                 and (capability=='images' or capability in binding.get('capabilities',[])))
 
+
+def capability_projection(service,model):
+    if not is_custom(service):return None
+    binding=model.get('verification') or {}
+    valid=binding.get('configuration_sha256')==configuration_identity(service,model)
+    return {key:('UNSUPPORTED' if not declared else 'INVALIDATED' if binding and not valid else 'VERIFIED' if valid and key in binding.get('capabilities',[]) else 'DECLARED_UNTESTED')
+            for key,declared in service['template']['capabilities'].items()}
+
 def receipt_model_bound(receipt,requested):
     if not isinstance(receipt,Mapping) or receipt.get('route')!='DECLARATIVE_COMMAND_TEMPLATE' or receipt.get('profile_kind')!='CLI':return False
     if receipt.get('status')!='PASS' or receipt.get('requested_model')!=requested or receipt.get('request_model_binding_status')!='DECLARED_ARGV_AND_BINARY':return False

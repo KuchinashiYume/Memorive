@@ -164,6 +164,20 @@ class InboxStore:
             rows = connection.execute("SELECT record_json FROM items ORDER BY item_id").fetchall()
         return [deepcopy(self._decode(row["record_json"])) for row in rows]
 
+    def find_by_content(self, content_sha256: str, *, exclude_item_id: str | None = None) -> dict[str, Any] | None:
+        query = (
+            "SELECT record_json FROM items WHERE content_sha256=? "
+            "AND state NOT IN ('TRASHED','DELETED','DEDUPLICATED')"
+        )
+        parameters: list[Any] = [content_sha256]
+        if exclude_item_id is not None:
+            query += " AND item_id!=?"
+            parameters.append(exclude_item_id)
+        query += " ORDER BY item_id LIMIT 1"
+        with closing(self._connect()) as connection:
+            row = connection.execute(query, parameters).fetchone()
+        return None if row is None else deepcopy(self._decode(row["record_json"]))
+
     def active_content_items(self, content_sha256: str, *, exclude_item_id: str) -> list[dict[str, Any]]:
         with closing(self._connect()) as connection:
             rows=connection.execute("SELECT record_json FROM items WHERE content_sha256=? AND item_id!=? AND state NOT IN ('TRASHED','DELETED','DEDUPLICATED') ORDER BY item_id",(content_sha256,exclude_item_id)).fetchall()
@@ -218,6 +232,13 @@ class InboxStore:
             self._event(connection, "DISPATCH_INTENT_ENQUEUED", accepted["item_id"], accepted)
             connection.commit()
         return accepted, False
+
+    def read_intent(self, idempotency_key: str) -> dict[str, Any]:
+        with closing(self._connect()) as connection:
+            row = connection.execute("SELECT record_json FROM outbox WHERE idempotency_key=?", (idempotency_key,)).fetchone()
+        if row is None:
+            raise InboxError("INBOX_DISPATCH_INTENT_NOT_FOUND")
+        return deepcopy(self._decode(row["record_json"]))
 
     def update_intent(self, idempotency_key: str, state: str, receipt: Mapping[str, Any]) -> tuple[dict[str, Any], bool]:
         with closing(self._connect()) as connection:

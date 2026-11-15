@@ -701,6 +701,44 @@ class CurrentTaskProductController:
             "execution_profile": deepcopy(dict(option["execution_profile"])),
         }
 
+    def create_session_refinement_task(
+        self,
+        *,
+        display_name: str,
+        local_projection_id: str,
+        source_snapshot_sha256: str,
+        selected_profile_ref: str,
+        message_count: int,
+    ) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.create_task(
+            display_name=display_name,
+            local_projection_id=local_projection_id,
+            source_snapshot_sha256=source_snapshot_sha256,
+            selected_profile_ref=selected_profile_ref,
+            message_count=message_count,
+        )
+
+    def begin_session_refinement_step(self, job_id: str, node_id: str) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.begin_step(job_id, node_id)
+
+    def get_session_refinement_task(self, job_id: str) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.get_job(job_id)
+
+    def find_session_refinement_task(
+        self, local_projection_id: str
+    ) -> dict[str, Any] | None:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.find_session_refinement_task(
+            local_projection_id
+        )
+
     def set_session_refinement_model(
         self,
         job_id: str,
@@ -717,6 +755,51 @@ class CurrentTaskProductController:
             profile_ref=profile_ref,
             display_name=display_name,
         )
+
+    def complete_session_refinement_step(self, job_id: str, node_id: str) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.complete_step(job_id, node_id)
+
+    def succeed_session_refinement_task(
+        self,
+        job_id: str,
+        *,
+        draft_id: str,
+        model_calls: int,
+        external_model_calls: int,
+    ) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.succeed(
+            job_id,
+            draft_id=draft_id,
+            model_calls=model_calls,
+            external_model_calls=external_model_calls,
+        )
+
+    def fail_session_refinement_task(
+        self,
+        job_id: str,
+        *,
+        error_code: str,
+        model_calls: int = 0,
+    ) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.fail(
+            job_id, error_code=error_code, model_calls=model_calls
+        )
+
+    def session_refinement_cancelled(self, job_id: str) -> bool:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.is_cancelled(job_id)
+
+    def cancel_session_refinement_task(self, job_id: str) -> dict[str, Any]:
+        if self._refinement_store is None:
+            raise RuntimeError("SESSION_REFINEMENT_TASK_MANAGER_NOT_CONFIGURED")
+        return self._refinement_store.cancel(job_id)
 
     def _view(self) -> dict[str, Any]:
         session = self.session.view()

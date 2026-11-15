@@ -35,6 +35,10 @@ class SafeShortcutRegistry:
         self._handlers = dict(handlers)
         self._sequence = 0
 
+    @property
+    def action_ids(self) -> tuple[str, ...]:
+        return FIXED_INTERNAL_ACTION_IDS
+
     def dispatch(self, request: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(request, Mapping) or set(request) - {"action_id", "locator"}:
             raise ValueError("ASSISTANT_SHORTCUT_REQUEST_FIELDS_INVALID")

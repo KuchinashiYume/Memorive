@@ -224,6 +224,11 @@ def _default_verifier_call(task_type: str, payload: dict) -> str:
     return resp.get("text") or ""
 
 
+def _default_gpt_call(payload: dict) -> str:
+    """Compatibility wrapper for the original GPT judgment slot."""
+    return _default_verifier_call("verify_judgment", payload)
+
+
 def _judgment_local_ready() -> bool:
     """本地判断类异源校核槽(本地异源判据模型 ≠ 生成结论的 Claude)是否就绪。
     Core:无本地判断类模型、判断类恒走 GPT(openai 境外)→ **恒 False**(entrusted / 归属不明恒 fail-closed);

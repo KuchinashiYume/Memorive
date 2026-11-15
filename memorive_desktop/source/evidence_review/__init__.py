@@ -73,3 +73,31 @@ __all__ = [
     "ATOMIC_REPAIR_TIMEOUT_SECONDS",
     "AtomicRepairContractError",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .mechanical import mechanical_check
+from .report import read_report
+from .transcription import make_evidence_review_source
+from .transcription import verify_and_drive
+from .claim_evidence import apply_fact_verdicts
+from .claim_evidence import build_claim_evidence_view
+from .claim_evidence import field_credibility_summaries
+from .claim_evidence import repair_evidence_occurrence
+from .claim_evidence import render_reviewed_field
+from .quality_axes import assess_numeric_plausibility
+from .quality_axes import build_quality_axes
+from .quality_axes import compare_numeric_facts
+from .atomic_repair import apply_atomic_repairs
+from .atomic_repair import build_atomic_delta_view
+from .atomic_repair import build_atomic_repair_bundle
+from .atomic_repair import build_atomic_repair_prompt
+from .atomic_repair import build_atomic_repair_request
+from .atomic_repair import classify_delta_resolution
+from .atomic_repair import governed_omission_precheck
+from .atomic_repair import prune_unresolved_targets
+from .atomic_repair import route_full_review_to_closure
+from .atomic_repair import validate_atomic_repair_gateway_response
+from .atomic_repair import validate_atomic_repairs
+from .opportunity_verification import verify_opportunity_candidate
+from .ownership_binding import compute_analysis_binding_hash
+__all__ = [*__all__, 'mechanical_check', 'verify_and_drive', 'make_evidence_review_source', 'read_report', 'compute_analysis_binding_hash', 'build_claim_evidence_view', 'apply_fact_verdicts', 'field_credibility_summaries', 'repair_evidence_occurrence', 'render_reviewed_field', 'build_quality_axes', 'compare_numeric_facts', 'assess_numeric_plausibility', 'route_full_review_to_closure', 'build_atomic_repair_bundle', 'build_atomic_repair_prompt', 'build_atomic_repair_request', 'validate_atomic_repair_gateway_response', 'validate_atomic_repairs', 'apply_atomic_repairs', 'build_atomic_delta_view', 'classify_delta_resolution', 'governed_omission_precheck', 'prune_unresolved_targets', 'verify_opportunity_candidate']

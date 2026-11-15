@@ -102,6 +102,16 @@ class SandboxJobStore:
 
         return self._with_writer(callback)
 
+    def create_job(self, job: dict[str, Any]) -> dict[str, Any]:
+        def callback(state: dict[str, Any]) -> dict[str, Any]:
+            if job["job_id"] in state["jobs"]:
+                raise IdempotencyConflict(job["job_id"])
+            state["jobs"][job["job_id"]] = immutable_copy(job)
+            self._append_event(state, "JOB_CREATED", job)
+            return immutable_copy(job)
+
+        return self._with_writer(callback)
+
     def read_job(self, job_id: str) -> dict[str, Any]:
         job = self._read_state()["jobs"].get(job_id)
         if job is None:

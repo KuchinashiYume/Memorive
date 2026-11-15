@@ -26,3 +26,8 @@ __all__ = [
     "SettlementObservation",
     "UsageObservation",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .reconciliation import DiscrepancyQueue
+from .reconciliation import reconcile_observations
+__all__ = [*__all__, 'DiscrepancyQueue', 'reconcile_observations']

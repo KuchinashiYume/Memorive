@@ -773,6 +773,25 @@ class ExternalDataSources:
         with self.activity_lock:
             return set(self.active_sources)
 
+    def refresh_due(self, *, now=None, preferences=None, should_stop=None):
+        now = now or datetime.now(timezone.utc)
+        results = []
+        if not automatic_metadata_enabled():
+            return {"updated":[], "failed":[], "results":[], "external_model_calls":0}
+        for config in self._load()["sources"]:
+            if should_stop and should_stop():
+                break
+            if not config["enabled"] or config["refresh_mode"] not in {"WEEKLY", "DAILY"}:
+                continue
+            if config["credential_env"] and not self.environment.get(config["credential_env"]):
+                continue
+            result = self.refresh(config["source_id"], expected_revision=self._load()["revision"],
+                preferences=preferences, _automatic=True, _now=now)
+            results.append(result)
+        return {"updated":[r["source_id"] for r in results if r["status"] == "PASS"],
+                "failed":[r["source_id"] for r in results if r["status"] in {"ERROR", "RATE_LIMITED"}],
+                "results":results, "external_model_calls":0}
+
     def get_state(self) -> dict[str, Any]:
         from .literature_sources import projection as literature_projection
         state = self._load()

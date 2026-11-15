@@ -87,3 +87,17 @@ __all__ = [
     "SourceIdDisposition",
     "derive_facet_coverage_inputs",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .coverage_artifacts import admit_chunk_snapshots
+from .coverage_artifacts import build_facet_definition_artifact
+from .coverage_artifacts import build_logical_span_artifact
+from .coverage_artifacts import build_references_bias_policy
+from .coverage_artifacts import build_retrieval_coverage_assessment
+from .coverage_artifacts import build_source_role_assessment
+from .coverage_artifacts import build_source_role_policy
+from .coverage_artifacts import build_span_assembly_policy
+from .coverage_artifacts import validate_artifact_graph
+from .coverage_artifacts import validate_holdout_public_manifest
+from .structured_context import retrieve_faceted_candidates
+__all__ = [*__all__, 'retrieve_faceted_candidates', 'admit_chunk_snapshots', 'build_facet_definition_artifact', 'build_logical_span_artifact', 'build_references_bias_policy', 'build_retrieval_coverage_assessment', 'build_source_role_assessment', 'build_source_role_policy', 'build_span_assembly_policy', 'validate_artifact_graph', 'validate_holdout_public_manifest']

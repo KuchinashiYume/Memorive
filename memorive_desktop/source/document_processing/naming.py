@@ -36,6 +36,11 @@ def display_title(title: str) -> str:
     return truncate_title(sanitize_title(title))
 
 
+def make_paper_id(surname: str, year: str | int, suffix: str = "") -> str:
+    """paper_id = 姓氏 + 年份(+ 碰撞后缀);不带方括号。姓氏罗马化/拼音判定人工在上游定。"""
+    return f"{surname}{year}{suffix}"
+
+
 def folder_name(paper_id: str, display: str) -> str:
     """文件夹名:[paper_id] 标题(display 已净化+截断)。"""
     return f"[{paper_id}] {display}"

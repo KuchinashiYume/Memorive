@@ -384,4 +384,21 @@ class SegmentCompletionLedger:
         }
         return {**body, "content_hash": canonical_hash(body)}
 
+    def terminal_shards(self) -> list[dict[str, Any]]:
+        return [deepcopy(self._terminal[item]) for item in self.expected if item in self._terminal]
+
+    def resume_plan(self) -> dict[str, Any]:
+        snapshot = self.snapshot()
+        runnable: list[str] = []
+        blocked: list[str] = []
+        for segment_id in snapshot["missing_segment_ids"]:
+            attempts = sum(item["segment_id"] == segment_id for item in self._attempts)
+            (runnable if attempts < self.max_attempts_per_segment else blocked).append(segment_id)
+        return {
+            "reuse_terminal_segment_ids": snapshot["terminal_segment_ids"],
+            "schedule_segment_ids": runnable,
+            "blocked_segment_ids": blocked,
+            "full_document_rerun": False,
+        }
+
 __all__ = ["SegmentCompletionLedger", "SegmentShardValidator"]

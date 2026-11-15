@@ -316,6 +316,10 @@ class LocalModelProductController:
             )
         return models
 
+    @classmethod
+    def _models_from_payload(cls, kind: str, payload: Any) -> list[str]:
+        return [row["model_name"] for row in cls._model_details_from_payload(kind, payload)]
+
     def _verify(self, endpoint_id: str) -> dict[str, Any]:
         state = self._load()
         row = state["endpoints"].get(endpoint_id)

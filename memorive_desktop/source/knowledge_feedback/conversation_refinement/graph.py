@@ -14,6 +14,8 @@ from knowledge_feedback.canonical import (
 )
 
 from .contracts import BLOCK_TYPES, ROLES, ConversationContractError, object_ref
+from .contracts import validate_export_snapshot
+from .provider_adapter import validate_provider_export
 
 
 _GRAPH_KEYS = {
@@ -129,6 +131,88 @@ def validate_normalized_graph(value: Mapping[str, Any]) -> dict[str, Any]:
     if result["deterministic"] is not True:
         raise ConversationContractError("GRAPH_DETERMINISM_REQUIRED")
     return result
+
+
+def build_normalized_graph(
+    *, graph_id: str, snapshot: Mapping[str, Any], export: Mapping[str, Any]
+) -> dict[str, Any]:
+    checked_snapshot = validate_export_snapshot(snapshot)
+    checked_export = validate_provider_export(export)
+    if checked_snapshot["provider_profile"] != checked_export["provider_profile"]:
+        raise ConversationContractError("GRAPH_PROVIDER_PROFILE_MISMATCH")
+    if checked_snapshot["source_payload_hash"] != typed_payload_hash(checked_export):
+        raise ConversationContractError("GRAPH_SNAPSHOT_PAYLOAD_HASH_MISMATCH")
+    observed_denominator = {
+        "conversation_count": len(checked_export["conversations"]),
+        "message_count": sum(
+            len(conversation["messages"])
+            for conversation in checked_export["conversations"]
+        ),
+        "attachment_count": sum(
+            len(conversation["attachments"])
+            for conversation in checked_export["conversations"]
+        ),
+    }
+    frozen_denominator = {
+        key: checked_snapshot[key]
+        for key in ("conversation_count", "message_count", "attachment_count")
+    }
+    if frozen_denominator != observed_denominator:
+        raise ConversationContractError("GRAPH_SNAPSHOT_DENOMINATOR_MISMATCH")
+    payload_bytes = len(
+        json.dumps(
+            checked_export,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    )
+    if checked_snapshot["source_payload_bytes"] != payload_bytes:
+        raise ConversationContractError("GRAPH_SNAPSHOT_PAYLOAD_BYTES_MISMATCH")
+    nodes: list[dict[str, Any]] = []
+    for conversation in checked_export["conversations"]:
+        for sequence, raw in enumerate(conversation["messages"]):
+            if not isinstance(raw, Mapping):
+                raise ConversationContractError("MESSAGE_MUST_BE_OBJECT")
+            expected = {
+                "message_id",
+                "parent_id",
+                "role",
+                "blocks",
+                "created_at",
+                "status",
+                "edit_of",
+                "regeneration_group",
+            }
+            if set(raw) != expected:
+                raise ConversationContractError("MESSAGE_EXACT_KEYS_MISMATCH")
+            node = deepcopy(dict(raw))
+            node["conversation_id"] = conversation["conversation_id"]
+            node["provider_sequence"] = sequence
+            nodes.append(_validate_node(node, "message"))
+    nodes.sort(key=lambda item: item["message_id"])
+    by_id = {item["message_id"]: item for item in nodes}
+    if len(by_id) != len(nodes):
+        raise ConversationContractError("DUPLICATE_MESSAGE_ID")
+    if _cycle_nodes(by_id):
+        raise ConversationContractError("GRAPH_CYCLE")
+    payload = {
+        "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+        "graph_id": graph_id,
+        "revision": 1,
+        "snapshot_ref": object_ref(checked_snapshot, id_field="snapshot_id"),
+        "snapshot_hash": deepcopy(checked_snapshot["content_hash"]),
+        "conversation_ids": sorted({item["conversation_id"] for item in nodes}),
+        "nodes": nodes,
+        "orphan_message_ids": sorted(
+            item["message_id"]
+            for item in nodes
+            if item["parent_id"] is not None and item["parent_id"] not in by_id
+        ),
+        "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
+        "deterministic": True,
+    }
+    return validate_normalized_graph(make_hashed_payload(payload))
 
 
 def message_text(node: Mapping[str, Any]) -> str:

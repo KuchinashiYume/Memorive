@@ -33,6 +33,12 @@ def sha256_file(path: Path | str) -> str:
     return digest.hexdigest()
 
 
+def new_artifact_id() -> str:
+    """Create a new opaque identity for one persistent artifact instance."""
+
+    return f"art_{uuid.uuid4().hex}"
+
+
 def legacy_artifact_id(
     *,
     run_ref: str,
@@ -87,6 +93,27 @@ def parent_link(
     }
     _validate_parent_link(link)
     return link
+
+
+def unresolved_requirement(
+    requirement: str,
+    reason_code: str,
+    *,
+    evidence_refs: Iterable[str],
+    candidate_artifact_ids: Iterable[str] = (),
+    search_hints: Iterable[str] = (),
+) -> dict[str, Any]:
+    """Describe a missing relationship without guessing a resolved parent."""
+
+    value = {
+        "requirement": requirement,
+        "reason_code": reason_code,
+        "evidence_refs": list(evidence_refs),
+        "candidate_artifact_ids": list(candidate_artifact_ids),
+        "search_hints": list(search_hints),
+    }
+    _validate_unresolved(value)
+    return value
 
 
 def build_envelope(
@@ -244,6 +271,22 @@ def validate_envelope(envelope: Mapping[str, Any]) -> None:
     _require_text_list(envelope.get("evidence_refs"), "evidence_refs", allow_empty=False)
     if not isinstance(envelope.get("metadata"), Mapping):
         raise EnvelopeValidationError("metadata must be an object")
+
+
+def lineage_status(envelope: Mapping[str, Any]) -> str:
+    """Derive a display value; lineage detail remains authoritative."""
+
+    validate_envelope(envelope)
+    lineage = envelope["lineage"]
+    if lineage["conflicting_candidates"]:
+        return "conflicted"
+    if lineage["resolved_parent_links"] and lineage["unresolved_parent_requirements"]:
+        return "partial"
+    if lineage["resolved_parent_links"]:
+        return "complete"
+    if lineage["unresolved_parent_requirements"]:
+        return "unknown"
+    return "complete"
 
 
 def validate_event(event: Mapping[str, Any]) -> None:

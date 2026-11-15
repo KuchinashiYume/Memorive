@@ -39,3 +39,14 @@ __all__ = [
     "visibility_state",
     "write_staged_bytes",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .assembly import assemble_card_candidate
+from .assembly import build_analysis_lineage
+from .assembly import build_assembly_manifest
+from .assembly import build_field_candidates
+from .assembly import dry_assemble
+from .contracts import dispatch_artifact_validation
+from .merge import merge_facts
+from .topology import plan_bounded_segment_split
+__all__ = [*__all__, 'assemble_card_candidate', 'build_analysis_lineage', 'build_assembly_manifest', 'build_field_candidates', 'dispatch_artifact_validation', 'dry_assemble', 'merge_facts', 'plan_bounded_segment_split']

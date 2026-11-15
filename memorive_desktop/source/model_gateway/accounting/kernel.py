@@ -7,12 +7,17 @@ from typing import Iterable
 from .calculator import DecimalCalculator
 from .contracts import AccountingEnvelope, PriceQuery, UsageObservation
 from .pricing.catalog import PriceCatalog
+from pathlib import Path
 
 
 class AccountingKernel:
     def __init__(self, catalog: PriceCatalog):
         self.catalog = catalog
         self.calculator = DecimalCalculator()
+
+    @classmethod
+    def from_catalog_path(cls, path: Path | str) -> "AccountingKernel":
+        return cls(PriceCatalog.load(path))
 
     def quote(
         self,

@@ -22,6 +22,7 @@ from .schema_v2 import legacy_artifact_id
 from .schema_v2 import new_artifact_id
 from .schema_v2 import unresolved_requirement
 from .errors import FrontmatterParseError
+import copy
 
 _FENCE = re.compile(r"(?m)^---[ \t]*\r?$")
 _TAGS = ("PDF", "RawMD", "CleanMD", "Chunks", "Card", "Analysis")
@@ -37,6 +38,12 @@ _TYPES = {
 
 @dataclass(frozen=True)
 class AdaptationResult:
+
+    def by_type(self, artifact_type: str) -> dict[str, Any]:
+        hits = [x for x in self.envelopes if x["artifact_type"] == artifact_type]
+        if len(hits) != 1:
+            raise KeyError(f"expected one {artifact_type!r} envelope, found {len(hits)}")
+        return copy.deepcopy(hits[0])
     envelopes: tuple[dict[str, Any], ...]
     mapping_summary: dict[str, Any]
 

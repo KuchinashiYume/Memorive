@@ -92,6 +92,10 @@
     {
       "name": "E11-existing-schemas-v1",
       "kept_because": "Id of the data migration in the update protocol. Installed updaters check it in an update package."
+    },
+    {
+      "name": "SOURCE_CONNECTORS_LITERATURE_DISCOVERY_20260810_190016_candidate002",
+      "kept_because": "Run id constant of the literature connector framework, restored unchanged with the code that was removed in this round."
     }
   ],
   "files": [
@@ -102,6 +106,38 @@
     {
       "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",
       "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
+    },
+    {
+      "path": "memorive_desktop/source/memorive_review/health.py",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/research_reports/cli.py",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/research_reports/source.py",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/research_reports/schemas",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/memorive_application",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/research_recommendations/knowledge_promotion_cross_atomic_card_promotion.py",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/research_recommendations/candidate_review_cross_candidate_card_staging.py",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
+    },
+    {
+      "path": "memorive_desktop/source/evidence_review/opportunity_verification.py",
+      "set_aside_because": "Restored unchanged on 2026-11-15 after having been removed as uncalled. It still carries ids from the time it was written; they are cleaned when this code is reworked, before the next release."
     }
   ]
 }

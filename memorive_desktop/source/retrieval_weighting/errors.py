@@ -15,6 +15,15 @@ class FieldVectorError(RuntimeError):
         super().__init__(message)
         self.context = deepcopy(dict(context or {}))
 
+    def to_issue(self) -> dict[str, Any]:
+        """Return a serializable issue without a traceback or source payload."""
+
+        return {
+            "code": self.code,
+            "message": str(self),
+            "context": deepcopy(self.context),
+        }
+
 class ContractViolation(FieldVectorError):
     """Raised when an input violates a frozen candidate contract."""
 

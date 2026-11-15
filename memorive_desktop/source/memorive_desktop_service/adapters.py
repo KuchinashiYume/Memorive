@@ -24,6 +24,7 @@ REQUIRED_FACADE_METHODS = (
     "lookup_start_by_idempotency_key",
 )
 
+
 REAL_ADDITIONAL_METHODS = (
     "start_job",
     "get_status",
@@ -108,6 +109,27 @@ class RealFacadeAdapter(FacadeAdapter):
             allowed_methods=REQUIRED_FACADE_METHODS + REAL_ADDITIONAL_METHODS,
             watch_batch_max=watch_batch_max,
         )
+
+
+class FakeFacadeAdapter(FacadeAdapter):
+    adapter_kind = "synthetic_fake_facade"
+
+    def __init__(self, facade: Any, *, watch_batch_max: int = 64):
+        super().__init__(facade, allowed_methods=REQUIRED_FACADE_METHODS, watch_batch_max=watch_batch_max)
+
+    def call(self, method: str, params: Mapping[str, Any]) -> Any:
+        accepted = super().call(method, params)
+        if method in {"get_job", "get_attempt"} and isinstance(accepted, dict):
+            accepted.setdefault("schema_version", "ApplicationJobRecord-v1")
+        return accepted
+
+
+def load_facade_contract(contract_path: Path | str) -> dict[str, Any]:
+    value = json.loads(Path(contract_path).read_text(encoding="utf-8"))
+    observed = tuple(value.get("projected_required_facade_methods", []))
+    if observed != REQUIRED_FACADE_METHODS:
+        raise ProtocolViolation("FACADE_METHOD_DENOMINATOR_DRIFT")
+    return _immutable(value)
 
 
 __all__ = [

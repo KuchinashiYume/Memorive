@@ -62,6 +62,11 @@ _PROMPT_PATH = (
 
 @dataclass(frozen=True)
 class RepairAdmitResult:
+
+    @property
+    def sonnet_calls(self):
+        """Deprecated Python alias; persisted receipts use verify_calls."""
+        return self.verify_calls
     outcome: str
     verify_calls: int
     distill_repair_calls: int

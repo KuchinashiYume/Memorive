@@ -21,6 +21,7 @@ from .models import (
     NormalizedConversation,
     NormalizedMessage,
 )
+from typing import Iterable
 
 
 def _utc_now() -> str:
@@ -857,3 +858,34 @@ class SessionArchive:
             parameters,
         ).fetchall()
         return [dict(row) for row in rows]
+
+    @_synchronized
+    def set_hidden(
+        self,
+        identities: Iterable[tuple[str, str]],
+        *,
+        hidden: bool,
+    ) -> dict[str, Any]:
+        requested = tuple(dict.fromkeys(identities))
+        changed = 0
+        missing: list[str] = []
+        with self._connection:
+            for provider, provider_conversation_id in requested:
+                cursor = self._connection.execute(
+                    """
+                    UPDATE conversations SET hidden = ?
+                    WHERE provider = ? AND provider_conversation_id = ?
+                    """,
+                    (1 if hidden else 0, provider, provider_conversation_id),
+                )
+                if cursor.rowcount:
+                    changed += 1
+                else:
+                    missing.append(f"{provider}:{provider_conversation_id}")
+        return {
+            "requested_count": len(requested),
+            "changed_count": changed,
+            "missing_identities": missing,
+            "hidden": hidden,
+            "remote_session_mutations": 0,
+        }

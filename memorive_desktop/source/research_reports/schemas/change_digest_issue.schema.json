@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:research:research-reports:research_reports:change-digest-issue:1.1-candidate002",
+  "title": "RESEARCH_REPORTS ChangeDigest issue",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "issue_id",
+    "error_code",
+    "source_record_ref",
+    "source_content_hash",
+    "observed_at",
+    "affected_window",
+    "blocking_status",
+    "evidence_ref",
+    "sanitized_error_context"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "issue_id": {
+      "type": "string",
+      "pattern": "^RESEARCH_REPORTS-ISSUE-[A-F0-9]{32}$"
+    },
+    "error_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{2,127}$"
+    },
+    "source_record_ref": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 512,
+      "pattern": "^(?!.*//)source_snapshot/(?!\\.\\.?/)(?!.*?/\\.\\.?/)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*\\.jsonl#line=[1-9][0-9]*$"
+    },
+    "source_content_hash": {
+      "type": "string",
+      "pattern": "^[A-F0-9]{64}$"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "affected_window": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^(daily|weekly|monthly):[^\\r\\n]+\\.\\.[^\\r\\n]+$",
+          "maxLength": 256
+        }
+      ]
+    },
+    "blocking_status": {
+      "enum": [
+        "blocking",
+        "non_blocking"
+      ]
+    },
+    "evidence_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[^\\r\\n\\u0000-\\u001F\\u007F]+$"
+    },
+    "sanitized_error_context": {
+      "type": "object",
+      "required": [
+        "field_names",
+        "payload_echoed"
+      ],
+      "properties": {
+        "field_names": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_.\\[\\]-]+$"
+          }
+        },
+        "payload_echoed": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

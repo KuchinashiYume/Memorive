@@ -707,6 +707,17 @@ def validate_locator(
     return dict(locator)
 
 
+def load_and_validate_locator(
+    locator_path: str | os.PathLike[str],
+    owned_root: str | os.PathLike[str],
+) -> dict[str, Any]:
+    """Load one explicit locator path and validate it without fallback."""
+
+    path = ensure_owned_path(locator_path, owned_root, must_exist=True)
+    locator = load_json_file(path)
+    return validate_locator(locator, owned_root)
+
+
 __all__ = [
     "BACKEND",
     "EXPECTED_MEMBER_NAMES",

@@ -100,3 +100,48 @@ class TimelineReconciler:
 
     def timeline(self) -> list[dict[str, Any]]:
         return deepcopy(self._accepted)
+
+
+class WatchRecoveryController:
+    def __init__(self, reconciler: TimelineReconciler):
+        self.reconciler = reconciler
+        self.connection_state = "CONNECTED"
+        self.disconnect_reason: str | None = None
+        self.recovery_epoch = 0
+
+    def disconnect(self, reason: str) -> dict[str, Any]:
+        self.connection_state = "DISCONNECTED"
+        self.disconnect_reason = require_identifier(reason, "disconnect_reason")
+        return self.snapshot("WATCH_DISCONNECT")
+
+    def begin_reconnect(self) -> dict[str, Any]:
+        if self.connection_state != "DISCONNECTED":
+            raise EventIntegrityError("WATCH_RECONNECT_PRECONDITION")
+        self.connection_state = "RECONNECTING"
+        self.recovery_epoch += 1
+        return self.snapshot("WATCH_RECONNECTING")
+
+    def reconnect(self, events: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+        if self.connection_state not in {"DISCONNECTED", "RECONNECTING", "RECOVERING_AFTER_RESTART"}:
+            raise EventIntegrityError("WATCH_RECONNECT_PRECONDITION")
+        receipt = self.reconciler.ingest(events)
+        self.connection_state = "CONNECTED" if receipt["status"] == "PASS" else "RECONNECTING"
+        self.disconnect_reason = None if self.connection_state == "CONNECTED" else self.disconnect_reason
+        return {**self.snapshot("WATCH_RECONNECT"), "reconciliation": receipt}
+
+    def service_restarted(self) -> dict[str, Any]:
+        self.connection_state = "RECOVERING_AFTER_RESTART"
+        self.recovery_epoch += 1
+        return self.snapshot("SERVICE_RESTART")
+
+    def snapshot(self, event: str = "SNAPSHOT") -> dict[str, Any]:
+        return {
+            "schema_version": "CurrentTaskWatchRecoveryReceipt-v1",
+            "event": event,
+            "connection_state": self.connection_state,
+            "disconnect_reason": self.disconnect_reason,
+            "recovery_epoch": self.recovery_epoch,
+            "event_cursor": self.reconciler.cursor,
+            "job_id": self.reconciler.job_id,
+            "attempt_id": self.reconciler.attempt_id,
+        }

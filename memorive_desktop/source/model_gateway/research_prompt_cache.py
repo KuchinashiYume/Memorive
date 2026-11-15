@@ -120,6 +120,16 @@ def prefix_parts(prompt):
     return split_source(prompt)
 
 
+def decode_research_prompt(prompt):
+    data=json.JSONDecoder().raw_decode(prompt.split('\nDATA\n',1)[1])[0]
+    if '<SOURCE_CONTEXT>\n' in prompt:
+        stable=json.loads(prompt.split('<SOURCE_CONTEXT>\n',1)[1].split('\n</SOURCE_CONTEXT>',1)[0])
+        data.update({k:stable[k] for k in ('evidence','confirmed_memory')})
+        if 'source_scope' in stable:data['source_scope']=stable['source_scope']
+        if 'research_topic' in stable:data['research_topic']=stable['research_topic']
+    return data
+
+
 def model_binding(model,prompt,schema,allow_session=False):
     value=copy.deepcopy(model);parts=prefix_parts(prompt)
     if parts:

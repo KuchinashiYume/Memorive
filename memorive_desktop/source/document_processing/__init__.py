@@ -32,3 +32,9 @@ __all__ = [
     "embed_from_chunks",
     "PipelineResult",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .pipeline import re_embed_from_rawmd
+from .pipeline import resume_after_note_review
+from .pipeline import run_pipeline
+__all__ = [*__all__, 'run_pipeline', 'resume_after_note_review', 're_embed_from_rawmd']

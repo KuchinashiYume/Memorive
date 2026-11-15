@@ -54,4 +54,18 @@ class RedactionPolicy:
         elif isinstance(value, str) and self.contains_sensitive(value):
             raise PrivacyBoundaryError(f"SENSITIVE_VALUE:{path}")
 
+    def scan_surfaces(self, surfaces: Mapping[str, str]) -> dict[str, Any]:
+        failures = sorted(
+            name for name, value in surfaces.items() if not isinstance(value, str) or self.contains_sensitive(value)
+        )
+        return {
+            "schema_version": "MessagesCanaryRedactionReceipt-v1",
+            "surface_count": len(surfaces),
+            "surfaces": sorted(surfaces),
+            "failure_count": len(failures),
+            "failures": failures,
+            "raw_values_recorded": False,
+            "status": "PASS" if not failures else "FAIL",
+        }
+
 __all__ = ["PrivacyBoundaryError", "RedactionPolicy"]

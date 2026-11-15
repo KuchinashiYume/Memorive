@@ -36,3 +36,7 @@ __all__ = [
     "TimelineReconciler",
     "build_core_execution_snapshot",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .events import WatchRecoveryController
+__all__ = [*__all__, 'WatchRecoveryController']

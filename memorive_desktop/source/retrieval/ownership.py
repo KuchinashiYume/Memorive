@@ -772,6 +772,29 @@ def validate_cache_binding(snapshot_or_object: Any, cached_key: str, cached_revi
     return True
 
 
+def render_snapshot_frontmatter(snapshot_or_object: Any) -> str:
+    import yaml
+
+    snapshot = validate_snapshot(snapshot_or_object)
+    payload = {"ownership_snapshot": snapshot.to_dict()}
+    return "---\n" + yaml.safe_dump(payload, allow_unicode=True, sort_keys=True) + "---\n"
+
+
+def parse_snapshot_frontmatter(text: str) -> OwnershipSnapshot:
+    import yaml
+
+    if not isinstance(text, str) or not text.startswith("---\n"):
+        raise OwnershipContractError(OWNERSHIP_INVALID, "ownership frontmatter is malformed")
+    try:
+        body = text.split("---\n", 2)[1]
+        payload = yaml.safe_load(body)
+    except Exception as exc:
+        raise OwnershipContractError(OWNERSHIP_INVALID, "ownership frontmatter parse failed") from exc
+    if not isinstance(payload, Mapping) or not isinstance(payload.get("ownership_snapshot"), Mapping):
+        raise OwnershipContractError(OWNERSHIP_MISSING, "ownership_snapshot is missing from frontmatter")
+    return validate_snapshot(OwnershipSnapshot.from_dict(payload["ownership_snapshot"]))
+
+
 def propagation_receipt(
     snapshot_or_object: Any,
     *,

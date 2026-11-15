@@ -181,6 +181,23 @@ def _text(value: Any, limit: int = 320) -> str:
     return rendered[: max(1, limit - 1)].rstrip() + "…"
 
 
+def _message_text(content: Any, limit: int = 12_000) -> str:
+    if isinstance(content, str):
+        return _text(content, limit)
+    if not isinstance(content, list):
+        return ""
+    chunks: list[str] = []
+    for item in content:
+        if not isinstance(item, Mapping):
+            continue
+        if item.get("type") not in {"text", "input_text", "output_text"}:
+            continue
+        value = item.get("text")
+        if isinstance(value, str) and value.strip():
+            chunks.append(value.strip())
+    return _text("\n\n".join(chunks), limit)
+
+
 def _full_message_text(content: Any) -> str:
     """Render one user/assistant message without collapsing or clipping it."""
     if isinstance(content, str):

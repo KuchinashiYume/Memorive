@@ -9,10 +9,27 @@ from typing import Any, Callable
 
 from .contracts import canonical_json_bytes, immutable_copy, utc_now
 from .errors import CorruptEventLog, IdempotencyConflict, JobNotFound, VersionConflict
+from .contracts import canonical_sha256
+import re
 
 
 Mutator = Callable[[dict[str, Any]], dict[str, Any]]
 ResultFactory = Callable[[dict[str, Any]], dict[str, Any]]
+
+
+_SENSITIVE_FIELD = re.compile(r"(^|_)(api[_-]?key|password|secret|token|credential[_-]?value)($|_)", re.IGNORECASE)
+
+
+def _require_secret_free(value: Any, path: str = "payload") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            rendered = str(key)
+            if _SENSITIVE_FIELD.search(rendered):
+                raise ValueError(f"SENSITIVE_OUTBOX_FIELD_FORBIDDEN:{path}.{rendered}")
+            _require_secret_free(child, f"{path}.{rendered}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            _require_secret_free(child, f"{path}[{index}]")
 
 
 class DurableJobStore:
@@ -162,6 +179,20 @@ class DurableJobStore:
 
         return self._transaction(callback)
 
+    def create_job(self, job: dict[str, Any]) -> dict[str, Any]:
+        def callback(connection: sqlite3.Connection) -> dict[str, Any]:
+            try:
+                connection.execute(
+                    "INSERT INTO jobs(job_id, attempt_id, version, payload_json) VALUES(?, ?, ?, ?)",
+                    (job["job_id"], job["attempt_id"], job["version"], self._encode(job)),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise IdempotencyConflict(job["job_id"]) from exc
+            self._append_event(connection, "JOB_CREATED", job)
+            return immutable_copy(job)
+
+        return self._transaction(callback)
+
     def read_job(self, job_id: str) -> dict[str, Any]:
         with closing(self._connect()) as connection:
             row = connection.execute("SELECT payload_json FROM jobs WHERE job_id=?", (job_id,)).fetchone()
@@ -264,6 +295,108 @@ class DurableJobStore:
             return result, False
 
         return self._transaction(callback)
+
+    def enqueue_external_effect(
+        self,
+        job_id: str,
+        *,
+        effect_type: str,
+        payload: dict[str, Any],
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        payload_copy = immutable_copy(payload)
+        _require_secret_free(payload_copy)
+        effect_id = "effect_" + canonical_sha256(
+            {"job_id": job_id, "effect_type": effect_type, "idempotency_key": idempotency_key, "payload": payload_copy}
+        )[:24].lower()
+
+        def callback(connection: sqlite3.Connection) -> dict[str, Any]:
+            if connection.execute("SELECT 1 FROM jobs WHERE job_id=?", (job_id,)).fetchone() is None:
+                raise JobNotFound(job_id)
+            existing = connection.execute(
+                "SELECT record_json, payload_json FROM outbox WHERE job_id=? AND effect_type=? AND idempotency_key=?",
+                (job_id, effect_type, idempotency_key),
+            ).fetchone()
+            if existing is not None:
+                if self._decode(existing["payload_json"]) != payload_copy:
+                    raise IdempotencyConflict(f"outbox:{job_id}:{effect_type}:{idempotency_key}")
+                return immutable_copy(self._decode(existing["record_json"]))
+            now = utc_now()
+            record = {
+                "schema_version": "ExternalEffectOutboxRecord-v1",
+                "effect_id": effect_id,
+                "job_id": job_id,
+                "effect_type": effect_type,
+                "idempotency_key": idempotency_key,
+                "version": 1,
+                "state": "PENDING",
+                "payload": payload_copy,
+                "worker_id": None,
+                "receipt": None,
+                "created_at": now,
+                "updated_at": now,
+            }
+            connection.execute(
+                "INSERT INTO outbox(effect_id, job_id, effect_type, idempotency_key, version, state, payload_json, record_json) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                (effect_id, job_id, effect_type, idempotency_key, 1, "PENDING", self._encode(payload_copy), self._encode(record)),
+            )
+            return immutable_copy(record)
+
+        return self._transaction(callback)
+
+    def _update_external_effect(
+        self,
+        effect_id: str,
+        *,
+        expected_version: int,
+        allowed_state: str,
+        mutator: Callable[[dict[str, Any]], None],
+    ) -> dict[str, Any]:
+        def callback(connection: sqlite3.Connection) -> dict[str, Any]:
+            row = connection.execute("SELECT version, state, record_json FROM outbox WHERE effect_id=?", (effect_id,)).fetchone()
+            if row is None:
+                raise JobNotFound(effect_id)
+            if int(row["version"]) != expected_version:
+                raise VersionConflict(f"expected {expected_version}; observed {row['version']}")
+            if row["state"] != allowed_state:
+                raise VersionConflict(f"expected state {allowed_state}; observed {row['state']}")
+            record = immutable_copy(self._decode(row["record_json"]))
+            mutator(record)
+            record["version"] = expected_version + 1
+            record["updated_at"] = utc_now()
+            connection.execute(
+                "UPDATE outbox SET version=?, state=?, record_json=? WHERE effect_id=?",
+                (record["version"], record["state"], self._encode(record), effect_id),
+            )
+            return immutable_copy(record)
+
+        return self._transaction(callback)
+
+    def claim_external_effect(self, effect_id: str, *, expected_version: int, worker_id: str) -> dict[str, Any]:
+        return self._update_external_effect(
+            effect_id,
+            expected_version=expected_version,
+            allowed_state="PENDING",
+            mutator=lambda record: record.update({"state": "IN_FLIGHT", "worker_id": str(worker_id)}),
+        )
+
+    def complete_external_effect(
+        self,
+        effect_id: str,
+        *,
+        expected_version: int,
+        succeeded: bool,
+        receipt: dict[str, Any],
+    ) -> dict[str, Any]:
+        _require_secret_free(receipt, "receipt")
+        return self._update_external_effect(
+            effect_id,
+            expected_version=expected_version,
+            allowed_state="IN_FLIGHT",
+            mutator=lambda record: record.update(
+                {"state": "SUCCEEDED" if succeeded else "FAILED", "receipt": immutable_copy(receipt)}
+            ),
+        )
 
     def list_external_effects(self, job_id: str | None = None) -> list[dict[str, Any]]:
         query = "SELECT record_json FROM outbox"

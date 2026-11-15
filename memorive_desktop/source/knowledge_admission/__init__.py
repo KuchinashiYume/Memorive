@@ -66,3 +66,10 @@ __all__ = [
     "DecisionError",
     "DecisionContractError",
 ]
+
+# Names the package offered before; restored with the code behind them.
+from .machine import manual_approve
+from .machine import manual_reject
+from .errors import AdmissionBlocked
+from .errors import RealStateTransitionForbidden
+__all__ = [*__all__, 'manual_approve', 'manual_reject', 'AdmissionBlocked', 'RealStateTransitionForbidden']
