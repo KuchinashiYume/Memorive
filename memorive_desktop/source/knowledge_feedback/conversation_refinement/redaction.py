@@ -48,6 +48,7 @@ def validate_redaction_result(value: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def redact_text(text: str) -> dict[str, Any]:
+    """Replace keys, tokens, e-mail addresses and cookie values before a text is refined."""
     if not isinstance(text, str):
         raise ConversationContractError("REDACTION_INPUT_MUST_BE_TEXT")
     redacted = text
@@ -58,17 +59,15 @@ def redact_text(text: str) -> dict[str, Any]:
         if matches:
             categories.append(category)
             count += matches
-    return validate_redaction_result(
-        make_hashed_payload(
-            {
-                "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1",
-                "redacted_text": redacted,
-                "redaction_count": count,
-                "categories": sorted(categories),
-                "original_text_retained": False,
-                "credential_cookie_storage_value_retained": False,
-            }
-        )
+    return make_hashed_payload(
+        {
+            "schema_version": "CONVERSATION_REFINEMENT_REDACTION_RESULT_V1",
+            "redacted_text": redacted,
+            "redaction_count": count,
+            "categories": sorted(categories),
+            "original_text_retained": False,
+            "credential_cookie_storage_value_retained": False,
+        }
     )
 
 

@@ -216,11 +216,16 @@ def build_normalized_graph(
 
 
 def message_text(node: Mapping[str, Any]) -> str:
-    checked = _validate_node(node, "node")
-    return "\n".join(block["text"] for block in checked["blocks"] if block["type"] in {"text", "code"} and block["text"] is not None)
+    """The readable text of a message given by a caller: its text and code blocks."""
+    return node_text(_validate_node(node, "node"))
 
 
-__all__ = ["message_text", "validate_normalized_graph"]
+def node_text(node: Mapping[str, Any]) -> str:
+    """The readable text of a node of a checked graph."""
+    return "\n".join(block["text"] for block in node["blocks"] if block["type"] in {"text", "code"} and block["text"] is not None)
+
+
+__all__ = ["message_text", "node_text", "validate_normalized_graph"]
 
 # Names this module exported before; restored with the code behind them.
 __all__ = [*__all__, 'build_normalized_graph']

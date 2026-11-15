@@ -9,15 +9,10 @@ import re
 from typing import Any, Mapping, Sequence
 import unicodedata
 
-from jsonschema import Draft202012Validator
-
 from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
-from knowledge_feedback.conversation_refinement import (
-    make_model_refinement_items,
-    validate_normalized_graph,
-    validate_typed_refinement_item,
-)
+from knowledge_feedback.conversation_refinement import make_model_refinement_items
 from knowledge_feedback.conversation_refinement.contracts import REFINEMENT_TYPES
+from knowledge_feedback.conversation_refinement.graph import node_text
 from model_gateway.local_structured_chat import LocalStructuredChatAdapter
 
 
@@ -40,6 +35,7 @@ _ITEM_FIELDS = {
     "candidate_text",
     "refinement_type",
 }
+_MAX_CANDIDATE_CHARS = 10_000
 
 
 class ConversationRefinementBridgeError(ValueError):
@@ -139,23 +135,16 @@ def _validate_request(value: Mapping[str, Any]) -> dict[str, Any]:
     return request
 
 
-def _selected_messages(
-    messages: Sequence[Mapping[str, str]],
-) -> list[tuple[int, dict[str, str]]]:
-    # Capacity failures must surface from the execution channel; never silently
-    # omit the beginning of a selected conversation or truncate one message.
-    return [(index, dict(row)) for index, row in enumerate(messages)]
-
-
 def _build_graph(request: Mapping[str, Any]) -> tuple[dict[str, Any], list[str]]:
-    selected = _selected_messages(request["messages"])
+    """One graph node per selected message, each the reply to the one before. Every message goes
+    in whole: a conversation too long for the model fails there, nothing is cut here."""
     conversation_id = "conversation:" + hashlib.sha256(
         _canonical_bytes(request["source"])
     ).hexdigest()[:24]
     nodes: list[dict[str, Any]] = []
     message_ids: list[str] = []
     prior: str | None = None
-    for original_index, row in selected:
+    for original_index, row in enumerate(request["messages"]):
         message_id = f"message-{original_index:08d}"
         message_ids.append(message_id)
         nodes.append(
@@ -190,7 +179,7 @@ def _build_graph(request: Mapping[str, Any]) -> tuple[dict[str, Any], list[str]]
             "deterministic": True,
         }
     )
-    return validate_normalized_graph(graph), message_ids
+    return graph, message_ids
 
 
 def _response_schema(*, message_ids: Sequence[str]) -> dict[str, Any]:
@@ -199,7 +188,7 @@ def _response_schema(*, message_ids: Sequence[str]) -> dict[str, Any]:
         "additionalProperties": False,
         "required": sorted(_ITEM_FIELDS),
         "properties": {
-            "candidate_text": {"type": "string", "minLength": 1, "maxLength": 10_000},
+            "candidate_text": {"type": "string", "minLength": 1, "maxLength": _MAX_CANDIDATE_CHARS},
             "refinement_type": {"enum": sorted(REFINEMENT_TYPES)},
         },
     }
@@ -242,12 +231,11 @@ def _validate_model_proposals(
             raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_ITEM_FIELDS_INVALID")
         if item["message_id"] != message_id:
             raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_ITEM_ORDER_INVALID")
-        _require_text(
-            item["candidate_text"], "REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID", 10_000
-        )
+        text = item["candidate_text"]
+        if not isinstance(text, str) or not text.strip() or len(text) > _MAX_CANDIDATE_CHARS or "\x00" in text:
+            raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID")
         if item["refinement_type"] not in REFINEMENT_TYPES:
             raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_TYPE_INVALID")
-    Draft202012Validator(_response_schema(message_ids=message_ids)).validate(output)
     return items
 
 
@@ -265,7 +253,6 @@ def _formal_subject_output(
             proposals=proposals,
             scope="SELECTED_SESSION_MESSAGES",
         )
-        items = [validate_typed_refinement_item(item) for item in items]
     except Exception as error:
         raise ConversationRefinementBridgeError(
             str(getattr(error, "code", None) or error)
@@ -291,11 +278,7 @@ def _render_prompt(
             {
                 "message_id": row["message_id"],
                 "role": row["role"],
-                "content": "\n".join(
-                    block["text"] or ""
-                    for block in row["blocks"]
-                    if block["type"] in {"text", "code"}
-                ),
+                "content": node_text(row),
             }
             for row in graph["nodes"]
             if row["message_id"] in message_ids
@@ -412,8 +395,6 @@ class ExistingConversationRefinementChannel:
             raise ConversationRefinementBridgeError(
                 "REFINEMENT_PROMPT_UNAVAILABLE"
             ) from error
-        if not template.strip():
-            raise ConversationRefinementBridgeError("REFINEMENT_PROMPT_EMPTY")
 
         graph, message_ids = _build_graph(request)
         schema = _response_schema(message_ids=message_ids)

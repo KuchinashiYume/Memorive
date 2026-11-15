@@ -1,4 +1,9 @@
-"""Deterministic Construction-A refiner for Extensions synthetic and canary data."""
+"""Typed refinement items: one reviewable candidate per conversation message.
+
+An item is made by rules (deterministic_refine_graph) or from a model's proposal
+(make_model_refinement_items). Either way the refiner only proposes: the evidence state follows
+from the type, and a person decides what is kept.
+"""
 
 from __future__ import annotations
 
@@ -22,7 +27,7 @@ from .contracts import (
     object_ref,
     validate_context_capsule,
 )
-from .graph import message_text, validate_normalized_graph
+from .graph import node_text, validate_normalized_graph
 from .redaction import redact_text
 from .contracts import validate_selection_receipt
 
@@ -207,6 +212,101 @@ def _classify(role: str, text: str) -> tuple[str, str]:
     return "PROVENANCE_ONLY", stripped
 
 
+_NEEDS_EVIDENCE = {"AI_SUGGESTION", "HYPOTHESIS", "REPOSITORY_VERIFIABLE_FACT_CLAIM"}
+_RULE_BASED = "CONVERSATION_REFINEMENT_DETERMINISTIC_RULE_BASED_REFINER_V1"
+_MODEL_ASSISTED = "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1"
+
+
+def _item(
+    *,
+    item_id: str,
+    graph: Mapping[str, Any],
+    node: Mapping[str, Any],
+    capsule: Mapping[str, Any],
+    candidate_text: str,
+    refinement_type: str,
+    redaction: Mapping[str, Any],
+    scope: str,
+    ownership: str,
+    classification: str,
+    producer: str,
+) -> dict[str, Any]:
+    """One typed item from a checked graph, node and capsule. The evidence state follows from the
+    type alone: the refiner proposes, and never decides whether a claim is true."""
+    for field, value in (("item_id", item_id), ("scope", scope), ("ownership", ownership), ("classification", classification)):
+        if not isinstance(value, str) or not value:
+            raise ConversationContractError(f"TYPED_ITEM_{field.upper()}_INVALID")
+    evidence_state = {"PROVENANCE_ONLY": "PROVENANCE_ONLY", "FORBIDDEN_REUSE": "FORBIDDEN"}.get(refinement_type, "UNVERIFIED_CLAIM")
+    limitations = []
+    if refinement_type in _NEEDS_EVIDENCE:
+        limitations.append("REQUIRES_INDEPENDENT_EVIDENCE_OR_USER_DECISION")
+    if not capsule["context_complete"]:
+        limitations.append("CONTEXT_INSUFFICIENT")
+    return make_hashed_payload(
+        {
+            "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
+            "item_id": item_id,
+            "revision": 1,
+            "graph_ref": object_ref(graph, id_field="graph_id"),
+            "graph_hash": deepcopy(graph["content_hash"]),
+            "conversation_id": node["conversation_id"],
+            "message_refs": [node["message_id"]],
+            "context_capsule_ref": object_ref(capsule, id_field="capsule_id"),
+            "context_capsule_hash": deepcopy(capsule["content_hash"]),
+            "candidate_text": candidate_text,
+            "candidate_text_hash": typed_payload_hash({"candidate_text": candidate_text}),
+            "refinement_type": refinement_type,
+            "scope": scope,
+            "limitations": sorted(limitations),
+            "evidence_state": evidence_state,
+            "ownership": ownership,
+            "classification": classification,
+            "redaction_hash": deepcopy(redaction["content_hash"]),
+            "producer": producer,
+            "truth_decided_by_refiner": False,
+            "selected_scope_verified": True,
+        }
+    )
+
+
+def _rule_based_item(*, item_id, graph, node, capsule, scope, ownership, classification) -> dict[str, Any]:
+    """The type comes from a prefix such as DECISION: or from who wrote the message."""
+    text = node_text(node)
+    if not text.strip():
+        raise ConversationContractError("TYPED_ITEM_TEXT_REQUIRED")
+    redaction = redact_text(text)
+    refinement_type, candidate_text = _classify(node["role"], redaction["redacted_text"])
+    if not candidate_text:
+        raise ConversationContractError("TYPED_ITEM_CANDIDATE_TEXT_REQUIRED")
+    return _item(item_id=item_id, graph=graph, node=node, capsule=capsule, candidate_text=candidate_text,
+                 refinement_type=refinement_type, redaction=redaction, scope=scope, ownership=ownership,
+                 classification=classification, producer=_RULE_BASED)
+
+
+def _model_item(*, item_id, graph, node, capsule, candidate_text, refinement_type, scope, ownership, classification) -> dict[str, Any]:
+    """The model chooses only the text and one of the refinement types; the rest is set here."""
+    if refinement_type not in REFINEMENT_TYPES:
+        raise ConversationContractError("TYPED_ITEM_TYPE_INVALID")
+    if not isinstance(candidate_text, str) or not candidate_text.strip():
+        raise ConversationContractError("TYPED_ITEM_CANDIDATE_TEXT_REQUIRED")
+    redaction = redact_text(candidate_text.strip())
+    accepted_text = redaction["redacted_text"].strip()
+    if not accepted_text:
+        raise ConversationContractError("TYPED_ITEM_CANDIDATE_TEXT_REQUIRED")
+    return _item(item_id=item_id, graph=graph, node=node, capsule=capsule, candidate_text=accepted_text,
+                 refinement_type=refinement_type, redaction=redaction, scope=scope, ownership=ownership,
+                 classification=classification, producer=_MODEL_ASSISTED)
+
+
+def _checked(graph, node, capsule):
+    """A caller's graph and capsule, checked once; the node must be one of the graph's."""
+    checked_graph = validate_normalized_graph(graph)
+    checked_capsule = validate_context_capsule(capsule)
+    if node not in checked_graph["nodes"]:
+        raise ConversationContractError("TYPED_ITEM_NODE_NOT_IN_GRAPH")
+    return checked_graph, checked_capsule
+
+
 def make_typed_refinement_item(
     *,
     item_id: str,
@@ -217,53 +317,10 @@ def make_typed_refinement_item(
     ownership: str = "self",
     classification: str = "PRIVATE_USER_CONVERSATION",
 ) -> dict[str, Any]:
-    checked_graph = validate_normalized_graph(graph)
-    checked_capsule = validate_context_capsule(capsule)
-    if node not in checked_graph["nodes"]:
-        raise ConversationContractError("TYPED_ITEM_NODE_NOT_IN_GRAPH")
-    text = message_text(node)
-    if not text.strip():
-        raise ConversationContractError("TYPED_ITEM_TEXT_REQUIRED")
-    redaction = redact_text(text)
-    type_name, candidate_text = _classify(node["role"], redaction["redacted_text"])
-    if not candidate_text:
-        raise ConversationContractError("TYPED_ITEM_CANDIDATE_TEXT_REQUIRED")
-    evidence_state = {
-        "PROVENANCE_ONLY": "PROVENANCE_ONLY",
-        "FORBIDDEN_REUSE": "FORBIDDEN",
-    }.get(type_name, "UNVERIFIED_CLAIM")
-    limitations = []
-    if type_name in {"AI_SUGGESTION", "HYPOTHESIS", "REPOSITORY_VERIFIABLE_FACT_CLAIM"}:
-        limitations.append("REQUIRES_INDEPENDENT_EVIDENCE_OR_USER_DECISION")
-    if not checked_capsule["context_complete"]:
-        limitations.append("CONTEXT_INSUFFICIENT")
-    return validate_typed_refinement_item(
-        make_hashed_payload(
-            {
-                "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
-                "item_id": item_id,
-                "revision": 1,
-                "graph_ref": object_ref(checked_graph, id_field="graph_id"),
-                "graph_hash": deepcopy(checked_graph["content_hash"]),
-                "conversation_id": node["conversation_id"],
-                "message_refs": [node["message_id"]],
-                "context_capsule_ref": object_ref(checked_capsule, id_field="capsule_id"),
-                "context_capsule_hash": deepcopy(checked_capsule["content_hash"]),
-                "candidate_text": candidate_text,
-                "candidate_text_hash": typed_payload_hash({"candidate_text": candidate_text}),
-                "refinement_type": type_name,
-                "scope": scope,
-                "limitations": sorted(limitations),
-                "evidence_state": evidence_state,
-                "ownership": ownership,
-                "classification": classification,
-                "redaction_hash": deepcopy(redaction["content_hash"]),
-                "producer": "CONVERSATION_REFINEMENT_DETERMINISTIC_RULE_BASED_REFINER_V1",
-                "truth_decided_by_refiner": False,
-                "selected_scope_verified": True,
-            }
-        )
-    )
+    """A rule-based item for one message of a graph."""
+    checked_graph, checked_capsule = _checked(graph, node, capsule)
+    return _rule_based_item(item_id=item_id, graph=checked_graph, node=node, capsule=checked_capsule,
+                            scope=scope, ownership=ownership, classification=classification)
 
 
 def make_model_typed_refinement_item(
@@ -278,70 +335,12 @@ def make_model_typed_refinement_item(
     ownership: str = "self",
     classification: str = "PRIVATE_USER_CONVERSATION",
 ) -> dict[str, Any]:
-    """Bind a model proposal to the existing typed-item authority.
-
-    The model may propose only candidate text and one of the frozen refinement
-    types. Evidence state, limitations, provenance, hashes, and the no-truth-
-    decision boundary remain host-owned and are validated by the same Capabilities
-    contract as deterministic refinement items.
-    """
-
-    checked_graph = validate_normalized_graph(graph)
-    checked_capsule = validate_context_capsule(capsule)
-    if node not in checked_graph["nodes"]:
-        raise ConversationContractError("TYPED_ITEM_NODE_NOT_IN_GRAPH")
-    if refinement_type not in REFINEMENT_TYPES:
-        raise ConversationContractError("TYPED_ITEM_TYPE_INVALID")
-    if not isinstance(candidate_text, str) or not candidate_text.strip():
-        raise ConversationContractError("TYPED_ITEM_CANDIDATE_TEXT_REQUIRED")
-    redaction = redact_text(candidate_text.strip())
-    accepted_text = redaction["redacted_text"].strip()
-    if not accepted_text:
-        raise ConversationContractError("TYPED_ITEM_CANDIDATE_TEXT_REQUIRED")
-    evidence_state = {
-        "PROVENANCE_ONLY": "PROVENANCE_ONLY",
-        "FORBIDDEN_REUSE": "FORBIDDEN",
-    }.get(refinement_type, "UNVERIFIED_CLAIM")
-    limitations = []
-    if refinement_type in {
-        "AI_SUGGESTION",
-        "HYPOTHESIS",
-        "REPOSITORY_VERIFIABLE_FACT_CLAIM",
-    }:
-        limitations.append("REQUIRES_INDEPENDENT_EVIDENCE_OR_USER_DECISION")
-    if not checked_capsule["context_complete"]:
-        limitations.append("CONTEXT_INSUFFICIENT")
-    return validate_typed_refinement_item(
-        make_hashed_payload(
-            {
-                "schema_version": "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1",
-                "item_id": item_id,
-                "revision": 1,
-                "graph_ref": object_ref(checked_graph, id_field="graph_id"),
-                "graph_hash": deepcopy(checked_graph["content_hash"]),
-                "conversation_id": node["conversation_id"],
-                "message_refs": [node["message_id"]],
-                "context_capsule_ref": object_ref(
-                    checked_capsule, id_field="capsule_id"
-                ),
-                "context_capsule_hash": deepcopy(checked_capsule["content_hash"]),
-                "candidate_text": accepted_text,
-                "candidate_text_hash": typed_payload_hash(
-                    {"candidate_text": accepted_text}
-                ),
-                "refinement_type": refinement_type,
-                "scope": scope,
-                "limitations": sorted(limitations),
-                "evidence_state": evidence_state,
-                "ownership": ownership,
-                "classification": classification,
-                "redaction_hash": deepcopy(redaction["content_hash"]),
-                "producer": "CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1",
-                "truth_decided_by_refiner": False,
-                "selected_scope_verified": True,
-            }
-        )
-    )
+    """An item from a model's proposal for one message of a graph. Evidence state, limitations,
+    provenance and hashes are set as for rule-based items."""
+    checked_graph, checked_capsule = _checked(graph, node, capsule)
+    return _model_item(item_id=item_id, graph=checked_graph, node=node, capsule=checked_capsule,
+                       candidate_text=candidate_text, refinement_type=refinement_type, scope=scope,
+                       ownership=ownership, classification=classification)
 
 
 def _context_capsule_for_node(
@@ -351,8 +350,10 @@ def _context_capsule_for_node(
     selected: set[str],
     scope: str,
 ) -> dict[str, Any]:
+    """The context a message is read in: its parent when that is selected too, and whether its
+    wording negates, corrects or reports a failure."""
     parent_refs = [node["parent_id"]] if node["parent_id"] in selected else []
-    lowered = message_text(node).lower()
+    lowered = node_text(node).lower()
     return make_context_capsule(
         capsule_id=f"capsule:{graph['graph_id']}:{node['message_id']}",
         required_message_refs=sorted({node["message_id"], *parent_refs}),
@@ -376,45 +377,29 @@ def make_model_refinement_items(
     proposals: Sequence[Mapping[str, Any]],
     scope: str,
 ) -> list[dict[str, Any]]:
-    """Project bounded model proposals into formal typed refinement items."""
-
+    """Items from a model's proposals: one per message, in message order."""
     checked_graph = validate_normalized_graph(graph)
     nodes_by_id = {node["message_id"]: node for node in checked_graph["nodes"]}
-    accepted: list[dict[str, Any]] = []
-    message_ids: list[str] = []
+    rows: list[Mapping[str, Any]] = []
     for proposal in proposals:
-        if not isinstance(proposal, Mapping) or set(proposal) != {
-            "message_id",
-            "candidate_text",
-            "refinement_type",
-        }:
+        if not isinstance(proposal, Mapping) or set(proposal) != {"message_id", "candidate_text", "refinement_type"}:
             raise ConversationContractError("MODEL_REFINEMENT_PROPOSAL_FIELDS_INVALID")
-        row = deepcopy(dict(proposal))
-        message_id = row["message_id"]
-        if not isinstance(message_id, str) or message_id not in nodes_by_id:
+        if not isinstance(proposal["message_id"], str) or proposal["message_id"] not in nodes_by_id:
             raise ConversationContractError("MODEL_REFINEMENT_MESSAGE_REF_INVALID")
-        message_ids.append(message_id)
-        accepted.append(row)
-    if not accepted or message_ids != sorted(set(message_ids)):
+        rows.append(proposal)
+    message_ids = [row["message_id"] for row in rows]
+    if not rows or message_ids != sorted(set(message_ids)):
         raise ConversationContractError("MODEL_REFINEMENT_MESSAGE_REFS_INVALID")
     selected = set(message_ids)
-    return [
-        make_model_typed_refinement_item(
-            item_id=f"item:{checked_graph['graph_id']}:{row['message_id']}",
-            graph=checked_graph,
-            node=nodes_by_id[row["message_id"]],
-            capsule=_context_capsule_for_node(
-                graph=checked_graph,
-                node=nodes_by_id[row["message_id"]],
-                selected=selected,
-                scope=scope,
-            ),
-            candidate_text=row["candidate_text"],
-            refinement_type=row["refinement_type"],
-            scope=scope,
-        )
-        for row in accepted
-    ]
+    items = []
+    for row in rows:
+        node = nodes_by_id[row["message_id"]]
+        capsule = _context_capsule_for_node(graph=checked_graph, node=node, selected=selected, scope=scope)
+        items.append(_model_item(
+            item_id=f"item:{checked_graph['graph_id']}:{node['message_id']}", graph=checked_graph, node=node,
+            capsule=capsule, candidate_text=row["candidate_text"], refinement_type=row["refinement_type"],
+            scope=scope, ownership="self", classification="PRIVATE_USER_CONVERSATION"))
+    return items
 
 
 def deterministic_refine_graph(
@@ -423,6 +408,7 @@ def deterministic_refine_graph(
     selection_receipt: Mapping[str, Any],
     scope: str,
 ) -> list[dict[str, Any]]:
+    """Rule-based items for the messages a selection receipt names."""
     checked_graph = validate_normalized_graph(graph)
     selection = validate_selection_receipt(selection_receipt)
     if selection["snapshot_hash"] != checked_graph["snapshot_hash"]:
@@ -435,37 +421,11 @@ def deterministic_refine_graph(
     items: list[dict[str, Any]] = []
     for message_id in sorted(selected):
         node = nodes_by_id[message_id]
-        capsule = _context_capsule_for_node(
-            graph=checked_graph,
-            node=node,
-            selected=selected,
-            scope=scope,
-        )
-        items.append(
-            make_typed_refinement_item(
-                item_id=f"item:{checked_graph['graph_id']}:{message_id}",
-                graph=checked_graph,
-                node=node,
-                capsule=capsule,
-                scope=scope,
-            )
-        )
+        capsule = _context_capsule_for_node(graph=checked_graph, node=node, selected=selected, scope=scope)
+        items.append(_rule_based_item(
+            item_id=f"item:{checked_graph['graph_id']}:{message_id}", graph=checked_graph, node=node,
+            capsule=capsule, scope=scope, ownership="self", classification="PRIVATE_USER_CONVERSATION"))
     return items
-
-
-_CONFLICT_KEYS = {
-    "schema_version",
-    "conflict_id",
-    "revision",
-    "item_refs",
-    "dimension",
-    "resolution",
-    "resolver",
-    "evidence_refs",
-    "resolved",
-    "history_overwritten",
-    "content_hash",
-}
 
 
 def make_conflict_set(
@@ -508,8 +468,6 @@ def make_conflict_set(
             "history_overwritten": False,
         }
     )
-    if set(value) != _CONFLICT_KEYS:
-        raise ConversationContractError("CONFLICT_SET_EXACT_KEYS_MISMATCH")
     return value
 
 
