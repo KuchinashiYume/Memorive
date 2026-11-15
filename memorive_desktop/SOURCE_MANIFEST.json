@@ -4146,6 +4146,11 @@
       "bytes": 20239
     },
     {
+      "path": "source/memorive_research_workspace/answering.py",
+      "sha256": "c3f6b37eff6e6cea97c0e9b6ce7335011efa7d06145b828429feaeeb6a97832b",
+      "bytes": 35499
+    },
+    {
       "path": "source/memorive_research_workspace/attachments.py",
       "sha256": "fb0b253c1202a395c6b612f1c83f6d1d1007122f5f2741fea2afae21b1591137",
       "bytes": 15973
@@ -4242,8 +4247,8 @@
     },
     {
       "path": "source/memorive_research_workspace/service.py",
-      "sha256": "4d3ab13e9784f839dc6480434ccf3db3177fc13e26688a6a99709c1af9084117",
-      "bytes": 63048
+      "sha256": "366c230ca94c95eecec887c7b52a974870ab1441afd4d3cbb6629b274808f401",
+      "bytes": 35890
     },
     {
       "path": "source/memorive_research_workspace/skill_bridge.py",

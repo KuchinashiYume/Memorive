@@ -2,8 +2,10 @@
 
 The model is optional. Evidence-only mode returns quotations explicitly; it
 never masquerades as a generated answer or launches an external agent.
+
+How a question is answered, step by step, is in answering.py.
 """
-import copy,json,re,threading,time
+import json,re,threading,time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from .store import Store,digest,uid,now,packed
@@ -14,7 +16,7 @@ from .connections import Connections,DESKTOP as CONNECTION_METHODS
 from .answer_evidence import AnswerEvidence,METHODS as ANSWER_EVIDENCE_METHODS
 from . import answer_coverage
 from . import answer_versions
-from memorive_language import freeze as freeze_language, locale as output_locale
+from memorive_language import freeze as freeze_language
 from memorive_language.text import choose
 
 PUBLIC_METHODS=frozenset({'memo.capabilities','memo.search','memo.read_evidence','memo.prepare_tension',
@@ -260,288 +262,13 @@ class ResearchWorkspace:
             'instructions':'Compare each facet with quoted evidence. Distinguish incomparable conditions from conflicting findings. Return a proposed interpretation with limitations; never declare novelty from missing search results.',
             'source_snapshot_hash':digest([{k:r[k] for k in ('id','artifact_id','content_hash','chunk_hash')} for r in refs])}
 
-    def _context(self,thread,question,refs,settings,coverage_plan=None,topic_snapshot=None,*,request_context=None):
-        memories=[] if thread['temporary'] or not settings['memory_enabled'] else [m for m in self.store.list('memory')
-            if m['active'] and (m['scope']=='user' or m['project']==thread['project'])]
-        if '_memory_snapshot' in settings:memories=settings['_memory_snapshot']
-        selected=(coverage_plan or {}).get('scope_ids',self.attachments.scope_ids(thread))
-        topic_snapshot=topic_snapshot or self.topic.snapshot(thread,selected)
-        messages=[];withheld_history=[]
-        for message in thread['messages']:
-            if message['id'] in topic_snapshot.get('withheld_message_ids',[]):withheld_history.append(message['id']);continue
-            try:
-                for citation in message.get('citations',[]):
-                    if selected is not None and citation['artifact_id'] not in selected:raise ValueError('HISTORY_OUTSIDE_SCOPE')
-                    self.index.read(citation['id'],thread['project'],expected_hash=citation['content_hash'])
-            except (ValueError,OSError):withheld_history.append(message['id']);continue
-            messages.append(message)
-        keep=settings['recent_messages']
-        older=messages[:-keep] if len(messages)>keep else []
-        summary=[{'message_id':m['id'],'role':m['role'],'excerpt':m['text'][:300]} for m in older[-16:]]
-        payload={'_thread_scope':digest(thread['id']),'_temporary':thread['temporary'],'confirmed_memory':[{'id':m['id'],'revision':m['revision'],'text':m['text']} for m in memories[:12]],
-            'extractive_summary':summary,'recent_messages':[{'message_id':m['id'],'role':m['role'],'text':m['text']} for m in messages[-keep:]],
-            'evidence':[{**{k:r.get(k) for k in ('id','artifact_id','document_id','title','text','content_hash','page','line_start','line_end')},
-                         **{k:r[k] for k in ('material_layer','source_content_hash','knowledge_review','structure_refs','line_basis','source_warnings') if k in r}} for r in refs],'question':question,
-            'withheld_history_ids':withheld_history}
-        # Count the whole request envelope before topic allocation and optional trimming.
-        payload.update(copy.deepcopy(request_context or {}))
-        budget=settings['context_chars']
-        if coverage_plan is not None:
-            payload['source_scope']={'artifact_ids':coverage_plan['scope_ids'],'facets':[f['label'] for f in coverage_plan['facets']],
-                'notice':'Only retained excerpts below were supplied. Missing excerpts or Card fields are not absence in the source. Facet sufficiency remains unassessed.'}
-            if coverage_plan.get('unavailable_sources'):
-                payload['source_scope']['unavailable_sources']=coverage_plan['unavailable_sources']
-                payload['source_scope']['notice']+=' Excluded knowledge has unavailable source versions; its saved review state is unchanged. Do not treat it as current evidence or infer scientific rejection.'
-        # The total budget is unchanged. User quotations share its actual
-        # remaining capacity rather than failing at an arbitrary one-third
-        # partition. Optional model notes still have a conservative soft limit.
-        structural=dict(payload,evidence=[],confirmed_memory=[],extractive_summary=[],recent_messages=[],research_topic={})
-        if coverage_plan is not None:
-            structural['source_scope']=dict(payload['source_scope'],retained_artifact_ids=[],missing_artifact_ids=coverage_plan['scope_ids'])
-        topic_budget=max(0,budget-len(packed(structural))+2)
-        payload['research_topic']=self.topic.context(topic_snapshot,topic_budget,optional_limit=budget//3)
-        def size():
-            if coverage_plan is not None:
-                retained=list(dict.fromkeys(r['artifact_id'] for r in payload['evidence']))
-                payload['source_scope'].update(retained_artifact_ids=retained,
-                    missing_artifact_ids=[a for a in coverage_plan['scope_ids'] if a not in retained] if coverage_plan['scope_ids'] is not None else None)
-            return len(packed(payload))
-        # Remove low-priority historic context first; never slice the current question or invent a summary.
-        while size()>budget and payload['recent_messages']:payload['recent_messages'].pop(0)
-        while size()>budget and payload['extractive_summary']:payload['extractive_summary'].pop(0)
-        while size()>budget and payload['confirmed_memory']:payload['confirmed_memory'].pop()
-        if size()>budget and payload['evidence']:
-            from .context_selection import select
-            by_id={r['id']:r for r in payload['evidence']}
-            def fits(selected_refs):
-                payload['evidence']=[by_id[r['id']] for r in selected_refs]
-                return size()<=budget
-            selected_refs=select(refs,question,fits)
-            payload['evidence']=[by_id[r['id']] for r in selected_refs]
-        if size()>budget:raise ValueError('QUESTION_EXCEEDS_CONTEXT_BUDGET')
-        return payload,summary
-
     def ask(self,thread_id,question,request_id,artifact_ids=None,agent_profile_ref=None,path_token=None,output_language=None):
         return self.versions.enqueue(thread_id,question,request_id,artifact_ids,agent_profile_ref,path_token_expected=path_token,output_language=output_language)
 
     def _answer(self,identity,question,artifact_ids):
-        started=time.monotonic();usage={};search={}
-        try:
-            from .answer_conversation import run_if_requested
-            initial=self.job_status(identity)
-            if not initial.get('retry_of') and run_if_requested(self,identity,question):return
-            from memorive_settings.task_scheduling import TASK_CATEGORIES
-            def checkpoint():
-                row = self.store.get('job', identity)
-                if self.closed or not row or row.get('cancel_requested'):
-                    raise ValueError('RESEARCH_CANCELLED')
-            with TASK_CATEGORIES.enter('RESEARCH_CHAT', checkpoint=checkpoint):
-                job=self.store.get('job',identity)
-                if not job:return
-                with self.store.tx() as db:
-                    job=self.store.get('job',identity,db=db)
-                    if self.closed or not job or job['status'] not in {'QUEUED','RUNNING'} or job.get('cancel_requested'):return
-                    job=self.store.put('job',identity,job['project'],dict(job,status='RUNNING'),db=db)
-                thread=self.versions.generation_thread(job);settings=dict(job.get('model_settings') or self.settings())
-                request_context={'language_context':copy.deepcopy(job.get('language_context') or freeze_language()),'answer_style':copy.deepcopy(job['answer_style']),'_thread_scope':digest(thread['id']),
-                    '_answer_path':{'ids':[m['id'] for m in job.get('parent_path',[])],'hash':job.get('parent_path_hash')}}
-                if 'memory_snapshot' in job:settings['_memory_snapshot']=job['memory_snapshot']
-                if job.get('retry_snapshot'):
-                    prior=job['retry_snapshot'];context=copy.deepcopy(prior['context']);summary=copy.deepcopy(prior['summary'])
-                    refs=copy.deepcopy(prior['refs']);search=copy.deepcopy(prior['search']);intent=prior['intent']
-                    coverage_snapshot=copy.deepcopy(prior['coverage_snapshot']);evidence_context=copy.deepcopy(prior['evidence_context'])
-                    admitted={r['id'] for r in refs}
-                    self.versions.validate_retry_topic(job,prior,context)
-                    context.update(request_context,task_intent=intent)
-                else:
-                    coverage_plan=answer_coverage.plan(question,artifact_ids)
-                    unavailable=self.index.unavailable_derived(thread['project'],artifact_ids)
-                    if unavailable:coverage_plan['unavailable_sources']=[dict(artifact_id=aid,**value) for aid,value in sorted(unavailable.items())]
-                    coverage_plan['project']=thread['project'];coverage_plan['hash']=digest({k:v for k,v in coverage_plan.items() if k!='hash'})
-                    search=self.index.search(question,thread['project'],limit=8,artifact_ids=artifact_ids,policy_config=(job.get('weight_policy') or {}).get('config'));refs=search['results']
-                    refs=answer_coverage.local_candidates(self.index,artifact_ids,refs,coverage_plan)
-                    retrieved_refs=list(refs)
-                    # Short follow-ups may omit the original topic. Reuse only fresh citations
-                    # from this thread, within any explicit document selection.
-                    if not refs:
-                        previous=next((m for m in reversed(thread['messages']) if m['role']=='assistant' and m.get('citations')),None)
-                        for citation in (previous or {}).get('citations',[])[:8]:
-                            if artifact_ids is not None and citation['artifact_id'] not in artifact_ids:continue
-                            try:
-                                ref=self.index.read(citation['id'],thread['project'],expected_hash=citation['content_hash'])
-                                refs.append(dict(ref,selection='previous_turn'))
-                            except (ValueError,OSError):continue
-                    # Explicit files stay usable for Chinese questions about English PDFs.
-                    # Balance the evidence across selected documents before adding ranked hits.
-                    read_refs=list(refs)
-                    if artifact_ids:
-                        balanced=[];per_document=[]
-                        with self.store.tx() as db:
-                            for aid in artifact_ids:
-                                if aid in unavailable:continue
-                                matches=[r for r in refs if r['artifact_id']==aid]
-                                # Explicit selection must cover body pages even when a
-                                # Chinese query has few lexical matches in an English PDF.
-                                rows=db.execute('SELECT id,page FROM chunks WHERE artifact_id=? ORDER BY page,line_start,id',(aid,)).fetchall()
-                                chosen=matches[:2];seen={r['id'] for r in chosen};pages={r.get('page') for r in chosen}
-                                for row in rows:
-                                    if row['id'] not in seen and row['page'] not in pages:
-                                        chosen.append(dict(self.index.read(row['id'],thread['project'],db=db),selection='selected_document_page'))
-                                        seen.add(row['id']);pages.add(row['page'])
-                                for row in rows:
-                                    if row['id'] not in seen:
-                                        chosen.append(dict(self.index.read(row['id'],thread['project'],db=db),selection='selected_document_context'))
-                                        seen.add(row['id'])
-                                per_document.append(chosen)
-                        # Round-robin order preserves both papers if the context budget
-                        # later removes its tail. Never reuse another paper's identity.
-                        for index in range(max((len(rows) for rows in per_document),default=0)):
-                            for rows in per_document:
-                                if index<len(rows):balanced.append(rows[index])
-                        read_refs=balanced
-                        # Already-read, authorized excerpts stay eligible until
-                        # the context's actual character budget has been applied.
-                        refs=answer_coverage.pack_order(balanced,question)
-                    if unavailable and not refs:
-                        coverage=answer_coverage.snapshot(self.store,coverage_plan,retrieved_refs,read_refs,refs)
-                        self.store.put('job',identity,job['project'],dict(self.job_status(identity),evidence_coverage=coverage))
-                        raise ValueError('EVIDENCE_NO_CURRENT_SOURCE')
-                    comparison=bool(re.search(r'比较|对比|异同|差异|张力|矛盾|冲突|compare|comparison|differ|tension|conflict',question,re.I))
-                    # Comparing methods, results or passages inside one selected
-                    # paper is a valid single-document follow-up.  Require two
-                    # papers only when the wording or selection explicitly asks
-                    # for a cross-document comparison.
-                    cross_document=bool(re.search(r'跨篇|跨文献|不同文献|两篇|多篇|这些研究|这些文献|这些论文|between\s+(?:the\s+)?(?:papers|documents|studies)|across\s+(?:papers|documents|studies)',question,re.I))
-                    intent='comparison' if comparison else ('knowledge' if re.search(r'回流|保存.*知识|整理.*结论|save.*knowledge',question,re.I) else 'question')
-                    if cross_document and len({answer_coverage.document_key(r) for r in refs})<2:raise ValueError('TENSION_NEEDS_TWO_PAPERS')
-                    context,summary=self._context(thread,question,refs,settings,coverage_plan,job.get('topic_snapshot'),
-                        request_context=dict(request_context,task_intent='agent' if job.get('kind')=='agent' else intent))
-                    admitted={e['id'] for e in context['evidence']};refs=[r for r in refs if r['id'] in admitted]
-                    coverage_snapshot=answer_coverage.snapshot(self.store,coverage_plan,retrieved_refs,read_refs,refs)
-                    evidence_context={'question':question,'coverage':coverage_snapshot,'retained':refs,'read':read_refs}
-                    checkpoint()
-                    if cross_document and len({answer_coverage.document_key(r) for r in refs})<2:raise ValueError('COMPARISON_CONTEXT_TOO_SMALL')
-                response_schema=None;response_contract=None
-                if settings['profile_ref']:
-                    from .desktop import ANSWER_SCHEMA
-                    from .response_contract import bind_evidence,REVISION as response_revision
-                    base_schema=ANSWER_SCHEMA
-                    if job.get('kind')=='agent':
-                        from research_opportunities.research_opportunities import schema
-                        base_schema=schema()
-                    response_schema=bind_evidence(base_schema,[e['id'] for e in context['evidence']])
-                    response_contract={'revision':response_revision,'schema_sha256':digest(response_schema),
-                                       'evidence_ids':[e['id'] for e in context['evidence']]}
-                self.store.put('job',identity,job['project'],dict(self.job_status(identity),evidence_coverage=coverage_snapshot,response_contract=response_contract))
-                # Frozen retry evidence is never silently retrimmed after a style change.
-                if len(packed(context))>settings['context_chars']:
-                    raise ValueError('RETRY_CONTEXT_EXCEEDS_CONTEXT_BUDGET' if job.get('retry_of') else 'QUESTION_EXCEEDS_CONTEXT_BUDGET')
-                self.versions.validate_context(job,context,refs)
-                checkpoint()
-                from model_gateway.research_prompt_cache import research_prompt,CHAT_RULES
-                from .skill_bridge import METHOD_RULES
-                prompt=research_prompt(CHAT_RULES+'\n'+METHOD_RULES,context)
-                value={}
-                usage={};engine='evidence_only';citations=[r['id'] for r in refs]
-                # Discussion depth is not an execution requirement. Only a
-                # concrete request for external/long-running work suggests handoff.
-                handoff=bool(re.search(r'^(?:请|帮我)?(?:交给|转交).{0,16}(?:Agent|智能体)|^(?:请|帮我)?(?:持续|自动|跨应用|跨仓库).{0,24}(?:执行|运行|抓取|监控)|^(?:please\s+)?(?:hand off|delegate).{0,24}agent|^(?:please\s+)?(?:continuously|autonomously).{0,24}(?:run|execute|monitor)',question,re.I))
-                if settings['profile_ref']:
-                    if not (self.agent_model if job.get('kind')=='agent' else self.model):raise ValueError('CHAT_MODEL_RUNNER_UNAVAILABLE')
-                    if job.get('kind')=='agent':
-                        from research_opportunities.research_opportunities import schema,instructions
-                        prompt=research_prompt(instructions()+'\n'+METHOD_RULES,context)
-                        pack={'schema_version':'MemoAgentHandoff-v2','project':thread['project'],'thread_id':thread['id'],'question':question,
-                            'agent':settings['agent'],'evidence':refs,'conversation_summary':[{'role':m['role'],'text':m.get('text',m.get('excerpt',''))} for m in context['extractive_summary']+context['recent_messages']],
-                            'instructions':instructions(),'language_context':copy.deepcopy(request_context['language_context']),'expression_preference':job['answer_style'],'expression_scope':'User preference only; does not replace receiving agent permissions or task instructions','created_at':now(),'external_transmission':True,'artifact_ids':artifact_ids,'profile_ref':settings['profile_ref']}
-                        pack['content_hash']=digest(pack)
-                        self.store.put('handoff','handoff_'+identity,thread['project'],pack)
-                        self.store.put('job',identity,job['project'],dict(self.job_status(identity),handoff_id='handoff_'+identity,progress='AGENT_RUNNING'))
-                        result=self.agent_model(profile_ref=settings['profile_ref'],prompt=prompt,job_id=identity,response_schema=response_schema)
-                    else:result=self.model(profile_ref=settings['profile_ref'],prompt=prompt,job_id=identity,response_schema=response_schema)
-                    value=result['response'];usage=result.get('execution_receipt',{});engine=result.get('model_name','configured_model')
-                    if not isinstance(value,dict) or not isinstance(value.get('answer'),str) or not isinstance(value.get('citations'),list):raise ValueError('CHAT_RESPONSE_INVALID')
-                    if any(not isinstance(c,str) or c not in admitted for c in value['citations']):raise ValueError('CHAT_CITATION_NOT_IN_CONTEXT')
-                    text=value['answer'];citations=value['citations']
-                    if not text.strip():raise ValueError('CHAT_RESPONSE_EMPTY')
-                else:
-                    text=(choose(request_context['language_context'],'已找到以下资料片段。当前为本地检索模式，可在输入框选择模型继续提问。\n\n','The excerpts below were retrieved locally. Select a model in the input area to continue.\n\n','以下の断片をローカル検索で取得しました。入力欄でモデルを選択して質問を続けられます。\n\n')+
-                        '\n\n'.join(f'[{i+1}] {r["title"]}\n{r["text"][:550]}' for i,r in enumerate(refs))) if refs else choose(request_context['language_context'],'当前项目中没有找到足够相关的证据。请检查资料范围、刷新索引，或准备材料交给 Agent。','No sufficiently relevant evidence was found in this project. Check the material scope, refresh the index, or prepare materials for an agent.','このプロジェクトでは十分に関連する証拠が見つかりませんでした。資料の範囲を確認し、索引を更新するか、エージェントに渡す資料を用意してください。')
-                    citations=[r['id'] for r in refs]
-                with self.store.tx() as db:
-                    latest=self.store.get('job',identity,db=db)
-                    if not latest:return
-                    if self.closed and latest['status'] in {'QUEUED','RUNNING'}:
-                        self.store.put('job',identity,job['project'],dict(latest,status='INTERRUPTED',usage=usage,error='Workspace closed; result discarded',elapsed_ms=round((time.monotonic()-started)*1000)),db=db)
-                        return
-                    if latest['status'] not in {'QUEUED','RUNNING'}:
-                        if usage:self.store.put('job',identity,job['project'],dict(latest,late_usage=usage,late_result='DISCARDED',elapsed_ms=round((time.monotonic()-started)*1000)),db=db)
-                        return
-                    if latest['cancel_requested']:
-                        self.store.put('job',identity,job['project'],dict(latest,status='CANCELLED',usage=usage,elapsed_ms=round((time.monotonic()-started)*1000)),db=db);return
-                    if latest['status'] not in {'QUEUED','RUNNING'}:return
-                    current=self.store.get('thread',thread['id'],db=db)
-                    if not current:return
-                    if current.get('archived'):raise ValueError('THREAD_ARCHIVED')
-                    self.versions.validate_context(job,context,refs,db=db)
-                    user=copy.deepcopy(job['question_message'])
-                    by_evidence_id={r['id']:r for r in refs}
-                    answer={'id':uid('msg_'),'role':'assistant','text':text,'created_at':now(),'citations':[by_evidence_id[i] for i in citations],
-                        'answer_version':1,'language_context':copy.deepcopy(request_context['language_context']),'evidence_context':evidence_context,'claim_reviews':[],'review_binding':None,
-                        'engine':engine,'usage':usage,'ranking_policy_hash':search.get('policy_hash'),'ranking_receipts':search.get('ranking_receipts',[]),'ranking_warnings':search.get('warnings',[]),'intent':intent,'artifact_ids':artifact_ids or [],'elapsed_ms':round((time.monotonic()-started)*1000),'needs_agent':handoff,
-                        'context':{'memory_ids':[m['id'] for m in context['confirmed_memory']],'summary_message_ids':[m['message_id'] for m in context['extractive_summary']],
-                            'chars':len(packed(context)),'estimated_input_tokens':(len(prompt)+2)//3,'token_estimate_only':True}}
-                    answer['generation']={'schema_version':'MemoAnswerGeneration-v1','job_id':identity,'request_id':job['request_id'],
-                        'topic_snapshot':copy.deepcopy((job.get('retry_snapshot') or {}).get('topic_snapshot') or job['topic_snapshot']),
-                        'language_context':copy.deepcopy(request_context['language_context']),
-                        'topic_commit_binding':job['topic_snapshot']['binding'],'style':copy.deepcopy(job['answer_style']),'model_binding':copy.deepcopy(job.get('model_binding')),
-                        'model_settings':copy.deepcopy(job['model_settings']),'weight_policy':copy.deepcopy(job['weight_policy']),
-                        'artifact_ids':artifact_ids,'context':copy.deepcopy(context),'summary':summary,'refs':refs,'search':search,
-                        'intent':intent,'coverage_snapshot':coverage_snapshot,'evidence_context':evidence_context,
-                        'prompt_sha256':digest(prompt.encode()),'actual_instruction_sha256':digest(prompt.split('<SOURCE_CONTEXT>',1)[0].encode()),
-                        'parent_path_hash':job['parent_path_hash'],'retry_of':job.get('retry_of')}
-                    if job.get('kind')=='agent':
-                        from research_opportunities.research_opportunities import validate
-                        answer['opportunities']=validate(value.get('opportunities',[]),admitted);answer['agent_result']=True;answer['needs_agent']=False
-                    draft=value.get('knowledge_draft')
-                    if (intent in {'comparison','knowledge'} or job.get('kind')=='agent') and draft is not None:
-                        issue=None
-                        if not isinstance(draft,dict) or set(draft)!={'title','claim','scope','limitations','evidence_ids'}:
-                            issue='KNOWLEDGE_DRAFT_INVALID'
-                        elif any(not isinstance(draft[k],str) or not draft[k].strip() for k in ('title','claim','scope','limitations')):
-                            issue='KNOWLEDGE_DRAFT_INVALID'
-                        elif not isinstance(draft['evidence_ids'],list) or not draft['evidence_ids'] or any(not isinstance(i,str) or i not in admitted for i in draft['evidence_ids']):
-                            issue='KNOWLEDGE_DRAFT_CITATION_INVALID'
-                        if issue:
-                            answer['knowledge_draft_issue']=issue
-                            self.store.event('KNOWLEDGE_DRAFT_WITHHELD',identity,{'reason':issue,'draft_hash':digest(draft),'answer_preserved':True},db)
-                        else:
-                            proposal=self.feedback.propose(project=thread['project'],**draft,origin='desktop',language_context=request_context['language_context'],db=db)
-                            answer['feedback_id']=proposal['id']
-                            self.store.put('answer_feedback',answer['id'],thread['project'],dict(thread_id=thread['id'],answer_id=answer['id'],feedback_id=proposal['id'],job_id=identity),db=db)
-                    user['artifact_ids']=artifact_ids or []
-                    topic_result=self.topic.commit_answer(job['topic_snapshot'],self.versions.generation_thread(job,db=db),user,answer,value.get('research_notes',[]),artifact_ids,db)
-                    answer['research_progress']=topic_result
-                    answer['context']['research_topic']=context['research_topic']
-                    answer['context']['history_message_ids']=[m['message_id'] for m in context['extractive_summary']+context['recent_messages']]
-                    answer['context']['withheld_history_ids']=context['withheld_history_ids']
-                    answer_versions.append(current,user,answer,selection_revision=job['selection_revision'])
-                    current['summary']=[];current['summary_ids']=[]
-                    if len(current['messages'])==2 and not current.get('title_custom'):current['title']=question[:70]
-                    current['updated_at']=now()
-                    self.store.put('thread',thread['id'],thread['project'],current,db=db)
-                    self.store.put('job',identity,job['project'],dict(latest,status='COMPLETE',answer_id=answer['id'],elapsed_ms=answer['elapsed_ms'],usage=usage),db=db)
-                    if settings['use_recent_interests'] and not thread['temporary'] and not job.get('retry_of'):
-                        from retrieval_weighting.research_interests import term_hashes
-                        self.store.event('EXPLICIT_RESEARCH_INTEREST',thread['id'],{'query_hash':digest(question),'term_hashes':term_hashes(question),'evidence_ids':citations,'project':thread['project']},db)
-        except BaseException as exc:
-            usage=getattr(exc,'execution_receipt',None) or usage
-            with self.store.tx() as db:
-                job=self.store.get('job',identity,db=db)
-                # A late worker exception cannot undo an already committed
-                # success or a restart's terminal recovery decision.
-                if job and job['status'] in {'QUEUED','RUNNING','CANCELLED'}:
-                    self.store.put('job',identity,job['project'],dict(job,status='CANCELLED' if job.get('cancel_requested') else 'ERROR',error=str(exc)[:180],usage=usage,ranking_receipts=search.get('ranking_receipts',[]),elapsed_ms=round((time.monotonic()-started)*1000)),db=db)
+        """Answer a queued question; the worker pool runs this. The steps are in answering.py."""
+        from .answering import answer_job
+        answer_job(self,identity,question,artifact_ids)
 
     def job_status(self,job_id):
         row=self.store.get('job',job_id)

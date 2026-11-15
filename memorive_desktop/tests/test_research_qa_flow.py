@@ -3,7 +3,8 @@ cancelled, interrupted by a restart, or answered again.
 
 Each test asks about the synthetic paper of examples/research_qa.py with a stand-in model, so the
 whole path runs (queue, excerpts, prompt, model, checks, save) and nothing leaves the computer.
-The code these tests cover starts at ResearchWorkspace.ask (memorive_research_workspace/service.py).
+The code these tests cover starts at ResearchWorkspace.ask (memorive_research_workspace/service.py);
+the steps of answering are in memorive_research_workspace/answering.py.
 """
 from __future__ import annotations
 
