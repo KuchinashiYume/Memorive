@@ -1,6 +1,13 @@
+"""The message list of the desktop window, kept in message_projection_store.json.
+
+The file holds {schema_version, revision, updated_at, state, state_sha256}; the state holds the
+messages by id, the dedupe index (dedupe key -> message id, which follows from the messages)
+and the projection cursor with the fingerprints of projected events. Every message is checked
+as a MessageRecord and scanned for secrets when it is read or written. A file that cannot be
+read is moved aside as message_projection.corrupt.<hash>.json and replaced by an empty list.
+"""
 from __future__ import annotations
 
-from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -46,46 +53,29 @@ class MessageStore:
         self.redaction_policy = redaction_policy or RedactionPolicy()
 
     def _atomic_write(self, path: Path, payload: Mapping[str, Any]) -> None:
-        encoded = canonical_json_bytes(dict(payload)) + b"\n"
         temporary = path.parent / f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
         with temporary.open("xb") as stream:
-            stream.write(encoded)
+            stream.write(canonical_json_bytes(dict(payload)) + b"\n")
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
 
     def _validate_state(self, value: Any) -> dict[str, Any]:
-        if not isinstance(value, Mapping) or set(value) != {"messages", "dedupe_index", "projection"}:
-            raise MessageStoreCorrupt("MESSAGE_STORE_STATE_FIELDS_INVALID")
-        raw_messages = value["messages"]
-        if not isinstance(raw_messages, Mapping) or len(raw_messages) > 10000:
+        if not isinstance(value, Mapping) or not isinstance(value.get("messages", {}), Mapping):
             raise MessageStoreCorrupt("MESSAGE_STORE_MESSAGES_INVALID")
         messages: dict[str, dict[str, Any]] = {}
-        for message_id, raw in raw_messages.items():
-            record = MessageRecord.from_mapping(raw)
-            if message_id != record.message_id:
-                raise MessageStoreCorrupt("MESSAGE_STORE_MESSAGE_KEY_MISMATCH")
-            accepted = record.to_dict()
-            self.redaction_policy.assert_public_safe(accepted)
-            messages[message_id] = accepted
-        raw_index = value["dedupe_index"]
-        if not isinstance(raw_index, Mapping) or len(raw_index) != len(messages):
-            raise MessageStoreCorrupt("MESSAGE_STORE_DEDUPE_INDEX_INVALID")
-        dedupe_index: dict[str, str] = {}
-        for key, message_id in raw_index.items():
-            if message_id not in messages or messages[message_id]["dedupe_key"] != key:
-                raise MessageStoreCorrupt("MESSAGE_STORE_DEDUPE_INDEX_MISMATCH")
-            dedupe_index[str(key)] = str(message_id)
-        projection = value["projection"]
-        if not isinstance(projection, Mapping) or set(projection) != {"cursor", "fingerprints"}:
-            raise MessageStoreCorrupt("MESSAGE_STORE_PROJECTION_FIELDS_INVALID")
-        cursor = projection["cursor"]
+        for raw in value.get("messages", {}).values():
+            record = MessageRecord.from_mapping(raw).to_dict()
+            self.redaction_policy.assert_public_safe(record)
+            messages[record["message_id"]] = record
+        projection = value.get("projection", default_projection_state())
+        cursor = projection.get("cursor") if isinstance(projection, Mapping) else None
+        fingerprints = projection.get("fingerprints") if isinstance(projection, Mapping) else None
         if isinstance(cursor, bool) or not isinstance(cursor, int) or cursor < 0:
             raise MessageStoreCorrupt("MESSAGE_STORE_CURSOR_INVALID")
-        fingerprints = projection["fingerprints"]
-        if not isinstance(fingerprints, Mapping) or len(fingerprints) > 512:
+        if not isinstance(fingerprints, Mapping):
             raise MessageStoreCorrupt("MESSAGE_STORE_FINGERPRINTS_INVALID")
-        accepted_fingerprints: dict[str, str] = {}
+        accepted: dict[int, str] = {}
         for sequence, digest in fingerprints.items():
             try:
                 number = int(sequence)
@@ -93,104 +83,71 @@ class MessageStore:
                 raise MessageStoreCorrupt("MESSAGE_STORE_FINGERPRINT_SEQUENCE_INVALID") from exc
             if number <= 0 or not isinstance(digest, str) or len(digest) != 64:
                 raise MessageStoreCorrupt("MESSAGE_STORE_FINGERPRINT_INVALID")
-            accepted_fingerprints[str(number)] = digest
+            accepted[number] = digest
         return {
             "messages": dict(sorted(messages.items())),
-            "dedupe_index": dict(sorted(dedupe_index.items())),
-            "projection": {"cursor": cursor, "fingerprints": dict(sorted(accepted_fingerprints.items(), key=lambda row: int(row[0])))},
+            "dedupe_index": dict(sorted((row["dedupe_key"], key) for key, row in messages.items())),
+            "projection": {"cursor": cursor, "fingerprints": {str(n): accepted[n] for n in sorted(accepted)}},
         }
 
-    def _envelope(self, state: Mapping[str, Any], revision: int) -> dict[str, Any]:
+    def _write(self, state: Mapping[str, Any], revision: int) -> dict[str, Any]:
         accepted = self._validate_state(state)
-        return {
-            "schema_version": STORE_SCHEMA_VERSION,
-            "revision": revision,
-            "updated_at": utc_now(),
-            "state": accepted,
-            "state_sha256": _state_sha(accepted),
-        }
-
-    def _validate_envelope(self, value: Any) -> dict[str, Any]:
-        if not isinstance(value, Mapping) or set(value) != {
-            "schema_version",
-            "revision",
-            "updated_at",
-            "state",
-            "state_sha256",
-        }:
-            raise MessageStoreCorrupt("MESSAGE_STORE_ENVELOPE_INVALID")
-        if value["schema_version"] != STORE_SCHEMA_VERSION:
-            raise MessageStoreCorrupt("MESSAGE_STORE_SCHEMA_UNSUPPORTED")
-        revision = value["revision"]
-        if isinstance(revision, bool) or not isinstance(revision, int) or revision < 0:
-            raise MessageStoreCorrupt("MESSAGE_STORE_REVISION_INVALID")
-        state = self._validate_state(value["state"])
-        if value["state_sha256"] != _state_sha(state):
-            raise MessageStoreCorrupt("MESSAGE_STORE_CHECKSUM_MISMATCH")
-        return {**dict(value), "state": state}
+        # updated_at and state_sha256 are kept for earlier versions, which require them
+        envelope = {"schema_version": STORE_SCHEMA_VERSION, "revision": revision, "updated_at": utc_now(),
+                    "state": accepted, "state_sha256": _state_sha(accepted)}
+        self._atomic_write(self.path, envelope)
+        return envelope
 
     def _recover(self, raw: bytes, reason: str) -> dict[str, Any]:
         digest = hashlib.sha256(raw).hexdigest().upper()
         quarantine = self.profile_root / f"message_projection.corrupt.{digest[:16]}.json"
         if not quarantine.exists() and self.path.exists():
             os.replace(self.path, quarantine)
-        recovered = self._envelope(default_state(), 0)
-        self._atomic_write(self.path, recovered)
-        self._atomic_write(
-            self.recovery_receipt_path,
-            {
-                "schema_version": "MessagesMessageStoreRecoveryReceipt-v1",
-                "reason_code": reason,
-                "corrupt_bytes": len(raw),
-                "corrupt_sha256": digest,
-                "quarantine_name": quarantine.name,
-                "raw_content_in_receipt": False,
-                "delete_performed": False,
-                "status": "RECOVERED_TO_SAFE_EMPTY_PROJECTION",
-            },
-        )
+        recovered = self._write(default_state(), 0)
+        self._atomic_write(self.recovery_receipt_path, {
+            "schema_version": "MessagesMessageStoreRecoveryReceipt-v1", "reason_code": reason,
+            "corrupt_bytes": len(raw), "corrupt_sha256": digest, "quarantine_name": quarantine.name,
+            "raw_content_in_receipt": False, "delete_performed": False,
+            "status": "RECOVERED_TO_SAFE_EMPTY_PROJECTION"})
         return recovered
+
+    def _load(self, *, recover_corruption: bool = True) -> dict[str, Any]:
+        if not self.path.exists():
+            return self._write(default_state(), 0)
+        raw = self.path.read_bytes()
+        try:
+            value = json.loads(raw.decode("utf-8"))
+            if not isinstance(value, Mapping) or value.get("schema_version") != STORE_SCHEMA_VERSION:
+                raise MessageStoreCorrupt("MESSAGE_STORE_SCHEMA_UNSUPPORTED")
+            revision = value.get("revision")
+            if isinstance(revision, bool) or not isinstance(revision, int) or revision < 0:
+                raise MessageStoreCorrupt("MESSAGE_STORE_REVISION_INVALID")
+            return {**value, "state": self._validate_state(value.get("state"))}
+        except PrivacyBoundaryError:
+            raise
+        except Exception as exc:
+            if recover_corruption:
+                return self._recover(raw, str(exc).split(":", 1)[0] or type(exc).__name__)
+            if isinstance(exc, MessageStoreCorrupt):
+                raise
+            raise MessageStoreCorrupt("MESSAGE_STORE_DECODE_FAILED") from exc
 
     def load(self, *, recover_corruption: bool = True) -> dict[str, Any]:
         with projection_lock(self.profile_root):
             return self._load(recover_corruption=recover_corruption)
 
-    def _load(self, *, recover_corruption: bool = True) -> dict[str, Any]:
-        if not self.path.exists():
-            initial = self._envelope(default_state(), 0)
-            self._atomic_write(self.path, initial)
-            return deepcopy(initial)
-        raw = self.path.read_bytes()
-        try:
-            return deepcopy(self._validate_envelope(json.loads(raw.decode("utf-8"))))
-        except PrivacyBoundaryError:
-            raise
-        except Exception as exc:
-            if not recover_corruption:
-                if isinstance(exc, MessageStoreCorrupt):
-                    raise
-                raise MessageStoreCorrupt("MESSAGE_STORE_DECODE_FAILED") from exc
-            return deepcopy(self._recover(raw, str(exc).split(":", 1)[0] or type(exc).__name__))
-
     def save(self, state: Mapping[str, Any], *, expected_revision: int) -> dict[str, Any]:
         with projection_lock(self.profile_root):
-            return self._save(state,expected_revision=expected_revision)
-
-    def _save(self, state: Mapping[str, Any], *, expected_revision: int) -> dict[str, Any]:
-        current = self._load(recover_corruption=False)
-        if current["revision"] != expected_revision:
-            raise ValueError(f"MESSAGE_STORE_REVISION_CONFLICT:{expected_revision}:{current['revision']}")
-        accepted = self._envelope(state, expected_revision + 1)
-        self._atomic_write(self.path, accepted)
-        return deepcopy(accepted)
+            current = self._load(recover_corruption=False)["revision"]
+            if current != expected_revision:
+                raise ValueError(f"MESSAGE_STORE_REVISION_CONFLICT:{expected_revision}:{current}")
+            return self._write(state, expected_revision + 1)
 
     def transaction(self, mutator: Callable[[dict[str, Any]], Any]) -> tuple[dict[str, Any], Any]:
         with projection_lock(self.profile_root):
             current = self._load(recover_corruption=False)
-            state = deepcopy(current["state"])
-            result = mutator(state)
-            saved = self._save(state, expected_revision=current["revision"])
-            return saved, result
+            result = mutator(current["state"])
+            return self._write(current["state"], current["revision"] + 1), result
 
     def records(self) -> list[MessageRecord]:
         envelope = self.load(recover_corruption=False)
@@ -208,11 +165,10 @@ class MessageStore:
             raw = state["messages"].get(message_id)
             if raw is None:
                 raise KeyError(message_id)
-            updated = deepcopy(raw)
-            mutator(updated)
-            record = MessageRecord.from_mapping(updated)
-            state["messages"][message_id] = record.to_dict()
-            return record.to_dict()
+            mutator(raw)
+            record = MessageRecord.from_mapping(raw).to_dict()
+            state["messages"][message_id] = record
+            return record
 
         _, result = self.transaction(apply)
         return MessageRecord.from_mapping(result)
@@ -220,9 +176,8 @@ class MessageStore:
     def delete_records(self, message_ids: list[str] | tuple[str, ...]) -> dict[str, Any]:
         """Delete an exact message set atomically and return a narrow receipt.
 
-        This is intentionally not exposed as a general UI action.  It exists for
-        explicit, audited cleanup of stale projection rows while keeping the
-        dedupe index and envelope checksum consistent.
+        This is not a general UI action: it removes stale projection rows (the dedupe index follows
+        from the messages that remain).
         """
 
         accepted = tuple(dict.fromkeys(str(value).strip() for value in message_ids))
@@ -233,24 +188,10 @@ class MessageStore:
             missing = [message_id for message_id in accepted if message_id not in state["messages"]]
             if missing:
                 raise ValueError("MESSAGE_STORE_DELETE_TARGET_MISSING:" + ",".join(missing))
-            removed = []
-            for message_id in accepted:
-                raw = state["messages"].pop(message_id)
-                dedupe_key = raw["dedupe_key"]
-                if state["dedupe_index"].pop(dedupe_key, None) != message_id:
-                    raise MessageStoreCorrupt("MESSAGE_STORE_DELETE_DEDUPE_MISMATCH")
-                removed.append(
-                    {
-                        "message_id": message_id,
-                        "title": raw["title"],
-                        "severity": raw["severity"],
-                        "collection_state": raw["collection_state"],
-                    }
-                )
-            return {
-                "removed": removed,
-                "remaining_count": len(state["messages"]),
-            }
+            removed = [state["messages"].pop(message_id) for message_id in accepted]
+            return {"removed": [{key: raw[key] for key in ("message_id", "title", "severity", "collection_state")}
+                                for raw in removed],
+                    "remaining_count": len(state["messages"])}
 
         saved, result = self.transaction(apply)
         return {
