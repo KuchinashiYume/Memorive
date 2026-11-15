@@ -86,6 +86,7 @@ returns, `save_answer` discards the answer and keeps the call's usage on the job
 | Which material a conversation draws on; files added in the window | `scope_ids`, `configure`, `attach` in `memorive_research_workspace/attachments.py` | `test_attachments.py`, `test_workspace_vision_and_handoffs.py` |
 | Agent settings; the folder prepared for a desktop agent app | `memorive_research_workspace/agents.py` | `test_research_workspace_inputs.py`, `test_workspace_vision_and_handoffs.py` |
 | Which processed papers can be added to a research project | `memorive_research_workspace/library_bridge.py` | `test_library_for_research.py` |
+| Connected apps: bringing papers in, outputs, note write-back, the companion's calls | `memorive_research_workspace/connections.py` | `test_connections.py` |
 | What a connected device is shown when its document is processed | `job_results` in `memorive_research_workspace/desktop_connections.py` | `test_library_for_research.py` |
 
 Run the whole suite before you finish; the files above are the quick check while you work.
