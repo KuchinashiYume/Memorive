@@ -3082,8 +3082,8 @@
     },
     {
       "path": "source/knowledge_admission/card_io.py",
-      "sha256": "fabfa6591a5f8fcb3e9e784361df1229feb63558378d4d5a533878cd1bdd097a",
-      "bytes": 4231
+      "sha256": "d3be43371b6b688d6adbdce07d03f3c7290909d2af3e3e85a6ed181bdc23612e",
+      "bytes": 4575
     },
     {
       "path": "source/knowledge_admission/conversation_ingest_preview.py",
@@ -3102,8 +3102,8 @@
     },
     {
       "path": "source/knowledge_admission/errors.py",
-      "sha256": "b765ac4425603684ec73de53fee1e47c030857e4d040b5d76a9abb72ac37dae9",
-      "bytes": 4021
+      "sha256": "478a1cfbeb4bdac854c8c6d54ea83b0250579881350f424d15d3c26e613631e4",
+      "bytes": 3729
     },
     {
       "path": "source/knowledge_admission/knowledge_admission_log.py",

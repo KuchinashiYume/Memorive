@@ -8,6 +8,11 @@ The front matter runs from a "---" line at the very start of the file to the nex
 only "---" (trailing spaces and a CR allowed), so a value such as "title: A---B" does not end it.
 Cards are written by yaml.dump, so review_status is a plain unquoted value; any other form is
 refused rather than rewritten.
+
+Known issue elsewhere: five other readers still cut the front matter with split("---", 2), so a
+value containing "---" ends it early there: document_processing/document_chunk_chunk.py,
+document_processing/document_clean_clean.py, document_processing/pipeline.py,
+evidence_extraction/distill.py and memorive_workflow/segmented_distill.py.
 """
 from __future__ import annotations
 

@@ -30,9 +30,8 @@ class TransitionNotEnabledError(KnowledgeAdmissionError):
 
 
 class TriggerNotAcceptedError(KnowledgeAdmissionError):
-    """触发源非 Core 执行路径可接受(仅 MANUAL/PLACEHOLDER):AUTO_RULE 留第 3 步、EVIDENCE_REVIEW_VERDICT 留 Verification。
-    (RETRIEVAL_WEIGHTING 解除降权改 DerivedPenalty/不改准入态、是 KNOWLEDGE_ADMISSION_log 治理轴触发源(第 2 步),根本不在 transition 的
-    Trigger 枚举里 —— 传字符串会先被 isinstance 挡成 MissingBasisError。)"""
+    """Not raised any more: transition() accepts every Trigger member, and anything else is a
+    MissingBasisError. Kept so that code importing it keeps working."""
 
 
 class MissingBasisError(KnowledgeAdmissionError):
@@ -44,14 +43,14 @@ class MissingBasisError(KnowledgeAdmissionError):
 class CardStateError(KnowledgeAdmissionError):
     """卡片状态载体异常 —— fail-closed 不猜、不腐蚀文件:
     frontmatter 非 --- … --- / 解析非 dict、review_status 缺失或不在三态枚举、
-    frontmatter 内 review_status 行非唯一无引号 plain scalar(0 或 >1 行)、落盘自证不符;
+    frontmatter 内 review_status 行非唯一无引号 plain scalar(0 或 >1 行)、临时文件读回的状态不符;
     以及数据 ID 严格读:source_anchor.paper_id 缺失 / 空 / 类型不对(read_data_id,不回退文件名)。"""
 
 
 class KnowledgeAdmissionLogAppendError(KnowledgeAdmissionError):
-    """KNOWLEDGE_ADMISSION_log 追加受控错误:reason / data_id 空、event_category 非枚举、目录不可建 / 不可写(pre-flight)、
-    append-only 被破坏(写后变小);或 write_status 成功而 append 失败 —— 暴露「状态已变、留痕失败」的
-    审计缺口,绝不静默(本步不做事务回滚)。"""
+    """The admission log could not be written: preflight() found the folder missing or read-only
+    (the card is not moved), or appending the line failed after the card was moved. The second
+    case is raised, not hidden, so the missing log line shows."""
 
 
 class DecisionError(KnowledgeAdmissionError):
