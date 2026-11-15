@@ -92,6 +92,7 @@ returns, `save_answer` discards the answer and keeps the call's usage on the job
 | Knowledge drafts from answers: proposing, reviewing, retracting, revisions, the note written on acceptance | `knowledge_feedback/research_ingest.py` | `test_knowledge_drafts.py` |
 | Session refinement: what the model must answer, the typed items made from it | `memorive_workflow_bridge/conversation_refinement.py`, `knowledge_feedback/conversation_refinement/refinement.py` | `test_refinement_model_output.py` |
 | Card review states (pending, active, quarantined), automatic review, the admission log | `knowledge_admission/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
+| Custom command-line model tools: the template, how it is run, how its output is read | `memorive_settings/cli_templates.py`, `cli_template_execution.py` | `characterize/test_cli_templates.py` |
 | How a model request is sent: API, command-line agents, embeddings, OCR | `memorive_settings/model_validation.py`; model-name patterns and API endpoints in `model_endpoints.py`; the workflow exam's own part in `workflow_exam_runner.py` | `test_analysis_provider_transport.py`, `test_model_execution.py` |
 
 Run the whole suite before you finish; the files above are the quick check while you work.
