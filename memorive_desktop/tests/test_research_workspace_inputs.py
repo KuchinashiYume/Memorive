@@ -292,3 +292,15 @@ def test_a_developer_client_cannot_reach_a_connection_of_another_project(workspa
         workspace.developer.save(_client(connection_ids=[connection["id"]]))
     with pytest.raises(ValueError, match="CLIENT_NOT_FOUND"):
         workspace.developer.save(_client(), client_id="client_missing")
+
+def test_a_memory_is_forgotten_only_at_its_current_revision(tmp_path):
+    workspace = ResearchWorkspace(tmp_path / "forget", catalog=lambda: [])
+    try:
+        memory = workspace.memory_save("Prefer primary sources")
+        for revision in (None, memory["revision"] + 1):
+            with pytest.raises(ValueError, match="REVISION_CONFLICT"):
+                workspace.memory_forget(memory["id"], revision)
+        assert workspace.store.get("memory", memory["id"])["text"] == "Prefer primary sources"
+        assert workspace.memory_forget(memory["id"], memory["revision"])["status"] == "FORGOTTEN"
+    finally:
+        workspace.close()

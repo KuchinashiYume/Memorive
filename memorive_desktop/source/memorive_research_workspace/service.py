@@ -284,10 +284,9 @@ class ResearchWorkspace:
     def memory_forget(self, memory_id, expected_revision):
         with self.store.tx() as db:
             memory = self.store.get('memory', memory_id, db=db)
-            if not memory:
+            if not memory or memory['revision'] != expected_revision:
                 raise ValueError('REVISION_CONFLICT')
             # Tombstones contain no previous content; worker context is rechecked before publication.
-            # The put checks expected_revision.
             self.store.put('memory', memory_id, memory['project'], dict(memory, text='', active=False), expected=expected_revision, db=db)
             self.store.event('MEMORY_FORGOTTEN', memory_id, {}, db)
         return {'status': 'FORGOTTEN'}

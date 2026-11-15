@@ -10,7 +10,6 @@ sources with their text by excerpt, the conversation, and START_HERE.md. Nothing
 is called; the user opens the folder in the app.
 """
 import re
-import shutil
 from pathlib import Path
 
 from memorive_folder_management.policy import windows_io_path
@@ -145,11 +144,11 @@ def _export_source(workspace, artifact, number, material, folder, warnings):
            'source_hash': artifact['content_hash'], 'files': []}
     try:
         source = safe_path(workspace.store.root if artifact['kind'] == 'derived' else artifact['root'], artifact['path'])
-        source_io = windows_io_path(source)
-        if digest(source_io.read_bytes()) != artifact['content_hash']:
+        data = windows_io_path(source).read_bytes()  # read once: what is written is what was checked
+        if digest(data) != artifact['content_hash']:
             raise ValueError('EVIDENCE_STALE')
         copied = material / (f'{number:03d}' + source.suffix.lower())
-        shutil.copyfile(source_io, windows_io_path(copied))
+        windows_io_path(copied).write_bytes(data)
         row['files'].append(copied.relative_to(folder).as_posix())
         with workspace.store.tx() as db:
             excerpts = [dict(r) for r in db.execute('SELECT * FROM chunks WHERE artifact_id=? ORDER BY page,line_start,id',
@@ -161,10 +160,11 @@ def _export_source(workspace, artifact, number, material, folder, warnings):
         row['chunks'] = len(excerpts)
         if artifact.get('source_original_path'):
             original = safe_path(artifact['root'], artifact['source_original_path'])
-            if digest(original.read_bytes()) != artifact['source_content_hash']:
+            data = original.read_bytes()
+            if digest(data) != artifact['source_content_hash']:
                 raise ValueError('EVIDENCE_STALE')
             preserved = material / (f'{number:03d}-original' + original.suffix.lower())
-            shutil.copyfile(original, preserved)
+            preserved.write_bytes(data)
             row['files'].append(preserved.relative_to(folder).as_posix())
         row.update(material_layer=material_layer(artifact), source_content_hash=source_document_hash(artifact),
                    line_basis='rawmd_global' if artifact.get('skill_source') else 'page_local')
