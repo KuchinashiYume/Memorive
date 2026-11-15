@@ -1,0 +1,510 @@
+{
+  "schema_version": "discovery.configuration.fixture-seed.0.1",
+  "classification": "SYNTHETIC_PUBLIC_SAFE_A0",
+  "rights": {
+    "redistribution": "PUBLIC_SAFE_SYNTHETIC",
+    "contains_real_bibliographic_metadata": false,
+    "contains_pdf_or_fulltext": false,
+    "contains_private_gold_or_holdout": false,
+    "contains_credentials": false,
+    "formal_library_derived": false
+  },
+  "frozen_clock": "2026-08-10T18:00:00+09:00",
+  "publication_cutoff": "2025-01-01",
+  "profiles": {
+    "topic": {
+      "profile_id": "VECTOR_PROFILE:TOPIC_COSINE_V01",
+      "dimension_name": "topic",
+      "metric": "COSINE_SIMILARITY",
+      "dimension": 3,
+      "threshold": 0.95,
+      "match_rule": "GTE"
+    },
+    "method": {
+      "profile_id": "VECTOR_PROFILE:METHOD_EUCLIDEAN_V01",
+      "dimension_name": "method",
+      "metric": "EUCLIDEAN_DISTANCE",
+      "dimension": 2,
+      "threshold": 0.15,
+      "match_rule": "LTE"
+    },
+    "object": {
+      "profile_id": "VECTOR_PROFILE:OBJECT_COSINE_V01",
+      "dimension_name": "object",
+      "metric": "COSINE_SIMILARITY",
+      "dimension": 3,
+      "threshold": 0.95,
+      "match_rule": "GTE"
+    }
+  },
+  "directions": [
+    {"direction_id": "DIRECTION:structure", "label": "Synthetic deterministic identity", "evidence_scope": "ABSTRACT_LEVEL"},
+    {"direction_id": "DIRECTION:B", "label": "Synthetic version and graph methods", "evidence_scope": "ABSTRACT_LEVEL"},
+    {"direction_id": "DIRECTION:C", "label": "Synthetic collision controls", "evidence_scope": "METADATA_ONLY"}
+  ],
+  "records": [
+    {
+      "paper_id": "PAPER:EXACT",
+      "title": "Deterministic Identity Ledger",
+      "active": true,
+      "identity_status": "VERIFIED",
+      "work_cluster_id": "WORK:EXACT",
+      "manifestation_ids": ["MANIFESTATION:EXACT-VOR"],
+      "identifiers": ["DOI:10.99999/SYNTHETIC.EXACT"],
+      "publication_date": "2024-04-10",
+      "directions": ["DIRECTION:structure"],
+      "fields": {
+        "topic": "deterministic identity",
+        "method": "hash ledger",
+        "object": "bibliographic records",
+        "abstract": "Synthetic abstract for exact identity evidence."
+      },
+      "vectors": {"topic": [1.0, 0.0, 0.0], "method": [0.0, 0.0], "object": [1.0, 0.0, 0.0]},
+      "version_links": []
+    },
+    {
+      "paper_id": "PAPER:VERSION",
+      "title": "Versioned Graph Resolver",
+      "active": true,
+      "identity_status": "VERIFIED",
+      "work_cluster_id": "WORK:VERSION",
+      "manifestation_ids": ["MANIFESTATION:VERSION-VOR"],
+      "identifiers": ["DOI:10.99999/SYNTHETIC.VERSION.VOR"],
+      "publication_date": "2024-05-20",
+      "directions": ["DIRECTION:B"],
+      "fields": {
+        "topic": "version graph",
+        "method": "edge resolver",
+        "object": "manifestations",
+        "abstract": "Synthetic abstract for explicit version evidence."
+      },
+      "vectors": {"topic": [0.0, 1.0, 0.0], "method": [1.0, 0.0], "object": [0.0, 1.0, 0.0]},
+      "version_links": [
+        {
+          "candidate_manifestation_id": "MANIFESTATION:VERSION-PREPRINT",
+          "local_manifestation_id": "MANIFESTATION:VERSION-VOR",
+          "evidence_ref": "VERSION_EDGE:SYNTHETIC_PREPRINT_TO_VOR"
+        }
+      ]
+    },
+    {
+      "paper_id": "PAPER:COLLISION",
+      "title": "Shared Collision Title",
+      "active": true,
+      "identity_status": "VERIFIED",
+      "work_cluster_id": "WORK:COLLISION-LOCAL",
+      "manifestation_ids": ["MANIFESTATION:COLLISION-LOCAL"],
+      "identifiers": ["DOI:10.99999/SYNTHETIC.COLLISION.LOCAL"],
+      "publication_date": "2023-03-03",
+      "directions": ["DIRECTION:C"],
+      "fields": {
+        "topic": "collision control",
+        "method": "negative fixture",
+        "object": "unrelated samples",
+        "abstract": "Synthetic negative control sharing only a title."
+      },
+      "vectors": {"topic": [0.0, 0.0, 1.0], "method": [2.0, 0.0], "object": [0.0, 0.0, 1.0]},
+      "version_links": []
+    },
+    {
+      "paper_id": "PAPER:CITATION",
+      "title": "Explicit Citation Target",
+      "active": true,
+      "identity_status": "VERIFIED",
+      "work_cluster_id": "WORK:CITATION-LOCAL",
+      "manifestation_ids": ["MANIFESTATION:CITATION-LOCAL"],
+      "identifiers": ["DOI:10.99999/SYNTHETIC.CITATION.TARGET"],
+      "publication_date": "2022-02-02",
+      "directions": ["DIRECTION:C"],
+      "fields": {
+        "topic": "citation provenance",
+        "method": "explicit edge",
+        "object": "citation graph",
+        "abstract": "Synthetic citation target."
+      },
+      "vectors": {"topic": [0.7, 0.7, 0.0], "method": [3.0, 0.0], "object": [0.7, 0.7, 0.0]},
+      "version_links": []
+    },
+    {
+      "paper_id": "PAPER:DIRECTION_A",
+      "title": "Direction structure Anchor",
+      "active": true,
+      "identity_status": "VERIFIED",
+      "work_cluster_id": "WORK:DIRECTION-structure",
+      "manifestation_ids": ["MANIFESTATION:DIRECTION-structure"],
+      "identifiers": ["DOI:10.99999/SYNTHETIC.DIRECTION.structure"],
+      "publication_date": "2021-01-01",
+      "directions": ["DIRECTION:structure"],
+      "fields": {
+        "topic": "direction alpha topic",
+        "method": "alpha method",
+        "object": "alpha object",
+        "abstract": "Synthetic direction structure anchor."
+      },
+      "vectors": {"topic": [1.0, 0.0, 0.0], "method": [4.0, 0.0], "object": [1.0, 0.0, 0.0]},
+      "version_links": []
+    },
+    {
+      "paper_id": "PAPER:DIRECTION_B",
+      "title": "Direction B Anchor",
+      "active": true,
+      "identity_status": "VERIFIED",
+      "work_cluster_id": "WORK:DIRECTION-B",
+      "manifestation_ids": ["MANIFESTATION:DIRECTION-B"],
+      "identifiers": ["DOI:10.99999/SYNTHETIC.DIRECTION.B"],
+      "publication_date": "2021-06-01",
+      "directions": ["DIRECTION:B"],
+      "fields": {
+        "topic": "direction beta topic",
+        "method": "beta method",
+        "object": "beta object",
+        "abstract": "Synthetic direction B anchor."
+      },
+      "vectors": {"topic": [0.0, 1.0, 0.0], "method": [0.0, 1.0], "object": [0.0, 1.0, 0.0]},
+      "version_links": []
+    }
+  ],
+  "citation_edges": [
+    {
+      "edge_id": "CITATION_EDGE:EXPLICIT_001",
+      "source_ref": "CANDIDATE:CITATION_EXPLICIT",
+      "target_ref": "PAPER:CITATION",
+      "source_identifier": "DOI:10.99999/SYNTHETIC.CITATION.SOURCE",
+      "target_identifier": "DOI:10.99999/SYNTHETIC.CITATION.TARGET",
+      "provenance_ref": "PROVENANCE:SYNTHETIC_EDGE_001"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "EXACT_SAME_WORK",
+      "scope": ["PAPER:EXACT"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:EXACT",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:EXACT",
+        "manifestation_ids": ["MANIFESTATION:EXACT-VOR"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.EXACT"],
+        "title": "Deterministic Identity Ledger",
+        "publication_date": "2026-01-15",
+        "fields": {"topic": "deterministic identity", "method": "hash ledger", "object": "bibliographic records", "abstract": "Synthetic exact candidate."},
+        "query_vectors": {"topic": [1.0, 0.0, 0.0], "method": [0.0, 0.0], "object": [1.0, 0.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:EXACT|EXACT_SAME_WORK", "PAPER:EXACT|METHOD_SIMILAR", "PAPER:EXACT|OBJECT_SIMILAR", "PAPER:EXACT|TOPIC_SIMILAR"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "FALSE", "direction_new": "FALSE"}
+      }
+    },
+    {
+      "case_id": "ALTERNATE_VERSION",
+      "scope": ["PAPER:VERSION"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:VERSION",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:VERSION",
+        "manifestation_ids": ["MANIFESTATION:VERSION-PREPRINT"],
+        "identifiers": ["ARXIV:9999.00001V1"],
+        "title": "Versioned Graph Resolver preprint",
+        "publication_date": "2024-01-15",
+        "fields": {"topic": "version graph", "method": "edge resolver", "object": "manifestations", "abstract": "Synthetic alternate manifestation."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [1.0, 0.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:VERSION|ALTERNATE_VERSION", "PAPER:VERSION|METHOD_SIMILAR", "PAPER:VERSION|OBJECT_SIMILAR", "PAPER:VERSION|TOPIC_SIMILAR"],
+        "novelty": {"publication_new": "FALSE", "first_seen_new": "TRUE", "library_new": "FALSE", "direction_new": "FALSE"}
+      }
+    },
+    {
+      "case_id": "TITLE_COLLISION_NOT_IDENTITY",
+      "scope": ["PAPER:COLLISION"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:TITLE_COLLISION",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:COLLISION-CANDIDATE",
+        "manifestation_ids": ["MANIFESTATION:COLLISION-CANDIDATE"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.COLLISION.CANDIDATE"],
+        "title": "Shared Collision Title",
+        "publication_date": "2026-02-01",
+        "fields": {"topic": "different topic", "method": "different method", "object": "different object", "abstract": "Synthetic title collision."},
+        "query_vectors": {"topic": [1.0, 0.0, 0.0], "method": [8.0, 8.0], "object": [1.0, 0.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:COLLISION|POSSIBLE_DUPLICATE"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "UNKNOWN", "direction_new": "TRUE"}
+      }
+    },
+    {
+      "case_id": "IDENTITY_CONFLICT_UNKNOWN",
+      "scope": ["PAPER:EXACT"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:IDENTITY_CONFLICT",
+        "identity_status": "CONFLICT",
+        "work_cluster_id": "WORK:EXACT",
+        "manifestation_ids": ["MANIFESTATION:CONFLICT"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.EXACT"],
+        "title": "Conflicted identity",
+        "publication_date": "2026-02-02",
+        "fields": {"topic": "unresolved", "method": "unresolved", "object": "unresolved", "abstract": "Synthetic conflict."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [9.0, 9.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": [],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "UNKNOWN", "direction_new": "TRUE"},
+        "unknown_reason_codes": ["IDENTITY_NOT_VERIFIED"]
+      }
+    },
+    {
+      "case_id": "EXPLICIT_CITATION_EDGE",
+      "scope": ["PAPER:CITATION"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:CITATION_EXPLICIT",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:CITATION-SOURCE",
+        "manifestation_ids": ["MANIFESTATION:CITATION-SOURCE"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.CITATION.SOURCE"],
+        "title": "Explicit Citation Source",
+        "publication_date": "2026-03-03",
+        "fields": {"topic": "source topic", "method": "source method", "object": "source object", "abstract": "Synthetic explicit citation source."},
+        "query_vectors": {"topic": [0.0, 0.0, 1.0], "method": [9.0, 9.0], "object": [0.0, 0.0, 1.0]},
+        "citation_claims": ["PAPER:CITATION"]
+      },
+      "expected": {
+        "relations": ["PAPER:CITATION|DIRECT_CITATION_RELATION", "PAPER:CITATION|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "TRUE"}
+      }
+    },
+    {
+      "case_id": "CITATION_TEXT_WITHOUT_EDGE",
+      "scope": ["PAPER:CITATION"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:CITATION_CLAIM_ONLY",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:CITATION-CLAIM-ONLY",
+        "manifestation_ids": ["MANIFESTATION:CITATION-CLAIM-ONLY"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.CITATION.CLAIM"],
+        "title": "Claimed citation without edge",
+        "publication_date": "2026-03-04",
+        "fields": {"topic": "unverified claim", "method": "natural language", "object": "citation text", "abstract": "This abstract claims to cite a target but has no edge."},
+        "query_vectors": {"topic": [0.0, 0.0, 1.0], "method": [9.0, 9.0], "object": [0.0, 0.0, 1.0]},
+        "citation_claims": ["PAPER:CITATION"]
+      },
+      "expected": {
+        "relations": ["PAPER:CITATION|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "TRUE"},
+        "unknown_reason_codes": ["UNVERIFIED_CITATION_CLAIM_IGNORED"]
+      }
+    },
+    {
+      "case_id": "TOPIC_ONLY_SIMILAR",
+      "scope": ["PAPER:DIRECTION_A"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:TOPIC_ONLY",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:TOPIC-ONLY",
+        "manifestation_ids": ["MANIFESTATION:TOPIC-ONLY"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.TOPIC.ONLY"],
+        "title": "Topic-only candidate",
+        "publication_date": "2026-04-01",
+        "fields": {"topic": "direction alpha topic", "method": "different method", "object": "different object", "abstract": "Synthetic topic-only candidate."},
+        "query_vectors": {"topic": [1.0, 0.0, 0.0], "method": [9.0, 9.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY", "PAPER:DIRECTION_A|TOPIC_SIMILAR"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "FALSE"}
+      }
+    },
+    {
+      "case_id": "METHOD_DISTANCE_LOW_MATCHES",
+      "scope": ["PAPER:DIRECTION_B"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:METHOD_DISTANCE_LOW",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:METHOD-LOW",
+        "manifestation_ids": ["MANIFESTATION:METHOD-LOW"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.METHOD.LOW"],
+        "title": "Low distance method candidate",
+        "publication_date": "2026-04-02",
+        "fields": {"topic": "different topic", "method": "beta method near", "object": "different object", "abstract": "Synthetic low-distance method case."},
+        "query_vectors": {"topic": [1.0, 0.0, 0.0], "method": [0.1, 1.0], "object": [1.0, 0.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_B|METHOD_SIMILAR", "PAPER:DIRECTION_B|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "FALSE"}
+      }
+    },
+    {
+      "case_id": "OBJECT_ONLY_SIMILAR",
+      "scope": ["PAPER:DIRECTION_A"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:OBJECT_ONLY",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:OBJECT-ONLY",
+        "manifestation_ids": ["MANIFESTATION:OBJECT-ONLY"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.OBJECT.ONLY"],
+        "title": "Object-only candidate",
+        "publication_date": "2026-04-03",
+        "fields": {"topic": "different topic", "method": "different method", "object": "alpha object", "abstract": "Synthetic object-only candidate."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [9.0, 9.0], "object": [1.0, 0.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY", "PAPER:DIRECTION_A|OBJECT_SIMILAR"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "FALSE"}
+      }
+    },
+    {
+      "case_id": "CROSS_DIRECTION_BRIDGE",
+      "scope": ["PAPER:DIRECTION_A", "PAPER:DIRECTION_B"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:BRIDGE",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:BRIDGE",
+        "manifestation_ids": ["MANIFESTATION:BRIDGE"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.BRIDGE"],
+        "title": "Cross-direction bridge candidate",
+        "publication_date": "2026-05-01",
+        "fields": {"topic": "direction alpha topic", "method": "beta method", "object": "new object", "abstract": "Synthetic bridge joining two directions."},
+        "query_vectors": {"topic": [1.0, 0.0, 0.0], "method": [0.0, 1.0], "object": [0.0, 0.0, 1.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": [
+          "PAPER:DIRECTION_A|BRIDGE_BETWEEN_DIRECTIONS",
+          "PAPER:DIRECTION_A|NEW_TO_LIBRARY",
+          "PAPER:DIRECTION_A|TOPIC_SIMILAR",
+          "PAPER:DIRECTION_B|METHOD_SIMILAR"
+        ],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "TRUE"}
+      }
+    },
+    {
+      "case_id": "SINGLE_DIRECTION_NOT_BRIDGE",
+      "scope": ["PAPER:DIRECTION_A"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:SINGLE_DIRECTION",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:SINGLE-DIRECTION",
+        "manifestation_ids": ["MANIFESTATION:SINGLE-DIRECTION"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.SINGLE.DIRECTION"],
+        "title": "Single direction candidate",
+        "publication_date": "2026-05-02",
+        "fields": {"topic": "direction alpha topic", "method": "other method", "object": "alpha object", "abstract": "Synthetic single direction candidate."},
+        "query_vectors": {"topic": [1.0, 0.0, 0.0], "method": [9.0, 9.0], "object": [1.0, 0.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY", "PAPER:DIRECTION_A|OBJECT_SIMILAR", "PAPER:DIRECTION_A|TOPIC_SIMILAR"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "FALSE"}
+      }
+    },
+    {
+      "case_id": "ABSTRACT_LEVEL_NEW_DIRECTION",
+      "scope": ["PAPER:DIRECTION_A", "PAPER:DIRECTION_B"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:NEW_DIRECTION",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:NEW-DIRECTION",
+        "manifestation_ids": ["MANIFESTATION:NEW-DIRECTION"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.NEW.DIRECTION"],
+        "title": "New direction estimate candidate",
+        "publication_date": "2026-05-03",
+        "fields": {"topic": "unseen topic", "method": "unseen method", "object": "unseen object", "abstract": "Synthetic abstract-level new direction estimate."},
+        "query_vectors": {"topic": [0.0, 0.0, 1.0], "method": [9.0, 9.0], "object": [0.0, 0.0, 1.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "TRUE"},
+        "direction_scope": "ABSTRACT_LEVEL_ESTIMATE"
+      }
+    },
+    {
+      "case_id": "LIBRARY_COVERAGE_INCOMPLETE",
+      "scope": ["PAPER:DIRECTION_A"],
+      "coverage_overrides": {"library_identity_complete": false},
+      "candidate": {
+        "candidate_id": "CANDIDATE:LIBRARY_COVERAGE_UNKNOWN",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:LIBRARY-UNKNOWN",
+        "manifestation_ids": ["MANIFESTATION:LIBRARY-UNKNOWN"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.LIBRARY.UNKNOWN"],
+        "title": "Incomplete library coverage candidate",
+        "publication_date": "2026-06-01",
+        "fields": {"topic": "unseen topic", "method": "unseen method", "object": "unseen object", "abstract": "Synthetic incomplete library coverage."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [9.0, 9.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": [],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "TRUE", "library_new": "UNKNOWN", "direction_new": "TRUE"}
+      }
+    },
+    {
+      "case_id": "FIRST_SEEN_COVERAGE_INCOMPLETE",
+      "scope": ["PAPER:DIRECTION_A"],
+      "coverage_overrides": {"first_seen_complete": false},
+      "candidate": {
+        "candidate_id": "CANDIDATE:FIRST_SEEN_UNKNOWN",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:FIRST-SEEN-UNKNOWN",
+        "manifestation_ids": ["MANIFESTATION:FIRST-SEEN-UNKNOWN"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.FIRST.SEEN.UNKNOWN"],
+        "title": "Incomplete first-seen coverage candidate",
+        "publication_date": "2026-06-02",
+        "fields": {"topic": "unseen topic", "method": "unseen method", "object": "unseen object", "abstract": "Synthetic incomplete first-seen coverage."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [9.0, 9.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "UNKNOWN", "library_new": "TRUE", "direction_new": "TRUE"}
+      }
+    },
+    {
+      "case_id": "ALREADY_SEEN",
+      "scope": ["PAPER:DIRECTION_A"],
+      "seen_candidate_ids": ["CANDIDATE:ALREADY_SEEN"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:ALREADY_SEEN",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:ALREADY-SEEN",
+        "manifestation_ids": ["MANIFESTATION:ALREADY-SEEN"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.ALREADY.SEEN"],
+        "title": "Already seen candidate",
+        "publication_date": "2026-06-03",
+        "fields": {"topic": "unseen topic", "method": "unseen method", "object": "unseen object", "abstract": "Synthetic already-seen candidate."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [9.0, 9.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "TRUE", "first_seen_new": "FALSE", "library_new": "TRUE", "direction_new": "TRUE"}
+      }
+    },
+    {
+      "case_id": "PUBLICATION_DATE_MISSING",
+      "scope": ["PAPER:DIRECTION_A"],
+      "candidate": {
+        "candidate_id": "CANDIDATE:DATE_UNKNOWN",
+        "identity_status": "VERIFIED",
+        "work_cluster_id": "WORK:DATE-UNKNOWN",
+        "manifestation_ids": ["MANIFESTATION:DATE-UNKNOWN"],
+        "identifiers": ["DOI:10.99999/SYNTHETIC.DATE.UNKNOWN"],
+        "title": "Missing publication date candidate",
+        "publication_date": null,
+        "fields": {"topic": "unseen topic", "method": "unseen method", "object": "unseen object", "abstract": "Synthetic missing date candidate."},
+        "query_vectors": {"topic": [0.0, 1.0, 0.0], "method": [9.0, 9.0], "object": [0.0, 1.0, 0.0]},
+        "citation_claims": []
+      },
+      "expected": {
+        "relations": ["PAPER:DIRECTION_A|NEW_TO_LIBRARY"],
+        "novelty": {"publication_new": "UNKNOWN", "first_seen_new": "TRUE", "library_new": "TRUE", "direction_new": "TRUE"}
+      }
+    }
+  ]
+}

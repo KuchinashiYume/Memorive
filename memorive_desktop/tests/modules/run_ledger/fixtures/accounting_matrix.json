@@ -1,0 +1,53 @@
+{
+  "schema_version": "ACCOUNTING_MATRIX_V1",
+  "cases": [
+    {
+      "case_id": "DIRECT_API_ACTUAL",
+      "axes": {"process_transport": "api_sdk", "inference_location": "external_provider", "access_mode": "api_key", "billing_mode": "paygo_api"},
+      "evidence_class": "api",
+      "accounting": {"usage_status": "ACTUAL", "token_usage": {"input_tokens": 12, "output_tokens": 8, "reasoning_tokens": 0, "total_tokens": 20}, "cost_status": "ACTUAL", "cost_value": 0.03, "currency": "CNY", "local_resource_status": "N/A_EXTERNAL", "local_resource_metrics": {}}
+    },
+    {
+      "case_id": "API_VIA_CLI_UNKNOWN",
+      "axes": {"process_transport": "cli_process", "inference_location": "external_provider", "access_mode": "api_key", "billing_mode": "paygo_api"},
+      "evidence_class": "api",
+      "accounting": {"usage_status": "UNKNOWN", "token_usage": {"input_tokens": null, "output_tokens": null, "reasoning_tokens": null, "total_tokens": null}, "cost_status": "UNKNOWN", "cost_value": null, "currency": null, "local_resource_status": "N/A_EXTERNAL", "local_resource_metrics": {}}
+    },
+    {
+      "case_id": "DIRECT_API_ESTIMATED",
+      "axes": {"process_transport": "api_sdk", "inference_location": "external_provider", "access_mode": "api_key", "billing_mode": "paygo_api"},
+      "evidence_class": "api",
+      "accounting": {"usage_status": "ACTUAL", "token_usage": {"input_tokens": 12, "output_tokens": 8, "reasoning_tokens": 0, "total_tokens": 20}, "cost_status": "ESTIMATED", "cost_value": 0.025, "currency": "CNY", "local_resource_status": "N/A_EXTERNAL", "local_resource_metrics": {}}
+    },
+    {
+      "case_id": "SUBSCRIPTION_CLI",
+      "axes": {"process_transport": "cli_process", "inference_location": "external_provider", "access_mode": "subscription_session", "billing_mode": "subscription_entitlement"},
+      "evidence_class": "subscription_cli",
+      "accounting": {"usage_status": "N/A_SUBSCRIPTION_CLI", "token_usage": {"input_tokens": null, "output_tokens": null, "reasoning_tokens": null, "total_tokens": null}, "cost_status": "N/A_SUBSCRIPTION_CLI", "cost_value": null, "currency": null, "local_resource_status": "N/A_EXTERNAL", "local_resource_metrics": {}}
+    },
+    {
+      "case_id": "LOCAL_MODEL",
+      "axes": {"process_transport": "local_process", "inference_location": "local_machine", "access_mode": "local_runtime", "billing_mode": "local_compute"},
+      "evidence_class": "local_compute",
+      "accounting": {"usage_status": "N/A_LOCAL_COMPUTE", "token_usage": {"input_tokens": null, "output_tokens": null, "reasoning_tokens": null, "total_tokens": null}, "cost_status": "N/A_LOCAL_COMPUTE", "cost_value": null, "currency": null, "local_resource_status": "ACTUAL", "local_resource_metrics": {"duration_ms": 15, "peak_rss_bytes": 4096}}
+    },
+    {
+      "case_id": "NON_MODEL_LOCAL",
+      "axes": {"process_transport": "local_process", "inference_location": "none", "access_mode": "local_runtime", "billing_mode": "none"},
+      "evidence_class": "non_model_local",
+      "accounting": {"usage_status": "N/A_NON_MODEL_LOCAL", "token_usage": {"input_tokens": null, "output_tokens": null, "reasoning_tokens": null, "total_tokens": null}, "cost_status": "N/A_NON_MODEL_LOCAL", "cost_value": null, "currency": null, "local_resource_status": "ACTUAL", "local_resource_metrics": {"duration_ms": 11}}
+    },
+    {
+      "case_id": "HUMAN",
+      "axes": {"process_transport": "human", "inference_location": "none", "access_mode": "none", "billing_mode": "none"},
+      "evidence_class": "human",
+      "accounting": {"usage_status": "N/A_HUMAN", "token_usage": {"input_tokens": null, "output_tokens": null, "reasoning_tokens": null, "total_tokens": null}, "cost_status": "N/A_HUMAN", "cost_value": null, "currency": null, "local_resource_status": "N/A_HUMAN", "local_resource_metrics": {}}
+    },
+    {
+      "case_id": "BLOCKED_BEFORE_START",
+      "axes": {"process_transport": "none", "inference_location": "unknown", "access_mode": "unknown", "billing_mode": "unknown"},
+      "evidence_class": "blocked_before_start",
+      "accounting": {"usage_status": "NOT_INCURRED_BEFORE_START", "token_usage": {"input_tokens": null, "output_tokens": null, "reasoning_tokens": null, "total_tokens": null}, "cost_status": "NOT_INCURRED_BEFORE_START", "cost_value": null, "currency": null, "local_resource_status": "NOT_INCURRED_BEFORE_START", "local_resource_metrics": {}}
+    }
+  ]
+}

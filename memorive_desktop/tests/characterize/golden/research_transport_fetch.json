@@ -1,0 +1,2257 @@
+{
+ "arxiv_bad_id": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "EXACT_ARXIV_REQUEST_INVALID"
+  },
+  "sent": []
+ },
+ "arxiv_exact_id": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1723 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": false,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "id_list": "2608.00001v2",
+     "max_results": 3
+    },
+    "external_call_performed": true,
+    "next_cursor": 2,
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "provider": "ARXIV",
+    "raw_count": 2,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": "A synthetic abstract about deterministic evidence-bound discovery connectors.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Ada Synthetic",
+         "family": null,
+         "given": null
+        },
+        {
+         "display_name": "Lin Fixture",
+         "family": null,
+         "given": null
+        }
+       ],
+       "date_precision": "DAY",
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "platform": "arXiv",
+       "publication_date_source": "arxiv.published",
+       "published_date": "2026-08-08T12:00:00Z",
+       "record_type": "arxiv-preprint",
+       "title": "Auditable Discovery Systems",
+       "updated_date": "2026-08-09T12:00:00Z",
+       "version": "2508.09991v1"
+      },
+      "identifiers": {
+       "arxiv_id": "2508.09991",
+       "doi": "10.99999/memorive.synthetic.001",
+       "pmid": null,
+       "source_record_id": "2508.09991v1"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.001"
+       },
+       {
+        "label": "来源",
+        "url": "https://arxiv.org/abs/2508.09991v1"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "LANDING_PAGE",
+        "locator": "https://arxiv.org/abs/2508.09991v1",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "ARXIV",
+      "source_record_id": "2508.09991v1"
+     },
+     {
+      "bibliographic": {
+       "abstract": "A synthetic study of cache keys, pagination, and polite backoff.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Grace Example",
+         "family": null,
+         "given": null
+        }
+       ],
+       "date_precision": "DAY",
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "platform": "arXiv",
+       "publication_date_source": "arxiv.published",
+       "published_date": "2026-08-07T13:00:00Z",
+       "record_type": "arxiv-preprint",
+       "title": "Rate Limited Metadata Replay",
+       "updated_date": "2026-08-09T13:00:00Z",
+       "version": "2508.09992v2"
+      },
+      "identifiers": {
+       "arxiv_id": "2508.09992",
+       "doi": null,
+       "pmid": null,
+       "source_record_id": "2508.09992v2"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "来源",
+        "url": "https://arxiv.org/abs/2508.09992v2"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "LANDING_PAGE",
+        "locator": "https://arxiv.org/abs/2508.09992v2",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions",
+       "identifiers.doi"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "ARXIV",
+      "source_record_id": "2508.09992v2"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "ARXIV_ATOM_API",
+    "total_results": 3
+   }
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://export.arxiv.org/api/query?id_list=2608.00001v2&max_results=3"
+   }
+  ]
+ },
+ "arxiv_latest_window": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1723 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": false,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "max_results": 3,
+     "search_query": "(all:discovery) AND submittedDate:[202601010000 TO 202606302359]",
+     "sortBy": "submittedDate",
+     "sortOrder": "descending",
+     "start": 0
+    },
+    "external_call_performed": true,
+    "next_cursor": 2,
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "provider": "ARXIV",
+    "raw_count": 2,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": "A synthetic abstract about deterministic evidence-bound discovery connectors.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Ada Synthetic",
+         "family": null,
+         "given": null
+        },
+        {
+         "display_name": "Lin Fixture",
+         "family": null,
+         "given": null
+        }
+       ],
+       "date_precision": "DAY",
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "platform": "arXiv",
+       "publication_date_source": "arxiv.published",
+       "published_date": "2026-08-08T12:00:00Z",
+       "record_type": "arxiv-preprint",
+       "title": "Auditable Discovery Systems",
+       "updated_date": "2026-08-09T12:00:00Z",
+       "version": "2508.09991v1"
+      },
+      "identifiers": {
+       "arxiv_id": "2508.09991",
+       "doi": "10.99999/memorive.synthetic.001",
+       "pmid": null,
+       "source_record_id": "2508.09991v1"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.001"
+       },
+       {
+        "label": "来源",
+        "url": "https://arxiv.org/abs/2508.09991v1"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "LANDING_PAGE",
+        "locator": "https://arxiv.org/abs/2508.09991v1",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "ARXIV",
+      "source_record_id": "2508.09991v1"
+     },
+     {
+      "bibliographic": {
+       "abstract": "A synthetic study of cache keys, pagination, and polite backoff.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Grace Example",
+         "family": null,
+         "given": null
+        }
+       ],
+       "date_precision": "DAY",
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "platform": "arXiv",
+       "publication_date_source": "arxiv.published",
+       "published_date": "2026-08-07T13:00:00Z",
+       "record_type": "arxiv-preprint",
+       "title": "Rate Limited Metadata Replay",
+       "updated_date": "2026-08-09T13:00:00Z",
+       "version": "2508.09992v2"
+      },
+      "identifiers": {
+       "arxiv_id": "2508.09992",
+       "doi": null,
+       "pmid": null,
+       "source_record_id": "2508.09992v2"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "来源",
+        "url": "https://arxiv.org/abs/2508.09992v2"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "LANDING_PAGE",
+        "locator": "https://arxiv.org/abs/2508.09992v2",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions",
+       "identifiers.doi"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "ARXIV",
+      "source_record_id": "2508.09992v2"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "ARXIV_ATOM_API",
+    "total_results": 3
+   }
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://export.arxiv.org/api/query?search_query=%28all%3Adiscovery%29+AND+submittedDate%3A%5B202601010000+TO+202606302359%5D&start=0&max_results=3&sortBy=submittedDate&sortOrder=descending"
+   }
+  ]
+ },
+ "arxiv_relevance": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1723 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": false,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "max_results": 3,
+     "search_query": "all:auditable discovery",
+     "sortBy": "relevance",
+     "sortOrder": "descending",
+     "start": 0
+    },
+    "external_call_performed": true,
+    "next_cursor": 2,
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "provider": "ARXIV",
+    "raw_count": 2,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": "A synthetic abstract about deterministic evidence-bound discovery connectors.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Ada Synthetic",
+         "family": null,
+         "given": null
+        },
+        {
+         "display_name": "Lin Fixture",
+         "family": null,
+         "given": null
+        }
+       ],
+       "date_precision": "DAY",
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "platform": "arXiv",
+       "publication_date_source": "arxiv.published",
+       "published_date": "2026-08-08T12:00:00Z",
+       "record_type": "arxiv-preprint",
+       "title": "Auditable Discovery Systems",
+       "updated_date": "2026-08-09T12:00:00Z",
+       "version": "2508.09991v1"
+      },
+      "identifiers": {
+       "arxiv_id": "2508.09991",
+       "doi": "10.99999/memorive.synthetic.001",
+       "pmid": null,
+       "source_record_id": "2508.09991v1"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.001"
+       },
+       {
+        "label": "来源",
+        "url": "https://arxiv.org/abs/2508.09991v1"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "LANDING_PAGE",
+        "locator": "https://arxiv.org/abs/2508.09991v1",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "ARXIV",
+      "source_record_id": "2508.09991v1"
+     },
+     {
+      "bibliographic": {
+       "abstract": "A synthetic study of cache keys, pagination, and polite backoff.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Grace Example",
+         "family": null,
+         "given": null
+        }
+       ],
+       "date_precision": "DAY",
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "platform": "arXiv",
+       "publication_date_source": "arxiv.published",
+       "published_date": "2026-08-07T13:00:00Z",
+       "record_type": "arxiv-preprint",
+       "title": "Rate Limited Metadata Replay",
+       "updated_date": "2026-08-09T13:00:00Z",
+       "version": "2508.09992v2"
+      },
+      "identifiers": {
+       "arxiv_id": "2508.09992",
+       "doi": null,
+       "pmid": null,
+       "source_record_id": "2508.09992v2"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "来源",
+        "url": "https://arxiv.org/abs/2508.09992v2"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "LANDING_PAGE",
+        "locator": "https://arxiv.org/abs/2508.09992v2",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions",
+       "identifiers.doi"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "ARXIV",
+      "source_record_id": "2508.09992v2"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "ARXIV_ATOM_API",
+    "total_results": 3
+   }
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://export.arxiv.org/api/query?search_query=all%3Aauditable+discovery&start=0&max_results=3&sortBy=relevance&sortOrder=descending"
+   }
+  ]
+ },
+ "crossref_bad_doi": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "EXACT_DOI_REQUEST_INVALID"
+  },
+  "sent": []
+ },
+ "crossref_cached_second_call": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1282 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": true,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "cursor": "*",
+     "order": "desc",
+     "query": "cached topic",
+     "rows": 2,
+     "sort": "score"
+    },
+    "external_call_performed": false,
+    "next_cursor": "crx-cursor-2",
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "pagination_mode": "CURSOR",
+    "provider": "CROSSREF",
+    "raw_count": 2,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": "structure synthetic Crossref-like abstract intentionally conflicting with the arXiv-like title.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Ada Synthetic",
+         "family": "Synthetic",
+         "given": "Ada"
+        },
+        {
+         "display_name": "Lin Fixture",
+         "family": "Fixture",
+         "given": "Lin"
+        }
+       ],
+       "date_precision": "DAY",
+       "deposited_date": null,
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "publication_date_source": "published",
+       "publication_dates": {
+        "posted": null,
+        "published": "2026-08-08",
+        "published-online": null,
+        "published-print": null
+       },
+       "published_date": "2026-08-08",
+       "publisher": null,
+       "record_type": "journal-article",
+       "title": "Auditable Discovery Systems: structure Revised Synthetic Title",
+       "updated_date": null,
+       "version": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.99999/memorive.synthetic.001",
+       "pmid": null,
+       "source_record_id": "10.99999/memorive.synthetic.001"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.001"
+       },
+       {
+        "label": "来源",
+        "url": "https://example.invalid/doi/10.99999/memorive.synthetic.001"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://example.invalid/doi/10.99999/memorive.synthetic.001",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "CROSSREF",
+      "source_record_id": "10.99999/memorive.synthetic.001"
+     },
+     {
+      "bibliographic": {
+       "abstract": "structure synthetic abstract about raw and normalized response hashes.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Edsger Example",
+         "family": "Example",
+         "given": "Edsger"
+        }
+       ],
+       "date_precision": "DAY",
+       "deposited_date": null,
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "publication_date_source": "published",
+       "publication_dates": {
+        "posted": null,
+        "published": "2026-08-07",
+        "published-online": null,
+        "published-print": null
+       },
+       "published_date": "2026-08-07",
+       "publisher": null,
+       "record_type": "proceedings-article",
+       "title": "Deterministic Snapshot Contracts",
+       "updated_date": null,
+       "version": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.99999/memorive.synthetic.002",
+       "pmid": null,
+       "source_record_id": "10.99999/memorive.synthetic.002"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.002"
+       },
+       {
+        "label": "来源",
+        "url": "https://example.invalid/doi/10.99999/memorive.synthetic.002"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://example.invalid/doi/10.99999/memorive.synthetic.002",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "CROSSREF",
+      "source_record_id": "10.99999/memorive.synthetic.002"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "CROSSREF_REST_WORKS_JSON",
+    "total_results": 3
+   }
+  },
+  "sent": []
+ },
+ "crossref_exact_doi": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1282 bytes",
+   "call-1.result.json": {
+    "error_code": "SOURCE_RECORD_ENVELOPE_EXCEEDED",
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "error_code",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "FAILED"
+   }
+  },
+  "result": {
+   "error": "ValueError",
+   "message": "SOURCE_RECORD_ENVELOPE_EXCEEDED"
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?filter=doi%3A10.99999%2Fmemorive.synthetic.001&rows=1"
+   }
+  ]
+ },
+ "crossref_http_429": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "2 bytes",
+   "call-1.result.json": {
+    "error_code": "SOURCE_HTTP_429",
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "error_code",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 429,
+    "stage": "TERMINAL",
+    "status": "FAILED"
+   }
+  },
+  "result": {
+   "error": "ValueError",
+   "message": "SOURCE_HTTP_429"
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?query=x&rows=2&cursor=%2A&sort=score&order=desc"
+   }
+  ]
+ },
+ "crossref_latest": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1282 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": false,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "filter": "from-pub-date:2026-01-01,until-pub-date:2026-06-30",
+     "offset": 4,
+     "order": "desc",
+     "query": "discovery",
+     "rows": 2,
+     "sort": "published"
+    },
+    "external_call_performed": true,
+    "next_cursor": null,
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "pagination_mode": "BOUNDED_OFFSET_FOR_PUBLICATION_SORT",
+    "provider": "CROSSREF",
+    "raw_count": 2,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": "structure synthetic Crossref-like abstract intentionally conflicting with the arXiv-like title.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Ada Synthetic",
+         "family": "Synthetic",
+         "given": "Ada"
+        },
+        {
+         "display_name": "Lin Fixture",
+         "family": "Fixture",
+         "given": "Lin"
+        }
+       ],
+       "date_precision": "DAY",
+       "deposited_date": null,
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "publication_date_source": "published",
+       "publication_dates": {
+        "posted": null,
+        "published": "2026-08-08",
+        "published-online": null,
+        "published-print": null
+       },
+       "published_date": "2026-08-08",
+       "publisher": null,
+       "record_type": "journal-article",
+       "title": "Auditable Discovery Systems: structure Revised Synthetic Title",
+       "updated_date": null,
+       "version": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.99999/memorive.synthetic.001",
+       "pmid": null,
+       "source_record_id": "10.99999/memorive.synthetic.001"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.001"
+       },
+       {
+        "label": "来源",
+        "url": "https://example.invalid/doi/10.99999/memorive.synthetic.001"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://example.invalid/doi/10.99999/memorive.synthetic.001",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "CROSSREF",
+      "source_record_id": "10.99999/memorive.synthetic.001"
+     },
+     {
+      "bibliographic": {
+       "abstract": "structure synthetic abstract about raw and normalized response hashes.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Edsger Example",
+         "family": "Example",
+         "given": "Edsger"
+        }
+       ],
+       "date_precision": "DAY",
+       "deposited_date": null,
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "publication_date_source": "published",
+       "publication_dates": {
+        "posted": null,
+        "published": "2026-08-07",
+        "published-online": null,
+        "published-print": null
+       },
+       "published_date": "2026-08-07",
+       "publisher": null,
+       "record_type": "proceedings-article",
+       "title": "Deterministic Snapshot Contracts",
+       "updated_date": null,
+       "version": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.99999/memorive.synthetic.002",
+       "pmid": null,
+       "source_record_id": "10.99999/memorive.synthetic.002"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.002"
+       },
+       {
+        "label": "来源",
+        "url": "https://example.invalid/doi/10.99999/memorive.synthetic.002"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://example.invalid/doi/10.99999/memorive.synthetic.002",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "CROSSREF",
+      "source_record_id": "10.99999/memorive.synthetic.002"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "CROSSREF_REST_WORKS_JSON",
+    "total_results": 3
+   }
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?query=discovery&rows=2&sort=published&order=desc&offset=4&filter=from-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-06-30"
+   }
+  ]
+ },
+ "crossref_not_json": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "6 bytes",
+   "call-1.result.json": {
+    "error_code": "SOURCE_SCHEMA_DRIFT",
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "error_code",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "FAILED"
+   }
+  },
+  "result": {
+   "error": "ValueError",
+   "message": "SOURCE_SCHEMA_DRIFT"
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?query=x&rows=2&cursor=%2A&sort=score&order=desc"
+   }
+  ]
+ },
+ "crossref_relevance": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1282 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": false,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "cursor": "*",
+     "order": "desc",
+     "query": "auditable discovery",
+     "rows": 2,
+     "sort": "score"
+    },
+    "external_call_performed": true,
+    "next_cursor": "crx-cursor-2",
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "pagination_mode": "CURSOR",
+    "provider": "CROSSREF",
+    "raw_count": 2,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": "structure synthetic Crossref-like abstract intentionally conflicting with the arXiv-like title.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Ada Synthetic",
+         "family": "Synthetic",
+         "given": "Ada"
+        },
+        {
+         "display_name": "Lin Fixture",
+         "family": "Fixture",
+         "given": "Lin"
+        }
+       ],
+       "date_precision": "DAY",
+       "deposited_date": null,
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "publication_date_source": "published",
+       "publication_dates": {
+        "posted": null,
+        "published": "2026-08-08",
+        "published-online": null,
+        "published-print": null
+       },
+       "published_date": "2026-08-08",
+       "publisher": null,
+       "record_type": "journal-article",
+       "title": "Auditable Discovery Systems: structure Revised Synthetic Title",
+       "updated_date": null,
+       "version": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.99999/memorive.synthetic.001",
+       "pmid": null,
+       "source_record_id": "10.99999/memorive.synthetic.001"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.001"
+       },
+       {
+        "label": "来源",
+        "url": "https://example.invalid/doi/10.99999/memorive.synthetic.001"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://example.invalid/doi/10.99999/memorive.synthetic.001",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "CROSSREF",
+      "source_record_id": "10.99999/memorive.synthetic.001"
+     },
+     {
+      "bibliographic": {
+       "abstract": "structure synthetic abstract about raw and normalized response hashes.",
+       "abstract_status": "PROVIDED_BY_SOURCE",
+       "authors": [
+        {
+         "display_name": "Edsger Example",
+         "family": "Example",
+         "given": "Edsger"
+        }
+       ],
+       "date_precision": "DAY",
+       "deposited_date": null,
+       "indexed_date": null,
+       "institutions": [],
+       "journal": null,
+       "publication_date_source": "published",
+       "publication_dates": {
+        "posted": null,
+        "published": "2026-08-07",
+        "published-online": null,
+        "published-print": null
+       },
+       "published_date": "2026-08-07",
+       "publisher": null,
+       "record_type": "proceedings-article",
+       "title": "Deterministic Snapshot Contracts",
+       "updated_date": null,
+       "version": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.99999/memorive.synthetic.002",
+       "pmid": null,
+       "source_record_id": "10.99999/memorive.synthetic.002"
+      },
+      "identity_evidence_level": "EXACT_SOURCE_IDENTIFIER",
+      "links": [
+       {
+        "label": "DOI",
+        "url": "https://doi.org/10.99999/memorive.synthetic.002"
+       },
+       {
+        "label": "来源",
+        "url": "https://example.invalid/doi/10.99999/memorive.synthetic.002"
+       }
+      ],
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://example.invalid/doi/10.99999/memorive.synthetic.002",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.journal",
+       "bibliographic.institutions"
+      ],
+      "schema_version": "E6NormalizedMetadata-v1",
+      "source_provider": "CROSSREF",
+      "source_record_id": "10.99999/memorive.synthetic.002"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "CROSSREF_REST_WORKS_JSON",
+    "total_results": 3
+   }
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?query=auditable+discovery&rows=2&cursor=%2A&sort=score&order=desc"
+   }
+  ]
+ },
+ "crossref_too_many_records": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "1282 bytes",
+   "call-1.result.json": {
+    "error_code": "SOURCE_RECORD_ENVELOPE_EXCEEDED",
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "error_code",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "FAILED"
+   }
+  },
+  "result": {
+   "error": "ValueError",
+   "message": "SOURCE_RECORD_ENVELOPE_EXCEEDED"
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?query=x&rows=1&cursor=%2A&sort=score&order=desc"
+   }
+  ]
+ },
+ "crossref_transport_error": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.result.json": {
+    "error_code": "EXTERNAL_METADATA_TIMEOUT",
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "error_code",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "TERMINAL",
+    "status": "FAILED"
+   }
+  },
+  "result": {
+   "error": "ValueError",
+   "message": "EXTERNAL_METADATA_TIMEOUT"
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.crossref.org/works?query=x&rows=2&cursor=%2A&sort=score&order=desc"
+   }
+  ]
+ },
+ "page_size_over_limit": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "SOURCE_PAGE_SIZE_INVALID"
+  },
+  "sent": []
+ },
+ "page_size_zero": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "SOURCE_PAGE_SIZE_INVALID"
+  },
+  "sent": []
+ },
+ "unknown_provider": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "LITERATURE_PROVIDER_UNSUPPORTED"
+  },
+  "sent": []
+ },
+ "wos_key_with_newline": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "LITERATURE_CREDENTIAL_INVALID"
+  },
+  "sent": []
+ },
+ "wos_with_key": {
+  "records": {
+   "call-1.presend.json": {
+    "error_code": null,
+    "fields": [
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "evidence_class",
+     "external_call_performed",
+     "input_sha256",
+     "module",
+     "output_schema_sha256",
+     "phase",
+     "profile",
+     "profile_sha256",
+     "receipt_path",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "status",
+     "task"
+    ],
+    "http_status": null,
+    "stage": "PRE_SEND",
+    "status": "NOT_STARTED"
+   },
+   "call-1.response": "343 bytes",
+   "call-1.result.json": {
+    "error_code": null,
+    "fields": [
+     "accounting_status",
+     "attempt_id",
+     "authorization",
+     "budget",
+     "call_id",
+     "cost",
+     "currency",
+     "evidence_class",
+     "external_call_performed",
+     "finished_at",
+     "http_status",
+     "input_sha256",
+     "input_tokens",
+     "latency_ms",
+     "module",
+     "output_schema_sha256",
+     "output_tokens",
+     "phase",
+     "production_qualification",
+     "profile",
+     "profile_sha256",
+     "raw_record_count",
+     "receipt_path",
+     "record_count",
+     "recorded_at",
+     "request",
+     "request_attempt_id",
+     "requested_model",
+     "response_bytes",
+     "response_sha256",
+     "returned_model",
+     "role",
+     "route",
+     "route_sha256",
+     "run_id",
+     "schema_version",
+     "sha256",
+     "stage",
+     "started_at",
+     "status",
+     "task"
+    ],
+    "http_status": 200,
+    "stage": "TERMINAL",
+    "status": "SUCCEEDED"
+   }
+  },
+  "result": {
+   "result": {
+    "cache_hit": false,
+    "captured_at": "<volatile>",
+    "effective_query": {
+     "db": "WOS",
+     "limit": 3,
+     "page": 1,
+     "q": "TS=(x)"
+    },
+    "external_call_performed": true,
+    "next_cursor": null,
+    "normalization_schema": "E6NormalizedMetadata-v1",
+    "provider": "WEB-OF-SCIENCE",
+    "raw_count": 1,
+    "records": [
+     {
+      "bibliographic": {
+       "abstract": null,
+       "authors": [
+        {
+         "display_name": "Test Author",
+         "family": null,
+         "given": null
+        }
+       ],
+       "published_date": null,
+       "record_type": "unknown",
+       "title": "Original English title",
+       "updated_date": null
+      },
+      "identifiers": {
+       "arxiv_id": null,
+       "doi": "10.9999/synthetic",
+       "pmid": null,
+       "source_record_id": "WOS:SYNTHETIC"
+      },
+      "location_claims": [
+       {
+        "kind": "METADATA_RECORD",
+        "locator": "https://www.webofscience.com/wos/woscc/full-record/WOS:SYNTHETIC",
+        "materialized": false,
+        "rights_status": "LOCATION_CLAIM_ONLY"
+       }
+      ],
+      "partial_fields": [
+       "bibliographic.published_date",
+       "bibliographic.updated_date",
+       "bibliographic.abstract"
+      ],
+      "source_record_id": "WOS:SYNTHETIC"
+     }
+    ],
+    "request_id": "call-1",
+    "response_sha256": "<sha256>",
+    "schema_version": "DesktopDesktopMetadataResult-v1",
+    "skipped_records": [],
+    "source_schema": "WOS_STARTER_DOCUMENTS_JSON",
+    "total_results": 1
+   }
+  },
+  "sent": [
+   {
+    "body": null,
+    "header_names": [
+     "Accept",
+     "User-Agent",
+     "X-ApiKey"
+    ],
+    "max_response_bytes": 2000000,
+    "method": "GET",
+    "proxy_address": "",
+    "proxy_mode": "NONE",
+    "timeout_seconds": 30,
+    "url": "https://api.clarivate.com/apis/wos-starter/v1/documents?q=TS%3D%28x%29&db=WOS&limit=3&page=1"
+   }
+  ]
+ },
+ "wos_without_key": {
+  "records": {},
+  "result": {
+   "error": "ValueError",
+   "message": "LITERATURE_CREDENTIAL_REQUIRED"
+  },
+  "sent": []
+ }
+}

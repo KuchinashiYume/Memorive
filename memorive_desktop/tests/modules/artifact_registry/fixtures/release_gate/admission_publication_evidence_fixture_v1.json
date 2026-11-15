@@ -1,0 +1,24 @@
+{
+  "coverage": {
+    "evidence_refs": [
+      "fixture://analysis_admission/coverage/available"
+    ],
+    "status": "available"
+  },
+  "research_analysis_source_resolution": {
+    "all_literature_source_ids_resolve_to_pack": true,
+    "evidence_ref": "fixture://analysis_admission/research_analysis/source-resolution-pass"
+  },
+  "evidence_review_review": {
+    "independent": true,
+    "review_ref": "fixture://analysis_admission/evidence_review/independent-review-pass",
+    "review_status": "passed"
+  },
+  "paper_outcome": {
+    "evidence_refs": [
+      "fixture://analysis_admission/paper-outcome/passed"
+    ],
+    "status": "passed"
+  },
+  "schema_version": "analysis_admission-admission-publication-evidence-fixture-v1"
+}

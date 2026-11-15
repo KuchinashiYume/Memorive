@@ -1,0 +1,181 @@
+{
+  "schema_version": "STRUCTURAL_QUERY_PACK_V1",
+  "pack_id": "STRUCTURAL_A_QUERY_PACK_001",
+  "purpose": "CONTRACT_AND_MATH_ONLY_NOT_SEMANTIC_QUALITY",
+  "public_safe": true,
+  "synthetic_only": true,
+  "semantic_B_eligible": false,
+  "embedding_profile_id": "offline:fixture-v1-d4",
+  "embedding_model_id": "fixture-hash-vector-v1",
+  "embedding_dimension": 4,
+  "field_export_sha256": "4681645E6A8DEAD4E65C71855C81A81164EB16756FF070710C5508B114AFFE28",
+  "structural_injection_fixture_sha256": "E04188A53D72371ABE15AB14750B0E8C3B024D71242B6787AB6DC2DE4FF05DFD",
+  "queries": [
+    {
+      "query_id": "SA-Q01-METHOD",
+      "stratum": "method",
+      "query_text": "STRUCTURAL_FIXTURE_METHOD_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "dimensions": [
+        {
+          "dimension_id": "method",
+          "field_path_templates": ["method/{item}"],
+          "allocation": 1.0,
+          "query_vector": [-0.32022182747820965, 0.6971419008733187, -0.2934895246352743, 0.5703639629066798]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q02-CONCLUSION",
+      "stratum": "conclusion",
+      "query_text": "STRUCTURAL_FIXTURE_CONCLUSION_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "dimensions": [
+        {
+          "dimension_id": "conclusion",
+          "field_path_templates": ["author_conclusion"],
+          "allocation": 1.0,
+          "query_vector": [-0.7718722312761288, 0.3783472337345584, 0.3400815020128931, -0.3813282067968123]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q03-DATA",
+      "stratum": "data_numeric",
+      "query_text": "STRUCTURAL_FIXTURE_METRIC_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "dimensions": [
+        {
+          "dimension_id": "data_numeric",
+          "field_path_templates": ["key_data/{item}/metric"],
+          "allocation": 1.0,
+          "query_vector": [0.4070251609741972, 0.3115055347173507, -0.5886662207297095, -0.625113510289281]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q04-LIMITATION",
+      "stratum": "limitations_outlook",
+      "query_text": "STRUCTURAL_FIXTURE_LIMITATION_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "dimensions": [
+        {
+          "dimension_id": "limitations",
+          "field_path_templates": ["author_limitations_outlook/limitations/{item}/quote"],
+          "allocation": 1.0,
+          "query_vector": [0.023450001032329394, -0.6144142927918752, -0.011504848042990661, 0.7885510844175863]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q05-COUNTER",
+      "stratum": "counterevidence",
+      "query_text": "STRUCTURAL_FIXTURE_BOUNDARY_COUNTER_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "counterevidence_requested": true,
+      "dimensions": [
+        {
+          "dimension_id": "boundary_counterevidence",
+          "field_path_templates": ["boundary_conditions/{item}", "author_limitations_outlook/limitations/{item}/quote"],
+          "allocation": 1.0,
+          "query_vector": [0.4504256585181293, 0.844162692659227, 0.2415448868589045, 0.16174715485334534]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q06-MULTI",
+      "stratum": "multi_intent",
+      "query_text": "STRUCTURAL_FIXTURE_METHOD_AND_LIMITATION_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "dimensions": [
+        {
+          "dimension_id": "method",
+          "field_path_templates": ["method/{item}"],
+          "allocation": 0.55,
+          "query_vector": [-0.32022182747820965, 0.6971419008733187, -0.2934895246352743, 0.5703639629066798]
+        },
+        {
+          "dimension_id": "limitations",
+          "field_path_templates": ["author_limitations_outlook/limitations/{item}/quote"],
+          "allocation": 0.45,
+          "query_vector": [0.023450001032329394, -0.6144142927918752, -0.011504848042990661, 0.7885510844175863]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q07-SCOPE",
+      "stratum": "explicit_scope",
+      "query_text": "STRUCTURAL_FIXTURE_EXPLICIT_SCOPE_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "dimensions": [
+        {
+          "dimension_id": "research_question",
+          "field_path_templates": ["research_question"],
+          "allocation": 1.0,
+          "query_vector": [-0.4807498902473435, 0.49741022092772547, 0.10279108838901888, -0.7147703178585407]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q08-PROVENANCE",
+      "stratum": "derived_original_competition",
+      "query_text": "STRUCTURAL_FIXTURE_PROVENANCE_COMPETITION_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "inject_structural_derived_competitor": true,
+      "dimensions": [
+        {
+          "dimension_id": "key_results",
+          "field_path_templates": ["key_results"],
+          "allocation": 1.0,
+          "query_vector": [-0.446509181596213, 0.28723682206095474, 0.5245739000987847, 0.6655424720765413]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q09-DIVERSITY",
+      "stratum": "diversity",
+      "query_text": "STRUCTURAL_FIXTURE_DIVERSITY_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001", "FixtureDiversity002", "FixtureDiversity003"]},
+      "inject_structural_multi_source_candidates": true,
+      "dimensions": [
+        {
+          "dimension_id": "comparison_groups",
+          "field_path_templates": ["comparison_context/groups/{item}"],
+          "allocation": 1.0,
+          "query_vector": [-0.19824405454909835, 0.8659484088778738, 0.3705469560077883, 0.27115973408892186]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q10-FILTERED-UNDERFILL",
+      "stratum": "hard_filter_underfill",
+      "query_text": "STRUCTURAL_FIXTURE_FILTERED_UNDERFILL_001",
+      "explicit_scope": {"paper_ids": ["FixtureOutside999"]},
+      "exercise_filtered_underfill": true,
+      "dimensions": [
+        {
+          "dimension_id": "method",
+          "field_path_templates": ["method/{item}"],
+          "allocation": 1.0,
+          "query_vector": [-0.32022182747820965, 0.6971419008733187, -0.2934895246352743, 0.5703639629066798]
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q11-COUNTER-UNDERFILL",
+      "stratum": "counterevidence_underfill",
+      "query_text": "STRUCTURAL_FIXTURE_COUNTER_UNDERFILL_001",
+      "explicit_scope": {"paper_ids": ["FixtureSelf001"]},
+      "counterevidence_requested": true,
+      "exercise_filtered_underfill": true,
+      "dimensions": [
+        {
+          "dimension_id": "missing_counterevidence",
+          "field_path_templates": ["author_limitations_outlook/limitations/99/quote"],
+          "allocation": 1.0,
+          "query_vector": [0.023450001032329394, -0.6144142927918752, -0.011504848042990661, 0.7885510844175863]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/field-vectors/doc_type_metadata.schema.json",
+  "title": "DocTypeMetadata",
+  "description": "Fail-closed sidecar metadata for Card Schema v6 documents. It does not mutate the Card.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "metadata_id",
+    "artifact_ref",
+    "artifact_id",
+    "artifact_revision",
+    "artifact_content_hash",
+    "source_refs",
+    "card_id",
+    "card_revision",
+    "card_content_hash",
+    "observed_value",
+    "canonical_value",
+    "resolution_status",
+    "source_ref",
+    "source_hash",
+    "recorded_at",
+    "observed_at",
+    "normalization_contract_version"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "metadata_id": {
+      "type": "string",
+      "pattern": "^DTM-[A-Za-z0-9][A-Za-z0-9._:-]{5,127}$"
+    },
+    "artifact_ref": {"$ref": "#/$defs/nonEmptyRef"},
+    "artifact_id": {"$ref": "#/$defs/nonEmptyToken"},
+    "artifact_revision": {"type": "integer", "minimum": 1},
+    "artifact_content_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "source_refs": {"$ref": "#/$defs/nonEmptyRefs"},
+    "card_id": {"$ref": "#/$defs/nonEmptyToken"},
+    "card_revision": {"type": "integer", "minimum": 1},
+    "card_content_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "observed_value": {
+      "oneOf": [
+        {"type": "string", "minLength": 1, "maxLength": 128},
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"enum": ["literature", "note"]}
+        },
+        {"type": "null"}
+      ]
+    },
+    "canonical_value": {"enum": ["literature", "note", null]},
+    "resolution_status": {"enum": ["resolved", "missing", "unknown", "conflicting"]},
+    "source_ref": {"$ref": "#/$defs/nonEmptyRef"},
+    "source_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "normalization_contract_version": {"const": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"resolution_status": {"const": "resolved"}}},
+      "then": {
+        "oneOf": [
+          {
+            "properties": {
+              "observed_value": {"const": "literature"},
+              "canonical_value": {"const": "literature"}
+            }
+          },
+          {
+            "properties": {
+              "observed_value": {"const": "note"},
+              "canonical_value": {"const": "note"}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {"properties": {"resolution_status": {"const": "missing"}}},
+      "then": {
+        "properties": {
+          "observed_value": {"type": "null"},
+          "canonical_value": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"resolution_status": {"const": "unknown"}}},
+      "then": {
+        "properties": {
+          "observed_value": {"type": "string", "minLength": 1},
+          "canonical_value": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"resolution_status": {"const": "conflicting"}}},
+      "then": {
+        "properties": {
+          "observed_value": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {"enum": ["literature", "note"]}
+          },
+          "canonical_value": {"type": "null"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "hashDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "nonEmptyToken": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "nonEmptyRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "nonEmptyRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonEmptyRef"}
+    }
+  }
+}

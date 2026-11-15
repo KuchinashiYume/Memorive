@@ -1,0 +1,10 @@
+{
+  "schema_version": "discovery.data_contracts.failure-scenarios.0.1",
+  "scenarios": [
+    {"id": "ARXIV_RATE_LIMIT", "connector_id": "ARXIV", "error_code": "SOURCE_RATE_LIMITED", "protocol_status": 429, "retry_after_seconds": 7, "retryable": true},
+    {"id": "CROSSREF_TRANSIENT_503", "connector_id": "CROSSREF", "error_code": "SOURCE_TRANSIENT_FAILURE", "protocol_status": 503, "retry_after_seconds": null, "retryable": true},
+    {"id": "CROSSREF_SCHEMA_DRIFT", "connector_id": "CROSSREF", "error_code": "SOURCE_SCHEMA_DRIFT", "protocol_status": 200, "retry_after_seconds": null, "retryable": false},
+    {"id": "NETWORK_DISABLED", "connector_id": "ARXIV", "error_code": "NETWORK_DISABLED_BY_CONTRACT", "protocol_status": null, "retry_after_seconds": null, "retryable": false},
+    {"id": "EXTENSION_NOT_CONFIGURED", "connector_id": "OPENALEX", "error_code": "CONNECTOR_NOT_CONFIGURED", "protocol_status": null, "retry_after_seconds": null, "retryable": false}
+  ]
+}

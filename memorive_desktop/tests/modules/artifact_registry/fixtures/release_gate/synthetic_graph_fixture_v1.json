@@ -1,0 +1,56 @@
+{
+  "analysis_a1": {
+    "payload": {
+      "analysis_id": "A1",
+      "finding": "synthetic reviewed analysis",
+      "version": 1
+    },
+    "schema_ref": "memorive://analysis/v1"
+  },
+  "card_c1": {
+    "payload": {
+      "card_id": "C1",
+      "claim": "synthetic baseline claim",
+      "version": 1
+    },
+    "schema_ref": "memorive://card/v6"
+  },
+  "card_c2": {
+    "payload": {
+      "card_id": "C2",
+      "claim": "synthetic superseding claim",
+      "version": 2
+    },
+    "schema_ref": "memorive://card/v6"
+  },
+  "card_c3": {
+    "payload": {
+      "card_id": "C3",
+      "claim": "synthetic later but unrelated claim",
+      "version": 3
+    },
+    "schema_ref": "memorive://card/v6"
+  },
+  "chunk_only_pack": {
+    "payload": {
+      "chunk_ids": [
+        "chunk-synthetic-001"
+      ],
+      "pack_id": "P-CHUNK-ONLY"
+    },
+    "schema_ref": "memorive://context-pack/v1"
+  },
+  "fixture_id": "analysis_admission-synthetic-six-scenario-v1",
+  "pack_p1": {
+    "payload": {
+      "chunk_ids": [
+        "chunk-synthetic-001"
+      ],
+      "pack_id": "CORE",
+      "version": 1
+    },
+    "schema_ref": "memorive://context-pack/v1"
+  },
+  "paper_id": "paper-synthetic-001",
+  "schema_version": "analysis_admission-synthetic-graph-fixture-v1"
+}

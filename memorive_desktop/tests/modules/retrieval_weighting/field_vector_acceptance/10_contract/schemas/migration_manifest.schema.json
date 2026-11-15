@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/field-vectors/migration_manifest.schema.json",
+  "title": "candidate migration machine manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "migration_id", "migration_state", "source_snapshot",
+    "source_snapshot_canonical_sha256", "previous_candidate", "candidate_manifest_ref",
+    "candidate_manifest_hash", "candidate_tree_sha256", "owned_staging", "rollback_target",
+    "expected_record_count", "record_exact_set", "record_exact_set_sha256", "profile",
+    "index_identity", "active_index_baseline", "build_cutoff_at", "partial_write_count",
+    "protected_roots_verification", "activation", "rollback_receipt", "external_calls",
+    "cost_cny", "production_mutations", "git_mutations"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "migration_id": {"type": "string", "pattern": "^FIELD_VECTORS_MIGRATION_[A-F0-9]{64}$"},
+    "migration_state": {"enum": ["validated", "rolled_back", "failed"]},
+    "source_snapshot": {"$ref": "#/$defs/sourceSnapshotAnchor"},
+    "source_snapshot_canonical_sha256": {"$ref": "#/$defs/sha256"},
+    "previous_candidate": {"$ref": "#/$defs/candidateAnchor"},
+    "candidate_manifest_ref": {"$ref": "#/$defs/nonEmpty"},
+    "candidate_manifest_hash": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "candidate_tree_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "owned_staging": {"$ref": "#/$defs/nonEmpty"},
+    "rollback_target": {"oneOf": [{"$ref": "#/$defs/candidateAnchor"}, {"type": "null"}]},
+    "expected_record_count": {"type": "integer", "minimum": 1},
+    "record_exact_set": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"$ref": "#/$defs/recordAnchor"}
+    },
+    "record_exact_set_sha256": {"$ref": "#/$defs/sha256"},
+    "profile": {"$ref": "#/$defs/profile"},
+    "index_identity": {"$ref": "#/$defs/indexIdentity"},
+    "active_index_baseline": {"$ref": "#/$defs/activeIndexBaseline"},
+    "build_cutoff_at": {"type": "string", "format": "date-time"},
+    "partial_write_count": {"const": 0},
+    "protected_roots_verification": {"const": "EXTERNAL_A_RUNNER_RECEIPT_REQUIRED"},
+    "activation": {"const": false},
+    "rollback_receipt": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/rollbackReceipt"}]},
+    "external_calls": {"const": 0},
+    "cost_cny": {"const": 0},
+    "production_mutations": {"const": 0},
+    "git_mutations": {"const": 0}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"migration_state": {"const": "validated"}}},
+      "then": {
+        "properties": {
+          "candidate_manifest_hash": {"$ref": "#/$defs/sha256"},
+          "candidate_tree_sha256": {"$ref": "#/$defs/sha256"},
+          "rollback_receipt": {"type": "null"}
+        }
+      },
+      "else": {"properties": {"rollback_receipt": {"$ref": "#/$defs/rollbackReceipt"}}}
+    },
+    {
+      "if": {"properties": {"previous_candidate": {"properties": {"exists": {"const": false}}}}},
+      "then": {"properties": {"rollback_target": {"type": "null"}}},
+      "else": {"properties": {"rollback_target": {"$ref": "#/$defs/candidateAnchor"}}}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "vectorId": {"type": "string", "pattern": "^fv1_[a-f0-9]{64}$"},
+    "nonEmpty": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\r\\n]+$"},
+    "storageToken": {"type": "string", "pattern": "^[A-Za-z0-9._:-]+$"},
+    "hashDescriptor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "sourceSnapshotAnchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["object_type", "source_snapshot_id", "content_hash"],
+      "properties": {
+        "object_type": {"const": "SourceSnapshot"},
+        "source_snapshot_id": {"type": "string", "pattern": "^ss1_[a-f0-9]{64}$"},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+      }
+    },
+    "candidateAnchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["exists", "locator", "tree_sha256", "manifest_sha256", "immutable"],
+      "properties": {
+        "exists": {"type": "boolean"},
+        "locator": {"oneOf": [{"$ref": "#/$defs/nonEmpty"}, {"type": "null"}]},
+        "tree_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "manifest_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "immutable": {"const": true}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"exists": {"const": false}}},
+          "then": {"properties": {"locator": {"type": "null"}, "tree_sha256": {"type": "null"}, "manifest_sha256": {"type": "null"}}},
+          "else": {"properties": {"locator": {"$ref": "#/$defs/nonEmpty"}, "tree_sha256": {"$ref": "#/$defs/sha256"}, "manifest_sha256": {"$ref": "#/$defs/sha256"}}}
+        }
+      ]
+    },
+    "profile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["embedding_profile_id", "embedding_model_id", "embedding_dimension", "embedding_normalization", "index_version"],
+      "properties": {
+        "embedding_profile_id": {"$ref": "#/$defs/storageToken"},
+        "embedding_model_id": {"const": "fixture-hash-vector-v2"},
+        "embedding_dimension": {"type": "integer", "minimum": 1, "maximum": 65536},
+        "embedding_normalization": {"enum": ["none", "l2"]},
+        "index_version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "indexIdentity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["index_id", "version", "collection_id", "build_cutoff_at", "vector_type", "field_registry_id", "field_registry_version", "field_registry_hash", "production_eligible", "content_hash"],
+      "properties": {
+        "index_id": {"$ref": "#/$defs/storageToken"},
+        "version": {"type": "integer", "minimum": 1},
+        "collection_id": {"$ref": "#/$defs/storageToken"},
+        "build_cutoff_at": {"type": "string", "format": "date-time"},
+        "vector_type": {"const": "card_field"},
+        "field_registry_id": {"$ref": "#/$defs/nonEmpty"},
+        "field_registry_version": {"type": "integer", "minimum": 1},
+        "field_registry_hash": {"$ref": "#/$defs/sha256"},
+        "production_eligible": {"const": false},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+      }
+    },
+    "activeIndexBaseline": {
+      "type": "object", "additionalProperties": false,
+      "required": ["authority_ref", "authority_raw_sha256", "declared_locator", "exists", "member_count", "bytes", "tree_sha256", "read_only"],
+      "properties": {
+        "authority_ref": {"$ref": "#/$defs/nonEmpty"},
+        "authority_raw_sha256": {"$ref": "#/$defs/sha256"},
+        "declared_locator": {"$ref": "#/$defs/nonEmpty"},
+        "exists": {"type": "boolean"},
+        "member_count": {"type": "integer", "minimum": 0},
+        "bytes": {"type": "integer", "minimum": 0},
+        "tree_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "read_only": {"const": true}
+      }
+    },
+    "recordAnchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["vector_id", "content_hash", "storage_key", "card_id", "field_path", "data_ownership"],
+      "properties": {
+        "vector_id": {"$ref": "#/$defs/vectorId"},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"},
+        "storage_key": {"$ref": "#/$defs/nonEmpty"},
+        "card_id": {"$ref": "#/$defs/nonEmpty"},
+        "field_path": {"$ref": "#/$defs/nonEmpty"},
+        "data_ownership": {"enum": ["self", "entrusted"]}
+      }
+    },
+    "rollbackReceipt": {
+      "type": "object", "additionalProperties": false,
+      "required": ["receipt_id", "reason", "removed_staging_only", "rollback_target_unchanged"],
+      "properties": {
+        "receipt_id": {"type": "string", "pattern": "^FIELD_VECTORS_ROLLBACK_[A-F0-9]{64}$"},
+        "reason": {"$ref": "#/$defs/nonEmpty"},
+        "removed_staging_only": {"const": true},
+        "rollback_target_unchanged": {"const": true}
+      }
+    }
+  }
+}

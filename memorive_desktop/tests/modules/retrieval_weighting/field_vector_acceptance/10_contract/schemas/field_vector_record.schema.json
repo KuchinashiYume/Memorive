@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/field-vectors/field_vector_record.schema.json",
+  "title": "FieldVectorRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "vector_id", "vector_type", "identity_version", "paper_id",
+    "card_artifact_ref", "card_id", "card_revision", "card_content_hash",
+    "field_source_id", "field_path", "value_locator", "canonical_value", "value_hash",
+    "source_refs", "source_coverage", "provenance_refs", "parent_refs", "doc_type",
+    "data_ownership", "review_status_snapshot", "source_snapshot_id",
+    "source_snapshot_hash", "embedding_profile_id", "embedding_model_id",
+    "embedding_dimension", "embedding_normalization", "embedding", "index_id",
+    "index_version", "collection_id", "storage_key", "observed_at", "build_cutoff_at",
+    "content_hash", "hash_kind", "supersedes", "invalidation_state", "invalidated_by",
+    "production_eligible"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "vector_id": {"$ref": "#/$defs/vectorId"},
+    "vector_type": {"const": "card_field"},
+    "identity_version": {"const": 1},
+    "paper_id": {"$ref": "#/$defs/nonEmptyToken"},
+    "card_artifact_ref": {"$ref": "#/$defs/nonEmptyRef"},
+    "card_id": {"$ref": "#/$defs/nonEmptyToken"},
+    "card_revision": {"type": "integer", "minimum": 1},
+    "card_content_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "field_source_id": {"type": "string", "pattern": "^fsi1_[a-f0-9]{64}$"},
+    "field_path": {"$ref": "#/$defs/fieldPath"},
+    "value_locator": {
+      "type": "string",
+      "pattern": "^/(research_question|research_object/[0-9]+|method/[0-9]+|key_results|author_conclusion|boundary_conditions/[0-9]+|comparison_context/(object|condition|groups/[0-9]+|time|scale|scenario|applicability)|key_data/[0-9]+/metric|author_limitations_outlook/(limitations|outlook)/[0-9]+/quote)$"
+    },
+    "canonical_value": {"$ref": "#/$defs/nonEmptyRef"},
+    "value_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "source_refs": {"$ref": "#/$defs/nonEmptyRefs"},
+    "source_coverage": {"enum": ["field_anchor", "item_anchor", "artifact_level_no_dedicated_anchor"]},
+    "provenance_refs": {"$ref": "#/$defs/nonEmptyRefs"},
+    "parent_refs": {"$ref": "#/$defs/nonEmptyRefs"},
+    "doc_type": {"enum": ["literature", "note"]},
+    "data_ownership": {"enum": ["self", "entrusted"]},
+    "review_status_snapshot": {"const": "active"},
+    "source_snapshot_id": {"type": "string", "pattern": "^ss1_[a-f0-9]{64}$"},
+    "source_snapshot_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "embedding_profile_id": {"type": "string", "pattern": "^(offline|local-only):[A-Za-z0-9._:-]+$"},
+    "embedding_model_id": {"const": "fixture-hash-vector-v2"},
+    "embedding_dimension": {"type": "integer", "minimum": 1, "maximum": 65536},
+    "embedding_normalization": {"enum": ["none", "l2"]},
+    "embedding": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 65536,
+      "items": {"type": "number"}
+    },
+    "index_id": {"type": "string", "pattern": "^(offline|local-only):[A-Za-z0-9._:-]+$"},
+    "index_version": {"type": "integer", "minimum": 1},
+    "collection_id": {"type": "string", "pattern": "^(offline|local-only):[A-Za-z0-9._:-]+$"},
+    "storage_key": {
+      "type": "string",
+      "pattern": "^field-vector/v1/[A-Za-z0-9._:-]+/[A-Za-z0-9._:-]+/fv1_[a-f0-9]{64}$"
+    },
+    "observed_at": {"type": "string", "format": "date-time"},
+    "build_cutoff_at": {"type": "string", "format": "date-time"},
+    "content_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "hash_kind": {"const": "rfc8785_jcs_sha256"},
+    "supersedes": {"oneOf": [{"$ref": "#/$defs/vectorId"}, {"type": "null"}]},
+    "invalidation_state": {"enum": ["active", "invalidated", "tombstoned"]},
+    "invalidated_by": {"oneOf": [{"$ref": "#/$defs/vectorId"}, {"type": "null"}]},
+    "production_eligible": {"const": false}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"invalidation_state": {"const": "active"}}},
+      "then": {"properties": {"invalidated_by": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"invalidation_state": {"enum": ["invalidated", "tombstoned"]}}},
+      "then": {"properties": {"invalidated_by": {"$ref": "#/$defs/vectorId"}}}
+    },
+    {
+      "if": {"properties": {"data_ownership": {"const": "entrusted"}}},
+      "then": {
+        "properties": {
+          "embedding_profile_id": {"pattern": "^local-only:"},
+          "index_id": {"pattern": "^local-only:"},
+          "collection_id": {"pattern": "^local-only:"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"data_ownership": {"const": "self"}}},
+      "then": {
+        "properties": {
+          "embedding_profile_id": {"pattern": "^offline:"},
+          "index_id": {"pattern": "^offline:"},
+          "collection_id": {"pattern": "^offline:"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "hashDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "vectorId": {"type": "string", "pattern": "^fv1_[a-f0-9]{64}$"},
+    "fieldPath": {
+      "type": "string",
+      "pattern": "^(research_question|research_object/[0-9]+|method/[0-9]+|key_results|author_conclusion|boundary_conditions/[0-9]+|comparison_context/(object|condition|groups/[0-9]+|time|scale|scenario|applicability)|key_data/[0-9]+/metric|author_limitations_outlook/(limitations|outlook)/[0-9]+/quote)$"
+    },
+    "nonEmptyToken": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "nonEmptyRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "nonEmptyRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonEmptyRef"}
+    }
+  }
+}

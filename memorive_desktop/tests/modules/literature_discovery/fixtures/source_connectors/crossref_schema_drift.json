@@ -1,0 +1,10 @@
+{
+  "status": "ok",
+  "message-type": "synthetic-breaking-shape",
+  "message-version": "synthetic-drift-99",
+  "message": {
+    "records": [
+      {"invented-field": "This shape intentionally lacks message.items and must fail closed."}
+    ]
+  }
+}

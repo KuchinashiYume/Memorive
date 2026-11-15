@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/field-vectors/candidate_index_manifest.schema.json",
+  "title": "immutable CandidateIndexManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "backend", "state", "status", "index_id", "index_version",
+    "collection_id", "ownership_partition", "profile", "index_identity", "build_cutoff_at",
+    "created_at", "source_snapshot", "active_index_baseline", "record_count",
+    "idempotent_duplicate_count", "record_exact_set", "record_exact_set_sha256",
+    "predecessor_vector_ids", "payload_tree_sha256", "payload_tree_excludes", "records_file",
+    "records_sha256", "source_snapshot_file", "source_snapshot_sha256", "tombstones_file",
+    "tombstones_sha256", "tombstone_count", "tombstone_exact_set",
+    "tombstone_exact_set_sha256", "exclusive_create", "write_scope", "external_calls",
+    "cost_cny", "production_mutations", "git_mutations", "production_eligible", "activation",
+    "manifest_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "backend": {"const": "canonical_manifest_index"},
+    "state": {"const": "immutable_candidate"},
+    "status": {"const": "candidate_immutable"},
+    "index_id": {"$ref": "#/$defs/storageToken"},
+    "index_version": {"type": "integer", "minimum": 1},
+    "collection_id": {"$ref": "#/$defs/storageToken"},
+    "ownership_partition": {"enum": ["self", "entrusted_local_only"]},
+    "profile": {"$ref": "#/$defs/profile"},
+    "index_identity": {"$ref": "#/$defs/indexIdentity"},
+    "build_cutoff_at": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_snapshot": {"$ref": "#/$defs/sourceSnapshotAnchor"},
+    "active_index_baseline": {"$ref": "#/$defs/activeIndexBaseline"},
+    "record_count": {"type": "integer", "minimum": 1},
+    "idempotent_duplicate_count": {"type": "integer", "minimum": 0},
+    "record_exact_set": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"$ref": "#/$defs/recordAnchor"}
+    },
+    "record_exact_set_sha256": {"$ref": "#/$defs/sha256"},
+    "predecessor_vector_ids": {
+      "type": "array", "uniqueItems": true,
+      "items": {"$ref": "#/$defs/vectorId"}
+    },
+    "payload_tree_sha256": {"$ref": "#/$defs/sha256"},
+    "payload_tree_excludes": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "prefixItems": [
+        {"const": "manifest.json"},
+        {"const": "IMMUTABLE_CANDIDATE.json"},
+        {"const": "SHA256SUMS"}
+      ],
+      "items": false
+    },
+    "records_file": {"const": "records.jsonl"},
+    "records_sha256": {"$ref": "#/$defs/sha256"},
+    "source_snapshot_file": {"const": "source_snapshot.json"},
+    "source_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "tombstones_file": {"const": "tombstones.jsonl"},
+    "tombstones_sha256": {"$ref": "#/$defs/sha256"},
+    "tombstone_count": {"type": "integer", "minimum": 0},
+    "tombstone_exact_set": {
+      "type": "array", "uniqueItems": true,
+      "items": {"$ref": "#/$defs/tombstoneAnchor"}
+    },
+    "tombstone_exact_set_sha256": {"$ref": "#/$defs/sha256"},
+    "exclusive_create": {"const": true},
+    "write_scope": {"const": "isolated_sandbox_only"},
+    "external_calls": {"const": 0},
+    "cost_cny": {"const": 0},
+    "production_mutations": {"const": 0},
+    "git_mutations": {"const": 0},
+    "production_eligible": {"const": false},
+    "activation": {"const": false},
+    "manifest_id": {"type": "string", "pattern": "^FIELD_VECTORS_CANDIDATE_INDEX_[A-F0-9]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"ownership_partition": {"const": "entrusted_local_only"}}},
+      "then": {
+        "properties": {
+          "index_id": {"pattern": "^local-only:"},
+          "collection_id": {"pattern": "^local-only:"},
+          "profile": {"properties": {"embedding_profile_id": {"pattern": "^local-only:"}}}
+        }
+      },
+      "else": {
+        "properties": {
+          "index_id": {"pattern": "^offline:"},
+          "collection_id": {"pattern": "^offline:"},
+          "profile": {"properties": {"embedding_profile_id": {"pattern": "^offline:"}}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "vectorId": {"type": "string", "pattern": "^fv1_[a-f0-9]{64}$"},
+    "nonEmpty": {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^[^\\r\\n]+$"},
+    "storageToken": {"type": "string", "pattern": "^[A-Za-z0-9._:-]+$"},
+    "hashDescriptor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "profile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["embedding_profile_id", "embedding_model_id", "embedding_dimension", "embedding_normalization", "index_version"],
+      "properties": {
+        "embedding_profile_id": {"$ref": "#/$defs/storageToken"},
+        "embedding_model_id": {"const": "fixture-hash-vector-v2"},
+        "embedding_dimension": {"type": "integer", "minimum": 1, "maximum": 65536},
+        "embedding_normalization": {"enum": ["none", "l2"]},
+        "index_version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "indexIdentity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["index_id", "version", "collection_id", "build_cutoff_at", "vector_type", "field_registry_id", "field_registry_version", "field_registry_hash", "production_eligible", "content_hash"],
+      "properties": {
+        "index_id": {"$ref": "#/$defs/storageToken"},
+        "version": {"type": "integer", "minimum": 1},
+        "collection_id": {"$ref": "#/$defs/storageToken"},
+        "build_cutoff_at": {"type": "string", "format": "date-time"},
+        "vector_type": {"const": "card_field"},
+        "field_registry_id": {"$ref": "#/$defs/nonEmpty"},
+        "field_registry_version": {"type": "integer", "minimum": 1},
+        "field_registry_hash": {"$ref": "#/$defs/sha256"},
+        "production_eligible": {"const": false},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+      }
+    },
+    "sourceSnapshotAnchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["object_type", "source_snapshot_id", "content_hash"],
+      "properties": {
+        "object_type": {"const": "SourceSnapshot"},
+        "source_snapshot_id": {"type": "string", "pattern": "^ss1_[a-f0-9]{64}$"},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+      }
+    },
+    "activeIndexBaseline": {
+      "type": "object", "additionalProperties": false,
+      "required": ["authority_ref", "authority_raw_sha256", "declared_locator", "exists", "member_count", "bytes", "tree_sha256", "read_only"],
+      "properties": {
+        "authority_ref": {"$ref": "#/$defs/nonEmpty"},
+        "authority_raw_sha256": {"$ref": "#/$defs/sha256"},
+        "declared_locator": {"$ref": "#/$defs/nonEmpty"},
+        "exists": {"type": "boolean"},
+        "member_count": {"type": "integer", "minimum": 0},
+        "bytes": {"type": "integer", "minimum": 0},
+        "tree_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "read_only": {"const": true}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"exists": {"const": false}}},
+          "then": {"properties": {"member_count": {"const": 0}, "bytes": {"const": 0}, "tree_sha256": {"type": "null"}}},
+          "else": {"properties": {"tree_sha256": {"$ref": "#/$defs/sha256"}}}
+        }
+      ]
+    },
+    "recordAnchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["vector_id", "content_hash", "storage_key", "card_id", "field_path", "data_ownership"],
+      "properties": {
+        "vector_id": {"$ref": "#/$defs/vectorId"},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"},
+        "storage_key": {"type": "string", "pattern": "^field-vector/v1/[^/]+/[^/]+/fv1_[a-f0-9]{64}$"},
+        "card_id": {"$ref": "#/$defs/nonEmpty"},
+        "field_path": {"$ref": "#/$defs/nonEmpty"},
+        "data_ownership": {"enum": ["self", "entrusted"]}
+      }
+    },
+    "tombstoneAnchor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["tombstone_id", "vector_id", "invalidated_by", "reason", "content_hash"],
+      "properties": {
+        "tombstone_id": {"type": "string", "pattern": "^tombstone_[a-f0-9]{64}$"},
+        "vector_id": {"$ref": "#/$defs/vectorId"},
+        "invalidated_by": {"oneOf": [{"$ref": "#/$defs/vectorId"}, {"type": "null"}]},
+        "reason": {"enum": ["superseded", "removed_from_source_snapshot"]},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+      }
+    }
+  }
+}

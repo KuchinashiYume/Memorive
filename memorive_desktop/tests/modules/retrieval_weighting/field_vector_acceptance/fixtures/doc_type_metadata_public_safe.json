@@ -1,0 +1,353 @@
+{
+  "authored_at": "2026-08-03T00:00:00Z",
+  "content_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "01094FE2C343BCB94F2F146C05C855843419581219C6D4154C71C996DB02BD9C"
+  },
+  "generated_from_observed": false,
+  "metadata_pack_id": "PUBLIC_SAFE_DOC_TYPE_METADATA_V1",
+  "public_safe": true,
+  "records": [
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "8DE7292977E753F619FE7A93B92714CD2EBCD3FF795F63425F32410F442EFB61"
+      },
+      "artifact_id": "ART-FIX-001",
+      "artifact_ref": "artifact://fixture/ART-FIX-001@1",
+      "artifact_revision": 1,
+      "canonical_value": "literature",
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "A4596710D2F5521ACD91976F9349FEA831332EC580085CB37D8CAB5616FD7B6D"
+      },
+      "card_id": "CARD-FIX-SELF-001",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-001",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "literature",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "resolved",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "41C84A83F14F17413641038FB0F5212A9A6BAD8C0F201BB5B5146FA36B8E6E1C"
+      },
+      "source_ref": "source://fixture/public/001#doc-type",
+      "source_refs": [
+        "source://fixture/public/001#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "11B17AEDF1493DEB951E8CE4304C5B6F1CB8E51345F723798F9BD8D8453706AE"
+      },
+      "artifact_id": "ART-FIX-002",
+      "artifact_ref": "artifact://fixture/ART-FIX-002@1",
+      "artifact_revision": 1,
+      "canonical_value": "note",
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "C89AC90644DA63281A4A420EB7C9192C65A8BA3769A8F9193075DD58D311E07B"
+      },
+      "card_id": "CARD-FIX-002",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-002",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "note",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "resolved",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "779E571AD560D83005651D5B22FB22BDB5A1869D20DE6C50E7DEC76231658FAE"
+      },
+      "source_ref": "source://fixture/public/002#doc-type",
+      "source_refs": [
+        "source://fixture/public/002#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "72331FDB22BB8781EFA35341A10522F2DE895AECE7476B408DC16F6C5D2C0D8F"
+      },
+      "artifact_id": "ART-FIX-003",
+      "artifact_ref": "artifact://fixture/ART-FIX-003@1",
+      "artifact_revision": 1,
+      "canonical_value": "literature",
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "2AC87D78F404C90D9A56A121B37035B7078A949087E7688F0B8A60504AD86631"
+      },
+      "card_id": "CARD-FIX-003",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-003",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "literature",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "resolved",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "5925DE9AC6264BB3E4C9F91D942C0AA26031FF92F4A59834D8EF7D75B907AC14"
+      },
+      "source_ref": "source://fixture/public/003#doc-type",
+      "source_refs": [
+        "source://fixture/public/003#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "C65801C29ACBB5841806A386C5DD266AB52AD3202ADFD695F4DF822D548242F7"
+      },
+      "artifact_id": "ART-FIX-004",
+      "artifact_ref": "artifact://fixture/ART-FIX-004@1",
+      "artifact_revision": 1,
+      "canonical_value": "literature",
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "EE1F7BD4FC37900A37BE7DA3575745F12F3A9766979E0E66A128AEA0C2C532EE"
+      },
+      "card_id": "CARD-FIX-004",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-004",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "literature",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "resolved",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "8AB4106FBF579FFA739FB809818E9BD1E76C5C1D5215E124530827D006114543"
+      },
+      "source_ref": "source://fixture/public/004#doc-type",
+      "source_refs": [
+        "source://fixture/public/004#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "A3E76414FCC6DEFB9379F98D413D840AE51E24A29B093F7577813AAFFC5D8F24"
+      },
+      "artifact_id": "ART-FIX-005",
+      "artifact_ref": "artifact://fixture/ART-FIX-005@1",
+      "artifact_revision": 1,
+      "canonical_value": null,
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "6DBEE308BA8CDF0561E8DBE39660E916DA3CE3BDC413A3B6C2541E7C9EF9068F"
+      },
+      "card_id": "CARD-FIX-005",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-005",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": null,
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "missing",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "FD90A3F523FDC7EA67981F4F367D2D8B7D443617C20C1A86A1E6A871BEAB6C5D"
+      },
+      "source_ref": "source://fixture/public/005#doc-type",
+      "source_refs": [
+        "source://fixture/public/005#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "CC7DE78C26F93A599597773AEE905342F2C0B16D1AF54FB006F922DB30A82E50"
+      },
+      "artifact_id": "ART-FIX-006",
+      "artifact_ref": "artifact://fixture/ART-FIX-006@1",
+      "artifact_revision": 1,
+      "canonical_value": null,
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "3FD4495FEFEB7583EBAF0C4EE219A286803E088596F4EEF8D49AC601DEFA6519"
+      },
+      "card_id": "CARD-FIX-006",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-006",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "dataset",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "unknown",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "EA69841DDA08F8FDCD9C4598619025FE5A5ABD38D994DD85CC1BA81482807259"
+      },
+      "source_ref": "source://fixture/public/006#doc-type",
+      "source_refs": [
+        "source://fixture/public/006#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "97FE6AD8CA435E763CA563325EBD7673ABE8F6E8A5D522344A56701FF89F1F75"
+      },
+      "artifact_id": "ART-FIX-007",
+      "artifact_ref": "artifact://fixture/ART-FIX-007@1",
+      "artifact_revision": 1,
+      "canonical_value": "literature",
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "4ADB358F4E4452E76217361BEFFE30BE022C55B5AA788789F006422919B74046"
+      },
+      "card_id": "CARD-FIX-007",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-007",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "literature",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "resolved",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "5BFA897493C8939667614B467B98A530A78916604525B74D9D8FC100152D79B0"
+      },
+      "source_ref": "source://fixture/public/007#doc-type",
+      "source_refs": [
+        "source://fixture/public/007#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "22BC38A59D2359AF66E9F2CB9EFC56F0BC0361D1BDE3A48D137A41DB8FC6F841"
+      },
+      "artifact_id": "ART-FIX-008",
+      "artifact_ref": "artifact://fixture/ART-FIX-008@2",
+      "artifact_revision": 2,
+      "canonical_value": "literature",
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "FF1C17018BB3D3DD4E4631B43895D642FADD4DE0FB2AA4E240310A23DA025A99"
+      },
+      "card_id": "CARD-FIX-SELF-001",
+      "card_revision": 2,
+      "metadata_id": "DTM-FIX-008",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": "literature",
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "resolved",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "3368CB50E68268DA6542469854643D4071D17C4474B5466FD122B29C556F6C21"
+      },
+      "source_ref": "source://fixture/public/008#doc-type",
+      "source_refs": [
+        "source://fixture/public/008#doc-type"
+      ]
+    },
+    {
+      "artifact_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "8DE7292977E753F619FE7A93B92714CD2EBCD3FF795F63425F32410F442EFB61"
+      },
+      "artifact_id": "ART-FIX-001",
+      "artifact_ref": "artifact://fixture/ART-FIX-001@1",
+      "artifact_revision": 1,
+      "canonical_value": null,
+      "card_content_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "A4596710D2F5521ACD91976F9349FEA831332EC580085CB37D8CAB5616FD7B6D"
+      },
+      "card_id": "CARD-FIX-SELF-001",
+      "card_revision": 1,
+      "metadata_id": "DTM-FIX-CONFLICT-001",
+      "normalization_contract_version": 1,
+      "observed_at": "2026-08-02T00:00:00Z",
+      "observed_value": [
+        "literature",
+        "note"
+      ],
+      "recorded_at": "2026-08-02T00:00:00Z",
+      "resolution_status": "conflicting",
+      "schema_version": "1.0",
+      "source_hash": {
+        "algorithm": "sha256",
+        "hash_kind": "rfc8785_jcs_sha256",
+        "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+        "value": "15F7A0647FDE86253304819C036E1E909E902CA5CF2D42E9247618BAC7F2FD43"
+      },
+      "source_ref": "source://fixture/public/001#doc-type-conflict",
+      "source_refs": [
+        "source://fixture/public/001#doc-type-conflict",
+        "source://fixture/public/001#doc-type-literature",
+        "source://fixture/public/001#doc-type-note"
+      ]
+    }
+  ],
+  "schema_version": "1.0"
+}

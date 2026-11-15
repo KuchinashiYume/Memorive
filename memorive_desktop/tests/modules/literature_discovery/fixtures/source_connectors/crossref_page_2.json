@@ -1,0 +1,23 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "synthetic-0.1",
+  "message": {
+    "total-results": 3,
+    "items-per-page": 2,
+    "next-cursor": null,
+    "items": [
+      {
+        "DOI": "10.99999/memorive.synthetic.004",
+        "type": "journal-article",
+        "title": ["Offline Connectors Without Transport"],
+        "abstract": "structure synthetic abstract demonstrating a connector implementation with no network transport.",
+        "author": [
+          {"given": "Barbara", "family": "Fixture"}
+        ],
+        "published": {"date-parts": [[2026, 8, 6]]},
+        "URL": "https://example.invalid/doi/10.99999/memorive.synthetic.004"
+      }
+    ]
+  }
+}

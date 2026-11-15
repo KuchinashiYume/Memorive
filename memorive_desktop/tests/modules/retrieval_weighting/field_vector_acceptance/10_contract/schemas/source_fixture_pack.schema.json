@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/field-vectors/source_fixture_pack.schema.json",
+  "title": "public-safe Card Schema v6 fixture pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_fixture_pack_id",
+    "authored_at",
+    "card_schema_raw_sha256",
+    "generated_from_observed",
+    "public_safe",
+    "records",
+    "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "source_fixture_pack_id": {"const": "PUBLIC_SAFE_CARD_V6_FIXTURES_V1"},
+    "authored_at": {"type": "string", "format": "date-time"},
+    "card_schema_raw_sha256": {"const": "EDE7FA88E9C94316CCCC8ED9394261D6DDC1E72FCF73D55871CDD072DAF6C165"},
+    "generated_from_observed": {"const": false},
+    "public_safe": {"const": true},
+    "records": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/fixture"}
+    },
+    "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "hashDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "nonEmpty": {"type": "string", "minLength": 1, "pattern": "^[^\\r\\n]+$"},
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/nonEmpty"}
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chunk_id", "quote", "section_page"],
+      "properties": {
+        "chunk_id": {"$ref": "#/$defs/nonEmpty"},
+        "quote": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+        "section_page": {"oneOf": [{"type": "string"}, {"type": "null"}]}
+      }
+    },
+    "anchorList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/anchor"}
+    },
+    "credibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["credibility", "note", "danger"],
+      "properties": {
+        "credibility": {"enum": ["verified", "anchor_uncertain", "flagged", "unknown"]},
+        "note": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+        "danger": {"oneOf": [{"type": "string"}, {"type": "null"}]}
+      }
+    },
+    "sourceAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paper_id", "section_page", "chunk_id", "by_field"],
+      "properties": {
+        "paper_id": {"$ref": "#/$defs/nonEmpty"},
+        "section_page": {"type": "null"},
+        "chunk_id": {"type": "null"},
+        "by_field": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["research_question", "research_object", "method", "key_results", "author_conclusion", "boundary_conditions"],
+          "properties": {
+            "research_question": {"$ref": "#/$defs/anchorList"},
+            "research_object": {"$ref": "#/$defs/anchorList"},
+            "method": {"$ref": "#/$defs/anchorList"},
+            "key_results": {"$ref": "#/$defs/anchorList"},
+            "author_conclusion": {"$ref": "#/$defs/anchorList"},
+            "boundary_conditions": {"$ref": "#/$defs/anchorList"}
+          }
+        }
+      }
+    },
+    "keyDataItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "metric", "sample", "stat", "quote", "chunk_id", "needs_review", "credibility", "credibility_note", "danger"],
+      "properties": {
+        "value": {"$ref": "#/$defs/nonEmpty"},
+        "unit": {"$ref": "#/$defs/nonEmpty"},
+        "metric": {"$ref": "#/$defs/nonEmpty"},
+        "sample": {"$ref": "#/$defs/nonEmpty"},
+        "stat": {"$ref": "#/$defs/nonEmpty"},
+        "quote": {"$ref": "#/$defs/nonEmpty"},
+        "chunk_id": {"$ref": "#/$defs/nonEmpty"},
+        "needs_review": {"type": "boolean"},
+        "credibility": {"enum": ["verified", "anchor_uncertain", "flagged", "unknown"]},
+        "credibility_note": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+        "danger": {"oneOf": [{"type": "string"}, {"type": "null"}]}
+      }
+    },
+    "quoteChunk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quote", "chunk_id"],
+      "properties": {
+        "quote": {"$ref": "#/$defs/nonEmpty"},
+        "chunk_id": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title", "research_question", "research_object", "method", "key_results",
+        "author_conclusion", "boundary_conditions", "source_anchor", "key_data",
+        "comparison_context", "author_limitations_outlook", "terms", "citations",
+        "field_credibility", "completion_status", "omissions", "review_status",
+        "is_derived", "data_ownership", "schema_version", "distill_model", "distilled_at"
+      ],
+      "properties": {
+        "title": {"$ref": "#/$defs/nonEmpty"},
+        "research_question": {"$ref": "#/$defs/nonEmpty"},
+        "research_object": {"$ref": "#/$defs/stringList"},
+        "method": {"$ref": "#/$defs/stringList"},
+        "key_results": {"$ref": "#/$defs/nonEmpty"},
+        "author_conclusion": {"$ref": "#/$defs/nonEmpty"},
+        "boundary_conditions": {"$ref": "#/$defs/stringList"},
+        "source_anchor": {"$ref": "#/$defs/sourceAnchor"},
+        "key_data": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/keyDataItem"}},
+        "comparison_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["object", "condition", "groups", "time", "scale", "scenario", "applicability"],
+          "properties": {
+            "object": {"$ref": "#/$defs/nonEmpty"},
+            "condition": {"$ref": "#/$defs/nonEmpty"},
+            "groups": {"$ref": "#/$defs/stringList"},
+            "time": {"$ref": "#/$defs/nonEmpty"},
+            "scale": {"$ref": "#/$defs/nonEmpty"},
+            "scenario": {"$ref": "#/$defs/nonEmpty"},
+            "applicability": {"$ref": "#/$defs/nonEmpty"}
+          }
+        },
+        "author_limitations_outlook": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["limitations", "outlook"],
+          "properties": {
+            "limitations": {"type": "array", "items": {"$ref": "#/$defs/quoteChunk"}},
+            "outlook": {"type": "array", "items": {"$ref": "#/$defs/quoteChunk"}}
+          }
+        },
+        "terms": {"type": "array"},
+        "citations": {"type": "array"},
+        "field_credibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["research_question", "research_object", "method", "key_results", "author_conclusion", "boundary_conditions"],
+          "properties": {
+            "research_question": {"$ref": "#/$defs/credibility"},
+            "research_object": {"$ref": "#/$defs/credibility"},
+            "method": {"$ref": "#/$defs/credibility"},
+            "key_results": {"$ref": "#/$defs/credibility"},
+            "author_conclusion": {"$ref": "#/$defs/credibility"},
+            "boundary_conditions": {"$ref": "#/$defs/credibility"}
+          }
+        },
+        "completion_status": {"const": "complete"},
+        "omissions": {"type": "array", "maxItems": 0},
+        "review_status": {"enum": ["pending", "active", "quarantined"]},
+        "is_derived": {"const": false},
+        "data_ownership": {"enum": ["self", "entrusted", "unknown"]},
+        "schema_version": {"const": 6},
+        "distill_model": {"$ref": "#/$defs/nonEmpty"},
+        "distilled_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixture_id", "scenario", "authority", "doc_type_metadata_id", "card"],
+      "properties": {
+        "fixture_id": {"type": "string", "pattern": "^FX-[A-Z0-9-]+$"},
+        "scenario": {"$ref": "#/$defs/nonEmpty"},
+        "authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["card_artifact_ref", "card_id", "revision", "content_hash"],
+          "properties": {
+            "card_artifact_ref": {"$ref": "#/$defs/nonEmpty"},
+            "card_id": {"$ref": "#/$defs/nonEmpty"},
+            "revision": {"type": "integer", "minimum": 1},
+            "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+          }
+        },
+        "doc_type_metadata_id": {"type": "string", "pattern": "^DTM-[A-Za-z0-9._:-]+$"},
+        "card": {"$ref": "#/$defs/card"}
+      }
+    }
+  }
+}

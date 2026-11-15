@@ -1,0 +1,35 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "synthetic-0.1",
+  "message": {
+    "total-results": 3,
+    "items-per-page": 2,
+    "next-cursor": "crx-cursor-2",
+    "items": [
+      {
+        "DOI": "10.99999/Memorive.SYNTHETIC.001",
+        "type": "journal-article",
+        "title": ["Auditable Discovery Systems: structure Revised Synthetic Title"],
+        "abstract": "structure synthetic Crossref-like abstract intentionally conflicting with the arXiv-like title.",
+        "author": [
+          {"given": "Ada", "family": "Synthetic"},
+          {"given": "Lin", "family": "Fixture"}
+        ],
+        "published": {"date-parts": [[2026, 8, 8]]},
+        "URL": "https://example.invalid/doi/10.99999/memorive.synthetic.001"
+      },
+      {
+        "DOI": "10.99999/memorive.synthetic.002",
+        "type": "proceedings-article",
+        "title": ["Deterministic Snapshot Contracts"],
+        "abstract": "structure synthetic abstract about raw and normalized response hashes.",
+        "author": [
+          {"given": "Edsger", "family": "Example"}
+        ],
+        "published": {"date-parts": [[2026, 8, 7]]},
+        "URL": "https://example.invalid/doi/10.99999/memorive.synthetic.002"
+      }
+    ]
+  }
+}

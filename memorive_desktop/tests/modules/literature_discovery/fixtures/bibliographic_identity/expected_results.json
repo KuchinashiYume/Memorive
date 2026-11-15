@@ -1,0 +1,34 @@
+{
+  "schema_version": "discovery.service_contracts.expected-results.0.1",
+  "hard_criteria": {
+    "mandatory_failed": 0,
+    "mandatory_errors": 0,
+    "mandatory_skipped": 0,
+    "false_split": 0,
+    "automatic_false_merge": 0,
+    "network_calls": 0,
+    "external_api_calls": 0,
+    "model_calls": 0,
+    "tokens": 0,
+    "cost_cny": 0,
+    "formal_writes": 0,
+    "artifact_registry_reads": 0,
+    "artifact_registry_writes": 0,
+    "candidate_cards_created": 0
+  },
+  "case_expectations": {
+    "EXACT_DOI_CROSS_SOURCE": {"observations": 2, "manifestations": 1, "work_clusters": 1, "identity_conflicts": 0, "review_queue_items": 0, "version_edges": 0, "verified_candidates": 1, "hint_decisions": 0},
+    "DOI_METADATA_CONFLICT": {"observations": 2, "manifestations": 2, "work_clusters": 2, "identity_conflicts": 1, "review_queue_items": 1, "version_edges": 0, "verified_candidates": 0, "hint_decisions": 0},
+    "ARXIV_VERSION_CHAIN": {"observations": 2, "manifestations": 2, "work_clusters": 1, "identity_conflicts": 0, "review_queue_items": 0, "version_edges": 1, "verified_candidates": 1, "hint_decisions": 0},
+    "CROSS_IDENTIFIER_CONFLICT": {"observations": 2, "manifestations": 2, "work_clusters": 2, "identity_conflicts": 1, "review_queue_items": 2, "version_edges": 0, "verified_candidates": 0, "hint_decisions": 0},
+    "SIMILAR_TITLE_NEGATIVE": {"observations": 2, "manifestations": 2, "work_clusters": 2, "identity_conflicts": 0, "review_queue_items": 1, "version_edges": 0, "verified_candidates": 2, "hint_decisions": 0},
+    "EXPLICIT_PREPRINT_CONFERENCE_VOR": {"observations": 3, "manifestations": 3, "work_clusters": 1, "identity_conflicts": 0, "review_queue_items": 0, "version_edges": 2, "verified_candidates": 1, "hint_decisions": 0},
+    "PMID_EXACT_DEDUPE": {"observations": 2, "manifestations": 1, "work_clusters": 1, "identity_conflicts": 0, "review_queue_items": 0, "version_edges": 0, "verified_candidates": 1, "hint_decisions": 0},
+    "WEAK_TITLE_AUTHOR_YEAR_HINT": {"observations": 0, "manifestations": 0, "work_clusters": 0, "identity_conflicts": 0, "review_queue_items": 0, "version_edges": 0, "verified_candidates": 0, "hint_decisions": 1},
+    "AI_FALSE_TITLE_HINT": {"observations": 0, "manifestations": 0, "work_clusters": 0, "identity_conflicts": 0, "review_queue_items": 0, "version_edges": 0, "verified_candidates": 0, "hint_decisions": 1}
+  },
+  "tamper_expectations": {
+    "SOURCE_OBSERVATION_CONTENT": "SOURCE_OBSERVATION_HASH_MISMATCH",
+    "EVIDENCE_REGISTRY": "EVIDENCE_REGISTRY_HASH_MISMATCH"
+  }
+}

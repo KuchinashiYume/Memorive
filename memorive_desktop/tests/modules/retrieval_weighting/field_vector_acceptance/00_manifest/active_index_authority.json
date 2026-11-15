@@ -1,0 +1,9 @@
+{
+ "note": "synthetic stand-in for the frozen H0 authority, written by port_modules.py",
+ "production_vault": {
+  "exists": false
+ },
+ "declared_paths": {
+  "production_vault": "memorive-test-absent-production-vault"
+ }
+}

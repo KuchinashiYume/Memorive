@@ -1,0 +1,9 @@
+{
+  "status": "ok", "message-type": "work-list", "message-version": "synthetic-0.1",
+  "message": {"total-results": 4, "items-per-page": 4, "next-cursor": null, "items": [
+    {"DOI": "10.99999/discovery.t09.g2.101", "type": "journal-article", "title": ["Horizon Scanning for Open Vocabulary Detection"], "abstract": "An independent horizon scan for open-vocabulary object detection beyond closed benchmark labels.", "author": [{"given": "Yara", "family": "Horizon"}], "published": {"date-parts": [[2026, 8, 5]]}, "URL": "https://example.invalid/doi/g2.101"},
+    {"DOI": "10.99999/discovery.t09.g2.102", "type": "proceedings-article", "title": ["Auditable Instance Segmentation Pipelines"], "abstract": "Evidence-bound instance segmentation pipelines with deterministic region and mask lineage.", "author": [{"given": "Zane", "family": "Masks"}], "published": {"date-parts": [[2026, 8, 6]]}, "URL": "https://example.invalid/doi/g2.102"},
+    {"DOI": "10.99999/discovery.t09.g2.103", "type": "journal-article", "title": ["Object Detection under Long Tail Coverage"], "abstract": "Coverage-aware region detectors for long-tail object categories and sparse observations.", "author": [{"given": "Iris", "family": "Coverage"}], "published": {"date-parts": [[2026, 8, 7]]}, "URL": "https://example.invalid/doi/g2.103"},
+    {"DOI": "10.99999/discovery.t09.g2.104", "type": "journal-article", "title": ["Versioned Region Detector Evaluation"], "abstract": "Versioned evaluation records for region detectors, proposals, and bounding-box refinements.", "author": [{"given": "Noah", "family": "Version"}], "published": {"date-parts": [[2026, 8, 8]]}, "URL": "https://example.invalid/doi/g2.104"}
+  ]}
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
+      xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>Synthetic arXiv-like fixture page 1</title>
+  <id>https://example.invalid/source-connectors/arxiv/page/1</id>
+  <updated>2026-08-10T00:00:00Z</updated>
+  <opensearch:totalResults>3</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <opensearch:itemsPerPage>2</opensearch:itemsPerPage>
+  <entry>
+    <id>https://example.invalid/abs/2508.09991v1</id>
+    <updated>2026-08-09T12:00:00Z</updated>
+    <published>2026-08-08T12:00:00Z</published>
+    <title>Auditable Discovery Systems</title>
+    <summary>A synthetic abstract about deterministic evidence-bound discovery connectors.</summary>
+    <author><name>Ada Synthetic</name></author>
+    <author><name>Lin Fixture</name></author>
+    <arxiv:doi>10.99999/memorive.synthetic.001</arxiv:doi>
+    <category term="cs.DL" />
+    <link href="https://example.invalid/abs/2508.09991v1" rel="alternate" type="text/html" />
+    <link href="https://example.invalid/pdf/2508.09991v1" rel="related" type="application/pdf" />
+  </entry>
+  <entry>
+    <id>https://example.invalid/abs/2508.09992v2</id>
+    <updated>2026-08-09T13:00:00Z</updated>
+    <published>2026-08-07T13:00:00Z</published>
+    <title>Rate Limited Metadata Replay</title>
+    <summary>A synthetic study of cache keys, pagination, and polite backoff.</summary>
+    <author><name>Grace Example</name></author>
+    <category term="cs.IR" />
+    <link href="https://example.invalid/abs/2508.09992v2" rel="alternate" type="text/html" />
+  </entry>
+</feed>

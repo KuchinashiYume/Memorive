@@ -1,0 +1,19 @@
+{
+  "created_at": "2026-07-17T12:49:04+08:00",
+  "freshness_evidence_sources": [
+    "explicit_supersedes_relation",
+    "frozen_manifest_selected_target"
+  ],
+  "policy_id": "analysis_admission-compatibility-policy-sandbox-v1",
+  "policy_version": "1.0",
+  "schema_rules": {
+    "memorive://card/v6|memorive://context-pack/v1|memorive://analysis/v1": {
+      "adapter_required": false,
+      "reason_codes": [
+        "SCHEMA_TRIPLET_POLICY_COMPATIBLE"
+      ],
+      "status": "compatible"
+    }
+  },
+  "schema_version": "analysis_admission-compatibility-policy-v1"
+}

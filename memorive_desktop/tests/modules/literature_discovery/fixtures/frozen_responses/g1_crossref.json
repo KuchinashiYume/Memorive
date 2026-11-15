@@ -1,0 +1,9 @@
+{
+  "status": "ok", "message-type": "work-list", "message-version": "synthetic-0.1",
+  "message": {"total-results": 4, "items-per-page": 4, "next-cursor": null, "items": [
+    {"DOI": "10.99999/discovery.t09.g1.101", "type": "journal-article", "title": ["Benchmark Shift in Large Scale Image Recognition"], "abstract": "structure synthetic metadata study of benchmark shift in large-scale image recognition.", "author": [{"given": "Mina", "family": "Benchmark"}], "published": {"date-parts": [[2026, 8, 5]]}, "URL": "https://example.invalid/doi/g1.101"},
+    {"DOI": "10.99999/discovery.t09.g1.102", "type": "proceedings-article", "title": ["Shortcut Connections under Distribution Shift"], "abstract": "Residual shortcut connections evaluated under bounded visual distribution shifts.", "author": [{"given": "Rene", "family": "Residual"}], "published": {"date-parts": [[2026, 8, 6]]}, "URL": "https://example.invalid/doi/g1.102"},
+    {"DOI": "10.99999/discovery.t09.g1.103", "type": "journal-article", "title": ["Convolutional Network Audit Trails"], "abstract": "Deterministic audit trails for convolutional network training and evaluation metadata.", "author": [{"given": "Tara", "family": "Audit"}], "published": {"date-parts": [[2026, 8, 7]]}, "URL": "https://example.invalid/doi/g1.103"},
+    {"DOI": "10.99999/discovery.t09.g1.104", "type": "journal-article", "title": ["Visual Recognition Error Taxonomies"], "abstract": "An evidence-bound taxonomy of visual recognition failures and diagnostic signals.", "author": [{"given": "Omar", "family": "Errors"}], "published": {"date-parts": [[2026, 8, 8]]}, "URL": "https://example.invalid/doi/g1.104"}
+  ]}
+}

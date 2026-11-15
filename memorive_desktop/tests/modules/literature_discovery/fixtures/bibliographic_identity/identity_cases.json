@@ -1,0 +1,103 @@
+{
+  "schema_version": "discovery.service_contracts.identity-cases.0.1",
+  "rights_status": "SYNTHETIC_SELF_OWNED_PUBLIC_SAFE",
+  "cases": [
+    {
+      "case_id": "EXACT_DOI_CROSS_SOURCE",
+      "records": [
+        {"record_id": "doi_exact_arxiv", "source_connector": "ARXIV", "source_record_id": "10.99999/memorive.synthetic.110", "identifiers": {"arxiv_id": null, "doi": "10.99999/Memorive.SYNTHETIC.110", "pmid": null}, "title": "Deterministic Identity Ledger", "authors": ["Ada Fixture"], "published_year": 2026, "record_type": "journal-article"},
+        {"record_id": "doi_exact_crossref", "source_connector": "CROSSREF", "source_record_id": "10.99999/memorive.synthetic.110", "identifiers": {"arxiv_id": null, "doi": "https://doi.org/10.99999/memorive.synthetic.110", "pmid": null}, "title": "Deterministic Identity Ledger", "authors": ["Ada Fixture"], "published_year": 2026, "record_type": "journal-article"}
+      ],
+      "version_links": [],
+      "hints": [],
+      "positive_groups": [["doi_exact_arxiv", "doi_exact_crossref"]],
+      "negative_pairs": []
+    },
+    {
+      "case_id": "DOI_METADATA_CONFLICT",
+      "records": [
+        {"record_id": "doi_conflict_a", "source_connector": "ARXIV", "source_record_id": "10.99999/memorive.synthetic.120", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.120", "pmid": null}, "title": "Identity Claim Alpha", "authors": ["Alpha Author"], "published_year": 2025, "record_type": "journal-article"},
+        {"record_id": "doi_conflict_b", "source_connector": "CROSSREF", "source_record_id": "10.99999/memorive.synthetic.120", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.120", "pmid": null}, "title": "Identity Claim Beta", "authors": ["Beta Author"], "published_year": 2026, "record_type": "journal-article"}
+      ],
+      "version_links": [],
+      "hints": [],
+      "positive_groups": [],
+      "negative_pairs": [["doi_conflict_a", "doi_conflict_b"]]
+    },
+    {
+      "case_id": "ARXIV_VERSION_CHAIN",
+      "records": [
+        {"record_id": "arxiv_v1", "source_connector": "ARXIV", "source_record_id": "2608.01234v1", "identifiers": {"arxiv_id": "2608.01234", "doi": null, "pmid": null}, "title": "Version Preserving Graphs", "authors": ["Vera Version"], "published_year": 2026, "record_type": "arxiv-preprint"},
+        {"record_id": "arxiv_v2", "source_connector": "ARXIV", "source_record_id": "2608.01234v2", "identifiers": {"arxiv_id": "2608.01234", "doi": null, "pmid": null}, "title": "Version Preserving Graphs", "authors": ["Vera Version"], "published_year": 2026, "record_type": "arxiv-preprint"}
+      ],
+      "version_links": [],
+      "hints": [],
+      "positive_groups": [["arxiv_v1", "arxiv_v2"]],
+      "negative_pairs": []
+    },
+    {
+      "case_id": "CROSS_IDENTIFIER_CONFLICT",
+      "records": [
+        {"record_id": "cross_identifier_a", "source_connector": "ARXIV", "source_record_id": "2608.02222v1", "identifiers": {"arxiv_id": "2608.02222", "doi": "10.99999/memorive.synthetic.130", "pmid": null}, "title": "Cross Identifier Claims", "authors": ["Case One"], "published_year": 2026, "record_type": "arxiv-preprint"},
+        {"record_id": "cross_identifier_b", "source_connector": "CROSSREF", "source_record_id": "2608.02222v1", "identifiers": {"arxiv_id": "2608.02222", "doi": "10.99999/memorive.synthetic.131", "pmid": null}, "title": "Cross Identifier Claims", "authors": ["Case One"], "published_year": 2026, "record_type": "journal-article"}
+      ],
+      "version_links": [],
+      "hints": [],
+      "positive_groups": [],
+      "negative_pairs": [["cross_identifier_a", "cross_identifier_b"]]
+    },
+    {
+      "case_id": "SIMILAR_TITLE_NEGATIVE",
+      "records": [
+        {"record_id": "title_collision_a", "source_connector": "ARXIV", "source_record_id": "10.99999/memorive.synthetic.140", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.140", "pmid": null}, "title": "Shared Synthetic Title", "authors": ["Alice One"], "published_year": 2024, "record_type": "journal-article"},
+        {"record_id": "title_collision_b", "source_connector": "CROSSREF", "source_record_id": "10.99999/memorive.synthetic.141", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.141", "pmid": null}, "title": "Shared Synthetic Title", "authors": ["Bob Two"], "published_year": 2026, "record_type": "journal-article"}
+      ],
+      "version_links": [],
+      "hints": [],
+      "positive_groups": [],
+      "negative_pairs": [["title_collision_a", "title_collision_b"]]
+    },
+    {
+      "case_id": "EXPLICIT_PREPRINT_CONFERENCE_VOR",
+      "records": [
+        {"record_id": "explicit_preprint", "source_connector": "ARXIV", "source_record_id": "10.99999/memorive.synthetic.150", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.150", "pmid": null}, "title": "Lifecycle of an Auditable Work", "authors": ["Carol Chain"], "published_year": 2024, "record_type": "preprint"},
+        {"record_id": "explicit_conference", "source_connector": "CROSSREF", "source_record_id": "10.99999/memorive.synthetic.151", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.151", "pmid": null}, "title": "Lifecycle of an Auditable Work: Conference Version", "authors": ["Carol Chain"], "published_year": 2025, "record_type": "proceedings-article"},
+        {"record_id": "explicit_vor", "source_connector": "CROSSREF", "source_record_id": "10.99999/memorive.synthetic.152", "identifiers": {"arxiv_id": null, "doi": "10.99999/memorive.synthetic.152", "pmid": null}, "title": "Lifecycle of an Auditable Work: Version of Record", "authors": ["Carol Chain"], "published_year": 2026, "record_type": "journal-article"}
+      ],
+      "version_links": [
+        {"from_record_id": "explicit_preprint", "to_record_id": "explicit_conference", "relation_type": "PREPRINT_TO_CONFERENCE", "evidence_ref": "fixture:version-assertion:150-151", "work_anchor": "fixture:work:lifecycle-auditable"},
+        {"from_record_id": "explicit_conference", "to_record_id": "explicit_vor", "relation_type": "CONFERENCE_TO_VOR", "evidence_ref": "fixture:version-assertion:151-152", "work_anchor": "fixture:work:lifecycle-auditable"}
+      ],
+      "hints": [],
+      "positive_groups": [["explicit_preprint", "explicit_conference", "explicit_vor"]],
+      "negative_pairs": []
+    },
+    {
+      "case_id": "PMID_EXACT_DEDUPE",
+      "records": [
+        {"record_id": "pmid_a", "source_connector": "ARXIV", "source_record_id": "pmid:00043210", "identifiers": {"arxiv_id": null, "doi": null, "pmid": "PMID:00043210"}, "title": "PMID Boundary Fixture", "authors": ["Pat Med"], "published_year": 2023, "record_type": "journal-article"},
+        {"record_id": "pmid_b", "source_connector": "CROSSREF", "source_record_id": "43210", "identifiers": {"arxiv_id": null, "doi": null, "pmid": "43210"}, "title": "PMID Boundary Fixture", "authors": ["Pat Med"], "published_year": 2023, "record_type": "journal-article"}
+      ],
+      "version_links": [],
+      "hints": [],
+      "positive_groups": [["pmid_a", "pmid_b"]],
+      "negative_pairs": []
+    },
+    {
+      "case_id": "WEAK_TITLE_AUTHOR_YEAR_HINT",
+      "records": [],
+      "version_links": [],
+      "hints": [{"hint_id": "weak_hint_001", "discovery_origin": "TITLE_AUTHOR_YEAR_HINT", "title": "structure Plausible but Unverified Work", "authors": ["Unknown Example"], "year": 2026}],
+      "positive_groups": [],
+      "negative_pairs": []
+    },
+    {
+      "case_id": "AI_FALSE_TITLE_HINT",
+      "records": [],
+      "version_links": [],
+      "hints": [{"hint_id": "ai_hint_001", "discovery_origin": "AI_HINT", "title": "Fabricated Quantum Bibliography", "authors": ["Imaginary Author"], "year": 2099}],
+      "positive_groups": [],
+      "negative_pairs": []
+    }
+  ]
+}

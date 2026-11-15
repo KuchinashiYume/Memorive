@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memorive.local/schemas/field-vectors/field_vector_tombstone.schema.json",
+  "title": "FieldVectorTombstone",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tombstone_id", "vector_id", "invalidation_state", "invalidated_by",
+    "reason", "activation", "production_eligible", "content_hash"
+  ],
+  "properties": {
+    "tombstone_id": {"type": "string", "pattern": "^tombstone_[a-f0-9]{64}$"},
+    "vector_id": {"$ref": "#/$defs/vectorId"},
+    "invalidation_state": {"const": "tombstoned"},
+    "invalidated_by": {"oneOf": [{"$ref": "#/$defs/vectorId"}, {"type": "null"}]},
+    "reason": {"enum": ["superseded", "removed_from_source_snapshot"]},
+    "activation": {"const": false},
+    "production_eligible": {"const": false},
+    "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"reason": {"const": "superseded"}}},
+      "then": {"properties": {"invalidated_by": {"$ref": "#/$defs/vectorId"}}},
+      "else": {"properties": {"invalidated_by": {"type": "null"}}}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "vectorId": {"type": "string", "pattern": "^fv1_[a-f0-9]{64}$"},
+    "hashDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

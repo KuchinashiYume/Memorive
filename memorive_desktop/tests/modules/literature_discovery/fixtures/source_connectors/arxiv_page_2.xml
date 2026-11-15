@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
+      xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>Synthetic arXiv-like fixture page 2</title>
+  <id>https://example.invalid/source-connectors/arxiv/page/2</id>
+  <updated>2026-08-10T00:00:00Z</updated>
+  <opensearch:totalResults>3</opensearch:totalResults>
+  <opensearch:startIndex>2</opensearch:startIndex>
+  <opensearch:itemsPerPage>2</opensearch:itemsPerPage>
+  <entry>
+    <id>https://example.invalid/abs/2508.09993v1</id>
+    <updated>2026-08-09T14:00:00Z</updated>
+    <published>2026-08-06T14:00:00Z</published>
+    <title>Failure Disclosure in Dual Source Pipelines</title>
+    <summary>A synthetic abstract about partial coverage and fail-closed semantics.</summary>
+    <author><name>Katherine Sample</name></author>
+    <arxiv:doi>10.99999/memorive.synthetic.003</arxiv:doi>
+    <category term="cs.SE" />
+    <link href="https://example.invalid/abs/2508.09993v1" rel="alternate" type="text/html" />
+  </entry>
+</feed>

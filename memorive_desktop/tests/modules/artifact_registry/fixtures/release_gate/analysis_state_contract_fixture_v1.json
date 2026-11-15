@@ -1,0 +1,11 @@
+{
+  "approved": false,
+  "authority": "fixture_only_non_authoritative",
+  "contract_ref": "fixture://analysis_admission/analysis-state-contract/v1",
+  "deployment_eligible": false,
+  "from_status": "analysis_generated",
+  "non_authoritative": true,
+  "requested_scope": "analysis",
+  "simulation_only": true,
+  "to_status": "analysis_admitted"
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": "discovery.service_contracts.identifier-cases.0.1",
+  "rights_status": "SYNTHETIC_SELF_OWNED_PUBLIC_SAFE",
+  "cases": [
+    {"case_id": "DOI_PLAIN", "kind": "DOI", "input": "10.99999/Memorive.SYNTHETIC.101", "expected": {"valid": true, "canonical_value": "10.99999/memorive.synthetic.101", "base_value": null, "version": null, "error_code": null, "existence_verified": false}},
+    {"case_id": "DOI_PREFIX", "kind": "DOI", "input": " DOI:10.99999/Memorive.SYNTHETIC.101 ", "expected": {"valid": true, "canonical_value": "10.99999/memorive.synthetic.101", "base_value": null, "version": null, "error_code": null, "existence_verified": false}},
+    {"case_id": "DOI_URL", "kind": "DOI", "input": "https://doi.org/10.99999/Memorive.SYNTHETIC.101", "expected": {"valid": true, "canonical_value": "10.99999/memorive.synthetic.101", "base_value": null, "version": null, "error_code": null, "existence_verified": false}},
+    {"case_id": "DOI_INVALID", "kind": "DOI", "input": "not-a-doi", "expected": {"valid": false, "canonical_value": null, "base_value": null, "version": null, "error_code": "INVALID_DOI", "existence_verified": false}},
+    {"case_id": "ARXIV_BASE", "kind": "ARXIV", "input": "2608.01234", "expected": {"valid": true, "canonical_value": "2608.01234", "base_value": "2608.01234", "version": null, "error_code": null, "existence_verified": false}},
+    {"case_id": "ARXIV_URL_V1", "kind": "ARXIV", "input": "https://arxiv.org/abs/2608.01234v1", "expected": {"valid": true, "canonical_value": "2608.01234v1", "base_value": "2608.01234", "version": 1, "error_code": null, "existence_verified": false}},
+    {"case_id": "ARXIV_V2", "kind": "ARXIV", "input": "2608.01234V2", "expected": {"valid": true, "canonical_value": "2608.01234v2", "base_value": "2608.01234", "version": 2, "error_code": null, "existence_verified": false}},
+    {"case_id": "ARXIV_V0_REJECT", "kind": "ARXIV", "input": "2608.01234v0", "expected": {"valid": false, "canonical_value": null, "base_value": null, "version": null, "error_code": "INVALID_ARXIV_ID", "existence_verified": false}},
+    {"case_id": "PMID_LEADING_ZERO", "kind": "PMID", "input": "PMID:00012345", "expected": {"valid": true, "canonical_value": "12345", "base_value": null, "version": null, "error_code": null, "existence_verified": false}},
+    {"case_id": "PMID_URL", "kind": "PMID", "input": "https://pubmed.ncbi.nlm.nih.gov/00012345/", "expected": {"valid": true, "canonical_value": "12345", "base_value": null, "version": null, "error_code": null, "existence_verified": false}},
+    {"case_id": "PMID_ALL_ZERO_REJECT", "kind": "PMID", "input": "000000", "expected": {"valid": false, "canonical_value": null, "base_value": null, "version": null, "error_code": "INVALID_PMID", "existence_verified": false}},
+    {"case_id": "PMID_NON_ASCII_REJECT", "kind": "PMID", "input": "１２３４５", "expected": {"valid": false, "canonical_value": null, "base_value": null, "version": null, "error_code": "INVALID_PMID", "existence_verified": false}},
+    {"case_id": "PMID_CANONICAL_TOO_LONG", "kind": "PMID", "input": "1234567890", "expected": {"valid": false, "canonical_value": null, "base_value": null, "version": null, "error_code": "INVALID_PMID", "existence_verified": false}},
+    {"case_id": "UNSUPPORTED_KIND", "kind": "ISBN", "input": "9780000000000", "expected": {"valid": false, "canonical_value": null, "base_value": null, "version": null, "error_code": "UNSUPPORTED_IDENTIFIER_KIND", "existence_verified": false}}
+  ]
+}

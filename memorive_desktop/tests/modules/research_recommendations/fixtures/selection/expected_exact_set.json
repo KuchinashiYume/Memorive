@@ -1,0 +1,91 @@
+{
+  "schema_version": "discovery.intake.expected-exact-set.0.1",
+  "balanced": {
+    "selected_candidate_ids": [
+      "CANDIDATE:CITATION_CLAIM_ONLY",
+      "CANDIDATE:TOPIC_ONLY",
+      "CANDIDATE:CORE-6",
+      "CANDIDATE:DATE_UNKNOWN",
+      "CANDIDATE:ADJ-4",
+      "CANDIDATE:BRIDGE",
+      "CANDIDATE:NEW_DIRECTION",
+      "CANDIDATE:FIRST_SEEN_UNKNOWN"
+    ],
+    "selected_channels": [
+      "CORE", "CORE", "CORE", "ADJACENT", "ADJACENT", "BRIDGE", "HORIZON", "COVERAGE_REPAIR"
+    ],
+    "unselected_reason_codes": {
+      "CANDIDATE:ADJ-3": ["DIRECTION_CAP_REACHED"],
+      "CANDIDATE:ALREADY_SEEN": ["ALREADY_SEEN"],
+      "CANDIDATE:CITATION_EXPLICIT": ["JOURNAL_CAP_REACHED"],
+      "CANDIDATE:EXACT": ["LIBRARY_NOVELTY_NOT_TRUE"],
+      "CANDIDATE:IDENTITY_CONFLICT": ["IDENTITY_NOT_VERIFIED", "LIBRARY_NOVELTY_NOT_TRUE"],
+      "CANDIDATE:LIBRARY_COVERAGE_UNKNOWN": ["LIBRARY_NOVELTY_NOT_TRUE"],
+      "CANDIDATE:METHOD_DISTANCE_LOW": ["AUTHOR_CAP_REACHED"],
+      "CANDIDATE:OBJECT_ONLY": ["INSTITUTION_CAP_REACHED"],
+      "CANDIDATE:SINGLE_DIRECTION": ["SOURCE_CAP_REACHED"],
+      "CANDIDATE:SOURCE-FAIL": ["SOURCE_UNAVAILABLE"],
+      "CANDIDATE:TITLE_COLLISION": ["LIBRARY_NOVELTY_NOT_TRUE"],
+      "CANDIDATE:TOPIC_ONLY-ALT": ["NON_REPRESENTATIVE_MANIFESTATION"],
+      "CANDIDATE:VERSION": ["LIBRARY_NOVELTY_NOT_TRUE"]
+    },
+    "channel_allocations": {
+      "CORE": {"target": 3, "selected": 3, "gap": 0, "status": "FILLED"},
+      "ADJACENT": {"target": 2, "selected": 2, "gap": 0, "status": "FILLED"},
+      "BRIDGE": {"target": 1, "selected": 1, "gap": 0, "status": "FILLED"},
+      "HORIZON": {"target": 1, "selected": 1, "gap": 0, "status": "FILLED"},
+      "COVERAGE_REPAIR": {"target": 1, "selected": 1, "gap": 0, "status": "FILLED"}
+    },
+    "cap_rejections": [
+      "CANDIDATE:ADJ-3|DIRECTION_CAP_REACHED",
+      "CANDIDATE:CITATION_EXPLICIT|JOURNAL_CAP_REACHED",
+      "CANDIDATE:METHOD_DISTANCE_LOW|AUTHOR_CAP_REACHED",
+      "CANDIDATE:OBJECT_ONLY|INSTITUTION_CAP_REACHED",
+      "CANDIDATE:SINGLE_DIRECTION|SOURCE_CAP_REACHED"
+    ],
+    "max_observed_caps": {"author": 2, "institution": 2, "journal": 2, "source": 2, "direction": 4},
+    "whitespace_slots": 2,
+    "work_cluster_count": 20
+  },
+  "coverage_complete": {
+    "warnings": [
+      "COVERAGE_REPAIR_UNDER_TARGET_30D",
+      "COVERAGE_REPAIR_UNDER_TARGET_90D",
+      "DIRECTION_CONCENTRATION_30D",
+      "DIRECTION_CONCENTRATION_90D",
+      "HORIZON_ABSENT_30D",
+      "HORIZON_ABSENT_90D"
+    ],
+    "windows": {
+      "30": {"status": "COMPLETE", "denominator": 10, "core_count": 8, "horizon_count": 0, "coverage_repair_count": 0},
+      "90": {"status": "COMPLETE", "denominator": 12, "core_count": 10, "horizon_count": 0, "coverage_repair_count": 0}
+    }
+  },
+  "coverage_incomplete": {
+    "window_90_status": "UNKNOWN",
+    "window_90_denominator": null,
+    "window_90_counts_are_null": true,
+    "required_warning": "HISTORY_COVERAGE_UNKNOWN_90D"
+  },
+  "extreme_core": {
+    "selected_count": 3,
+    "core_selected": 3,
+    "underfilled_channels": ["ADJACENT", "BRIDGE", "HORIZON", "COVERAGE_REPAIR"],
+    "core_backfill_count": 0
+  },
+  "absent_horizon": {
+    "selected_count": 7,
+    "horizon_selected": 0,
+    "horizon_gap": 1,
+    "core_selected": 3,
+    "core_backfill_count": 0
+  },
+  "red_lines": {
+    "behavior_error_code": "BEHAVIOR_INPUT_NOT_ACCEPTED_IN_Intake",
+    "production_write_error_code": "PRODUCTION_WRITE_FORBIDDEN_Intake",
+    "context_hash_drift_error_code": "CONTEXT_HASH_DRIFT",
+    "plan_hash_drift_error_code": "PLAN_HASH_DRIFT",
+    "fact_hash_drift_error_code": "FACT_HASH_DRIFT",
+    "equal_rank_tie_selected": "CANDIDATE:CITATION_CLAIM_ONLY"
+  }
+}

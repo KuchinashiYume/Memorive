@@ -1,0 +1,1320 @@
+{
+  "authored_at": "2026-08-03T00:00:00Z",
+  "card_schema_raw_sha256": "EDE7FA88E9C94316CCCC8ED9394261D6DDC1E72FCF73D55871CDD072DAF6C165",
+  "content_hash": {
+    "algorithm": "sha256",
+    "hash_kind": "rfc8785_jcs_sha256",
+    "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+    "value": "B71A9D62143ADCE8AC3FCF421ADBEB66EE0216A2686CBECDC1CE57FF72408ECF"
+  },
+  "generated_from_observed": false,
+  "public_safe": true,
+  "records": [
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-001@1",
+        "card_id": "CARD-FIX-SELF-001",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "A4596710D2F5521ACD91976F9349FEA831332EC580085CB37D8CAB5616FD7B6D"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开自有作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureSelf001_chunk_limitation_0",
+              "quote": "公开自有作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureSelf001_chunk_outlook_0",
+              "quote": "公开自有作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开自有边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开自有适用边界",
+          "condition": "公开自有干预条件",
+          "groups": [
+            "公开自有实验组",
+            "公开自有对照组"
+          ],
+          "object": "公开自有比较对象",
+          "scale": "公开自有尺度",
+          "scenario": "公开自有场景",
+          "time": "公开自有时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "self",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureSelf001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开自有指标",
+            "needs_review": true,
+            "quote": "公开自有指标原文",
+            "sample": "公开自有样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开自有关键结果",
+        "method": [
+          "公开自有研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开自有研究对象"
+        ],
+        "research_question": "公开自有研究问题",
+        "review_status": "active",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_author_conclusion",
+                "quote": "公开自有作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_boundary_conditions",
+                "quote": "['公开自有边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_key_results",
+                "quote": "公开自有关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_method",
+                "quote": "['公开自有研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_research_object",
+                "quote": "['公开自有研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_research_question",
+                "quote": "公开自有研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureSelf001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开自有公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-001",
+      "fixture_id": "FX-ACTIVE-SELF-LITERATURE-R1",
+      "scenario": "active_self_literature"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-002@1",
+        "card_id": "CARD-FIX-002",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "C89AC90644DA63281A4A420EB7C9192C65A8BA3769A8F9193075DD58D311E07B"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开受托作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureEntrusted001_chunk_limitation_0",
+              "quote": "公开受托作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureEntrusted001_chunk_outlook_0",
+              "quote": "公开受托作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开受托边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开受托适用边界",
+          "condition": "公开受托干预条件",
+          "groups": [
+            "公开受托实验组",
+            "公开受托对照组"
+          ],
+          "object": "公开受托比较对象",
+          "scale": "公开受托尺度",
+          "scenario": "公开受托场景",
+          "time": "公开受托时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "entrusted",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureEntrusted001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开受托指标",
+            "needs_review": true,
+            "quote": "公开受托指标原文",
+            "sample": "公开受托样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开受托关键结果",
+        "method": [
+          "公开受托研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开受托研究对象"
+        ],
+        "research_question": "公开受托研究问题",
+        "review_status": "active",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureEntrusted001_chunk_author_conclusion",
+                "quote": "公开受托作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureEntrusted001_chunk_boundary_conditions",
+                "quote": "['公开受托边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureEntrusted001_chunk_key_results",
+                "quote": "公开受托关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureEntrusted001_chunk_method",
+                "quote": "['公开受托研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureEntrusted001_chunk_research_object",
+                "quote": "['公开受托研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureEntrusted001_chunk_research_question",
+                "quote": "公开受托研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureEntrusted001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开受托公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-002",
+      "fixture_id": "FX-ACTIVE-ENTRUSTED-NOTE-R1",
+      "scenario": "active_entrusted_note"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-003@1",
+        "card_id": "CARD-FIX-003",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "2AC87D78F404C90D9A56A121B37035B7078A949087E7688F0B8A60504AD86631"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开待审作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixturePending001_chunk_limitation_0",
+              "quote": "公开待审作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixturePending001_chunk_outlook_0",
+              "quote": "公开待审作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开待审边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开待审适用边界",
+          "condition": "公开待审干预条件",
+          "groups": [
+            "公开待审实验组",
+            "公开待审对照组"
+          ],
+          "object": "公开待审比较对象",
+          "scale": "公开待审尺度",
+          "scenario": "公开待审场景",
+          "time": "公开待审时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "self",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixturePending001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开待审指标",
+            "needs_review": true,
+            "quote": "公开待审指标原文",
+            "sample": "公开待审样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开待审关键结果",
+        "method": [
+          "公开待审研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开待审研究对象"
+        ],
+        "research_question": "公开待审研究问题",
+        "review_status": "pending",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixturePending001_chunk_author_conclusion",
+                "quote": "公开待审作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixturePending001_chunk_boundary_conditions",
+                "quote": "['公开待审边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixturePending001_chunk_key_results",
+                "quote": "公开待审关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixturePending001_chunk_method",
+                "quote": "['公开待审研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixturePending001_chunk_research_object",
+                "quote": "['公开待审研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixturePending001_chunk_research_question",
+                "quote": "公开待审研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixturePending001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开待审公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-003",
+      "fixture_id": "FX-PENDING-SELF-LITERATURE-R1",
+      "scenario": "pending_self_literature"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-004@1",
+        "card_id": "CARD-FIX-004",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "EE1F7BD4FC37900A37BE7DA3575745F12F3A9766979E0E66A128AEA0C2C532EE"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开隔离作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureQuarantine001_chunk_limitation_0",
+              "quote": "公开隔离作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureQuarantine001_chunk_outlook_0",
+              "quote": "公开隔离作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开隔离边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开隔离适用边界",
+          "condition": "公开隔离干预条件",
+          "groups": [
+            "公开隔离实验组",
+            "公开隔离对照组"
+          ],
+          "object": "公开隔离比较对象",
+          "scale": "公开隔离尺度",
+          "scenario": "公开隔离场景",
+          "time": "公开隔离时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "self",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureQuarantine001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开隔离指标",
+            "needs_review": true,
+            "quote": "公开隔离指标原文",
+            "sample": "公开隔离样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开隔离关键结果",
+        "method": [
+          "公开隔离研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开隔离研究对象"
+        ],
+        "research_question": "公开隔离研究问题",
+        "review_status": "quarantined",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureQuarantine001_chunk_author_conclusion",
+                "quote": "公开隔离作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureQuarantine001_chunk_boundary_conditions",
+                "quote": "['公开隔离边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureQuarantine001_chunk_key_results",
+                "quote": "公开隔离关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureQuarantine001_chunk_method",
+                "quote": "['公开隔离研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureQuarantine001_chunk_research_object",
+                "quote": "['公开隔离研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureQuarantine001_chunk_research_question",
+                "quote": "公开隔离研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureQuarantine001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开隔离公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-004",
+      "fixture_id": "FX-QUARANTINED-SELF-LITERATURE-R1",
+      "scenario": "quarantined_self_literature"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-005@1",
+        "card_id": "CARD-FIX-005",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "6DBEE308BA8CDF0561E8DBE39660E916DA3CE3BDC413A3B6C2541E7C9EF9068F"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开缺类型作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureMissingType001_chunk_limitation_0",
+              "quote": "公开缺类型作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureMissingType001_chunk_outlook_0",
+              "quote": "公开缺类型作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开缺类型边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开缺类型适用边界",
+          "condition": "公开缺类型干预条件",
+          "groups": [
+            "公开缺类型实验组",
+            "公开缺类型对照组"
+          ],
+          "object": "公开缺类型比较对象",
+          "scale": "公开缺类型尺度",
+          "scenario": "公开缺类型场景",
+          "time": "公开缺类型时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "self",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureMissingType001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开缺类型指标",
+            "needs_review": true,
+            "quote": "公开缺类型指标原文",
+            "sample": "公开缺类型样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开缺类型关键结果",
+        "method": [
+          "公开缺类型研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开缺类型研究对象"
+        ],
+        "research_question": "公开缺类型研究问题",
+        "review_status": "active",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureMissingType001_chunk_author_conclusion",
+                "quote": "公开缺类型作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureMissingType001_chunk_boundary_conditions",
+                "quote": "['公开缺类型边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureMissingType001_chunk_key_results",
+                "quote": "公开缺类型关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureMissingType001_chunk_method",
+                "quote": "['公开缺类型研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureMissingType001_chunk_research_object",
+                "quote": "['公开缺类型研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureMissingType001_chunk_research_question",
+                "quote": "公开缺类型研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureMissingType001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开缺类型公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-005",
+      "fixture_id": "FX-ACTIVE-SELF-MISSING-DOC-TYPE-R1",
+      "scenario": "active_self_missing_doc_type"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-006@1",
+        "card_id": "CARD-FIX-006",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "3FD4495FEFEB7583EBAF0C4EE219A286803E088596F4EEF8D49AC601DEFA6519"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开未知类型作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureUnknownType001_chunk_limitation_0",
+              "quote": "公开未知类型作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureUnknownType001_chunk_outlook_0",
+              "quote": "公开未知类型作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开未知类型边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开未知类型适用边界",
+          "condition": "公开未知类型干预条件",
+          "groups": [
+            "公开未知类型实验组",
+            "公开未知类型对照组"
+          ],
+          "object": "公开未知类型比较对象",
+          "scale": "公开未知类型尺度",
+          "scenario": "公开未知类型场景",
+          "time": "公开未知类型时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "self",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureUnknownType001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开未知类型指标",
+            "needs_review": true,
+            "quote": "公开未知类型指标原文",
+            "sample": "公开未知类型样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开未知类型关键结果",
+        "method": [
+          "公开未知类型研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开未知类型研究对象"
+        ],
+        "research_question": "公开未知类型研究问题",
+        "review_status": "active",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureUnknownType001_chunk_author_conclusion",
+                "quote": "公开未知类型作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureUnknownType001_chunk_boundary_conditions",
+                "quote": "['公开未知类型边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureUnknownType001_chunk_key_results",
+                "quote": "公开未知类型关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureUnknownType001_chunk_method",
+                "quote": "['公开未知类型研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureUnknownType001_chunk_research_object",
+                "quote": "['公开未知类型研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureUnknownType001_chunk_research_question",
+                "quote": "公开未知类型研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureUnknownType001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开未知类型公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-006",
+      "fixture_id": "FX-ACTIVE-SELF-UNKNOWN-DOC-TYPE-R1",
+      "scenario": "active_self_unknown_doc_type"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-007@1",
+        "card_id": "CARD-FIX-007",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "4ADB358F4E4452E76217361BEFFE30BE022C55B5AA788789F006422919B74046"
+        },
+        "revision": 1
+      },
+      "card": {
+        "author_conclusion": "公开未知权属作者结论",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureUnknownOwner001_chunk_limitation_0",
+              "quote": "公开未知权属作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureUnknownOwner001_chunk_outlook_0",
+              "quote": "公开未知权属作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开未知权属边界条件"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开未知权属适用边界",
+          "condition": "公开未知权属干预条件",
+          "groups": [
+            "公开未知权属实验组",
+            "公开未知权属对照组"
+          ],
+          "object": "公开未知权属比较对象",
+          "scale": "公开未知权属尺度",
+          "scenario": "公开未知权属场景",
+          "time": "公开未知权属时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "unknown",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureUnknownOwner001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开未知权属指标",
+            "needs_review": true,
+            "quote": "公开未知权属指标原文",
+            "sample": "公开未知权属样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "1"
+          }
+        ],
+        "key_results": "公开未知权属关键结果",
+        "method": [
+          "公开未知权属研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开未知权属研究对象"
+        ],
+        "research_question": "公开未知权属研究问题",
+        "review_status": "active",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureUnknownOwner001_chunk_author_conclusion",
+                "quote": "公开未知权属作者结论",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureUnknownOwner001_chunk_boundary_conditions",
+                "quote": "['公开未知权属边界条件']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureUnknownOwner001_chunk_key_results",
+                "quote": "公开未知权属关键结果",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureUnknownOwner001_chunk_method",
+                "quote": "['公开未知权属研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureUnknownOwner001_chunk_research_object",
+                "quote": "['公开未知权属研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureUnknownOwner001_chunk_research_question",
+                "quote": "公开未知权属研究问题",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureUnknownOwner001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开未知权属公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-007",
+      "fixture_id": "FX-ACTIVE-UNKNOWN-OWNERSHIP-R1",
+      "scenario": "active_unknown_ownership"
+    },
+    {
+      "authority": {
+        "card_artifact_ref": "artifact://fixture/ART-FIX-008@2",
+        "card_id": "CARD-FIX-SELF-001",
+        "content_hash": {
+          "algorithm": "sha256",
+          "hash_kind": "rfc8785_jcs_sha256",
+          "scope": "PAYLOAD_EXCLUDING_CONTENT_HASH",
+          "value": "FF1C17018BB3D3DD4E4631B43895D642FADD4DE0FB2AA4E240310A23DA025A99"
+        },
+        "revision": 2
+      },
+      "card": {
+        "author_conclusion": "公开自有作者结论修订",
+        "author_limitations_outlook": {
+          "limitations": [
+            {
+              "chunk_id": "FixtureSelf001_chunk_limitation_0",
+              "quote": "公开自有作者自陈局限"
+            }
+          ],
+          "outlook": [
+            {
+              "chunk_id": "FixtureSelf001_chunk_outlook_0",
+              "quote": "公开自有作者展望"
+            }
+          ]
+        },
+        "boundary_conditions": [
+          "公开自有边界条件修订"
+        ],
+        "citations": [],
+        "comparison_context": {
+          "applicability": "公开自有适用边界",
+          "condition": "公开自有干预条件修订",
+          "groups": [
+            "公开自有实验组",
+            "公开自有对照组"
+          ],
+          "object": "公开自有比较对象",
+          "scale": "公开自有尺度",
+          "scenario": "公开自有场景",
+          "time": "公开自有时段"
+        },
+        "completion_status": "complete",
+        "data_ownership": "self",
+        "distill_model": "public-safe-offline-fixture",
+        "distilled_at": "2026-08-02T00:00:00Z",
+        "field_credibility": {
+          "author_conclusion": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "boundary_conditions": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "key_results": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "method": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_object": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          },
+          "research_question": {
+            "credibility": "unknown",
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "note": null
+          }
+        },
+        "is_derived": false,
+        "key_data": [
+          {
+            "chunk_id": "FixtureSelf001_chunk_key_data_0",
+            "credibility": "unknown",
+            "credibility_note": null,
+            "danger": "⚠ 未核·勿直接引·须核原文",
+            "metric": "公开自有指标",
+            "needs_review": true,
+            "quote": "公开自有指标原文",
+            "sample": "公开自有样本",
+            "stat": "fixture-stat",
+            "unit": "fixture-unit",
+            "value": "2"
+          }
+        ],
+        "key_results": "公开自有关键结果修订",
+        "method": [
+          "公开自有研究方法"
+        ],
+        "omissions": [],
+        "research_object": [
+          "公开自有研究对象"
+        ],
+        "research_question": "公开自有研究问题修订",
+        "review_status": "active",
+        "schema_version": 6,
+        "source_anchor": {
+          "by_field": {
+            "author_conclusion": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_author_conclusion",
+                "quote": "公开自有作者结论修订",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "boundary_conditions": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_boundary_conditions",
+                "quote": "['公开自有边界条件修订']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "key_results": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_key_results",
+                "quote": "公开自有关键结果修订",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "method": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_method",
+                "quote": "['公开自有研究方法']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_object": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_research_object",
+                "quote": "['公开自有研究对象']",
+                "section_page": "fixture-page-1"
+              }
+            ],
+            "research_question": [
+              {
+                "chunk_id": "FixtureSelf001_chunk_research_question",
+                "quote": "公开自有研究问题修订",
+                "section_page": "fixture-page-1"
+              }
+            ]
+          },
+          "chunk_id": null,
+          "paper_id": "FixtureSelf001",
+          "section_page": null
+        },
+        "terms": [],
+        "title": "公开自有公开合成文献"
+      },
+      "doc_type_metadata_id": "DTM-FIX-008",
+      "fixture_id": "FX-ACTIVE-SELF-LITERATURE-R2-SUCCESSOR",
+      "scenario": "active_self_literature_successor"
+    }
+  ],
+  "schema_version": "1.0",
+  "source_fixture_pack_id": "PUBLIC_SAFE_CARD_V6_FIXTURES_V1"
+}

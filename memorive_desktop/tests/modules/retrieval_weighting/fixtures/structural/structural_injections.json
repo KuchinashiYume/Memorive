@@ -1,0 +1,35 @@
+{
+  "schema_version": "SEMANTIC_AGGREGATION_STRUCTURAL_INJECTION_FIXTURE_V1",
+  "fixture_id": "STRUCTURAL_A_INJECTIONS_001",
+  "purpose": "PUBLIC_SAFE_STRUCTURAL_PROVENANCE_AND_DIVERSITY_CONTROLS",
+  "public_safe": true,
+  "synthetic_only": true,
+  "semantic_claims_allowed": false,
+  "injections": [
+    {
+      "query_id": "SA-Q08-PROVENANCE",
+      "evidence": [
+        {
+          "field_path": "key_results",
+          "source_id": "synthetic:configuration:q08:derived-competitor",
+          "provenance_state": "derived"
+        }
+      ]
+    },
+    {
+      "query_id": "SA-Q09-DIVERSITY",
+      "evidence": [
+        {
+          "field_path": "comparison_context/groups/0",
+          "source_id": "synthetic:configuration:q09:diversity-002",
+          "provenance_state": "original"
+        },
+        {
+          "field_path": "comparison_context/groups/0",
+          "source_id": "synthetic:configuration:q09:diversity-003",
+          "provenance_state": "original"
+        }
+      ]
+    }
+  ]
+}
