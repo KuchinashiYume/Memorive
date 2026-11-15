@@ -275,8 +275,12 @@ class Connections:
         return self._run(job, connection, preview)
 
     def _ingest(self, connection, row):
-        """Index one paper: its file (when it has one) and a note of its bibliography and annotations.
-        add_library_file checks the file against the hash taken at the preview."""
+        """Index one paper: its file (when it has one) and a note of its bibliography and annotations."""
+        # First, before anything is reused or written: the file must still be the one previewed. The
+        # later check in add_library_file is not enough: a paper brought in before returns early, and a
+        # file swapped for a PDF without text would only be marked as needing OCR.
+        if row['path'] and digest(self._path(connection, row['path']).read_bytes()) != row['file_hash']:
+            raise ValueError('PREVIEW_SOURCE_CHANGED')
         old = self.store.get('connector_document', row['source_id'])
         if old and old['fingerprint'] == row['fingerprint'] and old['state'] == 'active':
             return old

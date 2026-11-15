@@ -66,6 +66,33 @@ def test_a_file_changed_after_the_preview_is_not_brought_in(workspace, vault):
     job = workspace.connections.commit(preview["id"], preview["preview_hash"])
     assert job["status"] == "ERROR" and job["steps"][0]["status"] == "ERROR"
     assert workspace.store.list("connector_document", "default") == []
+    # Nothing is written for it either, not even its bibliography note.
+    assert not (workspace.store.root / "connector_sources").exists()
+
+
+def test_a_paper_brought_in_before_is_not_reused_once_its_file_changed(workspace, vault):
+    connection = workspace.connections.save("default", "Notes", "folder", str(vault))
+    bring_in(workspace, connection, "k12.md")
+    earlier = workspace.connections.preview(connection["id"], paths=["k12.md"])  # unchanged at this point
+    (vault / "k12.md").write_bytes(b"changed after the preview")
+    job = workspace.connections.commit(earlier["id"], earlier["preview_hash"])
+    assert job["status"] == "ERROR" and job["steps"][0]["error"] == "PREVIEW_SOURCE_CHANGED"
+
+
+def test_a_pdf_replaced_by_one_without_text_is_not_brought_in(workspace, tmp_path):
+    fitz = pytest.importorskip("fitz")
+    folder = tmp_path / "pdfs"
+    folder.mkdir()
+    document = fitz.open()
+    document.new_page().insert_text((72, 72), "Growth of strain K12 doubled at 37 C.")
+    document.save(str(folder / "k12.pdf"))
+    connection = workspace.connections.save("default", "Papers", "folder", str(folder))
+    preview = workspace.connections.preview(connection["id"], paths=["k12.pdf"])
+    blank = fitz.open()
+    blank.new_page()
+    (folder / "k12.pdf").write_bytes(blank.tobytes())  # same name, no text layer
+    job = workspace.connections.commit(preview["id"], preview["preview_hash"])
+    assert job["status"] == "ERROR" and job["steps"][0]["error"] == "PREVIEW_SOURCE_CHANGED"
 
 
 def test_outputs_and_a_changed_file(workspace, vault):
