@@ -102,17 +102,31 @@ _OFFICIAL_MODULE_FILES = {
     "artifact_registry.schema_v2": ("artifact_registry/schema.py", "artifact_registry/schema_v2.py"),
 }
 OFFICIAL_VALIDATOR_RECEIPTS: dict[str, dict[str, Any]] = {}
+_RECEIPT_MODULES: dict[str, tuple[Any, ...]] = {}   # the module objects each receipt was built from
 
 
 def _official_callable(module_name: str, function_name: str):
-    """Return the validator that the owning package provides for its records."""
+    """Return the validator that the owning package provides for its records.
+
+    Every module the receipt lists must be loaded from this source tree; a module of the same name loaded
+    from another folder first is refused rather than used. The receipt hashes the files of the modules that
+    are actually loaded and is built again when one of them has been replaced.
+    """
     files = _OFFICIAL_MODULE_FILES.get(module_name)
     if files is None:
         _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"no validator is registered for {module_name}", "schema_version")
+    source_root = Path(__file__).resolve().parent.parent
     try:
         module = importlib.import_module(module_name)
-        if module_name not in OFFICIAL_VALIDATOR_RECEIPTS:
-            source_root = Path(__file__).resolve().parent.parent
+        loaded = []
+        for relative in files:
+            listed = importlib.import_module(relative.removesuffix(".py").replace("/", "."))
+            location = getattr(listed, "__file__", None)
+            if location is None or Path(location).resolve() != (source_root / relative).resolve():
+                _error("OFFICIAL_VALIDATOR_SOURCE_MISMATCH",
+                       f"{listed.__name__} is not loaded from {source_root}", "schema_version")
+            loaded.append(listed)
+        if _RECEIPT_MODULES.get(module_name) != tuple(loaded) or module_name not in OFFICIAL_VALIDATOR_RECEIPTS:
             receipt_files = []
             for relative in files:
                 raw = (source_root / relative).read_bytes()
@@ -122,10 +136,11 @@ def _official_callable(module_name: str, function_name: str):
                 "module_file": str(Path(module.__file__).resolve()),
                 "files": receipt_files,
             }
+            _RECEIPT_MODULES[module_name] = tuple(loaded)
     except (ImportError, OSError):
         _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"the validator module {module_name} is unavailable", "schema_version")
     validator = getattr(module, function_name, None)
-    if not callable(validator):
+    if not callable(validator) or getattr(validator, "__module__", None) != module_name:
         _error("OFFICIAL_VALIDATOR_UNAVAILABLE", f"{module_name}.{function_name} is unavailable", "schema_version")
     return validator
 
