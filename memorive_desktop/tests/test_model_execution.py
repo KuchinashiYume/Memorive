@@ -53,6 +53,15 @@ class Runner:
         return self._next("image", request)
 
 
+@pytest.fixture
+def waits(monkeypatch):
+    """Record the waits between tries (retry.wait_before_retry) instead of sleeping."""
+    from memorive_model_execution import retry
+    seen = []
+    monkeypatch.setattr(retry, "wait_before_retry", seen.append)
+    return seen
+
+
 def make_controller(root: Path, runner: Runner) -> SettingsController:
     store = SettingsStore(root / "profile", default_factory=lambda: default_settings(workspace_root=str(root), artifact_root=str(root)))
     controller = SettingsController(
@@ -80,21 +89,22 @@ def test_a_frozen_research_question_is_sent_once(tmp_path):
     assert len(runner.calls) == 1
 
 
-def test_a_research_question_is_tried_again_after_a_temporary_failure(tmp_path):
+def test_a_research_question_is_tried_again_after_a_temporary_failure(tmp_path, waits):
     runner = Runner(transient_failure(), transient_failure(), dict(PASS))
     controller = make_controller(tmp_path, runner)
     frozen = controller.research_chat_freeze(run_id=RUN_ID, profile_ref="local:chat")
     result = controller.research_chat_execute(snapshot_id=frozen["snapshot_id"], prompt="What changed?", response_schema=SCHEMA)
     assert result["status"] == "PASS" and len(runner.calls) == 3
     assert [a["status"] for a in result["recovery_attempts"]] == ["FAILED", "FAILED", "PASS"]
+    assert waits == [0, 1]  # 1 s before the second try, 2 s before the third
 
 
-def test_a_research_question_is_not_tried_again_after_a_lasting_failure(tmp_path):
+def test_a_research_question_is_not_tried_again_after_a_lasting_failure(tmp_path, waits):
     runner = Runner({"status": "FAILED", "reason": "API_AUTHENTICATION_FAILED", "execution_receipt": {}})
     controller = make_controller(tmp_path, runner)
     frozen = controller.research_chat_freeze(run_id=RUN_ID, profile_ref="local:chat")
     result = controller.research_chat_execute(snapshot_id=frozen["snapshot_id"], prompt="What changed?", response_schema=SCHEMA)
-    assert result["status"] == "FAILED" and len(runner.calls) == 1
+    assert result["status"] == "FAILED" and len(runner.calls) == 1 and waits == []
 
 
 def test_a_profile_that_is_not_available_is_refused(tmp_path):

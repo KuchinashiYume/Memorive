@@ -21,6 +21,7 @@ example = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(example)
 
 from memorive_research_workspace.service import ResearchWorkspace  # noqa: E402
+from memorive_research_workspace.store import digest  # noqa: E402
 
 
 class Model(example.ExampleModel):
@@ -170,3 +171,53 @@ def test_answering_again_calls_the_model_again_and_keeps_both_versions(setup):
     assert len(model.calls) == 2
     versions = [m for m in workspace.thread_get(thread_id)["messages"] if m["role"] == "assistant"]
     assert job["answer_id"] in {m["id"] for m in versions}
+
+
+AGENT = {"profile_ref": "cli:codex", "eligible": True, "profile_kind": "CLI", "adapter_id": "codex_cli",
+         "binding_hash": "agent", "model_name": "agent-model"}
+
+
+class Agent:
+    """Stands in for a coding agent run from the command line; keeps the prompt it was given."""
+
+    def __init__(self):
+        self.prompts = []
+
+    def __call__(self, *, profile_ref, prompt, job_id, response_schema):
+        self.prompts.append(prompt)
+        first = example.EXCERPT_ID.search(prompt).group(0)
+        answer = {"answer": "Growth doubles from 25 C to 37 C.", "citations": [first], "needs_agent": False,
+                  "opportunities": []}
+        return {"response": answer, "model_name": AGENT["model_name"], "execution_receipt": {"status": "PASS"}}
+
+
+def test_an_agent_job_works_from_the_agent_instructions_and_leaves_a_handoff_pack(tmp_path):
+    from model_gateway.research_prompt_cache import CHAT_RULES
+    from research_opportunities.research_opportunities import instructions
+
+    library = tmp_path / "library"
+    library.mkdir()
+    paper = library / "k12.md"
+    paper.write_text(example.PAPER, encoding="utf-8")
+    workspace = ResearchWorkspace(tmp_path / "workspace", catalog=lambda: [dict(example.PROFILE), dict(AGENT)], model=Model())
+    workspace.agent_model = agent = Agent()
+    try:
+        thread = workspace.thread_create()
+        material = workspace.index.add_library_file(
+            thread["project"], path=paper, root=library, external_id="k12",
+            expected_hash=hashlib.sha256(paper.read_bytes()).hexdigest(), title="K12", material_layer="cleaned")
+        workspace.attachments.configure(thread["id"], thread["revision"], {"artifact_ids": [material["id"]]})
+        job_id = workspace.agent_dispatch(thread["id"], example.QUESTION, "agent-request-0001")["id"]
+        _finish(workspace)
+        job = workspace.job_status(job_id)
+        assert (job["status"], job.get("error"), job["kind"]) == ("COMPLETE", None, "agent")
+        # The agent is given its own instructions, not the chat rules, and the saved hash is of that prompt.
+        [prompt] = agent.prompts
+        assert instructions() in prompt and CHAT_RULES not in prompt
+        [answer] = _answers(workspace, thread["id"])
+        assert answer["generation"]["prompt_sha256"] == digest(prompt.encode())
+        assert answer["agent_result"] is True and answer["opportunities"] == []
+        handoff = workspace.store.get("handoff", job["handoff_id"])
+        assert (handoff["question"], handoff["instructions"]) == (example.QUESTION, instructions())
+    finally:
+        workspace.close()

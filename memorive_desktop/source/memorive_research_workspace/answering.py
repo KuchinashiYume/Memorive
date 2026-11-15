@@ -56,7 +56,7 @@ def answer_job(workspace, job_id, question, artifact_ids):
 
 
 class AnswerJob:
-    """One research question being answered. Each step keeps what later steps need."""
+    """One research question being answered. Each step keeps what later steps need, listed below."""
 
     def __init__(self, workspace, job_id, question, artifact_ids):
         self.ws = workspace
@@ -65,8 +65,30 @@ class AnswerJob:
         self.question = question
         self.artifact_ids = artifact_ids
         self.started = time.monotonic()
-        self.usage = {}
-        self.search = {}
+        # Set by start:
+        self.job = None              # the job record, now RUNNING
+        self.thread = None           # the conversation the answer goes to
+        self.settings = None         # model settings frozen with the question
+        self.request_context = None  # language, answer style and answer path, frozen with the question
+        # Set by gather_evidence, or by reuse_evidence_of_retried_answer when answering again:
+        self.search = {}             # the index search, with its ranking receipts
+        self.intent = None           # 'question', 'comparison' or 'knowledge' (question_intent)
+        self.context = None          # everything the model is shown (model_context)
+        self.summary = None          # older conversation turns, shortened
+        self.refs = None             # the excerpts in the context
+        self.admitted = None         # their ids: an answer may cite only these
+        self.coverage_snapshot = None  # how far the excerpts cover the question; saved with the job
+        self.evidence_context = None   # question, coverage, excerpts kept and read; saved with the answer
+        # Set by build_request:
+        self.response_schema = None  # the answer format, bound to the excerpt ids
+        self.prompt = None           # what the model is sent
+        # Set by ask_model and check_answer:
+        self.value = None            # the model's reply as returned
+        self.text = None             # the answer text that is saved
+        self.citations = None        # ids of the excerpts the answer cites
+        self.engine = None           # the model's name, or 'evidence_only' without a model
+        self.handoff = None          # whether the question asks to hand the work to an agent
+        self.usage = {}              # what the model call used; kept even when the job fails
 
     def elapsed_ms(self):
         return round((time.monotonic() - self.started) * 1000)
@@ -164,10 +186,7 @@ class AnswerJob:
                            dict(self.ws.job_status(self.job_id), evidence_coverage=coverage))
             raise ValueError('EVIDENCE_NO_CURRENT_SOURCE')
         cross_document = bool(CROSS_DOCUMENT.search(question))
-        if COMPARISON.search(question):
-            self.intent = 'comparison'
-        else:
-            self.intent = 'knowledge' if KNOWLEDGE.search(question) else 'question'
+        self.intent = self.question_intent()
         if cross_document and len({answer_coverage.document_key(r) for r in refs}) < 2:
             raise ValueError('TENSION_NEEDS_TWO_PAPERS')
         task_intent = 'agent' if self.job.get('kind') == 'agent' else self.intent
@@ -181,6 +200,12 @@ class AnswerJob:
         # The context budget may have dropped one of the papers the question compares.
         if cross_document and len({answer_coverage.document_key(r) for r in refs}) < 2:
             raise ValueError('COMPARISON_CONTEXT_TOO_SMALL')
+
+    def question_intent(self):
+        """What the question asks for: a comparison, knowledge to keep, or an answer."""
+        if COMPARISON.search(self.question):
+            return 'comparison'
+        return 'knowledge' if KNOWLEDGE.search(self.question) else 'question'
 
     def citations_of_previous_answer(self):
         """A short follow-up may omit the topic: reuse the still-current citations of the last answer."""
@@ -311,16 +336,21 @@ class AnswerJob:
 
     def build_request(self):
         """Bind the answer schema to the excerpts shown, check the context, and build the prompt."""
+        from model_gateway.research_prompt_cache import CHAT_RULES, research_prompt
+        from .skill_bridge import METHOD_RULES
         self.response_schema = None
         response_contract = None
+        rules = CHAT_RULES
         evidence_ids = [e['id'] for e in self.context['evidence']]
         if self.settings['profile_ref']:
             from .desktop import ANSWER_SCHEMA
             from .response_contract import REVISION, bind_evidence
             base_schema = ANSWER_SCHEMA
             if self.job.get('kind') == 'agent':
-                from research_opportunities.research_opportunities import schema
+                # An agent job answers in the agent's format and works from the agent's instructions.
+                from research_opportunities.research_opportunities import instructions, schema
                 base_schema = schema()
+                rules = instructions()
             self.response_schema = bind_evidence(base_schema, evidence_ids)
             response_contract = {'revision': REVISION, 'schema_sha256': digest(self.response_schema), 'evidence_ids': evidence_ids}
         self.store.put('job', self.job_id, self.job['project'], dict(self.ws.job_status(self.job_id),
@@ -330,9 +360,7 @@ class AnswerJob:
             raise ValueError('RETRY_CONTEXT_EXCEEDS_CONTEXT_BUDGET' if self.job.get('retry_of') else 'QUESTION_EXCEEDS_CONTEXT_BUDGET')
         self.ws.versions.validate_context(self.job, self.context, self.refs)
         self.checkpoint()
-        from model_gateway.research_prompt_cache import CHAT_RULES, research_prompt
-        from .skill_bridge import METHOD_RULES
-        self.prompt = research_prompt(CHAT_RULES + '\n' + METHOD_RULES, self.context)
+        self.prompt = research_prompt(rules + '\n' + METHOD_RULES, self.context)
 
     # --- 4. model ---------------------------------------------------------------------------------
 
@@ -349,7 +377,7 @@ class AnswerJob:
         if not model:
             raise ValueError('CHAT_MODEL_RUNNER_UNAVAILABLE')
         if self.job.get('kind') == 'agent':
-            self.prepare_agent_handoff()
+            self.save_agent_handoff()
         result = model(profile_ref=self.settings['profile_ref'], prompt=self.prompt, job_id=self.job_id,
                        response_schema=self.response_schema)
         self.value = result['response']
@@ -385,12 +413,9 @@ class AnswerJob:
                          '以下の断片をローカル検索で取得しました。入力欄でモデルを選択して質問を続けられます。\n\n')
         return heading + '\n\n'.join(f'[{i + 1}] {r["title"]}\n{r["text"][:550]}' for i, r in enumerate(self.refs))
 
-    def prepare_agent_handoff(self):
-        """An agent job: switch to the agent's instructions and save the hand-off pack it works from."""
+    def save_agent_handoff(self):
+        """An agent job: save the hand-off pack the agent works from (its prompt is made in build_request)."""
         from research_opportunities.research_opportunities import instructions
-        from .skill_bridge import METHOD_RULES
-        from model_gateway.research_prompt_cache import research_prompt
-        self.prompt = research_prompt(instructions() + '\n' + METHOD_RULES, self.context)
         context, thread = self.context, self.thread
         pack = {
             'schema_version': 'MemoAgentHandoff-v2', 'project': thread['project'], 'thread_id': thread['id'],
