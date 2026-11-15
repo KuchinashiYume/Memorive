@@ -188,6 +188,22 @@ def test_an_answer_is_not_saved_when_its_file_changed_while_the_model_ran(setup)
     assert (job["status"], job["error"]) == ("ERROR", "EVIDENCE_STALE")
     assert _answers(workspace, thread_id) == []
 
+def test_a_conversation_answers_one_question_at_a_time(setup):
+    model = Model()
+    model.release.clear()
+    workspace, thread_id, material_id = setup(model)
+    job_id = _ask(workspace, thread_id, material_id, wait=False)
+    assert model.called.wait(60)
+    with pytest.raises(ValueError, match="THREAD_BUSY"):
+        _ask(workspace, thread_id, material_id, "request-0002", wait=False)
+    # Cancelled, but the model call is still running: the conversation stays busy until it ends.
+    workspace.cancel(job_id)
+    with pytest.raises(ValueError, match="THREAD_BUSY"):
+        _ask(workspace, thread_id, material_id, "request-0003", wait=False)
+    model.release.set()
+    _finish(workspace)
+    assert workspace.job_status(_ask(workspace, thread_id, material_id, "request-0004"))["status"] == "COMPLETE"
+
 AGENT = {"profile_ref": "cli:codex", "eligible": True, "profile_kind": "CLI", "adapter_id": "codex_cli",
          "binding_hash": "agent", "model_name": "agent-model"}
 
