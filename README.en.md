@@ -130,6 +130,8 @@ You are free to modify Memorive. The included **Test Console** starts your own b
 
 [Console guide](memorive_console/README.en.md) · [中文](memorive_console/README.md) · [日本語](memorive_console/README.ja.md). The console code is also AGPL-3.0-only; see the [console notice](memorive_console/NOTICE.txt) for icon rights.
 
+To change the code itself, start with the [developer guide](memorive_desktop/DEVELOPING.md): where each part of the code is, a runnable example, and which tests to run after a change.
+
 ## How this project is developed
 
 All of the project's own code was written and iterated by **OpenAI Codex** and **Anthropic Claude Code**. The project initiator defined the requirements and product design and carried out testing and acceptance.

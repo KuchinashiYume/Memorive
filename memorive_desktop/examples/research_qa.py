@@ -79,7 +79,8 @@ def keep_data_inside(folder: Path) -> None:
 
 def run(folder: Path) -> dict:
     """Ask one question about the synthetic paper; return what was saved."""
-    folder = Path(folder)
+    # The evidence index compares full paths; a short 8.3 name (as in the temp folder) would not match.
+    folder = Path(folder).resolve()
     keep_data_inside(folder)
     from memorive_research_workspace.service import ResearchWorkspace
 

@@ -130,6 +130,8 @@ Memorive 的代码可以自由修改。仓库附带的**测试控制台**会在�
 
 [控制台使用说明](memorive_console/README.md) · [English](memorive_console/README.en.md) · [日本語](memorive_console/README.ja.md)。控制台代码同样采用 AGPL-3.0-only，图标的权利说明见[控制台声明](memorive_console/NOTICE.txt)。
 
+要修改代码本身，请先看[开发说明](memorive_desktop/DEVELOPING.md)（英文）：各部分代码在哪里、一个能直接运行的示例，以及改动后要跑哪些测试。
+
 ## 开发方式
 
 项目自身的代码全部由 **OpenAI Codex** 和 **Anthropic Claude Code** 编写和迭代，项目发起者负责需求、产品设计和测试验收。

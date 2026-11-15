@@ -7881,23 +7881,23 @@
     },
     {
       "path": "README.en.md",
-      "sha256": "3f0b648cb12538a00cbd05df68a5049d8a1faa58f2ed7516b2364b4632d5ee75",
-      "bytes": 13053
+      "sha256": "5a7213937961c5e025170a10724ce336756bfb99e29f95fce56eb1d357502839",
+      "bytes": 13240
     },
     {
       "path": "README.ja.md",
-      "sha256": "f2ff7fe29486c3a89b5e2fdbe498d072f0d0e09881ae044cc0a7684759cb9044",
-      "bytes": 15643
+      "sha256": "37c4abeaa9fd5021ee6b22f3b0a20a1bba218546a6c9f5dddabcaf62b29795cb",
+      "bytes": 15903
     },
     {
       "path": "README.md",
-      "sha256": "3f0b648cb12538a00cbd05df68a5049d8a1faa58f2ed7516b2364b4632d5ee75",
-      "bytes": 13053
+      "sha256": "5a7213937961c5e025170a10724ce336756bfb99e29f95fce56eb1d357502839",
+      "bytes": 13240
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "4ef6a4419300f1f8f13fb6a1351379020ceec983f5c8e8103604ce5b5f98277e",
-      "bytes": 12026
+      "sha256": "773438695f3e9800bdecdfcc3001c8f388d79e8a7bce34c8051e86663cb20b6c",
+      "bytes": 12220
     },
     {
       "path": "SOURCE_VERSION.json",
@@ -9556,8 +9556,8 @@
     },
     {
       "path": "memorive_desktop/examples/research_qa.py",
-      "sha256": "3b069f4c3868e1f4970d178c07e64e755a305720975428096e0eeda6dda7e09d",
-      "bytes": 5889
+      "sha256": "54e64401445cf020d6ab6f7b5eb83dc4776f358c64c3daeeb6f89c001efafab5",
+      "bytes": 6004
     },
     {
       "path": "memorive_desktop/source/memorive_model_execution/__init__.py",
@@ -9573,6 +9573,11 @@
       "path": "memorive_desktop/source/memorive_model_execution/retry.py",
       "sha256": "0b284f774cdaf5f2ac5dfb97612b8eb3e1b43f0a4ee864060e50a842e71d5ac0",
       "bytes": 4931
+    },
+    {
+      "path": "memorive_desktop/DEVELOPING.md",
+      "sha256": "8344fa53c990d2a4ac355670fd327548425ca88f29341e73c31ee963e55395b4",
+      "bytes": 7424
     }
   ]
 }

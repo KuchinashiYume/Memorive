@@ -130,6 +130,8 @@ Memorive のコードは自由に変更できます。付属の**テストコン
 
 [コンソールの使い方](memorive_console/README.ja.md) · [中文](memorive_console/README.md) · [English](memorive_console/README.en.md)。コンソールのコードも AGPL-3.0-only です。アイコンの権利については[コンソールの声明](memorive_console/NOTICE.txt)をご覧ください。
 
+コード自体を変更するときは、まず[開発ガイド](memorive_desktop/DEVELOPING.md)（英語）をご覧ください。コードの各部分の場所、そのまま動かせる例、変更後に実行するテストをまとめています。
+
 ## 開発について
 
 プロジェクト独自のコードは、すべて **OpenAI Codex** と **Anthropic Claude Code** が書き、改良を重ねてきました。企画者は要件定義、製品設計、テストと受け入れ確認を担当しています。
