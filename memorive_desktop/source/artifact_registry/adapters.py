@@ -435,6 +435,14 @@ class P1LegacyAdapter:
         return AdaptationResult(envelopes=envelopes, mapping_summary=summary)
 
 
+def register_adaptation(
+    registry: ArtifactRegistry, result: AdaptationResult
+) -> list[str]:
+    """Register an adaptation in dependency order without changing sources."""
+
+    return [registry.register(envelope) for envelope in result.envelopes]
+
+
 def build_open_type_envelope(
     path: Path | str,
     *,

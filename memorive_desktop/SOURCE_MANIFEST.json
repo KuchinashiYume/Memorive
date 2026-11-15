@@ -2197,13 +2197,13 @@
     },
     {
       "path": "source/artifact_registry/__init__.py",
-      "sha256": "659bf742186ae956cae011d03455644714f31c0fd2554c31bc0a35f97093cb43",
-      "bytes": 1768
+      "sha256": "45d957769ff3a066e145e70c6ee8acaad9c88b73594f80266bbb3dc275216323",
+      "bytes": 2356
     },
     {
       "path": "source/artifact_registry/adapters.py",
-      "sha256": "f3ac3e9f49e4b32f8fdc99b0f3d23e5b31fb03c2635c499c0a213c790d72139c",
-      "bytes": 24278
+      "sha256": "f6b2246a1b00727ff031be536ede95e640a42e8cd85b2946046509be2a0656d7",
+      "bytes": 24540
     },
     {
       "path": "source/artifact_registry/analysis_compatibility.py",
