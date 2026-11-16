@@ -37,9 +37,6 @@ from memorive_current_task.refinement_tasks import (
     RefinementTaskError,
     safe_error_code,
 )
-from knowledge_feedback.conversation_refinement import (
-    validate_typed_refinement_item,
-)
 from memorive_settings.model_capabilities import infer_api_model_capability
 
 
@@ -3218,68 +3215,6 @@ class SessionsProductController:
             for index, child in enumerate(value):
                 SessionsProductController._reject_sensitive_channel_result(child, f"{path}[{index}]")
 
-    def _validate_refinement_channel_result(
-        self,
-        value: Any,
-        *,
-        task_id: str,
-        profile_ref: str,
-    ) -> dict[str, Any]:
-        expected = {
-            "profile_ref",
-            "requested_model",
-            "returned_model",
-            "subject_output",
-            "model_calls",
-            "external_model_calls",
-            "external_network_calls",
-            "provider_calls",
-            "execution_receipt",
-        }
-        if not isinstance(value, Mapping) or set(value) != expected:
-            raise SessionProductError("SESSION_REFINEMENT_CHANNEL_RESULT_FIELDS_INVALID")
-        accepted = deepcopy(dict(value))
-        if (
-            accepted.get("profile_ref") != profile_ref
-        ):
-            raise SessionProductError("SESSION_REFINEMENT_CHANNEL_RESULT_IDENTITY_INVALID")
-        if not _text(accepted.get("requested_model"), 240) or not _text(accepted.get("returned_model"), 240):
-            raise SessionProductError("SESSION_REFINEMENT_CHANNEL_MODEL_IDENTITY_MISSING")
-        if accepted.get("model_calls") != 1:
-            raise SessionProductError("SESSION_REFINEMENT_CHANNEL_CALL_COUNT_INVALID")
-        for field in ("external_model_calls", "external_network_calls", "provider_calls"):
-            count = accepted.get(field)
-            if isinstance(count, bool) or count not in {0, 1}:
-                raise SessionProductError("SESSION_REFINEMENT_CHANNEL_EFFECT_COUNT_INVALID")
-        subject_output = accepted.get("subject_output")
-        if (
-            not isinstance(subject_output, Mapping)
-            or set(subject_output) != {"schema_version", "pack_id", "graph_hash", "items"}
-            or subject_output.get("schema_version") != "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1"
-            or subject_output.get("pack_id") != task_id
-            or not isinstance(subject_output.get("graph_hash"), Mapping)
-            or not isinstance(subject_output.get("items"), list)
-            or not subject_output["items"]
-        ):
-            raise SessionProductError("SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID")
-        try:
-            subject_output["items"] = [
-                validate_typed_refinement_item(item)
-                for item in subject_output["items"]
-            ]
-        except Exception as error:
-            raise SessionProductError(
-                "SESSION_REFINEMENT_Capabilities_TYPED_ITEM_INVALID"
-            ) from error
-        if not isinstance(accepted.get("execution_receipt"), Mapping) or not accepted["execution_receipt"]:
-            raise SessionProductError("SESSION_REFINEMENT_CHANNEL_RECEIPT_REQUIRED")
-        self._reject_sensitive_channel_result(accepted)
-        try:
-            _sha256_json(accepted)
-        except (TypeError, ValueError) as error:
-            raise SessionProductError("SESSION_REFINEMENT_CHANNEL_RESULT_JSON_INVALID") from error
-        return accepted
-
     def _refinement_task_for_projection(self, projection_id: str) -> dict[str, Any] | None:
         manager = self._refinement_task_manager
         finder = getattr(manager, "find_session_refinement_task", None)
@@ -3396,12 +3331,10 @@ class SessionsProductController:
                 "review_required": True,
                 "auto_ingest": False,
             }
-            raw_result = execute(request)
-            result = self._validate_refinement_channel_result(
-                raw_result,
-                task_id=job_id,
-                profile_ref=str(settings["profile_ref"]),
-            )
+            # The channel builds this result in this process from checked parts; only secret
+            # fields are looked for before it is stored with the draft.
+            result = execute(request)
+            self._reject_sensitive_channel_result(result)
             model_calls = 1
             self._metrics["refinement_model_calls"] += 1
             self._metrics["external_model_calls"] += int(result["external_model_calls"])

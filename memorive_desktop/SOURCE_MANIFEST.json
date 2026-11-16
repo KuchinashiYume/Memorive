@@ -4417,8 +4417,8 @@
     },
     {
       "path": "source/memorive_sessions/product_controller.py",
-      "sha256": "7ad2c908edbb81783d0405f8df5ccad0aae0c758bb2a5bf617c556bce551e923",
-      "bytes": 192865
+      "sha256": "0ef061fecabfe175fbcc92f91ffa49ebf757223ee79701595c228bec92155edc",
+      "bytes": 189795
     },
     {
       "path": "source/memorive_settings/__init__.py",

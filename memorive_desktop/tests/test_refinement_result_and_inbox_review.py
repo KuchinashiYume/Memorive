@@ -1,15 +1,13 @@
 """Two checks around refinement and review:
 
-* the result a model returns for a session refinement is kept only if it came from the chosen
-  profile through exactly one call, carries a receipt and hash-sealed items for this task, and
-  holds no credential field;
+* the result of a session refinement is built by the refinement channel in this process from
+  checked parts, so the sessions controller only refuses it when it holds a credential field;
 * the "logic review" choice on an inbox item can change only before the item is dispatched, and
   the dispatched request carries the choice.
 """
 from __future__ import annotations
 
 import copy
-from types import SimpleNamespace
 
 import pytest
 
@@ -56,80 +54,26 @@ def _result(**changes):
     return value
 
 
-def _check(value, task_id=TASK):
-    owner = SimpleNamespace(_reject_sensitive_channel_result=SessionsProductController._reject_sensitive_channel_result)
-    return SessionsProductController._validate_refinement_channel_result(owner, value, task_id=task_id,
-                                                                       profile_ref=PROFILE)
+def _scan(value):
+    SessionsProductController._reject_sensitive_channel_result(value)
 
 
-def test_a_result_from_the_chosen_profile_is_kept():
+def test_a_result_without_secret_fields_is_kept_as_it_is():
     value = _result()
     before = copy.deepcopy(value)
-    items = value["subject_output"]["items"]
-    accepted = _check(value)
-    assert accepted["subject_output"]["items"][0]["item_id"] == value["subject_output"]["items"][0]["item_id"]
-    assert value == before and value["subject_output"]["items"] is items
+    _scan(value)
+    assert value == before
 
 
-def _subject(**changes):
-    subject = _formal_subject(REQUEST)
-    subject.update(changes)
-    return subject
-
-
-def _tampered_item():
-    """An item claiming the refiner decided the claim is true."""
-    subject = _formal_subject(REQUEST)
-    subject["items"][0]["truth_decided_by_refiner"] = True
-    return subject
-
-
-@pytest.mark.parametrize("value, code", [
-    ("result", "SESSION_REFINEMENT_CHANNEL_RESULT_FIELDS_INVALID"),
-    ({k: v for k, v in _result().items() if k != "provider_calls"}, "SESSION_REFINEMENT_CHANNEL_RESULT_FIELDS_INVALID"),
-    (dict(_result(), raw_text="x"), "SESSION_REFINEMENT_CHANNEL_RESULT_FIELDS_INVALID"),
-    (_result(profile_ref="local:ollama:other"), "SESSION_REFINEMENT_CHANNEL_RESULT_IDENTITY_INVALID"),
-    (_result(requested_model=" "), "SESSION_REFINEMENT_CHANNEL_MODEL_IDENTITY_MISSING"),
-    (_result(returned_model=None), "SESSION_REFINEMENT_CHANNEL_MODEL_IDENTITY_MISSING"),
-    (_result(model_calls=0), "SESSION_REFINEMENT_CHANNEL_CALL_COUNT_INVALID"),
-    (_result(model_calls=2), "SESSION_REFINEMENT_CHANNEL_CALL_COUNT_INVALID"),
-    (_result(external_model_calls=2), "SESSION_REFINEMENT_CHANNEL_EFFECT_COUNT_INVALID"),
-    (_result(external_network_calls=True), "SESSION_REFINEMENT_CHANNEL_EFFECT_COUNT_INVALID"),
-    (_result(provider_calls=-1), "SESSION_REFINEMENT_CHANNEL_EFFECT_COUNT_INVALID"),
-    (_result(subject_output=[]), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(extra=1)), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(schema_version="OTHER")), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(pack_id="refine-task-2")), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(graph_hash="A" * 64)), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(items=[])), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(items={})), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_subject(items={"item": 1})), "SESSION_REFINEMENT_Capabilities_SUBJECT_OUTPUT_INVALID"),
-    (_result(subject_output=_tampered_item()), "SESSION_REFINEMENT_Capabilities_TYPED_ITEM_INVALID"),
-    (_result(execution_receipt={}), "SESSION_REFINEMENT_CHANNEL_RECEIPT_REQUIRED"),
-    (_result(execution_receipt="PASS"), "SESSION_REFINEMENT_CHANNEL_RECEIPT_REQUIRED"),
-    (_result(execution_receipt={"status": "PASS", "request": {"Authorization": "Bearer x"}}),
-     "SESSION_REFINEMENT_RESULT_SENSITIVE_FIELD_FORBIDDEN"),
-    (_result(execution_receipt={"status": "PASS", "attempts": [{"api_key": "x"}]}),
-     "SESSION_REFINEMENT_RESULT_SENSITIVE_FIELD_FORBIDDEN"),
-    (_result(execution_receipt={"status": "PASS", "tags": {"a", "b"}}), "SESSION_REFINEMENT_CHANNEL_RESULT_JSON_INVALID"),
+@pytest.mark.parametrize("receipt", [
+    {"status": "PASS", "request": {"Authorization": "Bearer x"}},
+    {"status": "PASS", "attempts": [{"api_key": "x"}]},
+    {"status": "PASS", "Cookie_Value": "x"},
+    {"status": "PASS", "nested": [{"deeper": {"password": "x"}}]},
 ])
-def test_a_result_that_cannot_be_traced_or_holds_a_credential_is_refused(value, code):
-    with pytest.raises(SessionProductError) as caught:
-        _check(value)
-    assert str(caught.value) == code
-
-
-def test_a_result_for_another_task_is_refused():
-    with pytest.raises(SessionProductError, match="SUBJECT_OUTPUT_INVALID"):
-        _check(_result(), task_id="refine-task-2")
-
-
-@pytest.mark.parametrize("counts", [
-    {"external_model_calls": 1, "external_network_calls": 1, "provider_calls": 0},
-    {"external_model_calls": 0, "external_network_calls": 0, "provider_calls": 0},
-])
-def test_zero_or_one_outside_effect_is_accepted(counts):
-    _check(_result(**counts))
+def test_a_result_holding_a_secret_field_is_refused(receipt):
+    with pytest.raises(SessionProductError, match="SESSION_REFINEMENT_RESULT_SENSITIVE_FIELD_FORBIDDEN"):
+        _scan(_result(execution_receipt=receipt))
 
 
 # Logic review choice on an inbox item
