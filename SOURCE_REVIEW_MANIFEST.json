@@ -4636,8 +4636,8 @@
     },
     {
       "path": "memorive_desktop/source/evidence_review/judgment_debt.py",
-      "sha256": "07b11446addf460da28a07232ab3b48bad1f6b5236d6c19a55550a8b544d08e7",
-      "bytes": 1998
+      "sha256": "d00910ca150efd82c38ad3888de3df68fe0d92a824909c9f7c6d1898dd7b3b06",
+      "bytes": 2047
     },
     {
       "path": "memorive_desktop/source/evidence_review/mechanical.py",
@@ -4671,8 +4671,8 @@
     },
     {
       "path": "memorive_desktop/source/evidence_review/report.py",
-      "sha256": "67a8421f894a42adfa1ae238a9870f84539e0c93a40d6685073167815700e9c0",
-      "bytes": 5070
+      "sha256": "84a407dbc3c85224313df2917fe47890f07f5002b5aca7a1d0ef963c3e0f2dc8",
+      "bytes": 5170
     },
     {
       "path": "memorive_desktop/source/evidence_review/reviewer_contract.py",
@@ -4746,8 +4746,8 @@
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/knowledge_admission_log.py",
-      "sha256": "1d0161ee03ef803351153970d581178ba4dd3549cda6d21000de995f2ea896ce",
-      "bytes": 3161
+      "sha256": "38875ba375e31aacdc27af32817b36390a1953b1fcc7871e736915a6f742961e",
+      "bytes": 3237
     },
     {
       "path": "memorive_desktop/source/knowledge_admission/machine.py",
@@ -6506,8 +6506,8 @@
     },
     {
       "path": "memorive_desktop/source/model_gateway/cache.py",
-      "sha256": "c590c4f5627c7dfda1b1714458f3e30adb38809d0e7bad0d8e75c54ca819e083",
-      "bytes": 1943
+      "sha256": "28eee5bf6d86b38b64497421cda13bca9c081c7e634380051dfab6712f7698a4",
+      "bytes": 1991
     },
     {
       "path": "memorive_desktop/source/model_gateway/cache_session.py",
@@ -7776,8 +7776,8 @@
     },
     {
       "path": "memorive_desktop/source/runtime_log/config.py",
-      "sha256": "62dd32f0ea9ef2e7ed3ac93f8652f12857a4ca4851270df34f217cb0d0e43e9d",
-      "bytes": 1741
+      "sha256": "d9570a94f7ca4313c21c8b91a681456ea82cbc35a3b17023f60af538fbab8e93",
+      "bytes": 1779
     },
     {
       "path": "memorive_desktop/source/runtime_log/logger.py",
@@ -7961,7 +7961,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "06a05d835f4f3b3aa0a6d35b7445c66ff8e22314f7b0785f9500edb1234342dc",
+      "sha256": "182b8ea77610ebafc773c50215045d06afdc0a35baa892cb8e399a0bb71bf7cd",
       "bytes": 255036
     },
     {
