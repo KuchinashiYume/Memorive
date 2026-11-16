@@ -23,7 +23,6 @@ from .exam_successor import (
     ANALYSIS_REPAIR_MATERIALITY_REVISION,
     ExecutionOutcome,
     Scorability,
-    WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     admit_quality_fail,
     analysis_cohort_model_fail_decision,
     analysis_material_repair_targets,
@@ -35,8 +34,11 @@ from .exam_successor import (
     cumulative_category_repair_penalty,
     determine_scorability,
     terminal_disposition,
-    workflow_exam_output_limit_contract,
     workflow_exam_structured_output_policy,
+)
+from memorive.models.output_limits import (
+    WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
+    workflow_exam_output_limit_contract,
 )
 from .retrieval_exam_calibration import (
     EMBEDDING_ROLE_ADEQUACY_POLICY,

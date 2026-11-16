@@ -16,8 +16,10 @@ from memorive_settings.model_validation import (  # noqa: E402
     MAX_PROCESS_CAPTURE_BYTES,
 )
 from memorive_settings.exam_successor import (  # noqa: E402
-    workflow_exam_output_limit_contract,
     workflow_exam_structured_output_policy,
+)
+from memorive.models.output_limits import (  # noqa: E402
+    workflow_exam_output_limit_contract,
 )
 
 

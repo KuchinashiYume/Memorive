@@ -10,7 +10,7 @@ from inspect import signature
 import json
 from typing import Any, Callable, Mapping, Sequence
 
-from .contracts import normalize_external_api_base_url
+from .model_endpoints import normalize_external_api_base_url
 from .model_endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile, json_sha256
 from .exam_score_history import ExamScoreHistory
 from .model_validation import FailClosedModelValidationRunner, default_executable_resolver, validation_result

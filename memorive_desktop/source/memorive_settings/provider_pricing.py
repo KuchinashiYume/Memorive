@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from .provider_catalog_aliases import official_deepseek, FLASH_ALIASES, SOURCE
-from .leaderboard import identity, join_base
+from memorive.models.identity import identity, join_base
 from .leaderboard_price_registry import resolved_public_route_price
 
 

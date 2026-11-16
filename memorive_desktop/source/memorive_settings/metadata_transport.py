@@ -16,11 +16,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPSHandler, ProxyHandler, Request, build_opener, getproxies, proxy_bypass
 from .model_validation import UrllibHttpTransport, _NoRedirect
+from memorive.platform.tls import PUBLIC_ROOTS_SHA256, public_metadata_context
 
 ECB_ENDPOINT = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
-PUBLIC_ROOTS_PATH = ((Path(sys._MEIPASS) / 'source/memorive_settings/public_roots.pem')
-    if getattr(sys, 'frozen', False) else Path(__file__).with_name('public_roots.pem'))
-PUBLIC_ROOTS_SHA256 = 'bbc7e9c01d7551bb8a159b5dedd989b8ee3ce105aff522b68eb1b01bf854cab0'
 _LIVEBENCH_BASE = 'https://raw.githubusercontent.com/LiveBench/new-livebench/main/'
 LIVEBENCH_GITHUB_API = 'https://api.github.com/repos/LiveBench/new-livebench'
 GITHUB_API_VERSION = '2026-03-10'
@@ -71,19 +69,6 @@ def is_builtin_public_metadata(url):
         return True
     return bool(re.fullmatch(re.escape(_LIVEBENCH_BASE) +
         r'public/(?:categories_\d{4}_\d{2}_\d{2}\.json|table_\d{4}_\d{2}_\d{2}\.csv)', url))
-
-def public_metadata_context():
-    # Byte-exact Mozilla public roots, with distribution/license provenance.
-    # Preserve OS roots and strict defaults; never install roots system-wide.
-    try:
-        bundle = PUBLIC_ROOTS_PATH.read_bytes()
-    except OSError as error:
-        raise ValueError('EXTERNAL_METADATA_PUBLIC_ROOTS_UNAVAILABLE') from error
-    if hashlib.sha256(bundle).hexdigest() != PUBLIC_ROOTS_SHA256:
-        raise ValueError('EXTERNAL_METADATA_PUBLIC_ROOTS_INTEGRITY')
-    context = ssl.create_default_context()
-    context.load_verify_locations(cadata=bundle.decode('ascii'))
-    return context
 
 def metadata_error_code(error):
     cause = getattr(error, "reason", error)

@@ -36,11 +36,11 @@ def stamp_release_views(stage, display_version):
 
 def check_public_roots(source):
     """Treat certificate encoding as immutable data, independent of product naming."""
-    settings=source/'memorive_settings'
-    tree=ast.parse((settings/'metadata_transport.py').read_text('utf8'))
+    platform=source/'memorive'/'platform'
+    tree=ast.parse((platform/'tls.py').read_text('utf8'))
     expected=next(ast.literal_eval(node.value) for node in tree.body
                   if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='PUBLIC_ROOTS_SHA256' for t in node.targets))
-    bundle=(settings/'public_roots.pem').read_bytes()
+    bundle=(platform/'public_roots.pem').read_bytes()
     if sha256(bundle).hexdigest()!=expected:
         raise ValueError('PUBLIC_ROOTS_INTEGRITY_MISMATCH')
     context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)

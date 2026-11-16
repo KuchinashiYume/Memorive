@@ -17,10 +17,12 @@ import uuid
 from .exam_successor import (
     ExecutionOutcome,
     Scorability,
-    WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     admit_quality_fail,
-    workflow_exam_output_limit_contract,
     workflow_exam_structured_output_policy,
+)
+from memorive.models.output_limits import (
+    WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
+    workflow_exam_output_limit_contract,
 )
 from .ocr_exam_successor import (
     MAIN_CASE_IDS as OCR_MAIN_CASE_IDS,

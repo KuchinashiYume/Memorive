@@ -18,15 +18,17 @@ from memorive_analysis_reviewer_exam import (
 
 from .exam_successor import (
     Scorability,
-    WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     admit_quality_fail,
     build_repair_round,
     canonical_sha256,
     classify_execution_outcome,
     cumulative_category_repair_penalty,
     terminal_disposition,
-    workflow_exam_output_limit_contract,
     workflow_exam_structured_output_policy,
+)
+from memorive.models.output_limits import (
+    WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
+    workflow_exam_output_limit_contract,
 )
 from .workflow_exam import (
     AUTHORIZATION_SCHEMA,

@@ -28,7 +28,8 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 import uuid
 import zipfile
 
-from .contracts import canonical_sha256, immutable, normalize_external_api_base_url, scan_sensitive, utc_now
+from .contracts import canonical_sha256, immutable, scan_sensitive, utc_now
+from .model_endpoints import normalize_external_api_base_url
 from .model_validation import UrllibHttpTransport
 from .store import SettingsStore
 from .metadata_transport import (PublicMetadataHttpTransport, MetadataRateLimitError,

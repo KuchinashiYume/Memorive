@@ -26,7 +26,7 @@ from urllib.error import HTTPError
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
-from .exam_successor import (
+from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     WORKFLOW_EXAM_TRANSPORT_CAPTURE_BYTES,
     workflow_exam_output_limit_contract,

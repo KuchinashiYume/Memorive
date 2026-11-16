@@ -10,7 +10,8 @@ SettingsController in controller.py). It holds three kinds of code:
                 it holds a LiveModelValidationRunner and sends the exam's requests through it),
                 workflow_exam.py, specialized_exam.py, analysis_reviewer_exam.py, exam_successor.py,
                 exam_jobs.py, exam_score_history.py and the other *exam* modules.
-The model calls and the exams are to move to packages of their own; until then this is where they are.
+The model calls move to memorive/models (model identity and the reply size rule are there already) and
+the exams to memorive/exams; until then this is where they are.
 """
 
 from .capability import CapabilityProjection

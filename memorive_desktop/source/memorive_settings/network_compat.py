@@ -96,7 +96,7 @@ def resolve_proxy(url, mode, address):
 def tls_context():
     # Reuse the integrity-checked public roots already distributed with Memo.
     # OS/company roots remain present and hostname verification remains on.
-    from .metadata_transport import public_metadata_context
+    from memorive.platform.tls import public_metadata_context
     return public_metadata_context()
 
 

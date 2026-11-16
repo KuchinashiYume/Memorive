@@ -18,6 +18,7 @@ from .model_capabilities import (
     workflow_node_accepts_capability,
 )
 from .kimi_endpoint import KIMI_ENDPOINTS, is_kimi_service
+from .model_endpoints import API_PROTOCOLS, normalize_external_api_base_url
 
 
 SETTINGS_SCHEMA_VERSION = "SettingsTemplate-v7"
@@ -25,7 +26,6 @@ STORE_SCHEMA_VERSION = "SettingsStoreEnvelope-v7"
 MODES = frozenset({"NORMAL", "ADVANCED", "DEVELOPER"})
 PLANS = frozenset({"ECONOMY", "STANDARD", "HIGH_QUALITY", "MAXIMUM"})
 CONNECTION_STATES = frozenset({"UNVERIFIED", "AVAILABLE", "INVALID"})
-API_PROTOCOLS = frozenset({"AUTO", "OPENAI_COMPATIBLE", "ANTHROPIC", "GEMINI"})
 PROXY_MODES = frozenset({"SYSTEM", "NONE", "CUSTOM"})
 VIEWERS = frozenset({"INTERNAL", "FOLDER", "EXTERNAL_LIBRARY"})
 EXTERNAL_LIBRARY_PROVIDERS = frozenset(
@@ -140,49 +140,6 @@ def _display_name_identity(value: str) -> str:
     """Return the comparison identity for user-visible provider/model names."""
     normalized = unicodedata.normalize("NFKC", value)
     return " ".join(normalized.split()).casefold()
-
-
-def normalize_external_api_base_url(value: Any) -> str:
-    """Validate a user-authorized public HTTPS API base without resolving DNS."""
-    if not isinstance(value, str) or not value or len(value) > 512:
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    normalized = value.strip().rstrip("/")
-    if normalized != value.rstrip("/") or not normalized:
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    if any(character.isspace() or ord(character) < 32 for character in normalized):
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    if "\\" in normalized:
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    try:
-        parsed = urlsplit(normalized)
-        port = parsed.port
-    except ValueError as error:
-        raise ValueError("MODEL_API_BASE_URL_INVALID") from error
-    if (
-        parsed.scheme.casefold() != "https"
-        or not parsed.netloc
-        or not parsed.hostname
-        or parsed.username is not None
-        or parsed.password is not None
-        or parsed.query
-        or parsed.fragment
-    ):
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    host = parsed.hostname.casefold().rstrip(".")
-    if host == "localhost" or host.endswith(".localhost"):
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    try:
-        address = ipaddress.ip_address(host)
-    except ValueError:
-        address = None
-    if address is not None and not address.is_global:
-        raise ValueError("MODEL_API_BASE_URL_INVALID")
-    netloc = parsed.hostname
-    if ":" in netloc and not netloc.startswith("["):
-        netloc = f"[{netloc}]"
-    if port is not None:
-        netloc = f"{netloc}:{port}"
-    return urlunsplit(("https", netloc, parsed.path.rstrip("/"), "", ""))
 
 
 def _integer(

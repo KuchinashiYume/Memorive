@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from typing import Any, Mapping, Sequence
 
-from .exam_successor import (
+from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     workflow_exam_output_limit_contract,
 )

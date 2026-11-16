@@ -67,16 +67,18 @@ when that code is restructured:
 | Area | Packages |
 | --- | --- |
 | Desktop: window, service, panels | `runtime.py` (ProductApi), `memorive_desktop_service`, `memorive_desktop_assistant`, `memorive_current_task`, `memorive_messages`, `memorive_work_log`, `memorive_accounting`, `memorive_test_console_bridge`, `release_links.py` |
-| Documents | `memorive_inbox`, `memorive_workflow`, `document_processing`, `evidence_extraction`, `evidence_review`, `knowledge_admission`, `artifact_registry`, `memorive_library`, `memorive_review`, `memorive_front_matter.py` |
+| Documents | `memorive/documents/processing/registration.py` (paper IDs), `memorive_inbox`, `memorive_workflow`, `document_processing`, `evidence_extraction`, `evidence_review`, `knowledge_admission`, `artifact_registry`, `memorive_library`, `memorive_review`, `memorive_front_matter.py` |
 | Research | `memorive_research_workspace`, `memorive_research_runtime`, `literature_discovery`, `research_recommendations`, `research_reports`, `research_analysis`, `research_opportunities`, `retrieval`, `retrieval_weighting`, `knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive_sessions`, `memorive_session_archive`, `memorive_browser_companion`, `memorive_workflow_bridge`, `knowledge_feedback/conversation_refinement` |
-| Models | `memorive_model_execution`, `model_gateway`, `memorive_local_models`, and in `memorive_settings`: `model_validation.py`, `model_endpoints.py`, `call_ledger.py`, `cancellable_http.py`, `windows_cli.py`, the CLI templates |
+| Models | `memorive/models` (`identity.py` model identity, `output_limits.py` reply size rule), `memorive_model_execution`, `model_gateway`, `memorive_local_models`, and in `memorive_settings`: `model_validation.py`, `model_endpoints.py`, `call_ledger.py`, `cancellable_http.py`, `windows_cli.py`, the CLI templates |
 | Exams | `memorive_model_evaluation`, `memorive_analysis_reviewer_exam`, `memorive_review/exam.py`, and in `memorive_settings`: the `*exam*` modules, `quality_new.py`, `workflow_exam_runner.py` |
-| Shared basics | `memorive_folder_management`, `runtime_log`, `run_ledger`, `memorive_language`, `memorive_source_language.py`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
+| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates), `memorive_folder_management`, `runtime_log`, `run_ledger`, `memorive_language`, `memorive_source_language.py`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
 
-`memorive_settings` holds code of three areas: the settings themselves, the model requests and the
-exams. The model requests are to move to `memorive_model_execution` and the exams to a package of
-their own; the table shows where they belong, the package docstring shows where they are today.
+During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
+sessions, models, exams, platform); each row names what is already there first.
+`memorive_settings` still holds code of three areas: the settings themselves, the model requests and
+the exams. The model requests move to `memorive/models` and the exams to `memorive/exams`; the
+table shows where they belong, the package docstring shows where they are today.
 
 ### Who keeps which data
 
