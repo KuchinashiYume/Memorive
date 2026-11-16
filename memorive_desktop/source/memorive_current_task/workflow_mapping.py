@@ -3,7 +3,8 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from memorive_settings.contracts import canonical_sha256, validate_settings
+from memorive_settings.contracts import validate_settings
+from memorive.platform.json_files import canonical_sha256
 from memorive.models.capabilities import EMBEDDING, infer_api_model_capability
 from memorive_workflow.capacity import describe_capacity
 

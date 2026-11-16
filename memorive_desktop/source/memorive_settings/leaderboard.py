@@ -9,7 +9,8 @@ import re
 from statistics import median
 from threading import RLock, Thread
 
-from .contracts import canonical_sha256, utc_now
+from .contracts import utc_now
+from memorive.platform.json_files import canonical_sha256
 from .leaderboard_pricing import select_leaderboard_price
 from memorive.models.price_registry import alias_model_id, official_catalog_models, public_route_price
 from memorive.models.identity import VENDORS, identity, join_base, number, text

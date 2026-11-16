@@ -5,7 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import uuid
-from .contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 from .store import SettingsStore
 
 def target_identity(target):

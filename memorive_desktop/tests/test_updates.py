@@ -9,7 +9,8 @@ from threading import Event
 import pytest
 from memorive_settings.external_sources import ExternalDataSources, default_sources, role_references
 from memorive.models.validation.transport import HttpResponse
-from memorive_settings.contracts import canonical_sha256, default_settings
+from memorive_settings.contracts import default_settings
+from memorive.platform.json_files import canonical_sha256
 from memorive_settings.controller import SettingsController
 from memorive_settings.store import SettingsStore
 

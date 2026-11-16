@@ -9,13 +9,13 @@ from typing import Any, Callable, Mapping, Sequence
 from .capability import CapabilityProjection
 from .contracts import (
     DEFAULT_PROFILE_BY_NODE,
-    canonical_sha256,
     immutable,
     risk_ids,
-    scan_sensitive,
     settings_field_contract,
     validate_settings,
 )
+from memorive.platform.json_files import canonical_sha256
+from memorive.platform.sensitive import scan_sensitive
 from .credentials import CredentialReferenceManager
 from .directory_policy import DirectoryPolicy
 from memorive.models.kimi_endpoint import (

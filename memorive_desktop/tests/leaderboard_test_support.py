@@ -13,7 +13,8 @@ TREE = ROOT
 BASE = ROOT
 sys.path[:0] = [str(TREE / "source"), str(TREE / "product/desktop")]
 from memorive_settings.capability import CapabilityProjection
-from memorive_settings.contracts import canonical_sha256, default_settings, utc_now
+from memorive_settings.contracts import default_settings, utc_now
+from memorive.platform.json_files import canonical_sha256
 from memorive_settings.controller import SettingsController
 from memorive_settings.credentials import CredentialReferenceManager
 from memorive_settings.directory_policy import DirectoryPolicy

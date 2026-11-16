@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 import pytest
-from memorive_settings.contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 from memorive_settings.exam_score_history import ExamScoreHistory
 from memorive_settings.tiered_exam import project_tier_result
 from memorive.models.validation.runner import LiveModelValidationRunner

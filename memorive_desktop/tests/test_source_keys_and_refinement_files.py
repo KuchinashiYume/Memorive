@@ -38,7 +38,7 @@ def test_wos_contract_and_secret_never_in_receipts(tmp_path,monkeypatch):
 
 def test_v2_source_migration_preserves_choices_and_bytes(tmp_path):
     from memorive_settings.literature_sources import projection
-    from memorive_settings.contracts import canonical_sha256
+    from memorive.platform.json_files import canonical_sha256
     old={"schema_version":"LiteratureSourceSelection-v2","revision":7,"selected":["arxiv"],
         "slots":[{"slot_id":"literature-1","provider":"arxiv"},{"slot_id":"literature-2","provider":None},{"slot_id":"literature-3","provider":None}]}
     old["sha256"]=canonical_sha256(old)

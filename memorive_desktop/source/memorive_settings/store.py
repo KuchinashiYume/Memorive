@@ -16,11 +16,11 @@ from run_ledger.writer_lock import KernelFileLock
 from .contracts import (
     SETTINGS_SCHEMA_VERSION,
     STORE_SCHEMA_VERSION,
-    canonical_sha256,
     default_settings,
     utc_now,
     validate_settings,
 )
+from memorive.platform.json_files import canonical_sha256
 from memorive.models.capabilities import EMBEDDING, RERANKER, infer_api_model_capability
 from memorive.platform.json_files import write_json_atomic
 

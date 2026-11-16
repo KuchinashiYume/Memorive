@@ -8,7 +8,7 @@ import re
 from typing import Any, Mapping, Sequence
 import unicodedata
 
-from memorive.platform.json_files import canonical_json_bytes, canonical_sha256
+from memorive.platform.json_files import canonical_json_bytes
 from memorive.platform.sensitive import scan_sensitive
 from memorive.models.capabilities import (
     infer_api_model_capability,
@@ -1202,13 +1202,10 @@ __all__ = [
     "STORE_SCHEMA_VERSION",
     "WORKFLOW_DEFINITIONS",
     "WORKFLOW_IDS",
-    "canonical_json_bytes",
-    "canonical_sha256",
     "default_settings",
     "immutable",
     "normalize_external_api_base_url",
     "risk_ids",
-    "scan_sensitive",
     "settings_field_contract",
     "utc_now",
     "validate_settings",

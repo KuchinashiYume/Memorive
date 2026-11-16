@@ -28,7 +28,9 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 import uuid
 import zipfile
 
-from .contracts import canonical_sha256, immutable, scan_sensitive, utc_now
+from .contracts import immutable, utc_now
+from memorive.platform.json_files import canonical_sha256
+from memorive.platform.sensitive import scan_sensitive
 from memorive.models.endpoints import normalize_external_api_base_url
 from memorive.models.validation.transport import UrllibHttpTransport
 from .store import SettingsStore

@@ -9,7 +9,7 @@ from copy import deepcopy
 import math
 from typing import Any, Mapping, Sequence
 
-from .contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 from .exam_successor import cumulative_category_repair_penalty
 
 REVISION = "Quality_NEW_NESTED_COVERAGE_AND_UNIFORM_TWO_REPAIRS_V1"

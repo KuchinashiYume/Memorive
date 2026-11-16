@@ -24,12 +24,11 @@ from runtime import ProductApi  # noqa: E402
 from app import extract_inbox_drop_paths  # noqa: E402
 from memorive_settings.contracts import (  # noqa: E402
     STORE_SCHEMA_VERSION,
-    canonical_json_bytes,
-    canonical_sha256,
     default_settings,
     settings_field_contract,
     validate_settings,
 )
+from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
 from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
 from memorive_settings.store import SettingsStore  # noqa: E402
 

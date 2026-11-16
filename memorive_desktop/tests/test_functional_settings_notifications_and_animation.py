@@ -22,11 +22,10 @@ from runtime import ProductApi  # noqa: E402
 from memorive_settings.contracts import (  # noqa: E402
     SETTINGS_SCHEMA_VERSION,
     STORE_SCHEMA_VERSION,
-    canonical_json_bytes,
-    canonical_sha256,
     default_settings,
     validate_settings,
 )
+from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
 from memorive_settings.store import SettingsStore  # noqa: E402
 
 

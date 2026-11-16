@@ -14,7 +14,9 @@ import threading
 from typing import Any
 
 from run_ledger.writer_lock import KernelFileLock
-from .contracts import canonical_sha256, scan_sensitive, utc_now
+from .contracts import utc_now
+from memorive.platform.json_files import canonical_sha256
+from memorive.platform.sensitive import scan_sensitive
 
 _observer = ContextVar("workflow_exam_observer", default=None)
 TERMINAL = {"COMPLETE", "ERROR", "CANCELLED", "INTERRUPTED"}

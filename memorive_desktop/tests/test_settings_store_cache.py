@@ -4,7 +4,8 @@ save through another store object, a damaged file. Each result must be a private
 """
 import json
 
-from memorive_settings.contracts import canonical_sha256, default_settings
+from memorive_settings.contracts import default_settings
+from memorive.platform.json_files import canonical_sha256
 from memorive_settings.store import SettingsStore
 
 

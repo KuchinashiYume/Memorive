@@ -7,7 +7,7 @@ import math
 import re
 import time
 
-from .contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 
 POLICY = 'CATALOG_MATCHED_ENDPOINT_NO_PROMOTION_V2'
 COMPATIBLE_POLICIES = {POLICY, 'CATALOG_MATCHED_ENDPOINT_NO_PROMOTION_V1'}

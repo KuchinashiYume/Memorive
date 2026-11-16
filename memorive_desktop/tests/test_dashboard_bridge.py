@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 from runtime import ProductApi
-from memorive_settings.contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 from memorive_settings.external_sources import ExternalDataSources, default_sources
 from memorive_settings.quality_new import validate_quality_new_catalog
 

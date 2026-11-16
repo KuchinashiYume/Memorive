@@ -1,6 +1,6 @@
 """Verification belongs to a target, not to its editable row or display label."""
 from copy import deepcopy
-from .contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 
 
 def network_identity(settings):

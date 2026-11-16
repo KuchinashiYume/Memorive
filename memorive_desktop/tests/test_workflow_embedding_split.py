@@ -21,11 +21,10 @@ from memorive_settings.capability import CapabilityProjection  # noqa: E402
 from memorive_settings.contracts import (  # noqa: E402
     SETTINGS_SCHEMA_VERSION,
     STORE_SCHEMA_VERSION,
-    canonical_json_bytes,
-    canonical_sha256,
     default_settings,
     validate_settings,
 )
+from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
 from memorive_settings.controller import SettingsController  # noqa: E402
 from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
 from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402

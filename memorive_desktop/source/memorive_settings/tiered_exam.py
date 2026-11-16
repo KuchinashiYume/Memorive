@@ -15,7 +15,7 @@ import math
 import inspect
 from typing import Any, Mapping
 
-from .contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 from .exam_tiers import REVISION, ROLE_BY_NODE, TIERS, nested_selection, tier_manifest, validate_tier
 
 

@@ -2,7 +2,8 @@
 from copy import deepcopy
 from pathlib import Path
 import json, os
-from .contracts import canonical_sha256, scan_sensitive
+from memorive.platform.json_files import canonical_sha256
+from memorive.platform.sensitive import scan_sensitive
 from .external_sources import validate_source, _origin
 from .leaderboard import validate_preferences, PREF_SCHEMA
 from . import literature_sources

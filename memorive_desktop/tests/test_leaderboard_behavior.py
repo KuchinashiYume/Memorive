@@ -11,7 +11,7 @@ import pytest
 from leaderboard_test_support import setup, payloads, seed_sources, wait_refresh, model, ROOT, BASE, TREE
 from memorive_settings.leaderboard import DEFAULTS, project_rows, validate_preferences, identity, variant_id
 from memorive_settings.leaderboard_fx import parse_ecb
-from memorive_settings.contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 from memorive_settings.external_sources import default_sources
 from memorive_desktop_service.control_store import default_state, validate_state
 

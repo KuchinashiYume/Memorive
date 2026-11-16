@@ -4,7 +4,7 @@ import json
 import os
 import re
 from pathlib import Path
-from .contracts import canonical_sha256
+from memorive.platform.json_files import canonical_sha256
 
 PRESETS = {
     'arxiv': ('arXiv', 'https://export.arxiv.org/api/query', ''),
