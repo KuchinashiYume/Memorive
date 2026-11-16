@@ -7,7 +7,7 @@ from .cache_session import Continuation
 import uuid
 
 import base64
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from http.client import IncompleteRead
 import hashlib
 import json
@@ -3497,6 +3497,158 @@ def _default_executable_resolver(value: str) -> str | None:
     return str(Path(located).resolve()) if located else None
 
 
+@dataclass
+class _ChatAttempt:
+    """One structured chat request while it runs (LiveModelValidationRunner.execute_structured_chat).
+
+    The request and what preparation decided are set when it is made; the route that sends it
+    (_send_api, _send_cli, _send_local) fills in the reply, the counts and the route's evidence;
+    the finish reads them. failed() builds the result of a request that did not succeed, from the
+    values as they are at that moment."""
+
+    # The request.
+    profile_kind: str
+    service: Mapping[str, Any]
+    model: Mapping[str, Any]
+    prompt: str
+    response_schema: Mapping[str, Any]
+    purpose: str
+    timeout_seconds: int | None
+    # Decided by preparation; the API route may set limits and effective_max_output_tokens again,
+    # the CLI route behavior_hash.
+    requested_model: str
+    output_limit_mode: str | None
+    limits: Mapping[str, Any]
+    effective_max_output_tokens: int | None
+    prompt_bytes: bytes
+    behavior_hash: str
+    started_at: float
+    strict_cli_identity_binding: bool
+    # Filled in by the route that sends it.
+    response: Mapping[str, Any] | None = None
+    returned_model: str | None = None
+    usage: Mapping[str, Any] = field(default_factory=dict)
+    route: str = ''
+    external_network_calls: int = 0
+    provider_calls: int = 0
+    external_process_launches: int = 0
+    transport_diagnostic: Mapping[str, Any] | None = None
+    api_provider_family: str | None = None
+    cli_binary_sha256: str | None = None
+    cli_version: str | None = None
+    cli_identity_authority_ref: str | None = None
+    request_model_binding_status: str | None = None
+    request_model_binding_sha256: str | None = None
+    model_allowlist_sha256: str | None = None
+
+    def failed(
+        self,
+        reason: str,
+        *,
+        returned_model: str | None,
+        raw_usage: Mapping[str, Any] | None,
+        external_network_calls: int,
+        provider_calls: int,
+        external_model_calls: int,
+        external_process_launches: int,
+        route: str,
+        region: str,
+        egress: str,
+        transport_diagnostic: Mapping[str, Any] | None = None,
+    ) -> Mapping[str, Any]:
+        token_usage = _normalise_token_usage(raw_usage or {})
+        estimated_cost_cny = (
+            _api_estimated_cost_cny(
+                self.requested_model, self.model, token_usage
+            )
+            if self.profile_kind == "API"
+            else (0.0 if self.profile_kind == "LOCAL" else None)
+        )
+        if self.profile_kind == "CLI":
+            cost_evidence = "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
+        elif self.profile_kind == "LOCAL":
+            cost_evidence = "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
+        elif estimated_cost_cny is not None:
+            cost_evidence = (
+                "FROZEN_TARGET_PRICING_PROFILE_ESTIMATE"
+                if self.model.get("pricing_evidence_ref")
+                else "FROZEN_Quality_PUBLIC_PRICING_PROFILE_2026-07-30_ESTIMATE"
+            )
+        else:
+            cost_evidence = "ATTEMPT_COST_EVIDENCE_UNAVAILABLE"
+        duration_ms = max(0, round((time.monotonic() - self.started_at) * 1000))
+        execution_receipt = {
+            "schema_version": "SettingsStructuredChatExecutionReceipt-v2",
+            "status": "FAILED",
+            "profile_kind": self.profile_kind,
+            "purpose": self.purpose,
+            "route": self.route,
+            "requested_model": self.requested_model,
+            "returned_model": self.returned_model,
+            "behavior_sha256": self.behavior_hash,
+            "response_sha256": None,
+            "duration_ms": duration_ms,
+            "token_usage": token_usage or None,
+            "prompt_cache": cache_usage(dict(raw_usage or {})),
+            "actual_cost": None,
+            "estimated_cost_cny": estimated_cost_cny,
+            "cost_evidence": cost_evidence,
+            "region": region,
+            "egress": egress,
+            "failure_reason": reason,
+            "quality_assessment": 'NOT_ASSESSED',
+            "resource_limits": self.limits,
+            "capacity_assessment": (
+                'NOT_ASSESSED' if reason in {'STRUCTURED_CHAT_JSON_TRUNCATED',
+                    'MODEL_OUTPUT_TRUNCATED', 'API_RESPONSE_INCOMPLETE_REMOTE_STATE_UNKNOWN',
+                    'CLI_OUTPUT_LIMIT_EXCEEDED', 'CLI_INPUT_TOO_LARGE'} else None
+            ),
+            "output_budget": {
+                "effective_sent_tokens": self.effective_max_output_tokens,
+                "source": (
+                    "CALLER_VERIFIED_PROFILE"
+                    if self.effective_max_output_tokens is not None
+                    else (
+                        "CLI_PROVIDER_MANAGED"
+                        if self.profile_kind == "CLI"
+                        else "PROVIDER_OR_LOCAL_RUNTIME_MANAGED"
+                    )
+                ),
+                "product_hard_limit_added": False,
+            },
+            "max_output_tokens_mode": (
+                "PROVIDER_DEFAULT"
+                if self.effective_max_output_tokens is None
+                else "EXPLICIT"
+            ),
+            "request_max_output_tokens": self.effective_max_output_tokens,
+        }
+        if self.purpose == "workflow_model_exam":
+            execution_receipt["output_limit_contract"] = (
+                workflow_exam_output_limit_contract()
+            )
+            execution_receipt["length_only_failure_quality_semantics"] = (
+                "NOT_ASSESSED_NEVER_MODEL_FAIL_OR_SEMANTIC_REPAIR"
+            )
+        if isinstance(self.transport_diagnostic, Mapping):
+            execution_receipt["transport_diagnostic"] = dict(
+                self.transport_diagnostic
+            )
+        return {
+            "schema_version": "SettingsStructuredChatRunnerResult-v1",
+            "status": "FAILED",
+            "reason": reason,
+            "requested_model": self.requested_model,
+            "returned_model": self.returned_model,
+            "duration_ms": duration_ms,
+            "external_network_calls": self.external_network_calls,
+            "provider_calls": self.provider_calls,
+            "external_model_calls": external_model_calls,
+            "external_process_launches": self.external_process_launches,
+            "execution_receipt": execution_receipt,
+        }
+
+
 class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixin, _SpecializedModelExecutionMixin):
     """Sends the app's model requests: API and command-line chat (execute_structured_chat),
     embeddings, OCR and reranking (the mixins above), the API model list and the minimal
@@ -3899,6 +4051,14 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         max_output_tokens: int | None = None,
         timeout_seconds: int | None = None,
     ) -> Mapping[str, Any]:
+        """Send one structured chat request; every model request of the app comes through here.
+
+        1. Here: check the request, work out the output and time limits, build the prompt bytes.
+           A custom command-line tool is run by cli_template_execution.py instead.
+        2. _send_api, _send_cli or _send_local sends it by the route of the profile and puts the
+           reply, the counts and the route's evidence on the _ChatAttempt.
+        3. _chat_result checks the returned model and builds the result with usage, cost and receipt.
+        A request that fails at any point ends with _ChatAttempt.failed."""
         if profile_kind not in {"API", "CLI", "LOCAL"}:
             raise ValueError("STRUCTURED_CHAT_PROFILE_KIND_INVALID")
         requested_model = model.get("model_name")
@@ -3942,317 +4102,138 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             return execute(self,service,model,prompt_bytes.decode('utf8'),schema=response_schema,purpose=purpose,timeout=timeout_seconds)
         behavior_hash = hashlib.sha256(prompt_bytes).hexdigest().upper()
         started_at = time.monotonic()
-
-        def failed_attempt(
-            reason: str,
-            *,
-            returned_model: str | None,
-            raw_usage: Mapping[str, Any] | None,
-            external_network_calls: int,
-            provider_calls: int,
-            external_model_calls: int,
-            external_process_launches: int,
-            route: str,
-            region: str,
-            egress: str,
-            transport_diagnostic: Mapping[str, Any] | None = None,
-        ) -> Mapping[str, Any]:
-            token_usage = _normalise_token_usage(raw_usage or {})
-            estimated_cost_cny = (
-                _api_estimated_cost_cny(
-                    requested_model, model, token_usage
-                )
-                if profile_kind == "API"
-                else (0.0 if profile_kind == "LOCAL" else None)
-            )
-            if profile_kind == "CLI":
-                cost_evidence = "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
-            elif profile_kind == "LOCAL":
-                cost_evidence = "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
-            elif estimated_cost_cny is not None:
-                cost_evidence = (
-                    "FROZEN_TARGET_PRICING_PROFILE_ESTIMATE"
-                    if model.get("pricing_evidence_ref")
-                    else "FROZEN_Quality_PUBLIC_PRICING_PROFILE_2026-07-30_ESTIMATE"
-                )
-            else:
-                cost_evidence = "ATTEMPT_COST_EVIDENCE_UNAVAILABLE"
-            duration_ms = max(0, round((time.monotonic() - started_at) * 1000))
-            execution_receipt = {
-                "schema_version": "SettingsStructuredChatExecutionReceipt-v2",
-                "status": "FAILED",
-                "profile_kind": profile_kind,
-                "purpose": purpose,
-                "route": route,
-                "requested_model": requested_model,
-                "returned_model": returned_model,
-                "behavior_sha256": behavior_hash,
-                "response_sha256": None,
-                "duration_ms": duration_ms,
-                "token_usage": token_usage or None,
-                "prompt_cache": cache_usage(dict(raw_usage or {})),
-                "actual_cost": None,
-                "estimated_cost_cny": estimated_cost_cny,
-                "cost_evidence": cost_evidence,
-                "region": region,
-                "egress": egress,
-                "failure_reason": reason,
-                "quality_assessment": 'NOT_ASSESSED',
-                "resource_limits": limits,
-                "capacity_assessment": (
-                    'NOT_ASSESSED' if reason in {'STRUCTURED_CHAT_JSON_TRUNCATED',
-                        'MODEL_OUTPUT_TRUNCATED', 'API_RESPONSE_INCOMPLETE_REMOTE_STATE_UNKNOWN',
-                        'CLI_OUTPUT_LIMIT_EXCEEDED', 'CLI_INPUT_TOO_LARGE'} else None
-                ),
-                "output_budget": {
-                    "effective_sent_tokens": effective_max_output_tokens,
-                    "source": (
-                        "CALLER_VERIFIED_PROFILE"
-                        if effective_max_output_tokens is not None
-                        else (
-                            "CLI_PROVIDER_MANAGED"
-                            if profile_kind == "CLI"
-                            else "PROVIDER_OR_LOCAL_RUNTIME_MANAGED"
-                        )
-                    ),
-                    "product_hard_limit_added": False,
-                },
-                "max_output_tokens_mode": (
-                    "PROVIDER_DEFAULT"
-                    if effective_max_output_tokens is None
-                    else "EXPLICIT"
-                ),
-                "request_max_output_tokens": effective_max_output_tokens,
-            }
-            if purpose == "workflow_model_exam":
-                execution_receipt["output_limit_contract"] = (
-                    workflow_exam_output_limit_contract()
-                )
-                execution_receipt["length_only_failure_quality_semantics"] = (
-                    "NOT_ASSESSED_NEVER_MODEL_FAIL_OR_SEMANTIC_REPAIR"
-                )
-            if isinstance(transport_diagnostic, Mapping):
-                execution_receipt["transport_diagnostic"] = dict(
-                    transport_diagnostic
-                )
-            return {
-                "schema_version": "SettingsStructuredChatRunnerResult-v1",
-                "status": "FAILED",
-                "reason": reason,
-                "requested_model": requested_model,
-                "returned_model": returned_model,
-                "duration_ms": duration_ms,
-                "external_network_calls": external_network_calls,
-                "provider_calls": provider_calls,
-                "external_model_calls": external_model_calls,
-                "external_process_launches": external_process_launches,
-                "execution_receipt": execution_receipt,
-            }
-        response: Mapping[str, Any]
-        returned_model: str
-        usage: Mapping[str, Any] = {}
-        external_network_calls = 0
-        provider_calls = 0
-        external_process_launches = 0
-        route = ""
-        api_provider_family: str | None = None
-        transport_diagnostic: Mapping[str, Any] | None = None
         strict_cli_identity_binding = (
             profile_kind == "CLI"
             and model.get("require_exact_cli_identity_binding") is True
         )
-        cli_binary_sha256: str | None = None
-        cli_version: str | None = None
-        cli_identity_authority_ref: str | None = None
-        request_model_binding_status: str | None = None
-        request_model_binding_sha256: str | None = None
-        model_allowlist_sha256: str | None = None
+        # The state of this one request, filled in by the route that sends it (see _ChatAttempt).
+        attempt = _ChatAttempt(
+            behavior_hash=behavior_hash,
+            effective_max_output_tokens=effective_max_output_tokens,
+            limits=limits,
+            model=model,
+            output_limit_mode=output_limit_mode,
+            profile_kind=profile_kind,
+            prompt=prompt,
+            prompt_bytes=prompt_bytes,
+            purpose=purpose,
+            requested_model=requested_model,
+            response_schema=response_schema,
+            service=service,
+            started_at=started_at,
+            timeout_seconds=timeout_seconds,
+            strict_cli_identity_binding=strict_cli_identity_binding,
+        )
+        # Send it by the route of the profile; a route returns a failed result, or None once it has a reply.
+        send = {"API": self._send_api, "CLI": self._send_cli}.get(profile_kind, self._send_local)
+        failed = send(attempt)
+        if failed is not None:
+            return failed
+        return self._chat_result(attempt)
 
-        if profile_kind == "API":
-            try:
-                profile = _api_profile(service)
-            except ValueError as error:
-                raise ValueError("API_ENDPOINT_INVALID") from error
-            if profile is None:
-                raise ValueError("API_PROVIDER_UNSUPPORTED")
-            api_provider_family = profile.provider_family
-            if (output_limit_mode == "PROVIDER_DEFAULT"
-                    and api_provider_family != "ANTHROPIC"
-                    and limits["capacity"]["user_output_limit_tokens"] is None):
-                # Omit the optional wire field when the user-selected execution
-                # policy delegates it. The known provider ceiling remains evidence,
-                # not an application-imposed generation cutoff.
-                effective_max_output_tokens = None
-                limits["wire_output_policy"] = "PROVIDER_DEFAULT"
-            if (
-                api_provider_family == "ANTHROPIC"
-                and effective_max_output_tokens is None
-            ):
-                raise ValueError("API_OUTPUT_CAPACITY_REQUIRED")
-            credential_ref = service.get("credential_ref")
-            if not isinstance(credential_ref, str) or not credential_ref:
-                raise ValueError("API_CREDENTIAL_UNAVAILABLE")
-            try:
-                secret_bytes = self._credential_resolver(credential_ref)
-                if not isinstance(secret_bytes, bytes) or not secret_bytes or len(secret_bytes) > 512:
-                    raise ValueError("API_CREDENTIAL_INVALID")
-                secret = secret_bytes.decode("utf-8", errors="strict")
-            except (OSError, PermissionError, UnicodeDecodeError, ValueError) as error:
-                raise ValueError("API_CREDENTIAL_UNAVAILABLE") from error
-            headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "User-Agent": "Memorive-Structured-Chat/1",
-                **dict(profile.extra_headers),
-            }
-            headers[profile.auth_header] = (
-                f"Bearer {secret}" if profile.auth_header == "Authorization" else secret
+    def _send_api(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
+        """Send the request to the provider's API; a failed result, or None with the reply on attempt."""
+        try:
+            profile = _api_profile(attempt.service)
+        except ValueError as error:
+            raise ValueError("API_ENDPOINT_INVALID") from error
+        if profile is None:
+            raise ValueError("API_PROVIDER_UNSUPPORTED")
+        attempt.api_provider_family = profile.provider_family
+        if (attempt.output_limit_mode == "PROVIDER_DEFAULT"
+                and attempt.api_provider_family != "ANTHROPIC"
+                and attempt.limits["capacity"]["user_output_limit_tokens"] is None):
+            # Omit the optional wire field when the user-selected execution
+            # policy delegates it. The known provider ceiling remains evidence,
+            # not an application-imposed generation cutoff.
+            attempt.effective_max_output_tokens = None
+            attempt.limits["wire_output_policy"] = "PROVIDER_DEFAULT"
+        if (
+            attempt.api_provider_family == "ANTHROPIC"
+            and attempt.effective_max_output_tokens is None
+        ):
+            raise ValueError("API_OUTPUT_CAPACITY_REQUIRED")
+        credential_ref = attempt.service.get("credential_ref")
+        if not isinstance(credential_ref, str) or not credential_ref:
+            raise ValueError("API_CREDENTIAL_UNAVAILABLE")
+        try:
+            secret_bytes = self._credential_resolver(credential_ref)
+            if not isinstance(secret_bytes, bytes) or not secret_bytes or len(secret_bytes) > 512:
+                raise ValueError("API_CREDENTIAL_INVALID")
+            secret = secret_bytes.decode("utf-8", errors="strict")
+        except (OSError, PermissionError, UnicodeDecodeError, ValueError) as error:
+            raise ValueError("API_CREDENTIAL_UNAVAILABLE") from error
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "Memorive-Structured-Chat/1",
+            **dict(profile.extra_headers),
+        }
+        headers[profile.auth_header] = (
+            f"Bearer {secret}" if profile.auth_header == "Authorization" else secret
+        )
+        proxy_mode, proxy_address, configured_timeout = self._preferences()
+        timeout = attempt.timeout_seconds
+        request_body = _api_chat_request(
+            profile,
+            model=attempt.requested_model,
+            prompt=attempt.prompt,
+            response_schema=attempt.response_schema,
+            max_output_tokens=attempt.effective_max_output_tokens,
+            model_config=attempt.model,
+        )
+        attempt.transport_diagnostic = {
+            "api_request_body_sha256": hashlib.sha256(
+                request_body
+            ).hexdigest().upper(),
+            "max_output_tokens_mode": (
+                "PROVIDER_DEFAULT"
+                if attempt.effective_max_output_tokens is None
+                else "EXPLICIT"
+            ),
+            "request_max_output_tokens": attempt.effective_max_output_tokens,
+            "wire_max_tokens_field_present": (
+                b'"max_tokens":' in request_body
+                or b'"max_completion_tokens":' in request_body
+                or b'"maxOutputTokens":' in request_body
+            ),
+            "streaming": json.loads(request_body).get("stream") is True,
+            "reasoning_effort": json.loads(request_body).get("reasoning_effort"),
+            "thinking_option": json.loads(request_body).get("thinking"),
+            "enable_thinking": json.loads(request_body).get("enable_thinking"),
+        }
+        api_max_response_bytes = attempt.model.get("api_max_response_bytes")
+        if api_max_response_bytes is not None and (
+            isinstance(api_max_response_bytes, bool)
+            or not isinstance(api_max_response_bytes, int)
+            or api_max_response_bytes <= 0
+        ):
+            raise ValueError("API_RESPONSE_LIMIT_INVALID")
+        attempt.transport_diagnostic["max_response_bytes"] = api_max_response_bytes
+        try:
+            http_response = self._http.request(
+                method="POST",
+                url=_api_chat_url(profile, attempt.requested_model),
+                headers=headers,
+                body=request_body,
+                timeout_seconds=timeout,
+                proxy_mode=proxy_mode,
+                proxy_address=proxy_address,
+                max_response_bytes=api_max_response_bytes,
             )
-            proxy_mode, proxy_address, configured_timeout = self._preferences()
-            timeout = timeout_seconds
-            request_body = _api_chat_request(
-                profile,
-                model=requested_model,
-                prompt=prompt,
-                response_schema=response_schema,
-                max_output_tokens=effective_max_output_tokens,
-                model_config=model,
-            )
-            transport_diagnostic = {
-                "api_request_body_sha256": hashlib.sha256(
-                    request_body
-                ).hexdigest().upper(),
-                "max_output_tokens_mode": (
-                    "PROVIDER_DEFAULT"
-                    if effective_max_output_tokens is None
-                    else "EXPLICIT"
-                ),
-                "request_max_output_tokens": effective_max_output_tokens,
-                "wire_max_tokens_field_present": (
-                    b'"max_tokens":' in request_body
-                    or b'"max_completion_tokens":' in request_body
-                    or b'"maxOutputTokens":' in request_body
-                ),
-                "streaming": json.loads(request_body).get("stream") is True,
-                "reasoning_effort": json.loads(request_body).get("reasoning_effort"),
-                "thinking_option": json.loads(request_body).get("thinking"),
-                "enable_thinking": json.loads(request_body).get("enable_thinking"),
+            attempt.external_network_calls = 1
+            attempt.provider_calls = 1
+            attempt.transport_diagnostic = {
+                **dict(attempt.transport_diagnostic or {}),
+                **dict(http_response.transport_diagnostic or {}),
+                "http_status": http_response.status_code,
             }
-            api_max_response_bytes = model.get("api_max_response_bytes")
-            if api_max_response_bytes is not None and (
-                isinstance(api_max_response_bytes, bool)
-                or not isinstance(api_max_response_bytes, int)
-                or api_max_response_bytes <= 0
-            ):
-                raise ValueError("API_RESPONSE_LIMIT_INVALID")
-            transport_diagnostic["max_response_bytes"] = api_max_response_bytes
-            try:
-                http_response = self._http.request(
-                    method="POST",
-                    url=_api_chat_url(profile, requested_model),
-                    headers=headers,
-                    body=request_body,
-                    timeout_seconds=timeout,
-                    proxy_mode=proxy_mode,
-                    proxy_address=proxy_address,
-                    max_response_bytes=api_max_response_bytes,
-                )
-                external_network_calls = 1
-                provider_calls = 1
-                transport_diagnostic = {
-                    **dict(transport_diagnostic or {}),
-                    **dict(http_response.transport_diagnostic or {}),
-                    "http_status": http_response.status_code,
-                }
-                if http_response.status_code != 200:
-                    _, _, rejection = _api_failure_evidence(http_response.body)
-                    transport_diagnostic.update(rejection)
-                if http_response.status_code in {401, 403}:
-                    return failed_attempt(
-                        "API_AUTHENTICATION_REJECTED",
-                        returned_model=None,
-                        raw_usage=None,
-                        external_network_calls=1,
-                        provider_calls=1,
-                        external_model_calls=1,
-                        external_process_launches=0,
-                        route="EXISTING_SETTINGS_API_TRANSPORT",
-                        region="PROVIDER_MANAGED_UNDISCLOSED",
-                        egress="PROVIDER_API",
-                        transport_diagnostic=transport_diagnostic,
-                    )
-                if http_response.status_code == 429:
-                    return failed_attempt(
-                        "API_RATE_LIMITED",
-                        returned_model=None,
-                        raw_usage=None,
-                        external_network_calls=1,
-                        provider_calls=1,
-                        external_model_calls=1,
-                        external_process_launches=0,
-                        route="EXISTING_SETTINGS_API_TRANSPORT",
-                        region="PROVIDER_MANAGED_UNDISCLOSED",
-                        egress="PROVIDER_API",
-                        transport_diagnostic=transport_diagnostic,
-                    )
-                if http_response.status_code != 200:
-                    return failed_attempt(
-                        "API_STRUCTURED_CHAT_REQUEST_FAILED",
-                        returned_model=None,
-                        raw_usage=None,
-                        external_network_calls=1,
-                        provider_calls=1,
-                        external_model_calls=1,
-                        external_process_launches=0,
-                        route="EXISTING_SETTINGS_API_TRANSPORT",
-                        region="PROVIDER_MANAGED_UNDISCLOSED",
-                        egress="PROVIDER_API",
-                        transport_diagnostic=transport_diagnostic,
-                    )
-                try:
-                    returned_model, response, usage = _api_chat_response(
-                        profile, http_response.body, model
-                    )
-                except ValueError as error:
-                    (
-                        recovered_model,
-                        recovered_usage,
-                        api_diagnostic,
-                    ) = _api_failure_evidence(
-                        http_response.body
-                    )
-                    return failed_attempt(
-                        str(error),
-                        returned_model=recovered_model,
-                        raw_usage=recovered_usage,
-                        external_network_calls=1,
-                        provider_calls=1,
-                        external_model_calls=1,
-                        external_process_launches=0,
-                        route="EXISTING_SETTINGS_API_TRANSPORT",
-                        region="PROVIDER_MANAGED_UNDISCLOSED",
-                        egress="PROVIDER_API",
-                        transport_diagnostic={**dict(transport_diagnostic or {}), **dict(http_response.transport_diagnostic or {}),
-                                              **dict(api_diagnostic),
-                                              **self._preserve_capacity_response(http_response.body)},
-                    )
-                transport_diagnostic = {
-                    **dict(transport_diagnostic or {}),
-                    **dict(http_response.transport_diagnostic or {}),
-                }
-            except _ResponseInterrupted as error:
-                return failed_attempt(
-                    'API_RESPONSE_INCOMPLETE_REMOTE_STATE_UNKNOWN',
-                    returned_model=None, raw_usage=None, external_network_calls=1,
-                    provider_calls=1, external_model_calls=1, external_process_launches=0,
-                    route='EXISTING_SETTINGS_API_TRANSPORT', region='PROVIDER_MANAGED_UNDISCLOSED',
-                    egress='PROVIDER_API', transport_diagnostic={**error.diagnostic,
-                        **self._preserve_capacity_response(error.partial, partial=True),
-                        'automatic_duplicate_request_safe': False},
-                )
-            except (OSError, TimeoutError) as error:
-                return failed_attempt(
-                    "API_RESPONSE_STATUS_UNKNOWN",
+            if http_response.status_code != 200:
+                _, _, rejection = _api_failure_evidence(http_response.body)
+                attempt.transport_diagnostic.update(rejection)
+            if http_response.status_code in {401, 403}:
+                return attempt.failed(
+                    "API_AUTHENTICATION_REJECTED",
                     returned_model=None,
                     raw_usage=None,
                     external_network_calls=1,
@@ -4262,246 +4243,385 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                     route="EXISTING_SETTINGS_API_TRANSPORT",
                     region="PROVIDER_MANAGED_UNDISCLOSED",
                     egress="PROVIDER_API",
-                    transport_diagnostic={
-                        **dict(transport_diagnostic or {}),
-                        'exception_type': type(error).__name__,
-                        'dispatch_state': 'MAY_HAVE_BEEN_ACCEPTED',
-                        'remote_cancellation_confirmed': False,
-                        'automatic_duplicate_request_safe': False,
-                    },
+                    transport_diagnostic=attempt.transport_diagnostic,
                 )
-            finally:
-                secret = ""
-                secret_bytes = b""
-                headers.clear()
-            route = "EXISTING_SETTINGS_API_TRANSPORT"
-        elif profile_kind == "CLI":
-            adapter_id = service.get("adapter_id")
-            executable_value = service.get("executable")
-            if not isinstance(adapter_id, str):
-                raise ValueError("CLI_ADAPTER_UNSUPPORTED")
-            if not isinstance(executable_value, str):
-                raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
-            executable = self._executable_resolver(executable_value)
-            if executable is None:
-                raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
-            if strict_cli_identity_binding:
-                expected_binary_sha256 = service.get("cli_binary_sha256")
-                cli_version_value = service.get("cli_version")
-                identity_authority_value = service.get(
-                    "cli_identity_authority_ref"
+            if http_response.status_code == 429:
+                return attempt.failed(
+                    "API_RATE_LIMITED",
+                    returned_model=None,
+                    raw_usage=None,
+                    external_network_calls=1,
+                    provider_calls=1,
+                    external_model_calls=1,
+                    external_process_launches=0,
+                    route="EXISTING_SETTINGS_API_TRANSPORT",
+                    region="PROVIDER_MANAGED_UNDISCLOSED",
+                    egress="PROVIDER_API",
+                    transport_diagnostic=attempt.transport_diagnostic,
                 )
-                if (
-                    not isinstance(expected_binary_sha256, str)
-                    or not SAFE_SHA256.fullmatch(expected_binary_sha256.upper())
-                    or _resolved_file_sha256(executable)
-                    != expected_binary_sha256.upper()
-                    or not isinstance(cli_version_value, str)
-                    or not cli_version_value
-                    or not isinstance(identity_authority_value, str)
-                    or not identity_authority_value
-                ):
-                    raise ValueError(
-                        "CLI_STRUCTURED_CHAT_BINARY_IDENTITY_BINDING_INVALID"
-                    )
-                cli_binary_sha256 = expected_binary_sha256.upper()
-                cli_version = cli_version_value
-                cli_identity_authority_ref = identity_authority_value
-            thinking_mode = model.get("thinking_mode", "")
-            if not isinstance(thinking_mode, str):
-                thinking_mode = ""
-            proxy_mode, proxy_address, configured_timeout = self._preferences()
-            timeout = timeout_seconds
-            self._scratch_root.mkdir(parents=True, exist_ok=True)
-            with structured_chat_workspace(self._scratch_root, profile_kind=profile_kind,
-                    service=service, model=model, purpose=purpose) as workspace:
-                output_schema_path: str | None = None
-                if adapter_id == "codex_cli":
-                    transport_schema: Mapping[str, Any] = model.get("prompt_cache_transport_schema", response_schema)
-                    if purpose == "conversation_refinement":
-                        transport_schema, transport_diagnostic = _codex_refinement_transport_schema(transport_schema)
-                    elif purpose in {
-                        "workflow_model_exam",
-                        "core_document_processing",
-                        "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
-                    }:
-                        (
-                            transport_schema,
-                            transport_diagnostic,
-                        ) = _codex_transport_schema(transport_schema)
-                    schema_path = write_response_schema(workspace, json.dumps(
-                        transport_schema, ensure_ascii=False, allow_nan=False,
-                        sort_keys=True, separators=(",", ":"),
-                    ).encode("utf-8"))
-                    output_schema_path = str(schema_path)
-                try:
-                    argv, stdin_bytes = _cli_argv(
-                        adapter_id,
-                        executable,
-                        requested_model,
-                        thinking_mode,
-                        str(workspace),
-                        prompt_bytes,
-                        output_schema_path,
-                    )
-                except ValueError as error:
-                    raise ValueError(str(error)) from error
-                continuation = Continuation(workspace, model, prompt_bytes,
-                    transport_schema if adapter_id == "codex_cli" else response_schema)
-                if continuation.enabled:
-                    argv = continuation.prepare_argv(argv)
-                    stdin_bytes = continuation.prompt_bytes
-                    behavior_hash = hashlib.sha256(stdin_bytes).hexdigest().upper()
-                if strict_cli_identity_binding:
-                    model_indices = [
-                        index for index, item in enumerate(argv) if item == "--model"
-                    ]
-                    if (
-                        len(model_indices) != 1
-                        or model_indices[0] + 1 >= len(argv)
-                        or argv[model_indices[0] + 1] != requested_model
-                    ):
-                        raise ValueError("CODEX_REQUEST_MODEL_ARGV_INVALID")
-                    model_allowlist_sha256 = _workflow_exam_v8_sha256(
-                        {"allowed_models": [requested_model]}
-                    )
-                    request_model_binding_sha256 = _workflow_exam_v8_sha256(
-                        {
-                            "adapter_id": adapter_id,
-                            "binary_sha256": cli_binary_sha256,
-                            "cli_version": cli_version,
-                            "argv_sha256": _workflow_exam_v8_sha256(list(argv)),
-                            "model_flag_index": model_indices[0],
-                            "requested_model": requested_model,
-                            "model_allowlist_sha256": model_allowlist_sha256,
-                            "behavior_sha256": behavior_hash,
-                        }
-                    )
-                    request_model_binding_status = (
-                        "EXACT_ARGV_BINARY_AND_FROZEN_ALLOWLIST"
-                    )
-                    transport_diagnostic = {
-                        **dict(transport_diagnostic or {}),
-                        "request_model_binding_status": (
-                            request_model_binding_status
-                        ),
-                        "request_model_binding_sha256": (
-                            request_model_binding_sha256
-                        ),
-                        "model_allowlist_sha256": model_allowlist_sha256,
-                        "cli_binary_sha256": cli_binary_sha256,
-                        "cli_version": cli_version,
-                        "identity_authority_ref": cli_identity_authority_ref,
-                    }
-                process = self._process.run(
-                    argv=argv,
-                    cwd=str(workspace),
-                    environment=self._safe_environment(
-                        adapter_id, workspace, proxy_mode, proxy_address
-                    ),
-                    stdin_bytes=stdin_bytes,
-                    timeout_seconds=timeout,
-                    shell=False,
+            if http_response.status_code != 200:
+                return attempt.failed(
+                    "API_STRUCTURED_CHAT_REQUEST_FAILED",
+                    returned_model=None,
+                    raw_usage=None,
+                    external_network_calls=1,
+                    provider_calls=1,
+                    external_model_calls=1,
+                    external_process_launches=0,
+                    route="EXISTING_SETTINGS_API_TRANSPORT",
+                    region="PROVIDER_MANAGED_UNDISCLOSED",
+                    egress="PROVIDER_API",
+                    transport_diagnostic=attempt.transport_diagnostic,
                 )
-                events_accepted = True
-                if continuation.enabled:
-                    event_summary, event_error = _execution_codex_event_diagnostic(process.stdout, requested_model)
-                    events_accepted = (event_error is None and isinstance(event_summary, Mapping)
-                        and event_summary.get("finish_status") == "SUCCESS"
-                        and event_summary.get("model_identity_grade") != "CONFLICT")
-                continuation.complete(process, _structured_document_from_output(process.stdout), response_schema,
-                    events_accepted=events_accepted)
-                transport_diagnostic = {**dict(transport_diagnostic or {}), **continuation.diagnostic}
-                if (continuation.enabled and process.started and process.returncode == 0
-                        and continuation.diagnostic.get("session_record_status") != "SUCCESS"):
-                    return failed_attempt(
-                        "CODEX_CONTINUATION_VALIDATION_FAILED", returned_model=None,
-                        raw_usage=continuation.attempt_usage or {}, external_network_calls=0,
-                        provider_calls=0, external_model_calls=1, external_process_launches=1,
-                        route="CODEX_CLI_SUBSCRIPTION", region="OPENAI_MANAGED_UNDISCLOSED",
-                        egress="CODEX_CLI", transport_diagnostic=transport_diagnostic,
-                    )
-            if not process.started:
-                return failed_attempt("CLI_PROCESS_START_FAILED", returned_model=None,
-                    raw_usage=None, external_network_calls=0, provider_calls=0,
-                    external_model_calls=0, external_process_launches=0,
-                    route="CODEX_CLI_SUBSCRIPTION", region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI", transport_diagnostic={
-                        **dict(transport_diagnostic or {}), "provider_request_sent": False,
-                    })
-            external_process_launches = 1
-            transport_diagnostic = {
-                **dict(transport_diagnostic or {}),
-                "stdout_total_bytes": process.stdout_total_bytes,
-                "stderr_total_bytes": process.stderr_total_bytes,
-                "capture_quota_bytes": process.capture_quota_bytes,
-                "quota_source": (
-                    "EXPLICIT_RESOURCE_PROFILE"
-                    if process.capture_quota_bytes is not None
-                    else "DISK_SPOOL_NO_GENERIC_PRODUCT_LIMIT"
-                ),
+            try:
+                attempt.returned_model, attempt.response, attempt.usage = _api_chat_response(
+                    profile, http_response.body, attempt.model
+                )
+            except ValueError as error:
+                (
+                    recovered_model,
+                    recovered_usage,
+                    api_diagnostic,
+                ) = _api_failure_evidence(
+                    http_response.body
+                )
+                return attempt.failed(
+                    str(error),
+                    returned_model=recovered_model,
+                    raw_usage=recovered_usage,
+                    external_network_calls=1,
+                    provider_calls=1,
+                    external_model_calls=1,
+                    external_process_launches=0,
+                    route="EXISTING_SETTINGS_API_TRANSPORT",
+                    region="PROVIDER_MANAGED_UNDISCLOSED",
+                    egress="PROVIDER_API",
+                    transport_diagnostic={**dict(attempt.transport_diagnostic or {}), **dict(http_response.transport_diagnostic or {}),
+                                          **dict(api_diagnostic),
+                                          **self._preserve_capacity_response(http_response.body)},
+                )
+            attempt.transport_diagnostic = {
+                **dict(attempt.transport_diagnostic or {}),
+                **dict(http_response.transport_diagnostic or {}),
             }
-            usage = (continuation.attempt_usage or {}) if continuation.enabled else _usage_from_cli_output(process.stdout)
-            if process.timed_out:
-                return failed_attempt(
-                    "CLI_STRUCTURED_CHAT_TIMEOUT",
-                    returned_model=None,
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
-                    transport_diagnostic=transport_diagnostic,
+        except _ResponseInterrupted as error:
+            return attempt.failed(
+                'API_RESPONSE_INCOMPLETE_REMOTE_STATE_UNKNOWN',
+                returned_model=None, raw_usage=None, external_network_calls=1,
+                provider_calls=1, external_model_calls=1, external_process_launches=0,
+                route='EXISTING_SETTINGS_API_TRANSPORT', region='PROVIDER_MANAGED_UNDISCLOSED',
+                egress='PROVIDER_API', transport_diagnostic={**error.diagnostic,
+                    **self._preserve_capacity_response(error.partial, partial=True),
+                    'automatic_duplicate_request_safe': False},
+            )
+        except (OSError, TimeoutError) as error:
+            return attempt.failed(
+                "API_RESPONSE_STATUS_UNKNOWN",
+                returned_model=None,
+                raw_usage=None,
+                external_network_calls=1,
+                provider_calls=1,
+                external_model_calls=1,
+                external_process_launches=0,
+                route="EXISTING_SETTINGS_API_TRANSPORT",
+                region="PROVIDER_MANAGED_UNDISCLOSED",
+                egress="PROVIDER_API",
+                transport_diagnostic={
+                    **dict(attempt.transport_diagnostic or {}),
+                    'exception_type': type(error).__name__,
+                    'dispatch_state': 'MAY_HAVE_BEEN_ACCEPTED',
+                    'remote_cancellation_confirmed': False,
+                    'automatic_duplicate_request_safe': False,
+                },
+            )
+        finally:
+            secret = ""
+            secret_bytes = b""
+            headers.clear()
+        attempt.route = "EXISTING_SETTINGS_API_TRANSPORT"
+
+    def _send_cli(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
+        """Run the command-line tool; a failed result, or None with the reply on attempt."""
+        adapter_id = attempt.service.get("adapter_id")
+        executable_value = attempt.service.get("executable")
+        if not isinstance(adapter_id, str):
+            raise ValueError("CLI_ADAPTER_UNSUPPORTED")
+        if not isinstance(executable_value, str):
+            raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
+        executable = self._executable_resolver(executable_value)
+        if executable is None:
+            raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
+        if attempt.strict_cli_identity_binding:
+            expected_binary_sha256 = attempt.service.get("cli_binary_sha256")
+            cli_version_value = attempt.service.get("cli_version")
+            identity_authority_value = attempt.service.get(
+                "cli_identity_authority_ref"
+            )
+            if (
+                not isinstance(expected_binary_sha256, str)
+                or not SAFE_SHA256.fullmatch(expected_binary_sha256.upper())
+                or _resolved_file_sha256(executable)
+                != expected_binary_sha256.upper()
+                or not isinstance(cli_version_value, str)
+                or not cli_version_value
+                or not isinstance(identity_authority_value, str)
+                or not identity_authority_value
+            ):
+                raise ValueError(
+                    "CLI_STRUCTURED_CHAT_BINARY_IDENTITY_BINDING_INVALID"
                 )
-            if process.output_truncated:
-                return failed_attempt(
-                    "CLI_OUTPUT_LIMIT_EXCEEDED",
-                    returned_model=None,
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
-                    transport_diagnostic=transport_diagnostic,
-                )
-            if process.returncode != 0:
-                from .cli_verification_transport import failure_reason
-                failure_diagnostic = {
-                    **dict(transport_diagnostic or {}),
-                    **dict(_cli_failure_diagnostic(process)),
-                }
-                return failed_attempt(
-                    failure_reason(process.stderr + b"\n" + process.stdout),
-                    returned_model=None,
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
-                    transport_diagnostic=failure_diagnostic,
-                )
+            attempt.cli_binary_sha256 = expected_binary_sha256.upper()
+            attempt.cli_version = cli_version_value
+            attempt.cli_identity_authority_ref = identity_authority_value
+        thinking_mode = attempt.model.get("thinking_mode", "")
+        if not isinstance(thinking_mode, str):
+            thinking_mode = ""
+        proxy_mode, proxy_address, configured_timeout = self._preferences()
+        timeout = attempt.timeout_seconds
+        self._scratch_root.mkdir(parents=True, exist_ok=True)
+        with structured_chat_workspace(self._scratch_root, profile_kind=attempt.profile_kind,
+                service=attempt.service, model=attempt.model, purpose=attempt.purpose) as workspace:
+            output_schema_path: str | None = None
             if adapter_id == "codex_cli":
-                execution_diagnostic, execution_error = _execution_codex_event_diagnostic(
-                    process.stdout, requested_model
-                )
-                if execution_error is not None and purpose in {
-                    "workflow_model_exam", "conversation_refinement",
+                transport_schema: Mapping[str, Any] = attempt.model.get("prompt_cache_transport_schema", attempt.response_schema)
+                if attempt.purpose == "conversation_refinement":
+                    transport_schema, attempt.transport_diagnostic = _codex_refinement_transport_schema(transport_schema)
+                elif attempt.purpose in {
+                    "workflow_model_exam",
                     "core_document_processing",
                     "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
                 }:
-                    return failed_attempt(
-                        execution_error,
-                        returned_model=None,
-                        raw_usage=usage,
+                    (
+                        transport_schema,
+                        attempt.transport_diagnostic,
+                    ) = _codex_transport_schema(transport_schema)
+                schema_path = write_response_schema(workspace, json.dumps(
+                    transport_schema, ensure_ascii=False, allow_nan=False,
+                    sort_keys=True, separators=(",", ":"),
+                ).encode("utf-8"))
+                output_schema_path = str(schema_path)
+            try:
+                argv, stdin_bytes = _cli_argv(
+                    adapter_id,
+                    executable,
+                    attempt.requested_model,
+                    thinking_mode,
+                    str(workspace),
+                    attempt.prompt_bytes,
+                    output_schema_path,
+                )
+            except ValueError as error:
+                raise ValueError(str(error)) from error
+            continuation = Continuation(workspace, attempt.model, attempt.prompt_bytes,
+                transport_schema if adapter_id == "codex_cli" else attempt.response_schema)
+            if continuation.enabled:
+                argv = continuation.prepare_argv(argv)
+                stdin_bytes = continuation.prompt_bytes
+                attempt.behavior_hash = hashlib.sha256(stdin_bytes).hexdigest().upper()
+            if attempt.strict_cli_identity_binding:
+                model_indices = [
+                    index for index, item in enumerate(argv) if item == "--model"
+                ]
+                if (
+                    len(model_indices) != 1
+                    or model_indices[0] + 1 >= len(argv)
+                    or argv[model_indices[0] + 1] != attempt.requested_model
+                ):
+                    raise ValueError("CODEX_REQUEST_MODEL_ARGV_INVALID")
+                attempt.model_allowlist_sha256 = _workflow_exam_v8_sha256(
+                    {"allowed_models": [attempt.requested_model]}
+                )
+                attempt.request_model_binding_sha256 = _workflow_exam_v8_sha256(
+                    {
+                        "adapter_id": adapter_id,
+                        "binary_sha256": attempt.cli_binary_sha256,
+                        "cli_version": attempt.cli_version,
+                        "argv_sha256": _workflow_exam_v8_sha256(list(argv)),
+                        "model_flag_index": model_indices[0],
+                        "requested_model": attempt.requested_model,
+                        "model_allowlist_sha256": attempt.model_allowlist_sha256,
+                        "behavior_sha256": attempt.behavior_hash,
+                    }
+                )
+                attempt.request_model_binding_status = (
+                    "EXACT_ARGV_BINARY_AND_FROZEN_ALLOWLIST"
+                )
+                attempt.transport_diagnostic = {
+                    **dict(attempt.transport_diagnostic or {}),
+                    "request_model_binding_status": (
+                        attempt.request_model_binding_status
+                    ),
+                    "request_model_binding_sha256": (
+                        attempt.request_model_binding_sha256
+                    ),
+                    "model_allowlist_sha256": attempt.model_allowlist_sha256,
+                    "cli_binary_sha256": attempt.cli_binary_sha256,
+                    "cli_version": attempt.cli_version,
+                    "identity_authority_ref": attempt.cli_identity_authority_ref,
+                }
+            process = self._process.run(
+                argv=argv,
+                cwd=str(workspace),
+                environment=self._safe_environment(
+                    adapter_id, workspace, proxy_mode, proxy_address
+                ),
+                stdin_bytes=stdin_bytes,
+                timeout_seconds=timeout,
+                shell=False,
+            )
+            events_accepted = True
+            if continuation.enabled:
+                event_summary, event_error = _execution_codex_event_diagnostic(process.stdout, attempt.requested_model)
+                events_accepted = (event_error is None and isinstance(event_summary, Mapping)
+                    and event_summary.get("finish_status") == "SUCCESS"
+                    and event_summary.get("model_identity_grade") != "CONFLICT")
+            continuation.complete(process, _structured_document_from_output(process.stdout), attempt.response_schema,
+                events_accepted=events_accepted)
+            attempt.transport_diagnostic = {**dict(attempt.transport_diagnostic or {}), **continuation.diagnostic}
+            if (continuation.enabled and process.started and process.returncode == 0
+                    and continuation.diagnostic.get("session_record_status") != "SUCCESS"):
+                return attempt.failed(
+                    "CODEX_CONTINUATION_VALIDATION_FAILED", returned_model=None,
+                    raw_usage=continuation.attempt_usage or {}, external_network_calls=0,
+                    provider_calls=0, external_model_calls=1, external_process_launches=1,
+                    route="CODEX_CLI_SUBSCRIPTION", region="OPENAI_MANAGED_UNDISCLOSED",
+                    egress="CODEX_CLI", transport_diagnostic=attempt.transport_diagnostic,
+                )
+        if not process.started:
+            return attempt.failed("CLI_PROCESS_START_FAILED", returned_model=None,
+                raw_usage=None, external_network_calls=0, provider_calls=0,
+                external_model_calls=0, external_process_launches=0,
+                route="CODEX_CLI_SUBSCRIPTION", region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI", transport_diagnostic={
+                    **dict(attempt.transport_diagnostic or {}), "provider_request_sent": False,
+                })
+        attempt.external_process_launches = 1
+        attempt.transport_diagnostic = {
+            **dict(attempt.transport_diagnostic or {}),
+            "stdout_total_bytes": process.stdout_total_bytes,
+            "stderr_total_bytes": process.stderr_total_bytes,
+            "capture_quota_bytes": process.capture_quota_bytes,
+            "quota_source": (
+                "EXPLICIT_RESOURCE_PROFILE"
+                if process.capture_quota_bytes is not None
+                else "DISK_SPOOL_NO_GENERIC_PRODUCT_LIMIT"
+            ),
+        }
+        attempt.usage = (continuation.attempt_usage or {}) if continuation.enabled else _usage_from_cli_output(process.stdout)
+        if process.timed_out:
+            return attempt.failed(
+                "CLI_STRUCTURED_CHAT_TIMEOUT",
+                returned_model=None,
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=1,
+                external_process_launches=1,
+                route="CODEX_CLI_SUBSCRIPTION",
+                region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI",
+                transport_diagnostic=attempt.transport_diagnostic,
+            )
+        if process.output_truncated:
+            return attempt.failed(
+                "CLI_OUTPUT_LIMIT_EXCEEDED",
+                returned_model=None,
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=1,
+                external_process_launches=1,
+                route="CODEX_CLI_SUBSCRIPTION",
+                region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI",
+                transport_diagnostic=attempt.transport_diagnostic,
+            )
+        if process.returncode != 0:
+            from .cli_verification_transport import failure_reason
+            failure_diagnostic = {
+                **dict(attempt.transport_diagnostic or {}),
+                **dict(_cli_failure_diagnostic(process)),
+            }
+            return attempt.failed(
+                failure_reason(process.stderr + b"\n" + process.stdout),
+                returned_model=None,
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=1,
+                external_process_launches=1,
+                route="CODEX_CLI_SUBSCRIPTION",
+                region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI",
+                transport_diagnostic=failure_diagnostic,
+            )
+        if adapter_id == "codex_cli":
+            execution_diagnostic, execution_error = _execution_codex_event_diagnostic(
+                process.stdout, attempt.requested_model
+            )
+            if execution_error is not None and attempt.purpose in {
+                "workflow_model_exam", "conversation_refinement",
+                "core_document_processing",
+                "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
+            }:
+                return attempt.failed(
+                    execution_error,
+                    returned_model=None,
+                    raw_usage=attempt.usage,
+                    external_network_calls=0,
+                    provider_calls=0,
+                    external_model_calls=1,
+                    external_process_launches=1,
+                    route="CODEX_CLI_SUBSCRIPTION",
+                    region="OPENAI_MANAGED_UNDISCLOSED",
+                    egress="CODEX_CLI",
+                    transport_diagnostic={
+                        **dict(attempt.transport_diagnostic or {}),
+                        "execution_parser_error": execution_error,
+                        "stdout_sha256": hashlib.sha256(
+                            process.stdout
+                        ).hexdigest().upper(),
+                    },
+                )
+            if execution_error is not None:
+                attempt.transport_diagnostic = {
+                    **dict(attempt.transport_diagnostic or {}),
+                    "execution_parser_error": execution_error,
+                    "execution_parser_compatibility_fallback": True,
+                    "stdout_sha256": hashlib.sha256(
+                        process.stdout
+                    ).hexdigest().upper(),
+                }
+            if isinstance(execution_diagnostic, Mapping):
+                attempt.transport_diagnostic = {
+                    **dict(attempt.transport_diagnostic or {}),
+                    "execution_parser_version": execution_diagnostic.get(
+                        "parser_version"
+                    ),
+                    "execution_events_sha256": execution_diagnostic.get(
+                        "events_sha256"
+                    ),
+                    "execution_model_identity_grade": execution_diagnostic.get(
+                        "model_identity_grade"
+                    ),
+                    "execution_returned_model": execution_diagnostic.get(
+                        "returned_model"
+                    ),
+                    "execution_usage_status": execution_diagnostic.get(
+                        "usage_status"
+                    ),
+                }
+                if execution_diagnostic.get("finish_status") != "SUCCESS":
+                    return attempt.failed(
+                        "CODEX_JSONL_FINISH_NOT_SUCCESS",
+                        returned_model=(
+                            execution_diagnostic.get("returned_model")
+                            if isinstance(
+                                execution_diagnostic.get("returned_model"), str
+                            )
+                            else None
+                        ),
+                        raw_usage=attempt.usage,
                         external_network_calls=0,
                         provider_calls=0,
                         external_model_calls=1,
@@ -4509,232 +4629,164 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                         route="CODEX_CLI_SUBSCRIPTION",
                         region="OPENAI_MANAGED_UNDISCLOSED",
                         egress="CODEX_CLI",
-                        transport_diagnostic={
-                            **dict(transport_diagnostic or {}),
-                            "execution_parser_error": execution_error,
-                            "stdout_sha256": hashlib.sha256(
-                                process.stdout
-                            ).hexdigest().upper(),
-                        },
+                        transport_diagnostic=attempt.transport_diagnostic,
                     )
-                if execution_error is not None:
-                    transport_diagnostic = {
-                        **dict(transport_diagnostic or {}),
-                        "execution_parser_error": execution_error,
-                        "execution_parser_compatibility_fallback": True,
-                        "stdout_sha256": hashlib.sha256(
-                            process.stdout
-                        ).hexdigest().upper(),
+                if execution_diagnostic.get("model_identity_grade") == "CONFLICT":
+                    return attempt.failed(
+                        "CLI_RETURNED_MODEL_MISMATCH",
+                        returned_model=(
+                            execution_diagnostic.get("returned_model")
+                            if isinstance(
+                                execution_diagnostic.get("returned_model"), str
+                            )
+                            else None
+                        ),
+                        raw_usage=attempt.usage,
+                        external_network_calls=0,
+                        provider_calls=0,
+                        external_model_calls=1,
+                        external_process_launches=1,
+                        route="CODEX_CLI_SUBSCRIPTION",
+                        region="OPENAI_MANAGED_UNDISCLOSED",
+                        egress="CODEX_CLI",
+                        transport_diagnostic=attempt.transport_diagnostic,
+                    )
+                execution_usage = execution_diagnostic.get("token_usage")
+                if isinstance(execution_usage, Mapping) and not continuation.enabled:
+                    attempt.usage = {
+                        **dict(attempt.usage),
+                        **dict(execution_usage),
                     }
-                if isinstance(execution_diagnostic, Mapping):
-                    transport_diagnostic = {
-                        **dict(transport_diagnostic or {}),
-                        "execution_parser_version": execution_diagnostic.get(
-                            "parser_version"
-                        ),
-                        "execution_events_sha256": execution_diagnostic.get(
-                            "events_sha256"
-                        ),
-                        "execution_model_identity_grade": execution_diagnostic.get(
-                            "model_identity_grade"
-                        ),
-                        "execution_returned_model": execution_diagnostic.get(
-                            "returned_model"
-                        ),
-                        "execution_usage_status": execution_diagnostic.get(
-                            "usage_status"
-                        ),
-                    }
-                    if execution_diagnostic.get("finish_status") != "SUCCESS":
-                        return failed_attempt(
-                            "CODEX_JSONL_FINISH_NOT_SUCCESS",
-                            returned_model=(
-                                execution_diagnostic.get("returned_model")
-                                if isinstance(
-                                    execution_diagnostic.get("returned_model"), str
-                                )
-                                else None
-                            ),
-                            raw_usage=usage,
-                            external_network_calls=0,
-                            provider_calls=0,
-                            external_model_calls=1,
-                            external_process_launches=1,
-                            route="CODEX_CLI_SUBSCRIPTION",
-                            region="OPENAI_MANAGED_UNDISCLOSED",
-                            egress="CODEX_CLI",
-                            transport_diagnostic=transport_diagnostic,
-                        )
-                    if execution_diagnostic.get("model_identity_grade") == "CONFLICT":
-                        return failed_attempt(
-                            "CLI_RETURNED_MODEL_MISMATCH",
-                            returned_model=(
-                                execution_diagnostic.get("returned_model")
-                                if isinstance(
-                                    execution_diagnostic.get("returned_model"), str
-                                )
-                                else None
-                            ),
-                            raw_usage=usage,
-                            external_network_calls=0,
-                            provider_calls=0,
-                            external_model_calls=1,
-                            external_process_launches=1,
-                            route="CODEX_CLI_SUBSCRIPTION",
-                            region="OPENAI_MANAGED_UNDISCLOSED",
-                            egress="CODEX_CLI",
-                            transport_diagnostic=transport_diagnostic,
-                        )
-                    execution_usage = execution_diagnostic.get("token_usage")
-                    if isinstance(execution_usage, Mapping) and not continuation.enabled:
-                        usage = {
-                            **dict(usage),
-                            **dict(execution_usage),
-                        }
-            reported = _reported_models(process.stdout)
-            if reported and requested_model not in reported:
-                return failed_attempt(
-                    "CLI_RETURNED_MODEL_MISMATCH",
-                    returned_model=(
-                        next(iter(reported)) if len(reported) == 1 else None
-                    ),
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
-                )
-            if (
-                purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
-                and not reported
-                and adapter_id != "codex_cli"
-            ):
-                return failed_attempt(
-                    "CLI_RETURNED_MODEL_EVIDENCE_MISSING",
-                    returned_model=None,
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
-                )
-            response = _structured_document_from_output(process.stdout) or {}
-            if continuation.enabled:
-                response = response.get("payload") if isinstance(response, dict) and set(response) == {"payload"} else {}
-            if not response:
-                return failed_attempt(
-                    "STRUCTURED_CHAT_RESPONSE_INVALID",
-                    returned_model=requested_model if reported else None,
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
-                )
-            # Codex CLI binds the selected model through the exact --model
-            # argument.  Current JSONL may omit a redundant model field; a
-            # successful process with no contradictory identity still binds
-            # the returned identity to that exact invocation.
-            returned_model = requested_model
-            route = "CODEX_CLI_SUBSCRIPTION"
-        else:
-            if (
-                service.get("endpoint_kind") != "ollama"
-                or service.get("structured_chat_adapter")
-                != "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
-                or service.get("execution_eligible") is not True
-                or service.get("exact_identity_available") is not True
-                or not isinstance(service.get("chat_endpoint"), str)
-                or not isinstance(service.get("model_digest"), str)
-                or not SAFE_SHA256.fullmatch(str(service["model_digest"]).upper())
-            ):
-                raise ValueError("LOCAL_STRUCTURED_CHAT_PROFILE_INVALID")
-            from model_gateway.local_structured_chat import LocalStructuredChatAdapter, _default_open
-            from .call_ledger import recording_urlopen
+        reported = _reported_models(process.stdout)
+        if reported and attempt.requested_model not in reported:
+            return attempt.failed(
+                "CLI_RETURNED_MODEL_MISMATCH",
+                returned_model=(
+                    next(iter(reported)) if len(reported) == 1 else None
+                ),
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=1,
+                external_process_launches=1,
+                route="CODEX_CLI_SUBSCRIPTION",
+                region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI",
+            )
+        if (
+            attempt.purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
+            and not reported
+            and adapter_id != "codex_cli"
+        ):
+            return attempt.failed(
+                "CLI_RETURNED_MODEL_EVIDENCE_MISSING",
+                returned_model=None,
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=1,
+                external_process_launches=1,
+                route="CODEX_CLI_SUBSCRIPTION",
+                region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI",
+            )
+        attempt.response = _structured_document_from_output(process.stdout) or {}
+        if continuation.enabled:
+            attempt.response = attempt.response.get("payload") if isinstance(attempt.response, dict) and set(attempt.response) == {"payload"} else {}
+        if not attempt.response:
+            return attempt.failed(
+                "STRUCTURED_CHAT_RESPONSE_INVALID",
+                returned_model=attempt.requested_model if reported else None,
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=1,
+                external_process_launches=1,
+                route="CODEX_CLI_SUBSCRIPTION",
+                region="OPENAI_MANAGED_UNDISCLOSED",
+                egress="CODEX_CLI",
+            )
+        # Codex CLI binds the selected model through the exact --model
+        # argument.  Current JSONL may omit a redundant model field; a
+        # successful process with no contradictory identity still binds
+        # the returned identity to that exact invocation.
+        attempt.returned_model = attempt.requested_model
+        attempt.route = "CODEX_CLI_SUBSCRIPTION"
 
-            timeout = timeout_seconds
-            local_num_ctx = (
-                limits['capacity']['effective_capacity']['shared_context_tokens']
-                if limits['capacity']['machine_safe_input_tokens'] is not None else None
-            )
-            local_binding = {
-                "schema_version": "EvaluationAssetsLocalStructuredChatBinding-v1",
-                "endpoint": service["chat_endpoint"],
-                "requested_model": requested_model,
-                "expected_model_digest": str(service["model_digest"]).upper(),
-                "think": False,
-                "temperature": 0,
-                "seed": 0,
-                "cloud_fallback": False,
-            }
-            if effective_max_output_tokens is not None:
-                local_binding["num_predict"] = effective_max_output_tokens
-            if local_num_ctx is not None:
-                local_binding["num_ctx"] = local_num_ctx
-            transport_diagnostic = {"local_num_ctx": local_num_ctx, "local_num_predict": effective_max_output_tokens, "capacity_profile_specific": True}
-            outcome = LocalStructuredChatAdapter(urlopen=recording_urlopen(_default_open)).execute(
-                prompt=prompt_bytes.decode("utf-8"),
-                schema=response_schema,
-                binding=local_binding,
-                purpose=purpose,
-                timeout_seconds=timeout,
-            )
-            local_receipt = outcome.receipt
-            local_model_calls = int(
-                local_receipt.get("local_model_request_count") or 0
-            )
-            usage = (
-                local_receipt.get("usage")
-                if isinstance(local_receipt.get("usage"), Mapping)
-                else {}
-            )
-            if not outcome.success or not isinstance(outcome.response, Mapping):
-                return failed_attempt(
-                    ('STRUCTURED_CHAT_JSON_TRUNCATED' if outcome.error_code == 'MODEL_OUTPUT_TRUNCATED'
-                     else outcome.error_code or "LOCAL_STRUCTURED_CHAT_FAILED"),
-                    returned_model=(
-                        local_receipt.get("returned_model")
-                        if isinstance(local_receipt.get("returned_model"), str)
-                        else None
-                    ),
-                    raw_usage=usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=local_model_calls,
-                    external_process_launches=0,
-                    route="OLLAMA_LOOPBACK",
-                    region="LOCAL_MACHINE",
-                    egress="LOOPBACK_ONLY",
-                    transport_diagnostic={
-                        **({'finish_reason': 'length'} if outcome.error_code == 'MODEL_OUTPUT_TRUNCATED' else {}),
-                        **(self._preserve_capacity_response(json.dumps(outcome.raw_response).encode('utf-8'))
-                           if isinstance(getattr(outcome, 'raw_response', None), Mapping) else {}),
-                        **transport_diagnostic,
-                        "local_receipt_sha256": local_receipt.get(
-                            "receipt_sha256"
-                        ),
-                        "model_digest": local_receipt.get("model_digest"),
-                        "ollama_version": local_receipt.get("ollama_version"),
-                        "local_metadata_request_count": local_receipt.get(
-                            "local_metadata_request_count"
-                        ),
-                        "local_model_request_count": local_model_calls,
-                    },
-                )
-            response = dict(outcome.response)
-            returned_model = str(local_receipt.get("returned_model") or "")
-            route = "OLLAMA_LOOPBACK"
-            transport_diagnostic.update(
-                {
+    def _send_local(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
+        """Ask the local model; a failed result, or None with the reply on attempt."""
+        if (
+            attempt.service.get("endpoint_kind") != "ollama"
+            or attempt.service.get("structured_chat_adapter")
+            != "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
+            or attempt.service.get("execution_eligible") is not True
+            or attempt.service.get("exact_identity_available") is not True
+            or not isinstance(attempt.service.get("chat_endpoint"), str)
+            or not isinstance(attempt.service.get("model_digest"), str)
+            or not SAFE_SHA256.fullmatch(str(attempt.service["model_digest"]).upper())
+        ):
+            raise ValueError("LOCAL_STRUCTURED_CHAT_PROFILE_INVALID")
+        from model_gateway.local_structured_chat import LocalStructuredChatAdapter, _default_open
+        from .call_ledger import recording_urlopen
+
+        timeout = attempt.timeout_seconds
+        local_num_ctx = (
+            attempt.limits['capacity']['effective_capacity']['shared_context_tokens']
+            if attempt.limits['capacity']['machine_safe_input_tokens'] is not None else None
+        )
+        local_binding = {
+            "schema_version": "EvaluationAssetsLocalStructuredChatBinding-v1",
+            "endpoint": attempt.service["chat_endpoint"],
+            "requested_model": attempt.requested_model,
+            "expected_model_digest": str(attempt.service["model_digest"]).upper(),
+            "think": False,
+            "temperature": 0,
+            "seed": 0,
+            "cloud_fallback": False,
+        }
+        if attempt.effective_max_output_tokens is not None:
+            local_binding["num_predict"] = attempt.effective_max_output_tokens
+        if local_num_ctx is not None:
+            local_binding["num_ctx"] = local_num_ctx
+        attempt.transport_diagnostic = {"local_num_ctx": local_num_ctx, "local_num_predict": attempt.effective_max_output_tokens, "capacity_profile_specific": True}
+        outcome = LocalStructuredChatAdapter(urlopen=recording_urlopen(_default_open)).execute(
+            prompt=attempt.prompt_bytes.decode("utf-8"),
+            schema=attempt.response_schema,
+            binding=local_binding,
+            purpose=attempt.purpose,
+            timeout_seconds=timeout,
+        )
+        local_receipt = outcome.receipt
+        local_model_calls = int(
+            local_receipt.get("local_model_request_count") or 0
+        )
+        attempt.usage = (
+            local_receipt.get("usage")
+            if isinstance(local_receipt.get("usage"), Mapping)
+            else {}
+        )
+        if not outcome.success or not isinstance(outcome.response, Mapping):
+            return attempt.failed(
+                ('STRUCTURED_CHAT_JSON_TRUNCATED' if outcome.error_code == 'MODEL_OUTPUT_TRUNCATED'
+                 else outcome.error_code or "LOCAL_STRUCTURED_CHAT_FAILED"),
+                returned_model=(
+                    local_receipt.get("returned_model")
+                    if isinstance(local_receipt.get("returned_model"), str)
+                    else None
+                ),
+                raw_usage=attempt.usage,
+                external_network_calls=0,
+                provider_calls=0,
+                external_model_calls=local_model_calls,
+                external_process_launches=0,
+                route="OLLAMA_LOOPBACK",
+                region="LOCAL_MACHINE",
+                egress="LOOPBACK_ONLY",
+                transport_diagnostic={
+                    **({'finish_reason': 'length'} if outcome.error_code == 'MODEL_OUTPUT_TRUNCATED' else {}),
+                    **(self._preserve_capacity_response(json.dumps(outcome.raw_response).encode('utf-8'))
+                       if isinstance(getattr(outcome, 'raw_response', None), Mapping) else {}),
+                    **attempt.transport_diagnostic,
                     "local_receipt_sha256": local_receipt.get(
                         "receipt_sha256"
                     ),
@@ -4744,72 +4796,90 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                         "local_metadata_request_count"
                     ),
                     "local_model_request_count": local_model_calls,
-                }
+                },
             )
+        attempt.response = dict(outcome.response)
+        attempt.returned_model = str(local_receipt.get("returned_model") or "")
+        attempt.route = "OLLAMA_LOOPBACK"
+        attempt.transport_diagnostic.update(
+            {
+                "local_receipt_sha256": local_receipt.get(
+                    "receipt_sha256"
+                ),
+                "model_digest": local_receipt.get("model_digest"),
+                "ollama_version": local_receipt.get("ollama_version"),
+                "local_metadata_request_count": local_receipt.get(
+                    "local_metadata_request_count"
+                ),
+                "local_model_request_count": local_model_calls,
+            }
+        )
 
+    def _chat_result(self, attempt: "_ChatAttempt") -> Mapping[str, Any]:
+        """The result of a request whose route got a reply: the returned model checked, usage, cost and the receipt."""
         from .provider_catalog_aliases import catalog_alias
-        provider_alias = catalog_alias(service, requested_model, [returned_model]) if profile_kind == 'API' else None
-        if (unicodedata.normalize("NFKC", returned_model).strip()
-            != unicodedata.normalize("NFKC", requested_model).strip() and provider_alias is None):
-            return failed_attempt(
+        provider_alias = catalog_alias(attempt.service, attempt.requested_model, [attempt.returned_model]) if attempt.profile_kind == 'API' else None
+        if (unicodedata.normalize("NFKC", attempt.returned_model).strip()
+            != unicodedata.normalize("NFKC", attempt.requested_model).strip() and provider_alias is None):
+            return attempt.failed(
                 "STRUCTURED_CHAT_RETURNED_MODEL_MISMATCH",
-                returned_model=returned_model,
-                raw_usage=usage,
-                external_network_calls=external_network_calls,
-                provider_calls=provider_calls,
+                returned_model=attempt.returned_model,
+                raw_usage=attempt.usage,
+                external_network_calls=attempt.external_network_calls,
+                provider_calls=attempt.provider_calls,
                 external_model_calls=1,
-                external_process_launches=external_process_launches,
-                route=route,
+                external_process_launches=attempt.external_process_launches,
+                route=attempt.route,
                 region=(
                     "OPENAI_MANAGED_UNDISCLOSED"
-                    if profile_kind == "CLI"
+                    if attempt.profile_kind == "CLI"
                     else (
                         "LOCAL_MACHINE"
-                        if profile_kind == "LOCAL"
+                        if attempt.profile_kind == "LOCAL"
                         else "PROVIDER_MANAGED_UNDISCLOSED"
                     )
                 ),
                 egress=(
                     "CODEX_CLI"
-                    if profile_kind == "CLI"
-                    else ("LOOPBACK_ONLY" if profile_kind == "LOCAL" else "PROVIDER_API")
+                    if attempt.profile_kind == "CLI"
+                    else ("LOOPBACK_ONLY" if attempt.profile_kind == "LOCAL" else "PROVIDER_API")
                 ),
             )
-        token_usage = _normalise_token_usage(usage)
+        token_usage = _normalise_token_usage(attempt.usage)
         if (
-            purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
+            attempt.purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
             and not token_usage
         ):
-            return failed_attempt(
+            return attempt.failed(
                 "STRUCTURED_CHAT_TOKEN_EVIDENCE_MISSING",
-                returned_model=returned_model,
-                raw_usage=usage,
-                external_network_calls=external_network_calls,
-                provider_calls=provider_calls,
+                returned_model=attempt.returned_model,
+                raw_usage=attempt.usage,
+                external_network_calls=attempt.external_network_calls,
+                provider_calls=attempt.provider_calls,
                 external_model_calls=1,
-                external_process_launches=external_process_launches,
-                route=route,
+                external_process_launches=attempt.external_process_launches,
+                route=attempt.route,
                 region=(
                     "OPENAI_MANAGED_UNDISCLOSED"
-                    if profile_kind == "CLI"
+                    if attempt.profile_kind == "CLI"
                     else (
                         "LOCAL_MACHINE"
-                        if profile_kind == "LOCAL"
+                        if attempt.profile_kind == "LOCAL"
                         else "PROVIDER_MANAGED_UNDISCLOSED"
                     )
                 ),
                 egress=(
                     "CODEX_CLI"
-                    if profile_kind == "CLI"
-                    else ("LOOPBACK_ONLY" if profile_kind == "LOCAL" else "PROVIDER_API")
+                    if attempt.profile_kind == "CLI"
+                    else ("LOOPBACK_ONLY" if attempt.profile_kind == "LOCAL" else "PROVIDER_API")
                 ),
             )
-        if purpose == "workflow_model_exam":
+        if attempt.purpose == "workflow_model_exam":
             observed_completion_tokens = int(
                 token_usage.get("completion_tokens") or 0
             )
-            transport_diagnostic = {
-                **dict(transport_diagnostic or {}),
+            attempt.transport_diagnostic = {
+                **dict(attempt.transport_diagnostic or {}),
                 "output_limit_contract": workflow_exam_output_limit_contract(),
                 "observed_completion_tokens": observed_completion_tokens,
                 "calibrated_reply_token_ceiling": (
@@ -4825,16 +4895,16 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             }
         estimated_cost_cny = (
             _api_estimated_cost_cny(
-                requested_model, model, token_usage
+                attempt.requested_model, attempt.model, token_usage
             )
-            if profile_kind == "API"
+            if attempt.profile_kind == "API"
             else None
         )
-        if profile_kind == "CLI":
+        if attempt.profile_kind == "CLI":
             cost_evidence = "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
             region = "OPENAI_MANAGED_UNDISCLOSED"
             egress = "CODEX_CLI"
-        elif profile_kind == "LOCAL":
+        elif attempt.profile_kind == "LOCAL":
             estimated_cost_cny = 0.0
             cost_evidence = "LOCAL_COMPUTE_NO_PROVIDER_API_COST"
             region = "LOCAL_MACHINE"
@@ -4842,7 +4912,7 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         elif estimated_cost_cny is not None:
             cost_evidence = (
                 "FROZEN_TARGET_PRICING_PROFILE_ESTIMATE"
-                if model.get("pricing_evidence_ref")
+                if attempt.model.get("pricing_evidence_ref")
                 else "FROZEN_Quality_PUBLIC_PRICING_PROFILE_2026-07-30_ESTIMATE"
             )
             region = "PROVIDER_MANAGED_UNDISCLOSED"
@@ -4851,14 +4921,14 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             cost_evidence = "NOT_REPORTED_BY_TRANSPORT"
             region = "PROVIDER_MANAGED_UNDISCLOSED"
             egress = "PROVIDER_API"
-        duration_ms = max(0, round((time.monotonic() - started_at) * 1000))
+        duration_ms = max(0, round((time.monotonic() - attempt.started_at) * 1000))
         from runtime_log.cache_metrics import cache_metrics
-        transport_diagnostic = {**dict(transport_diagnostic or {}),
-            'prompt_cache_metrics': cache_metrics(dict(usage or {}), duration_ms=duration_ms,
+        attempt.transport_diagnostic = {**dict(attempt.transport_diagnostic or {}),
+            'prompt_cache_metrics': cache_metrics(dict(attempt.usage or {}), duration_ms=duration_ms,
                 estimated_cost=estimated_cost_cny)}
         response_hash = hashlib.sha256(
             json.dumps(
-                response,
+                attempt.response,
                 ensure_ascii=False,
                 allow_nan=False,
                 sort_keys=True,
@@ -4869,24 +4939,24 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             "schema_version": "SettingsStructuredChatRunnerResult-v1",
             "status": "PASS",
             "reason": "STRUCTURED_CHAT_COMPLETED",
-            "requested_model": requested_model,
-            "returned_model": returned_model,
-            "response": response,
+            "requested_model": attempt.requested_model,
+            "returned_model": attempt.returned_model,
+            "response": attempt.response,
             "duration_ms": duration_ms,
-            "external_network_calls": external_network_calls,
-            "provider_calls": provider_calls,
+            "external_network_calls": attempt.external_network_calls,
+            "provider_calls": attempt.provider_calls,
             "external_model_calls": 1,
-            "external_process_launches": external_process_launches,
+            "external_process_launches": attempt.external_process_launches,
             "execution_receipt": {
                 "schema_version": "SettingsStructuredChatExecutionReceipt-v2",
                 "status": "PASS",
-                "profile_kind": profile_kind,
-                "purpose": purpose,
+                "profile_kind": attempt.profile_kind,
+                "purpose": attempt.purpose,
                 **({'provider_model_alias': {**provider_alias, 'endpoint_origin': 'https://api.deepseek.com'}} if provider_alias is not None else {}),
-                "route": route,
-                "requested_model": requested_model,
-                "returned_model": returned_model,
-                "behavior_sha256": behavior_hash,
+                "route": attempt.route,
+                "requested_model": attempt.requested_model,
+                "returned_model": attempt.returned_model,
+                "behavior_sha256": attempt.behavior_hash,
                 "response_sha256": response_hash,
                 "duration_ms": duration_ms,
                 "token_usage": token_usage,
@@ -4897,31 +4967,31 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                 "egress": egress,
                 "model_identity_evidence": (
                     "DIRECT_CLI_REQUEST_BINDING_V1"
-                    if strict_cli_identity_binding
+                    if attempt.strict_cli_identity_binding
                     else "CLI_EXACT_MODEL_ARGUMENT_AND_SUCCESSFUL_PROCESS"
-                    if profile_kind == "CLI"
+                    if attempt.profile_kind == "CLI"
                     else (
                         "OLLAMA_EXACT_NAME_DIGEST_AND_RESPONSE_MODEL"
-                        if profile_kind == "LOCAL"
+                        if attempt.profile_kind == "LOCAL"
                         else "PROVIDER_RESPONSE_MODEL_FIELD"
                     )
                 ),
-                "request_model_binding_status": request_model_binding_status,
-                "request_model_binding_sha256": request_model_binding_sha256,
-                "model_allowlist_sha256": model_allowlist_sha256,
-                "identity_authority_ref": cli_identity_authority_ref,
-                "cli_binary_sha256": cli_binary_sha256,
-                "cli_version": cli_version,
-                "transport_diagnostic": transport_diagnostic,
-                "resource_limits": limits,
+                "request_model_binding_status": attempt.request_model_binding_status,
+                "request_model_binding_sha256": attempt.request_model_binding_sha256,
+                "model_allowlist_sha256": attempt.model_allowlist_sha256,
+                "identity_authority_ref": attempt.cli_identity_authority_ref,
+                "cli_binary_sha256": attempt.cli_binary_sha256,
+                "cli_version": attempt.cli_version,
+                "transport_diagnostic": attempt.transport_diagnostic,
+                "resource_limits": attempt.limits,
                 "output_budget": {
-                    "effective_sent_tokens": effective_max_output_tokens,
+                    "effective_sent_tokens": attempt.effective_max_output_tokens,
                     "source": (
                         "CALLER_VERIFIED_PROFILE"
-                        if effective_max_output_tokens is not None
+                        if attempt.effective_max_output_tokens is not None
                         else (
                             "CLI_PROVIDER_MANAGED"
-                            if profile_kind == "CLI"
+                            if attempt.profile_kind == "CLI"
                             else "PROVIDER_OR_LOCAL_RUNTIME_MANAGED"
                         )
                     ),
@@ -4929,10 +4999,10 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                 },
                 "max_output_tokens_mode": (
                     "PROVIDER_DEFAULT"
-                    if effective_max_output_tokens is None
+                    if attempt.effective_max_output_tokens is None
                     else "EXPLICIT"
                 ),
-                "request_max_output_tokens": effective_max_output_tokens,
+                "request_max_output_tokens": attempt.effective_max_output_tokens,
             },
         }
 
