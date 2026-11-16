@@ -122,8 +122,8 @@
     },
     {
       "path": "integrations/skills/memo-feedback/SKILL.md",
-      "sha256": "d7b82329f600a8a1357284eb0b812ba0b6f97a13dcb4c895413a80011052df3f",
-      "bytes": 826
+      "sha256": "ab303af49e22b02c1cc5e40711b5243475e76c018dfebe544a6c7495efce7772",
+      "bytes": 1608
     },
     {
       "path": "integrations/skills/memo-research/SKILL.md",
@@ -162,8 +162,8 @@
     },
     {
       "path": "integrations/skills/memo-tension/SKILL.md",
-      "sha256": "43715db29246ead831c6dc72a5f17cace78e9fcb74e784ebf0ba6e11f1c01b14",
-      "bytes": 939
+      "sha256": "edc6a873f948cc030d9dacc307d4069a69f8b990c87251dda9135b24fc71854c",
+      "bytes": 1470
     },
     {
       "path": "integrations/zotero/memorive-companion/bootstrap.js",
