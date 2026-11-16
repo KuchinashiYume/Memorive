@@ -88,7 +88,7 @@ slots:
     enabled: true
     provider: chroma
     model_id: null                            # 向量库非模型
-    endpoint: 'G:\Memorive-运维\向量库\'          # 库外、内嵌持久化、不进检索/嵌入
+    endpoint: null                             # embedded store; its folder is CHROMA_ROOT in document_processing/config.py
     api_key_env: null                          # 本地、无 key
     swap_granularity: 可插拔后端 (换库)
     on_swap: ⚠ 换库必须迁移数据 / 重建索引 (硬约束①)

@@ -12,22 +12,27 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+from runtime_log.config import default_runtime_root, ops_root
 
-def _resolve(default: str, *env_names: str) -> Path:
-    """路径解析:优先取环境变量,缺省回落 default(默认值仅此一处)。"""
+
+def _resolve(default: Path, *env_names: str) -> Path:
+    """The first of the variables that is set, otherwise default."""
     for name in env_names:
         v = os.environ.get(name)
         if v and v.strip():
             return Path(v)
-    return Path(default)
+    return default
 
 
-# ── 路径变量(默认值仅此一处;env 可覆盖,不许他处硬编码)──────────
-VAULT_ROOT = _resolve(r"G:\Memorive", "MEMORIVE_VAULT_ROOT")            # 正式 Vault 根
-OPS_ROOT = _resolve(r"G:\Memorive-运维", "MEMORIVE_OPS_ROOT")           # 运维区根(日志 / 备份)
-SANDBOX_ROOT = _resolve(r"G:\Memorive-沙盒", "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT")  # 内测沙盒根(库外、可整体删)
-# Windows 原生 HNSW 在非 ASCII persist path 下会漏写索引二进制;向量库单独落纯 ASCII 根。
-CHROMA_ROOT = _resolve(r"G:\Memorive-ops\vector-store", "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT")
+# The four roots, each overridden by its variable. The desktop service binds all four to its profile
+# (memorive_workflow/executor.py); without that they lie under the runtime root that components use
+# when nothing has bound them (runtime_log/config.py).
+VAULT_ROOT = _resolve(default_runtime_root() / "vault", "MEMORIVE_VAULT_ROOT")  # the formal library
+OPS_ROOT = ops_root()  # logs, caches, backups
+SANDBOX_ROOT = _resolve(default_runtime_root() / "sandbox", "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT")
+# The native HNSW index on Windows drops index files under a non-ASCII persist path, so the vector
+# store has a root of its own that can be set to an ASCII path.
+CHROMA_ROOT = _resolve(default_runtime_root() / "vector-store", "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT")
 
 
 def root_for(target: str = "sandbox") -> Path:

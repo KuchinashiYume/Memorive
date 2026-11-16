@@ -1,9 +1,10 @@
 """The admission log: one JSON line per review-state move, one file per year.
 
 Each line holds the time, the card's data ID, the old and new state, the trigger and the reason.
-The files live outside the library, in the operations folder (MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR
-overrides it). This module only appends and reads; it offers no way to rewrite a file. The log is
-operational data: it is never embedded or searched.
+The files live outside the library, in MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR or by default in the
+knowledge_admission folder of the ops area (runtime_log/config.py, ops_root). This module only
+appends and reads; it offers no way to rewrite a file. The log is operational data: it is never
+embedded or searched.
 """
 from __future__ import annotations
 
@@ -12,24 +13,26 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+from runtime_log.config import ops_root
+
 from .errors import KnowledgeAdmissionLogAppendError
 
-DEFAULT_KNOWLEDGE_ADMISSION_LOG_DIR = r"G:\Memorive-运维\KnowledgeAdmission状态账本"
 ENV_KNOWLEDGE_ADMISSION_LOG_DIR = "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR"
 
 
-def _log_dir() -> Path:
-    return Path(os.environ.get(ENV_KNOWLEDGE_ADMISSION_LOG_DIR, DEFAULT_KNOWLEDGE_ADMISSION_LOG_DIR))
+def log_dir() -> Path:
+    """The folder of the yearly log files. retrieval/candidate_retrieval.py reads it too."""
+    return Path(os.environ.get(ENV_KNOWLEDGE_ADMISSION_LOG_DIR) or ops_root() / "knowledge_admission")
 
 
 def _log_path(year: int) -> Path:
-    return _log_dir() / f"KNOWLEDGE_ADMISSION_log_{year}.jsonl"
+    return log_dir() / f"KNOWLEDGE_ADMISSION_log_{year}.jsonl"
 
 
 def preflight() -> None:
     """Make sure the log folder exists and can be written. Called before a card is changed, so a
     missing or read-only folder stops the move instead of leaving it unlogged."""
-    d = _log_dir()
+    d = log_dir()
     try:
         d.mkdir(parents=True, exist_ok=True)
     except OSError as e:

@@ -40,19 +40,13 @@ def resolve_paths(overrides: dict[str, str] | None = None) -> dict[str, str]:
 
 
 class ChromaPathTest(unittest.TestCase):
-    def test_default_paths_are_ascii_and_point_to_migrated_store(self) -> None:
-        paths = resolve_paths()
-        self.assertEqual(paths["root"], r"G:\Memorive-ops\vector-store")
-        self.assertEqual(
-            paths["sandbox"],
-            r"G:\Memorive-ops\vector-store\chroma-sandbox-v2",
-        )
-        self.assertEqual(
-            paths["vault"],
-            r"G:\Memorive-ops\vector-store\chroma-vault",
-        )
-        for value in paths.values():
-            value.encode("ascii")
+    def test_default_paths_lie_under_local_app_data(self) -> None:
+        # Without the variables the store goes to the runtime root under LOCALAPPDATA
+        # (runtime_log/config.py), not to a fixed drive.
+        paths = resolve_paths({"LOCALAPPDATA": r"C:\local"})
+        self.assertEqual(paths["root"], r"C:\local\Memorive\runtime\vector-store")
+        self.assertEqual(paths["sandbox"], r"C:\local\Memorive\runtime\vector-store\chroma-sandbox-v2")
+        self.assertEqual(paths["vault"], r"C:\local\Memorive\runtime\vector-store\chroma-vault")
 
     def test_root_override_keeps_sandbox_and_vault_isolated(self) -> None:
         paths = resolve_paths({"MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT": r"G:\custom-root"})

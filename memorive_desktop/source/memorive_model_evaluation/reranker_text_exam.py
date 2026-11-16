@@ -25,7 +25,6 @@ ASSET_ROOT = (
 )
 CANONICAL_REFERENCE_PACK = ASSET_ROOT / "reference_pack"
 CANONICAL_LOW_COST_REHEARSAL = ASSET_ROOT / "low_cost_rehearsal"
-OPS_TEST_ROOT = Path(r"G:\Memorive-运维\测试")
 
 EXPECTED_PACK_REVISION = "reranker_text_reference_pack_r0.1.1"
 EXPECTED_MODEL = "Pro/BAAI/bge-reranker-v2-m3"
@@ -933,7 +932,8 @@ def run_formal_pro_exam(
     *,
     max_cost_cny: float = DEFAULT_MAX_COST_CNY,
 ) -> dict[str, Any]:
-    """Run one canonical Pro exam without accepting arbitrary input paths."""
+    """Run one canonical Pro exam without accepting arbitrary input paths. The results go to
+    output_dir, a new folder the operator names."""
 
     if Path.cwd().resolve() != REPO_ROOT.resolve():
         raise RerankerTextExamError(
@@ -941,11 +941,6 @@ def run_formal_pro_exam(
             f"expected={REPO_ROOT.resolve()}:observed={Path.cwd().resolve()}"
         )
     output = output_dir.resolve()
-    if not _is_within(output, OPS_TEST_ROOT):
-        raise RerankerTextExamError(
-            "FORMAL_RUN_OUTPUT_ROOT_MISMATCH:"
-            f"expected_under={OPS_TEST_ROOT.resolve()}:observed={output}"
-        )
     if output.exists():
         raise RerankerTextExamError(
             f"FORMAL_RUN_OUTPUT_ALREADY_EXISTS:{output}"

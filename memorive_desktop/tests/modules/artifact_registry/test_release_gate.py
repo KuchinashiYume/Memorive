@@ -60,11 +60,7 @@ class QualityT04ReleaseGateTests(unittest.TestCase):
         self.addCleanup(self._temp.cleanup)
         self.run_root = Path(self._temp.name).resolve(strict=False)
         repo_root = (Path(__file__).resolve().parents[3] / "source")
-        self.boundary = SandboxBoundary.build(
-            self.run_root,
-            [repo_root],
-            allow_test_temp_root=True,
-        )
+        self.boundary = SandboxBoundary.build(self.run_root, [repo_root])
         input_root = self.run_root / "inputs"
         input_root.mkdir(parents=True, exist_ok=True)
         copied_inputs: dict[Path, Path] = {}
@@ -342,25 +338,21 @@ class QualityT04ReleaseGateTests(unittest.TestCase):
                 forbidden(manifest)
         self.assertEqual(before, len(context.factory.registry.read_events()))
 
-    def test_07_formal_repository_is_always_a_protected_write_root(self) -> None:
+    def test_07_a_sandbox_that_overlaps_a_protected_root_is_refused(self) -> None:
+        library = self.run_root / "library"
         with self.assertRaises(SandboxBoundaryViolation):
-            SandboxBoundary.build(Path(r"G:\Memorive"), [])
+            SandboxBoundary.build(library / "run", [library])
         with self.assertRaises(SandboxBoundaryViolation):
-            SandboxBoundary(
-                sandbox_root=Path(r"G:\Memorive"),
-                protected_roots=(),
-            )
+            SandboxBoundary(sandbox_root=self.run_root, protected_roots=(library,))
+        with self.assertRaises(SandboxBoundaryViolation):
+            self.boundary.require_write_path(self.run_root.parent / "outside.json")
 
-    def test_08_noncanonical_test_root_requires_explicit_authority(self) -> None:
-        repo_root = (Path(__file__).resolve().parents[3] / "source")
-        with self.assertRaises(SandboxBoundaryViolation):
-            SandboxBoundary.build(self.run_root, [repo_root])
-        boundary = SandboxBoundary.build(
-            self.run_root,
-            [repo_root],
-            allow_test_temp_root=True,
-        )
-        self.assertEqual(boundary.sandbox_root, self.run_root)
+    def test_08_any_folder_apart_from_the_protected_roots_can_be_the_sandbox(self) -> None:
+        # The sandbox is not tied to a drive or folder name: the caller picks it and the roots to protect.
+        boundary = SandboxBoundary.build(self.run_root / "run", [self.run_root / "library"])
+        self.assertEqual(boundary.sandbox_root, self.run_root / "run")
+        self.assertEqual(boundary.protected_roots, (self.run_root / "library",))
+        self.assertEqual(boundary.require_write_path(self.run_root / "run" / "a.json"), self.run_root / "run" / "a.json")
 
 
 if __name__ == "__main__":

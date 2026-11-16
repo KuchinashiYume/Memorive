@@ -1,8 +1,11 @@
-"""MODEL_GATEWAY Cache Layer:精确匹配、文件缓存 (库外运维区)。
+"""The model gateway's response cache: exact-match files in the ops area.
 
-- key = sha256(task_type + model_id + prompt_version + 规范化 payload);文件名 = hash、不含原始 payload。
-- 默认落库外 G:\\Memorive-运维\\缓存\\,可经环境变量 MEMORIVE_MODEL_GATEWAY_CACHE_DIR 覆盖;不入 git、不进嵌入/检索。
-- Core 保持简单:精确匹配,无过期 / LRU / 复杂失效。只缓存成功真调结果 (调用方把关)。
+- key = sha256(task_type + model_id + prompt_version + normalized payload); the file name is the
+  hash and holds no raw payload.
+- The folder is MEMORIVE_MODEL_GATEWAY_CACHE_DIR, or model_gateway_cache in the ops area
+  (runtime_log/config.py, ops_root). It is never committed, embedded or searched.
+- Kept simple: exact match only, no expiry, LRU or invalidation. Only successful real calls are
+  cached; the caller decides that.
 """
 from __future__ import annotations
 
@@ -11,13 +14,14 @@ import json
 import os
 from pathlib import Path
 
-DEFAULT_CACHE_DIR = r"G:\Memorive-运维\缓存"
+from runtime_log.config import ops_root
+
 ENV_CACHE_DIR = "MEMORIVE_MODEL_GATEWAY_CACHE_DIR"
 
 
 class CacheLayer:
     def __init__(self, cache_dir: Path | str | None = None):
-        self.cache_dir = Path(cache_dir or os.environ.get(ENV_CACHE_DIR, DEFAULT_CACHE_DIR))
+        self.cache_dir = Path(cache_dir or os.environ.get(ENV_CACHE_DIR) or ops_root() / "model_gateway_cache")
 
     def key(self, task_type: str, model_id: str | None, prompt_version: str | None, payload: dict) -> str:
         canon = json.dumps(
