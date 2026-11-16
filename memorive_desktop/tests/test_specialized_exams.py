@@ -35,10 +35,8 @@ from memorive_settings.ocr_exam_successor import (  # noqa: E402
     score_balanced_sample,
     score_case_successor,
 )
-from memorive_settings.specialized_exam import (  # noqa: E402
-    QualityOcrPageExamExecutor,
-    QualityRerankerTextExamExecutor,
-)
+from memorive_settings.specialized_exam.ocr import QualityOcrPageExamExecutor  # noqa: E402
+from memorive_settings.specialized_exam.reranker import QualityRerankerTextExamExecutor  # noqa: E402
 
 
 OCR_PACK = SOURCE_ROOT / "memorive_model_evaluation" / "assets" / "ocr_page_exam" / "v3" / "reference_pack"

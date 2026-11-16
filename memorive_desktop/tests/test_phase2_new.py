@@ -24,7 +24,7 @@ from memorive_settings.workflow_exam.embedding import (
     QualityEmbeddingExamExecutor,
     QualityNewEmbeddingExamExecutor,
 )
-from memorive_settings.specialized_exam import (
+from memorive_settings.specialized_exam.reranker import (
     QualityNewRerankerTextExamExecutor,
     QualityNewRerankerTextLanguageBankExamExecutor,
     QualityNewRerankerTextProductionExamExecutor,

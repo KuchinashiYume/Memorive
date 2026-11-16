@@ -6,7 +6,7 @@ SettingsController in controller.py). It holds two kinds of code:
                 jobs, user preferences, the leaderboard and external sources;
   model exams   workflow_exam_runner.py (WorkflowExams: the exam catalog, plans, runs and stored scores;
                 it holds a LiveModelValidationRunner and sends the exam's requests through it),
-                workflow_exam/ (one module per exam family), specialized_exam.py,
+                workflow_exam/ (one module per exam family), specialized_exam/ (OCR, reranker),
                 analysis_reviewer_exam.py, exam_successor.py, exam_jobs.py, exam_score_history.py and
                 the other *exam* modules.
 The model requests themselves are in memorive/models: the controller holds the runner from
@@ -54,13 +54,13 @@ from .exam_successor import (
     TerminalDisposition,
 )
 from .analysis_reviewer_exam import QualityAnalysisReviewerExamSuccessorExecutor
-from .specialized_exam import (
+from memorive_settings.specialized_exam.reranker import (
     QualityNewRerankerTextExamExecutor,
     QualityNewRerankerTextLanguageBankExamExecutor,
     QualityNewRerankerTextProductionExamExecutor,
-    QualityOcrPageExamExecutor,
     QualityRerankerTextExamExecutor,
 )
+from memorive_settings.specialized_exam.ocr import QualityOcrPageExamExecutor
 
 __all__ = [
     "CapabilityProjection",

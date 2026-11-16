@@ -4667,8 +4667,8 @@
     },
     {
       "path": "source/memorive_settings/__init__.py",
-      "sha256": "a9025459dff6d1c5d5a16d7a62c26e9f6f9e56944b5741b6f7932a90422ea76a",
-      "bytes": 4058
+      "sha256": "9d074cd9c80dcfdfe1d42b295169908805fe6e19a0dc2976efe475b98c93bb90",
+      "bytes": 4144
     },
     {
       "path": "source/memorive_settings/analysis_reviewer_exam.py",
@@ -4836,9 +4836,24 @@
       "bytes": 7028
     },
     {
-      "path": "source/memorive_settings/specialized_exam.py",
-      "sha256": "467a8cc118c70934de08d68c278cf975cd81bf8f4cbef9e7b8b749aea5f57840",
-      "bytes": 155926
+      "path": "source/memorive_settings/specialized_exam/__init__.py",
+      "sha256": "8abfd5f859d4dfd92f8994a7256d0ce1bf46ac576ccc452a63dd38bb6d0b151a",
+      "bytes": 321
+    },
+    {
+      "path": "source/memorive_settings/specialized_exam/common.py",
+      "sha256": "993d13ff22e0d02c6c710a2bf24ad0e088baf39bf33890dc1cf328aae79670a9",
+      "bytes": 6086
+    },
+    {
+      "path": "source/memorive_settings/specialized_exam/ocr.py",
+      "sha256": "c24d6513373d427e077be36350250496e016c6e0c9492b5ff13d9bd8641b6bab",
+      "bytes": 64626
+    },
+    {
+      "path": "source/memorive_settings/specialized_exam/reranker.py",
+      "sha256": "645085bc34b0ad885523f5831c822447d6133f8fc4097436f93bd20d95cd2f44",
+      "bytes": 86339
     },
     {
       "path": "source/memorive_settings/store.py",
