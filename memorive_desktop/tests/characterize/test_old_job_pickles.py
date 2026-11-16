@@ -3,12 +3,14 @@
 A processed paper's job folder holds 06_context_pack.pkl (a ContextPack) and 07_analysis.pkl (an
 AnalysisResult), written with pickle.HIGHEST_PROTOCOL by memorive/documents/workflow/executor.py; an analysis
 revision keeps pickle.dumps of an AnalysisResult (memorive/documents/card_review/analysis_revision.py). The samples
-in golden/old_job_pickles were written on 2026-11-16, before any of these classes moved, with
-code-plan/work/upgrade/make_job_pickle_samples.py; they hold every nested class those objects can
-contain.
+in golden/old_job_pickles were written on 2026-11-16, before any of these classes moved: the objects
+expected_objects() builds, made with the classes as they were then and pickled the way the writers do
+(pickle.HIGHEST_PROTOCOL, 5, for the two job folder files; pickle.dumps with the default protocol, 4,
+for the revision). They hold every nested class those objects can contain.
 
-The readers load through memorive/platform/pickle_compat.py, and so do these tests. They pin three
-things: the samples still load into objects equal to ones built now; the classes they name are
+The readers load through memorive/platform/pickle_compat.py: executor.py with pickle_compat.load,
+analysis_revision.py with pickle_compat.loads, and these tests call the same two functions. They pin
+three things: the samples still load into objects equal to ones built now; the classes they name are
 exactly the ones below; and each of those names is either still a class at that place or a key of
 pickle_compat.MOVED. When a class moves, its old name goes into MOVED; a class added to or removed
 from these objects shows up here.
@@ -39,7 +41,7 @@ STORED_CLASSES = {
 
 
 def expected_objects():
-    """The same objects make_job_pickle_samples.py pickled, built with the current classes."""
+    """The objects the samples were made from, built with the current classes."""
     contributor = OwnershipContributor(subject_ref="paper:P001", data_ownership="user_owned",
                                        assertion_ref="assert:1", revision=2, basis_ref="basis:1",
                                        binding_digest="D" * 64)
@@ -73,7 +75,7 @@ def expected_objects():
 
 
 class RecordingUnpickler(pickle_compat.JobUnpickler):
-    """Loads like the job folder readers do and notes each (module, class) the data names."""
+    """The readers' unpickler, also noting each (module, class) the data names; only for listing names."""
 
     def __init__(self, stream, seen):
         super().__init__(stream)
@@ -84,20 +86,23 @@ class RecordingUnpickler(pickle_compat.JobUnpickler):
         return super().find_class(module, name)
 
 
-def load(path: Path, seen: set) -> object:
+def read_as_the_product_does(path: Path) -> object:
+    if path.name == "analysis_revision.pkl":
+        return pickle_compat.loads(path.read_bytes())
     with path.open("rb") as stream:
-        return RecordingUnpickler(stream, seen).load()
+        return pickle_compat.load(stream)
 
 
 @pytest.mark.parametrize("name", sorted(expected_objects()))
 def test_an_old_job_pickle_loads_into_the_current_classes(name):
-    assert load(GOLDEN / name, set()) == expected_objects()[name]
+    assert read_as_the_product_does(GOLDEN / name) == expected_objects()[name]
 
 
 def test_the_samples_name_exactly_the_known_classes():
     seen = set()
     for name in expected_objects():
-        load(GOLDEN / name, seen)
+        with (GOLDEN / name).open("rb") as stream:
+            RecordingUnpickler(stream, seen).load()
     assert seen == STORED_CLASSES
 
 
