@@ -15,6 +15,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 
 
 CURRENT_VERSION = json.loads(
@@ -33,10 +34,10 @@ PREFLIGHT_URL = (
 
 
 def _api(tmp_path: Path) -> tuple[ProductApi, Path, Path]:
-    api = object.__new__(ProductApi)
-    api._source_root = ATTEMPT_ROOT / "source"
-    api._profile_root = tmp_path / "profile"
-    api._system_effects_enabled = False
+    api = companion()
+    api.source_root = ATTEMPT_ROOT / "source"
+    api.profile_root = tmp_path / "profile"
+    api.system_effects_enabled = False
     downloads = tmp_path / "Downloads"
     downloads.mkdir(parents=True)
     api._browser_session_download_roots = lambda: [downloads]
@@ -160,14 +161,14 @@ def test_auto_refresh_marks_one_repair_preflight_when_extension_version_changes(
 ) -> None:
     api, _downloads, state_path = _api(tmp_path)
     _write_state(api, state_path, package_sha256="OLD")
-    destination = api._profile_root / "browser_companion" / "extension-v1"
+    destination = api.profile_root / "browser_companion" / "extension-v1"
     destination.mkdir(parents=True)
     (destination / "manifest.json").write_text(
         json.dumps({"manifest_version": 3, "version": "3.4.1"}),
         encoding="utf-8",
     )
 
-    receipt = api._refresh_prepared_browser_companion_package()
+    receipt = api.refresh_prepared_package()
     state = json.loads(state_path.read_text(encoding="utf-8"))
 
     assert receipt["status"] == "UPDATED"
@@ -181,7 +182,7 @@ def test_explicit_install_preserves_upgrade_repair_gate_without_auto_sync(
 ) -> None:
     api, _downloads, state_path = _api(tmp_path)
     _write_state(api, state_path, package_sha256="OLD")
-    destination = api._profile_root / "browser_companion" / "extension-v1"
+    destination = api.profile_root / "browser_companion" / "extension-v1"
     destination.mkdir(parents=True)
     (destination / "manifest.json").write_text(
         json.dumps({"manifest_version": 3, "version": "3.4.1"}),
@@ -209,7 +210,7 @@ def test_repair_gate_forces_preflight_even_with_an_incremental_cursor(
     )
     _write_identity(downloads)
     api._browser_companion_incremental_cursor = _eligible_cursor
-    api._system_effects_enabled = True
+    api.system_effects_enabled = True
     api._browser_executables = lambda: [
         ("Microsoft Edge", Path("C:/Program Files/Edge/msedge.exe"), "edge://extensions")
     ]

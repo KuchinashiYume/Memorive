@@ -34,6 +34,9 @@ start" below).
   knowledge draft (`knowledge_feedback/research_ingest.py`).
 - **Sessions**: imported or captured conversations (`memorive_sessions`, `memorive_session_archive`,
   `memorive_browser_companion`) → refinement through `memorive_workflow_bridge` → typed items for review.
+  The browser extension's install, reload and sync, and importing session files, are in
+  `memorive_browser_companion/desktop.py` (`BrowserCompanionDesktop`); `ProductApi` forwards the
+  window's calls to it.
 - **Exams**: the settings page → `memorive_settings` (exam jobs and executors) → the exam modules
   loaded by name (`memorive_model_evaluation`) → the model request → scoring → score history.
 - **Discovery and reports**: the window (`research.*`, `ai.*`, `home.*`) or a schedule →

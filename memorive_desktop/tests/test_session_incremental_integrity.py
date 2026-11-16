@@ -18,6 +18,7 @@ from tests.test_browser_capture_successor_repair import (  # noqa: E402
     _library,
 )
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 from memorive_session_archive import (  # noqa: E402
     ArchiveInputError,
     BrowserLibraryImporter,
@@ -70,7 +71,7 @@ def test_terminal_sync_report_accepts_runner_timeout_metadata(tmp_path: Path) ->
     }
     report_path = tmp_path / "memorive-session-library-sync-report-real-3-5-0.json"
     report_path.write_text(json.dumps(report), encoding="utf-8")
-    api = ProductApi.__new__(ProductApi)
+    api = companion()
     api._browser_session_download_roots = lambda: [tmp_path]
 
     loaded = api._latest_browser_companion_sync_report(  # noqa: SLF001

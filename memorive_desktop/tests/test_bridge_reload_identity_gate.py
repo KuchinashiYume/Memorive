@@ -15,6 +15,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 
 
 RELOAD_URL = (
@@ -38,10 +39,10 @@ CURRENT_EXTENSION_VERSION = json.loads(
 
 
 def _prepared_api(tmp_path: Path) -> tuple[ProductApi, Path]:
-    api = object.__new__(ProductApi)
-    api._source_root = ATTEMPT_ROOT / "source"
-    api._profile_root = tmp_path / "profile"
-    api._system_effects_enabled = False
+    api = companion()
+    api.source_root = ATTEMPT_ROOT / "source"
+    api.profile_root = tmp_path / "profile"
+    api.system_effects_enabled = False
     downloads = tmp_path / "Downloads"
     downloads.mkdir(parents=True)
     api._browser_session_download_roots = lambda: [downloads]
@@ -141,7 +142,7 @@ def test_reload_action_opens_only_reload_fragment_and_records_pending_identity(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     api, _downloads = _prepared_api(tmp_path)
-    api._system_effects_enabled = True
+    api.system_effects_enabled = True
     api._browser_executables = lambda: [
         ("Microsoft Edge", Path("C:/Program Files/Edge/msedge.exe"), "edge://extensions")
     ]
@@ -214,7 +215,7 @@ def test_current_identity_alone_opens_v5_preflight_without_running_full(
 ) -> None:
     api, downloads = _prepared_api(tmp_path)
     _write_identity_receipt(downloads, CURRENT_EXTENSION_VERSION)
-    api._system_effects_enabled = True
+    api.system_effects_enabled = True
     api._browser_executables = lambda: [
         ("Microsoft Edge", Path("C:/Program Files/Edge/msedge.exe"), "edge://extensions")
     ]
@@ -271,7 +272,7 @@ def test_install_update_uses_extension_self_reload_not_browser_restart(
     tmp_path: Path,
 ) -> None:
     api, _downloads = _prepared_api(tmp_path)
-    api._system_effects_enabled = True
+    api.system_effects_enabled = True
     launched: list[str | None] = []
     api._launch_browser_companion_reload = lambda preferred=None: (
         launched.append(preferred)
@@ -303,7 +304,7 @@ def test_current_identity_recovers_extension_id_before_automatic_reload(
     state["extension_id"] = None
     state_path.write_text(json.dumps(state), encoding="utf-8")
     _write_identity_receipt(downloads, CURRENT_EXTENSION_VERSION)
-    api._system_effects_enabled = True
+    api.system_effects_enabled = True
     launched: list[str | None] = []
     api._launch_browser_companion_reload = lambda preferred=None: (
         launched.append(preferred)

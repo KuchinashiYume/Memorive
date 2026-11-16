@@ -13,6 +13,7 @@ for candidate in (ROOT / "source", ROOT / "product" / "desktop"):
         sys.path.insert(0, str(candidate))
 
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 
 
 def _dedicated_report() -> dict[str, object]:
@@ -67,7 +68,7 @@ def test_sync_report_accepts_only_coherent_dedicated_minimized_window_shape(
         json.dumps(_dedicated_report()),
         encoding="utf-8",
     )
-    api = ProductApi.__new__(ProductApi)
+    api = companion()
     api._browser_session_download_roots = lambda: [valid_root]
 
     loaded = api._latest_browser_companion_sync_report(

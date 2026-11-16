@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 from memorive_settings.contracts import canonical_sha256
-from memorive_settings.store import SettingsStore
+from memorive_settings.store import write_json_atomic
 
 BUILTINS = {
     'deepseek': ('DeepSeek','https://chat.deepseek.com/', ['chat.deepseek.com']),
@@ -184,9 +184,9 @@ class SiteProfiles:
                 return current
             state=dict(schema_version='DesktopBrowserSites-v1',revision=current['revision']+1,
                        sites=accepted,profile_sha256=profile_hash(accepted))
-            writer=SettingsStore(self.root)
-            writer._atomic_write(self.root/f'sites_before_{current["revision"]:06d}_{current["profile_sha256"]}.json',current)
-            writer._atomic_write(self.path,state)
+            self.root.mkdir(parents=True,exist_ok=True)
+            write_json_atomic(self.root/f'sites_before_{current["revision"]:06d}_{current["profile_sha256"]}.json',current)
+            write_json_atomic(self.path,state)
             return state
 
 def extension_profile_script(rows):

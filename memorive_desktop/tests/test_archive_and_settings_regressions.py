@@ -677,7 +677,7 @@ def test_extension_caps_new_syncs_at_50_and_uses_14_day_or_sidebar_evidence() ->
     content = (
         ROOT / "source" / "memorive_browser_companion" / "extension" / "content.js"
     ).read_text(encoding="utf-8")
-    runtime = (ROOT / "source" / "runtime.py").read_text(
+    runtime = (ROOT / "source" / "memorive_browser_companion" / "desktop.py").read_text(
         encoding="utf-8"
     )
 
@@ -691,4 +691,4 @@ def test_extension_caps_new_syncs_at_50_and_uses_14_day_or_sidebar_evidence() ->
     assert "RECENT_14_DAYS_OR_30_CONVERSATIONS" in runner
     assert "RECENT_14_DAYS" in content
     assert "RECENT_30_CONVERSATIONS" in content
-    assert "self._sessions.import_session_file(source)" in runtime
+    assert "self.sessions.import_session_file(source)" in runtime

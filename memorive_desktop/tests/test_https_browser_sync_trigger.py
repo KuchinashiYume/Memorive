@@ -13,6 +13,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 
 
 TRIGGER_URL = (
@@ -33,8 +34,8 @@ def test_runtime_opens_approved_https_fragment_in_connected_browser(
         launched.append(command)
         return _Process()
 
-    api = object.__new__(ProductApi)
-    api._system_effects_enabled = True
+    api = companion()
+    api.system_effects_enabled = True
     api.browser_companion_status = lambda: {
         "prepared": True,
         "extension_connected": True,

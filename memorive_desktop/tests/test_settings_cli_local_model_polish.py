@@ -16,6 +16,7 @@ from memorive_current_task.workflow_mapping import build_core_execution_snapshot
 from memorive_local_models.product_controller import LocalModelProductController  # noqa: E402
 from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 
 
 CURRENT_EXTENSION_VERSION = json.loads(
@@ -113,8 +114,8 @@ def test_recognized_local_models_have_stable_profiles_and_phase1_mapping(
 
 
 def test_browser_status_projects_explicit_preflight_result(tmp_path: Path) -> None:
-    api = object.__new__(ProductApi)
-    api._profile_root = tmp_path / "profile"
+    api = companion()
+    api.profile_root = tmp_path / "profile"
     state_path = api._browser_companion_state_path()
     state_path.parent.mkdir(parents=True)
     state_path.write_text(

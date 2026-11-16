@@ -10,13 +10,14 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
         sys.path.insert(0, str(candidate))
 
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 
 
 def _api(tmp_path: Path) -> ProductApi:
-    api = ProductApi.__new__(ProductApi)
-    api._source_root = ATTEMPT_ROOT / "source"
-    api._profile_root = tmp_path / "profile"
-    api._system_effects_enabled = True
+    api = companion()
+    api.source_root = ATTEMPT_ROOT / "source"
+    api.profile_root = tmp_path / "profile"
+    api.system_effects_enabled = True
     return api
 
 
@@ -37,7 +38,7 @@ def test_prepared_extension_refresh_never_claims_loaded_code_is_current(
         encoding="utf-8",
     )
 
-    receipt = api._refresh_prepared_browser_companion_package()
+    receipt = api.refresh_prepared_package()
     updated_state = json.loads(state_path.read_text(encoding="utf-8"))
 
     assert receipt["status"] == "UPDATED"

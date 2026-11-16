@@ -12,6 +12,7 @@ sys.path.insert(0, str(ATTEMPT_ROOT / "product" / "desktop"))
 
 from memorive_sessions.product_controller import SessionProductError, SessionsProductController
 from runtime import ProductApi
+from browser_companion_support import companion  # noqa: E402
 
 
 WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
@@ -148,9 +149,9 @@ def test_formal_session_list_excludes_retired_current_page_snapshots(tmp_path: P
 
 
 def test_legacy_confirmation_does_not_impersonate_extension_handshake(tmp_path: Path) -> None:
-    api = ProductApi.__new__(ProductApi)
-    api._source_root = ATTEMPT_ROOT / "source"
-    api._profile_root = tmp_path / "profile"
+    api = companion()
+    api.source_root = ATTEMPT_ROOT / "source"
+    api.profile_root = tmp_path / "profile"
     state_path = api._browser_companion_state_path()
     state_path.parent.mkdir(parents=True)
     state_path.write_text(

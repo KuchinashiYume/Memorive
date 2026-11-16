@@ -15,6 +15,8 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
+from memorive_browser_companion.desktop import BrowserCompanionDesktop  # noqa: E402
 
 
 GEMINI_SYNC_BASE = "https://gemini.google.com/app?memorive_bridge_sync=v1#"
@@ -34,10 +36,10 @@ CURRENT_EXTENSION_VERSION = json.loads(
 
 
 def _api(tmp_path: Path) -> tuple[ProductApi, Path]:
-    api = object.__new__(ProductApi)
-    api._source_root = ATTEMPT_ROOT / "source"
-    api._profile_root = tmp_path / "profile"
-    api._system_effects_enabled = False
+    api = companion()
+    api.source_root = ATTEMPT_ROOT / "source"
+    api.profile_root = tmp_path / "profile"
+    api.system_effects_enabled = False
     downloads = tmp_path / "Downloads"
     downloads.mkdir(parents=True)
     api._browser_session_download_roots = lambda: [downloads]
@@ -152,8 +154,8 @@ def test_preflight_receipt_is_bounded_to_two_per_provider(
     class _Process:
         pid = 41501
 
-    api = object.__new__(ProductApi)
-    api._system_effects_enabled = True
+    api = companion()
+    api.system_effects_enabled = True
     api.browser_companion_status = lambda: {
         "prepared": True,
         "extension_connected": True,
@@ -193,7 +195,7 @@ def test_pre_340_reports_are_rejected_and_future_semver_is_not_ceiling_locked(
     assert status["bridge_identity_verified"] is False
     assert status["bridge_reload_required"] is True
     assert status["report_extension_version"] == "3.3.9"
-    assert ProductApi._browser_companion_semver_at_least("3.4.0", (3, 4, 0)) is True
-    assert ProductApi._browser_companion_semver_at_least("3.4.0-rc.1", (3, 4, 0)) is False
+    assert BrowserCompanionDesktop._browser_companion_semver_at_least("3.4.0", (3, 4, 0)) is True
+    assert BrowserCompanionDesktop._browser_companion_semver_at_least("3.4.0-rc.1", (3, 4, 0)) is False
 
 

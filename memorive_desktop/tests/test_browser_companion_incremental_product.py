@@ -18,6 +18,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from browser_companion_support import companion  # noqa: E402
 from memorive_desktop_assistant.models import AssistantWindowPlacement  # noqa: E402
 from memorive_desktop_assistant.placement import (  # noqa: E402
     WorkArea,
@@ -66,13 +67,13 @@ class _Archive:
 
 class _SessionController:
     def __init__(self, archive: _Archive) -> None:
-        self._session_archive = archive
+        self.session_archive = archive
 
 
 def _launchable_api(rows: dict[str, list[dict[str, str]]]) -> ProductApi:
-    api = object.__new__(ProductApi)
-    api._system_effects_enabled = True
-    api._sessions = _SessionController(_Archive(rows))
+    api = companion()
+    api.system_effects_enabled = True
+    api.sessions = _SessionController(_Archive(rows))
     api.browser_companion_status = lambda: {
         "prepared": True,
         "extension_connected": True,
@@ -170,7 +171,7 @@ def test_three_provider_archive_switches_to_bounded_incremental_cursor(
 
 
 def test_cursor_helper_is_imported_after_embedded_source_becomes_available() -> None:
-    runtime_path = ATTEMPT_ROOT / "source" / "runtime.py"
+    runtime_path = ATTEMPT_ROOT / "source" / "memorive_browser_companion" / "desktop.py"
     tree = ast.parse(runtime_path.read_text(encoding="utf-8"))
 
     module_imports = [

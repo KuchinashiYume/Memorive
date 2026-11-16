@@ -21,7 +21,7 @@ def test_config_change_invalidates_identity_and_previous_preflight(tmp_path):
 def test_current_hash_identity_then_enabled_only_preflight(tmp_path):
     api,downloads,state_path=_api(tmp_path)
     rows=default_sites();rows[1]['enabled']=False
-    config=SiteProfiles(api._profile_path('BROWSER_COMPANION')).save(rows,0)
+    config=SiteProfiles(api.profile_path('BROWSER_COMPANION')).save(rows,0)
     _write_state(api,state_path);_write_identity(downloads);_write_preflight(downloads)
     for path in downloads.rglob('*.json'):
         data=json.loads(path.read_text())

@@ -58,7 +58,7 @@ def test_save_rejects_control_characters(tmp_path,url):
 
 def test_legacy_unknown_config_remains_editable_but_cannot_issue_plugin(tmp_path):
     api,_,_= _api(tmp_path)
-    store=SiteProfiles(api._profile_path("BROWSER_COMPANION"))
+    store=SiteProfiles(api.profile_path("BROWSER_COMPANION"))
     rows=normalize_sites(custom("https://unverified.example.org/"))
     state=dict(schema_version="DesktopBrowserSites-v1",revision=1,sites=rows,profile_sha256=profile_hash(rows))
     store.root.mkdir(parents=True,exist_ok=True)

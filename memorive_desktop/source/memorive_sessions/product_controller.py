@@ -587,6 +587,11 @@ class SessionsProductController:
                 self._save(migrated_state)
         self._validate_state(self._load())
 
+    @property
+    def session_archive(self) -> SessionArchive:
+        """The archive of captured sessions; the browser companion counts it for its sync cursor."""
+        return self._session_archive
+
     def _inbox_refinement_call(
         self, method: str, params: Mapping[str, Any]
     ) -> Any:

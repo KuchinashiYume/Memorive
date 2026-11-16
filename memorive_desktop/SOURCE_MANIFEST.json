@@ -3412,13 +3412,18 @@
     },
     {
       "path": "source/memorive_browser_companion/__init__.py",
-      "sha256": "21c2c32e33c391786e904679769b183869d00bf58b6145e6a0e178a5fa642bfe",
-      "bytes": 625
+      "sha256": "a94b3addeb078e0ae6c99e1e3cdf4f14036a06faf86ae8ac2761a1aad6c56223",
+      "bytes": 811
     },
     {
       "path": "source/memorive_browser_companion/browsers.py",
       "sha256": "76c8c066e130a84b12e348ea93b75a5a3baa144b8af32d28b6342dcf1deac295",
       "bytes": 2856
+    },
+    {
+      "path": "source/memorive_browser_companion/desktop.py",
+      "sha256": "a7aecf8c35282f4643c7f49417a260acf9bec4d5fa9cb184360b5118822091e4",
+      "bytes": 95527
     },
     {
       "path": "source/memorive_browser_companion/extension/README.txt",
@@ -3487,8 +3492,8 @@
     },
     {
       "path": "source/memorive_browser_companion/site_profiles.py",
-      "sha256": "f0f567ef0815274d9c2a811fbb6cbb678e7686d75bb060b2d02554da63e8f0be",
-      "bytes": 12915
+      "sha256": "aa72245dce2c80a3fbb47bfafe9ef2a1fd3930b0b3b8c81b206178a6aa6bb3dc",
+      "bytes": 12925
     },
     {
       "path": "source/memorive_current_task/__init__.py",
@@ -4442,8 +4447,8 @@
     },
     {
       "path": "source/memorive_sessions/product_controller.py",
-      "sha256": "0ef061fecabfe175fbcc92f91ffa49ebf757223ee79701595c228bec92155edc",
-      "bytes": 189795
+      "sha256": "7a5bda1fe1df4833123ec7c68e6b56332cab0938088575568693463d895f58fd",
+      "bytes": 190002
     },
     {
       "path": "source/memorive_settings/__init__.py",
@@ -6647,8 +6652,8 @@
     },
     {
       "path": "source/runtime.py",
-      "sha256": "106ea6a72a848f807fdae1fd91cd9172d195452d2aee514878fd157aae5f0c0c",
-      "bytes": 313268
+      "sha256": "92a4731ab22fd976f29ca4315527bda2b31fc43571ffd27a230fd22752c9fb97",
+      "bytes": 222750
     },
     {
       "path": "source/runtime_log/__init__.py",
