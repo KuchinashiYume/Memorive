@@ -1,4 +1,5 @@
-"""Deterministic audit, directed-repair, and scoring core for MODEL_EVALUATION card exams."""
+"""Checking, directed repair and scoring for the card exams.
+"""
 
 from __future__ import annotations
 

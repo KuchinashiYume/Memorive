@@ -1,4 +1,5 @@
-"""Local evaluator for the frozen RETRIEVAL-CALIBRATION query/metric pack."""
+"""Scores retrieval locally against the fixed retrieval-calibration pack of queries and metrics.
+"""
 from __future__ import annotations
 
 from collections import defaultdict

@@ -1,4 +1,4 @@
-"""Fail-closed loader for repository-resident MODEL_EVALUATION reference exam packs.
+"""Loads and checks the reference exam packs kept in the repository.
 
 Reference packs are fixed, non-blind regression assets.  The subject-facing
 transport may read only members explicitly marked provider-visible; Gold is

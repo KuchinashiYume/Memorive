@@ -1,8 +1,10 @@
-"""受限 legacy YMath PDF 字体恢复。
+"""Recovers the text of PDFs set in the old YMath fonts, within narrow limits.
 
-只接受审计过的六个 YMath/ZMath CFF 字体程序。字体名、程序 SHA-256、
-rawdict 输入字符和 texttrace glyph id 必须同时匹配；未知项全部拒绝。
-恢复只在内存中重建带页标的 Markdown，不改源 PDF、不调用 OCR。
+Only the six audited YMath/ZMath CFF font programs are accepted. The font name, the program's
+SHA-256, the rawdict input character and the texttrace glyph id must all match; anything unknown is
+refused. The recovery rebuilds Markdown with page markers in memory only; it does not change the
+source PDF or call OCR. pymupdf_engine.py, legacy_symbol_layout.py and legacy_ymath_layout.py use
+it.
 """
 from __future__ import annotations
 

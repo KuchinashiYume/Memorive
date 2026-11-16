@@ -1,7 +1,8 @@
-"""将已审计 legacy glyph 按坐标桥接回 PyMuPDF-Layout Markdown。
+"""Puts audited old-font glyphs back into PyMuPDF-Layout Markdown by their page coordinates.
 
-字符是否合法不由作者名、正文位置或字符白名单判断。硬决策只使用字体程序、
-glyph id、页面坐标与 Layout 归属；语境分类仅进入审计元数据。
+Whether a character is valid is never decided by the author's name, its place in the text or a
+character allow list. Firm decisions use only the font program, the glyph id, the page coordinates
+and the Layout block it belongs to; the context classification only goes into the audit metadata.
 """
 from __future__ import annotations
 

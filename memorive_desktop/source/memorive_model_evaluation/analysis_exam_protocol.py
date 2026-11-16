@@ -1,4 +1,4 @@
-"""Frozen, provider-blind protocol primitives for the MODEL_EVALUATION analysis exam.
+"""The fixed protocol pieces of the analysis exam, the same for every provider.
 
 The private Form/Gold payloads remain in an authorised Quality sandbox.  This
 module contains the production implementation needed to validate those assets,

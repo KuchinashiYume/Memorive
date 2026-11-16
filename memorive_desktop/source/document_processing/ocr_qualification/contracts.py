@@ -1,4 +1,5 @@
-"""Fail-closed contracts for PAGE-RECOGNITION page qualification.
+"""The objects of OCR page qualification and their checks: page inputs, normalized page transcriptions
+and the qualification of a page family.
 
 The module validates local objects only.  It never opens a provider channel,
 reads a credential, selects a production route, or authorizes activation.

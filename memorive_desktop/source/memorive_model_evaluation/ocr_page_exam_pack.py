@@ -1,4 +1,5 @@
-"""Fail-closed verifier and perfect replay for an OCR page reference pack."""
+"""Checks an OCR page reference pack and replays it with its reference answers.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,7 @@
-"""Owned-process, local-only Office legacy bridge."""
+"""Converts old Office files (.doc, .ppt, .xls) to .docx, .pptx and .xlsx with the installed Office,
+through a PowerShell process it starts and waits for (convert_legacy_to_ooxml).
+document_conversion/adapters.py uses it.
+"""
 from __future__ import annotations
 
 import json

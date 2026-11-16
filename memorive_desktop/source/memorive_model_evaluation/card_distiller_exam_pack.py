@@ -1,4 +1,5 @@
-"""Contracts and fail-closed replay for the formal Card reference exam pack."""
+"""Checks the card distiller's reference exam pack and replays it with its reference answers.
+"""
 
 from __future__ import annotations
 

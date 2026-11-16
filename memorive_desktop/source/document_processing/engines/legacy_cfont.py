@@ -1,15 +1,16 @@
-"""受限 legacy C<number> PDF 字体恢复。
+"""Recovers the text of PDFs with old C<number> fonts, within narrow limits.
 
-只服务 PyMuPDF 轻量沙盒引擎。部分旧 Elsevier PDF 没有 ToUnicode，
-但 Type1 Encoding /Differences 仍保留 C<number> 字形名；PyMuPDF 1.28
-rawdict 同时提供字体名、PDF 输入码和 synthetic 空格标记，因而可在不
-OCR、不猜频率的前提下确定性恢复。
+Used only by the lightweight PyMuPDF engine (pymupdf_engine.py, legacy_cfont_layout.py). Some old
+Elsevier PDFs have no ToUnicode map, but their Type1 Encoding /Differences still keep the C<number>
+glyph names; PyMuPDF 1.28's rawdict gives the font name, the PDF input code and the synthetic space
+marks together, so the text can be recovered exactly, without OCR or guessing from frequencies.
 
-安全边界：
-- 只接受审计过的 Adv* 字体名；
-- C32..C126 按 ASCII，16 个特殊字形显式白名单；
-- 未知字形、synthetic 缺失歧义、残留 U+FFFD/控制字符全部 fail-closed；
-- 不写源 PDF、不落盘，只返回内存 Markdown。
+Limits:
+- only the audited Adv* font names are accepted;
+- C32..C126 map to ASCII, and 16 special glyphs are listed explicitly;
+- an unknown glyph, an ambiguous missing synthetic space, or a leftover U+FFFD or control character
+stops the recovery;
+- the source PDF is not written and nothing goes to disk; only Markdown in memory is returned.
 """
 from __future__ import annotations
 
