@@ -1,18 +1,21 @@
-"""CandidateRetrieval Candidate Retrieval —— chunk 单层召回 + active-only 回读活卡 + 归并回卡片(Retrieval 第 2 步)。
+"""Candidate retrieval: chunks recalled for a question, only from active cards, mapped back to their card fields.
 
-承 Retrieval 第 0 步契约 §一/§二/§五 + 两拍板:
-- 拍板①:ServiceContracts 库只 chunk 级向量 → **chunk 单层 overfetch 召回** + 经 paper_id/source_anchor 归并回卡片/字段。
-- 拍板②:active-only 是 **post-filter**——回读卡片 frontmatter 活 `review_status`(`card_io.read_status`),
-  **绝不信向量库 metadata 里冻结的 pending**。
-**只召回、不打包**(排权重/反例名额/token 全留 ContextAssembly);查现成 Chroma、`get_collection` 不建库。
+- The library holds vectors per chunk only, so chunks are recalled in one query with overfetch and
+  mapped back to cards and fields through paper_id and the card's source_anchor.
+- Only active cards count, decided after the query from the card's own front matter
+  (card_io.read_status), never from the review status frozen in the vector metadata.
+It recalls only; weights, counterexample room and tokens are context assembly's. It opens the
+existing Chroma collection and never creates one.
 
-⚠ 距离≠相似度(口径②):Chroma `.query()` 回 `distances`(**越小越近**);排序按 distance **升序**。
-⚠ 固定召回(口径①):**单次** query(n_results=min(MAX_OVERFETCH, count))→ active-only → require_verified →
-   每卡限额 → 取 target。「够不够」按**最终 final**判(非 raw active——早停会漏补每卡限额/require_verified 挤掉的名额)。
-⚠ logical rerank(A·修跨篇混入):active-only 之后保留**可注入排序缝**。旧 score reranker 仅作兼容；
-   新 `multimodal_listwise` 使用本地多模态模型返回完整候选 ID 顺序，不伪造 0–1 分数、不做阈值硬砍。
-   两者均默认关；本地 listwise 可处理 entrusted，任何失败整批回退 distance，绝不 cloud fallback。
-   五维/DerivedPenalty/doc_type 仍不做;active 读活卡、非冻结 metadata。
+Distance is not similarity: Chroma's query returns distances, smaller is closer, sorted ascending.
+A fixed number is recalled: one query (n_results=min(MAX_OVERFETCH, count)), then active only,
+then require_verified, then the per-card limit, then up to target. Whether there are enough is
+judged on the final list, not on the raw active hits.
+Reranking can be plugged in after the active filter: the older score reranker (legacy_score) is
+kept for compatibility; multimodal_listwise asks a local multimodal model for the full order of
+candidate ids, with no made-up 0-1 scores and no threshold. Both are off by default. The local
+listwise ranking may see entrusted data; any failure falls back to distance order for the whole
+batch, never to a cloud model.
 """
 from __future__ import annotations
 
@@ -35,21 +38,21 @@ from memorive.documents.card_states.errors import CardStateError
 from memorive.research.retrieval.ownership import bind_authority_projection, snapshot_fields
 from memorive.research.retrieval.types import Candidate, CandidateSet
 
-# ── 默认值:全 env 可配、读取失败回默认;RUNTIME_LOG 记本次实际用值(口径⑦)──
+# ── defaults: each can be set by environment; the values used are logged ──
 _ENV = {
     "target": ("MEMORIVE_RETRIEVAL_TARGET_RECALL", 15),
     "factor": ("MEMORIVE_RETRIEVAL_OVERFETCH_FACTOR", 4),
     "max_overfetch": ("MEMORIVE_RETRIEVAL_MAX_OVERFETCH", 200),
     "per_card": ("MEMORIVE_RETRIEVAL_PER_CARD_CAP", 3),
 }
-_CANON_EMBED = "bge-m3"                          # query 必与 chunk 同向量空间(口径⑥)
-_MAX_DROPPED_EXAMPLES = 8                        # RUNTIME_LOG 附少量剔除样例(计数为主,不全量)
+_CANON_EMBED = "bge-m3"                          # the question must be in the chunks' vector space
+_MAX_DROPPED_EXAMPLES = 8                        # a few dropped examples go into the log; mainly counts
 _OWNERSHIP_VALUES = {"self", "entrusted", "unknown"}
-_TRIAL_CARD_SUFFIX = re.compile(r"__v\d+trial$")  # 保留的蒸馏试验旁证卡，不是当前活卡
+_TRIAL_CARD_SUFFIX = re.compile(r"__v\d+trial$")  # a card kept from a distillation trial, not the live card
 
 
 def _cfg() -> dict:
-    """读 env 配置,任一非正/解析失败回默认(口径⑦)。"""
+    """The settings from the environment; a value that is not positive or not readable falls back to the default."""
     out = {}
     for key, (env, default) in _ENV.items():
         raw = os.environ.get(env)
@@ -61,19 +64,21 @@ def _cfg() -> dict:
     return out
 
 
-# ── rerank 配置(A·修跨篇混入):float/bool,不进 int-only `_cfg`;阈值允许 0/负=不砍,不套 v>0 ──
+# ── rerank settings: a bool and a float, apart from the integer _cfg; a threshold of 0 or less cuts nothing ──
 _RERANK_ENV = {
-    "enabled": ("MEMORIVE_RETRIEVAL_RERANK_ENABLED", False),     # bool:默认关(A1a 零回归;开=开启 rerank)
-    "threshold": ("MEMORIVE_RETRIEVAL_RERANK_THRESHOLD", 0.3),   # float:relevance_score < 阈值 → 砍。默认 0.3 保守:
-    # A1b 真跑标定(Yaseen 综述问题)——切题 Yaseen 分∈[0.89,0.996]、离题 Chen 分∈[0.013,0.262],间隔极大;
-    # 0.3 砍净离题、对切题留巨大余量(承拍板⑤阈值保守·不饿死反例名额)。设 0/负=只重排不砍;可 env 覆盖。
+    "enabled": ("MEMORIVE_RETRIEVAL_RERANK_ENABLED", False),     # bool, off by default
+    "threshold": ("MEMORIVE_RETRIEVAL_RERANK_THRESHOLD", 0.3),   # float: a relevance_score below it is cut. 0.3 is cautious:
+    # measured on a review question, on-topic chunks scored 0.89 to 0.996 and off-topic ones 0.013 to
+    # 0.262, so 0.3 cuts the off-topic ones and keeps a wide margin, without starving the room for
+    # counterexamples. 0 or less only reorders.
 }
 _RANK_MODE_ENV = "MEMORIVE_RETRIEVAL_RANK_MODE"
 _RANK_MODES = frozenset({"off", "legacy_score", "multimodal_listwise", "auto"})
 
 
 def _rerank_cfg() -> dict:
-    """读 rerank env(bool enabled / float threshold)。解析失败/NaN/inf 回默认;**阈值不套 `>0` 卡**(0/负合法=不砍)。"""
+    """The rerank settings (bool enabled, float threshold); unreadable, NaN or infinite values fall back
+    to the default. The threshold may be 0 or negative, meaning nothing is cut."""
     raw = os.environ.get(_RERANK_ENV["enabled"][0])
     if raw is not None and raw.strip():
         enabled = raw.strip().lower() in ("1", "true", "yes", "on")
@@ -98,11 +103,12 @@ def _rerank_cfg() -> dict:
     return {"enabled": mode != "off", "mode": mode, "threshold": thr}
 
 
-# ── query 嵌入(MODEL_GATEWAY,可注入;槽参数化,口径⑥)────────────────────────────
+# ── the question's vector (through the gateway; injectable; the slot is a parameter) ──
 def _default_embed(question: str, embed_task_type: str) -> list:
-    """默认 query 嵌入:经 MODEL_GATEWAY `embed(embed_task_type, [question])`,取第一条向量。
-    模型须 bge-m3(与 chunk 同向量空间)——否则拒用。query=自有数据→默认 cloud 槽;留 embed_local seam。"""
-    from memorive.models.gateway import embed as model_gateway_embed     # 局部 import:测试注入 embed_fn 时不触发 MODEL_GATEWAY
+    """The question's vector through the gateway, embed(embed_task_type, [question]). The model must be
+    bge-m3, the chunks' vector space, or the vector is refused. The question is the user's own data,
+    so the cloud slot is the default."""
+    from memorive.models.gateway import embed as model_gateway_embed     # imported here, so an injected embed_fn never loads the gateway
     res = model_gateway_embed(embed_task_type, [question])
     if res.get("embedding_model") != _CANON_EMBED:
         raise ValueError(f"CandidateRetrieval: query 嵌入模型 {res.get('embedding_model')!r} ≠ {_CANON_EMBED};"
@@ -113,12 +119,13 @@ def _default_embed(question: str, embed_task_type: str) -> list:
     return list(embs[0])
 
 
-# ── rerank 打分(MODEL_GATEWAY,可注入;A·修跨篇混入)────────────────────────────────
+# ── rerank scores (through the gateway; injectable) ──
 def _default_rerank(question: str, texts: list, rerank_task_type: str = "rerank") -> list:
-    """默认 rerank:经 MODEL_GATEWAY `rerank(rerank_task_type, question, texts)`,回**每条 relevance_score**(按 texts 序对齐)。
-    契约:MODEL_GATEWAY 回 `{"results": [{"index", "relevance_score"}, …]}`(adapter 保证按 index 排序对齐 texts)。
-    query=自有数据→默认 cloud siliconflow 槽(国内 domestic_skip);entrusted 本地 rerank 路留 seam(A1a 未接,后续)。"""
-    from memorive.models.gateway import rerank as model_gateway_rerank      # 局部 import:测试注入 rerank_fn 时不触发 MODEL_GATEWAY
+    """Reranking through the gateway, rerank(rerank_task_type, question, texts): one relevance_score per
+    text, in the order of texts (the gateway returns {"results": [{"index", "relevance_score"}, ...]}
+    sorted by index). The default is the cloud SiliconFlow slot (domestic, so the region check skips
+    it); a local rerank for entrusted data is not connected."""
+    from memorive.models.gateway import rerank as model_gateway_rerank      # imported here, so an injected rerank_fn never loads the gateway
     res = model_gateway_rerank(rerank_task_type, question, list(texts))
     results = res.get("results") or []
     if len(results) != len(texts):
@@ -178,16 +185,17 @@ def _default_multimodal_rank(
     }
 
 
-# ── 开现成 Chroma:get_collection、不建库(口径⑧)──────────────────────
+# ── the existing Chroma collection; never created here ──
 def _open_collection(target: str):
-    """开现成 collection(get_collection、**非** get_or_create);查不到即报错、绝不建库。"""
+    """Open the existing collection (get_collection, not get_or_create); a missing one raises."""
     import chromadb
     from memorive.documents.processing.config import COLLECTION, chroma_dir
     client = chromadb.PersistentClient(path=str(chroma_dir(target)))
     return client.get_collection(COLLECTION[target])
 
 
-# ── paper_id → 卡片路径(D2;含字面 [ ],遍历前缀匹配、不用 glob 元字符;0/多匹配 → None)口径③ ──
+# ── paper_id -> card file: names contain literal [ ], so prefixes are compared instead of glob;
+#    no match or several give None ──
 def _resolve_paper_folder(paper_id: str, lib_root: Path) -> Path | None:
     if not lib_root.is_dir():
         return None
@@ -198,7 +206,8 @@ def _resolve_paper_folder(paper_id: str, lib_root: Path) -> Path | None:
 
 
 def _resolve_card(paper_id: str, lib_root: Path) -> Path | None:
-    """文献库/[<paper_id>] …/[Card][<paper_id>] ….md;0 或多匹配 → None(调用方 fail-closed),**不 crash、不猜**。"""
+    """The card file, library/[<paper_id>] .../[Card][<paper_id>] ....md; None when there is no match or
+    more than one (the caller treats it as not active)."""
     folder = _resolve_paper_folder(paper_id, lib_root)
     if folder is None:
         return None
@@ -247,9 +256,9 @@ def resolve_chunk_metadata(paper_id: str, chunk_id: str, lib_root: Path,
 
 
 def _live_status(paper_id: str, lib_root: Path, cache: dict) -> str:
-    """回读活卡 review_status(拍板②)。返回 active/pending/quarantined,或 **card_missing**(解析不出)/
-    **card_state_error**(坏卡/缺字段:read_status 抛)——两者均 fail-closed 当非 active(口径③,区分卡找不到 vs 坏卡)。
-    同 paper_id 只读一次(cache)。"""
+    """The card's live review_status: active, pending or quarantined, or card_missing (no card file) or
+    card_state_error (read_status raised on a broken card); both of those count as not active, kept
+    apart in the counts. Each paper_id is read once (cache)."""
     if paper_id in cache:
         return cache[paper_id]
     card = _resolve_card(paper_id, lib_root)
@@ -265,7 +274,7 @@ def _live_status(paper_id: str, lib_root: Path, cache: dict) -> str:
 
 
 def _read_frontmatter(card_path: Path) -> dict | None:
-    """best-effort 读 frontmatter(首两独占行 --- 之间 → yaml)。失败返 None、绝不抛。"""
+    """The card's front matter (YAML between the first two lines that are just ---), or None; never raises."""
     try:
         text = card_path.read_bytes().decode("utf-8")
         parts = split_front_matter(text)
@@ -278,8 +287,9 @@ def _read_frontmatter(card_path: Path) -> dict | None:
 
 
 def _field_for_chunk(paper_id: str, chunk_id: str, lib_root: Path, fm_cache: dict) -> str | None:
-    """best-effort:读卡片 source_anchor.by_field 返回含该 chunk_id 的字段名;任何异常 → None(不阻断,口径⑤)。
-    **真兼容(口径④)**:anchors 是 dict → v2 读 `chunk_ids`;是 list → v3 读元素 `chunk_id`(或 v1 裸串);其它 → 跳过。"""
+    """The card field whose source_anchor.by_field holds this chunk_id, or None on any problem (the
+    chunk is kept). Reads all card versions: a dict of anchors (v2, chunk_ids), a list (v3, each
+    item's chunk_id, or v1 plain strings); anything else is skipped."""
     try:
         if paper_id not in fm_cache:
             card = _resolve_card(paper_id, lib_root)
@@ -302,8 +312,9 @@ def _field_for_chunk(paper_id: str, chunk_id: str, lib_root: Path, fm_cache: dic
 
 
 def _credibility_for_field(paper_id: str, field, fm_cache: dict):
-    """v6.4 之四·上半:从卡片 `field_credibility` 回读该字段 EVIDENCE_REVIEW 信用档(**先只透传**、不改检索权重)。
-    field 为 None(综合字段/查不到)或旧 v1–v4 卡缺 field_credibility → None、**不阻断**。复用 _field_for_chunk 已填的 fm_cache。"""
+    """The card review's credibility of the field, from the card's field_credibility; passed on only,
+    it changes no weight. None when field is None or an older card (v1 to v4) has no
+    field_credibility. Uses the front matter cache _field_for_chunk filled."""
     if field is None:
         return None
     try:
@@ -317,10 +328,11 @@ def _credibility_for_field(paper_id: str, field, fm_cache: dict):
 
 
 def _data_ownership_for_paper(paper_id: str, lib_root: Path, fm_cache: dict) -> str | None:
-    """回读活卡归属。缺失/非法/读卡失败一律 None，供 rerank fail-closed 跳过云端。
+    """The card's live data ownership; None when missing, invalid or unreadable, and then reranking
+    skips the cloud.
 
-    归属是可否把候选原文送云的唯一依据，和 active-only 一样必须以卡片 live frontmatter 为准，
-    不信向量 metadata 的冻结副本。
+    Ownership alone decides whether a candidate's text may go to the cloud, so like the active
+    filter it is read from the card's front matter, never from the copy in the vector metadata.
     """
     try:
         if paper_id not in fm_cache:
@@ -373,31 +385,33 @@ def _ownership_for_candidate(paper_id: str, chunk_id: str, hit: dict,
     )
 
 
-# ── require_verified:§二.3 fail-closed(默认关,口径④真 ts fail-closed)────────────────
+# ── require_verified (off by default): any doubt counts as not verified ──
 def _judge_verified(recs: list, evidence_review_value: str) -> bool:
-    """该 paper_id 的 to=='active' 记录集:任一 ts 缺失 / fromisoformat 解析失败 / 最新时间不唯一 → False(fail-closed);
-    唯一最新且 trigger==EvidenceReview校核结果 → True。**不静默丢缺 ts、不用字符串 max。**"""
+    """Whether the paper's latest to=='active' record was triggered by a card review verdict. Any record
+    without a readable ts, or two records sharing the latest time, gives False; times are parsed,
+    never compared as strings."""
     if not recs:
-        return False                                        # 查不到 → fail-closed
+        return False                                        # none found: not verified
     parsed = []
     for r in recs:
         ts = r.get("ts")
         if not isinstance(ts, str) or not ts.strip():
-            return False                                    # 任一缺 ts → fail-closed
+            return False                                    # a record without ts: not verified
         try:
             dt = datetime.fromisoformat(ts)
         except (ValueError, TypeError):
-            return False                                    # 解析失败 → fail-closed
+            return False                                    # an unreadable ts: not verified
         parsed.append((dt, r))
     latest = max(dt for dt, _ in parsed)
     newest = [r for dt, r in parsed if dt == latest]
-    if len(newest) != 1:                                    # 最新时间不唯一 → fail-closed
+    if len(newest) != 1:                                    # two latest records: not verified
         return False
     return newest[0].get("trigger") == evidence_review_value
 
 
 def _verified_by_evidence_review(paper_id: str, cache: dict) -> bool:
-    """扫描现存 KNOWLEDGE_ADMISSION_log_YYYY.jsonl,取 data_id==paper_id 且 to=='active' 记录,交 _judge_verified 判(真 ts fail-closed)。"""
+    """Read the card state logs (KNOWLEDGE_ADMISSION_log_YYYY.jsonl) for the paper's to=='active'
+    records and let _judge_verified decide."""
     if paper_id in cache:
         return cache[paper_id]
     from memorive.documents.card_states.machine import Trigger
@@ -416,9 +430,10 @@ def _verified_by_evidence_review(paper_id: str, cache: dict) -> bool:
     return ok
 
 
-# ── Chroma 查询 → 内部命中列表 ───────────────────────────────────────────
+# ── Chroma query -> hits ──────────────────────────────────────────────
 def _query(col, qvec, n: int, *, where: dict | None = None) -> list:
-    """Chroma query → [dict(chunk_id,paper_id,text,distance)]；where 非空时在向量层硬限来源。"""
+    """A Chroma query as [dict(chunk_id, paper_id, text, distance)]; a non-empty where limits the source
+    inside the vector store."""
     if n <= 0:
         return []
     kwargs = {
@@ -534,7 +549,7 @@ def _should_run_multimodal_rank(strategy, active: list[dict]) -> bool:
 
 
 def _count_for_scope(col, where: dict | None) -> int:
-    """共享模式用 collection.count；指定来源时按同一 metadata where 计数。"""
+    """collection.count in shared mode; with a source, the count under the same metadata where."""
     if where is None:
         return col.count()
     scoped = col.get(where=where, include=[])
@@ -547,16 +562,18 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
                         multimodal_rank_fn=None,
                         collection=None, lib_root=None,
                         paper_id: str | None = None) -> CandidateSet:
-    """CandidateRetrieval 主入口:问题 → CandidateSet(chunk 单层召回 + active-only 回读活卡 + rerank + 归并回卡片)。
+    """Question -> CandidateSet: recall chunks, keep those of active cards, rerank, map back to cards.
 
-    paper_id=None → 共享 collection；paper_id 非空 → Chroma `where={"paper_id": paper_id}` 硬限指定论文。
-    自然语言中的标题/ID 不视为来源约束，调用方必须显式传本参数；scope 同步进入 CandidateSet 与 RUNTIME_LOG。
-    embed_fn / rerank_fn / multimodal_rank_fn / collection / lib_root 可注入(验收用)。
-    **单次** overfetch 到 min(MAX_OVERFETCH, count)→ active-only → require_verified → **rerank(默认关)** → 每卡限额 → 取 target。
-    `MEMORIVE_RETRIEVAL_RANK_MODE=multimodal_listwise|auto` 时走本地完整 ID 顺序；不产生 relevance score、
-      不做阈值砍除。调用/结果任一异常退回 distance。旧 `rerank_fn(question,texts)->list[float]`
-      仅在 `legacy_score` 兼容模式使用；所有模式默认关闭。
-    只召回、不打包;active-only 是 post-filter(回读活卡、非冻结 metadata);固定召回不随库膨胀。
+    paper_id=None searches the shared collection; a paper_id limits it in Chroma with
+    where={"paper_id": paper_id}. A title or id in the question text is not taken as a limit; callers
+    pass paper_id. The scope goes into the CandidateSet and the log.
+    embed_fn, rerank_fn, multimodal_rank_fn, collection and lib_root can be injected (tests).
+    One overfetch query up to min(MAX_OVERFETCH, count), then active only, then require_verified,
+    then reranking (off by default), then the per-card limit, then up to target.
+    MEMORIVE_RETRIEVAL_RANK_MODE=multimodal_listwise or auto uses a local model's full order of ids:
+      no relevance score, no threshold; any failure falls back to distance order. The older
+      rerank_fn(question, texts) -> list[float] is used only in legacy_score mode. All modes are off
+      by default. The number recalled is fixed and does not grow with the library.
     """
     if not isinstance(question, str) or not question.strip():
         raise ValueError("CandidateRetrieval: question 必须是非空字符串(空 / 纯空白 fail-loud)")
@@ -580,7 +597,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
     col = collection if collection is not None else _open_collection(target)
     count = _count_for_scope(col, scope_where)
 
-    # 单次 overfetch 到上限(口径①:别两段早停;够不够按最终 final 判)。
+    # One overfetch query up to the cap; whether there are enough is judged on the final list.
     hits = _query(col, qvec, min(cfg["max_overfetch"], count), where=scope_where)
 
     drop = {k: 0 for k in ("pending", "quarantined", "card_missing", "card_state_error",
@@ -591,7 +608,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
         if len(examples) < _MAX_DROPPED_EXAMPLES:
             examples.append({"chunk_id": chunk_id, "reason": reason})
 
-    # active-only post-filter(回读活卡;分类计数,口径③⑤)。
+    # Keep chunks of active cards (the card's live status), counting the rest by reason.
     st_cache, fm_cache, ver_cache, chunk_metadata_cache = {}, {}, {}, {}
     active = []
     for h in hits:
@@ -602,7 +619,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
             drop[st] += 1                                   # pending/quarantined/card_missing/card_state_error
             _ex(h["chunk_id"], st)
 
-    # require_verified(默认关):仅放行触发源=EvidenceReview校核结果者(口径④真 ts fail-closed)。
+    # require_verified (off by default): only cards admitted on a card review verdict.
     if require_verified:
         kept = []
         for h in active:
@@ -613,9 +630,10 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
                 _ex(h["chunk_id"], "verified_fail")
         active = kept
 
-    # logical rerank 默认关。legacy_score 保留旧分数/阈值兼容；multimodal_listwise 只接受完整 ID 顺序。
+    # Reranking is off by default. legacy_score keeps the old scores and threshold; multimodal_listwise
+    # accepts only a full order of ids.
     rcfg = _rerank_cfg()
-    # 关闭时保持 Core 精确旧路径：不为未执行的模型排序提前读 sidecar。
+    # When off, nothing changes: no sidecar is read for a ranking that will not run.
     if rcfg["enabled"]:
         for hit in active:
             _enrich_rank_metadata(hit, lib_root, chunk_metadata_cache)
@@ -734,9 +752,10 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
             else:
                 active.sort(key=lambda h: h["distance"])
     else:
-        active.sort(key=lambda h: h["distance"])            # 口径②:distance 升序(越小越近);rerank 关时的现状路径
+        active.sort(key=lambda h: h["distance"])            # distance ascending, smaller is closer; the path without reranking
 
-    # 每卡限额 + 取满 target(贪心按序；listwise 用序位、legacy 用分数、关闭时用距离)。
+    # The per-card limit, then up to target, in order (the listwise place, the legacy score, or
+    # the distance when reranking is off).
     per_card, final = {}, []
     for h in active:
         if len(final) >= cfg["target"]:
@@ -749,7 +768,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
         field = _field_for_chunk(h["paper_id"], h["chunk_id"], lib_root, fm_cache)
         if field is None:
             drop["field_missing"] += 1
-        cred = _credibility_for_field(h["paper_id"], field, fm_cache)   # v6.4 之四:透传该字段 EVIDENCE_REVIEW 信用档
+        cred = _credibility_for_field(h["paper_id"], field, fm_cache)   # the card review's credibility of the field, passed on
         structure = {
             key: h.get(key)
             for key in ("section_path", "block_type", "page_start", "page_end", "source_role")
@@ -833,7 +852,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
                    "scope": {"mode": scope_mode, "paper_id": paper_id,
                              "matched_vector_count": count},
                    "strategy_qtype": getattr(getattr(strategy, "qtype", None), "value", None),
-                   # logical rerank 留痕；listwise 序位与 score 严格分型。
+                   # the reranking record; a listwise place and a score are kept apart
                    "rerank": {"enabled": rcfg["enabled"], "threshold": rcfg["threshold"],
                               "mode": rerank_state["mode"],
                               "output_kind": rerank_state["output_kind"],

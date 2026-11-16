@@ -1,18 +1,20 @@
-"""RESEARCH_ANALYSIS 分析输出契约本体(Analysis 第 1 步)——拿 Context Pack + 问题 → 固定四段分析建议。
+"""The analysis of one paper: a context pack and a question become suggestions in four fixed sections.
 
-承 Analysis 第 0 步契约。链路:渲染 prompt(§一四段) → 组 payload → 经 MODEL_GATEWAY call("analysis")
-(绝不直连 SDK;§六) → 严格解析 JSON(坏/空 fail-loud) → 模块据权威块重建 source_id
-+ 假源移出文献支持段(§三 + Q2 fail-closed) → 强制四段标签 + 免责语(§二/§四) → RUNTIME_LOG 留痕(§七)。
+The steps: render the prompt, build the payload, call the model through the gateway
+(call("analysis"), never an SDK), parse the JSON strictly (a broken or empty reply raises), rebuild
+each sentence's source_id from the given blocks and move sentences with an unknown source out of
+the literature section, add the section labels and the disclaimer, write a reason record.
 
-守边界(承契约):
-- 消费 Context Pack、不自检索;active ≠ 已校验(不据 admission 判可信);认真对待反例名额。
-- 不造自动越界检测器(§四:越界靠 prompt 约束 + 人工抽查)。
-- 假源检测是**集合成员判断**、纯确定性、**不上模型判官**(含 deepseek-flash)。
-- 「真 id 但块不支撑该句」的语义误挂属 EVIDENCE_REVIEW 分析级校核(verify_judgment、Integration 接)、
-  RESEARCH_ANALYSIS 只交挂了 source_id 的校核对象、不自判语义支撑(登债)。
+What it does not do:
+- It reads the context pack and never retrieves on its own; active does not mean reviewed.
+- It has no automatic check for overreach; the prompt and spot checks by people cover that.
+- Finding a made-up source is a set membership test, without a model.
+- Whether a real block actually supports its sentence is for the card review's judgment step;
+  this module hands over the sentences with their source_id.
 
-调模型经可注入 seam model_call(默认 call("analysis"));链路健壮性(双档留痕/记账/区域门/
-归属安全阀/红线)留第 2 步,本步聚焦「输出对不对」。
+The model call can be injected (model_call; by default call("analysis")). Before the call the
+pack's data ownership is bound, the ownership guard runs and, for an overseas provider, the
+region check.
 """
 from __future__ import annotations
 from memorive.models.gateway.prompt_cache import source_first
@@ -56,15 +58,16 @@ _PROMPT_PATHS = {
     "source_language": _PROMPT_ROOT / "v6.md",
 }
 
-_TIMEOUT = 180          # deepseek-v4 推理模型、分析慢,给足
+_TIMEOUT = 180          # a reasoning model; analyses take long
 
 
 class AnalysisError(Exception):
-    """RESEARCH_ANALYSIS 分析失败(坏/空模型响应等)——绝不静默产半份分析(承 EVIDENCE_REVIEW fail-loud 口径)。"""
+    """The analysis failed (a broken or empty model reply, say); half an analysis is never returned."""
 
 
 class OwnershipFailClosed(AnalysisError):
-    """归属安全阀挡下:他人托付 / 无权处置数据 + 本地 RESEARCH_ANALYSIS 推理槽未就绪 → 绝不静默转云(承 §七 b)。"""
+    """Stopped for data ownership: the data is entrusted or not the user's to send, and no local
+    analysis model is ready, so it is never sent to the cloud instead."""
 
     def __init__(self, message: str, *, error_code: str | None = None):
         self.error_code = error_code
@@ -72,7 +75,7 @@ class OwnershipFailClosed(AnalysisError):
 
 
 class RegionBlocked(AnalysisError):
-    """境外 API 出口区域预检门挡下(大陆出口 / 出口区域无法确认;承 §六、v6.4 之二)。"""
+    """Stopped by the region check before an overseas API (a mainland exit, or the region is unknown)."""
 
 
 _PROMPT_CACHE: dict[str, str] = {}
@@ -103,7 +106,7 @@ def _prompt_template(*, output_language: str | None = None) -> str:
 
 
 def _render_blocks(context_pack) -> str:
-    """把 Context Pack 每块渲染给模型:chunk_id + 是否反例 + 原文。"""
+    """Each block of the context pack as the model sees it: chunk_id, whether it is a counterexample, the text."""
     lines = []
     for b in getattr(context_pack, "blocks", ()) or ():
         cid = (getattr(b, "source", None) or {}).get("chunk_id")
@@ -207,7 +210,7 @@ def build_payload(
     *,
     output_language: str | None = None,
 ) -> dict:
-    """组 MODEL_GATEWAY payload；max_tokens 由 analysis 槽作单一配置源。"""
+    """The gateway payload; max_tokens comes from the analysis slot only."""
     template = (_prompt_template(output_language=output_language)
                 .replace("__QUESTION__", question)
                 .replace("__OUTPUT_LANGUAGE__", language_display_name(output_language)))
@@ -245,7 +248,7 @@ def _require_str_list(data: dict, key: str) -> list:
 
 
 def parse_analysis(text) -> dict:
-    """严格解析模型四段 JSON;坏/空/schema 非法 → AnalysisError(绝不静默产半份)。"""
+    """Parse the model's four-section JSON strictly; a broken, empty or invalid reply raises AnalysisError."""
     if not isinstance(text, str) or not text.strip():
         raise AnalysisError("模型响应为空 / 非字符串")
     try:
@@ -271,8 +274,8 @@ def parse_analysis(text) -> dict:
         lit.append({"text": t.strip(),
                     "source_chunk_id": cid.strip() if isinstance(cid, str) and cid.strip() else None})
 
-    # possibly_irrelevant(A·修跨篇混入·RESEARCH_ANALYSIS 相关性闸):**优雅兜底**——键缺省(v2 旧响应)→ 空列表、绝不 fail-loud;
-    # 键在但非列表 → fail-loud(v3 契约违反);每条 {text, source_chunk_id, reason}(reason 可缺)。
+    # possibly_irrelevant: a missing key (an older reply) is an empty list; a key that is not a list
+    # raises. Each item is {text, source_chunk_id, reason}, reason optional.
     pi_raw = data.get("possibly_irrelevant")
     pi = []
     if pi_raw is not None:
@@ -302,8 +305,8 @@ def parse_analysis(text) -> dict:
 
 
 def _default_model_call(payload: dict) -> dict:
-    """默认:经 MODEL_GATEWAY call("analysis")——绝不直连 SDK;MODEL_GATEWAY 失败 → AnalysisError。
-    ⚠ 保持 analysis 语义(承第 0 步首跑硬约束):走 analysis 槽记账/区域门/留痕,不复用 distill/verify。"""
+    """The default model call: call("analysis") through the gateway; a gateway failure raises
+    AnalysisError. It uses the analysis slot (its cost record, region check and log), not distill or verify."""
     from memorive.models.gateway import call
     from memorive.models.gateway.errors import GatewayError
     try:
@@ -312,8 +315,8 @@ def _default_model_call(payload: dict) -> dict:
         raise AnalysisError(f"MODEL_GATEWAY analysis 调用失败:{type(e).__name__}: {e}") from e
 
 
-# ── 归属对象绑定 + 区域门(Analysis 第2步;发模型调用前的两道闸)──────────────────────
-# 区域门白名单:仅这两个 reason + not gated 才放行;gated / region_unknown / 任何将来新增未知 reason 一律默认挡。
+# ── ownership binding and the region check, before the model call ─────────────────────
+# Only these two reasons pass, and only when not gated; gated, region_unknown and any future reason stop.
 _REGION_PASS_REASONS = ("domestic_skip", "region_ok")
 
 
@@ -429,17 +432,17 @@ def _raise_ownership_fail_closed(exc: OwnershipContractError, *, stage: str) -> 
 
 
 def _default_region_check() -> None:
-    """区域门(承 §六、v6.4 之二):经 region_preflight('analysis')(由 slot.provider 驱动)——
-    国内 / 本地 → domestic_skip 放行;非陆 → region_ok 放行;大陆 → gated 挡下;查不到 → 交人(均挡下、绝不静默发调用)。
-    首跑 DeepSeek(国内)自动放行;升 Anthropic(境外)才真进门。"""
+    """The region check, region_preflight('analysis'), decided by slot.provider: domestic or local
+    passes (domestic_skip), another country passes (region_ok), mainland China stops (gated), an
+    unknown region stops too and is left to the user. DeepSeek is domestic; Anthropic is overseas."""
     from memorive.models.gateway import region_preflight
     from memorive.models.gateway.errors import GatewayError
     try:
         rc = region_preflight("analysis")
     except GatewayError as e:
         raise AnalysisError(f"RESEARCH_ANALYSIS 区域门预检失败:{type(e).__name__}: {e}") from e
-    # 真 fail-closed · 白名单放行:仅「非 gated 且 reason ∈ {domestic_skip, region_ok}」放行;
-    # gated / region_unknown / 任何将来新增未知 reason 一律默认挡(绝不静默放行)。
+    # Only "not gated and reason in {domestic_skip, region_ok}" passes; gated, region_unknown and any
+    # reason added later stop the call.
     if (not rc.get("gated")) and rc.get("reason") in _REGION_PASS_REASONS:
         return
     msg = rc.get("message") or f"区域门挡下:reason={rc.get('reason')}, gated={rc.get('gated')}"
@@ -453,13 +456,16 @@ def analyze(context_pack, question: str, *,
             data_ownership=None, legacy_data_ownership=None,
             ownership_route_profile=None, model_call=None,
             region_check=None, output_language: str | None = None) -> AnalysisResult:
-    """RESEARCH_ANALYSIS 主入口:Context Pack + 问题 → 固定四段分析建议(建议性、非结论)。
+    """Context pack and question -> an analysis in four sections (suggestions, not conclusions).
 
-    融合铁律 + source_id 强制 + 越界防线 + 免责语。发模型调用前依次:pack ownership binding → guard → 区域门。
-    data_ownership:旧参数别名，仅 compare-only；新调用使用 legacy_data_ownership。
-    model_call:可注入(默认 call("analysis") 走**自动 API 档**;注入 = **手动订阅档**/合成,不经 MODEL_GATEWAY 不记账)。
-    region_check:可注入(默认查 analysis 槽 provider 属境外才 preflight;离线测各区域场景用)。
-    constraints:输出约束占位(留后续)。
+    Before the model call: the pack's ownership binding, the ownership guard, the region check.
+    data_ownership: the old name of the parameter, compared only; new callers pass
+      legacy_data_ownership.
+    model_call: by default call("analysis"), the automatic API path with a cost record; an injected
+      call is the manual (subscription) path or a test, without the gateway or a cost record.
+    region_check: by default the check runs when the analysis slot's provider is overseas; tests
+      inject one.
+    constraints: reserved for output constraints.
     """
     if not isinstance(question, str) or not question.strip():
         raise ValueError("RESEARCH_ANALYSIS: 问题为空(fail-loud、不发空 prompt)")
@@ -511,9 +517,10 @@ def analyze(context_pack, question: str, *,
             stage="model_seam",
         )
 
-    # 先建权威块索引 + guard(加固):重复 / 缺失 / 空 chunk_id → fail-loud、**不发模型调用**。
-    # source_id 是 EVIDENCE_REVIEW 下游挂载点;把"上游不出重复 chunk_id"从隐式覆盖(by_cid[cid]=block)变显式拒绝。
-    # (当前 CandidateRetrieval 单次 col.query()、向量 id=chunk_id、无多查询合并,pack 内重复不该出现;此为显式护栏、非活 bug 修复。)
+    # Index the blocks by chunk_id first: a repeated, missing or empty chunk_id raises before any
+    # model call. source_id is what the card review attaches to, so a repeated chunk_id is refused
+    # rather than silently overwritten (retrieval makes one query keyed by chunk_id, so a pack
+    # should not have one).
     by_cid = {}
     for b in getattr(context_pack, "blocks", ()) or ():
         cid = (getattr(b, "source", None) or {}).get("chunk_id")
@@ -523,8 +530,9 @@ def analyze(context_pack, question: str, *,
             raise AnalysisError(f"Context Pack 出现重复 chunk_id={cid!r};source_id 挂载点会错配,拒绝分析(fail-loud、不发模型调用)")
         by_cid[cid] = b
 
-    # 区域门:仅默认 MODEL_GATEWAY 路径(境外 API 真调用)前挡;region_check 可注入(离线测各场景)。
-    # 手动档 / 合成(注入 model_call、未注入 region_check)不发真调用 → 跳过区域门。
+    # The region check runs only on the default gateway path (a real overseas call); tests inject
+    # region_check. The manual path and tests (model_call injected, region_check not) send no real
+    # call and skip it.
     if region_check is not None:
         region_check()
     elif model_call is None:
@@ -553,17 +561,17 @@ def analyze(context_pack, question: str, *,
     payload = build_payload(context_pack, question, output_language=language)
     resp = (model_call or _default_model_call)(payload)
     text = (resp or {}).get("text") or ""
-    parsed = parse_analysis(text)          # 坏/空 → AnalysisError
+    parsed = parse_analysis(text)          # broken or empty: AnalysisError
 
-    # possibly_irrelevant(A·RESEARCH_ANALYSIS 相关性闸兜底):先分流它，使同一 source_chunk_id 的相关性判定对
-    # literature_support 有优先级。否则模型双挂同一块时会把离题块既显示为支持、又显示为离题，误导读者。
-    # 不变量:possibly_irrelevant 恒可解析——cid 解析不出(假源)则归 flagged,不留在此段。
+    # possibly_irrelevant first, so its verdict on a source_chunk_id wins over literature_support:
+    # otherwise a block the model cited both ways would show as support and as off topic. Every
+    # possibly_irrelevant item resolves; one with an unknown chunk id goes to flagged.
     lit, flagged, possibly_irrelevant = [], [], []
     irrelevant_chunk_ids, suppressed_literature_chunk_ids = set(), []
     for item in parsed["possibly_irrelevant"]:
         cid = item["source_chunk_id"]
         block = by_cid.get(cid) if cid is not None else None
-        if block is None:                  # 模型把离题标到一个不在库的假源上 → 当假源处理(归 flagged)
+        if block is None:                  # off topic but citing an unknown chunk: flagged
             flagged.append(FlaggedClaim(text=item["text"], claimed_chunk_id=cid))
         else:
             possibly_irrelevant.append(PossiblyIrrelevantClaim(
@@ -573,11 +581,11 @@ def analyze(context_pack, question: str, *,
     for item in parsed["literature_support"]:
         cid = item["source_chunk_id"]
         block = by_cid.get(cid) if cid is not None else None
-        if block is None:                  # 无效/假源(不在给定块内 或 没挂)→ 移出文献支持段(Q2)
+        if block is None:                  # no source, or not a given block: out of the literature section
             flagged.append(FlaggedClaim(text=item["text"], claimed_chunk_id=cid))
-        elif cid in irrelevant_chunk_ids: # 相关性闸优先：同源离题块不得仍充当文献支持
+        elif cid in irrelevant_chunk_ids: # a block marked off topic cannot also support
             suppressed_literature_chunk_ids.append(cid)
-        else:                              # 权威重建 source_id(据块、非模型自报)
+        else:                              # source_id rebuilt from the block, not taken from the model
             lit.append(LiteratureClaim(
                 text=item["text"],
                 source_id=dict(block.source),
@@ -588,7 +596,7 @@ def analyze(context_pack, question: str, *,
     analysis_model = (resp or {}).get("model") or (
         {"zh":"(未知)","ja":"(不明)"}.get(language, "(unknown)")
     )
-    mode = "manual" if model_call is not None else "auto"   # 双档由路径定:注入 model_call=手动订阅/合成(不经 MODEL_GATEWAY 不记账);默认=自动 API 档(经 MODEL_GATEWAY 记账)。「manual:」前缀仅作 analysis_model 命名规范
+    mode = "manual" if model_call is not None else "auto"   # an injected model_call is manual (no gateway, no cost record); the "manual:" prefix only names analysis_model
     analyzed_at = datetime.now().astimezone().isoformat(timespec="minutes")
     coverage_status = str(getattr(context_pack, "coverage_status", "not_assessed"))
     missing_facets = tuple(getattr(context_pack, "missing_facets", ()) or ())
@@ -684,7 +692,7 @@ def analyze(context_pack, question: str, *,
         ownership_propagation_receipt=receipt.to_dict(),
     )
 
-    # RUNTIME_LOG 留痕(§七):响亮记假源计数(承 Q2)。
+    # The reason record, with the count of sentences without a valid source.
     log_reason("RESEARCH_ANALYSIS", "RESEARCH_ANALYSIS 分析",
                f"mode={mode} model={analysis_model} lit={len(lit)} ai={len(result.ai_general_knowledge)} "
                f"risk={len(result.risks_and_uncertainties)} recheck={len(result.recheck_locations)} "
@@ -705,7 +713,7 @@ def analyze(context_pack, question: str, *,
                    "recheck_count": len(result.recheck_locations),
                    "flagged_unsourced_count": len(flagged),
                    "flagged_claimed_chunk_ids": [c.claimed_chunk_id for c in flagged],
-                   # A(修跨篇混入):相关性闸留痕(离题块移出文献支持、单列疑似不相关)
+                   # off-topic sentences, moved out of the literature section
                    "possibly_irrelevant_count": len(possibly_irrelevant),
                    "possibly_irrelevant_chunk_ids": [c.source_id.get("chunk_id") for c in possibly_irrelevant],
                    "suppressed_literature_support_count": len(suppressed_literature_chunk_ids),

@@ -1,14 +1,14 @@
-"""Memorive RESEARCH-ANALYSIS/RESEARCH_ANALYSIS · RESEARCH_ANALYSIS 分析共享数据结构(Analysis 第 1 步立)。
+"""The analysis records: from a context pack and a question, suggestions in four fixed sections
+(suggestions, not conclusions). Literature support and AI general knowledge are kept apart, every
+literature sentence names its source, and a disclaimer ends the analysis. Job folders pickle
+AnalysisResult (memorive/platform/pickle_compat.py reads old ones).
 
-承 Analysis 第 0 步契约 §一/§二/§三/§四:RESEARCH_ANALYSIS 拿 Context Pack + 问题 → 固定四段分析建议
-(建议性、非结论)。融合铁律(文献支持 ⊥ AI 通识)+ source_id 强制 + 越界防线 + 免责语。
-
-命门落法(结构性保证、不靠模型自觉):
-- 四段固定标签 + 末尾免责语由**模块渲染**强制,不依赖模型每次记得(§二/§四)。
-- 文献支持每句的 source_id 由**模块据权威块重建**(§三);模型只给 source_chunk_id、
-  模块补全 paper_id/field。
-- 无效/假 source_chunk_id(不在给定块内)的句子**移出文献支持段**、进 flagged_unsourced、
-  绝不留在文献支持段(§二命门 + Q2 fail-closed)。
+These hold by construction, not by the model remembering them:
+- the four section labels and the closing disclaimer are rendered by this module;
+- each literature sentence's source_id is rebuilt by the module from the given blocks; the model
+  gives only source_chunk_id, the module adds paper_id and field;
+- a sentence whose source_chunk_id is not among the given blocks is moved out of the literature
+  section into flagged_unsourced.
 """
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ from dataclasses import dataclass
 
 from memorive.platform.language.source_preservation import normalize_source_language
 
-# 末尾固定免责语(§四:模块强制附、不依赖模型)。
+# The closing disclaimer, added by this module, not by the model.
 DISCLAIMER = "以上为建议，判断与撰写请自行完成。"
 
-# 四段固定标签(§二融合铁律:两块一眼可分;模块渲染、非模型产)。
+# The four section labels, rendered by this module so literature and AI knowledge are clearly apart.
 LABEL_LITERATURE = "【你的文献支持，附引用】"
 LABEL_AI_GENERAL = "【AI 补充通识，未经你的库验证，请核实】"
 LABEL_RISKS = "【风险与不确定性】"
@@ -101,29 +101,31 @@ def _localized(language: str | None) -> dict[str, str]:
 
 @dataclass(frozen=True)
 class LiteratureClaim:
-    """文献支持段的一句:必挂 source_id(模块据权威块重建的 {chunk_id,paper_id,field})。"""
+    """A sentence of the literature section, with its source_id ({chunk_id, paper_id, field}, rebuilt
+    by the module from the given blocks)."""
     text: str
-    source_id: dict          # {"chunk_id","paper_id","field"};field 可 None
+    source_id: dict          # {"chunk_id", "paper_id", "field"}; field may be None
     origin: str = "unknown"
     facet_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class FlaggedClaim:
-    """疑似无源/假源:模型挂的 source_chunk_id 不在给定块内(或没挂)。
-    移出文献支持段、需人工核(承 Q2 fail-closed 向命门)。"""
+    """A sentence whose source_chunk_id is missing or not among the given blocks. It is moved out of
+    the literature section for a person to check."""
     text: str
-    claimed_chunk_id: str | None    # 模型挂的(无效)chunk_id;None=模型没挂
+    claimed_chunk_id: str | None    # the chunk_id the model gave; None if none
 
 
 @dataclass(frozen=True)
 class PossiblyIrrelevantClaim:
-    """疑似不相关(A·修跨篇混入·RESEARCH_ANALYSIS 相关性闸兜底):source_chunk_id **能解析**(真在库、非假源),
-    但内容与本问题领域/研究对象不符(跨篇/跨域)。**区别于 FlaggedClaim**(假源、解析不出):本类挂
-    **模块据权威块重建的真 source_id**(可溯源),交人工判断是否采用;仅归类、绝不替用户下「不能用」结论。"""
+    """A sentence that may be off topic: its source_chunk_id resolves to a real block, but the content
+    is about another field or system than the question. Unlike FlaggedClaim (a source that does not
+    resolve), it carries the real source_id; a person decides whether to use it. It is only sorted
+    apart, never declared unusable."""
     text: str
-    source_id: dict                 # {"chunk_id","paper_id","field"}(据权威块重建;field 可 None)——能解析
-    reason: str | None = None       # 模型给的「为何判为离题」(研究不同体系),供人工参考;可缺
+    source_id: dict                 # {"chunk_id", "paper_id", "field"}, rebuilt; field may be None
+    reason: str | None = None       # the model's reason it is off topic, for the person; optional
 
 
 @dataclass(frozen=True)
@@ -146,17 +148,17 @@ def _bullets(items, none_text: str) -> list:
 
 @dataclass(frozen=True)
 class AnalysisResult:
-    """RESEARCH_ANALYSIS 产物:固定四段分析建议(建议性、非结论)。四段结构恒在(各段可空)、末尾免责语恒在。"""
+    """An analysis: suggestions in four fixed sections (each may be empty) and the closing disclaimer."""
     question: str
-    literature_support: tuple        # tuple[LiteratureClaim](每句挂重建 source_id)
+    literature_support: tuple        # tuple[LiteratureClaim], each with its rebuilt source_id
     ai_general_knowledge: tuple      # tuple[str]
     risks_and_uncertainties: tuple   # tuple[str]
     recheck_locations: tuple         # tuple[str]
-    flagged_unsourced: tuple         # tuple[FlaggedClaim](无效/假源、已移出文献支持段)
-    disclaimer: str                  # 恒 = DISCLAIMER(模块强制)
-    analysis_model: str              # 留痕:实际模型/档(承 §五;双档区分留第 2 步)
-    analyzed_at: str                 # 留痕:产出时间戳(本地、到分钟)
-    possibly_irrelevant: tuple = ()  # A(修跨篇混入):tuple[PossiblyIrrelevantClaim](真源但离题、单列疑似不相关);尾加默认=非破坏
+    flagged_unsourced: tuple         # tuple[FlaggedClaim], moved out of the literature section
+    disclaimer: str                  # always DISCLAIMER
+    analysis_model: str              # the model that answered
+    analyzed_at: str                 # when, local time to the minute
+    possibly_irrelevant: tuple = ()  # tuple[PossiblyIrrelevantClaim]; a default, so older pickles still load
     coverage_status: str = "not_assessed"
     missing_facets: tuple[str, ...] = ()
     answer_complete: bool | None = None
@@ -182,7 +184,8 @@ class AnalysisResult:
     review_limitations: tuple[str, ...] = ()
 
     def render(self, *, language: str | None = None) -> str:
-        """渲染人读的固定四段 + 免责语(§二两块一眼可分 + §四免责语强制)。"""
+        """The analysis as people read it: the four sections, literature and AI knowledge clearly apart,
+        and the disclaimer."""
         labels = _localized(language)
         L = [f"{labels['question']} {self.question}", "", labels["literature"]]
         if self.literature_support and any(c.facet_ids for c in self.literature_support):

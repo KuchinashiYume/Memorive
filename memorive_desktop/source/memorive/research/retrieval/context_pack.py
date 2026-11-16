@@ -1,18 +1,22 @@
-"""ContextAssembly Context Pack Builder —— 简化权重 + 强制反例名额 + token 硬上限打包(Retrieval 第 3 步)。
+"""Context assembly: the candidates packed into the context pack the analysis reads, with a simple
+weight, reserved room for counterexamples and a hard token limit.
 
-承契约 §一/§三/§四/§六。输入 = CandidateRetrieval `CandidateSet` + QueryUnderstanding `strategy`(可选),**不重新召回**。
+Input: candidate retrieval's CandidateSet and, optionally, query understanding's strategy. Nothing
+is recalled again.
 
-两条命门本步兑现(**= 完成判据,不打折**):
-- **强制反例名额(§四)**:pool 内**强制预留** `counterexample_target` 个「疑似反例」名额 + 截断中受保护 +
-  填不满如实 `counterexample_filled < target`(RUNTIME_LOG)。名额机制本步做全;仅「让反例真进 pool」
-  (CandidateRetrieval 检索多样化)是未来增强/债——**不是**把名额留 Research。
-- **token 硬上限(§三·生死线)**:三级优先级 **硬顶(绝对)> 反例保护 > 主流**;**只整块取舍、不切块内文本**;
-  单块 > 硬顶 → 整块不入(记 single_block_over_limit);`estimated_tokens ≤ token_hard_limit` **永远成立**、允许空 pack。
+Two rules always hold:
+- Room for counterexamples: counterexample_target places are reserved for likely counterexamples,
+  which are protected when the pack is cut; when fewer are found, counterexample_filled < target is
+  recorded as it is. Getting more counterexamples into the candidates is future work for retrieval.
+- The token limit: the limit comes first, then protected counterexamples, then the rest. Whole
+  blocks are kept or dropped, never cut; a block larger than the limit is dropped
+  (single_block_over_limit). estimated_tokens <= token_hard_limit always holds; an empty pack is
+  allowed.
 
-守边界:不重新召回;不造五维/DerivedPenalty/doc_type(留 `weight_fn` seam);admission 只标 active;
-  子对话精炼不做(登债);**reranker 在 CandidateRetrieval 落**(A·修跨篇混入),ContextAssembly 侧仅承其分:`_default_weight` 优先用
-  `rerank_score`(承拍板②)、ContextBlock 透传该分;ContextPack **绝不混 RESEARCH_ANALYSIS/RESEARCH_OPPORTUNITIES 字段**;CandidateRetrieval 召回计数原样透传。
-反例判定是**粗筛**(强信号)、恒标「疑似反例」交 RESEARCH_ANALYSIS,不裁判真实张力(承 §四.6)。
+The weight is the reranker's score when there is one (candidate_retrieval.py reranks), else
+1/(1+distance); weight_fn can replace it. admission is only marked active. The pack holds packing
+fields only, nothing of the analysis or opportunities; candidate retrieval's counts pass through.
+Counterexamples are found by strong signals only and marked "likely"; the analysis judges them.
 """
 from __future__ import annotations
 
@@ -34,27 +38,27 @@ from memorive.research.retrieval.ownership import (
 )
 from memorive.research.retrieval.types import ContextBlock, ContextPack
 
-# ── 默认值:全 env 可配、读取失败回默认;RUNTIME_LOG 记本次实际用值(口径⑦)──
+# ── defaults: each can be set by environment; the values used are logged ──
 _ENV = {
     "counterexample_target": ("MEMORIVE_RETRIEVAL_COUNTEREXAMPLE_TARGET", 3),
     "token_hard_limit": ("MEMORIVE_RETRIEVAL_TOKEN_HARD_LIMIT", 6000),
-    "token_ratio": ("MEMORIVE_RETRIEVAL_TOKEN_RATIO", 1.0),          # float(保守偏高估=安全)
+    "token_ratio": ("MEMORIVE_RETRIEVAL_TOKEN_RATIO", 1.0),          # float; estimating high is the safe side
     "overhead_per_block": ("MEMORIVE_RETRIEVAL_TOKEN_OVERHEAD_PER_BLOCK", 32),
 }
 
-# 强信号:**单独触发** is_counterexample(疑似反例)。承口径①。
+# Strong signals: each alone sets is_counterexample.
 _STRONG_CE = (
     "相反", "反对", "反证", "不支持", "证伪", "无显著", "未观察到", "未发现", "不成立",
     "相矛盾", "驳斥", "证据不足", "并不支持", "无法重现", "未能重现",
     "contrary", "contradict", "refute", "no significant", "failed to", "did not support",
     "does not support", "no evidence", "inconsistent with", "disprove", "rebut",
 )
-# 弱信号:仅辅助、**不单独触发**(留作口径记录;本步不单独用,承口径①)。
+# Weak signals: never alone; kept as a record of what was considered.
 _WEAK_CE = ("但", "然而", "局限", "however", "but", "limitation")
 
 
 def _cfg() -> dict:
-    """读 env 配置,任一非正/解析失败回默认(口径⑦)。"""
+    """The settings from the environment; a value that is not positive or not readable falls back to the default."""
     out = {}
     for key, (env, default) in _ENV.items():
         raw = os.environ.get(env)
@@ -70,15 +74,16 @@ def _cfg() -> dict:
 
 
 def _weight(distance, rule_weight: float = 1.0):
-    """`1/(1+max(distance,0))×规则`;distance 缺失/NaN/inf → None(调用方置 0.0 最低权重 + RUNTIME_LOG,不污染排序)。承口径⑧。"""
+    """1/(1+max(distance, 0)) times the rules; a missing, NaN or infinite distance gives None (the
+    caller then uses 0.0 and logs it, so the order is not disturbed)."""
     if distance is None or not isinstance(distance, (int, float)) or not math.isfinite(distance):
         return None
     return (1.0 / (1.0 + max(float(distance), 0.0))) * rule_weight
 
 
 def _default_weight(candidate):
-    """A(修跨篇混入·承拍板②):rerank **开**(candidate.rerank_score 有效)→ 直接用 relevance_score 作权重
-    (越大越相关);rerank **关**/跳过/未跑(rerank_score=None)→ 退回 `1/(1+distance)`。二者皆越大越优,排序一致。"""
+    """The reranker's relevance score when there is one (larger is more relevant); otherwise
+    1/(1+distance). Both are larger-is-better, so the order is the same kind."""
     rs = getattr(candidate, "rerank_score", None)
     if rs is not None and isinstance(rs, (int, float)) and math.isfinite(rs):
         return float(rs)
@@ -86,12 +91,14 @@ def _default_weight(candidate):
 
 
 def _estimate_tokens(content, ratio: float, overhead: int) -> int:
-    """`ceil(len(content)×ratio)+overhead`(保守上界,overhead 含 source/admission 等序列化开销)。承口径③。"""
+    """ceil(len(content) x ratio) + overhead: an upper estimate; overhead covers the serialized
+    source, admission and so on."""
     return math.ceil(len(content or "") * ratio) + overhead
 
 
 def _is_counterexample(text) -> bool:
-    """**强信号才触发**疑似反例(承口径①);弱信号不单独触发。中文子串 + 英文小写匹配。"""
+    """A likely counterexample: only strong signals count, weak ones alone do not. Chinese as
+    substrings, English in lower case."""
     t = (text or "").lower()
     return any(kw in t for kw in _STRONG_CE)
 
@@ -226,10 +233,11 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
                        retrieval_mode: str | None = None,
                        token_hard_limit: int | None = None,
                        card_review_qualifications=()) -> ContextPack:
-    """ContextAssembly 主入口:CandidateSet → ContextPack(简化权重 + 强制反例名额 + token 硬上限打包)。
+    """CandidateSet -> ContextPack: weights, reserved counterexample room, the token limit.
 
-    三级优先级 **硬顶(绝对)> 反例保护 > 主流**;只整块取舍;`estimated_tokens ≤ token_hard_limit` 永成立。
-    确定化:反例池/主流池各按 (weight 降 / distance 升 / chunk_id 升) 稳定排序,可复现可测。
+    The limit first, then protected counterexamples, then the rest; whole blocks only;
+    estimated_tokens <= token_hard_limit always holds. Counterexamples and the rest are each sorted by
+    weight (descending), distance and chunk_id (ascending), so the result is the same every time.
     """
     cfg = _cfg()
     if token_hard_limit is not None and (
@@ -250,7 +258,7 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
     cands = list(getattr(candidate_set, "candidates", ()) or ())
     wf = weight_fn or _default_weight
 
-    # 名额:找反例类放大(承口径⑦);≤ 候选数。
+    # The room for counterexamples: larger for FIND_COUNTEREXAMPLE, at most the number of candidates.
     single_paper = retrieval_mode == "single_paper_extraction"
     ce_target = (0 if single_paper
                  else cfg["counterexample_target"])
@@ -259,7 +267,7 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
         ce_target = max(ce_target, math.ceil(getattr(candidate_set, "final_active_count", len(cands)) * 0.5))
     ce_target = min(ce_target, len(cands))
 
-    # 1. 算 weight + tokens + 疑似反例(distance 防守,口径⑧)。
+    # 1. Weight, tokens and likely counterexample of each candidate.
     bad_distance = 0
     rows = []
     for c in cands:
@@ -270,7 +278,8 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
         rows.append({"c": c, "w": float(w), "tok": _estimate_tokens(c.text, ratio, overhead),
                      "ce": _is_counterexample(c.text)})
 
-    # 2. 稳定排序:listwise 序位优先；否则沿用 weight / distance。序位不是伪造 relevance score。
+    # 2. A stable order: a model-generated ranking first, else weight and distance. A ranking place
+    #    is not turned into a fake relevance score.
     def _key(r):
         d = r["c"].distance
         d = d if isinstance(d, (int, float)) and math.isfinite(d) else math.inf
@@ -284,21 +293,21 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
     ce_pool = [] if single_paper else sorted((r for r in rows if r["ce"]), key=_key)
     main_pool = sorted(rows if single_paper else (r for r in rows if not r["ce"]), key=_key)
 
-    # 3. 三级优先级打包(硬顶绝对 > 反例保护 > 主流;整块取舍,口径④⑤⑥)。
+    # 3. Pack: the limit first, then protected counterexamples, then the rest; whole blocks only.
     selected, total, ce_filled = [], review_tokens, 0
     single_over, ce_token_dropped, main_truncated = [], [], []
-    for r in ce_pool:                                       # 3a 先放至多 ce_target 个反例(受保护)
+    for r in ce_pool:                                       # 3a: up to ce_target counterexamples, protected
         if ce_filled >= ce_target:
             break
-        if r["tok"] > hard:                                # 反例自身超顶 → 整块丢、破不了顶(口径⑤)
+        if r["tok"] > hard:                                # a counterexample larger than the limit is dropped
             single_over.append(r["c"].chunk_id)
-        elif total + r["tok"] > hard:                      # 硬顶已紧,该反例放不下 → underfill(试下一个更小的)
+        elif total + r["tok"] > hard:                      # no room left for it: underfilled; try a smaller one
             ce_token_dropped.append(r["c"].chunk_id)
         else:
             selected.append(r)
             total += r["tok"]
             ce_filled += 1
-    for r in main_pool:                                    # 3b 再放主流(紧时先砍主流、绝不挤已选反例)
+    for r in main_pool:                                    # 3b: the rest; when space is short they go first, never a chosen counterexample
         if r["tok"] > hard:
             single_over.append(r["c"].chunk_id)
         elif total + r["tok"] > hard:
@@ -307,7 +316,7 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
             selected.append(r)
             total += r["tok"]
 
-    # 4. 产物:按 weight 排序输出(反例已在 selected 中受保护)。
+    # 4. The pack, by weight (the counterexamples are among the selected blocks).
     blocks = tuple(_ownership_block(row) for row in sorted(selected, key=_key))
     context_pack_ref, context_pack_hash = _context_pack_identity(blocks, qualifications)
     pack_snapshot = aggregate_blocks(blocks, subject_ref=context_pack_ref)
@@ -364,8 +373,8 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
                f"{' underfilled' if ce_filled < ce_target else ''}{' truncated' if truncated else ''}",
                event_category=None, context={
                    "estimated_tokens": total, "token_hard_limit": hard,
-                   "counterexample_slots": {"target": ce_target, "filled": ce_filled},   # 主口径,与 ContextPack 一致
-                   "counterexample_target": ce_target, "counterexample_filled": ce_filled,  # 扁平诊断(保留)
+                   "counterexample_slots": {"target": ce_target, "filled": ce_filled},   # the same form as in ContextPack
+                   "counterexample_target": ce_target, "counterexample_filled": ce_filled,  # flat copies for diagnosis
                    "counterexample_boost": boosted, "truncated": truncated,
                    "single_block_over_limit": single_over, "ce_token_dropped": ce_token_dropped,
                    "mainstream_truncated": main_truncated, "bad_distance": bad_distance,
@@ -376,7 +385,7 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
                        else "LEGACY_ENV_DEFAULT"
                    ),
                    "retrieval_mode": retrieval_mode or "multi_paper_synthesis",
-                   # CandidateRetrieval 计数原样透传(ContextAssembly 不改)
+                   # candidate retrieval's counts, passed through unchanged
                    "raw_recall_count": pack.raw_recall_count,
                    "filtered_non_active_count": pack.filtered_non_active_count,
                    "final_active_count": pack.final_active_count,

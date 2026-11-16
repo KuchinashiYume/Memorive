@@ -1,12 +1,16 @@
-"""Memorive RETRIEVAL/RETRIEVAL · RETRIEVAL 检索加权共享数据结构(Retrieval 第 1 步立;CandidateRetrieval/ContextAssembly 后续步骤复用)。
+"""The records retrieval passes along: what the question asks, the candidate chunks, the context pack.
 
-承 Retrieval 第 0 步契约 §一:QueryUnderstanding 只产「问题类型 + 检索策略参数」,不做召回/打包。
-- QueryType   五类主类(主 qtype 恒为其一)。
-- RetrievalStrategy 检索策略参数(含 counterexample_boost 信号,传 ContextAssembly)。
-- QueryUnderstanding = QueryUnderstanding 完整输出(只含策略参数,无候选块、无 Context Pack)。
+Query understanding only classifies the question and sets strategy parameters; candidate retrieval
+recalls chunks; context assembly packs them for the analysis.
+- QueryType: the five question types (every question gets one).
+- RetrievalStrategy: the strategy parameters, including counterexample_boost for context assembly.
+- QueryUnderstanding: the whole output of query understanding (parameters only, no chunks, no pack).
+- Candidate, CandidateSet: what candidate retrieval recalls.
+- ContextBlock, ContextPack: what context assembly hands to the analysis. Job folders pickle the
+  pack (memorive/platform/pickle_compat.py reads old ones).
 
-口径钉死:limitation_interest 是与主类**正交的副信号**(关注作者自陈局限),
-**不新增第六类、不驱动 counterexample_boost**(承第 1 步口径③④)。
+limitation_interest is a side signal next to the question type (the question is about limitations
+the authors state); it is not a sixth type and does not set counterexample_boost.
 """
 from __future__ import annotations
 
@@ -17,40 +21,43 @@ from memorive.research.retrieval.ownership import OwnershipContributor
 
 
 class QueryType(str, Enum):
-    """问题主类(5 类,承契约 §一)。主 qtype 恒为其一;全不命中兜底到 LOOKUP_CONCEPT(带 is_fallback)。"""
-    FIND_DATA = "find_data"                      # 找数据:某数值 / 指标
-    FIND_METHOD = "find_method"                  # 找方法:怎么做 / 流程 / 技术
-    FIND_COUNTEREXAMPLE = "find_counterexample"  # 找反例:反证 / 相反 / 证伪(→ counterexample_boost)
-    REVIEW_SYNTHESIS = "review_synthesis"        # 综述脉络:演变 / 概览 / 对比
-    LOOKUP_CONCEPT = "lookup_concept"            # 查概念:是什么 / 定义(亦作全不命中兜底占位)
+    """The question type. Every question gets one; with no signal at all it is LOOKUP_CONCEPT with
+    is_fallback set."""
+    FIND_DATA = "find_data"                      # a number or measure
+    FIND_METHOD = "find_method"                  # how something is done: a procedure, a technique
+    FIND_COUNTEREXAMPLE = "find_counterexample"  # counter-evidence (sets counterexample_boost)
+    REVIEW_SYNTHESIS = "review_synthesis"        # an overview: development, comparison
+    LOOKUP_CONCEPT = "lookup_concept"            # what something is; also the fallback
 
 
 @dataclass(frozen=True)
 class RetrievalStrategy:
-    """QueryUnderstanding 产出的检索策略参数(只输出、不执行;CandidateRetrieval/ContextAssembly 读)。
+    """The strategy parameters query understanding sets; candidate retrieval and context assembly read them.
 
-    counterexample_boost —— 「加大反例名额」信号,传 ContextAssembly(承契约 §四:找反例类整包以反例为主、名额放大)。
-      **仅由 counterexample_intent 驱动**(即主类为 FIND_COUNTEREXAMPLE 时);limitation_interest 绝不置此位。
-    limitation_interest —— 与主类正交的副信号:问句关注「作者自陈局限」时置 True,只影响 recall_emphasis、
-      **不放大反例名额**(承口径③:别把「找局限」当「找反证」)。
-    recall_emphasis —— ⚠ 仅「记录级粗提示」:Core 无字段级向量、其实际检索效果有限(供 RUNTIME_LOG 记录
-      + 将来 ContextAssembly/RETRIEVAL_WEIGHTING 用);QueryUnderstanding **绝不**据此造字段级加权 / 字段向量 / doc_type 来源加权 / RETRIEVAL_WEIGHTING 五维(留 Research)。
+    counterexample_boost: more room for counterexamples in the pack. Set only when the question type
+      is FIND_COUNTEREXAMPLE; limitation_interest never sets it.
+    limitation_interest: the question is about limitations the authors state. It changes only
+      recall_emphasis, not the room for counterexamples (looking for limitations is not looking for
+      counter-evidence).
+    recall_emphasis: a coarse hint, recorded in the log; there are no per-field vectors, so it
+      changes retrieval little, and no field weights are built from it.
     """
     qtype: QueryType
-    counterexample_boost: bool = False           # 仅 counterexample_intent(主类 FIND_COUNTEREXAMPLE)→ True
-    limitation_interest: bool = False            # 正交副信号:关注作者自陈局限,不放大反例名额
-    recall_emphasis: str | None = None           # 粗提示:'key_data'/'method'/'diversity'/'counterexample'/'limitations'/None
+    counterexample_boost: bool = False           # True only for FIND_COUNTEREXAMPLE
+    limitation_interest: bool = False            # about stated limitations; no more counterexample room
+    recall_emphasis: str | None = None           # 'key_data', 'method', 'diversity', 'counterexample', 'limitations' or None
 
 
 @dataclass(frozen=True)
 class QueryUnderstanding:
-    """QueryUnderstanding 完整输出。**只含策略参数**——无候选块、无 Context Pack(守边界:召回=CandidateRetrieval、打包=ContextAssembly)。"""
+    """The whole output of query understanding: strategy parameters only, no chunks and no pack
+    (recall is candidate retrieval's job, packing context assembly's)."""
     question: str
     qtype: QueryType
     strategy: RetrievalStrategy
-    matched_signals: tuple = ()                  # 命中的主类信号词(保序去重,可复现/可测);兜底为空 ()
-    is_fallback: bool = False                    # 主类无显式信号 → True(兜底中性策略,不裸标「判为查概念」)
-    confidence: str = "rule"                     # 'rule'(命中规则)/ 'low'(兜底);Core 规则后端的诚实标注
+    matched_signals: tuple = ()                  # the signal words that matched, in order, once each; () for the fallback
+    is_fallback: bool = False                    # no signal matched: a neutral strategy
+    confidence: str = "rule"                     # 'rule' (a rule matched) or 'low' (fallback)
 
 
 @dataclass(frozen=True)
@@ -67,28 +74,31 @@ class QueryFacet:
 
 @dataclass(frozen=True)
 class Candidate:
-    """CandidateRetrieval 候选块(承契约 §一;Retrieval 第 2 步)。**只召回、不打包**——无 weight/token/反例字段(留 ContextAssembly)。
+    """One recalled chunk. Recall only: no weight, tokens or counterexample fields (those are packing).
 
-    ⚠ `distance` = Chroma `.query()` 原始距离(**越小越近**);排序按 distance **升序**,
-      **绝不当 similarity 降序**(承第 2 步口径②)。若 ContextAssembly 需归一化 similarity,届时再由 distance 换算。
-    admission 恒 `"active"`(准入通过)、**绝不 `"已校验"`**(承 §〇 准入⊥校验)。
-    `field` best-effort:查不到卡片 by_field 归属则 None、**绝不因此剔除**(承口径⑤);必填仅前四 + admission。
-    `verified_by_evidence_review`:`require_verified=False` 时 None;True 仅当放行 `KNOWLEDGE_ADMISSION_log` 触发源 =
-      `Trigger.EVIDENCE_REVIEW_VERDICT.value`(实现比对枚举值、勿硬编码中文字面量;防标签漂移,承 §〇)。
+    distance is Chroma's raw query distance, smaller is closer; candidates are sorted by it ascending,
+      never treated as a similarity. Context assembly converts it if it needs a similarity.
+    admission is always "active" (the card is admitted), which is not the same as reviewed.
+    field is filled when the card says which field the chunk belongs to, else None; the chunk is
+      kept either way. Required: the first four fields and admission.
+    verified_by_evidence_review is None when require_verified is off; True only when the card state
+      log admitted the card on a card review verdict (compared by the enum value
+      Trigger.EVIDENCE_REVIEW_VERDICT.value, not by a label text).
     """
-    chunk_id: str                                # 向量主键(= 向量 metadata.chunk_id)
-    paper_id: str                                # 所属卡片(= 向量 metadata.paper_id)
-    text: str                                    # chunk 原文(Chroma document)
-    distance: float                              # 原始距离,越小越近(排序升序)
-    admission: str = "active"                    # 恒 active 准入;绝不已校验
-    field: str | None = None                     # best-effort 归并到的卡片字段名;None 不阻断
-    verified_by_evidence_review: bool | None = None           # require_verified 关时 None
-    credibility: str | None = None               # v6.4 之四·上半:该字段的 EVIDENCE_REVIEW 信用档(verified/anchor_uncertain/flagged/unknown);
-                                                 # **先只透传**(从卡片 field_credibility 回读)、不改检索权重(承分级信任·上半)
-    rerank_score: float | None = None            # A(v6.4·修跨篇混入):CandidateRetrieval cross-encoder 重排相关性分。
-                                                 # rerank **关**时 None(权重退回 1/(1+distance));**开**时=该块 relevance_score
-                                                 # (ContextAssembly 权重替换为本分——承拍板②;越大越相关,与 distance 越小越近相反)。
-    ranking_rank: int | None = None              # 生成式 listwise 的序位；不是 relevance score。
+    chunk_id: str                                # the vector's key (metadata.chunk_id)
+    paper_id: str                                # the paper (metadata.paper_id)
+    text: str                                    # the chunk's text (Chroma document)
+    distance: float                              # raw distance, smaller is closer
+    admission: str = "active"                    # always active; not the same as reviewed
+    field: str | None = None                     # the card field, when known
+    verified_by_evidence_review: bool | None = None           # None when require_verified is off
+    credibility: str | None = None               # the card review's credibility of the field (verified,
+                                                 # anchor_uncertain, flagged, unknown), read from the card's
+                                                 # field_credibility; passed on only, it changes no weight
+    rerank_score: float | None = None            # the cross-encoder's relevance score; None with reranking
+                                                 # off (the weight is then 1/(1+distance)). With reranking on,
+                                                 # context assembly uses it as the weight; larger is more relevant.
+    ranking_rank: int | None = None              # the place in a model-generated ranking; not a score
     section_path: str | None = None               # source-structure: DocumentChunk structure metadata; missing stays unknown
     block_type: str | None = None
     page_start: int | None = None
@@ -122,31 +132,32 @@ class Candidate:
 
 @dataclass(frozen=True)
 class CandidateSet:
-    """CandidateRetrieval 产物:候选块集合 + 汇总(RUNTIME_LOG 亦记同口径计数)。**无 weight/token/反例名额字段**(留 ContextAssembly)。"""
-    candidates: tuple                            # tuple[Candidate](按 distance 升序、每卡限额内、≤ target)
-    target_active_count: int                     # 目标固定召回数(env 可配、不随库膨胀)
-    raw_recall_count: int                        # raw Chroma 命中数(overfetch 实际取回)
-    filtered_non_active_count: int               # 回读活卡滤掉的非 active(+ require_verified 未过)数
-    final_active_count: int                      # 最终 active 候选数(≤ target)
-    reached_overfetch_cap: bool                  # overfetch 到 MAX_OVERFETCH 仍不足(active<target 可能因封顶)
+    """What candidate retrieval returns: the candidates and counts (the log records the same counts).
+    No weights, tokens or counterexample slots; those are packing."""
+    candidates: tuple                            # tuple[Candidate], by distance, within the per-paper limit, at most target
+    target_active_count: int                     # the fixed number to recall (set by environment, not by library size)
+    raw_recall_count: int                        # what Chroma returned (with overfetch)
+    filtered_non_active_count: int               # dropped: not active, or not reviewed when required
+    final_active_count: int                      # active candidates kept (at most target)
+    reached_overfetch_cap: bool                  # MAX_OVERFETCH was reached with fewer than target
     require_verified: bool = False
-    scope_mode: str = "shared"                   # shared / paper_id；默认共享，保持既有调用兼容
-    scope_paper_id: str | None = None            # scope_mode=paper_id 时为目标论文，否则 None
+    scope_mode: str = "shared"                   # shared or paper_id; shared by default
+    scope_paper_id: str | None = None            # the paper when scope_mode is paper_id, else None
 
 
 @dataclass(frozen=True)
 class ContextBlock:
-    """ContextAssembly 打包块(承契约 §一 L41;Retrieval 第 3 步)。**只含打包字段**——绝不混 RESEARCH_ANALYSIS/RESEARCH_OPPORTUNITIES 字段
-    (answer/analysis/claim/tension/judgement/final_conclusion 等)。"""
-    content: str                                 # chunk 原文
-    source: dict                                 # 来源(契约 §一)= {"chunk_id":…, "paper_id":…, "field":…};field 可 None
-    weight: float                                # Core 简化权重(1/(1+max(distance,0))×规则)
-    is_counterexample: bool                      # **疑似反例**(强信号粗筛;不裁判真实张力,交 RESEARCH_ANALYSIS)
-    tokens: int                                  # ceil(len(content)×ratio)+overhead(保守上界)
-    admission: str = "active"                    # 恒 active 准入;**绝不已校验**
-    verified_by_evidence_review: bool | None = None           # 沿用 CandidateRetrieval(require_verified 过者 True;否则 None)
-    credibility: str | None = None               # v6.4 之四·上半:沿用 CandidateRetrieval Candidate.credibility(该字段 EVIDENCE_REVIEW 信用档);先只透传
-    rerank_score: float | None = None            # A(v6.4·修跨篇混入):沿用 CandidateRetrieval Candidate.rerank_score(rerank 关时 None);留痕/诊断用
+    """One chunk in the context pack. Packing fields only; nothing of the analysis or opportunities
+    (answer, analysis, claim, tension, judgement, final_conclusion ...)."""
+    content: str                                 # the chunk's text
+    source: dict                                 # where it comes from: {"chunk_id", "paper_id", "field"}; field may be None
+    weight: float                                # the weight: 1/(1+max(distance, 0)) times the rules
+    is_counterexample: bool                      # a likely counterexample (strong signals only; the analysis judges it)
+    tokens: int                                  # ceil(len(content) x ratio) + overhead, an upper estimate
+    admission: str = "active"                    # always active; not the same as reviewed
+    verified_by_evidence_review: bool | None = None           # as in the Candidate
+    credibility: str | None = None               # the Candidate's credibility, passed on
+    rerank_score: float | None = None            # the Candidate's rerank_score, for records and diagnosis
     member_chunk_ids: tuple[str, ...] = ()
     logical_span_id: str | None = None
     logical_role: str | None = None
@@ -179,19 +190,21 @@ class ContextBlock:
 
 @dataclass(frozen=True)
 class ContextPack:
-    """ContextAssembly 产物:交 RESEARCH_ANALYSIS 的唯一文献上下文。**只含打包字段**;CandidateRetrieval 召回计数原样透传、ContextAssembly 只加打包计数。
-    不变量:`estimated_tokens ≤ token_hard_limit` **永远成立**(只整块取舍、不切块内文本;允许空 pack)。"""
-    blocks: tuple                                # tuple[ContextBlock](反例受保护、按 weight 排序、总 token ≤ 硬顶)
-    estimated_tokens: int                        # 总估算(含 overhead)≤ token_hard_limit
-    token_hard_limit: int                        # env 可配硬顶(生死线)
-    counterexample_slots: dict                   # 反例名额(契约 §一)= {"target": boost 后目标, "filled": 实际填几个};filled<target = underfilled、如实不硬凑
-    truncated: bool                              # 是否因 token 上限丢弃/截断了块(明细在 RUNTIME_LOG)
-    # ── CandidateRetrieval 召回计数原样透传(ContextAssembly 不改)──
+    """What context assembly hands to the analysis: the only literature context it gets. Packing fields
+    only; candidate retrieval's counts are passed through as they are, packing adds its own.
+    estimated_tokens <= token_hard_limit always holds: whole blocks are kept or dropped, never cut;
+    an empty pack is allowed."""
+    blocks: tuple                                # tuple[ContextBlock], by weight, counterexamples kept, within the token limit
+    estimated_tokens: int                        # the estimate with overhead, at most token_hard_limit
+    token_hard_limit: int                        # the hard limit, set by environment
+    counterexample_slots: dict                   # {"target": room for counterexamples, "filled": how many}; fewer are not padded
+    truncated: bool                              # blocks were dropped for the token limit (details in the log)
+    # ── candidate retrieval's counts, passed through unchanged ──
     raw_recall_count: int
     filtered_non_active_count: int
     final_active_count: int
     require_verified: bool = False
-    scope_mode: str = "shared"                   # 从 CandidateSet 原样透传，供 RESEARCH_ANALYSIS/留痕辨认来源边界
+    scope_mode: str = "shared"                   # from the CandidateSet, so the analysis knows the scope
     scope_paper_id: str | None = None
     retrieval_mode: str = "multi_paper_synthesis"
     query_facets: tuple[QueryFacet, ...] = ()

@@ -1,16 +1,17 @@
-"""QueryUnderstanding Query Understanding —— 识别问题主类 + 切检索策略参数(Retrieval 第 1 步)。
+"""Query understanding: the question's type and the retrieval strategy parameters.
 
-承 Retrieval 第 0 步契约 §一:问题 → 问题类型 + 检索策略参数(含「是否加大反例名额」信号),
-**只输出策略参数、不做召回 / 打包**(召回=CandidateRetrieval、打包=ContextAssembly,守边界)。
+A question becomes a question type and strategy parameters (including whether to give
+counterexamples more room). It only outputs parameters; recall is candidate_retrieval.py's job and
+packing context_pack.py's.
 
-分类后端(Core)= 规则 + 关键词(**不调模型、零额度**)。分类封在 `_classify()` 后留**可换后端 seam**:
-将来若换 MODEL_GATEWAY 便宜模型做意图识别,只换 `_classify`、对外签名不变——**且必经 MODEL_GATEWAY、绝不直连 SDK**(承契约 §八)。
+Classification uses rules and keywords: no model, no cost. It sits behind _classify(), so a model
+could replace it later without changing the signature, called through the gateway like every model.
 
-⚠ recall_emphasis 只作「记录级粗提示」:Core 无字段级向量、实际检索效果有限;
-QueryUnderstanding **绝不**造字段级加权 / 字段向量 / doc_type 来源加权 / RETRIEVAL_WEIGHTING 五维(留 Research)。
-⚠ 规则/关键词分类是**粗筛**:英文按**词首锚定 + 前缀匹配**(吃下复数/屈折:limitation→limitations、
-   method→methods、controvers→controversy/controversial;词首锚定使 'rate' 仍不误命中 'accurate'),
-   中文按子串;仍可能过/欠命中,属 Core 已知局限,换 MODEL_GATEWAY 模型后端可改善。
+recall_emphasis is a coarse hint for the log only: there are no per-field vectors, and no field
+weights are built from it.
+The keyword match is coarse: English words match at the start of a word with any ending (limitation
+matches limitations, controvers matches controversy and controversial; 'rate' does not match
+'accurate'), Chinese as substrings. It can still miss or over-match.
 """
 from __future__ import annotations
 
@@ -20,14 +21,15 @@ from memorive.platform.logs import log_reason
 
 from memorive.research.retrieval.types import QueryType, QueryUnderstanding, RetrievalStrategy
 
-# ── 关键词表(小写匹配;中/英)。counterexample_intent 与 limitation_interest **严格分开**(口径③):
-#    前者=找反证(→ FIND_COUNTEREXAMPLE + counterexample_boost);后者=作者自陈局限(→ 仅 recall_emphasis)。──
-_COUNTEREXAMPLE_INTENT = (        # 找反证 / 相反证据
+# ── keywords (matched in lower case; Chinese and English). Looking for counter-evidence
+#    (FIND_COUNTEREXAMPLE and counterexample_boost) is kept apart from interest in the limitations
+#    the authors state (recall_emphasis only). ──
+_COUNTEREXAMPLE_INTENT = (        # counter-evidence
     "反例", "反证", "相反", "反对", "证伪", "反驳", "驳斥", "争议", "不成立", "站不住",
     "counterexample", "counter-example", "against", "contradict", "refute", "rebut",
     "dispute", "disprove", "controvers", "conflicting",
 )
-_LIMITATION_INTEREST = (          # 正交副信号:作者自陈「局限 / 不足」(≠ 找反证)
+_LIMITATION_INTEREST = (          # limitations the authors state (not counter-evidence)
     "局限", "不足", "短板", "缺陷", "适用范围", "边界条件",
     "limitation", "shortcoming", "drawback", "weakness", "caveat",
 )
@@ -48,7 +50,8 @@ _LOOKUP_CONCEPT = (
     "what is", "define", "definition", "meaning",
 )
 
-# 主类优先级(高→低;**确定、可复现、可测**)。找反例最高(反回音室是命门,宁可多留反例)。
+# The order of the question types, highest first. Counterexamples come first: rather keep too many
+# than let the analysis echo one side.
 _PRIORITY = (
     (QueryType.FIND_COUNTEREXAMPLE, _COUNTEREXAMPLE_INTENT),
     (QueryType.FIND_DATA, _FIND_DATA),
@@ -57,7 +60,7 @@ _PRIORITY = (
     (QueryType.LOOKUP_CONCEPT, _LOOKUP_CONCEPT),
 )
 
-# 类型 → recall_emphasis 粗提示(记录级、非真实加权)。
+# Question type -> recall_emphasis (a hint for the log, not a weight).
 _EMPHASIS = {
     QueryType.FIND_DATA: "key_data",
     QueryType.FIND_METHOD: "method",
@@ -67,39 +70,39 @@ _EMPHASIS = {
 
 
 def _hits(text_lower: str, keywords) -> list[str]:
-    """text(已小写)中命中的关键词(保序去重)。英文/短语按**词首锚定 + 前缀匹配**
-    (吃复数/屈折:limitation→limitations、method→methods、controvers→controversy;
-    词首锚定 `(?<![a-z0-9])` 使 'rate' 不误命中 'accurate'——'rate' 前是 'u'),中文/含符号按子串。
-    用于 matched_signals —— 结果确定、可复现、可测。"""
+    """The keywords found in text (lower case), in order, once each. English words and phrases match
+    at the start of a word with any ending (limitation matches limitations; the anchor
+    (?<![a-z0-9]) keeps 'rate' from matching 'accurate'); Chinese and words with symbols match as
+    substrings. Used for matched_signals, so the result is the same every time."""
     out: list[str] = []
     for kw in keywords:
         if kw.replace(" ", "").replace("-", "").isalnum() and kw.isascii():
-            # 词首锚定、**不锚词尾** → 前缀匹配吃下复数/屈折;'rate' 仍不命中 'accurate'(前有字母)。
+            # Anchored at the start of a word only, so endings match; 'rate' still misses 'accurate'.
             matched = re.search(rf"(?<![a-z0-9]){re.escape(kw)}", text_lower) is not None
         else:
-            matched = kw in text_lower                      # 中文无词边界 → 子串
+            matched = kw in text_lower                      # Chinese has no word boundaries: substring
         if matched and kw not in out:
             out.append(kw)
     return out
 
 
 def _classify(question: str):
-    """Core 规则/关键词分类。返回 (qtype, matched_signals, limitation_interest, is_fallback)。
-    **可换后端 seam**:将来换 MODEL_GATEWAY 模型只改本函数、签名不变(且经 MODEL_GATEWAY、绝不直连 SDK)。"""
+    """Classify by rules and keywords. Returns (qtype, matched_signals, limitation_interest, is_fallback).
+    A model could replace this function later with the same signature."""
     text = question.lower()
-    limitation = bool(_hits(text, _LIMITATION_INTEREST))    # 正交副信号,不参与主类优先级裁决
-    for qtype, keywords in _PRIORITY:                        # 固定优先级取第一个命中的主类
+    limitation = bool(_hits(text, _LIMITATION_INTEREST))    # a side signal; not part of choosing the type
+    for qtype, keywords in _PRIORITY:                        # the first type that matches, in the fixed order
         hit = _hits(text, keywords)
         if hit:
             return qtype, tuple(hit), limitation, False
-    return QueryType.LOOKUP_CONCEPT, (), limitation, True    # 全不命中 → 兜底(中性、is_fallback=True)
+    return QueryType.LOOKUP_CONCEPT, (), limitation, True    # nothing matched: the neutral fallback
 
 
 def understand_query(question: str) -> QueryUnderstanding:
-    """QueryUnderstanding 主入口:问题 → QueryUnderstanding(**只出策略参数,不召回 / 不打包**)。
+    """A question as QueryUnderstanding: strategy parameters only, no recall, no packing.
 
-    空 / 纯空白问题 → ValueError(fail-loud;且**不写一次正常分类日志**)。
-    正常 / 兜底分类均经 RUNTIME_LOG `log_reason` 留痕(兜底 reason 写「无显式信号→fallback」,不写「判为查概念」)。
+    An empty or blank question raises ValueError and writes no log entry. Every classification,
+    fallback included, writes a reason record (a fallback says no signal matched).
     """
     if not isinstance(question, str) or not question.strip():
         raise ValueError("QueryUnderstanding: question 必须是非空字符串(空 / 纯空白 fail-loud,不做分类、不写日志)")
@@ -107,7 +110,7 @@ def understand_query(question: str) -> QueryUnderstanding:
     qtype, matched, limitation, is_fallback = _classify(question)
     strategy = RetrievalStrategy(
         qtype=qtype,
-        counterexample_boost=(qtype is QueryType.FIND_COUNTEREXAMPLE),   # 仅 counterexample_intent 驱动
+        counterexample_boost=(qtype is QueryType.FIND_COUNTEREXAMPLE),   # only FIND_COUNTEREXAMPLE sets it
         limitation_interest=limitation,
         recall_emphasis=("limitations" if limitation else _EMPHASIS.get(qtype)),
     )
