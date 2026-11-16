@@ -1,6 +1,7 @@
 """Role-separated semantic recomputation for research opportunities.
 
-This module deliberately imports only the shared canonical byte primitive.  It
+This module deliberately imports only the shared canonical byte primitive and the
+shared list of comparison concepts (CONCEPT_ORDER, CONDITIONAL_CONCEPTS).  It
 does not import RESEARCH_OPPORTUNITIES source, projection, gap, comparison, tension, or candidate
 producer functions.  This separation does not constitute an external review.
 """
@@ -14,6 +15,8 @@ from datetime import datetime
 from typing import Any, Mapping, Sequence
 
 from research_opportunities.canonical import (
+    CONCEPT_ORDER,
+    CONDITIONAL_CONCEPTS,
     content_hash_matches,
     external_hash_is_valid,
     sha256_bytes,
@@ -22,19 +25,6 @@ from research_opportunities.canonical import (
 )
 
 
-CONCEPT_ORDER = (
-    "research_object",
-    "intervention_factor",
-    "comparator",
-    "method",
-    "metric",
-    "boundary_condition",
-    "scale_context",
-    "claim_type",
-)
-CONDITIONAL_CONCEPTS = frozenset(
-    {"intervention_factor", "comparator", "method", "boundary_condition", "scale_context"}
-)
 CANDIDATE_KEYS = {
     "object_id",
     "schema_version",

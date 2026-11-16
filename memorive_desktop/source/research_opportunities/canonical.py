@@ -1,4 +1,5 @@
-"""RFC 8785/I-JSON hashing shared only as a byte-level primitive.
+"""RFC 8785/I-JSON hashing shared only as a byte-level primitive, and the list of
+concepts two studies are compared on.
 
 Semantic producer and verifier logic remain in separate modules.  Sharing the
 canonical byte primitive avoids two hash domains while preserving separate
@@ -17,6 +18,24 @@ from typing import Any, Mapping
 
 
 _SHA256_RE = re.compile(r"^[A-F0-9]{64}$")
+
+# The concepts two studies are compared on, in this order. The producer (core.py) and the
+# verifier (evidence_review/opportunity_verification.py) share this list and nothing else of
+# each other's logic; research Q&A names them in its comparison prompt.
+CONCEPT_ORDER = (
+    "research_object",
+    "intervention_factor",
+    "comparator",
+    "method",
+    "metric",
+    "boundary_condition",
+    "scale_context",
+    "claim_type",
+)
+# A difference in one of these makes a comparison conditional.
+CONDITIONAL_CONCEPTS = frozenset(
+    {"intervention_factor", "comparator", "method", "boundary_condition", "scale_context"}
+)
 
 
 def _reject_lone_surrogates(value: str) -> None:

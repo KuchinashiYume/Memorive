@@ -2962,8 +2962,8 @@
     },
     {
       "path": "source/evidence_review/opportunity_verification.py",
-      "sha256": "7d8e2a5efdd46dfe92ca9997879bb26e005ab3310cdc17c159a3c6f508965021",
-      "bytes": 66411
+      "sha256": "36a21a93f419126e1e4b218db07b73c1a6d2398a8f99900bcc4ff7374a151e93",
+      "bytes": 66219
     },
     {
       "path": "source/evidence_review/ownership_binding.py",
@@ -6092,13 +6092,13 @@
     },
     {
       "path": "source/research_opportunities/canonical.py",
-      "sha256": "db50578cecaf347a0242838b3b3b3d8e04d966cbc95b2ea9aceb7a32f4eed341",
-      "bytes": 5156
+      "sha256": "43fb836ab8530541152eceb53590924e160d5316d4ac0a6c6dfd4fd1a9967382",
+      "bytes": 5856
     },
     {
       "path": "source/research_opportunities/core.py",
-      "sha256": "117ad6edf928d997946a78866c613226f948dbd9cc409617f5026d3392f6e560",
-      "bytes": 82644
+      "sha256": "fcebaaa446e25c23e327ce062ada07fcde8afe01fb804a850b963419b82edc54",
+      "bytes": 82370
     },
     {
       "path": "source/research_opportunities/errors.py",

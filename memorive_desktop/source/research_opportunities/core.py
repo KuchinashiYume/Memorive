@@ -10,6 +10,8 @@ from datetime import datetime
 from typing import Any, Mapping, Sequence
 
 from .canonical import (
+    CONCEPT_ORDER,
+    CONDITIONAL_CONCEPTS,
     sha256_bytes,
     typed_payload_hash,
 )
@@ -22,19 +24,6 @@ from .canonical import typed_hash_is_valid
 from .canonical import with_content_hash
 
 
-CONCEPT_ORDER = (
-    "research_object",
-    "intervention_factor",
-    "comparator",
-    "method",
-    "metric",
-    "boundary_condition",
-    "scale_context",
-    "claim_type",
-)
-CONDITIONAL_CONCEPTS = frozenset(
-    {"intervention_factor", "comparator", "method", "boundary_condition", "scale_context"}
-)
 ALLOWED_TRIGGER_TYPES = frozenset({"manual", "weekly", "knowledge_feedback_influx"})
 LIMIT_KEYS = (
     "max_clusters",
