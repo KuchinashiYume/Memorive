@@ -9,11 +9,11 @@ from typing import Any, Mapping, Sequence
 
 from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from tests.modules.retrieval_weighting.field_vector_acceptance.restored_contracts import validate_card_authority, validate_doc_type_metadata
-from retrieval_weighting.contracts import make_hashed_payload, require_non_empty_refs, require_non_empty_string
-from retrieval_weighting.contracts import require_utc_timestamp
-from retrieval_weighting.errors import ContractViolation, FieldVectorError
-from retrieval_weighting.errors import SourceEligibilityError
-from retrieval_weighting.field_registry import expand_card_fields, get_field_registry
+from memorive.research.ranking.contracts import make_hashed_payload, require_non_empty_refs, require_non_empty_string
+from memorive.research.ranking.contracts import require_utc_timestamp
+from memorive.research.ranking.errors import ContractViolation, FieldVectorError
+from memorive.research.ranking.errors import SourceEligibilityError
+from memorive.research.ranking.field_registry import expand_card_fields, get_field_registry
 
 
 def _parse_utc(value: str) -> datetime:

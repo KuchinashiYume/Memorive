@@ -196,7 +196,7 @@ def migrate_contents(profile: Path) -> dict:
                              after_schema=updated.get('schema_version')))
     workspace = folders.path_for('WORKSPACE')/'research_workspace'
     if (workspace/'research_workspace_v1.sqlite3').exists():
-        from memorive_research_workspace.store import Store
+        from memorive.research.workspace.store import Store
         Store(workspace)  # schema bootstrap only; no workspace model, archive loop or indexing.
         migrated.append(dict(kind='existing_research_store_bootstrap', lifecycle_schema=2))
     checks = []
@@ -292,7 +292,7 @@ def verify(profile: Path, operation: Path) -> dict:
     # Import contract boundaries without constructing services, model gateways,
     # archival/index workers, or generating fresh user reports.
     import memorive_settings.store
-    import memorive_research_workspace.store
+    import memorive.research.workspace.store
     import memorive.platform.folders
     import product_identity
     if inventory(profile) != before:

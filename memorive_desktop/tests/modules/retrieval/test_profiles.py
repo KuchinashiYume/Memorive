@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval.retrieval_calibration.profile_compare import compare_profiles, run_profile
-from retrieval_weighting.retrieval_calibration_block_role_calibration import BlockRoleCalibrationPolicy
+from memorive.research.retrieval.retrieval_calibration.profile_compare import compare_profiles, run_profile
+from memorive.research.ranking.retrieval_calibration_block_role_calibration import BlockRoleCalibrationPolicy
 Retrieval_SHA = "B" * 64
 QUERY = {"query_id": "Q", "query_intent": "quantitative_result"}
 ROWS = [

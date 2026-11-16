@@ -1,4 +1,4 @@
-"""The evidence index (memorive_research_workspace/evidence.py): documents become numbered excerpts,
+"""The evidence index (memorive/research/workspace/evidence.py): documents become numbered excerpts,
 and an excerpt is read only while the file it came from is unchanged.
 
 Material comes in two ways: a file added from the library (add_library_file, kept as a snapshot
@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from memorive_research_workspace.service import ResearchWorkspace
-from memorive_research_workspace.store import digest
+from memorive.research.workspace.service import ResearchWorkspace
+from memorive.research.workspace.store import digest
 
 LINE = "Growth of strain K12 was measured every hour at 25 C, 30 C and 37 C in the same medium."
 PAPER = "\n".join(f"{number:03d} {LINE}" for number in range(1, 61))  # about 5,500 characters

@@ -14,7 +14,7 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
 from memorive.platform.logs import extract_module_logs
-from retrieval import build_context_pack, retrieve_candidates  # noqa: E402
+from memorive.research.retrieval import build_context_pack, retrieve_candidates  # noqa: E402
 
 
 class FakeCollection:

@@ -4,13 +4,13 @@ import json
 import unittest
 from pathlib import Path
 
-from research_reports.digest import GENERATOR_VERSION
-from research_reports.policy import SECTION_TITLES
+from memorive.research.reports.digest import GENERATOR_VERSION
+from memorive.research.reports.policy import SECTION_TITLES
 
 # The packaged report templates. CT-007 used to compare copies of them inside a materialized
 # acceptance sandbox; the sandbox and the schemas it copied were removed with the replay CLI
 # (b3407ef), and both copies came from this folder anyway.
-TEMPLATES = Path(__file__).resolve().parents[3] / "source" / "research_reports" / "templates"
+TEMPLATES = Path(__file__).resolve().parents[3] / "source" / "memorive" / "research" / "reports" / "templates"
 
 
 class ContractTests(unittest.TestCase):

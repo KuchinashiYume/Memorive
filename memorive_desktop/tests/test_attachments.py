@@ -1,5 +1,5 @@
 """A conversation's material and the files added to it in the window
-(memorive_research_workspace/attachments.py). Pictures read by the vision model are covered in
+(memorive/research/workspace/attachments.py). Pictures read by the vision model are covered in
 test_workspace_vision_and_handoffs.py; everything here is text and runs in a temporary folder.
 """
 from __future__ import annotations
@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from memorive_research_workspace.service import ResearchWorkspace
-from memorive_research_workspace.store import digest
+from memorive.research.workspace.service import ResearchWorkspace
+from memorive.research.workspace.store import digest
 
 NOTE = "\n".join(f"{n:03d} Growth of strain K12 doubled between 25 C and 37 C in every repeat." for n in range(1, 41))
 

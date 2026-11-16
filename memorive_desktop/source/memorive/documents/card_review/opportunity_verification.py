@@ -14,7 +14,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
-from research_opportunities.canonical import (
+from memorive.research.opportunities.canonical import (
     CONCEPT_ORDER,
     CONDITIONAL_CONCEPTS,
     content_hash_matches,

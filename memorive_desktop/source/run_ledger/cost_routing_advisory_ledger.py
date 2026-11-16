@@ -10,7 +10,7 @@ from typing import Any, Mapping, Sequence
 
 from .writer_lock import KernelWriterLock
 
-from retrieval_weighting.contracts import make_hashed_payload, make_stable_id, verify_hashed_payload
+from memorive.research.ranking.contracts import make_hashed_payload, make_stable_id, verify_hashed_payload
 
 
 _ROW_KEYS = {

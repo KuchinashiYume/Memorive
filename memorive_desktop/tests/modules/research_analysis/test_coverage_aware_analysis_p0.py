@@ -10,17 +10,17 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from retrieval.context_pack import _context_pack_identity
-from retrieval.ownership import (
+from memorive.research.retrieval.context_pack import _context_pack_identity
+from memorive.research.retrieval.ownership import (
     aggregate_blocks,
     aggregate_ownership,
     bind_authority_projection,
     propagation_receipt,
     snapshot_fields,
 )
-from retrieval.types import ContextBlock, ContextPack, QueryFacet
-from research_analysis.analysis import analyze
-from research_analysis.types import LABEL_RETRIEVAL_LIMITATIONS
+from memorive.research.retrieval.types import ContextBlock, ContextPack, QueryFacet
+from memorive.research.analysis.analysis import analyze
+from memorive.research.analysis.types import LABEL_RETRIEVAL_LIMITATIONS
 
 
 def block(

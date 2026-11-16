@@ -4,8 +4,8 @@ service kept, or answered again.
 
 Each test asks about the synthetic paper of examples/research_qa.py with a stand-in model, so the
 whole path runs (queue, excerpts, prompt, model, checks, save) and nothing leaves the computer.
-The code these tests cover starts at ResearchWorkspace.ask (memorive_research_workspace/service.py);
-the steps of answering are in memorive_research_workspace/answering.py.
+The code these tests cover starts at ResearchWorkspace.ask (memorive/research/workspace/service.py);
+the steps of answering are in memorive/research/workspace/answering.py.
 """
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ _spec = importlib.util.spec_from_file_location("research_qa_example_for_flow", E
 example = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(example)
 
-from memorive_research_workspace.service import ResearchWorkspace  # noqa: E402
-from memorive_research_workspace.store import digest  # noqa: E402
+from memorive.research.workspace.service import ResearchWorkspace  # noqa: E402
+from memorive.research.workspace.store import digest  # noqa: E402
 
 
 class Model(example.ExampleModel):
@@ -317,7 +317,7 @@ class Agent:
 
 def test_an_agent_job_works_from_the_agent_instructions_and_leaves_a_handoff_pack(tmp_path):
     from memorive.models.gateway.research_prompt_cache import CHAT_RULES
-    from research_opportunities.research_opportunities import instructions
+    from memorive.research.opportunities.research_opportunities import instructions
 
     library = tmp_path / "library"
     library.mkdir()

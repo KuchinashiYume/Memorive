@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from knowledge_feedback.canonical import typed_payload_hash
+from memorive.research.knowledge_feedback.canonical import typed_payload_hash
 from memorive.sessions.refinement import validate_typed_refinement_item
 from memorive.sessions.refinement.model_channel import (
     ConversationRefinementBridgeError,

@@ -511,7 +511,7 @@ class ExportSnapshotContractTests(unittest.TestCase):
                 envelope = deepcopy(make_envelope())
                 envelope.pop("content_hash")
                 envelope[field] = True
-                from knowledge_feedback.canonical import make_hashed_payload
+                from memorive.research.knowledge_feedback.canonical import make_hashed_payload
 
                 with self.assertRaises(ConversationContractError):
                     validate_source_access_envelope(make_hashed_payload(envelope))

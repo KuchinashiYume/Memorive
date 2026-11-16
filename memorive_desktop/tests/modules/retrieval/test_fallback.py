@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval.retrieval_calibration.fallback import apply_fallback
-from retrieval.retrieval_calibration.pre_rerank_snapshot import create_snapshot
+from memorive.research.retrieval.retrieval_calibration.fallback import apply_fallback
+from memorive.research.retrieval.retrieval_calibration.pre_rerank_snapshot import create_snapshot
 ROWS = [
     {"candidate_id": "A", "paper_id": "P", "chunk_id": "A", "text": "a", "distance": 0.1},
     {"candidate_id": "B", "paper_id": "P", "chunk_id": "B", "text": "b", "distance": 0.2},

@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass, field
 
 from memorive.documents.card_states import DecisionError    # 坏/空响应 = 环节失败信号(绝不当「无异议」)
 from memorive.platform.logs import log_reason
-from retrieval.ownership import (
+from memorive.research.retrieval.ownership import (
     OWNERSHIP_BINDING_MISMATCH,
     OWNERSHIP_LOCAL_ROUTE_UNAVAILABLE,
     OwnershipContractError,

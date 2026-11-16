@@ -336,7 +336,7 @@ class ResearchRuntime:
                 raise ValueError('RESEARCH_PERIOD_INVALID')
             sources=[]
             from .report_identity import previous_window,project
-            from research_reports.policy import ZONE,validate_window
+            from memorive.research.reports.policy import ZONE,validate_window
             current=self.report_clock() if self.report_clock else datetime.now(ZONE)
             if regenerate_from is not None:
                 original_path=self.run_path(regenerate_from)
@@ -581,8 +581,8 @@ class ResearchRuntime:
 
     def _report(self,run_id,period,window=None,cutoff=None,language_context=None):
         from .digest import build_digest
-        from research_reports.renderer import render_markdown
-        from research_reports.policy import ZONE
+        from memorive.research.reports.renderer import render_markdown
+        from memorive.research.reports.policy import ZONE
         from .report_identity import previous_window
         current=datetime.fromisoformat(cutoff) if cutoff else self.report_clock() if self.report_clock else datetime.now(ZONE)
         window=window or previous_window(period,current)

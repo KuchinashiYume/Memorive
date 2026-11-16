@@ -2,7 +2,7 @@
 from calendar import monthrange
 from datetime import datetime, timedelta
 import re
-from research_reports.policy import ZONE
+from memorive.research.reports.policy import ZONE
 from .common import read,write,sealed
 
 def defaults():

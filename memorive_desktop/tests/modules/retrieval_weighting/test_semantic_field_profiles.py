@@ -4,9 +4,9 @@ from copy import deepcopy
 import unittest
 
 from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash
-from retrieval_weighting.contracts import make_hashed_payload
-from retrieval_weighting.errors import FieldVectorError
-from retrieval_weighting.semantic_field_profiles import semantic_overlay_vector_id, validate_semantic_field_embedding_overlay, validate_semantic_field_profile
+from memorive.research.ranking.contracts import make_hashed_payload
+from memorive.research.ranking.errors import FieldVectorError
+from memorive.research.ranking.semantic_field_profiles import semantic_overlay_vector_id, validate_semantic_field_embedding_overlay, validate_semantic_field_profile
 def hash_for(label: str) -> dict[str, str]:
     return typed_payload_hash({"label": label})
 

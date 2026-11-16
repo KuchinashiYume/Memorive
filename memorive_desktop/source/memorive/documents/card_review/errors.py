@@ -34,7 +34,7 @@ class OwnershipFailClosed(EvidenceReviewError):
     """归属安全阀挡下(Integration第2步④ + 复审③):卡 / 数据 **非明确 self**(entrusted / 缺失 / 未知)+ 本地 EVIDENCE_REVIEW 校核槽未就绪 →
     fail-closed,**绝不把他人托付 / 归属不明数据送 Haiku(搬运类)或 GPT(判断类)境外云**(手动订阅档亦不可绕过)。
     系统性 / 策略性 → raise(非 DecisionError:不重试、不 admit)。
-    ⚠ **异类同名警告(复审[5]/[7]·记债)**:本类是 `EvidenceReviewError` 子类,与 `research_analysis.OwnershipFailClosed`(`AnalysisError`
+    ⚠ **异类同名警告(复审[5]/[7]·记债)**:本类是 `EvidenceReviewError` 子类,与 `memorive.research.analysis.OwnershipFailClosed`(`AnalysisError`
     子类)**同名但不同类、不同继承树**——理念平行(都是归属 fail-closed)、**但非同一异常**。跨 RESEARCH_ANALYSIS+EVIDENCE_REVIEW 的编排器若用单个
     `except OwnershipFailClosed` 只会 catch 到 import 的那一个、漏另一个;须**两个都 catch**。统一为一个共享归属异常 +
     共享归属阀(触 RESEARCH_ANALYSIS)属**债**、另开(承复审 altitude:三处近乎复制的「非 self→fail-closed」阀值得抽共享机制)。"""

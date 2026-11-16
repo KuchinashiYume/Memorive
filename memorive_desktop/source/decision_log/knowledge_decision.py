@@ -11,7 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
-from retrieval_weighting.contracts import make_hashed_payload, validate_hash_descriptor, verify_hashed_payload
+from memorive.research.ranking.contracts import make_hashed_payload, validate_hash_descriptor, verify_hashed_payload
 
 
 RECEIPT_SCHEMA = "KNOWLEDGE_FEEDBACK_HUMAN_KNOWLEDGE_DECISION_RECEIPT_V1"

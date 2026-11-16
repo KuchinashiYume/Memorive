@@ -8,7 +8,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from datetime import datetime, timedelta
 from typing import Any
 
-from research_recommendations.discovery_channels_research_recommendations_multichannel_slate import (  # the code both modules share; one copy is kept there
+from memorive.research.recommendations.discovery_channels_research_recommendations_multichannel_slate import (  # the code both modules share; one copy is kept there
     SlateCompositionError,
     canonical_json,
     sha256_json,

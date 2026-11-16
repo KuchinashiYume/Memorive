@@ -11,7 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
-from knowledge_feedback.canonical import (
+from memorive.research.knowledge_feedback.canonical import (
     make_hashed_payload,
     typed_payload_hash,
     validate_hash_descriptor,

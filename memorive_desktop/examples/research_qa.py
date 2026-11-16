@@ -5,13 +5,13 @@
 This is the path a question takes in the desktop app, without the window and without a real
 model:
 
-1. A research workspace (memorive_research_workspace.ResearchWorkspace) is made in a new folder.
+1. A research workspace (memorive.research.workspace.ResearchWorkspace) is made in a new folder.
 2. A synthetic paper is added as material. The evidence index cuts it into numbered excerpts.
    The conversation is set to use the stand-in model and that paper.
 3. A question is asked about that paper. The workspace queues a job, selects excerpts, builds the
    prompt and calls the model function it was given.
 4. The model here is ExampleModel: it reads the excerpt ids from the prompt and answers with the
-   first one. In the app the model function is wired in memorive_research_workspace/desktop.py
+   first one. In the app the model function is wired in memorive/research/workspace/desktop.py
    and runs the configured model through the settings service.
 5. The workspace checks that the answer cites only excerpts it was shown, saves it in the
    conversation and marks the job COMPLETE.
@@ -82,7 +82,7 @@ def run(folder: Path) -> dict:
     # The evidence index compares full paths; a short 8.3 name (as in the temp folder) would not match.
     folder = Path(folder).resolve()
     keep_data_inside(folder)
-    from memorive_research_workspace.service import ResearchWorkspace
+    from memorive.research.workspace.service import ResearchWorkspace
 
     library = folder / "library"
     library.mkdir(parents=True, exist_ok=True)

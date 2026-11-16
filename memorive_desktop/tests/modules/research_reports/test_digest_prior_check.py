@@ -10,8 +10,8 @@ import copy
 
 import pytest
 
-from research_reports.canonical import typed_payload_hash
-from research_reports.digest import DigestAuthorityError, _validate_prior
+from memorive.research.reports.canonical import typed_payload_hash
+from memorive.research.reports.digest import DigestAuthorityError, _validate_prior
 
 PRIOR_ID = "digest-daily-2026-11-02-r1"
 

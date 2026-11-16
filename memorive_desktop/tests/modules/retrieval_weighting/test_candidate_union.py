@@ -3,10 +3,10 @@ from __future__ import annotations
 import unittest
 from copy import deepcopy
 
-from retrieval_weighting.candidate_union import build_unified_candidate_pool, make_candidate_id, validate_candidate_identity
-from retrieval_weighting.counterevidence import COUNTEREVIDENCE_FIELD_PATH_PATTERNS, make_frozen_distance_matrix, select_counterevidence_candidates, validate_frozen_distance_matrix
-from retrieval_weighting.contracts import make_hashed_payload
-from retrieval_weighting.errors import ContractViolation, IdentityConflict, SourceSnapshotDriftError
+from memorive.research.ranking.candidate_union import build_unified_candidate_pool, make_candidate_id, validate_candidate_identity
+from memorive.research.ranking.counterevidence import COUNTEREVIDENCE_FIELD_PATH_PATTERNS, make_frozen_distance_matrix, select_counterevidence_candidates, validate_frozen_distance_matrix
+from memorive.research.ranking.contracts import make_hashed_payload
+from memorive.research.ranking.errors import ContractViolation, IdentityConflict, SourceSnapshotDriftError
 from tests.modules.retrieval_weighting.test_shadow_contracts import _snapshot
 
 

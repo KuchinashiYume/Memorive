@@ -22,7 +22,7 @@ from memorive_current_task import CurrentTaskProductController  # noqa: E402
 from memorive_desktop_service.adapters import RealFacadeAdapter  # noqa: E402
 from memorive_desktop_service.control_store import ControlStore  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
-from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
 from memorive.sessions.refinement import (  # noqa: E402
     make_context_capsule,
     make_model_typed_refinement_item,

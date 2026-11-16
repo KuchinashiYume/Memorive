@@ -23,16 +23,16 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from jsonschema import Draft202012Validator
 
-from retrieval.context_pack import build_context_pack, validate_context_pack_binding
-from retrieval.ownership import EMPTY_CONTEXT_PACK, OWNERSHIP_AUTHORITY_INSUFFICIENT, OWNERSHIP_BINDING_MISMATCH, OWNERSHIP_CONFLICT, OWNERSHIP_DOWNGRADE_ATTEMPT, OWNERSHIP_INVALID, OWNERSHIP_LEGACY_ADAPTER_REQUIRED, OWNERSHIP_LOCAL_ROUTE_UNAVAILABLE, OWNERSHIP_MISSING, OWNERSHIP_PROJECTION_STALE, OWNERSHIP_VERSION_UNSUPPORTED, OwnershipAssertion, OwnershipContractError, OwnershipContributor, OwnershipGuard, OwnershipSnapshot, adapt_legacy_authorities, aggregate_blocks, aggregate_ownership, amendment_candidate, bind_authority_projection, compare_legacy_binding, ownership_cache_key, ownership_preflight, propagation_receipt, snapshot_fields, trace_ownership, validate_cache_binding, validate_snapshot
-from retrieval.ownership import parse_snapshot_frontmatter, render_snapshot_frontmatter
-from retrieval.structured_context import (
+from memorive.research.retrieval.context_pack import build_context_pack, validate_context_pack_binding
+from memorive.research.retrieval.ownership import EMPTY_CONTEXT_PACK, OWNERSHIP_AUTHORITY_INSUFFICIENT, OWNERSHIP_BINDING_MISMATCH, OWNERSHIP_CONFLICT, OWNERSHIP_DOWNGRADE_ATTEMPT, OWNERSHIP_INVALID, OWNERSHIP_LEGACY_ADAPTER_REQUIRED, OWNERSHIP_LOCAL_ROUTE_UNAVAILABLE, OWNERSHIP_MISSING, OWNERSHIP_PROJECTION_STALE, OWNERSHIP_VERSION_UNSUPPORTED, OwnershipAssertion, OwnershipContractError, OwnershipContributor, OwnershipGuard, OwnershipSnapshot, adapt_legacy_authorities, aggregate_blocks, aggregate_ownership, amendment_candidate, bind_authority_projection, compare_legacy_binding, ownership_cache_key, ownership_preflight, propagation_receipt, snapshot_fields, trace_ownership, validate_cache_binding, validate_snapshot
+from memorive.research.retrieval.ownership import parse_snapshot_frontmatter, render_snapshot_frontmatter
+from memorive.research.retrieval.structured_context import (
     _neighbor_candidate,
     build_card_anchor_candidates,
     build_logical_spans,
 )
-from retrieval.types import Candidate, CandidateSet, ContextBlock, ContextPack, QueryFacet
-from research_analysis.analysis import (
+from memorive.research.retrieval.types import Candidate, CandidateSet, ContextBlock, ContextPack, QueryFacet
+from memorive.research.analysis.analysis import (
     OwnershipFailClosed as M4OwnershipFailClosed,
     analyze,
     build_analysis_request_envelope,
@@ -453,7 +453,7 @@ class OwnershipReplayAndSchemaTest(unittest.TestCase):
         self.assertEqual(parse_snapshot_frontmatter(render_snapshot_frontmatter(original)), original)
         code = (
             "import json,sys; "
-            "from retrieval.ownership import OwnershipSnapshot,validate_snapshot; "
+            "from memorive.research.retrieval.ownership import OwnershipSnapshot,validate_snapshot; "
             "x=validate_snapshot(OwnershipSnapshot.from_dict(json.load(sys.stdin))); "
             "print(x.ownership_digest)"
         )
@@ -474,7 +474,7 @@ class OwnershipReplayAndSchemaTest(unittest.TestCase):
         self.assertEqual(caught.exception.code, OWNERSHIP_VERSION_UNSUPPORTED)
 
     def test_schema_examples_validate(self):
-        schema_root = REPO_ROOT / "retrieval" / "schemas"
+        schema_root = REPO_ROOT / "memorive" / "research" / "retrieval" / "schemas"
         snapshot_schema = json.loads(
             (schema_root / "data_ownership_ownership_snapshot_v1.schema.json").read_text(encoding="utf-8")
         )

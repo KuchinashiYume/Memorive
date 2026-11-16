@@ -12,12 +12,12 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
-from retrieval_weighting.contracts import (
+from memorive.research.ranking.contracts import (
     make_hashed_payload,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
-from knowledge_feedback.contracts import (
+from memorive.research.knowledge_feedback.contracts import (
     candidate_version_ref,
     validate_derived_knowledge_candidate,
 )

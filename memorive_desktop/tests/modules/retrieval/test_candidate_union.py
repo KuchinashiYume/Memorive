@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval.retrieval_calibration.candidate_union_adapter import stable_candidate_union
+from memorive.research.retrieval.retrieval_calibration.candidate_union_adapter import stable_candidate_union
 def row(candidate_id: str, paper_id: str, distance: float = 0.1, field_score: float = 1.0):
     return {"candidate_id": candidate_id, "paper_id": paper_id, "chunk_id": candidate_id, "text": candidate_id, "distance": distance, "field_score": field_score}
 

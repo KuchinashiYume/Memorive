@@ -5,17 +5,17 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from retrieval_weighting.contracts import typed_payload_hash
-from retrieval_weighting.derived_penalty import build_derived_penalty_record
+from memorive.research.ranking.contracts import typed_payload_hash
+from memorive.research.ranking.derived_penalty import build_derived_penalty_record
 from memorive.documents.card_states.knowledge_submission import make_controlled_ingest_dry_run_receipt
 from memorive.documents.card_states.derived_knowledge_artifact import (
     make_controlled_activation_preview,
     make_pending_artifact_projection,
 )
-from knowledge_feedback.contracts import candidate_version_ref, knowledge_text_hash, make_derived_knowledge_candidate, make_source_omission_boundary, make_source_snapshot, project_candidate_transition
-from knowledge_feedback.eligibility import build_eligibility_report
-from knowledge_feedback.lineage import build_lineage_ledger
-from knowledge_feedback.penalty import build_penalty_eligibility_evidence
+from memorive.research.knowledge_feedback.contracts import candidate_version_ref, knowledge_text_hash, make_derived_knowledge_candidate, make_source_omission_boundary, make_source_snapshot, project_candidate_transition
+from memorive.research.knowledge_feedback.eligibility import build_eligibility_report
+from memorive.research.knowledge_feedback.lineage import build_lineage_ledger
+from memorive.research.knowledge_feedback.penalty import build_penalty_eligibility_evidence
 from decision_log.knowledge_decision import build_synthetic_human_decision_fixture
 from memorive.documents.registry.knowledge_feedback_adapter import make_knowledge_registration_preview
 from .controlled_knowledge_feedback import audit_self_reinforcement

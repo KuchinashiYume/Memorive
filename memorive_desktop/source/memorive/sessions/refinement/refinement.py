@@ -13,7 +13,7 @@ import re
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
-from knowledge_feedback.canonical import (
+from memorive.research.knowledge_feedback.canonical import (
     make_hashed_payload,
     typed_payload_hash,
     validate_hash_descriptor,

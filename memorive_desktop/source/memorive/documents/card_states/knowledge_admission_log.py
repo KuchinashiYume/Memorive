@@ -21,7 +21,7 @@ ENV_KNOWLEDGE_ADMISSION_LOG_DIR = "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR"
 
 
 def log_dir() -> Path:
-    """The folder of the yearly log files. retrieval/candidate_retrieval.py reads it too."""
+    """The folder of the yearly log files. memorive/research/retrieval/candidate_retrieval.py reads it too."""
     return Path(os.environ.get(ENV_KNOWLEDGE_ADMISSION_LOG_DIR) or ops_root() / "knowledge_admission")
 
 

@@ -3,9 +3,9 @@ from __future__ import annotations
 from copy import deepcopy
 import unittest
 
-from retrieval_weighting.contracts import make_hashed_payload
-from retrieval_weighting.errors import ContractViolation, FieldVectorError
-from retrieval_weighting.field_search import search_field_vectors
+from memorive.research.ranking.contracts import make_hashed_payload
+from memorive.research.ranking.errors import ContractViolation, FieldVectorError
+from memorive.research.ranking.field_search import search_field_vectors
 from tests.modules.retrieval_weighting.current_field_records import field_records
 
 

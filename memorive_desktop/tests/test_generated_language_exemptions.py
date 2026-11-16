@@ -18,7 +18,7 @@ from memorive.documents.card_distillation.card import DANGER_UNKNOWN_FIELD, DANG
 from memorive.platform.language.source_preservation import SourceLanguageDriftError
 from memorive.documents.workflow.executor import (_validate_artifact_language, _validate_context_pack_language,
                                         _validate_judgment_language)
-from retrieval.structured_context import _FACET_SPECS
+from memorive.research.retrieval.structured_context import _FACET_SPECS
 
 SOURCE = "Samples were incubated at 37 C. 实验条件 appeared in the original table."
 EN = dict(source_text=SOURCE, source_language="en")

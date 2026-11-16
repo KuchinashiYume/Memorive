@@ -8,11 +8,11 @@ from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 
-from research_reports import renderer
-from research_reports.renderer import render_markdown
+from memorive.research.reports import renderer
+from memorive.research.reports.renderer import render_markdown
 
 
-TEMPLATE_ROOT = (Path(__file__).resolve().parents[3] / "source" / "research_reports") / "templates"
+TEMPLATE_ROOT = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "research" / "reports") / "templates"
 TOKEN_PATTERN = re.compile(r"{{([a-z_]+)}}")
 
 

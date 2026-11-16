@@ -13,8 +13,8 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from memorive_research_workspace.service import ResearchWorkspace, desktop_handoff
-from memorive_research_workspace.store import digest
+from memorive.research.workspace.service import ResearchWorkspace, desktop_handoff
+from memorive.research.workspace.store import digest
 
 RECEIPT = {"status": "PASS", "behavior_sha256": "b" * 64, "token_usage": {"input_tokens": 5}}
 PASS = {"status": "PASS", "text": "Figure 1: growth doubled after 20 minutes.", "execution_receipt": RECEIPT}

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval.retrieval_calibration.candidate_features import build_reranker_provenance, resolve_feature_envelope
+from memorive.research.retrieval.retrieval_calibration.candidate_features import build_reranker_provenance, resolve_feature_envelope
 BASE = {"candidate_id": "A", "paper_id": "P", "chunk_id": "C", "text": "text", "distance": 0.1}
 
 

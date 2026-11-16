@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from retrieval.shadow_seam import preserve_baseline_with_shadow_observation
+from memorive.research.retrieval.shadow_seam import preserve_baseline_with_shadow_observation
 class ShadowSeamTests(unittest.TestCase):
     @staticmethod
     def _projection() -> dict:

@@ -1,4 +1,4 @@
-"""Connected apps (memorive_research_workspace/connections.py): bringing papers in through a preview,
+"""Connected apps (memorive/research/workspace/connections.py): bringing papers in through a preview,
 their outputs, writing a managed block into a note, exporting, and actions queued for the desktop.
 Everything runs in a temporary folder with plain markdown papers.
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from memorive_research_workspace.service import ResearchWorkspace
+from memorive.research.workspace.service import ResearchWorkspace
 
 PAPER = "# Growth of K12\n\n" + "\n".join(f"Line {n}: growth doubled at 37 C." for n in range(1, 30))
 

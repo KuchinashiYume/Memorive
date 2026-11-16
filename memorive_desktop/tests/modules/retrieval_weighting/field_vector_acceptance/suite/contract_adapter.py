@@ -44,19 +44,19 @@ if CANDIDATE_ROOT.exists() and str(CANDIDATE_ROOT) not in sys.path:
     sys.path.insert(0, str(CANDIDATE_ROOT))
 
 CORE_MODULES = (
-    "retrieval_weighting.source_snapshot",
-    "retrieval_weighting.field_vectors",
+    "memorive.research.ranking.source_snapshot",
+    "memorive.research.ranking.field_vectors",
 )
 INDEX_MODULES = (
-    "retrieval_weighting.candidate_index",
-    "retrieval_weighting.migration",
-    "retrieval_weighting.locator",
-    "retrieval_weighting",
+    "memorive.research.ranking.candidate_index",
+    "memorive.research.ranking.migration",
+    "memorive.research.ranking.locator",
+    "memorive.research.ranking",
 )
 CONTRACT_MODULES = (
-    "retrieval_weighting.contracts",
+    "memorive.research.ranking.contracts",
     "memorive.platform.jcs",
-    "retrieval_weighting.field_registry",
+    "memorive.research.ranking.field_registry",
 )
 
 

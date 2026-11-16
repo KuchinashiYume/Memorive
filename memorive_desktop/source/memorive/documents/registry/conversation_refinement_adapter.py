@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
-from knowledge_feedback.canonical import make_hashed_payload, verify_hashed_payload
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload, verify_hashed_payload
 from memorive.sessions.refinement.contracts import ConversationContractError, object_ref
 from memorive.sessions.refinement.destination import validate_destination_projection
 from memorive.documents.card_states.conversation_ingest_preview import validate_conversation_ingest_preview

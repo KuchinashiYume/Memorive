@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Mapping
 
-from research_analysis.review_orchestration_events import (
+from memorive.research.analysis.review_orchestration_events import (
     AnalysisCompletionEventError,
     canonical_hash,
     validate_analysis_completed_event,

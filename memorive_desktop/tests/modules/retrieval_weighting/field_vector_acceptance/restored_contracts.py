@@ -4,7 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
-from retrieval_weighting.contracts import Any, ContractViolation, Mapping, SourceSnapshotDriftError, _CARD_AUTHORITY_KEYS, _exact_keys, _mapping, datetime, deepcopy, require_non_empty_refs, require_non_empty_string, timedelta, typed_payload_hash, validate_hash_descriptor
+from memorive.research.ranking.contracts import Any, ContractViolation, Mapping, SourceSnapshotDriftError, _CARD_AUTHORITY_KEYS, _exact_keys, _mapping, datetime, deepcopy, require_non_empty_refs, require_non_empty_string, timedelta, typed_payload_hash, validate_hash_descriptor
 
 
 def require_utc_timestamp(value: Any, field_name: str) -> str:

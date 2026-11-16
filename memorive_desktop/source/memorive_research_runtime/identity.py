@@ -3,7 +3,7 @@
 verify_source_observation and _claim_from_observation read the desktop's source observations,
 including the kind whose title, authors and year are optional. resolve_identity_batch runs the
 shared algorithm (resolve_identity_batch_with in
-literature_discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py) with
+memorive/research/discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py) with
 this module's PRODUCER. memorive_research_runtime/acquisition.py calls it.
 """
 
@@ -13,8 +13,8 @@ import copy
 import re
 from typing import Any, Mapping, Sequence
 
-from literature_discovery.connector_framework import canonical_json, sha256_json
-from literature_discovery.bibliographic_identity_literature_discovery_bibliographic_identity import (  # the code both modules share
+from memorive.research.discovery.connector_framework import canonical_json, sha256_json
+from memorive.research.discovery.bibliographic_identity_literature_discovery_bibliographic_identity import (  # the code both modules share
     IdentityResolutionError,
     _normalized_text,
     _published_year,

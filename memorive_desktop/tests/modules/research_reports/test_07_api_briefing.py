@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from memorive.models.gateway.config import GatewayConfig
-from research_reports.api_briefing import BLOCKED_INPUT_INCOMPLETE, GENERATED, SKIPPED_NO_LIBRARY_CHANGE, BriefingApiError, qualifying_library_change_ids
-from research_reports.api_briefing import run_api_briefing
+from memorive.research.reports.api_briefing import BLOCKED_INPUT_INCOMPLETE, GENERATED, SKIPPED_NO_LIBRARY_CHANGE, BriefingApiError, qualifying_library_change_ids
+from memorive.research.reports.api_briefing import run_api_briefing
 TITLES = {
     "daily": ["新增", "修改", "待审", "失败"],
     "weekly": ["研究进展", "明确标记的重要变化", "未验证项", "明确来源的潜在张力", "风险与待办"],
@@ -125,7 +125,7 @@ def _response(value: dict, provider: str, model: str) -> dict:
 
 class ApiBriefingTests(unittest.TestCase):
     def test_profiles_match_gateway_slots_exactly(self) -> None:
-        from research_reports.api_briefing import PROFILES
+        from memorive.research.reports.api_briefing import PROFILES
 
         config = GatewayConfig((Path(__file__).resolve().parents[3] / "source") / "memorive" / "models" / "gateway" / "models.yaml")
         for profile in PROFILES.values():
@@ -199,7 +199,7 @@ class ApiBriefingTests(unittest.TestCase):
             self.assertIn("API narrative", result.markdown_text)
 
     def test_explicit_anthropic_low_override_does_not_change_defaults(self) -> None:
-        from research_reports.api_briefing import BriefProfile, PROFILES
+        from memorive.research.reports.api_briefing import BriefProfile, PROFILES
 
         default_daily = PROFILES["daily"]
         profile = BriefProfile(

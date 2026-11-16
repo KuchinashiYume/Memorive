@@ -4,17 +4,17 @@ from copy import deepcopy
 import unittest
 
 from memorive.platform.jcs import sha256_bytes
-from retrieval_weighting.contracts import make_hashed_payload, typed_payload_hash
-from retrieval_weighting.derived_penalty import UNKNOWN_PROVENANCE_AUTHORITY_BLOCKED, apply_authority_penalty, build_derived_penalty_record, validate_derived_penalty_against_policy, validate_derived_penalty_record
-from retrieval_weighting.errors import ContractViolation
-from retrieval_weighting.field_registry import get_field_registry
-from retrieval_weighting.providers import AUTHORITY_PROVIDERS, PROVIDERS, RELEVANCE_PROVIDERS, build_absent_provider_score_record, build_provider_score_record, build_strict_provider_score_record, validate_provider_score_record, validate_provider_set
-from retrieval_weighting.query_dimensions import (
+from memorive.research.ranking.contracts import make_hashed_payload, typed_payload_hash
+from memorive.research.ranking.derived_penalty import UNKNOWN_PROVENANCE_AUTHORITY_BLOCKED, apply_authority_penalty, build_derived_penalty_record, validate_derived_penalty_against_policy, validate_derived_penalty_record
+from memorive.research.ranking.errors import ContractViolation
+from memorive.research.ranking.field_registry import get_field_registry
+from memorive.research.ranking.providers import AUTHORITY_PROVIDERS, PROVIDERS, RELEVANCE_PROVIDERS, build_absent_provider_score_record, build_provider_score_record, build_strict_provider_score_record, validate_provider_score_record, validate_provider_set
+from memorive.research.ranking.query_dimensions import (
     build_query_dimension_profile,
     validate_query_dimension_profile,
 )
-from retrieval_weighting.shadow_contracts import reject_scorer_or_oracle_fields
-from retrieval_weighting.shadow_contracts import validate_retrieval_policy_snapshot
+from memorive.research.ranking.shadow_contracts import reject_scorer_or_oracle_fields
+from memorive.research.ranking.shadow_contracts import validate_retrieval_policy_snapshot
 def _hash(label: str) -> dict[str, str]:
     return typed_payload_hash({"label": label})
 

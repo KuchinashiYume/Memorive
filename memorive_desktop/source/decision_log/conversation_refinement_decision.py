@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
-from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash, validate_hash_descriptor, verify_hashed_payload
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash, validate_hash_descriptor, verify_hashed_payload
 from memorive.sessions.refinement.contracts import DECISION_STATES, ConversationContractError
 from memorive.sessions.refinement.refinement import validate_typed_refinement_item
 

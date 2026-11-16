@@ -15,7 +15,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
 from memorive.sessions.refinement.refinement import make_typed_refinement_item  # noqa: E402
 from memorive.sessions.refinement import (  # noqa: E402
     make_context_capsule,

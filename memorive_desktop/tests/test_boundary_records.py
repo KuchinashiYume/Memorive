@@ -14,7 +14,7 @@ from memorive_desktop_service.protocol import CANCEL_SCHEMA, PROTOCOL_VERSION, v
 from memorive.platform.folders.policy import document_folder
 from memorive_test_console_bridge.expressions import BY_ID
 from memorive_test_console_bridge.protocol import validate_command
-from research_recommendations.exposure_feedback import ExposureFeedbackError, validate_research_interaction_event
+from memorive.research.recommendations.exposure_feedback import ExposureFeedbackError, validate_research_interaction_event
 
 
 # Cancel frames on the desktop connection

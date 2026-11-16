@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 import unittest
 
-from retrieval_weighting.errors import ContractViolation
-from retrieval_weighting.structural_candidate import build_structural_observed
+from memorive.research.ranking.errors import ContractViolation
+from memorive.research.ranking.structural_candidate import build_structural_observed
 from tests.modules.retrieval_weighting.current_field_records import structural_inputs
 INJECTIONS = Path(__file__).resolve().parent / "fixtures" / "structural" / "structural_injections.json"
 

@@ -835,7 +835,7 @@ def evaluate_A_014() -> dict[str, Any]:
             synthetic = workspace / "synthetic_symlink_component"
             synthetic.mkdir()
             symlink_probe = synthetic
-            import retrieval_weighting.locator as locator_module
+            import memorive.research.ranking.locator as locator_module
 
             original = locator_module._is_reparse_point
             with patch.object(
@@ -875,7 +875,7 @@ def evaluate_A_014() -> dict[str, Any]:
             synthetic_junction = workspace / "synthetic_junction_component"
             synthetic_junction.mkdir()
             junction_probe = synthetic_junction
-            import retrieval_weighting.locator as locator_module
+            import memorive.research.ranking.locator as locator_module
 
             original = locator_module._is_reparse_point
             with patch.object(

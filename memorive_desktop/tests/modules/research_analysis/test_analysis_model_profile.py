@@ -9,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from research_analysis import analysis
+from memorive.research.analysis import analysis
 from memorive.models.gateway.config import GatewayConfig
 
 

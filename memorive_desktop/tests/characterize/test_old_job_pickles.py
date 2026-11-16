@@ -19,9 +19,9 @@ from pathlib import Path
 import pytest
 
 from memorive.platform import pickle_compat
-from research_analysis.types import AnalysisResult, FlaggedClaim, LiteratureClaim, PossiblyIrrelevantClaim
-from retrieval.ownership import OwnershipContributor
-from retrieval.types import ContextBlock, ContextPack, QueryFacet
+from memorive.research.analysis.types import AnalysisResult, FlaggedClaim, LiteratureClaim, PossiblyIrrelevantClaim
+from memorive.research.retrieval.ownership import OwnershipContributor
+from memorive.research.retrieval.types import ContextBlock, ContextPack, QueryFacet
 
 GOLDEN = Path(__file__).with_name("golden") / "old_job_pickles"
 

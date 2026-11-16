@@ -21,7 +21,7 @@ import pytest
 # verify() and migrate() import these; importing them first, while the program does not look
 # packaged, keeps their module-level paths pointing at the source tree for later tests.
 import memorive.platform.folders  # noqa: F401
-import memorive_research_workspace.store  # noqa: F401
+import memorive.research.workspace.store  # noqa: F401
 import memorive_settings.store  # noqa: F401
 import product_identity  # noqa: F401
 import update_maintenance as maintenance

@@ -1,4 +1,4 @@
-"""Knowledge drafts (knowledge_feedback/research_ingest.py): a draft that cites excerpts waits for a
+"""Knowledge drafts (memorive/research/knowledge_feedback/research_ingest.py): a draft that cites excerpts waits for a
 person; accepting it writes a knowledge note that can be cited like any other material.
 
 A draft is proposed by the desktop or by an agent. Only the desktop reviews it. Accepting writes
@@ -15,7 +15,7 @@ import pytest
 
 from memorive.documents.registry.registry_v2 import ArtifactRegistry
 from memorive.platform.language import freeze
-from memorive_research_workspace.service import ResearchWorkspace
+from memorive.research.workspace.service import ResearchWorkspace
 
 PAPER = "\n".join(f"{n:03d} Growth of strain K12 was measured every hour at 37 C in the same medium." for n in range(1, 41))
 

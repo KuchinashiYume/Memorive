@@ -12,7 +12,7 @@ def _write(path,value):
 
 def complete_analysis_revision(analysis,pack,review,chunks,*,bridge,evidence_root,output_language,
         model_call=None, region_check=None, verifier_call=None):
-    from research_analysis.revision import revise_analysis
+    from memorive.research.analysis.revision import revise_analysis
     from memorive.documents.card_review import verify_research_analysis
     root=Path(evidence_root)
     root.mkdir(parents=True,exist_ok=True)

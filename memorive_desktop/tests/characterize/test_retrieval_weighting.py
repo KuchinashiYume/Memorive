@@ -9,7 +9,7 @@ import json
 from copy import deepcopy
 from pathlib import Path
 
-from retrieval_weighting import contracts, field_registry, query_dimensions
+from memorive.research.ranking import contracts, field_registry, query_dimensions
 from memorive.platform.jcs import typed_payload_hash
 from tests.characterize.golden import check, outcome, rejected_as
 

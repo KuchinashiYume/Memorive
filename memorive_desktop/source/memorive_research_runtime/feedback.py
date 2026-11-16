@@ -1,7 +1,7 @@
 """Single-writer desktop persistence around the unchanged RECOMMENDATION-HISTORY event engine."""
 from pathlib import Path
 from threading import RLock
-from research_recommendations import exposure_feedback as engine
+from memorive.research.recommendations import exposure_feedback as engine
 from .common import read, write, sealed, sha, now
 
 class FeedbackStore:

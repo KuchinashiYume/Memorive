@@ -1,7 +1,7 @@
 """Which model profiles research can choose (memorive_research_runtime/report_models.py).
 
 profile_options() decides it from data: the saved settings and the recognized local models. The
-desktop's catalog() and the window-less binding (memorive_research_workspace/headless_models.py) only
+desktop's catalog() and the window-less binding (memorive/research/workspace/headless_models.py) only
 supply that data. Here the settings snapshot is replaced by a fixed list of profiles.
 """
 from __future__ import annotations

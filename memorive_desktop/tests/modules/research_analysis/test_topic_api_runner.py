@@ -14,7 +14,7 @@ from copy import deepcopy
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from research_analysis.research_handoff_research_analysis_cross_topic_api_runner import CrossTopicRunResult, CrossTopicRunnerError, FrozenTextArtifact, FrozenTopicRequest, build_cross_topic_payload, normalize_cross_topic_identity_metadata, render_cross_topic_artifacts, render_cross_topic_markdown, run_cross_topic_analysis
+from memorive.research.analysis.research_handoff_research_analysis_cross_topic_api_runner import CrossTopicRunResult, CrossTopicRunnerError, FrozenTextArtifact, FrozenTopicRequest, build_cross_topic_payload, normalize_cross_topic_identity_metadata, render_cross_topic_artifacts, render_cross_topic_markdown, run_cross_topic_analysis
 def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest().upper()
 

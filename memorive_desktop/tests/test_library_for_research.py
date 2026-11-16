@@ -3,8 +3,8 @@
 The library controller (memorive/documents/library/product_controller.py) learns about those files from the
 processing jobs and offers them through core_artifacts() and resolve_core_private_artifact().
 The research workspace uses them in two places:
-  memorive_research_workspace/library_bridge.py       adding cards, analyses and documents to a project
-  memorive_research_workspace/desktop_connections.py  showing a connected device what a job produced
+  memorive/research/workspace/library_bridge.py       adding cards, analyses and documents to a project
+  memorive/research/workspace/desktop_connections.py  showing a connected device what a job produced
 These tests build one processed paper in a temporary folder; nothing else is read.
 """
 from __future__ import annotations
@@ -19,9 +19,9 @@ import pytest
 
 from memorive_desktop_service.control_store import ControlStore
 from memorive.documents.library import LibraryProductController
-from memorive_research_workspace import desktop_connections, library_bridge
-from memorive_research_workspace.desktop_connections import job_results
-from memorive_research_workspace.store import Store
+from memorive.research.workspace import desktop_connections, library_bridge
+from memorive.research.workspace.desktop_connections import job_results
+from memorive.research.workspace.store import Store
 
 CONTRACTS = Path(__file__).resolve().parents[1] / "contracts" / "integration"
 JOB = "job-paper-1"

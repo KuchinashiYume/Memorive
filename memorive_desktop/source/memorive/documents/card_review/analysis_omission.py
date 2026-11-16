@@ -1,8 +1,8 @@
 """Exact-claim logical omission after one producer repair and independent Delta review."""
 from dataclasses import asdict, replace
-from retrieval.ownership import stable_sha256
-from research_analysis.revision import bind_successor
-from research_analysis.analysis import _analysis_quality_metrics
+from memorive.research.retrieval.ownership import stable_sha256
+from memorive.research.analysis.revision import bind_successor
+from memorive.research.analysis.analysis import _analysis_quality_metrics
 from memorive.documents.card_review.ownership_binding import build_ownership_review_task
 
 

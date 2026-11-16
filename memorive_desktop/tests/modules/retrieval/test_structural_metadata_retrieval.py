@@ -11,7 +11,7 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from retrieval.candidate_retrieval import _query, resolve_chunk_metadata
+from memorive.research.retrieval.candidate_retrieval import _query, resolve_chunk_metadata
 
 
 class FakeCollection:

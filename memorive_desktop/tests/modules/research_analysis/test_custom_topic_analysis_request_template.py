@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 CUSTOM_REQUEST_TEMPLATE_PATH = (
-    (Path(__file__).resolve().parents[3] / "source" / "research_analysis")
+    (Path(__file__).resolve().parents[3] / "source" / "memorive" / "research" / "analysis")
     / "templates"
     / "custom_topic_analysis_request.md.tmpl"
 )

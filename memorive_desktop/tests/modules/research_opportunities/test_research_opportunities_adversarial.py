@@ -10,8 +10,8 @@ import unittest
 from copy import deepcopy
 from pathlib import Path
 
-from research_opportunities import canonical_json_bytes, ContractRejected, EvidenceRejected, typed_payload_hash
-from research_opportunities import CandidateRejected, SourceRejected, assess_comparability, build_opportunity_candidate, classify_tension, extract_author_stated_gaps, external_hash_is_valid, make_anchor_resolution_receipt, make_ignore_decision, make_pair_ledger, make_source_snapshot, make_trigger_scope_receipt, project_comparison_concepts, validate_anchor_resolution_receipt, validate_source_card, with_content_hash
+from memorive.research.opportunities import canonical_json_bytes, ContractRejected, EvidenceRejected, typed_payload_hash
+from memorive.research.opportunities import CandidateRejected, SourceRejected, assess_comparability, build_opportunity_candidate, classify_tension, extract_author_stated_gaps, external_hash_is_valid, make_anchor_resolution_receipt, make_ignore_decision, make_pair_ledger, make_source_snapshot, make_trigger_scope_receipt, project_comparison_concepts, validate_anchor_resolution_receipt, validate_source_card, with_content_hash
 from memorive.documents.card_review import verify_opportunity_candidate
 from memorive.documents.card_review.opportunity_verification import _ignore_valid as m6_ignore_valid
 from memorive.documents.card_states.opportunity_submission import make_review_submission_request, validate_knowledge_admission_validation_receipt, validate_review_submission_request
@@ -1034,7 +1034,7 @@ class Successor003Tests(unittest.TestCase):
                 imports.append(node.module)
             elif isinstance(node, ast.Import):
                 imports.extend(alias.name for alias in node.names)
-        self.assertNotIn("research_opportunities.core", imports)
+        self.assertNotIn("memorive.research.opportunities.core", imports)
 
 
 if __name__ == "__main__":

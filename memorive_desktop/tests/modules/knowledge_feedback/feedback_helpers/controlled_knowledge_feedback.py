@@ -9,13 +9,13 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
 
-from retrieval_weighting.contracts import (
+from memorive.research.ranking.contracts import (
     make_hashed_payload,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
-from knowledge_feedback.contracts import candidate_version_ref, validate_derived_knowledge_candidate
-from knowledge_feedback.lineage import validate_lineage_ledger
+from memorive.research.knowledge_feedback.contracts import candidate_version_ref, validate_derived_knowledge_candidate
+from memorive.research.knowledge_feedback.lineage import validate_lineage_ledger
 
 
 _AUDIT_KEYS = {

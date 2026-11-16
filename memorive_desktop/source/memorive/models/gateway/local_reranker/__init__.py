@@ -1,5 +1,5 @@
 """Local reranker models for retrieval calibration: requests, result checks and the doctor
-(reranker_doctor, used by retrieval/retrieval_calibration/cli.py).
+(reranker_doctor, used by memorive/research/retrieval/retrieval_calibration/cli.py).
 """
 
 from memorive.models.gateway.local_reranker.adapter import LocalRerankerAdapter, LocalRerankerOutcome

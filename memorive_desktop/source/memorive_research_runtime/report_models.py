@@ -80,8 +80,8 @@ def freeze(runtime,run_id,period):
     return frozen
 
 def compose(runtime,run_id,params,result):
-    from research_reports.api_briefing import BriefingApiError,prepare_mapped_briefing,validate_mapped_narrative
-    from research_reports.renderer import render_markdown,render_markdown_with_narrative
+    from memorive.research.reports.api_briefing import BriefingApiError,prepare_mapped_briefing,validate_mapped_narrative
+    from memorive.research.reports.renderer import render_markdown,render_markdown_with_narrative
     frozen=params['report_model']
     digest=result['digest']
     prompt,schema=prepare_mapped_briefing(digest,language=params.get('language_context'))

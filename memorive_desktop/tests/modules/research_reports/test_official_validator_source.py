@@ -1,5 +1,5 @@
 """The receipt of an official record validator describes the code that actually runs
-(research_reports.adapters._official_callable).
+(memorive.research.reports.adapters._official_callable).
 
 The validator is used only when every module its receipt lists is loaded from this source tree; a
 module of the same name loaded first from another folder is refused, leaves no receipt and is not
@@ -17,10 +17,10 @@ from pathlib import Path
 
 import pytest
 
-from research_reports import adapters
-from research_reports.errors import SourceRecordError
+from memorive.research.reports import adapters
+from memorive.research.reports.errors import SourceRecordError
 
-SOURCE = Path(adapters.__file__).resolve().parent.parent
+SOURCE = Path(adapters.__file__).resolve().parents[3]
 FOREIGN = 'def validate_record(record):\n    return "foreign"\n'
 
 

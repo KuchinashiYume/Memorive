@@ -5,13 +5,13 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
-from retrieval_weighting.contracts import (
+from memorive.research.ranking.contracts import (
     make_hashed_payload,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
 from memorive.documents.card_states.knowledge_submission import validate_controlled_ingest_dry_run_receipt
-from knowledge_feedback.contracts import validate_derived_knowledge_candidate
+from memorive.research.knowledge_feedback.contracts import validate_derived_knowledge_candidate
 
 from memorive.documents.registry.errors import ContractValidationError
 

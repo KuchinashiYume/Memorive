@@ -11,7 +11,7 @@ import math
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from retrieval_weighting.contracts import make_hashed_payload, make_stable_id, verify_hashed_payload
+from memorive.research.ranking.contracts import make_hashed_payload, make_stable_id, verify_hashed_payload
 
 
 POLICY_ORDER = [

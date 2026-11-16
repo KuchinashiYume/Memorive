@@ -1,7 +1,7 @@
 """Passive completed-window reports, triggered by material outputs, not log noise."""
 from datetime import datetime, timedelta
-from research_reports.policy import ZONE, original_window_ref, validate_window
-from research_reports.renderer import render_markdown
+from memorive.research.reports.policy import ZONE, original_window_ref, validate_window
+from memorive.research.reports.renderer import render_markdown
 from .common import sha, sealed, write, read
 from .digest import build_digest
 

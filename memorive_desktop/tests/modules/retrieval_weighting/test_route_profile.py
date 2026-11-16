@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval_weighting.retrieval_calibration_route_profile import RetrievalProfile, resolve_route, route_matrix
+from memorive.research.ranking.retrieval_calibration_route_profile import RetrievalProfile, resolve_route, route_matrix
 class RouteProfileTests(unittest.TestCase):
     def test_off_never_enables_new_routes(self) -> None:
         result = resolve_route(

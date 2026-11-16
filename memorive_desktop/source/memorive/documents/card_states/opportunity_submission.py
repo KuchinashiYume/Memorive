@@ -6,14 +6,14 @@ import math
 from copy import deepcopy
 from typing import Any, Mapping
 
-from research_opportunities.canonical import (
+from memorive.research.opportunities.canonical import (
     content_hash_matches,
     sha256_bytes,
     typed_hash_is_valid,
     typed_payload_hash,
     with_content_hash,
 )
-from research_opportunities.errors import CandidateRejected
+from memorive.research.opportunities.errors import CandidateRejected
 
 
 CANDIDATE_KEYS = {

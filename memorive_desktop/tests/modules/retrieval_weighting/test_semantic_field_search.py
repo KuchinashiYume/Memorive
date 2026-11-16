@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval_weighting.errors import ContractViolation, FieldVectorError
-from retrieval_weighting.semantic_field_search import search_semantic_field_overlays
+from memorive.research.ranking.errors import ContractViolation, FieldVectorError
+from memorive.research.ranking.semantic_field_search import search_semantic_field_overlays
 from tests.modules.retrieval_weighting.test_semantic_field_profiles import (
     semantic_overlay,
     semantic_profile,

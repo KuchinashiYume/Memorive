@@ -444,7 +444,7 @@ class CoreModelBridge:
         schema = _response_schema(task_type, prompt)
         if payload.get("response_contract") is not None:
             if task_type == "analysis" and payload["response_contract"] == "analysis_targeted_revision_v1":
-                from research_analysis.revision import REPAIR_SCHEMA
+                from memorive.research.analysis.revision import REPAIR_SCHEMA
                 schema = REPAIR_SCHEMA
             elif task_type == "distill" and payload["response_contract"] == "distill_aux_v1":
                 from memorive.documents.card_distillation.response_contracts import AUX_SCHEMA
@@ -465,7 +465,7 @@ class CoreModelBridge:
             from memorive.models.gateway.cache_session import REVISION, split_source
             pieces = split_source(prompt)
             if pieces is not None:
-                from research_analysis.revision import REPAIR_SCHEMA
+                from memorive.research.analysis.revision import REPAIR_SCHEMA
                 contracts = [_ANALYSIS_SCHEMA, REPAIR_SCHEMA] if task_type == "analysis" else [_BATCH_SCHEMA, _DIRECT_VIOLATIONS_SCHEMA]
                 execution_profile["model"].update(
                     prompt_cache_scope=_sha256({"source_prefix": pieces[0], "node_id": node_id}),

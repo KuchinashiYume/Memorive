@@ -2,7 +2,7 @@
 
 from functools import partial
 
-from research_reports.digest import DigestIdentity, build_digest as _build_digest
+from memorive.research.reports.digest import DigestIdentity, build_digest as _build_digest
 
 IDENTITY = DigestIdentity(
     generator_version="desktop-desktop-research_reports/1.0",

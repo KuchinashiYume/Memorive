@@ -9,9 +9,9 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from retrieval import Candidate, CandidateSet, QueryFacet
-from retrieval.structured_context import bibliography_is_eligible, build_card_anchor_candidates, build_logical_spans, build_structured_context_pack, detect_query_facets, infer_source_role, is_high_confidence_bibliography
-from retrieval.structured_context import retrieve_faceted_candidates
+from memorive.research.retrieval import Candidate, CandidateSet, QueryFacet
+from memorive.research.retrieval.structured_context import bibliography_is_eligible, build_card_anchor_candidates, build_logical_spans, build_structured_context_pack, detect_query_facets, infer_source_role, is_high_confidence_bibliography
+from memorive.research.retrieval.structured_context import retrieve_faceted_candidates
 def candidate_set(*candidates: Candidate) -> CandidateSet:
     return CandidateSet(
         candidates=tuple(candidates),

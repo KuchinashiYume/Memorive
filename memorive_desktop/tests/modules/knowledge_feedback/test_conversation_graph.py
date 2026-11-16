@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from copy import deepcopy
 
-from knowledge_feedback.canonical import make_hashed_payload
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload
 from memorive.sessions.refinement.contracts import ConversationContractError
 from memorive.sessions.refinement.graph import validate_normalized_graph
 from memorive.sessions.refinement.graph import build_normalized_graph

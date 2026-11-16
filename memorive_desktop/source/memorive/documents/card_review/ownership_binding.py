@@ -4,8 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from research_analysis.analysis import analysis_binding_payload
-from retrieval.ownership import (
+from memorive.research.analysis.analysis import analysis_binding_payload
+from memorive.research.retrieval.ownership import (
     OWNERSHIP_BINDING_MISMATCH,
     OwnershipContractError,
     OwnershipGuard,

@@ -2,7 +2,7 @@
 import threading, time, os, subprocess, re, json
 from pathlib import Path
 from .common import sha, now, write, read, sealed
-from literature_discovery.live_metadata_transport import (
+from memorive.research.discovery.live_metadata_transport import (
     TransportPolicy,
 )
 from memorive.models.validation.transport import UrllibHttpTransport

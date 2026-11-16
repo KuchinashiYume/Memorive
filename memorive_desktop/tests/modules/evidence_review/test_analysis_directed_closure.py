@@ -5,9 +5,9 @@ _TEMP = tempfile.TemporaryDirectory(prefix='memorive-closure-regression-')
 ROOT=Path(_TEMP.name)
 sys.dont_write_bytecode=True
 os.environ['MEMORIVE_RUNTIME_LOG_LOG_DIR']=str(ROOT/'ops/runtime_log')
-from research_analysis.revision import bind_successor
-from research_analysis.types import LiteratureClaim
-from retrieval.ownership import stable_sha256
+from memorive.research.analysis.revision import bind_successor
+from memorive.research.analysis.types import LiteratureClaim
+from memorive.research.retrieval.ownership import stable_sha256
 from memorive.documents.card_review.analysis_omission import finalize_delta, omission_notice
 
 def read(p):return json.loads(p.read_text(encoding='utf-8'))
@@ -15,8 +15,8 @@ def read(p):return json.loads(p.read_text(encoding='utf-8'))
 class ClosureTests(unittest.TestCase):
  def setUp(self):
   from tests.modules.research_analysis.test_coverage_aware_analysis_p0 import pack, block, response
-  from research_analysis.analysis import analyze
-  from research_analysis.revision import revise_analysis
+  from memorive.research.analysis.analysis import analyze
+  from memorive.research.analysis.revision import revise_analysis
   from memorive.documents.card_review.ownership_binding import build_ownership_review_task
   self.pack=pack(block('Paper#a',section='Results',facet_ids=(),source_role='direct_result',span_id='a'),
       block('Paper#b',section='Results',facet_ids=(),source_role='direct_result',span_id='b'),coverage_status='not_assessed')

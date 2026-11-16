@@ -28,10 +28,10 @@ def attach_stdio():
 
 def _run():
     attach_stdio()
-    from memorive_research_workspace.agent_entry import main as run
+    from memorive.research.workspace.agent_entry import main as run
     sys.argv=[sys.argv[0]]+[v for v in sys.argv[1:] if v!='--memo-agent']
     return run()
 
 def main():
-    from memorive_research_workspace.agent_entry import entrypoint
+    from memorive.research.workspace.agent_entry import entrypoint
     return entrypoint(_run)

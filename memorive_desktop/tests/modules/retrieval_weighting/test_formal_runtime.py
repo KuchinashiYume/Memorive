@@ -10,19 +10,19 @@ import sys
 import tempfile
 import unittest
 
-from retrieval_weighting.candidate_index import build_candidate_index
+from memorive.research.ranking.candidate_index import build_candidate_index
 from memorive.platform.jcs import canonical_json_bytes
-from retrieval_weighting.contracts import make_hashed_payload
-from retrieval_weighting.field_registry import get_field_registry
-from retrieval_weighting.field_vectors import build_field_vector_records
-from retrieval_weighting.locator import validate_locator
-from retrieval_weighting.source_snapshot import build_source_snapshot
+from memorive.research.ranking.contracts import make_hashed_payload
+from memorive.research.ranking.field_registry import get_field_registry
+from memorive.research.ranking.field_vectors import build_field_vector_records
+from memorive.research.ranking.locator import validate_locator
+from memorive.research.ranking.source_snapshot import build_source_snapshot
 from tests.modules.retrieval_weighting.current_field_records import stable_fields
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 FIXTURE_ROOT = Path(__file__).resolve().parent / "field_vector_acceptance" / "fixtures"
 ORACLE = FIXTURE_ROOT / "reference_oracle_v1" / "expected_records.jsonl"
 BUILD_CUTOFF = "2026-08-03T00:00:00Z"
-# retrieval_weighting/locator.py accepts a run root only under <...>/Memorive-沙盒/Research_研究运营/.
+# memorive/research/ranking/locator.py accepts a run root only under <...>/Memorive-沙盒/Research_研究运营/.
 # That parent is made in the temp folder, so running the tests leaves no folder in the checkout.
 GOVERNED_SANDBOX_PARENT = Path(tempfile.gettempdir()) / "Memorive-沙盒" / "Research_研究运营"
 
@@ -182,7 +182,7 @@ class FormalRuntimeTests(unittest.TestCase):
                     sys.executable,
                     "-B",
                     "-m",
-                    "retrieval_weighting",
+                    "memorive.research.ranking",
                     "--input",
                     str(request_path),
                     "--output",

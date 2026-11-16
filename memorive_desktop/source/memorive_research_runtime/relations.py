@@ -1,5 +1,5 @@
 """Structured bibliographic matches. Free-text mentions are never identity evidence."""
-from literature_discovery.connector_framework import normalize_doi, normalize_arxiv_id, ConnectorError
+from memorive.research.discovery.connector_framework import normalize_doi, normalize_arxiv_id, ConnectorError
 import re
 
 def canonical_doi(value):
@@ -46,7 +46,7 @@ def exact_library_matches(identifiers,records):
 
 def metadata_comparison(candidate,records):
     """Discovery relation renderer, explicit metadata-only successor; no fake vectors."""
-    from literature_discovery import novelty_assessment_literature_discovery_library_relation_novelty as original
+    from memorive.research.discovery import novelty_assessment_literature_discovery_library_relation_novelty as original
     from .common import sha
     relations=[]
     unidentified=0

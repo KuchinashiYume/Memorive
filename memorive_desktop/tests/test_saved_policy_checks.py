@@ -10,10 +10,10 @@ import pytest
 
 from memorive.platform.language import policy as language
 from memorive_research_runtime import report_schedule
-from research_opportunities.research_opportunities import validate as opportunities
-from research_reports.errors import WindowContractError
-from research_reports.policy import validate_window
-from retrieval_weighting import research_policy
+from memorive.research.opportunities.research_opportunities import validate as opportunities
+from memorive.research.reports.errors import WindowContractError
+from memorive.research.reports.policy import validate_window
+from memorive.research.ranking import research_policy
 
 
 # Frozen output language

@@ -81,7 +81,7 @@ def _canonical_bytes(value: Any) -> bytes:
 def _validate_context_pack_language(artifact: Mapping[str, Any], *, source_text: str, source_language: str) -> None:
     # Only exact built-in retrieval vocabulary is metadata. Preserve the saved
     # pack and its hash; source blocks and every other field remain checked.
-    from retrieval.structured_context import _FACET_SPECS
+    from memorive.research.retrieval.structured_context import _FACET_SPECS
     content = _jsonable(artifact)
     for facet in content.get("pack", {}).get("query_facets", []):
         spec = _FACET_SPECS.get(facet.get("id"))
@@ -828,14 +828,14 @@ class CorePipelineExecutor:
                 pack_json = stage_root / "06_context_pack.json"
                 if "06_CONTEXT_PACK" not in completed:
                     start("06_CONTEXT_PACK")
-                    from retrieval import build_context_pack, retrieve_candidates, understand_query
+                    from memorive.research.retrieval import build_context_pack, retrieve_candidates, understand_query
 
                     understood = understand_query(question)
                     # Document analysis needs the admitted paper's methods,
                     # results, conclusions, and source qualifications.
                     rows, chunk_texts = self._load_chunks(folder, paper_id)
-                    from retrieval.candidate_retrieval import _read_frontmatter
-                    from retrieval.document_context import (
+                    from memorive.research.retrieval.candidate_retrieval import _read_frontmatter
+                    from memorive.research.retrieval.document_context import (
                         bind_document_card, document_candidates,
                         document_candidates_from_sidecar,
                     )
@@ -880,8 +880,8 @@ class CorePipelineExecutor:
                     )
                     # Reuse the existing estimator and actual rendered prompt;
                     # do not pre-deduct invented reasoning/margin constants.
-                    from retrieval.context_pack import _cfg, _estimate_tokens
-                    from research_analysis.analysis import build_payload
+                    from memorive.research.retrieval.context_pack import _cfg, _estimate_tokens
+                    from memorive.research.analysis.analysis import build_payload
                     from types import SimpleNamespace
 
                     estimator = _cfg()
@@ -890,7 +890,7 @@ class CorePipelineExecutor:
                                          estimator['overhead_per_block'])
                         for row in candidates.candidates
                     )
-                    from retrieval.review_qualifications import card_review_qualifications, render_review_context
+                    from memorive.research.retrieval.review_qualifications import card_review_qualifications, render_review_context
                     review_text = render_review_context(card_review_qualifications(card_for_context, paper_id=paper_id))
                     candidate_tokens += _estimate_tokens(review_text, estimator['token_ratio'], 0) if review_text else 0
                     empty_payload = build_payload(SimpleNamespace(blocks=()), question,
@@ -904,7 +904,7 @@ class CorePipelineExecutor:
                         candidate_estimated_tokens=candidate_tokens,
                         prompt_measurement_source='ACTUAL_RENDERED_PROMPT_WITH_EXISTING_RETRIEVAL_ESTIMATOR',
                     )
-                    from retrieval.structured_context import build_structured_context_pack
+                    from memorive.research.retrieval.structured_context import build_structured_context_pack
                     pack = build_structured_context_pack(
                         candidates, question, card=card_for_context, chunks=rows,
                         strategy=understood.strategy, retrieval_mode='single_paper_extraction',
@@ -985,7 +985,7 @@ class CorePipelineExecutor:
                 analysis_md = stage_root / "07_analysis.md"
                 if "07_ANALYSIS" not in completed:
                     start("07_ANALYSIS")
-                    from research_analysis import analyze
+                    from memorive.research.analysis import analyze
 
                     analysis = analyze(
                         pack,

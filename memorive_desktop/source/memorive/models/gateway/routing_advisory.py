@@ -8,7 +8,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from retrieval_weighting.contracts import make_hashed_payload, verify_hashed_payload
+from memorive.research.ranking.contracts import make_hashed_payload, verify_hashed_payload
 from memorive.exams.evaluation.dynamic_routing_advisory import advise_routes
 
 

@@ -4,10 +4,10 @@ import copy
 import math
 import unittest
 
-from retrieval_weighting.aggregation import AUTHORITY_MASS, PROVIDER_WEIGHTS, aggregate_availability_aware, aggregate_both_policies, aggregate_architecture_baseline, rank_score_explanations
-from retrieval_weighting.derived_penalty import UNKNOWN_PROVENANCE_AUTHORITY_BLOCKED, build_derived_penalty_record
-from retrieval_weighting.errors import ContractViolation
-from retrieval_weighting.providers import PROVIDERS, build_absent_provider_score_record, build_strict_provider_score_record
+from memorive.research.ranking.aggregation import AUTHORITY_MASS, PROVIDER_WEIGHTS, aggregate_availability_aware, aggregate_both_policies, aggregate_architecture_baseline, rank_score_explanations
+from memorive.research.ranking.derived_penalty import UNKNOWN_PROVENANCE_AUTHORITY_BLOCKED, build_derived_penalty_record
+from memorive.research.ranking.errors import ContractViolation
+from memorive.research.ranking.providers import PROVIDERS, build_absent_provider_score_record, build_strict_provider_score_record
 from tests.modules.retrieval_weighting.test_shadow_contracts import (
     _penalty_policy,
     _provider as _contract_provider,

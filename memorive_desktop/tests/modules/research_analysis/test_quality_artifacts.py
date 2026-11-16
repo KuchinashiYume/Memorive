@@ -7,11 +7,11 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
-from retrieval.coverage_artifacts import ArtifactPointer, ChunkSnapshot, FacetCoverageInput, FacetSpec, MemberRole
-from retrieval.coverage_artifacts import build_facet_definition_artifact, build_references_bias_policy, build_logical_span_artifact, build_retrieval_coverage_assessment, build_source_role_assessment, build_source_role_policy, build_span_assembly_policy
-from retrieval.types import LogicalSpan
-from research_analysis.retrieval_quality_research_analysis_quality_artifacts import AnalysisQualityValidationError, build_analysis_quality_assessment, project_coverage_onto_analysis
-from research_analysis.types import AnalysisResult, DISCLAIMER, LiteratureClaim
+from memorive.research.retrieval.coverage_artifacts import ArtifactPointer, ChunkSnapshot, FacetCoverageInput, FacetSpec, MemberRole
+from memorive.research.retrieval.coverage_artifacts import build_facet_definition_artifact, build_references_bias_policy, build_logical_span_artifact, build_retrieval_coverage_assessment, build_source_role_assessment, build_source_role_policy, build_span_assembly_policy
+from memorive.research.retrieval.types import LogicalSpan
+from memorive.research.analysis.retrieval_quality_research_analysis_quality_artifacts import AnalysisQualityValidationError, build_analysis_quality_assessment, project_coverage_onto_analysis
+from memorive.research.analysis.types import AnalysisResult, DISCLAIMER, LiteratureClaim
 
 
 NOW = "2026-07-18T14:45:00+08:00"

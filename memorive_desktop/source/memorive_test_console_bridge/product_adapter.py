@@ -118,7 +118,7 @@ class ProductConsoleAdapter:
     def _report(self, period, request_id):
         # The frozen RESEARCH_REPORTS CLI performs all source/authority/hash checks and calls
         # the original digest builder, domain validator and fixed renderer.
-        from research_reports.cli import run
+        from memorive.research.reports.cli import run
         from argparse import Namespace
         path,binding=self._bound_input('report-'+period+'.json')
         if binding.get('digest_kind')!=period:

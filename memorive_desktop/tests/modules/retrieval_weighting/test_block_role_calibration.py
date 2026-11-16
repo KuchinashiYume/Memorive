@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from retrieval_weighting.retrieval_calibration_block_role_calibration import BlockRoleCalibrationPolicy, NEUTRAL, PROTECT, SOFT_PENALIZE
+from memorive.research.ranking.retrieval_calibration_block_role_calibration import BlockRoleCalibrationPolicy, NEUTRAL, PROTECT, SOFT_PENALIZE
 Retrieval_SHA = "B" * 64
 
 

@@ -11,7 +11,7 @@ import copy
 
 import pytest
 
-from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
 from memorive.sessions.refinement import make_context_capsule, validate_normalized_graph
 from memorive.documents.inbox import InboxController
 from memorive.documents.inbox.contracts import InboxError

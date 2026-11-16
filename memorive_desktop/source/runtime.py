@@ -1376,11 +1376,11 @@ class ProductApi:
             return home_call(self._research.host,method,dict(params or {}))
         if method in AI_METHODS:
             return self._research.ai.call(method,dict(params or {}))
-        from memorive_research_workspace.service import DESKTOP_METHODS
+        from memorive.research.workspace.service import DESKTOP_METHODS
         if method in DESKTOP_METHODS:
             with self._lock:
                 if not hasattr(self, '_memo'):
-                    from memorive_research_workspace.desktop import create
+                    from memorive.research.workspace.desktop import create
                     self._memo=create(service=self._service,library=self._library,
                         local_models=getattr(self,'_local_models',None),profile_root=self._profile_root,
                         workspace_root=self._profile_path('WORKSPACE')/'research_workspace',
@@ -2254,7 +2254,7 @@ class ProductApi:
 
     def memo_prepare_desktop_handoff(self,request):
         self.call('memo.capabilities',{})
-        from memorive_research_workspace.agents import desktop_handoff
+        from memorive.research.workspace.agents import desktop_handoff
         # GetFolderPath uses the Windows account path, not the packaged private profile override.
         import ctypes
         buffer=ctypes.create_unicode_buffer(32768)
@@ -2298,7 +2298,7 @@ class ProductApi:
         args=['--memo-agent','--workspace',str(self._memo.store.root),'--mcp']
         if not helper.exists():
             helper=Path(sys.executable)
-            args=[str(self._source_root/'memorive_research_workspace/agent_entry.py'),*[v for v in args if v!='--memo-agent']]
+            args=[str(self._source_root/'memorive/research/workspace/agent_entry.py'),*[v for v in args if v!='--memo-agent']]
         toml='[mcp_servers.memo]\ncommand = '+json.dumps(str(helper),ensure_ascii=False)+'\nargs = '+json.dumps(args,ensure_ascii=False)+'\n'
         return {'mcpServers':{'memo':{'command':str(helper),'args':args}},'codex_config_toml':toml,
                 'obsidian_plugin':str(base/'integrations/obsidian/memorive-companion'),

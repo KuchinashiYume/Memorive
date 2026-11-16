@@ -349,7 +349,7 @@ class AIBriefing:
                 receipt=response.get('execution_receipt') or {}
                 calls=len(receipt.get('physical_call_ids') or [])
                 r.update_state(run_id,model_calls=calls,paid_model_calls=calls if params['report_model']['profile_kind']=='API' else 0,execution_receipt=receipt)
-                from memorive_research_workspace.model_receipts import verified_result
+                from memorive.research.workspace.model_receipts import verified_result
                 verified_result(response,params['report_model'])
                 check()
                 r.update_state(run_id,stage='VALIDATING')

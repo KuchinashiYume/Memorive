@@ -7,9 +7,9 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from literature_discovery.connector_framework import ConnectorError, sha256_json
-from literature_discovery.connector_framework import CrossrefOfflineConnector, make_frozen_replay_observation, make_frozen_response_snapshot, verify_snapshot
-from literature_discovery.bibliographic_identity_literature_discovery_bibliographic_identity import IdentityResolutionError, resolve_identity_batch
+from memorive.research.discovery.connector_framework import ConnectorError, sha256_json
+from memorive.research.discovery.connector_framework import CrossrefOfflineConnector, make_frozen_replay_observation, make_frozen_response_snapshot, verify_snapshot
+from memorive.research.discovery.bibliographic_identity_literature_discovery_bibliographic_identity import IdentityResolutionError, resolve_identity_batch
 # The repository's own Discovery contracts.
 CONTRACT_ROOT = Path(__file__).resolve().parents[4] / "contracts" / "Discovery_文献发现" / "10_模块契约"
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "frozen_responses" / "g1_crossref.json"

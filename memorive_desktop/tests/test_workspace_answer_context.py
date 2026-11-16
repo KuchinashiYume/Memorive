@@ -1,5 +1,5 @@
 """Research chat answers are saved only if their inputs did not change while the model ran
-(memorive_research_workspace.answer_versions.validate_context / validate_retry_topic).
+(memorive.research.workspace.answer_versions.validate_context / validate_retry_topic).
 
 The question is frozen with the chosen model's configuration and the confirmed memories. If the
 model configuration or a memory changes before the answer is saved, the answer is discarded and
@@ -12,8 +12,8 @@ import copy
 
 import pytest
 
-from memorive_research_workspace.answer_versions import AnswerVersions
-from memorive_research_workspace.service import ResearchWorkspace
+from memorive.research.workspace.answer_versions import AnswerVersions
+from memorive.research.workspace.service import ResearchWorkspace
 
 RECEIPT = {"status": "PASS", "behavior_sha256": "b" * 64, "token_usage": {"input_tokens": 5}}
 PROFILE = {"profile_ref": "api:chat", "eligible": True, "profile_kind": "API", "binding_hash": "h1",

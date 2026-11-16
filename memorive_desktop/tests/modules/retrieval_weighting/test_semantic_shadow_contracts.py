@@ -3,9 +3,9 @@ from __future__ import annotations
 from copy import deepcopy
 import unittest
 
-from retrieval_weighting.contracts import make_hashed_payload
-from retrieval_weighting.errors import FieldVectorError
-from retrieval_weighting.semantic_shadow_contracts import canonical_artifact_raw_sha256, validate_semantic_profile_terminal_receipt, validate_semantic_retrieval_policy_snapshot
+from memorive.research.ranking.contracts import make_hashed_payload
+from memorive.research.ranking.errors import FieldVectorError
+from memorive.research.ranking.semantic_shadow_contracts import canonical_artifact_raw_sha256, validate_semantic_profile_terminal_receipt, validate_semantic_retrieval_policy_snapshot
 from tests.modules.retrieval_weighting.test_semantic_field_profiles import (
     raw_hash_for,
     semantic_overlay,

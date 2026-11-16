@@ -7,8 +7,8 @@ import urllib.error
 from pathlib import Path
 from typing import Any
 
-from literature_discovery.live_metadata_transport import LiveTransportError, TransportPolicy, canonical_sha256, sha256_bytes
-from literature_discovery.live_metadata_transport import ReceiptValidator, build_pre_send_receipt, build_url, execute_get
+from memorive.research.discovery.live_metadata_transport import LiveTransportError, TransportPolicy, canonical_sha256, sha256_bytes
+from memorive.research.discovery.live_metadata_transport import ReceiptValidator, build_pre_send_receipt, build_url, execute_get
 # The repository's own Discovery contracts.
 CONTRACT_ROOT = Path(__file__).resolve().parents[4] / "contracts" / "Discovery_文献发现" / "10_模块契约"
 SCHEMA_PATH = next(CONTRACT_ROOT.glob("*_ExternalSourceRequestReceipt_*r0.2.schema.json"))

@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import unittest
 
-from retrieval.retrieval_calibration.profile_compare import run_profile
+from memorive.research.retrieval.retrieval_calibration.profile_compare import run_profile
 class _ForbiddenPolicy:
     def calibrate(self, *_args, **_kwargs):
         raise AssertionError("OFF_CALLED_CALIBRATION")

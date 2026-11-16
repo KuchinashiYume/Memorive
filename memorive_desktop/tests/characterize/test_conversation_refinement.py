@@ -14,7 +14,7 @@ import re
 from copy import deepcopy
 from pathlib import Path
 
-from knowledge_feedback.canonical import make_hashed_payload
+from memorive.research.knowledge_feedback.canonical import make_hashed_payload
 from memorive.sessions.refinement import (
     make_context_capsule,
     make_model_refinement_items,

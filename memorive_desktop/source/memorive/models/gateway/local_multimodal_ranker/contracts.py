@@ -1,5 +1,5 @@
 """Requests and result checks for ranking candidates with a local multimodal model that returns the
-candidate ids in order, not scores (retrieval/candidate_retrieval.py uses it through
+candidate ids in order, not scores (memorive/research/retrieval/candidate_retrieval.py uses it through
 LocalMultimodalRankerAdapter).
 
 It takes the place of the rerank step but returns an order of candidate ids; it never

@@ -85,7 +85,7 @@ def test_the_segmented_distill_reader_keeps_the_whole_title(tmp_path):
 def test_the_card_readers_keep_the_whole_title(tmp_path):
     from memorive.documents.registry.adapters import read_frontmatter
     from memorive.documents.card_review.mechanical import _read_frontmatter as mechanical
-    from retrieval.candidate_retrieval import _read_frontmatter as retrieval
+    from memorive.research.retrieval.candidate_retrieval import _read_frontmatter as retrieval
     card = write(tmp_path, "card.md")
     assert read_frontmatter(card)["title"] == TITLE
     assert mechanical(card)["title"] == TITLE

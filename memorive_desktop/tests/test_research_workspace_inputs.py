@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import pytest
 
-from memorive_research_workspace.agent_protocol import validate_arguments
-from memorive_research_workspace.bibliography import parse
-from memorive_research_workspace.model_receipts import ModelExecutionError, verified_result
-from memorive_research_workspace.service import ResearchWorkspace, validate_agent_settings
+from memorive.research.workspace.agent_protocol import validate_arguments
+from memorive.research.workspace.bibliography import parse
+from memorive.research.workspace.model_receipts import ModelExecutionError, verified_result
+from memorive.research.workspace.service import ResearchWorkspace, validate_agent_settings
 
 
 @pytest.fixture

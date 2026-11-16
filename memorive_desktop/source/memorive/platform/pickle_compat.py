@@ -13,8 +13,18 @@ import io
 import pickle
 from typing import BinaryIO
 
-# (old module, class name) -> (module now, class name now). Filled in when a pickled class moves.
-MOVED: dict[tuple[str, str], tuple[str, str]] = {}
+# (old module, class name) -> (module now, class name now): the classes of a job folder's pickles
+# moved in v2.00 from retrieval and research_analysis to memorive/research.
+MOVED: dict[tuple[str, str], tuple[str, str]] = {
+    ("retrieval.types", "ContextPack"): ("memorive.research.retrieval.types", "ContextPack"),
+    ("retrieval.types", "ContextBlock"): ("memorive.research.retrieval.types", "ContextBlock"),
+    ("retrieval.types", "QueryFacet"): ("memorive.research.retrieval.types", "QueryFacet"),
+    ("retrieval.ownership", "OwnershipContributor"): ("memorive.research.retrieval.ownership", "OwnershipContributor"),
+    ("research_analysis.types", "AnalysisResult"): ("memorive.research.analysis.types", "AnalysisResult"),
+    ("research_analysis.types", "LiteratureClaim"): ("memorive.research.analysis.types", "LiteratureClaim"),
+    ("research_analysis.types", "FlaggedClaim"): ("memorive.research.analysis.types", "FlaggedClaim"),
+    ("research_analysis.types", "PossiblyIrrelevantClaim"): ("memorive.research.analysis.types", "PossiblyIrrelevantClaim"),
+}
 
 
 class JobUnpickler(pickle.Unpickler):

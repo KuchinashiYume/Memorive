@@ -9,7 +9,7 @@ from html import unescape
 import json, re
 from urllib.parse import urlsplit, quote
 from defusedxml import ElementTree as ET
-from literature_discovery.connector_framework import normalize_doi, normalize_arxiv_id
+from memorive.research.discovery.connector_framework import normalize_doi, normalize_arxiv_id
 from .common import sha
 
 SCHEMA = 'E6NormalizedMetadata-v1'
