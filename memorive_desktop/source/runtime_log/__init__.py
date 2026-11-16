@@ -1,12 +1,8 @@
-"""Memorive RUNTIME-LOG/RUNTIME_LOG · RUNTIME_LOG 日志 / Debug —— 系统黑匣子。
+"""The runtime log: log.txt and its structured records, read by module, kept for the days chosen in Settings.
 
-对外正式入口只有 log();log_error() 是 log(..., is_error=True) 的便捷通道 (非第二套机制)。
-业务写入: from runtime_log import log[, log_error]。
-排错抽取: from runtime_log import extract_module_logs(按模块名抽出一段日志)。
-两契约:   from runtime_log import log_accounting(记账·契约①) / log_reason(原因记录·契约②)。
-
-(Logger 类属内部 / 测试注入用,不在公共入口;业务模块勿直接实例化——
- 需要注入路径的测试可 from runtime_log.logger import Logger。)
+logger.py and records.py write, reader.py reads one module's lines, retention.py removes old days,
+lock.py serializes writers. Most packages log through it. product_paths.py describes the roles of
+product folders for callers that ask.
 """
 from .logger import log, log_error
 from .records import log_accounting, log_reason

@@ -1,3 +1,9 @@
+"""The message centre: messages about finished jobs, results and errors, and Windows notifications.
+
+The window reaches it through messages.* methods (product_controller.py). store.py keeps the
+message list in message_projection_store.json; navigation.py opens the place a message points to.
+"""
+
 from .contracts import MessageContractError, MessageRecord, StatusAxes
 from .controller import MessageActionError, MessageController
 from .navigation import LocatorNavigationError, MessageNavigator

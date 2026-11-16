@@ -1,14 +1,11 @@
-"""Card review states: a card is pending until it is reviewed, then active or quarantined.
+"""Card review states (pending, active, quarantined) and the admission log.
 
-    transition(card_path, to_status, *, trigger, reason)   move a card and log the move
-    apply_verdict(card_path, verdict, *, trigger, reason)  PASS -> active, FAIL -> quarantined
-    manual_approve / manual_reject(card_path, *, reason)    a person's decision
-    auto_review(card_path, decision_source, ...)           ask a decision source, retry, hand over
-    read_status / read_data_id(card_path)                  read the card's front matter
-    read_records(year)                                     read the admission log
+machine.py moves a card between states, card_io.py reads and writes the review_status field,
+dispatch.py runs automatic review, knowledge_admission_log.py writes one line per move.
+The workflow's review step uses them; memorive_app reads review status through them.
 
-The review itself (the rules, the model calls) happens elsewhere; this package only applies a
-decision. The always-PASS placeholder source is for offline self-tests and is not exported.
+The *_submission.py, *_preview.py and derived_knowledge_artifact.py modules build submission and
+preview records for knowledge_feedback and research opportunities; they write no card.
 """
 from .states import PENDING, ACTIVE, QUARANTINED, STATES, is_legal, is_core_enabled
 from .card_io import read_status, read_data_id

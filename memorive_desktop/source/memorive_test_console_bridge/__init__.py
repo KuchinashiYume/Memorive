@@ -1,8 +1,8 @@
-"""Authenticated loopback bridge for an isolated Memorive console session.
+"""A loopback bridge for the separate Memorive Test Console app.
 
-Commands use native product stores and services in an isolated console session.
-Research commands retain their inherited source admission gates. Protocol
-support does not imply that live research execution is qualified.
+The desktop service wraps its service in it only when started for a console session
+(MEMORIVE_TEST_CONSOLE_AUTO_EXECUTION=DISABLED); it lets the console drive product
+stores and take visual probes. The window does not use it.
 """
 
 from __future__ import annotations

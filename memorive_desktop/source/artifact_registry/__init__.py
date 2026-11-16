@@ -1,4 +1,14 @@
-"""Memorive ARTIFACT-REGISTRY ARTIFACT_REGISTRY Artifact Registry candidate."""
+"""Records of a paper's product files (PDF, RawMD, CleanMD, chunks, cards, analyses) and their schemas.
+
+Used by the app: adapters.py reads a product file's front matter and identity for retrieval,
+reports and research; registry_v2.py and schema_v2.py keep an append-only registry of product
+envelopes, where retrieval's coverage reports (retrieval/coverage_artifacts.py) record theirs.
+
+Not started by the window: the asset migration tools (migration.py, migration_contracts.py,
+maintenance.py, query_projection.py, data_lifecycle.py) move or rebuild a registry in a folder the
+caller names; registry.py is the first registry version; the *_adapter.py and analysis_*.py
+modules build previews and admission records that other packages call. Each module says more.
+"""
 
 from .adapters import (
     AdaptationResult,

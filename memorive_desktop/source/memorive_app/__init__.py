@@ -1,4 +1,11 @@
-"""APPLICATION-FACADE tool-neutral public application contract."""
+"""The application core the desktop service is built on: jobs, credentials, diagnostics, IPC.
+
+facade.py is the application facade the service calls; durable_store.py keeps jobs, events and
+idempotency keys in SQLite; credentials.py stores secrets in Windows Credential Manager by reference;
+ipc_auth.py authenticates the loopback connection; diagnostics.py and support_bundle.py build the
+diagnostic view and the support bundle. adapters.py is a read-only adapter for card review status
+that other code can use.
+"""
 
 from .capabilities import build_capability_snapshot, evaluate_preflight
 from .contracts import JobControlState

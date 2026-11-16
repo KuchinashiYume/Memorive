@@ -1,4 +1,10 @@
-"""Research opportunities: public API."""
+"""Research opportunities: questions and hypotheses an answer proposes from cited evidence, and the
+concepts two studies are compared on.
+
+research_opportunities.py is used by research Q&A; canonical.py holds CONCEPT_ORDER and the hashing
+shared with the verifier (evidence_review/opportunity_verification.py). core.py is a pipeline that
+builds source, gap, comparison and opportunity objects; other packages call it, the window does not.
+"""
 
 from .canonical import (
     canonical_json_bytes,

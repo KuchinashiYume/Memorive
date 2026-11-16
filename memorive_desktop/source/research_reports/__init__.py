@@ -1,4 +1,8 @@
-"""Deterministic, read-only RESEARCH_REPORTS research change log candidate."""
+"""Research reports: daily, weekly and monthly digests of what changed in the library and in research.
+
+The research runtime renders them on schedule (digest.py, renderer.py, api_briefing.py).
+python -m research_reports (cli.py) builds a report by hand from a source folder.
+"""
 
 from .digest import GENERATOR_VERSION, build_digest
 

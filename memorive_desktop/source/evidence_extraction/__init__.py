@@ -1,13 +1,11 @@
-"""Memorive EVIDENCE-EXTRACTION/EVIDENCE_EXTRACTION · EVIDENCE_EXTRACTION 蒸馏。
+"""Card extraction: a model reads a paper's CleanMD chunks and fills the fields of an evidence card.
 
-把一篇 Clean MD 单篇、忠于原文地提炼成核心卡片(双层知识库上层)。
+distill.py runs it for one paper; segmented_distill/ does the same for long papers in segments;
+normalize.py, anchor_repair.py and core_language_recovery.py fix what the model returned before the
+card is written; card.py writes the card. The workflow (memorive_workflow) calls these for each paper.
 
-对外:
-    from evidence_extraction import distill
-    r = distill(cleanmd_path_or_folder, target="sandbox")   # → DistillResult(status/card_path/…)
-
-核心 7 字段抽取骨架(Configuration 第 1 步):经 MODEL_GATEWAY 调 deepseek-v4-pro(不直连 SDK)、Prompt 内建 R1–R9、
-每核心内容字段挂真实 chunk_id(by_field 贯穿锚点)、归属红线挡 entrusted/缺失、产物 review_status=pending。
+The fact_identity_* modules derive fact identities and required fields of a card; other
+packages call them, the window does not.
 """
 from .distill import DistillResult, distill
 

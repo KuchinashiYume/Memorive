@@ -1,12 +1,10 @@
-"""Memorive RETRIEVAL/RETRIEVAL · RETRIEVAL 检索加权。
+"""Retrieval for analysis and review: understanding the query, finding candidate chunks, and building
+the context pack a model is shown.
 
-Retrieval 第 1 步:QueryUnderstanding Query Understanding(问题 → 主类 + 检索策略参数)。
-
-    from retrieval import understand_query
-    qu = understand_query("有没有人反对这个结论?")   # → QueryUnderstanding{qtype, strategy, ...}
-
-QueryUnderstanding **只出策略参数、不召回 / 不打包**(召回=CandidateRetrieval、打包=ContextAssembly,均后续步骤,本步不建)。
-分类 Core 用规则/关键词、零额度;换 MODEL_GATEWAY 模型后端的 seam 已预留(经 MODEL_GATEWAY、绝不直连 SDK)。
+query_understanding.py, candidate_retrieval.py and context_pack.py are the three steps;
+structured_context.py and document_context.py build context from a paper's structure. The workflow's
+analysis and review nodes use them; research Q&A uses coverage_artifacts.py for its coverage report. retrieval_calibration/ (with its cli.py) compares rankings and is
+run by hand; shadow_seam.py observes an alternative ranking and is off by default.
 """
 from .candidate_retrieval import retrieve_candidates
 from .context_pack import build_context_pack, validate_context_pack_binding

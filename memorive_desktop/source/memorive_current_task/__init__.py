@@ -1,3 +1,10 @@
+"""The current task panel: the job list, the flow chart of a job's nodes, and the actions on them.
+
+The window reaches it through current_task.* methods (CurrentTaskProductController in
+product_controller.py). workflow_mapping.py turns saved settings into the job shape the workflow
+runs; refinement_tasks.py stores session refinement tasks; events.py orders a job's events.
+"""
+
 from .actions import ActionController, ActionError, CommandDisabled, ConfirmationError
 from .events import EventIntegrityError, TimelineReconciler
 from .locators import CurrentTaskLocator, LocatorError

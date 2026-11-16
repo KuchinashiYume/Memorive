@@ -1,4 +1,11 @@
-"""FIELD-VECTORS/CROSS non-production field-vector candidate package."""
+"""Ranking of research material, and field-vector tools.
+
+Used by research Q&A: research_policy.py, research_ranking.py and research_rule.py rank excerpts
+by the user's weights and rules; research_fields.py and research_interests.py describe fields and
+interests. The field-vector and shadow ranking tools (candidate_index.py, migration.py, locator.py,
+field_vectors.py, shadow_contracts.py and others) are run through python -m retrieval_weighting with
+an explicit request file, or called as functions; the window does not start them.
+"""
 
 from .locator import (
     LocatorError,

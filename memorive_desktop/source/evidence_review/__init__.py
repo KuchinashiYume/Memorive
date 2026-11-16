@@ -1,4 +1,13 @@
-"""Memorive 证据复核：卡片的转写核对、判断复核、评分入库和修复。"""
+"""Card review: checking a written card against the paper and repairing it.
+
+mechanical.py checks that every cited chunk exists; transcription.py checks quoted values against
+the source; judgment and atomic review ask a model to judge claims; repair_flow.py repairs what
+failed. The workflow's review nodes and research Q&A's claim check call these.
+
+Other entries: review_orchestration/ is an operator API (create_or_get_job, pause, resume, cancel,
+dispatch_once) that a caller drives; opportunity_verification.py recomputes research opportunities
+independently of the code that produced them; the fact_identity_* modules evaluate repair loops.
+"""
 from .errors import CardParseError, CardUnreadable, ChunkStoreError, EvidenceReviewError, OwnershipFailClosed
 from .parser import parse_violations
 from .problems import MechanicalResult, Problem

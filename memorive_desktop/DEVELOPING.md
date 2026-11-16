@@ -13,6 +13,77 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 | `examples/` | Small programs that run one feature without the window. |
 | `tools/` | Build, manifest and release tools. |
 
+## The packages and how they fit together
+
+Each package's `__init__.py` says what the package does, how the window or anything else reaches it,
+and where its data lives. Read that first: a module that the window never imports may still be
+loaded by name, run from the command line or called as a component (see "Code the window does not
+start" below).
+
+### How a feature runs
+
+- **Documents**: the inbox (`memorive_inbox`) takes a file → the workflow (`memorive_workflow`) runs
+  it through conversion, cleaning and chunking (`document_processing`), card extraction
+  (`evidence_extraction`), card review (`evidence_review`, `knowledge_admission`) and analysis
+  (`research_analysis`, `retrieval`) → the library (`memorive_library`) shows the results.
+- **Research Q&A**: the window (`memo.*`) → `memorive_research_workspace` chooses excerpts and builds
+  the request → the settings service runs the model (`memorive_model_execution`,
+  `memorive_settings/model_validation.py`) → the workspace saves the answer, its citations and any
+  knowledge draft (`knowledge_feedback/research_ingest.py`).
+- **Sessions**: imported or captured conversations (`memorive_sessions`, `memorive_session_archive`,
+  `memorive_browser_companion`) → refinement through `memorive_workflow_bridge` → typed items for review.
+- **Exams**: the settings page → `memorive_settings` (exam jobs and executors) → the exam modules
+  loaded by name (`memorive_model_evaluation`) → the model request → scoring → score history.
+- **Discovery and reports**: the window (`research.*`, `ai.*`, `home.*`) or a schedule →
+  `memorive_research_runtime` with `literature_discovery`, `research_recommendations` and
+  `research_reports`.
+
+Calls go from the window side towards the business packages, from those to model execution and
+transport (`memorive_model_execution`, `memorive_settings`, `model_gateway`), and from all of them to
+the shared basics (`memorive_folder_management`, `runtime_log`, `memorive_language`, `run_ledger`,
+`decision_log`). A few basics still reach into business packages; these are the places to untangle
+when that code is restructured:
+
+- `memorive_folder_management/policy.py` takes `display_title`, `file_name` and `folder_name` from
+  `document_processing/naming.py`, so the folder layout depends on the documents area.
+- `runtime_log/cache_metrics.py` imports `model_gateway.prompt_cache` inside a function.
+- `run_ledger`: the channel accounting, cost routing and analysis admission modules import
+  `model_gateway`, `retrieval_weighting`, `artifact_registry` and `knowledge_admission`.
+- `decision_log`: its decision builders import hashing helpers from `retrieval_weighting/contracts.py`
+  and `knowledge_feedback/canonical.py`. Several packages keep their own copy of these canonical
+  hashing helpers (`research_opportunities/canonical.py`, `research_reports/canonical.py` and others).
+
+### Which area each package belongs to
+
+| Area | Packages |
+| --- | --- |
+| Desktop: window, service, panels | `runtime.py` (ProductApi), `memorive_desktop_service`, `memorive_desktop_assistant`, `memorive_current_task`, `memorive_messages`, `memorive_work_log`, `memorive_accounting`, `memorive_test_console_bridge`, `release_links.py` |
+| Documents | `memorive_inbox`, `memorive_workflow`, `document_processing`, `evidence_extraction`, `evidence_review`, `knowledge_admission`, `artifact_registry`, `memorive_library`, `memorive_review`, `memorive_front_matter.py` |
+| Research | `memorive_research_workspace`, `memorive_research_runtime`, `literature_discovery`, `research_recommendations`, `research_reports`, `research_analysis`, `research_opportunities`, `retrieval`, `retrieval_weighting`, `knowledge_feedback` (knowledge drafts) |
+| Sessions | `memorive_sessions`, `memorive_session_archive`, `memorive_browser_companion`, `memorive_workflow_bridge`, `knowledge_feedback/conversation_refinement` |
+| Models | `memorive_model_execution`, `model_gateway`, `memorive_local_models`, and in `memorive_settings`: `model_validation.py`, `model_endpoints.py`, `call_ledger.py`, `cancellable_http.py`, `windows_cli.py`, the CLI templates |
+| Exams | `memorive_model_evaluation`, `memorive_analysis_reviewer_exam`, `memorive_review/exam.py`, and in `memorive_settings`: the `*exam*` modules, `quality_new.py`, `workflow_exam_runner.py` |
+| Shared basics | `memorive_folder_management`, `runtime_log`, `run_ledger`, `memorive_language`, `memorive_source_language.py`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
+
+`memorive_settings` holds code of three areas: the settings themselves, the model requests and the
+exams. The model requests are to move to `memorive_model_execution` and the exams to a package of
+their own; the table shows where they belong, the package docstring shows where they are today.
+
+### Who keeps which data
+
+| Data | Kept by |
+| --- | --- |
+| Settings, model profiles, CLI templates, credentials (by reference) | `memorive_settings` (`store.py`, `credentials.py`) |
+| Model snapshots, call attempts and results | `memorive_model_execution` (`research_chat_profiles/` and the like), the call ledger in `memorive_settings/call_ledger.py` |
+| Imported files and processing jobs | `memorive_inbox`, `memorive_workflow`, `memorive_app` (job store) |
+| A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `document_processing`, `evidence_extraction`, `knowledge_admission` (review state in the card); read through `memorive_library` |
+| Research conversations, answers, knowledge drafts | `memorive_research_workspace` (its own SQLite store) |
+| Imported chat sessions and refinement tasks | `memorive_session_archive`, `memorive_current_task/refinement_tasks.py` |
+| Exam plans, results and score history | the exam code in `memorive_settings` (`exam_score_history.py`, the `workflow_exams/` run folders) |
+| Messages, window state, work log | `memorive_messages`, `memorive_desktop_service/control_store.py`, `memorive_work_log` |
+| Folder layout of a profile | `memorive_folder_management` |
+| Runtime log | `runtime_log` |
+
 ## Running the tests
 
 The tests are in the Git repository only: source archives (the ZIP that GitHub offers and the

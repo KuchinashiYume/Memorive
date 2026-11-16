@@ -1,4 +1,9 @@
-"""Memorive DECISION-LOG/DECISION_LOG design-decision and baseline toolkit."""
+"""A log of design decisions: Markdown records with a fixed schema, stored append-only (store.py).
+
+Not started by the window. knowledge_feedback, artifact_registry and the routing advisory of the
+exams call its builders (knowledge_decision.py, conversation_refinement_decision.py,
+routing_decision_preview.py) to describe a decision as a record; baseline.py checks a saved baseline.
+"""
 
 from .baseline import (
     AXIS_VALUES,

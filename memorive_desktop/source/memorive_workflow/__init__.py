@@ -1,7 +1,10 @@
-"""Thin Core runtime bridge used by the packaged Memorive desktop service.
+"""The document workflow: the worker that runs a paper through its nodes (convert, clean, chunk,
+extract cards, review, analyse ...).
 
-The package owns durable scheduling, checkpoints and UI-facing receipts only.
-DOCUMENT_PROCESSING--KNOWLEDGE_ADMISSION scientific/business behavior remains in the snapshotted Core modules.
+The desktop service starts the worker (worker.py); executor.py runs each node; scheduling.py and
+task_controls.py run nodes in lanes and handle pause and cancel; model_bridge.py sends a node's
+model calls; segmented_distill.py runs long papers in segments. The inbox and the current task
+panel start and watch its jobs.
 """
 
 from .contracts import (

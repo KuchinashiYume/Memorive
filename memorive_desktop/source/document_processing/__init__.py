@@ -1,15 +1,13 @@
-"""Memorive 文档预处理流水线。
+"""The document pipeline: a source file becomes RawMD, CleanMD, chunks and vectors.
 
-传送带五段:DocumentIngest 导入 → DocumentConvert 转换/OCR → DocumentClean 清洗 → DocumentChunk 切块 → DocumentEmbed 嵌入。
+The workflow (memorive_workflow) runs these steps for each paper: convert (document_convert_convert,
+document_conversion/), clean (document_clean_clean), chunk (document_chunk_chunk), embed
+(document_embed_embed) and ingest (document_ingest_ingest); pipeline.py chains them for one file.
+document_structure/ reads a document's sections; the window reaches it through structure.* methods.
 
-分段入口:
-    from document_processing import ingest, convert
-    raw = ingest(pdf_path, data_ownership="self", doc_type="literature")
-    result = convert(raw, paper_id="Smith2020", title="...", target="sandbox")
-
-整线入口在 pipeline.py:run_document_processing 跑到切块为止,embed_from_chunks 对切好的块做嵌入。
-
-调模型经 MODEL_GATEWAY(不直连 SDK)、每步留痕经 RUNTIME_LOG。
+Other entries: python -m document_processing.document_conversion.cli (probe, verify-structure,
+convert); ocr_qualification/ scores OCR output against reference pages and is run by hand;
+vector_generation.py builds and manages a separate Chroma collection for a caller.
 """
 from .document_ingest_ingest import ingest
 from .document_convert_convert import convert

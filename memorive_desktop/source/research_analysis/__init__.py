@@ -1,8 +1,8 @@
-"""Memorive RESEARCH-ANALYSIS/RESEARCH_ANALYSIS · RESEARCH_ANALYSIS 分析。
+"""Analysis of one paper: a model answers a fixed set of analysis questions from the paper's context pack.
 
-拿 RETRIEVAL Context Pack 出固定四段分析建议(建议性、非结论)。
-
-融合铁律(文献支持 ⊥ AI 通识)+ source_id 强制 + 越界防线 + 免责语;经 MODEL_GATEWAY、绝不直连 SDK。
+The workflow's analysis node calls analysis.py; revision.py applies review findings to an
+analysis; types.py holds the analysis records. The cross-topic runner and the quality and
+event modules are called by evidence review and other code, not by the window.
 """
 from .analysis import (
     AnalysisError,
