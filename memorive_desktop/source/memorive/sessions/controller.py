@@ -1,3 +1,6 @@
+"""SessionsProductController: the sessions page's sessions.* methods: imported and captured
+conversations, the browser companion's captures, and starting and following their refinement.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

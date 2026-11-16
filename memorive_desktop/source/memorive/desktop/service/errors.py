@@ -1,3 +1,6 @@
+"""Errors of the service connection: protocol violations, rejected authentication, timeouts,
+cancellations, lost connections, back pressure. client.py raises them; the test console reads them.
+"""
 from __future__ import annotations
 
 from typing import Any

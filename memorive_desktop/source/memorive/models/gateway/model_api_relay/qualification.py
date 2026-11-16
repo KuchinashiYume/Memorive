@@ -1,3 +1,6 @@
+"""Whether a relay route qualifies: its qualification key, the backend's identity, what
+capabilities it loses, and the compatibility report.
+"""
 from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence

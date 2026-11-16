@@ -1,3 +1,4 @@
+"""The archive's normalized records: messages, conversations, import failures and batches."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

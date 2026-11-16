@@ -1,3 +1,6 @@
+"""InboxController: importing a file: the path check, a copy into the app's custody, the
+inbox row and the dispatch intent that starts its processing job.
+"""
 from __future__ import annotations
 
 import hashlib

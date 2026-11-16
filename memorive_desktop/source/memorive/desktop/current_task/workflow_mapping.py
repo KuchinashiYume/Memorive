@@ -1,3 +1,6 @@
+"""Turns the saved settings into the fixed nine-node job shape the workflow runs
+(build_core_execution_snapshot): which model each node uses, with its descriptor.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

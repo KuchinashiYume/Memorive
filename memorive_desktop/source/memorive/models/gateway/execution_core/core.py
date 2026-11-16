@@ -1,3 +1,7 @@
+"""ExecutionCore: one model execution: pick a channel (routing.py), run the process in a job
+workspace (runner.py, workspace.py), normalize its output (normalization.py), and record the
+outcome (ExecutionOutcome).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

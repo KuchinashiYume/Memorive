@@ -1,3 +1,6 @@
+"""DesktopAssistantController: the desk assistant's state from service health and jobs, its
+on/off and visibility, its saved placement and the shortcut requests. desktop.py builds it.
+"""
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence

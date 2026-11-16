@@ -1,3 +1,6 @@
+"""Which completed analyses get reviewed: evaluate_trigger applies the policy's must-review,
+exempt and sampling rules; TriggerRegistry remembers deliveries so one event makes one decision.
+"""
 from __future__ import annotations
 
 import hashlib

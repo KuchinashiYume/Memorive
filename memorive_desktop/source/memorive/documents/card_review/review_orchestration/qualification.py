@@ -1,3 +1,6 @@
+"""qualify_offline_run: judges an offline run of review orchestration from its scenario, fault
+and replay results.
+"""
 from __future__ import annotations
 
 from typing import Any, Mapping

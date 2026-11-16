@@ -1,3 +1,6 @@
+"""LoopbackApplicationService: the real authenticated loopback service around the facade, for
+the harness.
+"""
 from __future__ import annotations
 
 import asyncio

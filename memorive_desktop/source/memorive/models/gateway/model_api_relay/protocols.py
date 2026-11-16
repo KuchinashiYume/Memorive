@@ -1,3 +1,6 @@
+"""RelayProtocolRegistry: how a request is written for each relay protocol
+(PreparedProtocolRequest).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

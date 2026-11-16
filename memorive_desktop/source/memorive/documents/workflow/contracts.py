@@ -1,3 +1,6 @@
+"""The workflow's node ids and the records a node run takes and returns (CoreExecutionContext,
+CoreArtifact, CoreExecutionResult).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

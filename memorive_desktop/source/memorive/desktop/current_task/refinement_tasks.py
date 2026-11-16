@@ -1,3 +1,7 @@
+"""SessionRefinementTaskStore: the session refinement tasks (which conversation, which model,
+their state), stored as metadata only. The sessions page, the current-task page, the work log and
+the desk assistant read it; ProductApi builds it.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

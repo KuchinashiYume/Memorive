@@ -1,3 +1,6 @@
+"""The service side of the connection (ApplicationServiceHost): accepts authenticated
+loopback connections, runs each request on the adapter, streams events and handles cancels.
+"""
 from __future__ import annotations
 
 import asyncio

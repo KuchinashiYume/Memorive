@@ -1,3 +1,4 @@
+"""InboxServiceAdapter: maps each inbox.* method the service receives to the InboxController."""
 from __future__ import annotations
 
 import inspect

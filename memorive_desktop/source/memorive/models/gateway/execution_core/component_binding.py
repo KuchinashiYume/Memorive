@@ -1,3 +1,6 @@
+"""The files an execution is bound to (ComponentBinding) and the check that their hashes still
+match before a process starts (verify_component_bindings).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

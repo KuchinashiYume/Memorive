@@ -1,3 +1,6 @@
+"""Shared helpers of the inbox: time, canonical JSON and hashes, field checks, item states and
+the item id of a file.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

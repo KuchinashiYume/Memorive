@@ -1,3 +1,6 @@
+"""ensure_legacy_core_projection: copies the files of an older folder layout, after checking them,
+into the current one-folder-per-paper layout.
+"""
 from __future__ import annotations
 
 import hashlib

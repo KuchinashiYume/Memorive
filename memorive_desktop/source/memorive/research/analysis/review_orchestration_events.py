@@ -1,3 +1,6 @@
+"""The "analysis completed" event that review orchestration listens to: its shape, canonical hash and
+check (build_analysis_completed_event, validate_analysis_completed_event).
+"""
 from __future__ import annotations
 
 import hashlib

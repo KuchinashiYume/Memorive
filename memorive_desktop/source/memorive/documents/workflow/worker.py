@@ -1,3 +1,6 @@
+"""CoreVerticalWorker: takes the inbox's dispatch intents and runs one job at a time through
+executor.py; an interruption leaves the intent pending so the job resumes after a restart.
+"""
 from __future__ import annotations
 
 import asyncio

@@ -1,3 +1,6 @@
+"""The message formats of the service connection: request, response, cancel and the
+authentication handshake, with their schema names, frame size limit and checks.
+"""
 from __future__ import annotations
 
 import asyncio

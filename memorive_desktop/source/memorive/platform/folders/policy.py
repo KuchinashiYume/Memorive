@@ -1,3 +1,7 @@
+"""The folder policy of a profile (contracts/extensions/DesktopFolderManagementPolicy.json):
+ProfileFolderManager maps a logical folder to its path; document_folder and document_artifact_path
+name a paper's folder and files.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

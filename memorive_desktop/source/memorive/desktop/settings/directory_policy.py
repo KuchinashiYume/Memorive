@@ -1,3 +1,6 @@
+"""DirectoryPolicy: which folders the user may choose for data (under the allowed roots, with
+enough free space), and the check of the folders in the settings.
+"""
 from __future__ import annotations
 
 from pathlib import Path

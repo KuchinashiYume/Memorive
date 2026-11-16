@@ -1,3 +1,6 @@
+"""MessageNavigator: opens the place a message points to (a job, an attempt, an artifact)
+from its locator: first the page, then the item on it.
+"""
 from __future__ import annotations
 
 from typing import Any

@@ -1,3 +1,6 @@
+"""Kimi's domestic and international API platforms: recognizing a Kimi service from its public
+labels and choosing the platform through its model list.
+"""
 from __future__ import annotations
 
 import unicodedata

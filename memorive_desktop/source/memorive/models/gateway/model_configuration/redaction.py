@@ -1,3 +1,6 @@
+"""Redaction of configuration records before they are shown, and the check that no secret
+value is left in them.
+"""
 from __future__ import annotations
 
 import json

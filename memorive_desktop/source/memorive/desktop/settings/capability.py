@@ -1,3 +1,6 @@
+"""CapabilityProjection: which capabilities the app has (ready, disabled, not configured ...),
+as the settings page shows them. service_main.py builds it; the controller serves its snapshot.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

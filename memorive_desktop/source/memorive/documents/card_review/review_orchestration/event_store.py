@@ -1,3 +1,6 @@
+"""AppendOnlyReviewEventStore: the review job events, append-only, in memory or in a file inside
+a sandbox folder, with deduplication and a check that the writer saw the latest event.
+"""
 from __future__ import annotations
 
 import json

@@ -1,3 +1,6 @@
+"""Diagnoses after a crash: whether a job can be resumed (diagnose_recovery) and whether a lock
+is stale (diagnose_lock).
+"""
 from __future__ import annotations
 
 from typing import Any, Mapping

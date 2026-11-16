@@ -1,3 +1,6 @@
+"""The fault matrix of the integration harness: job stores that time out or run out of disk,
+backups and schema checks, used by orchestrator.py.
+"""
 from __future__ import annotations
 
 from contextlib import closing

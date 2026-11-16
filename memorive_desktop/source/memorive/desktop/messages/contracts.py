@@ -1,3 +1,6 @@
+"""The message record (MessageRecord), its status axes and the checks on identifiers, times,
+texts, attachments and source events; canonical JSON and hashes.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -1,3 +1,4 @@
+"""prepare_public_synthetic_ocr: an OCR request through a relay, with only redacted evidence kept."""
 from __future__ import annotations
 
 import base64

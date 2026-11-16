@@ -1,3 +1,7 @@
+"""The integration harness run (main): drives the real application facade and a fake one
+through the loopback transport, compares their answers method by method and runs the fault
+matrix. Run by hand.
+"""
 from __future__ import annotations
 
 import asyncio

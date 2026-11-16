@@ -1,3 +1,6 @@
+"""RedactionPolicy: keeps secrets and private paths out of message texts and the surfaces they are
+shown on.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

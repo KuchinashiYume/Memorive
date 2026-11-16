@@ -1,3 +1,6 @@
+"""PathSecurityPolicy.inspect: whether a path may be imported: inside the allowed root, no
+symbolic link or reparse point on the way, no device path, no "..".
+"""
 from __future__ import annotations
 
 import os

@@ -1,3 +1,4 @@
+"""workload_projection: a file's pages or entries, counted to size its processing job."""
 from __future__ import annotations
 
 from pathlib import Path

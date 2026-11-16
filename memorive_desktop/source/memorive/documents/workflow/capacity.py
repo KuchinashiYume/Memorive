@@ -1,3 +1,6 @@
+"""context_pack_budget: how many tokens the context pack of an analysis may use, from the
+model's capacity (resource_limits.describe_capacity). executor.py uses it.
+"""
 from __future__ import annotations
 from typing import Any, Mapping
 from memorive.models.gateway.resource_limits import describe_capacity

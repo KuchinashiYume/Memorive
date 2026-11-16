@@ -1,3 +1,6 @@
+"""build_incremental_cursor: from the newest rows of the local archive, the hash-only position
+up to which a conversation was archived, so the browser companion sends only what is new.
+"""
 from __future__ import annotations
 
 import base64

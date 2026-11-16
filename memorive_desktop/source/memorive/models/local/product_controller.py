@@ -1,3 +1,6 @@
+"""LocalModelProductController: the local_models.* methods: finds model servers on this
+computer's loopback address and checks them, without running a model.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

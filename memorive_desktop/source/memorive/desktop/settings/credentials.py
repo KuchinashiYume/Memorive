@@ -1,3 +1,6 @@
+"""CredentialReferenceManager: API keys kept in Windows Credential Manager and referred to by
+reference in the settings; SyntheticDiscardCredentialBackend stands in for it in tests.
+"""
 from __future__ import annotations
 
 import ctypes

@@ -1,3 +1,6 @@
+"""ReviewOrchestrationOperator: create or find a review job for a completed analysis, pause,
+resume, cancel, and dispatch one job to an execute function the caller supplies.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

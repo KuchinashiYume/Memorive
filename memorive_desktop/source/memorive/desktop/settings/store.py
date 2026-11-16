@@ -1,3 +1,6 @@
+"""SettingsStore: the settings file, read and written whole with a revision check; a file written by
+a newer version of the app is left as it is (SettingsFromNewerVersion).
+"""
 from __future__ import annotations
 
 from copy import deepcopy

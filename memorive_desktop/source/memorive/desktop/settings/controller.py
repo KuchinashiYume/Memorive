@@ -1,3 +1,7 @@
+"""SettingsController: everything behind the settings.* methods: reading and saving settings,
+model nodes and profiles, credentials, CLI templates, verification jobs, exams, the leaderboard,
+external sources. It holds the model runner and WorkflowExams.
+"""
 from __future__ import annotations
 from memorive.models.provider_aliases import matches_result_model
 

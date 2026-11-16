@@ -1,3 +1,6 @@
+"""Records of review orchestration and their checks: the trigger policy, the review job spec, job
+events, the analysis review receipt; canonical hashes of them.
+"""
 from __future__ import annotations
 
 import hashlib

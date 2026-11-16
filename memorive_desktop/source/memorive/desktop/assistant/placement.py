@@ -1,3 +1,6 @@
+"""Where the desk assistant's window may sit: the work areas of the screens, keeping it visible
+and restoring the default place.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

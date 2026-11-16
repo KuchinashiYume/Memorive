@@ -1,3 +1,7 @@
+"""CurrentTaskProductController: the current-task page's current_task.* methods. Reads and
+commands go to the background service through the application facade; the page's own state is in
+the control store.
+"""
 from __future__ import annotations
 
 import uuid

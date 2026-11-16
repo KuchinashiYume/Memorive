@@ -1,3 +1,6 @@
+"""CurrentTaskLocator: the link form of a job, attempt or node on the current-task page, parsed
+and rendered, with checks that it names nothing private.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

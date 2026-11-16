@@ -1,3 +1,6 @@
+"""Importers of chat exports into the archive: DeepSeek's official export, Google Takeout for
+Gemini, and the browser companion's session files (BrowserLibraryImporter).
+"""
 from __future__ import annotations
 
 from collections import defaultdict

@@ -1,3 +1,6 @@
+"""A job attempt's events in order for the page (TimelineReconciler) and picking up again after
+a lost event stream (WatchRecoveryController).
+"""
 from __future__ import annotations
 
 from copy import deepcopy

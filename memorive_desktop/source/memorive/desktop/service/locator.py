@@ -1,3 +1,6 @@
+"""Stable names for jobs, attempts, artifacts, events and actions, used in links and messages
+(StableLocator), and the page route each one opens (route_for_locator, StableLocatorResolver).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

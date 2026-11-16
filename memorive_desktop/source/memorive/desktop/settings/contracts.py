@@ -1,3 +1,6 @@
+"""The settings file's shape: default_settings, validate_settings (checks settings and returns them
+in normal form), and the helpers for names and identities of providers and models.
+"""
 from __future__ import annotations
 
 from contextvars import ContextVar

@@ -1,3 +1,6 @@
+"""Reading the conversation a chat site (DeepSeek, Kimi, Gemini) shows in Edge, through the
+visible page only, for the sessions page's current-page capture.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timezone

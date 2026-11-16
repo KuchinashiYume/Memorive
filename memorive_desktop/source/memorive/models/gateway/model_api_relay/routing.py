@@ -1,3 +1,6 @@
+"""RelayRoutePlanner: chooses direct or relay explicitly, never falling back on its own;
+ProfiledRouter is the gateway's router aware of endpoint profiles.
+"""
 from __future__ import annotations
 
 from typing import Any, Mapping

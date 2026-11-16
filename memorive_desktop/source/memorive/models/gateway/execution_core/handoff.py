@@ -1,3 +1,6 @@
+"""HandoffContract: the events an execution hands to its caller, versioned and immutable;
+the model channel receipts read them as they are.
+"""
 from __future__ import annotations
 
 import hashlib

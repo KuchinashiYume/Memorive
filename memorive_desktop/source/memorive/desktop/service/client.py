@@ -1,3 +1,9 @@
+"""The window's side of the service connection (ApplicationServiceClient).
+
+Opens an authenticated loopback connection, sends requests, waits for answers and events, and
+reconnects only for the calls listed in SAFE_RECONNECT_METHODS; mutations are never sent twice.
+The current-task page and the harness use it; sync_client.py shares one across threads.
+"""
 from __future__ import annotations
 
 import asyncio

@@ -1,3 +1,4 @@
+"""configuration_error_envelope: the error envelope (memorive_app's) for configuration errors."""
 from __future__ import annotations
 
 from memorive_app.contracts import error_envelope

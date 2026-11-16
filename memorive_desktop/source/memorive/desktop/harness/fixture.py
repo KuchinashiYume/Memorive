@@ -1,3 +1,4 @@
+"""build_isolated_fixture: a throw-away profile for an integration harness run."""
 from __future__ import annotations
 
 from dataclasses import dataclass

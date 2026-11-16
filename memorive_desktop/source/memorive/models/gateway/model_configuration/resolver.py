@@ -1,3 +1,4 @@
+"""TierResolver: which model profile a tier resolves to under the tier policy."""
 from __future__ import annotations
 
 from datetime import datetime

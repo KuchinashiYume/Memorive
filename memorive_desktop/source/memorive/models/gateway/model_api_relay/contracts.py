@@ -1,3 +1,6 @@
+"""The records of relay calls: endpoint profiles, credential and model alias bindings, protocol
+manifests, and the catalog of endpoint profiles (EndpointProfileCatalog).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

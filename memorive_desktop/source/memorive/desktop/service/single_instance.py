@@ -1,3 +1,7 @@
+"""One desktop window per profile (SingleInstanceCoordinator): the first instance holds
+desktop.instance.lock; a later start puts what it should open (a locator) into the activation queue
+desktop.activation.sqlite3, which the running window drains.
+"""
 from __future__ import annotations
 
 from contextlib import closing

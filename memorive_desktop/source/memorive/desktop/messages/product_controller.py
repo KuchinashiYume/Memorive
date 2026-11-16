@@ -1,3 +1,7 @@
+"""MessagesProductController: the message centre's messages.* methods. Turns the service's
+job events (ingest_runtime_event) and events other parts of the app post (post_event: the
+research runtime, the test console) into messages and keeps them in the store.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

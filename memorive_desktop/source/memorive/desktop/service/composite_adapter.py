@@ -1,3 +1,6 @@
+"""One service adapter made of several: the application facade, the settings, the inbox and
+the review service. service_main.py builds it and the service routes each method to its owner.
+"""
 from __future__ import annotations
 
 from typing import Any, Mapping

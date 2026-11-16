@@ -1,3 +1,6 @@
+"""The records of model configuration: credential bindings, provider presets, model profiles,
+tier policies, connection receipts, and their checks.
+"""
 from __future__ import annotations
 
 from datetime import datetime

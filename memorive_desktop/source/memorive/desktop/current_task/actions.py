@@ -1,3 +1,7 @@
+"""The actions a job offers on the current-task page (ActionController): which are available
+for its state, running one with a version check and an idempotency key, and the two-step cancel
+(begin_cancel, confirm_cancel). product_controller.py uses it.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

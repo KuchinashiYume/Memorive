@@ -1,3 +1,11 @@
+"""Review orchestration: deciding which completed analyses get reviewed and running those reviews as jobs.
+
+trigger.py decides from the policy; operator.py creates, pauses, resumes, cancels and dispatches
+review jobs; event_store.py keeps their events append-only and projection.py computes a job's state
+from them; recovery.py and qualification.py diagnose crashes and judge offline runs. Not reached
+from the app's own code: a component API, entered through operator.py (see DEVELOPING.md); tests
+call it.
+"""
 from memorive.documents.card_review.review_orchestration.contracts import (
     ReviewOrchestrationContractError,
     build_analysis_review_receipt,

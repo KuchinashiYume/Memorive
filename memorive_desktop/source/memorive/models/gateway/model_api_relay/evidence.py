@@ -1,3 +1,6 @@
+"""Receipts of relay attempts and of requests blocked before sending, and the append-only ledger
+that checks them (AttemptLedger).
+"""
 from __future__ import annotations
 
 import math

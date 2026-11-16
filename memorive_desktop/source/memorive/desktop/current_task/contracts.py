@@ -1,3 +1,6 @@
+"""Shared helpers and shapes of the current-task page: canonical JSON and hashes, field checks,
+the page's view state, how a state is presented, the default nodes of a job.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

@@ -1,3 +1,6 @@
+"""Texts in the writing language for handing a research conversation to a desktop agent app:
+the instructions, the introduction and the launch prompt. research/workspace uses them.
+"""
 from memorive.platform.language.text import choose
 
 def instructions(language):

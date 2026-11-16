@@ -1,3 +1,7 @@
+"""CorePipelineExecutor: runs a paper's nodes in order: document processing, card distillation,
+card review, retrieval and analysis, writing each node's artifacts into the job folder (including
+06_context_pack.pkl and 07_analysis.pkl). worker.py calls it for each job.
+"""
 from __future__ import annotations
 from memorive.models.scheduling import scheduled
 

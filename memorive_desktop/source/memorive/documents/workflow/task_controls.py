@@ -1,3 +1,7 @@
+"""TaskControlStore: per-job controls shared between the window and the worker process: a
+node's model override, a pause point before a node, the nodes already started. The window sets
+them; the worker reads them as it reaches each node.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

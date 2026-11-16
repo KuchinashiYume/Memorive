@@ -1,3 +1,6 @@
+"""WorkLogProductController: the work log page's work_log.* methods: entries and milestones from
+the app's jobs and refinement tasks, filters, the links an entry opens, and redacted exports.
+"""
 from __future__ import annotations
 
 from memorive.desktop.service.projection_reads import projection_request, once_per_projection

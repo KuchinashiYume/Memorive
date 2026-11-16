@@ -1,3 +1,6 @@
+"""The desk assistant's data: what it shows (AssistantPresentation) and where its window sits
+(AssistantWindowPlacement).
+"""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass

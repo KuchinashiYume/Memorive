@@ -1,3 +1,6 @@
+"""ChannelSelector: picks the channel (adapter and model) for an execution from the registry
+and the policy, without starting a process.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -1,3 +1,6 @@
+"""CoreModelBridge: sends a node's model calls with the model the job froze for that node,
+through the gateway's seams.
+"""
 from __future__ import annotations
 from memorive.models.calls.ledger import call_scope, execution_checkpoint, ExecutionControlSignal
 

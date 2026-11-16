@@ -1,3 +1,6 @@
+"""LibraryProductController: the library page's library.* methods: processed papers, the files
+each one has, opening and exporting them, and the read confirmation (paper_review.py).
+"""
 from __future__ import annotations
 
 from memorive.desktop.service.projection_reads import projection_request, once_per_projection

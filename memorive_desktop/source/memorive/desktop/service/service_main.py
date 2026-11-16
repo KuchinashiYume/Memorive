@@ -1,3 +1,7 @@
+"""Starts the background service: builds the settings controller, the inbox controller, the
+review service and the application facade for one profile, writes the endpoint file the window
+reads, and serves until the window asks it to stop or the parent process ends.
+"""
 from __future__ import annotations
 
 import argparse

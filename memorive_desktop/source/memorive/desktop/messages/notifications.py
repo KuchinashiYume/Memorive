@@ -1,3 +1,6 @@
+"""Windows notifications for messages: the user's preferences and which messages notify
+(NotificationPlanner); SyntheticWindowsBridge records toasts instead of showing them, for tests.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

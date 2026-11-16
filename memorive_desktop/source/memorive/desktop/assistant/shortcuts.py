@@ -1,3 +1,4 @@
+"""SafeShortcutRegistry: the desk assistant's keyboard shortcuts and the checks on them."""
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping

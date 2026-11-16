@@ -1,3 +1,4 @@
+"""legacy_env_name_reference: refers to an environment variable by name, without reading it."""
 from __future__ import annotations
 
 import re

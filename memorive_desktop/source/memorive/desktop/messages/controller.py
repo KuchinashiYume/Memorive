@@ -1,3 +1,6 @@
+"""MessageController: the message list as the window shows it: modes, search, opening and
+closing a message's detail, the UI state kept in the control store.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

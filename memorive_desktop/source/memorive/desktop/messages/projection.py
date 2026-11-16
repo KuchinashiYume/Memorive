@@ -1,3 +1,6 @@
+"""MessageProjectionEngine: which events become messages and how, with checks that the stored
+projection is intact.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

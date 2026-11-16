@@ -1,3 +1,4 @@
+"""AdapterRegistry: the versioned adapter manifests, looked up by exact key, never probed."""
 from __future__ import annotations
 
 from dataclasses import dataclass

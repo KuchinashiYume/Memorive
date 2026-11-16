@@ -1,3 +1,6 @@
+"""Shared helpers of the execution core: time, canonical JSON and hashes, JSON-only copies, object
+references and the checks on them (ContractViolation).
+"""
 from __future__ import annotations
 
 from copy import deepcopy

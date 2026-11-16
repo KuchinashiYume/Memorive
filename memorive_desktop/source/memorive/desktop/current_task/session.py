@@ -1,3 +1,6 @@
+"""CurrentTaskSession: what the page has selected (job, node) and closing all detail views,
+kept in the control store.
+"""
 from __future__ import annotations
 
 from typing import Any, Mapping

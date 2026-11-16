@@ -1,3 +1,6 @@
+"""SettingsServiceAdapter: maps each settings.* method the service receives to the
+SettingsController.
+"""
 from __future__ import annotations
 
 import inspect

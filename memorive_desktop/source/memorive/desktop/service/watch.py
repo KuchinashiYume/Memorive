@@ -1,3 +1,6 @@
+"""EventCursorReconciler: puts event pages from the service in order, drops duplicates and
+keeps a bounded buffer for the window.
+"""
 from __future__ import annotations
 
 from collections import deque

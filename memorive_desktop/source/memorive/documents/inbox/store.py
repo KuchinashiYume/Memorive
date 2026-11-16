@@ -1,3 +1,4 @@
+"""InboxStore: the inbox rows (each imported file and its state)."""
 from __future__ import annotations
 
 from contextlib import closing

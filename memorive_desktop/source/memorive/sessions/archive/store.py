@@ -1,3 +1,4 @@
+"""SessionArchive: the SQLite archive of imported conversations; imports never delete what is there."""
 from __future__ import annotations
 
 from dataclasses import replace

@@ -1,3 +1,6 @@
+"""project_assistant_state: what the desk assistant shows, from service health and the latest
+jobs.
+"""
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence

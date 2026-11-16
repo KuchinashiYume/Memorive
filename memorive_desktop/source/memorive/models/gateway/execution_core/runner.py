@@ -1,3 +1,6 @@
+"""IsolatedJobRunner: runs a command-line tool by argument list, without a shell, in its job
+workspace, with bounded output capture and a time limit (ProcessSpec in, ProcessRun out).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

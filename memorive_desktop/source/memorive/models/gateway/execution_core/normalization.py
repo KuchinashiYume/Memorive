@@ -1,3 +1,4 @@
+"""OutputNormalizer: turns a command-line tool's raw output into the result record."""
 from __future__ import annotations
 
 import hashlib

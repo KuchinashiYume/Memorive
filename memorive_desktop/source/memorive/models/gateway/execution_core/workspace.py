@@ -1,3 +1,4 @@
+"""JobWorkspace: the folder an execution may read, write and run in, created fresh for the job."""
 from __future__ import annotations
 
 import os

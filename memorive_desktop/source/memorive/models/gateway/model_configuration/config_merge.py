@@ -1,3 +1,4 @@
+"""Checks the ordinary and the advanced model configuration and merges them."""
 from __future__ import annotations
 
 from typing import Any, Mapping

@@ -1,3 +1,6 @@
+"""CoreSegmentedDistiller: card distillation of a long paper in segments, chosen by the model's
+capacity, and the merge of the segments' facts.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

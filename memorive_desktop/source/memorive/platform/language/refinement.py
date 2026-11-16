@@ -1,3 +1,6 @@
+"""Labels and enum names of session refinement items in the writing language; the library's
+refinement Markdown uses them.
+"""
 from memorive.platform.language.text import choose
 
 JA={'会话精炼成品 · 待人工复核':'会話の精錬結果 · 人による確認待ち',

@@ -1,3 +1,6 @@
+"""SafeRelayClient: sends one request to a relay endpoint: a single attempt, no redirects, a
+bounded reply.
+"""
 from __future__ import annotations
 
 import ipaddress

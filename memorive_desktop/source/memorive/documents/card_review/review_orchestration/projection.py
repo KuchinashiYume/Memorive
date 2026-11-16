@@ -1,3 +1,6 @@
+"""The current state of a review job, computed from its events (project_review_job), and the
+allowed state transitions.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

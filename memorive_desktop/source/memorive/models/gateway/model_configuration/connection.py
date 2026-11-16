@@ -1,3 +1,6 @@
+"""check_connection: a provider connection check that runs only against FakeProvider here, and
+the receipt for a check that was not run.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

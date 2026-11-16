@@ -1,3 +1,8 @@
+"""ProductApi: every call from the window arrives here and goes to the part that owns it
+(settings, inbox, library, sessions, research, messages, the desk assistant ...). It starts and
+watches the background service (ServiceProcessManager) and builds the page controllers at start.
+product/desktop/app.py creates it.
+"""
 from __future__ import annotations
 
 import base64

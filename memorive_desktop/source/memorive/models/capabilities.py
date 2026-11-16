@@ -1,3 +1,6 @@
+"""The kind of model (chat, embedding, reranker, OCR) told from provider and name
+(infer_api_model_capability), and which workflow nodes accept which kind.
+"""
 from __future__ import annotations
 
 import unicodedata

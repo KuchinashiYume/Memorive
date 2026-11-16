@@ -1,3 +1,4 @@
+"""InMemoryFakeCredentialStore: a credential store for tests that keeps only hashes of secrets."""
 from __future__ import annotations
 
 import hashlib
