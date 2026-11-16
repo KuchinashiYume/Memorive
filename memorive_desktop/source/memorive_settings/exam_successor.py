@@ -1084,13 +1084,16 @@ def build_cache_binding(
     *,
     binding: CategoryBinding | Mapping[str, Any],
     model_identity: Mapping[str, Any],
-    executor_sha256: str,
+    executor_sha256: str | None = None,
     outcome_contract_revision: str = CONTRACT_REVISION,
 ) -> dict[str, Any]:
+    """The identity a cached score is reused under: the exam category and the model.
+
+    executor_sha256, the hash of the exam code that produced the score, is only kept as a
+    record of where the score came from. It is not part of cache_binding_sha256, so editing
+    the exam's source does not make earlier scores stale."""
     category = binding.as_dict() if isinstance(binding, CategoryBinding) else deepcopy(dict(binding))
     _validate_binding(category)
-    if not _SHA256.fullmatch(executor_sha256):
-        raise ValueError("EXECUTOR_SHA256_INVALID")
     required_model = ("profile_kind", "requested_model", "returned_model")
     if any(not isinstance(model_identity.get(key), str) or not model_identity[key] for key in required_model):
         raise ValueError("CACHE_MODEL_IDENTITY_INCOMPLETE")
@@ -1098,13 +1101,14 @@ def build_cache_binding(
         "schema_version": CACHE_BINDING_REVISION,
         "category_binding": category,
         "model_identity": deepcopy(dict(model_identity)),
-        "executor_sha256": executor_sha256,
         "outcome_contract_revision": outcome_contract_revision,
         "horizontal_comparison_eligible": True,
         "cross_category_comparison_forbidden": True,
         "global_ranking_forbidden": True,
     }
     payload["cache_binding_sha256"] = canonical_sha256(payload)
+    if executor_sha256 is not None:
+        payload["executor_sha256"] = executor_sha256
     return payload
 
 

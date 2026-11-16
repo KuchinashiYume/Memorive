@@ -106,6 +106,10 @@
       "kept_because": "Id of the one build the earlier executable health check was made for; it compares the running build with it."
     },
     {
+      "name": "E2_DataAnomaly_v3_8390243B50F5CCB65F5E",
+      "kept_because": "Name the data anomaly exam files its scores under (memorive_review/exam.py, EXECUTOR_REF). v1.02 to v1.03 wrote it into saved scores; a new name would hide them. The score test checks it."
+    },
+    {
       "name": "\"candidate002\"",
       "kept_because": "Read by the report command line from a frozen evidence package made during development. The name is part of that package, so it changes only together with the package."
     },
@@ -161,7 +165,7 @@
   "files": [
     {
       "path": "memorive_desktop/source/memorive_review/exam.py",
-      "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
+      "set_aside_because": "Exam code; its reasons, modes and score name are written into exam plans and results. It is cleaned up with the other exam code."
     },
     {
       "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",

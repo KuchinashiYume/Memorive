@@ -96,3 +96,16 @@ def test_saved_luna_high_selection_is_not_rejected_as_wrong_cohort():
     assert Executor._profile_kind(target)=='CLI'
     target['thinking_mode']='xhigh'
     assert Executor._profile_kind(target)=='CLI'
+
+def test_data_anomaly_scores_saved_by_earlier_versions_are_still_found(tmp_path):
+    """v1.02 to v1.03 filed this exam's scores under this name. The name no longer depends on
+    the bytes of exam.py, so editing that file does not hide them."""
+    from memorive_review.exam import DataAnomalyExamExecutor
+    executor=DataAnomalyExamExecutor(tmp_path)
+    assert executor.EXECUTOR_REF=="E2_DataAnomaly_v3_8390243B50F5CCB65F5E"
+    history=ExamScoreHistory(tmp_path/"workflow_exam_scores")
+    node={"node_id":"logic_review"}
+    target=dict(kind="API",config_id="api-fixture",model_name="deepseek-v4-flash")
+    saved=dict(status="PASS",score=77,executor_ref="E2_DataAnomaly_v3_8390243B50F5CCB65F5E",exam_tier=dict(TIER))
+    assert history.record(node,target,saved,{saved["executor_ref"]})
+    assert history.lookup(node,target,{executor.EXECUTOR_REF})["score"]==77

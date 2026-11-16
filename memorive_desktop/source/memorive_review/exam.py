@@ -59,10 +59,13 @@ def score_answers(cases,answers,key):
 
 class DataAnomalyExamExecutor:
     native_coverage_plan=True
+    # The name this exam's scores are filed under. It used to be computed with a hash of this
+    # file's bytes, so any edit of the file hid the scores saved before; it is now fixed at the
+    # value v1.02 to v1.03 wrote. Give it a new name when the questions, answer key, scoring,
+    # prompt or answer format change, as the other exams do.
+    EXECUTOR_REF='E2_DataAnomaly_v3_8390243B50F5CCB65F5E'
     def __init__(self,scratch_root):
         self._scratch_root=Path(scratch_root)
-        manifest,*_=assets()
-        self.EXECUTOR_REF='E2_DataAnomaly_v3_'+digest({'manifest':manifest,'scorer':digest(Path(__file__).read_bytes()),'prompt':PROMPT_VERSION,'schema':SCHEMA})[:20]
     def plan(self,node,target,context):
         if node.get('node_id')!='logic_review':return {'status':'NOT_AVAILABLE','reason':'E2_EXAM_NODE_UNSUPPORTED'}
         if target.get('kind') not in {'API','CLI'} or target.get('connection_status')!='AVAILABLE':

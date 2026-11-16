@@ -4352,8 +4352,8 @@
     },
     {
       "path": "source/memorive_review/exam.py",
-      "sha256": "d3d2c2abf930907bfa5446adfe7013f11de773b78fa9b67bfe78f0f899391d64",
-      "bytes": 15172
+      "sha256": "f6ffc0db70575c002bf0302e89aed63c94832ed1724496b903cb211a1bbe873c",
+      "bytes": 15382
     },
     {
       "path": "source/memorive_review/formats.py",
@@ -4542,8 +4542,8 @@
     },
     {
       "path": "source/memorive_settings/exam_successor.py",
-      "sha256": "f1c164e07dc0e6e13a7d9880abfc7326b8012015545fd420e86e042bb0febda6",
-      "bytes": 48288
+      "sha256": "3110011bced983a5dbab4a31ee17f2011197e463cdb67277c31b2dedf5e6ec7e",
+      "bytes": 48581
     },
     {
       "path": "source/memorive_settings/exam_tiers.py",
