@@ -35,7 +35,7 @@ from model_gateway.errors import GatewayError
 from model_gateway.prompts import PromptRegistry
 import model_gateway
 
-from document_processing.naming import display_title, file_name
+from memorive.platform.naming import display_title, file_name
 
 from .anchor_repair import (AnchorRepairContractError, collect_core_anchor_issues,
                             recover_core_anchors_once, write_trace_exclusive)

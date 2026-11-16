@@ -23,7 +23,7 @@ from runtime_log import log, log_error
 from .config import library_root, now_iso
 from .document_conversion.diagnostics import parse_source_marker
 from .errors import DocumentProcessingError
-from .naming import display_title, file_name, folder_name
+from memorive.platform.naming import display_title, file_name, folder_name
 
 _PAGE_RE = re.compile(r"^\s*<!--\s*memorive:page:(\d+)\s*-->\s*$")
 _PAGENUM_RE = re.compile(r"^\s*\d{1,4}\s*$")

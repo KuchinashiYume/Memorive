@@ -54,8 +54,6 @@ the shared basics (`memorive_folder_management`, `runtime_log`, `memorive_langua
 `decision_log`). A few basics still reach into business packages; these are the places to untangle
 when that code is restructured:
 
-- `memorive_folder_management/policy.py` takes `display_title`, `file_name` and `folder_name` from
-  `document_processing/naming.py`, so the folder layout depends on the documents area.
 - `run_ledger`: the channel accounting, cost routing and analysis admission modules import
   `model_gateway`, `retrieval_weighting`, `artifact_registry` and `knowledge_admission`.
 - `decision_log` and `knowledge_feedback` import each other: `knowledge_feedback` calls decision_log's

@@ -31,7 +31,7 @@ from runtime_log import log, log_error
 from .config import library_root, now_iso
 from .document_conversion.diagnostics import parse_source_marker
 from .errors import DocumentProcessingError
-from .naming import display_title, file_name, folder_name
+from memorive.platform.naming import display_title, file_name, folder_name
 
 # chunk 结构版本(承 ServiceContracts 第3步拍板③):由 DocumentChunk 产出、描述 **chunk 结构**的版本。
 # DocumentChunk 是这字段的唯一定义者;DocumentEmbed 只承带进向量 metadata、不当定义者(嵌入行为 ≠ chunk 结构)。

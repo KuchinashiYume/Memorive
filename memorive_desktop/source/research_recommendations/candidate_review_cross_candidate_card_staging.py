@@ -26,7 +26,7 @@ from document_processing.document_ingest_ingest import ingest
 from document_processing.document_convert_convert import convert
 from document_processing.document_clean_clean import clean
 from document_processing.document_chunk_chunk import chunk
-from document_processing.naming import make_paper_id
+from memorive.platform.naming import make_paper_id
 from evidence_extraction.card import CONTENT_FIELDS, build_card, write_card
 from evidence_review.atomic_review import build_atomic_review_view, deterministic_precheck
 from evidence_review.mechanical import mechanical_check

@@ -1,6 +1,6 @@
 """Deterministic readable projection; source text and JSON evidence are untouched."""
 import re
-from document_processing.naming import display_title, file_name
+from memorive.platform.naming import display_title, file_name
 
 def readable_name(artifact_id, title):
     return file_name('Refinement',artifact_id.removeprefix('refinement-product-'),display_title(title),'md')

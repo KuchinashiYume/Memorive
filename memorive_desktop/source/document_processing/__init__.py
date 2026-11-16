@@ -4,7 +4,8 @@ pipeline.py (run_document_processing, embed_from_chunks) is what the workflow (m
 calls for one paper. It chains the steps: convert (document_convert_convert with
 document_conversion/), clean (document_clean_clean), chunk (document_chunk_chunk), embed
 (document_embed_embed) and ingest (document_ingest_ingest); research_recommendations also calls the
-step modules directly. naming.py names a paper's files and folders for several packages.
+step modules directly. A paper's file and folder names come from memorive/platform/naming.py, its
+paper id registry from memorive/documents/processing/registration.py.
 document_structure/ reads a document's sections; the window reaches it through structure.* methods
 (document_structure/desktop.py).
 

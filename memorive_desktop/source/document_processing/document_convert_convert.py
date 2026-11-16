@@ -26,7 +26,8 @@ from .config import (CORRUPT_PAGE_FRACTION_FAIL_RATIO, OCR_VIA_MODEL_GATEWAY_REA
                      now_iso)
 from .engines import get_engine
 from .errors import OcrSafetyValve, ScanSuspectError, TextIntegrityError
-from .naming import PaperIdRegistry, display_title, file_name, folder_name
+from memorive.documents.processing.registration import PaperIdRegistry
+from memorive.platform.naming import display_title, file_name, folder_name
 from .ocr_page_rescue import rescue_pdf_pages
 from .types import ConvertResult, RawObject
 

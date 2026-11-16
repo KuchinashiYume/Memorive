@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from typing import Any, Mapping
 
-from document_processing.naming import display_title, file_name, folder_name
+from memorive.platform.naming import display_title, file_name, folder_name
 
 
 POLICY_RELATIVE_PATH = Path("contracts") / "extensions" / "DesktopFolderManagementPolicy.json"
@@ -79,6 +79,7 @@ def _validate_policy(payload: Any) -> Mapping[str, Any]:
     if (
         not isinstance(artifacts, dict)
         or artifacts.get("layout") != "ONE_PAPER_ONE_FOLDER_FLAT"
+        # The policy file's label for the naming rules; they now live in memorive/platform/naming.py.
         or artifacts.get("naming_authority") != "document_processing.naming"
         or not isinstance(artifacts.get("allowed_kinds"), dict)
     ):
