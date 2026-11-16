@@ -1,7 +1,8 @@
-"""DocumentConvert PDF 页面级 OCR 救援与双路确定性校核。
+"""OCR rescue of single PDF pages during conversion, and the check between the two paths.
 
-数字版主引擎仍是第一路；本模块只处理无文本、低文本、确定性乱码页或显式抽检页。
-所有 OCR 调用逐页进行，受托数据在读取源文件、渲染和 base64 编码之前挡下。
+The digital engine stays the first path; this module handles only pages with no text, too little
+text, text known to be garbled, or pages chosen for a spot check. OCR runs page by page; entrusted
+data is stopped before the source file is read, rendered or base64-encoded.
 """
 from __future__ import annotations
 
@@ -143,7 +144,7 @@ def _rebuild_pages(pages: dict[int, str], pages_total: int) -> str:
 
 
 class _PdfRenderer:
-    """一次打开 PDF，按需渲染候选页，避免每页重复打开整篇。"""
+    """Open the PDF once and render candidate pages as needed, instead of opening it for every page."""
 
     def __init__(self, path: Path):
         import fitz
@@ -171,10 +172,11 @@ def rescue_pdf_pages(
     render_page: Callable[[Path, int], bytes] | None = None,
     ocr_client: Callable[..., dict] | None = None,
 ) -> tuple[str, ConvertReport]:
-    """救援候选页并返回重建 Markdown 与不可变报告副本。
+    """Rescue the candidate pages; returns the rebuilt Markdown and a copy of the report.
 
-    可用数字文本在冲突时始终保留；只有主路不可用且 OCR 合法时才替换。
-    OCR 单页失败不会丢弃已完成页，但主路也不可用时报告 complete=False。
+    Usable digital text always wins a conflict; a page is replaced only when the digital text is
+    unusable and the OCR result is valid. A failed page keeps the pages already done, and the report
+    says complete=False when the digital text is unusable too.
     """
     pages = _parse_pages(raw_md_text, report.pages_total)
     forced = set(forced_pages or ())
@@ -198,7 +200,7 @@ def rescue_pdf_pages(
     if not candidates:
         return raw_md_text, report
 
-    # 红线：候选已由主引擎内存文本判定，但在此之前未打开/读取源 PDF。
+    # The candidates were found from the engine's text in memory; the source PDF has not been opened yet.
     if raw.meta.data_ownership != "self":
         log_error("DocumentConvert", "OCR 数据归属闸门触发", context={
             "step": "ocr_page_rescue/ownership_gate",

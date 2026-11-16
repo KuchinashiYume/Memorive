@@ -47,7 +47,7 @@ class LegacyYMathLayoutRecovery:
 
 
 def _is_auxiliary_layout_line(target: dict[str, Any]) -> bool:
-    """仅识别完全由已审计特殊 glyph 组成的 Layout 游离行。"""
+    """Find stray Layout lines made only of audited special glyphs."""
     line = target.get("line")
     if not line:
         return False
@@ -69,7 +69,7 @@ def _is_auxiliary_layout_line(target: dict[str, Any]) -> bool:
 
 
 def _context_hint(target: dict[str, Any], recovered_text: str) -> str:
-    """仅供审计参考；返回值不参与映射、放行或拒绝。"""
+    """For the audit only; the result never decides a mapping, a pass or a refusal."""
     target_class = str(target.get("class") or "")
     if target_class == "page-header":
         return "running_header"
@@ -563,7 +563,7 @@ def recover_legacy_ymath_layout_pdf(
     *,
     baseline_markdown: str,
 ) -> LegacyYMathLayoutRecovery | None:
-    """只读恢复 Layout Markdown；不适用时返回 None。"""
+    """Restore the Layout Markdown, reading only; None when it does not apply."""
     audit = recover_legacy_ymath_pdf(Path(path))
     if audit is None:
         return None

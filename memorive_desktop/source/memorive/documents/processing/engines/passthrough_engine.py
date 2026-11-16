@@ -1,4 +1,4 @@
-"""已是 Markdown 的输入直通(读取原文,不改内容)。"""
+"""Markdown input passes through as it is."""
 from __future__ import annotations
 
 from pathlib import Path

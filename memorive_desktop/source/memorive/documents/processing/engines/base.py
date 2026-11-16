@@ -1,5 +1,5 @@
-"""Memorive DOCUMENT-PROCESSING/DOCUMENT_PROCESSING · DOCUMENT_PROCESSING 转换引擎基类。约定:convert(raw) -> (raw_md_text, ConvertReport)。
-只负责「原始文件 → Raw MD 文本」,不落盘、不命名、不判质量(那些在 document_convert_convert)。"""
+"""The base of the conversion engines: convert(raw) -> (raw_md_text, ConvertReport). An engine turns the
+source file into RawMD text only; writing, naming and quality checks are document_convert_convert.py's."""
 from __future__ import annotations
 
 from memorive.documents.processing.types import ConvertReport, RawObject

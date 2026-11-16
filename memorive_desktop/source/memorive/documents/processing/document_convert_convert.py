@@ -1,12 +1,13 @@
-"""DocumentConvert 转换/OCR —— 传送带第二节。
+"""Conversion and OCR, the second step of the pipeline.
 
-把 RawObject 转成 Raw MD:引擎可插拔(改配置即换;正式主力 marker、沙盒轻量 pymupdf4llm、
-txt 用 markitdown、图片经 MODEL_GATEWAY OCR),输出 Raw MD + 转换报告,并按命名规范落
-文件夹 / [PDF] / [RawMD] / paper_id、写全 frontmatter 交 DocumentClean。
-三道安全阀在此:① 需 OCR 但 model_gateway_ocr 未就绪;② 数字版 PDF 疑似扫描件;
-③ PDF 转换文本含灾难性 U+FFFD 损坏。
-均报错挡下 + 写 RUNTIME_LOG detail,绝不静默降级。
-守边界:DocumentConvert 只转换,不清洗页眉页脚/断行(DocumentClean)、不判质量(EVIDENCE_REVIEW)。
+Turns a RawObject into RawMD with a pluggable engine (chosen by configuration: marker as the main
+engine, pymupdf4llm in the sandbox, markitdown for text files, OCR through the gateway for
+pictures), returns the RawMD and a conversion report, and writes the paper's folder, [PDF], [RawMD]
+with its full front matter, and paper_id, for cleaning.
+Three checks stop a paper here, each logged at detail level, never with a quiet fallback: the input
+needs OCR and OCR through the gateway is not ready; a digital PDF looks like a scan; the converted
+text is badly damaged (U+FFFD).
+It only converts: headers, footers and broken lines are cleaning's, quality is the card review's.
 """
 from __future__ import annotations
 
@@ -52,7 +53,7 @@ def _forbidden_control_count(text: str) -> int:
 
 
 def _validate_pdf_text_integrity(raw_md_text: str, *, pages_total: int) -> None:
-    """校验确定性 U+FFFD / Cc 损坏；不判断内容正确性或重要性。"""
+    """Check for damage (U+FFFD, control characters); not whether the content is right or important."""
     text = raw_md_text or ""
     content_only = _PAGE_MARKER_RE.sub("", text)
     replacement_count = content_only.count("\ufffd")
@@ -130,7 +131,7 @@ def _validate_pdf_text_integrity(raw_md_text: str, *, pages_total: int) -> None:
 
 
 def _yaml_scalar(s: str) -> str:
-    """把任意字符串写成合法 YAML 标量(JSON 双引号形式即合法 YAML)。"""
+    """Any string as a valid YAML scalar (JSON's double-quoted form is valid YAML)."""
     return json.dumps(s, ensure_ascii=False)
 
 
@@ -158,7 +159,7 @@ def _anchor_projection(raw_md_text: str) -> list[dict]:
 
 
 def _frontmatter(paper_id, title, meta, report, engine_name, converted_at) -> str:
-    """[RawMD] frontmatter,补充要求②:9 项写全,确保 DocumentClean 能接。"""
+    """The [RawMD] front matter, all nine fields, so cleaning can take it."""
     cr = {"engine": report.engine, "engine_version": report.engine_version,
           "pages_total": report.pages_total,
           "pages_failed": report.pages_failed, "warnings": report.warnings,
@@ -178,10 +179,10 @@ def _frontmatter(paper_id, title, meta, report, engine_name, converted_at) -> st
         "---",
         f"paper_id: {paper_id}",
         f"title: {_yaml_scalar(title)}",
-        f"data_ownership: {meta.data_ownership}",   # 红线标记:经此 frontmatter 传给 DocumentClean/DocumentChunk/DocumentEmbed
+        f"data_ownership: {meta.data_ownership}",   # travels in the front matter to cleaning, chunking, embedding
         f"doc_type: {meta.doc_type}",
         f"original_format: {meta.original_format}",
-        "review_status: pending",                   # KNOWLEDGE_ADMISSION 占位(正式状态机 Intake);DOCUMENT_PROCESSING 产物不放行 Active
+        "review_status: pending",                   # document processing never makes anything active; the card states do
         f"convert_engine: {engine_name}",
         "converter_profile_id: legacy_document_convert_compat_v1",
         f"source_sha256: {report.source_sha256}",
@@ -198,8 +199,9 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
             target: str = "sandbox", engine: str | None = None,
             allow_short: bool = False,
             ocr_pages: list[int] | None = None) -> ConvertResult:
-    """转换一个 RawObject。paper_id/title 由人工给定/确认(承确认 4),不凭元数据自动定。
-    allow_short=True:人工确认「非扫描件、正文本就短」时放行安全阀②(留痕,非静默)。"""
+    """Convert one RawObject. paper_id and title are given or confirmed by a person, not taken from
+    metadata. allow_short=True: a person confirmed the file is not a scan, just short; the scan check
+    lets it through and records that."""
     fmt = raw.meta.original_format
     engine_name = engine or engine_for(fmt, target)
     source_sha256 = _sha256(raw.path)
@@ -208,7 +210,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
     from memorive.models.gateway.gateway import current_gateway
     ocr_ready = OCR_VIA_MODEL_GATEWAY_READY or bool(getattr(current_gateway(), 'page_ocr_ready', False))
 
-    # ── 安全阀①:需 OCR(图片/扫描)但 model_gateway_ocr 未就绪 → 报错挡下,不静默降级 ──
+    # ── needs OCR (a picture or scan) and OCR through the gateway is not ready: stop ──
     if (
         engine_name == "model_gateway_ocr"
         or (fmt == "pdf" and ocr_pages)
@@ -222,13 +224,13 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
         raise OcrSafetyValve(
             "需 OCR 但 model_gateway_ocr 未就绪;拒绝静默降级。加 ocr 槽 + adapter 后再处理该输入。")
 
-    # ── paper_id 人工确认表:碰撞走人工消歧,不自动按导入顺序定(承确认 4)──
+    # ── paper_id from the confirmed table; a clash is resolved by a person, not by import order ──
     reg = PaperIdRegistry(target=target)
     disp = display_title(title)
     folder = library_root(target) / folder_name(paper_id, disp)
     reg.ensure(paper_id, folder)
 
-    # ── 转换(只转换、不清洗、不判质量)──
+    # ── conversion (no cleaning, no quality judgment) ──
     eng = get_engine(engine_name)
     try:
         raw_md_text, report = eng.convert(raw)
@@ -238,7 +240,8 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
             "paper_id": paper_id, "source": raw.meta.source})
         raise
 
-    # ── 页面级救援：主引擎先跑，只有候选页经 MODEL_GATEWAY 单页 OCR；默认关闭、显式 readiness 才进入 ──
+    # ── page rescue: after the main engine, only candidate pages get OCR through the gateway, one by
+    #    one; off by default, used only when explicitly ready ──
     if any(row.get('requires_page_ocr') for row in report.page_details) and not ocr_ready:
         raise TextIntegrityError('PDF_FONT_UNICODE_CONFLICT: configured page OCR is required')
     if fmt == "pdf" and ocr_ready:
@@ -258,7 +261,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
             })
             raise
 
-    # ── 安全阀③:字符很多但含灾难性 U+FFFD → 报错挡下,不产出伪成功 RawMD ──
+    # ── plenty of characters but badly damaged (U+FFFD): stop; no RawMD that looks fine but is not ──
     if fmt == "pdf":
         try:
             _validate_pdf_text_integrity(
@@ -270,7 +273,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
                 "pages": str(report.pages_total)})
             if report.complete:
                 raise
-            # OCR 已逐页尝试但仍有失败页：保留其他完成页，交编排层停在 DocumentConvert 后。
+            # OCR failed on some pages: the finished pages are kept and the job stops after conversion.
             report = replace(
                 report,
                 warnings=[
@@ -279,9 +282,9 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
                 ],
             )
 
-    # ── 安全阀②:数字版 PDF 文本过少 → 疑似扫描件,报错挡下、不产出空 [RawMD] ──
+    # ── too little text in a digital PDF: probably a scan; stop, no empty [RawMD] ──
     if fmt == "pdf":
-        # 扫描件判据只数正文,排除工程页标记(否则标记字符会虚增计数、削弱安全阀②)
+        # count the text only, not the page markers, which would inflate the count
         content_only = _PAGE_MARKER_RE.sub("", raw_md_text or "")
         nonspace = len("".join(content_only.split()))
         floor = SCAN_SUSPECT_MIN_CHARS_PER_PAGE * max(report.pages_total, 1)
@@ -301,7 +304,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
                     "pages_failed": report.pages_failed,
                 })
             elif allow_short:
-                # 人工确认「非扫描件、正文本就短」→ 放行,但留痕(显式 override、非静默)
+                # a person confirmed it is short, not a scan: let it through and record it
                 log("DocumentConvert", "短文本放行(人工确认非扫描件)", data={
                     "paper_id": paper_id, "chars": nonspace, "floor": floor,
                     "pages": report.pages_total, "note": "allow_short=True 人工 override"})
@@ -352,14 +355,14 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
         anchor_map=_anchor_projection(raw_md_text),
     )
 
-    # ── 命名落盘:[PDF] 存档 + [RawMD](frontmatter 9 项)──
+    # ── write [PDF] (the source kept) and [RawMD] (nine front matter fields) ──
     folder.mkdir(parents=True, exist_ok=True)
     rawmd_path = folder / file_name("RawMD", paper_id, disp, "md")
     pdf_path: Path | None = None
     original_path: Path | None = None
     if fmt == "pdf":
         pdf_path = folder / file_name("PDF", paper_id, disp, "pdf")
-        shutil.copy2(raw.path, pdf_path)            # 原件存档为 [PDF]
+        shutil.copy2(raw.path, pdf_path)            # the source, kept as [PDF]
         original_path = pdf_path
     else:
         original_extension = raw.path.suffix.lower().lstrip(".") or fmt
@@ -373,7 +376,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
     rawmd_path.write_text(
         _frontmatter(paper_id, title, raw.meta, report, report.engine, converted_at) + raw_md_text,
         encoding="utf-8")
-    reg.commit(paper_id, folder)                    # 落盘成功后确认绑定,重跑幂等
+    reg.commit(paper_id, folder)                    # bind after the files are written, so a rerun gives the same result
 
     is_light = (engine_name == PDF_SANDBOX_LIGHT)
     log("DocumentConvert", "转换完成" if report.complete else "OCR 部分结果已保留", data={
@@ -383,7 +386,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
         "pages_failed": report.pages_failed, "complete": report.complete,
         "chars": len(raw_md_text),
         "rawmd": str(rawmd_path)})
-    if report.pages_failed:                         # 有失败页 → 升 detail 留痕
+    if report.pages_failed:                         # failed pages: logged at detail level
         log("DocumentConvert", "转换有失败页", is_error=True, context={
             "step": "convert", "error": f"{len(report.pages_failed)} 页转换失败",
             "paper_id": paper_id, "pages_failed": str(report.pages_failed)})

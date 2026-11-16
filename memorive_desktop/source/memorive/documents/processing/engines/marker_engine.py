@@ -1,6 +1,7 @@
-"""正式主力 marker-pdf 引擎。
+"""The main PDF engine, marker-pdf.
 
-依赖保持懒加载；未安装或 API 不兼容时 fail closed，绝不静默降级到轻量引擎。
+marker is loaded when the engine runs; if it is missing or its API has changed, conversion stops
+and never falls back quietly to the light engine.
 """
 from __future__ import annotations
 

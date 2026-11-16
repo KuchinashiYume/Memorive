@@ -93,7 +93,7 @@ _GLYPH_RULES = {
 
 
 class LegacyYMathRecoveryError(ValueError):
-    """输入像审计过的 YMath PDF，但无法无歧义恢复。"""
+    """The input looks like an audited YMath PDF but cannot be restored without ambiguity."""
 
 
 @dataclass(frozen=True)
@@ -514,7 +514,7 @@ def _recover_document(
 def recover_legacy_ymath_pdf(
     path: Path,
 ) -> LegacyYMathRecovery | None:
-    """只读恢复审计过的 YMath PDF；不适用时返回 None。"""
+    """Restore an audited YMath PDF, reading only; None when it does not apply."""
     import pymupdf
 
     document = pymupdf.open(path)

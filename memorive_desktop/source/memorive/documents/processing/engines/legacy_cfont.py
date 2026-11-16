@@ -71,7 +71,7 @@ _ALLOWED_WHITESPACE_CONTROLS = {"\t", "\n", "\r"}
 
 
 class LegacyCFontRecoveryError(ValueError):
-    """输入像 legacy C-font，但无法无歧义恢复。"""
+    """The input looks like a legacy C-font PDF but cannot be restored without ambiguity."""
 
 
 @dataclass(frozen=True)
@@ -456,7 +456,7 @@ def _recover_document(
 def recover_legacy_c_number_pdf(
     path: Path,
 ) -> LegacyCFontRecovery | None:
-    """只读尝试恢复审计过的 Adv* C<number> PDF；不适用时返回 None。"""
+    """Try to restore an audited Adv* C<number> PDF, reading only; None when it does not apply."""
     import pymupdf
 
     document = pymupdf.open(path)

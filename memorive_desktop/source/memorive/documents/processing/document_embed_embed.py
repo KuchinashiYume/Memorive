@@ -1,26 +1,36 @@
-"""DocumentEmbed 嵌入 —— 传送带第五节(ServiceContracts 第 3 步)。
+"""Embedding, the fifth step of the pipeline.
 
-读 `[Chunks].jsonl`(DocumentChunk 产)→ 按 `data_ownership` 分流 → 调 MODEL_GATEWAY 拿向量 → 写 Chroma + metadata → 记 RUNTIME_LOG。
+Reads [Chunks].jsonl from chunking, routes by data_ownership, gets the vectors through the model
+gateway, writes them with their metadata to Chroma and logs the run.
 
-流程(承上会话定稿 + 对抗性审查加固):
-  ① 字段/唯一性校验:关键字段非空 + **篇内 chunk_id 唯一**(早于 MODEL_GATEWAY/Chroma,防裸异常与部分写)。
-  ② 归属分流:self→云 `embed_cloud` / entrusted→本地 `embed_local` / **缺失或未知→报错挡下**(不猜、不默认上云,拍板①)。
-  ③ 安全阀(红线):entrusted 走本地前,先经 **MODEL_GATEWAY healthcheck** 纯探测;未就绪 → 抛 `EmbedLocalNotReadyError`
-     中断本篇、**零写入、绝不静默上云**;DocumentEmbed 从不 catch 后改调 embed_cloud(结构性保证)。
-     ⚠「本地=回环」由 MODEL_GATEWAY ollama adapter 硬断言(endpoint 非 localhost 即挡下),DocumentEmbed 不重定义 endpoint。
-  ④ 整库重嵌前置检查:目标 collection 已含不同 `embedding_model` / `vector_type` → 挡下(取回不全则 fail-closed 保守挡)。
-  ⑤ 去重前置检查:`col.get(ids)` 有已存在 → 报错(只增不改)。
-  ⑥ 原子:先内存嵌完(逐块调 MODEL_GATEWAY、验向量)——**add 之前任一失败零写入**;分批写(≤5000/批,防 Chroma 批上限)+
-     **写后校验**;写阶段任一失败 → 按 `embedding_run_id` 精确回滚本批、**失败即零残留**,再上抛(裸异常转受控)。
+The steps:
+  (1) Fields and uniqueness: key fields not empty, each chunk_id once in the paper; checked before
+      the gateway or Chroma is touched.
+  (2) Route by ownership: self to the cloud slot embed_cloud, entrusted to the local slot
+      embed_local; a missing or unknown ownership stops the paper (nothing is guessed, nothing goes
+      to the cloud by default).
+  (3) For entrusted data, the gateway's healthcheck asks whether the local model is ready (without
+      sending text). If not, EmbedLocalNotReadyError stops the paper with nothing written; this
+      module never catches it to call embed_cloud instead. That the local endpoint is a loopback
+      address is enforced by the gateway's Ollama adapter.
+  (4) The collection must not hold another embedding_model or vector_type (a different model
+      means re-embedding the library); an incomplete read-back stops the paper as well.
+  (5) No chunk_id may already be in the collection (vectors are only added).
+  (6) All vectors are made in memory first, chunk by chunk, and checked; any failure before the
+      write leaves nothing written. The write goes in batches of at most 5000 (Chroma's limit) and is
+      checked after; a failure while writing deletes this run's vectors by embedding_run_id, so nothing
+      is left, and raises.
 
-⚠ Chroma 重复 id 行为(实测 1.5.9):**跨 add / 与库中已存在 id → 静默忽略**(保留旧值不覆盖);
-  **同一 add 调用内部重复 id → 抛 DuplicateIDError**。故篇内唯一性必须由本模块 ① 显式预检,不靠 Chroma。
-⚠ 并发:DocumentEmbed 假设**单写者**(去重预检与 add 非原子、Chroma 文件级无跨进程锁);post-write run_id 校验是竞态最后兜底。
+Chroma 1.5.9 ignores an id that is already stored, keeping the old value, and raises
+DuplicateIDError for a repeated id within one add; that is why step (1) checks uniqueness itself.
+One writer is assumed: the duplicate check and the add are not atomic and Chroma has no
+cross-process lock; the run_id check after the write is the last guard.
 
-守边界:DocumentEmbed 只「读归属→选 embed_cloud/local 槽→调 memorive.models.gateway.embed/healthcheck→写 chroma+metadata→记 RUNTIME_LOG」;
-endpoint/model/**归一化**/**回环断言**/健康探测/**归属保护文案**全在 MODEL_GATEWAY;canonical 模型名从 MODEL_GATEWAY 承带(不自定义)。
+This module only reads the ownership, picks the slot, calls the gateway's embed and healthcheck,
+writes to Chroma and logs. Endpoint, model, name normalization, the loopback rule, the health check
+and the ownership message are the gateway's; the canonical model name comes from the gateway.
 
-留痕:每条向量 metadata 12 项,只增不改。
+Each vector's metadata has 12 fields and is never changed afterwards.
 """
 from __future__ import annotations
 
@@ -33,7 +43,7 @@ from datetime import datetime
 from pathlib import Path
 
 from memorive.platform.logs import log, log_error
-from memorive.models.gateway import CANONICAL_EMBED_MODEL as CANON_EMBED_MODEL   # 单一来源(承对抗审查 #8)
+from memorive.models.gateway import CANONICAL_EMBED_MODEL as CANON_EMBED_MODEL   # the gateway's canonical name
 from memorive.models.gateway import embed as model_gateway_embed
 from memorive.models.gateway import healthcheck as model_gateway_healthcheck
 
@@ -43,10 +53,10 @@ from memorive.documents.processing.errors import (EmbedLocalNotReadyError, Docum
                      VectorModelConflictError, VectorWriteVerifyError)
 from memorive.documents.processing.chroma_durability import ensure_chroma_writable, write_embedding_checkpoint
 
-VECTOR_TYPE = "chunk"                   # 本阶段只嵌下层原文向量(卡片字段向量属 Configuration/Retrieval,不在此)
-_SLOT = {"self": "embed_cloud", "entrusted": "embed_local"}    # 归属 → MODEL_GATEWAY 槽
+VECTOR_TYPE = "chunk"                   # chunk vectors only; card field vectors are not made here
+_SLOT = {"self": "embed_cloud", "entrusted": "embed_local"}    # ownership -> gateway slot
 _BACKEND = {"embed_cloud": "cloud", "embed_local": "local"}
-_MAX_ADD_BATCH = 5000                   # < Chroma 硬上限 5461,分批写防 InternalError
+_MAX_ADD_BATCH = 5000                   # below Chroma's limit of 5461
 _STRUCTURE_METADATA = ("page_start", "page_end", "section_path", "block_type")
 
 
@@ -123,13 +133,13 @@ def _remove_spool(root: Path, target: str) -> None:
 
 
 def _now_minute() -> str:
-    """一次运行统一的**带时区**时间戳、**到分钟**(承约束三:非 naive、不逐 chunk 各取 now)。"""
+    """One timestamp for the run, with the offset, to the minute (not one per chunk)."""
     return datetime.now().astimezone().isoformat(timespec="minutes")
 
 
 def _open_collection(target: str):
-    """打开(或建)目标 Chroma collection。物理落库外运维区(承 D2 隔离);chromadb 懒加载。"""
-    import chromadb                                   # 懒加载:不装 chromadb 时不阻塞 import document_processing
+    """Open or create the Chroma collection, in the ops area outside the library; chromadb is loaded here."""
+    import chromadb                                   # loaded here, so the package imports without chromadb
     cdir = chroma_dir(target)
     cdir.mkdir(parents=True, exist_ok=True)
     client = chromadb.PersistentClient(path=str(cdir))
@@ -138,8 +148,8 @@ def _open_collection(target: str):
 
 
 def _validate_records(recs: list, chunk_ids: list, paper_id, src: str):
-    """① 字段完整性 + 篇内唯一性(早于 MODEL_GATEWAY/Chroma;只记 chunk_id、不记文本)。"""
-    for r in recs:                                     # 关键字段非空(防 metadata None → Chroma 裸 TypeError)
+    """(1) Key fields present and each chunk_id once (before the gateway or Chroma; only chunk ids are logged)."""
+    for r in recs:                                     # key fields present (None in metadata would make Chroma raise)
         cid, pid = r.get("chunk_id"), r.get("paper_id")
         if not (isinstance(cid, str) and cid.strip()):
             log_error("M1e", "chunk_id 缺失/非法,挡下", context={
@@ -151,13 +161,13 @@ def _validate_records(recs: list, chunk_ids: list, paper_id, src: str):
                 "step": "embed/字段校验", "paper_id": str(paper_id), "chunk_id": cid, "source": src,
                 "error": f"chunk {cid} 的 paper_id 缺失/非字符串:{pid!r};挡下。"})
             raise DocumentProcessingError(f"[{paper_id}] chunk {cid} 的 paper_id 缺失/非法。")
-        txt = r.get("text")                            # text 非空 str(免下游 r["text"] 裸 KeyError;空文本无可嵌)
+        txt = r.get("text")                            # text a non-empty string
         if not (isinstance(txt, str) and txt.strip()):
             log_error("M1e", "chunk text 缺失/空,挡下", context={
                 "step": "embed/字段校验", "paper_id": str(paper_id), "chunk_id": cid, "source": src,
                 "error": f"chunk {cid} 的 text 缺失/空/非字符串;无可嵌,挡下。"})
             raise DocumentProcessingError(f"[{paper_id}] chunk {cid} 的 text 缺失/空;挡下。")
-    seen, dups = set(), set()                          # 篇内 chunk_id 唯一(防 Chroma DuplicateIDError / 静默去重致部分写)
+    seen, dups = set(), set()                          # each chunk_id once in the paper
     for c in chunk_ids:
         (dups if c in seen else seen).add(c)
     if dups:
@@ -168,9 +178,9 @@ def _validate_records(recs: list, chunk_ids: list, paper_id, src: str):
 
 
 def _route(recs: list, paper_id, src: str) -> str:
-    """② 归属分流:返回统一 ownership;缺失/非字符串/未知/混合一律报错挡下(绝不默认上云)。"""
+    """(2) The paper's one ownership; missing, not a string, unknown or mixed stops it."""
     raw = [r.get("data_ownership") for r in recs]
-    # 先判类型再 strip:非字符串(int/list/bool/None)/空串 → 归属不可读,调 MODEL_GATEWAY 前挡下(免 .strip() 裸 AttributeError)
+    # Type first, then strip: a value that is not a string, or empty, is unreadable and stops the paper.
     bad = [v for v in raw if not isinstance(v, str) or not v.strip()]
     if bad:
         kinds = sorted({repr(v) if isinstance(v, str) else type(v).__name__ for v in bad})
@@ -194,22 +204,22 @@ def _route(recs: list, paper_id, src: str) -> str:
 
 
 def _safety_valve(paper_id):
-    """③ 安全阀:entrusted 走本地前,经 MODEL_GATEWAY healthcheck 纯探测;未就绪→报错挡下、零写入、绝不上云。"""
-    hc = model_gateway_healthcheck("embed_local")               # MODEL_GATEWAY 报状态(纯 GET /api/tags,不发任何 chunk 文本;含回环断言)
+    """(3) For entrusted data: is the local model ready? If not, stop with nothing written."""
+    hc = model_gateway_healthcheck("embed_local")               # GET /api/tags only, no chunk text; the loopback rule applies
     if not hc.get("ready"):
         msg = hc.get("message") or "[MODEL_GATEWAY/embed_local] 本地嵌入未就绪;他人托付数据已挡下、未上云。"
         log_error("M1e", "安全阀:他人托付+本地未就绪,挡下(未上云)", context={
             "step": "embed/安全阀", "paper_id": str(paper_id),
             "dependency": "ollama/bge-m3(embed_local)", "error": msg})
-        raise EmbedLocalNotReadyError(msg)           # ← 直接上抛,DocumentEmbed 从不 catch 后改调 embed_cloud
+        raise EmbedLocalNotReadyError(msg)           # raised as it is; never caught to use embed_cloud
 
 
 def _check_rebuild_conflict(col, col_name, paper_id):
-    """④ 整库重嵌前置检查:已有向量的 embedding_model / vector_type 与本次不一致 → 挡下。
-    取回不全(未来 chromadb 分页?)→ fail-closed 保守挡下,不漏检异模型(承对抗审查)。"""
+    """(4) Stop when stored vectors have another embedding_model or vector_type. An incomplete
+    read-back (paging in a future chromadb, say) stops too, so another model is never missed."""
     total = col.count()
     if total == 0:
-        return                                        # 空库,无冲突
+        return                                        # an empty collection: no conflict
     metas = col.get(include=["metadatas"]).get("metadatas") or []
     if len(metas) < total:
         log_error("M1e", "整库一致性检查取回不全,保守挡下", context={
@@ -217,11 +227,11 @@ def _check_rebuild_conflict(col, col_name, paper_id):
             "error": f"collection {col_name} count={total} 但 get 只回 {len(metas)};无法确保穷尽,保守挡下(防漏检异模型)。"})
         raise VectorModelConflictError(
             f"collection {col_name} 一致性检查取回不全({len(metas)}<{total});保守挡下,请人工核查。")
-    # 不剔除 None:任一条 metadata 缺 embedding_model / vector_type 即当作冲突 fail-closed(缺字段≠无冲突)
+    # None stays: metadata without embedding_model or vector_type counts as a conflict
     models = {(m or {}).get("embedding_model") for m in metas}
     vtypes = {(m or {}).get("vector_type") for m in metas}
-    if models - {CANON_EMBED_MODEL}:                  # 含 None(缺字段)即触发
-        shown = sorted(map(str, models))              # map(str) 避免 None 与 str 排序比较崩
+    if models - {CANON_EMBED_MODEL}:                  # None (a missing field) counts too
+        shown = sorted(map(str, models))              # map(str), so None sorts with strings
         log_error("M1e", "整库重嵌冲突:模型不一致/缺失,挡下", context={
             "step": "embed/整库检查", "paper_id": str(paper_id),
             "error": (f"collection {col_name} 含 embedding_model={shown}(非全 {CANON_EMBED_MODEL},None=缺字段);"
@@ -238,7 +248,7 @@ def _check_rebuild_conflict(col, col_name, paper_id):
 
 
 def _check_duplicates(col, chunk_ids, paper_id):
-    """⑤ 去重前置检查:库内已存在 chunk_id(Chroma add 遇已存在静默忽略,故须显式预检)。"""
+    """(5) Stop when a chunk_id is already stored (Chroma's add would ignore it silently)."""
     existing = col.get(ids=chunk_ids).get("ids") or []
     if existing:
         log_error("M1e", "chunk_id 已存在,挡下(只增不改)", context={
@@ -250,7 +260,7 @@ def _check_duplicates(col, chunk_ids, paper_id):
 
 
 def _verify_written(col, chunk_ids, run_id, paper_id):
-    """写后 post-write verification:取回数量 + 本批 run_id/model/vector_type 全符合。"""
+    """After the write: the count read back and this run's run_id, model and vector_type must all match."""
     got = col.get(ids=chunk_ids, include=["metadatas"])
     got_ids = got.get("ids") or []
     if len(got_ids) != len(chunk_ids):
@@ -263,7 +273,8 @@ def _verify_written(col, chunk_ids, run_id, paper_id):
 
 
 def _write_atomic(col, chunk_ids, vectors, metadatas, documents, run_id, paper_id):
-    """⑥ 分批写(≤5000/批)+ 写后校验;任一步失败 → 按 run_id 精确回滚本批、**失败即零残留**,再上抛。"""
+    """(6) Write in batches of at most 5000 and check; on any failure delete this run's vectors by
+    run_id, leaving nothing, and raise."""
     try:
         for i in range(0, len(chunk_ids), _MAX_ADD_BATCH):
             s = slice(i, i + _MAX_ADD_BATCH)
@@ -271,18 +282,18 @@ def _write_atomic(col, chunk_ids, vectors, metadatas, documents, run_id, paper_i
         _verify_written(col, chunk_ids, run_id, paper_id)
     except Exception as exc:
         try:
-            col.delete(where={"embedding_run_id": run_id})     # 精确回滚本批(run_id 唯一),使"失败=零残留"
+            col.delete(where={"embedding_run_id": run_id})     # delete exactly this run's vectors
         except Exception as del_exc:
             log_error("M1e", "回滚失败(需人工按 run_id 清理)", context={
                 "step": "embed/回滚", "paper_id": str(paper_id),
                 "error": f"写失败后按 run_id={run_id} 回滚亦失败:{type(del_exc).__name__}: {del_exc}"})
-        if not isinstance(exc, DocumentProcessingError):                       # 裸 Chroma 异常 → 记痕 + 转受控(守 errors 契约)
+        if not isinstance(exc, DocumentProcessingError):                       # a Chroma exception: log it and raise this package's error
             log_error("M1e", "写入失败(已回滚),转受控", context={
                 "step": "embed/写入", "paper_id": str(paper_id),
                 "error": f"{type(exc).__name__}: {exc};已按 run_id={run_id} 回滚零残留。"})
             raise VectorWriteVerifyError(
                 f"[{paper_id}] 写入失败(已回滚零残留):{type(exc).__name__}: {exc}") from exc
-        raise                                                 # 受控错误(如写后校验)→ 回滚后原样上抛
+        raise                                                 # a known error (the check after the write): raised as it is
 
 
 def _vector_metadata(r: dict, *, ownership: str, provider_model_id: str,
@@ -314,7 +325,7 @@ def _vector_metadata(r: dict, *, ownership: str, provider_model_id: str,
 
 
 def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
-    """把一篇 `[Chunks].jsonl` 嵌入并写入向量库。返回本次运行摘要。"""
+    """Embed one paper's [Chunks].jsonl and write the vectors; returns a summary of the run."""
     p = Path(chunks_jsonl)
     if not p.exists():
         log_error("M1e", "Chunks 不存在", context={
@@ -328,19 +339,19 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
     paper_id = recs[0].get("paper_id")
     chunk_ids = [r.get("chunk_id") for r in recs]
 
-    # ① 字段完整性 + 篇内唯一性(早于分流/MODEL_GATEWAY/Chroma)
+    # (1) fields and uniqueness
     _validate_records(recs, chunk_ids, paper_id, str(p))
 
-    # ② 分流(缺失/未知/混合 → 在调 MODEL_GATEWAY 之前挡下)
+    # (2) route by ownership
     ownership = _route(recs, paper_id, str(p))
     slot = _SLOT[ownership]
     backend = _BACKEND[slot]
 
-    # ③ 安全阀(仅 entrusted;未就绪 → 挡下、零写入、绝不上云)
+    # (3) the local model must be ready for entrusted data
     if slot == "embed_local":
         _safety_valve(paper_id)
 
-    # ④⑤ 在构造 Chroma client 前隔离不可重启的 HNSW 库。
+    # (4) and (5): set aside an HNSW store that cannot be reopened before the Chroma client is made.
     try:
         ensure_chroma_writable(target)
     except RuntimeError as exc:
@@ -349,9 +360,10 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
     _check_rebuild_conflict(col, col_name, paper_id)
     _check_duplicates(col, chunk_ids, paper_id)
 
-    # ⑥ 逐 chunk 持久化模型结果；Chroma 仍保持整篇原子写入。进程或
-    # 本地服务中断后可从最后一个成功 chunk 继续，不重复烧掉前序调用。
-    run_id = uuid.uuid4().hex          # 完整 128 位:run_id 兼作回滚 delete 条件,截断碰撞会误删他批向量(守「数据永不误删」)
+    # (6) Each chunk's model result is saved as it comes; Chroma still gets the whole paper at once.
+    # After a crash of the process or the local service, the run continues from the last saved chunk
+    # without paying for earlier calls again.
+    run_id = uuid.uuid4().hex          # the full 128 bits: run_id is what a rollback deletes by, so a shortened id could delete another run's vectors
     embedded_at = _now_minute()
     vectors, models_seen, provider_ids = [], set(), set()
     source_sha256 = hashlib.sha256(p.read_bytes()).hexdigest().upper()
@@ -383,14 +395,14 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
                 reused_checkpoint_count += 1
                 node_units.complete(r["chunk_id"])
                 continue
-            res = model_gateway_embed(slot, [r["text"]])            # MODEL_GATEWAY 已校验单条返回==1、已归一化 embedding_model
+            res = model_gateway_embed(slot, [r["text"]])            # the gateway checked one vector came back and normalized the model name
             embs = res.get("embeddings") or []
-            if len(embs) != 1:                            # 双保险(MODEL_GATEWAY 已保证)
+            if len(embs) != 1:                            # checked again here
                 log_error("M1e", "单块嵌入返回数量异常", context={
                     "step": "embed/累积", "paper_id": str(paper_id), "chunk_id": r["chunk_id"],
                     "error": f"chunk {r['chunk_id']} 返回 {len(embs)} 条(期望 1);零写入。"})
                 raise VectorWriteVerifyError(f"[{r['chunk_id']}] 单块返回数量异常;零写入。")
-            v = embs[0]                                   # 畸形向量(空/None/非数值)校验(承对抗审查 #5)
+            v = embs[0]                                   # a malformed vector (empty, None, not numbers)
             if not (isinstance(v, (list, tuple)) and v
                     and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v)):
                 log_error("M1e", "嵌入向量畸形,挡下", context={
@@ -420,16 +432,16 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
             if res.get("embedding_model") == CANON_EMBED_MODEL:
                 node_units.complete(r["chunk_id"])
 
-    if len(vectors) != len(recs):                     # 总数校验(纵深)
+    if len(vectors) != len(recs):                     # the total count
         raise VectorWriteVerifyError(f"[{paper_id}] 累积向量数 {len(vectors)} ≠ chunk 数 {len(recs)};零写入。")
-    if models_seen != {CANON_EMBED_MODEL}:            # 归一化后必须全 bge-m3
+    if models_seen != {CANON_EMBED_MODEL}:            # all bge-m3 after normalization
         log_error("M1e", "嵌入模型归一化后非预期", context={
             "step": "embed/一致性", "paper_id": str(paper_id),
             "error": f"本批 embedding_model={sorted(models_seen)}(期望 [{CANON_EMBED_MODEL}]);零写入。"})
         raise VectorModelConflictError(f"[{paper_id}] 本批模型 {sorted(models_seen)} ≠ {CANON_EMBED_MODEL};零写入。")
     provider_model_id = "|".join(sorted(x for x in provider_ids if x)) or CANON_EMBED_MODEL
 
-    documents = [r["text"] for r in recs]             # documents=清洗后 chunk text(拍板①,库外)
+    documents = [r["text"] for r in recs]             # documents: the cleaned chunk texts (stored outside the library)
     metadatas = [
         _vector_metadata(
             r,

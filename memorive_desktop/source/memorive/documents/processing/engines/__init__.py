@@ -1,10 +1,9 @@
-"""Memorive DOCUMENT-PROCESSING/DOCUMENT_PROCESSING · DOCUMENT_PROCESSING 转换引擎注册表。
+"""The registry of conversion engines, in the style of the gateway's provider registry.
 
-采用 memorive/models/gateway/providers 风格的注册表分派。
-
-改 config.ENGINE 定位或 convert(engine=...) 即换引擎,业务代码不动(承 D3 配置驱动)。
-import 本包即触发各引擎 @register(引擎内部对 marker/pymupdf/markitdown 均为懒加载,
-未装也不影响 import——真用到未装引擎时才在 convert() 报友好错)。
+config.ENGINE or convert(engine=...) chooses the engine; the calling code does not change.
+Importing the package registers every engine (@register). Each engine loads marker, pymupdf or
+markitdown only when it runs, so a missing one does not break the import; convert() reports it
+when that engine is used.
 """
 from __future__ import annotations
 
@@ -30,5 +29,5 @@ def registered() -> list[str]:
     return sorted(_ENGINES)
 
 
-# 触发注册(顺序无关)
+# importing registers each engine (order does not matter)
 from memorive.documents.processing.engines import pymupdf_engine, markitdown_engine, passthrough_engine, marker_engine, model_gateway_ocr_engine  # noqa: E402,F401

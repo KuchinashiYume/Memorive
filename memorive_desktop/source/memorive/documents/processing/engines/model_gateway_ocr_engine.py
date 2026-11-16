@@ -1,8 +1,8 @@
-"""图片 / 扫描件 OCR —— 经 MODEL_GATEWAY 调用,**不直连任何模型 SDK**。
+"""OCR of pictures and scans through the model gateway, never a model SDK directly.
 
-⚠ ocr 槽 + 视觉/OCR adapter 未建(拍板 2 推迟);config.OCR_VIA_MODEL_GATEWAY_READY=False 时,
-由 document_convert_convert 的安全阀①在进入本引擎前就挡下,绝不静默降级到
-pytesseract / marker 内部 OCR / 任何直连模型 SDK。建好 ocr 槽后置 True 并补全本引擎。
+While config.OCR_VIA_MODEL_GATEWAY_READY is False, document_convert_convert.py stops such files
+before they reach this engine, and nothing falls back to pytesseract, marker's own OCR or a model
+SDK. The flag is set when the OCR slot is ready.
 """
 from __future__ import annotations
 

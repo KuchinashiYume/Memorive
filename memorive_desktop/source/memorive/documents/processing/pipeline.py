@@ -1,12 +1,12 @@
-"""DOCUMENT_PROCESSING 流水线编排：把既有五段串起来，不改各段内部逻辑。
+"""The document pipeline: the five steps in order, each unchanged.
 
-两个入口，工作流执行器都在用：
-  - `run_document_processing(...)`  ingest→convert→clean→chunk，停在落盘的 Chunks 文件。
-  - `embed_from_chunks(...)`         对已落盘的 Chunks 文件做 DocumentEmbed。
+Two entry points, both used by the workflow executor:
+  - run_document_processing(...): ingest, convert, clean, chunk; stops at the written Chunks file.
+  - embed_from_chunks(...): embedding of a written Chunks file.
 
-约定：
-  - 重跑不覆盖：DocumentEmbed 遇到已存在的 chunk_id 时用 `VectorDuplicateError` 挡下，只增不改。
-  - 受控的 `DocumentProcessingError` / `GatewayError` 记为 `status="failed"` 的结果返回；其他异常照常抛出。
+A rerun never overwrites: embedding refuses a chunk_id already stored (VectorDuplicateError).
+DocumentProcessingError and GatewayError become a result with status="failed"; other exceptions
+are raised.
 """
 from __future__ import annotations
 
@@ -29,12 +29,12 @@ from memorive.documents.processing.document_embed_embed import embed
 from memorive.documents.processing.errors import VectorDuplicateError
 import uuid
 
-_MODULE = "DOCUMENT_PROCESSING"   # 编排层 RUNTIME_LOG 分区键(各段用 DocumentIngest…DocumentEmbed)
+_MODULE = "DOCUMENT_PROCESSING"   # the pipeline's log module (the steps log as DocumentIngest ... DocumentEmbed)
 
 
 @dataclass
 class PipelineResult:
-    """流水线终态：completed / note_review_pending / partial_recovery_pending / failed。"""
+    """How the pipeline ended: completed, note_review_pending, partial_recovery_pending or failed."""
     status: str
     paper_id: str | None = None
     doc_type: str | None = None
@@ -49,7 +49,7 @@ class PipelineResult:
     error_message: str | None = None
 
 
-# ── 编排层小工具(不改 DocumentIngest–DocumentEmbed;开 collection 复用公共 config,与 DocumentEmbed 同一路径源)──
+# ── helpers (the collection is opened through the same config as embedding) ──
 def _open_collection(target: str):
     import chromadb
     cdir = chroma_dir(target)
@@ -58,17 +58,17 @@ def _open_collection(target: str):
 
 
 def _backup_dir(target: str) -> Path:
-    """re_embed 快照落盘目录:与向量库同根旁置(sandbox→{OPS_ROOT}/chroma-backup)。
-    ⚠ 属**运维区(OPS_ROOT)、库外、不入 git**(已核实:该路径 git check-ignore=outside repository;
-    运维/chroma 完全不在 git,承 D0)——快照含 documents(原文 chunk 文本),他人托付原文仅落本地运维、绝不上云。
-    随 chroma_dir 的 env 覆盖而移(测试自隔离)。"""
+    """The folder for re_embed snapshots, next to the vector store ({OPS_ROOT}/chroma-backup for the
+    sandbox): in the ops area, outside the library and outside git. A snapshot holds the chunk texts,
+    so entrusted text stays on this computer. It moves with chroma_dir's environment variable."""
     return chroma_dir(target).parent / "chroma-backup"
 
 
 def _read_frontmatter(rawmd_path) -> dict:
-    """读并**受控校验** RawMD frontmatter(resume/re_embed 共享;不依赖内存对象)。
-    不存在 / 非法 / 关键字段缺失或非 str → 抛受控 `DocumentProcessingError`。★杜绝 paper_id=None 走到
-    `col.delete(where={"paper_id": None})`(Chroma 里 None 可能匹配全部 → 删光整库)。"""
+    """Read and check the RawMD front matter (for resume and re_embed; from the file, not from memory).
+    A missing or invalid file, or a key field that is missing or not a string, raises
+    DocumentProcessingError. This keeps paper_id=None away from col.delete(where={"paper_id": None}),
+    which Chroma might apply to everything."""
     p = Path(rawmd_path)
     if not p.exists():
         log_error(_MODULE, "RawMD 不存在", context={
@@ -109,7 +109,7 @@ def _read_frontmatter(rawmd_path) -> dict:
 
 
 def _failed(stage, paper_id, doc_type, target, exc, *, extra_hint="", **paths) -> PipelineResult:
-    """受控错误 → 统一 failed 结果 + RUNTIME_LOG pipeline_failed(该段自身已写 detail;此处记编排级归位)。"""
+    """A known error as a failed result, with a pipeline_failed log entry (the step logged its own details)."""
     msg = str(exc) + extra_hint
     log_error(_MODULE, f"pipeline_failed@{stage}", context={
         "step": f"pipeline/{stage}", "error": f"{type(exc).__name__}: {exc}",
@@ -119,7 +119,8 @@ def _failed(stage, paper_id, doc_type, target, exc, *, extra_hint="", **paths) -
 
 
 def _run_tail(rawmd_path, target, paper_id, doc_type, *, finished_event="pipeline_finished") -> PipelineResult:
-    """DocumentClean→DocumentEmbed(clean→chunk→embed);逐段跟踪 stopped_at;受控错误→failed(去重错补重嵌提示)。"""
+    """Clean, chunk and embed, tracking stopped_at; a known error gives a failed result (a duplicate
+    points to the re-embed entry)."""
     cleanp = chunksp = None
     stage = "M1c"
     try:
@@ -130,7 +131,7 @@ def _run_tail(rawmd_path, target, paper_id, doc_type, *, finished_event="pipelin
         summary = embed(chunksp, target=target)
     except (DocumentProcessingError, GatewayError) as exc:
         hint = ""
-        if isinstance(exc, VectorDuplicateError):    # 去重挡下 → 指路唯一重嵌入口(不在正线/resume 清库)
+        if isinstance(exc, VectorDuplicateError):    # a duplicate: point to re_embed; the normal path never deletes
             hint = " 若要改后重嵌,请走 re_embed_from_rawmd(rawmd_path, target=...)(唯一允许清旧向量的入口)。"
         return _failed(stage, paper_id, doc_type, target, exc, extra_hint=hint,
                        rawmd_path=str(rawmd_path),
@@ -307,7 +308,7 @@ def run_pipeline(source, *, data_ownership: str, doc_type: str = "literature",
                  paper_id: str, title: str, target: str = "sandbox",
                  skip_note_review: bool = False,
                  ocr_pages: list[int] | None = None) -> PipelineResult:
-    """正线:一键跑五段。笔记(doc_type=note)在 DocumentConvert 后暂停等人核(除非 skip_note_review)。"""
+    """All five steps. A note (doc_type=note) pauses after conversion for a person to check, unless skip_note_review."""
     log(_MODULE, "pipeline_start", data={
         "paper_id": paper_id, "doc_type": doc_type, "target": target,
         "source": str(source), "skip_note_review": skip_note_review,
@@ -348,13 +349,13 @@ def run_pipeline(source, *, data_ownership: str, doc_type: str = "literature",
             resume_hint=hint,
         )
 
-    if doc_type == "note" and not skip_note_review:                 # ■ 笔记闸门:暂停(正常返回)
+    if doc_type == "note" and not skip_note_review:                 # a note: pause (a normal return)
         hint = f"人核 RawMD 转录/格式后,调 resume_after_note_review(r'{rawmd}', target='{target}')"
         log(_MODULE, "note_review_pending", data={
             "paper_id": paper_id, "rawmd_path": rawmd, "stopped_at": "after_document_convert"})
         return PipelineResult(status="note_review_pending", paper_id=paper_id, doc_type=doc_type,
                               target=target, rawmd_path=rawmd, stopped_at="after_document_convert", resume_hint=hint)
-    if doc_type == "note" and skip_note_review:                     # 跳过也留痕、不静默
+    if doc_type == "note" and skip_note_review:                     # skipping is recorded too
         log(_MODULE, "note_review_skipped", data={
             "paper_id": paper_id, "rawmd_path": rawmd,
             "note": "doc_type=note 但闸门被显式跳过(skip_note_review=True)"})
@@ -363,7 +364,7 @@ def run_pipeline(source, *, data_ownership: str, doc_type: str = "literature",
 
 
 def resume_after_note_review(rawmd_path, *, target: str = "sandbox") -> PipelineResult:
-    """人核 RawMD 后续跑 DocumentClean→DocumentEmbed;元数据全从 frontmatter 读(受控校验;不依赖内存 ConvertResult)。"""
+    """After a person checked the RawMD: clean, chunk, embed. The metadata is read from the front matter."""
     try:
         fm = _read_frontmatter(rawmd_path)
     except DocumentProcessingError as exc:
@@ -375,16 +376,18 @@ def resume_after_note_review(rawmd_path, *, target: str = "sandbox") -> Pipeline
 
 
 def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResult:
-    """★显式重嵌(唯一清库入口):落盘快照 + 先清净再恢复。embed 失败 / purge 未清净 → 旧向量按快照恢复到重嵌前(守「数据永不误删」)。
-    ★合法 paper_id(经 _read_frontmatter 受控校验)之后才开 collection,杜绝 paper_id=None 走到 col.delete/get where。
-    ⚠ 并发:承 DocumentEmbed「单写者假设」——勿对同一 paper_id 并发 re_embed / run_pipeline;将来多进程需在此加锁(当前不实现、留排查锚点)。"""
+    """Re-embed one paper, the only way vectors are deleted: write a snapshot, delete, embed again; if
+    the embedding fails or the delete leaves vectors behind, the snapshot restores the state before.
+    The collection is opened only after paper_id has been checked (_read_frontmatter), so paper_id=None
+    never reaches col.delete or get. Embedding assumes one writer: do not re-embed or run the pipeline
+    for the same paper_id at the same time; several processes would need a lock here."""
     try:
         fm = _read_frontmatter(rawmd_path)
     except DocumentProcessingError as exc:
         return _failed("读 RawMD frontmatter", None, None, target, exc, rawmd_path=str(rawmd_path))
     paper_id, doc_type = fm["paper_id"], fm["doc_type"]
 
-    # 1) 先 clean→chunk:确认新产物能出(产不出就早失败,此刻还没碰旧向量)
+    # 1) Clean and chunk first: if that fails, it fails before the old vectors are touched.
     stage = "DocumentClean(重嵌前置)"
     try:
         cleanp = clean(rawmd_path, target=target)
@@ -396,11 +399,12 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
     col = _open_collection(target)
     run_id = uuid.uuid4().hex
 
-    # 2) 取旧向量快照(含 embeddings/metadatas/documents)
+    # 2) Take the snapshot of the old vectors (embeddings, metadatas, documents).
     snap = col.get(where={"paper_id": paper_id}, include=["embeddings", "metadatas", "documents"])
     old_ids = list(snap.get("ids") or [])
     old_count = len(old_ids)
-    # ⚠ chromadb 的 embeddings 返回 numpy 数组:不能 `or []`(布尔歧义崩)、须显式转 Python float(否则 json.dump 崩 numpy.float32)
+    # chromadb returns numpy arrays: no `or []` (ambiguous truth value), and convert to Python floats
+    # (json.dump cannot write numpy.float32).
     raw_emb = snap.get("embeddings")
     emb_list = [] if raw_emb is None else [[float(x) for x in e] for e in raw_emb]
     snap_obj = {"paper_id": paper_id, "run_id": run_id, "collection": COLLECTION[target], "ids": old_ids,
@@ -408,7 +412,7 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
                 "metadatas": list(snap.get("metadatas") or []),
                 "documents": list(snap.get("documents") or [])}
 
-    # 3) ★快照落盘(非纯内存:进程崩了也能手工恢复)+ RUNTIME_LOG re_embed_purge_planned
+    # 3) Write the snapshot to disk, so a crash can still be recovered by hand; log re_embed_purge_planned.
     bdir = _backup_dir(target)
     bdir.mkdir(parents=True, exist_ok=True)
     snap_path = bdir / f"{paper_id}_{run_id}.json"
@@ -417,7 +421,8 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
         "paper_id": paper_id, "old_count": old_count, "snapshot_path": str(snap_path),
         "collection": COLLECTION[target], "trigger": "re_embed_from_rawmd", "basis": "显式重嵌(人触发)"})
 
-    # 4) 清旧 + ★清净验证(delete 未清净就 embed 会撞已存在 id 静默忽略 → 混合态);deleted_count 记实际值
+    # 4) Delete the old vectors and confirm none are left (embedding over a leftover id would be
+    #    ignored silently and mix old and new); deleted_count records the real number.
     if old_count:
         col.delete(where={"paper_id": paper_id})
     remaining_after = len(col.get(where={"paper_id": paper_id}).get("ids") or [])
@@ -426,7 +431,7 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
         "paper_id": paper_id, "old_count": old_count, "remaining_after_delete": remaining_after,
         "deleted_count": deleted, "collection": COLLECTION[target],
         "trigger": "re_embed_from_rawmd", "basis": "显式重嵌(人触发)"})
-    if remaining_after:                       # 未清净 → 代码无法自证旧向量完好,**不谎报**;转从快照恢复到重嵌前(不 embed)
+    if remaining_after:                       # vectors left behind: restore from the snapshot instead of embedding
         log_error(_MODULE, "re_embed_purge_not_clean", context={
             "step": "re_embed_from_rawmd/purge", "paper_id": str(paper_id),
             "error": (f"delete 后仍剩 {remaining_after} 条(应 0);无法自证旧向量完好,"
@@ -435,7 +440,7 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
             col, paper_id, doc_type, target, snap_obj, snap_path, rawmd_path, cleanp, chunksp,
             reason="purge 未清净", cause_detail=f"delete 后仍剩 {remaining_after} 条(应 0)", error_type="DocumentProcessingError")
 
-    # 5) 写新向量
+    # 5) Write the new vectors.
     try:
         summary = embed(chunksp, target=target)
     except (DocumentProcessingError, GatewayError) as exc:
@@ -443,7 +448,7 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
             col, paper_id, doc_type, target, snap_obj, snap_path, rawmd_path, cleanp, chunksp,
             reason="新嵌入失败", cause_detail=f"{type(exc).__name__}: {exc}", error_type=type(exc).__name__)
 
-    # 6) 成功 → 删快照(chroma-backup 平时保持空)
+    # 6) Success: delete the snapshot (chroma-backup is normally empty).
     snap_path.unlink(missing_ok=True)
     log(_MODULE, "pipeline_finished", data={
         "paper_id": paper_id, "target": target, "backend": summary.get("backend"),
@@ -455,23 +460,26 @@ def re_embed_from_rawmd(rawmd_path, *, target: str = "sandbox") -> PipelineResul
 
 def _restore_from_snapshot(col, paper_id, doc_type, target, snap_obj, snap_path, rawmd_path, cleanp, chunksp,
                            *, reason, cause_detail, error_type) -> PipelineResult:
-    """重嵌中止(embed 失败 / purge 未清净)→ 用落盘快照把旧向量恢复到**重嵌前**:先清净→确认空→**全清全补** add→验条数;
-    绝不重调 MODEL_GATEWAY。恢复成功=`re_embed_restore`;失败=`re_embed_restore_failed`(保留快照指路人工)。
-    文案中性、只说代码能自证的话(不谎报"未受影响")。全清全补是幂等确定的,比"补回 missing"更强(不需信任残留那几条)。"""
+    """After a failed re-embed, restore the old vectors from the snapshot: delete what is there, confirm
+    it is empty, add everything back, check the count. The gateway is never called. Success logs
+    re_embed_restore; failure logs re_embed_restore_failed and keeps the snapshot for a person. The
+    messages say only what the code can confirm. Restoring everything is repeatable and does not rely
+    on whatever was left behind."""
     old_ids = snap_obj["ids"]
     try:
-        # ★先清净 + 确认空:中止时库里可能残留(embed 已写部分新 chunk_id / purge 没删净);不清净就 add 会撞已存在 id 被静默忽略 → 混合态
+        # Delete and confirm empty first: after an abort, new chunk ids or undeleted old ones may be
+        # there, and adding over them would be ignored silently and mix old and new.
         col.delete(where={"paper_id": paper_id})
         pre = len(col.get(where={"paper_id": paper_id}).get("ids") or [])
-        if pre:                                      # 清净未成功 → 不 add(否则混合态),转恢复失败分支
+        if pre:                                      # not empty: do not add; report the restore as failed
             raise RuntimeError(f"清净失败:delete 后仍剩 {pre} 条")
-        if old_ids:                                  # old_count>0 才恢复;=0 时清净后即回到重嵌前(该篇无向量)
+        if old_ids:                                  # nothing to add back when the paper had no vectors
             col.add(ids=old_ids, embeddings=snap_obj["embeddings"],
-                    metadatas=snap_obj["metadatas"], documents=snap_obj["documents"])   # 旧向量原样,不调 MODEL_GATEWAY
+                    metadatas=snap_obj["metadatas"], documents=snap_obj["documents"])   # the old vectors as they were; no model call
         restored = len(col.get(where={"paper_id": paper_id}).get("ids") or [])
         if restored != len(old_ids):
             raise RuntimeError(f"恢复条数不符:期望 {len(old_ids)}、实得 {restored}")
-    except Exception as rexc:                         # 恢复失败 → 保留快照、明确指路人工恢复
+    except Exception as rexc:                         # restore failed: keep the snapshot and say how to restore by hand
         log_error(_MODULE, "re_embed_restore_failed", context={
             "step": "re_embed_from_rawmd/restore", "paper_id": str(paper_id),
             "error": (f"重嵌中止({reason})后旧向量恢复失败,快照(含原文 chunk 文本、属运维区本地文件)保留在 {snap_path},"
@@ -481,7 +489,7 @@ def _restore_from_snapshot(col, paper_id, doc_type, target, snap_obj, snap_path,
                               stopped_at=f"重嵌中止({reason});restore 失败", error_type=error_type,
                               error_message=(f"重嵌中止({reason}:{cause_detail})且旧向量恢复失败;"
                                              f"快照(含原文)在 {snap_path},请人工恢复。"))
-    # 恢复成功 → 删快照
+    # Restored: delete the snapshot.
     snap_path.unlink(missing_ok=True)
     log(_MODULE, "re_embed_restore", data={
         "paper_id": paper_id, "restored_count": len(old_ids), "collection": COLLECTION[target], "reason": reason,

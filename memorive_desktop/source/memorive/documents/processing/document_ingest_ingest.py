@@ -1,9 +1,9 @@
-"""DocumentIngest 导入 —— 传送带第一节。
+"""Ingest, the first step of the pipeline.
 
-接收一个原始文件(PDF/图片/笔记/已有 MD),记录来源、导入时间、**数据归属标记**、
-文档类型、原始格式,输出 RawObject + 元数据。归属标记是红线(承第 0 步硬约束①):
-未声明不放行;它经 RawObject 一路传给 DocumentConvert→DocumentClean→DocumentChunk→DocumentEmbed。
-守边界:DocumentIngest 只登记、不转换。
+Takes a source file (PDF, picture, note, Markdown), records its source, the time, its data
+ownership, its document type and format, and returns a RawObject with the metadata. A file without
+a declared data ownership is refused; the ownership travels with the RawObject through conversion,
+cleaning, chunking and embedding. Ingest only records; it converts nothing.
 """
 from __future__ import annotations
 
@@ -49,16 +49,16 @@ def _infer_format(p: Path) -> str:
 
 
 def ingest(source_path, *, data_ownership: str, doc_type: str = "literature") -> RawObject:
-    """导入一个原始文件。data_ownership 必填('self'|'entrusted')。"""
+    """Ingest one source file. data_ownership is required ('self' or 'entrusted')."""
     p = Path(source_path)
 
-    # 补充要求①:源文件必须存在,否则写 RUNTIME_LOG detail + 抛受控错。
+    # The source file must exist; otherwise log it at detail level and raise.
     if not p.exists() or not p.is_file():
         log_error("M1a", "源文件不存在", context={
             "step": "ingest", "error": f"源文件不存在或非文件: {p}", "source": str(p)})
         raise DocumentProcessingError(f"源文件不存在或非文件: {p}")
 
-    # 归属红线:未声明 / 非法值不放行。
+    # A missing or invalid data ownership is refused.
     if data_ownership not in ("self", "entrusted"):
         log_error("M1a", "数据归属未声明", context={
             "step": "ingest", "error": f"data_ownership 非法: {data_ownership!r}",

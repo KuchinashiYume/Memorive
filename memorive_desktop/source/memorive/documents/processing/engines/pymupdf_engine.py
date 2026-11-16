@@ -1,8 +1,8 @@
-"""⚠ 轻量沙盒引擎、非正式主力(承拍板 1)。
+"""The light engine for digital PDFs in the sandbox, not the main one.
 
-pymupdf4llm:纯 wheel、无 torch、快;仅用于**沙盒数字版 PDF** 的快速跑通。
-正式主力是 marker(见 config.PDF_PRIMARY);复杂表格 / 多栏 / 扫描件的保真留给 marker,
-别拿本引擎的产出去评切块阶段的表格保真。
+pymupdf4llm: a plain wheel, no torch, fast. The main engine is marker (config.PDF_PRIMARY); complex
+tables, columns and scans are marker's, so this engine's output is no measure of table fidelity in
+chunking.
 """
 from __future__ import annotations
 
@@ -39,12 +39,13 @@ class PymupdfLightEngine(ConvertEngine):
             return self._convert(raw, text_document, font_recovery)
 
     def _convert(self, raw, text_document, font_recovery):
-        import pymupdf4llm                   # 懒加载
+        import pymupdf4llm                   # loaded when used
         # Keep the accepted lightweight conversion independent of optional Layout availability.
         pymupdf4llm.use_layout(False)
-        # page_chunks=True 逐页转,拿权威页号;页间插机器可解析页标记 <!-- memorive:page:N -->
-        # (N=物理页序 1..)。**跨页表的识别/合并/pagespan 不在此做**——留到 DocumentClean 删完页眉页脚后、
-        # DocumentChunk 切块时按「表身份连续性」判(那时两半表间只剩纯页标记,才判得准;承第2步护栏三)。
+        # page_chunks=True converts page by page with the real page numbers; a marker
+        # <!-- memorive:page:N --> (N the physical page, from 1) goes between pages. Tables across
+        # pages are joined later, in chunking, after cleaning has removed headers and footers, when
+        # only the page marker sits between the two halves.
         # Select the audited Layout baseline before recovery. The public wrapper
         # has process-global state, so call parse_document explicitly below.
         from memorive.documents.processing.engines.legacy_cfont import _build_font_maps, LegacyCFontRecoveryError
@@ -109,8 +110,9 @@ class PymupdfLightEngine(ConvertEngine):
         if font_recovery:
             warnings.append('已按内嵌字体哈希及原始字形恢复字符编码；保留原生文字，不修改源 PDF')
 
-        # 先按字体程序 SHA / raw code / glyph id / 坐标恢复已审计科学符号。
-        # 不根据正文字符或语言猜测；部分可恢复、未知 glyph、结构变化均拒绝。
+        # First restore audited scientific symbols by font program SHA, raw code, glyph id and position.
+        # Nothing is guessed from the text or its language; a partial restore, an unknown glyph or a
+        # changed structure is refused.
         if "\ufffd" in md:
             try:
                 symbols = recover_legacy_symbol_layout_pdf(
@@ -150,8 +152,8 @@ class PymupdfLightEngine(ConvertEngine):
                     f"sha256={symbols.content_sha256}"
                 )
 
-        # 若仍有 U+FFFD，再尝试既有受限 legacy C-font 恢复。
-        # 不适用/拒绝时保留原文，交 DocumentConvert 安全阀③ fail-closed，绝不静默放行。
+        # If U+FFFD is still there, try the restricted legacy C-font restore. When it does not apply
+        # or refuses, the text stays as it is and conversion's check stops it.
         if "\ufffd" in md:
             try:
                 recovered = recover_legacy_cfont_layout_pdf(
@@ -186,8 +188,9 @@ class PymupdfLightEngine(ConvertEngine):
                         f"context_hints={recovered.context_hints},"
                         f"sha256={recovered.content_sha256}")
 
-        # 不根据正文字符猜测：只读核验 PDF 内嵌字体程序。六个程序哈希
-        # 全部匹配后才按 glyph id / 坐标桥接回 Layout Markdown；未知项拒绝。
+        # Nothing is guessed from the text: the PDF's embedded font programs are checked, and only when
+        # all six program hashes match are glyph ids and positions mapped back into the Layout
+        # Markdown; anything unknown is refused.
         try:
             ymath = recover_legacy_ymath_layout_pdf(
                 raw.path,
