@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from memorive_inbox.service_adapter import INBOX_METHODS, InboxServiceAdapter
+from memorive.documents.inbox.service_adapter import INBOX_METHODS, InboxServiceAdapter
 from memorive_settings.service_adapter import SETTINGS_METHODS, SettingsServiceAdapter
 
 from .adapters import RealFacadeAdapter

@@ -5,7 +5,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Sequence
 
-from artifact_registry import new_artifact_id
+from memorive.documents.registry import new_artifact_id
 
 from retrieval.coverage_artifacts import (
     ArtifactPointer,

@@ -5,7 +5,7 @@ equal this set exactly. A release-time renaming once turned AdvPSMSAM10 into
 AdvPSMSAKNOWLEDGE_FEEDBACK, and recovery failed for every such PDF from v1.01 until the fix.
 The names below are the ones in the original development source.
 """
-from document_processing.engines import legacy_cfont
+from memorive.documents.processing.engines import legacy_cfont
 
 REAL_FONT_NAMES = {
     "AdvP4C4E51", "AdvP4C4E74", "AdvPSMP1", "AdvPSMP10", "AdvPSMPi6", "AdvPSMSAM10",

@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from artifact_registry.errors import ContractValidationError
-from artifact_registry.analysis_materialization import ArtifactFactory
-from artifact_registry.analysis_products import (
+from memorive.documents.registry.errors import ContractValidationError
+from memorive.documents.registry.analysis_materialization import ArtifactFactory
+from memorive.documents.registry.analysis_products import (
     ArtifactProduct,
     artifact_ref,
     stable_identifier,

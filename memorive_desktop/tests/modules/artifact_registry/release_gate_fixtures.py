@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from artifact_registry.errors import ContractValidationError
-from artifact_registry.analysis_materialization import ArtifactFactory
+from memorive.documents.registry.errors import ContractValidationError
+from memorive.documents.registry.analysis_materialization import ArtifactFactory
 
 
 @dataclass(frozen=True)

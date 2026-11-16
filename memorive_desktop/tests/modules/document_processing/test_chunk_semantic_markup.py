@@ -9,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from document_processing import document_chunk_chunk  # noqa: E402
+from memorive.documents.processing import document_chunk_chunk  # noqa: E402
 
 
 YANG_FRAGMENT = (

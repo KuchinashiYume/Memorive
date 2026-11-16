@@ -17,7 +17,7 @@ PATH_ENV_NAMES = (
 )
 PROBE = (
     "import json; "
-    "from document_processing.config import CHROMA_ROOT, chroma_dir; "
+    "from memorive.documents.processing.config import CHROMA_ROOT, chroma_dir; "
     "print(json.dumps({'root': str(CHROMA_ROOT), "
     "'sandbox': str(chroma_dir('sandbox')), "
     "'vault': str(chroma_dir('vault'))}))"

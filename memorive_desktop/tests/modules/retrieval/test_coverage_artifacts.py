@@ -7,7 +7,7 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
-from artifact_registry import build_envelope, canonical_json, parent_link
+from memorive.documents.registry import build_envelope, canonical_json, parent_link
 from retrieval.coverage_artifacts import ArtifactPointer, ChunkSnapshot, FacetCoverageInput, FacetSpec, FrozenArtifactRecord, MemberRole, EvidenceArtifactValidationError, derive_facet_coverage_inputs, validate_verification_payload
 from retrieval.coverage_artifacts import admit_chunk_snapshots, build_facet_definition_artifact, build_logical_span_artifact, build_references_bias_policy, build_retrieval_coverage_assessment, build_source_role_assessment, build_source_role_policy, build_span_assembly_policy, validate_artifact_graph, validate_holdout_public_manifest
 from retrieval.types import LogicalSpan

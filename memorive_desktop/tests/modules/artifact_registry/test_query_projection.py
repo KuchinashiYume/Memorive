@@ -7,12 +7,12 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from artifact_registry.migration import registry_baseline
-from artifact_registry.migration_contracts import sha256_bytes
-from artifact_registry.query_projection import ProjectionCorruptError, ProjectionError, ProjectionStaleError, QueryProjectionBuilder, RegistryQueryService, projection_source_fingerprint, query_result_digest
-from artifact_registry.registry_v2 import ArtifactRegistry
-from artifact_registry.schema_v2 import parent_link
-from artifact_registry.schema_v2 import unresolved_requirement
+from memorive.documents.registry.migration import registry_baseline
+from memorive.documents.registry.migration_contracts import sha256_bytes
+from memorive.documents.registry.query_projection import ProjectionCorruptError, ProjectionError, ProjectionStaleError, QueryProjectionBuilder, RegistryQueryService, projection_source_fingerprint, query_result_digest
+from memorive.documents.registry.registry_v2 import ArtifactRegistry
+from memorive.documents.registry.schema_v2 import parent_link
+from memorive.documents.registry.schema_v2 import unresolved_requirement
 from tests.modules.artifact_registry.test_migration import FIXED_TIME, T10TestCase
 
 
@@ -164,7 +164,7 @@ class ProjectionBuildTests(ProjectionTestCase):
     def test_projection_schema_accepts_build_receipt(self) -> None:
         _items, receipt = self.build()
         schema = json.loads(
-            ((Path(__file__).resolve().parents[3] / "source" / "artifact_registry") / "schemas" / "asset_migration_query_projection_v1.schema.json").read_text(encoding="utf-8")
+            ((Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "registry") / "schemas" / "asset_migration_query_projection_v1.schema.json").read_text(encoding="utf-8")
         )
         Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
 
@@ -236,7 +236,7 @@ class ProjectionQueryTests(ProjectionTestCase):
         self.build()
         result = self.service().find_artifacts({"artifact_type": "card"})
         schema = json.loads(
-            ((Path(__file__).resolve().parents[3] / "source" / "artifact_registry") / "schemas" / "asset_migration_query_result_v1.schema.json").read_text(encoding="utf-8")
+            ((Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "registry") / "schemas" / "asset_migration_query_result_v1.schema.json").read_text(encoding="utf-8")
         )
         Draft202012Validator(schema, format_checker=FormatChecker()).validate(result)
         self.assertEqual(result["result_digest"], query_result_digest(result))

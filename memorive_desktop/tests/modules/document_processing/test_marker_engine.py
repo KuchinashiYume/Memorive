@@ -7,9 +7,9 @@ import types
 import unittest
 from unittest.mock import patch
 
-from document_processing.engines.marker_engine import MarkerEngine
-from document_processing.errors import EngineNotAvailable
-from document_processing.types import IngestMeta, RawObject
+from memorive.documents.processing.engines.marker_engine import MarkerEngine
+from memorive.documents.processing.errors import EngineNotAvailable
+from memorive.documents.processing.types import IngestMeta, RawObject
 
 
 def _raw(path: Path) -> RawObject:

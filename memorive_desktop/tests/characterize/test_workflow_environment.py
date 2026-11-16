@@ -3,13 +3,13 @@
 Pins today's behaviour of CorePipelineExecutor._bind_environment before the planned
 change (it refuses to run when one of its environment variables is already set to a
 different value). Paths are shown relative to the runtime folder; os.environ and the
-document_processing.config roots are restored after each case.
+memorive.documents.processing.config roots are restored after each case.
 """
 import os
 from pathlib import Path
 from types import SimpleNamespace
 
-from document_processing import config as processing_config
+from memorive.documents.processing import config as processing_config
 from memorive_workflow.executor import CorePipelineExecutor
 from tests.characterize.golden import check
 

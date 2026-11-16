@@ -357,7 +357,7 @@ def build_core_execution_snapshot(
         "external_model_calls": 0,
     }
     if document_structure_config is not None:
-        from document_processing.document_structure.bundle import normalize_config
+        from memorive.documents.processing.document_structure.bundle import normalize_config
         payload["workflow_config"]["document_structure"] = normalize_config(deepcopy(dict(document_structure_config)))
     payload["snapshot_sha256"] = canonical_sha256(payload)
     return payload

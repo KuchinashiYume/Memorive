@@ -12,8 +12,8 @@ import json
 import pymupdf
 import pytest
 
-from document_processing.document_conversion.models import DocumentConversionError
-from document_processing.document_structure.service import verify_bundle, write_structure
+from memorive.documents.processing.document_conversion.models import DocumentConversionError
+from memorive.documents.processing.document_structure.service import verify_bundle, write_structure
 
 
 @pytest.fixture

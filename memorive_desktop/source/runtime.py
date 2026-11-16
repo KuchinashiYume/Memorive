@@ -856,12 +856,12 @@ class ProductApi:
                 include_synthetic_projection=test_fixture_mode,
                 core_job_provider=lambda: self._current_task.core_job_rows(include_history=True),
             )
-            from memorive_library.core_products import CoreProducts
+            from memorive.documents.library.core_products import CoreProducts
             self._core_products = CoreProducts(
                 service=self._service, profile_path=self._profile_path, state_dir=self._state_dir,
                 write_json_file=self._write_json_file, is_reparse_point=self._is_reparse_point,
             )
-            library_module = importlib.import_module("memorive_library.product_controller")
+            library_module = importlib.import_module("memorive.documents.library.product_controller")
             self._library = library_module.LibraryProductController(
                 self._service, self._control_store,
                 self._source_root.parent / "contracts" / "integration",

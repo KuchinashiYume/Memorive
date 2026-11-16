@@ -13,8 +13,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from test_cli_settings_usability import _controller, _configured_cli_services
 from test_research_discovery_feedback import api
-from memorive_library.paper_review import PaperReview
-from memorive_library.product_controller import LibraryProductController
+from memorive.documents.library.paper_review import PaperReview
+from memorive.documents.library.product_controller import LibraryProductController
 from memorive_research_runtime.periodic import windows
 from memorive_research_runtime.common import read
 

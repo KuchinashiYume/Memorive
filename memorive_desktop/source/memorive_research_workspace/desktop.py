@@ -15,7 +15,7 @@ def create(*, service, library, local_models, profile_root, workspace_root, desk
     """The desktop's research workspace, wired to the parts of the desktop it uses:
 
     service            the settings service client: settings, model profiles, model calls
-    library            the library controller (memorive_library): processed papers added to a project
+    library            the library controller (memorive/documents/library): processed papers added to a project
     local_models       the local model registry (memorive_local_models), or None
     profile_root       the user profile folder, recorded for the window-less process (headless_models.py)
     workspace_root     the folder of the workspace's own store

@@ -2,7 +2,7 @@
 
 The current registry appends only v2 objects, but it must keep reading files that earlier versions
 wrote: schema_v2.validate_readable_envelope and schema_v2.validate_event hand v1 objects to
-artifact_registry.schema. These tests build v1 objects with the v1 helpers, read them back through the
+memorive.documents.registry.schema. These tests build v1 objects with the v1 helpers, read them back through the
 current registry and the v2 entry points, and check that malformed v1 objects are refused.
 """
 from __future__ import annotations
@@ -12,9 +12,9 @@ import json
 
 import pytest
 
-from artifact_registry import ArtifactRegistry, CorruptRegistryError, EnvelopeValidationError
-from artifact_registry import schema as v1
-from artifact_registry.schema_v2 import validate_event, validate_readable_envelope
+from memorive.documents.registry import ArtifactRegistry, CorruptRegistryError, EnvelopeValidationError
+from memorive.documents.registry import schema as v1
+from memorive.documents.registry.schema_v2 import validate_event, validate_readable_envelope
 
 A, B, C = ("art_" + digit * 32 for digit in "123")
 AT = "2026-07-17T07:45:14+08:00"

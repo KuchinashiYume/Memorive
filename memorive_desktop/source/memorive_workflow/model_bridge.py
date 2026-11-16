@@ -843,7 +843,7 @@ class CoreModelBridge:
             isinstance(page_number, bool) or not isinstance(page_number, int) or page_number < 1 or
             not isinstance(source_sha256, str) or not _SHA256.fullmatch(source_sha256.upper())):
             raise OcrResultInvalid('Core_PAGE_OCR_SOURCE_BINDING_INVALID')
-        from document_processing.ocr_page_rescue import _ocr_text_error
+        from memorive.documents.processing.ocr_page_rescue import _ocr_text_error
         node_id = '01_DOCUMENT_INGEST'
         configured = self.nodes.get(node_id)
         if not isinstance(configured, Mapping) or configured.get('enabled') is not True:

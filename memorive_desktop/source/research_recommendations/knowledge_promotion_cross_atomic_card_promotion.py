@@ -27,9 +27,9 @@ from memorive.platform.naming import display_title, file_name, folder_name
 from evidence_review.atomic_review import build_atomic_review_view, deterministic_precheck
 from knowledge_admission.card_io import read_data_id, read_status, write_status
 from knowledge_admission.states import is_legal
-from artifact_registry.analysis_materialization import SandboxBoundary
-from artifact_registry.registry_v2 import ArtifactRegistry
-from artifact_registry.schema_v2 import build_envelope
+from memorive.documents.registry.analysis_materialization import SandboxBoundary
+from memorive.documents.registry.registry_v2 import ArtifactRegistry
+from memorive.documents.registry.schema_v2 import build_envelope
 from research_recommendations.candidate_review_cross_candidate_card_staging import (
     CandidateCardStager,
     GuardDenied as RetrievalGuardDenied,

@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import pytest
 
-from artifact_registry import (ArtifactConflictError, ArtifactRegistry, EnvelopeValidationError, UnknownArtifactError,
+from memorive.documents.registry import (ArtifactConflictError, ArtifactRegistry, EnvelopeValidationError, UnknownArtifactError,
                                build_envelope, ledger_record_ref, new_artifact_id, parent_link, sha256_file)
-from artifact_registry.schema_v2 import unresolved_requirement, validate_envelope
+from memorive.documents.registry.schema_v2 import unresolved_requirement, validate_envelope
 
 AT = "2026-07-17T08:00:00+08:00"
 CONTRACT = "memorive://runtime_log/terminal-ledger/v2"

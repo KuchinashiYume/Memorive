@@ -11,7 +11,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from document_processing.engines import legacy_cfont, legacy_cfont_layout, legacy_symbol_layout, legacy_ymath
+from memorive.documents.processing.engines import legacy_cfont, legacy_cfont_layout, legacy_symbol_layout, legacy_ymath
 
 
 @pytest.mark.parametrize("module, error", [

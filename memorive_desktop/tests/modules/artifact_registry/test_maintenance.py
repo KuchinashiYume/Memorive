@@ -8,8 +8,8 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from artifact_registry.maintenance import RegistryMaintenanceService, human_summary, main
-from artifact_registry.migration import registry_baseline
+from memorive.documents.registry.maintenance import RegistryMaintenanceService, human_summary, main
+from memorive.documents.registry.migration import registry_baseline
 from tests.modules.artifact_registry.test_migration import T10TestCase
 
 
@@ -120,7 +120,7 @@ class MaintenanceTests(T10TestCase):
         self.assertIn("digest=", output.getvalue())
 
     def test_all_four_task_schemas_are_valid_draft_2020_12(self) -> None:
-        schema_root = (Path(__file__).resolve().parents[3] / "source" / "artifact_registry") / "schemas"
+        schema_root = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "registry") / "schemas"
         paths = sorted(schema_root.glob("asset_migration_*.schema.json"))
         self.assertEqual(len(paths), 4)
         for path in paths:
@@ -139,7 +139,7 @@ class MaintenanceTests(T10TestCase):
         self.assertTrue(all(not hasattr(service, name) for name in forbidden))
 
     def test_exact_product_surface_is_twelve_paths(self) -> None:
-        package = (Path(__file__).resolve().parents[3] / "source" / "artifact_registry")
+        package = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "registry")
         exact = {
             package / "migration_contracts.py",
             package / "migration.py",

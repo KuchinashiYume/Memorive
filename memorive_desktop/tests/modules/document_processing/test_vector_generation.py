@@ -15,7 +15,7 @@ sys.path.insert(0, str(REPO_ROOT))
 FIXED_TIME = "2026-08-14T14:00:00Z"
 FIXED_CLOCK = lambda: FIXED_TIME
 
-from document_processing.vector_generation import GenerationError, IsolatedChromaGeneration, assert_generation_compatible, validate_generation_contract
+from memorive.documents.processing.vector_generation import GenerationError, IsolatedChromaGeneration, assert_generation_compatible, validate_generation_contract
 from memorive.models.gateway.local_embedding import build_compatibility_manifest
 class FakeCollection:
     def __init__(self, name: str, metadata: dict):

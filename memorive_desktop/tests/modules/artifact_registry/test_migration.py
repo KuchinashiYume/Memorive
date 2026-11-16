@@ -9,12 +9,12 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from artifact_registry.errors import ConcurrentWriterError
-from artifact_registry.migration import MigrationDivergenceError, MigrationExecutor, MigrationPlanner, MigrationPreflightError, PlannedMigrationFault, registry_baseline
-from artifact_registry.migration_contracts import MigrationContractError, artifact_id_from_identity, inventory_digest, load_jsonl_receipts, sha256_bytes
-from artifact_registry.registry_v2 import ArtifactRegistry
-from artifact_registry.schema_v2 import build_envelope, parent_link
-from artifact_registry.schema_v2 import unresolved_requirement
+from memorive.documents.registry.errors import ConcurrentWriterError
+from memorive.documents.registry.migration import MigrationDivergenceError, MigrationExecutor, MigrationPlanner, MigrationPreflightError, PlannedMigrationFault, registry_baseline
+from memorive.documents.registry.migration_contracts import MigrationContractError, artifact_id_from_identity, inventory_digest, load_jsonl_receipts, sha256_bytes
+from memorive.documents.registry.registry_v2 import ArtifactRegistry
+from memorive.documents.registry.schema_v2 import build_envelope, parent_link
+from memorive.documents.registry.schema_v2 import unresolved_requirement
 FIXED_TIME = "2026-08-17T12:00:00+09:00"
 
 
@@ -428,7 +428,7 @@ class MigrationSchemaTests(T10TestCase):
         self.executor().apply_or_resume(
             batch, plan, target_registry_root=self.registry_root, receipt_path=self.receipt_path
         )
-        schema_root = (Path(__file__).resolve().parents[3] / "source" / "artifact_registry") / "schemas"
+        schema_root = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "registry") / "schemas"
         checker = FormatChecker()
         batch_schema = json.loads(
             (schema_root / "asset_migration_migration_batch_v1.schema.json").read_text(encoding="utf-8")
@@ -441,7 +441,7 @@ class MigrationSchemaTests(T10TestCase):
             Draft202012Validator(receipt_schema, format_checker=checker).validate(record)
 
     def test_schema_rejects_unknown_field_and_bad_hash(self) -> None:
-        schema_root = (Path(__file__).resolve().parents[3] / "source" / "artifact_registry") / "schemas"
+        schema_root = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "registry") / "schemas"
         schema = json.loads(
             (schema_root / "asset_migration_migration_batch_v1.schema.json").read_text(encoding="utf-8")
         )

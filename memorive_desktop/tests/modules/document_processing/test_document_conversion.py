@@ -9,15 +9,15 @@ from unittest import mock
 
 from jsonschema import Draft202012Validator
 
-from document_processing.config import engine_for
-from document_processing.errors import DocumentProcessingError
-from document_processing import document_chunk_chunk
-from document_processing.document_ingest_ingest import _infer_format
-from document_processing.document_conversion import CANONICAL_FORMATS, ConversionCandidate, DocumentConversionError, FormatVerdict, RecognitionStatus, SelectionStatus
-from document_processing.document_conversion import DocumentConversionFacade, compare_candidates, probe_document
-from document_processing.document_conversion.diagnostics import parse_source_marker
-from document_processing.document_conversion.diagnostics import make_source_marker
-from document_processing.document_conversion.models import ConversionAmendment, ConversionReceipt
+from memorive.documents.processing.config import engine_for
+from memorive.documents.processing.errors import DocumentProcessingError
+from memorive.documents.processing import document_chunk_chunk
+from memorive.documents.processing.document_ingest_ingest import _infer_format
+from memorive.documents.processing.document_conversion import CANONICAL_FORMATS, ConversionCandidate, DocumentConversionError, FormatVerdict, RecognitionStatus, SelectionStatus
+from memorive.documents.processing.document_conversion import DocumentConversionFacade, compare_candidates, probe_document
+from memorive.documents.processing.document_conversion.diagnostics import parse_source_marker
+from memorive.documents.processing.document_conversion.diagnostics import make_source_marker
+from memorive.documents.processing.document_conversion.models import ConversionAmendment, ConversionReceipt
 
 
 PNG_1X1 = (
@@ -106,7 +106,7 @@ class PersistentObjectTests(unittest.TestCase):
         self.assertNotEqual(amendment.old_output_sha256, amendment.new_output_sha256)
 
     def test_three_schemas_accept_minimal_objects(self):
-        schema_root = (Path(__file__).resolve().parents[3] / "source" / "document_processing") / "schemas"
+        schema_root = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "processing") / "schemas"
         receipt = ConversionReceipt.minimal_for_test(
             source_sha256="1" * 64,
             output_sha256="2" * 64,

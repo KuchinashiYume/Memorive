@@ -5,11 +5,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from artifact_registry.migration import PlannedMigrationFault, registry_baseline
-from artifact_registry.migration_contracts import artifact_id_from_identity, load_jsonl_receipts
-from artifact_registry.query_projection import ProjectionError, ProjectionStaleError, QueryProjectionBuilder, RegistryQueryService, projection_source_fingerprint
-from artifact_registry.registry_v2 import ArtifactRegistry
-from artifact_registry.schema_v2 import build_envelope
+from memorive.documents.registry.migration import PlannedMigrationFault, registry_baseline
+from memorive.documents.registry.migration_contracts import artifact_id_from_identity, load_jsonl_receipts
+from memorive.documents.registry.query_projection import ProjectionError, ProjectionStaleError, QueryProjectionBuilder, RegistryQueryService, projection_source_fingerprint
+from memorive.documents.registry.registry_v2 import ArtifactRegistry
+from memorive.documents.registry.schema_v2 import build_envelope
 from tests.modules.artifact_registry.test_migration import FIXED_TIME, T10TestCase
 
 
@@ -165,7 +165,7 @@ class FaultMatrixTests(T10TestCase):
         drifted = copy.deepcopy(real)
         drifted["record_count"] += 1
         with patch(
-            "artifact_registry.query_projection.projection_source_fingerprint",
+            "memorive.documents.registry.query_projection.projection_source_fingerprint",
             side_effect=[real, drifted],
         ):
             with self.assertRaises(ProjectionError) as caught:

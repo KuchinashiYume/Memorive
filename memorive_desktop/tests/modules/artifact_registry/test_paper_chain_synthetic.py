@@ -12,8 +12,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from artifact_registry import ArtifactRegistry, lineage_status, register_adaptation, sha256_file
-from artifact_registry.adapters import P1LegacyAdapter
+from memorive.documents.registry import ArtifactRegistry, lineage_status, register_adaptation, sha256_file
+from memorive.documents.registry.adapters import P1LegacyAdapter
 
 PAPER = "SYNTHETIC-PAPER-1"
 CHUNKS = {

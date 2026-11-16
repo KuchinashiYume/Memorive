@@ -8,11 +8,11 @@ from unittest import mock
 
 from memorive.models.gateway.errors import OcrOwnershipBlocked
 
-from document_processing import document_convert_convert, pipeline
-from document_processing.engines.model_gateway_ocr_engine import ModelGatewayOcrEngine
-from document_processing.errors import DocumentProcessingError
-from document_processing.ocr_page_rescue import rescue_pdf_pages
-from document_processing.types import (
+from memorive.documents.processing import document_convert_convert, pipeline
+from memorive.documents.processing.engines.model_gateway_ocr_engine import ModelGatewayOcrEngine
+from memorive.documents.processing.errors import DocumentProcessingError
+from memorive.documents.processing.ocr_page_rescue import rescue_pdf_pages
+from memorive.documents.processing.types import (
     ConvertReport,
     IngestMeta,
     RawObject,

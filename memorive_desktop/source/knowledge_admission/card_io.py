@@ -5,7 +5,7 @@ other byte of the file stays as it was, line endings included. The new text goes
 file first, is read back, and only then replaces the card.
 
 The front matter runs from a "---" line at the very start of the file to the next line that is
-only "---" (memorive_front_matter.py, shared with the RawMD and CleanMD readers), so a value such
+only "---" (memorive/documents/front_matter.py, shared with the RawMD and CleanMD readers), so a value such
 as "title: A---B" does not end it. Cards are written by yaml.dump, so review_status is a plain
 unquoted value; any other form is refused rather than rewritten.
 """
@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-from memorive_front_matter import front_matter_fences
+from memorive.documents.front_matter import front_matter_fences
 
 from .errors import CardStateError
 from .states import STATES

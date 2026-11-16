@@ -14,8 +14,8 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
         sys.path.insert(0, str(candidate))
 
 from memorive_desktop_service.control_store import ControlStore  # noqa: E402
-from memorive_inbox import InboxController  # noqa: E402
-from memorive_library import LibraryProductController, LibraryProductError  # noqa: E402
+from memorive.documents.inbox import InboxController  # noqa: E402
+from memorive.documents.library import LibraryProductController, LibraryProductError  # noqa: E402
 from tests.test_refinement_runtime_coordination import (  # noqa: E402
     _HealthyService,
 )

@@ -7,8 +7,8 @@ import unittest
 
 from jsonschema import Draft202012Validator
 
-from document_processing.ocr_qualification import OCRQualificationContractError, QualificationThresholds, compare_page, diagnose_page, evaluate_accounting, explain_route, normalize_transcription, normalize_provider_payload, project_family_qualification, score_page, summarize_qualification_matrix, validate_cell_denominator, validate_page_subject_input
-from document_processing.ocr_qualification.contracts import load_schema
+from memorive.documents.processing.ocr_qualification import OCRQualificationContractError, QualificationThresholds, compare_page, diagnose_page, evaluate_accounting, explain_route, normalize_transcription, normalize_provider_payload, project_family_qualification, score_page, summarize_qualification_matrix, validate_cell_denominator, validate_page_subject_input
+from memorive.documents.processing.ocr_qualification.contracts import load_schema
 SHA_A = "A" * 64
 SHA_B = "B" * 64
 SHA_C = "C" * 64

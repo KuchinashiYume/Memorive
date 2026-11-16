@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from artifact_registry.registry_v2 import ArtifactRegistry
+from memorive.documents.registry.registry_v2 import ArtifactRegistry
 from memorive.platform.language import freeze
 from memorive_research_workspace.service import ResearchWorkspace
 

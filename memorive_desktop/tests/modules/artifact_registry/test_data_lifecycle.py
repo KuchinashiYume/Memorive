@@ -7,7 +7,7 @@ import subprocess
 import pytest
 
 from memorive.platform.folders.roles import DirectoryRole
-from artifact_registry.data_lifecycle import SYNTHETIC_MARKER, DataLifecycleViolation, FaultPoint, MigrationPlan, MigrationState, SyntheticMigrationEngine, build_asset_record, data_inventory
+from memorive.documents.registry.data_lifecycle import SYNTHETIC_MARKER, DataLifecycleViolation, FaultPoint, MigrationPlan, MigrationState, SyntheticMigrationEngine, build_asset_record, data_inventory
 def synthetic_root(tmp_path: Path) -> Path:
     root = tmp_path / "隔离 synthetic root"
     root.mkdir(parents=True)

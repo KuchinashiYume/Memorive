@@ -22,7 +22,7 @@ from memorive.exams.resources import exam_package
 
 from .adapters import RealFacadeAdapter
 from .composite_adapter import CompositeServiceAdapter
-from memorive_inbox import InboxController, InboxServiceAdapter
+from memorive.documents.inbox import InboxController, InboxServiceAdapter
 from memorive.models.local import LocalModelProductController
 from memorive_current_task import build_core_execution_snapshot
 from memorive_workflow import (
@@ -493,7 +493,7 @@ async def run(
     inbox_controller.job_state_provider = facade.get_job
     inbox_controller.recover()
 
-    from document_processing.document_structure.desktop import StructureDesktop
+    from memorive.documents.processing.document_structure.desktop import StructureDesktop
     structure_controller=StructureDesktop(folders.path_for('Core_JOBS'))
 
     def core_workflow_snapshot() -> Mapping[str, object]:

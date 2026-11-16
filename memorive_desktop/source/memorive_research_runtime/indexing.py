@@ -37,7 +37,7 @@ def history_backfill(runtime):
         'failures':failed,'scope':'ALL_HASH_BOUND_DISCOVERY_RESULTS_INDEPENDENT_OF_UI'})
 
 def backfill(runtime):
-    from memorive_inbox.store import InboxStore
+    from memorive.documents.inbox.store import InboxStore
     root=runtime.host.profile_path('INBOX')
     database=root/'inbox_store.sqlite3'
     if database.exists():

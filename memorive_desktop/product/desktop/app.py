@@ -6732,7 +6732,7 @@ if __name__ == "__main__":
         configure_resource_imports(root)
         if not getattr(sys, 'frozen', False):
             configure_resource_imports(root.parents[1])
-        from document_processing.engines.isolated_pdf import main as native_pdf_main
+        from memorive.documents.processing.engines.isolated_pdf import main as native_pdf_main
         raise SystemExit(native_pdf_main([v for v in sys.argv[1:] if v != '--memo-native-pdf']))
     if '--memo-agent' in sys.argv or ('--workspace' in sys.argv and any(v in sys.argv for v in ('--mcp','--call','--connector-call'))):
         root=resource_root()

@@ -5,7 +5,7 @@ it must stay equal to jobs() after the store's own writes, after another store o
 thread or process) writes, and for a store opened fresh. InboxStore.list_intents(state) and
 has_pending_intent(item_id) must agree with filtering the full intent list.
 """
-from memorive_inbox.store import InboxStore
+from memorive.documents.inbox.store import InboxStore
 from memorive_review.store import ReviewStore
 
 

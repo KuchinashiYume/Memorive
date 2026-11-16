@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from memorive_front_matter import split_front_matter
+from memorive.documents.front_matter import split_front_matter
 
 from .errors import CardParseError, CardUnreadable
 from .errors import ChunkStoreError

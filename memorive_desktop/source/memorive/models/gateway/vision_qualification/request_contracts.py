@@ -47,7 +47,9 @@ def _copy(value: Any) -> Any:
 def _page_schema() -> dict[str, Any]:
     path = (
         Path(__file__).resolve().parents[4]
-        / "document_processing"
+        / "memorive"
+        / "documents"
+        / "processing"
         / "schemas"
         / "page_recognition_page_subject_input_v1.schema.json"
     )

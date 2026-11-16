@@ -13,7 +13,7 @@ import uuid
 
 import yaml
 
-from memorive_front_matter import split_front_matter
+from memorive.documents.front_matter import split_front_matter
 from memorive.platform.naming import display_title, file_name
 from evidence_extraction.card import CONTENT_FIELDS, LIST_FIELDS, build_card, detect_card_lang, write_card
 from evidence_extraction.config import CARD_SCHEMA_VERSION, INPUT_MAX_CHARS, now_minute

@@ -9,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from document_processing.document_embed_embed import _vector_metadata
+from memorive.documents.processing.document_embed_embed import _vector_metadata
 
 
 class EmbeddingStructuralMetadataTest(unittest.TestCase):

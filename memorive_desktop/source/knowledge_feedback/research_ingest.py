@@ -173,8 +173,8 @@ class ResearchFeedback:
 
     def _register(self, draft, refs, db):
         """Write the note, register it with the sources it cites, and add it to the evidence index."""
-        from artifact_registry.registry_v2 import ArtifactRegistry
-        from artifact_registry.schema_v2 import build_envelope
+        from memorive.documents.registry.registry_v2 import ArtifactRegistry
+        from memorive.documents.registry.schema_v2 import build_envelope
         folder = self.store.root / 'feedback_artifacts'
         folder.mkdir(exist_ok=True)
         registry = ArtifactRegistry(self.store.root / 'artifact_registry_registry')
@@ -206,8 +206,8 @@ class ResearchFeedback:
     def _source_link(self, ref, draft, registry, folder, db):
         """The registry link to one cited source. An accepted note is linked directly; any other
         document through a registered copy of the version that was cited."""
-        from artifact_registry.errors import UnknownArtifactError
-        from artifact_registry.schema_v2 import build_envelope, parent_link
+        from memorive.documents.registry.errors import UnknownArtifactError
+        from memorive.documents.registry.schema_v2 import build_envelope, parent_link
         source = self.store.get('artifact', ref['artifact_id'], db=db)
         if source['kind'] == 'derived':
             parent_id = source['id']

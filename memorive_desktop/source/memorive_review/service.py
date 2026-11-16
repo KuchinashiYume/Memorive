@@ -17,7 +17,7 @@ from .engine import analyze, digest, MAX_BYTES, ENGINE_VERSION, RULE_VERSION
 from .store import ReviewStore, atomic, TERMINAL
 from .logic import GLOBAL_INPUT_CONTRACT, cloud_profile, segments, global_segment, response_schema, prompt, invoke, validate_response, build_report
 
-from document_processing.document_structure.desktop import StructureDesktop, METHODS as STRUCTURE_METHODS
+from memorive.documents.processing.document_structure.desktop import StructureDesktop, METHODS as STRUCTURE_METHODS
 REVIEW_METHODS=('review.job','review.report','review.disposition','review.control','review.list')+STRUCTURE_METHODS
 ATTENTION={'FAILED','UNCERTAIN','PUBLICATION_FAILED'}
 FINISHED={'COMPLETED','COMPLETED_LIMITED','SKIPPED','CANCELLED'}

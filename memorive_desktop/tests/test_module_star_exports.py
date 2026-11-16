@@ -47,7 +47,7 @@ RESTORED = {'evidence_extraction.segmented_distill.contracts': ['dispatch_artifa
  'memorive_app.contracts': ['error_envelope'],
  'memorive_desktop_service.adapters': ['FakeFacadeAdapter'],
  'memorive_desktop_service.errors': ['BackpressureExceeded', 'InstanceAlreadyActive'],
- 'memorive_inbox.contracts': ['require_item_state'],
+ 'memorive.documents.inbox.contracts': ['require_item_state'],
  'memorive_research_runtime.identity': ['normalize_identifier', 'initialization_candidate_base_projection'],
  'research_reports.api_briefing': ['run_api_briefing'],
  'retrieval.coverage_artifacts': ['admit_chunk_snapshots',

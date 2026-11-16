@@ -17,7 +17,7 @@ from knowledge_feedback.eligibility import build_eligibility_report
 from knowledge_feedback.lineage import build_lineage_ledger
 from knowledge_feedback.penalty import build_penalty_eligibility_evidence
 from decision_log.knowledge_decision import build_synthetic_human_decision_fixture
-from artifact_registry.knowledge_feedback_adapter import make_knowledge_registration_preview
+from memorive.documents.registry.knowledge_feedback_adapter import make_knowledge_registration_preview
 from .controlled_knowledge_feedback import audit_self_reinforcement
 
 

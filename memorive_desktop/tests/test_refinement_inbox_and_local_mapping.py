@@ -14,8 +14,8 @@ if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
 from memorive_current_task.refinement_tasks import SessionRefinementTaskStore  # noqa: E402
-from memorive_inbox import InboxController  # noqa: E402
-from memorive_inbox import InboxServiceAdapter  # noqa: E402
+from memorive.documents.inbox import InboxController  # noqa: E402
+from memorive.documents.inbox import InboxServiceAdapter  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
 from memorive.models.capabilities import (  # noqa: E402

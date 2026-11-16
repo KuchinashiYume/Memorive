@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-from memorive_front_matter import split_front_matter
+from memorive.documents.front_matter import split_front_matter
 from memorive.platform.logs import log, log_error
 from memorive.models.gateway import call
 from memorive.models.gateway.errors import GatewayError

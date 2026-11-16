@@ -12,7 +12,7 @@ ROOT = (Path(__file__).resolve().parents[3] / "source")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from document_processing.engines.legacy_ymath_layout import (  # noqa: E402
+from memorive.documents.processing.engines.legacy_ymath_layout import (  # noqa: E402
     _context_hint,
     _is_auxiliary_layout_line,
     _render_text_target,

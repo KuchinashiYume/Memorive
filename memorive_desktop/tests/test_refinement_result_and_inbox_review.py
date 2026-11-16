@@ -13,8 +13,8 @@ import pytest
 
 from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
 from memorive.sessions.refinement import make_context_capsule, validate_normalized_graph
-from memorive_inbox import InboxController
-from memorive_inbox.contracts import InboxError
+from memorive.documents.inbox import InboxController
+from memorive.documents.inbox.contracts import InboxError
 from memorive.sessions.controller import SessionsProductController
 from memorive.sessions.controller import SessionProductError
 from memorive.sessions.refinement.refinement import make_typed_refinement_item

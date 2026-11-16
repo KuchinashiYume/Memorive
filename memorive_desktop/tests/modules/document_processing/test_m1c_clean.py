@@ -11,7 +11,7 @@ ROOT = (Path(__file__).resolve().parents[3] / "source")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from document_processing.document_clean_clean import (  # noqa: E402
+from memorive.documents.processing.document_clean_clean import (  # noqa: E402
     _classify_boundary_noise,
     _strip_publisher_boilerplate,
 )

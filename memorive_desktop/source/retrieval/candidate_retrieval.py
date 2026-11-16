@@ -26,7 +26,7 @@ from pathlib import Path
 
 import yaml
 
-from memorive_front_matter import split_front_matter
+from memorive.documents.front_matter import split_front_matter
 from memorive.platform.logs import log_reason
 from knowledge_admission import knowledge_admission_log
 from knowledge_admission.card_io import read_status
@@ -182,7 +182,7 @@ def _default_multimodal_rank(
 def _open_collection(target: str):
     """开现成 collection(get_collection、**非** get_or_create);查不到即报错、绝不建库。"""
     import chromadb
-    from document_processing.config import COLLECTION, chroma_dir
+    from memorive.documents.processing.config import COLLECTION, chroma_dir
     client = chromadb.PersistentClient(path=str(chroma_dir(target)))
     return client.get_collection(COLLECTION[target])
 
@@ -572,7 +572,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
     # so let the requested target and downstream token budget decide instead.
     effective_per_card = cfg["target"] if paper_id is not None else cfg["per_card"]
     if lib_root is None:
-        from document_processing.config import library_root
+        from memorive.documents.processing.config import library_root
         lib_root = library_root(target)
     lib_root = Path(lib_root)
 

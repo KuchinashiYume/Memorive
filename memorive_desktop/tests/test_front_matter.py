@@ -1,4 +1,4 @@
-"""Front matter at the top of RawMD, CleanMD and card files (memorive_front_matter.py).
+"""Front matter at the top of RawMD, CleanMD and card files (memorive/documents/front_matter.py).
 
 The front matter ends at the next line that is only "---", so a value such as "title: A---B" stays
 whole. Every reader of these files uses the same splitter; each one is read here once with such a
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from memorive_front_matter import split_front_matter
+from memorive.documents.front_matter import split_front_matter
 
 TITLE = "Growth A---B at 37 C"
 FRONT = f"paper_id: paper-0001\ntitle: {TITLE}\ndata_ownership: self\ndoc_type: paper\n"
@@ -61,12 +61,12 @@ def test_a_fence_may_carry_trailing_spaces_but_nothing_else():
 # Every reader
 
 def test_the_rawmd_reader_keeps_the_whole_title(tmp_path):
-    from document_processing.pipeline import _read_frontmatter
+    from memorive.documents.processing.pipeline import _read_frontmatter
     assert _read_frontmatter(write(tmp_path, "raw.md"))["title"] == TITLE
 
 
 def test_the_cleaning_step_keeps_the_whole_title_and_body():
-    from document_processing.document_clean_clean import _split_frontmatter
+    from memorive.documents.processing.document_clean_clean import _split_frontmatter
     front, body = _split_frontmatter(TEXT)
     assert front["title"] == TITLE
     assert body == "First line of the body.\n---\nA dash line in the body.\n"
@@ -83,7 +83,7 @@ def test_the_segmented_distill_reader_keeps_the_whole_title(tmp_path):
 
 
 def test_the_card_readers_keep_the_whole_title(tmp_path):
-    from artifact_registry.adapters import read_frontmatter
+    from memorive.documents.registry.adapters import read_frontmatter
     from evidence_review.mechanical import _read_frontmatter as mechanical
     from retrieval.candidate_retrieval import _read_frontmatter as retrieval
     card = write(tmp_path, "card.md")
@@ -93,7 +93,7 @@ def test_the_card_readers_keep_the_whole_title(tmp_path):
 
 
 def test_a_reader_still_refuses_a_file_without_front_matter(tmp_path):
-    from document_processing.errors import DocumentProcessingError
-    from document_processing.pipeline import _read_frontmatter
+    from memorive.documents.processing.errors import DocumentProcessingError
+    from memorive.documents.processing.pipeline import _read_frontmatter
     with pytest.raises(DocumentProcessingError):
         _read_frontmatter(write(tmp_path, "raw.md", "no front matter here\n"))

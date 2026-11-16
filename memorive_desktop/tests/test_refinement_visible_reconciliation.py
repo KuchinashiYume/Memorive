@@ -12,7 +12,7 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_inbox import InboxController  # noqa: E402
+from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402
     LOCAL_PROFILE_REF,

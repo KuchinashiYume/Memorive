@@ -1,6 +1,6 @@
 """What the research workspace reads from the library: the files that document processing produced.
 
-The library controller (memorive_library/product_controller.py) learns about those files from the
+The library controller (memorive/documents/library/product_controller.py) learns about those files from the
 processing jobs and offers them through core_artifacts() and resolve_core_private_artifact().
 The research workspace uses them in two places:
   memorive_research_workspace/library_bridge.py       adding cards, analyses and documents to a project
@@ -18,7 +18,7 @@ from types import SimpleNamespace
 import pytest
 
 from memorive_desktop_service.control_store import ControlStore
-from memorive_library import LibraryProductController
+from memorive.documents.library import LibraryProductController
 from memorive_research_workspace import desktop_connections, library_bridge
 from memorive_research_workspace.desktop_connections import job_results
 from memorive_research_workspace.store import Store

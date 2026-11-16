@@ -3,7 +3,7 @@
 Document processing leaves a card, an analysis, the original and the cleaned text of each paper in
 the library. library_list shows those files; library_add puts the chosen ones into the project's
 search index (workspace.index.add_library_file). The files come from the library controller
-(memorive_library/product_controller.py: core_artifacts and resolve_core_private_artifact); no
+(memorive/documents/library/product_controller.py: core_artifacts and resolve_core_private_artifact); no
 folder is scanned.
 """
 from pathlib import Path

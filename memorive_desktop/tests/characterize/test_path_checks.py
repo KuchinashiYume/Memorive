@@ -1,7 +1,7 @@
 """Which file paths the research evidence reader and the inbox import accept.
 
 Pins today's behaviour of memorive_research_workspace.evidence.safe_path and
-memorive_inbox.path_policy.PathSecurityPolicy.inspect, including folder junctions, before
+memorive.documents.inbox.path_policy.PathSecurityPolicy.inspect, including folder junctions, before
 any change to how links are handled. The folder layout is built in tmp_path; two junctions
 point one folder inside and one outside the allowed root (Windows only: mklink /J needs no
 administrator rights). Paths are shown relative to tmp_path.
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 
-from memorive_inbox.path_policy import PathSecurityPolicy
+from memorive.documents.inbox.path_policy import PathSecurityPolicy
 from memorive_research_workspace.evidence import safe_path
 from memorive_research_workspace.skill_bridge import load_bundle
 from memorive_research_workspace.store import digest

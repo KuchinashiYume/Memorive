@@ -18,7 +18,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
 from memorive_current_task import CurrentTaskProductController  # noqa: E402
 from memorive_current_task.refinement_tasks import REFINEMENT_NODE_IDS  # noqa: E402
 from memorive_desktop_service.control_store import ControlStore  # noqa: E402
-from memorive_library import LibraryProductController  # noqa: E402
+from memorive.documents.library import LibraryProductController  # noqa: E402
 from memorive_messages import MessagesProductController  # noqa: E402
 from memorive_work_log import WorkLogProductController  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402

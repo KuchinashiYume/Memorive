@@ -6,10 +6,10 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from document_processing import document_convert_convert
-from document_processing.errors import TextIntegrityError
-from document_processing.document_convert_convert import _validate_pdf_text_integrity
-from document_processing.types import ConvertReport, IngestMeta, RawObject
+from memorive.documents.processing import document_convert_convert
+from memorive.documents.processing.errors import TextIntegrityError
+from memorive.documents.processing.document_convert_convert import _validate_pdf_text_integrity
+from memorive.documents.processing.types import ConvertReport, IngestMeta, RawObject
 
 
 def _page(revision: int, text: str) -> str:

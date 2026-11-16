@@ -21,7 +21,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_inbox import InboxController  # noqa: E402
+from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
 from memorive_messages import MessagesProductController  # noqa: E402
 from memorive.sessions.refinement.model_channel import _response_schema  # noqa: E402

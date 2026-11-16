@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from document_processing import document_embed_embed as embed
-from document_processing.errors import (DocumentProcessingError, VectorDuplicateError, VectorModelConflictError,
+from memorive.documents.processing import document_embed_embed as embed
+from memorive.documents.processing.errors import (DocumentProcessingError, VectorDuplicateError, VectorModelConflictError,
                                         VectorWriteVerifyError)
 
 MODEL, VTYPE = embed.CANON_EMBED_MODEL, embed.VECTOR_TYPE

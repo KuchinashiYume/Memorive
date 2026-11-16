@@ -99,7 +99,7 @@ PUBLICATION_FIELDS = {
 # are listed so that a report can say which code checked its records.
 _OFFICIAL_MODULE_FILES = {
     "run_ledger.schema": ("run_ledger/schema.py",),
-    "artifact_registry.schema_v2": ("artifact_registry/schema.py", "artifact_registry/schema_v2.py"),
+    "memorive.documents.registry.schema_v2": ("memorive/documents/registry/schema.py", "memorive/documents/registry/schema_v2.py"),
 }
 OFFICIAL_VALIDATOR_RECEIPTS: dict[str, dict[str, Any]] = {}
 _RECEIPT_MODULES: dict[str, tuple[Any, ...]] = {}   # the module objects each receipt was built from
@@ -688,7 +688,7 @@ def _adapt_runtime_log(record: dict[str, Any], ref: str, raw_hash: str) -> dict[
 
 
 def _adapt_artifact_registry(record: dict[str, Any], ref: str, raw_hash: str) -> dict[str, Any]:
-    official_validate_event = _official_callable("artifact_registry.schema_v2", "validate_event")
+    official_validate_event = _official_callable("memorive.documents.registry.schema_v2", "validate_event")
     try:
         official_validate_event(record)
     except Exception as exc:

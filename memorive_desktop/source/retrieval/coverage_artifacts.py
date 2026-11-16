@@ -16,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-from artifact_registry import (
+from memorive.documents.registry import (
     build_envelope,
     canonical_json,
     parent_link,
@@ -24,7 +24,7 @@ from artifact_registry import (
 )
 
 from .types import LogicalSpan
-from artifact_registry import new_artifact_id
+from memorive.documents.registry import new_artifact_id
 
 
 _ARTIFACT_ID = re.compile(r"^art_[0-9a-f]{32}$")

@@ -16,8 +16,8 @@ from knowledge_feedback.eligibility import build_eligibility_report
 from knowledge_feedback.errors import ContractRejected, SourceIneligible
 from knowledge_feedback.lineage import build_lineage_ledger, build_replay_plan, validate_lineage_ledger, validate_replay_plan
 from decision_log.knowledge_decision import KnowledgeDecisionError, assert_decision_binds_candidate
-from artifact_registry.knowledge_feedback_adapter import make_knowledge_registration_preview
-from artifact_registry.errors import ContractValidationError
+from memorive.documents.registry.knowledge_feedback_adapter import make_knowledge_registration_preview
+from memorive.documents.registry.errors import ContractValidationError
 from tests.modules.knowledge_feedback.feedback_helpers.controlled_knowledge_feedback import audit_self_reinforcement
 from tests.modules.knowledge_feedback.feedback_helpers.controlled_knowledge_feedback_fixture import (
     EVALUATED_AT,

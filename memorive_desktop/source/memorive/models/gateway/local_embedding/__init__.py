@@ -1,5 +1,5 @@
 """Local embedding models: LocalEmbeddingSeam runs one behind the execution core's process isolation.
-document_processing/vector_generation.py checks a model's compatibility manifest with it.
+memorive/documents/processing/vector_generation.py checks a model's compatibility manifest with it.
 
 Importing this package performs no runtime discovery, process start, or network
 request. It uses the execution core (model_gateway/execution_core) as it is.

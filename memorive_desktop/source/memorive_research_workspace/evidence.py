@@ -153,7 +153,7 @@ def page_layout(folder):
     key = ('page layout', str(folder))
     if checked is not None and key in checked:
         return checked[key]
-    from document_processing.document_structure.bundle import load
+    from memorive.documents.processing.document_structure.bundle import load
     _receipt, structure = load(folder)
     if checked is not None:
         checked[key] = structure
@@ -198,7 +198,7 @@ class EvidenceIndex:
 
     def _page_layout_binding(self, root, structure_bundle, expected_hash, source_content_hash):
         """The page layout must be the one made from this text and its source document."""
-        from document_processing.document_structure.bundle import load
+        from memorive.documents.processing.document_structure.bundle import load
         folder = safe_path(root, Path(structure_bundle) / 'bundle.json').parent
         _receipt, structure = load(folder)
         if (structure['rawmd_sha256'].lower() != expected_hash.lower()

@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from document_processing.config import now_iso, root_for
-from document_processing.errors import DocumentProcessingError
+from memorive.documents.processing.config import now_iso, root_for
+from memorive.documents.processing.errors import DocumentProcessingError
 
 
 class PaperIdRegistry:

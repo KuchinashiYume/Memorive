@@ -320,7 +320,7 @@ class CorePipelineExecutor:
 
         # Restart-unsafe Chroma must be isolated before any resumed workflow
         # opens the shared collection and pins its files on Windows.
-        from document_processing.chroma_durability import ensure_chroma_writable
+        from memorive.documents.processing.chroma_durability import ensure_chroma_writable
 
         self.chroma_startup_recovery = ensure_chroma_writable("sandbox")
 
@@ -348,7 +348,7 @@ class CorePipelineExecutor:
         # a user job starts, so that module can already exist by the time this
         # isolated runtime is constructed.  Keep the adopted Core functions and
         # update only their cached root values to the exact environment just bound.
-        from document_processing import config as document_processing_config
+        from memorive.documents.processing import config as document_processing_config
 
         document_processing_config.VAULT_ROOT = Path(values["MEMORIVE_DOCUMENT_PROCESSING_VAULT_ROOT"])
         document_processing_config.OPS_ROOT = Path(values["MEMORIVE_OPS_ROOT"])
@@ -464,7 +464,7 @@ class CorePipelineExecutor:
             rows, _mapping = self._load_chunks(folder, paper_id)
             self._one(folder, "[CleanMD]", ".md")
             chunks_path = self._one(folder, "[Chunks]", ".jsonl")
-            from document_processing.chroma_durability import (
+            from memorive.documents.processing.chroma_durability import (
                 ERROR_CODE,
                 inspect_chroma_restart_durability,
                 recover_embedding_checkpoint,
@@ -476,7 +476,7 @@ class CorePipelineExecutor:
             if inspect_chroma_restart_durability("sandbox").get("status") == ERROR_CODE:
                 return False
             import chromadb
-            from document_processing.config import COLLECTION
+            from memorive.documents.processing.config import COLLECTION
 
             client = chromadb.PersistentClient(path=str(self.chroma_dir))
             try:
@@ -497,12 +497,12 @@ class CorePipelineExecutor:
         the HNSW segment.  Inspect the exact collection segment as well as the
         live API so node 02 does not silently claim restart-safe retrieval.
         """
-        from document_processing.chroma_durability import (
+        from memorive.documents.processing.chroma_durability import (
             embedding_checkpoint_status,
             ensure_chroma_writable,
             inspect_chroma_restart_durability,
         )
-        from document_processing.config import COLLECTION
+        from memorive.documents.processing.config import COLLECTION
 
         collection_name = COLLECTION["sandbox"]
         folder = self._paper_folder(paper_id)
@@ -672,7 +672,7 @@ class CorePipelineExecutor:
                 if "01_DOCUMENT_INGEST" not in completed:
                     start("01_DOCUMENT_INGEST")
                     if not self._document_processing_document_complete(paper_id):
-                        from document_processing import run_document_processing
+                        from memorive.documents.processing import run_document_processing
 
                         result = run_document_processing(
                             context.source_path,
@@ -726,7 +726,7 @@ class CorePipelineExecutor:
                 if "02_CHUNK_EMBEDDING" not in completed:
                     start("02_CHUNK_EMBEDDING")
                     if not self._document_processing_complete(paper_id):
-                        from document_processing import embed_from_chunks
+                        from memorive.documents.processing import embed_from_chunks
 
                         chunks_path = self._one(folder, "[Chunks]", ".jsonl")
                         result = embed_from_chunks(chunks_path, target="sandbox")
@@ -1248,7 +1248,7 @@ class CorePipelineExecutor:
                 # E10 candidates retain their own source-bound, verifiable bundle.
                 structure_root=context.run_root/'structure-candidate'
                 if (structure_root/'bundle.json').is_file():
-                    from document_processing.document_structure.bundle import publication_specs
+                    from memorive.documents.processing.document_structure.bundle import publication_specs
                     artifact_specs += publication_specs(structure_root,managed_folder/'structure')
                 # The source-language rule is a persistence boundary, not only a
                 # prompt hint.  Recheck every textual Core mainline artifact

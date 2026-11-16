@@ -49,7 +49,7 @@ def test_v2_source_migration_preserves_choices_and_bytes(tmp_path):
     assert path.read_bytes()==before
 
 def test_readable_refinement_english_body_is_not_translated():
-    from memorive_library.refinement_markdown import render
+    from memorive.documents.library.refinement_markdown import render
     item={"candidate_text":"Evidence must remain in its original language.",
           "refinement_type":"CLAIM","scope":"Selected discussion","evidence_state":"UNVERIFIED",
           "message_refs":["message-1"],"limitations":["No independent verification."]}

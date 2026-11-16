@@ -13,9 +13,9 @@ import os
 import pymupdf
 import pytest
 
-from document_processing.document_conversion.models import DocumentConversionError
-from document_processing.document_structure.bundle import build_bundle, load, normalize_config, preview, verify
-from document_processing.document_structure.contract import digest, file_sha, structure_id, validate_structure
+from memorive.documents.processing.document_conversion.models import DocumentConversionError
+from memorive.documents.processing.document_structure.bundle import build_bundle, load, normalize_config, preview, verify
+from memorive.documents.processing.document_structure.contract import digest, file_sha, structure_id, validate_structure
 
 NATIVE = {"mode": "native"}
 
