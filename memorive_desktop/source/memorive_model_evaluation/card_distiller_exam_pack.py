@@ -1,4 +1,5 @@
-"""Checks the card distiller's reference exam pack and replays it with its reference answers.
+"""Checks the card distiller's reference exam pack, and that an answer built from its reference
+answers scores 100.
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Checks an OCR page reference pack and replays it with its reference answers.
+"""Checks an OCR page reference pack, and that an answer built from its reference answers scores 100.
 """
 
 from __future__ import annotations

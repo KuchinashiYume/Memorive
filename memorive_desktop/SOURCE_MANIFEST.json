@@ -4112,8 +4112,8 @@
     },
     {
       "path": "source/memorive_model_evaluation/card_distiller_exam_pack.py",
-      "sha256": "9c5da860ff73cb03673c842c3a173af7707e659b50139b3a30b3f90e7270185b",
-      "bytes": 21593
+      "sha256": "20f2fdeb293a8dee22e0dc344f10a4a01d3349f0b4f67d404b82f5921de29428",
+      "bytes": 21616
     },
     {
       "path": "source/memorive_model_evaluation/card_distiller_exam_protocol.py",
@@ -4172,8 +4172,8 @@
     },
     {
       "path": "source/memorive_model_evaluation/ocr_page_exam_pack.py",
-      "sha256": "dedade253141d4c35feb53c6893f5080344e7fd79fef63d9fd7e72c54f5b5aa4",
-      "bytes": 24488
+      "sha256": "812da7a686751b33b20604fa76721414ff9aba5fd354fae116408e7dbb8cf219",
+      "bytes": 24510
     },
     {
       "path": "source/memorive_model_evaluation/ocr_page_exam_protocol.py",
