@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:knowledge-feedback:knowledge-source-snapshot:r0.1",
+  "title": "KnowledgeSourceSnapshot v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "snapshot_id", "frozen_at", "source_mode",
+    "source_items", "reference_pack_status", "upstream_authorities",
+    "real_source_count", "synthetic_fixture", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "KNOWLEDGE_FEEDBACK_KNOWLEDGE_SOURCE_SNAPSHOT_V2"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "frozen_at": {"type": "string", "format": "date-time"},
+    "source_mode": {"const": "PUBLIC_SAFE_FULLY_SYNTHETIC_ONLY"},
+    "source_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/sourceItem"}
+    },
+    "reference_pack_status": {"const": "ABSENT_FAIL_CLOSED"},
+    "upstream_authorities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["initialization_common_object", "configuration_handoff", "intake_handoff"],
+      "properties": {
+        "initialization_common_object": {"$ref": "#/$defs/hashDescriptor"},
+        "configuration_handoff": {"$ref": "#/$defs/hashDescriptor"},
+        "intake_handoff": {"$ref": "#/$defs/hashDescriptor"}
+      }
+    },
+    "real_source_count": {"const": 0},
+    "synthetic_fixture": {"const": true},
+    "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+  },
+  "$defs": {
+    "hashDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+      }
+    },
+    "uniqueStringArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "nonEmptyUniqueStringArray": {
+      "allOf": [
+        {"$ref": "#/$defs/uniqueStringArray"},
+        {"minItems": 1}
+      ]
+    },
+    "attempts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sonnet_initial_review_calls", "deepseek_repair_calls",
+        "sonnet_targeted_review_calls"
+      ],
+      "properties": {
+        "sonnet_initial_review_calls": {"type": "integer", "minimum": 1},
+        "deepseek_repair_calls": {"type": "integer", "minimum": 0},
+        "sonnet_targeted_review_calls": {"type": "integer", "minimum": 0}
+      }
+    },
+    "tombstone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tombstone_ref", "target_ref", "removed_value_hash", "removed_value_hash_basis", "attempts",
+        "initial_report_ref", "final_report_ref"
+      ],
+      "properties": {
+        "tombstone_ref": {"type": "string", "pattern": "^fixture://"},
+        "target_ref": {"type": "string", "pattern": "^fixture://"},
+        "removed_value_hash": {"$ref": "#/$defs/hashDescriptor"},
+        "removed_value_hash_basis": {"const": "JCS_KNOWLEDGE_VALUE_WRAPPER_V1"},
+        "attempts": {"$ref": "#/$defs/attempts"},
+        "initial_report_ref": {"type": "string", "pattern": "^fixture://"},
+        "final_report_ref": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^fixture://"}
+          ]
+        }
+      }
+    },
+    "omissionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "applicability", "completion_status", "tombstones",
+        "plaintext_removed_values_present", "omission_manifest_hash_basis", "omission_manifest_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "KNOWLEDGE_FEEDBACK_SOURCE_OMISSION_BOUNDARY_V1"},
+        "applicability": {
+          "enum": ["NOT_APPLICABLE", "DIRECT_CARD_V6", "INHERITED_CARD_V6"]
+        },
+        "completion_status": {
+          "enum": ["NOT_APPLICABLE", "complete", "passed_with_omissions"]
+        },
+        "tombstones": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tombstone"}
+        },
+        "plaintext_removed_values_present": {"const": false},
+        "omission_manifest_hash_basis": {"const": "JCS_SOURCE_OMISSION_BOUNDARY_EXCLUDING_HASH_V1"},
+        "omission_manifest_hash": {"$ref": "#/$defs/hashDescriptor"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"applicability": {"const": "NOT_APPLICABLE"}}},
+          "then": {
+            "properties": {
+              "completion_status": {"const": "NOT_APPLICABLE"},
+              "tombstones": {"maxItems": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"completion_status": {"const": "complete"}}},
+          "then": {"properties": {"tombstones": {"maxItems": 0}}}
+        },
+        {
+          "if": {
+            "properties": {"completion_status": {"const": "passed_with_omissions"}}
+          },
+          "then": {"properties": {"tombstones": {"minItems": 1}}}
+        }
+      ]
+    },
+    "sourceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref", "source_kind", "revision", "content_hash",
+        "review_status", "verification_result", "source_locator",
+        "field_anchors", "verification_evidence_refs", "original_source_refs",
+        "derived_only", "eligible", "issue_codes", "omission_boundary"
+      ],
+      "properties": {
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_kind": {
+          "enum": [
+            "SYNTHETIC_ORIGINAL", "SYNTHETIC_VERIFIED_ANALYSIS",
+            "SYNTHETIC_OPPORTUNITY_CANDIDATE", "SYNTHETIC_DERIVED"
+          ]
+        },
+        "revision": {"type": "integer", "minimum": 1},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"},
+        "review_status": {
+          "enum": ["active", "accepted", "validated", "synthetic_control"]
+        },
+        "verification_result": {"const": "PASS"},
+        "source_locator": {"type": "string", "pattern": "^fixture://"},
+        "field_anchors": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+        "verification_evidence_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+        "original_source_refs": {"$ref": "#/$defs/uniqueStringArray"},
+        "derived_only": {"type": "boolean"},
+        "eligible": {"type": "boolean"},
+        "issue_codes": {"$ref": "#/$defs/uniqueStringArray"},
+        "omission_boundary": {"$ref": "#/$defs/omissionBoundary"}
+      }
+    }
+  }
+}

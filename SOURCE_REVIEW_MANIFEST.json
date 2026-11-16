@@ -871,8 +871,8 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-feedback/SKILL.md",
-      "sha256": "d7b82329f600a8a1357284eb0b812ba0b6f97a13dcb4c895413a80011052df3f",
-      "bytes": 826
+      "sha256": "ab303af49e22b02c1cc5e40711b5243475e76c018dfebe544a6c7495efce7772",
+      "bytes": 1608
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/agents/openai.yaml",
@@ -911,8 +911,8 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-tension/SKILL.md",
-      "sha256": "43715db29246ead831c6dc72a5f17cace78e9fcb74e784ebf0ba6e11f1c01b14",
-      "bytes": 939
+      "sha256": "edc6a873f948cc030d9dacc307d4069a69f8b990c87251dda9135b24fc71854c",
+      "bytes": 1470
     },
     {
       "path": "memorive_desktop/integrations/zotero/memorive-companion/bootstrap.js",
@@ -3981,8 +3981,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/adapters.py",
-      "sha256": "08a062e72a7846b27366fa07f6d75f44ededc6ae695c3ed59a3d613ca42decb3",
-      "bytes": 24806
+      "sha256": "92ff6c954f4ea6b862a1a6e7d863941d17fb6e22b31dd4f5a5a889c97350c4cb",
+      "bytes": 25014
     },
     {
       "path": "memorive_desktop/source/artifact_registry/errors.py",
@@ -7966,8 +7966,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "0e3f8e6c3c29dd1239e4f5d177f9461ca144ab083057a09cb7029a31c17d7a71",
-      "bytes": 253784
+      "sha256": "22867a8f4db4fcd0ce3a53a59266aaf9312ef03118f25a58087635d9305db38c",
+      "bytes": 253786
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -9618,6 +9618,26 @@
       "path": "memorive_desktop/DEVELOPING.md",
       "sha256": "155d6932a7098de492a930f9628fd2cc9880f481b0b7c14e6a5a23c32513e994",
       "bytes": 23872
+    },
+    {
+      "path": ".agents/skills/memorive-development/SKILL.md",
+      "sha256": "8963654dc0e4c89638111de371e5073c9b943215960fe97c04554234cca189ce",
+      "bytes": 4393
+    },
+    {
+      "path": ".claude/skills/memorive-development/SKILL.md",
+      "sha256": "0bd8aff958beb0135826518c2cddc19894f8b65e8ce7850e7bf45ec8688a2d7d",
+      "bytes": 511
+    },
+    {
+      "path": "contracts/KnowledgeFeedback_知识反馈/10_模块契约/Memorive_KNOWLEDGE_FEEDBACK_DerivedKnowledgeCandidate_模块契约_r0.2.schema.json",
+      "sha256": "ce56ffb984e4f0d5c1a751f8da0edc910750a69532e4fd2cd466b008c82706c8",
+      "bytes": 6238
+    },
+    {
+      "path": "contracts/KnowledgeFeedback_知识反馈/10_模块契约/Memorive_KNOWLEDGE_FEEDBACK_KnowledgeSourceSnapshot_模块契约_r0.1.schema.json",
+      "sha256": "4863d54da76b3a6cfa713b0b4cb8f6abb2b7709b83bfdba42e0244bfa5a9a393",
+      "bytes": 6864
     }
   ]
 }

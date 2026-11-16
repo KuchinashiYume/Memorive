@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:memorive:knowledge-feedback:derived-knowledge-candidate:r0.2",
+  "title": "DerivedKnowledgeCandidate v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "common_object", "candidate_kind", "reusable_claim",
+    "reusable_claim_hash", "reusable_claim_hash_basis", "scope", "limitations", "source_snapshot_refs",
+    "source_snapshot_hashes", "evidence_refs", "field_qualification_refs",
+    "source_usage_bindings", "generation_basis", "producer_version",
+    "review_state", "decision_receipt_ref", "derived_penalty_record_ref",
+    "derived_penalty_record_hash", "derived_penalty_eligibility_ref",
+    "self_reinforcement_audit_ref", "not_literature_card",
+    "scientific_judgment_status", "test_only", "content_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "KNOWLEDGE_FEEDBACK_DERIVED_KNOWLEDGE_CANDIDATE_V2"},
+    "common_object": {"$ref": "#/$defs/commonObject"},
+    "candidate_kind": {
+      "enum": ["SYNTHETIC_REUSABLE_METHOD_NOTE", "SYNTHETIC_REUSABLE_BOUNDARY_NOTE"]
+    },
+    "reusable_claim": {"type": "string", "minLength": 1},
+    "reusable_claim_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "reusable_claim_hash_basis": {"const": "JCS_KNOWLEDGE_VALUE_WRAPPER_V1"},
+    "scope": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+    "limitations": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+    "source_snapshot_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+    "source_snapshot_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/hashDescriptor"}
+    },
+    "evidence_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+    "field_qualification_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+    "source_usage_bindings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/sourceUsageBinding"}
+    },
+    "generation_basis": {"type": "string", "minLength": 1},
+    "producer_version": {"const": "KNOWLEDGE_FEEDBACK_KNOWLEDGE_FEEDBACK_CONTROLLED_KNOWLEDGE_FEEDBACK_V2"},
+    "review_state": {
+      "enum": ["candidate", "review_pending", "approved_for_controlled_ingest", "rejected"]
+    },
+    "decision_receipt_ref": {"type": ["string", "null"], "minLength": 1},
+    "derived_penalty_record_ref": {"type": "string", "minLength": 1},
+    "derived_penalty_record_hash": {"$ref": "#/$defs/hashDescriptor"},
+    "derived_penalty_eligibility_ref": {"type": "string", "minLength": 1},
+    "self_reinforcement_audit_ref": {"type": "string", "minLength": 1},
+    "not_literature_card": {"const": true},
+    "scientific_judgment_status": {"const": "NOT_ASSESSED"},
+    "test_only": {"const": true},
+    "content_hash": {"$ref": "#/$defs/hashDescriptor"}
+  },
+  "$defs": {
+    "hashDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "hash_kind", "scope", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "hash_kind": {"const": "rfc8785_jcs_sha256"},
+        "scope": {"const": "PAYLOAD_EXCLUDING_CONTENT_HASH"},
+        "value": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+      }
+    },
+    "nonEmptyUniqueStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "sourceUsageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_ref", "used_target_refs"],
+      "properties": {
+        "source_ref": {"type": "string", "minLength": 1},
+        "used_target_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"}
+      }
+    },
+    "humanDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision_id", "decided_by", "decided_at", "decision", "evidence_refs"],
+      "properties": {
+        "decision_id": {"type": "string", "minLength": 1},
+        "decided_by": {"type": "string", "minLength": 1},
+        "decided_at": {"type": "string", "format": "date-time"},
+        "decision": {"enum": ["APPROVE", "REJECT"]},
+        "evidence_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"}
+      }
+    },
+    "commonObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object_id", "schema_version", "revision", "content_hash", "producer",
+        "consumers", "state", "parent_refs", "provenance_refs", "supersedes",
+        "immutable_fields", "failure_semantics", "derived_penalty",
+        "human_approval_required", "human_approval", "controlled_ingest_authorized"
+      ],
+      "properties": {
+        "object_id": {"type": "string", "minLength": 1},
+        "schema_version": {"const": "2.0"},
+        "revision": {"type": "integer", "minimum": 1},
+        "content_hash": {"$ref": "#/$defs/hashDescriptor"},
+        "producer": {"const": "KNOWLEDGE_FEEDBACK_KNOWLEDGE_FEEDBACK_CONTROLLED_KNOWLEDGE_FEEDBACK_V2"},
+        "consumers": {"const": ["M08", "KNOWLEDGE_FEEDBACK", "DECISION_LOG", "ARTIFACT_REGISTRY", "MODEL_EVALUATION"]},
+        "state": {
+          "enum": ["candidate", "review_pending", "approved_for_controlled_ingest", "rejected"]
+        },
+        "parent_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+        "provenance_refs": {"$ref": "#/$defs/nonEmptyUniqueStringArray"},
+        "supersedes": {"type": ["string", "null"], "minLength": 1},
+        "immutable_fields": {
+          "const": ["object_id", "schema_version", "revision", "content_hash", "producer", "parent_refs", "provenance_refs", "supersedes"]
+        },
+        "failure_semantics": {
+          "const": {"BLOCKED": "fail_closed", "ERROR": "quarantined", "FAIL": "fail_closed", "NOT_ASSESSED": "no_eligibility"}
+        },
+        "derived_penalty": {"type": "number", "minimum": 0},
+        "human_approval_required": {"const": true},
+        "human_approval": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/humanDecision"}]},
+        "controlled_ingest_authorized": {"type": "boolean"}
+      }
+    }
+  }
+}
