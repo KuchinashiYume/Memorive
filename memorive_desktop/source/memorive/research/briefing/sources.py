@@ -4,7 +4,7 @@ from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 import json, urllib.request, urllib.parse, re
 import xml.etree.ElementTree as ET
-from .common import read, write, sealed, sha, now
+from memorive.research.common import read, write, sealed, sha, now
 
 SOURCES = {
     'openai_news': {'label':'OpenAI 公告', 'category':'announcement', 'format':'rss',

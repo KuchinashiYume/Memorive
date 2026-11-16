@@ -2,7 +2,7 @@
 made from them. Deterministic and offline: no network, model, clock, randomness or environment.
 
 resolve_identity_batch_with is the algorithm. resolve_identity_batch is the literature discovery
-entry; memorive_research_runtime/identity.py is the research runtime's entry, with its own
+entry; identity.py here is the research runtime's entry, with its own
 observation check and claim reader. The identifier normalizers and the other helpers here serve both.
 """
 
@@ -453,7 +453,7 @@ def resolve_identity_batch_with(
     """Resolve one deterministic offline batch without performing any I/O.
 
     The algorithm shared by literature discovery (resolve_identity_batch below) and the research
-    runtime (memorive_research_runtime/identity.py). What differs between them comes in: verify
+    runtime (identity.py). What differs between them comes in: verify
     checks one observation against the evidence registry, claim_from_observation reads its
     identity claim, producer is written into every record, and is_synthetic marks the candidate
     records. When all claims of an identifier carry optional_metadata (only runtime claims do), they

@@ -930,8 +930,8 @@ class ProductApi:
                 sample_job=self._sample_job, sample_message=self._sample_message,
             )
             self._browser_companion_auto_update = self._browser_companion.refresh_prepared_package()
-            from memorive_research_runtime.host import ResearchHost
-            from memorive_research_runtime.runtime import ResearchRuntime
+            from memorive.research.host import ResearchHost
+            from memorive.research.runtime import ResearchRuntime
             self._research = ResearchRuntime(ResearchHost(
                 service=self._service, library=self._library, messages=self._messages,
                 work_log=self._work_log, local_models=self._local_models,
@@ -941,7 +941,7 @@ class ProductApi:
                 notify_window=self._send_page_event,
                 research_workspace=lambda: getattr(self, "_memo", None)))
             self._library.research_artifact_provider = self._research.library_rows
-            from memorive_research_runtime.task_projection import log_rows
+            from memorive.research.task_projection import log_rows
             self._work_log.research_provider=lambda:log_rows(self._research)
             self._desk_assistant.start_deliveries()
         except Exception:
@@ -1375,8 +1375,8 @@ class ProductApi:
                     from update_service import UpdateService
                     self._updates = UpdateService(self)
             return self._updates.call(method, dict(params or {}))
-        from memorive_research_runtime.home import METHODS as HOME_METHODS, call as home_call
-        from memorive_research_runtime.ai_briefing import METHODS as AI_METHODS
+        from memorive.research.home import METHODS as HOME_METHODS, call as home_call
+        from memorive.research.briefing.jobs import METHODS as AI_METHODS
         if method in HOME_METHODS:
             return home_call(self._research.host,method,dict(params or {}))
         if method in AI_METHODS:
@@ -1391,13 +1391,13 @@ class ProductApi:
                         workspace_root=self._profile_path('WORKSPACE')/'research_workspace',
                         desktop_call=self.call,stage_inbox_paths=self.stage_inbox_paths)
             return self._memo.call(method,dict(params or {}),desktop=True)
-        from memorive_research_runtime.runtime import METHODS as RESEARCH_METHODS
+        from memorive.research.runtime import METHODS as RESEARCH_METHODS
         if method in RESEARCH_METHODS:
             return self._research.call(method,dict(params or {}))
         # Research answers messages that point at its runs and draws its runs on the current-task page.
         research=getattr(self,'_research',None)
         if research is not None and (method=='messages.navigate' or method in CURRENT_TASK_METHODS):
-            from memorive_research_runtime import routes as research_routes
+            from memorive.research import routes as research_routes
             answer=(research_routes.navigate(research,dict(params or {})) if method=='messages.navigate'
                     else research_routes.current_task(research,method,dict(params or {}),self._current_task.call))
             if answer is not None:
@@ -1439,7 +1439,7 @@ class ProductApi:
                         "GREEN": "COMPLETE",
                         "BLUE": "WEEKLY",
                     }[message.severity]
-                    from memorive_research_runtime.routes import literature_notification
+                    from memorive.research.routes import literature_notification
                     if literature_notification(self._research,message.target_locator):
                         kind='LITERATURE'
                     delivery = self._deliver_windows_notification(

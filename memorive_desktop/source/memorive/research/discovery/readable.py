@@ -1,6 +1,6 @@
 """One readable projection of source metadata, links and relation evidence."""
 import re
-from .metadata_v3 import links
+from memorive.research.discovery.metadata import links
 
 def text(value):
     return str(value or '').replace('<','&lt;').replace('>','&gt;')

@@ -14,7 +14,7 @@ def web(name):return (ROOT/'product/web'/name).read_text(encoding='utf8')
 
 
 def _scheduler(root,config,requests):
-    from memorive_research_runtime.runtime import ResearchRuntime
+    from memorive.research.runtime import ResearchRuntime
     instance=ResearchRuntime.__new__(ResearchRuntime)
     instance.root=root;instance.lock=RLock();instance.closed=False;instance.current=None
     def call(method,params):
@@ -26,7 +26,7 @@ def _scheduler(root,config,requests):
 
 
 def test_disabling_receiving_does_not_rewrite_schedule(tmp_path,monkeypatch):
-    from memorive_research_runtime.common import defaults
+    from memorive.research.common import defaults
     monkeypatch.delenv('MEMORIVE_TEST_CONSOLE_AUTO_EXECUTION',raising=False)
     config=dict(defaults(),passive_enabled=True,topic='fixture',interval_hours=168)
     runtime=_scheduler(tmp_path,config,[]);runtime.passive_tick(100)
@@ -35,7 +35,7 @@ def test_disabling_receiving_does_not_rewrite_schedule(tmp_path,monkeypatch):
     assert (tmp_path/'passive_schedule.json').read_bytes()==snapshot
 
 def test_report_windows_only_come_from_material_progress():
-    from memorive_research_runtime.periodic import windows,material_progress
+    from memorive.research.reports.periodic import windows,material_progress
     current=datetime(2026,9,8,tzinfo=timezone.utc)
     assert windows([],current)==[]
     library=SimpleNamespace(core_activity_rows=lambda:[{'task_id':'ok','updated_at':'2026-09-01T10:00:00Z'},

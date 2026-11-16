@@ -1,14 +1,14 @@
-"""EVO E6 workspace identity index, independent of UI filtering and exposure.
+"""The workspace's identity index, independent of what the window filters or shows.
 
-SQLite serializes identity/file/publication binding. Backfill consumes bounded
-metadata batches; discovery never opens a PDF or Card to answer identity queries.
+SQLite keeps the bindings of identity, file and publication. Backfill reads metadata in bounded
+batches; discovery never opens a PDF or a card to answer an identity query.
 """
 from contextlib import closing
 from pathlib import Path
 import json, re, sqlite3, threading
-from .common import sha, now
-from .relations import identity_keys, record_identifiers, canonical_doi, normalize_arxiv_id, ConnectorError
-from .metadata_v3 import plain
+from memorive.research.common import sha, now
+from memorive.research.discovery.relations import identity_keys, record_identifiers, canonical_doi, normalize_arxiv_id, ConnectorError
+from memorive.research.discovery.metadata import plain
 
 INACTIVE = {'TRASHED','DELETED','DEDUPLICATED'}
 

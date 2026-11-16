@@ -10,8 +10,8 @@ from memorive.platform.language.text import choose
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import copy, re, threading, time, json
-from .common import sha, now, write, read, sealed, validate_config, defaults, CHANNELS
-from .transport import MetadataClient
+from memorive.research.common import sha, now, write, read, sealed, validate_config, defaults, CHANNELS
+from memorive.research.discovery.transport import MetadataClient
 
 METHODS=frozenset({'research.state','research.config_get','research.config_save','research.start','research.get','research.cancel',
     'research.source_refresh','research.feedback_state','research.expose','research.feedback','research.revoke',
@@ -31,9 +31,9 @@ class ResearchRuntime:
         self.host=host
         self.root=host.profile_path('WORKSPACE')/'research'
         self.root.mkdir(parents=True,exist_ok=True)
-        from .ai_briefing import AIBriefing
+        from memorive.research.briefing.jobs import AIBriefing
         self.ai=AIBriefing(self)
-        from .feedback import FeedbackStore
+        from memorive.research.recommendations.feedback_store import FeedbackStore
         self.feedback=FeedbackStore(self.root)
         self.lock=threading.RLock()
         self.stop=threading.Event()
@@ -44,10 +44,10 @@ class ResearchRuntime:
         self.current=None
         self.selected_run=None  # the research run shown on the current-task page (routes.current_task)
         self.closed=False
-        from .work_index import WorkIndex
+        from memorive.research.discovery.work_index import WorkIndex
         self.work_index=WorkIndex(self.root)
         self.index_stop=threading.Event()
-        from .indexing import loop as index_loop
+        from memorive.research.discovery.indexing import loop as index_loop
         self.index_thread=threading.Thread(target=index_loop,args=(self,),name='desktop-work-identity-index',daemon=True)
         self.index_thread.start()
         self.report_clock=None
@@ -69,11 +69,11 @@ class ResearchRuntime:
         self.scheduler.start()
 
     def library_rows(self):
-        from .library_projection import rows
+        from memorive.research.reports.library_projection import rows
         return rows(self.root)
 
     def publish_to_library(self, run_id, kind, result):
-        from .library_projection import publish
+        from memorive.research.reports.library_projection import publish
         readable=self.run_path(run_id)/'result.md'
         if not readable.is_file() or readable.read_text(encoding='utf8')!=result['markdown']:
             raise ValueError('RESEARCH_READABLE_RESULT_MISMATCH')
@@ -98,7 +98,7 @@ class ResearchRuntime:
                 self.passive_status = 'WAITING_CONFIGURATION'
 
     def report_tick(self, current=None):
-        from .periodic import tick
+        from memorive.research.reports.periodic import tick
         return tick(self, current)
 
     def has_active_run(self):
@@ -191,7 +191,7 @@ class ResearchRuntime:
         for path in (self.root/'runs').glob('*/state.json'):
             item=read(path)
             items.append(item)
-        from .report_identity import project
+        from memorive.research.reports.identity import project
         items=project(self.root,items)
         return {'schema_version':'DesktopResearchState-v1','runs':sorted(items,key=lambda x:x['created_at'],reverse=True),
                 'active_run_id':self.current if self.has_active_run() else None,
@@ -218,7 +218,7 @@ class ResearchRuntime:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
             result=read(self.run_path(p['run_id'])/'result.json')
             row=next((r for r in result['recommendations'] if r['candidate_id']==p['candidate_id']),None)
-            from .metadata_v3 import links
+            from memorive.research.discovery.metadata import links
             allowed=(row.get('links') or links(row['identifiers'],row.get('locations',[]))) if row else []
             if not any(link['url']==p['url'] for link in allowed):
                 raise ValueError('RESEARCH_SOURCE_LINK_INVALID')
@@ -226,23 +226,23 @@ class ResearchRuntime:
         if method=='research.workflow_get':
             if p:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            from .report_models import projection
+            from memorive.research.reports.models import projection
             return projection(self)
         if method=='research.workflow_save':
             if set(p)!={'config','expected_revision'}:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            from .report_models import save
+            from memorive.research.reports.models import save
             return save(self,**p)
         if method=='research.schedule_get':
             if p:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            from .report_schedule import get
+            from memorive.research.reports.schedule import get
             with self.lock:
                 return get(self.root)
         if method=='research.schedule_save':
             if set(p)!={'config','expected_revision'}:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            from .report_schedule import save
+            from memorive.research.reports.schedule import save
             return save(self,**p)
         if method=='research.state':
             if p:
@@ -287,7 +287,7 @@ class ResearchRuntime:
         if method=='research.interaction_state':
             if p:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            from .interactions import current_digest
+            from memorive.research.recommendations.interactions import current_digest
             return current_digest(self)
         if method in {'research.config_get','research.config_save'}:
             return self.host.service.call(method.replace('research.config','settings.research'),p)
@@ -335,7 +335,7 @@ class ResearchRuntime:
             if period not in {'daily','weekly','monthly'}:
                 raise ValueError('RESEARCH_PERIOD_INVALID')
             sources=[]
-            from .report_identity import previous_window,project
+            from memorive.research.reports.identity import previous_window,project
             from memorive.research.reports.policy import ZONE,validate_window
             current=self.report_clock() if self.report_clock else datetime.now(ZONE)
             if regenerate_from is not None:
@@ -349,8 +349,8 @@ class ResearchRuntime:
                     raise ValueError('REPORT_WINDOW_UNAVAILABLE')
                 previous=read(original_path/'request.json')
                 if 'material_progress' in previous:
-                    from .periodic import material_progress as progress_rows,windows
-                    from .report_identity import window_key
+                    from memorive.research.reports.periodic import material_progress as progress_rows,windows
+                    from memorive.research.reports.identity import window_key
                     matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
                     material_progress=matches[0]['progress'] if matches else previous['material_progress']
             report_window=report_window or previous_window(period,current)
@@ -371,7 +371,7 @@ class ResearchRuntime:
                 params['regenerate_from']=regenerate_from
         if kind=='discovery':
             params['source_snapshot']=[s for s in literature['slots'] if s['provider'] in sources]
-            from .query_plan import request_options
+            from memorive.research.discovery.query_plan import request_options
             params['discovery_options']=request_options(objective,direction_id,days)
             if direction_id is not None and not any(d['id']==direction_id for d in config['directions']):
                 raise ValueError('RESEARCH_DIRECTION_NOT_FOUND')
@@ -431,9 +431,9 @@ class ResearchRuntime:
                     return read(self.run_path(self.current)/'state.json')
                 raise ValueError('RESEARCH_ALREADY_RUNNING')
             if kind=='report':
-                from .report_models import freeze
-                from .periodic import material_progress as progress_rows,windows
-                from .report_identity import window_key
+                from memorive.research.reports.models import freeze
+                from memorive.research.reports.periodic import material_progress as progress_rows,windows
+                from memorive.research.reports.identity import window_key
                 if not params.get('material_progress'):
                     matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
                     params['material_progress']=matches[0]['progress'] if matches else []
@@ -445,7 +445,7 @@ class ResearchRuntime:
             self.current=run_id
             item=self.update_state(run_id,run_id=run_id,kind=kind,language_context=language_context,title=((next(d['name'] for d in config['directions'] if d['id']==direction_id) if direction_id else config['topic'] or ' / '.join(d['name'] for d in config['directions']))+' · '+choose(language_context,'最新文献' if params['discovery_options']['objective']=='latest' else '高度相关文献','Latest literature' if params['discovery_options']['objective']=='latest' else 'Related literature','最新文献' if params['discovery_options']['objective']=='latest' else '関連文献')) if kind=='discovery' else {'daily':'日报','weekly':'周报','monthly':'月报'}[period],created_at=now(),status='QUEUED',stage='WAITING',request_sha256=sha(params),period=period)
             if report_window:
-                from .report_identity import next_revision,title
+                from memorive.research.reports.identity import next_revision,title
                 revision=next_revision(self.root,report_window)
                 item=self.update_state(run_id,title=title(report_window,revision,language_context),report_window=report_window,
                     report_revision=revision,regenerate_from=regenerate_from,report_model=params.get('report_model'))
@@ -474,12 +474,12 @@ class ResearchRuntime:
             with TASK_CATEGORIES.enter('RESEARCH_' + params['kind'].upper(), checkpoint=checkpoint), session_scope(self.progress_session(run_id)):
                 self.update_state(run_id,status='RUNNING',stage='COLLECTING')
                 if 'material_progress' in params:
-                    from .periodic import render
+                    from memorive.research.reports.periodic import render
                     result=render(self,run_id,params)
                 else:
                     result=self._discovery(run_id,params) if params['kind']=='discovery' else self._report(run_id,params['period'],params.get('report_window'),params.get('report_cutoff'),params.get('language_context'))
                 if params.get('report_model'):
-                    from .report_models import compose
+                    from memorive.research.reports.models import compose
                     result=compose(self,run_id,params,result)
                     self.update_state(run_id,model_calls=result['model_calls'],paid_model_calls=result['paid_model_calls'])
                 if self.stop.is_set():
@@ -563,7 +563,7 @@ class ResearchRuntime:
             return repaired
 
     def _finalize_discovery(self,run_id,result):
-        from .readable import discovery_markdown
+        from memorive.research.discovery.readable import discovery_markdown
         bound=self.work_index.commit_batch(run_id,result['recommendations'])
         result=dict(result,**bound)
         result['channel_allocations']=[dict(row,selected=sum(r['channel']==row['channel'] for r in result['recommendations']),
@@ -576,14 +576,14 @@ class ResearchRuntime:
         return result
 
     def _discovery(self,run_id,params):
-        from .discovery import run
+        from memorive.research.discovery.desktop import run
         return run(self,run_id,params)
 
     def _report(self,run_id,period,window=None,cutoff=None,language_context=None):
-        from .digest import build_digest
+        from memorive.research.reports.digest_builder import build_digest
         from memorive.research.reports.renderer import render_markdown
         from memorive.research.reports.policy import ZONE
-        from .report_identity import previous_window
+        from memorive.research.reports.identity import previous_window
         current=datetime.fromisoformat(cutoff) if cutoff else self.report_clock() if self.report_clock else datetime.now(ZONE)
         window=window or previous_window(period,current)
         start=datetime.fromisoformat(window['start'])
@@ -656,7 +656,7 @@ class ResearchRuntime:
         return self.host.messages.post_event(event)[0]
 
     def _failure_message(self,run_id,stage):
-        from .task_projection import STEPS
+        from memorive.research.task_projection import STEPS
         state=read(self.run_path(run_id)/'state.json')
         place=dict(STEPS).get(stage,'文献检索')
         problem='结果已生成，但文件、索引或消息投递未完成；请修复投递，无需重新检索。' if stage=='PUBLISHING' else '来源未返回可用数据；请检查来源配置、凭据或网络后重新检索。'

@@ -11,7 +11,7 @@ PRESETS = {
     'crossref': ('Crossref', 'https://api.crossref.org/works', ''),
     'web-of-science': ('Web of Science Starter', 'https://api.clarivate.com/apis/wos-starter/v1/documents', 'WOS_API_KEY'),
 }
-CATALOG = tuple((p, v[0], '官方文献元数据', 'CONNECTOR_BUILT', 'memorive_research_runtime.transport')
+CATALOG = tuple((p, v[0], '官方文献元数据', 'CONNECTOR_BUILT', 'memorive.research.discovery.transport')
                 for p,v in PRESETS.items())
 SELECTABLE = frozenset(PRESETS)
 SLOT_IDS = ('literature-1','literature-2','literature-3')

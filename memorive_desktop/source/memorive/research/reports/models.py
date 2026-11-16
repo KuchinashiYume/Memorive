@@ -1,7 +1,11 @@
+"""Which model profiles research reports and the AI briefing may use: the options offered from the
+settings and local models (profile_options, profiles_offered, catalog), the saved choice (save), and
+the profile frozen for a run (freeze, compose). The research workspace uses it too.
+"""
 from memorive.models.provider_aliases import matches_result_model
 """Report workflow configuration and the source-bound model narrative bridge."""
-from .common import read,write,sealed,sha
-from .task_projection import REPORT_STEPS
+from memorive.research.common import read,write,sealed,sha
+from memorive.research.task_projection import REPORT_STEPS
 PERIODS=('daily','weekly','monthly')
 
 def config(root):

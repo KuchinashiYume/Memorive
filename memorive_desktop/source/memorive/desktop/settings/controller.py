@@ -277,7 +277,7 @@ class SettingsController:
         return self.external_data_sources.get_state()
 
     def research_get(self):
-        from memorive_research_runtime.common import read, defaults, sealed
+        from memorive.research.common import read, defaults, sealed
         path=self.store.profile_root/'research_preferences.json'
         if not path.exists():
             return {'schema_version':'ResearchPreferences-v1','revision':0,'config':defaults()}
@@ -286,7 +286,7 @@ class SettingsController:
         return sealed(dict(saved,config=dict(defaults(),**saved['config'])))
 
     def research_save(self, *, config, expected_revision):
-        from memorive_research_runtime.common import validate_config_edit, sealed
+        from memorive.research.common import validate_config_edit, sealed
         with self.external_data_sources._write_lock():
             current=self.research_get()
             if type(expected_revision) is not int or expected_revision!=current['revision']:

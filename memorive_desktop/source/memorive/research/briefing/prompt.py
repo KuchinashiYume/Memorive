@@ -1,9 +1,9 @@
 """Production prompt: the editorial baseline, adapted to source-ID-bound output."""
 import json
-from .common import sha
+from memorive.research.common import sha
 from memorive.desktop.settings.answer_styles import from_snapshot, effective_override
 from memorive.platform.language.policy import freeze, validate, locale, instruction
-from .ai_prompt_locales import SYSTEM_EN, SYSTEM_JA, COMMON_EN, COMMON_JA, MODES_EN, MODES_JA, FOOTERS
+from memorive.research.briefing.prompt_locales import SYSTEM_EN, SYSTEM_JA, COMMON_EN, COMMON_JA, MODES_EN, MODES_JA, FOOTERS
 
 VERSION='MemoAIBriefing-P08Editorial-v3'
 SYSTEM='''你是一名中文 AI 资讯编辑。读者问“最近 AI 界有什么进展”时，你要帮他看出这一段时间的主线，而不是逐条复述公司公告。

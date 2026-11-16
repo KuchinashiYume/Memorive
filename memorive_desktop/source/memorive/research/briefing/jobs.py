@@ -1,13 +1,13 @@
 """Explicit AI briefing jobs in the existing research task/result/message lifecycle."""
 from datetime import datetime, timedelta, timezone, date
 import json, re, sqlite3, threading
-from .common import read, write, sealed, sha, now
-from .ai_sources import PublicSources, SOURCES, source_url
+from memorive.research.common import read, write, sealed, sha, now
+from memorive.research.briefing.sources import PublicSources, SOURCES, source_url
 from memorive.platform.language.policy import freeze as freeze_language, from_settings, validate as validate_language
 from memorive.platform.language.text import choose
 
 METHODS=frozenset({'ai.state','ai.config_get','ai.config_save','ai.generate','ai.get','ai.cancel','ai.retry','ai.open_source'})
-from .ai_prompt import VERSION as TEMPLATE
+from memorive.research.briefing.prompt import VERSION as TEMPLATE
 ZONE=timezone(timedelta(hours=9))
 DEFAULT_CONFIG={'profile_ref':None,'sources':list(SOURCES),'range_mode':'7','range_start':None,'range_end':None,'focus':''}
 STATEMENT={'anyOf':[{'type':'null'},{'type':'object','additionalProperties':False,'properties':{
@@ -125,7 +125,7 @@ class AIBriefing:
         # Read-only migration of the early E7 shape; existing settings are preserved.
         return dict(value,config={**DEFAULT_CONFIG,**value['config']})
     def config_get(self):
-        from .report_models import catalog
+        from memorive.research.reports.models import catalog
         value=self.config()
         options=catalog(self.r)
         ref=value['config']['profile_ref'] or workspace_settings(self.r.host).get('profile_ref')
@@ -338,7 +338,7 @@ class AIBriefing:
                         r.notify_ui()
                         return
                 r.update_state(run_id,stage='COMPOSING',cache_key=cache_key)
-                from .ai_prompt import assemble
+                from memorive.research.briefing.prompt import assemble
                 prompt_record=assemble(materials,params['window'],params['focus'],params['style'],SCHEMA,params.get('language_context'))
                 prompt=prompt_record['prompt']
                 write(path/'model_request.json',sealed(dict(prompt_record,schema=SCHEMA,snapshot_id=params['report_model']['snapshot_id'],

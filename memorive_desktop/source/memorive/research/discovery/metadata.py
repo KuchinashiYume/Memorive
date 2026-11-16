@@ -1,7 +1,7 @@
-"""EVO E6 metadata successor: optional fields never invent bibliographic facts.
+"""Paper metadata from a source: optional fields never invent bibliographic facts.
 
-Legacy fixture connectors remain immutable. This production adapter retains raw
-page boundaries, source date precision and version identities separately.
+The old fixture connectors stay as they are. This adapter keeps raw page boundaries, the precision
+of a source's dates and version identities apart.
 """
 from datetime import date
 from calendar import monthrange
@@ -10,7 +10,7 @@ import json, re
 from urllib.parse import urlsplit, quote
 from defusedxml import ElementTree as ET
 from memorive.research.discovery.connector_framework import normalize_doi, normalize_arxiv_id
-from .common import sha
+from memorive.research.common import sha
 
 SCHEMA = 'E6NormalizedMetadata-v1'
 

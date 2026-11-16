@@ -1,8 +1,9 @@
-"""Single-writer desktop persistence around the unchanged RECOMMENDATION-HISTORY event engine."""
+"""Recommendation feedback events stored by one writer, around the recommendation history engine
+(exposure_feedback.py), which it does not change."""
 from pathlib import Path
 from threading import RLock
 from memorive.research.recommendations import exposure_feedback as engine
-from .common import read, write, sealed, sha, now
+from memorive.research.common import read, write, sealed, sha, now
 
 class FeedbackStore:
     def __init__(self,root):
@@ -71,7 +72,7 @@ class FeedbackStore:
         stamp=as_of or now()
         ledger=engine.build_exposure_ledger(state['events'])
         suppressions=engine.derive_scoped_suppressions(ledger,stamp)
-        from .work_index import canonical_manifestation
+        from memorive.research.discovery.work_index import canonical_manifestation
         canonical=canonical_manifestation(item['manifestation_id'])
         variants={canonical,item['manifestation_id']}|{e['manifestation_id'] for e in state['events']
             if e.get('manifestation_id') and canonical_manifestation(e['manifestation_id'])==canonical}

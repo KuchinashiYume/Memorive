@@ -1,7 +1,7 @@
 """Manual public metadata acquisition, with a durable binding before every attempt."""
 import threading, time, os, subprocess, re, json
 from pathlib import Path
-from .common import sha, now, write, read, sealed
+from memorive.research.common import sha, now, write, read, sealed
 from memorive.research.discovery.live_metadata_transport import (
     TransportPolicy,
 )
@@ -78,7 +78,7 @@ class MetadataClient:
 
     def fetch(self,provider,topic,count,run_id,call_id,stop,*,cursor=None,source_snapshot=None,exact_doi=None,exact_arxiv=None):
         from memorive.desktop.settings.literature_sources import PRESETS
-        from . import wos
+        from memorive.research.discovery import wos
         if provider.lower() not in PRESETS:
             raise ValueError('LITERATURE_PROVIDER_UNSUPPORTED')
         source=source_snapshot or (next((s for s in self.source_config() if s['provider']==provider.lower()),None) if self.source_config else None)
@@ -163,7 +163,7 @@ class MetadataClient:
                     raise ValueError('SOURCE_HTTP_'+str(response.status_code))
                 if stop.is_set():
                     raise ValueError('RESEARCH_CANCELLED')
-                from .metadata_v3 import parse_arxiv,parse_crossref
+                from memorive.research.discovery.metadata import parse_arxiv,parse_crossref
                 parsed=wos.parse(response.body) if provider=='WEB-OF-SCIENCE' else (parse_arxiv if provider=='ARXIV' else parse_crossref)(response.body)
                 if len(parsed['records'])>count:
                     raise ValueError('SOURCE_RECORD_ENVELOPE_EXCEEDED')

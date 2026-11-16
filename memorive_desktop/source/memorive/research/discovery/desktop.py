@@ -2,21 +2,22 @@
 from datetime import datetime,timezone
 import re
 from inspect import signature,Parameter
-from .common import CHANNELS,sha,now,read,write,sealed
-from .directions import effective_directions,channel_targets
-from .transport import PAGE_LIMITS
+from memorive.research.common import CHANNELS,sha,now,read,write,sealed
+from memorive.research.discovery.directions import effective_directions,channel_targets
+from memorive.research.discovery.transport import PAGE_LIMITS
 from memorive.documents.workflow.node_progress import scope
 
 def run(runtime,run_id,params):
-    from . import identity,slate
+    from memorive.research.discovery import identity
+    from memorive.research.discovery import slate
     from memorive.research.discovery.connector_framework import sha256_json
     config=params['config']
     directions=effective_directions(config)
     targets=channel_targets(config,directions)
-    from .acquisition import collect,resolve
-    from .query_plan import assess
-    from .metadata_v3 import links,date_bounds
-    from .work_index import manifestation
+    from memorive.research.discovery.acquisition import collect,resolve
+    from memorive.research.discovery.query_plan import assess
+    from memorive.research.discovery.metadata import links,date_bounds
+    from memorive.research.discovery.work_index import manifestation
     options=params['discovery_options']
     if options.get('direction_id'):
         directions=[d for d in directions if d['id']==options['direction_id']]
@@ -50,7 +51,7 @@ def run(runtime,run_id,params):
         'context_hash':context['content_hash'],'primary_channel_priority':list(slate.PRIMARY_CHANNEL_PRIORITY),
         'tie_break':'CANONICAL_IDENTITY_ASC','no_backfill':'CORE_SILENT_BACKFILL_FORBIDDEN',
         'history_windows_days':[30,90],'frozen_as_of':now()})
-    from .recent_interest_adapter import frozen as freeze_interests,ranking as interest_ranking
+    from memorive.research.discovery.recent_interests import frozen as freeze_interests,ranking as interest_ranking
     interest_snapshot=freeze_interests(runtime,config)
     facts=[]
     display={}
@@ -160,7 +161,7 @@ def run(runtime,run_id,params):
     history=runtime.feedback.history([d['id'] for d in directions])
     result=slate.compose_projection(facts,context,plan,history)
     recommendations=[dict(display[x['candidate_id']],**x) for x in result['slate']['selected']]
-    from .readable import discovery_markdown
+    from memorive.research.discovery.readable import discovery_markdown
     from memorive.platform.language.discovery import reason
     for row in recommendations:
         row['recommendation_reason']=reason(row,params.get('language_context'))

@@ -14,7 +14,7 @@ ROOT = Path(os.environ.get('MEMORIVE_TESTS_TARGET', Path(__file__).resolve().par
 for folder in (ROOT / 'source', ROOT / 'product/desktop'):
     sys.path.insert(0, str(folder))
 from memorive.desktop.api import ProductApi
-from memorive_research_runtime.common import defaults
+from memorive.research.common import defaults
 from memorive.desktop.test_console.product_adapter import ProductConsoleAdapter
 
 

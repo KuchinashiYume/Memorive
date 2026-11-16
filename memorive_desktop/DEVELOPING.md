@@ -7,7 +7,7 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 
 | Folder | What it holds |
 | --- | --- |
-| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`); one package still waits to move (`memorive_research_runtime`, into `memorive/research`). `memorive/desktop/api.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
+| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`). `memorive/desktop/api.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
 | `ui/` | The sources of the window's two pages. `tools/build_pages.py` builds `product/desktop/bundle_integrated.html` and `bundle_assistant.html` from them; see `ui/README.md`. |
 | `tests/` | The tests. Run them with `tests/run_tests.py` (below). |
 | `examples/` | Small programs that run one feature without the window. |
@@ -43,10 +43,10 @@ start" below).
   `WorkflowExams` (`memorive/exams/runner.py`) plans and runs a node's exam and
   keeps the scores; it holds the model runner and sends the exam's requests through it.
 - **Discovery and reports**: the window (`research.*`, `ai.*`, `home.*`) or a schedule →
-  `memorive_research_runtime` (`runtime.py` runs discovery and reports, `ai_briefing.py` the AI
+  `memorive/research` (`runtime.py` runs discovery and reports, `briefing/` the AI
   briefing, `home.py` the home page summary) with `memorive/research/discovery`, `memorive/research/recommendations`
   and `memorive/research/reports`. Messages and current-task requests about a research run are answered by
-  its `routes.py`. The package reaches the rest of the app only through the `ResearchHost` that
+  its `routes.py`. The runtime reaches the rest of the app only through the `ResearchHost` that
   `ProductApi` builds (`host.py`): the settings service, library, messages, work log and window events.
 
 Calls go from the window side towards the business packages, from those to model execution and
@@ -68,7 +68,7 @@ places still reach across areas; these are the places to untangle when that code
 | --- | --- |
 | Desktop: window, service, panels | `memorive/desktop` (`api.py` ProductApi, `settings/`, `service/`, `assistant/`, `current_task/`, `messages/`, `work_log/`, `accounting/`, `test_console/`, `harness/` an integration harness run by hand, `release_links.py`; its docstring lists each part) |
 | Documents | `memorive/documents` (`inbox/`, `processing/` with `registration.py` for paper IDs, `library/`, `registry/` the artifact registry, `front_matter.py`; `workflow/`, `card_distillation/`, `card_review/`, `card_states/`, `data_review/`; its docstring lists each part) |
-| Research | `memorive/research/workspace`, `memorive_research_runtime` (moves next), `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports`, `memorive/research/analysis`, `memorive/research/opportunities`, `memorive/research/retrieval`, `memorive/research/ranking`, `memorive/research/knowledge_feedback` (knowledge drafts) |
+| Research | `memorive/research/workspace`, `memorive/research` (`runtime.py` and the files next to it, `briefing/`), `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports`, `memorive/research/analysis`, `memorive/research/opportunities`, `memorive/research/retrieval`, `memorive/research/ranking`, `memorive/research/knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
 | Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
@@ -169,13 +169,13 @@ can ask again from the window.
 | --- | --- | --- |
 | When a failed model call is tried again, how often, how long to wait | `memorive/models/execution/retry.py` | `test_model_execution.py` |
 | How a model profile is frozen and a call is sent once | `memorive/models/execution/runs.py` | `test_model_execution.py` |
-| Which model profiles research may choose | `profile_options` in `memorive_research_runtime/report_models.py`; the desktop supplies its data in `catalog()`, the window-less process in `memorive/research/workspace/headless_models.py` | `test_research_model_catalog.py` |
+| Which model profiles research may choose | `profile_options` in `memorive/research/reports/models.py`; the desktop supplies its data in `catalog()`, the window-less process in `memorive/research/workspace/headless_models.py` | `test_research_model_catalog.py` |
 | The instructions the model is given | `CHAT_RULES` in `memorive/models/gateway/research_prompt_cache.py`; for an agent job `instructions()` in `memorive/research/opportunities/research_opportunities.py`; `AnswerJob.build_request` chooses between them | `test_research_qa_flow.py` |
 | The answer format the model must return | `ANSWER_SCHEMA` in `memorive/research/workspace/desktop.py`; `AnswerJob.build_request` ties it to the excerpt ids | `test_research_qa_flow.py` |
 | Which excerpts go into the prompt | `AnswerJob.gather_evidence` and `AnswerJob.model_context` in `answering.py`; `context_selection.py` | `test_research_qa_flow.py` |
 | How an answer is checked (text present, only shown excerpts cited) | `AnswerJob.check_answer` | `test_research_qa_flow.py` |
-| The message a research run leaves when it finishes or fails | `post_result_message` and `_failure_message` in `memorive_research_runtime/runtime.py`; they hand the event to `MessagesProductController.post_event` | `test_research_discovery_feedback.py` |
-| Where a message about a research run leads; research runs on the current-task page | `memorive_research_runtime/routes.py` | `test_research_discovery_feedback.py` |
+| The message a research run leaves when it finishes or fails | `post_result_message` and `_failure_message` in `memorive/research/runtime.py`; they hand the event to `MessagesProductController.post_event` | `test_research_discovery_feedback.py` |
+| Where a message about a research run leads; research runs on the current-task page | `memorive/research/routes.py` | `test_research_discovery_feedback.py` |
 | What is saved with an answer, answer versions | `AnswerJob.save_answer`, `answer_versions.py` | `test_research_qa_flow.py`, `test_workspace_answer_context.py` |
 | How a document becomes numbered, searchable excerpts | `excerpts_of` and `EvidenceIndex` in `memorive/research/workspace/evidence.py` | `test_evidence_index.py`, `test_research_qa_flow.py` |
 | When an excerpt counts as stale, and how often its files are hashed | `EvidenceIndex.read` and `checking_each_file_once` in `evidence.py`; the blocks are opened in `AnswerJob.run` and `AnswerVersions.validate_context` | `test_evidence_index.py`, `test_research_qa_flow.py` |

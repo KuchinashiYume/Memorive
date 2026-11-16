@@ -1,3 +1,9 @@
+"""The research runtime's state files and settings: JSON state read and written under a lock with
+atomic replacement (read, write, sealed), hashes (sha), the current time (now), and the default
+research settings with their checks (defaults, validate_config, validate_config_edit).
+
+Used by the runtime's modules, the settings service and the ranking package.
+"""
 from pathlib import Path
 from datetime import datetime, timezone
 import json, hashlib, os, uuid

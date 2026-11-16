@@ -1,10 +1,10 @@
-"""EVO E6 bounded acquisition; all seeds/pages share one frozen request budget."""
+"""Fetching candidate papers within a budget: all seeds and pages share one fixed request budget."""
 from inspect import signature,Parameter
 import re,time
-from .common import sha,read,write,sealed
-from .query_plan import plans,source_query
-from .metadata_v3 import links
-from .relations import identity_keys
+from memorive.research.common import sha,read,write,sealed
+from memorive.research.discovery.query_plan import plans,source_query
+from memorive.research.discovery.metadata import links
+from memorive.research.discovery.relations import identity_keys
 
 def collect(runtime,run_id,params,directions,targets):
     from memorive.research.discovery.connector_framework import sha256_json
@@ -142,7 +142,7 @@ def collect(runtime,run_id,params,directions,targets):
     return fetched,failures,observations,records,memberships,seed_map,seed_evidence
 
 def resolve(observations,registry):
-    from . import identity
+    from memorive.research.discovery import identity
     exact=[r for r in observations if identity_keys(r['identifiers'])]
     result=identity.resolve_identity_batch(exact,registry)
     # A source URL is a metadata identity, never an assertion of a verified DOI.

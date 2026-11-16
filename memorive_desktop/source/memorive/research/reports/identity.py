@@ -1,7 +1,7 @@
-"""SHARED typed report identity; legacy enrichment is read-only."""
+"""The typed identity of a report; older enrichment is read only."""
 from datetime import datetime,timedelta
 from memorive.research.reports.policy import ZONE,validate_window
-from .common import read
+from memorive.research.common import read
 
 LABELS={'daily':'日报','weekly':'周报','monthly':'月报'}
 

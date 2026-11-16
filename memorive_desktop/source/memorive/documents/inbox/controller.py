@@ -169,7 +169,7 @@ class InboxController:
         bound_path = Path(str(binding["bound_path"]))
         locator = self._locator(bound_path)
         content_sha = str(binding["sha256"])
-        from memorive_research_runtime.work_index import own_file_metadata
+        from memorive.research.discovery.work_index import own_file_metadata
         identity = own_file_metadata(bound_path)
         work_binding = self.work_index.bind_file({'item_id':item_id,'content_sha256':content_sha,'state':'QUEUED'},identity,target_resolver=self._accessible_duplicate) if self.work_index else None
         duplicate = (self._accessible_duplicate(work_binding['duplicate_item_id']) if work_binding and work_binding.get('duplicate_item_id') else None)

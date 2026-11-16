@@ -47,7 +47,7 @@ def exact_library_matches(identifiers,records):
 def metadata_comparison(candidate,records):
     """Discovery relation renderer, explicit metadata-only successor; no fake vectors."""
     from memorive.research.discovery import novelty_assessment_literature_discovery_library_relation_novelty as original
-    from .common import sha
+    from memorive.research.common import sha
     relations=[]
     unidentified=0
     candidate_keys=identity_keys(candidate['identifiers'])

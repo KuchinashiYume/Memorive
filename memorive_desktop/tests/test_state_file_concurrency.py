@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def test_research_state_read_and_atomic_replace_are_serialized(tmp_path,monkeypatch):
-    from memorive_research_runtime import common
+    from memorive.research import common
     target=tmp_path/'state.json'
     common.write(target,common.sealed({'state':'RUNNING'}))
     opened=threading.Event();release=threading.Event();writer_started=threading.Event()

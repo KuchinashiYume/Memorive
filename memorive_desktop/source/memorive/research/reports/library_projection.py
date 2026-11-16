@@ -1,5 +1,5 @@
 """Hash-bound local Library projections; no canonical registry promotion."""
-from .common import read, sealed, write, sha
+from memorive.research.common import read, sealed, write, sha
 
 def current_row(row):
     row=dict(row)
@@ -46,7 +46,7 @@ def publish(root, run_id, kind, title, result, created_at):
 
 
 def rows(root):
-    from .report_identity import project
+    from memorive.research.reports.identity import project
     reports={item['run_id']:item for item in project(root) if item.get('kind')=='report'}
     result = []
     for path in sorted((root / 'runs').glob('*/library.json')):

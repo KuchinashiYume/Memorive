@@ -1,4 +1,4 @@
-"""DISCOVERY-CHANNELS sandbox candidate: deterministic five-channel finite slate composer."""
+"""The candidate slate: a fixed, deterministic set of candidates composed from five channels."""
 
 from __future__ import annotations
 

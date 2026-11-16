@@ -376,7 +376,7 @@ class InboxStore:
         return [{"sequence": int(row["sequence"]), **self._decode(row["event_json"])} for row in rows]
 
     def changed_items(self, after_sequence: int, limit: int) -> tuple[list[int], list[dict[str, Any]], int]:
-        """For an index that follows the inbox (research's work index, memorive_research_runtime/work_index.py).
+        """For an index that follows the inbox (research's work index, memorive/research/discovery/work_index.py).
 
         Returns the sequence numbers of up to limit events after after_sequence, the items those
         events name (each once, in event order) and the newest sequence number in the store.

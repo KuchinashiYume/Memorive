@@ -48,7 +48,7 @@ RESTORED = {'memorive.documents.card_distillation.segmented_distill.contracts': 
  'memorive.desktop.service.adapters': ['FakeFacadeAdapter'],
  'memorive.desktop.service.errors': ['BackpressureExceeded', 'InstanceAlreadyActive'],
  'memorive.documents.inbox.contracts': ['require_item_state'],
- 'memorive_research_runtime.identity': ['normalize_identifier', 'initialization_candidate_base_projection'],
+ 'memorive.research.discovery.identity': ['normalize_identifier', 'initialization_candidate_base_projection'],
  'memorive.research.reports.api_briefing': ['run_api_briefing'],
  'memorive.research.retrieval.coverage_artifacts': ['admit_chunk_snapshots',
                                   'build_facet_definition_artifact',

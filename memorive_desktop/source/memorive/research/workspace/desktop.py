@@ -22,7 +22,7 @@ def create(*, service, library, local_models, profile_root, workspace_root, desk
     desktop_call       ProductApi.call: the inbox and current task methods a connected app's files go through
     stage_inbox_paths  ProductApi.stage_inbox_paths: copies a connected app's file for the inbox
     """
-    from memorive_research_runtime.report_models import profiles_offered
+    from memorive.research.reports.models import profiles_offered
     def interest_get():
         return service.call('settings.research_get',{})['config']['use_recent_interests']
     def interest_set(enabled):

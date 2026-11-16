@@ -1,4 +1,4 @@
-"""Which model profiles research can choose (memorive_research_runtime/report_models.py).
+"""Which model profiles research can choose (memorive/research/reports/models.py).
 
 profile_options() decides it from data: the saved settings and the recognized local models. The
 desktop's catalog() and the window-less binding (memorive/research/workspace/headless_models.py) only
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from memorive_research_runtime import report_models
+from memorive.research.reports import models as report_models
 
 
 def profile(ref, kind, capability="CHAT", status="AVAILABLE", credential=True, runnable=None, exact=None):

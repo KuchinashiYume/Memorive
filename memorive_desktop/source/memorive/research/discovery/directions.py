@@ -1,5 +1,5 @@
 """Stable user-confirmed direction identities, independent of delivery channels."""
-from .common import sha,CHANNELS
+from memorive.research.common import sha,CHANNELS
 
 def effective_directions(config):
     if config.get('directions'):

@@ -9,7 +9,7 @@ run ids and draws a research run on the current-task page:
 - literature_notification: whether a message about a result is a literature discovery, which
   gets its own Windows notification kind.
 """
-from .task_projection import bindings, view
+from memorive.research.task_projection import bindings, view
 
 RUN_LOCATOR = 'memorive://job/research-'
 RESULT_LOCATOR = 'memorive://artifact/research-'

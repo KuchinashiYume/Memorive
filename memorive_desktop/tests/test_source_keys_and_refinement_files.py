@@ -10,11 +10,11 @@ ROOT = Path(os.environ.get("MEMORIVE_TESTS_TARGET", Path(__file__).resolve().par
 for p in (ROOT/"source", ROOT/"product/desktop"):
     sys.path.insert(0, str(p))
 from memorive.desktop.api import ProductApi
-from memorive_research_runtime.common import defaults, sealed, write, read
+from memorive.research.common import defaults, sealed, write, read
 
 
 def test_wos_contract_and_secret_never_in_receipts(tmp_path,monkeypatch):
-    from memorive_research_runtime.transport import MetadataClient, _last
+    from memorive.research.discovery.transport import MetadataClient, _last
     from memorive.desktop.settings.metadata_transport import MetadataResponse
     secret="synthetic-key-not-a-real-credential"
     monkeypatch.setenv("WOS_API_KEY",secret);_last.clear()
@@ -96,12 +96,12 @@ def test_matching_preference_is_saved_not_an_execution_filter(api):
     current["config"]["matching_preference"]=90
     saved=api.call("research.config_save", {"config":current["config"],"expected_revision":current["revision"]})
     assert saved["config"]["matching_preference"]==90
-    runtime=(ROOT/"source/memorive_research_runtime/runtime.py").read_text(encoding="utf8")
+    runtime=(ROOT/"source/memorive/research/runtime.py").read_text(encoding="utf8")
     assert "matching_preference" not in runtime
 
 
 def test_wos_no_key_fails_before_transport(tmp_path, monkeypatch):
-    from memorive_research_runtime.transport import MetadataClient
+    from memorive.research.discovery.transport import MetadataClient
     monkeypatch.delenv("WOS_API_KEY", raising=False)
     class NoNetwork:
         def request(self, **kwargs): raise AssertionError("No credential may perform I/O")

@@ -346,7 +346,7 @@ def build_inbox_controller(
         minimum_free_bytes=256,
         include_sample_projection=include_sample_track,
     )
-    from memorive_research_runtime.work_index import WorkIndex
+    from memorive.research.discovery.work_index import WorkIndex
     controller.work_index = WorkIndex(folders.path_for("WORKSPACE") / "research")
     if not include_sample_track:
         return controller
@@ -524,7 +524,7 @@ async def run(
     core_task_controls = TaskControlStore(folders.path_for("Core_TASK_CONTROLS"))
     inbox_controller.job_state_provider = lambda job_id: {
         **facade.get_job(job_id), "pause_node_id":core_task_controls.pause_point(job_id)}
-    from memorive_research_runtime.interactions import record_analysis
+    from memorive.research.recommendations.interactions import record_analysis
     core_worker = CoreVerticalWorker(
         facade=facade,
         inbox=inbox_controller,

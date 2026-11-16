@@ -7,8 +7,8 @@ import os,re,json,time,threading
 from pathlib import Path
 from urllib.parse import urlencode
 from memorive.research.workspace.store import digest,now,uid
-from memorive_research_runtime.common import sealed,write,read
-from memorive_research_runtime.transport import BoundedMetadataTransport
+from memorive.research.common import sealed,write,read
+from memorive.research.discovery.transport import BoundedMetadataTransport
 
 class BibliometricsClient:
     def __init__(self,root,preferences,transport=None):

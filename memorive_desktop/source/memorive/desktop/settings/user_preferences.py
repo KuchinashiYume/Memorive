@@ -7,7 +7,7 @@ import zlib
 import unicodedata
 from pathlib import Path
 from threading import RLock
-from memorive_research_runtime.common import read, write, sealed
+from memorive.research.common import read, write, sealed
 from memorive.desktop.settings.answer_styles import DEFAULT_STYLE,validate_style
 
 _LOCK = RLock()

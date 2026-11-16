@@ -1,8 +1,8 @@
-"""EVO E6 explicit query objectives and inspectable metadata relation evidence."""
+"""Explicit query objectives, and evidence of how a candidate's metadata relates to them that a person can inspect."""
 from datetime import date,datetime,timedelta,timezone
 import math,re
-from .common import sha
-from .metadata_v3 import date_bounds
+from memorive.research.common import sha
+from memorive.research.discovery.metadata import date_bounds
 
 OBJECTIVES=('latest','related')
 LIMITS={'max_requests':12,'max_pages_per_query':2,'page_size':20,'max_elapsed_seconds':240,

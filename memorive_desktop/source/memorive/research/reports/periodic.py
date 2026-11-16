@@ -2,8 +2,8 @@
 from datetime import datetime, timedelta
 from memorive.research.reports.policy import ZONE, original_window_ref, validate_window
 from memorive.research.reports.renderer import render_markdown
-from .common import sha, sealed, write, read
-from .digest import build_digest
+from memorive.research.common import sha, sealed, write, read
+from memorive.research.reports.digest_builder import build_digest
 
 
 def material_progress(host):
@@ -45,10 +45,10 @@ def tick(runtime, current=None):
             return {'status':'CLOSED'}
         if runtime.has_active_run():
             return {'status':'BUSY'}
-        from .report_schedule import get,due_at
-        from .report_identity import project,window_key
+        from memorive.research.reports.schedule import get,due_at
+        from memorive.research.reports.identity import project,window_key
         schedule=get(runtime.root)['config']
-        from .report_models import config,catalog
+        from memorive.research.reports.models import config,catalog
         mapping=config(runtime.root)['config']
         available={r['profile_ref'] for r in catalog(runtime) if r['eligible']}
         produced={window_key(row['report_window']) for row in project(runtime.root)

@@ -1,6 +1,6 @@
 """Public literature metadata requests: what MetadataClient.fetch sends, returns and records.
 
-Pins today's behaviour of memorive_research_runtime.transport before the planned removal of
+Pins today's behaviour of memorive.research.discovery.transport before the planned removal of
 the source hashes it writes into every request record (the hash of transport.py and of
 runtime.py). A fake transport stands in for the network and answers with the synthetic
 Crossref and arXiv pages the module tests already use. Recorded per case: the request the
@@ -15,8 +15,8 @@ import re
 import threading
 from pathlib import Path
 
-from memorive_research_runtime import transport
-from memorive_research_runtime.common import read
+from memorive.research.discovery import transport
+from memorive.research.common import read
 from memorive.desktop.settings.metadata_transport import MetadataResponse
 from tests.characterize.golden import check, outcome
 

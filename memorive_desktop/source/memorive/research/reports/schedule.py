@@ -1,9 +1,9 @@
-"""SHARED report due-times; preserve the established RESEARCH_REPORTS calendar/timezone."""
+"""When a report is due; keeps the calendar and time zone research reports already use."""
 from calendar import monthrange
 from datetime import datetime, timedelta
 import re
 from memorive.research.reports.policy import ZONE
-from .common import read,write,sealed
+from memorive.research.common import read,write,sealed
 
 def defaults():
     return {'daily_time':'00:00','weekly_time':'00:00','weekly_day':0,

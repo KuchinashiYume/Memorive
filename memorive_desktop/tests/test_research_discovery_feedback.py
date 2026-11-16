@@ -17,7 +17,7 @@ def api(tmp_path,monkeypatch):
     instance.close()
 
 def test_direction_registry_is_not_channel_names():
-    from memorive_research_runtime.common import defaults, validate_config
+    from memorive.research.common import defaults, validate_config
     config=defaults()
     assert 'directions' in config
     config['directions']=[{'id':'direction-a','revision':1,'name':'A','query':'alpha',
@@ -27,12 +27,12 @@ def test_direction_registry_is_not_channel_names():
     assert len(validate_config(config)['directions'])==2
 
 def test_count_is_user_reading_target_not_fixed_twenty():
-    from memorive_research_runtime.common import defaults,validate_config
+    from memorive.research.common import defaults,validate_config
     c=defaults();c['count']=30
     assert validate_config(c)['count']==30
 
 def test_library_identity_never_substring_or_report_text():
-    from memorive_research_runtime.relations import exact_library_matches
+    from memorive.research.discovery.relations import exact_library_matches
     records=[{'artifact_id':'a','identifiers':{'doi':'10.1234/paper.extra'}},
              {'artifact_id':'b','summary':'mentions 10.1234/paper'}]
     assert exact_library_matches({'doi':'10.1234/paper'},records)==[]
@@ -40,7 +40,7 @@ def test_library_identity_never_substring_or_report_text():
     assert exact_library_matches({'doi':'10.1234/paper'},records)==['c']
 
 def test_feedback_uses_append_only_engine(tmp_path):
-    from memorive_research_runtime.feedback import FeedbackStore
+    from memorive.research.recommendations.feedback_store import FeedbackStore
     store=FeedbackStore(tmp_path)
     item={'candidate_id':'candidate-a','work_cluster_id':'work-a','primary_direction_id':'direction-a',
           'direction_revision':'1','manifestation_id':'version-a','position':1,'channel':'CORE','evidence_refs':['fixture']}
@@ -54,7 +54,7 @@ def test_feedback_uses_append_only_engine(tmp_path):
     assert len(store.snapshot()['events'])==3
 
 def test_view_only_does_not_generate_exposures(tmp_path):
-    from memorive_research_runtime.feedback import FeedbackStore
+    from memorive.research.recommendations.feedback_store import FeedbackStore
     store=FeedbackStore(tmp_path)
     assert store.snapshot()['events']==[]
 
@@ -71,7 +71,7 @@ def test_config_migration_preserves_legacy_matching_and_choices(api):
     assert result['config']['push_enabled'] is False
 
 def test_single_source_refresh_is_real_scoped_action(api):
-    from memorive_research_runtime.runtime import METHODS
+    from memorive.research.runtime import METHODS
     assert 'research.source_refresh' in METHODS
 
 @pytest.fixture
@@ -109,7 +109,7 @@ def test_task_library_message_log_single_identity(discovery):
     logs=api.call('work_log.list_entries',{'time_range':'all'})['rows']
     assert any(r['job_id']==run for r in logs)
     statepath=api._research.run_path(run)/'state.json'
-    from memorive_research_runtime.common import read,write,sealed
+    from memorive.research.common import read,write,sealed
     write(statepath,sealed(dict(read(statepath),finished_at='2026-01-01T00:00:00Z')))
     assert next(r for r in api.call('research.task_list',{})['rows'] if r['run_id']==run)['history']
 
@@ -143,7 +143,7 @@ def test_source_refresh_is_disabled_without_receive_consent(discovery):
 
 
 def test_global_exclusion_requires_confirmation_and_survives_restart(tmp_path):
-    from memorive_research_runtime.feedback import FeedbackStore
+    from memorive.research.recommendations.feedback_store import FeedbackStore
     store=FeedbackStore(tmp_path)
     item={'candidate_id':'x','work_cluster_id':'w','primary_direction_id':'direction-a',
         'direction_revision':'1','manifestation_id':'m','position':1,'channel':'CORE','evidence_refs':['proof']}
@@ -169,7 +169,7 @@ def test_user_share_limit_never_rounded_up(discovery):
     assert result['status']=='SUCCEEDED' and result['result']['recommendations']==[]
 
 def test_title_signal_is_not_fake_vector():
-    from memorive_research_runtime.relations import metadata_comparison
+    from memorive.research.discovery.relations import metadata_comparison
     result=metadata_comparison({'candidate_id':'a','title':'Same title','identifiers':{}},
         [{'artifact_id':'b','title':'Same title','identifiers':[]}])
     assert result['library_new']=='UNKNOWN'
@@ -189,7 +189,7 @@ def test_failed_task_deeplink_and_repair_affordance(discovery,monkeypatch):
     monkeypatch.setattr(api._research,'publish_to_library',lambda *a: (_ for _ in ()).throw(OSError('Injected publication failure')))
     row=api._research.start(kind='discovery',request_id='fail-deeplink',topic='Synthetic workflow',count=2)
     api._research.thread.join(20)
-    from memorive_research_runtime.task_projection import bindings
+    from memorive.research.task_projection import bindings
     task=next(t for t in bindings(api._research) if t['run']==row['run_id'])
     assert task['delivery_repair_available'] and task['workflow_nodes'][4]['state']=='FAILED'
     messages=api.call('messages.list',{})['rows']

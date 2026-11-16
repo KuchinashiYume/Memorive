@@ -16,7 +16,7 @@ def bind(workspace):
         raise ValueError('MEMO_PROFILE_NOT_INITIALIZED')
     from memorive.desktop.service.service_main import build_settings_controller,LocalModelProductController
     from memorive.desktop.settings.service_adapter import SettingsServiceAdapter
-    from memorive_research_runtime.report_models import profiles_offered
+    from memorive.research.reports.models import profiles_offered
     controller=build_settings_controller(profile)
     service=SettingsServiceAdapter(controller)
     local_models=LocalModelProductController(profile.parent/'local_models')

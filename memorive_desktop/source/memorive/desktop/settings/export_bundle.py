@@ -34,7 +34,7 @@ def recover(owner):
         owner.store.write_json(path,tx)
 
 def extensions(owner):
-    from memorive_research_runtime.common import defaults, validate_config, read
+    from memorive.research.common import defaults, validate_config, read
     research=paths(owner)['research']
     return {'external_sources':owner.external_data_sources._load()['sources'],
             'literature_selected':literature_sources.load(owner.external_data_sources.root)['selected'],
@@ -42,7 +42,7 @@ def extensions(owner):
             'research':validate_config(read(research)['config']) if research.exists() else defaults()}
 
 def validate(owner,value):
-    from memorive_research_runtime.common import validate_config
+    from memorive.research.common import validate_config
     if not isinstance(value,dict) or set(value)!={'external_sources','literature_selected','leaderboard','research'}:
         raise ValueError('SETTINGS_IMPORT_EXTENSIONS_INVALID')
     if not isinstance(value['external_sources'],list):
@@ -61,7 +61,7 @@ def validate(owner,value):
     return dict(external_sources=sources,literature_selected=sorted(selected),leaderboard=validate_preferences(value['leaderboard']),research=validate_config(value['research']))
 
 def import_bundle(owner,payload,expected_revision,confirmed_risk_ids):
-    from memorive_research_runtime.common import sealed, read
+    from memorive.research.common import sealed, read
     accepted=validate(owner,payload['extensions'])
     source=owner.external_data_sources
     leader=owner._leaderboard_service()

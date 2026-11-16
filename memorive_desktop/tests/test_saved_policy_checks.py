@@ -9,7 +9,7 @@ import copy
 import pytest
 
 from memorive.platform.language import policy as language
-from memorive_research_runtime import report_schedule
+from memorive.research.reports import schedule as report_schedule
 from memorive.research.opportunities.research_opportunities import validate as opportunities
 from memorive.research.reports.errors import WindowContractError
 from memorive.research.reports.policy import validate_window

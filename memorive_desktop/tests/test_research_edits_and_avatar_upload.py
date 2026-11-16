@@ -11,7 +11,7 @@ def web(name):return (ROOT/'product/web'/name).read_text(encoding='utf8')
 
 
 def test_bounded_research_edits_and_legacy_preservation():
-    from memorive_research_runtime.common import defaults,validate_config_edit
+    from memorive.research.common import defaults,validate_config_edit
     initial=defaults()
     for key,value in [('count',101),('count',0),('count',1.5),('interval_hours',12),('interval_hours',366*24)]:
         changed=dict(initial,**{key:value})

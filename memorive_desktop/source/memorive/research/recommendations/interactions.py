@@ -1,7 +1,7 @@
 """Neutral completed-analysis evidence. Never mines historical conversations."""
 from pathlib import Path
 from threading import RLock
-from .common import sha,now,read,write,sealed
+from memorive.research.common import sha,now,read,write,sealed
 from memorive.research.recommendations import exposure_feedback as discovery
 _LOCK=RLock()
 
@@ -39,7 +39,7 @@ def current_digest(runtime):
         return {'status':'DISABLED_BY_USER','display_status':'近期互动记录已关闭','ranking_consumed':False,'events':[]}
     path=runtime.root/'analysis_interactions.json'
     events=read(path)['events'] if path.exists() else []
-    from .recent_interest_adapter import frozen
+    from memorive.research.discovery.recent_interests import frozen
     interests=frozen(runtime,config)
     return {'status':'EXPLICIT_QUERY_PRODUCER_READY','display_status':f'近期兴趣已开启 · {len(interests["events"])} 条有效提问',
         'ranking_consumed':False,'ranking_consumption_scope':'PER_DISCOVERY_RUN_RECEIPT',

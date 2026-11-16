@@ -8,7 +8,7 @@ from datetime import datetime,timezone
 from memorive.research.workspace.store import digest,now,uid
 
 def bind(workspace,service):
-    from memorive_research_runtime.transport import MetadataClient
+    from memorive.research.discovery.transport import MetadataClient
     from memorive.research.ranking.research_bibliometrics import BibliometricsClient
     client=MetadataClient(workspace.store.root/'rule_metadata',lambda:service.call('settings.get_state',{})['settings']['preferences'])
     metrics=BibliometricsClient(workspace.store.root/'bibliometrics',client.preferences,client.transport)

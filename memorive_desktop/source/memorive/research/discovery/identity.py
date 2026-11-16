@@ -4,7 +4,7 @@ verify_source_observation and _claim_from_observation read the desktop's source 
 including the kind whose title, authors and year are optional. resolve_identity_batch runs the
 shared algorithm (resolve_identity_batch_with in
 memorive/research/discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py) with
-this module's PRODUCER. memorive_research_runtime/acquisition.py calls it.
+this module's PRODUCER. acquisition.py calls it.
 """
 
 from __future__ import annotations

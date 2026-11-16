@@ -1,10 +1,10 @@
-"""EVO E6 bounded background backfill for legacy workspace metadata."""
+"""Background backfill of the identity index for older workspace metadata, in bounded batches."""
 from contextlib import closing
 from pathlib import Path
 from types import SimpleNamespace
 import json
-from .common import sha,sealed,read
-from .relations import record_identifiers
+from memorive.research.common import sha,sealed,read
+from memorive.research.discovery.relations import record_identifiers
 
 def history_backfill(runtime):
     index=runtime.work_index
