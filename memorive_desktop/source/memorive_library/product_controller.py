@@ -148,9 +148,9 @@ class LibraryProductController:
         self._refinement_artifact_ids = {
             entry["row"]["artifact_id"] for entry in refinement_catalog["products"]
         }
-        self._core_entries_by_artifact_id: dict[str, dict[str, Any]] = {}
+        self.core_entries_by_artifact_id: dict[str, dict[str, Any]] = {}
         self._core_artifact_ids: set[str] = set()
-        self._core_row_aliases: dict[str, str] = {}
+        self.core_row_aliases: dict[str, str] = {}
         for entry in refinement_catalog["products"]:
             self._rows_by_id[entry["row"]["artifact_id"]] = deepcopy(entry["row"])
         self._metrics = {
@@ -272,7 +272,7 @@ class LibraryProductController:
                 )
             if artifact_id not in {product["artifact_id"] for product in product_files}:
                 raise LibraryProductError("LIBRARY_Core_SELECTED_PRODUCT_MISSING")
-            updated_at = str(raw.get("updated_at") or self._utc_now())
+            updated_at = str(raw.get("updated_at") or self.utc_now())
             size_bytes = int(raw.get("size_bytes") or 0)
             context_pack = (
                 raw.get("context_pack")
@@ -477,14 +477,14 @@ class LibraryProductController:
         with self._core_lock:
             for artifact_id in self._core_artifact_ids:
                 self._rows_by_id.pop(artifact_id, None)
-            self._core_entries_by_artifact_id = entries
+            self.core_entries_by_artifact_id = entries
             self._core_artifact_ids = set(document_rows)
-            self._core_row_aliases = aliases
+            self.core_row_aliases = aliases
             for artifact_id, row in document_rows.items():
                 self._rows_by_id[artifact_id] = deepcopy(row)
 
     @staticmethod
-    def _read_core_entry_file(
+    def read_core_entry_file(
         entry: Mapping[str, Any],
         *,
         root_field: str,
@@ -528,11 +528,11 @@ class LibraryProductController:
         (display_name, status, ...). The records are copies; changing them changes nothing in the library.
         """
         self._sync_core_artifacts()
-        return deepcopy(self._core_entries_by_artifact_id)
+        return deepcopy(self.core_entries_by_artifact_id)
 
     def _core_entry(self, artifact_id: str) -> Mapping[str, Any]:
         self._sync_core_artifacts()
-        entry = self._core_entries_by_artifact_id.get(str(artifact_id or ""))
+        entry = self.core_entries_by_artifact_id.get(str(artifact_id or ""))
         if entry is None:
             raise LibraryProductError("LIBRARY_Core_ARTIFACT_NOT_FOUND")
         return entry
@@ -540,7 +540,7 @@ class LibraryProductController:
     def read_core_artifact(self, artifact_id: str) -> tuple[Path, bytes]:
         """The path and content of a product file, read once. The content is checked against the
         sha256 the job recorded, so it can be handed on as it is."""
-        return self._read_core_entry_file(
+        return self.read_core_entry_file(
             self._core_entry(artifact_id),
             root_field="artifact_root",
             path_field="private_path",
@@ -554,7 +554,7 @@ class LibraryProductController:
 
     def resolve_core_private_source(self, artifact_id: str) -> Path:
         """The path of the source document a product was made from, checked the same way."""
-        path, _content = self._read_core_entry_file(
+        path, _content = self.read_core_entry_file(
             self._core_entry(artifact_id),
             root_field="source_root",
             path_field="source_private_path",
@@ -692,7 +692,7 @@ class LibraryProductController:
         temporary.replace(self.refinement_review_state_path)
 
     @staticmethod
-    def _utc_now() -> str:
+    def utc_now() -> str:
         return datetime.now(timezone.utc).isoformat(timespec="microseconds").replace(
             "+00:00", "Z"
         )
@@ -770,7 +770,7 @@ class LibraryProductController:
             state = self._load_refinement_review_state()
             entry = self._refinement_entries_by_artifact_id[artifact_id]
             current = state["artifacts"].get(artifact_id)
-            opened_at = current["opened_at"] if current else self._utc_now()
+            opened_at = current["opened_at"] if current else self.utc_now()
             state["artifacts"][artifact_id] = {
                 "artifact_id": artifact_id,
                 "draft_sha256": entry["draft_sha256"],
@@ -796,7 +796,7 @@ class LibraryProductController:
             ]
             if current is None or current.get("draft_sha256") != expected:
                 raise LibraryProductError("LIBRARY_REFINEMENT_OPEN_REQUIRED")
-            confirmed_at = current.get("confirmed_at") or self._utc_now()
+            confirmed_at = current.get("confirmed_at") or self.utc_now()
             current["confirmed_at"] = confirmed_at
             self._save_refinement_review_state(state)
         return {
@@ -1044,7 +1044,7 @@ class LibraryProductController:
         }
 
     def _core_metadata(self, artifact_id: str) -> dict[str, Any]:
-        entry = self._core_entries_by_artifact_id.get(artifact_id)
+        entry = self.core_entries_by_artifact_id.get(artifact_id)
         if entry is None:
             return {}
         return {
@@ -1113,7 +1113,7 @@ class LibraryProductController:
                 files.append(row)
             for product in products:
                 artifact_id = product['artifact_id']
-                entry = self._core_entries_by_artifact_id.get(artifact_id, {})
+                entry = self.core_entries_by_artifact_id.get(artifact_id, {})
                 files.append({**row, 'artifact_id':artifact_id,
                     'stable_locator':f'memorive://artifact/{artifact_id}',
                     'display_name':product['file_name'],
@@ -1153,13 +1153,13 @@ class LibraryProductController:
         its document, with the file's own kind and hash."""
         self._sync_research_artifacts()
         self._sync_core_artifacts()
-        resolved_id = self._core_row_aliases.get(artifact_id, artifact_id)
+        resolved_id = self.core_row_aliases.get(artifact_id, artifact_id)
         row = self._rows_by_id.get(resolved_id)
         if row is None:
             raise LibraryProductError("LIBRARY_ARTIFACT_NOT_FOUND")
         public = self._public(row)
         if resolved_id != artifact_id:
-            child = self._core_entries_by_artifact_id.get(artifact_id)
+            child = self.core_entries_by_artifact_id.get(artifact_id)
             if child is not None:
                 public.update(
                     {

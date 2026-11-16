@@ -44,7 +44,7 @@ class CompositeServiceAdapter:
         target = str(params["target"])
         if target not in {"FAILED", "SUCCEEDED"}:
             raise ProtocolViolation("Verification_FIXTURE_TRANSITION_TARGET_INVALID")
-        updated = self.facade._transition(
+        updated = self.facade.transition(
             str(params["job_id"]),
             int(params["expected_version"]),
             target,

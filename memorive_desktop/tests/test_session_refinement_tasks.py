@@ -48,7 +48,7 @@ class _FacadeService:
 
     def call(self, method: str, params: Mapping[str, Any]) -> Any:
         if method == "current_task.fixture_transition":
-            updated = self.facade._transition(  # noqa: SLF001 - synthetic fixture seam
+            updated = self.facade.transition(
                 str(params["job_id"]),
                 int(params["expected_version"]),
                 str(params["target"]),

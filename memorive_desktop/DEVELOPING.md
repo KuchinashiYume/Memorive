@@ -25,7 +25,9 @@ start" below).
 - **Documents**: the inbox (`memorive_inbox`) takes a file → the workflow (`memorive_workflow`) runs
   it through conversion, cleaning and chunking (`document_processing`), card extraction
   (`evidence_extraction`), card review (`evidence_review`, `knowledge_admission`) and analysis
-  (`research_analysis`, `retrieval`) → the library (`memorive_library`) shows the results.
+  (`research_analysis`, `retrieval`) → the library (`memorive_library`) shows the results. The
+  current-task page lists the jobs (`CurrentTaskProductController.core_job_rows`); the library gets
+  a row for each delivered file from `memorive_library/core_products.py`.
 - **Research Q&A**: the window (`memo.*`) → `memorive_research_workspace` chooses excerpts and builds
   the request → the settings service runs the model (`memorive_model_execution`,
   `memorive_settings/model_validation.py`) → the workspace saves the answer, its citations and any

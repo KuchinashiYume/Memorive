@@ -151,14 +151,16 @@ class CoreVerticalWorker:
         self.run_root.mkdir(parents=True, exist_ok=True)
         self.review_service = None
 
-    def _execution_interrupt(self, job_id: str) -> None:
+    def execution_interrupt(self, job_id: str) -> None:
+        """Stop the step that is running when the app is closing or the job left its running states (also used by data review)."""
         if self._stop_event is not None and self._stop_event.is_set():
             raise ExecutionControlSignal('STOPPED')
         state = self.facade.get_job(job_id)['control_state']
         if state not in {'RUNNING', 'PAUSED', 'PAUSE_REQUESTED', 'RESUME_REQUESTED', 'CANCEL_REQUESTED'}:
             raise ExecutionControlSignal(state)
 
-    def _execution_checkpoint(self, job_id: str) -> None:
+    def execution_checkpoint(self, job_id: str) -> None:
+        """Between steps: return while the job runs, wait while it is paused, stop when it was cancelled (also used by data review)."""
         from . import node_progress
         while True:
             if self._stop_event is not None and self._stop_event.is_set():
@@ -499,8 +501,9 @@ class CoreVerticalWorker:
             "workflow_config": deepcopy(snapshot["workflow_config"]),
         }
 
-    def _source_path(self, item: Mapping[str, Any]) -> Path:
-        path = self.inbox._path(str(item.get("bound_locator") or ""))
+    def source_path(self, item: Mapping[str, Any]) -> Path:
+        """The inbox file of an item, checked against its recorded hash (also used by data review)."""
+        path = self.inbox.path_of(str(item.get("bound_locator") or ""))
         if not path.is_file():
             raise ValueError("Core_BOUND_SOURCE_MISSING")
         observed = hashlib.sha256(path.read_bytes()).hexdigest().upper()
@@ -508,7 +511,8 @@ class CoreVerticalWorker:
             raise ValueError("Core_BOUND_SOURCE_HASH_MISMATCH")
         return path
 
-    def _bind_artifact(self, context: CoreExecutionContext, artifact: CoreArtifact) -> None:
+    def bind_artifact(self, context: CoreExecutionContext, artifact: CoreArtifact) -> None:
+        """Record a file a step wrote in the job folder as the job's artifact, checked against its hash (also used by data review)."""
         path = Path(artifact.path).resolve(strict=True)
         root = context.artifact_root.resolve(strict=True)
         if not path.is_file() or not path.is_relative_to(root):
@@ -543,7 +547,7 @@ class CoreVerticalWorker:
                                    idempotency_key='core-dispatch-failed:'+job_id)
             return
         if job["control_state"] not in {"FAILED", "CANCELLED", "SUCCEEDED"}:
-            self.facade._transition(
+            self.facade.transition(
                 job_id,
                 job["version"],
                 "FAILED",
@@ -673,7 +677,7 @@ class CoreVerticalWorker:
             job_id = str(handle["job_id"])
             self.inbox.bind_core_job(item["item_id"], job_id=job_id)
             job = self.facade.get_job(job_id)
-        source_path = self._source_path(item)
+        source_path = self.source_path(item)
         if job["control_state"] == "QUEUED":
             status = self.facade.mark_running(job_id, expected_version=job["version"])
             status = self.facade.set_safe_checkpoint(
@@ -723,9 +727,9 @@ class CoreVerticalWorker:
             # PAUSED_BEFORE runs under the pause-point transaction. Never wait
             # for resume there: the resume operation needs the same lock.
             if state != 'PAUSED_BEFORE':
-                self._execution_checkpoint(job_id)
+                self.execution_checkpoint(job_id)
             else:
-                self._execution_interrupt(job_id)
+                self.execution_interrupt(job_id)
             done = len(checkpoint.load()['completed_node_ids'])
             current = node_id or node_ids[min(done, len(node_ids)-1)]
             from . import node_progress
@@ -755,7 +759,7 @@ class CoreVerticalWorker:
                 lambda row: row.update(execution_waiting=state == 'WAITING'))
 
         def on_node_completed(node_id: str, completed_units: int) -> None:
-            self._execution_checkpoint(job_id)
+            self.execution_checkpoint(job_id)
             if node_id not in node_ids:
                 raise ValueError("Core_PROGRESS_NODE_UNKNOWN")
             expected_units = node_ids.index(node_id) + 1
@@ -778,25 +782,25 @@ class CoreVerticalWorker:
         try:
             from memorive_settings.task_scheduling import activity_scope
             from .node_progress import session_scope, facade_session
-            with execution_control(lambda: self._execution_checkpoint(job_id),
-                                   interrupt=lambda: self._execution_interrupt(job_id)), activity_scope(on_activity), session_scope(facade_session(self.facade, job_id, job['attempt_id'])):
+            with execution_control(lambda: self.execution_checkpoint(job_id),
+                                   interrupt=lambda: self.execution_interrupt(job_id)), activity_scope(on_activity), session_scope(facade_session(self.facade, job_id, job['attempt_id'])):
                 on_activity('WAITING')
-                self._execution_checkpoint(job_id)
+                self.execution_checkpoint(job_id)
                 result = self.review_service.restore_result(job_id) if self.review_service else None
                 if result is None:
                     result = self.executor.execute(
                         context, completed_node_ids=completed, on_node_completed=on_node_completed,
                     )
-            self._execution_checkpoint(job_id)
+            self.execution_checkpoint(job_id)
             if not isinstance(result, CoreExecutionResult):
                 raise ValueError("Core_EXECUTOR_RESULT_INVALID")
             final_checkpoint = checkpoint.load()
             if tuple(final_checkpoint["completed_node_ids"]) != node_ids:
                 raise ValueError("Core_EXECUTOR_INCOMPLETE")
             for artifact in result.artifacts:
-                self._execution_checkpoint(job_id)
-                self._bind_artifact(context, artifact)
-            self._execution_checkpoint(job_id)
+                self.execution_checkpoint(job_id)
+                self.bind_artifact(context, artifact)
+            self.execution_checkpoint(job_id)
             if self.review_service and DATA_NODE in node_ids:
                 if not self.review_service.mainline_done(context,result):
                     return {'status':'WAITING_REVIEW','job_id':job_id,'mainline_complete':True,'production_ingestion_performed':True}
@@ -807,7 +811,7 @@ class CoreVerticalWorker:
                     return self._cancelled_receipt(job_id,item,intent,checkpoint,mainline_result=result)
             job = self.facade.get_job(job_id)
             if job["control_state"] != "SUCCEEDED":
-                self.facade._transition(
+                self.facade.transition(
                     job_id,
                     job["version"],
                     "SUCCEEDED",

@@ -851,6 +851,84 @@ class CurrentTaskProductController:
             "status": "READY",
         }
 
+    def core_job_rows(self, *, include_history: bool = False) -> list[dict[str, Any]]:
+        """The document jobs on this page (with the history when asked), each with its state,
+        workflow nodes, failed node and error code. Used by the messages (a message for each finished
+        job), the work log and ProductApi's document event pump."""
+
+        projection = self._list(history_details=include_history)
+        bindings = (
+            [*projection.get("production_bindings", []),
+             *(projection.get("history_bindings", []) if include_history else [])]
+            if isinstance(projection, dict) else []
+        )
+        if not isinstance(bindings, list):
+            raise RuntimeError("Core_JOB_BINDINGS_INVALID")
+        rows: list[dict[str, Any]] = []
+        for raw in bindings:
+            if not isinstance(raw, Mapping) or raw.get("workflow_kind") != "CORE_DOCUMENT":
+                continue
+            job_id = str(raw.get("job_id") or "")
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,191}", job_id):
+                raise RuntimeError("Core_JOB_ID_INVALID")
+            job = self.adapter.call("get_job", {"job_id": job_id})
+            nodes = deepcopy(raw.get("workflow_nodes") or [])
+            failed_node = next(
+                (
+                    str(node.get("node_id") or "")
+                    for node in nodes
+                    if isinstance(node, Mapping) and node.get("state") == "FAILED"
+                ),
+                "",
+            )
+            events = self.adapter.call(
+                "get_job_events", {"job_id": job_id, "after_sequence": 0}
+            )
+            event_rows = events.get("events", []) if isinstance(events, Mapping) else []
+            terminal_event = next(
+                (
+                    event
+                    for event in reversed(event_rows)
+                    if isinstance(event, Mapping)
+                    and str(event.get("control_state") or "").upper()
+                    in {"SUCCEEDED", "FAILED", "CANCELLED"}
+                ),
+                {},
+            )
+            event_type = str(terminal_event.get("event_type") or "")
+            error_code = ""
+            if str(job.get("control_state") or "").upper() == "FAILED":
+                error_code = event_type.split("Core_FAILED:", 1)[-1] if "Core_FAILED:" in event_type else event_type
+            rows.append(
+                {
+                    **deepcopy(dict(raw)),
+                    "job_id": job_id,
+                    "attempt_id": str(job.get("attempt_id") or raw.get("attempt_id") or ""),
+                    "control_state": str(job.get("control_state") or raw.get("control_state") or "UNKNOWN").upper(),
+                    "display_name": str(raw.get("display_name") or job_id)[:180],
+                    "workflow_kind": "CORE_DOCUMENT",
+                    "nodes": nodes,
+                    "workflow_nodes": nodes,
+                    "failed_node_id": failed_node or None,
+                    "error_code": re.sub(r"[^A-Z0-9_:-]", "_", error_code.upper())[:120],
+                    "created_at": job.get("created_at") or raw.get("created_at"),
+                    "updated_at": job.get("updated_at") or raw.get("updated_at"),
+                    "completed_at": (
+                        job.get("updated_at")
+                        if str(job.get("control_state") or "").upper() in {"SUCCEEDED", "FAILED", "CANCELLED"}
+                        else None
+                    ),
+                    "artifact_count": len(job.get("artifact_bindings") or []),
+                    "context_pack": (
+                        deepcopy(raw.get("context_pack"))
+                        if isinstance(raw.get("context_pack"), Mapping)
+                        else None
+                    ),
+                    "raw_private_content_included": False,
+                }
+            )
+        return rows
+
     def _list(self, *, history_details: bool = True) -> dict[str, Any]:
         projection = self.projector.list_projection()
         if self._dismissed_jobs:

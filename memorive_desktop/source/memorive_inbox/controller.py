@@ -95,7 +95,7 @@ class InboxController:
             row=self.store.read_item(item_id)
             if row['state'] in {'TRASHED','DELETED','DEDUPLICATED'} or not row.get('bound_locator'):
                 return None
-            return row if windows_io_path(self._path(row['bound_locator'])).is_file() else None
+            return row if windows_io_path(self.path_of(row['bound_locator'])).is_file() else None
         except InboxError:
             return None
 
@@ -136,7 +136,8 @@ class InboxController:
             raise InboxError("INBOX_BOUND_PATH_OUTSIDE_DATA_ROOT")
         return resolved.relative_to(self.data_root).as_posix()
 
-    def _path(self, locator: str) -> Path:
+    def path_of(self, locator: str) -> Path:
+        """The file a stored locator names, inside the inbox data folder (also used by the document worker)."""
         if not isinstance(locator, str) or not locator or ".." in Path(locator).parts:
             raise InboxError("INBOX_LOCATOR_INVALID")
         resolved = (self.data_root / locator).resolve(strict=False)
@@ -705,7 +706,7 @@ class InboxController:
                 continue
             pending = item.get("pending_binding")
             if pending:
-                path = windows_io_path(self._path(pending["bound_locator"]))
+                path = windows_io_path(self.path_of(pending["bound_locator"]))
                 observed = hashlib.sha256(path.read_bytes()).hexdigest().upper() if path.is_file() else None
                 if observed == pending["content_sha256"]:
                     binding = {
@@ -1106,7 +1107,7 @@ class InboxController:
             locator = item.get("bound_locator")
             trash_locator = None
             if locator:
-                source = self._path(locator)
+                source = self.path_of(locator)
                 io_source = windows_io_path(source)
                 if io_source.exists():
                     target = self.trash_root / f"{item_id}_{source.name}"
@@ -1163,8 +1164,8 @@ class InboxController:
         restored = []
         for entry in operation["items"]:
             if entry["trash_locator"]:
-                source = self._path(entry["trash_locator"])
-                target = self._path(entry["bound_locator"])
+                source = self.path_of(entry["trash_locator"])
+                target = self.path_of(entry["bound_locator"])
                 io_source = windows_io_path(source)
                 io_target = windows_io_path(target)
                 if io_target.exists():
@@ -1196,8 +1197,8 @@ class InboxController:
         removed = []
         for entry in operation["items"]:
             if entry["bound_locator"]:
-                source = self._path(entry["bound_locator"])
-                target = self._path(entry["trash_locator"])
+                source = self.path_of(entry["bound_locator"])
+                target = self.path_of(entry["trash_locator"])
                 io_source = windows_io_path(source)
                 io_target = windows_io_path(target)
                 if io_source.exists():
@@ -1216,7 +1217,7 @@ class InboxController:
         for item in self.store.list_items():
             if item["state"] not in {"QUEUED", "PROCESSING", "ERROR"} or not item.get("bound_locator"):
                 continue
-            path = windows_io_path(self._path(item["bound_locator"]))
+            path = windows_io_path(self.path_of(item["bound_locator"]))
             observed = hashlib.sha256(path.read_bytes()).hexdigest().upper() if path.is_file() else None
             if observed != item.get("content_sha256"):
                 error = InboxError("INBOX_BOUND_FILE_MISSING_OR_CHANGED", retryable=False)
@@ -1384,7 +1385,7 @@ class InboxController:
             locator = item.get("trash_locator")
             if not locator:
                 continue
-            path = self._path(locator)
+            path = self.path_of(locator)
             if windows_io_path(path).exists():
                 handoff.append(str(windows_io_path(path)))
         return {

@@ -35,9 +35,9 @@ class PaperReview:
 
     def snapshot(self, artifact_id, verify=False):
         lib = self.library
-        logical = lib._core_row_aliases.get(artifact_id, artifact_id)
-        entry = lib._core_entries_by_artifact_id[logical]
-        children = {key:value for key,value in lib._core_entries_by_artifact_id.items()
+        logical = lib.core_row_aliases.get(artifact_id, artifact_id)
+        entry = lib.core_entries_by_artifact_id[logical]
+        children = {key:value for key,value in lib.core_entries_by_artifact_id.items()
                     if value['job_id'] == entry['job_id'] and key != logical
                     and value['source_content_sha256'] == entry['source_content_sha256']}
         required = {key for key,value in children.items()
@@ -47,10 +47,10 @@ class PaperReview:
         manifest = {'source_sha256':entry['source_content_sha256'], 'job_id':entry['job_id'], 'files':files}
         digest = hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()
         if verify:
-            lib._read_core_entry_file(entry,root_field='source_root',path_field='source_private_path',
+            lib.read_core_entry_file(entry,root_field='source_root',path_field='source_private_path',
                 sha256_field='source_content_sha256',error_scope='SOURCE')
             for child in children.values():
-                lib._read_core_entry_file(child,root_field='artifact_root',path_field='private_path',
+                lib.read_core_entry_file(child,root_field='artifact_root',path_field='private_path',
                     sha256_field='content_sha256',error_scope='ARTIFACT')
         return logical, digest, manifest, required, kinds == {'CORE_CARD','CORE_ANALYSIS'}
 
@@ -81,7 +81,7 @@ class PaperReview:
             row = state['versions'].setdefault(key, {'artifact_id':logical,'manifest':manifest,'opened_files':{}})
             if artifact_id in manifest['files']:
                 row['opened_files'][artifact_id] = manifest['files'][artifact_id]
-            row['opened_at'] = self.library._utc_now()
+            row['opened_at'] = self.library.utc_now()
             self._write(state)
             return self.metadata(logical)
 
@@ -92,7 +92,7 @@ class PaperReview:
             row = state['versions'].get(logical + ':' + digest)
             if not complete or not row or not required.issubset(set(row['opened_files'])):
                 raise ValueError('PAPER_REVIEW_OPEN_CURRENT_CARD_AND_ANALYSIS_REQUIRED')
-            row.setdefault('confirmed_at', self.library._utc_now())
+            row.setdefault('confirmed_at', self.library.utc_now())
             self._write(state)
             return {'status':'PASS','artifact_id':logical,'review':self.metadata(logical),
                     'source_file_mutations':0,'canonical_registry_mutations':0}

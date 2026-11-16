@@ -577,7 +577,11 @@ class ApplicationFacade:
             raise ContractViolation("START_IDEMPOTENCY_KEY_NOT_FOUND")
         return result
 
-    def _transition(self, job_id: str, expected_version: int, target: str, event_type: str) -> dict[str, Any]:
+    def transition(self, job_id: str, expected_version: int, target: str, event_type: str) -> dict[str, Any]:
+        """Move a job to the control state target if it is still at expected_version, recording event_type.
+
+        Used here and by the document worker (memorive_workflow/worker.py), the composite adapter
+        and the test console. apply_transition refuses a change the current state does not allow."""
         def mutate(job: dict[str, Any]) -> dict[str, Any]:
             job["control_state"] = apply_transition(job["control_state"], target)
             job["state_history"].append(target)
@@ -627,7 +631,7 @@ class ApplicationFacade:
         return result
 
     def mark_running(self, job_id: str, *, expected_version: int) -> dict[str, Any]:
-        return self._status(self._transition(job_id, expected_version, "RUNNING", "JOB_RUNNING"))
+        return self._status(self.transition(job_id, expected_version, "RUNNING", "JOB_RUNNING"))
 
     def set_safe_checkpoint(self, job_id: str, *, expected_version: int, safe: bool) -> dict[str, Any]:
         def mutate(job: dict[str, Any]) -> dict[str, Any]:

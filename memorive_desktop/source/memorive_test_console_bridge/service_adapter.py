@@ -75,7 +75,7 @@ class ConsoleServiceAdapter:
                             row=self.facade.record_action_request(jid,expected_version=version,action_request_id='console-action-'+p['request_id'],action='REVIEW_CONSOLE_EVENT',payload={'test_data':True})
                             version=row['observed_version']
                         if target != 'WAITING_HUMAN':
-                            self.facade._transition(jid,version,target,'CONSOLE_SIMULATED_'+p['event'].upper())
+                            self.facade.transition(jid,version,target,'CONSOLE_SIMULATED_'+p['event'].upper())
                 return {'job_id':jid,'job':self.facade.get_job(jid),'test_data':True,'native_store':True}
             if method=='console.dispatch':
                 if set(p)!={'item_id','request_id','allow_model_calls'} or p['allow_model_calls'] is not True:
@@ -115,7 +115,7 @@ class ConsoleServiceAdapter:
                         self.owned_jobs.add(receipt['job_id'])
                     if job.get('request',{}).get('job_type')=='memorive-console-simulation':
                         started=self.facade.mark_running(receipt['job_id'],expected_version=receipt['observed_version'])
-                        self.facade._transition(receipt['job_id'],started['observed_version'],'SUCCEEDED','CONSOLE_SIMULATION_REPLAY_COMPLETED')
+                        self.facade.transition(receipt['job_id'],started['observed_version'],'SUCCEEDED','CONSOLE_SIMULATION_REPLAY_COMPLETED')
                 else:
                     receipt=getattr(self.facade,action+'_job')(p['job_id'],expected_version=job['version'],idempotency_key='console:'+p['request_id'])
                 return {'action_receipt':receipt,'business_job_complete':False,'test_data':job.get('request',{}).get('job_type')=='memorive-console-simulation'}

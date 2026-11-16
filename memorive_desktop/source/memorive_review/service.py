@@ -79,7 +79,7 @@ class ReviewService:
         from memorive_workflow import node_progress
         while True:
             node_progress.hold(self.store.get(job_id).get('paused',False))
-            self.worker._execution_checkpoint(job_id)
+            self.worker.execution_checkpoint(job_id)
             state=self.store.get(job_id)
             if state.get('cancel_requested'):
                 raise ExecutionControlSignal('CANCELLED')
@@ -147,7 +147,7 @@ class ReviewService:
                 report['report_id']='data-'+digest(report)[:32]
                 report['report_sha256']=digest({k:v for k,v in report.items() if k!='report_sha256'})
                 atomic(saved,report)
-            return self.store.publish(context.job_id,report,binder=lambda artifact:self.worker._bind_artifact(context,artifact))
+            return self.store.publish(context.job_id,report,binder=lambda artifact:self.worker.bind_artifact(context,artifact))
         except ExecutionControlSignal:
             raise
         except Exception as error:
@@ -249,7 +249,7 @@ class ReviewService:
         report.pop('report_id',None)
         report['report_id']='data-'+digest(report)[:32]
         report['report_sha256']=digest(report)
-        self.store.publish(context.job_id,report,binder=lambda artifact:self.worker._bind_artifact(context,artifact))
+        self.store.publish(context.job_id,report,binder=lambda artifact:self.worker.bind_artifact(context,artifact))
         self.store.update(context.job_id,'CARD_GAP_ASSISTED',{'card_assist_key':receipt_key})
     def blocks_main_claim(self,job_id):
         state=self.store.get(job_id)
@@ -276,7 +276,7 @@ class ReviewService:
         state=self.store.get(job_id)
         item=self.worker.inbox.store.read_item(state['item_id'])
         root=self.worker.run_root/job_id
-        return CoreExecutionContext(job_id,job['attempt_id'],state['item_id'],self.worker._source_path(item),item['source_name'],state['source_sha256'],root,root/'artifacts',
+        return CoreExecutionContext(job_id,job['attempt_id'],state['item_id'],self.worker.source_path(item),item['source_name'],state['source_sha256'],root,root/'artifacts',
             job['snapshots']['workflow_definition']['content'],job['snapshots']['workflow_config']['content'])
     @scheduled('LITERATURE',pipeline=True)
     def run_claimed(self,job_id):
@@ -285,7 +285,7 @@ class ReviewService:
         from memorive_settings.task_scheduling import activity_scope
         lane=None
         try:
-            with execution_control(lambda:self.checkpoint(job_id),interrupt=lambda:self.worker._execution_interrupt(job_id)), session_scope(facade_session(self.worker.facade,job_id,self.worker.facade.get_job(job_id)['attempt_id'])), activity_scope(lambda state,node=None:activity(state,LOGIC_NODE)):
+            with execution_control(lambda:self.checkpoint(job_id),interrupt=lambda:self.worker.execution_interrupt(job_id)), session_scope(facade_session(self.worker.facade,job_id,self.worker.facade.get_job(job_id)['attempt_id'])), activity_scope(lambda state,node=None:activity(state,LOGIC_NODE)):
                 lane=PIPELINE_LANES.enter(LOGIC_NODE)
                 state=self.store.get(job_id)
                 context=self.context(job_id)
@@ -376,7 +376,7 @@ class ReviewService:
                     atomic(report_path,report)
                 self.store.update(job_id,'REPORT_SAVED',{'logic_state':'PUBLISHING'})
                 execution_checkpoint()
-                self.store.publish(job_id,report,binder=lambda artifact:self.worker._bind_artifact(context,artifact))
+                self.store.publish(job_id,report,binder=lambda artifact:self.worker.bind_artifact(context,artifact))
                 return self.store.public(job_id)
         except ExecutionControlSignal as signal:
             state=self.store.get(job_id)
