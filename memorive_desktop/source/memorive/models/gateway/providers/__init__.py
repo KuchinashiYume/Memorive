@@ -1,9 +1,8 @@
-"""Memorive MODEL-GATEWAY/MODEL_GATEWAY · MODEL_GATEWAY Provider 注册表。
+"""The provider registry: provider name to adapter class.
 
-provider 名 → adapter 类。
-
-Router 靠"读 slot.provider → 查本表"分派,绝不用 if provider == 'xxx' 硬编码。
-加一个 provider = 写个 adapter + 在文末 import 一行登记(登记非分派),Router 不改。
+The router looks up slot.provider here; there is no if provider == 'xxx' in code. A new provider is
+an adapter module that registers itself, plus one import line at the end of this file; the router
+does not change.
 """
 from __future__ import annotations
 
@@ -32,9 +31,8 @@ def registered() -> list[str]:
     return sorted(_REGISTRY)
 
 
-# ── adapter 登记(自注册;加 provider 在此加一行,Router 不动)──
+# ── the adapters register themselves when imported; a new provider adds one line here ──
 from memorive.models.gateway.providers import deepseek  # noqa: E402,F401
-from memorive.models.gateway.providers import siliconflow, ollama  # noqa: E402,F401  嵌入云/本地两 adapter(ServiceContracts 第 3 步)
-from memorive.models.gateway.providers import openai  # noqa: E402,F401  判断类 GPT 异源(Verification 第 3 步·verify_judgment 槽)
-from memorive.models.gateway.providers import anthropic  # noqa: E402,F401  RESEARCH_ANALYSIS 分析 · Opus(升 Anthropic;Messages API)
-# 后续各链路上线再加: from . import chroma ...
+from memorive.models.gateway.providers import siliconflow, ollama  # noqa: E402,F401  cloud and local embeddings
+from memorive.models.gateway.providers import openai  # noqa: E402,F401  a second model for card review judgments (verify_judgment)
+from memorive.models.gateway.providers import anthropic  # noqa: E402,F401  research analysis (Messages API)

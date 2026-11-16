@@ -1,7 +1,5 @@
-"""Memorive MODEL-GATEWAY/MODEL_GATEWAY · MODEL_GATEWAY Provider adapter 契约。
-
-每个 provider 一个 adapter,自己负责该家的 auth / 请求构造 / 响应解析,
-并把响应归一化成统一形状返回。
+"""What a provider adapter does. Each provider has one adapter that handles its authentication,
+builds its requests, reads its replies and returns them in one common shape.
 """
 from __future__ import annotations
 
@@ -17,33 +15,30 @@ class ProviderAdapter:
         raise NotImplementedError
 
     def invoke(self, slot, payload: dict) -> dict:
-        """[chat] 按 slot + payload 发起一次对话调用,
-        返回归一化 dict: {task_type, provider, model, text, usage, raw}。"""
+        """Chat: one call for slot and payload; returns {task_type, provider, model, text, usage, raw}."""
         raise NotImplementedError
 
     def embed(self, slot, payload: dict) -> dict:
-        """[embed] 按 slot + payload(含 'input')发起一次嵌入调用,
-        返回归一化 dict: {task_type, provider, model, embeddings:[[...]], usage, raw}。
-        raw 仅供函数内/测试用,绝不进日志(承 ServiceContracts 第 3 步安全约束)。"""
+        """Embeddings for payload['input']; returns {task_type, provider, model, embeddings: [[...]],
+        usage, raw}. raw is for the caller and tests only and never goes into a log."""
         raise NotImplementedError
 
     def rerank(self, slot, payload: dict) -> dict:
-        """[rerank] 按 slot + payload(含 'query' + 'documents')发起一次重排调用(A·修跨篇混入),
-        返回归一化 dict: {task_type, provider, model, results:[{index, relevance_score}], usage, raw}。
-        results 须按 index 升序、对齐 documents(承 embed 同款防 block↔score 错位口径);
-        raw 仅供函数内/测试用,绝不进日志。"""
+        """Rerank payload['documents'] against payload['query']; returns {task_type, provider, model,
+        results: [{index, relevance_score}], usage, raw}, results in index order matching documents.
+        raw never goes into a log."""
         raise NotImplementedError
 
     def ocr(self, slot, payload: dict) -> dict:
-        """[ocr] 单页图片转 Markdown。
+        """OCR: one page image to Markdown.
 
-        payload 只在所有权闸门通过后进入 adapter，含 image_bytes、mime_type、
-        page_number、source_sha256 与版本化 prompt；返回必须回显页号和源哈希，
-        并提供响应 SHA-256 供 DOCUMENT_PROCESSING 双路校核留痕。
+        payload reaches the adapter only after the data ownership check; it holds image_bytes,
+        mime_type, page_number, source_sha256 and the versioned prompt. The reply must repeat the page
+        number and source hash and give the reply's SHA-256, which document processing records.
         """
         raise NotImplementedError
 
     def healthcheck(self, slot) -> dict:
-        """[embed 安全阀专用] 纯能力探测(如 GET /api/tags),**不发任何待嵌文本**;
-        返回结构化状态 dict(至少含 'ready': bool)。挡下动作由调用方(DocumentEmbed)据 ready 决定。"""
+        """For local embedding only: whether the service is ready (GET /api/tags, say), without sending
+        any text. Returns a dict with at least 'ready': bool; document embedding decides whether to stop."""
         raise NotImplementedError

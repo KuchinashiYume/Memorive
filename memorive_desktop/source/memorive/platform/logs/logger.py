@@ -1,12 +1,10 @@
-"""RUNTIME_LOG 日志统一写入入口 + 双级机制骨架。
+"""Writing the runtime log: one entry point and two levels.
 
-对外正式入口只一个: 模块级 log();log_error() 是 log(..., is_error=True) 的便捷通道,
-**非第二套写入机制**。各模块经它写,由入口统一补时间戳、序列化 (JSONL)、append 落盘——
-各模块不得各写各的落盘逻辑;唯一落盘点是 _append()。
-
-本步 (DataContracts 第1步) 只做骨架: 写通一条 + 出错自动升详细级。
-分区抽取 (第2步) / 记账 + 原因记录 (第3步) / append-only 硬拦截 (第4步) 留挂接位,
-见下方 [第N步] 注释;骨架不用重构即可挂上。
+There is one way in: the module-level log(); log_error() is log(..., is_error=True), not a second
+writer. The entry point adds the timestamp, serializes the entry as one JSON line and appends it;
+_append() is the only place that writes the file. Entries are progress level (for people) or detail
+level (for an AI reading the log); an error is always written at detail level. records.py writes
+the accounting and reason records, reader.py reads one module's lines, retention.py removes old days.
 """
 from __future__ import annotations
 
@@ -17,23 +15,24 @@ from pathlib import Path
 from memorive.platform.logs.config import get_log_path
 from memorive.platform.logs.lock import log_lock
 
-LEVELS = ("progress", "detail")                    # 进度级 (给人) / 详细级 (给 AI, 出错自动升)
-RECORD_TYPES = ("event", "accounting", "reason")   # event / 记账 / 原因 (后两者见 records.py)
-_ERROR_CONTEXT_KEYS = ("step", "error")            # 错误 context 必含: 哪一步 + 什么错 (模块名在顶层 module)
+LEVELS = ("progress", "detail")                    # for people / for an AI; errors are always detail
+RECORD_TYPES = ("event", "accounting", "reason")   # the last two are written by records.py
+_ERROR_CONTEXT_KEYS = ("step", "error")            # an error says which step and what went wrong; the module is top-level
 
 
 class AppendOnlyViolation(RuntimeError):
-    """append-only 不变式被破坏 (写入后文件竟变小 = 疑发生截断 / 覆盖)。
+    """The log file got smaller during a write, so something truncated or overwrote it.
 
-    注: 这只是**部分防呆**——只抓得到"文件变小",抓不到"用 w 覆盖但新内容更长"。
-    append-only 的核心保障是: 唯一 _append() + 硬编码 open(.., "a") + 无覆盖 / 清空 API +
-    extract 禁 out_path=源 log;完整历史不被改写由"前缀不变"测试证明 (见第 4 步演示)。
+    This catches only a file that shrank, not one overwritten with longer content. The log stays
+    append-only because _append() is the only writer and opens the file with "a", there is no API
+    that overwrites or clears it, and extraction refuses to write over the log; a test checks that
+    earlier entries are never rewritten.
     """
 
 
 class Logger:
-    """统一写入入口的实体。**内部 / 测试注入用**——业务模块勿直接实例化,一律经模块级
-    log() / log_error();持有落盘路径,便于测试注入临时路径 (不导出到包公共入口)。"""
+    """The writer behind log() and log_error(), holding the log file's path. Modules call the
+    module-level functions; tests make a Logger with a temporary path. Not exported by the package."""
 
     def __init__(self, log_path: Path | None = None):
         self.log_path = log_path or get_log_path()
@@ -42,61 +41,59 @@ class Logger:
             context: dict | None = None, reason: str | None = None,
             record_type: str = "event", data: dict | None = None,
             is_error: bool = False) -> dict:
-        """写一条日志。补 ts、序列化、append;返回落盘的那条 entry。
+        """Write one entry: add the timestamp, serialize, append. Returns the entry written.
 
-        出错自动升级 (承修订B, 机器可判定): is_error=True 即把该条强制升 detail 级,
-        不靠 event 文本关键词猜错误、不需人工切档。
-        错误日志必须带非空 context (定位所需),否则拒写 (承修订: 自带上下文)。
+        is_error=True writes the entry at detail level; nothing is guessed from the event text.
+        An error entry must carry a non-empty context with step and error, or it is refused.
         """
         if is_error:
-            level = "detail"                       # ← 出错自动升详细级 (唯一升级触发口)
+            level = "detail"                       # errors are always detail level
         _validate(module, event, level, record_type)
         if is_error:
-            _validate_error_context(context)   # 强化: 非空 dict 且含非空 step + error (自带上下文达标)
+            _validate_error_context(context)   # a non-empty dict with non-empty step and error
         entry = self._build_entry(module, event, level, record_type, context, reason, data)
         self._append(_to_jsonl(entry))
         return entry
 
     def log_error(self, module: str, event: str, *, context: dict | None = None,
                   reason: str | None = None) -> dict:
-        """错误事件便捷通道 (承修订B): 等价 log(..., is_error=True),**非第二套写入机制**。
-        context 必填非空 dict (校验见 log)。"""
+        """Write an error entry: the same as log(..., is_error=True). context is required."""
         return self.log(module, event, context=context, reason=reason, is_error=True)
 
-    # ── 内部 ────────────────────────────────────────────────
+    # ── internal ────────────────────────────────────────────
     def _build_entry(self, module, event, level, record_type, context, reason, data) -> dict:
         entry = {
-            "ts": _now_iso(),          # ← 入口统一补时间戳,调用方不碰
-            "module": module,          # ← 分区键 (第2步按它抽取)
+            "ts": _now_iso(),          # added here; callers never pass it
+            "module": module,          # reader.py extracts a module's lines by this key
             "level": level,
             "record_type": record_type,
             "event": event,
         }
         if context is not None:
             entry["context"] = context
-        if reason is not None:         # [第3步] 原因记录 (record_type='reason') 主用此位
+        if reason is not None:         # used mainly by reason records (record_type='reason')
             entry["reason"] = reason
-        if data is not None:           # [第3步] 记账 8 字段 / 原因扩展走 data 结构化块
+        if data is not None:           # the fields of accounting and reason records
             entry["data"] = data
         return entry
 
     def _append(self, line: str) -> None:
-        """唯一落盘点。硬编码 append 模式,不提供任何覆盖 / 截断路径 (append-only 核心)。"""
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)   # 确保运维目录在
-        # 与日志保留 (retention.py) 共用同一把跨进程锁: 保留清理替换文件期间不会有写入落空。
+        """The only place that writes the log file: always in append mode, never truncating."""
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        # The same cross-process lock as retention.py, so no entry is lost while it replaces the file.
         with log_lock(self.log_path):
             before = self.log_path.stat().st_size if self.log_path.exists() else 0
-            with open(self.log_path, "a", encoding="utf-8") as f:     # ← 唯一写路径、硬编码 "a"、无覆盖入口
+            with open(self.log_path, "a", encoding="utf-8") as f:
                 f.write(line)
-            # 部分防呆 (非完整证明): 文件只增不减,写后变小即疑截断 / 覆盖 → 抛。
-            # 抓不到"w 覆盖但更长"的情形;完整历史不被改写靠"结构性无覆盖 API + 前缀不变测试"。
+            # The file only grows; if it is smaller after the write, something truncated or
+            # overwrote it (see AppendOnlyViolation for what this does not catch).
             after = self.log_path.stat().st_size
         if after < before:
             raise AppendOnlyViolation(
                 f"append-only 被破坏: 写后文件变小 ({before}→{after} 字节),疑覆盖 / 截断")
 
 
-# ── 模块级唯一入口 (镜像 memorive.models.gateway.call 的用法) ──────────────
+# ── the module-level entry points ─────────────────────────────────────────
 _default: Logger | None = None
 
 
@@ -111,24 +108,24 @@ def _get_default() -> Logger:
 def log(module: str, event: str, *, level: str = "progress", context: dict | None = None,
         reason: str | None = None, record_type: str = "event", data: dict | None = None,
         is_error: bool = False) -> dict:
-    """RUNTIME_LOG 唯一对外写入口。业务: from memorive.platform.logs import log; log("DocumentConvert", "开始处理第3篇")"""
+    """Write a log entry. Usage: from memorive.platform.logs import log; log("DocumentConvert", "processing paper 3")"""
     return _get_default().log(module, event, level=level, context=context, reason=reason,
                               record_type=record_type, data=data, is_error=is_error)
 
 
 def log_error(module: str, event: str, *, context: dict | None = None,
               reason: str | None = None) -> dict:
-    """错误事件便捷入口 (自动升 detail, context 必填非空)。业务: from memorive.platform.logs import log_error"""
+    """Write an error entry (detail level; context is required). Usage: from memorive.platform.logs import log_error"""
     return _get_default().log_error(module, event, context=context, reason=reason)
 
 
-# ── 辅助 ────────────────────────────────────────────────────
+# ── helpers ─────────────────────────────────────────────────
 def _now_iso() -> str:
     return datetime.now().astimezone().isoformat(timespec="seconds")   # 2026-07-01T14:32:05+08:00
 
 
 def _to_jsonl(entry: dict) -> str:
-    return json.dumps(entry, ensure_ascii=False) + "\n"   # 中文不转义,日志可读
+    return json.dumps(entry, ensure_ascii=False) + "\n"   # non-ASCII text stays readable
 
 
 def _validate(module: str, event: str, level: str, record_type: str) -> None:
@@ -143,9 +140,9 @@ def _validate(module: str, event: str, level: str, record_type: str) -> None:
 
 
 def _validate_error_context(context) -> None:
-    """错误日志 context 达标校验 (自带上下文): 非空 dict 且含非空 step + error。
-    module 在顶层已保证;错误若涉及外部模型 / API / 文件 / DB,建议再补
-    call / dependency / file / paper_id / chunk_id / input_summary 等 (非硬性)。"""
+    """An error entry's context must be a non-empty dict with non-empty step and error. For an error
+    involving a model, an API, a file or a database, call / dependency / file / paper_id / chunk_id /
+    input_summary help too (not required)."""
     if not (isinstance(context, dict) and context):
         raise ValueError(
             "错误日志 (is_error / log_error) 必须提供非空 context (dict);见设计文档 §1.5。")

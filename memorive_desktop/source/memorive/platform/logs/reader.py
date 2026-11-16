@@ -1,8 +1,8 @@
-"""RUNTIME_LOG 按模块抽取 —— 从 log.txt 里按 module 字段筛出单模块日志段。
+"""One module's lines from log.txt, picked by the module field.
 
-用途:排错时只把某模块(如 DocumentConvert)那一段单独取出发给 AI,不必倒整份日志。
-保持轻量:只做「按 module 字段筛出一段」,不是检索引擎
-(无索引 / 查询语言 / 时间范围 / 告警);读源日志**逐行流式读**,适配长期日志。
+For troubleshooting: the lines of one module (DocumentConvert, say) can be handed to an AI without
+the whole log. It only filters by module; there is no index, query language or time range. The log
+is read line by line, so a long log is fine.
 """
 from __future__ import annotations
 
@@ -14,13 +14,13 @@ from memorive.platform.logs.config import get_log_path
 
 def extract_module_logs(module: str, *, log_path: Path | str | None = None,
                         out_path: Path | str | None = None) -> list[str]:
-    """按 module 字段筛出该模块的所有日志行(保持原文件顺序,原样 JSONL 字符串)。
+    """All log lines of one module, in file order, as the JSON lines they are.
 
-    module   : 目标模块名,**精确匹配** module 字段(不会把 'DOCUMENT_PROCESSING' 误匹配 'DocumentConvert')。
-    log_path : 源日志,默认当前生效的 log.txt(可配置)。
-    out_path : 给定则把筛出的行另存到该文件(单独发 AI 用);不给则只返回。
-               **不得等于源 log.txt**(否则会把正式日志覆盖成抽取子集,拒之以守 append-only)。
-    返回:筛出的原始行列表(不含换行)。源文件不存在时返回 []。
+    module   : the module name, matched exactly against the module field.
+    log_path : the log to read; by default the log.txt in use.
+    out_path : if given, the lines are also written to this file. It may not be the log itself,
+               which would replace the log with the extract.
+    Returns the lines without line breaks; [] when the log does not exist.
     """
     if not isinstance(module, str) or not module.strip():
         raise ValueError("module 必须是非空字符串(不能为空或纯空白)")
@@ -34,7 +34,7 @@ def extract_module_logs(module: str, *, log_path: Path | str | None = None,
 
     picked: list[str] = []
     if src.exists():
-        with src.open("r", encoding="utf-8") as f:      # 逐行流式读,适配长期日志
+        with src.open("r", encoding="utf-8") as f:      # line by line, for long logs
             for raw in f:
                 line = raw.strip()
                 if not line:
@@ -42,12 +42,12 @@ def extract_module_logs(module: str, *, log_path: Path | str | None = None,
                 try:
                     entry = json.loads(line)
                 except json.JSONDecodeError:
-                    continue                            # 跳过异常行(正常写入不会出现)
-                if entry.get("module") == module:       # ← 精确按 module 字段筛
+                    continue                            # a malformed line (normal writes make none)
+                if entry.get("module") == module:
                     picked.append(line)
 
     if dst is not None:
-        dst.parent.mkdir(parents=True, exist_ok=True)   # 写出前建父目录
+        dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text("\n".join(picked) + ("\n" if picked else ""), encoding="utf-8")
 
     return picked

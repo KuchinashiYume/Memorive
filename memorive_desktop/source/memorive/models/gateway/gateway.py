@@ -1,7 +1,8 @@
-"""MODEL_GATEWAY 统一入口。业务模块只 import 本模块的 call(),绝不 import 任何厂商 SDK。
+"""The model gateway: the one way the document and research code calls a model.
 
-四个能力(Prompt 版本化 / 缓存 / 记账 / 降级)本步只留挂接位,
-后续步骤在 call() 里按标注接上,骨架不用重构。
+Callers use call(), embed(), rerank(), ocr(), healthcheck() and region_preflight() below and never a
+vendor SDK. ModelGateway adds versioned prompts (PromptRegistry), the response cache, cost records
+(CostManager) and retries with error classes (FallbackPolicy) around each provider call.
 """
 from __future__ import annotations
 
@@ -24,22 +25,24 @@ from memorive.models.gateway.prompts import PROMPT_DIR, PromptRegistry
 from memorive.models.gateway.router import Router
 
 
-# 本系统嵌入模型归一化后的**唯一 canonical 名**(单一来源:整库一致性基准;DocumentEmbed 承带、不自定义,承 ServiceContracts 第 3 步对抗审查 #8)。
+# The one canonical name of the embedding model after normalization; the whole library is checked
+# against it, and document embedding takes it from here.
 CANONICAL_EMBED_MODEL = "bge-m3"
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _canonical_embed_model(raw: str) -> str:
-    """归一化嵌入模型名:去 provider 前缀(BAAI/bge-m3→bge-m3)+ 去 :tag(bge-m3:latest→bge-m3)。
-    使云 / 本地同一 bge-m3 记同名,整库重嵌一致性检查不把云 / 本地误判成模型冲突挡下(承 ServiceContracts 第 3 步)。"""
+    """The embedding model's name without provider prefix or tag (BAAI/bge-m3 and bge-m3:latest both
+    become bge-m3), so cloud and local bge-m3 count as the same model when the library is checked for
+    one embedding model."""
     return (raw or "").split("/")[-1].split(":")[0]
 
 
 def _rerank_contract_error(result, expected_count: int) -> str | None:
-    """校验 rerank 的 score↔document 对齐契约，返回错误摘要或 None。
+    """Check that a rerank reply gives each document exactly one score; returns an error summary or None.
 
-    只校验形状、index 与数值，不记录 query/document 原文。数量相等仍不足以防止
-    重复或越界 index 让某个 score 静默错挂到另一块上。
+    Only shape, indexes and numbers are checked; no query or document text is recorded. Equal counts
+    are not enough: a repeated or out-of-range index would attach a score to the wrong document.
     """
     if not isinstance(result, dict):
         return f"provider 返回 {type(result).__name__}，期望对象"
@@ -78,7 +81,7 @@ def _ocr_contract_error(
     page_number: int,
     source_sha256: str,
 ) -> str | None:
-    """单页 OCR 结果最小契约；只返回结构错误摘要，不含识别正文。"""
+    """The minimal shape of one page's OCR result; returns a structural error summary, never the text."""
     if not isinstance(result, dict):
         return f"provider 返回 {type(result).__name__}，期望对象"
     if not isinstance(result.get("text"), str) or not result["text"].strip():
@@ -100,10 +103,10 @@ class ModelGateway:
     def __init__(self, config_path: Path = _CONFIG_PATH, prompts_root: Path = _PROMPTS_ROOT, *, region_probe=None):
         self.config = GatewayConfig(config_path)
         self.router = Router(self.config)
-        self.prompts = PromptRegistry(prompts_root)   # 第2步:Prompt Registry
-        self.cache = CacheLayer()                     # 第3步:Cache Layer (文件缓存、库外)
-        self.cost = CostManager(self.config)          # 第3步:Cost & Quota Manager (记账写 RUNTIME_LOG)
-        self.fallback = FallbackPolicy()              # 第4步:Fallback + 四类报错
+        self.prompts = PromptRegistry(prompts_root)
+        self.cache = CacheLayer()                     # a file cache outside the library
+        self.cost = CostManager(self.config)          # writes cost records to the runtime log
+        self.fallback = FallbackPolicy()              # retries and the four error classes
         self._region_probe = region_probe
 
     def _require_region_authorization(self, task_type: str, slot) -> dict:
@@ -124,48 +127,51 @@ class ModelGateway:
         return self.router.dispatch(task_type, payload, capability=capability)
 
     def call(self, task_type: str, payload: dict, *, bypass_cache: bool = False) -> dict:
-        # [第2步] 从 Registry 取该模块当前模板(取不到不炸);版本供缓存 key 与记账用。
+        # The module's current template from the registry (None if there is none); its version goes
+        # into the cache key and the cost record.
         template = self.prompts.get_or_none(task_type)
-        # 规范成字符串版本号 (如 "v2",与 prompts/<module>/v<N>.md 命名一致);
-        # RUNTIME_LOG 记账契约要 str/None,PromptRegistry.version 是 int,在此统一口径。
+        # As a string ("v2", like prompts/<module>/v<N>.md): the cost record takes str or None,
+        # PromptRegistry.version is an int.
         prompt_version = f"v{template.version}" if template else None
-        slot = self.config.slot(task_type)   # api_key_env→quota_account、model_id→缓存 key
+        slot = self.config.slot(task_type)   # api_key_env becomes quota_account, model_id goes into the cache key
         key = self.cache.key(task_type, slot.model_id, prompt_version, payload)
 
-        # [第3步] 缓存命中:不真调、直接返回(仍记一条 cache_hit=true 记账,不重复计费)。
-        # 灾难恢复重试可显式绕过旧响应；仍沿用同一 key，真调成功后刷新缓存，避免后续继续重放坏响应。
+        # A cache hit returns without a call (a cost record with cache_hit=true is still written, at no
+        # cost). A disaster-recovery retry can bypass the cached reply; it keeps the same key and a
+        # successful call refreshes the cache, so a bad reply is not replayed again.
         if not bypass_cache:
             hit = self.cache.get(key)
             if hit is not None:
                 return self.cost.record(task_type, hit, slot, prompt_version, cache_hit=True)
 
-        # 仅在将要发生真实 dispatch 时执行；缓存命中不产生外部请求。
+        # Only when a real request is about to be sent; a cache hit sends nothing.
         region_receipt = self._require_region_authorization(task_type, slot)
 
-        # [第4步] Fallback 包住 dispatch:瞬时错重试、配置类分类挡下、每次失败 RUNTIME_LOG 留痕、不崩
+        # FallbackPolicy wraps the request: transient errors are retried, configuration errors stop it,
+        # every failure is logged.
         result, retries = self.fallback.run(
             task_type, slot, lambda: self._dispatch_with_region_receipt(task_type, slot, region_receipt, payload))
         result["prompt_version"] = prompt_version
-        if result.get("text"):               # 只缓存成功、非空真调结果(失败已抛受控 DependencyError、空返回不缓存)
+        if result.get("text"):               # only successful, non-empty replies are cached
             self.cache.put(key, result)
-        # [第3步] 记账写 RUNTIME_LOG(cache_hit=false;retries 由 Fallback 提供)
+        # The cost record (cache_hit=false; retries come from FallbackPolicy).
         return self.cost.record(task_type, result, slot, prompt_version, retries=retries, cache_hit=False)
 
-    # ── 嵌入(ServiceContracts 第 3 步)——call() 的语义包装,复用同一核心(同槽/同 fallback/同记账),非旁路 ──
+    # ── embeddings: the same slot, retries and cost record as call() ──
     def embed(self, task_type: str, inputs: list) -> dict:
-        """嵌入入口。inputs = 待嵌文本列表(DocumentEmbed 逐块传 [text])。
-        与 call() 唯一差别:嵌入无 Prompt 模板、不走缓存(加固:防他人数据向量进共享缓存)——
-        二者对嵌入本就 N/A。返回含 embeddings + 归一化 embedding_model + provider_model_id(raw)。"""
-        slot = self.config.slot(task_type)                     # 同一槽配置
+        """Embed inputs, a list of texts (document embedding passes one chunk at a time). Unlike call()
+        there is no prompt template and no cache, so vectors of someone else's data never enter a shared
+        cache. Returns the embeddings, the normalized embedding_model and the raw provider_model_id."""
+        slot = self.config.slot(task_type)
         region_receipt = self._require_region_authorization(task_type, slot)
-        result, retries = self.fallback.run(                   # 同一 Fallback(重试/挡下/留痕)
+        result, retries = self.fallback.run(
             task_type, slot,
             lambda: self._dispatch_with_region_receipt(task_type, slot, region_receipt, {"input": inputs}, capability="embed"))
         raw_id = result.get("model") or slot.model_id
-        result["provider_model_id"] = raw_id                   # 审计:API 回显 raw(BAAI/bge-m3 或 bge-m3:latest)
-        result["embedding_model"] = _canonical_embed_model(raw_id)   # 归一化:云/本地同记 bge-m3
-        # 数量校验**先于记账**:输入 N → 必须返回 N。不符 → 留 RUNTIME_LOG 错误痕 + 抛 EmbedResultInvalid,
-        # **绝不记成功账**(否则污染第③场景"MODEL_GATEWAY 记账无 cloud embed"硬证据、且成功假象误导);校验过才 record。
+        result["provider_model_id"] = raw_id                   # as the API returned it (BAAI/bge-m3 or bge-m3:latest)
+        result["embedding_model"] = _canonical_embed_model(raw_id)   # cloud and local both bge-m3
+        # The count is checked before the cost record: N inputs must give N vectors. Otherwise the error
+        # is logged and EmbedResultInvalid raised, and no success is recorded.
         n_in, n_out = len(inputs), len(result.get("embeddings") or [])
         if n_out != n_in:
             log_error("MODEL_GATEWAY", "嵌入返回数量不符,已拒用", context={
@@ -176,21 +182,22 @@ class ModelGateway:
             raise EmbedResultInvalid(
                 f"[{task_type}] 嵌入返回数量不符:输入 {n_in} 条、返回 {n_out} 条;"
                 f"已拒用(不记成功账、一条不写、防 chunk↔向量错位)。")
-        return self.cost.record(                               # 同一记账(cost 已认 embed_cloud/local→embed+backend)
+        return self.cost.record(                               # embed_cloud and embed_local are recorded as embed
             task_type, result, slot, None, retries=retries, cache_hit=False)
 
-    # ── 重排(A·修跨篇混入)——embed() 的姊妹件,同槽/同 fallback/同记账,只多 capability=rerank 一路 ──
+    # ── reranking: like embed(), with capability=rerank ──
     def rerank(self, task_type: str, query: str, documents: list) -> dict:
-        """重排入口。query = 问题串;documents = 候选块原文列表。回 results:[{index, relevance_score}](按 index 对齐 documents)。
-        与 embed() 同:无 Prompt 模板、**不走缓存**(防他人数据进共享缓存,rerank 亦 N/A)。
-        siliconflow(国内)→ region_gate domestic_skip,无需 region_preflight。"""
-        slot = self.config.slot(task_type)                     # 同一槽配置
+        """Rerank documents (candidate chunk texts) against query. Returns results: [{index,
+        relevance_score}], the indexes referring to documents. Like embed(): no prompt template and no
+        cache. SiliconFlow is a domestic provider, so the region check skips it."""
+        slot = self.config.slot(task_type)
         region_receipt = self._require_region_authorization(task_type, slot)
-        result, retries = self.fallback.run(                   # 同一 Fallback(重试/挡下/留痕)
+        result, retries = self.fallback.run(
             task_type, slot,
             lambda: self._dispatch_with_region_receipt(task_type, slot, region_receipt, {"query": query, "documents": documents}, capability="rerank"))
-        # 契约校验**先于记账**:不仅数量相同，还必须 index 唯一、完整覆盖输入且 score 合法。
-        # 否则哪怕 N 条都在，也可能把某块的分数静默错挂到另一块，绝不记成功账。
+        # Checked before the cost record: each input index exactly once and every score valid; with N
+        # results but a repeated index a score would attach to the wrong chunk. No success is recorded
+        # for a bad reply.
         n_in = len(documents)
         contract_error = _rerank_contract_error(result, n_in)
         if contract_error is not None:
@@ -203,7 +210,7 @@ class ModelGateway:
                 f"[{task_type}] 重排返回契约不符:{contract_error};"
                 f"已拒用(不记成功账、防 block↔score 错位)。")
         result["results"] = sorted(result["results"], key=lambda item: item["index"])
-        return self.cost.record(                               # 同一记账(task_type=rerank,RUNTIME_LOG enum 已认)
+        return self.cost.record(                               # task_type rerank
             task_type, result, slot, None, retries=retries, cache_hit=False)
 
     def ocr(
@@ -216,7 +223,8 @@ class ModelGateway:
         source_sha256: str,
         data_ownership: str,
     ) -> dict:
-        """页面级 OCR；不走共享缓存，所有权与结果契约分别在网络前后硬校验。"""
+        """OCR of one page; no shared cache. Data ownership is checked before the request and the
+        result's shape after it."""
         if data_ownership != "self":
             raise OcrOwnershipBlocked(
                 f"[{task_type}] data_ownership={data_ownership!r}；"
@@ -276,12 +284,12 @@ class ModelGateway:
             cache_hit=False,
         )
 
-    # ── 嵌入安全阀健康探测(ServiceContracts 第 3 步)——仅供 embed_local;MODEL_GATEWAY 报告状态,DocumentEmbed 据 ready 决定挡下 ──
+    # ── local embedding readiness: only embed_local; document embedding stops when not ready ──
     def healthcheck(self, task_type: str) -> dict:
-        """纯能力探测本地嵌入是否就绪(GET /api/tags,不发任何待嵌文本)。
-        返回结构化 {ready, ...};未就绪时补归属保护 message(MODEL_GATEWAY 给,DocumentEmbed 挡下时记 RUNTIME_LOG detail)。
-        **硬限制:仅 embed_local**——自有数据走云端无「绝不降级」红线、不需预检,
-        误调 embed_cloud 会把归属保护文案套到云端(语义错),故受控报错挡下。"""
+        """Whether the local embedding model is ready (GET /api/tags; no text is sent). Returns {ready,
+        ...}; when not ready, a message about data ownership is added, which document embedding logs when
+        it stops. Only embed_local: the cloud slot needs no such check, and its message would be wrong
+        there, so other slots are refused."""
         if task_type != "embed_local":
             raise InvalidHealthcheckTarget(
                 f"healthcheck 仅用于 embed_local 安全阀预检,不适用于 {task_type!r};"
@@ -293,22 +301,23 @@ class ModelGateway:
                     "message": ownership_local_message(task_type, slot, reason)}
         adapter = providers.get_adapter(slot.provider)
         try:
-            hc = adapter.healthcheck(slot)                     # 纯探测(连不上/超时/解析失败均视未就绪、不崩)
+            hc = adapter.healthcheck(slot)                     # unreachable, timeout or bad reply: not ready
         except Exception as exc:
             hc = {"ready": False, "reason": f"本地服务不可达({type(exc).__name__})", "want": slot.model_id}
         if hc.get("ready"):
             return hc
         hc.setdefault("reason", "未就绪")
-        hc["message"] = ownership_local_message(task_type, slot, hc["reason"])   # 补友好文案
+        hc["message"] = ownership_local_message(task_type, slot, hc["reason"])
         return hc
 
-    # ── 境外 API 区域预检门(测前安全阀)——call() 的姊妹件,同「查 slot → 交纯逻辑」结构 ──
+    # ── the region check before an overseas API: look up the slot, then decide in region_gate ──
     def region_preflight(self, task_type: str, *, probe=None) -> dict:
-        """测境外 API(GPT/Gemini/Claude)前查本机出口区域:大陆挡下、非陆放行、查不到交人。
-        只探测出口归属、**不发起任何 API 请求**;与 EVIDENCE_REVIEW/KNOWLEDGE_ADMISSION 无关。
-        两条前提见 region_gate 模块 docstring:仅 TUN 全局代理下成立、区域通过 ≠ key 有效。
-        国内 / 本地 / human / 占位槽自动 skipped 放行(不查 geo)。probe 可注入(离线测)。"""
-        slot = self.config.slot(task_type)    # 未知 task_type → UnknownTaskType(归 MODEL_GATEWAY 错误体系)
+        """Before calling an overseas API (GPT, Gemini, Claude), look up this computer's exit region:
+        mainland China stops the call, elsewhere lets it through, an unknown region is left to the user.
+        Only the exit region is probed; no API request is made. region_gate.py states the two premises
+        (it holds only behind a global TUN proxy; a passed region does not mean the key works).
+        Domestic, local, human and placeholder slots are skipped. probe can be injected for tests."""
+        slot = self.config.slot(task_type)    # an unknown task_type raises UnknownTaskType
         return region_gate.preflight_for_slot(
             slot, probe=probe or getattr(self, "_region_probe", None)
         )
@@ -339,18 +348,18 @@ def current_gateway():
 
 
 def call(task_type: str, payload: dict, *, bypass_cache: bool = False) -> dict:
-    """MODEL_GATEWAY 对话入口。业务: from memorive.models.gateway import call; call("distill", {...})"""
+    """A chat call. Usage: from memorive.models.gateway import call; call("distill", {...})"""
     return current_gateway().call(task_type, payload, bypass_cache=bypass_cache)
 
 
 def embed(task_type: str, inputs: list) -> dict:
-    """MODEL_GATEWAY 嵌入入口。业务(DocumentEmbed): from memorive.models.gateway import embed; embed("embed_cloud", [text, ...])"""
+    """An embedding call (document embedding): from memorive.models.gateway import embed; embed("embed_cloud", [text, ...])"""
     return current_gateway().embed(task_type, inputs)
 
 
 def rerank(task_type: str, query: str, documents: list) -> dict:
-    """MODEL_GATEWAY 重排入口。业务(CandidateRetrieval): from memorive.models.gateway import rerank; rerank("rerank", question, [text, ...])
-       → {results:[{index, relevance_score}], ...}(按 index 对齐 documents)。"""
+    """A rerank call (candidate retrieval): from memorive.models.gateway import rerank; rerank("rerank", question, [text, ...])
+       returns {results: [{index, relevance_score}], ...}, the indexes referring to documents."""
     return current_gateway().rerank(task_type, query, documents)
 
 
@@ -363,7 +372,7 @@ def ocr(
     source_sha256: str,
     data_ownership: str,
 ) -> dict:
-    """MODEL_GATEWAY 页面 OCR 入口；业务模块不得绕过 Gateway 直连 provider。"""
+    """OCR of one page image; callers go through the gateway, never to a provider directly."""
     return current_gateway().ocr(
         task_type,
         image_bytes,
@@ -375,13 +384,13 @@ def ocr(
 
 
 def healthcheck(task_type: str) -> dict:
-    """MODEL_GATEWAY 嵌入安全阀健康探测入口。业务(DocumentEmbed): healthcheck("embed_local") → {ready, message, ...}"""
+    """Whether the local embedding model is ready (document embedding): healthcheck("embed_local") returns {ready, message, ...}"""
     return current_gateway().healthcheck(task_type)
 
 
 def region_preflight(task_type: str, *, probe=None) -> dict:
-    """MODEL_GATEWAY 境外 API 区域预检门入口。测境外 API 前:
+    """The region check before calling an overseas API:
         from memorive.models.gateway import region_preflight
-        rc = region_preflight("analysis")   # → {ok, gated, region, reason, message, ...}
-    据 rc['gated'] 决定挡下 / 放行、rc['reason'] 判类;见 region_gate 模块 docstring 两条前提。"""
+        rc = region_preflight("analysis")   # -> {ok, gated, region, reason, message, ...}
+    rc['gated'] says whether to stop, rc['reason'] why; region_gate.py's docstring states its two premises."""
     return current_gateway().region_preflight(task_type, probe=probe)

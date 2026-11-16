@@ -1,7 +1,7 @@
-"""Memorive MODEL-GATEWAY/MODEL_GATEWAY · 读取 MODEL_GATEWAY 模型配置(models.yaml) → 结构化 SlotConfig。
+"""The gateway's slot configuration: models.yaml read into SlotConfig records.
 
-纪律:本模块只记 api_key_env 的"名",绝不在此(或任何地方)取 key 的"值";
-key 值由各 adapter 在真正调用时才从环境变量读。
+Only the name of a key's environment variable (api_key_env) is kept here, never the key; an adapter
+reads the key from the environment when it makes the call.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from memorive.models.gateway.errors import UnknownTaskType
 # The slot configuration lies next to this module; every reader takes its path from here.
 MODELS_YAML = Path(__file__).with_name("models.yaml")
 
-# 与 models.yaml 各槽字段对应(api_key_env 只存名、不存值)
+# The fields of a slot in models.yaml (api_key_env holds a variable name, never a key)
 _SLOT_FIELDS = {
     "enabled", "provider", "model_id", "endpoint",
     "api_key_env", "swap_granularity", "on_swap", "notes",
@@ -36,13 +36,13 @@ class SlotConfig:
     swap_granularity: str | None = None
     on_swap: str | None = None
     notes: str | None = None
-    thinking_type: str | None = None      # Anthropic adaptive / manual / disabled thinking 模式(按 slot 配置)
-    effort: str | None = None             # Anthropic output_config.effort；显式记录实验档位
-    max_tokens: int | None = None         # 该槽的输出硬上限；thinking + 最终文本共用
-    temperature: float | None = None      # OCR/对话确定性采样；None 时由 adapter 用安全默认
-    timeout_seconds: int | None = None    # 单次请求超时；有限重试仍由 FallbackPolicy 统一控制
-    image_detail: str | None = None       # 多模态 image_url.detail: auto | low | high
-    prompt_version: int | None = None     # 生产槽显式固定版本；避免资格/实验 successor 自动接管 live prompt
+    thinking_type: str | None = None      # Anthropic thinking mode: adaptive, manual or disabled
+    effort: str | None = None             # Anthropic output_config.effort, recorded as set
+    max_tokens: int | None = None         # the slot's output limit, thinking and final text together
+    temperature: float | None = None      # sampling for OCR and chat; None uses the adapter's default
+    timeout_seconds: int | None = None    # per request; retries are FallbackPolicy's
+    image_detail: str | None = None       # image_url.detail for pictures: auto, low or high
+    prompt_version: int | None = None     # pins the prompt version, so a newer trial version is not picked up
     price_profile_id: str | None = None   # ACCOUNTING-RECOVERY versioned PriceCatalog ref
     price_profile_revision: str | None = None
 

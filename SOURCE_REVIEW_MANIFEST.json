@@ -4481,7 +4481,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "72c60ae7e14d1a32b5ae5ad863458c5ddcf5ac1a5ab6447cd5f621a223e2aed4",
+      "sha256": "ba70fd92b78c4f8b74f9405a0ef4e2c9616207212a790978aad69f0c113a84a1",
       "bytes": 266678
     },
     {
@@ -6166,18 +6166,18 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/logs/logger.py",
-      "sha256": "667863eaaeec54a5a921f1307af43274ab26140228e6d6ed006a421a3bced829",
-      "bytes": 8950
+      "sha256": "115ed56ea726e63ac15a20f9d694e86fcfe2de57ea8975d25f12bdc951715153",
+      "bytes": 8373
     },
     {
       "path": "memorive_desktop/source/memorive/platform/logs/reader.py",
-      "sha256": "fab6b5b9436e7670e41ed18a9c4a12d787f7ab2d51610dba21aff64212ac1144",
-      "bytes": 2619
+      "sha256": "ac3ca225e118bdb0c1b8b8a0f3f790f5c4ce4e8ca7cd266701b8eacf72424af2",
+      "bytes": 2314
     },
     {
       "path": "memorive_desktop/source/memorive/platform/logs/records.py",
-      "sha256": "50c576fef4a6645c4f6d15125d28633a7db721dfe92f59d1cd1ac39f9db3c0bd",
-      "bytes": 7747
+      "sha256": "7991f0833848b328b965f215264b04c9a9eebeaa25721046597d3160a4de1e40",
+      "bytes": 7376
     },
     {
       "path": "memorive_desktop/source/memorive/platform/logs/retention.py",
@@ -6246,8 +6246,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/cache.py",
-      "sha256": "fbdd2deebb39a036683fffb4a14d65a615b685bcfea8a4ce4477ea7f9e537084",
-      "bytes": 2015
+      "sha256": "91af4a91adbe824e718e2185c0a09a8d8794d4f7fd60b6810487a7abd9bc2157",
+      "bytes": 2036
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/cache_metrics.py",
@@ -6276,18 +6276,18 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/config.py",
-      "sha256": "ba25c38475ad76915b2a74e9b5f723d17bbc55f2526ebda4938ce730cd7609aa",
-      "bytes": 4340
+      "sha256": "292611e722d251810a3ba3623d0186fe186e48ee3db98317ed092ea5103923e3",
+      "bytes": 4246
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/cost.py",
-      "sha256": "37808fee4a73b44d8a0ad4f5aa44ad294e368b71553963de87ca1748f32a0ceb",
-      "bytes": 7804
+      "sha256": "061484eab9df856942d2a0cae2c5669010196cfb15cb202663fa326dfd8569c7",
+      "bytes": 7764
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/errors.py",
-      "sha256": "ad361be6c8b3d641f55ea672b3af7a1f919c21ff895c9ded65c62983d494b369",
-      "bytes": 3784
+      "sha256": "35cb02d82c85eb79955a98d70146b3b9041de759dbd6536a69c7d80762e31d65",
+      "bytes": 3438
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/execution_core/__init__.py",
@@ -6381,13 +6381,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/fallback.py",
-      "sha256": "17bfae68b47eba7b40a6838aa32ae7ee6bc43603804371bec8f5d69d1202ebb8",
-      "bytes": 10262
+      "sha256": "b41590a8850ac49b0163611a1843c780e238d2030ff988959f4a33252b6cab9d",
+      "bytes": 10068
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/gateway.py",
-      "sha256": "15bfe7899fa3118b602b5efa0ca2f5ea2228557dd1d95451c75cc15428bf7c1b",
-      "bytes": 21512
+      "sha256": "544d2b583d340cc3390fd45164704ed35970f786d9418fa1c8799b67e41c3c95",
+      "bytes": 20767
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/local_capability/__init__.py",
@@ -6801,8 +6801,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/prompts.py",
-      "sha256": "718cfc94cce0ae9dfdea02e09bed756ae62e6a2a9e716324f9da8e44ca72421e",
-      "bytes": 4155
+      "sha256": "4ff5953728aea7e7ad611f9d72ccc24f7a7097c3446d14714e18660306b3f736",
+      "bytes": 4043
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/prompts/__init__.py",
@@ -7261,43 +7261,43 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/__init__.py",
-      "sha256": "ddeeffe44cdaaa35ddb913141f71fffc1db7d524a91dbfc3ffabb06f7a8ccfb0",
-      "bytes": 1565
+      "sha256": "d8bfb6a37982d28155ac12a55d552e4f8c2701d0c6e229ccc054336e459669ec",
+      "bytes": 1422
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/anthropic.py",
-      "sha256": "cc7cd7bde5f8b260081d78d24e5420af5b8ad4a162723e0f85f6fa22ac6e3efd",
-      "bytes": 22521
+      "sha256": "3053fb9090b7bf037e83c2927c7f0e004174b10828322e5c097274fe9112f0ee",
+      "bytes": 22468
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/base.py",
-      "sha256": "3ff398ffff85fd3e168c1a0406a8a134a371c254516fdf39495e80ef13ffbf28",
-      "bytes": 2550
+      "sha256": "923f8fcf5ab2e46acdca8b640c30b522cb5e1d416f42c3d39b0a7a0c14169ead",
+      "bytes": 2243
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/deepseek.py",
-      "sha256": "38252de262630ce94c3d21a6c63b6e069b62bce3493d76f787e6083a3749d07d",
-      "bytes": 12959
+      "sha256": "0daf4b337bf6d81781520af2952df476cf270b751ffff988235357f44a496a97",
+      "bytes": 12953
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/ollama.py",
-      "sha256": "f781e00c66256f59b7c54beaeeb37f89c9531a043fac2d23cc0fa15422c8e41d",
-      "bytes": 4142
+      "sha256": "4f4ec016570aa96ce1925f20ff8fc5ffadc0c87e326c3b269fc0563af624cb85",
+      "bytes": 3844
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/openai.py",
-      "sha256": "e0046056e04b2b6c10cb05eb1ea91b0b9bedd8dae14952e4607d121e8e01324f",
-      "bytes": 1922
+      "sha256": "8554a86c6538cf64ff3b70c8b76b6129e35090dcfe570630827e8caebc35e829",
+      "bytes": 1861
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/providers/siliconflow.py",
-      "sha256": "f185ab563e9a2363cb9ee4d23569d520970b060b8b4540ea4ce60589cdbd0af9",
-      "bytes": 9361
+      "sha256": "3ac58d1c4cb5fe0c92ec86298868840b3137f31c7bffba066f06d21744b874f8",
+      "bytes": 9200
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/region_gate.py",
-      "sha256": "d427c5347f8b49676922c2ca21b7cb4e64711d20b64b36a5d21c802b557830d5",
-      "bytes": 15587
+      "sha256": "fbcfb564abd67b31a86e3b90c2d00fa6792ceafcda5855de691928de672d4768",
+      "bytes": 15023
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/research_prompt_cache.py",
@@ -7326,8 +7326,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/router.py",
-      "sha256": "6a50ec60a06dd28f25bcef4dcb99b9292eccb64cb84e02bd751da41da772b2ab",
-      "bytes": 2535
+      "sha256": "f4204c8874560dea73b700823e0a368f75b213ad2afb64fe8205509072e82475",
+      "bytes": 2381
     },
     {
       "path": "memorive_desktop/source/memorive/models/gateway/routing_advisory.py",

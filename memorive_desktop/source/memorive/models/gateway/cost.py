@@ -70,7 +70,7 @@ class CostManager:
                 cache_hit=cache_hit,
                 context=context or None,
             )
-        except Exception as exc:   # 记账失败不拖垮调用,但不静默 (warn + 标记结果)
+        except Exception as exc:   # a failed cost record does not fail the call; warn and mark the result
             warnings.warn(f"RUNTIME_LOG 记账写入失败 (不影响本次调用结果): {exc!r}", stacklevel=2)
             if isinstance(result, dict):
                 result["_accounting_error"] = repr(exc)
@@ -151,8 +151,8 @@ class CostManager:
 
 
 def _map_task_type(task_type: str):
-    """MODEL_GATEWAY 槽位名 → RUNTIME_LOG 记账 task_type (硬枚举) + backend。
-    embed_cloud / embed_local → embed + cloud/local (承第 3 步契约:云/本地不进 task_type,落 context.backend)。"""
+    """A gateway slot name as the cost record's task_type and backend: embed_cloud and embed_local
+    are both task_type embed, with backend cloud or local."""
     if task_type in ("embed_cloud", "embed_local"):
         return "embed", task_type.split("_", 1)[1]
     return task_type, None
@@ -165,6 +165,6 @@ def _map_tokens(usage):
     return {
         "prompt": usage.get("prompt_tokens", 0),
         "completion": usage.get("completion_tokens", 0),
-        "reasoning": details.get("reasoning_tokens", 0),   # completion 的子集,不叠加
-        "total": usage.get("total_tokens", 0),             # provider 原始口径
+        "reasoning": details.get("reasoning_tokens", 0),   # part of completion, not added to it
+        "total": usage.get("total_tokens", 0),             # as the provider counts it
     }

@@ -1,9 +1,10 @@
-"""SiliconFlow 云端嵌入 + 重排 adapter(ServiceContracts 第 3 步嵌入 / A·修跨篇混入重排)。
+"""The SiliconFlow adapter: cloud embeddings, reranking and DeepSeek-OCR.
 
-OpenAI 兼容 `/v1/embeddings`(body `{model,input}` → resp `{data:[{embedding}],model,usage}`);
-`/v1/rerank`(body `{model,query,documents}` → resp `{results:[{index,relevance_score}],tokens,model}`);
-urllib、**不引任何 SDK**;key 走环境变量。**Authorization header 绝不进日志**(安全红线)。
-自有数据默认走此(embed_cloud / rerank·国内 domestic_skip);他人托付走本地(见 ollama.py)。
+OpenAI-compatible /v1/embeddings (body {model, input}, reply {data: [{embedding}], model, usage});
+/v1/rerank (body {model, query, documents}, reply {results: [{index, relevance_score}], tokens,
+model}). Plain urllib, no SDK; the key comes from the environment, and the Authorization header is
+never logged. The user's own data uses it by default (embed_cloud, rerank; a domestic provider, so
+the region check skips it); entrusted data is embedded locally (ollama.py).
 """
 from __future__ import annotations
 
@@ -30,14 +31,14 @@ _GROUNDING_METADATA_LINE_RE = re.compile(
 
 
 def _normalize_deepseek_ocr_markdown(content: object) -> object:
-    """删除 DeepSeek grounding 坐标行，保留其后的 Markdown 正文。"""
+    """Drop DeepSeek's grounding coordinate lines and keep the Markdown after them."""
     if not isinstance(content, str):
         return content
     return _GROUNDING_METADATA_LINE_RE.sub("", content).strip()
 
 
 def _sanitized_http_error(exc: urllib.error.HTTPError) -> urllib.error.HTTPError:
-    """提取 SiliconFlow 错误 code/message；不保留响应流、请求体、图片或凭据。"""
+    """SiliconFlow's error code and message; the reply stream, request body, image and credentials are not kept."""
     provider_code = None
     provider_message = None
     try:
@@ -78,7 +79,8 @@ def _sanitized_http_error(exc: urllib.error.HTTPError) -> urllib.error.HTTPError
 @register("siliconflow")
 class SiliconFlowAdapter(ProviderAdapter):
     def ocr(self, slot, payload: dict) -> dict:
-        """DeepSeek-OCR 单页调用。图片只在所有权闸门之后进入本方法并编码。"""
+        """DeepSeek-OCR for one page. The image reaches this method, and is encoded, only after the
+        data ownership check."""
         key = os.environ.get(slot.api_key_env or "")
         if not key:
             raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
@@ -147,33 +149,33 @@ class SiliconFlowAdapter(ProviderAdapter):
         }
 
     def embed(self, slot, payload: dict) -> dict:
-        key = os.environ.get(slot.api_key_env or "")          # 按配置里的"环境变量名"取 key
+        key = os.environ.get(slot.api_key_env or "")          # the variable named in the configuration
         if not key:
             raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
 
         body = json.dumps({"model": slot.model_id, "input": payload["input"]}).encode("utf-8")
         req = urllib.request.Request(slot.endpoint, data=body, method="POST")
-        req.add_header("Authorization", f"Bearer {key}")      # ⚠ 凭据:绝不进日志/错误/metadata
+        req.add_header("Authorization", f"Bearer {key}")      # never in a log, an error or metadata
         req.add_header("Content-Type", "application/json")
 
         with urllib.request.urlopen(req, timeout=60) as resp:
             data = json.loads(resp.read().decode("utf-8"))
 
-        # OpenAI 兼容规范不保证 data 按输入顺序返回,须按 index 重排(承 ServiceContracts 第 3 步对抗审查 #7:
-        # 防将来 >1 输入的批量调用 chunk↔向量错位;单条调用下亦无害)。
+        # The OpenAI-compatible API does not promise data in input order, so it is sorted by index;
+        # with several inputs a vector would otherwise land on the wrong chunk.
         items = sorted(data["data"], key=lambda d: d.get("index", 0))
         return {
             "task_type": slot.task_type,
             "provider": "siliconflow",
-            "model": data.get("model"),                        # raw 回显(如 BAAI/bge-m3),归一化在 gateway 出口
-            "embeddings": [d["embedding"] for d in items],     # OpenAI 兼容 data[i].embedding,按 index 重排
+            "model": data.get("model"),                        # as returned (BAAI/bge-m3); the gateway normalizes it
+            "embeddings": [d["embedding"] for d in items],     # data[i].embedding in index order
             "usage": data.get("usage"),
-            "raw": data,                                        # ⚠ 仅函数内/测试用,绝不进日志
+            "raw": data,                                        # for the caller and tests only; never logged
         }
 
     def rerank(self, slot, payload: dict) -> dict:
-        """cross-encoder 重排(A·修跨篇混入)。POST /v1/rerank,回每个 document 的 relevance_score。"""
-        key = os.environ.get(slot.api_key_env or "")          # 按配置里的"环境变量名"取 key
+        """Cross-encoder reranking: POST /v1/rerank returns each document's relevance_score."""
+        key = os.environ.get(slot.api_key_env or "")          # the variable named in the configuration
         if not key:
             raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
 
@@ -181,23 +183,23 @@ class SiliconFlowAdapter(ProviderAdapter):
             "model": slot.model_id,
             "query": payload["query"],
             "documents": payload["documents"],
-            "return_documents": False,                        # 只要 index+score 对齐,不回显原文(省流量)
+            "return_documents": False,                        # index and score only, not the texts
         }).encode("utf-8")
         req = urllib.request.Request(slot.endpoint, data=body, method="POST")
-        req.add_header("Authorization", f"Bearer {key}")      # ⚠ 凭据:绝不进日志/错误/metadata
+        req.add_header("Authorization", f"Bearer {key}")      # never in a log, an error or metadata
         req.add_header("Content-Type", "application/json")
 
         with urllib.request.urlopen(req, timeout=60) as resp:
             data = json.loads(resp.read().decode("utf-8"))
 
-        # /v1/rerank 回 {results:[{index, relevance_score, document?}], tokens, model};
-        # 按 index 升序对齐 documents(承 embed 同款防 block↔score 错位口径,承 #7)。
+        # /v1/rerank returns {results: [{index, relevance_score, document?}], tokens, model}; sorted by
+        # index so each score stays with its document.
         items = sorted(data.get("results") or [], key=lambda r: r.get("index", 0))
         return {
             "task_type": slot.task_type,
             "provider": "siliconflow",
-            "model": data.get("model") or slot.model_id,   # /v1/rerank 不回 model 字段 → 退回槽 model_id(记账/观测)
+            "model": data.get("model") or slot.model_id,   # /v1/rerank has no model field: the slot's model_id
             "results": [{"index": r.get("index"), "relevance_score": r.get("relevance_score")} for r in items],
-            "usage": None,          # rerank 按文档/调用计费、非 token 形状 → 记 None,不误配 token 账(bge-reranker 无定价→est_cost null)
-            "raw": data,                                        # ⚠ 仅函数内/测试用,绝不进日志
+            "usage": None,          # billed per document or call, not per token, so no token counts
+            "raw": data,                                        # for the caller and tests only; never logged
         }

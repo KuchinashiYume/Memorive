@@ -226,7 +226,7 @@ class DeepSeekAdapter(ProviderAdapter):
         }
 
     def invoke(self, slot, payload: dict) -> dict:
-        key = os.environ.get(slot.api_key_env or "")       # 按配置里的"环境变量名"取 key
+        key = os.environ.get(slot.api_key_env or "")       # the variable named in the configuration
         if not key:
             raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
 
@@ -255,7 +255,7 @@ class DeepSeekAdapter(ProviderAdapter):
         body = json.dumps(body_data).encode("utf-8")
 
         req = urllib.request.Request(slot.endpoint, data=body, method="POST")
-        req.add_header("Authorization", f"Bearer {key}")   # DeepSeek = OpenAI 兼容:Bearer
+        req.add_header("Authorization", f"Bearer {key}")   # OpenAI-compatible: Bearer
         req.add_header("Content-Type", "application/json")
 
         wall_clock_seconds = float(

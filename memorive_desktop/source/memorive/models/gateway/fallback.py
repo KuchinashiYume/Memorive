@@ -1,12 +1,14 @@
-"""MODEL_GATEWAY Fallback Policy + 依赖健康检查四类报错(改动⑦)。
+"""What the gateway does when a model call fails, and the four error classes shown to the user.
 
-- 瞬时错(网络/超时/429/5xx)先自动重试(≤MAX_RETRIES 次、退避);仍失败 → transient_exhausted、提示人
-  (承拍板:耗尽仍归第④类,不误标②服务下线)。
-- 配置类(key / 服务 / 分析校核)不重试、立即分类挡下。
-- analysis / verify 的失败用户层归③(RESEARCH_ANALYSIS/EVIDENCE_REVIEW 暂停),但 context 保留底层 root_class(承要求 A)。
-- 每次失败在 RUNTIME_LOG 留一条降级痕(log_error,自带上下文):retry 痕(action=retry)与最终挡下痕
-  (action=block)区分(承要求 B);给人的是受控 DependencyError 四段文案(承要求 C,非崩溃)。
-- 换备用:留 fallback_to 钩子、本步不建真实切换逻辑(无已验证备用槽,承拍板)。
+- A transient error (network, timeout, 429, 5xx) is retried up to MAX_RETRIES times with back-off;
+  if it still fails, the class is transient_exhausted (class 4), not "service down".
+- Configuration errors (key, service, the analysis or review model) are not retried; the call
+  stops at once with its class.
+- For analysis and card review, the user sees class 3 (analysis or review paused); the log context
+  keeps the underlying root_class.
+- Every failure writes an error entry to the runtime log: action=retry for a retry, action=block
+  for the final stop. The user gets a DependencyError with a four-part message, not a crash.
+- Switching to a backup slot is not built; there is no verified backup slot.
 """
 from __future__ import annotations
 
@@ -19,39 +21,41 @@ from memorive.platform.logs import log_error
 
 from memorive.models.gateway.errors import ApiKeyMissing, DependencyError, HumanSlot, SlotDisabled
 
-MAX_RETRIES = 2                          # 最多重试 2 次 = 共 3 次尝试
+MAX_RETRIES = 2                          # 3 attempts in all
 MAX_ATTEMPTS = MAX_RETRIES + 1
-_BACKOFF = (0.5, 1.0)                     # 生产退避(秒),对应第 1 / 2 次重试后
-_ENV_SLEEP = "MEMORIVE_MODEL_GATEWAY_RETRY_SLEEP"       # 测试可设 0 关闭等待(承拍板)
+_BACKOFF = (0.5, 1.0)                     # seconds to wait after the first and second attempt
+_ENV_SLEEP = "MEMORIVE_MODEL_GATEWAY_RETRY_SLEEP"       # tests set it to 0 to skip the waits
 
-# 底层根因(不看 task_type)
+# The underlying cause, whatever the task type
 ROOT_AUTH_OR_QUOTA = "auth_or_quota"
 ROOT_SERVICE_UNAVAILABLE = "service_unavailable"
 ROOT_SLOT_DISABLED = "slot_disabled"
 ROOT_TRANSIENT = "transient"
 ROOT_TRANSIENT_EXHAUSTED = "transient_exhausted"
 
-# 用户四类(给人的)
-CLASS_KEY = "key_or_quota"                              # ①
-CLASS_SERVICE = "service_unavailable"                   # ②
-CLASS_ANALYSIS_VERIFY = "analysis_verify_unavailable"   # ③
-CLASS_TRANSIENT_EXHAUSTED = "transient_exhausted"       # ④(耗尽)
+# The four classes the user sees
+CLASS_KEY = "key_or_quota"                              # 1
+CLASS_SERVICE = "service_unavailable"                   # 2
+CLASS_ANALYSIS_VERIFY = "analysis_verify_unavailable"   # 3
+CLASS_TRANSIENT_EXHAUSTED = "transient_exhausted"       # 4: retries used up
 
-# ── 安全阀红线:归属保护(承 ServiceContracts 第 3 步)────────────────────────────
-# 他人托付数据本地嵌入失败,**绝不兜底到云端**(否则等于把须严格本地的数据偷偷上云,违 D0)。
-# 现无真实换备用逻辑(fallback_to 仅留钩子);此表把红线**写死**——将来任何换备用扩展,
-# 在真正切换前必须先查 is_fallback_forbidden(src, dst),命中即拒、不得映射。
+# ── data ownership ────────────────────────────────────────────────────────────
+# When local embedding of entrusted data fails, it never falls back to the cloud: that data must stay
+# on this computer. There is no backup switching yet; any future switch must ask
+# is_fallback_forbidden(src, dst) first and refuse a forbidden pair.
 FORBIDDEN_FALLBACK = frozenset({("embed_local", "embed_cloud")})
 
 
 def is_fallback_forbidden(src: str, dst: str) -> bool:
-    """换备用是否被红线禁止(embed_local→embed_cloud = 他人数据偷偷上云,永远禁)。"""
+    """Whether switching from src to dst is forbidden: embed_local to embed_cloud would send data
+    entrusted to the user to the cloud, so it never happens."""
     return (src, dst) in FORBIDDEN_FALLBACK
 
 
 def ownership_local_message(task_type: str, slot, reason: str) -> str:
-    """归属保护友好文案(四要素:哪个模块 + 哪个依赖 + 什么错 + 怎么处理);明写不上云。
-    DocumentEmbed 见 ready:false 挡下时,经 RUNTIME_LOG detail 记它(不含任何 chunk 文本 / 凭据)。"""
+    """The message about data ownership when local embedding is not ready: which module, which
+    dependency, what went wrong, what to do; it says plainly that nothing goes to the cloud. Document
+    embedding logs it at detail level when it stops (no chunk text, no credentials)."""
     model = getattr(slot, "model_id", None) or "本地模型"
     return (f"[MODEL_GATEWAY/{task_type}] 归属保护:他人托付数据须本地嵌入,但本地 Ollama({model})未就绪"
             f"({reason})。已挡下、未上云。请启动 Ollama 并 `ollama pull {model}` 后重试;"
@@ -67,19 +71,19 @@ class FallbackPolicy:
             raise ValueError("backoff must contain at least one delay when retries are enabled")
         self.max_retries = max_retries
         self.max_attempts = max_retries + 1
-        # fallback_to 换备用:留钩子,本步不建真实切换(无已验证备用槽)。
-        # ⚠ 将来真建切换时:切换前必先查 is_fallback_forbidden(src,dst),挡下 embed_local→embed_cloud。
+        # Switching to a backup slot is not built. A future switch must check
+        # is_fallback_forbidden(src, dst) first, which refuses embed_local -> embed_cloud.
 
     def run(self, task_type: str, slot, dispatch_fn):
-        """包住一次 dispatch:瞬时错重试、配置类分类挡下,每次失败留 RUNTIME_LOG 痕。
-        成功 → (result, retries_used);最终失败 → 抛受控 DependencyError(不崩)。"""
+        """Run one request: retry transient errors, stop at configuration errors, log every failure.
+        Returns (result, retries_used); a final failure raises DependencyError."""
         dep = _dependency(slot)
         step = f"{task_type} 调用({dep})"
         for attempt in range(1, self.max_attempts + 1):
             try:
                 return dispatch_fn(), attempt - 1
             except HumanSlot:
-                raise                       # 最终判断=人,不属依赖失败,原样放行
+                raise                       # a human slot is not a dependency failure
             except Exception as exc:
                 root = _root_class(exc)
                 if root == ROOT_TRANSIENT and attempt < self.max_attempts:
@@ -87,7 +91,7 @@ class FallbackPolicy:
                             attempt=attempt, max_attempts=self.max_attempts)
                     self._sleep(attempt)
                     continue
-                if root == ROOT_TRANSIENT:  # 瞬时但重试耗尽 → 仍归④(不误标②)
+                if root == ROOT_TRANSIENT:  # retries used up: class 4, not "service down"
                     root = ROOT_TRANSIENT_EXHAUSTED
                 error_class = _user_class(root, task_type)
                 _record(task_type, dep, step, exc, root, action="block",
@@ -103,28 +107,28 @@ class FallbackPolicy:
             time.sleep(secs)
 
 
-# ── 分类 ────────────────────────────────────────────────────
+# ── classes ─────────────────────────────────────────────────
 def _root_class(exc) -> str:
     if isinstance(exc, SlotDisabled):
         return ROOT_SLOT_DISABLED
     if isinstance(exc, ApiKeyMissing):
         return ROOT_AUTH_OR_QUOTA
-    if isinstance(exc, HTTPError):          # 注意:HTTPError 是 URLError 子类,须先判
+    if isinstance(exc, HTTPError):          # HTTPError is a URLError, so it comes first
         if exc.code in (401, 402, 403):
             return ROOT_AUTH_OR_QUOTA
         if exc.code in (404, 501):
             return ROOT_SERVICE_UNAVAILABLE
         if exc.code in (408, 409, 425, 429) or 500 <= exc.code <= 599:
-            return ROOT_TRANSIENT           # 仅超时/冲突/限流/5xx 视作瞬时
-        return ROOT_SERVICE_UNAVAILABLE     # 其余 4xx 是请求/契约错误，一次挡下
+            return ROOT_TRANSIENT           # timeouts, conflicts, rate limits and 5xx only
+        return ROOT_SERVICE_UNAVAILABLE     # other 4xx are request errors: stop at once
     if isinstance(exc, (URLError, TimeoutError, ConnectionError, IncompleteRead)):
         return ROOT_TRANSIENT
-    return ROOT_SERVICE_UNAVAILABLE         # 未知 → 保守当服务问题
+    return ROOT_SERVICE_UNAVAILABLE         # anything else counts as a service problem
 
 
 def _user_class(root: str, task_type: str) -> str:
     if task_type in ("analysis", "verify", "verify_judgment"):
-        return CLASS_ANALYSIS_VERIFY        # ③(RESEARCH_ANALYSIS/EVIDENCE_REVIEW 暂停;底层 root 仍保留在 RUNTIME_LOG context,承要求 A)
+        return CLASS_ANALYSIS_VERIFY        # 3; the log context keeps the root class
     return {
         ROOT_AUTH_OR_QUOTA: CLASS_KEY,
         ROOT_SERVICE_UNAVAILABLE: CLASS_SERVICE,
@@ -133,23 +137,23 @@ def _user_class(root: str, task_type: str) -> str:
     }.get(root, CLASS_SERVICE)
 
 
-# ── 留痕 & 文案 ─────────────────────────────────────────────
+# ── log entries and messages ────────────────────────────────
 def _record(task_type, dep, step, exc, root_class, *, action, attempt, max_attempts, error_class=None):
     event = (f"[{task_type}] 依赖瞬时失败,自动重试" if action == "retry"
              else f"[{task_type}] 依赖不可用,已挡下")
     context = {
-        "step": step,                                # RUNTIME_LOG 错误 context 必含
-        "error": f"{type(exc).__name__}: {exc}",     # RUNTIME_LOG 错误 context 必含
+        "step": step,                                # required in an error entry
+        "error": f"{type(exc).__name__}: {exc}",     # required in an error entry
         "dependency": dep,
         "task_type": task_type,
-        "root_class": root_class,                    # 底层根因(承要求 A)
-        "action": action,                            # retry / block(承要求 B)
+        "root_class": root_class,                    # the underlying cause
+        "action": action,                            # retry or block
         "attempt": attempt,
         "max_attempts": max_attempts,
     }
     if error_class is not None:
-        context["error_class"] = error_class         # 用户四类(仅 block 有终值)
-    log_error("MODEL_GATEWAY", event, context=context)          # 自动 detail 级、自带上下文;绝不静默
+        context["error_class"] = error_class         # the user class, set when the call stops
+    log_error("MODEL_GATEWAY", event, context=context)
 
 
 def _message(task_type, dep, error_class, root_class, exc, *, max_attempts: int = MAX_ATTEMPTS) -> str:

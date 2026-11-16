@@ -1,9 +1,7 @@
-"""OpenAI adapter(chat/completions,Bearer)。
-
-Verification 第 3 步:判断类 GPT 异源校核(verify_judgment 槽)用。OpenAI 官方 chat/completions,
-与 deepseek adapter 同款(DeepSeek 即"OpenAI 兼容")。⚠ 境外 API:调用前须 TUN(出口非大陆);
-区域预检门(region_preflight)在测前 D0/D4 拦大陆出口,live 调用由 TUN 保证。
-纪律:key 只按 api_key_env 名从环境变量取、绝不硬编码 / 打印。
+"""The OpenAI adapter (chat/completions, Bearer), used for the second model in card review
+judgments (the verify_judgment slot). The same form as the DeepSeek adapter, which is OpenAI
+compatible. It is an overseas API: region_preflight stops calls from a mainland China exit.
+The key is read only from the environment variable named by api_key_env, never written or printed.
 """
 from __future__ import annotations
 
@@ -19,7 +17,7 @@ from memorive.models.gateway.errors import ApiKeyMissing
 @register("openai")
 class OpenAIAdapter(ProviderAdapter):
     def invoke(self, slot, payload: dict) -> dict:
-        key = os.environ.get(slot.api_key_env or "")       # 按配置"环境变量名"取 key
+        key = os.environ.get(slot.api_key_env or "")       # the variable named in the configuration
         if not key:
             raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
 

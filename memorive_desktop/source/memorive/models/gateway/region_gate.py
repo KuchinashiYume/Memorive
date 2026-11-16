@@ -1,21 +1,21 @@
-"""MODEL_GATEWAY 境外 API 区域预检门(测前安全阀)——纯逻辑,不查 config / 不碰 SDK / 不读 key / 不 log。
+"""The region check before an overseas API is called: whether this computer's exit IP is in mainland China.
 
-它是 gateway.healthcheck() 安全阀的姊妹件:同型「先纯探测 → 返回结构化 dict、不抛异常
-表达结论 → 调用方据结论挡下 / 放行」,只是探测对象从「本地 Ollama 是否就绪」换成
-「本机出口 IP 是否在中国大陆」。判 config→slot 由 gateway.ModelGateway 负责；
-call / embed / rerank / ocr 的真实 dispatch 前均强制消费本模块的结构化结论。
-本模块只接 SlotConfig、恒返回 dict。
+Pure logic: no configuration, no SDK, no key, no logging. It takes a SlotConfig and always returns a
+dict; it does not raise to say "blocked". gateway.ModelGateway looks up the slot, and call, embed,
+rerank and ocr all require this check's result before they send an overseas request.
 
-⚠ 语义前提(务必读):本门只接受 allowlist 内的 HTTPS geo source，并要求 geo URL 与
-provider endpoint 由 urllib.request 默认 opener 解析到同一显式代理 route。DIRECT/TUN、
-PAC split-route、bypass 或无法解析的 system route 均不可证明同出口，必须 fail closed。
-区域 receipt 在真正 dispatch 前再次按当前 proxy state 复核，route 漂移即阻断。
+Premises:
+- Only an allowed HTTPS geo source is used, and the geo URL and the provider's endpoint must
+  resolve, through urllib.request's default opener, to the same explicit proxy route. A direct or
+  TUN route, a PAC split route, a bypass or an unknown system route cannot prove the same exit, so
+  the check fails closed. Before the request is sent, the receipt is checked again against the
+  current proxy state; a changed route blocks it.
+- A passed region does not mean the key works, has quota or a subscription; the connection test
+  after the check finds that out.
 
-⚠ 区域通过 ≠ key 有效:本门只回答「出口区域是否放行」,绝不代表 key 可用 / 有额度 /
-已订阅;key 是否可调由放行后的 D0 / D4 连通性测试自行判定。
-
-守克制:只做区域判断。不做 key 全量检查 / 余额 / 订阅 / 失败四档分类 / 自动切代理 /
-注册表驱动;国内 API 自动 skip。境外请求只有 `ok=true && gated=false` 才能 dispatch。
+It only judges the region: no key checks, balances, subscriptions, error classes or proxy
+switching. Domestic APIs are skipped. An overseas request may be sent only when ok is true and
+gated is false.
 """
 from __future__ import annotations
 
@@ -26,20 +26,20 @@ import urllib.request
 from datetime import datetime
 from urllib.parse import urlsplit
 
-# 境外 API provider 名单(硬编码;加境外 provider 在此加一行 = 预留空位,与 models.yaml slot.provider 对齐)。
-# GPT→openai、Gemini→google、Claude→anthropic。国内(deepseek/siliconflow)、本地(ollama/chroma)、
-# human、占位(TBD)均不在集合内 → 自动跳过、不进门。
+# The overseas providers, by slot.provider in models.yaml: GPT is openai, Gemini google, Claude
+# anthropic. A new overseas provider is added here. Domestic (deepseek, siliconflow), local (ollama,
+# chroma), human and placeholder slots are not in the set and are skipped.
 _OVERSEAS_PROVIDERS = frozenset({"openai", "google", "anthropic"})
 
-# geo 源:只允许冻结 allowlist；env 只能选择，不能扩大 source 集合。
-_ENV_GEO_URL = "MEMORIVE_MODEL_GATEWAY_GEO_URL"     # 覆盖名:换源只改环境变量、不改代码
+# The geo source: only the fixed allowlist; the environment variable can choose one, not add one.
+_ENV_GEO_URL = "MEMORIVE_MODEL_GATEWAY_GEO_URL"     # chooses the source without a code change
 _DEFAULT_GEO_URL = None  # fail closed: an explicit HTTPS source is required
-_GEO_TIMEOUT = 3                     # 秒(2–3s,偏 3s 容代理往返)
+_GEO_TIMEOUT = 3                     # seconds, enough for a round trip through a proxy
 _TRUSTED_GEO_SOURCES = {
     "https://www.cloudflare.com/cdn-cgi/trace": "CLOUDFLARE_CDN_CGI_TRACE_V1",
 }
 
-# reason 机器可判枚举(调用方判定不靠中文串;中文只进 message)。
+# reason values for code to compare; the user-facing text goes into message.
 _R_SKIP = "domestic_skip"
 _R_OK = "region_ok"
 _R_BLOCKED = "region_cn_blocked"
@@ -47,8 +47,8 @@ _R_UNKNOWN = "region_unknown"
 
 
 def _now_iso() -> str:
-    """本地带时区、秒级 —— 对齐 KNOWLEDGE_ADMISSION_log `ts`(knowledge_admission_log.py)/ RUNTIME_LOG `_now_iso`(logger.py):
-    项目一贯 `datetime.now().astimezone()`(本地 +08:00、非 UTC),同一处日志不出现两种口径。"""
+    """Local time with its offset, to the second, as the card state log and the runtime log write it
+    (datetime.now().astimezone(), not UTC), so one log never mixes two time forms."""
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
@@ -140,13 +140,14 @@ def _proxy_route_id(url: str) -> str | None:
 
 
 def _parse_region(body: str) -> str | None:
-    """从 geo 响应体取二字母国家码并大写;取不到返 None。兼容两类源:
-    JSON(ip-api.com→countryCode / ipinfo.io→country)与行式 trace(cloudflare cdn-cgi/trace→loc=XX)。"""
+    """The two-letter country code from a geo reply, upper case, or None. Reads JSON (ip-api.com's
+    countryCode, ipinfo.io's country) and line traces (Cloudflare cdn-cgi/trace, loc=XX)."""
     body = (body or "").strip()
     try:
         data = json.loads(body)
         if isinstance(data, dict):
-            # 优先 countryCode(ip-api 的 country 是全名 "China"、不能先读);仅无 code 字段时(如 ipinfo)才用 country
+            # countryCode first (ip-api's country is a full name such as "China"); country only when
+            # there is no code field (ipinfo)
             code = data.get("countryCode") or data.get("country_code") or data.get("country")
             if isinstance(code, str) and code.strip():
                 normalized = code.strip().upper()
@@ -155,7 +156,7 @@ def _parse_region(body: str) -> str | None:
                 return normalized if len(normalized) == 2 and normalized.isalpha() else None
     except Exception:
         pass
-    for line in body.splitlines():           # cloudflare trace: 一行 loc=XX
+    for line in body.splitlines():           # Cloudflare trace: a line loc=XX
         if line.startswith("loc="):
             code = line[4:].strip().upper()
             return code if len(code) == 2 and code.isalpha() else None
@@ -196,13 +197,12 @@ def _route_binding(slot) -> str:
 
 
 def _default_probe(slot) -> dict:
-    """查出口 IP 国家码并返回 route-bound evidence dict。
+    """Look up the exit IP's country code and return evidence bound to the route.
 
-    ⚠ 用与各 provider adapter 相同的 urllib.request.urlopen **默认 opener**(继承同一
-    HTTP(S)_PROXY / 系统代理)—— TUN 全局下 geo 与目标 API 同出口,判断才有意义。
-    任何失败(无 URL / 非 HTTPS / URLError / 超时 / 解析 / 无国家码字段)均返回
-    不足以授权的 evidence dict；
-    不崩、不抛、**绝不返回完整 IP**(只国家码)。"""
+    Uses urllib.request.urlopen's default opener, the same as the provider adapters (the same
+    HTTP(S)_PROXY or system proxy), so the geo source and the API share the exit. Any failure (no URL,
+    not HTTPS, URLError, timeout, unreadable reply, no country code) returns evidence that does not
+    authorize the call. Never raises; never returns the full IP, only the country code."""
     context = _route_context(slot)
     url = context["geo_url"]
     if not context["valid"] or not url:
@@ -260,26 +260,26 @@ def _unknown_message(slot) -> str:
 
 
 def preflight_for_slot(slot, *, probe=None) -> dict:
-    """纯核:接一个 SlotConfig,判 A/B/C/D/E,恒返回结构化 dict(绝不抛异常表达大陆 / 未知)。
+    """The check for one SlotConfig, steps A to E below; always returns a dict, never raises to say
+    "mainland" or "unknown".
 
-    probe: 可注入的出口探测,签名 (slot) -> evidence dict,
-           完全替代 _default_probe(离线单测注入假 probe、不打真网;缺省用 _default_probe)。
+    probe: the exit lookup, (slot) -> evidence dict, replacing _default_probe (tests pass a fake
+           one so no network is used).
 
-    返回 dict 至少包含:
-      ok / gated / region / reason / message / skipped / provider / geo_provider / checked_at；
-    境外槽另含 transport / route_binding / evidence_valid。
-    (不含任何 key 值、不含完整 IP —— region / geo_provider 只到国家码 / host 级。)
+    The dict has at least ok, gated, region, reason, message, skipped, provider, geo_provider and
+    checked_at; for an overseas slot also transport, route_binding and evidence_valid. It holds no
+    key and no full IP: region is a country code, geo_provider a host.
     """
     provider = getattr(slot, "provider", None)
     checked_at = _now_iso()
 
-    # A 判是否境外:非境外(国内 / 本地 / human / 占位 TBD)→ 直接跳过,不查 geo、不调 probe。
+    # A: not overseas (domestic, local, human, placeholder): skip, without a lookup.
     if not _is_overseas(provider):
         return {"ok": True, "gated": False, "region": None, "reason": _R_SKIP,
                 "message": None, "skipped": True, "provider": provider,
                 "geo_provider": None, "checked_at": checked_at}
 
-    # B 查出口区域(probe 可注入;缺省 _default_probe)。
+    # B: look up the exit region (probe, by default _default_probe).
     evidence = (probe or _default_probe)(slot)
     if not isinstance(evidence, dict):
         evidence = {}
@@ -313,15 +313,15 @@ def preflight_for_slot(slot, *, probe=None) -> dict:
         return {**base, "ok": False, "gated": True, "region": None,
                 "reason": _R_UNKNOWN, "message": _unknown_message(slot)}
 
-    # C 中国大陆则挡下(不发起任何 API 请求)。
+    # C: mainland China blocks the call (no API request is made).
     if region == "CN":
         return {**base, "ok": False, "gated": True, "region": "CN",
                 "reason": _R_BLOCKED, "message": _gated_message(slot, region)}
 
-    # D 非中国大陆则放行:放行集 = **任何非大陆国家码**(SG/TW/JP/HK/US… 全放),仅 countryCode=="CN" 挡。
-    #   不列死放行名单——列名单反会误挡合法非陆节点。
-    #   ⚠ HK/TW 的 ip-api 码待在该节点实测确认(应为标准 ISO HK/TW、不并入 CN;SG 已两网实测,
-    #     TW/JP/HK 待以获准 HTTPS geo 源确认 countryCode≠CN;承 07-04 HK/TW/MO 风险)——待办/债。
+    # D: any other country code passes (SG, TW, JP, HK, US ...); only "CN" blocks. There is no list
+    #   of allowed countries, which would block valid exits. Still open: confirming with the allowed
+    #   HTTPS geo source that HK and TW exits report HK and TW, not CN (SG was confirmed on two
+    #   networks).
     return {**base, "ok": True, "gated": False, "region": region,
             "reason": _R_OK, "message": _pass_message(slot, region)}
 

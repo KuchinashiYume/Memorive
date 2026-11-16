@@ -1,18 +1,22 @@
-"""Anthropic adapter(Messages API,x-api-key)。
+"""The Anthropic adapter (Messages API, x-api-key).
 
-⚠ Anthropic = Messages API,与 OpenAI 兼容那套不同(openai.py 只当结构参照、别照抄):
+The Messages API differs from the OpenAI-compatible APIs:
   POST https://api.anthropic.com/v1/messages
-  头 x-api-key: <key> + anthropic-version: 2023-06-01(非 Bearer)
-  体 {model, max_tokens(必填), messages:[{role,content}]}(RESEARCH_ANALYSIS 纯 user、无 system 顶层字段)
-  回 content[](块列表)→ 取第一个 type=="text" 的 .text;usage={input_tokens,output_tokens}
-⚠ 境外 API:调用前须 TUN(出口非大陆);region_preflight 在 RESEARCH_ANALYSIS 发调用前拦大陆出口。
-⚠ key 只按 api_key_env 名从环境变量取(RESEARCH_ANALYSIS 用 MEMORIVE_ANTHROPIC_KEY——非 ANTHROPIC_API_KEY,
-  后者被 Claude Code 用 OAuth 剥离、CC 子进程读不到);绝不硬编码 / 打印。
-⚠ Opus 4.8 / Sonnet 5 的 adaptive thinking 与 effort 由 slot/payload 显式下发：
-  thinking={type:"adaptive"}；effort 在 output_config.effort（不是 thinking 内）。
-  输出上限涵盖 thinking + 最终文本；B 实验的 xhigh 用 analysis 槽 64k。
-归一化 usage → OpenAI 风格 {prompt_tokens,completion_tokens,completion_tokens_details,total_tokens}，
-其中 reasoning_tokens 承接 Anthropic output_tokens_details.thinking_tokens（output 仍为包含 thinking 的计费总量）。
+  headers x-api-key: <key> and anthropic-version: 2023-06-01 (not Bearer)
+  body {model, max_tokens (required), messages: [{role, content}]}; research analysis sends user
+  messages only, no top-level system field
+  reply content[] (a list of blocks): the first block with type "text" holds the text; usage has
+  input_tokens and output_tokens
+It is an overseas API: region_preflight stops the call when the exit is in mainland China.
+The key is read only from the environment variable named by api_key_env (research analysis uses
+MEMORIVE_ANTHROPIC_KEY, not ANTHROPIC_API_KEY, which Claude Code strips for its subprocesses); it is
+never written into code or printed.
+Adaptive thinking and effort for Opus 4.8 and Sonnet 5 come from the slot or the payload:
+thinking={type: "adaptive"}, effort in output_config.effort (not inside thinking). The output limit
+covers thinking and the final text.
+usage is returned in OpenAI form {prompt_tokens, completion_tokens, completion_tokens_details,
+total_tokens}; reasoning_tokens carries Anthropic's output_tokens_details.thinking_tokens, and
+output_tokens stays the billed total that includes thinking.
 """
 from __future__ import annotations
 
@@ -106,7 +110,8 @@ def _positive_int(value, label: str) -> int:
 
 
 def _thinking(slot, payload: dict) -> dict | None:
-    """调用参数优先，其次读 slot；仅允许官方 thinking type，避免把 effort 错塞进 thinking。"""
+    """The call's value first, then the slot's; only Anthropic's thinking types are allowed, so effort
+    is never put inside thinking."""
     raw = payload.get("thinking")
     if raw is None:
         configured = getattr(slot, "thinking_type", None)
@@ -123,7 +128,7 @@ def _thinking(slot, payload: dict) -> dict | None:
 
 
 def _output_config(slot, payload: dict) -> dict | None:
-    """合并 output_config；调用方显式 output_config/effort 优先于槽配置。"""
+    """Merge output_config; the caller's output_config or effort wins over the slot's."""
     raw = payload.get("output_config")
     if raw is None:
         out = {}
@@ -156,7 +161,7 @@ def _max_tokens(slot, payload: dict) -> int:
 
 
 def _temperature(payload: dict) -> float | None:
-    """显式采样温度才透传；缺省不下发，以兼容不再支持 temperature 的新模型。"""
+    """Pass temperature only when it is set; newer models refuse it."""
     raw = payload.get("temperature")
     if raw is None:
         return None
@@ -296,7 +301,8 @@ def _read_sse_response(
 
 
 def _usage_count(value) -> int | float:
-    """provider usage 缺失/畸形时如实归零，避免把布尔/NaN 送进 RUNTIME_LOG 记账契约。"""
+    """A usage count, or 0 when the provider's is missing or malformed, so no boolean or NaN reaches
+    the cost record."""
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
         return 0
     return value
@@ -400,7 +406,7 @@ class AnthropicAdapter(ProviderAdapter):
         }
 
     def invoke(self, slot, payload: dict) -> dict:
-        key = os.environ.get(slot.api_key_env or "")       # 按配置里的"环境变量名"取 key
+        key = os.environ.get(slot.api_key_env or "")       # the variable named in the configuration
         if not key:
             raise ApiKeyMissing(slot.task_type, slot.api_key_env or "(未配置)")
 
@@ -413,7 +419,7 @@ class AnthropicAdapter(ProviderAdapter):
         stream = _stream_enabled(payload)
         body_data = {
             "model": slot.model_id,
-            "max_tokens": max_tokens,                         # Anthropic 必填；包含 thinking + 最终文本
+            "max_tokens": max_tokens,                         # required; covers thinking and the final text
             "messages": payload["messages"],
         }
         if system is not None:
@@ -431,7 +437,7 @@ class AnthropicAdapter(ProviderAdapter):
         body = json.dumps(body_data).encode("utf-8")
 
         req = urllib.request.Request(slot.endpoint, data=body, method="POST")
-        req.add_header("x-api-key", key)                     # Anthropic: x-api-key(非 Bearer)
+        req.add_header("x-api-key", key)                     # x-api-key, not Bearer
         req.add_header("anthropic-version", _ANTHROPIC_VERSION)
         req.add_header("Content-Type", "application/json")
 
@@ -472,7 +478,7 @@ class AnthropicAdapter(ProviderAdapter):
             headers = getattr(resp, "headers", None)
             request_id = headers.get("request-id") if headers is not None else None
 
-        # content 是块列表;取第一个 type=="text" 的 .text(RESEARCH_ANALYSIS 无 thinking/工具,content[0] 即 text)
+        # content is a list of blocks; the text is in the first block of type "text"
         text = next((b.get("text", "") for b in (data.get("content") or []) if b.get("type") == "text"), "")
         u = data.get("usage") or {}
         details = u.get("output_tokens_details") or {}
@@ -486,7 +492,8 @@ class AnthropicAdapter(ProviderAdapter):
             "provider": "anthropic",
             "model": data.get("model"),
             "text": text,
-            # output_tokens 含思考、是计费总量；reasoning 只作可观测拆分，绝不叠加进 total/cost。
+            # output_tokens includes thinking and is what is billed; reasoning is shown apart, never
+            # added to the total or the cost.
             "usage": {"prompt_tokens": it, "completion_tokens": ot,
                       "cache_creation_input_tokens": cache_creation_tokens,
                       "cache_read_input_tokens": cache_read_tokens,

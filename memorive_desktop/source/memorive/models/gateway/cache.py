@@ -32,7 +32,7 @@ class CacheLayer:
         return hashlib.sha256(canon.encode("utf-8")).hexdigest()
 
     def _path(self, key: str) -> Path:
-        return self.cache_dir / f"{key}.json"        # 文件名 = hash,不写原始 payload
+        return self.cache_dir / f"{key}.json"        # named by the hash; the request itself is not stored
 
     def get(self, key: str) -> dict | None:
         p = self._path(key)
@@ -41,7 +41,7 @@ class CacheLayer:
         try:
             return json.loads(p.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
-            return None                              # 坏缓存视作未命中
+            return None                              # a broken entry counts as a miss
 
     def put(self, key: str, result: dict) -> None:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
