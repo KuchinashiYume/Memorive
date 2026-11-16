@@ -1,5 +1,6 @@
 """Shared basics used by every area. Nothing here imports a business area.
 
+  clock.py        the current UTC time as the desktop writes it into receipts
   naming.py       titles, paper IDs and the names of document folders and files
   json_files.py   canonical JSON, its SHA-256, and JSON files written whole (compact or indented)
   sensitive.py    the check that keeps secrets out of what the app writes

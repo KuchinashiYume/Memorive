@@ -4,7 +4,6 @@ import asyncio
 import base64
 from copy import deepcopy
 import ctypes
-from datetime import datetime, timezone
 import hashlib
 import hmac
 import importlib
@@ -27,7 +26,8 @@ import webbrowser
 from application_behavior import WindowsAutostartManager, decide_close_action
 from network_diagnostics import run_network_diagnostic
 from memorive_browser_companion.browsers import BROWSERS, FAMILIES, discover as discover_browsers, family as browser_family, select as select_browser
-from memorive.platform.json_files import write_json_indented
+from memorive.platform.clock import utc_now as _utc_now
+from memorive.platform.json_files import lenient_sha256 as _sha256_json, write_json_indented
 from memorive.platform.windows_paths import windows_io_path
 from notification_runtime import NOTIFICATION_KINDS, plan_windows_notification
 
@@ -263,15 +263,6 @@ def _local_assistant_projection(*, visible: bool, refresh_unavailable: bool) -> 
         "system_autostart_writes": 0,
         "status": "DEGRADED" if refresh_unavailable else "READY",
     }
-
-
-def _sha256_json(value: Any) -> str:
-    body = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return hashlib.sha256(body).hexdigest().upper()
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
 def core_terminal_transition_presentations(

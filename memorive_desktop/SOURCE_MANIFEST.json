@@ -3437,13 +3437,18 @@
     },
     {
       "path": "source/memorive/platform/__init__.py",
-      "sha256": "9bfa833f7cc5d07da99132a2aab4c0f39eeba80e20e62a2d0b36498eb27d0cea",
-      "bytes": 562
+      "sha256": "cfbd52f7e68fba2ac7b0fe63d1a10c20b06cb0e69158aa33dce34a6b83352bdd",
+      "bytes": 641
+    },
+    {
+      "path": "source/memorive/platform/clock.py",
+      "sha256": "9871c07636872b961f2ad82385f5911d4c057589f5bbe5c0ccf4f75fd183cd11",
+      "bytes": 405
     },
     {
       "path": "source/memorive/platform/json_files.py",
-      "sha256": "84fae0415bbeccbf18cc99f45ea4044d0bc8856630a69e154d353f8d0da52f8c",
-      "bytes": 3802
+      "sha256": "9f8d2914e7b4709a8e9c9dc6c5f0f381de550a175505fbef83a03f04a1c5841d",
+      "bytes": 4241
     },
     {
       "path": "source/memorive/platform/naming.py",
@@ -6812,8 +6817,8 @@
     },
     {
       "path": "source/runtime.py",
-      "sha256": "45d3ced7860db5b8b46b8118560095bbf0184203c00f899f18122e4fab0ece9c",
-      "bytes": 221998
+      "sha256": "dbfe96eb5bb3ce35f7fbcb40d17035c67414dc35ca4b03dc6a610ebdd8137a54",
+      "bytes": 221721
     },
     {
       "path": "source/runtime_log/__init__.py",
