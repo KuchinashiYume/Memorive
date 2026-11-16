@@ -11,6 +11,8 @@ from typing import Any, Mapping, Sequence
 import unicodedata
 from urllib.parse import urlsplit, urlunsplit
 
+from memorive.platform.json_files import canonical_json_bytes, canonical_sha256
+from memorive.platform.sensitive import SENSITIVE_KEY, SENSITIVE_VALUE, scan_sensitive
 from .model_capabilities import (
     infer_api_model_capability,
     workflow_node_accepts_capability,
@@ -42,14 +44,6 @@ LOCAL_MODEL_PROFILE = re.compile(r"^local:[0-9a-f]{24}$")
 MODEL_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
 API_MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 CLI_MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
-SENSITIVE_KEY = re.compile(
-    r"(?i)^(api[_-]?key|authorization|cookie|credential[_-]?value|password|secret|token|private[_-]?payload|gold|holdout)$"
-)
-SENSITIVE_VALUE = (
-    re.compile(r"(?i)(?:^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{16,}"),
-    re.compile(r"(?i)gh[pousr]_[A-Za-z0-9]{20,}"),
-    re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
-)
 
 WORKFLOW_DEFINITIONS = (
     ("ingest", "文档处理与内容理解", True, True, "PARSER_PROFILE"),
@@ -110,37 +104,11 @@ def utc_now() -> str:
     )
 
 
-def canonical_json_bytes(value: Any) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        allow_nan=False,
-    ).encode("utf-8")
-
-
-def canonical_sha256(value: Any) -> str:
-    return hashlib.sha256(canonical_json_bytes(value)).hexdigest().upper()
 
 
 def immutable(value: Any) -> Any:
     return json.loads(canonical_json_bytes(value).decode("utf-8"))
 
-
-def scan_sensitive(value: Any, path: str = "root") -> None:
-    if isinstance(value, Mapping):
-        for key, child in value.items():
-            rendered = str(key)
-            if SENSITIVE_KEY.fullmatch(rendered):
-                raise ValueError(f"SENSITIVE_KEY_REJECTED:{path}.{rendered}")
-            scan_sensitive(child, f"{path}.{rendered}")
-    elif isinstance(value, list):
-        for index, child in enumerate(value):
-            scan_sensitive(child, f"{path}[{index}]")
-    elif isinstance(value, str):
-        if any(pattern.search(value) for pattern in SENSITIVE_VALUE):
-            raise ValueError(f"SENSITIVE_VALUE_REJECTED:{path}")
 
 
 # True while a settings file is being read: fields this version does not know are

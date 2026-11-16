@@ -5086,8 +5086,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_browser_companion/site_profiles.py",
-      "sha256": "aa72245dce2c80a3fbb47bfafe9ef2a1fd3930b0b3b8c81b206178a6aa6bb3dc",
-      "bytes": 12925
+      "sha256": "c795b28737399e25ab46236c3407571cf91a4d798447e474ea4b6971d6359dd0",
+      "bytes": 12930
     },
     {
       "path": "memorive_desktop/source/memorive_browser_companion/desktop.py",
@@ -6116,8 +6116,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/contracts.py",
-      "sha256": "97679794005757bf7ff0f73b15555e167b7511f3310e98cc685567958038725b",
-      "bytes": 53132
+      "sha256": "820a6747c3bfb5d76a83c7b1f7a2142aecc6ec4d160dd11da018450fa8c7178e",
+      "bytes": 51918
     },
     {
       "path": "memorive_desktop/source/memorive_settings/controller.py",
@@ -6296,8 +6296,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/store.py",
-      "sha256": "da34a459ba5af074fbfde5186aff5dfbfa7802af97f12d4fd83d0d396b7312cf",
-      "bytes": 19114
+      "sha256": "f9c2ae7ea13c3bec70398a679cd286a96412a71d6d26cd63e953b907308fbbfd",
+      "bytes": 18125
     },
     {
       "path": "memorive_desktop/source/memorive_settings/task_scheduling.py",
@@ -7961,8 +7961,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "b912fe60bc96094c7e4cbfadb71931a6014ef89b5e655cca85fd2bc67658c12c",
-      "bytes": 254680
+      "sha256": "3efdb74afd857a7b5a51c19762fc54a8a2a7bed94d01052042b8faf8f079a22e",
+      "bytes": 255035
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -9596,8 +9596,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_model_execution/execution.py",
-      "sha256": "43ce6ad725f597d11313df828e87d44e6f1538ccdd27478f2ce6963dcffbf18a",
-      "bytes": 15726
+      "sha256": "cd84fdbc4cac576166b905b7befcb080becf32936c19590f32c09d044745dac6",
+      "bytes": 15731
     },
     {
       "path": "memorive_desktop/source/memorive_model_execution/retry.py",
@@ -9663,6 +9663,16 @@
       "path": "memorive_desktop/source/memorive/platform/naming.py",
       "sha256": "298385275bfcfad8f31c4d984486016d07f3bfbfec9bfd197e0dc6d5961acd52",
       "bytes": 2107
+    },
+    {
+      "path": "memorive_desktop/source/memorive/platform/json_files.py",
+      "sha256": "cd6ff750f7a15b651139062a8e1f35d09b13b670a6e61d357eba275be783fdfc",
+      "bytes": 2165
+    },
+    {
+      "path": "memorive_desktop/source/memorive/platform/sensitive.py",
+      "sha256": "90070238f95cb42844475f150b590fccad449ea3313f2b01b9cbfa5821651aa2",
+      "bytes": 1584
     }
   ]
 }

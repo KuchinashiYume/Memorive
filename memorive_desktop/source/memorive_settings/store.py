@@ -24,25 +24,8 @@ from .contracts import (
     validate_settings,
 )
 from .model_capabilities import EMBEDDING, RERANKER, infer_api_model_capability
+from memorive.platform.json_files import write_json_atomic
 
-
-def write_json_atomic(path: Path, payload: Mapping[str, Any], before_replace: Callable | None = None) -> None:
-    """Write payload as canonical JSON to path: to a temporary file in the same folder, flushed to disk,
-    then moved over path, so a reader never sees half a file. before_replace(stage, temporary), when
-    given, runs just before the move (the settings store's tests inject faults there).
-
-    The settings store writes through it; the model execution package writes its snapshots and
-    results with it. Other settings modules write through SettingsStore.write_json."""
-    encoded = canonical_json_bytes(dict(payload)) + b"\n"
-    # Same folder, short name: Windows installations may still enforce MAX_PATH.
-    temporary = path.parent / f".{uuid.uuid4().hex}.tmp"
-    with temporary.open("xb") as stream:
-        stream.write(encoded)
-        stream.flush()
-        os.fsync(stream.fileno())
-    if before_replace is not None:
-        before_replace("before_replace", temporary)
-    os.replace(temporary, path)
 
 
 class SettingsCorrupt(RuntimeError):

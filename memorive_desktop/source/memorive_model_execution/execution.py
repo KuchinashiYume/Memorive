@@ -14,8 +14,8 @@ import re
 import threading
 
 from memorive_settings.call_ledger import ExecutionControlSignal, call_scope, execution_checkpoint, execution_control
-from memorive_settings.contracts import canonical_sha256, scan_sensitive
-from memorive_settings.store import write_json_atomic
+from memorive.platform.json_files import canonical_sha256, write_json_atomic
+from memorive.platform.sensitive import scan_sensitive
 from memorive_settings.model_capabilities import infer_api_model_capability
 
 from . import retry
