@@ -26,7 +26,7 @@ def navigate(runtime, params):
         runtime.call('research.get', {'run_id': run})
         return {'status': 'PASS', 'research_task_id': run, 'route': 'current-task', 'job_id': run}
     if text.startswith(RESULT_LOCATOR):
-        from memorive_desktop_service.locator import StableLocator
+        from memorive.desktop.service.locator import StableLocator
         locator = StableLocator.parse(params['locator'])
         if locator.object_id != 'result':
             raise ValueError('RESEARCH_ARTIFACT_INVALID')

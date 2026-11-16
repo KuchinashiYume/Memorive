@@ -40,7 +40,7 @@ def test_native_pet_adds_frames_without_changing_motion_contract() -> None:
 
 def test_local_ui_signal_is_allowlisted_and_delivered() -> None:
     sys.path.insert(0, str(DESKTOP))
-    from memorive_desktop_assistant.desktop import AssistantDesktop
+    from memorive.desktop.assistant.desktop import AssistantDesktop
 
     captured: list[dict[str, object]] = []
     api = object.__new__(AssistantDesktop)
@@ -62,7 +62,7 @@ def test_local_ui_signal_is_allowlisted_and_delivered() -> None:
 
 def test_local_ui_signal_fails_closed_for_unknown_input_and_presenter_errors() -> None:
     sys.path.insert(0, str(DESKTOP))
-    from memorive_desktop_assistant.desktop import AssistantDesktop
+    from memorive.desktop.assistant.desktop import AssistantDesktop
 
     api = object.__new__(AssistantDesktop)
     api.lock = threading.RLock()

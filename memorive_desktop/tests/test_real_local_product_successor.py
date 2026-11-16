@@ -20,17 +20,17 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from runtime import ProductApi  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
 from app import extract_inbox_drop_paths  # noqa: E402
-from memorive_settings.contracts import (  # noqa: E402
+from memorive.desktop.settings.contracts import (  # noqa: E402
     STORE_SCHEMA_VERSION,
     default_settings,
     settings_field_contract,
     validate_settings,
 )
 from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
-from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.settings.credentials import CredentialReferenceManager  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
 
 
 def _make_api(state_root: Path) -> ProductApi:
@@ -446,7 +446,7 @@ def test_application_exit_closes_both_windows_without_shell_or_external_process(
     try:
         api.attach_window(main_window)
         api.attach_assistant_window(assistant_window)
-        monkeypatch.setattr("runtime.threading.Timer", ImmediateTimer)
+        monkeypatch.setattr("memorive.desktop.api.threading.Timer", ImmediateTimer)
         receipt = api.exit_application({})
         duplicate = api.exit_application({})
         assert receipt["status"] == "EXIT_SCHEDULED"

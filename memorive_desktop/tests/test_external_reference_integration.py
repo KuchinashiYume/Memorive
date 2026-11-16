@@ -3,16 +3,16 @@ import json
 from pathlib import Path
 
 import pytest
-from memorive_settings.capability import CapabilityProjection
-from memorive_settings.contracts import default_settings
-from memorive_settings.controller import SettingsController
-from memorive_settings.credentials import CredentialReferenceManager
-from memorive_settings.directory_policy import DirectoryPolicy
-from memorive_settings.external_sources import ExternalDataSources
+from memorive.desktop.settings.capability import CapabilityProjection
+from memorive.desktop.settings.contracts import default_settings
+from memorive.desktop.settings.controller import SettingsController
+from memorive.desktop.settings.credentials import CredentialReferenceManager
+from memorive.desktop.settings.directory_policy import DirectoryPolicy
+from memorive.desktop.settings.external_sources import ExternalDataSources
 from memorive.models.validation.transport import HttpResponse
 from memorive.models.validation.runner import LiveModelValidationRunner
-from memorive_settings.service_adapter import SettingsServiceAdapter, SETTINGS_METHODS
-from memorive_settings.store import SettingsStore
+from memorive.desktop.settings.service_adapter import SettingsServiceAdapter, SETTINGS_METHODS
+from memorive.desktop.settings.store import SettingsStore
 
 
 def controller(root, transport=None):
@@ -76,7 +76,7 @@ def test_new_methods_are_in_all_packaged_bridge_allowlists():
     root = Path(__file__).resolve().parents[1]
     for method in ("settings.external_sources_get", "settings.external_sources_save", "settings.external_sources_refresh", "settings.external_model_reference"):
         assert method in SETTINGS_METHODS
-        for rel in ("product/web/settings_bridge.js", "source/runtime.py"):
+        for rel in ("product/web/settings_bridge.js", "source/memorive/desktop/api.py"):
             assert method in (root / rel).read_text(encoding="utf-8")
 
 

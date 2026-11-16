@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 import pytest
-from runtime import ProductApi
+from memorive.desktop.api import ProductApi
 
 ROOT=Path(__file__).resolve().parents[1]
 

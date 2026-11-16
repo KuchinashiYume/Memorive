@@ -14,7 +14,7 @@ def test_exam_ui_has_no_native_confirmation_dialog():
 
 
 def test_exam_start_is_background_job_not_long_ipc_request():
-    from memorive_settings.service_adapter import SETTINGS_METHODS
+    from memorive.desktop.settings.service_adapter import SETTINGS_METHODS
     assert {'settings.start_workflow_exam','settings.workflow_exam_status','settings.cancel_workflow_exam'}<=set(SETTINGS_METHODS)
 
 

@@ -12,14 +12,14 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_settings.capability import CapabilityProjection  # noqa: E402
-from memorive_settings.contracts import default_settings  # noqa: E402
-from memorive_settings.controller import SettingsController  # noqa: E402
-from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
-from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
-from memorive_settings.service_adapter import SETTINGS_METHODS, SettingsServiceAdapter  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
-from runtime import ProductApi  # noqa: E402
+from memorive.desktop.settings.capability import CapabilityProjection  # noqa: E402
+from memorive.desktop.settings.contracts import default_settings  # noqa: E402
+from memorive.desktop.settings.controller import SettingsController  # noqa: E402
+from memorive.desktop.settings.credentials import CredentialReferenceManager  # noqa: E402
+from memorive.desktop.settings.directory_policy import DirectoryPolicy  # noqa: E402
+from memorive.desktop.settings.service_adapter import SETTINGS_METHODS, SettingsServiceAdapter  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
 
 
 def _controller(tmp_path: Path) -> SettingsController:

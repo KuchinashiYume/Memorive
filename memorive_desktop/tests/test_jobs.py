@@ -6,10 +6,10 @@ import time
 import pytest
 
 from memorive.exams.jobs import WorkflowExamJobs, observed_call
-from memorive_settings.store import SettingsStore
-from memorive_settings.service_adapter import SettingsServiceAdapter
-from memorive_desktop_service.service import ApplicationServiceHost
-from memorive_desktop_service.client import ApplicationServiceClient
+from memorive.desktop.settings.store import SettingsStore
+from memorive.desktop.settings.service_adapter import SettingsServiceAdapter
+from memorive.desktop.service.service import ApplicationServiceHost
+from memorive.desktop.service.client import ApplicationServiceClient
 from test_cli_settings_usability import _controller
 
 

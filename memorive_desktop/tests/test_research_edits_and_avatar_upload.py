@@ -27,7 +27,7 @@ def test_bounded_research_edits_and_legacy_preservation():
     assert validate_config_edit(dict(legacy,push_enabled=False),legacy)['count']==1001
 
 def test_new_preferences_are_private_atomic_and_revision_guarded(tmp_path):
-    from memorive_settings.user_preferences import UserPreferences
+    from memorive.desktop.settings.user_preferences import UserPreferences
     store=UserPreferences(tmp_path)
     assert store.get()['config']==dict(username='',avatar_png='',hide_expressions=False,answer_style='professional')  # answer_style added in v1.02
     assert not (tmp_path/'user_preferences.json').exists()
@@ -41,7 +41,7 @@ def test_new_preferences_are_private_atomic_and_revision_guarded(tmp_path):
         with pytest.raises(ValueError):store.save(config=dict(value['config'],username=name),expected_revision=1)
 
 def test_avatar_server_rejects_forged_oversized_or_multiframe_payloads():
-    from memorive_settings.user_preferences import normalize_avatar
+    from memorive.desktop.settings.user_preferences import normalize_avatar
     def png(size):
         import struct,zlib
         def chunk(kind,payload):return struct.pack('>I',len(payload))+kind+payload+struct.pack('>I',zlib.crc32(kind+payload))
@@ -56,7 +56,7 @@ def test_avatar_server_rejects_forged_oversized_or_multiframe_payloads():
         with pytest.raises(ValueError):normalize_avatar(base64.b64encode(data).decode())
 
 def test_corruption_is_not_overwritten(tmp_path):
-    from memorive_settings.user_preferences import UserPreferences
+    from memorive.desktop.settings.user_preferences import UserPreferences
     path=tmp_path/'user_preferences.json';path.write_bytes(b'corrupt-test-fixture')
     with pytest.raises(Exception):UserPreferences(tmp_path).get()
     assert path.read_bytes()==b'corrupt-test-fixture'

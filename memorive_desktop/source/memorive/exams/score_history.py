@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import uuid
 from memorive.platform.json_files import canonical_sha256
-from memorive_settings.store import SettingsStore
+from memorive.desktop.settings.store import SettingsStore
 
 def target_identity(target):
     from memorive.models.cli.templates import is_custom,configuration_identity

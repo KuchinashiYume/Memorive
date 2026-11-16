@@ -20,10 +20,10 @@
                        prompts and their files, caches, cost, the local model components
   local/               local model servers (Ollama and the like) found and checked for the window
 
-The settings service (memorive_settings) holds the runner and serves these as settings.* calls.
+The settings service (memorive/desktop/settings) holds the runner and serves these as settings.* calls.
 scheduling.py reads the workflow's worker count (memorive/documents/workflow/contracts.py,
 CORE_WORKER_CAPACITY). Places where gateway/ still reaches into other areas:
-research_prompt_cache.py reads the answer styles of memorive_settings, routing_advisory.py uses
+research_prompt_cache.py reads the answer styles of memorive/desktop/settings, routing_advisory.py uses
 the exam scoring (memorive.exams.evaluation) and the hashing helpers of retrieval_weighting,
 model_configuration/errors.py takes the error envelope from memorive_app.
 """

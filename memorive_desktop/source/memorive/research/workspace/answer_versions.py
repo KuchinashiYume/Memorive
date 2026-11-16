@@ -16,7 +16,7 @@ saved, that those inputs still hold.
 import copy,re
 from memorive.research.workspace.store import digest,uid,now,packed
 from memorive.research.workspace.evidence import checking_each_file_once
-from memorive_settings import answer_styles
+from memorive.desktop.settings import answer_styles
 from memorive.platform.language import freeze as freeze_language
 
 TREE_VERSION='MemoAnswerTree-v1'

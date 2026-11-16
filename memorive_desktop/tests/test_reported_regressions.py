@@ -214,12 +214,12 @@ def test_refinement_options_include_every_verified_local_model(tmp_path: Path) -
 
 
 def test_runtime_enables_visible_readers_and_migrates_part11_preferences() -> None:
-    runtime = (ATTEMPT_ROOT / "source" / "runtime.py").read_text(encoding="utf-8")
+    runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
 
     assert "legacy_deepseek_visible_ui_projection=False" not in runtime
     assert "EdgeKimiVisibleUIReader" in runtime
-    # The desk assistant's preferences and their upgrade live in memorive_desktop_assistant/desktop.py.
-    assistant = (ATTEMPT_ROOT / "source" / "memorive_desktop_assistant" / "desktop.py").read_text(encoding="utf-8")
+    # The desk assistant's preferences and their upgrade live in memorive/desktop/assistant/desktop.py.
+    assistant = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "assistant" / "desktop.py").read_text(encoding="utf-8")
     assert "DesktopAssistantPreferences-v3" in assistant
     assert "logo_left_action" not in runtime + assistant
     assert "logo_right_action" not in runtime + assistant

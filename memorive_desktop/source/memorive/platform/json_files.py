@@ -84,7 +84,7 @@ def write_json_indented(path: Path, payload: dict[str, Any]) -> None:
 
 def lenient_sha256(value: Any) -> str:
     """SHA-256, upper-case hex, of value as sorted, compact UTF-8 JSON. Unlike canonical_sha256 it
-    lets NaN and infinity through; the desktop (runtime.py) and the desk assistant hash their receipts
+    lets NaN and infinity through; the desktop (memorive/desktop/api.py) and the desk assistant hash their receipts
     and projections with it."""
     body = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(body).hexdigest().upper()

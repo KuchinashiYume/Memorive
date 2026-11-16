@@ -9,13 +9,13 @@ import pytest
 ROOT = Path(os.environ.get("MEMORIVE_TESTS_TARGET", Path(__file__).resolve().parents[1]))
 for p in (ROOT/"source", ROOT/"product/desktop"):
     sys.path.insert(0, str(p))
-from runtime import ProductApi
+from memorive.desktop.api import ProductApi
 from memorive_research_runtime.common import defaults, sealed, write, read
 
 
 def test_wos_contract_and_secret_never_in_receipts(tmp_path,monkeypatch):
     from memorive_research_runtime.transport import MetadataClient, _last
-    from memorive_settings.metadata_transport import MetadataResponse
+    from memorive.desktop.settings.metadata_transport import MetadataResponse
     secret="synthetic-key-not-a-real-credential"
     monkeypatch.setenv("WOS_API_KEY",secret);_last.clear()
     class Synthetic:
@@ -37,7 +37,7 @@ def test_wos_contract_and_secret_never_in_receipts(tmp_path,monkeypatch):
         if p.is_file():assert secret.encode() not in p.read_bytes()
 
 def test_v2_source_migration_preserves_choices_and_bytes(tmp_path):
-    from memorive_settings.literature_sources import projection
+    from memorive.desktop.settings.literature_sources import projection
     from memorive.platform.json_files import canonical_sha256
     old={"schema_version":"LiteratureSourceSelection-v2","revision":7,"selected":["arxiv"],
         "slots":[{"slot_id":"literature-1","provider":"arxiv"},{"slot_id":"literature-2","provider":None},{"slot_id":"literature-3","provider":None}]}

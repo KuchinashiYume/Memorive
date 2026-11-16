@@ -6,8 +6,8 @@ ROOT=Path(_TEMP.name)
 sys.dont_write_bytecode=True
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'source'))
 os.environ['MEMORIVE_RUNTIME_LOG_LOG_DIR']=str(ROOT/'tests/runtime/ops/runtime_log')
-from memorive_settings.cache_session import Continuation,REVISION,IDLE_TTL_SECONDS
-from memorive_settings.cache_workspace import structured_chat_workspace
+from memorive.desktop.settings.cache_session import Continuation,REVISION,IDLE_TTL_SECONDS
+from memorive.desktop.settings.cache_workspace import structured_chat_workspace
 from memorive.models.validation.runner import LiveModelValidationRunner
 from memorive.models.validation.transport import ProcessResult
 S={'type':'object','properties':{'value':{'type':'string'}},'required':['value'],'additionalProperties':False}

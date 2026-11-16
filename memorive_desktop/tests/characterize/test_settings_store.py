@@ -1,6 +1,6 @@
 """The settings file on disk: what loading and saving do with edited, newer or broken files.
 
-Pins today's behaviour of memorive_settings.store.SettingsStore before the planned change
+Pins today's behaviour of memorive.desktop.settings.store.SettingsStore before the planned change
 (the file carries its own checksum and an exact field set; any mismatch makes load()
 move the file aside and start again from defaults). Each case uses its own profile folder.
 Timestamps and the quarantine file name are left out of the golden file.
@@ -8,9 +8,9 @@ Timestamps and the quarantine file name are left out of the golden file.
 import json
 from pathlib import Path
 
-from memorive_settings.contracts import default_settings
+from memorive.desktop.settings.contracts import default_settings
 from memorive.platform.json_files import canonical_sha256
-from memorive_settings.store import SettingsCorrupt, SettingsStore
+from memorive.desktop.settings.store import SettingsCorrupt, SettingsStore
 from tests.characterize.golden import check
 
 HERE = Path(__file__).parent

@@ -11,7 +11,7 @@ ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ATTEMPT_ROOT / "product" / "desktop"))
 
 from memorive.sessions.controller import SessionProductError, SessionsProductController
-from runtime import ProductApi
+from memorive.desktop.api import ProductApi
 from browser_companion_support import companion  # noqa: E402
 
 

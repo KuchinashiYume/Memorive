@@ -7,7 +7,7 @@ build of the scoring code is installed as the package model_evaluation_quality_s
 package and its own assets are used instead.
 
 The desktop service builds the exam executors from exam_package() and passes each one the paths of
-its pack (memorive_desktop_service/service_main.py); the scoring modules' own defaults for manual
+its pack (memorive/desktop/service/service_main.py); the scoring modules' own defaults for manual
 runs use local_assets_root().
 """
 from __future__ import annotations

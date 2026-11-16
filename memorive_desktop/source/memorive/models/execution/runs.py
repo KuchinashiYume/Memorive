@@ -4,7 +4,7 @@ ReportProfileExecution is the base: freeze() and execute(). The other kinds chan
 ResearchChatExecution tries again after temporary failures and transcribes pictures,
 AIBriefingExecution can be cancelled before and during its run, ResearchEmbeddingExecution asks for
 embeddings. The settings controller makes one object of each kind and serves them as settings.*
-calls (memorive_settings/controller.py).
+calls (memorive/desktop/settings/controller.py).
 """
 import base64
 import copy

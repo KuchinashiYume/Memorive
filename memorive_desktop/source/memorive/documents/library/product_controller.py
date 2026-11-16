@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from memorive_desktop_service.projection_reads import projection_request, once_per_projection
+from memorive.desktop.service.projection_reads import projection_request, once_per_projection
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib

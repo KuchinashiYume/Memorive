@@ -184,7 +184,7 @@ def migrate(profile: Path, operation: Path) -> dict:
 
 def migrate_contents(profile: Path) -> dict:
     """Only the isolated migration copy is writable in this function."""
-    from memorive_settings.store import SettingsStore
+    from memorive.desktop.settings.store import SettingsStore
     from memorive.platform.folders import ProfileFolderManager
     folders = ProfileFolderManager(profile/'profile')
     settings_root = folders.path_for('SETTINGS')
@@ -291,7 +291,7 @@ def verify(profile: Path, operation: Path) -> dict:
             raise ValueError('UPDATE_RUNTIME_RESOURCE_MISSING')
     # Import contract boundaries without constructing services, model gateways,
     # archival/index workers, or generating fresh user reports.
-    import memorive_settings.store
+    import memorive.desktop.settings.store
     import memorive.research.workspace.store
     import memorive.platform.folders
     import product_identity

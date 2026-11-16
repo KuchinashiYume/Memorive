@@ -17,7 +17,7 @@ from pathlib import Path
 
 from memorive_research_runtime import transport
 from memorive_research_runtime.common import read
-from memorive_settings.metadata_transport import MetadataResponse
+from memorive.desktop.settings.metadata_transport import MetadataResponse
 from tests.characterize.golden import check, outcome
 
 HERE = Path(__file__).parent

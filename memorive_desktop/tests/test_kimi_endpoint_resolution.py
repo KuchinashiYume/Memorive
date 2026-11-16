@@ -12,12 +12,12 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1] / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_settings.capability import CapabilityProjection
-from memorive_settings.contracts import default_settings, validate_settings
-from memorive_settings.controller import SettingsController
-from memorive_settings.credentials import CredentialReferenceManager
-from memorive_settings.directory_policy import DirectoryPolicy
-from memorive_settings.store import SettingsStore
+from memorive.desktop.settings.capability import CapabilityProjection
+from memorive.desktop.settings.contracts import default_settings, validate_settings
+from memorive.desktop.settings.controller import SettingsController
+from memorive.desktop.settings.credentials import CredentialReferenceManager
+from memorive.desktop.settings.directory_policy import DirectoryPolicy
+from memorive.desktop.settings.store import SettingsStore
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]

@@ -31,7 +31,7 @@ def test_queue_terminal_transition_has_a_dedicated_ui_projection_observer() -> N
     sessions = (
         ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "controller.py"
     ).read_text(encoding="utf-8")
-    runtime = (ATTEMPT_ROOT / "source" / "runtime.py").read_text(
+    runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(
         encoding="utf-8"
     )
 

@@ -10,8 +10,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from memorive_current_task.product_controller import CurrentTaskProductController
-from memorive_current_task.projection import CurrentTaskProjector, ProjectionError
+from memorive.desktop.current_task.product_controller import CurrentTaskProductController
+from memorive.desktop.current_task.projection import CurrentTaskProjector, ProjectionError
 
 CATALOG = [
     {"profile_ref": "api:chat", "model": "chat-model", "credential_reference_stored": True, "capability": "CHAT"},

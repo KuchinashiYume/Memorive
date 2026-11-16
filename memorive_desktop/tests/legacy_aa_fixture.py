@@ -1,5 +1,5 @@
 """Explicit legacy adapter fixture, not the product default."""
-from memorive_settings.external_sources import default_sources
+from memorive.desktop.settings.external_sources import default_sources
 from memorive.platform.json_files import canonical_sha256
 
 def aa_source():

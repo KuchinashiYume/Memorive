@@ -12,7 +12,7 @@ for candidate in (ROOT / "source", ROOT / "product" / "desktop"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from runtime import ProductApi  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
 
 

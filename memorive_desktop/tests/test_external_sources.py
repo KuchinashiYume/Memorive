@@ -5,7 +5,7 @@ import zipfile
 
 import pytest
 
-from memorive_settings.external_sources import (
+from memorive.desktop.settings.external_sources import (
     ExternalDataSources, default_sources, normalize_payload, role_references,
     validate_source,
 )

@@ -102,7 +102,7 @@ def research_prompt(rules,context):
     stable['scope']=context.get('_thread_scope')
     stable['temporary']=context.get('_temporary',True)
     if 'answer_style' in context:
-        from memorive_settings.answer_styles import from_snapshot
+        from memorive.desktop.settings.answer_styles import from_snapshot
         rules=rules.rstrip()+'\n\n<ANSWER_EXPRESSION>\n'+from_snapshot(context['answer_style'])+'\n</ANSWER_EXPRESSION>'
         stable['answer_style']=copy.deepcopy(context['answer_style'])
     if 'language_context' in context:

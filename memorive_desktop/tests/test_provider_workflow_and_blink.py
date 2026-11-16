@@ -16,7 +16,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
+from memorive.desktop.settings.contracts import default_settings, validate_settings  # noqa: E402
 
 
 def _configured_settings() -> dict:
@@ -130,7 +130,7 @@ def test_repeated_idle_projection_preserves_the_existing_blink_deadline() -> Non
 
 
 def test_assistant_move_uses_the_native_ui_thread_when_a_form_is_attached() -> None:
-    runtime = (DESKTOP_ROOT.parents[1] / "source" / "memorive_desktop_assistant" / "desktop.py").read_text(encoding="utf-8")
+    runtime = (DESKTOP_ROOT.parents[1] / "source" / "memorive" / "desktop" / "assistant" / "desktop.py").read_text(encoding="utf-8")
     mover = runtime.split("def _move_window_native", 1)[1].split(
         "def move_window", 1
     )[0]

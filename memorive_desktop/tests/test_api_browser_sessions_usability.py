@@ -13,7 +13,7 @@ sys.path.insert(0, str(ATTEMPT_ROOT / "product" / "desktop"))
 from memorive.models.local.product_controller import LocalModelProductController
 from memorive.sessions.edge_visible_ui import EdgeDeepSeekVisibleUIReader
 from memorive.sessions.controller import SessionProductError, SessionsProductController
-from runtime import ProductApi
+from memorive.desktop.api import ProductApi
 
 
 WEB_ROOT = ATTEMPT_ROOT / "product" / "web"

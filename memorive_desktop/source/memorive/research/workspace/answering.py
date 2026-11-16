@@ -387,7 +387,7 @@ class AnswerJob:
         if self.job.get('kind') == 'agent':
             self.save_agent_handoff()
         if self.received:
-            from memorive.research.workspace.model_receipts import verified_result  # imported here, as in desktop.py: it loads memorive_settings
+            from memorive.research.workspace.model_receipts import verified_result  # imported here, as in desktop.py: it loads memorive/desktop/settings
             snapshot, kept = self.received
             result = verified_result(kept, snapshot)  # as the model function checks a result it receives
         else:

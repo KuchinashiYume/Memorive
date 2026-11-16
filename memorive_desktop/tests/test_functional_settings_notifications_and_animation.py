@@ -18,15 +18,15 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from runtime import ProductApi  # noqa: E402
-from memorive_settings.contracts import (  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
+from memorive.desktop.settings.contracts import (  # noqa: E402
     SETTINGS_SCHEMA_VERSION,
     STORE_SCHEMA_VERSION,
     default_settings,
     validate_settings,
 )
 from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
 
 
 def _make_api(state_root: Path) -> ProductApi:

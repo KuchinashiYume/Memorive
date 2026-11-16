@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from memorive_desktop_assistant.models import AssistantWindowPlacement
-from memorive_desktop_assistant.placement import WorkArea, clamp_placement
+from memorive.desktop.assistant.models import AssistantWindowPlacement
+from memorive.desktop.assistant.placement import WorkArea, clamp_placement
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
@@ -17,8 +17,8 @@ def _read(path: Path) -> str:
 
 
 def test_runtime_enumerates_all_monitors_and_persists_visible_bounds() -> None:
-    # The desk assistant's window code is in memorive_desktop_assistant/desktop.py.
-    runtime = _read(DESKTOP_ROOT.parents[1] / "source" / "memorive_desktop_assistant" / "desktop.py")
+    # The desk assistant's window code is in memorive/desktop/assistant/desktop.py.
+    runtime = _read(DESKTOP_ROOT.parents[1] / "source" / "memorive" / "desktop" / "assistant" / "desktop.py")
     assert "EnumDisplayMonitors" in runtime
     assert "GetMonitorInfoW" in runtime
     assert "MONITORINFOEXW" in runtime

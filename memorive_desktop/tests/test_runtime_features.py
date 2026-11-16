@@ -17,8 +17,8 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
 
 from application_behavior import decide_close_action  # noqa: E402
 from network_diagnostics import parse_cloudflare_trace, run_network_diagnostic  # noqa: E402
-from memorive_desktop_assistant import project_assistant_state  # noqa: E402
-from runtime import ProductApi  # noqa: E402
+from memorive.desktop.assistant import project_assistant_state  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
 
 
 HEALTH = {

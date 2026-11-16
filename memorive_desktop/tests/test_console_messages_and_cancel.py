@@ -13,9 +13,9 @@ import pytest
 ROOT = Path(os.environ.get('MEMORIVE_TESTS_TARGET', Path(__file__).resolve().parents[1]))
 for folder in (ROOT / 'source', ROOT / 'product/desktop'):
     sys.path.insert(0, str(folder))
-from runtime import ProductApi
+from memorive.desktop.api import ProductApi
 from memorive_research_runtime.common import defaults
-from memorive_test_console_bridge.product_adapter import ProductConsoleAdapter
+from memorive.desktop.test_console.product_adapter import ProductConsoleAdapter
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def test_message_frame_and_error_motion_are_explicit():
 
 
 def test_delivery_is_retained_until_ack(tmp_path):
-    from memorive_desktop_assistant.delivery import AssistantDeliveryQueue
+    from memorive.desktop.assistant.delivery import AssistantDeliveryQueue
     queue = AssistantDeliveryQueue(tmp_path / 'delivery.json')
     presentation = {'animation_state': 'ERROR', 'reason_code': 'MESSAGE_NEEDS_ATTENTION', 'locator': 'memorive://job/test'}
     queue.enqueue('message-1', presentation)
@@ -85,7 +85,7 @@ def test_real_console_cancel_during_snapshot_keeps_bridge_alive(api):
 
 @pytest.mark.parametrize('dispatch_completed',[False,True])
 def test_cancel_lost_reply_reconciles_same_logical_key(api, monkeypatch, dispatch_completed):
-    from memorive_desktop_service.errors import ConnectionLost
+    from memorive.desktop.service.errors import ConnectionLost
     adapter = ProductConsoleAdapter(api, SimpleNamespace(data_root=api._state_dir.parent.parent, session_id='review-sample-regression'), threading.Event())
     job = adapter.execute('event.inject',{'event':'stall','note':'loopback failure injection'},'cancel-disconnect-event',False)['job_id']
     original = api._service.call
@@ -105,7 +105,7 @@ def test_cancel_lost_reply_reconciles_same_logical_key(api, monkeypatch, dispatc
 
 
 def test_cancel_unavailable_never_reports_success(api, monkeypatch):
-    from memorive_desktop_service.errors import ConnectionLost
+    from memorive.desktop.service.errors import ConnectionLost
     adapter = ProductConsoleAdapter(api, SimpleNamespace(data_root=api._state_dir.parent.parent, session_id='review-sample-regression'), threading.Event())
     job = adapter.execute('event.inject',{'event':'stall','note':'synthetic'},'unavailable-event',False)['job_id']
     original=api._service.call

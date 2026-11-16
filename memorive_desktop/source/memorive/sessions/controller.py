@@ -31,7 +31,7 @@ from memorive.sessions.archive.models import (
     NormalizedConversation,
     NormalizedMessage,
 )
-from memorive_current_task.refinement_tasks import (
+from memorive.desktop.current_task.refinement_tasks import (
     REFINEMENT_NODE_IDS,
     RefinementTaskCancelled,
     RefinementTaskError,

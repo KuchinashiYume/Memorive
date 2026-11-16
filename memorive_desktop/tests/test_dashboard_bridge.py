@@ -2,9 +2,9 @@
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from runtime import ProductApi
+from memorive.desktop.api import ProductApi
 from memorive.platform.json_files import canonical_sha256
-from memorive_settings.external_sources import ExternalDataSources, default_sources
+from memorive.desktop.settings.external_sources import ExternalDataSources, default_sources
 from memorive.exams.catalog import validate_quality_new_catalog
 
 ROOT=Path(__file__).resolve().parents[1]

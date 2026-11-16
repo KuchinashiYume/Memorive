@@ -1245,7 +1245,7 @@ class InboxController:
                 return {"display_state": "已暂停" if control == "PAUSED" else "暂停中",
                         "execution_state": control}
             if control in {"RUNNING","QUEUED"} and job.get("pause_node_id"):
-                from memorive_current_task.workflow_mapping import Core_NODES
+                from memorive.desktop.current_task.workflow_mapping import Core_NODES
                 names={row[1]:row[2] for row in Core_NODES}
                 return {"display_state":"已设置暂停点","execution_state":"PAUSE_SCHEDULED",
                         "pause_node_id":job["pause_node_id"],"pause_node_name":names.get(job['pause_node_id'],'指定节点')}

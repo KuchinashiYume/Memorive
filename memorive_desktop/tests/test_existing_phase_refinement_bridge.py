@@ -188,4 +188,4 @@ def test_bridge_is_only_a_phase6_contract_and_phase7_local_composition():
     assert "Phase5ApiStructuredExecutor" not in bridge
     assert "Phase5CliStructuredExecutor" not in bridge
     assert "memorive.models.gateway.execution_core.adapters" not in bridge
-    assert "memorive_settings.refinement_execution" not in bridge
+    assert "memorive.desktop.settings.refinement_execution" not in bridge

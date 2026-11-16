@@ -12,7 +12,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from runtime import ProductApi  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
 from memorive.models.local.product_controller import LocalModelProductController  # noqa: E402
 
 

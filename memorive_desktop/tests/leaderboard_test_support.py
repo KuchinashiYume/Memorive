@@ -12,18 +12,18 @@ ROOT = Path(__file__).resolve().parents[1]
 TREE = ROOT
 BASE = ROOT
 sys.path[:0] = [str(TREE / "source"), str(TREE / "product/desktop")]
-from memorive_settings.capability import CapabilityProjection
-from memorive_settings.contracts import default_settings, utc_now
+from memorive.desktop.settings.capability import CapabilityProjection
+from memorive.desktop.settings.contracts import default_settings, utc_now
 from memorive.platform.json_files import canonical_sha256
-from memorive_settings.controller import SettingsController
-from memorive_settings.credentials import CredentialReferenceManager
-from memorive_settings.directory_policy import DirectoryPolicy
-from memorive_settings.external_sources import ExternalDataSources, default_sources, normalize_payload
-from memorive_settings.livebench_reference import CATEGORY_METRICS
+from memorive.desktop.settings.controller import SettingsController
+from memorive.desktop.settings.credentials import CredentialReferenceManager
+from memorive.desktop.settings.directory_policy import DirectoryPolicy
+from memorive.desktop.settings.external_sources import ExternalDataSources, default_sources, normalize_payload
+from memorive.desktop.settings.livebench_reference import CATEGORY_METRICS
 from memorive.models.validation.transport import HttpResponse
-from memorive_settings.service_adapter import SettingsServiceAdapter
-from memorive_settings.store import SettingsStore
-from runtime import ProductApi
+from memorive.desktop.settings.service_adapter import SettingsServiceAdapter
+from memorive.desktop.settings.store import SettingsStore
+from memorive.desktop.api import ProductApi
 
 
 def model(index):

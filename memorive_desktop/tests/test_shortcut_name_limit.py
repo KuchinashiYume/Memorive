@@ -14,7 +14,7 @@ for candidate in (ROOT / "product" / "desktop", ROOT / "source"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_desktop_assistant.desktop import AssistantDesktop  # noqa: E402
+from memorive.desktop.assistant.desktop import AssistantDesktop  # noqa: E402
 
 
 class AssistantStub:

@@ -1,6 +1,6 @@
 """What the research runtime uses from the rest of the app, in one object.
 
-ProductApi (runtime.py) builds one ResearchHost when it starts and passes it to ResearchRuntime;
+ProductApi (memorive/desktop/api.py) builds one ResearchHost when it starts and passes it to ResearchRuntime;
 the runtime and its helpers (home.py, ai_briefing.py, indexing.py, periodic.py, report_models.py
 and the others) reach other parts of the app only through these fields.
 """

@@ -104,8 +104,8 @@ def initialize_language(state: Path, data: Path | None):
     value = _binding_json(marker)
     if value.get('owner') != INSTALL_OWNER or not _same_path(value.get('data_root'), data) or value.get('language') not in ('zh-CN','en-US','ja-JP'):
         raise ValueError('INSTALLER_DEFAULT_LANGUAGE_INVALID')
-    from memorive_settings.store import SettingsStore
-    from memorive_settings.contracts import default_settings
+    from memorive.desktop.settings.store import SettingsStore
+    from memorive.desktop.settings.contracts import default_settings
     from memorive.platform.folders import ProfileFolderManager
     folders = ProfileFolderManager(state/'profile')
     def defaults():

@@ -1,5 +1,5 @@
 """Settings "maximum cache": staged import batches beyond the limit are removed, oldest first
-(memorive_desktop_service.temporary_cache.limit).
+(memorive.desktop.service.temporary_cache.limit).
 
 Only the staging folder's own batch folders are measured and removed. A batch younger than an
 hour may still be on its way into the inbox and stays; links and junctions are neither measured
@@ -13,7 +13,7 @@ import time
 
 import pytest
 
-from memorive_desktop_service.temporary_cache import SPARE_SECONDS, limit
+from memorive.desktop.service.temporary_cache import SPARE_SECONDS, limit
 
 MB = 1024 * 1024
 NOW = time.time()

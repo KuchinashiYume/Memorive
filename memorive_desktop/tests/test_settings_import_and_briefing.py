@@ -18,9 +18,9 @@ from memorive_research_runtime import report_models
 from memorive_research_runtime.ai_briefing import DEFAULT_CONFIG, AIBriefing
 from memorive_research_runtime.ai_sources import SOURCES
 from memorive_research_runtime.common import defaults as research_defaults
-from memorive_settings.export_bundle import validate as validate_extensions
-from memorive_settings.external_sources import ExternalDataSources
-from memorive_settings.leaderboard import DEFAULTS as LEADERBOARD_DEFAULTS
+from memorive.desktop.settings.export_bundle import validate as validate_extensions
+from memorive.desktop.settings.external_sources import ExternalDataSources
+from memorive.desktop.settings.leaderboard import DEFAULTS as LEADERBOARD_DEFAULTS
 
 
 # Imported settings bundle

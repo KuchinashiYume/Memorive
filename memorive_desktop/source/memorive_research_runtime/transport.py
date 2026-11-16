@@ -6,7 +6,7 @@ from memorive.research.discovery.live_metadata_transport import (
     TransportPolicy,
 )
 from memorive.models.validation.transport import UrllibHttpTransport
-from memorive_settings.metadata_transport import metadata_error_code, PublicMetadataHttpTransport, MetadataResponse
+from memorive.desktop.settings.metadata_transport import metadata_error_code, PublicMetadataHttpTransport, MetadataResponse
 from urllib.parse import urlsplit, urlencode
 from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHandler
 from urllib.error import HTTPError
@@ -77,7 +77,7 @@ class MetadataClient:
         self.source_config=source_config
 
     def fetch(self,provider,topic,count,run_id,call_id,stop,*,cursor=None,source_snapshot=None,exact_doi=None,exact_arxiv=None):
-        from memorive_settings.literature_sources import PRESETS
+        from memorive.desktop.settings.literature_sources import PRESETS
         from . import wos
         if provider.lower() not in PRESETS:
             raise ValueError('LITERATURE_PROVIDER_UNSUPPORTED')

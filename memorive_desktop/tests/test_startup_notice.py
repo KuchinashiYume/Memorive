@@ -1,6 +1,6 @@
 """The notice shown when the settings file comes from a newer version of Memorive.
 
-- memorive_settings.store.file_from_newer_version only reads the version of the file;
+- memorive.desktop.settings.store.file_from_newer_version only reads the version of the file;
 - startup_notice.notice_page builds the notice from the shipped bundle_integrated.html, reusing
   its close dialog, style sheets, close icon and typography functions. If the page is changed so
   that one of these parts is missing or renamed, notice_page raises
@@ -16,8 +16,8 @@ from pathlib import Path
 import pytest
 
 import startup_notice
-from memorive_settings.contracts import STORE_SCHEMA_VERSION
-from memorive_settings.store import file_from_newer_version
+from memorive.desktop.settings.contracts import STORE_SCHEMA_VERSION
+from memorive.desktop.settings.store import file_from_newer_version
 
 BUNDLE = Path(__file__).resolve().parents[1] / "product" / "desktop" / "bundle_integrated.html"
 CURRENT = int(re.fullmatch(r"SettingsStoreEnvelope-v(\d+)", STORE_SCHEMA_VERSION).group(1))

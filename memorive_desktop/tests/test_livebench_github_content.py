@@ -12,8 +12,8 @@ import json
 
 import pytest
 
-from memorive_settings.external_sources import _github_commit, _github_content
-from memorive_settings.metadata_transport import LIVEBENCH_GITHUB_API
+from memorive.desktop.settings.external_sources import _github_commit, _github_content
+from memorive.desktop.settings.metadata_transport import LIVEBENCH_GITHUB_API
 
 COMMIT = "a" * 40
 PATH = "results/2026-11-01/table.csv"

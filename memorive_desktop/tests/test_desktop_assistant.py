@@ -4,11 +4,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from memorive_desktop_assistant import DesktopAssistantController, SafeShortcutRegistry, project_assistant_state
-from memorive_desktop_assistant.models import AssistantPresentation, AssistantWindowPlacement
-from memorive_desktop_assistant.placement import PYWEBVIEW_WINDOW_SPEC, WorkArea, clamp_placement, restore_default_placement, visible_bounds
-from memorive_desktop_assistant.shortcuts import FIXED_INTERNAL_ACTION_IDS
-from memorive_desktop_service.control_store import ControlStore
+from memorive.desktop.assistant import DesktopAssistantController, SafeShortcutRegistry, project_assistant_state
+from memorive.desktop.assistant.models import AssistantPresentation, AssistantWindowPlacement
+from memorive.desktop.assistant.placement import PYWEBVIEW_WINDOW_SPEC, WorkArea, clamp_placement, restore_default_placement, visible_bounds
+from memorive.desktop.assistant.shortcuts import FIXED_INTERNAL_ACTION_IDS
+from memorive.desktop.service.control_store import ControlStore
 
 
 HEALTH = {

@@ -7,7 +7,7 @@ import pytest
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_external_reference_integration import controller
-from memorive_settings.external_sources import role_references
+from memorive.desktop.settings.external_sources import role_references
 from memorive.models.validation.runner import LiveModelValidationRunner
 
 ROOT = Path(__file__).resolve().parents[1]

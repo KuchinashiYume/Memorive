@@ -18,9 +18,9 @@ if str(SOURCE_ROOT) not in sys.path:
 
 from memorive_app.facade import ApplicationFacade  # noqa: E402
 from memorive_app.job_store import SandboxJobStore  # noqa: E402
-from memorive_current_task import CurrentTaskProductController  # noqa: E402
-from memorive_desktop_service.adapters import RealFacadeAdapter  # noqa: E402
-from memorive_desktop_service.control_store import ControlStore  # noqa: E402
+from memorive.desktop.current_task import CurrentTaskProductController  # noqa: E402
+from memorive.desktop.service.adapters import RealFacadeAdapter  # noqa: E402
+from memorive.desktop.service.control_store import ControlStore  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
 from memorive.sessions.refinement import (  # noqa: E402

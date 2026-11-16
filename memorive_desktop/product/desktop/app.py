@@ -92,7 +92,7 @@ def run_embedded_service() -> int:
     root = resource_root()
     configure_resource_imports(root)
     forwarded = [argument for argument in sys.argv[1:] if argument != SERVICE_MODE_ARG]
-    from memorive_desktop_service.service_main import main as service_main
+    from memorive.desktop.service.service_main import main as service_main
     return int(service_main(forwarded))
 
 
@@ -6208,7 +6208,7 @@ def main() -> int:
     if not frozen:
         # Source checkout: load the same modules the packaged build loads.
         configure_resource_imports(root.parents[1])
-    from memorive_test_console_bridge import ConsoleBridge, ConsoleLaunch
+    from memorive.desktop.test_console import ConsoleBridge, ConsoleLaunch
 
     console_launch = ConsoleLaunch.from_environment(Path(sys.executable))
     if console_launch is not None:
@@ -6414,7 +6414,7 @@ def main() -> int:
         # A settings file from a newer version stops the service before it is ready.
         # Say so in the app's own dialog instead of ending without a word.
         from memorive.platform.folders import ProfileFolderManager
-        from memorive_settings.store import file_from_newer_version
+        from memorive.desktop.settings.store import file_from_newer_version
         settings_file = ProfileFolderManager(state_dir / "profile").path_for("SETTINGS") / "settings.json"
         if file_from_newer_version(settings_file):
             from startup_notice import show_settings_from_newer_version
@@ -6427,7 +6427,7 @@ def main() -> int:
                 page_file=state_dir / "profile" / "ui" / "startup_notice.html",
                 storage_path=notice_storage, brand=BRAND,
             )
-    from runtime import ProductApi
+    from memorive.desktop.api import ProductApi
     try:
         session_source_roots = None
         if console_launch is not None:

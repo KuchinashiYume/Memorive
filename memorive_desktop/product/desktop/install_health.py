@@ -52,7 +52,7 @@ def main(root):
     state = probe/'localappdata/Memorive/desktop-review/state'
     if state.exists():
         raise RuntimeError('INSTALL_HEALTH_REQUIRES_FRESH_STATE')
-    from runtime import ProductApi
+    from memorive.desktop.api import ProductApi
     api = None
     result = {'status':'FAIL', 'kind':'EMPTY_OFFLINE_RUNTIME', 'release_version':json.loads((root/'release_identity_binding.json').read_text('utf8'))['release_version']}
     try:

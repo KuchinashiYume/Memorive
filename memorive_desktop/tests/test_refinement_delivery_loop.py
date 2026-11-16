@@ -22,7 +22,7 @@ from memorive.sessions.refinement import (  # noqa: E402
     validate_normalized_graph,
     validate_typed_refinement_item,
 )
-from memorive_desktop_service.control_store import ControlStore  # noqa: E402
+from memorive.desktop.service.control_store import ControlStore  # noqa: E402
 from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.documents.library import LibraryProductController  # noqa: E402
 from memorive.sessions.refinement.model_channel import (  # noqa: E402

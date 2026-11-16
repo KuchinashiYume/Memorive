@@ -16,12 +16,12 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-import runtime as runtime_module  # noqa: E402
-from runtime import ProductApi  # noqa: E402
-from memorive_desktop_assistant.desktop import AssistantDesktop  # noqa: E402
+import memorive.desktop.api as runtime_module  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
+from memorive.desktop.assistant.desktop import AssistantDesktop  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
-from memorive_desktop_assistant.models import AssistantWindowPlacement  # noqa: E402
-from memorive_desktop_assistant.placement import (  # noqa: E402
+from memorive.desktop.assistant.models import AssistantWindowPlacement  # noqa: E402
+from memorive.desktop.assistant.placement import (  # noqa: E402
     WorkArea,
     clamp_placement,
     restore_default_placement,

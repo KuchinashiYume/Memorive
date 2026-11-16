@@ -13,8 +13,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from runtime import ProductApi
-from memorive_desktop_assistant.desktop import AssistantDesktop
+from memorive.desktop.api import ProductApi
+from memorive.desktop.assistant.desktop import AssistantDesktop
 
 
 class _Service:

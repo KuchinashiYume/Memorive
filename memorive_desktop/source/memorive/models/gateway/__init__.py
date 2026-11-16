@@ -2,8 +2,8 @@
 
 Used outside the package: gateway.py (document processing, card extraction and review, research
 analysis, retrieval, the workflow), which calls providers/ and router.py inside the package;
-providers/anthropic.py and deepseek.py directly by memorive_settings; local_structured_chat.py (chat
-with a local model) by memorive_settings and session refinement; prompts/ and prompt_cache.py;
+providers/anthropic.py and deepseek.py directly by memorive/desktop/settings; local_structured_chat.py (chat
+with a local model) by memorive/desktop/settings and session refinement; prompts/ and prompt_cache.py;
 research_prompt_cache.py; resource_limits.py; execution_core (runner, contracts, and codex_cli.py,
 whose parser reads a Codex run's output); local_multimodal_ranker/ by retrieval.
 

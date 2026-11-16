@@ -23,7 +23,7 @@ def main(root):
             path=target/folder;path.mkdir(exist_ok=True);os.environ[key]=str(path)
         sources={name:target/'session-sources'/name for name in ('codex_home','claude_home')}
         for path in sources.values():path.mkdir(parents=True)
-        from runtime import ProductApi
+        from memorive.desktop.api import ProductApi
         api=ProductApi(target/'state',root/'source',root/'source/facade_method_binding.json',system_effects_enabled=False,
             session_source_roots=sources,session_visible_ui_reader={},test_fixture_mode=False)
         settings=api.call('settings.get_state',{})['settings'];nodes={n['node_id']:n for n in settings['workflow']['nodes']}

@@ -3,7 +3,7 @@ id or its ranking record carries one.
 
 identity() turns a model id, or a ranking record (Artificial Analysis, Epoch AI, LiveBench rows),
 into (vendor, base_model, effort); join_base() makes version punctuation comparable. The model
-leaderboard in Settings (memorive_settings/leaderboard.py) groups ranking rows by these keys, and
+leaderboard in Settings (memorive/desktop/settings/leaderboard.py) groups ranking rows by these keys, and
 the price registry (memorive/models/price_registry.json) is keyed by them, so the
 call ledger's price estimate (memorive/models/pricing.py) resolves a request's model the
 same way. number() and text() read a finite number and a short printable string; the leaderboard

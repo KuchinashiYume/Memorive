@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
-from memorive_accounting.product_controller import AccountingProductController
+from memorive.desktop.accounting.product_controller import AccountingProductController
 
 
 class LocalModels:

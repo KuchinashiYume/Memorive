@@ -1,7 +1,7 @@
 """Production prompt: the editorial baseline, adapted to source-ID-bound output."""
 import json
 from .common import sha
-from memorive_settings.answer_styles import from_snapshot, effective_override
+from memorive.desktop.settings.answer_styles import from_snapshot, effective_override
 from memorive.platform.language.policy import freeze, validate, locale, instruction
 from .ai_prompt_locales import SYSTEM_EN, SYSTEM_JA, COMMON_EN, COMMON_JA, MODES_EN, MODES_JA, FOOTERS
 

@@ -13,12 +13,12 @@ from pathlib import Path
 
 import pytest
 
-from memorive_settings.capability import CapabilityProjection
-from memorive_settings.contracts import default_settings
-from memorive_settings.controller import SettingsController
-from memorive_settings.credentials import CredentialReferenceManager
-from memorive_settings.directory_policy import DirectoryPolicy
-from memorive_settings.store import SettingsStore
+from memorive.desktop.settings.capability import CapabilityProjection
+from memorive.desktop.settings.contracts import default_settings
+from memorive.desktop.settings.controller import SettingsController
+from memorive.desktop.settings.credentials import CredentialReferenceManager
+from memorive.desktop.settings.directory_policy import DirectoryPolicy
+from memorive.desktop.settings.store import SettingsStore
 
 RUN_ID = "research-" + "a" * 24
 CHAT = {"profile_ref": "local:chat", "execution_eligible": True, "exact_identity_available": True, "capability": "CHAT",

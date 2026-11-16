@@ -45,8 +45,8 @@ RESTORED = {'memorive.documents.card_distillation.segmented_distill.contracts': 
                                                   'execute_get',
                                                   'with_content_hash'],
  'memorive_app.contracts': ['error_envelope'],
- 'memorive_desktop_service.adapters': ['FakeFacadeAdapter'],
- 'memorive_desktop_service.errors': ['BackpressureExceeded', 'InstanceAlreadyActive'],
+ 'memorive.desktop.service.adapters': ['FakeFacadeAdapter'],
+ 'memorive.desktop.service.errors': ['BackpressureExceeded', 'InstanceAlreadyActive'],
  'memorive.documents.inbox.contracts': ['require_item_state'],
  'memorive_research_runtime.identity': ['normalize_identifier', 'initialization_candidate_base_projection'],
  'memorive.research.reports.api_briefing': ['run_api_briefing'],
@@ -96,8 +96,8 @@ def test_a_star_import_gives_every_listed_name(module_name):
     ("memorive.sessions.refinement.provider_adapter", "capture_local_jsonl_snapshot", "function"),
     ("memorive.research.ranking.migration", "migrate_candidate", "function"),
     ("memorive.research.ranking.migration", "MigrationFailure", "exception"),
-    ("memorive_desktop_service.errors", "BackpressureExceeded", "exception"),
-    ("memorive_desktop_service.errors", "InstanceAlreadyActive", "exception"),
+    ("memorive.desktop.service.errors", "BackpressureExceeded", "exception"),
+    ("memorive.desktop.service.errors", "InstanceAlreadyActive", "exception"),
 ])
 def test_names_older_callers_import_are_there_with_their_kind(module_name, name, kind):
     namespace = {}
@@ -110,6 +110,6 @@ def test_names_older_callers_import_are_there_with_their_kind(module_name, name,
 
 
 def test_the_command_outbox_stays_removed():
-    assert importlib.util.find_spec("memorive_desktop_service.command_outbox") is None
-    errors = importlib.import_module("memorive_desktop_service.errors")
+    assert importlib.util.find_spec("memorive.desktop.service.command_outbox") is None
+    errors = importlib.import_module("memorive.desktop.service.errors")
     assert "DesktopCommandOutbox" not in errors.__all__

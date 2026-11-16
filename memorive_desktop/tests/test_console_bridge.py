@@ -16,7 +16,7 @@ SOURCE = ROOT / "source"
 if str(SOURCE) not in sys.path:
     sys.path.insert(0, str(SOURCE))
 
-from memorive_test_console_bridge import (  # noqa: E402
+from memorive.desktop.test_console import (  # noqa: E402
     BASE_PATH,
     ConsoleBridge,
     ConsoleBridgeError,

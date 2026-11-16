@@ -21,7 +21,7 @@ def profile_options(settings_state, local_models, capability='CHAT'):
     saved settings (as settings.get_state returns them) and the recognized local models. A profile is
     eligible when it is connected and its credential is stored; a local model must also be eligible to
     run and have an exact identity."""
-    from memorive_current_task.workflow_mapping import build_core_execution_snapshot
+    from memorive.desktop.current_task.workflow_mapping import build_core_execution_snapshot
     snapshot = build_core_execution_snapshot(settings_state['settings'], settings_revision=settings_state['revision'],
                                              local_model_profiles=local_models)
     options = []

@@ -38,7 +38,7 @@ class LoopbackMetadata:
         return json.dumps({'status':'ok','message-type':'work-list','message-version':'1.0.0','message':{'items':items,'total-results':len(items),'items-per-page':len(items),'query':{'start-index':0}}}).encode()
 
     def request(self, **params):
-        from memorive_settings.metadata_transport import MetadataResponse
+        from memorive.desktop.settings.metadata_transport import MetadataResponse
         host = urlsplit(params['url']).hostname
         source = {'export.arxiv.org':'ARXIV','api.crossref.org':'CROSSREF'}[host]
         opener = build_opener(ProxyHandler({}))

@@ -1,4 +1,4 @@
-"""Saving settings from the window (memorive_settings/controller.py): preview, then save.
+"""Saving settings from the window (memorive/desktop/settings/controller.py): preview, then save.
 
 preview() checks settings without writing them: the settings themselves, the folders, and the
 risks a person must confirm (a retry count of 0-1 or above 5 for a model step). save() writes
@@ -11,12 +11,12 @@ from copy import deepcopy
 
 import pytest
 
-from memorive_settings.capability import CapabilityProjection
-from memorive_settings.contracts import default_settings, risk_ids, validate_settings
-from memorive_settings.controller import SettingsController
-from memorive_settings.credentials import CredentialReferenceManager
-from memorive_settings.directory_policy import DirectoryPolicy
-from memorive_settings.store import SettingsStore
+from memorive.desktop.settings.capability import CapabilityProjection
+from memorive.desktop.settings.contracts import default_settings, risk_ids, validate_settings
+from memorive.desktop.settings.controller import SettingsController
+from memorive.desktop.settings.credentials import CredentialReferenceManager
+from memorive.desktop.settings.directory_policy import DirectoryPolicy
+from memorive.desktop.settings.store import SettingsStore
 
 
 @pytest.fixture

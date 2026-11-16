@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse,hashlib,json,shutil,sys
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'source'))
-from memorive_settings.contracts import validate_settings,STORE_SCHEMA_VERSION
+from memorive.desktop.settings.contracts import validate_settings,STORE_SCHEMA_VERSION
 from memorive.platform.json_files import canonical_sha256
 from memorive.platform.sensitive import scan_sensitive
 

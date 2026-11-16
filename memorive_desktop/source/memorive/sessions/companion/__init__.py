@@ -3,7 +3,7 @@ page layout of supported chat sites (site_profiles.py), and keeps the position u
 conversation was archived (incremental_cursor.py).
 
 desktop.py (BrowserCompanionDesktop) is what the desktop runs: installing, reloading and syncing the
-extension and importing browser session files. ProductApi in runtime.py builds it and forwards the
+extension and importing browser session files. ProductApi in memorive/desktop/api.py builds it and forwards the
 window's browser companion calls to it; the session archive (memorive/sessions/archive) uses site_profiles.py.
 """
 

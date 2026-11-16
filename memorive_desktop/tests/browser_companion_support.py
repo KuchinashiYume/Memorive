@@ -16,7 +16,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
         sys.path.insert(0, str(candidate))
 
 from memorive.sessions.companion.desktop import BrowserCompanionDesktop  # noqa: E402
-from runtime import ProductApi  # noqa: E402
+from memorive.desktop.api import ProductApi  # noqa: E402
 
 
 def companion(service=None) -> BrowserCompanionDesktop:

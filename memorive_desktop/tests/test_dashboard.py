@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from memorive_settings.model_dashboard import ranking_projection, billing_projection
+from memorive.desktop.settings.model_dashboard import ranking_projection, billing_projection
 
 class DashboardTests(unittest.TestCase):
     def setUp(self):

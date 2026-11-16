@@ -14,8 +14,8 @@ def bind(workspace):
         raise ValueError('MEMO_PROFILE_BINDING_MISMATCH')
     if not folders.path_for('SETTINGS').is_dir():
         raise ValueError('MEMO_PROFILE_NOT_INITIALIZED')
-    from memorive_desktop_service.service_main import build_settings_controller,LocalModelProductController
-    from memorive_settings.service_adapter import SettingsServiceAdapter
+    from memorive.desktop.service.service_main import build_settings_controller,LocalModelProductController
+    from memorive.desktop.settings.service_adapter import SettingsServiceAdapter
     from memorive_research_runtime.report_models import profiles_offered
     controller=build_settings_controller(profile)
     service=SettingsServiceAdapter(controller)

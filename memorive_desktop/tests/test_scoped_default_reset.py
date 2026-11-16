@@ -15,13 +15,13 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_settings.capability import CapabilityProjection  # noqa: E402
-from memorive_settings.contracts import default_settings  # noqa: E402
-from memorive_settings.controller import SettingsController  # noqa: E402
-from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
-from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
-from memorive_settings.service_adapter import SETTINGS_METHODS, SettingsServiceAdapter  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.settings.capability import CapabilityProjection  # noqa: E402
+from memorive.desktop.settings.contracts import default_settings  # noqa: E402
+from memorive.desktop.settings.controller import SettingsController  # noqa: E402
+from memorive.desktop.settings.credentials import CredentialReferenceManager  # noqa: E402
+from memorive.desktop.settings.directory_policy import DirectoryPolicy  # noqa: E402
+from memorive.desktop.settings.service_adapter import SETTINGS_METHODS, SettingsServiceAdapter  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
 
 
 SILICONFLOW_REFERENCE = "REF:windows:Memorive/siliconflow/primary"
@@ -313,7 +313,7 @@ def test_runtime_scoped_reset_covers_visible_assistant_fields_only(
         "hide_sensitive_names": True,
     }
 
-    from memorive_desktop_assistant.desktop import AssistantDesktop
+    from memorive.desktop.assistant.desktop import AssistantDesktop
 
     candidate = AssistantDesktop.preferences_for_reset_scope(
         scope,
@@ -325,7 +325,7 @@ def test_runtime_scoped_reset_covers_visible_assistant_fields_only(
 
 
 def test_runtime_allowlist_and_postprocessing_use_scoped_reset_only() -> None:
-    runtime_source = (DESKTOP_ROOT.parents[1] / "source" / "runtime.py").read_text(encoding="utf-8")
+    runtime_source = (DESKTOP_ROOT.parents[1] / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
 
     assert '"settings.reset_scope"' in runtime_source
     assert '"settings.model_service_remove"' in runtime_source

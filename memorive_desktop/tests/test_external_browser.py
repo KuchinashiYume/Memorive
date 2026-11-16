@@ -3,7 +3,7 @@ from copy import deepcopy
 import json
 from pathlib import Path
 import pytest
-from memorive_settings.external_sources import ExternalDataSources
+from memorive.desktop.settings.external_sources import ExternalDataSources
 from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import configure_aa
 

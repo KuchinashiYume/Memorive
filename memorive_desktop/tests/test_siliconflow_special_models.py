@@ -14,18 +14,18 @@ WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_settings.capability import CapabilityProjection  # noqa: E402
-from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
-from memorive_settings.controller import SettingsController  # noqa: E402
-from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
-from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
+from memorive.desktop.settings.capability import CapabilityProjection  # noqa: E402
+from memorive.desktop.settings.contracts import default_settings, validate_settings  # noqa: E402
+from memorive.desktop.settings.controller import SettingsController  # noqa: E402
+from memorive.desktop.settings.credentials import CredentialReferenceManager  # noqa: E402
+from memorive.desktop.settings.directory_policy import DirectoryPolicy  # noqa: E402
 from memorive.models.capabilities import (  # noqa: E402
     infer_api_model_capability,
     workflow_node_accepts_capability,
 )
 from memorive.models.validation.transport import HttpResponse  # noqa: E402
 from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
 
 
 SILICONFLOW_REFERENCE = "REF:windows:Memorive/siliconflow/primary"

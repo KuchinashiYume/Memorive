@@ -22,7 +22,7 @@ import pytest
 # packaged, keeps their module-level paths pointing at the source tree for later tests.
 import memorive.platform.folders  # noqa: F401
 import memorive.research.workspace.store  # noqa: F401
-import memorive_settings.store  # noqa: F401
+import memorive.desktop.settings.store  # noqa: F401
 import product_identity  # noqa: F401
 import update_maintenance as maintenance
 

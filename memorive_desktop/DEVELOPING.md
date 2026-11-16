@@ -7,7 +7,7 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 
 | Folder | What it holds |
 | --- | --- |
-| `source/` | The Python code of the desktop app, one package per feature (`memorive/research/workspace`, `memorive_settings`, and the areas under `memorive/`: `documents`, `models`, `sessions`, `platform`, ...). `runtime.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
+| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`); four packages still wait to be split (`memorive_app`, `memorive_research_runtime`, `run_ledger`, `decision_log`). `memorive/desktop/api.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
 | `ui/` | The sources of the window's two pages. `tools/build_pages.py` builds `product/desktop/bundle_integrated.html` and `bundle_assistant.html` from them; see `ui/README.md`. |
 | `tests/` | The tests. Run them with `tests/run_tests.py` (below). |
 | `examples/` | Small programs that run one feature without the window. |
@@ -37,7 +37,7 @@ start" below).
   The browser extension's install, reload and sync, and importing session files, are in
   `memorive/sessions/companion/desktop.py` (`BrowserCompanionDesktop`); `ProductApi` forwards the
   window's calls to it.
-- **Exams**: the settings page → `memorive_settings` (exam jobs and executors) → the exam modules
+- **Exams**: the settings page → `memorive/desktop/settings` (exam jobs and executors) → the exam modules
   loaded by name (`memorive/exams/evaluation`, found with the packs by `memorive/exams/resources.py`)
   → the model request → scoring → score history.
   `WorkflowExams` (`memorive/exams/runner.py`) plans and runs a node's exam and
@@ -50,7 +50,7 @@ start" below).
   `ProductApi` builds (`host.py`): the settings service, library, messages, work log and window events.
 
 Calls go from the window side towards the business packages, from those to model execution and
-transport (`memorive/models`, `memorive_settings`), and from all of them to
+transport (`memorive/models`, `memorive/desktop/settings`), and from all of them to
 the shared basics (`memorive/platform`, `run_ledger`,
 `decision_log`). A few basics still reach into business packages; these are the places to untangle
 when that code is restructured:
@@ -67,32 +67,31 @@ when that code is restructured:
 
 | Area | Packages |
 | --- | --- |
-| Desktop: window, service, panels | `runtime.py` (ProductApi), `memorive_desktop_service`, `memorive_desktop_assistant`, `memorive_current_task`, `memorive_messages`, `memorive_work_log`, `memorive_accounting`, `memorive_test_console_bridge`, `release_links.py` |
+| Desktop: window, service, panels | `memorive/desktop` (`api.py` ProductApi, `settings/`, `service/`, `assistant/`, `current_task/`, `messages/`, `work_log/`, `accounting/`, `test_console/`, `harness/` an integration harness run by hand, `release_links.py`; its docstring lists each part) |
 | Documents | `memorive/documents` (`inbox/`, `processing/` with `registration.py` for paper IDs, `library/`, `registry/` the artifact registry, `front_matter.py`; `workflow/`, `card_distillation/`, `card_review/`, `card_states/`, `data_review/`; its docstring lists each part) |
 | Research | `memorive/research/workspace`, `memorive_research_runtime`, `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports`, `memorive/research/analysis`, `memorive/research/opportunities`, `memorive/research/retrieval`, `memorive/research/ranking`, `memorive/research/knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
 | Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
-| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file), `run_ledger`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
+| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file), `run_ledger`, `decision_log`, `memorive_app` (jobs, credentials, IPC) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
 sessions, models, exams, platform); each row names what is already there first.
-`memorive_settings` still holds code of two areas: the settings themselves and the exams. The exams
-move to `memorive/exams`; the table shows where they belong, the package docstring shows where they
-are today.
+The exams are in `memorive/exams`; `memorive/desktop/settings` keeps re-exporting the exam executors
+for older imports.
 
 ### Who keeps which data
 
 | Data | Kept by |
 | --- | --- |
-| Settings, model profiles, CLI templates, credentials (by reference) | `memorive_settings` (`store.py`, `credentials.py`) |
+| Settings, model profiles, CLI templates, credentials (by reference) | `memorive/desktop/settings` (`store.py`, `credentials.py`) |
 | Model snapshots, call attempts and results | `memorive/models/execution` (`research_chat_profiles/` and the like), the call ledger in `memorive/models/calls/ledger.py` |
 | Imported files and processing jobs | `memorive/documents/inbox`, `memorive/documents/workflow`, `memorive_app` (job store) |
 | A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `memorive/documents/processing`, `memorive/documents/card_distillation`, `memorive/documents/card_states` (review state in the card); read through `memorive/documents/library` |
 | Research conversations, answers, knowledge drafts | `memorive/research/workspace` (its own SQLite store) |
-| Imported chat sessions and refinement tasks | `memorive/sessions/archive`, `memorive_current_task/refinement_tasks.py` |
+| Imported chat sessions and refinement tasks | `memorive/sessions/archive`, `memorive/desktop/current_task/refinement_tasks.py` |
 | Exam plans, results and score history | `memorive/exams` (`score_history.py`, the `workflow_exams/` run folders) |
-| Messages, window state, work log | `memorive_messages`, `memorive_desktop_service/control_store.py`, `memorive_work_log` |
+| Messages, window state, work log | `memorive/desktop/messages`, `memorive/desktop/service/control_store.py`, `memorive/desktop/work_log` |
 | Folder layout of a profile | `memorive/platform/folders` |
 | Runtime log | `memorive/platform/logs` |
 
@@ -143,12 +142,12 @@ to cover every way a question can end.
 | Step | Where |
 | --- | --- |
 | The chat page sends `memo.ask` and then polls `memo.job_status`. | `ui/integrated/routes/chat/workspace.js` |
-| `ProductApi.call` hands the research workspace's methods (`DESKTOP_METHODS` in `service.py`) to the workspace. On first use it creates the workspace with `create(...)`, passing the settings service, library, local models, profile folders, its own `call` and `stage_inbox_paths`; `create` also gives the workspace the model function. | `source/runtime.py`, `source/memorive_research_workspace/desktop.py` |
+| `ProductApi.call` hands the research workspace's methods (`DESKTOP_METHODS` in `service.py`) to the workspace. On first use it creates the workspace with `create(...)`, passing the settings service, library, local models, profile folders, its own `call` and `stage_inbox_paths`; `create` also gives the workspace the model function. | `source/memorive/desktop/api.py`, `source/memorive/research/workspace/desktop.py` |
 | `ResearchWorkspace.call` dispatches the method; `ask()` passes the question on. | `memorive/research/workspace/service.py` |
 | `AnswerVersions.enqueue` checks the request, freezes the model choice, answer style, memories and research topic in a `QUEUED` job, and hands the job to the worker pool. Answering again (`memo.answer_retry`) goes through `AnswerVersions.retry` to the same place. | `memorive/research/workspace/answer_versions.py` |
 | The worker runs `answer_job()`: `AnswerJob.start`, `gather_evidence`, `build_request`, `ask_model`, `check_answer`, `save_answer`; any error goes to `record_failure`. The module docstring lists what each step does. | `memorive/research/workspace/answering.py` |
 | The model function freezes the chosen model profile (`settings.research_chat_freeze`) and runs it (`settings.research_chat_execute`). | `memorive/research/workspace/desktop.py` |
-| The settings service runs the call: the snapshot is sent once, temporary failures are tried again, the call is counted. | `memorive_settings/controller.py`, `memorive/models/execution/` |
+| The settings service runs the call: the snapshot is sent once, temporary failures are tried again, the call is counted. | `memorive/desktop/settings/controller.py`, `memorive/models/execution/` |
 | The request itself is sent by the model validation runner. | `memorive/models/validation/runner.py` (`execute_structured_chat`) |
 
 **Cancel.** `memo.cancel` (`ResearchWorkspace.cancel`) marks the job `CANCELLED` at once. The steps of

@@ -4,7 +4,7 @@ public_roots.pem is Mozilla's root store as packaged by certifi (version and lic
 public_roots_manifest.json and public_roots_LICENSE); PUBLIC_ROOTS_SHA256 pins it, and the build
 (tools/build_memorive.py, check_public_roots) checks the file against that hash.
 public_metadata_context() adds these roots to the system's; it never installs them system-wide.
-External metadata and price downloads (memorive_settings/metadata_transport.py) and model API calls
+External metadata and price downloads (memorive/desktop/settings/metadata_transport.py) and model API calls
 (memorive/models/calls/network.py, tls_context) use it.
 """
 import hashlib

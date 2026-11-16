@@ -7,13 +7,13 @@ from __future__ import annotations
 import pytest
 
 from memorive.platform.naming import TITLE_MAX
-from memorive_accounting.projection import _normalize as accounting_row
+from memorive.desktop.accounting.projection import _normalize as accounting_row
 from memorive_app.durable_store import DurableJobStore, _require_secret_free
-from memorive_desktop_service.errors import ProtocolViolation, SchemaIncompatible
-from memorive_desktop_service.protocol import CANCEL_SCHEMA, PROTOCOL_VERSION, validate_cancel
+from memorive.desktop.service.errors import ProtocolViolation, SchemaIncompatible
+from memorive.desktop.service.protocol import CANCEL_SCHEMA, PROTOCOL_VERSION, validate_cancel
 from memorive.platform.folders.policy import document_folder
-from memorive_test_console_bridge.expressions import BY_ID
-from memorive_test_console_bridge.protocol import validate_command
+from memorive.desktop.test_console.expressions import BY_ID
+from memorive.desktop.test_console.protocol import validate_command
 from memorive.research.recommendations.exposure_feedback import ExposureFeedbackError, validate_research_interaction_event
 
 

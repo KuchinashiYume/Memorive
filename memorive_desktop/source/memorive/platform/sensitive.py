@@ -2,8 +2,8 @@
 name a secret (api key, password, token, gold answers and the like) or whose strings look like one
 (sk-..., GitHub tokens, private keys).
 
-The settings (memorive_settings/contracts.py) and model execution run it on what they save.
-memorive_current_task/actions.py and memorive_messages/privacy.py have rules of their own and do not
+The settings (memorive/desktop/settings/contracts.py) and model execution run it on what they save.
+memorive/desktop/current_task/actions.py and memorive/desktop/messages/privacy.py have rules of their own and do not
 use this one.
 """
 from __future__ import annotations

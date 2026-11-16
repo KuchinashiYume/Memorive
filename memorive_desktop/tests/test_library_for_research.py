@@ -17,7 +17,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from memorive_desktop_service.control_store import ControlStore
+from memorive.desktop.service.control_store import ControlStore
 from memorive.documents.library import LibraryProductController
 from memorive.research.workspace import desktop_connections, library_bridge
 from memorive.research.workspace.desktop_connections import job_results

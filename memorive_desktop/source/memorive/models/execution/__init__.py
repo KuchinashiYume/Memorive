@@ -17,7 +17,7 @@ Where things are:
   retry.py       which failures are tried again, how often, and how long to wait in between; the
                  workflow's model calls (memorive/documents/workflow/model_bridge.py) follow the same rules
 
-The settings controller (memorive_settings/controller.py) makes one object of each kind and serves
+The settings controller (memorive/desktop/settings/controller.py) makes one object of each kind and serves
 them as settings.research_chat_freeze, settings.research_chat_execute and the like. The request
 itself is sent by the model validation runner the controller holds (memorive/models/validation/runner.py).
 """

@@ -217,7 +217,7 @@ class AIBriefing:
             raise ValueError('AI_MODEL_REQUIRED')
         if not cfg['config']['sources']:
             raise ValueError('AI_SOURCE_REQUIRED')
-        from memorive_settings import answer_styles
+        from memorive.desktop.settings import answer_styles
         pref=self.r.host.service.call('settings.user_get',{})
         style=answer_styles.snapshot(pref['config']['answer_style'],preference_revision=pref['revision'])
         language=from_settings(self.r.host.service,current_user_text=focus,explicit_locale=output_locale)

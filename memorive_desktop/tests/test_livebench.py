@@ -4,8 +4,8 @@ import csv
 import io
 import json
 import pytest
-from memorive_settings.external_sources import ExternalDataSources,default_sources,normalize_payload,role_references
-from memorive_settings.livebench_reference import CATEGORY_METRICS,release_urls,DEFAULT_ENDPOINT
+from memorive.desktop.settings.external_sources import ExternalDataSources,default_sources,normalize_payload,role_references
+from memorive.desktop.settings.livebench_reference import CATEGORY_METRICS,release_urls,DEFAULT_ENDPOINT
 from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import configure_aa
 

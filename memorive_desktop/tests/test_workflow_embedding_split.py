@@ -13,22 +13,22 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_current_task.projection import CurrentTaskProjector  # noqa: E402
-from memorive_current_task.workflow_mapping import (  # noqa: E402
+from memorive.desktop.current_task.projection import CurrentTaskProjector  # noqa: E402
+from memorive.desktop.current_task.workflow_mapping import (  # noqa: E402
     build_core_execution_snapshot,
 )
-from memorive_settings.capability import CapabilityProjection  # noqa: E402
-from memorive_settings.contracts import (  # noqa: E402
+from memorive.desktop.settings.capability import CapabilityProjection  # noqa: E402
+from memorive.desktop.settings.contracts import (  # noqa: E402
     SETTINGS_SCHEMA_VERSION,
     STORE_SCHEMA_VERSION,
     default_settings,
     validate_settings,
 )
 from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
-from memorive_settings.controller import SettingsController  # noqa: E402
-from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
-from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.settings.controller import SettingsController  # noqa: E402
+from memorive.desktop.settings.credentials import CredentialReferenceManager  # noqa: E402
+from memorive.desktop.settings.directory_policy import DirectoryPolicy  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
 
 
 def _node(settings: dict[str, object], node_id: str) -> dict[str, object]:

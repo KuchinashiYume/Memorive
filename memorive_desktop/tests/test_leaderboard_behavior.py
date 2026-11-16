@@ -9,11 +9,11 @@ import threading
 import time
 import pytest
 from leaderboard_test_support import setup, payloads, seed_sources, wait_refresh, model, ROOT, BASE, TREE
-from memorive_settings.leaderboard import DEFAULTS, project_rows, validate_preferences, identity, variant_id
-from memorive_settings.leaderboard_fx import parse_ecb
+from memorive.desktop.settings.leaderboard import DEFAULTS, project_rows, validate_preferences, identity, variant_id
+from memorive.desktop.settings.leaderboard_fx import parse_ecb
 from memorive.platform.json_files import canonical_sha256
-from memorive_settings.external_sources import default_sources
-from memorive_desktop_service.control_store import default_state, validate_state
+from memorive.desktop.settings.external_sources import default_sources
+from memorive.desktop.service.control_store import default_state, validate_state
 
 
 def test_formula_independent_oracle_and_currency_does_not_affect_scores(tmp_path):

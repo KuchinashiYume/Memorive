@@ -8,7 +8,7 @@ import sys
 
 import pytest
 
-from memorive_settings.contracts import default_settings, validate_settings
+from memorive.desktop.settings.contracts import default_settings, validate_settings
 from memorive.models.capabilities import infer_api_model_capability, workflow_node_accepts_capability
 from memorive.models.validation.transport import HttpResponse
 from memorive.models.validation.runner import LiveModelValidationRunner

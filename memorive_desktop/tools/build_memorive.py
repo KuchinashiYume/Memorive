@@ -176,7 +176,7 @@ def main():
     for p in (stage/'source').rglob('*.py'):
         rel=p.relative_to(stage/'source').with_suffix('').as_posix().replace('/','.')
         hidden.add(rel.removesuffix('.__init__'))
-    hidden.update(['assistant_alpha','assistant_native_motion','console_expressions','console_permission','install_health','integrated_agent','notification_runtime','offline_help','product_identity','runtime','window_chrome','network_diagnostics','clr','pythonnet','fitz','docx','websockets','sqlite3.dbapi2'])
+    hidden.update(['assistant_alpha','assistant_native_motion','console_expressions','console_permission','install_health','integrated_agent','notification_runtime','offline_help','product_identity','memorive.desktop.api','window_chrome','network_diagnostics','clr','pythonnet','fitz','docx','websockets','sqlite3.dbapi2'])
     hidden.update(['update_maintenance','update_startup','update_service','startup_notice'])
     spec=out/'Memorive.spec'
     version=out/'version.txt'

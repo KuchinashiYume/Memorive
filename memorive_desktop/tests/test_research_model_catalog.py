@@ -35,7 +35,7 @@ PROFILES = [
 
 @pytest.fixture
 def snapshot(monkeypatch):
-    import memorive_current_task.workflow_mapping as mapping
+    import memorive.desktop.current_task.workflow_mapping as mapping
     given = {}
 
     def build(settings, *, settings_revision, local_model_profiles):

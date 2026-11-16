@@ -23,10 +23,10 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
 
 from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
-from memorive_messages import MessagesProductController  # noqa: E402
+from memorive.desktop.messages import MessagesProductController  # noqa: E402
 from memorive.sessions.refinement.model_channel import _response_schema  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
-from runtime import ServiceProcessManager  # noqa: E402
+from memorive.desktop.api import ServiceProcessManager  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402
     LOCAL_PROFILE_REF,
     _FacadeService,
@@ -143,7 +143,7 @@ def test_local_adapter_projects_safe_schema_rejection_reason() -> None:
 class _HealthyService:
     def call(self, method: str, _params: Mapping[str, Any]) -> Mapping[str, Any]:
         if method == "settings.get_state":  # messages read the UI language (v1.02)
-            from memorive_settings.contracts import default_settings
+            from memorive.desktop.settings.contracts import default_settings
             return {"settings": default_settings()}
         assert method == "service.health"
         return {

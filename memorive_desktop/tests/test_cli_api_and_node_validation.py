@@ -13,18 +13,18 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_settings.capability import CapabilityProjection  # noqa: E402
-from memorive_settings.contracts import (  # noqa: E402
+from memorive.desktop.settings.capability import CapabilityProjection  # noqa: E402
+from memorive.desktop.settings.contracts import (  # noqa: E402
     default_settings,
     validate_settings,
 )
 from memorive.platform.json_files import canonical_json_bytes, canonical_sha256  # noqa: E402
-from memorive_settings.controller import SettingsController  # noqa: E402
-from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
-from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
+from memorive.desktop.settings.controller import SettingsController  # noqa: E402
+from memorive.desktop.settings.credentials import CredentialReferenceManager  # noqa: E402
+from memorive.desktop.settings.directory_policy import DirectoryPolicy  # noqa: E402
 from memorive.models.validation.runner import FailClosedModelValidationRunner  # noqa: E402
 from memorive.exams.runner import FailClosedWorkflowExams  # noqa: E402
-from memorive_settings.store import SettingsStore  # noqa: E402
+from memorive.desktop.settings.store import SettingsStore  # noqa: E402
 
 
 EXPECTED_ADAPTERS = {
@@ -106,7 +106,7 @@ def test_cli_contract_rejects_duplicate_profile_and_invalid_score() -> None:
 
 
 def test_phase1_execution_snapshot_recognizes_enabled_cli_model() -> None:
-    from memorive_current_task.workflow_mapping import build_core_execution_snapshot
+    from memorive.desktop.current_task.workflow_mapping import build_core_execution_snapshot
 
     settings = default_settings()
     settings["cli_services"][0]["enabled"] = True

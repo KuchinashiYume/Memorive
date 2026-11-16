@@ -13,11 +13,11 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_current_task.refinement_tasks import SessionRefinementTaskStore  # noqa: E402
+from memorive.desktop.current_task.refinement_tasks import SessionRefinementTaskStore  # noqa: E402
 from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.documents.inbox import InboxServiceAdapter  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
-from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
+from memorive.desktop.settings.contracts import default_settings, validate_settings  # noqa: E402
 from memorive.models.capabilities import (  # noqa: E402
     CHAT,
     EMBEDDING,
@@ -220,7 +220,7 @@ def test_refinement_queue_is_not_projected_as_current_task(tmp_path: Path) -> No
 
 
 def test_runtime_uses_a_sessions_owned_refinement_queue_store() -> None:
-    runtime = (ATTEMPT_ROOT / "source" / "runtime.py").read_text(encoding="utf-8")
+    runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
 
     assert 'state_root=self._state_dir / "current_task"' not in runtime
     assert 'self._state_dir / "sessions" / "refinement_queue_tasks"' in runtime
