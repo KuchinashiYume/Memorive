@@ -55,7 +55,7 @@ class MarkerSession:
 
     def __enter__(self):
         from model_gateway.execution_core.runner import _TreeController
-        from memorive_settings.cli_verification_transport import resume_owned_process
+        from memorive.models.cli.verification_transport import resume_owned_process
         try:
             self.identity=inspect_runtime(self.runtime)
             self.work.mkdir(parents=True,exist_ok=False)
@@ -158,7 +158,7 @@ class MarkerSession:
         return result
 
     def close(self):
-        from memorive_settings.cli_verification_transport import stop_owned_tree
+        from memorive.models.cli.verification_transport import stop_owned_tree
         if self.process is not None:
             if self.process.poll() is None:
                 try:

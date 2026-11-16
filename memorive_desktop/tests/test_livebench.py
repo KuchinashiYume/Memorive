@@ -6,7 +6,7 @@ import json
 import pytest
 from memorive_settings.external_sources import ExternalDataSources,default_sources,normalize_payload,role_references
 from memorive_settings.livebench_reference import CATEGORY_METRICS,release_urls,DEFAULT_ENDPOINT
-from memorive_settings.model_validation import HttpResponse
+from memorive.models.validation import HttpResponse
 from legacy_aa_fixture import configure_aa
 
 def bundle(models=None):

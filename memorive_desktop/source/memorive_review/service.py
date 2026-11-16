@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 import threading
 import time
-from memorive_settings.call_ledger import execution_control, execution_checkpoint, ExecutionControlSignal
-from memorive_settings.task_scheduling import scheduled
+from memorive.models.calls.ledger import execution_control, execution_checkpoint, ExecutionControlSignal
+from memorive.models.scheduling import scheduled
 from memorive_workflow.contracts import DATA_NODE, LOGIC_NODE, CoreArtifact
 from .engine import analyze, digest, MAX_BYTES, ENGINE_VERSION, RULE_VERSION
 from .store import ReviewStore, atomic, TERMINAL
@@ -282,7 +282,7 @@ class ReviewService:
     def run_claimed(self,job_id):
         from memorive_workflow.scheduling import PIPELINE_LANES
         from memorive_workflow.node_progress import session_scope, facade_session, activity, scope
-        from memorive_settings.task_scheduling import activity_scope
+        from memorive.models.scheduling import activity_scope
         lane=None
         try:
             with execution_control(lambda:self.checkpoint(job_id),interrupt=lambda:self.worker.execution_interrupt(job_id)), session_scope(facade_session(self.worker.facade,job_id,self.worker.facade.get_job(job_id)['attempt_id'])), activity_scope(lambda state,node=None:activity(state,LOGIC_NODE)):
@@ -309,8 +309,8 @@ class ReviewService:
                                 continue
                             try:
                                 validate_response(saved_response,text=text,segment=saved_part)
-                                from memorive_settings.provider_catalog_aliases import matches_result_model
-                                valid=(saved_receipt.get('status')=='PASS' and saved_receipt.get('purpose')=='core_document_processing' and saved_receipt.get('profile_kind')==node['profile_kind'] and __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(saved_receipt) and matches_result_model(saved_receipt,node['execution_profile']['model']['model_name']))
+                                from memorive.models.provider_aliases import matches_result_model
+                                valid=(saved_receipt.get('status')=='PASS' and saved_receipt.get('purpose')=='core_document_processing' and saved_receipt.get('profile_kind')==node['profile_kind'] and __import__('memorive.models.cli.templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(saved_receipt) and matches_result_model(saved_receipt,node['execution_profile']['model']['model_name']))
                             except Exception:valid=False  # Optional observation only; business validation still owns the outcome.
                             if valid:
                                 node_units.complete(saved_part['segment_id'])
@@ -358,12 +358,12 @@ class ReviewService:
                             receipt=result.get('execution_receipt')
                             if not isinstance(receipt,dict):
                                 raise ValueError('LOGIC_EXECUTION_RECEIPT_REQUIRED')
-                            from memorive_settings.provider_catalog_aliases import matches_result_model
+                            from memorive.models.provider_aliases import matches_result_model
                             requested=node['execution_profile']['model']['model_name']
                             if (receipt.get('status')!='PASS' or receipt.get('profile_kind')!=node['profile_kind']
                                     or receipt.get('purpose')!='core_document_processing'
                                     or not matches_result_model(result,requested) or not matches_result_model(receipt,requested)
-                                    or not __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt)):
+                                    or not __import__('memorive.models.cli.templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt)):
                                 raise ValueError('LOGIC_EXECUTION_IDENTITY_OR_USAGE_INVALID')
                             responses.append(response)
                             receipts.append(receipt)

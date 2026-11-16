@@ -37,7 +37,7 @@ from memorive_current_task.refinement_tasks import (
     RefinementTaskError,
     safe_error_code,
 )
-from memorive_settings.model_capabilities import infer_api_model_capability
+from memorive.models.capabilities import infer_api_model_capability
 
 
 _PROJECTION_STATE_LOCKS_GUARD = threading.Lock()
@@ -3281,7 +3281,7 @@ class SessionsProductController:
     ) -> None:
         manager = self._refinement_task_manager
         model_calls = 0
-        from memorive_settings.task_scheduling import TASK_CATEGORIES
+        from memorive.models.scheduling import TASK_CATEGORIES
         gate = TASK_CATEGORIES.enter('REFINEMENT', checkpoint=lambda: self._refinement_wait_checkpoint(job_id))
         admitted = False
         try:

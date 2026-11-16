@@ -23,7 +23,7 @@ from .contracts import (
     utc_now,
     validate_settings,
 )
-from .model_capabilities import EMBEDDING, RERANKER, infer_api_model_capability
+from memorive.models.capabilities import EMBEDDING, RERANKER, infer_api_model_capability
 from memorive.platform.json_files import write_json_atomic
 
 

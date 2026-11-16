@@ -7,7 +7,7 @@ from .engine import digest
 from .store import atomic
 from .logic import obj, STRING
 from memorive_settings.exam_tiers import nested_selection, tier_manifest, validate_tier
-from memorive_settings.call_ledger import execution_checkpoint, call_scope, ExecutionControlSignal
+from memorive.models.calls.ledger import execution_checkpoint, call_scope, ExecutionControlSignal
 
 CATEGORY='DATA_ANOMALY_FALSE_POSITIVE_CONTROL'
 PROMPT_VERSION='DataAnomalyExamPrompt-v2-explicit-severity'
@@ -86,7 +86,7 @@ class DataAnomalyExamExecutor:
             return {'status':'NOT_AVAILABLE','reason':'E2_EXAM_NODE_UNSUPPORTED'}
         if target.get('kind') not in {'API','CLI'} or target.get('connection_status')!='AVAILABLE':
             return {'status':'NOT_AVAILABLE','reason':'LOGIC_CLOUD_PROFILE_REQUIRED'}
-        from memorive_settings.cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target) and not exam_eligible(target):
             return {'status':'NOT_AVAILABLE','reason':'CLI_TEMPLATE_CAPABILITY_NOT_VERIFIED'}
         manifest,pack,key,protocol=assets()

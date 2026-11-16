@@ -9,8 +9,8 @@ import sys
 import pytest
 
 from memorive_settings.contracts import default_settings, validate_settings
-from memorive_settings.model_capabilities import infer_api_model_capability, workflow_node_accepts_capability
-from memorive_settings.model_validation import HttpResponse, LiveModelValidationRunner
+from memorive.models.capabilities import infer_api_model_capability, workflow_node_accepts_capability
+from memorive.models.validation import HttpResponse, LiveModelValidationRunner
 from memorive_settings.workflow_exam import QualityNewEmbeddingExamExecutor
 
 

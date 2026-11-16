@@ -32,7 +32,7 @@ def _command(request, response):
 
 def _wait_owned(command, *, environment, interrupt):
     from model_gateway.execution_core.runner import _TreeController
-    from memorive_settings.cli_verification_transport import resume_owned_process, stop_owned_tree
+    from memorive.models.cli.verification_transport import resume_owned_process, stop_owned_tree
     tree = _TreeController()
     process = None
     try:
@@ -59,7 +59,7 @@ def _wait_owned(command, *, environment, interrupt):
 
 def convert_isolated(raw):
     from ..types import ConvertReport
-    from memorive_settings.call_ledger import execution_checkpoint, execution_interrupt_callback
+    from memorive.models.calls.ledger import execution_checkpoint, execution_interrupt_callback
     execution_checkpoint()
     source = Path(raw.path).resolve(strict=True)
     source_sha = _digest(source)

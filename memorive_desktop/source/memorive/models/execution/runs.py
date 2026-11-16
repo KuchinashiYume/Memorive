@@ -13,12 +13,12 @@ import os
 import re
 import threading
 
-from memorive_settings.call_ledger import ExecutionControlSignal, call_scope, execution_checkpoint, execution_control
+from memorive.models.calls.ledger import ExecutionControlSignal, call_scope, execution_checkpoint, execution_control
 from memorive.platform.json_files import canonical_sha256, write_json_atomic
 from memorive.platform.sensitive import scan_sensitive
-from memorive_settings.model_capabilities import infer_api_model_capability
+from memorive.models.capabilities import infer_api_model_capability
 
-from . import retry
+from memorive.models.execution import retry
 
 PERIODS = ('daily', 'weekly', 'monthly')
 SNAPSHOT_ID = re.compile(r'[A-Fa-f0-9]{64}')
@@ -34,7 +34,7 @@ class ReportProfileExecution:
 
     It is given what it uses: the settings store (the chosen profiles, and the profile folder the
     snapshots go in), the model runner that sends the request (LiveModelValidationRunner in
-    memorive_settings/model_validation.py), resolve_local_profile for local models, and count_calls,
+    memorive/models/validation.py), resolve_local_profile for local models, and count_calls,
     which adds a result's calls to the settings service's counters.
     """
     periods = PERIODS
@@ -100,7 +100,7 @@ class ReportProfileExecution:
                 raise ValueError('REPORT_MODEL_UNAVAILABLE')
         if not service or not model or model.get('connection_status') != 'AVAILABLE':
             raise ValueError('REPORT_MODEL_UNAVAILABLE')
-        from memorive_settings.cli_templates import exam_eligible, is_custom, stable_configuration_identity
+        from memorive.models.cli.templates import exam_eligible, is_custom, stable_configuration_identity
         # A custom command-line tool is used only after it has passed its capability check.
         if kind == 'CLI' and is_custom(service) and not exam_eligible(
                 {**service, **model, 'configuration_sha256': stable_configuration_identity(service, model)}):

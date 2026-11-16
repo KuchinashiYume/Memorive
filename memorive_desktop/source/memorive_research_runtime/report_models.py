@@ -1,4 +1,4 @@
-from memorive_settings.provider_catalog_aliases import matches_result_model
+from memorive.models.provider_aliases import matches_result_model
 """Report workflow configuration and the source-bound model narrative bridge."""
 from .common import read,write,sealed,sha
 from .task_projection import REPORT_STEPS
@@ -106,7 +106,7 @@ def compose(runtime,run_id,params,result):
         raise ValueError('REPORT_MODEL_EXECUTION_FAILED')
     if response.get('requested_model')!=frozen['model_name'] or not matches_result_model(response, frozen['model_name']):
         raise ValueError('REPORT_MODEL_IDENTITY_MISMATCH')
-    if not __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt):
+    if not __import__('memorive.models.cli.templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt):
         raise ValueError('REPORT_MODEL_RECEIPT_INCOMPLETE')
     try:
         narrative=validate_mapped_narrative(response.get('response'),digest)

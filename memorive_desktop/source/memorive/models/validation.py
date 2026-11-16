@@ -1,9 +1,9 @@
 from __future__ import annotations
-from memorive_settings.task_scheduling import scheduled
-from .call_ledger import CallLedger, RecordingTransport, recorded_execution
+from memorive.models.scheduling import scheduled
+from memorive.models.calls.ledger import CallLedger, RecordingTransport, recorded_execution
 from model_gateway.prompt_cache import cache_usage
-from .cache_workspace import structured_chat_workspace, write_response_schema
-from .cache_session import Continuation
+from model_gateway.cache_workspace import structured_chat_workspace, write_response_schema
+from model_gateway.cache_session import Continuation
 import uuid
 
 import base64
@@ -31,8 +31,8 @@ from memorive.models.output_limits import (
     WORKFLOW_EXAM_TRANSPORT_CAPTURE_BYTES,
     workflow_exam_output_limit_contract,
 )
-from .model_capabilities import infer_api_model_capability
-from .model_endpoints import (
+from memorive.models.capabilities import infer_api_model_capability
+from memorive.models.endpoints import (
     SAFE_MODEL,
     SAFE_SHA256,
     SAFE_THINKING,
@@ -477,7 +477,7 @@ class _EmbeddingExecutionMixin:
                 )
                 opener = build_opener(ProxyHandler({}), _NoRedirect())
                 metadata_calls += 1
-                from .call_ledger import recording_urlopen
+                from memorive.models.calls.ledger import recording_urlopen
                 opener.open = recording_urlopen(opener.open)
                 with opener.open(
                     Request(tags_endpoint, method="GET"), timeout=min(10, timeout_seconds)
@@ -899,7 +899,7 @@ class _SpecializedModelExecutionMixin:
         ):
             raise ValueError("OCR_IMAGE_REQUEST_INVALID")
         if profile_kind=='CLI' and service.get('adapter_id')=='command_template':
-            from .cli_template_execution import execute
+            from memorive.models.cli.template_execution import execute
             result=execute(self,service,model,prompt,purpose=purpose,timeout=timeout_seconds,image=image_bytes)
             result['schema_version']='SettingsOcrImageRunnerResult-v1'
             text=result.pop('response','')
@@ -986,7 +986,7 @@ class _SpecializedModelExecutionMixin:
                     ],
                     "stream": False,
                 }
-                from .api_request_options import reasoning_profile, resolve_reasoning_options, apply_reasoning_options
+                from memorive.models.request_options import reasoning_profile, resolve_reasoning_options, apply_reasoning_options
                 control = reasoning_profile(requested_model, profile.url, profile.provider_family)
                 options = resolve_reasoning_options(control, model)
                 if options is not None:
@@ -1021,7 +1021,7 @@ class _SpecializedModelExecutionMixin:
                 status_code = http_response.status_code
                 raw = http_response.body
                 if status_code != 200:
-                    from .api_request_options import safe_error_details
+                    from memorive.models.request_options import safe_error_details
                     transport_diagnostic = {'http_status': status_code,
                         'provider_body_sha256': hashlib.sha256(raw).hexdigest()}
                     try:
@@ -1099,7 +1099,7 @@ class _SpecializedModelExecutionMixin:
                 tags_endpoint = urlunsplit((parsed.scheme, parsed.netloc, "/api/tags", "", ""))
                 opener = build_opener(ProxyHandler({}), _NoRedirect())
                 metadata_calls = 1
-                from .call_ledger import recording_urlopen
+                from memorive.models.calls.ledger import recording_urlopen
                 opener.open = recording_urlopen(opener.open)
                 with opener.open(Request(tags_endpoint, method="GET"), timeout=min(10, timeout_seconds)) as response:
                     tags_raw = response.read(2 * 1024 * 1024 + 1)
@@ -1208,7 +1208,7 @@ class _SpecializedModelExecutionMixin:
                 executable = self._executable_resolver(executable_value)
                 if executable is None:
                     raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
-                from .cli_image_identity import bind_saved_cli_identity
+                from memorive.models.cli.image_identity import bind_saved_cli_identity
                 proxy_mode, proxy_address, _ = self.preferences()
                 self.scratch_root.mkdir(parents=True, exist_ok=True)
                 service, identity_probes = bind_saved_cli_identity(
@@ -1678,7 +1678,7 @@ class _SpecializedModelExecutionMixin:
                     raise ValueError("LOCAL_RERANK_ENDPOINT_INVALID")
                 opener = build_opener(ProxyHandler({}), _NoRedirect())
                 request = Request(endpoint_value, data=body, headers={"Content-Type": "application/json"}, method="POST")
-                from .call_ledger import recording_urlopen
+                from memorive.models.calls.ledger import recording_urlopen
                 opener.open = recording_urlopen(opener.open)
                 model_calls = 1
                 with opener.open(request, timeout=timeout_seconds) as response:
@@ -1965,7 +1965,7 @@ class UrllibHttpTransport:
             raise ValueError("API_RESPONSE_LIMIT_INVALID")
         if not url.startswith("https://"):
             raise ValueError("API_VALIDATION_HTTPS_REQUIRED")
-        from .network_compat import resolve_proxy, tls_context
+        from memorive.models.calls.network import resolve_proxy, tls_context
         from urllib.request import HTTPSHandler
         proxy = resolve_proxy(url, proxy_mode, proxy_address)
         proxy_handler = ProxyHandler({'https': proxy} if proxy else {})
@@ -1983,8 +1983,8 @@ class UrllibHttpTransport:
                     'remote_cancellation_confirmed': False,
                 }) from error
             return HttpResponse(status_code=int(response.status), body=payload)
-        from .cancellable_http import read_response
-        from .call_ledger import execution_interrupt_callback
+        from memorive.models.calls.cancellable_http import read_response
+        from memorive.models.calls.ledger import execution_interrupt_callback
         return read_response(opener.open, request, timeout=timeout_seconds,
             interrupt=execution_interrupt_callback(), reader=read, read_error_response=True)
 
@@ -2017,11 +2017,11 @@ class BoundedSubprocessTransport:
         process.kill()
 
     def run_verification(self, **kwargs):
-        from .cli_verification_transport import run_verification
+        from memorive.models.cli.verification_transport import run_verification
         return run_verification(self, **kwargs)
 
     def run_template(self, *, capture_quota_bytes, **kwargs):
-        from .cli_verification_transport import run_verification
+        from memorive.models.cli.verification_transport import run_verification
         transport=BoundedSubprocessTransport(capture_quota_bytes=capture_quota_bytes)
         return run_verification(transport, template_mode=True, **kwargs)
 
@@ -2067,7 +2067,7 @@ class BoundedSubprocessTransport:
         timed_out = False
         try:
             with stdout_path.open("xb") as stdout_stream, stderr_path.open("xb") as stderr_stream:
-                from .windows_cli import native_process_path
+                from memorive.models.cli.windows import native_process_path
                 process = subprocess.Popen(
                     list(argv),
                     cwd=native_process_path(cwd),
@@ -2426,7 +2426,7 @@ def _cli_argv(
     output_schema_path: str | None = None,
     image_path: str | None = None,
 ) -> tuple[tuple[str, ...], bytes | None]:
-    from .windows_cli import native_process_path
+    from memorive.models.cli.windows import native_process_path
     cwd=native_process_path(cwd)
     if output_schema_path:
         output_schema_path=native_process_path(output_schema_path)
@@ -2940,7 +2940,7 @@ def _api_chat_request(
     model_config: Mapping[str, Any],
 ) -> bytes:
     prompt_text = _structured_prompt(prompt, response_schema).decode("utf-8")
-    from .api_request_options import reasoning_profile, resolve_reasoning_options, apply_reasoning_options
+    from memorive.models.request_options import reasoning_profile, resolve_reasoning_options, apply_reasoning_options
     reasoning_control = reasoning_profile(model, profile.url, profile.provider_family)
     reasoning_options = resolve_reasoning_options(reasoning_control, model_config)
     if profile.provider_family == "ANTHROPIC":
@@ -2952,7 +2952,7 @@ def _api_chat_request(
             "stream": True,
             "messages": [{"role": "user", "content": prompt_text}],
         }
-        from .api_request_options import anthropic_options
+        from memorive.models.request_options import anthropic_options
         if reasoning_options is None:
             value.update(anthropic_options(model, model_config, max_output_tokens))
         if model_config.get("streaming") is True:
@@ -3297,7 +3297,7 @@ def _api_failure_evidence(
         "provider_body_sha256": body_sha256,
         "provider_body_json": True,
     }
-    from .api_request_options import safe_error_details
+    from memorive.models.request_options import safe_error_details
     diagnostic.update(safe_error_details(value))
     stop_reason = value.get('stop_reason')
     candidates = value.get('candidates')
@@ -3451,19 +3451,19 @@ def default_executable_resolver(value: str) -> str | None:
     candidate = Path(value)
     if candidate.is_absolute():
         if os.name == "nt" and candidate.name.lower() in {"codex.cmd", "codex.bat"}:
-            from .windows_cli import native_codex_from_shim
+            from memorive.models.cli.windows import native_codex_from_shim
             return native_codex_from_shim(candidate)
         return str(candidate.resolve()) if candidate.is_file() else None
     if any(separator in value for separator in ("/", "\\")):
         return None
     if os.name == "nt":
-        from .windows_cli import resolve_supported_cli_executable
+        from memorive.models.cli.windows import resolve_supported_cli_executable
         supported_cli = resolve_supported_cli_executable(value)
         if supported_cli:
             return supported_cli
     located = shutil.which(value)
     if os.name == "nt" and located and Path(located).name.lower() in {"codex.cmd", "codex.bat"}:
-        from .windows_cli import native_codex_from_shim
+        from memorive.models.cli.windows import native_codex_from_shim
         return native_codex_from_shim(located)
     return str(Path(located).resolve()) if located else None
 
@@ -3757,7 +3757,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                         proxy_address=proxy_address,
                     )
                 except (OSError, TimeoutError, ValueError) as error:
-                    from .network_compat import error_code
+                    from memorive.models.calls.network import error_code
                     result["reason"] = error_code(error)
                     return result
                 if response.status_code in {401, 403}:
@@ -3777,7 +3777,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     return result
                 available_models = _catalog_choices([*available_models, *catalog])
                 matched = _catalog_match(profile, requested_model, catalog)
-                from .provider_catalog_aliases import catalog_alias
+                from memorive.models.provider_aliases import catalog_alias
                 alias = catalog_alias(service, requested_model, catalog) if matched is None else None
                 if alias is not None:
                     result.update(status="AVAILABLE", reason="API_MODEL_CATALOG_MATCH",
@@ -3880,9 +3880,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         cli_service: Mapping[str, Any],
         model: Mapping[str, Any],
     ) -> Mapping[str, Any]:
-        from .cli_templates import is_custom
+        from memorive.models.cli.templates import is_custom
         if is_custom(cli_service):
-            from .cli_template_execution import verify
+            from memorive.models.cli.template_execution import verify
             return verify(self,cli_service,model)
         requested_model = model.get("model_name")
         result = self._base("CLI", status="INVALID", reason="CLI_VALIDATION_FAILED")
@@ -3957,7 +3957,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         if process.output_truncated:
             result["reason"] = "CLI_OUTPUT_LIMIT_EXCEEDED"
             return result
-        from .cli_verification_transport import result_reason
+        from memorive.models.cli.verification_transport import result_reason
         failure = result_reason(process)
         if failure is not None:
             result["reason"] = failure
@@ -3994,7 +3994,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         """Send one structured chat request; every model request of the app comes through here.
 
         1. Here: check the request, work out the output and time limits, build the prompt bytes.
-           A custom command-line tool is run by cli_template_execution.py instead.
+           A custom command-line tool is run by cli/template_execution.py instead.
         2. _send_api, _send_cli or _send_local sends it by the route of the profile and puts the
            reply, the counts and the route's evidence on the _ChatAttempt.
         3. _chat_result checks the returned model and builds the result with usage, cost and receipt.
@@ -4036,9 +4036,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         ):
             raise ValueError("STRUCTURED_CHAT_TIMEOUT_INVALID")
         prompt_bytes = _structured_prompt(prompt, response_schema)
-        from .cli_templates import is_custom
+        from memorive.models.cli.templates import is_custom
         if profile_kind=='CLI' and is_custom(service):
-            from .cli_template_execution import execute
+            from memorive.models.cli.template_execution import execute
             return execute(self,service,model,prompt_bytes.decode('utf8'),schema=response_schema,purpose=purpose,timeout=timeout_seconds)
         behavior_hash = hashlib.sha256(prompt_bytes).hexdigest().upper()
         started_at = time.monotonic()
@@ -4477,7 +4477,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 transport_diagnostic=attempt.transport_diagnostic,
             )
         if process.returncode != 0:
-            from .cli_verification_transport import failure_reason
+            from memorive.models.cli.verification_transport import failure_reason
             failure_diagnostic = {
                 **dict(attempt.transport_diagnostic or {}),
                 **dict(_cli_failure_diagnostic(process)),
@@ -4667,7 +4667,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         ):
             raise ValueError("LOCAL_STRUCTURED_CHAT_PROFILE_INVALID")
         from model_gateway.local_structured_chat import LocalStructuredChatAdapter, _default_open
-        from .call_ledger import recording_urlopen
+        from memorive.models.calls.ledger import recording_urlopen
 
         timeout = attempt.timeout_seconds
         local_num_ctx = (
@@ -4757,7 +4757,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
 
     def _chat_result(self, attempt: "_ChatAttempt") -> Mapping[str, Any]:
         """The result of a request whose route got a reply: the returned model checked, usage, cost and the receipt."""
-        from .provider_catalog_aliases import catalog_alias
+        from memorive.models.provider_aliases import catalog_alias
         provider_alias = catalog_alias(attempt.service, attempt.requested_model, [attempt.returned_model]) if attempt.profile_kind == 'API' else None
         if (unicodedata.normalize("NFKC", attempt.returned_model).strip()
             != unicodedata.normalize("NFKC", attempt.requested_model).strip() and provider_alias is None):

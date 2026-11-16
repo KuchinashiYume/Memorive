@@ -57,7 +57,7 @@ class StructureDesktop:
         config=normalize_config(context.workflow_config.get('document_structure',{}),verify_runtime=False)
         if config.get('mode','off')=='off':
             return {'status':'DISABLED'}
-        from memorive_settings.call_ledger import execution_checkpoint,ExecutionControlSignal
+        from memorive.models.calls.ledger import execution_checkpoint,ExecutionControlSignal
         folder=Path(folder)
         sources=[p for p in folder.iterdir() if p.name.startswith(('[PDF]','[Original]')) and p.is_file()]
         raws=[p for p in folder.iterdir() if p.name.startswith('[RawMD]') and p.suffix=='.md']

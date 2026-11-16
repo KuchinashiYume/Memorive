@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import pytest
 from memorive_settings.exam_score_history import ExamScoreHistory
-from memorive_settings.model_validation import LiveModelValidationRunner
+from memorive.models.validation import LiveModelValidationRunner
 from memorive_settings.workflow_exam_runner import WorkflowExams
 from memorive_settings.contracts import canonical_sha256
 

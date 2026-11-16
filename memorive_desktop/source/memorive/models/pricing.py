@@ -2,9 +2,9 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from .provider_catalog_aliases import official_deepseek, FLASH_ALIASES, SOURCE
+from memorive.models.provider_aliases import official_deepseek, FLASH_ALIASES, SOURCE
 from memorive.models.identity import identity, join_base
-from .leaderboard_price_registry import resolved_public_route_price
+from memorive.models.price_registry import resolved_public_route_price
 
 
 def snapshot(service, model, at):

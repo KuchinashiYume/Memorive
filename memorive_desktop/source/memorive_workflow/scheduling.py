@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from collections import deque
 import threading
 import time
-from memorive_settings.call_ledger import execution_checkpoint
+from memorive.models.calls.ledger import execution_checkpoint
 
 
 class PipelineLanes:

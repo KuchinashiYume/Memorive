@@ -1,4 +1,4 @@
-"""Running a custom command-line model tool described by a template (cli_templates.py).
+"""Running a custom command-line model tool described by a template (templates.py).
 
 execute() checks the request against the template, prepares an attempt folder (prompt, schema and
 image files as the template asks), builds the command line and the environment, records what is
@@ -17,10 +17,10 @@ import tempfile
 import time
 from collections.abc import Mapping
 
-from .cli_templates import (PARSER, TOKEN, digest, parse_output, stable_configuration_identity,
+from memorive.models.cli.templates import (PARSER, TOKEN, digest, parse_output, stable_configuration_identity,
                             validate_local_fields, verification_current)
-from .call_ledger import execution_checkpoint
-from .windows_cli import resolve_template_entry, template_command, template_launch_files, native_process_path
+from memorive.models.calls.ledger import execution_checkpoint
+from memorive.models.cli.windows import resolve_template_entry, template_command, template_launch_files, native_process_path
 
 # Windows refuses longer command lines; such a template must pass the prompt by stdin or file.
 MAX_WINDOWS_COMMAND_LINE = 30000
@@ -275,7 +275,7 @@ def verify(runner, service, model):
                   'additionalProperties': False}
     prompt = 'Reply with MEMORIVE_READY.'
     if schema:
-        from .model_validation import _structured_prompt
+        from memorive.models.validation import _structured_prompt
         prompt = _structured_prompt(prompt, schema).decode('utf8')
     image = base64.b64decode(_PROBE_IMAGE) if template['capabilities']['images'] else None
     outcome = execute(runner, service, model, prompt, schema=schema, image=image)

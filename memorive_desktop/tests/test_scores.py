@@ -8,7 +8,7 @@ import pytest
 from memorive_settings.contracts import canonical_sha256
 from memorive_settings.exam_score_history import ExamScoreHistory
 from memorive_settings.tiered_exam import project_tier_result
-from memorive_settings.model_validation import LiveModelValidationRunner
+from memorive.models.validation import LiveModelValidationRunner
 from memorive_settings.workflow_exam_runner import WorkflowExams
 
 ROOT=Path(__file__).resolve().parents[1]

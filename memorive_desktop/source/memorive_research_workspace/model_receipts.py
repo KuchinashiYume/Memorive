@@ -1,5 +1,5 @@
 """Keep a failed model attempt's existing receipt attached to the local job."""
-from memorive_settings.provider_catalog_aliases import matches_result_model
+from memorive.models.provider_aliases import matches_result_model
 
 class ModelExecutionError(ValueError):
     def __init__(self, code, receipt):
@@ -13,6 +13,6 @@ def verified_result(result, snapshot):
         raise ModelExecutionError('CHAT_MODEL_EXECUTION_FAILED', receipt)
     if result.get('requested_model') != snapshot['model_name'] or not matches_result_model(result,snapshot['model_name']):
         raise ModelExecutionError('CHAT_MODEL_IDENTITY_MISMATCH', receipt)
-    if not __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt):
+    if not __import__('memorive.models.cli.templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(receipt):
         raise ModelExecutionError('CHAT_MODEL_RECEIPT_INCOMPLETE', receipt)
     return dict(result, model_name=snapshot['model_name'])

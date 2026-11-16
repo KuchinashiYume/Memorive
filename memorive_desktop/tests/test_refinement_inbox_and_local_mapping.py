@@ -18,7 +18,7 @@ from memorive_inbox import InboxController  # noqa: E402
 from memorive_inbox import InboxServiceAdapter  # noqa: E402
 from memorive_sessions import SessionsProductController  # noqa: E402
 from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
-from memorive_settings.model_capabilities import (  # noqa: E402
+from memorive.models.capabilities import (  # noqa: E402
     CHAT,
     EMBEDDING,
     RERANKER,
@@ -28,7 +28,7 @@ from memorive_settings.model_capabilities import (  # noqa: E402
 from memorive_workflow_bridge.conversation_refinement import (  # noqa: E402
     ExistingConversationRefinementChannel,
 )
-from memorive_settings.model_validation import (  # noqa: E402
+from memorive.models.validation import (  # noqa: E402
     HttpResponse,
     LiveModelValidationRunner,
     ProcessResult,

@@ -8,7 +8,7 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1] / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_settings import model_validation
+from memorive.models import validation as model_validation
 
 
 def test_codex_resolver_prefers_real_exe_over_cmd_wrapper(

@@ -892,7 +892,7 @@ class ProductApi:
                     raise RuntimeError("PRIVATE_TEST_PROFILE_PRESELECTION_ROOT_MISMATCH")
                 self._private_profile_selection = selection
         self._state_dir = requested_state_dir
-        from memorive_settings.task_scheduling import TASK_CATEGORIES
+        from memorive.models.scheduling import TASK_CATEGORIES
         TASK_CATEGORIES.bind(self._state_dir / 'profile')
         self._source_root = source_root.resolve()
         self._method_binding_path = method_binding_path.resolve()

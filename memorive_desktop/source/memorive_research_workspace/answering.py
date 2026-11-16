@@ -112,7 +112,7 @@ class AnswerJob:
             # A request to work on an earlier conversation is answered by answer_conversation instead.
             if not self.ws.job_status(self.job_id).get('retry_of') and run_if_requested(self.ws, self.job_id, self.question):
                 return
-            from memorive_settings.task_scheduling import TASK_CATEGORIES
+            from memorive.models.scheduling import TASK_CATEGORIES
             with TASK_CATEGORIES.enter('RESEARCH_CHAT', checkpoint=self.checkpoint):
                 if not self.start():
                     return

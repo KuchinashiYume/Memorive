@@ -27,7 +27,7 @@ from .contracts import (
     CoreExecutionResult,
 )
 from .task_controls import TaskControlStore
-from memorive_settings.call_ledger import execution_control, ExecutionControlSignal
+from memorive.models.calls.ledger import execution_control, ExecutionControlSignal
 
 
 _SHA256 = re.compile(r"^[A-F0-9]{64}$")
@@ -780,7 +780,7 @@ class CoreVerticalWorker:
             )
 
         try:
-            from memorive_settings.task_scheduling import activity_scope
+            from memorive.models.scheduling import activity_scope
             from .node_progress import session_scope, facade_session
             with execution_control(lambda: self.execution_checkpoint(job_id),
                                    interrupt=lambda: self.execution_interrupt(job_id)), activity_scope(on_activity), session_scope(facade_session(self.facade, job_id, job['attempt_id'])):

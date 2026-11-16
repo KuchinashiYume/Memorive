@@ -1,5 +1,5 @@
 from __future__ import annotations
-from memorive_settings.provider_catalog_aliases import matches_result_model
+from memorive.models.provider_aliases import matches_result_model
 
 from copy import deepcopy
 from inspect import signature
@@ -18,15 +18,15 @@ from .contracts import (
 )
 from .credentials import CredentialReferenceManager
 from .directory_policy import DirectoryPolicy
-from .kimi_endpoint import (
+from memorive.models.kimi_endpoint import (
     KIMI_ENDPOINTS,
     is_kimi_service,
     kimi_auto_resolution_requested,
     resolve_kimi_api_platform,
 )
-from .model_validation import FailClosedModelValidationRunner, ModelValidationRunner
+from memorive.models.validation import FailClosedModelValidationRunner, ModelValidationRunner
 from .workflow_exam_runner import FailClosedWorkflowExams
-from .model_capabilities import infer_api_model_capability
+from memorive.models.capabilities import infer_api_model_capability
 from .store import SettingsStore
 from .external_sources import ExternalDataSources
 from .verification_state import adopt_saved_verifications, api_identity, cli_identity, invalidate_changed_targets
@@ -172,8 +172,8 @@ class SettingsController:
         # The workflow exams (workflow_exam_runner.WorkflowExams): exam plans, runs and stored scores.
         self.workflow_exams = workflow_exams or FailClosedWorkflowExams()
         self.local_profile_resolver = local_profile_resolver
-        # Model runs for reports, the AI briefing and research Q&A (memorive_model_execution).
-        from memorive_model_execution import AIBriefingExecution, ReportProfileExecution, ResearchChatExecution
+        # Model runs for reports, the AI briefing and research Q&A (memorive/models/execution).
+        from memorive.models.execution import AIBriefingExecution, ReportProfileExecution, ResearchChatExecution
         self.report_execution = ReportProfileExecution(**self._execution_parts())
         self.ai_briefing_execution = AIBriefingExecution(**self._execution_parts())
         self.research_chat_execution = ResearchChatExecution(**self._execution_parts())
@@ -219,7 +219,7 @@ class SettingsController:
             return UserPreferences(self.store.profile_root).save(config=config, expected_revision=expected_revision)
 
     def get_state(self) -> dict[str, Any]:
-        from .api_request_options import reasoning_profiles
+        from memorive.models.request_options import reasoning_profiles
         envelope = self.store.load()
         catalog_method = getattr(
             self.workflow_exams, "workflow_exam_score_catalog", None
@@ -366,7 +366,7 @@ class SettingsController:
                 None,
             )
             if model is not None:
-                from .cli_templates import is_custom,stable_configuration_identity
+                from memorive.models.cli.templates import is_custom,stable_configuration_identity
                 return {
                     **{k:deepcopy(v) for k,v in cli_service.items() if k not in {'models','display_name','connection_status'}},
                     "kind": "CLI",
@@ -778,7 +778,7 @@ class SettingsController:
             "extensions": extensions(self),
         }
         payload['settings']=deepcopy(payload['settings'])
-        from .cli_templates import is_custom,export_service
+        from memorive.models.cli.templates import is_custom,export_service
         for service in payload['settings']['cli_services']:
             if not is_custom(service):
                 continue
@@ -1037,7 +1037,7 @@ class SettingsController:
         return str(status)
 
     def _execution_parts(self) -> dict[str, Any]:
-        """What a model execution object (memorive_model_execution) is given: the store, the runner
+        """What a model execution object (memorive/models/execution) is given: the store, the runner
         that sends requests, the local profile resolver and the call counter."""
         return {
             "store": self.store,
@@ -1417,7 +1417,7 @@ class SettingsController:
                 raise ValueError("CLI_RESOLVED_EXECUTABLE_INVALID")
             target_service["executable"] = resolved_executable
         target_model["connection_status"] = status
-        from .cli_templates import is_custom,stable_configuration_identity,PARSER
+        from memorive.models.cli.templates import is_custom,stable_configuration_identity,PARSER
         if is_custom(target_service):
             target_model['verification']=(dict(configuration_sha256=stable_configuration_identity(target_service,target_model),
                 capabilities=list(result.get('verified_capabilities',[])),parser_version=PARSER) if status=='AVAILABLE' else None)
@@ -1437,11 +1437,11 @@ class SettingsController:
         )
 
     def research_embedding_freeze(self, *, run_id, profile_ref):
-        from memorive_model_execution import ResearchEmbeddingExecution
+        from memorive.models.execution import ResearchEmbeddingExecution
         return ResearchEmbeddingExecution(**self._execution_parts()).freeze(run_id=run_id,period='embedding',profile_ref=profile_ref)
 
     def research_embedding_execute(self, *, snapshot_id, inputs):
-        from memorive_model_execution import ResearchEmbeddingExecution
+        from memorive.models.execution import ResearchEmbeddingExecution
         return ResearchEmbeddingExecution(**self._execution_parts()).execute(snapshot_id=snapshot_id,inputs=inputs)
 
     def research_chat_freeze(self, *, run_id, profile_ref):
@@ -1543,7 +1543,7 @@ class SettingsController:
         runner = getattr(self.model_validation_runner, "execute_structured_chat", None)
         if not callable(runner):
             raise ValueError("STRUCTURED_CHAT_RUNNER_NOT_CONFIGURED")
-        from .call_ledger import call_scope
+        from memorive.models.calls.ledger import call_scope
         with call_scope(job_id=task_id, profile_ref=profile_ref, task_type=purpose):
             result = dict(
                 runner(

@@ -144,7 +144,7 @@ def _atomic_write(path: Path, value: dict[str, object]) -> None:
 
 
 def build_settings_controller(profile_root: Path) -> SettingsController:
-    from memorive_settings.task_scheduling import TASK_CATEGORIES
+    from memorive.models.scheduling import TASK_CATEGORIES
     TASK_CATEGORIES.bind(profile_root)
     folders = ProfileFolderManager(profile_root)
     settings_root = folders.path_for("SETTINGS")

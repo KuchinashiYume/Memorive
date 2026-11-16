@@ -444,7 +444,7 @@ class AnswerEvidence:
         started=time.monotonic()
         usage={}
         try:
-            from memorive_settings.task_scheduling import TASK_CATEGORIES
+            from memorive.models.scheduling import TASK_CATEGORIES
             def checkpoint():
                 job=self.ws.store.get('job',identity)
                 if self.ws.closed or not job or job.get('cancel_requested'):
@@ -468,7 +468,7 @@ class AnswerEvidence:
                 checkpoint()
                 result=self.ws.model(profile_ref=option['profile_ref'],prompt=prompt,job_id=identity,response_schema=_review_schema(payload))
                 usage=result.get('execution_receipt') or {}
-                if usage.get('status')!='PASS' or not __import__('memorive_settings.cli_templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(usage):
+                if usage.get('status')!='PASS' or not __import__('memorive.models.cli.templates',fromlist=['receipt_evidence_complete']).receipt_evidence_complete(usage):
                     raise ValueError('REVIEW_RECEIPT_INCOMPLETE')
                 if result.get('model_name')!=option['model_name']:
                     raise ValueError('REVIEW_MODEL_IDENTITY_MISMATCH')

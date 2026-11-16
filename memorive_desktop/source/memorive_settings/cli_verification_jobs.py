@@ -65,7 +65,7 @@ class CliVerificationJobs:
 
     def _run(self, job_id, params, lock):
         try:
-            from .cli_verification_transport import verification_context
+            from memorive.models.cli.verification_transport import verification_context
             def progress(update):
                 with self._mutex:
                     current=self._read(job_id)
@@ -77,7 +77,7 @@ class CliVerificationJobs:
             def cancelled():
                 with self._mutex:
                     return self._read(job_id).get('cancel_requested') is True
-            from .task_scheduling import TASK_CATEGORIES
+            from memorive.models.scheduling import TASK_CATEGORIES
             def checkpoint():
                 if cancelled():
                     raise ValueError('CLI_VERIFICATION_CANCELLED')

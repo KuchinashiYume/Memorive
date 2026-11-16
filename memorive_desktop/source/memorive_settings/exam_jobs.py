@@ -118,12 +118,12 @@ class WorkflowExamJobs:
                            call_kind=kind, updated_at=utc_now())
                 self._write(row)
         try:
-            from .task_scheduling import TASK_CATEGORIES
+            from memorive.models.scheduling import TASK_CATEGORIES
             def checkpoint():
                 if self._read(job_id)['cancel_requested']:
                     raise RuntimeError('WORKFLOW_EXAM_CANCELLED_BEFORE_NEXT_CALL')
             with TASK_CATEGORIES.enter('MODEL_EXAM', checkpoint=checkpoint):
-                from .call_ledger import call_scope,execution_control
+                from memorive.models.calls.ledger import call_scope,execution_control
                 with observe_calls(progress), call_scope(job_id=job_id, node_id=params['node_id']), execution_control(checkpoint):
                     # Do not run a plan against a different model/settings snapshot.
                     row = self._read(job_id)

@@ -15,7 +15,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPSHandler, ProxyHandler, Request, build_opener, getproxies, proxy_bypass
-from .model_validation import UrllibHttpTransport, _NoRedirect
+from memorive.models.validation import UrllibHttpTransport, _NoRedirect
 from memorive.platform.tls import PUBLIC_ROOTS_SHA256, public_metadata_context
 
 ECB_ENDPOINT = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
@@ -110,7 +110,7 @@ class PublicMetadataHttpTransport(UrllibHttpTransport):
         if not self.owns_public_route(url):
             raise ValueError('EXTERNAL_METADATA_ENDPOINT_NOT_PINNED')
         host = urlsplit(url).hostname
-        from .network_compat import resolve_proxy
+        from memorive.models.calls.network import resolve_proxy
         proxy = resolve_proxy(url, mode, address)
         if proxy:
             # CONNECT sends the exact allowlisted hostname to the configured

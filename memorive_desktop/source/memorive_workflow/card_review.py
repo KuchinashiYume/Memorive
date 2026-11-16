@@ -2,7 +2,7 @@
 from dataclasses import asdict
 import hashlib, json, os, shutil, uuid
 from pathlib import Path
-from memorive_settings.call_ledger import execution_checkpoint
+from memorive.models.calls.ledger import execution_checkpoint
 
 def _hash(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()
 

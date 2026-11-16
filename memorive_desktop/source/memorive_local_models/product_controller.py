@@ -16,7 +16,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
-from memorive_settings.model_capabilities import infer_api_model_capability
+from memorive.models.capabilities import infer_api_model_capability
 
 
 LOCAL_MODEL_METHODS = frozenset(

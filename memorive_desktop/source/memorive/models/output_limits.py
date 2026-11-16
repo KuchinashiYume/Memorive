@@ -2,7 +2,7 @@
 
 No reply is cut at a size the app guesses: a request asks for the limit the model, provider and
 runtime all support, or leaves the provider's default. WORKFLOW_EXAM_REPLY_TOKEN_CEILING is ten times
-the largest reply measured from a strong model. Model validation (memorive_settings/model_validation.py)
+the largest reply measured from a strong model. Model validation (memorive/models/validation.py)
 refuses an OCR request that asks for more than it and notes when a workflow-exam chat reply goes past
 it; the exam executors in memorive_settings record it with their results.
 workflow_exam_output_limit_contract() describes the whole rule and is stored with every workflow-exam

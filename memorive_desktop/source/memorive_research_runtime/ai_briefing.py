@@ -296,8 +296,8 @@ class AIBriefing:
             self.r.notify_ui()
             return self.get(run_id)
     def execute(self,run_id,params):
-        from memorive_settings.task_scheduling import TASK_CATEGORIES
-        from memorive_settings.call_ledger import execution_control,ExecutionControlSignal
+        from memorive.models.scheduling import TASK_CATEGORIES
+        from memorive.models.calls.ledger import execution_control,ExecutionControlSignal
         from memorive_workflow.node_progress import session_scope
         r=self.r
         path=r.run_path(run_id)

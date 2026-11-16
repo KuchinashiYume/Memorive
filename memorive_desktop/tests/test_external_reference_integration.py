@@ -9,7 +9,7 @@ from memorive_settings.controller import SettingsController
 from memorive_settings.credentials import CredentialReferenceManager
 from memorive_settings.directory_policy import DirectoryPolicy
 from memorive_settings.external_sources import ExternalDataSources
-from memorive_settings.model_validation import HttpResponse, LiveModelValidationRunner
+from memorive.models.validation import HttpResponse, LiveModelValidationRunner
 from memorive_settings.service_adapter import SettingsServiceAdapter, SETTINGS_METHODS
 from memorive_settings.store import SettingsStore
 

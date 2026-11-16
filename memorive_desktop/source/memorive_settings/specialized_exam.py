@@ -1,5 +1,5 @@
 from __future__ import annotations
-from memorive_settings.provider_catalog_aliases import matches_result_model
+from memorive.models.provider_aliases import matches_result_model
 
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -145,7 +145,7 @@ class _SpecializedExamBase:
         estimate = receipt.get("estimated_cost_cny")
         if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
             state["estimated_cost_cny"] += float(estimate)
-        from .cli_templates import accumulate_usage
+        from memorive.models.cli.templates import accumulate_usage
         accumulate_usage(state,receipt.get("token_usage"))
 
     @staticmethod
@@ -681,13 +681,13 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
-        from .cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target):
             return "CLI" if exam_eligible(target,"images") else None
         inherited = _QualityOcrPageExamExecutorV1._profile_kind(target)
         if inherited is not None:
             return inherited
-        from .cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target):
             return "CLI" if exam_eligible(target) else None
         if target.get("kind") != "CLI":
@@ -1151,7 +1151,7 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
                         )
                     )
                 )
-                from .cli_templates import receipt_model_bound
+                from memorive.models.cli.templates import receipt_model_bound
                 generic_bound=target.get("adapter_id")=="command_template" and receipt_model_bound(execution_receipt,requested_model)
                 if returned != requested_model and not recorded_unverified and not generic_bound:
                     raise ValueError("OCR_MODEL_IDENTITY_MISMATCH")
@@ -2207,7 +2207,7 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
                 and bool(target.get("config_id"))
                 else None
             )
-        from .cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target):
             return "CLI" if exam_eligible(target) else None
         if target.get("kind") != "CLI":
@@ -2456,7 +2456,7 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
             bool(SHA256.fullmatch(str(receipt.get("response_sha256") or ""))),
             "RESPONSE_HASH",
         )
-        from .cli_templates import receipt_model_bound
+        from memorive.models.cli.templates import receipt_model_bound
         custom_bound=target.get("adapter_id")=="command_template" and receipt_model_bound(receipt,requested_model)
         require(custom_bound or isinstance(receipt.get("token_usage"), Mapping), "TOKEN_USAGE")
         require(isinstance(response, Mapping), "RESPONSE_OBJECT")

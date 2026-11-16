@@ -2,7 +2,7 @@
 from __future__ import annotations
 import re
 from typing import Any, Mapping
-from .model_capabilities import infer_api_model_capability
+from memorive.models.capabilities import infer_api_model_capability
 
 def _text(value: Any, limit: int = 320) -> str:
     if value is None:

@@ -7,7 +7,7 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 
 | Folder | What it holds |
 | --- | --- |
-| `source/` | The Python code of the desktop app, one package per feature (`memorive_research_workspace`, `memorive_library`, `memorive_settings`, `memorive_model_execution`, ...). `runtime.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
+| `source/` | The Python code of the desktop app, one package per feature (`memorive_research_workspace`, `memorive_library`, `memorive_settings`, `memorive/models/execution`, ...). `runtime.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
 | `ui/` | The sources of the window's two pages. `tools/build_pages.py` builds `product/desktop/bundle_integrated.html` and `bundle_assistant.html` from them; see `ui/README.md`. |
 | `tests/` | The tests. Run them with `tests/run_tests.py` (below). |
 | `examples/` | Small programs that run one feature without the window. |
@@ -29,8 +29,8 @@ start" below).
   current-task page lists the jobs (`CurrentTaskProductController.core_job_rows`); the library gets
   a row for each delivered file from `memorive_library/core_products.py`.
 - **Research Q&A**: the window (`memo.*`) → `memorive_research_workspace` chooses excerpts and builds
-  the request → the settings service runs the model (`memorive_model_execution`,
-  `memorive_settings/model_validation.py`) → the workspace saves the answer, its citations and any
+  the request → the settings service runs the model (`memorive/models/execution`,
+  `memorive/models/validation.py`) → the workspace saves the answer, its citations and any
   knowledge draft (`knowledge_feedback/research_ingest.py`).
 - **Sessions**: imported or captured conversations (`memorive_sessions`, `memorive_session_archive`,
   `memorive_browser_companion`) → refinement through `memorive_workflow_bridge` → typed items for review.
@@ -49,7 +49,7 @@ start" below).
   `ProductApi` builds (`host.py`): the settings service, library, messages, work log and window events.
 
 Calls go from the window side towards the business packages, from those to model execution and
-transport (`memorive_model_execution`, `memorive_settings`, `model_gateway`), and from all of them to
+transport (`memorive/models/execution`, `memorive_settings`, `model_gateway`), and from all of them to
 the shared basics (`memorive_folder_management`, `runtime_log`, `memorive_language`, `run_ledger`,
 `decision_log`). A few basics still reach into business packages; these are the places to untangle
 when that code is restructured:
@@ -70,22 +70,22 @@ when that code is restructured:
 | Documents | `memorive/documents/processing/registration.py` (paper IDs), `memorive_inbox`, `memorive_workflow`, `document_processing`, `evidence_extraction`, `evidence_review`, `knowledge_admission`, `artifact_registry`, `memorive_library`, `memorive_review`, `memorive_front_matter.py` |
 | Research | `memorive_research_workspace`, `memorive_research_runtime`, `literature_discovery`, `research_recommendations`, `research_reports`, `research_analysis`, `research_opportunities`, `retrieval`, `retrieval_weighting`, `knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive_sessions`, `memorive_session_archive`, `memorive_browser_companion`, `memorive_workflow_bridge`, `knowledge_feedback/conversation_refinement` |
-| Models | `memorive/models` (`identity.py` model identity, `output_limits.py` reply size rule), `memorive_model_execution`, `model_gateway`, `memorive_local_models`, and in `memorive_settings`: `model_validation.py`, `model_endpoints.py`, `call_ledger.py`, `cancellable_http.py`, `windows_cli.py`, the CLI templates |
+| Models | `memorive/models` (`validation.py` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; its docstring lists each file), `model_gateway`, `memorive_local_models` |
 | Exams | `memorive_model_evaluation`, `memorive_analysis_reviewer_exam`, `memorive_review/exam.py`, and in `memorive_settings`: the `*exam*` modules, `quality_new.py`, `workflow_exam_runner.py` |
 | Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates), `memorive_folder_management`, `runtime_log`, `run_ledger`, `memorive_language`, `memorive_source_language.py`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
 sessions, models, exams, platform); each row names what is already there first.
-`memorive_settings` still holds code of three areas: the settings themselves, the model requests and
-the exams. The model requests move to `memorive/models` and the exams to `memorive/exams`; the
-table shows where they belong, the package docstring shows where they are today.
+`memorive_settings` still holds code of two areas: the settings themselves and the exams. The exams
+move to `memorive/exams`; the table shows where they belong, the package docstring shows where they
+are today.
 
 ### Who keeps which data
 
 | Data | Kept by |
 | --- | --- |
 | Settings, model profiles, CLI templates, credentials (by reference) | `memorive_settings` (`store.py`, `credentials.py`) |
-| Model snapshots, call attempts and results | `memorive_model_execution` (`research_chat_profiles/` and the like), the call ledger in `memorive_settings/call_ledger.py` |
+| Model snapshots, call attempts and results | `memorive/models/execution` (`research_chat_profiles/` and the like), the call ledger in `memorive/models/calls/ledger.py` |
 | Imported files and processing jobs | `memorive_inbox`, `memorive_workflow`, `memorive_app` (job store) |
 | A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `document_processing`, `evidence_extraction`, `knowledge_admission` (review state in the card); read through `memorive_library` |
 | Research conversations, answers, knowledge drafts | `memorive_research_workspace` (its own SQLite store) |
@@ -147,8 +147,8 @@ to cover every way a question can end.
 | `AnswerVersions.enqueue` checks the request, freezes the model choice, answer style, memories and research topic in a `QUEUED` job, and hands the job to the worker pool. Answering again (`memo.answer_retry`) goes through `AnswerVersions.retry` to the same place. | `memorive_research_workspace/answer_versions.py` |
 | The worker runs `answer_job()`: `AnswerJob.start`, `gather_evidence`, `build_request`, `ask_model`, `check_answer`, `save_answer`; any error goes to `record_failure`. The module docstring lists what each step does. | `memorive_research_workspace/answering.py` |
 | The model function freezes the chosen model profile (`settings.research_chat_freeze`) and runs it (`settings.research_chat_execute`). | `memorive_research_workspace/desktop.py` |
-| The settings service runs the call: the snapshot is sent once, temporary failures are tried again, the call is counted. | `memorive_settings/controller.py`, `memorive_model_execution/` |
-| The request itself is sent by the model validation runner. | `memorive_settings/model_validation.py` (`execute_structured_chat`) |
+| The settings service runs the call: the snapshot is sent once, temporary failures are tried again, the call is counted. | `memorive_settings/controller.py`, `memorive/models/execution/` |
+| The request itself is sent by the model validation runner. | `memorive/models/validation.py` (`execute_structured_chat`) |
 
 **Cancel.** `memo.cancel` (`ResearchWorkspace.cancel`) marks the job `CANCELLED` at once. The steps of
 `AnswerJob` check for this between them. A model call already running is not stopped: when it
@@ -168,8 +168,8 @@ can ask again from the window.
 
 | To change | Open | Run |
 | --- | --- | --- |
-| When a failed model call is tried again, how often, how long to wait | `memorive_model_execution/retry.py` | `test_model_execution.py` |
-| How a model profile is frozen and a call is sent once | `memorive_model_execution/execution.py` | `test_model_execution.py` |
+| When a failed model call is tried again, how often, how long to wait | `memorive/models/execution/retry.py` | `test_model_execution.py` |
+| How a model profile is frozen and a call is sent once | `memorive/models/execution/runs.py` | `test_model_execution.py` |
 | Which model profiles research may choose | `profile_options` in `memorive_research_runtime/report_models.py`; the desktop supplies its data in `catalog()`, the window-less process in `memorive_research_workspace/headless_models.py` | `test_research_model_catalog.py` |
 | The instructions the model is given | `CHAT_RULES` in `model_gateway/research_prompt_cache.py`; for an agent job `instructions()` in `research_opportunities/research_opportunities.py`; `AnswerJob.build_request` chooses between them | `test_research_qa_flow.py` |
 | The answer format the model must return | `ANSWER_SCHEMA` in `memorive_research_workspace/desktop.py`; `AnswerJob.build_request` ties it to the excerpt ids | `test_research_qa_flow.py` |
@@ -188,11 +188,11 @@ can ask again from the window.
 | Knowledge drafts from answers: proposing, reviewing, retracting, revisions, the note written on acceptance | `knowledge_feedback/research_ingest.py` | `test_knowledge_drafts.py` |
 | Session refinement: what the model must answer, the typed items made from it | `memorive_workflow_bridge/conversation_refinement.py`, `knowledge_feedback/conversation_refinement/refinement.py` | `test_refinement_model_output.py` |
 | Card review states (pending, active, quarantined), automatic review, the admission log | `knowledge_admission/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
-| Custom command-line model tools: the template, how it is run, how its output is read | `memorive_settings/cli_templates.py`, `cli_template_execution.py` | `characterize/test_cli_templates.py` |
-| How a model request is sent: API, command-line agents, embeddings, OCR | `memorive_settings/model_validation.py`: a structured chat goes `execute_structured_chat` (checks, limits, prompt) → `_send_api`, `_send_cli` or `_send_local` → `_chat_result`, with one request's state on `_ChatAttempt`; model-name patterns and API endpoints in `model_endpoints.py`; the workflow exam's own part in `workflow_exam_runner.py` | `test_analysis_provider_transport.py`, `test_model_execution.py` |
+| Custom command-line model tools: the template, how it is run, how its output is read | `memorive/models/cli/templates.py`, `template_execution.py` | `characterize/test_cli_templates.py` |
+| How a model request is sent: API, command-line agents, embeddings, OCR | `memorive/models/validation.py`: a structured chat goes `execute_structured_chat` (checks, limits, prompt) → `_send_api`, `_send_cli` or `_send_local` → `_chat_result`, with one request's state on `_ChatAttempt`; model-name patterns and API endpoints in `model_endpoints.py`; the workflow exam's own part in `workflow_exam_runner.py` | `test_analysis_provider_transport.py`, `test_model_execution.py` |
 | The front matter at the top of RawMD, CleanMD and card files | `memorive_front_matter.py`; every reader of those files uses it | `test_front_matter.py` |
 | Which files research may read: below the root, not through links, not in private folders; bundles added as attachments | `safe_path` in `memorive_research_workspace/evidence.py`; `load_bundle` in `skill_bridge.py` | `characterize/test_path_checks.py` |
-| What happens to a question that was running when the app restarted | `_recover_after_restart` and `finish_answers_received_before_restart` in `memorive_research_workspace/service.py`; `stored_result` in `memorive_model_execution/execution.py` | `test_research_qa_flow.py`, `test_model_execution.py` |
+| What happens to a question that was running when the app restarted | `_recover_after_restart` and `finish_answers_received_before_restart` in `memorive_research_workspace/service.py`; `stored_result` in `memorive/models/execution/runs.py` | `test_research_qa_flow.py`, `test_model_execution.py` |
 | The name an exam's scores are saved under, and when a saved score is reused | `EXECUTOR_REF` of each exam executor; `ExamScoreHistory` in `memorive_settings/exam_score_history.py`; `build_cache_binding` in `exam_successor.py` | `test_scores.py` |
 
 Run the whole suite before you finish; the files above are the quick check while you work.
@@ -207,7 +207,7 @@ kept and shipped; this list says how each one is entered.
 | --- | --- | --- |
 | Exam modules, `memorive_model_evaluation/` | The settings page starts an exam (`settings.start_workflow_exam`); `service_main._quality_exam_package()` names this package and `workflow_exam.py` imports its submodules with `importlib.import_module`. | A search for import statements does not find them. |
 | Inherited exam scores: `_validate_workflow_exam_catalog` and `_validate_workflow_exam_catalog_v8` in `memorive_settings/workflow_exam_runner.py` | `WorkflowExams(catalog=...)` in `workflow_exam_runner.py`. The desktop passes `None` (`service_main.py`: new installations have no inherited results), so the reader runs only when a caller supplies a catalog. | Reads score catalogs saved by earlier versions; kept so those stay readable. |
-| Command-line agent adapters in `model_gateway/execution_core/adapters/`: `claude_code.py`, `codebuddy_code.py`, `gemini_cli.py`, `github_copilot_cli.py`, `kimi_code.py`, `qwen_code.py` | Component API: build the adapter with its policy and call it. | The window runs command-line models through Settings instead: `memorive_settings/model_validation.py` builds the command (`_cli_argv`) and runs it. Of the adapters in that folder only `codex_cli.py` is used on that path: its parser reads the event stream a Codex run prints. |
+| Command-line agent adapters in `model_gateway/execution_core/adapters/`: `claude_code.py`, `codebuddy_code.py`, `gemini_cli.py`, `github_copilot_cli.py`, `kimi_code.py`, `qwen_code.py` | Component API: build the adapter with its policy and call it. | The window runs command-line models through Settings instead: `memorive/models/validation.py` builds the command (`_cli_argv`) and runs it. Of the adapters in that folder only `codex_cli.py` is used on that path: its parser reads the event stream a Codex run prints. |
 | Field-vector index tools in `retrieval_weighting/` (`cli.py`, `candidate_index.py`, `migration.py`, `locator.py`, `field_vectors.py`) | `python -m retrieval_weighting --input <request> --output <receipt> --root <run folder> --cutoff <UTC time>`, where the request's `operation` is build, migrate or validate. | Research Q&A uses `research_policy.py`, `research_ranking.py`, `research_rule.py`, and through `research_fields.py` and `query_dimensions.py` the input checks in `shadow_contracts.py`. |
 | Shadow ranking modules in `retrieval_weighting/`: `aggregation.py`, `providers.py`, `candidate_union.py`, `counterevidence.py`, `field_search.py`, `semantic_field_profiles.py`, `semantic_field_search.py`, `semantic_shadow_contracts.py`, `source_snapshot.py`, `structural_candidate.py`, `retrieval_calibration_block_role_calibration.py` | Direct import only: neither the app nor the command line above reaches them. The tests import them. | |
 | Knowledge feedback contracts: `knowledge_feedback/contracts.py`, `eligibility.py`, `lineage.py`, `penalty.py`, with `knowledge_admission/knowledge_submission.py`, `derived_knowledge_artifact.py` and `artifact_registry/knowledge_feedback_adapter.py` | `knowledge_admission` and `artifact_registry` import `contracts.py` and `eligibility.py`; `lineage.py` and `penalty.py` have no caller outside the package; the submission and preview modules are called by `artifact_registry` or only by tests. None of them writes a card, the registry or an index. | Saving an answer as knowledge in the window goes through `knowledge_feedback/research_ingest.py`, not through these. |

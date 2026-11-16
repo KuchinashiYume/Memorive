@@ -49,7 +49,7 @@ def cloud_profile(node):
             or service.get('execution_channel') in {'LOCAL_MODEL','LOCAL_INFERENCE'}):raise ValueError('LOGIC_LOCAL_MODEL_NOT_PROVIDED')
     if model.get('connection_status',service.get('connection_status'))!='AVAILABLE':
         raise ValueError('LOGIC_PROFILE_UNAVAILABLE')
-    from memorive_settings.cli_templates import is_custom,exam_eligible
+    from memorive.models.cli.templates import is_custom,exam_eligible
     if node['profile_kind']=='CLI' and is_custom(service):
         if not exam_eligible({**service,**model}):
             raise ValueError('CLI_TEMPLATE_CAPABILITY_NOT_VERIFIED')
@@ -280,7 +280,7 @@ def invoke(node,*,validation_runner,evidence_root,job_id,request_id,source_promp
     """
     from memorive_workflow.model_bridge import CoreModelBridge
     from model_gateway.resource_limits import resolve_call_limits
-    from memorive_settings.call_ledger import call_scope,execution_checkpoint,ExecutionControlSignal
+    from memorive.models.calls.ledger import call_scope,execution_checkpoint,ExecutionControlSignal
     node=cloud_profile(node)
     profile=node['execution_profile']
     execution_checkpoint()

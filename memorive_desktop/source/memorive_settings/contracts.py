@@ -13,12 +13,12 @@ from urllib.parse import urlsplit, urlunsplit
 
 from memorive.platform.json_files import canonical_json_bytes, canonical_sha256
 from memorive.platform.sensitive import SENSITIVE_KEY, SENSITIVE_VALUE, scan_sensitive
-from .model_capabilities import (
+from memorive.models.capabilities import (
     infer_api_model_capability,
     workflow_node_accepts_capability,
 )
-from .kimi_endpoint import KIMI_ENDPOINTS, is_kimi_service
-from .model_endpoints import API_PROTOCOLS, normalize_external_api_base_url
+from memorive.models.kimi_endpoint import KIMI_ENDPOINTS, is_kimi_service
+from memorive.models.endpoints import API_PROTOCOLS, normalize_external_api_base_url
 
 
 SETTINGS_SCHEMA_VERSION = "SettingsTemplate-v7"
@@ -536,7 +536,7 @@ def _validate_model_services(value: Any) -> list[dict[str, Any]]:
 
 
 def _validate_cli_services(value: Any) -> list[dict[str, Any]]:
-    from .cli_templates import ADAPTER, ID, LOCAL_FIELDS, validate_local_fields, CAPABILITIES, PARSER
+    from memorive.models.cli.templates import ADAPTER, ID, LOCAL_FIELDS, validate_local_fields, CAPABILITIES, PARSER
     if not isinstance(value, list) or not len(CLI_DEFINITIONS) <= len(value) <= 71:
         raise ValueError("CLI_SERVICES_INVALID")
     rows_by_id: dict[str, Mapping[str, Any]] = {}

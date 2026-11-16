@@ -1,5 +1,5 @@
 from __future__ import annotations
-from memorive_settings.provider_catalog_aliases import matches_result_model
+from memorive.models.provider_aliases import matches_result_model
 
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -2832,7 +2832,7 @@ class QualityCardDistillerExamExecutor:
             or not receipt.get("egress")
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_CALL_RECEIPT_INVALID")
-        from .cli_templates import receipt_model_bound
+        from memorive.models.cli.templates import receipt_model_bound
         if is_cli and receipt_model_bound(receipt,requested_model):
             if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:
                 raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
@@ -4496,7 +4496,7 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
-        from .cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target):
             return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
@@ -6369,7 +6369,7 @@ class QualityCardReviewerExamExecutor:
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
-        from .cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target):
             return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
@@ -6600,7 +6600,7 @@ class QualityCardReviewerExamExecutor:
             )
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_CALL_RECEIPT_INVALID")
-        from .cli_templates import receipt_model_bound
+        from memorive.models.cli.templates import receipt_model_bound
         if is_cli and receipt_model_bound(receipt,requested_model):
             if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:
                 raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
@@ -6834,7 +6834,7 @@ class QualityCardReviewerExamExecutor:
         estimate = receipt.get("estimated_cost_cny")
         if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
             state["estimated_cost_cny"] += float(estimate)
-        from .cli_templates import accumulate_usage
+        from memorive.models.cli.templates import accumulate_usage
         accumulate_usage(state,receipt.get("token_usage"))
         state["returned_model"]=receipt.get("returned_model")
         return response
@@ -8821,7 +8821,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
 
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
-        from .cli_templates import is_custom,exam_eligible
+        from memorive.models.cli.templates import is_custom,exam_eligible
         if is_custom(target):
             return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")

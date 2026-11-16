@@ -115,7 +115,7 @@ def recorded_execution(fn):
              'behavior_sha256':digest({k:v for k,v in values.items() if k!='self'}),
              'status':'PREPARED','region':'PROVIDER_MANAGED_UNDISCLOSED' if kind!='LOCAL' else 'LOCAL',
              'route':kind,'egress':'LOCAL' if kind=='LOCAL' else 'PROVIDER_MANAGED'}
-        from .provider_pricing import snapshot, estimate
+        from memorive.models.pricing import snapshot, estimate
         price = snapshot(service, model, pre['recorded_at']) if kind == 'API' else None
         if price is not None:
             pre['price_snapshot'] = price
@@ -124,11 +124,11 @@ def recorded_execution(fn):
         token=_execution.set(state)
         started=time.monotonic()
         try:
-            from .task_scheduling import CLI_RESOURCES
+            from memorive.models.scheduling import CLI_RESOURCES
             with CLI_RESOURCES.enter(self,service) if kind=='CLI' else nullcontext():
                 result=dict(fn(self,*args,**kwargs))
             receipt=dict(result.get('execution_receipt') or {})
-            from .provider_catalog_aliases import catalog_alias
+            from memorive.models.provider_aliases import catalog_alias
             alias=catalog_alias(service, model.get('model_name'), [result.get('returned_model')]) if kind=='API' else None
             if alias is not None and result.get('returned_model') != model.get('model_name'):
                 receipt['provider_model_alias']={**alias,'endpoint_origin':'https://api.deepseek.com'}
@@ -231,7 +231,7 @@ class RecordingTransport:
         except BaseException as error:
             if not (state['ledger'].root/'transport'/(identity+'.post.json')).exists():
                 state['ledger'].write('transport',identity,'post',{**pre,'recorded_at':now(),'status':'ERROR',
-                    'error_type':type(error).__name__,'network_error_code':__import__('memorive_settings.network_compat',fromlist=['error_code']).error_code(error) if method=='request' else None,'duration_ms':round((time.monotonic()-started)*1000),
+                    'error_type':type(error).__name__,'network_error_code':__import__('memorive.models.calls.network',fromlist=['error_code']).error_code(error) if method=='request' else None,'duration_ms':round((time.monotonic()-started)*1000),
                     'remote_result':'UNKNOWN'})
             raise
 
@@ -242,7 +242,7 @@ def recording_urlopen(opener):
         from types import SimpleNamespace
         class Native:
             def request(self, **_kwargs):
-                from .cancellable_http import read_response
+                from memorive.models.calls.cancellable_http import read_response
                 return read_response(opener, request, timeout=timeout, interrupt=_interrupt.get())
         response=RecordingTransport(Native()).request(method=request.get_method(),url=request.full_url,
             body=request.data,proxy_mode='DIRECT',proxy_address='')

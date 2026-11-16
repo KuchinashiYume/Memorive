@@ -70,7 +70,7 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
                 'records':matches if len(matches)==1 else [],'candidate_count':len(matches),'pages_read':read,'source_sha256':source_sha256,
                 'gap':gap,'card_written':False,'external_model_calls':0,'whole_document_absence_claim':False}
     except Exception as error:
-        from memorive_settings.call_ledger import ExecutionControlSignal
+        from memorive.models.calls.ledger import ExecutionControlSignal
         if isinstance(error,ExecutionControlSignal):
             raise
         result={'status':'UNRESOLVED','reason':type(error).__name__,'pages_read':read,'source_sha256':source_sha256,'card_written':False,'external_model_calls':0}

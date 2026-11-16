@@ -13,7 +13,7 @@ import jsonschema
 import pytest
 
 from memorive_review.logic import cloud_profile, validate_response
-from memorive_settings.cli_templates import ADAPTER
+from memorive.models.cli.templates import ADAPTER
 
 TEXT = "\n".join([
     "Samples were incubated at 37 C.",

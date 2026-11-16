@@ -1,5 +1,5 @@
 """Runs the Codex CLI as a command-line model (CodexCliAdapter with CodexCliPolicy) and reads the event
-stream it prints. memorive_settings/model_validation.py uses its parser for the Codex requests the
+stream it prints. memorive/models/validation.py uses its parser for the Codex requests the
 app sends.
 
 It does not select routes, retry, activate a profile, write

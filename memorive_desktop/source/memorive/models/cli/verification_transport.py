@@ -188,7 +188,7 @@ def result_reason(process):
 
 def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_seconds,shell,
                      template_mode=False,result_paths=()):
-    from .model_validation import ProcessResult
+    from memorive.models.validation import ProcessResult
     from model_gateway.execution_core.runner import _TreeController
     if shell is not False:
         raise ValueError('CLI_VALIDATION_SHELL_FORBIDDEN')
@@ -233,14 +233,14 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
     try:
         publish(True)
         if template_mode:
-            from .call_ledger import execution_checkpoint
+            from memorive.models.calls.ledger import execution_checkpoint
             execution_checkpoint()
         if cancelled():
             stopped=True
             stage='STOPPING'
             raise OSError('CLI_VERIFICATION_CANCELLED_BEFORE_START')
         with stdout_path.open('xb') as stdout,stderr_path.open('xb') as stderr:
-            from .windows_cli import native_process_path
+            from memorive.models.cli.windows import native_process_path
             process=subprocess.Popen(list(argv),cwd=native_process_path(cwd),env=dict(environment),stdin=subprocess.PIPE if stdin_bytes is not None else subprocess.DEVNULL,
                 stdout=stdout,stderr=stderr,shell=False,
                 creationflags=(subprocess.CREATE_NEW_PROCESS_GROUP|subprocess.CREATE_NO_WINDOW|4) if os.name=='nt' else 0,
@@ -262,7 +262,7 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
                 stderr_size=0
                 while process.poll() is None:
                     if template_mode:
-                        from .call_ledger import execution_interrupt_callback
+                        from memorive.models.calls.ledger import execution_interrupt_callback
                         interrupt=execution_interrupt_callback()
                         if interrupt is not None:
                             interrupt()
@@ -325,7 +325,7 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
     observed_types.update(str(row['type']) for row in ([] if template_mode else events(result.stdout))
                           if row.get('type') in {'thread.started','turn.started','turn.completed','turn.failed','item.started','item.completed','error'})
     diagnostic['event_types']=sorted(observed_types)
-    from .model_validation import _reported_models, _normalise_token_usage, _usage_from_cli_output
+    from memorive.models.validation import _reported_models, _normalise_token_usage, _usage_from_cli_output
     reported=set() if template_mode else _reported_models(result.stdout)
     evidence.update(status='CANCELLED' if stopped else 'FINISHED',finished_at=stamp(),duration_ms=result.duration_ms,
         returncode=result.returncode,returned_model=requested if requested in reported else None,

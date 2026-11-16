@@ -3,7 +3,7 @@ from copy import deepcopy
 import json
 import sqlite3
 from pathlib import Path
-from .cli_templates import import_service, export_service, new_service, is_custom, verification_current
+from memorive.models.cli.templates import import_service, export_service, new_service, is_custom, verification_current
 
 def projection(settings):
     settings=deepcopy(settings)

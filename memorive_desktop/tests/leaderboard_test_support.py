@@ -19,7 +19,7 @@ from memorive_settings.credentials import CredentialReferenceManager
 from memorive_settings.directory_policy import DirectoryPolicy
 from memorive_settings.external_sources import ExternalDataSources, default_sources, normalize_payload
 from memorive_settings.livebench_reference import CATEGORY_METRICS
-from memorive_settings.model_validation import HttpResponse
+from memorive.models.validation import HttpResponse
 from memorive_settings.service_adapter import SettingsServiceAdapter
 from memorive_settings.store import SettingsStore
 from runtime import ProductApi

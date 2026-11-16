@@ -19,11 +19,11 @@ from memorive_settings.contracts import default_settings, validate_settings  # n
 from memorive_settings.controller import SettingsController  # noqa: E402
 from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
 from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
-from memorive_settings.model_capabilities import (  # noqa: E402
+from memorive.models.capabilities import (  # noqa: E402
     infer_api_model_capability,
     workflow_node_accepts_capability,
 )
-from memorive_settings.model_validation import (  # noqa: E402
+from memorive.models.validation import (  # noqa: E402
     HttpResponse,
     LiveModelValidationRunner,
 )

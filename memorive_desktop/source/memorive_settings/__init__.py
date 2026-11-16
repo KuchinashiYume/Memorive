@@ -1,24 +1,22 @@
-"""The settings service, and for now also the model request code and the model exams.
+"""The settings service, and for now also the model exams.
 
 The window reaches it through settings.* methods (service_adapter.py maps each method to
-SettingsController in controller.py). It holds three kinds of code:
-  settings      store.py, contracts.py, credentials.py, cli_templates.py, the verification jobs,
-                user preferences, the leaderboard and external sources;
-  model calls   model_validation.py (LiveModelValidationRunner sends every model request of the app),
-                model_endpoints.py, call_ledger.py, cancellable_http.py, windows_cli.py;
+SettingsController in controller.py). It holds two kinds of code:
+  settings      store.py, contracts.py, credentials.py, cli_template_management.py, the verification
+                jobs, user preferences, the leaderboard and external sources;
   model exams   workflow_exam_runner.py (WorkflowExams: the exam catalog, plans, runs and stored scores;
                 it holds a LiveModelValidationRunner and sends the exam's requests through it),
                 workflow_exam.py, specialized_exam.py, analysis_reviewer_exam.py, exam_successor.py,
                 exam_jobs.py, exam_score_history.py and the other *exam* modules.
-The model calls move to memorive/models (model identity and the reply size rule are there already) and
-the exams to memorive/exams; until then this is where they are.
+The model requests themselves are in memorive/models: the controller holds the runner from
+memorive/models/validation.py. The exams move to memorive/exams.
 """
 
 from .capability import CapabilityProjection
 from .controller import SettingsController
 from .credentials import CredentialReferenceManager, SyntheticDiscardCredentialBackend
 from .directory_policy import DirectoryPolicy
-from .model_validation import (
+from memorive.models.validation import (
     FailClosedModelValidationRunner,
     LiveModelValidationRunner,
     ModelValidationRunner,

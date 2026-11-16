@@ -21,14 +21,14 @@ quality_package.__path__ = [str(SOURCE_ROOT / "memorive_model_evaluation")]
 quality_package.__package__ = Quality_PACKAGE
 sys.modules[Quality_PACKAGE] = quality_package
 
-from memorive_settings.model_capabilities import (  # noqa: E402
+from memorive.models.capabilities import (  # noqa: E402
     EMBEDDING,
     RERANKER,
     VISION_OCR,
     infer_api_model_capability,
     workflow_node_accepts_capability,
 )
-from memorive_settings.model_validation import (  # noqa: E402
+from memorive.models.validation import (  # noqa: E402
     HttpResponse,
     LiveModelValidationRunner,
     ProcessResult,

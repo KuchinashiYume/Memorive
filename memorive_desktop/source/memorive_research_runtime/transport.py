@@ -5,7 +5,7 @@ from .common import sha, now, write, read, sealed
 from literature_discovery.live_metadata_transport import (
     TransportPolicy,
 )
-from memorive_settings.model_validation import UrllibHttpTransport
+from memorive.models.validation import UrllibHttpTransport
 from memorive_settings.metadata_transport import metadata_error_code, PublicMetadataHttpTransport, MetadataResponse
 from urllib.parse import urlsplit, urlencode
 from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHandler

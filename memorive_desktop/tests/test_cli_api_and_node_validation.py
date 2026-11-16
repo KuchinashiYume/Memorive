@@ -23,7 +23,7 @@ from memorive_settings.contracts import (  # noqa: E402
 from memorive_settings.controller import SettingsController  # noqa: E402
 from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
 from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
-from memorive_settings.model_validation import FailClosedModelValidationRunner  # noqa: E402
+from memorive.models.validation import FailClosedModelValidationRunner  # noqa: E402
 from memorive_settings.workflow_exam_runner import FailClosedWorkflowExams  # noqa: E402
 from memorive_settings.store import SettingsStore  # noqa: E402
 

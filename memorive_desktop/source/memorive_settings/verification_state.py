@@ -17,7 +17,7 @@ def api_identity(settings, service):
 
 
 def cli_identity(settings, service, model):
-    from .cli_templates import is_custom,stable_configuration_identity
+    from memorive.models.cli.templates import is_custom,stable_configuration_identity
     if is_custom(service):
         return canonical_sha256({'configuration':stable_configuration_identity(service,model),'network':network_identity(settings)})
     return canonical_sha256({'service':{k:v for k,v in service.items()
@@ -33,7 +33,7 @@ def adopt_saved_verifications(store):
     files are still the ones verified, the value is replaced by the current form, which
     does not depend on them; the tool can then update itself without losing it.
     """
-    from .cli_templates import is_custom,stable_configuration_identity,verification_current
+    from memorive.models.cli.templates import is_custom,stable_configuration_identity,verification_current
     envelope = store.load()
     settings = deepcopy(envelope['settings'])
     rewritten = 0
@@ -66,9 +66,9 @@ def invalidate_changed_targets(previous, proposed):
             before = models.get(row['profile_ref'])
             same = before is not None and cli_identity(previous,old,before) == cli_identity(result,service,row)
             row['connection_status'] = before['connection_status'] if same and row['connection_status'] != 'UNVERIFIED' else 'UNVERIFIED'
-            from .cli_templates import is_custom
+            from memorive.models.cli.templates import is_custom
             if is_custom(service):
-                from .cli_templates import stable_configuration_identity,verification_current
+                from memorive.models.cli.templates import stable_configuration_identity,verification_current
                 valid=same and verification_current(before.get('verification'),service,row)
                 # A value saved by an earlier version is rewritten in the current form.
                 row['verification']=dict(deepcopy(before['verification']),configuration_sha256=stable_configuration_identity(service,row)) if valid else None

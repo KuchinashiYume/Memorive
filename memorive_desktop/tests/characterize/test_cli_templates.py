@@ -1,6 +1,6 @@
 """Custom command-line model tools: template checks, output parsing, sharing, and runs.
 
-Pins the behaviour of memorive_settings.cli_templates and cli_template_execution. Since
+Pins the behaviour of memorive.models.cli.templates and template_execution. Since
 11fdcf9 a verification is saved under stable_configuration_identity (no file hashes), so a
 CLI that updates itself keeps its verification; a value saved in the old format still counts
 while the program's files are unchanged (verification_current). The runs use
@@ -17,8 +17,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from memorive_settings import cli_template_execution as execution
-from memorive_settings import cli_templates as templates
+from memorive.models.cli import template_execution as execution
+from memorive.models.cli import templates as templates
 from tests.characterize.golden import check, outcome
 
 HERE = Path(__file__).parent

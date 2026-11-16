@@ -466,7 +466,7 @@ class ResearchRuntime:
 
     def _execute(self,run_id,params):
         try:
-            from memorive_settings.task_scheduling import TASK_CATEGORIES
+            from memorive.models.scheduling import TASK_CATEGORIES
             def checkpoint():
                 if self.stop.is_set():
                     raise ValueError('RESEARCH_CANCELLED')

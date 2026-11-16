@@ -1,5 +1,5 @@
 from __future__ import annotations
-from memorive_settings.task_scheduling import scheduled
+from memorive.models.scheduling import scheduled
 
 from copy import deepcopy
 from dataclasses import asdict, is_dataclass
@@ -21,7 +21,7 @@ from .contracts import (
     CoreExecutionResult,
 )
 from .model_bridge import CoreModelBridge
-from memorive_settings.call_ledger import execution_checkpoint
+from memorive.models.calls.ledger import execution_checkpoint
 from .capacity import context_pack_budget, describe_capacity
 
 
@@ -648,7 +648,7 @@ class CorePipelineExecutor:
             def start(*node_ids: str) -> None:
                 execution_checkpoint()
                 release_lanes()
-                from memorive_settings.task_scheduling import execution_activity
+                from memorive.models.scheduling import execution_activity
                 pending = [node_id for node_id in node_ids if node_id not in completed]
                 if not pending:
                     return

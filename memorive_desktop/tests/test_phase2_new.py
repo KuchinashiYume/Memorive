@@ -18,7 +18,7 @@ from memorive_settings.quality_new import (
     project_cached_entry,
     validate_quality_new_catalog,
 )
-from memorive_settings.model_validation import (
+from memorive.models.validation import (
     HttpResponse,
     LiveModelValidationRunner,
     ProcessResult,

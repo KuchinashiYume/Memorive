@@ -26,7 +26,7 @@ def matches_result_model(result, requested):
     if returned == requested:
         return isinstance(requested,str) and bool(requested)
     receipt=result.get('execution_receipt',result)
-    from .cli_templates import receipt_model_bound
+    from memorive.models.cli.templates import receipt_model_bound
     if receipt_model_bound(receipt,requested):
         return True
     if not isinstance(receipt,Mapping) or receipt.get('profile_kind')!='API':

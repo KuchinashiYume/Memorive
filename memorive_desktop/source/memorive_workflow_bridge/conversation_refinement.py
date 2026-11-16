@@ -1,5 +1,5 @@
 from __future__ import annotations
-from memorive_settings.task_scheduling import scheduled
+from memorive.models.scheduling import scheduled
 
 from copy import deepcopy
 import hashlib

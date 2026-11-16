@@ -264,7 +264,7 @@ class Attachments:
             receipt = result.get('execution_receipt') or {}
             if result.get('status') != 'PASS' or receipt.get('status') != 'PASS':
                 raise ValueError(result.get('reason') or 'ATTACHMENT_VISION_FAILED')
-            from memorive_settings.cli_templates import receipt_evidence_complete
+            from memorive.models.cli.templates import receipt_evidence_complete
             if not receipt_evidence_complete(receipt):
                 raise ValueError('ATTACHMENT_VISION_RECEIPT_REQUIRED')
             receipts.append(receipt)

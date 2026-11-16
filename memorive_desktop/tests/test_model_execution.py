@@ -56,7 +56,7 @@ class Runner:
 @pytest.fixture
 def waits(monkeypatch):
     """Record the waits between tries (retry.wait_before_retry) instead of sleeping."""
-    from memorive_model_execution import retry
+    from memorive.models.execution import retry
     seen = []
     monkeypatch.setattr(retry, "wait_before_retry", seen.append)
     return seen

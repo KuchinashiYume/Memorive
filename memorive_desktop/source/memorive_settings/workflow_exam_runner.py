@@ -10,10 +10,10 @@ from inspect import signature
 import json
 from typing import Any, Callable, Mapping, Sequence
 
-from .model_endpoints import normalize_external_api_base_url
-from .model_endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile, json_sha256
+from memorive.models.endpoints import normalize_external_api_base_url
+from memorive.models.endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile, json_sha256
 from .exam_score_history import ExamScoreHistory
-from .model_validation import FailClosedModelValidationRunner, default_executable_resolver, validation_result
+from memorive.models.validation import FailClosedModelValidationRunner, default_executable_resolver, validation_result
 from .quality_new import (
     Quality_NEW_CATALOG_SCHEMA,
     validate_quality_new_catalog,
@@ -728,7 +728,7 @@ class WorkflowExams:
                 or accepted.get('adapter_id') != 'codex_cli'
                 or accepted.get('connection_status') != 'AVAILABLE'):
             return accepted
-        from .cli_image_identity import bind_saved_cli_identity, FIELDS
+        from memorive.models.cli.image_identity import bind_saved_cli_identity, FIELDS
         if any(key in accepted for key in FIELDS):
             return accepted
         executable = self.executable_resolver(accepted.get('executable'))

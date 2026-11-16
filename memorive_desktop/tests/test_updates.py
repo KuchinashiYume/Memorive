@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 import pytest
 from memorive_settings.external_sources import ExternalDataSources, default_sources, role_references
-from memorive_settings.model_validation import HttpResponse
+from memorive.models.validation import HttpResponse
 from memorive_settings.contracts import canonical_sha256, default_settings
 from memorive_settings.controller import SettingsController
 from memorive_settings.store import SettingsStore

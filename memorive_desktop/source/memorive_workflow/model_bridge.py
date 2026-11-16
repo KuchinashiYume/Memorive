@@ -1,5 +1,5 @@
 from __future__ import annotations
-from memorive_settings.call_ledger import call_scope, execution_checkpoint, ExecutionControlSignal
+from memorive.models.calls.ledger import call_scope, execution_checkpoint, ExecutionControlSignal
 
 from copy import deepcopy
 import hashlib
@@ -11,7 +11,7 @@ from typing import Any, Callable, Mapping, Sequence
 import uuid
 
 from model_gateway.errors import GatewayError, InvalidHealthcheckTarget, OcrResultInvalid
-from memorive_model_execution import retry
+from memorive.models.execution import retry
 
 from .capacity import describe_capacity
 
@@ -318,7 +318,7 @@ class CoreModelBridge:
             raise GatewayError(f"Core_NODE_EXECUTION_PROFILE_INVALID:{node_id}")
         return node
 
-    # Which failures are tried again, and the wait in between: memorive_model_execution/retry.py.
+    # Which failures are tried again, and the wait in between: memorive/models/execution/retry.py.
     _transient_retry_eligible = staticmethod(retry.is_temporary_failure)
     _wait_before_retry = staticmethod(retry.wait_before_retry)
 

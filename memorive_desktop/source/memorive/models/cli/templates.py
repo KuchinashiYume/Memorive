@@ -195,7 +195,7 @@ def validate_local_fields(service):
     group=service.get('concurrency_group','')
     if not isinstance(group,str) or (group and ID.fullmatch(group) is None):
         raise ValueError('CLI_TEMPLATE_CONCURRENCY_GROUP_INVALID')
-    from .windows_cli import resolve_template_entry,template_launch_files
+    from memorive.models.cli.windows import resolve_template_entry,template_launch_files
     executable=resolve_template_entry(service.get('executable',''))
     if executable:
         template_launch_files(executable,template['argv'],interpreter=interpreter,interpreter_arguments=template['interpreter_argv'])
@@ -289,7 +289,7 @@ def configuration_identity(service,model=None):
     for key in ('executable','interpreter'):
         raw=service.get(key)
         if raw:
-            from .windows_cli import resolve_template_entry
+            from memorive.models.cli.windows import resolve_template_entry
             try:
                 path=resolve_template_entry(raw)
                 identities[key]=dict(path=path,sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()) if path else None
@@ -297,7 +297,7 @@ def configuration_identity(service,model=None):
                 identities[key]=None
     data['executables']=identities
     try:
-        from .windows_cli import resolve_template_entry,template_launch_files
+        from memorive.models.cli.windows import resolve_template_entry,template_launch_files
         executable=resolve_template_entry(service.get('executable',''))
         if executable:
             files=template_launch_files(executable,service.get('template',{}).get('argv',[]),interpreter=service.get('interpreter',''),interpreter_arguments=service.get('template',{}).get('interpreter_argv',[]))

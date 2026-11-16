@@ -1,14 +1,14 @@
 """When a failed model call is tried again, and how long to wait before the next try.
 
 Every model call made for a feature follows these rules: the workflow's nodes
-(memorive_workflow/model_bridge.py) and the research Q&A (execution.py). Change retries here.
+(memorive_workflow/model_bridge.py) and the research Q&A (runs.py). Change retries here.
 """
 from __future__ import annotations
 
 import time
 from typing import Any, Mapping
 
-from memorive_settings.call_ledger import execution_checkpoint
+from memorive.models.calls.ledger import execution_checkpoint
 
 # How often a research question is sent again after a temporary failure (so at most three sends).
 RESEARCH_CHAT_RETRIES = 2
