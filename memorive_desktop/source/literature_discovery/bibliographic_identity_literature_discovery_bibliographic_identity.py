@@ -1,8 +1,9 @@
-"""BIBLIOGRAPHIC-IDENTITY/LITERATURE_DISCOVERY deterministic, pure-offline bibliographic identity resolver.
+"""Bibliographic identity: which source observations name the same work, and the candidate records
+made from them. Deterministic and offline: no network, model, clock, randomness or environment.
 
-The resolver consumes already-frozen DataContracts SourceObservation objects and an exact
-evidence registry.  It contains no transport, provider SDK, model integration,
-production writer, registry adapter, clock, randomness, or environment lookup.
+resolve_identity_batch_with is the algorithm. resolve_identity_batch is the literature discovery
+entry; memorive_research_runtime/identity.py is the research runtime's entry, with its own
+observation check and claim reader. The identifier normalizers and the other helpers here serve both.
 """
 
 from __future__ import annotations
@@ -438,23 +439,34 @@ def _dedupe_conflict_specs(specs: Iterable[Mapping[str, Any]]) -> list[dict[str,
     return sorted(unique.values(), key=lambda item: canonical_json(item))
 
 
-def resolve_identity_batch(
+def resolve_identity_batch_with(
     observations: Sequence[Mapping[str, Any]],
     evidence_registry: Mapping[str, Mapping[str, Any]],
     *,
     version_links: Sequence[Mapping[str, Any]] = (),
     hints: Sequence[Mapping[str, Any]] = (),
+    verify,
+    claim_from_observation,
+    producer: str,
+    is_synthetic: bool,
 ) -> dict[str, Any]:
-    """Resolve one deterministic offline batch without performing any I/O."""
+    """Resolve one deterministic offline batch without performing any I/O.
+
+    The algorithm shared by literature discovery (resolve_identity_batch below) and the research
+    runtime (memorive_research_runtime/identity.py). What differs between them comes in: verify
+    checks one observation against the evidence registry, claim_from_observation reads its
+    identity claim, producer is written into every record, and is_synthetic marks the candidate
+    records. When all claims of an identifier carry optional_metadata (only runtime claims do), they
+    conflict only where a non-empty title, author list or year differs."""
 
     copied_observations = [copy.deepcopy(dict(item)) for item in observations]
     object_ids = [str(item.get("object_id", "")) for item in copied_observations]
     if len(object_ids) != len(set(object_ids)):
         raise IdentityResolutionError("DUPLICATE_SOURCE_OBSERVATION_ID", object_ids)
     for observation in copied_observations:
-        verify_source_observation(observation, evidence_registry)
+        verify(observation, evidence_registry)
 
-    claims = [_claim_from_observation(item) for item in copied_observations]
+    claims = [claim_from_observation(item) for item in copied_observations]
     claims_by_ref = {claim["observation_ref"]: claim for claim in claims}
     conflict_specs: list[dict[str, Any]] = []
 
@@ -480,7 +492,11 @@ def resolve_identity_batch(
         if len(token_claims) < 2:
             continue
         signatures = {canonical_json(claim["metadata_signature"]) for claim in token_claims}
-        if len(signatures) > 1:
+        optional=all(claim.get("optional_metadata") for claim in token_claims)
+        conflicting=len(signatures)>1
+        if optional:
+            conflicting=any(len({canonical_json(c["metadata_signature"][k]) for c in token_claims if c["metadata_signature"][k] not in (None,[],"")})>1 for k in ("title","authors","published_year"))
+        if conflicting:
             conflict_specs.append({
                 "reason_code": "EXACT_IDENTIFIER_METADATA_CONFLICT",
                 "source_observation_refs": [claim["observation_ref"] for claim in token_claims],
@@ -559,7 +575,7 @@ def resolve_identity_batch(
             "object_type": "BibliographicIdentity",
             "object_id": identity_id,
             "revision": 1,
-            "producer": PRODUCER,
+            "producer": producer,
             "single_writer": IDENTITY_WRITER,
             "consumers": ["LITERATURE_DISCOVERY.CANDIDATE_REGISTRY", "NOVELTY-ASSESSMENT/CROSS"],
             "identity_status": identity_status,
@@ -761,7 +777,7 @@ def resolve_identity_batch(
             "object_id": cluster_id,
             "work_cluster_id": cluster_id,
             "revision": 1,
-            "producer": PRODUCER,
+            "producer": producer,
             "single_writer": IDENTITY_WRITER,
             "consumers": ["LITERATURE_DISCOVERY.CANDIDATE_REGISTRY", "NOVELTY-ASSESSMENT/CROSS"],
             "identity_status": cluster_status,
@@ -792,7 +808,7 @@ def resolve_identity_batch(
             "object_id": manifestation_id,
             "manifestation_id": manifestation_id,
             "revision": 1,
-            "producer": PRODUCER,
+            "producer": producer,
             "single_writer": IDENTITY_WRITER,
             "consumers": ["LITERATURE_DISCOVERY.CANDIDATE_REGISTRY", "NOVELTY-ASSESSMENT/CROSS"],
             "identity_ref": interim["identity_ref"],
@@ -828,7 +844,7 @@ def resolve_identity_batch(
             "object_id": conflict_id,
             "conflict_id": conflict_id,
             "revision": 1,
-            "producer": PRODUCER,
+            "producer": producer,
             "single_writer": IDENTITY_WRITER,
             "consumers": ["HUMAN_IDENTITY_REVIEW", "LITERATURE_DISCOVERY.CANDIDATE_REGISTRY"],
             "reason_code": spec["reason_code"],
@@ -847,7 +863,7 @@ def resolve_identity_batch(
             "object_id": review_id,
             "review_item_id": review_id,
             "revision": 1,
-            "producer": PRODUCER,
+            "producer": producer,
             "single_writer": IDENTITY_WRITER,
             "consumers": ["HUMAN_IDENTITY_REVIEW"],
             "reason_code": spec["reason_code"],
@@ -884,7 +900,7 @@ def resolve_identity_batch(
                 "object_id": review_id,
                 "review_item_id": review_id,
                 "revision": 1,
-                "producer": PRODUCER,
+                "producer": producer,
                 "single_writer": IDENTITY_WRITER,
                 "consumers": ["HUMAN_IDENTITY_REVIEW"],
                 "reason_code": "POSSIBLE_DUPLICATE_TITLE_ONLY",
@@ -961,7 +977,7 @@ def resolve_identity_batch(
             "configuration_input_eligible": configuration_eligible,
             "candidate_card_eligible": False,
             "eligibility_reason_codes": sorted(reasons),
-            "is_synthetic": True,
+            "is_synthetic": is_synthetic,
         })
         candidate_projections.append(projection)
 
@@ -1018,6 +1034,27 @@ def resolve_identity_batch(
     return result
 
 
+def resolve_identity_batch(
+    observations: Sequence[Mapping[str, Any]],
+    evidence_registry: Mapping[str, Mapping[str, Any]],
+    *,
+    version_links: Sequence[Mapping[str, Any]] = (),
+    hints: Sequence[Mapping[str, Any]] = (),
+) -> dict[str, Any]:
+    """Resolve one deterministic offline batch of discovery observations without performing any I/O."""
+
+    return resolve_identity_batch_with(
+        observations,
+        evidence_registry,
+        version_links=version_links,
+        hints=hints,
+        verify=verify_source_observation,
+        claim_from_observation=_claim_from_observation,
+        producer=PRODUCER,
+        is_synthetic=True,
+    )
+
+
 def initialization_candidate_base_projection(projection: Mapping[str, Any]) -> dict[str, Any]:
     """Return the exact Initialization base fields for compatibility validation."""
 
@@ -1038,6 +1075,7 @@ __all__ = [
     "normalize_arxiv_identifier",
     "normalize_pmid_identifier",
     "resolve_identity_batch",
+    "resolve_identity_batch_with",
     "initialization_candidate_base_projection",
     "verify_source_observation",
 ]

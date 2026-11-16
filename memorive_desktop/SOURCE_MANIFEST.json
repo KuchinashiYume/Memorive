@@ -3217,8 +3217,8 @@
     },
     {
       "path": "source/literature_discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py",
-      "sha256": "c9da0dad55a7e9815b95b5c035d04492338974ce79bfd1c160d4b74ae2194897",
-      "bytes": 48306
+      "sha256": "6b37236e4707a5c7e5ba4790cff650330db3aad03292fdd21c406fdedc41630f",
+      "bytes": 50136
     },
     {
       "path": "source/literature_discovery/connector_framework.py",
@@ -4262,8 +4262,8 @@
     },
     {
       "path": "source/memorive_research_runtime/identity.py",
-      "sha256": "db73670424751c55aa0b358d6d334cb9159d77082b925c91dae5c35f3f73b24a",
-      "bytes": 40231
+      "sha256": "40ea34249dcf311e697cf8e622fb84f5e018f0d5b00aa321a17b08a1ef0749ba",
+      "bytes": 11967
     },
     {
       "path": "source/memorive_research_runtime/indexing.py",
