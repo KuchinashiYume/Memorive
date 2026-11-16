@@ -38,13 +38,16 @@ def profile_options(settings_state, local_models, capability='CHAT'):
     return options
 
 
+def profiles_offered(service, local_models, capability='CHAT'):
+    """profile_options read from the settings service and the local model registry (None when there
+    is none). The research workspace, the window-less process and the research runtime all use it."""
+    local = local_models.call('local_models.list', {}).get('recognized_models', []) if local_models else []
+    return profile_options(service.call('settings.get_state', {}), local, capability)
+
+
 def catalog(runtime, capability='CHAT'):
-    """profile_options for the desktop research runtime. The one place here that reads the desktop
-    host: its settings service and its local model registry."""
-    state = runtime.api._service.call('settings.get_state', {})
-    registry = getattr(runtime.api, '_local_models', None)
-    local = registry.call('local_models.list', {}).get('recognized_models', []) if registry else []
-    return profile_options(state, local, capability)
+    """profiles_offered for the desktop research runtime, from the desktop host it holds."""
+    return profiles_offered(runtime.api._service, getattr(runtime.api, '_local_models', None), capability)
 
 def projection(runtime):
     value=config(runtime.root)

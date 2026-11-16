@@ -16,14 +16,13 @@ def bind(workspace):
         raise ValueError('MEMO_PROFILE_NOT_INITIALIZED')
     from memorive_desktop_service.service_main import build_settings_controller,LocalModelProductController
     from memorive_settings.service_adapter import SettingsServiceAdapter
-    from memorive_research_runtime.report_models import profile_options
+    from memorive_research_runtime.report_models import profiles_offered
     controller=build_settings_controller(profile)
     service=SettingsServiceAdapter(controller)
     local_models=LocalModelProductController(profile.parent/'local_models')
     def catalog(capability='CHAT'):
         # The same saved settings and local models the desktop reads, without the desktop host.
-        local=local_models.call('local_models.list',{}).get('recognized_models',[])
-        return profile_options(service.call('settings.get_state',{}),local,capability)
+        return profiles_offered(service,local_models,capability)
     def execute(*,profile_ref,prompt,job_id,response_schema):
         snap=service.call('settings.research_chat_freeze',{'run_id':job_id,'profile_ref':profile_ref})
         result=service.call('settings.research_chat_execute',{'snapshot_id':snap['snapshot_id'],'prompt':prompt,'response_schema':response_schema})

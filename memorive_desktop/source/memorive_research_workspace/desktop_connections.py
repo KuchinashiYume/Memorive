@@ -35,7 +35,10 @@ def job_results(library, job_id):
     return results
 
 
-def bind(workspace, api):
+def bind(workspace, *, library, service, desktop_call, stage_inbox_paths):
+    """Give the workspace's connections the desktop's inbox: a connected app's document is staged
+    (stage_inbox_paths), imported and dispatched through the inbox methods (desktop_call), and its
+    results are read from the library and the job's state from the service."""
     def submit(document, request_id):
         existing = document.get('processing') or {}
         if existing.get('item_id'):
@@ -43,17 +46,17 @@ def bind(workspace, api):
         identity = 'stage_' + digest([document['document_id'], document['file_hash']])[:28]
         staged = workspace.store.get('connector_stage', identity)
         if not staged:
-            result = api.stage_inbox_paths([document['path']])
+            result = stage_inbox_paths([document['path']])
             staged = workspace.store.put('connector_stage', identity, document['project'], result)
-        batch = api.call('inbox.import_paths', {'paths': staged['paths'], 'request_id': identity, 'source_kind': 'picker'})
+        batch = desktop_call('inbox.import_paths', {'paths': staged['paths'], 'request_id': identity, 'source_kind': 'picker'})
         item = batch['items'][0]['item']
         if item['state'] == 'DEDUPLICATED':
             # The same file is already in the inbox: follow that item.
-            item = api.call('inbox.item_detail', {'item_id': item['duplicate_of']})
+            item = desktop_call('inbox.item_detail', {'item_id': item['duplicate_of']})
         if item.get('state') == 'ERROR':
             raise ValueError('INBOX_IMPORT_FAILED:' + str(item.get('error'))[:120])
         if not item.get('job_id') and item.get('state') == 'QUEUED':
-            api.call('inbox.dispatch', {'item_id': item['item_id'], 'idempotency_key': identity})
+            desktop_call('inbox.dispatch', {'item_id': item['item_id'], 'idempotency_key': identity})
         return {'item_id': item['item_id'], 'job_id': item.get('job_id'), 'state': item['state'], 'submitted_at': now(),
                 'route': 'inbox', 'execution': 'existing_mainline_with_saved_settings'}
 
@@ -61,12 +64,12 @@ def bind(workspace, api):
         previous = document.get('processing')
         if not previous:
             return None
-        item = api.call('inbox.item_detail', {'item_id': previous['item_id']})
+        item = desktop_call('inbox.item_detail', {'item_id': previous['item_id']})
         job_id = item.get('job_id')
         results, control_state = [], None
         if job_id:
-            results = job_results(api._library, job_id)
-            job = api._service.call('get_job', {'job_id': job_id})
+            results = job_results(library, job_id)
+            job = service.call('get_job', {'job_id': job_id})
             control_state = job.get('control_state', job.get('job_control_state'))
         processing = dict(previous, job_id=job_id, state=item['state'], control_state=control_state,
                           error=item.get('error'), last_observed_at=now())
@@ -76,7 +79,7 @@ def bind(workspace, api):
         previous = (status(document) or {}).get('processing') or {}
         if not previous.get('job_id'):
             raise ValueError('CURRENT_TASK_REQUIRED')
-        api.call('current_task.retry', {'job_id': previous['job_id'], 'request_id': request_id})
+        desktop_call('current_task.retry', {'job_id': previous['job_id'], 'request_id': request_id})
         return dict(previous, state='RETRY_REQUESTED', retry_scope='failed_node', retry_requested_at=now())
 
     workspace.connections.processing_submit = submit

@@ -2422,7 +2422,10 @@ class ProductApi:
             with self._lock:
                 if not hasattr(self, '_memo'):
                     from memorive_research_workspace.desktop import create
-                    self._memo=create(self)
+                    self._memo=create(service=self._service,library=self._library,
+                        local_models=getattr(self,'_local_models',None),profile_root=self._profile_root,
+                        workspace_root=self._profile_path('WORKSPACE')/'research_workspace',
+                        desktop_call=self.call,stage_inbox_paths=self.stage_inbox_paths)
             return self._memo.call(method,dict(params or {}),desktop=True)
         from memorive_research_runtime.runtime import METHODS as RESEARCH_METHODS
         if method in RESEARCH_METHODS:

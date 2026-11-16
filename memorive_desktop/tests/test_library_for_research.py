@@ -175,11 +175,11 @@ def test_a_connected_device_follows_its_job_until_the_results_are_ready(tmp_path
     stopped = threading.Event()
     stopped.set()  # the background loop ends at once
     workspace = SimpleNamespace(store=store, connections=SimpleNamespace(), conversations=None, connector_stop=stopped)
-    api = SimpleNamespace(
-        _library=library,
-        call=lambda method, params: {"item_id": params["item_id"], "job_id": JOB, "state": "DONE"},
-        _service=SimpleNamespace(call=lambda method, params: {"control_state": "SUCCEEDED"}))
-    desktop_connections.bind(workspace, api)
+    desktop_connections.bind(
+        workspace, library=library,
+        service=SimpleNamespace(call=lambda method, params: {"control_state": "SUCCEEDED"}),
+        desktop_call=lambda method, params: {"item_id": params["item_id"], "job_id": JOB, "state": "DONE"},
+        stage_inbox_paths=None)
     workspace.connector_thread.join(5)
     # An action that was running when the desktop stopped is marked, so the user checks it first.
     assert store.get("connector_action", "action-1")["status"] == "INTERRUPTED"
