@@ -7966,7 +7966,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "0095b3593504e473ec34a1c4c18b3a9958ccfe6b3c259f9406416c9f7d159b84",
+      "sha256": "013c74bf774d1d12dee6cb41a1e6c83053708a89925ba28b9b7fb260094c3350",
       "bytes": 253784
     },
     {
@@ -8536,8 +8536,8 @@
     },
     {
       "path": "memorive_desktop/source/model_gateway/cache_metrics.py",
-      "sha256": "a8bd91055c68635d8bb1c97cd87baf18d4c4974127608f149152665b072e9810",
-      "bytes": 2311
+      "sha256": "0b4ab4e8675f3b401b71a65055031b511fba077b62d50cebf5212cff2a639d7e",
+      "bytes": 2442
     },
     {
       "path": "memorive_desktop/source/retrieval/retrieval_calibration/__init__.py",

@@ -1,7 +1,8 @@
 """Prompt cache and throughput figures of one model call, from the usage the provider returned.
 
-The model runner (memorive_settings/model_validation.py), cost.py and research_prompt_cache.py put
-them into their receipts; prices stay in cost.py.
+Called by the model runner (memorive_settings/model_validation.py, into the call's
+transport_diagnostic), cost.py (into the runtime-log accounting record) and research_prompt_cache.py
+(into its cache observation). It computes no prices: callers pass in the cost they worked out.
 """
 from __future__ import annotations
 

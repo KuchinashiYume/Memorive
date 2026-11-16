@@ -4947,8 +4947,8 @@
     },
     {
       "path": "source/model_gateway/cache_metrics.py",
-      "sha256": "a8bd91055c68635d8bb1c97cd87baf18d4c4974127608f149152665b072e9810",
-      "bytes": 2311
+      "sha256": "0b4ab4e8675f3b401b71a65055031b511fba077b62d50cebf5212cff2a639d7e",
+      "bytes": 2442
     },
     {
       "path": "source/model_gateway/cache_session.py",
