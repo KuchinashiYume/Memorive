@@ -167,19 +167,12 @@ class ResearchChatExecution(ReportProfileExecution):
         return super().freeze(run_id=run_id, period='chat', profile_ref=profile_ref)
 
     def _execute_model(self, binding, snapshot_id, prompt, response_schema, output_tokens):
-        from model_gateway.local_structured_chat import _research_source_scope
-        from memorive_settings.model_validation import _structured_prompt
-        if binding.get('period') != 'chat':
-            raise ValueError('RESEARCH_SOURCE_PURPOSE_INVALID')
         attempts = []
         for attempt in range(retry.RESEARCH_CHAT_RETRIES + 1):
             execution_checkpoint()
             if attempt:
                 retry.wait_before_retry(attempt - 1)
-            # The local gateway appends the JSON schema instructions; scope the exact text it sends.
-            wire_prompt = _structured_prompt(prompt, response_schema).decode('utf-8')
-            with _research_source_scope(wire_prompt, snapshot_id):
-                result = super()._execute_model(binding, snapshot_id, prompt, response_schema, output_tokens)
+            result = super()._execute_model(binding, snapshot_id, prompt, response_schema, output_tokens)
             scan_sensitive(result)
             path = self.root / (snapshot_id + '.attempt-' + str(attempt + 1) + '.result.json')
             self.controller.store._atomic_write(path, result)

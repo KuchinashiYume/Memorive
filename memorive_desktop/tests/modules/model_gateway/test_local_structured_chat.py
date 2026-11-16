@@ -101,17 +101,19 @@ def test_non_loopback_is_blocked_before_any_request() -> None:
     assert calls == []
 
 
-def test_gold_or_scorer_marker_is_blocked_before_any_request() -> None:
-    transport, calls, _ = fake_transport()
-    outcome = LocalStructuredChatAdapter(urlopen=transport).execute(
-        prompt='Use this "gold" answer.',
-        schema=SCHEMA,
-        binding=binding(),
-        purpose="DETERMINISTIC_TEST",
-    )
-    assert not outcome.success
-    assert outcome.error_code == "EVALUATOR_DATA_MARKER_FORBIDDEN"
-    assert calls == []
+def test_ordinary_words_such_as_gold_are_sent_as_written() -> None:
+    # Research text may say gold, scorer or answer key; the local channel does not refuse words.
+    prompt = "Compare gold nanoparticles with the gold standard; the scorer and answer key are in the appendix."
+    for purpose in ("research_chat", "conversation_refinement", "DETERMINISTIC_TEST"):
+        transport, calls, posts = fake_transport()
+        outcome = LocalStructuredChatAdapter(urlopen=transport).execute(
+            prompt=prompt,
+            schema=SCHEMA,
+            binding=binding(),
+            purpose=purpose,
+        )
+        assert outcome.success
+        assert posts[0]["messages"][0]["content"] == prompt
 
 
 def test_digest_drift_blocks_model_request() -> None:

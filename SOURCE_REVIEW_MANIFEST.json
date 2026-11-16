@@ -6681,8 +6681,8 @@
     },
     {
       "path": "memorive_desktop/source/model_gateway/local_structured_chat.py",
-      "sha256": "79fb6e28519ba26c9180f343f1a6118244954bb7105a04ace7ca3e703f8e81b9",
-      "bytes": 20018
+      "sha256": "8f07dc75021003256c91f3a440fefdd7274a3f2b63cba02d9a9663a92d13834f",
+      "bytes": 17339
     },
     {
       "path": "memorive_desktop/source/model_gateway/model_capabilities.json",
@@ -7946,7 +7946,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "a36893c642ea3bad149a315f95187f60a4e1179874a6c3ad2e8efaf21609a624",
+      "sha256": "1e271218312e4597560766ffedb304081a97affd29d04d30d4990f7c5383f0af",
       "bytes": 252699
     },
     {
@@ -9576,8 +9576,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_model_execution/execution.py",
-      "sha256": "e310f3a0927499be1761eeff0907f108c5821d7233a3c75fac8a51e1b468a217",
-      "bytes": 15772
+      "sha256": "c247b4efb75ce8bdbc8d7561792561c9471a6ac16c9750733bc05c634304efe5",
+      "bytes": 15246
     },
     {
       "path": "memorive_desktop/source/memorive_model_execution/retry.py",
