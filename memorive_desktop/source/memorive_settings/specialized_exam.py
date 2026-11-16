@@ -680,12 +680,14 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
         from .cli_templates import is_custom,exam_eligible
-        if is_custom(target):return "CLI" if exam_eligible(target,"images") else None
+        if is_custom(target):
+            return "CLI" if exam_eligible(target,"images") else None
         inherited = _QualityOcrPageExamExecutorV1._profile_kind(target)
         if inherited is not None:
             return inherited
         from .cli_templates import is_custom,exam_eligible
-        if is_custom(target):return "CLI" if exam_eligible(target) else None
+        if is_custom(target):
+            return "CLI" if exam_eligible(target) else None
         if target.get("kind") != "CLI":
             return None
         return (
@@ -2204,7 +2206,8 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
                 else None
             )
         from .cli_templates import is_custom,exam_eligible
-        if is_custom(target):return "CLI" if exam_eligible(target) else None
+        if is_custom(target):
+            return "CLI" if exam_eligible(target) else None
         if target.get("kind") != "CLI":
             return None
         return (
@@ -2246,7 +2249,8 @@ class QualityNewRerankerTextExamExecutor(QualityRerankerTextExamExecutor):
         profile_kind: str,
         target: Mapping[str, Any],
     ) -> str:
-        if target.get("adapter_id")=="command_template":return "DECLARATIVE_COMMAND_TEMPLATE"
+        if target.get("adapter_id")=="command_template":
+            return "DECLARATIVE_COMMAND_TEMPLATE"
         if self._uses_local_general_adapter(target):
             return "OLLAMA_STRUCTURED_CHAT_GENERAL_MODEL_RERANK"
         return self._claim_route(profile_kind)

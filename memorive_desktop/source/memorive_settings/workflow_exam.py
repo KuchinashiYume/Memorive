@@ -2832,7 +2832,8 @@ class QualityCardDistillerExamExecutor:
             raise ValueError("WORKFLOW_MODEL_EXAM_CALL_RECEIPT_INVALID")
         from .cli_templates import receipt_model_bound
         if is_cli and receipt_model_bound(receipt,requested_model):
-            if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
+            if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:
+                raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
             return receipt
         usage = receipt.get("token_usage")
         if not isinstance(usage, Mapping):
@@ -4494,7 +4495,8 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
         from .cli_templates import is_custom,exam_eligible
-        if is_custom(target):return "CLI" if exam_eligible(target) else None
+        if is_custom(target):
+            return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
         if kind == "API":
             if QualityCardDistillerExamExecutor._eligible_target(
@@ -6366,7 +6368,8 @@ class QualityCardReviewerExamExecutor:
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
         from .cli_templates import is_custom,exam_eligible
-        if is_custom(target):return "CLI" if exam_eligible(target) else None
+        if is_custom(target):
+            return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
         if kind == "API":
             if (
@@ -6597,7 +6600,8 @@ class QualityCardReviewerExamExecutor:
             raise ValueError("WORKFLOW_MODEL_EXAM_CALL_RECEIPT_INVALID")
         from .cli_templates import receipt_model_bound
         if is_cli and receipt_model_bound(receipt,requested_model):
-            if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
+            if receipt.get("actual_cost") is not None or receipt.get("estimated_cost_cny") is not None:
+                raise ValueError("WORKFLOW_MODEL_EXAM_CLI_COST_EVIDENCE_INVALID")
             return receipt
         usage = receipt.get("token_usage")
         if not isinstance(usage, Mapping):
@@ -8816,7 +8820,8 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
     @staticmethod
     def _profile_kind(target: Mapping[str, Any]) -> str | None:
         from .cli_templates import is_custom,exam_eligible
-        if is_custom(target):return "CLI" if exam_eligible(target) else None
+        if is_custom(target):
+            return "CLI" if exam_eligible(target) else None
         kind = target.get("kind")
         if kind == "API":
             if (

@@ -25,7 +25,7 @@ from .schema_v2 import unresolved_requirement
 from .errors import FrontmatterParseError
 import copy
 
-_TAGS =("PDF", "RawMD", "CleanMD", "Chunks", "Card", "Analysis")
+_TAGS = ("PDF", "RawMD", "CleanMD", "Chunks", "Card", "Analysis")
 _TYPES = {
     "PDF": "source_pdf",
     "RawMD": "raw_markdown",

@@ -1684,7 +1684,8 @@ class WorkflowExamRunnerMixin:
             recorded = self._exam_score_history.recover_completed_embedding(node, target, active_executor_refs)
         if recorded is not None:
             return recorded
-        if target.get("adapter_id")=="command_template":return None
+        if target.get("adapter_id")=="command_template":
+            return None
 
         def reusable(candidate: Mapping[str, Any]) -> bool:
             if candidate.get(

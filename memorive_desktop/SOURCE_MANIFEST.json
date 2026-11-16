@@ -2202,8 +2202,8 @@
     },
     {
       "path": "source/artifact_registry/adapters.py",
-      "sha256": "720866852cbde8c85e763cefcb577f70e7e368879def38799888f98a0d90790f",
-      "bytes": 24805
+      "sha256": "08a062e72a7846b27366fa07f6d75f44ededc6ae695c3ed59a3d613ca42decb3",
+      "bytes": 24806
     },
     {
       "path": "source/artifact_registry/analysis_compatibility.py",
@@ -4352,8 +4352,8 @@
     },
     {
       "path": "source/memorive_review/exam.py",
-      "sha256": "f6ffc0db70575c002bf0302e89aed63c94832ed1724496b903cb211a1bbe873c",
-      "bytes": 15382
+      "sha256": "7292ad03b64b47d16ab2d0142a0ea1a43a5f2e86848c6a3da34eb2efe4fefb1d",
+      "bytes": 15985
     },
     {
       "path": "source/memorive_review/formats.py",
@@ -4537,8 +4537,8 @@
     },
     {
       "path": "source/memorive_settings/exam_score_history.py",
-      "sha256": "bbf9629b358a386ce56272d39ae7870870a0404d913f990fa666e39cc21242d9",
-      "bytes": 7439
+      "sha256": "af72f01c27eb445709a1d4b63b089caca388976c0b43ea65575078e2387aa7fd",
+      "bytes": 7449
     },
     {
       "path": "source/memorive_settings/exam_successor.py",
@@ -4692,8 +4692,8 @@
     },
     {
       "path": "source/memorive_settings/specialized_exam.py",
-      "sha256": "c0dafc7fc6dbc6e59438d71a6f516d28ba03a353ead961887de04a072be308c6",
-      "bytes": 155723
+      "sha256": "78bfa676f8a95f453ef010a7b349900ff7743bd27928e3e4c5c7d641b8704e77",
+      "bytes": 155779
     },
     {
       "path": "source/memorive_settings/store.py",
@@ -4707,8 +4707,8 @@
     },
     {
       "path": "source/memorive_settings/tiered_exam.py",
-      "sha256": "a09cdc03d407d6bc88d6f561544b661ac225a208b10f4193e0874e0f68021e4b",
-      "bytes": 19466
+      "sha256": "9640883f2928f9dce0bca17d02aff4d7f1d0ae3a4f5770dd2cf3ff48fc873a2c",
+      "bytes": 19476
     },
     {
       "path": "source/memorive_settings/user_preferences.py",
@@ -4727,13 +4727,13 @@
     },
     {
       "path": "source/memorive_settings/workflow_exam.py",
-      "sha256": "77c078847f435046a634f7c3a0b3002fd3354b9868c8a6be283db3e2fb4c495d",
-      "bytes": 627732
+      "sha256": "343eacd96d6d17a86d2ceb4a13c69372e8247637091bb4e7c61db0c1f356243f",
+      "bytes": 627810
     },
     {
       "path": "source/memorive_settings/workflow_exam_runner.py",
-      "sha256": "7f7d78da634b0b94ac3c0dedd3531d7972ae713708a40f6f48103dac3f5b2ef2",
-      "bytes": 91381
+      "sha256": "b8ece99dd60c2069c9241fde5bdcb0b37a44fc0de20e7c3d5c9d98405a66dae0",
+      "bytes": 91395
     },
     {
       "path": "source/memorive_source_language.py",

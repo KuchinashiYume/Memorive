@@ -10,7 +10,8 @@ from .store import SettingsStore
 
 def target_identity(target):
     from .cli_templates import is_custom,configuration_identity
-    if is_custom(target):return canonical_sha256({'kind':'CLI','configuration':configuration_identity(target,target)})
+    if is_custom(target):
+        return canonical_sha256({'kind':'CLI','configuration':configuration_identity(target,target)})
     return canonical_sha256(dict(target))
 
 class ExamScoreHistory:
