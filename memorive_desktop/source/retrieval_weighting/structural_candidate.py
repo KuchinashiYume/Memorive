@@ -1,4 +1,8 @@
-"""Gold-free structural candidate builder for the SEMANTIC-AGGREGATION A fixture."""
+"""Builds the structural candidate evidence for a field-vector retrieval test from public inputs only,
+without the reference answers (build_structural_observed). Part of the field-vector and shadow
+ranking tools, run through python -m retrieval_weighting (see DEVELOPING.md); the app does not call
+it.
+"""
 
 from __future__ import annotations
 

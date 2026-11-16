@@ -1,4 +1,6 @@
-"""Fail-closed exception types for the isolated ServiceContracts candidate."""
+"""The errors of the field-vector tools (FieldVectorError and its subclasses); each carries a fixed
+code and context that is safe to show.
+"""
 
 from __future__ import annotations
 

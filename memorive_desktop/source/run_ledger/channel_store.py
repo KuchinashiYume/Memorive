@@ -1,4 +1,6 @@
-"""Sandbox-bound append-only store for CHANNEL-ACCOUNTING channel attempt records."""
+"""Append-only store of channel attempt records with a single writer, kept inside the folder it is
+given (ChannelLedgerStore). Nothing in the app uses it yet.
+"""
 
 from __future__ import annotations
 

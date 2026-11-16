@@ -7536,8 +7536,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/errors.py",
-      "sha256": "bd6a6c4bc9d387f90bc89ec0dcd8a8fc05b798a0120a18abff64ee152e82a4fa",
-      "bytes": 1649
+      "sha256": "154116d6b0ccff61028d72b9f7f91f9baf6a2f98e666bfaa3b265152ff0b8ed9",
+      "bytes": 1715
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/field_registry.py",
@@ -7576,8 +7576,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/research_policy.py",
-      "sha256": "535668c17bb354e6f03911875eda073719425a31c9980242dd89840862bc42e4",
-      "bytes": 16007
+      "sha256": "244a232189596e52904680b2f8110067ea75440921c4e4e643dbb66cecdaa1d3",
+      "bytes": 16257
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/research_ranking.py",
@@ -7611,8 +7611,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/retrieval_calibration_route_profile.py",
-      "sha256": "50e834bebb0eecb6db61ad471fd455253fb83c26cec3ae0962022317959b6256",
-      "bytes": 3119
+      "sha256": "814fd95fab0f278b5adfff61fe3ccdb59c7eee35bc1d3041b1efb387bb6695a2",
+      "bytes": 3220
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/__main__.py",
@@ -7626,8 +7626,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/candidate_union.py",
-      "sha256": "3e86fcc5dbe35d25992bf5b0623444e7ffc5ab3bf1c0c71b625d1f10b8650e33",
-      "bytes": 14261
+      "sha256": "36e5ecbf7ea720c3736370684b30fc8fdd6742d412db2f52ce2c0750774fb8b1",
+      "bytes": 14435
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/cli.py",
@@ -7641,13 +7641,13 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/derived_penalty.py",
-      "sha256": "289ca0892ad04f026b65fc37c085ee7d4a46a5e5a496243c10c219493883525c",
-      "bytes": 15306
+      "sha256": "5349c167c99317b3d7a20ee3286ec76118b1701520fd38ea202e8773c5cfbc74",
+      "bytes": 15517
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/field_search.py",
-      "sha256": "adebd37302386d83e2297891a1d2423a321baeb01b19937cb2499747185a2545",
-      "bytes": 6885
+      "sha256": "fdb5c32ab544da7c58eeb1b41e68f874b4b24bc3789940a6e299fdbd8e5b1a65",
+      "bytes": 7123
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/providers.py",
@@ -7656,8 +7656,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/semantic_field_profiles.py",
-      "sha256": "53afbcc0e77ecbb71927178eea7d13061f3db68010e7ee5a9dc859a5e80adce6",
-      "bytes": 22451
+      "sha256": "212a599ba023fc794061056819b86580771aea7e8e47905ba4d2f8e9f147e2cc",
+      "bytes": 22583
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/semantic_field_search.py",
@@ -7666,8 +7666,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/semantic_shadow_contracts.py",
-      "sha256": "d8fd5ac064505588fc1db37e093333498ea646fc5be91c62060321337b72c3c8",
-      "bytes": 16766
+      "sha256": "85e009bf7345cc2a60c57dd87e1fbbb7a2c07a56884ac8aadf7766bcb26bd383",
+      "bytes": 17094
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/source_snapshot.py",
@@ -7676,8 +7676,8 @@
     },
     {
       "path": "memorive_desktop/source/retrieval_weighting/structural_candidate.py",
-      "sha256": "3522fd774c23eb1d4b15acedfb1a5478f7b819c947051959569032c47243fab5",
-      "bytes": 11427
+      "sha256": "5980b4b24659ba15d404c3e6ceab810cfddcd837e6922cdc6fc22033029669c2",
+      "bytes": 11652
     },
     {
       "path": "memorive_desktop/source/run_ledger/__init__.py",
@@ -7711,18 +7711,18 @@
     },
     {
       "path": "memorive_desktop/source/run_ledger/writer_lock.py",
-      "sha256": "f941558c2a87c207eee5503c254e475c681df1435f19a0cb085174d7b604a1c7",
-      "bytes": 13898
+      "sha256": "f08c2d6feebcd8f519a1d8b64cf6bea71a52906314772920dd176318bdf6866a",
+      "bytes": 14072
     },
     {
       "path": "memorive_desktop/source/run_ledger/closure.py",
-      "sha256": "5b55ed0f910bea9c0a9b95a8154d0c4440bea4fa96c82c19f2ac9562b447361a",
-      "bytes": 2860
+      "sha256": "15658b626e42589b9c08b47e47acccdf9213140532d58916fffabfe788f60c63",
+      "bytes": 2978
     },
     {
       "path": "memorive_desktop/source/run_ledger/core_adapter.py",
-      "sha256": "b1376da7cfbe3998fe7b8a1a6050bd316eef75863c62002849c7ee7d30efa02f",
-      "bytes": 17963
+      "sha256": "28cc57d53019f57ba49ddaeb72add28e7dcbfdb578441e6c8aa5ca81558c4d5a",
+      "bytes": 18080
     },
     {
       "path": "memorive_desktop/source/run_ledger/lifecycle.py",
@@ -7741,13 +7741,13 @@
     },
     {
       "path": "memorive_desktop/source/run_ledger/channel_evidence.py",
-      "sha256": "676ef4ddc8ad4088c21c0589d50a88bf19d6cf2e2f14679316438fa15d35e399",
-      "bytes": 39799
+      "sha256": "cc7b8ef07f0d04b8ee2e30b8c48cbd252f64beea1c60138645a0d5c45077a723",
+      "bytes": 39907
     },
     {
       "path": "memorive_desktop/source/run_ledger/channel_store.py",
-      "sha256": "4276960ce2a2c18412ebff2eb50b38b324e586c5f51f864be3a1c0d5b38f1113",
-      "bytes": 8701
+      "sha256": "598eb38230b1a34f9a35121cd60adc3041ad7c71a531a38f6fc40f2904aa47c8",
+      "bytes": 8780
     },
     {
       "path": "memorive_desktop/source/run_ledger/cost_routing_advisory_ledger.py",
@@ -7756,8 +7756,8 @@
     },
     {
       "path": "memorive_desktop/source/run_ledger/cost_routing_historical_recovery.py",
-      "sha256": "c4bd045f3de4bb125229a2a6cf05c4307f0cd3ee5081c9704ef5c427b547f28b",
-      "bytes": 9603
+      "sha256": "9e6ed43975a425ce1d0b046c0110df864db49456e7c833dfdb42c5267ce5e5fc",
+      "bytes": 9700
     },
     {
       "path": "memorive_desktop/source/run_ledger/recovery.py",
@@ -7966,7 +7966,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "e4f21c8ec9b9990b474e61d0e6eb29c1aadc5b99972d1d2f5088313a7eef4167",
+      "sha256": "0e3f8e6c3c29dd1239e4f5d177f9461ca144ab083057a09cb7029a31c17d7a71",
       "bytes": 253784
     },
     {

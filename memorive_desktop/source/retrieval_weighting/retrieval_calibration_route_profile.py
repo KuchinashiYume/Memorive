@@ -1,4 +1,6 @@
-"""Qualification-only Installation route profiles and fail-closed fallback decisions."""
+"""Retrieval route profiles for the calibration tools and the fallback decision between them
+(resolve_route, route_matrix); retrieval/retrieval_calibration/profile_compare.py uses it.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass

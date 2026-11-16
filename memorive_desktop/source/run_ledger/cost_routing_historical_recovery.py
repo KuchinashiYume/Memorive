@@ -1,7 +1,8 @@
-"""COST-ROUTING public-safe historical evidence recovery and classification.
+"""Turns historical model-call records into cost-routing evidence: each record is classified as exact,
+partial or unknown from what it contains (recover_historical_record). Nothing in the app calls it.
 
-The module is deliberately pure: it does not read provider services, mutate an
-RUNTIME_LOG ledger, or infer missing identity fields.  Callers must supply source
+It reads no provider service, changes no runtime-log ledger and does not infer missing
+identity fields.  Callers must supply source
 records and receive deterministic append-ready projections.
 """
 

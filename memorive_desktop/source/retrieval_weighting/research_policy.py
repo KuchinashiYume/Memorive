@@ -1,4 +1,8 @@
-"""Configurable desktop successor; historical Research frozen policies stay immutable."""
+"""The research ranking policy the user sets: the weights and the interest settings (ResearchPolicy),
+and how the signals are combined (aggregate). Research Q&A (memorive_research_workspace/service.py),
+the research runtime's recent interests and research_ranking.py use it; policies saved by earlier
+versions are read as they are.
+"""
 import math,copy,re
 from datetime import datetime,timezone
 from memorive_research_workspace.store import digest,now,packed

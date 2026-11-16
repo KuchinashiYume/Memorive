@@ -1,4 +1,9 @@
-"""Terminal-receipt-gated r0.2 contracts for the semantic Shadow successor."""
+"""Checks that a semantic field profile passed its qualification: the final receipt
+(validate_semantic_profile_terminal_receipt) and the retrieval policy snapshot that ties profile,
+overlay and receipt together (validate_semantic_retrieval_policy_snapshot). Part of the field-vector
+and shadow ranking tools, run through python -m retrieval_weighting (see DEVELOPING.md); the app
+does not call it.
+"""
 
 from __future__ import annotations
 

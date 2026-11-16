@@ -1,8 +1,9 @@
-"""Strict additive contracts for the SEMANTIC-AGGREGATION semantic field successor.
+"""Checks semantic field profiles and their embedding overlays: embeddings computed beforehand by a
+local Ollama run, for the field-vector shadow retrieval. Part of the field-vector and shadow ranking
+tools, run through python -m retrieval_weighting (see DEVELOPING.md); the app does not call it.
 
-The predecessor ``field_vectors`` module deliberately accepts only the ServiceContracts
-fixture-hash profile.  This module is a separate successor surface for
-precomputed embeddings from an explicitly authorized loopback Ollama run.  It
+field_vectors.py accepts only the fixture-hash profile; this module takes embeddings
+computed beforehand by an explicitly authorized local Ollama run.  It
 performs no embedding, model, network or index operation; it only verifies
 immutable JSON-domain profile and overlay artifacts.
 

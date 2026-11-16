@@ -1,6 +1,8 @@
-"""Deterministic legacy/field candidate union for SEMANTIC-AGGREGATION Shadow retrieval.
+"""Builds one candidate pool for the field-vector shadow retrieval from the plain candidates and the
+field candidates (build_unified_candidate_pool). Part of the field-vector and shadow ranking tools,
+run through python -m retrieval_weighting (see DEVELOPING.md); the app does not call it.
 
-The union is deliberately a pool-construction control plane.  Reciprocal Rank
+The union only builds the pool.  Reciprocal Rank
 Fusion (RRF) is computed from ranks only, retained as pool provenance, and is
 never exposed as a seventh score provider or as a final ranking weight.
 """

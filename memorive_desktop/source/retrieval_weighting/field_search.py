@@ -1,4 +1,8 @@
-"""Deterministic, offline search over frozen FIELD-VECTORS field-vector records."""
+"""Searches stored field-vector records offline: ranks the eligible records by dot product for one
+embedding profile (search_field_vectors). structural_candidate.py uses it. Part of the field-vector
+and shadow ranking tools, run through python -m retrieval_weighting (see DEVELOPING.md); the app
+does not call it.
+"""
 
 from __future__ import annotations
 

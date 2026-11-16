@@ -1,4 +1,7 @@
-"""Authority-only DerivedPenalty and fail-closed override contract."""
+"""The penalty on derived knowledge (DerivedPenalty): records, their checks against the policy in a
+retrieval snapshot, and apply_authority_penalty, which lowers only the authority score and leaves
+relevance as it is. knowledge_feedback/penalty.py and aggregation.py use it.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,6 @@
-"""Read-only adapter for the frozen Core round-7 evidence package."""
+"""Reads a saved document-processing evidence package (its manifests and ledgers) and reports only the
+facts they support (CoreEvidencePackageAdapter). Nothing in the app calls it.
+"""
 
 from __future__ import annotations
 

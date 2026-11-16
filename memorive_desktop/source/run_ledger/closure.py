@@ -1,4 +1,6 @@
-"""Frozen-paper closure and retry/repair policy checks."""
+"""Checks on a run over a fixed set of papers: every paper ends with exactly one outcome, and a failed
+answer is not hidden by an ordinary retry. core_adapter.py uses it.
+"""
 
 from __future__ import annotations
 
