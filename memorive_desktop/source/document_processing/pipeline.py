@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
+from memorive_front_matter import split_front_matter
 from runtime_log import log, log_error
 from model_gateway.errors import GatewayError
 
@@ -73,8 +74,8 @@ def _read_frontmatter(rawmd_path) -> dict:
         log_error(_MODULE, "RawMD 不存在", context={
             "step": "读 RawMD frontmatter", "error": f"RawMD 不存在: {p}", "source": str(p)})
         raise DocumentProcessingError(f"RawMD 不存在: {p}")
-    parts = p.read_text(encoding="utf-8").split("---", 2)
-    if len(parts) < 3:
+    parts = split_front_matter(p.read_text(encoding="utf-8"))
+    if parts is None:
         log_error(_MODULE, "RawMD frontmatter 非法", context={
             "step": "读 RawMD frontmatter", "error": "未以 --- frontmatter --- 开头(split 后不足 3 段)",
             "source": str(p)})

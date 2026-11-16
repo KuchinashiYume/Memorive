@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 import yaml
+
+from memorive_front_matter import split_front_matter
 
 from .errors import AdapterError
 from .registry_v2 import ArtifactRegistry
@@ -24,8 +25,7 @@ from .schema_v2 import unresolved_requirement
 from .errors import FrontmatterParseError
 import copy
 
-_FENCE = re.compile(r"(?m)^---[ \t]*\r?$")
-_TAGS = ("PDF", "RawMD", "CleanMD", "Chunks", "Card", "Analysis")
+_TAGS =("PDF", "RawMD", "CleanMD", "Chunks", "Card", "Analysis")
 _TYPES = {
     "PDF": "source_pdf",
     "RawMD": "raw_markdown",
@@ -53,13 +53,13 @@ def read_frontmatter(path: Path | str) -> dict[str, Any]:
 
     source = Path(path)
     text = source.read_text(encoding="utf-8")
-    fences = list(_FENCE.finditer(text))
-    if len(fences) < 2 or fences[0].start() != 0:
+    parts = split_front_matter(text)
+    if parts is None or parts[0]:
         raise FrontmatterParseError(
             f"frontmatter requires two standalone fences at file start: {source}"
         )
     try:
-        value = yaml.safe_load(text[fences[0].end() : fences[1].start()])
+        value = yaml.safe_load(parts[1])
     except yaml.YAMLError as exc:
         raise FrontmatterParseError(f"invalid YAML frontmatter: {source}: {exc}") from exc
     if not isinstance(value, dict):

@@ -25,6 +25,7 @@ import re
 from pathlib import Path
 
 import yaml
+from memorive_front_matter import split_front_matter
 from runtime_log import log, log_error
 
 from .config import library_root, now_iso
@@ -137,14 +138,14 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
         raise DocumentProcessingError(f"CleanMD 不存在: {p}")
 
     text = p.read_text(encoding="utf-8")
-    # frontmatter 泄漏护栏:CleanMD 必以 --- frontmatter 开头(≥2 个 ---),否则拒切,防 frontmatter 当正文
-    if not text.startswith("---") or text.count("---") < 2:
+    # CleanMD 必以 --- frontmatter --- 开头,否则拒切,防 frontmatter 当正文
+    parts = split_front_matter(text)
+    if parts is None or parts[0]:
         log_error("DocumentChunk", "CleanMD frontmatter 非法", context={
             "step": "chunk",
             "error": "CleanMD 未以 --- frontmatter --- 开头;拒绝切块以防 frontmatter 混入正文。",
             "source": str(p)})
         raise DocumentProcessingError("CleanMD frontmatter 非法(需 --- … --- 开头)")
-    parts = text.split("---", 2)
     fm = yaml.safe_load(parts[1]) or {}
     from .chinese_structure import structure_lines, merge_wrapped_paragraphs, is_running_heading
     body = structure_lines(parts[2])

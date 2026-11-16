@@ -13,6 +13,7 @@ import uuid
 
 import yaml
 
+from memorive_front_matter import split_front_matter
 from document_processing.naming import display_title, file_name
 from evidence_extraction.card import CONTENT_FIELDS, LIST_FIELDS, build_card, detect_card_lang, write_card
 from evidence_extraction.config import CARD_SCHEMA_VERSION, INPUT_MAX_CHARS, now_minute
@@ -86,8 +87,8 @@ def _atomic_text(path: Path, value: str) -> None:
 
 
 def _frontmatter(path: Path) -> dict[str, Any]:
-    parts = path.read_text(encoding="utf-8").split("---", 2)
-    if len(parts) < 3:
+    parts = split_front_matter(path.read_text(encoding="utf-8"))
+    if parts is None:
         raise RuntimeError(f"Capabilities_SEGMENT_CARD_FRONTMATTER_INVALID:{path}")
     value = yaml.safe_load(parts[1])
     if not isinstance(value, dict):

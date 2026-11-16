@@ -26,6 +26,7 @@ from pathlib import Path
 
 import yaml
 
+from memorive_front_matter import split_front_matter
 from runtime_log import log_reason
 from knowledge_admission import knowledge_admission_log
 from knowledge_admission.card_io import read_status
@@ -42,7 +43,6 @@ _ENV = {
     "per_card": ("MEMORIVE_RETRIEVAL_PER_CARD_CAP", 3),
 }
 _CANON_EMBED = "bge-m3"                          # query 必与 chunk 同向量空间(口径⑥)
-_FENCE = re.compile(r"(?m)^---[ \t]*\r?$")       # frontmatter fence(best-effort 读 by_field 用)
 _MAX_DROPPED_EXAMPLES = 8                        # RUNTIME_LOG 附少量剔除样例(计数为主,不全量)
 _OWNERSHIP_VALUES = {"self", "entrusted", "unknown"}
 _TRIAL_CARD_SUFFIX = re.compile(r"__v\d+trial$")  # 保留的蒸馏试验旁证卡，不是当前活卡
@@ -268,10 +268,10 @@ def _read_frontmatter(card_path: Path) -> dict | None:
     """best-effort 读 frontmatter(首两独占行 --- 之间 → yaml)。失败返 None、绝不抛。"""
     try:
         text = card_path.read_bytes().decode("utf-8")
-        fences = list(_FENCE.finditer(text))
-        if len(fences) < 2:
+        parts = split_front_matter(text)
+        if parts is None:
             return None
-        fm = yaml.safe_load(text[fences[0].end():fences[1].start()])
+        fm = yaml.safe_load(parts[1])
         return fm if isinstance(fm, dict) else None
     except Exception:
         return None

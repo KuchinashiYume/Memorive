@@ -5,14 +5,9 @@ other byte of the file stays as it was, line endings included. The new text goes
 file first, is read back, and only then replaces the card.
 
 The front matter runs from a "---" line at the very start of the file to the next line that is
-only "---" (trailing spaces and a CR allowed), so a value such as "title: A---B" does not end it.
-Cards are written by yaml.dump, so review_status is a plain unquoted value; any other form is
-refused rather than rewritten.
-
-Known issue elsewhere: five other readers still cut the front matter with split("---", 2), so a
-value containing "---" ends it early there: document_processing/document_chunk_chunk.py,
-document_processing/document_clean_clean.py, document_processing/pipeline.py,
-evidence_extraction/distill.py and memorive_workflow/segmented_distill.py.
+only "---" (memorive_front_matter.py, shared with the RawMD and CleanMD readers), so a value such
+as "title: A---B" does not end it. Cards are written by yaml.dump, so review_status is a plain
+unquoted value; any other form is refused rather than rewritten.
 """
 from __future__ import annotations
 
@@ -23,10 +18,11 @@ from pathlib import Path
 
 import yaml
 
+from memorive_front_matter import front_matter_fences
+
 from .errors import CardStateError
 from .states import STATES
 
-_FENCE = re.compile(r"(?m)^---[ \t]*\r?$")
 # Group 3 keeps the end of the line, so a CRLF card stays CRLF.
 _STATUS_LINE = re.compile(r"^(review_status:[ \t]*)([A-Za-z_]+)([ \t]*\r?)$", re.MULTILINE)
 
@@ -38,10 +34,10 @@ def _read_text(card_path: Path) -> str:
 
 def _split_frontmatter(card_path: Path, text: str) -> tuple[str, str, str]:
     """(opening fence, front matter, the rest), which joined give the text back byte for byte."""
-    fences = list(_FENCE.finditer(text))
-    if len(fences) < 2 or fences[0].start() != 0:
+    fences = front_matter_fences(text)
+    if fences is None or fences[0].start() != 0:
         raise CardStateError(f"卡片 frontmatter 非法(需以独占一行 --- 开头、且有闭合 ---): {card_path}")
-    f1, f2 = fences[0], fences[1]
+    f1, f2 = fences
     return text[:f1.end()], text[f1.end():f2.start()], text[f2.start():]
 
 

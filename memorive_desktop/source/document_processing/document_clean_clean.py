@@ -17,6 +17,7 @@ import re
 from pathlib import Path
 
 import yaml
+from memorive_front_matter import split_front_matter
 from runtime_log import log, log_error
 
 from .config import library_root, now_iso
@@ -136,9 +137,9 @@ def _strip_publisher_boilerplate(
 
 
 def _split_frontmatter(text: str):
-    if not text.startswith("---"):
+    parts = split_front_matter(text)
+    if parts is None or parts[0]:
         raise DocumentProcessingError("RawMD 缺 frontmatter(--- 开头);DocumentClean 需要 DocumentConvert 产物。")
-    parts = text.split("---", 2)
     fm = yaml.safe_load(parts[1]) or {}
     body = parts[2].lstrip("\n")
     return fm, body

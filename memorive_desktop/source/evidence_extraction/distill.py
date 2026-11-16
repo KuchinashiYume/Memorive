@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
+from memorive_front_matter import split_front_matter
 from runtime_log import log, log_error
 from model_gateway import call
 from model_gateway.errors import GatewayError
@@ -116,8 +117,8 @@ def _locate(source):
 
 
 def _read_frontmatter(cleanmd: Path) -> dict:
-    parts = cleanmd.read_text(encoding="utf-8").split("---", 2)
-    if len(parts) < 3:
+    parts = split_front_matter(cleanmd.read_text(encoding="utf-8"))
+    if parts is None:
         _fail(SourceInvalidError, f"CleanMD frontmatter 非法(需 --- … --- 开头): {cleanmd}", "distill/读CleanMD")
     fm = yaml.safe_load(parts[1])
     if not isinstance(fm, dict):
