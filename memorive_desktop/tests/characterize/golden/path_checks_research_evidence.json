@@ -8,7 +8,7 @@
  },
  "junction_itself": {
   "error": "ValueError",
-  "message": "SOURCE_OUTSIDE_VAULT"
+  "message": "SOURCE_LINK_REJECTED"
  },
  "missing_file": {
   "error": "FileNotFoundError"
@@ -36,11 +36,12 @@
   "message": "SOURCE_ROOT_UNAVAILABLE"
  },
  "through_junction_inside": {
-  "result": "<tmp>/root/docs/a.md"
+  "error": "ValueError",
+  "message": "SOURCE_LINK_REJECTED"
  },
  "through_junction_to_outside": {
   "error": "ValueError",
-  "message": "SOURCE_OUTSIDE_VAULT"
+  "message": "SOURCE_LINK_REJECTED"
  },
  "unsupported_type": {
   "result": "<tmp>/root/tool.exe"

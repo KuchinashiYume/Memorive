@@ -65,10 +65,11 @@ def safe_path(root,path):
     for part in rel.parts:
         if part.startswith('.') or part in DENY_DIRS:
             raise ValueError('SOURCE_PRIVATE_DIRECTORY')
+        # The member itself, not where it points: only the levels above it, already checked, are resolved.
+        cur_io=windows_io_path(cur)/part
         cur/=part
-        cur_io=windows_io_path(cur)
         info=cur_io.lstat()
-        if cur.is_symlink() or cur_io.is_symlink() or getattr(info,'st_file_attributes',0)&getattr(stat,'FILE_ATTRIBUTE_REPARSE_POINT',0x400):
+        if stat.S_ISLNK(info.st_mode) or getattr(info,'st_file_attributes',0)&getattr(stat,'FILE_ATTRIBUTE_REPARSE_POINT',0x400):
             raise ValueError('SOURCE_LINK_REJECTED')
     resolved=path.resolve(strict=False)
     if not resolved.is_relative_to(root) or not windows_io_path(resolved).is_file():

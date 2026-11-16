@@ -41,6 +41,9 @@ def _snapshot(path, data):
 def load_bundle(manifest):
     """Validate all bytes and ranges before mutating a conversation or its index."""
     path = Path(manifest).absolute()
+    # safe_path compares against the resolved root; resolve only the folder, so a folder reached
+    # through a junction or written as a short (8.3) name matches, and the file itself is still checked.
+    path = path.parent.resolve(strict=False) / path.name
     path = safe_path(path.parent, path)
     if path.stat().st_size > 1024 * 1024:
         raise ValueError('SKILL_MANIFEST_TOO_LARGE')

@@ -4232,8 +4232,8 @@
     },
     {
       "path": "source/memorive_research_workspace/evidence.py",
-      "sha256": "e2d285c3998ee1b3f9c70906d4cef9ee22c387ac30aa88f752502f0222efeb8d",
-      "bytes": 25131
+      "sha256": "d1153aac7130c873ec94cb2679cf4c065c0a816f274f6e52bddcbe313c8e8259",
+      "bytes": 25230
     },
     {
       "path": "source/memorive_research_workspace/handoffs.py",
@@ -4272,8 +4272,8 @@
     },
     {
       "path": "source/memorive_research_workspace/skill_bridge.py",
-      "sha256": "4bda751c835af2786d13c8508144500392351830e1e5bafb71543fe80f1db468",
-      "bytes": 17964
+      "sha256": "f9e86a2ccf08658c4c22c9e96efe15cb583f4733f82de4246deb10a2c69866a2",
+      "bytes": 18223
     },
     {
       "path": "source/memorive_research_workspace/skill_contract.py",

@@ -6,10 +6,17 @@ any change to how links are handled. The folder layout is built in tmp_path; two
 point one folder inside and one outside the allowed root (Windows only: mklink /J needs no
 administrator rights). Paths are shown relative to tmp_path.
 
-Found while writing this: both checks look for reparse points on the \\?\ form of the path
-(windows_io_path), where Windows does not report a folder junction, so a file reached through
-a junction is accepted when its real location is inside the allowed root.
+safe_path reads each level's own attributes, so a file reached through a junction is refused
+wherever the junction points. The inbox check still looks for reparse points on the resolved
+\\?\ form of the path (windows_io_path), where Windows does not report a folder junction, so it
+accepts a file reached through a junction whose real location is inside the allowed root.
+
+load_bundle resolves the folder of a memo-source manifest before safe_path compares it with the
+resolved root, so a bundle in a folder reached through a junction or named by a short (8.3)
+path loads.
 """
+import ctypes
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -18,6 +25,8 @@ import pytest
 
 from memorive_inbox.path_policy import PathSecurityPolicy
 from memorive_research_workspace.evidence import safe_path
+from memorive_research_workspace.skill_bridge import load_bundle
+from memorive_research_workspace.store import digest
 from tests.characterize.golden import check, outcome
 
 HERE = Path(__file__).parent
@@ -95,3 +104,35 @@ def test_inbox_import_inspect(tree):
     cases["allowlist_includes_outside"] = _clean(outcome(
         PathSecurityPolicy([tree / "root", tree / "outside"], tree / "destination").inspect, str(tree / "root/linked_out/d.md")), tree)
     check("path_checks_inbox_import", cases, HERE)
+
+
+def _bundle(folder):
+    """A memo-source bundle of one Markdown file; returns its manifest."""
+    folder.mkdir(parents=True)
+    text = b"# Title\nOne line of text.\n"
+    (folder / "paper.md").write_bytes(text)
+    (folder / "paper.raw.md").write_bytes(text)
+    sha = digest(text)
+    manifest = {"schema": "memo-source/1", "source_sha256": sha,
+                "original": {"path": "paper.md", "sha256": sha}, "raw": {"path": "paper.raw.md", "sha256": sha},
+                "converter": {"name": "fixture"}, "warnings": [], "pages": [{"page": None, "line_start": 1, "line_end": 2}]}
+    (folder / "memo-source.json").write_text(json.dumps(manifest), encoding="utf8")
+    return folder / "memo-source.json"
+
+
+def test_a_bundle_in_a_folder_reached_through_a_junction_loads(tmp_path):
+    manifest = _bundle(tmp_path / "real" / "bundle")
+    _junction(tmp_path / "alias", tmp_path / "real")
+    _value, files, _lines = load_bundle(tmp_path / "alias" / "bundle" / "memo-source.json")
+    assert files["raw"][0] == manifest.parent.resolve() / "paper.raw.md"
+
+
+def test_a_bundle_named_by_a_short_path_loads(tmp_path):
+    folder = tmp_path / "a folder with a long name"
+    manifest = _bundle(folder / "bundle")
+    buffer = ctypes.create_unicode_buffer(1024)
+    ctypes.windll.kernel32.GetShortPathNameW(str(folder), buffer, len(buffer))
+    if not buffer.value or Path(buffer.value).name == folder.name:
+        pytest.skip("this volume makes no 8.3 names")
+    _value, files, _lines = load_bundle(Path(buffer.value) / "bundle" / "memo-source.json")
+    assert files["original"][0] == manifest.parent.resolve() / "paper.md"
