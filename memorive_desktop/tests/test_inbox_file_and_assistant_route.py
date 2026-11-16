@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import pytest
 
 from runtime import ProductApi
+from memorive_desktop_assistant.desktop import AssistantDesktop
 
 
 class _Service:
@@ -120,21 +121,21 @@ class _Window:
 @pytest.mark.parametrize("route", ["home", "settings", "messages"])
 def test_the_assistant_switches_to_a_known_page_and_raises_the_window(route):
     raised = []
-    api = SimpleNamespace(_window=_Window(), _bring_main_window_to_foreground=lambda: raised.append(True))
-    ProductApi._activate_main_route(api, route)
-    assert api._window.scripts == ["window.__Desktop_INTEGRATED_APP__.activate(" + json.dumps(route) + ")"]
+    api = SimpleNamespace(main_window=_Window(), bring_main_window_to_foreground=lambda: raised.append(True))
+    AssistantDesktop._activate_main_route(api, route)
+    assert api.main_window.scripts == ["window.__Desktop_INTEGRATED_APP__.activate(" + json.dumps(route) + ")"]
     assert raised == [True]
 
 
 @pytest.mark.parametrize("route", ["library", "home');alert(1);('", "", None])
 def test_the_assistant_cannot_open_any_other_page_or_inject_script(route):
-    api = SimpleNamespace(_window=_Window(), _bring_main_window_to_foreground=lambda: None)
+    api = SimpleNamespace(main_window=_Window(), bring_main_window_to_foreground=lambda: None)
     with pytest.raises(ValueError, match="ASSISTANT_MAIN_ROUTE_INVALID"):
-        ProductApi._activate_main_route(api, route)
-    assert api._window.scripts == []
+        AssistantDesktop._activate_main_route(api, route)
+    assert api.main_window.scripts == []
 
 
 def test_switching_needs_the_main_window():
-    api = SimpleNamespace(_window=None, _bring_main_window_to_foreground=lambda: None)
+    api = SimpleNamespace(main_window=None, bring_main_window_to_foreground=lambda: None)
     with pytest.raises(RuntimeError, match="PRODUCT_WINDOW_NOT_ATTACHED"):
-        ProductApi._activate_main_route(api, "home")
+        AssistantDesktop._activate_main_route(api, "home")

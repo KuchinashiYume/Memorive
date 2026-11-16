@@ -130,20 +130,20 @@ def test_repeated_idle_projection_preserves_the_existing_blink_deadline() -> Non
 
 
 def test_assistant_move_uses_the_native_ui_thread_when_a_form_is_attached() -> None:
-    runtime = (DESKTOP_ROOT.parents[1] / "source" / "runtime.py").read_text(encoding="utf-8")
-    mover = runtime.split("def _move_assistant_window_native", 1)[1].split(
-        "def assistant_move_window", 1
+    runtime = (DESKTOP_ROOT.parents[1] / "source" / "memorive_desktop_assistant" / "desktop.py").read_text(encoding="utf-8")
+    mover = runtime.split("def _move_window_native", 1)[1].split(
+        "def move_window", 1
     )[0]
     assert "native.Invoke(Action(apply_move))" in mover
     assert "native.Left = x" in mover
     assert "native.Top = y" in mover
-    public_move = runtime.split("def assistant_move_window", 1)[1].split(
-        "def assistant_shortcut", 1
+    public_move = runtime.split("def move_window", 1)[1].split(
+        "def shortcut", 1
     )[0]
-    assert "self._move_assistant_window_native(" in public_move
+    assert "self._move_window_native(" in public_move
     assert "native_width=visible_width" in public_move
     assert "native_height=visible_height" in public_move
-    assert "self._assistant_window.move(" not in public_move
+    assert "self.window.move(" not in public_move
 
 
 def test_transparency_probe_accounts_for_a_changing_underlay_without_accepting_a_box() -> None:

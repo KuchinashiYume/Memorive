@@ -14,7 +14,7 @@ for candidate in (ROOT / "product" / "desktop", ROOT / "source"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from runtime import ProductApi  # noqa: E402
+from memorive_desktop_assistant.desktop import AssistantDesktop  # noqa: E402
 
 
 class AssistantStub:
@@ -22,11 +22,11 @@ class AssistantStub:
         return None
 
 
-def make_api(path: Path) -> ProductApi:
-    api = object.__new__(ProductApi)
-    api._assistant_preferences_path = path
-    api._assistant = AssistantStub()
-    api._set_assistant_window_visibility = lambda visible: {"visible": visible, "status": "PASS"}
+def make_api(path: Path) -> AssistantDesktop:
+    api = object.__new__(AssistantDesktop)
+    api.preferences_path = path
+    api.controller = AssistantStub()
+    api._set_window_visibility = lambda visible: {"visible": visible, "status": "PASS"}
     return api
 
 
@@ -45,31 +45,31 @@ def stored_names(path: Path) -> list[str]:
 
 def test_first_save_works_without_an_existing_preferences_file(tmp_path: Path) -> None:
     path = tmp_path / "assistant_preferences_v3.json"
-    make_api(path)._assistant_preference_save(request(["a" * 20, "", ""]))
+    make_api(path).preference_save(request(["a" * 20, "", ""]))
     assert stored_names(path) == ["a" * 20, "", ""]
 
 
 def test_new_name_longer_than_20_characters_is_rejected(tmp_path: Path) -> None:
     path = tmp_path / "assistant_preferences_v3.json"
     api = make_api(path)
-    api._assistant_preference_save(request(["short", "", ""]))
+    api.preference_save(request(["short", "", ""]))
     with pytest.raises(ValueError, match="ASSISTANT_SHORTCUT_NAME_TOO_LONG"):
-        api._assistant_preference_save(request(["b" * 21, "", ""]))
+        api.preference_save(request(["b" * 21, "", ""]))
     assert stored_names(path) == ["short", "", ""]
 
 
 def test_existing_long_name_is_kept_until_it_is_edited(tmp_path: Path) -> None:
     path = tmp_path / "assistant_preferences_v3.json"
     api = make_api(path)
-    api._assistant_preference_save(request(["short", "", ""]))
+    api.preference_save(request(["short", "", ""]))
     value = json.loads(path.read_text(encoding="utf-8"))
     value["shortcut_entries"][0]["name"] = "c" * 30  # written by a version that allowed 40
     path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
 
-    api._assistant_preference_save(request(["c" * 30, "second", ""]))
+    api.preference_save(request(["c" * 30, "second", ""]))
     assert stored_names(path) == ["c" * 30, "second", ""]
     with pytest.raises(ValueError, match="ASSISTANT_SHORTCUT_NAME_TOO_LONG"):
-        api._assistant_preference_save(request(["d" * 30, "second", ""]))
+        api.preference_save(request(["d" * 30, "second", ""]))
 
 
 PROFILES = Path(os.environ["MEMORIVE_OLD_PROFILES"]) if os.environ.get("MEMORIVE_OLD_PROFILES") else None
@@ -83,9 +83,9 @@ def test_preferences_written_by_released_versions_load_and_resave(tmp_path: Path
         path.parent.mkdir()
         path.write_bytes(source.read_bytes())
         api = make_api(path)
-        loaded = api._load_assistant_preferences()
+        loaded = api.load_preferences()
         assert len(loaded["shortcut_entries"]) == 3
-        api._assistant_preference_save({k: loaded[k] for k in ("enabled", "shortcut_entries", "reminder_scope", "hide_sensitive_names")})
-        assert api._load_assistant_preferences()["shortcut_entries"] == loaded["shortcut_entries"]
+        api.preference_save({k: loaded[k] for k in ("enabled", "shortcut_entries", "reminder_scope", "hide_sensitive_names")})
+        assert api.load_preferences()["shortcut_entries"] == loaded["shortcut_entries"]
         checked += 1
     assert checked >= 1

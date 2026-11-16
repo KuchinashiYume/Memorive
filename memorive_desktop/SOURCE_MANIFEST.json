@@ -212,8 +212,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "28c09731e59baff258c814b07257e527b3d4647bc3548adc7621b488ea1db449",
-      "bytes": 371832
+      "sha256": "09042fd04a3529bb0d9c11976933333e0261b12f7d59010e9224a16317b48199",
+      "bytes": 371857
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -3792,8 +3792,8 @@
     },
     {
       "path": "source/memorive_desktop_assistant/__init__.py",
-      "sha256": "f85ccad257d1dc47d756386d5f23687c0ec3e40d3102343bd10b0cac6f6d116a",
-      "bytes": 700
+      "sha256": "b6b3fbb2205b0321b9ccb9f603514c57abb62292f8e2ebabf66bac1058fd3539",
+      "bytes": 806
     },
     {
       "path": "source/memorive_desktop_assistant/controller.py",
@@ -3804,6 +3804,11 @@
       "path": "source/memorive_desktop_assistant/delivery.py",
       "sha256": "e7c9b76c42a502be631b160d4a35dd6079cb6cce44eb9ba63daba0483050e3a9",
       "bytes": 2429
+    },
+    {
+      "path": "source/memorive_desktop_assistant/desktop.py",
+      "sha256": "e905ae6256bcf5eb1a1fb2216fcc06be7866421ae69a6c673feb734eaa2cc259",
+      "bytes": 76216
     },
     {
       "path": "source/memorive_desktop_assistant/models.py",
@@ -6817,8 +6822,8 @@
     },
     {
       "path": "source/runtime.py",
-      "sha256": "dbfe96eb5bb3ce35f7fbcb40d17035c67414dc35ca4b03dc6a610ebdd8137a54",
-      "bytes": 221721
+      "sha256": "76291a1d321378bff6720b9a97b3a9d8429ed51e5c3d8b53f1a71101d3e29903",
+      "bytes": 149297
     },
     {
       "path": "source/runtime_log/__init__.py",

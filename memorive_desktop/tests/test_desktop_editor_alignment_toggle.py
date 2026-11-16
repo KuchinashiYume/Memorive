@@ -17,13 +17,14 @@ def _read(path: Path) -> str:
 
 
 def test_runtime_enumerates_all_monitors_and_persists_visible_bounds() -> None:
-    runtime = _read(DESKTOP_ROOT.parents[1] / "source" / "runtime.py")
+    # The desk assistant's window code is in memorive_desktop_assistant/desktop.py.
+    runtime = _read(DESKTOP_ROOT.parents[1] / "source" / "memorive_desktop_assistant" / "desktop.py")
     assert "EnumDisplayMonitors" in runtime
     assert "GetMonitorInfoW" in runtime
     assert "MONITORINFOEXW" in runtime
     assert "GetScaleFactorForMonitor" in runtime
     assert "GetDpiForMonitor" in runtime
-    assert "_refresh_assistant_display_topology" in runtime
+    assert "_refresh_display_topology" in runtime
     assert "target_area.dpi_percent" in runtime
     assert "native.SetBounds" in runtime
     assert "visible_bounds" in runtime

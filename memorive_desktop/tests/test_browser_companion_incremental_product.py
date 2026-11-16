@@ -18,6 +18,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
+from memorive_desktop_assistant.desktop import AssistantDesktop  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
 from memorive_desktop_assistant.models import AssistantWindowPlacement  # noqa: E402
 from memorive_desktop_assistant.placement import (  # noqa: E402
@@ -253,18 +254,18 @@ def test_first_assistant_placement_is_persisted_without_restore_action() -> None
 
     store = _ControlStore()
     assistant = _Assistant(store)
-    api = object.__new__(ProductApi)
-    api._lock = threading.RLock()
-    api._assistant_window = None
-    api._control_store = store
-    api._assistant = assistant
-    api._assistant_areas = (area,)
-    api._assistant_placement_class = AssistantWindowPlacement
-    api._assistant_clamp_placement = clamp_placement
-    api._assistant_visible_bounds = visible_bounds
+    api = object.__new__(AssistantDesktop)
+    api.lock = threading.RLock()
+    api.window = None
+    api.control_store = store
+    api.controller = assistant
+    api.areas = (area,)
+    api.placement_class = AssistantWindowPlacement
+    api.clamp_placement = clamp_placement
+    api.visible_bounds = visible_bounds
 
-    first = api.assistant_initial_placement()
-    second = api.assistant_initial_placement()
+    first = api.initial_placement()
+    second = api.initial_placement()
 
     assert first == second
     assert len(assistant.persisted) == 1

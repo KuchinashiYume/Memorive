@@ -119,8 +119,8 @@ def test_cancel_unavailable_never_reports_success(api, monkeypatch):
 
 
 def test_actual_message_poll_holds_until_render_ack(api):
-    preferences=api._load_assistant_preferences()
-    api._write_json_file(api._assistant_preferences_path,dict(preferences,reminder_scope='INCLUDE_ORDINARY'))
+    preferences=api._desk_assistant.load_preferences()
+    api._write_json_file(api._desk_assistant.preferences_path,dict(preferences,reminder_scope='INCLUDE_ORDINARY'))
     adapter=ProductConsoleAdapter(api, SimpleNamespace(data_root=api._state_dir.parent.parent,session_id='review-sample-regression'), threading.Event())
     for kind,animation in [('info','MESSAGE'),('error','ERROR')]:
         message=adapter.execute('message.test',{'kind':kind,'title':'Synthetic reminder','body':'No remote calls'},'msg-'+kind,False)
@@ -136,10 +136,10 @@ def test_actual_message_poll_holds_until_render_ack(api):
 
 def test_unacknowledged_message_claim_can_recover_after_presenter_restart(api):
     params={'locator':'memorive://job/recovery','reason_code':'MESSAGE_NEEDS_ATTENTION','animation_state':'ERROR','delivery_id':'message:recovery','reduced_motion':False}
-    api._assistant_deliveries.enqueue(params['delivery_id'],params)
+    api._desk_assistant.deliveries.enqueue(params['delivery_id'],params)
     assert api.claim_assistant_presentation_delivery(params)['status']=='CLAIMED'
     assert api.claim_assistant_presentation_delivery(params)['status']=='ALREADY_CONSUMED'
-    api._assistant_delivery_session='new-presenter-session'
+    api._desk_assistant.delivery_session='new-presenter-session'
     assert api.claim_assistant_presentation_delivery(params)['status']=='CLAIMED'
 
 

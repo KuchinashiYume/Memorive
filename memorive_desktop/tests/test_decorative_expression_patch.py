@@ -40,20 +40,20 @@ def test_native_pet_adds_frames_without_changing_motion_contract() -> None:
 
 def test_local_ui_signal_is_allowlisted_and_delivered() -> None:
     sys.path.insert(0, str(DESKTOP))
-    from runtime import ProductApi
+    from memorive_desktop_assistant.desktop import AssistantDesktop
 
     captured: list[dict[str, object]] = []
-    api = object.__new__(ProductApi)
-    api._lock = threading.RLock()
-    api._assistant_presenter = lambda presentation: captured.append(presentation)
+    api = object.__new__(AssistantDesktop)
+    api.lock = threading.RLock()
+    api.presenter = lambda presentation: captured.append(presentation)
 
-    receipt = api.assistant_ui_signal({"kind": "SAVE_SUCCESS", "event_id": "save-0001"})
+    receipt = api.ui_signal({"kind": "SAVE_SUCCESS", "event_id": "save-0001"})
     assert receipt["status"] == "APPLIED"
     assert captured[-1]["animation_state"] == "SUCCESS"
     assert captured[-1]["reason_code"] == "LOCAL_UI_SAVE_SUCCESS"
     assert captured[-1]["locator"] == "memorive://ui/save_success/save-0001"
 
-    receipt = api.assistant_ui_signal({"kind": "ERROR_MESSAGE", "event_id": "error-0001"})
+    receipt = api.ui_signal({"kind": "ERROR_MESSAGE", "event_id": "error-0001"})
     assert receipt["status"] == "APPLIED"
     assert captured[-1]["animation_state"] == "ERROR"
     assert captured[-1]["reason_code"] == "LOCAL_UI_ERROR_MESSAGE"
@@ -62,27 +62,27 @@ def test_local_ui_signal_is_allowlisted_and_delivered() -> None:
 
 def test_local_ui_signal_fails_closed_for_unknown_input_and_presenter_errors() -> None:
     sys.path.insert(0, str(DESKTOP))
-    from runtime import ProductApi
+    from memorive_desktop_assistant.desktop import AssistantDesktop
 
-    api = object.__new__(ProductApi)
-    api._lock = threading.RLock()
-    api._assistant_presenter = None
-    detached = api.assistant_ui_signal({"kind": "SAVE_SUCCESS", "event_id": "save-0002"})
+    api = object.__new__(AssistantDesktop)
+    api.lock = threading.RLock()
+    api.presenter = None
+    detached = api.ui_signal({"kind": "SAVE_SUCCESS", "event_id": "save-0002"})
     assert detached["status"] == "NOT_ATTACHED"
     assert detached["external_network_calls"] == 0
     assert detached["external_model_calls"] == 0
     with pytest.raises(ValueError, match="KIND_INVALID"):
-        api.assistant_ui_signal({"kind": "UNKNOWN", "event_id": "event-1"})
+        api.ui_signal({"kind": "UNKNOWN", "event_id": "event-1"})
     with pytest.raises(ValueError, match="FIELDS_INVALID"):
-        api.assistant_ui_signal({"kind": "SAVE_SUCCESS", "event_id": "event-2", "copy": "private"})
+        api.ui_signal({"kind": "SAVE_SUCCESS", "event_id": "event-2", "copy": "private"})
 
     def fail(_presentation: dict[str, object]) -> None:
         raise RuntimeError("synthetic presenter failure")
 
-    api._assistant_presenter = fail
-    failed = api.assistant_ui_signal({"kind": "ERROR_MESSAGE", "event_id": "error-0002"})
+    api.presenter = fail
+    failed = api.ui_signal({"kind": "ERROR_MESSAGE", "event_id": "error-0002"})
     assert failed["status"] == "ERROR:RuntimeError"
 
-    api._assistant_presenter = lambda presentation: {"durable_claim_status": "BLOCKED:OSError"}
-    blocked = api.assistant_ui_signal({"kind": "SAVE_SUCCESS", "event_id": "save-0003"})
+    api.presenter = lambda presentation: {"durable_claim_status": "BLOCKED:OSError"}
+    blocked = api.ui_signal({"kind": "SAVE_SUCCESS", "event_id": "save-0003"})
     assert blocked["status"] == "BLOCKED_NATIVE_DELIVERY"

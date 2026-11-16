@@ -22,7 +22,6 @@ from memorive_settings.credentials import CredentialReferenceManager  # noqa: E4
 from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
 from memorive_settings.service_adapter import SETTINGS_METHODS, SettingsServiceAdapter  # noqa: E402
 from memorive_settings.store import SettingsStore  # noqa: E402
-from runtime import ProductApi  # noqa: E402
 
 
 SILICONFLOW_REFERENCE = "REF:windows:Memorive/siliconflow/primary"
@@ -314,7 +313,9 @@ def test_runtime_scoped_reset_covers_visible_assistant_fields_only(
         "hide_sensitive_names": True,
     }
 
-    candidate = ProductApi._assistant_preferences_for_reset_scope(
+    from memorive_desktop_assistant.desktop import AssistantDesktop
+
+    candidate = AssistantDesktop.preferences_for_reset_scope(
         scope,
         current,
         default_shortcuts=[{"name": "", "target": ""} for _ in range(3)],
@@ -331,4 +332,4 @@ def test_runtime_allowlist_and_postprocessing_use_scoped_reset_only() -> None:
     assert '"settings.reset",' not in runtime_source
     assert 'if method == "settings.reset_scope"' in runtime_source
     assert '"settings.import_redacted",' in runtime_source
-    assert "_assistant_preferences_for_reset_scope" in runtime_source
+    assert "self._desk_assistant.preferences_for_reset_scope(" in runtime_source

@@ -218,9 +218,11 @@ def test_runtime_enables_visible_readers_and_migrates_part11_preferences() -> No
 
     assert "legacy_deepseek_visible_ui_projection=False" not in runtime
     assert "EdgeKimiVisibleUIReader" in runtime
-    assert "DesktopAssistantPreferences-v3" in runtime
-    assert "logo_left_action" not in runtime
-    assert "logo_right_action" not in runtime
-    assert '"shortcut_entries"' in runtime
-    assert '"reminder_scope"' in runtime
-    assert '"hide_sensitive_names"' in runtime
+    # The desk assistant's preferences and their upgrade live in memorive_desktop_assistant/desktop.py.
+    assistant = (ATTEMPT_ROOT / "source" / "memorive_desktop_assistant" / "desktop.py").read_text(encoding="utf-8")
+    assert "DesktopAssistantPreferences-v3" in assistant
+    assert "logo_left_action" not in runtime + assistant
+    assert "logo_right_action" not in runtime + assistant
+    assert '"shortcut_entries"' in assistant
+    assert '"reminder_scope"' in assistant
+    assert '"hide_sensitive_names"' in assistant

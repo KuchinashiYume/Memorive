@@ -4853,11 +4853,11 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         # path. Work-area coordinates are physical pixels while the 90x90
         # pywebview size is logical, so each monitor's own DPI participates.
         primary_assistant_area = next(
-            (area for area in api._assistant_areas if area.primary),
-            api._assistant_areas[0],
+            (area for area in api._desk_assistant.areas if area.primary),
+            api._desk_assistant.areas[0],
         )
-        visible_left, visible_top, visible_width, visible_height = api._assistant_visible_bounds(
-            api._assistant_placement_class(
+        visible_left, visible_top, visible_width, visible_height = api._desk_assistant.visible_bounds(
+            api._desk_assistant.placement_class(
                 monitor_id=primary_assistant_area.monitor_id,
                 x=0,
                 y=0,
@@ -4906,7 +4906,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             },
             "top_left": native_pet_drag_top_left,
             "bottom_right": native_pet_drag,
-            "enumerated_monitor_count": len(api._assistant_areas),
+            "enumerated_monitor_count": len(api._desk_assistant.areas),
         }
         # Reproduce the reported failure surface: one terminal animation starts,
         # ninety-nine more completion deliveries arrive while the user drags

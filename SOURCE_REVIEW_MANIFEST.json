@@ -966,8 +966,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/app.py",
-      "sha256": "28c09731e59baff258c814b07257e527b3d4647bc3548adc7621b488ea1db449",
-      "bytes": 371832
+      "sha256": "09042fd04a3529bb0d9c11976933333e0261b12f7d59010e9224a16317b48199",
+      "bytes": 371857
     },
     {
       "path": "memorive_desktop/product/desktop/application_behavior.py",
@@ -5151,8 +5151,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_assistant/__init__.py",
-      "sha256": "f85ccad257d1dc47d756386d5f23687c0ec3e40d3102343bd10b0cac6f6d116a",
-      "bytes": 700
+      "sha256": "b6b3fbb2205b0321b9ccb9f603514c57abb62292f8e2ebabf66bac1058fd3539",
+      "bytes": 806
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_assistant/controller.py",
@@ -5183,6 +5183,11 @@
       "path": "memorive_desktop/source/memorive_desktop_assistant/shortcuts.py",
       "sha256": "b456b51cfcddad974ad257ad5ee2c71ea4b3e2cead2b549dcf9e604fdf0ebe63",
       "bytes": 3196
+    },
+    {
+      "path": "memorive_desktop/source/memorive_desktop_assistant/desktop.py",
+      "sha256": "e905ae6256bcf5eb1a1fb2216fcc06be7866421ae69a6c673feb734eaa2cc259",
+      "bytes": 76216
     },
     {
       "path": "memorive_desktop/source/memorive_desktop_service/__init__.py",
@@ -7651,8 +7656,8 @@
     },
     {
       "path": "memorive_desktop/source/runtime.py",
-      "sha256": "dbfe96eb5bb3ce35f7fbcb40d17035c67414dc35ca4b03dc6a610ebdd8137a54",
-      "bytes": 221721
+      "sha256": "76291a1d321378bff6720b9a97b3a9d8429ed51e5c3d8b53f1a71101d3e29903",
+      "bytes": 149297
     },
     {
       "path": "memorive_desktop/source/runtime_log/__init__.py",
@@ -7846,8 +7851,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "d56ec9e2f399e2314109420fdeb795b0100885dc63a45b39c1d74ea2b1ebc850",
-      "bytes": 259581
+      "sha256": "b04695d257dcb9efe897a5fb6de8644bf14fb8f5717c4a354a1bdff708b040ff",
+      "bytes": 259766
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
