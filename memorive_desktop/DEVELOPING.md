@@ -112,6 +112,12 @@ throw-away folder and then runs pytest. Do not run plain `pytest`: the product c
 your real Memorive data, so `tests/conftest.py` stops any run in which these folders are not set or
 lie inside a real data folder.
 
+The background service binds every data folder to its profile when it starts. A component you call
+on its own, or an example you run, uses `%LOCALAPPDATA%\Memorive\runtime` instead: the log, the
+model cache, review reports and ledgers go to its `ops` folder, documents to `sandbox` and the vector
+store to `vector-store` (`source/runtime_log/config.py`). Each `MEMORIVE_*` variable that
+`run_tests.py` sets moves one of these folders.
+
 After changing files under `source/`, `product/` or `ui/`, update the manifests as BUILDING.md
 describes (`build_pages.py` for `ui/`, then `sync_manifests.py`); the build refuses files whose
 hash differs from the manifest.

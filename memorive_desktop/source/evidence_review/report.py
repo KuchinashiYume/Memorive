@@ -1,8 +1,11 @@
-"""EVIDENCE_REVIEW 校核报告(Verification 第 2 步)——**运行产物、库外运维区、默认不入库、不进检索**。
+"""Evidence review reports (verification step 2): run output in the ops area, never committed or searched.
 
-KNOWLEDGE_ADMISSION_log 只留 `report=<report_id>` 链过去(不展开 Problem[]);完整详情(Problem[] + 同源置信 + 升级异源待办)
-在本报告。report_id 让 KNOWLEDGE_ADMISSION_log 的 report=<id> **可反查**(resolve_report)。
-落点:`{OPS_ROOT}/EvidenceReview校核报告/{report_id}.json`(默认与 KNOWLEDGE_ADMISSION_log/RUNTIME_LOG 同运维区;env MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR 覆盖)。
+The admission log keeps only a `report=<report_id>` link (not the Problem[] list); the full details
+(Problem[], same-source confidence, escalation to a cross-source review) are in this report, and
+resolve_report finds a report from that link.
+Location: `<MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR>/{report_id}.json`, by default the
+evidence_review_reports folder of the ops area, next to the admission log and the runtime log
+(runtime_log/config.py, ops_root).
 """
 from __future__ import annotations
 
@@ -14,8 +17,9 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-DEFAULT_EVIDENCE_REVIEW_REPORT_DIR = r"G:\Memorive-运维\EvidenceReview校核报告"   # 库外运维区(与 KNOWLEDGE_ADMISSION_log / RUNTIME_LOG 日志、ServiceContracts 向量库同区)
-ENV_EVIDENCE_REVIEW_REPORT_DIR = "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR"             # 覆盖默认落点(便携 / 测试)
+from runtime_log.config import ops_root
+
+ENV_EVIDENCE_REVIEW_REPORT_DIR = "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR"
 
 # 置信度(承决策②(a) / 防同源自检)
 CONFIDENCE_SAME_SOURCE = "same_source_low"           # 校核模型与生成该卡的 distill_model 同供应商 / 家族
@@ -23,7 +27,7 @@ CONFIDENCE_CROSS_SOURCE = "cross_source"             # 异源(verify 槽 = Anthr
 
 
 def _report_dir() -> Path:
-    return Path(os.environ.get(ENV_EVIDENCE_REVIEW_REPORT_DIR) or DEFAULT_EVIDENCE_REVIEW_REPORT_DIR)
+    return Path(os.environ.get(ENV_EVIDENCE_REVIEW_REPORT_DIR) or ops_root() / "evidence_review_reports")
 
 
 def _now_iso() -> str:

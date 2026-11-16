@@ -34,8 +34,10 @@ from evidence_review.mechanical import mechanical_check
 
 ADAPTER_VERSION = "candidate_review-candidate-staging-a0-v1"
 RUN_ID = "CANDIDATE_REVIEW_CROSS_20260811_165122_candidate001"
-PRODUCTION_FILE_ROOT = Path(r"G:\Memorive-运维\候选卡片空间")
-PRODUCTION_INDEX_ROOT = Path(r"G:\Memorive-ops\vector-store\discovery-candidate-card-space-v1")
+# Where the production candidate card space and its index belong, under the configured ops and
+# vector-store roots. The stager itself writes only under the space_root it is given.
+PRODUCTION_FILE_ROOT = document_processing_config.OPS_ROOT / "候选卡片空间"
+PRODUCTION_INDEX_ROOT = document_processing_config.CHROMA_ROOT / "discovery-candidate-card-space-v1"
 PRODUCTION_NAMESPACE = "memorive_discovery_candidate_cards_v1"
 CANDIDATE_READER = "CANDIDATE_REVIEW.CANDIDATE_CARD_BUNDLE_WRITER"
 PROMOTION_READER = "KNOWLEDGE_PROMOTION.EXACT_PROMOTION_WRITER"

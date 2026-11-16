@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import re
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -18,12 +17,6 @@ from .snapshots import build_registry_snapshot_envelope
 
 
 _SAFE_NAME = re.compile(r"[^a-z0-9_-]+")
-_CANONICAL_SANDBOX_ROOT = Path(r"G:\Memorive-沙盒")
-_CANONICAL_PROTECTED_ROOTS = (
-    Path(r"G:\Memorive"),
-    Path(r"G:\Memorive-运维"),
-    Path(r"G:\Memorive-ops"),
-)
 
 
 def sha256_bytes(value: bytes) -> str:
@@ -44,35 +37,20 @@ def _intersects(left: Path, right: Path) -> bool:
 
 @dataclass(frozen=True)
 class SandboxBoundary:
-    """Closed allow-list for every Configuration write target."""
+    """Where a run may write: inside sandbox_root and outside every protected root. The caller
+    chooses both; the two must not overlap."""
 
     sandbox_root: Path
     protected_roots: tuple[Path, ...]
-    _allow_test_temp_root: bool = False
 
     def __post_init__(self) -> None:
         root = Path(self.sandbox_root).resolve(strict=False)
-        mandatory = tuple(
-            item.resolve(strict=False) for item in _CANONICAL_PROTECTED_ROOTS
+        protected = tuple(
+            dict.fromkeys(Path(item).resolve(strict=False) for item in self.protected_roots)
         )
-        supplied = tuple(
-            Path(item).resolve(strict=False) for item in self.protected_roots
-        )
-        protected = tuple(dict.fromkeys((*mandatory, *supplied)))
         if any(_intersects(item, root) for item in protected):
             raise SandboxBoundaryViolation(
                 "sandbox_root must be disjoint from every protected root"
-            )
-        canonical_sandbox = _CANONICAL_SANDBOX_ROOT.resolve(strict=False)
-        test_temp = Path(tempfile.gettempdir()).resolve(strict=False)
-        canonical_root = _contains(canonical_sandbox, root)
-        authorized_test_root = self._allow_test_temp_root and _contains(
-            test_temp, root
-        )
-        if not canonical_root and not authorized_test_root:
-            raise SandboxBoundaryViolation(
-                "sandbox_root must be under G:\\Memorive-沙盒; only an explicit "
-                "test-only temporary root is permitted outside it"
             )
         object.__setattr__(self, "sandbox_root", root)
         object.__setattr__(self, "protected_roots", protected)
@@ -82,18 +60,8 @@ class SandboxBoundary:
         cls,
         sandbox_root: Path | str,
         protected_roots: Iterable[Path | str],
-        *,
-        allow_test_temp_root: bool = False,
     ) -> "SandboxBoundary":
-        root = Path(sandbox_root).resolve(strict=False)
-        supplied = tuple(
-            Path(item).resolve(strict=False) for item in protected_roots
-        )
-        return cls(
-            sandbox_root=root,
-            protected_roots=supplied,
-            _allow_test_temp_root=allow_test_temp_root,
-        )
+        return cls(sandbox_root=Path(sandbox_root), protected_roots=tuple(protected_roots))
 
     def require_write_path(self, path: Path | str) -> Path:
         target = Path(path).resolve(strict=False)

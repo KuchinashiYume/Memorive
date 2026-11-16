@@ -401,7 +401,7 @@ def _verified_by_evidence_review(paper_id: str, cache: dict) -> bool:
     if paper_id in cache:
         return cache[paper_id]
     from knowledge_admission.machine import Trigger
-    log_dir = Path(os.environ.get(knowledge_admission_log.ENV_KNOWLEDGE_ADMISSION_LOG_DIR, knowledge_admission_log.DEFAULT_KNOWLEDGE_ADMISSION_LOG_DIR))
+    log_dir = knowledge_admission_log.log_dir()
     recs = []
     if log_dir.is_dir():
         for p in log_dir.glob("KNOWLEDGE_ADMISSION_log_*.jsonl"):

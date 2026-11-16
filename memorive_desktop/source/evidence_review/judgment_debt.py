@@ -12,13 +12,14 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-DEFAULT_DEBT_DIR = r"G:\Memorive-运维\待办"
+from runtime_log.config import ops_root
+
 ENV_DEBT_DIR = "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR"
 DEBT_FILENAME = "evidence_review_judgment_cross_source_pending.jsonl"
 
 
 def _path() -> Path:
-    return Path(os.environ.get(ENV_DEBT_DIR, DEFAULT_DEBT_DIR)) / DEBT_FILENAME
+    return Path(os.environ.get(ENV_DEBT_DIR) or ops_root() / "evidence_review_judgment_debt") / DEBT_FILENAME
 
 
 def record_pending_judgment(*, target: dict, producer_model: str | None,
