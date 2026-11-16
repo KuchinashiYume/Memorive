@@ -2,9 +2,8 @@
 
 Used by research Q&A and the research runtime: research_policy.py, research_ranking.py,
 research_rule.py and research_interests.py rank excerpts by the user's weights, rules and interests.
-contracts.py and canonical.py hold hashing helpers that other areas import (the document registry and
-card states, knowledge feedback, the exam scoring, the model gateway, cost routing, research
-reports, session refinement);
+contracts.py also offers the hashed-payload helpers of platform/hashed_payloads.py, which other
+areas now import from platform directly;
 derived_penalty.py is used by knowledge_feedback.
 
 The command line (python -m memorive.research.ranking with a request file) builds, migrates and

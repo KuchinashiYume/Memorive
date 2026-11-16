@@ -10,7 +10,11 @@ from typing import Any, Mapping, Sequence
 
 from memorive.platform.ledger.writer_lock import KernelWriterLock
 
-from memorive.research.ranking.contracts import make_hashed_payload, make_stable_id, verify_hashed_payload
+from memorive.platform.hashed_payloads import (
+    make_hashed_payload,
+    make_stable_id,
+    verify_hashed_payload,
+)
 
 
 _ROW_KEYS = {

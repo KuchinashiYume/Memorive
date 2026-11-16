@@ -54,13 +54,14 @@ transport (`memorive/models`, `memorive/desktop/settings`), and from all of them
 the shared basics (`memorive/platform`: jobs, run ledgers, decision records and the rest). A few
 places still reach across areas; these are the places to untangle when that code is restructured:
 
-- The hashed-payload helpers (`make_hashed_payload`, `verify_hashed_payload` and the like) live in
-  `memorive/research/ranking/contracts.py`; `memorive/models` (the gateway's routing advice,
-  `cost_routing/`), the document registry and card states and session refinement import them from
-  there or through `memorive/research/knowledge_feedback/canonical.py`.
+- `memorive/desktop/settings` serves as a shared base for lower areas: research (the AI briefing's
+  answer styles, the metadata transport and literature sources, the answer versions), the exams
+  (settings contracts, the score store) and the model gateway (answer styles).
+- `memorive/models/gateway/routing_advisory.py` uses the exam scoring
+  (`memorive/exams/evaluation/dynamic_routing_advisory.py`).
 - The refinement decision receipts (`memorive/sessions/refinement/decision.py`) take
-  `DECISION_STATES` and `validate_typed_refinement_item` from `memorive/research/knowledge_feedback`. Several packages keep their own copy of these canonical
-  hashing helpers (`memorive/research/opportunities/canonical.py`, `memorive/research/reports/canonical.py` and others).
+  `DECISION_STATES` and `validate_typed_refinement_item` from `memorive/research/knowledge_feedback`.
+- Several packages keep their own copy of the canonical hashing helpers (`memorive/research/opportunities/canonical.py`, `memorive/research/reports/canonical.py` and others).
 
 ### Which area each package belongs to
 

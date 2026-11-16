@@ -13,12 +13,12 @@ import re
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
-from memorive.research.knowledge_feedback.canonical import (
+from memorive.platform.hashed_payloads import (
     make_hashed_payload,
-    typed_payload_hash,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
+from memorive.platform.jcs import typed_payload_hash
 
 from memorive.sessions.refinement.contracts import (
     REFINEMENT_TYPES,

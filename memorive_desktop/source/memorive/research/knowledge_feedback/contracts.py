@@ -12,7 +12,12 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
-from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash, validate_hash_descriptor, verify_hashed_payload
+from memorive.platform.hashed_payloads import (
+    make_hashed_payload,
+    validate_hash_descriptor,
+    verify_hashed_payload,
+)
+from memorive.platform.jcs import typed_payload_hash
 from memorive.research.knowledge_feedback.errors import ContractRejected, SourceIneligible
 
 

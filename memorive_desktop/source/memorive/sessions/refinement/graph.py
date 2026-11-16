@@ -6,12 +6,12 @@ import json
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from memorive.research.knowledge_feedback.canonical import (
+from memorive.platform.hashed_payloads import (
     make_hashed_payload,
-    typed_payload_hash,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
+from memorive.platform.jcs import typed_payload_hash
 
 from memorive.sessions.refinement.contracts import BLOCK_TYPES, ROLES, ConversationContractError, object_ref
 from memorive.sessions.refinement.contracts import validate_export_snapshot

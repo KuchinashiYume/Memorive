@@ -27,6 +27,5 @@ The settings service (memorive/desktop/settings) holds the runner and serves the
 scheduling.py reads the workflow's worker count (memorive/documents/workflow/contracts.py,
 CORE_WORKER_CAPACITY). Places where gateway/ still reaches into other areas:
 research_prompt_cache.py reads the answer styles of memorive/desktop/settings, routing_advisory.py uses
-the exam scoring (memorive.exams.evaluation) and the hashing helpers of the research ranking
-contracts (memorive/research/ranking/contracts.py).
+the exam scoring (memorive.exams.evaluation).
 """

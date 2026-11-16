@@ -10,12 +10,12 @@ from memorive.research.knowledge_feedback.decision import (
     assert_decision_binds_candidate,
 )
 
-from memorive.research.knowledge_feedback.canonical import (
+from memorive.platform.hashed_payloads import (
     make_hashed_payload,
-    typed_payload_hash,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
+from memorive.platform.jcs import typed_payload_hash
 from memorive.research.knowledge_feedback.contracts import (
     assert_candidate_binds_snapshot,
     validate_derived_knowledge_candidate,

@@ -5,12 +5,12 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
-from memorive.research.ranking.contracts import (
+from memorive.platform.hashed_payloads import (
     make_hashed_payload,
-    typed_payload_hash,
     validate_hash_descriptor,
     verify_hashed_payload,
 )
+from memorive.platform.jcs import typed_payload_hash
 from memorive.research.ranking.derived_penalty import (
     apply_authority_penalty,
     validate_derived_penalty_against_policy,
