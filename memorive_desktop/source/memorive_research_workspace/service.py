@@ -126,12 +126,14 @@ class ResearchWorkspace:
             self.thread_forget(identity, revision)
 
     def note_model_snapshot(self, job_id, snapshot):
-        """Keep on a running job the model snapshot its question is sent with, so that after a restart
-        the result kept under it can still be saved (finish_answers_received_before_restart). Model
-        calls that are not a job's answer, such as ranking, have no job and are skipped."""
+        """Keep on a running question the model snapshot it is sent with, so that after a restart the
+        result kept under it can still be saved (finish_answers_received_before_restart). Only the
+        questions AnswerJob answers keep it: kind 'chat' or 'agent' (AnswerVersions.enqueue). The
+        same model function also serves calls that are not such an answer: ranking has no job, and
+        a claim review runs as a job of kind 'answer_review' that is not answered again."""
         with self.store.tx() as db:
             job = self.store.get('job', job_id, db=db)
-            if job and job['status'] == 'RUNNING':
+            if job and job['status'] == 'RUNNING' and job.get('kind') in ('chat', 'agent'):
                 self.store.put('job', job_id, job['project'], dict(job, model_snapshot=snapshot), db=db)
 
     def finish_answers_received_before_restart(self, stored_result):

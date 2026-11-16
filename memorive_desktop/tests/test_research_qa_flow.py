@@ -213,6 +213,34 @@ def test_after_a_restart_an_answer_the_model_already_returned_is_saved(setup, tm
         restarted.close()
 
 
+@pytest.mark.parametrize("asked_in_conversation", [False, True])
+def test_a_claim_review_running_at_a_restart_stays_interrupted(setup, tmp_path, asked_in_conversation):
+    """A claim review calls the same model function as an answer, but it is not answered again after a
+    restart: it keeps no model snapshot, so its kept result is never looked up and nothing is sent.
+    Two shapes: a review started on its own, and a question in the conversation turned into a review."""
+    workspace, thread_id, material_id = setup()
+    project = workspace.thread_get(thread_id)["project"]
+    identity = "research-" + "a" * 24
+    review = {"kind": "answer_review", "project": project, "thread_id": thread_id, "answer_id": "answer-x",
+              "status": "RUNNING", "cancel_requested": False, "created_at": "2026-11-16T00:00:00Z"}
+    if asked_in_conversation:
+        review.update(question_message={"role": "user", "text": "Check this answer."}, artifact_ids=[material_id])
+    workspace.store.put("job", identity, project, review, expected=0)
+    workspace.note_model_snapshot(identity, {"snapshot_id": "snapshot-review"})
+    assert "model_snapshot" not in workspace.store.get("job", identity)
+    workspace.close()
+    after_restart = Model()
+    restarted = _open(tmp_path / "workspace", after_restart, recover=True)
+    try:
+        looked_up = []
+        restarted.finish_answers_received_before_restart(lambda snapshot: looked_up.append(snapshot) or {"status": "PASS"})
+        _finish(restarted)
+        assert restarted.job_status(identity)["status"] == "INTERRUPTED"
+        assert (looked_up, after_restart.calls) == ([], [])
+    finally:
+        restarted.close()
+
+
 def test_after_a_restart_without_a_kept_result_the_job_stays_interrupted(setup, tmp_path):
     restarted, after_restart, model, thread_id, job_id = _restart_after_the_model_answered(setup, tmp_path, keep_result=False)
     try:
