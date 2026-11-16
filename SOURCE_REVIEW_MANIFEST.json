@@ -4121,8 +4121,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "82b3481a71525b5b783050052a347dbd775790143d703431be303f5ed6bbd5d7",
-      "bytes": 267718
+      "sha256": "783c295a24babb64e9dd2aadf5c403d2484323ca7ccc461b74e56b0dfc753bd9",
+      "bytes": 267901
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -5211,8 +5211,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/__init__.py",
-      "sha256": "d4b7ddadf23ef80e8d6a099b9b6f3c3b512e9f91bf7a0a1c4ba35495d18d6de4",
-      "bytes": 1452
+      "sha256": "48d81f17ae38fb7a5428cd3f92831ae7cb40aec27675933d9485470b7fba0ca5",
+      "bytes": 1553
     },
     {
       "path": "memorive_desktop/source/memorive/platform/naming.py",
@@ -8506,8 +8506,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/contracts.py",
-      "sha256": "739b7630887acd5c941b77d949b7da724f3c71a4a5c04e5e556a8c0be22e9271",
-      "bytes": 16864
+      "sha256": "d2f93551756e25de09421b6132207bd905263c30bee642d5e4da0ee6907b96c6",
+      "bytes": 13313
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/counterevidence.py",
@@ -8521,8 +8521,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/errors.py",
-      "sha256": "154116d6b0ccff61028d72b9f7f91f9baf6a2f98e666bfaa3b265152ff0b8ed9",
-      "bytes": 1715
+      "sha256": "448fd717f7f0ddd222faac5dca78c6781e3f323774b88e9e320250d4499ee038",
+      "bytes": 1135
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/field_registry.py",
@@ -9693,6 +9693,11 @@
       "path": "memorive_desktop/source/memorive/platform/ledger/writer_lock.py",
       "sha256": "2227130be24d7f9169f2d03db3b3d1508b23ab9a9d1c83e68ebac39b7914da26",
       "bytes": 14198
+    },
+    {
+      "path": "memorive_desktop/source/memorive/platform/hashed_payloads.py",
+      "sha256": "9fab29a1bd98862dca98c9537f7ede06bc748bc7cef2982e0610f63661b9ab72",
+      "bytes": 5903
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/service/schemas/application_facade_v1.schema.json",

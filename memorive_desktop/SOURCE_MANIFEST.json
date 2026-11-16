@@ -5487,8 +5487,8 @@
     },
     {
       "path": "source/memorive/platform/__init__.py",
-      "sha256": "d4b7ddadf23ef80e8d6a099b9b6f3c3b512e9f91bf7a0a1c4ba35495d18d6de4",
-      "bytes": 1452
+      "sha256": "48d81f17ae38fb7a5428cd3f92831ae7cb40aec27675933d9485470b7fba0ca5",
+      "bytes": 1553
     },
     {
       "path": "source/memorive/platform/clock.py",
@@ -5554,6 +5554,11 @@
       "path": "source/memorive/platform/folders/roles.py",
       "sha256": "9bbeeffcc33a0fd25ab37f23dcd0908d5df7f75826f173370d706d90749b6004",
       "bytes": 12078
+    },
+    {
+      "path": "source/memorive/platform/hashed_payloads.py",
+      "sha256": "9fab29a1bd98862dca98c9537f7ede06bc748bc7cef2982e0610f63661b9ab72",
+      "bytes": 5903
     },
     {
       "path": "source/memorive/platform/jcs.py",
@@ -6077,8 +6082,8 @@
     },
     {
       "path": "source/memorive/research/ranking/contracts.py",
-      "sha256": "739b7630887acd5c941b77d949b7da724f3c71a4a5c04e5e556a8c0be22e9271",
-      "bytes": 16864
+      "sha256": "d2f93551756e25de09421b6132207bd905263c30bee642d5e4da0ee6907b96c6",
+      "bytes": 13313
     },
     {
       "path": "source/memorive/research/ranking/counterevidence.py",
@@ -6092,8 +6097,8 @@
     },
     {
       "path": "source/memorive/research/ranking/errors.py",
-      "sha256": "154116d6b0ccff61028d72b9f7f91f9baf6a2f98e666bfaa3b265152ff0b8ed9",
-      "bytes": 1715
+      "sha256": "448fd717f7f0ddd222faac5dca78c6781e3f323774b88e9e320250d4499ee038",
+      "bytes": 1135
     },
     {
       "path": "source/memorive/research/ranking/field_registry.py",
