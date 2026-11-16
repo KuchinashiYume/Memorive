@@ -3582,9 +3582,9 @@ class _ChatAttempt:
             "status": "FAILED",
             "profile_kind": self.profile_kind,
             "purpose": self.purpose,
-            "route": self.route,
+            "route": route,
             "requested_model": self.requested_model,
-            "returned_model": self.returned_model,
+            "returned_model": returned_model,
             "behavior_sha256": self.behavior_hash,
             "response_sha256": None,
             "duration_ms": duration_ms,
@@ -3630,21 +3630,21 @@ class _ChatAttempt:
             execution_receipt["length_only_failure_quality_semantics"] = (
                 "NOT_ASSESSED_NEVER_MODEL_FAIL_OR_SEMANTIC_REPAIR"
             )
-        if isinstance(self.transport_diagnostic, Mapping):
+        if isinstance(transport_diagnostic, Mapping):
             execution_receipt["transport_diagnostic"] = dict(
-                self.transport_diagnostic
+                transport_diagnostic
             )
         return {
             "schema_version": "SettingsStructuredChatRunnerResult-v1",
             "status": "FAILED",
             "reason": reason,
             "requested_model": self.requested_model,
-            "returned_model": self.returned_model,
+            "returned_model": returned_model,
             "duration_ms": duration_ms,
-            "external_network_calls": self.external_network_calls,
-            "provider_calls": self.provider_calls,
+            "external_network_calls": external_network_calls,
+            "provider_calls": provider_calls,
             "external_model_calls": external_model_calls,
-            "external_process_launches": self.external_process_launches,
+            "external_process_launches": external_process_launches,
             "execution_receipt": execution_receipt,
         }
 
