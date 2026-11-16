@@ -1,6 +1,6 @@
 """Runs Claude Code as a command-line model (ClaudeCodeAdapter with ClaudeCodePolicy) and records which
 executable and --model argument were used. Not used for the app's own requests: the window runs
-command-line models through memorive/models/validation.py (see DEVELOPING.md, "Code the
+command-line models through memorive/models/validation/ (see DEVELOPING.md, "Code the
 window does not start").
 
 The adapter proves what local executable and exact ``--model`` argument were

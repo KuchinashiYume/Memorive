@@ -1,7 +1,7 @@
 """Model requests: who a model is, what a call may ask for, how calls are sent and recorded.
 
-  validation.py        LiveModelValidationRunner: every model request of the app is sent here
-                       (API, command-line tools, local models, embeddings, OCR)
+  validation/          LiveModelValidationRunner: every model request of the app is sent here
+                       (API, command-line tools, local models, embeddings, OCR, reranking)
   execution/           a feature's model run: the profile frozen once, the request sent once
                        (runs.py), and when a failed call is tried again (retry.py)
   calls/               the call ledger (ledger.py), cancellable HTTP reads, proxy and TLS settings

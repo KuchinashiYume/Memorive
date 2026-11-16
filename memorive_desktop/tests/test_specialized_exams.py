@@ -28,11 +28,8 @@ from memorive.models.capabilities import (  # noqa: E402
     infer_api_model_capability,
     workflow_node_accepts_capability,
 )
-from memorive.models.validation import (  # noqa: E402
-    HttpResponse,
-    LiveModelValidationRunner,
-    ProcessResult,
-)
+from memorive.models.validation.transport import HttpResponse, ProcessResult  # noqa: E402
+from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
 from memorive_settings.ocr_exam_successor import (  # noqa: E402
     MAIN_CASE_IDS,
     score_balanced_sample,

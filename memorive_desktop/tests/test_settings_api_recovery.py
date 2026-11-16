@@ -12,10 +12,8 @@ if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
 from memorive_settings.controller import SettingsController  # noqa: E402
-from memorive.models.validation import (  # noqa: E402
-    HttpResponse,
-    LiveModelValidationRunner,
-)
+from memorive.models.validation.transport import HttpResponse  # noqa: E402
+from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
 
 
 class CatalogTransport:

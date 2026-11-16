@@ -9,7 +9,7 @@ from memorive_settings.external_sources import (
     ExternalDataSources, default_sources, normalize_payload, role_references,
     validate_source,
 )
-from memorive.models.validation import HttpResponse
+from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import aa_source, configure_aa
 
 

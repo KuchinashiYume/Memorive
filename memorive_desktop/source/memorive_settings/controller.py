@@ -24,7 +24,7 @@ from memorive.models.kimi_endpoint import (
     kimi_auto_resolution_requested,
     resolve_kimi_api_platform,
 )
-from memorive.models.validation import FailClosedModelValidationRunner, ModelValidationRunner
+from memorive.models.validation.runner import FailClosedModelValidationRunner, ModelValidationRunner
 from .workflow_exam_runner import FailClosedWorkflowExams
 from memorive.models.capabilities import infer_api_model_capability
 from .store import SettingsStore

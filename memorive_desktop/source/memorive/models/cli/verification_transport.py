@@ -188,7 +188,7 @@ def result_reason(process):
 
 def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_seconds,shell,
                      template_mode=False,result_paths=()):
-    from memorive.models.validation import ProcessResult
+    from memorive.models.validation.transport import ProcessResult
     from model_gateway.execution_core.runner import _TreeController
     if shell is not False:
         raise ValueError('CLI_VALIDATION_SHELL_FORBIDDEN')
@@ -325,7 +325,11 @@ def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_second
     observed_types.update(str(row['type']) for row in ([] if template_mode else events(result.stdout))
                           if row.get('type') in {'thread.started','turn.started','turn.completed','turn.failed','item.started','item.completed','error'})
     diagnostic['event_types']=sorted(observed_types)
-    from memorive.models.validation import _reported_models, _normalise_token_usage, _usage_from_cli_output
+    from memorive.models.validation.usage import (
+        _reported_models,
+        _normalise_token_usage,
+        _usage_from_cli_output,
+    )
     reported=set() if template_mode else _reported_models(result.stdout)
     evidence.update(status='CANCELLED' if stopped else 'FINISHED',finished_at=stamp(),duration_ms=result.duration_ms,
         returncode=result.returncode,returned_model=requested if requested in reported else None,

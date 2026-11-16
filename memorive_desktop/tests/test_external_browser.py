@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import pytest
 from memorive_settings.external_sources import ExternalDataSources
-from memorive.models.validation import HttpResponse
+from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import configure_aa
 
 ROOT=Path(__file__).resolve().parents[1]

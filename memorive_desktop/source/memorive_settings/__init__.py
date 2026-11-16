@@ -9,14 +9,14 @@ SettingsController in controller.py). It holds two kinds of code:
                 workflow_exam.py, specialized_exam.py, analysis_reviewer_exam.py, exam_successor.py,
                 exam_jobs.py, exam_score_history.py and the other *exam* modules.
 The model requests themselves are in memorive/models: the controller holds the runner from
-memorive/models/validation.py. The exams move to memorive/exams.
+memorive/models/validation/runner.py. The exams move to memorive/exams.
 """
 
 from .capability import CapabilityProjection
 from .controller import SettingsController
 from .credentials import CredentialReferenceManager, SyntheticDiscardCredentialBackend
 from .directory_policy import DirectoryPolicy
-from memorive.models.validation import (
+from memorive.models.validation.runner import (
     FailClosedModelValidationRunner,
     LiveModelValidationRunner,
     ModelValidationRunner,

@@ -9,12 +9,12 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1] / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive.models.validation import (  # noqa: E402
+from memorive.models.validation.transport import (  # noqa: E402
     BoundedSubprocessTransport,
     HttpResponse,
-    LiveModelValidationRunner,
     MAX_PROCESS_CAPTURE_BYTES,
 )
+from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
 from memorive_settings.exam_successor import (  # noqa: E402
     workflow_exam_structured_output_policy,
 )

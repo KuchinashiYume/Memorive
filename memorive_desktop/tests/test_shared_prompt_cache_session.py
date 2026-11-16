@@ -8,7 +8,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'source'))
 os.environ['MEMORIVE_RUNTIME_LOG_LOG_DIR']=str(ROOT/'tests/runtime/ops/runtime_log')
 from memorive_settings.cache_session import Continuation,REVISION,IDLE_TTL_SECONDS
 from memorive_settings.cache_workspace import structured_chat_workspace
-from memorive.models.validation import LiveModelValidationRunner,ProcessResult
+from memorive.models.validation.runner import LiveModelValidationRunner
+from memorive.models.validation.transport import ProcessResult
 S={'type':'object','properties':{'value':{'type':'string'}},'required':['value'],'additionalProperties':False}
 T={'type':'object','properties':{'payload':S},'required':['payload'],'additionalProperties':False}
 MODEL={'model_name':'gpt-5.6-sol','thinking_mode':'high','prompt_cache_scope':'fixed-test-scope','prompt_cache_session':REVISION,'prompt_cache_transport_schema':T}

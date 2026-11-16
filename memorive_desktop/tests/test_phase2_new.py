@@ -18,11 +18,8 @@ from memorive_settings.quality_new import (
     project_cached_entry,
     validate_quality_new_catalog,
 )
-from memorive.models.validation import (
-    HttpResponse,
-    LiveModelValidationRunner,
-    ProcessResult,
-)
+from memorive.models.validation.transport import HttpResponse, ProcessResult
+from memorive.models.validation.runner import LiveModelValidationRunner
 from memorive_settings.workflow_exam import (
     QualityEmbeddingExamExecutor,
     QualityNewEmbeddingExamExecutor,

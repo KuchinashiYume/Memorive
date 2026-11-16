@@ -275,7 +275,7 @@ def verify(runner, service, model):
                   'additionalProperties': False}
     prompt = 'Reply with MEMORIVE_READY.'
     if schema:
-        from memorive.models.validation import _structured_prompt
+        from memorive.models.validation.structured import _structured_prompt
         prompt = _structured_prompt(prompt, schema).decode('utf8')
     image = base64.b64decode(_PROBE_IMAGE) if template['capabilities']['images'] else None
     outcome = execute(runner, service, model, prompt, schema=schema, image=image)

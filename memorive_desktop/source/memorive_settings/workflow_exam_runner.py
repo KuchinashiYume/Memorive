@@ -13,7 +13,11 @@ from typing import Any, Callable, Mapping, Sequence
 from memorive.models.endpoints import normalize_external_api_base_url
 from memorive.models.endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile, json_sha256
 from .exam_score_history import ExamScoreHistory
-from memorive.models.validation import FailClosedModelValidationRunner, default_executable_resolver, validation_result
+from memorive.models.validation.runner import (
+    FailClosedModelValidationRunner,
+    default_executable_resolver,
+    validation_result,
+)
 from .quality_new import (
     Quality_NEW_CATALOG_SCHEMA,
     validate_quality_new_catalog,

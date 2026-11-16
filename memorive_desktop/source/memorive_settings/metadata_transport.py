@@ -15,7 +15,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPSHandler, ProxyHandler, Request, build_opener, getproxies, proxy_bypass
-from memorive.models.validation import UrllibHttpTransport, _NoRedirect
+from memorive.models.validation.transport import UrllibHttpTransport, _NoRedirect
 from memorive.platform.tls import PUBLIC_ROOTS_SHA256, public_metadata_context
 
 ECB_ENDPOINT = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"

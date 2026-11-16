@@ -34,7 +34,7 @@ class ReportProfileExecution:
 
     It is given what it uses: the settings store (the chosen profiles, and the profile folder the
     snapshots go in), the model runner that sends the request (LiveModelValidationRunner in
-    memorive/models/validation.py), resolve_local_profile for local models, and count_calls,
+    memorive/models/validation/runner.py), resolve_local_profile for local models, and count_calls,
     which adds a result's calls to the settings service's counters.
     """
     periods = PERIODS

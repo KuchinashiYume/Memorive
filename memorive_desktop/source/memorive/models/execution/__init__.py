@@ -19,7 +19,7 @@ Where things are:
 
 The settings controller (memorive_settings/controller.py) makes one object of each kind and serves
 them as settings.research_chat_freeze, settings.research_chat_execute and the like. The request
-itself is sent by the model validation runner the controller holds (memorive/models/validation.py).
+itself is sent by the model validation runner the controller holds (memorive/models/validation/runner.py).
 """
 from memorive.models.execution.runs import AIBriefingExecution, ReportProfileExecution, ResearchChatExecution, ResearchEmbeddingExecution
 

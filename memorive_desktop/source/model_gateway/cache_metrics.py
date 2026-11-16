@@ -1,6 +1,6 @@
 """Prompt cache and throughput figures of one model call, from the usage the provider returned.
 
-Called by the model runner (memorive/models/validation.py, into the call's
+Called by the model runner (memorive/models/validation/, into the call's
 transport_diagnostic), cost.py (into the runtime-log accounting record) and research_prompt_cache.py
 (into its cache observation). It computes no prices: callers pass in the cost they worked out.
 """

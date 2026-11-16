@@ -30,7 +30,7 @@ import zipfile
 
 from .contracts import canonical_sha256, immutable, scan_sensitive, utc_now
 from memorive.models.endpoints import normalize_external_api_base_url
-from memorive.models.validation import UrllibHttpTransport
+from memorive.models.validation.transport import UrllibHttpTransport
 from .store import SettingsStore
 from .metadata_transport import (PublicMetadataHttpTransport, MetadataRateLimitError,
     metadata_error_code, metadata_rate_limit, transient_metadata_error,

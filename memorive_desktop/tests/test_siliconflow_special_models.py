@@ -23,10 +23,8 @@ from memorive.models.capabilities import (  # noqa: E402
     infer_api_model_capability,
     workflow_node_accepts_capability,
 )
-from memorive.models.validation import (  # noqa: E402
-    HttpResponse,
-    LiveModelValidationRunner,
-)
+from memorive.models.validation.transport import HttpResponse  # noqa: E402
+from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
 from memorive_settings.store import SettingsStore  # noqa: E402
 
 

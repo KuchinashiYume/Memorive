@@ -28,11 +28,8 @@ from memorive.models.capabilities import (  # noqa: E402
 from memorive_workflow_bridge.conversation_refinement import (  # noqa: E402
     ExistingConversationRefinementChannel,
 )
-from memorive.models.validation import (  # noqa: E402
-    HttpResponse,
-    LiveModelValidationRunner,
-    ProcessResult,
-)
+from memorive.models.validation.transport import HttpResponse, ProcessResult  # noqa: E402
+from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402
     LOCAL_PROFILE_REF,
     _FacadeService,

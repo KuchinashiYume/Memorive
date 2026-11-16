@@ -15,7 +15,8 @@ from urllib.error import URLError
 
 import pytest
 
-from memorive.models.validation import HttpResponse, LiveModelValidationRunner, ProcessResult
+from memorive.models.validation.transport import HttpResponse, ProcessResult
+from memorive.models.validation.runner import LiveModelValidationRunner
 
 SCHEMA = {"type": "object", "required": ["ok"], "properties": {"ok": {"type": "boolean"}}}
 PREFERENCES = {"proxy_mode": "NONE", "proxy_address": "", "request_timeout_seconds": 30}

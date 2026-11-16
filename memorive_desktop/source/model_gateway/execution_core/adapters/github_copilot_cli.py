@@ -1,5 +1,5 @@
 """Runs the GitHub Copilot CLI as a command-line model (offline only). Not used for the app's own
-requests: the window runs command-line models through memorive/models/validation.py (see
+requests: the window runs command-line models through memorive/models/validation/ (see
 DEVELOPING.md, "Code the window does not start").
 
 The adapter binds an immutable launcher/entrypoint, exact ``--model``
