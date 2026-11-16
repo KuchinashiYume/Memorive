@@ -9618,6 +9618,16 @@
       "path": "memorive_desktop/DEVELOPING.md",
       "sha256": "155d6932a7098de492a930f9628fd2cc9880f481b0b7c14e6a5a23c32513e994",
       "bytes": 23872
+    },
+    {
+      "path": "contracts/KnowledgeFeedback_知识反馈/10_模块契约/Memorive_KNOWLEDGE_FEEDBACK_DerivedKnowledgeCandidate_模块契约_r0.2.schema.json",
+      "sha256": "ce56ffb984e4f0d5c1a751f8da0edc910750a69532e4fd2cd466b008c82706c8",
+      "bytes": 6238
+    },
+    {
+      "path": "contracts/KnowledgeFeedback_知识反馈/10_模块契约/Memorive_KNOWLEDGE_FEEDBACK_KnowledgeSourceSnapshot_模块契约_r0.1.schema.json",
+      "sha256": "4863d54da76b3a6cfa713b0b4cb8f6abb2b7709b83bfdba42e0244bfa5a9a393",
+      "bytes": 6864
     }
   ]
 }
