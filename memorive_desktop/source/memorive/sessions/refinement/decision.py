@@ -1,4 +1,4 @@
-"""Append-only human decision receipts for CONVERSATION-REFINEMENT refinement items."""
+"""Append-only receipts of a person's decision on refinement items. destination.py checks them."""
 
 from __future__ import annotations
 

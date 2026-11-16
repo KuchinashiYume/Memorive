@@ -1,7 +1,7 @@
 """The capability snapshot taken before a job starts (each capability required or optional, its
 availability and qualification) and the preflight that decides from it whether the job may start.
 
-Used by the application facade and the capability adapters in memorive_app.
+Used by the application facade and the capability adapters in memorive/desktop/service.
 """
 from __future__ import annotations
 

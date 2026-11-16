@@ -3,7 +3,10 @@
 service_main.py starts it (python -m memorive.desktop.service) and builds the settings and inbox
 controllers, the review service and the application facade, and serves them over IPC; protocol.py and client.py are the IPC between window and
 service; control_store.py keeps window state; single_instance.py keeps one window per user;
-locator.py names jobs and artifacts in links.
+locator.py names jobs and artifacts in links. facade.py is the application facade the service serves;
+diagnostics.py and support_bundle.py build the diagnostic view and the support bundle; ipc_auth.py
+authenticates the loopback connection; capability_adapters.py feeds the capability snapshot.
+schemas/ holds the facade's contract schemas.
 """
 
 from memorive.desktop.service.adapters import RealFacadeAdapter, REQUIRED_FACADE_METHODS

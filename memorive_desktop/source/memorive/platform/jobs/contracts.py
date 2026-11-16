@@ -4,7 +4,7 @@ resolved profile snapshot.
 
 utc_now is platform/clock.py's and the canonical encoding is platform/json_files.py's; here a value
 JSON cannot hold raises ContractViolation('CANONICAL_JSON_INVALID'). Used by the job stores, the
-application facade and support bundle (memorive_app), the desktop harness and the document workflow.
+application facade and support bundle (memorive/desktop/service), the desktop harness and the document workflow.
 """
 from __future__ import annotations
 

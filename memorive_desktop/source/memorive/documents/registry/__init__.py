@@ -4,7 +4,8 @@ schema and an append-only registry.
 Used outside the package: schema_v2.py (build and check product envelopes) by retrieval, research
 analysis, research reports, research recommendations and knowledge_feedback; registry_v2.py (the
 append-only registry) by knowledge_feedback and research_recommendations; analysis_materialization.py
-and analysis_products.py by knowledge_admission, research_recommendations and run_ledger.
+and analysis_products.py by knowledge_admission, research_recommendations and the card states'
+publication preview.
 
 Not reached from the app's own code (tests call them): the asset migration tools (migration.py,
 migration_contracts.py, maintenance.py, query_projection.py, data_lifecycle.py), the first registry

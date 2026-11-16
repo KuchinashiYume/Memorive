@@ -1,6 +1,6 @@
 """Receipts of model channel attempts (one try of a model call on one channel) and the checks on their
 accounting; ChannelAttemptBuilder builds the record that the local embedding model's binding feeds.
-channel_store.py stores them; nothing in the app writes them yet.
+store.py stores them; nothing in the app writes them yet.
 
 It reads the execution core's handoff events as they are and classifies each attempt on four
 axes; it never sends a request or writes the operations ledger.

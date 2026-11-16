@@ -88,7 +88,7 @@ def make_destination_projection(
     *, projection_id: str, item: Mapping[str, Any], decision_receipt: Mapping[str, Any]
 ) -> dict[str, Any]:
     checked_item = validate_typed_refinement_item(item)
-    from decision_log.conversation_refinement_decision import validate_refinement_decision_receipt
+    from memorive.sessions.refinement.decision import validate_refinement_decision_receipt
 
     decision = validate_refinement_decision_receipt(decision_receipt)
     if decision["item_hash"] != checked_item["content_hash"]:

@@ -8,7 +8,8 @@ repair_flow.py, grading.py and the other modules are used inside the package by 
 
 Not reached from the app's own code (tests call them): review_orchestration/, an operator API
 (create_or_get_job, pause, resume, cancel, dispatch_once with an execute function the caller
-supplies); the two fact_identity_* modules; research_handoff_cross_analysis_review.py.
+supplies); the two fact_identity_* modules; decision_adapter.py, which turns repair evidence into a
+design decision record; research_handoff_cross_analysis_review.py.
 opportunity_verification.py, which recomputes research opportunities independently of the code
 that produced them, has no caller outside the package and its tests.
 """

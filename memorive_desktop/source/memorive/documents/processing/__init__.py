@@ -11,7 +11,8 @@ document_structure/ reads a document's sections; the window reaches it through s
 
 Not reached from the app's own code: python -m memorive.documents.processing.document_conversion.cli (probe,
 verify-structure, convert); ocr_qualification/, which scores OCR output against reference pages; and
-vector_generation.py, which builds and manages a separate Chroma collection. Tests call the last two.
+vector_generation.py, which builds and manages a separate Chroma collection. Tests call the last two, and
+evidence_package.py, which reads a saved evidence package of this pipeline.
 """
 from memorive.documents.processing.document_ingest_ingest import ingest
 from memorive.documents.processing.document_convert_convert import convert

@@ -1,7 +1,7 @@
 """What the service may call on the application facade.
 
 FacadeAdapter allows only the listed facade methods and caps event batches; RealFacadeAdapter wraps
-the real facade (memorive_app.facade), FakeFacadeAdapter a synthetic one for tests and the harness.
+the real facade (facade.py), FakeFacadeAdapter a synthetic one for tests and the harness.
 load_facade_contract reads the method list the window and the service agree on.
 """
 from __future__ import annotations

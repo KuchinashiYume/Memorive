@@ -7,7 +7,7 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 
 | Folder | What it holds |
 | --- | --- |
-| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`); four packages still wait to be split (`memorive_app`, `memorive_research_runtime`, `run_ledger`, `decision_log`). `memorive/desktop/api.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
+| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`); one package still waits to move (`memorive_research_runtime`, into `memorive/research`). `memorive/desktop/api.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
 | `ui/` | The sources of the window's two pages. `tools/build_pages.py` builds `product/desktop/bundle_integrated.html` and `bundle_assistant.html` from them; see `ui/README.md`. |
 | `tests/` | The tests. Run them with `tests/run_tests.py` (below). |
 | `examples/` | Small programs that run one feature without the window. |
@@ -51,16 +51,15 @@ start" below).
 
 Calls go from the window side towards the business packages, from those to model execution and
 transport (`memorive/models`, `memorive/desktop/settings`), and from all of them to
-the shared basics (`memorive/platform`, `run_ledger`,
-`decision_log`). A few basics still reach into business packages; these are the places to untangle
-when that code is restructured:
+the shared basics (`memorive/platform`: jobs, run ledgers, decision records and the rest). A few
+places still reach across areas; these are the places to untangle when that code is restructured:
 
-- `run_ledger`: the channel accounting, cost routing and analysis admission modules import
-  `memorive/models/gateway`, `memorive/research/ranking`, `memorive/documents/registry` and `memorive/documents/card_states`.
-- `decision_log` and `memorive/research/knowledge_feedback` import each other: `memorive/research/knowledge_feedback` calls decision_log's
-  builders (`knowledge_decision.py`, `conversation_refinement_decision.py`), and those take hashing
-  helpers, `DECISION_STATES` and `validate_typed_refinement_item` from `memorive/research/knowledge_feedback`, and hashing
-  helpers from `memorive/research/ranking/contracts.py`. Several packages keep their own copy of these canonical
+- The hashed-payload helpers (`make_hashed_payload`, `verify_hashed_payload` and the like) live in
+  `memorive/research/ranking/contracts.py`; `memorive/models` (the gateway's routing advice,
+  `cost_routing/`), the document registry and card states and session refinement import them from
+  there or through `memorive/research/knowledge_feedback/canonical.py`.
+- The refinement decision receipts (`memorive/sessions/refinement/decision.py`) take
+  `DECISION_STATES` and `validate_typed_refinement_item` from `memorive/research/knowledge_feedback`. Several packages keep their own copy of these canonical
   hashing helpers (`memorive/research/opportunities/canonical.py`, `memorive/research/reports/canonical.py` and others).
 
 ### Which area each package belongs to
@@ -69,11 +68,11 @@ when that code is restructured:
 | --- | --- |
 | Desktop: window, service, panels | `memorive/desktop` (`api.py` ProductApi, `settings/`, `service/`, `assistant/`, `current_task/`, `messages/`, `work_log/`, `accounting/`, `test_console/`, `harness/` an integration harness run by hand, `release_links.py`; its docstring lists each part) |
 | Documents | `memorive/documents` (`inbox/`, `processing/` with `registration.py` for paper IDs, `library/`, `registry/` the artifact registry, `front_matter.py`; `workflow/`, `card_distillation/`, `card_review/`, `card_states/`, `data_review/`; its docstring lists each part) |
-| Research | `memorive/research/workspace`, `memorive_research_runtime`, `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports`, `memorive/research/analysis`, `memorive/research/opportunities`, `memorive/research/retrieval`, `memorive/research/ranking`, `memorive/research/knowledge_feedback` (knowledge drafts) |
+| Research | `memorive/research/workspace`, `memorive_research_runtime` (moves next), `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports`, `memorive/research/analysis`, `memorive/research/opportunities`, `memorive/research/retrieval`, `memorive/research/ranking`, `memorive/research/knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
 | Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
-| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file), `run_ledger`, `decision_log`, `memorive_app` (jobs, credentials, IPC) |
+| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file; `jobs/`, `ledger/` the run ledgers and writer lock, `decisions/` design decision records, `errors.py`, `credentials.py`) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
 sessions, models, exams, platform); each row names what is already there first.
@@ -86,7 +85,7 @@ for older imports.
 | --- | --- |
 | Settings, model profiles, CLI templates, credentials (by reference) | `memorive/desktop/settings` (`store.py`, `credentials.py`) |
 | Model snapshots, call attempts and results | `memorive/models/execution` (`research_chat_profiles/` and the like), the call ledger in `memorive/models/calls/ledger.py` |
-| Imported files and processing jobs | `memorive/documents/inbox`, `memorive/documents/workflow`, `memorive_app` (job store) |
+| Imported files and processing jobs | `memorive/documents/inbox`, `memorive/documents/workflow`, `memorive/platform/jobs` (job stores) |
 | A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `memorive/documents/processing`, `memorive/documents/card_distillation`, `memorive/documents/card_states` (review state in the card); read through `memorive/documents/library` |
 | Research conversations, answers, knowledge drafts | `memorive/research/workspace` (its own SQLite store) |
 | Imported chat sessions and refinement tasks | `memorive/sessions/archive`, `memorive/desktop/current_task/refinement_tasks.py` |

@@ -20,7 +20,7 @@ FAKE_WORKER = Path(__file__).resolve().with_name(
 FIXED_TIME = "2026-08-14T14:00:00Z"
 FIXED_CLOCK = lambda: FIXED_TIME
 
-from run_ledger.channel_evidence import ChannelAttemptBuilder, validate_channel_attempt
+from memorive.models.channels.evidence import ChannelAttemptBuilder, validate_channel_attempt
 from memorive.models.gateway.local_embedding.worker import WorkerError, validate_request
 from memorive.models.gateway.local_embedding import LocalEmbeddingSeam, LocalSeamViolation, build_compatibility_manifest, validate_compatibility_manifest
 def compatibility_manifest(generation_root: Path, *, clock=FIXED_CLOCK) -> dict:

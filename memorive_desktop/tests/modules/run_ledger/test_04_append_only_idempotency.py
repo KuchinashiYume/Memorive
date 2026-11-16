@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import json
 
-from run_ledger import ConcurrentWriterError
+from memorive.platform.ledger import ConcurrentWriterError
 from memorive.platform.ledger.errors import AppendOnlyViolation, RecordConflictError
 from memorive.platform.ledger.store import LedgerStore
 from tests.modules.run_ledger.common import IsolatedLedgerTestCase, attempt_record, paper_outcome

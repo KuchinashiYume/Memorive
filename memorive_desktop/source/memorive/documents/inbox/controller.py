@@ -12,7 +12,7 @@ import threading
 from functools import wraps
 from typing import Any, Mapping, Sequence
 
-from memorive_app.import_binding import FileImportBinder
+from memorive.documents.inbox.import_binding import FileImportBinder
 from memorive.platform.windows_paths import windows_io_path
 
 from memorive.documents.inbox.contracts import (

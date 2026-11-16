@@ -1,7 +1,7 @@
 """A job store in plain files for the sandbox: job_state.json and an append-only job_events.jsonl,
 written under the ledger's writer lock (platform/ledger/writer_lock.py), one writer per folder.
 
-Used by the diagnostics and the capability adapters in memorive_app.
+Used by the diagnostics and the capability adapters in memorive/desktop/service.
 """
 from __future__ import annotations
 

@@ -19,6 +19,9 @@
   gateway/             model transport for the document and research work: providers, routing,
                        prompts and their files, caches, cost, the local model components
   local/               local model servers (Ollama and the like) found and checked for the window
+  channels/            receipts of model channel attempts and their append-only store
+  cost_routing/        cost routing advice: its ledger of rejections, historical evidence, decision
+                       previews
 
 The settings service (memorive/desktop/settings) holds the runner and serves these as settings.* calls.
 scheduling.py reads the workflow's worker count (memorive/documents/workflow/contracts.py,

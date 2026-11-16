@@ -16,7 +16,7 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_app.facade import ApplicationFacade  # noqa: E402
+from memorive.desktop.service.facade import ApplicationFacade  # noqa: E402
 from memorive.platform.jobs.sandbox_store import SandboxJobStore  # noqa: E402
 from memorive.desktop.current_task import CurrentTaskProductController  # noqa: E402
 from memorive.desktop.service.adapters import RealFacadeAdapter  # noqa: E402

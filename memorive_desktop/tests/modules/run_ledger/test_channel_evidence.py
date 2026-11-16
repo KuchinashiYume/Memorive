@@ -9,11 +9,11 @@ import unittest
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from run_ledger import ConcurrentWriterError
-from run_ledger.channel_evidence import ChannelAttemptBuilder, build_accounting_amendment, derive_evidence_class, validate_accounting, validate_channel_attempt
-from run_ledger.channel_store import ChannelLedgerStore
+from memorive.platform.ledger import ConcurrentWriterError
+from memorive.models.channels.evidence import ChannelAttemptBuilder, build_accounting_amendment, derive_evidence_class, validate_accounting, validate_channel_attempt
+from memorive.models.channels.store import ChannelLedgerStore
 from memorive.platform.ledger.errors import AppendOnlyViolation, ChannelEvidenceError, RecordConflictError
-from run_ledger.channel_store import SANDBOX_MARKER_BYTES, SANDBOX_MARKER_NAME
+from memorive.models.channels.store import SANDBOX_MARKER_BYTES, SANDBOX_MARKER_NAME
 from memorive.models.gateway.execution_core import (
     ExecutionCore,
     HandoffContract,
@@ -35,7 +35,7 @@ from tests.modules.model_gateway.test_execution_core import (
 
 HERE = Path(__file__).resolve().parent
 MATRIX_PATH = HERE / "fixtures" / "accounting_matrix.json"
-CHANNEL_SCHEMA_PATH = HERE.parents[2] / "source" / "run_ledger" / "schemas" / "runtime_log_channel_attempt_v1.schema.json"
+CHANNEL_SCHEMA_PATH = HERE.parents[2] / "source" / "memorive" / "models" / "channels" / "schemas" / "runtime_log_channel_attempt_v1.schema.json"
 TS = "2026-08-13T11:00:00Z"
 HASH_A = "A" * 64
 HASH_B = "B" * 64

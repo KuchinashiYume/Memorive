@@ -1,3 +1,6 @@
+"""Binding an imported file into the inbox's custody: FileImportBinder copies the bytes from an
+already-open source handle into an immutable copy and records its hash. The inbox controller uses it.
+"""
 from __future__ import annotations
 
 import hashlib

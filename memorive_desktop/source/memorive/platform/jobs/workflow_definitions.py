@@ -1,7 +1,7 @@
 """Workflow definitions read from one folder: WorkflowDefinitionProvider resolves a workflow id to its
 JSON file (no symlinks, nothing outside the folder) and returns the definition with its hashes.
 
-The memorive_app package offers it; nothing in the app calls it, tests do.
+Nothing in the app calls it; tests do.
 """
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
-"""Zero-side-effect DECISION_LOG decision preview for COST-ROUTING routing advice."""
+"""A preview of the design decision record a piece of cost routing advice would become, with no side
+effects. Nothing in the app calls it."""
 
 from __future__ import annotations
 

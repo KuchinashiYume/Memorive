@@ -11,7 +11,7 @@ import time
 from typing import Any, Mapping
 
 from memorive.platform.errors import ApplicationError
-from memorive_app.ipc_auth import LoopbackPeerAuthenticator
+from memorive.desktop.service.ipc_auth import LoopbackPeerAuthenticator
 
 from memorive.desktop.service.adapters import FacadeAdapter
 from memorive.desktop.service.errors import DesktopServiceError, ProtocolViolation, RequestCancelled, RequestTimeout

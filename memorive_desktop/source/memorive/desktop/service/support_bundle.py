@@ -1,3 +1,6 @@
+"""The support bundle (SupportBundleBuilder): diagnostic files with secrets and personal paths
+redacted, refused when forbidden content remains. The facade builds it.
+"""
 from __future__ import annotations
 
 import re

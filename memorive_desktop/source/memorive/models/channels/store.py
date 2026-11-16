@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, NoReturn
 
-from .channel_evidence import (
+from memorive.models.channels.evidence import (
     AMENDMENT_KIND,
     TERMINAL_KIND,
     canonical_json,

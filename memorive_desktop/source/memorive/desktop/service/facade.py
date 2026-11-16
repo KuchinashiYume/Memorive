@@ -1,3 +1,10 @@
+"""The application facade the desktop service calls: create a job (idempotently, after the
+capability preflight), cancel, pause and resume it, read jobs and events, run the diagnostics and
+build a support bundle.
+
+Built by service_main.py and served over IPC through adapters.py; the harness (memorive/desktop/harness)
+runs it end to end. Jobs live in platform/jobs/durable_store.py.
+"""
 from __future__ import annotations
 
 from copy import deepcopy
@@ -16,7 +23,7 @@ from memorive.platform.jobs.contracts import (
     resolved_profile_snapshot,
     utc_now,
 )
-from .diagnostics import DiagnosticCore
+from memorive.desktop.service.diagnostics import DiagnosticCore
 from memorive.platform.errors import (
     CapabilityBlocked,
     ContractViolation,
@@ -24,7 +31,7 @@ from memorive.platform.errors import (
     ResumeInputDrift,
 )
 from memorive.platform.jobs.lifecycle import apply_transition
-from .support_bundle import SupportBundleBuilder
+from memorive.desktop.service.support_bundle import SupportBundleBuilder
 
 
 TERMINAL_STATES = frozenset({"SUCCEEDED", "FAILED", "CANCELLED", "BLOCKED_BEFORE_START"})

@@ -10,7 +10,7 @@ from memorive.sessions.refinement.provider_adapter import build_synthetic_snapsh
 from memorive.sessions.refinement.refinement import PREFIX_TYPES
 from memorive.sessions.refinement.refinement import deterministic_refine_graph
 from tests.modules.knowledge_feedback.test_export_snapshot_contract import NOW, make_envelope, make_export, message
-from decision_log.conversation_refinement_decision import make_refinement_decision_receipt
+from memorive.sessions.refinement.decision import make_refinement_decision_receipt
 FAMILIES = [
     "decision_constraint",
     "fact_evidence",

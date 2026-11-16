@@ -1,7 +1,7 @@
 """Which job state may follow which (LEGAL_TRANSITIONS, apply_transition), and how a stopped job's
 folder is classified for recovery from its events and its writer lock.
 
-Used by the application facade and the diagnostics in memorive_app.
+Used by the application facade and the diagnostics in memorive/desktop/service.
 """
 from __future__ import annotations
 

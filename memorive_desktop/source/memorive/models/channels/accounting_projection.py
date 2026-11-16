@@ -1,4 +1,4 @@
-"""Append-only accounting amendment projection without denominator drift."""
+"""The accounting amendments of channel attempts projected append-only, without the counted total drifting."""
 
 from __future__ import annotations
 

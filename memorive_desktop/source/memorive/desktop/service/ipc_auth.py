@@ -1,3 +1,6 @@
+"""Authentication of the loopback IPC connection between window and service: a single-use HMAC
+challenge (LoopbackPeerAuthenticator in service.py, compute_challenge_response in client.py).
+"""
 from __future__ import annotations
 
 import hashlib

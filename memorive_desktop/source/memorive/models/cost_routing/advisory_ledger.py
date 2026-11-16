@@ -1,4 +1,4 @@
-"""Append-only rejection and abstention ledger for COST-ROUTING advice."""
+"""An append-only ledger of rejected and withheld cost routing advice. Nothing in the app calls it."""
 
 from __future__ import annotations
 

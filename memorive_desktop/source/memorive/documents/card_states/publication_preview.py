@@ -1,4 +1,5 @@
-"""Memorive ANALYSIS-ADMISSION/RUNTIME_LOG non-authoritative publication candidate previews."""
+"""Previews of publication candidates for analysis admission results in the runtime log; they do not
+publish anything and are not authoritative. Nothing in the app calls it."""
 
 from __future__ import annotations
 

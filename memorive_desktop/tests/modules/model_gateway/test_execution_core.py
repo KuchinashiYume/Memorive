@@ -1129,7 +1129,8 @@ class StaticBoundaryTest(unittest.TestCase):
             path.read_text(encoding="utf-8")
             for path in sorted((REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core").glob("*.py"))
         )
-        self.assertNotIn("run_ledger", source)
+        for ledger in ("platform.ledger", "models.channels", "models.cost_routing"):  # the run_ledger modules
+            self.assertNotIn(ledger, source)
         self.assertNotIn("platform.logs", source)
         self.assertNotIn("requests.", source)
         self.assertNotIn("urllib", source)

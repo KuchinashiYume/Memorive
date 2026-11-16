@@ -7,7 +7,7 @@ from memorive.sessions.refinement.contracts import ConversationContractError
 from memorive.sessions.refinement.destination import make_destination_projection
 from memorive.sessions.refinement.refinement import deterministic_refine_graph
 from tests.modules.knowledge_feedback.test_typed_refinement import refinement_fixture
-from decision_log.conversation_refinement_decision import make_refinement_decision_receipt
+from memorive.sessions.refinement.decision import make_refinement_decision_receipt
 from memorive.documents.card_states.conversation_ingest_preview import make_conversation_ingest_preview
 NOW = "2026-08-18T02:00:00+09:00"
 

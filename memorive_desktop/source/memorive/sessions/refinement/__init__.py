@@ -5,7 +5,8 @@ turns it into a normalized conversation graph, redaction.py removes what must no
 refinement.py makes one reviewable item per message; destination.py, batch.py and
 knowledge_feedback_adapter.py preview where an accepted item would go. model_channel.py is the
 channel through which refinement runs a model (ProductApi in memorive/desktop/api.py builds it);
-model_choices.py lists the models a refinement task may use. The library, card states and the
+model_choices.py lists the models a refinement task may use. decision.py keeps the receipts of a
+person's decision on items, which destination.py checks. The library, card states and the
 artifact registry use the contracts and destination checks.
 """
 

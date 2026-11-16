@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
-from decision_log.knowledge_decision import (
+from memorive.research.knowledge_feedback.decision import (
     KnowledgeDecisionError,
     assert_decision_binds_candidate,
 )

@@ -1,3 +1,7 @@
+"""Read-only adapters that feed the capability snapshot (platform/jobs/capabilities.py): card review
+status, declared model capabilities, sandbox evidence of the runtime log, the logging folder's role.
+Nothing in the app calls them; they are kept for the facade's capability inputs.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

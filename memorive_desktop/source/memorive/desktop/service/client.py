@@ -11,7 +11,7 @@ import time
 from typing import Any, Mapping
 import uuid
 
-from memorive_app.ipc_auth import compute_challenge_response
+from memorive.desktop.service.ipc_auth import compute_challenge_response
 
 from memorive.desktop.service.errors import AuthenticationRejected, ConnectionLost, DesktopServiceError, RequestTimeout
 from memorive.desktop.service.protocol import (

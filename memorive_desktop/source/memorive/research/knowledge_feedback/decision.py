@@ -1,8 +1,8 @@
-"""DECISION_LOG decision carrier for one exact DerivedKnowledgeCandidate revision.
+"""The design decision record for one exact revision of a derived knowledge candidate.
 
-Construction A can create only explicitly synthetic fixtures.  The validator
-also defines the future real-receipt shape, but this module performs no user
-decision, status transition, ingest, Registry write, or activation.
+Only explicitly synthetic fixtures can be built. The validator also defines the shape of a future
+real receipt, but this module makes no user decision, status change, ingest, registry write or
+activation. eligibility.py calls it.
 """
 
 from __future__ import annotations

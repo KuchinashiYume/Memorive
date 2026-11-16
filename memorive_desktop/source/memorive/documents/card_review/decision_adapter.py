@@ -1,4 +1,5 @@
-"""Memorive FACT-IDENTITY/DECISION_LOG adapter from EVIDENCE_REVIEW repair evidence to a valid DDL record."""
+"""Turns the card review's repair evidence into a valid design decision record. Nothing in the app
+calls it."""
 
 from __future__ import annotations
 

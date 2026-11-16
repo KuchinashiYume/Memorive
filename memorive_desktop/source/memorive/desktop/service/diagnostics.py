@@ -1,3 +1,6 @@
+"""The diagnostic view (DiagnosticCore): reads the contract schemas, the job store's integrity and the
+recovery state of the sandbox, without touching the network. The facade builds it.
+"""
 from __future__ import annotations
 
 import json

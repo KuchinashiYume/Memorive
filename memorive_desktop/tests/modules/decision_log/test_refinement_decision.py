@@ -6,7 +6,7 @@ from copy import deepcopy
 from memorive.sessions.refinement.contracts import ConversationContractError
 from memorive.sessions.refinement.refinement import deterministic_refine_graph
 from tests.modules.knowledge_feedback.test_typed_refinement import refinement_fixture
-from decision_log.conversation_refinement_decision import assert_decision_binds_item, make_refinement_decision_receipt, validate_refinement_decision_receipt
+from memorive.sessions.refinement.decision import assert_decision_binds_item, make_refinement_decision_receipt, validate_refinement_decision_receipt
 NOW = "2026-08-18T02:00:00+09:00"
 
 

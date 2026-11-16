@@ -6,6 +6,6 @@ memorive/sessions/refinement now.
 
 contracts.py and eligibility.py are an earlier set of knowledge feedback contracts that
 knowledge_admission and artifact_registry call; canonical.py holds hashing helpers several packages
-use. lineage.py and penalty.py have no caller outside the package and its tests. This package and
-decision_log import each other.
+use. lineage.py and penalty.py have no caller outside the package and its tests. decision.py is the
+design decision record for a derived knowledge candidate, which eligibility.py checks.
 """
