@@ -100,8 +100,30 @@ can ask again from the window.
 | Card review states (pending, active, quarantined), automatic review, the admission log | `knowledge_admission/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
 | Custom command-line model tools: the template, how it is run, how its output is read | `memorive_settings/cli_templates.py`, `cli_template_execution.py` | `characterize/test_cli_templates.py` |
 | How a model request is sent: API, command-line agents, embeddings, OCR | `memorive_settings/model_validation.py`; model-name patterns and API endpoints in `model_endpoints.py`; the workflow exam's own part in `workflow_exam_runner.py` | `test_analysis_provider_transport.py`, `test_model_execution.py` |
+| The front matter at the top of RawMD, CleanMD and card files | `memorive_front_matter.py`; every reader of those files uses it | `test_front_matter.py` |
+| Which files research may read: below the root, not through links, not in private folders; bundles added as attachments | `safe_path` in `memorive_research_workspace/evidence.py`; `load_bundle` in `skill_bridge.py` | `characterize/test_path_checks.py` |
+| What happens to a question that was running when the app restarted | `_recover_after_restart` and `finish_answers_received_before_restart` in `memorive_research_workspace/service.py`; `stored_result` in `memorive_model_execution/execution.py` | `test_research_qa_flow.py`, `test_model_execution.py` |
+| The name an exam's scores are saved under, and when a saved score is reused | `EXECUTOR_REF` of each exam executor; `ExamScoreHistory` in `memorive_settings/exam_score_history.py`; `build_cache_binding` in `exam_successor.py` | `test_scores.py` |
 
 Run the whole suite before you finish; the files above are the quick check while you work.
+
+## Code the window does not start
+
+Some packages are not reached from the window's own code. They run when an operator calls
+them, when a run loads them by name, or when a caller passes them the data they need. They are
+kept and shipped; this list says how each one is entered.
+
+| Code | How it is entered | Notes |
+| --- | --- | --- |
+| Exam modules, `memorive_model_evaluation/` | The settings page starts an exam (`settings.start_workflow_exam`); `service_main._quality_exam_package()` names this package and `workflow_exam.py` imports its submodules with `importlib.import_module`. | A search for import statements does not find them. |
+| Inherited exam scores: `_validate_workflow_exam_catalog` and `_validate_workflow_exam_catalog_v8` in `memorive_settings/workflow_exam_runner.py` | `LiveModelValidationRunner(workflow_exam_catalog=...)`. The desktop passes `None` (`service_main.py`: new installations have no inherited results), so the reader runs only when a caller supplies a catalog. | Reads score catalogs saved by earlier versions; kept so those stay readable. |
+| Command-line agent adapters in `model_gateway/execution_core/adapters/`: `claude_code.py`, `codebuddy_code.py`, `gemini_cli.py`, `github_copilot_cli.py`, `kimi_code.py`, `qwen_code.py` | Component API: build the adapter with its policy and call it. | The window runs command-line models through Settings instead: `memorive_settings/model_validation.py` builds the command (`_cli_argv`) and runs it. Of the adapters in that folder only `codex_cli.py` is used on that path: its parser reads the event stream a Codex run prints. |
+| Field-vector and shadow ranking in `retrieval_weighting/` (`candidate_index.py`, `migration.py`, `locator.py`, `field_vectors.py`, `shadow_contracts.py`, `semantic_shadow_contracts.py` and the modules they use) | `python -m retrieval_weighting --input <request> --output <receipt> --root <run folder> --cutoff <UTC time>`, where the request's `operation` is build, migrate or validate; or the functions the package exports. | Research Q&A uses the same package's `research_policy.py`, `research_ranking.py` and `research_rule.py`. |
+| Knowledge feedback contracts: `knowledge_feedback/contracts.py`, `eligibility.py`, `lineage.py`, `penalty.py`, with `knowledge_admission/knowledge_submission.py`, `derived_knowledge_artifact.py` and `artifact_registry/knowledge_feedback_adapter.py` | Component API: contract checks and dry-run adapters; none of them writes a card, the registry or an index. | Saving an answer as knowledge in the window goes through `knowledge_feedback/research_ingest.py`, not through these. |
+| Research opportunity pipeline: `research_opportunities/core.py`, `knowledge_admission/opportunity_submission.py`, `evidence_review/opportunity_verification.py` | Component API. | Research Q&A uses `research_opportunities/research_opportunities.py` and the eight comparison concepts `CONCEPT_ORDER`, which producer and verifier share from `research_opportunities/canonical.py`. |
+| Document conversion command line | `python -m document_processing.document_conversion.cli` with probe, verify-structure or convert | Calls the same conversion facade as the app. |
+| Local model components: the packages `model_gateway/local_capability/`, `local_embedding/` and `model_api_relay/` | Component API: the broker's `execute()` in `local_capability/broker.py`, `LocalEmbeddingSeam.execute()` in `local_embedding/seam.py`, `SafeRelayClient.invoke()` in `model_api_relay/client.py`. Each needs its configuration from the caller and is off by default. | `python -m model_gateway.local_capability` prints status and diagnostics only. |
+| Evidence review orchestration, `evidence_review/review_orchestration/` | Its operator (`operator.py`): `create_or_get_job`, `pause`, `resume`, `cancel`, and `dispatch_once` with an execute function the caller supplies. | |
 
 ## Reading library files from other packages
 
