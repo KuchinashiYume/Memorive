@@ -2842,8 +2842,8 @@
     },
     {
       "path": "source/evidence_review/analysis_revision.py",
-      "sha256": "2557a3cadac801e959b0bcbf2956147cfd588aba9031eadb25eec59592968d7c",
-      "bytes": 3747
+      "sha256": "f2a706731bd3b9786d93fd80d8bdc3f0d1e977470a6e5d04a93788d62b69cbc7",
+      "bytes": 3801
     },
     {
       "path": "source/evidence_review/atomic_repair.py",
@@ -4797,8 +4797,8 @@
     },
     {
       "path": "source/memorive/platform/__init__.py",
-      "sha256": "6a4ad782e154fdc6e372ac3658474c9f373efb8730e6a5704e6ae0686493ba1a",
-      "bytes": 945
+      "sha256": "da7fe166105d7484dd042ba23bae8afb8623fa646c0c678e624f4f203afeb454",
+      "bytes": 1032
     },
     {
       "path": "source/memorive/platform/clock.py",
@@ -4939,6 +4939,11 @@
       "path": "source/memorive/platform/naming.py",
       "sha256": "298385275bfcfad8f31c4d984486016d07f3bfbfec9bfd197e0dc6d5961acd52",
       "bytes": 2107
+    },
+    {
+      "path": "source/memorive/platform/pickle_compat.py",
+      "sha256": "c11dea568af780ba48fc688d1e963fe52fe17664e130dbfb71fb924ef983b850",
+      "bytes": 1355
     },
     {
       "path": "source/memorive/platform/public_roots.pem",
@@ -6222,8 +6227,8 @@
     },
     {
       "path": "source/memorive_workflow/executor.py",
-      "sha256": "a4e2862ffac33a1824e28e5fc48bbb302e0c5966459722aabfd470196a714edd",
-      "bytes": 70138
+      "sha256": "c2b6b91b1fc552eb5c63ab55152196f8d4ff17cfd80cf20df6889770f9d69d55",
+      "bytes": 70197
     },
     {
       "path": "source/memorive_workflow/model_bridge.py",

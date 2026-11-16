@@ -7,15 +7,18 @@ in golden/old_job_pickles were written on 2026-11-16, before any of these classe
 code-plan/work/upgrade/make_job_pickle_samples.py; they hold every nested class those objects can
 contain.
 
-These tests pin two things: the samples still load into objects equal to ones built now, and the
-classes they name are exactly the ones below. When the classes move, old names must keep loading
-(the loader then maps them), and a class added to or removed from these objects shows up here.
+The readers load through memorive/platform/pickle_compat.py, and so do these tests. They pin three
+things: the samples still load into objects equal to ones built now; the classes they name are
+exactly the ones below; and each of those names is either still a class at that place or a key of
+pickle_compat.MOVED. When a class moves, its old name goes into MOVED; a class added to or removed
+from these objects shows up here.
 """
-import pickle
+import importlib
 from pathlib import Path
 
 import pytest
 
+from memorive.platform import pickle_compat
 from research_analysis.types import AnalysisResult, FlaggedClaim, LiteratureClaim, PossiblyIrrelevantClaim
 from retrieval.ownership import OwnershipContributor
 from retrieval.types import ContextBlock, ContextPack, QueryFacet
@@ -69,7 +72,7 @@ def expected_objects():
     return {"06_context_pack.pkl": pack, "07_analysis.pkl": analysis, "analysis_revision.pkl": analysis}
 
 
-class RecordingUnpickler(pickle.Unpickler):
+class RecordingUnpickler(pickle_compat.JobUnpickler):
     """Loads like the job folder readers do and notes each (module, class) the data names."""
 
     def __init__(self, stream, seen):
@@ -96,3 +99,10 @@ def test_the_samples_name_exactly_the_known_classes():
     for name in expected_objects():
         load(GOLDEN / name, seen)
     assert seen == STORED_CLASSES
+
+
+@pytest.mark.parametrize("stored", sorted(STORED_CLASSES))
+def test_each_stored_name_is_still_there_or_mapped(stored):
+    module, name = stored
+    if stored not in pickle_compat.MOVED:
+        assert isinstance(getattr(importlib.import_module(module), name), type)

@@ -4,6 +4,8 @@ from dataclasses import asdict
 import hashlib,json,pickle
 from pathlib import Path
 
+from memorive.platform import pickle_compat
+
 def _write(path,value):
     with path.open('x',encoding='utf-8') as stream:
         json.dump(value,stream,ensure_ascii=False,indent=2,allow_nan=False)
@@ -25,7 +27,7 @@ def complete_analysis_revision(analysis,pack,review,chunks,*,bridge,evidence_roo
         payload=(root/'analysis.pkl').read_bytes()
         if hashlib.sha256(payload).hexdigest()!=result['analysis_pickle_sha256']:
             raise RuntimeError('ANALYSIS_REVISION_CHECKPOINT_TAMPERED')
-        current=pickle.loads(payload)
+        current=pickle_compat.loads(payload)
         if current.analysis_hash!=result['successor_analysis_hash']:
             raise RuntimeError('ANALYSIS_REVISION_CHECKPOINT_CONTENT_MISMATCH')
         return current,result['combined_review']

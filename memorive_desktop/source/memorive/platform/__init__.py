@@ -8,6 +8,7 @@
   tls.py            the bundled public root certificates and the TLS context built from them
   windows_paths.py  file paths past the Windows MAX_PATH limit
   data_folders.py   where data goes when nothing has bound the folders to a profile
+  pickle_compat.py  reading job pickles of earlier versions after their classes moved
   folders/          the folders of a user profile, their migration, and the roles of product folders
   logs/             the runtime log
   language/         which language new content is written in

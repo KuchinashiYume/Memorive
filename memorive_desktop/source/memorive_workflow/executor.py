@@ -38,6 +38,7 @@ def _is_chroma_hnsw_read_failure(error: Exception) -> bool:
 from .segmented_distill import CoreSegmentedDistiller
 from .task_controls import TaskControlStore
 from .scheduling import PIPELINE_LANES
+from memorive.platform import pickle_compat
 from memorive.platform.folders import (
     document_artifact_path,
     document_folder,
@@ -953,7 +954,7 @@ class CorePipelineExecutor:
                     _atomic_json(pack_json, context_pack_artifact)
                     mark("06_CONTEXT_PACK")
                 with pack_pickle.open("rb") as stream:
-                    pack = pickle.load(stream)
+                    pack = pickle_compat.load(stream)
                 context_pack_summary = {
                     "truncated": bool(pack.truncated),
                     "original_estimated_tokens": int(
@@ -1014,7 +1015,7 @@ class CorePipelineExecutor:
                     analysis_md.write_text(rendered_analysis, encoding="utf-8")
                     mark("07_ANALYSIS")
                 with analysis_pickle.open("rb") as stream:
-                    analysis = pickle.load(stream)
+                    analysis = pickle_compat.load(stream)
                 if self.interaction_sink is not None:
                     execution_checkpoint()
                     # Separate observation receipt; failure never reruns a completed model call.
