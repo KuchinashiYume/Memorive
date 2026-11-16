@@ -68,7 +68,13 @@ returns, `save_answer` discards the answer and keeps the call's usage on the job
 
 **Restart.** When the app starts, the workspace is opened with `recover=True`, and jobs that were
 `QUEUED` or `RUNNING` become `INTERRUPTED` ("Restarted; retry explicitly"); see
-`ResearchWorkspace.__init__`. The user can ask again from the window.
+`ResearchWorkspace.__init__`. A job keeps the model snapshot its question was sent with
+(`note_model_snapshot`, called by the model function in `desktop.py`). Once the desktop has wired
+the workspace, `finish_answers_received_before_restart` asks the settings service for the result
+it kept under that snapshot (`settings.research_chat_result`). If there is one, the job is answered
+again through the normal steps with that result in place of the model call: the excerpts are
+searched again, nothing is sent. Without a kept result the job stays `INTERRUPTED`, and the user
+can ask again from the window.
 
 ## Where to change what
 

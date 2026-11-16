@@ -24,7 +24,9 @@ settings service and runs it there (settings.research_chat_freeze / settings.res
 Cancelling: ResearchWorkspace.cancel() marks the job CANCELLED at once. The checkpoints between the steps
 stop a cancelled job. A model call that is already running is not stopped; save_answer discards what it
 returns and keeps its usage on the job as late_usage.
-Restart: a workspace opened with recover=True marks QUEUED and RUNNING jobs INTERRUPTED.
+Restart: a workspace opened with recover=True marks QUEUED and RUNNING jobs INTERRUPTED. A job whose model call
+had finished is then answered again through these same steps with the result the settings service kept, in place
+of the call (ResearchWorkspace.finish_answers_received_before_restart); nothing is sent again.
 """
 from __future__ import annotations
 
@@ -52,20 +54,23 @@ HANDOFF = re.compile(r'^(?:请|帮我)?(?:交给|转交).{0,16}(?:Agent|智能�
 LIVE = {'QUEUED', 'RUNNING'}
 
 
-def answer_job(workspace, job_id, question, artifact_ids):
+def answer_job(workspace, job_id, question, artifact_ids, received=None):
     """Answer one queued question; the workspace's worker pool runs this."""
-    AnswerJob(workspace, job_id, question, artifact_ids).run()
+    AnswerJob(workspace, job_id, question, artifact_ids, received).run()
 
 
 class AnswerJob:
     """One research question being answered. Each step keeps what later steps need, listed below."""
 
-    def __init__(self, workspace, job_id, question, artifact_ids):
+    def __init__(self, workspace, job_id, question, artifact_ids, received=None):
         self.ws = workspace
         self.store = workspace.store
         self.job_id = job_id
         self.question = question
         self.artifact_ids = artifact_ids
+        # After a restart: (model snapshot, the result the settings service kept for it), used in place
+        # of the model call (ResearchWorkspace.finish_answers_received_before_restart).
+        self.received = received
         self.started = time.monotonic()
         # Set by start:
         self.job = None              # the job record, now RUNNING
@@ -381,8 +386,13 @@ class AnswerJob:
             raise ValueError('CHAT_MODEL_RUNNER_UNAVAILABLE')
         if self.job.get('kind') == 'agent':
             self.save_agent_handoff()
-        result = model(profile_ref=self.settings['profile_ref'], prompt=self.prompt, job_id=self.job_id,
-                       response_schema=self.response_schema)
+        if self.received:
+            from .model_receipts import verified_result  # imported here, as in desktop.py: it loads memorive_settings
+            snapshot, kept = self.received
+            result = verified_result(kept, snapshot)  # as the model function checks a result it receives
+        else:
+            result = model(profile_ref=self.settings['profile_ref'], prompt=self.prompt, job_id=self.job_id,
+                           response_schema=self.response_schema)
         self.value = result['response']
         self.usage = result.get('execution_receipt', {})
         self.engine = result.get('model_name', 'configured_model')

@@ -3957,8 +3957,8 @@
     },
     {
       "path": "source/memorive_model_execution/execution.py",
-      "sha256": "c247b4efb75ce8bdbc8d7561792561c9471a6ac16c9750733bc05c634304efe5",
-      "bytes": 15246
+      "sha256": "2e790af2f1098ce2cdeccfacd65ca1632b00debdab992c0331e83067544fe469",
+      "bytes": 15701
     },
     {
       "path": "source/memorive_model_execution/retry.py",
@@ -4167,8 +4167,8 @@
     },
     {
       "path": "source/memorive_research_workspace/answering.py",
-      "sha256": "0e66b3a3031ad0351b85a7f269649a918a80d1b37a8744ae0f968c5632b05b9f",
-      "bytes": 37735
+      "sha256": "6df0a9a290e4e319ee038bb80e300d54cf56a2f56e0ba2d9589291763f675ef0",
+      "bytes": 38557
     },
     {
       "path": "source/memorive_research_workspace/attachments.py",
@@ -4212,8 +4212,8 @@
     },
     {
       "path": "source/memorive_research_workspace/desktop.py",
-      "sha256": "b52ade90e7539ff08418dc3faf7044665f9da859d3351e4fa031d5c29af92f1d",
-      "bytes": 4403
+      "sha256": "05acc280fb7d5be1681630b4364da12b243e40aba3ed132386570a71993df6ab",
+      "bytes": 4830
     },
     {
       "path": "source/memorive_research_workspace/desktop_connections.py",
@@ -4267,8 +4267,8 @@
     },
     {
       "path": "source/memorive_research_workspace/service.py",
-      "sha256": "d183ff60fe5bdc9e812ea6abae7dddcd99ca6fa4057251f11d7a75dbf0b11819",
-      "bytes": 33009
+      "sha256": "0b9de0966af9fde54d10cab3c73c4795d0d6623eae067f197cd3927b5b130624",
+      "bytes": 35276
     },
     {
       "path": "source/memorive_research_workspace/skill_bridge.py",
@@ -4517,8 +4517,8 @@
     },
     {
       "path": "source/memorive_settings/controller.py",
-      "sha256": "89ebbd1bcb246b296f47a62e484a14fb0535cdc06754b0f38c997b8aba372c25",
-      "bytes": 87530
+      "sha256": "0ae1a4467df1432efd512f54dacd9f6289aa330f40269f39142fcbfe0f247259",
+      "bytes": 87666
     },
     {
       "path": "source/memorive_settings/credentials.py",
@@ -4687,8 +4687,8 @@
     },
     {
       "path": "source/memorive_settings/service_adapter.py",
-      "sha256": "f0b7e503cd270fc97e4bafe6ea21fe760c6f6c2b7933ddfa8448c1cf6843f820",
-      "bytes": 6928
+      "sha256": "b50395d1d00d682708411677b48e5d3ab46aa0477440785ee87fffb61b749796",
+      "bytes": 7028
     },
     {
       "path": "source/memorive_settings/specialized_exam.py",

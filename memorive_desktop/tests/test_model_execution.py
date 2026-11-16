@@ -89,6 +89,18 @@ def test_a_frozen_research_question_is_sent_once(tmp_path):
     assert len(runner.calls) == 1
 
 
+def test_the_kept_result_of_a_research_question_is_read_back_without_sending(tmp_path):
+    """After a restart the research workspace asks for the result a snapshot already has
+    (settings.research_chat_result); nothing is sent again."""
+    runner = Runner()
+    controller = make_controller(tmp_path, runner)
+    frozen = controller.research_chat_freeze(run_id=RUN_ID, profile_ref="local:chat")
+    assert controller.research_chat_result(snapshot_id=frozen["snapshot_id"]) is None
+    sent = controller.research_chat_execute(snapshot_id=frozen["snapshot_id"], prompt="What changed?", response_schema=SCHEMA)
+    assert controller.research_chat_result(snapshot_id=frozen["snapshot_id"]) == sent
+    assert len(runner.calls) == 1
+
+
 def test_a_research_question_is_tried_again_after_a_temporary_failure(tmp_path, waits):
     runner = Runner(transient_failure(), transient_failure(), dict(PASS))
     controller = make_controller(tmp_path, runner)

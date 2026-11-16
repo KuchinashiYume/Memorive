@@ -22,6 +22,8 @@ def create(api):
         return [r for r in report_catalog(api._research) if r['profile_kind'] in {'API','LOCAL','CLI'}]
     def execute(*,profile_ref,prompt,job_id,response_schema=ANSWER_SCHEMA):
         snap=api._service.call('settings.research_chat_freeze',{'run_id':job_id,'profile_ref':profile_ref})
+        # Kept on the job, so that a result that arrives just before a crash can still be saved after it.
+        workspace.note_model_snapshot(job_id,snap)
         # Route and exact model are frozen server-side; the browser never supplies credentials.
         result=api._service.call('settings.research_chat_execute',{'snapshot_id':snap['snapshot_id'],'prompt':prompt,'response_schema':response_schema})
         from .model_receipts import verified_result
@@ -55,4 +57,7 @@ def create(api):
     bind(workspace,api._library)
     from .desktop_connections import bind as bind_connections
     bind_connections(workspace,api)
+    # Answers whose model call finished before the app was closed are saved now, from the kept result.
+    workspace.finish_answers_received_before_restart(
+        lambda snap:api._service.call('settings.research_chat_result',{'snapshot_id':snap['snapshot_id']}))
     return workspace

@@ -9,6 +9,7 @@ from memorive_desktop_service.protocol import canonical_json_bytes
 SETTINGS_METHODS = (
     "settings.research_chat_freeze",
     "settings.research_chat_execute",
+    "settings.research_chat_result",
     "settings.research_image_execute",
     "settings.research_embedding_freeze",
     "settings.research_embedding_execute",
@@ -65,6 +66,7 @@ SETTINGS_METHODS = (
 METHOD_TARGETS = {
     "settings.research_chat_freeze": "research_chat_freeze",
     "settings.research_chat_execute": "research_chat_execute",
+    "settings.research_chat_result": "research_chat_result",
     "settings.research_image_execute": "research_image_execute",
     "settings.research_embedding_freeze": "research_embedding_freeze",
     "settings.research_embedding_execute": "research_embedding_execute",

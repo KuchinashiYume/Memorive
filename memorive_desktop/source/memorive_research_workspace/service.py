@@ -93,12 +93,14 @@ class ResearchWorkspace:
         # Legacy answer trees are normalized on individual reads and persisted
         # with their next actual content edit, never by a startup body scan.
         self._developer = None
+        self.interrupted_during_model_call = []  # filled by _recover_after_restart
         if recover:
             self._recover_after_restart()
 
     def _recover_after_restart(self):
         """Jobs and attachment preparations a previous process left running did not finish: mark them
-        interrupted (the user retries). Temporary conversations of that process are forgotten."""
+        interrupted (the user retries). Temporary conversations of that process are forgotten.
+        Jobs whose model call had started are remembered for finish_answers_received_before_restart."""
         with self.store.tx() as db:
             for job in self.store.recoverable_jobs('attachment_job', db):
                 if job['status'] not in {'QUEUED', 'RUNNING'}:
@@ -114,12 +116,43 @@ class ResearchWorkspace:
             for job in self.store.recoverable_jobs('job', db):
                 if job['status'] in {'QUEUED', 'RUNNING'}:
                     self.store.put('job', job['id'], job['project'], dict(job, status='INTERRUPTED', error='Restarted; retry explicitly'), db=db)
+                    if job.get('model_snapshot'):
+                        self.interrupted_during_model_call.append(job['id'])
         # A crash cannot run close(). Temporary branches and drafts from
         # that process must not reappear in the next desktop session.
         with self.store.read() as db:
             temporary = [(r['id'], r['source_revision']) for r in db.execute('SELECT id,source_revision FROM conversation_catalog WHERE temporary=1')]
         for identity, revision in temporary:
             self.thread_forget(identity, revision)
+
+    def note_model_snapshot(self, job_id, snapshot):
+        """Keep on a running job the model snapshot its question is sent with, so that after a restart
+        the result kept under it can still be saved (finish_answers_received_before_restart). Model
+        calls that are not a job's answer, such as ranking, have no job and are skipped."""
+        with self.store.tx() as db:
+            job = self.store.get('job', job_id, db=db)
+            if job and job['status'] == 'RUNNING':
+                self.store.put('job', job_id, job['project'], dict(job, model_snapshot=snapshot), db=db)
+
+    def finish_answers_received_before_restart(self, stored_result):
+        """The second half of a restart, run once the desktop has wired the workspace. A job the restart
+        interrupted while its model call was running is answered again through the normal steps when
+        stored_result(snapshot) gives the result the settings service kept for that call: the excerpts
+        are searched again and nothing is sent. Without a kept result the job stays INTERRUPTED."""
+        from .answering import answer_job
+        for job_id in self.interrupted_during_model_call:
+            job = self.store.get('job', job_id)
+            kept = stored_result(job['model_snapshot'])
+            if kept is None:
+                continue
+            with self.store.tx() as db:
+                job = self.store.get('job', job_id, db=db)
+                if job['status'] != 'INTERRUPTED':
+                    continue
+                queued = {key: value for key, value in job.items() if key != 'error'}
+                self.store.put('job', job_id, job['project'], dict(queued, status='QUEUED'), db=db)
+            self.futures[job_id] = self.pool.submit(answer_job, self, job_id, job['question_message']['text'],
+                                                    job['artifact_ids'], received=(job['model_snapshot'], kept))
 
     @property
     def developer(self):

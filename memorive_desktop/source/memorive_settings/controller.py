@@ -1439,6 +1439,9 @@ class SettingsController:
     def research_chat_execute(self, *, snapshot_id, prompt, response_schema):
         return self.research_chat_execution.execute(snapshot_id=snapshot_id,prompt=prompt,response_schema=response_schema)
 
+    def research_chat_result(self, *, snapshot_id):
+        return self.research_chat_execution.stored_result(snapshot_id=snapshot_id)
+
     def ai_briefing_freeze(self, *, run_id, profile_ref):
         return self.ai_briefing_execution.freeze(run_id=run_id,period='briefing',profile_ref=profile_ref)
 

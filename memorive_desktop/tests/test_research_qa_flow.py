@@ -1,5 +1,6 @@
 """How a research question ends: answered, answered from local excerpts only, refused, failed,
-cancelled, interrupted by a restart, or answered again.
+cancelled, interrupted by a restart, saved after a restart from the result the settings
+service kept, or answered again.
 
 Each test asks about the synthetic paper of examples/research_qa.py with a stand-in model, so the
 whole path runs (queue, excerpts, prompt, model, checks, save) and nothing leaves the computer.
@@ -157,6 +158,70 @@ def test_a_job_running_when_the_app_restarts_is_marked_interrupted(setup, tmp_pa
     # The answer the first process still received is not saved over the restart's decision.
     assert workspace.job_status(job_id)["status"] == "INTERRUPTED"
     assert _answers(workspace, thread_id) == []
+
+
+class SettingsService:
+    """Stands in for desktop.py's model function and the settings service behind it: the call is frozen
+    into a snapshot, which the job keeps, and the service keeps the result under that snapshot."""
+
+    def __init__(self, model):
+        self.model, self.workspace, self.kept = model, None, {}
+
+    def __call__(self, **request):
+        snapshot = {"snapshot_id": "snapshot-" + request["job_id"], "model_name": example.PROFILE["model_name"]}
+        self.workspace.note_model_snapshot(request["job_id"], snapshot)
+        result = self.model(**request)
+        receipt = dict(result["execution_receipt"], behavior_sha256="0" * 64)
+        self.kept[snapshot["snapshot_id"]] = dict(result, status="PASS", execution_receipt=receipt,
+                                                  requested_model=snapshot["model_name"], returned_model=snapshot["model_name"])
+        return result
+
+    def stored_result(self, snapshot):
+        return self.kept.get(snapshot["snapshot_id"])
+
+
+def _restart_after_the_model_answered(setup, tmp_path, *, keep_result):
+    """The model returns, but the restart has already happened, so the first process cannot save the answer."""
+    model = Model()
+    model.release.clear()
+    service = SettingsService(model)
+    workspace, thread_id, material_id = setup(service)
+    service.workspace = workspace
+    job_id = _ask(workspace, thread_id, material_id, wait=False)
+    assert model.called.wait(60)
+    after_restart = Model()
+    restarted = _open(tmp_path / "workspace", after_restart, recover=True)
+    model.release.set()
+    _finish(workspace)
+    assert workspace.job_status(job_id)["status"] == "INTERRUPTED"
+    if not keep_result:
+        service.kept.clear()
+    restarted.finish_answers_received_before_restart(service.stored_result)
+    _finish(restarted)
+    return restarted, after_restart, model, thread_id, job_id
+
+
+def test_after_a_restart_an_answer_the_model_already_returned_is_saved(setup, tmp_path):
+    restarted, after_restart, model, thread_id, job_id = _restart_after_the_model_answered(setup, tmp_path, keep_result=True)
+    try:
+        job = restarted.job_status(job_id)
+        [answer] = _answers(restarted, thread_id)
+        assert job["status"] == "COMPLETE" and job["answer_id"] == answer["id"]
+        assert answer["engine"] == example.PROFILE["model_name"]
+        assert (len(model.calls), len(after_restart.calls)) == (1, 0)  # asked once, before the restart
+    finally:
+        restarted.close()
+
+
+def test_after_a_restart_without_a_kept_result_the_job_stays_interrupted(setup, tmp_path):
+    restarted, after_restart, model, thread_id, job_id = _restart_after_the_model_answered(setup, tmp_path, keep_result=False)
+    try:
+        job = restarted.job_status(job_id)
+        assert (job["status"], job["error"]) == ("INTERRUPTED", "Restarted; retry explicitly")
+        assert _answers(restarted, thread_id) == []
+        assert (len(model.calls), len(after_restart.calls)) == (1, 0)
+    finally:
+        restarted.close()
 
 
 def test_answering_again_calls_the_model_again_and_keeps_both_versions(setup):

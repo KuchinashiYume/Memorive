@@ -185,6 +185,15 @@ class ResearchChatExecution(ReportProfileExecution):
         result['recovery_attempts'] = attempts
         return result
 
+    def stored_result(self, *, snapshot_id):
+        """The result execute() kept for this snapshot, or None. After a restart the research workspace
+        saves an answer whose model call had finished from it; nothing is sent."""
+        require_snapshot_id(snapshot_id)
+        path = self.root / (snapshot_id + '.result.json')
+        if not path.is_file():
+            return None
+        return json.loads(path.read_text(encoding='utf8'))
+
     def execute_image(self, *, snapshot_id, image_base64, mime_type):
         """Transcribe a picture attached to a research question with the chosen chat model."""
         require_snapshot_id(snapshot_id)
