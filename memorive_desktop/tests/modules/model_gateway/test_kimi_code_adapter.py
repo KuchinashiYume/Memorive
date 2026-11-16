@@ -13,11 +13,11 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from model_gateway.execution_core.adapters.kimi_code import KimiCodePolicy, KimiCodeViolation
-from model_gateway.execution_core.adapters.kimi_code import KimiCodeAdapter
-from model_gateway.execution_core.contracts import canonical_sha256  # noqa: E402
-from model_gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
-from model_gateway.execution_core.workspace import JobWorkspace  # noqa: E402
+from memorive.models.gateway.execution_core.adapters.kimi_code import KimiCodePolicy, KimiCodeViolation
+from memorive.models.gateway.execution_core.adapters.kimi_code import KimiCodeAdapter
+from memorive.models.gateway.execution_core.contracts import canonical_sha256  # noqa: E402
+from memorive.models.gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
+from memorive.models.gateway.execution_core.workspace import JobWorkspace  # noqa: E402
 
 
 CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
@@ -74,7 +74,7 @@ def policy(subscription_home: Path) -> KimiCodePolicy:
         help_sha256=sha256(FAKE_KIMI),
         git_bash_path=str(GIT_BASH),
         git_bash_sha256=sha256(GIT_BASH),
-        runner_sha256=sha256(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+        runner_sha256=sha256(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
         model_catalog_sha256=sha256(FAKE_KIMI),
         allowed_models=(MODEL,),
         allowed_profiles=("kimi_device_oauth", "moonshot_api_blocked"),
@@ -99,7 +99,7 @@ def policy(subscription_home: Path) -> KimiCodePolicy:
             "entrypoint_sha256": str(FAKE_KIMI),
             "help_sha256": str(FAKE_KIMI),
             "git_bash_sha256": str(GIT_BASH),
-            "runner_sha256": str(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+            "runner_sha256": str(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
             "model_catalog_sha256": str(FAKE_KIMI),
         },
     )
@@ -593,7 +593,7 @@ class KimiParserAndRunnerTest(unittest.TestCase):
 class KimiStaticBoundaryTest(unittest.TestCase):
     def test_adapter_has_no_network_retry_activation_or_answer_text_identity(self):
         source = (
-            REPO_ROOT / "model_gateway" / "execution_core" / "adapters" / "kimi_code.py"
+            REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "adapters" / "kimi_code.py"
         ).read_text(encoding="utf-8")
         self.assertNotIn("requests.", source)
         self.assertNotIn("urllib", source)

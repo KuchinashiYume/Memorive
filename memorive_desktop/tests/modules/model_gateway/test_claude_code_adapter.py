@@ -14,11 +14,11 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from model_gateway.execution_core.adapters.claude_code import ClaudeCodePolicy, ClaudeCodeViolation, RELAY_REPORTED_UNVERIFIED
-from model_gateway.execution_core.adapters.claude_code import ClaudeCodeAdapter
-from model_gateway.execution_core.contracts import canonical_sha256  # noqa: E402
-from model_gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
-from model_gateway.execution_core.workspace import JobWorkspace  # noqa: E402
+from memorive.models.gateway.execution_core.adapters.claude_code import ClaudeCodePolicy, ClaudeCodeViolation, RELAY_REPORTED_UNVERIFIED
+from memorive.models.gateway.execution_core.adapters.claude_code import ClaudeCodeAdapter
+from memorive.models.gateway.execution_core.contracts import canonical_sha256  # noqa: E402
+from memorive.models.gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
+from memorive.models.gateway.execution_core.workspace import JobWorkspace  # noqa: E402
 
 
 CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
@@ -92,7 +92,7 @@ def policy() -> ClaudeCodePolicy:
         exact_version="2.1.229 (Claude Code)",
         binary_sha256=sha256(Path(PYTHON)),
         help_sha256=sha256(FAKE_CLAUDE),
-        runner_sha256=sha256(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+        runner_sha256=sha256(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
         model_catalog_sha256=sha256(FAKE_CLAUDE),
         allowed_models=(MODEL, "claude-opus-4-6"),
         allowed_efforts=("high", "max"),
@@ -113,7 +113,7 @@ def policy() -> ClaudeCodePolicy:
         component_paths={
             "binary_sha256": PYTHON,
             "help_sha256": str(FAKE_CLAUDE),
-            "runner_sha256": str(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+            "runner_sha256": str(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
             "model_catalog_sha256": str(FAKE_CLAUDE),
         },
     )
@@ -590,7 +590,7 @@ class ClaudeParserAndRunnerTest(unittest.TestCase):
 class ClaudeStaticBoundaryTest(unittest.TestCase):
     def test_adapter_has_no_network_retry_activation_or_model_text_identity(self):
         source = (
-            REPO_ROOT / "model_gateway" / "execution_core" / "adapters" / "claude_code.py"
+            REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "adapters" / "claude_code.py"
         ).read_text(encoding="utf-8")
         self.assertNotIn("requests.", source)
         self.assertNotIn("urllib", source)

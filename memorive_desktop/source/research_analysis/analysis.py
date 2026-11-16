@@ -15,12 +15,12 @@
 归属安全阀/红线)留第 2 步,本步聚焦「输出对不对」。
 """
 from __future__ import annotations
-from model_gateway.prompt_cache import source_first
+from memorive.models.gateway.prompt_cache import source_first
+from memorive.models.gateway.prompts import PROMPT_DIR
 
 import json
 from dataclasses import replace
 from datetime import datetime
-from pathlib import Path
 
 from memorive.platform.logs import log_reason
 from retrieval.context_pack import validate_context_pack_binding
@@ -50,7 +50,7 @@ from .types import (
     disclaimer_for,
 )
 
-_PROMPT_ROOT = Path(__file__).resolve().parent.parent / "model_gateway" / "prompts" / "analysis"
+_PROMPT_ROOT = PROMPT_DIR / "analysis"
 _PROMPT_PATHS = {
     "legacy": _PROMPT_ROOT / "v4.md",
     "source_language": _PROMPT_ROOT / "v6.md",
@@ -304,8 +304,8 @@ def parse_analysis(text) -> dict:
 def _default_model_call(payload: dict) -> dict:
     """默认:经 MODEL_GATEWAY call("analysis")——绝不直连 SDK;MODEL_GATEWAY 失败 → AnalysisError。
     ⚠ 保持 analysis 语义(承第 0 步首跑硬约束):走 analysis 槽记账/区域门/留痕,不复用 distill/verify。"""
-    from model_gateway import call
-    from model_gateway.errors import GatewayError
+    from memorive.models.gateway import call
+    from memorive.models.gateway.errors import GatewayError
     try:
         return call("analysis", payload)
     except GatewayError as e:
@@ -432,8 +432,8 @@ def _default_region_check() -> None:
     """区域门(承 §六、v6.4 之二):经 region_preflight('analysis')(由 slot.provider 驱动)——
     国内 / 本地 → domestic_skip 放行;非陆 → region_ok 放行;大陆 → gated 挡下;查不到 → 交人(均挡下、绝不静默发调用)。
     首跑 DeepSeek(国内)自动放行;升 Anthropic(境外)才真进门。"""
-    from model_gateway import region_preflight
-    from model_gateway.errors import GatewayError
+    from memorive.models.gateway import region_preflight
+    from memorive.models.gateway.errors import GatewayError
     try:
         rc = region_preflight("analysis")
     except GatewayError as e:

@@ -45,7 +45,7 @@ class RetryCacheBypassTest(unittest.TestCase):
             calls.append((task_type, payload, bypass_cache))
             return {"text": '{"violations":[]}'}
 
-        with patch("model_gateway.call", side_effect=fake_call):
+        with patch("memorive.models.gateway.call", side_effect=fake_call):
             result = transcription._default_call_verify("same prompt", bypass_cache=True)
 
         self.assertEqual(result, '{"violations":[]}')

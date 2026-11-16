@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-from model_gateway.providers import anthropic
+from memorive.models.gateway.providers import anthropic
 
 
 class _Headers:

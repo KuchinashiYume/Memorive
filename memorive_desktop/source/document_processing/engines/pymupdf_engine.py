@@ -27,7 +27,7 @@ class PymupdfLightEngine(ConvertEngine):
     name = "pymupdf4llm"
 
     def convert(self, raw: RawObject) -> tuple[str, ConvertReport]:
-        from model_gateway.gateway import current_gateway
+        from memorive.models.gateway.gateway import current_gateway
         if getattr(current_gateway(), 'isolate_native_pdf', False):
             from .isolated_pdf import convert_isolated
             return convert_isolated(raw)

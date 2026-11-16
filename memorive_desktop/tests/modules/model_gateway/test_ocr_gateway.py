@@ -13,20 +13,20 @@ from urllib.error import HTTPError
 from unittest.mock import patch
 
 from memorive.platform.logs.records import TASK_TYPES, log_accounting
-from model_gateway.config import GatewayConfig, SlotConfig
-from model_gateway.errors import (
+from memorive.models.gateway.config import GatewayConfig, SlotConfig
+from memorive.models.gateway.errors import (
     DependencyError,
     OcrOwnershipBlocked,
     OcrResultInvalid,
 )
-from model_gateway.fallback import FallbackPolicy, ROOT_SERVICE_UNAVAILABLE
-from model_gateway.gateway import ModelGateway
-from model_gateway.prompts import PromptRegistry
-from model_gateway.providers.siliconflow import SiliconFlowAdapter
+from memorive.models.gateway.fallback import FallbackPolicy, ROOT_SERVICE_UNAVAILABLE
+from memorive.models.gateway.gateway import ModelGateway
+from memorive.models.gateway.prompts import PromptRegistry
+from memorive.models.gateway.providers.siliconflow import SiliconFlowAdapter
 
 
 SOURCE_SHA256 = "a" * 64
-GATEWAY_ROOT = (Path(__file__).resolve().parents[3] / "source" / "model_gateway")
+GATEWAY_ROOT = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway")
 
 
 class _Config:
@@ -288,7 +288,7 @@ class SiliconFlowOcrAdapterTest(unittest.TestCase):
 
         with (
             patch.dict(os.environ, {"SILICONFLOW_API_KEY": "test-secret"}),
-            patch("model_gateway.providers.siliconflow.urllib.request.urlopen", _urlopen),
+            patch("memorive.models.gateway.providers.siliconflow.urllib.request.urlopen", _urlopen),
         ):
             result = SiliconFlowAdapter().ocr(slot, payload)
 
@@ -356,7 +356,7 @@ class SiliconFlowOcrAdapterTest(unittest.TestCase):
         with (
             patch.dict(os.environ, {"SILICONFLOW_API_KEY": "test-secret"}),
             patch(
-                "model_gateway.providers.siliconflow.urllib.request.urlopen",
+                "memorive.models.gateway.providers.siliconflow.urllib.request.urlopen",
                 _urlopen,
             ),
             self.assertRaises(HTTPError) as caught,
@@ -391,7 +391,7 @@ class OcrHttpFallbackTest(unittest.TestCase):
             raise error
 
         with (
-            patch("model_gateway.fallback.log_error") as mocked_log,
+            patch("memorive.models.gateway.fallback.log_error") as mocked_log,
             self.assertRaises(DependencyError) as caught,
         ):
             FallbackPolicy(backoff=(0, 0)).run("ocr", slot, dispatch)

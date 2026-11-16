@@ -14,14 +14,14 @@ from run_ledger.channel_evidence import ChannelAttemptBuilder, build_accounting_
 from run_ledger.channel_store import ChannelLedgerStore
 from run_ledger.errors import AppendOnlyViolation, ChannelEvidenceError, RecordConflictError
 from run_ledger.channel_store import SANDBOX_MARKER_BYTES, SANDBOX_MARKER_NAME
-from model_gateway.execution_core import (
+from memorive.models.gateway.execution_core import (
     ExecutionCore,
     HandoffContract,
     IsolatedJobRunner,
     OutputNormalizer,
     canonical_sha256,
 )
-from model_gateway.execution_core.contracts import base_object
+from memorive.models.gateway.execution_core.contracts import base_object
 from tests.modules.model_gateway.test_execution_core import (
     CORE_SCHEMA,
     FIXED_CLOCK,
@@ -57,7 +57,7 @@ def successful_handoff(
 ) -> dict:
     registry, profile = registry_with_profile()
     selector = __import__(
-        "model_gateway.execution_core", fromlist=["ChannelSelector"]
+        "memorive.models.gateway.execution_core", fromlist=["ChannelSelector"]
     ).ChannelSelector(CORE_SCHEMA, registry, clock=FIXED_CLOCK)
     handoff = HandoffContract(CORE_SCHEMA, clock=FIXED_CLOCK)
     core = ExecutionCore(
@@ -90,7 +90,7 @@ def successful_handoff(
 def blocked_handoff(*, job_id: str = "job_blocked", attempt_id: str = "attempt_001") -> dict:
     registry, profile = registry_with_profile(status="DISABLED")
     selector = __import__(
-        "model_gateway.execution_core", fromlist=["ChannelSelector"]
+        "memorive.models.gateway.execution_core", fromlist=["ChannelSelector"]
     ).ChannelSelector(CORE_SCHEMA, registry, clock=FIXED_CLOCK)
     outcome = selector.select(execution_request(), role_binding("profile_fake"), [profile])
     return HandoffContract(CORE_SCHEMA, clock=FIXED_CLOCK).build(
@@ -118,7 +118,7 @@ def not_started_handoff(
 ) -> dict:
     registry, profile = registry_with_profile()
     selector = __import__(
-        "model_gateway.execution_core", fromlist=["ChannelSelector"]
+        "memorive.models.gateway.execution_core", fromlist=["ChannelSelector"]
     ).ChannelSelector(CORE_SCHEMA, registry, clock=FIXED_CLOCK)
     core = ExecutionCore(
         CORE_SCHEMA,

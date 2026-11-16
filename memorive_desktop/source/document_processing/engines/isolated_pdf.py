@@ -31,7 +31,7 @@ def _command(request, response):
 
 
 def _wait_owned(command, *, environment, interrupt):
-    from model_gateway.execution_core.runner import _TreeController
+    from memorive.models.gateway.execution_core.runner import _TreeController
     from memorive.models.cli.verification_transport import resume_owned_process, stop_owned_tree
     tree = _TreeController()
     process = None

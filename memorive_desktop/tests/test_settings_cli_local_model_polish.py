@@ -13,7 +13,7 @@ for candidate in (SOURCE_ROOT, ATTEMPT_ROOT / "product" / "desktop"):
         sys.path.insert(0, str(candidate))
 
 from memorive_current_task.workflow_mapping import build_core_execution_snapshot  # noqa: E402
-from memorive_local_models.product_controller import LocalModelProductController  # noqa: E402
+from memorive.models.local.product_controller import LocalModelProductController  # noqa: E402
 from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
 from runtime import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402

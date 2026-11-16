@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Any, Mapping
-from model_gateway.resource_limits import describe_capacity
+from memorive.models.gateway.resource_limits import describe_capacity
 
 
 def context_pack_budget(

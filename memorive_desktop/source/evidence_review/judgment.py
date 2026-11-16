@@ -11,12 +11,12 @@
 chunk_id resolve、再 GPT 语义层。
 """
 from __future__ import annotations
-from model_gateway.prompt_cache import source_first
+from memorive.models.gateway.prompt_cache import source_first
+from memorive.models.gateway.prompts import PROMPT_DIR
 
 import json
 import re
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
 
 from knowledge_admission import DecisionError    # 坏/空响应 = 环节失败信号(绝不当「无异议」)
 from memorive.platform.logs import log_reason
@@ -31,7 +31,7 @@ from .ownership_binding import build_ownership_review_task
 from .errors import OwnershipFailClosed        # 判断类归属安全阀(Integration第2步复审:补 GPT 送原文出境的洞)
 from memorive.platform.language.source_preservation import language_display_name, normalize_source_language
 
-_PROMPT_ROOT = Path(__file__).resolve().parent.parent / "model_gateway" / "prompts" / "verify"
+_PROMPT_ROOT = PROMPT_DIR / "verify"
 _PROMPT_PATHS = {
     "legacy": _PROMPT_ROOT / "judgment_cross_source_v2.md",
     "source_language": _PROMPT_ROOT / "judgment_cross_source_v3.md",
@@ -102,11 +102,10 @@ def select_judgment_candidates(producer_model: str | None) -> tuple[str | None, 
     if producer_provider is None:
         return None, []
 
-    from model_gateway.config import GatewayConfig
-    from model_gateway.errors import UnknownTaskType
+    from memorive.models.gateway.config import MODELS_YAML, GatewayConfig
+    from memorive.models.gateway.errors import UnknownTaskType
 
-    config_path = Path(__file__).resolve().parent.parent / "model_gateway" / "models.yaml"
-    config = GatewayConfig(config_path)
+    config = GatewayConfig(MODELS_YAML)
     ordered = []
     for order, task_type in enumerate(_JUDGMENT_TASK_ORDER):
         try:
@@ -201,8 +200,8 @@ def parse_gpt_disputes(text, *, output_language: str | None = None) -> dict:
 def _default_region_check(task_type: str = "verify_judgment") -> None:
     """判断类区域门(承 Integration第2步②):openai(境外)发 GPT 调用前必过 region_preflight('verify_judgment')——
     大陆挡、非陆放、查不到交人;挡下 → DecisionError(不硬撞 403、可重跑 / 升级)。复用 RESEARCH_ANALYSIS/EVIDENCE_REVIEW 同一套区域门。"""
-    from model_gateway import region_preflight
-    from model_gateway.errors import GatewayError
+    from memorive.models.gateway import region_preflight
+    from memorive.models.gateway.errors import GatewayError
     try:
         rc = region_preflight(task_type)
     except GatewayError as e:
@@ -215,8 +214,8 @@ def _default_region_check(task_type: str = "verify_judgment") -> None:
 
 def _default_verifier_call(task_type: str, payload: dict) -> str:
     """真实异源校核:经 MODEL_GATEWAY 调 verify_judgment 槽(GPT)。MODEL_GATEWAY 依赖失败 → DecisionError。**绝不直连 SDK。**"""
-    from model_gateway import call
-    from model_gateway.errors import GatewayError
+    from memorive.models.gateway import call
+    from memorive.models.gateway.errors import GatewayError
     try:
         resp = call(task_type, payload)
     except GatewayError as e:

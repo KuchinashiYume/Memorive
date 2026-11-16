@@ -7,9 +7,9 @@ import unittest
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from model_gateway.model_configuration import ERROR_CODE_CATALOG, FakeProvider, ModelConfigurationError, TierResolver, assert_forbidden_values_absent, check_connection, configuration_error_envelope, connection_not_run_receipt, legacy_env_name_reference, merge_configuration, redact_public, validate_advanced_config, validate_model_profile, validate_provider_preset, validate_tier_policy
-from model_gateway.model_configuration.fixtures import EXPIRES_AT, OBSERVED_AT, RESOLVE_AT, advanced_config, disclosed_collapse_policy, model_profiles, ordinary_config, provider_preset, tier_policy, unavailable_policy, verified_credential
-SCHEMA_ROOT = (Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "model_configuration" / "schemas"
+from memorive.models.gateway.model_configuration import ERROR_CODE_CATALOG, FakeProvider, ModelConfigurationError, TierResolver, assert_forbidden_values_absent, check_connection, configuration_error_envelope, connection_not_run_receipt, legacy_env_name_reference, merge_configuration, redact_public, validate_advanced_config, validate_model_profile, validate_provider_preset, validate_tier_policy
+from memorive.models.gateway.model_configuration.fixtures import EXPIRES_AT, OBSERVED_AT, RESOLVE_AT, advanced_config, disclosed_collapse_policy, model_profiles, ordinary_config, provider_preset, tier_policy, unavailable_policy, verified_credential
+SCHEMA_ROOT = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "model_configuration" / "schemas"
 
 
 def error_code(callable_):

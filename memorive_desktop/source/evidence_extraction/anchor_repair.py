@@ -8,7 +8,7 @@ entries are removed locally only when each affected field still retains at
 least one real same-paper anchor.
 """
 from __future__ import annotations
-from model_gateway.prompt_cache import source_first, split_repair_sources, canonical
+from memorive.models.gateway.prompt_cache import source_first, split_repair_sources, canonical
 
 import copy
 import hashlib

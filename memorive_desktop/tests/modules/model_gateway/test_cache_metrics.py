@@ -1,5 +1,5 @@
-from model_gateway.cache_metrics import cache_metrics
-from model_gateway.prompt_cache import cache_usage
+from memorive.models.gateway.cache_metrics import cache_metrics
+from memorive.models.gateway.prompt_cache import cache_usage
 
 
 def test_output_and_reasoning_are_not_added_twice():
@@ -30,7 +30,7 @@ def test_money_basis_is_explicit_and_actual_does_not_replace_unknown_with_zero()
 
 
 def test_provider_aliases_reach_existing_accounting_kernel():
-    from model_gateway.accounting.contracts import UsageObservation
+    from memorive.models.gateway.accounting.contracts import UsageObservation
     row = UsageObservation.from_provider_usage({'prompt_tokens': 100, 'completion_tokens': 20,
                                                 'prompt_cache_hit_tokens': 80})
     assert row.cache_read_input_tokens == 80

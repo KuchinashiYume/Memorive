@@ -10,10 +10,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from model_gateway.errors import NonLocalEmbedEndpoint
-from model_gateway.local_multimodal_ranker import LocalMultimodalRankerViolation, build_request
-from model_gateway.local_multimodal_ranker.contracts import bytes_sha256
-from model_gateway.providers.ollama import OllamaAdapter
+from memorive.models.gateway.errors import NonLocalEmbedEndpoint
+from memorive.models.gateway.local_multimodal_ranker import LocalMultimodalRankerViolation, build_request
+from memorive.models.gateway.local_multimodal_ranker.contracts import bytes_sha256
+from memorive.models.gateway.providers.ollama import OllamaAdapter
 from tests.modules.model_gateway.test_local_multimodal_ranker import _batch, _binding
 
 

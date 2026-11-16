@@ -16,7 +16,7 @@ FIXED_TIME = "2026-08-14T14:00:00Z"
 FIXED_CLOCK = lambda: FIXED_TIME
 
 from document_processing.vector_generation import GenerationError, IsolatedChromaGeneration, assert_generation_compatible, validate_generation_contract
-from model_gateway.local_embedding import build_compatibility_manifest
+from memorive.models.gateway.local_embedding import build_compatibility_manifest
 class FakeCollection:
     def __init__(self, name: str, metadata: dict):
         self.name = name

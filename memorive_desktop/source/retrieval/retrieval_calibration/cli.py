@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Sequence
 
-from model_gateway.local_reranker.doctor import reranker_doctor
+from memorive.models.gateway.local_reranker.doctor import reranker_doctor
 
 from .candidate_trace import explain_result
 

@@ -5,9 +5,9 @@ from typing import Any
 
 import pytest
 
-from model_gateway.local_capability import ActivationStatus, ExecutionStatus, FileIdentity, LocalCapabilityBroker, LocalEgressEvidence, LocalExecutionEnvelope, LocalResourceEnvelope, LocalRoleProfile, LocalRuntimeAssetManifest, LogicalRole, OwnershipClass
-from model_gateway.local_capability.adapters import AnalysisAdapter, DistillAdapter, EmbeddingAdapter, OCRAdapter, RetrievalAdapter, VerifyAdapter
-from model_gateway.local_capability.errors import LocalCapabilityError
+from memorive.models.gateway.local_capability import ActivationStatus, ExecutionStatus, FileIdentity, LocalCapabilityBroker, LocalEgressEvidence, LocalExecutionEnvelope, LocalResourceEnvelope, LocalRoleProfile, LocalRuntimeAssetManifest, LogicalRole, OwnershipClass
+from memorive.models.gateway.local_capability.adapters import AnalysisAdapter, DistillAdapter, EmbeddingAdapter, OCRAdapter, RetrievalAdapter, VerifyAdapter
+from memorive.models.gateway.local_capability.errors import LocalCapabilityError
 SHA = "A" * 64
 
 

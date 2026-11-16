@@ -17,7 +17,7 @@ from pathlib import Path
 import yaml
 from memorive_front_matter import split_front_matter
 from memorive.platform.logs import log, log_error
-from model_gateway.errors import GatewayError
+from memorive.models.gateway.errors import GatewayError
 
 from .config import COLLECTION, chroma_dir
 from .errors import DocumentProcessingError

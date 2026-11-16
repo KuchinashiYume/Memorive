@@ -9,7 +9,7 @@ import sys
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from model_gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
+from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
 
 
 DIGEST = "25b843619e944cd0ae6069f94ff4e5e26a16e109ccbc0a66a0f05979ed70098e"

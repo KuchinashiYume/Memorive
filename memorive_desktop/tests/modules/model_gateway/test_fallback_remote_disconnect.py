@@ -6,8 +6,8 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from model_gateway.errors import ApiKeyMissing, DependencyError, SlotDisabled
-from model_gateway.fallback import (
+from memorive.models.gateway.errors import ApiKeyMissing, DependencyError, SlotDisabled
+from memorive.models.gateway.fallback import (
     CLASS_ANALYSIS_VERIFY,
     ROOT_TRANSIENT,
     ROOT_TRANSIENT_EXHAUSTED,
@@ -55,7 +55,7 @@ class RemoteDisconnectedFallbackTest(unittest.TestCase):
                 raise self._incomplete_read()
             return {"text": "ok"}
 
-        with patch("model_gateway.fallback.log_error") as mocked_log:
+        with patch("memorive.models.gateway.fallback.log_error") as mocked_log:
             result, retries = FallbackPolicy(backoff=(0, 0)).run(
                 "distill",
                 self.slot,
@@ -88,7 +88,7 @@ class RemoteDisconnectedFallbackTest(unittest.TestCase):
                     raise error
 
                 with (
-                    patch("model_gateway.fallback.log_error") as mocked_log,
+                    patch("memorive.models.gateway.fallback.log_error") as mocked_log,
                     self.assertRaises(DependencyError),
                 ):
                     FallbackPolicy(backoff=(0, 0)).run(
@@ -120,7 +120,7 @@ class RemoteDisconnectedFallbackTest(unittest.TestCase):
                 raise self._disconnect()
             return {"text": "ok"}
 
-        with patch("model_gateway.fallback.log_error") as mocked_log:
+        with patch("memorive.models.gateway.fallback.log_error") as mocked_log:
             result, retries = FallbackPolicy(backoff=(0, 0)).run(
                 "analysis",
                 self.slot,
@@ -158,7 +158,7 @@ class RemoteDisconnectedFallbackTest(unittest.TestCase):
             raise self._disconnect()
 
         with (
-            patch("model_gateway.fallback.log_error") as mocked_log,
+            patch("memorive.models.gateway.fallback.log_error") as mocked_log,
             self.assertRaises(DependencyError) as caught,
         ):
             FallbackPolicy(backoff=(0, 0)).run(
@@ -199,7 +199,7 @@ class RemoteDisconnectedFallbackTest(unittest.TestCase):
             raise self._disconnect()
 
         with (
-            patch("model_gateway.fallback.log_error") as mocked_log,
+            patch("memorive.models.gateway.fallback.log_error") as mocked_log,
             self.assertRaises(DependencyError),
         ):
             FallbackPolicy(backoff=(0,), max_retries=1).run(

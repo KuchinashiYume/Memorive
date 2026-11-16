@@ -801,7 +801,7 @@ class ProductApi:
         self._closed = False
         try:
             self._service.start()
-            local_models_module = importlib.import_module("memorive_local_models.product_controller")
+            local_models_module = importlib.import_module("memorive.models.local.product_controller")
             self._local_models = local_models_module.LocalModelProductController(
                 self._state_dir / "local_models"
             )

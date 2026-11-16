@@ -11,7 +11,7 @@
 粒度 = 每张 Card 固定两次(整批首审 + 整批最终复查);无字段值 / 无 chunk 的对象跳过并记 malformed、不发空 subject。
 """
 from __future__ import annotations
-from model_gateway.prompt_cache import policy_first, source_first
+from memorive.models.gateway.prompt_cache import policy_first, source_first
 
 import json
 import re
@@ -22,7 +22,8 @@ from pathlib import Path
 
 from knowledge_admission import (AutoResult, DecisionError, ReviewDecision, Trigger, Verdict,
                               auto_review)
-from model_gateway.errors import GatewayError
+from memorive.models.gateway.errors import GatewayError
+from memorive.models.gateway.prompts import PROMPT_DIR
 from memorive.platform.logs import log_reason
 
 from . import report as _report
@@ -34,12 +35,7 @@ from .problems import Problem
 
 # R1–R9 回原文 prompt。v10 是完整基线，v13 追加关系精度与计数召回约束；
 # 重跑段只在 bypass_cache 灾难恢复轮启用。
-_PROMPT_DIR = (
-    Path(__file__).resolve().parent.parent
-    / "model_gateway"
-    / "prompts"
-    / "verify"
-)
+_PROMPT_DIR = PROMPT_DIR / "verify"
 _PROMPT_BASE_PATH = _PROMPT_DIR / "r1_r9_transcription_v10.md"
 _PROMPT_DELTA_PATHS = (
     _PROMPT_DIR / "r1_r9_transcription_v13.md",
@@ -195,13 +191,12 @@ def _same_source(distill_model, verify_provider, verify_model):
 
 def _verify_slot():
     """读 verify 槽的 provider / model(防同源判定用);不发调用。"""
-    from model_gateway.gateway import current_gateway
+    from memorive.models.gateway.gateway import current_gateway
     runtime_identity = getattr(current_gateway(), 'review_identity', None)
     if callable(runtime_identity):
         return runtime_identity()
-    from model_gateway.config import GatewayConfig
-    import model_gateway
-    cfg = GatewayConfig(Path(model_gateway.__file__).with_name("models.yaml"))
+    from memorive.models.gateway.config import MODELS_YAML, GatewayConfig
+    cfg = GatewayConfig(MODELS_YAML)
     s = cfg.slot("verify")
     return s.provider, s.model_id
 
@@ -1049,8 +1044,8 @@ def _propagate_literal_direct_conflicts(
 
 def _default_call_verify(prompt: str, *, bypass_cache: bool = False) -> str:
     """真实回原文异源复核:经 MODEL_GATEWAY 调 verify 槽(Anthropic Sonnet 5 细校、异源)。MODEL_GATEWAY 依赖失败(受控)→ DecisionError(可重跑)。"""
-    from model_gateway import call
-    from model_gateway.errors import GatewayError
+    from memorive.models.gateway import call
+    from memorive.models.gateway.errors import GatewayError
     # Sonnet 5 使用 adaptive thinking + xhigh;max_tokens 同时覆盖思考与最终 JSON，
     # 不再沿用 Haiku 的 4096。区域门已在 transcription_verify 层每卡过一次。
     try:
@@ -1072,8 +1067,8 @@ def _default_region_check() -> None:
     """区域门:经 region_preflight('verify')(由 verify 槽 provider 驱动)——国内 / 本地 → domestic_skip 放行;
     非陆 → region_ok 放行;大陆 → gated 挡下;查不到 → 交人(均挡下、绝不静默发调用)。
     verify 槽 = deepseek(国内)时自动放行;升 Anthropic(境外)才真进门。挡下抛 DecisionError(可重跑 / 升级留 pending)。"""
-    from model_gateway import region_preflight
-    from model_gateway.errors import GatewayError
+    from memorive.models.gateway import region_preflight
+    from memorive.models.gateway.errors import GatewayError
     try:
         rc = region_preflight("verify")
     except GatewayError as e:

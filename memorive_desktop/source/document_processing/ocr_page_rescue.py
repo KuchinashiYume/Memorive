@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from memorive.platform.logs import log, log_error
-from model_gateway import ocr
-from model_gateway.errors import OcrOwnershipBlocked
+from memorive.models.gateway import ocr
+from memorive.models.gateway.errors import OcrOwnershipBlocked
 
 from .config import (
     OCR_PAGE_RENDER_DPI,

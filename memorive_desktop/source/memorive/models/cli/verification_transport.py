@@ -188,7 +188,7 @@ def result_reason(process):
 def run_verification(transport,*,argv,cwd,environment,stdin_bytes,timeout_seconds,shell,
                      template_mode=False,result_paths=()):
     from memorive.models.validation.transport import ProcessResult
-    from model_gateway.execution_core.runner import _TreeController
+    from memorive.models.gateway.execution_core.runner import _TreeController
     if shell is not False:
         raise ValueError('CLI_VALIDATION_SHELL_FORBIDDEN')
     progress,cancelled=_context.get()

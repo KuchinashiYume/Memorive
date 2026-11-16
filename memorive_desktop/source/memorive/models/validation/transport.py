@@ -44,8 +44,8 @@ class _ResponseInterrupted(OSError):
 
 def _read_chat_stream(response, request_body: bytes | None) -> HttpResponse:
     """Reuse MODEL_GATEWAY SSE parsers. Heartbeats show connectivity, not model progress."""
-    from model_gateway.providers.deepseek import _read_sse_response as read_openai
-    from model_gateway.providers.anthropic import _read_sse_response as read_anthropic
+    from memorive.models.gateway.providers.deepseek import _read_sse_response as read_openai
+    from memorive.models.gateway.providers.anthropic import _read_sse_response as read_anthropic
 
     diagnostic = {'stream': True, 'received_bytes': 0, 'heartbeat_count': 0,
                   'progress_event_count': 0, 'last_byte_monotonic': None,

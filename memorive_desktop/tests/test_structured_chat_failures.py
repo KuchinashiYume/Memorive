@@ -105,7 +105,7 @@ def test_a_command_line_tool_that_exits_with_an_error_fails(tmp_path):
 
 
 def test_a_local_model_that_cannot_be_reached_fails(tmp_path, monkeypatch):
-    import model_gateway.local_structured_chat as local_chat
+    import memorive.models.gateway.local_structured_chat as local_chat
 
     def unreachable(*_args, **_kwargs):
         raise URLError("connection refused")

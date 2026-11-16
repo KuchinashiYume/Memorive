@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from model_gateway.local_capability import LocalResourceEnvelope
-from model_gateway.local_capability.errors import ResourceBlocked
-from model_gateway.local_capability.resource import admit_resource, bounded_recovery
+from memorive.models.gateway.local_capability import LocalResourceEnvelope
+from memorive.models.gateway.local_capability.errors import ResourceBlocked
+from memorive.models.gateway.local_capability.resource import admit_resource, bounded_recovery
 def envelope() -> LocalResourceEnvelope:
     return LocalResourceEnvelope(
         envelope_id="resource-001",

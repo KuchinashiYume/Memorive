@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from model_gateway.local_capability.adapters.retrieval import plan_isolated_generation, validate_retrieval_output
-from model_gateway.local_capability.errors import ContractViolation
+from memorive.models.gateway.local_capability.adapters.retrieval import plan_isolated_generation, validate_retrieval_output
+from memorive.models.gateway.local_capability.errors import ContractViolation
 def test_isolated_generation_plan_is_create_only_and_has_zero_filesystem_mutations(tmp_path: Path) -> None:
     run_root = tmp_path / "local_inference-run"
     plan = plan_isolated_generation(run_root, "generation-001", protected_roots=(tmp_path / "production",))

@@ -21,8 +21,8 @@ FIXED_TIME = "2026-08-14T14:00:00Z"
 FIXED_CLOCK = lambda: FIXED_TIME
 
 from run_ledger.channel_evidence import ChannelAttemptBuilder, validate_channel_attempt
-from model_gateway.local_embedding.worker import WorkerError, validate_request
-from model_gateway.local_embedding import LocalEmbeddingSeam, LocalSeamViolation, build_compatibility_manifest, validate_compatibility_manifest
+from memorive.models.gateway.local_embedding.worker import WorkerError, validate_request
+from memorive.models.gateway.local_embedding import LocalEmbeddingSeam, LocalSeamViolation, build_compatibility_manifest, validate_compatibility_manifest
 def compatibility_manifest(generation_root: Path, *, clock=FIXED_CLOCK) -> dict:
     return build_compatibility_manifest(
         manifest_id="local_seam_test_manifest",

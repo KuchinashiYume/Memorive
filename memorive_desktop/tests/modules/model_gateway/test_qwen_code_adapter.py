@@ -13,11 +13,11 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from model_gateway.execution_core.adapters.qwen_code import QwenCodePolicy, QwenCodeViolation
-from model_gateway.execution_core.adapters.qwen_code import QwenCodeAdapter
-from model_gateway.execution_core.contracts import canonical_sha256  # noqa: E402
-from model_gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
-from model_gateway.execution_core.workspace import JobWorkspace  # noqa: E402
+from memorive.models.gateway.execution_core.adapters.qwen_code import QwenCodePolicy, QwenCodeViolation
+from memorive.models.gateway.execution_core.adapters.qwen_code import QwenCodeAdapter
+from memorive.models.gateway.execution_core.contracts import canonical_sha256  # noqa: E402
+from memorive.models.gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
+from memorive.models.gateway.execution_core.workspace import JobWorkspace  # noqa: E402
 
 
 CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
@@ -71,7 +71,7 @@ def policy(subscription_home: Path) -> QwenCodePolicy:
         wrapper_sha256=sha256(FAKE_QWEN),
         entrypoint_sha256=sha256(FAKE_QWEN),
         help_sha256=sha256(FAKE_QWEN),
-        runner_sha256=sha256(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+        runner_sha256=sha256(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
         model_catalog_sha256=sha256(FAKE_QWEN),
         allowed_models=(MODEL, "qwen3-coder-plus"),
         allowed_profiles=("qwen_oauth", "dashscope_api"),
@@ -95,7 +95,7 @@ def policy(subscription_home: Path) -> QwenCodePolicy:
             "wrapper_sha256": str(FAKE_QWEN),
             "entrypoint_sha256": str(FAKE_QWEN),
             "help_sha256": str(FAKE_QWEN),
-            "runner_sha256": str(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+            "runner_sha256": str(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
             "model_catalog_sha256": str(FAKE_QWEN),
         },
     )
@@ -622,7 +622,7 @@ class QwenParserAndRunnerTest(unittest.TestCase):
 class QwenStaticBoundaryTest(unittest.TestCase):
     def test_adapter_has_no_network_retry_activation_or_answer_text_identity(self):
         source = (
-            REPO_ROOT / "model_gateway" / "execution_core" / "adapters" / "qwen_code.py"
+            REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "adapters" / "qwen_code.py"
         ).read_text(encoding="utf-8")
         self.assertNotIn("requests.", source)
         self.assertNotIn("urllib", source)

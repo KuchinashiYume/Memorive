@@ -5,7 +5,7 @@ execute_rerank scores passages against a query.
 from __future__ import annotations
 
 from memorive.models.calls.ledger import recorded_execution
-from model_gateway.prompt_cache import cache_usage
+from memorive.models.gateway.prompt_cache import cache_usage
 import base64
 from dataclasses import field
 import hashlib
@@ -24,7 +24,7 @@ from memorive.models.output_limits import (
     workflow_exam_output_limit_contract,
 )
 from memorive.models.endpoints import SAFE_MODEL, SAFE_SHA256, _api_profile, json_sha256
-from model_gateway.resource_limits import resolve_call_limits
+from memorive.models.gateway.resource_limits import resolve_call_limits
 
 from memorive.models.validation.api_route import _api_chat_url
 from memorive.models.validation.cli_route import (

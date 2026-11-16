@@ -13,7 +13,7 @@ for candidate in (ROOT / "source", ROOT / "product" / "desktop"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_local_models.product_controller import LocalModelProductController  # noqa: E402
+from memorive.models.local.product_controller import LocalModelProductController  # noqa: E402
 from memorive_session_archive import (  # noqa: E402
     ArchiveInputError,
     DeepSeekOfficialImporter,

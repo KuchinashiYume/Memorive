@@ -1,6 +1,5 @@
 """Carry unresolved admitted-Card review facts without declaring a scientific verdict."""
 from copy import deepcopy
-from pathlib import Path
 import hashlib
 import json
 
@@ -35,7 +34,8 @@ def card_review_qualifications(card, *, paper_id=None):
 def render_review_context(qualifications):
     if not qualifications:
         return ''
-    template = (Path(__file__).parents[1] / 'model_gateway/prompts/analysis/card_review_qualifications_v1.md').read_text('utf8')
+    from memorive.models.gateway.prompts import PROMPT_DIR
+    template = (PROMPT_DIR / 'analysis/card_review_qualifications_v1.md').read_text('utf8')
     return template.replace('__REVIEW_JSON__', json.dumps(qualifications, ensure_ascii=False, sort_keys=True))
 
 

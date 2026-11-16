@@ -13,7 +13,7 @@ import time
 import unittest
 import warnings
 
-from model_gateway.execution_core import (
+from memorive.models.gateway.execution_core import (
     AdapterRegistry,
     ChannelSelector,
     ContractViolation,
@@ -29,7 +29,7 @@ from model_gateway.execution_core import (
     canonical_sha256,
     validate_initialization_object,
 )
-from model_gateway.execution_core.contracts import base_object
+from memorive.models.gateway.execution_core.contracts import base_object
 
 
 FIXED_TIME = "2026-08-13T08:00:00Z"
@@ -1127,7 +1127,7 @@ class StaticBoundaryTest(unittest.TestCase):
     def test_execution_core_does_not_write_the_run_ledger_or_runtime_log(self):
         source = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in sorted((REPO_ROOT / "model_gateway" / "execution_core").glob("*.py"))
+            for path in sorted((REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core").glob("*.py"))
         )
         self.assertNotIn("run_ledger", source)
         self.assertNotIn("platform.logs", source)

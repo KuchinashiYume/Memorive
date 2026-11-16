@@ -13,7 +13,8 @@ from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
 from knowledge_feedback.conversation_refinement import make_model_refinement_items
 from knowledge_feedback.conversation_refinement.contracts import REFINEMENT_TYPES
 from knowledge_feedback.conversation_refinement.graph import node_text
-from model_gateway.local_structured_chat import LocalStructuredChatAdapter
+from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter
+from memorive.models.gateway.prompts import PROMPT_DIR
 
 
 _HEX64 = re.compile(r"^[0-9A-Fa-f]{64}$")
@@ -311,13 +312,7 @@ class ExistingConversationRefinementChannel:
         self._profile_executor = profile_executor
         self._prompt_path = Path(
             prompt_path
-            or (
-                Path(__file__).resolve().parents[1]
-                / "model_gateway"
-                / "prompts"
-                / "conversation_refinement"
-                / "v3.md"
-            )
+            or PROMPT_DIR / "conversation_refinement" / "v3.md"
         ).resolve()
 
     def _local_profile(self, profile_ref: str) -> dict[str, Any]:

@@ -4,9 +4,9 @@ from dataclasses import replace
 
 import pytest
 
-from model_gateway.local_capability import LocalEgressEvidence
-from model_gateway.local_capability.egress import evaluate_zero_egress
-from model_gateway.local_capability.errors import LocalCapabilityError
+from memorive.models.gateway.local_capability import LocalEgressEvidence
+from memorive.models.gateway.local_capability.egress import evaluate_zero_egress
+from memorive.models.gateway.local_capability.errors import LocalCapabilityError
 def evidence(mode: str = "OFFLINE_FAKE_A1") -> LocalEgressEvidence:
     return LocalEgressEvidence(
         evidence_id="egress-001",

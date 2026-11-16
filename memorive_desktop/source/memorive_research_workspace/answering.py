@@ -344,7 +344,7 @@ class AnswerJob:
 
     def build_request(self):
         """Bind the answer schema to the excerpts shown, check the context, and build the prompt."""
-        from model_gateway.research_prompt_cache import CHAT_RULES, research_prompt
+        from memorive.models.gateway.research_prompt_cache import CHAT_RULES, research_prompt
         from .skill_bridge import METHOD_RULES
         self.response_schema = None
         response_contract = None

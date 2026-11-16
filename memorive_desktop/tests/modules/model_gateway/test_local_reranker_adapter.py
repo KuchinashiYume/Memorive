@@ -8,7 +8,7 @@ import unittest
 
 from jsonschema import Draft202012Validator
 
-from model_gateway.local_reranker.adapter import LocalRerankerAdapter
+from memorive.models.gateway.local_reranker.adapter import LocalRerankerAdapter
 from tests.modules.model_gateway.local_reranker_fixture import (
     make_fake_manifest,
     provenance,
@@ -17,7 +17,7 @@ from tests.modules.model_gateway.local_reranker_fixture import (
 
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
-RESOURCE_SCHEMA_PATH = REPO_ROOT / "model_gateway" / "local_reranker" / "schemas" / "resource_receipt_v1.schema.json"
+RESOURCE_SCHEMA_PATH = REPO_ROOT / "memorive" / "models" / "gateway" / "local_reranker" / "schemas" / "resource_receipt_v1.schema.json"
 
 
 def _fake_worker(path: Path, *, duplicate_index: bool = False) -> None:

@@ -54,7 +54,7 @@ class MarkerSession:
         self.ready=None
 
     def __enter__(self):
-        from model_gateway.execution_core.runner import _TreeController
+        from memorive.models.gateway.execution_core.runner import _TreeController
         from memorive.models.cli.verification_transport import resume_owned_process
         try:
             self.identity=inspect_runtime(self.runtime)

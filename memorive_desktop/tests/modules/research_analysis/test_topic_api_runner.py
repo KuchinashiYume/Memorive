@@ -298,7 +298,7 @@ class CrossTopicApiRunnerTests(unittest.TestCase):
         self.assertNotIn("system", payload)
 
     def test_anthropic_adapter_receives_mature_minimal_request_shape(self) -> None:
-        from model_gateway.providers.anthropic import AnthropicAdapter
+        from memorive.models.gateway.providers.anthropic import AnthropicAdapter
 
         payload = build_cross_topic_payload(
             request=self.request(),

@@ -33,9 +33,9 @@ from datetime import datetime
 from pathlib import Path
 
 from memorive.platform.logs import log, log_error
-from model_gateway import CANONICAL_EMBED_MODEL as CANON_EMBED_MODEL   # 单一来源(承对抗审查 #8)
-from model_gateway import embed as model_gateway_embed
-from model_gateway import healthcheck as model_gateway_healthcheck
+from memorive.models.gateway import CANONICAL_EMBED_MODEL as CANON_EMBED_MODEL   # 单一来源(承对抗审查 #8)
+from memorive.models.gateway import embed as model_gateway_embed
+from memorive.models.gateway import healthcheck as model_gateway_healthcheck
 
 from .config import COLLECTION, chroma_dir
 from .errors import (EmbedLocalNotReadyError, DocumentProcessingError, OwnershipMissingError,

@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from memorive.models.scheduling import scheduled
 from memorive.models.calls.ledger import CallLedger, RecordingTransport, recorded_execution
-from model_gateway.prompt_cache import cache_usage
-from model_gateway.cache_workspace import structured_chat_workspace, write_response_schema
-from model_gateway.cache_session import Continuation
+from memorive.models.gateway.prompt_cache import cache_usage
+from memorive.models.gateway.cache_workspace import structured_chat_workspace, write_response_schema
+from memorive.models.gateway.cache_session import Continuation
 from dataclasses import dataclass, field
 import hashlib
 import json
@@ -31,7 +31,7 @@ from memorive.models.output_limits import (
 )
 from memorive.models.capabilities import infer_api_model_capability
 from memorive.models.endpoints import SAFE_MODEL, SAFE_SHA256, _api_profile, json_sha256
-from model_gateway.resource_limits import resolve_call_limits
+from memorive.models.gateway.resource_limits import resolve_call_limits
 
 from memorive.models.validation.api_route import (
     _api_chat_request,
@@ -1493,7 +1493,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             or not SAFE_SHA256.fullmatch(str(attempt.service["model_digest"]).upper())
         ):
             raise ValueError("LOCAL_STRUCTURED_CHAT_PROFILE_INVALID")
-        from model_gateway.local_structured_chat import LocalStructuredChatAdapter, _default_open
+        from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter, _default_open
         from memorive.models.calls.ledger import recording_urlopen
 
         timeout = attempt.timeout_seconds
@@ -1689,7 +1689,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             region = "PROVIDER_MANAGED_UNDISCLOSED"
             egress = "PROVIDER_API"
         duration_ms = max(0, round((time.monotonic() - attempt.started_at) * 1000))
-        from model_gateway.cache_metrics import cache_metrics
+        from memorive.models.gateway.cache_metrics import cache_metrics
         attempt.transport_diagnostic = {**dict(attempt.transport_diagnostic or {}),
             'prompt_cache_metrics': cache_metrics(dict(attempt.usage or {}), duration_ms=duration_ms,
                 estimated_cost=estimated_cost_cny)}

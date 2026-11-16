@@ -10,8 +10,8 @@ from types import SimpleNamespace
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from model_gateway.cache import CacheLayer
-from model_gateway.gateway import ModelGateway
+from memorive.models.gateway.cache import CacheLayer
+from memorive.models.gateway.gateway import ModelGateway
 
 
 class _Config:

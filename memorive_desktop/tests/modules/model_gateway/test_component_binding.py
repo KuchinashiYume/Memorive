@@ -9,13 +9,13 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from model_gateway.execution_core.component_binding import (
+from memorive.models.gateway.execution_core.component_binding import (
     ComponentBinding,
     bindings_from_policy,
     verify_component_bindings,
 )
-from model_gateway.execution_core.runner import IsolatedJobRunner, ProcessSpec
-from model_gateway.execution_core.workspace import JobWorkspace
+from memorive.models.gateway.execution_core.runner import IsolatedJobRunner, ProcessSpec
+from memorive.models.gateway.execution_core.workspace import JobWorkspace
 from tests.modules.model_gateway import (
     test_codex_cli_adapter as codex,
     test_claude_code_adapter as claude,
@@ -133,7 +133,7 @@ class ComponentBindingTests(unittest.TestCase):
                 raw_cap_bytes=1024,
                 component_bindings=(ComponentBinding("runner_sha256", str(component), digest),),
             )
-            with patch("model_gateway.execution_core.runner.verify_component_bindings", side_effect=[None, "COMPONENT_HASH_MISMATCH"]), patch("model_gateway.execution_core.runner.subprocess.Popen") as popen:
+            with patch("memorive.models.gateway.execution_core.runner.verify_component_bindings", side_effect=[None, "COMPONENT_HASH_MISMATCH"]), patch("memorive.models.gateway.execution_core.runner.subprocess.Popen") as popen:
                 run = IsolatedJobRunner(schema).run(workspace, spec)
             popen.assert_not_called()
             self.assertFalse(run.receipt["process_started"])

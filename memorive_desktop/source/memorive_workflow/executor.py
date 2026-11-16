@@ -625,7 +625,7 @@ class CorePipelineExecutor:
                 ),
             )
 
-            import model_gateway.gateway as gateway_module
+            import memorive.models.gateway.gateway as gateway_module
 
             gateway_binding = gateway_module.gateway_scope(bridge)
             gateway_binding.__enter__()

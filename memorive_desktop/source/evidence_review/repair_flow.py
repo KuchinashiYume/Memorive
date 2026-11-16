@@ -5,7 +5,7 @@ repair -> one review of changed items only -> omit unresolved
 items with tombstones -> atomically finalize Card v6 -> KNOWLEDGE_ADMISSION active.
 """
 from __future__ import annotations
-from model_gateway.prompt_cache import split_repair_sources, source_first, canonical
+from memorive.models.gateway.prompt_cache import split_repair_sources, source_first, canonical
 
 import copy
 import hashlib
@@ -29,8 +29,9 @@ from evidence_extraction.card import (
     detect_card_lang,
 )
 from knowledge_admission import ACTIVE, DecisionError, Trigger, transition
-from model_gateway import call as gateway_call
-from model_gateway.errors import GatewayError
+from memorive.models.gateway import call as gateway_call
+from memorive.models.gateway.errors import GatewayError
+from memorive.models.gateway.prompts import PROMPT_DIR
 from memorive.platform.logs import log_reason
 
 from . import report as _report
@@ -51,13 +52,7 @@ _DROP_DISPOSITIONS = frozenset({"source_conflict", "missing_anchor", "unrecovera
 _KEY_DATA_LOCATION_RE = re.compile(r"^key_data\[(\d+)]$")
 _ITEM_PREFIX_RE = re.compile(r"^item_index=(\d+)\s*[；;]\s*")
 _TOKEN_RE = re.compile(r"(?u)\b[^\W_]{3,}\b")
-_PROMPT_PATH = (
-    Path(__file__).resolve().parent.parent
-    / "model_gateway"
-    / "prompts"
-    / "distill_repair"
-    / "v2.md"
-)
+_PROMPT_PATH = PROMPT_DIR / "distill_repair" / "v2.md"
 
 
 @dataclass(frozen=True)

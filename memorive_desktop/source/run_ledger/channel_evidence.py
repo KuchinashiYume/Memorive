@@ -17,8 +17,8 @@ from typing import Any, Callable, Mapping, Sequence
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from model_gateway.execution_core import HandoffContract, HandoffViolation
-from model_gateway.execution_core.contracts import ContractViolation, utc_now
+from memorive.models.gateway.execution_core import HandoffContract, HandoffViolation
+from memorive.models.gateway.execution_core.contracts import ContractViolation, utc_now
 
 from .errors import ChannelEvidenceError
 

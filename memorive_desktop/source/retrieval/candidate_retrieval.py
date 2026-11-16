@@ -102,7 +102,7 @@ def _rerank_cfg() -> dict:
 def _default_embed(question: str, embed_task_type: str) -> list:
     """默认 query 嵌入:经 MODEL_GATEWAY `embed(embed_task_type, [question])`,取第一条向量。
     模型须 bge-m3(与 chunk 同向量空间)——否则拒用。query=自有数据→默认 cloud 槽;留 embed_local seam。"""
-    from model_gateway import embed as model_gateway_embed     # 局部 import:测试注入 embed_fn 时不触发 MODEL_GATEWAY
+    from memorive.models.gateway import embed as model_gateway_embed     # 局部 import:测试注入 embed_fn 时不触发 MODEL_GATEWAY
     res = model_gateway_embed(embed_task_type, [question])
     if res.get("embedding_model") != _CANON_EMBED:
         raise ValueError(f"CandidateRetrieval: query 嵌入模型 {res.get('embedding_model')!r} ≠ {_CANON_EMBED};"
@@ -118,7 +118,7 @@ def _default_rerank(question: str, texts: list, rerank_task_type: str = "rerank"
     """默认 rerank:经 MODEL_GATEWAY `rerank(rerank_task_type, question, texts)`,回**每条 relevance_score**(按 texts 序对齐)。
     契约:MODEL_GATEWAY 回 `{"results": [{"index", "relevance_score"}, …]}`(adapter 保证按 index 排序对齐 texts)。
     query=自有数据→默认 cloud siliconflow 槽(国内 domestic_skip);entrusted 本地 rerank 路留 seam(A1a 未接,后续)。"""
-    from model_gateway import rerank as model_gateway_rerank      # 局部 import:测试注入 rerank_fn 时不触发 MODEL_GATEWAY
+    from memorive.models.gateway import rerank as model_gateway_rerank      # 局部 import:测试注入 rerank_fn 时不触发 MODEL_GATEWAY
     res = model_gateway_rerank(rerank_task_type, question, list(texts))
     results = res.get("results") or []
     if len(results) != len(texts):
@@ -137,7 +137,7 @@ def _default_multimodal_rank(
     failure that the caller converts to the frozen distance fallback.
     """
 
-    from model_gateway.local_multimodal_ranker import LocalMultimodalRankerAdapter
+    from memorive.models.gateway.local_multimodal_ranker import LocalMultimodalRankerAdapter
 
     digest = os.environ.get("MEMORIVE_RETRIEVAL_LOCAL_MULTIMODAL_MODEL_DIGEST", "").strip()
     if not digest:

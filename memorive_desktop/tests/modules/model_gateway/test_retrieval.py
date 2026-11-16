@@ -5,9 +5,9 @@ from typing import Any
 
 import pytest
 
-from model_gateway.local_capability import LocalExecutionEnvelope, LogicalRole, InstallationMultimodalRetrievalRunner
-from model_gateway.local_capability.adapters.retrieval import validate_retrieval_output
-from model_gateway.local_capability.errors import ContractViolation
+from memorive.models.gateway.local_capability import LocalExecutionEnvelope, LogicalRole, InstallationMultimodalRetrievalRunner
+from memorive.models.gateway.local_capability.adapters.retrieval import validate_retrieval_output
+from memorive.models.gateway.local_capability.errors import ContractViolation
 @dataclass
 class Outcome:
     success: bool

@@ -10,12 +10,12 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
 from research_analysis import analysis
-from model_gateway.config import GatewayConfig
+from memorive.models.gateway.config import GatewayConfig
 
 
 class AnalysisModelProfileTest(unittest.TestCase):
     def test_analysis_slot_uses_sonnet_fine_analysis_profile(self) -> None:
-        config = GatewayConfig(REPO_ROOT / "model_gateway" / "models.yaml")
+        config = GatewayConfig(REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml")
         slot = config.slot("analysis")
 
         self.assertTrue(slot.enabled)

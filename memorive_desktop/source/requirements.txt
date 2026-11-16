@@ -20,5 +20,5 @@ jsonschema==4.26.0     # 当前 Qualification clean-runtime profile；Draft 2020
 
 # ── ServiceContracts 后续待装 ────────
 # marker-pdf           # 见 document_processing-marker optional profile；安装与打包权仍受 Desktop rights gate 阻断
-# 注:本地嵌入不需 pip 包——ollama adapter 走 urllib/HTTP(见 model_gateway/providers/ollama.py);
+# 注:本地嵌入不需 pip 包——ollama adapter 走 urllib/HTTP(见 memorive/models/gateway/providers/ollama.py);
 #     Ollama 本体是系统级服务(用户自装 + `ollama pull bge-m3`),非 pip 依赖

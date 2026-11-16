@@ -156,7 +156,7 @@ def test_bridge_returns_existing_formal_typed_items_not_parallel_simplified_item
         prompt_path=(
             ATTEMPT_ROOT
             / "source"
-            / "model_gateway"
+            / "memorive" / "models" / "gateway"
             / "prompts"
             / "conversation_refinement"
             / "v2.md"

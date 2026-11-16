@@ -3,7 +3,7 @@ usage numbers, the token usage of an API reply, and the estimated cost in CNY.
 """
 from __future__ import annotations
 
-from model_gateway.prompt_cache import cache_usage
+from memorive.models.gateway.prompt_cache import cache_usage
 import json
 from typing import Any, Mapping
 from memorive.models.endpoints import SAFE_MODEL

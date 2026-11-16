@@ -7,11 +7,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from model_gateway.config import SlotConfig
-from model_gateway.errors import GatewayError
-from model_gateway.gateway import ModelGateway
-from model_gateway.region_gate import _normalized_https_url, _parse_region, _proxy_route_id, _route_context, preflight_for_slot, validate_dispatch_receipt
-from model_gateway.region_gate import _route_binding
+from memorive.models.gateway.config import SlotConfig
+from memorive.models.gateway.errors import GatewayError
+from memorive.models.gateway.gateway import ModelGateway
+from memorive.models.gateway.region_gate import _normalized_https_url, _parse_region, _proxy_route_id, _route_context, preflight_for_slot, validate_dispatch_receipt
+from memorive.models.gateway.region_gate import _route_binding
 TRUSTED_GEO_URL = "https://www.cloudflare.com/cdn-cgi/trace"
 
 
@@ -36,7 +36,7 @@ def _evidence(slot, code="JP", **overrides):
 @patch.dict(os.environ, {"MEMORIVE_MODEL_GATEWAY_GEO_URL": TRUSTED_GEO_URL})
 class RegionEvidenceTests(unittest.TestCase):
     def setUp(self):
-        self.route_patcher = patch("model_gateway.region_gate._proxy_route_id", return_value="A" * 64)
+        self.route_patcher = patch("memorive.models.gateway.region_gate._proxy_route_id", return_value="A" * 64)
         self.route_patcher.start()
         self.addCleanup(self.route_patcher.stop)
 
@@ -92,7 +92,7 @@ class RegionEvidenceTests(unittest.TestCase):
     def test_split_route_and_post_probe_route_change_fail_closed(self):
         slot = _overseas_slot()
         same_route = "A" * 64
-        with patch("model_gateway.region_gate._proxy_route_id", return_value=same_route):
+        with patch("memorive.models.gateway.region_gate._proxy_route_id", return_value=same_route):
             receipt = preflight_for_slot(slot, probe=lambda _slot: _evidence(slot, "JP"))
             self.assertTrue(receipt["ok"])
             self.assertTrue(validate_dispatch_receipt(slot, receipt))
@@ -100,7 +100,7 @@ class RegionEvidenceTests(unittest.TestCase):
         def split_route(url):
             return "B" * 64 if "cloudflare.com" in url else "C" * 64
 
-        with patch("model_gateway.region_gate._proxy_route_id", side_effect=split_route):
+        with patch("memorive.models.gateway.region_gate._proxy_route_id", side_effect=split_route):
             split = preflight_for_slot(slot, probe=lambda _slot: _evidence(slot, "JP"))
             self.assertFalse(split["ok"])
             self.assertTrue(split["gated"])
@@ -176,8 +176,8 @@ class MalformedRouteInputTests(unittest.TestCase):
         slot = _overseas_slot()
         malformed_proxy = "http://proxy.invalid:bad"
         with (
-            patch("model_gateway.region_gate.urllib.request.proxy_bypass", return_value=False),
-            patch("model_gateway.region_gate.urllib.request.getproxies", return_value={"https": malformed_proxy}),
+            patch("memorive.models.gateway.region_gate.urllib.request.proxy_bypass", return_value=False),
+            patch("memorive.models.gateway.region_gate.urllib.request.getproxies", return_value={"https": malformed_proxy}),
         ):
             self.assertIsNone(_proxy_route_id(slot.endpoint))
             result = preflight_for_slot(slot, probe=lambda _slot: {"country_code": "JP"})

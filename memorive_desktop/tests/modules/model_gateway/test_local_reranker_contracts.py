@@ -7,8 +7,8 @@ import sys
 import tempfile
 import unittest
 
-from model_gateway.local_reranker.contracts import LocalRerankerViolation, build_request, render_document_for_reranker, validate_compatibility_manifest
-from model_gateway.local_reranker.contracts import file_sha256
+from memorive.models.gateway.local_reranker.contracts import LocalRerankerViolation, build_request, render_document_for_reranker, validate_compatibility_manifest
+from memorive.models.gateway.local_reranker.contracts import file_sha256
 from tests.modules.model_gateway.local_reranker_fixture import _write, make_fake_manifest, provenance
 
 

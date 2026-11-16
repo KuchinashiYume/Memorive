@@ -7,7 +7,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from model_gateway.providers import anthropic
+from memorive.models.gateway.providers import anthropic
 
 
 class _FakeResponse:

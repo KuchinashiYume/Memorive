@@ -17,7 +17,7 @@ import statistics
 from time import monotonic
 from typing import Any, Callable, Mapping, Sequence
 import uuid
-from model_gateway.resource_limits import resolve_call_limits
+from memorive.models.gateway.resource_limits import resolve_call_limits
 from memorive.exams.outcomes import (
     ExecutionOutcome,
     Scorability,

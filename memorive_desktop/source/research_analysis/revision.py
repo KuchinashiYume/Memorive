@@ -1,13 +1,13 @@
 """A bound, exact-target successor for single-paper RESEARCH_ANALYSIS Analysis review findings."""
 from __future__ import annotations
 from dataclasses import replace, asdict
-from pathlib import Path
 import json
 
 from retrieval.context_pack import validate_context_pack_binding
 from retrieval.ownership import OwnershipSnapshot, propagation_receipt, stable_sha256
 from evidence_review.ownership_binding import build_ownership_review_task
-from model_gateway import call
+from memorive.models.gateway import call
+from memorive.models.gateway.prompts import PROMPT_DIR
 from memorive.platform.language.source_preservation import validate_generated_language
 from .analysis import (analysis_binding_payload, build_payload, build_analysis_request_envelope,
     _default_region_check, _block_origin, _block_facets, _analysis_quality_metrics)
@@ -64,7 +64,7 @@ def revise_analysis(previous, context_pack, review, *, output_language='en', mod
     (region_check or _default_region_check)()
     base=build_payload(context_pack,previous.question,output_language=output_language)
     base['response_contract']='analysis_targeted_revision_v1'
-    template=(Path(__file__).parents[1]/'model_gateway/prompts/analysis/revision_v1.md').read_text(encoding='utf-8')
+    template=(PROMPT_DIR/'analysis/revision_v1.md').read_text(encoding='utf-8')
     base['messages'][0]['content']+='\n\n'+template.replace('__TARGETS_JSON__',json.dumps(
         {'base_analysis_hash':previous.analysis_hash,'targets':[targets[i] for i in sorted(targets)]},
         ensure_ascii=False,sort_keys=True))

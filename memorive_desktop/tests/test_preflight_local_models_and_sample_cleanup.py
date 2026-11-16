@@ -13,7 +13,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
         sys.path.insert(0, str(candidate))
 
 from runtime import ProductApi  # noqa: E402
-from memorive_local_models.product_controller import LocalModelProductController  # noqa: E402
+from memorive.models.local.product_controller import LocalModelProductController  # noqa: E402
 
 
 def _text(path: Path) -> str:

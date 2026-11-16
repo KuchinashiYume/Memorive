@@ -22,7 +22,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
         sys.path.insert(0, str(candidate))
 
 from memorive_inbox import InboxController  # noqa: E402
-from model_gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
+from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
 from memorive_messages import MessagesProductController  # noqa: E402
 from memorive_workflow_bridge.conversation_refinement import _response_schema  # noqa: E402
 from memorive_sessions import SessionsProductController  # noqa: E402

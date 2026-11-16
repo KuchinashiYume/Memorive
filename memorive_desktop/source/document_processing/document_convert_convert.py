@@ -205,7 +205,7 @@ def convert(raw: RawObject, *, paper_id: str, title: str,
     source_sha256 = _sha256(raw.path)
     # Desktop jobs bind their selected OCR model through the existing MODEL_GATEWAY scope.
     # Legacy callers retain their explicit readiness switch; no global route is changed.
-    from model_gateway.gateway import current_gateway
+    from memorive.models.gateway.gateway import current_gateway
     ocr_ready = OCR_VIA_MODEL_GATEWAY_READY or bool(getattr(current_gateway(), 'page_ocr_ready', False))
 
     # ── 安全阀①:需 OCR(图片/扫描)但 model_gateway_ocr 未就绪 → 报错挡下,不静默降级 ──

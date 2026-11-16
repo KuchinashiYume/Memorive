@@ -20,8 +20,8 @@ from .document_embed_embed import (
     _vector_metadata,
     _write_atomic,
 )
-from model_gateway.execution_core.contracts import canonical_sha256, utc_now
-from model_gateway.local_embedding import validate_compatibility_manifest
+from memorive.models.gateway.execution_core.contracts import canonical_sha256, utc_now
+from memorive.models.gateway.local_embedding import validate_compatibility_manifest
 
 
 SCHEMA_VERSION = "LOCAL_RETRIEVAL_VECTOR_INDEX_GENERATION_V1"

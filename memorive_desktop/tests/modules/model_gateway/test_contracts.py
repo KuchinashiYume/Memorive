@@ -6,9 +6,9 @@ import json
 import pytest
 from jsonschema import Draft202012Validator
 
-from model_gateway.local_capability import ActivationStatus, CombinedLocalChainVerdict, ExecutionStatus, FileIdentity, LocalEgressEvidence, LocalExecutionEnvelope, LocalExecutionReceipt, LocalOwnershipRouteDecision, LocalResourceEnvelope, LocalRoleProfile, LocalRoleQualificationVerdict, LocalRuntimeAssetManifest, LogicalRole, OwnershipClass, QualificationStatus, combine_role_verdicts, validate_contract
-from model_gateway.local_capability.contracts import SCHEMA_DIR
-from model_gateway.local_capability.errors import ContractViolation
+from memorive.models.gateway.local_capability import ActivationStatus, CombinedLocalChainVerdict, ExecutionStatus, FileIdentity, LocalEgressEvidence, LocalExecutionEnvelope, LocalExecutionReceipt, LocalOwnershipRouteDecision, LocalResourceEnvelope, LocalRoleProfile, LocalRoleQualificationVerdict, LocalRuntimeAssetManifest, LogicalRole, OwnershipClass, QualificationStatus, combine_role_verdicts, validate_contract
+from memorive.models.gateway.local_capability.contracts import SCHEMA_DIR
+from memorive.models.gateway.local_capability.errors import ContractViolation
 def file_identity(label: str, character: str = "A") -> FileIdentity:
     return FileIdentity(locator=f"C:/assets/{label}", sha256=character * 64, bytes=10)
 

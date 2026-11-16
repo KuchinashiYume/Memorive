@@ -5,9 +5,9 @@ from typing import Any
 
 import pytest
 
-from model_gateway.local_capability import LocalExecutionEnvelope, LogicalRole
-from model_gateway.local_capability.adapters import AnalysisAdapter, DistillAdapter, EmbeddingAdapter, OCRAdapter, RetrievalAdapter, VerifyAdapter
-from model_gateway.local_capability.errors import ContractViolation
+from memorive.models.gateway.local_capability import LocalExecutionEnvelope, LogicalRole
+from memorive.models.gateway.local_capability.adapters import AnalysisAdapter, DistillAdapter, EmbeddingAdapter, OCRAdapter, RetrievalAdapter, VerifyAdapter
+from memorive.models.gateway.local_capability.errors import ContractViolation
 def envelope(role: LogicalRole) -> LocalExecutionEnvelope:
     return LocalExecutionEnvelope(
         request_id="request-001",

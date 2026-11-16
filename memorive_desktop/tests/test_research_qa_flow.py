@@ -316,7 +316,7 @@ class Agent:
 
 
 def test_an_agent_job_works_from_the_agent_instructions_and_leaves_a_handoff_pack(tmp_path):
-    from model_gateway.research_prompt_cache import CHAT_RULES
+    from memorive.models.gateway.research_prompt_cache import CHAT_RULES
     from research_opportunities.research_opportunities import instructions
 
     library = tmp_path / "library"

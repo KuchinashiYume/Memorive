@@ -19,8 +19,8 @@ class ModelGatewayOcrEngine(ConvertEngine):
     name = "model_gateway_ocr"
 
     def convert(self, raw: RawObject) -> tuple[str, ConvertReport]:
-        from model_gateway import ocr
-        from model_gateway.errors import OcrOwnershipBlocked
+        from memorive.models.gateway import ocr
+        from memorive.models.gateway.errors import OcrOwnershipBlocked
 
         if raw.meta.data_ownership != "self":
             raise OcrOwnershipBlocked(

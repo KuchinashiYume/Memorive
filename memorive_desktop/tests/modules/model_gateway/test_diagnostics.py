@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from model_gateway.local_capability import ActivationStatus, ExecutionStatus, FileIdentity, LocalExecutionReceipt, LocalRoleProfile, LocalRuntimeAssetManifest, LogicalRole, OwnershipClass
-from model_gateway.local_capability.diagnostics import local_diagnose, local_preflight, local_status
-from model_gateway.local_capability.errors import LocalCapabilityError
+from memorive.models.gateway.local_capability import ActivationStatus, ExecutionStatus, FileIdentity, LocalExecutionReceipt, LocalRoleProfile, LocalRuntimeAssetManifest, LogicalRole, OwnershipClass
+from memorive.models.gateway.local_capability.diagnostics import local_diagnose, local_preflight, local_status
+from memorive.models.gateway.local_capability.errors import LocalCapabilityError
 def manifest() -> LocalRuntimeAssetManifest:
     file = FileIdentity(locator="C:/asset", sha256="A" * 64, bytes=1)
     return LocalRuntimeAssetManifest(
@@ -161,7 +161,7 @@ def test_diagnose_reports_plane_without_repair(error: str | None, status: Execut
 
 def test_cli_status_does_not_start_or_contact_a_model() -> None:
     completed = subprocess.run(
-        [sys.executable, "-m", "model_gateway.local_capability", "local-status"],
+        [sys.executable, "-m", "memorive.models.gateway.local_capability", "local-status"],
         cwd=Path(__file__).resolve().parents[3] / "source",
         check=True,
         capture_output=True,

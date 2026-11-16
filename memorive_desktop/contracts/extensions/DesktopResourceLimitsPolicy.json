@@ -44,7 +44,7 @@
       "provider": "DeepSeek",
       "verified_on": "2026-09-04",
       "url": "https://api-docs.deepseek.com/quick_start/pricing/",
-      "runtime_registry": "source/model_gateway/model_capabilities.json"
+      "runtime_registry": "source/memorive/models/gateway/model_capabilities.json"
     }
   ],
   "transport": {

@@ -178,7 +178,7 @@ def _first_positive_integer(values: Sequence[Any]) -> int | None:
 
 def _capacity_from_registry(model_name: str) -> tuple[int | None, int | None, str | None]:
     try:
-        import model_gateway.capabilities as capability_module
+        import memorive.models.gateway.capabilities as capability_module
 
         path = Path(capability_module.DEFAULT_REGISTRY_PATH)
         raw = json.loads(path.read_text(encoding="utf-8"))
@@ -218,7 +218,7 @@ def _resolve_capacity_profile(
     if not isinstance(model_name, str) or not model_name.strip():
         raise RuntimeError("Capabilities_SEGMENT_CAPACITY_MODEL_NAME_MISSING")
 
-    from model_gateway.resource_limits import describe_capacity
+    from memorive.models.gateway.resource_limits import describe_capacity
     from evidence_extraction.distill import PromptRegistry, _PROMPTS_ROOT, DISTILL_TASK
 
     capacity = describe_capacity(profile_kind=node.get('profile_kind'),

@@ -149,7 +149,7 @@ def test_browser_bundle_rejects_unapproved_provider_host_and_partial_content(tmp
 def test_local_model_discovery_and_verification_never_runs_inference_or_external_network(
     tmp_path: Path,
 ) -> None:
-    from memorive_local_models.product_controller import LocalModelProductController, LocalModelProductError
+    from memorive.models.local.product_controller import LocalModelProductController, LocalModelProductError
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802

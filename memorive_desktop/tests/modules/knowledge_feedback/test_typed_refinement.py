@@ -13,8 +13,8 @@ from knowledge_feedback.conversation_refinement.redaction import redact_text
 from knowledge_feedback.conversation_refinement.refinement import REFINEMENT_SUBJECT_SLOT
 from knowledge_feedback.conversation_refinement.refinement import deterministic_refine_graph, make_conflict_set, make_refinement_subject_binding
 from tests.modules.knowledge_feedback.test_export_snapshot_contract import NOW, make_envelope, make_export, message
-from model_gateway.config import GatewayConfig
-from model_gateway.prompts import PromptRegistry
+from memorive.models.gateway.config import GatewayConfig
+from memorive.models.gateway.prompts import PromptRegistry
 
 
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
@@ -63,8 +63,8 @@ def refinement_fixture() -> tuple[dict, dict]:
 
 class TypedRefinementTests(unittest.TestCase):
     def test_refinement_subject_uses_replaceable_m9_slot(self) -> None:
-        config = GatewayConfig(REPO_ROOT / "model_gateway" / "models.yaml")
-        prompt = PromptRegistry(REPO_ROOT / "model_gateway" / "prompts").get(
+        config = GatewayConfig(REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml")
+        prompt = PromptRegistry(REPO_ROOT / "memorive" / "models" / "gateway" / "prompts").get(
             REFINEMENT_SUBJECT_SLOT
         )
         slot = config.slot(REFINEMENT_SUBJECT_SLOT)
@@ -92,12 +92,12 @@ class TypedRefinementTests(unittest.TestCase):
 
     def test_replacing_slot_model_changes_frozen_behavior_without_code_change(self) -> None:
         source = yaml.safe_load(
-            (REPO_ROOT / "model_gateway" / "models.yaml").read_text(encoding="utf-8")
+            (REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml").read_text(encoding="utf-8")
         )
         with TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "models.yaml"
-            original = GatewayConfig(REPO_ROOT / "model_gateway" / "models.yaml")
-            prompt = PromptRegistry(REPO_ROOT / "model_gateway" / "prompts").get(
+            original = GatewayConfig(REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml")
+            prompt = PromptRegistry(REPO_ROOT / "memorive" / "models" / "gateway" / "prompts").get(
                 REFINEMENT_SUBJECT_SLOT
             )
             before = make_refinement_subject_binding(

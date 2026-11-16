@@ -6,14 +6,14 @@ from pathlib import Path
 
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 
-from model_gateway.reviewer_batch import BatchContractError, build_batch_requests, reconcile_batch_results, stable_custom_id
-from model_gateway.reviewer_binding import ModelIdMismatch, ReviewerBinding, ReviewerUnavailable
-from model_gateway.reviewer_budget import BudgetBlocked, BudgetLedger, calculate_anthropic_cost
+from memorive.models.gateway.reviewer_batch import BatchContractError, build_batch_requests, reconcile_batch_results, stable_custom_id
+from memorive.models.gateway.reviewer_binding import ModelIdMismatch, ReviewerBinding, ReviewerUnavailable
+from memorive.models.gateway.reviewer_budget import BudgetBlocked, BudgetLedger, calculate_anthropic_cost
 class ReviewerExecutionSafetyTest(unittest.TestCase):
     def test_binding_reads_exact_current_verify_slot(self) -> None:
         binding = ReviewerBinding.from_files(
-            REPO_ROOT / "model_gateway" / "card_reviewer.yaml",
-            REPO_ROOT / "model_gateway" / "models.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "card_reviewer.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml",
         )
         self.assertEqual(binding.provider, "anthropic")
         self.assertEqual(binding.exact_model_id, "claude-sonnet-5")
@@ -25,8 +25,8 @@ class ReviewerExecutionSafetyTest(unittest.TestCase):
 
     def test_actual_model_mismatch_fails_current_call(self) -> None:
         binding = ReviewerBinding.from_files(
-            REPO_ROOT / "model_gateway" / "card_reviewer.yaml",
-            REPO_ROOT / "model_gateway" / "models.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "card_reviewer.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml",
         )
         with self.assertRaises(ModelIdMismatch):
             binding.assert_actual_model("claude-other")
@@ -38,15 +38,15 @@ class ReviewerExecutionSafetyTest(unittest.TestCase):
 
     def test_full_disabled_is_forbidden_by_binding(self) -> None:
         binding = ReviewerBinding.from_files(
-            REPO_ROOT / "model_gateway" / "card_reviewer.yaml",
-            REPO_ROOT / "model_gateway" / "models.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "card_reviewer.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml",
         )
         self.assertEqual(binding.full["thinking"]["type"], "adaptive")
 
     def test_full_request_uses_native_json_schema_output(self) -> None:
         binding = ReviewerBinding.from_files(
-            REPO_ROOT / "model_gateway" / "card_reviewer.yaml",
-            REPO_ROOT / "model_gateway" / "models.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "card_reviewer.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml",
         )
         schema = {
             "type": "object",
@@ -76,8 +76,8 @@ class ReviewerExecutionSafetyTest(unittest.TestCase):
 
     def test_low_risk_disabled_is_candidate_not_enabled(self) -> None:
         binding = ReviewerBinding.from_files(
-            REPO_ROOT / "model_gateway" / "card_reviewer.yaml",
-            REPO_ROOT / "model_gateway" / "models.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "card_reviewer.yaml",
+            REPO_ROOT / "memorive" / "models" / "gateway" / "models.yaml",
         )
         self.assertFalse(binding.low_risk_delta["enabled"])
         self.assertEqual(binding.low_risk_delta["thinking"]["type"], "disabled")

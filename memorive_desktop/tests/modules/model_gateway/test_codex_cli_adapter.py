@@ -9,13 +9,13 @@ import sys
 import tempfile
 import unittest
 
-from model_gateway.execution_core import (
+from memorive.models.gateway.execution_core import (
     IsolatedJobRunner,
     JobWorkspace,
     WorkspaceViolation,
     canonical_sha256,
 )
-from model_gateway.execution_core.adapters import (
+from memorive.models.gateway.execution_core.adapters import (
     CodexAdapterViolation,
     CodexCliAdapter,
     CodexCliPolicy,
@@ -33,7 +33,7 @@ EXTERNAL_SCHEMA = json.loads(
     (REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "external_model_call_receipt.schema.json").read_bytes()
 )
 FAKE_CODEX = Path(__file__).resolve().with_name("fake_codex.py")
-ADAPTER_SOURCE = REPO_ROOT / "model_gateway" / "execution_core" / "adapters" / "codex_cli.py"
+ADAPTER_SOURCE = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "adapters" / "codex_cli.py"
 PYTHON = str(Path(sys.executable).resolve())
 PAYLOAD_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -78,7 +78,7 @@ def policy(
         exact_version="codex-cli 0.147.0",
         binary_sha256=sha256(Path(PYTHON)),
         exec_help_sha256=sha256(FAKE_CODEX),
-        runner_sha256=sha256(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+        runner_sha256=sha256(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
         allowed_models=("gpt-5.6-luna", "gpt-5.6-terra"),
         allowed_reasoning_efforts=("high",),
         allowed_access_profiles=access_profiles,
@@ -96,7 +96,7 @@ def policy(
         component_paths={
             "binary_sha256": PYTHON,
             "exec_help_sha256": str(FAKE_CODEX),
-            "runner_sha256": str(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+            "runner_sha256": str(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
         },
     )
 

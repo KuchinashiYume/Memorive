@@ -12,7 +12,7 @@ import re
 from typing import Any, Mapping
 from memorive.models.endpoints import SAFE_MODEL, SAFE_THINKING
 try:
-    from model_gateway.execution_core.adapters.codex_cli import (
+    from memorive.models.gateway.execution_core.adapters.codex_cli import (
         CodexAdapterViolation as _ExecutionCodexAdapterViolation,
         CodexCliAdapter as _ExecutionCodexCliAdapter,
     )

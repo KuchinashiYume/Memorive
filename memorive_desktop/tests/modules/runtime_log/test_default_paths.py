@@ -12,7 +12,7 @@ import pytest
 
 from evidence_review import judgment_debt, report
 from knowledge_admission import knowledge_admission_log
-from model_gateway.cache import CacheLayer
+from memorive.models.gateway.cache import CacheLayer
 from memorive.platform import data_folders
 from memorive.platform.logs import config
 

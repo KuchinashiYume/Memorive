@@ -73,7 +73,7 @@ def import_settings(source:Path,destination:Path):
     migrations.append({'path':relative,'source_sha256':hashlib.sha256(raw).hexdigest(),'schema_version':current_schema})
     raw=(json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode('utf8')
    if relative.startswith('local_models/'):
-    from memorive_local_models.product_controller import LocalModelProductController
+    from memorive.models.local.product_controller import LocalModelProductController
     LocalModelProductController._validate_state(value)
    elif set(value)!={'schema_version','enabled','shortcut_entries','reminder_scope','hide_sensitive_names'}:
     raise ValueError('ASSISTANT_SETTINGS_FIELDS_INVALID')

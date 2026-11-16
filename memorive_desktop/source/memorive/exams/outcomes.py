@@ -133,7 +133,7 @@ def workflow_exam_structured_output_policy(
     replaced with a guessed context. Mandatory protocol fields still use the
     verified provider limit.
     """
-    from model_gateway.resource_limits import resolve_call_limits
+    from memorive.models.gateway.resource_limits import resolve_call_limits
 
     kind = str(target.get("kind") or "")
     if kind not in {"API", "CLI", "LOCAL"}:

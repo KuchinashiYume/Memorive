@@ -10,7 +10,7 @@ import pytest
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ATTEMPT_ROOT / "product" / "desktop"))
 
-from memorive_local_models.product_controller import LocalModelProductController
+from memorive.models.local.product_controller import LocalModelProductController
 from memorive_sessions.edge_visible_ui import EdgeDeepSeekVisibleUIReader
 from memorive_sessions.product_controller import SessionProductError, SessionsProductController
 from runtime import ProductApi

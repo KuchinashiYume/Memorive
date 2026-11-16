@@ -8,7 +8,7 @@ import json
 from typing import Any, Mapping
 from urllib.parse import quote, urlsplit, urlunsplit
 from memorive.models.endpoints import SAFE_MODEL, _ApiProfile
-from model_gateway.resource_limits import _registry_entry
+from memorive.models.gateway.resource_limits import _registry_entry
 
 from memorive.models.validation.structured import _json_object_from_text, _structured_prompt
 
@@ -110,7 +110,7 @@ def _api_chat_request(
             if profile.provider_family == 'OPENAI_COMPATIBLE':
                 value['stream_options'] = {'include_usage': True}
     if model_config.get('prompt_cache_layout')=='MEMO_RESEARCH_PREFIX_V1' and profile.provider_family=='ANTHROPIC' and urlsplit(profile.url).hostname=='api.anthropic.com':
-        from model_gateway.research_prompt_cache import prefix_parts
+        from memorive.models.gateway.research_prompt_cache import prefix_parts
         parts=prefix_parts(prompt_text)
         if parts and len(parts[0])>=2048:
             value['messages'][0]['content']=[{'type':'text','text':parts[0],'cache_control':{'type':'ephemeral','ttl':'5m'}},{'type':'text','text':parts[1]}]

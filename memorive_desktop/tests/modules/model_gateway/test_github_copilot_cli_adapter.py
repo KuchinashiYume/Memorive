@@ -15,11 +15,11 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from model_gateway.execution_core.adapters.github_copilot_cli import GitHubCopilotCLIPolicy, GitHubCopilotCLIViolation
-from model_gateway.execution_core.adapters.github_copilot_cli import GitHubCopilotCLIAdapter
-from model_gateway.execution_core.contracts import canonical_sha256  # noqa: E402
-from model_gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
-from model_gateway.execution_core.workspace import JobWorkspace, WorkspaceViolation  # noqa: E402
+from memorive.models.gateway.execution_core.adapters.github_copilot_cli import GitHubCopilotCLIPolicy, GitHubCopilotCLIViolation
+from memorive.models.gateway.execution_core.adapters.github_copilot_cli import GitHubCopilotCLIAdapter
+from memorive.models.gateway.execution_core.contracts import canonical_sha256  # noqa: E402
+from memorive.models.gateway.execution_core.runner import IsolatedJobRunner  # noqa: E402
+from memorive.models.gateway.execution_core.workspace import JobWorkspace, WorkspaceViolation  # noqa: E402
 
 
 CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
@@ -65,7 +65,7 @@ def policy() -> GitHubCopilotCLIPolicy:
         wrapper_sha256=sha256(FAKE),
         entrypoint_sha256=sha256(FAKE),
         help_sha256=sha256(FAKE),
-        runner_sha256=sha256(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+        runner_sha256=sha256(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
         model_catalog_sha256=sha256(FAKE),
         allowed_models=(MODEL, "gpt-5.3-codex"),
         allowed_profiles=(PROFILE,),
@@ -83,7 +83,7 @@ def policy() -> GitHubCopilotCLIPolicy:
             "wrapper_sha256": str(FAKE),
             "entrypoint_sha256": str(FAKE),
             "help_sha256": str(FAKE),
-            "runner_sha256": str(REPO_ROOT / "model_gateway" / "execution_core" / "runner.py"),
+            "runner_sha256": str(REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "runner.py"),
             "model_catalog_sha256": str(FAKE),
         },
     )
@@ -699,7 +699,7 @@ class GitHubCopilotStaticBoundaryTest(unittest.TestCase):
     def test_adapter_has_no_network_retry_git_mutation_or_activation(self):
         source = (
             REPO_ROOT
-            / "model_gateway"
+            / "memorive" / "models" / "gateway"
             / "execution_core"
             / "adapters"
             / "github_copilot_cli.py"

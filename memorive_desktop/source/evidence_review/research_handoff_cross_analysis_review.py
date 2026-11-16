@@ -17,12 +17,11 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 import jsonschema
 
-from model_gateway.prompts import PromptRegistry
+from memorive.models.gateway.prompts import PROMPT_DIR, PromptRegistry
 
 
 PASS = "PASS"
@@ -40,7 +39,7 @@ DELTA_REVIEW_VERSION = "memorive.research.analysis.cross-analysis-delta-review.v
 REPAIR_VERSION = "memorive.research.analysis.cross-analysis-targeted-repair.v1"
 TOMBSTONE_VERSION = "memorive.research.analysis.cross-analysis-tombstone.v1"
 
-_PROMPTS = PromptRegistry(Path(__file__).resolve().parents[1] / "model_gateway" / "prompts")
+_PROMPTS = PromptRegistry(PROMPT_DIR)
 _SHA256 = re.compile(r"^[A-F0-9]{64}$")
 _SOURCE_ID = re.compile(r"^[A-Za-z0-9_-]+#c[0-9]{4}$")
 _SUCCESS_STOPS = frozenset({"stop", "end_turn"})

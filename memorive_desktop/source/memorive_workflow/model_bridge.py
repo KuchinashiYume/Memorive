@@ -10,7 +10,7 @@ import re
 from typing import Any, Callable, Mapping, Sequence
 import uuid
 
-from model_gateway.errors import GatewayError, InvalidHealthcheckTarget, OcrResultInvalid
+from memorive.models.gateway.errors import GatewayError, InvalidHealthcheckTarget, OcrResultInvalid
 from memorive.models.execution import retry
 
 from .capacity import describe_capacity
@@ -462,7 +462,7 @@ class CoreModelBridge:
         )
         # Bind reusable context to its content and role, independent of attempt paths.
         if node["profile_kind"] == "CLI" and execution_profile["service"].get("adapter_id") == "codex_cli":
-            from model_gateway.cache_session import REVISION, split_source
+            from memorive.models.gateway.cache_session import REVISION, split_source
             pieces = split_source(prompt)
             if pieces is not None:
                 from research_analysis.revision import REPAIR_SCHEMA
@@ -499,7 +499,7 @@ class CoreModelBridge:
                 else None
             )
         )
-        from model_gateway.resource_limits import resolve_call_limits
+        from memorive.models.gateway.resource_limits import resolve_call_limits
 
         limits = resolve_call_limits(
             profile_kind=node['profile_kind'],
@@ -869,7 +869,8 @@ class CoreModelBridge:
             fallback = None
         else:
             primary = self._node(node_id)
-        prompt_path = Path(__file__).resolve().parents[1] / 'model_gateway/prompts/ocr/v6.md'
+        from memorive.models.gateway.prompts import PROMPT_DIR
+        prompt_path = PROMPT_DIR / 'ocr/v6.md'
         prompt = prompt_path.read_text(encoding='utf-8')
         page_binding = {'source_sha256': source_sha256.upper(), 'page_number': page_number,
             'image_sha256': hashlib.sha256(image_bytes).hexdigest().upper(),

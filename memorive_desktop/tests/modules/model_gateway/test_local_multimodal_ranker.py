@@ -11,7 +11,7 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
 from retrieval.retrieval_calibration.candidate_features import build_reranker_provenance
-from model_gateway.local_multimodal_ranker import (  # noqa: E402
+from memorive.models.gateway.local_multimodal_ranker import (  # noqa: E402
     LocalMultimodalRankerAdapter,
     LocalMultimodalRankerViolation,
     build_request,

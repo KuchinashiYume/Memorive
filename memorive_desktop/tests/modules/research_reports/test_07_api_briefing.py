@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from model_gateway.config import GatewayConfig
+from memorive.models.gateway.config import GatewayConfig
 from research_reports.api_briefing import BLOCKED_INPUT_INCOMPLETE, GENERATED, SKIPPED_NO_LIBRARY_CHANGE, BriefingApiError, qualifying_library_change_ids
 from research_reports.api_briefing import run_api_briefing
 TITLES = {
@@ -127,7 +127,7 @@ class ApiBriefingTests(unittest.TestCase):
     def test_profiles_match_gateway_slots_exactly(self) -> None:
         from research_reports.api_briefing import PROFILES
 
-        config = GatewayConfig((Path(__file__).resolve().parents[3] / "source") / "model_gateway" / "models.yaml")
+        config = GatewayConfig((Path(__file__).resolve().parents[3] / "source") / "memorive" / "models" / "gateway" / "models.yaml")
         for profile in PROFILES.values():
             slot = config.slot(profile.slot)
             self.assertTrue(slot.enabled)

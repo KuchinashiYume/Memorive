@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from model_gateway.local_reranker.doctor import reranker_doctor
+from memorive.models.gateway.local_reranker.doctor import reranker_doctor
 from tests.modules.model_gateway.local_reranker_fixture import make_fake_manifest
 
 

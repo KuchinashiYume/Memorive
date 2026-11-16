@@ -16,8 +16,14 @@
   pricing.py           a call's price estimate; price_registry.py and .json hold public prices,
                        provider_aliases.py the provider's own compatibility names
   output_limits.py     how large a reply may be
+  gateway/             model transport for the document and research work: providers, routing,
+                       prompts and their files, caches, cost, the local model components
+  local/               local model servers (Ollama and the like) found and checked for the window
 
 The settings service (memorive_settings) holds the runner and serves these as settings.* calls.
-Nothing here imports the settings, the exams or the desktop; scheduling.py reads the workflow's
-worker count (memorive_workflow/contracts.py, CORE_WORKER_CAPACITY).
+scheduling.py reads the workflow's worker count (memorive_workflow/contracts.py,
+CORE_WORKER_CAPACITY). Places where gateway/ still reaches into other areas:
+research_prompt_cache.py reads the answer styles of memorive_settings, routing_advisory.py uses
+the exam scoring (memorive.exams.evaluation) and the hashing helpers of retrieval_weighting,
+model_configuration/errors.py takes the error envelope from memorive_app.
 """

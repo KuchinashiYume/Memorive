@@ -1280,7 +1280,7 @@
     {
       "source": "memorive_desktop/contracts/extensions/DesktopResourceLimitsPolicy.json",
       "destination": "contracts/extensions/DesktopResourceLimitsPolicy.json",
-      "sha256": "f47be465717daddd454129bded5d3faefe36aca06811e4b1b23a3de3cee53141"
+      "sha256": "a55640b47ee6957feffae6d2b6a176110c5d62293fcdf810eb7152cf6a4d8c07"
     },
     {
       "source": "memorive_desktop/contracts/extensions/SafeShortcutRegistryContract.json",

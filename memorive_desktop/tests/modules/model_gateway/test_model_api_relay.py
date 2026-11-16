@@ -14,8 +14,8 @@ import urllib.error
 
 import jsonschema
 
-from model_gateway.config import GatewayConfig
-from model_gateway.model_api_relay import AttemptLedger, EndpointProfileCatalog, ProfiledRouter, RelayContractError, RelayProtocolRegistry, RelayRoutePlanner, SafeRelayClient, build_capability_loss_map, build_compatibility_report, build_presend_blocked_receipt, build_relay_qualification_key, build_relay_attempt_receipt, canonical_sha256, classify_backend_identity, evaluate_qualification, prepare_public_synthetic_ocr, project_runtime_log_relay_extension, validate_credential_binding, validate_endpoint_profile, validate_model_alias_binding, validate_protocol_manifest
+from memorive.models.gateway.config import GatewayConfig
+from memorive.models.gateway.model_api_relay import AttemptLedger, EndpointProfileCatalog, ProfiledRouter, RelayContractError, RelayProtocolRegistry, RelayRoutePlanner, SafeRelayClient, build_capability_loss_map, build_compatibility_report, build_presend_blocked_receipt, build_relay_qualification_key, build_relay_attempt_receipt, canonical_sha256, classify_backend_identity, evaluate_qualification, prepare_public_synthetic_ocr, project_runtime_log_relay_extension, validate_credential_binding, validate_endpoint_profile, validate_model_alias_binding, validate_protocol_manifest
 HASH_A = "A" * 64
 HASH_B = "B" * 64
 HASH_C = "C" * 64
@@ -385,14 +385,14 @@ class EvidenceAndIntegrationTests(unittest.TestCase):
         )
         fake_client = mock.Mock()
         fake_client.invoke.return_value = {"text": "OK", "provider": "ExampleRelay"}
-        config = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "models.yaml")
+        config = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "models.yaml")
         router = ProfiledRouter(config, catalog, {"distill": "relay-openai-chat-v1"}, client=fake_client, clock=lambda: NOW)
         result = router.dispatch("distill", {"messages": [{"role":"user","content":"OK"}]})
         self.assertEqual(result["text"], "OK")
         fake_client.invoke.assert_called_once()
 
     def test_schema_assets_are_valid_json_and_no_secret_fields(self):
-        schema_dir = (Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "model_api_relay" / "schemas"
+        schema_dir = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "model_api_relay" / "schemas"
         expected = {
             "model_api_endpoint_profile_v1.schema.json",
             "credential_endpoint_binding_v1.schema.json",
@@ -409,7 +409,7 @@ class EvidenceAndIntegrationTests(unittest.TestCase):
 
     def test_profile_bundle_loader_is_root_and_hash_bound(self):
         import tempfile
-        from model_gateway.execution_core.contracts import bytes_sha256
+        from memorive.models.gateway.execution_core.contracts import bytes_sha256
         bundle = {
             "schema_version": "MODEL_API_RELAY_ENDPOINT_PROFILE_BUNDLE_V1",
             "profiles": [profile()],
@@ -446,7 +446,7 @@ class EvidenceAndIntegrationTests(unittest.TestCase):
         catalog = EndpointProfileCatalog(profiles=[profile()], credential_bindings=[binding()], model_alias_bindings=[alias()], protocol_manifests=[manifest()])
         resolved = catalog.resolve("relay-openai-chat-v1", role="distill", capability="chat", at=NOW)
         client = SafeRelayClient(opener=Opener(), environ={"MODEL_API_RELAY_RELAY_KEY":"secret-value"}, resolver=lambda *_args, **_kwargs: [(2,1,6,"",("8.8.8.8",443))], monotonic=iter([1.0,1.01]).__next__)
-        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "models.yaml").slot("distill")
+        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "models.yaml").slot("distill")
         result = client.invoke(resolved, slot, {"messages":[{"role":"user","content":"Reply OK"}],"max_tokens":8})
         self.assertEqual(captured["authorization"], "Bearer secret-value")
         self.assertEqual(captured["url"], "https://relay.example.test/v1/chat/completions")
@@ -456,7 +456,7 @@ class EvidenceAndIntegrationTests(unittest.TestCase):
     def test_safe_client_blocks_missing_credential_private_dns_and_redirect(self):
         catalog = EndpointProfileCatalog(profiles=[profile()], credential_bindings=[binding()], model_alias_bindings=[alias()], protocol_manifests=[manifest()])
         resolved = catalog.resolve("relay-openai-chat-v1", role="distill", capability="chat", at=NOW)
-        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "models.yaml").slot("distill")
+        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "models.yaml").slot("distill")
         opener = mock.Mock()
         with self.assertRaisesRegex(RelayContractError, "CREDENTIAL_NOT_PRESENT"):
             SafeRelayClient(opener=opener, environ={}).invoke(resolved, slot, {"messages":[{"role":"user","content":"OK"}]})
@@ -856,7 +856,7 @@ class RoutingEvidenceAndTransportTests(unittest.TestCase):
 
     def test_client_classifies_redirect_timeout_disconnect_and_competing_env(self):
         resolved = self.resolved()
-        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "models.yaml").slot("distill")
+        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "models.yaml").slot("distill")
         resolver = lambda *_a, **_k: [(2, 1, 6, "", ("8.8.8.8", 443))]
 
         class RedirectOpener:
@@ -932,7 +932,7 @@ class RoutingEvidenceAndTransportTests(unittest.TestCase):
             resolved = catalog_for(p=p, b=b, a=a).resolve(
                 "selfhosted-openai-chat-v1", role="distill", capability="chat", at=NOW
             )
-            slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "models.yaml").slot("distill")
+            slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "models.yaml").slot("distill")
             result = SafeRelayClient(
                 environ={"MODEL_API_RELAY_DUMMY_RELAY_CLIENT_TOKEN": "dummy-only"}, timeout_seconds=5
             ).invoke(resolved, slot, {"messages": [{"role": "user", "content": "Reply OK"}], "max_tokens": 8})
@@ -1002,14 +1002,14 @@ class RoutingEvidenceAndTransportTests(unittest.TestCase):
         resolved = catalog_for(p=p, b=b, a=a, m=m).resolve(
             "selfhosted-ocr-v1", role="ocr", capability="vision_ocr", at=NOW
         )
-        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "models.yaml").slot("ocr")
+        slot = GatewayConfig((Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "models.yaml").slot("ocr")
         result = SafeRelayClient(
             opener=Opener(), environ={"MODEL_API_RELAY_DUMMY_RELAY_CLIENT_TOKEN": "dummy-only"}
         ).invoke(resolved, slot, {"messages": [{"role": "user", "content": "synthetic"}]}, capability="vision_ocr")
         self.assertEqual(result["text"], "OK")
 
     def test_all_schema_assets_validate_and_examples_conform(self):
-        schema_dir = (Path(__file__).resolve().parents[3] / "source" / "model_gateway") / "model_api_relay" / "schemas"
+        schema_dir = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "model_api_relay" / "schemas"
         schemas = {path.name: json.loads(path.read_text("utf-8")) for path in schema_dir.glob("*.json")}
         for schema in schemas.values():
             jsonschema.Draft202012Validator.check_schema(schema)

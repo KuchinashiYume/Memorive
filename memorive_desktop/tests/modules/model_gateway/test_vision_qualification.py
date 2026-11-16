@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import unittest
 
-from model_gateway.vision_qualification import VisionRequestContractError, build_claude_api_projection, build_openai_api_image_projection, build_openai_cli_image_projection, build_presend_receipt, evaluate_presend_readiness, inspect_cli_event_stream, not_configured_local_capability, project_terminal_evidence, vision_channel_doctor
+from memorive.models.gateway.vision_qualification import VisionRequestContractError, build_claude_api_projection, build_openai_api_image_projection, build_openai_cli_image_projection, build_presend_receipt, evaluate_presend_readiness, inspect_cli_event_stream, not_configured_local_capability, project_terminal_evidence, vision_channel_doctor
 SHA_A = "A" * 64
 SHA_B = "B" * 64
 SHA_C = "C" * 64

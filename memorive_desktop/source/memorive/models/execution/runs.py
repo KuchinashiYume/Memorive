@@ -140,7 +140,7 @@ class ReportProfileExecution:
                 raise ValueError('REPORT_MODEL_ALREADY_SENT')
             self._claim(snapshot_id, {'behavior_sha256': canonical_sha256({'prompt': prompt, 'schema': response_schema})})
         if self.purpose_prefix == 'research_':
-            from model_gateway.research_prompt_cache import model_binding
+            from memorive.models.gateway.research_prompt_cache import model_binding
             # Research requests share a cacheable prefix; a Codex CLI session may be reused for it.
             allow_session = binding['profile_kind'] == 'CLI' and binding['service'].get('adapter_id') == 'codex_cli'
             binding['model'] = model_binding(binding['model'], prompt, response_schema, allow_session=allow_session)
@@ -149,7 +149,7 @@ class ReportProfileExecution:
         scan_sensitive(result)
         result['report_snapshot_id'] = snapshot_id
         if self.purpose_prefix == 'research_':
-            from model_gateway.research_prompt_cache import observation
+            from memorive.models.gateway.research_prompt_cache import observation
             result.setdefault('execution_receipt', {})['research_cache'] = observation(binding['model'], result.get('execution_receipt', {}))
         return self._finish(snapshot_id, result)
 

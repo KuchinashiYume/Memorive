@@ -8,8 +8,8 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 import pytest
 
-from model_gateway.local_capability import secure_storage
-from model_gateway.local_capability.secure_storage import SecureStorageError, encrypt_selected_path, restore_encrypted_copy, verify_encrypted_copy
+from memorive.models.gateway.local_capability import secure_storage
+from memorive.models.gateway.local_capability.secure_storage import SecureStorageError, encrypt_selected_path, restore_encrypted_copy, verify_encrypted_copy
 SCHEMA = Path(secure_storage.__file__).parent / "schemas" / "local_encryption_target_v1.schema.json"
 
 

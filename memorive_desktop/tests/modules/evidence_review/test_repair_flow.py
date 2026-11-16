@@ -19,7 +19,7 @@ from evidence_extraction.config import CARD_SCHEMA_VERSION
 import evidence_review
 from evidence_review import repair_flow
 from evidence_review.repair_flow import repair_and_admit
-from model_gateway.errors import DependencyError
+from memorive.models.gateway.errors import DependencyError
 
 
 def _frontmatter(path: Path) -> dict:

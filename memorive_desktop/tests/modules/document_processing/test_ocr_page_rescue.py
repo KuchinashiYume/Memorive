@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from model_gateway.errors import OcrOwnershipBlocked
+from memorive.models.gateway.errors import OcrOwnershipBlocked
 
 from document_processing import document_convert_convert, pipeline
 from document_processing.engines.model_gateway_ocr_engine import ModelGatewayOcrEngine
@@ -182,7 +182,7 @@ class ImageOcrOwnershipTest(unittest.TestCase):
     def test_entrusted_image_is_blocked_before_file_read(self) -> None:
         missing_source = Path("entrusted-image-must-not-be-read.png")
         with (
-            mock.patch("model_gateway.ocr") as mocked_ocr,
+            mock.patch("memorive.models.gateway.ocr") as mocked_ocr,
             self.assertRaises(OcrOwnershipBlocked),
         ):
             ModelGatewayOcrEngine().convert(

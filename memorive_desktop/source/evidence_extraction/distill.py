@@ -19,7 +19,7 @@
 """
 from __future__ import annotations
 from memorive.platform.language.source_preservation import language_display_name, detect_source_language
-from model_gateway.prompt_cache import source_first
+from memorive.models.gateway.prompt_cache import source_first
 
 import json
 import os
@@ -30,10 +30,9 @@ from pathlib import Path
 import yaml
 from memorive_front_matter import split_front_matter
 from memorive.platform.logs import log, log_error
-from model_gateway import call
-from model_gateway.errors import GatewayError
-from model_gateway.prompts import PromptRegistry
-import model_gateway
+from memorive.models.gateway import call
+from memorive.models.gateway.errors import GatewayError
+from memorive.models.gateway.prompts import PROMPT_DIR, PromptRegistry
 
 from memorive.platform.naming import display_title, file_name
 
@@ -58,7 +57,7 @@ from .normalize import (normalize, quote_in_text,
                         recover_unique_scientific_unit_pdf_quote)
 
 _MODULE = "EVIDENCE_EXTRACTION"
-_PROMPTS_ROOT = Path(model_gateway.__file__).parent / "prompts"   # MODEL_GATEWAY Prompt Registry 根(单一来源)
+_PROMPTS_ROOT = PROMPT_DIR
 _HAN_CHAR_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
 _HAN_RUN_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]+")
 _KANA_RE = re.compile(r"[\u3040-\u30ff]")

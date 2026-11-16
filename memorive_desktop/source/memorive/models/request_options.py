@@ -42,7 +42,7 @@ def project_reasoning_control(control):
     return value
 
 def reasoning_profiles() -> dict[str, Any]:
-    from model_gateway.capabilities import DEFAULT_REGISTRY_PATH
+    from memorive.models.gateway.capabilities import DEFAULT_REGISTRY_PATH
     import json
     raw=json.loads(DEFAULT_REGISTRY_PATH.read_text('utf8'))
     found={}

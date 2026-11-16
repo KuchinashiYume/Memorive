@@ -112,7 +112,7 @@ class DataAnomalyExamExecutor:
         return plan
     def execute(self,node,target,context,*,authorization,structured_chat):
         from memorive.exams.card_reviewer import QualityCardReviewerExamExecutor
-        from model_gateway.resource_limits import resolve_call_limits
+        from memorive.models.gateway.resource_limits import resolve_call_limits
         plan=self.plan(node,target,context)
         if plan.get('status')!='READY':
             return {'status':'NOT_RUN','reason':plan.get('reason'),'score':None,'external_model_calls':0}

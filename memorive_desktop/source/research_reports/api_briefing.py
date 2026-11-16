@@ -15,12 +15,11 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Callable, Mapping
 
 import jsonschema
 
-from model_gateway.prompts import PromptRegistry
+from memorive.models.gateway.prompts import PROMPT_DIR, PromptRegistry
 
 from .renderer import render_markdown_with_narrative
 
@@ -30,7 +29,7 @@ SKIPPED_NO_LIBRARY_CHANGE = "SKIPPED_NO_LIBRARY_CHANGE"
 BLOCKED_INPUT_INCOMPLETE = "BLOCKED_INPUT_INCOMPLETE"
 
 NARRATIVE_VERSION = "memorive.research.research_reports.brief-narrative.v1"
-_PROMPTS = PromptRegistry(Path(__file__).resolve().parents[1] / "model_gateway" / "prompts")
+_PROMPTS = PromptRegistry(PROMPT_DIR)
 _SUCCESS_STOPS = frozenset({"stop", "end_turn"})
 _LIBRARY_CHANGE_AXES = frozenset(
     {

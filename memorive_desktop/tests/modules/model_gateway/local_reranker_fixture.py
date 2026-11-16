@@ -5,7 +5,7 @@ import hashlib
 from pathlib import Path
 import sys
 
-from model_gateway.local_reranker.contracts import file_sha256
+from memorive.models.gateway.local_reranker.contracts import file_sha256
 
 
 def provenance(*, source_role: str = "results", page_family: str = "digital") -> dict:
@@ -19,7 +19,7 @@ def provenance(*, source_role: str = "results", page_family: str = "digital") ->
         "metadata_status": "vector",
         "field_provenance": {"page_family": "vector", "source_role": "vector"},
     }
-    from model_gateway.local_reranker.contracts import canonical_sha256
+    from memorive.models.gateway.local_reranker.contracts import canonical_sha256
 
     value["provenance_sha256"] = canonical_sha256(value)
     return value

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from model_gateway.local_capability import ActivationStatus, LocalRoleProfile, LogicalRole, OwnershipClass
-from model_gateway.local_capability.errors import OwnershipBlocked
-from model_gateway.local_capability.ownership import require_local_route, resolve_ownership, route_ownership
+from memorive.models.gateway.local_capability import ActivationStatus, LocalRoleProfile, LogicalRole, OwnershipClass
+from memorive.models.gateway.local_capability.errors import OwnershipBlocked
+from memorive.models.gateway.local_capability.ownership import require_local_route, resolve_ownership, route_ownership
 def profile(*, allowed: tuple[OwnershipClass, ...] = tuple(OwnershipClass), qualification: bool = True) -> LocalRoleProfile:
     return LocalRoleProfile(
         profile_id="profile-local-analysis",

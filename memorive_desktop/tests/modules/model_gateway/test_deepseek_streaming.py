@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from model_gateway.providers.deepseek import DeepSeekAdapter, _read_sse_response
+from memorive.models.gateway.providers.deepseek import DeepSeekAdapter, _read_sse_response
 
 
 class _Headers(dict):

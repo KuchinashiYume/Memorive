@@ -23,7 +23,7 @@ from memorive.exams.resources import exam_package
 from .adapters import RealFacadeAdapter
 from .composite_adapter import CompositeServiceAdapter
 from memorive_inbox import InboxController, InboxServiceAdapter
-from memorive_local_models import LocalModelProductController
+from memorive.models.local import LocalModelProductController
 from memorive_current_task import build_core_execution_snapshot
 from memorive_workflow import (
     CorePipelineExecutor,

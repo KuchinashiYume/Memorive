@@ -5,7 +5,7 @@ import json
 import unittest
 from pathlib import Path
 
-from model_gateway.config import GatewayConfig
+from memorive.models.gateway.config import GatewayConfig
 from evidence_review.research_handoff_cross_analysis_review import BLOCKED, DEFAULT_REVIEW_PROFILE, PASS, PASS_WITH_OMISSIONS, CrossAnalysisReviewError, FrozenEvidenceSnippet, ReviewProfile, build_cross_analysis_review_view, run_cross_analysis_review_closure
 SECTION_IDS = (
     "scope_and_evidence_boundary",
@@ -393,7 +393,7 @@ class CrossAnalysisReviewTests(unittest.TestCase):
         self.assertEqual(repair_payload["max_tokens"], 2048)
 
     def test_default_review_profile_reuses_the_existing_gateway_slot(self) -> None:
-        config = GatewayConfig((Path(__file__).resolve().parents[3] / "source") / "model_gateway" / "models.yaml")
+        config = GatewayConfig((Path(__file__).resolve().parents[3] / "source") / "memorive" / "models" / "gateway" / "models.yaml")
         slot = config.slot(DEFAULT_REVIEW_PROFILE.slot)
         self.assertTrue(slot.enabled)
         self.assertEqual(slot.provider, DEFAULT_REVIEW_PROFILE.provider)

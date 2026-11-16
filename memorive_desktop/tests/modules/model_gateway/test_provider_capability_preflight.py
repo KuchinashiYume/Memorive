@@ -7,9 +7,9 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from model_gateway.providers.anthropic import AnthropicAdapter
-from model_gateway.providers.deepseek import DeepSeekAdapter
-from model_gateway.router import Router
+from memorive.models.gateway.providers.anthropic import AnthropicAdapter
+from memorive.models.gateway.providers.deepseek import DeepSeekAdapter
+from memorive.models.gateway.router import Router
 
 
 class _Headers(dict):
@@ -111,7 +111,7 @@ class ProviderCapabilityPreflightTest(unittest.TestCase):
                 "timeout": timeout,
             }
         )
-        with patch("model_gateway.router.providers.get_adapter", return_value=adapter) as get_adapter:
+        with patch("memorive.models.gateway.router.providers.get_adapter", return_value=adapter) as get_adapter:
             result = Router(config).preflight_model("verify", timeout=23)
 
         get_adapter.assert_called_once_with("anthropic")

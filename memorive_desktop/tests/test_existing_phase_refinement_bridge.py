@@ -119,7 +119,7 @@ def _channel(row: dict, adapter: _LocalAdapter | None = None):
         prompt_path=(
             ROOT
             / "source"
-            / "model_gateway"
+            / "memorive" / "models" / "gateway"
             / "prompts"
             / "conversation_refinement"
             / "v2.md"
@@ -182,10 +182,10 @@ def test_bridge_is_only_a_phase6_contract_and_phase7_local_composition():
     bridge = (
         ROOT / "source" / "memorive_workflow_bridge" / "conversation_refinement.py"
     ).read_text(encoding="utf-8")
-    assert "model_gateway.local_structured_chat" in bridge
+    assert "memorive.models.gateway.local_structured_chat" in bridge
     assert "knowledge_feedback.conversation_refinement" in bridge
     assert "SafeRelayClient" not in bridge
     assert "Phase5ApiStructuredExecutor" not in bridge
     assert "Phase5CliStructuredExecutor" not in bridge
-    assert "model_gateway.execution_core.adapters" not in bridge
+    assert "memorive.models.gateway.execution_core.adapters" not in bridge
     assert "memorive_settings.refinement_execution" not in bridge

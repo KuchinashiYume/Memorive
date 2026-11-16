@@ -279,7 +279,7 @@ def invoke(node,*,validation_runner,evidence_root,job_id,request_id,source_promp
     automatically. There is no LOCAL fallback or source-triggered tool use.
     """
     from memorive_workflow.model_bridge import CoreModelBridge
-    from model_gateway.resource_limits import resolve_call_limits
+    from memorive.models.gateway.resource_limits import resolve_call_limits
     from memorive.models.calls.ledger import call_scope,execution_checkpoint,ExecutionControlSignal
     node=cloud_profile(node)
     profile=node['execution_profile']
