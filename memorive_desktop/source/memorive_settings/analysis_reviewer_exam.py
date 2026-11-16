@@ -30,13 +30,10 @@ from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     workflow_exam_output_limit_contract,
 )
-from .workflow_exam import (
+from memorive_settings.workflow_exam.common import (
     AUTHORIZATION_SCHEMA,
-    CORE_CARD_REVIEWER_ABSOLUTE_PROMPT_CHAR_LIMIT,
-    CORE_CARD_REVIEWER_EFFECTIVE_PROMPT_CHAR_LIMIT,
     PLAN_SCHEMA,
     RESULT_SCHEMA,
-    QualityCardReviewerExamExecutor,
     _effective_structured_prompt_metrics,
     _file_sha256,
     _load_json,
@@ -44,6 +41,11 @@ from .workflow_exam import (
     _not_run,
     _sha256,
     _write_json_create_only,
+)
+from memorive_settings.workflow_exam.card_reviewer import (
+    CORE_CARD_REVIEWER_ABSOLUTE_PROMPT_CHAR_LIMIT,
+    CORE_CARD_REVIEWER_EFFECTIVE_PROMPT_CHAR_LIMIT,
+    QualityCardReviewerExamExecutor,
     core_card_reviewer_workload_profile,
 )
 

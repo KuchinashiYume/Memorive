@@ -20,7 +20,7 @@ from memorive_settings.quality_new import (
 )
 from memorive.models.validation.transport import HttpResponse, ProcessResult
 from memorive.models.validation.runner import LiveModelValidationRunner
-from memorive_settings.workflow_exam import (
+from memorive_settings.workflow_exam.embedding import (
     QualityEmbeddingExamExecutor,
     QualityNewEmbeddingExamExecutor,
 )

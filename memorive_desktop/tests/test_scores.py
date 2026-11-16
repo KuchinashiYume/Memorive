@@ -91,7 +91,9 @@ def test_mismatching_result_executor_is_not_silently_rebound(tmp_path):
     assert ExamScoreHistory(tmp_path/"scores").record(NODE,TARGET,projected,{REF}) is False
 
 def test_saved_luna_high_selection_is_not_rejected_as_wrong_cohort():
-    from memorive_settings.workflow_exam import QualityNewCardDistillerLanguageBankExamExecutor as Executor
+    from memorive_settings.workflow_exam.card_distiller import (
+        QualityNewCardDistillerLanguageBankExamExecutor as Executor,
+    )
     target=dict(kind='CLI',adapter_id='codex_cli',model_name='gpt-5.6-luna',
         thinking_mode='high',connection_status='AVAILABLE',config_id='codex-cli')
     assert Executor._profile_kind(target)=='CLI'

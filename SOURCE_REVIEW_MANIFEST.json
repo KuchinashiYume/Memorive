@@ -5956,8 +5956,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_review/exam.py",
-      "sha256": "01a154e388cc3477887e7dd53d40bf58b583acba1145245e755a4caf05d4d85a",
-      "bytes": 15982
+      "sha256": "565ef611808c4d99a3aa4ab83150c8d8db1f67e2c1243ce1793e98f0a2e94ea4",
+      "bytes": 15996
     },
     {
       "path": "memorive_desktop/source/memorive_review/formats.py",
@@ -6031,13 +6031,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/__init__.py",
-      "sha256": "c4506f5b43a3ab787b49d4f6851021e8617e5e0607d85489a837307401393973",
-      "bytes": 3810
+      "sha256": "a9025459dff6d1c5d5a16d7a62c26e9f6f9e56944b5741b6f7932a90422ea76a",
+      "bytes": 4058
     },
     {
       "path": "memorive_desktop/source/memorive_settings/analysis_reviewer_exam.py",
-      "sha256": "1facfe47071ab23981a0415fe0bb46290d8c7eca46cc4e848d265e834f4c886a",
-      "bytes": 61450
+      "sha256": "289ebed676c9b1d5071f6658371a152aac9e2ab2d0918a2b7297fad4a23963d0",
+      "bytes": 61538
     },
     {
       "path": "memorive_desktop/source/memorive_settings/answer_styles.py",
@@ -6201,8 +6201,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/specialized_exam.py",
-      "sha256": "3f01d7237ad4b3ca553f50c7b247eb00536fca042cbd6f490d7aa1f44c15e514",
-      "bytes": 155902
+      "sha256": "467a8cc118c70934de08d68c278cf975cd81bf8f4cbef9e7b8b749aea5f57840",
+      "bytes": 155926
     },
     {
       "path": "memorive_desktop/source/memorive_settings/store.py",
@@ -6223,11 +6223,6 @@
       "path": "memorive_desktop/source/memorive_settings/verification_state.py",
       "sha256": "3d815ffa85599ac5fce61a21029a328777307208b7bb0995b36386877828440c",
       "bytes": 4421
-    },
-    {
-      "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",
-      "sha256": "e9291edc60f0dc8fbb6c275ce2d429c777eead7ae4bbdf879d8b407cdf95353e",
-      "bytes": 627914
     },
     {
       "path": "memorive_desktop/source/memorive_settings/workflow_exam_runner.py",
@@ -7781,8 +7776,8 @@
     },
     {
       "path": "memorive_desktop/tools/historical_names.json",
-      "sha256": "5b8b671ef339eaaab2a89986f96d76dfce7e37238d6d3f120abc8fc98b6284cb",
-      "bytes": 8773
+      "sha256": "32fb1345a20e7268d4487afd0e4aba8a0755db2027be08e9a11aa22e07941953",
+      "bytes": 8770
     },
     {
       "path": "memorive_desktop/tools/build_pages.py",
@@ -7856,8 +7851,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "489e4d8512533a44a705193ed83028215b8962fc8981db01c8a51ad531fed60d",
-      "bytes": 257674
+      "sha256": "24c04e464f713bd34fea3711e91a361ca9cd3271adad8987839c0b1a217336ab",
+      "bytes": 258648
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -9491,8 +9486,8 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "1688e3d2c5676d1a2cf6bf6bd185e114f1b51c486929e8f03ffbf89d5968e5d3",
-      "bytes": 24976
+      "sha256": "f8f63733c6190c85e4c86cd8aea0d4f56c1163eb22c444f3ddfdc8ec792db6ac",
+      "bytes": 25006
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
@@ -9748,6 +9743,36 @@
       "path": "memorive_desktop/source/memorive/models/validation/usage.py",
       "sha256": "6dc6c45d4679dd29502106d6f657e7f3436cf6026f4fe562226b9b9bacbecbf8",
       "bytes": 8392
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam/__init__.py",
+      "sha256": "10ebcba5792fb4da79e12ffb52cd554c1cd6e1da398fd98946822a7578753962",
+      "bytes": 611
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam/analysis.py",
+      "sha256": "20f8f63bc5442bfe080fb1c793c1ab5dd0f58b1f80f11ed363620811754f5a1e",
+      "bytes": 158629
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam/card_distiller.py",
+      "sha256": "c81520f541ef08288a6a1f1607680847c90e5b3fe5b5727d71de7af0588d7e98",
+      "bytes": 145813
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam/card_reviewer.py",
+      "sha256": "625d5b5623d4655520a3dca0e729a09f04ffa254e31b40f107dc6e8ac84498b5",
+      "bytes": 226160
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam/common.py",
+      "sha256": "b87814be822b630d923294911f940f24bf24660b07c1a6e99cba6152eace104e",
+      "bytes": 11759
+    },
+    {
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam/embedding.py",
+      "sha256": "0f26a9dce922728acec3160e20c1e4cf8d45960abfab1049f2c9a71b648e2d88",
+      "bytes": 89288
     }
   ]
 }

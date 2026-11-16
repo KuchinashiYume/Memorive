@@ -168,7 +168,7 @@
       "set_aside_because": "Exam code; its reasons, modes and score name are written into exam plans and results. It is cleaned up with the other exam code."
     },
     {
-      "path": "memorive_desktop/source/memorive_settings/workflow_exam.py",
+      "path": "memorive_desktop/source/memorive_settings/workflow_exam",
       "set_aside_because": "Exam code records the hashes of its own files in exam results. It is cleaned up as a separate piece of work."
     },
     {

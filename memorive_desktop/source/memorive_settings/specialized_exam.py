@@ -34,7 +34,7 @@ from .ocr_exam_successor import (
     score_case_successor as score_ocr_case_successor,
 )
 from .retrieval_exam_calibration import RERANKER_TWO_SLOT_POLICY
-from .workflow_exam import (
+from memorive_settings.workflow_exam.common import (
     AUTHORIZATION_SCHEMA,
     PLAN_SCHEMA,
     RESULT_SCHEMA,

@@ -6,8 +6,9 @@ SettingsController in controller.py). It holds two kinds of code:
                 jobs, user preferences, the leaderboard and external sources;
   model exams   workflow_exam_runner.py (WorkflowExams: the exam catalog, plans, runs and stored scores;
                 it holds a LiveModelValidationRunner and sends the exam's requests through it),
-                workflow_exam.py, specialized_exam.py, analysis_reviewer_exam.py, exam_successor.py,
-                exam_jobs.py, exam_score_history.py and the other *exam* modules.
+                workflow_exam/ (one module per exam family), specialized_exam.py,
+                analysis_reviewer_exam.py, exam_successor.py, exam_jobs.py, exam_score_history.py and
+                the other *exam* modules.
 The model requests themselves are in memorive/models: the controller holds the runner from
 memorive/models/validation/runner.py. The exams move to memorive/exams.
 """
@@ -23,13 +24,17 @@ from memorive.models.validation.runner import (
 )
 from .service_adapter import SETTINGS_METHODS, SettingsServiceAdapter
 from .store import SettingsStore
-from .workflow_exam import (
-    QualityAnalysisExamExecutor,
+from memorive_settings.workflow_exam.analysis import QualityAnalysisExamExecutor
+from memorive_settings.workflow_exam.embedding import (
     QualityEmbeddingExamExecutor,
     QualityNewEmbeddingExamExecutor,
+)
+from memorive_settings.workflow_exam.card_distiller import (
     QualityNewCardDistillerLanguageBankExamExecutor,
     QualityCardDistillerDirectExamExecutor,
     QualityCardDistillerExamExecutor,
+)
+from memorive_settings.workflow_exam.card_reviewer import (
     QualityCardReviewerExamExecutor,
     QualityCardReviewerExamSuccessorExecutor,
 )

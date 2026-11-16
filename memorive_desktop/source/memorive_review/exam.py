@@ -111,7 +111,7 @@ class DataAnomalyExamExecutor:
         plan['plan_sha256']=digest(plan)
         return plan
     def execute(self,node,target,context,*,authorization,structured_chat):
-        from memorive_settings.workflow_exam import QualityCardReviewerExamExecutor
+        from memorive_settings.workflow_exam.card_reviewer import QualityCardReviewerExamExecutor
         from model_gateway.resource_limits import resolve_call_limits
         plan=self.plan(node,target,context)
         if plan.get('status')!='READY':

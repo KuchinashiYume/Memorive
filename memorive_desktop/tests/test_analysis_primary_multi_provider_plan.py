@@ -9,11 +9,9 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_settings.workflow_exam import (
-    QualityAnalysisExamExecutor,
-    _api_worst_case_request_reserve_cny,
-    _sha256,
-)
+from memorive_settings.workflow_exam.analysis import QualityAnalysisExamExecutor
+from memorive_settings.workflow_exam.card_reviewer import _api_worst_case_request_reserve_cny
+from memorive_settings.workflow_exam.common import _sha256
 
 
 def test_opus5_max_worst_case_reserve_uses_provider_output_ceiling() -> None:
