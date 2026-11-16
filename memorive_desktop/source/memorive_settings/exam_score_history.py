@@ -122,5 +122,5 @@ class ExamScoreHistory:
         row["record_sha256"] = canonical_sha256(row)
         self.root.mkdir(parents=True, exist_ok=True)
         # Existing atomic persistence, a new record each time, never an overwrite.
-        SettingsStore(self.root)._atomic_write(self.root / (row["recorded_at"].replace(":", "-") + "-" + uuid.uuid4().hex + ".json"), row)
+        SettingsStore(self.root).write_json(self.root / (row["recorded_at"].replace(":", "-") + "-" + uuid.uuid4().hex + ".json"), row)
         return True

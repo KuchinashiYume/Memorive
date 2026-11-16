@@ -706,13 +706,13 @@ class WorkflowExamRunnerMixin:
         executable = self._executable_resolver(accepted.get('executable'))
         if executable is None:
             return accepted
-        proxy_mode, proxy_address, _ = self._preferences()
-        self._scratch_root.mkdir(parents=True, exist_ok=True)
+        proxy_mode, proxy_address, _ = self.preferences()
+        self.scratch_root.mkdir(parents=True, exist_ok=True)
         accepted, _ = bind_saved_cli_identity(accepted, executable,
-            process=self._process,
-            environment=self._safe_environment('codex_cli', self._scratch_root,
+            process=self.process_transport,
+            environment=self.safe_environment('codex_cli', self.scratch_root,
                                               proxy_mode, proxy_address),
-            root=self._scratch_root)
+            root=self.scratch_root)
         return accepted
 
     @staticmethod

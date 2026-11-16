@@ -357,7 +357,7 @@ class MessagesProductController:
                 "resolved_by_job_id": dict(resolutions),
                 "backend_job_evidence_deleted": False,
             })
-            self.store._atomic_write(
+            self.store.write_json(
                 self.store.profile_root / f"resolved_failures_{receipt['revision']:08d}.json",
                 receipt,
             )

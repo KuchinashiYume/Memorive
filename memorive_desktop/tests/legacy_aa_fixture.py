@@ -13,5 +13,5 @@ def configure_aa(service):
     state=service._load()
     state['sources'][0]=aa_source()
     state['sha256']=canonical_sha256(state)
-    service.writer._atomic_write(service.path,state)
+    service.writer.write_json(service.path,state)
     return service

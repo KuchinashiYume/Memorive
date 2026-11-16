@@ -119,7 +119,7 @@ def seed_sources(external, data):
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         target = external.root / "snapshots" / config["source_id"] / (stamp + "-fixture.json")
         target.parent.mkdir(parents=True, exist_ok=True)
-        external.writer._atomic_write(target, snapshot)
+        external.writer.write_json(target, snapshot)
 
 
 def wait_refresh(controller):

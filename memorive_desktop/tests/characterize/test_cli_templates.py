@@ -87,13 +87,13 @@ class _Runner:
     """Just the parts of the settings model runner that execute() and verify() use."""
 
     def __init__(self, scratch):
-        self._scratch_root = Path(scratch)
-        self._process = _Process()
+        self.scratch_root = Path(scratch)
+        self.process_transport = _Process()
 
-    def _preferences(self):
+    def preferences(self):
         return "system", "", None
 
-    def _safe_environment(self, kind, workspace, proxy_mode, proxy_address):
+    def safe_environment(self, kind, workspace, proxy_mode, proxy_address):
         keep = ("SystemRoot", "SYSTEMROOT", "PATH", "TEMP", "TMP", "COMSPEC")
         return {name: os.environ[name] for name in keep if name in os.environ}
 

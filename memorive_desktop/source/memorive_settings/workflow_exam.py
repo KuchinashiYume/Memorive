@@ -1925,7 +1925,7 @@ def score_card_reviewer_role_projection(
         post_scores[form_id] = post
         original_details = {
             item["case_id"]: item
-            for item in exam._reviewer_exam_wrong_details(original_score)
+            for item in exam.reviewer_exam_wrong_details(original_score)
         }
         target_ids = list(exact_sets.get(form_id, []))
         if any(case_id not in original_details for case_id in target_ids):
@@ -1938,7 +1938,7 @@ def score_card_reviewer_role_projection(
         repair_issue_priority_by_case: dict[str, str] = {}
         for case_id in target_ids:
             issues, failed_fields, severity = (
-                exam._reviewer_exam_issue_metadata(
+                exam.reviewer_exam_issue_metadata(
                     original_details[case_id]
                 )
             )
@@ -1948,7 +1948,7 @@ def score_card_reviewer_role_projection(
             repair_issue_priority_by_case[case_id] = severity
         form_case_count = len(exam.form_cases(form)[1])
         form_case_counts[form_id] = form_case_count
-        initial_penalty = exam._reviewer_exam_form_penalty(
+        initial_penalty = exam.reviewer_exam_form_penalty(
             form_case_count=form_case_count,
             wrong_case_count=len(target_ids),
             issue_categories=issue_categories,
@@ -1956,7 +1956,7 @@ def score_card_reviewer_role_projection(
         )
         initial_penalties[form_id] = initial_penalty
 
-        post_wrong_details = exam._reviewer_exam_wrong_details(post)
+        post_wrong_details = exam.reviewer_exam_wrong_details(post)
         post_wrong_ids = {item["case_id"] for item in post_wrong_details}
         original_wrong_ids = set(target_ids)
         remaining[form_id] = sorted(post_wrong_ids & original_wrong_ids)
@@ -1979,7 +1979,7 @@ def score_card_reviewer_role_projection(
         governed_disposition_case_ids: list[str] = []
         for detail in post_wrong_details:
             issues, failed_fields, severity = (
-                exam._reviewer_exam_issue_metadata(detail)
+                exam.reviewer_exam_issue_metadata(detail)
             )
             case_id = str(detail["case_id"])
             gold_case = gold_by_id.get(case_id)
@@ -2125,7 +2125,7 @@ def score_card_reviewer_role_projection(
                     ),
                 }
             )
-        residual_disposition_penalty = exam._reviewer_exam_form_penalty(
+        residual_disposition_penalty = exam.reviewer_exam_form_penalty(
             form_case_count=form_case_count,
             wrong_case_count=len(residual_case_ids),
             issue_categories=residual_issue_categories,
@@ -2618,7 +2618,7 @@ class QualityCardDistillerExamExecutor:
             quality_package
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_Quality_PACKAGE_INVALID")
-        self._scratch_root = Path(scratch_root).resolve()
+        self.scratch_root = Path(scratch_root).resolve()
         self._quality_package = quality_package
         self._reference_pack_root = Path(reference_pack_root).resolve()
         self._pricing_profile_path = (
@@ -4315,7 +4315,7 @@ class QualityCardDistillerExamExecutor:
             return _not_run(authorization_reason, requested_model=requested_model)
 
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -4939,7 +4939,7 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
         if authorization_reason is not None:
             return _not_run(authorization_reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -5731,7 +5731,7 @@ class QualityCardReviewerExamExecutor:
             quality_package
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_Quality_PACKAGE_INVALID")
-        self._scratch_root = Path(scratch_root).resolve()
+        self.scratch_root = Path(scratch_root).resolve()
         self._quality_package = quality_package
         self._reference_pack_root = Path(reference_pack_root).resolve()
         default_pricing = (
@@ -5972,13 +5972,13 @@ class QualityCardReviewerExamExecutor:
             issue_categories: set[str] = set()
             severity_categories: set[str] = set()
             for case_id in target_ids:
-                issues, _fields, severity = exam._reviewer_exam_issue_metadata(
+                issues, _fields, severity = exam.reviewer_exam_issue_metadata(
                     details[case_id]
                 )
                 issue_categories.update(issues)
                 severity_categories.add(severity)
             form_case_count = len(exam.form_cases(forms[form_id])[1])
-            nonlinear = exam._reviewer_exam_form_penalty(
+            nonlinear = exam.reviewer_exam_form_penalty(
                 form_case_count=form_case_count,
                 wrong_case_count=len(target_ids),
                 issue_categories=issue_categories,
@@ -6979,7 +6979,7 @@ class QualityCardReviewerExamExecutor:
             return _not_run(authorization_reason, requested_model=requested_model)
 
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -9023,7 +9023,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
         cohort_basis: Mapping[str, Any],
         cohort_slots: list[int],
     ) -> list[dict[str, Any]]:
-        workflow_root = self._scratch_root / "workflow_exams"
+        workflow_root = self.scratch_root / "workflow_exams"
         if not workflow_root.is_dir():
             return []
         expected_identity = self._panel_model_identity(target)
@@ -10078,13 +10078,13 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
             artifact_categories: set[str] = set()
             for case_id in target_ids:
                 issues, _failed_fields, artifacts, severity = (
-                    exam._analysis_exam_issue_metadata(details[case_id])
+                    exam.analysis_exam_issue_metadata(details[case_id])
                 )
                 issue_categories.update(issues)
                 severity_categories.add(severity)
                 artifact_categories.update(artifacts)
             case_count = len(forms[form_id]["cases"])
-            penalty = exam._analysis_exam_form_penalty(
+            penalty = exam.analysis_exam_form_penalty(
                 form_case_count=case_count,
                 wrong_case_count=len(target_ids),
                 issue_categories=issue_categories,
@@ -10614,7 +10614,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
         if authorization_reason is not None:
             return _not_run(authorization_reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -10658,7 +10658,7 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                 )
                 source_run_id = str(source_panel["panel_id"])
                 source_run_root = (
-                    self._scratch_root / "workflow_exams" / source_run_id
+                    self.scratch_root / "workflow_exams" / source_run_id
                 )
                 source_cohort_path = (
                     source_run_root
@@ -12217,7 +12217,7 @@ class QualityEmbeddingExamExecutor:
             quality_package
         ):
             raise ValueError("WORKFLOW_MODEL_EXAM_Quality_PACKAGE_INVALID")
-        self._scratch_root = Path(scratch_root).resolve()
+        self.scratch_root = Path(scratch_root).resolve()
         self._quality_package = quality_package
         self._reference_pack_root = Path(reference_pack_root).resolve()
         self._modules: dict[str, Any] | None = None
@@ -12283,7 +12283,7 @@ class QualityEmbeddingExamExecutor:
         try:
             exam = self._quality()["exam"]
             diagnosis = exam.inspect_reference_pack(self._reference_pack_root)
-            scorer = exam._load_bundled_scorer(self._reference_pack_root)
+            scorer = exam.load_bundled_scorer(self._reference_pack_root)
             replay = scorer.verify_reference_pack(self._reference_pack_root)
         except (ImportError, OSError, ValueError, RuntimeError):
             return _not_available("WORKFLOW_MODEL_EXAM_Quality_ASSETS_INVALID")
@@ -12424,7 +12424,7 @@ class QualityEmbeddingExamExecutor:
         if reason is not None:
             return _not_run(reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -12447,7 +12447,7 @@ class QualityEmbeddingExamExecutor:
         }
         try:
             exam = self._quality()["exam"]
-            scorer = exam._load_bundled_scorer(self._reference_pack_root)
+            scorer = exam.load_bundled_scorer(self._reference_pack_root)
             scores: dict[str, dict[str, Any]] = {}
             dimension: int | None = None
             logical_call_index = 0
@@ -13199,7 +13199,7 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
         legacy_sha256 = _file_sha256(
             self._legacy_reference_pack_root / "SHA256SUMS.txt"
         )
-        legacy_scorer = exam._load_bundled_scorer(
+        legacy_scorer = exam.load_bundled_scorer(
             self._legacy_reference_pack_root
         )
         diagnosis = exam.inspect_reference_pack(self._legacy_reference_pack_root)
@@ -13470,7 +13470,7 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
         if reason is not None:
             return _not_run(reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(

@@ -1,8 +1,12 @@
-"""Invocation-local sampling views over the existing Quality/Execution executors.
+"""Shorter exam runs (exam tiers): an exam executor run on a sample of its cases.
 
-No replacement provider transport, scorer, Gold, repair prompt or reply cap.
-FULL preserves the predecessor inputs. Reduced tiers retain every family that
-the predecessor scorer requires; actual coverage is always part of the plan.
+The exam runner (workflow_exam_runner.py) calls tier_executor(executor, context); without a tier in
+the context it returns the executor itself. Otherwise it returns a copy of the executor whose class is a subclass made here. The subclass replaces the executor's
+input hooks (_exam_inputs, _sample_manifest, _load_assets, _load_sample; _prune_pack is used for the
+card exams) with versions that call the original hook and keep the tier's cases, and its plan()
+records the coverage. Below FULL the copy writes under scratch_root/exam_tiers/<tier>, so a partial
+run never fills the cache of a full one. project_tier_result adds the coverage to the result. The
+model request, the scorer and the reference answers are the executor's own.
 """
 from __future__ import annotations
 
@@ -282,8 +286,8 @@ def tier_executor(executor: Any, context: Mapping[str, Any]) -> Any:
     view = copy(executor)
     view.__class__ = type(f"{name}CoverageView", (base,), attrs)
     # Partial observations must never complete a predecessor/full cohort cache.
-    if tier != "FULL" and hasattr(view, "_scratch_root"):
-        view._scratch_root = view._scratch_root / "exam_tiers" / tier.lower()
+    if tier != "FULL" and hasattr(view, "scratch_root"):
+        view.scratch_root = view.scratch_root / "exam_tiers" / tier.lower()
     return view
 
 

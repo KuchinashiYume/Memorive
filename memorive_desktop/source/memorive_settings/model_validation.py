@@ -465,7 +465,7 @@ class _EmbeddingExecutionMixin:
                     if profile.auth_header == "Authorization"
                     else secret
                 )
-                proxy_mode, proxy_address, _ = self._preferences()
+                proxy_mode, proxy_address, _ = self.preferences()
             else:
                 if (
                     service.get("endpoint_kind") != "ollama"
@@ -1022,7 +1022,7 @@ class _SpecializedModelExecutionMixin:
                     allow_nan=False,
                     separators=(",", ":"),
                 ).encode("utf-8")
-                proxy_mode, proxy_address, _ = self._preferences()
+                proxy_mode, proxy_address, _ = self.preferences()
                 model_calls = 1
                 http_response = self._http.request(
                     method="POST",
@@ -1229,13 +1229,13 @@ class _SpecializedModelExecutionMixin:
                 if executable is None:
                     raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
                 from .cli_image_identity import bind_saved_cli_identity
-                proxy_mode, proxy_address, _ = self._preferences()
-                self._scratch_root.mkdir(parents=True, exist_ok=True)
+                proxy_mode, proxy_address, _ = self.preferences()
+                self.scratch_root.mkdir(parents=True, exist_ok=True)
                 service, identity_probes = bind_saved_cli_identity(
-                    service, executable, process=self._process,
-                    environment=self._safe_environment(
-                        adapter_id, self._scratch_root, proxy_mode, proxy_address),
-                    root=self._scratch_root)
+                    service, executable, process=self.process_transport,
+                    environment=self.safe_environment(
+                        adapter_id, self.scratch_root, proxy_mode, proxy_address),
+                    root=self.scratch_root)
                 metadata_calls += identity_probes
                 expected_binary_sha256 = service.get("cli_binary_sha256")
                 cli_version = service.get("cli_version")
@@ -1251,15 +1251,15 @@ class _SpecializedModelExecutionMixin:
                     or not identity_authority_ref
                 ):
                     raise ValueError("CLI_OCR_BINARY_IDENTITY_BINDING_INVALID")
-                proxy_mode, proxy_address, _ = self._preferences()
-                self._scratch_root.mkdir(parents=True, exist_ok=True)
+                proxy_mode, proxy_address, _ = self.preferences()
+                self.scratch_root.mkdir(parents=True, exist_ok=True)
                 suffix = {
                     "image/png": ".png",
                     "image/jpeg": ".jpg",
                     "image/webp": ".webp",
                 }[mime_type]
                 with tempfile.TemporaryDirectory(
-                    prefix="memorive-ocr-cli-", dir=self._scratch_root
+                    prefix="memorive-ocr-cli-", dir=self.scratch_root
                 ) as temporary:
                     workspace = Path(temporary).resolve()
                     image_path = workspace / f"input{suffix}"
@@ -1299,10 +1299,10 @@ class _SpecializedModelExecutionMixin:
                             "behavior_sha256": behavior_sha256,
                         }
                     )
-                    process = self._process.run(
+                    process = self.process_transport.run(
                         argv=argv,
                         cwd=str(workspace),
-                        environment=self._safe_environment(
+                        environment=self.safe_environment(
                             adapter_id, workspace, proxy_mode, proxy_address
                         ),
                         stdin_bytes=stdin_bytes,
@@ -1603,7 +1603,7 @@ class _SpecializedModelExecutionMixin:
                 headers[profile.auth_header] = (
                     f"Bearer {secret}" if profile.auth_header == "Authorization" else secret
                 )
-                proxy_mode, proxy_address, _ = self._preferences()
+                proxy_mode, proxy_address, _ = self.preferences()
                 model_calls = 1
                 response = self._http.request(
                     method="POST",
@@ -3676,9 +3676,9 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             except (ValueError, AttributeError, TypeError):
                 visible = None
         data = (visible if isinstance(visible, str) else '').encode('utf-8')
-        self._scratch_root.mkdir(parents=True, exist_ok=True)
+        self.scratch_root.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(prefix='response-evidence-', suffix='.txt',
-                dir=self._scratch_root, delete=False) as stream:
+                dir=self.scratch_root, delete=False) as stream:
             stream.write(data)
             path = Path(stream.name)
         return {'visible_response_path': str(path), 'visible_response_bytes': len(data),
@@ -3702,11 +3702,11 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
     ):
         self._credential_resolver = credential_resolver
         self._preferences_loader = preferences_loader
-        self._scratch_root = Path(scratch_root)
-        self._exam_score_history = ExamScoreHistory(self._scratch_root / "workflow_exam_scores")
-        self._call_ledger = CallLedger(self._scratch_root / "model_call_ledger")
+        self.scratch_root = Path(scratch_root)
+        self._exam_score_history = ExamScoreHistory(self.scratch_root / "workflow_exam_scores")
+        self._call_ledger = CallLedger(self.scratch_root / "model_call_ledger")
         self._http = RecordingTransport(http_transport or UrllibHttpTransport())
-        self._process = RecordingTransport(process_transport or BoundedSubprocessTransport())
+        self.process_transport = RecordingTransport(process_transport or BoundedSubprocessTransport())
         self._executable_resolver = executable_resolver
         (
             self._workflow_exam_entries,
@@ -3738,7 +3738,7 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             "external_process_launches": 0,
         }
 
-    def _preferences(self) -> tuple[str, str, int]:
+    def preferences(self) -> tuple[str, str, int]:
         value = self._preferences_loader()
         proxy_mode = value.get("proxy_mode", "SYSTEM")
         proxy_address = value.get("proxy_address", "")
@@ -3793,7 +3793,7 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         headers[profile.auth_header] = (
             f"Bearer {secret}" if profile.auth_header == "Authorization" else secret
         )
-        proxy_mode, proxy_address, timeout = self._preferences()
+        proxy_mode, proxy_address, timeout = self.preferences()
         started_at = time.monotonic()
         next_url = profile.url
         visited_urls: set[str] = set()
@@ -3874,7 +3874,7 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
             headers.clear()
 
     @staticmethod
-    def _safe_environment(
+    def safe_environment(
         adapter_id: str,
         cwd: Path,
         proxy_mode: str,
@@ -3970,10 +3970,10 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         thinking_mode = model.get("thinking_mode", "")
         if not isinstance(thinking_mode, str):
             thinking_mode = ""
-        proxy_mode, proxy_address, timeout = self._preferences()
-        self._scratch_root.mkdir(parents=True, exist_ok=True)
+        proxy_mode, proxy_address, timeout = self.preferences()
+        self.scratch_root.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(
-            prefix="memorive-model-validation-", dir=self._scratch_root
+            prefix="memorive-model-validation-", dir=self.scratch_root
         ) as temporary:
             workspace = Path(temporary).resolve()
             try:
@@ -3990,13 +3990,13 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                 else:
                     result.update(status="NOT_RUN", reason="CLI_MODEL_CONFIGURATION_INVALID")
                 return result
-            environment = self._safe_environment(
+            environment = self.safe_environment(
                 adapter_id, workspace, proxy_mode, proxy_address
             )
             options = dict(argv=argv, cwd=str(workspace), environment=environment,
                            stdin_bytes=stdin_bytes, timeout_seconds=timeout, shell=False)
             # Recording and cancellation must use the same transport path.
-            process, diagnostic = self._process.run_verification(**options)
+            process, diagnostic = self.process_transport.run_verification(**options)
             result['cli_diagnostic'] = diagnostic
         result["duration_ms"] = process.duration_ms
         if not process.started:
@@ -4172,7 +4172,7 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         headers[profile.auth_header] = (
             f"Bearer {secret}" if profile.auth_header == "Authorization" else secret
         )
-        proxy_mode, proxy_address, configured_timeout = self._preferences()
+        proxy_mode, proxy_address, configured_timeout = self.preferences()
         timeout = attempt.timeout_seconds
         request_body = _api_chat_request(
             profile,
@@ -4376,10 +4376,10 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         thinking_mode = attempt.model.get("thinking_mode", "")
         if not isinstance(thinking_mode, str):
             thinking_mode = ""
-        proxy_mode, proxy_address, configured_timeout = self._preferences()
+        proxy_mode, proxy_address, configured_timeout = self.preferences()
         timeout = attempt.timeout_seconds
-        self._scratch_root.mkdir(parents=True, exist_ok=True)
-        with structured_chat_workspace(self._scratch_root, profile_kind=attempt.profile_kind,
+        self.scratch_root.mkdir(parents=True, exist_ok=True)
+        with structured_chat_workspace(self.scratch_root, profile_kind=attempt.profile_kind,
                 service=attempt.service, model=attempt.model, purpose=attempt.purpose) as workspace:
             output_schema_path: str | None = None
             if adapter_id == "codex_cli":
@@ -4459,10 +4459,10 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                     "cli_version": attempt.cli_version,
                     "identity_authority_ref": attempt.cli_identity_authority_ref,
                 }
-            process = self._process.run(
+            process = self.process_transport.run(
                 argv=argv,
                 cwd=str(workspace),
-                environment=self._safe_environment(
+                environment=self.safe_environment(
                     adapter_id, workspace, proxy_mode, proxy_address
                 ),
                 stdin_bytes=stdin_bytes,

@@ -26,11 +26,11 @@ def recover(owner):
             if before is None:
                 target.unlink(missing_ok=True)
             else:
-                owner.store._atomic_write(target,before)
+                owner.store.write_json(target,before)
         tx['state']='ROLLED_BACK'
         tx.pop('sha256',None)
         tx['sha256']=canonical_sha256(tx)
-        owner.store._atomic_write(path,tx)
+        owner.store.write_json(path,tx)
 
 def extensions(owner):
     from memorive_research_runtime.common import defaults, validate_config, read
@@ -73,7 +73,7 @@ def import_bundle(owner,payload,expected_revision,confirmed_risk_ids):
         tx={'schema_version':'SettingsImportTransaction-v1','state':'PREPARED','before':before}
         tx['sha256']=canonical_sha256(tx)
         path=owner.store.profile_root/'settings_import_transaction.json'
-        owner.store._atomic_write(path,tx)
+        owner.store.write_json(path,tx)
         try:
             receipt=owner.save(payload['settings'],expected_revision=expected_revision,confirmed_risk_ids=confirmed_risk_ids)
             ext=source._load()
@@ -85,13 +85,13 @@ def import_bundle(owner,payload,expected_revision,confirmed_risk_ids):
             for key,value in (('external_sources',ext),('literature',lit),('leaderboard',pref)):
                 value.pop('sha256',None)
                 value['sha256']=canonical_sha256(value)
-                owner.store._atomic_write(targets[key],value)
+                owner.store.write_json(targets[key],value)
             prior=read(targets['research']) if targets['research'].exists() else {'revision':0}
-            owner.store._atomic_write(targets['research'],sealed({'schema_version':'ResearchPreferences-v1','revision':prior['revision']+1,'config':accepted['research']}))
+            owner.store.write_json(targets['research'],sealed({'schema_version':'ResearchPreferences-v1','revision':prior['revision']+1,'config':accepted['research']}))
             tx.update(state='COMMITTED')
             tx.pop('sha256',None)
             tx['sha256']=canonical_sha256(tx)
-            owner.store._atomic_write(path,tx)
+            owner.store.write_json(path,tx)
         except Exception:
             # Recovery uses the same durable before-images, including absent files.
             recover(owner)

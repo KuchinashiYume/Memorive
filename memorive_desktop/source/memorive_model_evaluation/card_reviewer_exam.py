@@ -1080,7 +1080,7 @@ def score_form(
     return value
 
 
-def _reviewer_exam_wrong_details(
+def reviewer_exam_wrong_details(
     score: Mapping[str, Any],
 ) -> list[Mapping[str, Any]]:
     details = score.get("details")
@@ -1102,7 +1102,7 @@ def _reviewer_exam_wrong_details(
     return wrong
 
 
-def _reviewer_exam_issue_metadata(
+def reviewer_exam_issue_metadata(
     detail: Mapping[str, Any],
 ) -> tuple[list[str], list[str], str]:
     components = detail.get("components")
@@ -1264,7 +1264,7 @@ def build_exam_directed_repair_package(
             row_by_id[case_id] = row
         wrong_by_id = {
             item.get("case_id"): item
-            for item in _reviewer_exam_wrong_details(score)
+            for item in reviewer_exam_wrong_details(score)
         }
         unknown = sorted(set(wrong_by_id) - set(case_order))
         if unknown:
@@ -1280,7 +1280,7 @@ def build_exam_directed_repair_package(
         for case_id in exact_set:
             detail = wrong_by_id[case_id]
             issues, failed_fields, severity = (
-                _reviewer_exam_issue_metadata(detail)
+                reviewer_exam_issue_metadata(detail)
             )
             current = row_by_id.get(case_id)
             if current is None:
@@ -1545,7 +1545,7 @@ def merge_exam_directed_repair(
     }
 
 
-def _reviewer_exam_form_penalty(
+def reviewer_exam_form_penalty(
     *,
     form_case_count: int,
     wrong_case_count: int,
@@ -1658,7 +1658,7 @@ def score_exam_after_directed_repair(
         post_scores[form_id] = post
         wrong_after = {
             item["case_id"]
-            for item in _reviewer_exam_wrong_details(post)
+            for item in reviewer_exam_wrong_details(post)
         }
         remaining[form_id] = sorted(
             wrong_after & original_wrong_sets[form_id]
@@ -1701,7 +1701,7 @@ def score_exam_after_directed_repair(
     for form_id in ("A", "B"):
         original_details = {
             item["case_id"]: item
-            for item in _reviewer_exam_wrong_details(
+            for item in reviewer_exam_wrong_details(
                 original_scores[form_id]
             )
         }
@@ -1710,13 +1710,13 @@ def score_exam_after_directed_repair(
         target_ids = list(exact_sets.get(form_id, []))
         for case_id in target_ids:
             issues, _failed_fields, severity = (
-                _reviewer_exam_issue_metadata(
+                reviewer_exam_issue_metadata(
                     original_details[case_id]
                 )
             )
             issue_categories.update(issues)
             severity_categories.add(severity)
-        penalty = _reviewer_exam_form_penalty(
+        penalty = reviewer_exam_form_penalty(
             form_case_count=len(form_cases(forms[form_id])[1]),
             wrong_case_count=len(target_ids),
             issue_categories=issue_categories,

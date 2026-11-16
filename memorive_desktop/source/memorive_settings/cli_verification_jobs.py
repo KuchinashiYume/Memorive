@@ -23,7 +23,7 @@ class CliVerificationJobs:
 
     def _write(self, row):
         scan_sensitive(row)
-        self.store._atomic_write(self._path(row['job_id']), row)
+        self.store.write_json(self._path(row['job_id']), row)
 
     def _read(self, job_id):
         return json.loads(self._path(job_id).read_text(encoding='utf-8'))

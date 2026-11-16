@@ -163,7 +163,7 @@ class CLIResources:
         if service.get('concurrency_group'):
             keys.append('account:'+service['concurrency_group'])
         keys=sorted(set(keys))
-        root=TASK_CATEGORIES.root or runner._scratch_root/'scheduler'
+        root=TASK_CATEGORIES.root or runner.scratch_root/'scheduler'
         root.mkdir(parents=True,exist_ok=True)
         path=root/'cli_resources.sqlite3'
         with sqlite3.connect(path,timeout=30) as db:

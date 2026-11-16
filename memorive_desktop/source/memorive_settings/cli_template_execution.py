@@ -93,8 +93,8 @@ def _attempt_files(workspace, template, wire, schema, image):
 def _environment(runner, local, workspace):
     """The safe base environment plus the template's variables, each from the process
     environment (ENV:NAME) or from the credential store (REF:...)."""
-    proxy_mode, proxy_address, _ = runner._preferences()
-    environment = runner._safe_environment('command_template', workspace, proxy_mode, proxy_address)
+    proxy_mode, proxy_address, _ = runner.preferences()
+    environment = runner.safe_environment('command_template', workspace, proxy_mode, proxy_address)
     environment.update(PYTHONIOENCODING='utf-8', PYTHONUTF8='1')
     for name, ref in local['environment'].items():
         if ref.startswith('ENV:'):
@@ -175,8 +175,8 @@ def execute(runner, service, model, prompt, *, schema=None, purpose='cli_verific
         if not executable:
             raise ValueError('CLI_EXECUTABLE_NOT_FOUND')
 
-        runner._scratch_root.mkdir(parents=True, exist_ok=True)
-        workspace = Path(tempfile.mkdtemp(prefix='command-', dir=runner._scratch_root)).resolve()
+        runner.scratch_root.mkdir(parents=True, exist_ok=True)
+        workspace = Path(tempfile.mkdtemp(prefix='command-', dir=runner.scratch_root)).resolve()
         response_file, schema_file, files = _attempt_files(workspace, template, wire, schema, image)
         thinking = model.get('thinking_mode', '')
         context = dict(files, prompt=prompt, model=template['model_map'].get(requested, requested),
@@ -212,7 +212,7 @@ def execute(runner, service, model, prompt, *, schema=None, purpose='cli_verific
             cli_binary_sha256=identities[0]['sha256'], executable_identities=identities,
             template_attempt_path=str(workspace))
 
-        process, diagnostic = runner._process.run_template(
+        process, diagnostic = runner.process_transport.run_template(
             argv=argv, cwd=str(workspace), environment=environment,
             stdin_bytes=wire if template['input'] == 'stdin' else None, timeout_seconds=binding['timeout_seconds'],
             shell=False, capture_quota_bytes=template['max_output_bytes'], result_paths=(response_file,))

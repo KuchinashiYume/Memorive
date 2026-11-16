@@ -930,7 +930,7 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
         if reason is not None:
             return _not_run(reason, requested_model=str(requested_model))
         run_id = "analysis-reviewer-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(

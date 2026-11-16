@@ -32,7 +32,7 @@ def write_json_atomic(path: Path, payload: Mapping[str, Any], before_replace: Ca
     given, runs just before the move (the settings store's tests inject faults there).
 
     The settings store writes through it; the model execution package writes its snapshots and
-    results with it. Several other packages still call SettingsStore._atomic_write for the same job."""
+    results with it. Other settings modules write through SettingsStore.write_json."""
     encoded = canonical_json_bytes(dict(payload)) + b"\n"
     # Same folder, short name: Windows installations may still enforce MAX_PATH.
     temporary = path.parent / f".{uuid.uuid4().hex}.tmp"
@@ -152,7 +152,10 @@ class SettingsStore:
             "settings_sha256": canonical_sha256(accepted),
         }
 
-    def _atomic_write(self, path: Path, payload: Mapping[str, Any]) -> None:
+    def write_json(self, path: Path, payload: Mapping[str, Any]) -> None:
+        """Write payload to path with write_json_atomic, through this store's fault injector. The other
+        settings files (exam and verification jobs, exports, external sources, score history) are
+        written through here too."""
         write_json_atomic(path, payload, before_replace=self.fault_injector)
 
     def _validate_envelope(self, value: Any) -> dict[str, Any]:
@@ -222,8 +225,8 @@ class SettingsStore:
             self._upgrade_external_library(settings)
         shape = self._upgrade_current_shape(settings)
         migrated = self._envelope(settings, int(value["revision"]) + 1)
-        self._atomic_write(self.path, migrated)
-        self._atomic_write(
+        self.write_json(self.path, migrated)
+        self.write_json(
             self.migration_receipt_path,
             {
                 "schema_version": f"SettingsMigrationReceipt-{receipt}",
@@ -340,8 +343,8 @@ class SettingsStore:
         if not quarantine.exists() and self.path.exists():
             os.replace(self.path, quarantine)
         recovered = self._envelope(self.default_factory(), 0)
-        self._atomic_write(self.path, recovered)
-        self._atomic_write(
+        self.write_json(self.path, recovered)
+        self.write_json(
             self.recovery_receipt_path,
             {
                 "schema_version": "SettingsRecoveryReceipt-v1",
@@ -362,7 +365,7 @@ class SettingsStore:
     def _load_unlocked(self, *, recover_corruption: bool = True) -> dict[str, Any]:
         if not self.path.exists():
             initial = self._envelope(self.default_factory(), 0)
-            self._atomic_write(self.path, initial)
+            self.write_json(self.path, initial)
             return deepcopy(initial)
         raw = self.path.read_bytes()
         if raw == self._checked_bytes:
@@ -402,7 +405,7 @@ class SettingsStore:
                     f"SETTINGS_REVISION_CONFLICT:{expected_revision}:{current['revision']}"
                 )
             accepted = self._envelope(settings, expected_revision + 1)
-            self._atomic_write(self.path, accepted)
+            self.write_json(self.path, accepted)
             return deepcopy(accepted)
 
 

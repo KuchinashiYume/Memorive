@@ -124,7 +124,7 @@ def test_fx_additive_default_preserves_disabled_slot_and_routes(tmp_path):
     api,c,s,t=setup(tmp_path)
     state=s._load()
     state["sources"]=state["sources"][:3];state["sha256"]=canonical_sha256(state)
-    s.writer._atomic_write(s.path,state)
+    s.writer.write_json(s.path,state)
     old=s.path.read_bytes()
     assert len(s._load()["sources"])==4 and s.path.read_bytes()==old
     fx=s._load()["sources"][-1];fx["enabled"]=False

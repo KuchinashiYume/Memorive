@@ -25,7 +25,7 @@ class ApiVerificationJobs:
 
     def _write(self, row):
         scan_sensitive(row)
-        self.store._atomic_write(self._path(row['job_id']),row)
+        self.store.write_json(self._path(row['job_id']),row)
 
     def _lock(self):
         return KernelFileLock(self.root / 'worker.lock')

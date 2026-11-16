@@ -52,7 +52,8 @@ class MessageStore:
         self.recovery_receipt_path = self.profile_root / "message_projection_recovery.json"
         self.redaction_policy = redaction_policy or RedactionPolicy()
 
-    def _atomic_write(self, path: Path, payload: Mapping[str, Any]) -> None:
+    def write_json(self, path: Path, payload: Mapping[str, Any]) -> None:
+        """Write payload to path through a temporary file in the same folder (also used by the messages controller)."""
         temporary = path.parent / f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
         with temporary.open("xb") as stream:
             stream.write(canonical_json_bytes(dict(payload)) + b"\n")
@@ -95,7 +96,7 @@ class MessageStore:
         # updated_at and state_sha256 are kept for earlier versions, which require them
         envelope = {"schema_version": STORE_SCHEMA_VERSION, "revision": revision, "updated_at": utc_now(),
                     "state": accepted, "state_sha256": _state_sha(accepted)}
-        self._atomic_write(self.path, envelope)
+        self.write_json(self.path, envelope)
         return envelope
 
     def _recover(self, raw: bytes, reason: str) -> dict[str, Any]:
@@ -104,7 +105,7 @@ class MessageStore:
         if not quarantine.exists() and self.path.exists():
             os.replace(self.path, quarantine)
         recovered = self._write(default_state(), 0)
-        self._atomic_write(self.recovery_receipt_path, {
+        self.write_json(self.recovery_receipt_path, {
             "schema_version": "MessagesMessageStoreRecoveryReceipt-v1", "reason_code": reason,
             "corrupt_bytes": len(raw), "corrupt_sha256": digest, "quarantine_name": quarantine.name,
             "raw_content_in_receipt": False, "delete_performed": False,

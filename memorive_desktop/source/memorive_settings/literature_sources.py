@@ -133,5 +133,5 @@ def save(owner, source, expected_revision):
             raise ValueError('LITERATURE_SOURCE_SELECTION_INVALID')
         state.update(selected=_selected(slots),revision=state['revision']+1)
         state['sha256']=canonical_sha256(state)
-        owner.writer._atomic_write(owner.root/'literature_sources.json',state)
+        owner.writer.write_json(owner.root/'literature_sources.json',state)
     return owner.get_state()

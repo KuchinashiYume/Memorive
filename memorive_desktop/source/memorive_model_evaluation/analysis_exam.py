@@ -1387,7 +1387,7 @@ def _analysis_exam_wrong_details(
     return wrong
 
 
-def _analysis_exam_issue_metadata(
+def analysis_exam_issue_metadata(
     detail: Mapping[str, Any],
 ) -> tuple[list[str], list[str], list[str], str]:
     axes = detail.get("axes")
@@ -1588,7 +1588,7 @@ def build_exam_directed_repair_package(
                 failed_fields,
                 target_artifacts,
                 severity,
-            ) = _analysis_exam_issue_metadata(detail)
+            ) = analysis_exam_issue_metadata(detail)
             current_rows: dict[str, Any] = {}
             current_row_hashes: dict[str, str] = {}
             for artifact in ANALYSIS_ARTIFACTS:
@@ -1853,7 +1853,7 @@ def merge_exam_directed_repair(
     }
 
 
-def _analysis_exam_form_penalty(
+def analysis_exam_form_penalty(
     *,
     form_case_count: int,
     wrong_case_count: int,
@@ -2008,14 +2008,14 @@ def score_exam_after_directed_repair(
                 _failed_fields,
                 artifacts,
                 severity,
-            ) = _analysis_exam_issue_metadata(
+            ) = analysis_exam_issue_metadata(
                 original_detail_by_id[case_id]
             )
             issue_categories.update(issues)
             severity_categories.add(severity)
             artifact_categories.update(artifacts)
         _, case_order = _form_cases(forms[form_id])
-        penalty = _analysis_exam_form_penalty(
+        penalty = analysis_exam_form_penalty(
             form_case_count=len(case_order),
             wrong_case_count=len(target_ids),
             issue_categories=issue_categories,

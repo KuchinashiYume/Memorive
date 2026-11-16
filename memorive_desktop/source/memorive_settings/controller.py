@@ -298,7 +298,7 @@ class SettingsController:
             previous_order=current.get('direction_recency',list(reversed(prior)))
             order=list(dict.fromkeys(list(reversed(changed))+[key for key in previous_order if key in ids]+list(reversed(ids))))
             value=sealed({'schema_version':'ResearchPreferences-v1','revision':current['revision']+1,'config':accepted,'direction_recency':order})
-            self.store._atomic_write(self.store.profile_root/'research_preferences.json',value)
+            self.store.write_json(self.store.profile_root/'research_preferences.json',value)
         return value
 
     def external_sources_save(self, *, source: Mapping[str, Any], expected_revision: int) -> dict[str, Any]:
@@ -531,13 +531,13 @@ class SettingsController:
         directory = self.store.profile_root / "exam_score_imports"
         directory.mkdir(exist_ok=True)
         identity = canonical_sha256({"before":before, "changes":changes})
-        self.store._atomic_write(directory / (identity + ".before.json"), before)
+        self.store.write_json(directory / (identity + ".before.json"), before)
         saved = self.store.save(accepted, expected_revision=before["revision"])
         receipt = {"schema_version":"ExistingExamScoreImport-v1", "status":"IMPORTED", "changes":changes,
                    "before_revision":before["revision"], "after_revision":saved["revision"],
                    "before_sha256":before["settings_sha256"], "after_sha256":saved["settings_sha256"],
                    "model_mapping_changed":False, "external_model_calls":0}
-        self.store._atomic_write(directory / (identity + ".receipt.json"), receipt)
+        self.store.write_json(directory / (identity + ".receipt.json"), receipt)
         return receipt
 
     def register_directory(self, *, role: str, path: str) -> dict[str, Any]:
@@ -819,7 +819,7 @@ class SettingsController:
             self.store._upgrade_current_shape(upgraded)
             payload['settings']=upgraded
             payload['export_sha256']=canonical_sha256({k:v for k,v in payload.items() if k!='export_sha256'})
-            self.store._atomic_write(self.store.profile_root/('import_migration_'+original_hash+'.json'),{'schema_version':'E2ImportedSettingsMigration-v1','source_export_sha256':original_hash,'converted_export_sha256':payload['export_sha256']})
+            self.store.write_json(self.store.profile_root/('import_migration_'+original_hash+'.json'),{'schema_version':'E2ImportedSettingsMigration-v1','source_export_sha256':original_hash,'converted_export_sha256':payload['export_sha256']})
         settings = validate_settings(payload["settings"])
         current = self.store.load(recover_corruption=False)
         if (

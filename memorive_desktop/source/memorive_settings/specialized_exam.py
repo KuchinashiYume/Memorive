@@ -214,7 +214,7 @@ class _QualityOcrPageExamExecutorV1(_SpecializedExamBase):
     ) -> None:
         if not isinstance(quality_package, str) or not SAFE_PACKAGE.fullmatch(quality_package):
             raise ValueError("WORKFLOW_MODEL_EXAM_Quality_PACKAGE_INVALID")
-        self._scratch_root = Path(scratch_root).resolve()
+        self.scratch_root = Path(scratch_root).resolve()
         self._quality_package = quality_package
         self._reference_pack_root = Path(reference_pack_root).resolve()
         self._modules: dict[str, Any] | None = None
@@ -381,7 +381,7 @@ class _QualityOcrPageExamExecutorV1(_SpecializedExamBase):
         if reason is not None:
             return _not_run(reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -948,7 +948,7 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
         if reason is not None:
             return _not_run(reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(
@@ -1486,7 +1486,7 @@ class QualityRerankerTextExamExecutor(_SpecializedExamBase):
     ) -> None:
         if not isinstance(quality_package, str) or not SAFE_PACKAGE.fullmatch(quality_package):
             raise ValueError("WORKFLOW_MODEL_EXAM_Quality_PACKAGE_INVALID")
-        self._scratch_root = Path(scratch_root).resolve()
+        self.scratch_root = Path(scratch_root).resolve()
         self._quality_package = quality_package
         self._reference_pack_root = Path(reference_pack_root).resolve()
         self._module: Any | None = None
@@ -1805,7 +1805,7 @@ class QualityRerankerTextExamExecutor(_SpecializedExamBase):
         if reason is not None:
             return _not_run(reason, requested_model=requested_model)
         run_id = "workflow-exam-" + uuid.uuid4().hex
-        run_root = self._scratch_root / "workflow_exams" / run_id
+        run_root = self.scratch_root / "workflow_exams" / run_id
         run_root.mkdir(parents=True, exist_ok=False)
         _write_json_create_only(run_root / "plan.json", plan)
         _write_json_create_only(

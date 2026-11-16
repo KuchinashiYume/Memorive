@@ -201,7 +201,7 @@ def inspect_reference_pack(
     }
 
 
-def _load_bundled_scorer(
+def load_bundled_scorer(
     pack_root: Path = CANONICAL_REFERENCE_PACK,
 ) -> ModuleType:
     scorer_path = pack_root.resolve() / "scoring" / "embedding_exam_tool.py"
@@ -275,7 +275,7 @@ def verify_canonical_reference_pack() -> dict[str, Any]:
             "FORMAL_REFERENCE_PACK_INVALID:"
             + json.dumps(diagnosis, ensure_ascii=False, sort_keys=True)
         )
-    scorer = _load_bundled_scorer(CANONICAL_REFERENCE_PACK)
+    scorer = load_bundled_scorer(CANONICAL_REFERENCE_PACK)
     replay = scorer.verify_reference_pack(CANONICAL_REFERENCE_PACK)
     manifest = _load_json(CANONICAL_REFERENCE_PACK / "manifest.reference.json")
     scale = load_selection_scale()
@@ -303,7 +303,7 @@ def verify_canonical_reference_pack() -> dict[str, Any]:
 
 def formal_pro_plan() -> dict[str, Any]:
     verification = verify_canonical_reference_pack()
-    scorer = _load_bundled_scorer(CANONICAL_REFERENCE_PACK)
+    scorer = load_bundled_scorer(CANONICAL_REFERENCE_PACK)
     profile = scorer.PROFILES["pro"]
     if profile["model"] != EXPECTED_MODEL:
         raise EmbeddingTextExamError("FORMAL_PRO_PROFILE_MODEL_MISMATCH")
@@ -374,7 +374,7 @@ def run_formal_pro_exam(
             "FORMAL_RUN_COST_CAP_EXCEEDED:"
             f"{plan['budget']['worst_case_cost_cny']}>{max_cost_cny}"
         )
-    scorer = _load_bundled_scorer(CANONICAL_REFERENCE_PACK)
+    scorer = load_bundled_scorer(CANONICAL_REFERENCE_PACK)
     result = scorer.run_profile(
         CANONICAL_REFERENCE_PACK,
         output,

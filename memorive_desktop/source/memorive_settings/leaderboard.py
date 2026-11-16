@@ -421,7 +421,7 @@ class LeaderboardService:
                 raise ValueError("LEADERBOARD_SCORE_SOURCE_INVALID")
             state.update(revision=state["revision"] + 1, preferences=candidate)
             state["sha256"] = canonical_sha256(state)
-            self.sources.writer._atomic_write(self.path, state)
+            self.sources.writer.write_json(self.path, state)
         return self.get()
 
     def _snapshots(self):

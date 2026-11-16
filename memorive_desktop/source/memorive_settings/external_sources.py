@@ -606,8 +606,8 @@ class ExternalDataSources:
             directory = self.root / "policy_migrations"
             directory.mkdir(exist_ok=True)
             # The prior record contains env names only, never credential values.
-            self.writer._atomic_write(directory / (canonical_sha256(before) + ".json"), before)
-            self.writer._atomic_write(self.path, state)
+            self.writer.write_json(directory / (canonical_sha256(before) + ".json"), before)
+            self.writer.write_json(self.path, state)
             return {"status":"MIGRATED", "revision":state["revision"]}
 
     @staticmethod
@@ -634,7 +634,7 @@ class ExternalDataSources:
             state["sources"] = [accepted if x["source_id"] == accepted["source_id"] else x for x in state["sources"]]
             state["revision"] += 1
             state["sha256"] = canonical_sha256(state)
-            self.writer._atomic_write(self.path, state)
+            self.writer.write_json(self.path, state)
         return self.get_state()
 
     def _latest(self, config: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -695,7 +695,7 @@ class ExternalDataSources:
         value["sha256"] = canonical_sha256(value)
         directory = self.root / "receipts" / "latest"
         directory.mkdir(parents=True, exist_ok=True)
-        self.writer._atomic_write(directory / (config["source_id"] + ".json"), value)
+        self.writer.write_json(directory / (config["source_id"] + ".json"), value)
 
     def _schedule(self):
         path = self.root / "refresh_schedule.json"
@@ -745,7 +745,7 @@ class ExternalDataSources:
             schedule = self._schedule()
             schedule["sources"][config["source_id"]] = {"identity":self._source_identity(config), "attempted_at":now.isoformat()}
             schedule["sha256"] = canonical_sha256(schedule)
-            self.writer._atomic_write(self.root / "refresh_schedule.json", schedule)
+            self.writer.write_json(self.root / "refresh_schedule.json", schedule)
 
     def _mark_outcome(self, config, now, result):
         identity = self._source_identity(config)
@@ -768,7 +768,7 @@ class ExternalDataSources:
                 entry["retry_after"] = result["retry_after"]
                 entry["reason"] = result.get("reason", "EXTERNAL_METADATA_RATE_LIMITED")
             schedule["sha256"] = canonical_sha256(schedule)
-            self.writer._atomic_write(self.root / "refresh_schedule.json", schedule)
+            self.writer.write_json(self.root / "refresh_schedule.json", schedule)
 
     def refresh_activity(self):
         with self.activity_lock:
@@ -878,7 +878,7 @@ class ExternalDataSources:
                        external_model_calls=0, external_network_calls=0, tokens=None, cost=None,
                        cost_semantics="METADATA_NOT_MODEL_INFERENCE", provider_received_gold=False,
                        status="PRE_SEND", settings_revision=state["revision"])
-        self.writer._atomic_write(receipt_dir / f"{call_id}.presend.json", receipt)
+        self.writer.write_json(receipt_dir / f"{call_id}.presend.json", receipt)
         started = time.monotonic()
         try:
             headers = {"Accept": "application/json, application/zip, application/xml, text/xml", "User-Agent": "Memorive-QualityNew-References/1"}
@@ -925,7 +925,7 @@ class ExternalDataSources:
                         source_id=source_id, endpoint=page_url, config_sha256=receipt['config_sha256'],
                         requested_at=utc_now(), method='GET', page=page, attempt=page_attempt, external_model_calls=0,
                         credential_env=env, status='PRE_SEND')
-                    self.writer._atomic_write(receipt_dir / f'{call_id}.page{page:04d}.a{page_attempt}.presend.json', physical)
+                    self.writer.write_json(receipt_dir / f'{call_id}.page{page:04d}.a{page_attempt}.presend.json', physical)
                     receipt['external_network_calls'] += 1
                     page_started = time.monotonic()
                     try:
@@ -963,7 +963,7 @@ class ExternalDataSources:
                     finally:
                         physical['duration_ms'] = round((time.monotonic()-page_started)*1000)
                         physical['receipt_sha256'] = canonical_sha256(physical)
-                        self.writer._atomic_write(receipt_dir / f'{call_id}.page{page:04d}.a{page_attempt}.result.json', physical)
+                        self.writer.write_json(receipt_dir / f'{call_id}.page{page:04d}.a{page_attempt}.result.json', physical)
                     if physical['status'] != 'ERROR':
                         break
                     time.sleep(0.5 * (2 ** (page_attempt-1)))
@@ -1034,7 +1034,7 @@ class ExternalDataSources:
                         source_id=source_id,endpoint=endpoint,model_id=model_id,attempt=attempt,config_sha256=receipt['config_sha256'],
                         requested_at=utc_now(),method='GET',external_model_calls=0,credential_env='',status='PRE_SEND')
                     try:
-                        self.writer._atomic_write(receipt_dir/f'{call_id}.price.{identifier}.presend.json',physical)
+                        self.writer.write_json(receipt_dir/f'{call_id}.price.{identifier}.presend.json',physical)
                     except OSError as error:
                         raise ValueError('REFERENCE_PRICE_LOCAL_WRITE_FAILED') from error
                     begin=time.monotonic()
@@ -1059,7 +1059,7 @@ class ExternalDataSources:
                         physical['duration_ms']=round((time.monotonic()-begin)*1000)
                         physical['receipt_sha256']=canonical_sha256(physical)
                         try:
-                            self.writer._atomic_write(receipt_dir/f'{call_id}.price.{identifier}.result.json',physical)
+                            self.writer.write_json(receipt_dir/f'{call_id}.price.{identifier}.result.json',physical)
                         except OSError as error:
                             raise ValueError('REFERENCE_PRICE_LOCAL_WRITE_FAILED') from error
                 records=enrich_records(records,fetch_price,
@@ -1091,7 +1091,7 @@ class ExternalDataSources:
                 snapshot["sha256"] = canonical_sha256(snapshot)
                 directory = self.root / "snapshots" / source_id
                 directory.mkdir(parents=True, exist_ok=True)
-                self.writer._atomic_write(directory / f"{call_id}.json", snapshot)
+                self.writer.write_json(directory / f"{call_id}.json", snapshot)
             receipt.update(status="PASS", record_count=len(records), snapshot_sha256=snapshot["sha256"])
         except Exception as error:
             # Do not reflect server bodies, headers, key values, or arbitrary exceptions.
@@ -1103,7 +1103,7 @@ class ExternalDataSources:
         finally:
             receipt["duration_ms"] = round((time.monotonic() - started) * 1000)
             receipt["receipt_sha256"] = canonical_sha256(receipt)
-            self.writer._atomic_write(receipt_dir / f"{call_id}.result.json", receipt)
+            self.writer.write_json(receipt_dir / f"{call_id}.result.json", receipt)
             try:
                 self._store_last_refresh(source, receipt)
             except OSError:
