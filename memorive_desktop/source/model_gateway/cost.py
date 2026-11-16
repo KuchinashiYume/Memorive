@@ -40,7 +40,7 @@ class CostManager:
                 "currency": envelope.currency,
             }
 
-        from runtime_log.cache_metrics import cache_metrics
+        from .cache_metrics import cache_metrics
         context = {"prompt_cache_metrics": cache_metrics(usage_raw, duration_ms=result.get("duration_ms"))}
         if backend:
             context["backend"] = backend

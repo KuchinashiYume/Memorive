@@ -1,4 +1,8 @@
-"""Evidence-only cache and throughput projection; pricing remains owned by MODEL_GATEWAY."""
+"""Prompt cache and throughput figures of one model call, from the usage the provider returned.
+
+The model runner (memorive_settings/model_validation.py), cost.py and research_prompt_cache.py put
+them into their receipts; prices stay in cost.py.
+"""
 from __future__ import annotations
 
 import math
@@ -10,7 +14,7 @@ def _count(value):
 
 def cache_metrics(usage, *, duration_ms=None, estimated_cost=None, actual_cost=None):
     """Unknown observations stay null; reasoning is a subset of output, not extra output."""
-    from model_gateway.prompt_cache import cache_usage
+    from .prompt_cache import cache_usage
 
     usage = usage or {}
     cache = cache_usage(usage)

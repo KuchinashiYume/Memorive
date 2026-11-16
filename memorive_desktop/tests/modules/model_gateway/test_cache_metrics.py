@@ -1,4 +1,4 @@
-from runtime_log.cache_metrics import cache_metrics
+from model_gateway.cache_metrics import cache_metrics
 from model_gateway.prompt_cache import cache_usage
 
 

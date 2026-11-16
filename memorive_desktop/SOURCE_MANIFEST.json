@@ -4647,8 +4647,8 @@
     },
     {
       "path": "source/memorive_settings/model_validation.py",
-      "sha256": "b5969db87b989432f341e79d6b34867986521975955fb800a5489412608ab9a8",
-      "bytes": 225142
+      "sha256": "2065417d74976e3c6a78b3bb178e15041105f2f43ebdb9deabec970c2d305790",
+      "bytes": 225144
     },
     {
       "path": "source/memorive_settings/network_compat.py",
@@ -4946,6 +4946,11 @@
       "bytes": 1923
     },
     {
+      "path": "source/model_gateway/cache_metrics.py",
+      "sha256": "a8bd91055c68635d8bb1c97cd87baf18d4c4974127608f149152665b072e9810",
+      "bytes": 2311
+    },
+    {
       "path": "source/model_gateway/cache_session.py",
       "sha256": "2c2ec495ad4621b04f971564881afc60e4ca854fb9afffd81b8fd67340bc50c9",
       "bytes": 10304
@@ -4972,8 +4977,8 @@
     },
     {
       "path": "source/model_gateway/cost.py",
-      "sha256": "caa078f79f9e9b2b4d2e540b64f45a1c23341a043b32e3315e91fadec67ac9b0",
-      "bytes": 7575
+      "sha256": "3bc6b6c4ade06b6a4a5e36f76c979b8e365e53e35dd1c172686a1f18aec93487",
+      "bytes": 7564
     },
     {
       "path": "source/model_gateway/errors.py",
@@ -5992,8 +5997,8 @@
     },
     {
       "path": "source/model_gateway/research_prompt_cache.py",
-      "sha256": "e36bff2d3f5f39fad02947a80aaa9f68c50074297a987577ac8eee09ae346054",
-      "bytes": 10741
+      "sha256": "d43e448ebb7359b85e9e99689a23dd54755a42fb7aa8e69ef5b250635df7bf5a",
+      "bytes": 10730
     },
     {
       "path": "source/model_gateway/resource_limits.py",
@@ -6659,11 +6664,6 @@
       "path": "source/runtime_log/__init__.py",
       "sha256": "23a741b61ef18fadbc331f195cd6940f0f03c99dab20c7992796984bd1c46763",
       "bytes": 704
-    },
-    {
-      "path": "source/runtime_log/cache_metrics.py",
-      "sha256": "5367a6a0b8eb565535d43b285a7579ccf92d06d091ca33327a9fffdf41aad8b0",
-      "bytes": 2163
     },
     {
       "path": "source/runtime_log/config.py",

@@ -153,7 +153,7 @@ def model_binding(model,prompt,schema,allow_session=False):
     return value
 
 def observation(model,receipt):
-    from runtime_log.cache_metrics import cache_metrics
+    from .cache_metrics import cache_metrics
     return {'layout':model.get('prompt_cache_layout','UNCHANGED'),'scope_hash':model.get('prompt_cache_scope'),
         'response_reused':False,'cli_continuation_enabled':bool(model.get('prompt_cache_session')),'local_continuation_idle_ttl_seconds':1800 if model.get('prompt_cache_session') else None,'supplier_ttl':'PROVIDER_MANAGED_UNKNOWN',
         'explicit_ttl_policy':'5m only for the official Anthropic endpoint; no TTL sent to unknown APIs',

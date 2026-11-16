@@ -4862,7 +4862,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             region = "PROVIDER_MANAGED_UNDISCLOSED"
             egress = "PROVIDER_API"
         duration_ms = max(0, round((time.monotonic() - attempt.started_at) * 1000))
-        from runtime_log.cache_metrics import cache_metrics
+        from model_gateway.cache_metrics import cache_metrics
         attempt.transport_diagnostic = {**dict(attempt.transport_diagnostic or {}),
             'prompt_cache_metrics': cache_metrics(dict(attempt.usage or {}), duration_ms=duration_ms,
                 estimated_cost=estimated_cost_cny)}
