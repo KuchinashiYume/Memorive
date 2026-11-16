@@ -1,8 +1,7 @@
-"""EVIDENCE_REVIEW 问题清单结构(Verification 第 1 步立;后续步骤 R1–R9 搬运类 / GPT 异源复用同一形状)。
-
-Problem 通用形状(承第 1 步草案④):source / severity / kind / location / field / chunk_id / detail。
-机械层产出 source='mechanical'、severity='error';将来搬运类 R1–R9 用 source='transcription'、
-判断类 GPT 异源用 source='gpt'(本步只落 mechanical)。
+"""The shape of a problem the card review finds, shared by every check: source, severity, kind,
+location, field, chunk_id, detail. The mechanical check writes source='mechanical' with
+severity='error'; the transcription checks (R1 to R9) use 'transcription' and the second-model
+judgments 'gpt'.
 """
 from __future__ import annotations
 
@@ -11,21 +10,21 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Problem:
-    source: str                    # 'mechanical'(本步)/ 将来 'transcription'(R1–R9)/ 'gpt'(异源)
-    severity: str                  # 'error' /(将来可扩 'warn' 等)
-    kind: str                      # 'broken_link' / 'malformed_anchor'(本步两类)
-    location: str                  # 精确路径:by_field.key_results.chunk_ids[2] / key_data[5].chunk_id
-    detail: str                    # 人读说明
+    source: str                    # 'mechanical', 'transcription' (R1 to R9) or 'gpt'
+    severity: str                  # 'error' (others may follow)
+    kind: str                      # 'broken_link' or 'malformed_anchor' for the mechanical check
+    location: str                  # the exact place: by_field.key_results.chunk_ids[2], key_data[5].chunk_id
+    detail: str                    # for people
     field: str | None = None       # key_results / research_object / 'key_data' / None
-    chunk_id: str | None = None    # 涉事 chunk_id(空 / 非串时 None)
-    quote: str | None = None       # 搬运类 R 违规的原文短摘(**只存、不做 substring 校验**,v3 之八另办);机械层恒 None
+    chunk_id: str | None = None    # the chunk_id concerned (None when empty or not a string)
+    quote: str | None = None       # a short quote of a transcription problem (stored, not checked); None for the mechanical check
 
 
 @dataclass
 class MechanicalResult:
-    ok: bool                       # = problems 为空
+    ok: bool                       # no problems
     problems: list                 # list[Problem]
-    checked: int                   # 尝试 resolve 的 chunk_id 个数(不含 malformed)
-    resolved: int                  # resolve 成功数
-    broken: int                    # broken_link 数
-    malformed: int                 # malformed_anchor 数
+    checked: int                   # chunk ids looked up (not counting malformed ones)
+    resolved: int                  # found
+    broken: int                    # broken links
+    malformed: int                 # malformed anchors

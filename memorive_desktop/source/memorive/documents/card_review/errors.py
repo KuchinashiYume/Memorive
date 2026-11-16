@@ -1,9 +1,8 @@
-"""Memorive EVIDENCE-REVIEW/EVIDENCE_REVIEW · EVIDENCE_REVIEW 校核错误类型(Verification)。
-
-分两层(承 Verification 第 1 步草案④):
-- **系统性错误**(卡不可读 / YAML 解析失败 / chunk 库不可读或与卡不符)→ raise 这些受控异常,
-  调用方应捕获(而非任其冒泡成 traceback);机械层在这类错误下**无法继续校验**。
-- **锚点级问题**(断链 / 形态不明)→ **不 raise**,记入 `MechanicalResult.problems`。
+"""The errors of the card review, in two kinds:
+- errors that stop the check (an unreadable card, YAML that does not parse, a chunk store that cannot
+  be read or belongs to another paper) are raised; callers catch them instead of showing a traceback;
+- problems with single anchors (a broken link, an unclear form) are not raised but recorded in
+  MechanicalResult.problems.
 """
 from __future__ import annotations
 
@@ -11,30 +10,31 @@ from memorive.documents.card_states import DecisionError
 
 
 class EvidenceReviewError(Exception):
-    """EVIDENCE_REVIEW 校核所有受控错误的基类。"""
+    """The base of the card review's errors."""
 
 
 class CardUnreadable(EvidenceReviewError):
-    """卡文件不可读(不存在 / IO 错)。系统性 → raise。"""
+    """The card file cannot be read (missing, an I/O error)."""
 
 
 class CardParseError(EvidenceReviewError):
-    """卡 frontmatter 缺失 / YAML 解析失败 / 非 mapping。系统性 → raise。"""
+    """The card's front matter is missing, does not parse as YAML, or is not a mapping."""
 
 
 class ChunkStoreError(EvidenceReviewError):
-    """chunk 库定位 / 读取 / 解析失败,或库 paper_id 与卡不符。系统性 → raise。"""
+    """The chunk store cannot be found, read or parsed, or its paper_id differs from the card's."""
 
 
 class BatchContractExhausted(DecisionError):
-    """整卡某阶段的唯一技术输出重试已耗尽；外层不得再重跑整卡。"""
+    """A stage of the whole card used up its one retry for technical output; the caller must not run
+    the whole card again."""
 
 
 class OwnershipFailClosed(EvidenceReviewError):
-    """归属安全阀挡下(Integration第2步④ + 复审③):卡 / 数据 **非明确 self**(entrusted / 缺失 / 未知)+ 本地 EVIDENCE_REVIEW 校核槽未就绪 →
-    fail-closed,**绝不把他人托付 / 归属不明数据送 Haiku(搬运类)或 GPT(判断类)境外云**(手动订阅档亦不可绕过)。
-    系统性 / 策略性 → raise(非 DecisionError:不重试、不 admit)。
-    ⚠ **异类同名警告(复审[5]/[7]·记债)**:本类是 `EvidenceReviewError` 子类,与 `memorive.research.analysis.OwnershipFailClosed`(`AnalysisError`
-    子类)**同名但不同类、不同继承树**——理念平行(都是归属 fail-closed)、**但非同一异常**。跨 RESEARCH_ANALYSIS+EVIDENCE_REVIEW 的编排器若用单个
-    `except OwnershipFailClosed` 只会 catch 到 import 的那一个、漏另一个;须**两个都 catch**。统一为一个共享归属异常 +
-    共享归属阀(触 RESEARCH_ANALYSIS)属**债**、另开(承复审 altitude:三处近乎复制的「非 self→fail-closed」阀值得抽共享机制)。"""
+    """Stopped for data ownership: the card or its data is not clearly the user's own (entrusted,
+    missing, unknown) and no local review model is ready. Such data is never sent to an overseas cloud
+    model, neither for transcription checks nor for judgments, and the manual path cannot bypass this.
+    Raised; not a DecisionError, so no retry and no admission.
+    Note: memorive.research.analysis.OwnershipFailClosed (an AnalysisError) has the same name but is a
+    different class in another hierarchy. Code that runs both the analysis and the card review must
+    catch both. Merging them into one shared ownership error and check is open work."""

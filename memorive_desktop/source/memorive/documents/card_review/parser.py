@@ -1,21 +1,22 @@
-"""EVIDENCE_REVIEW 搬运类回原文复核 · DS 响应解析(Verification 第 2 步)。
+"""Parsing the model's reply in the transcription check (the card checked against the source).
 
-**mock 与真模型共用同一解析器。** 契约(②,最要紧):
-- legacy schema:`{"violations":[{"rule":"R1..R9","quote":<可选短摘>,"detail":<非空>}]}`；
-- production evidence schema 在每条 violation 中强制 `card_quote` / `source_quote` / `evidence_relation`，
-  模型不得生成自由文本 detail；解析器由四字段确定性生成 detail。由调用方传 `require_evidence=True`
-  启用；旧 mock 默认仍兼容 legacy schema。
-- **well-formed 且 violations 为空列表 = 无违规**(交由上层判 PASS)。
-- **坏响应绝不静默当「无违规=PASS」**:非 str / 坏 JSON / 缺 violations / 元素非法 / rule 不在 R1–R9 /
-  detail 空 → **DecisionError**(可重跑环节失败;auto_review 重跑、连错 2 次升级、卡留 pending)。
-- parser 只校 schema；生产 evidence 的 literal substring 门由 transcription 对真实卡值 / chunk 执行。
+Real models and test doubles go through the same parser:
+- the legacy shape is {"violations": [{"rule": "R1".."R9", "quote": <optional short quote>, "detail": <not empty>}]};
+- the production evidence shape requires card_quote, source_quote and evidence_relation in each
+  violation; the model writes no free-text detail, the parser builds it from the four fields. Callers
+  ask for it with require_evidence=True; tests still use the legacy shape by default.
+- A well-formed reply with an empty violations list means no violations (the caller decides PASS).
+- A bad reply never counts as "no violations": not a string, broken JSON, no violations key, a bad
+  item, a rule outside R1 to R9, an empty detail all raise DecisionError (a retry; auto_review
+  retries, hands over after two failures in a row, and the card stays pending).
+The parser checks the shape only; transcription.py checks quotes against the real card and chunks.
 """
 from __future__ import annotations
 
 import json
 import re
 
-from memorive.documents.card_states import DecisionError   # 坏响应 = 可重跑环节失败(复用 KNOWLEDGE_ADMISSION 连错升级)
+from memorive.documents.card_states import DecisionError   # a bad reply is a step failure that can be retried
 from memorive.documents.card_distillation.distill import _first_json_object  # one copy, kept there
 
 _VALID_RULES = frozenset(f"R{i}" for i in range(1, 10))          # R1..R9
@@ -24,12 +25,12 @@ _EVIDENCE_RELATIONS = frozenset({
     "explicit_omission",
     "missing_from_given_chunks",
 })
-_FENCE_RE = re.compile(r"\A\s*```(?:json)?\s*|\s*```\s*\Z", re.I)  # 容错 markdown ```json 围栏
+_FENCE_RE = re.compile(r"\A\s*```(?:json)?\s*|\s*```\s*\Z", re.I)  # a ```json fence is allowed
 
 
 def _reject_dup_keys(pairs):
-    """json.loads object_pairs_hook:任一对象内出现重复键 → ValueError(已在 except → DecisionError)。
-    堵独立对抗审计发现的洞:`{"violations":[真违规],"violations":[]}` 标准 json 保留**最后一个**(空)→ 假 PASS。"""
+    """object_pairs_hook for json.loads: a repeated key in any object raises ValueError (and so
+    DecisionError). Plain json keeps the last one, so {"violations": [real], "violations": []} would pass."""
     seen = {}
     for k, v in pairs:
         if k in seen:
@@ -39,29 +40,30 @@ def _reject_dup_keys(pairs):
 
 
 def parse_violations(response_text, *, require_evidence: bool = False) -> list:
-    """解析回原文复核响应。默认兼容 legacy [{rule, quote, detail}]；生产路径可强制结构证据。
-    空列表合法(= 无违规)；任何坏响应 → DecisionError(绝不当 PASS)。"""
+    """Parse a transcription check reply. The legacy [{rule, quote, detail}] by default; production
+    can require the evidence fields. An empty list means no violations; any bad reply raises DecisionError."""
     if not isinstance(response_text, str) or not response_text.strip():
         raise DecisionError("回原文复核响应为空 / 非字符串(不当无违规)")
     body = _FENCE_RE.sub("", response_text.strip()).strip()
-    # 容错:异源 Haiku 无违规时常在 `{"violations":[]}` 后追加 markdown 说明段,严格 json.loads(整串) 会撞
-    # "Extra data";取首个配平 JSON 对象、忽略尾随**纯散文**(仍须开头是合法对象,不削弱「坏响应绝不当 PASS」)。
+    # Some models add prose after {"violations": []}, which json.loads of the whole text rejects as
+    # "Extra data"; the first balanced JSON object is taken and trailing prose ignored (the reply must
+    # still start with a valid object).
     obj_text = _first_json_object(body)
-    if obj_text is None:                                    # 无 JSON 对象(纯散文 / 空 / 括号汤)→ 交 json.loads 抛 → DecisionError
+    if obj_text is None:                                    # no JSON object: json.loads raises, so DecisionError
         obj_text = body
-    # ⚠ 安全红线(经对抗性扫盲二次加固,airtight):首个 JSON 对象**之后一旦再出现 '{'**,一律判坏响应 → DecisionError。
-    #   理由:任何藏在尾部的第二个真 violations 对象都必含 '{';纯字符存在性检测**无状态机可被转义 / 诱饵 / 未闭合串欺骗**
-    #   ——`{"violations":[]} {诱饵} {"violations":[真违规]}` 之类「首个空对象遮蔽真违规」的假 PASS 无一能绕过。
-    #   代价:尾随散文若含装饰性 '{'(真 Haiku 无违规输出实测不含)→ 亦判 DecisionError(升级留 pending、绝不静默 PASS)。
+    # Any '{' after the first JSON object makes the reply bad (DecisionError). A second violations
+    #   object hidden after an empty first one must contain '{', and a plain character test cannot be
+    #   fooled by escapes, decoys or unclosed strings. Prose with a decorative '{' is refused too (real
+    #   replies without violations were seen to have none); the card then stays pending.
     elif "{" in body[body.find(obj_text) + len(obj_text):]:
         raise DecisionError("回原文复核响应在首个 JSON 对象后仍含 '{'(疑多对象 / 真违规被遮蔽),不当无违规")
     try:
-        data = json.loads(obj_text, object_pairs_hook=_reject_dup_keys)   # 拒绝重复键(dup "violations" 会保留最后一个空列表 → 假 PASS)
-    except (json.JSONDecodeError, ValueError, RecursionError) as e:  # ValueError 含 _reject_dup_keys 抛的重复键;RecursionError:超深嵌套
+        data = json.loads(obj_text, object_pairs_hook=_reject_dup_keys)   # repeated keys are refused (a second empty violations would win)
+    except (json.JSONDecodeError, ValueError, RecursionError) as e:  # ValueError covers _reject_dup_keys; RecursionError deep nesting
         raise DecisionError(f"回原文复核响应非合法 JSON / 含重复键:{e}(不当无违规)") from e
-    # ⚠ 安全红线(独立对抗审计加固):顶层必须**恰为** {"violations": ...}、无任何其它键。
-    #   契约(r1_r9_transcription_v1.md 输出段)即只此一键;若放行额外 / 别名键(如 "Violations" / " violations" /
-    #   "extra"),真违规可挂旁支键下、而本函数只读 data["violations"] → 假 PASS(独立审计发现的 84 洞之一类)。
+    # The top level must be exactly {"violations": ...} with no other key, as the prompt asks. Another
+    #   or look-alike key ("Violations", " violations", "extra") could carry the real violations while
+    #   only data["violations"] is read.
     if not isinstance(data, dict) or set(data.keys()) != {"violations"}:
         raise DecisionError("回原文复核响应顶层须恰为 {'violations':[...]}、无其它 / 重复键(不当无违规)")
     vlist = data["violations"]
@@ -79,7 +81,7 @@ def parse_violations(response_text, *, require_evidence: bool = False) -> list:
                     f"得 {sorted(v.keys())}"
                 )
         rule = v.get("rule")
-        if not isinstance(rule, str) or rule not in _VALID_RULES:   # isinstance 先行:防 rule 为 list/dict(unhashable)时 `in frozenset` 抛 TypeError
+        if not isinstance(rule, str) or rule not in _VALID_RULES:   # isinstance first: a list or dict would make `in frozenset` raise
             raise DecisionError(f"violations[{i}].rule 非法(须 R1–R9,得 {rule!r})")
         if require_evidence:
             card_quote = v.get("card_quote")
@@ -129,5 +131,5 @@ def parse_violations(response_text, *, require_evidence: bool = False) -> list:
         quote = v.get("quote")
         if quote is not None and not isinstance(quote, str):
             raise DecisionError(f"violations[{i}].quote 须为字符串或缺省")
-        out.append({"rule": rule, "quote": quote, "detail": detail.strip()})   # quote 只存、不做 substring 校验
+        out.append({"rule": rule, "quote": quote, "detail": detail.strip()})   # quote is stored, not checked
     return out

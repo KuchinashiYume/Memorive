@@ -1,14 +1,14 @@
-"""EVIDENCE_REVIEW 判断类校核 · GPT 异源定向证伪(Verification 第 3 步)。
+"""The judgment check of the card review: a second model (GPT) tries to refute an analysis conclusion.
 
-对 **Claude 的分析结论**做异源证伪:GPT 站对立面挑「依据撑不起结论」(夸大/曲解/无依据/超范围)。
-护城河(最要紧)——**只给「结论 + 该结论引用的那几个 chunk」,严禁整篇、严禁推理链**;经 MODEL_GATEWAY 调 verify_judgment 槽(GPT)、绝不直连。
+GPT takes the opposite side and looks for conclusions their evidence does not carry (overstated,
+distorted, without evidence, beyond scope). It is given only the conclusion and the chunks the
+conclusion cites, never the whole paper and never the reasoning, through the gateway's
+verify_judgment slot.
 
-⚠ **真实对象待 Analysis/Integration**:判断类真实对象 = RESEARCH_ANALYSIS 分析结论,**RESEARCH_ANALYSIS(Analysis)未建** → 本步搭机制 + prompt 契约 + 分级,
-用**构造测试结论**验通机制,**真实分析结论校核端到端待 Analysis/Integration**、不写成已端到端。
-
-守边界:**绝不自检**(必须换 GPT、不是让原模型自看)、**经 MODEL_GATEWAY 不直连**、**不做 MODEL_EVALUATION 长期统计**、机制层不驱动 KNOWLEDGE_ADMISSION
-(KNOWLEDGE_ADMISSION 是卡片准入闸门;判断类校的是 RESEARCH_ANALYSIS 分析结论、非卡片)。机械 + 语义双层:先机械层校结论引用的
-chunk_id resolve、再 GPT 语义层。
+It never asks the model that wrote the conclusion to check itself, keeps no long-term statistics, and
+never changes a card's state: it checks analysis conclusions, not cards. Two layers: first the
+mechanical check that the cited chunk ids exist, then GPT. verify_research_analysis connects it to the
+analysis output (AnalysisResult).
 """
 from __future__ import annotations
 from memorive.models.gateway.prompt_cache import source_first
@@ -18,7 +18,7 @@ import json
 import re
 from dataclasses import asdict, dataclass, field
 
-from memorive.documents.card_states import DecisionError    # 坏/空响应 = 环节失败信号(绝不当「无异议」)
+from memorive.documents.card_states import DecisionError    # a broken or empty reply is a step failure, never "no dispute"
 from memorive.platform.logs import log_reason
 from memorive.research.retrieval.ownership import (
     OWNERSHIP_BINDING_MISMATCH,
@@ -28,7 +28,7 @@ from memorive.research.retrieval.ownership import (
 from memorive.documents.card_review.judgment_debt import record_pending_judgment
 from memorive.documents.card_review.ownership_binding import build_ownership_review_task
 
-from memorive.documents.card_review.errors import OwnershipFailClosed        # 判断类归属安全阀(Integration第2步复审:补 GPT 送原文出境的洞)
+from memorive.documents.card_review.errors import OwnershipFailClosed        # the data ownership check before chunk text goes to GPT
 from memorive.platform.language.source_preservation import language_display_name, normalize_source_language
 
 _PROMPT_ROOT = PROMPT_DIR / "verify"
@@ -40,9 +40,9 @@ _LEGACY_DISPUTE_TYPES = frozenset({"夸大", "曲解", "无依据", "超范围"}
 _SOURCE_LANGUAGE_DISPUTE_TYPES = frozenset(
     {"overstatement", "distortion", "unsupported", "out_of_scope"}
 )
-_REGION_PASS_REASONS = ("domestic_skip", "region_ok")   # 区域门白名单放行(承 RESEARCH_ANALYSIS/EVIDENCE_REVIEW 同套门)
+_REGION_PASS_REASONS = ("domestic_skip", "region_ok")   # the reasons that pass the region check
 
-# 分级 6 信号(承决策 D):任一 true → 送 GPT;含手动开关 manual_override + return_to_library
+# The six signals: any one sends the conclusion to GPT (manual_override is the hand switch)
 _GRADE_SIGNALS = ("will_publish", "core_data", "return_to_library",
                   "low_confidence", "has_number_or_causal", "manual_override")
 _JUDGMENT_TASK_ORDER = ("verify_judgment", "verify_judgment_fallback")
@@ -52,16 +52,16 @@ _PROVIDER_PREFIXES = (("claude", "anthropic"), ("gpt", "openai"), ("deepseek", "
 
 @dataclass
 class Conclusion:
-    """判断类校核对象(**构造测试用**;真实来自 RESEARCH_ANALYSIS/Analysis、未建)。
-    text=Claude 分析结论;cited_chunk_ids=该结论引用的 chunk(精确取);6 个分级信号。"""
+    """A conclusion to check: text, the chunks it cites (cited_chunk_ids, taken exactly) and the six
+    signals that decide whether it is sent."""
     text: str
     cited_chunk_ids: list = field(default_factory=list)
-    will_publish: bool = False          # 会写进论文的关键结论
-    core_data: bool = False             # 核心数据
-    return_to_library: bool = False     # 将回流入库(KNOWLEDGE_FEEDBACK)
-    low_confidence: bool = False        # Claude 自标低置信 / 依据单薄
-    has_number_or_causal: bool = False  # 含具体数字 / 因果断言
-    manual_override: bool = False       # 手动开关「这条我要用,送 GPT 复核」
+    will_publish: bool = False          # a key conclusion that will be published
+    core_data: bool = False             # core data
+    return_to_library: bool = False     # it will flow back into the library (knowledge feedback)
+    low_confidence: bool = False        # the analysis marked it low confidence or thinly supported
+    has_number_or_causal: bool = False  # a number or a causal claim
+    manual_override: bool = False       # the user wants this one checked
 
 
 @dataclass(frozen=True)
@@ -77,8 +77,8 @@ class VerifierCandidate:
 
 
 def should_gpt_verify(conclusion) -> tuple:
-    """分级(承决策 D):6 信号任一 true → (True, None) 送 GPT;否则 (False, skip_reason) 跳过省额度。
-    **跳过必返回 skip_reason**(可审计:为什么没送 GPT)。"""
+    """Whether to send it: any of the six signals gives (True, None); otherwise (False, skip_reason) to
+    save quota, the reason saying why it was not sent."""
     hits = [s for s in _GRADE_SIGNALS if getattr(conclusion, s, False)]
     if hits:
         return True, None
@@ -139,8 +139,8 @@ def build_gpt_payload(
     *,
     output_language: str | None = None,
 ) -> dict:
-    """组装发给 GPT 的输入(**护城河**):**只含「结论 + 该结论引用的那几个 chunk」**。
-    按 cited_chunk_ids **精确取**(即便 chunk_texts 里有整篇,也只放引用的那几段)——**不含整篇、不含推理链**。"""
+    """What GPT is given: the conclusion and the chunks it cites, taken exactly by cited_chunk_ids even
+    when chunk_texts holds the whole paper; never the whole paper, never the reasoning."""
     cited = {cid: chunk_texts.get(cid, "") for cid in conclusion.cited_chunk_ids}
     template = (_prompt_template(output_language=output_language)
                 .replace("__CONCLUSION__", conclusion.text)
@@ -153,8 +153,9 @@ def build_gpt_payload(
 
 
 def parse_gpt_disputes(text, *, output_language: str | None = None) -> dict:
-    """解析 GPT 异源响应 → {agrees: bool, disputes:[{type,detail,quote}]}。
-    坏/空/schema 非法响应 → DecisionError(**绝不静默当「无异议」**);type 只能 夸大/曲解/无依据/超范围、detail 非空。"""
+    """Parse GPT's reply into {agrees: bool, disputes: [{type, detail, quote}]}. A broken, empty or
+    invalid reply raises DecisionError and never counts as "no dispute"; type must be one of the four
+    dispute types and detail must not be empty."""
     if not isinstance(text, str) or not text.strip():
         raise DecisionError("GPT 异源响应为空 / 非字符串(不当无异议)")
     body = text.strip()
@@ -189,7 +190,7 @@ def parse_gpt_disputes(text, *, output_language: str | None = None) -> dict:
             raise DecisionError(f"disputes[{i}].quote 须为字符串或缺省")
         out.append({"type": d["type"], "detail": detail.strip(), "quote": q})
     agrees = data["agrees"]
-    # 守卫①:一致性——agrees=true 必空 disputes;agrees=false 必至少一条。矛盾 → DecisionError(不静默接受)
+    # agrees=true needs no disputes, agrees=false at least one; a contradiction raises DecisionError
     if agrees and out:
         raise DecisionError("GPT 异源响应矛盾:agrees=true 却带 disputes(不静默接受)")
     if not agrees and not out:
@@ -198,8 +199,9 @@ def parse_gpt_disputes(text, *, output_language: str | None = None) -> dict:
 
 
 def _default_region_check(task_type: str = "verify_judgment") -> None:
-    """判断类区域门(承 Integration第2步②):openai(境外)发 GPT 调用前必过 region_preflight('verify_judgment')——
-    大陆挡、非陆放、查不到交人;挡下 → DecisionError(不硬撞 403、可重跑 / 升级)。复用 RESEARCH_ANALYSIS/EVIDENCE_REVIEW 同一套区域门。"""
+    """The region check before calling GPT (overseas): region_preflight('verify_judgment'), the same as
+    for the analysis and the transcription check. Mainland China or an unknown region raises
+    DecisionError (retried or escalated) instead of running into a 403."""
     from memorive.models.gateway import region_preflight
     from memorive.models.gateway.errors import GatewayError
     try:
@@ -213,7 +215,7 @@ def _default_region_check(task_type: str = "verify_judgment") -> None:
 
 
 def _default_verifier_call(task_type: str, payload: dict) -> str:
-    """真实异源校核:经 MODEL_GATEWAY 调 verify_judgment 槽(GPT)。MODEL_GATEWAY 依赖失败 → DecisionError。**绝不直连 SDK。**"""
+    """The real check: the gateway's verify_judgment slot (GPT); a gateway failure raises DecisionError."""
     from memorive.models.gateway import call
     from memorive.models.gateway.errors import GatewayError
     try:
@@ -229,22 +231,22 @@ def _default_gpt_call(payload: dict) -> str:
 
 
 def _judgment_local_ready() -> bool:
-    """本地判断类异源校核槽(本地异源判据模型 ≠ 生成结论的 Claude)是否就绪。
-    Core:无本地判断类模型、判断类恒走 GPT(openai 境外)→ **恒 False**(entrusted / 归属不明恒 fail-closed);
-    未来若落地本地异源判据模型可启用(债)。与 transcription._evidence_review_local_ready 同构、同接入 gate 条件。"""
+    """Whether a local model for judgments (other than the one that wrote the conclusion) is ready.
+    There is none, judgments always go to GPT overseas, so this is always False and entrusted or
+    unclear data always stops. Built like transcription._evidence_review_local_ready."""
     return False
 
 
 def _judgment_ownership_gate(data_ownership) -> None:
-    """判断类归属安全阀(Integration第2步复审·补 f850cba 洞):判断类把 chunk 原文发 GPT(openai 境外),
-    与搬运类 Haiku 同样是「送原文出境」——**非明确 self 一律 fail-closed**(对齐 distill / EVIDENCE_REVIEW 转录阀口径,
-    不信调用方声明为 self 之外的任何值)。**结构与 transcription._ownership_gate 对齐**:self 放行 /
-    entrusted+本地判断类槽就绪放行(Core 恒 False、走不到)/ 其余(entrusted 未就绪 · 缺失 · 未知 · None)恒挡。
-    抛 OwnershipFailClosed(不驱动 KNOWLEDGE_ADMISSION、GPT 一次不许调)。"""
+    """The data ownership check: a judgment sends chunk text to GPT overseas, like the transcription
+    check sends it to another vendor, so anything not clearly the user's own stops. Built like
+    transcription._ownership_gate: self passes; entrusted would pass with a ready local judgment model
+    (there is none); anything else (entrusted, missing, unknown, None) raises OwnershipFailClosed before
+    any GPT call."""
     if data_ownership == "self":
-        return                                             # self:自有数据 → GPT 异源校核 OK
+        return                                             # self: the user's own data may go to GPT
     if data_ownership == "entrusted" and _judgment_local_ready():
-        return                                             # (未来)本地判断类槽就绪 → entrusted 可本地校核;Core 恒 False、走不到
+        return                                             # a ready local judgment model (there is none)
     msg = (f"判断类校核:数据归属非明确 self(得 {data_ownership!r};entrusted / 缺失 / 未知一律挡)+ "
            "本地判断类校核槽未就绪 → fail-closed;绝不把他人托付 / 归属不明原文送 GPT(openai)境外云")
     log_reason("EVIDENCE_REVIEW", "EVIDENCE_REVIEW 判断类归属安全阀挡下", msg, event_category="verify", target="")
@@ -254,46 +256,45 @@ def _judgment_ownership_gate(data_ownership) -> None:
 def judgment_verify(conclusion, chunk_texts: dict, *, gpt_call=None, region_check=None,
                     data_ownership=None, verify_task_type: str = "verify_judgment",
                     output_language: str | None = None, force_review: bool = False) -> dict:
-    """判断类 GPT 异源校核。机械 + 语义双层:
-    ① 机械层:结论引用的 chunk_id 都 resolve 吗?否 → 拦下、不送 GPT。
-    ② 分级:6 信号判是否送 GPT;跳过带 skip_reason。
-    ③ 区域门:真 MODEL_GATEWAY 路径(未注入 gpt_call)发 GPT 前必过 region_preflight('verify_judgment');注入 mock 跳过。
-    ④ 送 GPT:payload 只含结论 + 引用 chunk(护城河)→ 解析异议。
-    返回 dict(含 stage / gpt_sent / payload_sent 便于护城河断言);**不驱动 KNOWLEDGE_ADMISSION**(校的是 RESEARCH_ANALYSIS 分析结论、非卡片)。
-    region_check 可注入(离线测各区域场景);默认查 verify_judgment 槽 provider 属境外才 preflight。
-    data_ownership:**归属安全阀**——非明确 'self'(entrusted / 缺失 / 未知 / None)→ 在任何 GPT / mock 调用前 fail-closed
-      (OwnershipFailClosed),绝不把原文送 GPT 境外云;判断类无本地路故 self 外皆挡。"""
-    _judgment_ownership_gate(data_ownership)               # ① 归属安全阀:最先、在机械层 / 建 payload / 区域门 / GPT 之前
+    """Check one conclusion with GPT, in two layers:
+    1. mechanical: do all cited chunk ids exist? If not, stop without sending.
+    2. the six signals decide whether to send; a skip carries skip_reason.
+    3. on the real gateway path (gpt_call not injected) the region check runs first; a test double skips it.
+    4. send only the conclusion and its cited chunks, and parse the disputes.
+    Returns a dict (with stage, gpt_sent, payload_sent, so tests can check what was sent). It changes
+    no card state. region_check can be injected; by default it runs when the slot's provider is overseas.
+    data_ownership: anything but an explicit 'self' raises OwnershipFailClosed before any call, real or test."""
+    _judgment_ownership_gate(data_ownership)               # ownership first, before anything else
     cited = conclusion.cited_chunk_ids
-    if not cited:                                       # 守卫③:无任何引用 → 无依据可证伪,不把无依据结论发给 GPT
+    if not cited:                                       # no citation: nothing to check against; not sent
         return {"stage": "mechanical_failed", "gpt_sent": False, "broken_chunk_ids": [],
                 "note": "结论无 cited_chunk_ids(无依据可证伪),机械层拦下、不送 GPT"}
-    # 双层·机械层先过 + 守卫②:引用断链 或 chunk 文本为空 / 全空白 → 不送 GPT(与第 2 步「无 chunk 不发空 prompt」一致)
+    # The mechanical layer: a broken citation or an empty chunk text means nothing is sent.
     bad = [c for c in cited if c not in chunk_texts or not (chunk_texts.get(c) or "").strip()]
     if bad:
         return {"stage": "mechanical_failed", "gpt_sent": False, "broken_chunk_ids": bad,
                 "note": "结论引用的 chunk_id 未 resolve 或原文为空 / 空白,机械层拦下、不送 GPT(不发空 prompt)"}
-    send, skip_reason = should_gpt_verify(conclusion)   # 分级
+    send, skip_reason = should_gpt_verify(conclusion)   # the six signals
     if not send and not force_review:
         return {"stage": "graded_skip", "gpt_sent": False, "skip_reason": skip_reason}
     payload = build_gpt_payload(
         conclusion, chunk_texts, output_language=output_language
-    )   # 护城河:只含结论 + 引用 chunk
-    if region_check is not None:                           # 区域门:真调用前必过(承②;mock 注入 gpt_call 则跳过)
+    )   # only the conclusion and its cited chunks
+    if region_check is not None:                           # the region check before a real call (an injected gpt_call skips it)
         region_check()
     elif gpt_call is None:
         _default_region_check(verify_task_type)
     resp = (gpt_call or (lambda body: _default_verifier_call(verify_task_type, body)))(payload)
     parsed = parse_gpt_disputes(
         resp, output_language=output_language
-    )                                                      # 坏响应 → DecisionError(不当无异议)
+    )                                                      # a bad reply raises DecisionError
     return {"stage": "gpt_verified", "gpt_sent": True, "conclusion": conclusion.text,
             "agrees": parsed["agrees"], "disputes": parsed["disputes"], "payload_sent": payload,
             "verifier_task_type": verify_task_type}
 
 
-# ── RESEARCH_ANALYSIS 分析结论 → 判断类校核 glue(Integration第2步② 归位;接 RESEARCH_ANALYSIS 输出 → judgment 入口)────────────
-# 红线:**不驱动 KNOWLEDGE_ADMISSION、不改任何卡 review_status、不 reverse-quarantine 来源卡**(判断类校的是 RESEARCH_ANALYSIS 分析结论、非卡片)。
+# ── from analysis conclusions to the judgment check ──────────────────────────────
+# It changes no card state and never quarantines a source card: it checks analysis conclusions, not cards.
 _NUM_RE = re.compile(r"\d")
 _CAUSAL_WORDS = ("因", "导致", "使得", "从而", "因此", "由于", "促使", "造成", "提高", "增加", "降低",
                  "减少", "改善", "增强", "抑制", "达到", "取决于", "influence", "cause", "lead", "result",
@@ -375,14 +376,14 @@ def _deferred_ruling(
 
 
 def _has_number_or_causal(text: str) -> bool:
-    """粗判结论是否「含具体数字 / 因果断言」(分级信号;偏宽 = 多送 GPT 更安全)。"""
+    """A rough test for a number or a causal claim in the conclusion (a signal; erring wide sends more, the safe side)."""
     t = text or ""
     return bool(_NUM_RE.search(t)) or any(w in t for w in _CAUSAL_WORDS)
 
 
 def conclusion_from_claim(claim, *, will_publish=False, manual_override=False) -> Conclusion:
-    """RESEARCH_ANALYSIS 文献支持句(LiteratureClaim:text + source_id{chunk_id,paper_id,field})→ 判断类 Conclusion。
-    引用既有权威 source_id 的完整成员；不扩展到未被该逻辑块引用的邻段。**不改 RESEARCH_ANALYSIS 产物。**"""
+    """A literature sentence of the analysis (LiteratureClaim: text and source_id {chunk_id, paper_id,
+    field}) as a Conclusion citing exactly its source, not neighbouring chunks. The analysis is not changed."""
     sid = getattr(claim, "source_id", None) or {}
     cid = sid.get("chunk_id")
     members = sid.get("member_chunk_ids")
@@ -410,14 +411,14 @@ def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownersh
                        candidate_resolver=None,
                        output_language: str | None = None,
                        claim_indexes=None) -> dict:
-    """接 RESEARCH_ANALYSIS AnalysisResult → 判断类校核报告(Integration第2步② 归位)。**不驱动 KNOWLEDGE_ADMISSION、不碰任何卡**(红线)。
-    **data_ownership 归属安全阀**:须显式声明 'self' 才放行;**默认 None → 非 self → 优雅 fail-closed(OwnershipFailClosed)**
-      (复审[1]:默认 None 而非必填,漏传得 fail-closed 挡下而非 TypeError 崩;仍绝不放行非 self)。非明确 self → 在任何
-      GPT 调用前 fail-closed,绝不把他人托付 / 归属不明原文送 GPT 境外云。⚠ **债**:本轮用调用方显式声明 (a) 兜底;更稳的
-      「逐条 source_id.paper_id 回查各来源卡 data_ownership、任一非 self 即挡」(b) 待 paper_id→卡解析现成后补(不信调用方)。
-    ① 溯源校验(机械层):每句文献支持的 source_id.chunk_id 是否 resolve 到给定 chunk 原文;
-    ② 选至多 max_gpt 条「含数字 / 因果 且 溯源挂得上」的代表结论,送 GPT 异源证伪(护城河:只结论 + 引用 chunk);
-    ③ 逐条裁决 + target 指向 RESEARCH_ANALYSIS 分析对象(分析句有问题 ≠ 来源卡该隔离,故不动来源卡)。"""
+    """An AnalysisResult -> a judgment report. It changes no card.
+    data_ownership must be 'self' explicitly; the default None stops (OwnershipFailClosed) rather than
+      raising TypeError, and anything else stops before any GPT call. Still open: checking each
+      source's card ownership by source_id.paper_id instead of trusting the caller.
+    1. Mechanical: each literature sentence's source_id.chunk_id must resolve to a given chunk.
+    2. Up to max_gpt conclusions with a number or causal claim and a resolving source go to GPT.
+    3. Each verdict targets the analysis sentence; a weak sentence does not mean its source card should
+       be quarantined, so source cards are untouched."""
     if data_ownership is not None and legacy_data_ownership is not None:
         if data_ownership != legacy_data_ownership:
             raise OwnershipFailClosed(
@@ -547,7 +548,7 @@ def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownersh
                          "requested_indexes": sorted(selected_indexes) if selected_indexes is not None else None},
         "ownership_review_task": asdict(ownership_task),
         "ownership_propagation_receipt": ownership_task.ownership_propagation_receipt,
-        "drives_knowledge_admission": False,   # 红线:判断类不驱动 KNOWLEDGE_ADMISSION、不 reverse-quarantine 来源卡
+        "drives_knowledge_admission": False,   # judgments never change card states
     }
     log_reason("EVIDENCE_REVIEW", "judgment_verify_research_analysis",
                f"判断类校核 RESEARCH_ANALYSIS 分析:溯源 {report['trace_resolved']}/{len(claims)} resolve;异源候选送 {len(picked)} 条"

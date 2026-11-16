@@ -2932,8 +2932,8 @@
     },
     {
       "path": "source/memorive/documents/card_review/errors.py",
-      "sha256": "e219476decf8703e5c0317fad7f5357d6c6a13d2ee875a7d8a50bc8d3d4f2393",
-      "bytes": 2367
+      "sha256": "7bb16c187720ca283ebb531134226523b9e47b63da52d506d739f3f58c9d6977",
+      "bytes": 1877
     },
     {
       "path": "source/memorive/documents/card_review/fact_identity_evidence_review_absence_governance.py",
@@ -2947,13 +2947,13 @@
     },
     {
       "path": "source/memorive/documents/card_review/grading.py",
-      "sha256": "95f6739a2f15bf3417f081f02d32ab93370c9bb4808d2ac79cc8d238c0b16ef9",
-      "bytes": 12224
+      "sha256": "9905d850b085e05bb2d2dbcb344a434899476dc0da509780f47c38933701d4a8",
+      "bytes": 12006
     },
     {
       "path": "source/memorive/documents/card_review/judgment.py",
-      "sha256": "b954df97ad2bd67c10d36d43989634a7bf4b9aa33c24abf917879c25d7252c5f",
-      "bytes": 33251
+      "sha256": "f4e9301c7e150521da2879de3d1dc832e5c0df5100b7361213e40e1fe0d39e35",
+      "bytes": 31219
     },
     {
       "path": "source/memorive/documents/card_review/judgment_debt.py",
@@ -2962,8 +2962,8 @@
     },
     {
       "path": "source/memorive/documents/card_review/mechanical.py",
-      "sha256": "2ac79506a3ef64b33c9feafe3d2dfdc90fc2e9c309a053af9662bb4bc7d1d3d5",
-      "bytes": 7022
+      "sha256": "af6ce2f5b06a271e31637c5df0d9e4f347c76ae2fe233777a7f496f80c18c0d1",
+      "bytes": 7126
     },
     {
       "path": "source/memorive/documents/card_review/opportunity_verification.py",
@@ -2977,13 +2977,13 @@
     },
     {
       "path": "source/memorive/documents/card_review/parser.py",
-      "sha256": "46fb857f3fe1324fae275d428a4cef19341dd1e50a4c121b254db6e882002571",
-      "bytes": 8377
+      "sha256": "04281e7def134b58384a288ff233e4275ed2f22f40c0bc96532cc19ff729ad35",
+      "bytes": 7853
     },
     {
       "path": "source/memorive/documents/card_review/problems.py",
-      "sha256": "63f5749b8b19846e3e95627357c6fc7e3e9c03e23f571644385d64aaef73d26d",
-      "bytes": 1687
+      "sha256": "704b0cbff3ba7efb3ec2229e5998ee3d33261fb99f402282690c6bac6eef712f",
+      "bytes": 1533
     },
     {
       "path": "source/memorive/documents/card_review/quality_axes.py",
@@ -2997,8 +2997,8 @@
     },
     {
       "path": "source/memorive/documents/card_review/report.py",
-      "sha256": "a212501b1540bbabeda65a05fbc4359a917cccaafc02453df8cedfdb8ce3dfab",
-      "bytes": 5194
+      "sha256": "b089d2a2717dbe64e27461d85e9489b373be37adf82f0d1f1442733714788b7b",
+      "bytes": 5200
     },
     {
       "path": "source/memorive/documents/card_review/research_handoff_cross_analysis_review.py",
@@ -3067,8 +3067,8 @@
     },
     {
       "path": "source/memorive/documents/card_review/transcription.py",
-      "sha256": "515edbfdb891f05335ccdedd94bb52c08b7e115aa9b0f51bae08e541932d3603",
-      "bytes": 65081
+      "sha256": "c8f1c47a5b38d09c714f54934918a63514247a6830fb464eb7c49529c6ff3675",
+      "bytes": 63992
     },
     {
       "path": "source/memorive/documents/card_states/__init__.py",
@@ -3102,8 +3102,8 @@
     },
     {
       "path": "source/memorive/documents/card_states/errors.py",
-      "sha256": "478a1cfbeb4bdac854c8c6d54ea83b0250579881350f424d15d3c26e613631e4",
-      "bytes": 3729
+      "sha256": "06d82dc1ecd2544c5a6c91b4afa00c148142f2099ca680e3c35ee6537d68443c",
+      "bytes": 3379
     },
     {
       "path": "source/memorive/documents/card_states/knowledge_admission_log.py",

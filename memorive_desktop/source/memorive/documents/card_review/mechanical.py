@@ -1,6 +1,8 @@
-"""证据复核读取卡片用：取出卡片开头 --- … --- 之间的 YAML 头信息。
+"""The mechanical check of a card: every chunk_id the card cites must exist in the paper's chunk store.
 
-卡片读不了时抛 CardUnreadable；没有头信息、YAML 解析失败或解析结果不是映射时抛 CardParseError。
+It reads the card's YAML front matter (between --- and ---): an unreadable card raises
+CardUnreadable; missing front matter, YAML that does not parse or is not a mapping raises
+CardParseError.
 """
 from __future__ import annotations
 
@@ -35,8 +37,8 @@ def _read_frontmatter(card_path: Path) -> dict:
 
 
 def _load_chunk_ids(card_path: Path) -> tuple[set, str | None]:
-    """定位卡同目录唯一 [Chunks]*.jsonl,载入全部 chunk_id 集合 + 库 paper_id。
-    定位 / 读取 / 解析失败 → ChunkStoreError(系统性、raise)。"""
+    """Find the one [Chunks]*.jsonl next to the card and load its chunk ids and paper_id; failing to
+    find, read or parse it raises ChunkStoreError."""
     folder = card_path.parent
     matches = sorted(p for p in folder.glob("*.jsonl") if p.name.startswith("[Chunks]"))
     if not matches:
@@ -95,11 +97,11 @@ class _Checker:
             if isinstance(cids, list):                       # v2:{section_page, chunk_ids:[str…]}
                 for i, cid in enumerate(cids):
                     self.resolve(cid, f"{base}.chunk_ids[{i}]", fname)
-            elif "chunk_id" in anchors:                      # v3 单对象:{chunk_id, quote}
+            elif "chunk_id" in anchors:                      # v3, one object: {chunk_id, quote}
                 self.resolve(anchors.get("chunk_id"), f"{base}.chunk_id", fname)
             else:
                 self.mal(base, fname, "by_field 锚点形态不明(dict 既无 chunk_ids 列表也无 chunk_id),fail-closed")
-        elif isinstance(anchors, list):                      # v3 列表:[{chunk_id, quote}…]
+        elif isinstance(anchors, list):                      # v3, a list: [{chunk_id, quote} ...]
             for i, el in enumerate(anchors):
                 if isinstance(el, dict) and "chunk_id" in el:
                     self.resolve(el.get("chunk_id"), f"{base}[{i}].chunk_id", fname)
@@ -115,22 +117,22 @@ class _Checker:
 
 
 def mechanical_check(card_path) -> MechanicalResult:
-    """校一张卡的所有 chunk_id 引用是否 resolve。返回 MechanicalResult;
-    系统性错误 raise EvidenceReviewError(CardUnreadable / CardParseError / ChunkStoreError)。"""
+    """Check that every chunk_id the card cites exists; returns a MechanicalResult. Errors that stop
+    the check raise (CardUnreadable, CardParseError, ChunkStoreError)."""
     card_path = Path(card_path)
-    fm = _read_frontmatter(card_path)                        # raise on 系统性
-    chunk_ids, store_paper = _load_chunk_ids(card_path)      # raise on 系统性
+    fm = _read_frontmatter(card_path)                        # raises when the check cannot go on
+    chunk_ids, store_paper = _load_chunk_ids(card_path)      # raises when the check cannot go on
 
     sa = fm.get("source_anchor")
     card_paper = sa.get("paper_id") if isinstance(sa, dict) else None
-    if store_paper and card_paper and store_paper != card_paper:   # ③ 元数据比对,防加载错库致大批假阳性
+    if store_paper and card_paper and store_paper != card_paper:   # compare paper ids, so another paper's store does not give a flood of false problems
         raise ChunkStoreError(
             f"chunk 库 paper_id={store_paper!r} 与卡 source_anchor.paper_id={card_paper!r} 不符(疑加载错库)")
 
     ck = _Checker(chunk_ids)
     by_field = sa.get("by_field") if isinstance(sa, dict) else None
     if isinstance(by_field, dict):
-        for fname, anchors in by_field.items():              # ① 遍历实际存在的所有字段,不写死 6 个
+        for fname, anchors in by_field.items():              # every field the card has, not a fixed list
             ck.by_field(fname, anchors)
     else:
         ck.mal("source_anchor.by_field", None, "source_anchor.by_field 缺失或非映射,无法校锚点")

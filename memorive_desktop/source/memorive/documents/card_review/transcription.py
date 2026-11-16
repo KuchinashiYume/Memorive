@@ -1,14 +1,17 @@
-"""EVIDENCE_REVIEW 搬运类蒸馏级校核(Verification 第 2 步-c):对照原文逐条过 R1–R9 → 组 ReviewDecision 驱动 KNOWLEDGE_ADMISSION。
+"""The transcription check of a card: each item against its source, by the rules R1 to R9.
 
-流程:收集校核对象(`key_data.needs_review=true` 切入 + 遍历 by_field 实际字段)→ 全部对象与去重锚定
-原文整批首审一次 → 同批最终复查一次 → parser + 本地逐字证据门 → 汇总 verdict(任一 R1–R9
-违规→FAIL,否则 PASS)+ 命中 R 条 → 组 EvidenceReviewReport(含同源置信)
-+ ReviewDecision → `auto_review(trigger=Trigger.EVIDENCE_REVIEW_VERDICT)` 驱动 KNOWLEDGE_ADMISSION。
+Steps: collect the subjects (key_data entries with needs_review=true and every by_field field), send
+all of them with their anchored source text in one batch for a first review, then once more for a
+final review, parse the reply and check its quotes word for word against the card and the chunks,
+and decide (any R1 to R9 violation is FAIL, otherwise PASS). The result is an EvidenceReviewReport
+(with the same-source confidence); verify_and_drive turns it into a ReviewDecision for auto_review.
 
-守边界:**经 MODEL_GATEWAY 不直连**;**只蒸馏级、不为转换级单开**;**绝不自检**(回原文=独立异源子对话、非蒸馏模型自查);
-**防同源自检**(卡 distill_model 供应商 vs verify 槽供应商同 → 同源低置信、核心字段升级异源待 Anthropic);
-**坏响应 / 调用失败 = DecisionError**(auto_review 重跑、连错 2 次升级、卡留 pending),**绝不当无违规=PASS**;
-粒度 = 每张 Card 固定两次(整批首审 + 整批最终复查);无字段值 / 无 chunk 的对象跳过并记 malformed、不发空 subject。
+It calls the model through the gateway, checks distilled cards only, and never lets the
+distilling model check itself: when the card's distill_model and the verify slot share a vendor,
+confidence is low and the core fields wait for a check by another vendor. A bad reply or a failed
+call raises DecisionError (auto_review retries, hands over after two failures, the card stays
+pending) and never counts as PASS. Each card costs exactly two calls; a subject without a value or
+a chunk is skipped as malformed, never sent empty.
 """
 from __future__ import annotations
 from memorive.models.gateway.prompt_cache import policy_first, source_first
@@ -33,8 +36,8 @@ from memorive.documents.card_review import parser as _parser
 from memorive.documents.card_review.parser import parse_violations
 from memorive.documents.card_review.problems import Problem
 
-# R1–R9 回原文 prompt。v10 是完整基线，v13 追加关系精度与计数召回约束；
-# 重跑段只在 bypass_cache 灾难恢复轮启用。
+# The R1 to R9 prompts: v10 is the full baseline, v13 adds rules on relation precision and counting
+# recall; the rerun section is used only in a bypass_cache disaster-recovery round.
 _PROMPT_DIR = PROMPT_DIR / "verify"
 _PROMPT_BASE_PATH = _PROMPT_DIR / "r1_r9_transcription_v10.md"
 _PROMPT_DELTA_PATHS = (
@@ -53,7 +56,7 @@ _BATCH_REVIEW_PROMPT_PATH = (
 _RECOVERY_START = "<!-- RECOVERY_ONLY_START -->"
 _RECOVERY_END = "<!-- RECOVERY_ONLY_END -->"
 _VALID_RULES = frozenset(f"R{i}" for i in range(1, 10))
-# 核心字段(数值 / 结论):同源时挂「升级异源待 Anthropic」
+# Core fields (values, conclusions): with the same source they wait for another vendor
 _CORE_FIELDS = frozenset({"key_data", "key_results", "author_conclusion"})
 
 NODE04_BATCH_MAX_SOURCE_CHARS = 48_000
@@ -68,7 +71,7 @@ def _now_iso() -> str:
 
 
 def _load_chunk_texts(card_path: Path) -> dict:
-    """卡同目录唯一 [Chunks]*.jsonl → {chunk_id: text}。缺失 / 不可读 → ChunkStoreError(系统性、raise)。"""
+    """{chunk_id: text} from the one [Chunks]*.jsonl next to the card; a missing or unreadable file raises ChunkStoreError."""
     folder = card_path.parent
     matches = sorted(p for p in folder.glob("*.jsonl") if p.name.startswith("[Chunks]"))
     if not matches:
@@ -93,7 +96,7 @@ def _load_chunk_texts(card_path: Path) -> dict:
 def _render_value(v) -> str:
     if isinstance(v, list):
         return "\n".join(f"- {x}" for x in v)
-    if isinstance(v, dict):                      # key_data 条:JSON 保留字段边界，避免 value=>70 歧义
+    if isinstance(v, dict):                      # a key_data entry as JSON, so field boundaries are clear (no value=>70 ambiguity)
         rendered = {
             key: v.get(key)
             for key in ("value", "unit", "metric", "sample", "stat")
@@ -104,8 +107,8 @@ def _render_value(v) -> str:
 
 
 def _by_field_chunk_ids(anchors):
-    """从一个 by_field 锚点取 chunk_id 列表(v2 {chunk_ids:[...]} / v3 {chunk_id} 单对象或列表);
-    形态不明 → None(上层记 malformed、不发 prompt)。与机械层同款形态识别、不猜。"""
+    """The chunk ids of one by_field anchor (v2 {chunk_ids: [...]}, v3 {chunk_id} alone or in a list);
+    None for an unknown form (recorded as malformed, nothing sent). The same forms as the mechanical check."""
     if isinstance(anchors, dict):
         cids = anchors.get("chunk_ids")
         if isinstance(cids, list):
@@ -125,18 +128,18 @@ def _by_field_chunk_ids(anchors):
 
 
 def _collect_subjects(fm: dict) -> list:
-    """收集校核对象:key_data.needs_review=true 条 + 遍历 by_field 实际字段。
-    粒度=每字段 / 每 key_data 条一次;只去重完全相同的(location, chunk 组)。"""
+    """The subjects: key_data entries with needs_review=true and every by_field field the card has, one
+    each; only exact repeats of (location, chunks) are merged."""
     subjects, seen = [], set()
 
     def add(location, field, value, chunk_ids):
         key = (location, frozenset(chunk_ids or []))
-        if key in seen:                          # 只去重完全相同的(对象, chunk 组)
+        if key in seen:                          # only exact repeats of (subject, chunks)
             return
         seen.add(key)
         subjects.append(_Subject(location, field, _render_value(value), list(chunk_ids or [])))
 
-    # ① 切入口:key_data.needs_review=true 高风险条(每条一次)
+    # (1) key_data entries with needs_review=true, the risky ones, once each
     kd = fm.get("key_data")
     if isinstance(kd, list):
         for i, e in enumerate(kd):
@@ -144,7 +147,7 @@ def _collect_subjects(fm: dict) -> list:
                 cid = e.get("chunk_id")
                 add(f"key_data[{i}]", "key_data", e, [cid] if isinstance(cid, str) and cid else [])
 
-    # ② 遍历 by_field 实际存在的字段(每字段一次、整组锚定 chunk)
+    # (2) every by_field field the card has, once each, with all its anchored chunks
     sa = fm.get("source_anchor")
     by_field = sa.get("by_field") if isinstance(sa, dict) else None
     if isinstance(by_field, dict):
@@ -155,7 +158,7 @@ def _collect_subjects(fm: dict) -> list:
 
 
 def _vendor(model_id) -> str:
-    """model_id 取供应商前缀(deepseek-v4-pro→deepseek)。Core 只 deepseek,前缀即 provider。"""
+    """The vendor prefix of a model id (deepseek-v4-pro -> deepseek)."""
     return str(model_id or "").split("-")[0].lower()
 
 
@@ -178,8 +181,8 @@ def _expand_absence_scope(subjects, chunk_texts):
 
 
 def _same_source(distill_model, verify_provider, verify_model):
-    """防同源自检(④/⑦):卡 distill_model 供应商 vs verify 槽供应商。同 → (True, reason);
-    卡无 distill_model → 保守当同源(核心字段照挂升级异源)。flash 与 pro 同家族、不算异源。"""
+    """Whether the card's distill_model and the verify slot share a vendor: (True, reason) if so. A card
+    without distill_model counts as the same source. flash and pro are one family."""
     if not distill_model:
         return True, "卡无 distill_model 字段,保守按同源处理(核心字段照挂升级异源)"
     dv = _vendor(distill_model)
@@ -190,7 +193,7 @@ def _same_source(distill_model, verify_provider, verify_model):
 
 
 def _verify_slot():
-    """读 verify 槽的 provider / model(防同源判定用);不发调用。"""
+    """The verify slot's provider and model, for the same-source test; no call is made."""
     from memorive.models.gateway.gateway import current_gateway
     runtime_identity = getattr(current_gateway(), 'review_identity', None)
     if callable(runtime_identity):
@@ -778,7 +781,7 @@ def _validate_batch_rows(
 
 
 def _is_cjk_character(char: str) -> bool:
-    """仅识别 CJK 汉字；空格回填不得跨英文词界、数字或标点。"""
+    """Only CJK characters; restoring spaces never crosses an English word boundary, a digit or punctuation."""
     if not char:
         return False
     codepoint = ord(char)
@@ -791,7 +794,8 @@ def _is_cjk_character(char: str) -> bool:
 
 
 def _normalize_cjk_pdf_whitespace(text: str) -> tuple[str, list[int]]:
-    """只删除两侧均为汉字的 Unicode 空白，并保留规范化字符到原文偏移的映射。"""
+    """Remove only whitespace with a CJK character on both sides, keeping the map from normalized
+    characters to offsets in the original."""
     normalized, offsets = [], []
     index = 0
     while index < len(text):
@@ -814,7 +818,8 @@ def _normalize_cjk_pdf_whitespace(text: str) -> tuple[str, list[int]]:
 
 
 def _recover_unique_cjk_pdf_quote(source_quote: str, chunk_text: str) -> str | None:
-    """仅当中文词内空格规范化后在 chunk 唯一命中，回填原文真实连续子串。"""
+    """When a quote matches the chunk exactly once after spaces inside Chinese words are normalized,
+    return the real continuous substring of the original."""
     normalized_quote, _ = _normalize_cjk_pdf_whitespace(source_quote)
     normalized_chunk, offsets = _normalize_cjk_pdf_whitespace(chunk_text)
     if (
@@ -865,7 +870,8 @@ def _recover_unique_pdf_whitespace_quote(source_quote: str, chunk_text: str) -> 
 
 
 def _validate_violation_evidence(violation: dict, value_text: str, chunk_text: str) -> dict:
-    """验证模型的两侧逐字证据；仅当前 chunks 未见时强制降为 R8 疑锚点归位。"""
+    """Check the model's word-for-word quotes on both sides; a quote not found in the given chunks is
+    turned into an R8 anchor misplacement."""
     card_quote = violation.get("card_quote")
     if not isinstance(card_quote, str) or not card_quote or card_quote not in value_text:
         raise DecisionError("EVIDENCE_REVIEW evidence.card_quote 不是卡上内容的连续逐字子串(不落错误信用档)")
@@ -1043,11 +1049,12 @@ def _propagate_literal_direct_conflicts(
 
 
 def _default_call_verify(prompt: str, *, bypass_cache: bool = False) -> str:
-    """真实回原文异源复核:经 MODEL_GATEWAY 调 verify 槽(Anthropic Sonnet 5 细校、异源)。MODEL_GATEWAY 依赖失败(受控)→ DecisionError(可重跑)。"""
+    """The real check through the gateway's verify slot (Anthropic Sonnet 5, another vendor); a gateway
+    failure raises DecisionError (retried)."""
     from memorive.models.gateway import call
     from memorive.models.gateway.errors import GatewayError
-    # Sonnet 5 使用 adaptive thinking + xhigh;max_tokens 同时覆盖思考与最终 JSON，
-    # 不再沿用 Haiku 的 4096。区域门已在 transcription_verify 层每卡过一次。
+    # Sonnet 5 uses adaptive thinking at xhigh; max_tokens covers thinking and the final JSON. The
+    # region check already ran once per card in transcription_verify.
     try:
         resp = call("verify", {"messages": [{"role": "user", "content": prompt}],
                                "max_tokens": 16384, "timeout": 180},
@@ -1057,23 +1064,23 @@ def _default_call_verify(prompt: str, *, bypass_cache: bool = False) -> str:
     return resp.get("text") or ""
 
 
-# ── 区域门(承 RESEARCH_ANALYSIS §六 / v6.4 之二;升 Anthropic verify 后境外,发 verify 前必过)──────────
-# 白名单放行:仅「非 gated 且 reason ∈ {domestic_skip, region_ok}」放行;gated / region_unknown /
-# 将来新增未知 reason 一律默认挡(绝不静默放行)。挡下 → DecisionError:auto_review 升级、卡留 pending 报人工、绝不硬撞 403。
+# ── the region check before the verify call (Anthropic is overseas) ──────────
+# Only "not gated and reason in {domestic_skip, region_ok}" passes; gated, region_unknown and any
+# future reason stop with DecisionError: auto_review escalates and the card stays pending for a person.
 _REGION_PASS_REASONS = ("domestic_skip", "region_ok")
 
 
 def _default_region_check() -> None:
-    """区域门:经 region_preflight('verify')(由 verify 槽 provider 驱动)——国内 / 本地 → domestic_skip 放行;
-    非陆 → region_ok 放行;大陆 → gated 挡下;查不到 → 交人(均挡下、绝不静默发调用)。
-    verify 槽 = deepseek(国内)时自动放行;升 Anthropic(境外)才真进门。挡下抛 DecisionError(可重跑 / 升级留 pending)。"""
+    """The region check, region_preflight('verify'), decided by the verify slot's provider: domestic or
+    local passes, another country passes, mainland China and an unknown region stop with DecisionError
+    (retried, or escalated with the card pending)."""
     from memorive.models.gateway import region_preflight
     from memorive.models.gateway.errors import GatewayError
     try:
         rc = region_preflight("verify")
     except GatewayError as e:
         raise DecisionError(f"EVIDENCE_REVIEW verify 区域门预检失败(可重跑):{type(e).__name__}: {e}") from e
-    # 真 fail-closed · 白名单放行(承 RESEARCH_ANALYSIS 同款):仅「非 gated 且 reason ∈ {domestic_skip, region_ok}」放行。
+    # Only "not gated and reason in {domestic_skip, region_ok}" passes, as for the analysis.
     if (not rc.get("gated")) and rc.get("reason") in _REGION_PASS_REASONS:
         return
     msg = rc.get("message") or f"区域门挡下:reason={rc.get('reason')}, gated={rc.get('gated')}"
@@ -1081,23 +1088,23 @@ def _default_region_check() -> None:
 
 
 def _evidence_review_local_ready() -> bool:
-    """本地 EVIDENCE_REVIEW 异源校核槽是否就绪。Core:本地推理路占位、未建 → **恒 False**(entrusted 数据恒 fail-closed);待落地(债)。"""
+    """Whether a local review model is ready. None is built, so always False and entrusted data always stops."""
     return False
 
 
 def _ownership_gate(fm) -> None:
-    """归属安全阀(承 Integration第2步④ + 复审③ 对齐 distill 口径):**非明确 self 一律 fail-closed**——
-    self → 云端 EVIDENCE_REVIEW 校核 OK;entrusted → 须本地 EVIDENCE_REVIEW 校核(Core 未落地 → 恒挡);**缺失 / 未知 → 归属不明绝不上云(恒挡)**。
-    比只挡 entrusted 更严、堵「归属不明放行」的 fail-open 方向(与 distill「非 self 一律挡、不调 MODEL_GATEWAY」同口径)。
-    在任何外呼(区域探测 / Haiku)前判;挡下抛 OwnershipFailClosed,绝不把他人托付 / 归属不明数据送 Haiku 境外云。"""
+    """The data ownership check, the same as distillation's: anything not clearly 'self' stops. self may
+    go to the cloud model; entrusted needs a local model (there is none, so it stops); missing or
+    unknown stops too, which is stricter than stopping only entrusted. It runs before any outside call
+    (the region probe, the model) and raises OwnershipFailClosed."""
     own = fm.get("data_ownership") if isinstance(fm, dict) else None
     if own == "self":
-        return                                             # self:自有数据 → 云端校核 OK
+        return                                             # self: the user's own data may go to the cloud model
     if own == "entrusted" and _evidence_review_local_ready():
-        return                                             # (未来)本地 EVIDENCE_REVIEW 就绪 → entrusted 可本地校核;Core 恒 False、走不到
+        return                                             # a ready local review model (there is none)
     msg = (f"数据归属非明确 self(得 {own!r};entrusted / 缺失 / 未知一律挡)+ 本地 EVIDENCE_REVIEW 校核槽未就绪(Core 占位)→ "
            "fail-closed 挡下;绝不静默送 Haiku 境外云、手动订阅档亦不可绕过(承归属安全阀·对齐 distill 口径)")
-    title = fm.get("title") if isinstance(fm, dict) else None   # 复审[2]:非 dict fm 也不崩(与上面 own 取值同守卫)
+    title = fm.get("title") if isinstance(fm, dict) else None   # a front matter that is not a dict does not break this
     log_reason("EVIDENCE_REVIEW", "EVIDENCE_REVIEW 归属安全阀挡下", msg, event_category="verify", target=str(title or ""))
     raise OwnershipFailClosed(msg)
 
@@ -1293,11 +1300,12 @@ def _run_batch_stage_with_one_contract_retry(
 def transcription_verify(
     card_path, *, call_verify=None, region_check=None, bypass_cache: bool = False
 ) -> "_report.EvidenceReviewReport":
-    """跑一次搬运类校核 → 写 EvidenceReviewReport → 返回。**不驱动 KNOWLEDGE_ADMISSION**(驱动见 verify_and_drive)。
-    call_verify 可注入(离线 mock;缺省 = 真实经 MODEL_GATEWAY)。bypass_cache 只供灾难恢复重试跳过旧坏响应；
-    注入式 call_verify(prompt) 接口保持不变。MODEL_GATEWAY / 解析 / schema 失败 → DecisionError(可重跑)。
-    region_check 可注入(默认查 verify 槽 provider 属境外才 preflight;离线测各区域场景用)。
-    ④ 归属安全阀:entrusted 卡在**任何外呼前** fail-closed(OwnershipFailClosed),绝不送 Haiku 境外云。"""
+    """Run the transcription check once, write the EvidenceReviewReport and return it. It changes no
+    card state (verify_and_drive does). call_verify can be injected (tests; by default the gateway).
+    bypass_cache is only for a disaster-recovery retry that skips an old bad reply. Gateway, parsing
+    or shape failures raise DecisionError. region_check can be injected; by default it runs when the
+    verify slot's provider is overseas. A card that is not the user's own stops before any outside
+    call (OwnershipFailClosed)."""
     card_path = Path(card_path)
     if call_verify is None:
         def call(prompt: str) -> str:
@@ -1308,15 +1316,15 @@ def transcription_verify(
     else:
         call = call_verify
         technical_retry_call = call_verify
-    fm = _read_frontmatter(card_path)                      # 先读卡(系统性错误 → CardUnreadable/CardParseError)
-    _ownership_gate(fm)                                    # ④ 归属安全阀:entrusted 绝不上云 —— 最先、任何外呼(区域探测/Haiku)前
-    # 区域门:仅默认 MODEL_GATEWAY 真调用路径(境外 API)前挡;region_check 可注入(离线测各场景);
-    # mock 路径(注入 call_verify、未注入 region_check)不发真调用 → 跳过区域门(承 RESEARCH_ANALYSIS 同款门控)。
+    fm = _read_frontmatter(card_path)                      # read the card first (CardUnreadable, CardParseError)
+    _ownership_gate(fm)                                    # data ownership first, before any outside call
+    # The region check runs on the real gateway path only; tests inject region_check. With call_verify
+    # injected and no region_check, no real call is made and the check is skipped, as for the analysis.
     if region_check is not None:
         region_check()
     elif call_verify is None:
         _default_region_check()
-    chunk_texts = _load_chunk_texts(card_path)             # 系统性错误 → ChunkStoreError(raise)
+    chunk_texts = _load_chunk_texts(card_path)             # raises ChunkStoreError
     verify_provider, verify_model = _verify_slot()
     distill_model = fm.get("distill_model")
     same_src, same_reason = _same_source(distill_model, verify_provider, verify_model)
@@ -1326,14 +1334,14 @@ def transcription_verify(
     eligible_subjects = []
     for subj in subjects:
         chunk_text = "\n\n".join(chunk_texts.get(c, "") for c in subj.chunk_ids).strip()
-        if not subj.value_text.strip() or not chunk_text:  # 无字段值 / 无 chunk → 记 malformed、不发空 subject(控预算)
+        if not subj.value_text.strip() or not chunk_text:  # no value or no chunk: malformed, never sent empty
             problems.append(Problem(source="transcription", severity="warn", kind="malformed_subject",
                                     location=subj.location, field=subj.field,
                                     chunk_id=subj.chunk_ids[0] if subj.chunk_ids else None,
                                     detail="无字段值 / 无 chunk 原文,跳过回原文复核(未发空 subject)"))
             continue
         eligible_subjects.append(subj)
-        checked_locations.append(subj.location)            # 真进整批 prompt、真核过的 subject.location(per-entry 守卫:未核→unknown 非 verified)
+        checked_locations.append(subj.location)            # the subjects really sent; anything not listed stays unknown, never verified
         if subj.field in _CORE_FIELDS:
             checked_core.append(subj.location)
 
@@ -1378,7 +1386,7 @@ def transcription_verify(
             node_units.complete("final")
             problems.extend(final_problems)
 
-    # 精确相同的已验证 direct conflict 可在共享锚点字段间本地传播，不产生额外 API 调用。
+    # An identical verified direct conflict spreads to fields sharing the anchor, without another call.
     problems = _propagate_literal_direct_conflicts(
         problems,
         subjects,
@@ -1386,7 +1394,8 @@ def transcription_verify(
         checked_locations,
     )
 
-    # ④ verdict:任一 R1–R9 违规 → FAIL,否则 PASS(malformed 只记录、不驱动 verdict;同源低置信不改此阈值)
+    # The verdict: any R1 to R9 violation is FAIL, otherwise PASS (malformed subjects and low
+    # same-source confidence do not change it).
     verdict = "FAIL" if any(p.kind in _VALID_RULES for p in problems) else "PASS"
     confidence = _report.CONFIDENCE_SAME_SOURCE if same_src else _report.CONFIDENCE_CROSS_SOURCE
     upgrade_pending = ([f"{loc}(核心字段,同供应商复核,可配置其他供应商再核)" for loc in checked_core]
@@ -1403,7 +1412,7 @@ def transcription_verify(
 
 
 def make_evidence_review_source(*, call_verify=None, region_check=None):
-    """把搬运类校核包成 auto_review 的 decision_source:Callable[[Path], ReviewDecision]。"""
+    """The transcription check as auto_review's decision_source: Callable[[Path], ReviewDecision]."""
     def evidence_review_transcription_source(card_path):
         rep = transcription_verify(card_path, call_verify=call_verify, region_check=region_check)
         verdict = Verdict.PASS if rep.verdict == "PASS" else Verdict.FAIL
@@ -1413,13 +1422,15 @@ def make_evidence_review_source(*, call_verify=None, region_check=None):
 
 
 def verify_and_drive(card_path, *, call_verify=None, region_check=None, escalate_after=2) -> AutoResult:
-    """搬运类校核 → 经 auto_review(trigger=Trigger.EVIDENCE_REVIEW_VERDICT)驱动 KNOWLEDGE_ADMISSION。
-    PASS→active / FAIL→quarantined;MODEL_GATEWAY / 解析 / 区域门失败→DecisionError→重跑、连错 2 次→escalated(卡留 pending)。
-    **KNOWLEDGE_ADMISSION 不改**(2a 已激活 EVIDENCE_REVIEW_VERDICT + 认 ReviewDecision)。
+    """The transcription check driving the card state through auto_review
+    (trigger=Trigger.EVIDENCE_REVIEW_VERDICT): PASS makes the card active, FAIL quarantines it; gateway,
+    parsing or region failures raise DecisionError, are retried, and after two in a row the card is
+    escalated and stays pending.
 
-    ⚠ **v6.4 之四·上半起 = 旧整卡-verdict 路径,非分级信任准入**:它 FAIL→整卡 quarantine(正是分级信任要替代的行为)、
-    **不落 per-entry 信用档**。**分级信任准入统一走 `memorive.documents.card_review.grade_and_admit`**(EVIDENCE_REVIEW 判→per-field 信用档→带档进 active、
-    不整卡 quarantine)。本函数保留仅供「整卡 verdict」旧用途 / Verification 测试;分级信任管线**勿用它准入**(会绕过信用档标)。
-    〔跨路径安全兜底:build_card 从建卡起给 unknown 落 ⚠未核标,故即便误经本路径进 active 也不会「unknown 却无标」。〕"""
+    This is the older whole-card verdict path, not graded admission: FAIL quarantines the whole card
+    and no per-entry credibility is written. Graded admission goes through
+    memorive.documents.card_review.grade_and_admit; this function stays for the whole-card verdict and
+    its tests and must not be used to admit cards in the graded pipeline. (Even so, build_card marks
+    unchecked entries from the start, so a card admitted this way has no unmarked unknown entries.)"""
     return auto_review(Path(card_path), make_evidence_review_source(call_verify=call_verify, region_check=region_check),
                        trigger=Trigger.EVIDENCE_REVIEW_VERDICT, escalate_after=escalate_after)
