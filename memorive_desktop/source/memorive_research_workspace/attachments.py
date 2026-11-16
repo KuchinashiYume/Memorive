@@ -12,7 +12,7 @@ answer (JSON with a memo-* schema) is handed to the skill bridge instead.
 """
 import io,json,stat,threading
 from pathlib import Path
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 from .store import digest,uid,now,packed
 
 METHODS=frozenset({'memo.attach_files','memo.attachment_status','memo.thread_configure','memo.material_preview','memo.material_remove'})

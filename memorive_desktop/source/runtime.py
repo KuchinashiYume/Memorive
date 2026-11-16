@@ -27,7 +27,8 @@ import webbrowser
 from application_behavior import WindowsAutostartManager, decide_close_action
 from network_diagnostics import run_network_diagnostic
 from memorive_browser_companion.browsers import BROWSERS, FAMILIES, discover as discover_browsers, family as browser_family, select as select_browser
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.json_files import write_json_indented
+from memorive.platform.windows_paths import windows_io_path
 from notification_runtime import NOTIFICATION_KINDS, plan_windows_notification
 
 
@@ -4302,26 +4303,8 @@ class ProductApi:
                 "status": "PASS",
             }
 
-    @staticmethod
-    def _write_json_file(path: Path, payload: dict[str, Any]) -> None:
-        encoded = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8") + b"\n"
-        if len(encoded) > 4 * 1024 * 1024:
-            raise ValueError("JSON_EXPORT_TOO_LARGE")
-        path = Path(path).resolve(strict=False)
-        target_io = windows_io_path(path)
-        if not windows_io_path(path.parent).is_dir():
-            raise ValueError("JSON_EXPORT_PARENT_MISSING")
-        temporary = path.parent / f".json.{os.getpid()}.{uuid.uuid4().hex}.tmp"
-        temporary_io = windows_io_path(temporary)
-        try:
-            with temporary_io.open("xb") as stream:
-                stream.write(encoded)
-                stream.flush()
-                os.fsync(stream.fileno())
-            os.replace(temporary_io, target_io)
-        finally:
-            if temporary_io.exists():
-                temporary_io.unlink()
+    # The profile and UI state files are written whole, indented (memorive/platform/json_files.py).
+    _write_json_file = staticmethod(write_json_indented)
 
     def _save_json_dialog(self, payload: dict[str, Any], filename: str) -> dict[str, Any]:
         if self._window is None:

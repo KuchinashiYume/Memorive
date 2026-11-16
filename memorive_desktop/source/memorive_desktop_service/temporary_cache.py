@@ -10,7 +10,7 @@ import shutil
 import time
 from pathlib import Path
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 SPARE_SECONDS = 60 * 60     # a batch staged within the last hour may still be on its way into the inbox
 

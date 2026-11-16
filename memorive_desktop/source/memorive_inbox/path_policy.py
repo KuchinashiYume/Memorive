@@ -6,7 +6,7 @@ import re
 import stat
 from typing import Any, Mapping, Sequence
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 from .contracts import IMPORTABLE_EXTENSIONS, InboxError
 

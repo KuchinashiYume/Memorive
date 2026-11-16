@@ -12,7 +12,7 @@ is called; the user opens the folder in the app.
 import re
 from pathlib import Path
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 from .evidence import material_layer, safe_path, source_document_hash
 from .store import digest, now, packed, uid

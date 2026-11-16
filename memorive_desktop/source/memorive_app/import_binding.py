@@ -7,7 +7,7 @@ import re
 import stat
 import uuid
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 
 _SAFE_SUFFIX = re.compile(r"^\.[A-Za-z0-9]{1,16}$")

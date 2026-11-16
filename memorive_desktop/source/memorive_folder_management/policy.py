@@ -9,30 +9,11 @@ import re
 from typing import Any, Mapping
 
 from memorive.platform.naming import display_title, file_name, folder_name
+from memorive.platform.windows_paths import windows_io_path
 
 
 POLICY_RELATIVE_PATH = Path("contracts") / "extensions" / "DesktopFolderManagementPolicy.json"
 _SAFE_PAPER_ID = re.compile(r"[A-Za-z0-9._-]{1,128}")
-
-
-def windows_io_path(path: Path | str) -> Path:
-    """Use Windows' extended namespace without changing the physical location.
-
-    Literature titles occur in both folder and artifact names. Their paths can
-    exceed MAX_PATH even under a normal user profile. Do not require a machine
-    registry change or shorten a user's document identity to make I/O work.
-    Resolve first so dot components and relative paths retain normal semantics.
-    """
-    resolved = Path(path).resolve(strict=False)
-    if os.name != "nt":
-        return resolved
-    prefix = os.sep * 2 + "?" + os.sep
-    rendered = str(resolved)
-    if rendered.startswith(prefix):
-        return resolved
-    if rendered.startswith(os.sep * 2):
-        return Path(prefix + "UNC" + os.sep + rendered[2:])
-    return Path(prefix + rendered)
 
 
 @dataclass(frozen=True)

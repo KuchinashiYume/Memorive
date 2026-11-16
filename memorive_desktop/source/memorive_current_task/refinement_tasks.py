@@ -11,7 +11,7 @@ from typing import Any, Mapping
 import uuid
 
 from .contracts import canonical_json_bytes, state_presentation
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 
 REFINEMENT_NODES = (

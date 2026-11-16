@@ -4,7 +4,7 @@ from pathlib import Path
 import os
 from typing import Any, Mapping, Sequence
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 
 class DirectoryPolicy:

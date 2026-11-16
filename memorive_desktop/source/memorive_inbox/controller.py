@@ -10,7 +10,7 @@ from functools import wraps
 from typing import Any, Mapping, Sequence
 
 from memorive_app.import_binding import FileImportBinder
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 from .contracts import (
     CONTRACT_REVISION,

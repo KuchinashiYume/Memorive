@@ -23,7 +23,7 @@ import time
 from typing import Any, Callable, Mapping
 import uuid
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 from .browsers import BROWSERS, FAMILIES, discover as discover_browsers, family as browser_family, select as select_browser
 

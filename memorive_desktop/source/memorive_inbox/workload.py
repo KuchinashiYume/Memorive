@@ -5,7 +5,7 @@ import re
 import struct
 import zipfile
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 
 def _zip_count(path: Path, pattern: re.Pattern[str]) -> int | None:

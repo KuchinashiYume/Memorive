@@ -8,7 +8,7 @@ import re
 from typing import Any, Iterable
 from urllib.parse import urlparse, urlsplit
 
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 from .models import (
     ArchiveInputError,

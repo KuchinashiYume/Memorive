@@ -19,7 +19,7 @@ import uuid
 from memorive_app.durable_store import DurableJobStore
 from memorive_app.facade import ApplicationFacade
 from memorive_folder_management import ProfileFolderManager
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 from .adapters import RealFacadeAdapter
 from .composite_adapter import CompositeServiceAdapter

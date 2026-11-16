@@ -20,7 +20,7 @@ import collections, contextlib, contextvars, math, os, re, stat
 from pathlib import Path
 from urllib.parse import quote
 from .store import digest,packed,now
-from memorive_folder_management.policy import windows_io_path
+from memorive.platform.windows_paths import windows_io_path
 
 DENY_DIRS={'.git','.obsidian','.codex','.claude','node_modules','__pycache__','.venv','venv'}
 EXTENSIONS={'.md','.txt','.json','.pdf'}
