@@ -3312,8 +3312,8 @@
     },
     {
       "path": "source/memorive/models/cli/verification_transport.py",
-      "sha256": "640bfc3c0b0177dfe889ec73c24c66a735362c2a48f8d01dd282a1555863d7de",
-      "bytes": 17424
+      "sha256": "4552e41d641474de35c10397459ff86adc1f05221b5e6cb2e288090ecd0136e1",
+      "bytes": 17413
     },
     {
       "path": "source/memorive/models/cli/windows.py",
@@ -4987,8 +4987,8 @@
     },
     {
       "path": "source/memorive_workflow/model_bridge.py",
-      "sha256": "a77b229416a7da0a7aa3979b00d51906938398e920529308582151df2293e0dd",
-      "bytes": 49590
+      "sha256": "39cede0473ea73bd0676ebba705d7821edeb0d0c9a089593f7b8dfcb56d27a6e",
+      "bytes": 49586
     },
     {
       "path": "source/memorive_workflow/node_progress.py",

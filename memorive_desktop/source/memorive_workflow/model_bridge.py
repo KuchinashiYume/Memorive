@@ -462,7 +462,7 @@ class CoreModelBridge:
         )
         # Bind reusable context to its content and role, independent of attempt paths.
         if node["profile_kind"] == "CLI" and execution_profile["service"].get("adapter_id") == "codex_cli":
-            from memorive_settings.cache_session import REVISION, split_source
+            from model_gateway.cache_session import REVISION, split_source
             pieces = split_source(prompt)
             if pieces is not None:
                 from research_analysis.revision import REPAIR_SCHEMA
