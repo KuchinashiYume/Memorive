@@ -66,9 +66,8 @@ def make_controller(root: Path, runner: Runner) -> SettingsController:
     store = SettingsStore(root / "profile", default_factory=lambda: default_settings(workspace_root=str(root), artifact_root=str(root)))
     controller = SettingsController(
         store=store, credentials=CredentialReferenceManager(), capabilities=CapabilityProjection([], revision="test"),
-        directory_policy=DirectoryPolicy([root]),
+        directory_policy=DirectoryPolicy([root]), model_validation_runner=runner,
         local_profile_resolver=lambda ref: {"local:chat": dict(CHAT), "local:embed": dict(EMBEDDING)}.get(ref))
-    controller.model_validation_runner = runner
     return controller
 
 

@@ -15,6 +15,7 @@ import threading
 
 from memorive_settings.call_ledger import ExecutionControlSignal, call_scope, execution_checkpoint, execution_control
 from memorive_settings.contracts import canonical_sha256, scan_sensitive
+from memorive_settings.store import write_json_atomic
 from memorive_settings.model_capabilities import infer_api_model_capability
 
 from . import retry
@@ -31,9 +32,10 @@ def require_snapshot_id(value):
 class ReportProfileExecution:
     """Freeze a model profile chosen in Settings and send one request for it.
 
-    `controller` is the settings controller. It gives the settings store (the chosen profiles, and the
-    folder the snapshots go in), local_profile_resolver for local models, model_validation_runner,
-    which sends the request, and _record_validation_effects, which counts the calls made.
+    It is given what it uses: the settings store (the chosen profiles, and the profile folder the
+    snapshots go in), the model runner that sends the request (LiveModelValidationRunner in
+    memorive_settings/model_validation.py), resolve_local_profile for local models, and count_calls,
+    which adds a result's calls to the settings service's counters.
     """
     periods = PERIODS
     purpose_prefix = "report_"
@@ -41,16 +43,19 @@ class ReportProfileExecution:
     output_tokens = None
     capability = 'CHAT'
 
-    def __init__(self, controller):
-        self.controller = controller
-        self.root = controller.store.profile_root / self.directory_name
+    def __init__(self, *, store, runner, resolve_local_profile, count_calls):
+        self.store = store
+        self.runner = runner
+        self.resolve_local_profile = resolve_local_profile
+        self.count_calls = count_calls
+        self.root = store.profile_root / self.directory_name
         self.lock = threading.RLock()
 
     def freeze(self, *, run_id, period, profile_ref):
         """Copy the chosen profile into <snapshot id>.json; later changes in Settings do not affect the run."""
         if not isinstance(run_id, str) or not re.fullmatch(r'research-[a-f0-9]{24}', run_id) or period not in self.periods:
             raise ValueError('REPORT_PROFILE_REQUEST_INVALID')
-        current = self.controller.store.load(recover_corruption=False)
+        current = self.store.load(recover_corruption=False)
         kind, service, model = self._profile(current['settings'], profile_ref)
         binding = {'run_id': run_id, 'period': period, 'profile_ref': profile_ref, 'profile_kind': kind,
                    'service': copy.deepcopy(service), 'model': copy.deepcopy(model),
@@ -61,7 +66,7 @@ class ReportProfileExecution:
             self.root.mkdir(parents=True, exist_ok=True)
             path = self.root / (identity + '.json')
             if not path.exists():
-                self.controller.store._atomic_write(path, binding)
+                write_json_atomic(path, binding)
         if kind == 'API':
             parts = (str(model.get(k) or '').strip() for k in ('model_name', 'tier', 'thinking_mode'))
             display_name = '-'.join(part for part in parts if part)
@@ -87,7 +92,7 @@ class ReportProfileExecution:
                     break
         if service is None and isinstance(profile_ref, str) and profile_ref.startswith('local:'):
             kind = 'LOCAL'
-            resolver = self.controller.local_profile_resolver
+            resolver = self.resolve_local_profile
             service = resolver(profile_ref) if callable(resolver) else None
             model = service
             if service and (service.get('execution_eligible') is not True or service.get('exact_identity_available') is not True
@@ -121,8 +126,8 @@ class ReportProfileExecution:
 
     def _finish(self, snapshot_id, result):
         """Keep the result next to the snapshot and count the calls it made."""
-        self.controller.store._atomic_write(self.root / (snapshot_id + '.result.json'), result)
-        self.controller._record_validation_effects(result)
+        write_json_atomic(self.root / (snapshot_id + '.result.json'), result)
+        self.count_calls(result)
         return result
 
     def execute(self, *, snapshot_id, prompt, response_schema):
@@ -150,7 +155,7 @@ class ReportProfileExecution:
 
     def _execute_model(self, binding, snapshot_id, prompt, response_schema, output_tokens):
         """Send the request through the model validation runner."""
-        return dict(self.controller.model_validation_runner.execute_structured_chat(
+        return dict(self.runner.execute_structured_chat(
             profile_kind=binding['profile_kind'], service=binding['service'], model=binding['model'],
             prompt=prompt, response_schema=response_schema, purpose=self.purpose_prefix + binding['period'],
             **({'max_output_tokens': output_tokens} if output_tokens else {})))
@@ -175,13 +180,13 @@ class ResearchChatExecution(ReportProfileExecution):
             result = super()._execute_model(binding, snapshot_id, prompt, response_schema, output_tokens)
             scan_sensitive(result)
             path = self.root / (snapshot_id + '.attempt-' + str(attempt + 1) + '.result.json')
-            self.controller.store._atomic_write(path, result)
+            write_json_atomic(path, result)
             attempts.append({'attempt': attempt + 1, 'status': result.get('status'),
                              'reason': result.get('reason'), 'result_file': path.name})
             if attempt == retry.RESEARCH_CHAT_RETRIES or not retry.research_chat_should_retry(result):
                 break
             # execute() counts the final attempt; count the failed ones here.
-            self.controller._record_validation_effects(result)
+            self.count_calls(result)
         result['recovery_attempts'] = attempts
         return result
 
@@ -207,7 +212,7 @@ class ResearchChatExecution(ReportProfileExecution):
             binding = self._binding(snapshot_id)
             self._claim(snapshot_id, {'image_sha256': canonical_sha256({'image': image_base64}), 'purpose': 'research_attachment'})
         with call_scope(job_id=binding['run_id'], profile_ref=binding['profile_ref'], task_type='research_attachment'):
-            result = dict(self.controller.model_validation_runner.execute_ocr_image(
+            result = dict(self.runner.execute_ocr_image(
                 profile_kind=binding['profile_kind'], service=binding['service'], model=binding['model'], image_bytes=data,
                 mime_type=mime_type, prompt=prompt, purpose='research_attachment', max_output_tokens=None, timeout_seconds=600))
         scan_sensitive(result)
@@ -231,7 +236,7 @@ class ResearchEmbeddingExecution(ReportProfileExecution):
             raise ValueError('REPORT_PROFILE_SNAPSHOT_INVALID')
         self._claim(snapshot_id, {'behavior_sha256': canonical_sha256({'inputs': inputs, 'purpose': 'research_retrieval'})})
         with call_scope(job_id=binding['run_id'], profile_ref=binding['profile_ref'], task_type='research_retrieval'):
-            result = dict(self.controller.model_validation_runner.execute_embeddings(
+            result = dict(self.runner.execute_embeddings(
                 profile_kind=binding['profile_kind'], service=binding['service'], model=binding['model'], inputs=inputs,
                 purpose='research_retrieval', timeout_seconds=600))
         scan_sensitive(result)
@@ -249,7 +254,7 @@ class AIBriefingExecution(ReportProfileExecution):
     def cancel(self, snapshot_id):
         if not isinstance(snapshot_id, str) or not re.fullmatch('[a-fA-F0-9]{64}', snapshot_id) or not (self.root / (snapshot_id + '.json')).is_file():
             raise ValueError('AI_SNAPSHOT_INVALID')
-        self.controller.store._atomic_write(self.root / (snapshot_id + '.cancel.json'), {'cancel_requested': True})
+        write_json_atomic(self.root / (snapshot_id + '.cancel.json'), {'cancel_requested': True})
         return {'status': 'CANCELLING'}
 
     def execute(self, **kwargs):
@@ -266,5 +271,5 @@ class AIBriefingExecution(ReportProfileExecution):
                 return super().execute(**kwargs)
         except ExecutionControlSignal as signal:
             result = {'status': 'CANCELLED', 'reason': 'AI_MODEL_CANCELLED', 'execution_receipt': signal.execution_receipt or {}}
-            self.controller.store._atomic_write(self.root / (snapshot_id + '.cancelled-result.json'), result)
+            write_json_atomic(self.root / (snapshot_id + '.cancelled-result.json'), result)
             return result

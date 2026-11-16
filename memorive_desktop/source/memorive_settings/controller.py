@@ -170,9 +170,9 @@ class SettingsController:
         self.local_profile_resolver = local_profile_resolver
         # Model runs for reports, the AI briefing and research Q&A (memorive_model_execution).
         from memorive_model_execution import AIBriefingExecution, ReportProfileExecution, ResearchChatExecution
-        self.report_execution = ReportProfileExecution(self)
-        self.ai_briefing_execution = AIBriefingExecution(self)
-        self.research_chat_execution = ResearchChatExecution(self)
+        self.report_execution = ReportProfileExecution(**self._execution_parts())
+        self.ai_briefing_execution = AIBriefingExecution(**self._execution_parts())
+        self.research_chat_execution = ResearchChatExecution(**self._execution_parts())
         self.external_data_sources = external_data_sources or ExternalDataSources(
             store.profile_root / "external_data"
         )
@@ -1032,6 +1032,16 @@ class SettingsController:
             raise ValueError("MODEL_VALIDATION_RESULT_STATUS_INVALID")
         return str(status)
 
+    def _execution_parts(self) -> dict[str, Any]:
+        """What a model execution object (memorive_model_execution) is given: the store, the runner
+        that sends requests, the local profile resolver and the call counter."""
+        return {
+            "store": self.store,
+            "runner": self.model_validation_runner,
+            "resolve_local_profile": self.local_profile_resolver,
+            "count_calls": self._record_validation_effects,
+        }
+
     def _record_validation_effects(self, result: Mapping[str, Any]) -> None:
         self.metrics["model_validation_requests"] += 1
         for field in (
@@ -1424,11 +1434,11 @@ class SettingsController:
 
     def research_embedding_freeze(self, *, run_id, profile_ref):
         from memorive_model_execution import ResearchEmbeddingExecution
-        return ResearchEmbeddingExecution(self).freeze(run_id=run_id,period='embedding',profile_ref=profile_ref)
+        return ResearchEmbeddingExecution(**self._execution_parts()).freeze(run_id=run_id,period='embedding',profile_ref=profile_ref)
 
     def research_embedding_execute(self, *, snapshot_id, inputs):
         from memorive_model_execution import ResearchEmbeddingExecution
-        return ResearchEmbeddingExecution(self).execute(snapshot_id=snapshot_id,inputs=inputs)
+        return ResearchEmbeddingExecution(**self._execution_parts()).execute(snapshot_id=snapshot_id,inputs=inputs)
 
     def research_chat_freeze(self, *, run_id, profile_ref):
         return self.research_chat_execution.freeze(run_id=run_id,profile_ref=profile_ref)
