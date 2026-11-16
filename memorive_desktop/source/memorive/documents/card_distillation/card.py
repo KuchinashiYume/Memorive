@@ -1,11 +1,13 @@
-"""EVIDENCE_EXTRACTION 卡片装配 + 落盘。
+"""Building and writing a card.
 
-**模型 JSON 只是中间产物;本模块把校验后的字段转成严格符合 D1 card_schema(v4)的 [Card] frontmatter**
-(承约束:不得把 {value,anchors} 私自当卡片格式落盘)。
-范围:核心 7 字段 + 每字段 by_field 锚点(**v4 第二刀:per-锚点对象列表 [{chunk_id, quote, section_page}]**,高风险字段
-挂逐字 quote、综合字段 quote 可 null)+ 机制字段(Step 1);key_data 关键数据块(Step 2:每条
-{value,unit,metric,sample,stat,quote,chunk_id,needs_review}、只挂 chunk_id 不落盘 section_page;**v3 第一刀起每条挂逐字原文
-quote**、蒸馏当场 substring 验真、不过整卡 fail-closed,承之八);比较上下文/局限展望/术语引用 三附属留 Step 3。
+The model's JSON is only an intermediate; this module turns the checked fields into [Card] front
+matter that follows the card schema exactly (the {value, anchors} shape is never written as a card).
+It covers the 7 core fields with each field's by_field anchors (a list of anchor objects
+[{chunk_id, quote, section_page}]; high-risk fields carry a verbatim quote, combined fields may have a
+null quote) and the bookkeeping fields; the key_data block (each entry {value, unit, metric, sample,
+stat, quote, chunk_id, needs_review}, with chunk_id but no section_page written; each quote is
+verbatim from the source, checked as a substring during distillation, and a failure refuses the whole
+card); and the extra blocks (comparison context, limitations and outlook, terms and citations).
 """
 from __future__ import annotations
 
@@ -19,39 +21,43 @@ import yaml
 from memorive.documents.card_distillation.config import CARD_SCHEMA_VERSION
 from memorive.documents.card_distillation.errors import CardExistsError
 
-# ── 分级信任信用档(v5·上半;承 v6.4 之四)──────────────────────────────
-# 每字段 / 每 key_data 一个:EVIDENCE_REVIEW 无 flag=verified / EVIDENCE_REVIEW 疑锚点归位=anchor_uncertain / EVIDENCE_REVIEW 真违规=flagged;
-# EVIDENCE_EXTRACTION 建卡时未跑 EVIDENCE_REVIEW=unknown。旧 v1–v4 卡缺 field_credibility → 读端当 unknown(read_field_credibility 兜底)。
+# -- credibility (graded admission) ---------------------------------------------------
+# One for each field and each key_data entry: no review finding = verified, a probable anchor
+# misplacement = anchor_uncertain, a real violation = flagged; not reviewed yet = unknown, which is how a
+# card starts. Older v1 to v4 cards without field_credibility read as unknown (read_field_credibility).
 CRED_VERIFIED = "verified"
 CRED_ANCHOR_UNCERTAIN = "anchor_uncertain"
 CRED_FLAGGED = "flagged"
 CRED_UNKNOWN = "unknown"
 CREDIBILITIES = frozenset({CRED_VERIFIED, CRED_ANCHOR_UNCERTAIN, CRED_FLAGGED, CRED_UNKNOWN})
-# 未核默认危险标(承外审第三轮 [中·跨路径]):**从建卡起就带**——任何 admit 路径(grade_and_admit 之外的
-# verify_and_drive / manual_approve / placeholder)都不产出「unknown 却无标」进 active。verified 才 danger=None。
-# grading._mark 的 unknown 分支复用这两个常量(建卡时标 = 落档时标,逐字一致)。
+# The "not checked" mark is on a card from the start, so no way of admitting it (verify_and_drive,
+# manual_approve or placeholder, besides grade_and_admit) puts an unknown entry into active without a
+# mark; only verified has danger=None. grading._mark uses these two constants for unknown, so the text
+# is the same either way.
 DANGER_UNKNOWN_KD = "⚠ 数值 EVIDENCE_REVIEW 未核(未收为异源核对象 / 锚点缺失 / 缺 chunk)·勿直接引·须核原文"
 DANGER_UNKNOWN_FIELD = "⚠ 该字段 EVIDENCE_REVIEW 未核(未收为异源核对象 / 锚点缺失 / 缺 chunk)·勿直接引·须核原文"
-_FENCE_RE = re.compile(r"(?m)^---[ \t]*\r?$")   # CRLF 安全 frontmatter fence(与 memorive/documents/card_states/card_io 同款)
+_FENCE_RE = re.compile(r"(?m)^---[ \t]*\r?$")   # CRLF-safe front matter fence (the same as in memorive/documents/card_states/card_io)
 
-# 6 个核心内容字段(第 7 字段 source_anchor 是贯穿性锚点,单独装配)。
+# The six core content fields (the 7th, source_anchor, anchors all of them and is built apart).
 CONTENT_FIELDS = ["research_question", "research_object", "method",
                   "key_results", "author_conclusion", "boundary_conditions"]
-# 列表型 vs 标量型(承 D1 第一节类型):列表=字符串列表,其余=字符串。
+# List fields and string fields: a list field is a list of strings, the rest are strings.
 LIST_FIELDS = {"research_object", "method", "boundary_conditions"}
 FINAL_COMPLETION_STATUSES = frozenset({"complete", "passed_with_omissions"})
 
-# ── 卡片主语言粗判(仅用于系统标签本地化:section_page 缺省 / 正文注释;绝不碰字段内容)──
-# 承 v6.3 之七「数据层不残留异语」:Prompt v4 让 7 字段随原文语言,但少数**系统生成**、Prompt
-# 覆盖不到的死角(缺省占位、正文 HTML 注释、model 兜底)会把中文漏进英文卡,须跟随卡片语言。
-_HAN_RE = re.compile(r"[一-鿿]")        # 汉字
-_KANA_RE = re.compile(r"[぀-ヿ]")       # 日文假名(平/片)
+# -- rough main language of a card (only for system labels: the section_page default and the body comment) --
+# The prompt keeps the 7 fields in the source's language, but a few texts the system writes and the
+# prompt does not reach (defaults, the body HTML comment, model fallback) would put Chinese into an
+# English card, so they follow the card's language. Field content is never changed.
+_HAN_RE = re.compile(r"[一-鿿]")        # Han characters
+_KANA_RE = re.compile(r"[぀-ヿ]")       # Japanese kana (hiragana and katakana)
 
 
 def detect_card_lang(field_values) -> str:
-    """粗判卡片主语言 → 'zh' | 'en',仅决定系统标签语言、**不改任何字段内容**。
-    判据:含假名 → 'en'(日文等走中性英文,绝不给非中文卡错挂中文);否则汉字占比 ≥ 20% → 'zh';
-    其余(英文为主、偶发汉字被占比阈值挡)→ 'en'。→ **英文卡永不误挂中文标签**。"""
+    """Rough main language of a card: 'ja', 'zh' or 'en'. It only picks the language of system labels
+    and never changes field content.
+    Kana present: 'ja'; otherwise Han characters at 20% or more: 'zh'; anything else (mostly English,
+    a few Han characters kept out by the threshold): 'en'. So an English card never gets Chinese labels."""
     parts = []
     for v in field_values:
         parts.extend(v if isinstance(v, list) else [v])
@@ -63,9 +69,10 @@ def detect_card_lang(field_values) -> str:
     return "zh" if len(_HAN_RE.findall(s)) / len(s) >= 0.20 else "en"
 
 
-# ── key_data 结构化模板标签(系统脚手架:随 card_lang 由系统定,承之七英文卡永不挂中文标签)──
-# sample 四槽 = R4 作用域落点;stat 三槽 = R3 统计语义落点。**标签由系统定、内容随原文语言**。
-# 模型只填内容 + 逐字照用注入的标签;validator 按 card_lang 认对应标签集(见 distill._validate_key_data)。
+# -- key_data template labels (system scaffolding chosen by card_lang; an English card never gets Chinese labels) --
+# The four sample slots hold R4's scope, the three stat slots R3's statistics. The labels are the
+# system's, the content is in the source's language. The model fills in content and uses the given
+# labels verbatim; the validator accepts the label set of card_lang (distill._validate_key_data).
 KEY_DATA_SAMPLE_SLOTS = ("group", "phase_time", "subprocess", "comparator")
 KEY_DATA_STAT_SLOTS = ("stat_type", "n", "significance")
 _KEY_DATA_LABELS = {
@@ -80,11 +87,12 @@ _KEY_DATA_LABELS = {
 
 
 def key_data_labels(lang: str) -> dict:
-    """按卡片语言取 key_data 模板标签集(承之七:系统标签由系统定、不混语;非 zh 一律走中性英文)。"""
+    """The key_data template labels for a card's language (system labels are set by the system and
+    never mixed; a language without its own set gets English)."""
     return _KEY_DATA_LABELS.get(lang, _KEY_DATA_LABELS["en"])
 
 
-# 正文区占位注释(随卡片语言;承之七:系统标签不残留异语)。系统生成、非文献内容。
+# The body's placeholder comment, in the card's language; written by the system, not paper content.
 _BODY_COMMENT = {
     "ja": "<!-- 本文: 原文に忠実な要約。構造化フィールド、key_data、比較・限界・用語の補助情報は frontmatter に保存。個人的な分析は KNOWLEDGE_FEEDBACK に属します。 -->\n",
     "zh": ("<!-- 正文区:纯人读忠实提要(结构化字段 + key_data + 三附属[比较上下文/局限展望/术语引用] 均在 frontmatter;"
@@ -96,7 +104,7 @@ _BODY_COMMENT = {
 
 
 class _CardDumper(yaml.SafeDumper):
-    """长文本(含换行)用 `|` 块标量落盘(承 D1「长文本默认进 frontmatter 的 | 多行块」)。"""
+    """Writes long text (with line breaks) as a `|` block scalar, the schema's form for long text."""
 
 
 def _str_representer(dumper, data):
@@ -111,15 +119,19 @@ def build_card(*, paper_id: str, title: str, data_ownership: str,
                fields: dict, by_field: dict, distill_model: str, distilled_at: str,
                schema_version: int, key_data: list | None = None,
                aux: dict | None = None) -> dict:
-    """把校验后的字段组装成严格 D1 序的 frontmatter dict。
-    fields: {字段: value};by_field: {字段: [{chunk_id, quote, section_page}, …]}(v4 第二刀 per-锚点;quote 可 null);
-    key_data: 已校验的关键数据条目列表(每条 {value,unit,metric,sample,stat,quote,chunk_id,needs_review});
-      附属块·必含(承 card_schema §三①);**只挂 chunk_id、不落盘 section_page**(页码由 chunk_id 反查、
-      仅渲染/日志/校核视图派生显示,非 schema 变更);**quote 为逐字原文**(v3 第一刀,蒸馏当场过 substring 验真、承之八)。
-    aux: 三附属抽取结果(Configuration 步3)——**落盘三态**:
-      · aux=dict(成功)→ 四块按 card_schema §三②③④ 落(某块空列表也落);
-      · aux=None(整体失败)→ 四块**全不落**(不带 aux 的 pending 卡,承决策:低风险不拖垮核心+key_data)。
-      (RUNTIME_LOG 另有 aux_call/aux_finished/aux_failed 区分「未运行 / 失败 / 成功但空」。)"""
+    """Put the checked fields into a front matter dict in the schema's order.
+    fields: {field: value}; by_field: {field: [{chunk_id, quote, section_page}, ...]} (one object per
+      anchor; quote may be null);
+    key_data: the checked key_data entries (each {value, unit, metric, sample, stat, quote, chunk_id,
+      needs_review}), a required block. Only chunk_id is written, not section_page (the page is looked
+      up from chunk_id for display, logs and the review view); quote is verbatim from the source
+      (checked as a substring during distillation).
+    aux: the extra blocks:
+      - a dict (success): the four blocks are written (empty lists too);
+      - None (failure): none of the four is written (a pending card without them; their failure does
+        not affect the core fields and key_data).
+      (The runtime log has aux_call / aux_finished / aux_failed to tell "not run", "failed" and
+      "succeeded but empty" apart.)"""
     card_language = detect_card_lang(fields.get(f) for f in CONTENT_FIELDS)
     chinese = card_language == "zh"
     unknown_number = DANGER_UNKNOWN_KD if chinese else "Unverified value; check the source before citing."
@@ -128,47 +140,50 @@ def build_card(*, paper_id: str, title: str, data_ownership: str,
         unknown_number = '未検証の数値です。引用前に原文を確認してください。'
         unknown_field = '未検証の項目です。引用前に原文を確認してください。'
     fm: dict = {"title": title}
-    for f in CONTENT_FIELDS:                       # 6 内容字段(D1 类型)
+    for f in CONTENT_FIELDS:                       # the six content fields
         fm[f] = fields[f]
-    fm["source_anchor"] = {                        # 第 7 字段:贯穿性锚点(v4 by_field:per-锚点对象列表)
+    fm["source_anchor"] = {                        # the 7th field, which anchors all the others (by_field: a list of anchor objects per field)
         "paper_id": paper_id,
-        "section_page": None,                      # 旧版整卡级锚点:v2 起不作 Configuration 主锚点、留 v1 兼容
+        "section_page": None,                      # the old whole-card anchor: not the main anchor since v2, kept for v1 cards
         "chunk_id": None,
-        # v4(source_anchor v3 第二刀):每字段 = 锚点对象列表 [{chunk_id, quote, section_page}, …](quote 可 null)
+        # each field: a list of anchor objects [{chunk_id, quote, section_page}, ...] (quote may be null)
         "by_field": {f: [dict(a) for a in by_field[f]] for f in CONTENT_FIELDS},
     }
-    # 附属块·必含(空列表合法:纯定性论文;承决策③校验在 distill)。
-    # v5 分级信任:每条加信用档位(EVIDENCE_EXTRACTION 建卡未跑 EVIDENCE_REVIEW → unknown + **⚠未核标**;grade_and_admit 落 verified〔无标〕/anchor/flagged〔各带标〕)。
+    # A required block (an empty list is fine for a purely qualitative paper; checked in distill).
+    # Each entry starts unknown with the not-checked mark; grade_and_admit sets verified (no mark),
+    # anchor_uncertain or flagged (each with a mark).
     fm["key_data"] = [{**dict(e), "credibility": CRED_UNKNOWN, "credibility_note": None, "danger": unknown_number}
                       for e in (key_data or [])]
-    if aux is not None:                            # 三附属·仅存储/可选:aux 成功才落(四块;空列表也落);失败→四块全不落(三态)
+    if aux is not None:                            # extra blocks, stored only: all four when aux succeeded (empty lists too), none after a failure
         fm["comparison_context"] = list(aux.get("comparison_context") or [])
         fm["author_limitations_outlook"] = (aux.get("author_limitations_outlook")
                                             or {"limitations": [], "outlook": []})
         fm["terms"] = list(aux.get("terms") or [])
         fm["citations"] = list(aux.get("citations") or [])
-    # v5 分级信任·上半:顶层 per-字段信用档(6 核心字段;EVIDENCE_EXTRACTION 建卡 unknown + **⚠未核标**、EVIDENCE_REVIEW grade_and_admit 落档)。
+    # top-level credibility of the six core fields: unknown with the not-checked mark until grade_and_admit
     fm["field_credibility"] = {f: {"credibility": CRED_UNKNOWN, "note": None, "danger": unknown_field}
                                for f in CONTENT_FIELDS}
     fm["completion_status"] = "pending_review"
     fm["omissions"] = []
-    fm["review_status"] = "pending"                # 前向依赖过渡:不放行 Active(KNOWLEDGE_ADMISSION 待 Intake)
-    fm["is_derived"] = False                       # 文献卡恒 false;衍生条目归 KNOWLEDGE_FEEDBACK
-    fm["data_ownership"] = data_ownership          # 承 DocumentIngest/D0
+    fm["review_status"] = "pending"                # not active yet; the card state step admits it
+    fm["is_derived"] = False                       # always false for a paper card; derived entries belong to knowledge feedback
+    fm["data_ownership"] = data_ownership          # from document intake
     fm["schema_version"] = schema_version
-    fm["distill_model"] = distill_model            # 留痕:MODEL_GATEWAY 回显实际档
-    fm["distilled_at"] = distilled_at              # 留痕:带时区到分钟,只增不改随重做另起
+    fm["distill_model"] = distill_model            # the model the gateway reports it used
+    fm["distilled_at"] = distilled_at              # local time with offset, to the minute; a redo writes a new one
     return fm
 
 
 def write_card(card_path: Path, fm: dict, *, overwrite: bool = False) -> Path:
-    """落 [Card].md:frontmatter(严格序、长文本 | 块)+ 空正文占位(占位注释随卡片语言,承之七)。
-    **默认不覆盖**:目标已存在且 not overwrite → `CardExistsError`(承 ARTIFACT_REGISTRY 数据永不覆盖;要覆盖须显式 overwrite=True)。"""
+    """Write [Card].md: the front matter (schema order, long text as | blocks) and an empty body with a
+    placeholder comment in the card's language.
+    No overwrite by default: when the target exists and overwrite is false, CardExistsError (stored
+    data is never overwritten; pass overwrite=True to replace it)."""
     if card_path.exists() and not overwrite:
         raise CardExistsError(f"[Card] 已存在、默认不覆盖: {card_path}(重蒸馏要覆盖须显式 overwrite=True)。")
     front = yaml.dump(fm, Dumper=_CardDumper, allow_unicode=True, sort_keys=False,
                       default_flow_style=False, width=10_000)
-    lang = detect_card_lang([fm.get(f) for f in CONTENT_FIELDS])   # 占位注释随卡片语言(之七:系统标签不残留异语)
+    lang = detect_card_lang([fm.get(f) for f in CONTENT_FIELDS])   # the placeholder comment follows the card's language
     body = "---\n" + front + "---\n\n" + _BODY_COMMENT[lang]
     if overwrite:
         fd, temporary = tempfile.mkstemp(dir=card_path.parent, prefix=".card_publish_", suffix=".tmp")
@@ -191,8 +206,8 @@ def write_card(card_path: Path, fm: dict, *, overwrite: bool = False) -> Path:
 
 
 def read_field_credibility(fm: dict) -> dict:
-    """读端兼容:取顶层 field_credibility;旧 v1–v4 卡缺该键 → 6 核心字段全 `unknown`(不臆断已校验、也不报错)。
-    承 v5 分级信任「旧卡缺 credibility 当 unknown」。"""
+    """The top-level field_credibility; an older v1 to v4 card without it gives unknown for all six
+    core fields (neither taken as checked nor an error)."""
     fc = fm.get("field_credibility")
     if isinstance(fc, dict):
         return fc
@@ -200,33 +215,36 @@ def read_field_credibility(fm: dict) -> dict:
 
 
 def apply_field_credibility(card_path: Path, field_cred: dict, key_data_cred: list) -> Path:
-    """把 EVIDENCE_REVIEW 分级信任档写进**已有卡**(grade_and_admit 调):更新顶层 field_credibility + 每条 key_data 的
-    credibility/credibility_note/danger;**其余 frontmatter 与正文逐字保留**(读 yaml 改档再同款 _CardDumper 重转、
-    review_status 不动、由 KNOWLEDGE_ADMISSION 另行转移);经 tmp+os.replace **原子写**。CRLF 安全。
+    """Write the review's credibilities into an existing card (called by grade_and_admit): the top-level
+    field_credibility and each key_data entry's credibility, credibility_note and danger. The rest of
+    the front matter and the body stay as they are (the YAML is read, changed and dumped again with
+    the same _CardDumper; review_status is not touched, the card state step moves it). Written
+    atomically through a temporary file and os.replace; CRLF-safe.
 
-    field_cred:{字段: {credibility, note}}(6 核心字段);key_data_cred:与 key_data 同序 [{credibility, note, danger}]。
+    field_cred: {field: {credibility, note}} (six core fields); key_data_cred: [{credibility, note,
+    danger}] in key_data order.
     """
     text = card_path.read_bytes().decode("utf-8")
     fences = list(_FENCE_RE.finditer(text))
     if len(fences) < 2 or fences[0].start() != 0:
         raise ValueError(f"卡片 frontmatter 非法(需独占一行 --- 开头 + 闭合): {card_path}")
     front = text[fences[0].end():fences[1].start()]
-    body_from_2nd_fence = text[fences[1].start():]        # "---\n\n<正文…>" 逐字保留
+    body_from_2nd_fence = text[fences[1].start():]        # "---\n\n<body...>" kept as it is
     fm = yaml.safe_load(front)
     if not isinstance(fm, dict):
         raise ValueError(f"卡片 frontmatter 解析非 dict: {card_path}")
-    fm["field_credibility"] = field_cred                 # 覆盖(EVIDENCE_EXTRACTION 建卡的 unknown → EVIDENCE_REVIEW 落档)
+    fm["field_credibility"] = field_cred                 # replaces the unknown set when the card was made
     kd = fm.get("key_data")
     if isinstance(kd, list):
         for i, e in enumerate(kd):
             if not isinstance(e, dict):
                 continue
-            if i < len(key_data_cred):                 # 正常:按 index 落 grade 档(verified 才 danger=None)
+            if i < len(key_data_cred):                 # normal case: the grade at this index (only verified has danger=None)
                 c = key_data_cred[i]
                 e["credibility"] = c.get("credibility", CRED_UNKNOWN)
                 e["credibility_note"] = c.get("note")
                 e["danger"] = c.get("danger")
-            else:                                      # 越界兜底(不该发生;承外审 [低]:绝不留 unknown 无标)→ unknown + ⚠
+            else:                                      # out of range (should not happen): unknown with the mark, never unknown without one
                 e["credibility"] = CRED_UNKNOWN
                 e["credibility_note"] = None
                 e["danger"] = DANGER_UNKNOWN_KD
@@ -237,7 +255,7 @@ def apply_field_credibility(card_path: Path, field_cred: dict, key_data_cred: li
     try:
         with os.fdopen(fd, "wb") as f:
             f.write(new_text.encode("utf-8"))
-        os.replace(tmp, card_path)                       # 同盘原子替换:要么旧、要么整份新
+        os.replace(tmp, card_path)                       # an atomic replace on the same disk: the old file or the whole new one
     except BaseException:
         try:
             os.unlink(tmp)

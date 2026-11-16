@@ -1,86 +1,107 @@
-"""Memorive EVIDENCE-EXTRACTION/EVIDENCE_EXTRACTION · EVIDENCE_EXTRACTION 蒸馏受控错误(承 DocumentProcessingError 风格:受控、非崩溃;抛前已写 RUNTIME_LOG detail 日志)。
+"""Errors of card distillation: expected failures, not crashes, in the style of DocumentProcessingError.
+A detail entry is in the runtime log before each one is raised.
 
-调用方(编排/自测)捕获后展示 message。非受控异常(疑 bug)不在此列、上抛不吞。
+Callers (the workflow, tests) catch them and show the message. Unexpected exceptions (likely bugs) are
+not among them and are raised as they are.
 """
 from __future__ import annotations
 
 
 class EvidenceExtractionError(Exception):
-    """EVIDENCE_EXTRACTION 蒸馏通用受控错误。"""
+    """General expected error of card distillation."""
 
 
 class SourceNotFoundError(EvidenceExtractionError):
-    """入口定位不到同篇 [CleanMD] 或 [Chunks].jsonl —— fail-closed,**绝不退回「直接用 CleanMD 蒸馏」**
-    (退回=每字段 chunk_id 溯源根基当场崩,承 DocumentEmbed「不静默降级」同理)。"""
+    """The [CleanMD] or [Chunks].jsonl of the same paper cannot be found. Distillation stops and never
+    falls back to distilling CleanMD directly, which would lose the chunk_id each field is traced to."""
 
 
 class SourceInvalidError(EvidenceExtractionError):
-    """CleanMD frontmatter 非法 / 某 chunk 缺 chunk_id / 同篇 paper_id 或归属不一致 —— fail-closed 挡下。"""
+    """The CleanMD front matter is invalid, a chunk has no chunk_id, or the paper_id or ownership differs
+    within one paper: distillation stops."""
 
 
 class OwnershipBlockedError(EvidenceExtractionError):
-    """归属红线:`data_ownership=entrusted`(须本地 LLM、Core 未落地)或**缺失/未知**(归属不明)→
-    直接挡下、**不调 MODEL_GATEWAY**(蒸馏走 DeepSeek 云端,绝不发他人托付/归属不明数据,承 D0 / DocumentEmbed 安全阀同理)。"""
+    """Ownership: data_ownership=entrusted (needs a local model, not available yet), missing or unknown
+    stops distillation before the gateway is called. Distillation uses a cloud model (DeepSeek), and data
+    entrusted by others or of unknown ownership is never sent."""
 
 
 class ChunksTooLargeError(EvidenceExtractionError):
-    """拼接输入超字符上限 → 受控报错,**绝不静默截断**(截断会破 R8 取材全范围、并让模型把没读到的误标未给破 R9)。
-    分段策略是将来长文献的事,本步受控报错即可。"""
+    """The joined input is over the character limit. An error, never a silent cut: a cut breaks R8 (use
+    the whole text) and lets the model mark what it never read as not given, breaking R9."""
 
 
 class CardParseError(EvidenceExtractionError):
-    """模型响应剥围栏/提取首个 JSON 对象后仍非合法 JSON;原始响应已记 RUNTIME_LOG detail,**绝不吞成空卡**。"""
+    """The model's reply is not valid JSON even after removing the fence and taking the first JSON object.
+    The raw reply is in the runtime log detail; it never becomes an empty card."""
 
 
 class CardLanguageDriftError(CardParseError):
-    """核心叙述出现来源不支持的跨语言长片段；拒绝模型新增翻译或异语解释。"""
+    """The core text has a long passage in another language that the source does not support; translations
+    or explanations in another language added by the model are refused."""
 
 
 class CardFieldMissingError(EvidenceExtractionError):
-    """模型输出缺核心字段,或字段结构/类型不符(缺 value/chunk_ids、类型不对)。"""
+    """The model's output lacks a core field, or a field has the wrong shape or type (no value or
+    chunk_ids, a wrong type)."""
 
 
 class CardAnchorInvalidError(EvidenceExtractionError):
-    """核心字段假 chunk_id 经唯一一次定向修复后仍无法安全处置。
+    """A core field's made-up chunk_id could not be handled safely after the one targeted repair.
 
-    普通情形先由 DeepSeek 只修受影响锚点，再跑完整本地门；返修契约失败时只删除假锚点记录，
-    且每个字段仍须保留至少一个真实同篇锚点。若安全删除会令字段失去全部锚点，才以本错误整卡拒绝。
+    Normally DeepSeek repairs only the affected anchors and the full local check runs again. If the
+    repair reply breaks its contract, only the made-up anchors are removed, and each field must still keep
+    at least one real anchor in the same paper. Only when that would leave a field with no anchor is the
+    whole card refused with this error.
     """
 
 
 class CardExistsError(EvidenceExtractionError):
-    """目标 [Card] 已存在且未显式 `overwrite=True` → **默认不覆盖、受控挡下**
-    (承 ARTIFACT_REGISTRY 数据永不覆盖 + 契约 §四「重蒸馏不得覆盖旧卡」;覆盖是危险动作,须显式 + 留痕,同 re_embed「唯一显式入口」模式)。"""
+    """The target [Card] already exists and overwrite=True was not given: stored data is never
+    overwritten by default, and distilling again must not replace the old card. Overwriting has to be
+    asked for explicitly and is logged, like re_embed's single explicit entry."""
 
 
 class KeyDataInvalidError(EvidenceExtractionError):
-    """key_data 抽取的**结构层**校验不过 → fail-closed **整卡拒**(承决策③「失败不产半截卡」)。
-    只管结构:裸数值(stat 空 / stat_type 无值,违 R3)、unit 空、quote 缺 / 空、sample 四槽模板不全(R4 无从落)、
-    chunk_id 杜撰(∉ 真实 chunks)、缺字段。
-    **不管语义真伪**:真锚配假值、原文有统计却写「未给」、作用域填错(把局部当总体)——明列为
-    Verification / EVIDENCE_REVIEW 异源覆盖的已知缺口,validator 不越界判、不误报(守「只结构不语义」)。"""
+    """The structure check of the key_data extraction failed; the whole card is refused, so no half card
+    is written.
+    Structure only: a bare number (stat empty, or stat_type without a value, against R3), an empty unit, a
+    missing or empty quote, an incomplete four-slot sample template (no place for R4), a made-up chunk_id
+    (not among the real chunks), a missing field.
+    Meaning is not checked: a real anchor with a wrong value, statistics in the source marked "not given",
+    a wrong scope (a part taken for the whole). These are known gaps left to the second-vendor review; the
+    validator does not judge them and does not report them."""
 
 
 class CardQuoteNotFoundError(EvidenceExtractionError):
-    """`quote` **原文验真不过 → 整卡 fail-closed**(source_anchor v3;承之八「机器逐字符验真」):不写卡、卡走 pending,
-    报错入 RUNTIME_LOG(paper_id / 定位 path / chunk_id / reason 供人核)。
-    **收口口径(07-09 修一/二/三):此错只发生在唯一一种情形** —— `key_data`(数值,第一刀)+ **干净源**(无 U+FFFD / <br>)
-    + quote 归一化后非该 chunk 原文子串 + targeted 重抄一次仍非子串。这是唯一像「整句臆造」的确定性信号。
-    **其余一律不抛、不杀卡**:① 超长真子串 → 接受(长≠假、只记观测);② 烂码源致忠实 quote 对不上 → key_data 保留原 quote +
-    记 DOCUMENT_PROCESSING 债、by_field 降级 null;③ by_field 任何字段(现无字段硬 gate:模型对含 boundary_conditions 在内的核心内容字段都会
-    paraphrase / 综合、无一可靠逐字锚)quote 挂不上 → 降级 null、改写 / 综合忠实归 EVIDENCE_REVIEW 异源 + 人核。
+    """A quote failed the check against the source, so the whole card is refused: no card is written, the
+    card stays pending, and the error goes to the runtime log (paper_id, path, chunk_id and reason, for a
+    person to check).
+    It happens in one case only: a key_data quote (numbers) from a clean source (no U+FFFD or <br>) that,
+    normalized, is not a substring of its chunk, and still is not after one targeted re-copy. That is the
+    one clear sign of a made-up sentence.
+    Nothing else raises it or removes the card: (1) a long real substring is accepted (long is not false;
+    it is only noted); (2) when a garbled source makes a faithful quote fail, key_data keeps the quote, a
+    document processing debt is recorded and the by_field quote becomes null; (3) a by_field quote that
+    fails becomes null (no field is strictly checked: models paraphrase or combine every core content
+    field, boundary_conditions included, so none has a reliable verbatim anchor), and whether a paraphrase
+    is faithful is left to the second-vendor review and a person.
 
-    **诚实边界(承第一刀外部审核 F1)**:substring 证的是「**引文在原文在场**」这一确定性事实——挡下的是「引文根本
-    不在原文」那类(跨源 merge / 整句臆造 / 连支撑句都编)。它**不**证「value 忠于该句 / 改写忠于原意」:真锚配假值
-    (quote 真、value 假)、改写漂移(paraphrase 不忠,如 merge attach 了一句真的部分原文)**仍归 EVIDENCE_REVIEW 异源校核**
-    (key_data 恒 needs_review=true、照进 EVIDENCE_REVIEW)。故本层是 EVIDENCE_REVIEW **之前的一道确定性预筛,不替代 EVIDENCE_REVIEW**。
+    The substring check proves only that the quote is present in the source. It catches quotes that are
+    not there at all (merged from another source, a made-up sentence, made-up support). It does not prove
+    that the value follows the sentence or that a paraphrase keeps the meaning: a real quote with a wrong
+    value, or a paraphrase that drifts, is still for the second-vendor review (key_data is always
+    needs_review=true and goes to that review). So this is a fixed check before the review, not a
+    replacement for it.
 
-    携结构化定位(异常对象带字段、不只 RUNTIME_LOG log context;承 F3):path 人读定位、chunk_id、reason、locator 结构化附加。"""
+    The location is on the error as fields, not only in the log context: path (for people), chunk_id,
+    reason, and the structured locator."""
 
     def __init__(self, message: str, *, path: str | None = None, chunk_id: str | None = None,
                  reason: str | None = None, locator: dict | None = None):
         super().__init__(message)
-        self.path = path                 # 人读定位:key_data[3].quote / by_field.key_results[1].quote
+        self.path = path                 # for people: key_data[3].quote / by_field.key_results[1].quote
         self.chunk_id = chunk_id
         self.reason = reason
-        self.locator = locator or {}     # 结构化附加:block / entry_index / entry_no / field / anchor_index …
+        self.locator = locator or {}     # structured: block / entry_index / entry_no / field / anchor_index ...

@@ -2717,13 +2717,13 @@
     },
     {
       "path": "source/memorive/documents/card_distillation/card.py",
-      "sha256": "933d3c0ac4bcdee8c8816b23995ef8701175ec9c1a873628ea854578a5200060",
-      "bytes": 23917
+      "sha256": "b0604c2b9362cc1c12c74837e3203e651bf77901e49ffd5e4dee3a4be950d185",
+      "bytes": 23878
     },
     {
       "path": "source/memorive/documents/card_distillation/config.py",
-      "sha256": "94ea6367960c8eba8e3ced952f32554c949b31effa3a623fc02b7cb1eb728c78",
-      "bytes": 8738
+      "sha256": "f1e21fdd320857d968f1b7e6f3591821bbf68e0d230287570de568c75d1678cc",
+      "bytes": 8125
     },
     {
       "path": "source/memorive/documents/card_distillation/contracts/fact_identity/FactIdentitySidecar.schema.json",
@@ -2767,13 +2767,13 @@
     },
     {
       "path": "source/memorive/documents/card_distillation/distill.py",
-      "sha256": "9319a1a5c7cb61548cc0f04b75b790dcb48eeb71840ef6c9a58aaa4114738ffa",
-      "bytes": 98111
+      "sha256": "54e9859274128f777b2e7af8cb2c55791652b087d1be47f7ac7e65500372b9c7",
+      "bytes": 100680
     },
     {
       "path": "source/memorive/documents/card_distillation/errors.py",
-      "sha256": "246a22583932a4129c83a8652e0f20c423ee54a047f8c3b2d234b9a3dbb06fe3",
-      "bytes": 5820
+      "sha256": "004fb0b71d202e5e1724d6bdfb30506720f4ea8cdd99b2b180675f3b81a8c044",
+      "bytes": 6128
     },
     {
       "path": "source/memorive/documents/card_distillation/fact_identity_evidence_extraction_contract_core.py",
@@ -2792,8 +2792,8 @@
     },
     {
       "path": "source/memorive/documents/card_distillation/normalize.py",
-      "sha256": "c09e4e50b4c817d660fec10ea36866d0f2622dd30e0721d931b01e2bee9df2e9",
-      "bytes": 16789
+      "sha256": "fbd3019b2819e9823c651d339939a1e0d11a572b7dc1cc54b505d9e564080df2",
+      "bytes": 17060
     },
     {
       "path": "source/memorive/documents/card_distillation/response_contracts.py",
