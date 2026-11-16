@@ -4,9 +4,9 @@ from retrieval_weighting.research_interests import snapshot,signal
 def frozen(runtime,config):
     if not config.get('use_recent_interests'):
         return {'enabled':False,'events':[]}
-    workspace=getattr(runtime.api,'_memo',None)
+    workspace=runtime.host.research_workspace()
     if workspace is None:
-        path=runtime.api._profile_path('WORKSPACE')/'research_workspace'
+        path=runtime.host.profile_path('WORKSPACE')/'research_workspace'
         if not (path/'research_workspace_v1.sqlite3').exists():
             return {'enabled':True,'events':[]}
         from memorive_research_workspace.store import Store

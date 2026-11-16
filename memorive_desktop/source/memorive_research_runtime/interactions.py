@@ -34,7 +34,7 @@ def record_analysis(root,config,context,analysis):
         'automatic_analysis_is_not_user_interest':True}
 
 def current_digest(runtime):
-    config=runtime.api._service.call('settings.research_get',{})['config']
+    config=runtime.host.service.call('settings.research_get',{})['config']
     if not config['use_recent_interests']:
         return {'status':'DISABLED_BY_USER','display_status':'近期互动记录已关闭','ranking_consumed':False,'events':[]}
     path=runtime.root/'analysis_interactions.json'

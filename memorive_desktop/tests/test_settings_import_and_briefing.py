@@ -108,7 +108,7 @@ OPTIONS = [{"profile_ref": "api:chat", "eligible": True}, {"profile_ref": "api:o
 def briefing(tmp_path, monkeypatch):
     monkeypatch.setattr(report_models, "catalog", lambda runtime, capability="CHAT": copy.deepcopy(OPTIONS))
     runtime = SimpleNamespace(root=tmp_path / "research", lock=threading.RLock(),
-                              api=SimpleNamespace(_profile_path=lambda name: tmp_path / "profile"))
+                              host=SimpleNamespace(profile_path=lambda name: tmp_path / "profile"))
     runtime.root.mkdir()
     return AIBriefing(runtime)
 

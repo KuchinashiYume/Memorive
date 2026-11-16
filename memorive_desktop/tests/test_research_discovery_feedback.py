@@ -98,7 +98,7 @@ def test_task_library_message_log_single_identity(discovery):
     api,fixture=discovery
     record=api._research.run_sync('discovery','crosspage-1',topic='Synthetic workflow',count=3)
     run=record['run_id']
-    assert (api._research._run_path(run)/'result.md').read_text(encoding='utf8')==record['result']['markdown']
+    assert (api._research.run_path(run)/'result.md').read_text(encoding='utf8')==record['result']['markdown']
     listed=api.call('current_task.list',{})['research_bindings']
     assert any(r['job_id']==run and len(r['workflow_nodes'])==6 for r in listed)
     assert api.call('current_task.select_task',{'run':run})['projection']['workflow_kind']=='RESEARCH_DISCOVERY'
@@ -108,7 +108,7 @@ def test_task_library_message_log_single_identity(discovery):
     assert route['artifact_id']==run+'/result'
     logs=api.call('work_log.list_entries',{'time_range':'all'})['rows']
     assert any(r['job_id']==run for r in logs)
-    statepath=api._research._run_path(run)/'state.json'
+    statepath=api._research.run_path(run)/'state.json'
     from memorive_research_runtime.common import read,write,sealed
     write(statepath,sealed(dict(read(statepath),finished_at='2026-01-01T00:00:00Z')))
     assert next(r for r in api.call('research.task_list',{})['rows'] if r['run_id']==run)['history']
@@ -116,14 +116,14 @@ def test_task_library_message_log_single_identity(discovery):
 
 def test_publish_repair_never_repeats_acquisition(discovery,monkeypatch):
     api,fixture=discovery
-    original=api._research._publish_library
+    original=api._research.publish_to_library
     def failed(*args,**kwargs):raise OSError('test interrupted publication')
-    monkeypatch.setattr(api._research,'_publish_library',failed)
+    monkeypatch.setattr(api._research,'publish_to_library',failed)
     item=api._research.start(kind='discovery',request_id='delivery-repair',topic='Synthetic workflow',count=2)
     api._research.thread.join(20)
-    path=api._research._run_path(item['run_id'])
+    path=api._research.run_path(item['run_id'])
     before=(path/'result.json').read_bytes();calls=len(fixture.calls)
-    monkeypatch.setattr(api._research,'_publish_library',original)
+    monkeypatch.setattr(api._research,'publish_to_library',original)
     repaired=api.call('research.repair_delivery',{'run_id':item['run_id']})
     assert repaired['status']=='SUCCEEDED' and len(fixture.calls)==calls
     assert (path/'result.json').read_bytes()==before
@@ -178,7 +178,7 @@ def test_title_signal_is_not_fake_vector():
 def test_corrupt_readable_repair_does_not_overwrite_or_refetch(discovery):
     api,fixture=discovery
     result=api._research.run_sync('discovery','readable-corrupt',topic='Synthetic workflow',count=2)
-    path=api._research._run_path(result['run_id'])/'result.md'
+    path=api._research.run_path(result['run_id'])/'result.md'
     path.write_text('External user edit',encoding='utf8');before=len(fixture.calls)
     with pytest.raises(ValueError,match='READABLE_RESULT_MISMATCH'):
         api.call('research.repair_delivery',{'run_id':result['run_id']})
@@ -186,7 +186,7 @@ def test_corrupt_readable_repair_does_not_overwrite_or_refetch(discovery):
 
 def test_failed_task_deeplink_and_repair_affordance(discovery,monkeypatch):
     api,_=discovery
-    monkeypatch.setattr(api._research,'_publish_library',lambda *a: (_ for _ in ()).throw(OSError('Injected publication failure')))
+    monkeypatch.setattr(api._research,'publish_to_library',lambda *a: (_ for _ in ()).throw(OSError('Injected publication failure')))
     row=api._research.start(kind='discovery',request_id='fail-deeplink',topic='Synthetic workflow',count=2)
     api._research.thread.join(20)
     from memorive_research_runtime.task_projection import bindings

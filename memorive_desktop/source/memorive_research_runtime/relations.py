@@ -58,12 +58,12 @@ def metadata_comparison(candidate,records):
             unidentified+=1
         overlap=candidate_keys & local_keys
         title=record.get('title') or record.get('display_name') or ''
-        same_title=bool(title and original._normalized_text(title)==original._normalized_text(candidate['title']))
+        same_title=bool(title and original.normalized_text(title)==original.normalized_text(candidate['title']))
         if not overlap and not same_title:
             continue
         local={'paper_id':str(record.get('artifact_id') or record.get('paper_id')),
             'title':title,'content_hash':sha(record).upper()}
-        relations.append(original._make_relation(c,local,'EXACT_SAME_WORK' if overlap else 'POSSIBLE_DUPLICATE',
+        relations.append(original.make_relation(c,local,'EXACT_SAME_WORK' if overlap else 'POSSIBLE_DUPLICATE',
             evidence_method='NORMALIZED_EXACT_IDENTIFIER' if overlap else 'TITLE_ONLY_REVIEW_SIGNAL',
             evidence_refs=[c['content_hash'],local['content_hash'],*sorted(overlap)],
             similar_dimensions=['work_identity' if overlap else 'title'],different_dimensions=['source_record'],

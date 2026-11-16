@@ -11,7 +11,7 @@ import uuid
 from memorive_desktop_service.control_store import ControlStore
 from memorive_desktop_service.locator import StableLocator
 
-from .contracts import MessageRecord, message_dedupe_key, stable_message_sort
+from .contracts import MessageRecord, message_dedupe_key, message_id_for_dedupe, stable_message_sort
 from .controller import MessageActionError, MessageController
 from .navigation import MessageNavigator
 from .notifications import NotificationPlanner, SyntheticWindowsBridge
@@ -537,6 +537,19 @@ class MessagesProductController:
                 "auto_read_start_message_ids": auto_read,
                 "auto_read_start_message_count": len(auto_read),
             }
+
+    def post_event(self, event: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
+        """Add one message that another part of the app wrote in full: discovery, reports, the test console.
+
+        The event has every field except its sequence number. The number is taken here, under the
+        lock every message write holds, so two writers never get the same one; then the message
+        engine projects the event. Returns the message id and the engine's receipt.
+        """
+        with self._runtime_event_lock:
+            sequence = int(self.store.load(recover_corruption=False)["state"]["projection"]["cursor"]) + 1
+            event = {**event, "sequence": sequence}
+            receipt = MessageProjectionEngine(self.store, synthetic_only=False).ingest([event])
+        return message_id_for_dedupe(message_dedupe_key(event)), receipt
 
     def _contract(self) -> dict[str, Any]:
         names = (

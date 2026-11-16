@@ -35,8 +35,11 @@ start" below).
 - **Exams**: the settings page → `memorive_settings` (exam jobs and executors) → the exam modules
   loaded by name (`memorive_model_evaluation`) → the model request → scoring → score history.
 - **Discovery and reports**: the window (`research.*`, `ai.*`, `home.*`) or a schedule →
-  `memorive_research_runtime` with `literature_discovery`, `research_recommendations` and
-  `research_reports`.
+  `memorive_research_runtime` (`runtime.py` runs discovery and reports, `ai_briefing.py` the AI
+  briefing, `home.py` the home page summary) with `literature_discovery`, `research_recommendations`
+  and `research_reports`. Messages and current-task requests about a research run are answered by
+  its `routes.py`. The package reaches the rest of the app only through the `ResearchHost` that
+  `ProductApi` builds (`host.py`): the settings service, library, messages, work log and window events.
 
 Calls go from the window side towards the business packages, from those to model execution and
 transport (`memorive_model_execution`, `memorive_settings`, `model_gateway`), and from all of them to
@@ -127,7 +130,7 @@ to cover every way a question can end.
 | Step | Where |
 | --- | --- |
 | The chat page sends `memo.ask` and then polls `memo.job_status`. | `ui/integrated/routes/chat/workspace.js` |
-| `ProductApi.call` hands the research workspace's methods (`DESKTOP_METHODS` in `service.py`) to the workspace. On first use it creates the workspace with `create(api)`, which also gives it the model function. | `source/runtime.py`, `source/memorive_research_workspace/desktop.py` |
+| `ProductApi.call` hands the research workspace's methods (`DESKTOP_METHODS` in `service.py`) to the workspace. On first use it creates the workspace with `create(...)`, passing the settings service, library, local models, profile folders, its own `call` and `stage_inbox_paths`; `create` also gives the workspace the model function. | `source/runtime.py`, `source/memorive_research_workspace/desktop.py` |
 | `ResearchWorkspace.call` dispatches the method; `ask()` passes the question on. | `memorive_research_workspace/service.py` |
 | `AnswerVersions.enqueue` checks the request, freezes the model choice, answer style, memories and research topic in a `QUEUED` job, and hands the job to the worker pool. Answering again (`memo.answer_retry`) goes through `AnswerVersions.retry` to the same place. | `memorive_research_workspace/answer_versions.py` |
 | The worker runs `answer_job()`: `AnswerJob.start`, `gather_evidence`, `build_request`, `ask_model`, `check_answer`, `save_answer`; any error goes to `record_failure`. The module docstring lists what each step does. | `memorive_research_workspace/answering.py` |
@@ -160,6 +163,8 @@ can ask again from the window.
 | The answer format the model must return | `ANSWER_SCHEMA` in `memorive_research_workspace/desktop.py`; `AnswerJob.build_request` ties it to the excerpt ids | `test_research_qa_flow.py` |
 | Which excerpts go into the prompt | `AnswerJob.gather_evidence` and `AnswerJob.model_context` in `answering.py`; `context_selection.py` | `test_research_qa_flow.py` |
 | How an answer is checked (text present, only shown excerpts cited) | `AnswerJob.check_answer` | `test_research_qa_flow.py` |
+| The message a research run leaves when it finishes or fails | `post_result_message` and `_failure_message` in `memorive_research_runtime/runtime.py`; they hand the event to `MessagesProductController.post_event` | `test_research_discovery_feedback.py` |
+| Where a message about a research run leads; research runs on the current-task page | `memorive_research_runtime/routes.py` | `test_research_discovery_feedback.py` |
 | What is saved with an answer, answer versions | `AnswerJob.save_answer`, `answer_versions.py` | `test_research_qa_flow.py`, `test_workspace_answer_context.py` |
 | How a document becomes numbered, searchable excerpts | `excerpts_of` and `EvidenceIndex` in `memorive_research_workspace/evidence.py` | `test_evidence_index.py`, `test_research_qa_flow.py` |
 | When an excerpt counts as stale, and how often its files are hashed | `EvidenceIndex.read` and `checking_each_file_once` in `evidence.py`; the blocks are opened in `AnswerJob.run` and `AnswerVersions.validate_context` | `test_evidence_index.py`, `test_research_qa_flow.py` |

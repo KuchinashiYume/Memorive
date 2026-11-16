@@ -33,7 +33,7 @@ def collect(runtime,run_id,params,directions,targets):
             raise ValueError('SOURCE_TIME_LIMIT_REACHED')
         request_index+=1
         call_id='metadata-'+str(request_index).zfill(4)
-        runtime._state(run_id,stage='COLLECTING',source=source,request_index=request_index)
+        runtime.update_state(run_id,stage='COLLECTING',source=source,request_index=request_index)
         try:
             parameters=signature(runtime.client.fetch).parameters
             paged=all(k in parameters for k in ('cursor','source_snapshot')) or any(p.kind==Parameter.VAR_KEYWORD for p in parameters.values())
@@ -43,7 +43,7 @@ def collect(runtime,run_id,params,directions,targets):
             fetched.append({k:v for k,v in batch.items() if k!='records'})
             return batch
         except Exception as exc:
-            path=runtime._run_path(run_id)/'requests'/(call_id+'.result.json')
+            path=runtime.run_path(run_id)/'requests'/(call_id+'.result.json')
             receipt=read(path) if path.exists() else {}
             failures.append({'source':source,'error_code':str(exc),'request_id':call_id,
                 'external_call_performed':receipt.get('external_call_performed',False)})
@@ -71,7 +71,7 @@ def collect(runtime,run_id,params,directions,targets):
                 seed_map[direction['id']].append(record)
             seed_evidence.append({'direction_id':direction['id'],'seed_id':seed_id,'status':status,'metadata':record})
         plan_rows.extend(plans(direction,seed_map[direction['id']],options))
-    write(runtime._run_path(run_id)/'query_plan.json',sealed({'options':options,'directions':directions,
+    write(runtime.run_path(run_id)/'query_plan.json',sealed({'options':options,'directions':directions,
         'queries':plan_rows,'seeds':seed_evidence,'source_snapshots':params.get('source_snapshot',[])}))
     search_succeeded=0
     branches=[d['id']+':'+s for d in directions for s in params['sources'] if any(targets[c]>0 for c in d['channels'])]
@@ -119,7 +119,7 @@ def collect(runtime,run_id,params,directions,targets):
                             memberships.setdefault(oid,{}).setdefault(direction['id'],{'direction':direction,'channels':channels,
                                 'query_sha256':plan['query_sha256']})
                         following=batch.get('next_cursor')
-                        write(runtime._run_path(run_id)/'acquisition_checkpoint.json',sealed({'source':source,'direction_id':direction['id'],
+                        write(runtime.run_path(run_id)/'acquisition_checkpoint.json',sealed({'source':source,'direction_id':direction['id'],
                             'next_cursor':following,'observations':list(observations.values()),'source_results':fetched,'source_failures':failures,
                             'request_count':request_index,'limits':limits}))
                         if following is None or not batch.get('raw_count',len(batch['records'])):
@@ -136,9 +136,9 @@ def collect(runtime,run_id,params,directions,targets):
                         break
                 branch_units.complete(direction['id']+':'+source)
     if not search_succeeded and failures:
-        write(runtime._run_path(run_id)/'source_failures.json',sealed({'failures':failures,'external_api_calls':sum(bool(x.get('external_call_performed')) for x in failures)}))
+        write(runtime.run_path(run_id)/'source_failures.json',sealed({'failures':failures,'external_api_calls':sum(bool(x.get('external_call_performed')) for x in failures)}))
         raise ValueError('ALL_LITERATURE_SOURCES_FAILED')
-    write(runtime._run_path(run_id)/'query_outcomes.json',sealed({'plans':plan_rows,'request_count':request_index,'seed_requests':seed_requests,'elapsed_seconds':time.monotonic()-started}))
+    write(runtime.run_path(run_id)/'query_outcomes.json',sealed({'plans':plan_rows,'request_count':request_index,'seed_requests':seed_requests,'elapsed_seconds':time.monotonic()-started}))
     return fetched,failures,observations,records,memberships,seed_map,seed_evidence
 
 def resolve(observations,registry):

@@ -18,8 +18,8 @@ SCHEMA={'type':'object','additionalProperties':False,'properties':{
         'source_ids':{'type':'array','minItems':1,'items':{'type':'string'}}},'required':['title','what','why','source_ids']}}},
     'required':['mainline','items','trend']}
 
-def workspace_settings(api):
-    path=api._profile_path('WORKSPACE')/'research_workspace/research_workspace_v1.sqlite3'
+def workspace_settings(host):
+    path=host.profile_path('WORKSPACE')/'research_workspace/research_workspace_v1.sqlite3'
     if not path.is_file():
         return {}
     with sqlite3.connect(path.as_uri()+'?mode=ro',uri=True) as db:
@@ -128,7 +128,7 @@ class AIBriefing:
         from .report_models import catalog
         value=self.config()
         options=catalog(self.r)
-        ref=value['config']['profile_ref'] or workspace_settings(self.r.api).get('profile_ref')
+        ref=value['config']['profile_ref'] or workspace_settings(self.r.host).get('profile_ref')
         model=next((r for r in options if r['profile_ref']==ref and r['eligible']),None)
         cfg=value['config']
         window=period(cfg['range_start'],cfg['range_end']) if cfg['range_mode']=='custom' else period(days=int(cfg['range_mode']))
@@ -185,7 +185,7 @@ class AIBriefing:
             if set(p)!={'run_id','request_id'}:
                 raise ValueError('AI_PARAMS_INVALID')
             old=self.get(p['run_id'])
-            path=self.r._run_path(p['run_id'])
+            path=self.r.run_path(p['run_id'])
             if old['status'] in {'RUNNING','QUEUED','CANCELLED','SUCCEEDED'}:
                 raise ValueError('AI_RETRY_UNAVAILABLE')
             if ((path/'result.json').exists() or old.get('reused_run_id')) and (old.get('failed_stage') in {'PUBLISHING','NOTIFYING'} or old.get('notification_error')):
@@ -200,7 +200,7 @@ class AIBriefing:
             row=next((r for r in result.get('sources',[]) if r['source_id']==p['source_id'] and r['url']==p['url']),None)
             if row is None:
                 raise ValueError('AI_SOURCE_URL_INVALID')
-            return self.r.api.assistant_launch_target({'target':source_url(row['source'],row['url'])})
+            return self.r.host.open_target({'target':source_url(row['source'],row['url'])})
         if set(p)!={'run_id'}:
             raise ValueError('AI_PARAMS_INVALID')
         self.get(p['run_id'])
@@ -218,18 +218,18 @@ class AIBriefing:
         if not cfg['config']['sources']:
             raise ValueError('AI_SOURCE_REQUIRED')
         from memorive_settings import answer_styles
-        pref=self.r.api._service.call('settings.user_get',{})
+        pref=self.r.host.service.call('settings.user_get',{})
         style=answer_styles.snapshot(pref['config']['answer_style'],preference_revision=pref['revision'])
-        language=from_settings(self.r.api._service,current_user_text=focus,explicit_locale=output_locale)
+        language=from_settings(self.r.host.service,current_user_text=focus,explicit_locale=output_locale)
         # A failure retry belongs to the old output, even after a UI language change.
         # A fresh explicit generation snapshots the new setting. Legacy jobs were Chinese.
         if retry_from:
-            old=read(self.r._run_path(retry_from)/'request.json')
+            old=read(self.r.run_path(retry_from)/'request.json')
             language=validate_language(old.get('language_context') or freeze_language())
         intent={'window':window,'sources':cfg['config']['sources'],'model_ref':model['profile_ref'],
             'model_binding':model['binding_hash'],'focus':focus.strip(),'style':style,'template':TEMPLATE,'language_context':language}
         identity='research-'+sha('ai:'+request_id)[:24]
-        path=self.r._run_path(identity)
+        path=self.r.run_path(identity)
         with self.r.lock:
             if self.r.closed:
                 raise ValueError('RESEARCH_CLOSED')
@@ -247,18 +247,18 @@ class AIBriefing:
                 if prior['intent']!=intent or prior['refresh']!=refresh or prior.get('retry_from')!=retry_from:
                     raise ValueError('AI_IDEMPOTENCY_CONFLICT')
                 return self.get(identity)
-            if self.r._has_active_run():
-                active=read(self.r._run_path(self.r.current)/'request.json')
+            if self.r.has_active_run():
+                active=read(self.r.run_path(self.r.current)/'request.json')
                 if active.get('kind')=='ai_briefing' and active.get('intent')==intent:
                     return self.get(self.r.current)
                 raise ValueError('RESEARCH_ALREADY_RUNNING')
-            frozen=self.r.api._service.call('settings.ai_briefing_freeze',{'run_id':identity,'profile_ref':model['profile_ref']})
+            frozen=self.r.host.service.call('settings.ai_briefing_freeze',{'run_id':identity,'profile_ref':model['profile_ref']})
             params={'kind':'ai_briefing','period':None,'config':{'push_enabled':True},'intent':intent,**intent,
                 'refresh':refresh,'retry_from':retry_from,'report_model':frozen}
             write(path/'request.json',sealed(params))
             self.r.stop=threading.Event()
             self.r.current=identity
-            item=self.r._state(identity,run_id=identity,kind='ai_briefing',period=None,title=f"{briefing_title(language)} · {window['start']}—{window['end']}",language_context=language,
+            item=self.r.update_state(identity,run_id=identity,kind='ai_briefing',period=None,title=f"{briefing_title(language)} · {window['start']}—{window['end']}",language_context=language,
                 status='QUEUED',stage='WAITING',created_at=now(),request_sha256=sha(params),report_model=frozen,
                 model_calls=0,paid_model_calls=0,window=window)
             self.r.thread=threading.Thread(target=self.execute,args=(identity,params),name='desktop-ai-briefing',daemon=True)
@@ -267,9 +267,9 @@ class AIBriefing:
     def _deliver_cached(self,run_id,check=lambda:None):
         """Complete this request against the original artifact; never rewrite its owner."""
         r=self.r
-        state=read(r._run_path(run_id)/'state.json')
+        state=read(r.run_path(run_id)/'state.json')
         owner=state['reused_run_id']
-        origin=r._run_path(owner)
+        origin=r.run_path(owner)
         result=read(origin/'result.json')
         if (result.get('kind')!='ai_briefing' or result.get('cache_key')!=state['cache_key'] or
                 result.get('sha256')!=state.get('result_sha256') or sealed(result)['sha256']!=result.get('sha256') or
@@ -277,37 +277,37 @@ class AIBriefing:
                 state.get('library_locator')!='memorive://artifact/'+owner+'/result'):
             raise ValueError('AI_CACHED_RESULT_INVALID')
         check()
-        r._state(run_id,stage='NOTIFYING')
+        r.update_state(run_id,stage='NOTIFYING')
         # The original artifact identity is also the message dedupe identity.
         # A prior cancellation remains recorded on its original task.
-        mid=r._message(owner,'ai_briefing',result,None)
+        mid=r.post_result_message(owner,'ai_briefing',result,None)
         check()
-        return r._state(run_id,status=result['status'],stage='COMPLETE',finished_at=now(),
+        return r.update_state(run_id,status=result['status'],stage='COMPLETE',finished_at=now(),
             message_id=mid,notification_status='MESSAGE_CREATED',notification_error=None,
             failed_stage=None,error_code=None,delivery_repaired_at=now())
     def repair_cached_delivery(self,run_id):
         with self.r.lock:
-            state=read(self.r._run_path(run_id)/'state.json')
+            state=read(self.r.run_path(run_id)/'state.json')
             if state['status'] in {'RUNNING','QUEUED'}:
                 raise ValueError('RESEARCH_STILL_RUNNING')
             if state['status']=='CANCELLED':
                 raise ValueError('AI_CANCELLED_DELIVERY_FORBIDDEN')
             self._deliver_cached(run_id)
-            self.r._notify_ui()
+            self.r.notify_ui()
             return self.get(run_id)
     def execute(self,run_id,params):
         from memorive_settings.task_scheduling import TASK_CATEGORIES
         from memorive_settings.call_ledger import execution_control,ExecutionControlSignal
         from memorive_workflow.node_progress import session_scope
         r=self.r
-        path=r._run_path(run_id)
+        path=r.run_path(run_id)
         def check():
             if r.stop.is_set():
                 raise ExecutionControlSignal('CANCELLED')
         try:
-            with execution_control(check),TASK_CATEGORIES.enter('RESEARCH_AI_BRIEFING',checkpoint=check),session_scope(r._progress_session(run_id)):
-                r._state(run_id,status='RUNNING',stage='COLLECTING')
-                oldpath=r._run_path(params['retry_from']) if params.get('retry_from') else None
+            with execution_control(check),TASK_CATEGORIES.enter('RESEARCH_AI_BRIEFING',checkpoint=check),session_scope(r.progress_session(run_id)):
+                r.update_state(run_id,status='RUNNING',stage='COLLECTING')
+                oldpath=r.run_path(params['retry_from']) if params.get('retry_from') else None
                 prior=read(oldpath/'materials.json') if oldpath and (oldpath/'materials.json').exists() else None
                 oldrequest=read(oldpath/'request.json') if prior else None
                 # Retry retains its explicit dates/focus but snapshots current source/model/style settings.
@@ -321,7 +321,7 @@ class AIBriefing:
                     collection=self.sources.collect(params['sources'],params['window']['utc_start'],params['window']['utc_end'],path,check,
                         refresh=params['refresh'] or bool(prior),only=[f['source'] for f in prior['failures']] if prior else None)
                 write(path/'materials.json',sealed(collection))
-                r._state(run_id,source_failures=collection['failures'])
+                r.update_state(run_id,source_failures=collection['failures'])
                 check()
                 if collection['failures'] and len(collection['failures'])==len(params['sources']):
                     raise ValueError('AI_ALL_SOURCES_FAILED')
@@ -331,28 +331,28 @@ class AIBriefing:
                 cache_key=sha({'intent':params['intent'],'versions':sorted(m['version'] for m in materials),'source_failures':collection['failures']})
                 for previous in self.runs():
                     if previous['run_id']!=run_id and previous.get('cache_key')==cache_key and previous.get('library_locator'):
-                        r._state(run_id,stage='NOTIFYING',cache_key=cache_key,
+                        r.update_state(run_id,stage='NOTIFYING',cache_key=cache_key,
                             reused_run_id=previous.get('reused_run_id') or previous['run_id'],library_locator=previous['library_locator'],
                             result_sha256=previous['result_sha256'],cache_hit=True)
                         self._deliver_cached(run_id,check)
-                        r._notify_ui()
+                        r.notify_ui()
                         return
-                r._state(run_id,stage='COMPOSING',cache_key=cache_key)
+                r.update_state(run_id,stage='COMPOSING',cache_key=cache_key)
                 from .ai_prompt import assemble
                 prompt_record=assemble(materials,params['window'],params['focus'],params['style'],SCHEMA,params.get('language_context'))
                 prompt=prompt_record['prompt']
                 write(path/'model_request.json',sealed(dict(prompt_record,schema=SCHEMA,snapshot_id=params['report_model']['snapshot_id'],
                     scope='PUBLIC_MATERIALS_AND_EXPLICIT_FOCUS_ONLY',source_ids=[m['source_id'] for m in materials])))
                 check()
-                response=r.api._service.call('settings.ai_briefing_execute',{'snapshot_id':params['report_model']['snapshot_id'],'prompt':prompt,'response_schema':SCHEMA})
+                response=r.host.service.call('settings.ai_briefing_execute',{'snapshot_id':params['report_model']['snapshot_id'],'prompt':prompt,'response_schema':SCHEMA})
                 write(path/'model_result.json',sealed(response))
                 receipt=response.get('execution_receipt') or {}
                 calls=len(receipt.get('physical_call_ids') or [])
-                r._state(run_id,model_calls=calls,paid_model_calls=calls if params['report_model']['profile_kind']=='API' else 0,execution_receipt=receipt)
+                r.update_state(run_id,model_calls=calls,paid_model_calls=calls if params['report_model']['profile_kind']=='API' else 0,execution_receipt=receipt)
                 from memorive_research_workspace.model_receipts import verified_result
                 verified_result(response,params['report_model'])
                 check()
-                r._state(run_id,stage='VALIDATING')
+                r.update_state(run_id,stage='VALIDATING')
                 result=mapped_report(response.get('response'),collection,params['window'],params['style'],params.get('language_context'))
                 result.update(report_model=params['report_model'],execution_receipt=receipt,model_calls=calls,
                     paid_model_calls=calls if params['report_model']['profile_kind']=='API' else 0,cache_key=cache_key)
@@ -360,17 +360,17 @@ class AIBriefing:
                 write(path/'result.json',result)
                 (path/'result.md').write_text(result['markdown'],encoding='utf8')
                 check()
-                r._state(run_id,stage='PUBLISHING',result_sha256=result['sha256'])
-                r._publish_library(run_id,'ai_briefing',result)
+                r.update_state(run_id,stage='PUBLISHING',result_sha256=result['sha256'])
+                r.publish_to_library(run_id,'ai_briefing',result)
                 check()
-                r._state(run_id,stage='NOTIFYING')
-                mid=r._message(run_id,'ai_briefing',result,None)
-                r._state(run_id,status=result['status'],stage='COMPLETE',finished_at=now(),message_id=mid,notification_status='MESSAGE_CREATED')
+                r.update_state(run_id,stage='NOTIFYING')
+                mid=r.post_result_message(run_id,'ai_briefing',result,None)
+                r.update_state(run_id,status=result['status'],stage='COMPLETE',finished_at=now(),message_id=mid,notification_status='MESSAGE_CREATED')
         except (Exception,ExecutionControlSignal) as exc:
             previous=read(path/'state.json')
             code=str(exc)
             if not re.fullmatch('[A-Z0-9_: -]{1,180}',code):
                 code='AI_EXECUTION_FAILED'
             stopped='INTERRUPTED' if r.closed else 'CANCELLED' if r.stop.is_set() else 'FAILED'
-            r._state(run_id,status=stopped,stage='STOPPED',failed_stage=previous.get('stage'),error_code=code,finished_at=now())
-        r._notify_ui()
+            r.update_state(run_id,status=stopped,stage='STOPPED',failed_stage=previous.get('stage'),error_code=code,finished_at=now())
+        r.notify_ui()

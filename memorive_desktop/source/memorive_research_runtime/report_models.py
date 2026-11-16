@@ -47,7 +47,7 @@ def profiles_offered(service, local_models, capability='CHAT'):
 
 def catalog(runtime, capability='CHAT'):
     """profiles_offered for the desktop research runtime, from the desktop host it holds."""
-    return profiles_offered(runtime.api._service, getattr(runtime.api, '_local_models', None), capability)
+    return profiles_offered(runtime.host.service, runtime.host.local_models, capability)
 
 def projection(runtime):
     value=config(runtime.root)
@@ -75,7 +75,7 @@ def freeze(runtime,run_id,period):
     ref=value['config'][period]
     if not ref:
         raise ValueError('REPORT_MODEL_REQUIRED')
-    frozen=runtime.api._service.call('settings.report_profile_freeze',{'run_id':run_id,'period':period,'profile_ref':ref})
+    frozen=runtime.host.service.call('settings.report_profile_freeze',{'run_id':run_id,'period':period,'profile_ref':ref})
     frozen['workflow_revision']=value['revision']
     return frozen
 
@@ -92,14 +92,14 @@ def compose(runtime,run_id,params,result):
     claim=sealed({'snapshot_id':frozen['snapshot_id'],'profile_ref':frozen['profile_ref'],
                   'profile_kind':frozen['profile_kind'],'model':frozen['model_name'],
                   'behavior_sha256':sha({'prompt':prompt,'schema':schema})})
-    write(runtime._run_path(run_id)/'model_request.json',claim)
-    response=runtime.api._service.call('settings.report_profile_execute',{'snapshot_id':frozen['snapshot_id'],'prompt':prompt,'response_schema':schema})
-    write(runtime._run_path(run_id)/'model_result.json',sealed(response))
+    write(runtime.run_path(run_id)/'model_request.json',claim)
+    response=runtime.host.service.call('settings.report_profile_execute',{'snapshot_id':frozen['snapshot_id'],'prompt':prompt,'response_schema':schema})
+    write(runtime.run_path(run_id)/'model_result.json',sealed(response))
     receipt=response.get('execution_receipt') or {}
     attempted = bool(receipt.get('physical_call_ids')) or receipt.get('status') == 'PASS'
     call_count = max(int(receipt.get('external_model_calls') or 0), int(attempted))
     paid_count = max(int(receipt.get('provider_calls') or 0), int(attempted)) if frozen['profile_kind']=='API' else 0
-    runtime._state(run_id,model_calls=call_count,
+    runtime.update_state(run_id,model_calls=call_count,
         paid_model_calls=paid_count,
         execution_status=receipt.get('status','NOT_ASSESSED'))
     if response.get('status')!='PASS' or receipt.get('status')!='PASS':
@@ -123,7 +123,7 @@ def compose(runtime,run_id,params,result):
             narrative_status='OMITTED_INVALID',narrative_error_code=code,
             report_model=frozen,model_calls=call_count,paid_model_calls=paid_count,
             execution_receipt=receipt,engine='Desktop source-bound deterministic report')
-        runtime._state(run_id,narrative_status='OMITTED_INVALID',narrative_error_code=code)
+        runtime.update_state(run_id,narrative_status='OMITTED_INVALID',narrative_error_code=code)
         return result
     usage=receipt.get('token_usage') or {}
     metadata={'slot':'report_'+params['period'],'provider':frozen['profile_kind'],'model':frozen['model_name'],

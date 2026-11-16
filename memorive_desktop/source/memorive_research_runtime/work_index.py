@@ -291,24 +291,20 @@ class WorkIndex:
     def backfill_inbox(self,inbox,limit=64):
         store=inbox.store
         cursor=self.cursor('inbox_event',0)
-        with closing(store._connect()) as source:
-            events=source.execute('SELECT sequence,item_id FROM events WHERE sequence>? ORDER BY sequence LIMIT ?',(cursor,limit)).fetchall()
-            last=source.execute('SELECT COALESCE(MAX(sequence),0) FROM events').fetchone()[0]
-            ids=list(dict.fromkeys(r['item_id'] for r in events if r['item_id']))
-            items=[json.loads(r[0]) for item_id in ids for r in source.execute('SELECT record_json FROM items WHERE item_id=?',(item_id,))]
+        sequences,items,last=store.changed_items(cursor,limit)
         for item in items:
             if not item.get('content_sha256'):
                 continue
             metadata=item.get('bibliographic_identity')
             if not metadata:
-                path=inbox._path(item['bound_locator']) if item.get('bound_locator') else None
+                path=inbox.path_of(item['bound_locator']) if item.get('bound_locator') else None
                 metadata=own_file_metadata(path) if path and path.is_file() else {'identifiers':{},'identity_evidence':'SOURCE_UNAVAILABLE'}
                 item=store.update_item(item['item_id'],'E6_IDENTITY_INDEXED',lambda row,m=metadata:row.update(bibliographic_identity=m))
             self.synchronize_file(item,metadata)
-        if events:
-            self.set_cursor('inbox_event',events[-1]['sequence'])
-        status={'status':'COMPLETE' if not events or events[-1]['sequence']>=last else 'BACKFILLING',
-            'processed_event_cursor':events[-1]['sequence'] if events else cursor,'observed_event_count':last,
+        if sequences:
+            self.set_cursor('inbox_event',sequences[-1])
+        status={'status':'COMPLETE' if not sequences or sequences[-1]>=last else 'BACKFILLING',
+            'processed_event_cursor':sequences[-1] if sequences else cursor,'observed_event_count':last,
             'records_this_batch':len(items),'maximum_records_per_batch':limit,'scope':'ALL_INBOX_STATES_INCLUDING_COMPLETED_AND_TRASHED'}
         self.set_cursor('inbox_coverage',status)
         return status

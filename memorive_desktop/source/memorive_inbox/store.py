@@ -374,6 +374,22 @@ class InboxStore:
             ).fetchall()
         return [{"sequence": int(row["sequence"]), **self._decode(row["event_json"])} for row in rows]
 
+    def changed_items(self, after_sequence: int, limit: int) -> tuple[list[int], list[dict[str, Any]], int]:
+        """For an index that follows the inbox (research's work index, memorive_research_runtime/work_index.py).
+
+        Returns the sequence numbers of up to limit events after after_sequence, the items those
+        events name (each once, in event order) and the newest sequence number in the store.
+        """
+        with closing(self._connect()) as connection:
+            events = connection.execute(
+                "SELECT sequence,item_id FROM events WHERE sequence>? ORDER BY sequence LIMIT ?", (after_sequence, limit)
+            ).fetchall()
+            last = connection.execute("SELECT COALESCE(MAX(sequence),0) FROM events").fetchone()[0]
+            ids = list(dict.fromkeys(row["item_id"] for row in events if row["item_id"]))
+            items = [json.loads(row[0]) for item_id in ids
+                     for row in connection.execute("SELECT record_json FROM items WHERE item_id=?", (item_id,))]
+        return [row["sequence"] for row in events], items, last
+
     def get_setting(self, setting_key: str, default: Mapping[str, Any]) -> dict[str, Any]:
         with closing(self._connect()) as connection:
             row = connection.execute("SELECT record_json FROM settings WHERE setting_key=?", (setting_key,)).fetchone()

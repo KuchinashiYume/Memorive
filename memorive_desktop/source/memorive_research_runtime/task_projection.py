@@ -45,7 +45,7 @@ def bindings(runtime):
             'workflow_nodes':nodes,'progress':{'completed_units':sum(n['state']=='COMPLETED' for n in nodes),'total_units':len(nodes)},
             'artifact_count':int(bool(item.get('result_sha256'))),'result_locator':item.get('library_locator'),
             'period':item.get('period'),'report_window':item.get('report_window'),'report_revision':item.get('report_revision'),
-            'delivery_repair_available':bool((runtime._run_path(item['run_id'])/'result.json').exists() and (item['status']=='FAILED' or item.get('notification_error'))),
+            'delivery_repair_available':bool((runtime.run_path(item['run_id'])/'result.json').exists() and (item['status']=='FAILED' or item.get('notification_error'))),
             'source_status':item['status'],'error_code':item.get('error_code'),'synthetic_only':False})
     return rows
 
@@ -68,7 +68,7 @@ def log_rows(runtime):
         rows.append({'log_entry_id':'activity-'+run,'job_id':run,'title':('外部文献·' if item['kind']=='discovery' else '')+item['title'],
             'summary':status+' · '+labels.get(item.get('stage'),'已停止'),'type_label':{'discovery':'外部文献','report':'周期报告','ai_briefing':'AI 近况'}[item['kind']],
             'event_time_utc':stamp.isoformat(),'event_sequence':1,'date':local.date().isoformat(),
-            'age_bucket':runtime.api._work_log._age_bucket(stamp),'ledger_type':'branch','parse_status':'ready',
+            'age_bucket':runtime.host.work_log.age_bucket(stamp),'ledger_type':'branch','parse_status':'ready',
             'source_locator':'memorive://ledger/branch/'+run,'job_locator':'memorive://job/'+run,
             'state_axis':{'QUEUED':'等待执行','RUNNING':'正在执行','SUCCEEDED':'已完成','PARTIAL':'部分完成',
                           'FAILED':'执行异常','CANCELLED':'已取消','INTERRUPTED':'已中断'}.get(item['status'],'状态未知'),

@@ -40,8 +40,8 @@ class BoundedMetadataTransport:
             raise ValueError('METADATA_HEADER_INVALID')
         limit=min(k['max_response_bytes'],2000000)
         if os.name=='nt':
-            proxy=PublicMetadataHttpTransport._proxy(k['proxy_mode'],k['proxy_address'],parts.hostname)
-            args=[str(PublicMetadataHttpTransport._curl_path()),'--disable','--silent','--show-error','--proto','=https','--max-redirs','0','--ca-native','--connect-timeout','10','--max-time','30','--max-filesize',str(limit),'--proxy',proxy,'--noproxy','']
+            proxy=PublicMetadataHttpTransport.curl_proxy(k['proxy_mode'],k['proxy_address'],parts.hostname)
+            args=[str(PublicMetadataHttpTransport.curl_path()),'--disable','--silent','--show-error','--proto','=https','--max-redirs','0','--ca-native','--connect-timeout','10','--max-time','30','--max-filesize',str(limit),'--proxy',proxy,'--noproxy','']
             # Pass credentialed headers over stdin, never a process command line.
             args.extend(['--header','@-'])
             header_input='\n'.join(key+': '+value for key,value in k['headers'].items()).encode('utf8')

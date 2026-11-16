@@ -1163,12 +1163,19 @@ class ProductApi:
             self._browser_companion_auto_update = (
                 self._refresh_prepared_browser_companion_package()
             )
+            from memorive_research_runtime.host import ResearchHost
             from memorive_research_runtime.runtime import ResearchRuntime
-            self._research = ResearchRuntime(self)
+            self._research = ResearchRuntime(ResearchHost(
+                service=self._service, library=self._library, messages=self._messages,
+                work_log=self._work_log, local_models=self._local_models,
+                profile_path=self._profile_path, desktop_call=self.call,
+                open_target=self.assistant_launch_target,
+                library_job_rows=self._core_library_job_rows,
+                notify_window=self._send_page_event,
+                research_workspace=lambda: getattr(self, "_memo", None)))
             self._library.research_artifact_provider = self._research.library_rows
             from memorive_research_runtime.task_projection import log_rows
             self._work_log.research_provider=lambda:log_rows(self._research)
-            self._research_selected_run=None
             from memorive_desktop_assistant.delivery import AssistantDeliveryQueue
             self._assistant_delivery_session = uuid.uuid4().hex
             self._assistant_deliveries = AssistantDeliveryQueue(self._profile_path("UI_STATE") / "assistant_deliveries_v1.json")
@@ -1521,6 +1528,15 @@ class ProductApi:
                 durable_receipt["ui_dispatch_status"] = "WARNING:" + type(error).__name__
                 durable_receipt["status"] = "WARNING"
         self._write_json_file(self._core_event_receipt_path, durable_receipt)
+
+    def _send_page_event(self, name: str) -> None:
+        """Dispatch the window event name on the page; nothing while no window is attached or Windows is ending the session."""
+        if self._window is None or getattr(self, "_system_session_ending", False):
+            return
+        try:
+            self._window.evaluate_js(f"window.dispatchEvent(new CustomEvent('{name}'))")
+        except Exception:
+            pass
 
     def _core_event_loop(self) -> None:
         while not self._core_event_stop.is_set():
@@ -2414,7 +2430,7 @@ class ProductApi:
         from memorive_research_runtime.home import METHODS as HOME_METHODS, call as home_call
         from memorive_research_runtime.ai_briefing import METHODS as AI_METHODS
         if method in HOME_METHODS:
-            return home_call(self,method,dict(params or {}))
+            return home_call(self._research.host,method,dict(params or {}))
         if method in AI_METHODS:
             return self._research.ai.call(method,dict(params or {}))
         from memorive_research_workspace.service import DESKTOP_METHODS
@@ -2430,45 +2446,14 @@ class ProductApi:
         from memorive_research_runtime.runtime import METHODS as RESEARCH_METHODS
         if method in RESEARCH_METHODS:
             return self._research.call(method,dict(params or {}))
-        if method=='messages.navigate' and str((params or {}).get('locator','')).startswith('memorive://job/research-'):
-            locator=params['locator']
-            run=locator.split('/')[-1]
-            if params.get('message_id') and self._messages.store.get(params['message_id']).target_locator!=locator:
-                raise ValueError('RESEARCH_MESSAGE_TARGET_MISMATCH')
-            self._research.call('research.get',{'run_id':run})
-            return {'status':'PASS','research_task_id':run,'route':'current-task','job_id':run}
-        if method in CURRENT_TASK_METHODS and hasattr(self,'_research'):
-            from memorive_research_runtime.task_projection import bindings as research_bindings,view as research_view
-            p=dict(params or {})
-            if method=='current_task.select_task':
-                self._research_selected_run=p.get('run') if str(p.get('run','')).startswith('research-') else None
-            selected=self._research_selected_run
-            if method in {'current_task.list','current_task.refresh'}:
-                result=self._current_task.call(method,p)
-                if isinstance(result,dict):
-                    result['research_bindings']=research_bindings(self._research)
-                return result
-            if selected and method in {'current_task.select_task','current_task.select_node','current_task.view'}:
-                return research_view(self._research,selected)
-            if selected and method=='current_task.close_all':
-                self._research_selected_run=None
-                return {'status':'PASS'}
-            if selected and method not in {'current_task.get_contract','current_task.effect_metrics'}:
-                raise ValueError('文献发现任务请使用流程图中的取消、重新检索或查看结果按钮')
-        if method == 'messages.navigate' and str((params or {}).get('locator','')).startswith('memorive://artifact/research-'):
-            from memorive_desktop_service.locator import StableLocator
-            locator=StableLocator.parse(params['locator'])
-            if locator.object_id != 'result':
-                raise ValueError('RESEARCH_ARTIFACT_INVALID')
-            run_id=locator.job_id
-            if params.get('message_id') and self._messages.store.get(params['message_id']).target_locator!=params['locator']:
-                raise ValueError('RESEARCH_MESSAGE_TARGET_MISMATCH')
-            result=self._research.call('research.get',{'run_id':run_id})
-            if result['status'] not in {'SUCCEEDED','PARTIAL'}:
-                raise ValueError('RESEARCH_RESULT_UNAVAILABLE')
-            row = self._library.get_artifact(run_id + '/result')
-            return {'status':'PASS','research_run_id':run_id,'route':'library','view':row['mode'],
-                    'artifact_id':row['artifact_id'],'result_sha256':row['result_sha256'],'target_locator':row['stable_locator']}
+        # Research answers messages that point at its runs and draws its runs on the current-task page.
+        research=getattr(self,'_research',None)
+        if research is not None and (method=='messages.navigate' or method in CURRENT_TASK_METHODS):
+            from memorive_research_runtime import routes as research_routes
+            answer=(research_routes.navigate(research,dict(params or {})) if method=='messages.navigate'
+                    else research_routes.current_task(research,method,dict(params or {}),self._current_task.call))
+            if answer is not None:
+                return answer
         if not isinstance(method, str) or method not in REVIEW_METHODS | SETTINGS_METHODS | ACCOUNTING_METHODS | INBOX_METHODS | CURRENT_TASK_METHODS | MESSAGES_METHODS | SESSIONS_METHODS | LOCAL_MODEL_METHODS | ASSISTANT_PREFERENCE_METHODS | LIBRARY_METHODS | WORK_LOG_METHODS:
             raise ValueError("product method is not allowlisted")
         accepted = deepcopy(dict(params or {}))
@@ -2506,11 +2491,9 @@ class ProductApi:
                         "GREEN": "COMPLETE",
                         "BLUE": "WEEKLY",
                     }[message.severity]
-                    if str(message.target_locator or '').startswith('memorive://artifact/research-'):
-                        run=str(message.target_locator).split('/')[3]
-                        state=self._research.call('research.get',{'run_id':run})
-                        if state['kind']=='discovery':
-                            kind='LITERATURE'
+                    from memorive_research_runtime.routes import literature_notification
+                    if literature_notification(self._research,message.target_locator):
+                        kind='LITERATURE'
                     delivery = self._deliver_windows_notification(
                         kind=kind,
                         locator=message.target_locator,

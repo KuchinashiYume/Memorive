@@ -6,10 +6,10 @@ from .common import sha, sealed, write, read
 from .digest import build_digest
 
 
-def material_progress(api):
-    completed = {r['job_id'] for r in api._core_library_job_rows() if r.get('control_state') == 'SUCCEEDED'}
-    papers = [dict(r,material_kind='PAPER') for r in api._library.core_activity_rows() if r['task_id'] in completed]
-    conversations = [dict(r,material_kind='REFINEMENT') for r in api._library.refinement_activity_rows()]
+def material_progress(host):
+    completed = {r['job_id'] for r in host.library_job_rows() if r.get('control_state') == 'SUCCEEDED'}
+    papers = [dict(r,material_kind='PAPER') for r in host.library.core_activity_rows() if r['task_id'] in completed]
+    conversations = [dict(r,material_kind='REFINEMENT') for r in host.library.refinement_activity_rows()]
     # Review clicks, reading, reports and discovery metadata do not count as a new
     # processed paper or newly refined conversation.
     return papers + conversations
@@ -43,7 +43,7 @@ def tick(runtime, current=None):
             return {'status':'CLOSED'}
         if getattr(runtime,'scheduler_stop',None) and runtime.scheduler_stop.is_set():
             return {'status':'CLOSED'}
-        if runtime._has_active_run():
+        if runtime.has_active_run():
             return {'status':'BUSY'}
         from .report_schedule import get,due_at
         from .report_identity import project,window_key
@@ -52,8 +52,8 @@ def tick(runtime, current=None):
         mapping=config(runtime.root)['config']
         available={r['profile_ref'] for r in catalog(runtime) if r['eligible']}
         produced={window_key(row['report_window']) for row in project(runtime.root)
-                  if row.get('report_window') and (runtime._run_path(row['run_id'])/'result.json').exists()}
-        progress = material_progress(runtime.api)
+                  if row.get('report_window') and (runtime.run_path(row['run_id'])/'result.json').exists()}
+        progress = material_progress(runtime.host)
         for candidate in windows(progress,current):
             window = candidate['window']
             if mapping[window['period']] not in available:
@@ -65,7 +65,7 @@ def tick(runtime, current=None):
             while True:
                 request_id=base_id if not attempt else base_id+'-retry-'+str(attempt)
                 run_id='research-'+sha(request_id)[:24]
-                path=runtime._run_path(run_id)
+                path=runtime.run_path(run_id)
                 if (path/'result.json').exists():
                     # Rendering succeeded, even if publication later failed.
                     # Delivery repair reuses this result; never render it twice.
@@ -115,8 +115,8 @@ def render(runtime, run_id, params):
             item_units.complete(key)
     members=[{'source_system':'Desktop_MATERIAL_OUTPUT','source_ref':r['stable_locator'],'sha256':sha(r).upper()} for r in progress]
     snapshot={'events':events,'members':members,'manifest_sha256':sha({'members':members,'events':events}).upper(),'issues':[],'conflicts':[]}
-    write(runtime._run_path(run_id)/'source_snapshot.json',sealed(snapshot))
-    runtime._state(run_id,stage='COMPOSING')
+    write(runtime.run_path(run_id)/'source_snapshot.json',sealed(snapshot))
+    runtime.update_state(run_id,stage='COMPOSING')
     digest=build_digest(snapshot,digest_kind=period,window_start=window['start'],window_end=window['end'],cutoff_at=params['report_cutoff'])
     return {'schema_version':'DesktopPeriodicReport-v1','period':period,'window_start':window['start'],
         'window_end':window['end'],'source_event_count':len(events),'material_progress_count':len(progress),

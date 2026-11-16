@@ -22,7 +22,7 @@ def run(runtime,run_id,params):
         directions=[d for d in directions if d['id']==options['direction_id']]
         targets=channel_targets(config,directions)
     fetched,failures,observations,record_by_id,memberships,seed_map,seed_evidence=collect(runtime,run_id,params,directions,targets)
-    runtime._state(run_id,stage='RESOLVING_IDENTITIES')
+    runtime.update_state(run_id,stage='RESOLVING_IDENTITIES')
     registry={oid:{'content_hash':o['content_hash'],'source_snapshot_id':o['source_snapshot_id'],
         **{k:o['source_evidence'][k] for k in ('snapshot_sha256','normalized_record_sha256')}} for oid,o in observations.items()}
     resolved=resolve(list(observations.values()),registry)
@@ -156,7 +156,7 @@ def run(runtime,run_id,params):
                 facts.append(fact)
                 display[fact['candidate_id']]=row
             candidate_units.complete(base_candidate['candidate_id'])
-    runtime._state(run_id,stage='COMPOSING')
+    runtime.update_state(run_id,stage='COMPOSING')
     history=runtime.feedback.history([d['id'] for d in directions])
     result=slate.compose_projection(facts,context,plan,history)
     recommendations=[dict(display[x['candidate_id']],**x) for x in result['slate']['selected']]
@@ -170,7 +170,7 @@ def run(runtime,run_id,params):
         'recent_interest':interest_snapshot,
         'slate':result,'context':{'context':context,'plan':plan,'facts':facts,'library_sha256':sha(library),
         'feedback_sha256':sha(feedback),'comparisons':comparisons,'suppressions':suppressed}}.items():
-        write(runtime._run_path(run_id)/(name+'.json'),sealed(body))
+        write(runtime.run_path(run_id)/(name+'.json'),sealed(body))
     calls=sum(bool(x.get('external_call_performed')) for x in fetched+failures)
     return {'schema_version':'DesktopDiscoveryResult-v3','language_context':params.get('language_context'),'discovery_options':options,'seed_evidence':seed_evidence,'index_coverage':library,'status':'PARTIAL' if failures else 'SUCCEEDED',
         'recommendations':recommendations,'source_results':fetched,'source_failures':failures,

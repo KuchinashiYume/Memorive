@@ -117,7 +117,7 @@ def _stable_id(prefix: str, payload: Any) -> str:
     return prefix + hashlib.sha256(canonical_json(payload)).hexdigest()[:24]
 
 
-def _normalized_text(value: Any) -> str:
+def normalized_text(value: Any) -> str:
     normalized = unicodedata.normalize("NFKC", str(value or "")).casefold()
     return " ".join(re.findall(r"[\w]+", normalized, flags=re.UNICODE))
 
@@ -531,8 +531,8 @@ def _different_dimensions(candidate: Mapping[str, Any], record: Mapping[str, Any
     different = [
         dimension_name
         for dimension_name in ("topic", "method", "object")
-        if _normalized_text(candidate["fields"][dimension_name])
-        != _normalized_text(record["fields"][dimension_name])
+        if normalized_text(candidate["fields"][dimension_name])
+        != normalized_text(record["fields"][dimension_name])
     ]
     if candidate.get("publication_date") != record.get("publication_date"):
         different.append("publication_date")
@@ -541,7 +541,7 @@ def _different_dimensions(candidate: Mapping[str, Any], record: Mapping[str, Any
     return sorted(set(different))
 
 
-def _make_relation(
+def make_relation(
     candidate: Mapping[str, Any],
     record: Mapping[str, Any],
     relation_type: str,
@@ -620,7 +620,7 @@ def _pair_analysis(
     if candidate_verified and local_verified:
         if (same_cluster and manifestation_overlap) or identifier_overlap:
             refs = [candidate["content_hash"], record["content_hash"], *identifier_overlap]
-            relations.append(_make_relation(
+            relations.append(make_relation(
                 candidate,
                 record,
                 "EXACT_SAME_WORK",
@@ -633,7 +633,7 @@ def _pair_analysis(
                 reason_codes=["VERIFIED_IDENTITY_MATCH"],
             ))
         elif same_cluster and version_evidence:
-            relations.append(_make_relation(
+            relations.append(make_relation(
                 candidate,
                 record,
                 "ALTERNATE_VERSION",
@@ -650,8 +650,8 @@ def _pair_analysis(
                 "reason_code": "SAME_WORK_CLUSTER_WITHOUT_VERSION_EVIDENCE",
                 "evidence_refs": sorted([candidate_id, paper_id]),
             })
-        elif _normalized_text(candidate["title"]) == _normalized_text(record["title"]):
-            relations.append(_make_relation(
+        elif normalized_text(candidate["title"]) == normalized_text(record["title"]):
+            relations.append(make_relation(
                 candidate,
                 record,
                 "POSSIBLE_DUPLICATE",
@@ -690,7 +690,7 @@ def _pair_analysis(
                 if edge["source_ref"] == candidate_id
                 else "LOCAL_CITES_CANDIDATE"
             )
-            relations.append(_make_relation(
+            relations.append(make_relation(
                 candidate,
                 record,
                 "DIRECT_CITATION_RELATION",
@@ -720,7 +720,7 @@ def _pair_analysis(
                 "object": "OBJECT_SIMILAR",
             }[dimension_name]
             public_measurement = {key: item[key] for key in item if key != "match"}
-            relations.append(_make_relation(
+            relations.append(make_relation(
                 candidate,
                 record,
                 relation_type,
@@ -950,7 +950,7 @@ def resolve_candidate_comparison(
             for direction_id in direction_match_ids
             for dimension_name in direction_support[direction_id]
         })
-        relations.append(_make_relation(
+        relations.append(make_relation(
             candidate_copy,
             anchor,
             "BRIDGE_BETWEEN_DIRECTIONS",
@@ -993,7 +993,7 @@ def resolve_candidate_comparison(
     )
     if novelty["axes"]["library_new"]["status"] == "TRUE":
         anchor = sorted(records, key=lambda item: item["paper_id"])[0]
-        relations.append(_make_relation(
+        relations.append(make_relation(
             candidate_copy,
             anchor,
             "NEW_TO_LIBRARY",

@@ -371,7 +371,8 @@ class WorkLogProductController:
             return None
         return parsed.astimezone(timezone.utc)
 
-    def _age_bucket(self, event_time: datetime) -> str:
+    def age_bucket(self, event_time: datetime) -> str:
+        """The work log group of an entry by its age: today, this week, and so on (also used for research runs)."""
         now = self._now_provider()
         if not isinstance(now, datetime) or now.tzinfo is None:
             raise WorkLogProductError("WORK_LOG_NOW_PROVIDER_INVALID")
@@ -665,7 +666,7 @@ class WorkLogProductController:
                 )
             progress = task.get("progress") if isinstance(task.get("progress"), Mapping) else {}
             row = {
-                "age_bucket": self._age_bucket(event_time),
+                "age_bucket": self.age_bucket(event_time),
                 "date": local_time.date().isoformat(),
                 "event_sequence": sequence,
                 "event_time_utc": event_time.isoformat(timespec="microseconds").replace("+00:00", "Z"),

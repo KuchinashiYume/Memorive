@@ -19,7 +19,7 @@ def _scheduler(root,config,requests):
     instance.root=root;instance.lock=RLock();instance.closed=False;instance.current=None
     def call(method,params):
         return {'config':deepcopy(config)} if method=='settings.research_get' else {'literature':{'selected':['arxiv']}}
-    instance.api=SimpleNamespace(_service=SimpleNamespace(call=call))
+    instance.host=SimpleNamespace(service=SimpleNamespace(call=call))
     def start(**params):requests.append(params);return {'run_id':'test-only-'+str(len(requests))}
     instance.start=start
     return instance
@@ -40,9 +40,9 @@ def test_report_windows_only_come_from_material_progress():
     assert windows([],current)==[]
     library=SimpleNamespace(core_activity_rows=lambda:[{'task_id':'ok','updated_at':'2026-09-01T10:00:00Z'},
         {'task_id':'failed','updated_at':'2026-09-01T10:00:00Z'}],refinement_activity_rows=lambda:[])
-    api=SimpleNamespace(_library=library,_core_library_job_rows=lambda:[{'job_id':'ok','control_state':'SUCCEEDED'},
+    host=SimpleNamespace(library=library,library_job_rows=lambda:[{'job_id':'ok','control_state':'SUCCEEDED'},
         {'job_id':'failed','control_state':'FAILED'}])
-    progress=material_progress(api)
+    progress=material_progress(host)
     assert len(progress)==1 and progress[0]['task_id']=='ok'
     assert {r['window']['period'] for r in windows(progress,current)}=={'daily','weekly'}
 

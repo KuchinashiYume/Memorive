@@ -30,23 +30,17 @@ class ProductConsoleAdapter:
             return {'messages':messages, 'inbox':inbox, 'jobs':jobs, 'reports':reports}
 
     def _message(self, kind, title, body, request_id, *, job_id=None, report_period=None):
-        from memorive_messages.projection import MessageProjectionEngine
-        from memorive_messages.contracts import message_dedupe_key, message_id_for_dedupe
         severity = 'RED' if kind in {'error','report_failed','stalled','target_missing'} else 'YELLOW' if kind in {'warning','review'} else 'GREEN' if kind in {'success','imported'} else 'BLUE'
         event_type = {'success':'JOB_COMPLETED', 'error':'JOB_FAILED', 'report_failed':'REPORT_FAILED', 'daily':'REPORT_READY','weekly':'REPORT_READY','monthly':'REPORT_READY', 'review':'ACTION_REQUIRED'}.get(kind,'USER_INFORMATION')
-        store=self.api._messages.store
-        with self.api._messages._runtime_event_lock:
-            event={'sequence':int(store.load(recover_corruption=False)['state']['projection']['cursor'])+1,
-                'event_id':'console-event-'+uuid.uuid4().hex,'event_type':event_type,
-                'job_id':job_id or self.launch.session_id,'run_id':self.launch.session_id,'attempt_id':request_id,
-                'node_id':None,'root_cause':'CONSOLE_'+kind.upper()+'_'+sha(request_id)[:16],'occurred_at':now(),'severity':severity,
-                'message_required':True,'safe_title':title,'safe_summary':body[:320],'safe_body':body,
-                'target_locator':'memorive://job/'+(job_id or self.launch.session_id),
-                'protected_bulk_read':severity in {'RED','YELLOW'} or kind in {'daily','weekly','monthly','report_failed','discovery'},'attachment_refs':[],
-                'status_axes':{'lifecycle_status':'completed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'},
-                'report_period':report_period}
-            receipt=MessageProjectionEngine(store,synthetic_only=False).ingest([event])
-            mid=message_id_for_dedupe(message_dedupe_key(event))
+        event={'event_id':'console-event-'+uuid.uuid4().hex,'event_type':event_type,
+            'job_id':job_id or self.launch.session_id,'run_id':self.launch.session_id,'attempt_id':request_id,
+            'node_id':None,'root_cause':'CONSOLE_'+kind.upper()+'_'+sha(request_id)[:16],'occurred_at':now(),'severity':severity,
+            'message_required':True,'safe_title':title,'safe_summary':body[:320],'safe_body':body,
+            'target_locator':'memorive://job/'+(job_id or self.launch.session_id),
+            'protected_bulk_read':severity in {'RED','YELLOW'} or kind in {'daily','weekly','monthly','report_failed','discovery'},'attachment_refs':[],
+            'status_axes':{'lifecycle_status':'completed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'},
+            'report_period':report_period}
+        mid, receipt = self.api._messages.post_event(event)
         return {'message_id':mid, 'native_receipt':receipt, 'test_data':True}
 
     def _require_target(self, category, value):

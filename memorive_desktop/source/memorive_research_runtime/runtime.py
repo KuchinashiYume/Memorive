@@ -1,4 +1,10 @@
-"""User-facing, persistent research execution over native desktop state."""
+"""Research runs: literature discovery, periodic reports and the AI briefing, one run at a time.
+
+ProductApi.call forwards research.* here (ResearchRuntime.call). Each run keeps its files in
+WORKSPACE/research/runs/<run id>/ (request.json, state.json, result.json, result.md); a finished
+run is published to the library and announced by a message. Two background threads start here:
+the schedule of passive discovery and reports, and the work index (indexing.py).
+"""
 from pathlib import Path
 from memorive_language.text import choose
 from datetime import datetime, timedelta, timezone
@@ -13,9 +19,17 @@ METHODS=frozenset({'research.state','research.config_get','research.config_save'
     'research.workflow_get','research.workflow_save','research.discover','research.index_state','research.open_source'})
 
 class ResearchRuntime:
-    def __init__(self,api):
-        self.api=api
-        self.root=api._profile_path('WORKSPACE')/'research'
+    """The research runs of this profile; ProductApi builds one with a ResearchHost (host.py).
+
+    The other modules of this package use these methods of it: run_path (the folder of a run),
+    update_state (merge changes into its state.json), has_active_run, progress_session (workflow
+    node progress), publish_to_library, post_result_message and notify_ui (tell the page that a
+    result was published).
+    """
+
+    def __init__(self,host):
+        self.host=host
+        self.root=host.profile_path('WORKSPACE')/'research'
         self.root.mkdir(parents=True,exist_ok=True)
         from .ai_briefing import AIBriefing
         self.ai=AIBriefing(self)
@@ -25,9 +39,10 @@ class ResearchRuntime:
         self.stop=threading.Event()
         self.thread=None
         self._node_progress_live={}
-        self.client=MetadataClient(self.root,lambda:self.api._service.call('settings.get_state',{})['settings']['preferences'],
-            source_config=lambda:self.api._service.call('settings.external_sources_get',{})['literature']['slots'])
+        self.client=MetadataClient(self.root,lambda:self.host.service.call('settings.get_state',{})['settings']['preferences'],
+            source_config=lambda:self.host.service.call('settings.external_sources_get',{})['literature']['slots'])
         self.current=None
+        self.selected_run=None  # the research run shown on the current-task page (routes.current_task)
         self.closed=False
         from .work_index import WorkIndex
         self.work_index=WorkIndex(self.root)
@@ -45,11 +60,11 @@ class ResearchRuntime:
                 write(path,sealed(dict(item,status='INTERRUPTED',failed_stage=item.get('stage'),error_code='PROCESS_INTERRUPTED',finished_at=now())))
             elif item['status'] in {'SUCCEEDED','PARTIAL'} and (path.parent/'result.json').exists():
                 try:
-                    self._publish_library(item['run_id'], item['kind'], read(path.parent/'result.json'))
+                    self.publish_to_library(item['run_id'], item['kind'], read(path.parent/'result.json'))
                 except (OSError,ValueError,KeyError):
                     # One damaged historical report must not prevent desktop
                     # startup or hide other papers. Never overwrite that file.
-                    self._state(item['run_id'],notification_error='RESEARCH_EXISTING_RESULT_NEEDS_REVIEW',status='PARTIAL')
+                    self.update_state(item['run_id'],notification_error='RESEARCH_EXISTING_RESULT_NEEDS_REVIEW',status='PARTIAL')
         self.scheduler = threading.Thread(target=self._schedule_loop, name='desktop-passive-discovery', daemon=True)
         self.scheduler.start()
 
@@ -57,14 +72,14 @@ class ResearchRuntime:
         from .library_projection import rows
         return rows(self.root)
 
-    def _publish_library(self, run_id, kind, result):
+    def publish_to_library(self, run_id, kind, result):
         from .library_projection import publish
-        readable=self._run_path(run_id)/'result.md'
+        readable=self.run_path(run_id)/'result.md'
         if not readable.is_file() or readable.read_text(encoding='utf8')!=result['markdown']:
             raise ValueError('RESEARCH_READABLE_RESULT_MISMATCH')
-        state = read(self._run_path(run_id)/'state.json')
+        state = read(self.run_path(run_id)/'state.json')
         row = publish(self.root, run_id, kind, state['title'], result, state['created_at'])
-        self._state(run_id, library_artifact_id=row['artifact_id'], library_view=row['mode'],
+        self.update_state(run_id, library_artifact_id=row['artifact_id'], library_view=row['mode'],
                     library_locator=row['stable_locator'], result_sha256=result['sha256'])
         return row
 
@@ -86,12 +101,12 @@ class ResearchRuntime:
         from .periodic import tick
         return tick(self, current)
 
-    def _has_active_run(self):
+    def has_active_run(self):
         # Result publication is the transaction boundary. The completed
         # worker may still be posting a UI notification; that is not another
         # research execution and must not reject the user's next request.
         with self.lock:
-            return bool(self.current and read(self._run_path(self.current)/'state.json')['status'] in {'QUEUED','RUNNING'})
+            return bool(self.current and read(self.run_path(self.current)/'state.json')['status'] in {'QUEUED','RUNNING'})
 
     def passive_tick(self, current_time=None):
         import os
@@ -101,20 +116,20 @@ class ResearchRuntime:
                 return {'status':'CLOSED'}
             if os.environ.get('MEMORIVE_TEST_CONSOLE_AUTO_EXECUTION') == 'DISABLED':
                 return {'status':'PAUSED_CONSOLE_SESSION'}
-            config = self.api._service.call('settings.research_get',{})['config']
+            config = self.host.service.call('settings.research_get',{})['config']
             if not config['passive_enabled']:
                 return {'status':'DISABLED'}
             if not config['topic'].strip() and not config.get('directions'):
                 return {'status':'TOPIC_REQUIRED'}
-            if not self.api._service.call('settings.external_sources_get',{})['literature']['selected']:
+            if not self.host.service.call('settings.external_sources_get',{})['literature']['selected']:
                 return {'status':'SOURCE_REQUIRED'}
-            if self._has_active_run():
+            if self.has_active_run():
                 return {'status':'RUNNING','run_id':self.current}
             path = self.root/'passive_schedule.json'
             saved = read(path) if path.exists() else {}
             if saved.get('request_id'):
                 previous_id='research-'+sha(saved['request_id'])[:24]
-                previous_path=self._run_path(previous_id)
+                previous_path=self.run_path(previous_id)
                 previous=read(previous_path/'state.json') if (previous_path/'state.json').exists() else {}
                 if (previous_path/'result.json').exists():
                     # Publication may have failed after the immutable result.
@@ -141,14 +156,14 @@ class ResearchRuntime:
             item = self.start(kind='discovery',request_id=request_id,trigger='PASSIVE_OPT_IN')
             return {'status':'RUNNING','run_id':item['run_id'],'next_due_unix':None}
 
-    def _run_path(self,run_id):
+    def run_path(self,run_id):
         if not isinstance(run_id,str) or not re.fullmatch(r'research-[a-f0-9]{24}',run_id):
             raise ValueError('RESEARCH_ID_INVALID')
         return self.root/'runs'/run_id
 
-    def _state(self,identity,**changes):
+    def update_state(self,identity,**changes):
         with self.lock:
-            path=self._run_path(identity)/'state.json'
+            path=self.run_path(identity)/'state.json'
             prior=read(path) if path.exists() else {}
             value=sealed(dict(prior,**changes))
             write(path,value)
@@ -157,16 +172,16 @@ class ResearchRuntime:
                 stage(identity,changes['stage'],value.get('status')=='RUNNING')
             return value
 
-    def _progress_session(self,run_id):
+    def progress_session(self,run_id):
         from memorive_workflow.node_progress import Session,apply_event
-        prior=read(self._run_path(run_id)/'state.json').get('node_progress',{})
+        prior=read(self.run_path(run_id)/'state.json').get('node_progress',{})
         def sink(event):
             with self.lock:
-                state=read(self._run_path(run_id)/'state.json')
+                state=read(self.run_path(run_id)/'state.json')
                 rows=apply_event(state.get('node_progress',{}),event,job_id=run_id,attempt_id=run_id,
                     control_state='CANCELLED' if self.stop.is_set() else state['status'])
                 if rows!=state.get('node_progress',{}):
-                    self._state(run_id,node_progress=rows)
+                    self.update_state(run_id,node_progress=rows)
                     if event['action']=='BEGIN':
                         self._node_progress_live.setdefault(run_id,{})[event['node_id']]=event['node_execution_id']
         return Session(run_id,run_id,sink,previous=prior,invalidate=lambda:self._node_progress_live.pop(run_id,None))
@@ -179,11 +194,11 @@ class ResearchRuntime:
         from .report_identity import project
         items=project(self.root,items)
         return {'schema_version':'DesktopResearchState-v1','runs':sorted(items,key=lambda x:x['created_at'],reverse=True),
-                'active_run_id':self.current if self._has_active_run() else None,
-                'sources':self.api._service.call('settings.external_sources_get',{})['literature'],
+                'active_run_id':self.current if self.has_active_run() else None,
+                'sources':self.host.service.call('settings.external_sources_get',{})['literature'],
                 'execution_mode':'MANUAL_AND_OPT_IN_PASSIVE_METADATA',
                 'paid_model_calls':sum(r.get('paid_model_calls',0) for r in items),
-                'passive_config':self.api._service.call('settings.research_get',{})['config'],
+                'passive_config':self.host.service.call('settings.research_get',{})['config'],
                 'passive_console_locked':__import__('os').environ.get('MEMORIVE_TEST_CONSOLE_AUTO_EXECUTION')=='DISABLED'}
 
     def call(self,method,p):
@@ -201,13 +216,13 @@ class ResearchRuntime:
         if method=='research.open_source':
             if set(p)!={'run_id','candidate_id','url'}:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            result=read(self._run_path(p['run_id'])/'result.json')
+            result=read(self.run_path(p['run_id'])/'result.json')
             row=next((r for r in result['recommendations'] if r['candidate_id']==p['candidate_id']),None)
             from .metadata_v3 import links
             allowed=(row.get('links') or links(row['identifiers'],row.get('locations',[]))) if row else []
             if not any(link['url']==p['url'] for link in allowed):
                 raise ValueError('RESEARCH_SOURCE_LINK_INVALID')
-            return self.api.assistant_launch_target({'target':p['url']})
+            return self.host.open_target({'target':p['url']})
         if method=='research.workflow_get':
             if p:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
@@ -244,13 +259,13 @@ class ResearchRuntime:
         if method=='research.source_refresh':
             if set(p)!={'source','request_id'}:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            if not self.api._service.call('settings.research_get',{})['config']['passive_enabled']:
+            if not self.host.service.call('settings.research_get',{})['config']['passive_enabled']:
                 raise ValueError('RESEARCH_RECEIVING_DISABLED')
             return self.start(kind='discovery',request_id=p['request_id'],source_filter=p['source'])
         if method=='research.expose':
             if set(p)!={'run_id','candidate_id','request_id'}:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
-            result=read(self._run_path(p['run_id'])/'result.json')
+            result=read(self.run_path(p['run_id'])/'result.json')
             item=next((x for x in result['recommendations'] if x['candidate_id']==p['candidate_id']),None)
             if item is None:
                 raise ValueError('RESEARCH_CANDIDATE_NOT_FOUND')
@@ -275,14 +290,14 @@ class ResearchRuntime:
             from .interactions import current_digest
             return current_digest(self)
         if method in {'research.config_get','research.config_save'}:
-            return self.api._service.call(method.replace('research.config','settings.research'),p)
+            return self.host.service.call(method.replace('research.config','settings.research'),p)
         if method=='research.start':
             if any(key in p for key in ('trigger','source_filter','report_window','material_progress','report_cutoff')):
                 raise ValueError('RESEARCH_PARAMS_INVALID')
             return self.start(**p)
         if set(p)!={'run_id'}:
             raise ValueError('RESEARCH_PARAMS_INVALID')
-        path=self._run_path(p['run_id'])
+        path=self.run_path(p['run_id'])
         if method=='research.get':
             result=read(path/'state.json')
             result['delivery_recoverable']=(path/'candidate_result.json').exists() or (path/'result.json').exists()
@@ -291,11 +306,11 @@ class ResearchRuntime:
                 result['result']=body
             return result
         with self.lock:
-            if self.current==p['run_id'] and self._has_active_run():
+            if self.current==p['run_id'] and self.has_active_run():
                 self.stop.set()
                 state=read(path/'state.json')
                 if state['kind']=='ai_briefing':
-                    self.api._service.call('settings.ai_briefing_cancel',{'snapshot_id':state['report_model']['snapshot_id']})
+                    self.host.service.call('settings.ai_briefing_cancel',{'snapshot_id':state['report_model']['snapshot_id']})
                 return {'run_id':p['run_id'],'status':'CANCELLING'}
             return read(path/'state.json')
 
@@ -303,12 +318,12 @@ class ResearchRuntime:
         if kind not in {'discovery','report'} or not isinstance(request_id,str) or not 1<=len(request_id)<=160:
             raise ValueError('RESEARCH_START_INVALID')
         implicit_report=kind=='report' and trigger=='MANUAL' and report_window is None and report_cutoff is None and material_progress is None
-        config=self.api._service.call('settings.research_get',{})['config']
+        config=self.host.service.call('settings.research_get',{})['config']
         if kind=='discovery':
             config=validate_config(dict(config,topic=config['topic'] if topic is None else topic,count=config['count'] if count is None else count))
             if not config['topic'].strip() and not config.get('directions'):
                 raise ValueError('RESEARCH_TOPIC_REQUIRED')
-            literature=self.api._service.call('settings.external_sources_get',{})['literature']
+            literature=self.host.service.call('settings.external_sources_get',{})['literature']
             sources=literature['selected']
             if source_filter is not None:
                 if source_filter not in sources:
@@ -324,7 +339,7 @@ class ResearchRuntime:
             from research_reports.policy import ZONE,validate_window
             current=self.report_clock() if self.report_clock else datetime.now(ZONE)
             if regenerate_from is not None:
-                original_path=self._run_path(regenerate_from)
+                original_path=self.run_path(regenerate_from)
                 original=read(original_path/'state.json')
                 if original.get('kind')!='report' or original.get('period')!=period or original['status'] in {'QUEUED','RUNNING'}:
                     raise ValueError('REPORT_REGENERATION_INVALID')
@@ -336,7 +351,7 @@ class ResearchRuntime:
                 if 'material_progress' in previous:
                     from .periodic import material_progress as progress_rows,windows
                     from .report_identity import window_key
-                    matches=[row for row in windows(progress_rows(self.api),current) if window_key(row['window'])==window_key(report_window)]
+                    matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
                     material_progress=matches[0]['progress'] if matches else previous['material_progress']
             report_window=report_window or previous_window(period,current)
             report_cutoff=report_cutoff or current.isoformat()
@@ -344,7 +359,7 @@ class ResearchRuntime:
         if kind!='report' and regenerate_from is not None:
             raise ValueError('REPORT_REGENERATION_INVALID')
         from memorive_language import from_settings
-        language_context=from_settings(self.api._service,explicit_locale=output_language)
+        language_context=from_settings(self.host.service,explicit_locale=output_language)
         params={'kind':kind,'config':config,'sources':sources,'period':period,'language_context':language_context}
         if output_language is not None:
             params['output_language']=output_language
@@ -369,7 +384,7 @@ class ResearchRuntime:
                 raise ValueError('RESEARCH_PASSIVE_AUTHORIZATION_INVALID')
             params['trigger'] = trigger
         run_id='research-'+sha(request_id)[:24]
-        path=self._run_path(run_id)
+        path=self.run_path(run_id)
         with self.lock:
             if self.closed:
                 raise ValueError('RESEARCH_CLOSED')
@@ -409,18 +424,18 @@ class ResearchRuntime:
                 if item['request_sha256']!=sha(replay):
                     raise ValueError('RESEARCH_IDEMPOTENCY_CONFLICT')
                 return item
-            if self._has_active_run():
-                current_request=read(self._run_path(self.current)/'request.json')
+            if self.has_active_run():
+                current_request=read(self.run_path(self.current)/'request.json')
                 comparison=lambda value:{k:v for k,v in value.items() if k not in {'sha256','trigger'}}
                 if kind=='discovery' and comparison(current_request)==comparison(params):
-                    return read(self._run_path(self.current)/'state.json')
+                    return read(self.run_path(self.current)/'state.json')
                 raise ValueError('RESEARCH_ALREADY_RUNNING')
             if kind=='report':
                 from .report_models import freeze
                 from .periodic import material_progress as progress_rows,windows
                 from .report_identity import window_key
                 if not params.get('material_progress'):
-                    matches=[row for row in windows(progress_rows(self.api),current) if window_key(row['window'])==window_key(report_window)]
+                    matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
                     params['material_progress']=matches[0]['progress'] if matches else []
                 if not params['material_progress']:
                     raise ValueError('REPORT_NO_LIBRARY_CHANGE')
@@ -428,11 +443,11 @@ class ResearchRuntime:
                 params['report_language']=language_context['effective_output_locale']
             self.stop=threading.Event()
             self.current=run_id
-            item=self._state(run_id,run_id=run_id,kind=kind,language_context=language_context,title=((next(d['name'] for d in config['directions'] if d['id']==direction_id) if direction_id else config['topic'] or ' / '.join(d['name'] for d in config['directions']))+' · '+choose(language_context,'最新文献' if params['discovery_options']['objective']=='latest' else '高度相关文献','Latest literature' if params['discovery_options']['objective']=='latest' else 'Related literature','最新文献' if params['discovery_options']['objective']=='latest' else '関連文献')) if kind=='discovery' else {'daily':'日报','weekly':'周报','monthly':'月报'}[period],created_at=now(),status='QUEUED',stage='WAITING',request_sha256=sha(params),period=period)
+            item=self.update_state(run_id,run_id=run_id,kind=kind,language_context=language_context,title=((next(d['name'] for d in config['directions'] if d['id']==direction_id) if direction_id else config['topic'] or ' / '.join(d['name'] for d in config['directions']))+' · '+choose(language_context,'最新文献' if params['discovery_options']['objective']=='latest' else '高度相关文献','Latest literature' if params['discovery_options']['objective']=='latest' else 'Related literature','最新文献' if params['discovery_options']['objective']=='latest' else '関連文献')) if kind=='discovery' else {'daily':'日报','weekly':'周报','monthly':'月报'}[period],created_at=now(),status='QUEUED',stage='WAITING',request_sha256=sha(params),period=period)
             if report_window:
                 from .report_identity import next_revision,title
                 revision=next_revision(self.root,report_window)
-                item=self._state(run_id,title=title(report_window,revision,language_context),report_window=report_window,
+                item=self.update_state(run_id,title=title(report_window,revision,language_context),report_window=report_window,
                     report_revision=revision,regenerate_from=regenerate_from,report_model=params.get('report_model'))
             write(path/'request.json',sealed(params))
             self.thread=threading.Thread(target=self._execute,args=(run_id,params),name='desktop-research',daemon=True)
@@ -456,8 +471,8 @@ class ResearchRuntime:
                 if self.stop.is_set():
                     raise ValueError('RESEARCH_CANCELLED')
             from memorive_workflow.node_progress import session_scope
-            with TASK_CATEGORIES.enter('RESEARCH_' + params['kind'].upper(), checkpoint=checkpoint), session_scope(self._progress_session(run_id)):
-                self._state(run_id,status='RUNNING',stage='COLLECTING')
+            with TASK_CATEGORIES.enter('RESEARCH_' + params['kind'].upper(), checkpoint=checkpoint), session_scope(self.progress_session(run_id)):
+                self.update_state(run_id,status='RUNNING',stage='COLLECTING')
                 if 'material_progress' in params:
                     from .periodic import render
                     result=render(self,run_id,params)
@@ -466,57 +481,49 @@ class ResearchRuntime:
                 if params.get('report_model'):
                     from .report_models import compose
                     result=compose(self,run_id,params,result)
-                    self._state(run_id,model_calls=result['model_calls'],paid_model_calls=result['paid_model_calls'])
+                    self.update_state(run_id,model_calls=result['model_calls'],paid_model_calls=result['paid_model_calls'])
                 if self.stop.is_set():
                     raise ValueError('RESEARCH_CANCELLED')
                 if params['kind']=='discovery':
-                    write(self._run_path(run_id)/'candidate_result.json',sealed(result))
+                    write(self.run_path(run_id)/'candidate_result.json',sealed(result))
                     result=self._finalize_discovery(run_id,result)
                 result['language_context']=params.get('language_context')
                 result=sealed(result)
-                write(self._run_path(run_id)/'result.json',result)
-                (self._run_path(run_id)/'result.md').write_text(result['markdown'],encoding='utf8')
-                self._state(run_id,stage='PUBLISHING',result_sha256=result['sha256'])
-                self._publish_library(run_id, params['kind'], result)
+                write(self.run_path(run_id)/'result.json',result)
+                (self.run_path(run_id)/'result.md').write_text(result['markdown'],encoding='utf8')
+                self.update_state(run_id,stage='PUBLISHING',result_sha256=result['sha256'])
+                self.publish_to_library(run_id, params['kind'], result)
                 notification_failed=False
                 try:
                     if params['kind']=='report':
-                        self._state(run_id,stage='NOTIFYING')
+                        self.update_state(run_id,stage='NOTIFYING')
                     if params['kind'] == 'discovery' and (not params['config']['push_enabled'] or not result.get('new_work_count',len(result.get('recommendations',[]))) and not result.get('new_version_count',0)):
-                        self._state(run_id, message_id=None, notification_status='SUPPRESSED_BY_USER')
+                        self.update_state(run_id, message_id=None, notification_status='SUPPRESSED_BY_USER')
                     else:
-                        mid=self._message(run_id,params['kind'],result,params['period'])
-                        self._state(run_id,message_id=mid,notification_status='MESSAGE_CREATED')
+                        mid=self.post_result_message(run_id,params['kind'],result,params['period'])
+                        self.update_state(run_id,message_id=mid,notification_status='MESSAGE_CREATED')
                 except Exception:
                     notification_failed=True
-                    self._state(run_id,notification_error='RESEARCH_MESSAGE_PROJECTION_FAILED')
-                self._state(run_id,status='PARTIAL' if notification_failed else result.get('status','SUCCEEDED'),stage='COMPLETE',finished_at=now())
-                if self.api._window is not None and not getattr(self.api,'_system_session_ending',False):
-                    try:
-                        self.api._window.evaluate_js("window.dispatchEvent(new CustomEvent('desktop:research-published'))")
-                    except Exception:
-                        pass
+                    self.update_state(run_id,notification_error='RESEARCH_MESSAGE_PROJECTION_FAILED')
+                self.update_state(run_id,status='PARTIAL' if notification_failed else result.get('status','SUCCEEDED'),stage='COMPLETE',finished_at=now())
+                self.notify_ui()
         except Exception as exc:
             code=str(exc) if re.fullmatch(r'[A-Z0-9_: -]{1,180}',str(exc)) else 'RESEARCH_EXECUTION_FAILED'
-            previous=read(self._run_path(run_id)/'state.json')
+            previous=read(self.run_path(run_id)/'state.json')
             stopped_status='CANCELLED' if self.stop.is_set() else 'FAILED'
             if params['kind']=='report' and self.stop.is_set() and self.closed:
                 stopped_status='INTERRUPTED'
                 code='PROCESS_INTERRUPTED'
-            self._state(run_id,status=stopped_status,failed_stage=previous.get('stage'),stage='STOPPED',finished_at=now(),error_code=code)
+            self.update_state(run_id,status=stopped_status,failed_stage=previous.get('stage'),stage='STOPPED',finished_at=now(),error_code=code)
             if not self.stop.is_set() and params['config']['push_enabled']:
                 try:
                     self._failure_message(run_id,previous.get('stage'))
                 except Exception:
-                    self._state(run_id,notification_error='RESEARCH_ERROR_MESSAGE_PENDING')
-            self._notify_ui()
+                    self.update_state(run_id,notification_error='RESEARCH_ERROR_MESSAGE_PENDING')
+            self.notify_ui()
 
-    def _notify_ui(self):
-        if self.api._window is not None and not getattr(self.api,'_system_session_ending',False):
-            try:
-                self.api._window.evaluate_js("window.dispatchEvent(new CustomEvent('desktop:research-published'))")
-            except Exception:
-                pass
+    def notify_ui(self):
+        self.host.notify_window('desktop:research-published')
 
     def task_list(self):
         clock=datetime.now(timezone.utc)
@@ -530,7 +537,7 @@ class ResearchRuntime:
     def repair_delivery(self,run_id):
         # Result publication retry, not model/network retry. No new run or result hash.
         with self.lock:
-            path=self._run_path(run_id)
+            path=self.run_path(run_id)
             state=read(path/'state.json')
             if state['status'] in {'RUNNING','QUEUED'}:
                 raise ValueError('RESEARCH_STILL_RUNNING')
@@ -545,14 +552,14 @@ class ResearchRuntime:
             result=read(path/'result.json')
             if not (path/'result.md').exists():
                 (path/'result.md').write_text(result['markdown'],encoding='utf8')
-            self._publish_library(run_id,params['kind'],result)
+            self.publish_to_library(run_id,params['kind'],result)
             suppress=params['kind']=='discovery' and (not params['config']['push_enabled'] or not result.get('new_work_count',len(result.get('recommendations',[]))) and not result.get('new_version_count',0))
             if not suppress and not state.get('message_id'):
-                mid=self._message(run_id,params['kind'],result,params['period'])
-                self._state(run_id,message_id=mid,notification_status='MESSAGE_CREATED')
-            repaired=self._state(run_id,status=result.get('status','SUCCEEDED'),stage='COMPLETE',
+                mid=self.post_result_message(run_id,params['kind'],result,params['period'])
+                self.update_state(run_id,message_id=mid,notification_status='MESSAGE_CREATED')
+            repaired=self.update_state(run_id,status=result.get('status','SUCCEEDED'),stage='COMPLETE',
                 finished_at=state.get('finished_at') or now(),notification_error=None,delivery_repaired_at=now())
-            self._notify_ui()
+            self.notify_ui()
             return repaired
 
     def _finalize_discovery(self,run_id,result):
@@ -564,7 +571,7 @@ class ResearchRuntime:
             unused_positions=max(0,row['target']-sum(r['channel']==row['channel'] for r in result['recommendations'])),
             status='FILLED' if row['target']==sum(r['channel']==row['channel'] for r in result['recommendations']) else 'CHANNEL_UNDERFILLED')
             for row in result['channel_allocations']]
-        title=read(self._run_path(run_id)/'state.json')['title']
+        title=read(self.run_path(run_id)/'state.json')['title']
         result['markdown']=discovery_markdown(title,result['recommendations'],result['source_failures'],result,language=result.get('language_context'))
         return result
 
@@ -584,11 +591,11 @@ class ResearchRuntime:
         events=[]
         seen=set()
         members=[]
-        jobs=self.api._service.call('list_jobs',{})['jobs']
+        jobs=self.host.service.call('list_jobs',{})['jobs']
         for job in jobs:
             if self.stop.is_set():
                 raise ValueError('RESEARCH_CANCELLED')
-            payload=self.api._service.call('get_job_events',{'job_id':job['job_id']})
+            payload=self.host.service.call('get_job_events',{'job_id':job['job_id']})
             rows=payload.get('events',[]) if isinstance(payload,dict) else payload
             rows=[row for row in rows if row.get('event_type')!='NODE_PROGRESS_RECORDED']
             members.append({'source_system':'Desktop_APPLICATION_EVENTS','source_ref':'memorive://job/'+job['job_id'],'sha256':sha(rows).upper()})
@@ -604,12 +611,12 @@ class ResearchRuntime:
                 state=row.get('control_state') or row.get('to_state') or row.get('state') or row.get('event_type') or '记录'
                 category='失败' if any(x in str(state) for x in ('FAIL','ERROR')) else '待审' if 'WAITING' in str(state) else '新增' if 'CREAT' in str(state) or state=='QUEUED' else '修改'
                 events.append({'event_id':eid,'event_kind':str(row.get('event_type','DESKTOP_JOB_EVENT')),'occurred_at':stamp,'observed_at':stamp,'source_system':'Desktop_APPLICATION_EVENTS','source_record_ref':'event:'+str(row.get('event_id',key)),'source_content_hash':key.upper(),'subject_refs':['memorive://job/'+job['job_id']],'evidence_refs':[key.upper()],'status_axis':'control_state','to_state':str(state),'verification_status':'not_applicable','display_text':str(job.get('display_name') or job.get('title') or job['job_id'])+' · '+str(state),'daily_category':category,'weekly_categories':['风险与待办'] if category in {'失败','待审'} else ['研究进展'],'monthly_categories':['风险与未评估维度'],'explicit_tags':[]})
-        work=self.api.call('work_log.list_entries',{'time_range':'all','page':1,'page_size':500})
+        work=self.host.desktop_call('work_log.list_entries',{'time_range':'all','page':1,'page_size':500})
         work_rows=list(work.get('rows',[]))
         for page in range(2,(work.get('total_count',len(work_rows))+499)//500+1):
             if self.stop.is_set():
                 raise ValueError('RESEARCH_CANCELLED')
-            work_rows.extend(self.api.call('work_log.list_entries',{'time_range':'all','page':page,'page_size':500})['rows'])
+            work_rows.extend(self.host.desktop_call('work_log.list_entries',{'time_range':'all','page':page,'page_size':500})['rows'])
         work['rows']=work_rows
         members.append({'source_system':'Desktop_WORK_LOG_PROJECTION','source_ref':'desktop-work-log','sha256':sha(work).upper()})
         for row in work.get('records',work.get('rows',[])):
@@ -620,60 +627,51 @@ class ResearchRuntime:
             category='失败' if row.get('severity')=='RED' else '修改'
             events.append({'event_id':'RE-'+key[:32].upper(),'event_kind':'DESKTOP_ACTIVITY','occurred_at':stamp,'observed_at':stamp,'source_system':'Desktop_WORK_LOG_PROJECTION','source_record_ref':row['log_entry_id'],'source_content_hash':key.upper(),'subject_refs':[row['source_locator']],'evidence_refs':[key.upper()],'status_axis':'control_state','to_state':row.get('public_payload',{}).get('control_state','RECORDED'),'verification_status':'not_applicable','display_text':row['title']+' · '+row['summary'],'daily_category':category,'weekly_categories':['风险与待办'] if category=='失败' else ['研究进展'],'monthly_categories':['风险与未评估维度'],'explicit_tags':[]})
         snapshot={'events':events,'members':members,'manifest_sha256':sha({'members':members,'events':events}).upper(),'issues':[],'conflicts':[]}
-        write(self._run_path(run_id)/'source_snapshot.json',sealed(snapshot))
-        self._state(run_id,stage='COMPOSING')
+        write(self.run_path(run_id)/'source_snapshot.json',sealed(snapshot))
+        self.update_state(run_id,stage='COMPOSING')
         digest=build_digest(snapshot,digest_kind=period,window_start=start.isoformat(),window_end=end.isoformat(),cutoff_at=current.isoformat())
         markdown=render_markdown(digest,language=language_context)
         return {'schema_version':'DesktopPeriodicReport-v1','language_context':language_context,'period':period,'window_start':start.isoformat(),'window_end':end.isoformat(),'source_event_count':len(events),'digest':digest,'markdown':markdown,'source_scope':['CURRENT_DESKTOP_APPLICATION_EVENTS','CURRENT_DESKTOP_WORK_LOG'],'status':'SUCCEEDED','engine':'Desktop RESEARCH_REPORTS runtime successor + unchanged RESEARCH_REPORTS templates','paid_model_calls':0}
 
-    def _message(self,run_id,kind,result,period):
-        from memorive_messages.projection import MessageProjectionEngine
-        from memorive_messages.contracts import message_dedupe_key,message_id_for_dedupe
-        store=self.api._messages.store
+    def post_result_message(self,run_id,kind,result,period):
         summary = (f"{'部分来源未完成；已' if result.get('status')=='PARTIAL' else '检索完成，'}保存 {result.get('new_work_count',len(result.get('recommendations',[])))} 篇新增题录、{result.get('new_version_count',0)} 个新版本。"
                    if kind == 'discovery' else "AI 近况已生成并保存。" if kind=="ai_briefing" else "周期报告已生成并保存。")
         body = summary + "\n请前往资料库查看正文。\n结果校验值：" + result['sha256']
-        with self.api._messages._runtime_event_lock:
-            title=read(self._run_path(run_id)/'state.json')['title']
-            if kind=='discovery':
-                title='外部文献·'+title
-            event={'sequence':int(store.load(recover_corruption=False)['state']['projection']['cursor'])+1,'event_id':'event-'+run_id,'event_type':'REPORT_READY' if kind=='report' else 'USER_INFORMATION','job_id':run_id,'run_id':run_id,'attempt_id':run_id,'node_id':None,'root_cause':'RESEARCH_RESULT','occurred_at':now(),'severity':'BLUE','message_required':True,'safe_title':title,'safe_summary':body[:320],'safe_body':body[:3900],'target_locator':'memorive://artifact/'+run_id+'/result','protected_bulk_read':True,'attachment_refs':[],'status_axes':{'lifecycle_status':'completed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'},'report_period':period}
-            from memorive_language.messages import content
-            if kind=='discovery':
-                request=read(self._run_path(run_id)/'request.json')
-                event['message_content']=content('discovery.ready',topic=request['config'].get('topic','')[:512],works=int(result.get('new_work_count',len(result.get('recommendations',[])))),versions=int(result.get('new_version_count',0)),relations=int(result.get('new_relation_count',0)))
-            elif kind=='report':
-                state=read(self._run_path(run_id)/'state.json')
-                event['message_content']=content('report.ready',period=period,start=result.get('window_start',''),end=result.get('window_end',''),revision=state.get('report_revision',1))
-            elif kind=='ai_briefing':
-                from memorive_language.messages import render
-                event['message_content']=content('ai.ready',start=result['window']['start'],end=result['window']['end'],partial=result.get('status')=='PARTIAL')
-                copy=render(event['message_content'],result.get('language_context'))
-                event.update(safe_title=copy['title'],safe_summary=copy['summary'],safe_body=copy['body'])
-            MessageProjectionEngine(store,synthetic_only=False).ingest([event])
-            return message_id_for_dedupe(message_dedupe_key(event))
+        title=read(self.run_path(run_id)/'state.json')['title']
+        if kind=='discovery':
+            title='外部文献·'+title
+        event={'event_id':'event-'+run_id,'event_type':'REPORT_READY' if kind=='report' else 'USER_INFORMATION','job_id':run_id,'run_id':run_id,'attempt_id':run_id,'node_id':None,'root_cause':'RESEARCH_RESULT','occurred_at':now(),'severity':'BLUE','message_required':True,'safe_title':title,'safe_summary':body[:320],'safe_body':body[:3900],'target_locator':'memorive://artifact/'+run_id+'/result','protected_bulk_read':True,'attachment_refs':[],'status_axes':{'lifecycle_status':'completed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'},'report_period':period}
+        from memorive_language.messages import content
+        if kind=='discovery':
+            request=read(self.run_path(run_id)/'request.json')
+            event['message_content']=content('discovery.ready',topic=request['config'].get('topic','')[:512],works=int(result.get('new_work_count',len(result.get('recommendations',[])))),versions=int(result.get('new_version_count',0)),relations=int(result.get('new_relation_count',0)))
+        elif kind=='report':
+            state=read(self.run_path(run_id)/'state.json')
+            event['message_content']=content('report.ready',period=period,start=result.get('window_start',''),end=result.get('window_end',''),revision=state.get('report_revision',1))
+        elif kind=='ai_briefing':
+            from memorive_language.messages import render
+            event['message_content']=content('ai.ready',start=result['window']['start'],end=result['window']['end'],partial=result.get('status')=='PARTIAL')
+            copy=render(event['message_content'],result.get('language_context'))
+            event.update(safe_title=copy['title'],safe_summary=copy['summary'],safe_body=copy['body'])
+        return self.host.messages.post_event(event)[0]
 
     def _failure_message(self,run_id,stage):
-        from memorive_messages.projection import MessageProjectionEngine
         from .task_projection import STEPS
-        state=read(self._run_path(run_id)/'state.json')
+        state=read(self.run_path(run_id)/'state.json')
         place=dict(STEPS).get(stage,'文献检索')
         problem='结果已生成，但文件、索引或消息投递未完成；请修复投递，无需重新检索。' if stage=='PUBLISHING' else '来源未返回可用数据；请检查来源配置、凭据或网络后重新检索。'
         if state['kind']=='report':
             place='周期报告投递' if stage=='PUBLISHING' else '周期报告生成'
             problem='报告已生成，但文件、索引或消息投递未完成；无需重复处理文献或对话。' if stage=='PUBLISHING' else '无法从已完成的文献或精炼成品生成报告，请检查相关成果记录。'
-        store=self.api._messages.store
-        with self.api._messages._runtime_event_lock:
-            event={'sequence':int(store.load(recover_corruption=False)['state']['projection']['cursor'])+1,
-                'event_id':'failure-'+run_id,'event_type':'USER_INFORMATION','job_id':run_id,'run_id':run_id,
-                'attempt_id':run_id,'node_id':None,'root_cause':'RESEARCH_FAILURE','occurred_at':state['finished_at'],
-                'severity':'RED','message_required':True,'safe_title':('外部文献·' if state['kind']=='discovery' else '')+state['title'],
-                'safe_summary':'出错位置：'+place+'。'+problem,'safe_body':'出错位置：'+place+'。'+problem,
-                'target_locator':'memorive://job/'+run_id,'protected_bulk_read':True,'attachment_refs':[],
-                'status_axes':{'lifecycle_status':'failed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'}}
-            from memorive_language.messages import content
-            event['message_content']=content('research.failed',kind=state['kind'],title=state['title'][:512],stage=stage or 'UNKNOWN')
-            MessageProjectionEngine(store,synthetic_only=False).ingest([event])
+        event={'event_id':'failure-'+run_id,'event_type':'USER_INFORMATION','job_id':run_id,'run_id':run_id,
+            'attempt_id':run_id,'node_id':None,'root_cause':'RESEARCH_FAILURE','occurred_at':state['finished_at'],
+            'severity':'RED','message_required':True,'safe_title':('外部文献·' if state['kind']=='discovery' else '')+state['title'],
+            'safe_summary':'出错位置：'+place+'。'+problem,'safe_body':'出错位置：'+place+'。'+problem,
+            'target_locator':'memorive://job/'+run_id,'protected_bulk_read':True,'attachment_refs':[],
+            'status_axes':{'lifecycle_status':'failed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'}}
+        from memorive_language.messages import content
+        event['message_content']=content('research.failed',kind=state['kind'],title=state['title'][:512],stage=stage or 'UNKNOWN')
+        self.host.messages.post_event(event)
 
     def close(self):
         self.scheduler_stop.set()
@@ -686,11 +684,11 @@ class ResearchRuntime:
             self.closed=True
             self.stop.set()
             thread=self.thread
-        pending_report=bool(self.current and (self._run_path(self.current)/'model_request.json').exists())
+        pending_report=bool(self.current and (self.run_path(self.current)/'model_request.json').exists())
         if self.current and thread and thread.is_alive():
-            state=read(self._run_path(self.current)/'state.json')
+            state=read(self.run_path(self.current)/'state.json')
             if state['kind']=='ai_briefing':
-                self.api._service.call('settings.ai_briefing_cancel',{'snapshot_id':state['report_model']['snapshot_id']})
+                self.host.service.call('settings.ai_briefing_cancel',{'snapshot_id':state['report_model']['snapshot_id']})
         if thread and thread.is_alive():
             thread.join(timeout=2 if pending_report else 35)
         if thread and thread.is_alive():
@@ -698,8 +696,8 @@ class ResearchRuntime:
                 # The provider may still finish outside our process. Persist an
                 # interruption before the owner closes the IPC service; the
                 # durable request claim prevents an automatic paid resend.
-                item=read(self._run_path(self.current)/'state.json')
-                self._state(self.current,status='INTERRUPTED',failed_stage=item.get('stage'),
+                item=read(self.run_path(self.current)/'state.json')
+                self.update_state(self.current,status='INTERRUPTED',failed_stage=item.get('stage'),
                     error_code='PROCESS_INTERRUPTED',finished_at=now())
                 return {'status':'STOPPING_REPORT','request_outcome':'PENDING_REVIEW'}
             raise RuntimeError('RESEARCH_EXECUTION_STILL_QUIESCING')

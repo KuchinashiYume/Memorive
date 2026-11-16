@@ -196,7 +196,8 @@ class PublicMetadataHttpTransport(UrllibHttpTransport):
                 return response_value(error, int(error.code))
 
     @staticmethod
-    def _curl_path():
+    def curl_path():
+        """curl.exe in the Windows system folder; public metadata requests go through it (also research's transport.py)."""
         folder = ctypes.create_unicode_buffer(32768)
         length = ctypes.windll.kernel32.GetSystemDirectoryW(folder, len(folder))
         if not 0 < length < len(folder):
@@ -207,7 +208,8 @@ class PublicMetadataHttpTransport(UrllibHttpTransport):
         return path
 
     @staticmethod
-    def _proxy(mode, address, hostname):
+    def curl_proxy(mode, address, hostname):
+        """The --proxy value for curl from the proxy setting: '' for none, the system's or the user's address."""
         if mode == "NONE":
             return ""
         if mode == "SYSTEM":
@@ -238,7 +240,7 @@ class PublicMetadataHttpTransport(UrllibHttpTransport):
             raise ValueError("API_RESPONSE_LIMIT_INVALID")
         limit = min(limit or 262144, 262144)
         proxy, route = self._public_route(kwargs['url'], kwargs['proxy_mode'], kwargs['proxy_address'])
-        args = [str(self._curl_path()), "--disable", "--silent", "--show-error",
+        args = [str(self.curl_path()), "--disable", "--silent", "--show-error",
                 "--proto", "=https", "--proto-redir", "=https", "--max-redirs", "0", "--ca-native",
                 "--connect-timeout", str(min(timeout,10)), "--max-time", str(timeout),
                 "--max-filesize", str(limit), "--proxy", proxy, "--noproxy", ""]
