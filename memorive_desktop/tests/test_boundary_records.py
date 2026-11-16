@@ -8,7 +8,7 @@ import pytest
 
 from memorive.platform.naming import TITLE_MAX
 from memorive.desktop.accounting.projection import _normalize as accounting_row
-from memorive_app.durable_store import DurableJobStore, _require_secret_free
+from memorive.platform.jobs.durable_store import DurableJobStore, _require_secret_free
 from memorive.desktop.service.errors import ProtocolViolation, SchemaIncompatible
 from memorive.desktop.service.protocol import CANCEL_SCHEMA, PROTOCOL_VERSION, validate_cancel
 from memorive.platform.folders.policy import document_folder

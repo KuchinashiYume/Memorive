@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any, Mapping, Sequence
 
-from .schema import validate_decision
+from memorive.platform.decisions.schema import validate_decision
 
 
 _ARTIFACT_ID = re.compile(r"^art_[0-9a-f]{32}$")

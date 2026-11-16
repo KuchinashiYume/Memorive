@@ -44,7 +44,7 @@ RESTORED = {'memorive.documents.card_distillation.segmented_distill.contracts': 
                                                   'build_url',
                                                   'execute_get',
                                                   'with_content_hash'],
- 'memorive_app.contracts': ['error_envelope'],
+ 'memorive.platform.error_envelope': ['error_envelope'],
  'memorive.desktop.service.adapters': ['FakeFacadeAdapter'],
  'memorive.desktop.service.errors': ['BackpressureExceeded', 'InstanceAlreadyActive'],
  'memorive.documents.inbox.contracts': ['require_item_state'],

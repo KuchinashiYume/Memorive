@@ -865,7 +865,7 @@ class HandoffAndCoreTest(unittest.TestCase):
             normalizer=OutputNormalizer(CORE_SCHEMA, clock=FIXED_CLOCK),
             handoff=self.handoff,
         )
-        ledger_before = tree_hash(REPO_ROOT / "run_ledger")
+        ledger_before = tree_hash(REPO_ROOT / "memorive" / "platform" / "ledger")
         with tempfile.TemporaryDirectory() as temp:
             outcome = core.execute(
                 execution_request(),
@@ -897,7 +897,7 @@ class HandoffAndCoreTest(unittest.TestCase):
             self.assertEqual(terminal["acceptance_verdict"], "NOT_ASSESSED")
             self.assertEqual(terminal["verification_result"], "NOT_ASSESSED")
             self.assertEqual(terminal["execution_result"], "SUCCESS")
-        self.assertEqual(ledger_before, tree_hash(REPO_ROOT / "run_ledger"))
+        self.assertEqual(ledger_before, tree_hash(REPO_ROOT / "memorive" / "platform" / "ledger"))
 
     def test_selected_manifest_is_the_only_executable_authority(self):
         mismatched = deepcopy(self.profile)

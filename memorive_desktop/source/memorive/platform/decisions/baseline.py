@@ -1,4 +1,4 @@
-"""Memorive DECISION-LOG/DECISION_LOG frozen four-axis baseline validation.
+"""Checking capability claims against the fixed four-axis baseline matrix of decision records.
 
 This module validates facts; it does not perform state transitions.
 """

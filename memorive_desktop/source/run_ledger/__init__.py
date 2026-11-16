@@ -1,15 +1,13 @@
-"""Ledgers of runs, jobs and model channel attempts, and the kernel file locks that keep one writer per file.
+"""Model channel accounting, cost routing ledgers and two document readers of ledger data, not yet
+in their areas. The run ledgers and the writer lock are in memorive/platform/ledger; the lock and
+ConcurrentWriterError are still offered here under the old package name, which two tests import.
 
-Used outside the package: writer_lock.py and errors.py by memorive_app (its job store) and by
-memorive/desktop/settings (the settings store, the verification and exam jobs); schema.py by
-research_reports, which calls run_ledger.schema.validate_record by name.
-
-The ledgers themselves (store.py: yearly append-only JSONL files) and the channel accounting
-(channel_store.py, channel_evidence.py, accounting_projection.py), cost routing, recovery, closure
-and core adapter modules have no caller outside the package; tests call some of them.
+channel_store.py, channel_evidence.py, accounting_projection.py, the cost routing modules,
+core_adapter.py and the analysis admission publication preview have no caller outside the package;
+tests call some of them. They move to the models and documents areas next.
 """
 
-from .errors import ConcurrentWriterError
-from .writer_lock import KernelFileLock, KernelWriterLock, LockLease
+from memorive.platform.ledger.errors import ConcurrentWriterError
+from memorive.platform.ledger.writer_lock import KernelFileLock, KernelWriterLock, LockLease
 
 __all__ = ["ConcurrentWriterError", "KernelFileLock", "KernelWriterLock", "LockLease"]

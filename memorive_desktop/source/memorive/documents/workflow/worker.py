@@ -7,7 +7,7 @@ import asyncio
 import threading
 from functools import cached_property
 from concurrent.futures import ThreadPoolExecutor
-from memorive_app.errors import VersionConflict
+from memorive.platform.errors import VersionConflict
 from copy import deepcopy
 import hashlib
 import json
@@ -21,7 +21,8 @@ import uuid
 
 from memorive.platform.folders import ProfileFolderManager
 
-from memorive_app.contracts import canonical_sha256, utc_now
+from memorive.platform.clock import utc_now
+from memorive.platform.jobs.contracts import canonical_sha256
 
 from memorive.documents.workflow.contracts import (
     Core_NODE_IDS, DATA_REVIEW_NODE_IDS, DATA_NODE, node_ids_for, CORE_WORKER_CAPACITY,

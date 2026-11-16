@@ -15,7 +15,7 @@ from memorive.documents.registry.analysis_products import (
 )
 from memorive.documents.card_states.analysis_admission_knowledge_admission_analysis_admission import require_buildable
 
-from .errors import RealPublicationForbidden
+from memorive.platform.ledger.errors import RealPublicationForbidden
 
 
 MANIFEST_SCHEMA_VERSION = "analysis_admission-publication-candidate-manifest-v1"

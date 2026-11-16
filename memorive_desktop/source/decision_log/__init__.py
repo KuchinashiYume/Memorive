@@ -1,15 +1,14 @@
-"""A log of design decisions: Markdown records with a fixed schema, stored append-only (store.py).
+"""Decision builders that are not yet in their areas; the decision records themselves (schema,
+store, baseline) are in memorive/platform/decisions and are still offered here under their old names.
 
-Used outside the package only by knowledge_feedback: eligibility.py calls knowledge_decision.py and
-conversation_refinement/destination.py calls conversation_refinement_decision.py. The two packages
-import each other: these builders take hashing helpers, DECISION_STATES and
-validate_typed_refinement_item from knowledge_feedback.
-
-No caller outside the package: baseline.py, schema.py, store.py, routing_decision_preview.py and
-fact_identity_decision_log_decision_adapter.py.
+knowledge_decision.py is called by the knowledge feedback eligibility, conversation_refinement_decision.py
+by the session refinement's destination; both take hashing helpers, DECISION_STATES and
+validate_typed_refinement_item from knowledge feedback. routing_decision_preview.py and
+fact_identity_decision_log_decision_adapter.py have no caller outside the package. They move to the
+research, sessions, models and documents areas next.
 """
 
-from .baseline import (
+from memorive.platform.decisions.baseline import (
     AXIS_VALUES,
     BaselineValidationError,
     get_capability,
@@ -18,14 +17,14 @@ from .baseline import (
     validate_matrix,
     validate_production_claim,
 )
-from .schema import (
+from memorive.platform.decisions.schema import (
     DECISION_STATUSES,
     DECISION_TYPES,
     MODULE_IDS,
     DecisionValidationError,
     validate_decision,
 )
-from .store import AppendOnlyViolation, DecisionStore, parse_markdown, render_markdown
+from memorive.platform.decisions.store import AppendOnlyViolation, DecisionStore, parse_markdown, render_markdown
 from .fact_identity_decision_log_decision_adapter import (
     build_ddl_decision,
     build_intake_repair_loop_decision,

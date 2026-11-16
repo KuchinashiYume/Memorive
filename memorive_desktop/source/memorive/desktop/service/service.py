@@ -10,7 +10,7 @@ import logging
 import time
 from typing import Any, Mapping
 
-from memorive_app.errors import ApplicationError
+from memorive.platform.errors import ApplicationError
 from memorive_app.ipc_auth import LoopbackPeerAuthenticator
 
 from memorive.desktop.service.adapters import FacadeAdapter

@@ -1,10 +1,15 @@
+"""The capability snapshot taken before a job starts (each capability required or optional, its
+availability and qualification) and the preflight that decides from it whether the job may start.
+
+Used by the application facade and the capability adapters in memorive_app.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping, Sequence
 
-from .contracts import canonical_sha256, immutable_copy, require_text, require_timestamp
-from .errors import ContractViolation
+from memorive.platform.jobs.contracts import canonical_sha256, immutable_copy, require_text, require_timestamp
+from memorive.platform.errors import ContractViolation
 
 
 REQUIREMENTS = frozenset({"required", "optional"})

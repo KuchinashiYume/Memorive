@@ -1,3 +1,9 @@
+"""The desktop service's job store in SQLite: jobs, their events, idempotency keys and external
+effects, with updates against an expected version and an integrity report. Payloads holding a field
+named like a secret are refused.
+
+Opened by the desktop service (memorive/desktop/service/service_main.py) and the desktop harness.
+"""
 from __future__ import annotations
 
 from contextlib import closing
@@ -7,9 +13,10 @@ from pathlib import Path
 import sqlite3
 from typing import Any, Callable
 
-from .contracts import canonical_json_bytes, immutable_copy, utc_now
-from .errors import CorruptEventLog, IdempotencyConflict, JobNotFound, VersionConflict
-from .contracts import canonical_sha256
+from memorive.platform.clock import utc_now
+from memorive.platform.jobs.contracts import canonical_json_bytes, immutable_copy
+from memorive.platform.errors import CorruptEventLog, IdempotencyConflict, JobNotFound, VersionConflict
+from memorive.platform.jobs.contracts import canonical_sha256
 import re
 
 

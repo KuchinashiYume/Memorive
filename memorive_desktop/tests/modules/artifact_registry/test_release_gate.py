@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from run_ledger.analysis_admission_runtime_log_publication_preview import build_publication_candidate_manifest, build_publication_dry_run
-from run_ledger.errors import RealPublicationForbidden
+from memorive.platform.ledger.errors import RealPublicationForbidden
 from run_ledger.analysis_admission_runtime_log_publication_preview import append_publication_ledger, execute_publication, update_canonical_or_latest_pointer
 from memorive.documents.registry import CompatibilityPolicy, SandboxBoundaryViolation, validate_envelope
 from memorive.documents.registry import unresolved_requirement

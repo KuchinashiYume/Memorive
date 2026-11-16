@@ -1,3 +1,8 @@
+"""A job store in plain files for the sandbox: job_state.json and an append-only job_events.jsonl,
+written under the ledger's writer lock (platform/ledger/writer_lock.py), one writer per folder.
+
+Used by the diagnostics and the capability adapters in memorive_app.
+"""
 from __future__ import annotations
 
 from copy import deepcopy
@@ -7,11 +12,12 @@ from pathlib import Path
 from typing import Any, Callable
 import uuid
 
-from run_ledger.errors import ConcurrentWriterError
-from run_ledger.writer_lock import KernelWriterLock
+from memorive.platform.ledger.errors import ConcurrentWriterError
+from memorive.platform.ledger.writer_lock import KernelWriterLock
 
-from .contracts import canonical_json_bytes, immutable_copy, utc_now
-from .errors import ConcurrentWriter, CorruptEventLog, IdempotencyConflict, JobNotFound, VersionConflict
+from memorive.platform.clock import utc_now
+from memorive.platform.jobs.contracts import canonical_json_bytes, immutable_copy
+from memorive.platform.errors import ConcurrentWriter, CorruptEventLog, IdempotencyConflict, JobNotFound, VersionConflict
 
 
 Mutator = Callable[[dict[str, Any]], dict[str, Any]]

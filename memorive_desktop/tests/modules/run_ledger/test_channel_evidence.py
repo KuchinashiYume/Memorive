@@ -12,7 +12,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from run_ledger import ConcurrentWriterError
 from run_ledger.channel_evidence import ChannelAttemptBuilder, build_accounting_amendment, derive_evidence_class, validate_accounting, validate_channel_attempt
 from run_ledger.channel_store import ChannelLedgerStore
-from run_ledger.errors import AppendOnlyViolation, ChannelEvidenceError, RecordConflictError
+from memorive.platform.ledger.errors import AppendOnlyViolation, ChannelEvidenceError, RecordConflictError
 from run_ledger.channel_store import SANDBOX_MARKER_BYTES, SANDBOX_MARKER_NAME
 from memorive.models.gateway.execution_core import (
     ExecutionCore,
@@ -712,7 +712,7 @@ class ChannelStoreTests(unittest.TestCase):
                 method({})
 
     def test_store_is_a_thin_successor_of_the_run_ledger_store(self) -> None:
-        from run_ledger.store import LedgerStore
+        from memorive.platform.ledger.store import LedgerStore
 
         self.assertTrue(issubclass(ChannelLedgerStore, LedgerStore))
         for method_name in (
@@ -762,7 +762,7 @@ class ChannelStoreTests(unittest.TestCase):
         self.assertEqual(len(store.read_records()), outcomes.count("appended"))
 
     def test_truncated_tail_fails_closed_and_preserves_original_bytes(self) -> None:
-        from run_ledger.errors import TruncatedLedgerError
+        from memorive.platform.ledger.errors import TruncatedLedgerError
 
         store = self.store()
         store.root.mkdir(parents=True)

@@ -1,4 +1,5 @@
-"""Schema contract for the Memorive DECISION_LOG Design Decision Log (DDL)."""
+"""The schema of a design decision record (validate_decision) and its allowed types, statuses and
+module ids."""
 
 from __future__ import annotations
 

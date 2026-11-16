@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any, Mapping
 
-from .contracts import canonical_json_bytes, canonical_sha256, immutable_copy, require_text, require_timestamp
-from .errors import SupportBundleForbidden
+from memorive.platform.jobs.contracts import canonical_json_bytes, canonical_sha256, immutable_copy, require_text, require_timestamp
+from memorive.platform.errors import SupportBundleForbidden
 
 
 ALLOWED_PROJECTIONS = frozenset({"build.json", "doctor.json", "jobs.json", "errors.json", "capabilities.json"})

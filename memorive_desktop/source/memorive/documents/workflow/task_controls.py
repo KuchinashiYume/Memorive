@@ -14,7 +14,7 @@ import sqlite3
 from typing import Any, Iterator, Mapping
 import uuid
 
-from memorive_app.contracts import utc_now
+from memorive.platform.clock import utc_now
 
 from memorive.documents.workflow.contracts import Core_NODE_IDS, DATA_REVIEW_NODE_IDS, node_ids_for
 

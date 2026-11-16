@@ -7,7 +7,7 @@ import secrets
 import time
 from typing import Any, Callable, Mapping
 
-from .contracts import canonical_json_bytes, immutable_copy
+from memorive.platform.jobs.contracts import canonical_json_bytes, immutable_copy
 
 
 def _loopback(peer_host: str) -> str:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from run_ledger.store import LedgerStore
+from memorive.platform.ledger.store import LedgerStore
 from tests.modules.run_ledger.common import (
     IsolatedLedgerTestCase,
     attempt_record,

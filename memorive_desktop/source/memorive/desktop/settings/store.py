@@ -13,8 +13,8 @@ import re
 from threading import Lock, RLock
 from typing import Any, Callable, Mapping
 
-from run_ledger.errors import ConcurrentWriterError
-from run_ledger.writer_lock import KernelFileLock
+from memorive.platform.ledger.errors import ConcurrentWriterError
+from memorive.platform.ledger.writer_lock import KernelFileLock
 
 from memorive.desktop.settings.contracts import (
     SETTINGS_SCHEMA_VERSION,

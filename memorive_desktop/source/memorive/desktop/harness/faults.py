@@ -10,8 +10,8 @@ import shutil
 import sqlite3
 from typing import Any, Callable
 
-from memorive_app.durable_store import DurableJobStore
-from memorive_app.errors import CorruptEventLog
+from memorive.platform.jobs.durable_store import DurableJobStore
+from memorive.platform.errors import CorruptEventLog
 from memorive_app.facade import ApplicationFacade
 from memorive.desktop.service.adapters import RealFacadeAdapter
 

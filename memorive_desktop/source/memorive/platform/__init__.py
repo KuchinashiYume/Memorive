@@ -9,7 +9,13 @@
   windows_paths.py  file paths past the Windows MAX_PATH limit
   data_folders.py   where data goes when nothing has bound the folders to a profile
   pickle_compat.py  reading job pickles of earlier versions after their classes moved
+  errors.py         the application's error types
+  error_envelope.py the payload that reports an application error
+  credentials.py    secrets in Windows Credential Manager, by reference
   folders/          the folders of a user profile, their migration, and the roles of product folders
   logs/             the runtime log
   language/         which language new content is written in
+  jobs/             job contracts, the job stores, state transitions, the checks before a job starts
+  ledger/           run ledgers and the file locks that keep one writer per file
+  decisions/        design decision records
 """

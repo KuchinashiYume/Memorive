@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator, NoReturn
 
-from .errors import (
+from memorive.platform.ledger.errors import (
     AppendOnlyViolation,
     ConcurrentWriterError,
     CorruptLedgerError,
@@ -20,14 +20,14 @@ from .errors import (
     SchemaValidationError,
     TruncatedLedgerError,
 )
-from .schema import (
+from memorive.platform.ledger.schema import (
     SCHEMA_VERSION,
     canonical_json,
     record_type_of,
     record_year,
     validate_record,
 )
-from .writer_lock import KernelWriterLock
+from memorive.platform.ledger.writer_lock import KernelWriterLock
 
 _YEAR_FILE = re.compile(r"^[0-9]{4}\.jsonl$")
 

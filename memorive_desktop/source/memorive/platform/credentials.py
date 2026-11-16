@@ -1,3 +1,9 @@
+"""Secrets in Windows Credential Manager, stored and read by reference ("REF:windows:<name>"), so the
+settings keep only the reference.
+
+WindowsCredentialStore binds, resolves, deletes and checks a reference; the settings' credentials
+(memorive/desktop/settings/credentials.py) use it.
+"""
 from __future__ import annotations
 
 import ctypes

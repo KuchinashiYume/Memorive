@@ -7,7 +7,7 @@ import unittest
 from memorive.models.gateway.execution_core.contracts import canonical_sha256
 from memorive.models.gateway.model_configuration import TierResolver, assert_forbidden_values_absent, merge_configuration
 from memorive.models.gateway.model_configuration.fixtures import RESOLVE_AT, advanced_config, model_profiles, ordinary_config, provider_preset, tier_policy, verified_credential
-from memorive_app.contracts import resolved_profile_snapshot
+from memorive.platform.jobs.contracts import resolved_profile_snapshot
 
 
 PACKAGE_ROOT = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "models" / "gateway") / "model_configuration"

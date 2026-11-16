@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import copy
 
-from run_ledger.store import LedgerStore
-from run_ledger.errors import SchemaValidationError
+from memorive.platform.ledger.store import LedgerStore
+from memorive.platform.ledger.errors import SchemaValidationError
 from tests.modules.run_ledger.common import (
     IsolatedLedgerTestCase,
     RUN_ID,

@@ -1,7 +1,8 @@
-"""configuration_error_envelope: the error envelope (memorive_app's) for configuration errors."""
+"""configuration_error_envelope: the platform's error envelope (memorive/platform/error_envelope.py) for
+configuration errors."""
 from __future__ import annotations
 
-from memorive_app.contracts import error_envelope
+from memorive.platform.error_envelope import error_envelope
 
 from memorive.models.gateway.model_configuration.contracts import ModelConfigurationError
 

@@ -28,7 +28,7 @@ class TaskCategories:
 
     @contextmanager
     def _durable(self, root, category, pipeline, checkpoint):
-        from run_ledger.writer_lock import process_start_marker, process_identity_status
+        from memorive.platform.ledger.writer_lock import process_start_marker, process_identity_status
         path = root / 'categories.sqlite3'
         with sqlite3.connect(path) as db:
             ticket = db.execute('INSERT INTO queue(category,pipeline,pid,marker) VALUES (?,?,?,?)',
@@ -143,7 +143,7 @@ class CLIResources:
         from memorive.models.cli.templates import is_custom,digest
         from memorive.models.cli.windows import resolve_template_entry,template_command
         from memorive.models.cli.verification_transport import _context
-        from run_ledger.writer_lock import process_start_marker,process_identity_status
+        from memorive.platform.ledger.writer_lock import process_start_marker,process_identity_status
         from memorive.documents.workflow.contracts import CORE_WORKER_CAPACITY
         import hashlib,json
         def checkpoint():

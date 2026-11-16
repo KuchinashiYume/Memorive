@@ -98,7 +98,7 @@ PUBLICATION_FIELDS = {
 # The package that owns a record format also provides its validator. The files
 # are listed so that a report can say which code checked its records.
 _OFFICIAL_MODULE_FILES = {
-    "run_ledger.schema": ("run_ledger/schema.py",),
+    "memorive.platform.ledger.schema": ("memorive/platform/ledger/schema.py",),
     "memorive.documents.registry.schema_v2": ("memorive/documents/registry/schema.py", "memorive/documents/registry/schema_v2.py"),
 }
 OFFICIAL_VALIDATOR_RECEIPTS: dict[str, dict[str, Any]] = {}
@@ -652,7 +652,7 @@ def _runtime_log_status(record: dict[str, Any]) -> tuple[str, str, str, list[str
 
 
 def _adapt_runtime_log(record: dict[str, Any], ref: str, raw_hash: str) -> dict[str, Any]:
-    official_validate_record = _official_callable("run_ledger.schema", "validate_record")
+    official_validate_record = _official_callable("memorive.platform.ledger.schema", "validate_record")
     try:
         official_validate_record(record)
     except Exception as exc:

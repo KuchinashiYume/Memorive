@@ -1,10 +1,15 @@
+"""Which job state may follow which (LEGAL_TRANSITIONS, apply_transition), and how a stopped job's
+folder is classified for recovery from its events and its writer lock.
+
+Used by the application facade and the diagnostics in memorive_app.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 
-from run_ledger.writer_lock import (
+from memorive.platform.ledger.writer_lock import (
     host_id_hash,
     ledger_prefix_sha256,
     parse_lease,
@@ -12,8 +17,8 @@ from run_ledger.writer_lock import (
     read_lease_bytes,
 )
 
-from .contracts import JOB_CONTROL_STATES
-from .errors import InvalidTransition
+from memorive.platform.jobs.contracts import JOB_CONTROL_STATES
+from memorive.platform.errors import InvalidTransition
 
 
 LEGAL_TRANSITIONS = {

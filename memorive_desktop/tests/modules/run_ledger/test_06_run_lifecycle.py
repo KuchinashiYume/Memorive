@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
 
-from run_ledger.lifecycle import RunTerminalEvent
-from run_ledger.store import LedgerStore
-from run_ledger.lifecycle import RunClosure
-from run_ledger.errors import SchemaValidationError
+from memorive.platform.ledger.run_closure import RunTerminalEvent
+from memorive.platform.ledger.store import LedgerStore
+from memorive.platform.ledger.run_closure import RunClosure
+from memorive.platform.ledger.errors import SchemaValidationError
 from tests.modules.run_ledger.common import IsolatedLedgerTestCase, TS
 
 

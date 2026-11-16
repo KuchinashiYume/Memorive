@@ -7,10 +7,11 @@ from typing import Any, Mapping
 
 from jsonschema import Draft202012Validator
 
-from .contracts import require_text, utc_now
-from .errors import CorruptEventLog
-from .job_store import SandboxJobStore
-from .lifecycle import recovery_classification
+from memorive.platform.clock import utc_now
+from memorive.platform.jobs.contracts import require_text
+from memorive.platform.errors import CorruptEventLog
+from memorive.platform.jobs.sandbox_store import SandboxJobStore
+from memorive.platform.jobs.lifecycle import recovery_classification
 
 
 class DiagnosticCore:

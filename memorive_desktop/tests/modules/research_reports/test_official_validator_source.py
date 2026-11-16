@@ -21,19 +21,20 @@ from memorive.research.reports import adapters
 from memorive.research.reports.errors import SourceRecordError
 
 SOURCE = Path(adapters.__file__).resolve().parents[3]
+LEDGER = SOURCE / "memorive" / "platform" / "ledger"
 FOREIGN = 'def validate_record(record):\n    return "foreign"\n'
 
 
 @pytest.fixture(autouse=True)
 def isolated_modules():
-    saved = {name: module for name, module in sys.modules.items() if name.startswith("run_ledger")}
+    saved = {name: module for name, module in sys.modules.items() if name.startswith("memorive.platform.ledger")}
     receipts = dict(adapters.OFFICIAL_VALIDATOR_RECEIPTS)
     cache = getattr(adapters, "_RECEIPT_MODULES", {})
     receipt_modules = dict(cache)
     adapters.OFFICIAL_VALIDATOR_RECEIPTS.clear()
     cache.clear()
     yield
-    for name in [n for n in sys.modules if n.startswith("run_ledger")]:
+    for name in [n for n in sys.modules if n.startswith("memorive.platform.ledger")]:
         del sys.modules[name]
     sys.modules.update(saved)
     adapters.OFFICIAL_VALIDATOR_RECEIPTS.clear()
@@ -49,59 +50,59 @@ def _refusal(call):
 
 
 def _validator():
-    return adapters._official_callable("run_ledger.schema", "validate_record")
+    return adapters._official_callable("memorive.platform.ledger.schema", "validate_record")
 
 
 def test_the_validator_of_this_tree_comes_with_a_receipt_of_its_file():
     validator = _validator()
-    assert Path(sys.modules[validator.__module__].__file__).resolve() == (SOURCE / "run_ledger" / "schema.py").resolve()
-    receipt = adapters.OFFICIAL_VALIDATOR_RECEIPTS["run_ledger.schema"]
-    assert Path(receipt["module_file"]) == (SOURCE / "run_ledger" / "schema.py").resolve()
+    assert Path(sys.modules[validator.__module__].__file__).resolve() == (LEDGER / "schema.py").resolve()
+    receipt = adapters.OFFICIAL_VALIDATOR_RECEIPTS["memorive.platform.ledger.schema"]
+    assert Path(receipt["module_file"]) == (LEDGER / "schema.py").resolve()
     assert receipt["files"][0]["sha256"].lower() == hashlib.sha256(
-        (SOURCE / "run_ledger" / "schema.py").read_bytes()).hexdigest()
+        (LEDGER / "schema.py").read_bytes()).hexdigest()
 
 
 def test_a_same_named_module_from_another_folder_is_not_used(tmp_path):
-    other = tmp_path / "other_copy" / "run_ledger"
+    other = tmp_path / "other_copy" / "ledger"
     other.mkdir(parents=True)
     (other / "__init__.py").write_text("", encoding="utf-8")
     (other / "schema.py").write_text(FOREIGN, encoding="utf-8")
-    for name in [n for n in sys.modules if n.startswith("run_ledger")]:
+    for name in [n for n in sys.modules if n.startswith("memorive.platform.ledger")]:
         del sys.modules[name]
-    spec = importlib.util.spec_from_file_location("run_ledger", other / "__init__.py",
+    spec = importlib.util.spec_from_file_location("memorive.platform.ledger", other / "__init__.py",
                                                   submodule_search_locations=[str(other)])
     package = importlib.util.module_from_spec(spec)
-    sys.modules["run_ledger"] = package
+    sys.modules["memorive.platform.ledger"] = package
     spec.loader.exec_module(package)
-    importlib.import_module("run_ledger.schema")
+    importlib.import_module("memorive.platform.ledger.schema")
     assert "OFFICIAL_VALIDATOR_SOURCE_MISMATCH" == _refusal(_validator)
-    assert "run_ledger.schema" not in adapters.OFFICIAL_VALIDATOR_RECEIPTS
+    assert "memorive.platform.ledger.schema" not in adapters.OFFICIAL_VALIDATOR_RECEIPTS
 
 
 def test_a_module_loaded_again_gets_its_own_receipt():
     _validator()
-    first = sys.modules["run_ledger.schema"]
-    del sys.modules["run_ledger.schema"]
-    second = importlib.import_module("run_ledger.schema")
+    first = sys.modules["memorive.platform.ledger.schema"]
+    del sys.modules["memorive.platform.ledger.schema"]
+    second = importlib.import_module("memorive.platform.ledger.schema")
     assert first is not second
     validator = _validator()
     assert validator.__globals__ is second.__dict__
-    assert getattr(adapters, "_RECEIPT_MODULES", {}).get("run_ledger.schema", (None,))[0] is second
+    assert getattr(adapters, "_RECEIPT_MODULES", {}).get("memorive.platform.ledger.schema", (None,))[0] is second
 
 
 def test_a_module_swapped_in_after_a_valid_receipt_is_refused(tmp_path):
     _validator()
     stray = tmp_path / "schema.py"
     stray.write_text(FOREIGN, encoding="utf-8")
-    spec = importlib.util.spec_from_file_location("run_ledger.schema", stray)
+    spec = importlib.util.spec_from_file_location("memorive.platform.ledger.schema", stray)
     swapped = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(swapped)
-    sys.modules["run_ledger.schema"] = swapped
+    sys.modules["memorive.platform.ledger.schema"] = swapped
     assert "OFFICIAL_VALIDATOR_SOURCE_MISMATCH" == _refusal(_validator)
 
 
 def test_a_validator_imported_from_elsewhere_into_the_module_is_refused(monkeypatch):
-    module = importlib.import_module("run_ledger.schema")
+    module = importlib.import_module("memorive.platform.ledger.schema")
     monkeypatch.setattr(module, "validate_record", lambda record: "borrowed")
     assert "OFFICIAL_VALIDATOR_UNAVAILABLE" == _refusal(_validator)
 

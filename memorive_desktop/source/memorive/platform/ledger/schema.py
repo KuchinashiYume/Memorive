@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from .errors import SchemaValidationError
+from memorive.platform.ledger.errors import SchemaValidationError
 from datetime import datetime
 
 SCHEMA_VERSION = "2.0"

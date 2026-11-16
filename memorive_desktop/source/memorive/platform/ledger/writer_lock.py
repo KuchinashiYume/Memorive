@@ -1,6 +1,6 @@
 """One writer per file: a non-blocking OS file lock (KernelFileLock) and, for writers that need it, a
-lease record on disk (LockLease, KernelWriterLock). The job store and job lifecycle
-(memorive_app/job_store.py, lifecycle.py), the settings store, the verification and exam jobs and
+lease record on disk (LockLease, KernelWriterLock). The sandbox job store and the job lifecycle
+(platform/jobs/sandbox_store.py, lifecycle.py), the settings store, the verification and exam jobs and
 task scheduling use it.
 """
 
@@ -19,8 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
-from .errors import ConcurrentWriterError
-from .schema import canonical_json
+from memorive.platform.ledger.errors import ConcurrentWriterError
+from memorive.platform.ledger.schema import canonical_json
 
 
 LOCK_FILENAME = ".writer.lock"

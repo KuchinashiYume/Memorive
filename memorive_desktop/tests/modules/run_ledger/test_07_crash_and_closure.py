@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from run_ledger.closure import enforce_follow_up_policy
-from run_ledger.store import LedgerStore
-from run_ledger.errors import PaperOutcomeClosureGap, PolicyViolation, SchemaValidationError, TruncatedLedgerError
-from run_ledger.closure import validate_paper_outcome_closure
-from run_ledger.schema import validate_record
+from memorive.platform.ledger.closure import enforce_follow_up_policy
+from memorive.platform.ledger.store import LedgerStore
+from memorive.platform.ledger.errors import PaperOutcomeClosureGap, PolicyViolation, SchemaValidationError, TruncatedLedgerError
+from memorive.platform.ledger.closure import validate_paper_outcome_closure
+from memorive.platform.ledger.schema import validate_record
 from tests.modules.run_ledger.common import IsolatedLedgerTestCase, attempt_record, paper_outcome
 
 

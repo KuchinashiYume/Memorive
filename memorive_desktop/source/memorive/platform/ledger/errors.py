@@ -1,4 +1,5 @@
-"""DataContracts terminal-ledger domain errors."""
+"""Errors of the run ledgers and the writer lock: schema validation, append-only and record conflicts,
+concurrent writers, corrupt or truncated ledgers, closure gaps, policy violations and channel evidence."""
 
 from __future__ import annotations
 

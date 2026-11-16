@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
-from .errors import SchemaValidationError
-from .schema import (
+from memorive.platform.ledger.errors import SchemaValidationError
+from memorive.platform.ledger.schema import (
     ACCEPTANCE_VERDICTS,
     LIFECYCLE_STATUSES,
     SCHEMA_VERSION,

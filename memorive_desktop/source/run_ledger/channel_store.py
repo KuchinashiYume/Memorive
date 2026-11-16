@@ -17,12 +17,12 @@ from .channel_evidence import (
     canonical_json,
     validate_channel_record,
 )
-from .errors import (
+from memorive.platform.ledger.errors import (
     AppendOnlyViolation,
     ChannelEvidenceError,
     RecordConflictError,
 )
-from .store import LedgerStore
+from memorive.platform.ledger.store import LedgerStore
 
 
 SANDBOX_MARKER_NAME = ".memorive-sandbox-root"

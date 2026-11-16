@@ -1,14 +1,24 @@
+"""The application's shared contracts: job control states, the sets of verdicts and statuses,
+canonical JSON and its SHA-256, field checks (require_text, require_timestamp, require_sha256) and the
+resolved profile snapshot.
+
+utc_now is platform/clock.py's and the canonical encoding is platform/json_files.py's; here a value
+JSON cannot hold raises ContractViolation('CANONICAL_JSON_INVALID'). Used by the job stores, the
+application facade and support bundle (memorive_app), the desktop harness and the document workflow.
+"""
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 import hashlib
 import json
 import re
 from typing import Any, Mapping, Sequence
 
-from .errors import ContractViolation
+from memorive.platform import json_files
+from memorive.platform.clock import utc_now
+from memorive.platform.errors import ContractViolation
 
 
 CONTRACT_REVISION = "1.0"
@@ -40,19 +50,9 @@ FORMALIZATION_STATUSES = frozenset({"AUTHORIZED", "NOT_AUTHORIZED", "FORMALIZED"
 DEPLOYMENT_STATUSES = frozenset({"disabled", "staged", "active", "rolled_back"})
 
 
-def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
-
-
 def canonical_json_bytes(value: Any) -> bytes:
     try:
-        return json.dumps(
-            value,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-            allow_nan=False,
-        ).encode("utf-8")
+        return json_files.canonical_json_bytes(value)
     except (TypeError, ValueError) as exc:
         raise ContractViolation("CANONICAL_JSON_INVALID") from exc
 
@@ -136,41 +136,6 @@ def resolved_profile_snapshot(
     return payload
 
 
-def error_envelope(
-    *,
-    code: str,
-    category: str,
-    severity: str,
-    retryable: bool,
-    user_action: str,
-    technical_summary: str,
-    correlation_id: str,
-    job_id: str | None = None,
-    attempt_id: str | None = None,
-    retry_after: str | None = None,
-    cause_ref: str | None = None,
-    support_bundle_recommended: bool = False,
-) -> dict[str, Any]:
-    if not isinstance(retryable, bool) or not isinstance(support_bundle_recommended, bool):
-        raise ContractViolation("ERROR_BOOLEAN_INVALID")
-    return {
-        "schema_version": "ErrorEnvelope-v1",
-        "contract_revision": CONTRACT_REVISION,
-        "error_code": require_text(code, "error_code"),
-        "category": require_text(category, "category"),
-        "severity": require_text(severity, "severity"),
-        "retryable": retryable,
-        "retry_after": retry_after,
-        "user_action": require_text(user_action, "user_action"),
-        "technical_summary": require_text(technical_summary, "technical_summary"),
-        "correlation_id": require_text(correlation_id, "correlation_id"),
-        "job_id": job_id,
-        "attempt_id": attempt_id,
-        "cause_ref": cause_ref,
-        "support_bundle_recommended": support_bundle_recommended,
-    }
-
-
 __all__ = [
     "ACCEPTANCE_VERDICTS",
     "CONTRACT_REVISION",
@@ -186,6 +151,3 @@ __all__ = [
     "resolved_profile_snapshot",
     "utc_now",
 ]
-
-# Names this module exported before; restored with the code behind them.
-__all__ = [*__all__, 'error_envelope']

@@ -1,3 +1,8 @@
+"""Workflow definitions read from one folder: WorkflowDefinitionProvider resolves a workflow id to its
+JSON file (no symlinks, nothing outside the folder) and returns the definition with its hashes.
+
+The memorive_app package offers it; nothing in the app calls it, tests do.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -6,8 +11,8 @@ from pathlib import Path
 import re
 from typing import Any
 
-from .contracts import canonical_sha256, immutable_copy
-from .errors import ContractViolation
+from memorive.platform.jobs.contracts import canonical_sha256, immutable_copy
+from memorive.platform.errors import ContractViolation
 
 
 _WORKFLOW_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")

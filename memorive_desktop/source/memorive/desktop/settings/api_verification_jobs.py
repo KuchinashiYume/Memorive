@@ -4,7 +4,7 @@ import json
 import hashlib
 import re
 import threading
-from run_ledger.writer_lock import KernelFileLock
+from memorive.platform.ledger.writer_lock import KernelFileLock
 from memorive.desktop.settings.contracts import utc_now
 from memorive.platform.json_files import canonical_sha256
 from memorive.platform.sensitive import scan_sensitive

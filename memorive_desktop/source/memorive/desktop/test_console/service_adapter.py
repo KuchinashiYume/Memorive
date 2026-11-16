@@ -1,7 +1,7 @@
 """Console-only product service entry points; no production mode registration."""
 from __future__ import annotations
 import threading, hashlib, json
-from memorive_app.contracts import utc_now
+from memorive.platform.clock import utc_now
 
 class ConsoleServiceAdapter:
     adapter_kind='real_application_facade_console_session'

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import copy
 
-from run_ledger.store import LedgerStore
-from run_ledger.errors import SchemaValidationError
-from run_ledger.schema import validate_record
+from memorive.platform.ledger.store import LedgerStore
+from memorive.platform.ledger.errors import SchemaValidationError
+from memorive.platform.ledger.schema import validate_record
 from tests.modules.run_ledger.common import TS, IsolatedLedgerTestCase, attempt_amendment, attempt_record
 
 

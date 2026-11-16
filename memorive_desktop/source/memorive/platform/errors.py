@@ -1,3 +1,9 @@
+"""The application's error types: ApplicationError and its subclasses, each with a stable code, a
+category and whether a retry may help.
+
+Raised by the job stores and contracts in platform/jobs, the application facade (memorive_app), the
+document workflow worker and the desktop service. error_envelope.py turns one into the reply payload.
+"""
 from __future__ import annotations
 
 from typing import Any

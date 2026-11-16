@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlparse
 
-from .capabilities import build_capability_snapshot, evaluate_preflight
-from .contracts import (
+from memorive.platform.jobs.capabilities import build_capability_snapshot, evaluate_preflight
+from memorive.platform.jobs.contracts import (
     CONTRACT_REVISION,
     canonical_sha256,
     immutable_copy,
@@ -17,13 +17,13 @@ from .contracts import (
     utc_now,
 )
 from .diagnostics import DiagnosticCore
-from .errors import (
+from memorive.platform.errors import (
     CapabilityBlocked,
     ContractViolation,
     PauseUnsupported,
     ResumeInputDrift,
 )
-from .lifecycle import apply_transition
+from memorive.platform.jobs.lifecycle import apply_transition
 from .support_bundle import SupportBundleBuilder
 
 
@@ -310,7 +310,7 @@ class ApplicationFacade:
 
     def record_node_progress(self, job_id, event):
         from memorive.documents.workflow.node_progress import apply_event
-        from .errors import VersionConflict
+        from memorive.platform.errors import VersionConflict
         for observation_attempt in range(3):
             current = self.store.read_job(job_id)
             rows = apply_event(current.get('node_progress', {}), event,
@@ -727,7 +727,7 @@ class ApplicationFacade:
         # Progress has no caller-owned expected version. A concurrent control
         # action must remain authoritative; reapply only this monotonic projection
         # to its fresh version, never rerun the completed model operation.
-        from .errors import VersionConflict
+        from memorive.platform.errors import VersionConflict
         while True:
             try:
                 updated = self.store.update_job(job_id, expected_version=current["version"], event_type="PROGRESS_RECORDED", mutator=mutate)

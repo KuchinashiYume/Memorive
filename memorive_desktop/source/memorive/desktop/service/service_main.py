@@ -18,7 +18,7 @@ import signal
 from typing import Mapping
 import uuid
 
-from memorive_app.durable_store import DurableJobStore
+from memorive.platform.jobs.durable_store import DurableJobStore
 from memorive_app.facade import ApplicationFacade
 from memorive.platform.folders import ProfileFolderManager
 from memorive.platform.windows_paths import windows_io_path

@@ -20,7 +20,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from memorive.models.gateway.execution_core import HandoffContract, HandoffViolation
 from memorive.models.gateway.execution_core.contracts import ContractViolation, utc_now
 
-from .errors import ChannelEvidenceError
+from memorive.platform.ledger.errors import ChannelEvidenceError
 
 
 SCHEMA_VERSION = "CHANNEL_ACCOUNTING_CHANNEL_ATTEMPT_V1"

@@ -8,7 +8,7 @@ import hashlib
 import re
 from typing import Any
 
-from memorive_app.credentials import WindowsCredentialStore
+from memorive.platform.credentials import WindowsCredentialStore
 
 from memorive.desktop.settings.contracts import REFERENCE, utc_now
 

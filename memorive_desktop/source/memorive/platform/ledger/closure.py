@@ -4,8 +4,8 @@ answer is not hidden by an ordinary retry. core_adapter.py uses it.
 
 from __future__ import annotations
 
-from .errors import PaperOutcomeClosureGap, PolicyViolation, SchemaValidationError
-from .schema import validate_record
+from memorive.platform.ledger.errors import PaperOutcomeClosureGap, PolicyViolation, SchemaValidationError
+from memorive.platform.ledger.schema import validate_record
 
 
 def frozen_paper_ids(sample_manifest: dict) -> tuple[str, ...]:

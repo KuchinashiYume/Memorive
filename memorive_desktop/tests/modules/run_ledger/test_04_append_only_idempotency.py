@@ -4,8 +4,8 @@ import copy
 import json
 
 from run_ledger import ConcurrentWriterError
-from run_ledger.errors import AppendOnlyViolation, RecordConflictError
-from run_ledger.store import LedgerStore
+from memorive.platform.ledger.errors import AppendOnlyViolation, RecordConflictError
+from memorive.platform.ledger.store import LedgerStore
 from tests.modules.run_ledger.common import IsolatedLedgerTestCase, attempt_record, paper_outcome
 
 

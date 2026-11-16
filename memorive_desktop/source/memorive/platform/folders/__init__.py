@@ -3,8 +3,8 @@
 policy.py maps a logical folder (INBOX, SETTINGS, MODEL_VALIDATION ...) to its path in the profile
 (long Windows paths go through memorive/platform/windows_paths.py); migration.py copies files of
 older folder layouts into the current one. Almost every desktop package uses it. roles.py describes
-the roles of product folders (program, config, user data, cache, log ...) for artifact_registry and
-memorive_app.
+the roles of product folders (program, config, user data, cache, log ...) for the document registry's
+data lifecycle and the capability adapters.
 """
 
 from memorive.platform.folders.policy import (

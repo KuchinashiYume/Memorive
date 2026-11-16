@@ -10,8 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from .errors import ConcurrentWriterError
-from .writer_lock import (
+from memorive.platform.ledger.errors import ConcurrentWriterError
+from memorive.platform.ledger.writer_lock import (
     LEASE_FILENAME,
     LOCK_FILENAME,
     LOCK_SENTINEL,

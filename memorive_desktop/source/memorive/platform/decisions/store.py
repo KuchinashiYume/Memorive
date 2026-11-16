@@ -1,4 +1,4 @@
-"""Append-only Markdown storage and search for DECISION_LOG DDL records."""
+"""Design decision records as Markdown: rendering, parsing, append-only storage and search."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
-from .schema import DECISION_ID_PATTERN, DECISION_STATUSES, DecisionValidationError, validate_decision
+from memorive.platform.decisions.schema import DECISION_ID_PATTERN, DECISION_STATUSES, DecisionValidationError, validate_decision
 
 
 class AppendOnlyViolation(RuntimeError):

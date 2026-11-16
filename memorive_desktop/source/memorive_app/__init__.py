@@ -1,17 +1,18 @@
-"""The application core the desktop service is built on: jobs, credentials, diagnostics, IPC.
+"""The application core the desktop service is built on: the facade, diagnostics, support bundle and IPC.
 
-facade.py is the application facade the service calls; durable_store.py keeps jobs, events and
-idempotency keys in SQLite; credentials.py stores secrets in Windows Credential Manager by reference;
-ipc_auth.py authenticates the loopback connection; diagnostics.py and support_bundle.py build the
-diagnostic view and the support bundle. adapters.py, a read-only adapter for card review status, is
-not reached from the app's own code.
+facade.py is the application facade the service calls; ipc_auth.py authenticates the loopback
+connection; diagnostics.py and support_bundle.py build the diagnostic view and the support bundle;
+import_binding.py binds imported files into the inbox. adapters.py, a read-only adapter for card
+review status, is not reached from the app's own code. The job stores, contracts, errors and
+credentials are in memorive/platform (jobs/, errors.py, credentials.py); the modules here move to the
+desktop and documents areas next.
 """
 
-from .capabilities import build_capability_snapshot, evaluate_preflight
-from .contracts import JobControlState
-from .credentials import WindowsCredentialStore
+from memorive.platform.jobs.capabilities import build_capability_snapshot, evaluate_preflight
+from memorive.platform.jobs.contracts import JobControlState
+from memorive.platform.credentials import WindowsCredentialStore
 from .diagnostics import DiagnosticCore
-from .durable_store import DurableJobStore
+from memorive.platform.jobs.durable_store import DurableJobStore
 from .facade import ApplicationFacade
 from .import_binding import FileImportBinder
 from .ipc_auth import LoopbackPeerAuthenticator
@@ -32,5 +33,5 @@ __all__ = [
 ]
 
 # Names the package offered before; restored with the code behind them.
-from .workflow import WorkflowDefinitionProvider
+from memorive.platform.jobs.workflow_definitions import WorkflowDefinitionProvider
 __all__ = [*__all__, 'WorkflowDefinitionProvider']

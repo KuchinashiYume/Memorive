@@ -13,8 +13,8 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any, Awaitable, Callable, Mapping
 
-from memorive_app.contracts import canonical_json_bytes, canonical_sha256
-from memorive_app.durable_store import DurableJobStore
+from memorive.platform.jobs.contracts import canonical_json_bytes, canonical_sha256
+from memorive.platform.jobs.durable_store import DurableJobStore
 from memorive_app.facade import ApplicationFacade
 from memorive.desktop.service.adapters import (
     REQUIRED_FACADE_METHODS,
