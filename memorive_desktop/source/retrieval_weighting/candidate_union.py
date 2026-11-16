@@ -1,6 +1,7 @@
-"""Builds one candidate pool for the field-vector shadow retrieval from the plain candidates and the
-field candidates (build_unified_candidate_pool). Part of the field-vector and shadow ranking tools,
-run through python -m retrieval_weighting (see DEVELOPING.md); the app does not call it.
+"""Builds one candidate pool for the shadow retrieval from the plain candidates and the field
+candidates (build_unified_candidate_pool). Part of the shadow ranking modules: neither the app nor
+the python -m retrieval_weighting command line reaches it; only a direct import uses it, as the
+tests do.
 
 The union only builds the pool.  Reciprocal Rank
 Fusion (RRF) is computed from ranks only, retained as pool provenance, and is

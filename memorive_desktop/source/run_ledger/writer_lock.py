@@ -1,6 +1,7 @@
 """One writer per file: a non-blocking OS file lock (KernelFileLock) and, for writers that need it, a
-lease record on disk (LockLease, KernelWriterLock). The job store, the settings store, the
-verification and exam jobs and task scheduling use it.
+lease record on disk (LockLease, KernelWriterLock). The job store and job lifecycle
+(memorive_app/job_store.py, lifecycle.py), the settings store, the verification and exam jobs and
+task scheduling use it.
 """
 
 from __future__ import annotations

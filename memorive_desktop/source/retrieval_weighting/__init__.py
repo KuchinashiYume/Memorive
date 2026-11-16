@@ -7,9 +7,14 @@ decision_log, knowledge_admission, knowledge_feedback, memorive_model_evaluation
 research_reports, run_ledger);
 derived_penalty.py is used by knowledge_feedback.
 
-The field-vector and shadow ranking tools (candidate_index.py, migration.py, locator.py,
-field_vectors.py, shadow_contracts.py and others) are not reached from the app's own code: they run
-through python -m retrieval_weighting with an explicit request file, and tests call them.
+The command line (python -m retrieval_weighting with a request file) builds, migrates and
+validates field-vector indexes: cli.py, candidate_index.py, migration.py, locator.py,
+field_vectors.py. shadow_contracts.py holds input checks that query_dimensions.py uses, so
+research Q&A reaches it through research_ranking.py and research_fields.py. The other shadow
+ranking modules (aggregation, providers, candidate_union, counterevidence, field_search,
+semantic_field_profiles, semantic_field_search, semantic_shadow_contracts, source_snapshot,
+structural_candidate, retrieval_calibration_block_role_calibration) are reached by neither;
+only a direct import uses them, as the tests do.
 """
 
 from .locator import (

@@ -1,7 +1,7 @@
 """Searches stored field-vector records offline: ranks the eligible records by dot product for one
-embedding profile (search_field_vectors). structural_candidate.py uses it. Part of the field-vector
-and shadow ranking tools, run through python -m retrieval_weighting (see DEVELOPING.md); the app
-does not call it.
+embedding profile (search_field_vectors); structural_candidate.py uses it. Part of the shadow
+ranking modules: neither the app nor the python -m retrieval_weighting command line reaches it; only
+a direct import uses it, as the tests do.
 """
 
 from __future__ import annotations

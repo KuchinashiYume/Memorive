@@ -1,6 +1,7 @@
 """Token limits and other capabilities of known models, from a versioned registry file
-(registry_capabilities). The settings' API request options, segmented card distillation,
-memorive_app and the provider adapters read it.
+(registry_capabilities). Read by memorive_settings/api_request_options.py,
+memorive_workflow/segmented_distill.py, providers/deepseek.py and resource_limits.py
+(DEFAULT_REGISTRY_PATH).
 
 Some providers expose token ceilings in their live model metadata API; others
 only expose model visibility.  Adapters may combine a successful live probe
