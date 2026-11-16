@@ -111,7 +111,7 @@ def execution_profile(
         ("Execution_ROUTER", "Execution_JOB_RUNNER", "Execution_EVIDENCE_ADAPTER"),
     )
     value["extensions"] = {
-        "adapter_manifest_revision": "fake-r1",
+        "adapter_manifest_revision": "candidate001",
         "qualification_state": qualification,
         "minimum_route_qualification": "Q5",
         "capabilities": list(capabilities),
@@ -149,7 +149,7 @@ def execution_profile(
                 "raw_cap_bytes": 65536,
             },
             "retry_policy": {"max_attempts": 1, "automatic_retry": False},
-            "qualification_report_ref": "qualificationreport_fake@fake-r1",
+            "qualification_report_ref": "qualificationreport_fake@candidate001",
         }
     )
     return value
@@ -320,7 +320,7 @@ class InitializationContractAndRegistryTest(unittest.TestCase):
         self.assertEqual(record.manifest["adapter_id"], "fake")
         self.assertEqual(record.manifest_sha256, canonical_sha256(record.manifest))
         self.assertEqual(
-            registry.resolve("fake", "fake-r1", record.manifest_sha256), record
+            registry.resolve("fake", record.revision, record.manifest_sha256), record
         )
         with self.assertRaises(RegistryViolation) as caught:
             registry.register(adapter_manifest(), enabled=True)
@@ -338,15 +338,15 @@ class InitializationContractAndRegistryTest(unittest.TestCase):
                     adapter_manifest(), enabled=enabled, stale=stale
                 )
                 with self.assertRaises(RegistryViolation) as caught:
-                    registry.resolve("fake", "fake-r1", record.manifest_sha256)
+                    registry.resolve("fake", record.revision, record.manifest_sha256)
                 self.assertEqual(caught.exception.code, code)
         registry = AdapterRegistry(CORE_SCHEMA)
         record = registry.register(adapter_manifest(), enabled=True)
         with self.assertRaises(RegistryViolation) as caught:
-            registry.resolve("fake", "fake-r1", "0" * 64)
+            registry.resolve("fake", record.revision, "0" * 64)
         self.assertEqual(caught.exception.code, "ADAPTER_MANIFEST_HASH_MISMATCH")
         with self.assertRaises(RegistryViolation) as caught:
-            registry.resolve("missing", "fake-r1", record.manifest_sha256)
+            registry.resolve("missing", record.revision, record.manifest_sha256)
         self.assertEqual(caught.exception.code, "ADAPTER_MANIFEST_NOT_FOUND")
 
 
@@ -1094,7 +1094,7 @@ class HandoffAndCoreTest(unittest.TestCase):
                 workspace_parent=temp,
                 job_id="job_attempt_1",
                 attempt_id="attempt_001",
-                predecessor_attempt_ref="attempt_000@fake-r1",
+                predecessor_attempt_ref="attempt_000@candidate001",
                 input_materials={},
                 protected_roots=(REPO_ROOT,),
                 process_spec_factory=lambda workspace, profile, manifest: process_spec(
@@ -1110,7 +1110,7 @@ class HandoffAndCoreTest(unittest.TestCase):
                 first.handoff["events"][-1]["payload"]["attempt_lineage"],
                 {
                     "attempt_id": "attempt_001",
-                    "predecessor_attempt_ref": "attempt_000@fake-r1",
+                    "predecessor_attempt_ref": "attempt_000@candidate001",
                 },
             )
 
