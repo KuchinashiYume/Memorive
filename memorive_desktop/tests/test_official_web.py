@@ -3,12 +3,12 @@ import json
 from pathlib import Path
 import sys
 import pytest
-from memorive_browser_companion.site_profiles import (
+from memorive.sessions.companion.site_profiles import (
     SiteProfiles, default_sites, normalize_sites, profile_hash, active_sites,
     official_web_identity, configured_extension, extension_profile_script,
 )
-from memorive_session_archive.importers import BrowserLibraryImporter
-from memorive_session_archive.models import ArchiveInputError
+from memorive.sessions.archive.importers import BrowserLibraryImporter
+from memorive.sessions.archive.models import ArchiveInputError
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"tests"))
 from test_extension_upgrade_repair_gate import _api
@@ -65,7 +65,7 @@ def test_legacy_unknown_config_remains_editable_but_cannot_issue_plugin(tmp_path
     store.path.write_text(json.dumps(state),encoding="utf-8")
     assert store.get()["sites"][0]["enabled"] is True
     assert active_sites(rows)==[]
-    package=configured_extension(ROOT/"source/memorive_browser_companion/extension",tmp_path/"pack",rows)
+    package=configured_extension(ROOT/"source/memorive/sessions/companion/extension",tmp_path/"pack",rows)
     manifest=json.loads((package/"manifest.json").read_text(encoding="utf-8"))
     assert manifest["host_permissions"]==manifest["content_scripts"]==[]
     assert api.install_browser_companion()["status"]=="BROWSER_NO_VERIFIED_OFFICIAL_SITES"
@@ -76,7 +76,7 @@ def test_legacy_unknown_config_remains_editable_but_cannot_issue_plugin(tmp_path
 
 def test_verified_custom_site_gets_only_its_exact_permission(tmp_path):
     saved=SiteProfiles(tmp_path/"state").save(custom(),0)
-    package=configured_extension(ROOT/"source/memorive_browser_companion/extension",tmp_path/"pack",saved["sites"])
+    package=configured_extension(ROOT/"source/memorive/sessions/companion/extension",tmp_path/"pack",saved["sites"])
     manifest=json.loads((package/"manifest.json").read_text(encoding="utf-8"))
     assert manifest["host_permissions"]==["https://chat.qwen.ai/*"]
     assert manifest["content_scripts"][0]["matches"]==manifest["host_permissions"]
@@ -97,7 +97,7 @@ def test_import_rejects_unofficial_current_page(url):
 
 
 def test_generated_default_profile_has_no_drift():
-    assert (ROOT/"source/memorive_browser_companion/extension/site_profiles.js").read_text(encoding="utf-8")==extension_profile_script(default_sites())
+    assert (ROOT/"source/memorive/sessions/companion/extension/site_profiles.js").read_text(encoding="utf-8")==extension_profile_script(default_sites())
 
 @pytest.mark.parametrize("url",[
     "https://gemini.google.com/u/0/app?hl=zh-cn&pageId=none",

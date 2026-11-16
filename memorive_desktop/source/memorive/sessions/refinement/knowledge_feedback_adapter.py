@@ -7,9 +7,9 @@ from typing import Any, Mapping
 
 from knowledge_feedback.canonical import make_hashed_payload
 
-from .contracts import ConversationContractError, object_ref
-from .destination import validate_destination_projection
-from .refinement import validate_typed_refinement_item
+from memorive.sessions.refinement.contracts import ConversationContractError, object_ref
+from memorive.sessions.refinement.destination import validate_destination_projection
+from memorive.sessions.refinement.refinement import validate_typed_refinement_item
 
 
 def make_knowledge_feedback_candidate_preview(

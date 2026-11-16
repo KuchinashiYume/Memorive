@@ -89,7 +89,7 @@ def _session_fixture_clock(request, monkeypatch):
     if Path(str(request.node.fspath)).name not in SESSION_CLOCK_FILES:
         return
     import datetime as real
-    import memorive_sessions.product_controller as controller
+    import memorive.sessions.controller as controller
 
     class FixtureDateTime(real.datetime):
         @classmethod

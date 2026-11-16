@@ -14,11 +14,11 @@ for candidate in (ROOT / "source", ROOT / "product" / "desktop"):
         sys.path.insert(0, str(candidate))
 
 from memorive.models.local.product_controller import LocalModelProductController  # noqa: E402
-from memorive_session_archive import (  # noqa: E402
+from memorive.sessions.archive import (  # noqa: E402
     ArchiveInputError,
     DeepSeekOfficialImporter,
 )
-from memorive_sessions.product_controller import (  # noqa: E402
+from memorive.sessions.controller import (  # noqa: E402
     SessionProductError,
     SessionsProductController,
 )
@@ -672,12 +672,12 @@ def test_local_model_discovery_continues_after_one_adapter_returns_invalid_paylo
 
 def test_extension_caps_new_syncs_at_50_and_uses_14_day_or_sidebar_evidence() -> None:
     runner = (
-        ROOT / "source" / "memorive_browser_companion" / "extension" / "runner.js"
+        ROOT / "source" / "memorive" / "sessions" / "companion" / "extension" / "runner.js"
     ).read_text(encoding="utf-8")
     content = (
-        ROOT / "source" / "memorive_browser_companion" / "extension" / "content.js"
+        ROOT / "source" / "memorive" / "sessions" / "companion" / "extension" / "content.js"
     ).read_text(encoding="utf-8")
-    runtime = (ROOT / "source" / "memorive_browser_companion" / "desktop.py").read_text(
+    runtime = (ROOT / "source" / "memorive" / "sessions" / "companion" / "desktop.py").read_text(
         encoding="utf-8"
     )
 

@@ -7,8 +7,8 @@ from typing import Any, Mapping, Sequence
 
 from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash, verify_hashed_payload
 
-from .contracts import ConversationContractError, object_ref
-from .destination import validate_destination_projection
+from memorive.sessions.refinement.contracts import ConversationContractError, object_ref
+from memorive.sessions.refinement.destination import validate_destination_projection
 
 
 _BATCH_KEYS = {

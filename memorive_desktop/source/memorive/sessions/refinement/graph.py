@@ -13,9 +13,9 @@ from knowledge_feedback.canonical import (
     verify_hashed_payload,
 )
 
-from .contracts import BLOCK_TYPES, ROLES, ConversationContractError, object_ref
-from .contracts import validate_export_snapshot
-from .provider_adapter import validate_provider_export
+from memorive.sessions.refinement.contracts import BLOCK_TYPES, ROLES, ConversationContractError, object_ref
+from memorive.sessions.refinement.contracts import validate_export_snapshot
+from memorive.sessions.refinement.provider_adapter import validate_provider_export
 
 
 _GRAPH_KEYS = {

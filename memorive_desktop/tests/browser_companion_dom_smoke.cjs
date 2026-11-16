@@ -10,7 +10,9 @@ const contentScript = fs.readFileSync(
   path.join(
     attemptRoot,
     "source",
-    "memorive_browser_companion",
+    "memorive",
+    "sessions",
+    "companion",
     "extension",
     "content.js"
   ),

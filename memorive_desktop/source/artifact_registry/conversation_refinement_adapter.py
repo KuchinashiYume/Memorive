@@ -6,8 +6,8 @@ from copy import deepcopy
 from typing import Any, Mapping
 
 from knowledge_feedback.canonical import make_hashed_payload, verify_hashed_payload
-from knowledge_feedback.conversation_refinement.contracts import ConversationContractError, object_ref
-from knowledge_feedback.conversation_refinement.destination import validate_destination_projection
+from memorive.sessions.refinement.contracts import ConversationContractError, object_ref
+from memorive.sessions.refinement.destination import validate_destination_projection
 from knowledge_admission.conversation_ingest_preview import validate_conversation_ingest_preview
 
 

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from knowledge_feedback.conversation_refinement.contracts import DECISION_STATES, DESTINATIONS, REFINEMENT_TYPES
-from knowledge_feedback.conversation_refinement.contracts import make_selection_receipt
-from knowledge_feedback.conversation_refinement.destination import TYPE_DESTINATION, make_destination_projection
-from knowledge_feedback.conversation_refinement.graph import build_normalized_graph
-from knowledge_feedback.conversation_refinement.provider_adapter import build_synthetic_snapshot
-from knowledge_feedback.conversation_refinement.refinement import PREFIX_TYPES
-from knowledge_feedback.conversation_refinement.refinement import deterministic_refine_graph
+from memorive.sessions.refinement.contracts import DECISION_STATES, DESTINATIONS, REFINEMENT_TYPES
+from memorive.sessions.refinement.contracts import make_selection_receipt
+from memorive.sessions.refinement.destination import TYPE_DESTINATION, make_destination_projection
+from memorive.sessions.refinement.graph import build_normalized_graph
+from memorive.sessions.refinement.provider_adapter import build_synthetic_snapshot
+from memorive.sessions.refinement.refinement import PREFIX_TYPES
+from memorive.sessions.refinement.refinement import deterministic_refine_graph
 from tests.modules.knowledge_feedback.test_export_snapshot_contract import NOW, make_envelope, make_export, message
 from decision_log.conversation_refinement_decision import make_refinement_decision_receipt
 FAMILIES = [

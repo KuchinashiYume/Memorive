@@ -13,11 +13,11 @@ from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping, Sequence
 
-from .contracts import (
+from memorive.sessions.refinement.contracts import (
     ConversationContractError,
 )
-from .contracts import make_export_snapshot
-from .contracts import validate_source_access_envelope
+from memorive.sessions.refinement.contracts import make_export_snapshot
+from memorive.sessions.refinement.contracts import validate_source_access_envelope
 
 
 SYNTHETIC_PROFILE = "GENERIC_SYNTHETIC_EXPORT_V1"

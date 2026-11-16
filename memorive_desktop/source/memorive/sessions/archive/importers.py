@@ -10,7 +10,7 @@ from urllib.parse import urlparse, urlsplit
 
 from memorive.platform.windows_paths import windows_io_path
 
-from .models import (
+from memorive.sessions.archive.models import (
     ArchiveInputError,
     BROWSER_CAPTURE_SOURCE_ACTIVE_TAB_V1,
     BROWSER_CAPTURE_SOURCE_DEPLOYED_DRAFT,
@@ -473,7 +473,7 @@ class BrowserLibraryImporter:
         allowed_hosts = _PROVIDER_HOSTS
         if provider.startswith('web-'):
             # Provider-controlled payloads never grant themselves a new origin.
-            from memorive_browser_companion.site_profiles import normalize_sites, profile_hash, active_sites
+            from memorive.sessions.companion.site_profiles import normalize_sites, profile_hash, active_sites
             if not allowed_site_settings:
                 raise ArchiveInputError('BROWSER_CUSTOM_SITE_NOT_CONFIGURED')
             sites=normalize_sites(allowed_site_settings['sites'])
@@ -543,7 +543,7 @@ class BrowserLibraryImporter:
 
         generated_at = _iso_timestamp(payload.get("generated_at"), "generated_at")
         if current_page_capture:
-            from memorive_browser_companion.site_profiles import official_web_identity
+            from memorive.sessions.companion.site_profiles import official_web_identity
             # Manual visible-page capture uses the official-origin registry.
             # Background-sync selections and their hashes do not grant or deny
             # this user-triggered operation; the custom-sync branch above keeps

@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from memorive_sessions.product_controller import SessionProductError, SessionsProductController
+from memorive.sessions.controller import SessionProductError, SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
-EXTENSION_ROOT = ATTEMPT_ROOT / "source" / "memorive_browser_companion" / "extension"
+EXTENSION_ROOT = ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "companion" / "extension"
 
 
 class _HealthyService:

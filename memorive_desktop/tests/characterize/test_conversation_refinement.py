@@ -1,6 +1,6 @@
 """Conversation refinement: what its validators accept and reject, and what the builders make.
 
-Pins today's behaviour of knowledge_feedback.conversation_refinement (graph, redaction,
+Pins today's behaviour of memorive.sessions.refinement (graph, redaction,
 context capsule, typed refinement items) before the planned removal of the hash envelopes
 (make_hashed_payload / verify_hashed_payload) around these records.
 
@@ -15,7 +15,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from knowledge_feedback.canonical import make_hashed_payload
-from knowledge_feedback.conversation_refinement import (
+from memorive.sessions.refinement import (
     make_context_capsule,
     make_model_refinement_items,
     redact_text,
@@ -24,7 +24,7 @@ from knowledge_feedback.conversation_refinement import (
     validate_redaction_result,
     validate_typed_refinement_item,
 )
-from memorive_workflow_bridge.conversation_refinement import _build_graph
+from memorive.sessions.refinement.model_channel import _build_graph
 from tests.characterize.golden import check, outcome
 
 HERE = Path(__file__).parent

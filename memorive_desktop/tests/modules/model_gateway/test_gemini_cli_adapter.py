@@ -20,8 +20,8 @@ from memorive.models.gateway.execution_core.runner import IsolatedJobRunner  # n
 from memorive.models.gateway.execution_core.workspace import JobWorkspace  # noqa: E402
 
 
-CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
-CALL_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "external_model_call_receipt.schema.json"
+CORE_SCHEMA_PATH = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "schemas" / "execution_execution_core.schema.json"
+CALL_SCHEMA_PATH = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "schemas" / "external_model_call_receipt.schema.json"
 CORE_SCHEMA = json.loads(CORE_SCHEMA_PATH.read_text(encoding="utf-8"))
 CALL_SCHEMA = json.loads(CALL_SCHEMA_PATH.read_text(encoding="utf-8"))
 FAKE_GEMINI = Path(__file__).with_name("fake_gemini.py").resolve()

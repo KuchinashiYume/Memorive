@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from memorive_sessions.product_controller import SessionProductError, SessionsProductController
+from memorive.sessions.controller import SessionProductError, SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
@@ -222,7 +222,7 @@ def test_session_discovery_uses_the_current_profile_or_environment_not_a_machine
     bootstrap = controller.call("sessions.bootstrap", {})
     assert {row["provider_id"] for row in bootstrap["records"]} == {"codex", "claude"}
     implementation = (
-        ATTEMPT_ROOT / "source" / "memorive_sessions" / "edge_visible_ui.py"
+        ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "edge_visible_ui.py"
     ).read_text(encoding="utf-8")
     assert "KuchinashiYume" not in implementation
     assert "G:\\" not in implementation

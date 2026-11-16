@@ -16,7 +16,7 @@ if str(SOURCE_ROOT) not in sys.path:
 from memorive_current_task.refinement_tasks import SessionRefinementTaskStore  # noqa: E402
 from memorive_inbox import InboxController  # noqa: E402
 from memorive_inbox import InboxServiceAdapter  # noqa: E402
-from memorive_sessions import SessionsProductController  # noqa: E402
+from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from memorive_settings.contracts import default_settings, validate_settings  # noqa: E402
 from memorive.models.capabilities import (  # noqa: E402
     CHAT,
@@ -25,7 +25,7 @@ from memorive.models.capabilities import (  # noqa: E402
     VISION_OCR,
     workflow_node_accepts_capability,
 )
-from memorive_workflow_bridge.conversation_refinement import (  # noqa: E402
+from memorive.sessions.refinement.model_channel import (  # noqa: E402
     ExistingConversationRefinementChannel,
 )
 from memorive.models.validation.transport import HttpResponse, ProcessResult  # noqa: E402

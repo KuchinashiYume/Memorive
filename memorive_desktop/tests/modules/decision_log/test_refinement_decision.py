@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 from copy import deepcopy
 
-from knowledge_feedback.conversation_refinement.contracts import ConversationContractError
-from knowledge_feedback.conversation_refinement.refinement import deterministic_refine_graph
+from memorive.sessions.refinement.contracts import ConversationContractError
+from memorive.sessions.refinement.refinement import deterministic_refine_graph
 from tests.modules.knowledge_feedback.test_typed_refinement import refinement_fixture
 from decision_log.conversation_refinement_decision import assert_decision_binds_item, make_refinement_decision_receipt, validate_refinement_decision_receipt
 NOW = "2026-08-18T02:00:00+09:00"

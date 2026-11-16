@@ -19,7 +19,7 @@ from tests.test_browser_capture_successor_repair import (  # noqa: E402
 )
 from runtime import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
-from memorive_session_archive import (  # noqa: E402
+from memorive.sessions.archive import (  # noqa: E402
     ArchiveInputError,
     BrowserLibraryImporter,
     SessionArchive,

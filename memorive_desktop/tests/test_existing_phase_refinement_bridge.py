@@ -109,7 +109,7 @@ def _local_row() -> dict:
 
 
 def _channel(row: dict, adapter: _LocalAdapter | None = None):
-    from memorive_workflow_bridge.conversation_refinement import (
+    from memorive.sessions.refinement.model_channel import (
         ExistingConversationRefinementChannel,
     )
 
@@ -147,7 +147,7 @@ def test_channel_reuses_phase7_local_adapter_and_phase6_subject_contract():
 
 
 def test_channel_fails_closed_for_remote_profiles_instead_of_reinventing_execution():
-    from memorive_workflow_bridge.conversation_refinement import (
+    from memorive.sessions.refinement.model_channel import (
         ConversationRefinementBridgeError,
     )
 
@@ -164,7 +164,7 @@ def test_channel_fails_closed_for_remote_profiles_instead_of_reinventing_executi
 
 
 def test_channel_fails_closed_for_local_identity_gap():
-    from memorive_workflow_bridge.conversation_refinement import (
+    from memorive.sessions.refinement.model_channel import (
         ConversationRefinementBridgeError,
     )
 
@@ -180,10 +180,10 @@ def test_channel_fails_closed_for_local_identity_gap():
 
 def test_bridge_is_only_a_phase6_contract_and_phase7_local_composition():
     bridge = (
-        ROOT / "source" / "memorive_workflow_bridge" / "conversation_refinement.py"
+        ROOT / "source" / "memorive" / "sessions" / "refinement" / "model_channel.py"
     ).read_text(encoding="utf-8")
     assert "memorive.models.gateway.local_structured_chat" in bridge
-    assert "knowledge_feedback.conversation_refinement" in bridge
+    assert "memorive.sessions.refinement" in bridge
     assert "SafeRelayClient" not in bridge
     assert "Phase5ApiStructuredExecutor" not in bridge
     assert "Phase5CliStructuredExecutor" not in bridge

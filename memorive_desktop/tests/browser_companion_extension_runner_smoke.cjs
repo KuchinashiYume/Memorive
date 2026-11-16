@@ -11,7 +11,9 @@ const attemptRoot = path.resolve(__dirname, "..");
 const extensionRoot = path.join(
   attemptRoot,
   "source",
-  "memorive_browser_companion",
+  "memorive",
+  "sessions",
+  "companion",
   "extension"
 );
 const profileRoot = fs.mkdtempSync(path.join(os.tmpdir(), "memorive-extension-runner-"));

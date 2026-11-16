@@ -11,8 +11,8 @@ ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ATTEMPT_ROOT / "product" / "desktop"))
 
 from memorive.models.local.product_controller import LocalModelProductController
-from memorive_sessions.edge_visible_ui import EdgeDeepSeekVisibleUIReader
-from memorive_sessions.product_controller import SessionProductError, SessionsProductController
+from memorive.sessions.edge_visible_ui import EdgeDeepSeekVisibleUIReader
+from memorive.sessions.controller import SessionProductError, SessionsProductController
 from runtime import ProductApi
 
 
@@ -187,7 +187,7 @@ def test_local_model_discovery_verifies_each_saved_loopback_endpoint(
 
 def test_browser_companion_indexes_history_titles_and_captures_canonical_turns() -> None:
     content = (
-        ATTEMPT_ROOT / "source" / "memorive_browser_companion" / "extension" / "content.js"
+        ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "companion" / "extension" / "content.js"
     ).read_text(encoding="utf-8")
 
     assert "indexRecentSessions" in content

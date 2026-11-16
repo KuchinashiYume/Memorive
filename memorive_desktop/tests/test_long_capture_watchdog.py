@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXTENSION = ROOT / "source" / "memorive_browser_companion" / "extension"
+EXTENSION = ROOT / "source" / "memorive" / "sessions" / "companion" / "extension"
 
 
 def test_real_watchdog_failure_writes_its_own_privacy_safe_report() -> None:

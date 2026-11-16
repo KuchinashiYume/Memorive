@@ -15,7 +15,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_browser_companion.desktop import BrowserCompanionDesktop  # noqa: E402
+from memorive.sessions.companion.desktop import BrowserCompanionDesktop  # noqa: E402
 from runtime import ProductApi  # noqa: E402
 
 

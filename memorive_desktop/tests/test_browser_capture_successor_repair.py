@@ -11,7 +11,7 @@ for candidate in (ROOT / "source", ROOT / "product" / "desktop"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive_sessions.product_controller import SessionsProductController  # noqa: E402
+from memorive.sessions.controller import SessionsProductController  # noqa: E402
 
 
 class _HealthyService:

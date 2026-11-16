@@ -9,7 +9,7 @@ import threading
 
 import pytest
 
-from memorive_sessions.product_controller import SessionProductError, SessionsProductController
+from memorive.sessions.controller import SessionProductError, SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]

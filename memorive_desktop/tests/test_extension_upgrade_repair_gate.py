@@ -22,7 +22,7 @@ CURRENT_VERSION = json.loads(
     (
         ATTEMPT_ROOT
         / "source"
-        / "memorive_browser_companion"
+        / "memorive" / "sessions" / "companion"
         / "extension"
         / "manifest.json"
     ).read_text(encoding="utf-8")
@@ -69,8 +69,8 @@ def _write_identity(downloads: Path) -> None:
         "schema_version": "MEMORIVE_BROWSER_COMPANION_IDENTITY_V1",
         # Identity receipts carry these since extension 3.6.0 / 3.10.1.
         "browser_family": "EDGE",
-        "site_profile_sha256": __import__("memorive_browser_companion.site_profiles", fromlist=["x"]).profile_hash(
-            __import__("memorive_browser_companion.site_profiles", fromlist=["x"]).default_sites()),
+        "site_profile_sha256": __import__("memorive.sessions.companion.site_profiles", fromlist=["x"]).profile_hash(
+            __import__("memorive.sessions.companion.site_profiles", fromlist=["x"]).default_sites()),
         "extension_id": "abcdefghijklmnopabcdefghijklmnop",
         "extension_version": CURRENT_VERSION,
         "observed_at": "2026-08-29T11:00:00Z",

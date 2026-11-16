@@ -4,7 +4,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-from memorive_sessions.product_controller import SessionsProductController
+from memorive.sessions.controller import SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]

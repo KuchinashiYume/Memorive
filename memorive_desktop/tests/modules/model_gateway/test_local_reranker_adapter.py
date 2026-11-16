@@ -16,7 +16,7 @@ from tests.modules.model_gateway.local_reranker_fixture import (
 
 
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
-CORE_SCHEMA_PATH = REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json"
+CORE_SCHEMA_PATH = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "schemas" / "execution_execution_core.schema.json"
 RESOURCE_SCHEMA_PATH = REPO_ROOT / "memorive" / "models" / "gateway" / "local_reranker" / "schemas" / "resource_receipt_v1.schema.json"
 
 

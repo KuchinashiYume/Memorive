@@ -7,8 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from memorive_sessions.edge_visible_ui import EdgeDeepSeekVisibleUIReader
-from memorive_sessions.product_controller import SessionProductError, SessionsProductController
+from memorive.sessions.edge_visible_ui import EdgeDeepSeekVisibleUIReader
+from memorive.sessions.controller import SessionProductError, SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
@@ -365,7 +365,7 @@ def test_deepseek_full_scroll_reaches_both_ends_and_restores_the_users_position(
         "_visible_text_nodes",
         classmethod(_nodes),
     )
-    monkeypatch.setattr("memorive_sessions.edge_visible_ui.time.sleep", lambda _seconds: None)
+    monkeypatch.setattr("memorive.sessions.edge_visible_ui.time.sleep", lambda _seconds: None)
     api = {
         "ScrollPattern": SimpleNamespace(Pattern=object(), NoScroll=-1.0),
         "ScrollAmount": SimpleNamespace(NoAmount=object(), LargeIncrement=object()),

@@ -39,7 +39,7 @@ CURRENT_EXTENSION_VERSION = json.loads(
     (
         ATTEMPT_ROOT
         / "source"
-        / "memorive_browser_companion"
+        / "memorive" / "sessions" / "companion"
         / "extension"
         / "manifest.json"
     ).read_text(encoding="utf-8")
@@ -172,7 +172,7 @@ def test_three_provider_archive_switches_to_bounded_incremental_cursor(
 
 
 def test_cursor_helper_is_imported_after_embedded_source_becomes_available() -> None:
-    runtime_path = ATTEMPT_ROOT / "source" / "memorive_browser_companion" / "desktop.py"
+    runtime_path = ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "companion" / "desktop.py"
     tree = ast.parse(runtime_path.read_text(encoding="utf-8"))
 
     module_imports = [
@@ -183,7 +183,7 @@ def test_cursor_helper_is_imported_after_embedded_source_becomes_available() -> 
     assert all(
         not (
             isinstance(node, ast.ImportFrom)
-            and node.module == "memorive_browser_companion.incremental_cursor"
+            and node.module == "memorive.sessions.companion.incremental_cursor"
         )
         for node in module_imports
     )
@@ -200,7 +200,7 @@ def test_cursor_helper_is_imported_after_embedded_source_becomes_available() -> 
         and node.func.attr == "import_module"
         and node.args
         and isinstance(node.args[0], ast.Constant)
-        and node.args[0].value == "memorive_browser_companion.incremental_cursor"
+        and node.args[0].value == "memorive.sessions.companion.incremental_cursor"
         for node in ast.walk(method)
     )
 

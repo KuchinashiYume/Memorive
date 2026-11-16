@@ -16,14 +16,14 @@ from urllib.parse import urlsplit
 import uuid
 
 from memorive.platform.windows_paths import windows_io_path
-from memorive_session_archive import (
+from memorive.sessions.archive import (
     ArchiveInputError,
     BrowserLibraryImporter,
     DeepSeekOfficialImporter,
     GeminiTakeoutImporter,
     SessionArchive,
 )
-from memorive_session_archive.models import (
+from memorive.sessions.archive.models import (
     BROWSER_CAPTURE_SOURCE_ACTIVE_TAB_V1,
     BROWSER_CAPTURE_SOURCE_KINDS,
     ImportBatch,
@@ -3042,7 +3042,7 @@ class SessionsProductController:
         )
 
     def _configured_refinement_models(self) -> list[dict[str, Any]]:
-        from memorive_settings.refinement_models import configured_refinement_models
+        from memorive.sessions.refinement.model_choices import configured_refinement_models
         try:
             projection = self.service.call("settings.get_state", {})
         except Exception:

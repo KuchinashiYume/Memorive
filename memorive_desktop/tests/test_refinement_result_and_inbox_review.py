@@ -12,12 +12,12 @@ import copy
 import pytest
 
 from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
-from knowledge_feedback.conversation_refinement import make_context_capsule, validate_normalized_graph
+from memorive.sessions.refinement import make_context_capsule, validate_normalized_graph
 from memorive_inbox import InboxController
 from memorive_inbox.contracts import InboxError
-from memorive_sessions import SessionsProductController
-from memorive_sessions.product_controller import SessionProductError
-from knowledge_feedback.conversation_refinement.refinement import make_typed_refinement_item
+from memorive.sessions.controller import SessionsProductController
+from memorive.sessions.controller import SessionProductError
+from memorive.sessions.refinement.refinement import make_typed_refinement_item
 
 TASK = "refine-task-1"
 PROFILE = "local:ollama:qwen"

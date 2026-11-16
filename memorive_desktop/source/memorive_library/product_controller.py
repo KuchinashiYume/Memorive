@@ -11,7 +11,7 @@ import stat
 import threading
 from typing import Any, Callable, Mapping
 
-from knowledge_feedback.conversation_refinement import (
+from memorive.sessions.refinement import (
     validate_typed_refinement_item,
 )
 

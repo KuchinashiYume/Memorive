@@ -4,10 +4,10 @@ import unittest
 from copy import deepcopy
 
 from knowledge_feedback.canonical import make_hashed_payload
-from knowledge_feedback.conversation_refinement.contracts import ConversationContractError
-from knowledge_feedback.conversation_refinement.graph import validate_normalized_graph
-from knowledge_feedback.conversation_refinement.graph import build_normalized_graph
-from knowledge_feedback.conversation_refinement.provider_adapter import build_synthetic_snapshot
+from memorive.sessions.refinement.contracts import ConversationContractError
+from memorive.sessions.refinement.graph import validate_normalized_graph
+from memorive.sessions.refinement.graph import build_normalized_graph
+from memorive.sessions.refinement.provider_adapter import build_synthetic_snapshot
 from tests.modules.knowledge_feedback.test_export_snapshot_contract import NOW, make_envelope, make_export, message
 
 

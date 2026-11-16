@@ -5,7 +5,7 @@ import pytest
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests'))
 from test_extension_upgrade_repair_gate import _api
-from memorive_browser_companion.site_profiles import OFFICIAL_WEB_SITES, BUILTINS
+from memorive.sessions.companion.site_profiles import OFFICIAL_WEB_SITES, BUILTINS
 
 
 def test_catalog_is_not_mutable_authority(tmp_path):

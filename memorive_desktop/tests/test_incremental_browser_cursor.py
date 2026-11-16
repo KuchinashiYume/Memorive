@@ -14,7 +14,7 @@ SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
-from memorive_browser_companion.incremental_cursor import (  # noqa: E402
+from memorive.sessions.companion.incremental_cursor import (  # noqa: E402
     build_incremental_cursor,
 )
 

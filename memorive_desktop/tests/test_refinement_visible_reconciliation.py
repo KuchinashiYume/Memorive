@@ -13,7 +13,7 @@ if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
 from memorive_inbox import InboxController  # noqa: E402
-from memorive_sessions import SessionsProductController  # noqa: E402
+from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402
     LOCAL_PROFILE_REF,
     _FacadeService,
@@ -29,7 +29,7 @@ from tests.test_refinement_inbox_and_local_mapping import (  # noqa: E402
 
 def test_queue_terminal_transition_has_a_dedicated_ui_projection_observer() -> None:
     sessions = (
-        ATTEMPT_ROOT / "source" / "memorive_sessions" / "product_controller.py"
+        ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "controller.py"
     ).read_text(encoding="utf-8")
     runtime = (ATTEMPT_ROOT / "source" / "runtime.py").read_text(
         encoding="utf-8"

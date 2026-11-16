@@ -107,7 +107,7 @@ class ComponentBindingTests(unittest.TestCase):
 
     def test_second_measurement_blocks_before_popen(self):
         repo = (Path(__file__).resolve().parents[3] / "source")
-        schema = json.loads((repo / "memorive_workflow_bridge" / "contracts" / "execution_execution_core.schema.json").read_text(encoding="utf-8"))
+        schema = json.loads((repo / "memorive" / "models" / "gateway" / "execution_core" / "schemas" / "execution_execution_core.schema.json").read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             component = root / "component.bin"

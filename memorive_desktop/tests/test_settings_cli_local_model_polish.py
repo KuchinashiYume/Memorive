@@ -23,7 +23,7 @@ CURRENT_EXTENSION_VERSION = json.loads(
     (
         ATTEMPT_ROOT
         / "source"
-        / "memorive_browser_companion"
+        / "memorive" / "sessions" / "companion"
         / "extension"
         / "manifest.json"
     ).read_text(encoding="utf-8")

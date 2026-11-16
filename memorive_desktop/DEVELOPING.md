@@ -32,10 +32,10 @@ start" below).
   the request → the settings service runs the model (`memorive/models/execution`,
   `memorive/models/validation/runner.py`) → the workspace saves the answer, its citations and any
   knowledge draft (`knowledge_feedback/research_ingest.py`).
-- **Sessions**: imported or captured conversations (`memorive_sessions`, `memorive_session_archive`,
-  `memorive_browser_companion`) → refinement through `memorive_workflow_bridge` → typed items for review.
+- **Sessions**: imported or captured conversations (`memorive/sessions`: `controller.py`, `archive/`,
+  `companion/`) → refinement (`refinement/`, its model channel `model_channel.py`) → typed items for review.
   The browser extension's install, reload and sync, and importing session files, are in
-  `memorive_browser_companion/desktop.py` (`BrowserCompanionDesktop`); `ProductApi` forwards the
+  `memorive/sessions/companion/desktop.py` (`BrowserCompanionDesktop`); `ProductApi` forwards the
   window's calls to it.
 - **Exams**: the settings page → `memorive_settings` (exam jobs and executors) → the exam modules
   loaded by name (`memorive/exams/evaluation`, found with the packs by `memorive/exams/resources.py`)
@@ -70,7 +70,7 @@ when that code is restructured:
 | Desktop: window, service, panels | `runtime.py` (ProductApi), `memorive_desktop_service`, `memorive_desktop_assistant`, `memorive_current_task`, `memorive_messages`, `memorive_work_log`, `memorive_accounting`, `memorive_test_console_bridge`, `release_links.py` |
 | Documents | `memorive/documents/processing/registration.py` (paper IDs), `memorive_inbox`, `memorive_workflow`, `document_processing`, `evidence_extraction`, `evidence_review`, `knowledge_admission`, `artifact_registry`, `memorive_library`, `memorive_review`, `memorive_front_matter.py` |
 | Research | `memorive_research_workspace`, `memorive_research_runtime`, `literature_discovery`, `research_recommendations`, `research_reports`, `research_analysis`, `research_opportunities`, `retrieval`, `retrieval_weighting`, `knowledge_feedback` (knowledge drafts) |
-| Sessions | `memorive_sessions`, `memorive_session_archive`, `memorive_browser_companion`, `memorive_workflow_bridge`, `knowledge_feedback/conversation_refinement` |
+| Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
 | Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive_review/exam.py` |
 | Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file), `run_ledger`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
@@ -90,7 +90,7 @@ are today.
 | Imported files and processing jobs | `memorive_inbox`, `memorive_workflow`, `memorive_app` (job store) |
 | A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `document_processing`, `evidence_extraction`, `knowledge_admission` (review state in the card); read through `memorive_library` |
 | Research conversations, answers, knowledge drafts | `memorive_research_workspace` (its own SQLite store) |
-| Imported chat sessions and refinement tasks | `memorive_session_archive`, `memorive_current_task/refinement_tasks.py` |
+| Imported chat sessions and refinement tasks | `memorive/sessions/archive`, `memorive_current_task/refinement_tasks.py` |
 | Exam plans, results and score history | `memorive/exams` (`score_history.py`, the `workflow_exams/` run folders) |
 | Messages, window state, work log | `memorive_messages`, `memorive_desktop_service/control_store.py`, `memorive_work_log` |
 | Folder layout of a profile | `memorive/platform/folders` |
@@ -187,7 +187,7 @@ can ask again from the window.
 | Connected apps: bringing papers in, outputs, note write-back, the companion's calls | `memorive_research_workspace/connections.py` | `test_connections.py` |
 | What a connected device is shown when its document is processed | `job_results` in `memorive_research_workspace/desktop_connections.py` | `test_library_for_research.py` |
 | Knowledge drafts from answers: proposing, reviewing, retracting, revisions, the note written on acceptance | `knowledge_feedback/research_ingest.py` | `test_knowledge_drafts.py` |
-| Session refinement: what the model must answer, the typed items made from it | `memorive_workflow_bridge/conversation_refinement.py`, `knowledge_feedback/conversation_refinement/refinement.py` | `test_refinement_model_output.py` |
+| Session refinement: what the model must answer, the typed items made from it | `memorive/sessions/refinement/model_channel.py`, `memorive/sessions/refinement/refinement.py` | `test_refinement_model_output.py` |
 | Card review states (pending, active, quarantined), automatic review, the admission log | `knowledge_admission/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
 | Custom command-line model tools: the template, how it is run, how its output is read | `memorive/models/cli/templates.py`, `template_execution.py` | `characterize/test_cli_templates.py` |
 | How a model request is sent: API, command-line agents, embeddings, OCR | `memorive/models/validation/runner.py`: a structured chat goes `execute_structured_chat` (checks, limits, prompt) → `_send_api`, `_send_cli` or `_send_local` → `_chat_result`, with one request's state on `_ChatAttempt`; the API and command-line routes in `api_route.py` and `cli_route.py` next to it; model-name patterns and API endpoints in `memorive/models/endpoints.py`; the workflow exam's own part in `memorive/exams/runner.py` | `test_analysis_provider_transport.py`, `test_model_execution.py` |

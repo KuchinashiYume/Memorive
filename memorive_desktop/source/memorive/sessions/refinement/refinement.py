@@ -20,16 +20,16 @@ from knowledge_feedback.canonical import (
     verify_hashed_payload,
 )
 
-from .contracts import (
+from memorive.sessions.refinement.contracts import (
     REFINEMENT_TYPES,
     ConversationContractError,
     make_context_capsule,
     object_ref,
     validate_context_capsule,
 )
-from .graph import node_text, validate_normalized_graph
-from .redaction import redact_text
-from .contracts import validate_selection_receipt
+from memorive.sessions.refinement.graph import node_text, validate_normalized_graph
+from memorive.sessions.refinement.redaction import redact_text
+from memorive.sessions.refinement.contracts import validate_selection_receipt
 
 
 PREFIX_TYPES = {

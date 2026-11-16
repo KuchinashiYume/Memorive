@@ -5,7 +5,7 @@ ProductApi builds one BrowserCompanionDesktop at startup and forwards to it the 
 browser_companion_*, *_browser_companion*, sync_browser_sessions_from_downloads and
 import_browser_sessions_file calls. The extension writes into the browser's download folder;
 the sync reads its reports there and hands each session file to the sessions controller
-(memorive_sessions). Its own state is in the BROWSER_COMPANION profile folder (setup_v1.json,
+(memorive/sessions/controller.py). Its own state is in the BROWSER_COMPANION profile folder (setup_v1.json,
 the prepared extension, session-library).
 """
 from __future__ import annotations
@@ -25,7 +25,7 @@ import uuid
 
 from memorive.platform.windows_paths import windows_io_path
 
-from .browsers import BROWSERS, FAMILIES, discover as discover_browsers, family as browser_family, select as select_browser
+from memorive.sessions.companion.browsers import BROWSERS, FAMILIES, discover as discover_browsers, family as browser_family, select as select_browser
 
 
 class BrowserCompanionDesktop:
@@ -48,7 +48,7 @@ class BrowserCompanionDesktop:
         self.window = window
 
     def browser_companion_sites(self) -> dict[str, Any]:
-        from memorive_browser_companion.site_profiles import SiteProfiles, default_sites, normalize_sites, profile_hash, site_authorizations, OFFICIAL_WEB_SITES, BUILTINS
+        from memorive.sessions.companion.site_profiles import SiteProfiles, default_sites, normalize_sites, profile_hash, site_authorizations, OFFICIAL_WEB_SITES, BUILTINS
         catalog = [dict(provider=key, name=name, hosts=list(hosts), adapter=key if key in BUILTINS else 'generic')
                    for key, name, hosts, _proof in OFFICIAL_WEB_SITES]
         if self.profile_root is None:
@@ -58,7 +58,7 @@ class BrowserCompanionDesktop:
         return dict(state, site_authorizations=site_authorizations(state['sites']), official_site_catalog=catalog)
 
     def save_browser_companion_sites(self, sites, expected_revision):
-        from memorive_browser_companion.site_profiles import SiteProfiles
+        from memorive.sessions.companion.site_profiles import SiteProfiles
         # Reconcile a newly arrived terminal report before inspecting the
         # durable request marker. A completed request is not an active worker.
         self.browser_companion_status()
@@ -72,11 +72,11 @@ class BrowserCompanionDesktop:
         return dict(result, package_refresh=refreshed)
 
     def _browser_enabled_sites(self):
-        from memorive_browser_companion.site_profiles import active_sites
+        from memorive.sessions.companion.site_profiles import active_sites
         return active_sites(self.browser_companion_sites()['sites'])
 
     def _browser_companion_package(self) -> tuple[Path, set[str], str]:
-        source = (self.source_root / "memorive_browser_companion" / "extension").resolve()
+        source = (self.source_root / "memorive" / "sessions" / "companion" / "extension").resolve()
         try:
             source.relative_to(self.source_root)
         except ValueError as error:
@@ -96,7 +96,7 @@ class BrowserCompanionDesktop:
         }
         if not source.is_dir() or {path.name for path in source.iterdir() if path.is_file()} != required:
             raise RuntimeError("BROWSER_COMPANION_PACKAGE_INVALID")
-        from memorive_browser_companion.site_profiles import configured_extension, default_sites, profile_hash
+        from memorive.sessions.companion.site_profiles import configured_extension, default_sites, profile_hash
         settings = self.browser_companion_sites()
         if settings['profile_sha256'] != profile_hash(default_sites()):
             source = configured_extension(source, self._browser_companion_export_root()/'packages', settings['sites'])
@@ -121,7 +121,7 @@ class BrowserCompanionDesktop:
             raise RuntimeError("BROWSER_COMPANION_DESTINATION_ESCAPE")
 
     def open_browser_companion_site(self, url, preferred_browser=None):
-        from memorive_browser_companion.site_profiles import normalize_sites, official_web_identity, GENERIC, BUILTINS
+        from memorive.sessions.companion.site_profiles import normalize_sites, official_web_identity, GENERIC, BUILTINS
         identity = official_web_identity(url)
         if not identity:
             raise ValueError("BROWSER_SITE_NOT_VERIFIED_OFFICIAL")
@@ -692,7 +692,7 @@ class BrowserCompanionDesktop:
             }
         try:
             cursor_module = importlib.import_module(
-                "memorive_browser_companion.incremental_cursor"
+                "memorive.sessions.companion.incremental_cursor"
             )
             provider_counts = {
                 provider_id: len(

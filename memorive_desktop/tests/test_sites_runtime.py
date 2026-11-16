@@ -6,8 +6,8 @@ import pytest
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests'))
 from test_extension_upgrade_repair_gate import _api,_write_state,_write_identity,_write_preflight
-from memorive_browser_companion.site_profiles import SiteProfiles,default_sites,normalize_sites,profile_hash,configured_extension
-from memorive_browser_companion.incremental_cursor import build_incremental_cursor
+from memorive.sessions.companion.site_profiles import SiteProfiles,default_sites,normalize_sites,profile_hash,configured_extension
+from memorive.sessions.companion.incremental_cursor import build_incremental_cursor
 
 def test_config_change_invalidates_identity_and_previous_preflight(tmp_path):
     api,downloads,state_path=_api(tmp_path);_write_state(api,state_path);_write_identity(downloads);_write_preflight(downloads)

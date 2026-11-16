@@ -16,7 +16,7 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
 import runtime as runtime_module  # noqa: E402
 from runtime import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
-from memorive_browser_companion.desktop import BrowserCompanionDesktop  # noqa: E402
+from memorive.sessions.companion.desktop import BrowserCompanionDesktop  # noqa: E402
 
 
 GEMINI_SYNC_BASE = "https://gemini.google.com/app?memorive_bridge_sync=v1#"
@@ -28,7 +28,7 @@ CURRENT_EXTENSION_VERSION = json.loads(
     (
         ATTEMPT_ROOT
         / "source"
-        / "memorive_browser_companion"
+        / "memorive" / "sessions" / "companion"
         / "extension"
         / "manifest.json"
     ).read_text(encoding="utf-8")
@@ -72,8 +72,8 @@ def _write_report(
         "schema_version": "MEMORIVE_BROWSER_COMPANION_IDENTITY_V1",
         # Identity receipts carry these since extension 3.6.0 / 3.10.1.
         "browser_family": "EDGE",
-        "site_profile_sha256": __import__("memorive_browser_companion.site_profiles", fromlist=["x"]).profile_hash(
-            __import__("memorive_browser_companion.site_profiles", fromlist=["x"]).default_sites()),
+        "site_profile_sha256": __import__("memorive.sessions.companion.site_profiles", fromlist=["x"]).profile_hash(
+            __import__("memorive.sessions.companion.site_profiles", fromlist=["x"]).default_sites()),
         "extension_id": "abcdefghijklmnopabcdefghijklmnop",
         "extension_version": extension_version or CURRENT_EXTENSION_VERSION,
         "observed_at": "2026-08-29T02:29:59Z",

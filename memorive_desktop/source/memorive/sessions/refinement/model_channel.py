@@ -1,3 +1,8 @@
+"""The channel through which session refinement runs a model.
+
+ProductApi in runtime.py builds the channel (ExistingConversationRefinementChannel); the sessions
+page sends refinement requests through it and gets typed refinement items back.
+"""
 from __future__ import annotations
 from memorive.models.scheduling import scheduled
 
@@ -10,9 +15,9 @@ from typing import Any, Mapping, Sequence
 import unicodedata
 
 from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash
-from knowledge_feedback.conversation_refinement import make_model_refinement_items
-from knowledge_feedback.conversation_refinement.contracts import REFINEMENT_TYPES
-from knowledge_feedback.conversation_refinement.graph import node_text
+from memorive.sessions.refinement import make_model_refinement_items
+from memorive.sessions.refinement.contracts import REFINEMENT_TYPES
+from memorive.sessions.refinement.graph import node_text
 from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter
 from memorive.models.gateway.prompts import PROMPT_DIR
 

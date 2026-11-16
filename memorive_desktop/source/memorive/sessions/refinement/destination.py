@@ -7,8 +7,8 @@ from typing import Any, Mapping
 
 from knowledge_feedback.canonical import make_hashed_payload, validate_hash_descriptor, verify_hashed_payload
 
-from .contracts import DESTINATIONS, ConversationContractError, object_ref
-from .refinement import validate_typed_refinement_item
+from memorive.sessions.refinement.contracts import DESTINATIONS, ConversationContractError, object_ref
+from memorive.sessions.refinement.refinement import validate_typed_refinement_item
 
 
 TYPE_DESTINATION = {

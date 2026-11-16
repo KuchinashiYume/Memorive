@@ -11,7 +11,7 @@ if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
 from memorive_inbox import InboxController  # noqa: E402
-from memorive_sessions import SessionsProductController  # noqa: E402
+from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from tests.test_universal_current_page_capture import (  # noqa: E402
     _current_page_bundle,
 )

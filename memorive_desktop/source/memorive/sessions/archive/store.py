@@ -13,7 +13,7 @@ from uuid import uuid4
 from urllib.parse import urlparse
 import re
 
-from .models import (
+from memorive.sessions.archive.models import (
     BROWSER_CAPTURE_SOURCE_STRUCTURED_DOM_V4,
     BROWSER_CAPTURE_SOURCE_ACTIVE_TAB_V1,
     BROWSER_CAPTURE_STRUCTURED_DOM_PREDECESSORS,

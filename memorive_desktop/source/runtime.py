@@ -814,7 +814,7 @@ class ProductApi:
                 core_root=self._profile_path("Core_JOBS"),
             )
             refinement_module = importlib.import_module(
-                "memorive_workflow_bridge.conversation_refinement"
+                "memorive.sessions.refinement.model_channel"
             )
             self._conversation_refinement_channel = (
                 refinement_module.ExistingConversationRefinementChannel(
@@ -870,9 +870,9 @@ class ProductApi:
                 include_synthetic_projection=test_fixture_mode,
                 core_artifact_provider=self._core_products.rows,
             )
-            sessions_module = importlib.import_module("memorive_sessions.product_controller")
+            sessions_module = importlib.import_module("memorive.sessions.controller")
             if session_visible_ui_reader is None:
-                visible_ui_module = importlib.import_module("memorive_sessions.edge_visible_ui")
+                visible_ui_module = importlib.import_module("memorive.sessions.edge_visible_ui")
                 session_visible_ui_reader = {
                     "deepseek": visible_ui_module.EdgeDeepSeekVisibleUIReader(),
                     "gemini": visible_ui_module.EdgeGeminiVisibleUIReader(),
@@ -896,7 +896,7 @@ class ProductApi:
                 refinement_result_observer=self._on_refinement_result,
             )
             self._sessions.sync_refinement_queue()
-            from memorive_browser_companion.desktop import BrowserCompanionDesktop
+            from memorive.sessions.companion.desktop import BrowserCompanionDesktop
             self._browser_companion = BrowserCompanionDesktop(
                 profile_root=self._profile_root, source_root=self._source_root, sessions=self._sessions,
                 profile_path=self._profile_path, write_json_file=self._write_json_file,
@@ -2765,7 +2765,7 @@ class ProductApi:
             # Provider strings, paths and raw records must not become UI errors.
             return {"status": "ERROR", "reason": "DASHBOARD_READ_FAILED"}
 
-    # The browser companion and browser sessions: the window calls these; memorive_browser_companion/desktop.py
+    # The browser companion and browser sessions: the window calls these; memorive/sessions/companion/desktop.py
     # (BrowserCompanionDesktop) does the work.
     def browser_companion_sites(self) -> dict[str, Any]:
         return self._browser_companion.browser_companion_sites()

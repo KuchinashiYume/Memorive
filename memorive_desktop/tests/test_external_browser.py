@@ -38,14 +38,14 @@ def test_explicit_preflight_does_not_turn_into_incremental(tmp_path,monkeypatch)
     result=api.run_browser_companion_test_read()
     assert result['sync_mode']=='PREFLIGHT' and result['per_provider_limit']==2
 def test_site_profiles_exact_hosts_and_disabled_scope():
-    from memorive_browser_companion.site_profiles import default_sites, normalize_sites, profile_hash, active_sites
+    from memorive.sessions.companion.site_profiles import default_sites, normalize_sites, profile_hash, active_sites
     rows=default_sites(); rows[1]['enabled']=False
     assert [r['provider_id'] for r in active_sites(normalize_sites(rows))]==['deepseek','kimi']
     assert profile_hash(rows)!=profile_hash(default_sites())
     for row in rows: row['enabled']=False
     assert active_sites(normalize_sites(rows))==[]
 def test_custom_site_identity_cannot_masquerade_as_builtin():
-    from memorive_browser_companion.site_profiles import default_sites, normalize_sites
+    from memorive.sessions.companion.site_profiles import default_sites, normalize_sites
     rows=default_sites(); rows[0].update(adapter='generic',name='Another AI',url='https://ai.example.org/chat/')
     normalized=normalize_sites(rows)
     assert normalized[0]['provider_id'].startswith('web-')
@@ -54,6 +54,6 @@ def test_custom_site_identity_cannot_masquerade_as_builtin():
     with pytest.raises(ValueError): normalize_sites(rows)
 @pytest.mark.parametrize('url',['http://ai.example.org/','https://localhost/','https://127.0.0.1/','https://192.168.0.3/','https://example.org/?key=private','https://*.example.org/','https://example.org:444/'])
 def test_custom_site_rejects_unsafe_addresses(url):
-    from memorive_browser_companion.site_profiles import default_sites, normalize_sites
+    from memorive.sessions.companion.site_profiles import default_sites, normalize_sites
     rows=default_sites(); rows[0].update(adapter='generic',url=url)
     with pytest.raises(ValueError): normalize_sites(rows)

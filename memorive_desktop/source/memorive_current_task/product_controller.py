@@ -1590,7 +1590,7 @@ class CurrentTaskProductController:
                     raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_OVERRIDE_INVALID")
                 node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
                 profile_ref = str(accepted.get("profile_ref") or "").strip()
-                from memorive_settings.refinement_models import configured_refinement_models
+                from memorive.sessions.refinement.model_choices import configured_refinement_models
                 if not profile_ref:
                     raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_PROFILE_INVALID")
                 state = self._settings_provider() if self._settings_provider is not None else {}

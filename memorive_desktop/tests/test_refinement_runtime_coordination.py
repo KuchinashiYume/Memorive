@@ -24,8 +24,8 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
 from memorive_inbox import InboxController  # noqa: E402
 from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
 from memorive_messages import MessagesProductController  # noqa: E402
-from memorive_workflow_bridge.conversation_refinement import _response_schema  # noqa: E402
-from memorive_sessions import SessionsProductController  # noqa: E402
+from memorive.sessions.refinement.model_channel import _response_schema  # noqa: E402
+from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from runtime import ServiceProcessManager  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402
     LOCAL_PROFILE_REF,

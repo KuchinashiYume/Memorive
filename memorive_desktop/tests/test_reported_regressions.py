@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from memorive_sessions.product_controller import SessionsProductController
+from memorive.sessions.controller import SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
@@ -185,7 +185,7 @@ def test_kimi_current_visible_conversation_is_projected_read_only(tmp_path: Path
 
 
 def test_edge_visible_ui_reader_has_portable_provider_profiles() -> None:
-    module = (SOURCE_ROOT / "memorive_sessions" / "edge_visible_ui.py").read_text(encoding="utf-8")
+    module = (SOURCE_ROOT / "memorive" / "sessions" / "edge_visible_ui.py").read_text(encoding="utf-8")
 
     assert "class EdgeKimiVisibleUIReader" in module
     assert "class EdgeGeminiVisibleUIReader" in module

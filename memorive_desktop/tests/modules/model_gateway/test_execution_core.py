@@ -35,7 +35,7 @@ from memorive.models.gateway.execution_core.contracts import base_object
 FIXED_TIME = "2026-08-13T08:00:00Z"
 FIXED_CLOCK = lambda: FIXED_TIME
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
-CONTRACT_ROOT = REPO_ROOT / "memorive_workflow_bridge" / "contracts"
+CONTRACT_ROOT = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "schemas"
 CORE_SCHEMA_PATH = CONTRACT_ROOT / "execution_execution_core.schema.json"
 CORE_SCHEMA = json.loads(CORE_SCHEMA_PATH.read_bytes())
 FAKE_PROCESS = Path(__file__).resolve().with_name("fake_process.py")

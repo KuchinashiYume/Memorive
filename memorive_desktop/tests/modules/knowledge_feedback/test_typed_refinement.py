@@ -6,12 +6,12 @@ import unittest
 
 import yaml
 
-from knowledge_feedback.conversation_refinement.contracts import make_selection_receipt
-from knowledge_feedback.conversation_refinement.graph import build_normalized_graph
-from knowledge_feedback.conversation_refinement.provider_adapter import build_synthetic_snapshot
-from knowledge_feedback.conversation_refinement.redaction import redact_text
-from knowledge_feedback.conversation_refinement.refinement import REFINEMENT_SUBJECT_SLOT
-from knowledge_feedback.conversation_refinement.refinement import deterministic_refine_graph, make_conflict_set, make_refinement_subject_binding
+from memorive.sessions.refinement.contracts import make_selection_receipt
+from memorive.sessions.refinement.graph import build_normalized_graph
+from memorive.sessions.refinement.provider_adapter import build_synthetic_snapshot
+from memorive.sessions.refinement.redaction import redact_text
+from memorive.sessions.refinement.refinement import REFINEMENT_SUBJECT_SLOT
+from memorive.sessions.refinement.refinement import deterministic_refine_graph, make_conflict_set, make_refinement_subject_binding
 from tests.modules.knowledge_feedback.test_export_snapshot_contract import NOW, make_envelope, make_export, message
 from memorive.models.gateway.config import GatewayConfig
 from memorive.models.gateway.prompts import PromptRegistry

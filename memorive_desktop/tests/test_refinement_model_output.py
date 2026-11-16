@@ -1,8 +1,8 @@
 """Session refinement: what the model's answer must look like, and the items made from it.
 
-The workflow bridge (memorive_workflow_bridge/conversation_refinement.py) turns the selected
+The model channel (memorive/sessions/refinement/model_channel.py) turns the selected
 messages of a session into a conversation graph, asks a model for one proposal per message, and
-turns each proposal into a typed refinement item (knowledge_feedback/conversation_refinement).
+turns each proposal into a typed refinement item (memorive/sessions/refinement).
 The model is replaced here by a local adapter that returns a prepared answer.
 """
 from __future__ import annotations
@@ -13,8 +13,8 @@ from types import SimpleNamespace
 import pytest
 
 from knowledge_feedback.canonical import typed_payload_hash
-from knowledge_feedback.conversation_refinement import validate_typed_refinement_item
-from memorive_workflow_bridge.conversation_refinement import (
+from memorive.sessions.refinement import validate_typed_refinement_item
+from memorive.sessions.refinement.model_channel import (
     ConversationRefinementBridgeError,
     ExistingConversationRefinementChannel,
 )

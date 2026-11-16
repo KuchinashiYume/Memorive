@@ -25,12 +25,12 @@ from memorive.models.gateway.execution_core.adapters import (
 FIXED_TIME = "2026-08-14T02:30:00Z"
 FIXED_CLOCK = lambda: FIXED_TIME
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
-CONTRACT_ROOT = REPO_ROOT / "memorive_workflow_bridge" / "contracts"
+CONTRACT_ROOT = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "schemas"
 CORE_SCHEMA = json.loads(
     (CONTRACT_ROOT / "execution_execution_core.schema.json").read_bytes()
 )
 EXTERNAL_SCHEMA = json.loads(
-    (REPO_ROOT / "memorive_workflow_bridge" / "contracts" / "external_model_call_receipt.schema.json").read_bytes()
+    (REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "schemas" / "external_model_call_receipt.schema.json").read_bytes()
 )
 FAKE_CODEX = Path(__file__).resolve().with_name("fake_codex.py")
 ADAPTER_SOURCE = REPO_ROOT / "memorive" / "models" / "gateway" / "execution_core" / "adapters" / "codex_cli.py"

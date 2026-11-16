@@ -7,7 +7,7 @@ from typing import Any, Mapping
 
 from knowledge_feedback.canonical import make_hashed_payload, verify_hashed_payload
 
-from .contracts import ConversationContractError
+from memorive.sessions.refinement.contracts import ConversationContractError
 
 
 _PATTERNS = (

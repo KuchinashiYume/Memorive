@@ -16,8 +16,8 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
         sys.path.insert(0, str(candidate))
 
 from knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
-from knowledge_feedback.conversation_refinement.refinement import make_typed_refinement_item  # noqa: E402
-from knowledge_feedback.conversation_refinement import (  # noqa: E402
+from memorive.sessions.refinement.refinement import make_typed_refinement_item  # noqa: E402
+from memorive.sessions.refinement import (  # noqa: E402
     make_context_capsule,
     validate_normalized_graph,
     validate_typed_refinement_item,
@@ -25,10 +25,10 @@ from knowledge_feedback.conversation_refinement import (  # noqa: E402
 from memorive_desktop_service.control_store import ControlStore  # noqa: E402
 from memorive_inbox import InboxController  # noqa: E402
 from memorive_library import LibraryProductController  # noqa: E402
-from memorive_workflow_bridge.conversation_refinement import (  # noqa: E402
+from memorive.sessions.refinement.model_channel import (  # noqa: E402
     ExistingConversationRefinementChannel,
 )
-from memorive_sessions import SessionsProductController  # noqa: E402
+from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
 from memorive.exams.runner import WorkflowExams  # noqa: E402
 from tests.test_existing_phase_refinement_bridge import (  # noqa: E402
