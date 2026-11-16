@@ -55,7 +55,7 @@ The installer checks missing Microsoft prerequisites in System Check, including 
 
 This source targets **v1.02**. Build receipts identify the exact source, resources and output bytes under review. Earlier binaries do not represent changed inputs. Historical execution evidence remains tied to its original candidate; a static review or successful build does not establish new runtime acceptance, acceptance on every Windows machine or byte-for-byte reproducibility.
 
-Public names use functional responsibilities, such as `document_processing`, `model_gateway`, `retrieval`, `evidence_review` and `memorive_research_workspace`. Original third-party implementation bytes and licenses are preserved. Configurations store opaque credential references; new bindings use the Memorive namespace.
+Public names use functional responsibilities, grouped by area under `source/memorive/`, such as `memorive.documents.processing`, `memorive.models.gateway`, `memorive.research.retrieval`, `memorive.documents.card_review` and `memorive.research.workspace`. Original third-party implementation bytes and licenses are preserved. Configurations store opaque credential references; new bindings use the Memorive namespace.
 
 `tools/import_local_settings.py --source-profile <existing profile> --new-profile <new empty profile>` copies only the documented settings files. It validates configuration checksums, refuses an existing destination, and does not read the credential vault or copy documents and conversations. Credential references remain usable only where the original local credential store is available. This is not an automatic migration of a research library.
 

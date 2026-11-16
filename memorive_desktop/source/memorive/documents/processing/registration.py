@@ -1,6 +1,6 @@
 """The paper id registry: which folder each paper_id is bound to, confirmed by a person.
 
-document_convert_convert.py and research_recommendations' card promotion use it. The ids and names
+document_convert_convert.py and the card promotion of research recommendations use it. The ids and names
 themselves come from memorive/platform/naming.py.
 """
 from __future__ import annotations

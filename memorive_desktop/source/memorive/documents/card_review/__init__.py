@@ -3,7 +3,7 @@
 Used outside the package: judgment.py, analysis_omission.py and analysis_revision.py by the
 workflow's review nodes; claim_evidence.py, atomic_review.py, reviewer_routing.py and
 segmented_distill_repair.py by research Q&A's claim check; mechanical.py and atomic_review.py by
-research_recommendations; ownership_binding.py by research_analysis. transcription.py,
+research recommendations; ownership_binding.py by the research analysis. transcription.py,
 repair_flow.py, grading.py and the other modules are used inside the package by these.
 
 Not reached from the app's own code (tests call them): review_orchestration/, an operator API

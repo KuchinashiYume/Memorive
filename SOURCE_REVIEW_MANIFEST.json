@@ -521,8 +521,8 @@
     },
     {
       "path": "memorive_desktop/BUILDING.md",
-      "sha256": "3279e7673a5798117287f29ea11e2b4d8204f5c2709360c0d71e5e6dbf076bcb",
-      "bytes": 7892
+      "sha256": "27a644a8563486f3a820deddd16024b3825d48d0f0ccc446c383a07acced5375",
+      "bytes": 7987
     },
     {
       "path": "memorive_desktop/contracts/accounting/AccountingPanelProductMethod-v3.json",
@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "0605bae4891426c53b64854ed28f540fde2ff86b71ca9a6d9b7d529c5c5ca1de",
+      "sha256": "82b3481a71525b5b783050052a347dbd775790143d703431be303f5ed6bbd5d7",
       "bytes": 267718
     },
     {
@@ -5171,13 +5171,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/processing/__init__.py",
-      "sha256": "0ef6542341b7a4cb6861739649a61f426b4895c88c68ce48722247e07914e183",
-      "bytes": 2182
+      "sha256": "cb425ffa4e18a1e3cd711e39231936a0930ab07be916ac3d3b1fe8e8c3682932",
+      "bytes": 2191
     },
     {
       "path": "memorive_desktop/source/memorive/documents/processing/registration.py",
-      "sha256": "0f30866817a5f8b46c461f8917d5b293d26e9981956f43e7712b3f511518942c",
-      "bytes": 2297
+      "sha256": "0f1d1b3d4aa810d468590f18359583ea8f9aa9f31d5092e9a7c0eae59cd3d6e3",
+      "bytes": 2303
     },
     {
       "path": "memorive_desktop/source/memorive/documents/processing/chinese_structure.py",
@@ -5261,8 +5261,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/data_folders.py",
-      "sha256": "fa05aee1b4d20f156523ae68311a67a5c5caee93d27717cc188013a8278a9b47",
-      "bytes": 1487
+      "sha256": "cb29c903d50473524cd98a7eb11a4a375bf9d6e194827b7161a0240bcb44c01b",
+      "bytes": 1488
     },
     {
       "path": "memorive_desktop/source/memorive/models/__init__.py",
@@ -5446,8 +5446,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/exams/evaluation/__init__.py",
-      "sha256": "d69b597f5ca84664290743520dbb804d23fde2f588d8ea88d7c61710bf8e2868",
-      "bytes": 698
+      "sha256": "3a128bafa8a3e97ae1e80aa54955f352e23b2eb4df47587cd402c354ec143cff",
+      "bytes": 702
     },
     {
       "path": "memorive_desktop/source/memorive/exams/evaluation/analysis_exam.py",
@@ -7531,8 +7531,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/registry/__init__.py",
-      "sha256": "f95b0faf1d194616efb857095af82b265cc6af716d25719fd6a31864d2cbe1f4",
-      "bytes": 5009
+      "sha256": "733e7c02d57160cda934d8180e443585041e56312231cb23b805f18531ff2987",
+      "bytes": 5004
     },
     {
       "path": "memorive_desktop/source/memorive/documents/registry/adapters.py",
@@ -7656,8 +7656,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_distillation/__init__.py",
-      "sha256": "e8c032c5b98e23f4101dc3e1701fc6044a5bf5b78e8f0d724b3045b6c9d6417f",
-      "bytes": 811
+      "sha256": "9bb6f863d5988c5c2ac68a827496105b63e032c36065be74b162c3e0141f049d",
+      "bytes": 821
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_distillation/anchor_repair.py",
@@ -7791,8 +7791,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_review/__init__.py",
-      "sha256": "6ba0c36a47935e4109fa1b59e97bf99c350292f31f189d8c80ad8e5058a43ff9",
-      "bytes": 6695
+      "sha256": "5bade03b8c5aeca7bddc30b2d6775ce7bcd25b8a7d8843446906316a06f6ad3c",
+      "bytes": 6699
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_review/analysis_omission.py",
@@ -8026,8 +8026,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_states/__init__.py",
-      "sha256": "e5bddff3b8e4776e00e591acf7b2c3a9b7a4f7236ed4f68f657925317194dae1",
-      "bytes": 2665
+      "sha256": "65bff5a43c31f8ba8e7d34bd3dc254eec66774472038b329985a0344d6d140ac",
+      "bytes": 2669
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_states/analysis_admission_knowledge_admission_analysis_admission.py",
@@ -8136,8 +8136,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/workflow/__init__.py",
-      "sha256": "716c7151497944b64223d70b03ecfff4d12de210adeba79b759d5fe6b153fc60",
-      "bytes": 1462
+      "sha256": "7722ed5d9ab31f0bd417eeba104312455a77329c172fcf317cfe42fd3ddf8cf1",
+      "bytes": 1495
     },
     {
       "path": "memorive_desktop/source/memorive/documents/workflow/analysis_omission.py",
@@ -8261,7 +8261,7 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/analysis/__init__.py",
-      "sha256": "a779def165cb54f9750a358b2353263195c61861beb9b55e33b29050252c86b0",
+      "sha256": "8e68c2b028bdb253cd1ef8567f385c5e9033e17518fd821908159e25548504bc",
       "bytes": 2494
     },
     {
@@ -8406,7 +8406,7 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/knowledge_feedback/__init__.py",
-      "sha256": "dae9c751d38222d76734496ea3e8601dae868a67b8d16d46e1413239e9cdee4b",
+      "sha256": "b40eb8ff4ca86702d7170b4648acf74e18344058530a3331caa7e8f77f506294",
       "bytes": 702
     },
     {
@@ -8616,8 +8616,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/shadow_contracts.py",
-      "sha256": "afebe473e31c47f0a9c46a63de76990107b45092f6f8ee0edb16f02e265d5fe0",
-      "bytes": 8826
+      "sha256": "7b5c9eceb235352366abf530db6842493128486963a0270681f0c3f7207ea017",
+      "bytes": 8819
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/source_snapshot.py",

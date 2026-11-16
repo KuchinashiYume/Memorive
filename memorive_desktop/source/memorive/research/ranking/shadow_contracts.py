@@ -1,4 +1,4 @@
-"""Checks shared by the structural shadow ranking steps of retrieval_weighting.
+"""Checks shared by the structural shadow ranking steps of this package.
 
 The ranking steps (aggregation, candidate_union, counterevidence, derived_penalty) all take a
 retrieval policy snapshot. validate_retrieval_policy_snapshot() returns a copy of it after checking

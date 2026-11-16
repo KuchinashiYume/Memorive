@@ -2,11 +2,11 @@
 
 machine.py moves a card between states, card_io.py reads and writes the review_status field,
 dispatch.py runs automatic review, knowledge_admission_log.py writes one line per move. Evidence
-review moves cards (machine.py, dispatch.py); the workflow, retrieval, research_recommendations and
+review moves cards (machine.py, dispatch.py); the workflow, retrieval, research recommendations and
 the desktop service's capability adapters read review status (card_io.py, states.py).
 
 Submission and preview records: conversation_ingest_preview.py and knowledge_submission.py are used
-by artifact_registry, the analysis admission module by publication_preview.py (a preview of
+by the document registry, the analysis admission module by publication_preview.py (a preview of
 publication candidates); the app reaches none of these four,
 nor derived_knowledge_artifact.py and opportunity_submission.py, which only tests call.
 """

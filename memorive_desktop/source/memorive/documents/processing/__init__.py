@@ -1,9 +1,9 @@
 """The document pipeline: a source file becomes RawMD, CleanMD, chunks and vectors.
 
-pipeline.py (run_document_processing, embed_from_chunks) is what the workflow (memorive_workflow)
+pipeline.py (run_document_processing, embed_from_chunks) is what the workflow (memorive/documents/workflow)
 calls for one paper. It chains the steps: convert (document_convert_convert with
 document_conversion/), clean (document_clean_clean), chunk (document_chunk_chunk), embed
-(document_embed_embed) and ingest (document_ingest_ingest); research_recommendations also calls the
+(document_embed_embed) and ingest (document_ingest_ingest); research recommendations also call the
 step modules directly. A paper's file and folder names come from memorive/platform/naming.py, its
 paper id registry from registration.py here.
 document_structure/ reads a document's sections; the window reaches it through structure.* methods
