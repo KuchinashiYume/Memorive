@@ -516,8 +516,8 @@
     },
     {
       "path": "memorive_desktop/ASSET_NOTICE.md",
-      "sha256": "8911db08b0ab2d2dad92fe31cd21e2b4ed651d5033a83e8360cb40a7387b20ce",
-      "bytes": 6622
+      "sha256": "ad70347e4a0b920575247febf91acd895cea772e6619cde7a773dfab1a04d8d9",
+      "bytes": 6561
     },
     {
       "path": "memorive_desktop/BUILDING.md",
@@ -2951,8 +2951,8 @@
     },
     {
       "path": "memorive_desktop/release_materials/ASSET_NOTICE.md",
-      "sha256": "8911db08b0ab2d2dad92fe31cd21e2b4ed651d5033a83e8360cb40a7387b20ce",
-      "bytes": 6622
+      "sha256": "ad70347e4a0b920575247febf91acd895cea772e6619cde7a773dfab1a04d8d9",
+      "bytes": 6561
     },
     {
       "path": "memorive_desktop/release_materials/BUILDING.md",
