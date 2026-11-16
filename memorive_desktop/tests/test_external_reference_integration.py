@@ -92,7 +92,7 @@ def test_os_lock_and_revision_protect_separate_controller_instances(tmp_path):
 
 
 def test_partial_observation_cannot_overwrite_existing_full_node_score(tmp_path):
-    from memorive_settings.exam_tiers import tier_manifest
+    from memorive.exams.tiers import tier_manifest
     c = controller(tmp_path)
     current = c.store.load()
     settings = deepcopy(current["settings"])
@@ -120,7 +120,7 @@ def test_metadata_only_call_cannot_be_dispatched_to_model_executor(tmp_path):
 
 
 def test_unscored_tier_keeps_coverage_without_presenting_old_score_as_new(tmp_path):
-    from memorive_settings.exam_tiers import tier_manifest
+    from memorive.exams.tiers import tier_manifest
     c = controller(tmp_path)
     current = c.store.load()
     settings = deepcopy(current["settings"])

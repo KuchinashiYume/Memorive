@@ -11,7 +11,7 @@ from pathlib import Path
 from time import monotonic
 from typing import Any, Callable, Mapping
 import uuid
-from memorive_settings.exam_successor import (
+from memorive.exams.outcomes import (
     ExecutionOutcome,
     Scorability,
     admit_quality_fail,
@@ -21,7 +21,7 @@ from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     workflow_exam_output_limit_contract,
 )
-from memorive_settings.ocr_exam_successor import (
+from memorive.exams.ocr_scoring import (
     MAIN_CASE_IDS as OCR_MAIN_CASE_IDS,
     SAMPLE_REVISION as OCR_SAMPLE_REVISION,
     SCORING_PROJECTION_REVISION as OCR_SCORING_PROJECTION_REVISION,
@@ -30,7 +30,7 @@ from memorive_settings.ocr_exam_successor import (
     score_balanced_sample as score_ocr_balanced_sample,
     score_case_successor as score_ocr_case_successor,
 )
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     PLAN_SCHEMA,
     RESULT_SCHEMA,
@@ -43,7 +43,7 @@ from memorive_settings.workflow_exam.common import (
     _write_json_create_only,
 )
 
-from memorive_settings.specialized_exam.common import SHA256, _SpecializedExamBase
+from memorive.exams.specialized_base import SHA256, _SpecializedExamBase
 
 
 Core_MEAN_SOURCE_CHARS = 69_274

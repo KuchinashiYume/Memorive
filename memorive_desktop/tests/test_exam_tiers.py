@@ -1,6 +1,6 @@
 import pytest
 
-from memorive_settings.exam_tiers import nested_selection, tier_manifest, scored_projection, validate_tier
+from memorive.exams.tiers import nested_selection, tier_manifest, scored_projection, validate_tier
 
 
 def test_nested_prefix_is_model_independent_and_preserves_controls():

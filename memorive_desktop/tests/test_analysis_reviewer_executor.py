@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from memorive_settings.analysis_reviewer_exam import (
+from memorive.exams.analysis_reviewer.executor import (
     _attach_rejected_observed_values,
 )
 

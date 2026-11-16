@@ -5,7 +5,7 @@ import threading
 import time
 import pytest
 
-from memorive_settings.exam_jobs import WorkflowExamJobs, observed_call
+from memorive.exams.jobs import WorkflowExamJobs, observed_call
 from memorive_settings.store import SettingsStore
 from memorive_settings.service_adapter import SettingsServiceAdapter
 from memorive_desktop_service.service import ApplicationServiceHost

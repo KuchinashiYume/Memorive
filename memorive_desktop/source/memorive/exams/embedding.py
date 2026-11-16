@@ -14,13 +14,13 @@ import statistics
 from time import monotonic
 from typing import Any, Callable, Mapping, Sequence
 import uuid
-from memorive_settings.exam_successor import classify_execution_outcome
-from memorive_settings.retrieval_exam_calibration import (
+from memorive.exams.outcomes import classify_execution_outcome
+from memorive.exams.retrieval_calibration import (
     EMBEDDING_ROLE_ADEQUACY_POLICY,
     assess_embedding_role_adequacy,
 )
 
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     EXECUTOR_REF,
     PLAN_SCHEMA,

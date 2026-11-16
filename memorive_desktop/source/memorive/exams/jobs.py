@@ -14,7 +14,7 @@ import threading
 from typing import Any
 
 from run_ledger.writer_lock import KernelFileLock
-from .contracts import utc_now
+from memorive_settings.contracts import utc_now
 from memorive.platform.json_files import canonical_sha256
 from memorive.platform.sensitive import scan_sensitive
 

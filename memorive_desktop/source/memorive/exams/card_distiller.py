@@ -18,7 +18,7 @@ from time import monotonic
 from typing import Any, Callable, Mapping, Sequence
 import uuid
 from model_gateway.resource_limits import resolve_call_limits
-from memorive_settings.exam_successor import (
+from memorive.exams.outcomes import (
     ExecutionOutcome,
     Scorability,
     admit_quality_fail,
@@ -32,7 +32,7 @@ from memorive.models.output_limits import (
     workflow_exam_output_limit_contract,
 )
 
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     Core_PRIMARY_CARD_OUTPUT_BYTE_LIMIT,
     Core_PRIMARY_CARD_OUTPUT_CHAR_LIMIT,

@@ -2747,7 +2747,7 @@ class ProductApi:
                 data = module.billing_projection(exam_root, self._profile_path("Core_JOBS"))
             else:
                 projection = self._service.call("settings.get_state", {})
-                history_module = importlib.import_module("memorive_settings.exam_score_history")
+                history_module = importlib.import_module("memorive.exams.score_history")
                 history = history_module.ExamScoreHistory(exam_root / "workflow_exam_scores").rows()
                 external_root = self._profile_path("SETTINGS") / "external_data"
                 external = {"rows": [], "unavailable_sources": []}

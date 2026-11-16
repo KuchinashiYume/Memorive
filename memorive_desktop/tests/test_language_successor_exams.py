@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 def test_phase2_new_projection_does_not_invent_a_repair_penalty() -> None:
-    from memorive_settings.quality_new import _entry_repair_burden
+    from memorive.exams.catalog import _entry_repair_burden
 
     projected = _entry_repair_burden(
         {

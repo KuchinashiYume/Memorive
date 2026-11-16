@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 import pytest
-from memorive_settings.exam_score_history import ExamScoreHistory
+from memorive.exams.score_history import ExamScoreHistory
 from memorive.models.validation.runner import LiveModelValidationRunner
-from memorive_settings.workflow_exam_runner import WorkflowExams
+from memorive.exams.runner import WorkflowExams
 from memorive.platform.json_files import canonical_sha256
 
 ROOT = Path(__file__).resolve().parents[1]

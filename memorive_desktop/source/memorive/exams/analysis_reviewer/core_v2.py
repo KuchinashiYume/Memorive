@@ -4,7 +4,7 @@ from copy import deepcopy
 import re
 from typing import Any, Mapping
 
-from . import core_v1_frozen as base
+from memorive.exams.analysis_reviewer import core_v1_frozen as base
 
 
 sha256 = base.sha256

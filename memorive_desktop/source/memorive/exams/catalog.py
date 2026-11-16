@@ -11,7 +11,7 @@ from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     workflow_exam_output_limit_contract,
 )
-from .retrieval_exam_calibration import (
+from memorive.exams.retrieval_calibration import (
     EMBEDDING_ROLE_ADEQUACY_POLICY,
     RERANKER_TWO_SLOT_POLICY,
 )
@@ -666,7 +666,7 @@ def plan_exam_volume(
     if normalized_role not in _VOLUME_POLICIES:
         raise ValueError("Quality_NEW_EXAM_ROLE_UNSUPPORTED")
     if normalized_tier in {"LIGHT", "HALF", "FULL"}:
-        from .exam_tiers import REVISION, TIERS
+        from memorive.exams.tiers import REVISION, TIERS
         baseline = plan_exam_volume(normalized_role, "STANDARD", cache_reusable=cache_reusable, profile_kind=profile_kind)
         baseline.update(tier=normalized_tier, coverage_policy_revision=REVISION,
                         requested_fraction=TIERS[normalized_tier][0], max_directed_repairs=2,

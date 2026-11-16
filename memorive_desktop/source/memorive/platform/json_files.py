@@ -1,6 +1,6 @@
 """Canonical JSON, and JSON files written whole. Used by the settings (contracts.py, store.py),
 model execution (memorive/models/execution/runs.py), the reply size rule, the exam contracts
-(memorive_settings/exam_successor.py) and the browser companion's site profiles.
+(memorive/exams/outcomes.py) and the browser companion's site profiles.
 
 canonical_json_bytes is the strict encoding: sorted keys, compact separators, UTF-8, and NaN or
 infinity refused. canonical_sha256 is its SHA-256 in upper-case hex. write_json_atomic writes canonical

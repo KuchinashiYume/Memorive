@@ -9,7 +9,7 @@ from typing import Any, Mapping
 
 import pytest
 
-from memorive_settings.quality_new import (
+from memorive.exams.catalog import (
     DEFAULT_WORKFLOW_MAPPING,
     Quality_NEW_CATALOG_SCHEMA,
     build_quality_new_catalog,
@@ -20,11 +20,11 @@ from memorive_settings.quality_new import (
 )
 from memorive.models.validation.transport import HttpResponse, ProcessResult
 from memorive.models.validation.runner import LiveModelValidationRunner
-from memorive_settings.workflow_exam.embedding import (
+from memorive.exams.embedding import (
     QualityEmbeddingExamExecutor,
     QualityNewEmbeddingExamExecutor,
 )
-from memorive_settings.specialized_exam.reranker import (
+from memorive.exams.reranker import (
     QualityNewRerankerTextExamExecutor,
     QualityNewRerankerTextLanguageBankExamExecutor,
     QualityNewRerankerTextProductionExamExecutor,

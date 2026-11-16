@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from typing import Any, Mapping
 import unicodedata
-from memorive_settings.exam_successor import Scorability
+from memorive.exams.outcomes import Scorability
 
 
 PLAN_SCHEMA = "WorkflowModelExamPlan-v2"

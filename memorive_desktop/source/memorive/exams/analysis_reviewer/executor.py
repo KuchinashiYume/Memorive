@@ -9,14 +9,14 @@ from time import monotonic
 from typing import Any, Callable, Mapping, Sequence
 import uuid
 
-from memorive_analysis_reviewer_exam import (
+from memorive.exams.analysis_reviewer import (
     BUNDLED_CORE_V2_IMPORT_ADAPTER_REVISION,
     SOURCE_CORE_V1_SHA256,
     SOURCE_CORE_V2_SHA256,
     core_v2,
 )
 
-from .exam_successor import (
+from memorive.exams.outcomes import (
     Scorability,
     admit_quality_fail,
     build_repair_round,
@@ -30,7 +30,7 @@ from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     workflow_exam_output_limit_contract,
 )
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     PLAN_SCHEMA,
     RESULT_SCHEMA,
@@ -42,7 +42,7 @@ from memorive_settings.workflow_exam.common import (
     _sha256,
     _write_json_create_only,
 )
-from memorive_settings.workflow_exam.card_reviewer import (
+from memorive.exams.card_reviewer import (
     CORE_CARD_REVIEWER_ABSOLUTE_PROMPT_CHAR_LIMIT,
     CORE_CARD_REVIEWER_EFFECTIVE_PROMPT_CHAR_LIMIT,
     QualityCardReviewerExamExecutor,

@@ -1,16 +1,12 @@
-"""The settings service, and for now also the model exams.
+"""The settings service.
 
 The window reaches it through settings.* methods (service_adapter.py maps each method to
-SettingsController in controller.py). It holds two kinds of code:
-  settings      store.py, contracts.py, credentials.py, cli_template_management.py, the verification
-                jobs, user preferences, the leaderboard and external sources;
-  model exams   workflow_exam_runner.py (WorkflowExams: the exam catalog, plans, runs and stored scores;
-                it holds a LiveModelValidationRunner and sends the exam's requests through it),
-                workflow_exam/ (one module per exam family), specialized_exam/ (OCR, reranker),
-                analysis_reviewer_exam.py, exam_successor.py, exam_jobs.py, exam_score_history.py and
-                the other *exam* modules.
-The model requests themselves are in memorive/models: the controller holds the runner from
-memorive/models/validation/runner.py. The exams move to memorive/exams.
+SettingsController in controller.py): store.py, contracts.py, credentials.py,
+cli_template_management.py, the verification jobs, user preferences, the leaderboard and external
+sources. The model requests are in memorive/models (the controller holds the runner from
+memorive/models/validation/runner.py), the model exams in memorive/exams (the controller holds
+WorkflowExams from memorive/exams/runner.py). This package still exports the exam executors by name
+for its callers.
 """
 
 from .capability import CapabilityProjection
@@ -24,21 +20,21 @@ from memorive.models.validation.runner import (
 )
 from .service_adapter import SETTINGS_METHODS, SettingsServiceAdapter
 from .store import SettingsStore
-from memorive_settings.workflow_exam.analysis import QualityAnalysisExamExecutor
-from memorive_settings.workflow_exam.embedding import (
+from memorive.exams.analysis import QualityAnalysisExamExecutor
+from memorive.exams.embedding import (
     QualityEmbeddingExamExecutor,
     QualityNewEmbeddingExamExecutor,
 )
-from memorive_settings.workflow_exam.card_distiller import (
+from memorive.exams.card_distiller import (
     QualityNewCardDistillerLanguageBankExamExecutor,
     QualityCardDistillerDirectExamExecutor,
     QualityCardDistillerExamExecutor,
 )
-from memorive_settings.workflow_exam.card_reviewer import (
+from memorive.exams.card_reviewer import (
     QualityCardReviewerExamExecutor,
     QualityCardReviewerExamSuccessorExecutor,
 )
-from .quality_new import (
+from memorive.exams.catalog import (
     DEFAULT_WORKFLOW_MAPPING,
     Quality_NEW_CATALOG_SCHEMA,
     build_quality_new_catalog,
@@ -47,20 +43,20 @@ from .quality_new import (
     project_cached_entry,
     validate_quality_new_catalog,
 )
-from .exam_successor import (
+from memorive.exams.outcomes import (
     CategoryBinding,
     ExecutionOutcome,
     Scorability,
     TerminalDisposition,
 )
-from .analysis_reviewer_exam import QualityAnalysisReviewerExamSuccessorExecutor
-from memorive_settings.specialized_exam.reranker import (
+from memorive.exams.analysis_reviewer.executor import QualityAnalysisReviewerExamSuccessorExecutor
+from memorive.exams.reranker import (
     QualityNewRerankerTextExamExecutor,
     QualityNewRerankerTextLanguageBankExamExecutor,
     QualityNewRerankerTextProductionExamExecutor,
     QualityRerankerTextExamExecutor,
 )
-from memorive_settings.specialized_exam.ocr import QualityOcrPageExamExecutor
+from memorive.exams.ocr import QualityOcrPageExamExecutor
 
 __all__ = [
     "CapabilityProjection",

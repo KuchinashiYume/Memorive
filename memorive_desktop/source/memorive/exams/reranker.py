@@ -14,13 +14,13 @@ import statistics
 from time import monotonic
 from typing import Any, Callable, Mapping, Sequence
 import uuid
-from memorive_settings.exam_successor import workflow_exam_structured_output_policy
+from memorive.exams.outcomes import workflow_exam_structured_output_policy
 from memorive.models.output_limits import (
     WORKFLOW_EXAM_REPLY_TOKEN_CEILING,
     workflow_exam_output_limit_contract,
 )
-from memorive_settings.retrieval_exam_calibration import RERANKER_TWO_SLOT_POLICY
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.retrieval_calibration import RERANKER_TWO_SLOT_POLICY
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     PLAN_SCHEMA,
     RESULT_SCHEMA,
@@ -33,7 +33,7 @@ from memorive_settings.workflow_exam.common import (
     _write_json_create_only,
 )
 
-from memorive_settings.specialized_exam.common import SHA256, _SpecializedExamBase
+from memorive.exams.specialized_base import SHA256, _SpecializedExamBase
 
 
 class QualityRerankerTextExamExecutor(_SpecializedExamBase):

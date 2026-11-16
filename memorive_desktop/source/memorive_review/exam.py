@@ -6,7 +6,7 @@ import uuid
 from .engine import digest
 from .store import atomic
 from .logic import obj, STRING
-from memorive_settings.exam_tiers import nested_selection, tier_manifest, validate_tier
+from memorive.exams.tiers import nested_selection, tier_manifest, validate_tier
 from memorive.models.calls.ledger import execution_checkpoint, call_scope, ExecutionControlSignal
 
 CATEGORY='DATA_ANOMALY_FALSE_POSITIVE_CONTROL'
@@ -111,7 +111,7 @@ class DataAnomalyExamExecutor:
         plan['plan_sha256']=digest(plan)
         return plan
     def execute(self,node,target,context,*,authorization,structured_chat):
-        from memorive_settings.workflow_exam.card_reviewer import QualityCardReviewerExamExecutor
+        from memorive.exams.card_reviewer import QualityCardReviewerExamExecutor
         from model_gateway.resource_limits import resolve_call_limits
         plan=self.plan(node,target,context)
         if plan.get('status')!='READY':

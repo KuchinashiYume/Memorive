@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from memorive_settings.exam_successor import (
+from memorive.exams.outcomes import (
     CategoryBinding,
     ExecutionOutcome,
     Scorability,

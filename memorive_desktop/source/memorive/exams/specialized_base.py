@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from time import monotonic
 from typing import Any, Mapping
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     _not_run,
     _write_json_create_only,

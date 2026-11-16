@@ -1,6 +1,6 @@
 """Shorter exam runs (exam tiers): an exam executor run on a sample of its cases.
 
-The exam runner (workflow_exam_runner.py) calls tier_executor(executor, context); without a tier in
+The exam runner (runner.py) calls tier_executor(executor, context); without a tier in
 the context it returns the executor itself. Otherwise it returns a copy of the executor whose class is a subclass made here. The subclass replaces the executor's
 input hooks (_exam_inputs, _sample_manifest, _load_assets, _load_sample; _prune_pack is used for the
 card exams) with versions that call the original hook and keep the tier's cases, and its plan()
@@ -16,7 +16,7 @@ import inspect
 from typing import Any, Mapping
 
 from memorive.platform.json_files import canonical_sha256
-from .exam_tiers import REVISION, ROLE_BY_NODE, TIERS, nested_selection, tier_manifest, validate_tier
+from memorive.exams.tiers import REVISION, ROLE_BY_NODE, TIERS, nested_selection, tier_manifest, validate_tier
 
 
 def _hash(value, field):
@@ -155,7 +155,7 @@ def _embedding_assets(self, base, tier):
 
 
 def _analysis_reviewer_sample(self, base, tier, context):
-    from .analysis_reviewer_exam import _project_output_schema
+    from memorive.exams.analysis_reviewer.executor import _project_output_schema
     sample = base._load_sample(self, context)
     if tier == "FULL":
         return sample

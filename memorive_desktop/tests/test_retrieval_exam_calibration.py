@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from memorive_settings.retrieval_exam_calibration import (
+from memorive.exams.retrieval_calibration import (
     EMBEDDING_ROLE_ADEQUACY_POLICY,
     RERANKER_TWO_SLOT_POLICY,
     assess_embedding_role_adequacy,

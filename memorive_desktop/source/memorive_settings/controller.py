@@ -25,7 +25,7 @@ from memorive.models.kimi_endpoint import (
     resolve_kimi_api_platform,
 )
 from memorive.models.validation.runner import FailClosedModelValidationRunner, ModelValidationRunner
-from .workflow_exam_runner import FailClosedWorkflowExams
+from memorive.exams.runner import FailClosedWorkflowExams
 from memorive.models.capabilities import infer_api_model_capability
 from .store import SettingsStore
 from .external_sources import ExternalDataSources
@@ -182,7 +182,7 @@ class SettingsController:
         )
         from .export_bundle import recover
         recover(self)
-        from .exam_jobs import WorkflowExamJobs
+        from memorive.exams.jobs import WorkflowExamJobs
         self.exam_jobs = WorkflowExamJobs(store, self.test_workflow_node)
         from .cli_verification_jobs import CliVerificationJobs
         self.cli_verification_jobs = CliVerificationJobs(store, self.verify_cli_model, self._prepare_cli_verification)
@@ -318,7 +318,7 @@ class SettingsController:
 
     def external_model_reference(self, *, node_id: str, expected_profile_ref: str | None = None,
                                  preview_profile_ref: str | None = None) -> dict[str, Any]:
-        from .exam_tiers import ROLE_BY_NODE
+        from memorive.exams.tiers import ROLE_BY_NODE
         settings = self.store.load(recover_corruption=False)["settings"]
         node = next((r for r in settings["workflow"]["nodes"] if r["node_id"] == node_id), None)
         if node is None or node_id not in ROLE_BY_NODE:
@@ -1629,7 +1629,7 @@ class SettingsController:
         if authorization is not None and not isinstance(authorization, Mapping):
             raise ValueError("WORKFLOW_NODE_MODEL_TEST_AUTHORIZATION_INVALID")
         if exam_tier is not None:
-            from .exam_tiers import validate_tier
+            from memorive.exams.tiers import validate_tier
             validate_tier(exam_tier)
         if exam_sample_slot is not None and (
             isinstance(exam_sample_slot, bool)

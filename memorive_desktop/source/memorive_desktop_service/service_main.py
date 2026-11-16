@@ -302,7 +302,7 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
         ],
         scratch_root=folders.path_for("MODEL_VALIDATION"),
     )
-    from memorive_settings.workflow_exam_runner import WorkflowExams
+    from memorive.exams.runner import WorkflowExams
     workflow_exams = WorkflowExams(
         runner=validation_runner,
         local_profile_resolver=resolve_local_profile,

@@ -30,7 +30,7 @@ from memorive_workflow_bridge.conversation_refinement import (  # noqa: E402
 )
 from memorive_sessions import SessionsProductController  # noqa: E402
 from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
-from memorive_settings.workflow_exam_runner import WorkflowExams  # noqa: E402
+from memorive.exams.runner import WorkflowExams  # noqa: E402
 from tests.test_existing_phase_refinement_bridge import (  # noqa: E402
     _LocalAdapter,
     _LocalRegistry,

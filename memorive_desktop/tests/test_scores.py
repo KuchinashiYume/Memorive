@@ -6,10 +6,10 @@ from pathlib import Path
 from types import SimpleNamespace
 import pytest
 from memorive.platform.json_files import canonical_sha256
-from memorive_settings.exam_score_history import ExamScoreHistory
-from memorive_settings.tiered_exam import project_tier_result
+from memorive.exams.score_history import ExamScoreHistory
+from memorive.exams.tiered import project_tier_result
 from memorive.models.validation.runner import LiveModelValidationRunner
-from memorive_settings.workflow_exam_runner import WorkflowExams
+from memorive.exams.runner import WorkflowExams
 
 ROOT=Path(__file__).resolve().parents[1]
 REF="Quality_NEW_Quality_EMBEDDING_SUCCESSOR_EXECUTOR_V2"
@@ -91,7 +91,7 @@ def test_mismatching_result_executor_is_not_silently_rebound(tmp_path):
     assert ExamScoreHistory(tmp_path/"scores").record(NODE,TARGET,projected,{REF}) is False
 
 def test_saved_luna_high_selection_is_not_rejected_as_wrong_cohort():
-    from memorive_settings.workflow_exam.card_distiller import (
+    from memorive.exams.card_distiller import (
         QualityNewCardDistillerLanguageBankExamExecutor as Executor,
     )
     target=dict(kind='CLI',adapter_id='codex_cli',model_name='gpt-5.6-luna',

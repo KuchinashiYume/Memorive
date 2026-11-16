@@ -12,7 +12,7 @@ import re
 from time import monotonic
 from typing import Any, Callable, Mapping
 import uuid
-from memorive_settings.exam_successor import (
+from memorive.exams.outcomes import (
     ANALYSIS_REPAIR_ACCEPTANCE_REVISION,
     ANALYSIS_REPAIR_MATERIALITY_REVISION,
     ExecutionOutcome,
@@ -32,8 +32,8 @@ from memorive.models.output_limits import (
     workflow_exam_output_limit_contract,
 )
 
-from memorive_settings.workflow_exam.card_reviewer import QualityCardReviewerExamSuccessorExecutor
-from memorive_settings.workflow_exam.common import (
+from memorive.exams.card_reviewer import QualityCardReviewerExamSuccessorExecutor
+from memorive.exams.common import (
     AUTHORIZATION_SCHEMA,
     Core_PRIMARY_ANALYSIS_OUTPUT_CHAR_LIMIT,
     Core_PRIMARY_ANALYSIS_PROMPT_CHAR_SURROGATE_LIMIT,

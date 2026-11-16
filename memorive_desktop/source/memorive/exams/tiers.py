@@ -10,7 +10,7 @@ import math
 from typing import Any, Mapping, Sequence
 
 from memorive.platform.json_files import canonical_sha256
-from .exam_successor import cumulative_category_repair_penalty
+from memorive.exams.outcomes import cumulative_category_repair_penalty
 
 REVISION = "Quality_NEW_NESTED_COVERAGE_AND_UNIFORM_TWO_REPAIRS_V1"
 TIERS = {"LIGHT": (0.2, "轻度"), "HALF": (0.5, "半额"), "FULL": (1.0, "全量")}

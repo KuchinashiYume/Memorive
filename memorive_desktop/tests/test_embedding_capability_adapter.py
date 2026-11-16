@@ -12,7 +12,7 @@ from memorive_settings.contracts import default_settings, validate_settings
 from memorive.models.capabilities import infer_api_model_capability, workflow_node_accepts_capability
 from memorive.models.validation.transport import HttpResponse
 from memorive.models.validation.runner import LiveModelValidationRunner
-from memorive_settings.workflow_exam.embedding import QualityNewEmbeddingExamExecutor
+from memorive.exams.embedding import QualityNewEmbeddingExamExecutor
 
 
 ROOT = Path(__file__).resolve().parents[1]

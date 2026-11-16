@@ -12,13 +12,13 @@ from typing import Any, Callable, Mapping, Sequence
 
 from memorive.models.endpoints import normalize_external_api_base_url
 from memorive.models.endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile, json_sha256
-from .exam_score_history import ExamScoreHistory
+from memorive.exams.score_history import ExamScoreHistory
 from memorive.models.validation.runner import (
     FailClosedModelValidationRunner,
     default_executable_resolver,
     validation_result,
 )
-from .quality_new import (
+from memorive.exams.catalog import (
     Quality_NEW_CATALOG_SCHEMA,
     validate_quality_new_catalog,
 )
@@ -1911,7 +1911,7 @@ class WorkflowExams:
             return plan
         accepted_context = dict(context or {})
         executor_plan_diagnostics: list[dict[str, str]] = []
-        from .tiered_exam import tier_executor
+        from memorive.exams.tiered import tier_executor
         for original_executor in self._workflow_exam_executors:
             executor = tier_executor(original_executor, accepted_context)
             executor_ref = getattr(
@@ -1989,7 +1989,7 @@ class WorkflowExams:
         row = None if (context or {}).get("workflow_exam_force_live") is True else self._frozen_workflow_exam_row(node, resolved_target)
         if row is None:
             accepted_context = dict(context or {})
-            from .tiered_exam import tier_executor, project_tier_result
+            from memorive.exams.tiered import tier_executor, project_tier_result
             for original_executor in self._workflow_exam_executors:
                 executor = tier_executor(original_executor, accepted_context)
                 try:
@@ -2000,7 +2000,7 @@ class WorkflowExams:
                     continue
                 try:
                     parameters = signature(executor.execute).parameters
-                    from .exam_jobs import observed_call
+                    from memorive.exams.jobs import observed_call
                     kwargs: dict[str, Any] = {
                         "authorization": authorization,
                         "structured_chat": observed_call(self.runner.execute_structured_chat, "structured_chat"),

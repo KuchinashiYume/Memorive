@@ -15,7 +15,7 @@ from memorive.models.validation.transport import (  # noqa: E402
     MAX_PROCESS_CAPTURE_BYTES,
 )
 from memorive.models.validation.runner import LiveModelValidationRunner  # noqa: E402
-from memorive_settings.exam_successor import (  # noqa: E402
+from memorive.exams.outcomes import (  # noqa: E402
     workflow_exam_structured_output_policy,
 )
 from memorive.models.output_limits import (  # noqa: E402

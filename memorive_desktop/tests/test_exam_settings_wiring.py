@@ -19,7 +19,7 @@ def test_exam_start_is_background_job_not_long_ipc_request():
 
 
 def test_local_embedding_plan_matches_reused_single_input_transport():
-    from memorive_settings.workflow_exam.embedding import (
+    from memorive.exams.embedding import (
         QualityNewEmbeddingExamExecutor as Executor,
     )
     # Existing local_vector sends input:[value], not a batch of 256 values.

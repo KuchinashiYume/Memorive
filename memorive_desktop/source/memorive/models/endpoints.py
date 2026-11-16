@@ -1,7 +1,7 @@
 """Model names and API endpoints: the patterns a model name must match, the API protocols and the
 rule for an API base URL (public HTTPS only), and how a provider's settings map to its model-list
 URL and authentication header. Shared by the model runner (validation/) and the workflow exam
-(memorive_settings/workflow_exam_runner.py); the settings (memorive_settings/contracts.py) and
+(memorive/exams/runner.py); the settings (memorive_settings/contracts.py) and
 external sources (memorive_settings/external_sources.py) check endpoints with the same rule.
 """
 from __future__ import annotations

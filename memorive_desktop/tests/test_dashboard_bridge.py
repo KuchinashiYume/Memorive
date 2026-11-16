@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from runtime import ProductApi
 from memorive.platform.json_files import canonical_sha256
 from memorive_settings.external_sources import ExternalDataSources, default_sources
-from memorive_settings.quality_new import validate_quality_new_catalog
+from memorive.exams.catalog import validate_quality_new_catalog
 
 ROOT=Path(__file__).resolve().parents[1]
 
