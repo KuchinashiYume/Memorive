@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 import ctypes
 from datetime import datetime, timezone
-import hashlib
 import os
 import ipaddress
 import socket
@@ -10,7 +9,6 @@ from pathlib import Path
 import re
 import ssl
 import subprocess
-import sys
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit

@@ -9,8 +9,7 @@ import os
 from pathlib import Path
 import re
 from urllib.parse import urlsplit
-from memorive_settings.contracts import canonical_sha256
-from memorive.platform.json_files import write_json_atomic
+from memorive.platform.json_files import canonical_sha256, write_json_atomic
 
 BUILTINS = {
     'deepseek': ('DeepSeek','https://chat.deepseek.com/', ['chat.deepseek.com']),

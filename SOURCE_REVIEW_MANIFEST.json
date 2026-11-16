@@ -5086,8 +5086,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_browser_companion/site_profiles.py",
-      "sha256": "c795b28737399e25ab46236c3407571cf91a4d798447e474ea4b6971d6359dd0",
-      "bytes": 12930
+      "sha256": "0f63500d76a8ba6f0037cc14594ca9c2a8ffb8b7a3536188ae4195ec68670b4a",
+      "bytes": 12890
     },
     {
       "path": "memorive_desktop/source/memorive_browser_companion/desktop.py",
@@ -5621,8 +5621,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_research_runtime/identity.py",
-      "sha256": "40ea34249dcf311e697cf8e622fb84f5e018f0d5b00aa321a17b08a1ef0749ba",
-      "bytes": 11967
+      "sha256": "54c4000aeab5e2edb7826bbe60576f9e0f48f485e6b9c88c6667b6771ac3f790",
+      "bytes": 11787
     },
     {
       "path": "memorive_desktop/source/memorive_research_runtime/indexing.py",
@@ -6081,8 +6081,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/contracts.py",
-      "sha256": "523c36df46d908c1e0c27b76b1db8dc03bffa829a8c93ba0702dafece1d8c541",
-      "bytes": 50182
+      "sha256": "e2a291b04f25c91f93d215c1f7aae266e38275921c69006f7d54895715c1c81d",
+      "bytes": 50063
     },
     {
       "path": "memorive_desktop/source/memorive_settings/controller.py",
@@ -6111,8 +6111,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/exam_successor.py",
-      "sha256": "77a96078f0fa16d8e98cac6a991be93d0fe7ea0cfea5bd05da75b6ff2c7c5dcf",
-      "bytes": 45168
+      "sha256": "d4c854f611738f0c9fee2f2396e74751aa9e1b67e79372b41d5451db10710745",
+      "bytes": 45139
     },
     {
       "path": "memorive_desktop/source/memorive_settings/exam_tiers.py",
@@ -6131,8 +6131,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/leaderboard.py",
-      "sha256": "5a340e9ad35f56c859d33fe93786cdec2f7af26235838852275590932b264a85",
-      "bytes": 30105
+      "sha256": "68353bc225b3a3972deb13d35941610515793099adb5785f13fe3c6429050fdc",
+      "bytes": 30092
     },
     {
       "path": "memorive_desktop/source/memorive_settings/leaderboard_fx.py",
@@ -6156,8 +6156,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/metadata_transport.py",
-      "sha256": "619d5fd2822c5398ec5f0876df2ab66ed3c74eef4b622b3255117c956854c773",
-      "bytes": 14491
+      "sha256": "8420ac16915fdfb9f643cb16ad333fef0749ec5b7c7f11255a719d2ed7991931",
+      "bytes": 14463
     },
     {
       "path": "memorive_desktop/source/memorive_settings/model_dashboard.py",
@@ -6201,8 +6201,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive_settings/store.py",
-      "sha256": "908663d82b6552a96e83df4e2fb97df5876d3ef506149eda0d3a64af1d6f21ea",
-      "bytes": 18134
+      "sha256": "71bdd6371c17a51ae97812546566ef9af7d8d600795b576d8bcdbf0de9976ba4",
+      "bytes": 18092
     },
     {
       "path": "memorive_desktop/source/memorive_settings/tiered_exam.py",
@@ -7846,7 +7846,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "4b7205a91e0e7a9a0650ee9c1f7bfdbf6afaa325bead63b3a46d922b63707800",
+      "sha256": "7fca5f40f6a9f3edec0613ea5b56bc8bf90e8ef6c2c7fcefa03c4d9f6149f6dd",
       "bytes": 259228
     },
     {
@@ -9536,8 +9536,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/json_files.py",
-      "sha256": "cd6ff750f7a15b651139062a8e1f35d09b13b670a6e61d357eba275be783fdfc",
-      "bytes": 2165
+      "sha256": "452725779eb982203ba0ff8029d9a7369db153e2594f413537d6a9c5bf441922",
+      "bytes": 2319
     },
     {
       "path": "memorive_desktop/source/memorive/platform/sensitive.py",

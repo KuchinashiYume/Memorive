@@ -11,15 +11,11 @@ from __future__ import annotations
 
 import copy
 import re
-from collections import defaultdict
 from typing import Any, Mapping, Sequence
 
 from literature_discovery.connector_framework import canonical_json, sha256_json
 from literature_discovery.bibliographic_identity_literature_discovery_bibliographic_identity import (  # the code both modules share
     IdentityResolutionError,
-    _DisjointSet,
-    _stable_id,
-    _finalize_content_hash,
     _normalized_text,
     _published_year,
     _normalization_result,
@@ -29,10 +25,7 @@ from literature_discovery.bibliographic_identity_literature_discovery_bibliograp
     normalize_identifier,
     _canonical_identifier,
     _identifier_token,
-    _observation_alias,
     _manifestation_role,
-    _role_from_claims,
-    _dedupe_conflict_specs,
     initialization_candidate_base_projection,
     resolve_identity_batch_with,
 )
