@@ -30,6 +30,7 @@ from memorive_workflow_bridge.conversation_refinement import (  # noqa: E402
 )
 from memorive_sessions import SessionsProductController  # noqa: E402
 from memorive_settings.model_validation import LiveModelValidationRunner  # noqa: E402
+from memorive_settings.workflow_exam_runner import WorkflowExams  # noqa: E402
 from tests.test_existing_phase_refinement_bridge import (  # noqa: E402
     _LocalAdapter,
     _LocalRegistry,
@@ -178,7 +179,10 @@ def test_workflow_model_test_reuses_exact_frozen_exam_score_without_new_call(
         ),
         preferences_loader=lambda: {},
         scratch_root=tmp_path,
-        workflow_exam_catalog={
+    )
+    runner = WorkflowExams(
+        runner=runner,
+        catalog={
             "schema_version": "WorkflowModelExamScoreCatalog-v1",
             "entries": [
                 {
@@ -221,7 +225,10 @@ def test_workflow_model_test_fails_closed_when_profile_does_not_exactly_match(
         credential_resolver=lambda _ref: b"unused",
         preferences_loader=lambda: {},
         scratch_root=tmp_path,
-        workflow_exam_catalog={
+    )
+    runner = WorkflowExams(
+        runner=runner,
+        catalog={
             "schema_version": "WorkflowModelExamScoreCatalog-v1",
             "entries": [],
         },

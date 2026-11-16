@@ -78,7 +78,7 @@ def test_existing_scores_import_is_idempotent_and_preserves_all_other_settings(t
     class Runner:
         def cached_workflow_node_score(self, node, target):
             return {"score":90} if node["node_id"] == "card_distill" else None
-    controller = SettingsController(store=store, credentials=SimpleNamespace(), capabilities=SimpleNamespace(snapshot=lambda:{}), directory_policy=SimpleNamespace(), model_validation_runner=Runner())
+    controller = SettingsController(store=store, credentials=SimpleNamespace(), capabilities=SimpleNamespace(snapshot=lambda:{}), directory_policy=SimpleNamespace(), workflow_exams=Runner())
     before = store.load()
     result = controller.import_cached_exam_scores()
     after = store.load()

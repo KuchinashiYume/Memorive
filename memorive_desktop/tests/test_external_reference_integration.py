@@ -105,7 +105,7 @@ def test_partial_observation_cannot_overwrite_existing_full_node_score(tmp_path)
             return dict(status="PASS", reason="SYNTHETIC_SUBSET", score=42, duration_ms=0,
                         exam_tier=tier_manifest(role="CARD_DISTILLER", tier="LIGHT",
                                                full_ids=list("abcde"), selected_ids=["a"]))
-    c.model_validation_runner = Runner()
+    c.workflow_exams = Runner()
     result = c.test_workflow_node(node_id="card_distill", exam_tier="LIGHT")
     assert result["score"] == 42 and result["tier_result_is_provisional"]
     assert not result["persistent_mutation"] and c.store.path.read_bytes() == before
@@ -130,7 +130,7 @@ def test_unscored_tier_keeps_coverage_without_presenting_old_score_as_new(tmp_pa
         def test_workflow_node(self, node, target, *, context, authorization):
             return dict(status="NOT_RUN", reason="PANEL_COHORT_PENDING", duration_ms=0,
                 exam_tier=tier_manifest(role="ANALYSIS_PRIMARY", tier="LIGHT", full_ids=list("abcde"), selected_ids=["a"]))
-    c.model_validation_runner = Runner()
+    c.workflow_exams = Runner()
     result = c.test_workflow_node(node_id="analysis", exam_tier="LIGHT")
     assert result["exam_tier"]["tier"] == "LIGHT"
     assert result["attempt_score"] is None

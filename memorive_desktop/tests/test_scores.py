@@ -9,6 +9,7 @@ from memorive_settings.contracts import canonical_sha256
 from memorive_settings.exam_score_history import ExamScoreHistory
 from memorive_settings.tiered_exam import project_tier_result
 from memorive_settings.model_validation import LiveModelValidationRunner
+from memorive_settings.workflow_exam_runner import WorkflowExams
 
 ROOT=Path(__file__).resolve().parents[1]
 REF="Quality_NEW_Quality_EMBEDDING_SUCCESSOR_EXECUTOR_V2"
@@ -40,9 +41,9 @@ def save_legacy(root,plan,result):
     return folder
 
 def runner(path):
-    return LiveModelValidationRunner(credential_resolver=lambda _:(_ for _ in ()).throw(AssertionError("NO_KEYS")),
-        preferences_loader=lambda:{},scratch_root=path,workflow_exam_catalog=None,
-        workflow_exam_executors=[SimpleNamespace(EXECUTOR_REF=REF, plan=lambda *a:None,
+    return WorkflowExams(runner=LiveModelValidationRunner(credential_resolver=lambda _:(_ for _ in ()).throw(AssertionError("NO_KEYS")),
+        preferences_loader=lambda:{},scratch_root=path),catalog=None,
+        executors=[SimpleNamespace(EXECUTOR_REF=REF, plan=lambda *a:None,
             execute=lambda *a,**k:(_ for _ in ()).throw(AssertionError("NO_INFERENCE")))])
 
 def test_full_projection_carries_existing_executor_binding_into_real_cache(tmp_path):

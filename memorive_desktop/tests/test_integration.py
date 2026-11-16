@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 from memorive_settings.exam_score_history import ExamScoreHistory
 from memorive_settings.model_validation import LiveModelValidationRunner
+from memorive_settings.workflow_exam_runner import WorkflowExams
 from memorive_settings.contracts import canonical_sha256
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,8 +51,8 @@ def test_explicit_exam_does_not_silently_return_an_old_cached_grade(tmp_path):
             return {"status":"READY", "mode":"SYNTHETIC", "maximum_model_calls":1}
         def execute(self, node, target, context, **kwargs):
             return {"status":"NOT_RUN", "reason":"AUTHORIZATION_REQUIRED", "provider_calls":0}
-    runner = LiveModelValidationRunner(credential_resolver=lambda ref:b"",
-        preferences_loader=lambda:{}, scratch_root=tmp_path, workflow_exam_executors=[Executor()])
+    runner = WorkflowExams(runner=LiveModelValidationRunner(credential_resolver=lambda ref:b"",
+        preferences_loader=lambda:{}, scratch_root=tmp_path), executors=[Executor()])
     runner._exam_score_history.record(NODE, TARGET, RESULT, {"synthetic-exam-v1"})
     assert runner.cached_workflow_node_score(NODE, TARGET)["score"] == 87
     assert runner.plan_workflow_node_exam(NODE, TARGET)["maximum_model_calls"] == 0

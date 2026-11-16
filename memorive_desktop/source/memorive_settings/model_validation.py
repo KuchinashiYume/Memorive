@@ -38,12 +38,8 @@ from .model_endpoints import (
     SAFE_THINKING,
     _api_profile,
     _ApiProfile,
+    json_sha256,
 )
-from .workflow_exam_runner import (
-    WorkflowExamRunnerMixin,
-    _workflow_exam_v8_sha256,
-)
-from .exam_score_history import ExamScoreHistory
 from model_gateway.resource_limits import resolve_call_limits, _registry_entry
 
 try:
@@ -336,22 +332,6 @@ class ModelValidationRunner(Protocol):
         documents: Sequence[str],
         purpose: str,
         timeout_seconds: int = 120,
-    ) -> Mapping[str, Any]: ...
-
-    def plan_workflow_node_exam(
-        self,
-        node: Mapping[str, Any],
-        target: Mapping[str, Any],
-        context: Mapping[str, Any] | None = None,
-    ) -> Mapping[str, Any]: ...
-
-    def test_workflow_node(
-        self,
-        node: Mapping[str, Any],
-        target: Mapping[str, Any],
-        *,
-        context: Mapping[str, Any] | None = None,
-        authorization: Mapping[str, Any] | None = None,
     ) -> Mapping[str, Any]: ...
 
 
@@ -1284,15 +1264,15 @@ class _SpecializedModelExecutionMixin:
                         or argv[model_indices[0] + 1] != requested_model
                     ):
                         raise ValueError("CODEX_REQUEST_MODEL_ARGV_INVALID")
-                    model_allowlist_sha256 = _workflow_exam_v8_sha256(
+                    model_allowlist_sha256 = json_sha256(
                         {"allowed_models": [requested_model]}
                     )
-                    request_model_binding_sha256 = _workflow_exam_v8_sha256(
+                    request_model_binding_sha256 = json_sha256(
                         {
                             "adapter_id": "codex_cli",
                             "binary_sha256": expected_binary_sha256.upper(),
                             "cli_version": cli_version,
-                            "argv_sha256": _workflow_exam_v8_sha256(list(argv)),
+                            "argv_sha256": json_sha256(list(argv)),
                             "model_flag_index": model_indices[0],
                             "requested_model": requested_model,
                             "model_allowlist_sha256": model_allowlist_sha256,
@@ -1843,7 +1823,7 @@ class FailClosedModelValidationRunner:
     """Fallback boundary used outside the real desktop service."""
 
     @staticmethod
-    def _not_run(kind: str) -> dict[str, Any]:
+    def not_run(kind: str) -> dict[str, Any]:
         return {
             "schema_version": "SettingsModelValidationResult-v1",
             "kind": kind,
@@ -1868,7 +1848,7 @@ class FailClosedModelValidationRunner:
     ) -> Mapping[str, Any]:
         del service, model, inputs, purpose, timeout_seconds
         return {
-            **self._not_run(profile_kind),
+            **self.not_run(profile_kind),
             "schema_version": "SettingsEmbeddingRunnerResult-v1",
             "status": "FAILED",
             "reason": "EMBEDDING_RUNNER_NOT_CONFIGURED",
@@ -1889,7 +1869,7 @@ class FailClosedModelValidationRunner:
     ) -> Mapping[str, Any]:
         del service, model, image_bytes, mime_type, prompt, purpose, max_output_tokens, timeout_seconds
         return {
-            **self._not_run(profile_kind),
+            **self.not_run(profile_kind),
             "schema_version": "SettingsOcrImageRunnerResult-v1",
             "status": "FAILED",
             "reason": "OCR_IMAGE_RUNNER_NOT_CONFIGURED",
@@ -1908,21 +1888,21 @@ class FailClosedModelValidationRunner:
     ) -> Mapping[str, Any]:
         del service, model, query, documents, purpose, timeout_seconds
         return {
-            **self._not_run(profile_kind),
+            **self.not_run(profile_kind),
             "schema_version": "SettingsRerankRunnerResult-v1",
             "status": "FAILED",
             "reason": "RERANK_RUNNER_NOT_CONFIGURED",
         }
 
     def verify_api_model(self, service: Mapping[str, Any]) -> Mapping[str, Any]:
-        return self._not_run("API")
+        return self.not_run("API")
 
     def verify_cli_model(
         self,
         cli_service: Mapping[str, Any],
         model: Mapping[str, Any],
     ) -> Mapping[str, Any]:
-        return self._not_run("CLI")
+        return self.not_run("CLI")
 
     def execute_structured_chat(
         self,
@@ -1938,39 +1918,11 @@ class FailClosedModelValidationRunner:
     ) -> Mapping[str, Any]:
         del max_output_tokens, timeout_seconds
         return {
-            **self._not_run(profile_kind),
+            **self.not_run(profile_kind),
             "schema_version": "SettingsStructuredChatRunnerResult-v1",
             "status": "FAILED",
             "reason": "STRUCTURED_CHAT_RUNNER_NOT_CONFIGURED",
         }
-
-    def plan_workflow_node_exam(
-        self,
-        node: Mapping[str, Any],
-        target: Mapping[str, Any],
-        context: Mapping[str, Any] | None = None,
-    ) -> Mapping[str, Any]:
-        del node, target, context
-        return {
-            "schema_version": "WorkflowModelExamPlan-v2",
-            "status": "NOT_AVAILABLE",
-            "mode": "NONE",
-            "reason": "MODEL_VALIDATION_RUNNER_NOT_CONFIGURED",
-            "external_network_calls": 0,
-            "provider_calls": 0,
-            "external_model_calls": 0,
-        }
-
-    def test_workflow_node(
-        self,
-        node: Mapping[str, Any],
-        target: Mapping[str, Any],
-        *,
-        context: Mapping[str, Any] | None = None,
-        authorization: Mapping[str, Any] | None = None,
-    ) -> Mapping[str, Any]:
-        del node, target, context, authorization
-        return self._not_run("WORKFLOW_NODE")
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -3472,7 +3424,26 @@ def _resolved_file_sha256(path: str) -> str:
     return digest.hexdigest().upper()
 
 
-def _default_executable_resolver(value: str) -> str | None:
+def validation_result(kind: str, *, status: str, reason: str) -> dict[str, Any]:
+    """The result of a verification request before it runs (also the start of a workflow exam's result)."""
+    return {
+        "schema_version": "SettingsModelValidationResult-v1",
+        "kind": kind,
+        "status": status,
+        "score": None,
+        "reason": reason,
+        "requested_model": None,
+        "returned_model": None,
+        "duration_ms": 0,
+        "external_network_calls": 0,
+        "provider_calls": 0,
+        "external_model_calls": 0,
+        "external_process_launches": 0,
+    }
+
+
+def default_executable_resolver(value: str) -> str | None:
+    """The path of the command-line tool a profile names, or None (also used by the workflow exams)."""
     if not isinstance(value, str) or not value or len(value) > 260:
         return None
     if any(ord(character) < 32 or ord(character) == 127 for character in value):
@@ -3649,10 +3620,11 @@ class _ChatAttempt:
         }
 
 
-class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixin, _SpecializedModelExecutionMixin):
+class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecutionMixin):
     """Sends the app's model requests: API and command-line chat (execute_structured_chat),
     embeddings, OCR and reranking (the mixins above), the API model list and the minimal
-    verification requests. The workflow exam's methods come from WorkflowExamRunnerMixin."""
+    verification requests. The workflow exams (WorkflowExams, workflow_exam_runner.py) hold a runner
+    and send their requests through these methods."""
 
     def _preserve_capacity_response(self, body: bytes, *, partial: bool = False) -> dict[str, Any]:
         """Retain visible output on failure without copying credentials/thinking."""
@@ -3694,49 +3666,17 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
         scratch_root: Path,
         http_transport: HttpTransport | None = None,
         process_transport: ProcessTransport | None = None,
-        executable_resolver: Callable[[str], str | None] = _default_executable_resolver,
-        workflow_exam_catalog: Mapping[str, Any] | None = None,
-        workflow_exam_executors: Sequence[Any] = (),
-        local_profile_resolver: Callable[[str], Mapping[str, Any] | None]
-        | None = None,
+        executable_resolver: Callable[[str], str | None] = default_executable_resolver,
     ):
         self._credential_resolver = credential_resolver
         self._preferences_loader = preferences_loader
         self.scratch_root = Path(scratch_root)
-        self._exam_score_history = ExamScoreHistory(self.scratch_root / "workflow_exam_scores")
         self._call_ledger = CallLedger(self.scratch_root / "model_call_ledger")
         self._http = RecordingTransport(http_transport or UrllibHttpTransport())
         self.process_transport = RecordingTransport(process_transport or BoundedSubprocessTransport())
         self._executable_resolver = executable_resolver
-        (
-            self._workflow_exam_entries,
-            self._workflow_exam_historical_entries,
-        ) = self._validate_workflow_exam_catalog(workflow_exam_catalog)
-        self._workflow_exam_executors = tuple(workflow_exam_executors)
-        self._local_profile_resolver = local_profile_resolver
-        if any(
-            not callable(getattr(executor, "plan", None))
-            or not callable(getattr(executor, "execute", None))
-            for executor in self._workflow_exam_executors
-        ):
-            raise ValueError("WORKFLOW_MODEL_EXAM_EXECUTOR_INVALID")
 
-    @staticmethod
-    def _base(kind: str, *, status: str, reason: str) -> dict[str, Any]:
-        return {
-            "schema_version": "SettingsModelValidationResult-v1",
-            "kind": kind,
-            "status": status,
-            "score": None,
-            "reason": reason,
-            "requested_model": None,
-            "returned_model": None,
-            "duration_ms": 0,
-            "external_network_calls": 0,
-            "provider_calls": 0,
-            "external_model_calls": 0,
-            "external_process_launches": 0,
-        }
+    _base = staticmethod(validation_result)
 
     def preferences(self) -> tuple[str, str, int]:
         value = self._preferences_loader()
@@ -4428,15 +4368,15 @@ class LiveModelValidationRunner(WorkflowExamRunnerMixin, _EmbeddingExecutionMixi
                     or argv[model_indices[0] + 1] != attempt.requested_model
                 ):
                     raise ValueError("CODEX_REQUEST_MODEL_ARGV_INVALID")
-                attempt.model_allowlist_sha256 = _workflow_exam_v8_sha256(
+                attempt.model_allowlist_sha256 = json_sha256(
                     {"allowed_models": [attempt.requested_model]}
                 )
-                attempt.request_model_binding_sha256 = _workflow_exam_v8_sha256(
+                attempt.request_model_binding_sha256 = json_sha256(
                     {
                         "adapter_id": adapter_id,
                         "binary_sha256": attempt.cli_binary_sha256,
                         "cli_version": attempt.cli_version,
-                        "argv_sha256": _workflow_exam_v8_sha256(list(argv)),
+                        "argv_sha256": json_sha256(list(argv)),
                         "model_flag_index": model_indices[0],
                         "requested_model": attempt.requested_model,
                         "model_allowlist_sha256": attempt.model_allowlist_sha256,

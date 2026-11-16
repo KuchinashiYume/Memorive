@@ -1,17 +1,19 @@
-"""The workflow exam's part of the model runner: checking the exam catalog, planning and running
-an exam of one workflow node, and the stored scores. LiveModelValidationRunner (model_validation.py)
-inherits WorkflowExamRunnerMixin; these methods use the runner's own execute_* methods to send the
-exam's requests.
+"""The workflow exams (WorkflowExams): checking the exam catalog, planning and running the exam of
+one workflow node, and the stored scores. The desktop service (service_main.py) builds one with the
+model runner and gives it to SettingsController; the exam's requests go through the runner's
+execute_* methods. FailClosedWorkflowExams stands in when there is none.
 """
 from __future__ import annotations
 
 import hashlib
 from inspect import signature
 import json
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from .contracts import normalize_external_api_base_url
-from .model_endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile
+from .model_endpoints import SAFE_MODEL, SAFE_REASON_CODE, SAFE_SHA256, SAFE_THINKING, _api_profile, json_sha256
+from .exam_score_history import ExamScoreHistory
+from .model_validation import FailClosedModelValidationRunner, default_executable_resolver, validation_result
 from .quality_new import (
     Quality_NEW_CATALOG_SCHEMA,
     validate_quality_new_catalog,
@@ -114,16 +116,6 @@ WORKFLOW_EXAM_ROLE_NODE_BINDINGS = {
 }
 
 
-def _workflow_exam_v8_sha256(value: Any) -> str:
-    return hashlib.sha256(
-        json.dumps(
-            value,
-            ensure_ascii=False,
-            allow_nan=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-    ).hexdigest().upper()
 
 
 def _validate_workflow_exam_catalog_v8(
@@ -138,7 +130,7 @@ def _validate_workflow_exam_catalog_v8(
         "catalog_sha256",
     }:
         raise ValueError("WORKFLOW_MODEL_EXAM_CATALOG_V8_SHAPE_INVALID")
-    expected_catalog_sha256 = _workflow_exam_v8_sha256(
+    expected_catalog_sha256 = json_sha256(
         {key: item for key, item in value.items() if key != "catalog_sha256"}
     )
     if value.get("catalog_sha256") != expected_catalog_sha256:
@@ -169,7 +161,7 @@ def _validate_workflow_exam_catalog_v8(
             or not SAFE_MODEL.fullmatch(source_schema)
             or not isinstance(row.get("source_entry"), Mapping)
             or row.get("historical_record_sha256")
-            != _workflow_exam_v8_sha256(
+            != json_sha256(
                 {
                     key: item
                     for key, item in row.items()
@@ -511,9 +503,9 @@ def _validate_workflow_exam_catalog_v8(
                 or row["verdict"] != ("PASS" if pass_all else "FAIL")
                 or any(row[field] != value for field, value in summed.items())
                 or row["sample_manifest_sha256"]
-                != _workflow_exam_v8_sha256(sample_hashes)
+                != json_sha256(sample_hashes)
                 or row["evidence_sha256"]
-                != _workflow_exam_v8_sha256(evidence_hashes)
+                != json_sha256(evidence_hashes)
             ):
                 raise ValueError("WORKFLOW_MODEL_EXAM_CATALOG_V8_SERIES_INVALID")
         elif (
@@ -620,7 +612,7 @@ def _validate_workflow_exam_catalog_v8(
             "sample_revision": row["sample_revision"],
             "sample_manifest_sha256": row["sample_manifest_sha256"],
         }
-        expected_binding_hash = _workflow_exam_v8_sha256(
+        expected_binding_hash = json_sha256(
             {
                 key: item
                 for key, item in cache_binding.items()
@@ -652,7 +644,43 @@ def _validate_workflow_exam_catalog_v8(
     return tuple(accepted), tuple(historical)
 
 
-class WorkflowExamRunnerMixin:
+class WorkflowExams:
+    """The workflow exams: the exam catalog, planning and running the exam of one workflow node, and
+    the stored scores (SettingsController.test_workflow_node and the exam jobs call it).
+
+    runner is the model runner (LiveModelValidationRunner): the exam's requests go through its
+    execute_* methods, and its scratch_root holds the score history. executable_resolver finds the
+    command-line tool for the OCR exam; local_profile_resolver turns a local:... profile into the
+    local model it names. catalog holds scores of earlier versions (None for new installations);
+    executors are the exam executors, each with plan() and execute()."""
+
+    _base = staticmethod(validation_result)
+
+    def __init__(
+        self,
+        *,
+        runner: Any,
+        executable_resolver: Callable[[str], str | None] = default_executable_resolver,
+        local_profile_resolver: Callable[[str], Mapping[str, Any] | None] | None = None,
+        catalog: Mapping[str, Any] | None = None,
+        executors: Sequence[Any] = (),
+    ):
+        self.runner = runner
+        self.executable_resolver = executable_resolver
+        self.local_profile_resolver = local_profile_resolver
+        self._exam_score_history = ExamScoreHistory(runner.scratch_root / "workflow_exam_scores")
+        (
+            self._workflow_exam_entries,
+            self._workflow_exam_historical_entries,
+        ) = self._validate_workflow_exam_catalog(catalog)
+        self._workflow_exam_executors = tuple(executors)
+        if any(
+            not callable(getattr(executor, "plan", None))
+            or not callable(getattr(executor, "execute", None))
+            for executor in self._workflow_exam_executors
+        ):
+            raise ValueError("WORKFLOW_MODEL_EXAM_EXECUTOR_INVALID")
+
     def _resolve_exam_target(self, target: Mapping[str, Any]) -> dict[str, Any]:
         accepted = dict(target)
         if accepted.get("kind") != "BUILTIN_PROFILE":
@@ -661,11 +689,11 @@ class WorkflowExamRunnerMixin:
         if (
             not isinstance(profile_ref, str)
             or not profile_ref.startswith("local:")
-            or self._local_profile_resolver is None
+            or self.local_profile_resolver is None
         ):
             return accepted
         try:
-            projection = self._local_profile_resolver(profile_ref)
+            projection = self.local_profile_resolver(profile_ref)
         except Exception:
             return accepted
         if not isinstance(projection, Mapping):
@@ -703,16 +731,16 @@ class WorkflowExamRunnerMixin:
         from .cli_image_identity import bind_saved_cli_identity, FIELDS
         if any(key in accepted for key in FIELDS):
             return accepted
-        executable = self._executable_resolver(accepted.get('executable'))
+        executable = self.executable_resolver(accepted.get('executable'))
         if executable is None:
             return accepted
-        proxy_mode, proxy_address, _ = self.preferences()
-        self.scratch_root.mkdir(parents=True, exist_ok=True)
+        proxy_mode, proxy_address, _ = self.runner.preferences()
+        self.runner.scratch_root.mkdir(parents=True, exist_ok=True)
         accepted, _ = bind_saved_cli_identity(accepted, executable,
-            process=self.process_transport,
-            environment=self.safe_environment('codex_cli', self.scratch_root,
+            process=self.runner.process_transport,
+            environment=self.runner.safe_environment('codex_cli', self.runner.scratch_root,
                                               proxy_mode, proxy_address),
-            root=self.scratch_root)
+            root=self.runner.scratch_root)
         return accepted
 
     @staticmethod
@@ -1971,14 +1999,14 @@ class WorkflowExamRunnerMixin:
                     from .exam_jobs import observed_call
                     kwargs: dict[str, Any] = {
                         "authorization": authorization,
-                        "structured_chat": observed_call(self.execute_structured_chat, "structured_chat"),
+                        "structured_chat": observed_call(self.runner.execute_structured_chat, "structured_chat"),
                     }
                     if "embedding_call" in parameters:
-                        kwargs["embedding_call"] = observed_call(self.execute_embeddings, "embedding")
+                        kwargs["embedding_call"] = observed_call(self.runner.execute_embeddings, "embedding")
                     if "ocr_call" in parameters:
-                        kwargs["ocr_call"] = observed_call(self.execute_ocr_image, "ocr")
+                        kwargs["ocr_call"] = observed_call(self.runner.execute_ocr_image, "ocr")
                     if "rerank_call" in parameters:
-                        kwargs["rerank_call"] = observed_call(self.execute_rerank, "rerank")
+                        kwargs["rerank_call"] = observed_call(self.runner.execute_rerank, "rerank")
                     dynamic = executor.execute(
                         node,
                         resolved_target,
@@ -2017,3 +2045,35 @@ class WorkflowExamRunnerMixin:
             },
         )
         return result
+
+
+class FailClosedWorkflowExams:
+    """Used by SettingsController when it is given no WorkflowExams: every exam is not available."""
+
+    def plan_workflow_node_exam(
+        self,
+        node: Mapping[str, Any],
+        target: Mapping[str, Any],
+        context: Mapping[str, Any] | None = None,
+    ) -> Mapping[str, Any]:
+        del node, target, context
+        return {
+            "schema_version": "WorkflowModelExamPlan-v2",
+            "status": "NOT_AVAILABLE",
+            "mode": "NONE",
+            "reason": "MODEL_VALIDATION_RUNNER_NOT_CONFIGURED",
+            "external_network_calls": 0,
+            "provider_calls": 0,
+            "external_model_calls": 0,
+        }
+
+    def test_workflow_node(
+        self,
+        node: Mapping[str, Any],
+        target: Mapping[str, Any],
+        *,
+        context: Mapping[str, Any] | None = None,
+        authorization: Mapping[str, Any] | None = None,
+    ) -> Mapping[str, Any]:
+        del node, target, context, authorization
+        return FailClosedModelValidationRunner.not_run("WORKFLOW_NODE")

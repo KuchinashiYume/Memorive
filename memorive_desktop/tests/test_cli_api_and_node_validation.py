@@ -24,6 +24,7 @@ from memorive_settings.controller import SettingsController  # noqa: E402
 from memorive_settings.credentials import CredentialReferenceManager  # noqa: E402
 from memorive_settings.directory_policy import DirectoryPolicy  # noqa: E402
 from memorive_settings.model_validation import FailClosedModelValidationRunner  # noqa: E402
+from memorive_settings.workflow_exam_runner import FailClosedWorkflowExams  # noqa: E402
 from memorive_settings.store import SettingsStore  # noqa: E402
 
 
@@ -223,6 +224,7 @@ def test_validation_methods_persist_api_cli_status_and_node_score(tmp_path: Path
         capabilities=CapabilityProjection([], revision="fixture"),
         directory_policy=DirectoryPolicy([tmp_path]),
         model_validation_runner=runner,
+        workflow_exams=runner,
     )
 
     api_receipt = controller.verify_api_model(config_id="provider-fixture-primary")
@@ -260,7 +262,7 @@ def test_default_validation_boundary_is_fail_closed_and_never_calls_a_model() ->
         {"config_id": "codex-cli"},
         {"profile_ref": "cli:codex-cli:gpt-5.6"},
     )
-    node = runner.test_workflow_node(
+    node = FailClosedWorkflowExams().test_workflow_node(
         {"node_id": "analysis"},
         {"kind": "CLI", "profile_ref": "cli:codex-cli:gpt-5.6"},
     )

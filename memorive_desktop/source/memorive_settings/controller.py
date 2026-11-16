@@ -25,6 +25,7 @@ from .kimi_endpoint import (
     resolve_kimi_api_platform,
 )
 from .model_validation import FailClosedModelValidationRunner, ModelValidationRunner
+from .workflow_exam_runner import FailClosedWorkflowExams
 from .model_capabilities import infer_api_model_capability
 from .store import SettingsStore
 from .external_sources import ExternalDataSources
@@ -157,6 +158,7 @@ class SettingsController:
         capabilities: CapabilityProjection,
         directory_policy: DirectoryPolicy,
         model_validation_runner: ModelValidationRunner | None = None,
+        workflow_exams: Any | None = None,
         local_profile_resolver: Callable[[str], Mapping[str, Any] | None] | None = None,
         external_data_sources: ExternalDataSources | None = None,
     ):
@@ -167,6 +169,8 @@ class SettingsController:
         self.model_validation_runner = (
             model_validation_runner or FailClosedModelValidationRunner()
         )
+        # The workflow exams (workflow_exam_runner.WorkflowExams): exam plans, runs and stored scores.
+        self.workflow_exams = workflow_exams or FailClosedWorkflowExams()
         self.local_profile_resolver = local_profile_resolver
         # Model runs for reports, the AI briefing and research Q&A (memorive_model_execution).
         from memorive_model_execution import AIBriefingExecution, ReportProfileExecution, ResearchChatExecution
@@ -218,7 +222,7 @@ class SettingsController:
         from .api_request_options import reasoning_profiles
         envelope = self.store.load()
         catalog_method = getattr(
-            self.model_validation_runner, "workflow_exam_score_catalog", None
+            self.workflow_exams, "workflow_exam_score_catalog", None
         )
         catalog = (
             dict(catalog_method())
@@ -325,7 +329,7 @@ class SettingsController:
         target = self._workflow_model_target(settings, profile_ref)
         if preview_profile_ref is not None and target.get("kind") not in {"API", "CLI", "LOCAL"}:
             raise ValueError("EXTERNAL_REFERENCE_PROFILE_NOT_CONFIGURED")
-        lookup = getattr(self.model_validation_runner, "cached_workflow_node_score", None)
+        lookup = getattr(self.workflow_exams, "cached_workflow_node_score", None)
         cached = lookup(immutable({**node, "profile_ref":profile_ref}), immutable(target)) if callable(lookup) else None
         score = cached.get("score") if isinstance(cached, Mapping) else None
         if type(score) is not int or not 0 <= score <= 100:
@@ -493,7 +497,7 @@ class SettingsController:
     ) -> dict[str, Any]:
         accepted = deepcopy(settings)
         lookup = getattr(
-            self.model_validation_runner, "cached_workflow_node_score", None
+            self.workflow_exams, "cached_workflow_node_score", None
         )
         if not callable(lookup):
             return accepted
@@ -1674,7 +1678,7 @@ class SettingsController:
             context["workflow_exam_force_live"] = True
         if plan_only:
             planner = getattr(
-                self.model_validation_runner, "plan_workflow_node_exam", None
+                self.workflow_exams, "plan_workflow_node_exam", None
             )
             if not callable(planner):
                 plan: dict[str, Any] = {
@@ -1699,7 +1703,7 @@ class SettingsController:
             plan["settings_sha256"] = current["settings_sha256"]
             scan_sensitive(plan)
             return immutable(plan)
-        test_method = self.model_validation_runner.test_workflow_node
+        test_method = self.workflow_exams.test_workflow_node
         parameters = signature(test_method).parameters
         if "context" in parameters and "authorization" in parameters:
             result = dict(

@@ -5,12 +5,28 @@ settings map to its model-list URL and authentication header. Shared by the mode
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 import re
 from typing import Any, Mapping
 import unicodedata
 from urllib.parse import urlsplit, urlunsplit
 
 from .contracts import API_PROTOCOLS, normalize_external_api_base_url
+
+
+def json_sha256(value: Any) -> str:
+    """SHA-256 (upper-case hex) of value as compact JSON with sorted keys. The command-line request's
+    model allowlist and argv hashes and the workflow exam catalog use it."""
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest().upper()
 
 
 SAFE_MODEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")

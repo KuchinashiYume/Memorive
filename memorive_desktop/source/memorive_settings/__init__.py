@@ -6,7 +6,9 @@ SettingsController in controller.py). It holds three kinds of code:
                 user preferences, the leaderboard and external sources;
   model calls   model_validation.py (LiveModelValidationRunner sends every model request of the app),
                 model_endpoints.py, call_ledger.py, cancellable_http.py, windows_cli.py;
-  model exams   workflow_exam.py, specialized_exam.py, analysis_reviewer_exam.py, exam_successor.py,
+  model exams   workflow_exam_runner.py (WorkflowExams: the exam catalog, plans, runs and stored scores;
+                it holds a LiveModelValidationRunner and sends the exam's requests through it),
+                workflow_exam.py, specialized_exam.py, analysis_reviewer_exam.py, exam_successor.py,
                 exam_jobs.py, exam_score_history.py and the other *exam* modules.
 The model calls and the exams are to move to packages of their own; until then this is where they are.
 """

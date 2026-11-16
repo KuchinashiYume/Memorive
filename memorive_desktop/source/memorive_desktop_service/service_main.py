@@ -334,9 +334,13 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
             "preferences"
         ],
         scratch_root=folders.path_for("MODEL_VALIDATION"),
-        workflow_exam_catalog=workflow_exam_catalog,
-        workflow_exam_executors=exam_executors,
+    )
+    from memorive_settings.workflow_exam_runner import WorkflowExams
+    workflow_exams = WorkflowExams(
+        runner=validation_runner,
         local_profile_resolver=resolve_local_profile,
+        catalog=workflow_exam_catalog,
+        executors=exam_executors,
     )
     controller = SettingsController(
         store=store,
@@ -346,6 +350,7 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
         ),
         directory_policy=DirectoryPolicy(allowed_roots),
         model_validation_runner=validation_runner,
+        workflow_exams=workflow_exams,
         local_profile_resolver=resolve_local_profile,
     )
     controller.import_cached_exam_scores()
