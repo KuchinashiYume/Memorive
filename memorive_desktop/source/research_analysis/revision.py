@@ -5,7 +5,7 @@ import json
 
 from retrieval.context_pack import validate_context_pack_binding
 from retrieval.ownership import OwnershipSnapshot, propagation_receipt, stable_sha256
-from evidence_review.ownership_binding import build_ownership_review_task
+from memorive.documents.card_review.ownership_binding import build_ownership_review_task
 from memorive.models.gateway import call
 from memorive.models.gateway.prompts import PROMPT_DIR
 from memorive.platform.language.source_preservation import validate_generated_language

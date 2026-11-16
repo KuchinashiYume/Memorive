@@ -22,9 +22,9 @@ start" below).
 
 ### How a feature runs
 
-- **Documents**: the inbox (`memorive/documents/inbox`) takes a file → the workflow (`memorive_workflow`) runs
+- **Documents**: the inbox (`memorive/documents/inbox`) takes a file → the workflow (`memorive/documents/workflow`) runs
   it through conversion, cleaning and chunking (`memorive/documents/processing`), card extraction
-  (`evidence_extraction`), card review (`evidence_review`, `knowledge_admission`) and analysis
+  (`memorive/documents/card_distillation`), card review (`memorive/documents/card_review`, `memorive/documents/card_states`) and analysis
   (`research_analysis`, `retrieval`) → the library (`memorive/documents/library`) shows the results. The
   current-task page lists the jobs (`CurrentTaskProductController.core_job_rows`); the library gets
   a row for each delivered file from `memorive/documents/library/core_products.py`.
@@ -56,7 +56,7 @@ the shared basics (`memorive/platform`, `run_ledger`,
 when that code is restructured:
 
 - `run_ledger`: the channel accounting, cost routing and analysis admission modules import
-  `memorive/models/gateway`, `retrieval_weighting`, `memorive/documents/registry` and `knowledge_admission`.
+  `memorive/models/gateway`, `retrieval_weighting`, `memorive/documents/registry` and `memorive/documents/card_states`.
 - `decision_log` and `knowledge_feedback` import each other: `knowledge_feedback` calls decision_log's
   builders (`knowledge_decision.py`, `conversation_refinement_decision.py`), and those take hashing
   helpers, `DECISION_STATES` and `validate_typed_refinement_item` from `knowledge_feedback`, and hashing
@@ -68,11 +68,11 @@ when that code is restructured:
 | Area | Packages |
 | --- | --- |
 | Desktop: window, service, panels | `runtime.py` (ProductApi), `memorive_desktop_service`, `memorive_desktop_assistant`, `memorive_current_task`, `memorive_messages`, `memorive_work_log`, `memorive_accounting`, `memorive_test_console_bridge`, `release_links.py` |
-| Documents | `memorive/documents` (`inbox/`, `processing/` with `registration.py` for paper IDs, `library/`, `registry/` the artifact registry, `front_matter.py`; its docstring lists each part), `memorive_workflow`, `evidence_extraction`, `evidence_review`, `knowledge_admission`, `memorive_review` |
+| Documents | `memorive/documents` (`inbox/`, `processing/` with `registration.py` for paper IDs, `library/`, `registry/` the artifact registry, `front_matter.py`; `workflow/`, `card_distillation/`, `card_review/`, `card_states/`, `data_review/`; its docstring lists each part) |
 | Research | `memorive_research_workspace`, `memorive_research_runtime`, `literature_discovery`, `research_recommendations`, `research_reports`, `research_analysis`, `research_opportunities`, `retrieval`, `retrieval_weighting`, `knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
-| Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive_review/exam.py` |
+| Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
 | Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file), `run_ledger`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
@@ -87,8 +87,8 @@ are today.
 | --- | --- |
 | Settings, model profiles, CLI templates, credentials (by reference) | `memorive_settings` (`store.py`, `credentials.py`) |
 | Model snapshots, call attempts and results | `memorive/models/execution` (`research_chat_profiles/` and the like), the call ledger in `memorive/models/calls/ledger.py` |
-| Imported files and processing jobs | `memorive/documents/inbox`, `memorive_workflow`, `memorive_app` (job store) |
-| A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `memorive/documents/processing`, `evidence_extraction`, `knowledge_admission` (review state in the card); read through `memorive/documents/library` |
+| Imported files and processing jobs | `memorive/documents/inbox`, `memorive/documents/workflow`, `memorive_app` (job store) |
+| A paper's product files: RawMD, CleanMD, chunks, cards, analyses | `memorive/documents/processing`, `memorive/documents/card_distillation`, `memorive/documents/card_states` (review state in the card); read through `memorive/documents/library` |
 | Research conversations, answers, knowledge drafts | `memorive_research_workspace` (its own SQLite store) |
 | Imported chat sessions and refinement tasks | `memorive/sessions/archive`, `memorive_current_task/refinement_tasks.py` |
 | Exam plans, results and score history | `memorive/exams` (`score_history.py`, the `workflow_exams/` run folders) |
@@ -188,7 +188,7 @@ can ask again from the window.
 | What a connected device is shown when its document is processed | `job_results` in `memorive_research_workspace/desktop_connections.py` | `test_library_for_research.py` |
 | Knowledge drafts from answers: proposing, reviewing, retracting, revisions, the note written on acceptance | `knowledge_feedback/research_ingest.py` | `test_knowledge_drafts.py` |
 | Session refinement: what the model must answer, the typed items made from it | `memorive/sessions/refinement/model_channel.py`, `memorive/sessions/refinement/refinement.py` | `test_refinement_model_output.py` |
-| Card review states (pending, active, quarantined), automatic review, the admission log | `knowledge_admission/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
+| Card review states (pending, active, quarantined), automatic review, the admission log | `memorive/documents/card_states/machine.py`, `card_io.py`, `dispatch.py`, `knowledge_admission_log.py` | `test_card_review_states.py` |
 | Custom command-line model tools: the template, how it is run, how its output is read | `memorive/models/cli/templates.py`, `template_execution.py` | `characterize/test_cli_templates.py` |
 | How a model request is sent: API, command-line agents, embeddings, OCR | `memorive/models/validation/runner.py`: a structured chat goes `execute_structured_chat` (checks, limits, prompt) → `_send_api`, `_send_cli` or `_send_local` → `_chat_result`, with one request's state on `_ChatAttempt`; the API and command-line routes in `api_route.py` and `cli_route.py` next to it; model-name patterns and API endpoints in `memorive/models/endpoints.py`; the workflow exam's own part in `memorive/exams/runner.py` | `test_analysis_provider_transport.py`, `test_model_execution.py` |
 | The front matter at the top of RawMD, CleanMD and card files | `memorive/documents/front_matter.py`; every reader of those files uses it | `test_front_matter.py` |
@@ -211,11 +211,11 @@ kept and shipped; this list says how each one is entered.
 | Command-line agent adapters in `memorive/models/gateway/execution_core/adapters/`: `claude_code.py`, `codebuddy_code.py`, `gemini_cli.py`, `github_copilot_cli.py`, `kimi_code.py`, `qwen_code.py` | Component API: build the adapter with its policy and call it. | The window runs command-line models through the model runner instead: `memorive/models/validation/cli_route.py` builds the command (`_cli_argv`) and `runner.py` runs it. Of the adapters in that folder only `codex_cli.py` is used on that path: its parser reads the event stream a Codex run prints. |
 | Field-vector index tools in `retrieval_weighting/` (`cli.py`, `candidate_index.py`, `migration.py`, `locator.py`, `field_vectors.py`) | `python -m retrieval_weighting --input <request> --output <receipt> --root <run folder> --cutoff <UTC time>`, where the request's `operation` is build, migrate or validate. | Research Q&A uses `research_policy.py`, `research_ranking.py`, `research_rule.py`, and through `research_fields.py` and `query_dimensions.py` the input checks in `shadow_contracts.py`. |
 | Shadow ranking modules in `retrieval_weighting/`: `aggregation.py`, `providers.py`, `candidate_union.py`, `counterevidence.py`, `field_search.py`, `semantic_field_profiles.py`, `semantic_field_search.py`, `semantic_shadow_contracts.py`, `source_snapshot.py`, `structural_candidate.py`, `retrieval_calibration_block_role_calibration.py` | Direct import only: neither the app nor the command line above reaches them. The tests import them. | |
-| Knowledge feedback contracts: `knowledge_feedback/contracts.py`, `eligibility.py`, `lineage.py`, `penalty.py`, with `knowledge_admission/knowledge_submission.py`, `derived_knowledge_artifact.py` and `memorive/documents/registry/knowledge_feedback_adapter.py` | `knowledge_admission` and the artifact registry import `contracts.py` and `eligibility.py`; `lineage.py` and `penalty.py` have no caller outside the package; the submission and preview modules are called by the artifact registry or only by tests. None of them writes a card, the registry or an index. | Saving an answer as knowledge in the window goes through `knowledge_feedback/research_ingest.py`, not through these. |
-| Research opportunity pipeline: `research_opportunities/core.py`, `knowledge_admission/opportunity_submission.py`, `evidence_review/opportunity_verification.py` | Component API. | Research Q&A uses `research_opportunities/research_opportunities.py` and the eight comparison concepts `CONCEPT_ORDER`, which producer and verifier share from `research_opportunities/canonical.py`. |
+| Knowledge feedback contracts: `knowledge_feedback/contracts.py`, `eligibility.py`, `lineage.py`, `penalty.py`, with `memorive/documents/card_states/knowledge_submission.py`, `derived_knowledge_artifact.py` and `memorive/documents/registry/knowledge_feedback_adapter.py` | `memorive/documents/card_states` and the artifact registry import `contracts.py` and `eligibility.py`; `lineage.py` and `penalty.py` have no caller outside the package; the submission and preview modules are called by the artifact registry or only by tests. None of them writes a card, the registry or an index. | Saving an answer as knowledge in the window goes through `knowledge_feedback/research_ingest.py`, not through these. |
+| Research opportunity pipeline: `research_opportunities/core.py`, `memorive/documents/card_states/opportunity_submission.py`, `memorive/documents/card_review/opportunity_verification.py` | Component API. | Research Q&A uses `research_opportunities/research_opportunities.py` and the eight comparison concepts `CONCEPT_ORDER`, which producer and verifier share from `research_opportunities/canonical.py`. |
 | Document conversion command line | `python -m memorive.documents.processing.document_conversion.cli` with probe, verify-structure or convert | Calls the same conversion facade as the app. |
 | Local model components: the packages `memorive/models/gateway/local_capability/`, `local_embedding/` and `model_api_relay/` | Component API: the broker's `execute()` in `local_capability/broker.py`, `LocalEmbeddingSeam.execute()` in `local_embedding/seam.py`, `SafeRelayClient.invoke()` in `model_api_relay/client.py`. Each needs its configuration from the caller and is off by default. | `python -m memorive.models.gateway.local_capability` prints status and diagnostics only. |
-| Evidence review orchestration, `evidence_review/review_orchestration/` | Its operator (`operator.py`): `create_or_get_job`, `pause`, `resume`, `cancel`, and `dispatch_once` with an execute function the caller supplies. | |
+| Evidence review orchestration, `memorive/documents/card_review/review_orchestration/` | Its operator (`operator.py`): `create_or_get_job`, `pause`, `resume`, `cancel`, and `dispatch_once` with an execute function the caller supplies. | |
 
 ## Reading library files from other packages
 

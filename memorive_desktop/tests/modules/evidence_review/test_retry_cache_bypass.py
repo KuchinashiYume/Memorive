@@ -9,8 +9,8 @@ from unittest.mock import patch
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from knowledge_admission import DecisionError
-from evidence_review import grading, transcription
+from memorive.documents.card_states import DecisionError
+from memorive.documents.card_review import grading, transcription
 
 
 class RetryCacheBypassTest(unittest.TestCase):

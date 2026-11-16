@@ -13,7 +13,7 @@ from memorive.documents.registry.analysis_products import (
     stable_identifier,
     unique_text,
 )
-from knowledge_admission.analysis_admission_knowledge_admission_analysis_admission import require_buildable
+from memorive.documents.card_states.analysis_admission_knowledge_admission_analysis_admission import require_buildable
 
 from .errors import RealPublicationForbidden
 

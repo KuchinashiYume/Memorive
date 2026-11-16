@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from evidence_review import judgment_debt, report
-from knowledge_admission import knowledge_admission_log
+from memorive.documents.card_review import judgment_debt, report
+from memorive.documents.card_states import knowledge_admission_log
 from memorive.models.gateway.cache import CacheLayer
 from memorive.platform import data_folders
 from memorive.platform.logs import config
@@ -23,7 +23,7 @@ OPS_FOLDERS = {
     "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR": lambda: judgment_debt._path().parent,
     "MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR": knowledge_admission_log.log_dir,
 }
-# The same folder names the service binds (memorive_workflow/executor.py, _bind_environment).
+# The same folder names the service binds (memorive/documents/workflow/executor.py, _bind_environment).
 DEFAULT_NAMES = {
     "MEMORIVE_RUNTIME_LOG_LOG_DIR": "runtime_log",
     "MEMORIVE_MODEL_GATEWAY_CACHE_DIR": "model_gateway_cache",

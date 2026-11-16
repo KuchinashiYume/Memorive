@@ -10,7 +10,7 @@ from unittest.mock import patch
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from evidence_review import transcription
+from memorive.documents.card_review import transcription
 from memorive.models.gateway.config import GatewayConfig
 
 

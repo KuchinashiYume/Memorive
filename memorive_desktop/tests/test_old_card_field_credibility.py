@@ -3,7 +3,7 @@
 An old card has no field_credibility: every one of the six content fields reads as unknown,
 with the "not checked" warning, and nothing fails. A newer card returns its own values.
 """
-from evidence_extraction.card import CONTENT_FIELDS, CRED_UNKNOWN, DANGER_UNKNOWN_FIELD, read_field_credibility
+from memorive.documents.card_distillation.card import CONTENT_FIELDS, CRED_UNKNOWN, DANGER_UNKNOWN_FIELD, read_field_credibility
 
 
 def test_old_card_without_field_credibility_reads_six_unknown_fields():

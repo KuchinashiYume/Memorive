@@ -2,7 +2,7 @@
 
 The desktop package also owns prompt asset directories below this package,
 while Core historically exposes its registry from the sibling
-``model_gateway/prompts.py`` module.  Python gives the package precedence over the
+``memorive/models/gateway/prompts.py`` module.  Python gives the package precedence over the
 module when both exist, so explicitly re-export the frozen Core registry
 without copying or changing any prompt body.
 """

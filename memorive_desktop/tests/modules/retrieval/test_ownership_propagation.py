@@ -37,8 +37,8 @@ from research_analysis.analysis import (
     analyze,
     build_analysis_request_envelope,
 )
-from evidence_review import build_ownership_review_task, verify_research_analysis
-from evidence_review.errors import OwnershipFailClosed as M6OwnershipFailClosed
+from memorive.documents.card_review import build_ownership_review_task, verify_research_analysis
+from memorive.documents.card_review.errors import OwnershipFailClosed as M6OwnershipFailClosed
 
 
 def contributor(value: str | None, index: int = 1, *, subject: str | None = None):

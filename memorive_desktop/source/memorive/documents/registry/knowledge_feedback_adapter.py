@@ -10,7 +10,7 @@ from retrieval_weighting.contracts import (
     validate_hash_descriptor,
     verify_hashed_payload,
 )
-from knowledge_admission.knowledge_submission import validate_controlled_ingest_dry_run_receipt
+from memorive.documents.card_states.knowledge_submission import validate_controlled_ingest_dry_run_receipt
 from knowledge_feedback.contracts import validate_derived_knowledge_candidate
 
 from memorive.documents.registry.errors import ContractValidationError

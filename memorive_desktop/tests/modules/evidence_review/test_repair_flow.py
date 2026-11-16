@@ -14,11 +14,11 @@ import yaml
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from evidence_extraction.card import CONTENT_FIELDS, build_card, write_card
-from evidence_extraction.config import CARD_SCHEMA_VERSION
-import evidence_review
-from evidence_review import repair_flow
-from evidence_review.repair_flow import repair_and_admit
+from memorive.documents.card_distillation.card import CONTENT_FIELDS, build_card, write_card
+from memorive.documents.card_distillation.config import CARD_SCHEMA_VERSION
+import memorive.documents.card_review as card_review
+from memorive.documents.card_review import repair_flow
+from memorive.documents.card_review.repair_flow import repair_and_admit
 from memorive.models.gateway.errors import DependencyError
 
 
@@ -183,8 +183,8 @@ class RepairFlowTest(unittest.TestCase):
         ]
 
     def test_public_grade_and_admit_is_the_repair_flow(self) -> None:
-        self.assertIs(evidence_review.grade_and_admit, repair_and_admit)
-        self.assertIsNot(evidence_review.legacy_grade_and_admit, repair_and_admit)
+        self.assertIs(card_review.grade_and_admit, repair_and_admit)
+        self.assertIsNot(card_review.legacy_grade_and_admit, repair_and_admit)
 
     @staticmethod
     def _repair_payload() -> dict:

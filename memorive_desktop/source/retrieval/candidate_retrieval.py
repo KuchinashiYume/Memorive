@@ -28,9 +28,9 @@ import yaml
 
 from memorive.documents.front_matter import split_front_matter
 from memorive.platform.logs import log_reason
-from knowledge_admission import knowledge_admission_log
-from knowledge_admission.card_io import read_status
-from knowledge_admission.errors import CardStateError
+from memorive.documents.card_states import knowledge_admission_log
+from memorive.documents.card_states.card_io import read_status
+from memorive.documents.card_states.errors import CardStateError
 
 from .ownership import bind_authority_projection, snapshot_fields
 from .types import Candidate, CandidateSet
@@ -400,7 +400,7 @@ def _verified_by_evidence_review(paper_id: str, cache: dict) -> bool:
     """扫描现存 KNOWLEDGE_ADMISSION_log_YYYY.jsonl,取 data_id==paper_id 且 to=='active' 记录,交 _judge_verified 判(真 ts fail-closed)。"""
     if paper_id in cache:
         return cache[paper_id]
-    from knowledge_admission.machine import Trigger
+    from memorive.documents.card_states.machine import Trigger
     log_dir = knowledge_admission_log.log_dir()
     recs = []
     if log_dir.is_dir():

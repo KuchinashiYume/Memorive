@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from evidence_extraction.segmented_distill import SegmentCompletionLedger
-from evidence_extraction.segmented_distill.contracts import SegmentedDistillContractError
+from memorive.documents.card_distillation.segmented_distill import SegmentCompletionLedger
+from memorive.documents.card_distillation.segmented_distill.contracts import SegmentedDistillContractError
 
 TOPOLOGY = {"paper_id": "P1", "topology_hash": "T" * 64, "source_manifest_hash": "S" * 64,
             "segments": [{"segment_id": "seg-1"}, {"segment_id": "seg-2"}]}

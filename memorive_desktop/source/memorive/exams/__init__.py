@@ -5,6 +5,7 @@
   card_distiller.py, card_reviewer.py, analysis.py, embedding.py, ocr.py, reranker.py
                      the executors of each exam family (common.py and specialized_base.py are shared)
   analysis_reviewer/ the analysis reviewer exam: executor.py and its two scorer cores
+  data_anomaly.py    the data anomaly exam; its pack files are in assets/data_anomaly/
   outcomes.py        how an exam ends and is scored, and when a saved score is reused
   score_history.py   the local scores; tiers.py and tiered.py shorter runs; jobs.py exam jobs
   ocr_scoring.py, retrieval_calibration.py   scoring rules of the OCR, embedding and reranker exams

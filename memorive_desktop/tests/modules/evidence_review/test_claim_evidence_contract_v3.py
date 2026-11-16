@@ -10,8 +10,8 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from evidence_review.claim_evidence import validate_claim_evidence_review
-from evidence_review.claim_evidence import apply_fact_verdicts, build_claim_evidence_view, field_credibility_summaries, render_reviewed_field
+from memorive.documents.card_review.claim_evidence import validate_claim_evidence_review
+from memorive.documents.card_review.claim_evidence import apply_fact_verdicts, build_claim_evidence_view, field_credibility_summaries, render_reviewed_field
 class ClaimEvidenceContractV3Test(unittest.TestCase):
     def setUp(self) -> None:
         self.card = {

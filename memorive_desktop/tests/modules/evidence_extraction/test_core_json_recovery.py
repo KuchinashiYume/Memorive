@@ -12,8 +12,8 @@ from unittest.mock import patch
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-distill = import_module("evidence_extraction.distill")
-errors = import_module("evidence_extraction.errors")
+distill = import_module("memorive.documents.card_distillation.distill")
+errors = import_module("memorive.documents.card_distillation.errors")
 
 
 def _response(text: str, *, truncated: bool = False) -> dict:

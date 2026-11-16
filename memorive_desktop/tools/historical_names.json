@@ -107,7 +107,7 @@
     },
     {
       "name": "E2_DataAnomaly_v3_8390243B50F5CCB65F5E",
-      "kept_because": "Name the data anomaly exam files its scores under (memorive_review/exam.py, EXECUTOR_REF). v1.02 to v1.03 wrote it into saved scores; a new name would hide them. The score test checks it."
+      "kept_because": "Name the data anomaly exam files its scores under (memorive/exams/data_anomaly.py, EXECUTOR_REF). v1.02 to v1.03 wrote it into saved scores; a new name would hide them. The score test checks it."
     },
     {
       "name": "\"candidate002\"",
@@ -164,7 +164,7 @@
   ],
   "files": [
     {
-      "path": "memorive_desktop/source/memorive_review/exam.py",
+      "path": "memorive_desktop/source/memorive/exams/data_anomaly.py",
       "set_aside_because": "Exam code; its reasons, modes and score name are written into exam plans and results. It is cleaned up with the other exam code."
     },
     {

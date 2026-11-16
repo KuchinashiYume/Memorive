@@ -17,7 +17,7 @@ from .recovery import retry_counters, lineage_partition, TERMINAL as RECOVERY_TE
 from .refinement_tasks import REFINEMENT_NODE_IDS, SessionRefinementTaskStore
 from .session import CurrentTaskSession
 from .workflow_mapping import build_core_execution_snapshot
-from memorive_workflow.task_controls import TaskControlStore
+from memorive.documents.workflow.task_controls import TaskControlStore
 from memorive_desktop_service.client import RemoteCallError
 
 
@@ -585,10 +585,10 @@ class CurrentTaskProductController:
         started = controls.started_node_ids(job_id) if controls else ()
         result['pause_node_id'] = point
         if (self._core_run_root/'literature_review.sqlite3').is_file():
-            from memorive_review.store import ReviewStore
+            from memorive.documents.data_review.store import ReviewStore
             review=ReviewStore(self._core_run_root).public(job_id)
             if review:
-                from memorive_workflow.node_progress import project as node_progress_projection, is_live
+                from memorive.documents.workflow.node_progress import project as node_progress_projection, is_live
                 review['node_progress']=node_progress_projection(job.get('node_progress',{}),'E2_LOGIC_REVIEW',
                     job_id=job_id,attempt_id=job['attempt_id'],
                     active=review['logic_state'] in {'RUNNING','SENDING'} and not review.get('paused') and not review.get('cancel_requested') and control_state in {'RUNNING','PAUSE_REQUESTED'},

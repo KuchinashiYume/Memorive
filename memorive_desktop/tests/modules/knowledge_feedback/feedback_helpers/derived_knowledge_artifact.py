@@ -20,7 +20,7 @@ from retrieval_weighting.contracts import (
 )
 from knowledge_feedback.contracts import candidate_version_ref, validate_derived_knowledge_candidate
 
-from knowledge_admission.errors import AdmissionBlocked, RealStateTransitionForbidden
+from memorive.documents.card_states.errors import AdmissionBlocked, RealStateTransitionForbidden
 
 
 DERIVED_ARTIFACT_STATES = {"pending", "active", "quarantined"}

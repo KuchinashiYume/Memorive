@@ -1,4 +1,4 @@
-"""The auxiliary blocks of a card (evidence_extraction.distill._validate_aux).
+"""The auxiliary blocks of a card (memorive.documents.card_distillation.distill._validate_aux).
 
 The model's comparison context, author limitations and outlook, terms and citations are low-risk
 extras: bad entries are dropped one by one and the card is still written. Kept entries are
@@ -12,7 +12,7 @@ import importlib
 import pytest
 
 # The package exports a function named distill; take the module itself.
-distill = importlib.import_module("evidence_extraction.distill")
+distill = importlib.import_module("memorive.documents.card_distillation.distill")
 
 REAL = {"c1", "c2"}
 NG = distill.key_data_labels("zh")["not_given"]

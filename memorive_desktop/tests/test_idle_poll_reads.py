@@ -6,7 +6,7 @@ thread or process) writes, and for a store opened fresh. InboxStore.list_intents
 has_pending_intent(item_id) must agree with filtering the full intent list.
 """
 from memorive.documents.inbox.store import InboxStore
-from memorive_review.store import ReviewStore
+from memorive.documents.data_review.store import ReviewStore
 
 
 def _create(store, job_id, *, logic=True):

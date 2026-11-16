@@ -25,7 +25,7 @@ from .composite_adapter import CompositeServiceAdapter
 from memorive.documents.inbox import InboxController, InboxServiceAdapter
 from memorive.models.local import LocalModelProductController
 from memorive_current_task import build_core_execution_snapshot
-from memorive_workflow import (
+from memorive.documents.workflow import (
     CorePipelineExecutor,
     CoreVerticalWorker,
     TaskControlStore,
@@ -293,7 +293,7 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
             ),
             None,
         )
-    from memorive_review.exam import DataAnomalyExamExecutor
+    from memorive.exams.data_anomaly import DataAnomalyExamExecutor
     exam_executors=(*exam_executors,DataAnomalyExamExecutor(exam_scratch))
     validation_runner = LiveModelValidationRunner(
         credential_resolver=credentials.resolve_for_validation,
@@ -535,7 +535,7 @@ async def run(
         ),
         task_control_store=core_task_controls,
     )
-    from memorive_review.service import ReviewService
+    from memorive.documents.data_review.service import ReviewService
     reviews=ReviewService(core_worker,settings_controller.model_validation_runner)
     reviews.structure=structure_controller
     core_worker.review_service=reviews

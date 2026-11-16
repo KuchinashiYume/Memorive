@@ -3,7 +3,7 @@ concepts two studies are compared on.
 
 Research Q&A uses research_opportunities.py and imports core.py for CONCEPT_ORDER, which lives in
 canonical.py together with the hashing shared with the verifier
-(evidence_review/opportunity_verification.py). The rest of core.py is a pipeline that builds
+(memorive/documents/card_review/opportunity_verification.py). The rest of core.py is a pipeline that builds
 source, gap, comparison and opportunity objects; only tests call it.
 """
 

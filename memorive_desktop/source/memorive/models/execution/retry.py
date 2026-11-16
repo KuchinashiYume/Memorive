@@ -1,7 +1,7 @@
 """When a failed model call is tried again, and how long to wait before the next try.
 
 Every model call made for a feature follows these rules: the workflow's nodes
-(memorive_workflow/model_bridge.py) and the research Q&A (runs.py). Change retries here.
+(memorive/documents/workflow/model_bridge.py) and the research Q&A (runs.py). Change retries here.
 """
 from __future__ import annotations
 

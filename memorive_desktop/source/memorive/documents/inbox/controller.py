@@ -838,7 +838,7 @@ class InboxController:
 
     @_freeze_selection
     def set_data_bindings(self, item_id: str, *, bindings: list) -> dict[str, Any]:
-        from memorive_review.engine import MAX_RULES
+        from memorive.documents.data_review.engine import MAX_RULES
         if not isinstance(bindings,list) or len(bindings)>MAX_RULES or any(not isinstance(r,dict) for r in bindings):
             raise InboxError('INBOX_DATA_BINDINGS_INVALID')
         def change(row):

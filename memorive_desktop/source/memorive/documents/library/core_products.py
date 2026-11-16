@@ -388,7 +388,7 @@ class CoreProducts:
                                     ('core-data-review-','CORE_DATA_REVIEW'),('core-logic-review-','CORE_LOGIC_REVIEW')]:
                     if source_artifact_id.startswith(prefix):
                         artifact_kind=kind
-                        from memorive_review.store import ReviewStore
+                        from memorive.documents.data_review.store import ReviewStore
                         reviews=ReviewStore(self.profile_path('Core_JOBS'))
                         report_id=source_artifact_id[len(prefix):]
                         try:

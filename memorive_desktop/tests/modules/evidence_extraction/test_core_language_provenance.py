@@ -4,12 +4,12 @@ from __future__ import annotations
 import importlib
 import unittest
 
-from evidence_extraction.errors import CardParseError
+from memorive.documents.card_distillation.errors import CardParseError
 
 
 class CoreLanguageProvenanceTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.module = importlib.import_module("evidence_extraction.distill")
+        self.module = importlib.import_module("memorive.documents.card_distillation.distill")
         self.validator = getattr(
             self.module,
             "_validate_core_source_language",

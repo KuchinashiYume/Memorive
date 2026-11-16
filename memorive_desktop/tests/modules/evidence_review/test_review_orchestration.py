@@ -9,13 +9,13 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from research_analysis.review_orchestration_events import AnalysisCompletionEventError, build_analysis_completed_event, canonical_hash as analysis_hash, validate_analysis_completed_event
-from evidence_review.review_orchestration.contracts import ReviewOrchestrationContractError, build_analysis_review_receipt, canonical_hash, validate_review_job_event, validate_review_job_spec, validate_trigger_policy
-from evidence_review.review_orchestration.event_store import AppendOnlyReviewEventStore, ReviewEventDedupeConflict, StaleReviewHeadError
-from evidence_review.review_orchestration.operator import ReviewOrchestrationOperator
-from evidence_review.review_orchestration.projection import CorruptReviewEventError, ReviewTransitionError, project_review_job, projection_bytes
-from evidence_review.review_orchestration.qualification import EXPECTED_FAULT_GROUPS, qualify_offline_run
-from evidence_review.review_orchestration.recovery import diagnose_lock, diagnose_recovery
-from evidence_review.review_orchestration.trigger import TriggerRegistry, evaluate_trigger
+from memorive.documents.card_review.review_orchestration.contracts import ReviewOrchestrationContractError, build_analysis_review_receipt, canonical_hash, validate_review_job_event, validate_review_job_spec, validate_trigger_policy
+from memorive.documents.card_review.review_orchestration.event_store import AppendOnlyReviewEventStore, ReviewEventDedupeConflict, StaleReviewHeadError
+from memorive.documents.card_review.review_orchestration.operator import ReviewOrchestrationOperator
+from memorive.documents.card_review.review_orchestration.projection import CorruptReviewEventError, ReviewTransitionError, project_review_job, projection_bytes
+from memorive.documents.card_review.review_orchestration.qualification import EXPECTED_FAULT_GROUPS, qualify_offline_run
+from memorive.documents.card_review.review_orchestration.recovery import diagnose_lock, diagnose_recovery
+from memorive.documents.card_review.review_orchestration.trigger import TriggerRegistry, evaluate_trigger
 STAMP = "2026-08-17T19:00:00+09:00"
 LATE_STAMP = "2026-08-18T00:00:01+09:00"
 HASH_A = "A" * 64
@@ -158,7 +158,7 @@ def _append_claim(store: AppendOnlyReviewEventStore, job_id: str, *, attempt: st
 
 
 def _schema(name: str) -> dict[str, object]:
-    path = (Path(__file__).resolve().parents[3] / "source" / "evidence_review") / "contracts" / "review_orchestration" / name
+    path = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "card_review") / "contracts" / "review_orchestration" / name
     return json.loads(path.read_text(encoding="utf-8"))
 
 

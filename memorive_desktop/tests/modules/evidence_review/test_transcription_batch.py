@@ -12,8 +12,8 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from evidence_review import grade_and_admit, transcription
-from knowledge_admission import DecisionError
+from memorive.documents.card_review import grade_and_admit, transcription
+from memorive.documents.card_states import DecisionError
 
 
 def _batch_response(

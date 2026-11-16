@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from evidence_extraction.segmented_distill.publish import (
+from memorive.documents.card_distillation.segmented_distill.publish import (
     publish_bytes_no_clobber,
     publish_staged_card_no_clobber,
     visibility_state,

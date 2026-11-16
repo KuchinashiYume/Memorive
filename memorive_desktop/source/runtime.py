@@ -64,7 +64,7 @@ ACCOUNTING_METHODS = frozenset({
     "models.get_commerce_context_v1",
 })
 
-from memorive_review.service import REVIEW_METHODS as _REVIEW_METHODS
+from memorive.documents.data_review.service import REVIEW_METHODS as _REVIEW_METHODS
 REVIEW_METHODS=frozenset(_REVIEW_METHODS)
 
 INBOX_METHODS = frozenset({

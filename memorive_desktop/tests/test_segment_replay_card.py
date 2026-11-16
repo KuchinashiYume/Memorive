@@ -1,4 +1,4 @@
-"""Crash recovery in segmented distillation (memorive_workflow.segmented_distill._validate_replay_card).
+"""Crash recovery in segmented distillation (memorive.documents.workflow.segmented_distill._validate_replay_card).
 
 When a run restarts and finds a card already written for this paper, the card is reused only if
 it belongs to this paper, title and ownership, was written by the expected model under the
@@ -10,9 +10,9 @@ from __future__ import annotations
 import pytest
 import yaml
 
-from evidence_extraction.card import CONTENT_FIELDS, LIST_FIELDS, build_card, write_card
-from evidence_extraction.config import CARD_SCHEMA_VERSION
-from memorive_workflow.segmented_distill import _validate_replay_card
+from memorive.documents.card_distillation.card import CONTENT_FIELDS, LIST_FIELDS, build_card, write_card
+from memorive.documents.card_distillation.config import CARD_SCHEMA_VERSION
+from memorive.documents.workflow.segmented_distill import _validate_replay_card
 
 SOURCE = {"paper_id": "Doe2024", "title": "Rates of incubation", "data_ownership": "user_owned"}
 MODEL = "deepseek-v4-pro"

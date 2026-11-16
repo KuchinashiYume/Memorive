@@ -20,7 +20,7 @@ from typing import Any, Mapping
 _SHA256_RE = re.compile(r"^[A-F0-9]{64}$")
 
 # The concepts two studies are compared on, in this order. The producer (core.py) and the
-# verifier (evidence_review/opportunity_verification.py) share this list and nothing else of
+# verifier (memorive/documents/card_review/opportunity_verification.py) share this list and nothing else of
 # each other's logic; research Q&A names them in its comparison prompt.
 CONCEPT_ORDER = (
     "research_object",

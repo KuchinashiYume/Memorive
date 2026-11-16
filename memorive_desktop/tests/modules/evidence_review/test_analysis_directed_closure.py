@@ -8,7 +8,7 @@ os.environ['MEMORIVE_RUNTIME_LOG_LOG_DIR']=str(ROOT/'ops/runtime_log')
 from research_analysis.revision import bind_successor
 from research_analysis.types import LiteratureClaim
 from retrieval.ownership import stable_sha256
-from evidence_review.analysis_omission import finalize_delta, omission_notice
+from memorive.documents.card_review.analysis_omission import finalize_delta, omission_notice
 
 def read(p):return json.loads(p.read_text(encoding='utf-8'))
 
@@ -17,7 +17,7 @@ class ClosureTests(unittest.TestCase):
   from tests.modules.research_analysis.test_coverage_aware_analysis_p0 import pack, block, response
   from research_analysis.analysis import analyze
   from research_analysis.revision import revise_analysis
-  from evidence_review.ownership_binding import build_ownership_review_task
+  from memorive.documents.card_review.ownership_binding import build_ownership_review_task
   self.pack=pack(block('Paper#a',section='Results',facet_ids=(),source_role='direct_result',span_id='a'),
       block('Paper#b',section='Results',facet_ids=(),source_role='direct_result',span_id='b'),coverage_status='not_assessed')
   answer=response([{'text':'Yield increased by 80 percent.','source_chunk_id':'Paper#a'},
@@ -76,8 +76,8 @@ class ClosureTests(unittest.TestCase):
   with self.assertRaisesRegex(RuntimeError,'UNCHANGED_SET'):self.run_final()
 
  def test_complete_revision_replays_checkpoint_without_model_calls(self):
-  from evidence_review.analysis_revision import complete_analysis_revision
-  from evidence_review.judgment import VerifierCandidate
+  from memorive.documents.card_review.analysis_revision import complete_analysis_revision
+  from memorive.documents.card_review.judgment import VerifierCandidate
   import types
   calls=[]
   def revise(payload):

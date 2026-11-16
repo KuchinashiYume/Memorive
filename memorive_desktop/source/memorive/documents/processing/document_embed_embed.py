@@ -17,7 +17,7 @@
   **同一 add 调用内部重复 id → 抛 DuplicateIDError**。故篇内唯一性必须由本模块 ① 显式预检,不靠 Chroma。
 ⚠ 并发:DocumentEmbed 假设**单写者**(去重预检与 add 非原子、Chroma 文件级无跨进程锁);post-write run_id 校验是竞态最后兜底。
 
-守边界:DocumentEmbed 只「读归属→选 embed_cloud/local 槽→调 model_gateway.embed/healthcheck→写 chroma+metadata→记 RUNTIME_LOG」;
+守边界:DocumentEmbed 只「读归属→选 embed_cloud/local 槽→调 memorive.models.gateway.embed/healthcheck→写 chroma+metadata→记 RUNTIME_LOG」;
 endpoint/model/**归一化**/**回环断言**/健康探测/**归属保护文案**全在 MODEL_GATEWAY;canonical 模型名从 MODEL_GATEWAY 承带(不自定义)。
 
 留痕:每条向量 metadata 12 项,只增不改。
@@ -370,7 +370,7 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
     )
     reused_checkpoint_count = 0
     new_embedding_count = 0
-    from memorive_workflow.node_progress import scope
+    from memorive.documents.workflow.node_progress import scope
     with scope('VECTOR_GENERATION', chunk_ids) as node_units:
         for index, r in enumerate(recs):
             checkpoint_path = _spool_record_path(spool_root, index, r["chunk_id"])

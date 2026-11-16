@@ -92,7 +92,7 @@ class StructureDesktop:
             state['jobs'][context.job_id]=deepcopy(entry)
             self._write(state)
             self.active_jobs.add(context.job_id)
-        from memorive_workflow.node_progress import scope
+        from memorive.documents.workflow.node_progress import scope
         stages=None
         def progress(stage,details):
             if stage in {'parse','validate','review'}:
@@ -187,7 +187,7 @@ class StructureDesktop:
             entry,_,_=self._entry(self._read(),job_id)
             return context_pack(entry['bundle_path'],list(entry['confirmations']),budget=budget)
     def numeric_review(self,job_id,rules=None):
-        from memorive_review.engine import analyze,extract,NUMBER,UNITS
+        from memorive.documents.data_review.engine import analyze,extract,NUMBER,UNITS
         with self.lock:
             entry,_,value=self._entry(self._read(),job_id)
             records=[]

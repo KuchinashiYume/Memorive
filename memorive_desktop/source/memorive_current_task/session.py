@@ -6,7 +6,7 @@ from memorive_desktop_service.locator import StableLocator
 
 from .actions import ActionController
 from .contracts import FIXED_NODE_IDS, LEGACY_FIXED_NODE_IDS
-from memorive_workflow.contracts import DATA_NODE
+from memorive.documents.workflow.contracts import DATA_NODE
 from .projection import CurrentTaskProjector
 from .refinement_tasks import REFINEMENT_NODE_IDS
 

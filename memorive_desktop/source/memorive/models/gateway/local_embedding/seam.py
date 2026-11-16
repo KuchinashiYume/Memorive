@@ -1,7 +1,7 @@
 """Runs a local embedding model (LocalEmbeddingSeam) and checks its compatibility manifest.
 
 Process isolation, routing, normalization and the order of handoffs stay with the
-execution core (model_gateway/execution_core); the runtime log writes the call record. This module
+execution core (memorive/models/gateway/execution_core); the runtime log writes the call record. This module
 returns the binding that the call record's builder (ChannelAttemptBuilder) takes.
 """
 

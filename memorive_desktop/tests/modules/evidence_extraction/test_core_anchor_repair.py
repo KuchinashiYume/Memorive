@@ -14,8 +14,8 @@ from unittest.mock import patch
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-anchor_repair = import_module("evidence_extraction.anchor_repair")
-distill = import_module("evidence_extraction.distill")
+anchor_repair = import_module("memorive.documents.card_distillation.anchor_repair")
+distill = import_module("memorive.documents.card_distillation.distill")
 
 PAPER_ID = "NewPerspectivesAD"
 
@@ -102,8 +102,8 @@ def _valid_response(prompt: str) -> dict:
 
 class CoreAnchorRepairTest(unittest.TestCase):
     def test_card_create_repair_and_regenerate_budgets_are_independent(self) -> None:
-        from evidence_extraction import config
-        from evidence_review.atomic_repair import ATOMIC_REPAIR_MAX_TOKENS
+        from memorive.documents.card_distillation import config
+        from memorive.documents.card_review.atomic_repair import ATOMIC_REPAIR_MAX_TOKENS
 
         self.assertEqual(config.CARD_CREATE_MAX_TOKENS, 8192)
         self.assertEqual(config.CARD_CREATE_MAX_TOKENS_RETRY, 16384)

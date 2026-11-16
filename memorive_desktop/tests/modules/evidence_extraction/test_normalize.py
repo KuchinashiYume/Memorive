@@ -8,7 +8,7 @@
 **真实 chunk 校准**:嵌入 Integration 真实文献(Spagni2012 / Zhou2026)逐字原句 —— 正例(逐字子串过)、
   负例(该句改一词 / 改一数即不过)。真实全量 chunk 校准另见沙盒 smoke。
 
-直接跑:`python evidence_extraction/tests/test_normalize.py` → 打印正负例逐条 PASS/FAIL(正全绿 / 负全红即通过)。
+直接跑:`python memorive/documents/card_distillation/tests/test_normalize.py` → 打印正负例逐条 PASS/FAIL(正全绿 / 负全红即通过)。
 pytest 亦可发现 test_* 函数。
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str((Path(__file__).resolve().parents[3] / "source")))   # 允许直接 `python ...test_normalize.py`
-from evidence_extraction.normalize import normalize, quote_in_text   # noqa: E402
+from memorive.documents.card_distillation.normalize import normalize, quote_in_text   # noqa: E402
 
 
 # ── 负例:改了实词 / 数字,归一化后**仍不匹配**(quote_in_text 必 False)──────────────

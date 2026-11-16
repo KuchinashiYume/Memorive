@@ -23,9 +23,9 @@ from tests.modules.artifact_registry.release_gate_fixtures import (
     build_synthetic_graph,
     load_json,
 )
-from knowledge_admission.analysis_admission_knowledge_admission_analysis_admission import build_analysis_admission_request, validate_real_downstream_eligibility
-from knowledge_admission.errors import AdmissionBlocked, RealStateTransitionForbidden
-from knowledge_admission.analysis_admission_knowledge_admission_analysis_admission import execute_state_transition
+from memorive.documents.card_states.analysis_admission_knowledge_admission_analysis_admission import build_analysis_admission_request, validate_real_downstream_eligibility
+from memorive.documents.card_states.errors import AdmissionBlocked, RealStateTransitionForbidden
+from memorive.documents.card_states.analysis_admission_knowledge_admission_analysis_admission import execute_state_transition
 REGISTERED_AT = "2026-07-17T12:49:04+08:00"
 FIXTURE_ROOT = Path(__file__).resolve().parent / "fixtures" / "release_gate"
 POLICY_PATH = (

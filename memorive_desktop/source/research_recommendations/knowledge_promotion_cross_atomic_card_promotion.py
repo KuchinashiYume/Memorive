@@ -24,9 +24,9 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from memorive.documents.processing.registration import PaperIdRegistry
 from memorive.platform.naming import display_title, file_name, folder_name
-from evidence_review.atomic_review import build_atomic_review_view, deterministic_precheck
-from knowledge_admission.card_io import read_data_id, read_status, write_status
-from knowledge_admission.states import is_legal
+from memorive.documents.card_review.atomic_review import build_atomic_review_view, deterministic_precheck
+from memorive.documents.card_states.card_io import read_data_id, read_status, write_status
+from memorive.documents.card_states.states import is_legal
 from memorive.documents.registry.analysis_materialization import SandboxBoundary
 from memorive.documents.registry.registry_v2 import ArtifactRegistry
 from memorive.documents.registry.schema_v2 import build_envelope

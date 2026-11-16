@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from collections import namedtuple
 
-from evidence_review import transcription as tx
+from memorive.documents.card_review import transcription as tx
 
 Subject = namedtuple("Subject", "location field value_text chunk_ids")
 CHUNKS = {

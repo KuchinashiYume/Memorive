@@ -334,7 +334,7 @@ class CurrentTaskProjector:
                     ),
                 }
             )
-        from memorive_workflow.node_progress import project as node_progress_projection, is_live
+        from memorive.documents.workflow.node_progress import project as node_progress_projection, is_live
         for node in nodes:
             node['node_progress'] = node_progress_projection(job.get('node_progress', {}), node['node_id'],
                 job_id=job_id, attempt_id=attempt_id,

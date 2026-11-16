@@ -1,7 +1,7 @@
 """Where components keep their data when nothing has bound their folders to a profile.
 
 The desktop service binds every data folder to its profile when it starts, through the MEMORIVE_*
-variables (memorive_workflow/executor.py, CorePipelineExecutor._bind_environment). A process or
+variables (memorive/documents/workflow/executor.py, CorePipelineExecutor._bind_environment). A process or
 component that runs without that binding (the window process, a command-line tool, a component
 called on its own) uses default_runtime_root() with the same folder names. document_processing,
 model_gateway, evidence_review, knowledge_admission and the runtime log take their defaults from here.

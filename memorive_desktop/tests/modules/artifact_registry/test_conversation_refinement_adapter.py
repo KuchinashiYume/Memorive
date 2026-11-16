@@ -7,7 +7,7 @@ from memorive.sessions.refinement.knowledge_feedback_adapter import make_knowled
 from memorive.sessions.refinement.refinement import deterministic_refine_graph
 from tests.modules.knowledge_feedback.test_synthetic_qualification_pack import qualification_fixture
 from decision_log.conversation_refinement_decision import make_refinement_decision_receipt
-from knowledge_admission.conversation_ingest_preview import make_conversation_ingest_preview
+from memorive.documents.card_states.conversation_ingest_preview import make_conversation_ingest_preview
 from memorive.documents.registry.conversation_refinement_adapter import make_conversation_registration_preview
 NOW = "2026-08-18T02:00:00+09:00"
 

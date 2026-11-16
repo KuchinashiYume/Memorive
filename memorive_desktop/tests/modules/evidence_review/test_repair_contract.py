@@ -1,4 +1,4 @@
-"""The repair a model proposes for flagged card items (evidence_review.repair_flow._validate_repairs).
+"""The repair a model proposes for flagged card items (memorive.documents.card_review.repair_flow._validate_repairs).
 
 Each repair must target exactly one flagged item, say why, and either replace it with text
 anchored in a literal quote from the same paper, re-anchor it, or drop it with a stated reason.
@@ -11,7 +11,7 @@ import copy
 
 import pytest
 
-from evidence_review.repair_flow import RepairContractError, _validate_repairs
+from memorive.documents.card_review.repair_flow import RepairContractError, _validate_repairs
 
 CHUNKS = {
     "c1": "Samples were incubated at 37 C for 20 minutes in buffer A.",

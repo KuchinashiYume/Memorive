@@ -6,7 +6,7 @@ from typing import Any, Mapping, Sequence
 from memorive_settings.contracts import validate_settings
 from memorive.platform.json_files import canonical_sha256
 from memorive.models.capabilities import EMBEDDING, infer_api_model_capability
-from memorive_workflow.capacity import describe_capacity
+from memorive.documents.workflow.capacity import describe_capacity
 
 
 Core_NODES = (

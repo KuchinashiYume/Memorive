@@ -309,7 +309,7 @@ class ApplicationFacade:
                 leases.pop(node, None)
 
     def record_node_progress(self, job_id, event):
-        from memorive_workflow.node_progress import apply_event
+        from memorive.documents.workflow.node_progress import apply_event
         from .errors import VersionConflict
         for observation_attempt in range(3):
             current = self.store.read_job(job_id)
@@ -580,7 +580,7 @@ class ApplicationFacade:
     def transition(self, job_id: str, expected_version: int, target: str, event_type: str) -> dict[str, Any]:
         """Move a job to the control state target if it is still at expected_version, recording event_type.
 
-        Used here and by the document worker (memorive_workflow/worker.py), the composite adapter
+        Used here and by the document worker (memorive/documents/workflow/worker.py), the composite adapter
         and the test console. apply_transition refuses a change the current state does not allow."""
         def mutate(job: dict[str, Any]) -> dict[str, Any]:
             job["control_state"] = apply_transition(job["control_state"], target)

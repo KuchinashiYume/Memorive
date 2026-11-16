@@ -1,8 +1,8 @@
 """Records the cost of each ModelGateway call (gateway.py) in the runtime log.
 
 CostManager.record maps the gateway's task type to the runtime log's, estimates the cost with the
-accounting kernel (model_gateway/accounting) when a price catalog is configured, and writes one
-accounting record with runtime_log.log_accounting.
+accounting kernel (memorive/models/gateway/accounting) when a price catalog is configured, and writes one
+accounting record with memorive.platform.logs.log_accounting.
 
 Missing date/region/alias/cache evidence produces
 NOT_ASSESSED rather than a guessed zero or guessed actual cost.

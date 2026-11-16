@@ -9,8 +9,8 @@ from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 
-from evidence_review.claim_evidence import validate_claim_evidence_review
-from evidence_review.claim_evidence import _unify_fact_ids, apply_fact_verdicts, build_claim_evidence_view, repair_evidence_occurrence, render_reviewed_field
+from memorive.documents.card_review.claim_evidence import validate_claim_evidence_review
+from memorive.documents.card_review.claim_evidence import _unify_fact_ids, apply_fact_verdicts, build_claim_evidence_view, repair_evidence_occurrence, render_reviewed_field
 class ClaimEvidenceFaultInjectionP0Test(unittest.TestCase):
     def setUp(self) -> None:
         self.correct_quote = (

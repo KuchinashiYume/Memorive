@@ -11,13 +11,13 @@ import yaml
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from evidence_extraction.card import (
+from memorive.documents.card_distillation.card import (
     CONTENT_FIELDS,
     build_card,
     finalize_card_after_repair,
     write_card,
 )
-from evidence_extraction.config import CARD_SCHEMA_VERSION
+from memorive.documents.card_distillation.config import CARD_SCHEMA_VERSION
 
 
 def _frontmatter(path: Path) -> dict:

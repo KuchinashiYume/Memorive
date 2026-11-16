@@ -4,9 +4,9 @@ from copy import deepcopy
 
 import pytest
 
-from evidence_extraction.segmented_distill.assembly import build_analysis_lineage
-from evidence_review.segmented_distill_repair import BoundedRepairLedger, SegmentedRepairContractError, canonical_hash
-from evidence_review.segmented_distill_repair import apply_targeted_repair, freeze_targeted_repair_bundle
+from memorive.documents.card_distillation.segmented_distill.assembly import build_analysis_lineage
+from memorive.documents.card_review.segmented_distill_repair import BoundedRepairLedger, SegmentedRepairContractError, canonical_hash
+from memorive.documents.card_review.segmented_distill_repair import apply_targeted_repair, freeze_targeted_repair_bundle
 def card() -> dict:
     body = {
         "schema_version": "long_document-card-candidate-v1",

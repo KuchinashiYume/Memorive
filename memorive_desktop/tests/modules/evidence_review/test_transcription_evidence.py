@@ -11,9 +11,9 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from knowledge_admission import DecisionError
-from evidence_review import grading, parser, transcription
-from evidence_review.problems import Problem
+from memorive.documents.card_states import DecisionError
+from memorive.documents.card_review import grading, parser, transcription
+from memorive.documents.card_review.problems import Problem
 
 
 def _response(violation: dict) -> str:

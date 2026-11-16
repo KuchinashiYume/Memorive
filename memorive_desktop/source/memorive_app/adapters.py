@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from memorive.platform.folders.roles import ProductPathLayout
-from knowledge_admission import STATES, read_status
+from memorive.documents.card_states import STATES, read_status
 
 from .capabilities import build_capability_snapshot
 from .job_store import SandboxJobStore

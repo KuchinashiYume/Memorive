@@ -10,10 +10,10 @@ from memorive.platform.language.text import choose
 from memorive.platform.language.evidence import generated, followup
 from .store import digest,uid,now,packed
 from . import answer_coverage as coverage
-from evidence_review.atomic_review import split_free_text
-from evidence_review.claim_evidence import REVIEW_STATUSES,_claim_atoms,_scope_compatibility,validate_claim_evidence_review
-from evidence_review.reviewer_routing import classify_delta_risk,reviewer_mode_for_risk
-from evidence_review.segmented_distill_repair import _family
+from memorive.documents.card_review.atomic_review import split_free_text
+from memorive.documents.card_review.claim_evidence import REVIEW_STATUSES,_claim_atoms,_scope_compatibility,validate_claim_evidence_review
+from memorive.documents.card_review.reviewer_routing import classify_delta_risk,reviewer_mode_for_risk
+from memorive.documents.card_review.segmented_distill_repair import _family
 
 CONTRACT='MemoAnswerEvidenceReview-v3'
 METHODS=frozenset({'memo.answer_check','memo.answer_revise','memo.answer_review','memo.coverage_probe'})

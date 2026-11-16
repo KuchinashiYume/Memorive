@@ -4,11 +4,11 @@ import json
 import unittest
 from copy import deepcopy
 
-from evidence_review.atomic_repair import ATOMIC_REPAIR_MAX_TOKENS, ATOMIC_REPAIR_TIMEOUT_SECONDS, DELTA_PASS, HUMAN_REQUIRED, PASS_WITH_TOMBSTONES, TARGETED_REPAIR, AtomicRepairContractError, canonical_hash
-from evidence_review.atomic_repair import apply_atomic_repairs, build_atomic_delta_view, build_atomic_repair_bundle, build_atomic_repair_request, classify_delta_resolution, governed_omission_precheck, prune_unresolved_targets, route_full_review_to_closure, validate_atomic_repair_gateway_response, validate_atomic_repairs
-from evidence_review.atomic_review import build_atomic_review_view
-from evidence_review.reviewer_contract import required_atom_manifest
-from evidence_review.reviewer_contract import build_full_review_completion_view, merge_full_review_completion_payload, missing_required_atom_ids, validate_full_review
+from memorive.documents.card_review.atomic_repair import ATOMIC_REPAIR_MAX_TOKENS, ATOMIC_REPAIR_TIMEOUT_SECONDS, DELTA_PASS, HUMAN_REQUIRED, PASS_WITH_TOMBSTONES, TARGETED_REPAIR, AtomicRepairContractError, canonical_hash
+from memorive.documents.card_review.atomic_repair import apply_atomic_repairs, build_atomic_delta_view, build_atomic_repair_bundle, build_atomic_repair_request, classify_delta_resolution, governed_omission_precheck, prune_unresolved_targets, route_full_review_to_closure, validate_atomic_repair_gateway_response, validate_atomic_repairs
+from memorive.documents.card_review.atomic_review import build_atomic_review_view
+from memorive.documents.card_review.reviewer_contract import required_atom_manifest
+from memorive.documents.card_review.reviewer_contract import build_full_review_completion_view, merge_full_review_completion_payload, missing_required_atom_ids, validate_full_review
 class AtomicRepairClosureTest(unittest.TestCase):
     def setUp(self) -> None:
         self.card = {

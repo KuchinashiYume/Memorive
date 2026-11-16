@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from memorive.models.gateway.config import GatewayConfig
-from evidence_review.research_handoff_cross_analysis_review import BLOCKED, DEFAULT_REVIEW_PROFILE, PASS, PASS_WITH_OMISSIONS, CrossAnalysisReviewError, FrozenEvidenceSnippet, ReviewProfile, build_cross_analysis_review_view, run_cross_analysis_review_closure
+from memorive.documents.card_review.research_handoff_cross_analysis_review import BLOCKED, DEFAULT_REVIEW_PROFILE, PASS, PASS_WITH_OMISSIONS, CrossAnalysisReviewError, FrozenEvidenceSnippet, ReviewProfile, build_cross_analysis_review_view, run_cross_analysis_review_closure
 SECTION_IDS = (
     "scope_and_evidence_boundary",
     "comparison_dimensions",

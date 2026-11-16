@@ -10,7 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from memorive.documents.processing import config as processing_config
-from memorive_workflow.executor import CorePipelineExecutor
+from memorive.documents.workflow.executor import CorePipelineExecutor
 from tests.characterize.golden import check
 
 HERE = Path(__file__).parent

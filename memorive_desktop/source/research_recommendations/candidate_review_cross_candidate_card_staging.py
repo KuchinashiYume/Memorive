@@ -27,9 +27,9 @@ from memorive.documents.processing.document_convert_convert import convert
 from memorive.documents.processing.document_clean_clean import clean
 from memorive.documents.processing.document_chunk_chunk import chunk
 from memorive.platform.naming import make_paper_id
-from evidence_extraction.card import CONTENT_FIELDS, build_card, write_card
-from evidence_review.atomic_review import build_atomic_review_view, deterministic_precheck
-from evidence_review.mechanical import mechanical_check
+from memorive.documents.card_distillation.card import CONTENT_FIELDS, build_card, write_card
+from memorive.documents.card_review.atomic_review import build_atomic_review_view, deterministic_precheck
+from memorive.documents.card_review.mechanical import mechanical_check
 
 
 ADAPTER_VERSION = "candidate_review-candidate-staging-a0-v1"

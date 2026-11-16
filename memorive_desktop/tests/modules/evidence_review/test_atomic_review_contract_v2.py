@@ -8,21 +8,21 @@ from pathlib import Path
 
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 
-from evidence_review.atomic_review import (
+from memorive.documents.card_review.atomic_review import (
     ATOMIZATION_REVIEW_REQUIRED,
     build_atomic_review_view,
     deterministic_precheck,
     split_free_text,
 )
-from evidence_review.reviewer_contract import CARD_REVIEW_PASS, MODEL_REVIEW_PASS
-from evidence_review.reviewer_contract import compose_card_decision, load_reviewer_contract, validate_delta_review, validate_full_review
-from evidence_review.reviewer_routing import DeltaRisk, classify_delta_risk
+from memorive.documents.card_review.reviewer_contract import CARD_REVIEW_PASS, MODEL_REVIEW_PASS
+from memorive.documents.card_review.reviewer_contract import compose_card_decision, load_reviewer_contract, validate_delta_review, validate_full_review
+from memorive.documents.card_review.reviewer_routing import DeltaRisk, classify_delta_risk
 
 
 class AtomicReviewContractV2Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.contract_path = REPO_ROOT / "evidence_review" / "contracts" / "card_review_atomic_v2.json"
+        cls.contract_path = REPO_ROOT / "memorive" / "documents" / "card_review" / "contracts" / "card_review_atomic_v2.json"
         cls.contract = load_reviewer_contract(cls.contract_path)
 
     def setUp(self) -> None:

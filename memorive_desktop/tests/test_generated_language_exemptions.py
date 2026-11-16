@@ -1,4 +1,4 @@
-"""Language guard on generated artifacts for an English paper (memorive_workflow.executor).
+"""Language guard on generated artifacts for an English paper (memorive.documents.workflow.executor).
 
 Chinese text may appear in a generated artifact only where it was copied from the paper. Three
 places hold application text rather than model prose and are exempt: the built-in retrieval
@@ -14,9 +14,9 @@ import json
 import pytest
 import yaml
 
-from evidence_extraction.card import DANGER_UNKNOWN_FIELD, DANGER_UNKNOWN_KD
+from memorive.documents.card_distillation.card import DANGER_UNKNOWN_FIELD, DANGER_UNKNOWN_KD
 from memorive.platform.language.source_preservation import SourceLanguageDriftError
-from memorive_workflow.executor import (_validate_artifact_language, _validate_context_pack_language,
+from memorive.documents.workflow.executor import (_validate_artifact_language, _validate_context_pack_language,
                                         _validate_judgment_language)
 from retrieval.structured_context import _FACET_SPECS
 

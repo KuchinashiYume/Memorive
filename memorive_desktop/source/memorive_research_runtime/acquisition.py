@@ -8,7 +8,7 @@ from .relations import identity_keys
 
 def collect(runtime,run_id,params,directions,targets):
     from literature_discovery.connector_framework import sha256_json
-    from memorive_workflow.node_progress import scope
+    from memorive.documents.workflow.node_progress import scope
     options=params['discovery_options']
     limits=options['limits']
     started=time.monotonic()

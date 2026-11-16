@@ -10,14 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from knowledge_admission import knowledge_admission_log
-from knowledge_admission.card_io import read_data_id, read_status, write_status
-from knowledge_admission.dispatch import AutoResult, ReviewDecision, auto_review
-from knowledge_admission.errors import (CardStateError, DecisionContractError, DecisionError,
+from memorive.documents.card_states import knowledge_admission_log
+from memorive.documents.card_states.card_io import read_data_id, read_status, write_status
+from memorive.documents.card_states.dispatch import AutoResult, ReviewDecision, auto_review
+from memorive.documents.card_states.errors import (CardStateError, DecisionContractError, DecisionError,
                                         IllegalTransitionError, KnowledgeAdmissionError,
                                         KnowledgeAdmissionLogAppendError, MissingBasisError,
                                         TransitionNotEnabledError)
-from knowledge_admission.machine import (Trigger, Verdict, apply_verdict, manual_approve, manual_reject,
+from memorive.documents.card_states.machine import (Trigger, Verdict, apply_verdict, manual_approve, manual_reject,
                                          transition)
 
 CARD = """---

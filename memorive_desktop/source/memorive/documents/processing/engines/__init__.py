@@ -1,6 +1,6 @@
 """Memorive DOCUMENT-PROCESSING/DOCUMENT_PROCESSING · DOCUMENT_PROCESSING 转换引擎注册表。
 
-采用 model_gateway/providers 风格的注册表分派。
+采用 memorive/models/gateway/providers 风格的注册表分派。
 
 改 config.ENGINE 定位或 convert(engine=...) 即换引擎,业务代码不动(承 D3 配置驱动)。
 import 本包即触发各引擎 @register(引擎内部对 marker/pymupdf/markitdown 均为懒加载,

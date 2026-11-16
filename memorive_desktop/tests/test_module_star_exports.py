@@ -13,11 +13,11 @@ import importlib.util
 import pytest
 
 # Names each module listed in __all__ before this round and got back (commit 90147ac).
-RESTORED = {'evidence_extraction.segmented_distill.contracts': ['dispatch_artifact_validation', 'validate_field_candidate'],
- 'evidence_extraction.segmented_distill.merge': ['merge_facts'],
- 'evidence_extraction.segmented_distill.topology': ['plan_bounded_segment_split'],
- 'evidence_review.ownership_binding': ['compute_analysis_binding_hash'],
- 'evidence_review.segmented_distill_repair': ['apply_targeted_repair', 'freeze_targeted_repair_bundle'],
+RESTORED = {'memorive.documents.card_distillation.segmented_distill.contracts': ['dispatch_artifact_validation', 'validate_field_candidate'],
+ 'memorive.documents.card_distillation.segmented_distill.merge': ['merge_facts'],
+ 'memorive.documents.card_distillation.segmented_distill.topology': ['plan_bounded_segment_split'],
+ 'memorive.documents.card_review.ownership_binding': ['compute_analysis_binding_hash'],
+ 'memorive.documents.card_review.segmented_distill_repair': ['apply_targeted_repair', 'freeze_targeted_repair_bundle'],
  'memorive.sessions.refinement.contracts': ['make_capture_attempt_receipt',
                                                           'make_export_snapshot',
                                                           'make_selection_receipt',

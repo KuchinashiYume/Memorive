@@ -1,8 +1,8 @@
 """Job folders written by earlier versions keep pickles that name classes by module path.
 
 A processed paper's job folder holds 06_context_pack.pkl (a ContextPack) and 07_analysis.pkl (an
-AnalysisResult), written with pickle.HIGHEST_PROTOCOL by memorive_workflow/executor.py; an analysis
-revision keeps pickle.dumps of an AnalysisResult (evidence_review/analysis_revision.py). The samples
+AnalysisResult), written with pickle.HIGHEST_PROTOCOL by memorive/documents/workflow/executor.py; an analysis
+revision keeps pickle.dumps of an AnalysisResult (memorive/documents/card_review/analysis_revision.py). The samples
 in golden/old_job_pickles were written on 2026-11-16, before any of these classes moved, with
 code-plan/work/upgrade/make_job_pickle_samples.py; they hold every nested class those objects can
 contain.

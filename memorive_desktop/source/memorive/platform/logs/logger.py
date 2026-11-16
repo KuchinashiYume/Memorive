@@ -96,7 +96,7 @@ class Logger:
                 f"append-only 被破坏: 写后文件变小 ({before}→{after} 字节),疑覆盖 / 截断")
 
 
-# ── 模块级唯一入口 (镜像 model_gateway.call 的用法) ──────────────
+# ── 模块级唯一入口 (镜像 memorive.models.gateway.call 的用法) ──────────────
 _default: Logger | None = None
 
 

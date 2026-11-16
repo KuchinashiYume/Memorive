@@ -9,8 +9,8 @@ from pathlib import Path
 REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 sys.path.insert(0, str(REPO_ROOT))
 
-from evidence_review.quality_axes import needs_review
-from evidence_review.quality_axes import assess_numeric_plausibility, build_quality_axes, compare_numeric_facts
+from memorive.documents.card_review.quality_axes import needs_review
+from memorive.documents.card_review.quality_axes import assess_numeric_plausibility, build_quality_axes, compare_numeric_facts
 class QualityAxesP0Test(unittest.TestCase):
     def test_skipped_analysis_is_not_a_pipeline_failure(self) -> None:
         status = build_quality_axes(

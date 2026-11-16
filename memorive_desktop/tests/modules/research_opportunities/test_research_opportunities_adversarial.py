@@ -12,9 +12,9 @@ from pathlib import Path
 
 from research_opportunities import canonical_json_bytes, ContractRejected, EvidenceRejected, typed_payload_hash
 from research_opportunities import CandidateRejected, SourceRejected, assess_comparability, build_opportunity_candidate, classify_tension, extract_author_stated_gaps, external_hash_is_valid, make_anchor_resolution_receipt, make_ignore_decision, make_pair_ledger, make_source_snapshot, make_trigger_scope_receipt, project_comparison_concepts, validate_anchor_resolution_receipt, validate_source_card, with_content_hash
-from evidence_review import verify_opportunity_candidate
-from evidence_review.opportunity_verification import _ignore_valid as m6_ignore_valid
-from knowledge_admission.opportunity_submission import make_review_submission_request, validate_knowledge_admission_validation_receipt, validate_review_submission_request
+from memorive.documents.card_review import verify_opportunity_candidate
+from memorive.documents.card_review.opportunity_verification import _ignore_valid as m6_ignore_valid
+from memorive.documents.card_states.opportunity_submission import make_review_submission_request, validate_knowledge_admission_validation_receipt, validate_review_submission_request
 LIMITS = {
     "max_clusters": 2,
     "max_cards_per_cluster": 4,
@@ -1026,7 +1026,7 @@ class Successor003Tests(unittest.TestCase):
                     )
 
     def test_assessment_has_no_semantic_import_from_the_producer(self) -> None:
-        path = (Path(__file__).resolve().parents[3] / "source") / "evidence_review" / "opportunity_verification.py"
+        path = (Path(__file__).resolve().parents[3] / "source") / "memorive" / "documents" / "card_review" / "opportunity_verification.py"
         tree = ast.parse(path.read_text(encoding="utf-8"))
         imports = []
         for node in ast.walk(tree):

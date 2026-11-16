@@ -15,7 +15,7 @@ Where things are:
   runs.py        the kinds of run: reports, research questions (tried again after temporary
                  failures), pictures, embeddings, the AI briefing (which can be cancelled)
   retry.py       which failures are tried again, how often, and how long to wait in between; the
-                 workflow's model calls (memorive_workflow/model_bridge.py) follow the same rules
+                 workflow's model calls (memorive/documents/workflow/model_bridge.py) follow the same rules
 
 The settings controller (memorive_settings/controller.py) makes one object of each kind and serves
 them as settings.research_chat_freeze, settings.research_chat_execute and the like. The request

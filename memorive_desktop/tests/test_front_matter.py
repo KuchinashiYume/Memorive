@@ -73,18 +73,18 @@ def test_the_cleaning_step_keeps_the_whole_title_and_body():
 
 
 def test_the_distill_reader_keeps_the_whole_title(tmp_path):
-    from evidence_extraction.distill import _read_frontmatter
+    from memorive.documents.card_distillation.distill import _read_frontmatter
     assert _read_frontmatter(write(tmp_path, "clean.md"))["title"] == TITLE
 
 
 def test_the_segmented_distill_reader_keeps_the_whole_title(tmp_path):
-    from memorive_workflow.segmented_distill import _frontmatter
+    from memorive.documents.workflow.segmented_distill import _frontmatter
     assert _frontmatter(write(tmp_path, "card.md"))["title"] == TITLE
 
 
 def test_the_card_readers_keep_the_whole_title(tmp_path):
     from memorive.documents.registry.adapters import read_frontmatter
-    from evidence_review.mechanical import _read_frontmatter as mechanical
+    from memorive.documents.card_review.mechanical import _read_frontmatter as mechanical
     from retrieval.candidate_retrieval import _read_frontmatter as retrieval
     card = write(tmp_path, "card.md")
     assert read_frontmatter(card)["title"] == TITLE

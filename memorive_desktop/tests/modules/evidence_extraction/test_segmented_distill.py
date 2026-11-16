@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from evidence_extraction.segmented_distill import ArtifactKind, CapacityProfile, CapacityRoute, SegmentCompletionLedger, SegmentShardValidator, SegmentedDistillContractError, build_source_manifest, build_topology, route_document
-from evidence_extraction.segmented_distill import assemble_card_candidate, build_assembly_manifest, build_field_candidates, dispatch_artifact_validation, dry_assemble, merge_facts, plan_bounded_segment_split
-SCHEMA_ROOT = (Path(__file__).resolve().parents[3] / "source" / "evidence_extraction") / "contracts" / "long_document"
+from memorive.documents.card_distillation.segmented_distill import ArtifactKind, CapacityProfile, CapacityRoute, SegmentCompletionLedger, SegmentShardValidator, SegmentedDistillContractError, build_source_manifest, build_topology, route_document
+from memorive.documents.card_distillation.segmented_distill import assemble_card_candidate, build_assembly_manifest, build_field_candidates, dispatch_artifact_validation, dry_assemble, merge_facts, plan_bounded_segment_split
+SCHEMA_ROOT = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "documents" / "card_distillation") / "contracts" / "long_document"
 
 
 def chunks() -> list[dict[str, object]]:

@@ -5,7 +5,7 @@ from inspect import signature,Parameter
 from .common import CHANNELS,sha,now,read,write,sealed
 from .directions import effective_directions,channel_targets
 from .transport import PAGE_LIMITS
-from memorive_workflow.node_progress import scope
+from memorive.documents.workflow.node_progress import scope
 
 def run(runtime,run_id,params):
     from . import identity,slate

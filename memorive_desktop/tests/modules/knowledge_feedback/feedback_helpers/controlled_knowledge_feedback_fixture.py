@@ -7,8 +7,8 @@ from typing import Any
 
 from retrieval_weighting.contracts import typed_payload_hash
 from retrieval_weighting.derived_penalty import build_derived_penalty_record
-from knowledge_admission.knowledge_submission import make_controlled_ingest_dry_run_receipt
-from knowledge_admission.derived_knowledge_artifact import (
+from memorive.documents.card_states.knowledge_submission import make_controlled_ingest_dry_run_receipt
+from memorive.documents.card_states.derived_knowledge_artifact import (
     make_controlled_activation_preview,
     make_pending_artifact_projection,
 )

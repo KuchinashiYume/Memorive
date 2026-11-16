@@ -12,7 +12,7 @@ import copy
 import jsonschema
 import pytest
 
-from memorive_review.logic import cloud_profile, validate_response
+from memorive.documents.data_review.logic import cloud_profile, validate_response
 from memorive.models.cli.templates import ADAPTER
 
 TEXT = "\n".join([

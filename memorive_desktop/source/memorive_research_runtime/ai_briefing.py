@@ -298,7 +298,7 @@ class AIBriefing:
     def execute(self,run_id,params):
         from memorive.models.scheduling import TASK_CATEGORIES
         from memorive.models.calls.ledger import execution_control,ExecutionControlSignal
-        from memorive_workflow.node_progress import session_scope
+        from memorive.documents.workflow.node_progress import session_scope
         r=self.r
         path=r.run_path(run_id)
         def check():

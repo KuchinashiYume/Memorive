@@ -144,7 +144,7 @@ class CLIResources:
         from memorive.models.cli.windows import resolve_template_entry,template_command
         from memorive.models.cli.verification_transport import _context
         from run_ledger.writer_lock import process_start_marker,process_identity_status
-        from memorive_workflow.contracts import CORE_WORKER_CAPACITY
+        from memorive.documents.workflow.contracts import CORE_WORKER_CAPACITY
         import hashlib,json
         def checkpoint():
             execution_checkpoint()

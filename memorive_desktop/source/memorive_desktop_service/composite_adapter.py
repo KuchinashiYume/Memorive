@@ -7,7 +7,7 @@ from memorive_settings.service_adapter import SETTINGS_METHODS, SettingsServiceA
 
 from .adapters import RealFacadeAdapter
 from .errors import ProtocolViolation
-from memorive_review.service import REVIEW_METHODS
+from memorive.documents.data_review.service import REVIEW_METHODS
 
 
 CURRENT_TASK_FIXTURE_METHODS = ("current_task.fixture_transition",)
