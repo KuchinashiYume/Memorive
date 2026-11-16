@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from urllib.error import HTTPError
 from unittest.mock import patch
 
-from runtime_log.records import TASK_TYPES, log_accounting
+from memorive.platform.logs.records import TASK_TYPES, log_accounting
 from model_gateway.config import GatewayConfig, SlotConfig
 from model_gateway.errors import (
     DependencyError,
@@ -405,7 +405,7 @@ class OcrHttpFallbackTest(unittest.TestCase):
 class M11OcrAccountingContractTest(unittest.TestCase):
     def test_ocr_is_a_hard_enum_and_can_be_recorded(self) -> None:
         self.assertIn("ocr", TASK_TYPES)
-        with patch("runtime_log.records.log") as mocked_log:
+        with patch("memorive.platform.logs.records.log") as mocked_log:
             log_accounting(
                 "ocr",
                 "deepseek-ai/DeepSeek-OCR",

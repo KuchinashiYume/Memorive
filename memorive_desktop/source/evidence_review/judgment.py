@@ -19,7 +19,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from knowledge_admission import DecisionError    # 坏/空响应 = 环节失败信号(绝不当「无异议」)
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 from retrieval.ownership import (
     OWNERSHIP_BINDING_MISMATCH,
     OWNERSHIP_LOCAL_ROUTE_UNAVAILABLE,
@@ -29,7 +29,7 @@ from .judgment_debt import record_pending_judgment
 from .ownership_binding import build_ownership_review_task
 
 from .errors import OwnershipFailClosed        # 判断类归属安全阀(Integration第2步复审:补 GPT 送原文出境的洞)
-from memorive_source_language import language_display_name, normalize_source_language
+from memorive.platform.language.source_preservation import language_display_name, normalize_source_language
 
 _PROMPT_ROOT = Path(__file__).resolve().parent.parent / "model_gateway" / "prompts" / "verify"
 _PROMPT_PATHS = {

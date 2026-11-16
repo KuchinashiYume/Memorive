@@ -18,7 +18,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 from knowledge_admission import ACTIVE, DecisionError, Trigger, transition
 from evidence_extraction.card import (CONTENT_FIELDS, CRED_ANCHOR_UNCERTAIN, CRED_FLAGGED, CRED_UNKNOWN,
                              CRED_VERIFIED, DANGER_UNKNOWN_FIELD, DANGER_UNKNOWN_KD,

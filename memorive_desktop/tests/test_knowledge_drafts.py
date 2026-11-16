@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from artifact_registry.registry_v2 import ArtifactRegistry
-from memorive_language import freeze
+from memorive.platform.language import freeze
 from memorive_research_workspace.service import ResearchWorkspace
 
 PAPER = "\n".join(f"{n:03d} Growth of strain K12 was measured every hour at 37 C in the same medium." for n in range(1, 41))

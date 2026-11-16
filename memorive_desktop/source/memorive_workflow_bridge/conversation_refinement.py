@@ -89,7 +89,7 @@ def _validate_request(value: Mapping[str, Any]) -> dict[str, Any]:
         raise ConversationRefinementBridgeError("REFINEMENT_REQUEST_FIELDS_INVALID")
     request = _json_copy(dict(value))
     if request.get("language_context") is not None:
-        from memorive_language import validate
+        from memorive.platform.language import validate
         request["language_context"]=validate(request["language_context"])
     task_id = _require_text(request["task_id"], "REFINEMENT_TASK_ID_INVALID", 128)
     if not _SAFE_IDENTIFIER.fullmatch(task_id):

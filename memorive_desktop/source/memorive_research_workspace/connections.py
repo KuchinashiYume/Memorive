@@ -13,8 +13,8 @@ writeback_ack), and queue actions for the desktop (queue): ask, hand to an agent
 pump() runs those actions on the desktop's background thread (desktop_connections.py).
 """
 import copy,html,os,re,time
-from memorive_language import freeze
-from memorive_language.text import choose
+from memorive.platform.language import freeze
+from memorive.platform.language.text import choose
 from pathlib import Path
 from .store import digest,uid,now
 from .evidence import safe_path

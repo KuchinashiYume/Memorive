@@ -12,7 +12,7 @@ import unicodedata
 from pathlib import Path
 from typing import Callable, Iterable
 
-from runtime_log import log, log_error
+from memorive.platform.logs import log, log_error
 from model_gateway import ocr
 from model_gateway.errors import OcrOwnershipBlocked
 

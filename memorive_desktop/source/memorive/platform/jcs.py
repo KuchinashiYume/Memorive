@@ -1,4 +1,4 @@
-"""Accepted-RESEARCH-CONTRACTS-parity RFC 8785 helpers for ServiceContracts candidate objects.
+"""RFC 8785 (JCS) JSON and the payload hashes built on it, used for contract and research records.
 
 The serializer intentionally preserves the accepted implementation's UTF-16
 object-key ordering and I-JSON numeric boundary.  It must not be replaced by

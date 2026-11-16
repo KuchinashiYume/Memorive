@@ -17,7 +17,7 @@ import copy,re
 from .store import digest,uid,now,packed
 from .evidence import checking_each_file_once
 from memorive_settings import answer_styles
-from memorive_language import freeze as freeze_language
+from memorive.platform.language import freeze as freeze_language
 
 TREE_VERSION='MemoAnswerTree-v1'
 METHODS=frozenset({'memo.answer_retry','memo.answer_select','memo.answer_draft_get','memo.answer_draft_save'})

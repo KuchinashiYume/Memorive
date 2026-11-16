@@ -18,7 +18,7 @@ def append_reply(thread,question,text,refs,*,source,action,engine='evidence_only
     return message
 
 def review_reply(check,rows,question='',language_context=None):
-    from memorive_language import locale
+    from memorive.platform.language import locale
     lang=locale(language_context).split('-')[0] if language_context else language(question or check['question'])
     texts={c['id']:c['text'] for c in check['claims']}
     refs=[]
@@ -37,7 +37,7 @@ def review_reply(check,rows,question='',language_context=None):
         if row.get('conditions'):
             line+='\n'+say(lang,'适用条件：','Conditions: ','適用条件：')+row['conditions']
         if row.get('mechanical_issues'):
-            from memorive_language.evidence import generated
+            from memorive.platform.language.evidence import generated
             line+='\n'+ '；'.join(generated(issue,language_context) for issue in row['mechanical_issues'])
         if citations:
             line+=' '+''.join(citations)
@@ -81,7 +81,7 @@ def run_if_requested(ws,identity,question):
     check=ws.answer_evidence.check(thread['id'],source['id'])
     action=request['action']
     started=time.monotonic()
-    from memorive_language import locale
+    from memorive.platform.language import locale
     lang=locale(job.get('language_context')).split('-')[0]
     if 'quote' in request:
         matches=[i for i,c in enumerate(check['claims']) if request['quote'] in c['text']]

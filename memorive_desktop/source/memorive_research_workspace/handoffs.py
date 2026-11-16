@@ -40,8 +40,8 @@ class Handoffs:
         return out
 
     def create(self,thread_id,question='',evidence_ids=None,agent=None):
-        from memorive_language import freeze
-        from memorive_language.handoff import instructions
+        from memorive.platform.language import freeze
+        from memorive.platform.language.handoff import instructions
         language_context=freeze(self.w.language_settings_get(),current_user_text=question)
         selected_agent=agent or self.w.settings()['agent']
         with self.store.tx() as db:

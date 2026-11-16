@@ -56,7 +56,7 @@ def _join_text(value: str | Iterable[object]) -> str:
 def detect_source_language(value: str | Iterable[object]) -> str:
     """Detect zh/ja/en from source content, never from a model response or filename."""
 
-    from memorive_language.source import describe
+    from memorive.platform.language.source import describe
     return describe(_join_text(value))['language']
 
 

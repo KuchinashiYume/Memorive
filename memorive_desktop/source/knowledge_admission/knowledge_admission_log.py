@@ -2,7 +2,7 @@
 
 Each line holds the time, the card's data ID, the old and new state, the trigger and the reason.
 The files live outside the library, in MEMORIVE_KNOWLEDGE_ADMISSION_LOG_DIR or by default in the
-knowledge_admission folder of the ops area (runtime_log/config.py, ops_root). This module only
+knowledge_admission folder of the ops area (memorive/platform/data_folders.py, ops_root). This module only
 appends and reads; it offers no way to rewrite a file. The log is operational data: it is never
 embedded or searched.
 """
@@ -13,7 +13,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from runtime_log.config import ops_root
+from memorive.platform.data_folders import ops_root
 
 from .errors import KnowledgeAdmissionLogAppendError
 

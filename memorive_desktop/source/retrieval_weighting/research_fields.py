@@ -8,7 +8,7 @@ from pathlib import Path
 from memorive_research_workspace.store import digest,now
 from .field_registry import expand_card_fields,get_field_registry
 from .query_dimensions import build_query_dimension_profile
-from .canonical import typed_payload_hash
+from memorive.platform.jcs import typed_payload_hash
 from .errors import ContractViolation
 
 LABELS={'method':'方法','research_question':'研究问题','research_object':'研究对象','key_results':'结果',

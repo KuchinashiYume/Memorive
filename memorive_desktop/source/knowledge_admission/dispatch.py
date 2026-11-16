@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 
 from .card_io import read_status
 from .errors import DecisionContractError, DecisionError, IllegalTransitionError

@@ -27,7 +27,7 @@ from pathlib import Path
 import yaml
 
 from memorive_front_matter import split_front_matter
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 from knowledge_admission import knowledge_admission_log
 from knowledge_admission.card_io import read_status
 from knowledge_admission.errors import CardStateError

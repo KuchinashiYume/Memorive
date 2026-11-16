@@ -12,7 +12,7 @@ import stat
 from pathlib import Path
 from typing import Any, Mapping
 
-from .canonical import canonical_json_bytes
+from memorive.platform.jcs import canonical_json_bytes
 from .contracts import (
     verify_hashed_payload,
 )

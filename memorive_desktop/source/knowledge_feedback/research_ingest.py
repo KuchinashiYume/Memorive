@@ -29,7 +29,7 @@ class ResearchFeedback:
                 derived_type='synthesis', predecessor=None, handoff_binding=None, language_context=None, db=None):
         """Save a draft for review. Proposing the same draft again returns the saved one."""
         if language_context is not None:
-            from memorive_language import validate
+            from memorive.platform.language import validate
             language_context = validate(language_context)
         if derived_type not in DERIVED_TYPES:
             raise ValueError('DERIVED_TYPE_INVALID')
@@ -235,7 +235,7 @@ class ResearchFeedback:
 
 def note_text(draft, refs):
     """The Markdown of an accepted note. Drafts saved without a language get the English headings."""
-    from memorive_language.text import choose
+    from memorive.platform.language.text import choose
     language = draft.get('language_context') or 'en-US'
 
     def heading(zh, en, ja):

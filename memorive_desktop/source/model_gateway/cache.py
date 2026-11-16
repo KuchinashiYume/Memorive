@@ -3,7 +3,7 @@
 - key = sha256(task_type + model_id + prompt_version + normalized payload); the file name is the
   hash and holds no raw payload.
 - The folder is MEMORIVE_MODEL_GATEWAY_CACHE_DIR, or model_gateway_cache in the ops area
-  (runtime_log/config.py, ops_root). It is never committed, embedded or searched.
+  (memorive/platform/data_folders.py, ops_root). It is never committed, embedded or searched.
 - Kept simple: exact match only, no expiry, LRU or invalidation. Only successful real calls are
   cached; the caller decides that.
 """
@@ -14,7 +14,7 @@ import json
 import os
 from pathlib import Path
 
-from runtime_log.config import ops_root
+from memorive.platform.data_folders import ops_root
 
 ENV_CACHE_DIR = "MEMORIVE_MODEL_GATEWAY_CACHE_DIR"
 

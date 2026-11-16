@@ -22,7 +22,7 @@ from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 from retrieval.context_pack import validate_context_pack_binding
 from retrieval.ownership import (
     OWNERSHIP_BINDING_MISMATCH,
@@ -33,7 +33,7 @@ from retrieval.ownership import (
     propagation_receipt,
     stable_sha256,
 )
-from memorive_source_language import (
+from memorive.platform.language.source_preservation import (
     SourceLanguageDriftError,
     language_display_name,
     normalize_source_language,

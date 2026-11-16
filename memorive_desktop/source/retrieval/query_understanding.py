@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 
 from .types import QueryType, QueryUnderstanding, RetrievalStrategy
 

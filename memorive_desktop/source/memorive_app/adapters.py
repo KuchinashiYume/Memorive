@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from runtime_log.product_paths import ProductPathLayout
+from memorive.platform.folders.roles import ProductPathLayout
 from knowledge_admission import STATES, read_status
 
 from .capabilities import build_capability_snapshot

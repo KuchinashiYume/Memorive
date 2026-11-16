@@ -30,8 +30,8 @@ from .answer_evidence import AnswerEvidence,METHODS as ANSWER_EVIDENCE_METHODS
 from .agents import agent_matches,desktop_agent,desktop_handoff,validate_agent_settings  # noqa: F401 (desktop_handoff: runtime.py)
 from . import answer_coverage
 from . import answer_versions
-from memorive_language import freeze as freeze_language
-from memorive_language.text import choose
+from memorive.platform.language import freeze as freeze_language
+from memorive.platform.language.text import choose
 
 PUBLIC_METHODS=frozenset({'memo.capabilities','memo.search','memo.read_evidence','memo.prepare_tension',
     'memo.propose_feedback','memo.submit_draft','memo.job_status','memo.skill_context','memo.skill_answer'})

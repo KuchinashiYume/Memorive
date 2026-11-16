@@ -1,6 +1,6 @@
 """JCS, hashing and hostile-text helpers for research reports.
 
-The JCS serializer and payload hashes come from retrieval_weighting.canonical, which keeps
+The JCS serializer and payload hashes come from memorive.platform.jcs, which keeps
 parity with the accepted RESEARCH-CONTRACTS validator (UTF-16 key order, I-JSON numbers).
 """
 
@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from retrieval_weighting.canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash  # used by the other report modules
+from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash  # used by the other report modules
 import json
 from decimal import Decimal
 import math

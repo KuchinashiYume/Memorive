@@ -24,7 +24,7 @@ def window_key(window):
             datetime.fromisoformat(window['end']).astimezone(ZONE).isoformat())
 
 def title(window,revision=1,language=None):
-    from memorive_language.messages import period_name
+    from memorive.platform.language.messages import period_name
     start=datetime.fromisoformat(window['start']).astimezone(ZONE).date().isoformat()
     end=(datetime.fromisoformat(window['end']).astimezone(ZONE)-timedelta(days=1)).date().isoformat()
     return period_name(window['period'],language)+' · '+start+(' — '+end if window['period']!='daily' else '')+(' · v'+str(revision) if revision>1 else '')

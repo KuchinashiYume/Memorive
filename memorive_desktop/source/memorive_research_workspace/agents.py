@@ -73,7 +73,7 @@ def validate_agent_settings(value):
 def desktop_handoff(workspace, thread_id, question, root):
     """Prepare a folder under root for the chosen desktop agent app; returns its id, path and the
     prompt to paste into the app."""
-    from memorive_language.handoff import desktop_intro, launch_prompt
+    from memorive.platform.language.handoff import desktop_intro, launch_prompt
     from .skill_bridge import transport
     settings = workspace.settings()
     validate_agent_settings(settings)

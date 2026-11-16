@@ -1,6 +1,6 @@
 """Canonical hashing primitives inherited from the accepted RETRIEVAL_WEIGHTING contract."""
 
-from retrieval_weighting.canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash
+from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from retrieval_weighting.contracts import (
     make_hashed_payload,
     validate_hash_descriptor,

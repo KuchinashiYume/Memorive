@@ -9,7 +9,7 @@ RUNTIME_LOG 是契约接口、不收自由字符串: task_type / event_category 
 """
 from __future__ import annotations
 
-from .logger import log
+from memorive.platform.logs.logger import log
 
 # 记账任务类型:硬枚举(承第 0 步契约①)。analysis=RESEARCH_ANALYSIS 分析, verify=EVIDENCE_REVIEW 搬运类校核, verify_judgment=EVIDENCE_REVIEW 判断类 GPT 异源(Verification 第 3 步)。
 # 云 / 本地嵌入不在此区分——都记 'embed',差异落 model_id / quota_account / context.backend。

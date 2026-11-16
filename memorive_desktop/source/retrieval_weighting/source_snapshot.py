@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Mapping, Sequence
 
-from .canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash
+from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from .contracts import (
     make_hashed_payload,
     require_non_empty_refs,

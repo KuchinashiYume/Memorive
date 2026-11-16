@@ -1,4 +1,4 @@
-from .text import choose
+from memorive.platform.language.text import choose
 
 def instructions(language):
     return choose(language,

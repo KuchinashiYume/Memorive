@@ -101,7 +101,7 @@ def render(runtime, run_id, params):
             key=sha(item)
             stamp=item['updated_at']
             paper=item['material_kind']=='PAPER'
-            from memorive_language.text import choose
+            from memorive.platform.language.text import choose
             language=params.get('language_context')
             suffix=choose(language,' · 文献处理完成，成果待人工复核',' · Paper processing complete; human review required',' · 文献処理が完了し、人による確認が必要です') if paper else choose(language,' · 对话精炼完成，成果待人工复核',' · Conversation refinement complete; human review required',' · 会話の精錬が完了し、人による確認が必要です')
             text=item['display_name'] + suffix

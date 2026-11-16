@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, time as clock_time
 import re
 from typing import Any, Mapping
-from memorive_language.text import choose
+from memorive.platform.language.text import choose
 
 
 NOTIFICATION_KINDS = frozenset({"COMPLETE", "ERROR", "APPROVAL", "WEEKLY","LITERATURE"})

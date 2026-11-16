@@ -5,7 +5,7 @@ The admission log keeps only a `report=<report_id>` link (not the Problem[] list
 resolve_report finds a report from that link.
 Location: `<MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR>/{report_id}.json`, by default the
 evidence_review_reports folder of the ops area, next to the admission log and the runtime log
-(runtime_log/config.py, ops_root).
+(memorive/platform/data_folders.py, ops_root).
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-from runtime_log.config import ops_root
+from memorive.platform.data_folders import ops_root
 
 ENV_EVIDENCE_REVIEW_REPORT_DIR = "MEMORIVE_EVIDENCE_REVIEW_REPORT_DIR"
 

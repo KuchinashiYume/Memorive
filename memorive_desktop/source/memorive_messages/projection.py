@@ -132,7 +132,7 @@ class MessageProjectionEngine:
         locator = event.get("target_locator")
         if severity in {"RED", "YELLOW"} and locator is None:
             raise ProjectionIntegrityError("ACTIONABLE_MESSAGE_LOCATOR_REQUIRED")
-        from memorive_language.messages import content, validate
+        from memorive.platform.language.messages import content, validate
         message_content=validate(event.get("message_content"))
         if message_content is None and not any(event.get(k) for k in ("safe_title","safe_summary","safe_body")):
             message_content=content("system",severity=severity)

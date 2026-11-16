@@ -4,7 +4,7 @@ Waiting inputs and failed requests hold no worker slot. A durable SENDING marker
 is never silently replayed after a lost process or an ambiguous provider result.
 """
 from __future__ import annotations
-from memorive_language.source import context as source_language_context, describe as source_language_evidence
+from memorive.platform.language.source import context as source_language_context, describe as source_language_evidence
 from copy import deepcopy
 import json
 from pathlib import Path

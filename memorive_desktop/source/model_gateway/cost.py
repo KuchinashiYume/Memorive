@@ -12,7 +12,7 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-from runtime_log import log_accounting
+from memorive.platform.logs import log_accounting
 
 from .accounting import AccountingEnvelope, AccountingKernel, PriceCatalog, PriceQuery, UsageObservation
 from .accounting.contracts import legacy_float

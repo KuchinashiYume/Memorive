@@ -208,7 +208,7 @@ def prompt(segment,*,data_report=None,source_sha256,max_chars=None,language_cont
              'data_calculations': {'report_id':data_report.get('report_id'),'checks':data_report.get('checks',[])[:24],
                  'omitted_checks':max(0,len(data_report.get('checks',[]))-24)} if data_report else None}
     if language_context is not None:
-        from memorive_language import validate
+        from memorive.platform.language import validate
         payload['language_context']=validate(language_context)
         header+='Follow language_context.instruction for generated prose.\n'
     def serialized():return header+'\nLITERATURE_INPUT_JSON\n'+json.dumps(payload,ensure_ascii=False,separators=(',',':'))

@@ -31,7 +31,7 @@ from evidence_extraction.card import (
 from knowledge_admission import ACTIVE, DecisionError, Trigger, transition
 from model_gateway import call as gateway_call
 from model_gateway.errors import GatewayError
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 
 from . import report as _report
 from . import transcription as _tx

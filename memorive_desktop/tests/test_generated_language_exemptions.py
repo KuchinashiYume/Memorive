@@ -15,7 +15,7 @@ import pytest
 import yaml
 
 from evidence_extraction.card import DANGER_UNKNOWN_FIELD, DANGER_UNKNOWN_KD
-from memorive_source_language import SourceLanguageDriftError
+from memorive.platform.language.source_preservation import SourceLanguageDriftError
 from memorive_workflow.executor import (_validate_artifact_language, _validate_context_pack_language,
                                         _validate_judgment_language)
 from retrieval.structured_context import _FACET_SPECS

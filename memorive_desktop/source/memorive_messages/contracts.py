@@ -202,7 +202,7 @@ class MessageRecord:
     message_content: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
-        from memorive_language.messages import validate
+        from memorive.platform.language.messages import validate
         validate(self.message_content)
         require_identifier(self.message_id, "id")
         if not isinstance(self.dedupe_key, str) or not _SHA256.fullmatch(self.dedupe_key):

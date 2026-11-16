@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from runtime_log.config import ops_root
+from memorive.platform.data_folders import ops_root
 
 ENV_DEBT_DIR = "MEMORIVE_EVIDENCE_REVIEW_JUDGMENT_DEBT_DIR"
 DEBT_FILENAME = "evidence_review_judgment_cross_source_pending.jsonl"

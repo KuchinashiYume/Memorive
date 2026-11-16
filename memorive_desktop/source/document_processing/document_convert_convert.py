@@ -18,7 +18,7 @@ import shutil
 import unicodedata
 from pathlib import Path
 
-from runtime_log import log, log_error
+from memorive.platform.logs import log, log_error
 
 from .config import (CORRUPT_PAGE_FRACTION_FAIL_RATIO, OCR_VIA_MODEL_GATEWAY_READY,
                      PDF_SANDBOX_LIGHT, SCAN_SUSPECT_MIN_CHARS_PER_PAGE,

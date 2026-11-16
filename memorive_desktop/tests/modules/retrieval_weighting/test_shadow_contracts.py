@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import unittest
 
-from retrieval_weighting.canonical import sha256_bytes
+from memorive.platform.jcs import sha256_bytes
 from retrieval_weighting.contracts import make_hashed_payload, typed_payload_hash
 from retrieval_weighting.derived_penalty import UNKNOWN_PROVENANCE_AUTHORITY_BLOCKED, apply_authority_penalty, build_derived_penalty_record, validate_derived_penalty_against_policy, validate_derived_penalty_record
 from retrieval_weighting.errors import ContractViolation

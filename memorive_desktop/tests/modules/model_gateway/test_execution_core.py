@@ -1130,7 +1130,7 @@ class StaticBoundaryTest(unittest.TestCase):
             for path in sorted((REPO_ROOT / "model_gateway" / "execution_core").glob("*.py"))
         )
         self.assertNotIn("run_ledger", source)
-        self.assertNotIn("runtime_log", source)
+        self.assertNotIn("platform.logs", source)
         self.assertNotIn("requests.", source)
         self.assertNotIn("urllib", source)
 

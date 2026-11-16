@@ -11,7 +11,7 @@ import re
 from dataclasses import replace
 from typing import Any, Callable, Iterable
 
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 
 from .context_pack import build_context_pack
 from .ownership import (

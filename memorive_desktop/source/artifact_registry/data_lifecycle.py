@@ -15,7 +15,7 @@ from pathlib import Path, PurePosixPath
 import shutil
 from typing import Iterable, Mapping
 
-from runtime_log.product_paths import DirectoryRole
+from memorive.platform.folders.roles import DirectoryRole
 
 
 SYNTHETIC_MARKER = ".memorive_directory_roles_synthetic_root.json"

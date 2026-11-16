@@ -900,7 +900,7 @@ class CodexStaticBoundaryTest(unittest.TestCase):
         self.assertNotIn("subprocess.Popen", source)
         self.assertNotIn("git commit", source.casefold())
         self.assertNotIn("git push", source.casefold())
-        self.assertNotIn("runtime_log", source)
+        self.assertNotIn("platform.logs", source)
         self.assertNotIn("ChannelLedgerStore", source)
         self.assertNotIn("automatic_retry", source)
 

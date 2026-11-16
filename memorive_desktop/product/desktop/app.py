@@ -6413,7 +6413,7 @@ def main() -> int:
     if console_launch is None and not args.desktop_test_mode:
         # A settings file from a newer version stops the service before it is ready.
         # Say so in the app's own dialog instead of ending without a word.
-        from memorive_folder_management import ProfileFolderManager
+        from memorive.platform.folders import ProfileFolderManager
         from memorive_settings.store import file_from_newer_version
         settings_file = ProfileFolderManager(state_dir / "profile").path_for("SETTINGS") / "settings.json"
         if file_from_newer_version(settings_file):

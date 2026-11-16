@@ -1,5 +1,5 @@
 """Deterministic E1 explanations; claim/source text and verdict identifiers stay literal."""
-from .text import choose
+from memorive.platform.language.text import choose
 
 FACETS={
  'conditions':('研究对象与条件','Objects and conditions','対象と条件'),

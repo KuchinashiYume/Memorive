@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
-from memorive_language.text import choose
+from memorive.platform.language.text import choose
 
 from .contracts import MessageRecord, canonical_sha256
 from .navigation import MessageNavigator

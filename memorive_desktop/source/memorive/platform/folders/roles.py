@@ -1,4 +1,4 @@
-"""Product-neutral directory-role contracts for DIRECTORY-ROLES.
+"""The roles of product folders (program, config, user data, cache, log ...) and their rules.
 
 The current four development roots are custody locations, not installer
 defaults.  This module therefore has no built-in Windows product path.  A

@@ -55,7 +55,7 @@ INDEX_MODULES = (
 )
 CONTRACT_MODULES = (
     "retrieval_weighting.contracts",
-    "retrieval_weighting.canonical",
+    "memorive.platform.jcs",
     "retrieval_weighting.field_registry",
 )
 

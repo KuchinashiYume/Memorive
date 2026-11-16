@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .config import get_log_path
+from memorive.platform.logs.config import get_log_path
 
 
 def extract_module_logs(module: str, *, log_path: Path | str | None = None,

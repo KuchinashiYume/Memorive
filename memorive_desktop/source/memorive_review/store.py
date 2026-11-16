@@ -130,7 +130,7 @@ class ReviewStore:
         root.mkdir(parents=True,exist_ok=True)
         state=self.get(job_id)
         if state.get('source_name'):
-            from memorive_folder_management.policy import document_folder
+            from memorive.platform.folders.policy import document_folder
             root=document_folder(root,paper_id='DOC_'+state['source_sha256'][:16].upper(),title=Path(state['source_name']).stem)
             root.mkdir(parents=True,exist_ok=True)
         prefix='core-data-review' if kind=='DATA' else 'core-logic-review'
@@ -218,7 +218,7 @@ class ReviewStore:
 
 def render(report):
     if report.get("language_context"):
-        from memorive_language.source_reports import render as render_source_report
+        from memorive.platform.language.source_reports import render as render_source_report
         return render_source_report(report)
     return render_legacy(report)
 

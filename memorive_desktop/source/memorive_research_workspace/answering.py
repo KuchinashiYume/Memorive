@@ -34,8 +34,8 @@ import copy
 import re
 import time
 
-from memorive_language import freeze as freeze_language
-from memorive_language.text import choose
+from memorive.platform.language import freeze as freeze_language
+from memorive.platform.language.text import choose
 
 from . import answer_coverage, answer_versions
 from .evidence import checking_each_file_once

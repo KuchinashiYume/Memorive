@@ -1,5 +1,5 @@
 """Metadata-based recommendation copy; no new source or model requests."""
-from .text import choose
+from memorive.platform.language.text import choose
 
 JA = {'外部文献':'外部文献','查询目标':'検索の目的','最新文献':'最新文献','高度相关文献':'関連性の高い文献',
       '首次发表日期范围':'初回公開日の範囲','新增题录 / 新版本 / 新方向关联':'新規文献 / 新バージョン / 新しい研究方向との関連',

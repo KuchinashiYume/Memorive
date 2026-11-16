@@ -185,7 +185,7 @@ def migrate(profile: Path, operation: Path) -> dict:
 def migrate_contents(profile: Path) -> dict:
     """Only the isolated migration copy is writable in this function."""
     from memorive_settings.store import SettingsStore
-    from memorive_folder_management import ProfileFolderManager
+    from memorive.platform.folders import ProfileFolderManager
     folders = ProfileFolderManager(profile/'profile')
     settings_root = folders.path_for('SETTINGS')
     migrated = []
@@ -293,7 +293,7 @@ def verify(profile: Path, operation: Path) -> dict:
     # archival/index workers, or generating fresh user reports.
     import memorive_settings.store
     import memorive_research_workspace.store
-    import memorive_folder_management
+    import memorive.platform.folders
     import product_identity
     if inventory(profile) != before:
         raise ValueError('UPDATE_VERIFY_MUTATED_DATA')

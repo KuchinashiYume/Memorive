@@ -6,7 +6,7 @@ run is published to the library and announced by a message. Two background threa
 the schedule of passive discovery and reports, and the work index (indexing.py).
 """
 from pathlib import Path
-from memorive_language.text import choose
+from memorive.platform.language.text import choose
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import copy, re, threading, time, json
@@ -358,7 +358,7 @@ class ResearchRuntime:
             validate_window(period,report_window['start'],report_window['end'],report_cutoff)
         if kind!='report' and regenerate_from is not None:
             raise ValueError('REPORT_REGENERATION_INVALID')
-        from memorive_language import from_settings
+        from memorive.platform.language import from_settings
         language_context=from_settings(self.host.service,explicit_locale=output_language)
         params={'kind':kind,'config':config,'sources':sources,'period':period,'language_context':language_context}
         if output_language is not None:
@@ -641,7 +641,7 @@ class ResearchRuntime:
         if kind=='discovery':
             title='外部文献·'+title
         event={'event_id':'event-'+run_id,'event_type':'REPORT_READY' if kind=='report' else 'USER_INFORMATION','job_id':run_id,'run_id':run_id,'attempt_id':run_id,'node_id':None,'root_cause':'RESEARCH_RESULT','occurred_at':now(),'severity':'BLUE','message_required':True,'safe_title':title,'safe_summary':body[:320],'safe_body':body[:3900],'target_locator':'memorive://artifact/'+run_id+'/result','protected_bulk_read':True,'attachment_refs':[],'status_axes':{'lifecycle_status':'completed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'},'report_period':period}
-        from memorive_language.messages import content
+        from memorive.platform.language.messages import content
         if kind=='discovery':
             request=read(self.run_path(run_id)/'request.json')
             event['message_content']=content('discovery.ready',topic=request['config'].get('topic','')[:512],works=int(result.get('new_work_count',len(result.get('recommendations',[])))),versions=int(result.get('new_version_count',0)),relations=int(result.get('new_relation_count',0)))
@@ -649,7 +649,7 @@ class ResearchRuntime:
             state=read(self.run_path(run_id)/'state.json')
             event['message_content']=content('report.ready',period=period,start=result.get('window_start',''),end=result.get('window_end',''),revision=state.get('report_revision',1))
         elif kind=='ai_briefing':
-            from memorive_language.messages import render
+            from memorive.platform.language.messages import render
             event['message_content']=content('ai.ready',start=result['window']['start'],end=result['window']['end'],partial=result.get('status')=='PARTIAL')
             copy=render(event['message_content'],result.get('language_context'))
             event.update(safe_title=copy['title'],safe_summary=copy['summary'],safe_body=copy['body'])
@@ -669,7 +669,7 @@ class ResearchRuntime:
             'safe_summary':'出错位置：'+place+'。'+problem,'safe_body':'出错位置：'+place+'。'+problem,
             'target_locator':'memorive://job/'+run_id,'protected_bulk_read':True,'attachment_refs':[],
             'status_axes':{'lifecycle_status':'failed','verification_result':'NOT_ASSESSED','acceptance_verdict':'NOT_ASSESSED','capability_status':'AVAILABLE'}}
-        from memorive_language.messages import content
+        from memorive.platform.language.messages import content
         event['message_content']=content('research.failed',kind=state['kind'],title=state['title'][:512],stage=stage or 'UNKNOWN')
         self.host.messages.post_event(event)
 

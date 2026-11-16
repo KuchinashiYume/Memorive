@@ -407,7 +407,7 @@ def prepare_mapped_briefing(digest,language=None):
             'model_may_change_counts_hashes_or_status': False,
             'model_may_make_scientific_judgment': False, 'details_remain_deterministic': True},
     }
-    from memorive_language import validate
+    from memorive.platform.language import validate
     if language is not None:
         contract['language_context']=validate(language)
     prompt=_render_prompt(value['digest_kind'], contract, schema)

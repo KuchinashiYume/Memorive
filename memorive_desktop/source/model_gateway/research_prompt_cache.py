@@ -106,7 +106,7 @@ def research_prompt(rules,context):
         rules=rules.rstrip()+'\n\n<ANSWER_EXPRESSION>\n'+from_snapshot(context['answer_style'])+'\n</ANSWER_EXPRESSION>'
         stable['answer_style']=copy.deepcopy(context['answer_style'])
     if 'language_context' in context:
-        from memorive_language import validate
+        from memorive.platform.language import validate
         stable['language_context']=validate(context['language_context'])
     if '_answer_path' in context:
         stable['answer_path']=copy.deepcopy(context['_answer_path'])

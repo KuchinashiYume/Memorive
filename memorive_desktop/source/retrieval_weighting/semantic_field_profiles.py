@@ -20,7 +20,7 @@ import math
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from .canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash
+from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from .contracts import (
     require_non_empty_string,
     require_sha256,

@@ -132,7 +132,7 @@ class SessionRefinementTaskStore:
             if task.get("control_state") not in {"QUEUED", "RUNNING", *_TERMINAL_STATES}:
                 raise RefinementTaskError("REFINEMENT_TASK_CONTROL_STATE_INVALID")
             if task.get("language_context") is not None:
-                from memorive_language import validate
+                from memorive.platform.language import validate
                 validate(task["language_context"])
             nodes = task.get("nodes")
             if not isinstance(nodes, list) or [row.get("node_id") for row in nodes if isinstance(row, Mapping)] != list(REFINEMENT_NODE_IDS):
@@ -167,7 +167,7 @@ class SessionRefinementTaskStore:
         message_count: int,
         language_context: dict | None = None,
     ) -> dict[str, Any]:
-        from memorive_language import validate
+        from memorive.platform.language import validate
         if language_context is not None:
             language_context=validate(language_context)
         accepted_name = _safe_text(display_name, 160)

@@ -27,7 +27,7 @@ def _policy_path() -> Path:
     explicit = os.environ.get("MEMORIVE_Desktop_FOLDER_POLICY_PATH")
     if explicit:
         return Path(explicit).resolve(strict=True)
-    return (Path(__file__).resolve().parents[2] / POLICY_RELATIVE_PATH).resolve(strict=True)
+    return (Path(__file__).resolve().parents[4] / POLICY_RELATIVE_PATH).resolve(strict=True)
 
 
 def _validate_policy(payload: Any) -> Mapping[str, Any]:

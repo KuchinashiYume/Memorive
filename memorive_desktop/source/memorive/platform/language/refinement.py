@@ -1,4 +1,4 @@
-from .text import choose
+from memorive.platform.language.text import choose
 
 JA={'会话精炼成品 · 待人工复核':'会話の精錬結果 · 人による確認待ち',
     '以下条目保留原始精炼内容；不代表已经作出真实性判断。':'以下の項目は精錬結果を保持したもので、真偽を判定したものではありません。',

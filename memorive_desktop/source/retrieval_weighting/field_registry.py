@@ -6,7 +6,7 @@ import unicodedata
 from copy import deepcopy
 from typing import Any, Mapping
 
-from .canonical import canonical_json_bytes
+from memorive.platform.jcs import canonical_json_bytes
 from .contracts import (
     make_hashed_payload,
     make_value_hash,

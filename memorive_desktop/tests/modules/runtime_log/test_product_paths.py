@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from runtime_log.product_paths import DirectoryRole, DeploymentMode, PathContractViolation, ROLE_POLICIES, build_candidate_layout, deployment_compatibility_matrix, directory_role_contract, uninstall_retention_policy
+from memorive.platform.folders.roles import DirectoryRole, DeploymentMode, PathContractViolation, ROLE_POLICIES, build_candidate_layout, deployment_compatibility_matrix, directory_role_contract, uninstall_retention_policy
 
 
 def _skip_on_non_ascii_temp(tmp_path: Path) -> None:
@@ -43,7 +43,7 @@ def test_unicode_is_supported_but_ascii_sensitive_roles_remain_ascii(tmp_path: P
 
 
 def test_no_builtin_product_drive_or_username_is_selected() -> None:
-    source = (Path(__file__).resolve().parents[3] / "source" / "runtime_log").joinpath("product_paths.py").read_text(encoding="utf-8")
+    source = (Path(__file__).resolve().parents[3] / "source" / "memorive" / "platform" / "folders").joinpath("roles.py").read_text(encoding="utf-8")
     assert "G:\\Memorive" not in source
     assert "LOCALAPPDATA" not in source
     assert "PROGRAMFILES" not in source

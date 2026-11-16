@@ -23,7 +23,7 @@ from pathlib import Path
 from knowledge_admission import (AutoResult, DecisionError, ReviewDecision, Trigger, Verdict,
                               auto_review)
 from model_gateway.errors import GatewayError
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 
 from . import report as _report
 from .mechanical import _read_frontmatter

@@ -26,7 +26,7 @@ from pathlib import Path
 
 import yaml
 from memorive_front_matter import split_front_matter
-from runtime_log import log, log_error
+from memorive.platform.logs import log, log_error
 
 from .config import library_root, now_iso
 from .document_conversion.diagnostics import parse_source_marker

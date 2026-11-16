@@ -15,7 +15,7 @@ import time
 from http.client import IncompleteRead
 from urllib.error import HTTPError, URLError
 
-from runtime_log import log_error
+from memorive.platform.logs import log_error
 
 from .errors import ApiKeyMissing, DependencyError, HumanSlot, SlotDisabled
 

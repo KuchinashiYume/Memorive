@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Any, Mapping, Sequence
 
-from .canonical import canonical_json_bytes, sha256_bytes, typed_payload_hash
+from memorive.platform.jcs import canonical_json_bytes, sha256_bytes, typed_payload_hash
 from .errors import (
     ContractViolation,
 )

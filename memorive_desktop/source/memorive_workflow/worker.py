@@ -16,7 +16,7 @@ import time
 from typing import Any, Callable, Mapping, Protocol
 import uuid
 
-from memorive_folder_management import ProfileFolderManager
+from memorive.platform.folders import ProfileFolderManager
 
 from memorive_app.contracts import canonical_sha256, utc_now
 

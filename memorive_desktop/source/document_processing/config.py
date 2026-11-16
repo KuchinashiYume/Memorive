@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from runtime_log.config import default_runtime_root, ops_root
+from memorive.platform.data_folders import default_runtime_root, ops_root
 
 
 def _resolve(default: Path, *env_names: str) -> Path:
@@ -26,7 +26,7 @@ def _resolve(default: Path, *env_names: str) -> Path:
 
 # The four roots, each overridden by its variable. The desktop service binds all four to its profile
 # (memorive_workflow/executor.py); without that they lie under the runtime root that components use
-# when nothing has bound them (runtime_log/config.py).
+# when nothing has bound them (memorive/platform/data_folders.py).
 VAULT_ROOT = _resolve(default_runtime_root() / "vault", "MEMORIVE_VAULT_ROOT")  # the formal library
 OPS_ROOT = ops_root()  # logs, caches, backups
 SANDBOX_ROOT = _resolve(default_runtime_root() / "sandbox", "MEMORIVE_DOCUMENT_PROCESSING_SANDBOX_ROOT")

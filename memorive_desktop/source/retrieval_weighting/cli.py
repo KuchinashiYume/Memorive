@@ -11,7 +11,7 @@ import os
 from pathlib import Path, PurePath
 from typing import Any, Mapping, Sequence
 
-from .canonical import canonical_json_bytes
+from memorive.platform.jcs import canonical_json_bytes
 from .candidate_index import build_candidate_index
 from .contracts import require_utc_timestamp
 from .errors import ContractViolation, FieldVectorError

@@ -7,12 +7,12 @@ def readable_name(artifact_id, title):
 
 def render(draft, digest):
     # UI title prefixes do not determine the source language.
-    from memorive_language.refinement import label as select_label
+    from memorive.platform.language.refinement import label as select_label
     language=draft.get('language_context')
     if language is None:
         # Reproduce the legacy template for existing drafts without rewriting them.
         language='zh-CN' if re.search(r'[\u3400-\u9fff]', ''.join(item.get('candidate_text','') for item in draft['items'])) else 'en-US'
-    from memorive_language.refinement import enum as render_enum
+    from memorive.platform.language.refinement import enum as render_enum
     enum_label=render_enum if draft.get("language_context") else lambda lang,value:value
     label=lambda cn,en:select_label(language,cn,en)
     title=re.sub(r'^(?:精炼对话|Conversation refinement|会話の精錬)\s*[·・.]\s*','',draft['display_name'])

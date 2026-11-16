@@ -1,6 +1,6 @@
 """Conservative, deterministic source evidence; independent of UI and caches."""
 import re
-from .policy import freeze
+from memorive.platform.language.policy import freeze
 
 def describe(value):
     text=value if isinstance(value,str) else '\n'.join(str(v or '') for v in value)

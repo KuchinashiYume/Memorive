@@ -18,7 +18,7 @@
     key_data 与 局限/展望 的 quote substring 验真留之八,见技术债。留痕 distill_model/distilled_at 见 build_card(Step 1 已落)。
 """
 from __future__ import annotations
-from memorive_source_language import language_display_name, detect_source_language
+from memorive.platform.language.source_preservation import language_display_name, detect_source_language
 from model_gateway.prompt_cache import source_first
 
 import json
@@ -29,7 +29,7 @@ from pathlib import Path
 
 import yaml
 from memorive_front_matter import split_front_matter
-from runtime_log import log, log_error
+from memorive.platform.logs import log, log_error
 from model_gateway import call
 from model_gateway.errors import GatewayError
 from model_gateway.prompts import PromptRegistry
@@ -1214,7 +1214,7 @@ def _validate_key_data(
                                 locator={"block": "key_data", "entry_index": idx, "entry_no": no},
                                 gate=True, soft=False)
         _warn_value_absent(value, vquote, paper_id, f"key_data[{idx}]")   # F1 value-在场观测(warning-only)
-        from memorive_source_language import (detect_source_language,
+        from memorive.platform.language.source_preservation import (detect_source_language,
             validate_generated_language, SourceLanguageDriftError)
         source_text = "\n".join(chunk_texts.values())
         try:
@@ -1317,7 +1317,7 @@ def _extract_aux(chunk_text: str, real_ids: set, paper_id, card_lang: str, owner
             "paper_id": paper_id, "step": "distill/aux解析",
             "error": "aux 响应剥围栏后仍非合法 JSON 对象;落不带 aux 卡"})
         return None
-    from memorive_source_language import validate_generated_language, SourceLanguageDriftError
+    from memorive.platform.language.source_preservation import validate_generated_language, SourceLanguageDriftError
     def validate_language(value):
         validate_generated_language(
             source_text=chunk_text, generated_text=json.dumps(value, ensure_ascii=False),

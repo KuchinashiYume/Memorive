@@ -1,7 +1,7 @@
 """Fixed report templates, localized before dynamic source values are inserted."""
 from contextvars import ContextVar
 from functools import wraps
-from .policy import locale
+from memorive.platform.language.policy import locale
 
 _LANGUAGE=ContextVar('memo_report_language', default='zh-CN')
 

@@ -10,7 +10,7 @@ import stat
 from typing import Any, Iterable, Mapping
 import uuid
 
-from .policy import document_artifact_path, load_folder_management_policy
+from memorive.platform.folders.policy import document_artifact_path, load_folder_management_policy
 
 
 _ARTIFACT_KIND_BY_ID = {

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from memorive_source_language import normalize_source_language
+from memorive.platform.language.source_preservation import normalize_source_language
 
 # 末尾固定免责语(§四:模块强制附、不依赖模型)。
 DISCLAIMER = "以上为建议，判断与撰写请自行完成。"

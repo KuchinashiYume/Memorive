@@ -10,7 +10,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from retrieval_weighting import contracts, field_registry, query_dimensions
-from retrieval_weighting.canonical import typed_payload_hash
+from memorive.platform.jcs import typed_payload_hash
 from tests.characterize.golden import check, outcome, rejected_as
 
 HERE = Path(__file__).parent

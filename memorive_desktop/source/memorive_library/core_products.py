@@ -281,7 +281,7 @@ class CoreProducts:
                         raise RuntimeError("Core_FOLDER_PROJECTION_SUMMARY_INVALID") from error
                     if isinstance(parsed, dict):
                         summary = parsed
-                folder_module = importlib.import_module("memorive_folder_management")
+                folder_module = importlib.import_module("memorive.platform.folders")
                 projection = folder_module.ensure_legacy_core_projection(
                     artifact_root=artifact_root,
                     job_id=job_id,

@@ -394,7 +394,7 @@ class InboxController:
         idempotency_key: str,
         language_context: dict | None = None,
     ) -> dict[str, Any]:
-        from memorive_language import validate
+        from memorive.platform.language import validate
         if language_context is not None:
             language_context=validate(language_context)
         projection_id = require_identifier(

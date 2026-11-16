@@ -16,7 +16,7 @@ import uuid
 
 from memorive_app.durable_store import DurableJobStore
 from memorive_app.facade import ApplicationFacade
-from memorive_folder_management import ProfileFolderManager
+from memorive.platform.folders import ProfileFolderManager
 from memorive.platform.windows_paths import windows_io_path
 from memorive.exams.resources import exam_package
 
@@ -591,7 +591,7 @@ async def run(
 
     async def keep_logs_and_cache_within_settings() -> None:
         """Apply the log retention and the maximum cache chosen in Settings, at start and once a day."""
-        from runtime_log.retention import apply as apply_log_retention
+        from memorive.platform.logs.retention import apply as apply_log_retention
         from .temporary_cache import limit as limit_temporary_cache
 
         while not stop.is_set():

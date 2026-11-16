@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import json
 
-from runtime_log.config import get_log_path
-from runtime_log import extract_module_logs
+from memorive.platform.logs.config import get_log_path
+from memorive.platform.logs import extract_module_logs
 
 RED_LINE_CNY = 200.0
 

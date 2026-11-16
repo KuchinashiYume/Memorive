@@ -9,7 +9,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-from .canonical import canonical_json_bytes
+from memorive.platform.jcs import canonical_json_bytes
 from .errors import ContractViolation, FieldVectorError, IdentityConflict
 from .locator import (
     PathBoundaryError,

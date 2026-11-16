@@ -2,7 +2,7 @@
 import json
 from .common import sha
 from memorive_settings.answer_styles import from_snapshot, effective_override
-from memorive_language.policy import freeze, validate, locale, instruction
+from memorive.platform.language.policy import freeze, validate, locale, instruction
 from .ai_prompt_locales import SYSTEM_EN, SYSTEM_JA, COMMON_EN, COMMON_JA, MODES_EN, MODES_JA, FOOTERS
 
 VERSION='MemoAIBriefing-P08Editorial-v3'

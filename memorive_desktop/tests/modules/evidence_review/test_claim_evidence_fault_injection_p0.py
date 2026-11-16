@@ -266,7 +266,7 @@ class ClaimEvidenceFaultInjectionP0Test(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             os.environ["MEMORIVE_RUNTIME_LOG_LOG_DIR"] = tmp
             try:
-                with patch("runtime_log.logger._default", None):
+                with patch("memorive.platform.logs.logger._default", None):
                     repaired = repair_evidence_occurrence(
                         baseline,
                         self.chunks,

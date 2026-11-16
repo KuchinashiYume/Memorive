@@ -13,7 +13,7 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from .canonical import canonical_json_bytes, sha256_bytes
+from memorive.platform.jcs import canonical_json_bytes, sha256_bytes
 from .errors import ContractViolation, IdentityConflict, SourceSnapshotDriftError
 from .shadow_contracts import validate_retrieval_policy_snapshot
 

@@ -8,7 +8,7 @@ def bind(workspace):
         return
     binding=json.loads(path.read_text(encoding='utf-8'))
     profile=Path(binding['profile_root']).resolve(strict=True)
-    from memorive_folder_management.policy import ProfileFolderManager
+    from memorive.platform.folders.policy import ProfileFolderManager
     folders=ProfileFolderManager(profile)
     if (folders.path_for('WORKSPACE')/'research_workspace').resolve()!=workspace.store.root:
         raise ValueError('MEMO_PROFILE_BINDING_MISMATCH')

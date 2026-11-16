@@ -6,7 +6,7 @@ def current_row(row):
     if row.get('kind') in {'文献发现','外部文献'}:
         row['kind']='外部文献'
         row['mode']='memorive'
-        from memorive_language.text import choose
+        from memorive.platform.language.text import choose
         prefix=choose(row.get('language_context'),'外部文献','External literature','外部文献')+'·'
         if not row['display_name'].startswith(prefix):
             row['display_name']=prefix+row['display_name']

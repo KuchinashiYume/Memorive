@@ -112,7 +112,7 @@ _DATA_VARIABLES = (
     "MEMORIVE_DOCUMENT_PROCESSING_CHROMA_ROOT",
 )
 # The development machine's data folders, the product's defaults before 2.00. The defaults now lie
-# under LOCALAPPDATA (runtime_log/config.py), which the check below requires to be a throw-away folder.
+# under LOCALAPPDATA (memorive/platform/data_folders.py), which the check below requires to be a throw-away folder.
 _REAL_DATA_ROOTS = (r"G:\Memorive", r"G:\Memorive-运维", r"G:\Memorive-沙盒", r"G:\Memorive-ops")
 
 

@@ -699,7 +699,7 @@ class ProductApi:
             source_root = getattr(self, "_source_root", None)
             if source_root is not None:
                 _ensure_source_importable(Path(source_root))
-            folder_module = importlib.import_module("memorive_folder_management")
+            folder_module = importlib.import_module("memorive.platform.folders")
             manager = folder_module.ProfileFolderManager(profile_root)
             self._folder_manager = manager
         return manager.path_for(logical_directory)
@@ -776,7 +776,7 @@ class ProductApi:
         self._sequence = 0  # numbers the UI event receipts of this run
         profile_root = self._state_dir / "profile"
         self._profile_root = profile_root
-        folder_module = importlib.import_module("memorive_folder_management")
+        folder_module = importlib.import_module("memorive.platform.folders")
         self._folder_manager = folder_module.ProfileFolderManager(profile_root)
         self._inbox_root = self._profile_path("INBOX")
         self._inbox_source_root = self._profile_path("INBOX_SOURCE")

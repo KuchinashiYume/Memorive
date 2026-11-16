@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 import string
-from memorive_language.reports import tr, localized, template as localized_template, HEADING_FIELDS
+from memorive.platform.language.reports import tr, localized, template as localized_template, HEADING_FIELDS
 from collections import Counter
 from pathlib import Path
 

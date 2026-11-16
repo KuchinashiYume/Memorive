@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone, date
 import json, re, sqlite3, threading
 from .common import read, write, sealed, sha, now
 from .ai_sources import PublicSources, SOURCES, source_url
-from memorive_language.policy import freeze as freeze_language, from_settings, validate as validate_language
-from memorive_language.text import choose
+from memorive.platform.language.policy import freeze as freeze_language, from_settings, validate as validate_language
+from memorive.platform.language.text import choose
 
 METHODS=frozenset({'ai.state','ai.config_get','ai.config_save','ai.generate','ai.get','ai.cancel','ai.retry','ai.open_source'})
 from .ai_prompt import VERSION as TEMPLATE

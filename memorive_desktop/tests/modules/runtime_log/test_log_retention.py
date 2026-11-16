@@ -1,12 +1,12 @@
 """Log retention ("日志保留" in Settings, preferences.retention_days).
 
-The background service calls runtime_log.retention.apply at start and once a day. These tests
+The background service calls memorive.platform.logs.retention.apply at start and once a day. These tests
 call it directly with a fixed clock: event and reason entries older than the limit go, accounting
 entries and lines without a readable time stay, files of earlier service starts and old window
 start-up logs are deleted, the running service's files are not, and an unusable value changes
 nothing.
 
-Appending and the retention pass share one lock (runtime_log.lock, the file next to the log): an
+Appending and the retention pass share one lock (memorive/platform/logs/lock.py, the file next to the log): an
 entry written by another thread or process while a pass replaces the log waits and is kept, and
 the logger refuses any shrink of the log, whenever it happens.
 """
@@ -23,9 +23,9 @@ from pathlib import Path
 
 import pytest
 
-from runtime_log import retention
-from runtime_log.lock import LOCK_SUFFIX, log_lock
-from runtime_log.logger import AppendOnlyViolation, Logger
+from memorive.platform.logs import retention
+from memorive.platform.logs.lock import LOCK_SUFFIX, log_lock
+from memorive.platform.logs.logger import AppendOnlyViolation, Logger
 
 NOW = datetime(2026, 11, 15, 12, 0, 0, tzinfo=timezone.utc)
 
@@ -324,7 +324,7 @@ CHILD = """
 import sys
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
-from runtime_log.logger import Logger
+from memorive.platform.logs.logger import Logger
 Path(sys.argv[3]).write_text("about to append", encoding="utf-8")
 Logger(Path(sys.argv[2])).log("M", "cost from another process", record_type="accounting", data={"tokens": 5})
 Path(sys.argv[4]).write_text("appended", encoding="utf-8")
@@ -337,7 +337,7 @@ def test_an_append_from_another_process_waits_for_the_pass(tmp_path, monkeypatch
     script = tmp_path / "child.py"
     script.write_text(CHILD, encoding="utf-8")
     started, finished = tmp_path / "started", tmp_path / "finished"
-    source_root = str(Path(retention.__file__).resolve().parents[1])
+    source_root = str(Path(retention.__file__).resolve().parents[3])
     seen = {}
 
     def while_locked():
@@ -356,7 +356,7 @@ def test_an_append_from_another_process_waits_for_the_pass(tmp_path, monkeypatch
 
 def _shrink_before_writing(monkeypatch, log):
     """Something cuts the older half of the entries between the logger's size check and its write."""
-    import runtime_log.logger as logger_module
+    import memorive.platform.logs.logger as logger_module
 
     real_open = open
 

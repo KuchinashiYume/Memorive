@@ -5,9 +5,9 @@ checks never establish semantic support. Review uses the existing model runner,
 receipt validation, task pool and concurrency budget, only on explicit request.
 """
 import copy,re,time
-from memorive_language import freeze, validate as validate_language
-from memorive_language.text import choose
-from memorive_language.evidence import generated, followup
+from memorive.platform.language import freeze, validate as validate_language
+from memorive.platform.language.text import choose
+from memorive.platform.language.evidence import generated, followup
 from .store import digest,uid,now,packed
 from . import answer_coverage as coverage
 from evidence_review.atomic_review import split_free_text
@@ -342,7 +342,7 @@ class AnswerEvidence:
         if option['binding_hash']!=profile_hash:
             raise ValueError('REVIEW_PROFILE_CHANGED')
         thread,_=self._get(thread_id,answer_id)
-        from memorive_language import freeze
+        from memorive.platform.language import freeze
         language_context=freeze(self.ws.language_settings_get())
         payload=self._review_payload(check,claim_ids)
         payload['language_context']=language_context

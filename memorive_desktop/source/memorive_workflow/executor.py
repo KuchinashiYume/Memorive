@@ -38,12 +38,12 @@ def _is_chroma_hnsw_read_failure(error: Exception) -> bool:
 from .segmented_distill import CoreSegmentedDistiller
 from .task_controls import TaskControlStore
 from .scheduling import PIPELINE_LANES
-from memorive_folder_management import (
+from memorive.platform.folders import (
     document_artifact_path,
     document_folder,
     load_folder_management_policy,
 )
-from memorive_source_language import (
+from memorive.platform.language.source_preservation import (
     detect_source_language,
     normalize_source_language,
     validate_generated_language,
@@ -712,7 +712,7 @@ class CorePipelineExecutor:
                         self.review_service.data(context,enabled=context.workflow_config['nodes'][DATA_NODE].get('enabled',True))
                 source_rows, source_chunk_texts = self._load_chunks(folder, paper_id)
                 source_text = "\n".join(source_chunk_texts.values())
-                from memorive_language.source import describe
+                from memorive.platform.language.source import describe
                 source_language_evidence = describe(source_text)
                 source_language = source_language_evidence['language']
                 question = self._question(context, source_language)

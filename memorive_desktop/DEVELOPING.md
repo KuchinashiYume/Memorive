@@ -51,7 +51,7 @@ start" below).
 
 Calls go from the window side towards the business packages, from those to model execution and
 transport (`memorive/models/execution`, `memorive_settings`, `model_gateway`), and from all of them to
-the shared basics (`memorive_folder_management`, `runtime_log`, `memorive_language`, `run_ledger`,
+the shared basics (`memorive/platform`, `run_ledger`,
 `decision_log`). A few basics still reach into business packages; these are the places to untangle
 when that code is restructured:
 
@@ -73,7 +73,7 @@ when that code is restructured:
 | Sessions | `memorive_sessions`, `memorive_session_archive`, `memorive_browser_companion`, `memorive_workflow_bridge`, `knowledge_feedback/conversation_refinement` |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; its docstring lists each file), `model_gateway`, `memorive_local_models` |
 | Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive_review/exam.py` |
-| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates), `memorive_folder_management`, `runtime_log`, `run_ledger`, `memorive_language`, `memorive_source_language.py`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
+| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file), `run_ledger`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
 sessions, models, exams, platform); each row names what is already there first.
@@ -93,8 +93,8 @@ are today.
 | Imported chat sessions and refinement tasks | `memorive_session_archive`, `memorive_current_task/refinement_tasks.py` |
 | Exam plans, results and score history | `memorive/exams` (`score_history.py`, the `workflow_exams/` run folders) |
 | Messages, window state, work log | `memorive_messages`, `memorive_desktop_service/control_store.py`, `memorive_work_log` |
-| Folder layout of a profile | `memorive_folder_management` |
-| Runtime log | `runtime_log` |
+| Folder layout of a profile | `memorive/platform/folders` |
+| Runtime log | `memorive/platform/logs` |
 
 ## Running the tests
 
@@ -118,7 +118,7 @@ lie inside a real data folder.
 The background service binds every data folder to its profile when it starts. A component you call
 on its own, or an example you run, uses `%LOCALAPPDATA%\Memorive\runtime` instead: the log, the
 model cache, review reports and ledgers go to its `ops` folder, documents to `sandbox` and the vector
-store to `vector-store` (`source/runtime_log/config.py`). Each `MEMORIVE_*` variable that
+store to `vector-store` (`source/memorive/platform/data_folders.py`). Each `MEMORIVE_*` variable that
 `run_tests.py` sets moves one of these folders.
 
 After changing files under `source/`, `product/` or `ui/`, update the manifests as BUILDING.md

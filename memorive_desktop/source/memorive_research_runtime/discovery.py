@@ -161,7 +161,7 @@ def run(runtime,run_id,params):
     result=slate.compose_projection(facts,context,plan,history)
     recommendations=[dict(display[x['candidate_id']],**x) for x in result['slate']['selected']]
     from .readable import discovery_markdown
-    from memorive_language.discovery import reason
+    from memorive.platform.language.discovery import reason
     for row in recommendations:
         row['recommendation_reason']=reason(row,params.get('language_context'))
         row['relation_evidence']=dict(row['relation_evidence'],recommendation_reason=row['recommendation_reason'])

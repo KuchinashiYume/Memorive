@@ -76,8 +76,8 @@ class Conversations(ConversationLifecycle):
 
     def export(self,thread_id):
         row=self.workspace.thread_get(thread_id)
-        from memorive_language import freeze
-        from memorive_language.text import choose
+        from memorive.platform.language import freeze
+        from memorive.platform.language.text import choose
         language=freeze(self.workspace.language_settings_get())
         text='# '+row['title']+'\n\n'
         for m in row['messages']:

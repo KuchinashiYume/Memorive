@@ -14,8 +14,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from .config import get_log_path
-from .lock import log_lock
+from memorive.platform.logs.config import get_log_path
+from memorive.platform.logs.lock import log_lock
 
 LEVELS = ("progress", "detail")                    # 进度级 (给人) / 详细级 (给 AI, 出错自动升)
 RECORD_TYPES = ("event", "accounting", "reason")   # event / 记账 / 原因 (后两者见 records.py)
@@ -83,7 +83,7 @@ class Logger:
     def _append(self, line: str) -> None:
         """唯一落盘点。硬编码 append 模式,不提供任何覆盖 / 截断路径 (append-only 核心)。"""
         self.log_path.parent.mkdir(parents=True, exist_ok=True)   # 确保运维目录在
-        # 与日志保留 (runtime_log.retention) 共用同一把跨进程锁: 保留清理替换文件期间不会有写入落空。
+        # 与日志保留 (retention.py) 共用同一把跨进程锁: 保留清理替换文件期间不会有写入落空。
         with log_lock(self.log_path):
             before = self.log_path.stat().st_size if self.log_path.exists() else 0
             with open(self.log_path, "a", encoding="utf-8") as f:     # ← 唯一写路径、硬编码 "a"、无覆盖入口
@@ -111,14 +111,14 @@ def _get_default() -> Logger:
 def log(module: str, event: str, *, level: str = "progress", context: dict | None = None,
         reason: str | None = None, record_type: str = "event", data: dict | None = None,
         is_error: bool = False) -> dict:
-    """RUNTIME_LOG 唯一对外写入口。业务: from runtime_log import log; log("DocumentConvert", "开始处理第3篇")"""
+    """RUNTIME_LOG 唯一对外写入口。业务: from memorive.platform.logs import log; log("DocumentConvert", "开始处理第3篇")"""
     return _get_default().log(module, event, level=level, context=context, reason=reason,
                               record_type=record_type, data=data, is_error=is_error)
 
 
 def log_error(module: str, event: str, *, context: dict | None = None,
               reason: str | None = None) -> dict:
-    """错误事件便捷入口 (自动升 detail, context 必填非空)。业务: from runtime_log import log_error"""
+    """错误事件便捷入口 (自动升 detail, context 必填非空)。业务: from memorive.platform.logs import log_error"""
     return _get_default().log_error(module, event, context=context, reason=reason)
 
 

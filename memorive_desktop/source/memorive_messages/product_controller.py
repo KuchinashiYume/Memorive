@@ -156,7 +156,7 @@ class MessagesProductController:
         return self.service.call("settings.get_state", {})["settings"]["preferences"]["language"]
 
     def _localized(self, record):
-        from memorive_language.messages import project
+        from memorive.platform.language.messages import project
         return project(record, self._language())
 
     @staticmethod
@@ -200,7 +200,7 @@ class MessagesProductController:
         self._sync_core_messages()
         self._migrate_public_failure_copy()
         rows = stable_message_sort(self.store.records()) if mode is None else self.controller.list_messages(mode)
-        from memorive_language.messages import project
+        from memorive.platform.language.messages import project
         language=self._language()
         query=search.casefold().strip()
         projected: list[dict[str, Any]] = []
@@ -267,7 +267,7 @@ class MessagesProductController:
             if node_label == "文献处理流程" and any(needle in marker for needle in needles):
                 node_label = label
                 break
-        from memorive_language.messages import runtime_failure_kind
+        from memorive.platform.language.messages import runtime_failure_kind
         failure_kind=runtime_failure_kind(error_code,failed_node_id)
         if failure_kind=='length':
             problem = "输出不完整"
@@ -485,7 +485,7 @@ class MessagesProductController:
                         f"丢弃 {int(context_pack.get('dropped_evidence_block_count') or 0)} 个证据块。"
                         "可在资料库查看 整理分析材料；如需更多证据，可更换更大上下文模型后从该节点重新执行。"
                     )
-            from memorive_language.messages import runtime_content
+            from memorive.platform.language.messages import runtime_content
             message_content=runtime_content(event,core=core,state=control_state,failed_node_id=failed_node_id,raw_error=raw_error)
             projected = {
                 "message_content": message_content,

@@ -1,6 +1,6 @@
 """Typed system copy. Projection has no writes, model calls or notification effects."""
 from copy import deepcopy
-from .text import choose
+from memorive.platform.language.text import choose
 
 VERSION = 'MemoMessages-v1'
 

@@ -6,7 +6,7 @@ def text(value):
     return str(value or '').replace('<','&lt;').replace('>','&gt;')
 
 def discovery_markdown(topic,recommendations,failures,result=None,language=None):
-    from memorive_language.discovery import label as select_label
+    from memorive.platform.language.discovery import label as select_label
     label=lambda cn,en:select_label(language,cn,en)
     lines=['# '+label('外部文献','External literature')+' · '+text(topic),'']
     if result:

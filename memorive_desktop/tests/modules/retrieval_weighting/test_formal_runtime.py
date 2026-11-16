@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 from retrieval_weighting.candidate_index import build_candidate_index
-from retrieval_weighting.canonical import canonical_json_bytes
+from memorive.platform.jcs import canonical_json_bytes
 from retrieval_weighting.contracts import make_hashed_payload
 from retrieval_weighting.field_registry import get_field_registry
 from retrieval_weighting.field_vectors import build_field_vector_records

@@ -3506,8 +3506,8 @@ class SessionsProductController:
                     "operation_id": "refinement-retry-retire-" + uuid.uuid4().hex,
                 },
             )
-        from memorive_language import from_settings
-        from memorive_language.text import choose
+        from memorive.platform.language import from_settings
+        from memorive.platform.language.text import choose
         language_context=from_settings(self.service)
         display_name = choose(language_context,'精炼对话','Conversation refinement','会話の精錬')+' · '+(_text(row.get('title'),120) or projection_id)
         # An active Inbox item is the duplicate guard.  A fresh key permits a

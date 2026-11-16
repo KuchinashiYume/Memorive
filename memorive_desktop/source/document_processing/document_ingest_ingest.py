@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from runtime_log import log, log_error
+from memorive.platform.logs import log, log_error
 
 from .config import now_iso
 from .errors import DocumentProcessingError

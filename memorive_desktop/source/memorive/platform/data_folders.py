@@ -1,18 +1,16 @@
-"""Where the runtime log is written, and where components keep their data when nothing has told them.
+"""Where components keep their data when nothing has bound their folders to a profile.
 
 The desktop service binds every data folder to its profile when it starts, through the MEMORIVE_*
 variables (memorive_workflow/executor.py, CorePipelineExecutor._bind_environment). A process or
 component that runs without that binding (the window process, a command-line tool, a component
-called on its own) uses default_runtime_root() with the same folder names. The log is operational
-data: it is never embedded or searched.
+called on its own) uses default_runtime_root() with the same folder names. document_processing,
+model_gateway, evidence_review, knowledge_admission and the runtime log take their defaults from here.
 """
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-LOG_FILENAME = "log.txt"
-ENV_LOG_DIR = "MEMORIVE_RUNTIME_LOG_LOG_DIR"
 ENV_OPS_ROOT = "MEMORIVE_OPS_ROOT"
 
 
@@ -30,9 +28,3 @@ def ops_root() -> Path:
     folder: MEMORIVE_OPS_ROOT, or ops under default_runtime_root()."""
     root = os.environ.get(ENV_OPS_ROOT)
     return Path(root) if root else default_runtime_root() / "ops"
-
-
-def get_log_path() -> Path:
-    """The log.txt in use: in MEMORIVE_RUNTIME_LOG_LOG_DIR, or in the ops area's runtime_log folder."""
-    configured = os.environ.get(ENV_LOG_DIR)
-    return (Path(configured) if configured else ops_root() / "runtime_log") / LOG_FILENAME

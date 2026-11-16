@@ -106,7 +106,7 @@ def initialize_language(state: Path, data: Path | None):
         raise ValueError('INSTALLER_DEFAULT_LANGUAGE_INVALID')
     from memorive_settings.store import SettingsStore
     from memorive_settings.contracts import default_settings
-    from memorive_folder_management import ProfileFolderManager
+    from memorive.platform.folders import ProfileFolderManager
     folders = ProfileFolderManager(state/'profile')
     def defaults():
         settings = default_settings(workspace_root=str(folders.path_for('WORKSPACE')),

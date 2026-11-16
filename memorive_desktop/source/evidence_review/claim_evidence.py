@@ -7,7 +7,7 @@ import re
 from copy import deepcopy
 from typing import Any, Iterable
 
-from runtime_log import log_reason
+from memorive.platform.logs import log_reason
 
 from .atomic_review import CORE_FIELDS, split_free_text
 

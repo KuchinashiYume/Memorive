@@ -16,7 +16,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-from .canonical import canonical_json_bytes, typed_payload_hash
+from memorive.platform.jcs import canonical_json_bytes, typed_payload_hash
 from .contracts import (
     validate_embedding_profile,
     validate_index_identity,

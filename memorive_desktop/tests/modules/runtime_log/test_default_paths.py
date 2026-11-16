@@ -1,4 +1,4 @@
-"""Where components keep their data when nothing has bound their folders (runtime_log/config.py).
+"""Where components keep their data when nothing has bound their folders (memorive/platform/data_folders.py).
 
 The desktop service binds every folder through the MEMORIVE_* variables. Without them the defaults
 lie under <LOCALAPPDATA>/Memorive/runtime, with the ops area in its ops folder, and never on a fixed
@@ -13,7 +13,8 @@ import pytest
 from evidence_review import judgment_debt, report
 from knowledge_admission import knowledge_admission_log
 from model_gateway.cache import CacheLayer
-from runtime_log import config
+from memorive.platform import data_folders
+from memorive.platform.logs import config
 
 OPS_FOLDERS = {
     "MEMORIVE_RUNTIME_LOG_LOG_DIR": lambda: config.get_log_path().parent,
@@ -42,14 +43,14 @@ def unbound(monkeypatch, tmp_path):
 
 
 def test_the_runtime_root_lies_under_local_app_data(unbound):
-    assert config.default_runtime_root() == unbound / "local" / "Memorive" / "runtime"
-    assert config.ops_root() == unbound / "local" / "Memorive" / "runtime" / "ops"
+    assert data_folders.default_runtime_root() == unbound / "local" / "Memorive" / "runtime"
+    assert data_folders.ops_root() == unbound / "local" / "Memorive" / "runtime" / "ops"
 
 
 def test_without_local_app_data_the_runtime_root_is_in_the_home_folder(monkeypatch, tmp_path):
     monkeypatch.delenv("LOCALAPPDATA", raising=False)
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    assert config.default_runtime_root() == tmp_path / ".memorive" / "runtime"
+    assert data_folders.default_runtime_root() == tmp_path / ".memorive" / "runtime"
 
 
 def test_unbound_components_use_the_ops_area_of_the_runtime_root(unbound):

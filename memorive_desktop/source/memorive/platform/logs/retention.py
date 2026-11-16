@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
 
-from .lock import log_lock
+from memorive.platform.logs.lock import log_lock
 
 PRUNED_RECORD_TYPES = frozenset({"event", "reason"})
 SERVICE_LAUNCH_FILES = ("service-*.stdout.log", "service-*.stderr.log", "service-*.endpoint.json",

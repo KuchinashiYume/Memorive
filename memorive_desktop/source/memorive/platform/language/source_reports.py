@@ -1,6 +1,6 @@
 """Readable literature review projection. Scientific records remain byte-stable."""
 import json
-from .text import choose
+from memorive.platform.language.text import choose
 
 COPY={
  'Check conversion, labels and the supplied method binding.':('请核对换算、标签和所提供的方法绑定。','Check conversion, labels and the supplied method binding.','換算、ラベル、指定された手法との対応を確認してください。'),

@@ -9,7 +9,7 @@ import math
 import re
 from pathlib import Path
 
-from runtime_log import log_error
+from memorive.platform.logs import log_error
 
 from . import providers
 from . import region_gate
