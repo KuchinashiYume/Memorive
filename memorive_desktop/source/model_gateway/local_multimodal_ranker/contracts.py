@@ -1,7 +1,9 @@
-"""Fail-closed contracts for local multimodal generative listwise ranking.
+"""Requests and result checks for ranking candidates with a local multimodal model that returns the
+candidate ids in order, not scores (retrieval/candidate_retrieval.py uses it through
+LocalMultimodalRankerAdapter).
 
-This capability occupies the logical rerank stage but returns an ordered
-candidate-id exact set.  It never fabricates cross-encoder relevance scores.
+It takes the place of the rerank step but returns an order of candidate ids; it never
+makes up relevance scores.
 """
 from __future__ import annotations
 

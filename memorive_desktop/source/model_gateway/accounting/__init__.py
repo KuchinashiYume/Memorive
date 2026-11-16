@@ -1,7 +1,8 @@
-"""ACCOUNTING-RECOVERY offline accounting kernel candidate.
+"""Cost accounting of model calls: a price catalog (PriceCatalog), the usage a provider reports, and
+the estimate made from them (AccountingKernel). cost.py records each ModelGateway call with it.
 
-Model identity remains owned by the Execution ModelAliasBinding contract.  This
-package consumes an immutable binding reference and never invents aliases.
+The model is named by the caller's alias binding (ModelAliasBinding); this package never
+makes one up.
 """
 
 from .calculator import DecimalCalculator

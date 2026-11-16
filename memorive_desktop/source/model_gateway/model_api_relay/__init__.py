@@ -1,8 +1,8 @@
-"""MODEL-API-RELAY model API endpoint-profile and relay interchangeability seam.
+"""Calling a model through another API endpoint or relay: endpoint profiles, protocol adapters, route
+planning and receipts (SafeRelayClient). Off by default; nothing in the app calls it (see
+DEVELOPING.md).
 
-The package is inactive by default.  It defines a profile control plane,
-protocol adapters, explicit route planning and public-safe evidence projection;
-it does not mutate ``models.yaml`` or activate a production route.
+It does not mutate ``models.yaml`` or activate a production route.
 """
 
 from .contracts import (

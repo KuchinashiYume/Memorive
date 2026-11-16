@@ -1,4 +1,7 @@
-"""Process-local broker for six fail-closed local capability roles."""
+"""LocalCapabilityBroker: the one entry point for local models in six roles (OCR, distillation,
+analysis, verification, embedding, retrieval). A role answers only once it is configured; off by
+default.
+"""
 
 from __future__ import annotations
 

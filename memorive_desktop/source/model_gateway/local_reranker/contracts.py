@@ -1,4 +1,4 @@
-"""Contracts for the RETRIEVAL-CALIBRATION local-only reranker seam.
+"""Requests to a local reranker model and the checks on its result, for retrieval calibration.
 
 The subject request deliberately contains no relevance labels or scorer data.
 All checks are batch-atomic: one missing, duplicate, foreign, or non-finite

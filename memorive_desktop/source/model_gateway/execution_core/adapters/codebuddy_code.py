@@ -1,6 +1,8 @@
-"""Fail-closed, offline-only CodeBuddy Code adapter candidate for DEEPCODE-ADAPTER.
+"""Runs CodeBuddy Code as a command-line model (offline only). Not used for the app's own requests: the
+window runs command-line models through memorive_settings/model_validation.py (see DEVELOPING.md,
+"Code the window does not start").
 
-The Q2 contract binds an immutable launcher/entrypoint, exact ``--model``
+The adapter binds an immutable launcher/entrypoint, exact ``--model``
 argv, a frozen model catalog and a user-confirmed abstract login fact.  It
 never reads credential material, sends a real CLI prompt, activates a route,
 retries, falls back, or writes RUNTIME_LOG.  Generated answer text is never identity

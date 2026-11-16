@@ -1,4 +1,5 @@
-"""Fail-closed errors for the LOCAL-INFERENCE local capability broker."""
+"""The errors of the local capability broker; each turns into a receipt that is safe to show.
+"""
 
 from __future__ import annotations
 

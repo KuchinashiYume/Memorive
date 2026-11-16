@@ -1,7 +1,8 @@
-"""LOCAL-RETRIEVAL provider-neutral local embedding seam.
+"""Local embedding models: LocalEmbeddingSeam runs one behind the execution core's process isolation.
+document_processing/vector_generation.py checks a model's compatibility manifest with it.
 
 Importing this package performs no runtime discovery, process start, or network
-request. The seam composes the accepted DataContracts execution core without changing it.
+request. It uses the execution core (model_gateway/execution_core) as it is.
 """
 
 from .seam import (

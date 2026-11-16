@@ -1,7 +1,8 @@
-"""Fail-closed Codex CLI thin adapter for CODEX-ADAPTER.
+"""Runs the Codex CLI as a command-line model (CodexCliAdapter with CodexCliPolicy) and reads the event
+stream it prints. memorive_settings/model_validation.py uses its parser for the Codex requests the
+app sends.
 
-This module only maps a frozen Codex CLI compatibility key onto the accepted
-Initialization/DataContracts/ServiceContracts seams.  It does not select routes, retry, activate a profile, write
+It does not select routes, retry, activate a profile, write
 the real RUNTIME_LOG ledger, or read credential values for evidence.
 """
 

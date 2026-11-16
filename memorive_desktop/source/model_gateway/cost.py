@@ -1,7 +1,10 @@
-"""Compatibility facade over the ACCOUNTING-RECOVERY Accounting Kernel.
+"""Records the cost of each ModelGateway call (gateway.py) in the runtime log.
 
-The legacy RUNTIME_LOG projection remains available, but all numeric calculation comes
-from the one Decimal kernel.  Missing date/region/alias/cache evidence produces
+CostManager.record maps the gateway's task type to the runtime log's, estimates the cost with the
+accounting kernel (model_gateway/accounting) when a price catalog is configured, and writes one
+accounting record with runtime_log.log_accounting.
+
+Missing date/region/alias/cache evidence produces
 NOT_ASSESSED rather than a guessed zero or guessed actual cost.
 """
 from __future__ import annotations

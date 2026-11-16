@@ -1,4 +1,7 @@
-"""Fail-closed Claude Code thin adapter for CLAUDE-ADAPTER.
+"""Runs Claude Code as a command-line model (ClaudeCodeAdapter with ClaudeCodePolicy) and records which
+executable and --model argument were used. Not used for the app's own requests: the window runs
+command-line models through memorive_settings/model_validation.py (see DEVELOPING.md, "Code the
+window does not start").
 
 The adapter proves what local executable and exact ``--model`` argument were
 used.  It deliberately does *not* treat generated text, or a model label

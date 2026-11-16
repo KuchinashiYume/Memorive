@@ -1,4 +1,6 @@
-"""RETRIEVAL-CALIBRATION local-only reranker qualification seam."""
+"""Local reranker models for retrieval calibration: requests, result checks and the doctor
+(reranker_doctor, used by retrieval/retrieval_calibration/cli.py).
+"""
 
 from .adapter import LocalRerankerAdapter, LocalRerankerOutcome
 from .contracts import (

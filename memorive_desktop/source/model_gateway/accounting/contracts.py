@@ -1,4 +1,6 @@
-"""Typed, deterministic contracts for the ACCOUNTING-RECOVERY accounting kernel."""
+"""The value types of cost accounting and their checks: price query, usage observation, accounting
+envelope and settlement observation, with Decimal amounts.
+"""
 
 from __future__ import annotations
 

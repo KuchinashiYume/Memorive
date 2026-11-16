@@ -1,4 +1,6 @@
-"""Fail-closed Kimi CLI thin adapter for KIMI-ADAPTER.
+"""Runs the Kimi CLI as a command-line model. Not used for the app's own requests: the window runs
+command-line models through memorive_settings/model_validation.py (see DEVELOPING.md, "Code the
+window does not start").
 
 The adapter binds an immutable launcher/entrypoint, exact ``--model`` argv,
 frozen model catalog, access profile and entitlement snapshot.  Generated

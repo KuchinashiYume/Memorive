@@ -1,9 +1,8 @@
-"""LOCAL-RETRIEVAL provider-neutral local Embedding seam.
+"""Runs a local embedding model (LocalEmbeddingSeam) and checks its compatibility manifest.
 
-This module adds only the Runtime compatibility and thin-adapter surface. Process
-isolation, routing, normalization, handoff ordering, and attempt lineage remain
-owned by the accepted DataContracts ExecutionCore. RUNTIME_LOG remains the only ledger writer;
-this module returns the exact binding consumed by ServiceContracts ChannelAttemptBuilder.
+Process isolation, routing, normalization and the order of handoffs stay with the
+execution core (model_gateway/execution_core); the runtime log writes the call record. This module
+returns the binding that the call record's builder (ChannelAttemptBuilder) takes.
 """
 
 from __future__ import annotations

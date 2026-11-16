@@ -4892,8 +4892,8 @@
     },
     {
       "path": "source/model_gateway/accounting/__init__.py",
-      "sha256": "6b55573513b2eccc8df636a56735228a39aab0061109939f312f0cee4bc519f1",
-      "bytes": 1008
+      "sha256": "f7dde43ea1cd3649c84417e39d3f41ef11e704fc837b2cc07391b6793062e1f9",
+      "bytes": 1094
     },
     {
       "path": "source/model_gateway/accounting/adapters/__init__.py",
@@ -4912,8 +4912,8 @@
     },
     {
       "path": "source/model_gateway/accounting/contracts.py",
-      "sha256": "ecaa547dd0ea51f409cea10bd2b1c7bf99fdc3aa76e45c309453bd22b0dcbb30",
-      "bytes": 11999
+      "sha256": "b0857bd7829b593657a668af12d732ff14802ecc0f727367811c05b4136fe2f5",
+      "bytes": 12079
     },
     {
       "path": "source/model_gateway/accounting/kernel.py",
@@ -4962,8 +4962,8 @@
     },
     {
       "path": "source/model_gateway/capabilities.py",
-      "sha256": "33f3707a5d584eba84d360199b877aa0518eb1be6bd2382be22c936f9b1727d9",
-      "bytes": 1799
+      "sha256": "6cab910e1a5ca150cfecab4c4743555090bcb4baaef92dac26f816d73c2e05fb",
+      "bytes": 1977
     },
     {
       "path": "source/model_gateway/card_reviewer.yaml",
@@ -4977,8 +4977,8 @@
     },
     {
       "path": "source/model_gateway/cost.py",
-      "sha256": "3bc6b6c4ade06b6a4a5e36f76c979b8e365e53e35dd1c172686a1f18aec93487",
-      "bytes": 7564
+      "sha256": "195080bd487be01cfb89ddef2095b8dd77a85d553c30cfce63e38d49097ad7f9",
+      "bytes": 7703
     },
     {
       "path": "source/model_gateway/errors.py",
@@ -4997,38 +4997,38 @@
     },
     {
       "path": "source/model_gateway/execution_core/adapters/claude_code.py",
-      "sha256": "b1eae8c86fa025a9df23d127bbd7779aa69905004c8bab0b10825c04a38802b1",
-      "bytes": 35934
+      "sha256": "4ecd743d1086f796a5a846c8eb619d4c498a2dad542ca2d6a55810faf7ce5689",
+      "bytes": 36198
     },
     {
       "path": "source/model_gateway/execution_core/adapters/codebuddy_code.py",
-      "sha256": "94946d786ba0fc4bd935e84442390839fdd0891ea215b572d300a36e72c937e1",
-      "bytes": 42636
+      "sha256": "472976083aafefb386de37b07a3dd07b5dd3c549ad81b5e4aa95ba20b3c2afdc",
+      "bytes": 42787
     },
     {
       "path": "source/model_gateway/execution_core/adapters/codex_cli.py",
-      "sha256": "3224c18fefa74551325382868c6578132e789b81566159f8aafd1d76abeef18d",
-      "bytes": 50480
+      "sha256": "e3426c6f74cfa68b264db4eb29755eb00e6f71c09fc8392ebfa71fd44ed7bfb1",
+      "bytes": 50507
     },
     {
       "path": "source/model_gateway/execution_core/adapters/gemini_cli.py",
-      "sha256": "3b5c7ce469559b852a333347d2de5e3f60717c0968fc7efb5d1b4eb7574074f0",
-      "bytes": 38438
+      "sha256": "fc9c28bdd9a208d34dd0af0f333e2035f6c9ccbe12d2a9aab22917939ec75e1d",
+      "bytes": 38603
     },
     {
       "path": "source/model_gateway/execution_core/adapters/github_copilot_cli.py",
-      "sha256": "58740d472dbfcbc67efe7cdd9766d5dd7a3294a732ff506d1631818caea77185",
-      "bytes": 42296
+      "sha256": "9a38f0c5d37563824834250ce3eeeb6037661d442eab63250234512b73e68b9b",
+      "bytes": 42462
     },
     {
       "path": "source/model_gateway/execution_core/adapters/kimi_code.py",
-      "sha256": "6e0450d5253740f8545fb4e44a1ab30d9b999390b4c932c21f863dd34c936bb6",
-      "bytes": 36346
+      "sha256": "8a4f40c9cf696d174a947c386fb879aa0b607ca3b0ea27e5fbc04ea9c59890c7",
+      "bytes": 36513
     },
     {
       "path": "source/model_gateway/execution_core/adapters/qwen_code.py",
-      "sha256": "263ad0f64f6fe536ddbd254c98eb14aa3fd2e7730c8c801e001977987bde088c",
-      "bytes": 38969
+      "sha256": "dfad2cf674f49f6b190044b46bd48b79d6692071ced9aa334d5ab5d9201fa243",
+      "bytes": 39136
     },
     {
       "path": "source/model_gateway/execution_core/component_binding.py",
@@ -5132,8 +5132,8 @@
     },
     {
       "path": "source/model_gateway/local_capability/broker.py",
-      "sha256": "2b6f00b7b3b9bf2cecdbb9ef371ddaf70494e37d7a18786175599f03fe13c33c",
-      "bytes": 14634
+      "sha256": "432626933607eb1d8d6df83c357fd9edecd750fa1e177d20f09eae76167599a7",
+      "bytes": 14772
     },
     {
       "path": "source/model_gateway/local_capability/contracts.py",
@@ -5152,8 +5152,8 @@
     },
     {
       "path": "source/model_gateway/local_capability/errors.py",
-      "sha256": "ee74468221cf06833b9162024de22d21ac9d3cbd38c38cb877135c7212108843",
-      "bytes": 2111
+      "sha256": "29c3846ba7555b503784cd2986a1f5f02cb963b8a9246e63c668f56625bb5ff3",
+      "bytes": 2136
     },
     {
       "path": "source/model_gateway/local_capability/identity.py",
@@ -5242,8 +5242,8 @@
     },
     {
       "path": "source/model_gateway/local_embedding/__init__.py",
-      "sha256": "0c03dfc28d3e2cc2c627ebf88f85c210b6a3923678da3e7974dca670640bd898",
-      "bytes": 594
+      "sha256": "159047a273876c65afe5e77804be6881e3d4a15366617c73c44d521e745ab8e9",
+      "bytes": 716
     },
     {
       "path": "source/model_gateway/local_embedding/schemas/local_retrieval_local_seam_compatibility_v1.schema.json",
@@ -5252,8 +5252,8 @@
     },
     {
       "path": "source/model_gateway/local_embedding/seam.py",
-      "sha256": "45e34a0307079194fbeaa4eb94f796b0b59fb1ab287fdfce5dd2170dc5b0754a",
-      "bytes": 43638
+      "sha256": "a42d8233087a05ee93084d7353c34e7b0121dc9168aec1049669c68ef8d840d1",
+      "bytes": 43587
     },
     {
       "path": "source/model_gateway/local_embedding/worker.py",
@@ -5272,13 +5272,13 @@
     },
     {
       "path": "source/model_gateway/local_multimodal_ranker/contracts.py",
-      "sha256": "107463a06c23aad3a0e10f4b77412e429ac21f9bc569f986a2e83f9ad6a9862d",
-      "bytes": 14210
+      "sha256": "3ea14d25d2e7d2b7893dc21d341ee9ea8b95564de5a367c8f6f23a736b68d1fc",
+      "bytes": 14316
     },
     {
       "path": "source/model_gateway/local_reranker/__init__.py",
-      "sha256": "3bcf0c52b204fe206a1ef8486ae0d72073a2936169444b4848c5d603cb5fd1ba",
-      "bytes": 493
+      "sha256": "3100c4bbddc669951ce536e853c213c5b4f39f3cdac2fbd78d14ba49919af9fd",
+      "bytes": 589
     },
     {
       "path": "source/model_gateway/local_reranker/adapter.py",
@@ -5287,8 +5287,8 @@
     },
     {
       "path": "source/model_gateway/local_reranker/contracts.py",
-      "sha256": "e40a93aa0ce3e67a98ca9d6b3427b16bd6217de2b4bff979e9811eb70fbe9bd1",
-      "bytes": 19923
+      "sha256": "89049e63717f0e255aa9f8ff44e338980f8df42d3bd2d1658168342b124970a3",
+      "bytes": 19949
     },
     {
       "path": "source/model_gateway/local_reranker/doctor.py",
@@ -5317,8 +5317,8 @@
     },
     {
       "path": "source/model_gateway/model_api_relay/__init__.py",
-      "sha256": "2e79ab426fe1af30429f4ba80380e799d688fd4dce363206ce4b2221c675a63c",
-      "bytes": 1792
+      "sha256": "258756b0b840af88ba1d7b97d86fd718b255d6f69675f0de473e09ac72349f03",
+      "bytes": 1766
     },
     {
       "path": "source/model_gateway/model_api_relay/client.py",
@@ -6027,8 +6027,8 @@
     },
     {
       "path": "source/model_gateway/routing_advisory.py",
-      "sha256": "4fc9fa52d984cc615bf25dc2e1eb5dad0527b844e93227d9274b9c1d0496883e",
-      "bytes": 3693
+      "sha256": "79b40aeec8468911282eceef02b40950271d698ed75aaf6e58ccd55541763806",
+      "bytes": 3911
     },
     {
       "path": "source/model_gateway/vision_qualification/__init__.py",
