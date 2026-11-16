@@ -17,7 +17,7 @@ sys.path.insert(0, str(SOURCE_ROOT))
 
 Quality_PACKAGE = "quality_specialized_test"
 quality_package = ModuleType(Quality_PACKAGE)
-quality_package.__path__ = [str(SOURCE_ROOT / "memorive_model_evaluation")]
+quality_package.__path__ = [str(SOURCE_ROOT / "memorive" / "exams" / "evaluation")]
 quality_package.__package__ = Quality_PACKAGE
 sys.modules[Quality_PACKAGE] = quality_package
 

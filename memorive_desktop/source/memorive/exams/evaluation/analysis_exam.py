@@ -19,8 +19,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from .errors import ModelEvaluationAnalysisExamError
-from .analysis_exam_protocol import score_response
+from memorive.exams.evaluation.errors import ModelEvaluationAnalysisExamError
+from memorive.exams.evaluation.analysis_exam_protocol import score_response
 
 
 ANALYSIS_EXAM_AUDIT_SCHEMA_VERSION = "model_evaluation-analysis-exam-artifact-audit-v1"

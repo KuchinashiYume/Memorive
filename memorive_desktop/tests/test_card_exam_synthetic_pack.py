@@ -13,15 +13,15 @@ from pathlib import Path
 
 import pytest
 
-from memorive_model_evaluation.card_distiller_exam_assets import generate_form
-from memorive_model_evaluation.card_distiller_exam_protocol import (
+from memorive.exams.evaluation.card_distiller_exam_assets import generate_form
+from memorive.exams.evaluation.card_distiller_exam_protocol import (
     artifact_schema,
     output_schema,
     perfect_response,
     score_response,
 )
-from memorive_model_evaluation.errors import ModelEvaluationReferenceExamPackError
-from memorive_model_evaluation.reference_exam_pack import (
+from memorive.exams.evaluation.errors import ModelEvaluationReferenceExamPackError
+from memorive.exams.evaluation.reference_exam_pack import (
     CARD_DISTILLER_REQUIRED_MEMBER_ROLES,
     CARD_DISTILLER_ROLE_VISIBILITY,
     CHECKSUM_NAME,

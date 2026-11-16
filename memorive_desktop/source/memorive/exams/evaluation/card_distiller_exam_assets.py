@@ -15,7 +15,7 @@ from pathlib import Path
 import random
 from typing import Any
 
-from .card_distiller_exam_protocol import (
+from memorive.exams.evaluation.card_distiller_exam_protocol import (
     ARTIFACTS,
     CASES_PER_FORM,
     CORE_FIELDS,

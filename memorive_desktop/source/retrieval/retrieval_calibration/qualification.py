@@ -4,7 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-from memorive_model_evaluation.retrieval_metrics import (
+from memorive.exams.evaluation.retrieval_metrics import (
     build_qualification_manifest,
     score_profiles,
     validate_pack_bindings,

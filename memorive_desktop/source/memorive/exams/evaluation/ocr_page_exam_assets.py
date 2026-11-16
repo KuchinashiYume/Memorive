@@ -11,7 +11,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from .ocr_page_exam import FAMILIES, canonical_bytes, sha256_json, sha256_text
+from memorive.exams.evaluation.ocr_page_exam import FAMILIES, canonical_bytes, sha256_json, sha256_text
 
 
 PACK_SCHEMA_VERSION = "model_evaluation-ocr-page-reference-exam-pack-v1"

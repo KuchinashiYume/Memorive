@@ -15,14 +15,12 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+from memorive.exams.resources import local_assets_root
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-ASSET_ROOT = (
-    Path(__file__).resolve().parent
-    / "assets"
-    / "reranker_text_exam"
-    / "v1"
-)
+
+# The folder that holds memorive_model_evaluation/assets; recorded paths are relative to it.
+REPO_ROOT = local_assets_root().parents[1]
+ASSET_ROOT = local_assets_root() / "reranker_text_exam" / "v1"
 CANONICAL_REFERENCE_PACK = ASSET_ROOT / "reference_pack"
 CANONICAL_LOW_COST_REHEARSAL = ASSET_ROOT / "low_cost_rehearsal"
 
@@ -935,11 +933,6 @@ def run_formal_pro_exam(
     """Run one canonical Pro exam without accepting arbitrary input paths. The results go to
     output_dir, a new folder the operator names."""
 
-    if Path.cwd().resolve() != REPO_ROOT.resolve():
-        raise RerankerTextExamError(
-            "FORMAL_RUN_CWD_MISMATCH:"
-            f"expected={REPO_ROOT.resolve()}:observed={Path.cwd().resolve()}"
-        )
     output = output_dir.resolve()
     if output.exists():
         raise RerankerTextExamError(

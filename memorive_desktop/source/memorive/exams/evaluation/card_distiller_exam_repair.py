@@ -19,7 +19,7 @@ from typing import Any, Iterable, Mapping
 
 from jsonschema import Draft202012Validator
 
-from .card_distiller_exam_protocol import score_response
+from memorive.exams.evaluation.card_distiller_exam_protocol import score_response
 
 
 REPAIR_PACKAGE_SCHEMA_VERSION = (

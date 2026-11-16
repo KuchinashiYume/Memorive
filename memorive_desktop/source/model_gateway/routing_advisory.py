@@ -1,5 +1,5 @@
 """Read-only advice on which model route a call could take (preview_route_advice, using
-memorive_model_evaluation.dynamic_routing_advisory), from a snapshot of candidate routes over a time
+memorive/exams/evaluation/dynamic_routing_advisory.py), from a snapshot of candidate routes over a time
 window (make_routing_input_window_snapshot). It changes no route; nothing in the app calls it yet.
 """
 
@@ -9,7 +9,7 @@ from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
 from retrieval_weighting.contracts import make_hashed_payload, verify_hashed_payload
-from memorive_model_evaluation.dynamic_routing_advisory import advise_routes
+from memorive.exams.evaluation.dynamic_routing_advisory import advise_routes
 
 
 _WINDOW_KEYS = {

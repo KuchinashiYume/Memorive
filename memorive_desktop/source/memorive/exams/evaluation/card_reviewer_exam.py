@@ -15,7 +15,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from .errors import ModelEvaluationCardReviewerExamError
+from memorive.exams.evaluation.errors import ModelEvaluationCardReviewerExamError
 
 
 AUDIT_SCHEMA_VERSION = "model_evaluation-card-reviewer-response-audit-v4"

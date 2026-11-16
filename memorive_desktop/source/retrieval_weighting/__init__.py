@@ -3,7 +3,7 @@
 Used by research Q&A and the research runtime: research_policy.py, research_ranking.py,
 research_rule.py and research_interests.py rank excerpts by the user's weights, rules and interests.
 contracts.py and canonical.py hold hashing helpers that eight other packages import (artifact_registry,
-decision_log, knowledge_admission, knowledge_feedback, memorive_model_evaluation, model_gateway,
+decision_log, knowledge_admission, knowledge_feedback, memorive/exams/evaluation, model_gateway,
 research_reports, run_ledger);
 derived_penalty.py is used by knowledge_feedback.
 

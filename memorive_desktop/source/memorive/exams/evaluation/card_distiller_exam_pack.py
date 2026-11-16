@@ -11,8 +11,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .card_distiller_exam_assets import build_rehearsal_assets
-from .card_distiller_exam_protocol import (
+from memorive.exams.evaluation.card_distiller_exam_assets import build_rehearsal_assets
+from memorive.exams.evaluation.card_distiller_exam_protocol import (
     AGGREGATE_WEIGHTS,
     ARTIFACTS,
     AXIS_WEIGHTS,
@@ -28,7 +28,7 @@ from .card_distiller_exam_protocol import (
     perfect_response,
     score_response,
 )
-from .reference_exam_pack import (
+from memorive.exams.evaluation.reference_exam_pack import (
     DEFAULT_CARD_DISTILLER_REFERENCE_PACK,
     load_card_distiller_reference_exam_pack,
 )

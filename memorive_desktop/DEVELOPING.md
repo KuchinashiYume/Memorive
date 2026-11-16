@@ -38,7 +38,8 @@ start" below).
   `memorive_browser_companion/desktop.py` (`BrowserCompanionDesktop`); `ProductApi` forwards the
   window's calls to it.
 - **Exams**: the settings page → `memorive_settings` (exam jobs and executors) → the exam modules
-  loaded by name (`memorive_model_evaluation`) → the model request → scoring → score history.
+  loaded by name (`memorive/exams/evaluation`, found with the packs by `memorive/exams/resources.py`)
+  → the model request → scoring → score history.
   `WorkflowExams` (`memorive_settings/workflow_exam_runner.py`) plans and runs a node's exam and
   keeps the scores; it holds the model runner and sends the exam's requests through it.
 - **Discovery and reports**: the window (`research.*`, `ai.*`, `home.*`) or a schedule →
@@ -71,7 +72,7 @@ when that code is restructured:
 | Research | `memorive_research_workspace`, `memorive_research_runtime`, `literature_discovery`, `research_recommendations`, `research_reports`, `research_analysis`, `research_opportunities`, `retrieval`, `retrieval_weighting`, `knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive_sessions`, `memorive_session_archive`, `memorive_browser_companion`, `memorive_workflow_bridge`, `knowledge_feedback/conversation_refinement` |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; its docstring lists each file), `model_gateway`, `memorive_local_models` |
-| Exams | `memorive_model_evaluation`, `memorive_analysis_reviewer_exam`, `memorive_review/exam.py`, and in `memorive_settings`: the `*exam*` modules, `quality_new.py`, `workflow_exam_runner.py` |
+| Exams | `memorive/exams` (`evaluation/` scoring and pack code, `resources.py` where the packs are), `memorive_analysis_reviewer_exam`, `memorive_review/exam.py`, and in `memorive_settings`: the `*exam*` modules, `quality_new.py`, `workflow_exam_runner.py` |
 | Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates), `memorive_folder_management`, `runtime_log`, `run_ledger`, `memorive_language`, `memorive_source_language.py`, `decision_log`, `memorive_app` (jobs, credentials, IPC), `memorive_application` (an integration harness run by hand) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
@@ -205,7 +206,7 @@ kept and shipped; this list says how each one is entered.
 
 | Code | How it is entered | Notes |
 | --- | --- | --- |
-| Exam modules, `memorive_model_evaluation/` | The settings page starts an exam (`settings.start_workflow_exam`); `service_main._quality_exam_package()` names this package and the modules of `memorive_settings/workflow_exam/` import its submodules with `importlib.import_module`. | A search for import statements does not find them. |
+| Exam modules, `memorive/exams/evaluation/` | The settings page starts an exam (`settings.start_workflow_exam`); `exam_package()` in `memorive/exams/resources.py` names this package and the folder of the exam packs (`memorive_model_evaluation/assets`, not in the public repository), and the modules of `memorive_settings/workflow_exam/` import its submodules with `importlib.import_module`. | A search for import statements does not find them. |
 | Inherited exam scores: `_validate_workflow_exam_catalog` and `_validate_workflow_exam_catalog_v8` in `memorive_settings/workflow_exam_runner.py` | `WorkflowExams(catalog=...)` in `workflow_exam_runner.py`. The desktop passes `None` (`service_main.py`: new installations have no inherited results), so the reader runs only when a caller supplies a catalog. | Reads score catalogs saved by earlier versions; kept so those stay readable. |
 | Command-line agent adapters in `model_gateway/execution_core/adapters/`: `claude_code.py`, `codebuddy_code.py`, `gemini_cli.py`, `github_copilot_cli.py`, `kimi_code.py`, `qwen_code.py` | Component API: build the adapter with its policy and call it. | The window runs command-line models through the model runner instead: `memorive/models/validation/cli_route.py` builds the command (`_cli_argv`) and `runner.py` runs it. Of the adapters in that folder only `codex_cli.py` is used on that path: its parser reads the event stream a Codex run prints. |
 | Field-vector index tools in `retrieval_weighting/` (`cli.py`, `candidate_index.py`, `migration.py`, `locator.py`, `field_vectors.py`) | `python -m retrieval_weighting --input <request> --output <receipt> --root <run folder> --cutoff <UTC time>`, where the request's `operation` is build, migrate or validate. | Research Q&A uses `research_policy.py`, `research_ranking.py`, `research_rule.py`, and through `research_fields.py` and `query_dimensions.py` the input checks in `shadow_contracts.py`. |

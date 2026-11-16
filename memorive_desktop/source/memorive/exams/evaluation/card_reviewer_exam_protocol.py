@@ -6,7 +6,7 @@ from collections.abc import Callable, Mapping
 from copy import deepcopy
 from typing import Any
 
-from .card_reviewer_exam import (
+from memorive.exams.evaluation.card_reviewer_exam import (
     ReviewerExamError,
     audit_response,
     build_directed_repair_package,

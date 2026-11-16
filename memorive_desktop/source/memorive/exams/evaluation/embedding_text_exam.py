@@ -13,14 +13,12 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+from memorive.exams.resources import local_assets_root
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-ASSET_ROOT = (
-    Path(__file__).resolve().parent
-    / "assets"
-    / "embedding_text_exam"
-    / "v1"
-)
+
+# The folder that holds memorive_model_evaluation/assets; recorded paths are relative to it.
+REPO_ROOT = local_assets_root().parents[1]
+ASSET_ROOT = local_assets_root() / "embedding_text_exam" / "v1"
 CANONICAL_REFERENCE_PACK = ASSET_ROOT / "reference_pack"
 SELECTION_SCALE_PATH = ASSET_ROOT / "selection" / "selection_scale_r0_3.json"
 EXPECTED_PACK_REVISION = "embedding_text_reference_exam_r0.5"
@@ -357,11 +355,6 @@ def run_formal_pro_exam(
 ) -> dict[str, Any]:
     """Run the canonical Pro exam; no arbitrary pack path is accepted."""
 
-    if Path.cwd().resolve() != REPO_ROOT.resolve():
-        raise EmbeddingTextExamError(
-            "FORMAL_RUN_CWD_MISMATCH:"
-            f"expected={REPO_ROOT.resolve()}:observed={Path.cwd().resolve()}"
-        )
     output = output_dir.resolve()
     if output.exists():
         raise EmbeddingTextExamError(

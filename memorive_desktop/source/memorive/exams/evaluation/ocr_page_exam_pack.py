@@ -10,7 +10,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from .ocr_page_exam import (
+from memorive.exams.evaluation.ocr_page_exam import (
     FAMILIES,
     ExamMethodError,
     perfect_response,
@@ -18,7 +18,7 @@ from .ocr_page_exam import (
     sha256_json,
     sha256_text,
 )
-from .ocr_page_exam_assets import (
+from memorive.exams.evaluation.ocr_page_exam_assets import (
     CANONICAL_REPO_RELATIVE_PATH,
     DECLASSIFICATION_AUTHORIZATION_ID,
     GOLD_SCHEMA_VERSION,

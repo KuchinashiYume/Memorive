@@ -16,7 +16,8 @@ import re
 from types import MappingProxyType
 from typing import Any, Mapping
 
-from .errors import ModelEvaluationReferenceExamPackError
+from memorive.exams.evaluation.errors import ModelEvaluationReferenceExamPackError
+from memorive.exams.resources import local_assets_root
 
 
 REFERENCE_PACK_SCHEMA_VERSION = "model_evaluation-reference-exam-pack-manifest-v1"
@@ -24,27 +25,21 @@ REFERENCE_PACK_CLASSIFICATION = "REFERENCE_EXAM_PACK"
 MANIFEST_NAME = "manifest.reference.json"
 CHECKSUM_NAME = "SHA256SUMS.txt"
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+# Defaults for calls that pass no pack root: the local exam packs (memorive/exams/resources.py).
 DEFAULT_ANALYSIS_REFERENCE_PACK = (
-    REPO_ROOT
-    / "model_evaluation_quality_sentinel"
-    / "assets"
+    local_assets_root()
     / "analysis_exam"
     / "v1"
     / "reference_pack"
 )
 DEFAULT_CARD_REVIEWER_REFERENCE_PACK = (
-    REPO_ROOT
-    / "model_evaluation_quality_sentinel"
-    / "assets"
+    local_assets_root()
     / "card_reviewer_exam"
     / "v2"
     / "reference_pack"
 )
 DEFAULT_CARD_DISTILLER_REFERENCE_PACK = (
-    REPO_ROOT
-    / "model_evaluation_quality_sentinel"
-    / "assets"
+    local_assets_root()
     / "card_distiller_exam"
     / "v1"
     / "reference_pack"

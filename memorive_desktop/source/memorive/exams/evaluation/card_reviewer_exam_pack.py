@@ -12,8 +12,8 @@ from typing import Any
 from jsonschema import Draft202012Validator
 
 
-from .card_reviewer_exam import audit_response, score_form
-from .reference_exam_pack import (
+from memorive.exams.evaluation.card_reviewer_exam import audit_response, score_form
+from memorive.exams.evaluation.reference_exam_pack import (
     DEFAULT_CARD_REVIEWER_REFERENCE_PACK,
     ReferenceExamPack,
     load_card_reviewer_reference_exam_pack,

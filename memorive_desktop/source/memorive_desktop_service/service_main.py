@@ -5,14 +5,12 @@ import asyncio
 import ctypes
 import hashlib
 import hmac
-from importlib.util import find_spec
 import json
 import logging
 import os
 from pathlib import Path
 import re
 import signal
-import sys
 from typing import Mapping
 import uuid
 
@@ -20,6 +18,7 @@ from memorive_app.durable_store import DurableJobStore
 from memorive_app.facade import ApplicationFacade
 from memorive_folder_management import ProfileFolderManager
 from memorive.platform.windows_paths import windows_io_path
+from memorive.exams.resources import exam_package
 
 from .adapters import RealFacadeAdapter
 from .composite_adapter import CompositeServiceAdapter
@@ -98,36 +97,6 @@ def _stop_requested(endpoint_file, secret, parent_pid, pid):
         return False
 
 
-def _quality_exam_package() -> tuple[str, Path] | None:
-    packaged_candidates: list[Path] = []
-    frozen_root = getattr(sys, "_MEIPASS", None)
-    if isinstance(frozen_root, str) and frozen_root:
-        packaged_candidates.append(
-            Path(frozen_root).resolve() / "memorive_model_evaluation"
-        )
-    packaged_candidates.append(
-        Path(__file__).resolve().parents[1] / "memorive_model_evaluation"
-    )
-    seen: set[Path] = set()
-    for packaged in packaged_candidates:
-        if packaged in seen:
-            continue
-        seen.add(packaged)
-        if (
-            (packaged / "__init__.py").is_file()
-            and (packaged / "card_reviewer_exam.py").is_file()
-        ):
-            return "memorive_model_evaluation", packaged
-    formal = find_spec("model_evaluation_quality_sentinel")
-    locations = tuple(formal.submodule_search_locations or ()) if formal else ()
-    if len(locations) != 1:
-        return None
-    root = Path(locations[0]).resolve()
-    if not (root / "card_reviewer_exam.py").is_file():
-        return None
-    return "model_evaluation_quality_sentinel", root
-
-
 def _atomic_write(path: Path, value: dict[str, object]) -> None:
     target = windows_io_path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -173,19 +142,119 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
     workflow_exam_catalog = None  # New installations have no inherited exam results.
     exam_scratch = folders.path_for("MODEL_VALIDATION")
     exam_executors: tuple[object, ...] = ()
-    quality_binding = _quality_exam_package()
-    if quality_binding is not None:
-        quality_package, quality_root = quality_binding
-        quality_assets = quality_root / "assets"
-        distiller_executor = QualityCardDistillerExamExecutor(
+    # The scoring code and the folder of the exam packs (memorive/exams/resources.py).
+    quality_package, quality_assets = exam_package()
+    distiller_executor = QualityCardDistillerExamExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "card_distiller_exam"
+            / "v1"
+            / "reference_pack"
+        ),
+        pricing_profile_path=(
+            quality_assets
+            / "card_distiller_exam"
+            / "v1"
+            / "deepseek_flash_to_pro_profile.public.json"
+        ),
+    )
+    reviewer_executor = QualityCardReviewerExamSuccessorExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "card_reviewer_exam"
+            / "v2"
+            / "reference_pack"
+        ),
+        pricing_profile_path=(
+            quality_assets
+            / "card_distiller_exam"
+            / "v1"
+            / "deepseek_flash_to_pro_profile.public.json"
+        ),
+    )
+    direct_distiller_executor = QualityNewCardDistillerLanguageBankExamExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "card_distiller_exam"
+            / "v2"
+            / "reference_pack"
+        ),
+        pricing_profile_path=(
+            quality_assets
+            / "card_distiller_exam"
+            / "v1"
+            / "deepseek_flash_to_pro_profile.public.json"
+        ),
+    )
+    analysis_executor = QualityAnalysisExamExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "analysis_exam"
+            / "v1"
+            / "reference_pack"
+        ),
+        pricing_profile_path=(
+            quality_assets
+            / "card_distiller_exam"
+            / "v1"
+            / "deepseek_flash_to_pro_profile.public.json"
+        ),
+    )
+    embedding_executor = QualityNewEmbeddingExamExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "embedding_text_exam"
+            / "v3"
+            / "reference_pack"
+        ),
+    )
+    ocr_executor = QualityOcrPageExamExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "ocr_page_exam"
+            / "v3"
+            / "reference_pack"
+        ),
+    )
+    reranker_executor = QualityNewRerankerTextLanguageBankExamExecutor(
+        scratch_root=exam_scratch,
+        quality_package=quality_package,
+        reference_pack_root=(
+            quality_assets
+            / "reranker_text_exam"
+            / "v2"
+            / "reference_pack"
+        ),
+    )
+    analysis_reviewer_pack_root_text = os.environ.get(
+        "MEMORIVE_ANALYSIS_REVIEWER_PACK_ROOT"
+    )
+    analysis_reviewer_pack_root = (
+        Path(analysis_reviewer_pack_root_text).resolve()
+        if analysis_reviewer_pack_root_text
+        else (
+            profile_root.parent
+            / "formal_local_reference_packs"
+            / "analysis_reviewer_a4"
+        ).resolve()
+    )
+    analysis_reviewer_executor = (
+        QualityAnalysisReviewerExamSuccessorExecutor(
             scratch_root=exam_scratch,
             quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "card_distiller_exam"
-                / "v1"
-                / "reference_pack"
-            ),
+            reference_pack_root=analysis_reviewer_pack_root,
             pricing_profile_path=(
                 quality_assets
                 / "card_distiller_exam"
@@ -193,119 +262,17 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
                 / "deepseek_flash_to_pro_profile.public.json"
             ),
         )
-        reviewer_executor = QualityCardReviewerExamSuccessorExecutor(
-            scratch_root=exam_scratch,
-            quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "card_reviewer_exam"
-                / "v2"
-                / "reference_pack"
-            ),
-            pricing_profile_path=(
-                quality_assets
-                / "card_distiller_exam"
-                / "v1"
-                / "deepseek_flash_to_pro_profile.public.json"
-            ),
-        )
-        direct_distiller_executor = QualityNewCardDistillerLanguageBankExamExecutor(
-            scratch_root=exam_scratch,
-            quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "card_distiller_exam"
-                / "v2"
-                / "reference_pack"
-            ),
-            pricing_profile_path=(
-                quality_assets
-                / "card_distiller_exam"
-                / "v1"
-                / "deepseek_flash_to_pro_profile.public.json"
-            ),
-        )
-        analysis_executor = QualityAnalysisExamExecutor(
-            scratch_root=exam_scratch,
-            quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "analysis_exam"
-                / "v1"
-                / "reference_pack"
-            ),
-            pricing_profile_path=(
-                quality_assets
-                / "card_distiller_exam"
-                / "v1"
-                / "deepseek_flash_to_pro_profile.public.json"
-            ),
-        )
-        embedding_executor = QualityNewEmbeddingExamExecutor(
-            scratch_root=exam_scratch,
-            quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "embedding_text_exam"
-                / "v3"
-                / "reference_pack"
-            ),
-        )
-        ocr_executor = QualityOcrPageExamExecutor(
-            scratch_root=exam_scratch,
-            quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "ocr_page_exam"
-                / "v3"
-                / "reference_pack"
-            ),
-        )
-        reranker_executor = QualityNewRerankerTextLanguageBankExamExecutor(
-            scratch_root=exam_scratch,
-            quality_package=quality_package,
-            reference_pack_root=(
-                quality_assets
-                / "reranker_text_exam"
-                / "v2"
-                / "reference_pack"
-            ),
-        )
-        analysis_reviewer_pack_root_text = os.environ.get(
-            "MEMORIVE_ANALYSIS_REVIEWER_PACK_ROOT"
-        )
-        analysis_reviewer_pack_root = (
-            Path(analysis_reviewer_pack_root_text).resolve()
-            if analysis_reviewer_pack_root_text
-            else (
-                profile_root.parent
-                / "formal_local_reference_packs"
-                / "analysis_reviewer_a4"
-            ).resolve()
-        )
-        analysis_reviewer_executor = (
-            QualityAnalysisReviewerExamSuccessorExecutor(
-                scratch_root=exam_scratch,
-                quality_package=quality_package,
-                reference_pack_root=analysis_reviewer_pack_root,
-                pricing_profile_path=(
-                    quality_assets
-                    / "card_distiller_exam"
-                    / "v1"
-                    / "deepseek_flash_to_pro_profile.public.json"
-                ),
-            )
-        )
-        exam_executors = (
-            direct_distiller_executor,
-            distiller_executor,
-            reviewer_executor,
-            analysis_executor,
-            analysis_reviewer_executor,
-            embedding_executor,
-            ocr_executor,
-            reranker_executor,
-        )
+    )
+    exam_executors = (
+        direct_distiller_executor,
+        distiller_executor,
+        reviewer_executor,
+        analysis_executor,
+        analysis_reviewer_executor,
+        embedding_executor,
+        ocr_executor,
+        reranker_executor,
+    )
 
     def resolve_local_profile(profile_ref: str) -> Mapping[str, object] | None:
         try:

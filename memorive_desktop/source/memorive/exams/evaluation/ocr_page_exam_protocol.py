@@ -8,8 +8,8 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from .ocr_page_exam import ExamMethodError, sha256_json, sha256_text
-from .ocr_page_exam_assets import PROMPT_SHA256
+from memorive.exams.evaluation.ocr_page_exam import ExamMethodError, sha256_json, sha256_text
+from memorive.exams.evaluation.ocr_page_exam_assets import PROMPT_SHA256
 
 
 class ExternalCallNotAuthorized(RuntimeError):

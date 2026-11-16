@@ -3261,6 +3261,121 @@
       "bytes": 2277
     },
     {
+      "path": "source/memorive/exams/__init__.py",
+      "sha256": "2348a261ec93f0908c4500c32a79a67cc25faa3c2ef2b966c71c0932b5f44a6a",
+      "bytes": 306
+    },
+    {
+      "path": "source/memorive/exams/evaluation/__init__.py",
+      "sha256": "c091a565f6d59360043d44d9ba1d1660d60df36b3a27b06666f1cb7e176480c6",
+      "bytes": 701
+    },
+    {
+      "path": "source/memorive/exams/evaluation/analysis_exam.py",
+      "sha256": "69ddc355e61c37fdd139e582b3278b989c3cff0e0b177946c359fc899891fe91",
+      "bytes": 90006
+    },
+    {
+      "path": "source/memorive/exams/evaluation/analysis_exam_protocol.py",
+      "sha256": "1c4ebbcd9ec56b28bd8955b811f71e672b15c0c6745d79b1115d28323f60086c",
+      "bytes": 21798
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_distiller_exam_assets.py",
+      "sha256": "087f863303e9e79f5b1369d643e783495f97d066581b982fc69fd04789c9fe85",
+      "bytes": 37115
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_distiller_exam_pack.py",
+      "sha256": "dcc48bcd3ec2486e7bdcd0b94ca8b9b38dad9f1eb95ec3bbf54591ae1500907d",
+      "bytes": 21691
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_distiller_exam_protocol.py",
+      "sha256": "a5180e488953fda4c0fc3d8b8ae62962604438eb8481019a7a86fc1bc008d9b9",
+      "bytes": 44707
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_distiller_exam_repair.py",
+      "sha256": "ef50812c11b114bdd55a8b84487f20460f9819e425da0b0494b81268b6e338dc",
+      "bytes": 39426
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_reviewer_exam.py",
+      "sha256": "48f0b1d14fa7005fc1b7e5e545b02305279e60e85bfaec5a275479f198430af5",
+      "bytes": 77039
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_reviewer_exam_assets.py",
+      "sha256": "420127a80a5ac0738049313385bdbfa25088973dceacdf3a7a77faeac192fd32",
+      "bytes": 55837
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_reviewer_exam_pack.py",
+      "sha256": "ecad62923f39c6bf18892d423ed74c7697bff64cb614dda15ed0ce166cc96461",
+      "bytes": 17985
+    },
+    {
+      "path": "source/memorive/exams/evaluation/card_reviewer_exam_protocol.py",
+      "sha256": "ef5de6498ed37124f13ff6b011144f48ec2d6ea1abcc4d24dc6c7b970c1b84e5",
+      "bytes": 8196
+    },
+    {
+      "path": "source/memorive/exams/evaluation/dynamic_routing_advisory.py",
+      "sha256": "483084e7e00135929bcefff8d2ce3813f63c7298d3edef3abab72a2e2fc17248",
+      "bytes": 14968
+    },
+    {
+      "path": "source/memorive/exams/evaluation/embedding_text_exam.py",
+      "sha256": "45b2797a76005634ad264e8370f45fcbe9667768b157677bd51b036bb7bbfb84",
+      "bytes": 17703
+    },
+    {
+      "path": "source/memorive/exams/evaluation/errors.py",
+      "sha256": "d4480bfc4a0fe13e5d69ff0f1ed31894a411514cdbab63b1584ba0e0990fdc69",
+      "bytes": 1159
+    },
+    {
+      "path": "source/memorive/exams/evaluation/ocr_page_exam.py",
+      "sha256": "c59cc19ee5240e71f78c2b5f952b5affb97fe2a0f2371bb17d917df0ee5e3c75",
+      "bytes": 37388
+    },
+    {
+      "path": "source/memorive/exams/evaluation/ocr_page_exam_assets.py",
+      "sha256": "24bc84f4781df92e1cfd07bfafaac0f6aa25b91c94fab8cae6d19a5013968d3f",
+      "bytes": 50365
+    },
+    {
+      "path": "source/memorive/exams/evaluation/ocr_page_exam_pack.py",
+      "sha256": "466dba32de835d9f09338489575c775cb36feadcb6ae4e19baca4245741523be",
+      "bytes": 24560
+    },
+    {
+      "path": "source/memorive/exams/evaluation/ocr_page_exam_protocol.py",
+      "sha256": "d03d3696fd91e2f0873ed15895c7c991ece6d25cf56e438995b096b9a478c280",
+      "bytes": 5360
+    },
+    {
+      "path": "source/memorive/exams/evaluation/reference_exam_pack.py",
+      "sha256": "b9e206dc4a977d13cbf41e896e8d407ac502ebfd6d69fb19cc98e0c96ecaecf5",
+      "bytes": 19374
+    },
+    {
+      "path": "source/memorive/exams/evaluation/reranker_text_exam.py",
+      "sha256": "f000d1ab7e148567c78666697b8b85532d54404478a8aea34d401aa76bf6cbfe",
+      "bytes": 45641
+    },
+    {
+      "path": "source/memorive/exams/evaluation/retrieval_metrics.py",
+      "sha256": "79cb15454b166ee9c8d83df942f10e0b1204029b4ffa282260228b773cbb8b75",
+      "bytes": 13414
+    },
+    {
+      "path": "source/memorive/exams/resources.py",
+      "sha256": "edc7c9e0c87e78ad7795a4db8d0a92574202c8e59be533878163f4f4dccf946e",
+      "bytes": 2260
+    },
+    {
       "path": "source/memorive/models/__init__.py",
       "sha256": "2c25b897e160053dc1449254f5c3cd244923c2c8b4728af2e16f9df6d0edcb36",
       "bytes": 1788
@@ -3887,8 +4002,8 @@
     },
     {
       "path": "source/memorive_desktop_service/service_main.py",
-      "sha256": "94345c7d3db91258d788d3fb88f5bd530b1bec4ca1d5001e13033d0052ecfdf6",
-      "bytes": 28643
+      "sha256": "0f261aa7cd7455c061f920b4d4f96b6074698a2a6a102015f03fee902f89dc1c",
+      "bytes": 26957
     },
     {
       "path": "source/memorive_desktop_service/single_instance.py",
@@ -4104,111 +4219,6 @@
       "path": "source/memorive_messages/store.py",
       "sha256": "8fd89cce14b3282ac10fa019e9e22d2dbc6fb7790ad69fbb1b25af11ec87c1a2",
       "bytes": 10614
-    },
-    {
-      "path": "source/memorive_model_evaluation/__init__.py",
-      "sha256": "b18e1544bf52b6b36872a800cd3a692834c410db5bbe68f226ec7661ba935421",
-      "bytes": 572
-    },
-    {
-      "path": "source/memorive_model_evaluation/analysis_exam.py",
-      "sha256": "3a2d74eb6738aa857e6376b499fdd55bcb1ab9b7cd1d1f80bb00d37fc65437e1",
-      "bytes": 89956
-    },
-    {
-      "path": "source/memorive_model_evaluation/analysis_exam_protocol.py",
-      "sha256": "1c4ebbcd9ec56b28bd8955b811f71e672b15c0c6745d79b1115d28323f60086c",
-      "bytes": 21798
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_distiller_exam_assets.py",
-      "sha256": "95532dc9b01dc7660629eceb183ae03b87df190d2fb43797a257d78ca3f9acb3",
-      "bytes": 37090
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_distiller_exam_pack.py",
-      "sha256": "20f2fdeb293a8dee22e0dc344f10a4a01d3349f0b4f67d404b82f5921de29428",
-      "bytes": 21616
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_distiller_exam_protocol.py",
-      "sha256": "a5180e488953fda4c0fc3d8b8ae62962604438eb8481019a7a86fc1bc008d9b9",
-      "bytes": 44707
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_distiller_exam_repair.py",
-      "sha256": "d1f39dd89b298119f64388273ccbf2dce5e70f3b25b04468a891ae9f0f72d961",
-      "bytes": 39401
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_reviewer_exam.py",
-      "sha256": "830dd2e6f32f21627628636f839fcff9a55c57839d28f9b48b958991850ad5d7",
-      "bytes": 77014
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_reviewer_exam_assets.py",
-      "sha256": "420127a80a5ac0738049313385bdbfa25088973dceacdf3a7a77faeac192fd32",
-      "bytes": 55837
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_reviewer_exam_pack.py",
-      "sha256": "160e1c22977051e770d940e9f802cdfccdbc91110b249004ecaee8a47dd6bd8f",
-      "bytes": 17935
-    },
-    {
-      "path": "source/memorive_model_evaluation/card_reviewer_exam_protocol.py",
-      "sha256": "b66c31c2836a252b5b046519167349336712eb488640135f9b0de8995d7e35db",
-      "bytes": 8171
-    },
-    {
-      "path": "source/memorive_model_evaluation/dynamic_routing_advisory.py",
-      "sha256": "483084e7e00135929bcefff8d2ce3813f63c7298d3edef3abab72a2e2fc17248",
-      "bytes": 14968
-    },
-    {
-      "path": "source/memorive_model_evaluation/embedding_text_exam.py",
-      "sha256": "a7d40a0979a0bd9f840d762f7d9e3ec704e3e37a0de3ff2075177bc28c2920a8",
-      "bytes": 17826
-    },
-    {
-      "path": "source/memorive_model_evaluation/errors.py",
-      "sha256": "d4480bfc4a0fe13e5d69ff0f1ed31894a411514cdbab63b1584ba0e0990fdc69",
-      "bytes": 1159
-    },
-    {
-      "path": "source/memorive_model_evaluation/ocr_page_exam.py",
-      "sha256": "c59cc19ee5240e71f78c2b5f952b5affb97fe2a0f2371bb17d917df0ee5e3c75",
-      "bytes": 37388
-    },
-    {
-      "path": "source/memorive_model_evaluation/ocr_page_exam_assets.py",
-      "sha256": "27dd4a66b51d823e69a271db238adb757f3fcb0377c1fda62c2edd706c39b068",
-      "bytes": 50340
-    },
-    {
-      "path": "source/memorive_model_evaluation/ocr_page_exam_pack.py",
-      "sha256": "812da7a686751b33b20604fa76721414ff9aba5fd354fae116408e7dbb8cf219",
-      "bytes": 24510
-    },
-    {
-      "path": "source/memorive_model_evaluation/ocr_page_exam_protocol.py",
-      "sha256": "55a135d3255f99f8d0a651f0042bdd55d4d5635ac0880ce56118bc39070d07c1",
-      "bytes": 5310
-    },
-    {
-      "path": "source/memorive_model_evaluation/reference_exam_pack.py",
-      "sha256": "8da0de74a5fe57c4787b29e16eb53ad86cecb6431e213fa14bb247fb02a03c78",
-      "bytes": 19391
-    },
-    {
-      "path": "source/memorive_model_evaluation/reranker_text_exam.py",
-      "sha256": "407d2b3923e8883416376497f179df0cdf50a5f09c6fc2566228cc767740af00",
-      "bytes": 45763
-    },
-    {
-      "path": "source/memorive_model_evaluation/retrieval_metrics.py",
-      "sha256": "79cb15454b166ee9c8d83df942f10e0b1204029b4ffa282260228b773cbb8b75",
-      "bytes": 13414
     },
     {
       "path": "source/memorive_research_runtime/__init__.py",
@@ -6192,8 +6202,8 @@
     },
     {
       "path": "source/model_gateway/routing_advisory.py",
-      "sha256": "79b40aeec8468911282eceef02b40950271d698ed75aaf6e58ccd55541763806",
-      "bytes": 3911
+      "sha256": "c1f2277d783bb84e7f5dae011ddebb090ec763947eaf0df8979b20c15cd61ad7",
+      "bytes": 3914
     },
     {
       "path": "source/model_gateway/vision_qualification/__init__.py",
@@ -6532,7 +6542,7 @@
     },
     {
       "path": "source/retrieval/retrieval_calibration/qualification.py",
-      "sha256": "17214239f3f66405041a6ac530d796f744754e6cc1b23f7a7fff0010fc37334d",
+      "sha256": "fa32d437b7a10f4e1a4dfef78a2964a546f4b8ce04232280ccd8299cf9338aa5",
       "bytes": 11095
     },
     {
@@ -6572,7 +6582,7 @@
     },
     {
       "path": "source/retrieval_weighting/__init__.py",
-      "sha256": "bb20f1ec4e5fb2bdc269801f4e0ce3c1e7316606165e9c1b9b1ab8e9411e592e",
+      "sha256": "fa39fc75b70bee58ac764b18d88ad74317ebb8e72610471cad8e98ad4ffc5382",
       "bytes": 2375
     },
     {
