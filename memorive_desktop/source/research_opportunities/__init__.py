@@ -1,9 +1,10 @@
 """Research opportunities: questions and hypotheses an answer proposes from cited evidence, and the
 concepts two studies are compared on.
 
-research_opportunities.py is used by research Q&A; canonical.py holds CONCEPT_ORDER and the hashing
-shared with the verifier (evidence_review/opportunity_verification.py). core.py is a pipeline that
-builds source, gap, comparison and opportunity objects; other packages call it, the window does not.
+Research Q&A uses research_opportunities.py and imports core.py for CONCEPT_ORDER, which lives in
+canonical.py together with the hashing shared with the verifier
+(evidence_review/opportunity_verification.py). The rest of core.py is a pipeline that builds
+source, gap, comparison and opportunity objects; only tests call it.
 """
 
 from .canonical import (

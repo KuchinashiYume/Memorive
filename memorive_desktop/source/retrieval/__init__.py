@@ -2,9 +2,10 @@
 the context pack a model is shown.
 
 query_understanding.py, candidate_retrieval.py and context_pack.py are the three steps;
-structured_context.py and document_context.py build context from a paper's structure. The workflow's
-analysis and review nodes use them; research Q&A uses coverage_artifacts.py for its coverage report. retrieval_calibration/ (with its cli.py) compares rankings and is
-run by hand; shadow_seam.py observes an alternative ranking and is off by default.
+structured_context.py and document_context.py build context from a paper's structure. The workflow
+uses them, research analysis uses context_pack.py, and research Q&A uses coverage_artifacts.py for
+its coverage report. retrieval_calibration/ (with its own cli.py) and shadow_seam.py are not reached
+from the app's own code; tests call them.
 """
 from .candidate_retrieval import retrieve_candidates
 from .context_pack import build_context_pack, validate_context_pack_binding

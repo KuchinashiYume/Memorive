@@ -2,7 +2,7 @@
 
 logger.py and records.py write, reader.py reads one module's lines, retention.py removes old days,
 lock.py serializes writers. Most packages log through it. product_paths.py describes the roles of
-product folders for callers that ask.
+product folders for artifact_registry, memorive_app and research_reports.
 """
 from .logger import log, log_error
 from .records import log_accounting, log_reason

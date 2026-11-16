@@ -3,8 +3,8 @@
 facade.py is the application facade the service calls; durable_store.py keeps jobs, events and
 idempotency keys in SQLite; credentials.py stores secrets in Windows Credential Manager by reference;
 ipc_auth.py authenticates the loopback connection; diagnostics.py and support_bundle.py build the
-diagnostic view and the support bundle. adapters.py is a read-only adapter for card review status
-that other code can use.
+diagnostic view and the support bundle. adapters.py, a read-only adapter for card review status, is
+not reached from the app's own code.
 """
 
 from .capabilities import build_capability_snapshot, evaluate_preflight

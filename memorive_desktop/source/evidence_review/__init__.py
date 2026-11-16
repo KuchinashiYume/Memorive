@@ -1,12 +1,16 @@
 """Card review: checking a written card against the paper and repairing it.
 
-mechanical.py checks that every cited chunk exists; transcription.py checks quoted values against
-the source; judgment and atomic review ask a model to judge claims; repair_flow.py repairs what
-failed. The workflow's review nodes and research Q&A's claim check call these.
+Used outside the package: judgment.py, analysis_omission.py and analysis_revision.py by the
+workflow's review nodes; claim_evidence.py, atomic_review.py, reviewer_routing.py and
+segmented_distill_repair.py by research Q&A's claim check; mechanical.py and atomic_review.py by
+research_recommendations; ownership_binding.py by research_analysis. transcription.py,
+repair_flow.py, grading.py and the other modules are used inside the package by these.
 
-Other entries: review_orchestration/ is an operator API (create_or_get_job, pause, resume, cancel,
-dispatch_once) that a caller drives; opportunity_verification.py recomputes research opportunities
-independently of the code that produced them; the fact_identity_* modules evaluate repair loops.
+Not reached from the app's own code (tests call them): review_orchestration/, an operator API
+(create_or_get_job, pause, resume, cancel, dispatch_once with an execute function the caller
+supplies); the two fact_identity_* modules; research_handoff_cross_analysis_review.py.
+opportunity_verification.py, which recomputes research opportunities independently of the code
+that produced them, has no caller outside the package and its tests.
 """
 from .errors import CardParseError, CardUnreadable, ChunkStoreError, EvidenceReviewError, OwnershipFailClosed
 from .parser import parse_violations

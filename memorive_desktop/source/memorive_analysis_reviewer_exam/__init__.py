@@ -1,7 +1,8 @@
-"""Scorer code of the analysis reviewer exam (core_v1_frozen.py, core_v2.py).
+"""Scorer code of the analysis reviewer exam.
 
-The analysis reviewer exam in memorive_settings imports it when an exam is run from the settings
-page. The exam's question pack is kept locally, not in this package.
+The analysis reviewer exam in memorive_settings imports core_v2.py when an exam is run from the
+settings page; core_v1_frozen.py, the earlier scorer, has no caller outside the package. The exam's
+question pack is kept locally, not in this package.
 """
 
 from . import core_v1_frozen, core_v2

@@ -1,11 +1,13 @@
 """Card review states (pending, active, quarantined) and the admission log.
 
 machine.py moves a card between states, card_io.py reads and writes the review_status field,
-dispatch.py runs automatic review, knowledge_admission_log.py writes one line per move.
-The workflow's review step uses them; memorive_app reads review status through them.
+dispatch.py runs automatic review, knowledge_admission_log.py writes one line per move. Evidence
+review moves cards (machine.py, dispatch.py); the workflow, retrieval, research_recommendations and
+memorive_app read review status (card_io.py, states.py).
 
-The *_submission.py, *_preview.py and derived_knowledge_artifact.py modules build submission and
-preview records for knowledge_feedback and research opportunities; they write no card.
+Submission and preview records: conversation_ingest_preview.py and knowledge_submission.py are used
+by artifact_registry, the analysis admission module by run_ledger; the app reaches none of these four,
+nor derived_knowledge_artifact.py and opportunity_submission.py, which only tests call.
 """
 from .states import PENDING, ACTIVE, QUARANTINED, STATES, is_legal, is_core_enabled
 from .card_io import read_status, read_data_id

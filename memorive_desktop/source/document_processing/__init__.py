@@ -1,13 +1,16 @@
 """The document pipeline: a source file becomes RawMD, CleanMD, chunks and vectors.
 
-The workflow (memorive_workflow) runs these steps for each paper: convert (document_convert_convert,
+pipeline.py (run_document_processing, embed_from_chunks) is what the workflow (memorive_workflow)
+calls for one paper. It chains the steps: convert (document_convert_convert with
 document_conversion/), clean (document_clean_clean), chunk (document_chunk_chunk), embed
-(document_embed_embed) and ingest (document_ingest_ingest); pipeline.py chains them for one file.
-document_structure/ reads a document's sections; the window reaches it through structure.* methods.
+(document_embed_embed) and ingest (document_ingest_ingest); research_recommendations also calls the
+step modules directly. naming.py names a paper's files and folders for several packages.
+document_structure/ reads a document's sections; the window reaches it through structure.* methods
+(document_structure/desktop.py).
 
-Other entries: python -m document_processing.document_conversion.cli (probe, verify-structure,
-convert); ocr_qualification/ scores OCR output against reference pages and is run by hand;
-vector_generation.py builds and manages a separate Chroma collection for a caller.
+Not reached from the app's own code: python -m document_processing.document_conversion.cli (probe,
+verify-structure, convert); ocr_qualification/, which scores OCR output against reference pages; and
+vector_generation.py, which builds and manages a separate Chroma collection. Tests call the last two.
 """
 from .document_ingest_ingest import ingest
 from .document_convert_convert import convert

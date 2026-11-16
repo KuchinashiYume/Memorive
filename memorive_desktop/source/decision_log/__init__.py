@@ -1,8 +1,12 @@
 """A log of design decisions: Markdown records with a fixed schema, stored append-only (store.py).
 
-Not started by the window. knowledge_feedback, artifact_registry and the routing advisory of the
-exams call its builders (knowledge_decision.py, conversation_refinement_decision.py,
-routing_decision_preview.py) to describe a decision as a record; baseline.py checks a saved baseline.
+Used outside the package only by knowledge_feedback: eligibility.py calls knowledge_decision.py and
+conversation_refinement/destination.py calls conversation_refinement_decision.py. The two packages
+import each other: these builders take hashing helpers, DECISION_STATES and
+validate_typed_refinement_item from knowledge_feedback.
+
+No caller outside the package: baseline.py, schema.py, store.py, routing_decision_preview.py and
+fact_identity_decision_log_decision_adapter.py.
 """
 
 from .baseline import (

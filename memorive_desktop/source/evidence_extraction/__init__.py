@@ -2,10 +2,12 @@
 
 distill.py runs it for one paper; segmented_distill/ does the same for long papers in segments;
 normalize.py, anchor_repair.py and core_language_recovery.py fix what the model returned before the
-card is written; card.py writes the card. The workflow (memorive_workflow) calls these for each paper.
+card is written; card.py writes the card. The workflow (memorive_workflow) calls distill, card,
+config, response_contracts and segmented_distill; evidence_review and research_recommendations
+call distill and card.
 
-The fact_identity_* modules derive fact identities and required fields of a card; other
-packages call them, the window does not.
+The three fact_identity_* modules derive fact identities and required fields of a card. The app
+does not reach them; evidence_review imports the contract core.
 """
 from .distill import DistillResult, distill
 

@@ -2,7 +2,7 @@
 page layout of supported chat sites (site_profiles.py), and keeps the position up to which a
 conversation was archived (incremental_cursor.py).
 
-The sessions page and memorive_session_archive use it.
+ProductApi in runtime.py uses it for the sessions page; memorive_session_archive uses site_profiles.py.
 """
 
 from pathlib import Path

@@ -1,13 +1,15 @@
-"""Records of a paper's product files (PDF, RawMD, CleanMD, chunks, cards, analyses) and their schemas.
+"""Records of a paper's product files (PDF, RawMD, CleanMD, chunks, cards, analyses): the envelope
+schema and an append-only registry.
 
-Used by the app: adapters.py reads a product file's front matter and identity for retrieval,
-reports and research; registry_v2.py and schema_v2.py keep an append-only registry of product
-envelopes, where retrieval's coverage reports (retrieval/coverage_artifacts.py) record theirs.
+Used outside the package: schema_v2.py (build and check product envelopes) by retrieval, research
+analysis, research reports, research recommendations and knowledge_feedback; registry_v2.py (the
+append-only registry) by knowledge_feedback and research_recommendations; analysis_materialization.py
+and analysis_products.py by knowledge_admission, research_recommendations and run_ledger.
 
-Not started by the window: the asset migration tools (migration.py, migration_contracts.py,
-maintenance.py, query_projection.py, data_lifecycle.py) move or rebuild a registry in a folder the
-caller names; registry.py is the first registry version; the *_adapter.py and analysis_*.py
-modules build previews and admission records that other packages call. Each module says more.
+Not reached from the app's own code (tests call them): the asset migration tools (migration.py,
+migration_contracts.py, maintenance.py, query_projection.py, data_lifecycle.py), the first registry
+version (registry.py) and conversation_refinement_adapter.py. adapters.py (front matter of product
+files, envelopes for older files) is loaded with the package but has no caller outside it.
 """
 
 from .adapters import (
