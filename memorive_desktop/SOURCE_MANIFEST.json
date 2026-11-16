@@ -2202,8 +2202,8 @@
     },
     {
       "path": "source/artifact_registry/adapters.py",
-      "sha256": "08a062e72a7846b27366fa07f6d75f44ededc6ae695c3ed59a3d613ca42decb3",
-      "bytes": 24806
+      "sha256": "92ff6c954f4ea6b862a1a6e7d863941d17fb6e22b31dd4f5a5a889c97350c4cb",
+      "bytes": 25014
     },
     {
       "path": "source/artifact_registry/analysis_compatibility.py",

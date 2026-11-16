@@ -295,6 +295,18 @@ class P1LegacyAdapter:
                     },
                 )
             )
+        elif quote_mismatches:
+            # A quote that contradicts its chunk is a conflict, also when some anchors are missing;
+            # the envelope keeps a requirement either unresolved or conflicted, never both. Both
+            # lists of chunk ids stay in the metadata below.
+            card_conflicts.append(
+                {
+                    "requirement": "source_chunks",
+                    "reason_code": "CARD_QUOTE_CONFLICTS_WITH_CHUNK_TEXT",
+                    "candidate_artifact_ids": [ids["Chunks"]],
+                    "evidence_refs": [str(files["Card"]), str(files["Chunks"])],
+                }
+            )
         else:
             card_unresolved.append(
                 unresolved_requirement(
@@ -302,18 +314,9 @@ class P1LegacyAdapter:
                     "CARD_SOURCE_ANCHORS_DO_NOT_FULLY_RESOLVE",
                     evidence_refs=[str(files["Card"]), str(files["Chunks"])],
                     candidate_artifact_ids=[ids["Chunks"]],
-                    search_hints=missing_anchor_ids + quote_mismatches,
+                    search_hints=missing_anchor_ids,
                 )
             )
-            if quote_mismatches:
-                card_conflicts.append(
-                    {
-                        "requirement": "source_chunks",
-                        "reason_code": "CARD_QUOTE_CONFLICTS_WITH_CHUNK_TEXT",
-                        "candidate_artifact_ids": [ids["Chunks"]],
-                        "evidence_refs": [str(files["Card"]), str(files["Chunks"])],
-                    }
-                )
         card = build_envelope(
             artifact_id=ids["Card"],
             artifact_type=_TYPES["Card"],

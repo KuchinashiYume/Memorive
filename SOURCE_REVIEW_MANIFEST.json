@@ -3981,8 +3981,8 @@
     },
     {
       "path": "memorive_desktop/source/artifact_registry/adapters.py",
-      "sha256": "08a062e72a7846b27366fa07f6d75f44ededc6ae695c3ed59a3d613ca42decb3",
-      "bytes": 24806
+      "sha256": "92ff6c954f4ea6b862a1a6e7d863941d17fb6e22b31dd4f5a5a889c97350c4cb",
+      "bytes": 25014
     },
     {
       "path": "memorive_desktop/source/artifact_registry/errors.py",
@@ -7966,7 +7966,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c5bd97836172955814a3241c25c2488986a951784f45c65bda7e81b60ed01486",
+      "sha256": "6237fad56781ab892d761501921f7b8c4ef3d09daae9724639f48783cfd472a6",
       "bytes": 253786
     },
     {

@@ -27,8 +27,12 @@ def _front(fields: dict, body: str) -> str:
     return "---\n" + json.dumps(fields, ensure_ascii=False, indent=1) + "\n---\n" + body + "\n"
 
 
-def write_paper(folder: Path, *, card_chunk: str = "c1") -> None:
-    """The six files of one paper, named the way the library names them: [Role]title.ext."""
+def write_paper(folder: Path, *, card_chunk: str = "c1", card_quote: str = "rose by 12 percent",
+                missing_anchor: bool = False) -> None:
+    """The six files of one paper, named the way the library names them: [Role]title.ext.
+
+    card_chunk and card_quote are the card's first anchor; missing_anchor adds one that points
+    at a chunk the Chunks file does not have."""
     folder.mkdir(parents=True)
     (folder / "[PDF]synthetic paper.pdf").write_bytes(b"%PDF-1.4\n% synthetic test file\n")
     (folder / "[RawMD]synthetic paper.md").write_text(_front(
@@ -41,11 +45,14 @@ def write_paper(folder: Path, *, card_chunk: str = "c1") -> None:
              "chunk_hash": chunk_id.upper() * 32, "text": text} for chunk_id, text in CHUNKS.items()]
     (folder / "[Chunks]synthetic paper.jsonl").write_text(
         "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
+    limitations = [{"chunk_id": "c2", "quote": "not seen in the sandy plots"}]
+    if missing_anchor:
+        limitations.append({"chunk_id": "c9", "quote": "a chunk that is not there"})
     (folder / "[Card]synthetic paper.md").write_text(_front(
         {"schema_version": 6, "review_status": "active",
          "source_anchor": {"paper_id": PAPER, "by_field": {
-             "key_findings": [{"chunk_id": card_chunk, "quote": "rose by 12 percent"}],
-             "limitations": [{"chunk_id": "c2", "quote": "not seen in the sandy plots"}]}}},
+             "key_findings": [{"chunk_id": card_chunk, "quote": card_quote}],
+             "limitations": limitations}}},
         "Card text."), encoding="utf-8")
     (folder / "[Analysis]synthetic paper.md").write_text(_front(
         {"paper_id": PAPER, "artifact_type": "analysis", "analysis_model": "synthetic",
@@ -102,6 +109,28 @@ class SyntheticPaperChainTests(unittest.TestCase):
         self.assertEqual(card["metadata"]["missing_anchor_ids"], ["c9"])
         unresolved = {x["requirement"]: x for x in card["unresolved_parent_requirements"]}
         self.assertEqual(unresolved["source_chunks"]["reason_code"], "CARD_SOURCE_ANCHORS_DO_NOT_FULLY_RESOLVE")
+        self.assertEqual(card["conflicting_candidates"], [])
+
+    def test_a_card_quote_that_contradicts_its_chunk_is_a_conflict(self) -> None:
+        write_paper(self.paper, card_quote="fell by 40 percent")
+        result = self.adapter.adapt_bonakdarpour(self.paper)
+        card = result.by_type("card_markdown")
+        self.assertEqual(card["parent_artifacts"], [])
+        self.assertEqual(lineage_status(card), "conflicted")
+        self.assertEqual([x["reason_code"] for x in card["conflicting_candidates"]],
+                         ["CARD_QUOTE_CONFLICTS_WITH_CHUNK_TEXT"])
+        self.assertNotIn("source_chunks", {x["requirement"] for x in card["unresolved_parent_requirements"]})
+        self.assertEqual(card["metadata"]["quote_mismatches"], ["c1"])
+        self.assertEqual(register_adaptation(self.registry, result), ["appended"] * 6)
+
+    def test_a_missing_anchor_and_a_contradicting_quote_together_are_a_conflict(self) -> None:
+        write_paper(self.paper, card_quote="fell by 40 percent", missing_anchor=True)
+        card = self.adapter.adapt_bonakdarpour(self.paper).by_type("card_markdown")
+        self.assertEqual(lineage_status(card), "conflicted")
+        self.assertEqual([x["requirement"] for x in card["conflicting_candidates"]], ["source_chunks"])
+        self.assertNotIn("source_chunks", {x["requirement"] for x in card["unresolved_parent_requirements"]})
+        self.assertEqual(card["metadata"]["missing_anchor_ids"], ["c9"])
+        self.assertEqual(card["metadata"]["quote_mismatches"], ["c1"])
 
 
 if __name__ == "__main__":
