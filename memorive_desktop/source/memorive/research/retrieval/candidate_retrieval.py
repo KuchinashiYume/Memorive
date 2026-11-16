@@ -4,7 +4,8 @@
   mapped back to cards and fields through paper_id and the card's source_anchor.
 - Only active cards count, decided after the query from the card's own front matter
   (card_io.read_status), never from the review status frozen in the vector metadata.
-It recalls only; weights, counterexample room and tokens are context assembly's. It opens the
+It recalls only; weights, counterexample room and tokens are context assembly's, and the
+five-dimension weights, DerivedPenalty and doc_type are not applied here either. It opens the
 existing Chroma collection and never creates one.
 
 Distance is not similarity: Chroma's query returns distances, smaller is closer, sorted ascending.

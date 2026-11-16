@@ -1,7 +1,7 @@
 """Analysis of one paper: a model answers a fixed set of analysis questions from the paper's context pack.
 
 The workflow's analysis node calls analysis.py; revision.py applies review findings to an analysis
-(the workflow and evidence review call it); types.py holds the analysis records. the card review
+(the workflow and the card review call it); types.py holds the analysis records. The card review
 imports review_orchestration_events.py, but from code the app does not reach. The cross-topic
 runner and the quality artifacts module are not reached from the app's own code; tests call them.
 """
