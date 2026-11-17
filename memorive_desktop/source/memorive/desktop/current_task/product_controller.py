@@ -1291,18 +1291,7 @@ class CurrentTaskProductController:
             raise ValueError("CURRENT_TASK_PRODUCT_METHOD_NOT_ALLOWLISTED")
         accepted = self._assert_public_params(params or {})
         if method == "current_task.get_contract":
-            state = json.loads((self.contract_root / "CurrentTaskStateContract.json").read_text(encoding="utf-8"))
-            route = json.loads((self.contract_root / "RouteContract.json").read_text(encoding="utf-8"))
-            return {
-                "schema_version": "CurrentTaskCurrentTaskProductContract-v1",
-                "state_contract": state,
-                "route_contract": route,
-                "method_count": len(CURRENT_TASK_METHODS),
-                "all_business_calls_via_application_service": True,
-                "session_refinement_task_store": self._refinement_store is not None,
-                "synthetic_only": self._refinement_store is None,
-                "status": "PASS",
-            }
+            return self._get_contract()
         if method == "current_task.restart_status":
             if set(accepted) != {"request_id"} or self._core_task_controls is None:
                 raise ValueError("CURRENT_TASK_RESTART_STATUS_PARAMS_INVALID")
@@ -1321,30 +1310,7 @@ class CurrentTaskProductController:
         if method == "current_task.view":
             return self._view()
         if method == "current_task.start_core":
-            if set(accepted) != {"request", "idempotency_key"}:
-                raise ValueError("CURRENT_TASK_Core_START_PARAMS_INVALID")
-            request = accepted["request"]
-            idempotency_key = accepted["idempotency_key"]
-            if not isinstance(request, Mapping) or not isinstance(idempotency_key, str) or not idempotency_key:
-                raise ValueError("CURRENT_TASK_Core_START_REQUEST_INVALID")
-            bound_request = self.bind_core_request(request)
-            if bound_request.get("workflow_definition") is None:
-                raise ValueError("CURRENT_TASK_Core_JOB_TYPE_REQUIRED")
-            handle = self.adapter.call(
-                "start_job",
-                {"request": bound_request, "idempotency_key": idempotency_key},
-            )
-            job = self.adapter.call("get_job", {"job_id": handle["job_id"]})
-            return {
-                "schema_version": "MemoriveCoreStartReceipt-v1",
-                "handle": handle,
-                "workflow_definition_sha256": job["snapshots"]["workflow_definition"]["sha256"],
-                "workflow_config_sha256": job["snapshots"]["workflow_config"]["sha256"],
-                "settings_revision": self._workflow_execution_snapshot["settings_revision"],
-                "settings_sha256": self._workflow_execution_snapshot["settings_sha256"],
-                "external_route_activated": False,
-                "status": "STARTED_WITH_SAVED_Core_MAPPING",
-            }
+            return self._start_core(accepted)
         if method == "current_task.refresh":
             selected_job_id = self.session.view()["job_id"]
             if self._is_refinement_job(selected_job_id):
@@ -1353,82 +1319,13 @@ class CurrentTaskProductController:
                 return {"session": self.session.view(), "projection": self._view()["projection"]}
             return self.session.refresh()
         if method in {"current_task.pause_node", "current_task.resume_node"}:
-            job_id = self._job_id(accepted)
-            if set(accepted) - {"job_id","run","node_id","idempotency_key"}:
-                raise ValueError("CURRENT_TASK_NODE_CONTROL_PARAMS_INVALID")
-            if not self._is_core_job(job_id) or self._core_task_controls is None:
-                raise ValueError("CURRENT_TASK_NODE_CONTROL_UNAVAILABLE")
-            node_id = self._node_id_for_job(job_id, accepted.get("node_id"))
-            projection = self._project(job_id, overrides=self._core_overrides(job_id))
-            node = next(n for n in projection["graph"]["workflow_nodes"] if n["node_id"] == node_id)
-            if method.endswith("pause_node"):
-                if not node.get("pause_eligible"):
-                    raise ValueError("CURRENT_TASK_NODE_PAUSE_DISABLED")
-                receipt = self._core_task_controls.set_pause_point(job_id,node_id)
-            else:
-                if not node.get("resume_eligible"):
-                    raise ValueError("CURRENT_TASK_NODE_RESUME_DISABLED")
-                def resume():
-                    self._apply_node_control(job_id,"resume")
-                receipt = self._core_task_controls.clear_pause_point(job_id,node_id,resume=resume)
-            return self._record({"node_control_receipt":receipt,"view":self._view()})
+            return self._pause_or_resume_node(method, accepted)
         if method in {"current_task.pause", "current_task.resume"}:
-            job_id = self._job_id(accepted)
-            if self._is_refinement_job(job_id):
-                raise ValueError("CURRENT_TASK_REFINEMENT_ACTION_NOT_SUPPORTED")
-            job = self.adapter.call("get_job", {"job_id": job_id})
-            action = method.rsplit(".", 1)[-1]
-            # Progress updates may advance the version between this read and
-            # the control command. Retry only that typed optimistic conflict,
-            # retaining the same idempotency key and reading a fresh version.
-            identity = str(accepted.get("idempotency_key") or f"current_task-{action}-{self._action_receipts + 1}")
-            for control_attempt in range(3):
-                try:
-                    receipt = self.actions.execute(action, job_id,
-                        expected_version=job["version"], idempotency_key=identity)
-                    break
-                except Exception as error:
-                    if control_attempt == 2 or (
-                        getattr(error, 'code', None) != 'EXPECTED_VERSION_CONFLICT'
-                        and str(error).strip() != 'EXPECTED_VERSION_CONFLICT'
-                    ):
-                        raise
-                    job = self.adapter.call("get_job", {"job_id": job_id})
-            return self._record({"action_receipt": receipt, "view": self._view()})
+            return self._pause_or_resume(method, accepted)
         if method == "current_task.begin_cancel":
-            job_id = self._job_id(accepted)
-            if self._is_refinement_job(job_id):
-                assert self._refinement_store is not None
-                assert self._refinement_actions is not None
-                job = self._refinement_store.get_job(job_id)
-                receipt = self._refinement_actions.begin_cancel(
-                    job_id, expected_version=job["version"]
-                )
-                self._pending_cancel = {**dict(receipt), "workflow_kind": "SESSION_REFINEMENT"}
-            else:
-                job = self.adapter.call("get_job", {"job_id": job_id})
-                receipt = self.actions.begin_cancel(job_id, expected_version=job["version"])
-                self._pending_cancel = {**dict(receipt), "workflow_kind": "Core_SYNTHETIC"}
-            return receipt
+            return self._begin_cancel(accepted)
         if method == "current_task.confirm_cancel":
-            if self._pending_cancel is None:
-                raise ValueError("CURRENT_TASK_CANCEL_CONFIRMATION_MISSING")
-            pending = dict(self._pending_cancel)
-            token = str(accepted.get("token") or pending["token"])
-            action_controller = (
-                self._refinement_actions
-                if pending.get("workflow_kind") == "SESSION_REFINEMENT"
-                else self.actions
-            )
-            assert action_controller is not None
-            receipt = action_controller.confirm_cancel(
-                token,
-                pending["job_id"],
-                expected_version=int(pending["expected_version"]),
-                idempotency_key=str(accepted.get("idempotency_key") or f"current_task-cancel-{self._action_receipts + 1}"),
-            )
-            self._pending_cancel = None
-            return self._record({"action_receipt": receipt, "view": self._view()})
+            return self._confirm_cancel(accepted)
         if method == "current_task.delete_failed":
             job_id = self._job_id(accepted)
             if self._is_refinement_job(job_id):
@@ -1440,323 +1337,462 @@ class CurrentTaskProductController:
                 raise ValueError("CURRENT_TASK_DELETE_REQUIRES_FAILED_JOB")
             return self._record(self._dismiss_failed_job(job_id))
         if method == "current_task.retry":
-            job_id = self._job_id(accepted)
-            conflict=self._recovery_conflict(job_id)
-            if conflict:
-                return self._record({"status":"EXISTING_SUCCESSOR","retry_receipt":conflict})
-            if self._is_refinement_job(job_id):
-                raise ValueError("CURRENT_TASK_REFINEMENT_RETRY_REQUIRES_NEW_USER_ACTION")
-            job = self.adapter.call("get_job", {"job_id": job_id})
-            if job.get('request',{}).get('job_type')=='memorive-console-simulation':
-                receipt=self.adapter.call('console.control_task',{'job_id':job_id,'action':'retry','request_id':str(accepted.get('request_id') or uuid.uuid4().hex),'allow_model_calls':True})
-                return self._record({'action_receipt':receipt,'status':'SIMULATION_REPLAY_COMPLETED'})
-            if self._is_core_job(job_id) and self._core_task_controls is not None:
-                if job.get("control_state") != "FAILED":
-                    raise ValueError("CURRENT_TASK_Core_RETRY_REQUIRES_FAILED_JOB")
-                projection = self._project(
-                    job_id,
-                    overrides=self._core_overrides(job_id),
-                )
-                failed_node = next(
-                    (
-                        row
-                        for row in projection["graph"]["workflow_nodes"]
-                        if row.get("state") == "FAILED"
-                    ),
-                    None,
-                )
-                if not isinstance(failed_node, Mapping):
-                    raise ValueError("CURRENT_TASK_Core_FAILED_NODE_UNRESOLVED")
-                resolved = job.get("snapshots", {}).get(
-                    "resolved_task_input", {}
-                ).get("content", {})
-                item_id = resolved.get("item_id") if isinstance(resolved, Mapping) else None
-                if not isinstance(item_id, str) or not item_id:
-                    raise ValueError("CURRENT_TASK_Core_RETRY_ITEM_MISSING")
-                frozen = job.get("snapshots", {}).get("workflow_config", {}).get(
-                    "content", {}
-                )
-                effective = self._core_task_controls.effective_workflow_config(
-                    job_id, frozen
-                )
-                queued = self._core_task_controls.request_rollback(
-                    predecessor_job_id=job_id,
-                    item_id=item_id,
-                    resume_from_node_id=str(failed_node["node_id"]),
-                    workflow_config=effective,
-                )
-                return self._record(
-                    {
-                        "schema_version": "DesktopCoreFailedNodeRetryReceipt-v1",
-                        "retry_receipt": {
-                            key: deepcopy(value)
-                            for key, value in queued.items()
-                            if key != "workflow_config_json"
-                        },
-                        "resume_from_node_id": failed_node["node_id"],
-                        "task_overrides_applied": True,
-                        "status": "PENDING",
-                    }
-                )
-            run = next(key for key, value in self._jobs_by_run.items() if value == job_id)
-            policy = {
-                "request_id": str(accepted.get("request_id") or f"syn-retry-request-{run}"),
-                "correlation_id": str(accepted.get("correlation_id") or f"syn-retry-correlation-{run}"),
-            }
-            receipt = self.actions.execute(
-                "retry",
-                job_id,
-                expected_version=job["version"],
-                idempotency_key=str(accepted.get("idempotency_key") or f"current_task-retry-{run}"),
-                payload={"retry_policy": policy},
-            )
-            successor = receipt["facade_receipt"]
-            self._jobs_by_run[run] = successor["job_id"]
-            self.session.select_task(successor["job_id"])
-            return self._record({"action_receipt": receipt, "view": self._view()})
+            return self._retry(accepted)
         if method == "current_task.rollback_node":
-            job_id = self._job_id(accepted)
-            conflict=self._recovery_conflict(job_id)
-            if conflict:
-                return self._record({"status":"EXISTING_SUCCESSOR","rollback_receipt":conflict})
-            if not self._is_core_job(job_id) or self._core_task_controls is None:
-                raise ValueError("CURRENT_TASK_Core_ROLLBACK_UNAVAILABLE")
-            if set(accepted) - {"node_id", "job_id", "run"}:
-                raise ValueError("CURRENT_TASK_Core_ROLLBACK_PARAMS_INVALID")
-            node_id = self._node_id_for_job(job_id, accepted.get("node_id"))
+            return self._rollback_node(accepted)
+        if method == "current_task.respond":
+            return self._respond(accepted)
+        if method == "current_task.set_override":
+            return self._set_override(accepted)
+        if method == "current_task.restore_snapshot":
+            return self._restore_snapshot(accepted)
+        if method == "current_task.close_all":
+            return self.session.close_all()
+        if method == "current_task.effect_metrics":
+            return self._effect_metrics()
+        raise AssertionError(method)
+
+    def _get_contract(self) -> Any:
+        state = json.loads((self.contract_root / "CurrentTaskStateContract.json").read_text(encoding="utf-8"))
+        route = json.loads((self.contract_root / "RouteContract.json").read_text(encoding="utf-8"))
+        return {
+            "schema_version": "CurrentTaskCurrentTaskProductContract-v1",
+            "state_contract": state,
+            "route_contract": route,
+            "method_count": len(CURRENT_TASK_METHODS),
+            "all_business_calls_via_application_service": True,
+            "session_refinement_task_store": self._refinement_store is not None,
+            "synthetic_only": self._refinement_store is None,
+            "status": "PASS",
+        }
+
+    def _start_core(self, accepted: dict[str, Any]) -> Any:
+        if set(accepted) != {"request", "idempotency_key"}:
+            raise ValueError("CURRENT_TASK_Core_START_PARAMS_INVALID")
+        request = accepted["request"]
+        idempotency_key = accepted["idempotency_key"]
+        if not isinstance(request, Mapping) or not isinstance(idempotency_key, str) or not idempotency_key:
+            raise ValueError("CURRENT_TASK_Core_START_REQUEST_INVALID")
+        bound_request = self.bind_core_request(request)
+        if bound_request.get("workflow_definition") is None:
+            raise ValueError("CURRENT_TASK_Core_JOB_TYPE_REQUIRED")
+        handle = self.adapter.call(
+            "start_job",
+            {"request": bound_request, "idempotency_key": idempotency_key},
+        )
+        job = self.adapter.call("get_job", {"job_id": handle["job_id"]})
+        return {
+            "schema_version": "MemoriveCoreStartReceipt-v1",
+            "handle": handle,
+            "workflow_definition_sha256": job["snapshots"]["workflow_definition"]["sha256"],
+            "workflow_config_sha256": job["snapshots"]["workflow_config"]["sha256"],
+            "settings_revision": self._workflow_execution_snapshot["settings_revision"],
+            "settings_sha256": self._workflow_execution_snapshot["settings_sha256"],
+            "external_route_activated": False,
+            "status": "STARTED_WITH_SAVED_Core_MAPPING",
+        }
+
+    def _pause_or_resume_node(self, method: str, accepted: dict[str, Any]) -> Any:
+        job_id = self._job_id(accepted)
+        if set(accepted) - {"job_id","run","node_id","idempotency_key"}:
+            raise ValueError("CURRENT_TASK_NODE_CONTROL_PARAMS_INVALID")
+        if not self._is_core_job(job_id) or self._core_task_controls is None:
+            raise ValueError("CURRENT_TASK_NODE_CONTROL_UNAVAILABLE")
+        node_id = self._node_id_for_job(job_id, accepted.get("node_id"))
+        projection = self._project(job_id, overrides=self._core_overrides(job_id))
+        node = next(n for n in projection["graph"]["workflow_nodes"] if n["node_id"] == node_id)
+        if method.endswith("pause_node"):
+            if not node.get("pause_eligible"):
+                raise ValueError("CURRENT_TASK_NODE_PAUSE_DISABLED")
+            receipt = self._core_task_controls.set_pause_point(job_id,node_id)
+        else:
+            if not node.get("resume_eligible"):
+                raise ValueError("CURRENT_TASK_NODE_RESUME_DISABLED")
+            def resume():
+                self._apply_node_control(job_id,"resume")
+            receipt = self._core_task_controls.clear_pause_point(job_id,node_id,resume=resume)
+        return self._record({"node_control_receipt":receipt,"view":self._view()})
+
+    def _pause_or_resume(self, method: str, accepted: dict[str, Any]) -> Any:
+        job_id = self._job_id(accepted)
+        if self._is_refinement_job(job_id):
+            raise ValueError("CURRENT_TASK_REFINEMENT_ACTION_NOT_SUPPORTED")
+        job = self.adapter.call("get_job", {"job_id": job_id})
+        action = method.rsplit(".", 1)[-1]
+        # Progress updates may advance the version between this read and
+        # the control command. Retry only that typed optimistic conflict,
+        # retaining the same idempotency key and reading a fresh version.
+        identity = str(accepted.get("idempotency_key") or f"current_task-{action}-{self._action_receipts + 1}")
+        for control_attempt in range(3):
+            try:
+                receipt = self.actions.execute(action, job_id,
+                    expected_version=job["version"], idempotency_key=identity)
+                break
+            except Exception as error:
+                if control_attempt == 2 or (
+                    getattr(error, 'code', None) != 'EXPECTED_VERSION_CONFLICT'
+                    and str(error).strip() != 'EXPECTED_VERSION_CONFLICT'
+                ):
+                    raise
+                job = self.adapter.call("get_job", {"job_id": job_id})
+        return self._record({"action_receipt": receipt, "view": self._view()})
+
+    def _begin_cancel(self, accepted: dict[str, Any]) -> Any:
+        job_id = self._job_id(accepted)
+        if self._is_refinement_job(job_id):
+            assert self._refinement_store is not None
+            assert self._refinement_actions is not None
+            job = self._refinement_store.get_job(job_id)
+            receipt = self._refinement_actions.begin_cancel(
+                job_id, expected_version=job["version"]
+            )
+            self._pending_cancel = {**dict(receipt), "workflow_kind": "SESSION_REFINEMENT"}
+        else:
             job = self.adapter.call("get_job", {"job_id": job_id})
-            if job.get("control_state") not in {"FAILED", "SUCCEEDED", "CANCELLED", "PAUSED", "RUNNING"}:
-                raise ValueError("CURRENT_TASK_Core_ROLLBACK_REQUIRES_STABLE_TASK")
+            receipt = self.actions.begin_cancel(job_id, expected_version=job["version"])
+            self._pending_cancel = {**dict(receipt), "workflow_kind": "Core_SYNTHETIC"}
+        return receipt
+
+    def _confirm_cancel(self, accepted: dict[str, Any]) -> Any:
+        if self._pending_cancel is None:
+            raise ValueError("CURRENT_TASK_CANCEL_CONFIRMATION_MISSING")
+        pending = dict(self._pending_cancel)
+        token = str(accepted.get("token") or pending["token"])
+        action_controller = (
+            self._refinement_actions
+            if pending.get("workflow_kind") == "SESSION_REFINEMENT"
+            else self.actions
+        )
+        assert action_controller is not None
+        receipt = action_controller.confirm_cancel(
+            token,
+            pending["job_id"],
+            expected_version=int(pending["expected_version"]),
+            idempotency_key=str(accepted.get("idempotency_key") or f"current_task-cancel-{self._action_receipts + 1}"),
+        )
+        self._pending_cancel = None
+        return self._record({"action_receipt": receipt, "view": self._view()})
+
+    def _retry(self, accepted: dict[str, Any]) -> Any:
+        job_id = self._job_id(accepted)
+        conflict=self._recovery_conflict(job_id)
+        if conflict:
+            return self._record({"status":"EXISTING_SUCCESSOR","retry_receipt":conflict})
+        if self._is_refinement_job(job_id):
+            raise ValueError("CURRENT_TASK_REFINEMENT_RETRY_REQUIRES_NEW_USER_ACTION")
+        job = self.adapter.call("get_job", {"job_id": job_id})
+        if job.get('request',{}).get('job_type')=='memorive-console-simulation':
+            receipt=self.adapter.call('console.control_task',{'job_id':job_id,'action':'retry','request_id':str(accepted.get('request_id') or uuid.uuid4().hex),'allow_model_calls':True})
+            return self._record({'action_receipt':receipt,'status':'SIMULATION_REPLAY_COMPLETED'})
+        if self._is_core_job(job_id) and self._core_task_controls is not None:
+            if job.get("control_state") != "FAILED":
+                raise ValueError("CURRENT_TASK_Core_RETRY_REQUIRES_FAILED_JOB")
             projection = self._project(
                 job_id,
-                selected_node_id=node_id,
                 overrides=self._core_overrides(job_id),
+            )
+            failed_node = next(
+                (
+                    row
+                    for row in projection["graph"]["workflow_nodes"]
+                    if row.get("state") == "FAILED"
+                ),
+                None,
+            )
+            if not isinstance(failed_node, Mapping):
+                raise ValueError("CURRENT_TASK_Core_FAILED_NODE_UNRESOLVED")
+            resolved = job.get("snapshots", {}).get(
+                "resolved_task_input", {}
+            ).get("content", {})
+            item_id = resolved.get("item_id") if isinstance(resolved, Mapping) else None
+            if not isinstance(item_id, str) or not item_id:
+                raise ValueError("CURRENT_TASK_Core_RETRY_ITEM_MISSING")
+            frozen = job.get("snapshots", {}).get("workflow_config", {}).get(
+                "content", {}
+            )
+            effective = self._core_task_controls.effective_workflow_config(
+                job_id, frozen
+            )
+            queued = self._core_task_controls.request_rollback(
+                predecessor_job_id=job_id,
+                item_id=item_id,
+                resume_from_node_id=str(failed_node["node_id"]),
+                workflow_config=effective,
+            )
+            return self._record(
+                {
+                    "schema_version": "DesktopCoreFailedNodeRetryReceipt-v1",
+                    "retry_receipt": {
+                        key: deepcopy(value)
+                        for key, value in queued.items()
+                        if key != "workflow_config_json"
+                    },
+                    "resume_from_node_id": failed_node["node_id"],
+                    "task_overrides_applied": True,
+                    "status": "PENDING",
+                }
+            )
+        run = next(key for key, value in self._jobs_by_run.items() if value == job_id)
+        policy = {
+            "request_id": str(accepted.get("request_id") or f"syn-retry-request-{run}"),
+            "correlation_id": str(accepted.get("correlation_id") or f"syn-retry-correlation-{run}"),
+        }
+        receipt = self.actions.execute(
+            "retry",
+            job_id,
+            expected_version=job["version"],
+            idempotency_key=str(accepted.get("idempotency_key") or f"current_task-retry-{run}"),
+            payload={"retry_policy": policy},
+        )
+        successor = receipt["facade_receipt"]
+        self._jobs_by_run[run] = successor["job_id"]
+        self.session.select_task(successor["job_id"])
+        return self._record({"action_receipt": receipt, "view": self._view()})
+
+    def _rollback_node(self, accepted: dict[str, Any]) -> Any:
+        job_id = self._job_id(accepted)
+        conflict=self._recovery_conflict(job_id)
+        if conflict:
+            return self._record({"status":"EXISTING_SUCCESSOR","rollback_receipt":conflict})
+        if not self._is_core_job(job_id) or self._core_task_controls is None:
+            raise ValueError("CURRENT_TASK_Core_ROLLBACK_UNAVAILABLE")
+        if set(accepted) - {"node_id", "job_id", "run"}:
+            raise ValueError("CURRENT_TASK_Core_ROLLBACK_PARAMS_INVALID")
+        node_id = self._node_id_for_job(job_id, accepted.get("node_id"))
+        job = self.adapter.call("get_job", {"job_id": job_id})
+        if job.get("control_state") not in {"FAILED", "SUCCEEDED", "CANCELLED", "PAUSED", "RUNNING"}:
+            raise ValueError("CURRENT_TASK_Core_ROLLBACK_REQUIRES_STABLE_TASK")
+        projection = self._project(
+            job_id,
+            selected_node_id=node_id,
+            overrides=self._core_overrides(job_id),
+        )
+        node = next(
+            row for row in projection["graph"]["workflow_nodes"]
+            if row["node_id"] == node_id
+        )
+        if node.get("rollback_eligible") is not True:
+            raise ValueError("CURRENT_TASK_Core_ROLLBACK_NODE_NOT_COMPLETED")
+        resolved = job.get("snapshots", {}).get("resolved_task_input", {}).get("content", {})
+        item_id = resolved.get("item_id") if isinstance(resolved, Mapping) else None
+        if not isinstance(item_id, str) or not item_id:
+            raise ValueError("CURRENT_TASK_Core_ROLLBACK_ITEM_MISSING")
+        frozen_config = job.get("snapshots", {}).get("workflow_config", {}).get("content", {})
+        effective_config = self._core_task_controls.effective_workflow_config(
+            job_id, frozen_config
+        )
+        # Confirmed rewind retires the old execution before dispatch.
+        # Source-specific pipeline locking prevents overlapping successors.
+        if job.get("control_state") in {"PAUSED","RUNNING"}:
+            self._apply_node_control(job_id,"cancel")
+            self._core_task_controls.clear_pause_point(job_id)
+        queued = self._core_task_controls.request_rollback(
+            predecessor_job_id=job_id,
+            item_id=item_id,
+            resume_from_node_id=node_id,
+            workflow_config=effective_config,
+        )
+        return self._record(
+            {
+                "schema_version": "DesktopCoreRollbackRequestReceipt-v1",
+                "rollback_receipt": {
+                    key: deepcopy(value)
+                    for key, value in queued.items()
+                    if key != "workflow_config_json"
+                },
+                "predecessor_immutable": True,
+                "new_successor_required": True,
+                "status": "PENDING",
+            }
+        )
+
+    def _respond(self, accepted: dict[str, Any]) -> Any:
+        job_id = self._job_id(accepted)
+        if self._is_refinement_job(job_id):
+            raise ValueError("CURRENT_TASK_REFINEMENT_ACTION_NOT_SUPPORTED")
+        job = self.adapter.call("get_job", {"job_id": job_id})
+        pending = [row for row in job.get("action_requests", []) if row.get("state") == "PENDING"]
+        if not pending:
+            raise ValueError("CURRENT_TASK_PENDING_ACTION_REQUIRED")
+        response = accepted.get("response") or {"decision": "APPROVE_SYNTHETIC_CHECKPOINT"}
+        receipt = self.actions.execute(
+            "respond_to_action",
+            job_id,
+            expected_version=job["version"],
+            idempotency_key=str(accepted.get("idempotency_key") or f"current_task-respond-{self._action_receipts + 1}"),
+            payload={"action_request_id": pending[0]["action_request_id"], "response": response},
+        )
+        return self._record({"action_receipt": receipt, "view": self._view()})
+
+    def _set_override(self, accepted: dict[str, Any]) -> Any:
+        selected_job_id = self._job_id(accepted, allow_selected=True)
+        if self._is_refinement_job(selected_job_id):
+            if set(accepted) - {"job_id", "run", "node_id", "model", "profile_ref"}:
+                raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_OVERRIDE_INVALID")
+            node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
+            profile_ref = str(accepted.get("profile_ref") or "").strip()
+            from memorive.sessions.refinement.model_choices import configured_refinement_models
+            if not profile_ref:
+                raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_PROFILE_INVALID")
+            state = self._settings_provider() if self._settings_provider is not None else {}
+            options = configured_refinement_models(state, self._local_model_registry)
+            option = next((row for row in options if row['profile_ref'] == profile_ref
+                           and row['execution_eligible'] is True), None)
+            if option is None:
+                raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_PROFILE_UNAVAILABLE")
+            display_name = option['display_name']
+            receipt = self.set_session_refinement_model(
+                selected_job_id,
+                node_id=node_id,
+                profile_ref=profile_ref,
+                display_name=display_name,
+            )
+            return self._record(
+                {
+                    "override_receipt": {
+                        "schema_version": "DesktopSessionRefinementModelOverrideReceipt-v1",
+                        "job_id": selected_job_id,
+                        "node_id": node_id,
+                        "profile_ref": receipt["selected_profile_ref"],
+                        "model": display_name,
+                        "scope": "TASK_ONLY",
+                        "status": "PASS",
+                    },
+                    "view": self._view(),
+                }
+            )
+        node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
+        if self._is_core_job(selected_job_id) and self._core_task_controls is not None:
+            if set(accepted) - {"job_id", "run", "node_id", "enabled", "model", "profile_ref", "retry_count", "fallback_profile_ref"}:
+                raise ValueError("CURRENT_TASK_Core_OVERRIDE_PARAMS_INVALID")
+            projection = self._project(
+                selected_job_id,
+                selected_node_id=node_id,
+                overrides=self._core_overrides(selected_job_id),
             )
             node = next(
                 row for row in projection["graph"]["workflow_nodes"]
                 if row["node_id"] == node_id
             )
-            if node.get("rollback_eligible") is not True:
-                raise ValueError("CURRENT_TASK_Core_ROLLBACK_NODE_NOT_COMPLETED")
-            resolved = job.get("snapshots", {}).get("resolved_task_input", {}).get("content", {})
-            item_id = resolved.get("item_id") if isinstance(resolved, Mapping) else None
-            if not isinstance(item_id, str) or not item_id:
-                raise ValueError("CURRENT_TASK_Core_ROLLBACK_ITEM_MISSING")
-            frozen_config = job.get("snapshots", {}).get("workflow_config", {}).get("content", {})
-            effective_config = self._core_task_controls.effective_workflow_config(
-                job_id, frozen_config
-            )
-            # Confirmed rewind retires the old execution before dispatch.
-            # Source-specific pipeline locking prevents overlapping successors.
-            if job.get("control_state") in {"PAUSED","RUNNING"}:
-                self._apply_node_control(job_id,"cancel")
-                self._core_task_controls.clear_pause_point(job_id)
-            queued = self._core_task_controls.request_rollback(
-                predecessor_job_id=job_id,
-                item_id=item_id,
-                resume_from_node_id=node_id,
-                workflow_config=effective_config,
-            )
-            return self._record(
-                {
-                    "schema_version": "DesktopCoreRollbackRequestReceipt-v1",
-                    "rollback_receipt": {
-                        key: deepcopy(value)
-                        for key, value in queued.items()
-                        if key != "workflow_config_json"
-                    },
-                    "predecessor_immutable": True,
-                    "new_successor_required": True,
-                    "status": "PENDING",
-                }
-            )
-        if method == "current_task.respond":
-            job_id = self._job_id(accepted)
-            if self._is_refinement_job(job_id):
-                raise ValueError("CURRENT_TASK_REFINEMENT_ACTION_NOT_SUPPORTED")
-            job = self.adapter.call("get_job", {"job_id": job_id})
-            pending = [row for row in job.get("action_requests", []) if row.get("state") == "PENDING"]
-            if not pending:
-                raise ValueError("CURRENT_TASK_PENDING_ACTION_REQUIRED")
-            response = accepted.get("response") or {"decision": "APPROVE_SYNTHETIC_CHECKPOINT"}
-            receipt = self.actions.execute(
-                "respond_to_action",
-                job_id,
-                expected_version=job["version"],
-                idempotency_key=str(accepted.get("idempotency_key") or f"current_task-respond-{self._action_receipts + 1}"),
-                payload={"action_request_id": pending[0]["action_request_id"], "response": response},
-            )
-            return self._record({"action_receipt": receipt, "view": self._view()})
-        if method == "current_task.set_override":
-            selected_job_id = self._job_id(accepted, allow_selected=True)
-            if self._is_refinement_job(selected_job_id):
-                if set(accepted) - {"job_id", "run", "node_id", "model", "profile_ref"}:
-                    raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_OVERRIDE_INVALID")
-                node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
-                profile_ref = str(accepted.get("profile_ref") or "").strip()
-                from memorive.sessions.refinement.model_choices import configured_refinement_models
-                if not profile_ref:
-                    raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_PROFILE_INVALID")
-                state = self._settings_provider() if self._settings_provider is not None else {}
-                options = configured_refinement_models(state, self._local_model_registry)
-                option = next((row for row in options if row['profile_ref'] == profile_ref
-                               and row['execution_eligible'] is True), None)
-                if option is None:
-                    raise ValueError("CURRENT_TASK_REFINEMENT_MODEL_PROFILE_UNAVAILABLE")
-                display_name = option['display_name']
-                receipt = self.set_session_refinement_model(
-                    selected_job_id,
-                    node_id=node_id,
-                    profile_ref=profile_ref,
-                    display_name=display_name,
-                )
-                return self._record(
-                    {
-                        "override_receipt": {
-                            "schema_version": "DesktopSessionRefinementModelOverrideReceipt-v1",
-                            "job_id": selected_job_id,
-                            "node_id": node_id,
-                            "profile_ref": receipt["selected_profile_ref"],
-                            "model": display_name,
-                            "scope": "TASK_ONLY",
-                            "status": "PASS",
-                        },
-                        "view": self._view(),
-                    }
-                )
-            node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
-            if self._is_core_job(selected_job_id) and self._core_task_controls is not None:
-                if set(accepted) - {"job_id", "run", "node_id", "enabled", "model", "profile_ref", "retry_count", "fallback_profile_ref"}:
-                    raise ValueError("CURRENT_TASK_Core_OVERRIDE_PARAMS_INVALID")
-                projection = self._project(
-                    selected_job_id,
-                    selected_node_id=node_id,
-                    overrides=self._core_overrides(selected_job_id),
-                )
-                node = next(
-                    row for row in projection["graph"]["workflow_nodes"]
-                    if row["node_id"] == node_id
-                )
-                override: dict[str, Any] = {}
-                if "enabled" in accepted:
-                    if not isinstance(accepted["enabled"], bool) or node.get("enable_toggle_eligible") is not True:
-                        raise ValueError("CURRENT_TASK_NODE_ENABLE_LOCKED")
-                    override["enabled"] = accepted["enabled"]
-                if "retry_count" in accepted:
-                    retry_count = accepted["retry_count"]
-                    if (
-                        node.get("retry_change_eligible") is not True
-                        or isinstance(retry_count, bool)
-                        or not isinstance(retry_count, int)
-                        or not 0 <= retry_count <= 10
-                    ):
-                        raise ValueError("CURRENT_TASK_NODE_RETRY_LOCKED")
-                    override["retry_count"] = retry_count
-                if "model" in accepted or "profile_ref" in accepted:
-                    if node.get("model_change_eligible") is not True:
-                        raise ValueError("CURRENT_TASK_NODE_MODEL_LOCKED")
-                    self._validate_core_model_override(
-                        node_id,
-                        profile_ref=accepted.get("profile_ref"),
-                        model=accepted.get("model"),
-                    )
-                    override.update(
-                        self._resolved_profile_override(str(accepted["profile_ref"]).strip())
-                    )
-                    producer_id = {
-                        "04_CARD_CROSS_CHECK": "03_CARD_DISTILL",
-                        "08_JUDGMENT_CROSS_CHECK": "07_ANALYSIS",
-                    }.get(node_id)
-                    if producer_id is not None:
-                        effective = self._core_task_controls.effective_workflow_config(
-                            selected_job_id,
-                            self.adapter.call("get_job", {"job_id": selected_job_id})
-                            ["snapshots"]["workflow_config"]["content"],
-                        )
-                        if effective["nodes"][producer_id].get("profile_ref") == override["profile_ref"]:
-                            raise ValueError("CURRENT_TASK_HETEROGENEOUS_PROFILE_CONFLICT")
-                if node_id == '01_DOCUMENT_INGEST':
-                    effective = self._core_task_controls.effective_workflow_config(selected_job_id,
-                        self.adapter.call('get_job', {'job_id': selected_job_id})['snapshots']['workflow_config']['content'])
-                    primary_ref = override.get('profile_ref', effective['nodes'][node_id].get('profile_ref'))
-                    if 'fallback_profile_ref' in accepted:
-                        if node.get('model_change_eligible') is not True:
-                            raise ValueError('CURRENT_TASK_NODE_MODEL_LOCKED')
-                        ref = accepted['fallback_profile_ref']
-                        if ref is not None and (not isinstance(ref, str) or not ref.strip() or ref == primary_ref):
-                            raise ValueError('CURRENT_TASK_FALLBACK_INVALID')
-                        fallback = None
-                        if ref is not None:
-                            fallback = self._resolved_profile_override(ref)
-                            self._validate_core_model_override(node_id, profile_ref=ref, model=fallback['model'])
-                        override.update(fallback_profile_ref=ref, fallback_profile=fallback)
-                    elif primary_ref == effective['nodes'][node_id].get('fallback_profile_ref'):
-                        override.update(fallback_profile_ref=None, fallback_profile=None)
-                elif 'fallback_profile_ref' in accepted:
-                    raise ValueError('CURRENT_TASK_FALLBACK_NODE_INVALID')
-                if not override:
-                    raise ValueError("CURRENT_TASK_OVERRIDE_EMPTY")
-                receipt = self._core_task_controls.set_override(
-                    selected_job_id,
-                    node_id,
-                    override,
-                    allow_started_failed_node=(node.get("state") == "FAILED"),
-                )
-            else:
+            override: dict[str, Any] = {}
+            if "enabled" in accepted:
+                if not isinstance(accepted["enabled"], bool) or node.get("enable_toggle_eligible") is not True:
+                    raise ValueError("CURRENT_TASK_NODE_ENABLE_LOCKED")
+                override["enabled"] = accepted["enabled"]
+            if "retry_count" in accepted:
+                retry_count = accepted["retry_count"]
+                if (
+                    node.get("retry_change_eligible") is not True
+                    or isinstance(retry_count, bool)
+                    or not isinstance(retry_count, int)
+                    or not 0 <= retry_count <= 10
+                ):
+                    raise ValueError("CURRENT_TASK_NODE_RETRY_LOCKED")
+                override["retry_count"] = retry_count
+            if "model" in accepted or "profile_ref" in accepted:
+                if node.get("model_change_eligible") is not True:
+                    raise ValueError("CURRENT_TASK_NODE_MODEL_LOCKED")
                 self._validate_core_model_override(
                     node_id,
                     profile_ref=accepted.get("profile_ref"),
                     model=accepted.get("model"),
                 )
-                receipt = self.session.set_override(
-                    node_id,
-                    enabled=accepted.get("enabled"),
-                    model=accepted.get("model"),
-                    profile_ref=accepted.get("profile_ref"),
+                override.update(
+                    self._resolved_profile_override(str(accepted["profile_ref"]).strip())
                 )
-            return self._record({"override_receipt": receipt, "view": self._view()})
-        if method == "current_task.restore_snapshot":
-            selected_job_id = self._job_id(accepted, allow_selected=True)
-            if set(accepted) - {"job_id", "run", "node_id"}:
-                raise ValueError("CURRENT_TASK_RESTORE_PARAMS_INVALID")
-            if self._is_refinement_job(selected_job_id):
-                raise ValueError("CURRENT_TASK_REFINEMENT_SNAPSHOT_LOCKED")
-            node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
-            receipt = (
-                self._core_task_controls.clear_override(selected_job_id, node_id)
-                if self._is_core_job(selected_job_id)
-                and self._core_task_controls is not None
-                else self.session.restore_creation_snapshot(node_id)
+                producer_id = {
+                    "04_CARD_CROSS_CHECK": "03_CARD_DISTILL",
+                    "08_JUDGMENT_CROSS_CHECK": "07_ANALYSIS",
+                }.get(node_id)
+                if producer_id is not None:
+                    effective = self._core_task_controls.effective_workflow_config(
+                        selected_job_id,
+                        self.adapter.call("get_job", {"job_id": selected_job_id})
+                        ["snapshots"]["workflow_config"]["content"],
+                    )
+                    if effective["nodes"][producer_id].get("profile_ref") == override["profile_ref"]:
+                        raise ValueError("CURRENT_TASK_HETEROGENEOUS_PROFILE_CONFLICT")
+            if node_id == '01_DOCUMENT_INGEST':
+                effective = self._core_task_controls.effective_workflow_config(selected_job_id,
+                    self.adapter.call('get_job', {'job_id': selected_job_id})['snapshots']['workflow_config']['content'])
+                primary_ref = override.get('profile_ref', effective['nodes'][node_id].get('profile_ref'))
+                if 'fallback_profile_ref' in accepted:
+                    if node.get('model_change_eligible') is not True:
+                        raise ValueError('CURRENT_TASK_NODE_MODEL_LOCKED')
+                    ref = accepted['fallback_profile_ref']
+                    if ref is not None and (not isinstance(ref, str) or not ref.strip() or ref == primary_ref):
+                        raise ValueError('CURRENT_TASK_FALLBACK_INVALID')
+                    fallback = None
+                    if ref is not None:
+                        fallback = self._resolved_profile_override(ref)
+                        self._validate_core_model_override(node_id, profile_ref=ref, model=fallback['model'])
+                    override.update(fallback_profile_ref=ref, fallback_profile=fallback)
+                elif primary_ref == effective['nodes'][node_id].get('fallback_profile_ref'):
+                    override.update(fallback_profile_ref=None, fallback_profile=None)
+            elif 'fallback_profile_ref' in accepted:
+                raise ValueError('CURRENT_TASK_FALLBACK_NODE_INVALID')
+            if not override:
+                raise ValueError("CURRENT_TASK_OVERRIDE_EMPTY")
+            receipt = self._core_task_controls.set_override(
+                selected_job_id,
+                node_id,
+                override,
+                allow_started_failed_node=(node.get("state") == "FAILED"),
             )
-            return self._record({"override_receipt": receipt, "view": self._view()})
-        if method == "current_task.close_all":
-            return self.session.close_all()
-        if method == "current_task.effect_metrics":
-            refinement_jobs = (
-                self._refinement_store.list_jobs()
-                if self._refinement_store is not None
-                else []
+        else:
+            self._validate_core_model_override(
+                node_id,
+                profile_ref=accepted.get("profile_ref"),
+                model=accepted.get("model"),
             )
-            return {
-                "schema_version": "CurrentTaskCurrentTaskEffectMetrics-v1",
-                "synthetic_jobs_started": len(self._jobs_by_run),
-                "synthetic_action_receipts": self._action_receipts,
-                "production_jobs_started": len(refinement_jobs),
-                "session_refinement_jobs": len(refinement_jobs),
-                "session_refinement_model_calls": sum(row["model_calls"] for row in refinement_jobs),
-                "production_job_access": len(refinement_jobs),
-                "production_writes": len(refinement_jobs),
-                "external_network_calls": sum(row["external_model_calls"] for row in refinement_jobs),
-                "external_model_calls": sum(row["external_model_calls"] for row in refinement_jobs),
-                "provider_calls": sum(row["external_model_calls"] for row in refinement_jobs),
-                "credential_value_reads": 0,
-                "real_user_files_imported": 0,
-                "permanent_deletes": 0,
-                "cost_cny": 0,
-                "cost_usd": 0,
-                "status": "PASS",
-            }
-        raise AssertionError(method)
+            receipt = self.session.set_override(
+                node_id,
+                enabled=accepted.get("enabled"),
+                model=accepted.get("model"),
+                profile_ref=accepted.get("profile_ref"),
+            )
+        return self._record({"override_receipt": receipt, "view": self._view()})
+
+    def _restore_snapshot(self, accepted: dict[str, Any]) -> Any:
+        selected_job_id = self._job_id(accepted, allow_selected=True)
+        if set(accepted) - {"job_id", "run", "node_id"}:
+            raise ValueError("CURRENT_TASK_RESTORE_PARAMS_INVALID")
+        if self._is_refinement_job(selected_job_id):
+            raise ValueError("CURRENT_TASK_REFINEMENT_SNAPSHOT_LOCKED")
+        node_id = self._node_id_for_job(selected_job_id, accepted.get("node_id"))
+        receipt = (
+            self._core_task_controls.clear_override(selected_job_id, node_id)
+            if self._is_core_job(selected_job_id)
+            and self._core_task_controls is not None
+            else self.session.restore_creation_snapshot(node_id)
+        )
+        return self._record({"override_receipt": receipt, "view": self._view()})
+
+    def _effect_metrics(self) -> Any:
+        refinement_jobs = (
+            self._refinement_store.list_jobs()
+            if self._refinement_store is not None
+            else []
+        )
+        return {
+            "schema_version": "CurrentTaskCurrentTaskEffectMetrics-v1",
+            "synthetic_jobs_started": len(self._jobs_by_run),
+            "synthetic_action_receipts": self._action_receipts,
+            "production_jobs_started": len(refinement_jobs),
+            "session_refinement_jobs": len(refinement_jobs),
+            "session_refinement_model_calls": sum(row["model_calls"] for row in refinement_jobs),
+            "production_job_access": len(refinement_jobs),
+            "production_writes": len(refinement_jobs),
+            "external_network_calls": sum(row["external_model_calls"] for row in refinement_jobs),
+            "external_model_calls": sum(row["external_model_calls"] for row in refinement_jobs),
+            "provider_calls": sum(row["external_model_calls"] for row in refinement_jobs),
+            "credential_value_reads": 0,
+            "real_user_files_imported": 0,
+            "permanent_deletes": 0,
+            "cost_cny": 0,
+            "cost_usd": 0,
+            "status": "PASS",
+        }
 
 
 __all__ = ["CURRENT_TASK_METHODS", "CurrentTaskProductController"]
