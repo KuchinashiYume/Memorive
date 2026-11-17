@@ -4,7 +4,7 @@ capacity, and the merge of the segments' facts.
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from inspect import signature
 import hashlib
 import json
@@ -440,6 +440,100 @@ def _aggregate_cards(cards: Sequence[Mapping[str, Any]]) -> tuple[dict[str, Any]
     }
 
 
+@dataclass(frozen=True)
+class _SourcePaper:
+    """One paper's processed files, read once by CoreSegmentedDistiller.distill: the paper folder, its
+    CleanMD and chunks, the CleanMD front matter, the chunk rows and their source manifest."""
+    folder: Path
+    cleanmd: Path
+    chunks_path: Path
+    frontmatter: dict[str, Any]
+    records: list[dict[str, Any]]
+    manifest: dict[str, Any]
+
+    def card_path(self) -> Path:
+        """Where the paper's card goes, next to its CleanMD."""
+        return self.folder / file_name(
+            "Card", self.frontmatter["paper_id"], display_title(self.frontmatter["title"]), "md"
+        )
+
+
+def _read_source_paper(source: Path | str) -> _SourcePaper:
+    """Find the paper's CleanMD and chunks, check the ownership and build the source manifest."""
+    folder, cleanmd, chunks_path = _locate(source)
+    frontmatter = _read_frontmatter(cleanmd)
+    records, ownership = _read_chunks(
+        chunks_path, frontmatter["paper_id"], frontmatter["data_ownership"]
+    )
+    _ownership_gate(ownership, frontmatter["paper_id"])
+    manifest = build_source_manifest(
+        paper_id=frontmatter["paper_id"],
+        chunks=_manifest_chunks(records),
+        estimator_revision=ESTIMATOR_REVISION,
+    )
+    return _SourcePaper(folder, cleanmd, chunks_path, frontmatter, records, manifest)
+
+
+@dataclass(frozen=True)
+class _ChosenRoute:
+    """How distill handles the paper: the model's capacity profile (None when the provider manages
+    capacity) and its evidence, the router's decision, whether the rendered source is over the size
+    signal, its length, and the evidence written to capacity_route.json."""
+    profile: CapacityProfile | None
+    profile_evidence: dict[str, Any]
+    decision: CapacityRoute
+    by_size: bool
+    rendered_characters: int
+    evidence: dict[str, Any]
+
+
+def _legacy_kwargs(legacy_distill: Callable[..., DistillResult], profile: CapacityProfile | None, *,
+                   target: str, overwrite: bool) -> dict[str, Any]:
+    """The keyword arguments for one call of the card distiller: the options it accepts."""
+    parameters = signature(legacy_distill).parameters
+    kwargs: dict[str, Any] = {"target": target, "overwrite": overwrite}
+    if "max_tokens" in parameters and profile is not None:
+        kwargs["max_tokens"] = profile.max_output_tokens
+    if "segment_handoff_on_length" in parameters:
+        kwargs["segment_handoff_on_length"] = True
+    if "route_large_input" in parameters:
+        kwargs["route_large_input"] = True
+    return kwargs
+
+
+def _admit_segment(validator: SegmentShardValidator, ledger: SegmentCompletionLedger,
+                   manifest: Mapping[str, Any], topology: Mapping[str, Any],
+                   segment: Mapping[str, Any], receipt: Mapping[str, Any]) -> None:
+    """Record a finished segment in the completion ledger as a validated shard bound to its card."""
+    sequence = int(segment["sequence_index"])
+    raw_shard = {
+        "schema_version": "long_document-segment-fact-shard-v1",
+        "artifact_kind": "segment_fact_shard",
+        "paper_id": manifest["paper_id"],
+        "segment_id": segment["segment_id"],
+        "attempt_id": f"core-card-{sequence:03d}",
+        "source_manifest_hash": manifest["source_manifest_hash"],
+        "topology_hash": topology["topology_hash"],
+        "expected_core_chunk_ids": segment["core_chunk_ids"],
+        "observed_source_ids": [],
+        "terminal_marker": "LONG_DOCUMENT_SEGMENT_COMPLETE",
+        "facts": [],
+        "slot_observations": [],
+        "high_risk_tokens": [],
+        "local_conflicts": [],
+        "capacity_state": "complete",
+        "producer_receipt_ref": f"sha256:{receipt['card_sha256']}",
+    }
+    shard = validator.validate(raw_shard, provider_receipt={"finish_reason": "stop"})
+    ledger.record_attempt(
+        segment_id=segment["segment_id"],
+        attempt_id=raw_shard["attempt_id"],
+        state="terminal",
+        receipt_ref=raw_shard["producer_receipt_ref"],
+    )
+    ledger.admit(shard)
+
+
 class CoreSegmentedDistiller:
     """Activate LONG-DOCUMENT capacity routing without changing Core's short path."""
 
@@ -461,6 +555,15 @@ class CoreSegmentedDistiller:
         force_segment: bool = False,
         _prior_truncation: DistillResult | None = None,
     ) -> DistillResult:
+        """Distill one paper's card (node 03), in one pass when it fits, else segment by segment.
+
+        Reads the paper, chooses the route by the model's capacity and the size of the source, then:
+        one pass with the card distiller (or the card already written for this input); when that pass
+        is cut off by the output limit, or the source is too long, or an earlier run handed over to
+        segments, the paper is split into segments, each segment is distilled (or read back from its
+        saved receipt) and the segment cards are merged into the paper's card. Every decision and
+        result is written to the evidence folder.
+        """
         if force_segment and not comparison_mode:
             raise RuntimeError("Capabilities_FORCE_SEGMENT_PRODUCTION_FORBIDDEN")
         if target != "sandbox":
@@ -468,19 +571,35 @@ class CoreSegmentedDistiller:
         if legacy_distill is None:
             from memorive.documents.card_distillation import distill as legacy_distill
 
-        folder, cleanmd, chunks_path = _locate(source)
-        frontmatter = _read_frontmatter(cleanmd)
-        records, ownership = _read_chunks(
-            chunks_path, frontmatter["paper_id"], frontmatter["data_ownership"]
+        paper = _read_source_paper(source)
+        route = self._choose_route(paper, force_segment=force_segment, comparison_mode=comparison_mode)
+        fallback_identity = {'source_manifest_hash': paper.manifest['source_manifest_hash'],
+            'clean_sha256': _file_sha256(paper.cleanmd), 'chunks_sha256': _file_sha256(paper.chunks_path),
+            'profile_hash': _sha256(route.profile_evidence)}
+        adaptive_fallback = self._recorded_fallback(fallback_identity, _prior_truncation)
+        if route.decision is CapacityRoute.LEGACY_SINGLE_PASS and not route.by_size and adaptive_fallback is None:
+            result, adaptive_fallback = self._single_pass(
+                paper, route, fallback_identity, legacy_distill, target=target, overwrite=overwrite
+            )
+            if result is not None:
+                return result
+
+        topology = self._segment_topology(
+            paper, route, adaptive_fallback, comparison_mode=comparison_mode, force_segment=force_segment
         )
-        _ownership_gate(ownership, frontmatter["paper_id"])
-        manifest = build_source_manifest(
-            paper_id=frontmatter["paper_id"],
-            chunks=_manifest_chunks(records),
-            estimator_revision=ESTIMATOR_REVISION,
+        cards, segment_receipts, completion = self._distill_segments(
+            paper, route.profile, topology, legacy_distill, target=target
         )
+        return self._assemble_card(
+            paper, route, topology, cards, segment_receipts, completion, adaptive_fallback, overwrite=overwrite
+        )
+
+    def _choose_route(self, paper: _SourcePaper, *, force_segment: bool, comparison_mode: bool) -> _ChosenRoute:
+        """Resolve the model's capacity, decide the route and write capacity_route.json and
+        source_manifest.json; a route the router cannot decide stops the run."""
+        manifest = paper.manifest
         profile, profile_evidence = _resolve_capacity_profile(self.workflow_config)
-        rendered_source_character_estimate = len(_render_chunks(records))
+        rendered_source_character_estimate = len(_render_chunks(paper.records))
         character_route_triggered = (
             rendered_source_character_estimate > INPUT_MAX_CHARS
         )
@@ -528,7 +647,7 @@ class CoreSegmentedDistiller:
             "profile": profile_evidence,
             "decision": decision_evidence,
             "source_manifest_hash": manifest["source_manifest_hash"],
-            "source_chunk_count": len(records),
+            "source_chunk_count": len(paper.records),
             "legacy_input_character_limit": INPUT_MAX_CHARS,
             "legacy_input_limit_role": "SEGMENTATION_ROUTE_SIGNAL_NOT_TERMINAL_LIMIT",
             "rendered_source_character_estimate": rendered_source_character_estimate,
@@ -542,140 +661,155 @@ class CoreSegmentedDistiller:
                 "Capabilities_SEGMENT_CAPACITY_BLOCKED:"
                 + ",".join(str(value) for value in decision_evidence["reasons"])
             )
-        effective_route = decision_route.value
+        return _ChosenRoute(profile, profile_evidence, decision_route, character_route_triggered,
+                            rendered_source_character_estimate, route_evidence)
+
+    def _recorded_fallback(self, fallback_identity: dict[str, Any],
+                           prior_truncation: DistillResult | None) -> dict[str, Any] | None:
+        """The hand-over to segments, if there is one: read back from an earlier run of this input, or
+        recorded now when the caller passes the truncated result of its own pass."""
         adaptive_fallback: dict[str, Any] | None = None
         fallback_path = self.evidence_root / 'adaptive_segment_fallback.json'
-        fallback_identity = {'source_manifest_hash': manifest['source_manifest_hash'],
-            'clean_sha256': _file_sha256(cleanmd), 'chunks_sha256': _file_sha256(chunks_path),
-            'profile_hash': _sha256(profile_evidence)}
         if fallback_path.is_file():
             saved = json.loads(fallback_path.read_text('utf8'))
             if saved.get('input_identity') != fallback_identity:
                 raise RuntimeError('Capabilities_SEGMENT_FALLBACK_REPLAY_IDENTITY_CONFLICT')
             adaptive_fallback = saved
-        if _prior_truncation is not None:
-            if not _is_output_truncation(_prior_truncation):
+        if prior_truncation is not None:
+            if not _is_output_truncation(prior_truncation):
                 raise ValueError('Capabilities_SEGMENT_TRUNCATION_HANDOFF_INVALID')
             adaptive_fallback = {'schema_version': 'DesktopAdaptiveSegmentFallback-v1',
                 'trigger':'SEGMENT_OUTPUT_TRUNCATION', 'input_identity':fallback_identity,
                 'additional_single_pass_retry_performed':False}
             _atomic_json(fallback_path, adaptive_fallback)
-        if adaptive_fallback is not None:
-            effective_route = 'SEGMENTED_AFTER_OUTPUT_TRUNCATION'
-        if character_route_triggered:
-            effective_route = "SEGMENTED_BY_DOCUMENT_SIZE_ROUTE_SIGNAL"
-        if decision_route is CapacityRoute.LEGACY_SINGLE_PASS and not character_route_triggered and adaptive_fallback is None:
-            card_path = folder / file_name(
-                "Card", frontmatter["paper_id"], display_title(frontmatter["title"]), "md"
+        return adaptive_fallback
+
+    def _single_pass(
+        self,
+        paper: _SourcePaper,
+        route: _ChosenRoute,
+        fallback_identity: dict[str, Any],
+        legacy_distill: Callable[..., DistillResult],
+        *,
+        target: str,
+        overwrite: bool,
+    ) -> tuple[DistillResult | None, dict[str, Any] | None]:
+        """The paper in one pass: the card already written for this input and model, or one call of the
+        card distiller. Returns (result, None), or (None, the recorded hand-over) when the output limit
+        cut the pass off."""
+        frontmatter = paper.frontmatter
+        card_path = paper.card_path()
+        summary_path = self.evidence_root / "segmented_distill_summary.json"
+        final_binding = {
+            "source_manifest_hash": paper.manifest["source_manifest_hash"],
+            "clean_sha256": _file_sha256(paper.cleanmd),
+            "profile_hash": _sha256(route.profile_evidence),
+        }
+        if card_path.is_file() and not overwrite:
+            expected_model = route.profile_evidence["model_name"]
+            if summary_path.is_file():
+                prior_summary = json.loads(summary_path.read_text(encoding="utf-8"))
+                if "final_binding" in prior_summary:
+                    if (prior_summary["final_binding"] != final_binding
+                            or prior_summary.get("final_card_sha256") != _file_sha256(card_path)
+                            or not prior_summary.get("final_card_model")):
+                        raise RuntimeError("Capabilities_SEGMENT_FINAL_REPLAY_IDENTITY_CONFLICT")
+                    # A provider may echo an alias. Accept only the exact
+                    # previously completed output bound to this input/profile.
+                    expected_model = prior_summary["final_card_model"]
+            replay_card, self_check = _validate_replay_card(
+                card_path,
+                source_frontmatter=frontmatter,
+                expected_model=expected_model,
             )
-            summary_path = self.evidence_root / "segmented_distill_summary.json"
-            final_binding = {
-                "source_manifest_hash": manifest["source_manifest_hash"],
-                "clean_sha256": _file_sha256(cleanmd),
-                "profile_hash": _sha256(profile_evidence),
-            }
-            if card_path.is_file() and not overwrite:
-                expected_model = profile_evidence["model_name"]
-                if summary_path.is_file():
-                    prior_summary = json.loads(summary_path.read_text(encoding="utf-8"))
-                    if "final_binding" in prior_summary:
-                        if (prior_summary["final_binding"] != final_binding
-                                or prior_summary.get("final_card_sha256") != _file_sha256(card_path)
-                                or not prior_summary.get("final_card_model")):
-                            raise RuntimeError("Capabilities_SEGMENT_FINAL_REPLAY_IDENTITY_CONFLICT")
-                        # A provider may echo an alias. Accept only the exact
-                        # previously completed output bound to this input/profile.
-                        expected_model = prior_summary["final_card_model"]
-                replay_card, self_check = _validate_replay_card(
-                    card_path,
-                    source_frontmatter=frontmatter,
-                    expected_model=expected_model,
-                )
-                self.last_metrics = {
-                    **route_evidence,
-                    "route": decision_route.value,
-                    "segment_count": 1,
-                    "core_short_path_unchanged": True,
-                    "recovered_existing_final_card": True,
-                    "final_card_sha256": _file_sha256(card_path),
-                    "final_card_model": replay_card["distill_model"],
-                    "final_binding": final_binding,
-                }
-                _atomic_json(
-                    self.evidence_root / "segmented_distill_summary.json",
-                    self.last_metrics,
-                )
-                return DistillResult(
-                    status="completed",
-                    paper_id=frontmatter["paper_id"],
-                    card_path=str(card_path),
-                    distill_model=str(replay_card["distill_model"]),
-                    distilled_at=str(replay_card["distilled_at"]),
-                    chunk_count=len(records),
-                    self_check=self_check,
-                )
-            legacy_parameters = signature(legacy_distill).parameters
-            kwargs = {
-                "target": target,
-                "overwrite": overwrite,
-            }
-            if "max_tokens" in legacy_parameters and profile is not None:
-                kwargs["max_tokens"] = profile.max_output_tokens
-            if "segment_handoff_on_length" in legacy_parameters:
-                kwargs["segment_handoff_on_length"] = True
-            if "route_large_input" in legacy_parameters:
-                kwargs["route_large_input"] = True
-            result = legacy_distill(folder, **kwargs)
-            error_text = f"{result.error_type or ''} {result.error_message or ''}"
-            direct_segment_handoff = "segment_handoff" in error_text.lower()
-            length_retry_exhausted = _is_output_truncation(result)
-            if not length_retry_exhausted:
-                self.last_metrics = {
-                    **route_evidence,
-                    "route": decision_route.value,
-                    "segment_count": 1,
-                    "core_short_path_unchanged": True,
-                    "recovered_existing_final_card": False,
-                }
-                if result.status == "completed" and result.card_path:
-                    self.last_metrics.update(
-                        final_card_sha256=_file_sha256(Path(result.card_path)),
-                        final_card_model=result.distill_model,
-                        final_binding=final_binding,
-                    )
-                _atomic_json(
-                    self.evidence_root / "segmented_distill_summary.json",
-                    self.last_metrics,
-                )
-                return result
-            effective_route = "SEGMENTED_AFTER_OUTPUT_TRUNCATION"
-            adaptive_fallback = {
-                "schema_version": "DesktopAdaptiveSegmentFallback-v1",
-                "input_identity": fallback_identity,
-                "trigger": (
-                    "OUTPUT_TRUNCATION_DIRECT_SEGMENT_HANDOFF"
-                    if direct_segment_handoff
-                    else "OUTPUT_TRUNCATION_RETRY_EXHAUSTED"
-                ),
-                "legacy_result_status": result.status,
-                "legacy_error_type": result.error_type,
-                "original_capacity_route": decision_route.value,
-                "effective_route": effective_route,
-                "token_limits_changed": False,
-                "additional_single_pass_retry_performed": False,
-                "raw_error_message_persisted": False,
+            self.last_metrics = {
+                **route.evidence,
+                "route": route.decision.value,
+                "segment_count": 1,
+                "core_short_path_unchanged": True,
+                "recovered_existing_final_card": True,
+                "final_card_sha256": _file_sha256(card_path),
+                "final_card_model": replay_card["distill_model"],
+                "final_binding": final_binding,
             }
             _atomic_json(
-                self.evidence_root / "adaptive_segment_fallback.json",
-                adaptive_fallback,
+                self.evidence_root / "segmented_distill_summary.json",
+                self.last_metrics,
             )
+            return DistillResult(
+                status="completed",
+                paper_id=frontmatter["paper_id"],
+                card_path=str(card_path),
+                distill_model=str(replay_card["distill_model"]),
+                distilled_at=str(replay_card["distilled_at"]),
+                chunk_count=len(paper.records),
+                self_check=self_check,
+            ), None
+        result = legacy_distill(
+            paper.folder, **_legacy_kwargs(legacy_distill, route.profile, target=target, overwrite=overwrite)
+        )
+        error_text = f"{result.error_type or ''} {result.error_message or ''}"
+        direct_segment_handoff = "segment_handoff" in error_text.lower()
+        length_retry_exhausted = _is_output_truncation(result)
+        if not length_retry_exhausted:
+            self.last_metrics = {
+                **route.evidence,
+                "route": route.decision.value,
+                "segment_count": 1,
+                "core_short_path_unchanged": True,
+                "recovered_existing_final_card": False,
+            }
+            if result.status == "completed" and result.card_path:
+                self.last_metrics.update(
+                    final_card_sha256=_file_sha256(Path(result.card_path)),
+                    final_card_model=result.distill_model,
+                    final_binding=final_binding,
+                )
+            _atomic_json(
+                self.evidence_root / "segmented_distill_summary.json",
+                self.last_metrics,
+            )
+            return result, None
+        adaptive_fallback = {
+            "schema_version": "DesktopAdaptiveSegmentFallback-v1",
+            "input_identity": fallback_identity,
+            "trigger": (
+                "OUTPUT_TRUNCATION_DIRECT_SEGMENT_HANDOFF"
+                if direct_segment_handoff
+                else "OUTPUT_TRUNCATION_RETRY_EXHAUSTED"
+            ),
+            "legacy_result_status": result.status,
+            "legacy_error_type": result.error_type,
+            "original_capacity_route": route.decision.value,
+            "effective_route": "SEGMENTED_AFTER_OUTPUT_TRUNCATION",
+            "token_limits_changed": False,
+            "additional_single_pass_retry_performed": False,
+            "raw_error_message_persisted": False,
+        }
+        _atomic_json(
+            self.evidence_root / "adaptive_segment_fallback.json",
+            adaptive_fallback,
+        )
+        return None, adaptive_fallback
 
+    def _segment_topology(
+        self,
+        paper: _SourcePaper,
+        route: _ChosenRoute,
+        adaptive_fallback: dict[str, Any] | None,
+        *,
+        comparison_mode: bool,
+        force_segment: bool,
+    ) -> dict[str, Any]:
+        """Split the paper into segments that fit the model's input, and write topology.json."""
+        manifest = paper.manifest
+        profile = route.profile
         topology_core_limit = (
             profile.segment_core_token_limit
             if profile is not None
             else (
                 INPUT_MAX_CHARS
-                if character_route_triggered
+                if route.by_size
                 else max(
                     1,
                     math.ceil(
@@ -701,11 +835,25 @@ class CoreSegmentedDistiller:
         if adaptive_fallback is not None:
             # A truncation handoff must reduce real input, even for models whose
             # advertised context could hold the entire document in one call.
-            serialized_limit = min(serialized_limit, max(1, rendered_source_character_estimate // 2))
-        topology = _executable_topology(records, manifest,
+            serialized_limit = min(serialized_limit, max(1, route.rendered_characters // 2))
+        topology = _executable_topology(paper.records, manifest,
             min(topology_core_limit, serialized_limit), serialized_limit)
         _atomic_json(self.evidence_root / "topology.json", topology)
-        validator = SegmentShardValidator(manifest, topology)
+        return topology
+
+    def _distill_segments(
+        self,
+        paper: _SourcePaper,
+        profile: CapacityProfile | None,
+        topology: dict[str, Any],
+        legacy_distill: Callable[..., DistillResult],
+        *,
+        target: str,
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+        """Distill every segment in order and admit each one to the completion ledger; the segment
+        cards, their receipts and the ledger's final state (written to segment_completion_ledger.json).
+        A segment still missing at the end stops the run."""
+        validator = SegmentShardValidator(paper.manifest, topology)
         ledger = SegmentCompletionLedger(
             topology,
             max_attempts_per_segment=2,
@@ -716,104 +864,10 @@ class CoreSegmentedDistiller:
         from memorive.platform.progress import scope
         with scope('CARD_SEGMENTS', [v['segment_id'] for v in topology['segments']] if self._split_depth == 0 and len(topology['segments']) > 1 else []) as node_units:
             for segment in topology["segments"]:
-                sequence = int(segment["sequence_index"])
-                segment_root = self.evidence_root / "segments" / f"{sequence:03d}_{segment['segment_id']}"
-                paper_root = segment_root / "paper"
-                paper_root.mkdir(parents=True, exist_ok=True)
-                segment_rows = _segment_records(records, manifest, segment)
-                segment_clean = paper_root / cleanmd.name
-                segment_chunks = paper_root / chunks_path.name
-                _atomic_text(segment_clean, cleanmd.read_text(encoding="utf-8"))
-                _atomic_text(
-                    segment_chunks,
-                    "".join(
-                        json.dumps(row, ensure_ascii=False, allow_nan=False, sort_keys=True) + "\n"
-                        for row in segment_rows
-                    ),
+                card_path, receipt = self._distill_segment(
+                    paper, profile, topology, segment, legacy_distill, target=target
                 )
-                input_identity = {
-                    "source_manifest_hash": manifest["source_manifest_hash"],
-                    "topology_hash": topology["topology_hash"],
-                    "segment_id": segment["segment_id"],
-                    "execution_profile_hash": _sha256(self.workflow_config["nodes"]["03_CARD_DISTILL"]),
-                    "clean_sha256": _file_sha256(segment_clean),
-                    "chunks_sha256": _file_sha256(segment_chunks),
-                }
-                receipt_path = segment_root / "segment_receipt.json"
-                existing_cards = sorted(paper_root.glob("[[]Card[]]*.md"))
-                if receipt_path.is_file() and len(existing_cards) == 1:
-                    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-                    if receipt.get("input_identity") != input_identity or receipt.get("card_sha256") != _file_sha256(existing_cards[0]):
-                        raise RuntimeError(f"Capabilities_SEGMENT_REPLAY_CONFLICT:{segment['segment_id']}")
-                    card_path = existing_cards[0]
-                else:
-                    if existing_cards or receipt_path.exists():
-                        raise RuntimeError(f"Capabilities_SEGMENT_PARTIAL_REPLAY_STATE:{segment['segment_id']}")
-                    segment_parameters = signature(legacy_distill).parameters
-                    segment_kwargs = {"target": target, "overwrite": False}
-                    if "max_tokens" in segment_parameters and profile is not None:
-                        segment_kwargs["max_tokens"] = profile.max_output_tokens
-                    if "route_large_input" in segment_parameters:
-                        segment_kwargs["route_large_input"] = True
-                    if "segment_handoff_on_length" in segment_parameters:
-                        segment_kwargs["segment_handoff_on_length"] = True
-                    child_root = segment_root/'subsegments'
-                    if (child_root/'adaptive_segment_fallback.json').is_file():
-                        result = CoreSegmentedDistiller(workflow_config=self.workflow_config,
-                            evidence_root=child_root, _split_depth=self._split_depth+1).distill(
-                                paper_root, target=target, legacy_distill=legacy_distill)
-                    else:
-                        result = legacy_distill(paper_root, **segment_kwargs)
-                    if _is_output_truncation(result):
-                        if self._split_depth >= topology['max_split_depth']:
-                            raise RuntimeError('Capabilities_SEGMENT_CAPACITY_UNRESOLVED:MAX_SPLIT_DEPTH')
-                        # Reuse this adapter on the failed segment only. The prior
-                        # response becomes its persisted handoff; never send that
-                        # unchanged segment again before dividing it.
-                        child = CoreSegmentedDistiller(workflow_config=self.workflow_config,
-                            evidence_root=child_root, _split_depth=self._split_depth+1)
-                        result = child.distill(paper_root, target=target,
-                            legacy_distill=legacy_distill, _prior_truncation=result)
-                    if result.status != "completed" or not result.card_path:
-                        raise RuntimeError(
-                            f"Capabilities_SEGMENT_Core_DISTILL_FAILED:{segment['segment_id']}:{result.error_type}:{result.error_message}"
-                        )
-                    card_path = Path(result.card_path)
-                    receipt = {
-                        "schema_version": "DesktopLongDocumentSegmentReceipt-v1",
-                        "input_identity": input_identity,
-                        "card_sha256": _file_sha256(card_path),
-                        "distill_model": result.distill_model,
-                        "chunk_ids": [row["chunk_id"] for row in segment_rows],
-                        "producer": "Core_EVIDENCE_EXTRACTION_DISTILL_REUSED",
-                    }
-                    _atomic_json(receipt_path, receipt)
-                raw_shard = {
-                    "schema_version": "long_document-segment-fact-shard-v1",
-                    "artifact_kind": "segment_fact_shard",
-                    "paper_id": manifest["paper_id"],
-                    "segment_id": segment["segment_id"],
-                    "attempt_id": f"core-card-{sequence:03d}",
-                    "source_manifest_hash": manifest["source_manifest_hash"],
-                    "topology_hash": topology["topology_hash"],
-                    "expected_core_chunk_ids": segment["core_chunk_ids"],
-                    "observed_source_ids": [],
-                    "terminal_marker": "LONG_DOCUMENT_SEGMENT_COMPLETE",
-                    "facts": [],
-                    "slot_observations": [],
-                    "high_risk_tokens": [],
-                    "local_conflicts": [],
-                    "capacity_state": "complete",
-                    "producer_receipt_ref": f"sha256:{receipt['card_sha256']}",
-                }
-                shard = validator.validate(raw_shard, provider_receipt={"finish_reason": "stop"})
-                ledger.record_attempt(
-                    segment_id=segment["segment_id"],
-                    attempt_id=raw_shard["attempt_id"],
-                    state="terminal",
-                    receipt_ref=raw_shard["producer_receipt_ref"],
-                )
-                ledger.admit(shard)
+                _admit_segment(validator, ledger, paper.manifest, topology, segment, receipt)
                 cards.append(_frontmatter(card_path))
                 segment_receipts.append(receipt)
                 node_units.complete(segment["segment_id"])
@@ -822,10 +876,105 @@ class CoreSegmentedDistiller:
         _atomic_json(self.evidence_root / "segment_completion_ledger.json", completion)
         if completion["recovery_state"] != "completed" or completion["missing_segment_ids"]:
             raise RuntimeError("Capabilities_SEGMENT_COMPLETION_BARRIER_NOT_CLOSED")
-        final_card, aggregation = _aggregate_cards(cards)
-        card_path = folder / file_name(
-            "Card", frontmatter["paper_id"], display_title(frontmatter["title"]), "md"
+        return cards, segment_receipts, completion
+
+    def _distill_segment(
+        self,
+        paper: _SourcePaper,
+        profile: CapacityProfile | None,
+        topology: dict[str, Any],
+        segment: Mapping[str, Any],
+        legacy_distill: Callable[..., DistillResult],
+        *,
+        target: str,
+    ) -> tuple[Path, dict[str, Any]]:
+        """One segment: write its CleanMD and chunks into its own folder, then read back the card its
+        receipt binds, or distill it (splitting it further when the output limit cuts it off) and
+        write the receipt. Returns the card's path and the receipt."""
+        manifest = paper.manifest
+        sequence = int(segment["sequence_index"])
+        segment_root = self.evidence_root / "segments" / f"{sequence:03d}_{segment['segment_id']}"
+        paper_root = segment_root / "paper"
+        paper_root.mkdir(parents=True, exist_ok=True)
+        segment_rows = _segment_records(paper.records, manifest, segment)
+        segment_clean = paper_root / paper.cleanmd.name
+        segment_chunks = paper_root / paper.chunks_path.name
+        _atomic_text(segment_clean, paper.cleanmd.read_text(encoding="utf-8"))
+        _atomic_text(
+            segment_chunks,
+            "".join(
+                json.dumps(row, ensure_ascii=False, allow_nan=False, sort_keys=True) + "\n"
+                for row in segment_rows
+            ),
         )
+        input_identity = {
+            "source_manifest_hash": manifest["source_manifest_hash"],
+            "topology_hash": topology["topology_hash"],
+            "segment_id": segment["segment_id"],
+            "execution_profile_hash": _sha256(self.workflow_config["nodes"]["03_CARD_DISTILL"]),
+            "clean_sha256": _file_sha256(segment_clean),
+            "chunks_sha256": _file_sha256(segment_chunks),
+        }
+        receipt_path = segment_root / "segment_receipt.json"
+        existing_cards = sorted(paper_root.glob("[[]Card[]]*.md"))
+        if receipt_path.is_file() and len(existing_cards) == 1:
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if receipt.get("input_identity") != input_identity or receipt.get("card_sha256") != _file_sha256(existing_cards[0]):
+                raise RuntimeError(f"Capabilities_SEGMENT_REPLAY_CONFLICT:{segment['segment_id']}")
+            return existing_cards[0], receipt
+        if existing_cards or receipt_path.exists():
+            raise RuntimeError(f"Capabilities_SEGMENT_PARTIAL_REPLAY_STATE:{segment['segment_id']}")
+        segment_kwargs = _legacy_kwargs(legacy_distill, profile, target=target, overwrite=False)
+        child_root = segment_root/'subsegments'
+        if (child_root/'adaptive_segment_fallback.json').is_file():
+            result = CoreSegmentedDistiller(workflow_config=self.workflow_config,
+                evidence_root=child_root, _split_depth=self._split_depth+1).distill(
+                    paper_root, target=target, legacy_distill=legacy_distill)
+        else:
+            result = legacy_distill(paper_root, **segment_kwargs)
+        if _is_output_truncation(result):
+            if self._split_depth >= topology['max_split_depth']:
+                raise RuntimeError('Capabilities_SEGMENT_CAPACITY_UNRESOLVED:MAX_SPLIT_DEPTH')
+            # Reuse this adapter on the failed segment only. The prior
+            # response becomes its persisted handoff; never send that
+            # unchanged segment again before dividing it.
+            child = CoreSegmentedDistiller(workflow_config=self.workflow_config,
+                evidence_root=child_root, _split_depth=self._split_depth+1)
+            result = child.distill(paper_root, target=target,
+                legacy_distill=legacy_distill, _prior_truncation=result)
+        if result.status != "completed" or not result.card_path:
+            raise RuntimeError(
+                f"Capabilities_SEGMENT_Core_DISTILL_FAILED:{segment['segment_id']}:{result.error_type}:{result.error_message}"
+            )
+        card_path = Path(result.card_path)
+        receipt = {
+            "schema_version": "DesktopLongDocumentSegmentReceipt-v1",
+            "input_identity": input_identity,
+            "card_sha256": _file_sha256(card_path),
+            "distill_model": result.distill_model,
+            "chunk_ids": [row["chunk_id"] for row in segment_rows],
+            "producer": "Core_EVIDENCE_EXTRACTION_DISTILL_REUSED",
+        }
+        _atomic_json(receipt_path, receipt)
+        return card_path, receipt
+
+    def _assemble_card(
+        self,
+        paper: _SourcePaper,
+        route: _ChosenRoute,
+        topology: dict[str, Any],
+        cards: list[dict[str, Any]],
+        segment_receipts: list[dict[str, Any]],
+        completion: dict[str, Any],
+        adaptive_fallback: dict[str, Any] | None,
+        *,
+        overwrite: bool,
+    ) -> DistillResult:
+        """Merge the segment cards into the paper's card (or check the one already written against
+        them), write card_assembly.json and the run summary, and return the result."""
+        frontmatter = paper.frontmatter
+        final_card, aggregation = _aggregate_cards(cards)
+        card_path = paper.card_path()
         recovered_existing_final_card = False
         if card_path.is_file() and not overwrite:
             replay_card, self_check = _validate_replay_card(
@@ -846,7 +995,7 @@ class CoreSegmentedDistiller:
         assembly = {
             "schema_version": "DesktopLongDocumentCoreCardAssembly-v1",
             "adapter_profile_revision": ADAPTER_PROFILE_REVISION,
-            "source_manifest_hash": manifest["source_manifest_hash"],
+            "source_manifest_hash": paper.manifest["source_manifest_hash"],
             "topology_hash": topology["topology_hash"],
             "completion_ledger_hash": completion["content_hash"],
             "segment_card_sha256s": [receipt["card_sha256"] for receipt in segment_receipts],
@@ -854,8 +1003,14 @@ class CoreSegmentedDistiller:
             **aggregation,
         }
         _atomic_json(self.evidence_root / "card_assembly.json", assembly)
+        if route.by_size:
+            effective_route = "SEGMENTED_BY_DOCUMENT_SIZE_ROUTE_SIGNAL"
+        elif adaptive_fallback is not None:
+            effective_route = "SEGMENTED_AFTER_OUTPUT_TRUNCATION"
+        else:
+            effective_route = route.decision.value
         self.last_metrics = {
-            **route_evidence,
+            **route.evidence,
             "route": effective_route,
             "segment_count": len(topology["segments"]),
             "core_short_path_unchanged": False,
@@ -872,9 +1027,10 @@ class CoreSegmentedDistiller:
             card_path=str(card_path),
             distill_model=final_card["distill_model"],
             distilled_at=str(final_card["distilled_at"]),
-            chunk_count=len(records),
+            chunk_count=len(paper.records),
             self_check=self_check,
         )
+
 
 
 __all__ = [
