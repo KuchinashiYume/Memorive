@@ -66,6 +66,7 @@ from memorive.models.validation.structured import (
 from memorive.models.validation.transport import (
     BoundedSubprocessTransport,
     HttpTransport,
+    ProcessResult,
     ProcessTransport,
     UrllibHttpTransport,
     _ResponseInterrupted,
@@ -447,6 +448,73 @@ class _ChatAttempt:
             "external_model_calls": external_model_calls,
             "external_process_launches": external_process_launches,
             "execution_receipt": execution_receipt,
+        }
+
+    def tool_failed(
+        self,
+        reason: str,
+        *,
+        returned_model: str | None = None,
+        transport_diagnostic: Mapping[str, Any] | None = None,
+    ) -> Mapping[str, Any]:
+        """A failed result after the command-line tool ran: one model call and one process launch, no
+        direct network or provider call, the usage the tool reported so far."""
+        return self.failed(
+            reason,
+            returned_model=returned_model,
+            raw_usage=self.usage,
+            external_network_calls=0,
+            provider_calls=0,
+            external_model_calls=1,
+            external_process_launches=1,
+            route=self.route,
+            region=self.region,
+            egress=self.egress,
+            transport_diagnostic=transport_diagnostic,
+        )
+
+    def bind_request_model(self, adapter_id: str, argv: Sequence[str]) -> None:
+        """The command line must name exactly the requested model once; record that binding (binary,
+        version, command line, allow-list) on the attempt and in its transport diagnostic."""
+        model_indices = [
+            index for index, item in enumerate(argv) if item == "--model"
+        ]
+        if (
+            len(model_indices) != 1
+            or model_indices[0] + 1 >= len(argv)
+            or argv[model_indices[0] + 1] != self.requested_model
+        ):
+            raise ValueError("CODEX_REQUEST_MODEL_ARGV_INVALID")
+        self.model_allowlist_sha256 = json_sha256(
+            {"allowed_models": [self.requested_model]}
+        )
+        self.request_model_binding_sha256 = json_sha256(
+            {
+                "adapter_id": adapter_id,
+                "binary_sha256": self.cli_binary_sha256,
+                "cli_version": self.cli_version,
+                "argv_sha256": json_sha256(list(argv)),
+                "model_flag_index": model_indices[0],
+                "requested_model": self.requested_model,
+                "model_allowlist_sha256": self.model_allowlist_sha256,
+                "behavior_sha256": self.behavior_hash,
+            }
+        )
+        self.request_model_binding_status = (
+            "EXACT_ARGV_BINARY_AND_FROZEN_ALLOWLIST"
+        )
+        self.transport_diagnostic = {
+            **dict(self.transport_diagnostic or {}),
+            "request_model_binding_status": (
+                self.request_model_binding_status
+            ),
+            "request_model_binding_sha256": (
+                self.request_model_binding_sha256
+            ),
+            "model_allowlist_sha256": self.model_allowlist_sha256,
+            "cli_binary_sha256": self.cli_binary_sha256,
+            "cli_version": self.cli_version,
+            "identity_authority_ref": self.cli_identity_authority_ref,
         }
 
 
@@ -1111,12 +1179,29 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         attempt.route = "EXISTING_SETTINGS_API_TRANSPORT"
 
     def _send_cli(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
-        """Run the command-line tool; a failed result, or None with the reply on attempt."""
+        """Run the command-line tool; a failed result, or None with the reply on attempt.
+
+        _cli_executable finds the tool (and checks its exact identity when the profile asks for it),
+        _run_cli runs it once in a fresh workspace, _cli_exit_failure reads how the run ended and
+        _read_cli_reply reads the reply (for Codex its event stream first). Every result after the tool
+        ran counts one model call and one process launch (_ChatAttempt.tool_failed).
+        """
         adapter_id = attempt.service.get("adapter_id")
-        executable_value = attempt.service.get("executable")
         if not isinstance(adapter_id, str):
             raise ValueError("CLI_ADAPTER_UNSUPPORTED")
         attempt.route, attempt.region, attempt.egress = _cli_receipt_route(adapter_id)
+        executable = self._cli_executable(attempt)
+        process, continuation = self._run_cli(attempt, adapter_id, executable)
+        failed = self._cli_exit_failure(attempt, process, continuation)
+        if failed is not None:
+            return failed
+        return self._read_cli_reply(attempt, adapter_id, process, continuation)
+
+    def _cli_executable(self, attempt: "_ChatAttempt") -> str:
+        """The tool's resolved executable. When the profile asks for the tool's exact identity, the
+        binary's hash, its version and the identity record must be given and match; they go onto the
+        attempt."""
+        executable_value = attempt.service.get("executable")
         if not isinstance(executable_value, str):
             raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
         executable = self._executable_resolver(executable_value)
@@ -1144,6 +1229,15 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             attempt.cli_binary_sha256 = expected_binary_sha256.upper()
             attempt.cli_version = cli_version_value
             attempt.cli_identity_authority_ref = identity_authority_value
+        return executable
+
+    def _run_cli(
+        self, attempt: "_ChatAttempt", adapter_id: str, executable: str
+    ) -> tuple[ProcessResult, Continuation]:
+        """Run the tool once in a fresh workspace: the response schema file (Codex), the command line,
+        the continuation of an earlier session when the profile keeps one, the check that the command
+        names exactly the requested model (when the profile asks), the run, and the session record
+        afterwards. Returns the process result and the continuation."""
         thinking_mode = attempt.model.get("thinking_mode", "")
         if not isinstance(thinking_mode, str):
             thinking_mode = ""
@@ -1190,46 +1284,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 stdin_bytes = continuation.prompt_bytes
                 attempt.behavior_hash = hashlib.sha256(stdin_bytes).hexdigest().upper()
             if attempt.strict_cli_identity_binding:
-                model_indices = [
-                    index for index, item in enumerate(argv) if item == "--model"
-                ]
-                if (
-                    len(model_indices) != 1
-                    or model_indices[0] + 1 >= len(argv)
-                    or argv[model_indices[0] + 1] != attempt.requested_model
-                ):
-                    raise ValueError("CODEX_REQUEST_MODEL_ARGV_INVALID")
-                attempt.model_allowlist_sha256 = json_sha256(
-                    {"allowed_models": [attempt.requested_model]}
-                )
-                attempt.request_model_binding_sha256 = json_sha256(
-                    {
-                        "adapter_id": adapter_id,
-                        "binary_sha256": attempt.cli_binary_sha256,
-                        "cli_version": attempt.cli_version,
-                        "argv_sha256": json_sha256(list(argv)),
-                        "model_flag_index": model_indices[0],
-                        "requested_model": attempt.requested_model,
-                        "model_allowlist_sha256": attempt.model_allowlist_sha256,
-                        "behavior_sha256": attempt.behavior_hash,
-                    }
-                )
-                attempt.request_model_binding_status = (
-                    "EXACT_ARGV_BINARY_AND_FROZEN_ALLOWLIST"
-                )
-                attempt.transport_diagnostic = {
-                    **dict(attempt.transport_diagnostic or {}),
-                    "request_model_binding_status": (
-                        attempt.request_model_binding_status
-                    ),
-                    "request_model_binding_sha256": (
-                        attempt.request_model_binding_sha256
-                    ),
-                    "model_allowlist_sha256": attempt.model_allowlist_sha256,
-                    "cli_binary_sha256": attempt.cli_binary_sha256,
-                    "cli_version": attempt.cli_version,
-                    "identity_authority_ref": attempt.cli_identity_authority_ref,
-                }
+                attempt.bind_request_model(adapter_id, argv)
             process = self.process_transport.run(
                 argv=argv,
                 cwd=str(workspace),
@@ -1249,15 +1304,23 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             continuation.complete(process, _structured_document_from_output(process.stdout), attempt.response_schema,
                 events_accepted=events_accepted)
             attempt.transport_diagnostic = {**dict(attempt.transport_diagnostic or {}), **continuation.diagnostic}
-            if (continuation.enabled and process.started and process.returncode == 0
-                    and continuation.diagnostic.get("session_record_status") != "SUCCESS"):
-                return attempt.failed(
-                    "CODEX_CONTINUATION_VALIDATION_FAILED", returned_model=None,
-                    raw_usage=continuation.attempt_usage or {}, external_network_calls=0,
-                    provider_calls=0, external_model_calls=1, external_process_launches=1,
-                    route=attempt.route, region=attempt.region,
-                    egress=attempt.egress, transport_diagnostic=attempt.transport_diagnostic,
-                )
+        return process, continuation
+
+    def _cli_exit_failure(
+        self, attempt: "_ChatAttempt", process: ProcessResult, continuation: Continuation
+    ) -> Mapping[str, Any] | None:
+        """How the run ended: a continuation whose session record failed, a tool that did not start,
+        ran out of time, wrote more than allowed or exited with an error gives a failed result.
+        Otherwise None, with the run's output sizes and the usage it reported on the attempt."""
+        if (continuation.enabled and process.started and process.returncode == 0
+                and continuation.diagnostic.get("session_record_status") != "SUCCESS"):
+            return attempt.failed(
+                "CODEX_CONTINUATION_VALIDATION_FAILED", returned_model=None,
+                raw_usage=continuation.attempt_usage or {}, external_network_calls=0,
+                provider_calls=0, external_model_calls=1, external_process_launches=1,
+                route=attempt.route, region=attempt.region,
+                egress=attempt.egress, transport_diagnostic=attempt.transport_diagnostic,
+            )
         if not process.started:
             return attempt.failed("CLI_PROCESS_START_FAILED", returned_model=None,
                 raw_usage=None, external_network_calls=0, provider_calls=0,
@@ -1280,32 +1343,12 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         }
         attempt.usage = (continuation.attempt_usage or {}) if continuation.enabled else _usage_from_cli_output(process.stdout)
         if process.timed_out:
-            return attempt.failed(
-                "CLI_STRUCTURED_CHAT_TIMEOUT",
-                returned_model=None,
-                raw_usage=attempt.usage,
-                external_network_calls=0,
-                provider_calls=0,
-                external_model_calls=1,
-                external_process_launches=1,
-                route=attempt.route,
-                region=attempt.region,
-                egress=attempt.egress,
-                transport_diagnostic=attempt.transport_diagnostic,
+            return attempt.tool_failed(
+                "CLI_STRUCTURED_CHAT_TIMEOUT", transport_diagnostic=attempt.transport_diagnostic
             )
         if process.output_truncated:
-            return attempt.failed(
-                "CLI_OUTPUT_LIMIT_EXCEEDED",
-                returned_model=None,
-                raw_usage=attempt.usage,
-                external_network_calls=0,
-                provider_calls=0,
-                external_model_calls=1,
-                external_process_launches=1,
-                route=attempt.route,
-                region=attempt.region,
-                egress=attempt.egress,
-                transport_diagnostic=attempt.transport_diagnostic,
+            return attempt.tool_failed(
+                "CLI_OUTPUT_LIMIT_EXCEEDED", transport_diagnostic=attempt.transport_diagnostic
             )
         if process.returncode != 0:
             from memorive.models.cli.verification_transport import failure_reason
@@ -1313,175 +1356,126 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 **dict(attempt.transport_diagnostic or {}),
                 **dict(_cli_failure_diagnostic(process)),
             }
-            return attempt.failed(
+            return attempt.tool_failed(
                 failure_reason(process.stderr + b"\n" + process.stdout),
-                returned_model=None,
-                raw_usage=attempt.usage,
-                external_network_calls=0,
-                provider_calls=0,
-                external_model_calls=1,
-                external_process_launches=1,
-                route=attempt.route,
-                region=attempt.region,
-                egress=attempt.egress,
                 transport_diagnostic=failure_diagnostic,
             )
+        return None
+
+    def _read_cli_reply(
+        self, attempt: "_ChatAttempt", adapter_id: str, process: ProcessResult, continuation: Continuation
+    ) -> Mapping[str, Any] | None:
+        """The reply: for Codex its event stream first (_check_codex_events); then the models the tool
+        reports must include the requested one (for the strict purposes a tool other than Codex must
+        report one), and the answer document must be there. None with the answer on the attempt, or a
+        failed result."""
         if adapter_id == "codex_cli":
-            execution_diagnostic, execution_error = _execution_codex_event_diagnostic(
-                process.stdout, attempt.requested_model
-            )
-            if execution_error is not None and attempt.purpose in {
-                "workflow_model_exam", "conversation_refinement",
-                "core_document_processing",
-                "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
-            }:
-                return attempt.failed(
-                    execution_error,
-                    returned_model=None,
-                    raw_usage=attempt.usage,
-                    external_network_calls=0,
-                    provider_calls=0,
-                    external_model_calls=1,
-                    external_process_launches=1,
-                    route=attempt.route,
-                    region=attempt.region,
-                    egress=attempt.egress,
-                    transport_diagnostic={
-                        **dict(attempt.transport_diagnostic or {}),
-                        "execution_parser_error": execution_error,
-                        "stdout_sha256": hashlib.sha256(
-                            process.stdout
-                        ).hexdigest().upper(),
-                    },
-                )
-            if execution_error is not None:
-                attempt.transport_diagnostic = {
-                    **dict(attempt.transport_diagnostic or {}),
-                    "execution_parser_error": execution_error,
-                    "execution_parser_compatibility_fallback": True,
-                    "stdout_sha256": hashlib.sha256(
-                        process.stdout
-                    ).hexdigest().upper(),
-                }
-            if isinstance(execution_diagnostic, Mapping):
-                attempt.transport_diagnostic = {
-                    **dict(attempt.transport_diagnostic or {}),
-                    "execution_parser_version": execution_diagnostic.get(
-                        "parser_version"
-                    ),
-                    "execution_events_sha256": execution_diagnostic.get(
-                        "events_sha256"
-                    ),
-                    "execution_model_identity_grade": execution_diagnostic.get(
-                        "model_identity_grade"
-                    ),
-                    "execution_returned_model": execution_diagnostic.get(
-                        "returned_model"
-                    ),
-                    "execution_usage_status": execution_diagnostic.get(
-                        "usage_status"
-                    ),
-                }
-                if execution_diagnostic.get("finish_status") != "SUCCESS":
-                    return attempt.failed(
-                        "CODEX_JSONL_FINISH_NOT_SUCCESS",
-                        returned_model=(
-                            execution_diagnostic.get("returned_model")
-                            if isinstance(
-                                execution_diagnostic.get("returned_model"), str
-                            )
-                            else None
-                        ),
-                        raw_usage=attempt.usage,
-                        external_network_calls=0,
-                        provider_calls=0,
-                        external_model_calls=1,
-                        external_process_launches=1,
-                        route=attempt.route,
-                        region=attempt.region,
-                        egress=attempt.egress,
-                        transport_diagnostic=attempt.transport_diagnostic,
-                    )
-                if execution_diagnostic.get("model_identity_grade") == "CONFLICT":
-                    return attempt.failed(
-                        "CLI_RETURNED_MODEL_MISMATCH",
-                        returned_model=(
-                            execution_diagnostic.get("returned_model")
-                            if isinstance(
-                                execution_diagnostic.get("returned_model"), str
-                            )
-                            else None
-                        ),
-                        raw_usage=attempt.usage,
-                        external_network_calls=0,
-                        provider_calls=0,
-                        external_model_calls=1,
-                        external_process_launches=1,
-                        route=attempt.route,
-                        region=attempt.region,
-                        egress=attempt.egress,
-                        transport_diagnostic=attempt.transport_diagnostic,
-                    )
-                execution_usage = execution_diagnostic.get("token_usage")
-                if isinstance(execution_usage, Mapping) and not continuation.enabled:
-                    attempt.usage = {
-                        **dict(attempt.usage),
-                        **dict(execution_usage),
-                    }
+            failed = self._check_codex_events(attempt, process, continuation)
+            if failed is not None:
+                return failed
         reported = _reported_models(process.stdout)
         if reported and attempt.requested_model not in reported:
-            return attempt.failed(
+            return attempt.tool_failed(
                 "CLI_RETURNED_MODEL_MISMATCH",
                 returned_model=(
                     next(iter(reported)) if len(reported) == 1 else None
                 ),
-                raw_usage=attempt.usage,
-                external_network_calls=0,
-                provider_calls=0,
-                external_model_calls=1,
-                external_process_launches=1,
-                route=attempt.route,
-                region=attempt.region,
-                egress=attempt.egress,
             )
         if (
             attempt.purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
             and not reported
             and adapter_id != "codex_cli"
         ):
-            return attempt.failed(
-                "CLI_RETURNED_MODEL_EVIDENCE_MISSING",
-                returned_model=None,
-                raw_usage=attempt.usage,
-                external_network_calls=0,
-                provider_calls=0,
-                external_model_calls=1,
-                external_process_launches=1,
-                route=attempt.route,
-                region=attempt.region,
-                egress=attempt.egress,
-            )
+            return attempt.tool_failed("CLI_RETURNED_MODEL_EVIDENCE_MISSING")
         attempt.response = _structured_document_from_output(process.stdout) or {}
         if continuation.enabled:
             attempt.response = attempt.response.get("payload") if isinstance(attempt.response, dict) and set(attempt.response) == {"payload"} else {}
         if not attempt.response:
-            return attempt.failed(
+            return attempt.tool_failed(
                 "STRUCTURED_CHAT_RESPONSE_INVALID",
                 returned_model=attempt.requested_model if reported else None,
-                raw_usage=attempt.usage,
-                external_network_calls=0,
-                provider_calls=0,
-                external_model_calls=1,
-                external_process_launches=1,
-                route=attempt.route,
-                region=attempt.region,
-                egress=attempt.egress,
             )
         # Codex CLI binds the selected model through the exact --model
         # argument.  Current JSONL may omit a redundant model field; a
         # successful process with no contradictory identity still binds
         # the returned identity to that exact invocation.
         attempt.returned_model = attempt.requested_model
+        return None
+
+    def _check_codex_events(
+        self, attempt: "_ChatAttempt", process: ProcessResult, continuation: Continuation
+    ) -> Mapping[str, Any] | None:
+        """Codex's JSONL event stream: it must parse, the turn must finish successfully and name no
+        other model; its parser identity goes into the transport diagnostic and its token usage into
+        the attempt (unless a continuation already counted it). None, or a failed result."""
+        execution_diagnostic, execution_error = _execution_codex_event_diagnostic(
+            process.stdout, attempt.requested_model
+        )
+        if execution_error is not None and attempt.purpose in {
+            "workflow_model_exam", "conversation_refinement",
+            "core_document_processing",
+            "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing",
+        }:
+            return attempt.tool_failed(
+                execution_error,
+                transport_diagnostic={
+                    **dict(attempt.transport_diagnostic or {}),
+                    "execution_parser_error": execution_error,
+                    "stdout_sha256": hashlib.sha256(
+                        process.stdout
+                    ).hexdigest().upper(),
+                },
+            )
+        if execution_error is not None:
+            attempt.transport_diagnostic = {
+                **dict(attempt.transport_diagnostic or {}),
+                "execution_parser_error": execution_error,
+                "execution_parser_compatibility_fallback": True,
+                "stdout_sha256": hashlib.sha256(
+                    process.stdout
+                ).hexdigest().upper(),
+            }
+        if not isinstance(execution_diagnostic, Mapping):
+            return None
+        attempt.transport_diagnostic = {
+            **dict(attempt.transport_diagnostic or {}),
+            "execution_parser_version": execution_diagnostic.get(
+                "parser_version"
+            ),
+            "execution_events_sha256": execution_diagnostic.get(
+                "events_sha256"
+            ),
+            "execution_model_identity_grade": execution_diagnostic.get(
+                "model_identity_grade"
+            ),
+            "execution_returned_model": execution_diagnostic.get(
+                "returned_model"
+            ),
+            "execution_usage_status": execution_diagnostic.get(
+                "usage_status"
+            ),
+        }
+        returned_model = execution_diagnostic.get("returned_model")
+        returned_model = returned_model if isinstance(returned_model, str) else None
+        if execution_diagnostic.get("finish_status") != "SUCCESS":
+            return attempt.tool_failed(
+                "CODEX_JSONL_FINISH_NOT_SUCCESS",
+                returned_model=returned_model,
+                transport_diagnostic=attempt.transport_diagnostic,
+            )
+        if execution_diagnostic.get("model_identity_grade") == "CONFLICT":
+            return attempt.tool_failed(
+                "CLI_RETURNED_MODEL_MISMATCH",
+                returned_model=returned_model,
+                transport_diagnostic=attempt.transport_diagnostic,
+            )
+        execution_usage = execution_diagnostic.get("token_usage")
+        if isinstance(execution_usage, Mapping) and not continuation.enabled:
+            attempt.usage = {
+                **dict(attempt.usage),
+                **dict(execution_usage),
+            }
+        return None
 
     def _send_local(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
         """Ask the local model; a failed result, or None with the reply on attempt."""
