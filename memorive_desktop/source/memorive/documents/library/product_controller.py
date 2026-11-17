@@ -1343,23 +1343,7 @@ class LibraryProductController:
             self._require_keys(accepted, set())
             return self._contract()
         if method == "library.bootstrap":
-            self._require_keys(accepted, set())
-            if not self._service_ready():
-                raise LibraryProductError("LIBRARY_SERVICE_HEALTH_CONTRACT_INVALID")
-            literature = self._list({"view": "literature", "page": 1, "page_size": 100})
-            memorive = self._list({"view": "memorive", "page": 1, "page_size": 100})
-            records = literature["rows"] + memorive["rows"]
-            return {
-                "schema_version": "LibraryLibraryBootstrapProjection-v1",
-                "records": records,
-                "record_count": len(records),
-                "catalog_count": len(self._rows_by_id),
-                "binding_count": len(self._rows_by_id),
-                "synthetic_only": not bool(self._refinement_artifact_ids or self._core_artifact_ids or self._research_artifact_ids),
-                "canonical_artifact_registry_actual_reads": 0,
-                "external_view_execution": "DISABLED_VALIDATE_ONLY",
-                "status": "PASS",
-            }
+            return self._bootstrap(accepted)
         if method == "library.list_artifacts":
             self._require_keys(accepted, set(), {"view", "search", "status_filter", "kind_filter", "sort", "page", "page_size"})
             return self._list(accepted)
@@ -1367,25 +1351,7 @@ class LibraryProductController:
             self._require_keys(accepted, {"artifact_id"})
             return {"schema_version": "LibraryLibraryDetailProjection-v1", "artifact": self.get_artifact(str(accepted["artifact_id"])), "status": "PASS"}
         if method == "library.get_artifact_bindings":
-            self._require_keys(accepted, set(), {"artifact_id"})
-            artifact_id = accepted.get("artifact_id")
-            rows = [row for row in self.cached_rows() if artifact_id is None or row["artifact_id"] == artifact_id]
-            return {
-                "schema_version": "LibraryArtifactBindingProjection-v1",
-                "bindings": [
-                    {
-                        "artifact_id": row["artifact_id"],
-                        "view_snapshot_id": row["view_snapshot_id"],
-                        "stable_locator": row["stable_locator"],
-                        "lineage": deepcopy(row["lineage"]),
-                        "rights_status": row["rights_status"],
-                    }
-                    for row in rows
-                ],
-                "binding_count": len(rows),
-                "canonical_artifact_registry_actual_reads": 0,
-                "status": "PASS",
-            }
+            return self._get_artifact_bindings(accepted)
         if method == "library.get_lineage":
             self._require_keys(accepted, {"artifact_id"})
             row = self.get_artifact(str(accepted["artifact_id"]))
@@ -1417,20 +1383,7 @@ class LibraryProductController:
             self._save(state)
             return {"schema_version": "LibraryArtifactBoundReceipt-v1", "artifact_id": artifact_id, "stable_locator": self._rows_by_id[artifact_id]["stable_locator"], "status": "PASS"}
         if method == "library.resolve_locator":
-            self._require_keys(accepted, {"stable_locator"})
-            locator = str(accepted["stable_locator"])
-            prefix = "memorive://artifact/"
-            if not locator.startswith(prefix):
-                raise LibraryProductError("LIBRARY_LOCATOR_INVALID")
-            requested_id = locator[len(prefix) :]
-            selected = self.get_artifact(requested_id)
-            artifact_id = str(selected["artifact_id"])
-            locator = str(selected["stable_locator"])
-            state = self._load()
-            state["locator_history"].append({"stable_locator": locator, "artifact_id": artifact_id})
-            state["locator_history"] = state["locator_history"][-16:]
-            self._save(state)
-            return {"schema_version": "LibraryLocatorResolutionReceipt-v1", "stable_locator": locator, "artifact_id": artifact_id, "view":selected["mode"], "route": "library", "fuzzy_match_attempted": False, "canonical_artifact_registry_actual_reads": 0, "status": "PASS"}
+            return self._resolve_locator(accepted)
         if method == "library.validate_external_view":
             self._require_keys(accepted, {"artifact_id"})
             return self._safe_view(str(accepted["artifact_id"]))
@@ -1453,29 +1406,7 @@ class LibraryProductController:
             self._require_keys(accepted, set())
             return {"schema_version": "LibraryLibraryRefreshReceipt-v1", "catalog_count": len(self._rows_by_id), "canonical_artifact_registry_actual_reads": 0, "status": "PASS"}
         if method == "library.inject_fault":
-            self._require_keys(accepted, {"fault"})
-            fault = str(accepted["fault"])
-            classifications = {
-                "duplicate_display_name": "IDENTITIES_REMAIN_DISTINCT_BY_ARTIFACT_ID",
-                "path_changed": "STABLE_LOCATOR_PRESERVED_SOURCE_PATH_STALE",
-                "orphan_lineage": "ORPHAN_VISIBLE_FAIL_CLOSED_NO_FUZZY_BIND",
-                "rights_blocked": "SAFE_EXTERNAL_VIEW_BLOCKED",
-                "large_directory": "PAGED_SYNTHETIC_PROJECTION_ONLY",
-                "missing": "MISSING_VISIBLE_NO_OPEN",
-                "stale": "STALE_VISIBLE_REFRESH_ZERO_CANONICAL_ACCESS",
-                "unsupported": "UNSUPPORTED_SUFFIX_BLOCKED",
-            }
-            if fault not in classifications:
-                raise LibraryProductError("LIBRARY_FAULT_UNKNOWN")
-            return {
-                "schema_version": "LibraryLibraryFaultReceipt-v1",
-                "fault": fault,
-                "classification": classifications[fault],
-                "canonical_artifact_registry_actual_reads": 0,
-                "launch_performed": False,
-                "restricted_effects": 0,
-                "status": "PASS",
-            }
+            return self._inject_fault(accepted)
         if method == "library.restore":
             self._require_keys(accepted, set())
             state = self._load()
@@ -1488,6 +1419,87 @@ class LibraryProductController:
             "restricted_effect_total": restricted_total,
             "synthetic_only": not bool(self._refinement_artifact_ids or self._core_artifact_ids or self._research_artifact_ids),
             "status": "PASS" if restricted_total == 0 else "FAIL",
+        }
+
+    def _bootstrap(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, set())
+        if not self._service_ready():
+            raise LibraryProductError("LIBRARY_SERVICE_HEALTH_CONTRACT_INVALID")
+        literature = self._list({"view": "literature", "page": 1, "page_size": 100})
+        memorive = self._list({"view": "memorive", "page": 1, "page_size": 100})
+        records = literature["rows"] + memorive["rows"]
+        return {
+            "schema_version": "LibraryLibraryBootstrapProjection-v1",
+            "records": records,
+            "record_count": len(records),
+            "catalog_count": len(self._rows_by_id),
+            "binding_count": len(self._rows_by_id),
+            "synthetic_only": not bool(self._refinement_artifact_ids or self._core_artifact_ids or self._research_artifact_ids),
+            "canonical_artifact_registry_actual_reads": 0,
+            "external_view_execution": "DISABLED_VALIDATE_ONLY",
+            "status": "PASS",
+        }
+
+    def _get_artifact_bindings(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, set(), {"artifact_id"})
+        artifact_id = accepted.get("artifact_id")
+        rows = [row for row in self.cached_rows() if artifact_id is None or row["artifact_id"] == artifact_id]
+        return {
+            "schema_version": "LibraryArtifactBindingProjection-v1",
+            "bindings": [
+                {
+                    "artifact_id": row["artifact_id"],
+                    "view_snapshot_id": row["view_snapshot_id"],
+                    "stable_locator": row["stable_locator"],
+                    "lineage": deepcopy(row["lineage"]),
+                    "rights_status": row["rights_status"],
+                }
+                for row in rows
+            ],
+            "binding_count": len(rows),
+            "canonical_artifact_registry_actual_reads": 0,
+            "status": "PASS",
+        }
+
+    def _resolve_locator(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, {"stable_locator"})
+        locator = str(accepted["stable_locator"])
+        prefix = "memorive://artifact/"
+        if not locator.startswith(prefix):
+            raise LibraryProductError("LIBRARY_LOCATOR_INVALID")
+        requested_id = locator[len(prefix) :]
+        selected = self.get_artifact(requested_id)
+        artifact_id = str(selected["artifact_id"])
+        locator = str(selected["stable_locator"])
+        state = self._load()
+        state["locator_history"].append({"stable_locator": locator, "artifact_id": artifact_id})
+        state["locator_history"] = state["locator_history"][-16:]
+        self._save(state)
+        return {"schema_version": "LibraryLocatorResolutionReceipt-v1", "stable_locator": locator, "artifact_id": artifact_id, "view":selected["mode"], "route": "library", "fuzzy_match_attempted": False, "canonical_artifact_registry_actual_reads": 0, "status": "PASS"}
+
+    def _inject_fault(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, {"fault"})
+        fault = str(accepted["fault"])
+        classifications = {
+            "duplicate_display_name": "IDENTITIES_REMAIN_DISTINCT_BY_ARTIFACT_ID",
+            "path_changed": "STABLE_LOCATOR_PRESERVED_SOURCE_PATH_STALE",
+            "orphan_lineage": "ORPHAN_VISIBLE_FAIL_CLOSED_NO_FUZZY_BIND",
+            "rights_blocked": "SAFE_EXTERNAL_VIEW_BLOCKED",
+            "large_directory": "PAGED_SYNTHETIC_PROJECTION_ONLY",
+            "missing": "MISSING_VISIBLE_NO_OPEN",
+            "stale": "STALE_VISIBLE_REFRESH_ZERO_CANONICAL_ACCESS",
+            "unsupported": "UNSUPPORTED_SUFFIX_BLOCKED",
+        }
+        if fault not in classifications:
+            raise LibraryProductError("LIBRARY_FAULT_UNKNOWN")
+        return {
+            "schema_version": "LibraryLibraryFaultReceipt-v1",
+            "fault": fault,
+            "classification": classifications[fault],
+            "canonical_artifact_registry_actual_reads": 0,
+            "launch_performed": False,
+            "restricted_effects": 0,
+            "status": "PASS",
         }
 
 

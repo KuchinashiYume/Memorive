@@ -924,21 +924,7 @@ class WorkLogProductController:
             self._require_keys(accepted, set())
             return self._contract()
         if method == "work_log.bootstrap":
-            self._require_keys(accepted, set())
-            if not self._service_ready():
-                raise WorkLogProductError("WORK_LOG_SERVICE_HEALTH_CONTRACT_INVALID")
-            projection = self._list({"time_range": "7", "ledger_type": "all", "page": 1, "page_size": 500})
-            return {
-                "schema_version": "WorkLogWorkLogBootstrapProjection-v1",
-                "records": projection["rows"],
-                "record_count": projection["row_count"],
-                "catalog_count": len(self._rows_by_id),
-                "binding_count": len(self._rows_by_id),
-                "view_snapshot_id": projection["view_snapshot_id"],
-                "source_authority_access": "HASH_METADATA_ONLY_NO_RAW_BYTES",
-                "synthetic_only": self.include_synthetic_projection,
-                "status": "PASS",
-            }
+            return self._bootstrap(accepted)
         if method == "work_log.list_entries":
             self._require_keys(
                 accepted,
@@ -956,17 +942,7 @@ class WorkLogProductController:
             milestones = deepcopy(self._rows_by_id[entry_id]["milestones"])
             return {"schema_version": "WorkLogWorkLogMilestoneProjection-v1", "log_entry_id": entry_id, "milestones": milestones, "milestone_count": len(milestones), "raw_private_content_included": False, "status": "PASS"}
         if method == "work_log.set_filter":
-            self._require_keys(
-                accepted,
-                set(),
-                {"time_range", "ledger_type", "search", "severity", "status_axis", "date_from", "date_to", "page", "page_size"},
-            )
-            state = self._load()
-            for key, value in accepted.items():
-                state[key] = value
-            self._save(state)
-            projection = self._list({})
-            return {"schema_version": "WorkLogWorkLogFilterReceipt-v1", "view_snapshot_id": projection["view_snapshot_id"], "row_count": projection["row_count"], "revision": self._load()["revision"], "status": "PASS"}
+            return self._set_filter(accepted)
         if method == "work_log.select":
             self._require_keys(accepted, {"log_entry_id"})
             entry_id = str(accepted["log_entry_id"])
@@ -976,21 +952,7 @@ class WorkLogProductController:
             self._save(state)
             return {"schema_version": "WorkLogWorkLogSelectionReceipt-v1", "log_entry_id": entry_id, "job_id": entry["job_id"], "event_sequence": entry["event_sequence"], "status": "PASS"}
         if method == "work_log.resolve_job_locator":
-            self._require_keys(accepted, {"job_locator"})
-            locator = str(accepted["job_locator"])
-            prefix = "memorive://job/"
-            if not locator.startswith(prefix) or not locator[len(prefix) :]:
-                raise WorkLogProductError("WORK_LOG_JOB_LOCATOR_INVALID")
-            job_id = locator[len(prefix) :]
-            matches = [row for row in self._rows_by_id.values() if row["job_id"] == job_id]
-            if not matches:
-                raise WorkLogProductError("WORK_LOG_JOB_LOCATOR_NOT_FOUND")
-            self._metrics["locator_resolutions"] += 1
-            state = self._load()
-            state["locator_history"].append({"kind": "job", "locator": locator, "job_id": job_id})
-            state["locator_history"] = state["locator_history"][-32:]
-            self._save(state)
-            return {"schema_version": "WorkLogJobLocatorResolutionReceipt-v1", "job_locator": locator, "job_id": job_id, "route": "current-task", "match_count": len(matches), "fuzzy_match_attempted": False, "status": "PASS"}
+            return self._resolve_job_locator(accepted)
         if method == "work_log.resolve_evidence_locator":
             self._require_keys(accepted, {"evidence_locator"})
             locator = str(accepted["evidence_locator"])
@@ -1017,95 +979,11 @@ class WorkLogProductController:
             _, audit = self._export_projection(accepted)
             return {"schema_version": "WorkLogWorkLogExportPreview-v1", "scope": deepcopy(accepted), "row_count": audit["row_count"], "redacted_field_count": audit["redacted_field_count"], "canary_value_hits": 0, "forbidden_key_hits": 0, "files_written": 0, "status": "PASS"}
         if method == "work_log.export_redacted_view":
-            self._require_keys(accepted, {"export_id"}, {"time_range", "ledger_type", "search", "severity", "status_axis", "date_from", "date_to"})
-            export_id = str(accepted["export_id"])
-            destination = self._export_path(export_id)
-            temporary = self.export_root / f".tmp-{export_id}"
-            if destination.exists() or temporary.exists():
-                raise FileExistsError("WORK_LOG_EXPORT_DESTINATION_COLLISION")
-            redacted, audit = self._export_projection(accepted)
-            temporary.mkdir(parents=False, exist_ok=False)
-            try:
-                export_path = temporary / "work_log_public.json"
-                export_bytes = (json.dumps(redacted, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
-                export_path.write_bytes(export_bytes)
-                state = self._load()
-                if state["fault_mode"] == "export_write_failure":
-                    raise OSError("SYNTHETIC_EXPORT_WRITE_FAILURE")
-                manifest = {
-                    "schema_version": "WorkLogWorkLogPublicExportManifest-v1",
-                    "export_id": export_id,
-                    "export_file": "work_log_public.json",
-                    "export_bytes": len(export_bytes),
-                    "export_sha256": _sha256_bytes(export_bytes),
-                    "row_count": audit["row_count"],
-                    "redacted_field_count": audit["redacted_field_count"],
-                    "canary_value_hits": audit["canary_value_hits"],
-                    "forbidden_key_hits": audit["forbidden_key_hits"],
-                    "absolute_path_hits": audit["absolute_path_hits"],
-                    "source_authority_mutations": 0,
-                    "status": "PASS",
-                }
-                manifest_path = temporary / "manifest.json"
-                manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
-                temporary.replace(destination)
-            except Exception:
-                shutil.rmtree(temporary, ignore_errors=True)
-                if destination.exists():
-                    raise RuntimeError("WORK_LOG_EXPORT_ATOMICITY_BREACH")
-                raise
-            self._metrics["synthetic_export_writes"] += 2
-            self._metrics["redacted_field_count"] += audit["redacted_field_count"]
-            state = self._load()
-            state["export_receipts"].append({"export_id": export_id, "export_sha256": manifest["export_sha256"], "row_count": manifest["row_count"]})
-            state["export_receipts"] = state["export_receipts"][-32:]
-            self._save(state)
-            return {"schema_version": "WorkLogRedactedExportReceipt-v1", "export_id": export_id, "relative_directory": f"exports/export-{export_id}", "manifest": manifest, "atomic_write": True, "partial_final_output": False, "source_authority_mutations": 0, "status": "PASS"}
+            return self._export_redacted_view(accepted)
         if method == "work_log.verify_export":
-            self._require_keys(accepted, {"export_id"})
-            export_id = str(accepted["export_id"])
-            destination = self._export_path(export_id)
-            export_path = destination / "work_log_public.json"
-            manifest_path = destination / "manifest.json"
-            if not export_path.is_file() or not manifest_path.is_file():
-                raise WorkLogProductError("WORK_LOG_EXPORT_NOT_FOUND")
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            export_bytes = export_path.read_bytes()
-            text = export_bytes.decode("utf-8")
-            canary_hits = sum(text.casefold().count(str(value).casefold()) for value in self._canaries["values"])
-            forbidden_key_hits = sum(len(re.findall(rf'"[^"\\n]*{re.escape(key)}[^"\\n]*"\s*:', text.casefold())) for key in FORBIDDEN_EXPORT_KEYS)
-            absolute_path_hits = len(re.findall(r'"[A-Za-z]:[\\/]|"\\\\', text))
-            checks = {
-                "manifest_schema": manifest.get("schema_version") == "WorkLogWorkLogPublicExportManifest-v1",
-                "export_sha_exact": manifest.get("export_sha256") == _sha256_bytes(export_bytes),
-                "export_bytes_exact": manifest.get("export_bytes") == len(export_bytes),
-                "canary_hits_zero": canary_hits == 0,
-                "forbidden_key_hits_zero": forbidden_key_hits == 0,
-                "absolute_path_hits_zero": absolute_path_hits == 0,
-                "source_mutations_zero": manifest.get("source_authority_mutations") == 0,
-            }
-            self._metrics["export_verifications"] += 1
-            return {"schema_version": "WorkLogWorkLogExportVerification-v1", "export_id": export_id, "checks": checks, "verification_result": "PASS" if all(checks.values()) else "FAIL", "status": "PASS" if all(checks.values()) else "FAIL"}
+            return self._verify_export(accepted)
         if method == "work_log.inject_fault":
-            self._require_keys(accepted, {"fault"})
-            fault = str(accepted["fault"])
-            classifications = {
-                "duplicate": ("DUPLICATE_IDENTITY_DETECTED_STABLE_DEDUPE", 2),
-                "out_of_order": ("OUT_OF_ORDER_DETECTED_STABLE_SORT", 3),
-                "gap": ("EVENT_SEQUENCE_GAP_VISIBLE_NOT_FILLED", 1),
-                "clock_skew": ("CLOCK_SKEW_VISIBLE_EVENT_SEQUENCE_WINS", 1),
-                "large_stream": ("LARGE_STREAM_PAGED_STABLE_CURSOR", 5000),
-                "corrupt_event": ("CORRUPT_EVENT_PUBLIC_ERROR_NO_RAW_PAYLOAD", 1),
-                "missing_locator": ("MISSING_LOCATOR_FAIL_CLOSED_NO_FUZZY_MATCH", 1),
-                "export_write_failure": ("EXPORT_FAILURE_ATOMIC_NO_PARTIAL_FINAL", 1),
-            }
-            if fault not in classifications:
-                raise WorkLogProductError("WORK_LOG_FAULT_UNKNOWN")
-            state = self._load()
-            state["fault_mode"] = fault
-            self._save(state)
-            classification, affected = classifications[fault]
-            return {"schema_version": "WorkLogWorkLogFaultReceipt-v1", "fault": fault, "classification": classification, "synthetic_affected_rows": affected, "raw_private_content_included": False, "source_authority_mutations": 0, "restricted_effects": 0, "status": "PASS"}
+            return self._inject_fault(accepted)
         if method == "work_log.restore":
             self._require_keys(accepted, set())
             state = self._load()
@@ -1122,6 +1000,146 @@ class WorkLogProductController:
             "synthetic_only": self.include_synthetic_projection,
             "status": "PASS" if restricted_total == 0 else "FAIL",
         }
+
+    def _bootstrap(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, set())
+        if not self._service_ready():
+            raise WorkLogProductError("WORK_LOG_SERVICE_HEALTH_CONTRACT_INVALID")
+        projection = self._list({"time_range": "7", "ledger_type": "all", "page": 1, "page_size": 500})
+        return {
+            "schema_version": "WorkLogWorkLogBootstrapProjection-v1",
+            "records": projection["rows"],
+            "record_count": projection["row_count"],
+            "catalog_count": len(self._rows_by_id),
+            "binding_count": len(self._rows_by_id),
+            "view_snapshot_id": projection["view_snapshot_id"],
+            "source_authority_access": "HASH_METADATA_ONLY_NO_RAW_BYTES",
+            "synthetic_only": self.include_synthetic_projection,
+            "status": "PASS",
+        }
+
+    def _set_filter(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(
+            accepted,
+            set(),
+            {"time_range", "ledger_type", "search", "severity", "status_axis", "date_from", "date_to", "page", "page_size"},
+        )
+        state = self._load()
+        for key, value in accepted.items():
+            state[key] = value
+        self._save(state)
+        projection = self._list({})
+        return {"schema_version": "WorkLogWorkLogFilterReceipt-v1", "view_snapshot_id": projection["view_snapshot_id"], "row_count": projection["row_count"], "revision": self._load()["revision"], "status": "PASS"}
+
+    def _resolve_job_locator(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, {"job_locator"})
+        locator = str(accepted["job_locator"])
+        prefix = "memorive://job/"
+        if not locator.startswith(prefix) or not locator[len(prefix) :]:
+            raise WorkLogProductError("WORK_LOG_JOB_LOCATOR_INVALID")
+        job_id = locator[len(prefix) :]
+        matches = [row for row in self._rows_by_id.values() if row["job_id"] == job_id]
+        if not matches:
+            raise WorkLogProductError("WORK_LOG_JOB_LOCATOR_NOT_FOUND")
+        self._metrics["locator_resolutions"] += 1
+        state = self._load()
+        state["locator_history"].append({"kind": "job", "locator": locator, "job_id": job_id})
+        state["locator_history"] = state["locator_history"][-32:]
+        self._save(state)
+        return {"schema_version": "WorkLogJobLocatorResolutionReceipt-v1", "job_locator": locator, "job_id": job_id, "route": "current-task", "match_count": len(matches), "fuzzy_match_attempted": False, "status": "PASS"}
+
+    def _export_redacted_view(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, {"export_id"}, {"time_range", "ledger_type", "search", "severity", "status_axis", "date_from", "date_to"})
+        export_id = str(accepted["export_id"])
+        destination = self._export_path(export_id)
+        temporary = self.export_root / f".tmp-{export_id}"
+        if destination.exists() or temporary.exists():
+            raise FileExistsError("WORK_LOG_EXPORT_DESTINATION_COLLISION")
+        redacted, audit = self._export_projection(accepted)
+        temporary.mkdir(parents=False, exist_ok=False)
+        try:
+            export_path = temporary / "work_log_public.json"
+            export_bytes = (json.dumps(redacted, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+            export_path.write_bytes(export_bytes)
+            state = self._load()
+            if state["fault_mode"] == "export_write_failure":
+                raise OSError("SYNTHETIC_EXPORT_WRITE_FAILURE")
+            manifest = {
+                "schema_version": "WorkLogWorkLogPublicExportManifest-v1",
+                "export_id": export_id,
+                "export_file": "work_log_public.json",
+                "export_bytes": len(export_bytes),
+                "export_sha256": _sha256_bytes(export_bytes),
+                "row_count": audit["row_count"],
+                "redacted_field_count": audit["redacted_field_count"],
+                "canary_value_hits": audit["canary_value_hits"],
+                "forbidden_key_hits": audit["forbidden_key_hits"],
+                "absolute_path_hits": audit["absolute_path_hits"],
+                "source_authority_mutations": 0,
+                "status": "PASS",
+            }
+            manifest_path = temporary / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+            temporary.replace(destination)
+        except Exception:
+            shutil.rmtree(temporary, ignore_errors=True)
+            if destination.exists():
+                raise RuntimeError("WORK_LOG_EXPORT_ATOMICITY_BREACH")
+            raise
+        self._metrics["synthetic_export_writes"] += 2
+        self._metrics["redacted_field_count"] += audit["redacted_field_count"]
+        state = self._load()
+        state["export_receipts"].append({"export_id": export_id, "export_sha256": manifest["export_sha256"], "row_count": manifest["row_count"]})
+        state["export_receipts"] = state["export_receipts"][-32:]
+        self._save(state)
+        return {"schema_version": "WorkLogRedactedExportReceipt-v1", "export_id": export_id, "relative_directory": f"exports/export-{export_id}", "manifest": manifest, "atomic_write": True, "partial_final_output": False, "source_authority_mutations": 0, "status": "PASS"}
+
+    def _verify_export(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, {"export_id"})
+        export_id = str(accepted["export_id"])
+        destination = self._export_path(export_id)
+        export_path = destination / "work_log_public.json"
+        manifest_path = destination / "manifest.json"
+        if not export_path.is_file() or not manifest_path.is_file():
+            raise WorkLogProductError("WORK_LOG_EXPORT_NOT_FOUND")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        export_bytes = export_path.read_bytes()
+        text = export_bytes.decode("utf-8")
+        canary_hits = sum(text.casefold().count(str(value).casefold()) for value in self._canaries["values"])
+        forbidden_key_hits = sum(len(re.findall(rf'"[^"\\n]*{re.escape(key)}[^"\\n]*"\s*:', text.casefold())) for key in FORBIDDEN_EXPORT_KEYS)
+        absolute_path_hits = len(re.findall(r'"[A-Za-z]:[\\/]|"\\\\', text))
+        checks = {
+            "manifest_schema": manifest.get("schema_version") == "WorkLogWorkLogPublicExportManifest-v1",
+            "export_sha_exact": manifest.get("export_sha256") == _sha256_bytes(export_bytes),
+            "export_bytes_exact": manifest.get("export_bytes") == len(export_bytes),
+            "canary_hits_zero": canary_hits == 0,
+            "forbidden_key_hits_zero": forbidden_key_hits == 0,
+            "absolute_path_hits_zero": absolute_path_hits == 0,
+            "source_mutations_zero": manifest.get("source_authority_mutations") == 0,
+        }
+        self._metrics["export_verifications"] += 1
+        return {"schema_version": "WorkLogWorkLogExportVerification-v1", "export_id": export_id, "checks": checks, "verification_result": "PASS" if all(checks.values()) else "FAIL", "status": "PASS" if all(checks.values()) else "FAIL"}
+
+    def _inject_fault(self, accepted: dict[str, Any]) -> Any:
+        self._require_keys(accepted, {"fault"})
+        fault = str(accepted["fault"])
+        classifications = {
+            "duplicate": ("DUPLICATE_IDENTITY_DETECTED_STABLE_DEDUPE", 2),
+            "out_of_order": ("OUT_OF_ORDER_DETECTED_STABLE_SORT", 3),
+            "gap": ("EVENT_SEQUENCE_GAP_VISIBLE_NOT_FILLED", 1),
+            "clock_skew": ("CLOCK_SKEW_VISIBLE_EVENT_SEQUENCE_WINS", 1),
+            "large_stream": ("LARGE_STREAM_PAGED_STABLE_CURSOR", 5000),
+            "corrupt_event": ("CORRUPT_EVENT_PUBLIC_ERROR_NO_RAW_PAYLOAD", 1),
+            "missing_locator": ("MISSING_LOCATOR_FAIL_CLOSED_NO_FUZZY_MATCH", 1),
+            "export_write_failure": ("EXPORT_FAILURE_ATOMIC_NO_PARTIAL_FINAL", 1),
+        }
+        if fault not in classifications:
+            raise WorkLogProductError("WORK_LOG_FAULT_UNKNOWN")
+        state = self._load()
+        state["fault_mode"] = fault
+        self._save(state)
+        classification, affected = classifications[fault]
+        return {"schema_version": "WorkLogWorkLogFaultReceipt-v1", "fault": fault, "classification": classification, "synthetic_affected_rows": affected, "raw_private_content_included": False, "source_authority_mutations": 0, "restricted_effects": 0, "status": "PASS"}
 
 
 __all__ = ["FORBIDDEN_EXPORT_KEYS", "WORK_LOG_METHODS", "WorkLogProductController", "WorkLogProductError"]
