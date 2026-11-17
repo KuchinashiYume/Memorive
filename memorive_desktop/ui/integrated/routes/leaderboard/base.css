@@ -33,25 +33,6 @@
   }
 
   #desktop-partleaderboard-preview .desktop-window {
-    --desktop-canvas: #F5F2EC;
-    --desktop-surface: #FFFDF9;
-    --desktop-surface-raised: #FFFDF9;
-    --desktop-surface-subtle: #F0EDE6;
-    --desktop-surface-hover: #F0EDE6;
-    --desktop-surface-pressed: #E8E3DA;
-    --desktop-surface-selected: #EFEAE0;
-    --desktop-text-primary: #2A2723;
-    --desktop-text-secondary: #6E675E;
-    --desktop-border-subtle: #E8E3DA;
-    --desktop-border-default: #DFD9CF;
-    --desktop-border-strong: #B6AEA3;
-    --desktop-selection-border: #D9D1C2;
-    --desktop-focus-ring: #A9573A;
-    --desktop-brand: #A2603F;
-    --desktop-yellow-indicator: #AC7610;
-    --desktop-yellow-text: #8A5B12;
-    --desktop-tooltip-bg: #2A2723;
-    --desktop-tooltip-text: #FFFFFF;
     --desktop-left-size: 196px;
     --desktop-right-size: 260px;
     --desktop-bottom-size: 346px;
