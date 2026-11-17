@@ -476,8 +476,8 @@ def _cap_values(fact: Mapping[str, Any]) -> dict[str, list[str]]:
 
 
 def _first_cap_violation(
-    fact: Mapping[str, Any], counters: Mapping[str, Counter[str]], limits: Mapping[str, int]
-, rules) -> str | None:
+    fact: Mapping[str, Any], counters: Mapping[str, Counter[str]], limits: Mapping[str, int], rules
+) -> str | None:
     values = rules.cap_values(fact)
     for dimension in CAP_ORDER:
         if any(counters[dimension][value] + 1 > limits[dimension] for value in values[dimension]):
@@ -494,8 +494,8 @@ def compose_slate(
     production_write_target: str | None = None,
     rules: SlateRules | None = None,
 ) -> dict[str, Any]:
-    rules = rules or SANDBOX_RULES
     """Compose a deterministic finite slate without any cross-channel backfill."""
+    rules = rules or SANDBOX_RULES
 
     if behavior_events:
         raise SlateCompositionError("BEHAVIOR_INPUT_NOT_ACCEPTED_IN_Intake")
@@ -822,8 +822,8 @@ def compose_projection(
     rules = rules or SANDBOX_RULES
     composition = compose_slate(facts, context, plan, rules=rules)
     report = build_coverage_polarization_report(
-        composition["slate"], history, context, plan
-    , rules=rules)
+        composition["slate"], history, context, plan, rules=rules
+    )
     return {
         "recall_candidates": composition["recall_candidates"],
         "clusters": composition["clusters"],
