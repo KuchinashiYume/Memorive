@@ -95,10 +95,7 @@
       state === 'ERROR' ? uiText(uiText('模型数据获取失败 · 点击刷新重试')) :
       uiText(uiText('尚无模型数据 · 点击刷新获取'));
   }
-  const call = async (method, params = {}) => {
-    if (typeof window.pywebview?.api?.call === 'function') return (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
-    throw new Error('DESKTOP_BRIDGE_UNAVAILABLE');
-  };
+  const call = (method, params = {}) => window.__Desktop_SERVICE__.call(method, params);
   function accept(value) {
     if (value?.schema_version !== 'ModelLeaderboardProjection-v4' || !Array.isArray(value.rows) ||
         !value.preferences || !Array.isArray(value.sources) || value.qualification_eligible !== false) throw new Error('PROJECTION_INVALID');

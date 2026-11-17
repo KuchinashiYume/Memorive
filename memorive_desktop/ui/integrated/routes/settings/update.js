@@ -55,7 +55,7 @@
   window.addEventListener('desktop:settings-mode-scope-changed',mode);
   let state={},requesting=false,timer=null;
   const query=selector=>section.querySelector(selector);
-  const call=async(action,params={})=>window.pywebview.api.call('updates.'+action,params);
+  const call=(action,params={})=>window.__Desktop_SERVICE__.call('updates.'+action,params);
   function render(){
     section.querySelectorAll('[data-update-text]').forEach(node=>node.textContent=text(node.dataset.updateText));
     const update=state.update||{},stage=update.stage||update.state||'IDLE',error=state.error||update.error;

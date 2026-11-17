@@ -5,7 +5,7 @@
  if(!page)return;
  const q=s=>page.querySelector(s),
    t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s,
-   call=(m,p={})=>window.pywebview.api.call(m,p);
+   call=(m,p={})=>window.__Desktop_SERVICE__.call(m,p);
  const el=(tag,text,cls)=>{
    const n=document.createElement(tag);
    if(text!=null)n.textContent=t(text);

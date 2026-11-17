@@ -91,9 +91,8 @@
   }, true);
 
   const call = async (method, params = {}) => {
-    if (!nativeReady()) throw new Error('INBOX_NATIVE_TRANSPORT_NOT_READY');
     sequence += 1;
-    const receipt = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+    const receipt = await window.__Desktop_SERVICE__.call(method, params);
     lastReceipt = {
       method,
       request_sequence: sequence,

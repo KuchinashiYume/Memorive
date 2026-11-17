@@ -130,8 +130,7 @@
     if (typeof window.MEMORIVE_ACCOUNTING_REFERENCE_PROVIDER_V3 === 'function') {
       return window.MEMORIVE_ACCOUNTING_REFERENCE_PROVIDER_V3(method, params);
     }
-    if (window.pywebview?.api?.call) return window.pywebview.api.call(method, params);
-    throw new Error('ACCOUNTING_PRODUCT_API_UNAVAILABLE');
+    return window.__Desktop_SERVICE__.call(method, params);
   };
   const params = () => ({
     scope: scope.value,

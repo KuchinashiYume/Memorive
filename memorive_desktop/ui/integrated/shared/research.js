@@ -4,10 +4,7 @@
 (() => {
   'use strict';
   if (window.__Desktop_RESEARCH__) return;
-  const call = (method, params = {}) => {
-    if (!window.pywebview?.api?.call) throw new Error('桌面服务尚未连接');
-    return window.pywebview.api.call(method, params);
-  };
+  const call = (method, params = {}) => window.__Desktop_SERVICE__.call(method, params);
   const make = (tag, text, cls) => {
     const e = document.createElement(tag);
     if (text != null) e.textContent = text;

@@ -42,10 +42,7 @@
     '跨段原文关系已检查':['Cross-segment source relationships checked','分割間の原文関係を確認済み'],'全局关系检查受限':['Global relationship review limited','全体の関係確認に制限あり'],
     'literal_arithmetic':['Printed arithmetic','記載された算術式','原文明确算术关系'],'numeric_domain':['Named numeric domain','明示された数値領域','明确标签的数值范围'],
     '自动识别明确格式并提供数值摘要；规则表单用于补充条件。Card 缺口会按原文锚点自动关联，可选定位仅用于补充。':['Supported explicit formats and numeric summaries run automatically. Rules and Card-gap locators are optional additions.','明示された形式と数値要約は自動処理します。ルールと Card の位置指定は任意の補足です。']});
-  const call=async(method,params={})=>{
-    if(!window.pywebview?.api?.call)throw Error('NATIVE_TRANSPORT_REQUIRED');
-    return window.pywebview.api.call(method,params);
-  };
+  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
   const el=(tag,text,cls)=>{
     const e=document.createElement(tag);
     if(text!=null)e.textContent=text;

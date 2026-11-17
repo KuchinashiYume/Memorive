@@ -3,7 +3,7 @@
   if(window.__Desktop_REPORT_WORKFLOW__)return;
   const clone=x=>JSON.parse(JSON.stringify(x));
   let saved=null,draft=null,loading=null;
-  const call=(method,params={})=>window.pywebview.api.call(method,params);
+  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
   const dirty=()=>Boolean(saved&&JSON.stringify(saved.config)!==JSON.stringify(draft));
   const render=()=>window.__Desktop_SETTINGS_UI__?.renderWorkflow();
   const sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();

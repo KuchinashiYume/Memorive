@@ -68,7 +68,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     } else {
-      result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+      result = await window.__Desktop_SERVICE__.call(method, params);
     }
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:work-log-receipt', { detail: { method, result } }));

@@ -70,8 +70,7 @@
     return e;
   };
   const call=async(method,params={})=>{
-    if(!window.pywebview?.api?.call)throw Error('NATIVE_TRANSPORT_REQUIRED');
-    const result=await window.pywebview.api.call(method,params);
+    const result=await window.__Desktop_SERVICE__.call(method,params);
     if(result?.status==='BLOCKED')throw Error(result.code||'STRUCTURE_CONFIG_INVALID');
     return result;
   };

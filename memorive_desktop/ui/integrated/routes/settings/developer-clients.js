@@ -2,7 +2,7 @@
 (() => {
  'use strict';
  const q=s=>document.querySelector(s),t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
- const call=(m,p={})=>window.pywebview.api.call(m,p),
+ const call=(m,p={})=>window.__Desktop_SERVICE__.call(m,p),
    el=(tag,text,cls)=>{
      const n=document.createElement(tag);
      if(text!==null)n.textContent=t(text);

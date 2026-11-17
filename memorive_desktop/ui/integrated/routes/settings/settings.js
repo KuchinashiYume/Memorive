@@ -585,7 +585,6 @@
   const nativeReady = () => Boolean(window.pywebview?.api?.call);
 
   const call = async (method, params = {}) => {
-    if (!nativeReady()) throw new Error('LOCAL_SETTINGS_SERVICE_NOT_CONNECTED');
     requestSequence += 1;
     lastReceipt = {
       method,
@@ -597,7 +596,7 @@
     };
     let receipt;
     try {
-      receipt = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+      receipt = await window.__Desktop_SERVICE__.call(method, params);
     } catch (error) {
       lastReceipt = { ...lastReceipt, status: 'ERROR' };
       window.dispatchEvent(new CustomEvent('desktop:settings-receipt', { detail: lastReceipt }));

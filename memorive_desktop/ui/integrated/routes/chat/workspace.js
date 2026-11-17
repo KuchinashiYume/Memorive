@@ -11,10 +11,7 @@
     if(cls)e.className=cls;
     return e;
   };
-  const call=(method,params={})=>{
-    if(!window.pywebview?.api?.call)throw Error('NATIVE_CONNECTION_REQUIRED');
-    return (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method,params)) || window.pywebview.api.call(method,params));
-  };
+  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
   const errors={CLI_WORKSPACE_PATH_TOO_LONG:'当前目录过长，请将 Memo 放入较短的目录后重试',RULE_METRIC_INVALID:'请检查指标数值、年份与来源',RULE_SOURCE_REQUIRED:'请填写指标来源',VAULT_REQUIRED:'请先选择资料文件夹',CHAT_MODEL_UNAVAILABLE:'所选模型不可用，请检查模型设置',THREAD_BUSY:'当前对话正在回答',REVISION_CONFLICT:'内容已变化，请刷新后重试',EVIDENCE_STALE:'来源已修改，请更新索引',EVIDENCE_NOT_FOUND:'引用已失效，请更新索引',CHAT_MODEL_EXECUTION_FAILED:'模型未能完成回答，请查看调用记录',TENSION_NEEDS_TWO_SOURCES:'请选择至少两份文献证据',TENSION_NEEDS_TWO_PAPERS:'请选择来自不同文献的证据'};
   let state=null,
     project='default',

@@ -39,7 +39,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     }
-    const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+    const result = await window.__Desktop_SERVICE__.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:messages-receipt', { detail: { method, result } }));
     return result;

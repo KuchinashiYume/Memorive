@@ -43,7 +43,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     } else {
-      result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+      result = await window.__Desktop_SERVICE__.call(method, params);
     }
     receiptCount += 1;
     if(method === 'library.select' && result?.status === 'PASS' && result.artifact_id === selectedArtifactId)window.dispatchEvent(new CustomEvent('desktop:library-selection',{detail:{record:bindings.get(result.artifact_id)?.record || null}}));

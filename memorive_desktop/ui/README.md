@@ -86,11 +86,16 @@ The window runs the page in pywebview. `memorive/desktop/api/` (in `source/`) ho
 
 ### From the page to Python
 
-Most calls go through one method:
+Most calls go through one function, `shared/service.js`:
 
 ```js
-const result = await window.pywebview.api.call('library.list_artifacts', {});
+const result = await window.__Desktop_SERVICE__.call('library.list_artifacts', {});
 ```
+
+It sends `window.pywebview.api.call(method, params)`; while a route waits for its first list, it shows the route's
+loading placeholder (`DesktopDecorations.trackCall` in `shared/decorations.js`). Before pywebview is ready the
+promise is rejected with `DESKTOP_SERVICE_NOT_CONNECTED`. A route bridge wraps it only to add what is its own, such
+as a request number or a receipt event.
 
 `ProductApi.call` (`memorive/desktop/api/product_api.py`) passes the method to the part of the app that owns it. The method names start with their area (`settings.`, `inbox.`, `current_task.`, `messages.`, `sessions.`, `library.`, `work_log.`, `accounting.`, `local_models.`, `memo.` for research Q&A, ...); the names each area accepts are listed in `memorive/desktop/api/common.py`. To add a method, add it to its set there and to the controller that runs it.
 

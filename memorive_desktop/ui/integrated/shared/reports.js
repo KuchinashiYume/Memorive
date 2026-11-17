@@ -19,7 +19,7 @@
   }
   const t=text=>window.__Desktop_INTEGRATED_APP__?.translate?.(text)||text;
   const q=selector=>document.querySelector(selector);
-  const call=(method,params={})=>window.pywebview.api.call(method,params);
+  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
   const clone=value=>JSON.parse(JSON.stringify(value));
   let saved=null,draft=null,loading=false;
   const dirty=()=>saved!==null&&JSON.stringify(draft)!==JSON.stringify(saved.config);
