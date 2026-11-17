@@ -1,8 +1,9 @@
-"""RECOMMENDATION-HISTORY sandbox candidate: append-only exposure feedback and weak-signal guard.
+"""Which recommendations the user saw and how they reacted: an append-only ledger and the rule that
+keeps weak signals from counting. The feedback store and interactions use it.
 
 The module is deliberately pure and offline.  It does not open files, read a
 production adapter, use wall-clock time, access a network, or mutate Research,
-Profile, Policy, DirectionRegistry, ARTIFACT_REGISTRY, or a formal library.
+Profile, Policy, DirectionRegistry, the artifact registry, or a formal library.
 """
 
 from __future__ import annotations

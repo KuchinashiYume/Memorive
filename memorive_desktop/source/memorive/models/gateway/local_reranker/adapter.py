@@ -1,4 +1,4 @@
-"""Execution ExecutionCore-backed local Qwen3 reranker adapter for RETRIEVAL-CALIBRATION.
+"""Reranking with a local Qwen3 reranker model, run as an isolated job through execution_core.
 
 The parent side uses :class:`JobWorkspace` and :class:`IsolatedJobRunner`.
 The same file also contains the deliberately dependency-light worker entrypoint

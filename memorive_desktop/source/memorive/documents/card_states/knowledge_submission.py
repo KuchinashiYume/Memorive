@@ -1,7 +1,8 @@
-"""KNOWLEDGE_ADMISSION-owned, create-only dry-run adapter for KNOWLEDGE-FEEDBACK.
+"""A dry run of submitting knowledge feedback into the library, recording the states it would take.
+The registry's knowledge feedback preview uses it.
 
-This adapter never calls ``transition()``, card I/O, a real writer, ARTIFACT_REGISTRY, or an
-index.  It records the candidate state and the distinct derived-artifact state
+This adapter never calls ``transition()``, card I/O, a real writer, the artifact registry, or
+an index.  It records the candidate state and the distinct derived-artifact state
 without conflating ``approved_for_controlled_ingest`` with ``active``.
 """
 

@@ -1,13 +1,14 @@
-"""Provider-neutral Research cross-analysis review and targeted closure.
+"""Reviewing a cross-paper analysis and closing its open points in one targeted round, with any model
+provider. Only tests call it.
 
-This is a structural successor of the CORE atomic Card closure:
+It follows the shape of the Core atomic card closure:
 
     one Full review -> one consolidated producer repair -> one Delta review
     -> omit optional unresolved claims with tombstones or block required claims.
 
 The original analysis is immutable.  Provider HTTP, credentials, retries,
-fallback and receipt persistence remain owned by MODEL_GATEWAY/RUNTIME_LOG and are injected as
-strict callables.  There is no whole-analysis regeneration and no second Full
+fallback and receipt persistence stay with the model gateway and the runtime log
+and are injected as strict callables.  There is no whole-analysis regeneration and no second Full
 review route.
 """
 from __future__ import annotations

@@ -1,4 +1,7 @@
-"""LONG-DOCUMENT segmented long-document distillation capability."""
+"""Distilling a long document in segments: deciding whether to split (capacity.py), splitting into
+shards (shards.py, topology.py), merging and assembling the card (merge.py, assembly.py) and
+publishing it (publish.py). The workflow uses it (memorive/documents/workflow/segmented_distill.py).
+"""
 
 from memorive.documents.card_distillation.segmented_distill.capacity import CapacityDecision, CapacityProfile, CapacityRoute, route_document
 from memorive.documents.card_distillation.segmented_distill.contracts import (

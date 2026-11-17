@@ -1,4 +1,5 @@
-"""Controlled recovery for invented EVIDENCE_EXTRACTION core-field chunk identifiers.
+"""Fixing chunk references a model made up in a card's core fields (recover_core_anchors_once).
+distill.py uses it.
 
 The repair surface is deliberately narrow: one consolidated DeepSeek call may
 replace or remove only the invalid anchor entries identified by the local

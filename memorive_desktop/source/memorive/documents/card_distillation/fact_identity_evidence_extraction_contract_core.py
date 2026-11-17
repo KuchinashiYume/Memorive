@@ -1,7 +1,9 @@
-"""Memorive FACT-IDENTITY/EVIDENCE_EXTRACTION shared contract primitives.
+"""What card distillation and card review share for fact identity: canonical JSON and hashes, artifact
+references, the absence policy and its evidence, review states. The fact identity and required-slot
+modules use it.
 
-This module deliberately has no dependency on EVIDENCE_REVIEW.  EVIDENCE_EXTRACTION producers enforce these
-deterministic primitives directly, while EVIDENCE_REVIEW imports and re-exports the same
+This module deliberately has no dependency on card review.  The card distillation producers enforce
+these deterministic primitives directly, while card review imports and re-exports the same
 non-bypassable absence contract without creating a reverse dependency.
 """
 

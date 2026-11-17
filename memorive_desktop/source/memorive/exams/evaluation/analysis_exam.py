@@ -1,7 +1,9 @@
-"""Deterministic analysis-exam audit, directed repair, and publication helpers.
+"""Checking an analysis written in an exam, without a model: listing its structural defects, one
+directed repair, scoring and publishing the result. The exam executors (analysis, card reviewer,
+card distiller) load it by name.
 
-This module never calls a model and never reads private Gold.  It owns the MODEL_EVALUATION
-quality boundary around an MODEL_GATEWAY subject call: exhaustively inventory structural
+This module never calls a model and never reads private Gold.  It owns the exam's
+quality boundary around the model gateway call under test: exhaustively inventory structural
 defects, freeze the complete repair exact-set, validate one directed repair,
 and publish a provider-blind dual-form adjudication.
 """

@@ -1,4 +1,7 @@
-"""PAGE-RECOGNITION non-executing vision qualification seams."""
+"""Whether a vision model can do page recognition, decided without running it: the checks before a
+request is sent and the projections of what Claude, OpenAI and command-line image requests would
+look like. Not reached from the app's own code.
+"""
 
 from memorive.models.gateway.vision_qualification.request_contracts import (
     VisionRequestContractError,

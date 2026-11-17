@@ -1,4 +1,8 @@
-"""Read-only Core adapters for the ARTIFACT_REGISTRY candidate registry."""
+"""Read-only adapters that bring existing product files into the registry: read_frontmatter reads
+the front matter of a product file, P1LegacyAdapter registers an existing six-file Core chain without
+rewriting it, and build_open_type_envelope / build_successor_envelope make envelopes for other file
+kinds and for new versions. Loaded with the package; only tests call it (tests/modules/artifact_registry).
+"""
 
 from __future__ import annotations
 

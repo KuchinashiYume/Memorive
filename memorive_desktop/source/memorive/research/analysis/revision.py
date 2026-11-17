@@ -1,4 +1,7 @@
-"""A bound, exact-target successor for single-paper RESEARCH_ANALYSIS Analysis review findings."""
+"""Revising a single-paper analysis after its review findings: the new version is bound to exactly the
+analysis it replaces. Card review (analysis omission and revision) and the workflow's model bridge
+use it.
+"""
 from __future__ import annotations
 from dataclasses import replace, asdict
 import json

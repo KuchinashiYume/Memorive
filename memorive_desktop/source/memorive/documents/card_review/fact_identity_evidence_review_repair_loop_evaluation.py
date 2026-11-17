@@ -1,4 +1,6 @@
-"""Memorive FACT-IDENTITY/EVIDENCE_REVIEW evidence report for the bounded repair-loop decision."""
+"""For card review: the report that decides whether the bounded repair loop is worth running. Nothing
+imports it.
+"""
 
 from __future__ import annotations
 

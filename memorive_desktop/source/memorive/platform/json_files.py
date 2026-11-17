@@ -6,7 +6,7 @@ canonical_json_bytes is the strict encoding: sorted keys, compact separators, UT
 infinity refused. canonical_sha256 is its SHA-256 in upper-case hex. write_json_atomic writes canonical
 JSON and a newline to a temporary file in the same folder, flushes it to disk and moves it over the
 target, so a reader never sees half a file. write_json_indented does the same with indented JSON; the
-desktop (runtime.py) writes its profile and UI state files with it.
+desktop (memorive/desktop/api/) writes its profile and UI state files with it.
 
 Some other packages keep their own encoder without the NaN check (the "lenient" one); they are not
 merged here, because the two give different results for non-finite numbers.

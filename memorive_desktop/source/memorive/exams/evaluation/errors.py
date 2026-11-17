@@ -1,4 +1,4 @@
-"""Errors raised by the deterministic MODEL_EVALUATION quality-sentinel slice."""
+"""The errors of the exam scoring code in this package."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Fail-closed exception types for the RESEARCH_REPORTS shadow candidate."""
+"""The errors of research reports."""
 
 
 class ResearchReportsError(Exception):

@@ -2,7 +2,7 @@
 
 Reference packs are fixed, non-blind regression assets.  The subject-facing
 transport may read only members explicitly marked provider-visible; Gold is
-loaded later by the local MODEL_EVALUATION scorer.  A public projection, a locator, or a
+loaded later by the local exam scorer.  A public projection, a locator, or a
 hash-only record is deliberately insufficient here.
 """
 

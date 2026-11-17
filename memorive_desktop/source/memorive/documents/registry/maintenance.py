@@ -1,4 +1,7 @@
-"""Thin ASSET-MIGRATION maintenance facade; no duplicated SQL or Registry authority."""
+"""A command-line maintenance tool for a sandbox registry: RegistryDoctor checks it,
+RegistryMaintenanceService plans and runs migrations through migration.py and queries through
+query_projection.py. It has no SQL or registry writes of its own. Only tests call it.
+"""
 
 from __future__ import annotations
 

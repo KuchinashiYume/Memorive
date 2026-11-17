@@ -1,7 +1,9 @@
-"""KNOWLEDGE_ADMISSION-owned dual-layer state contract for KNOWLEDGE-FEEDBACK.
+"""The two states a piece of knowledge feedback goes through (approved candidate, then derived
+artifact), as projections only. Only tests call it.
 
-Construction A can create only unmaterialized projections.  No helper in this
-module calls the KNOWLEDGE_ADMISSION machine, a writer, ARTIFACT_REGISTRY, an index, or a production store.
+Its helpers create only unmaterialized projections.  No helper in this
+module calls the knowledge admission machine, a writer, the artifact registry, an index, or a
+production store.
 An approved candidate remains distinct from a future derived artifact, and a
 pending artifact would still require a separately authorized exact activation
 receipt before any real ``pending -> active`` transition.

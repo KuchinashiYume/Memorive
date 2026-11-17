@@ -1,4 +1,4 @@
-"""Formal MODEL_EVALUATION ``reranker_text`` reference-exam integration.
+"""The ``reranker_text`` exam, run against the reference pack kept in the repository.
 
 The formal entrypoint is bound to one repository-resident reference pack and
 one frozen low-cost rehearsal receipt.  Provider requests contain only the

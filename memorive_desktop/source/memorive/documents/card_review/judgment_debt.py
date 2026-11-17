@@ -1,8 +1,9 @@
-"""EVIDENCE_REVIEW judgment cross-source deferred-task ledger.
+"""A ledger of reviews that could not be done yet because no suitable verifier model was available
+(record_pending_judgment). judgment.py writes to it.
 
-When no eligible verifier is available, the RESEARCH_ANALYSIS result remains a suggestion rather
+When no eligible verifier is available, the research analysis result remains a suggestion rather
 than a blocked pipeline item.  This append-only operations ledger keeps the
-uncompleted review visible outside RUNTIME_LOG without persisting source chunks or keys.
+uncompleted review visible outside the runtime log without persisting source chunks or keys.
 """
 from __future__ import annotations
 

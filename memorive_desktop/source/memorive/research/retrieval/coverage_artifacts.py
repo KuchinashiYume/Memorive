@@ -1,9 +1,11 @@
-"""Memorive RETRIEVAL-QUALITY/RETRIEVAL · immutable coverage-governance artifacts.
+"""Immutable records of how well retrieval covered a question: chunk snapshots, facets and their
+coverage, verification artifacts. The research workspace's answer coverage and the analysis quality
+assessment use it.
 
 This module is deliberately layered above the Core runtime ``LogicalSpan``
 and ``ContextPack`` types.  It does not mutate chunks, does not call a model,
-and does not write the real ARTIFACT_REGISTRY registry.  Each payload is canonical JSON and
-is paired with a validated ARTIFACT_REGISTRY Artifact Envelope sidecar; the envelope hash is
+and does not write the real artifact registry.  Each payload is canonical JSON and
+is paired with a validated artifact envelope sidecar; the envelope hash is
 the SHA-256 of the exact payload bytes, avoiding an impossible self-hash.
 """
 from __future__ import annotations

@@ -1,4 +1,5 @@
-"""DISCOVERY-CHANNELS sandbox candidate: project accepted ServiceContracts/Configuration facts for RESEARCH_RECOMMENDATIONS.
+"""Projecting accepted configuration facts of discovery candidates for the research recommendations.
+Nothing imports it.
 
 This module is deliberately pure and offline. It does not perform discovery,
 identity resolution, relation inference, ranking, persistence, or network I/O.

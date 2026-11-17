@@ -1,4 +1,6 @@
-"""SOURCE-CONNECTORS/LITERATURE_DISCOVERY pure-offline connector candidate.
+"""What the literature source connectors share: normalizing DOIs, arXiv ids, dates and text, hashing,
+offline fixture files, search results, a deterministic cache and back-off. Acquisition, identity,
+metadata and relations in this package use it.
 
 This module deliberately contains no HTTP, socket, DNS, browser, subprocess, or
 provider SDK transport.  It accepts exact fixture bytes, emits evidence-bound

@@ -1,4 +1,6 @@
-"""Pure active-only runtime SourceSnapshot construction for FIELD-VECTORS."""
+"""The snapshot of active cards a field-vector index is built from (build_source_snapshot). Only
+tests call it.
+"""
 
 from __future__ import annotations
 

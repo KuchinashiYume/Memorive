@@ -1,4 +1,5 @@
-"""Generalized DataContracts adapter for the accepted RESEARCH-CONTRACTS common-object semantics.
+"""Checking a pack of common research objects with the same rules and hashes as the accepted research
+contracts validator. The report authority and command line use it.
 
 The accepted validator's hard-coded five-object fixture remains the oracle for
 overlapping rules.  This adapter applies the same JCS hash and invariants to an

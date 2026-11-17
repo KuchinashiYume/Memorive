@@ -1,8 +1,9 @@
-"""Role-separated semantic recomputation for research opportunities.
+"""Checking a research opportunity by recomputing it separately from the code that produced it
+(verify_opportunity_candidate). Re-exported by the package; tests call it.
 
 This module deliberately imports only the shared canonical byte primitive and the
 shared list of comparison concepts (CONCEPT_ORDER, CONDITIONAL_CONCEPTS).  It
-does not import RESEARCH_OPPORTUNITIES source, projection, gap, comparison, tension, or candidate
+does not import the research opportunities' source, projection, gap, comparison, tension, or candidate
 producer functions.  This separation does not constitute an external review.
 """
 

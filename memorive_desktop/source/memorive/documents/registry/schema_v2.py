@@ -1,8 +1,9 @@
-"""ARTIFACT_REGISTRY Artifact Envelope v2 schema and versioned event validation.
+"""The version-2 product envelope and its registry events: building, checking and reading them.
 
 The v2 persistence contract has one authoritative direct-parent field:
 ``parent_artifacts``.  ``resolved_parent_links`` is exposed only as a derived
-read helper and is never serialized by this module.
+read helper and is never serialized by this module. Retrieval, research analysis, reports,
+recommendations and knowledge feedback build their envelopes with it.
 """
 
 from __future__ import annotations

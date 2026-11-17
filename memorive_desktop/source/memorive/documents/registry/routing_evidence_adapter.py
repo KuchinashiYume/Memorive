@@ -1,4 +1,6 @@
-"""Zero-side-effect ARTIFACT_REGISTRY envelope preview for COST-ROUTING."""
+"""A preview of the envelope that model routing evidence would get in the registry, with no side
+effects. Re-exported by the package; nothing calls it.
+"""
 
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 """JCS, hashing and hostile-text helpers for research reports.
 
 The JCS serializer and payload hashes come from memorive.platform.jcs, which keeps
-parity with the accepted RESEARCH-CONTRACTS validator (UTF-16 key order, I-JSON numbers).
+parity with the accepted research contracts validator (UTF-16 key order, I-JSON numbers).
 """
 
 from __future__ import annotations

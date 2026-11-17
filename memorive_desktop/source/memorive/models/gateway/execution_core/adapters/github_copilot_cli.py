@@ -5,12 +5,13 @@ DEVELOPING.md, "Code the window does not start").
 The adapter binds an immutable launcher/entrypoint, exact ``--model``
 argv, a frozen model catalog and a user-confirmed abstract login fact.  It
 never reads credential material, sends a real CLI prompt, activates a route,
-retries, falls back, or writes RUNTIME_LOG.  Generated answer text is never identity
+retries, falls back, or writes the runtime log.  Generated answer text is never identity
 evidence.
 
 What it shares with the other command-line adapters (sidecar, entitlement or login checks, result
 normalization, the receipt) is in cli_common.py; this module keeps what is specific to the
-GitHub Copilot CLI: its policy, manifest, behavior hash, request binding, invocation, JSONL parsing and result normalization.
+GitHub Copilot CLI: its policy, manifest, behavior hash, request binding, invocation,
+JSONL parsing and result normalization.
 """
 
 from __future__ import annotations

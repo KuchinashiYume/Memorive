@@ -1,4 +1,6 @@
-"""Verification qualification evidence for the accepted RETRIEVAL_WEIGHTING DerivedPenalty contract."""
+"""Evidence that the derived penalty of memorive/research/ranking/derived_penalty.py was applied as
+its policy says, for knowledge feedback.
+"""
 
 from __future__ import annotations
 

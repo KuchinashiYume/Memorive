@@ -1,4 +1,6 @@
-"""Six-provider score contract for the SEMANTIC-AGGREGATION Shadow candidate."""
+"""The score record of each of the six shadow ranking providers: building and checking single
+records and whole sets. aggregation.py uses it.
+"""
 
 from __future__ import annotations
 

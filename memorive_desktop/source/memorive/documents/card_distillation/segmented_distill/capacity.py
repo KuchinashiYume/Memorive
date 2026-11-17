@@ -1,4 +1,6 @@
-"""Profile-aware, local-only capacity routing for LONG-DOCUMENT."""
+"""Whether a document fits one distillation call or must be split into segments, by the model profile
+(route_document). The package re-exports it.
+"""
 
 from __future__ import annotations
 

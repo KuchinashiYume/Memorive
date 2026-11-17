@@ -1,4 +1,4 @@
-"""Bounded local Ollama embedding worker for LOCAL-RETRIEVAL.
+"""The worker process that asks a local Ollama model for embeddings (seam.py starts it).
 
 The worker accepts one create-only JSON request file, asserts an exact loopback
 endpoint before opening a socket, writes pre-start/terminal sidecars without

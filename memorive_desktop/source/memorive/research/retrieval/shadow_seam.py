@@ -1,6 +1,7 @@
-"""Default-off SEMANTIC-AGGREGATION observation seam that preserves the RETRIEVAL baseline object.
+"""Running the shadow ranking beside a retrieval while keeping the retrieval's own result unchanged.
+Off by default; only tests call it.
 
-The module is intentionally not imported by the current RETRIEVAL entrypoint.  A
+The module is intentionally not imported by the current retrieval entry point.  A
 caller must pass ``shadow_enabled=True`` explicitly; no environment variable
 can activate it.  Candidate or receipt-sink failures never alter or replace the
 already-produced baseline result.

@@ -1,4 +1,5 @@
-"""Thin, immutable object contracts for LOCAL-INFERENCE.
+"""The local capability broker's immutable records: roles and statuses, file identities, runtime
+asset manifests, role profiles, execution envelopes and receipts, routing decisions and egress evidence.
 
 The objects intentionally carry locators, hashes and bounded measurements. They
 never carry a source document, image, prompt, model output, credential or Gold.

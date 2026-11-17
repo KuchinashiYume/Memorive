@@ -1,4 +1,7 @@
-"""Append-only ARTIFACT_REGISTRY Artifact Registry v2 with read-only v1 compatibility."""
+"""The append-only registry of product files (ArtifactRegistry, version 2); it still reads version-1
+registries. Knowledge feedback, research recommendations and the migration tools write and read
+through it.
+"""
 
 from __future__ import annotations
 

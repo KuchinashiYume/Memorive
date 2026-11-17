@@ -1,4 +1,6 @@
-"""ARTIFACT_REGISTRY dry-run preview for Verification; Registry and state mutation are impossible."""
+"""A preview of registering a knowledge feedback result in the registry, without registering it or
+changing any state. Re-exported by the package; the knowledge feedback tests call it.
+"""
 
 from __future__ import annotations
 

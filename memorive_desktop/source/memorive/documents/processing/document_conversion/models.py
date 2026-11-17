@@ -1,4 +1,6 @@
-"""DOCUMENT-FORMATS durable objects and orthogonal conversion state axes."""
+"""The records of a document conversion: the probe, image frames, adapter payloads, receipts,
+amendments and the result, with their status values. Every module of document_conversion uses them.
+"""
 from __future__ import annotations
 
 import dataclasses

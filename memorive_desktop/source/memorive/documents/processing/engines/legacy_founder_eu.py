@@ -3,8 +3,8 @@
 Some legacy PDFs render correct Latin glyphs but map them to unrelated Han in
 ToUnicode. Bind recovery to the embedded font SHA, Identity CID/GID mapping and
 the observed old Unicode. Never replace Han strings in extracted paragraphs or
-write back to the source PDF. The glyph audit is CF126-20 (166 visible glyphs).
-CF126-22 also binds legacy Type1 symbol programs, including a range dash whose
+write back to the source PDF. The glyph audit covers 166 visible glyphs.
+The recovery also binds legacy Type1 symbol programs, including a range dash whose
 incorrect Unicode was a valid Latin e. Unknown mappings remain unmodified.
 """
 from __future__ import annotations

@@ -1,4 +1,6 @@
-"""Deterministic QueryDimensionProfile construction for SEMANTIC-AGGREGATION."""
+"""The dimension profile of a query (QueryDimensionProfile), built deterministically. research_fields.py
+uses it for research Q&A.
+"""
 
 from __future__ import annotations
 

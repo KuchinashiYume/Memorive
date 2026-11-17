@@ -1,4 +1,4 @@
-"""Gold-isolated subject protocol for the MODEL_EVALUATION card-reviewer exam."""
+"""The card reviewer exam as the model under test sees it, kept apart from the Gold answers."""
 
 from __future__ import annotations
 

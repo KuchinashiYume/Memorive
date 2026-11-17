@@ -1,4 +1,6 @@
-"""Memorive FACT-IDENTITY/EVIDENCE_EXTRACTION per-Card fact identity producer."""
+"""The identity of each fact in a card (fingerprints, a sidecar file, merging sidecars, reading older
+fact ids). Nothing imports it.
+"""
 
 from __future__ import annotations
 

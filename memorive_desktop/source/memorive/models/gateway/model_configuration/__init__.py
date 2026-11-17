@@ -1,4 +1,7 @@
-"""MODEL-CONFIGURATION ordinary model-configuration contracts and offline resolvers."""
+"""Model configuration checked offline: provider presets, model profiles, tier policies, credential
+bindings, connection receipts, merging ordinary and advanced settings, and the tier resolver. Not
+reached from the app's own code; tests call it.
+"""
 
 from memorive.models.gateway.model_configuration.config_merge import merge_configuration, validate_advanced_config, validate_ordinary_config
 from memorive.models.gateway.model_configuration.connection import FakeProvider, check_connection, connection_not_run_receipt

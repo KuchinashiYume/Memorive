@@ -1,8 +1,8 @@
-"""Synthetic-only migration, backup, verification and rollback for DIRECTORY-ROLES.
+"""A synthetic test engine for migration, backup, verification and rollback of the product folders.
 
 The engine refuses to operate unless every path is below one caller-supplied
 sandbox root carrying the exact synthetic marker.  It cannot perform a real
-product switch, restore, uninstall, cleanup, or deletion.
+product switch, restore, uninstall, cleanup, or deletion. Only tests call it.
 """
 from __future__ import annotations
 

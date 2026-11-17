@@ -1,4 +1,5 @@
-"""Strict contracts shared by the LONG-DOCUMENT segmented-distillation path.
+"""The checks the segmented distillation of long documents shares: artifact kinds, field candidates
+and dispatching to the right validator. Every module of this package uses it.
 
 The module deliberately does not import the legacy whole-card validator.  A caller
 must bind that validator explicitly when the expected artifact is a final Card.

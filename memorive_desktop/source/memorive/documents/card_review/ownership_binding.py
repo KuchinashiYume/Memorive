@@ -1,4 +1,6 @@
-"""DATA-OWNERSHIP immutable ownership binding for RESEARCH_ANALYSIS -> EVIDENCE_REVIEW review tasks."""
+"""The review task that checks ownership in an analysis, bound immutably to that analysis
+(build_ownership_review_task). Judgment, analysis omission and analysis revision use it.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

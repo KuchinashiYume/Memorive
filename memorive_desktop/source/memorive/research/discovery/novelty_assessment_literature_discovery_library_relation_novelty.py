@@ -1,4 +1,5 @@
-"""NOVELTY-ASSESSMENT/LITERATURE_DISCOVERY deterministic, pure-offline library relation resolver.
+"""How a discovered paper relates to what is already in the user's library (same work, new version,
+related, new), decided offline from a library snapshot. relations.py uses it.
 
 The module consumes only a hash-bound ``LocalLibraryReadSnapshot`` and
 hash-bound ServiceContracts-compatible candidate projections.  It performs no filesystem,

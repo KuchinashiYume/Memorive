@@ -1,7 +1,9 @@
-"""Connect explicitly selected research Cards to the existing RETRIEVAL_WEIGHTING field contracts.
+"""Field semantics for the cards the user selected in research, through the retrieval field contracts.
+research_ranking.py uses it.
 
-This index belongs to the research workspace, never the frozen production RETRIEVAL
-index. It does not change a Card, EVIDENCE_REVIEW decision, KNOWLEDGE_ADMISSION state or prior qualification.
+This index belongs to the research workspace, never the frozen production retrieval
+index. It does not change a card, an evidence review decision, a knowledge admission state or a prior
+qualification.
 """
 import json,re
 from pathlib import Path

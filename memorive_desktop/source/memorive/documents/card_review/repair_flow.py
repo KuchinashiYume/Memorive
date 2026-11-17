@@ -1,8 +1,9 @@
-"""Single-round producer repair flow for final Card output.
+"""One round of repairing a finished card before it becomes active (repair_and_admit). Re-exported by
+the package; tests call it.
 
 Initial Card -> one whole-Card review -> one consolidated distillation-model
 repair -> one review of changed items only -> omit unresolved
-items with tombstones -> atomically finalize Card v6 -> KNOWLEDGE_ADMISSION active.
+items with tombstones -> atomically finalize Card v6 -> active in knowledge admission.
 """
 from __future__ import annotations
 from memorive.models.gateway.prompt_cache import split_repair_sources, source_first, canonical

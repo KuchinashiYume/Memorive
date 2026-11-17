@@ -1,4 +1,8 @@
-"""Memorive ANALYSIS-ADMISSION/ARTIFACT_REGISTRY four-axis compatibility and freshness assessment."""
+"""Whether a card pack, its analysis, the schema and the source scope still fit together, and whether
+an analysis is still fresh (build_compatibility_assessment, under a CompatibilityPolicy read from a
+file). Freshness comes only from explicit supersedes links and the frozen manifest, never from times.
+Re-exported by the package; tests call it (tests/modules/artifact_registry/test_release_gate.py).
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,6 @@
-"""Atomic append-only Artifact Registry for the ARTIFACT-REGISTRY candidate."""
+"""The first version of the append-only registry (ArtifactRegistry), with atomic appends. Nothing
+imports it now: registry_v2.py replaced it and reads version-1 envelopes through schema.py.
+"""
 
 from __future__ import annotations
 

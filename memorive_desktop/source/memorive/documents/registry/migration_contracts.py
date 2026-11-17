@@ -1,8 +1,9 @@
-"""Closed ASSET-MIGRATION contracts for exact-manifest migration and receipts.
+"""The records of a registry migration: the batch and item contracts, item envelopes and receipts.
 
 The module deliberately has no filesystem discovery helpers.  A caller must
 name every source item explicitly; identity is derived from frozen
-``identity_basis`` bytes and never from a mutable path.
+``identity_basis`` bytes and never from a mutable path. Used by migration.py,
+query_projection.py and maintenance.py.
 """
 
 from __future__ import annotations

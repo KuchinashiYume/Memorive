@@ -1,7 +1,7 @@
-"""RETRIEVAL-CALIBRATION rank-domain block-role calibration.
+"""Adjusting ranks by the role of the text block a candidate comes from.
 
-The policy is intentionally separate from RETRIEVAL_WEIGHTING ``DerivedPenalty``.  It never
-drops candidates and treats unknown or inconsistent metadata as neutral.
+The policy is intentionally separate from the derived penalty of derived_penalty.py.  It never
+drops candidates and treats unknown or inconsistent metadata as neutral. Only tests call it.
 """
 from __future__ import annotations
 

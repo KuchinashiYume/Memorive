@@ -1,4 +1,5 @@
-"""DISCOVERY-ACCEPTANCE bounded live transport for public scholarly metadata only.
+"""One HTTPS GET for public scholarly metadata, with a receipt before and after it. transport.py uses
+it.
 
 The module deliberately contains no discovery, identity, ranking, Card, or
 promotion logic.  It accepts an already frozen request and a Schema-valid

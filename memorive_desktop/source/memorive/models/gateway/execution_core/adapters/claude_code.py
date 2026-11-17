@@ -6,12 +6,13 @@ window does not start").
 The adapter proves what local executable and exact ``--model`` argument were
 used.  It deliberately does *not* treat generated text, or a model label
 returned through a third-party relay, as proof of the provider-served backend.
-It does not activate routes, retry, fall back, write the RUNTIME_LOG ledger, or read
+It does not activate routes, retry, fall back, write the runtime log, or read
 credential values for evidence.
 
 What it shares with the other command-line adapters (sidecar, entitlement or login checks, result
 normalization, the receipt) is in cli_common.py; this module keeps what is specific to the
-Claude Code: its policy, manifest, behavior hash, request binding, invocation, stream parsing, result normalization, receipt and qualification projection.
+Claude Code: its policy, manifest, behavior hash, request binding, invocation,
+stream parsing, result normalization, receipt and qualification projection.
 """
 
 from __future__ import annotations

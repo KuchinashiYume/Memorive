@@ -1,6 +1,7 @@
-"""KNOWLEDGE-PROMOTION sandbox-only idempotent atomic Card promotion coordinator.
+"""Promoting staged cards into the library in one atomic, repeatable step
+(AtomicCardPromotionCoordinator). Only tests call it.
 
-This candidate is intentionally scoped to the public-safe synthetic A0/B mirror.
+It works only on a public-safe synthetic mirror.
 It never resolves or writes a production target and it has no network/model path.
 """
 from __future__ import annotations

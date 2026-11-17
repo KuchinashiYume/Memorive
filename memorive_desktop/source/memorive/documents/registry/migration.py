@@ -1,9 +1,9 @@
-"""Manifest-driven, resumable ASSET-MIGRATION migration over the append-only Registry.
+"""Moving existing files into the registry from an explicit manifest, resumable after a crash.
 
 Planning is strictly read-only.  Applying is restricted to an explicitly
 bound isolated Registry root and records an append-only receipt chain.  The
 authoritative JSONL remains the source of truth when a crash separates a
-Registry append from its receipt commit.
+Registry append from its receipt commit. maintenance.py and tests call it.
 """
 
 from __future__ import annotations

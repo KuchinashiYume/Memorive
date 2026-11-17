@@ -1,14 +1,15 @@
-"""Memorive RESEARCH-HANDOFF/RESEARCH_ANALYSIS · cross-topic thin API runner.
+"""Running a cross-topic analysis through the model gateway and checking its JSON answer against the
+schema. Only tests call it.
 
 Purpose:
     Bind one frozen custom-topic request and its frozen Card/Analysis text
-    artifacts to the mature MODEL_GATEWAY ``analysis`` transport, then perform strict
+    artifacts to the model gateway's ``analysis`` transport, then perform strict
     local JSON and Draft 2020-12 Schema validation.
 
 Boundary:
     This module does not implement provider HTTP, credentials, retries,
     fallback, accounting, Card generation, or the Core single-paper
-    four-section Analysis parser.  Provider transport remains owned by MODEL_GATEWAY.
+    four-section Analysis parser.  Provider transport stays with the model gateway.
 """
 
 from __future__ import annotations

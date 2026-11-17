@@ -1,4 +1,6 @@
-"""KNOWLEDGE_ADMISSION-owned create-only Extensions destination preview."""
+"""A preview of where a refined conversation would land in the library, without writing it. The
+registry's conversation refinement preview uses it.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,7 @@
-"""EXECUTION-CORE local execution core.
+"""Running model work in isolated local processes: job workspaces (JobWorkspace), the isolated runner
+(IsolatedJobRunner), channel selection, handoff and output contracts, and the command-line model
+adapters (adapters/). Document processing (the isolated PDF engine, Marker, vector generation), the
+local embedding and reranker components and the model channels use it.
 
 The package is deliberately separate from the existing ``ModelGateway`` path.
 Importing it performs no discovery, authentication, process, or network action.

@@ -1,4 +1,7 @@
-"""RETRIEVAL-CALIBRATION retrieval-calibration qualification facade."""
+"""Calibrating retrieval before reranking: candidate features and traces, the candidate union,
+fallback, pre-rerank snapshots, profile comparison and the qualification run. Not reached from the
+app's own code; tests call it.
+"""
 
 from memorive.research.retrieval.retrieval_calibration.candidate_features import (
     build_reranker_provenance,

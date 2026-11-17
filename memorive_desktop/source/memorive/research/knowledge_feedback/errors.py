@@ -1,4 +1,6 @@
-"""Fail-closed errors for KNOWLEDGE-FEEDBACK controlled knowledge feedback."""
+"""The errors of knowledge feedback (KnowledgeFeedbackError and its subclasses). The package's
+contracts, eligibility, lineage and penalty modules raise them.
+"""
 
 
 class KnowledgeFeedbackError(ValueError):

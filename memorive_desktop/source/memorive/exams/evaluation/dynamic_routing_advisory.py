@@ -1,7 +1,8 @@
-"""COST-ROUTING deterministic quality-cost routing advice.
+"""Advice on which model to route a task to, from exam quality and cost.
+memorive/models/gateway/routing_advisory.py uses it.
 
 This surface emits advice only.  It never dispatches a model call, writes a
-route, makes an DECISION_LOG decision, registers an ARTIFACT_REGISTRY artifact, moves a pointer, or
+route, records a decision, registers an artifact in the registry, moves a pointer, or
 claims scientific optimality.
 """
 

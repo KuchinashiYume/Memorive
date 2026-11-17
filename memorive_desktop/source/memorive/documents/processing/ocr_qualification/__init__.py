@@ -1,4 +1,7 @@
-"""PAGE-RECOGNITION deterministic OCR and vision qualification primitives."""
+"""Qualifying OCR and vision models for page recognition, deterministically: contracts, normalizing
+provider output, scoring, routing explanations and reports. Not reached from the app's own code;
+tests call it.
+"""
 
 from memorive.documents.processing.ocr_qualification.contracts import (
     OCRQualificationContractError,

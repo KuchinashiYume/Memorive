@@ -1,4 +1,6 @@
-"""Memorive RETRIEVAL-QUALITY/RESEARCH_ANALYSIS · immutable AnalysisQualityAssessment builder."""
+"""The quality assessment of an analysis: which of its sources retrieval covered. Re-exported by the
+analysis package; tests call it.
+"""
 from __future__ import annotations
 
 from dataclasses import replace

@@ -1,4 +1,7 @@
-"""LOCAL-INFERENCE local capability broker (disabled-by-default candidate)."""
+"""The local capability broker: which local model may take which role (OCR, embedding, retrieval,
+distillation, analysis, verification), with its receipts and diagnostics. Off by default and not
+reached from the app's own code; python -m memorive.models.gateway.local_capability shows its status.
+"""
 
 from memorive.models.gateway.local_capability.broker import LocalCapabilityBroker
 from memorive.models.gateway.local_capability.contracts import canonical_sha256, combine_role_verdicts, contract_schema_sha256, validate_contract

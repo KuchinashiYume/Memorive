@@ -1,4 +1,4 @@
-"""Provider-blind primitives for the MODEL_EVALUATION card_distiller_primary exam.
+"""Provider-blind primitives for the card_distiller_primary exam.
 
 The public protocol is deliberately separated from private synthetic Forms and
 Gold.  This module performs no provider I/O.  It validates delivery shape,

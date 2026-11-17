@@ -1,4 +1,6 @@
-"""End-to-end, side-effect-free RETRIEVAL-CALIBRATION shadow qualification helpers."""
+"""Qualifying a reranker against the retrieval baseline with no side effects: baseline candidates,
+reranker batches, and one end-to-end run. Re-exported by the calibration package; tests call it.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

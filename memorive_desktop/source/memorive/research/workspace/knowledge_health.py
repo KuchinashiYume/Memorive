@@ -1,4 +1,6 @@
-"""Local MODEL_EVALUATION observations of source freshness, review age and retrieval composition."""
+"""Local observations of the knowledge base's health: how fresh the sources are, how old the reviews
+are and what retrieval draws on. The research workspace service and the exams use it.
+"""
 import json
 from datetime import datetime,timezone
 from memorive.research.workspace.store import now

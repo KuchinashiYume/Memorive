@@ -1,4 +1,6 @@
-"""Create-only KNOWLEDGE_ADMISSION submission adapter bound to an exact EVIDENCE_REVIEW report."""
+"""The request that submits a reviewed research opportunity to the library, bound to its exact
+review report. Only tests call it.
+"""
 
 from __future__ import annotations
 

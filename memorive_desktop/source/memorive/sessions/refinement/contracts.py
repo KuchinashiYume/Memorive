@@ -1,4 +1,6 @@
-"""Fail-closed contracts for CONVERSATION-REFINEMENT conversation refinement.
+"""The records of conversation refinement: source access, export snapshots, capture attempts,
+selections and context capsules, each made and checked here. The rest of session refinement, the
+card states' ingest preview and the registry's refinement preview use them.
 
 The objects in this module are deterministic, append-only projections.  They
 never read provider credentials, call a model, mutate a source conversation,

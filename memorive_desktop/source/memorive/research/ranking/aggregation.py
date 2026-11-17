@@ -1,4 +1,6 @@
-"""Auditable six-provider aggregation policies for SEMANTIC-AGGREGATION Shadow retrieval."""
+"""Combining the scores of the six shadow ranking providers into one ranking: two aggregation
+policies and the explanation of each score. Not reached from the app's own code; tests call it.
+"""
 
 from __future__ import annotations
 

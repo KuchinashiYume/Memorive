@@ -3,7 +3,7 @@ stream it prints. memorive/models/validation/cli_route.py uses its parser for th
 app sends.
 
 It does not select routes, retry, activate a profile, write
-the real RUNTIME_LOG ledger, or read credential values for evidence.
+the runtime log, or read credential values for evidence.
 """
 
 from __future__ import annotations

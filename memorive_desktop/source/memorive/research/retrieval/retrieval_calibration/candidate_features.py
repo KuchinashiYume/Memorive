@@ -1,4 +1,6 @@
-"""Read-only candidate metadata enrichment for RETRIEVAL-CALIBRATION."""
+"""Adding read-only metadata to retrieval candidates before reranking (feature envelopes, reranker
+provenance). The other calibration modules and the local multimodal ranker use it.
+"""
 from __future__ import annotations
 
 import hashlib

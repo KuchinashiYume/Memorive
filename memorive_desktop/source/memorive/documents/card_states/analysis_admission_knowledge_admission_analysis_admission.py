@@ -1,4 +1,6 @@
-"""Memorive ANALYSIS-ADMISSION/KNOWLEDGE_ADMISSION build-only Analysis admission requests."""
+"""Building the request that admits an analysis into the library, without carrying it out. The
+publication preview uses it.
+"""
 
 from __future__ import annotations
 

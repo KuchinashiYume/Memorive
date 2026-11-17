@@ -1,7 +1,8 @@
-"""Strict locator validation for the FIELD-VECTORS manifest-backed candidate index.
+"""Checking the locator of a field-vector index and the run folder it must stay inside.
 
 There is deliberately no default root, fallback index, or activation path in
 this module.  A caller must provide both a locator and the run-owned root.
+The ranking command line and candidate_index.py use it.
 """
 
 from __future__ import annotations

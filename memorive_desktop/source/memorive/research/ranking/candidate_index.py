@@ -1,8 +1,9 @@
-"""Deterministic, manifest-backed FIELD-VECTORS candidate index.
+"""Building a field-vector index from a manifest, as a candidate beside the active index.
 
 This is not a Chroma adapter.  It creates a new directory exclusively under
 the supplied run-owned root and materializes only canonical JSON/JSONL files.
 The resulting candidate is never production eligible and never activated.
+The ranking command line (cli.py, migration.py) uses it.
 """
 
 from __future__ import annotations

@@ -1,4 +1,6 @@
-"""Thin, read-only RETRIEVAL/RETRIEVAL_WEIGHTING candidate-union adapter."""
+"""The stable union of retrieval candidates from several sources, read-only. Re-exported by the
+calibration package; tests call it.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

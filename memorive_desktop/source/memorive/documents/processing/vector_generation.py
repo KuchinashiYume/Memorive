@@ -1,4 +1,6 @@
-"""LOCAL-RETRIEVAL isolated Chroma generation contract and bounded manager."""
+"""Building a Chroma vector index in an isolated folder under a generation contract
+(IsolatedChromaGeneration). Only tests call it.
+"""
 
 from __future__ import annotations
 

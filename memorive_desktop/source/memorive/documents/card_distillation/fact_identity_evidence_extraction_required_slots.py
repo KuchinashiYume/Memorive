@@ -1,4 +1,6 @@
-"""Memorive FACT-IDENTITY/EVIDENCE_EXTRACTION required-slot assessment producer."""
+"""Whether a card fills the slots its template requires, with real anchors in the paper
+(build_required_slot_assessment). Nothing imports it.
+"""
 
 from __future__ import annotations
 

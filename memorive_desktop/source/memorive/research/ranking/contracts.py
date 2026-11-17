@@ -1,4 +1,8 @@
-"""Strict runtime contracts for the isolated FIELD-VECTORS field-vector candidate."""
+"""Checks for field-vector indexes: storage tokens, vector ids, timestamps, card authority,
+document-type metadata, embedding profiles, ownership partitions and index identity. It also still
+offers the hashed-payload helpers of platform/hashed_payloads.py. Most of this package and knowledge
+feedback use it.
+"""
 
 from __future__ import annotations
 

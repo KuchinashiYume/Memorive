@@ -1,4 +1,8 @@
-"""Errors for the ARTIFACT-REGISTRY ARTIFACT_REGISTRY artifact registry candidate."""
+"""The registry's error classes (ArtifactRegistryRegistryError and its subclasses: contract,
+sandbox boundary, envelope, adapter, front matter, conflict, append-only, writer, corruption and
+unknown-artifact errors). Every module of the package raises them; the publication preview of the
+card states does too.
+"""
 
 from __future__ import annotations
 

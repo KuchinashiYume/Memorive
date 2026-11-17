@@ -1,6 +1,6 @@
 """Create-only encryption for a user-selected file or directory.
 
-LOCAL-INFERENCE deliberately uses the Windows current-user DPAPI boundary.  Every file
+It deliberately uses the Windows current-user DPAPI boundary.  Every file
 is split into independently authenticated chunks; chunk order and object
 identity are bound through DPAPI optional entropy.  Logical names and the
 directory layout live only in the encrypted manifest.
@@ -8,6 +8,7 @@ directory layout live only in the encrypted manifest.
 The public operation is copy-first: it never overwrites, renames or deletes the
 selected source.  A caller needs a separate destructive authority to perform a
 later source disposition step; this module intentionally has no such API.
+Only tests call it.
 """
 
 from __future__ import annotations

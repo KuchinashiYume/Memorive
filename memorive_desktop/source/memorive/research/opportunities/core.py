@@ -1,4 +1,7 @@
-"""Fail-closed RESEARCH_OPPORTUNITIES successor for source, gap, comparison, and opportunity objects."""
+"""Research opportunities from cards: source snapshots, author-stated gaps, comparisons between
+papers, and the opportunity objects, each checked. research_opportunities.py and the research
+workspace use it.
+"""
 
 from __future__ import annotations
 

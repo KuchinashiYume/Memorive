@@ -1,6 +1,7 @@
-"""Bounded Full -> one targeted repair -> Delta adapter for LONG-DOCUMENT.
+"""The review and one targeted repair of a card distilled in segments from a long document. The
+research workspace's answer evidence uses it.
 
-This module owns only the Verification orchestration contract.  It keeps the existing
+This module owns only the order of the review steps.  It keeps the existing
 ``atomic_repair`` implementation read-only and can carry an existing repair
 bundle reference without mutating that implementation.
 """

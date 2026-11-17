@@ -5,7 +5,7 @@ window does not start").
 The adapter binds an immutable launcher/entrypoint, exact ``--model`` argv,
 frozen model catalog, access profile and entitlement snapshot.  Generated
 answer text is never identity evidence.  It does not retry, fall back from an
-expired subscription to a paid API key, activate a route, or write RUNTIME_LOG.
+expired subscription to a paid API key, activate a route, or write the runtime log.
 
 What it shares with the other command-line adapters (sidecar, entitlement or login checks, result
 normalization, the receipt) is in cli_common.py; this module keeps what is specific to the

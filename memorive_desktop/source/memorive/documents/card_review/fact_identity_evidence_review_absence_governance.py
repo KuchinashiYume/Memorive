@@ -1,4 +1,6 @@
-"""Memorive FACT-IDENTITY/EVIDENCE_REVIEW absence evidence and coverage governance."""
+"""For card review: the check payload that a fact is really absent from a paper, and the coverage
+summary over all such checks. Nothing imports it.
+"""
 
 from __future__ import annotations
 

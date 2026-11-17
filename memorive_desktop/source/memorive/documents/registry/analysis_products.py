@@ -1,4 +1,6 @@
-"""Memorive ANALYSIS-ADMISSION/ARTIFACT_REGISTRY immutable values shared by the release-gate builders."""
+"""Small immutable values the analysis builders share: ArtifactProduct, artifact references and
+stable identifiers. Used by analysis_compatibility.py and the card states.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,6 @@
-"""Open Artifact Envelope schema and validation helpers for ARTIFACT_REGISTRY."""
+"""The version-1 product envelope: building and checking envelopes and registry events. registry.py
+writes with it; schema_v2.py uses it to read version-1 envelopes.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,7 @@
-"""Strict, read-only KNOWLEDGE_ADMISSION/RUNTIME_LOG/ARTIFACT_REGISTRY adapters into the DataContracts ResearchEvent view."""
+"""Reading knowledge admission records, runtime log entries and artifact registry events as research
+events for the reports, read-only (adapt_record). The report source, digest, authority and command
+line use it.
+"""
 
 from __future__ import annotations
 

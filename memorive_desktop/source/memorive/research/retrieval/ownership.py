@@ -1,4 +1,6 @@
-"""DATA-OWNERSHIP ownership contract and deterministic propagation guard.
+"""Who owns a piece of material (the user, a source, a model) and how that ownership carries over to
+everything derived from it: assertions, snapshots, amendments and propagation receipts. Retrieval,
+research analysis, card review and old job files (platform/pickle_compat.py) use it.
 
 This module owns no route, database, registry, or production migration.  It
 turns one authoritative ownership assertion into immutable, hash-bound

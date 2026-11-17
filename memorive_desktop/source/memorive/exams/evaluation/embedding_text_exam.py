@@ -1,4 +1,4 @@
-"""Formal MODEL_EVALUATION embedding_text reference-exam integration.
+"""The embedding_text exam, run against the reference pack kept in the repository.
 
 The formal run is intentionally bound to one repository-resident reference
 pack.  Gold is loaded only by the local scorer.  Provider requests contain

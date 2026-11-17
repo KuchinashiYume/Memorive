@@ -1,7 +1,9 @@
-"""Pure-offline CANDIDATE-REVIEW Candidate Card staging adapter.
+"""Staging candidate cards from a recommended paper in a run folder: chunks, evidence extraction and
+evidence review, all offline. The atomic card promotion uses it.
 
 This run-local construction module deliberately exposes only the deterministic
-DocumentIngest-DocumentChunk, EVIDENCE_EXTRACTION Card writer, and deterministic EVIDENCE_REVIEW path.  It has no production
+DocumentIngest-DocumentChunk, the evidence extraction card writer, and the deterministic evidence
+review path.  It has no production
 activation, promotion, Analysis, model, OCR, embedding, or network capability.
 """
 from __future__ import annotations

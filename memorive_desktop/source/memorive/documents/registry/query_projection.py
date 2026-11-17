@@ -1,8 +1,8 @@
-"""Disposable SQLite projection and bounded query facade for ASSET-MIGRATION.
+"""A disposable SQLite copy of the registry for queries (QueryProjectionBuilder, RegistryQueryService).
 
 The projection is never authoritative: every query rebinds it to an exact
 Registry fingerprint, stale data is never returned, and no API in this module
-writes back to Registry JSONL.
+writes back to Registry JSONL. maintenance.py and tests call it.
 """
 
 from __future__ import annotations

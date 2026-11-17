@@ -1,4 +1,5 @@
-"""API narrative layer for deterministic RESEARCH_REPORTS daily/weekly/monthly digests.
+"""The short narrative a model writes at the top of a daily, weekly or monthly report. models.py
+uses it.
 
 The ChangeDigest remains the sole fact and window authority.  This module adds
 one period-specific, source-bound front narrative only when that exact window
@@ -6,7 +7,7 @@ contains a qualifying library-state change.  No qualifying change means no
 report and zero model calls; incomplete source authority blocks before send.
 
 Provider transport, credentials, retry policy and strict per-call receipts are
-injected through ``model_call`` and remain MODEL_GATEWAY/RUNTIME_LOG responsibilities.
+injected through ``model_call`` and remain the model gateway's and the runtime log's job.
 """
 from __future__ import annotations
 

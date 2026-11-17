@@ -1,4 +1,5 @@
-"""Strict read-only adapter for the formal ARTIFACT_REGISTRY v1/v2 registry event wire.
+"""Reading one event of the artifact registry (versions 1 and 2) for the reports, read-only. adapters.py
+uses it.
 
 This module deliberately does not import ``pathlib``.  A registry locator is
 data, not a filesystem capability: it is validated as opaque text and only an

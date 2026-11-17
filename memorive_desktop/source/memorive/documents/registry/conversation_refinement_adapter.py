@@ -1,4 +1,7 @@
-"""ARTIFACT_REGISTRY read-only registration/query preview for a Extensions destination."""
+"""A preview of registering a refined conversation in the registry, without registering it: it reads
+the destination projection and the ingest preview of memorive/sessions/refinement and checks that
+nothing was written. Only tests call it (tests/modules/artifact_registry).
+"""
 
 from __future__ import annotations
 

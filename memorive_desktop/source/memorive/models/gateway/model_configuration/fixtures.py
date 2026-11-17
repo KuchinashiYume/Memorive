@@ -1,4 +1,6 @@
-"""Public-safe synthetic fixtures for MODEL-CONFIGURATION offline construction and B."""
+"""Synthetic example configurations for the model configuration tests: provider presets, model
+profiles, tier policies, credentials, ordinary and advanced settings.
+"""
 
 from __future__ import annotations
 

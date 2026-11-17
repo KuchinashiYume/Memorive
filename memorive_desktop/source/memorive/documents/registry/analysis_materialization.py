@@ -1,4 +1,8 @@
-"""Memorive ANALYSIS-ADMISSION/ARTIFACT_REGISTRY sandbox-only Artifact Envelope v2 materialization."""
+"""Writing version-2 artifacts for an analysis inside one sandbox folder: ArtifactFactory creates and
+registers them, SandboxBoundary keeps every write inside the sandbox and out of protected folders.
+The card states (analysis admission, publication preview) and the atomic card promotion of research
+recommendations use it.
+"""
 
 from __future__ import annotations
 

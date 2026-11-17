@@ -1,4 +1,6 @@
-"""Deterministic issue and sandbox-only RUNTIME_LOG candidate records."""
+"""Issue records of a report run, and the candidate runtime log error made from one (sandbox only).
+The report source, digest and command line use it.
+"""
 
 from __future__ import annotations
 
