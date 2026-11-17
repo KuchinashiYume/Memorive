@@ -4212,8 +4212,8 @@
     },
     {
       "path": "source/memorive/exams/runner/catalog_validation.py",
-      "sha256": "09f08e726e761af12e83c096e6cf1b41aef0f2ade757c77f49f91b134d6e443e",
-      "bytes": 23870
+      "sha256": "ca46525e3fc333e1f60c80addd61644be0b5a03a70e79338c535faeae2c8592e",
+      "bytes": 67582
     },
     {
       "path": "source/memorive/exams/runner/metadata.py",
@@ -4222,8 +4222,8 @@
     },
     {
       "path": "source/memorive/exams/runner/workflow_exams.py",
-      "sha256": "8e011544f24ed4a0b180fd6e120c9d3ba7da84c6b565aef6a5c5b9b897a58d76",
-      "bytes": 67950
+      "sha256": "09bf691ca96721fc91611537960f156ae5b4c64eecb49cc68614ab6c55ab9c4e",
+      "bytes": 20963
     },
     {
       "path": "source/memorive/exams/score_history.py",
