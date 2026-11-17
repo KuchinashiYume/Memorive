@@ -4121,8 +4121,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "ef896683d982a5d1cbe14837fe55eb92c92f0006712cca772144ef5be66bdd13",
-      "bytes": 276580
+      "sha256": "6565e719a1f48b4d3be4b2c77d2ef17f66941ea2cdc2a246e19424362a57a4a1",
+      "bytes": 276579
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -8281,8 +8281,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py",
-      "sha256": "65202f268f49641f593c264f1cb78c7d661f90fd3952391098b5d8a5daa04340",
-      "bytes": 50096
+      "sha256": "49211049677b271de596ba78de2b3634c48f2d064a47b1fda15a3344f6b089ec",
+      "bytes": 52185
     },
     {
       "path": "memorive_desktop/source/memorive/research/discovery/connector_framework.py",
@@ -8321,8 +8321,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/discovery/identity.py",
-      "sha256": "1400eac7946ae49431161833904dd8d640679f404faa485c0a2e665c60af8424",
-      "bytes": 11782
+      "sha256": "6c138daca2eb01fa3abda558919b35f73a2633e8e1138f6e5865e525f8f9c85b",
+      "bytes": 4649
     },
     {
       "path": "memorive_desktop/source/memorive/research/discovery/indexing.py",

@@ -9,6 +9,7 @@ observation check and claim reader. The identifier normalizers and the other hel
 from __future__ import annotations
 
 import copy
+from dataclasses import dataclass
 import re
 import unicodedata
 from collections import defaultdict
@@ -265,15 +266,48 @@ def _observation_alias(observation_ref: str) -> str:
     return "SOURCE_OBSERVATION:" + match.group(1).upper()
 
 
+@dataclass(frozen=True)
+class ObservationRules:
+    """What a reader of source observations accepts. Every other check is the same for all readers.
+
+    CONTRACT_RULES below read the frozen contract's observations; identity.py's DESKTOP_RULES read
+    the ones the desktop's own discovery writes."""
+
+    schema_versions: frozenset[str]
+    # Observations of this schema must say network_used False; None: every observation must.
+    offline_schema: str | None
+    # fixture_classification and source_evidence keys of an observation that is not schema 0.1.
+    snapshot_classification: str
+    snapshot_evidence_keys: frozenset[str]
+    # network_used and cache_hit must be booleans, not both true.
+    cache_flags: bool
+    # Observations of this schema may have no authors; their claims say optional_metadata.
+    optional_metadata_schema: str | None
+
+
+CONTRACT_RULES = ObservationRules(
+    schema_versions=frozenset({
+        "discovery.data_contracts.source-observation.0.1",
+        "discovery.data_contracts.source-observation.0.2",
+    }),
+    offline_schema=None,
+    snapshot_classification="FROZEN_PUBLIC_METADATA_A1",
+    snapshot_evidence_keys=frozenset({
+        "snapshot_sha256", "normalized_record_sha256", "fixture_classification",
+        "network_used", "acquisition_request_id"
+    }),
+    cache_flags=False,
+    optional_metadata_schema=None,
+)
+
+
 def verify_source_observation(
     observation: Mapping[str, Any],
     evidence_registry: Mapping[str, Mapping[str, Any]],
+    rules: ObservationRules = CONTRACT_RULES,
 ) -> None:
     object_id = str(observation.get("object_id", ""))
-    if observation.get("schema_version") not in {
-        "discovery.data_contracts.source-observation.0.1",
-        "discovery.data_contracts.source-observation.0.2",
-    }:
+    if observation.get("schema_version") not in rules.schema_versions:
         raise IdentityResolutionError("SOURCE_OBSERVATION_SCHEMA_MISMATCH", [object_id])
     if observation.get("object_type") != "SourceObservation":
         raise IdentityResolutionError("SOURCE_OBSERVATION_TYPE_MISMATCH", [object_id])
@@ -310,10 +344,12 @@ def verify_source_observation(
     for field in ("snapshot_sha256", "normalized_record_sha256"):
         if not re.fullmatch(r"[a-f0-9]{64}", str(exact_fields[field])):
             raise IdentityResolutionError("SOURCE_EVIDENCE_HASH_INVALID", [object_id])
-    if source_evidence.get("network_used") is not False:
+    if (
+        rules.offline_schema is None or observation.get("schema_version") == rules.offline_schema
+    ) and source_evidence.get("network_used") is not False:
         raise IdentityResolutionError("NETWORK_EVIDENCE_NOT_OFFLINE", [object_id])
     classification = source_evidence.get("fixture_classification")
-    if classification not in {"SYNTHETIC_PUBLIC_SAFE_A0", "FROZEN_PUBLIC_METADATA_A1"}:
+    if classification not in {"SYNTHETIC_PUBLIC_SAFE_A0", rules.snapshot_classification}:
         raise IdentityResolutionError("FIXTURE_CLASSIFICATION_REJECTED", [object_id])
     if observation.get("schema_version") == "discovery.data_contracts.source-observation.0.1":
         if classification != "SYNTHETIC_PUBLIC_SAFE_A0" or set(source_evidence) != {
@@ -321,11 +357,16 @@ def verify_source_observation(
         }:
             raise IdentityResolutionError("SOURCE_EVIDENCE_SCHEMA_MISMATCH", [object_id])
     elif (
-        classification != "FROZEN_PUBLIC_METADATA_A1"
-        or set(source_evidence) != {
-            "snapshot_sha256", "normalized_record_sha256", "fixture_classification",
-            "network_used", "acquisition_request_id"
-        }
+        classification != rules.snapshot_classification
+        or set(source_evidence) != rules.snapshot_evidence_keys
+        or (
+            rules.cache_flags
+            and (
+                type(source_evidence.get("network_used")) is not bool
+                or type(source_evidence.get("cache_hit")) is not bool
+                or (source_evidence["network_used"] and source_evidence["cache_hit"])
+            )
+        )
         or not isinstance(source_evidence.get("acquisition_request_id"), str)
         or not source_evidence["acquisition_request_id"]
         or observation.get("discovery_origin") != "KEYWORD_SEARCH"
@@ -358,7 +399,9 @@ def _role_from_claims(claims: Sequence[Mapping[str, Any]]) -> str:
     return max(roles, key=lambda role: (priority[role], role))
 
 
-def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
+def _claim_from_observation(
+    observation: Mapping[str, Any], rules: ObservationRules = CONTRACT_RULES
+) -> dict[str, Any]:
     identifiers = observation.get("identifiers")
     bibliographic = observation.get("bibliographic")
     if not isinstance(identifiers, Mapping) or not isinstance(bibliographic, Mapping):
@@ -392,7 +435,11 @@ def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
         key=lambda item: (item["kind"], item["value"]),
     )
     authors_value = bibliographic.get("authors")
-    if not isinstance(authors_value, list) or not authors_value:
+    authors_optional = (
+        rules.optional_metadata_schema is not None
+        and observation.get("schema_version") == rules.optional_metadata_schema
+    )
+    if not isinstance(authors_value, list) or (not authors_value and not authors_optional):
         raise IdentityResolutionError("BIBLIOGRAPHIC_AUTHORS_MISSING", [str(observation.get("object_id"))])
     authors = []
     for author in authors_value:
@@ -413,6 +460,7 @@ def _claim_from_observation(observation: Mapping[str, Any]) -> dict[str, Any]:
         "identifier_tokens": sorted(_identifier_token(item) for item in normalized_identifiers),
         "invalid_identifier_kinds": sorted(set(invalid_kinds)),
         "metadata_signature": metadata_signature,
+        **({"optional_metadata": authors_optional} if rules.optional_metadata_schema is not None else {}),
         "bibliographic_claim": {
             "observation_ref": observation["object_id"],
             "title": title.strip(),
@@ -1078,4 +1126,6 @@ __all__ = [
     "resolve_identity_batch_with",
     "initialization_candidate_base_projection",
     "verify_source_observation",
+    "ObservationRules",
+    "CONTRACT_RULES",
 ]
