@@ -54,10 +54,23 @@ transport (`memorive/models`, `memorive/desktop/settings`), and from all of them
 the shared basics (`memorive/platform`: jobs, run ledgers, decision records and the rest). A few
 places still reach across areas; these are the places to untangle when that code is restructured:
 
-- `memorive/desktop/settings` still serves a lower area: research discovery uses its metadata
-  transport and the list of literature sources.
-- `memorive/models/gateway/routing_advisory.py` uses the exam scoring
-  (`memorive/exams/evaluation/dynamic_routing_advisory.py`).
+- Lower areas still import parts of `memorive/desktop`:
+  - research discovery (`memorive/research/discovery/transport.py`) uses the settings' metadata
+    transport and the list of literature sources;
+  - the research workspace's headless model setup (`memorive/research/workspace/headless_models.py`)
+    builds the settings controller with `memorive/desktop/service/service_main.py` and
+    `memorive/desktop/settings/service_adapter.py`;
+  - the inbox (`memorive/documents/inbox/controller.py`) and research reports
+    (`memorive/research/reports/models.py`) use `memorive/desktop/current_task/workflow_mapping.py`;
+  - the sessions controller (`memorive/sessions/controller/refinement_queue.py` and
+    `refinement_tasks.py`) uses the refinement task store `memorive/desktop/current_task/refinement_tasks.py`;
+  - the research routes (`memorive/research/routes.py`) use `memorive/desktop/service/locator.py`;
+  - the data review health check (`memorive/documents/data_review/health.py`) builds a whole
+    `ProductApi` (`memorive/desktop/api/`).
+- `memorive/models` reaches up in two places: `memorive/models/gateway/routing_advisory.py` uses the
+  exam scoring (`memorive/exams/evaluation/dynamic_routing_advisory.py`), and
+  `memorive/models/scheduling.py` takes `CORE_WORKER_CAPACITY` from
+  `memorive/documents/workflow/contracts.py`.
 - The refinement decision receipts (`memorive/sessions/refinement/decision.py`) take
   `DECISION_STATES` and `validate_typed_refinement_item` from `memorive/research/knowledge_feedback`.
 - Several packages keep their own copy of the canonical hashing helpers (`memorive/research/opportunities/canonical.py`, `memorive/research/reports/canonical.py` and others).
@@ -66,12 +79,12 @@ places still reach across areas; these are the places to untangle when that code
 
 | Area | Packages |
 | --- | --- |
-| Desktop: window, service, panels | `memorive/desktop` (`api.py` ProductApi, `settings/`, `service/`, `assistant/`, `current_task/`, `messages/`, `work_log/`, `accounting/`, `test_console/`, `harness/` an integration harness run by hand, `release_links.py`; its docstring lists each part) |
+| Desktop: window, service, panels | `memorive/desktop` (`api/` ProductApi, `settings/`, `service/`, `assistant/`, `current_task/`, `messages/`, `work_log/`, `accounting/`, `test_console/`, `harness/` an integration harness run by hand, `release_links.py`; its docstring lists each part) |
 | Documents | `memorive/documents` (`inbox/`, `processing/` with `registration.py` for paper IDs, `library/`, `registry/` the artifact registry, `front_matter.py`; `workflow/`, `card_distillation/`, `card_review/`, `card_states/`, `data_review/`; its docstring lists each part) |
 | Research | `memorive/research/workspace`, `memorive/research` (`runtime.py` and the files next to it, `briefing/`), `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports`, `memorive/research/analysis`, `memorive/research/opportunities`, `memorive/research/retrieval`, `memorive/research/ranking`, `memorive/research/knowledge_feedback` (knowledge drafts) |
 | Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
-| Exams | `memorive/exams` (one module per exam family, `runner.py` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
+| Exams | `memorive/exams` (one module or package per exam family, `runner/` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
 | Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file; `jobs/`, `ledger/` the run ledgers and writer lock, `decisions/` design decision records, `errors.py`, `credentials.py`) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,

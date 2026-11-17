@@ -1,6 +1,6 @@
 """The desktop app's own code: the window's API, settings, the background service and the pages.
 
-  api.py             ProductApi, which receives every call from the window and passes it on
+  api/               ProductApi, which receives every call from the window and passes it on
   settings/          the settings service: stored settings, credentials, model nodes and profiles
   service/           the background service that runs jobs, and the window's client for it
   assistant/         the floating desk assistant
