@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "1d6403640b418004928e8b73a082378e38a43fa0c2097e4aed1c2ee5945cb9d5",
-      "bytes": 2701731
+      "sha256": "a0988d3e7b0ab373d3fe642e65b0a4ef4012d8d05c59d09d0190d507f811607b",
+      "bytes": 2700123
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "828a28b8182aad75ccda5c64e3021fd255866046af67e4b536d36a1ed9bbaf50",
+      "sha256": "de121857074e76e43b51b7df6043834a0ca0230dad13beb7a49f8aecb0776853",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "255cd5d52ed56ac0b8d9d31e1b497cad88ab568a7a08fedbe5db74574217cd25",
+      "sha256": "ce2d0fae2d66b50813af8961a3f84fbc1e076b6a82f8b46d39bd61076fe9cb32",
       "bytes": 275229
     },
     {
@@ -4696,8 +4696,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/bridge.js",
-      "sha256": "74637da3d8c74845f2d19261a1a2329e8013492f6f5b13ba9ac43422cf4df471",
-      "bytes": 46204
+      "sha256": "2ec22e036d8e749c3e30ea712becf663b0300c0f65c84c6f6018fec59cab6ea8",
+      "bytes": 46077
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/markup.html",
@@ -4736,13 +4736,13 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/view.js",
-      "sha256": "fd30312ecd32cd282ca45c588db57ef3d1117d2b8490b4e07146392199c1fbdc",
-      "bytes": 53318
+      "sha256": "95f5c8eda6e84ca97ac4a85ffaffc6ba4821eb6b78f1c8cb78d233c882ddc0b4",
+      "bytes": 53127
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/bridge.js",
-      "sha256": "3598e08c87154bd7a71ae10537a58abf24b0a78afc45c4a22a52457bdd738039",
-      "bytes": 17068
+      "sha256": "7341736fcfa6264d19ac6552e650e74e5bb05cce5f0aef1227230b8d4a324030",
+      "bytes": 16917
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/markup.html",
@@ -4756,8 +4756,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/bridge.js",
-      "sha256": "2d069499220e142537e51254b24143ad907577c35ac96ddd940d8d9de1ab55d7",
-      "bytes": 12228
+      "sha256": "e3d0c5eb8e96f32334087c751fd820398c9a55e83889476978964fd9c6dbe9ae",
+      "bytes": 12076
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/markup.html",
@@ -4771,8 +4771,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/bridge.js",
-      "sha256": "8acd5a38ede88fc85997c1fc98868bad2400dde5e3d0f369cc1d4887db55d242",
-      "bytes": 25882
+      "sha256": "a4f408e7a65a6cdfa1737c2b1ae8d7347c3dc0abd92e8f506f505bc9f830cade",
+      "bytes": 25393
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/markup.html",
@@ -4851,8 +4851,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/settings.js",
-      "sha256": "cb7c3f4b4f760e615d7d213804b0ea06574a40784bf87a81e062b3ab9f232769",
-      "bytes": 299956
+      "sha256": "420778483e24c4afa98da7baeb986708361d87871fcb3331b2a5d98cc7617b97",
+      "bytes": 299803
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/update.css",
@@ -4871,8 +4871,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/bridge.js",
-      "sha256": "399edbcf61e85a2ea5ccd7b6a38ca7bcc025f97dc95d8358d1524a9441b8adaf",
-      "bytes": 30402
+      "sha256": "f77380d4c92e2b774f1f10aedc6a84815530c0d2ecf4c7bc361e0f47d4989fc5",
+      "bytes": 30246
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/markup.html",
@@ -4886,8 +4886,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/bridge.js",
-      "sha256": "e3ab914a5bac367f135e50a21caeeade08493090269821995f2a20eb42c5efa6",
-      "bytes": 10385
+      "sha256": "ec124f130483533341dbc3fd07dffc1762c450c8addb05d4cf4618f403a23c92",
+      "bytes": 10196
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/markup.html",

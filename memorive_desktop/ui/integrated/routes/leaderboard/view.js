@@ -96,7 +96,6 @@
       uiText(uiText('尚无模型数据 · 点击刷新获取'));
   }
   const call = async (method, params = {}) => {
-    if (!['settings.leaderboard_get','settings.leaderboard_save','settings.leaderboard_refresh','settings.external_sources_refresh'].includes(method)) throw new Error('METHOD_NOT_ALLOWED');
     if (typeof window.pywebview?.api?.call === 'function') return (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
     throw new Error('DESKTOP_BRIDGE_UNAVAILABLE');
   };

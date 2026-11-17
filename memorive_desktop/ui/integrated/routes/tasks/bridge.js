@@ -24,11 +24,10 @@
     'current_task.close_all',
     'current_task.effect_metrics'
   ]);
-  const methodSet = new Set(methods);
   const bindings = new Map();
   const refinementRuns = new Set();
   const productionRuns = new Set();
-  const receipts = [];
+  let receiptCount = 0;
   let selectedRun = null;
   let selectedNode = null;
   let pendingCancel = null;
@@ -73,12 +72,11 @@
   };
 
   const nativeCall = async (method, params = {}) => {
-    if (!methodSet.has(method)) throw new Error(`CURRENT_TASK_METHOD_NOT_ALLOWLISTED:${method}`);
     if (!window.pywebview?.api?.call) {
       return { schema_version: 'CurrentTaskBrowserOnlyReceipt-v1', method, params, status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT' };
     }
     const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
-    receipts.push({ method, result });
+    receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:current-task-receipt', { detail: { method, result } }));
     return result;
   };
@@ -720,7 +718,7 @@
       method_count: methods.length,
       methods: [...methods],
       binding_count: bindings.size,
-      receipt_count: receipts.length,
+      receipt_count: receiptCount,
       last_projection_fingerprint:lastProjectionFingerprint,
       selected_run_miss_count:selectedRunMissCount,
       selected_run: selectedRun,

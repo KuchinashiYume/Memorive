@@ -20,10 +20,9 @@
     'work_log.restore',
     'work_log.effect_metrics'
   ]);
-  const methodSet = new Set(methods);
   const coreProjectionSource = 'core_job_provider';
   const bindings = new Map();
-  const receipts = [];
+  let receiptCount = 0;
   let selectedLogEntryId = null;
   document.getElementById('desktop-worklog-preview')?.addEventListener('desktop:inspector-closed', () => { selectedLogEntryId = null; });
   let sampleDirectoryLaunches = 0;
@@ -55,7 +54,6 @@
   };
 
   const nativeCall = async (method, params = {}) => {
-    if (!methodSet.has(method)) throw new Error(`WORK_LOG_METHOD_NOT_ALLOWLISTED:${method}`);
     let result;
     if (!window.pywebview?.api?.call) {
       result = {
@@ -69,7 +67,7 @@
     } else {
       result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
     }
-    receipts.push({ method, result });
+    receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:work-log-receipt', { detail: { method, result } }));
     return result;
   };
@@ -82,7 +80,7 @@
     const result = await action.call(window.pywebview.api);
     if (result?.status === 'OPENED' && method === 'open_work_log_sample_directory') sampleDirectoryLaunches += 1;
     if (result?.status === 'OPENED' && method === 'locate_work_log_sample_projection') sampleProjectionLocates += 1;
-    receipts.push({ method: `desktop.${method}`, result });
+    receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:work-log-receipt', { detail: { method: `desktop.${method}`, result } }));
     return result;
   };
@@ -241,7 +239,7 @@
       methods: [...methods],
       binding_count: bindings.size,
       selected_log_entry_id: selectedLogEntryId,
-      receipt_count: receipts.length,
+      receipt_count: receiptCount,
       native_transport: Boolean(window.pywebview?.api?.call),
       raw_authority_content_reads: 0,
       source_authority_mutations: 0,

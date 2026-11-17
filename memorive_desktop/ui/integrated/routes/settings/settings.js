@@ -24,7 +24,6 @@
     'sessions.refinement_settings_get', 'sessions.refinement_settings_save',
     'assistant.preference_get', 'assistant.preference_save'
   ]);
-  const allowedMethods = new Set(SETTINGS_METHODS);
   const SENSITIVE_RESET_SCOPES = new Set(['api', 'cli', 'local-models', 'workflow', 'refinement']);
   const RESETTABLE_SCOPES = new Set(['viewer', 'notice', 'behavior', 'network', 'privacy', 'appearance']);
   const RESET_COUNTDOWN_SECONDS = 10;
@@ -581,7 +580,6 @@
   const nativeReady = () => Boolean(window.pywebview?.api?.call);
 
   const call = async (method, params = {}) => {
-    if (!allowedMethods.has(method)) throw new Error(`SETTINGS_METHOD_NOT_ALLOWLISTED:${method}`);
     if (!nativeReady()) throw new Error('LOCAL_SETTINGS_SERVICE_NOT_CONNECTED');
     requestSequence += 1;
     lastReceipt = {

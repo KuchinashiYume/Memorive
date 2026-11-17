@@ -12,7 +12,6 @@
     'inbox.effect_metrics', 'sessions.refinement_cancel',
     'current_task.begin_cancel', 'current_task.confirm_cancel'
   ]);
-  const allowed = new Set(METHODS);
   const released = new WeakSet();
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -88,7 +87,6 @@
   }, true);
 
   const call = async (method, params = {}) => {
-    if (!allowed.has(method)) throw new Error('INBOX_METHOD_NOT_ALLOWLISTED:' + method);
     if (!nativeReady()) throw new Error('INBOX_NATIVE_TRANSPORT_NOT_READY');
     sequence += 1;
     const receipt = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
