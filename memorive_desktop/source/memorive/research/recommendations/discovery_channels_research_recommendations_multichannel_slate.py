@@ -1,4 +1,11 @@
-"""DISCOVERY-CHANNELS sandbox candidate: deterministic five-channel finite slate composer."""
+"""The five-channel candidate slate: its composition, shared with the desktop slate, and the sandbox
+candidate's own checks and channel rules.
+
+build_recall_candidates, compose_slate, build_coverage_polarization_report and compose_projection take a
+SlateRules: the functions that differ between the sandbox candidate here (SANDBOX_RULES, the default;
+synthetic input only) and the desktop slate in memorive/research/discovery/slate.py (DESKTOP_RULES). The
+sealing and hashing helpers here are used by both.
+"""
 
 from __future__ import annotations
 
@@ -6,9 +13,10 @@ import copy
 import hashlib
 import json
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from collections.abc import Iterable, Mapping, Sequence
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Callable
 
 
 CHANNELS = ("CORE", "ADJACENT", "BRIDGE", "HORIZON", "COVERAGE_REPAIR")
@@ -336,11 +344,28 @@ def _ranking_evidence(
     }
 
 
+@dataclass(frozen=True)
+class SlateRules:
+    """The checks and channel rules a slate is composed with: the functions that differ between the
+    sandbox candidate in this module and the desktop slate (memorive/research/discovery/slate.py).
+    The composition functions below take one (default: SANDBOX_RULES)."""
+
+    validate_context: Callable[..., Any]
+    validate_plan: Callable[..., Any]
+    eligible_channels: Callable[..., Any]
+    ranking_evidence: Callable[..., Any]
+    build_candidate_clusters: Callable[..., Any]
+    cap_values: Callable[..., Any]
+
+
 def build_recall_candidates(
-    facts: Sequence[Mapping[str, Any]], context: Mapping[str, Any], plan: Mapping[str, Any]
+    facts: Sequence[Mapping[str, Any]], context: Mapping[str, Any], plan: Mapping[str, Any],
+    *,
+    rules: SlateRules | None = None,
 ) -> list[dict[str, Any]]:
-    validate_context(context)
-    validate_plan(plan, context)
+    rules = rules or SANDBOX_RULES
+    rules.validate_context(context)
+    rules.validate_plan(plan, context)
     candidate_ids: set[str] = set()
     results: list[dict[str, Any]] = []
     for fact in facts:
@@ -349,7 +374,7 @@ def build_recall_candidates(
         if candidate_id in candidate_ids:
             raise SlateCompositionError("DUPLICATE_CANDIDATE_ID")
         candidate_ids.add(candidate_id)
-        channels, reason_codes = _eligible_channels(fact, context)
+        channels, reason_codes = rules.eligible_channels(fact, context)
         primary_channel = channels[0] if channels else None
         results.append(
             seal_object(
@@ -366,7 +391,7 @@ def build_recall_candidates(
                         "reason_codes": reason_codes,
                     },
                     "ranking_evidence": (
-                        _ranking_evidence(fact, primary_channel) if primary_channel else None
+                        rules.ranking_evidence(fact, primary_channel) if primary_channel else None
                     ),
                 }
             )
@@ -452,8 +477,8 @@ def _cap_values(fact: Mapping[str, Any]) -> dict[str, list[str]]:
 
 def _first_cap_violation(
     fact: Mapping[str, Any], counters: Mapping[str, Counter[str]], limits: Mapping[str, int]
-) -> str | None:
-    values = _cap_values(fact)
+, rules) -> str | None:
+    values = rules.cap_values(fact)
     for dimension in CAP_ORDER:
         if any(counters[dimension][value] + 1 > limits[dimension] for value in values[dimension]):
             return dimension
@@ -467,7 +492,9 @@ def compose_slate(
     *,
     behavior_events: Sequence[Mapping[str, Any]] | None = None,
     production_write_target: str | None = None,
+    rules: SlateRules | None = None,
 ) -> dict[str, Any]:
+    rules = rules or SANDBOX_RULES
     """Compose a deterministic finite slate without any cross-channel backfill."""
 
     if behavior_events:
@@ -477,11 +504,11 @@ def compose_slate(
     context_before = canonical_json(context)
     plan_before = canonical_json(plan)
     facts_before = canonical_json(facts)
-    validate_context(context)
-    validate_plan(plan, context)
+    rules.validate_context(context)
+    rules.validate_plan(plan, context)
     input_hashes_before = _input_hashes(context, plan)
-    recalls = build_recall_candidates(facts, context, plan)
-    clusters = build_candidate_clusters(facts, recalls)
+    recalls = build_recall_candidates(facts, context, plan, rules=rules)
+    clusters = rules.build_candidate_clusters(facts, recalls)
 
     fact_by_id = {item["candidate_id"]: item for item in facts}
     recall_by_id = {item["candidate_id"]: item for item in recalls}
@@ -527,7 +554,7 @@ def compose_slate(
         for recall in sorted(pool, key=_rank_sort_key):
             candidate_id = recall["candidate_id"]
             fact = fact_by_id[candidate_id]
-            violation = _first_cap_violation(fact, counters, limits)
+            violation = _first_cap_violation(fact, counters, limits, rules)
             if violation is not None:
                 reason = violation.upper() + "_CAP_REACHED"
                 unselected[candidate_id] = {
@@ -546,7 +573,7 @@ def compose_slate(
                     "reason_codes": ["CHANNEL_QUOTA_EXHAUSTED"],
                 }
                 continue
-            for dimension, values in _cap_values(fact).items():
+            for dimension, values in rules.cap_values(fact).items():
                 for value in values:
                     counters[dimension][value] += 1
             selected_by_channel[channel] += 1
@@ -640,10 +667,13 @@ def build_coverage_polarization_report(
     history: Mapping[str, Any],
     context: Mapping[str, Any],
     plan: Mapping[str, Any],
+    *,
+    rules: SlateRules | None = None,
 ) -> dict[str, Any]:
+    rules = rules or SANDBOX_RULES
     _assert_sealed(slate, "SLATE_HASH_DRIFT")
-    validate_context(context)
-    validate_plan(plan, context)
+    rules.validate_context(context)
+    rules.validate_plan(plan, context)
     as_of = _parse_aware_datetime(
         plan.get("frozen_as_of"), "PLAN_FROZEN_AS_OF_INVALID"
     )
@@ -786,11 +816,14 @@ def compose_projection(
     context: Mapping[str, Any],
     plan: Mapping[str, Any],
     history: Mapping[str, Any],
+    *,
+    rules: SlateRules | None = None,
 ) -> dict[str, Any]:
-    composition = compose_slate(facts, context, plan)
+    rules = rules or SANDBOX_RULES
+    composition = compose_slate(facts, context, plan, rules=rules)
     report = build_coverage_polarization_report(
         composition["slate"], history, context, plan
-    )
+    , rules=rules)
     return {
         "recall_candidates": composition["recall_candidates"],
         "clusters": composition["clusters"],
@@ -799,7 +832,19 @@ def compose_projection(
     }
 
 
+SANDBOX_RULES = SlateRules(
+    validate_context=validate_context,
+    validate_plan=validate_plan,
+    eligible_channels=_eligible_channels,
+    ranking_evidence=_ranking_evidence,
+    build_candidate_clusters=build_candidate_clusters,
+    cap_values=_cap_values,
+)
+
+
 __all__ = [
+    "SANDBOX_RULES",
+    "SlateRules",
     "CAP_ORDER",
     "CHANNELS",
     "PRIMARY_CHANNEL_PRIORITY",

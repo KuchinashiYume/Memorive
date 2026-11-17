@@ -5957,8 +5957,8 @@
     },
     {
       "path": "source/memorive/research/discovery/slate.py",
-      "sha256": "9870eedf2101bb8359ddab34414e1afc25932440989ec81eb77298d6a1bd1592",
-      "bytes": 34271
+      "sha256": "1eac5315a19493a25cb3f0686928b3c327042501d8020d9895ee2a7fb6422b86",
+      "bytes": 19144
     },
     {
       "path": "source/memorive/research/discovery/transport.py",
@@ -6222,8 +6222,8 @@
     },
     {
       "path": "source/memorive/research/recommendations/discovery_channels_research_recommendations_multichannel_slate.py",
-      "sha256": "b11e236939e94e92b2ec7319415e4516ddf2cb9ea4d95554c24962061b6934c6",
-      "bytes": 34259
+      "sha256": "e404d20766af1b13efe6b2bf3489ac662b41ce7075b8b518710614ff0fd870e6",
+      "bytes": 36062
     },
     {
       "path": "source/memorive/research/recommendations/exposure_feedback.py",

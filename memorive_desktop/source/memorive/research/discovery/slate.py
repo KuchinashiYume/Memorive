@@ -1,13 +1,20 @@
-"""The candidate slate: a fixed, deterministic set of candidates composed from five channels."""
+"""The candidate slate: a fixed, deterministic set of candidates composed from five channels.
+
+The composition is shared with the sandbox candidate
+(recommendations/discovery_channels_research_recommendations_multichannel_slate.py); this module holds the
+desktop's own checks and channel rules (DESKTOP_RULES) and passes them in. The discovery run
+(desktop.py) calls compose_projection.
+"""
 
 from __future__ import annotations
 
-import copy
-from collections import Counter, defaultdict
-from collections.abc import Iterable, Mapping, Sequence
-from datetime import datetime, timedelta
+from collections import defaultdict
+from collections.abc import Mapping, Sequence
 from typing import Any
 
+from memorive.research.recommendations import (
+    discovery_channels_research_recommendations_multichannel_slate as shared_slate,
+)
 from memorive.research.recommendations.discovery_channels_research_recommendations_multichannel_slate import (  # the code both modules share; one copy is kept there
     SlateCompositionError,
     canonical_json,
@@ -15,8 +22,6 @@ from memorive.research.recommendations.discovery_channels_research_recommendatio
     seal_object,
     _assert_sealed,
     _parse_aware_datetime,
-    _input_hashes,
-    _rank_sort_key,
 )
 
 
@@ -31,15 +36,6 @@ PRIMARY_CHANNEL_PRIORITY = (
 CAP_ORDER = ("author", "institution", "journal", "source", "direction")
 ACCESS_RANK = {"UNKNOWN": 0, "METADATA_ONLY": 1, "OPEN": 2}
 NOVELTY_RANK = {"FALSE": 0, "UNKNOWN": 1, "TRUE": 2}
-ZERO_SIDE_EFFECTS = {
-    "profile_writes": 0,
-    "policy_writes": 0,
-    "direction_writes": 0,
-    "library_writes": 0,
-    "artifact_registry_writes": 0,
-    "production_writes": 0,
-    "behavior_events_consumed": 0,
-}
 
 
 def validate_context(context: Mapping[str, Any]) -> None:
@@ -309,39 +305,7 @@ def _ranking_evidence(
 def build_recall_candidates(
     facts: Sequence[Mapping[str, Any]], context: Mapping[str, Any], plan: Mapping[str, Any]
 ) -> list[dict[str, Any]]:
-    validate_context(context)
-    validate_plan(plan, context)
-    candidate_ids: set[str] = set()
-    results: list[dict[str, Any]] = []
-    for fact in facts:
-        _assert_sealed(fact, "FACT_HASH_DRIFT")
-        candidate_id = fact.get("candidate_id")
-        if candidate_id in candidate_ids:
-            raise SlateCompositionError("DUPLICATE_CANDIDATE_ID")
-        candidate_ids.add(candidate_id)
-        channels, reason_codes = _eligible_channels(fact, context)
-        primary_channel = channels[0] if channels else None
-        results.append(
-            seal_object(
-                {
-                    "schema_version": "discovery.intake.recall-channel-candidate.0.1",
-                    "object_type": "RecallChannelCandidate",
-                    "candidate_id": candidate_id,
-                    "work_cluster_id": fact["work_cluster_id"],
-                    "fact_hash": fact["content_hash"],
-                    "primary_channel": primary_channel,
-                    "eligible_channels": channels,
-                    "eligibility": {
-                        "eligible": bool(channels),
-                        "reason_codes": reason_codes,
-                    },
-                    "ranking_evidence": (
-                        _ranking_evidence(fact, primary_channel) if primary_channel else None
-                    ),
-                }
-            )
-        )
-    return sorted(results, key=lambda item: item["candidate_id"])
+    return shared_slate.build_recall_candidates(facts, context, plan, rules=DESKTOP_RULES)
 
 
 def _representative_key(fact: Mapping[str, Any]) -> tuple[Any, ...]:
@@ -413,14 +377,14 @@ def _cap_values(fact: Mapping[str, Any]) -> dict[str, list[str]]:
     }
 
 
-def _first_cap_violation(
-    fact: Mapping[str, Any], counters: Mapping[str, Counter[str]], limits: Mapping[str, int]
-) -> str | None:
-    values = _cap_values(fact)
-    for dimension in CAP_ORDER:
-        if any(counters[dimension][value] + 1 > limits[dimension] for value in values[dimension]):
-            return dimension
-    return None
+DESKTOP_RULES = shared_slate.SlateRules(
+    validate_context=validate_context,
+    validate_plan=validate_plan,
+    eligible_channels=_eligible_channels,
+    ranking_evidence=_ranking_evidence,
+    build_candidate_clusters=build_candidate_clusters,
+    cap_values=_cap_values,
+)
 
 
 def compose_slate(
@@ -431,171 +395,10 @@ def compose_slate(
     behavior_events: Sequence[Mapping[str, Any]] | None = None,
     production_write_target: str | None = None,
 ) -> dict[str, Any]:
-    """Compose a deterministic finite slate without any cross-channel backfill."""
-
-    if behavior_events:
-        raise SlateCompositionError("BEHAVIOR_INPUT_NOT_ACCEPTED_IN_Intake")
-    if production_write_target is not None:
-        raise SlateCompositionError("PRODUCTION_WRITE_FORBIDDEN_Intake")
-    context_before = canonical_json(context)
-    plan_before = canonical_json(plan)
-    facts_before = canonical_json(facts)
-    validate_context(context)
-    validate_plan(plan, context)
-    input_hashes_before = _input_hashes(context, plan)
-    recalls = build_recall_candidates(facts, context, plan)
-    clusters = build_candidate_clusters(facts, recalls)
-
-    fact_by_id = {item["candidate_id"]: item for item in facts}
-    recall_by_id = {item["candidate_id"]: item for item in recalls}
-    representatives = {item["representative_candidate_id"] for item in clusters}
-    suppressed = {
-        item["candidate_id"]: item["reason_codes"]
-        for cluster in clusters
-        for item in cluster["suppressed_members"]
-    }
-    unselected: dict[str, dict[str, Any]] = {
-        candidate_id: {
-            "candidate_id": candidate_id,
-            "work_cluster_id": fact_by_id[candidate_id]["work_cluster_id"],
-            "channel": recall_by_id[candidate_id]["primary_channel"],
-            "reason_codes": reason_codes,
-        }
-        for candidate_id, reason_codes in suppressed.items()
-    }
-    for candidate_id in representatives:
-        recall = recall_by_id[candidate_id]
-        if not recall["eligibility"]["eligible"]:
-            unselected[candidate_id] = {
-                "candidate_id": candidate_id,
-                "work_cluster_id": recall["work_cluster_id"],
-                "channel": recall["primary_channel"],
-                "reason_codes": recall["eligibility"]["reason_codes"],
-            }
-
-    counters: dict[str, Counter[str]] = {dimension: Counter() for dimension in CAP_ORDER}
-    limits = plan["concentration_caps"]
-    targets = plan["channel_targets"]
-    selected: list[dict[str, Any]] = []
-    selected_by_channel: Counter[str] = Counter()
-    rejected_by_cap: list[str] = []
-
-    for channel in CHANNELS:
-        pool = [
-            recall_by_id[candidate_id]
-            for candidate_id in representatives
-            if recall_by_id[candidate_id]["primary_channel"] == channel
-            and recall_by_id[candidate_id]["eligibility"]["eligible"]
-        ]
-        for recall in sorted(pool, key=_rank_sort_key):
-            candidate_id = recall["candidate_id"]
-            fact = fact_by_id[candidate_id]
-            violation = _first_cap_violation(fact, counters, limits)
-            if violation is not None:
-                reason = violation.upper() + "_CAP_REACHED"
-                unselected[candidate_id] = {
-                    "candidate_id": candidate_id,
-                    "work_cluster_id": fact["work_cluster_id"],
-                    "channel": channel,
-                    "reason_codes": [reason],
-                }
-                rejected_by_cap.append(candidate_id + "|" + reason)
-                continue
-            if selected_by_channel[channel] >= targets[channel]:
-                unselected[candidate_id] = {
-                    "candidate_id": candidate_id,
-                    "work_cluster_id": fact["work_cluster_id"],
-                    "channel": channel,
-                    "reason_codes": ["CHANNEL_QUOTA_EXHAUSTED"],
-                }
-                continue
-            for dimension, values in _cap_values(fact).items():
-                for value in values:
-                    counters[dimension][value] += 1
-            selected_by_channel[channel] += 1
-            selected.append(
-                {
-                    "position": len(selected) + 1,
-                    "candidate_id": candidate_id,
-                    "work_cluster_id": fact["work_cluster_id"],
-                    "channel": channel,
-                    "primary_direction_id": fact["ranking_metadata"]["primary_direction_id"],
-                    "reason_codes": [
-                        f"SELECTED_{channel}",
-                        "CHANNEL_RANKED_LEXICOGRAPHIC",
-                        "CAPS_SATISFIED",
-                    ],
-                    "evidence_refs": recall["ranking_evidence"]["evidence_refs"],
-                    "ranking_evidence_ref": recall["content_hash"],
-                }
-            )
-
-    if len(selected) > plan["batch_size"] - plan["whitespace_slots"]:
-        raise SlateCompositionError("BATCH_OR_WHITESPACE_LIMIT_BREACHED")
-    selected_work_clusters = [item["work_cluster_id"] for item in selected]
-    if len(selected_work_clusters) != len(set(selected_work_clusters)):
-        raise SlateCompositionError("DUPLICATE_WORKCLUSTER_IN_SLATE")
-
-    allocations = []
-    for channel in CHANNELS:
-        selected_count = selected_by_channel[channel]
-        gap = max(0, targets[channel] - selected_count)
-        allocations.append(
-            {
-                "channel": channel,
-                "target": targets[channel],
-                "selected": selected_count,
-                "gap": gap,
-                "unused_positions": gap,
-                "status": "FILLED" if gap == 0 else "CHANNEL_UNDERFILLED",
-            }
-        )
-
-    observed_counts = {
-        dimension: dict(sorted(counter.items())) for dimension, counter in counters.items()
-    }
-    max_observed = {
-        dimension: max(counter.values(), default=0) for dimension, counter in counters.items()
-    }
-    slate_seed = {
-        "plan_hash": plan["content_hash"],
-        "selected": [item["candidate_id"] for item in selected],
-        "allocations": allocations,
-    }
-    input_hashes_after = _input_hashes(context, plan)
-    slate = seal_object(
-        {
-            "schema_version": "discovery.intake.recommendation-slate-detail.0.1",
-            "object_type": "RecommendationSlateDetail",
-            "slate_id": "Intake_SLATE:" + sha256_json(slate_seed)[:24].lower(),
-            "initialization_slate_ref": "RecommendationSlate",
-            "plan_id": plan["plan_id"],
-            "plan_hash": plan["content_hash"],
-            "context_hash": context["content_hash"],
-            "selected": selected,
-            "unselected": sorted(unselected.values(), key=lambda item: item["candidate_id"]),
-            "channel_allocations": allocations,
-            "caps": {
-                "limits": copy.deepcopy(limits),
-                "observed_counts": observed_counts,
-                "max_observed": max_observed,
-                "rejected_by_cap": sorted(rejected_by_cap),
-            },
-            "no_backfill": "CORE_SILENT_BACKFILL_FORBIDDEN",
-            "whitespace_slots": plan["whitespace_slots"],
-            "ordered": True,
-            "input_hashes_before": input_hashes_before,
-            "input_hashes_after": input_hashes_after,
-            "side_effects": copy.deepcopy(ZERO_SIDE_EFFECTS),
-        }
+    return shared_slate.compose_slate(
+        facts, context, plan, behavior_events=behavior_events,
+        production_write_target=production_write_target, rules=DESKTOP_RULES,
     )
-    if context_before != canonical_json(context) or plan_before != canonical_json(plan):
-        raise SlateCompositionError("CONTEXT_OR_PLAN_MUTATED")
-    if facts_before != canonical_json(facts):
-        raise SlateCompositionError("FACT_INPUT_MUTATED")
-    if input_hashes_before != input_hashes_after:
-        raise SlateCompositionError("PROFILE_POLICY_DIRECTION_OR_PLAN_HASH_DRIFT")
-    return {"recall_candidates": recalls, "clusters": clusters, "slate": slate}
 
 
 def build_coverage_polarization_report(
@@ -604,144 +407,7 @@ def build_coverage_polarization_report(
     context: Mapping[str, Any],
     plan: Mapping[str, Any],
 ) -> dict[str, Any]:
-    _assert_sealed(slate, "SLATE_HASH_DRIFT")
-    validate_context(context)
-    validate_plan(plan, context)
-    as_of = _parse_aware_datetime(
-        plan.get("frozen_as_of"), "PLAN_FROZEN_AS_OF_INVALID"
-    )
-    complete_windows_value = history.get("complete_windows_days", [])
-    if (
-        not isinstance(history.get("history_id"), str)
-        or not history.get("history_id")
-        or not isinstance(complete_windows_value, list)
-        or any(type(days) is not int for days in complete_windows_value)
-        or len(set(complete_windows_value)) != len(complete_windows_value)
-        or not set(complete_windows_value).issubset(plan["history_windows_days"])
-    ):
-        raise SlateCompositionError("HISTORY_SHAPE_INVALID")
-    complete_windows = set(complete_windows_value)
-    events = history.get("events", [])
-    if not isinstance(events, list):
-        raise SlateCompositionError("HISTORY_SHAPE_INVALID")
-    direction_ids = sorted(item["direction_id"] for item in context["directions"])
-    parsed_events: list[tuple[Mapping[str, Any], datetime]] = []
-    event_ids: set[str] = set()
-    for event in events:
-        event_id = event.get("event_id") if isinstance(event, Mapping) else None
-        if (
-            not isinstance(event, Mapping)
-            or not isinstance(event_id, str)
-            or not event_id
-            or event_id in event_ids
-        ):
-            raise SlateCompositionError("HISTORY_SHAPE_INVALID")
-        event_ids.add(event_id)
-        occurred_at = _parse_aware_datetime(
-            event.get("occurred_at"), "HISTORY_EVENT_TIME_INVALID"
-        )
-        if (
-            event.get("direction_id") not in direction_ids
-            or event.get("channel") not in CHANNELS
-        ):
-            raise SlateCompositionError("HISTORY_EVENT_REFERENCE_INVALID")
-        parsed_events.append((event, occurred_at))
-    planned_counts = Counter(item["primary_direction_id"] for item in slate["selected"])
-    max_share = context["policy"]["max_direction_share"]
-    windows = []
-    all_warnings: set[str] = set()
-    for days in plan["history_windows_days"]:
-        cutoff = as_of - timedelta(days=days)
-        cutoff_text = cutoff.isoformat().replace("+00:00", "Z")
-        if days not in complete_windows:
-            warnings = [f"HISTORY_COVERAGE_UNKNOWN_{days}D"]
-            all_warnings.update(warnings)
-            windows.append(
-                {
-                    "days": days,
-                    "cutoff": cutoff_text,
-                    "status": "UNKNOWN",
-                    "denominator": None,
-                    "counted_exposures": None,
-                    "direction_rows": [
-                        {
-                            "direction_id": direction_id,
-                            "planned_current_slate_count": planned_counts[direction_id],
-                            "actual_exposure_count": None,
-                            "share": None,
-                            "concentration_cap_breach": None,
-                        }
-                        for direction_id in direction_ids
-                    ],
-                    "channel_counts": {channel: None for channel in CHANNELS},
-                    "channel_gaps": {channel: None for channel in CHANNELS},
-                    "warnings": warnings,
-                }
-            )
-            continue
-
-        in_window = []
-        for event, occurred_at in parsed_events:
-            if cutoff <= occurred_at <= as_of:
-                in_window.append(event)
-        denominator = len(in_window)
-        direction_counts = Counter(item["direction_id"] for item in in_window)
-        channel_counts = Counter(item["channel"] for item in in_window)
-        direction_rows = []
-        warnings: list[str] = []
-        for direction_id in direction_ids:
-            actual = direction_counts[direction_id]
-            share = actual / denominator if denominator else 0.0
-            breach = share > max_share
-            direction_rows.append(
-                {
-                    "direction_id": direction_id,
-                    "planned_current_slate_count": planned_counts[direction_id],
-                    "actual_exposure_count": actual,
-                    "share": share,
-                    "concentration_cap_breach": breach,
-                }
-            )
-            if breach:
-                warnings.append(f"DIRECTION_CONCENTRATION_{days}D")
-        if channel_counts["HORIZON"] == 0:
-            warnings.append(f"HORIZON_ABSENT_{days}D")
-        if channel_counts["COVERAGE_REPAIR"] < plan["channel_targets"]["COVERAGE_REPAIR"]:
-            warnings.append(f"COVERAGE_REPAIR_UNDER_TARGET_{days}D")
-        warnings = sorted(set(warnings))
-        all_warnings.update(warnings)
-        windows.append(
-            {
-                "days": days,
-                "cutoff": cutoff_text,
-                "status": "COMPLETE",
-                "denominator": denominator,
-                "counted_exposures": denominator,
-                "direction_rows": direction_rows,
-                "channel_counts": {channel: channel_counts[channel] for channel in CHANNELS},
-                "channel_gaps": {
-                    channel: max(0, plan["channel_targets"][channel] - channel_counts[channel])
-                    for channel in CHANNELS
-                },
-                "warnings": warnings,
-            }
-        )
-
-    report_seed = {"slate_hash": slate["content_hash"], "as_of": plan["frozen_as_of"], "windows": windows}
-    return seal_object(
-        {
-            "schema_version": "discovery.intake.coverage-polarization-report.0.1",
-            "object_type": "CoveragePolarizationReport",
-            "report_id": "Intake_REPORT:" + sha256_json(report_seed)[:24].lower(),
-            "slate_hash": slate["content_hash"],
-            "as_of": plan["frozen_as_of"],
-            "windows": windows,
-            "warnings": sorted(all_warnings),
-            "proposal_boundary": "Verification_ONLY_NO_MUTATION",
-            "profile_mutations": 0,
-            "policy_mutations": 0,
-        }
-    )
+    return shared_slate.build_coverage_polarization_report(slate, history, context, plan, rules=DESKTOP_RULES)
 
 
 def compose_projection(
@@ -750,16 +416,7 @@ def compose_projection(
     plan: Mapping[str, Any],
     history: Mapping[str, Any],
 ) -> dict[str, Any]:
-    composition = compose_slate(facts, context, plan)
-    report = build_coverage_polarization_report(
-        composition["slate"], history, context, plan
-    )
-    return {
-        "recall_candidates": composition["recall_candidates"],
-        "clusters": composition["clusters"],
-        "slate": composition["slate"],
-        "coverage_report": report,
-    }
+    return shared_slate.compose_projection(facts, context, plan, history, rules=DESKTOP_RULES)
 
 
 __all__ = [
