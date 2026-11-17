@@ -3,8 +3,9 @@
 :root:lang(en) {--memo-font-heading:Arial,"SimHei","Microsoft YaHei","Yu Gothic","Meiryo",sans-serif;--memo-font-body:"Times New Roman","SimSun","Yu Gothic","Meiryo",serif;}
 :root:lang(ja) {--memo-font-heading:Arial,"Yu Gothic","Meiryo","SimHei","Microsoft YaHei",sans-serif;--memo-font-body:"Times New Roman","Yu Gothic","Meiryo","SimSun",serif;}
 [data-memo-type] {font-synthesis:none!important;}
-/* Sizes by role, scaled by the font size setting (app.js sets --desktop-font-factor on the body). In a layer, so
-   that like the inline sizes they replace they win over every other !important font-size. */
+/* Sizes by role, scaled by the font size setting (app.js sets --desktop-font-factor on the body). They sit in a
+   layer because an !important in a layer wins over the !important font sizes of the unlayered style sheets, as
+   the inline sizes they replace did. An inline !important font size would still win over them. */
 @layer memo-type-size {
   [data-memo-type="page"] {font-size:calc(26px * var(--desktop-font-factor, 1))!important;}
   [data-memo-type="section"],[data-memo-type="body"],[data-memo-type="empty"],[data-memo-type="control"],[data-memo-type="value"],[data-memo-type="code"] {font-size:calc(16px * var(--desktop-font-factor, 1))!important;}
