@@ -27,7 +27,7 @@ class LinksMixin:
 
     def open_developer_sdk(self) -> dict[str, Any]:
         import sys,os
-        root=(Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).resolve().parents[5])/'integrations/developer'
+        root=(Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).resolve().parents[4])/'integrations/developer'
         if not (root/'api-v1.schema.json').is_file():
             raise ValueError('DEVELOPER_SDK_MISSING')
         os.startfile(str(root))
