@@ -6,7 +6,11 @@
       let group=null;
       for(const child of [...stack.children]){
         if(child.matches('.field-label,.desktop-settings-two,.desktop-settings-three')){
-          if(!group){group=document.createElement('div');group.className='desktop-settings-form-group';stack.insertBefore(group,child);}
+          if(!group){
+            group=document.createElement('div');
+            group.className='desktop-settings-form-group';
+            stack.insertBefore(group,child);
+          }
           group.append(child);
         }else group=null;
       }

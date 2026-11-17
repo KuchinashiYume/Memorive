@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.getElementById('desktop-sessions-preview');
-  if (!root || !window.DesktopPreview) return;
+  if (!root || !window.DesktopPreview_sessions) return;
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
   const setRefineState = (message = '', { show = true, title = '' } = {}) => {
@@ -412,7 +412,10 @@
     q('#sessions-bulk').textContent = '批量管理';
     q('#sessions-batchbar').hidden = true;
     list.classList.remove('batch');
-    qa('.desktop-sessions-check').forEach((box) => { box.hidden = true; box.checked = false; });
+    qa('.desktop-sessions-check').forEach((box) => {
+      box.hidden = true;
+      box.checked = false;
+    });
     updateBatch();
   };
 
@@ -802,7 +805,10 @@
   list.addEventListener('click', (event) => {
     const card = event.target.closest('.desktop-sessions-card');
     if (!card) return;
-    if (event.target.closest('.desktop-sessions-check')) { updateBatch(); return; }
+    if (event.target.closest('.desktop-sessions-check')) {
+      updateBatch();
+      return;
+    }
     if (!batch) showDetail(card);
   });
   list.addEventListener('keydown', (event) => {

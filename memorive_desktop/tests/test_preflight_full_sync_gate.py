@@ -22,7 +22,6 @@ from memorive.sessions.companion.desktop import BrowserCompanionDesktop  # noqa:
 GEMINI_SYNC_BASE = "https://gemini.google.com/app?memorive_bridge_sync=v1#"
 PREFLIGHT_URL = f"{GEMINI_SYNC_BASE}memorive-browser-session-preflight-2-v5"
 FULL_URL = f"{GEMINI_SYNC_BASE}memorive-browser-session-full-v4"
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 DESKTOP_ROOT = ATTEMPT_ROOT / "product" / "desktop"
 CURRENT_EXTENSION_VERSION = json.loads(
     (

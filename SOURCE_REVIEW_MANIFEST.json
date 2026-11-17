@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "d902df255b89177d48e25bd28a00d10543da79baeb37bd7d5fcbbcf681686c4e",
-      "bytes": 2823630
+      "sha256": "7e3087332a30a07c02e69714cd370498d40db93891f6ea912dbdfb7edf5f803f",
+      "bytes": 2700570
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -2866,58 +2866,13 @@
     },
     {
       "path": "memorive_desktop/product/desktop/startup_notice.py",
-      "sha256": "ce5c36bf1b8bfea7613a4bf587eab4cf1b7d680e9bb1522ba4476785f639b392",
+      "sha256": "549d654a935b2bc6775677d4ebf5c53b68acf784001696c1ef1094de3317c5a4",
       "bytes": 11213
     },
     {
       "path": "memorive_desktop/product/web/assets/assistant/adopted_inline_001.png",
       "sha256": "5374cd25658256fe5d2042d9d8997854e3d8b2d01a13e4d724177b1be2a0ebca",
       "bytes": 75650
-    },
-    {
-      "path": "memorive_desktop/product/web/document_structure.js",
-      "sha256": "d7af0e709fde9e1c45b2367b3f4656b7cba9136aa387315c1c1e77b43b0f3974",
-      "bytes": 36120
-    },
-    {
-      "path": "memorive_desktop/product/web/evidence_check.js",
-      "sha256": "2294c32f336355a773d742a11f2d973dd4165906b7baad5ede3cb2d5df0c3339",
-      "bytes": 4333
-    },
-    {
-      "path": "memorive_desktop/product/web/leaderboard.css",
-      "sha256": "a51e055beb2eb57ee190058c5ef64e9790cfbb1bb69f8ffff129fc0bcdf5eca3",
-      "bytes": 20932
-    },
-    {
-      "path": "memorive_desktop/product/web/leaderboard.html",
-      "sha256": "77ca1ae5ef88f2ae1cf8d82f9e08f14d735bd7bdcecb534fd340cf9c03240329",
-      "bytes": 22832
-    },
-    {
-      "path": "memorive_desktop/product/web/leaderboard.js",
-      "sha256": "6c372e68b63b051044c382e585ee3a4c869f1eace1a592c2aa552ab859790186",
-      "bytes": 50499
-    },
-    {
-      "path": "memorive_desktop/product/web/node_progress.css",
-      "sha256": "fc2c19a187341e77cb51530a65847581252be9a78d0c37a1a61641ac4ca348a5",
-      "bytes": 494
-    },
-    {
-      "path": "memorive_desktop/product/web/node_progress.js",
-      "sha256": "c7725e05ea28310a717cd5d52479e362be58d71f24280581a4d594e07d109287",
-      "bytes": 7660
-    },
-    {
-      "path": "memorive_desktop/product/web/settings_bridge.js",
-      "sha256": "d8aac2589877930bd2009b0dbd3af8a01813292ff002fa846fb1105833cd38b3",
-      "bytes": 293390
-    },
-    {
-      "path": "memorive_desktop/product/web/update_bridge.js",
-      "sha256": "7034afea55b33d7cdf44aaea430ad485a5da6795427ca2fa5aff7056d9eca11a",
-      "bytes": 11050
     },
     {
       "path": "memorive_desktop/PUBLISHING.md",
@@ -4071,8 +4026,8 @@
     },
     {
       "path": "memorive_desktop/tools/check_internal_codes.py",
-      "sha256": "cfffdb8a487ea5ab012ae743d9db4cbdd99483738a33cdb66f0dc5cc2c76703b",
-      "bytes": 8597
+      "sha256": "ab1c81656ebb470a6a6604504152fb0fb5328816f5967763685020d9a3aad3da",
+      "bytes": 9343
     },
     {
       "path": "memorive_desktop/tools/historical_names.json",
@@ -4081,8 +4036,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_pages.py",
-      "sha256": "81617e148d38edb863b650188779c3725171596b649dc2694e6fce07162c59a7",
-      "bytes": 5247
+      "sha256": "ea29bbef8700729bb76c87058ceba8440a6b69c5833de7ab9ab63db53b40879e",
+      "bytes": 5489
     },
     {
       "path": "PUBLIC_RELEASE.md",
@@ -4116,13 +4071,13 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "9f91fda6b88360cc28ec5ff60ea1f3ee35eb158ebc2e44879a615d6a0af25886",
+      "sha256": "ad766babb90724cf46111b2b07abea459b11f8d7f57a2a8c2fca2022dae8a4f1",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "636e9c3b75c8526b5d7aca36eb640e8feb13a43aa191517ae84de0a8ec869c71",
-      "bytes": 276753
+      "sha256": "413680771ac832f406e61af9aa4ed04794bffb7ebb29dff4362316366491853f",
+      "bytes": 275229
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -4661,8 +4616,8 @@
     },
     {
       "path": "memorive_desktop/ui/README.md",
-      "sha256": "01d83e1e88f388d9ae9ea333b99952c532dc8c278594b6481dd8308f22686daa",
-      "bytes": 2187
+      "sha256": "b5b64b93fbf2da0a83eac5dd543f27a11f6b693dd5a893aa73a0bfbca49bd62c",
+      "bytes": 2647
     },
     {
       "path": "memorive_desktop/ui/assistant/assistant.css",
@@ -4706,8 +4661,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/page.html",
-      "sha256": "c20b70da8c2ed47356f919c7c9cdfddf4d6cdafa883a7d3d103430f152195047",
-      "bytes": 6496
+      "sha256": "03c85126fa7beffd1cf72a739783b605d610cb499b01925e0470a035b95978b5",
+      "bytes": 5792
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/answer-styles.css",
@@ -4716,68 +4671,58 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/evidence-check.js",
-      "sha256": "cc17a465bd1cbba56e8d731c66b6222c4d5b56040fc106b4634c18640f6945d2",
-      "bytes": 4335
+      "sha256": "e3c729ff0e314842cf92d60ce0f5ec4e6795ac6450c792c0e8c69ffc4f7fb408",
+      "bytes": 4459
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/markup.html",
-      "sha256": "95c462130a568f0f503200ae23844f41a48002ec0d7007bee8958f2e68d389cb",
-      "bytes": 31049
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/chat/preview.js",
-      "sha256": "f6b1a25f64be163a4ac7c65c6094fdbea09ddc39f48e5b7ae5c780b2d664e10d",
-      "bytes": 19633
+      "sha256": "62c597ddba96d6daeabffc4428361bf7aa9c452176438e3ea075dd4d5a6f362d",
+      "bytes": 16149
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/shell.css",
-      "sha256": "22a9dad2f459be8b71028752c0ce05ec6f54c621979acfb55b5df94ea11c7880",
-      "bytes": 74370
+      "sha256": "da8726cc8b632bfb00817e8c9a4938edf1178e5d8d1bbbd874b0fcc535ae5b8a",
+      "bytes": 73645
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.css",
-      "sha256": "95dcc482fd7283557f293367ec83e7464213f709d14b55db0ff5472f3e4fb297",
+      "sha256": "e22fc2f66305b85914ae86fd5ad13f7d8d0d734f37fafa84d9270a89962bbab8",
       "bytes": 63026
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.js",
-      "sha256": "7c1f25bb18077af04254c0d1ee172d66f26f8bf82de5c8496a304ce1fd2a6368",
-      "bytes": 104159
+      "sha256": "9c9903bcb7bdf33c936814c8f6667ff4b9478f39d957fdf52233573247c970c8",
+      "bytes": 113650
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/bridge.js",
-      "sha256": "26c867687754c639f233911567498b94e1c185addce7d7a5de0f89287f844ab6",
-      "bytes": 46186
+      "sha256": "2ec22e036d8e749c3e30ea712becf663b0300c0f65c84c6f6018fec59cab6ea8",
+      "bytes": 46077
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/markup.html",
-      "sha256": "1bfd052fbe6323b74e503e0ef8351bcdf740b27903f418b3a6ed89e6eba1248c",
-      "bytes": 25684
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/inbox/preview.js",
-      "sha256": "7002d23649e54a6ceeb7c20dd98ada1c98e2e3897eea8965f20f8cc05e18c13f",
-      "bytes": 19542
+      "sha256": "a07c8d08f08dd32f021b47c8b8d21e3feb435c9272ace5254cd516f55917e7e0",
+      "bytes": 10784
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/research-home.css",
-      "sha256": "3f29e5802401aeb61b391c75081baf19a1827923abd9c32782aa44ef29ded431",
-      "bytes": 6692
+      "sha256": "cf28fcda9e3bc890df7d8f37a55e2726252bf47f0ecd4d83d457d7ceb38a8cce",
+      "bytes": 6716
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/research-home.js",
-      "sha256": "913bff35cbe9a58eb072f61cdc3cce41bd44441f010f09c74bdc49633dbf097e",
-      "bytes": 33552
+      "sha256": "8441b965a69fd2ef1c4248f77a7b808421e72558ba336dd9e5bfddd7d62c37da",
+      "bytes": 35680
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/view.js",
-      "sha256": "ce5fc1285c3f2faaed5488209a06c4819f0bf60cc55a2bc4da8293abfd5c361c",
-      "bytes": 19485
+      "sha256": "f8e430d85e54f31881197703b800e9b80778836ad3d40934e23e2ade412d2cd7",
+      "bytes": 21107
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/base.css",
-      "sha256": "11b853822a42151d749212d0e82a9e4444f890b6c5993332de1a6ab1a9ce0788",
-      "bytes": 104182
+      "sha256": "13bce84eadc0073845f888a1696ab97064b4dc0b5fccf88c2c194de1497758d2",
+      "bytes": 103457
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/currency.js",
@@ -4786,153 +4731,128 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/markup.html",
-      "sha256": "ac74cf28e348e5a0fc4e6f7a121435c4d88bf36140b6083df49d0981d7be528a",
-      "bytes": 22749
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/leaderboard/preview.js",
-      "sha256": "173bb13af983a60599df462057568404e347fe32eb3055f83ad6fd6eb6dfc107",
-      "bytes": 19238
+      "sha256": "cd26ff6db342d3da46fceb666cb8c9e4a653e9d01b186a33b618fecb569b85cf",
+      "bytes": 7849
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/view.js",
-      "sha256": "c8ffbe616580d3986eda4b82cdf19d249e51ae0891873f5ae2dfe2dfebb2871c",
-      "bytes": 50917
+      "sha256": "95f5c8eda6e84ca97ac4a85ffaffc6ba4821eb6b78f1c8cb78d233c882ddc0b4",
+      "bytes": 53127
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/bridge.js",
-      "sha256": "56a30bf7f7cff891adb5376a389cceb155cb1cad499ac082a858d3a7cd039af6",
-      "bytes": 17049
+      "sha256": "7341736fcfa6264d19ac6552e650e74e5bb05cce5f0aef1227230b8d4a324030",
+      "bytes": 16917
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/markup.html",
-      "sha256": "c8902b5e309638a81cc102991978a9b22d8795d806f285791b39bb1abd810df8",
-      "bytes": 23827
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/library/preview.js",
-      "sha256": "88659a84e2f617764e713178268cc46100d5b5f2d264b78a0866151ae328a097",
-      "bytes": 19652
+      "sha256": "55e9edd38d728fd3b4938902e7390358fdbab3275f11fd286b90509421fdb8a1",
+      "bytes": 8927
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/view.js",
-      "sha256": "de129c00c7dd4e5c6b3f7662db5827db59d8570d5bf037c89a110fcfeca1f35f",
-      "bytes": 24468
+      "sha256": "803f3eb4df964ffc9fc1ba806a287dc437ffb295ed89408e74cec14b382cab33",
+      "bytes": 24589
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/bridge.js",
-      "sha256": "c6d631c6983032ac7964e94c8738683c9411f2d554243a56c7c10f951088549b",
-      "bytes": 12220
+      "sha256": "e3d0c5eb8e96f32334087c751fd820398c9a55e83889476978964fd9c6dbe9ae",
+      "bytes": 12076
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/markup.html",
-      "sha256": "577289e1671e98c3a86770db917a3f41d2726433068a96dc9f874afce032b3a4",
-      "bytes": 22800
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/messages/preview.js",
-      "sha256": "e55c81dfe74d961f96857c54c1b1144663850b1107d9e9df92f3ea957491f2f9",
-      "bytes": 19561
+      "sha256": "f637bc330f7f5517c9d8865e02837a926a804f172cb6943cbfcc9e3bdf544e01",
+      "bytes": 7900
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/view.js",
-      "sha256": "7b7a174f7cc061b53f65e2d2d866d85f39e8644dc5d6c986988e57a75eff7e85",
-      "bytes": 26313
+      "sha256": "7a30b9f52f53c72ba82c5ed16745107baa4df3e5fabb16b6ad3db22f2ce45a17",
+      "bytes": 26893
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/bridge.js",
-      "sha256": "8acd5a38ede88fc85997c1fc98868bad2400dde5e3d0f369cc1d4887db55d242",
-      "bytes": 25882
+      "sha256": "a4f408e7a65a6cdfa1737c2b1ae8d7347c3dc0abd92e8f506f505bc9f830cade",
+      "bytes": 25393
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/markup.html",
-      "sha256": "c777752a4f852c2515a27a399ffe21a6d3c9e48d6c4189ae31ae3ac7d37e060f",
-      "bytes": 26369
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/sessions/preview.js",
-      "sha256": "b5f9b155a34c5a2afc43a91f640138bd7b76a1b46c0393d881dcc2b741eb327f",
-      "bytes": 18921
+      "sha256": "a0e04ee375680fce3febb9979457b3a54a1c06e16dbaebf4f7f0651b95638219",
+      "bytes": 11469
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/view.js",
-      "sha256": "d8fbc2ee34d8257031d53ae1dd8f58d055b1a543600b12802fbe09082c126140",
-      "bytes": 48079
+      "sha256": "eee7d06cb275d7bfe459f984af916d66cd0036696aa44a1e514a2cb29ebf49e6",
+      "bytes": 48126
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/browser-sites.js",
-      "sha256": "33ac2d92dd9670917b85516d58b9a4c16f424cca008c898592d9d83aa44aaaa8",
-      "bytes": 13501
+      "sha256": "458db70563f3621aefcf08d07f598a96fa5a05b3f1d2bc0a916f750d302c999b",
+      "bytes": 14893
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/controls.js",
-      "sha256": "2664be22ca472d8819212bef547d8ea89502a95eb23d9f2b26ce280a7dc28713",
-      "bytes": 3799
+      "sha256": "472538eb3970906b384d8bf26f765549dc2e1c2f16af1caa89ca9b62bc155ddd",
+      "bytes": 4189
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/developer-clients.js",
-      "sha256": "82cf4baa602a00a22db81b202512c443c02424eb826b13339e74ce35c139ed79",
-      "bytes": 9846
+      "sha256": "5a06fd5c36a86a327ec637c891e3ab0f1679a93c78402972fdfc972576cb6ea3",
+      "bytes": 10564
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/exam-panel.js",
-      "sha256": "b35a25db90e0b0aa233a19a42f27e01712ef3de8ca910866f6157d21b20ec830",
-      "bytes": 7466
+      "sha256": "4edb4516236224df2786b6992083af5cef7657ee77a4fb7fde0e3ca282898658",
+      "bytes": 7655
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/external-sources.js",
-      "sha256": "a34ecb339b03c95e5fe9e245bcaffe8f31c095ea22e8885cf8efc07c293f5235",
-      "bytes": 22995
+      "sha256": "bb361f4ed2af1a6cd276ccf856452d7296be0e2bcae37f1fc6b27e44276dcab0",
+      "bytes": 23674
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/form-groups.js",
-      "sha256": "6d47e24b149cb985f29294db0c620930f377975fefbe29b47e30d0ea64b6fe2f",
-      "bytes": 818
+      "sha256": "a8c88b8c708130837a656cd4df4cddf99d1b7f46e19f1f7ff0681e454f7512e4",
+      "bytes": 872
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/icons.js",
-      "sha256": "77884ff1c8576eca09cbd267430a64a9f0a5b0aedabf7fb4afd1491bab8246c1",
-      "bytes": 11817
+      "sha256": "1678951205d552870f3e9435135db9e7f3c3b1e742223ea297d315c60df1c18b",
+      "bytes": 11887
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/logic-review.css",
-      "sha256": "d5a69e30a96eb75b1ff351e6a0666cbc181e72ed68c6277d5f581e3c8260be58",
+      "sha256": "393c0e88003f20939cb55b6a3d6bf3ed5e13d2c81ff94f881c8d7d0f11586981",
       "bytes": 1945
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/markup.html",
-      "sha256": "77ee32600efe708d1e71133984d31e6293777ff6258f341a599ae24911f27d2a",
-      "bytes": 128673
+      "sha256": "2afad6602dba90c5836f4d8d71e0c71d42fbc5194cf22008876ef37666837291",
+      "bytes": 113773
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/model-picker.js",
-      "sha256": "5280af7d229d70ff48db210c20a9d10e0b6f714db31ea30fd07938742f89bfe8",
-      "bytes": 94029
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/settings/preview.js",
-      "sha256": "67c8e02096e28ef6d34a4a7f082e6e5be28646290b2bfcdadaff33cbe451df71",
-      "bytes": 20749
+      "sha256": "8d90a0018de01ee4e9455323e35765b90a535a34777c6053c705b62882b53708",
+      "bytes": 95480
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/research-connections.js",
-      "sha256": "9269f00838a7a2db02cb6e80b728c6dd3cb6c3ce5927fd010982d677cfc72291",
-      "bytes": 17379
+      "sha256": "5ad5e61e828ee3c54af647d2810f45dfd77cff221919629d02ad69e0d29e556b",
+      "bytes": 18983
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/research-navigation.js",
-      "sha256": "281007a13e08322f2add2d88ae463ef4a4c25f48c38ca1c5e09c718e9212cf92",
-      "bytes": 5080
+      "sha256": "40a59632e3387fb837e0f389f622a8d6830bcf898e622b11b9261305de8af371",
+      "bytes": 5120
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/research-weights.js",
-      "sha256": "8e74ab2cc6911cd5130c479849816762e56e37692cce26815f248775424ee290",
-      "bytes": 16030
+      "sha256": "e077006fdbc245bacc4fcdc2a6beeae0432983cc94a1cdf6caa60a95daf26072",
+      "bytes": 17469
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/settings.js",
-      "sha256": "7d7b26184f76a92c99fc9f565208a8a636c04c59a2b3b849cdfb24afe76da252",
-      "bytes": 298622
+      "sha256": "420778483e24c4afa98da7baeb986708361d87871fcb3331b2a5d98cc7617b97",
+      "bytes": 299803
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/update.css",
@@ -4941,88 +4861,78 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/update.js",
-      "sha256": "6e7be5854fa0863a025dc181ccd15459a13ffe3faf46b6374ce33bd776d5e033",
-      "bytes": 11052
+      "sha256": "83d0be06d43a37b52c81c6d8c0beffa6de1b2341193f3458ba0cd89b3430ac5d",
+      "bytes": 11388
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/weight-controls.js",
-      "sha256": "944e9b6953444fc0c00f5cee3370b057ae44af4650623d46fa8e922d2f20402d",
-      "bytes": 2821
+      "sha256": "b5d1ef43c900c39917b862f07168de64af9f3d2d142a0a42f77df1bc662995ba",
+      "bytes": 2891
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/bridge.js",
-      "sha256": "4c8cd5aef5cc529af984397ec008f206cc5268ddc96a630b67bf67ee3a27460d",
-      "bytes": 30196
+      "sha256": "f77380d4c92e2b774f1f10aedc6a84815530c0d2ecf4c7bc361e0f47d4989fc5",
+      "bytes": 30246
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/markup.html",
-      "sha256": "baa0deb1f8faf90b6bbbb87e801c3a6c695fdba1f647387a91e43abd76a7ec5e",
-      "bytes": 41302
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/tasks/preview.js",
-      "sha256": "eea75cd9bf1425f3ad6dbbeda621338c07c3d16aec66b450a0370b2eec37251d",
-      "bytes": 18915
+      "sha256": "632299d3d84d801e0c94044650628d4b354df5a67d4ceefa19f15743d4091391",
+      "bytes": 26402
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/view.js",
-      "sha256": "deccc0ff7da29b2ccd94c33bb0c80b6de7726e86d9ff08595572217b38ec4b61",
-      "bytes": 106873
+      "sha256": "dc0881e4d5e33d3fe64f1c7f6805db67f226480c54c0e98214c0c33b79682304",
+      "bytes": 107004
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/bridge.js",
-      "sha256": "e3ab914a5bac367f135e50a21caeeade08493090269821995f2a20eb42c5efa6",
-      "bytes": 10385
+      "sha256": "ec124f130483533341dbc3fd07dffc1762c450c8addb05d4cf4618f403a23c92",
+      "bytes": 10196
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/markup.html",
-      "sha256": "ededbc9a20f270fc31fece43e0eeabe1bc68feae0d2006be4fb13550a397b124",
-      "bytes": 22866
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/worklog/preview.js",
-      "sha256": "153a3a4cabfa7fac010d8ed92a3e57f9b93f7fdf75913d7ca872450a3ff70d4c",
-      "bytes": 19533
+      "sha256": "c0acfd8f27ac4017f5e1e6f33105d1723f2c2fb48e639863b08aa493ce9699bf",
+      "bytes": 7966
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/view.js",
-      "sha256": "432171a55d5eb0ec0dce6194074eb8304d8ed2fa6f6816699ccdd571e597b5bb",
-      "bytes": 12490
+      "sha256": "73c101274fa7835e8da5f3e351cbeaac0c1af646b7c2fa6ec5d209d1b3bc54fd",
+      "bytes": 12514
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/accounting.css",
-      "sha256": "011ba1f40bd971da225f0034b6d5c0aad0017209c52aa8ccdd575ac2a010454b",
+      "sha256": "13bd761e3d0bc59b59766952d4ffa30206005a31aea209932e5f34215537de1e",
       "bytes": 12075
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/accounting.js",
-      "sha256": "9d1efc34dfbb70568738bb9a19b5857384174925638c28aeaaa7b0146761f9f1",
-      "bytes": 23548
+      "sha256": "f0dc1f5e5e4712a9ab8e27a1a44fb1fe9c829b712a2453068ca6068f3bd71299",
+      "bytes": 23618
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/app.js",
-      "sha256": "01764c2bc99609edfbbc5ca425ae204f1c9c3a202035a814856327265500975d",
-      "bytes": 361952
+      "sha256": "9530deda641fb67688a89490881d2f4bb51e32328000e5c0bbd1efd0562630bd",
+      "bytes": 361384
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/content-language.js",
-      "sha256": "3967c20bfebc25fbf49ff7b5024e7ed84ca1893a88064b62bbbaf0737491d3d5",
-      "bytes": 15262
+      "sha256": "6da4f930ec6f5136e7ebd4fd6948369babcdfb7a96aca464d6f56d692f4c08f5",
+      "bytes": 15274
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/controls.js",
-      "sha256": "9b80eac7ad69ee53da57de4a5af3281e96bb2a05bec5f4ad410b96e9def5c83b",
-      "bytes": 7393
+      "sha256": "cbf28bf132f9334cad8cf902a19790f0ae88740164fc886a6021695962b16f4d",
+      "bytes": 7643
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/cross-route.css",
-      "sha256": "79a01b1e744bf44863940f4a862fdfc93768ae8ee6f37ce09cbff6eba9735514",
+      "sha256": "6adb566ee6365e4254337694a37087ad9c985d154ec278016f484f9247da4ab6",
       "bytes": 25704
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/decorations.js",
-      "sha256": "57949a7217303c343a08182d794d1078c4d8f7d622660586a9471335295b4a7b",
-      "bytes": 17929
+      "sha256": "7698a9f2db5ece034bc937881f67ce6d03fbb57a2b0d781c5b4f2fdc60d04997",
+      "bytes": 18219
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/layout-system.css",
@@ -5031,13 +4941,13 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/local-user.css",
-      "sha256": "aeed0ece5eecce331323d9ddc7b2ec9ed008bf3565cf1c47046f1072ff3cc10a",
+      "sha256": "6aa8fa62a602b924dd045ceb18005a1de9ae2cac3fc80ab54d08d393e9ec7da8",
       "bytes": 7978
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/local-user.js",
-      "sha256": "6c96f28b52173c291e9024d1fb88f792d9c8ff56e11eb023bf1e2ea51424a23b",
-      "bytes": 11066
+      "sha256": "f57c3f2716b590a337eeeb52e524f17ae53b2417e77c9328b2a7c8e48c9dc8d1",
+      "bytes": 11848
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/locale-layout.css",
@@ -5051,48 +4961,48 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/node-progress.js",
-      "sha256": "96dadfae9ee7273962c54aebb198028451b2d5bf0c6d02f0db77ee0dcdfcd679",
-      "bytes": 7762
+      "sha256": "09f691d585bfca4fecc21f12535b8e7beae6df8f759d5deeb52049c24bec5828",
+      "bytes": 7954
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/paper-review.css",
-      "sha256": "8c195cb521a8305096337c64bdaee83adc9c8eff2520cf922205747ac4b8436b",
+      "sha256": "f6384b26f45a27ef7069c0cf43263d5b29a152fac3e06a4585e1c77930113c1a",
       "bytes": 4820
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/pdf-loader.js",
-      "sha256": "304771828afc22d9fcc5f94ca3dcf8abcc5f7d7156e2579aa5c616790ebc5849",
-      "bytes": 902
+      "sha256": "0f6de427281918b54738eb081855dd4305f33211b62a721bdb02f06b1dc5365c",
+      "bytes": 982
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/product-bridge.js",
-      "sha256": "eafb1519f96365ec8d756db501a776adda13cc0bf4b203c40c1a499b7eadfef3",
-      "bytes": 5749
+      "sha256": "7b536f30c6fa4f67b5128feaaf72edeff2026864fd526749c901086ead8fd9cf",
+      "bytes": 2788
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/report-workflow.js",
-      "sha256": "efff9e4b4d364c9630428826b818366d0c37f95ed930013045870ec0acfddde1",
-      "bytes": 2135
+      "sha256": "1bd2878086378f9877d14cc2387b2e7d3aeecdbccf387de31f9902c19c1083cb",
+      "bytes": 2241
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/reports.js",
-      "sha256": "75a9babfe03a39888a0790dcaec6e39809bf6e18c0500ba3dec97f2fca0e625d",
-      "bytes": 6927
+      "sha256": "c94ed762720f152989343f0be2bb41642024f4ae1333650210c24db471142c46",
+      "bytes": 7145
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/research.css",
-      "sha256": "47a3b5aa94dbc18f63e4ce5b087cc5889fc2cdf1f3813f98327ef113f8c6ddc6",
+      "sha256": "ed7e932a4b7dd25634889798fb2d87a89e1a0214ad2b45d3ed19cd9438b35600",
       "bytes": 7496
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/research.js",
-      "sha256": "e3657c6f62fd5e6f3155787787f537f6c94e66cd9b72260c2ac95dd2acfc8123",
-      "bytes": 35797
+      "sha256": "7fba9c632eae743d0e4c0c451528ec6553f38391920205090cebd9573ba2fe2d",
+      "bytes": 38226
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/review.js",
-      "sha256": "6729af811ffc7ca96185b318f204b962a30b8041e55ba32916260ef8eff4beda",
-      "bytes": 42164
+      "sha256": "06925dde1251213f695714c83164f588c37dc8c04818df29ddc63e3b18ccf656",
+      "bytes": 45468
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/scrollbars.css",
@@ -5101,33 +5011,33 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/scrollbars.js",
-      "sha256": "f9be8a88036cb352c31dae82ee57fae1e8c6af1d9b4709ca5e2c363827ba2f60",
-      "bytes": 3624
+      "sha256": "60172fb8630c43cbd79318bf42d59233b8852cc06247cb5085ca9b202f19738c",
+      "bytes": 3669
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/structure-review.js",
-      "sha256": "5a5215563e71800d09537a83e27d6dfc676b309f0481329be8487533cd086d0c",
-      "bytes": 36374
+      "sha256": "019c8b8da67fb211db433dd94c98f8d86c02057860f91e1ef721908e7a8bac73",
+      "bytes": 39005
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/typography.css",
-      "sha256": "08ed084bceeea741c087e4757a43b85a036b636b036a572d8d3be3a1846238bf",
-      "bytes": 7312
+      "sha256": "d74c9a337a7a0d14a74f303fb62855a01f6ee5c437fdf29bf4c0b834965b8046",
+      "bytes": 8075
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/window-chrome.css",
-      "sha256": "dee5143b50fad19107210952dd5d1e248ac71779f856e00b79d050d18e040dc4",
+      "sha256": "83ebde9adaaa761e7e53a604b71ee03f3328217a051a780175bba0869ea916cc",
       "bytes": 12801
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/window-chrome.js",
-      "sha256": "91d1134b0f9c1717634bcdef43e250146fa16f61bfdba287c4fd61cf93728f5c",
-      "bytes": 11855
+      "sha256": "f6c2342d5d2ae39043a6d0132e5ebc400f496acb933ab98d8787894ac377149a",
+      "bytes": 12483
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/route-base.css",
-      "sha256": "96e553abe00c335e8e3300e4f654e5d8f3f63b897f629bc099a1288228b2d628",
-      "bytes": 267911
+      "sha256": "46334cc4a593894bf73e9feb73d348e61366a7fdec37637f97e4f3c3444bf55e",
+      "bytes": 265098
     },
     {
       "path": "memorive_desktop/examples/research_qa.py",
@@ -10073,6 +9983,36 @@
       "path": "memorive_desktop/source/memorive/desktop/api/window.py",
       "sha256": "1cb74ad6770ca9f08a4749efd0386916782d07710135e69f953b5280662fd384",
       "bytes": 10921
+    },
+    {
+      "path": "memorive_desktop/ui/integrated/shared/frame/accounting-panel.html",
+      "sha256": "86779935a0cf6a32dcb03e8586272c17d8940046e8ee93a7b74dad733c75e095",
+      "bytes": 6177
+    },
+    {
+      "path": "memorive_desktop/ui/integrated/shared/frame/global-bar.html",
+      "sha256": "3982f7d1e37366f47ee7644ed81c2f245f191059eaa7dc4dc3b60551d800bee9",
+      "bytes": 1450
+    },
+    {
+      "path": "memorive_desktop/ui/integrated/shared/frame/icons.html",
+      "sha256": "0a16bedd620d9e979d06c802a93e1a529f90aa94efb24737e829dee4bcaeb78b",
+      "bytes": 4555
+    },
+    {
+      "path": "memorive_desktop/ui/integrated/shared/frame/navigation.html",
+      "sha256": "26d7b6e9f88746c57982c3660ddd9650287ec808b4ebdb4b1da764464c961a22",
+      "bytes": 2935
+    },
+    {
+      "path": "memorive_desktop/ui/integrated/shared/tokens.css",
+      "sha256": "5a4a652dd7ab45bbf732990cb00b3b6e1be08024a48d8fdc2fac13457180b9a6",
+      "bytes": 863
+    },
+    {
+      "path": "memorive_desktop/ui/integrated/shared/window-frame.js",
+      "sha256": "158027c43665abb13dd7eb9a91ee47e2dea3860d70a3359ceb66063770744efb",
+      "bytes": 23601
     }
   ]
 }

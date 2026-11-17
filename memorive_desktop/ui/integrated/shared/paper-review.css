@@ -27,13 +27,13 @@
 #desktop-inbox-preview .desktop-inbox-state.has-pause-hint .paper-review-pause-hint {grid-column:1;grid-row:1;text-align:right;overflow-wrap:anywhere;}
 #desktop-inbox-preview .desktop-inbox-state.has-pause-hint > span:last-child {grid-column:3;grid-row:1;overflow-wrap:anywhere;}
 #desktop-tasks-preview .paper-review-logic-task p {margin:8px 0;font-size:12px;}
-:is(.paper-review-dialog,.paper-review-panel) {box-sizing:border-box;font:inherit;line-height:1.65;background:var(--surface-primary,#fffdfa);color:var(--text-primary,#322f2a);}
+:is(.paper-review-dialog,.paper-review-panel) {box-sizing:border-box;font:inherit;line-height:1.65;background:var(--surface-primary,#FFFDF9);color:var(--text-primary,#33302A);}
 :is(.paper-review-dialog,.paper-review-panel)>.toolbar-group {display:flex;align-items:center;justify-content:space-between;gap:16px;}
 :is(.paper-review-dialog,.paper-review-panel) h4 {margin:18px 0 8px;}
-:is(.paper-review-dialog,.paper-review-panel) select {max-width:100%;background:var(--surface-primary,#fffdfa);color:inherit;}
+:is(.paper-review-dialog,.paper-review-panel) select {max-width:100%;background:var(--surface-primary,#FFFDF9);color:inherit;}
 :is(.paper-review-dialog,.paper-review-panel) details {margin:12px 0;}
 :is(.paper-review-dialog,.paper-review-panel) summary {cursor:pointer;}
-:is(.paper-review-dialog,.paper-review-panel) blockquote {margin:8px 0;padding:8px 12px;border-left:2px solid var(--border-subtle,#d8d2c7);background:var(--surface-secondary,#f1eee7);}
+:is(.paper-review-dialog,.paper-review-panel) blockquote {margin:8px 0;padding:8px 12px;border-left:2px solid var(--border-subtle,#d8d2c7);background:var(--surface-secondary,#F0EDE6);}
 :is(.paper-review-dialog,.paper-review-panel) .paper-review-facts {display:grid;grid-template-columns:auto 1fr;gap:5px 20px;}
 :is(.paper-review-dialog,.paper-review-panel) .paper-review-facts dd {margin:0;}
 :is(.paper-review-dialog,.paper-review-panel) fieldset {border:1px solid var(--border-subtle,#d8d2c7);border-radius:8px;margin:14px 0;padding:12px;min-width:0;}

@@ -24,11 +24,10 @@
     'current_task.close_all',
     'current_task.effect_metrics'
   ]);
-  const methodSet = new Set(methods);
   const bindings = new Map();
   const refinementRuns = new Set();
   const productionRuns = new Set();
-  const receipts = [];
+  let receiptCount = 0;
   let selectedRun = null;
   let selectedNode = null;
   let pendingCancel = null;
@@ -73,12 +72,11 @@
   };
 
   const nativeCall = async (method, params = {}) => {
-    if (!methodSet.has(method)) throw new Error(`CURRENT_TASK_METHOD_NOT_ALLOWLISTED:${method}`);
     if (!window.pywebview?.api?.call) {
       return { schema_version: 'CurrentTaskBrowserOnlyReceipt-v1', method, params, status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT' };
     }
     const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
-    receipts.push({ method, result });
+    receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:current-task-receipt', { detail: { method, result } }));
     return result;
   };
@@ -218,7 +216,9 @@
       projection = await nativeCall('current_task.list', {});
     } catch (error) {
       window.__Desktop_TASKS_UI__?.setProjectionLoadState?.('error');
-      window.__MEMO_NODE_PROGRESS__?.transport(false);lastProjectionFingerprint=null;progressConnectionLost=true;
+      window.__MEMO_NODE_PROGRESS__?.transport(false);
+      lastProjectionFingerprint=null;
+      progressConnectionLost=true;
       throw error;
     }
     window.__Desktop_TASKS_UI__?.setProjectionLoadState?.('ready');
@@ -244,7 +244,10 @@
       );
     }
     const bound = bindRows(projection);
-    if(progressConnectionLost){window.__Desktop_TASKS_UI__?.refreshNodeProgress?.();progressConnectionLost=false;}
+    if(progressConnectionLost){
+      window.__Desktop_TASKS_UI__?.refreshNodeProgress?.();
+      progressConnectionLost=false;
+    }
     return {
       schema_version: 'CurrentTaskCurrentTaskBridgeBootstrap-v2',
       binding_count: bound.rows.length + bound.refinementRows.length + bound.productionRows.length,
@@ -487,7 +490,10 @@
     restartRequestPromise = Promise.resolve().then(invoke).then(async(receipt) => {
         const request=receipt.retry_receipt || receipt.rollback_receipt;
         if (!request?.request_id) {
-          if (receipt.action_receipt) { await refresh(); return; }
+          if (receipt.action_receipt) {
+            await refresh();
+            return;
+          }
           throw new Error('未收到重新执行回执');
         }
         let state=request;
@@ -548,15 +554,20 @@
     const nodeControl = event.target.closest('#tasks-node-control');
     const deleteTask = event.target.closest('#tasks-delete-task');
     if (deleteTask && selectedRun) {
-      event.preventDefault(); event.stopImmediatePropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
       if (deleteTask.disabled || deleteTaskPromise) return;
       const jobId = selectedRun;
       const feedback = document.querySelector('#tasks-node-control-feedback');
       feedback.hidden = true;
-      deleteTask.disabled = true; deleteTask.setAttribute('aria-busy','true');
+      deleteTask.disabled = true;
+      deleteTask.setAttribute('aria-busy','true');
       deleteTaskPromise = nativeCall('current_task.delete_failed',{job_id:jobId})
         .then(() => {
-          selectedRun = null; selectedNode = null; pendingCancel = null; selectedRunMissCount = 0;
+          selectedRun = null;
+          selectedNode = null;
+          pendingCancel = null;
+          selectedRunMissCount = 0;
           return refresh();
         })
         .then(() => window.__Desktop_TASKS_UI__?.setTaskMode?.('current'))
@@ -564,12 +575,15 @@
           feedback.textContent = '删除失败，任务状态可能已变化。请刷新后重试。';
           feedback.hidden = false;
         }).finally(() => {
-          deleteTask.removeAttribute('aria-busy'); deleteTask.disabled = false; deleteTaskPromise = null;
+          deleteTask.removeAttribute('aria-busy');
+          deleteTask.disabled = false;
+          deleteTaskPromise = null;
         });
       return;
     }
     if (nodeControl && selectedRun && selectedNode) {
-      event.preventDefault(); event.stopImmediatePropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
       if (nodeControl.disabled || nodeControlPromise || restartRequestPromise) return;
       const action = nodeControl.dataset.action;
       if (action === 'retry') {
@@ -581,14 +595,17 @@
       const params={job_id:selectedRun,node_id:selectedNode};
       const feedback=document.querySelector('#tasks-node-control-feedback');
       feedback.hidden=true;
-      nodeControl.disabled=true; nodeControl.setAttribute('aria-busy','true');
+      nodeControl.disabled=true;
+      nodeControl.setAttribute('aria-busy','true');
       nodeControlPromise=nativeCall('current_task.'+action+'_node',params)
         .then(()=>Promise.all([refresh(),window.__Desktop_INBOX_BRIDGE__?.refresh?.()]))
         .catch(()=>{
           feedback.textContent='操作未完成，任务状态可能已变化。请刷新后重试。';
           feedback.hidden=false;
         }).finally(()=>{
-          nodeControl.removeAttribute('aria-busy');nodeControl.disabled=false;nodeControlPromise=null;
+          nodeControl.removeAttribute('aria-busy');
+          nodeControl.disabled=false;
+          nodeControlPromise=null;
         });
       return;
     }
@@ -630,13 +647,15 @@
       return;
     }
     if (event.target.closest('#tasks-open-successor')) {
-      event.preventDefault();event.stopImmediatePropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
       const job=event.target.closest('#tasks-open-successor').dataset.jobId;
       if(job)void openProductionRun(job);
       return;
     }
     if (event.target.closest('#tasks-return')) {
-      event.preventDefault();event.stopImmediatePropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
       const button=event.target.closest('#tasks-return'),key=selectedRun+':'+selectedNode;
       if(!window.__Desktop_UI_CONTROLS__?.confirmRestart(button,key))return;
       if (restartRequestPromise) return;
@@ -669,7 +688,8 @@
   window.addEventListener('desktop:session-refinement-task-updated', syncRefinementBindings);
   window.addEventListener('memorive:open-current-task', (event) => {
     if(String(event.detail?.job_id||'').startsWith('research-')){
-      void window.__Desktop_RESEARCH__?.openTask(event.detail.job_id);return;
+      void window.__Desktop_RESEARCH__?.openTask(event.detail.job_id);
+      return;
     }
     const jobId = event.detail?.job_id || event.detail?.run;
     if (jobId) void openProductionRun(jobId, event.detail?.node_id || null);
@@ -698,7 +718,7 @@
       method_count: methods.length,
       methods: [...methods],
       binding_count: bindings.size,
-      receipt_count: receipts.length,
+      receipt_count: receiptCount,
       last_projection_fingerprint:lastProjectionFingerprint,
       selected_run_miss_count:selectedRunMissCount,
       selected_run: selectedRun,

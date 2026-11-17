@@ -10,8 +10,7 @@
     'sessions.refresh', 'sessions.resolve_locator', 'sessions.inject_fault',
     'sessions.restore', 'sessions.effect_metrics'
   ]);
-  const methodSet = new Set(methods);
-  const receipts = [];
+  let receiptCount = 0;
   let bootstrapPromise = null;
   let assessedSourceCount = 0;
   let webRefreshPromise = null;
@@ -30,10 +29,9 @@
 
   const page = () => window.__Desktop_SESSION_PAGE__;
   const nativeCall = async (method, params = {}) => {
-    if (!methodSet.has(method)) throw new Error(`SESSIONS_METHOD_NOT_ALLOWLISTED:${method}`);
     if (!window.pywebview?.api?.call) throw new Error('SESSIONS_NATIVE_TRANSPORT_UNAVAILABLE');
     const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
-    receipts.push({ method, status:result?.status || 'UNKNOWN' });
+    receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:sessions-receipt', { detail:{ method, result } }));
     return result;
   };
@@ -125,7 +123,7 @@
     const action = window.pywebview?.api?.sync_browser_sessions_from_downloads;
     if (typeof action !== 'function') return null;
     const receipt = await action();
-    receipts.push({ method:'sync_browser_sessions_from_downloads', status:receipt?.status || 'UNKNOWN' });
+    receiptCount += 1;
     return receipt;
   };
   const normalizeLimit = (value) => {
@@ -137,7 +135,7 @@
     const action = window.pywebview?.api?.run_browser_companion_sync;
     if (typeof action !== 'function') throw new Error('BROWSER_COMPANION_SYNC_UNAVAILABLE');
     const receipt = await action();
-    receipts.push({ method:'run_browser_companion_sync', status:receipt?.status || 'UNKNOWN' });
+    receiptCount += 1;
     return receipt;
   };
   const notifyBrowserCompanionUpdated = (projection) => {
@@ -353,7 +351,7 @@
     const action = window.pywebview?.api?.browser_companion_status;
     if (typeof action !== 'function') throw new Error('BROWSER_COMPANION_STATUS_UNAVAILABLE');
     const projection = await action();
-    receipts.push({ method:'browser_companion_status', status:projection?.status || 'UNKNOWN' });
+    receiptCount += 1;
     return projection;
   };
 
@@ -366,7 +364,7 @@
     if (typeof action !== 'function') throw new Error('BROWSER_SESSION_FILE_IMPORT_UNAVAILABLE');
     try {
       const receipt = await action();
-      receipts.push({ method:'import_browser_sessions_file', status:receipt?.status || 'UNKNOWN' });
+      receiptCount += 1;
       if (receipt?.status === 'CANCELLED') return receipt;
       await query(page()?.currentFilter?.() || {});
       page()?.setBrowserCompanionStatus(await browserCompanionStatus());
@@ -519,7 +517,7 @@
       method_count:methods.length,
       methods:[...methods],
       binding_count:page()?.inspect().record_count || 0,
-      receipt_count:receipts.length,
+      receipt_count:receiptCount,
       selected_projection_id:page()?.selectedId() || null,
       native_transport:Boolean(window.pywebview?.api?.call),
       real_source_channels_assessed:assessedSourceCount,

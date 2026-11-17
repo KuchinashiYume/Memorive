@@ -437,8 +437,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "d902df255b89177d48e25bd28a00d10543da79baeb37bd7d5fcbbcf681686c4e",
-      "bytes": 2823630
+      "sha256": "7e3087332a30a07c02e69714cd370498d40db93891f6ea912dbdfb7edf5f803f",
+      "bytes": 2700570
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -2072,7 +2072,7 @@
     },
     {
       "path": "product/desktop/startup_notice.py",
-      "sha256": "ce5c36bf1b8bfea7613a4bf587eab4cf1b7d680e9bb1522ba4476785f639b392",
+      "sha256": "549d654a935b2bc6775677d4ebf5c53b68acf784001696c1ef1094de3317c5a4",
       "bytes": 11213
     },
     {
@@ -2104,51 +2104,6 @@
       "path": "product/web/assets/assistant/adopted_inline_001.png",
       "sha256": "5374cd25658256fe5d2042d9d8997854e3d8b2d01a13e4d724177b1be2a0ebca",
       "bytes": 75650
-    },
-    {
-      "path": "product/web/document_structure.js",
-      "sha256": "d7af0e709fde9e1c45b2367b3f4656b7cba9136aa387315c1c1e77b43b0f3974",
-      "bytes": 36120
-    },
-    {
-      "path": "product/web/evidence_check.js",
-      "sha256": "2294c32f336355a773d742a11f2d973dd4165906b7baad5ede3cb2d5df0c3339",
-      "bytes": 4333
-    },
-    {
-      "path": "product/web/leaderboard.css",
-      "sha256": "a51e055beb2eb57ee190058c5ef64e9790cfbb1bb69f8ffff129fc0bcdf5eca3",
-      "bytes": 20932
-    },
-    {
-      "path": "product/web/leaderboard.html",
-      "sha256": "77ca1ae5ef88f2ae1cf8d82f9e08f14d735bd7bdcecb534fd340cf9c03240329",
-      "bytes": 22832
-    },
-    {
-      "path": "product/web/leaderboard.js",
-      "sha256": "6c372e68b63b051044c382e585ee3a4c869f1eace1a592c2aa552ab859790186",
-      "bytes": 50499
-    },
-    {
-      "path": "product/web/node_progress.css",
-      "sha256": "fc2c19a187341e77cb51530a65847581252be9a78d0c37a1a61641ac4ca348a5",
-      "bytes": 494
-    },
-    {
-      "path": "product/web/node_progress.js",
-      "sha256": "c7725e05ea28310a717cd5d52479e362be58d71f24280581a4d594e07d109287",
-      "bytes": 7660
-    },
-    {
-      "path": "product/web/settings_bridge.js",
-      "sha256": "d8aac2589877930bd2009b0dbd3af8a01813292ff002fa846fb1105833cd38b3",
-      "bytes": 293390
-    },
-    {
-      "path": "product/web/update_bridge.js",
-      "sha256": "7034afea55b33d7cdf44aaea430ad485a5da6795427ca2fa5aff7056d9eca11a",
-      "bytes": 11050
     },
     {
       "path": "release_materials/INSTALL.md",

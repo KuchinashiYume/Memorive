@@ -1,6 +1,6 @@
   (() => {
     const root = document.getElementById('desktop-messages-preview');
-    const preview = window.DesktopPreview;
+    const preview = window.DesktopPreview_messages;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -21,7 +21,10 @@
         return;
       }
       if (bar.hidden) return;
-      if (reducedMotion.matches) { bar.hidden = true; return; }
+      if (reducedMotion.matches) {
+        bar.hidden = true;
+        return;
+      }
       void bar.offsetWidth;
       bar.classList.add('desktop-batch-leaving');
       window.setTimeout(() => {
@@ -157,7 +160,10 @@
       if (card.dataset.view === 'history') {
         card.classList.add('confirmed');
         if (['red','yellow'].includes(card.dataset.tone) && card.dataset.targetValid === 'true' && action) {
-          action.hidden = false; action.disabled = false; action.dataset.command = 'goto'; action.textContent = '前往';
+          action.hidden = false;
+          action.disabled = false;
+          action.dataset.command = 'goto';
+          action.textContent = '前往';
           action.setAttribute('aria-label', '前往对应任务节点');
         } else {
           if (action) action.hidden = true;
@@ -232,7 +238,8 @@
       const list = q('#messages-list');
       const toneBySeverity = { RED:'red', YELLOW:'yellow', GREEN:'green', BLUE:'blue' };
       list.replaceChildren(...(Array.isArray(rows) ? rows : []).map((row) => {
-        const originalRow=row;row=window.__MemoContentLanguage__.project(row);
+        const originalRow=row;
+        row=window.__MemoContentLanguage__.project(row);
         const tone = toneBySeverity[row.severity] || 'blue';
         const card = document.createElement('article');
         card.className = 'desktop-messages-card';
@@ -338,11 +345,17 @@
       requestAnimationFrame(() => q('#messages-title').focus({ preventScroll:true }));
     };
     const gotoTarget = (card) => {
-      if (card.dataset.targetValid !== 'true') { showToast('找不到关联任务或步骤。'); return; }
+      if (card.dataset.targetValid !== 'true') {
+        showToast('找不到关联任务或步骤。');
+        return;
+      }
       showToast('正在定位对应任务与流程节点…');
     };
     const confirmMessage = (card, allowProtected = false) => {
-      if (['red','yellow'].includes(card.dataset.tone) && !allowProtected) { showToast('红色与黄色消息只能在详情中手动确认。'); return false; }
+      if (['red','yellow'].includes(card.dataset.tone) && !allowProtected) {
+        showToast('红色与黄色消息只能在详情中手动确认。');
+        return false;
+      }
       if (card.dataset.view !== 'current' || card.dataset.pendingHistory === 'true') return false;
       card.classList.add('confirmed');
       card.classList.remove('unread');
@@ -353,10 +366,19 @@
       return true;
     };
     q('#messages-list').addEventListener('click', (event) => {
-      const card = event.target.closest('.desktop-messages-card'); if (!card) return;
-      if (event.target.closest('.desktop-messages-check')) { updateBatch(); return; }
+      const card = event.target.closest('.desktop-messages-card');
+      if (!card) return;
+      if (event.target.closest('.desktop-messages-check')) {
+        updateBatch();
+        return;
+      }
       const star = event.target.closest('.desktop-messages-star');
-      if (star) { event.stopPropagation(); setStar(card, star.getAttribute('aria-pressed') !== 'true'); if (mode === 'starred') applyMode(); else updateBatch(); return; }
+      if (star) {
+        event.stopPropagation();
+        setStar(card, star.getAttribute('aria-pressed') !== 'true');
+        if (mode === 'starred') applyMode(); else updateBatch();
+        return;
+      }
       const action = event.target.closest('.desktop-messages-action');
       if (action) {
         event.stopPropagation();
@@ -378,7 +400,10 @@
       showDetail(card);
       return true;
     };
-    qa('#messages-mode button').forEach((button) => button.addEventListener('click', () => { mode = button.dataset.mode; applyMode(); }));
+    qa('#messages-mode button').forEach((button) => button.addEventListener('click', () => {
+      mode = button.dataset.mode;
+      applyMode();
+    }));
     q('#messages-read').addEventListener('click', () => {
       const eligible = visibleCards().filter(eligibleRead);
       eligible.forEach((card) => {
@@ -404,15 +429,48 @@
       updateReadButton();
       updateBatch();
     });
-    q('#messages-select-visible').addEventListener('click', () => { visibleCards().forEach((card) => { card.querySelector('.desktop-messages-check').checked = true; }); updateBatch(); });
-    q('#messages-clear-selected').addEventListener('click', () => { qa('.desktop-messages-check').forEach((box) => { box.checked = false; }); updateBatch(); });
-    q('#messages-star-add').addEventListener('click', () => { const selected = selectedCards(); selected.forEach((card) => setStar(card, true)); showToast(`已加星 ${selected.length} 条`); updateBatch(); });
-    q('#messages-star-remove').addEventListener('click', () => { const selected = selectedCards(); selected.forEach((card) => setStar(card, false)); showToast(`已取消 ${selected.length} 条加星`); if (mode === 'starred') applyMode(); else updateBatch(); });
-    q('#messages-batch-read').addEventListener('click', () => { const selected = selectedCards(); const eligible = selected.filter(eligibleRead); eligible.forEach((card) => card.classList.remove('unread')); showToast(`已标记 ${eligible.length} 条为已读` + (selected.length > eligible.length ? ` · 跳过 ${selected.length - eligible.length} 条` : '')); updateReadButton(); updateBatch(); });
-    q('#messages-batch-confirm').addEventListener('click', () => { const selected = selectedCards(); const eligible = selected.filter(eligibleConfirm); eligible.forEach((card) => confirmMessage(card)); showToast(`已确认 ${eligible.length} 条` + (selected.length > eligible.length ? ` · 跳过 ${selected.length - eligible.length} 条` : '')); updateBatch(); });
+    q('#messages-select-visible').addEventListener('click', () => {
+      visibleCards().forEach((card) => { card.querySelector('.desktop-messages-check').checked = true; });
+      updateBatch();
+    });
+    q('#messages-clear-selected').addEventListener('click', () => {
+      qa('.desktop-messages-check').forEach((box) => { box.checked = false; });
+      updateBatch();
+    });
+    q('#messages-star-add').addEventListener('click', () => {
+      const selected = selectedCards();
+      selected.forEach((card) => setStar(card, true));
+      showToast(`已加星 ${selected.length} 条`);
+      updateBatch();
+    });
+    q('#messages-star-remove').addEventListener('click', () => {
+      const selected = selectedCards();
+      selected.forEach((card) => setStar(card, false));
+      showToast(`已取消 ${selected.length} 条加星`);
+      if (mode === 'starred') applyMode(); else updateBatch();
+    });
+    q('#messages-batch-read').addEventListener('click', () => {
+      const selected = selectedCards();
+      const eligible = selected.filter(eligibleRead);
+      eligible.forEach((card) => card.classList.remove('unread'));
+      showToast(`已标记 ${eligible.length} 条为已读` + (selected.length > eligible.length ? ` · 跳过 ${selected.length - eligible.length} 条` : ''));
+      updateReadButton();
+      updateBatch();
+    });
+    q('#messages-batch-confirm').addEventListener('click', () => {
+      const selected = selectedCards();
+      const eligible = selected.filter(eligibleConfirm);
+      eligible.forEach((card) => confirmMessage(card));
+      showToast(`已确认 ${eligible.length} 条` + (selected.length > eligible.length ? ` · 跳过 ${selected.length - eligible.length} 条` : ''));
+      updateBatch();
+    });
     q('#messages-refresh').addEventListener('click', () => {
       const pending = cards().filter((card) => card.dataset.pendingHistory === 'true');
-      pending.forEach((card) => { card.dataset.view = 'history'; delete card.dataset.pendingHistory; renderCardAction(card); });
+      pending.forEach((card) => {
+        card.dataset.view = 'history';
+        delete card.dataset.pendingHistory;
+        renderCardAction(card);
+      });
       showToast(`${pending.length} 条消息已移至历史`);
       applyMode();
     });
@@ -456,7 +514,9 @@
     const rightToggle = q('#desktop-toggle-right');
     rightToggle.addEventListener('click', (event) => {
       if (!selectedCard && preview.app.dataset.right !== 'true') {
-        event.preventDefault(); event.stopImmediatePropagation(); q('#desktop-live-state').textContent = '请先选择一条消息';
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        q('#desktop-live-state').textContent = '请先选择一条消息';
       }
     }, true);
     rightToggle.addEventListener('click', () => {
@@ -464,7 +524,9 @@
     });
     root.addEventListener('keydown', (event) => {
       if (event.ctrlKey && event.altKey && event.code === 'KeyB' && !selectedCard && preview.app.dataset.right !== 'true') {
-        event.preventDefault(); event.stopImmediatePropagation(); q('#desktop-live-state').textContent = '请先选择一条消息';
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        q('#desktop-live-state').textContent = '请先选择一条消息';
       }
     }, true);
     root.addEventListener('keydown', (event) => {
@@ -476,14 +538,23 @@
     // Language switching updates existing loaded nodes without reads, state writes or detail reopening.
     const projectLoaded=()=>{
       for(const card of cards()){
-        const original=contentRows.get(card);if(!original)continue;
+        const original=contentRows.get(card);
+        if(!original)continue;
         const row=window.__MemoContentLanguage__.project(original);
-        card.dataset.title=row.title;card.dataset.summary=row.summary||row.body||'';
-        const title=card.querySelector('.desktop-messages-copy strong'),summary=card.querySelector('.desktop-messages-copy small');
-        title.textContent=card.dataset.title;title.title=card.dataset.title;summary.textContent=card.dataset.summary;
+        card.dataset.title=row.title;
+        card.dataset.summary=row.summary||row.body||'';
+        const title=card.querySelector('.desktop-messages-copy strong'),
+          summary=card.querySelector('.desktop-messages-copy small');
+        title.textContent=card.dataset.title;
+        title.title=card.dataset.title;
+        summary.textContent=card.dataset.summary;
         const lang=document.documentElement.lang;
         card.querySelector('.desktop-messages-check')?.setAttribute('aria-label',({'zh-CN':'选择消息：','en-US':'Select message: ','ja-JP':'メッセージを選択：'}[lang]||'')+row.title);
-        if(selectedCard===card){q('#messages-title').textContent=row.title;q('#messages-title').title=row.title;q('#messages-summary').textContent=card.dataset.summary;}
+        if(selectedCard===card){
+          q('#messages-title').textContent=row.title;
+          q('#messages-title').title=row.title;
+          q('#messages-summary').textContent=card.dataset.summary;
+        }
       }
     };
     new MutationObserver(projectLoaded).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

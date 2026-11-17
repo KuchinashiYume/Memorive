@@ -15,8 +15,10 @@ section replaced by an include line:
     <!-- include: routes/inbox/view.js -->
 
 A line that holds only an include is replaced by the whole file; an include
-inside a line is replaced in place. Files are copied byte for byte, so keep each
-file's line endings as they are.
+inside a line is replaced in place. An included file may hold include lines of
+its own (each route's markup.html includes the window frame parts under
+shared/frame/). Paths are always relative to the page's folder. Files are
+copied byte for byte, so keep each file's line endings as they are.
 
 The page's Content-Security-Policy lists the sha256 of every inline script; the
 browser runs no other script. page.html holds %SCRIPT_HASHES% in its place, and
@@ -88,7 +90,7 @@ def generate(name: str) -> tuple[bytes, set[Path]]:
     def insert(match: re.Match) -> bytes:
         path = folder / (match.group(1) or match.group(2)).decode("utf-8")
         used.add(path)
-        return path.read_bytes()
+        return INCLUDE.sub(insert, path.read_bytes())   # an included file may include others
 
     page = INCLUDE.sub(insert, (folder / "page.html").read_bytes())
     hashes = " ".join(f"&#x27;{token}&#x27;" for token in needed_hashes(page.decode("utf-8")))

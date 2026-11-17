@@ -13,7 +13,6 @@ from memorive.sessions.controller import SessionProductError, SessionsProductCon
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 SOURCE_ROOT = ATTEMPT_ROOT / "source"
 RUN_ROOT = ATTEMPT_ROOT.parents[1]
 

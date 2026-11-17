@@ -13,7 +13,10 @@
       const holder=row.querySelector('.desktop-settings-cat-icon'),key=mapping[row.dataset.category];
       if(!holder||!key)return;
       const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('class','desktop-settings-icon');svg.setAttribute('aria-hidden','true');svg.setAttribute('data-settings-icon',key);
+      svg.setAttribute('viewBox','0 0 24 24');
+      svg.setAttribute('class','desktop-settings-icon');
+      svg.setAttribute('aria-hidden','true');
+      svg.setAttribute('data-settings-icon',key);
       for(const shape of shapes[key]){
         const child=document.createElementNS(svg.namespaceURI,shape.tag);
         for(const [k,v] of Object.entries(shape.attributes))child.setAttribute(k,v);
@@ -64,7 +67,8 @@
     'settings-reset-layout':'恢复默认布局','settings-shortcuts':'查看快捷键'
   };
   function applyActions(){
-    const root=document.getElementById('desktop-settings-preview');if(!root)return;
+    const root=document.getElementById('desktop-settings-preview');
+    if(!root)return;
     const reusedRefreshClass='desktop-action-refresh';
     const sharedTrashClass='desktop-action-trash';
     for(const node of root.querySelectorAll('button')){
@@ -76,11 +80,15 @@
         node.dataset.desktopNoTranslate='';
         if(node.textContent!==label)node.textContent=label;
         if(node.getAttribute('aria-label')!==label)node.setAttribute('aria-label',label);
-        node.removeAttribute('data-desktop-tip');node.removeAttribute('title');
+        node.removeAttribute('data-desktop-tip');
+        node.removeAttribute('title');
         continue;
       }
       if(/^settings-(api|cli|workflow)-code-save$/.test(node.id)){
-        node.hidden=true;node.setAttribute('aria-hidden','true');node.tabIndex=-1;continue;
+        node.hidden=true;
+        node.setAttribute('aria-hidden','true');
+        node.tabIndex=-1;
+        continue;
       }
       let match=actions[node.id];
       if(node.matches('[data-validate-cli],[data-validate-api],[data-local-model-verify]'))match=['verify','验证模型'];

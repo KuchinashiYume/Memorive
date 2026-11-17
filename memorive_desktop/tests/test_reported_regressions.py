@@ -7,7 +7,6 @@ from memorive.sessions.controller import SessionsProductController
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 SOURCE_ROOT = ATTEMPT_ROOT / "source"
 
 

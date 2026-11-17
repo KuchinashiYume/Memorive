@@ -52,7 +52,8 @@
       : route === 'sessions' ? '#sessions-listpane' : route === 'leaderboard' ? '#lb-ranking-panel' : '.page-body') || null;
   };
   const stopLoadingMotion = state => {
-    clearTimeout(state.frameTimer);state.frameTimer=0;
+    clearTimeout(state.frameTimer);
+    state.frameTimer=0;
   };
   const syncLoadingMotion = state => {
     stopLoadingMotion(state);
@@ -64,7 +65,8 @@
     let frame=0;
     const next=()=>{
       if (!state.count || !state.overlay?.isConnected || !isVisible(state.overlay) || document.hidden) return;
-      state.frames[frame].hidden=true;frame=(frame+1)%loadingFrames.length;
+      state.frames[frame].hidden=true;
+      frame=(frame+1)%loadingFrames.length;
       state.frames[frame].hidden=false;
       state.frameTimer=setTimeout(next,loadingDurations[frame]);
     };
@@ -72,16 +74,30 @@
   };
   const showLoading = (target,state) => {
     if (!state.count || !target.isConnected || state.overlay) return;
-    const overlay=document.createElement('div');overlay.className='desktop-loading-state';
-    overlay.setAttribute('role','status');overlay.setAttribute('aria-label',loadingCopy('正在加载…'));
-    const art=document.createElement('div');art.className='desktop-loading-art';art.setAttribute('aria-hidden','true');
+    const overlay=document.createElement('div');
+    overlay.className='desktop-loading-state';
+    overlay.setAttribute('role','status');
+    overlay.setAttribute('aria-label',loadingCopy('正在加载…'));
+    const art=document.createElement('div');
+    art.className='desktop-loading-art';
+    art.setAttribute('aria-hidden','true');
     state.frames=loadingFrames.map((source,index)=>{
-      const image=document.createElement('img');image.src=source;image.alt='';image.draggable=false;image.hidden=index!==0;
+      const image=document.createElement('img');
+      image.src=source;
+      image.alt='';
+      image.draggable=false;
+      image.hidden=index!==0;
       image.addEventListener('error',()=>overlay.classList.add('desktop-loading-art-unavailable'),{once:true});
-      art.append(image);return image;
+      art.append(image);
+      return image;
     });
-    const copy=document.createElement('span');copy.className='desktop-loading-copy';copy.textContent=loadingCopy('正在加载…');
-    overlay.append(art,copy);target.append(overlay);state.overlay=overlay;state.shownAt=performance.now();
+    const copy=document.createElement('span');
+    copy.className='desktop-loading-copy';
+    copy.textContent=loadingCopy('正在加载…');
+    overlay.append(art,copy);
+    target.append(overlay);
+    state.overlay=overlay;
+    state.shownAt=performance.now();
     syncLoadingMotion(state);
   };
   const beginLoading = target => {
@@ -97,7 +113,8 @@
       if (!target.classList.contains('desktop-loading-pending')) state.priorBusy=target.getAttribute('aria-busy');
       state.error=false;
       target.querySelector(':scope > .desktop-load-error')?.remove();
-      target.dataset.desktopLoadState='loading';target.setAttribute('aria-busy','true');
+      target.dataset.desktopLoadState='loading';
+      target.setAttribute('aria-busy','true');
       if (getComputedStyle(target).position==='static') target.classList.add('desktop-loading-positioned');
       // Keep a successful projection visible while refreshing. Only the first
       // unresolved read owns the placeholder; fast reads never flash artwork.
@@ -111,21 +128,29 @@
     if(state.overlay)syncLoadingMotion(state);
     let released=false;
     return failed => {
-      if (released) return;released=true;state.error ||= Boolean(failed);
+      if (released) return;
+      released=true;
+      state.error ||= Boolean(failed);
       state.count=Math.max(0,state.count-1);
       if (state.count) return;
-      clearTimeout(state.showTimer);stopLoadingMotion(state);
+      clearTimeout(state.showTimer);
+      stopLoadingMotion(state);
       // Projection rendering follows the awaited call; clear before the next paint.
       const settle=()=>requestAnimationFrame(()=>{
         if (state.count || state.generation!==generation) return;
-        state.overlay?.remove();state.overlay=null;state.frames=[];
+        state.overlay?.remove();
+        state.overlay=null;
+        state.frames=[];
         target.classList.remove('desktop-loading-pending');
         if (state.priorBusy===null) target.removeAttribute('aria-busy');
         else target.setAttribute('aria-busy',state.priorBusy);
         target.dataset.desktopLoadState=state.error&&!state.loaded?'error':'ready';
         if (state.error && !state.loaded && !target.querySelector('#tasks-list-status')) {
-          const error=document.createElement('p');error.className='desktop-load-error';error.setAttribute('role','alert');
-          error.textContent=loadingCopy('加载失败，请刷新重试');target.append(error);
+          const error=document.createElement('p');
+          error.className='desktop-load-error';
+          error.setAttribute('role','alert');
+          error.textContent=loadingCopy('加载失败，请刷新重试');
+          target.append(error);
         }
         if (!state.error) state.loaded=true;
       });
@@ -143,12 +168,20 @@
     const finish=wanted?beginLoading(target):null;
     try {
       const value=await invoke();
-      finish?.(['ERROR','FAILED','FAIL','BLOCKED'].includes(value?.status));return value;
-    } catch(error) { finish?.(true);throw error; }
+      finish?.(['ERROR','FAILED','FAIL','BLOCKED'].includes(value?.status));
+      return value;
+    } catch(error) {
+      finish?.(true);
+      throw error;
+    }
   };
   const syncAllLoading = () => {
     loadingStates.forEach((state,target)=>{
-      if (!target.isConnected) {stopLoadingMotion(state);loadingStates.delete(target);return;}
+      if (!target.isConnected) {
+        stopLoadingMotion(state);
+        loadingStates.delete(target);
+        return;
+      }
       syncLoadingMotion(state);
     });
   };
@@ -229,7 +262,8 @@
     const button=group?.querySelector('.desktop-home-expression-button');
     const image=button?.querySelector('.desktop-home-expression-image');
     if(!button||!image)return;
-    button.setAttribute('data-desktop-no-tooltip','');button.removeAttribute('title');
+    button.setAttribute('data-desktop-no-tooltip','');
+    button.removeAttribute('title');
     homeExpressions.push({ button, image });
     button.addEventListener('click', (event) => {
       if (event.button === 0) playHomeQuestion();
@@ -335,7 +369,10 @@
   };
 
   window.DesktopDecorations = Object.freeze({
-    applyHidden:hidden=>{if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupQuestion);syncAllLoading();},
+    applyHidden:hidden=>{
+      if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupQuestion);
+      syncAllLoading();
+    },
     beginLoading,
     trackCall,
     inspectLoading:()=>[...loadingStates].map(([target,state])=>({target:target.id||target.className,pending:state.count,

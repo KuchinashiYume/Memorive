@@ -43,7 +43,10 @@
   const releaseNotes=panel.querySelector('[data-update-notes]');
   function mode(){
     const advanced=panel.closest('.desktop-settings-shell').dataset.settingsMode==='advanced';
-    for(const row of panel.querySelectorAll('[data-about-advanced]')){row.hidden=!advanced;if(!advanced&&row.tagName==='DETAILS')row.open=false;}
+    for(const row of panel.querySelectorAll('[data-about-advanced]')){
+      row.hidden=!advanced;
+      if(!advanced&&row.tagName==='DETAILS')row.open=false;
+    }
   }
   window.addEventListener('desktop:settings-mode-changed',mode);
   window.addEventListener('desktop:settings-mode-scope-changed',mode);
@@ -55,14 +58,18 @@
     const update=state.update||{},stage=update.stage||update.state||'IDLE',error=state.error||update.error;
     query('[data-update-status]').textContent=error==='UPDATE_RELEASE_TRUST_NOT_CONFIGURED'?text('pendingKey'):error?text('failure'):text(stage);
     query('[data-update-diagnostics]').textContent=JSON.stringify({error:error||null,state:stage,operation:state.operation_id||null},null,2);
-    const size=update.asset?.size||update.total||0;query('[data-update-size]').textContent=size?(size/(1024*1024)).toLocaleString(language(),{maximumFractionDigits:1})+' MiB':'';
+    const size=update.asset?.size||update.total||0;
+    query('[data-update-size]').textContent=size?(size/(1024*1024)).toLocaleString(language(),{maximumFractionDigits:1})+' MiB':'';
     query('[data-update-reason]').textContent=update.fallback_reason?text(update.fallback_reason==='UPDATE_BASE_MISMATCH'?'baseMismatch':'noDelta'):'';
     releaseNotes.textContent=state.release?.notes?.[language()]||'';
     for(const node of [query('[data-update-size]'),query('[data-update-reason]'),releaseNotes])node.hidden=!node.textContent;
     mode();
-    const automatic=query('[data-update-action="preference"]');automatic.setAttribute('aria-checked',String(state.automatic_enabled!==false));automatic.setAttribute('aria-label',text('automatic'));
+    const automatic=query('[data-update-action="preference"]');
+    automatic.setAttribute('aria-checked',String(state.automatic_enabled!==false));
+    automatic.setAttribute('aria-label',text('automatic'));
     query('[data-update-action="check"]').disabled=requesting||state.busy||(update.stage&&!['COMPLETE','FAILED','CANCELLED','ROLLED_BACK'].includes(stage));
-    const buttons=query('[data-update-buttons]');buttons.replaceChildren();
+    const buttons=query('[data-update-buttons]');
+    buttons.replaceChildren();
     let actions=[];
     if(stage==='AVAILABLE')actions=update.asset?['download']:['prepare'];
     if(stage==='WAITING_FULL_CONSENT')actions=['full'];
@@ -72,28 +79,66 @@
     if(stage==='VERIFIED')actions=['apply','cancel'];
     if(stage==='WAITING_IDLE'&&update.new_version&&!state.busy)actions=['recover'];
     if(['RECOVERY_REQUIRED','MIGRATING','MIGRATED','ACTIVATING','BACKING_UP','BACKED_UP','VERIFYING_START','APPLYING'].includes(stage)&&!state.busy)actions=['recover'];
-    for(const action of actions){const button=document.createElement('button');button.type='button';button.className='soft-button';button.textContent=text(action);button.dataset.updateAction=action;button.disabled=requesting||(state.busy&&action!=='cancel');buttons.append(button);}
+    for(const action of actions){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='soft-button';
+      button.textContent=text(action);
+      button.dataset.updateAction=action;
+      button.disabled=requesting||(state.busy&&action!=='cancel');
+      buttons.append(button);
+    }
     buttons.hidden=!actions.length;
-    const progress=query('[data-update-progress]');progress.hidden=!['DOWNLOADING','VERIFYING_BASE'].includes(stage);progress.max=update.total||1;progress.value=update.current||0;
+    const progress=query('[data-update-progress]');
+    progress.hidden=!['DOWNLOADING','VERIFYING_BASE'].includes(stage);
+    progress.max=update.total||1;
+    progress.value=update.current||0;
   }
-  async function refresh(){try{state=await call('status');render();}catch(error){state.error=String(error);render();}}
+  async function refresh(){try{
+    state=await call('status');
+    render();
+  }catch(error){
+    state.error=String(error);
+    render();
+  }}
   section.addEventListener('click',async event=>{
-    const button=event.target.closest('[data-update-action]');if(!button||requesting)return;
-    const action=button.dataset.updateAction;requesting=true;render();
+    const button=event.target.closest('[data-update-action]');
+    if(!button||requesting)return;
+    const action=button.dataset.updateAction;
+    requesting=true;
+    render();
     try{
       if(action==='preference')state=await call(action,{enabled:state.automatic_enabled===false});
       else if(action==='prepare')state=await call(action,{target:state.update?.package_id});
       else if(action==='full')state=await call('download',{allow_full:true});
-      else if(action==='apply'||action==='recover'){await call(action);state.update={...state.update,stage:'WAITING_IDLE'};}
+      else if(action==='apply'||action==='recover'){
+        await call(action);
+        state.update={...state.update,stage:'WAITING_IDLE'};
+      }
       else state=await call(action);
     }catch(error){state.error=String(error);}
-    finally{requesting=false;render();}
+    finally{
+      requesting=false;
+      render();
+    }
   });
   window.addEventListener('desktop:settings-locale-change',render);
   window.addEventListener('pywebviewready',async()=>{
-    await refresh();timer=setInterval(()=>{if(!document.hidden&&!panel.closest('[hidden]'))void refresh();},1500);
-    setTimeout(async()=>{if(state.automatic_enabled!==false){try{state=await call('check',{automatic:true});render();}catch(error){state.error=String(error);render();}}},30000);
+    await refresh();
+    timer=setInterval(()=>{if(!document.hidden&&!panel.closest('[hidden]'))void refresh();},1500);
+    setTimeout(async()=>{
+      if(state.automatic_enabled!==false){
+        try{
+          state=await call('check',{automatic:true});
+          render();
+        }catch(error){
+          state.error=String(error);
+          render();
+        }
+      }
+    },30000);
   });
-  window.addEventListener('beforeunload',()=>clearInterval(timer));render();
+  window.addEventListener('beforeunload',()=>clearInterval(timer));
+  render();
 })();
 

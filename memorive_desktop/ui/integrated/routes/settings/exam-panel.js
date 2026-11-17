@@ -16,7 +16,11 @@
     q('#settings-exam-core-score').setAttribute('aria-label', hasExam ? '当前节点考试分数' : 'Epoch AI 参考分数');
     q('#settings-exam-core-dot').className = 'status-dot ' + (hasExam ? 'green' : 'yellow');
     let kind=q('#settings-exam-core-kind');
-    if(!kind){kind=document.createElement('small');kind.id='settings-exam-core-kind';q('#settings-exam-core-score').before(kind);}
+    if(!kind){
+      kind=document.createElement('small');
+      kind.id='settings-exam-core-kind';
+      q('#settings-exam-core-score').before(kind);
+    }
     kind.textContent=hasExam?'实测':finite(epoch)?'参考':'';
     kind.hidden=!kind.textContent;
     panel.querySelector('summary').title = hasExam ? '当前节点实测分数' : 'Epoch AI 参考 · 不同来源不可横向比较';
@@ -24,7 +28,9 @@
   function clearReferences() {
     epoch = null;
     for (const id of ['epoch','aa','openrouter']) {
-      const n = q('#settings-exam-' + id); n.textContent = '—'; n.removeAttribute('title');
+      const n = q('#settings-exam-' + id);
+      n.textContent = '—';
+      n.removeAttribute('title');
     }
     core();
   }
@@ -45,7 +51,10 @@
       for (const row of rows) {
         const values = row.display_metrics || row.metrics;
         const key = metrics.find(k => finite(values?.[k]?.value ?? values?.[k]));
-        if (key) { found = {row,key,value:values[key]?.value ?? values[key]}; break; }
+        if (key) {
+          found = {row,key,value:values[key]?.value ?? values[key]};
+          break;
+        }
       }
       if (!found) continue;
       const {row,key,value} = found, n = q('#settings-exam-' + id);
@@ -65,8 +74,14 @@
     const elapsed = Math.max(0, Math.floor(job?.started_at ? ((Date.parse(job.finished_at || new Date().toISOString()) - Date.parse(job.started_at)) / 1000) : ((performance.now() - active.started) / 1000)));
     const phases = {PLANNING:'准备中', RUNNING:'测试中', COMPLETE:'测试结束', ERROR:'未完成'};
     const terminal = ['COMPLETE','ERROR'].includes(active.phase);
-    if (terminal && active.phase === 'COMPLETE') { bar.max = 1; bar.value = 1; }
-    else if (job && Number.isInteger(job.maximum_calls) && job.maximum_calls > 0) { bar.max = job.maximum_calls; bar.value = Math.min(job.calls_returned,job.maximum_calls); }
+    if (terminal && active.phase === 'COMPLETE') {
+      bar.max = 1;
+      bar.value = 1;
+    }
+    else if (job && Number.isInteger(job.maximum_calls) && job.maximum_calls > 0) {
+      bar.max = job.maximum_calls;
+      bar.value = Math.min(job.calls_returned,job.maximum_calls);
+    }
     else bar.removeAttribute('value');
     bar.hidden = false;
     const stage = active.connectionLost ? '连接中断 · 正在重新查询' : job?.cancel_requested && !terminal ? '停止中 · 保留当前返回' : !terminal && job?.stage === 'WAITING_MODEL' ? '模型处理中' : phases[active.phase];
@@ -91,14 +106,24 @@
     q('#settings-exam-plan-copy').textContent = (tier ? `${tier.label} · ${tier.selected_count}/${tier.full_count} · ${Math.round(tier.actual_fraction*1000)/10}%` : '当前节点考试') + `\n最多 ${calls ?? '—'} 次 · ${cost}`;
     box.hidden = false;
     return new Promise(resolve => {
-      pendingConfirmation = accepted => {box.hidden = true; pendingConfirmation = null; resolve(accepted);};
+      pendingConfirmation = accepted => {
+        box.hidden = true;
+        pendingConfirmation = null;
+        resolve(accepted);
+      };
       q('#settings-exam-plan-start').onclick = () => pendingConfirmation?.(true);
       q('#settings-exam-plan-cancel').onclick = () => pendingConfirmation?.(false);
     });
   }
   root.addEventListener('click', event => {
     const node = event.target.closest('button.desktop-settings-node[data-step]');
-    if (node && node !== selected) { pendingConfirmation?.(false); selected = node; panel.open = false; clearReferences(); setTimeout(renderProgress,0); }
+    if (node && node !== selected) {
+      pendingConfirmation?.(false);
+      selected = node;
+      panel.open = false;
+      clearReferences();
+      setTimeout(renderProgress,0);
+    }
     if (event.target.closest('#settings-model-menu')) clearReferences();
   });
   window.addEventListener('desktop:external-model-reference', event => references(event.detail));

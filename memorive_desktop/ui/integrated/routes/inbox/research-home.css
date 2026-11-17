@@ -1,4 +1,4 @@
-/* E7 uses the inherited home art, warm controls and research sidepanel. */
+/* Research home on the start view: the home picture, warm controls and the research side panel. */
 #desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region{box-sizing:border-box;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:16px;height:260px;flex-shrink:0;padding:24px 16px;width:620px;max-width:100%;cursor:pointer}
 #desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region>.memo-research-home-copy{position:relative;justify-self:end;align-items:flex-end;width:100%;transition:opacity 140ms ease,transform 140ms ease}
 #desktop-inbox-preview #desktop-blank-state .memo-research-cycle-region>.memo-research-home-copy.memo-research-changing{opacity:0;transform:translateY(4px)}

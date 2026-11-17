@@ -1,5 +1,6 @@
 """Directed user-reported gap checks; runs against the copied predecessor first."""
 from pathlib import Path
+from page_sources import settings_scripts
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'product/desktop'))
@@ -9,7 +10,7 @@ def test_unified_caption_adapter_exists():
 
 
 def test_dirty_state_is_explicit_not_save_button_color():
-    assert 'getEditState' in (ROOT/'product/web/settings_bridge.js').read_text(encoding='utf8')
+    assert 'getEditState' in settings_scripts()
 
 
 import pytest

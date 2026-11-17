@@ -1,114 +1,5 @@
 window.__MEMO_PRODUCT_NAME__="Memorive";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (() => {
   'use strict';
   const routes = Object.freeze({
@@ -171,17 +62,16 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
   ]);
   const textSources = new WeakMap();
   const attributeSources = new WeakMap();
-  const fontBaselines = new WeakMap();
+  const typedElements = new WeakSet();
   const nativeTitleSources = new WeakMap();
   let activeRoute = 'home';
-  let requestSequence = 0;
   let assistantShowRequestCount = 0;
   let lastAssistantShowReceipt = null;
   let lastAssistantShowError = null;
   let startupRestoredRoute = null;
   let startupRestoreEnabled = false;
   let rememberedPanelState = {};
-  /* GLOBAL_ACCOUNTING_DRAWER_V1 */
+  // The sidebar and the bottom (accounting) panel are one setting for the whole window, kept here across routes.
   let globalBottomOpen = false, globalBottomSize = 346, bottomInitialized = false;
   let globalSidebarOpen = true, sidebarInitialized = false;
   const applyGlobalSidebar = (route) => {
@@ -293,7 +183,10 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
       }
       const source = sources[name];
       if (!source) return;
-      if(current !== source && !['en-US','ja-JP'].some(lang=>translatedAttribute(source,lang)===current)) { delete sources[name]; return; }
+      if(current !== source && !['en-US','ja-JP'].some(lang=>translatedAttribute(source,lang)===current)) {
+        delete sources[name];
+        return;
+      }
       const desired = translatedAttribute(source, language);
       if (current !== desired) element.setAttribute(name, desired);
     });
@@ -342,41 +235,42 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     if(element.closest('p,blockquote,li,.memo-message-body,[class*="-answer"],[class*="-markdown"]'))return 'body';
     return 'control';
   };
+  // Every element that shows text gets its type role in data-memo-type; typography.css gives each role its
+  // typeface and its size times --desktop-font-factor, which this sets on the body.
   const applyFontScale = (percent, rootNode = document.body) => {
     const scale = Math.min(2, Math.max(0.8, Number(percent) / 100 || 1));
     const scaleLabel=String(Math.round(scale*100)),factor=String(scale);
     if(document.body.dataset.desktopFontScale!==scaleLabel)document.body.dataset.desktopFontScale=scaleLabel;
     if(document.body.style.getPropertyValue('--desktop-font-factor')!==factor)document.body.style.setProperty('--desktop-font-factor',factor);
-    const sizes={page:26,section:16,body:16,empty:16,control:16,value:16,small:14,code:16};
     const elements=rootNode instanceof Element?[rootNode,...rootNode.querySelectorAll('*')]:[...document.querySelectorAll('body *')];
-    // Read computed baselines before any element font write, avoiding repeated forced layout.
-    const fontWrites=[];
+    // Decide every role before writing any, so the browser recomputes styles once.
+    const writes=[];
     elements.forEach(element=>{
       if(!(element instanceof HTMLElement))return;
       if(element.closest('.desktop-toolbar-icon,.desktop-sr-only,.sr-only')){
-        const previous=fontBaselines.get(element);
-        if(previous)fontWrites.push(()=>{element.style.setProperty('font-size',previous.inline||'',previous.priority||'');delete element.dataset.memoType;fontBaselines.delete(element);});
+        if(typedElements.has(element))writes.push(()=>{
+          delete element.dataset.memoType;
+          typedElements.delete(element);
+        });
         return;
       }
       if(element.matches('script,style')||element.closest('svg')||element.matches('[aria-hidden="true"]:not(select):not(.desktop-settings-code-highlight):not(.desktop-settings-code-line-numbers)'))return;
       const text=[...element.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent.trim()).join('');
       if(!text&&!element.matches('input,textarea,select,option,.desktop-settings-code-highlight,.desktop-settings-code-line-numbers'))return;
       if(text&&!/[\p{L}\p{N}]/u.test(text)&&!element.matches('input,textarea,.desktop-settings-code-highlight,.desktop-settings-code-line-numbers'))return;
-      let baseline=fontBaselines.get(element);
-      if(!baseline){
+      if(!typedElements.has(element)){
+        // Text drawn smaller than 6px or larger than 96px is decoration; it keeps its own size.
         const computed=parseFloat(getComputedStyle(element).fontSize);
         if(!Number.isFinite(computed)||computed<6||computed>96)return;
-        baseline={inline:element.style.fontSize,priority:element.style.getPropertyPriority('font-size')};fontBaselines.set(element,baseline);
       }
       // Re-evaluate after a node is moved or re-used by a component renderer.
       const role=typeRole(element);
-      const size=`${Math.round(sizes[role]*scale*100)/100}px`;
-      fontWrites.push(()=>{
+      writes.push(()=>{
+        typedElements.add(element);
         if(element.dataset.memoType!==role)element.dataset.memoType=role;
-        if(element.style.getPropertyValue('font-size')!==size||element.style.getPropertyPriority('font-size')!=='important')element.style.setProperty('font-size',size,'important');
       });
     });
-    fontWrites.forEach(write=>write());
+    writes.forEach(write=>write());
   };
 
   const applyTooltipPreference = (enabled) => {
@@ -385,7 +279,10 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     document.querySelectorAll('[title],[aria-label][class*="button"],.desktop-settings-category').forEach((element) => {
       // Custom tooltips own these elements. Do not recreate a title which
       // the panel's native-title observer immediately removes.
-      if (element.matches('[data-desktop-no-tooltip],[data-desktop-tip]')) { element.removeAttribute('title'); return; }
+      if (element.matches('[data-desktop-no-tooltip],[data-desktop-tip]')) {
+        element.removeAttribute('title');
+        return;
+      }
       const sources=attributeSources.get(element)||{};
       if(!nativeTitleSources.has(element)&&element.hasAttribute('title'))nativeTitleSources.set(element,sources.title||element.getAttribute('title'));
       const source=element.getAttribute('data-desktop-dynamic-title') ?? nativeTitleSources.get(element);
@@ -658,22 +555,19 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     const layout = state.root.querySelector('.desktop-workspace');
     if (layout) layout.style.transition = 'none';
     applyRememberedPanelState(normalized);
-    if (layout) { void layout.offsetWidth; layout.style.removeProperty('transition'); }
+    if (layout) {
+      void layout.offsetWidth;
+      layout.style.removeProperty('transition');
+    }
     document.title = `Memorive · ${state.descriptor.label}`;
     document.body.dataset.desktopActiveRoute = normalized;
     window.dispatchEvent(new CustomEvent('desktop-integrated-route', { detail: { route: normalized } }));
     return inspectRoute(normalized);
   };
 
+  // The desktop service keeps the route, so the window can reopen there (shared/product-bridge.js).
   const persist = (route, source = 'integrated-navigation') => {
-    if (!window.pywebview || !window.pywebview.api || typeof window.pywebview.api.dispatch !== 'function') return;
-    const request = {
-      event_type: 'navigation.select',
-      payload: { route },
-      request_id: `desktop-ui-integrated-${Date.now()}-${++requestSequence}`,
-      source,
-    };
-    Promise.resolve(window.pywebview.api.dispatch(request)).catch(() => undefined);
+    window.__Desktop_PRODUCT_BRIDGE__.dispatch('navigation.select', { route }, source).catch(() => undefined);
   };
 
   const runDesktopAssistantAction = (actionId = 'SHOW_DESKTOP_ASSISTANT') => {

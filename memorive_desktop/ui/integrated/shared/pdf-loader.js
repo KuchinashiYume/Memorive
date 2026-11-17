@@ -8,11 +8,19 @@
     if(pending)return pending;
     pending=new Promise((resolve,reject)=>{
       const script=document.createElement('script');
-      script.src='pdf_runtime.js';script.async=true;
-      const fail=()=>{script.remove();pending=null;reject(new Error('Desktop_PDFJS_RUNTIME_UNAVAILABLE'));};
+      script.src='pdf_runtime.js';
+      script.async=true;
+      const fail=()=>{
+        script.remove();
+        pending=null;
+        reject(new Error('Desktop_PDFJS_RUNTIME_UNAVAILABLE'));
+      };
       script.onerror=fail;
       script.onload=()=>{
-        if(!globalThis.pdfjsLib?.getDocument||!globalThis.pdfjsWorker?.WorkerMessageHandler){fail();return;}
+        if(!globalThis.pdfjsLib?.getDocument||!globalThis.pdfjsWorker?.WorkerMessageHandler){
+          fail();
+          return;
+        }
         resolve(globalThis.pdfjsLib);
       };
       document.head.append(script);

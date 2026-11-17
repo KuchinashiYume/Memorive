@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from page_sources import settings_scripts
 import json
 import sys
 import threading
@@ -92,7 +93,7 @@ def test_inbox_refinement_queue_is_visible_and_idempotent(tmp_path: Path) -> Non
 
 
 def test_settings_workflow_publishes_recognized_local_models_first() -> None:
-    bridge = (ATTEMPT_ROOT / "product" / "web" / "settings_bridge.js").read_text(encoding="utf-8")
+    bridge = settings_scripts()
 
     assert "return [...localOptions, ...apiOptions, ...cliOptions];" in bridge
     assert "model: localModelDisplayName(model)" in bridge

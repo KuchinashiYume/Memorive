@@ -2,7 +2,7 @@
   'use strict';
   const root = document.getElementById('desktop-inbox-preview');
   if (!root) return;
-  const preview = window.DesktopPreview;
+  const preview = window.DesktopPreview_inbox;
   const METHODS = Object.freeze([
     'inbox.get_contract', 'inbox.import_paths', 'inbox.get_auto_run',
     'inbox.set_auto_run', 'inbox.retry_import', 'inbox.recover',
@@ -12,7 +12,6 @@
     'inbox.effect_metrics', 'sessions.refinement_cancel',
     'current_task.begin_cancel', 'current_task.confirm_cancel'
   ]);
-  const allowed = new Set(METHODS);
   const released = new WeakSet();
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -88,7 +87,6 @@
   }, true);
 
   const call = async (method, params = {}) => {
-    if (!allowed.has(method)) throw new Error('INBOX_METHOD_NOT_ALLOWLISTED:' + method);
     if (!nativeReady()) throw new Error('INBOX_NATIVE_TRANSPORT_NOT_READY');
     sequence += 1;
     const receipt = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
@@ -251,7 +249,9 @@
     const check = card.querySelector('.desktop-inbox-check');
     if (strong) strong.textContent = row.name;
     if (small) small.textContent = meta;
-    if (status) { if(window.__MEMORIVE_REVIEW_UI__)window.__MEMORIVE_REVIEW_UI__.renderInboxState(status,row);else status.textContent=state; }
+    if (status) {
+      if(window.__MEMORIVE_REVIEW_UI__)window.__MEMORIVE_REVIEW_UI__.renderInboxState(status,row);else status.textContent=state;
+    }
     if (star) {
       star.disabled = row.state === 'PROCESSING';
       star.setAttribute('aria-pressed', String(Boolean(row.starred)));

@@ -1,4 +1,4 @@
-/* E2 additions inside the adopted shell; no second application or demo data. */
+/* Paper review (data and logic checks): its report dialog and its parts on the inbox and current-task pages. */
 (() => {
   const q=s=>document.querySelector(s);
   const copy={
@@ -46,38 +46,75 @@
     if(!window.pywebview?.api?.call)throw Error('NATIVE_TRANSPORT_REQUIRED');
     return window.pywebview.api.call(method,params);
   };
-  const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;};
+  const el=(tag,text,cls)=>{
+    const e=document.createElement(tag);
+    if(text!=null)e.textContent=text;
+    if(cls)e.className=cls;
+    return e;
+  };
   let itemId=null,selectionSequence=0;
   const inbox=async id=>{
-    const seq=++selectionSequence;const box=q('#inbox-logic-analysis-option');if(!box)return;
-    box.hidden=true;if(!id||!window.pywebview?.api?.call)return;
-    const item=await call('inbox.item_detail',{item_id:id});if(seq!==selectionSequence)return;
-    itemId=id;box.hidden=item.item_kind==='SESSION_REFINEMENT';
-    const input=q('#inbox-logic-analysis');input.checked=Boolean(item.logic_review_selected);input.disabled=item.review_choice_frozen===true;
+    const seq=++selectionSequence;
+    const box=q('#inbox-logic-analysis-option');
+    if(!box)return;
+    box.hidden=true;
+    if(!id||!window.pywebview?.api?.call)return;
+    const item=await call('inbox.item_detail',{item_id:id});
+    if(seq!==selectionSequence)return;
+    itemId=id;
+    box.hidden=item.item_kind==='SESSION_REFINEMENT';
+    const input=q('#inbox-logic-analysis');
+    input.checked=Boolean(item.logic_review_selected);
+    input.disabled=item.review_choice_frozen===true;
     q('#inbox-logic-analysis-help').textContent=t(input.disabled?'已随任务冻结；更改只适用于新任务。':'原文就绪后排队，使用已配置的云端模型。');
-    let rules=q('#paper-review-binding-button');if(!rules){rules=el('button',t('数值核查规则'),'soft-button');rules.id='paper-review-binding-button';rules.type='button';box.append(rules);}
+    let rules=q('#paper-review-binding-button');
+    if(!rules){
+      rules=el('button',t('数值核查规则'),'soft-button');
+      rules.id='paper-review-binding-button';
+      rules.type='button';
+      box.append(rules);
+    }
     rules.textContent=t('数值核查规则')+' · '+(item.data_review_bindings||[]).length;
     rules.onclick=()=>openBindings(id,item.data_review_bindings||[],item.review_choice_frozen===true);
   };
   q('#inbox-logic-analysis')?.addEventListener('change',async e=>{
-    const selected=e.target.checked,id=itemId;e.target.disabled=true;
-    try{await call('inbox.set_logic_review',{item_id:id,selected});await inbox(id);}
-    catch(error){e.target.checked=!selected;q('#inbox-logic-analysis-help').textContent=String(error.message);await inbox(id);}
+    const selected=e.target.checked,id=itemId;
+    e.target.disabled=true;
+    try{
+      await call('inbox.set_logic_review',{item_id:id,selected});
+      await inbox(id);
+    }
+    catch(error){
+      e.target.checked=!selected;
+      q('#inbox-logic-analysis-help').textContent=String(error.message);
+      await inbox(id);
+    }
   });
   document.addEventListener('click',e=>{
     const card=e.target.closest('.desktop-inbox-card[data-item-id]');
     if(card)void inbox(card.dataset.itemId).catch(error=>{q('#inbox-logic-analysis-help').textContent=error.message;});
-    if(e.target.closest('#inbox-close-detail')){selectionSequence++;q('#inbox-logic-analysis-option').hidden=true;}
+    if(e.target.closest('#inbox-close-detail')){
+      selectionSequence++;
+      q('#inbox-logic-analysis-option').hidden=true;
+    }
   });
   const tones={GREEN:'green',YELLOW:'yellow',RED:'red'};
   const badgeReports=new WeakMap();
   const riskText=report=>t(report.stale?'历史结果：输入或任务版本已变化':report.color==='RED'?'存在重要疑点，建议优先复核':report.color==='YELLOW'?'存在需要澄清的疑点':report.color==='GREEN'?'已检查范围未见重要疑点':'核查受限，无风险色结论');
   const reportButton=report=>{
-    const button=el('button',null,'text-button paper-review-report-risk');button.type='button';button.dataset.reviewReportId=report.report_id;
+    const button=el('button',null,'text-button paper-review-report-risk');
+    button.type='button';
+    button.dataset.reviewReportId=report.report_id;
     badgeReports.set(button,report);
-    const dot=el('span',null,'status-dot '+(tones[report.color]||'neutral'));dot.setAttribute('aria-hidden','true');
-    button.append(dot,document.createTextNode(riskText(report)));button.setAttribute('aria-label',riskText(report));
-    button.addEventListener('click',()=>void openReport(report.report_id).catch(error=>{button.title=error.message;button.textContent=error.message;}));return button;
+    const dot=el('span',null,'status-dot '+(tones[report.color]||'neutral'));
+    dot.setAttribute('aria-hidden','true');
+    button.append(dot,document.createTextNode(riskText(report)));
+    button.setAttribute('aria-label',riskText(report));
+    button.addEventListener('click',()=>void openReport(report.report_id).catch(error=>{
+      button.title=error.message;
+      button.textContent=error.message;
+    }));
+    return button;
   };
   const ruleNames={percentage:'比例与计数',sum:'分项合计',sd_se:'SD / SE 关系',cross:'同一量交叉核对',grid_mean:'离散量均值',test_p:'统计量与 p 值',raw_summary:'原始数值摘要'};
   const inputNames={count:'计数',denominator:'分母',percent:'百分比',parts:'分项数值',total:'合计',sd:'SD',se:'SE',n:'n',left:'左侧数值',right:'右侧数值',mean:'均值',statistic:'统计量',p:'p 值',values:'原始数值'};
@@ -91,28 +128,168 @@
     '四舍五入':['Nearest','最近接丸め'],'向零截断':['Toward zero','ゼロ方向に切り捨て'],'独立、等权均值':['Independent, equally weighted mean','独立・等加重の平均'],'正态':['Normal','正規'],'卡方':['Chi-square','カイ二乗'],'双侧':['Two-sided','両側'],'上尾':['Upper','上側'],'下尾':['Lower','下側'],'未校正':['Unadjusted','補正なし'],'无缺失':['No missing values','欠測なし'],'样本':['Sample','標本'],'总体':['Population','母集団']
   });
   function openBindings(id,saved,frozen){
-    const d=el('dialog',null,'paper-review-dialog');(q('#desktop-inbox-preview')||document.body).append(d);const head=el('div',null,'toolbar-group'),close=el('button',t('关闭'),'soft-button');close.type='button';close.onclick=()=>d.close();head.append(el('h3',t('数值核查规则')),close);d.append(head,el('p',t('只填写有明确依据的参数。未填写的项目保留为信息不足。')));
+    const d=el('dialog',null,'paper-review-dialog');
+    (q('#desktop-inbox-preview')||document.body).append(d);
+    const head=el('div',null,'toolbar-group'),close=el('button',t('关闭'),'soft-button');
+    close.type='button';
+    close.onclick=()=>d.close();
+    head.append(el('h3',t('数值核查规则')),close);
+    d.append(head,el('p',t('只填写有明确依据的参数。未填写的项目保留为信息不足。')));
     d.append(el('p',t('自动识别明确格式并提供数值摘要；规则表单用于补充条件。Card 缺口会按原文锚点自动关联，可选定位仅用于补充。')));
-    const form=el('form'),list=el('div');d.append(form);form.append(list);const entries=[];
-    const field=(parent,title,control)=>{const label=el('label',t(title),'paper-review-field');control.setAttribute('aria-label',t(title));control.disabled=frozen;label.append(control);parent.append(label);return control;};
+    const form=el('form'),list=el('div');
+    d.append(form);
+    form.append(list);
+    const entries=[];
+    const field=(parent,title,control)=>{
+      const label=el('label',t(title),'paper-review-field');
+      control.setAttribute('aria-label',t(title));
+      control.disabled=frozen;
+      label.append(control);
+      parent.append(label);
+      return control;
+    };
     function add(rule={}){
-      const section=el('fieldset');list.append(section);const type=el('select',null,'select');for(const [key,name] of Object.entries(ruleNames)){const o=el('option',t(name));o.value=key;type.append(o);}type.value=rule.type||'percentage';field(section,'规则',type);
-      const body=el('div'),basis=el('textarea'),remove=el('button',t('移除'),'soft-button');basis.value=rule.binding_source?.note||'';basis.required=true;basis.maxLength=2000;section.append(body);field(section,'适用条件依据',basis);remove.type='button';remove.disabled=frozen;section.append(remove);
-      const entry={section,type,basis,rule,fields:{},parameters:{}};entries.push(entry);remove.onclick=()=>{section.remove();entries.splice(entries.indexOf(entry),1);};
-      function render(){body.replaceChildren();entry.fields={};entry.parameters={};const definition=spec[type.value];entry.gaps={};
-        for(const key of definition[0]){const group=el('fieldset');group.append(el('legend',t(inputNames[key]||key)));body.append(group);const v=el('textarea'),quote=el('textarea'),existing=rule.inputs?.[key];const array=Array.isArray(existing)?existing:existing?[existing]:[];v.value=array.map(a=>a.raw||'').join('\n');quote.value=array[0]?.quote||'';v.maxLength=10000;quote.maxLength=4000;field(group,'原样数值',v);field(group,'原文片段',quote);if(['parts','values'].includes(key))group.append(el('small',t('多个数值每行一个；片段必须能唯一定位。')));entry.fields[key]={v,quote,existing};
-          if(!['parts','values'].includes(key)){const old=(rule.card_gap_bindings||[]).find(g=>g.parameter===key)||{},details=el('details');details.append(el('summary',t('Card 缺项辅助定位')),el('p',t('只在对应 Card 项被删去且本规则缺少此参数时回查；先查原文锚点，再查指定 PDF 页，不改写 Card。')));group.append(details);
-            const location=el('input'),label=el('input'),pages=el('input');location.value=old.card_location||'';label.value=old.label||'';pages.value=(old.pages||[]).join(', ');location.maxLength=300;label.maxLength=80;pages.maxLength=30;
-            field(details,'Card 字段位置',location);field(details,'原文数值标签',label);field(details,'PDF 页码（最多两页）',pages);entry.gaps[key]={old,location,label,pages};}
+      const section=el('fieldset');
+      list.append(section);
+      const type=el('select',null,'select');
+      for(const [key,name] of Object.entries(ruleNames)){
+        const o=el('option',t(name));
+        o.value=key;
+        type.append(o);
+      }
+      type.value=rule.type||'percentage';
+      field(section,'规则',type);
+      const body=el('div'),basis=el('textarea'),remove=el('button',t('移除'),'soft-button');
+      basis.value=rule.binding_source?.note||'';
+      basis.required=true;
+      basis.maxLength=2000;
+      section.append(body);
+      field(section,'适用条件依据',basis);
+      remove.type='button';
+      remove.disabled=frozen;
+      section.append(remove);
+      const entry={section,type,basis,rule,fields:{},parameters:{}};
+      entries.push(entry);
+      remove.onclick=()=>{
+        section.remove();
+        entries.splice(entries.indexOf(entry),1);
+      };
+      function render(){
+        body.replaceChildren();
+        entry.fields={};
+        entry.parameters={};
+        const definition=spec[type.value];
+        entry.gaps={};
+        for(const key of definition[0]){
+          const group=el('fieldset');
+          group.append(el('legend',t(inputNames[key]||key)));
+          body.append(group);
+          const v=el('textarea'),quote=el('textarea'),existing=rule.inputs?.[key];
+          const array=Array.isArray(existing)?existing:existing?[existing]:[];
+          v.value=array.map(a=>a.raw||'').join('\n');
+          quote.value=array[0]?.quote||'';
+          v.maxLength=10000;
+          quote.maxLength=4000;
+          field(group,'原样数值',v);
+          field(group,'原文片段',quote);
+          if(['parts','values'].includes(key))group.append(el('small',t('多个数值每行一个；片段必须能唯一定位。')));
+          entry.fields[key]={v,quote,existing};
+          if(!['parts','values'].includes(key)){
+            const old=(rule.card_gap_bindings||[]).find(g=>g.parameter===key)||{},details=el('details');
+            details.append(el('summary',t('Card 缺项辅助定位')),el('p',t('只在对应 Card 项被删去且本规则缺少此参数时回查；先查原文锚点，再查指定 PDF 页，不改写 Card。')));
+            group.append(details);
+            const location=el('input'),label=el('input'),pages=el('input');
+            location.value=old.card_location||'';
+            label.value=old.label||'';
+            pages.value=(old.pages||[]).join(', ');
+            location.maxLength=300;
+            label.maxLength=80;
+            pages.maxLength=30;
+            field(details,'Card 字段位置',location);
+            field(details,'原文数值标签',label);
+            field(details,'PDF 页码（最多两页）',pages);
+            entry.gaps[key]={old,location,label,pages};
+          }
         }
-        for(const key of definition[1]){const boolean=['unweighted_count','mutually_exclusive','exhaustive','same_quantity','equal_weights'].includes(key),options=boolean?[[true,'是'],[false,'否']]:choices[key];const c=el(options?'select':'input',null,options?'select':'');if(options){const unknown=el('option',t('未指定'));unknown.value='';c.append(unknown);for(const [v,name] of options){const o=el('option',t(name));o.value=String(v);c.append(o);}}else{c.type='text';c.maxLength=100;}c.value=rule.parameters?.[key]===undefined?'':String(rule.parameters[key]);field(body,paramNames[key]||key,c);entry.parameters[key]={c,boolean};}
-      }type.onchange=()=>{rule={};entry.rule={};render();};render();
+        for(const key of definition[1]){
+          const boolean=['unweighted_count','mutually_exclusive','exhaustive','same_quantity','equal_weights'].includes(key),
+            options=boolean?[[true,'是'],[false,'否']]:choices[key];
+          const c=el(options?'select':'input',null,options?'select':'');
+          if(options){
+            const unknown=el('option',t('未指定'));
+            unknown.value='';
+            c.append(unknown);
+            for(const [v,name] of options){
+              const o=el('option',t(name));
+              o.value=String(v);
+              c.append(o);
+            }
+          }else{
+            c.type='text';
+            c.maxLength=100;
+          }
+          c.value=rule.parameters?.[key]===undefined?'':String(rule.parameters[key]);
+          field(body,paramNames[key]||key,c);
+          entry.parameters[key]={c,boolean};
+        }
+      }
+      type.onchange=()=>{
+        rule={};
+        entry.rule={};
+        render();
+      };
+      render();
     }
-    for(const r of saved)add(r);const addButton=el('button',t('添加规则'),'soft-button');addButton.type='button';addButton.disabled=frozen;addButton.onclick=()=>add();const save=el('button',t('保存规则'),'primary-button');save.type='submit';save.disabled=frozen;const status=el('p');status.setAttribute('role','status');form.append(addButton,save,status);
-    form.onsubmit=async event=>{event.preventDefault();save.disabled=true;try{const bindings=entries.map(e=>{const inputs={},parameters={};for(const [k,x] of Object.entries(e.fields)){const values=x.v.value.split('\n').map(v=>v.trim()).filter(Boolean);if(values.length){if(!['parts','values'].includes(k)&&values.length!==1)throw Error(t('每个参数只允许一个数值。'));if(!x.quote.value.trim())throw Error(t('数值必须附上原文片段。'));
-        const prior=Array.isArray(x.existing)?x.existing:[x.existing];const selectors=values.map((raw,i)=>prior[i]?.raw===raw&&prior[i]?.quote===x.quote.value.trim()?prior[i]:{raw,quote:x.quote.value.trim()});inputs[k]=['parts','values'].includes(k)?selectors:selectors[0];}else if(typeof x.existing==='string')inputs[k]=x.existing;}for(const [k,x] of Object.entries(e.parameters))if(x.c.value!=='')parameters[k]=x.boolean?x.c.value==='true':x.c.value;const gaps=[];for(const [parameter,g] of Object.entries(e.gaps)){const location=g.location.value.trim(),label=g.label.value.trim(),pageText=g.pages.value.trim();if(!location&&!label&&!pageText)continue;if(!location||!label)throw Error(t('请同时填写 Card 位置和数值标签。'));const pages=pageText?pageText.split(/[,，\s]+/).map(Number):[];if(pages.length>2||pages.some(n=>!Number.isSafeInteger(n)||n<1)||new Set(pages).size!==pages.length)throw Error(t('页码须为一至两个正整数。'));gaps.push({...g.old,parameter,card_location:location,label,pages});}
-        return {...e.rule,card_gap_bindings:gaps,rule_id:e.rule.rule_id||'user-'+crypto.randomUUID(),type:e.type.value,inputs,parameters,binding_source:{kind:'EXPLICIT_USER_MAPPING',note:e.basis.value.trim()}};});await call('inbox.set_data_bindings',{item_id:id,bindings});d.close();await inbox(id);}catch(error){status.textContent=error.message;save.disabled=false;}};
-    d.addEventListener('close',()=>d.remove(),{once:true});d.showModal();close.focus();
+    for(const r of saved)add(r);
+    const addButton=el('button',t('添加规则'),'soft-button');
+    addButton.type='button';
+    addButton.disabled=frozen;
+    addButton.onclick=()=>add();
+    const save=el('button',t('保存规则'),'primary-button');
+    save.type='submit';
+    save.disabled=frozen;
+    const status=el('p');
+    status.setAttribute('role','status');
+    form.append(addButton,save,status);
+    form.onsubmit=async event=>{
+      event.preventDefault();
+      save.disabled=true;
+      try{
+        const bindings=entries.map(e=>{
+          const inputs={},parameters={};
+          for(const [k,x] of Object.entries(e.fields)){
+            const values=x.v.value.split('\n').map(v=>v.trim()).filter(Boolean);
+            if(values.length){
+              if(!['parts','values'].includes(k)&&values.length!==1)throw Error(t('每个参数只允许一个数值。'));
+              if(!x.quote.value.trim())throw Error(t('数值必须附上原文片段。'));
+        const prior=Array.isArray(x.existing)?x.existing:[x.existing];
+              const selectors=values.map((raw,i)=>prior[i]?.raw===raw&&prior[i]?.quote===x.quote.value.trim()?prior[i]:{raw,quote:x.quote.value.trim()});
+              inputs[k]=['parts','values'].includes(k)?selectors:selectors[0];
+            }else if(typeof x.existing==='string')inputs[k]=x.existing;
+          }
+          for(const [k,x] of Object.entries(e.parameters))if(x.c.value!=='')parameters[k]=x.boolean?x.c.value==='true':x.c.value;
+          const gaps=[];
+          for(const [parameter,g] of Object.entries(e.gaps)){
+            const location=g.location.value.trim(),label=g.label.value.trim(),pageText=g.pages.value.trim();
+            if(!location&&!label&&!pageText)continue;
+            if(!location||!label)throw Error(t('请同时填写 Card 位置和数值标签。'));
+            const pages=pageText?pageText.split(/[,，\s]+/).map(Number):[];
+            if(pages.length>2||pages.some(n=>!Number.isSafeInteger(n)||n<1)||new Set(pages).size!==pages.length)throw Error(t('页码须为一至两个正整数。'));
+            gaps.push({...g.old,parameter,card_location:location,label,pages});
+          }
+        return {...e.rule,card_gap_bindings:gaps,rule_id:e.rule.rule_id||'user-'+crypto.randomUUID(),type:e.type.value,inputs,parameters,binding_source:{kind:'EXPLICIT_USER_MAPPING',note:e.basis.value.trim()}};
+        });
+        await call('inbox.set_data_bindings',{item_id:id,bindings});
+        d.close();
+        await inbox(id);
+      }catch(error){
+          status.textContent=error.message;
+          save.disabled=false;
+        }
+    };
+    d.addEventListener('close',()=>d.remove(),{once:true});
+    d.showModal();
+    close.focus();
   }
   let dialog;
   Object.assign(copy,{'核查报告':['Review report','確認レポート'],
@@ -122,108 +299,311 @@
   async function openReport(id){
     const library=q('#desktop-library-preview');
     if(!library||library.closest('.desktop-route-surface')?.hidden)return;
-    const data=await call('review.report',{report_id:id});const report=data.report;
-    if(!dialog){dialog=el('section',null,'paper-review-panel');dialog.setAttribute('aria-label',t('核查报告'));dialog.tabIndex=-1;}
-    const host=library.querySelector('#desktop-right-panel .inspector-inner');if(!host)return;
+    const data=await call('review.report',{report_id:id});
+    const report=data.report;
+    if(!dialog){
+      dialog=el('section',null,'paper-review-panel');
+      dialog.setAttribute('aria-label',t('核查报告'));
+      dialog.tabIndex=-1;
+    }
+    const host=library.querySelector('#desktop-right-panel .inspector-inner');
+    if(!host)return;
     if(dialog.parentElement!==host)host.append(dialog);
-    dialog.hidden=false;dialog.dataset.reportId=id;
-    dialog.replaceChildren();const head=el('div',null,'toolbar-group');const close=el('button',t('关闭'),'soft-button');close.type='button';close.onclick=()=>{dialog.hidden=true;library.querySelector('.paper-review-report-risk')?.focus();};
-    head.append(el('h3',t(report.kind==='LOGIC'?'逻辑分析':'数据分析')),close);dialog.append(head,el('p',riskText({...report,...data.source_status})),el('p',t('机器报告保留不变，人工意见另行记录。')));
-    const body=el('div',null,'paper-review-source-body');body.setAttribute('translate','no');dialog.append(body);
+    dialog.hidden=false;
+    dialog.dataset.reportId=id;
+    dialog.replaceChildren();
+    const head=el('div',null,'toolbar-group');
+    const close=el('button',t('关闭'),'soft-button');
+    close.type='button';
+    close.onclick=()=>{
+      dialog.hidden=true;
+      library.querySelector('.paper-review-report-risk')?.focus();
+    };
+    head.append(el('h3',t(report.kind==='LOGIC'?'逻辑分析':'数据分析')),close);
+    dialog.append(head,el('p',riskText({...report,...data.source_status})),el('p',t('机器报告保留不变，人工意见另行记录。')));
+    const body=el('div',null,'paper-review-source-body');
+    body.setAttribute('translate','no');
+    dialog.append(body);
     const sourceLocale=report.language_context?.template_locale||report.language_context?.effective_output_locale||'en-US';
     const rt=s=>copy[s]?.[sourceLocale==='ja-JP'?1:sourceLocale==='en-US'?0:2]||s;
-    const scope=report.scope||{},summary=el('dl',null,'paper-review-facts');body.append(el('h4',rt('已检查范围')),summary);
+    const scope=report.scope||{},summary=el('dl',null,'paper-review-facts');
+    body.append(el('h4',rt('已检查范围')),summary);
     const fact=(title,value)=>{if(value!=null){summary.append(el('dt',rt(title)),el('dd',String(value)));}};
-    fact('原文行数',scope.processed_lines);fact('数值对象',scope.numeric_objects);fact('已完成核查',scope.completed_checks==null?null:scope.completed_checks+' / '+scope.planned_checks);
+    fact('原文行数',scope.processed_lines);
+    fact('数值对象',scope.numeric_objects);
+    fact('已完成核查',scope.completed_checks==null?null:scope.completed_checks+' / '+scope.planned_checks);
     fact('缺少参数',scope.missing_parameter_count);
-    if(report.descriptions){fact('最小值',report.descriptions.minimum);fact('最大值',report.descriptions.maximum);body.append(el('p',rt('不同对象的数值描述，不代表同一研究样本。')));}
-    if(report.numeric_blocks){const block=el('details');const columns=report.numeric_blocks.table_columns||[];block.append(el('summary',rt('数值列摘要')+' · '+columns.length));for(const c of columns)block.append(el('p',c.header_literal+' · L'+c.header_line+' · '+c.record_count+' · '+c.minimum+' — '+c.maximum));block.append(el('p',rt('字面加减对')+' · '+(report.numeric_blocks.plus_minus_pairs||[]).length),el('p',rt('不同对象的数值描述，不代表同一研究样本。')));body.append(block);}
-    if(scope.global_relationship_check){const global=scope.global_relationship_check;body.append(el('h4',rt('跨章节关系')),el('p',rt(global.status==='FULL_SOURCE_CHECKED'?'全文原文已联合检查':global.status==='CHECKED'?'跨段原文关系已检查':'全局关系检查受限')));for(const relation of global.checks||[]){const d=el('details');d.append(el('summary',relation.relation),el('p',relation.reasoning));for(const c of relation.citations||[])d.append(el('blockquote','L'+c.line+' · '+c.quote,'paper-review-source'));body.append(d);}}
+    if(report.descriptions){
+      fact('最小值',report.descriptions.minimum);
+      fact('最大值',report.descriptions.maximum);
+      body.append(el('p',rt('不同对象的数值描述，不代表同一研究样本。')));
+    }
+    if(report.numeric_blocks){
+      const block=el('details');
+      const columns=report.numeric_blocks.table_columns||[];
+      block.append(el('summary',rt('数值列摘要')+' · '+columns.length));
+      for(const c of columns)block.append(el('p',c.header_literal+' · L'+c.header_line+' · '+c.record_count+' · '+c.minimum+' — '+c.maximum));
+      block.append(el('p',rt('字面加减对')+' · '+(report.numeric_blocks.plus_minus_pairs||[]).length),el('p',rt('不同对象的数值描述，不代表同一研究样本。')));
+      body.append(block);
+    }
+    if(scope.global_relationship_check){
+      const global=scope.global_relationship_check;
+      body.append(el('h4',rt('跨章节关系')),el('p',rt(global.status==='FULL_SOURCE_CHECKED'?'全文原文已联合检查':global.status==='CHECKED'?'跨段原文关系已检查':'全局关系检查受限')));
+      for(const relation of global.checks||[]){
+        const d=el('details');
+        d.append(el('summary',relation.relation),el('p',relation.reasoning));
+        for(const c of relation.citations||[])d.append(el('blockquote','L'+c.line+' · '+c.quote,'paper-review-source'));
+        body.append(d);
+      }
+    }
     for(const limitation of scope.limitations||[])body.append(el('p',rt(limitation)));
     if(scope.not_run?.length)body.append(el('h4',rt('未覆盖范围')),el('p',scope.not_run.map(rt).join(' · ')));
     for(const note of report.missing_parameters||[])body.append(el('p',note));
     const statuses={COMPATIBLE:'条件相容',INCONSISTENT:'条件不相容',INSUFFICIENT_INFORMATION:'信息不足',INPUT_ERROR:'输入问题',NOT_APPLICABLE:'不适用'};
     if(report.checks?.length)body.append(el('h4',rt('核查结果')));
     const records=new Map([...(report.records||[]),...(report.supplemental_records||[])].map(r=>[r.record_id,r]));
-    for(const check of report.checks||[]){const d=el('details',null,'paper-review-check');d.open=check.status!=='COMPATIBLE';d.append(el('summary',rt(ruleNames[check.type]||check.type)+' · '+rt(statuses[check.status]||check.status)));
+    for(const check of report.checks||[]){
+      const d=el('details',null,'paper-review-check');
+      d.open=check.status!=='COMPATIBLE';
+      d.append(el('summary',rt(ruleNames[check.type]||check.type)+' · '+rt(statuses[check.status]||check.status)));
       if(check.reason)d.append(el('p',check.reason));
       if(check.calculation?.formula)d.append(el('p',rt('公式')+'：'+check.calculation.formula));
       for(const key of ['expected','expected_interval','reported_interval'])if(check.calculation?.[key]!=null)d.append(el('p',rt(key==='reported_interval'?'报告区间':'期待区间')+'：'+[].concat(check.calculation[key]).join(' — ')));
       if(check.missing?.length)d.append(el('p',rt('缺少参数')+'：'+check.missing.map(k=>rt(inputNames[k.split('.')[1]]||paramNames[k.split('.')[1]]||k)).join('、')));
       if(check.reason)d.append(el('p',check.reason));
-      for(const id of check.input_ids||[]){const row=records.get(id);if(row)d.append(el('blockquote',row.raw+' · L'+(row.source.line||'?')+'\n'+row.source.quote,'paper-review-source'));}body.append(d);
+      for(const id of check.input_ids||[]){
+        const row=records.get(id);
+        if(row)d.append(el('blockquote',row.raw+' · L'+(row.source.line||'?')+'\n'+row.source.quote,'paper-review-source'));
+      }
+      body.append(d);
     }
-    for(const finding of report.findings||[]){if(!finding.claim)continue;const section=el('section',null,'paper-review-finding');section.append(el('h4',finding.claim),el('p',rt(finding.reasoning)),el('p',rt(finding.alternative_explanation)));if(finding.escalation_limited)section.append(el('p',rt(finding.escalation_limited)));for(const ref of finding.citations||[])section.append(el('blockquote','L'+ref.line+' · '+ref.quote,'paper-review-source'));if(finding.missing_material?.length)section.append(el('p',rt('待补材料')+'：'+finding.missing_material.join('、')));body.append(section);}
-    if(report.records?.length){const disclosure=el('details');disclosure.append(el('summary',rt('数值与原文')+' · '+report.records.length));const list=el('div');const more=el('button',rt('更多数值'),'soft-button');more.type='button';let count=0;const next=()=>{for(const r of report.records.slice(count,count+30))list.append(el('p',r.raw+(r.unit_literal?' '+r.unit_literal:'')+' · L'+r.source.line+' · '+r.source.quote,'paper-review-source'));count+=30;more.hidden=count>=report.records.length;};more.onclick=next;disclosure.append(list,more);disclosure.addEventListener('toggle',()=>{if(disclosure.open&&!count)next();});body.append(disclosure);}
-    if(data.dispositions.length){dialog.append(el('h4',t('人工意见记录')));for(const item of data.dispositions)dialog.append(el('p',t(({EXPLAINED:'已解释',CONFIRMED_REPORT_ISSUE:'确认报告问题',NEEDS_MATERIAL:'待补材料',DEFERRED:'暂缓',REOPENED:'重新打开'})[item.action]||item.action)+' · '+item.reason+'\n'+(item.evidence||''),'paper-review-source'));}
+    for(const finding of report.findings||[]){
+      if(!finding.claim)continue;
+      const section=el('section',null,'paper-review-finding');
+      section.append(el('h4',finding.claim),el('p',rt(finding.reasoning)),el('p',rt(finding.alternative_explanation)));
+      if(finding.escalation_limited)section.append(el('p',rt(finding.escalation_limited)));
+      for(const ref of finding.citations||[])section.append(el('blockquote','L'+ref.line+' · '+ref.quote,'paper-review-source'));
+      if(finding.missing_material?.length)section.append(el('p',rt('待补材料')+'：'+finding.missing_material.join('、')));
+      body.append(section);
+    }
+    if(report.records?.length){
+      const disclosure=el('details');
+      disclosure.append(el('summary',rt('数值与原文')+' · '+report.records.length));
+      const list=el('div');
+      const more=el('button',rt('更多数值'),'soft-button');
+      more.type='button';
+      let count=0;
+      const next=()=>{
+        for(const r of report.records.slice(count,count+30))list.append(el('p',r.raw+(r.unit_literal?' '+r.unit_literal:'')+' · L'+r.source.line+' · '+r.source.quote,'paper-review-source'));
+        count+=30;
+        more.hidden=count>=report.records.length;
+      };
+      more.onclick=next;
+      disclosure.append(list,more);
+      disclosure.addEventListener('toggle',()=>{if(disclosure.open&&!count)next();});
+      body.append(disclosure);
+    }
+    if(data.dispositions.length){
+      dialog.append(el('h4',t('人工意见记录')));
+      for(const item of data.dispositions)dialog.append(el('p',t(({EXPLAINED:'已解释',CONFIRMED_REPORT_ISSUE:'确认报告问题',NEEDS_MATERIAL:'待补材料',DEFERRED:'暂缓',REOPENED:'重新打开'})[item.action]||item.action)+' · '+item.reason+'\n'+(item.evidence||''),'paper-review-source'));
+    }
     if(report.findings?.length){
-      const form=el('form');form.append(el('h4',t('记录人工意见')));const select=el('select',null,'select');select.setAttribute('aria-label',t('核查项目'));
-      for(const f of report.findings){const check=report.checks?.find(c=>c.rule_id===f.rule_id);const option=el('option',f.claim||t(ruleNames[check?.type]||f.rule_id));option.value=f.finding_id;select.append(option);}
-      const action=el('select',null,'select');action.setAttribute('aria-label',t('处理方式'));
-      for(const [value,name] of [['EXPLAINED','已解释'],['CONFIRMED_REPORT_ISSUE','确认报告问题'],['NEEDS_MATERIAL','待补材料'],['DEFERRED','暂缓'],['REOPENED','重新打开']]){const option=el('option',t(name));option.value=value;action.append(option);}
-      const reason=el('textarea');reason.required=true;reason.maxLength=4000;reason.setAttribute('aria-label',t('理由'));reason.placeholder=t('理由');
-      const evidence=el('textarea');evidence.maxLength=8000;evidence.setAttribute('aria-label',t('依据或出处'));evidence.placeholder=t('依据或出处');
-      const save=el('button',t('保存意见'),'primary-button');save.type='submit';const status=el('p');status.setAttribute('role','status');
+      const form=el('form');
+      form.append(el('h4',t('记录人工意见')));
+      const select=el('select',null,'select');
+      select.setAttribute('aria-label',t('核查项目'));
+      for(const f of report.findings){
+        const check=report.checks?.find(c=>c.rule_id===f.rule_id);
+        const option=el('option',f.claim||t(ruleNames[check?.type]||f.rule_id));
+        option.value=f.finding_id;
+        select.append(option);
+      }
+      const action=el('select',null,'select');
+      action.setAttribute('aria-label',t('处理方式'));
+      for(const [value,name] of [['EXPLAINED','已解释'],['CONFIRMED_REPORT_ISSUE','确认报告问题'],['NEEDS_MATERIAL','待补材料'],['DEFERRED','暂缓'],['REOPENED','重新打开']]){
+        const option=el('option',t(name));
+        option.value=value;
+        action.append(option);
+      }
+      const reason=el('textarea');
+      reason.required=true;
+      reason.maxLength=4000;
+      reason.setAttribute('aria-label',t('理由'));
+      reason.placeholder=t('理由');
+      const evidence=el('textarea');
+      evidence.maxLength=8000;
+      evidence.setAttribute('aria-label',t('依据或出处'));
+      evidence.placeholder=t('依据或出处');
+      const save=el('button',t('保存意见'),'primary-button');
+      save.type='submit';
+      const status=el('p');
+      status.setAttribute('role','status');
       form.append(select,action,reason,evidence,save,status);
-      form.onsubmit=async e=>{e.preventDefault();save.disabled=true;try{await call('review.disposition',{report_id:id,finding_id:select.value,action:action.value,reason:reason.value,evidence:evidence.value,operation_id:crypto.randomUUID()});await openReport(id);}catch(error){status.textContent=error.message;save.disabled=false;}};
+      form.onsubmit=async e=>{
+        e.preventDefault();
+        save.disabled=true;
+        try{
+          await call('review.disposition',{report_id:id,finding_id:select.value,action:action.value,reason:reason.value,evidence:evidence.value,operation_id:crypto.randomUUID()});
+          await openReport(id);
+        }catch(error){
+          status.textContent=error.message;
+          save.disabled=false;
+        }
+      };
       dialog.append(form);
     }
-    const technical=el('details');technical.append(el('summary','ID / SHA-256'),el('pre',report.report_id+'\n'+report.report_sha256+'\n'+report.source_sha256,'paper-review-source'));dialog.append(technical);
-    const calculation=el('details');calculation.append(el('summary',t('原始计算记录')));calculation.addEventListener('toggle',()=>{if(calculation.open&&calculation.childElementCount===1)calculation.append(el('pre',JSON.stringify(report,null,2),'paper-review-source'));});dialog.append(calculation);
-    dialog.scrollIntoView({block:'start'});dialog.focus({preventScroll:true});
+    const technical=el('details');
+    technical.append(el('summary','ID / SHA-256'),el('pre',report.report_id+'\n'+report.report_sha256+'\n'+report.source_sha256,'paper-review-source'));
+    dialog.append(technical);
+    const calculation=el('details');
+    calculation.append(el('summary',t('原始计算记录')));
+    calculation.addEventListener('toggle',()=>{
+      if(calculation.open&&calculation.childElementCount===1)calculation.append(el('pre',JSON.stringify(report,null,2),'paper-review-source'));
+    });
+    dialog.append(calculation);
+    dialog.scrollIntoView({block:'start'});
+    dialog.focus({preventScroll:true});
   }
   const taskLabels={FAILED:'失败',UNCERTAIN:'结果待确认',PUBLICATION_FAILED:'报告登记失败',SKIPPED:'已跳过',CANCELLED:'已取消',WAITING_INPUT:'等待原文',QUEUED:'排队',RUNNING:'执行中',SENDING:'执行中',PUBLISHING:'执行中',COMPLETED:'已完成',COMPLETED_LIMITED:'已完成'};
   function renderTask(binding,flowList,options={}){
-    let box=q('#paper-review-logic-task');if(!box){box=el('section',null,'paper-review-logic-task');box.id='paper-review-logic-task';flowList.after(box);}
-    const state=binding?.literature_review;box.hidden=!state?.logic_selected;if(box.hidden)return;
-    box.dataset.jobId=state.job_id;box.dataset.logicState=state.logic_state;box.setAttribute('aria-label',t('逻辑分析'));
+    let box=q('#paper-review-logic-task');
+    if(!box){
+      box=el('section',null,'paper-review-logic-task');
+      box.id='paper-review-logic-task';
+      flowList.after(box);
+    }
+    const state=binding?.literature_review;
+    box.hidden=!state?.logic_selected;
+    if(box.hidden)return;
+    box.dataset.jobId=state.job_id;
+    box.dataset.logicState=state.logic_state;
+    box.setAttribute('aria-label',t('逻辑分析'));
     const failed=['FAILED','UNCERTAIN','PUBLICATION_FAILED'].includes(state.logic_state);
     const tone=state.paused?'yellow':failed?'red':['COMPLETED','COMPLETED_LIMITED'].includes(state.logic_state)?'green':['RUNNING','SENDING','PUBLISHING'].includes(state.logic_state)?'blue':['SKIPPED','CANCELLED'].includes(state.logic_state)?'disabled':'neutral';
     let node=box.querySelector('.paper-review-logic-node');
     if(!node){
-      const list=el('ol',null,'desktop-tasks-flow-list'),step=el('li',null,'desktop-tasks-flow-step');node=el('button',null,'desktop-tasks-node paper-review-logic-node');node.type='button';node.setAttribute('aria-expanded','false');node.setAttribute('aria-selected','false');
-      const index=el('span',null,'desktop-tasks-node-index'),brain=q('#inbox-logic-analysis-option svg');if(brain)index.append(brain.cloneNode(true));else index.textContent='◇';index.setAttribute('aria-hidden','true');
-      const copyNode=el('span',null,'desktop-tasks-node-copy');copyNode.append(el('strong'),el('small',null,'desktop-tasks-node-purpose'),el('small',null,'desktop-tasks-node-model'));
-      node.append(index,copyNode);step.append(node);list.append(step);box.append(list);
+      const list=el('ol',null,'desktop-tasks-flow-list'),step=el('li',null,'desktop-tasks-flow-step');
+      node=el('button',null,'desktop-tasks-node paper-review-logic-node');
+      node.type='button';
+      node.setAttribute('aria-expanded','false');
+      node.setAttribute('aria-selected','false');
+      const index=el('span',null,'desktop-tasks-node-index'),brain=q('#inbox-logic-analysis-option svg');
+      if(brain)index.append(brain.cloneNode(true));else index.textContent='◇';
+      index.setAttribute('aria-hidden','true');
+      const copyNode=el('span',null,'desktop-tasks-node-copy');
+      copyNode.append(el('strong'),el('small',null,'desktop-tasks-node-purpose'),el('small',null,'desktop-tasks-node-model'));
+      node.append(index,copyNode);
+      step.append(node);
+      list.append(step);
+      box.append(list);
     }
     const status=t(state.paused?'暂停':taskLabels[state.logic_state]||state.logic_state);
-    node.dataset.tone=tone;node.dataset.node=t('逻辑分析');node.dataset.status=status;node.dataset.desktopDynamicTitle=status;node.title=status;node.setAttribute('aria-label',t('逻辑分析')+'，'+status);node.parentElement.className='desktop-tasks-flow-step state-'+tone;
-    node.querySelector('strong').textContent=t('逻辑分析');node.querySelector('.desktop-tasks-node-purpose').textContent=t('独立核查文献数据与逻辑');node.querySelector('.desktop-tasks-node-model').textContent=state.model_label||t('已配置的云端模型');
+    node.dataset.tone=tone;
+    node.dataset.node=t('逻辑分析');
+    node.dataset.status=status;
+    node.dataset.desktopDynamicTitle=status;
+    node.title=status;
+    node.setAttribute('aria-label',t('逻辑分析')+'，'+status);
+    node.parentElement.className='desktop-tasks-flow-step state-'+tone;
+    node.querySelector('strong').textContent=t('逻辑分析');
+    node.querySelector('.desktop-tasks-node-purpose').textContent=t('独立核查文献数据与逻辑');
+    node.querySelector('.desktop-tasks-node-model').textContent=state.model_label||t('已配置的云端模型');
     window.__MEMO_NODE_PROGRESS__?.apply(node,{node_id:'E2_LOGIC_REVIEW',state:(!state.paused&&['RUNNING','SENDING'].includes(state.logic_state))?'RUNNING':state.logic_state,node_progress:state.node_progress},binding);
-    node.reviewPanelState=state;node.reviewOwnerControlState=binding.control_state;node.onclick=()=>options.openNode?.(node);
-    node.reviewRefresh=updated=>{renderTask({...binding,literature_review:updated},flowList,options);renderTaskInspector(node,q('#desktop-tasks-preview'));};
+    node.reviewPanelState=state;
+    node.reviewOwnerControlState=binding.control_state;
+    node.onclick=()=>options.openNode?.(node);
+    node.reviewRefresh=updated=>{
+      renderTask({...binding,literature_review:updated},flowList,options);
+      renderTaskInspector(node,q('#desktop-tasks-preview'));
+    };
   }
   function renderTaskInspector(node,root){
     let detail=root.querySelector('#paper-review-task-controls');
-    if(!node?.classList.contains('paper-review-logic-node')){if(detail)detail.hidden=true;return false;}
-    const state=node.reviewPanelState;if(!state)return false;
+    if(!node?.classList.contains('paper-review-logic-node')){
+      if(detail)detail.hidden=true;
+      return false;
+    }
+    const state=node.reviewPanelState;
+    if(!state)return false;
     const query=s=>root.querySelector(s),status=node.dataset.status;
     for(const id of ['tasks-delete-task','tasks-node-control','tasks-human','tasks-capacity','tasks-adjust','tasks-adjust-footer','tasks-node-control-feedback'])query('#'+id).hidden=true;
-    query('#tasks-node-title').textContent=t('逻辑分析');query('#tasks-state-node').textContent=t('逻辑分析');query('#tasks-state-text').textContent=status;
-    query('#tasks-state-config').textContent=state.model_label||t('已配置的云端模型');query('#tasks-state-summary').textContent=t('独立核查文献数据与逻辑');
-    const badge=query('#tasks-node-status');badge.className='badge '+node.dataset.tone;badge.textContent=status;
-    if(!detail){detail=el('section',null,'inspector-section paper-review-task-controls');detail.id='paper-review-task-controls';query('.desktop-tasks-inspector').append(detail);}
+    query('#tasks-node-title').textContent=t('逻辑分析');
+    query('#tasks-state-node').textContent=t('逻辑分析');
+    query('#tasks-state-text').textContent=status;
+    query('#tasks-state-config').textContent=state.model_label||t('已配置的云端模型');
+    query('#tasks-state-summary').textContent=t('独立核查文献数据与逻辑');
+    const badge=query('#tasks-node-status');
+    badge.className='badge '+node.dataset.tone;
+    badge.textContent=status;
+    if(!detail){
+      detail=el('section',null,'inspector-section paper-review-task-controls');
+      detail.id='paper-review-task-controls';
+      query('.desktop-tasks-inspector').append(detail);
+    }
     detail.hidden=false;
     const stamp=[state.job_id,state.revision,state.logic_state,state.paused,state.completed_segments,node.reviewOwnerControlState,document.documentElement.lang].join(':');
-    if(detail.dataset.stamp===stamp)return true;detail.dataset.stamp=stamp;detail.replaceChildren();
-    const active=['WAITING_INPUT','QUEUED','RUNNING','SENDING','PUBLISHING'].includes(state.logic_state),failed=['FAILED','UNCERTAIN','PUBLICATION_FAILED'].includes(state.logic_state);
+    if(detail.dataset.stamp===stamp)return true;
+    detail.dataset.stamp=stamp;
+    detail.replaceChildren();
+    const active=['WAITING_INPUT','QUEUED','RUNNING','SENDING','PUBLISHING'].includes(state.logic_state),
+      failed=['FAILED','UNCERTAIN','PUBLICATION_FAILED'].includes(state.logic_state);
     if(state.mainline_complete&&active)detail.append(el('p',t('主线已完成，正在等待附加核查。')));
     if(state.reason_code)detail.append(el('p',state.reason_code));
     if(!['RUNNING','PAUSED'].includes(node.reviewOwnerControlState))return true;
-    const actions=[];if(active)actions.push([state.paused?'resume':'pause',state.paused?'继续':'暂停']);if(failed)actions.push(['retry','重试']);if(['WAITING_INPUT','QUEUED','FAILED'].includes(state.logic_state))actions.push(['skip','跳过']);if(active||failed)actions.push(['cancel','取消']);
-    let acknowledgement=null;if(state.logic_state==='UNCERTAIN'){const label=el('label');acknowledgement=el('input');acknowledgement.type='checkbox';label.append(acknowledgement,document.createTextNode(t('结果不确定；重试可能产生新的调用与费用。')));detail.append(label);}
-    const controls=el('div',null,'toolbar-group');const message=el('p');message.setAttribute('role','status');
-    for(const [action,name] of actions){const button=el('button',t(name),'soft-button');button.type='button';button.onclick=async()=>{button.disabled=true;try{const updated=await call('review.control',{job_id:state.job_id,action,expected_revision:state.revision,acknowledge_uncertain:acknowledgement?.checked===true});node.reviewRefresh(updated);}catch(error){message.textContent=error.message;button.disabled=false;}};controls.append(button);}detail.append(controls,message);return true;
+    const actions=[];
+    if(active)actions.push([state.paused?'resume':'pause',state.paused?'继续':'暂停']);
+    if(failed)actions.push(['retry','重试']);
+    if(['WAITING_INPUT','QUEUED','FAILED'].includes(state.logic_state))actions.push(['skip','跳过']);
+    if(active||failed)actions.push(['cancel','取消']);
+    let acknowledgement=null;
+    if(state.logic_state==='UNCERTAIN'){
+      const label=el('label');
+      acknowledgement=el('input');
+      acknowledgement.type='checkbox';
+      label.append(acknowledgement,document.createTextNode(t('结果不确定；重试可能产生新的调用与费用。')));
+      detail.append(label);
+    }
+    const controls=el('div',null,'toolbar-group');
+    const message=el('p');
+    message.setAttribute('role','status');
+    for(const [action,name] of actions){
+      const button=el('button',t(name),'soft-button');
+      button.type='button';
+      button.onclick=async()=>{
+        button.disabled=true;
+        try{
+          const updated=await call('review.control',{job_id:state.job_id,action,expected_revision:state.revision,acknowledge_uncertain:acknowledgement?.checked===true});
+          node.reviewRefresh(updated);
+        }catch(error){
+          message.textContent=error.message;
+          button.disabled=false;
+        }
+      };
+      controls.append(button);
+    }
+    detail.append(controls,message);
+    return true;
   }
   Object.assign(copy,{'独立核查文献数据与逻辑':['Review data and logic independently','データと論理の独立確認'],'已配置的云端模型':['Configured cloud model','設定済みクラウドモデル'],'节点状态与操作':['Node status and controls','ノードの状態と操作'],'已设置暂停点':['Pause point set','一時停止位置を設定済み'],'处理中':['Processing','処理中']});
   const pauseHint=name=>document.documentElement.lang.startsWith('en')?'Will pause before '+name:document.documentElement.lang.startsWith('ja')?name+'の前で一時停止':'将在'+name+'前暂停';
   function renderInboxState(status,row){
-    status.replaceChildren();status.classList.toggle('has-pause-hint',row.execution_state==='PAUSE_SCHEDULED');
+    status.replaceChildren();
+    status.classList.toggle('has-pause-hint',row.execution_state==='PAUSE_SCHEDULED');
     if(row.execution_state==='PAUSE_SCHEDULED')status.append(el('span',pauseHint(t(row.pause_node_name||'指定节点')),'paper-review-pause-hint'));
     status.append(el('span',t(row.execution_state==='PAUSE_SCHEDULED'?'处理中':row.display_state||row.state)));
   }
-  new MutationObserver(()=>{for(const button of document.querySelectorAll('.paper-review-report-risk')){const report=badgeReports.get(button);if(!report)continue;const dot=button.firstElementChild;button.replaceChildren(dot,document.createTextNode(riskText(report)));button.setAttribute('aria-label',riskText(report));}}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-  document.addEventListener('click',event=>{if(dialog&&event.target.closest('#desktop-library-preview .desktop-library-card,#library-close'))dialog.hidden=true;});
+  new MutationObserver(()=>{
+    for(const button of document.querySelectorAll('.paper-review-report-risk')){
+      const report=badgeReports.get(button);
+      if(!report)continue;
+      const dot=button.firstElementChild;
+      button.replaceChildren(dot,document.createTextNode(riskText(report)));
+      button.setAttribute('aria-label',riskText(report));
+    }
+  }).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  document.addEventListener('click',event=>{
+    if(dialog&&event.target.closest('#desktop-library-preview .desktop-library-card,#library-close'))dialog.hidden=true;
+  });
   window.__MEMORIVE_REVIEW_UI__={inbox,reportButton,openReport,renderTask,renderTaskInspector,renderInboxState,pauseHint};
 })();
 

@@ -21,16 +21,14 @@
     'library.restore',
     'library.effect_metrics'
   ]);
-  const methodSet = new Set(methods);
   const bindings = new Map();
-  const receipts = [];
+  let receiptCount = 0;
   let selectedArtifactId = null;
   let bootstrapPromise = null;
   const root = document.getElementById('desktop-library-preview');
   root?.addEventListener('desktop:inspector-closed', () => { selectedArtifactId = null; });
 
   const nativeCall = async (method, params = {}) => {
-    if (!methodSet.has(method)) throw new Error(`LIBRARY_METHOD_NOT_ALLOWLISTED:${method}`);
     let result;
     if (!window.pywebview?.api?.call) {
       result = {
@@ -44,7 +42,7 @@
     } else {
       result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
     }
-    receipts.push({ method, result });
+    receiptCount += 1;
     if(method === 'library.select' && result?.status === 'PASS' && result.artifact_id === selectedArtifactId)window.dispatchEvent(new CustomEvent('desktop:library-selection',{detail:{record:bindings.get(result.artifact_id)?.record || null}}));
     window.dispatchEvent(new CustomEvent('desktop:library-receipt', { detail: { method, result } }));
     return result;
@@ -115,7 +113,10 @@
     return requestPage(paging.page + 1, true, paging.query, generation);
   };
   const bootstrap = () => {
-    if (!bootstrapPromise) bootstrapPromise = refresh().catch(error => { bootstrapPromise=null; throw error; });
+    if (!bootstrapPromise) bootstrapPromise = refresh().catch(error => {
+      bootstrapPromise=null;
+      throw error;
+    });
     return bootstrapPromise;
   };
   const maybeLoadMore = () => {
@@ -345,7 +346,7 @@
       binding_count: bindings.size,
       paging:{...paging},
       selected_artifact_id: selectedArtifactId,
-      receipt_count: receipts.length,
+      receipt_count: receiptCount,
       native_transport: Boolean(window.pywebview?.api?.call),
       canonical_artifact_registry_actual_reads: 0,
       external_view_launches: 0,

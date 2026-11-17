@@ -15,7 +15,6 @@ from memorive.desktop.api import ProductApi
 from browser_companion_support import companion  # noqa: E402
 
 
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 EXTENSION_ROOT = ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "companion" / "extension"
 
 

@@ -9,7 +9,6 @@ import pytest
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ATTEMPT_ROOT / "source"
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 DESKTOP_ROOT = ATTEMPT_ROOT / "product" / "desktop"
 for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:

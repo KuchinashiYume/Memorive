@@ -29,7 +29,10 @@
     const roots = [...pending].filter(node => node.isConnected);
     pending.clear();
     roots.filter(node => !roots.some(other => other !== node && other.contains(node))).forEach(scan);
-    for (const node of tracked) if (!node.isConnected) { tracked.delete(node); active.delete(node); }
+    for (const node of tracked) if (!node.isConnected) {
+      tracked.delete(node);
+      active.delete(node);
+    }
   };
   const schedule = root => {
     if (!(root instanceof HTMLElement)) return;
@@ -69,9 +72,15 @@
   window.addEventListener('resize', () => schedule(document.body), {passive:true});
   document.addEventListener('pointermove', move, {passive:true});
   document.addEventListener('pointerdown', () => { dragging = active.size > 0; }, {passive:true});
-  window.addEventListener('pointerup', event => { dragging = false; move(event); }, {passive:true});
+  window.addEventListener('pointerup', event => {
+    dragging = false;
+    move(event);
+  }, {passive:true});
   document.addEventListener('pointerleave', () => { if (!dragging) setActive(new Set()); }, {passive:true});
-  window.addEventListener('blur', () => { dragging = false; setActive(new Set()); });
+  window.addEventListener('blur', () => {
+    dragging = false;
+    setActive(new Set());
+  });
   window.__MEMO_SCROLLBARS__ = Object.freeze({refresh:() => scan(document.documentElement)});
 })();
 

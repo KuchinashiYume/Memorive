@@ -19,16 +19,14 @@
     'messages.notification_activate',
     'messages.effect_metrics'
   ]);
-  const methodSet = new Set(methods);
   const bindings = new Map();
-  const receipts = [];
+  let receiptCount = 0;
   let selectedMessageId = null;
   document.getElementById('desktop-messages-preview')?.addEventListener('desktop:inspector-closed', () => { selectedMessageId = null; });
   let bootstrapPromise = null;
   let refreshPromise = null;
 
   const nativeCall = async (method, params = {}) => {
-    if (!methodSet.has(method)) throw new Error(`MESSAGES_METHOD_NOT_ALLOWLISTED:${method}`);
     if (!window.pywebview?.api?.call) {
       return {
         schema_version: 'MessagesBrowserOnlyReceipt-v1',
@@ -38,7 +36,7 @@
       };
     }
     const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
-    receipts.push({ method, result });
+    receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:messages-receipt', { detail: { method, result } }));
     return result;
   };
@@ -129,7 +127,8 @@
       return receipt;
     }
     if(receipt?.research_task_id){
-      await window.__Desktop_RESEARCH__?.openTask(receipt.research_task_id);return receipt;
+      await window.__Desktop_RESEARCH__?.openTask(receipt.research_task_id);
+      return receipt;
     }
     if (receipt?.status !== 'PASS') {
       if (receipt?.status === 'TARGET_UNAVAILABLE') await refresh();
@@ -289,7 +288,7 @@
       method_count: methods.length,
       methods: [...methods],
       binding_count: bindings.size,
-      receipt_count: receipts.length,
+      receipt_count: receiptCount,
       selected_message_id: selectedMessageId,
       native_transport: Boolean(window.pywebview?.api?.call),
       production_event_reads: 0,
