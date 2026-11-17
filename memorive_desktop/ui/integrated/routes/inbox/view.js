@@ -1,3 +1,6 @@
+/* Local behaviour of the inbox page that needs no service call: selecting cards, the batch bar, the filter menus and
+   the item preview area. bridge.js fills the page with the service's data. It still holds the design prototype's
+   sample preview texts and import progress (previewFor, the import timer); bridge.js writes the real preview. */
   (() => {
     const root = document.getElementById('desktop-inbox-preview');
     const preview = window.DesktopPreview_inbox;

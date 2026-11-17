@@ -1,3 +1,4 @@
+/* Styles of the logic analysis option in the inbox details and of the logic review step in the settings workflow list. */
 .desktop-inbox-logic-option {padding:10px 0 14px;border-bottom:1px solid var(--border-color,#d8d6cf);margin-bottom:12px;}
 .desktop-inbox-logic-label {display:flex;align-items:center;gap:8px;cursor:pointer;}
 .desktop-inbox-logic-label input {margin-left:auto;accent-color:var(--accent-color,#5f756a);}

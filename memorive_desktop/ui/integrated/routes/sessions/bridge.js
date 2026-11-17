@@ -1,3 +1,6 @@
+/* The session management page's calls to the desktop service (sessions.*): the saved AI chat sessions, capturing them
+   from browsers (with the browser companion), refining them, and deleting local copies. Publishes
+   window.__Desktop_SESSIONS_BRIDGE__ for view.js. */
 (() => {
   'use strict';
 
@@ -29,8 +32,7 @@
 
   const page = () => window.__Desktop_SESSION_PAGE__;
   const nativeCall = async (method, params = {}) => {
-    if (!window.pywebview?.api?.call) throw new Error('SESSIONS_NATIVE_TRANSPORT_UNAVAILABLE');
-    const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+    const result = await window.__Desktop_SERVICE__.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:sessions-receipt', { detail:{ method, result } }));
     return result;

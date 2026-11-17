@@ -1,3 +1,5 @@
+/* Draws the messages page from what bridge.js loaded: message cards, tones (failure, needs attention, done, notice),
+   selection and the detail panel. Publishes window.__Desktop_MESSAGES_VIEW__ for bridge.js. */
   (() => {
     const root = document.getElementById('desktop-messages-preview');
     const preview = window.DesktopPreview_messages;

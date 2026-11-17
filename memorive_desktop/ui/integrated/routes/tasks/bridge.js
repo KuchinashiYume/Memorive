@@ -1,3 +1,7 @@
+/* The current task page's calls to the desktop service (current_task.*): running jobs and their workflow nodes,
+   pausing, cancelling, answering a job's questions, overrides, and refinement tasks. Publishes
+   window.__Desktop_CURRENT_TASK_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   refresh(). */
 (() => {
   'use strict';
 
@@ -75,7 +79,7 @@
     if (!window.pywebview?.api?.call) {
       return { schema_version: 'CurrentTaskBrowserOnlyReceipt-v1', method, params, status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT' };
     }
-    const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+    const result = await window.__Desktop_SERVICE__.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:current-task-receipt', { detail: { method, result } }));
     return result;

@@ -1,3 +1,7 @@
+/* The inbox page's calls to the desktop service (inbox.*): the item list and its detail, importing files (picker and
+   drag and drop), dispatching items to processing, undo and redo, stars, deletion, and the preview of an item's file.
+   Publishes window.__Desktop_INBOX_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   refresh() when the service reports a change. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-inbox-preview');
@@ -87,9 +91,8 @@
   }, true);
 
   const call = async (method, params = {}) => {
-    if (!nativeReady()) throw new Error('INBOX_NATIVE_TRANSPORT_NOT_READY');
     sequence += 1;
-    const receipt = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+    const receipt = await window.__Desktop_SERVICE__.call(method, params);
     lastReceipt = {
       method,
       request_sequence: sequence,

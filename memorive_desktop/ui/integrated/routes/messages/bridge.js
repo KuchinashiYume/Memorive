@@ -1,3 +1,7 @@
+/* The messages page's calls to the desktop service (messages.*): the message list, reading and archiving, bulk actions,
+   and following a message to the page it is about. Refreshes every 5 seconds while the page is open. Publishes
+   window.__Desktop_MESSAGES_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   refresh(). */
 (() => {
   'use strict';
 
@@ -35,7 +39,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     }
-    const result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+    const result = await window.__Desktop_SERVICE__.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:messages-receipt', { detail: { method, result } }));
     return result;

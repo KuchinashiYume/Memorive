@@ -1,3 +1,5 @@
+/* Places hover tooltips with Floating UI when that library is on the page. The assistant page loads no Floating UI and
+   has no data-tooltip elements, so in the shipped page this does nothing; it came with the page template. */
 (() => {
   if (window.FloatingUIDOM == null) {
     return;

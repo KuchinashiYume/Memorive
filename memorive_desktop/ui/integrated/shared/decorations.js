@@ -1,3 +1,6 @@
+/* Decorations of the main window: the home and empty-state illustrations, loading placeholders while a page waits
+   for its first data (trackCall wraps service calls for this), and signals to the desk assistant
+   (assistant_ui_signal). Publishes window.DesktopDecorations. */
 (() => {
   'use strict';
   if (window.__Desktop_DECORATIONS_READY__) return;

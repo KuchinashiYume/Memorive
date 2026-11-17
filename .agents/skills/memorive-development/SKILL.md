@@ -14,7 +14,7 @@ kind of change), the code the window does not start, and where data is checked. 
 
 | Path | What it holds |
 | --- | --- |
-| `memorive_desktop/source/` | The desktop app's Python packages. `runtime.py` holds `ProductApi`, which passes every call from the window to the package that owns it. |
+| `memorive_desktop/source/` | The desktop app's Python packages. `memorive/desktop/api/` holds `ProductApi`, which passes every call from the window to the package that owns it. |
 | `memorive_desktop/ui/` | Sources of the window's pages. The built pages in `product/desktop/` are generated from them. |
 | `memorive_desktop/tests/` | Tests: `tests/modules/<package>/` per package, `characterize/` for recorded behaviour, the rest for the desktop app. |
 | `memorive_desktop/examples/` | Small programs that run one feature without the window, e.g. `research_qa.py`. |
@@ -47,6 +47,10 @@ kind of change), the code the window does not start, and where data is checked. 
 
 - UI: edit the sources under `memorive_desktop/ui/`, then run `python memorive_desktop/tools/build_pages.py`.
   Never edit `product/desktop/bundle_*.html` by hand.
+  `memorive_desktop/ui/README.md` says how the pages are laid out, how to add a route, a setting, a dialog
+  or a text, and which names in the page the Python code uses. Run the page check
+  (`memorive_desktop/tools/page_check/`) before and after a page change and compare the two runs; its
+  README says how.
 - Every published file is listed with its hash in the manifests. After changing files under `source/`,
   `product/`, `ui/`, `integrations/`, `contracts/` or `memorive_console/`, run
   `python memorive_desktop/tools/sync_manifests.py`. The build refuses a file whose hash differs.

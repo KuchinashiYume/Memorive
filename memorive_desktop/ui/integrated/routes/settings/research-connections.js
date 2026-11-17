@@ -1,3 +1,5 @@
+/* The research connections panel in settings: the folders, Obsidian vaults, Zotero libraries and bibliography files a
+   project draws on, their previews, imports and exports (memo.connection_*). Publishes window.__MEMO_CONNECTIONS__. */
 (() => {
  'use strict';
  const q=s=>document.querySelector(s),
@@ -8,7 +10,7 @@
      return e;
    };
  const t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
- const call=(m,p={})=>window.pywebview.api.call(m,p),
+ const call=(m,p={})=>window.__Desktop_SERVICE__.call(m,p),
    currentProject=()=>window.__MEMO_WORKSPACE__?.inspect().project||'default';
  const names={obsidian:'Obsidian',zotero:'Zotero',folder:'资料文件夹',bibliography:'书目文件'};
  const statusNames={COMPLETE:'已完成',ERROR:'需要处理',PARTIAL:'部分完成',INTERRUPTED:'已中断',QUEUED:'已排队',RUNNING:'处理中',DISPATCHED:'已交给主线',active:'可检索',changed:'来源已更新',unavailable:'来源不可用',SYNCED:'已回写',PROCESSING:'处理中',DEDUPLICATED:'已关联已有文献'};

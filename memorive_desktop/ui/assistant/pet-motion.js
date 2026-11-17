@@ -1,3 +1,5 @@
+/* The pet in the assistant window: its frames and animations (blink, attention, working, success, error), the speech
+   bubble, the menu, and dragging the pet. runtime-bridge.js feeds it the desktop service's state. */
     (() => {
       const root = document.getElementById('memorive-desktop-assistant-preview');
       if (!root || root.dataset.ready === 'true') return;

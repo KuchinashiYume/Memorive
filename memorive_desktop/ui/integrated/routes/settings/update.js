@@ -1,3 +1,6 @@
+/* The update panel in settings: shows the update state (updates.status every 1.5 seconds while the panel is open),
+   checks, downloads, applies and cancels updates, and the automatic-update switch. Checks once by itself 30 seconds
+   after start when automatic updates are on. */
 (() => {
   'use strict';
   const panel = document.querySelector('[data-panel="update"] .desktop-settings-form-stack');
@@ -52,7 +55,7 @@
   window.addEventListener('desktop:settings-mode-scope-changed',mode);
   let state={},requesting=false,timer=null;
   const query=selector=>section.querySelector(selector);
-  const call=async(action,params={})=>window.pywebview.api.call('updates.'+action,params);
+  const call=(action,params={})=>window.__Desktop_SERVICE__.call('updates.'+action,params);
   function render(){
     section.querySelectorAll('[data-update-text]').forEach(node=>node.textContent=text(node.dataset.updateText));
     const update=state.update||{},stage=update.stage||update.state||'IDLE',error=state.error||update.error;

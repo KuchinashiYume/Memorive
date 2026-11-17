@@ -1,3 +1,6 @@
+/* The work log page's calls to the desktop service (work_log.*): entries, milestones, export, and following an entry
+   to its job. Publishes window.__Desktop_WORK_LOG_BRIDGE__; shared/product-bridge.js and
+   memorive/desktop/api/page_events.py call it when the service reports a change. */
 (() => {
   'use strict';
 
@@ -65,7 +68,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     } else {
-      result = await (window.DesktopDecorations?.trackCall(method, () => window.pywebview.api.call(method, params)) || window.pywebview.api.call(method, params));
+      result = await window.__Desktop_SERVICE__.call(method, params);
     }
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:work-log-receipt', { detail: { method, result } }));

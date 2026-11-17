@@ -1,3 +1,5 @@
+/* Closing the window: the dialog that asks whether to quit or keep running in the tray when tasks are running or
+   settings are not saved. product/desktop/window_chrome.py calls window.__Desktop_WINDOW_CHROME__.requestClose(). */
 (() => {
   'use strict';
   if (window.__Desktop_WINDOW_CHROME__) return;

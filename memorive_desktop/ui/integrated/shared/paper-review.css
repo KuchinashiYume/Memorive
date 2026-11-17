@@ -1,3 +1,5 @@
+/* Styles of the paper review parts (shared/review.js) in the library, the current task page and the settings
+   workflow list. */
 #desktop-library-preview .desktop-library-files button.paper-review-report-risk {display:inline-flex;align-items:center;gap:6px;}
 .paper-review-report-risk .status-dot {display:inline-block;vertical-align:middle;}
 #desktop-settings-preview #settings-flow-list [data-step="human"]::before,#desktop-settings-preview #settings-flow-list [data-step="human"]::after {display:none!important;content:none!important;}

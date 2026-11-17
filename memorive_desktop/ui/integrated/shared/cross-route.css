@@ -305,7 +305,7 @@ html[lang] #desktop-settings-preview .desktop-settings-categories { grid-auto-ro
 /* keep empty-state copy centered inside the existing research sidebar. */
 #memo-evidence-panel .memo-centered-empty{display:flex;flex-direction:column;justify-content:center;align-items:stretch;text-align:center}
 #memo-evidence-panel .memo-empty-state{margin:auto 0;line-height:1.65;max-width:100%;font-size:var(--desktop-body-size,14px)}
-#memo-evidence-panel .memo-empty-state p{margin:0 0 8px}
+#memo-evidence-panel .memo-empty-state p{margin:0}
 #memo-evidence-panel .memo-empty-state .memo-material-scope-note{margin:0;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:12px}
 #memo-evidence-panel .memo-empty-state .memo-material-scope-note small{font-size:12px;line-height:1.6}
 #desktop-settings-preview #memo-desktop-fields .desktop-settings-form-group{display:flex!important;align-items:end;gap:8px}

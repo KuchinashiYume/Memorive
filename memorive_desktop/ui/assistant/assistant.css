@@ -1,3 +1,5 @@
+/* Styles of the desktop assistant window: the pet, its speech bubble and its menu (#memorive-desktop-assistant-preview).
+   The assistant keeps its own colour variables (--memorive-pet-*), with light and dark values. */
     #memorive-desktop-assistant-preview {
       --memorive-pet-canvas: light-dark(rgb(234 241 237), rgb(24 34 36));
       --memorive-pet-canvas-deep: light-dark(rgb(206 224 217), rgb(34 53 54));

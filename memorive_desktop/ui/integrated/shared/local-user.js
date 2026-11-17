@@ -1,3 +1,6 @@
+/* The user panel in settings and the user's name and picture in the navigation: user name, avatar, the answer style,
+   and hiding the assistant's expressions (settings.user_get, settings.user_save). Takes part in the page's shared
+   save and revert. Publishes window.__Desktop_LOCAL_USER__. */
 (() => {
   'use strict';
   if(window.__Desktop_LOCAL_USER__)return;
@@ -5,7 +8,7 @@
   let saved=null,draft=defaults(),loading=false,decoding=false,ready=false;
   const q=selector=>document.querySelector(selector);
   const t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
-  const call=(method,params={})=>window.pywebview.api.call(method,params);
+  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
   const config=()=>({...draft,username:q('#settings-username')?.value??draft.username});
   const dirty=()=>saved!==null&&JSON.stringify(config())!==JSON.stringify(saved.config);
   const sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();

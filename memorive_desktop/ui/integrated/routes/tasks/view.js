@@ -1,3 +1,5 @@
+/* Draws the current task page: job cards, the workflow flow of the selected job with each node's state and progress,
+   node details and overrides. Publishes window.__Desktop_TASKS_UI__ for bridge.js. */
   (() => {
     const root = document.getElementById('desktop-tasks-preview');
     const preview = window.DesktopPreview_tasks;
