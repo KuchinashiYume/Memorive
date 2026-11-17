@@ -325,7 +325,7 @@ def test_runtime_scoped_reset_covers_visible_assistant_fields_only(
 
 
 def test_runtime_allowlist_and_postprocessing_use_scoped_reset_only() -> None:
-    runtime_source = (DESKTOP_ROOT.parents[1] / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
+    runtime_source = "\n".join(path.read_text(encoding="utf-8") for path in sorted((DESKTOP_ROOT.parents[1] / "source" / "memorive" / "desktop" / "api").glob("*.py")))
 
     assert '"settings.reset_scope"' in runtime_source
     assert '"settings.model_service_remove"' in runtime_source

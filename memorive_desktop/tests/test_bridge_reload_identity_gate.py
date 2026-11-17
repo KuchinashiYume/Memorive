@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 import sys
 import time
 
@@ -13,7 +14,6 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-import memorive.desktop.api as runtime_module  # noqa: E402
 from memorive.desktop.api import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
 
@@ -152,7 +152,7 @@ def test_reload_action_opens_only_reload_fragment_and_records_pending_identity(
         pid = 41901
 
     monkeypatch.setattr(
-        runtime_module.subprocess,
+        subprocess,
         "Popen",
         lambda command, **_kwargs: launched.append(command) or _Process(),
     )
@@ -185,7 +185,7 @@ def test_manifest_report_identity_mismatch_keeps_preflight_and_full_closed(
     assert status["full_sync_eligible"] is False
 
     monkeypatch.setattr(
-        runtime_module.subprocess,
+        subprocess,
         "Popen",
         lambda *_args, **_kwargs: pytest.fail("identity mismatch must not launch sync"),
     )
@@ -225,7 +225,7 @@ def test_current_identity_alone_opens_v5_preflight_without_running_full(
         pid = 41910
 
     monkeypatch.setattr(
-        runtime_module.subprocess,
+        subprocess,
         "Popen",
         lambda command, **_kwargs: launched.append(command) or _Process(),
     )

@@ -1,5 +1,5 @@
 """ThreadedApplicationServiceClient: one control connection shared by the window's threads.
-ProductApi (memorive/desktop/api.py) uses it for calls to the service.
+ProductApi (memorive/desktop/api/) uses it for calls to the service.
 """
 from __future__ import annotations
 

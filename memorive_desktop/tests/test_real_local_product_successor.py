@@ -446,7 +446,7 @@ def test_application_exit_closes_both_windows_without_shell_or_external_process(
     try:
         api.attach_window(main_window)
         api.attach_assistant_window(assistant_window)
-        monkeypatch.setattr("memorive.desktop.api.threading.Timer", ImmediateTimer)
+        monkeypatch.setattr("threading.Timer", ImmediateTimer)
         receipt = api.exit_application({})
         duplicate = api.exit_application({})
         assert receipt["status"] == "EXIT_SCHEDULED"

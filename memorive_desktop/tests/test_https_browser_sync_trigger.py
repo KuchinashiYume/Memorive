@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 import sys
 
 import pytest
@@ -11,7 +12,6 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-import memorive.desktop.api as runtime_module  # noqa: E402
 from memorive.desktop.api import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
 
@@ -47,7 +47,7 @@ def test_runtime_opens_approved_https_fragment_in_connected_browser(
     api._browser_executables = lambda: [
         ("Microsoft Edge", Path("C:/Program Files/Edge/msedge.exe"), "edge://extensions")
     ]
-    monkeypatch.setattr(runtime_module.subprocess, "Popen", _popen)
+    monkeypatch.setattr(subprocess, "Popen", _popen)
 
     receipt = api.run_browser_companion_sync()
 

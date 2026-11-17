@@ -7,7 +7,7 @@ for a given change. Building the installer is described in [BUILDING.md](BUILDIN
 
 | Folder | What it holds |
 | --- | --- |
-| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`). `memorive/desktop/api.py` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it. |
+| `source/` | The Python code of the desktop app, one package per area under `memorive/` (`desktop`, `documents`, `research`, `sessions`, `models`, `exams`, `platform`). `memorive/desktop/api/` holds `ProductApi`, which receives every call from the window and passes it to the package that owns it; `product_api.py` has the class and `call`, the other files of that folder each hold one group of its window calls. |
 | `ui/` | The sources of the window's two pages. `tools/build_pages.py` builds `product/desktop/bundle_integrated.html` and `bundle_assistant.html` from them; see `ui/README.md`. |
 | `tests/` | The tests. Run them with `tests/run_tests.py` (below). |
 | `examples/` | Small programs that run one feature without the window. |
@@ -141,7 +141,7 @@ to cover every way a question can end.
 | Step | Where |
 | --- | --- |
 | The chat page sends `memo.ask` and then polls `memo.job_status`. | `ui/integrated/routes/chat/workspace.js` |
-| `ProductApi.call` hands the research workspace's methods (`DESKTOP_METHODS` in `service.py`) to the workspace. On first use it creates the workspace with `create(...)`, passing the settings service, library, local models, profile folders, its own `call` and `stage_inbox_paths`; `create` also gives the workspace the model function. | `source/memorive/desktop/api.py`, `source/memorive/research/workspace/desktop.py` |
+| `ProductApi.call` hands the research workspace's methods (`DESKTOP_METHODS` in `service.py`) to the workspace. On first use it creates the workspace with `create(...)`, passing the settings service, library, local models, profile folders, its own `call` and `stage_inbox_paths`; `create` also gives the workspace the model function. | `source/memorive/desktop/api/product_api.py`, `source/memorive/research/workspace/desktop.py` |
 | `ResearchWorkspace.call` dispatches the method; `ask()` passes the question on. | `memorive/research/workspace/service.py` |
 | `AnswerVersions.enqueue` checks the request, freezes the model choice, answer style, memories and research topic in a `QUEUED` job, and hands the job to the worker pool. Answering again (`memo.answer_retry`) goes through `AnswerVersions.retry` to the same place. | `memorive/research/workspace/answer_versions.py` |
 | The worker runs `answer_job()`: `AnswerJob.start`, `gather_evidence`, `build_request`, `ask_model`, `check_answer`, `save_answer`; any error goes to `record_failure`. The module docstring lists what each step does. | `memorive/research/workspace/answering.py` |

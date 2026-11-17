@@ -28,13 +28,14 @@ from tests.test_refinement_inbox_and_local_mapping import (  # noqa: E402
 
 
 def test_queue_terminal_transition_has_a_dedicated_ui_projection_observer() -> None:
-    # The sessions controller is a package; read all of its modules.
+    # The sessions controller and ProductApi are packages; read all of their modules.
     sessions = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "controller").glob("*.py"))
     )
-    runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(
-        encoding="utf-8"
+    runtime = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api").glob("*.py"))
     )
 
     assert "refinement_queue_observer" in sessions

@@ -11,7 +11,7 @@ PAGES = [*(WEB / f"part{index}.html" for index in range(3, 10)), WEB / "leaderbo
 def test_full_leaderboard_route_is_present_without_legacy_mini_card() -> None:
     html = (WEB / "leaderboard.html").read_text(encoding="utf-8")
     script = (WEB / "leaderboard.js").read_text(encoding="utf-8")
-    runtime = (ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
+    runtime = "\n".join(path.read_text(encoding="utf-8") for path in sorted((ROOT / "source" / "memorive" / "desktop" / "api").glob("*.py")))
     assert 'class="lb-table"' in html
     assert 'id="lb-rows"' in html
     assert 'id="lb-model-detail"' in html

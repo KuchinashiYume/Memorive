@@ -5,6 +5,7 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 import sys
 import threading
 
@@ -16,7 +17,6 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-import memorive.desktop.api as runtime_module  # noqa: E402
 from memorive.desktop.api import ProductApi  # noqa: E402
 from memorive.desktop.assistant.desktop import AssistantDesktop  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
@@ -118,7 +118,7 @@ def test_first_sync_uses_collision_safe_v5_preflight(
 
     api = _launchable_api({"deepseek": [_row("deepseek", 1)]})
     monkeypatch.setattr(
-        runtime_module.subprocess,
+        subprocess,
         "Popen",
         lambda command, **_kwargs: launched.append(command) or _Process(),
     )
@@ -144,7 +144,7 @@ def test_three_provider_archive_switches_to_bounded_incremental_cursor(
     }
     api = _launchable_api(rows)
     monkeypatch.setattr(
-        runtime_module.subprocess,
+        subprocess,
         "Popen",
         lambda command, **_kwargs: launched.append(command) or _Process(),
     )

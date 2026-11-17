@@ -1,5 +1,5 @@
 """The desk assistant's desktop side: its window, its preferences and shortcuts, and the notices it
-shows. AssistantDesktop holds them; ProductApi (memorive/desktop/api.py) builds it at start and keeps the names the
+shows. AssistantDesktop holds them; ProductApi (memorive/desktop/api/) builds it at start; api/assistant.py keeps the names the
 window, app.py and the research runtime call (assistant_bootstrap, assistant_move_window ...) as
 forwarders to it.
 

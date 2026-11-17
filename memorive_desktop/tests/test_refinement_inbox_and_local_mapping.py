@@ -220,7 +220,7 @@ def test_refinement_queue_is_not_projected_as_current_task(tmp_path: Path) -> No
 
 
 def test_runtime_uses_a_sessions_owned_refinement_queue_store() -> None:
-    runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
+    runtime = "\n".join(path.read_text(encoding="utf-8") for path in sorted((ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api").glob("*.py")))
 
     assert 'state_root=self._state_dir / "current_task"' not in runtime
     assert 'self._state_dir / "sessions" / "refinement_queue_tasks"' in runtime

@@ -214,7 +214,7 @@ def test_refinement_options_include_every_verified_local_model(tmp_path: Path) -
 
 
 def test_runtime_enables_visible_readers_and_migrates_part11_preferences() -> None:
-    runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(encoding="utf-8")
+    runtime = "\n".join(path.read_text(encoding="utf-8") for path in sorted((ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api").glob("*.py")))
 
     assert "legacy_deepseek_visible_ui_projection=False" not in runtime
     assert "EdgeKimiVisibleUIReader" in runtime

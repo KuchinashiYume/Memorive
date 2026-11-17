@@ -1,6 +1,6 @@
 """The channel through which session refinement runs a model.
 
-ProductApi in memorive/desktop/api.py builds the channel (ExistingConversationRefinementChannel); the sessions
+ProductApi (memorive/desktop/api/) builds the channel (ExistingConversationRefinementChannel); the sessions
 page sends refinement requests through it and gets typed refinement items back.
 """
 from __future__ import annotations

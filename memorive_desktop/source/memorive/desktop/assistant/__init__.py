@@ -2,7 +2,7 @@
 shortcuts (shortcuts.py), what it shows (projection.py) and how notifications reach it (delivery.py).
 
 desktop.py (AssistantDesktop) holds its desktop side: preferences, shortcuts, the window and the
-notices. ProductApi in memorive/desktop/api.py builds it at start and forwards the window's assistant_* calls to it.
+notices. ProductApi (memorive/desktop/api/) builds it at start; api/assistant.py forwards the window's assistant_* calls to it.
 """
 
 from memorive.desktop.assistant.controller import DesktopAssistantController

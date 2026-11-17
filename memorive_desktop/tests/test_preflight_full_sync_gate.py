@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 import sys
 import time
 
@@ -13,7 +14,6 @@ for candidate in (ATTEMPT_ROOT / "source", ATTEMPT_ROOT / "product" / "desktop")
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-import memorive.desktop.api as runtime_module  # noqa: E402
 from memorive.desktop.api import ProductApi  # noqa: E402
 from browser_companion_support import companion  # noqa: E402
 from memorive.sessions.companion.desktop import BrowserCompanionDesktop  # noqa: E402
@@ -168,7 +168,7 @@ def test_preflight_receipt_is_bounded_to_two_per_provider(
         ("Microsoft Edge", Path("C:/Program Files/Edge/msedge.exe"), "edge://extensions")
     ]
     monkeypatch.setattr(
-        runtime_module.subprocess,
+        subprocess,
         "Popen",
         lambda command, **_kwargs: launched.append(command) or _Process(),
     )
