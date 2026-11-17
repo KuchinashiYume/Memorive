@@ -3,6 +3,7 @@
   policy.py                  passing score, call and repair bounds, revisions, and the residual,
                              output-size and call-bound helpers the executors share
   executor.py                QualityCardDistillerExamExecutor, the reference exam
+  partition.py               the partition rule of a card projection and its directed patch
   direct_executor.py         QualityCardDistillerDirectExamExecutor, the direct (successor) form
   language_bank_executor.py  QualityNewCardDistillerLanguageBankExamExecutor, the language bank form
 

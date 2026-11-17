@@ -5,6 +5,7 @@ from __future__ import annotations
 from memorive.models.provider_aliases import matches_result_model
 from copy import deepcopy
 from dataclasses import dataclass, field
+from functools import cached_property
 from datetime import datetime, timezone
 import hashlib
 import importlib
@@ -33,6 +34,13 @@ from memorive.exams.common import (
     _public_forms,
     _sha256,
     _write_json_create_only,
+)
+from memorive.exams.card_distiller.partition import (
+    PARTITION_FIELDS,
+    merge_partition_patch,
+    partition_decision_targets,
+    partition_diagnostics,
+    partition_patch_schema,
 )
 from memorive.exams.card_distiller.policy import (
     CARD_DISTILLER_EXAM_CATEGORY_ID,
@@ -87,6 +95,90 @@ class _DistillerStage:
     cumulative_penalty: dict[str, Any] | None = None
     score: float = 0.0
     verdict: str = ""
+
+
+@dataclass
+class _Shard:
+    """One shard of a card distiller stage: the fact map or card projection rows of some targets, which
+    the model under test answers in one request (QualityCardDistillerExamExecutor._run_shard)."""
+
+    protocol: Any
+    run_id: str
+    stage_root: Path
+    state: dict[str, Any]
+    target: Mapping[str, Any]
+    form: Mapping[str, Any]
+    artifact: str
+    target_ids: list[str]
+    schema: Mapping[str, Any]
+    structured_chat: Callable[..., Mapping[str, Any]]
+    prompt: str = ""
+
+    @property
+    def name(self) -> str:
+        """The shard's name in its audit and patch file names."""
+        return f"{self.artifact}-{self.target_ids[0]}-{self.target_ids[-1]}"
+
+    @cached_property
+    def source(self) -> list[dict[str, Any]]:
+        """The form's source rows of the targets: its cases for a fact map, its packs for a projection."""
+        source_collection = "cases" if self.artifact == "fact_map" else "packs"
+        source_id_field = "case_id" if self.artifact == "fact_map" else "pack_id"
+        return [
+            deepcopy(row)
+            for row in self.form.get(source_collection, [])
+            if isinstance(row, Mapping) and row.get(source_id_field) in self.target_ids
+        ]
+
+    def contract(self) -> dict[str, Any]:
+        """What a repaired shard must hold: one row per target in order, and for a card projection the
+        exact partition of each pack's source cases."""
+        return (
+            {
+                "row_identity": "case_id",
+                "exact_target_order": self.target_ids,
+                "rule": "Return exactly one fact_map row per target case_id.",
+            }
+            if self.artifact == "fact_map"
+            else {
+                "row_identity": "pack_id",
+                "exact_target_order": self.target_ids,
+                "partition_fields": list(PARTITION_FIELDS),
+                "rules": [
+                    "For each pack, every source case_id must occur exactly once across partition_fields[].case_ids.",
+                    "No case_id may occur in two partition fields; move it to the single best matching field.",
+                    "The union of partition_fields[].case_ids must equal that pack's source case_ids exactly.",
+                    "Partition fields are buckets, not one-item slots: multiple case_ids in one field are required when the source pack has more cases than partition fields.",
+                    "Before returning, verify that both total assignment count and unique assignment count equal the exact source case count for every pack.",
+                    "key_data_case_ids is a separate summary list and does not relax the exact partition rule.",
+                    "Use only chunk_id values present in the same source pack as anchor_ids.",
+                ],
+            }
+        )
+
+    def audit(self, response: Mapping[str, Any]) -> dict[str, Any]:
+        """The exam protocol's audit of a reply to this shard."""
+        return self.protocol.audit_artifact(
+            form=dict(self.form),
+            response=response,
+            schema=dict(self.schema),
+            artifact=self.artifact,
+            target_ids=self.target_ids,
+        )
+
+    def request(self, fields: Mapping[str, Any]) -> str:
+        """A repair request: the fields and the hash of the shard's task prompt, as compact sorted JSON."""
+        return json.dumps(
+            {
+                **fields,
+                "source_task_prompt_sha256": hashlib.sha256(
+                    self.prompt.encode("utf-8")
+                ).hexdigest().upper(),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
 
 
 class QualityCardDistillerExamExecutor:
@@ -542,435 +634,160 @@ class QualityCardDistillerExamExecutor:
         schema: Mapping[str, Any],
         structured_chat: Callable[..., Mapping[str, Any]],
     ) -> dict[str, Any]:
-        protocol = modules["protocol"]
-        prompt = protocol.build_artifact_prompt(
-            dict(form), artifact, target_ids=target_ids, schema=dict(schema)
-        )
-        response = self._provider_call(
+        """Ask the model under test for one shard, then repair it until the protocol's audit passes, in at
+        most MAX_STRUCTURAL_REPAIR_ROUNDS rounds. A round asks for the whole shard again (_repair_shard),
+        except the last round of a card projection with cases missing or doubled, which asks only where
+        those cases go (_patch_shard_partition). Every audit is written to the stage's audits folder."""
+        shard = _Shard(
+            protocol=modules["protocol"],
             run_id=run_id,
             stage_root=stage_root,
             state=state,
             target=target,
-            prompt=prompt,
-            response_schema=schema,
-            structured_chat=structured_chat,
-            call_kind=f"INITIAL_{artifact.upper()}",
-        )
-        audit = protocol.audit_artifact(
-            form=dict(form),
-            response=response,
-            schema=dict(schema),
+            form=form,
             artifact=artifact,
             target_ids=target_ids,
+            schema=schema,
+            structured_chat=structured_chat,
         )
-        audit_name = (
-            f"{artifact}-{target_ids[0]}-{target_ids[-1]}-initial.json"
+        shard.prompt = shard.protocol.build_artifact_prompt(
+            dict(form), artifact, target_ids=target_ids, schema=dict(schema)
         )
-        _write_json_create_only(stage_root / "audits" / audit_name, audit)
+        response = self._shard_call(shard, shard.prompt, schema, f"INITIAL_{artifact.upper()}")
+        audit = shard.audit(response)
+        _write_json_create_only(stage_root / "audits" / f"{shard.name}-initial.json", audit)
         if audit["status"] == "PASS":
             return response
-        source_collection = "cases" if artifact == "fact_map" else "packs"
-        source_id_field = "case_id" if artifact == "fact_map" else "pack_id"
-        target_source = [
-            deepcopy(row)
-            for row in form.get(source_collection, [])
-            if isinstance(row, Mapping) and row.get(source_id_field) in target_ids
-        ]
-        partition_fields = [
-            "research_question",
-            "research_object",
-            "method",
-            "key_results",
-            "author_conclusion",
-            "boundary_conditions",
-        ]
-        artifact_contract = (
-            {
-                "row_identity": "case_id",
-                "exact_target_order": target_ids,
-                "rule": "Return exactly one fact_map row per target case_id.",
-            }
-            if artifact == "fact_map"
-            else {
-                "row_identity": "pack_id",
-                "exact_target_order": target_ids,
-                "partition_fields": partition_fields,
-                "rules": [
-                    "For each pack, every source case_id must occur exactly once across partition_fields[].case_ids.",
-                    "No case_id may occur in two partition fields; move it to the single best matching field.",
-                    "The union of partition_fields[].case_ids must equal that pack's source case_ids exactly.",
-                    "Partition fields are buckets, not one-item slots: multiple case_ids in one field are required when the source pack has more cases than partition fields.",
-                    "Before returning, verify that both total assignment count and unique assignment count equal the exact source case count for every pack.",
-                    "key_data_case_ids is a separate summary list and does not relax the exact partition rule.",
-                    "Use only chunk_id values present in the same source pack as anchor_ids.",
-                ],
-            }
-        )
-
-        def partition_diagnostics(current: Mapping[str, Any]) -> list[dict[str, Any]]:
-            if artifact != "card_projection":
-                return []
-            source_by_id = {
-                str(row.get("pack_id")): row
-                for row in target_source
-                if isinstance(row, Mapping)
-            }
-            current_rows = current.get("card_projection")
-            current_by_id = (
-                {
-                    str(row.get("pack_id")): row
-                    for row in current_rows
-                    if isinstance(row, Mapping)
-                }
-                if isinstance(current_rows, list)
-                else {}
-            )
-            diagnostics: list[dict[str, Any]] = []
-            for pack_id in target_ids:
-                source = source_by_id.get(pack_id, {})
-                expected = [
-                    str(case_id) for case_id in source.get("case_ids", [])
-                    if isinstance(case_id, str)
-                ]
-                row = current_by_id.get(pack_id, {})
-                observed_by_field: dict[str, list[str]] = {}
-                assigned: list[str] = []
-                for field in partition_fields:
-                    field_value = row.get(field)
-                    case_ids = (
-                        field_value.get("case_ids", [])
-                        if isinstance(field_value, Mapping)
-                        else []
-                    )
-                    normalized = [
-                        str(case_id) for case_id in case_ids
-                        if isinstance(case_id, str)
-                    ]
-                    observed_by_field[field] = normalized
-                    assigned.extend(normalized)
-                counts = {
-                    case_id: assigned.count(case_id) for case_id in set(assigned)
-                }
-                diagnostics.append(
-                    {
-                        "pack_id": pack_id,
-                        "exact_source_case_ids": expected,
-                        "expected_assignment_count": len(expected),
-                        "observed_assignment_count": len(assigned),
-                        "observed_unique_count": len(set(assigned)),
-                        "missing_case_ids": [
-                            case_id for case_id in expected if case_id not in assigned
-                        ],
-                        "duplicate_case_ids": sorted(
-                            case_id for case_id, count in counts.items() if count > 1
-                        ),
-                        "extra_case_ids": sorted(set(assigned) - set(expected)),
-                        "current_partition": observed_by_field,
-                    }
-                )
-            return diagnostics
-
-        def partition_decision_targets(
-            diagnostics: list[dict[str, Any]],
-        ) -> list[dict[str, Any]]:
-            targets: list[dict[str, Any]] = []
-            for diagnostic in diagnostics:
-                pack_id = str(diagnostic["pack_id"])
-                current_partition = diagnostic["current_partition"]
-                missing = set(diagnostic["missing_case_ids"])
-                duplicates = set(diagnostic["duplicate_case_ids"])
-                for case_id in diagnostic["exact_source_case_ids"]:
-                    if case_id not in missing and case_id not in duplicates:
-                        continue
-                    current_fields = [
-                        field for field in partition_fields
-                        if case_id in current_partition[field]
-                    ]
-                    targets.append(
-                        {
-                            "pack_id": pack_id,
-                            "case_id": case_id,
-                            "operation": (
-                                "ASSIGN_MISSING"
-                                if case_id in missing
-                                else "KEEP_ONE_REMOVE_DUPLICATES"
-                            ),
-                            "allowed_fields": (
-                                partition_fields
-                                if case_id in missing
-                                else current_fields
-                            ),
-                        }
-                    )
-            return targets
-
-        def partition_patch_schema(
-            decision_targets: list[dict[str, Any]],
-        ) -> dict[str, Any]:
-            case_ids = [str(row["case_id"]) for row in decision_targets]
-            return {
-                "type": "object",
-                "additionalProperties": False,
-                "required": ["decisions"],
-                "properties": {
-                    "decisions": {
-                        "type": "array",
-                        "minItems": len(decision_targets),
-                        "maxItems": len(decision_targets),
-                        "items": {
-                            "type": "object",
-                            "additionalProperties": False,
-                            "required": ["pack_id", "case_id", "field"],
-                            "properties": {
-                                "pack_id": {
-                                    "type": "string",
-                                    "enum": target_ids,
-                                },
-                                "case_id": {
-                                    "type": "string",
-                                    "enum": case_ids,
-                                },
-                                "field": {
-                                    "type": "string",
-                                    "enum": partition_fields,
-                                },
-                            },
-                        },
-                    }
-                },
-            }
-
-        def merge_partition_patch(
-            current: Mapping[str, Any],
-            patch: Mapping[str, Any],
-            diagnostics: list[dict[str, Any]],
-            decision_targets: list[dict[str, Any]],
-        ) -> dict[str, Any]:
-            decisions = patch.get("decisions")
-            if not isinstance(decisions, list):
-                raise ValueError("WORKFLOW_MODEL_EXAM_PARTITION_DECISIONS_REQUIRED")
-            expected_pairs = [
-                (str(row["pack_id"]), str(row["case_id"]))
-                for row in decision_targets
-            ]
-            observed_pairs = [
-                (
-                    str(row.get("pack_id")),
-                    str(row.get("case_id")),
-                )
-                for row in decisions
-                if isinstance(row, Mapping)
-            ]
-            if observed_pairs != expected_pairs or len(decisions) != len(
-                decision_targets
-            ):
-                raise ValueError(
-                    "WORKFLOW_MODEL_EXAM_PARTITION_DECISION_EXACT_SET_MISMATCH"
-                )
-            allowed_by_pair = {
-                (str(row["pack_id"]), str(row["case_id"])): set(
-                    row["allowed_fields"]
-                )
-                for row in decision_targets
-            }
-            selected: dict[tuple[str, str], str] = {}
-            for decision in decisions:
-                if not isinstance(decision, Mapping):
-                    raise ValueError(
-                        "WORKFLOW_MODEL_EXAM_PARTITION_DECISION_MAPPING_REQUIRED"
-                    )
-                pair = (
-                    str(decision.get("pack_id")),
-                    str(decision.get("case_id")),
-                )
-                field = decision.get("field")
-                if (
-                    not isinstance(field, str)
-                    or field not in allowed_by_pair[pair]
-                ):
-                    raise ValueError(
-                        "WORKFLOW_MODEL_EXAM_PARTITION_DECISION_FIELD_INVALID"
-                    )
-                selected[pair] = field
-            merged = deepcopy(dict(current))
-            rows = merged.get("card_projection")
-            if not isinstance(rows, list):
-                raise ValueError("WORKFLOW_MODEL_EXAM_PARTITION_ROWS_REQUIRED")
-            diagnostic_by_id = {
-                str(row["pack_id"]): row for row in diagnostics
-            }
-            for row in rows:
-                if not isinstance(row, dict):
-                    raise ValueError(
-                        "WORKFLOW_MODEL_EXAM_PARTITION_ROW_MAPPING_REQUIRED"
-                    )
-                pack_id = str(row.get("pack_id"))
-                diagnostic = diagnostic_by_id.get(pack_id)
-                if diagnostic is None:
-                    raise ValueError(
-                        "WORKFLOW_MODEL_EXAM_PARTITION_DIAGNOSTIC_MISSING"
-                    )
-                exact_source = set(diagnostic["exact_source_case_ids"])
-                for field in partition_fields:
-                    field_value = row.get(field)
-                    if not isinstance(field_value, dict) or not isinstance(
-                        field_value.get("case_ids"), list
-                    ):
-                        raise ValueError(
-                            "WORKFLOW_MODEL_EXAM_PARTITION_FIELD_INVALID"
-                        )
-                    field_value["case_ids"] = [
-                        case_id for case_id in field_value["case_ids"]
-                        if case_id in exact_source
-                    ]
-                for decision_target in decision_targets:
-                    if decision_target["pack_id"] != pack_id:
-                        continue
-                    case_id = str(decision_target["case_id"])
-                    for field in partition_fields:
-                        row[field]["case_ids"] = [
-                            value for value in row[field]["case_ids"]
-                            if value != case_id
-                        ]
-                    row[selected[(pack_id, case_id)]]["case_ids"].append(case_id)
-            return merged
-
-        current_audit = audit
         for repair_round in range(1, MAX_STRUCTURAL_REPAIR_ROUNDS + 1):
-            diagnostics = partition_diagnostics(response)
+            diagnostics = (
+                partition_diagnostics(response, target_ids, shard.source)
+                if artifact == "card_projection"
+                else []
+            )
             decision_targets = partition_decision_targets(diagnostics)
-            use_directed_partition_patch = (
+            if (
                 artifact == "card_projection"
                 and repair_round == MAX_STRUCTURAL_REPAIR_ROUNDS
                 and bool(decision_targets)
-            )
-            if use_directed_partition_patch:
-                patch_schema = partition_patch_schema(decision_targets)
-                repair_prompt = json.dumps(
-                    {
-                        "instruction": (
-                            "Return only the requested partition decisions in exact order. "
-                            "For each duplicate case choose the one current semantic field to "
-                            "keep; for each missing case choose the best semantic field to add. "
-                            "Do not rewrite the projection and do not omit a decision."
-                        ),
-                        "repair_round": repair_round,
-                        "artifact": artifact,
-                        "decision_targets": decision_targets,
-                        "partition_diagnostics": diagnostics,
-                        "target_source": target_source,
-                        "current_response": response,
-                        "output_schema": patch_schema,
-                        "source_task_prompt_sha256": hashlib.sha256(
-                            prompt.encode("utf-8")
-                        ).hexdigest().upper(),
-                    },
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                )
-                patch_response = self._provider_call(
-                    run_id=run_id,
-                    stage_root=stage_root,
-                    state=state,
-                    target=target,
-                    prompt=repair_prompt,
-                    response_schema=patch_schema,
-                    structured_chat=structured_chat,
-                    call_kind=(
-                        "DIRECTED_PARTITION_PATCH_CARD_PROJECTION_ROUND_2"
-                    ),
-                )
-                response = merge_partition_patch(
-                    response,
-                    patch_response,
-                    diagnostics,
-                    decision_targets,
-                )
-                repaired_audit = protocol.audit_artifact(
-                    form=dict(form),
-                    response=response,
-                    schema=dict(schema),
-                    artifact=artifact,
-                    target_ids=target_ids,
-                )
-                _write_json_create_only(
-                    stage_root
-                    / "partition_patches"
-                    / (
-                        f"{artifact}-{target_ids[0]}-{target_ids[-1]}-"
-                        "round-02.json"
-                    ),
-                    {
-                        "schema_version": "WorkflowModelExamPartitionPatch-v1",
-                        "decision_targets": decision_targets,
-                        "patch_response": patch_response,
-                        "merged_response_sha256": _sha256(response),
-                        "audit": repaired_audit,
-                    },
+            ):
+                response, audit = self._patch_shard_partition(
+                    shard, repair_round, response, diagnostics, decision_targets
                 )
             else:
-                repair_prompt = json.dumps(
-                    {
-                        "instruction": (
-                            "Repair all and only this failed Card Distiller shard. Return "
-                            "the complete exact target set in the original order and no other rows. "
-                            "Do not repeat the current response unchanged; correct every listed defect. "
-                            "For card_projection, do not stop after deduplicating: reassign every "
-                            "missing source case_id so each exact source case appears once."
-                        ),
-                        "repair_round": repair_round,
-                        "maximum_repair_rounds": MAX_STRUCTURAL_REPAIR_ROUNDS,
-                        "artifact": artifact,
-                        "target_ids": target_ids,
-                        "defects": current_audit["defects"],
-                        "artifact_contract": artifact_contract,
-                        "partition_diagnostics": diagnostics,
-                        "target_source": target_source,
-                        "current_response": response,
-                        "output_schema": schema,
-                        "source_task_prompt_sha256": hashlib.sha256(
-                            prompt.encode("utf-8")
-                        ).hexdigest().upper(),
-                    },
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                )
-                response = self._provider_call(
-                    run_id=run_id,
-                    stage_root=stage_root,
-                    state=state,
-                    target=target,
-                    prompt=repair_prompt,
-                    response_schema=schema,
-                    structured_chat=structured_chat,
-                    call_kind=(
-                        f"STRUCTURAL_REPAIR_{artifact.upper()}_ROUND_{repair_round}"
-                    ),
-                )
-                repaired_audit = protocol.audit_artifact(
-                    form=dict(form),
-                    response=response,
-                    schema=dict(schema),
-                    artifact=artifact,
-                    target_ids=target_ids,
-                )
-            repaired_audit_name = (
-                f"{artifact}-{target_ids[0]}-{target_ids[-1]}-repaired.json"
+                response, audit = self._repair_shard(shard, repair_round, response, audit, diagnostics)
+            audit_name = (
+                f"{shard.name}-repaired.json"
                 if repair_round == 1
-                else (
-                    f"{artifact}-{target_ids[0]}-{target_ids[-1]}-"
-                    f"repair-{repair_round:02d}.json"
-                )
+                else f"{shard.name}-repair-{repair_round:02d}.json"
             )
-            _write_json_create_only(
-                stage_root / "audits" / repaired_audit_name, repaired_audit
-            )
-            if repaired_audit["status"] == "PASS":
+            _write_json_create_only(stage_root / "audits" / audit_name, audit)
+            if audit["status"] == "PASS":
                 return response
-            current_audit = repaired_audit
         raise ValueError("WORKFLOW_MODEL_EXAM_SHARD_CONTRACT_UNCLOSED")
+
+    def _repair_shard(
+        self,
+        shard: _Shard,
+        repair_round: int,
+        response: Mapping[str, Any],
+        audit: Mapping[str, Any],
+        diagnostics: list[dict[str, Any]],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """One repair round: ask for the whole shard again with the last audit's defects, the contract,
+        the partition diagnostics and the source rows. Returns the reply and its audit."""
+        repair_prompt = shard.request(
+            {
+                "instruction": (
+                    "Repair all and only this failed Card Distiller shard. Return "
+                    "the complete exact target set in the original order and no other rows. "
+                    "Do not repeat the current response unchanged; correct every listed defect. "
+                    "For card_projection, do not stop after deduplicating: reassign every "
+                    "missing source case_id so each exact source case appears once."
+                ),
+                "repair_round": repair_round,
+                "maximum_repair_rounds": MAX_STRUCTURAL_REPAIR_ROUNDS,
+                "artifact": shard.artifact,
+                "target_ids": shard.target_ids,
+                "defects": audit["defects"],
+                "artifact_contract": shard.contract(),
+                "partition_diagnostics": diagnostics,
+                "target_source": shard.source,
+                "current_response": response,
+                "output_schema": shard.schema,
+            }
+        )
+        response = self._shard_call(
+            shard,
+            repair_prompt,
+            shard.schema,
+            f"STRUCTURAL_REPAIR_{shard.artifact.upper()}_ROUND_{repair_round}",
+        )
+        return response, shard.audit(response)
+
+    def _patch_shard_partition(
+        self,
+        shard: _Shard,
+        repair_round: int,
+        response: Mapping[str, Any],
+        diagnostics: list[dict[str, Any]],
+        decision_targets: list[dict[str, Any]],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """The last round of a card projection: ask only which field each missing or doubled case goes
+        to, merge the decisions into the current projection and record the patch. Returns the merged
+        projection and its audit."""
+        patch_schema = partition_patch_schema(decision_targets, shard.target_ids)
+        repair_prompt = shard.request(
+            {
+                "instruction": (
+                    "Return only the requested partition decisions in exact order. "
+                    "For each duplicate case choose the one current semantic field to "
+                    "keep; for each missing case choose the best semantic field to add. "
+                    "Do not rewrite the projection and do not omit a decision."
+                ),
+                "repair_round": repair_round,
+                "artifact": shard.artifact,
+                "decision_targets": decision_targets,
+                "partition_diagnostics": diagnostics,
+                "target_source": shard.source,
+                "current_response": response,
+                "output_schema": patch_schema,
+            }
+        )
+        patch_response = self._shard_call(
+            shard, repair_prompt, patch_schema, "DIRECTED_PARTITION_PATCH_CARD_PROJECTION_ROUND_2"
+        )
+        response = merge_partition_patch(response, patch_response, diagnostics, decision_targets)
+        audit = shard.audit(response)
+        _write_json_create_only(
+            shard.stage_root / "partition_patches" / f"{shard.name}-round-02.json",
+            {
+                "schema_version": "WorkflowModelExamPartitionPatch-v1",
+                "decision_targets": decision_targets,
+                "patch_response": patch_response,
+                "merged_response_sha256": _sha256(response),
+                "audit": audit,
+            },
+        )
+        return response, audit
+
+    def _shard_call(
+        self,
+        shard: _Shard,
+        prompt: str,
+        response_schema: Mapping[str, Any],
+        call_kind: str,
+    ) -> dict[str, Any]:
+        """One request of a shard to the model under test (_provider_call)."""
+        return self._provider_call(
+            run_id=shard.run_id,
+            stage_root=shard.stage_root,
+            state=shard.state,
+            target=shard.target,
+            prompt=prompt,
+            response_schema=response_schema,
+            structured_chat=shard.structured_chat,
+            call_kind=call_kind,
+        )
 
     @staticmethod
     def _project_directed_repair_schema(

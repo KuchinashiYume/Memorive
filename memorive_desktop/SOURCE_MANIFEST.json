@@ -3942,8 +3942,8 @@
     },
     {
       "path": "source/memorive/exams/card_distiller/__init__.py",
-      "sha256": "c9d31e48e0928f9d7f958f965385314790920fb5e4cffc54f5d940012d7eeaee",
-      "bytes": 1817
+      "sha256": "b479cb68629a9905dfa1c4219fa4dfe51b6e364577a9d6ae4e3b00bc8917809b",
+      "bytes": 1910
     },
     {
       "path": "source/memorive/exams/card_distiller/direct_executor.py",
@@ -3952,13 +3952,18 @@
     },
     {
       "path": "source/memorive/exams/card_distiller/executor.py",
-      "sha256": "2bd9fb8ca830ecd01bd9c2354f2bda67114a50242c190797c351840e039ef9c1",
-      "bytes": 89128
+      "sha256": "8b1173f41f83f12f3d87cbe326042ba0faa8d568687355c04a73fcd829f5a2c8",
+      "bytes": 80592
     },
     {
       "path": "source/memorive/exams/card_distiller/language_bank_executor.py",
       "sha256": "d79003dd50daf37c66a1ce167ebfc91fbbcc78e5d85503417fb5c46c00fa8150",
       "bytes": 19830
+    },
+    {
+      "path": "source/memorive/exams/card_distiller/partition.py",
+      "sha256": "26e56fc0353d35cf99f2e38212cb5c327a1f6fbcb3d4c2e4aeb58d40d6194723",
+      "bytes": 9915
     },
     {
       "path": "source/memorive/exams/card_distiller/policy.py",

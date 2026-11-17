@@ -4121,8 +4121,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "287a57f3974804798a05af6d45b1dea50a15efe71b4a2abb54eda61e3d5ab23e",
-      "bytes": 276564
+      "sha256": "83d02601d34cff26c25991da62eb29a4f7bc068ba5988894860deb1b9da5f5ee",
+      "bytes": 276753
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -9851,8 +9851,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/exams/card_distiller/__init__.py",
-      "sha256": "c9d31e48e0928f9d7f958f965385314790920fb5e4cffc54f5d940012d7eeaee",
-      "bytes": 1817
+      "sha256": "b479cb68629a9905dfa1c4219fa4dfe51b6e364577a9d6ae4e3b00bc8917809b",
+      "bytes": 1910
     },
     {
       "path": "memorive_desktop/source/memorive/exams/card_distiller/direct_executor.py",
@@ -9861,8 +9861,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/exams/card_distiller/executor.py",
-      "sha256": "2bd9fb8ca830ecd01bd9c2354f2bda67114a50242c190797c351840e039ef9c1",
-      "bytes": 89128
+      "sha256": "8b1173f41f83f12f3d87cbe326042ba0faa8d568687355c04a73fcd829f5a2c8",
+      "bytes": 80592
     },
     {
       "path": "memorive_desktop/source/memorive/exams/card_distiller/language_bank_executor.py",
@@ -9873,6 +9873,11 @@
       "path": "memorive_desktop/source/memorive/exams/card_distiller/policy.py",
       "sha256": "b03be992cfdf8d3cf06d5d537216115996e3e67c706d78abee29b43487ff3820",
       "bytes": 6019
+    },
+    {
+      "path": "memorive_desktop/source/memorive/exams/card_distiller/partition.py",
+      "sha256": "26e56fc0353d35cf99f2e38212cb5c327a1f6fbcb3d4c2e4aeb58d40d6194723",
+      "bytes": 9915
     },
     {
       "path": "memorive_desktop/source/memorive/exams/embedding/__init__.py",
