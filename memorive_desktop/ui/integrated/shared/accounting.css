@@ -1,13 +1,13 @@
 /* desktop-accounting-css-start */
 .desktop-accounting-panel {
-  --desktop-accounting-bg: #F3F0EA;
-  --desktop-accounting-surface: #FBF9F5;
+  --desktop-accounting-bg: #F0EDE6;
+  --desktop-accounting-surface: #FFFDF9;
   --desktop-accounting-surface-strong: #FFFDF9;
-  --desktop-accounting-selected: #EEE8DE;
+  --desktop-accounting-selected: #EFEAE0;
   --desktop-accounting-text: #2A2723;
-  --desktop-accounting-muted: #746D64;
-  --desktop-accounting-border: #DDD6CB;
-  --desktop-accounting-border-strong: #B9B0A4;
+  --desktop-accounting-muted: #756D64;
+  --desktop-accounting-border: #DFD9CF;
+  --desktop-accounting-border-strong: #B6AEA3;
   --desktop-accounting-accent: #C8704F;
   --desktop-accounting-blue: #557C9E;
   --desktop-accounting-green: #4E7E65;

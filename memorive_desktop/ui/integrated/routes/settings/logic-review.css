@@ -10,7 +10,7 @@
 .paper-review-logic-task label {font-size:12px;display:flex;gap:8px;}
 .paper-review-library-report {display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .paper-review-report-risk {display:inline-flex;align-items:center;gap:6px;font-size:12px;}
-.paper-review-dialog {background:var(--surface,#faf9f5);color:var(--text,#272923);border:1px solid var(--border-color,#a0a097);border-radius:14px;padding:22px;width:min(760px,85vw);max-height:82vh;overflow:auto;}
+.paper-review-dialog {background:var(--surface,#FFFDF9);color:var(--text,#272923);border:1px solid var(--border-color,#a0a097);border-radius:14px;padding:22px;width:min(760px,85vw);max-height:82vh;overflow:auto;}
 [data-theme="dark"] .paper-review-dialog {background:#242622;color:#eee;}
 .paper-review-dialog::backdrop {background:#0005;}
 .paper-review-dialog .toolbar-group {justify-content:space-between;}

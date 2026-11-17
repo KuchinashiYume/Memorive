@@ -14,7 +14,7 @@
 .desktop-research-muted { color:var(--text-secondary,#6e675e);font-size:13px;overflow-wrap:anywhere; }
 .desktop-research-history h4 { margin:12px 0;font-size:15px; }
 .desktop-research-run { width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:none;border:0;border-bottom:1px solid var(--border-default,#dfd9cf);padding:14px 0;color:inherit;cursor:pointer; }
-.desktop-research-run:hover { background:var(--surface-hover,#f3efe8); }
+.desktop-research-run:hover { background:var(--surface-hover,#F0EDE6); }
 .desktop-research-run small { color:var(--text-secondary,#6e675e); }
 .desktop-research-paper { padding:0 0 18px;border-bottom:1px solid var(--border-default,#dfd9cf);overflow-wrap:anywhere; }
 .desktop-research-paper h4 { font-family:inherit;font-size:var(--desktop-body-size,16px);line-height:1.5;margin:0; }
@@ -33,10 +33,10 @@
 .desktop-research-preferences[open] > summary .switch-copy > span::after {content:' ▴';}
 .desktop-research-preference-fields {padding:0 18px 18px;display:grid;gap:16px;}
 .desktop-research-preference-fields .field-label {display:grid;gap:8px;}
-.desktop-research-preference-fields input[type=range] {padding:0;accent-color:#925637;}
+.desktop-research-preference-fields input[type=range] {padding:0;accent-color:#8F5334;}
 .desktop-research-preference-fields output {font-variant-numeric:tabular-nums;}
 .desktop-research-preference-fields > button {justify-self:start;min-width:88px;}
-.desktop-research-direction {border:1px solid var(--line,#ded8ce);border-radius:12px;margin:12px 0;}
+.desktop-research-direction {border:1px solid var(--line,#DFD9CF);border-radius:12px;margin:12px 0;}
 .desktop-research-direction > summary {display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;}
 .desktop-research-direction > summary > strong {flex:1;min-width:0;}
 .desktop-research-channel-options,.desktop-research-feedback-row {display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0;}
@@ -52,7 +52,7 @@
 #desktop-settings-preview .desktop-research-section-head {display:flex;align-items:center;justify-content:space-between;gap:12px;}
 #desktop-settings-preview .desktop-research-section-head h4 {margin:0;}
 #desktop-settings-preview .desktop-research-section-head button {flex-shrink:0;}
-#desktop-settings-preview .desktop-research-advanced {padding:10px 0;border-top:1px solid var(--line,#ded8ce);min-width:0;}
+#desktop-settings-preview .desktop-research-advanced {padding:10px 0;border-top:1px solid var(--line,#DFD9CF);min-width:0;}
 #desktop-settings-preview .desktop-research-advanced > summary {padding:0;min-height:28px;font:inherit;cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;}
 #desktop-settings-preview .desktop-research-advanced > summary::after {content:'›';margin-left:auto;}
 #desktop-settings-preview .desktop-research-advanced[open] > summary::after {transform:rotate(90deg);}

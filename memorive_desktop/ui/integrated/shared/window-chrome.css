@@ -58,7 +58,7 @@
 [data-desktop-route] .desktop-navigation > .desktop-logo {flex-shrink:0;}
 [data-desktop-route] .desktop-navigation > .desktop-nav-list {flex:1;min-height:0;overflow:auto;align-content:start;}
 .desktop-nav-user {display:flex;align-items:center;gap:10px;min-height:60px;margin:12px 12px 14px;padding:10px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--desktop-text-primary,#302d26);font:inherit;text-align:left;cursor:pointer;flex:none;min-width:0;}
-.desktop-nav-user:hover {background:var(--desktop-surface-hover,#eae5db);border-color:var(--desktop-border-default,#dfd9cf);}
+.desktop-nav-user:hover {background:var(--desktop-surface-hover,#E8E3DA);border-color:var(--desktop-border-default,#dfd9cf);}
 .desktop-nav-user:focus-visible {outline:2px solid var(--desktop-accent,#955b3e);outline-offset:2px;}
 .desktop-nav-avatar {display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:50%;background:var(--desktop-surface-raised,#fffdf9);overflow:hidden;}
 .desktop-nav-avatar img {width:100%;height:100%;object-fit:cover;}
@@ -96,7 +96,7 @@
 .desktop-native-chrome .desktop-global-bar .desktop-global-right {flex:none;}
 .desktop-native-chrome .desktop-global-bar .desktop-global-left {overflow:hidden;flex:1;}
 .desktop-native-chrome .desktop-global-bar .desktop-global-left > button {flex:none;}
-.desktop-native-chrome .desktop-window-control {display:grid;place-items:center;width:40px;height:36px;flex:none;border:0;border-radius:9px;padding:10px;background:transparent;color:var(--desktop-text-secondary,#797368);cursor:default;}
+.desktop-native-chrome .desktop-window-control {display:grid;place-items:center;width:40px;height:36px;flex:none;border:0;border-radius:9px;padding:10px;background:transparent;color:var(--desktop-text-secondary,#7b756b);cursor:default;}
 .desktop-native-chrome .desktop-window-control:hover {background:var(--desktop-surface-subtle,#f0ede6);color:var(--desktop-text-primary,#302d26);}
 .desktop-native-chrome .desktop-window-control[data-window-action="close"]:hover {background:#f7e8e1;color:#a04732;}
 .desktop-window-control svg,.desktop-close-x svg {width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
@@ -105,7 +105,7 @@
 .desktop-close-dialog::backdrop {background:#302c2429;}
 .desktop-close-header {display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 22px;}
 .desktop-close-header h2 {margin:0;font:inherit;font-size:21px;font-weight:500;}
-.desktop-close-x {display:grid;place-items:center;width:30px;height:30px;padding:5px;flex:none;border:0;border-radius:8px;background:transparent;color:#81796d;cursor:pointer;}
+.desktop-close-x {display:grid;place-items:center;width:30px;height:30px;padding:5px;flex:none;border:0;border-radius:8px;background:transparent;color:#827b70;cursor:pointer;}
 .desktop-close-x:hover {background:#f0ede6;color:#302d26;}
 .desktop-close-notice {max-width:430px;margin:0 0 20px;color:#81715b;font-size:14px;}
 .desktop-close-notice[hidden],.desktop-close-dialog button[hidden] {display:none;}

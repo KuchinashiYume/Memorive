@@ -4192,7 +4192,7 @@
       shape('path', { d: 'M15 0v20M0 10h30', stroke: '#FFFFFF', 'stroke-width': 6 });
       shape('path', { d: 'M15 0v20M0 10h30', stroke: '#C8102E', 'stroke-width': 3.2 });
     } else {
-      banded(['#3A6EA5', '#FFFFFF', '#D04A4A']);
+      banded(['#3E6FA4', '#FFFFFF', '#D04A4A']);
     }
     span.appendChild(svg);
     return span;
