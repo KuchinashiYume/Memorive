@@ -123,7 +123,7 @@ def notice_page(bundle: Path, language: str, text: Mapping[str, str], font_scale
     typography = "\n".join(_function_source(page, head) for head in _TYPOGRAPHY)
     e = lambda key: html.escape(text[key], quote=True)
     setup = (
-        "const fontBaselines = new WeakMap();\n" + typography + "\n"
+        "const typedElements = new WeakSet();\n" + typography + "\n"
         f"document.body.dataset.desktopLanguage = {json.dumps(language)};\n"
         f"applyFontScale({int(font_scale_percent)});\n"
     )

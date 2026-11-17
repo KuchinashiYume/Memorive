@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "a0988d3e7b0ab373d3fe642e65b0a4ef4012d8d05c59d09d0190d507f811607b",
-      "bytes": 2700123
+      "sha256": "5505fc2e2d07e15e678c11a1388a856644136e6c158bbbd5eabeb16e067b9f50",
+      "bytes": 2700423
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -2866,7 +2866,7 @@
     },
     {
       "path": "memorive_desktop/product/desktop/startup_notice.py",
-      "sha256": "ce5c36bf1b8bfea7613a4bf587eab4cf1b7d680e9bb1522ba4476785f639b392",
+      "sha256": "549d654a935b2bc6775677d4ebf5c53b68acf784001696c1ef1094de3317c5a4",
       "bytes": 11213
     },
     {
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "de121857074e76e43b51b7df6043834a0ca0230dad13beb7a49f8aecb0776853",
+      "sha256": "d1332e568a5ece068cac5a860bb2d53ade482f411cee0d1ff4c949daacaf865d",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "ce2d0fae2d66b50813af8961a3f84fbc1e076b6a82f8b46d39bd61076fe9cb32",
+      "sha256": "c2e13530eb7fc656851899f202a6064aec5106503bc035065784da40ce63b185",
       "bytes": 275229
     },
     {
@@ -4911,8 +4911,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/app.js",
-      "sha256": "30abdd724443913f82fd3b13ab28e9573e6f15ba91433602ac290cf71ce8ce4e",
-      "bytes": 361730
+      "sha256": "9530deda641fb67688a89490881d2f4bb51e32328000e5c0bbd1efd0562630bd",
+      "bytes": 361384
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/content-language.js",
@@ -5021,8 +5021,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/typography.css",
-      "sha256": "08ed084bceeea741c087e4757a43b85a036b636b036a572d8d3be3a1846238bf",
-      "bytes": 7312
+      "sha256": "b1964cc7f42183c9c99e54ab52a605f916faf9dc1c015c8cd513a8aa4977ebeb",
+      "bytes": 7958
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/window-chrome.css",
