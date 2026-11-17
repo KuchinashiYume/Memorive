@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "a60a70bb12b4fd716a68a0aeea8d6286e840855f1e9f5e27a0502e08a3c40386",
-      "bytes": 2700277
+      "sha256": "576725d7e31013e0f3a0350c7a939a17427bdcb500b12e2dcbe82065d1092a02",
+      "bytes": 2700453
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "b20f7a683ca3da874b7a0da2129e6afdf7b18f978a9d30ed151f0a83f6f4f064",
+      "sha256": "d8feec1716be1d47631921c8052a88947afb5b893fd1a3226b8f862a2e6945cd",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "497e3a42480bd140076b97c5a80c1e335fb884df34a2b4676416e29176c291d2",
+      "sha256": "5ebeab97dd269db9df07ca7d36914c01d4eb56fc36a55f108a3cc62bbb642c18",
       "bytes": 275229
     },
     {
@@ -4796,8 +4796,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/developer-clients.js",
-      "sha256": "c34f2d1a9babac7e71879fc37804c1c5466d2f600b3ef8adb5de9a93e6ff0b4d",
-      "bytes": 10388
+      "sha256": "5a06fd5c36a86a327ec637c891e3ab0f1679a93c78402972fdfc972576cb6ea3",
+      "bytes": 10564
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/exam-panel.js",

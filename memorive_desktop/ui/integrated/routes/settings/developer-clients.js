@@ -228,7 +228,9 @@
   }
   q('#memo-agent-config-details').addEventListener('toggle',()=>{if(q('#memo-agent-config-details').open)load().catch(fail);});
   q('#memo-automation-details').addEventListener('toggle',()=>{if(q('#memo-automation-details').open)load().catch(e=>fail(e,'automation'));});
-  load().catch(fail);
+  // The desktop service answers once pywebview is ready.
+  if(window.pywebview?.api?.call)load().catch(fail);
+  else window.addEventListener('pywebviewready',()=>load().catch(fail),{once:true});
  }
  init();   // settings.js, loaded earlier, has published its bridge; the panel's markup is in the page
  window.__MEMO_DEVELOPER__=Object.freeze({load,save,discard,openClients,openAutomation,inspect:()=>({loaded:!!data,dirty:dirty(),editing,clients:data?.clients.length||0,api_version:data?.api_version})});
