@@ -302,7 +302,7 @@ def _cli_argv(
                 "--disable-slash-commands",
                 "--strict-mcp-config",
                 "--mcp-config",
-                "{}",
+                '{"mcpServers":{}}',
                 "--no-chrome",
                 "--no-session-persistence",
                 "--prompt-suggestions",
