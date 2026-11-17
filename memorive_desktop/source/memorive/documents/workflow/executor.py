@@ -608,765 +608,775 @@ class CorePipelineExecutor:
         with _EXECUTION_LOCK:
             self._bind_environment()
         with PIPELINE_LANES.paper((str(self.runtime_root), context.source_sha256)):
+            return self._run_paper(context, completed_node_ids, on_node_completed)
+
+    def _run_paper(
+        self,
+        context: CoreExecutionContext,
+        completed_node_ids: tuple[str, ...],
+        on_node_completed: Callable[[str, int], None],
+    ) -> CoreExecutionResult:
+        """Run the paper's nodes in order while execute holds the paper's lane. A node listed in
+        completed_node_ids is not run again; its saved output is read back instead."""
+        execution_checkpoint()
+        completed = set(completed_node_ids)
+        node_ids=node_ids_for(context.workflow_definition)
+        paper_id = self._paper_id(context)
+        title = Path(context.source_name).stem
+        stage_root = context.run_root / "core_stages"
+        stage_root.mkdir(parents=True, exist_ok=True)
+        bridge = CoreModelBridge(
+            workflow_config=context.workflow_config,
+            validation_runner=self.validation_runner,
+            evidence_root=context.run_root / "model_calls",
+            node_override_provider=(
+                (
+                    lambda node_id: self.task_control_store.overrides(context.job_id).get(
+                        node_id, {}
+                    )
+                )
+                if self.task_control_store is not None
+                else None
+            ),
+        )
+
+        import memorive.models.gateway.gateway as gateway_module
+
+        gateway_binding = gateway_module.gateway_scope(bridge)
+        gateway_binding.__enter__()
+        held_lanes = {}
+
+        def release_lanes():
+            for key, lock in list(held_lanes.items()):
+                PIPELINE_LANES.leave(key, lock)
+                held_lanes.pop(key)
+
+        def mark(node_id: str) -> None:
             execution_checkpoint()
-            completed = set(completed_node_ids)
-            node_ids=node_ids_for(context.workflow_definition)
-            paper_id = self._paper_id(context)
-            title = Path(context.source_name).stem
-            stage_root = context.run_root / "core_stages"
-            stage_root.mkdir(parents=True, exist_ok=True)
-            bridge = CoreModelBridge(
-                workflow_config=context.workflow_config,
-                validation_runner=self.validation_runner,
-                evidence_root=context.run_root / "model_calls",
-                node_override_provider=(
-                    (
-                        lambda node_id: self.task_control_store.overrides(context.job_id).get(
-                            node_id, {}
+            if node_id in completed:
+                return
+            on_node_completed(node_id, node_ids.index(node_id) + 1)
+            completed.add(node_id)
+            if node_id in held_lanes:
+                PIPELINE_LANES.leave(node_id, held_lanes.pop(node_id))
+
+        def start(*node_ids: str) -> None:
+            execution_checkpoint()
+            release_lanes()
+            from memorive.models.scheduling import execution_activity
+            pending = [node_id for node_id in node_ids if node_id not in completed]
+            if not pending:
+                return
+            # Claim each node only at its own execution boundary.
+            execution_activity('WAITING', pending[0])
+            for node_id in pending:
+                while True:
+                    held_lanes[node_id] = PIPELINE_LANES.enter(node_id)
+                    started = (self.task_control_store.mark_started(context.job_id, node_id,
+                        pause_callback=lambda: execution_activity('PAUSED_BEFORE', node_id))
+                        if self.task_control_store is not None else {'status':'PASS'})
+                    if started['status'] != 'PAUSED':
+                        break
+                    release_lanes()
+                    execution_checkpoint()
+            bridge.active_node_id = pending[0]
+            execution_activity('RUNNING', pending[0])
+
+        try:
+            if "01_DOCUMENT_INGEST" not in completed:
+                start("01_DOCUMENT_INGEST")
+                if not self._document_processing_document_complete(paper_id):
+                    from memorive.documents.processing import run_document_processing
+
+                    result = run_document_processing(
+                        context.source_path,
+                        data_ownership="self",
+                        doc_type="literature",
+                        paper_id=paper_id,
+                        title=title,
+                        target="sandbox",
+                    )
+                    _atomic_json(stage_root / "01_document_processing.json", result)
+                    if result.status != "completed":
+                        raise RuntimeError(
+                            f"DOCUMENT_PROCESSING_FAILED:{result.stopped_at}:{result.error_type}:{result.error_message}"
                         )
+                if not self._document_processing_document_complete(paper_id):
+                    raise RuntimeError("DOCUMENT_PROCESSING_OUTPUT_VERIFICATION_FAILED")
+                if self.review_service is not None:
+                    self.review_service.structure.prepare(context,self._paper_folder(paper_id))
+                mark("01_DOCUMENT_INGEST")
+
+            if not self._document_processing_document_complete(paper_id):
+                raise RuntimeError("DOCUMENT_PROCESSING_CHECKPOINT_ARTIFACTS_MISSING")
+
+            folder = self._paper_folder(paper_id)
+            assert folder is not None
+            if DATA_NODE in node_ids:
+                if self.review_service is None:
+                    raise RuntimeError('REVIEW_SERVICE_REQUIRED')
+                self.review_service.prepare_raw(context,self._one(folder,'[RawMD]','.md'))
+                if DATA_NODE not in completed:
+                    start(DATA_NODE)
+                    effective=context.workflow_config['nodes'][DATA_NODE].copy()
+                    if self.task_control_store:
+                        effective.update(self.task_control_store.overrides(context.job_id).get(DATA_NODE,{}))
+                    self.review_service.data(context,enabled=effective.get('enabled',True))
+                    mark(DATA_NODE)
+                elif self.review_service.store.get(context.job_id)['data_state']=='WAITING_INPUT':
+                    self.review_service.data(context,enabled=context.workflow_config['nodes'][DATA_NODE].get('enabled',True))
+            source_rows, source_chunk_texts = self._load_chunks(folder, paper_id)
+            source_text = "\n".join(source_chunk_texts.values())
+            from memorive.platform.language.source import describe
+            source_language_evidence = describe(source_text)
+            source_language = source_language_evidence['language']
+            question = self._question(context, source_language)
+            validate_generated_language(
+                source_text=source_text,
+                generated_text=question,
+                source_language=source_language,
+                artifact_name="Analysis question",
+            )
+            if "02_CHUNK_EMBEDDING" not in completed:
+                start("02_CHUNK_EMBEDDING")
+                if not self._document_processing_complete(paper_id):
+                    from memorive.documents.processing import embed_from_chunks
+
+                    chunks_path = self._one(folder, "[Chunks]", ".jsonl")
+                    result = embed_from_chunks(chunks_path, target="sandbox")
+                    _atomic_json(stage_root / "02_chunk_embedding.json", result)
+                    if result.status != "completed":
+                        raise RuntimeError(
+                            f"CHUNK_EMBEDDING_FAILED:{result.error_type}:{result.error_message}"
+                        )
+                if not self._document_processing_complete(paper_id):
+                    raise RuntimeError("CHUNK_EMBEDDING_OUTPUT_VERIFICATION_FAILED")
+                _atomic_json(
+                    stage_root / "02_embedding_query_readiness.json",
+                    self._document_processing_query_readiness(paper_id),
+                )
+                mark("02_CHUNK_EMBEDDING")
+
+            folder = self._paper_folder(paper_id)
+            assert folder is not None
+
+            capabilities_evidence_root = context.run_root / "long_document_segmented_distill"
+            capabilities_summary_path = capabilities_evidence_root / "segmented_distill_summary.json"
+            capabilities_distill_metrics: dict[str, Any] = (
+                json.loads(capabilities_summary_path.read_text(encoding="utf-8"))
+                if capabilities_summary_path.is_file()
+                else {}
+            )
+            card_path = self._resume_card(folder, stage_root, completed) if "03_CARD_DISTILL" in completed else None
+            if "03_CARD_DISTILL" not in completed:
+                start("03_CARD_DISTILL")
+                effective_workflow_config = (
+                    self.task_control_store.effective_workflow_config(
+                        context.job_id, context.workflow_config
                     )
                     if self.task_control_store is not None
+                    else context.workflow_config
+                )
+                segmented_distiller = CoreSegmentedDistiller(
+                    workflow_config=effective_workflow_config,
+                    evidence_root=capabilities_evidence_root,
+                )
+                distill_folder = self._card_distill_revision(
+                    folder, context,
+                    effective_workflow_config.get("nodes", {}).get("03_CARD_DISTILL", {}),
+                )
+                result = segmented_distiller.distill(
+                    distill_folder,
+                    target="sandbox",
+                    overwrite=False,
+                )
+                capabilities_distill_metrics = deepcopy(segmented_distiller.last_metrics)
+                _atomic_json(
+                    stage_root / "03_distill.json",
+                    {"core_result": result, "long_document": capabilities_distill_metrics},
+                )
+                if result.status != "completed" or not result.card_path:
+                    raise RuntimeError(
+                        f"Core_EVIDENCE_EXTRACTION_FAILED:{result.error_type}:{result.error_message}"
+                    )
+                card_path = Path(result.card_path)
+                seed = stage_root / "03_card_seed.md"
+                if not seed.exists():
+                    shutil.copy2(card_path, seed)
+                _atomic_json(stage_root / "03_card_seed_binding.json", {
+                    "sha256": _sha256_file(seed), "source_sha256": context.source_sha256,
+                    "node_id": "03_CARD_DISTILL", "job_id": context.job_id})
+                mark("03_CARD_DISTILL")
+            assert card_path is not None
+
+            if not {"04_CARD_CROSS_CHECK", "05_CARD_ADMISSION"}.issubset(completed):
+                start("04_CARD_CROSS_CHECK")
+                from memorive.documents.workflow.card_review import review_card_revision
+                seed = stage_root / "03_card_seed.md"
+                review_input = seed if seed.is_file() else card_path
+                # Keep the original Card basename for the core readers.
+                if seed.is_file():
+                    named_seed = stage_root / card_path.name
+                    if not named_seed.exists():
+                        shutil.copy2(seed, named_seed)
+                    review_input = named_seed
+                def before_admission():
+                    mark("04_CARD_CROSS_CHECK")
+                    start("05_CARD_ADMISSION")
+                card_path = review_card_revision(review_input, folder, stage_root,
+                                                before_publish=before_admission)
+                admitted_seed = stage_root / "05_admitted_card.md"
+                if not admitted_seed.exists():
+                    shutil.copy2(card_path, admitted_seed)
+                if _sha256_file(admitted_seed) != _sha256_file(card_path):
+                    raise RuntimeError("Core_ADMITTED_CARD_CHECKPOINT_CONFLICT")
+                _atomic_json(stage_root / "05_admitted_card_binding.json", {
+                    "sha256": _sha256_file(admitted_seed), "source_sha256": context.source_sha256,
+                    "node_id": "05_CARD_ADMISSION", "job_id": context.job_id})
+                mark("04_CARD_CROSS_CHECK")
+                mark("05_CARD_ADMISSION")
+
+            pack_pickle = stage_root / "06_context_pack.pkl"
+            if DATA_NODE in node_ids and self.review_service:
+                self.review_service.card_ready(context,card_path,source_rows=source_rows)
+            pack_json = stage_root / "06_context_pack.json"
+            if "06_CONTEXT_PACK" not in completed:
+                start("06_CONTEXT_PACK")
+                from memorive.research.retrieval import build_context_pack, retrieve_candidates, understand_query
+
+                understood = understand_query(question)
+                # Document analysis needs the admitted paper's methods,
+                # results, conclusions, and source qualifications.
+                rows, chunk_texts = self._load_chunks(folder, paper_id)
+                from memorive.research.retrieval.candidate_retrieval import _read_frontmatter
+                from memorive.research.retrieval.document_context import (
+                    bind_document_card, document_candidates,
+                    document_candidates_from_sidecar,
+                )
+                card_for_context = _read_frontmatter(card_path)
+                if not card_for_context:
+                    raise RuntimeError('Core_CONTEXT_CARD_UNREADABLE')
+                card_for_context = bind_document_card(
+                    card_for_context, paper_id,
+                    hashlib.sha256(card_path.read_bytes()).hexdigest(),
+                )
+                try:
+                    candidates = retrieve_candidates(
+                        question, understood.strategy, target="sandbox",
+                        paper_id=paper_id,
+                    )
+                except Exception as retrieval_error:
+                    if not _is_chroma_hnsw_read_failure(retrieval_error):
+                        raise
+                    candidates = document_candidates_from_sidecar(
+                        rows, card_for_context, paper_id
+                    )
+                else:
+                    # Question top-k seeds priority; whole-document coverage
+                    # then adds every eligible chunk from the admitted paper.
+                    candidates = document_candidates(
+                        candidates, rows, card_for_context
+                    )
+                effective_workflow_config = (
+                    self.task_control_store.effective_workflow_config(
+                        context.job_id, context.workflow_config
+                    )
+                    if self.task_control_store is not None
+                    else context.workflow_config
+                )
+                analysis_node = effective_workflow_config.get("nodes", {}).get(
+                    "07_ANALYSIS", {}
+                )
+                capacity = describe_capacity(
+                    profile_kind=analysis_node.get("profile_kind"),
+                    execution_profile=analysis_node.get("execution_profile"),
+                    node_requested_output_tokens=65_536,
+                )
+                # Reuse the existing estimator and actual rendered prompt;
+                # do not pre-deduct invented reasoning/margin constants.
+                from memorive.research.retrieval.context_pack import _cfg, _estimate_tokens
+                from memorive.research.analysis.analysis import build_payload
+                from types import SimpleNamespace
+
+                estimator = _cfg()
+                candidate_tokens = sum(
+                    _estimate_tokens(row.text, estimator['token_ratio'],
+                                     estimator['overhead_per_block'])
+                    for row in candidates.candidates
+                )
+                from memorive.research.retrieval.review_qualifications import card_review_qualifications, render_review_context
+                review_text = render_review_context(card_review_qualifications(card_for_context, paper_id=paper_id))
+                candidate_tokens += _estimate_tokens(review_text, estimator['token_ratio'], 0) if review_text else 0
+                empty_payload = build_payload(SimpleNamespace(blocks=()), question,
+                                              output_language=source_language)
+                prompt_tokens = sum(
+                    _estimate_tokens(row.get('content', ''), estimator['token_ratio'], 0)
+                    for row in empty_payload.get('messages', ())
+                )
+                pack_budget = context_pack_budget(
+                    capacity, prompt_reserve_tokens=prompt_tokens,
+                    candidate_estimated_tokens=candidate_tokens,
+                    prompt_measurement_source='ACTUAL_RENDERED_PROMPT_WITH_EXISTING_RETRIEVAL_ESTIMATOR',
+                )
+                from memorive.research.retrieval.structured_context import build_structured_context_pack
+                pack = build_structured_context_pack(
+                    candidates, question, card=card_for_context, chunks=rows,
+                    strategy=understood.strategy, retrieval_mode='single_paper_extraction',
+                    token_hard_limit=pack_budget['token_hard_limit'],
+                )
+                rows, chunk_texts = self._load_chunks(folder, paper_id)
+                block_ids = [block.source.get("chunk_id") for block in pack.blocks]
+                if (
+                    getattr(candidates, "scope_mode", None) != "paper_id"
+                    or getattr(candidates, "scope_paper_id", None) != paper_id
+                    or not block_ids
+                    or len(set(block_ids)) != len(block_ids)
+                    or any(chunk_id not in chunk_texts for chunk_id in block_ids)
+                    or pack.estimated_tokens > pack.token_hard_limit
+                ):
+                    raise RuntimeError("CORE_CONTEXT_PACK_CONTRACT_FAILED")
+                _atomic_pickle(pack_pickle, pack)
+                context_pack_artifact = {
+                        "question": question,
+                        "source_language": source_language,
+                "source_language_evidence": source_language_evidence,
+                        "understanding": understood,
+                        "candidates": candidates,
+                        "pack": pack,
+                        "summary": {
+                            "chunk_count": len(rows),
+                            "block_count": len(pack.blocks),
+                            "estimated_tokens": pack.estimated_tokens,
+                            "token_hard_limit": pack.token_hard_limit,
+                            "paper_id": paper_id,
+                            "chunk_ids": block_ids,
+                            "embedding_profile_source_node_id": "02_CHUNK_EMBEDDING",
+                            "capacity": capacity,
+                            "pack_budget": pack_budget,
+                            "truncated": pack.truncated,
+                            "original_estimated_tokens": pack.original_estimated_tokens,
+                            "retained_estimated_tokens": pack.estimated_tokens,
+                            "dropped_evidence_block_count": pack.dropped_evidence_block_count,
+                            "dropped_reason_counts": pack.dropped_reason_counts,
+                        },
+                    }
+                _validate_context_pack_language(
+                    context_pack_artifact,
+                    source_text=source_text,
+                    source_language=source_language,
+                )
+                _atomic_json(pack_json, context_pack_artifact)
+                mark("06_CONTEXT_PACK")
+            with pack_pickle.open("rb") as stream:
+                pack = pickle_compat.load(stream)
+            context_pack_summary = {
+                "truncated": bool(pack.truncated),
+                "original_estimated_tokens": int(
+                    getattr(pack, "original_estimated_tokens", 0) or 0
+                ),
+                "retained_estimated_tokens": int(pack.estimated_tokens),
+                "token_budget": int(pack.token_hard_limit),
+                "retained_block_count": len(pack.blocks),
+                "dropped_evidence_block_count": int(
+                    getattr(pack, "dropped_evidence_block_count", 0) or 0
+                ),
+                "dropped_reason_counts": deepcopy(
+                    getattr(pack, "dropped_reason_counts", None) or {}
+                ),
+                "recovery_action": (
+                    {
+                        "zh": "若需要更多证据，请为 Analysis 选择更大上下文的模型后，从 Context Pack 重新执行。",
+                        "en": "If more evidence is needed, select an Analysis model with a larger context and rerun from Context Pack.",
+                        "ja": "追加の証拠が必要な場合は、より大きなコンテキストを持つ Analysis モデルを選び、Context Pack から再実行してください。",
+                    }[source_language]
+                    if pack.truncated
                     else None
                 ),
+            }
+
+            analysis_pickle = stage_root / "07_analysis.pkl"
+            analysis_json = stage_root / "07_analysis.json"
+            analysis_md = stage_root / "07_analysis.md"
+            if "07_ANALYSIS" not in completed:
+                start("07_ANALYSIS")
+                from memorive.research.analysis import analyze
+
+                analysis = analyze(
+                    pack,
+                    question,
+                    data_ownership="self",
+                    output_language=source_language,
+                )
+                valid_ids = {block.source.get("chunk_id") for block in pack.blocks}
+                emitted_ids = [claim.source_id.get("chunk_id") for claim in analysis.literature_support]
+                if any(chunk_id not in valid_ids for chunk_id in emitted_ids):
+                    raise RuntimeError("CORE_ANALYSIS_SOURCE_ID_INVALID")
+                rendered_analysis = analysis.render(language=source_language)
+                validate_generated_language(
+                    source_text=source_text,
+                    generated_text=_canonical_bytes(analysis).decode("utf-8"),
+                    source_language=source_language,
+                    artifact_name="Analysis.json",
+                )
+                validate_generated_language(
+                    source_text=source_text,
+                    generated_text=rendered_analysis,
+                    source_language=source_language,
+                    artifact_name="Analysis.md",
+                )
+                _atomic_pickle(analysis_pickle, analysis)
+                _atomic_json(analysis_json, analysis)
+                analysis_md.write_text(rendered_analysis, encoding="utf-8")
+                mark("07_ANALYSIS")
+            with analysis_pickle.open("rb") as stream:
+                analysis = pickle_compat.load(stream)
+            if self.interaction_sink is not None:
+                execution_checkpoint()
+                # Separate observation receipt; failure never reruns a completed model call.
+                try:
+                    observation=self.interaction_sink(context,analysis)
+                except Exception:
+                    observation={"status":"OBSERVATION_DELIVERY_FAILED","model_retry_required":False}
+                if observation.get("status")!="DISABLED_BY_USER":
+                    try:
+                        _atomic_json(stage_root / "research_interaction_receipt.json",observation)
+                    except OSError:pass  # Observational persistence is not a model failure.
+            validate_generated_language(
+                source_text=source_text,
+                generated_text=analysis.render(language=source_language),
+                source_language=source_language,
+                artifact_name="Analysis checkpoint",
             )
 
-            import memorive.models.gateway.gateway as gateway_module
+            judgment_json = stage_root / "08_judgment.json"
+            if "08_JUDGMENT_CROSS_CHECK" not in completed:
+                start("08_JUDGMENT_CROSS_CHECK")
+                if not bridge.node_enabled("08_JUDGMENT_CROSS_CHECK"):
+                    judgment = {
+                        "node_id": "08_JUDGMENT_CROSS_CHECK",
+                        "execution_status": "SKIPPED",
+                        "verification_result": "NOT_ASSESSED",
+                        "reason": "DISABLED_BY_WORKFLOW_OR_TASK",
+                        "drives_knowledge_admission": False,
+                        "trace_total": 0, "trace_resolved": 0,
+                        "rulings": [],
+                        "deferred": [{"reason": "NODE_DISABLED_HUMAN_REVIEW_REQUIRED"}],
+                        "target": {"run_id": context.job_id, "paper_id": paper_id},
+                    }
+                else:
+                    from memorive.documents.card_review import verify_research_analysis
 
-            gateway_binding = gateway_module.gateway_scope(bridge)
-            gateway_binding.__enter__()
-            held_lanes = {}
-
-            def release_lanes():
-                for key, lock in list(held_lanes.items()):
-                    PIPELINE_LANES.leave(key, lock)
-                    held_lanes.pop(key)
-
-            def mark(node_id: str) -> None:
-                execution_checkpoint()
-                if node_id in completed:
-                    return
-                on_node_completed(node_id, node_ids.index(node_id) + 1)
-                completed.add(node_id)
-                if node_id in held_lanes:
-                    PIPELINE_LANES.leave(node_id, held_lanes.pop(node_id))
-
-            def start(*node_ids: str) -> None:
-                execution_checkpoint()
-                release_lanes()
-                from memorive.models.scheduling import execution_activity
-                pending = [node_id for node_id in node_ids if node_id not in completed]
-                if not pending:
-                    return
-                # Claim each node only at its own execution boundary.
-                execution_activity('WAITING', pending[0])
-                for node_id in pending:
-                    while True:
-                        held_lanes[node_id] = PIPELINE_LANES.enter(node_id)
-                        started = (self.task_control_store.mark_started(context.job_id, node_id,
-                            pause_callback=lambda: execution_activity('PAUSED_BEFORE', node_id))
-                            if self.task_control_store is not None else {'status':'PASS'})
-                        if started['status'] != 'PAUSED':
-                            break
-                        release_lanes()
-                        execution_checkpoint()
-                bridge.active_node_id = pending[0]
-                execution_activity('RUNNING', pending[0])
-
-            try:
-                if "01_DOCUMENT_INGEST" not in completed:
-                    start("01_DOCUMENT_INGEST")
-                    if not self._document_processing_document_complete(paper_id):
-                        from memorive.documents.processing import run_document_processing
-
-                        result = run_document_processing(
-                            context.source_path,
-                            data_ownership="self",
-                            doc_type="literature",
-                            paper_id=paper_id,
-                            title=title,
-                            target="sandbox",
-                        )
-                        _atomic_json(stage_root / "01_document_processing.json", result)
-                        if result.status != "completed":
-                            raise RuntimeError(
-                                f"DOCUMENT_PROCESSING_FAILED:{result.stopped_at}:{result.error_type}:{result.error_message}"
-                            )
-                    if not self._document_processing_document_complete(paper_id):
-                        raise RuntimeError("DOCUMENT_PROCESSING_OUTPUT_VERIFICATION_FAILED")
-                    if self.review_service is not None:
-                        self.review_service.structure.prepare(context,self._paper_folder(paper_id))
-                    mark("01_DOCUMENT_INGEST")
-
-                if not self._document_processing_document_complete(paper_id):
-                    raise RuntimeError("DOCUMENT_PROCESSING_CHECKPOINT_ARTIFACTS_MISSING")
-
-                folder = self._paper_folder(paper_id)
-                assert folder is not None
-                if DATA_NODE in node_ids:
-                    if self.review_service is None:
-                        raise RuntimeError('REVIEW_SERVICE_REQUIRED')
-                    self.review_service.prepare_raw(context,self._one(folder,'[RawMD]','.md'))
-                    if DATA_NODE not in completed:
-                        start(DATA_NODE)
-                        effective=context.workflow_config['nodes'][DATA_NODE].copy()
-                        if self.task_control_store:
-                            effective.update(self.task_control_store.overrides(context.job_id).get(DATA_NODE,{}))
-                        self.review_service.data(context,enabled=effective.get('enabled',True))
-                        mark(DATA_NODE)
-                    elif self.review_service.store.get(context.job_id)['data_state']=='WAITING_INPUT':
-                        self.review_service.data(context,enabled=context.workflow_config['nodes'][DATA_NODE].get('enabled',True))
-                source_rows, source_chunk_texts = self._load_chunks(folder, paper_id)
-                source_text = "\n".join(source_chunk_texts.values())
-                from memorive.platform.language.source import describe
-                source_language_evidence = describe(source_text)
-                source_language = source_language_evidence['language']
-                question = self._question(context, source_language)
-                validate_generated_language(
-                    source_text=source_text,
-                    generated_text=question,
-                    source_language=source_language,
-                    artifact_name="Analysis question",
-                )
-                if "02_CHUNK_EMBEDDING" not in completed:
-                    start("02_CHUNK_EMBEDDING")
-                    if not self._document_processing_complete(paper_id):
-                        from memorive.documents.processing import embed_from_chunks
-
-                        chunks_path = self._one(folder, "[Chunks]", ".jsonl")
-                        result = embed_from_chunks(chunks_path, target="sandbox")
-                        _atomic_json(stage_root / "02_chunk_embedding.json", result)
-                        if result.status != "completed":
-                            raise RuntimeError(
-                                f"CHUNK_EMBEDDING_FAILED:{result.error_type}:{result.error_message}"
-                            )
-                    if not self._document_processing_complete(paper_id):
-                        raise RuntimeError("CHUNK_EMBEDDING_OUTPUT_VERIFICATION_FAILED")
-                    _atomic_json(
-                        stage_root / "02_embedding_query_readiness.json",
-                        self._document_processing_query_readiness(paper_id),
-                    )
-                    mark("02_CHUNK_EMBEDDING")
-
-                folder = self._paper_folder(paper_id)
-                assert folder is not None
-
-                capabilities_evidence_root = context.run_root / "long_document_segmented_distill"
-                capabilities_summary_path = capabilities_evidence_root / "segmented_distill_summary.json"
-                capabilities_distill_metrics: dict[str, Any] = (
-                    json.loads(capabilities_summary_path.read_text(encoding="utf-8"))
-                    if capabilities_summary_path.is_file()
-                    else {}
-                )
-                card_path = self._resume_card(folder, stage_root, completed) if "03_CARD_DISTILL" in completed else None
-                if "03_CARD_DISTILL" not in completed:
-                    start("03_CARD_DISTILL")
-                    effective_workflow_config = (
-                        self.task_control_store.effective_workflow_config(
-                            context.job_id, context.workflow_config
-                        )
-                        if self.task_control_store is not None
-                        else context.workflow_config
-                    )
-                    segmented_distiller = CoreSegmentedDistiller(
-                        workflow_config=effective_workflow_config,
-                        evidence_root=capabilities_evidence_root,
-                    )
-                    distill_folder = self._card_distill_revision(
-                        folder, context,
-                        effective_workflow_config.get("nodes", {}).get("03_CARD_DISTILL", {}),
-                    )
-                    result = segmented_distiller.distill(
-                        distill_folder,
-                        target="sandbox",
-                        overwrite=False,
-                    )
-                    capabilities_distill_metrics = deepcopy(segmented_distiller.last_metrics)
-                    _atomic_json(
-                        stage_root / "03_distill.json",
-                        {"core_result": result, "long_document": capabilities_distill_metrics},
-                    )
-                    if result.status != "completed" or not result.card_path:
-                        raise RuntimeError(
-                            f"Core_EVIDENCE_EXTRACTION_FAILED:{result.error_type}:{result.error_message}"
-                        )
-                    card_path = Path(result.card_path)
-                    seed = stage_root / "03_card_seed.md"
-                    if not seed.exists():
-                        shutil.copy2(card_path, seed)
-                    _atomic_json(stage_root / "03_card_seed_binding.json", {
-                        "sha256": _sha256_file(seed), "source_sha256": context.source_sha256,
-                        "node_id": "03_CARD_DISTILL", "job_id": context.job_id})
-                    mark("03_CARD_DISTILL")
-                assert card_path is not None
-
-                if not {"04_CARD_CROSS_CHECK", "05_CARD_ADMISSION"}.issubset(completed):
-                    start("04_CARD_CROSS_CHECK")
-                    from memorive.documents.workflow.card_review import review_card_revision
-                    seed = stage_root / "03_card_seed.md"
-                    review_input = seed if seed.is_file() else card_path
-                    # Keep the original Card basename for the core readers.
-                    if seed.is_file():
-                        named_seed = stage_root / card_path.name
-                        if not named_seed.exists():
-                            shutil.copy2(seed, named_seed)
-                        review_input = named_seed
-                    def before_admission():
-                        mark("04_CARD_CROSS_CHECK")
-                        start("05_CARD_ADMISSION")
-                    card_path = review_card_revision(review_input, folder, stage_root,
-                                                    before_publish=before_admission)
-                    admitted_seed = stage_root / "05_admitted_card.md"
-                    if not admitted_seed.exists():
-                        shutil.copy2(card_path, admitted_seed)
-                    if _sha256_file(admitted_seed) != _sha256_file(card_path):
-                        raise RuntimeError("Core_ADMITTED_CARD_CHECKPOINT_CONFLICT")
-                    _atomic_json(stage_root / "05_admitted_card_binding.json", {
-                        "sha256": _sha256_file(admitted_seed), "source_sha256": context.source_sha256,
-                        "node_id": "05_CARD_ADMISSION", "job_id": context.job_id})
-                    mark("04_CARD_CROSS_CHECK")
-                    mark("05_CARD_ADMISSION")
-
-                pack_pickle = stage_root / "06_context_pack.pkl"
-                if DATA_NODE in node_ids and self.review_service:
-                    self.review_service.card_ready(context,card_path,source_rows=source_rows)
-                pack_json = stage_root / "06_context_pack.json"
-                if "06_CONTEXT_PACK" not in completed:
-                    start("06_CONTEXT_PACK")
-                    from memorive.research.retrieval import build_context_pack, retrieve_candidates, understand_query
-
-                    understood = understand_query(question)
-                    # Document analysis needs the admitted paper's methods,
-                    # results, conclusions, and source qualifications.
-                    rows, chunk_texts = self._load_chunks(folder, paper_id)
-                    from memorive.research.retrieval.candidate_retrieval import _read_frontmatter
-                    from memorive.research.retrieval.document_context import (
-                        bind_document_card, document_candidates,
-                        document_candidates_from_sidecar,
-                    )
-                    card_for_context = _read_frontmatter(card_path)
-                    if not card_for_context:
-                        raise RuntimeError('Core_CONTEXT_CARD_UNREADABLE')
-                    card_for_context = bind_document_card(
-                        card_for_context, paper_id,
-                        hashlib.sha256(card_path.read_bytes()).hexdigest(),
-                    )
-                    try:
-                        candidates = retrieve_candidates(
-                            question, understood.strategy, target="sandbox",
-                            paper_id=paper_id,
-                        )
-                    except Exception as retrieval_error:
-                        if not _is_chroma_hnsw_read_failure(retrieval_error):
-                            raise
-                        candidates = document_candidates_from_sidecar(
-                            rows, card_for_context, paper_id
-                        )
-                    else:
-                        # Question top-k seeds priority; whole-document coverage
-                        # then adds every eligible chunk from the admitted paper.
-                        candidates = document_candidates(
-                            candidates, rows, card_for_context
-                        )
-                    effective_workflow_config = (
-                        self.task_control_store.effective_workflow_config(
-                            context.job_id, context.workflow_config
-                        )
-                        if self.task_control_store is not None
-                        else context.workflow_config
-                    )
-                    analysis_node = effective_workflow_config.get("nodes", {}).get(
-                        "07_ANALYSIS", {}
-                    )
-                    capacity = describe_capacity(
-                        profile_kind=analysis_node.get("profile_kind"),
-                        execution_profile=analysis_node.get("execution_profile"),
-                        node_requested_output_tokens=65_536,
-                    )
-                    # Reuse the existing estimator and actual rendered prompt;
-                    # do not pre-deduct invented reasoning/margin constants.
-                    from memorive.research.retrieval.context_pack import _cfg, _estimate_tokens
-                    from memorive.research.analysis.analysis import build_payload
-                    from types import SimpleNamespace
-
-                    estimator = _cfg()
-                    candidate_tokens = sum(
-                        _estimate_tokens(row.text, estimator['token_ratio'],
-                                         estimator['overhead_per_block'])
-                        for row in candidates.candidates
-                    )
-                    from memorive.research.retrieval.review_qualifications import card_review_qualifications, render_review_context
-                    review_text = render_review_context(card_review_qualifications(card_for_context, paper_id=paper_id))
-                    candidate_tokens += _estimate_tokens(review_text, estimator['token_ratio'], 0) if review_text else 0
-                    empty_payload = build_payload(SimpleNamespace(blocks=()), question,
-                                                  output_language=source_language)
-                    prompt_tokens = sum(
-                        _estimate_tokens(row.get('content', ''), estimator['token_ratio'], 0)
-                        for row in empty_payload.get('messages', ())
-                    )
-                    pack_budget = context_pack_budget(
-                        capacity, prompt_reserve_tokens=prompt_tokens,
-                        candidate_estimated_tokens=candidate_tokens,
-                        prompt_measurement_source='ACTUAL_RENDERED_PROMPT_WITH_EXISTING_RETRIEVAL_ESTIMATOR',
-                    )
-                    from memorive.research.retrieval.structured_context import build_structured_context_pack
-                    pack = build_structured_context_pack(
-                        candidates, question, card=card_for_context, chunks=rows,
-                        strategy=understood.strategy, retrieval_mode='single_paper_extraction',
-                        token_hard_limit=pack_budget['token_hard_limit'],
-                    )
-                    rows, chunk_texts = self._load_chunks(folder, paper_id)
-                    block_ids = [block.source.get("chunk_id") for block in pack.blocks]
-                    if (
-                        getattr(candidates, "scope_mode", None) != "paper_id"
-                        or getattr(candidates, "scope_paper_id", None) != paper_id
-                        or not block_ids
-                        or len(set(block_ids)) != len(block_ids)
-                        or any(chunk_id not in chunk_texts for chunk_id in block_ids)
-                        or pack.estimated_tokens > pack.token_hard_limit
-                    ):
-                        raise RuntimeError("CORE_CONTEXT_PACK_CONTRACT_FAILED")
-                    _atomic_pickle(pack_pickle, pack)
-                    context_pack_artifact = {
-                            "question": question,
-                            "source_language": source_language,
-                    "source_language_evidence": source_language_evidence,
-                            "understanding": understood,
-                            "candidates": candidates,
-                            "pack": pack,
-                            "summary": {
-                                "chunk_count": len(rows),
-                                "block_count": len(pack.blocks),
-                                "estimated_tokens": pack.estimated_tokens,
-                                "token_hard_limit": pack.token_hard_limit,
-                                "paper_id": paper_id,
-                                "chunk_ids": block_ids,
-                                "embedding_profile_source_node_id": "02_CHUNK_EMBEDDING",
-                                "capacity": capacity,
-                                "pack_budget": pack_budget,
-                                "truncated": pack.truncated,
-                                "original_estimated_tokens": pack.original_estimated_tokens,
-                                "retained_estimated_tokens": pack.estimated_tokens,
-                                "dropped_evidence_block_count": pack.dropped_evidence_block_count,
-                                "dropped_reason_counts": pack.dropped_reason_counts,
-                            },
-                        }
-                    _validate_context_pack_language(
-                        context_pack_artifact,
-                        source_text=source_text,
-                        source_language=source_language,
-                    )
-                    _atomic_json(pack_json, context_pack_artifact)
-                    mark("06_CONTEXT_PACK")
-                with pack_pickle.open("rb") as stream:
-                    pack = pickle_compat.load(stream)
-                context_pack_summary = {
-                    "truncated": bool(pack.truncated),
-                    "original_estimated_tokens": int(
-                        getattr(pack, "original_estimated_tokens", 0) or 0
-                    ),
-                    "retained_estimated_tokens": int(pack.estimated_tokens),
-                    "token_budget": int(pack.token_hard_limit),
-                    "retained_block_count": len(pack.blocks),
-                    "dropped_evidence_block_count": int(
-                        getattr(pack, "dropped_evidence_block_count", 0) or 0
-                    ),
-                    "dropped_reason_counts": deepcopy(
-                        getattr(pack, "dropped_reason_counts", None) or {}
-                    ),
-                    "recovery_action": (
-                        {
-                            "zh": "若需要更多证据，请为 Analysis 选择更大上下文的模型后，从 Context Pack 重新执行。",
-                            "en": "If more evidence is needed, select an Analysis model with a larger context and rerun from Context Pack.",
-                            "ja": "追加の証拠が必要な場合は、より大きなコンテキストを持つ Analysis モデルを選び、Context Pack から再実行してください。",
-                        }[source_language]
-                        if pack.truncated
-                        else None
-                    ),
-                }
-
-                analysis_pickle = stage_root / "07_analysis.pkl"
-                analysis_json = stage_root / "07_analysis.json"
-                analysis_md = stage_root / "07_analysis.md"
-                if "07_ANALYSIS" not in completed:
-                    start("07_ANALYSIS")
-                    from memorive.research.analysis import analyze
-
-                    analysis = analyze(
-                        pack,
-                        question,
+                    _rows, chunk_texts = self._load_chunks(folder, paper_id)
+                    judgment = verify_research_analysis(
+                        analysis,
+                        chunk_texts,
                         data_ownership="self",
+                        target={
+                            "kind": "research_analysis",
+                            "run_id": context.job_id,
+                            "paper_id": paper_id,
+                            "question": question,
+                            "analysis_model": analysis.analysis_model,
+                        },
+                        max_gpt=2,
+                        candidate_resolver=bridge.select_judgment_candidates,
                         output_language=source_language,
                     )
-                    valid_ids = {block.source.get("chunk_id") for block in pack.blocks}
-                    emitted_ids = [claim.source_id.get("chunk_id") for claim in analysis.literature_support]
-                    if any(chunk_id not in valid_ids for chunk_id in emitted_ids):
-                        raise RuntimeError("CORE_ANALYSIS_SOURCE_ID_INVALID")
-                    rendered_analysis = analysis.render(language=source_language)
-                    validate_generated_language(
+                    if judgment.get("trace_resolved") != judgment.get("trace_total"):
+                        raise RuntimeError("Core_JUDGMENT_TRACE_UNRESOLVED")
+                    if judgment.get("drives_knowledge_admission") is not False:
+                        raise RuntimeError("Core_JUDGMENT_BOUNDARY_INVALID")
+                    _validate_judgment_language(
+                        judgment,
                         source_text=source_text,
-                        generated_text=_canonical_bytes(analysis).decode("utf-8"),
                         source_language=source_language,
-                        artifact_name="Analysis.json",
                     )
-                    validate_generated_language(
-                        source_text=source_text,
-                        generated_text=rendered_analysis,
-                        source_language=source_language,
-                        artifact_name="Analysis.md",
-                    )
-                    _atomic_pickle(analysis_pickle, analysis)
-                    _atomic_json(analysis_json, analysis)
-                    analysis_md.write_text(rendered_analysis, encoding="utf-8")
-                    mark("07_ANALYSIS")
-                with analysis_pickle.open("rb") as stream:
-                    analysis = pickle_compat.load(stream)
-                if self.interaction_sink is not None:
-                    execution_checkpoint()
-                    # Separate observation receipt; failure never reruns a completed model call.
-                    try:
-                        observation=self.interaction_sink(context,analysis)
-                    except Exception:
-                        observation={"status":"OBSERVATION_DELIVERY_FAILED","model_retry_required":False}
-                    if observation.get("status")!="DISABLED_BY_USER":
-                        try:
-                            _atomic_json(stage_root / "research_interaction_receipt.json",observation)
-                        except OSError:pass  # Observational persistence is not a model failure.
+                _atomic_json(judgment_json, judgment)
+                mark("08_JUDGMENT_CROSS_CHECK")
+            judgment = json.loads(judgment_json.read_text(encoding="utf-8"))
+
+            if judgment.get("execution_status") != "SKIPPED":
+                from memorive.documents.workflow.analysis_revision import complete_analysis_revision
+                _rows, revision_chunks = self._load_chunks(folder, paper_id)
+                revision_root = stage_root / "08_analysis_revision"
+                analysis, judgment = complete_analysis_revision(
+                    analysis, pack, judgment, revision_chunks, bridge=bridge,
+                    evidence_root=revision_root, output_language=source_language,
+                )
+                if (revision_root / "completed.json").is_file():
+                    # Original 07/08 artifacts remain immutable; downstream
+                    # packaging receives the reviewed successor explicitly.
+                    analysis_pickle = revision_root / "analysis.pkl"
+                    analysis_json = revision_root / "analysis.json"
+                    analysis_md = revision_root / "analysis.md"
+
+            review_md = stage_root / "09_human_review.md"
+            if "09_HUMAN_FINAL" not in completed:
+                start("09_HUMAN_FINAL")
+                review_text = render_human_review(
+                    title=title,
+                    paper_id=paper_id,
+                    source_sha256=context.source_sha256,
+                    question=question,
+                    analysis=analysis,
+                    judgment=judgment,
+                    source_language=source_language,
+                    synthetic=(
+                        "synthetic_one_page_literature_test"
+                        in context.source_name.casefold()
+                    ),
+                )
                 validate_generated_language(
                     source_text=source_text,
-                    generated_text=analysis.render(language=source_language),
+                    generated_text=review_text,
                     source_language=source_language,
-                    artifact_name="Analysis checkpoint",
+                    artifact_name="HumanReview.md",
                 )
+                review_md.write_text(review_text, encoding="utf-8")
 
-                judgment_json = stage_root / "08_judgment.json"
-                if "08_JUDGMENT_CROSS_CHECK" not in completed:
-                    start("08_JUDGMENT_CROSS_CHECK")
-                    if not bridge.node_enabled("08_JUDGMENT_CROSS_CHECK"):
-                        judgment = {
-                            "node_id": "08_JUDGMENT_CROSS_CHECK",
-                            "execution_status": "SKIPPED",
-                            "verification_result": "NOT_ASSESSED",
-                            "reason": "DISABLED_BY_WORKFLOW_OR_TASK",
-                            "drives_knowledge_admission": False,
-                            "trace_total": 0, "trace_resolved": 0,
-                            "rulings": [],
-                            "deferred": [{"reason": "NODE_DISABLED_HUMAN_REVIEW_REQUIRED"}],
-                            "target": {"run_id": context.job_id, "paper_id": paper_id},
-                        }
-                    else:
-                        from memorive.documents.card_review import verify_research_analysis
-
-                        _rows, chunk_texts = self._load_chunks(folder, paper_id)
-                        judgment = verify_research_analysis(
-                            analysis,
-                            chunk_texts,
-                            data_ownership="self",
-                            target={
-                                "kind": "research_analysis",
-                                "run_id": context.job_id,
-                                "paper_id": paper_id,
-                                "question": question,
-                                "analysis_model": analysis.analysis_model,
-                            },
-                            max_gpt=2,
-                            candidate_resolver=bridge.select_judgment_candidates,
-                            output_language=source_language,
-                        )
-                        if judgment.get("trace_resolved") != judgment.get("trace_total"):
-                            raise RuntimeError("Core_JUDGMENT_TRACE_UNRESOLVED")
-                        if judgment.get("drives_knowledge_admission") is not False:
-                            raise RuntimeError("Core_JUDGMENT_BOUNDARY_INVALID")
-                        _validate_judgment_language(
-                            judgment,
-                            source_text=source_text,
-                            source_language=source_language,
-                        )
-                    _atomic_json(judgment_json, judgment)
-                    mark("08_JUDGMENT_CROSS_CHECK")
-                judgment = json.loads(judgment_json.read_text(encoding="utf-8"))
-
-                if judgment.get("execution_status") != "SKIPPED":
-                    from memorive.documents.workflow.analysis_revision import complete_analysis_revision
-                    _rows, revision_chunks = self._load_chunks(folder, paper_id)
-                    revision_root = stage_root / "08_analysis_revision"
-                    analysis, judgment = complete_analysis_revision(
-                        analysis, pack, judgment, revision_chunks, bridge=bridge,
-                        evidence_root=revision_root, output_language=source_language,
-                    )
-                    if (revision_root / "completed.json").is_file():
-                        # Original 07/08 artifacts remain immutable; downstream
-                        # packaging receives the reviewed successor explicitly.
-                        analysis_pickle = revision_root / "analysis.pkl"
-                        analysis_json = revision_root / "analysis.json"
-                        analysis_md = revision_root / "analysis.md"
-
-                review_md = stage_root / "09_human_review.md"
-                if "09_HUMAN_FINAL" not in completed:
-                    start("09_HUMAN_FINAL")
-                    review_text = render_human_review(
-                        title=title,
+            source_documents = [
+                path
+                for path in folder.iterdir()
+                if path.is_file()
+                and (path.name.startswith("[PDF]") or path.name.startswith("[Original]"))
+            ]
+            if len(source_documents) != 1:
+                raise RuntimeError(
+                    f"CORE_SOURCE_DOCUMENT_CARDINALITY:{len(source_documents)}"
+                )
+            source_document = source_documents[0]
+            raw = self._one(folder, "[RawMD]", ".md")
+            clean = self._one(folder, "[CleanMD]", ".md")
+            chunks = self._one(folder, "[Chunks]", ".jsonl")
+            source_document_text = raw.read_text(encoding="utf-8")
+            managed_folder = document_folder(
+                context.artifact_root,
+                paper_id=paper_id,
+                title=title,
+            )
+            artifact_specs = (
+                (
+                    "core-source-document",
+                    "CORE_SOURCE_DOCUMENT",
+                    source_document,
+                    managed_folder / source_document.name,
+                    "原始文献",
+                ),
+                (
+                    "core-raw-document",
+                    "CORE_RAW_DOCUMENT",
+                    raw,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="RawMD",
                         paper_id=paper_id,
-                        source_sha256=context.source_sha256,
-                        question=question,
-                        analysis=analysis,
-                        judgment=judgment,
-                        source_language=source_language,
-                        synthetic=(
-                            "synthetic_one_page_literature_test"
-                            in context.source_name.casefold()
-                        ),
-                    )
-                    validate_generated_language(
-                        source_text=source_text,
-                        generated_text=review_text,
-                        source_language=source_language,
-                        artifact_name="HumanReview.md",
-                    )
-                    review_md.write_text(review_text, encoding="utf-8")
-
-                source_documents = [
-                    path
-                    for path in folder.iterdir()
-                    if path.is_file()
-                    and (path.name.startswith("[PDF]") or path.name.startswith("[Original]"))
-                ]
-                if len(source_documents) != 1:
-                    raise RuntimeError(
-                        f"CORE_SOURCE_DOCUMENT_CARDINALITY:{len(source_documents)}"
-                    )
-                source_document = source_documents[0]
-                raw = self._one(folder, "[RawMD]", ".md")
-                clean = self._one(folder, "[CleanMD]", ".md")
-                chunks = self._one(folder, "[Chunks]", ".jsonl")
-                source_document_text = raw.read_text(encoding="utf-8")
-                managed_folder = document_folder(
-                    context.artifact_root,
-                    paper_id=paper_id,
-                    title=title,
-                )
-                artifact_specs = (
-                    (
-                        "core-source-document",
-                        "CORE_SOURCE_DOCUMENT",
-                        source_document,
-                        managed_folder / source_document.name,
-                        "原始文献",
+                        title=title,
                     ),
-                    (
-                        "core-raw-document",
-                        "CORE_RAW_DOCUMENT",
-                        raw,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="RawMD",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "原始转换文档",
+                    "原始转换文档",
+                ),
+                (
+                    "core-clean-document",
+                    "CORE_CLEAN_DOCUMENT",
+                    clean,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="CleanMD",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-clean-document",
-                        "CORE_CLEAN_DOCUMENT",
-                        clean,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="CleanMD",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "清洗文档",
+                    "清洗文档",
+                ),
+                (
+                    "core-chunks",
+                    "CORE_CHUNKS",
+                    chunks,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="Chunks",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-chunks",
-                        "CORE_CHUNKS",
-                        chunks,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="Chunks",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "Chunks",
+                    "Chunks",
+                ),
+                (
+                    "core-card",
+                    "CORE_CARD",
+                    card_path,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="Card",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-card",
-                        "CORE_CARD",
-                        card_path,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="Card",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "Card",
+                    "Card",
+                ),
+                (
+                    "core-context-pack",
+                    "CORE_CONTEXT_PACK",
+                    pack_json,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="ContextPack",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-context-pack",
-                        "CORE_CONTEXT_PACK",
-                        pack_json,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="ContextPack",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "Context Pack",
+                    "Context Pack",
+                ),
+                (
+                    "core-analysis",
+                    "CORE_ANALYSIS",
+                    analysis_md,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="Analysis",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-analysis",
-                        "CORE_ANALYSIS",
-                        analysis_md,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="Analysis",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "Analysis",
+                    "Analysis",
+                ),
+                (
+                    "core-judgment-review",
+                    "CORE_JUDGMENT_REVIEW",
+                    judgment_json,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="Judgment",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-judgment-review",
-                        "CORE_JUDGMENT_REVIEW",
-                        judgment_json,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="Judgment",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "判断类异源校对",
+                    "判断类异源校对",
+                ),
+                (
+                    "core-human-review",
+                    "CORE_HUMAN_REVIEW",
+                    review_md,
+                    document_artifact_path(
+                        context.artifact_root,
+                        artifact_kind="HumanReview",
+                        paper_id=paper_id,
+                        title=title,
                     ),
-                    (
-                        "core-human-review",
-                        "CORE_HUMAN_REVIEW",
-                        review_md,
-                        document_artifact_path(
-                            context.artifact_root,
-                            artifact_kind="HumanReview",
-                            paper_id=paper_id,
-                            title=title,
-                        ),
-                        "人工最终复核包",
-                    ),
-                )
-                # E10 candidates retain their own source-bound, verifiable bundle.
-                structure_root=context.run_root/'structure-candidate'
-                if (structure_root/'bundle.json').is_file():
-                    from memorive.documents.processing.document_structure.bundle import publication_specs
-                    artifact_specs += publication_specs(structure_root,managed_folder/'structure')
-                # The source-language rule is a persistence boundary, not only a
-                # prompt hint.  Recheck every textual Core mainline artifact
-                # immediately before it enters the product library.  RawMD is the
-                # extracted source basis itself; all downstream text must not add
-                # foreign Han narration that is absent from that basis.
-                for (
-                    _artifact_id,
-                    artifact_kind,
+                    "人工最终复核包",
+                ),
+            )
+            # E10 candidates retain their own source-bound, verifiable bundle.
+            structure_root=context.run_root/'structure-candidate'
+            if (structure_root/'bundle.json').is_file():
+                from memorive.documents.processing.document_structure.bundle import publication_specs
+                artifact_specs += publication_specs(structure_root,managed_folder/'structure')
+            # The source-language rule is a persistence boundary, not only a
+            # prompt hint.  Recheck every textual Core mainline artifact
+            # immediately before it enters the product library.  RawMD is the
+            # extracted source basis itself; all downstream text must not add
+            # foreign Han narration that is absent from that basis.
+            for (
+                _artifact_id,
+                artifact_kind,
+                source_path,
+                _target_path,
+                _display_name,
+            ) in artifact_specs:
+                if artifact_kind in {"CORE_SOURCE_DOCUMENT","CORE_STRUCTURE_CANDIDATE"}:
+                    continue
+                _validate_artifact_language(
                     source_path,
-                    _target_path,
-                    _display_name,
-                ) in artifact_specs:
-                    if artifact_kind in {"CORE_SOURCE_DOCUMENT","CORE_STRUCTURE_CANDIDATE"}:
-                        continue
-                    _validate_artifact_language(
-                        source_path,
-                        artifact_kind=artifact_kind,
-                        source_text=source_document_text,
-                        source_language=source_language,
-                    )
-                copied_artifacts = [
-                    (
-                        artifact_id,
-                        artifact_kind,
-                        self._copy(source_path, target_path),
-                        display_name,
-                    )
-                    for artifact_id, artifact_kind, source_path, target_path, display_name
-                    in artifact_specs
-                ]
-                manifest_path = document_artifact_path(
-                    context.artifact_root,
-                    artifact_kind="FolderManifest",
-                    paper_id=paper_id,
-                    title=title,
+                    artifact_kind=artifact_kind,
+                    source_text=source_document_text,
+                    source_language=source_language,
                 )
-                _atomic_json(
-                    manifest_path,
-                    {
-                        "schema_version": "DesktopDocumentFolderManifest-v1",
-                        "folder_policy": {
-                            "schema_version": self.folder_management_policy.payload[
-                                "schema_version"
-                            ],
-                            "revision": self.folder_management_policy.payload["revision"],
-                            "sha256": self.folder_management_policy.sha256,
-                        },
-                        "job_id": context.job_id,
-                        "paper_id": paper_id,
-                        "title": title,
-                        "layout": "ONE_PAPER_ONE_FOLDER_FLAT",
-                        "files": [
-                            {
-                                "artifact_id": artifact_id,
-                                "kind": artifact_kind,
-                                "name": target_path.name,
-                                "sha256": _sha256_file(target_path),
-                                "bytes": target_path.stat().st_size,
-                            }
-                            for artifact_id, artifact_kind, target_path, _display_name
-                            in copied_artifacts
-                            if artifact_kind != "CORE_STRUCTURE_CANDIDATE"
-                        ],
-                        "legacy_files_deleted": 0,
-                        "settings_files_touched": 0,
-                    },
+            copied_artifacts = [
+                (
+                    artifact_id,
+                    artifact_kind,
+                    self._copy(source_path, target_path),
+                    display_name,
                 )
-                copied_artifacts.append(
-                    (
-                        "core-folder-manifest",
-                        "CORE_FOLDER_MANIFEST",
-                        manifest_path,
-                        "文件夹清单",
-                    )
-                )
-                artifacts = tuple(
-                    self._artifact(
-                        artifact_id=artifact_id,
-                        kind=artifact_kind,
-                        path=target_path,
-                        display_name=display_name,
-                    )
-                    for artifact_id, artifact_kind, target_path, display_name
-                    in copied_artifacts
-                )
-                metrics = {
-                    "paper_id": paper_id,
-                    "question": question,
-                    "source_language": source_language,
-                    "source_language_evidence": source_language_evidence,
-                    "core_modules_reused": ["M01", "M02", "M03", "M04", "M06", "M08", "M09", "RUNTIME_LOG"],
-                    "capabilities_successors_reused": ["LONG_DOCUMENT_SEGMENTED_DISTILLATION"],
-                    "folder_management_policy": {
+                for artifact_id, artifact_kind, source_path, target_path, display_name
+                in artifact_specs
+            ]
+            manifest_path = document_artifact_path(
+                context.artifact_root,
+                artifact_kind="FolderManifest",
+                paper_id=paper_id,
+                title=title,
+            )
+            _atomic_json(
+                manifest_path,
+                {
+                    "schema_version": "DesktopDocumentFolderManifest-v1",
+                    "folder_policy": {
                         "schema_version": self.folder_management_policy.payload[
                             "schema_version"
                         ],
                         "revision": self.folder_management_policy.payload["revision"],
                         "sha256": self.folder_management_policy.sha256,
                     },
-                    "long_document_distill": capabilities_distill_metrics,
-                    "embedding_profile_ref": context.workflow_config["nodes"]["02_CHUNK_EMBEDDING"].get("profile_ref"),
-                    "context_profile_source_node_id": context.workflow_config["nodes"]["06_CONTEXT_PACK"].get("profile_source_node_id"),
-                    "context_pack": context_pack_summary,
-                    "model_accounting": bridge.metrics(),
-                    "human_final_state": "REVIEW_PACKAGE_READY_NO_AUTOMATED_SCIENTIFIC_VERDICT",
-                }
-                _atomic_json(context.run_root / "core_execution_summary.json", metrics)
-                if "09_HUMAN_FINAL" not in completed:
-                    mark("09_HUMAN_FINAL")
-                return CoreExecutionResult(artifacts=artifacts, metrics=metrics)
-            finally:
-                release_lanes()
-                gateway_binding.__exit__(None, None, None)
+                    "job_id": context.job_id,
+                    "paper_id": paper_id,
+                    "title": title,
+                    "layout": "ONE_PAPER_ONE_FOLDER_FLAT",
+                    "files": [
+                        {
+                            "artifact_id": artifact_id,
+                            "kind": artifact_kind,
+                            "name": target_path.name,
+                            "sha256": _sha256_file(target_path),
+                            "bytes": target_path.stat().st_size,
+                        }
+                        for artifact_id, artifact_kind, target_path, _display_name
+                        in copied_artifacts
+                        if artifact_kind != "CORE_STRUCTURE_CANDIDATE"
+                    ],
+                    "legacy_files_deleted": 0,
+                    "settings_files_touched": 0,
+                },
+            )
+            copied_artifacts.append(
+                (
+                    "core-folder-manifest",
+                    "CORE_FOLDER_MANIFEST",
+                    manifest_path,
+                    "文件夹清单",
+                )
+            )
+            artifacts = tuple(
+                self._artifact(
+                    artifact_id=artifact_id,
+                    kind=artifact_kind,
+                    path=target_path,
+                    display_name=display_name,
+                )
+                for artifact_id, artifact_kind, target_path, display_name
+                in copied_artifacts
+            )
+            metrics = {
+                "paper_id": paper_id,
+                "question": question,
+                "source_language": source_language,
+                "source_language_evidence": source_language_evidence,
+                "core_modules_reused": ["M01", "M02", "M03", "M04", "M06", "M08", "M09", "RUNTIME_LOG"],
+                "capabilities_successors_reused": ["LONG_DOCUMENT_SEGMENTED_DISTILLATION"],
+                "folder_management_policy": {
+                    "schema_version": self.folder_management_policy.payload[
+                        "schema_version"
+                    ],
+                    "revision": self.folder_management_policy.payload["revision"],
+                    "sha256": self.folder_management_policy.sha256,
+                },
+                "long_document_distill": capabilities_distill_metrics,
+                "embedding_profile_ref": context.workflow_config["nodes"]["02_CHUNK_EMBEDDING"].get("profile_ref"),
+                "context_profile_source_node_id": context.workflow_config["nodes"]["06_CONTEXT_PACK"].get("profile_source_node_id"),
+                "context_pack": context_pack_summary,
+                "model_accounting": bridge.metrics(),
+                "human_final_state": "REVIEW_PACKAGE_READY_NO_AUTOMATED_SCIENTIFIC_VERDICT",
+            }
+            _atomic_json(context.run_root / "core_execution_summary.json", metrics)
+            if "09_HUMAN_FINAL" not in completed:
+                mark("09_HUMAN_FINAL")
+            return CoreExecutionResult(artifacts=artifacts, metrics=metrics)
+        finally:
+            release_lanes()
+            gateway_binding.__exit__(None, None, None)
 
 
 __all__ = ["CorePipelineExecutor"]

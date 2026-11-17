@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "759ab50ff684e5bac99e8478505fdc0d754269926ad674b4e38e2c87f8452cbb",
+      "sha256": "8e6e1604f3632fc71d650494b3cbcbcefa1627b897ea479fb71bfd96ee5dd14c",
       "bytes": 276579
     },
     {
@@ -8136,8 +8136,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/workflow/executor.py",
-      "sha256": "3a63bbe45fddb3fb9540c263c4f61e7c1cb23f000c48e03603519409efb2d7fb",
-      "bytes": 70983
+      "sha256": "d399d43117a0665f138502e59a34da031c4f794ad690e91db7f3e73bd2f03149",
+      "bytes": 68520
     },
     {
       "path": "memorive_desktop/source/memorive/documents/workflow/model_bridge.py",

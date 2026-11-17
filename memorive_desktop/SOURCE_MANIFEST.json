@@ -3827,8 +3827,8 @@
     },
     {
       "path": "source/memorive/documents/workflow/executor.py",
-      "sha256": "3a63bbe45fddb3fb9540c263c4f61e7c1cb23f000c48e03603519409efb2d7fb",
-      "bytes": 70983
+      "sha256": "d399d43117a0665f138502e59a34da031c4f794ad690e91db7f3e73bd2f03149",
+      "bytes": 68520
     },
     {
       "path": "source/memorive/documents/workflow/model_bridge.py",
