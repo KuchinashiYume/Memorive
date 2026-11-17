@@ -1,4 +1,4 @@
-/* E1 results in the existing context disclosure. No new controls or model calls. */
+/* Evidence check results, shown inside the chat's context disclosure. Adds no controls and calls no model. */
 (function(){
   'use strict';
   const statuses={SUPPORTED:'有支持',PARTIAL:'部分支持',UNSUPPORTED:'缺少支持',CONFLICT:'存在冲突',NEEDS_REVIEW:'需复核',NOT_REVIEWED:'未审核'};

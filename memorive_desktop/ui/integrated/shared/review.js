@@ -1,4 +1,4 @@
-/* E2 additions inside the adopted shell; no second application or demo data. */
+/* Paper review (data and logic checks): its report dialog and its parts on the inbox and current-task pages. */
 (() => {
   const q=s=>document.querySelector(s);
   const copy={

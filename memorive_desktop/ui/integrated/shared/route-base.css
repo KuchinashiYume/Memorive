@@ -2579,7 +2579,7 @@
 
 #desktop-settings-preview .desktop-settings-code-status > span:last-child { min-width:0; overflow-wrap:anywhere; }
 
-/* E8: reuse toolbar/import assets and the settings CLI glyph. */
+/* Reuses the toolbar and import icons and the settings page's CLI glyph. */
 
 #desktop-settings-preview .desktop-settings-cli-toolbar { display:flex; flex:0 0 auto; align-items:center; gap:8px; padding:0; border:0; background:transparent; }
 

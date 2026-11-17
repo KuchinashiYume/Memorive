@@ -72,7 +72,7 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
   let startupRestoredRoute = null;
   let startupRestoreEnabled = false;
   let rememberedPanelState = {};
-  /* GLOBAL_ACCOUNTING_DRAWER_V1 */
+  // The sidebar and the bottom (accounting) panel are one setting for the whole window, kept here across routes.
   let globalBottomOpen = false, globalBottomSize = 346, bottomInitialized = false;
   let globalSidebarOpen = true, sidebarInitialized = false;
   const applyGlobalSidebar = (route) => {

@@ -1,4 +1,4 @@
-/* E10: node 01 settings and in-place Library source review. */
+/* Document structure: the settings of workflow node 01 and reviewing a source in place in the library. */
 (() => {
   'use strict';
   const words={
