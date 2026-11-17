@@ -5,7 +5,7 @@ SettingsController in controller.py): store.py, contracts.py, credentials.py,
 cli_template_management.py, the verification jobs, user preferences, the leaderboard and external
 sources. The model requests are in memorive/models (the controller holds the runner from
 memorive/models/validation/runner.py), the model exams in memorive/exams (the controller holds
-WorkflowExams from memorive/exams/runner.py). This package still exports the exam executors by name
+WorkflowExams from memorive/exams/runner/). This package still exports the exam executors by name
 for its callers.
 """
 

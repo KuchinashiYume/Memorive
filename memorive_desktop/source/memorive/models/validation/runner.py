@@ -450,7 +450,7 @@ class _ChatAttempt:
 class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecutionMixin):
     """Sends the app's model requests: API and command-line chat (execute_structured_chat),
     embeddings, OCR and reranking (the mixins above), the API model list and the minimal
-    verification requests. The workflow exams (WorkflowExams, memorive/exams/runner.py) hold a runner
+    verification requests. The workflow exams (WorkflowExams, memorive/exams/runner/) hold a runner
     and send their requests through these methods."""
 
     def _preserve_capacity_response(self, body: bytes, *, partial: bool = False) -> dict[str, Any]:

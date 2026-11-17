@@ -2542,8 +2542,8 @@
     },
     {
       "path": "source/memorive/desktop/settings/__init__.py",
-      "sha256": "b4a5a62e24dd455b410a37e21b5d64c5b4ccedbd1248f4d1802b518ad3dccc02",
-      "bytes": 3812
+      "sha256": "9f163585ece21b1d24ad0563e6194c8608f1d8f6020999b1638a37b981bf8909",
+      "bytes": 3810
     },
     {
       "path": "source/memorive/desktop/settings/api_verification_jobs.py",
@@ -3797,7 +3797,7 @@
     },
     {
       "path": "source/memorive/exams/__init__.py",
-      "sha256": "6ceeaa0446e23ca567b2738a1ccfe5675f81a2fea60f3a790871b2a3e2428a18",
+      "sha256": "8dbdf69d87a8cc75b0441a64a894fdd163994ea00bea0cc2deb20b675eb6936d",
       "bytes": 1185
     },
     {
@@ -4146,9 +4146,24 @@
       "bytes": 16402
     },
     {
-      "path": "source/memorive/exams/runner.py",
-      "sha256": "a8b534336cf51d82e101ebf21eecd3ccd5447af4ae76d7d22bc107a51a887c20",
-      "bytes": 94367
+      "path": "source/memorive/exams/runner/__init__.py",
+      "sha256": "57f95f5ce0d3c30de95083f6828f2a457d2a4d0a1a1c5f0d5d4c50c93d4c1bf2",
+      "bytes": 1676
+    },
+    {
+      "path": "source/memorive/exams/runner/catalog_validation.py",
+      "sha256": "09f08e726e761af12e83c096e6cf1b41aef0f2ade757c77f49f91b134d6e443e",
+      "bytes": 23870
+    },
+    {
+      "path": "source/memorive/exams/runner/metadata.py",
+      "sha256": "8515b6afb5dfcd69ddf8f1b5ccc5148d5b305f5c1189a7bfdd946fd452317ac6",
+      "bytes": 3327
+    },
+    {
+      "path": "source/memorive/exams/runner/workflow_exams.py",
+      "sha256": "8e011544f24ed4a0b180fd6e120c9d3ba7da84c6b565aef6a5c5b9b897a58d76",
+      "bytes": 67950
     },
     {
       "path": "source/memorive/exams/score_history.py",
@@ -4282,8 +4297,8 @@
     },
     {
       "path": "source/memorive/models/endpoints.py",
-      "sha256": "92a382fdfb6d6d096026021742f70cf41734d77193780d027c2c78e64b6e9597",
-      "bytes": 7281
+      "sha256": "eb7ef401bfd95dce512d22f7eb339e363e975d07621861ca808e28e0e6fc7452",
+      "bytes": 7279
     },
     {
       "path": "source/memorive/models/execution/__init__.py",
@@ -5562,8 +5577,8 @@
     },
     {
       "path": "source/memorive/models/validation/runner.py",
-      "sha256": "54107f0dd9b27ee6f6f569bb17b15de7139d763b5c3f6b64fb623cc5ccadc9b6",
-      "bytes": 83034
+      "sha256": "858086e7859f609146f433a079347f7b7d423cddb1f36118577c5839bdccdbd9",
+      "bytes": 83032
     },
     {
       "path": "source/memorive/models/validation/structured.py",

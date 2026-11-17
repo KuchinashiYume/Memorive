@@ -1,6 +1,6 @@
 """Model exams: what the settings page's "test this node" runs.
 
-  runner.py          WorkflowExams: the exam catalog, planning and running a node's exam, stored scores
+  runner/            WorkflowExams: the exam catalog, planning and running a node's exam, stored scores
   catalog.py         the exam catalog and the default exam of each workflow node
   card_distiller/, card_reviewer/, analysis.py, embedding/, ocr/, reranker/
                      the executors of each exam family (common.py and specialized_base.py are shared)
