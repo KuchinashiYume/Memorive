@@ -2362,249 +2362,9 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                     profile_kind=str(run.target["kind"]),
                 )
                 for shard_index, shard in enumerate(shards, start=1):
-                    preload = self._preloaded_initial_artifact_rows(
-                        context=run.context,
-                        target=run.target,
-                        sample_slot=int(run.plan["sample_slot"]),
-                        form_id=form_id,
-                        artifact=artifact,
-                        target_case_ids=list(shard["target_ids"]),
+                    merged[artifact].extend(
+                        self._analysis_form_shard(run, form_id, artifact, shard_index, shard)
                     )
-                    case_by_id = {
-                        str(row["case_id"]): deepcopy(dict(row))
-                        for row in shard["target_form"]["cases"]
-                    }
-
-                    def subset_form(case_ids: list[str]) -> dict[str, Any]:
-                        projected = deepcopy(dict(shard["target_form"]))
-                        projected["cases"] = [
-                            deepcopy(case_by_id[case_id])
-                            for case_id in case_ids
-                        ]
-                        return projected
-
-                    preloaded_rows = deepcopy(preload["rows"])
-                    if preloaded_rows:
-                        preloaded_form = subset_form(
-                            list(preload["reused_case_ids"])
-                        )
-                        preloaded_schema = run.protocol.shard_artifact_schema(
-                            run.full_schema,
-                            artifact,
-                            target_count=len(preloaded_rows),
-                        )
-                        preloaded_response = {artifact: preloaded_rows}
-                        normalization = (
-                            self._normalize_case_local_anchor_aliases(
-                                form=preloaded_form,
-                                response=preloaded_response,
-                                artifact=artifact,
-                            )
-                        )
-                        preloaded_response = normalization[
-                            "normalized_response"
-                        ]
-                        run.state["analysis_anchor_normalizations"].extend(
-                            {
-                                "form_id": form_id,
-                                "artifact": artifact,
-                                "transport_stage": "PRELOADED_INITIAL",
-                                "shard_index": shard_index,
-                                **deepcopy(action),
-                            }
-                            for action in normalization["actions"]
-                        )
-                        preload_audit = run.exam.audit_analysis_artifact(
-                            form=preloaded_form,
-                            response=preloaded_response,
-                            schema=preloaded_schema,
-                            artifact=artifact,
-                        )
-                        if preload_audit.get("status") != "PASS":
-                            raise ValueError(
-                                "ANALYSIS_PRELOAD_ARTIFACT_INVALID"
-                            )
-                        preloaded_rows = deepcopy(
-                            preloaded_response[artifact]
-                        )
-
-                    live_rows: list[Any] = []
-                    missing_case_ids = list(preload["missing_case_ids"])
-                    if missing_case_ids:
-                        missing_form = subset_form(missing_case_ids)
-                        schema = run.protocol.shard_artifact_schema(
-                            run.full_schema,
-                            artifact,
-                            target_count=len(missing_case_ids),
-                        )
-                        prompt = run.protocol.build_artifact_prompt(
-                            missing_form,
-                            artifact,
-                            target_case_ids=missing_case_ids,
-                        )
-                        request = {
-                            "phase": "ANALYSIS_REFERENCE_EXAM",
-                            "artifact": artifact,
-                            "target_case_ids": missing_case_ids,
-                            "subject_prompt": prompt,
-                        }
-                        response = self._stable_provider_call(
-                            run_id=run.run_id,
-                            run_root=run.run_root,
-                            state=run.state,
-                            target=run.target,
-                            request=request,
-                            response_schema=schema,
-                            structured_chat=run.structured_chat,
-                            call_kind=(
-                                f"FORM_{form_id}_{artifact.upper()}_SHARD_{shard_index:02d}"
-                            ),
-                        )
-                        normalization = self._normalize_case_local_anchor_aliases(
-                            form=missing_form,
-                            response=response,
-                            artifact=artifact,
-                        )
-                        response = normalization["normalized_response"]
-                        run.state["analysis_anchor_normalizations"].extend(
-                            {
-                                "form_id": form_id,
-                                "artifact": artifact,
-                                "transport_stage": "INITIAL",
-                                "shard_index": shard_index,
-                                **deepcopy(action),
-                            }
-                            for action in normalization["actions"]
-                        )
-                        audit = run.exam.audit_analysis_artifact(
-                            form=missing_form,
-                            response=response,
-                            schema=schema,
-                            artifact=artifact,
-                        )
-                        if audit.get("status") != "PASS":
-                            residual_projection = (
-                                self._bounded_structural_residual_projection(
-                                    audit
-                                )
-                            )
-                            repair_request = {
-                                "phase": "ANALYSIS_STRUCTURAL_REPAIR",
-                                "instruction": (
-                                    "Repair only the listed structural residuals in "
-                                    "the current response. Use each defect_locator, "
-                                    "including any named anchor, as an exact locator. "
-                                    "Return the complete artifact rows for all and only "
-                                    "target_case_ids in their declared order."
-                                ),
-                                "artifact": artifact,
-                                "target_case_ids": missing_case_ids,
-                                "residual_projection": residual_projection,
-                                "current_response": response,
-                                "subject_prompt": prompt,
-                            }
-                            response = self._stable_provider_call(
-                                run_id=run.run_id,
-                                run_root=run.run_root,
-                                state=run.state,
-                                target=run.target,
-                                request=repair_request,
-                                response_schema=schema,
-                                structured_chat=run.structured_chat,
-                                call_kind=(
-                                    f"FORM_{form_id}_{artifact.upper()}_SHARD_{shard_index:02d}_REPAIR"
-                                ),
-                            )
-                            normalization = (
-                                self._normalize_case_local_anchor_aliases(
-                                    form=missing_form,
-                                    response=response,
-                                    artifact=artifact,
-                                )
-                            )
-                            response = normalization[
-                                "normalized_response"
-                            ]
-                            run.state["analysis_anchor_normalizations"].extend(
-                                {
-                                    "form_id": form_id,
-                                    "artifact": artifact,
-                                    "transport_stage": "STRUCTURAL_REPAIR",
-                                    "shard_index": shard_index,
-                                    **deepcopy(action),
-                                }
-                                for action in normalization["actions"]
-                            )
-                            audit = run.exam.audit_analysis_artifact(
-                                form=missing_form,
-                                response=response,
-                                schema=schema,
-                                artifact=artifact,
-                            )
-                        if audit.get("status") != "PASS":
-                            raise ValueError(
-                                "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_CONTRACT_UNCLOSED"
-                            )
-                        rows = response.get(artifact)
-                        if not isinstance(rows, list):
-                            raise ValueError(
-                                "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_INVALID"
-                            )
-                        live_rows = deepcopy(rows)
-
-                    combined_rows = preloaded_rows + live_rows
-                    combined_by_id: dict[str, Any] = {}
-                    for row in combined_rows:
-                        if (
-                            not isinstance(row, Mapping)
-                            or not isinstance(row.get("case_id"), str)
-                            or row["case_id"] in combined_by_id
-                        ):
-                            raise ValueError(
-                                "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_INVALID"
-                            )
-                        combined_by_id[str(row["case_id"])] = deepcopy(row)
-                    if set(combined_by_id) != set(shard["target_ids"]):
-                        raise ValueError(
-                            "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_EXACT_SET_INVALID"
-                        )
-                    ordered_rows = [
-                        combined_by_id[case_id]
-                        for case_id in shard["target_ids"]
-                    ]
-                    combined_schema = run.protocol.shard_artifact_schema(
-                        run.full_schema,
-                        artifact,
-                        target_count=len(shard["target_ids"]),
-                    )
-                    combined_audit = run.exam.audit_analysis_artifact(
-                        form=shard["target_form"],
-                        response={artifact: ordered_rows},
-                        schema=combined_schema,
-                        artifact=artifact,
-                    )
-                    if combined_audit.get("status") != "PASS":
-                        raise ValueError(
-                            "WORKFLOW_MODEL_EXAM_ANALYSIS_GLOBAL_AUDIT_FAILED"
-                        )
-                    if preloaded_rows:
-                        run.state["analysis_preloaded_initial_rows"].append(
-                            {
-                                "form_id": form_id,
-                                "artifact": artifact,
-                                "shard_index": shard_index,
-                                "reused_case_ids": list(
-                                    preload["reused_case_ids"]
-                                ),
-                                "missing_case_ids": missing_case_ids,
-                                "source_calls": deepcopy(
-                                    preload["source_calls"]
-                                ),
-                                "provider_calls_for_reused_rows": 0,
-                                "rows_sha256": _sha256(preloaded_rows),
-                            }
-                        )
-                    merged[artifact].extend(deepcopy(ordered_rows))
             response = {
                 "claim_map": merged["claim_map"],
                 "analysis_summary": merged["analysis_summary"],
@@ -2627,6 +2387,297 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
             )
             run.responses[form_id] = deepcopy(response)
             run.raw_scores[form_id] = deepcopy(raw)
+
+    def _analysis_form_shard(
+        self,
+        run: _AnalysisExamRun,
+        form_id: str,
+        artifact: str,
+        shard_index: int,
+        shard: Mapping[str, Any],
+    ) -> list[Any]:
+        """One shard of a form's artifact in the first pass: the rows an earlier panel left for some
+        cases (_analysis_preloaded_shard_rows), the rest asked of the model under test
+        (_analysis_live_shard_rows), and all of them audited together. Records the reused rows in the
+        run state and returns the shard's rows in target order."""
+        preload = self._preloaded_initial_artifact_rows(
+            context=run.context,
+            target=run.target,
+            sample_slot=int(run.plan["sample_slot"]),
+            form_id=form_id,
+            artifact=artifact,
+            target_case_ids=list(shard["target_ids"]),
+        )
+        case_by_id = {
+            str(row["case_id"]): deepcopy(dict(row))
+            for row in shard["target_form"]["cases"]
+        }
+
+        def subset_form(case_ids: list[str]) -> dict[str, Any]:
+            projected = deepcopy(dict(shard["target_form"]))
+            projected["cases"] = [
+                deepcopy(case_by_id[case_id])
+                for case_id in case_ids
+            ]
+            return projected
+
+        preloaded_rows = deepcopy(preload["rows"])
+        if preloaded_rows:
+            preloaded_rows = self._analysis_preloaded_shard_rows(
+                run,
+                form_id,
+                artifact,
+                shard_index,
+                subset_form(list(preload["reused_case_ids"])),
+                preloaded_rows,
+            )
+        live_rows: list[Any] = []
+        missing_case_ids = list(preload["missing_case_ids"])
+        if missing_case_ids:
+            live_rows = self._analysis_live_shard_rows(
+                run,
+                form_id,
+                artifact,
+                shard_index,
+                subset_form(missing_case_ids),
+                missing_case_ids,
+            )
+        combined_rows = preloaded_rows + live_rows
+        combined_by_id: dict[str, Any] = {}
+        for row in combined_rows:
+            if (
+                not isinstance(row, Mapping)
+                or not isinstance(row.get("case_id"), str)
+                or row["case_id"] in combined_by_id
+            ):
+                raise ValueError(
+                    "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_INVALID"
+                )
+            combined_by_id[str(row["case_id"])] = deepcopy(row)
+        if set(combined_by_id) != set(shard["target_ids"]):
+            raise ValueError(
+                "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_EXACT_SET_INVALID"
+            )
+        ordered_rows = [
+            combined_by_id[case_id]
+            for case_id in shard["target_ids"]
+        ]
+        combined_schema = run.protocol.shard_artifact_schema(
+            run.full_schema,
+            artifact,
+            target_count=len(shard["target_ids"]),
+        )
+        combined_audit = run.exam.audit_analysis_artifact(
+            form=shard["target_form"],
+            response={artifact: ordered_rows},
+            schema=combined_schema,
+            artifact=artifact,
+        )
+        if combined_audit.get("status") != "PASS":
+            raise ValueError(
+                "WORKFLOW_MODEL_EXAM_ANALYSIS_GLOBAL_AUDIT_FAILED"
+            )
+        if preloaded_rows:
+            run.state["analysis_preloaded_initial_rows"].append(
+                {
+                    "form_id": form_id,
+                    "artifact": artifact,
+                    "shard_index": shard_index,
+                    "reused_case_ids": list(
+                        preload["reused_case_ids"]
+                    ),
+                    "missing_case_ids": missing_case_ids,
+                    "source_calls": deepcopy(
+                        preload["source_calls"]
+                    ),
+                    "provider_calls_for_reused_rows": 0,
+                    "rows_sha256": _sha256(preloaded_rows),
+                }
+            )
+        return deepcopy(ordered_rows)
+
+    def _analysis_preloaded_shard_rows(
+        self,
+        run: _AnalysisExamRun,
+        form_id: str,
+        artifact: str,
+        shard_index: int,
+        preloaded_form: Mapping[str, Any],
+        preloaded_rows: list[Any],
+    ) -> list[Any]:
+        """Rows an earlier panel answered for some of a shard's cases: case-local anchors expanded and
+        recorded, then audited against those cases."""
+        preloaded_schema = run.protocol.shard_artifact_schema(
+            run.full_schema,
+            artifact,
+            target_count=len(preloaded_rows),
+        )
+        preloaded_response = {artifact: preloaded_rows}
+        normalization = (
+            self._normalize_case_local_anchor_aliases(
+                form=preloaded_form,
+                response=preloaded_response,
+                artifact=artifact,
+            )
+        )
+        preloaded_response = normalization[
+            "normalized_response"
+        ]
+        run.state["analysis_anchor_normalizations"].extend(
+            {
+                "form_id": form_id,
+                "artifact": artifact,
+                "transport_stage": "PRELOADED_INITIAL",
+                "shard_index": shard_index,
+                **deepcopy(action),
+            }
+            for action in normalization["actions"]
+        )
+        preload_audit = run.exam.audit_analysis_artifact(
+            form=preloaded_form,
+            response=preloaded_response,
+            schema=preloaded_schema,
+            artifact=artifact,
+        )
+        if preload_audit.get("status") != "PASS":
+            raise ValueError(
+                "ANALYSIS_PRELOAD_ARTIFACT_INVALID"
+            )
+        return deepcopy(
+            preloaded_response[artifact]
+        )
+
+    def _analysis_live_shard_rows(
+        self,
+        run: _AnalysisExamRun,
+        form_id: str,
+        artifact: str,
+        shard_index: int,
+        missing_form: Mapping[str, Any],
+        missing_case_ids: list[str],
+    ) -> list[Any]:
+        """Ask the model under test for a shard's cases that were not preloaded: expand case-local
+        anchors, audit, and when the audit fails ask once more with a compact view of what is wrong.
+        Returns the rows."""
+        schema = run.protocol.shard_artifact_schema(
+            run.full_schema,
+            artifact,
+            target_count=len(missing_case_ids),
+        )
+        prompt = run.protocol.build_artifact_prompt(
+            missing_form,
+            artifact,
+            target_case_ids=missing_case_ids,
+        )
+        request = {
+            "phase": "ANALYSIS_REFERENCE_EXAM",
+            "artifact": artifact,
+            "target_case_ids": missing_case_ids,
+            "subject_prompt": prompt,
+        }
+        response = self._stable_provider_call(
+            run_id=run.run_id,
+            run_root=run.run_root,
+            state=run.state,
+            target=run.target,
+            request=request,
+            response_schema=schema,
+            structured_chat=run.structured_chat,
+            call_kind=(
+                f"FORM_{form_id}_{artifact.upper()}_SHARD_{shard_index:02d}"
+            ),
+        )
+        normalization = self._normalize_case_local_anchor_aliases(
+            form=missing_form,
+            response=response,
+            artifact=artifact,
+        )
+        response = normalization["normalized_response"]
+        run.state["analysis_anchor_normalizations"].extend(
+            {
+                "form_id": form_id,
+                "artifact": artifact,
+                "transport_stage": "INITIAL",
+                "shard_index": shard_index,
+                **deepcopy(action),
+            }
+            for action in normalization["actions"]
+        )
+        audit = run.exam.audit_analysis_artifact(
+            form=missing_form,
+            response=response,
+            schema=schema,
+            artifact=artifact,
+        )
+        if audit.get("status") != "PASS":
+            residual_projection = (
+                self._bounded_structural_residual_projection(
+                    audit
+                )
+            )
+            repair_request = {
+                "phase": "ANALYSIS_STRUCTURAL_REPAIR",
+                "instruction": (
+                    "Repair only the listed structural residuals in "
+                    "the current response. Use each defect_locator, "
+                    "including any named anchor, as an exact locator. "
+                    "Return the complete artifact rows for all and only "
+                    "target_case_ids in their declared order."
+                ),
+                "artifact": artifact,
+                "target_case_ids": missing_case_ids,
+                "residual_projection": residual_projection,
+                "current_response": response,
+                "subject_prompt": prompt,
+            }
+            response = self._stable_provider_call(
+                run_id=run.run_id,
+                run_root=run.run_root,
+                state=run.state,
+                target=run.target,
+                request=repair_request,
+                response_schema=schema,
+                structured_chat=run.structured_chat,
+                call_kind=(
+                    f"FORM_{form_id}_{artifact.upper()}_SHARD_{shard_index:02d}_REPAIR"
+                ),
+            )
+            normalization = (
+                self._normalize_case_local_anchor_aliases(
+                    form=missing_form,
+                    response=response,
+                    artifact=artifact,
+                )
+            )
+            response = normalization[
+                "normalized_response"
+            ]
+            run.state["analysis_anchor_normalizations"].extend(
+                {
+                    "form_id": form_id,
+                    "artifact": artifact,
+                    "transport_stage": "STRUCTURAL_REPAIR",
+                    "shard_index": shard_index,
+                    **deepcopy(action),
+                }
+                for action in normalization["actions"]
+            )
+            audit = run.exam.audit_analysis_artifact(
+                form=missing_form,
+                response=response,
+                schema=schema,
+                artifact=artifact,
+            )
+        if audit.get("status") != "PASS":
+            raise ValueError(
+                "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_CONTRACT_UNCLOSED"
+            )
+        rows = response.get(artifact)
+        if not isinstance(rows, list):
+            raise ValueError(
+                "WORKFLOW_MODEL_EXAM_ANALYSIS_SHARD_INVALID"
+            )
+        return deepcopy(rows)
 
     def _run_analysis_repairs(self, run: _AnalysisExamRun) -> None:
         """The first-pass scores, then the directed repair rounds while repairable defects remain."""
