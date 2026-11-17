@@ -7,7 +7,8 @@ into the inbox; only the desktop runs model jobs:
                      the library (job_results)
   retry(document)    run the failed step of the job again
 pump() runs once a second on a background thread: it keeps conversations tidy, moves connection
-work along and refreshes the status of documents being processed.
+work along and refreshes the status of documents being processed (when a document's results first
+appear, the library is refreshed once).
 """
 import json
 import threading
@@ -98,6 +99,9 @@ def bind(workspace, *, library, service, desktop_call, stage_inbox_paths):
                 for document in workspace.store.list('connector_document'):
                     if document.get('processing'):
                         value = status(document)
+                        if value['results'] and not document.get('result_items'):
+                            # Its first results: refresh the library once, so the home page shows them.
+                            library.refresh_core_products()
                         updated = dict(document, processing=value['processing'], result_items=value['results'])
                         workspace.store.put('connector_document', document['id'], document['project'], updated)
             except (ValueError, OSError, RuntimeError) as exc:

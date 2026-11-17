@@ -168,6 +168,41 @@ def test_a_connected_device_reads_only_its_job(tmp_path, paper):
     assert [item["kind"] for item in results] == ["CORE_CARD", "CORE_ANALYSIS"] and asked == [JOB]
 
 
+def test_a_device_documents_first_results_refresh_the_library_once(tmp_path, paper):
+    """The background loop reads one job each second; when its results first appear it refreshes the
+    library once, so the home page (cached_rows) shows the new products."""
+    whole = []
+    library = LibraryProductController(
+        service=None, control_store=ControlStore(tmp_path / "ui"), contract_root=CONTRACTS,
+        fixture_root=tmp_path / "unused", state_root=tmp_path / "library", include_synthetic_projection=False,
+        core_artifact_provider=lambda: whole.append(1) or paper.rows,
+        core_job_artifact_provider=lambda job_id: [row for row in paper.rows if row["job_id"] == job_id])
+    assert library.cached_rows() == []
+    store = Store(tmp_path / "workspace")
+    store.put("connector_document", "doc-1", "project-1", {"id": "doc-1", "project": "project-1",
+                                                          "processing": {"item_id": "item-1"}})
+    stop = threading.Event()
+    workspace = SimpleNamespace(store=store, connections=SimpleNamespace(pump=lambda: None),
+                                conversations=SimpleNamespace(maintain=lambda: None), connector_stop=stop)
+    desktop_connections.bind(
+        workspace, library=library,
+        service=SimpleNamespace(call=lambda method, params: {"control_state": "SUCCEEDED"}),
+        desktop_call=lambda method, params: {"item_id": params["item_id"], "job_id": JOB, "state": "DONE"},
+        stage_inbox_paths=None)
+    try:
+        for _ in range(50):                      # the first pass stores the results
+            if store.get("connector_document", "doc-1").get("result_items"):
+                break
+            stop.wait(0.1)
+        stop.wait(1.5)                           # one more pass: the results are already there
+    finally:
+        stop.set()
+        workspace.connector_thread.join(5)
+    assert len(store.get("connector_document", "doc-1")["result_items"]) == 2
+    assert len(whole) == 1
+    assert [row["kind"] for row in library.cached_rows()] == ["文献"]
+
+
 def test_the_rows_of_one_job_ask_the_service_for_that_job_only(tmp_path):
     from memorive.documents.library.core_products import CoreProducts
 

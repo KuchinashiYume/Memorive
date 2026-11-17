@@ -564,6 +564,11 @@ class LibraryProductController:
             raise LibraryProductError(f"LIBRARY_Core_{error_scope}_HASH_MISMATCH")
         return target, data
 
+    def refresh_core_products(self) -> None:
+        """Rebuild the index of document products from the jobs now. cached_rows (the home page)
+        shows the index as last refreshed; the library page refreshes it on every read."""
+        self._sync_core_artifacts()
+
     def core_artifacts(self) -> dict[str, dict[str, Any]]:
         """Every file that document processing produced, by artifact id, read fresh from the jobs.
 
