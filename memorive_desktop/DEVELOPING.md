@@ -147,6 +147,18 @@ excerpts the model was shown. No real data folder and no network is used. Read
 `tests/test_research_qa_example.py` runs it, and `tests/test_research_qa_flow.py` uses the same paper
 to cover every way a question can end.
 
+## Trying document processing
+
+```powershell
+python .\memorive_desktop\examples\document_processing.py
+```
+
+The example writes a one-page synthetic paper as a PDF, runs the local document processing on it
+(RawMD, CleanMD, Chunks; no model) and distills an evidence card with a stand-in model gateway, then
+prints the files of the paper's folder and each card field with the chunks it cites. Everything goes
+into a new temporary folder; no real data folder and no network is used.
+`tests/test_document_processing_example.py` runs it.
+
 ## A research question, from the window to the saved answer
 
 | Step | Where |

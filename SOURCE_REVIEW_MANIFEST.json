@@ -5135,9 +5135,14 @@
       "bytes": 6004
     },
     {
+      "path": "memorive_desktop/examples/document_processing.py",
+      "sha256": "652a670c94de4ceeb7b804e2c41301f7d588ab5fa8e0436dece96545dd9886ca",
+      "bytes": 8080
+    },
+    {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "033e6acb9088c705d2cd2ce2352e374bf86a230ec1cf72cf99b13c02ce46626e",
-      "bytes": 26728
+      "sha256": "a14e82f8ae0013548cc83081eb907f918b6addbe03a8bcee5db987f63d3a92a3",
+      "bytes": 27262
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
