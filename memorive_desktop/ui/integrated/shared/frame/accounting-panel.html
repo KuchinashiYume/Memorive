@@ -1,0 +1,80 @@
+        <section class="desktop-bottom-panel desktop-accounting-panel" id="desktop-bottom-panel" aria-label="计费与用量" aria-hidden="true" inert data-metric="COST" data-accounting-version="r0.6">
+  <div class="desktop-accounting-toolbar">
+    <strong class="desktop-accounting-title"><svg aria-hidden="true"><use href="#desktop-icon-accounting"></use></svg><span>计费与用量</span></strong>
+    <label class="desktop-accounting-filter desktop-accounting-scope-filter">
+      <svg aria-hidden="true"><use href="#desktop-icon-crosshair"></use></svg>
+      <span class="desktop-sr-only">统计范围</span>
+      <select id="desktop-accounting-scope" aria-label="统计范围">
+        <option value="ALL">全部记录</option>
+        <option value="CURRENT_JOB" disabled>本任务（归属未完整）</option>
+      </select>
+    </label>
+    <label class="desktop-accounting-filter">
+      <svg aria-hidden="true"><use href="#desktop-icon-calendar-range"></use></svg>
+      <span class="desktop-sr-only">时间范围</span>
+      <select id="desktop-accounting-range" aria-label="时间范围">
+        <option value="7D">近 7 天</option>
+        <option value="30D" selected>近 30 天</option>
+        <option value="MONTH">本月</option>
+      </select>
+    </label>
+    <label class="desktop-accounting-filter desktop-accounting-model-filter">
+      <svg aria-hidden="true"><use href="#desktop-icon-models"></use></svg>
+      <span class="desktop-sr-only">模型</span>
+      <select id="desktop-accounting-model" aria-label="模型"><option value="ALL">全部模型</option></select>
+    </label>
+    <button class="desktop-accounting-icon-button" id="desktop-accounting-refresh" type="button" aria-label="立即刷新" title="立即刷新">
+      <svg aria-hidden="true"><use href="#desktop-icon-refresh"></use></svg>
+    </button>
+    <span class="desktop-accounting-sync" id="desktop-accounting-sync" aria-live="polite">等待同步</span>
+    <button class="desktop-accounting-icon-button" id="desktop-accounting-close" type="button" aria-label="关闭底部面板" title="关闭">
+      <svg aria-hidden="true"><use href="#desktop-icon-close"></use></svg>
+    </button>
+  </div>
+
+  <div class="desktop-accounting-body">
+    <div class="desktop-accounting-metrics" role="tablist" aria-label="选择图表指标">
+      <div class="desktop-accounting-metric-row is-active" data-metric-row="COST">
+        <button class="desktop-accounting-metric-leading desktop-accounting-currency" id="desktop-accounting-currency" type="button" aria-label="当前 USD，点击切换为 RMB" title="切换显示币种">
+          <svg aria-hidden="true"><use href="#desktop-icon-cost"></use></svg><span id="desktop-accounting-currency-code">USD</span>
+        </button>
+        <button class="desktop-accounting-metric-main" id="desktop-accounting-tab-cost" type="button" role="tab" aria-selected="true" aria-controls="desktop-accounting-chart" data-metric="COST">
+          <span class="desktop-accounting-metric-label">费用（含估算）</span>
+          <strong class="desktop-accounting-metric-value" id="desktop-accounting-cost">—</strong>
+          <span class="desktop-accounting-metric-note" id="desktop-accounting-cost-note">实际 — · 估算 —</span>
+        </button>
+      </div>
+      <div class="desktop-accounting-metric-row" data-metric-row="REQUESTS">
+        <span class="desktop-accounting-metric-leading" aria-hidden="true"><svg><use href="#desktop-icon-requests"></use></svg></span>
+        <button class="desktop-accounting-metric-main" id="desktop-accounting-tab-requests" type="button" role="tab" aria-selected="false" aria-controls="desktop-accounting-chart" data-metric="REQUESTS">
+          <span class="desktop-accounting-metric-label">请求次数</span>
+          <strong class="desktop-accounting-metric-value" id="desktop-accounting-attempts">—</strong>
+          <span class="desktop-accounting-metric-note" id="desktop-accounting-attempt-note">失败与重试也计入</span>
+        </button>
+      </div>
+      <div class="desktop-accounting-metric-row" data-metric-row="TOKENS">
+        <span class="desktop-accounting-metric-leading" aria-hidden="true"><svg><use href="#desktop-icon-tokens"></use></svg></span>
+        <button class="desktop-accounting-metric-main" id="desktop-accounting-tab-tokens" type="button" role="tab" aria-selected="false" aria-controls="desktop-accounting-chart" data-metric="TOKENS">
+          <span class="desktop-accounting-metric-label">Tokens</span>
+          <strong class="desktop-accounting-metric-value" id="desktop-accounting-tokens">—</strong>
+          <span class="desktop-accounting-metric-note" id="desktop-accounting-token-note">输入 — · 输出 —</span>
+        </button>
+      </div>
+    </div>
+
+    <figure class="desktop-accounting-chart" id="desktop-accounting-chart" role="tabpanel" aria-labelledby="desktop-accounting-tab-cost">
+      <figcaption class="desktop-accounting-chart-head">
+        <span class="desktop-accounting-chart-heading"><svg aria-hidden="true"><use id="desktop-accounting-chart-icon" href="#desktop-icon-cost"></use></svg><span id="desktop-accounting-chart-title">每日费用</span><small id="desktop-accounting-chart-unit">USD</small></span>
+        <span class="desktop-accounting-legend" id="desktop-accounting-legend"></span>
+      </figcaption>
+      <div class="desktop-accounting-plot" id="desktop-accounting-plot">
+        <svg id="desktop-accounting-svg" role="img" aria-labelledby="desktop-accounting-svg-title desktop-accounting-svg-desc" preserveAspectRatio="none">
+          <title id="desktop-accounting-svg-title">近 30 天每日费用</title>
+          <desc id="desktop-accounting-svg-desc">按已配置模型统计的每日费用柱状图。</desc>
+        </svg>
+        <div class="desktop-accounting-tooltip" id="desktop-accounting-tooltip" role="tooltip" hidden></div>
+        <div class="desktop-accounting-empty" id="desktop-accounting-empty" hidden>当前范围没有可显示数据</div>
+      </div>
+    </figure>
+  </div>
+</section>
