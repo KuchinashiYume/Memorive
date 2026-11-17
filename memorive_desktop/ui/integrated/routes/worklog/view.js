@@ -105,12 +105,14 @@
       const mark = makeElement('span', 'desktop-worklog-mark');
       mark.setAttribute('aria-hidden','true');
       const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('class','desktop-icon');
+      icon.setAttribute('viewBox','0 0 24 24');
+      icon.setAttribute('class','desktop-icon');
       const use=document.createElementNS('http://www.w3.org/2000/svg','use');
       const type=String(row.type_label||'');
       use.setAttribute('href',/报告|日报|周报|月报/.test(type+' '+String(row.title||''))?'#desktop-icon-calendar-range':
         /外部文献/.test(type)?'#desktop-icon-crosshair':/文献/.test(type)?'#desktop-icon-library':'#desktop-icon-messages');
-      icon.append(use);mark.append(icon);
+      icon.append(use);
+      mark.append(icon);
       const copy = makeElement('div', 'desktop-worklog-card-copy');
       copy.append(
         makeElement('strong', '', card.dataset.title),

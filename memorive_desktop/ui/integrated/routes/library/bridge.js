@@ -115,7 +115,10 @@
     return requestPage(paging.page + 1, true, paging.query, generation);
   };
   const bootstrap = () => {
-    if (!bootstrapPromise) bootstrapPromise = refresh().catch(error => { bootstrapPromise=null; throw error; });
+    if (!bootstrapPromise) bootstrapPromise = refresh().catch(error => {
+      bootstrapPromise=null;
+      throw error;
+    });
     return bootstrapPromise;
   };
   const maybeLoadMore = () => {

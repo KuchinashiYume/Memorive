@@ -43,15 +43,25 @@
   legend.hidden = true;
   legend.setAttribute('role','region');
   legend.setAttribute('aria-label','模型图例');
-  const closeLegend = () => { legend.hidden = true; legendButton.setAttribute('aria-expanded','false'); };
+  const closeLegend = () => {
+    legend.hidden = true;
+    legendButton.setAttribute('aria-expanded','false');
+  };
   legendButton.addEventListener('click', () => {
     legend.hidden = !legend.hidden;
     legendButton.setAttribute('aria-expanded', String(!legend.hidden));
   });
   document.addEventListener('pointerdown', e => { if (!legendWrap.contains(e.target)) closeLegend(); });
-  legendWrap.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLegend(); legendButton.focus(); } });
+  legendWrap.addEventListener('keydown', e => { if (e.key === 'Escape') {
+    closeLegend();
+    legendButton.focus();
+  } });
   const detailLines = (target, lines) => {
-    target.replaceChildren(...lines.map(text => {const n=document.createElement('span');n.textContent=text;return n;}));
+    target.replaceChildren(...lines.map(text => {
+      const n=document.createElement('span');
+      n.textContent=text;
+      return n;
+    }));
   };
 
   const plot = one('#desktop-accounting-plot');
@@ -135,7 +145,8 @@
     const fragment = document.createDocumentFragment();
     const all = document.createElement('option');
     all.value = 'ALL';
-    all.textContent = `全部模型 · ${rows.length}`; all.dataset.memoLabel=all.textContent;
+    all.textContent = `全部模型 · ${rows.length}`;
+    all.dataset.memoLabel=all.textContent;
     fragment.append(all);
     const labels = { API: 'API 模式', CLI: 'CLI 模式', LOCAL: '本地模型' };
     for (const kind of ['API', 'CLI', 'LOCAL']) {
@@ -146,7 +157,8 @@
       groupRows.forEach((row) => {
         const option = document.createElement('option');
         option.value = row.profile_ref;
-        option.textContent = `${kind === 'LOCAL' ? '本地' : kind} · ${row.provider_label} · ${row.model_label}`; option.dataset.memoLabel=option.textContent;
+        option.textContent = `${kind === 'LOCAL' ? '本地' : kind} · ${row.provider_label} · ${row.model_label}`;
+        option.dataset.memoLabel=option.textContent;
         group.append(option);
       });
       fragment.append(group);

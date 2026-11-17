@@ -12,7 +12,8 @@
     if(date)return ['今天','Today','今日'][locale]+' '+date[1];
     const checksum=text.match(/^(?:校验值：|Checksum: |チェックサム: )([a-f0-9]{64})$/i);
     if(checksum)return ['校验值：','Checksum: ','チェックサム: '][locale]+checksum[1];
-    const match=text.match(reportPattern);if(!match)return null;
+    const match=text.match(reportPattern);
+    if(!match)return null;
     const index=labelSets.find(row=>row.includes(match[1])).indexOf(match[1]);
     return labelSets[locale][index]+text.slice(match[1].length);
   }
@@ -29,7 +30,8 @@
       && Number.isInteger(draft.monthly_day)&&draft.monthly_day>=1&&draft.monthly_day<=31;
   }
   function render(){
-    const root=q('#settings-report-schedule');if(!root)return;
+    const root=q('#settings-report-schedule');
+    if(!root)return;
     root.querySelectorAll('input,select,button,summary').forEach(node=>{
       if(node.tagName!=='SUMMARY')node.disabled=!saved;
     });
@@ -56,43 +58,69 @@
     try{
       const value=await call('research.schedule_get');
       if(!force&&dirty())return;
-      saved=value;draft=clone(value.config);render();sync();
+      saved=value;
+      draft=clone(value.config);
+      render();
+      sync();
     }catch(_){q('#settings-report-schedule-status').textContent=t('报告时间读取失败，请重新打开设置');}
     finally{loading=false;}
   }
   async function save(){
     if(!valid())throw new Error('REPORT_SCHEDULE_TIME_INVALID');
     const value=await call('research.schedule_save',{config:draft,expected_revision:saved.revision});
-    saved=value;draft=clone(value.config);render();sync();return value;
+    saved=value;
+    draft=clone(value.config);
+    render();
+    sync();
+    return value;
   }
   async function reset(){
     if(!saved)await load();
     const value=await call('research.schedule_save',{config:{daily_time:'00:00',weekly_time:'00:00',weekly_day:0,monthly_time:'00:00',monthly_day:1},expected_revision:saved.revision});
-    saved=value;draft=clone(value.config);render();sync();
+    saved=value;
+    draft=clone(value.config);
+    render();
+    sync();
   }
   function init(){
-    const root=q('#settings-report-schedule');if(!root)return;
+    const root=q('#settings-report-schedule');
+    if(!root)return;
     const calendar=q('#settings-report-calendar');
     for(let day=1;day<=31;day++){
-      const button=document.createElement('button');button.type='button';button.dataset.monthDay=String(day);
-      button.textContent=String(day);button.className='desktop-report-day';
+      const button=document.createElement('button');
+      button.type='button';
+      button.dataset.monthDay=String(day);
+      button.textContent=String(day);
+      button.className='desktop-report-day';
       button.addEventListener('click',()=>{
-        if(!draft)return;draft.monthly_day=day;render();sync();
-        q('#settings-report-month-picker').open=false;q('#settings-report-month-picker summary').focus();
-      });calendar.append(button);
+        if(!draft)return;
+        draft.monthly_day=day;
+        render();
+        sync();
+        q('#settings-report-month-picker').open=false;
+        q('#settings-report-month-picker summary').focus();
+      });
+      calendar.append(button);
     }
     for(const input of root.querySelectorAll('[data-report-field]')){
       const changed=event=>{
         event.stopPropagation();
         if(!draft)return;
         draft[input.dataset.reportField]=input.tagName==='SELECT'?Number(input.value):input.value;
-        render();sync();
+        render();
+        sync();
       };
       input.addEventListener('change',changed);
       input.addEventListener('input',changed);
     }
     const picker=q('#settings-report-month-picker');
-    picker.addEventListener('keydown',event=>{if(event.key==='Escape'){picker.open=false;picker.querySelector('summary').focus();event.stopPropagation();}});
+    picker.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){
+        picker.open=false;
+        picker.querySelector('summary').focus();
+        event.stopPropagation();
+      }
+    });
     document.addEventListener('pointerdown',event=>{if(picker.open&&!picker.contains(event.target))picker.open=false;});
     window.__Desktop_SETTINGS_CONTROLS__?.help(q('#settings-report-schedule-label'),'报告生成时间',
       '按 UTC+08:00 汇总上一完整周期；仅在有新成果时生成。关闭期间错过的报告会在下次启动补生成，已生成的周期不重复。月报所选日期不存在时使用当月最后一天。');

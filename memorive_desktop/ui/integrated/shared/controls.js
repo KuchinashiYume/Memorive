@@ -6,15 +6,21 @@
   const keys={'‹':'back','<':'back','›':'right','>':'right','⌄':'down','⌃':'up','^':'up','×':'close','＋':'plus','+':'plus','－':'minus','−':'minus','⟳':'refresh','↻':'refresh'};
   paths.leaderboard='M5 21v-6M12 21V9M19 21V3';
   function createIcon(key){
-    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),p=document.createElementNS(svg.namespaceURI,'path');
-    svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('class','desktop-symbol');svg.setAttribute('aria-hidden','true');p.setAttribute('d',paths[key]);svg.append(p);
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),
+      p=document.createElementNS(svg.namespaceURI,'path');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('class','desktop-symbol');
+    svg.setAttribute('aria-hidden','true');
+    p.setAttribute('d',paths[key]);
+    svg.append(p);
     return svg;
   }
   function icons(root){
     const nodes=root instanceof Element?[root,...root.querySelectorAll(iconSelector)]:[...document.querySelectorAll(iconSelector)];
     for(const n of nodes){
       if(!n.matches(iconSelector)||n.classList.contains('desktop-toolbar-icon'))continue;
-      const key=keys[n.textContent.trim()];if(!key)continue;
+      const key=keys[n.textContent.trim()];
+      if(!key)continue;
       const svg=createIcon(key);
       if(n.tagName==='BUTTON'){
         if(!n.hasAttribute('aria-label'))n.setAttribute('aria-label',n.dataset.desktopTip||({plus:'增加',minus:'减少',close:'关闭',back:'返回',refresh:'刷新'}[key])||'展开');
@@ -60,34 +66,52 @@
   }
   const busy=async(button,work)=>{
     if(!button||button.getAttribute('aria-busy')==='true')return;
-    const disabled=button.disabled;button.disabled=true;button.setAttribute('aria-busy','true');
-    try{return await work();}finally{button.disabled=disabled;button.removeAttribute('aria-busy');}
+    const disabled=button.disabled;
+    button.disabled=true;
+    button.setAttribute('aria-busy','true');
+    try{return await work();}finally{
+      button.disabled=disabled;
+      button.removeAttribute('aria-busy');
+    }
   };
   // SHARED: confirmation expires without executing. Only another explicit
   // click on the same action and same task can return true.
   let pendingRestart=null;
   function cancelRestart(){
     if(!pendingRestart)return;
-    const row=pendingRestart;pendingRestart=null;clearInterval(row.timer);
-    if(row.iconHtml!=null)row.button.innerHTML=row.iconHtml;else row.button.textContent=row.label;row.button.removeAttribute('data-restart-armed');
-    row.button.removeAttribute('aria-pressed');delete row.button.dataset.desktopNoTranslate;
+    const row=pendingRestart;
+    pendingRestart=null;
+    clearInterval(row.timer);
+    if(row.iconHtml!=null)row.button.innerHTML=row.iconHtml;else row.button.textContent=row.label;
+    row.button.removeAttribute('data-restart-armed');
+    row.button.removeAttribute('aria-pressed');
+    delete row.button.dataset.desktopNoTranslate;
   }
   function confirmRestart(button,key,confirmationLabel=null){
     if(!button||button.disabled)return false;
     if(pendingRestart?.button===button && pendingRestart.key===key && performance.now()<pendingRestart.deadline){
-      cancelRestart();return true;
+      cancelRestart();
+      return true;
     }
     cancelRestart();
     const row={button,key,label:button.textContent,iconHtml:button.dataset.iconConfirm==='true'?button.innerHTML:null,confirmationLabel,deadline:performance.now()+5000,timer:null};
-    pendingRestart=row;button.dataset.restartArmed='true';button.dataset.desktopNoTranslate='true';button.setAttribute('aria-pressed','true');
+    pendingRestart=row;
+    button.dataset.restartArmed='true';
+    button.dataset.desktopNoTranslate='true';
+    button.setAttribute('aria-pressed','true');
     const tick=()=>{
-      if(!button.isConnected || performance.now()>=row.deadline){cancelRestart();return;}
+      if(!button.isConnected || performance.now()>=row.deadline){
+        cancelRestart();
+        return;
+      }
       const seconds=Math.ceil((row.deadline-performance.now())/1000);
       const language=document.documentElement.lang||'zh-CN';
       const label=row.confirmationLabel?(window.__Desktop_INTEGRATED_APP__?.translate?.(row.confirmationLabel)||row.confirmationLabel):(language.startsWith('en')?'Click again':language.startsWith('ja')?'もう一度クリック':'再次点击确认');
       button.textContent=label+' · '+seconds+'s';
     };
-    row.timer=setInterval(tick,100);tick();return false;
+    row.timer=setInterval(tick,100);
+    tick();
+    return false;
   }
   document.addEventListener('keydown',e=>{if(e.key==='Escape')cancelRestart();});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelRestart();});
@@ -97,12 +121,20 @@
   window.__Desktop_UI_CONTROLS__=Object.freeze({icons,busy,createIcon,confirmRestart,cancelRestart,confirmAction:confirmRestart,cancelAction:cancelRestart});
   function init(){
     window.__Desktop_SETTINGS_ICONS__?.apply();
-    icons(document);document.querySelectorAll(panelSelector).forEach(panel);
+    icons(document);
+    document.querySelectorAll(panelSelector).forEach(panel);
     new MutationObserver(records=>{
       for(const r of records){
-        if(r.type==='attributes'){panel(r.target);continue;}
+        if(r.type==='attributes'){
+          panel(r.target);
+          continue;
+        }
         if(r.type==='characterData')icons(r.target.parentElement);
-        for(const n of r.addedNodes)if(n instanceof Element){icons(n);panel(n);n.querySelectorAll(panelSelector).forEach(panel);}
+        for(const n of r.addedNodes)if(n instanceof Element){
+          icons(n);
+          panel(n);
+          n.querySelectorAll(panelSelector).forEach(panel);
+        }
       }
     }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-hidden','hidden']});
   }

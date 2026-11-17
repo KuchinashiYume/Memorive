@@ -20,8 +20,13 @@
     }
   });
   const agentSelect=page.querySelector('#memo-agent-model');
-  const agentPicker=window.__Desktop_MODEL_PICKER__.bind({button:page.querySelector('#memo-agent-model-adjust'),menu:page.querySelector('#memo-agent-model-menu'),label:page.querySelector('#memo-agent-model-label'),dot:page.querySelector('#memo-agent-model-dot'),onSelect:option=>{agentSelect.value=option.profileRef||'';agentSelect.dispatchEvent(new Event('change',{bubbles:true}));}});
-  function renderAgentOptions(options,currentRef){agentPicker.render([{profileRef:'',model:'使用常用 Agent 的可用模型',state:'green',note:''},...options.map(m=>({profileRef:m.profile_ref,model:m.display_name||m.model_name,state:m.eligible?'green':'yellow',note:m.profile_kind,disabled:!m.eligible}))],currentRef);}
+  const agentPicker=window.__Desktop_MODEL_PICKER__.bind({button:page.querySelector('#memo-agent-model-adjust'),menu:page.querySelector('#memo-agent-model-menu'),label:page.querySelector('#memo-agent-model-label'),dot:page.querySelector('#memo-agent-model-dot'),onSelect:option=>{
+    agentSelect.value=option.profileRef||'';
+    agentSelect.dispatchEvent(new Event('change',{bubbles:true}));
+  }});
+  function renderAgentOptions(options,currentRef){
+    agentPicker.render([{profileRef:'',model:'使用常用 Agent 的可用模型',state:'green',note:''},...options.map(m=>({profileRef:m.profile_ref,model:m.display_name||m.model_name,state:m.eligible?'green':'yellow',note:m.profile_kind,disabled:!m.eligible}))],currentRef);
+  }
   function refreshModelPicker() {
     const values = modelOptions || [...modelSelect.options].map(option => ({
       profileRef: option.value,
@@ -44,7 +49,8 @@
     const panel = panels.find(item => item.dataset.memoSettingsPanel === name);
     if (!panel) return false;
     current = name;
-    modelPicker.setOpen(false);agentPicker.setOpen(false);
+    modelPicker.setOpen(false);
+    agentPicker.setOpen(false);
     if (window.__MEMO_CONNECTIONS__?.inspect().opened) window.__MEMO_CONNECTIONS__.close();
     buttons.forEach(button => {
       if (button.dataset.memoSettingsCategory === name) button.setAttribute('aria-current', 'page');
@@ -78,7 +84,8 @@
   updateMemoryEmpty();
   window.addEventListener('desktop:settings-category-changed', event => {
     if (event.detail.category !== 'research-workspace') {
-      modelPicker.setOpen(false);agentPicker.setOpen(false);
+      modelPicker.setOpen(false);
+      agentPicker.setOpen(false);
       if (window.__MEMO_CONNECTIONS__?.inspect().opened) window.__MEMO_CONNECTIONS__.close();
     }
   });

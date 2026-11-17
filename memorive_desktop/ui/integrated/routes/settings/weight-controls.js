@@ -10,8 +10,10 @@
       &&relevance.reduce((n,k)=>n+weights[k]*100,0)>=group[0]-1e-7&&relevance.reduce((n,k)=>n+weights[k]*100,0)<=group[1]+1e-7;
   }
   function allocate(weights,pinned,requested,limits,group){
-    const keys=Object.keys(limits);if(!keys.includes(pinned)||!Number.isFinite(requested))throw Error('WEIGHT_RANGE_INVALID');
-    const value=clamp(Math.round(requested),...limits[pinned]),old=Object.fromEntries(keys.map(k=>[k,Math.max(0,Number(weights[k])*100||0)]));
+    const keys=Object.keys(limits);
+    if(!keys.includes(pinned)||!Number.isFinite(requested))throw Error('WEIGHT_RANGE_INVALID');
+    const value=clamp(Math.round(requested),...limits[pinned]),
+      old=Object.fromEntries(keys.map(k=>[k,Math.max(0,Number(weights[k])*100||0)]));
     const bounds=Object.fromEntries(keys.map(k=>[k,k===pinned?[value,value]:limits[k]]));
     const authority=keys.filter(k=>!relevance.includes(k));
     const sum=(ks,side)=>ks.reduce((n,k)=>n+bounds[k][side],0);
@@ -25,12 +27,18 @@
       const fixed=members.includes(pinned)?value:0,free=members.filter(k=>k!==pinned),wanted=total-fixed;
       if(members.includes(pinned))out[pinned]=value;
       let left=0,right=10000;
-      for(let i=0;i<64;i++){const mid=(left+right)/2,n=free.reduce((s,k)=>s+clamp(mid*Math.max(old[k],1),...bounds[k]),0);if(n<wanted)left=mid;else right=mid;}
+      for(let i=0;i<64;i++){
+        const mid=(left+right)/2,n=free.reduce((s,k)=>s+clamp(mid*Math.max(old[k],1),...bounds[k]),0);
+        if(n<wanted)left=mid;else right=mid;
+      }
       const raw=free.map(k=>({key:k,value:clamp(right*Math.max(old[k],1),...bounds[k])}));
       raw.forEach(r=>out[r.key]=Math.floor(r.value+1e-9));
       let remainder=total-members.reduce((n,k)=>n+(out[k]||0),0);
       raw.sort((a,b)=>(b.value-Math.floor(b.value+1e-9))-(a.value-Math.floor(a.value+1e-9))||keys.indexOf(a.key)-keys.indexOf(b.key));
-      for(const item of raw){if(remainder>0&&out[item.key]<bounds[item.key][1]){out[item.key]++;remainder--;}}
+      for(const item of raw){if(remainder>0&&out[item.key]<bounds[item.key][1]){
+        out[item.key]++;
+        remainder--;
+      }}
       if(remainder!==0)throw Error('WEIGHT_ALLOCATION_FAILED');
     }
     const normalized=Object.fromEntries(keys.map(k=>[k,out[k]/100]));

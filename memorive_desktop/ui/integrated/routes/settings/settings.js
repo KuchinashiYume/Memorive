@@ -547,13 +547,18 @@
       if(!row)continue;
       let help=row.querySelector('.desktop-refinement-help');
       if(!help){
-        help=document.createElement('span');help.className='desktop-settings-help-wrap desktop-refinement-help';
+        help=document.createElement('span');
+        help.className='desktop-settings-help-wrap desktop-refinement-help';
         help.innerHTML=`<span class="desktop-settings-help-trigger" role="button" tabindex="0" aria-describedby="settings-${name}-tip">?</span><span class="desktop-settings-help-tooltip" role="tooltip" id="settings-${name}-tip"></span>`;
-        const label=document.createElement('span');label.className='desktop-refinement-label';
-        const strong=row.querySelector('.switch-copy strong');strong.before(label);label.append(strong,help);
+        const label=document.createElement('span');
+        label.className='desktop-refinement-label';
+        const strong=row.querySelector('.switch-copy strong');
+        strong.before(label);
+        label.append(strong,help);
       }
       const index={'en-US':1,'ja-JP':2}[settingsLanguage()]||0;
-      const tip=help.querySelector('[role=tooltip]');if(tip.textContent!==helpCopy[name][index])tip.textContent=helpCopy[name][index];
+      const tip=help.querySelector('[role=tooltip]');
+      if(tip.textContent!==helpCopy[name][index])tip.textContent=helpCopy[name][index];
       help.querySelector('[role=button]').setAttribute('aria-label',row.querySelector('strong').textContent+' ?');
     }
     setText('#settings-assistant-appearance-title', 'assistant.title', '桌面助手');
@@ -1054,22 +1059,40 @@
     if (!fieldset) return control;
     fieldset.querySelector('legend').textContent = '处理偏好';
     let note = fieldset.querySelector('[data-reasoning-summary]');
-    if (!note) {note=create('small');note.dataset.reasoningSummary='';fieldset.append(note);}
+    if (!note) {
+      note=create('small');
+      note.dataset.reasoningSummary='';
+      fieldset.append(note);
+    }
     let toggle = fieldset.querySelector('[data-normal-thinking]');
     if (!toggle) {
-      const row=create('div','switch-row');row.dataset.normalThinkingRow='';
+      const row=create('div','switch-row');
+      row.dataset.normalThinkingRow='';
       row.append(create('span','switch-copy','深度思考'));
-      toggle=create('button','switch');toggle.type='button';toggle.role='switch';toggle.dataset.normalThinking='';toggle.setAttribute('aria-label','深度思考');
-      toggle.addEventListener('click',()=>{const enabled=toggle.getAttribute('aria-checked')!=='true';toggle.setAttribute('aria-checked',String(enabled));setSwitch('settings-thinking-enabled',enabled);setDraftPlan(enabled?'MAXIMUM':'ECONOMY');markDirty();});
-      row.append(toggle);fieldset.append(row);
+      toggle=create('button','switch');
+      toggle.type='button';
+      toggle.role='switch';
+      toggle.dataset.normalThinking='';
+      toggle.setAttribute('aria-label','深度思考');
+      toggle.addEventListener('click',()=>{
+        const enabled=toggle.getAttribute('aria-checked')!=='true';
+        toggle.setAttribute('aria-checked',String(enabled));
+        setSwitch('settings-thinking-enabled',enabled);
+        setDraftPlan(enabled?'MAXIMUM':'ECONOMY');
+        markDirty();
+      });
+      row.append(toggle);
+      fieldset.append(row);
     }
     const toggleOnly=control?.thinking_mode==='OPTIONAL' && !control.effort_values.length && !control.recommended_budget_tokens?.length;
     const choices=toggleOnly?[]:normalReasoningChoices(control);
-    const selected=selectedDraftPlan();const selectedIndex=control?.plan_indices?.[selected];
+    const selected=selectedDraftPlan();
+    const selectedIndex=control?.plan_indices?.[selected];
     const selectedChoice=choices.find(row=>row.index===selectedIndex) || choices[0];
     qa('#settings-model-plan [data-model-plan]').forEach(button=>{
       const choice=choices.find(row=>row.plan===button.dataset.modelPlan);
-      button.hidden=!choice;button.disabled=!choice;
+      button.hidden=!choice;
+      button.disabled=!choice;
       if(choice) button.textContent=choice.label;
       if(choices.length) button.setAttribute('aria-checked',String(choice===selectedChoice));
     });
@@ -1078,7 +1101,11 @@
     toggle.setAttribute('aria-checked',String(selectedIndex>0));
     note.textContent=!service.model_name?'选择模型后自动匹配可用选项。':!control?'使用接口默认配置；可调项尚未确认。':toggleOnly?'开启后会投入更多思考。':control.points.length<2?(control.thinking_mode==='ALWAYS'?'该模型始终思考，使用默认强度。':'该模型使用默认配置。'):'已按模型能力匹配可用选项。';
     const thinking=q('#settings-thinking-enabled');
-    if (thinking && control?.thinking_mode==='ALWAYS') {setSwitch('settings-thinking-enabled',true);thinking.disabled=true;thinking.setAttribute('aria-disabled','true');}
+    if (thinking && control?.thinking_mode==='ALWAYS') {
+      setSwitch('settings-thinking-enabled',true);
+      thinking.disabled=true;
+      thinking.setAttribute('aria-disabled','true');
+    }
     return control;
   };
 
@@ -1097,9 +1124,15 @@
       const input = create(enumField ? 'select' : 'input', enumField ? 'select' : 'field mono');
       if (enumField) {
         for (const optionValue of ['default', ...reasoningControl.effort_values]) {
-          const option=create('option','',optionValue==='default'?'模型默认':optionValue);option.value=optionValue;input.append(option);
+          const option=create('option','',optionValue==='default'?'模型默认':optionValue);
+          option.value=optionValue;
+          input.append(option);
         }
-        if (service?.tier && ![...input.options].some(o=>o.value===service.tier)) {const option=create('option','',service.tier+'（已有预设）');option.value=service.tier;input.append(option);}
+        if (service?.tier && ![...input.options].some(o=>o.value===service.tier)) {
+          const option=create('option','',service.tier+'（已有预设）');
+          option.value=service.tier;
+          input.append(option);
+        }
       } else input.type = 'text';
       input.maxLength = maximum;
       input.autocomplete = 'off';
@@ -1156,7 +1189,8 @@
     });
     const reasoningControl = apiReasoningControl(service);
     if (reasoningControl?.thinking_mode === 'ALWAYS') {
-      thinking.setAttribute('aria-checked','true');thinking.disabled=true;
+      thinking.setAttribute('aria-checked','true');
+      thinking.disabled=true;
       thinkingCopy.querySelector('span').textContent='该模型始终开启思考';
     }
     thinkingRow.append(thinkingCopy, thinking);
@@ -1321,10 +1355,20 @@
     card.querySelector('[data-cancel-cli-verification]')?.remove();
     if (receipt.status === 'RUNNING' && receipt.job_id) {
       const stop=create('button','soft-button','停止验证');
-      stop.type='button';stop.dataset.cancelCliVerification=receipt.job_id;
+      stop.type='button';
+      stop.dataset.cancelCliVerification=receipt.job_id;
       stop.disabled=Boolean(receipt.cancel_requested);
       if(stop.disabled)stop.textContent='正在停止…';
-      stop.onclick=async()=>{stop.disabled=true;try{await call('settings.cancel_cli_verification',{job_id:receipt.job_id});stop.textContent='正在停止…';}catch(_){stop.disabled=false;showToast('未能停止，请重试。');}};
+      stop.onclick=async()=>{
+        stop.disabled=true;
+        try{
+          await call('settings.cancel_cli_verification',{job_id:receipt.job_id});
+          stop.textContent='正在停止…';
+        }catch(_){
+          stop.disabled=false;
+          showToast('未能停止，请重试。');
+        }
+      };
       card.append(stop);
     }
   };
@@ -1458,7 +1502,11 @@
         commandCard.prepend(createCliField('显示名称',service.display_name,'cliServiceDisplay',{mono:false,maxLength:80}));
         const actions=create('div','desktop-settings-code-actions');
         for(const [key,label] of [['copy','复制'],['export','导出模板'],['delete','删除']]) {
-          const button=create('button','text-button',label);button.type='button';button.dataset.cliTemplateAction=key;button.dataset.cliConfigId=service.config_id;actions.append(button);
+          const button=create('button','text-button',label);
+          button.type='button';
+          button.dataset.cliTemplateAction=key;
+          button.dataset.cliConfigId=service.config_id;
+          actions.append(button);
         }
         const advanced=create('details','desktop-settings-local-model-advanced');
         advanced.append(create('summary','desktop-settings-disclosure','接入模板与高级设置'));
@@ -1466,9 +1514,15 @@
         fields.append(createCliField('解释器（脚本使用）',service.interpreter||'','cliInterpreter',{maxLength:260}),createCliField('共享并发组（可选）',service.concurrency_group||'','cliConcurrencyGroup',{maxLength:64}));
         for(const [key,label,value] of [['template','模板 JSON',service.template],['environment','环境变量引用 JSON',service.environment||{}]]) {
           const field=create('label','field-label',label),input=create('textarea','field mono');
-          input.dataset[key==='template'?'cliTemplate':'cliEnvironment']='';input.rows=key==='template'?16:3;input.spellcheck=false;input.value=JSON.stringify(value,null,2);field.append(input);fields.append(field);
+          input.dataset[key==='template'?'cliTemplate':'cliEnvironment']='';
+          input.rows=key==='template'?16:3;
+          input.spellcheck=false;
+          input.value=JSON.stringify(value,null,2);
+          field.append(input);
+          fields.append(field);
         }
-        advanced.append(fields);commandCard.append(actions,advanced);
+        advanced.append(fields);
+        commandCard.append(actions,advanced);
       }
       const models = create('div', 'desktop-settings-cli-models');
       models.dataset.cliModels = '';
@@ -1977,25 +2031,37 @@
 
 
   const showBridgeSetupGuide = (status) => {
-    const tools=q('#memo-bridge-setup-guide');if(!tools)return;
+    const tools=q('#memo-bridge-setup-guide');
+    if(!tools)return;
     tools.hidden=!status?.prepared || status?.bridge_identity_verified===true;
     q('#memo-bridge-folder').value=status?.extension_path || '';
   };
   q('#memo-bridge-copy-folder')?.addEventListener('click', async () => {
-    const value=q('#memo-bridge-folder')?.value;if(!value)return;
+    const value=q('#memo-bridge-folder')?.value;
+    if(!value)return;
     try { await navigator.clipboard.writeText(value); }
     catch (_) {
       const focus=document.activeElement,input=document.createElement('textarea');
-      input.value=value;input.style.cssText='position:fixed;opacity:0;pointer-events:none';
-      document.body.append(input);input.select();
-      let copied=false;try { copied=document.execCommand('copy'); } finally { input.remove();focus?.focus(); }
-      if(!copied){showToast('复制失败，请打开文件夹');return;}
+      input.value=value;
+      input.style.cssText='position:fixed;opacity:0;pointer-events:none';
+      document.body.append(input);
+      input.select();
+      let copied=false;
+      try { copied=document.execCommand('copy'); } finally {
+        input.remove();
+        focus?.focus();
+      }
+      if(!copied){
+        showToast('复制失败，请打开文件夹');
+        return;
+      }
     }
     showToast('路径已复制');
   });
   q('#memo-bridge-open-folder')?.addEventListener('click',()=>void nativeAction('open_browser_companion_folder').catch(()=>showToast('文件夹无法打开，请复制路径手动打开')));
   q('#memo-bridge-check')?.addEventListener('click',async()=>{
-    const button=q('#memo-bridge-check');button.disabled=true;
+    const button=q('#memo-bridge-check');
+    button.disabled=true;
     try {
       const status=renderBrowserCompanionStatus(await nativeAction('browser_companion_status'));
       showBridgeSetupGuide(status);
@@ -2013,7 +2079,10 @@
   });
 
   const prepareBrowserCompanion = async () => {
-    if(window.__Desktop_BROWSER_SITES__?.isDirty()){showToast('请先保存网页设置');return {status:'UNSAVED'};}
+    if(window.__Desktop_BROWSER_SITES__?.isDirty()){
+      showToast('请先保存网页设置');
+      return {status:'UNSAVED'};
+    }
     if (browserCompanionSetupInFlight) return {status:'PREPARING'};
     // Waiting for the extension must not lock the user out of reopening setup.
     // Reuse the existing identity poll instead of starting another five-minute poll.
@@ -2224,9 +2293,15 @@
       showToast(uiText('browser.toast.identity-required', '请先确认当前只读桥接身份，再开始网站试读。'));
       return browserCompanionState;
     }
-    if(window.__Desktop_BROWSER_SITES__?.isDirty()){showToast('请先保存网页设置');return browserCompanionState;}
+    if(window.__Desktop_BROWSER_SITES__?.isDirty()){
+      showToast('请先保存网页设置');
+      return browserCompanionState;
+    }
     const requestedMode = explicitMode==='AUTO' ? (browserCompanionState?.incremental_sync_eligible && !browserReadOutcome(browserCompanionState).failed.length ? 'INCREMENTAL' : 'PREFLIGHT') : explicitMode;
-    if (requestedMode === 'INCREMENTAL' && browserCompanionState?.incremental_sync_eligible !== true) { showToast('请先测试读取'); return browserCompanionState; }
+    if (requestedMode === 'INCREMENTAL' && browserCompanionState?.incremental_sync_eligible !== true) {
+      showToast('请先测试读取');
+      return browserCompanionState;
+    }
     setBrowserCompanionSyncState('starting', requestedMode);
     renderBrowserCompanionStatus(browserCompanionState);
     try {
@@ -2328,7 +2403,10 @@
 
   const verifyLocalModel = async (endpointId) => {
     const button = qa('[data-local-model-verify]').find((node) => node.dataset.localModelVerify === endpointId);
-    if (button) { button.disabled = true; button.textContent = uiText('local.verifying', '验证中…'); }
+    if (button) {
+      button.disabled = true;
+      button.textContent = uiText('local.verifying', '验证中…');
+    }
     try {
       const receipt = await call('local_models.verify', { endpoint_id: endpointId });
       renderLocalModels(await call('local_models.bootstrap', {}));
@@ -2338,7 +2416,10 @@
         : uiText('local.verify.unreachable', `本地服务未响应：${receipt.error_code || receipt.status}`, { error: receipt.error_code || receipt.status }));
       return receipt;
     } finally {
-      if (button && document.contains(button)) { button.disabled = false; button.textContent = uiText('local.verify.again', '再次验证'); }
+      if (button && document.contains(button)) {
+        button.disabled = false;
+        button.textContent = uiText('local.verify.again', '再次验证');
+      }
     }
   };
 
@@ -2394,7 +2475,10 @@
     const receipt = await call('assistant.preference_save', draft);
     draft.shortcut_entries.forEach((entry,index)=>{
       const input=q(`#settings-assistant-shortcut-name-${index+1}`);
-      if(input) { input.dataset.savedName=entry.name; input.setCustomValidity(''); }
+      if(input) {
+        input.dataset.savedName=entry.name;
+        input.setCustomValidity('');
+      }
     });
     if (options.refreshAfter !== false) renderAssistantPreferences(receipt);
     if (options.announce !== false) showToast(uiText('assistant.saved.toast', '桌面助手设置已保存并联动。'));
@@ -2565,7 +2649,10 @@
         service.display_name=card.querySelector('[data-cli-service-display]').value.trim();
         service.interpreter=card.querySelector('[data-cli-interpreter]').value.trim();
         service.concurrency_group=card.querySelector('[data-cli-concurrency-group]').value.trim();
-        try{service.template=JSON.parse(card.querySelector('[data-cli-template]').value);service.environment=JSON.parse(card.querySelector('[data-cli-environment]').value);}catch(_){throw new Error('接入模板或环境变量引用 JSON 格式不正确。');}
+        try{
+          service.template=JSON.parse(card.querySelector('[data-cli-template]').value);
+          service.environment=JSON.parse(card.querySelector('[data-cli-environment]').value);
+        }catch(_){throw new Error('接入模板或环境变量引用 JSON 格式不正确。');}
       }
       const previousByRef = new Map(service.models.map((model) => [model.profile_ref, model]));
       service.models = [...card.querySelectorAll('[data-cli-profile-ref]')].map((row) => {
@@ -2727,12 +2814,14 @@
     ];
     let expectedRevision=state.revision;
     for (const [scope,merge] of groups) {
-      const changed=structuredClone(baseline); merge(changed);
+      const changed=structuredClone(baseline);
+      merge(changed);
       if (JSON.stringify(changed)===JSON.stringify(baseline)) continue;
       try {
         const fresh=await call('settings.get_state',{});
         if (fresh.revision!==expectedRevision) throw new Error('EXPECTED_REVISION_CONFLICT');
-        const next=structuredClone(fresh.settings); merge(next);
+        const next=structuredClone(fresh.settings);
+        merge(next);
         const preview=await call('settings.preview',{settings:next,confirmed_risk_ids:confirmed});
         if(preview.status!=='PASS')throw new Error((preview.errors||[]).concat(preview.pending_risks||[]).join(':')||'SETTINGS_SAVE_REJECTED');
         const saved=await call('settings.save',{settings:next,expected_revision:expectedRevision,confirmed_risk_ids:confirmed});
@@ -2943,7 +3032,10 @@
       }
       const failed = Object.entries(stages).filter(([name,row]) => name !== 'refresh' && row.status === 'FAILED');
       if (!failed.length) markClean();
-      else { generalDraftDirty = true; syncSaveState(); }
+      else {
+        generalDraftDirty = true;
+        syncSaveState();
+      }
       try {
         // Refresh revisions after partial writes without replacing unsaved forms.
         await refresh({apply:!failed.length, preserveDraft:Boolean(failed.length)});
@@ -4349,7 +4441,8 @@
     action.dataset.validateApi = configId;
     action.textContent = receipt.status === 'AVAILABLE' ? '重新验证' : '再次验证';
     if (receipt.status === 'NOT_RUN') {
-      validationCard.classList.remove('red','neutral');validationCard.classList.add('yellow');
+      validationCard.classList.remove('red','neutral');
+      validationCard.classList.add('yellow');
       heading.textContent = '验证未完成';
       copy.textContent = apiValidationReasonCopy[receipt.reason] || '验证结果尚未确认，请重新查看验证状态。';
       return;
@@ -4425,7 +4518,8 @@
       const progress = (lost=false) => {
         const card = q(`[data-api-validation="${CSS.escape(configId)}"]`);
         if (!card) return;
-        card.classList.remove('red','neutral');card.classList.add('yellow');
+        card.classList.remove('red','neutral');
+        card.classList.add('yellow');
         card.querySelector('strong').textContent = '正在验证';
         card.querySelector('span').textContent = lost ? '暂时无法读取验证进度，正在重新连接。' : '正在读取模型目录…';
         card.querySelector('button').disabled = true;
@@ -4560,15 +4654,22 @@
     stop.onclick = async () => {
       stop.disabled = true;
       try { workflowExamJob = await call('settings.cancel_workflow_exam', {job_id:job.job_id}); }
-      catch (_) { showToast('停止请求未送达 · 可重试'); stop.disabled = false; }
+      catch (_) {
+        showToast('停止请求未送达 · 可重试');
+        stop.disabled = false;
+      }
     };
     while (true) {
       const terminal = examTerminal(workflowExamJob);
       window.__Desktop_EXAM_PANEL__?.progress(terminal ? (workflowExamJob.state === 'COMPLETE' ? 'COMPLETE' : 'ERROR') : 'RUNNING', {job:workflowExamJob,step,connectionLost});
-      stop.hidden = terminal; stop.disabled = !!workflowExamJob.cancel_requested;
+      stop.hidden = terminal;
+      stop.disabled = !!workflowExamJob.cancel_requested;
       if (terminal) return workflowExamJob.receipt || {status:'NOT_RUN',reason:workflowExamJob.reason || workflowExamJob.state};
       await new Promise(resolve => setTimeout(resolve,1500));
-      try { workflowExamJob = await call('settings.workflow_exam_status', {job_id:job.job_id}); connectionLost = false; }
+      try {
+        workflowExamJob = await call('settings.workflow_exam_status', {job_id:job.job_id});
+        connectionLost = false;
+      }
       catch (_) { connectionLost = true; }
     }
   };
@@ -4670,8 +4771,14 @@
     const service = (cliDraftServices || state.settings.cli_services).find((row) => row.config_id === configId);
     let model;
     try { model = pendingCliModel(card, service, used); }
-    catch (error) { showToast(error.message); return; }
-    if (!model) { showToast('请填写模型名称和模型标识。'); return; }
+    catch (error) {
+      showToast(error.message);
+      return;
+    }
+    if (!model) {
+      showToast('请填写模型名称和模型标识。');
+      return;
+    }
     card.querySelector('[data-cli-empty]')?.remove();
     card.querySelector('[data-cli-models]').append(createCliModelRow(service, model));
     displayInput.value = '';
@@ -4714,7 +4821,9 @@
     applySettings(state);
     Object.keys(developerScopeIds).forEach(scope=>refreshDeveloperEditor(scope,state.settings,true));
     for(const part of [...saveParticipants.values()])if(part.isDirty())await part.discard();
-    generalDraftDirty=false;cliDraftDirty=false;syncSaveState();
+    generalDraftDirty=false;
+    cliDraftDirty=false;
+    syncSaveState();
     showToast('已恢复已保存设置');
     return receipt;
   };
@@ -4840,19 +4949,40 @@
     return receipt;
   };
 
-  const installCliDraft = (services) => {renderCliServices({cli_services:services});setCliDraftDirty(true);};
+  const installCliDraft = (services) => {
+    renderCliServices({cli_services:services});
+    setCliDraftDirty(true);
+  };
   const cliTemplateAction = async (action,configId) => {
-    await bootstrap();const draft=collectCliServices();
-    if(action==='delete') {installCliDraft(draft.filter(s=>s.config_id!==configId));showToast('已从草稿移除；保存时检查模型引用。');return;}
+    await bootstrap();
+    const draft=collectCliServices();
+    if(action==='delete') {
+      installCliDraft(draft.filter(s=>s.config_id!==configId));
+      showToast('已从草稿移除；保存时检查模型引用。');
+      return;
+    }
     // Copy/export use the current draft through the same validated portable contract.
     const result=await call('settings.cli_template_prepare',{action,config_id:configId||null,...(['copy','export'].includes(action)?{payload:draft.find(s=>s.config_id===configId)}:{})});
     if(action==='export') {
-      const receipt=await nativeAction('export_cli_template_file',draft.find(s=>s.config_id===configId));if(receipt.status==='EXPORTED')showToast('已导出当前模板；本机路径、凭据与验证记录不包含在内。');
-    } else {installCliDraft([...draft,result.service]);showToast('已加入草稿；填写命令与模型后保存。');}
+      const receipt=await nativeAction('export_cli_template_file',draft.find(s=>s.config_id===configId));
+      if(receipt.status==='EXPORTED')showToast('已导出当前模板；本机路径、凭据与验证记录不包含在内。');
+    } else {
+      installCliDraft([...draft,result.service]);
+      showToast('已加入草稿；填写命令与模型后保存。');
+    }
   };
   q('#settings-cli-import-file')?.addEventListener('change',async event=>{
-    const file=event.target.files?.[0];event.target.value='';if(!file)return;
-    try{if(file.size>262144)throw new Error('模板文件过大。');const result=await call('settings.cli_template_prepare',{action:'import',payload:JSON.parse(await file.text())});cliImportPreview=result.service;const panel=q('#settings-cli-import-preview');panel.querySelector('[data-cli-import-copy]').textContent=`${result.preview.name} · ${result.preview.model_count} 个模型 · ${result.preview.input} → ${result.preview.output} · 本机路径待填写，验证待测`;panel.hidden=false;}catch(error){showToast(error.message);}
+    const file=event.target.files?.[0];
+    event.target.value='';
+    if(!file)return;
+    try{
+      if(file.size>262144)throw new Error('模板文件过大。');
+      const result=await call('settings.cli_template_prepare',{action:'import',payload:JSON.parse(await file.text())});
+      cliImportPreview=result.service;
+      const panel=q('#settings-cli-import-preview');
+      panel.querySelector('[data-cli-import-copy]').textContent=`${result.preview.name} · ${result.preview.model_count} 个模型 · ${result.preview.input} → ${result.preview.output} · 本机路径待填写，验证待测`;
+      panel.hidden=false;
+    }catch(error){showToast(error.message);}
   });
 
   const stopOriginal = (event) => {
@@ -4865,10 +4995,23 @@
     if (!target || !root.contains(target)) return;
     const fail = (prefix) => (error) => showToast(`${prefix}：${error.message}`);
 
-    if(target.id==='settings-cli-add'||target.dataset.cliTemplateAction){stopOriginal(event);void cliTemplateAction(target.dataset.cliTemplateAction||'new',target.dataset.cliConfigId).catch(fail('模板操作失败'));
-    } else if(target.id==='settings-cli-import'){stopOriginal(event);q('#settings-cli-import-file').click();
-    } else if(target.id==='settings-cli-import-cancel'){stopOriginal(event);cliImportPreview=null;q('#settings-cli-import-preview').hidden=true;
-    } else if(target.id==='settings-cli-import-accept'){stopOriginal(event);if(cliImportPreview){installCliDraft([...collectCliServices(),cliImportPreview]);cliImportPreview=null;}q('#settings-cli-import-preview').hidden=true;
+    if(target.id==='settings-cli-add'||target.dataset.cliTemplateAction){
+      stopOriginal(event);
+      void cliTemplateAction(target.dataset.cliTemplateAction||'new',target.dataset.cliConfigId).catch(fail('模板操作失败'));
+    } else if(target.id==='settings-cli-import'){
+      stopOriginal(event);
+      q('#settings-cli-import-file').click();
+    } else if(target.id==='settings-cli-import-cancel'){
+      stopOriginal(event);
+      cliImportPreview=null;
+      q('#settings-cli-import-preview').hidden=true;
+    } else if(target.id==='settings-cli-import-accept'){
+      stopOriginal(event);
+      if(cliImportPreview){
+        installCliDraft([...collectCliServices(),cliImportPreview]);
+        cliImportPreview=null;
+      }
+      q('#settings-cli-import-preview').hidden=true;
     } else if (target.id === 'settings-save') {
       stopOriginal(event);
       void save().catch(fail('设置保存失败'));
@@ -5070,7 +5213,8 @@
     }
     if((event.target.closest('#settings-mode') && root.querySelector('.desktop-settings-shell')?.dataset.modeScope==='refinement') || event.target.closest('#memo-weights-page, #memo-settings-page') ||
       (event.target.closest('#settings-mode') && root.querySelector('.desktop-settings-shell')?.dataset.modeScope==='research-weights')){
-      syncSaveState();return;
+      syncSaveState();
+      return;
     }
     if (event.target.closest('[role="switch"], #settings-mode button, [data-font-step], #settings-confirm-retry, #settings-confirm-model')) {
       window.setTimeout(markDirty, 0);
@@ -5137,7 +5281,10 @@
   });
 
   window.__Desktop_SETTINGS_BRIDGE__ = Object.freeze({
-    renderCodeEditor: (elements) => { renderDeveloperSyntax(null,elements); updateDeveloperLineNumbers(null,elements); },
+    renderCodeEditor: (elements) => {
+      renderDeveloperSyntax(null,elements);
+      updateDeveloperLineNumbers(null,elements);
+    },
     codeDiff: developerDiff,
     notify: showToast,
     methods: SETTINGS_METHODS,
@@ -5196,7 +5343,10 @@
     if (!job.job_id || examTerminal(job) || workflowExamInFlight) return;
     workflowExamInFlight = true;
     const step = [...nodeByStep.entries()].find(([,node]) => node === job.node_id)?.[0];
-    try { await watchWorkflowExam(job,step); await refresh(); }
+    try {
+      await watchWorkflowExam(job,step);
+      await refresh();
+    }
     finally { workflowExamInFlight = false; }
   };
   const startSettings = async () => {
@@ -5205,7 +5355,8 @@
     void resumeWorkflowExam().catch(() => showToast('考试状态待查询 · 重新打开设置可恢复'));
   };
   const refreshConsoleConnection=async()=>{
-    const status=q('#settings-console-status');if(!status)return;
+    const status=q('#settings-console-status');
+    if(!status)return;
     try{
       const value=await window.pywebview.api.get_console_connection();
       const connected=value.status==='CONNECTED';
@@ -5213,14 +5364,24 @@
       status.textContent=value.status==='PAUSED'?({'en-US':'Paused','ja-JP':'一時停止'}[lang]||'已暂停'):connected?({'en-US':'Connected','ja-JP':'接続済み'}[lang]||'已连接'):({'en-US':'Not connected','ja-JP':'未接続'}[lang]||'未连接');
       status.dataset.connectionStatus=value.status;
       const toggle=q('#settings-console-access');
-      toggle.disabled=!value.can_toggle;toggle.setAttribute('aria-checked',String(value.access_enabled===true));
-    }catch(_){status.textContent='连接状态暂不可用';status.dataset.connectionStatus='UNAVAILABLE';}
+      toggle.disabled=!value.can_toggle;
+      toggle.setAttribute('aria-checked',String(value.access_enabled===true));
+    }catch(_){
+      status.textContent='连接状态暂不可用';
+      status.dataset.connectionStatus='UNAVAILABLE';
+    }
   };
   q('#settings-console-access')?.addEventListener('click',async event=>{
-    event.preventDefault();event.stopPropagation();
-    const button=event.currentTarget;button.disabled=true;
-    try{await window.pywebview.api.set_console_connection({enabled:button.getAttribute('aria-checked')!=='true'});}
-    catch(_){showToast(({'en-US':'Console connection could not be changed','ja-JP':'コンソール接続を変更できません'}[settingsLanguage()]||'无法更改控制台接入状态'));}
+    event.preventDefault();
+    event.stopPropagation();
+    const button=event.currentTarget;
+    button.disabled=true;
+    try{
+      await window.pywebview.api.set_console_connection({enabled:button.getAttribute('aria-checked')!=='true'});
+    }
+    catch(_){
+      showToast(({'en-US':'Console connection could not be changed','ja-JP':'コンソール接続を変更できません'}[settingsLanguage()]||'无法更改控制台接入状态'));
+    }
     finally{await refreshConsoleConnection();}
   });
   q('[data-category="privacy"]')?.addEventListener('click',refreshConsoleConnection);

@@ -23,9 +23,12 @@
   headerRefresh.addEventListener('click', async () => {
     if (busy) return;
     if ([...q('#settings-external-sources').querySelectorAll('details')].some(card => card.__isDirty?.())) {
-      status('请先保存'); return;
+      status('请先保存');
+      return;
     }
-    busy = true; headerRefresh.disabled = true; headerRefresh.setAttribute('aria-busy','true');
+    busy = true;
+    headerRefresh.disabled = true;
+    headerRefresh.setAttribute('aria-busy','true');
     const controls = [...q('#settings-external-sources').querySelectorAll('button,input,select')].map(x=>[x,x.disabled]);
     controls.forEach(([x])=>x.disabled=true);
     status('正在更新');
@@ -36,13 +39,16 @@
       // Sequential calls preserve each source's existing lock, receipt and quota.
       for (const item of enabled) receipts.push(await call('settings.external_sources_refresh',
         {source_id:item.config.source_id, expected_revision:current.revision}));
-      await load(); refreshCurrent();
+      await load();
+      refreshCurrent();
       const failures=receipts.filter(x=>x.status!=='PASS');
       status(!enabled.length ? '未启用来源' : !failures.length ? '数据已更新' :
         `已更新 ${receipts.length-failures.length}/${receipts.length} · ${failureCopy(failures[0])}`);
     } catch (_) { status('更新失败 · 请检查网络'); }
     finally {
-      busy=false; headerRefresh.disabled=false; headerRefresh.removeAttribute('aria-busy');
+      busy=false;
+      headerRefresh.disabled=false;
+      headerRefresh.removeAttribute('aria-busy');
       controls.forEach(([x,disabled])=>{if(x.isConnected)x.disabled=disabled;});
     }
   });
@@ -80,8 +86,12 @@
   });
   function field(label, value, type = 'text') {
     const box = el('label', label, 'field-label');
-    const input = el('input', null, 'field'); input.type = type; input.value = value;
-    input.autocomplete = 'off'; box.append(input); return [box, input];
+    const input = el('input', null, 'field');
+    input.type = type;
+    input.value = value;
+    input.autocomplete = 'off';
+    box.append(input);
+    return [box, input];
   }
   async function render(resetPreferences=false) {
     const list = q('#settings-external-sources');
@@ -90,42 +100,57 @@
     if(resetPreferences)q('#settings-literature-sources').replaceChildren();
     const groups = new Map();
     for (const [key,label] of [['scores','模型评分'],['models','模型资料与报价'],['fx','汇率'],['literature','文献来源']]) {
-      const group=el('section',null,'desktop-settings-source-group'); group.dataset.sourceGroup=key;
+      const group=el('section',null,'desktop-settings-source-group');
+      group.dataset.sourceGroup=key;
       if(key!=='literature')group.append(el('h4',label));
-      list.append(group); groups.set(key,group);
+      list.append(group);
+      groups.set(key,group);
     }
     for (const item of state.sources) {
       const c = item.config;
-      const card = el('details', null, 'desktop-settings-source-card'); card.dataset.sourceId = c.source_id;
+      const card = el('details', null, 'desktop-settings-source-card');
+      card.dataset.sourceId = c.source_id;
       card.open = open.has(c.source_id);
       const head = el('summary');
-      const title = el('span'); title.append(el('strong', c.display_name), el('small',
+      const title = el('span');
+      title.append(el('strong', c.display_name), el('small',
         `${c.format === "ECB_FX_XML" ? (item.cached_currency_count || 0) + " 种币种" : item.cached_model_count + " 个模型"} · ${!c.enabled ? '已停用' : c.credential_env && !item.credential_configured ? '需配置凭据' : item.last_refresh?.status === 'ERROR' ? '更新失败' : item.status === 'CACHE_INVALID' ? '缓存异常，请更新' : item.status === 'CACHED' ? '已缓存' : item.status === 'STALE' ? '缓存待更新' : '—'}`));
       card.append(head);
       const body = el('div', null, 'desktop-settings-source-fields');
       const [nameBox, name] = field('来源名称', c.display_name);
       const [urlBox, url] = field('HTTPS 地址', c.endpoint, 'url');
       const [keyBox, key] = field('凭据变量', c.credential_env);
-      key.placeholder = '—'; key.spellcheck = false; key.title = '环境变量名，不填写 Key';
+      key.placeholder = '—';
+      key.spellcheck = false;
+      key.title = '环境变量名，不填写 Key';
       if (c.source_id === 'exchange-rates') {
-        url.readOnly=true;key.readOnly=true;keyBox.hidden=true;
+        url.readOnly=true;
+        key.readOnly=true;
+        keyBox.hidden=true;
         url.title='ECB 官方日汇率 · 每日检查更新';
       }
       const enabledBox = el('span', null, 'desktop-settings-source-head-actions');
-      const enabled = el('button', null, 'switch'); enabled.type = 'button';
-      enabled.setAttribute('role', 'switch'); enabled.setAttribute('aria-label', '启用此来源');
+      const enabled = el('button', null, 'switch');
+      enabled.type = 'button';
+      enabled.setAttribute('role', 'switch');
+      enabled.setAttribute('aria-label', '启用此来源');
       enabled.setAttribute('aria-checked', String(c.enabled));
       let isEnabled = c.enabled;
       enabled.addEventListener('click', event => {
-        event.preventDefault();event.stopPropagation();if(busy)return;
-        isEnabled=!isEnabled;enabled.setAttribute('aria-checked',String(isEnabled));
+        event.preventDefault();
+        event.stopPropagation();
+        if(busy)return;
+        isEnabled=!isEnabled;
+        enabled.setAttribute('aria-checked',String(isEnabled));
         window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
       });
       enabledBox.append(enabled, el('span', '›', 'desktop-settings-disclosure-icon'));
       head.append(title, enabledBox);
       const actions = el('div', null, 'desktop-settings-source-actions');
-      const save = el('button', '保存', 'primary-button'); save.type = 'button';
-      const refresh = el('button', '更新数据', 'soft-button'); refresh.type = 'button';
+      const save = el('button', '保存', 'primary-button');
+      save.type = 'button';
+      const refresh = el('button', '更新数据', 'soft-button');
+      refresh.type = 'button';
       refresh.disabled = !c.enabled;
       const dirty = () => name.value !== c.display_name || url.value.trim() !== c.endpoint || key.value.trim() !== c.credential_env || isEnabled !== c.enabled;
       card.__isDirty = dirty;
@@ -139,10 +164,17 @@
         card.removeAttribute('aria-busy');
       };
       refresh.addEventListener('click', async event => {
-        event.preventDefault();event.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         if (busy) return;
-        if (dirty()) { status('请先保存'); return; }
-        busy = true; disableFields(); refresh.setAttribute('aria-busy','true'); card.setAttribute('aria-busy', 'true');
+        if (dirty()) {
+          status('请先保存');
+          return;
+        }
+        busy = true;
+        disableFields();
+        refresh.setAttribute('aria-busy','true');
+        card.setAttribute('aria-busy', 'true');
         status(`正在更新 ${c.display_name}`);
         try {
           const receipt = await call('settings.external_sources_refresh', {source_id:c.source_id, expected_revision:state.revision});
@@ -150,7 +182,11 @@
           refreshCurrent();
           status(`${c.display_name} · `+(receipt.status === 'PASS' ? '已更新' : failureCopy(receipt)));
         } catch (_) { status(`${c.display_name} · 更新失败 · 请检查网络`); }
-        finally { busy = false; refresh.removeAttribute('aria-busy'); restoreFields(); }
+        finally {
+          busy = false;
+          refresh.removeAttribute('aria-busy');
+          restoreFields();
+        }
       });
       card.__save=async()=>{
         const next={...c,display_name:name.value.trim(),endpoint:url.value.trim(),enabled:isEnabled};
@@ -167,12 +203,18 @@
       [name,url,key].forEach(input=>{
         for(const eventName of ['input','change'])input.addEventListener(eventName,()=>window.__Desktop_SETTINGS_BRIDGE__.syncSaveState());
       });
-      refresh.textContent='⟳'; refresh.className='icon-button'; refresh.setAttribute('aria-label','更新 '+c.display_name); refresh.title='更新数据';
-      urlBox.classList.add('desktop-settings-source-wide'); keyBox.classList.add('desktop-settings-source-wide');
-      enabledBox.prepend(refresh); body.append(nameBox, urlBox, keyBox);
+      refresh.textContent='⟳';
+      refresh.className='icon-button';
+      refresh.setAttribute('aria-label','更新 '+c.display_name);
+      refresh.title='更新数据';
+      urlBox.classList.add('desktop-settings-source-wide');
+      keyBox.classList.add('desktop-settings-source-wide');
+      enabledBox.prepend(refresh);
+      body.append(nameBox, urlBox, keyBox);
       if (item.retrieved_at) {
         const time = el('small', new Date(item.retrieved_at).toLocaleString());
-        time.title = '最近更新'; body.append(time);
+        time.title = '最近更新';
+        body.append(time);
       }
       card.append(body);
       const groupKey=c.format==='ECB_FX_XML'?'fx':c.format==='OPENROUTER'?'models':'scores';
@@ -193,15 +235,21 @@
       'https://api.clarivate.com/apis/wos-starter/v1/documents':'web-of-science'
     };
     for(const slot of literature.slots) {
-      const row=el('details',null,'desktop-settings-source-card');row.dataset.sourceId=slot.slot_id;
+      const row=el('details',null,'desktop-settings-source-card');
+      row.dataset.sourceId=slot.slot_id;
       const summary=el('summary'),title=el('span');
       title.append(el('strong',slot.display_name||'未配置'),el('small',
         slot.configuration_status==='CREDENTIAL_REQUIRED'?'待配置凭据':slot.enabled?'已启用':'已停用'));
-      const toggle=el('button',null,'switch');toggle.type='button';toggle.setAttribute('role','switch');
-      toggle.setAttribute('aria-label','启用 '+(slot.display_name||'此来源'));toggle.setAttribute('aria-checked',String(slot.enabled));
+      const toggle=el('button',null,'switch');
+      toggle.type='button';
+      toggle.setAttribute('role','switch');
+      toggle.setAttribute('aria-label','启用 '+(slot.display_name||'此来源'));
+      toggle.setAttribute('aria-checked',String(slot.enabled));
       const headActions=el('span',null,'desktop-settings-source-head-actions');
-      const refresh=el('button','⟳','icon-button');refresh.type='button';
-      refresh.setAttribute('aria-label','更新 '+slot.display_name);refresh.title='更新数据';
+      const refresh=el('button','⟳','icon-button');
+      refresh.type='button';
+      refresh.setAttribute('aria-label','更新 '+slot.display_name);
+      refresh.title='更新数据';
       let receiving=false,availabilityRevision=0;
       const syncAvailability=()=>{
         refresh.disabled=busy||!receiving||!slot.enabled||slot.configuration_status==='CREDENTIAL_REQUIRED';
@@ -209,20 +257,29 @@
         refresh.setAttribute('aria-label','更新 '+slot.display_name+(reason?' · '+reason:''));
         refresh.title=refresh.getAttribute('aria-label');
       };
-      row.__setReceiving=value=>{availabilityRevision++;receiving=!!value;syncAvailability();};
+      row.__setReceiving=value=>{
+        availabilityRevision++;
+        receiving=!!value;
+        syncAvailability();
+      };
       row.__syncAvailability=syncAvailability;
       refresh.disabled=true;
       const requestedRevision=availabilityRevision;
-      call('research.config_get').then(value=>{if(refresh.isConnected&&requestedRevision===availabilityRevision)row.__setReceiving(value.config.passive_enabled);}).catch(()=>{if(requestedRevision===availabilityRevision)refresh.disabled=true;});
+      call('research.config_get').then(value=>{
+        if(refresh.isConnected&&requestedRevision===availabilityRevision)row.__setReceiving(value.config.passive_enabled);
+      }).catch(()=>{if(requestedRevision===availabilityRevision)refresh.disabled=true;});
       headActions.append(refresh,toggle,el('span','›','desktop-settings-disclosure-icon'));
-      summary.append(title,headActions);row.append(summary);
+      summary.append(title,headActions);
+      row.append(summary);
       const fields=el('div',null,'desktop-settings-source-fields');
       const [nameBox,name]=field('来源名称',slot.display_name);
       const [urlBox,url]=field('HTTPS 地址',slot.endpoint,'url');
       const [keyBox,key]=field('凭据变量',slot.credential_env);
       key.placeholder=slot.provider==='web-of-science'?'WOS_API_KEY':'无需凭据';
-      key.title='只填写环境变量名，不填写 Key';key.spellcheck=false;
-      urlBox.classList.add('desktop-settings-source-wide');keyBox.classList.add('desktop-settings-source-wide');
+      key.title='只填写环境变量名，不填写 Key';
+      key.spellcheck=false;
+      urlBox.classList.add('desktop-settings-source-wide');
+      keyBox.classList.add('desktop-settings-source-wide');
       const note=el('small',slot.provider==='web-of-science'?'Starter API · Key 暂空；取得后设置对应环境变量，再启用此来源':'公开元数据来源，无需 API Key');
       const actions=el('div',null,'desktop-settings-source-actions');
       let isEnabled=slot.enabled;
@@ -241,25 +298,41 @@
         syncAvailability();
       };
       refresh.onclick=async event=>{
-        event.preventDefault();event.stopPropagation();if(busy)return;
-        if(sourcesDirty() || q('[data-research-preferences]')?.__isDirty?.()){status('请先保存修改');return;}
-        busy=true;refresh.disabled=true;refresh.setAttribute('aria-busy','true');
+        event.preventDefault();
+        event.stopPropagation();
+        if(busy)return;
+        if(sourcesDirty() || q('[data-research-preferences]')?.__isDirty?.()){
+          status('请先保存修改');
+          return;
+        }
+        busy=true;
+        refresh.disabled=true;
+        refresh.setAttribute('aria-busy','true');
         try{
           const receipt=await call('research.source_refresh',{source:slot.provider,request_id:'source-'+crypto.randomUUID()});
           status(slot.display_name+' · '+(['QUEUED','RUNNING'].includes(receipt.status)?'已开始更新，可在当前任务查看进度':receipt.status==='SUCCEEDED'?'已更新':'请查看任务详情'));
           refreshCurrent();
         }catch(_){status(slot.display_name+' · 更新未完成，请检查研究方向、来源配置和网络');}
-        finally{busy=false;syncAvailability();refresh.removeAttribute('aria-busy');}
+        finally{
+          busy=false;
+          syncAvailability();
+          refresh.removeAttribute('aria-busy');
+        }
       };
       toggle.onclick=event=>{
-        event.preventDefault();event.stopPropagation();if(busy)return;
-        isEnabled=!isEnabled;toggle.setAttribute('aria-checked',String(isEnabled));
+        event.preventDefault();
+        event.stopPropagation();
+        if(busy)return;
+        isEnabled=!isEnabled;
+        toggle.setAttribute('aria-checked',String(isEnabled));
         window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
       };
       [name,url,key].forEach(input=>{
         for(const eventName of ['input','change'])input.addEventListener(eventName,()=>window.__Desktop_SETTINGS_BRIDGE__.syncSaveState());
       });
-      fields.append(actions,nameBox,urlBox,keyBox,note);row.append(fields);group.append(row);
+      fields.append(actions,nameBox,urlBox,keyBox,note);
+      row.append(fields);
+      group.append(row);
     }
   }
   const sourceCards=()=>[...root.querySelectorAll('#settings-external-sources .desktop-settings-source-card,#settings-literature-sources .desktop-settings-source-card')];
@@ -274,7 +347,8 @@
     if(generation!==loadGeneration)return;
     // A late category-load response must not erase edits made while it was in flight.
     if(!force && (sourcesDirty() || q('[data-research-preferences]')?.__isDirty?.()))return;
-    state=loaded;await render(force);
+    state=loaded;
+    await render(force);
   }
   window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('external-sources',{
     isDirty:sourcesDirty,
@@ -294,7 +368,8 @@
   async function refreshNode(node) {
     const request = ++sequence, nodeId = nodeMap[node.dataset.step];
     const profileRef = node.dataset.profileRef || null;
-    q('#settings-reference-summary').textContent = '—'; q('#settings-reference-details').replaceChildren();
+    q('#settings-reference-summary').textContent = '—';
+    q('#settings-reference-details').replaceChildren();
     window.__Desktop_EXAM_PANEL__?.clearReferences();
     if (!nodeId) return;
     try {
@@ -311,7 +386,8 @@
       q('#settings-reference-summary').textContent = result.references.length ? '↗' : '—';
       const detail = q('#settings-reference-details');
       for (const row of result.references) {
-        const section = el('section'); section.append(el('strong', `${row.source_name || row.source_id} · ${row.stale ? '缓存待更新' : '已缓存'}`));
+        const section = el('section');
+        section.append(el('strong', `${row.source_name || row.source_id} · ${row.stale ? '缓存待更新' : '已缓存'}`));
         if (row.local_base_model_reference) section.append(el('small', '基础模型参考 · 量化版本未实测'));
         if (row.benchmark_effort) section.append(el('small', `来源思考档：${row.benchmark_effort}${row.effort_mismatch ? ' · 与当前档位不同' : ''}`));
         const relevant = row.role_relevant_metrics || [];
@@ -321,16 +397,21 @@
         }
         if (row.confidence_interval) section.append(el('small', `来源置信区间：${row.confidence_interval.join('—')}`));
         if (row.operational?.context_length) section.append(el('p', `上下文：${row.operational.context_length} tokens`));
-        section.append(el('small', `${row.version || '—'} · ${row.retrieved_at ? new Date(row.retrieved_at).toLocaleDateString() : '—'}`)); detail.append(section);
+        section.append(el('small', `${row.version || '—'} · ${row.retrieved_at ? new Date(row.retrieved_at).toLocaleDateString() : '—'}`));
+        detail.append(section);
       }
     } catch (_) { if (request === sequence) q('#settings-reference-summary').textContent = '—'; }
   }
   root.addEventListener('click', event => {
     const node = event.target.closest('button.desktop-settings-node[data-step]');
-    if (node) { currentNode = node; refreshNode(node); }
+    if (node) {
+      currentNode = node;
+      refreshNode(node);
+    }
   });
   window.addEventListener('desktop:workflow-model-selected', event => {
-    currentNode = event.detail.node; refreshCurrent();
+    currentNode = event.detail.node;
+    refreshCurrent();
   });
   window.addEventListener('desktop:workflow-config-updated', () => queueMicrotask(refreshCurrent));
   window.__Desktop_EXTERNAL_SOURCES__ = Object.freeze({load, render, refreshCurrent});

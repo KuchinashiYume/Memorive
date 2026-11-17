@@ -733,7 +733,8 @@
         }
         node.querySelector('.desktop-tasks-node-status').innerHTML = statusIcon(state.tone) + '<span data-flow-state>' + state.label + '</span>';
         if(definition.pause_scheduled && binding.control_state!=='PAUSED'){
-          const hint=document.createElement('span');hint.className='paper-review-pause-hint';
+          const hint=document.createElement('span');
+          hint.className='paper-review-pause-hint';
           hint.textContent=window.__MEMORIVE_REVIEW_UI__?.pauseHint(node.dataset.node)||('将在'+node.dataset.node+'前暂停');
           node.querySelector('.desktop-tasks-node-status').prepend(hint);
         }
@@ -758,7 +759,9 @@
           q('#tasks-flow-source').textContent='周期报告';
           q('#tasks-flow-help').textContent='';
         }
-        const actions=document.createElement('div');actions.id='tasks-research-actions';actions.className='desktop-research-task-actions';
+        const actions=document.createElement('div');
+        actions.id='tasks-research-actions';
+        actions.className='desktop-research-task-actions';
         q('#tasks-route-status').after(actions);
         window.__Desktop_RESEARCH__?.taskActions(binding.job_id,binding,actions);
       }
@@ -824,7 +827,10 @@
       window.requestAnimationFrame(() => drawBypass({ animate:animateBypass }));
     };
     const updateInspector = (node) => {
-      if (window.__MEMORIVE_REVIEW_UI__?.renderTaskInspector(node,root)) {setModelMenu(false);return;}
+      if (window.__MEMORIVE_REVIEW_UI__?.renderTaskInspector(node,root)) {
+        setModelMenu(false);
+        return;
+      }
       const deleteTask = q('#tasks-delete-task');
       const selectedProductionBinding = productionBindings.get(currentTask?.dataset.run || '');
       deleteTask.hidden = !(
@@ -916,7 +922,8 @@
         control.hidden = currentTask?.dataset.workflowKind !== 'CORE_DOCUMENT' || !action || recoveryPending;
         control.dataset.action = action;
         if (control.dataset.restartArmed !== 'true') {
-          control.setAttribute('aria-label',label); control.dataset.desktopTip=label;
+          control.setAttribute('aria-label',label);
+          control.dataset.desktopTip=label;
           const paths = {pause:'<path d="M8 5v14M16 5v14"/>',
             resume:'<path d="m8 5 11 7-11 7z"/>',
             retry:'<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>'};
@@ -948,7 +955,9 @@
             (option.capabilities || []).some(cap => ['CHAT','VISION_OCR'].includes(cap)))];
           fallbackSelect.replaceChildren(...choices.map(choice => {
             const option = document.createElement('option');
-            option.value = choice.profileRef; option.textContent = choice.model; return option;
+            option.value = choice.profileRef;
+            option.textContent = choice.model;
+            return option;
           }));
           fallbackSelect.value = node.dataset.fallbackProfileRef || '';
           fallbackSelect.disabled = false;
@@ -1769,7 +1778,10 @@
     const toggleTaskInspector = (event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (preview.app.dataset.right === 'true') {closeInspector();return;}
+      if (preview.app.dataset.right === 'true') {
+        closeInspector();
+        return;
+      }
       const visible = (node) => node?.isConnected && node.getClientRects().length && !node.closest('[hidden]');
       const target = visible(lastInspectedNode) ? lastInspectedNode : qa('.desktop-tasks-node').find(visible);
       if (currentTask && target) openNodeInspector(target);

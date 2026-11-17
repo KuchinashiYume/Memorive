@@ -251,7 +251,9 @@
     const check = card.querySelector('.desktop-inbox-check');
     if (strong) strong.textContent = row.name;
     if (small) small.textContent = meta;
-    if (status) { if(window.__MEMORIVE_REVIEW_UI__)window.__MEMORIVE_REVIEW_UI__.renderInboxState(status,row);else status.textContent=state; }
+    if (status) {
+      if(window.__MEMORIVE_REVIEW_UI__)window.__MEMORIVE_REVIEW_UI__.renderInboxState(status,row);else status.textContent=state;
+    }
     if (star) {
       star.disabled = row.state === 'PROCESSING';
       star.setAttribute('aria-pressed', String(Boolean(row.starred)));

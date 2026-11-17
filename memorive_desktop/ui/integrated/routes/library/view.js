@@ -263,7 +263,14 @@
       button.dataset.filename = filename;
       button.dataset.artifactId = String(value.artifact_id || '');
       button.dataset.fileRole = String(value.role || 'product');
-      if(value.literature_review){const group=document.createElement('span');group.className='paper-review-library-report';group.append(button);const badge=window.__MEMORIVE_REVIEW_UI__?.reportButton(value.literature_review);if(badge)group.append(badge);return group;}
+      if(value.literature_review){
+        const group=document.createElement('span');
+        group.className='paper-review-library-report';
+        group.append(button);
+        const badge=window.__MEMORIVE_REVIEW_UI__?.reportButton(value.literature_review);
+        if(badge)group.append(badge);
+        return group;
+      }
       return button;
     };
 
@@ -290,8 +297,10 @@
       const isResearch = card.dataset.productKind === 'RESEARCH_RESULT';
       let researchSection = q('#library-research-result');
       if (!researchSection) {
-        researchSection = document.createElement('section');researchSection.id='library-research-result';
-          researchSection.className=q('#library-files-section').className;q('#library-files-section').before(researchSection);
+        researchSection = document.createElement('section');
+        researchSection.id='library-research-result';
+          researchSection.className=q('#library-files-section').className;
+        q('#library-files-section').before(researchSection);
       }
       researchSection.hidden = !isResearch;
       if (isResearch) window.__Desktop_RESEARCH__?.renderResult(card.dataset.researchRunId,researchSection)
@@ -411,7 +420,10 @@
       const version = ++libraryTransitionVersion;
       window.clearTimeout(libraryTransitionTimer);
       list.classList.remove('is-library-entering', 'is-library-leaving');
-      if (toastReducedMotion.matches) { applyLibraryMode(); return; }
+      if (toastReducedMotion.matches) {
+        applyLibraryMode();
+        return;
+      }
       void list.offsetWidth;
       list.classList.add('is-library-leaving');
       libraryTransitionTimer = window.setTimeout(() => {

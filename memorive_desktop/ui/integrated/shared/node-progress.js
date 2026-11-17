@@ -49,7 +49,9 @@
         if(value==null)node.removeAttribute(key);else node.setAttribute(key,value);
       }
     }
-    delete node.dataset.nodeProgressHint;active.delete(node);saved.delete(node);
+    delete node.dataset.nodeProgressHint;
+    active.delete(node);
+    saved.delete(node);
   }
   function apply(node,definition,binding){
     if(!node)return;
@@ -61,7 +63,10 @@
       if(p&&eligible&&diagnostics++<5)console.warn('NODE_PROGRESS_IGNORED');
       return;
     }
-    if(p.completed_units===0){clear(node);return;}
+    if(p.completed_units===0){
+      clear(node);
+      return;
+    }
     const logic=node.classList.contains('paper-review-logic-node');
     const slot=node.querySelector(logic?'.desktop-tasks-node-index':'.desktop-tasks-node-status');
     if(!slot)return;
@@ -77,13 +82,27 @@
     if(p.limited_units)hint+=['；其中 '+p.limited_units+' 项信息不足或不适用','; '+p.limited_units+' insufficient or not applicable','（'+p.limited_units+' 件は情報不足または適用外）'][l];
     if(binding.synthetic_only)hint=['控制台模拟 · ','Console simulation · ','コンソール模擬 · '][l]+hint;
     const svg=(previous?.identity===identity?previous.svg:null)||document.createElementNS(NS,'svg');
-    svg.setAttribute('viewBox','0 0 18 18');svg.setAttribute('width','18');svg.setAttribute('height','18');
-    svg.setAttribute('class','memo-node-progress');svg.setAttribute('aria-hidden','true');svg.setAttribute('focusable','false');
+    svg.setAttribute('viewBox','0 0 18 18');
+    svg.setAttribute('width','18');
+    svg.setAttribute('height','18');
+    svg.setAttribute('class','memo-node-progress');
+    svg.setAttribute('aria-hidden','true');
+    svg.setAttribute('focusable','false');
     if(!svg.firstChild){
       for(const type of ['track','arc']){
-        const c=document.createElementNS(NS,'circle');c.setAttribute('cx','9');c.setAttribute('cy','9');c.setAttribute('r','7');
-        c.setAttribute('fill','none');c.setAttribute('stroke-width','2');c.setAttribute('pathLength','100');c.setAttribute('class','memo-node-progress-'+type);
-        if(type==='arc'){c.setAttribute('stroke-dasharray','100');c.setAttribute('stroke-linecap','round');c.setAttribute('transform','rotate(-90 9 9)');}
+        const c=document.createElementNS(NS,'circle');
+        c.setAttribute('cx','9');
+        c.setAttribute('cy','9');
+        c.setAttribute('r','7');
+        c.setAttribute('fill','none');
+        c.setAttribute('stroke-width','2');
+        c.setAttribute('pathLength','100');
+        c.setAttribute('class','memo-node-progress-'+type);
+        if(type==='arc'){
+          c.setAttribute('stroke-dasharray','100');
+          c.setAttribute('stroke-linecap','round');
+          c.setAttribute('transform','rotate(-90 9 9)');
+        }
         svg.append(c);
       }
     }
@@ -94,9 +113,14 @@
       applied[key]=(attributes[key]?attributes[key]+' · ':'')+hint;
       node.setAttribute(key,applied[key]);
     }
-    icon.replaceWith(svg);node.dataset.nodeProgressHint=hint;
-    saved.set(node,{identity,revision:p.progress_revision,done:p.completed_units,svg,icon,attributes,applied});active.add(node);
+    icon.replaceWith(svg);
+    node.dataset.nodeProgressHint=hint;
+    saved.set(node,{identity,revision:p.progress_revision,done:p.completed_units,svg,icon,attributes,applied});
+    active.add(node);
   }
-  function transport(value){connected=value;if(!value)for(const node of [...active])clear(node);}
+  function transport(value){
+    connected=value;
+    if(!value)for(const node of [...active])clear(node);
+  }
   window.__MEMO_NODE_PROGRESS__={apply,clear,transport};
 })();

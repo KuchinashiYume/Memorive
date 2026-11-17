@@ -13,25 +13,37 @@
       const nextOptions=Array.isArray(values)?values:[];
       const signature=JSON.stringify([nextOptions,currentRef]);
       if(signature===renderSignature)return;
-      renderSignature=signature;options=nextOptions;
+      renderSignature=signature;
+      options=nextOptions;
       menu.replaceChildren();
       options.forEach((option,index)=>{
         const item=document.createElement('button');
-        item.type='button';item.setAttribute('role','menuitemradio');item.setAttribute('aria-checked',String((option.profileRef||'')===currentRef));
-        item.dataset.model=option.model;item.dataset.profileRef=option.profileRef||'';
+        item.type='button';
+        item.setAttribute('role','menuitemradio');
+        item.setAttribute('aria-checked',String((option.profileRef||'')===currentRef));
+        item.dataset.model=option.model;
+        item.dataset.profileRef=option.profileRef||'';
         item.dataset.modelKey=option.modelKey||'';
         // Resolve test scores through the workflow's existing frozen/history binding.
-        item.dataset.testScore='';item.dataset.state=option.state;
+        item.dataset.testScore='';
+        item.dataset.state=option.state;
         item.dataset.pickerIndex=String(index);
         if(option.risk)item.dataset.risk='true';
         item.disabled=Boolean(option.disabled);
-        const mark=document.createElement('span');mark.className='status-dot '+option.state;
-        const name=document.createElement('span');name.textContent=option.model;
-        const note=document.createElement('small');note.textContent=option.note;
-        item.append(mark,name,note);menu.append(item);
+        const mark=document.createElement('span');
+        mark.className='status-dot '+option.state;
+        const name=document.createElement('span');
+        name.textContent=option.model;
+        const note=document.createElement('small');
+        note.textContent=option.note;
+        item.append(mark,name,note);
+        menu.append(item);
       });
       const current=options.find(option=>(option.profileRef||'')===currentRef);
-      if(label){label.textContent=current?.model||'—';label.title=current?.model||'';}
+      if(label){
+        label.textContent=current?.model||'—';
+        label.title=current?.model||'';
+      }
       if(dot)dot.className='status-dot '+(current?.state||'yellow');
     };
     const click=event=>{
@@ -39,15 +51,26 @@
       if(!item||item.disabled||!menu.contains(item))return;
       const option=options[Number(item.dataset.pickerIndex)];
       if(!option)return;
-      setOpen(false);onSelect?.(option);button.focus();
+      setOpen(false);
+      onSelect?.(option);
+      button.focus();
     };
     const toggle=()=>setOpen(menu.dataset.open!=='true');
     const outside=event=>{if(!button.contains(event.target)&&!menu.contains(event.target))setOpen(false);};
     const keys=event=>{
-      if(event.key==='Escape'){event.preventDefault();setOpen(false);button.focus();return;}
-      if(event.key==='Tab'){setOpen(false);return;}
+      if(event.key==='Escape'){
+        event.preventDefault();
+        setOpen(false);
+        button.focus();
+        return;
+      }
+      if(event.key==='Tab'){
+        setOpen(false);
+        return;
+      }
       if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
-      event.preventDefault();setOpen(true);
+      event.preventDefault();
+      setOpen(true);
       const items=[...menu.querySelectorAll('button:not(:disabled)')];
       if(!items.length)return;
       const active=items.indexOf(document.activeElement);
@@ -56,13 +79,21 @@
       items[next].focus();
     };
     if(manageEvents){
-      button.addEventListener('click',toggle);button.addEventListener('keydown',keys);
-      menu.addEventListener('click',click);menu.addEventListener('keydown',keys);
+      button.addEventListener('click',toggle);
+      button.addEventListener('keydown',keys);
+      menu.addEventListener('click',click);
+      menu.addEventListener('keydown',keys);
       document.addEventListener('pointerdown',outside);
     }
     return {render,setOpen,destroy(){
       setOpen(false);
-      if(manageEvents){button.removeEventListener('click',toggle);button.removeEventListener('keydown',keys);menu.removeEventListener('click',click);menu.removeEventListener('keydown',keys);document.removeEventListener('pointerdown',outside);}
+      if(manageEvents){
+        button.removeEventListener('click',toggle);
+        button.removeEventListener('keydown',keys);
+        menu.removeEventListener('click',click);
+        menu.removeEventListener('keydown',keys);
+        document.removeEventListener('pointerdown',outside);
+      }
     }};
   }
   window.__Desktop_MODEL_PICKER__=Object.freeze({bind});
@@ -330,7 +361,10 @@
       const reason = pageError ? '存在红色配置错误' : activeRisk ? '风险变更仍待确认' : !pageDirty ? '无待保存修改' : '保存全部已确认修改';
       pageSave.dataset.desktopTip = reason;
     };
-    const markDirty = () => { pageDirty = true; updatePageSave(); };
+    const markDirty = () => {
+      pageDirty = true;
+      updatePageSave();
+    };
     const setNodeDirty = (dirty = true) => {
       if (!dirty) return;
       if (selectedNode) {
@@ -340,23 +374,43 @@
       }
       markDirty();
     };
-    const updateRiskState = () => { activeRisk = Boolean(retryTimer || modelTimer); updatePageSave(); };
+    const updateRiskState = () => {
+      activeRisk = Boolean(retryTimer || modelTimer);
+      updatePageSave();
+    };
     const stopRetryRisk = (restore = true) => {
-      clearInterval(retryTimer); retryTimer = 0; q('#settings-retry-risk').hidden = true;
+      clearInterval(retryTimer);
+      retryTimer = 0;
+      q('#settings-retry-risk').hidden = true;
       if (restore) q('#settings-retries').value = String(confirmedRetries);
       updateRiskState();
     };
     const stopModelRisk = (restore = true) => {
-      clearInterval(modelTimer); modelTimer = 0; q('#settings-model-risk').hidden = true;
-      if (restore) { q('#settings-current-model').textContent = confirmedModel.startsWith('尚未') ? '—' : confirmedModel; q('#settings-model-dot').className = 'status-dot ' + confirmedModelState; }
+      clearInterval(modelTimer);
+      modelTimer = 0;
+      q('#settings-model-risk').hidden = true;
+      if (restore) {
+        q('#settings-current-model').textContent = confirmedModel.startsWith('尚未') ? '—' : confirmedModel;
+        q('#settings-model-dot').className = 'status-dot ' + confirmedModelState;
+      }
       updateRiskState();
     };
-    const cancelRisks = () => { stopRetryRisk(true); stopModelRisk(true); };
+    const cancelRisks = () => {
+      stopRetryRisk(true);
+      stopModelRisk(true);
+    };
     const startCountdown = (kind, onExpire) => {
       let left = 10;
       const output = q(kind === 'retry' ? '#settings-retry-count' : '#settings-model-count');
       output.textContent = '10 秒';
-      const timer = setInterval(() => { left -= 1; output.textContent = left + ' 秒'; if (left <= 0) { clearInterval(timer); onExpire(); } }, 1000);
+      const timer = setInterval(() => {
+        left -= 1;
+        output.textContent = left + ' 秒';
+        if (left <= 0) {
+          clearInterval(timer);
+          onExpire();
+        }
+      }, 1000);
       if (kind === 'retry') retryTimer = timer; else modelTimer = timer;
       updateRiskState();
     };
@@ -450,7 +504,10 @@
           button.disabled = option.disabled || Boolean(option.parentElement?.disabled);
           const group=option.parentElement;
           if(select.closest('[id="desktop-bottom-panel"]')&&group?.tagName==='OPTGROUP'&&option===group.firstElementChild){
-            const label=document.createElement('div');label.className='memo-select-group';label.textContent=group.label;menu.append(label);
+            const label=document.createElement('div');
+            label.className='memo-select-group';
+            label.textContent=group.label;
+            menu.append(label);
           }
           button.dataset.index = String(optionIndex);
           button.textContent = option.dataset.memoLabel || option.textContent;
@@ -471,7 +528,10 @@
 
       trigger.addEventListener('click', () => setSelectOpen(entry, shellElement.dataset.open !== 'true'));
       trigger.addEventListener('keydown', (event) => {
-        if(event.key==='Escape'){setSelectOpen(entry,false);return;}
+        if(event.key==='Escape'){
+          setSelectOpen(entry,false);
+          return;
+        }
         if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
         setSelectOpen(entry, true);
@@ -495,7 +555,10 @@
           trigger.focus();
           return;
         }
-        if (event.key === 'Tab') { setSelectOpen(entry, false); return; }
+        if (event.key === 'Tab') {
+          setSelectOpen(entry, false);
+          return;
+        }
         if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
         let next = current;
@@ -538,7 +601,10 @@
       draft.getAnimations().forEach((animation) => animation.cancel());
       if (open) draft.hidden = false;
       const duration = motionMs(open ? 220 : 160);
-      if (!duration) { draft.hidden = !open; return; }
+      if (!duration) {
+        draft.hidden = !open;
+        return;
+      }
       const keyframes = open
         ? [{ opacity: 0, transform: 'translateY(-6px)', maxHeight: '0px' }, { opacity: 1, transform: 'translateY(0)', maxHeight: `${draft.scrollHeight}px` }]
         : [{ opacity: 1, transform: 'translateY(0)', maxHeight: `${draft.scrollHeight}px` }, { opacity: 0, transform: 'translateY(-6px)', maxHeight: '0px' }];
@@ -853,7 +919,9 @@
         {key:'COMPOSING',name:'生成报告'},{key:'PUBLISHING',name:'保存至资料库'},
         {key:'NOTIFYING',name:'发送报告提醒'},{key:'COMPLETE',name:'结果可用'}];
       workflowSteps.forEach((step,index)=>{
-        const definition=definitions[index];step.hidden=!definition;if(!definition)return;
+        const definition=definitions[index];
+        step.hidden=!definition;
+        if(!definition)return;
         const node=step.querySelector('.desktop-settings-node'),usesModel=definition.key==='COMPOSING';
         const ready=!usesModel||Boolean(selected&&!selected.disabled),tone=ready?'green':'yellow';
         step.className=`desktop-settings-flow-step state-${tone}${index<5?' link-'+tone:' desktop-settings-no-terminal-arrow'}`;
@@ -874,15 +942,23 @@
       flowList.classList.remove('is-card-review-disabled','is-judgment-review-disabled');
       routeCopy.textContent='01 → 02 → 03 → 04 → 05 → 06';
       const ready=selected&&!selected.disabled,score=q('#settings-flow-score');
-      score.textContent=ready?'6 / 6':'5 / 6';score.className='badge '+(ready?'green':'yellow');
+      score.textContent=ready?'6 / 6':'5 / 6';
+      score.className='badge '+(ready?'green':'yellow');
       workflowFlow?.setAttribute('aria-label',flowText(flowLabels[workflowView]));
       if(workflowNote)workflowNote.textContent='';
-      if(selectedNode){updateNodeTogglePresentation();updateNodeRetryPresentation(selectedNode);renderModelMenu(selectedNode);}
+      if(selectedNode){
+        updateNodeTogglePresentation();
+        updateNodeRetryPresentation(selectedNode);
+        renderModelMenu(selectedNode);
+      }
       requestAnimationFrame(()=>drawBypass());
     };
 
     const renderWorkflow = ({ animateBypass = false } = {}) => {
-      if (reportView()) { renderReportWorkflow(); return; }
+      if (reportView()) {
+        renderReportWorkflow();
+        return;
+      }
       if (workflowView === 'refinement') {
         renderRefinementWorkflow();
         return;
@@ -1213,7 +1289,11 @@
 
     let beforeAboutMode=null;
     const setModeScope = (categoryKey = '') => {
-      if(categoryKey!=='update'&&beforeAboutMode!==null){const previous=beforeAboutMode;beforeAboutMode=null;setSettingsMode(previous);}
+      if(categoryKey!=='update'&&beforeAboutMode!==null){
+        const previous=beforeAboutMode;
+        beforeAboutMode=null;
+        setSettingsMode(previous);
+      }
       const scoped = categoryKey === 'api' || categoryKey === 'cli' || categoryKey === 'workflow' || categoryKey === 'research-weights' || categoryKey === 'refinement' || categoryKey === 'update';
       q('#settings-mode').hidden = !scoped;
       shell.dataset.modeScope = scoped ? categoryKey : 'none';
@@ -1222,7 +1302,10 @@
       normalButton.hidden = categoryKey === 'cli';
       advancedButton.hidden = categoryKey === 'workflow';
       q('#settings-mode button[data-mode="developer"]').hidden=categoryKey==='update';
-      if(categoryKey==='update'){beforeAboutMode=shell.dataset.settingsMode;setSettingsMode('normal');}
+      if(categoryKey==='update'){
+        beforeAboutMode=shell.dataset.settingsMode;
+        setSettingsMode('normal');
+      }
       if (categoryKey === 'cli' && shell.dataset.settingsMode === 'normal') {
         setSettingsMode('advanced');
       }
@@ -1290,7 +1373,11 @@
     categories.forEach((button) => button.addEventListener('click', () => openCategory(button)));
     categories.forEach((button) => {
       const label=button.querySelector('strong')?.textContent.trim();
-      if(label){button.setAttribute('aria-label',label);button.setAttribute('title',label);button.dataset.desktopTip=label;}
+      if(label){
+        button.setAttribute('aria-label',label);
+        button.setAttribute('title',label);
+        button.dataset.desktopTip=label;
+      }
     });
     q('#settings-assistant-settings-link')?.addEventListener('click',()=>openCategory(q('[data-category="behavior"]')));
     q('#settings-assistant-settings-link')?.setAttribute('title','Logo 左键显示 · 右键隐藏');
@@ -1319,7 +1406,10 @@
       await animateDraft(true);
       markDirty();
     });
-    q('#settings-cancel-api').addEventListener('click', async () => { await animateDraft(false); showToast('未保存的 API 草稿已取消。'); });
+    q('#settings-cancel-api').addEventListener('click', async () => {
+      await animateDraft(false);
+      showToast('未保存的 API 草稿已取消。');
+    });
     const openNode = async (node) => {
       if (selectedNode === node && workarea.classList.contains('has-node') && !nodePanel.hidden) {
         // SAME_NODE_ALREADY_OPEN: keep the existing inspector and its unsaved draft intact.
@@ -1329,12 +1419,14 @@
       const alreadyOpen = workarea.classList.contains('has-node') && !nodePanel.hidden;
       cancelRisks();
       setModelMenu(false);
-      selectedNode = node; qa('.desktop-settings-node').forEach((item) => item.setAttribute('aria-current', String(item === node)));
+      selectedNode = node;
+      qa('.desktop-settings-node').forEach((item) => item.setAttribute('aria-current', String(item === node)));
       q('#settings-node-title').textContent = node.dataset.node;
       q('#settings-node-purpose').textContent = node.dataset.purpose || '';
       q('.desktop-settings-model-setting').hidden = node.dataset.modelLocked === 'true' && !node.dataset.profileSourceStep;
       q('#settings-adjust-model').hidden = node.dataset.modelLocked === 'true';
-      confirmedRetries = Number(node.dataset.retries || 2); q('#settings-retries').value = String(confirmedRetries);
+      confirmedRetries = Number(node.dataset.retries || 2);
+      q('#settings-retries').value = String(confirmedRetries);
       updateNodeRetryPresentation(node);
       confirmedModel = node.dataset.model || '尚未映射已配置模型';
       const currentOption = [...(window.__Desktop_REPORT_WORKFLOW__?.options()||[]), ...refinementModelOptions, ...configuredModelOptions, ...(workflowModels[node.dataset.step] || [])]
@@ -1384,23 +1476,44 @@
       setNodeDirty();
     });
     const evaluateRetry = () => {
-      const input = q('#settings-retries'); const value = Number(input.value); stopRetryRisk(false);
+      const input = q('#settings-retries');
+      const value = Number(input.value);
+      stopRetryRisk(false);
       const invalid = !Number.isInteger(value) || value < 0;
       retryError = invalid;
       q('.desktop-settings-node-body').classList.toggle('has-error', retryError || nodeError);
       q('#settings-node-error').hidden = !retryError && !nodeError;
       refreshPageError();
-      if (invalid) { setNodeDirty(false); return; }
+      if (invalid) {
+        setNodeDirty(false);
+        return;
+      }
       if (value <= 1 || value > 5) {
         q('#settings-retry-risk-copy').textContent = value <= 1 ? '不重试或低重试可能使任务在首次失败后终止。' : '多次重试可能增加模型调用费用和时间。';
-        q('#settings-retry-risk').hidden = false; startCountdown('retry', () => stopRetryRisk(true));
-      } else { confirmedRetries = value; if (selectedNode) selectedNode.dataset.retries = String(value); setNodeDirty(); }
+        q('#settings-retry-risk').hidden = false;
+        startCountdown('retry', () => stopRetryRisk(true));
+      } else {
+        confirmedRetries = value;
+        if (selectedNode) selectedNode.dataset.retries = String(value);
+        setNodeDirty();
+      }
       refreshPageError();
     };
-    q('#settings-retry-minus').addEventListener('click', () => { q('#settings-retries').value = String(Math.max(0, Number(q('#settings-retries').value || 0) - 1)); evaluateRetry(); });
-    q('#settings-retry-plus').addEventListener('click', () => { q('#settings-retries').value = String(Number(q('#settings-retries').value || 0) + 1); evaluateRetry(); });
+    q('#settings-retry-minus').addEventListener('click', () => {
+      q('#settings-retries').value = String(Math.max(0, Number(q('#settings-retries').value || 0) - 1));
+      evaluateRetry();
+    });
+    q('#settings-retry-plus').addEventListener('click', () => {
+      q('#settings-retries').value = String(Number(q('#settings-retries').value || 0) + 1);
+      evaluateRetry();
+    });
     q('#settings-retries').addEventListener('change', evaluateRetry);
-    q('#settings-confirm-retry').addEventListener('click', () => { confirmedRetries = Number(q('#settings-retries').value); if (selectedNode) selectedNode.dataset.retries = String(confirmedRetries); stopRetryRisk(false); setNodeDirty(); });
+    q('#settings-confirm-retry').addEventListener('click', () => {
+      confirmedRetries = Number(q('#settings-retries').value);
+      if (selectedNode) selectedNode.dataset.retries = String(confirmedRetries);
+      stopRetryRisk(false);
+      setNodeDirty();
+    });
     modelButton.addEventListener('click', () => setModelMenu(modelMenu.dataset.open !== 'true'));
     modelMenu.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-model]');
@@ -1416,7 +1529,10 @@
       queueMicrotask(() => window.dispatchEvent(new CustomEvent('desktop:workflow-model-selected', {detail:{node:changedNode}})));
       if (selectedNode) selectedNode.dataset.testScore = button.dataset.testScore || '';
       q('#settings-node-test-score').textContent = button.dataset.testScore || '—';
-      if (button.dataset.risk === 'true') { q('#settings-model-risk').hidden = false; startCountdown('model', () => stopModelRisk(true)); }
+      if (button.dataset.risk === 'true') {
+        q('#settings-model-risk').hidden = false;
+        startCountdown('model', () => stopModelRisk(true));
+      }
       else {
         confirmedModel = button.dataset.model;
         confirmedModelState = button.dataset.state;
@@ -1435,10 +1551,19 @@
         setNodeDirty();
       }
     });
-    q('#settings-confirm-model').addEventListener('click', () => { confirmedModel = q('#settings-current-model').textContent; q('#settings-current-model').title = confirmedModel; if (selectedNode) selectedNode.dataset.model = confirmedModel; if (selectedNode?.dataset.step === 'embedding') syncContextFromEmbedding(); renderWorkflow(); stopModelRisk(false); setNodeDirty(); });
+    q('#settings-confirm-model').addEventListener('click', () => {
+      confirmedModel = q('#settings-current-model').textContent;
+      q('#settings-current-model').title = confirmedModel;
+      if (selectedNode) selectedNode.dataset.model = confirmedModel;
+      if (selectedNode?.dataset.step === 'embedding') syncContextFromEmbedding();
+      renderWorkflow();
+      stopModelRisk(false);
+      setNodeDirty();
+    });
 
     q('#settings-mode').addEventListener('click', async (event) => {
-      const button = event.target.closest('button[data-mode]'); if (!button) return;
+      const button = event.target.closest('button[data-mode]');
+      if (!button) return;
       if (button.hidden || button.disabled) return;
       if (shell.dataset.modeScope === 'cli' && button.dataset.mode === 'normal') return;
       if (button.dataset.mode === 'developer' && workarea.classList.contains('has-node')) {
@@ -1459,7 +1584,10 @@
     q('#settings-library-provider').addEventListener('change', () => {
       const provider = q('#settings-library-provider').value;
       const configured = provider !== 'NONE';
-      q('#settings-library-name').disabled = !configured; q('#settings-library-root').disabled = !configured; q('#settings-library-browse').disabled = !configured; q('#settings-library-test').disabled = !configured;
+      q('#settings-library-name').disabled = !configured;
+      q('#settings-library-root').disabled = !configured;
+      q('#settings-library-browse').disabled = !configured;
+      q('#settings-library-test').disabled = !configured;
       if (configured && !q('#settings-library-name').value.trim()) {
         q('#settings-library-name').value = {
           OBSIDIAN: 'Obsidian Vault', LOGSEQ: 'Logseq Graph', ZOTERO: 'Zotero Library', CUSTOM: '外部资料库'
@@ -1471,17 +1599,33 @@
         ZOTERO: '请选择包含 zotero.sqlite 的 Zotero 数据目录。',
         CUSTOM: '请选择由外部程序实际管理的资料库根目录。'
       }[provider] || '选择资料库类型后，再选择对应根目录。';
-      q('#settings-library-status').textContent = configured ? '待检测' : '未检测'; q('#settings-library-copy').textContent = configured ? '请先完成真实本地检测，再保存设置' : '尚未配置'; q('#settings-library-dot').className = 'status-dot yellow';
+      q('#settings-library-status').textContent = configured ? '待检测' : '未检测';
+      q('#settings-library-copy').textContent = configured ? '请先完成真实本地检测，再保存设置' : '尚未配置';
+      q('#settings-library-dot').className = 'status-dot yellow';
       markDirty();
     });
     q('#settings-proxy-mode').addEventListener('change', () => {
       q('#settings-custom-proxy-fields').hidden = q('#settings-proxy-mode').value !== 'custom';
     });
-    q('#settings-proxy-address').addEventListener('input', () => { const value=q('#settings-proxy-address').value.trim(); const invalid=value && !/^(https?|socks5h?):\/\//i.test(value); q('#settings-network-error').hidden=!invalid; networkError=Boolean(invalid); refreshPageError(); });
+    q('#settings-proxy-address').addEventListener('input', () => {
+      const value=q('#settings-proxy-address').value.trim();
+      const invalid=value && !/^(https?|socks5h?):\/\//i.test(value);
+      q('#settings-network-error').hidden=!invalid;
+      networkError=Boolean(invalid);
+      refreshPageError();
+    });
     q('#settings-clear-cache').addEventListener('click', () => q('#settings-cache-confirm').hidden=false);
-    q('#settings-clear-confirm').addEventListener('click', () => { q('#settings-cache-confirm').hidden=true; showToast('临时缓存清理请求已完成；正式资产未受影响。'); });
+    q('#settings-clear-confirm').addEventListener('click', () => {
+      q('#settings-cache-confirm').hidden=true;
+      showToast('临时缓存清理请求已完成；正式资产未受影响。');
+    });
     q('#settings-shortcuts').addEventListener('click', () => setShortcutPopover(shortcutPopover.dataset.open !== 'true'));
-    qa('[data-font-step]').forEach((button) => button.addEventListener('click', () => { const output=q('#settings-font-size'); const next=Math.min(140,Math.max(80,Number.parseInt(output.textContent,10)+Number(button.dataset.fontStep))); output.textContent=next+'%'; markDirty(); }));
+    qa('[data-font-step]').forEach((button) => button.addEventListener('click', () => {
+      const output=q('#settings-font-size');
+      const next=Math.min(140,Math.max(80,Number.parseInt(output.textContent,10)+Number(button.dataset.fontStep)));
+      output.textContent=next+'%';
+      markDirty();
+    }));
     qa('[data-local-action]').forEach((button) => button.addEventListener('click', () => showToast(button.dataset.localAction)));
     pageSave.addEventListener('click', () => {
       if (window.pywebview?.api?.call) return;
@@ -1503,11 +1647,34 @@
     root.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         const openSelect = enhancedSelects.find((entry) => entry.shell.dataset.open === 'true');
-        if (openSelect) { event.preventDefault(); setSelectOpen(openSelect, false); openSelect.trigger.focus(); return; }
-        if (modelMenu.dataset.open === 'true') { event.preventDefault(); setModelMenu(false); modelButton.focus(); return; }
-        if (shortcutPopover.dataset.open === 'true') { event.preventDefault(); setShortcutPopover(false); q('#settings-shortcuts').focus(); return; }
-        if (retryTimer || modelTimer) { event.preventDefault(); cancelRisks(); return; }
-        if (workarea.classList.contains('has-node')) { event.preventDefault(); closeNode(); return; }
+        if (openSelect) {
+          event.preventDefault();
+          setSelectOpen(openSelect, false);
+          openSelect.trigger.focus();
+          return;
+        }
+        if (modelMenu.dataset.open === 'true') {
+          event.preventDefault();
+          setModelMenu(false);
+          modelButton.focus();
+          return;
+        }
+        if (shortcutPopover.dataset.open === 'true') {
+          event.preventDefault();
+          setShortcutPopover(false);
+          q('#settings-shortcuts').focus();
+          return;
+        }
+        if (retryTimer || modelTimer) {
+          event.preventDefault();
+          cancelRisks();
+          return;
+        }
+        if (workarea.classList.contains('has-node')) {
+          event.preventDefault();
+          closeNode();
+          return;
+        }
       }
       if (event.key === 'Enter' && retryTimer) q('#settings-confirm-retry').click();
       if (event.key === 'Enter' && modelTimer) q('#settings-confirm-model').click();
@@ -1552,7 +1719,8 @@
       drawBypass();
     });
     window.addEventListener('desktop:settings-locale-change', () => {
-      updateWorkflowHeader();renderWorkflow();
+      updateWorkflowHeader();
+      renderWorkflow();
     });
     window.__Desktop_SETTINGS_UI__ = Object.freeze({
       setWorkflowView,

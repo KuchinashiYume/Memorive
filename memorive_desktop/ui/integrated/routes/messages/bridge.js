@@ -129,7 +129,8 @@
       return receipt;
     }
     if(receipt?.research_task_id){
-      await window.__Desktop_RESEARCH__?.openTask(receipt.research_task_id);return receipt;
+      await window.__Desktop_RESEARCH__?.openTask(receipt.research_task_id);
+      return receipt;
     }
     if (receipt?.status !== 'PASS') {
       if (receipt?.status === 'TARGET_UNAVAILABLE') await refresh();

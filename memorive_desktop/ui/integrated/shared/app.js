@@ -1,114 +1,5 @@
 window.__MEMO_PRODUCT_NAME__="Memorive";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (() => {
   'use strict';
   const routes = Object.freeze({
@@ -293,7 +184,10 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
       }
       const source = sources[name];
       if (!source) return;
-      if(current !== source && !['en-US','ja-JP'].some(lang=>translatedAttribute(source,lang)===current)) { delete sources[name]; return; }
+      if(current !== source && !['en-US','ja-JP'].some(lang=>translatedAttribute(source,lang)===current)) {
+        delete sources[name];
+        return;
+      }
       const desired = translatedAttribute(source, language);
       if (current !== desired) element.setAttribute(name, desired);
     });
@@ -355,7 +249,11 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
       if(!(element instanceof HTMLElement))return;
       if(element.closest('.desktop-toolbar-icon,.desktop-sr-only,.sr-only')){
         const previous=fontBaselines.get(element);
-        if(previous)fontWrites.push(()=>{element.style.setProperty('font-size',previous.inline||'',previous.priority||'');delete element.dataset.memoType;fontBaselines.delete(element);});
+        if(previous)fontWrites.push(()=>{
+          element.style.setProperty('font-size',previous.inline||'',previous.priority||'');
+          delete element.dataset.memoType;
+          fontBaselines.delete(element);
+        });
         return;
       }
       if(element.matches('script,style')||element.closest('svg')||element.matches('[aria-hidden="true"]:not(select):not(.desktop-settings-code-highlight):not(.desktop-settings-code-line-numbers)'))return;
@@ -366,7 +264,8 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
       if(!baseline){
         const computed=parseFloat(getComputedStyle(element).fontSize);
         if(!Number.isFinite(computed)||computed<6||computed>96)return;
-        baseline={inline:element.style.fontSize,priority:element.style.getPropertyPriority('font-size')};fontBaselines.set(element,baseline);
+        baseline={inline:element.style.fontSize,priority:element.style.getPropertyPriority('font-size')};
+        fontBaselines.set(element,baseline);
       }
       // Re-evaluate after a node is moved or re-used by a component renderer.
       const role=typeRole(element);
@@ -385,7 +284,10 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     document.querySelectorAll('[title],[aria-label][class*="button"],.desktop-settings-category').forEach((element) => {
       // Custom tooltips own these elements. Do not recreate a title which
       // the panel's native-title observer immediately removes.
-      if (element.matches('[data-desktop-no-tooltip],[data-desktop-tip]')) { element.removeAttribute('title'); return; }
+      if (element.matches('[data-desktop-no-tooltip],[data-desktop-tip]')) {
+        element.removeAttribute('title');
+        return;
+      }
       const sources=attributeSources.get(element)||{};
       if(!nativeTitleSources.has(element)&&element.hasAttribute('title'))nativeTitleSources.set(element,sources.title||element.getAttribute('title'));
       const source=element.getAttribute('data-desktop-dynamic-title') ?? nativeTitleSources.get(element);
@@ -658,7 +560,10 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     const layout = state.root.querySelector('.desktop-workspace');
     if (layout) layout.style.transition = 'none';
     applyRememberedPanelState(normalized);
-    if (layout) { void layout.offsetWidth; layout.style.removeProperty('transition'); }
+    if (layout) {
+      void layout.offsetWidth;
+      layout.style.removeProperty('transition');
+    }
     document.title = `Memorive · ${state.descriptor.label}`;
     document.body.dataset.desktopActiveRoute = normalized;
     window.dispatchEvent(new CustomEvent('desktop-integrated-route', { detail: { route: normalized } }));
