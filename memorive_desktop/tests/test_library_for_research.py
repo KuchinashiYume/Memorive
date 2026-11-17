@@ -203,6 +203,24 @@ def test_a_device_documents_first_results_refresh_the_library_once(tmp_path, pap
     assert [row["kind"] for row in library.cached_rows()] == ["文献"]
 
 
+@pytest.mark.parametrize("products", ["one paper", "none"])
+def test_a_library_list_request_reads_the_products_once(tmp_path, paper, products):
+    """A list request syncs the products at its start and again while it lists them; within one request
+    the provider is read once, and the next request reads it again."""
+    reads = []
+    rows = paper.rows if products == "one paper" else []
+    library = LibraryProductController(
+        service=None, control_store=ControlStore(tmp_path / "ui"), contract_root=CONTRACTS,
+        fixture_root=tmp_path / "unused", state_root=tmp_path / "library", include_synthetic_projection=False,
+        core_artifact_provider=lambda: reads.append(1) or rows)
+    first = library.call("library.list_artifacts", {})
+    assert len(reads) == 1
+    second = library.call("library.list_artifacts", {})
+    assert len(reads) == 2
+    assert first["rows"] == second["rows"]
+    assert len(first["rows"]) == (1 if rows else 0)
+
+
 def test_a_failed_library_refresh_still_keeps_the_device_documents_results(tmp_path, paper):
     """Another job's refused product makes the whole-library refresh fail. The document still gets its
     results and state; the failure is kept as the desktop's last error, and the refresh is not tried

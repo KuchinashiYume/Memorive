@@ -195,7 +195,6 @@ class LibraryProductController:
             )
         self._validate_state(self._load())
 
-    @once_per_projection
     def _core_product_entries(self, source: list[Mapping[str, Any]]) -> dict[str, dict[str, Any]]:
         """One entry per product row of the provider, by artifact id: the row the library shows and the
         job's binding (job, file, root, sha256, source document). A row whose binding is not well formed
@@ -374,6 +373,7 @@ class LibraryProductController:
             files.append((artifact_id, deepcopy(entry), path, data))
         return files
 
+    @once_per_projection
     def _sync_core_artifacts(self) -> None:
         """Refresh metadata-only Library rows from verified Core bindings."""
 
