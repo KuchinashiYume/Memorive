@@ -356,6 +356,64 @@ def _not_available(reason: str) -> dict[str, Any]:
     }
 
 
+def _plan_authorization_reason(
+    authorization: Mapping[str, Any] | None,
+    plan: Mapping[str, Any],
+    *,
+    subscription: bool,
+) -> str | None:
+    """Why an authorization does not let this exam plan run, or None when it does: it has exactly its
+    five fields, the current schema and authorized True, this plan's hash and cost cap, and its
+    acknowledged_subscription_no_per_call_price is subscription (the exam says when a plan runs on a
+    subscription without per-call price)."""
+    if not isinstance(authorization, Mapping):
+        return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_REQUIRED"
+    if set(authorization) != {
+        "schema_version",
+        "authorized",
+        "plan_sha256",
+        "cost_cap_cny",
+        "acknowledged_subscription_no_per_call_price",
+    }:
+        return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_INVALID"
+    if (
+        authorization.get("schema_version") != AUTHORIZATION_SCHEMA
+        or authorization.get("authorized") is not True
+    ):
+        return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_REQUIRED"
+    if authorization.get("plan_sha256") != plan.get("plan_sha256"):
+        return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_MISMATCH"
+    if authorization.get("cost_cap_cny") != plan.get("budget_cap_cny"):
+        return "WORKFLOW_MODEL_EXAM_COST_CAP_MISMATCH"
+    if authorization.get("acknowledged_subscription_no_per_call_price") is not subscription:
+        return "WORKFLOW_MODEL_EXAM_COST_SEMANTICS_ACKNOWLEDGEMENT_REQUIRED"
+    return None
+
+
+def _ollama_exam_profile(target: Mapping[str, Any], field: str, value: str) -> bool:
+    """A local Ollama profile an exam can run on: its field (the structured chat adapter or the
+    capability the exam needs) is value, it may run and has an exact identity, it is available, and it
+    has a model name, a model digest and a settings id."""
+    return (
+        target.get("endpoint_kind") == "ollama"
+        and target.get(field) == value
+        and target.get("execution_eligible") is True
+        and target.get("exact_identity_available") is True
+        and target.get("connection_status") == "AVAILABLE"
+        and isinstance(target.get("model_name"), str)
+        and bool(target.get("model_name"))
+        and isinstance(target.get("model_digest"), str)
+        and bool(re.fullmatch("[A-F0-9]{64}", target["model_digest"]))
+        and isinstance(target.get("config_id"), str)
+        and bool(target.get("config_id"))
+    )
+
+
+def _comparison_binding_sha256(basis: Mapping[str, Any], cohort_id: str) -> str:
+    """The hash that binds an exam plan's comparison basis to its comparison cohort id."""
+    return _sha256({**basis, "comparison_cohort_id": cohort_id})
+
+
 def _not_run(reason: str, *, requested_model: str | None = None) -> dict[str, Any]:
     return {
         "schema_version": RESULT_SCHEMA,

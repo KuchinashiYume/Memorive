@@ -42,6 +42,8 @@ from memorive.exams.common import (
     _public_forms,
     _sha256,
     _write_json_create_only,
+    _ollama_exam_profile,
+    _plan_authorization_reason,
 )
 from memorive.exams.card_reviewer.policy import (
     CARD_REVIEWER_EXAM_CATEGORY_ID,
@@ -820,19 +822,8 @@ class QualityCardReviewerExamExecutor:
             ):
                 return "CLI"
         if kind == "LOCAL":
-            if (
-                target.get("endpoint_kind") == "ollama"
-                and target.get("structured_chat_adapter")
-                == "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
-                and target.get("execution_eligible") is True
-                and target.get("exact_identity_available") is True
-                and target.get("connection_status") == "AVAILABLE"
-                and isinstance(target.get("model_name"), str)
-                and bool(target.get("model_name"))
-                and isinstance(target.get("model_digest"), str)
-                and bool(re.fullmatch(r"[A-F0-9]{64}", target["model_digest"]))
-                and isinstance(target.get("config_id"), str)
-                and bool(target.get("config_id"))
+            if _ollama_exam_profile(
+                target, "structured_chat_adapter", "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
             ):
                 return "LOCAL"
         return None
@@ -955,32 +946,8 @@ class QualityCardReviewerExamExecutor:
         authorization: Mapping[str, Any] | None,
         plan: Mapping[str, Any],
     ) -> str | None:
-        if not isinstance(authorization, Mapping):
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_REQUIRED"
-        if set(authorization) != {
-            "schema_version",
-            "authorized",
-            "plan_sha256",
-            "cost_cap_cny",
-            "acknowledged_subscription_no_per_call_price",
-        }:
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_INVALID"
-        if (
-            authorization.get("schema_version") != AUTHORIZATION_SCHEMA
-            or authorization.get("authorized") is not True
-        ):
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_REQUIRED"
-        if authorization.get("plan_sha256") != plan.get("plan_sha256"):
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_MISMATCH"
-        if authorization.get("cost_cap_cny") != plan.get("budget_cap_cny"):
-            return "WORKFLOW_MODEL_EXAM_COST_CAP_MISMATCH"
-        expected_ack = plan.get("profile_kind") == "CLI"
-        if (
-            authorization.get("acknowledged_subscription_no_per_call_price")
-            is not expected_ack
-        ):
-            return "WORKFLOW_MODEL_EXAM_COST_SEMANTICS_ACKNOWLEDGEMENT_REQUIRED"
-        return None
+        """A command-line plan acknowledges a subscription without per-call price."""
+        return _plan_authorization_reason(authorization, plan, subscription=plan.get("profile_kind") == "CLI")
 
     @staticmethod
     def _validate_call_result(

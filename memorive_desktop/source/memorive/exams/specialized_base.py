@@ -8,9 +8,9 @@ import re
 from time import monotonic
 from typing import Any, Mapping
 from memorive.exams.common import (
-    AUTHORIZATION_SCHEMA,
     _not_run,
     _write_json_create_only,
+    _plan_authorization_reason,
 )
 
 
@@ -23,35 +23,15 @@ class _SpecializedExamBase:
         authorization: Mapping[str, Any] | None,
         plan: Mapping[str, Any],
     ) -> str | None:
-        if not isinstance(authorization, Mapping):
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_REQUIRED"
-        if set(authorization) != {
-            "schema_version",
-            "authorized",
-            "plan_sha256",
-            "cost_cap_cny",
-            "acknowledged_subscription_no_per_call_price",
-        }:
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_INVALID"
-        if (
-            authorization.get("schema_version") != AUTHORIZATION_SCHEMA
-            or authorization.get("authorized") is not True
-        ):
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_REQUIRED"
-        if authorization.get("plan_sha256") != plan.get("plan_sha256"):
-            return "WORKFLOW_MODEL_EXAM_AUTHORIZATION_MISMATCH"
-        if authorization.get("cost_cap_cny") != plan.get("budget_cap_cny"):
-            return "WORKFLOW_MODEL_EXAM_COST_CAP_MISMATCH"
-        subscription_without_per_call_price = (
-            plan.get("cost_semantics")
-            in {"CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT", "CLI_MANAGED_UNKNOWN"}
+        """A plan on a subscription command line without per-call price acknowledges it."""
+        return _plan_authorization_reason(
+            authorization,
+            plan,
+            subscription=plan.get("cost_semantics") in {
+                "CHATGPT_SUBSCRIPTION_CLI_NO_PER_CALL_PRICE_RECEIPT",
+                "CLI_MANAGED_UNKNOWN",
+            },
         )
-        if (
-            authorization.get("acknowledged_subscription_no_per_call_price")
-            is not subscription_without_per_call_price
-        ):
-            return "WORKFLOW_MODEL_EXAM_COST_SEMANTICS_ACKNOWLEDGEMENT_REQUIRED"
-        return None
 
     @staticmethod
     def _state() -> dict[str, Any]:

@@ -29,6 +29,7 @@ from memorive.exams.common import (
     _not_run,
     _sha256,
     _write_json_create_only,
+    _comparison_binding_sha256,
 )
 from memorive.exams.specialized_base import SHA256, _SpecializedExamBase
 
@@ -258,8 +259,8 @@ class QualityRerankerTextExamExecutor(_SpecializedExamBase):
             "sample_revision": self.SAMPLE_REVISION,
             "sample_manifest_sha256": sample["sample_manifest_sha256"],
             "comparison_cohort_id": comparison_cohort_id,
-            "comparison_binding_sha256": _sha256(
-                {**comparison_basis, "comparison_cohort_id": comparison_cohort_id}
+            "comparison_binding_sha256": _comparison_binding_sha256(
+                comparison_basis, comparison_cohort_id
             ),
             "horizontal_comparison_eligible": True,
             "horizontal_comparison_allowed_only_with_same_cohort": True,

@@ -37,6 +37,8 @@ from memorive.exams.common import (
     _not_run,
     _sha256,
     _write_json_create_only,
+    _comparison_binding_sha256,
+    _ollama_exam_profile,
 )
 from memorive.exams.embedding.executor import QualityEmbeddingExamExecutor
 
@@ -143,19 +145,7 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
                 return "API"
             return None
         if target.get("kind") == "LOCAL":
-            if (
-                target.get("endpoint_kind") == "ollama"
-                and target.get("capability") == "EMBEDDING"
-                and target.get("execution_eligible") is True
-                and target.get("exact_identity_available") is True
-                and target.get("connection_status") == "AVAILABLE"
-                and isinstance(target.get("model_name"), str)
-                and bool(target.get("model_name"))
-                and isinstance(target.get("model_digest"), str)
-                and bool(re.fullmatch(r"[A-F0-9]{64}", target["model_digest"]))
-                and isinstance(target.get("config_id"), str)
-                and bool(target.get("config_id"))
-            ):
+            if _ollama_exam_profile(target, "capability", "EMBEDDING"):
                 return "LOCAL"
         return None
 
@@ -567,12 +557,12 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
             "role_id": comparison_basis["role_id"],
             "sample_revision": self.SAMPLE_REVISION,
             "comparison_cohort_id": comparison_cohort_id,
-            "comparison_binding_sha256": _sha256(
-                {**comparison_basis, "comparison_cohort_id": comparison_cohort_id}
+            "comparison_binding_sha256": _comparison_binding_sha256(
+                comparison_basis, comparison_cohort_id
             ),
             "adversarial_comparison_cohort_id": adversarial_cohort_id,
-            "adversarial_comparison_binding_sha256": _sha256(
-                {**adversarial_basis, "comparison_cohort_id": adversarial_cohort_id}
+            "adversarial_comparison_binding_sha256": _comparison_binding_sha256(
+                adversarial_basis, adversarial_cohort_id
             ),
             "horizontal_comparison_eligible": True,
             "horizontal_comparison_allowed_only_with_same_cohort": True,

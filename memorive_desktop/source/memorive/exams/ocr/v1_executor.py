@@ -24,8 +24,10 @@ from memorive.exams.common import (
     _not_run,
     _sha256,
     _write_json_create_only,
+    _comparison_binding_sha256,
+    _ollama_exam_profile,
 )
-from memorive.exams.specialized_base import SHA256, _SpecializedExamBase
+from memorive.exams.specialized_base import _SpecializedExamBase
 
 
 Core_MEAN_SOURCE_CHARS = 69_274
@@ -89,17 +91,7 @@ class _QualityOcrPageExamExecutorV1(_SpecializedExamBase):
         if target.get("kind") == "LOCAL":
             return (
                 "LOCAL"
-                if target.get("endpoint_kind") == "ollama"
-                and target.get("capability") == "VISION_OCR"
-                and target.get("execution_eligible") is True
-                and target.get("exact_identity_available") is True
-                and target.get("connection_status") == "AVAILABLE"
-                and isinstance(target.get("model_name"), str)
-                and bool(target.get("model_name"))
-                and isinstance(target.get("model_digest"), str)
-                and bool(SHA256.fullmatch(str(target["model_digest"])))
-                and isinstance(target.get("config_id"), str)
-                and bool(target.get("config_id"))
+                if _ollama_exam_profile(target, "capability", "VISION_OCR")
                 else None
             )
         return None
@@ -172,8 +164,8 @@ class _QualityOcrPageExamExecutorV1(_SpecializedExamBase):
             "sample_slot": sample_slot,
             "sample_revision": f"OCR_COMPLETE_FORM_{form_id}_V1",
             "comparison_cohort_id": comparison_cohort_id,
-            "comparison_binding_sha256": _sha256(
-                {**comparison_basis, "comparison_cohort_id": comparison_cohort_id}
+            "comparison_binding_sha256": _comparison_binding_sha256(
+                comparison_basis, comparison_cohort_id
             ),
             "horizontal_comparison_eligible": True,
             "horizontal_comparison_allowed_only_with_same_cohort": True,

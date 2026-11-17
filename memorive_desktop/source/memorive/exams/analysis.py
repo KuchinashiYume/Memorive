@@ -52,6 +52,7 @@ from memorive.exams.common import (
     _sha256,
     _write_json_create_only,
     core_primary_workload_profile,
+    _ollama_exam_profile,
 )
 
 
@@ -222,19 +223,8 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                 return "CLI"
             return None
         if kind == "LOCAL":
-            if (
-                target.get("endpoint_kind") == "ollama"
-                and target.get("structured_chat_adapter")
-                == "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
-                and target.get("execution_eligible") is True
-                and target.get("exact_identity_available") is True
-                and target.get("connection_status") == "AVAILABLE"
-                and isinstance(target.get("model_name"), str)
-                and bool(target.get("model_name"))
-                and isinstance(target.get("model_digest"), str)
-                and bool(re.fullmatch(r"[A-F0-9]{64}", target["model_digest"]))
-                and isinstance(target.get("config_id"), str)
-                and bool(target.get("config_id"))
+            if _ollama_exam_profile(
+                target, "structured_chat_adapter", "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
             ):
                 return "LOCAL"
         return None
