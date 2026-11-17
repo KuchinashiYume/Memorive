@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c22b8a9bfdebe25f2b858cdc4923025292f7599c300562d101674b1489f152ee",
+      "sha256": "436485ab3586bf891b35638d76f09c2ec5df155675188017997b8e93d4c4fa34",
       "bytes": 276564
     },
     {
@@ -7171,8 +7171,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/core_products.py",
-      "sha256": "98ee012a1909e19793d88484bbeb6367139c3784e49612cca3a28cfe36d7c3af",
-      "bytes": 28129
+      "sha256": "352b20712450bc93d68eefeb9893d0e5902e2084d03e497b36828be722570f6d",
+      "bytes": 28338
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/paper_review.py",
@@ -7181,8 +7181,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/product_controller.py",
-      "sha256": "650f3c3d9518f5a8e5ff08811e07fc137b1bcb97b88bb970b767be8990f3e518",
-      "bytes": 74423
+      "sha256": "12b3e9054bb5ff0399ddd22bf09cbb3593854b6b1a4c9d7edf5edc4afef2c003",
+      "bytes": 76793
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/refinement_markdown.py",
@@ -9001,8 +9001,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/desktop_connections.py",
-      "sha256": "38b8590eeebe7a434baafc61dfcf2ce0ad46bc1490eac95836aa57b012cbd804",
-      "bytes": 6363
+      "sha256": "822ed8eec27d55b4668a28c7319d1c7ecfb6b19be6703b9451319e59b79ba2be",
+      "bytes": 6244
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/developer_api.py",
@@ -10041,8 +10041,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/product_api.py",
-      "sha256": "6170139f27558ea9c946f56d84cbdcd0ec4279d1a8eccf446e16aefb4a3ae117",
-      "bytes": 40414
+      "sha256": "68b9ccc4bf6c0a0ec7b4421d83f22f547542dd13a0a555f350e60cfdf2b2bee0",
+      "bytes": 40507
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/research_memo.py",

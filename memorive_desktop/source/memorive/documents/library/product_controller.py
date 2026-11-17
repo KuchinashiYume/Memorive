@@ -12,7 +12,7 @@ from pathlib import Path, PurePosixPath
 import re
 import stat
 import threading
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Collection, Mapping
 
 from memorive.sessions.refinement import (
     validate_typed_refinement_item,
@@ -97,6 +97,7 @@ class LibraryProductController:
         *,
         include_synthetic_projection: bool = True,
         core_artifact_provider: Callable[[], list[Mapping[str, Any]]] | None = None,
+        core_job_artifact_provider: Callable[[str], list[Mapping[str, Any]]] | None = None,
     ):
         self.service = service
         self.control_store = control_store
@@ -106,6 +107,7 @@ class LibraryProductController:
         self.state_root = state_root.resolve()
         self.include_synthetic_projection = bool(include_synthetic_projection)
         self._core_artifact_provider = core_artifact_provider
+        self._core_job_artifact_provider = core_job_artifact_provider
         self.research_artifact_provider = None
         self._research_artifact_ids = set()
         self.state_root.mkdir(parents=True, exist_ok=True)
@@ -194,14 +196,10 @@ class LibraryProductController:
         self._validate_state(self._load())
 
     @once_per_projection
-    def _sync_core_artifacts(self) -> None:
-        """Refresh metadata-only Library rows from verified Core bindings."""
-
-        if self.include_synthetic_projection or self._core_artifact_provider is None:
-            return
-        source = self._core_artifact_provider()
-        if not isinstance(source, list):
-            raise LibraryProductError("LIBRARY_Core_PROVIDER_RESULT_INVALID")
+    def _core_product_entries(self, source: list[Mapping[str, Any]]) -> dict[str, dict[str, Any]]:
+        """One entry per product row of the provider, by artifact id: the row the library shows and the
+        job's binding (job, file, root, sha256, source document). A row whose binding is not well formed
+        stops the sync."""
         entries: dict[str, dict[str, Any]] = {}
         for raw in source:
             if not isinstance(raw, Mapping):
@@ -339,6 +337,52 @@ class LibraryProductController:
                 "projection_status": projection_status,
                 "source_error_code": source_error_code,
             }
+        return entries
+
+    def core_job_files(
+        self, job_id: str, kinds: Collection[str]
+    ) -> list[tuple[str, dict[str, Any], Path, bytes]]:
+        """The product files of one job whose artifact kind is in kinds, as (artifact id, record, path,
+        content): each read once and checked like read_core_artifact. Only this job's rows are built
+        (the provider is asked for this job alone when core_job_artifact_provider is given), and the
+        library's own index is left as it is. The records are copies, in the provider's order.
+        """
+        if self.include_synthetic_projection or self._core_artifact_provider is None:
+            entries = self.core_entries_by_artifact_id
+        else:
+            source = (
+                self._core_job_artifact_provider(job_id)
+                if self._core_job_artifact_provider is not None
+                else self._core_artifact_provider()
+            )
+            if not isinstance(source, list):
+                raise LibraryProductError("LIBRARY_Core_PROVIDER_RESULT_INVALID")
+            entries = self._core_product_entries(
+                [raw for raw in source if isinstance(raw, Mapping) and str(raw.get("job_id") or "") == job_id]
+            )
+        files = []
+        for artifact_id, entry in entries.items():
+            if entry["job_id"] != job_id or entry["artifact_kind"] not in kinds:
+                continue
+            path, data = self.read_core_entry_file(
+                entry,
+                root_field="artifact_root",
+                path_field="private_path",
+                sha256_field="content_sha256",
+                error_scope="ARTIFACT",
+            )
+            files.append((artifact_id, deepcopy(entry), path, data))
+        return files
+
+    def _sync_core_artifacts(self) -> None:
+        """Refresh metadata-only Library rows from verified Core bindings."""
+
+        if self.include_synthetic_projection or self._core_artifact_provider is None:
+            return
+        source = self._core_artifact_provider()
+        if not isinstance(source, list):
+            raise LibraryProductError("LIBRARY_Core_PROVIDER_RESULT_INVALID")
+        entries = self._core_product_entries(source)
         child_entries = dict(entries)
         grouped: dict[str, dict[str, list[tuple[str, dict[str, Any]]]]] = {}
         for child_id, entry in child_entries.items():

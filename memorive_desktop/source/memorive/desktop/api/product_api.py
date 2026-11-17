@@ -233,6 +233,7 @@ class ProductApi(
                 self._state_dir / "library",
                 include_synthetic_projection=test_fixture_mode,
                 core_artifact_provider=self._core_products.rows,
+                core_job_artifact_provider=lambda job_id: self._core_products.rows(job_id),
             )
             sessions_module = importlib.import_module("memorive.sessions.controller")
             if session_visible_ui_reader is None:

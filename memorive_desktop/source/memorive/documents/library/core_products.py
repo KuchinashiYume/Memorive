@@ -31,19 +31,19 @@ class CoreProducts:
         self.write_json_file = write_json_file
         self.is_reparse_point = is_reparse_point
 
-    def rows(self) -> list[dict[str, Any]]:
-        """Project every job independently so one legacy defect cannot fail the page."""
+    def rows(self, job_id: str | None = None) -> list[dict[str, Any]]:
+        """Project every job (or only job_id) independently so one legacy defect cannot fail the page."""
 
         rows: list[dict[str, Any]] = []
-        for core_job in self.job_rows():
+        for core_job in self.job_rows(job_id):
             try:
                 rows.extend(self.rows_for_jobs([core_job]))
             except (OSError, RuntimeError, ValueError) as error:
                 rows.append(self.unavailable_row(core_job, error))
         return rows
 
-    def job_rows(self) -> list[dict[str, Any]]:
-        """Return durable, successfully delivered Core products.
+    def job_rows(self, only_job_id: str | None = None) -> list[dict[str, Any]]:
+        """Return durable, successfully delivered Core products (of every job, or of only_job_id).
 
         Current Task intentionally retains completed cards for only a short UI
         window. Library is a durable product index and must therefore enumerate
@@ -62,6 +62,8 @@ class CoreProducts:
             job_id = str(status.get("job_id") or "")
             if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,191}", job_id):
                 raise RuntimeError("Core_JOB_ID_INVALID")
+            if only_job_id is not None and job_id != only_job_id:
+                continue
             job = self.service.call("get_job", {"job_id": job_id})
             bindings = job.get("artifact_bindings") or []
             if not isinstance(bindings, list) or not bindings:

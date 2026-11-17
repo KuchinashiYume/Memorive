@@ -152,6 +152,45 @@ def test_a_file_the_index_refuses_is_reported_and_the_rest_are_added(library, pa
     assert result["failures"] == [{"id": paper.ids["CORE_ANALYSIS"], "code": "INDEX_FAILED"}]
 
 
+def test_a_connected_device_reads_only_its_job(tmp_path, paper):
+    """The status poll runs every second: it builds and reads its own job's files, not the whole library."""
+    asked = []
+
+    def one_job(job_id):
+        asked.append(job_id)
+        return [row for row in paper.rows if row["job_id"] == job_id]
+
+    library = LibraryProductController(
+        service=None, control_store=ControlStore(tmp_path / "ui"), contract_root=CONTRACTS,
+        fixture_root=tmp_path / "unused", state_root=tmp_path / "library", include_synthetic_projection=False,
+        core_artifact_provider=lambda: pytest.fail("the whole library was read"), core_job_artifact_provider=one_job)
+    results = job_results(library, JOB)
+    assert [item["kind"] for item in results] == ["CORE_CARD", "CORE_ANALYSIS"] and asked == [JOB]
+
+
+def test_the_rows_of_one_job_ask_the_service_for_that_job_only(tmp_path):
+    from memorive.documents.library.core_products import CoreProducts
+
+    calls = []
+
+    class Service:
+        def call(self, method, params):
+            calls.append((method, params.get("job_id")))
+            if method == "list_jobs":
+                return {"jobs": [{"job_id": f"job-{n}", "job_type": "memorive-core"} for n in range(3)]}
+            return {"job_id": params["job_id"], "control_state": "SUCCEEDED", "artifact_bindings": [{"artifact_id": "x"}]}
+
+    def write_json_file(path, value):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(value), encoding="utf-8")
+
+    products = CoreProducts(service=Service(), profile_path=lambda name: tmp_path / name, state_dir=tmp_path / "state",
+                            write_json_file=write_json_file, is_reparse_point=lambda path: False)
+    rows = products.rows("job-1")         # the job folder is missing: one row saying the files cannot be shown
+    assert [row["job_id"] for row in rows] == ["job-1"]
+    assert calls == [("list_jobs", None), ("get_job", "job-1"), ("get_job", "job-1")]
+
+
 def test_a_connected_device_gets_the_card_and_analysis_of_its_job(library, paper):
     results = {item["kind"]: item for item in job_results(library, JOB)}
     assert set(results) == {"CORE_CARD", "CORE_ANALYSIS"}

@@ -22,11 +22,8 @@ RESULT_KINDS = {'CORE_CARD', 'CORE_ANALYSIS'}
 def job_results(library, job_id):
     """The card and analysis a processing job produced, as markdown for the connected device."""
     results = []
-    for artifact_id, record in library.core_artifacts().items():
-        if record['job_id'] != job_id or record['artifact_kind'] not in RESULT_KINDS:
-            continue
-        # Read once; the library checks these bytes against the hash the job recorded.
-        path, raw = library.read_core_artifact(artifact_id)
+    # Only this job's files are built and read; the library checks the bytes against the hash the job recorded.
+    for artifact_id, record, path, raw in library.core_job_files(job_id, RESULT_KINDS):
         text = raw.decode('utf-8-sig')
         if path.suffix.lower() == '.json':
             text = '```json\n' + json.dumps(json.loads(text), ensure_ascii=False, indent=2) + '\n```'
