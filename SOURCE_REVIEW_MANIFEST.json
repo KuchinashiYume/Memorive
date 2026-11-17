@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "1fae0cab5c7673890326d661afba6237e53e7592dc8c0a105d9cdacce65a1533",
-      "bytes": 2704972
+      "sha256": "1d6403640b418004928e8b73a082378e38a43fa0c2097e4aed1c2ee5945cb9d5",
+      "bytes": 2701731
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "caf0de09d5af1be7068d88dc62be903b6aa4acb5b46069a9537d46304f73a859",
+      "sha256": "828a28b8182aad75ccda5c64e3021fd255866046af67e4b536d36a1ed9bbaf50",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "94466f4dbb9fd57d3cc636eb2f71c44efa24091b4ebdf3d58c338b706c96632b",
+      "sha256": "255cd5d52ed56ac0b8d9d31e1b497cad88ab568a7a08fedbe5db74574217cd25",
       "bytes": 275229
     },
     {
@@ -4691,8 +4691,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.js",
-      "sha256": "3e56c797601ff0d6b11a75af574540348eb9183cda271d1a0cb0847d11c17c21",
-      "bytes": 113723
+      "sha256": "9c9903bcb7bdf33c936814c8f6667ff4b9478f39d957fdf52233573247c970c8",
+      "bytes": 113650
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/bridge.js",
@@ -4911,8 +4911,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/app.js",
-      "sha256": "f86a6afcdcf4989dac258495d2a3c6f2b756b6aa4f8d7839595015bf4789ff71",
-      "bytes": 361937
+      "sha256": "30abdd724443913f82fd3b13ab28e9573e6f15ba91433602ac290cf71ce8ce4e",
+      "bytes": 361730
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/content-language.js",
@@ -4976,8 +4976,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/product-bridge.js",
-      "sha256": "eafb1519f96365ec8d756db501a776adda13cc0bf4b203c40c1a499b7eadfef3",
-      "bytes": 5749
+      "sha256": "7b536f30c6fa4f67b5128feaaf72edeff2026864fd526749c901086ead8fd9cf",
+      "bytes": 2788
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/report-workflow.js",

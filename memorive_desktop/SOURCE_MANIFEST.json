@@ -437,8 +437,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "1fae0cab5c7673890326d661afba6237e53e7592dc8c0a105d9cdacce65a1533",
-      "bytes": 2704972
+      "sha256": "1d6403640b418004928e8b73a082378e38a43fa0c2097e4aed1c2ee5945cb9d5",
+      "bytes": 2701731
     },
     {
       "path": "product/desktop/console_expressions.py",

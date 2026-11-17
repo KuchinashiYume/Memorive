@@ -65,7 +65,6 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
   const fontBaselines = new WeakMap();
   const nativeTitleSources = new WeakMap();
   let activeRoute = 'home';
-  let requestSequence = 0;
   let assistantShowRequestCount = 0;
   let lastAssistantShowReceipt = null;
   let lastAssistantShowError = null;
@@ -570,15 +569,9 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     return inspectRoute(normalized);
   };
 
+  // The desktop service keeps the route, so the window can reopen there (shared/product-bridge.js).
   const persist = (route, source = 'integrated-navigation') => {
-    if (!window.pywebview || !window.pywebview.api || typeof window.pywebview.api.dispatch !== 'function') return;
-    const request = {
-      event_type: 'navigation.select',
-      payload: { route },
-      request_id: `desktop-ui-integrated-${Date.now()}-${++requestSequence}`,
-      source,
-    };
-    Promise.resolve(window.pywebview.api.dispatch(request)).catch(() => undefined);
+    window.__Desktop_PRODUCT_BRIDGE__.dispatch('navigation.select', { route }, source).catch(() => undefined);
   };
 
   const runDesktopAssistantAction = (actionId = 'SHOW_DESKTOP_ASSISTANT') => {

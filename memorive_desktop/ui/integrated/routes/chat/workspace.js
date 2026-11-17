@@ -73,7 +73,7 @@
     if(research)name='settings';
     window.__Desktop_INTEGRATED_APP__?.activate(name);
     if(research)q('#memo-settings-category')?.click();
-    void window.pywebview?.api?.dispatch?.({event_type:'navigation.select',payload:{route:name},request_id:'desktop-ui-memo-nav-'+crypto.randomUUID(),source:'memo-workspace'}).catch(fail);
+    void window.__Desktop_PRODUCT_BRIDGE__.dispatch('navigation.select',{route:name},'memo-workspace').catch(fail);
   }
   function dialog(title){
     const d=create('dialog',null,'memo-dialog'),
