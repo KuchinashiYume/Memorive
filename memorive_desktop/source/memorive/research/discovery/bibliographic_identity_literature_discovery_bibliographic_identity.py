@@ -487,26 +487,9 @@ def _dedupe_conflict_specs(specs: Iterable[Mapping[str, Any]]) -> list[dict[str,
     return sorted(unique.values(), key=lambda item: canonical_json(item))
 
 
-def resolve_identity_batch_with(
-    observations: Sequence[Mapping[str, Any]],
-    evidence_registry: Mapping[str, Mapping[str, Any]],
-    *,
-    version_links: Sequence[Mapping[str, Any]] = (),
-    hints: Sequence[Mapping[str, Any]] = (),
-    verify,
-    claim_from_observation,
-    producer: str,
-    is_synthetic: bool,
-) -> dict[str, Any]:
-    """Resolve one deterministic offline batch without performing any I/O.
-
-    The algorithm shared by literature discovery (resolve_identity_batch below) and the research
-    runtime (identity.py). What differs between them comes in: verify
-    checks one observation against the evidence registry, claim_from_observation reads its
-    identity claim, producer is written into every record, and is_synthetic marks the candidate
-    records. When all claims of an identifier carry optional_metadata (only runtime claims do), they
-    conflict only where a non-empty title, author list or year differs."""
-
+def _verified_claims(observations, verify, evidence_registry, claim_from_observation):
+    """Copy the observations, refuse a repeated object id, verify each against the evidence registry and
+    read its identity claim; the claims, also by observation ref."""
     copied_observations = [copy.deepcopy(dict(item)) for item in observations]
     object_ids = [str(item.get("object_id", "")) for item in copied_observations]
     if len(object_ids) != len(set(object_ids)):
@@ -516,6 +499,13 @@ def resolve_identity_batch_with(
 
     claims = [claim_from_observation(item) for item in copied_observations]
     claims_by_ref = {claim["observation_ref"]: claim for claim in claims}
+    return copied_observations, object_ids, claims, claims_by_ref
+
+
+def _identifier_conflicts(claims):
+    """Conflicts found in the claims themselves: invalid or conflicting identifiers, the same identifier
+    with different metadata, and a pivot identifier (arXiv, PMID, DOI) that disagrees on its second
+    identifier. Also the claims by identifier token, and the refs that are conflicted or unresolved."""
     conflict_specs: list[dict[str, Any]] = []
 
     for claim in claims:
@@ -577,7 +567,12 @@ def resolve_identity_batch_with(
         for claim in claims
         if claim["identity_status"] == "UNRESOLVED"
     }
+    return conflict_specs, by_token, conflicted_refs, unresolved_refs
 
+
+def _bibliographic_identities(object_ids, by_token, conflicted_refs, unresolved_refs, claims_by_ref, producer):
+    """Group the observations that share an identifier; each group is one manifestation with its
+    bibliographic identity (verified, conflicted or unresolved)."""
     observation_dsu = _DisjointSet(object_ids)
     for token_claims in by_token.values():
         eligible_refs = sorted(
@@ -652,7 +647,13 @@ def resolve_identity_batch_with(
         }
         for ref in ref_group:
             observation_to_manifestation[ref] = manifestation_id
+    return manifestation_interim, observation_to_manifestation, bibliographic_identities
 
+
+def _version_links(manifestation_interim, version_links, observation_to_manifestation, conflict_specs):
+    """Link manifestations into works: arXiv versions of one paper, and the explicit version links whose
+    two observations are known and whose roles fit the relation; links that do not fit, and works with
+    more than one explicit anchor, become conflicts."""
     manifestation_ids = sorted(manifestation_interim)
     work_dsu = _DisjointSet(manifestation_ids)
     version_edges: list[dict[str, Any]] = []
@@ -754,7 +755,12 @@ def resolve_identity_batch_with(
         for member in ordered[1:]:
             work_dsu.union(ordered[0], member)
     conflict_specs = _dedupe_conflict_specs([*conflict_specs, *version_conflict_specs])
+    return manifestation_ids, work_dsu, version_edges, version_conflict_specs, conflict_specs
 
+
+def _work_clusters(work_dsu, version_edges, version_conflict_specs, manifestation_interim, conflict_specs, producer):
+    """One work cluster per group of linked manifestations, with its version edges, anchor and identity
+    status."""
     component_by_manifestation: dict[str, list[str]] = {}
     for component in work_dsu.groups():
         for manifestation_id in component:
@@ -839,7 +845,11 @@ def resolve_identity_batch_with(
         work_clusters.append(cluster)
         for manifestation_id in component:
             manifestation_to_cluster[manifestation_id] = cluster_id
+    return work_clusters, manifestation_to_cluster
 
+
+def _manifestation_records(work_clusters, manifestation_ids, manifestation_interim, manifestation_to_cluster, producer):
+    """The manifestation records, each with its work cluster and the version edges that touch it."""
     work_clusters_by_id = {item["work_cluster_id"]: item for item in work_clusters}
     manifestations: list[dict[str, Any]] = []
     for manifestation_id in manifestation_ids:
@@ -870,7 +880,12 @@ def resolve_identity_batch_with(
             "source_observations_preserved": True,
         })
         manifestations.append(manifestation)
+    return manifestations
 
+
+def _conflicts_and_reviews(observation_to_manifestation, manifestation_to_cluster, conflict_specs, producer, claims):
+    """The identity conflict records and the review queue: one review per conflict, and one per pair of
+    work clusters whose claims share a title."""
     observation_to_cluster = {
         ref: manifestation_to_cluster[manifestation_id]
         for ref, manifestation_id in observation_to_manifestation.items()
@@ -970,7 +985,12 @@ def resolve_identity_batch_with(
     for item in review_queue:
         for cluster_id in item["candidate_work_cluster_refs"]:
             reviews_by_cluster[cluster_id].append(item["review_item_id"])
+    return observation_to_cluster, identity_conflicts, review_queue, reviews_by_cluster
 
+
+def _candidate_projections(bibliographic_identities, manifestations, work_clusters, claims_by_ref, reviews_by_cluster, is_synthetic):
+    """One candidate record per work cluster: whether it may be configured, its origin and the review
+    items that hold it."""
     identities_by_id = {item["object_id"]: item for item in bibliographic_identities}
     manifestations_by_id = {item["manifestation_id"]: item for item in manifestations}
     candidate_projections: list[dict[str, Any]] = []
@@ -1028,7 +1048,12 @@ def resolve_identity_batch_with(
             "is_synthetic": is_synthetic,
         })
         candidate_projections.append(projection)
+    return candidate_projections
 
+
+def _hint_decisions(hints):
+    """Record each hint as unverified: a hint never creates a candidate, only an exact source observation
+    does. A hint of an unknown kind stops the batch."""
     hint_decisions: list[dict[str, Any]] = []
     for hint in sorted((copy.deepcopy(dict(item)) for item in hints), key=canonical_json):
         hint_id = str(hint.get("hint_id", ""))
@@ -1044,6 +1069,60 @@ def resolve_identity_batch_with(
             "candidate_card_eligible": False,
             "reason_code": "EXACT_SOURCE_OBSERVATION_REQUIRED",
         })
+    return hint_decisions
+
+
+def resolve_identity_batch_with(
+    observations: Sequence[Mapping[str, Any]],
+    evidence_registry: Mapping[str, Mapping[str, Any]],
+    *,
+    version_links: Sequence[Mapping[str, Any]] = (),
+    hints: Sequence[Mapping[str, Any]] = (),
+    verify,
+    claim_from_observation,
+    producer: str,
+    is_synthetic: bool,
+) -> dict[str, Any]:
+    """Resolve one deterministic offline batch without performing any I/O.
+
+    The algorithm shared by literature discovery (resolve_identity_batch below) and the research
+    runtime (identity.py). What differs between them comes in: verify
+    checks one observation against the evidence registry, claim_from_observation reads its
+    identity claim, producer is written into every record, and is_synthetic marks the candidate
+    records. When all claims of an identifier carry optional_metadata (only runtime claims do), they
+    conflict only where a non-empty title, author list or year differs."""
+
+    (copied_observations, object_ids, claims, claims_by_ref) = _verified_claims(
+        observations, verify, evidence_registry, claim_from_observation
+    )
+    conflict_specs, by_token, conflicted_refs, unresolved_refs = _identifier_conflicts(claims)
+
+    (manifestation_interim, observation_to_manifestation, bibliographic_identities) = _bibliographic_identities(
+        object_ids, by_token, conflicted_refs, unresolved_refs, claims_by_ref, producer
+    )
+
+    (manifestation_ids, work_dsu, version_edges, version_conflict_specs, conflict_specs) = _version_links(
+        manifestation_interim, version_links, observation_to_manifestation, conflict_specs
+    )
+
+    (work_clusters, manifestation_to_cluster) = _work_clusters(
+        work_dsu, version_edges, version_conflict_specs, manifestation_interim, conflict_specs, producer
+    )
+
+    manifestations = _manifestation_records(
+        work_clusters, manifestation_ids, manifestation_interim, manifestation_to_cluster, producer
+    )
+
+    (observation_to_cluster, identity_conflicts, review_queue, reviews_by_cluster) = _conflicts_and_reviews(
+        observation_to_manifestation, manifestation_to_cluster, conflict_specs, producer, claims
+    )
+
+    candidate_projections = _candidate_projections(
+        bibliographic_identities, manifestations, work_clusters, claims_by_ref, reviews_by_cluster,
+        is_synthetic
+    )
+
+    hint_decisions = _hint_decisions(hints)
 
     result: dict[str, Any] = {
         "schema_version": "discovery.service_contracts.identity-resolution-batch.0.1",

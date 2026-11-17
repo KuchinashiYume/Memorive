@@ -6067,8 +6067,8 @@
     },
     {
       "path": "source/memorive/research/discovery/bibliographic_identity_literature_discovery_bibliographic_identity.py",
-      "sha256": "49211049677b271de596ba78de2b3634c48f2d064a47b1fda15a3344f6b089ec",
-      "bytes": 52185
+      "sha256": "9647bcaae49da5fbb2f5b1e5173a8d4d8f4d3ce9067ca1a3f75af677bd15861f",
+      "bytes": 56684
     },
     {
       "path": "source/memorive/research/discovery/connector_framework.py",
