@@ -383,12 +383,8 @@
    }
  });
  for(const event of ['input','change'])page.addEventListener(event,e=>e.stopPropagation());
- const ready=setInterval(()=>{
-   const bridge=window.__Desktop_SETTINGS_BRIDGE__;
-   if(!bridge?.registerSaveParticipant)return;
-   clearInterval(ready);
-   bridge.registerSaveParticipant('research-weights',{isDirty:()=>dirty,save,discard,validate:valid});
- },150);
+ // settings.js loads earlier in the page and publishes its bridge as it loads.
+ window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('research-weights',{isDirty:()=>dirty,save,discard,validate:valid});
  window.__MEMO_WEIGHTS__={load,save,discard,inspect:()=>({scope,dirty,draft,mode,codeError,valid:valid()})};
 })();
 

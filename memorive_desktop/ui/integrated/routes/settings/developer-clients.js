@@ -191,9 +191,7 @@
    q('#memo-automation-details').open=true;
  };
  function init(){
-  const bridge=window.__Desktop_SETTINGS_BRIDGE__;
-  if(!bridge?.registerSaveParticipant||!q('#memo-dev-clients'))return false;
-  bridge.registerSaveParticipant('developer-access',{isDirty:dirty,validate:valid,save,discard});
+  window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('developer-access',{isDirty:dirty,validate:valid,save,discard});
   q('#memo-dev-add').onclick=()=>editClient();
   q('#memo-dev-cancel').onclick=()=>{
     drafts.delete(editing);
@@ -231,9 +229,8 @@
   q('#memo-agent-config-details').addEventListener('toggle',()=>{if(q('#memo-agent-config-details').open)load().catch(fail);});
   q('#memo-automation-details').addEventListener('toggle',()=>{if(q('#memo-automation-details').open)load().catch(e=>fail(e,'automation'));});
   load().catch(fail);
-  return true;
  }
- const timer=setInterval(()=>{if(init())clearInterval(timer);},180);
+ init();   // settings.js, loaded earlier, has published its bridge; the panel's markup is in the page
  window.__MEMO_DEVELOPER__=Object.freeze({load,save,discard,openClients,openAutomation,inspect:()=>({loaded:!!data,dirty:dirty(),editing,clients:data?.clients.length||0,api_version:data?.api_version})});
 })();
 
