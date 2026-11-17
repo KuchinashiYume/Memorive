@@ -57,6 +57,8 @@ SKIPPED_IN_DRAWINGS = {"module number"}
 TEXT = {".py", ".js", ".mjs", ".cjs", ".html", ".htm", ".css", ".json", ".md", ".txt", ".spec", ".iss", ".ps1", ".bat",
         ".cmd", ".toml", ".cfg", ".ini", ".yaml", ".yml", ".xml", ".sh", ".cs", ".tmpl", ".svg", ""}
 MANIFEST_PATH_LINE = re.compile(r'"(path|source|destination)"\s*:')
+# Script hashes in a page's Content-Security-Policy are random letters and digits ("sha256-...rE1Tz...").
+CONTENT_HASH = re.compile(r"sha(?:256|384|512)-[A-Za-z0-9+/]+=*")
 
 
 def word_patterns(path: Path) -> list[tuple[str, re.Pattern]]:
@@ -137,6 +139,7 @@ def main() -> int:
             for number, line in enumerate(handle, 1):
                 if manifest and MANIFEST_PATH_LINE.search(line):
                     continue  # manifests repeat every file name; the names themselves are checked above
+                line = CONTENT_HASH.sub(lambda hit: " " * len(hit.group()), line)
                 for kind, pattern in patterns:
                     if suffix in DRAWING and kind in SKIPPED_IN_DRAWINGS:
                         continue

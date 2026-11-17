@@ -4026,8 +4026,8 @@
     },
     {
       "path": "memorive_desktop/tools/check_internal_codes.py",
-      "sha256": "cfffdb8a487ea5ab012ae743d9db4cbdd99483738a33cdb66f0dc5cc2c76703b",
-      "bytes": 8597
+      "sha256": "6884e9bf27b0b3356fd8730b8c2d56d8fd4f85f736194afd715129d6db62110d",
+      "bytes": 8854
     },
     {
       "path": "memorive_desktop/tools/historical_names.json",
