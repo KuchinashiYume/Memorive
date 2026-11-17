@@ -216,6 +216,10 @@ can ask again from the window.
 | Which files research may read: below the root, not through links, not in private folders; bundles added as attachments | `safe_path` in `memorive/research/workspace/evidence.py`; `load_bundle` in `skill_bridge.py` | `characterize/test_path_checks.py` |
 | What happens to a question that was running when the app restarted | `_recover_after_restart` and `finish_answers_received_before_restart` in `memorive/research/workspace/service.py`; `stored_result` in `memorive/models/execution/runs.py` | `test_research_qa_flow.py`, `test_model_execution.py` |
 | The name an exam's scores are saved under, and when a saved score is reused | `EXECUTOR_REF` of each exam executor; `ExamScoreHistory` in `memorive/exams/score_history.py`; `build_cache_binding` in `memorive/exams/outcomes.py` | `test_scores.py` |
+| What a window page shows and how it is laid out; adding a route, a setting, a dialog or a text | `ui/integrated/` (one folder per route under `routes/`, shared parts under `shared/`); `ui/README.md` says how | `tools/build_pages.py`, then the tests that read the page sources through `tests/page_sources.py` and `test_library_inbox_navigation.py`, `test_lifecycle_surfaces.py`, `test_window_close_and_caption.py` |
+| A method the window calls with `window.pywebview.api.call` | its method set in `memorive/desktop/api/common.py` and the controller of its area; the page side is the route's `bridge.js` | the area's tests, `test_lifecycle_surfaces.py` |
+| A name, method or event of the page that the Python code uses | "From Python to the page" in `ui/README.md` lists them with their Python callers | the whole suite |
+| Colours, type sizes, the window frame shared by all routes | `ui/integrated/shared/tokens.css`, `typography.css`, `shared/frame/`, `shared/window-frame.js` | `tools/build_pages.py`, then look at the window in all three languages |
 
 Run the whole suite before you finish; the files above are the quick check while you work.
 

@@ -4616,8 +4616,8 @@
     },
     {
       "path": "memorive_desktop/ui/README.md",
-      "sha256": "b5b64b93fbf2da0a83eac5dd543f27a11f6b693dd5a893aa73a0bfbca49bd62c",
-      "bytes": 2647
+      "sha256": "608453f3324580e590c3953ede45e198f8c205e3ada842b2055019ec3a58112b",
+      "bytes": 15436
     },
     {
       "path": "memorive_desktop/ui/assistant/assistant.css",
@@ -5051,13 +5051,13 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "a14e82f8ae0013548cc83081eb907f918b6addbe03a8bcee5db987f63d3a92a3",
-      "bytes": 27262
+      "sha256": "c7f74138bd7031aa52a56e06c3f90a2fec638ecb5240abbb9bd5f0a410fad01d",
+      "bytes": 28317
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
-      "sha256": "8963654dc0e4c89638111de371e5073c9b943215960fe97c04554234cca189ce",
-      "bytes": 4393
+      "sha256": "1944d9a3b2c6491c8a5a0cc8d1a7db5c12d11bb80f41225120bcfdaa4f1b24b6",
+      "bytes": 4576
     },
     {
       "path": ".claude/skills/memorive-development/SKILL.md",
