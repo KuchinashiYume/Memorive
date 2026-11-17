@@ -16,6 +16,7 @@
   pricing.py           a call's price estimate; price_registry.py and .json hold public prices,
                        provider_aliases.py the provider's own compatibility names
   output_limits.py     how large a reply may be
+  answer_styles.py     how a research answer is worded (the style the user picks)
   gateway/             model transport for the document and research work: providers, routing,
                        prompts and their files, caches, cost, the local model components
   local/               local model servers (Ollama and the like) found and checked for the window

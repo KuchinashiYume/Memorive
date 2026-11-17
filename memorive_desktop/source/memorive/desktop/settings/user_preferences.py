@@ -8,7 +8,7 @@ import unicodedata
 from pathlib import Path
 from threading import RLock
 from memorive.research.common import read, write, sealed
-from memorive.desktop.settings.answer_styles import DEFAULT_STYLE,validate_style
+from memorive.models.answer_styles import DEFAULT_STYLE,validate_style
 
 _LOCK = RLock()
 AVATAR_BYTES = 384 * 1024  # base64 + envelope remains below the 1 MiB IPC frame.

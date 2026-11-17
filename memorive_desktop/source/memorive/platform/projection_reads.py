@@ -1,4 +1,7 @@
-"""Coalesce duplicate source reads within one UI query, never across queries."""
+"""Coalesce duplicate source reads within one UI query, never across queries.
+
+projection_request wraps a query method; the work log and the library product controllers use it.
+"""
 from contextvars import ContextVar
 from functools import wraps
 

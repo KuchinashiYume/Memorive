@@ -54,9 +54,8 @@ transport (`memorive/models`, `memorive/desktop/settings`), and from all of them
 the shared basics (`memorive/platform`: jobs, run ledgers, decision records and the rest). A few
 places still reach across areas; these are the places to untangle when that code is restructured:
 
-- `memorive/desktop/settings` serves as a shared base for lower areas: research (the AI briefing's
-  answer styles, the metadata transport and literature sources, the answer versions), the exams
-  (settings contracts, the score store) and the model gateway (answer styles).
+- `memorive/desktop/settings` still serves lower areas in two places: research discovery uses its
+  metadata transport and literature sources, and the exams keep scores through its store.
 - `memorive/models/gateway/routing_advisory.py` uses the exam scoring
   (`memorive/exams/evaluation/dynamic_routing_advisory.py`).
 - The refinement decision receipts (`memorive/sessions/refinement/decision.py`) take

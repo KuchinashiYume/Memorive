@@ -1,4 +1,9 @@
-"""Versioned, controlled expression preferences. Never changes tools or model tiers."""
+"""How a research answer is worded: versioned, controlled expression preferences (the user picks a
+style in settings). Never changes tools or model tiers.
+
+Used by the settings' user preferences, the research workspace's answer versions, the AI briefing's
+prompt and the gateway's research prompt cache.
+"""
 import hashlib,json
 
 COMMON_VERSION='MemoAnswerExpression-v1'
