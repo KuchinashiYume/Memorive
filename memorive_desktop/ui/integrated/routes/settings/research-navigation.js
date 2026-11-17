@@ -1,4 +1,7 @@
-/* Local navigation and shared controls. Workspace actions own all saved data. */
+/* The research Q&A part of the settings page (#memo-settings-page): switching between its categories, and its model
+   and agent pickers. Publishes window.__MEMO_SETTINGS_R2__ (show, renderAgentOptions, renderModelOptions,
+   refreshModelPicker, inspect), through which routes/chat/workspace.js fills the pickers. What is chosen is saved
+   by the research workspace's own actions. */
 (() => {
   'use strict';
   const page = document.getElementById('memo-settings-page');

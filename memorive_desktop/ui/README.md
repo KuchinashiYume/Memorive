@@ -45,7 +45,9 @@ Every source file starts with a comment that says what it is for and who uses it
 
 The settings page has a category list on the left (`<button class="desktop-settings-category" data-category="...">` in `routes/settings/markup.html`) and one panel per category (`data-panel="..."`). `routes/settings/model-picker.js` switches between them.
 
-A panel that saves its own data registers with the page's Save and Revert buttons:
+A panel with much code of its own gets its own script next to `settings.js`, as the browser companion
+(`browser-companion.js`) and the browser sites (`browser-sites.js`) have. A panel that saves its own data
+registers with the page's Save and Revert buttons:
 
 ```js
 window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('my-panel', {
@@ -99,18 +101,22 @@ as a request number or a receipt event.
 
 `ProductApi.call` (`memorive/desktop/api/product_api.py`) passes the method to the part of the app that owns it. The method names start with their area (`settings.`, `inbox.`, `current_task.`, `messages.`, `sessions.`, `library.`, `work_log.`, `accounting.`, `local_models.`, `memo.` for research Q&A, ...); the names each area accepts are listed in `memorive/desktop/api/common.py`. To add a method, add it to its set there and to the controller that runs it.
 
-A few desktop actions are their own methods of `ProductApi`, because they open a file picker, Explorer or another window:
+The window's own actions are methods of `ProductApi` that the page calls by name,
+`window.pywebview.api.<method>(...)`: they open a file picker, Explorer or another window, or work on the window
+itself. The settings scripts call them through the settings bridge's `nativeAction`.
 
-| Method | File in `memorive/desktop/api/` | Used by |
+| File in `memorive/desktop/api/` | Methods | Used by |
 | --- | --- | --- |
-| `get_control_state`, `persist_panel_state` | `window.py` | `shared/app.js` |
-| `dispatch` (`navigation.select`) | `product_api.py` | `shared/product-bridge.js` |
-| `assistant_shortcut`, `assistant_ui_signal` | `assistant.py` | `shared/app.js`, `shared/decorations.js` |
-| `pick_inbox_files`, `get_inbox_preview`, `open_inbox_item`, `locate_inbox_item`, `pick_research_files` | `inbox_files.py` | `routes/inbox/bridge.js`, `routes/chat/workspace.js` |
-| `memo_agent_config`, `memo_desktop_apps`, `memo_desktop_handoff_action`, `memo_open_evidence`, `memo_pick_agent_app`, `memo_pick_materials`, `memo_pick_vault`, `memo_prepare_desktop_handoff` | `research_memo.py` | `routes/chat/workspace.js`, `routes/settings/research-connections.js` |
-| `get_console_connection`, `set_console_connection` | `settings_page.py` | `routes/settings/settings.js` |
-| `open_structure_original` | `artifacts.py` | `shared/structure-review.js` |
-| `open_developer_sdk` | `links.py` | `routes/settings/developer-clients.js` |
+| `window.py` | `get_control_state`, `persist_panel_state`, `reset_panel_layout`, `get_window_state`, `window_action`, `update_window_regions`, `prepare_window_close`, `commit_window_close`, `cancel_window_close` | `shared/app.js`, `shared/window-chrome.js`, `routes/settings/settings.js` |
+| `product_api.py`, `page_events.py` | `dispatch` (`navigation.select`), `core_event_poll` | `shared/product-bridge.js` |
+| `assistant.py` | `assistant_shortcut`, `assistant_ui_signal` | `shared/app.js`, `shared/decorations.js`, `routes/settings/settings.js` |
+| `notifications.py` | `test_windows_notification` | `routes/settings/settings.js` |
+| `inbox_files.py` | `pick_inbox_files`, `get_inbox_preview`, `open_inbox_item`, `locate_inbox_item`, `pick_research_files` | `routes/inbox/bridge.js`, `routes/chat/workspace.js` |
+| `research_memo.py` | `memo_agent_config`, `memo_desktop_apps`, `memo_desktop_handoff_action`, `memo_open_evidence`, `memo_pick_agent_app`, `memo_pick_materials`, `memo_pick_vault`, `memo_prepare_desktop_handoff` | `routes/chat/workspace.js`, `routes/settings/research-connections.js` |
+| `artifacts.py` | `open_library_core_artifact`, `open_library_refinement_artifact`, `locate_library_core_source`, `locate_library_refinement_artifact`, `open_structure_original` | `routes/library/bridge.js`, `shared/structure-review.js` |
+| `settings_page.py` | `api_call_readiness`, `get_console_connection`, `set_console_connection`, `pick_settings_directory`, `open_settings_log_directory`, `clear_temporary_cache`, `test_network_connection`, `test_external_library`, `import_redacted_settings_file`, `export_redacted_settings_file`, `export_support_bundle_file`, `export_cli_template_file`, `record_settings_save_receipt` | `routes/settings/settings.js` |
+| `browser_companion.py` | `browser_companion_status`, `install_browser_companion`, `open_browser_companion_folder`, `open_browser_companion_site`, `save_browser_companion_sites`, `run_browser_companion_sync`, `run_browser_companion_full_sync`, `run_browser_companion_reload`, `run_browser_companion_test_read`, `sync_browser_sessions_from_downloads`, `import_browser_sessions_file` | `routes/settings/browser-companion.js`, `routes/settings/browser-sites.js`, `routes/sessions/bridge.js` |
+| `links.py` | `open_project_page`, `open_local_help`, `open_developer_sdk` | `routes/settings/settings.js`, `routes/settings/developer-clients.js` |
 
 A script that calls Python waits for the `pywebviewready` event when `window.pywebview.api` is not there yet.
 
