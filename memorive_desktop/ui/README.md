@@ -103,7 +103,7 @@ as a request number or a receipt event.
 
 The window's own actions are methods of `ProductApi` that the page calls by name,
 `window.pywebview.api.<method>(...)`: they open a file picker, Explorer or another window, or work on the window
-itself. The settings scripts call them through the settings bridge's `nativeAction`.
+itself. `settings.js` and `browser-companion.js` call them through the settings bridge's `nativeAction`.
 
 | File in `memorive/desktop/api/` | Methods | Used by |
 | --- | --- | --- |
