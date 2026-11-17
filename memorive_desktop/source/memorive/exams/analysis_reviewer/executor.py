@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -627,6 +628,34 @@ def _merge_exact_rows(
     return {"case_reviews": [row_map[case_id] for case_id in order]}
 
 
+@dataclass
+class _AnalysisReviewerExamRun:
+    """One run of the analysis reviewer exam (QualityAnalysisReviewerExamSuccessorExecutor.execute).
+
+    The plan, the run folder and the call counters are set when the run starts; _run_reviewer_forms
+    sends forms A and B to the model under test, scores each reply and runs the repair rounds;
+    _score_reviewer_exam combines the two forms, decides the verdict, writes the evidence and builds the
+    result. A failure is reported from the plan and counters as they are."""
+
+    # The run as planned.
+    target: Mapping[str, Any]
+    context: Mapping[str, Any]
+    structured_chat: Callable[..., Mapping[str, Any]]
+    plan: Mapping[str, Any]
+    requested_model: Any
+    started: float
+    run_id: str
+    run_root: Path
+    state: dict[str, Any]
+    # The sample, and per form the replies, scores and repair rounds.
+    sample: Any = None
+    responses: dict[str, dict[str, Any]] = field(default_factory=dict)
+    initial_scores: dict[str, dict[str, Any]] = field(default_factory=dict)
+    final_scores: dict[str, dict[str, Any]] = field(default_factory=dict)
+    repair_records: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    repair_penalties: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+
+
 class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecutor):
     """Independent A4 Analysis Reviewer executor with local-only Gold custody."""
 
@@ -946,7 +975,10 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
                 "accepted_at": datetime.now(timezone.utc).isoformat(),
             },
         )
-        state = {
+        run = _AnalysisReviewerExamRun(
+            target=target, context=context, structured_chat=structured_chat, plan=plan,
+            requested_model=requested_model, started=started, run_id=run_id, run_root=run_root,
+            state={
             "request_attempts": 0,
             "provider_calls": 0,
             "external_model_calls": 0,
@@ -954,389 +986,18 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
             "external_process_launches": 0,
             "estimated_cost_cny": 0.0,
             "token_usage": {"prompt_tokens": 0, "completion_tokens": 0},
-        }
+        },
+        )
         try:
-            sample = self._load_sample(context)
-            responses: dict[str, dict[str, Any]] = {}
-            initial_scores: dict[str, dict[str, Any]] = {}
-            final_scores: dict[str, dict[str, Any]] = {}
-            repair_records: dict[str, list[dict[str, Any]]] = {"A": [], "B": []}
-            repair_penalties: dict[str, list[dict[str, Any]]] = {"A": [], "B": []}
-            for form_id in ("A", "B"):
-                form = sample["forms"][form_id]
-                gold = sample["golds"][form_id]
-                schema = sample["schemas"][form_id]
-                request = {
-                    "phase": "INITIAL",
-                    "system": sample["prompt"]["system"],
-                    "user": sample["prompt"]["user_template"],
-                    "form": form,
-                    "output_schema": schema,
-                }
-                request["request_payload_hash"] = canonical_sha256(request)
-                response = self._call(
-                    run_id=run_id,
-                    run_root=run_root,
-                    state=state,
-                    target=target,
-                    request=request,
-                    schema=schema,
-                    structured_chat=structured_chat,
-                    call_kind=f"FORM_{form_id}_INITIAL",
-                )
-                normalization = core_v2.normalize_claim_pointer_leaves(form, response)
-                response = deepcopy(dict(normalization["normalized_response"]))
-                audit = core_v2.audit_response(form, response, schema)
-                if not audit.get("schema_valid") or not audit.get("exact_case_set_valid"):
-                    raise ValueError("ANALYSIS_REVIEWER_INITIAL_RESPONSE_NOT_SCOREABLE")
-                score = _score_form_successor(
-                    form=form,
-                    gold=gold,
-                    response=response,
-                    output_schema=schema,
-                    scoring_protocol=sample["scoring"],
-                )
-                initial_scores[form_id] = deepcopy(score)
-                unchanged_surface = canonical_sha256(
-                    {"form": form, "schema": schema, "scoring": sample["scoring"]}
-                )
-                prior_eligible: Mapping[str, Sequence[str]] | None = None
-                rejected_observed_history: dict[str, dict[str, list[Any]]] = {}
-                for round_number in (1, 2):
-                    target_ids = _wrong_case_ids(score)
-                    if not target_ids:
-                        break
-                    case_by_id = {
-                        str(row["case_id"]): row for row in form["cases"]
-                    }
-                    row_by_id = {
-                        str(row["case_id"]): row
-                        for row in response["case_reviews"]
-                    }
-                    repair_schema = _project_output_schema(schema, target_ids)
-                    feedback = _attach_rejected_observed_values(
-                        _machine_feedback(
-                            score,
-                            target_ids,
-                            gold=gold,
-                            response=response,
-                        ),
-                        response=response,
-                        history=rejected_observed_history,
-                    )
-                    repair_prompt = {
-                        "instruction": (
-                            "Replace all and only the listed residual case reviews. "
-                            "Use the original rubric and local evidence. Machine feedback "
-                            "names failed component groups and the exact output fields that "
-                            "still mismatch, but supplies no expected values. Reconsider every "
-                            "listed field from the original rubric and evidence. Values listed "
-                            "under rejected_observed_values_by_field are your own earlier answers "
-                            "that did not satisfy the scorer; do not reuse them for that field. "
-                            "Return JSON only."
-                        ),
-                        "semantic_repair_round": round_number,
-                        "repair_exact_set": target_ids,
-                        "target_cases": [deepcopy(case_by_id[item]) for item in target_ids],
-                        "current_case_reviews": [deepcopy(row_by_id[item]) for item in target_ids],
-                        "machine_feedback": feedback,
-                        "repair_output_schema": repair_schema,
-                        "reference_values_disclosed": False,
-                    }
-                    lifecycle = build_repair_round(
-                        round_number=round_number,
-                        category_id=ANALYSIS_REVIEWER_CATEGORY_ID,
-                        targets_by_form={form_id: target_ids},
-                        prior_targets_by_form=(
-                            {form_id: list(prior_eligible[form_id])}
-                            if prior_eligible is not None
-                            else None
-                        ),
-                        prompt_projection=repair_prompt,
-                        unchanged_surface_sha256=unchanged_surface,
-                    )
-                    repair_request = {
-                        "phase": "EXAM_SEMANTIC_DIRECTED_REPAIR",
-                        "semantic_repair_round": round_number,
-                        "system": sample["prompt"]["system"],
-                        "user": repair_prompt,
-                        "form": {
-                            **{key: deepcopy(value) for key, value in form.items() if key != "cases"},
-                            "cases": repair_prompt["target_cases"],
-                        },
-                        "output_schema": repair_schema,
-                        "repair_lifecycle_sha256": lifecycle["contract_sha256"],
-                    }
-                    repair_request["request_payload_hash"] = canonical_sha256(repair_request)
-                    repair_response = self._call(
-                        run_id=run_id,
-                        run_root=run_root,
-                        state=state,
-                        target=target,
-                        request=repair_request,
-                        schema=repair_schema,
-                        structured_chat=structured_chat,
-                        call_kind=f"FORM_{form_id}_SEMANTIC_REPAIR_ROUND_{round_number}",
-                    )
-                    subset_form = {
-                        **{key: deepcopy(value) for key, value in form.items() if key != "cases"},
-                        "cases": repair_prompt["target_cases"],
-                    }
-                    normalized = core_v2.normalize_claim_pointer_leaves(
-                        subset_form, repair_response
-                    )["normalized_response"]
-                    subset_audit = core_v2.audit_response(
-                        subset_form, normalized, repair_schema
-                    )
-                    if not subset_audit.get("schema_valid") or not subset_audit.get("exact_case_set_valid"):
-                        raise ValueError("ANALYSIS_REVIEWER_REPAIR_RESPONSE_NOT_SCOREABLE")
-                    response = _merge_exact_rows(
-                        form=form,
-                        response=response,
-                        repair_response=normalized,
-                        target_ids=target_ids,
-                    )
-                    score = _score_form_successor(
-                        form=form,
-                        gold=gold,
-                        response=response,
-                        output_schema=schema,
-                        scoring_protocol=sample["scoring"],
-                    )
-                    penalty = self._repair_penalty(
-                        sample["scoring"], len(target_ids), 72
-                    )
-                    repair_penalties[form_id].append(
-                        {"round_number": round_number, **penalty}
-                    )
-                    repair_records[form_id].append(lifecycle)
-                    prior_eligible = {form_id: _wrong_case_ids(score)}
-                responses[form_id] = response
-                final_scores[form_id] = score
+            run.sample = self._load_sample(run.context)
+            run.responses = {}
+            run.initial_scores = {}
+            run.final_scores = {}
+            run.repair_records = {"A": [], "B": []}
+            run.repair_penalties = {"A": [], "B": []}
+            self._run_reviewer_forms(run)
 
-            first_pass = round(
-                sum(float(initial_scores[item]["score"]) for item in ("A", "B")) / 2.0,
-                6,
-            )
-            adjusted_by_form: dict[str, float] = {}
-            cumulative_by_form: dict[str, Any] = {}
-            for form_id in ("A", "B"):
-                rows = repair_penalties[form_id]
-                if rows:
-                    cumulative = cumulative_category_repair_penalty(
-                        [
-                            {
-                                "round_number": row["round_number"],
-                                "category_id": ANALYSIS_REVIEWER_CATEGORY_ID,
-                                "nonlinear_category_penalty": 0.0,
-                                "fixed_penalty": row["fixed_penalty"],
-                                "volume_penalty": row["volume_penalty"],
-                            }
-                            for row in rows
-                        ]
-                    )
-                    burden = float(cumulative["cumulative_penalty"])
-                    cumulative_by_form[form_id] = cumulative
-                else:
-                    burden = 0.0
-                    cumulative_by_form[form_id] = None
-                adjusted_by_form[form_id] = round(
-                    max(0.0, float(final_scores[form_id]["score"]) - burden), 6
-                )
-            score_exact = round(sum(adjusted_by_form.values()) / 2.0, 6)
-            residual_by_form = {
-                form_id: _wrong_case_ids(final_scores[form_id])
-                for form_id in ("A", "B")
-            }
-            residual_count = sum(len(rows) for rows in residual_by_form.values())
-            safety_ids = sorted(
-                {
-                    case_id
-                    for form_id in ("A", "B")
-                    for case_id in final_scores[form_id]
-                    .get("critical_containment_successor_classification", {})
-                    .get("operationally_uncontained_case_ids", [])
-                }
-                | {
-                    case_id
-                    for form_id in ("A", "B")
-                    for case_id in final_scores[form_id][
-                        "clean_false_positive_successor_classification"
-                    ]["destructive_safety_blocking_case_ids"]
-                }
-            )
-            calibration_ids = sorted(
-                set(case_id for rows in residual_by_form.values() for case_id in rows)
-                - set(safety_ids)
-            )
-            disposition = terminal_disposition(
-                scorability=Scorability.SCOREABLE,
-                residual_count=residual_count,
-                safety_blocking_residual_count=len(safety_ids),
-                calibration_residual_count=len(calibration_ids),
-                governed_disposition_count=0,
-            )
-            hard_gates_pass = all(
-                final_scores[form_id]["hard_gates_pass"] for form_id in ("A", "B")
-            )
-            operational_pass = hard_gates_pass and score_exact >= 80.0 and not safety_ids
-            repair_rounds_used = max(
-                len(repair_records["A"]), len(repair_records["B"])
-            )
-            blocking_rows = [
-                {
-                    "case_id": case_id,
-                    "failed_fields": (
-                        ["decision_critical_review"]
-                        if case_id in safety_ids
-                        else ["residual_scoring_components"]
-                    ),
-                    "evidence_anchor": f"forms/{form_id}/case_scores/{case_id}",
-                    "blocking": True,
-                }
-                for form_id in ("A", "B")
-                for case_id in residual_by_form[form_id]
-            ]
-            if not operational_pass and not blocking_rows:
-                blocking_rows.append(
-                    {
-                        "case_id": "ANALYSIS_REVIEWER_AGGREGATE",
-                        "failed_fields": ["aggregate_score_or_hard_gate"],
-                        "evidence_anchor": "exam_result/aggregate",
-                        "blocking": True,
-                    }
-                )
-            if operational_pass:
-                fail_admission = None
-                verdict = "PASS"
-            else:
-                fail_admission = admit_quality_fail(
-                    execution_outcome="COMPLETED",
-                    scorability="SCOREABLE",
-                    repair_rounds_used=repair_rounds_used,
-                    repair_round_limit=2,
-                    repair_cycle_closed=(
-                        repair_rounds_used == 2 or residual_count == 0
-                    ),
-                    blocking_failures=blocking_rows,
-                    exact_hashes={
-                        "reference_pack_sha256": EXPECTED_MANIFEST_SHA256,
-                        "scoring_protocol_sha256": plan["scoring_protocol_sha256"],
-                        "executor_sha256": _file_sha256(Path(__file__)),
-                        "input_exact_set_sha256": canonical_sha256(
-                            sample["manifest"]["bindings"]
-                        ),
-                    },
-                )
-                verdict = (
-                    "FAIL"
-                    if fail_admission["fail_admitted"]
-                    else "NOT_ASSESSED"
-                )
-            public = {
-                "schema_version": "WorkflowModelExamRunResult-v2",
-                "status": verdict,
-                "execution_outcome": "COMPLETED",
-                "scorability": "SCOREABLE",
-                "raw_quality_candidate_verdict": (
-                    "PASS" if operational_pass else "FAIL"
-                ),
-                "quality_verdict": verdict,
-                "reason": "Quality_ANALYSIS_REVIEWER_SUCCESSOR_COMPLETED",
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "executor_ref": self.EXECUTOR_REF,
-                "executor_sha256": _file_sha256(Path(__file__)),
-                "requested_model": requested_model,
-                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
-                "score": round(score_exact),
-                "score_exact": score_exact,
-                "score_semantics": "POST_REPAIR_A4_NONLINEAR_SCORE_WITH_CUMULATIVE_CATEGORY_BURDEN",
-                "first_pass_score": first_pass,
-                "form_scores": adjusted_by_form,
-                "raw_final_form_scores": {
-                    form_id: final_scores[form_id]["score"] for form_id in ("A", "B")
-                },
-                "exam_category_id": ANALYSIS_REVIEWER_CATEGORY_ID,
-                "role_id": ANALYSIS_REVIEWER_ROLE_ID,
-                "reference_pack_id": EXPECTED_PACK_ID,
-                "reference_pack_revision": EXPECTED_PACK_REVISION,
-                "reference_pack_sha256": EXPECTED_MANIFEST_SHA256,
-                "scoring_protocol_revision": plan["scoring_protocol_revision"],
-                "scoring_protocol_sha256": plan["scoring_protocol_sha256"],
-                "scoring_projection_revision": ANALYSIS_REVIEWER_SCORING_PROJECTION_REVISION,
-                "comparison_binding_sha256": plan["comparison_binding_sha256"],
-                "comparison_cohort_id": plan["comparison_cohort_id"],
-                "horizontal_comparison_eligible": True,
-                "horizontal_comparison_allowed_only_with_same_cohort": True,
-                "cross_category_comparison_forbidden": True,
-                "global_ranking_forbidden": True,
-                "sample_revision": ANALYSIS_REVIEWER_SAMPLE_REVISION,
-                "sample_slot": sample["manifest"]["sample_slot"],
-                "sample_manifest_sha256": sample["manifest"][
-                    "manifest_sha256"
-                ],
-                "sample_metadata": sample["manifest"],
-                "semantic_repair_rounds": repair_rounds_used,
-                "semantic_repair_round_limit": 2,
-                "semantic_repair_lifecycle_by_form": repair_records,
-                "cumulative_category_repair_penalty_by_form": cumulative_by_form,
-                "failed_exam_item_count": residual_count,
-                "residual_case_ids_by_form": residual_by_form,
-                "safety_blocking_residual_count": len(safety_ids),
-                "safety_blocking_case_ids": safety_ids,
-                "calibration_residual_count": len(calibration_ids),
-                "calibration_case_ids": calibration_ids,
-                "terminal_disposition": disposition.value,
-                "operational_eligibility_verdict": (
-                    "SUITABLE"
-                    if operational_pass and not residual_count
-                    else (
-                        "SUITABLE_WITH_CALIBRATION"
-                        if operational_pass
-                        else "NOT_RECOMMENDED"
-                    )
-                ),
-                "operational_safety_gate": "PASS" if not safety_ids else "FAIL",
-                "operational_policy_revision": ANALYSIS_REVIEWER_OPERATIONAL_POLICY_REVISION,
-                "quality_fail_admission": fail_admission,
-                "provider_received_answer_key": False,
-                "local_pack_embedded_in_exe": False,
-                "local_pack_runtime_resolver_required": True,
-                "workload_profile": plan["workload_profile"],
-                "total_effective_prompt_chars": plan["total_effective_prompt_chars"],
-                "provider_calls": state["provider_calls"],
-                "request_attempts": state["request_attempts"],
-                "external_model_calls": state["external_model_calls"],
-                "external_network_calls": state["external_network_calls"],
-                "external_process_launches": state["external_process_launches"],
-                "token_usage": state["token_usage"],
-                "estimated_cost_cny": (
-                    round(state["estimated_cost_cny"], 9)
-                    if plan["profile_kind"] == "API"
-                    else (0.0 if plan["profile_kind"] == "LOCAL" else None)
-                ),
-                "actual_cost": None,
-                "cost_semantics": plan["cost_semantics"],
-                "reference_regression_only": True,
-                "blind_holdout_eligible": False,
-                "qualification_eligible": False,
-            }
-            for form_id, response in responses.items():
-                _write_json_create_only(
-                    run_root / "responses" / f"form_{form_id}_final.json", response
-                )
-            evidence = _write_json_create_only(run_root / "exam_result.json", public)
-            return {
-                "schema_version": RESULT_SCHEMA,
-                "kind": "WORKFLOW_NODE",
-                **{key: value for key, value in public.items() if key not in {"schema_version", "run_id"}},
-                "duration_ms": max(0, int((monotonic() - started) * 1000)),
-                "exam_mode": self.MODE,
-                "exam_run_id": run_id,
-                "exam_run_root": str(run_root),
-                "exam_evidence_sha256": evidence["sha256"],
-            }
+            return self._score_reviewer_exam(run)
         except Exception as error:
             reason = str(error) or type(error).__name__
             if len(reason) > 200:
@@ -1351,42 +1012,423 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
                 "scorability": "NOT_ASSESSED",
                 "quality_verdict": "NOT_ASSESSED",
                 "reason": reason,
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "provider_calls": state["provider_calls"],
-                "request_attempts": state["request_attempts"],
-                "external_model_calls": state["external_model_calls"],
-                "external_network_calls": state["external_network_calls"],
-                "external_process_launches": state["external_process_launches"],
-                "token_usage": state["token_usage"],
+                "run_id": run.run_id,
+                "plan_sha256": run.plan["plan_sha256"],
+                "provider_calls": run.state["provider_calls"],
+                "request_attempts": run.state["request_attempts"],
+                "external_model_calls": run.state["external_model_calls"],
+                "external_network_calls": run.state["external_network_calls"],
+                "external_process_launches": run.state["external_process_launches"],
+                "token_usage": run.state["token_usage"],
                 "estimated_cost_cny": (
-                    round(state["estimated_cost_cny"], 9)
-                    if plan["profile_kind"] == "API"
-                    else (0.0 if plan["profile_kind"] == "LOCAL" else None)
+                    round(run.state["estimated_cost_cny"], 9)
+                    if run.plan["profile_kind"] == "API"
+                    else (0.0 if run.plan["profile_kind"] == "LOCAL" else None)
                 ),
                 "score": None,
             }
-            evidence = _write_json_create_only(run_root / "exam_failure.json", failure)
-            result = _not_run(reason, requested_model=str(requested_model))
+            evidence = _write_json_create_only(run.run_root / "exam_failure.json", failure)
+            result = _not_run(reason, requested_model=str(run.requested_model))
             result.update(
                 assessment_status="NOT_ASSESSED",
                 execution_outcome=execution_outcome,
                 scorability="NOT_ASSESSED",
                 quality_verdict="NOT_ASSESSED",
-                duration_ms=max(0, int((monotonic() - started) * 1000)),
-                provider_calls=state["provider_calls"],
-                request_attempts=state["request_attempts"],
-                external_model_calls=state["external_model_calls"],
-                external_network_calls=state["external_network_calls"],
-                external_process_launches=state["external_process_launches"],
-                exam_run_id=run_id,
-                exam_run_root=str(run_root),
+                duration_ms=max(0, int((monotonic() - run.started) * 1000)),
+                provider_calls=run.state["provider_calls"],
+                request_attempts=run.state["request_attempts"],
+                external_model_calls=run.state["external_model_calls"],
+                external_network_calls=run.state["external_network_calls"],
+                external_process_launches=run.state["external_process_launches"],
+                exam_run_id=run.run_id,
+                exam_run_root=str(run.run_root),
                 exam_evidence_sha256=evidence["sha256"],
-                token_usage=state["token_usage"],
+                token_usage=run.state["token_usage"],
                 estimated_cost_cny=failure["estimated_cost_cny"],
-                cost_semantics=plan["cost_semantics"],
+                cost_semantics=run.plan["cost_semantics"],
             )
             return result
+
+    def _run_reviewer_forms(self, run: _AnalysisReviewerExamRun) -> None:
+        """Send forms A and B, score each reply, and run the repair rounds a form needs."""
+        for form_id in ("A", "B"):
+            form = run.sample["forms"][form_id]
+            gold = run.sample["golds"][form_id]
+            schema = run.sample["schemas"][form_id]
+            request = {
+                "phase": "INITIAL",
+                "system": run.sample["prompt"]["system"],
+                "user": run.sample["prompt"]["user_template"],
+                "form": form,
+                "output_schema": schema,
+            }
+            request["request_payload_hash"] = canonical_sha256(request)
+            response = self._call(
+                run_id=run.run_id,
+                run_root=run.run_root,
+                state=run.state,
+                target=run.target,
+                request=request,
+                schema=schema,
+                structured_chat=run.structured_chat,
+                call_kind=f"FORM_{form_id}_INITIAL",
+            )
+            normalization = core_v2.normalize_claim_pointer_leaves(form, response)
+            response = deepcopy(dict(normalization["normalized_response"]))
+            audit = core_v2.audit_response(form, response, schema)
+            if not audit.get("schema_valid") or not audit.get("exact_case_set_valid"):
+                raise ValueError("ANALYSIS_REVIEWER_INITIAL_RESPONSE_NOT_SCOREABLE")
+            score = _score_form_successor(
+                form=form,
+                gold=gold,
+                response=response,
+                output_schema=schema,
+                scoring_protocol=run.sample["scoring"],
+            )
+            run.initial_scores[form_id] = deepcopy(score)
+            unchanged_surface = canonical_sha256(
+                {"form": form, "schema": schema, "scoring": run.sample["scoring"]}
+            )
+            prior_eligible: Mapping[str, Sequence[str]] | None = None
+            rejected_observed_history: dict[str, dict[str, list[Any]]] = {}
+            for round_number in (1, 2):
+                target_ids = _wrong_case_ids(score)
+                if not target_ids:
+                    break
+                case_by_id = {
+                    str(row["case_id"]): row for row in form["cases"]
+                }
+                row_by_id = {
+                    str(row["case_id"]): row
+                    for row in response["case_reviews"]
+                }
+                repair_schema = _project_output_schema(schema, target_ids)
+                feedback = _attach_rejected_observed_values(
+                    _machine_feedback(
+                        score,
+                        target_ids,
+                        gold=gold,
+                        response=response,
+                    ),
+                    response=response,
+                    history=rejected_observed_history,
+                )
+                repair_prompt = {
+                    "instruction": (
+                        "Replace all and only the listed residual case reviews. "
+                        "Use the original rubric and local evidence. Machine feedback "
+                        "names failed component groups and the exact output fields that "
+                        "still mismatch, but supplies no expected values. Reconsider every "
+                        "listed field from the original rubric and evidence. Values listed "
+                        "under rejected_observed_values_by_field are your own earlier answers "
+                        "that did not satisfy the scorer; do not reuse them for that field. "
+                        "Return JSON only."
+                    ),
+                    "semantic_repair_round": round_number,
+                    "repair_exact_set": target_ids,
+                    "target_cases": [deepcopy(case_by_id[item]) for item in target_ids],
+                    "current_case_reviews": [deepcopy(row_by_id[item]) for item in target_ids],
+                    "machine_feedback": feedback,
+                    "repair_output_schema": repair_schema,
+                    "reference_values_disclosed": False,
+                }
+                lifecycle = build_repair_round(
+                    round_number=round_number,
+                    category_id=ANALYSIS_REVIEWER_CATEGORY_ID,
+                    targets_by_form={form_id: target_ids},
+                    prior_targets_by_form=(
+                        {form_id: list(prior_eligible[form_id])}
+                        if prior_eligible is not None
+                        else None
+                    ),
+                    prompt_projection=repair_prompt,
+                    unchanged_surface_sha256=unchanged_surface,
+                )
+                repair_request = {
+                    "phase": "EXAM_SEMANTIC_DIRECTED_REPAIR",
+                    "semantic_repair_round": round_number,
+                    "system": run.sample["prompt"]["system"],
+                    "user": repair_prompt,
+                    "form": {
+                        **{key: deepcopy(value) for key, value in form.items() if key != "cases"},
+                        "cases": repair_prompt["target_cases"],
+                    },
+                    "output_schema": repair_schema,
+                    "repair_lifecycle_sha256": lifecycle["contract_sha256"],
+                }
+                repair_request["request_payload_hash"] = canonical_sha256(repair_request)
+                repair_response = self._call(
+                    run_id=run.run_id,
+                    run_root=run.run_root,
+                    state=run.state,
+                    target=run.target,
+                    request=repair_request,
+                    schema=repair_schema,
+                    structured_chat=run.structured_chat,
+                    call_kind=f"FORM_{form_id}_SEMANTIC_REPAIR_ROUND_{round_number}",
+                )
+                subset_form = {
+                    **{key: deepcopy(value) for key, value in form.items() if key != "cases"},
+                    "cases": repair_prompt["target_cases"],
+                }
+                normalized = core_v2.normalize_claim_pointer_leaves(
+                    subset_form, repair_response
+                )["normalized_response"]
+                subset_audit = core_v2.audit_response(
+                    subset_form, normalized, repair_schema
+                )
+                if not subset_audit.get("schema_valid") or not subset_audit.get("exact_case_set_valid"):
+                    raise ValueError("ANALYSIS_REVIEWER_REPAIR_RESPONSE_NOT_SCOREABLE")
+                response = _merge_exact_rows(
+                    form=form,
+                    response=response,
+                    repair_response=normalized,
+                    target_ids=target_ids,
+                )
+                score = _score_form_successor(
+                    form=form,
+                    gold=gold,
+                    response=response,
+                    output_schema=schema,
+                    scoring_protocol=run.sample["scoring"],
+                )
+                penalty = self._repair_penalty(
+                    run.sample["scoring"], len(target_ids), 72
+                )
+                run.repair_penalties[form_id].append(
+                    {"round_number": round_number, **penalty}
+                )
+                run.repair_records[form_id].append(lifecycle)
+                prior_eligible = {form_id: _wrong_case_ids(score)}
+            run.responses[form_id] = response
+            run.final_scores[form_id] = score
+
+    def _score_reviewer_exam(self, run: _AnalysisReviewerExamRun) -> Any:
+        """Combine the scores of the two forms, decide the verdict and its blocking rows, write the evidence
+        and the public result, and return the result."""
+        first_pass = round(
+            sum(float(run.initial_scores[item]["score"]) for item in ("A", "B")) / 2.0,
+            6,
+        )
+        adjusted_by_form: dict[str, float] = {}
+        cumulative_by_form: dict[str, Any] = {}
+        for form_id in ("A", "B"):
+            rows = run.repair_penalties[form_id]
+            if rows:
+                cumulative = cumulative_category_repair_penalty(
+                    [
+                        {
+                            "round_number": row["round_number"],
+                            "category_id": ANALYSIS_REVIEWER_CATEGORY_ID,
+                            "nonlinear_category_penalty": 0.0,
+                            "fixed_penalty": row["fixed_penalty"],
+                            "volume_penalty": row["volume_penalty"],
+                        }
+                        for row in rows
+                    ]
+                )
+                burden = float(cumulative["cumulative_penalty"])
+                cumulative_by_form[form_id] = cumulative
+            else:
+                burden = 0.0
+                cumulative_by_form[form_id] = None
+            adjusted_by_form[form_id] = round(
+                max(0.0, float(run.final_scores[form_id]["score"]) - burden), 6
+            )
+        score_exact = round(sum(adjusted_by_form.values()) / 2.0, 6)
+        residual_by_form = {
+            form_id: _wrong_case_ids(run.final_scores[form_id])
+            for form_id in ("A", "B")
+        }
+        residual_count = sum(len(rows) for rows in residual_by_form.values())
+        safety_ids = sorted(
+            {
+                case_id
+                for form_id in ("A", "B")
+                for case_id in run.final_scores[form_id]
+                .get("critical_containment_successor_classification", {})
+                .get("operationally_uncontained_case_ids", [])
+            }
+            | {
+                case_id
+                for form_id in ("A", "B")
+                for case_id in run.final_scores[form_id][
+                    "clean_false_positive_successor_classification"
+                ]["destructive_safety_blocking_case_ids"]
+            }
+        )
+        calibration_ids = sorted(
+            set(case_id for rows in residual_by_form.values() for case_id in rows)
+            - set(safety_ids)
+        )
+        disposition = terminal_disposition(
+            scorability=Scorability.SCOREABLE,
+            residual_count=residual_count,
+            safety_blocking_residual_count=len(safety_ids),
+            calibration_residual_count=len(calibration_ids),
+            governed_disposition_count=0,
+        )
+        hard_gates_pass = all(
+            run.final_scores[form_id]["hard_gates_pass"] for form_id in ("A", "B")
+        )
+        operational_pass = hard_gates_pass and score_exact >= 80.0 and not safety_ids
+        repair_rounds_used = max(
+            len(run.repair_records["A"]), len(run.repair_records["B"])
+        )
+        blocking_rows = [
+            {
+                "case_id": case_id,
+                "failed_fields": (
+                    ["decision_critical_review"]
+                    if case_id in safety_ids
+                    else ["residual_scoring_components"]
+                ),
+                "evidence_anchor": f"forms/{form_id}/case_scores/{case_id}",
+                "blocking": True,
+            }
+            for form_id in ("A", "B")
+            for case_id in residual_by_form[form_id]
+        ]
+        if not operational_pass and not blocking_rows:
+            blocking_rows.append(
+                {
+                    "case_id": "ANALYSIS_REVIEWER_AGGREGATE",
+                    "failed_fields": ["aggregate_score_or_hard_gate"],
+                    "evidence_anchor": "exam_result/aggregate",
+                    "blocking": True,
+                }
+            )
+        if operational_pass:
+            fail_admission = None
+            verdict = "PASS"
+        else:
+            fail_admission = admit_quality_fail(
+                execution_outcome="COMPLETED",
+                scorability="SCOREABLE",
+                repair_rounds_used=repair_rounds_used,
+                repair_round_limit=2,
+                repair_cycle_closed=(
+                    repair_rounds_used == 2 or residual_count == 0
+                ),
+                blocking_failures=blocking_rows,
+                exact_hashes={
+                    "reference_pack_sha256": EXPECTED_MANIFEST_SHA256,
+                    "scoring_protocol_sha256": run.plan["scoring_protocol_sha256"],
+                    "executor_sha256": _file_sha256(Path(__file__)),
+                    "input_exact_set_sha256": canonical_sha256(
+                        run.sample["manifest"]["bindings"]
+                    ),
+                },
+            )
+            verdict = (
+                "FAIL"
+                if fail_admission["fail_admitted"]
+                else "NOT_ASSESSED"
+            )
+        public = {
+            "schema_version": "WorkflowModelExamRunResult-v2",
+            "status": verdict,
+            "execution_outcome": "COMPLETED",
+            "scorability": "SCOREABLE",
+            "raw_quality_candidate_verdict": (
+                "PASS" if operational_pass else "FAIL"
+            ),
+            "quality_verdict": verdict,
+            "reason": "Quality_ANALYSIS_REVIEWER_SUCCESSOR_COMPLETED",
+            "run_id": run.run_id,
+            "plan_sha256": run.plan["plan_sha256"],
+            "executor_ref": self.EXECUTOR_REF,
+            "executor_sha256": _file_sha256(Path(__file__)),
+            "requested_model": run.requested_model,
+            "returned_model": run.state.get("returned_model") if run.target.get("adapter_id")=="command_template" else run.requested_model,
+            "score": round(score_exact),
+            "score_exact": score_exact,
+            "score_semantics": "POST_REPAIR_A4_NONLINEAR_SCORE_WITH_CUMULATIVE_CATEGORY_BURDEN",
+            "first_pass_score": first_pass,
+            "form_scores": adjusted_by_form,
+            "raw_final_form_scores": {
+                form_id: run.final_scores[form_id]["score"] for form_id in ("A", "B")
+            },
+            "exam_category_id": ANALYSIS_REVIEWER_CATEGORY_ID,
+            "role_id": ANALYSIS_REVIEWER_ROLE_ID,
+            "reference_pack_id": EXPECTED_PACK_ID,
+            "reference_pack_revision": EXPECTED_PACK_REVISION,
+            "reference_pack_sha256": EXPECTED_MANIFEST_SHA256,
+            "scoring_protocol_revision": run.plan["scoring_protocol_revision"],
+            "scoring_protocol_sha256": run.plan["scoring_protocol_sha256"],
+            "scoring_projection_revision": ANALYSIS_REVIEWER_SCORING_PROJECTION_REVISION,
+            "comparison_binding_sha256": run.plan["comparison_binding_sha256"],
+            "comparison_cohort_id": run.plan["comparison_cohort_id"],
+            "horizontal_comparison_eligible": True,
+            "horizontal_comparison_allowed_only_with_same_cohort": True,
+            "cross_category_comparison_forbidden": True,
+            "global_ranking_forbidden": True,
+            "sample_revision": ANALYSIS_REVIEWER_SAMPLE_REVISION,
+            "sample_slot": run.sample["manifest"]["sample_slot"],
+            "sample_manifest_sha256": run.sample["manifest"][
+                "manifest_sha256"
+            ],
+            "sample_metadata": run.sample["manifest"],
+            "semantic_repair_rounds": repair_rounds_used,
+            "semantic_repair_round_limit": 2,
+            "semantic_repair_lifecycle_by_form": run.repair_records,
+            "cumulative_category_repair_penalty_by_form": cumulative_by_form,
+            "failed_exam_item_count": residual_count,
+            "residual_case_ids_by_form": residual_by_form,
+            "safety_blocking_residual_count": len(safety_ids),
+            "safety_blocking_case_ids": safety_ids,
+            "calibration_residual_count": len(calibration_ids),
+            "calibration_case_ids": calibration_ids,
+            "terminal_disposition": disposition.value,
+            "operational_eligibility_verdict": (
+                "SUITABLE"
+                if operational_pass and not residual_count
+                else (
+                    "SUITABLE_WITH_CALIBRATION"
+                    if operational_pass
+                    else "NOT_RECOMMENDED"
+                )
+            ),
+            "operational_safety_gate": "PASS" if not safety_ids else "FAIL",
+            "operational_policy_revision": ANALYSIS_REVIEWER_OPERATIONAL_POLICY_REVISION,
+            "quality_fail_admission": fail_admission,
+            "provider_received_answer_key": False,
+            "local_pack_embedded_in_exe": False,
+            "local_pack_runtime_resolver_required": True,
+            "workload_profile": run.plan["workload_profile"],
+            "total_effective_prompt_chars": run.plan["total_effective_prompt_chars"],
+            "provider_calls": run.state["provider_calls"],
+            "request_attempts": run.state["request_attempts"],
+            "external_model_calls": run.state["external_model_calls"],
+            "external_network_calls": run.state["external_network_calls"],
+            "external_process_launches": run.state["external_process_launches"],
+            "token_usage": run.state["token_usage"],
+            "estimated_cost_cny": (
+                round(run.state["estimated_cost_cny"], 9)
+                if run.plan["profile_kind"] == "API"
+                else (0.0 if run.plan["profile_kind"] == "LOCAL" else None)
+            ),
+            "actual_cost": None,
+            "cost_semantics": run.plan["cost_semantics"],
+            "reference_regression_only": True,
+            "blind_holdout_eligible": False,
+            "qualification_eligible": False,
+        }
+        for form_id, response in run.responses.items():
+            _write_json_create_only(
+                run.run_root / "responses" / f"form_{form_id}_final.json", response
+            )
+        evidence = _write_json_create_only(run.run_root / "exam_result.json", public)
+        return {
+            "schema_version": RESULT_SCHEMA,
+            "kind": "WORKFLOW_NODE",
+            **{key: value for key, value in public.items() if key not in {"schema_version", "run_id"}},
+            "duration_ms": max(0, int((monotonic() - run.started) * 1000)),
+            "exam_mode": self.MODE,
+            "exam_run_id": run.run_id,
+            "exam_run_root": str(run.run_root),
+            "exam_evidence_sha256": evidence["sha256"],
+        }
 
 
 __all__ = [

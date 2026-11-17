@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
 import importlib
@@ -38,6 +39,40 @@ from memorive.exams.common import (
     _write_json_create_only,
 )
 from memorive.exams.embedding.executor import QualityEmbeddingExamExecutor
+
+
+@dataclass
+class _EmbeddingExamRun:
+    """One run of the embedding exam (QualityNewEmbeddingExamExecutor.execute).
+
+    The plan, the run folder and the call counters are set when the run starts; _embedding_exam_rows
+    builds the production, adversarial and repeat rows from the exam assets; _run_embedding_lanes embeds
+    each lane; _score_embedding_exam scores the rankings, writes the evidence and builds the result. A
+    failure is reported from the plan and counters as they are."""
+
+    # The run as planned.
+    target: Mapping[str, Any]
+    embedding_call: Callable[..., Mapping[str, Any]]
+    plan: Mapping[str, Any]
+    requested_model: str | None
+    started: float
+    run_id: str
+    run_root: Path
+    state: dict[str, Any]
+    # The exam assets and the rows built from them.
+    assets: Any = None
+    production_tasks: Any = None
+    production_rows: list[dict[str, str]] = field(default_factory=list)
+    adversarial_rows: list[dict[str, str]] = field(default_factory=list)
+    adversarial_tasks_by_form: dict[str, dict[str, list[Mapping[str, Any]]]] = field(default_factory=dict)
+    repeat_rows: list[dict[str, str]] = field(default_factory=list)
+    # Counters and the vectors of each lane.
+    call_index: int = 0
+    dimension: int | None = None
+    observed_returned_model: str | None = None
+    production_vectors: dict[str, list[float]] = field(default_factory=dict)
+    adversarial_vectors: dict[str, list[float]] = field(default_factory=dict)
+    repeat_vectors: dict[str, list[float]] = field(default_factory=dict)
 
 
 class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
@@ -657,7 +692,10 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
                 "accepted_at": datetime.now(timezone.utc).isoformat(),
             },
         )
-        state: dict[str, Any] = {
+        run = _EmbeddingExamRun(
+            target=target, embedding_call=embedding_call, plan=plan, requested_model=requested_model,
+            started=started, run_id=run_id, run_root=run_root,
+            state={
             "request_attempts": 0,
             "provider_calls": 0,
             "external_model_calls": 0,
@@ -667,492 +705,23 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
             "estimated_cost_cny": 0.0,
             "cost_estimate_complete": True,
             "token_usage": {"prompt_tokens": 0, "completion_tokens": 0},
-        }
+        },
+        )
         try:
-            assets = self._load_assets()
-            production = assets["production"]
-            production_tasks = production["tasks"]
-            tasks_by_corpus = assets["tasks_by_corpus"]
-            production_rows: list[dict[str, str]] = []
-            for corpus in production["corpora"]:
-                corpus_id = str(corpus["corpus_id"])
-                production_rows.extend(
-                    {
-                        "key": f"PROD:D:{row['unit_id']}",
-                        "item_id": str(row["unit_id"]),
-                        "text": str(row["text"]),
-                        "corpus_id": corpus_id,
-                    }
-                    for row in corpus["documents"]
-                )
-                production_rows.extend(
-                    {
-                        "key": f"PROD:Q:{row['task_id']}",
-                        "item_id": str(row["task_id"]),
-                        "text": str(row["query"]),
-                        "corpus_id": corpus_id,
-                    }
-                    for row in tasks_by_corpus[corpus_id]
-                )
-            adversarial_rows: list[dict[str, str]] = []
-            adversarial_tasks_by_form: dict[str, dict[str, list[Mapping[str, Any]]]] = {}
-            for form_id in ("A", "B"):
-                form = assets["adversarial_forms"][form_id]
-                grouped: dict[str, list[Mapping[str, Any]]] = {}
-                for task in form["tasks"]:
-                    grouped.setdefault(str(task["corpus_id"]), []).append(task)
-                adversarial_tasks_by_form[form_id] = grouped
-                for corpus in form["corpora"]:
-                    corpus_id = str(corpus["corpus_id"])
-                    adversarial_rows.extend(
-                        {
-                            "key": f"ADV:{form_id}:D:{row['unit_id']}",
-                            "item_id": str(row["unit_id"]),
-                            "text": str(row["text"]),
-                            "corpus_id": corpus_id,
-                            "form_id": form_id,
-                        }
-                        for row in corpus["documents"]
-                    )
-                    adversarial_rows.extend(
-                        {
-                            "key": f"ADV:{form_id}:Q:{row['task_id']}",
-                            "item_id": str(row["task_id"]),
-                            "text": str(row["query"]),
-                            "corpus_id": corpus_id,
-                            "form_id": form_id,
-                        }
-                        for row in grouped[corpus_id]
-                    )
-            repeat_rows: list[dict[str, str]] = []
-            for corpus in production["corpora"]:
-                corpus_id = str(corpus["corpus_id"])
-                for row in corpus["documents"][:2]:
-                    source_key = f"PROD:D:{row['unit_id']}"
-                    repeat_rows.append(
-                        {
-                            "key": f"REPEAT:{source_key}",
-                            "source_key": source_key,
-                            "item_id": str(row["unit_id"]),
-                            "text": str(row["text"]),
-                            "corpus_id": corpus_id,
-                        }
-                    )
-                for row in tasks_by_corpus[corpus_id][:2]:
-                    source_key = f"PROD:Q:{row['task_id']}"
-                    repeat_rows.append(
-                        {
-                            "key": f"REPEAT:{source_key}",
-                            "source_key": source_key,
-                            "item_id": str(row["task_id"]),
-                            "text": str(row["query"]),
-                            "corpus_id": corpus_id,
-                        }
-                    )
-            if (
-                len(production_rows) != self.PRODUCTION_INPUT_COUNT
-                or len(adversarial_rows) != self.ADVERSARIAL_INPUT_COUNT
-                or len(repeat_rows) != self.REPEATABILITY_INPUT_COUNT
-            ):
-                raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_INPUT_TOPOLOGY_INVALID")
+            self._embedding_exam_rows(run)
 
-            call_index = 0
-            dimension: int | None = plan["expected_dimension"]
-            observed_returned_model: str | None = None
+            run.call_index = 0
+            run.dimension = run.plan["expected_dimension"]
+            run.observed_returned_model = None
 
-            def execute_lane(
-                lane_id: str,
-                rows: Sequence[Mapping[str, str]],
-            ) -> dict[str, list[float]]:
-                nonlocal call_index, dimension, observed_returned_model
-                collected: dict[str, list[float]] = {}
-                batch_size = int(plan["maximum_inputs_per_model_request"])
-                for start_index in range(0, len(rows), batch_size):
-                    batch_rows = rows[start_index : start_index + batch_size]
-                    inputs = [str(row["text"]) for row in batch_rows]
-                    input_ids = [str(row["key"]) for row in batch_rows]
-                    call_index += 1
-                    behavior_sha256 = _sha256(
-                        {
-                            "model": requested_model,
-                            "inputs": inputs,
-                            "purpose": "workflow_model_exam",
-                        }
-                    )
-                    claim = {
-                        "schema_version": "WorkflowEmbeddingPreSendClaim-v2",
-                        "created_at": datetime.now(timezone.utc).isoformat(),
-                        "call_id": f"call-{call_index:03d}",
-                        "call_kind": "EMBEDDING_SUCCESSOR_BATCH",
-                        "lane_id": lane_id,
-                        "profile_kind": plan["profile_kind"],
-                        "profile_ref": plan["profile_ref"],
-                        "purpose": "workflow_model_exam",
-                        "route": (
-                            "EXISTING_SETTINGS_API_TRANSPORT"
-                            if plan["profile_kind"] == "API"
-                            else "OLLAMA_LOOPBACK"
-                        ),
-                        "requested_model": requested_model,
-                        "model_digest": target.get("model_digest"),
-                        "input_count": len(inputs),
-                        "input_id_exact_set_sha256": _sha256(input_ids),
-                        "input_exact_set_sha256": _sha256(inputs),
-                        "behavior_sha256": behavior_sha256,
-                        "plan_sha256": plan["plan_sha256"],
-                        "provider_received_gold": False,
-                    }
-                    claim_receipt = _write_json_create_only(
-                        run_root / "claims" / f"call_{call_index:03d}.json",
-                        claim,
-                    )
-                    result = dict(
-                        embedding_call(
-                            profile_kind=str(target["kind"]),
-                            service=target,
-                            model=target,
-                            inputs=inputs,
-                            purpose="workflow_model_exam",
-                            timeout_seconds=300,
-                        )
-                    )
-                    for field in (
-                        "provider_calls",
-                        "external_model_calls",
-                        "external_network_calls",
-                        "external_process_launches",
-                        "local_metadata_calls",
-                    ):
-                        state[field] += int(result.get(field) or 0)
-                    state["request_attempts"] += int(
-                        result.get("external_model_calls") or 0
-                    )
-                    receipt = result.get("execution_receipt")
-                    if isinstance(receipt, Mapping):
-                        estimate = receipt.get("estimated_cost_cny")
-                        if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
-                            state["estimated_cost_cny"] += float(estimate)
-                        elif plan["profile_kind"] == "API":
-                            state["cost_estimate_complete"] = False
-                        usage = receipt.get("token_usage")
-                        if isinstance(usage, Mapping):
-                            for field in ("prompt_tokens", "completion_tokens"):
-                                value = usage.get(field)
-                                if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
-                                    state["token_usage"][field] = state["token_usage"][field] + value if state["token_usage"][field] is not None else None
-                    if result.get("status") != "PASS":
-                        raise ValueError(str(result.get("reason") or "EMBEDDING_CALL_FAILED"))
-                    if int(result.get("external_model_calls") or 0) != 1:
-                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_PHYSICAL_CALL_BINDING_INVALID")
-                    returned_model = result.get("returned_model")
-                    if returned_model != requested_model:
-                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_RETURNED_MODEL_MISMATCH")
-                    if observed_returned_model is None:
-                        observed_returned_model = str(returned_model)
-                    elif observed_returned_model != returned_model:
-                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_RETURNED_MODEL_DRIFT")
-                    if (
-                        not isinstance(receipt, Mapping)
-                        or receipt.get("behavior_sha256") != behavior_sha256
-                    ):
-                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_BEHAVIOR_RECEIPT_INVALID")
-                    vectors = result.get("vectors")
-                    if not isinstance(vectors, list):
-                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_VECTORS_MISSING")
-                    observed_dimension = assets["legacy_scorer"].validate_vectors(
-                        vectors,
-                        len(inputs),
-                        expected_dim=dimension,
-                    )
-                    if dimension is None:
-                        dimension = observed_dimension
-                    elif dimension != observed_dimension:
-                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_DIMENSION_DRIFT")
-                    for input_id, vector in zip(input_ids, vectors):
-                        if input_id in collected:
-                            raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_INPUT_ID_DUPLICATE")
-                        collected[input_id] = [float(value) for value in vector]
-                    _write_json_create_only(
-                        run_root / "receipts" / f"call_{call_index:03d}.json",
-                        {
-                            "schema_version": "WorkflowEmbeddingBatchReceipt-v3",
-                            "call_id": claim["call_id"],
-                            "lane_id": lane_id,
-                            "input_count": len(inputs),
-                            "input_id_exact_set_sha256": claim["input_id_exact_set_sha256"],
-                            "response_vector_sha256": _sha256(vectors),
-                            "dimension": dimension,
-                            "returned_model": returned_model,
-                            "physical_model_calls": 1,
-                            "pre_send_claim_sha256": claim_receipt["sha256"],
-                            "provider_received_gold": False,
-                            "execution_receipt": deepcopy(dict(receipt)),
-                        },
-                    )
-                return collected
+            self._run_embedding_lanes(run)
 
-            production_vectors = execute_lane("PRODUCTION_PRIMARY", production_rows)
-            adversarial_vectors = execute_lane("ADVERSARIAL_DIAGNOSTIC", adversarial_rows)
-            repeat_vectors = execute_lane("REPEATABILITY", repeat_rows)
-            if (
-                call_index != int(plan["maximum_model_calls"])
-                or state["request_attempts"] != int(plan["maximum_model_calls"])
-            ):
-                raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_CALL_COUNT_MISMATCH")
-
-            production_rankings: dict[str, list[str]] = {}
-            for task in production_tasks:
-                corpus = assets["corpus_by_id"][str(task["corpus_id"])]
-                document_ids = [str(row["unit_id"]) for row in corpus["documents"]]
-                document_vectors = [
-                    production_vectors[f"PROD:D:{unit_id}"]
-                    for unit_id in document_ids
-                ]
-                production_rankings[str(task["task_id"])] = self._rank_ids(
-                    document_ids,
-                    document_vectors,
-                    production_vectors[f"PROD:Q:{task['task_id']}"],
-                )
-            production_score = self._load_successor_scorer().score_track(
-                assets["gold"], production_rankings
-            )
-
-            adversarial_scores: dict[str, dict[str, Any]] = {}
-            adversarial_rankings: dict[str, list[str]] = {}
-            for form_id in ("A", "B"):
-                form = assets["adversarial_forms"][form_id]
-                grouped = adversarial_tasks_by_form[form_id]
-                form_rankings: dict[str, list[str]] = {}
-                for corpus in form["corpora"]:
-                    corpus_id = str(corpus["corpus_id"])
-                    document_ids = [str(row["unit_id"]) for row in corpus["documents"]]
-                    document_vectors = [
-                        adversarial_vectors[f"ADV:{form_id}:D:{unit_id}"]
-                        for unit_id in document_ids
-                    ]
-                    for task in grouped[corpus_id]:
-                        ranked = self._rank_ids(
-                            document_ids,
-                            document_vectors,
-                            adversarial_vectors[
-                                f"ADV:{form_id}:Q:{task['task_id']}"
-                            ],
-                        )
-                        form_rankings[str(task["task_id"])] = ranked
-                        adversarial_rankings[
-                            f"{form_id}:{task['task_id']}"
-                        ] = ranked
-                adversarial_scores[form_id] = assets["legacy_scorer"].score_form(
-                    form["gold"], form_rankings
-                )
-            adversarial_mean = statistics.fmean(
-                float(adversarial_scores[form_id]["score"])
-                for form_id in ("A", "B")
-            )
-
-            similarities = [
-                self._cosine(
-                    production_vectors[str(row["source_key"])],
-                    repeat_vectors[str(row["key"])],
-                )
-                for row in repeat_rows
-            ]
-            repeatability = {
-                "schema_version": "EmbeddingRepeatabilityScore-v1",
-                "selection_revision": self.REPEATABILITY_SELECTION_REVISION,
-                "sample_count": len(similarities),
-                "mean_vector_cosine": round(statistics.fmean(similarities), 12),
-                "minimum_vector_cosine": round(min(similarities), 12),
-                "below_0_999999_count": sum(value < 0.999999 for value in similarities),
-                "qualification_threshold_defined": False,
-            }
-            role_adequacy = assess_embedding_role_adequacy(
-                production_score,
-                repeatability,
-            )
-            cap = plan.get("budget_cap_cny")
-            estimated_cost = self._state_cost(state, str(plan["profile_kind"]))
-            if cap is not None and (
-                estimated_cost is None or estimated_cost > float(cap)
-            ):
-                raise ValueError("WORKFLOW_MODEL_EXAM_COST_CAP_NOT_VERIFIABLE_OR_EXCEEDED")
-
-            _write_json_create_only(
-                run_root / "rankings" / "production_rankings.json",
-                {
-                    "schema_version": "EmbeddingProductionRankings-v1",
-                    "rankings": production_rankings,
-                    "provider_received_gold": False,
-                },
-            )
-            _write_json_create_only(
-                run_root / "rankings" / "adversarial_rankings.json",
-                {
-                    "schema_version": "EmbeddingAdversarialRankings-v1",
-                    "rankings": adversarial_rankings,
-                    "provider_received_gold": False,
-                },
-            )
-            _write_json_create_only(
-                run_root / "scores" / "production_score.local.json",
-                production_score,
-            )
-            _write_json_create_only(
-                run_root / "scores" / "adversarial_score.local.json",
-                adversarial_scores,
-            )
-            _write_json_create_only(
-                run_root / "scores" / "repeatability.json",
-                repeatability,
-            )
-
-            production_score_exact = float(
-                production_score["production_recall_score"]
-            )
-            embedding_diagnostics = {
-                "schema_version": "QualityNewEmbeddingLiveDiagnostic-v2",
-                "score_views": {
-                    "production_primary": {
-                        "kind": "PRODUCTION_RECALL_AT_15",
-                        "score_exact": production_score_exact,
-                        "critical_evidence_recall_at_15": production_score[
-                            "critical_evidence_recall_at_15"
-                        ],
-                        "facet_coverage_at_15": production_score[
-                            "facet_coverage_at_15"
-                        ],
-                        "source_scope_integrity_at_15": production_score[
-                            "source_scope_integrity_at_15"
-                        ],
-                        "clean_control_recall_at_10": production_score[
-                            "clean_control_recall_at_10"
-                        ],
-                        "qualification_eligible": False,
-                        "quality_verdict": role_adequacy["quality_verdict"],
-                    },
-                    "adversarial_diagnostic": {
-                        "kind": "LEGACY_NONLINEAR_DEDUCTION_SAMPLE",
-                        "score_exact": round(adversarial_mean, 6),
-                        "form_scores": {
-                            form_id: adversarial_scores[form_id]["score"]
-                            for form_id in ("A", "B")
-                        },
-                        "independent_from_production_primary": True,
-                        "qualification_eligible": False,
-                    },
-                    "repeatability": repeatability,
-                },
-                "workload_shape": deepcopy(assets["workload_shape"]),
-                "selection_contract": {
-                    "single_aggregate_is_sufficient_for_selection": False,
-                    "production_and_adversarial_scores_must_not_be_combined": True,
-                    "repeatability_and_operational_profile_required": True,
-                    "meaningful_pairwise_separation_must_be_demonstrated": True,
-                    "pack_native_quality_threshold_defined": False,
-                    "quality_threshold_defined": True,
-                    "role_adequacy_policy_revision": (
-                        EMBEDDING_ROLE_ADEQUACY_POLICY["revision"]
-                    ),
-                    "formal_qualification_eligible": False,
-                    "model_failure_established": False,
-                },
-                "role_adequacy_assessment": role_adequacy,
-                "execution_provenance": {
-                    "physical_model_call_target": plan["maximum_model_calls"],
-                    "maximum_inputs_per_model_request": plan[
-                        "maximum_inputs_per_model_request"
-                    ],
-                    "production_input_count": self.PRODUCTION_INPUT_COUNT,
-                    "adversarial_input_count": self.ADVERSARIAL_INPUT_COUNT,
-                    "repeatability_input_count": self.REPEATABILITY_INPUT_COUNT,
-                    "historical_quality_call_count_relabelled": False,
-                },
-                "cross_category_comparison_forbidden": True,
-                "global_ranking_forbidden": True,
-            }
-            embedding_diagnostics["diagnostic_sha256"] = _sha256(
-                embedding_diagnostics
-            )
-            public_result = {
-                "schema_version": "WorkflowModelExamRunResult-v1",
-                "status": "PASS",
-                "execution_outcome": "COMPLETED",
-                "scorability": "SCOREABLE",
-                "raw_quality_candidate_verdict": role_adequacy[
-                    "quality_verdict"
-                ],
-                "reason": "Quality_NEW_EMBEDDING_SUCCESSOR_TECHNICALLY_COMPLETED",
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "requested_model": requested_model,
-                "returned_model": observed_returned_model,
-                "score": int(round(production_score_exact)),
-                "score_exact": round(production_score_exact, 6),
-                "score_semantics": (
-                    "FIRST_STAGE_HIGH_RECALL_AT_15_ROLE_ADEQUACY"
-                ),
-                "production_recall_score_exact": round(production_score_exact, 6),
-                "adversarial_diagnostic_score_exact": round(adversarial_mean, 6),
-                "quality_verdict": role_adequacy["quality_verdict"],
-                "acceptance_verdict": "NOT_ASSESSED",
-                "quality_threshold_defined": True,
-                "score_is_descriptive_within_category": False,
-                "role_adequacy_assessment": role_adequacy,
-                "model_fail_verdict": "NOT_ESTABLISHED",
-                "model_fail_established": False,
-                "exam_category_id": plan["exam_category_id"],
-                "role_id": plan["role_id"],
-                "sample_revision": plan["sample_revision"],
-                "comparison_cohort_id": plan["comparison_cohort_id"],
-                "comparison_binding_sha256": plan["comparison_binding_sha256"],
-                "adversarial_comparison_cohort_id": plan[
-                    "adversarial_comparison_cohort_id"
-                ],
-                "horizontal_comparison_eligible": True,
-                "horizontal_comparison_allowed_only_with_same_cohort": True,
-                "cross_category_comparison_forbidden": True,
-                "global_ranking_forbidden": True,
-                "failed_exam_item_count": int(production_score["critical_miss_count"]),
-                "critical_miss_count": int(production_score["critical_miss_count"]),
-                "failed_exam_item_count_semantics": (
-                    "PRODUCTION_DIAGNOSTIC_CRITICAL_MISS_NOT_ADMISSION_FAIL"
-                ),
-                "dimension": dimension,
-                "request_attempts": state["request_attempts"],
-                "provider_calls": state["provider_calls"],
-                "external_model_calls": state["external_model_calls"],
-                "external_network_calls": state["external_network_calls"],
-                "external_process_launches": state["external_process_launches"],
-                "local_metadata_calls": state["local_metadata_calls"],
-                "token_usage": state["token_usage"],
-                "estimated_cost_cny": estimated_cost,
-                "actual_cost": None,
-                "cost_semantics": plan["cost_semantics"],
-                "reference_regression_only": True,
-                "blind_holdout_eligible": False,
-                "qualification_eligible": False,
-                "provider_received_answer_key": False,
-                "provider_received_gold": False,
-                "embedding_diagnostics": embedding_diagnostics,
-            }
-            evidence = _write_json_create_only(
-                run_root / "exam_result.json", public_result
-            )
-            return {
-                **public_result,
-                "schema_version": RESULT_SCHEMA,
-                "kind": "WORKFLOW_NODE",
-                "duration_ms": max(0, int((monotonic() - started) * 1000)),
-                "exam_mode": plan["mode"],
-                "exam_run_id": run_id,
-                "exam_run_root": str(run_root.resolve()),
-                "exam_evidence_sha256": evidence["sha256"],
-            }
+            return self._score_embedding_exam(run)
         except Exception as error:
             reason = str(error) or type(error).__name__
             if len(reason) > 200:
                 reason = type(error).__name__
-            estimated_cost = self._state_cost(state, str(plan["profile_kind"]))
+            estimated_cost = self._state_cost(run.state, str(run.plan["profile_kind"]))
             failure = {
                 "schema_version": "WorkflowModelExamRunFailure-v1",
                 "status": "NOT_ASSESSED",
@@ -1162,40 +731,522 @@ class QualityNewEmbeddingExamExecutor(QualityEmbeddingExamExecutor):
                 "scorability": "NOT_ASSESSED",
                 "quality_verdict": "NOT_ASSESSED",
                 "reason": reason,
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "request_attempts": state["request_attempts"],
-                "provider_calls": state["provider_calls"],
-                "external_model_calls": state["external_model_calls"],
-                "external_network_calls": state["external_network_calls"],
-                "external_process_launches": state["external_process_launches"],
-                "local_metadata_calls": state["local_metadata_calls"],
-                "token_usage": state["token_usage"],
+                "run_id": run.run_id,
+                "plan_sha256": run.plan["plan_sha256"],
+                "request_attempts": run.state["request_attempts"],
+                "provider_calls": run.state["provider_calls"],
+                "external_model_calls": run.state["external_model_calls"],
+                "external_network_calls": run.state["external_network_calls"],
+                "external_process_launches": run.state["external_process_launches"],
+                "local_metadata_calls": run.state["local_metadata_calls"],
+                "token_usage": run.state["token_usage"],
                 "estimated_cost_cny": estimated_cost,
                 "score": None,
                 "provider_received_gold": False,
             }
             evidence = _write_json_create_only(
-                run_root / "exam_failure.json", failure
+                run.run_root / "exam_failure.json", failure
             )
-            result = _not_run(reason, requested_model=requested_model)
+            result = _not_run(reason, requested_model=run.requested_model)
             result.update(
-                duration_ms=max(0, int((monotonic() - started) * 1000)),
+                duration_ms=max(0, int((monotonic() - run.started) * 1000)),
                 execution_outcome=failure["execution_outcome"],
                 scorability="NOT_ASSESSED",
                 quality_verdict="NOT_ASSESSED",
-                exam_run_id=run_id,
-                exam_run_root=str(run_root.resolve()),
+                exam_run_id=run.run_id,
+                exam_run_root=str(run.run_root.resolve()),
                 exam_evidence_sha256=evidence["sha256"],
-                cost_semantics=plan["cost_semantics"],
-                request_attempts=state["request_attempts"],
-                provider_calls=state["provider_calls"],
-                external_model_calls=state["external_model_calls"],
-                external_network_calls=state["external_network_calls"],
-                external_process_launches=state["external_process_launches"],
-                local_metadata_calls=state["local_metadata_calls"],
-                token_usage=state["token_usage"],
+                cost_semantics=run.plan["cost_semantics"],
+                request_attempts=run.state["request_attempts"],
+                provider_calls=run.state["provider_calls"],
+                external_model_calls=run.state["external_model_calls"],
+                external_network_calls=run.state["external_network_calls"],
+                external_process_launches=run.state["external_process_launches"],
+                local_metadata_calls=run.state["local_metadata_calls"],
+                token_usage=run.state["token_usage"],
                 estimated_cost_cny=estimated_cost,
                 provider_received_gold=False,
             )
             return result
+
+    def _embedding_exam_rows(self, run: _EmbeddingExamRun) -> None:
+        """The production, adversarial and repeat rows to embed, built from the exam assets."""
+        run.assets = self._load_assets()
+        production = run.assets["production"]
+        run.production_tasks = production["tasks"]
+        tasks_by_corpus = run.assets["tasks_by_corpus"]
+        run.production_rows = []
+        for corpus in production["corpora"]:
+            corpus_id = str(corpus["corpus_id"])
+            run.production_rows.extend(
+                {
+                    "key": f"PROD:D:{row['unit_id']}",
+                    "item_id": str(row["unit_id"]),
+                    "text": str(row["text"]),
+                    "corpus_id": corpus_id,
+                }
+                for row in corpus["documents"]
+            )
+            run.production_rows.extend(
+                {
+                    "key": f"PROD:Q:{row['task_id']}",
+                    "item_id": str(row["task_id"]),
+                    "text": str(row["query"]),
+                    "corpus_id": corpus_id,
+                }
+                for row in tasks_by_corpus[corpus_id]
+            )
+        run.adversarial_rows = []
+        run.adversarial_tasks_by_form = {}
+        for form_id in ("A", "B"):
+            form = run.assets["adversarial_forms"][form_id]
+            grouped: dict[str, list[Mapping[str, Any]]] = {}
+            for task in form["tasks"]:
+                grouped.setdefault(str(task["corpus_id"]), []).append(task)
+            run.adversarial_tasks_by_form[form_id] = grouped
+            for corpus in form["corpora"]:
+                corpus_id = str(corpus["corpus_id"])
+                run.adversarial_rows.extend(
+                    {
+                        "key": f"ADV:{form_id}:D:{row['unit_id']}",
+                        "item_id": str(row["unit_id"]),
+                        "text": str(row["text"]),
+                        "corpus_id": corpus_id,
+                        "form_id": form_id,
+                    }
+                    for row in corpus["documents"]
+                )
+                run.adversarial_rows.extend(
+                    {
+                        "key": f"ADV:{form_id}:Q:{row['task_id']}",
+                        "item_id": str(row["task_id"]),
+                        "text": str(row["query"]),
+                        "corpus_id": corpus_id,
+                        "form_id": form_id,
+                    }
+                    for row in grouped[corpus_id]
+                )
+        run.repeat_rows = []
+        for corpus in production["corpora"]:
+            corpus_id = str(corpus["corpus_id"])
+            for row in corpus["documents"][:2]:
+                source_key = f"PROD:D:{row['unit_id']}"
+                run.repeat_rows.append(
+                    {
+                        "key": f"REPEAT:{source_key}",
+                        "source_key": source_key,
+                        "item_id": str(row["unit_id"]),
+                        "text": str(row["text"]),
+                        "corpus_id": corpus_id,
+                    }
+                )
+            for row in tasks_by_corpus[corpus_id][:2]:
+                source_key = f"PROD:Q:{row['task_id']}"
+                run.repeat_rows.append(
+                    {
+                        "key": f"REPEAT:{source_key}",
+                        "source_key": source_key,
+                        "item_id": str(row["task_id"]),
+                        "text": str(row["query"]),
+                        "corpus_id": corpus_id,
+                    }
+                )
+        if (
+            len(run.production_rows) != self.PRODUCTION_INPUT_COUNT
+            or len(run.adversarial_rows) != self.ADVERSARIAL_INPUT_COUNT
+            or len(run.repeat_rows) != self.REPEATABILITY_INPUT_COUNT
+        ):
+            raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_INPUT_TOPOLOGY_INVALID")
+
+    def _run_embedding_lanes(self, run: _EmbeddingExamRun) -> None:
+        """Embed the production, adversarial and repeat lanes with the model under test."""
+        def execute_lane(
+            lane_id: str,
+            rows: Sequence[Mapping[str, str]],
+        ) -> dict[str, list[float]]:
+            collected: dict[str, list[float]] = {}
+            batch_size = int(run.plan["maximum_inputs_per_model_request"])
+            for start_index in range(0, len(rows), batch_size):
+                batch_rows = rows[start_index : start_index + batch_size]
+                inputs = [str(row["text"]) for row in batch_rows]
+                input_ids = [str(row["key"]) for row in batch_rows]
+                run.call_index += 1
+                behavior_sha256 = _sha256(
+                    {
+                        "model": run.requested_model,
+                        "inputs": inputs,
+                        "purpose": "workflow_model_exam",
+                    }
+                )
+                claim = {
+                    "schema_version": "WorkflowEmbeddingPreSendClaim-v2",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "call_id": f"call-{run.call_index:03d}",
+                    "call_kind": "EMBEDDING_SUCCESSOR_BATCH",
+                    "lane_id": lane_id,
+                    "profile_kind": run.plan["profile_kind"],
+                    "profile_ref": run.plan["profile_ref"],
+                    "purpose": "workflow_model_exam",
+                    "route": (
+                        "EXISTING_SETTINGS_API_TRANSPORT"
+                        if run.plan["profile_kind"] == "API"
+                        else "OLLAMA_LOOPBACK"
+                    ),
+                    "requested_model": run.requested_model,
+                    "model_digest": run.target.get("model_digest"),
+                    "input_count": len(inputs),
+                    "input_id_exact_set_sha256": _sha256(input_ids),
+                    "input_exact_set_sha256": _sha256(inputs),
+                    "behavior_sha256": behavior_sha256,
+                    "plan_sha256": run.plan["plan_sha256"],
+                    "provider_received_gold": False,
+                }
+                claim_receipt = _write_json_create_only(
+                    run.run_root / "claims" / f"call_{run.call_index:03d}.json",
+                    claim,
+                )
+                result = dict(
+                    run.embedding_call(
+                        profile_kind=str(run.target["kind"]),
+                        service=run.target,
+                        model=run.target,
+                        inputs=inputs,
+                        purpose="workflow_model_exam",
+                        timeout_seconds=300,
+                    )
+                )
+                for field in (
+                    "provider_calls",
+                    "external_model_calls",
+                    "external_network_calls",
+                    "external_process_launches",
+                    "local_metadata_calls",
+                ):
+                    run.state[field] += int(result.get(field) or 0)
+                run.state["request_attempts"] += int(
+                    result.get("external_model_calls") or 0
+                )
+                receipt = result.get("execution_receipt")
+                if isinstance(receipt, Mapping):
+                    estimate = receipt.get("estimated_cost_cny")
+                    if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
+                        run.state["estimated_cost_cny"] += float(estimate)
+                    elif run.plan["profile_kind"] == "API":
+                        run.state["cost_estimate_complete"] = False
+                    usage = receipt.get("token_usage")
+                    if isinstance(usage, Mapping):
+                        for field in ("prompt_tokens", "completion_tokens"):
+                            value = usage.get(field)
+                            if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                                run.state["token_usage"][field] = run.state["token_usage"][field] + value if run.state["token_usage"][field] is not None else None
+                if result.get("status") != "PASS":
+                    raise ValueError(str(result.get("reason") or "EMBEDDING_CALL_FAILED"))
+                if int(result.get("external_model_calls") or 0) != 1:
+                    raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_PHYSICAL_CALL_BINDING_INVALID")
+                returned_model = result.get("returned_model")
+                if returned_model != run.requested_model:
+                    raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_RETURNED_MODEL_MISMATCH")
+                if run.observed_returned_model is None:
+                    run.observed_returned_model = str(returned_model)
+                elif run.observed_returned_model != returned_model:
+                    raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_RETURNED_MODEL_DRIFT")
+                if (
+                    not isinstance(receipt, Mapping)
+                    or receipt.get("behavior_sha256") != behavior_sha256
+                ):
+                    raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_BEHAVIOR_RECEIPT_INVALID")
+                vectors = result.get("vectors")
+                if not isinstance(vectors, list):
+                    raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_VECTORS_MISSING")
+                observed_dimension = run.assets["legacy_scorer"].validate_vectors(
+                    vectors,
+                    len(inputs),
+                    expected_dim=run.dimension,
+                )
+                if run.dimension is None:
+                    run.dimension = observed_dimension
+                elif run.dimension != observed_dimension:
+                    raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_DIMENSION_DRIFT")
+                for input_id, vector in zip(input_ids, vectors):
+                    if input_id in collected:
+                        raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_INPUT_ID_DUPLICATE")
+                    collected[input_id] = [float(value) for value in vector]
+                _write_json_create_only(
+                    run.run_root / "receipts" / f"call_{run.call_index:03d}.json",
+                    {
+                        "schema_version": "WorkflowEmbeddingBatchReceipt-v3",
+                        "call_id": claim["call_id"],
+                        "lane_id": lane_id,
+                        "input_count": len(inputs),
+                        "input_id_exact_set_sha256": claim["input_id_exact_set_sha256"],
+                        "response_vector_sha256": _sha256(vectors),
+                        "dimension": run.dimension,
+                        "returned_model": returned_model,
+                        "physical_model_calls": 1,
+                        "pre_send_claim_sha256": claim_receipt["sha256"],
+                        "provider_received_gold": False,
+                        "execution_receipt": deepcopy(dict(receipt)),
+                    },
+                )
+            return collected
+
+        run.production_vectors = execute_lane("PRODUCTION_PRIMARY", run.production_rows)
+        run.adversarial_vectors = execute_lane("ADVERSARIAL_DIAGNOSTIC", run.adversarial_rows)
+        run.repeat_vectors = execute_lane("REPEATABILITY", run.repeat_rows)
+        if (
+            run.call_index != int(run.plan["maximum_model_calls"])
+            or run.state["request_attempts"] != int(run.plan["maximum_model_calls"])
+        ):
+            raise ValueError("WORKFLOW_MODEL_EXAM_EMBEDDING_CALL_COUNT_MISMATCH")
+
+    def _score_embedding_exam(self, run: _EmbeddingExamRun) -> Any:
+        """Score the rankings, repeatability and role adequacy, write the evidence and the public result,
+        and return the result."""
+        production_rankings: dict[str, list[str]] = {}
+        for task in run.production_tasks:
+            corpus = run.assets["corpus_by_id"][str(task["corpus_id"])]
+            document_ids = [str(row["unit_id"]) for row in corpus["documents"]]
+            document_vectors = [
+                run.production_vectors[f"PROD:D:{unit_id}"]
+                for unit_id in document_ids
+            ]
+            production_rankings[str(task["task_id"])] = self._rank_ids(
+                document_ids,
+                document_vectors,
+                run.production_vectors[f"PROD:Q:{task['task_id']}"],
+            )
+        production_score = self._load_successor_scorer().score_track(
+            run.assets["gold"], production_rankings
+        )
+
+        adversarial_scores: dict[str, dict[str, Any]] = {}
+        adversarial_rankings: dict[str, list[str]] = {}
+        for form_id in ("A", "B"):
+            form = run.assets["adversarial_forms"][form_id]
+            grouped = run.adversarial_tasks_by_form[form_id]
+            form_rankings: dict[str, list[str]] = {}
+            for corpus in form["corpora"]:
+                corpus_id = str(corpus["corpus_id"])
+                document_ids = [str(row["unit_id"]) for row in corpus["documents"]]
+                document_vectors = [
+                    run.adversarial_vectors[f"ADV:{form_id}:D:{unit_id}"]
+                    for unit_id in document_ids
+                ]
+                for task in grouped[corpus_id]:
+                    ranked = self._rank_ids(
+                        document_ids,
+                        document_vectors,
+                        run.adversarial_vectors[
+                            f"ADV:{form_id}:Q:{task['task_id']}"
+                        ],
+                    )
+                    form_rankings[str(task["task_id"])] = ranked
+                    adversarial_rankings[
+                        f"{form_id}:{task['task_id']}"
+                    ] = ranked
+            adversarial_scores[form_id] = run.assets["legacy_scorer"].score_form(
+                form["gold"], form_rankings
+            )
+        adversarial_mean = statistics.fmean(
+            float(adversarial_scores[form_id]["score"])
+            for form_id in ("A", "B")
+        )
+
+        similarities = [
+            self._cosine(
+                run.production_vectors[str(row["source_key"])],
+                run.repeat_vectors[str(row["key"])],
+            )
+            for row in run.repeat_rows
+        ]
+        repeatability = {
+            "schema_version": "EmbeddingRepeatabilityScore-v1",
+            "selection_revision": self.REPEATABILITY_SELECTION_REVISION,
+            "sample_count": len(similarities),
+            "mean_vector_cosine": round(statistics.fmean(similarities), 12),
+            "minimum_vector_cosine": round(min(similarities), 12),
+            "below_0_999999_count": sum(value < 0.999999 for value in similarities),
+            "qualification_threshold_defined": False,
+        }
+        role_adequacy = assess_embedding_role_adequacy(
+            production_score,
+            repeatability,
+        )
+        cap = run.plan.get("budget_cap_cny")
+        estimated_cost = self._state_cost(run.state, str(run.plan["profile_kind"]))
+        if cap is not None and (
+            estimated_cost is None or estimated_cost > float(cap)
+        ):
+            raise ValueError("WORKFLOW_MODEL_EXAM_COST_CAP_NOT_VERIFIABLE_OR_EXCEEDED")
+
+        _write_json_create_only(
+            run.run_root / "rankings" / "production_rankings.json",
+            {
+                "schema_version": "EmbeddingProductionRankings-v1",
+                "rankings": production_rankings,
+                "provider_received_gold": False,
+            },
+        )
+        _write_json_create_only(
+            run.run_root / "rankings" / "adversarial_rankings.json",
+            {
+                "schema_version": "EmbeddingAdversarialRankings-v1",
+                "rankings": adversarial_rankings,
+                "provider_received_gold": False,
+            },
+        )
+        _write_json_create_only(
+            run.run_root / "scores" / "production_score.local.json",
+            production_score,
+        )
+        _write_json_create_only(
+            run.run_root / "scores" / "adversarial_score.local.json",
+            adversarial_scores,
+        )
+        _write_json_create_only(
+            run.run_root / "scores" / "repeatability.json",
+            repeatability,
+        )
+
+        production_score_exact = float(
+            production_score["production_recall_score"]
+        )
+        embedding_diagnostics = {
+            "schema_version": "QualityNewEmbeddingLiveDiagnostic-v2",
+            "score_views": {
+                "production_primary": {
+                    "kind": "PRODUCTION_RECALL_AT_15",
+                    "score_exact": production_score_exact,
+                    "critical_evidence_recall_at_15": production_score[
+                        "critical_evidence_recall_at_15"
+                    ],
+                    "facet_coverage_at_15": production_score[
+                        "facet_coverage_at_15"
+                    ],
+                    "source_scope_integrity_at_15": production_score[
+                        "source_scope_integrity_at_15"
+                    ],
+                    "clean_control_recall_at_10": production_score[
+                        "clean_control_recall_at_10"
+                    ],
+                    "qualification_eligible": False,
+                    "quality_verdict": role_adequacy["quality_verdict"],
+                },
+                "adversarial_diagnostic": {
+                    "kind": "LEGACY_NONLINEAR_DEDUCTION_SAMPLE",
+                    "score_exact": round(adversarial_mean, 6),
+                    "form_scores": {
+                        form_id: adversarial_scores[form_id]["score"]
+                        for form_id in ("A", "B")
+                    },
+                    "independent_from_production_primary": True,
+                    "qualification_eligible": False,
+                },
+                "repeatability": repeatability,
+            },
+            "workload_shape": deepcopy(run.assets["workload_shape"]),
+            "selection_contract": {
+                "single_aggregate_is_sufficient_for_selection": False,
+                "production_and_adversarial_scores_must_not_be_combined": True,
+                "repeatability_and_operational_profile_required": True,
+                "meaningful_pairwise_separation_must_be_demonstrated": True,
+                "pack_native_quality_threshold_defined": False,
+                "quality_threshold_defined": True,
+                "role_adequacy_policy_revision": (
+                    EMBEDDING_ROLE_ADEQUACY_POLICY["revision"]
+                ),
+                "formal_qualification_eligible": False,
+                "model_failure_established": False,
+            },
+            "role_adequacy_assessment": role_adequacy,
+            "execution_provenance": {
+                "physical_model_call_target": run.plan["maximum_model_calls"],
+                "maximum_inputs_per_model_request": run.plan[
+                    "maximum_inputs_per_model_request"
+                ],
+                "production_input_count": self.PRODUCTION_INPUT_COUNT,
+                "adversarial_input_count": self.ADVERSARIAL_INPUT_COUNT,
+                "repeatability_input_count": self.REPEATABILITY_INPUT_COUNT,
+                "historical_quality_call_count_relabelled": False,
+            },
+            "cross_category_comparison_forbidden": True,
+            "global_ranking_forbidden": True,
+        }
+        embedding_diagnostics["diagnostic_sha256"] = _sha256(
+            embedding_diagnostics
+        )
+        public_result = {
+            "schema_version": "WorkflowModelExamRunResult-v1",
+            "status": "PASS",
+            "execution_outcome": "COMPLETED",
+            "scorability": "SCOREABLE",
+            "raw_quality_candidate_verdict": role_adequacy[
+                "quality_verdict"
+            ],
+            "reason": "Quality_NEW_EMBEDDING_SUCCESSOR_TECHNICALLY_COMPLETED",
+            "run_id": run.run_id,
+            "plan_sha256": run.plan["plan_sha256"],
+            "requested_model": run.requested_model,
+            "returned_model": run.observed_returned_model,
+            "score": int(round(production_score_exact)),
+            "score_exact": round(production_score_exact, 6),
+            "score_semantics": (
+                "FIRST_STAGE_HIGH_RECALL_AT_15_ROLE_ADEQUACY"
+            ),
+            "production_recall_score_exact": round(production_score_exact, 6),
+            "adversarial_diagnostic_score_exact": round(adversarial_mean, 6),
+            "quality_verdict": role_adequacy["quality_verdict"],
+            "acceptance_verdict": "NOT_ASSESSED",
+            "quality_threshold_defined": True,
+            "score_is_descriptive_within_category": False,
+            "role_adequacy_assessment": role_adequacy,
+            "model_fail_verdict": "NOT_ESTABLISHED",
+            "model_fail_established": False,
+            "exam_category_id": run.plan["exam_category_id"],
+            "role_id": run.plan["role_id"],
+            "sample_revision": run.plan["sample_revision"],
+            "comparison_cohort_id": run.plan["comparison_cohort_id"],
+            "comparison_binding_sha256": run.plan["comparison_binding_sha256"],
+            "adversarial_comparison_cohort_id": run.plan[
+                "adversarial_comparison_cohort_id"
+            ],
+            "horizontal_comparison_eligible": True,
+            "horizontal_comparison_allowed_only_with_same_cohort": True,
+            "cross_category_comparison_forbidden": True,
+            "global_ranking_forbidden": True,
+            "failed_exam_item_count": int(production_score["critical_miss_count"]),
+            "critical_miss_count": int(production_score["critical_miss_count"]),
+            "failed_exam_item_count_semantics": (
+                "PRODUCTION_DIAGNOSTIC_CRITICAL_MISS_NOT_ADMISSION_FAIL"
+            ),
+            "dimension": run.dimension,
+            "request_attempts": run.state["request_attempts"],
+            "provider_calls": run.state["provider_calls"],
+            "external_model_calls": run.state["external_model_calls"],
+            "external_network_calls": run.state["external_network_calls"],
+            "external_process_launches": run.state["external_process_launches"],
+            "local_metadata_calls": run.state["local_metadata_calls"],
+            "token_usage": run.state["token_usage"],
+            "estimated_cost_cny": estimated_cost,
+            "actual_cost": None,
+            "cost_semantics": run.plan["cost_semantics"],
+            "reference_regression_only": True,
+            "blind_holdout_eligible": False,
+            "qualification_eligible": False,
+            "provider_received_answer_key": False,
+            "provider_received_gold": False,
+            "embedding_diagnostics": embedding_diagnostics,
+        }
+        evidence = _write_json_create_only(
+            run.run_root / "exam_result.json", public_result
+        )
+        return {
+            **public_result,
+            "schema_version": RESULT_SCHEMA,
+            "kind": "WORKFLOW_NODE",
+            "duration_ms": max(0, int((monotonic() - run.started) * 1000)),
+            "exam_mode": run.plan["mode"],
+            "exam_run_id": run.run_id,
+            "exam_run_root": str(run.run_root.resolve()),
+            "exam_evidence_sha256": evidence["sha256"],
+        }

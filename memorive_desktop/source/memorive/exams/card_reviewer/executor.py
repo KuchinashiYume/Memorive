@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from memorive.models.provider_aliases import matches_result_model
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
 import importlib
@@ -58,6 +59,63 @@ from memorive.exams.card_reviewer.successor import (
 )
 from memorive.exams.card_reviewer.repair_prompt import project_card_reviewer_repair_prompt
 from memorive.exams.card_reviewer.role_projection import score_card_reviewer_role_projection
+
+
+@dataclass
+class _CardReviewerExamRun:
+    """One run of the card reviewer exam (QualityCardReviewerExamExecutor.execute).
+
+    The plan, the run folder and the call counters are set when the run starts; _load_card_reviewer_inputs
+    reads the pack, its schemas and contracts and the two forms; execute sends forms A and B and scores
+    the replies; _repair_card_reviewer_forms runs the repair round and fixes the verdict, the scorecard
+    and the comparison; _publish_card_reviewer_exam decides the operational outcome, writes the
+    evidence and builds the result. A failure is reported from the plan and counters as they are."""
+
+    # The run as planned.
+    target: Mapping[str, Any]
+    context: Mapping[str, Any]
+    structured_chat: Callable[..., Mapping[str, Any]]
+    plan: Mapping[str, Any]
+    requested_model: Any
+    started: float
+    run_id: str
+    run_root: Path
+    state: dict[str, Any]
+    # The pack and the inputs of this run.
+    protocol: Any = None
+    exam: Any = None
+    schema: Any = None
+    prompt_contract: Any = None
+    scoring_protocol: Any = None
+    comparison_metadata: Any = None
+    exam_inputs: Any = None
+    forms: Any = None
+    golds: Any = None
+    form_schemas: Any = None
+    # Replies and first scores of forms A and B.
+    scores: dict[str, dict[str, Any]] = field(default_factory=dict)
+    responses: dict[str, dict[str, Any]] = field(default_factory=dict)
+    initial_form_scores: Any = None
+    pointer_normalization_actions: Any = None
+    # The repair round and the verdict it leads to.
+    repair_projection: dict[str, Any] | None = None
+    repair_prompt_projection: dict[str, Any] | None = None
+    qualification_verdict: str = ""
+    operational_eligibility: str = ""
+    operational_safety_gate: str = ""
+    safety_blocking_residual_count: int | None = None
+    calibration_residual_count: int | None = None
+    scorecard: dict[str, Any] | None = None
+    comparison_projection: Any = None
+    verdict: Any = None
+    score: Any = None
+    score_semantics: Any = None
+    repair_rounds: Any = None
+    repair_completion_rate: Any = None
+    repair_outcome_score: Any = None
+    repair_outcome_form_scores: Any = None
+    role_ability_form_scores: Any = None
+    failed_exam_item_count: Any = None
 
 
 class QualityCardReviewerExamExecutor:
@@ -1357,7 +1415,10 @@ class QualityCardReviewerExamExecutor:
                 "accepted_at": datetime.now(timezone.utc).isoformat(),
             },
         )
-        state = {
+        run = _CardReviewerExamRun(
+            target=target, context=context, structured_chat=structured_chat, plan=plan,
+            requested_model=requested_model, started=started, run_id=run_id, run_root=run_root,
+            state={
             "request_attempts": 0,
             "provider_calls": 0,
             "external_model_calls": 0,
@@ -1365,52 +1426,12 @@ class QualityCardReviewerExamExecutor:
             "external_process_launches": 0,
             "estimated_cost_cny": 0.0,
             "token_usage": {"prompt_tokens": 0, "completion_tokens": 0},
-        }
+        },
+        )
         try:
-            modules = self._quality()
-            protocol = modules["protocol"]
-            exam = modules["exam"]
-            pack = modules["reference"].load_card_reviewer_reference_exam_pack(
-                self._reference_pack_root
-            )
-            schema = _load_json(
-                pack.member("schemas/card_reviewer_output.schema.json")
-            )
-            prompt_contract = _load_json(
-                pack.member("prompts/card_reviewer_prompt.json")
-            )
-            scoring_protocol = _load_json(
-                pack.member("scoring/scoring_protocol.json")
-            )
-            planned_comparison = plan.get("comparison")
-            comparison_metadata = (
-                deepcopy(dict(planned_comparison))
-                if isinstance(planned_comparison, Mapping)
-                else card_reviewer_comparison_metadata(
-                    reference_pack_id=str(plan["reference_pack_id"]),
-                    reference_pack_revision=str(
-                        plan["reference_pack_revision"]
-                    ),
-                    reference_pack_sha256=str(plan["reference_pack_sha256"]),
-                    scoring_protocol_revision=str(
-                        scoring_protocol["schema_version"]
-                    ),
-                    scoring_protocol_sha256=_file_sha256(
-                        pack.member("scoring/scoring_protocol.json")
-                    ),
-                    executor_ref=self.EXECUTOR_REF,
-                )
-            )
-            exam_inputs = self._exam_inputs(
-                pack=pack,
-                schema=schema,
-                context=context,
-            )
-            forms = exam_inputs["forms"]
-            golds = exam_inputs["golds"]
-            form_schemas = exam_inputs["schemas"]
-            scores: dict[str, dict[str, Any]] = {}
-            responses: dict[str, dict[str, Any]] = {}
+            self._load_card_reviewer_inputs(run)
+            run.scores = {}
+            run.responses = {}
             for form_id in ("A", "B"):
                 call_index = {"value": 0}
 
@@ -1425,13 +1446,13 @@ class QualityCardReviewerExamExecutor:
                     if not isinstance(response_schema, Mapping):
                         raise ValueError("WORKFLOW_MODEL_EXAM_RESPONSE_SCHEMA_MISSING")
                     response = self._chunked_provider_call(
-                        run_id=run_id,
-                        run_root=run_root,
-                        state=state,
-                        target=target,
+                        run_id=run.run_id,
+                        run_root=run.run_root,
+                        state=run.state,
+                        target=run.target,
                         request=request,
                         response_schema=response_schema,
-                        structured_chat=structured_chat,
+                        structured_chat=run.structured_chat,
                         call_kind=(
                             f"FORM_{current_form}_INITIAL"
                             if index["value"] == 1
@@ -1441,779 +1462,702 @@ class QualityCardReviewerExamExecutor:
                     return {"status": "COMPLETED", "response": response}
 
                 result = self._execute_form_protocol(
-                    protocol=protocol,
-                    exam=exam,
-                    form=forms[form_id],
-                    schema=form_schemas[form_id],
-                    prompt_contract=prompt_contract,
-                    scoring_protocol=scoring_protocol,
+                    protocol=run.protocol,
+                    exam=run.exam,
+                    form=run.forms[form_id],
+                    schema=run.form_schemas[form_id],
+                    prompt_contract=run.prompt_contract,
+                    scoring_protocol=run.scoring_protocol,
                     subject_call=subject_call,
-                    gold=golds[form_id],
+                    gold=run.golds[form_id],
                 )
-                scores[form_id] = deepcopy(dict(result))
+                run.scores[form_id] = deepcopy(dict(result))
                 final_response = result.get("final_response")
                 if isinstance(final_response, Mapping):
-                    responses[form_id] = deepcopy(dict(final_response))
+                    run.responses[form_id] = deepcopy(dict(final_response))
 
-            initial_form_scores = {
+            run.initial_form_scores = {
                 form_id: (
-                    round(float(scores[form_id]["score"]), 6)
-                    if isinstance(scores[form_id].get("score"), (int, float))
-                    and not isinstance(scores[form_id].get("score"), bool)
+                    round(float(run.scores[form_id]["score"]), 6)
+                    if isinstance(run.scores[form_id].get("score"), (int, float))
+                    and not isinstance(run.scores[form_id].get("score"), bool)
                     else None
                 )
                 for form_id in ("A", "B")
             }
-            pointer_normalization_actions = [
+            run.pointer_normalization_actions = [
                 {
                     "form_id": form_id,
                     **deepcopy(dict(action)),
                 }
                 for form_id in ("A", "B")
-                for action in scores[form_id].get(
+                for action in run.scores[form_id].get(
                     "pointer_normalizations", []
                 )
                 if isinstance(action, Mapping)
             ]
-            repair_projection: dict[str, Any] | None = None
-            repair_prompt_projection: dict[str, Any] | None = None
-            qualification_verdict = "DISQUALIFIED"
-            operational_eligibility = "NOT_RECOMMENDED"
-            operational_safety_gate = "FAIL"
-            safety_blocking_residual_count: int | None = None
-            calibration_residual_count: int | None = None
-            scorecard: dict[str, Any] | None = None
-            comparison_projection = deepcopy(comparison_metadata)
+            run.repair_projection = None
+            run.repair_prompt_projection = None
+            run.qualification_verdict = "DISQUALIFIED"
+            run.operational_eligibility = "NOT_RECOMMENDED"
+            run.operational_safety_gate = "FAIL"
+            run.safety_blocking_residual_count = None
+            run.calibration_residual_count = None
+            run.scorecard = None
+            run.comparison_projection = deepcopy(run.comparison_metadata)
 
-            if not all(scores[form_id].get("status") == "SCORED" for form_id in ("A", "B")):
-                raise ValueError(
-                    "CARD_REVIEWER_STRUCTURAL_SCORING_NOT_SCOREABLE"
+            self._repair_card_reviewer_forms(run)
+
+            return self._publish_card_reviewer_exam(run)
+        except Exception as error:
+            reason = str(error) or type(error).__name__
+            if len(reason) > 200:
+                reason = type(error).__name__
+            failure = {
+                "schema_version": "WorkflowModelExamRunFailure-v1",
+                "status": "NOT_ASSESSED",
+                "reason": reason,
+                "run_id": run.run_id,
+                "plan_sha256": run.plan["plan_sha256"],
+                "provider_calls": run.state["provider_calls"],
+                "request_attempts": run.state["request_attempts"],
+                "external_model_calls": run.state["external_model_calls"],
+                "external_network_calls": run.state["external_network_calls"],
+                "external_process_launches": run.state[
+                    "external_process_launches"
+                ],
+                "token_usage": run.state["token_usage"],
+                "estimated_cost_cny": (
+                    round(run.state["estimated_cost_cny"], 9)
+                    if run.plan["profile_kind"] == "API"
+                    else (0.0 if run.plan["profile_kind"] == "LOCAL" else None)
+                ),
+                "score": None,
+                "execution_outcome": classify_execution_outcome(
+                    {"status": "ERROR", "reason": reason}
+                ).value,
+                "scorability": Scorability.NOT_ASSESSED.value,
+            }
+            evidence = _write_json_create_only(
+                run.run_root / "exam_failure.json", failure
+            )
+            result = _not_run(reason, requested_model=run.requested_model)
+            result.update(
+                duration_ms=max(0, int((monotonic() - run.started) * 1000)),
+                provider_calls=run.state["provider_calls"],
+                request_attempts=run.state["request_attempts"],
+                external_model_calls=run.state["external_model_calls"],
+                external_network_calls=run.state["external_network_calls"],
+                external_process_launches=run.state[
+                    "external_process_launches"
+                ],
+                exam_run_id=run.run_id,
+                exam_run_root=str(run.run_root.resolve()),
+                exam_evidence_sha256=evidence["sha256"],
+                token_usage=run.state["token_usage"],
+                estimated_cost_cny=failure["estimated_cost_cny"],
+                cost_semantics=run.plan["cost_semantics"],
+                execution_outcome=failure["execution_outcome"],
+                scorability=failure["scorability"],
+            )
+            return result
+
+    def _load_card_reviewer_inputs(self, run: _CardReviewerExamRun) -> None:
+        """The reference pack, its schema, prompt contract and scoring protocol, the comparison metadata,
+        and the forms, golds and form schemas of this run."""
+        modules = self._quality()
+        run.protocol = modules["protocol"]
+        run.exam = modules["exam"]
+        pack = modules["reference"].load_card_reviewer_reference_exam_pack(
+            self._reference_pack_root
+        )
+        run.schema = _load_json(
+            pack.member("schemas/card_reviewer_output.schema.json")
+        )
+        run.prompt_contract = _load_json(
+            pack.member("prompts/card_reviewer_prompt.json")
+        )
+        run.scoring_protocol = _load_json(
+            pack.member("scoring/scoring_protocol.json")
+        )
+        planned_comparison = run.plan.get("comparison")
+        run.comparison_metadata = (
+            deepcopy(dict(planned_comparison))
+            if isinstance(planned_comparison, Mapping)
+            else card_reviewer_comparison_metadata(
+                reference_pack_id=str(run.plan["reference_pack_id"]),
+                reference_pack_revision=str(
+                    run.plan["reference_pack_revision"]
+                ),
+                reference_pack_sha256=str(run.plan["reference_pack_sha256"]),
+                scoring_protocol_revision=str(
+                    run.scoring_protocol["schema_version"]
+                ),
+                scoring_protocol_sha256=_file_sha256(
+                    pack.member("scoring/scoring_protocol.json")
+                ),
+                executor_ref=self.EXECUTOR_REF,
+            )
+        )
+        run.exam_inputs = self._exam_inputs(
+            pack=pack,
+            schema=run.schema,
+            context=run.context,
+        )
+        run.forms = run.exam_inputs["forms"]
+        run.golds = run.exam_inputs["golds"]
+        run.form_schemas = run.exam_inputs["schemas"]
+
+    def _repair_card_reviewer_forms(self, run: _CardReviewerExamRun) -> None:
+        """Run the repair round on the scored forms (or record why there is none) and fix the verdict, the
+        scorecard, the residual counts and the comparison."""
+        if not all(run.scores[form_id].get("status") == "SCORED" for form_id in ("A", "B")):
+            raise ValueError(
+                "CARD_REVIEWER_STRUCTURAL_SCORING_NOT_SCOREABLE"
+            )
+            run.score = 0.0
+            run.score_semantics = "STRUCTURAL_CONTRACT_FAILURE_ZERO"
+            run.verdict = "FAIL"
+            run.failed_exam_item_count = sum(
+                len(run.exam.form_cases(run.forms[form_id])[1])
+                for form_id in ("A", "B")
+            )
+            run.role_ability_form_scores = {"A": 0.0, "B": 0.0}
+            run.repair_outcome_form_scores = {"A": 0.0, "B": 0.0}
+            run.repair_outcome_score = 0.0
+            run.repair_completion_rate = 0.0
+            hard_gates = {"A": "FAIL", "B": "FAIL"}
+            run.repair_rounds = 0
+            run.comparison_projection["horizontal_comparison_eligible"] = False
+            run.comparison_projection["noncomparison_reason"] = (
+                "STRUCTURAL_SCORING_FAILURE"
+            )
+            run.repair_projection = {
+                "schema_version": "DesktopCardReviewerRoleProjection-v5",
+                "status": "STRUCTURAL_SCORING_FAILURE",
+                "qualification_verdict": run.qualification_verdict,
+                "quality_exact_repair_qualification_verdict": (
+                    run.qualification_verdict
+                ),
+                "operational_eligibility_verdict": (
+                    run.operational_eligibility
+                ),
+                "operational_safety_gate": run.operational_safety_gate,
+                "operational_policy_revision": (
+                    CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
+                ),
+                "core_lifecycle_revision": (
+                    CORE_CARD_REVIEWER_LIFECYCLE_REVISION
+                ),
+                "core_closure_verdict": "HUMAN_REQUIRED",
+                "core_closure_score": 0.0,
+                "semantic_repair_rounds": 0,
+                "second_semantic_repair_allowed": (
+                    self.SEMANTIC_REPAIR_ROUND_LIMIT >= 2
+                ),
+                "role_ability_score": 0.0,
+                "score_semantics": run.score_semantics,
+                "role_ability_form_scores": deepcopy(
+                    run.role_ability_form_scores
+                ),
+                "reviewer_repair_outcome_score": 0.0,
+                "repair_completion_rate": 0.0,
+                "repair_completion_rate_semantics": (
+                    "ORIGINAL_WRONG_CASE_REACHES_EXACT_SCORE_100_"
+                    "WITH_NEW_WRONGS_COUNTED"
+                ),
+                "exact_case_repair_rate": 0.0,
+                "case_score_deficit_recovery_rate": 0.0,
+                "repair_metadata_collision_suspect_count": 0,
+                "collision_adjusted_repair_diagnostic_rate": 0.0,
+                "collision_adjusted_repair_diagnostic_only": True,
+                "repair_outcome_form_scores": deepcopy(
+                    run.repair_outcome_form_scores
+                ),
+                "structural_contract_failure_final_score": 0.0,
+                "numeric_score_is_not_qualification_verdict": True,
+                "cross_category_coefficients_reused": False,
+            }
+        else:
+            wrong_count = sum(
+                1
+                for form_id in ("A", "B")
+                for detail in run.scores[form_id].get("details", [])
+                if isinstance(detail, Mapping)
+                and isinstance(detail.get("score"), (int, float))
+                and not isinstance(detail.get("score"), bool)
+                and float(detail["score"]) < 100.0
+            )
+            run.repair_rounds = 0
+            if wrong_count:
+                repair_cycle = self._execute_semantic_repair_rounds(
+                    run_id=run.run_id,
+                    run_root=run.run_root,
+                    state=run.state,
+                    target=run.target,
+                    structured_chat=run.structured_chat,
+                    exam=run.exam,
+                    forms=run.forms,
+                    golds=run.golds,
+                    form_schemas=run.form_schemas,
+                    schema=run.schema,
+                    scoring_protocol=run.scoring_protocol,
+                    prompt_contract=run.prompt_contract,
+                    original_scores=run.scores,
+                    original_responses=run.responses,
                 )
-                score = 0.0
-                score_semantics = "STRUCTURAL_CONTRACT_FAILURE_ZERO"
-                verdict = "FAIL"
-                failed_exam_item_count = sum(
-                    len(exam.form_cases(forms[form_id])[1])
+                repaired = repair_cycle["projection"]
+                run.repair_rounds = int(repair_cycle["repair_rounds"])
+                run.repair_projection = deepcopy(dict(repaired))
+                run.repair_prompt_projection = deepcopy(
+                    dict(repair_cycle["repair_prompt_projection"])
+                )
+                run.responses = {
+                    key: deepcopy(dict(value))
+                    for key, value in repair_cycle["responses"].items()
+                }
+                run.score = float(repaired["role_ability_score"])
+                run.score_semantics = str(repaired["score_semantics"])
+                run.repair_outcome_score = float(
+                    repaired["reviewer_repair_outcome_score"]
+                )
+                run.repair_completion_rate = float(
+                    repaired["repair_completion_rate"]
+                )
+                run.failed_exam_item_count = int(
+                    repaired["failed_exam_item_count"]
+                )
+                run.role_ability_form_scores = dict(
+                    repaired["role_ability_form_scores"]
+                )
+                run.repair_outcome_form_scores = dict(
+                    repaired["repair_outcome_form_scores"]
+                )
+                hard_gates = {
+                    form_id: repaired["forms"][form_id][
+                        "hard_gate_verdict"
+                    ]
                     for form_id in ("A", "B")
+                }
+                run.qualification_verdict = str(
+                    repaired["qualification_verdict"]
                 )
-                role_ability_form_scores = {"A": 0.0, "B": 0.0}
-                repair_outcome_form_scores = {"A": 0.0, "B": 0.0}
-                repair_outcome_score = 0.0
-                repair_completion_rate = 0.0
-                hard_gates = {"A": "FAIL", "B": "FAIL"}
-                repair_rounds = 0
-                comparison_projection["horizontal_comparison_eligible"] = False
-                comparison_projection["noncomparison_reason"] = (
-                    "STRUCTURAL_SCORING_FAILURE"
+                run.operational_eligibility = str(
+                    repaired["operational_eligibility_verdict"]
                 )
-                repair_projection = {
+                run.operational_safety_gate = str(
+                    repaired["operational_safety_gate"]
+                )
+                run.safety_blocking_residual_count = int(
+                    repaired["safety_blocking_residual_count"]
+                )
+                run.calibration_residual_count = int(
+                    repaired["calibration_residual_count"]
+                )
+            else:
+                run.score = (
+                    float(run.scores["A"]["score"])
+                    + float(run.scores["B"]["score"])
+                ) / 2.0
+                run.score_semantics = CARD_REVIEWER_SCORE_SEMANTICS
+                run.repair_outcome_score = run.score
+                run.repair_completion_rate = 1.0
+                run.failed_exam_item_count = 0
+                run.role_ability_form_scores = {
+                    form_id: float(run.scores[form_id]["score"])
+                    for form_id in ("A", "B")
+                }
+                run.repair_outcome_form_scores = deepcopy(
+                    run.role_ability_form_scores
+                )
+                hard_gates = {
+                    form_id: str(run.scores[form_id]["hard_gate_verdict"])
+                    for form_id in ("A", "B")
+                }
+                run.qualification_verdict = (
+                    "PASS"
+                    if all(value == "PASS" for value in hard_gates.values())
+                    else "DISQUALIFIED"
+                )
+                run.operational_safety_gate = (
+                    "PASS"
+                    if run.qualification_verdict == "PASS"
+                    else "FAIL"
+                )
+                run.operational_eligibility = (
+                    "SUITABLE"
+                    if run.operational_safety_gate == "PASS"
+                    and run.score >= CARD_REVIEWER_OPERATIONAL_PASSING_SCORE
+                    else (
+                        "REJECT"
+                        if run.score < 60.0
+                        else "NOT_RECOMMENDED"
+                    )
+                )
+                run.safety_blocking_residual_count = 0
+                run.calibration_residual_count = 0
+                run.repair_projection = {
                     "schema_version": "DesktopCardReviewerRoleProjection-v5",
-                    "status": "STRUCTURAL_SCORING_FAILURE",
-                    "qualification_verdict": qualification_verdict,
+                    "status": "DIRECTED_REPAIR_NOT_REQUIRED",
+                    "qualification_verdict": run.qualification_verdict,
                     "quality_exact_repair_qualification_verdict": (
-                        qualification_verdict
+                        run.qualification_verdict
                     ),
                     "operational_eligibility_verdict": (
-                        operational_eligibility
+                        run.operational_eligibility
                     ),
-                    "operational_safety_gate": operational_safety_gate,
+                    "operational_safety_gate": run.operational_safety_gate,
                     "operational_policy_revision": (
                         CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
                     ),
                     "core_lifecycle_revision": (
                         CORE_CARD_REVIEWER_LIFECYCLE_REVISION
                     ),
-                    "core_closure_verdict": "HUMAN_REQUIRED",
-                    "core_closure_score": 0.0,
+                    "core_closure_verdict": "DELTA_PASS",
+                    "core_closure_score": round(run.score, 6),
                     "semantic_repair_rounds": 0,
                     "second_semantic_repair_allowed": (
                         self.SEMANTIC_REPAIR_ROUND_LIMIT >= 2
                     ),
-                    "role_ability_score": 0.0,
-                    "score_semantics": score_semantics,
-                    "role_ability_form_scores": deepcopy(
-                        role_ability_form_scores
+                    "governed_disposition_case_count": 0,
+                    "operational_passing_score": (
+                        CARD_REVIEWER_OPERATIONAL_PASSING_SCORE
                     ),
-                    "reviewer_repair_outcome_score": 0.0,
-                    "repair_completion_rate": 0.0,
+                    "safety_blocking_residual_count": 0,
+                    "safety_blocking_case_ids": [],
+                    "calibration_residual_count": 0,
+                    "calibration_case_ids": [],
+                    "operational_residual_diagnostics": {"A": [], "B": []},
+                    "role_ability_score": round(run.score, 6),
+                    "score_semantics": run.score_semantics,
+                    "initial_nonlinear_score": round(run.score, 6),
+                    "post_repair_nonlinear_score": round(run.score, 6),
+                    "reviewer_repair_outcome_score": round(run.score, 6),
+                    "repair_completion_rate": 1.0,
                     "repair_completion_rate_semantics": (
                         "ORIGINAL_WRONG_CASE_REACHES_EXACT_SCORE_100_"
                         "WITH_NEW_WRONGS_COUNTED"
                     ),
-                    "exact_case_repair_rate": 0.0,
-                    "case_score_deficit_recovery_rate": 0.0,
+                    "exact_case_repair_rate": 1.0,
+                    "case_score_deficit_recovery_rate": 1.0,
                     "repair_metadata_collision_suspect_count": 0,
-                    "collision_adjusted_repair_diagnostic_rate": 0.0,
+                    "repair_metadata_collision_suspect_case_ids": [],
+                    "collision_adjusted_repair_diagnostic_rate": 1.0,
                     "collision_adjusted_repair_diagnostic_only": True,
-                    "repair_outcome_form_scores": deepcopy(
-                        repair_outcome_form_scores
+                    "collision_adjusted_repair_qualification_effect": (
+                        "NONE"
                     ),
-                    "structural_contract_failure_final_score": 0.0,
-                    "numeric_score_is_not_qualification_verdict": True,
-                    "cross_category_coefficients_reused": False,
-                }
-            else:
-                wrong_count = sum(
-                    1
-                    for form_id in ("A", "B")
-                    for detail in scores[form_id].get("details", [])
-                    if isinstance(detail, Mapping)
-                    and isinstance(detail.get("score"), (int, float))
-                    and not isinstance(detail.get("score"), bool)
-                    and float(detail["score"]) < 100.0
-                )
-                repair_rounds = 0
-                if wrong_count:
-                    repair_cycle = self._execute_semantic_repair_rounds(
-                        run_id=run_id,
-                        run_root=run_root,
-                        state=state,
-                        target=target,
-                        structured_chat=structured_chat,
-                        exam=exam,
-                        forms=forms,
-                        golds=golds,
-                        form_schemas=form_schemas,
-                        schema=schema,
-                        scoring_protocol=scoring_protocol,
-                        prompt_contract=prompt_contract,
-                        original_scores=scores,
-                        original_responses=responses,
-                    )
-                    repaired = repair_cycle["projection"]
-                    repair_rounds = int(repair_cycle["repair_rounds"])
-                    repair_projection = deepcopy(dict(repaired))
-                    repair_prompt_projection = deepcopy(
-                        dict(repair_cycle["repair_prompt_projection"])
-                    )
-                    responses = {
-                        key: deepcopy(dict(value))
-                        for key, value in repair_cycle["responses"].items()
-                    }
-                    score = float(repaired["role_ability_score"])
-                    score_semantics = str(repaired["score_semantics"])
-                    repair_outcome_score = float(
-                        repaired["reviewer_repair_outcome_score"]
-                    )
-                    repair_completion_rate = float(
-                        repaired["repair_completion_rate"]
-                    )
-                    failed_exam_item_count = int(
-                        repaired["failed_exam_item_count"]
-                    )
-                    role_ability_form_scores = dict(
-                        repaired["role_ability_form_scores"]
-                    )
-                    repair_outcome_form_scores = dict(
-                        repaired["repair_outcome_form_scores"]
-                    )
-                    hard_gates = {
-                        form_id: repaired["forms"][form_id][
-                            "hard_gate_verdict"
-                        ]
-                        for form_id in ("A", "B")
-                    }
-                    qualification_verdict = str(
-                        repaired["qualification_verdict"]
-                    )
-                    operational_eligibility = str(
-                        repaired["operational_eligibility_verdict"]
-                    )
-                    operational_safety_gate = str(
-                        repaired["operational_safety_gate"]
-                    )
-                    safety_blocking_residual_count = int(
-                        repaired["safety_blocking_residual_count"]
-                    )
-                    calibration_residual_count = int(
-                        repaired["calibration_residual_count"]
-                    )
-                else:
-                    score = (
-                        float(scores["A"]["score"])
-                        + float(scores["B"]["score"])
-                    ) / 2.0
-                    score_semantics = CARD_REVIEWER_SCORE_SEMANTICS
-                    repair_outcome_score = score
-                    repair_completion_rate = 1.0
-                    failed_exam_item_count = 0
-                    role_ability_form_scores = {
-                        form_id: float(scores[form_id]["score"])
-                        for form_id in ("A", "B")
-                    }
-                    repair_outcome_form_scores = deepcopy(
-                        role_ability_form_scores
-                    )
-                    hard_gates = {
-                        form_id: str(scores[form_id]["hard_gate_verdict"])
-                        for form_id in ("A", "B")
-                    }
-                    qualification_verdict = (
-                        "PASS"
-                        if all(value == "PASS" for value in hard_gates.values())
-                        else "DISQUALIFIED"
-                    )
-                    operational_safety_gate = (
-                        "PASS"
-                        if qualification_verdict == "PASS"
-                        else "FAIL"
-                    )
-                    operational_eligibility = (
-                        "SUITABLE"
-                        if operational_safety_gate == "PASS"
-                        and score >= CARD_REVIEWER_OPERATIONAL_PASSING_SCORE
-                        else (
-                            "REJECT"
-                            if score < 60.0
-                            else "NOT_RECOMMENDED"
-                        )
-                    )
-                    safety_blocking_residual_count = 0
-                    calibration_residual_count = 0
-                    repair_projection = {
-                        "schema_version": "DesktopCardReviewerRoleProjection-v5",
-                        "status": "DIRECTED_REPAIR_NOT_REQUIRED",
-                        "qualification_verdict": qualification_verdict,
-                        "quality_exact_repair_qualification_verdict": (
-                            qualification_verdict
+                    "reviewer_repair_burden": {
+                        "initial_burden_total_mean": 0.0,
+                    },
+                    "role_ability_form_scores": deepcopy(
+                        run.role_ability_form_scores
+                    ),
+                    "repair_outcome_form_scores": deepcopy(
+                        run.repair_outcome_form_scores
+                    ),
+                    "failed_exam_item_count": 0,
+                    "scoring_axes": {
+                        "ability": (
+                            "Quality_CARD_REVIEWER_NONLINEAR_PIECEWISE"
                         ),
-                        "operational_eligibility_verdict": (
-                            operational_eligibility
+                        "repair_outcome": (
+                            "Quality_CARD_REVIEWER_R1_1"
                         ),
-                        "operational_safety_gate": operational_safety_gate,
-                        "operational_policy_revision": (
+                        "qualification": (
+                            "Quality_CARD_REVIEWER_R1_1_"
+                            "DISQUALIFY_ON_RESIDUAL"
+                        ),
+                        "operational_eligibility": (
                             CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
                         ),
-                        "core_lifecycle_revision": (
-                            CORE_CARD_REVIEWER_LIFECYCLE_REVISION
+                        "comparison": (
+                            "EXACT_SAME_CATEGORY_ROLE_PACK_SCORER_"
+                            "PROJECTION_ONLY"
                         ),
-                        "core_closure_verdict": "DELTA_PASS",
-                        "core_closure_score": round(score, 6),
-                        "semantic_repair_rounds": 0,
-                        "second_semantic_repair_allowed": (
-                            self.SEMANTIC_REPAIR_ROUND_LIMIT >= 2
-                        ),
-                        "governed_disposition_case_count": 0,
-                        "operational_passing_score": (
-                            CARD_REVIEWER_OPERATIONAL_PASSING_SCORE
-                        ),
-                        "safety_blocking_residual_count": 0,
-                        "safety_blocking_case_ids": [],
-                        "calibration_residual_count": 0,
-                        "calibration_case_ids": [],
-                        "operational_residual_diagnostics": {"A": [], "B": []},
-                        "role_ability_score": round(score, 6),
-                        "score_semantics": score_semantics,
-                        "initial_nonlinear_score": round(score, 6),
-                        "post_repair_nonlinear_score": round(score, 6),
-                        "reviewer_repair_outcome_score": round(score, 6),
-                        "repair_completion_rate": 1.0,
-                        "repair_completion_rate_semantics": (
-                            "ORIGINAL_WRONG_CASE_REACHES_EXACT_SCORE_100_"
-                            "WITH_NEW_WRONGS_COUNTED"
-                        ),
-                        "exact_case_repair_rate": 1.0,
-                        "case_score_deficit_recovery_rate": 1.0,
-                        "repair_metadata_collision_suspect_count": 0,
-                        "repair_metadata_collision_suspect_case_ids": [],
-                        "collision_adjusted_repair_diagnostic_rate": 1.0,
-                        "collision_adjusted_repair_diagnostic_only": True,
-                        "collision_adjusted_repair_qualification_effect": (
-                            "NONE"
-                        ),
-                        "reviewer_repair_burden": {
-                            "initial_burden_total_mean": 0.0,
-                        },
-                        "role_ability_form_scores": deepcopy(
-                            role_ability_form_scores
-                        ),
-                        "repair_outcome_form_scores": deepcopy(
-                            repair_outcome_form_scores
-                        ),
-                        "failed_exam_item_count": 0,
-                        "scoring_axes": {
-                            "ability": (
-                                "Quality_CARD_REVIEWER_NONLINEAR_PIECEWISE"
-                            ),
-                            "repair_outcome": (
-                                "Quality_CARD_REVIEWER_R1_1"
-                            ),
-                            "qualification": (
-                                "Quality_CARD_REVIEWER_R1_1_"
-                                "DISQUALIFY_ON_RESIDUAL"
-                            ),
-                            "operational_eligibility": (
-                                CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
-                            ),
-                            "comparison": (
-                                "EXACT_SAME_CATEGORY_ROLE_PACK_SCORER_"
-                                "PROJECTION_ONLY"
-                            ),
-                        },
-                        "numeric_score_is_not_qualification_verdict": True,
-                        "cross_category_coefficients_reused": False,
-                        "global_ranking_forbidden": True,
-                    }
-                scorecard = exam.publish_dual_form_result(
-                    provider=str(target.get("provider") or target.get("adapter_id")),
-                    model=str(target["model_name"]),
-                    parameters={
-                        "profile_kind": target["kind"],
-                        "thinking": target.get("thinking"),
-                        "thinking_mode": target.get("thinking_mode"),
-                        "maximum_model_calls": self._request_cap(
-                            str(target["kind"])
-                        ),
-                        "quality_semantic_call_limit": self.Quality_SEMANTIC_CALL_LIMIT,
-                        "case_chunk_limit": self.CASES_PER_CHUNK,
                     },
-                    forms={
-                        form_id: {
-                            "status": "SCORED",
-                            "score": role_ability_form_scores[form_id],
-                            "hard_gate_verdict": hard_gates[form_id],
-                        }
-                        for form_id in ("A", "B")
-                    },
-                    evidence_refs=[
-                        f"responses/form_{form_id}_final.json"
-                        for form_id in ("A", "B")
-                    ],
-                )
-                verdict = (
-                    "PASS"
-                    if operational_eligibility
-                    in {
-                        "SUITABLE",
-                        "SUITABLE_WITH_CALIBRATION",
-                        "SUITABLE_WITH_GOVERNED_DISPOSITION",
+                    "numeric_score_is_not_qualification_verdict": True,
+                    "cross_category_coefficients_reused": False,
+                    "global_ranking_forbidden": True,
+                }
+            run.scorecard = run.exam.publish_dual_form_result(
+                provider=str(run.target.get("provider") or run.target.get("adapter_id")),
+                model=str(run.target["model_name"]),
+                parameters={
+                    "profile_kind": run.target["kind"],
+                    "thinking": run.target.get("thinking"),
+                    "thinking_mode": run.target.get("thinking_mode"),
+                    "maximum_model_calls": self._request_cap(
+                        str(run.target["kind"])
+                    ),
+                    "quality_semantic_call_limit": self.Quality_SEMANTIC_CALL_LIMIT,
+                    "case_chunk_limit": self.CASES_PER_CHUNK,
+                },
+                forms={
+                    form_id: {
+                        "status": "SCORED",
+                        "score": run.role_ability_form_scores[form_id],
+                        "hard_gate_verdict": hard_gates[form_id],
                     }
-                    and scorecard["recommendation_code"]
-                    == "SUITABLE_AS_CARD_REVIEWER"
-                    else "FAIL"
-                )
-
-            raw_quality_verdict = verdict
-            blocking_failures: list[dict[str, Any]] = []
-            operational_rows = repair_projection.get(
-                "operational_residual_diagnostics", {}
+                    for form_id in ("A", "B")
+                },
+                evidence_refs=[
+                    f"responses/form_{form_id}_final.json"
+                    for form_id in ("A", "B")
+                ],
             )
-            if isinstance(operational_rows, Mapping):
-                for form_id in ("A", "B"):
-                    rows = operational_rows.get(form_id, [])
-                    if not isinstance(rows, list):
+            run.verdict = (
+                "PASS"
+                if run.operational_eligibility
+                in {
+                    "SUITABLE",
+                    "SUITABLE_WITH_CALIBRATION",
+                    "SUITABLE_WITH_GOVERNED_DISPOSITION",
+                }
+                and run.scorecard["recommendation_code"]
+                == "SUITABLE_AS_CARD_REVIEWER"
+                else "FAIL"
+            )
+
+    def _publish_card_reviewer_exam(self, run: _CardReviewerExamRun) -> Any:
+        """Decide the operational outcome from the verdict and the blocking failures, check the call and
+        cost caps, write the evidence and the public result, and return the result."""
+        raw_quality_verdict = run.verdict
+        blocking_failures: list[dict[str, Any]] = []
+        operational_rows = run.repair_projection.get(
+            "operational_residual_diagnostics", {}
+        )
+        if isinstance(operational_rows, Mapping):
+            for form_id in ("A", "B"):
+                rows = operational_rows.get(form_id, [])
+                if not isinstance(rows, list):
+                    continue
+                for row in rows:
+                    if not isinstance(row, Mapping):
                         continue
-                    for row in rows:
-                        if not isinstance(row, Mapping):
-                            continue
-                        failed_fields = sorted(
-                            {
-                                str(value)
-                                for key in (
-                                    "safety_reasons",
-                                    "calibration_reasons",
-                                    "failed_output_fields",
-                                )
-                                for value in (row.get(key) or [])
-                                if isinstance(value, str) and value
-                            }
-                        )
-                        if not failed_fields:
-                            failed_fields = [
-                                str(row.get("risk_class") or "ROLE_RESIDUAL")
-                            ]
-                        blocking_failures.append(
-                            {
-                                "case_id": str(
-                                    row.get("case_id")
-                                    or f"{form_id}-UNKNOWN"
-                                ),
-                                "failed_fields": failed_fields,
-                                "evidence_anchor": (
-                                    f"scoring_projection/forms/{form_id}/"
-                                    f"{row.get('case_id')}"
-                                ),
-                                "blocking": True,
-                            }
-                        )
-            if raw_quality_verdict == "FAIL" and not blocking_failures:
-                blocking_failures.append(
-                    {
-                        "case_id": "CARD_REVIEWER_AGGREGATE",
-                        "failed_fields": [
-                            "operational_eligibility_or_category_score"
-                        ],
-                        "evidence_anchor": "scoring_projection/aggregate",
-                        "blocking": True,
-                    }
-                )
-            quality_fail_admission = None
-            if raw_quality_verdict == "FAIL":
-                quality_fail_admission = admit_quality_fail(
-                    execution_outcome=ExecutionOutcome.COMPLETED,
-                    scorability=Scorability.SCOREABLE,
-                    repair_rounds_used=repair_rounds,
-                    repair_round_limit=self.SEMANTIC_REPAIR_ROUND_LIMIT,
-                    repair_cycle_closed=(
-                        repair_rounds == self.SEMANTIC_REPAIR_ROUND_LIMIT
-                        or failed_exam_item_count == 0
-                    ),
-                    blocking_failures=blocking_failures,
-                    exact_hashes={
-                        "reference_pack_sha256": str(
-                            plan["reference_pack_sha256"]
-                        ),
-                        "scoring_protocol_sha256": str(
-                            comparison_projection["scoring_protocol_sha256"]
-                        ),
-                        "executor_sha256": _file_sha256(Path(__file__)),
-                        "input_exact_set_sha256": _sha256(
-                            {"forms": forms, "schemas": form_schemas}
-                        ),
-                    },
-                )
-                verdict = str(quality_fail_admission["quality_verdict"])
-
-            exact_case_repair_rate = float(
-                repair_projection.get(
-                    "exact_case_repair_rate", repair_completion_rate
-                )
-            )
-            case_score_deficit_recovery_rate = float(
-                repair_projection.get(
-                    "case_score_deficit_recovery_rate",
-                    exact_case_repair_rate,
-                )
-            )
-            repair_metadata_collision_suspect_count = int(
-                repair_projection.get(
-                    "repair_metadata_collision_suspect_count", 0
-                )
-            )
-            collision_adjusted_repair_diagnostic_rate = float(
-                repair_projection.get(
-                    "collision_adjusted_repair_diagnostic_rate",
-                    exact_case_repair_rate,
-                )
-            )
-
-            if state["request_attempts"] > self._request_cap(str(target["kind"])):
-                raise ValueError("WORKFLOW_MODEL_EXAM_CALL_LIMIT_EXCEEDED")
-            cap = plan.get("budget_cap_cny")
-            if cap is not None and state["estimated_cost_cny"] > float(cap):
-                raise ValueError("WORKFLOW_MODEL_EXAM_COST_CAP_EXCEEDED")
-            for form_id, response in responses.items():
-                _write_json_create_only(
-                    run_root / "responses" / f"form_{form_id}_final.json",
-                    response,
-                )
-            public_result = {
-                "schema_version": "WorkflowModelExamRunResult-v1",
-                "status": verdict,
-                "reason": "Quality_REFERENCE_REGRESSION_COMPLETED",
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "executor_ref": self.EXECUTOR_REF,
-                "executor_binding_sha256": _file_sha256(Path(__file__)),
-                "requested_model": requested_model,
-                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
-                "score": int(round(score)),
-                "score_exact": round(score, 6),
-                "execution_outcome": ExecutionOutcome.COMPLETED.value,
-                "scorability": Scorability.SCOREABLE.value,
-                "raw_quality_candidate_verdict": raw_quality_verdict,
-                "quality_fail_admission": quality_fail_admission,
-                "score_semantics": score_semantics,
-                "form_scores": {
-                    key: round(float(value), 6)
-                    for key, value in role_ability_form_scores.items()
-                },
-                "role_ability_form_scores": {
-                    key: round(float(value), 6)
-                    for key, value in role_ability_form_scores.items()
-                },
-                "repair_outcome_form_scores": {
-                    key: round(float(value), 6)
-                    for key, value in repair_outcome_form_scores.items()
-                },
-                "initial_form_scores": initial_form_scores,
-                "post_repair_nonlinear_form_scores": {
-                    form_id: round(
-                        float(
-                            repair_projection.get("forms", {})
-                            .get(form_id, {})
-                            .get(
-                                "post_repair_nonlinear_score",
-                                role_ability_form_scores[form_id],
+                    failed_fields = sorted(
+                        {
+                            str(value)
+                            for key in (
+                                "safety_reasons",
+                                "calibration_reasons",
+                                "failed_output_fields",
                             )
-                        ),
-                        6,
+                            for value in (row.get(key) or [])
+                            if isinstance(value, str) and value
+                        }
                     )
-                    for form_id in ("A", "B")
-                },
-                "qualification_verdict": qualification_verdict,
-                "quality_exact_repair_qualification_verdict": (
-                    qualification_verdict
-                ),
-                "operational_eligibility_verdict": operational_eligibility,
-                "operational_safety_gate": operational_safety_gate,
-                "operational_policy_revision": (
-                    CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
-                ),
-                "core_lifecycle_revision": CORE_CARD_REVIEWER_LIFECYCLE_REVISION,
-                "core_closure_verdict": repair_projection.get(
-                    "core_closure_verdict",
-                    "DELTA_PASS" if failed_exam_item_count == 0 else "HUMAN_REQUIRED",
-                ),
-                "core_closure_score": repair_projection.get(
-                    "core_closure_score",
-                    repair_outcome_score,
-                ),
-                "governed_disposition_case_count": repair_projection.get(
-                    "governed_disposition_case_count",
-                    0,
-                ),
-                "safety_blocking_residual_count": (
-                    safety_blocking_residual_count
-                ),
-                "calibration_residual_count": calibration_residual_count,
-                "repair_prompt_projection": (
-                    {
-                        key: value
-                        for key, value in repair_prompt_projection.items()
-                        if key != "prompt"
-                    }
-                    if isinstance(repair_prompt_projection, Mapping)
-                    else None
-                ),
-                "repair_prompt_projection_revision": (
-                    CARD_REVIEWER_REPAIR_PROMPT_PROJECTION_REVISION
-                ),
-                "scorecard_recommendation_code": (
-                    scorecard.get("recommendation_code")
-                    if isinstance(scorecard, Mapping)
-                    else None
-                ),
-                "scoring_system_revision": (
-                    CARD_REVIEWER_SCORING_PROJECTION_REVISION
-                ),
-                "score_axes": {
-                    "role_ability_score": round(
-                        float(
-                            repair_projection.get(
-                                "role_ability_score", score
-                            )
-                        ),
-                        6,
-                    ),
-                    "post_repair_diagnostic_score": round(
-                        float(
-                            repair_projection.get(
-                                "post_repair_nonlinear_score", score
-                            )
-                        ),
-                        6,
-                    ),
-                    "reviewer_repair_outcome_score": round(
-                        repair_outcome_score, 6
-                    ),
-                    "reviewer_repair_burden": round(
-                        float(
-                            repair_projection.get(
-                                "reviewer_repair_burden", {}
-                            ).get(
-                                "initial_burden_total_mean", 0.0
-                            )
-                        ),
-                        6,
-                    ),
-                    "repair_completion_rate": round(
-                        repair_completion_rate, 9
-                    ),
-                    "exact_case_repair_rate": round(
-                        exact_case_repair_rate, 9
-                    ),
-                    "case_score_deficit_recovery_rate": round(
-                        case_score_deficit_recovery_rate, 9
-                    ),
-                    "repair_metadata_collision_suspect_count": (
-                        repair_metadata_collision_suspect_count
-                    ),
-                    "collision_adjusted_repair_diagnostic_rate": round(
-                        collision_adjusted_repair_diagnostic_rate, 9
-                    ),
-                    "collision_adjusted_repair_diagnostic_only": True,
-                    "qualification_verdict": qualification_verdict,
-                    "operational_eligibility_verdict": (
-                        operational_eligibility
-                    ),
-                    "operational_safety_gate": operational_safety_gate,
-                    "core_closure_score": round(
-                        float(
-                            repair_projection.get(
-                                "core_closure_score",
-                                repair_outcome_score,
-                            )
-                        ),
-                        6,
-                    ),
-                },
-                "scoring_projection": repair_projection,
-                "comparison": comparison_projection,
-                **comparison_projection,
-                "failed_exam_item_count": failed_exam_item_count,
-                "repair_rounds": repair_rounds,
-                "semantic_repair_rounds": repair_rounds,
-                "semantic_repair_round_limit": (
-                    self.SEMANTIC_REPAIR_ROUND_LIMIT
-                ),
-                "semantic_repair_lifecycle": repair_projection.get(
-                    "semantic_repair_lifecycle", []
-                ),
-                "cumulative_category_repair_penalty": repair_projection.get(
-                    "cumulative_category_repair_penalty"
-                ),
-                "structural_repair_turns": sum(
-                    int(scores[form_id].get("repair_turns") or 0)
-                    for form_id in ("A", "B")
-                ),
-                "pointer_normalization_revision": (
-                    CARD_REVIEWER_SUCCESSOR_POINTER_NORMALIZATION_REVISION
-                ),
-                "pointer_normalization_count": len(
-                    pointer_normalization_actions
-                ),
-                "pointer_normalizations": pointer_normalization_actions,
-                "execution_profile": exam_inputs.get("execution_profile"),
-                "sample_metadata": exam_inputs.get("sample_metadata"),
-                "workload_profile": plan.get("workload_profile"),
-                "initial_total_effective_prompt_chars": plan.get(
-                    "initial_total_effective_prompt_chars"
-                ),
-                "transport_topologies": deepcopy(
-                    state.get("transport_topologies", [])
-                ),
-                "output_limit_policy": plan.get("output_limit_policy"),
-                "provider_calls": state["provider_calls"],
-                "request_attempts": state["request_attempts"],
-                "external_model_calls": state["external_model_calls"],
-                "external_network_calls": state["external_network_calls"],
-                "external_process_launches": state[
-                    "external_process_launches"
-                ],
-                "token_usage": state["token_usage"],
-                "estimated_cost_cny": (
-                    round(state["estimated_cost_cny"], 9)
-                    if plan["profile_kind"] == "API"
-                    else (0.0 if plan["profile_kind"] == "LOCAL" else None)
-                ),
-                "actual_cost": None,
-                "cost_semantics": plan["cost_semantics"],
-                "reference_regression_only": True,
-                "blind_holdout_eligible": False,
-                "qualification_eligible": False,
-                "provider_received_answer_key": False,
-            }
-            evidence = _write_json_create_only(
-                run_root / "exam_result.json", public_result
+                    if not failed_fields:
+                        failed_fields = [
+                            str(row.get("risk_class") or "ROLE_RESIDUAL")
+                        ]
+                    blocking_failures.append(
+                        {
+                            "case_id": str(
+                                row.get("case_id")
+                                or f"{form_id}-UNKNOWN"
+                            ),
+                            "failed_fields": failed_fields,
+                            "evidence_anchor": (
+                                f"scoring_projection/forms/{form_id}/"
+                                f"{row.get('case_id')}"
+                            ),
+                            "blocking": True,
+                        }
+                    )
+        if raw_quality_verdict == "FAIL" and not blocking_failures:
+            blocking_failures.append(
+                {
+                    "case_id": "CARD_REVIEWER_AGGREGATE",
+                    "failed_fields": [
+                        "operational_eligibility_or_category_score"
+                    ],
+                    "evidence_anchor": "scoring_projection/aggregate",
+                    "blocking": True,
+                }
             )
-            duration_ms = max(0, int((monotonic() - started) * 1000))
-            return {
-                "schema_version": RESULT_SCHEMA,
-                "kind": "WORKFLOW_NODE",
-                "status": verdict,
-                "score": int(round(score)),
-                "score_exact": round(score, 6),
-                "score_semantics": score_semantics,
-                "execution_outcome": public_result["execution_outcome"],
-                "scorability": public_result["scorability"],
-                "raw_quality_candidate_verdict": public_result[
-                    "raw_quality_candidate_verdict"
-                ],
-                "quality_fail_admission": public_result[
-                    "quality_fail_admission"
-                ],
-                "reason": "Quality_REFERENCE_REGRESSION_COMPLETED",
-                "requested_model": requested_model,
-                "returned_model": state.get("returned_model") if target.get("adapter_id")=="command_template" else requested_model,
-                "duration_ms": duration_ms,
-                "external_network_calls": state["external_network_calls"],
-                "provider_calls": state["provider_calls"],
-                "request_attempts": state["request_attempts"],
-                "external_model_calls": state["external_model_calls"],
-                "external_process_launches": state[
-                    "external_process_launches"
-                ],
-                "exam_mode": plan["mode"],
-                "exam_run_id": run_id,
-                "exam_run_root": str(run_root.resolve()),
-                "exam_evidence_sha256": evidence["sha256"],
-                "executor_ref": self.EXECUTOR_REF,
-                "executor_binding_sha256": public_result[
-                    "executor_binding_sha256"
-                ],
-                "failed_exam_item_count": failed_exam_item_count,
-                "repair_rounds": repair_rounds,
-                "semantic_repair_rounds": repair_rounds,
-                "semantic_repair_round_limit": public_result[
-                    "semantic_repair_round_limit"
-                ],
-                "semantic_repair_lifecycle": public_result[
-                    "semantic_repair_lifecycle"
-                ],
-                "cumulative_category_repair_penalty": public_result[
-                    "cumulative_category_repair_penalty"
-                ],
-                "structural_repair_turns": public_result[
-                    "structural_repair_turns"
-                ],
-                "pointer_normalization_revision": public_result[
-                    "pointer_normalization_revision"
-                ],
-                "pointer_normalization_count": public_result[
-                    "pointer_normalization_count"
-                ],
-                "pointer_normalizations": public_result[
-                    "pointer_normalizations"
-                ],
-                "core_closure_verdict": public_result[
-                    "core_closure_verdict"
-                ],
-                "core_closure_score": public_result["core_closure_score"],
-                "governed_disposition_case_count": public_result[
-                    "governed_disposition_case_count"
-                ],
-                "execution_profile": public_result["execution_profile"],
-                "sample_metadata": public_result["sample_metadata"],
-                "workload_profile": public_result["workload_profile"],
-                "initial_total_effective_prompt_chars": public_result[
-                    "initial_total_effective_prompt_chars"
-                ],
-                "transport_topologies": public_result[
-                    "transport_topologies"
-                ],
-                "output_limit_policy": public_result[
-                    "output_limit_policy"
-                ],
-                "qualification_verdict": qualification_verdict,
-                "quality_exact_repair_qualification_verdict": (
-                    qualification_verdict
+        quality_fail_admission = None
+        if raw_quality_verdict == "FAIL":
+            quality_fail_admission = admit_quality_fail(
+                execution_outcome=ExecutionOutcome.COMPLETED,
+                scorability=Scorability.SCOREABLE,
+                repair_rounds_used=run.repair_rounds,
+                repair_round_limit=self.SEMANTIC_REPAIR_ROUND_LIMIT,
+                repair_cycle_closed=(
+                    run.repair_rounds == self.SEMANTIC_REPAIR_ROUND_LIMIT
+                    or run.failed_exam_item_count == 0
                 ),
-                "operational_eligibility_verdict": operational_eligibility,
-                "operational_safety_gate": operational_safety_gate,
-                "operational_policy_revision": (
-                    CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
+                blocking_failures=blocking_failures,
+                exact_hashes={
+                    "reference_pack_sha256": str(
+                        run.plan["reference_pack_sha256"]
+                    ),
+                    "scoring_protocol_sha256": str(
+                        run.comparison_projection["scoring_protocol_sha256"]
+                    ),
+                    "executor_sha256": _file_sha256(Path(__file__)),
+                    "input_exact_set_sha256": _sha256(
+                        {"forms": run.forms, "schemas": run.form_schemas}
+                    ),
+                },
+            )
+            run.verdict = str(quality_fail_admission["quality_verdict"])
+
+        exact_case_repair_rate = float(
+            run.repair_projection.get(
+                "exact_case_repair_rate", run.repair_completion_rate
+            )
+        )
+        case_score_deficit_recovery_rate = float(
+            run.repair_projection.get(
+                "case_score_deficit_recovery_rate",
+                exact_case_repair_rate,
+            )
+        )
+        repair_metadata_collision_suspect_count = int(
+            run.repair_projection.get(
+                "repair_metadata_collision_suspect_count", 0
+            )
+        )
+        collision_adjusted_repair_diagnostic_rate = float(
+            run.repair_projection.get(
+                "collision_adjusted_repair_diagnostic_rate",
+                exact_case_repair_rate,
+            )
+        )
+
+        if run.state["request_attempts"] > self._request_cap(str(run.target["kind"])):
+            raise ValueError("WORKFLOW_MODEL_EXAM_CALL_LIMIT_EXCEEDED")
+        cap = run.plan.get("budget_cap_cny")
+        if cap is not None and run.state["estimated_cost_cny"] > float(cap):
+            raise ValueError("WORKFLOW_MODEL_EXAM_COST_CAP_EXCEEDED")
+        for form_id, response in run.responses.items():
+            _write_json_create_only(
+                run.run_root / "responses" / f"form_{form_id}_final.json",
+                response,
+            )
+        public_result = {
+            "schema_version": "WorkflowModelExamRunResult-v1",
+            "status": run.verdict,
+            "reason": "Quality_REFERENCE_REGRESSION_COMPLETED",
+            "run_id": run.run_id,
+            "plan_sha256": run.plan["plan_sha256"],
+            "executor_ref": self.EXECUTOR_REF,
+            "executor_binding_sha256": _file_sha256(Path(__file__)),
+            "requested_model": run.requested_model,
+            "returned_model": run.state.get("returned_model") if run.target.get("adapter_id")=="command_template" else run.requested_model,
+            "score": int(round(run.score)),
+            "score_exact": round(run.score, 6),
+            "execution_outcome": ExecutionOutcome.COMPLETED.value,
+            "scorability": Scorability.SCOREABLE.value,
+            "raw_quality_candidate_verdict": raw_quality_verdict,
+            "quality_fail_admission": quality_fail_admission,
+            "score_semantics": run.score_semantics,
+            "form_scores": {
+                key: round(float(value), 6)
+                for key, value in run.role_ability_form_scores.items()
+            },
+            "role_ability_form_scores": {
+                key: round(float(value), 6)
+                for key, value in run.role_ability_form_scores.items()
+            },
+            "repair_outcome_form_scores": {
+                key: round(float(value), 6)
+                for key, value in run.repair_outcome_form_scores.items()
+            },
+            "initial_form_scores": run.initial_form_scores,
+            "post_repair_nonlinear_form_scores": {
+                form_id: round(
+                    float(
+                        run.repair_projection.get("forms", {})
+                        .get(form_id, {})
+                        .get(
+                            "post_repair_nonlinear_score",
+                            run.role_ability_form_scores[form_id],
+                        )
+                    ),
+                    6,
+                )
+                for form_id in ("A", "B")
+            },
+            "qualification_verdict": run.qualification_verdict,
+            "quality_exact_repair_qualification_verdict": (
+                run.qualification_verdict
+            ),
+            "operational_eligibility_verdict": run.operational_eligibility,
+            "operational_safety_gate": run.operational_safety_gate,
+            "operational_policy_revision": (
+                CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
+            ),
+            "core_lifecycle_revision": CORE_CARD_REVIEWER_LIFECYCLE_REVISION,
+            "core_closure_verdict": run.repair_projection.get(
+                "core_closure_verdict",
+                "DELTA_PASS" if run.failed_exam_item_count == 0 else "HUMAN_REQUIRED",
+            ),
+            "core_closure_score": run.repair_projection.get(
+                "core_closure_score",
+                run.repair_outcome_score,
+            ),
+            "governed_disposition_case_count": run.repair_projection.get(
+                "governed_disposition_case_count",
+                0,
+            ),
+            "safety_blocking_residual_count": (
+                run.safety_blocking_residual_count
+            ),
+            "calibration_residual_count": run.calibration_residual_count,
+            "repair_prompt_projection": (
+                {
+                    key: value
+                    for key, value in run.repair_prompt_projection.items()
+                    if key != "prompt"
+                }
+                if isinstance(run.repair_prompt_projection, Mapping)
+                else None
+            ),
+            "repair_prompt_projection_revision": (
+                CARD_REVIEWER_REPAIR_PROMPT_PROJECTION_REVISION
+            ),
+            "scorecard_recommendation_code": (
+                run.scorecard.get("recommendation_code")
+                if isinstance(run.scorecard, Mapping)
+                else None
+            ),
+            "scoring_system_revision": (
+                CARD_REVIEWER_SCORING_PROJECTION_REVISION
+            ),
+            "score_axes": {
+                "role_ability_score": round(
+                    float(
+                        run.repair_projection.get(
+                            "role_ability_score", run.score
+                        )
+                    ),
+                    6,
                 ),
-                "safety_blocking_residual_count": (
-                    safety_blocking_residual_count
+                "post_repair_diagnostic_score": round(
+                    float(
+                        run.repair_projection.get(
+                            "post_repair_nonlinear_score", run.score
+                        )
+                    ),
+                    6,
                 ),
-                "calibration_residual_count": calibration_residual_count,
-                "scoring_system_revision": (
-                    CARD_REVIEWER_SCORING_PROJECTION_REVISION
+                "reviewer_repair_outcome_score": round(
+                    run.repair_outcome_score, 6
                 ),
-                "repair_outcome_score": round(repair_outcome_score, 6),
+                "reviewer_repair_burden": round(
+                    float(
+                        run.repair_projection.get(
+                            "reviewer_repair_burden", {}
+                        ).get(
+                            "initial_burden_total_mean", 0.0
+                        )
+                    ),
+                    6,
+                ),
                 "repair_completion_rate": round(
-                    repair_completion_rate, 9
+                    run.repair_completion_rate, 9
                 ),
                 "exact_case_repair_rate": round(
                     exact_case_repair_rate, 9
@@ -2228,68 +2172,201 @@ class QualityCardReviewerExamExecutor:
                     collision_adjusted_repair_diagnostic_rate, 9
                 ),
                 "collision_adjusted_repair_diagnostic_only": True,
-                "repair_prompt_projection_revision": (
-                    CARD_REVIEWER_REPAIR_PROMPT_PROJECTION_REVISION
+                "qualification_verdict": run.qualification_verdict,
+                "operational_eligibility_verdict": (
+                    run.operational_eligibility
                 ),
-                **comparison_projection,
-                "token_usage": state["token_usage"],
-                "estimated_cost_cny": public_result["estimated_cost_cny"],
-                "actual_cost": None,
-                "cost_semantics": plan["cost_semantics"],
-                "reference_regression_only": True,
-                "blind_holdout_eligible": False,
-                "qualification_eligible": False,
-                "provider_received_answer_key": False,
-            }
-        except Exception as error:
-            reason = str(error) or type(error).__name__
-            if len(reason) > 200:
-                reason = type(error).__name__
-            failure = {
-                "schema_version": "WorkflowModelExamRunFailure-v1",
-                "status": "NOT_ASSESSED",
-                "reason": reason,
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "provider_calls": state["provider_calls"],
-                "request_attempts": state["request_attempts"],
-                "external_model_calls": state["external_model_calls"],
-                "external_network_calls": state["external_network_calls"],
-                "external_process_launches": state[
-                    "external_process_launches"
-                ],
-                "token_usage": state["token_usage"],
-                "estimated_cost_cny": (
-                    round(state["estimated_cost_cny"], 9)
-                    if plan["profile_kind"] == "API"
-                    else (0.0 if plan["profile_kind"] == "LOCAL" else None)
+                "operational_safety_gate": run.operational_safety_gate,
+                "core_closure_score": round(
+                    float(
+                        run.repair_projection.get(
+                            "core_closure_score",
+                            run.repair_outcome_score,
+                        )
+                    ),
+                    6,
                 ),
-                "score": None,
-                "execution_outcome": classify_execution_outcome(
-                    {"status": "ERROR", "reason": reason}
-                ).value,
-                "scorability": Scorability.NOT_ASSESSED.value,
-            }
-            evidence = _write_json_create_only(
-                run_root / "exam_failure.json", failure
-            )
-            result = _not_run(reason, requested_model=requested_model)
-            result.update(
-                duration_ms=max(0, int((monotonic() - started) * 1000)),
-                provider_calls=state["provider_calls"],
-                request_attempts=state["request_attempts"],
-                external_model_calls=state["external_model_calls"],
-                external_network_calls=state["external_network_calls"],
-                external_process_launches=state[
-                    "external_process_launches"
-                ],
-                exam_run_id=run_id,
-                exam_run_root=str(run_root.resolve()),
-                exam_evidence_sha256=evidence["sha256"],
-                token_usage=state["token_usage"],
-                estimated_cost_cny=failure["estimated_cost_cny"],
-                cost_semantics=plan["cost_semantics"],
-                execution_outcome=failure["execution_outcome"],
-                scorability=failure["scorability"],
-            )
-            return result
+            },
+            "scoring_projection": run.repair_projection,
+            "comparison": run.comparison_projection,
+            **run.comparison_projection,
+            "failed_exam_item_count": run.failed_exam_item_count,
+            "repair_rounds": run.repair_rounds,
+            "semantic_repair_rounds": run.repair_rounds,
+            "semantic_repair_round_limit": (
+                self.SEMANTIC_REPAIR_ROUND_LIMIT
+            ),
+            "semantic_repair_lifecycle": run.repair_projection.get(
+                "semantic_repair_lifecycle", []
+            ),
+            "cumulative_category_repair_penalty": run.repair_projection.get(
+                "cumulative_category_repair_penalty"
+            ),
+            "structural_repair_turns": sum(
+                int(run.scores[form_id].get("repair_turns") or 0)
+                for form_id in ("A", "B")
+            ),
+            "pointer_normalization_revision": (
+                CARD_REVIEWER_SUCCESSOR_POINTER_NORMALIZATION_REVISION
+            ),
+            "pointer_normalization_count": len(
+                run.pointer_normalization_actions
+            ),
+            "pointer_normalizations": run.pointer_normalization_actions,
+            "execution_profile": run.exam_inputs.get("execution_profile"),
+            "sample_metadata": run.exam_inputs.get("sample_metadata"),
+            "workload_profile": run.plan.get("workload_profile"),
+            "initial_total_effective_prompt_chars": run.plan.get(
+                "initial_total_effective_prompt_chars"
+            ),
+            "transport_topologies": deepcopy(
+                run.state.get("transport_topologies", [])
+            ),
+            "output_limit_policy": run.plan.get("output_limit_policy"),
+            "provider_calls": run.state["provider_calls"],
+            "request_attempts": run.state["request_attempts"],
+            "external_model_calls": run.state["external_model_calls"],
+            "external_network_calls": run.state["external_network_calls"],
+            "external_process_launches": run.state[
+                "external_process_launches"
+            ],
+            "token_usage": run.state["token_usage"],
+            "estimated_cost_cny": (
+                round(run.state["estimated_cost_cny"], 9)
+                if run.plan["profile_kind"] == "API"
+                else (0.0 if run.plan["profile_kind"] == "LOCAL" else None)
+            ),
+            "actual_cost": None,
+            "cost_semantics": run.plan["cost_semantics"],
+            "reference_regression_only": True,
+            "blind_holdout_eligible": False,
+            "qualification_eligible": False,
+            "provider_received_answer_key": False,
+        }
+        evidence = _write_json_create_only(
+            run.run_root / "exam_result.json", public_result
+        )
+        duration_ms = max(0, int((monotonic() - run.started) * 1000))
+        return {
+            "schema_version": RESULT_SCHEMA,
+            "kind": "WORKFLOW_NODE",
+            "status": run.verdict,
+            "score": int(round(run.score)),
+            "score_exact": round(run.score, 6),
+            "score_semantics": run.score_semantics,
+            "execution_outcome": public_result["execution_outcome"],
+            "scorability": public_result["scorability"],
+            "raw_quality_candidate_verdict": public_result[
+                "raw_quality_candidate_verdict"
+            ],
+            "quality_fail_admission": public_result[
+                "quality_fail_admission"
+            ],
+            "reason": "Quality_REFERENCE_REGRESSION_COMPLETED",
+            "requested_model": run.requested_model,
+            "returned_model": run.state.get("returned_model") if run.target.get("adapter_id")=="command_template" else run.requested_model,
+            "duration_ms": duration_ms,
+            "external_network_calls": run.state["external_network_calls"],
+            "provider_calls": run.state["provider_calls"],
+            "request_attempts": run.state["request_attempts"],
+            "external_model_calls": run.state["external_model_calls"],
+            "external_process_launches": run.state[
+                "external_process_launches"
+            ],
+            "exam_mode": run.plan["mode"],
+            "exam_run_id": run.run_id,
+            "exam_run_root": str(run.run_root.resolve()),
+            "exam_evidence_sha256": evidence["sha256"],
+            "executor_ref": self.EXECUTOR_REF,
+            "executor_binding_sha256": public_result[
+                "executor_binding_sha256"
+            ],
+            "failed_exam_item_count": run.failed_exam_item_count,
+            "repair_rounds": run.repair_rounds,
+            "semantic_repair_rounds": run.repair_rounds,
+            "semantic_repair_round_limit": public_result[
+                "semantic_repair_round_limit"
+            ],
+            "semantic_repair_lifecycle": public_result[
+                "semantic_repair_lifecycle"
+            ],
+            "cumulative_category_repair_penalty": public_result[
+                "cumulative_category_repair_penalty"
+            ],
+            "structural_repair_turns": public_result[
+                "structural_repair_turns"
+            ],
+            "pointer_normalization_revision": public_result[
+                "pointer_normalization_revision"
+            ],
+            "pointer_normalization_count": public_result[
+                "pointer_normalization_count"
+            ],
+            "pointer_normalizations": public_result[
+                "pointer_normalizations"
+            ],
+            "core_closure_verdict": public_result[
+                "core_closure_verdict"
+            ],
+            "core_closure_score": public_result["core_closure_score"],
+            "governed_disposition_case_count": public_result[
+                "governed_disposition_case_count"
+            ],
+            "execution_profile": public_result["execution_profile"],
+            "sample_metadata": public_result["sample_metadata"],
+            "workload_profile": public_result["workload_profile"],
+            "initial_total_effective_prompt_chars": public_result[
+                "initial_total_effective_prompt_chars"
+            ],
+            "transport_topologies": public_result[
+                "transport_topologies"
+            ],
+            "output_limit_policy": public_result[
+                "output_limit_policy"
+            ],
+            "qualification_verdict": run.qualification_verdict,
+            "quality_exact_repair_qualification_verdict": (
+                run.qualification_verdict
+            ),
+            "operational_eligibility_verdict": run.operational_eligibility,
+            "operational_safety_gate": run.operational_safety_gate,
+            "operational_policy_revision": (
+                CARD_REVIEWER_OPERATIONAL_POLICY_REVISION
+            ),
+            "safety_blocking_residual_count": (
+                run.safety_blocking_residual_count
+            ),
+            "calibration_residual_count": run.calibration_residual_count,
+            "scoring_system_revision": (
+                CARD_REVIEWER_SCORING_PROJECTION_REVISION
+            ),
+            "repair_outcome_score": round(run.repair_outcome_score, 6),
+            "repair_completion_rate": round(
+                run.repair_completion_rate, 9
+            ),
+            "exact_case_repair_rate": round(
+                exact_case_repair_rate, 9
+            ),
+            "case_score_deficit_recovery_rate": round(
+                case_score_deficit_recovery_rate, 9
+            ),
+            "repair_metadata_collision_suspect_count": (
+                repair_metadata_collision_suspect_count
+            ),
+            "collision_adjusted_repair_diagnostic_rate": round(
+                collision_adjusted_repair_diagnostic_rate, 9
+            ),
+            "collision_adjusted_repair_diagnostic_only": True,
+            "repair_prompt_projection_revision": (
+                CARD_REVIEWER_REPAIR_PROMPT_PROJECTION_REVISION
+            ),
+            **run.comparison_projection,
+            "token_usage": run.state["token_usage"],
+            "estimated_cost_cny": public_result["estimated_cost_cny"],
+            "actual_cost": None,
+            "cost_semantics": run.plan["cost_semantics"],
+            "reference_regression_only": True,
+            "blind_holdout_eligible": False,
+            "qualification_eligible": False,
+            "provider_received_answer_key": False,
+        }

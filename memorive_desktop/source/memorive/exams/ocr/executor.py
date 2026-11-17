@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
+from pathlib import Path
 from time import monotonic
 from typing import Any, Callable, Mapping
 import uuid
@@ -35,6 +37,38 @@ from memorive.exams.common import (
 )
 from memorive.exams.specialized_base import SHA256
 from memorive.exams.ocr.v1_executor import _QualityOcrPageExamExecutorV1
+
+
+@dataclass
+class _OcrExamRun:
+    """One run of the OCR page exam (QualityOcrPageExamExecutor.execute).
+
+    The plan, the run folder and the call counters are set when the run starts; _run_ocr_cases sends
+    every main and repeat case and collects the outputs, the returned models and identity grades;
+    _score_ocr_exam scores them against the gold, writes the evidence and builds the result. A failure
+    is reported from the plan and counters as they are."""
+
+    # The run as planned.
+    target: Mapping[str, Any]
+    ocr_call: Callable[..., Mapping[str, Any]]
+    plan: Mapping[str, Any]
+    requested_model: str | None
+    started: float
+    run_id: str
+    run_root: Path
+    state: dict[str, Any]
+    # The sample and its forms, read when the run starts.
+    modules: Any = None
+    sample: Any = None
+    forms: Any = None
+    form_case_by_id: dict[str, Any] = field(default_factory=dict)
+    # Counters and evidence while the cases run.
+    physical_index: int = 0
+    retry_budget_remaining: int = 0
+    returned_model_evidence: list[str | None] = field(default_factory=list)
+    identity_grades: list[str] = field(default_factory=list)
+    main_outputs: list[dict[str, Any]] = field(default_factory=list)
+    repeat_outputs: list[dict[str, Any]] = field(default_factory=list)
 
 
 class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
@@ -339,496 +373,507 @@ class QualityOcrPageExamExecutor(_QualityOcrPageExamExecutorV1):
                 "accepted_at": datetime.now(timezone.utc).isoformat(),
             },
         )
-        state = self._state()
+        run = _OcrExamRun(
+            target=target, ocr_call=ocr_call, plan=plan, requested_model=requested_model,
+            started=started, run_id=run_id, run_root=run_root, state=self._state(),
+        )
         try:
-            modules = self._quality()
-            sample, forms = self._sample_manifest()
-            if sample["sample_manifest_sha256"] != plan["sample_manifest_sha256"]:
+            run.modules = self._quality()
+            run.sample, run.forms = self._sample_manifest()
+            if run.sample["sample_manifest_sha256"] != run.plan["sample_manifest_sha256"]:
                 raise ValueError("OCR_SAMPLE_MANIFEST_DRIFT")
-            _write_json_create_only(run_root / "sample_manifest.json", sample)
-            form_case_by_id = {
+            _write_json_create_only(run.run_root / "sample_manifest.json", run.sample)
+            run.form_case_by_id = {
                 str(row["case_id"]): (form_id, row)
-                for form_id, form in forms.items()
+                for form_id, form in run.forms.items()
                 for row in form["cases"]
             }
-            physical_index = 0
-            retry_budget_remaining = int(plan["transport_retry_budget"])
-            returned_model_evidence: list[str | None] = []
-            identity_grades: list[str] = []
+            run.physical_index = 0
+            run.retry_budget_remaining = int(run.plan["transport_retry_budget"])
+            run.returned_model_evidence = []
+            run.identity_grades = []
 
-            def run_case(sample_row: Mapping[str, Any]) -> dict[str, Any]:
-                nonlocal physical_index, retry_budget_remaining
-                case_id = str(sample_row["case_id"])
-                generation = str(sample_row["generation"])
-                form_id, case = form_case_by_id[case_id]
-                form = forms[form_id]
-                prompt = (
-                    self._reference_pack_root / str(form["prompt_ref"])
-                ).read_text(encoding="utf-8")
-                visible = modules["protocol"].build_provider_visible_payload(
-                    pack=self._reference_pack_root,
-                    form=form,
-                    case_id=case_id,
-                )
-                image_bytes = __import__("base64").b64decode(
-                    visible["image_base64"], validate=True
-                )
-                request_max_output_tokens = plan["request_max_output_tokens"]
-                timeout_seconds = target.get(
-                    "exam_timeout_seconds",
-                    300 if target.get("kind") == "CLI" else 180,
-                )
-                while True:
-                    physical_index += 1
-                    claim = {
-                        "schema_version": "WorkflowOcrPreSendClaim-v2",
-                        "created_at": datetime.now(timezone.utc).isoformat(),
-                        "physical_call_id": f"call-{physical_index:02d}",
-                        "logical_index": sample_row["logical_index"],
-                        "generation": generation,
-                        "call_kind": (
-                            "OCR_PAGE_REPEAT_CASE"
-                            if generation != "gen1"
-                            else "OCR_PAGE_MAIN_CASE"
-                        ),
-                        "profile_kind": plan["profile_kind"],
-                        "profile_ref": plan["profile_ref"],
-                        "purpose": "workflow_model_exam",
-                        "route": ("DECLARATIVE_COMMAND_TEMPLATE" if target.get("adapter_id")=="command_template" else self._route(str(plan["profile_kind"]))),
-                        "requested_model": requested_model,
-                        "model_digest": target.get("model_digest"),
-                        "thinking_mode": target.get("thinking_mode"),
-                        "cli_binary_sha256": target.get("cli_binary_sha256"),
-                        "cli_version": target.get("cli_version"),
-                        "cli_identity_authority_ref": target.get(
-                            "cli_identity_authority_ref"
-                        ),
-                        "case_id": case_id,
-                        "image_sha256": case["image_sha256"],
-                        "mime_type": visible["mime_type"],
-                        "prompt_sha256": hashlib.sha256(
-                            prompt.encode("utf-8")
-                        ).hexdigest().upper(),
-                        "request_max_output_tokens": request_max_output_tokens,
-                        "behavior_sha256": _sha256(
-                            {
-                                "model": requested_model,
-                                "thinking_mode": target.get("thinking_mode"),
-                                "cli_binary_sha256": target.get(
-                                    "cli_binary_sha256"
-                                ),
-                                "cli_version": target.get("cli_version"),
-                                "image_sha256": case["image_sha256"],
-                                "mime_type": visible["mime_type"],
-                                "prompt": prompt,
-                                "purpose": "workflow_model_exam",
-                                "max_output_tokens": request_max_output_tokens,
-                            }
-                        ),
-                        "plan_sha256": plan["plan_sha256"],
-                        "provider_received_gold": False,
-                    }
-                    claim_receipt = _write_json_create_only(
-                        run_root / "claims" / f"call_{physical_index:02d}.json",
-                        claim,
-                    )
-                    result = dict(
-                        ocr_call(
-                            profile_kind=str(target["kind"]),
-                            service=target,
-                            model=target,
-                            image_bytes=image_bytes,
-                            mime_type=visible["mime_type"],
-                            prompt=prompt,
-                            purpose="workflow_model_exam",
-                            max_output_tokens=request_max_output_tokens,
-                            timeout_seconds=timeout_seconds,
-                        )
-                    )
-                    self._consume_result(state, result)
-                    attempt_summary = {
-                        "schema_version": "WorkflowOcrAttemptReceipt-v2",
-                        "physical_index": physical_index,
-                        "logical_index": sample_row["logical_index"],
-                        "generation": generation,
-                        "case_id": case_id,
-                        "status": result.get("status"),
-                        "reason": result.get("reason"),
-                        "requested_model": result.get("requested_model"),
-                        "returned_model": result.get("returned_model"),
-                        "external_model_calls": int(
-                            result.get("external_model_calls") or 0
-                        ),
-                        "physical_model_calls": int(
-                            result.get("physical_model_calls")
-                            if result.get("physical_model_calls") is not None
-                            else result.get("external_model_calls") or 0
-                        ),
-                        "external_budget_calls": int(
-                            result.get("external_budget_calls") or 0
-                        ),
-                        "local_model_calls": int(
-                            result.get("local_model_calls") or 0
-                        ),
-                        "duration_ms": result.get("duration_ms"),
-                        "pre_send_claim_sha256": claim_receipt["sha256"],
-                        "execution_receipt": deepcopy(
-                            dict(result.get("execution_receipt") or {})
-                        ),
-                        "provider_received_gold": False,
-                    }
-                    _write_json_create_only(
-                        run_root
-                        / "attempts"
-                        / f"call_{physical_index:02d}.json",
-                        attempt_summary,
-                    )
-                    if result.get("status") == "PASS":
-                        break
-                    failure_reason = str(result.get("reason") or "OCR_CALL_FAILED")
-                    retryable = any(
-                        token in failure_reason.upper()
-                        for token in (
-                            "RATE_LIMIT",
-                            "NETWORK",
-                            "TIMEOUT",
-                            "TEMPORARY",
-                            "CONNECTION",
-                        )
-                    )
-                    if (
-                        not retryable
-                        or retry_budget_remaining <= 0
-                        or int(result.get("external_model_calls") or 0) <= 0
-                    ):
-                        raise ValueError(failure_reason)
-                    retry_budget_remaining -= 1
+            self._run_ocr_cases(run)
+            return self._score_ocr_exam(run)
+        except Exception as error:
+            return self._failure(
+                started=run.started,
+                run_id=run.run_id,
+                run_root=run.run_root,
+                plan=run.plan,
+                requested_model=run.requested_model,
+                state=run.state,
+                error=error,
+            )
 
-                if result.get("requested_model") != requested_model:
-                    raise ValueError("OCR_MODEL_IDENTITY_MISMATCH")
-                execution_receipt = result.get("execution_receipt")
-                if not isinstance(execution_receipt, Mapping):
-                    raise ValueError("OCR_EXECUTION_RECEIPT_MISSING")
-                returned = result.get("returned_model")
-                identity_grade = execution_receipt.get("model_identity_grade")
-                recorded_unverified = (
-                    target.get("kind") == "CLI"
-                    and returned is None
-                    and identity_grade == "RECORDED_UNVERIFIED"
-                    and execution_receipt.get("provider_event_model_identity_grade")
-                    == "PROVIDER_NOT_EXPOSED"
-                    and execution_receipt.get("request_model_binding_status")
-                    == "EXACT_ARGV_AND_FROZEN_ALLOWLIST"
-                    and isinstance(
-                        execution_receipt.get("request_model_binding_sha256"), str
+    def _run_ocr_cases(self, run: _OcrExamRun) -> None:
+        """Send every main and repeat case to the model under test, within the retry budget."""
+        def run_case(sample_row: Mapping[str, Any]) -> dict[str, Any]:
+            case_id = str(sample_row["case_id"])
+            generation = str(sample_row["generation"])
+            form_id, case = run.form_case_by_id[case_id]
+            form = run.forms[form_id]
+            prompt = (
+                self._reference_pack_root / str(form["prompt_ref"])
+            ).read_text(encoding="utf-8")
+            visible = run.modules["protocol"].build_provider_visible_payload(
+                pack=self._reference_pack_root,
+                form=form,
+                case_id=case_id,
+            )
+            image_bytes = __import__("base64").b64decode(
+                visible["image_base64"], validate=True
+            )
+            request_max_output_tokens = run.plan["request_max_output_tokens"]
+            timeout_seconds = run.target.get(
+                "exam_timeout_seconds",
+                300 if run.target.get("kind") == "CLI" else 180,
+            )
+            while True:
+                run.physical_index += 1
+                claim = {
+                    "schema_version": "WorkflowOcrPreSendClaim-v2",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "physical_call_id": f"call-{run.physical_index:02d}",
+                    "logical_index": sample_row["logical_index"],
+                    "generation": generation,
+                    "call_kind": (
+                        "OCR_PAGE_REPEAT_CASE"
+                        if generation != "gen1"
+                        else "OCR_PAGE_MAIN_CASE"
+                    ),
+                    "profile_kind": run.plan["profile_kind"],
+                    "profile_ref": run.plan["profile_ref"],
+                    "purpose": "workflow_model_exam",
+                    "route": ("DECLARATIVE_COMMAND_TEMPLATE" if run.target.get("adapter_id")=="command_template" else self._route(str(run.plan["profile_kind"]))),
+                    "requested_model": run.requested_model,
+                    "model_digest": run.target.get("model_digest"),
+                    "thinking_mode": run.target.get("thinking_mode"),
+                    "cli_binary_sha256": run.target.get("cli_binary_sha256"),
+                    "cli_version": run.target.get("cli_version"),
+                    "cli_identity_authority_ref": run.target.get(
+                        "cli_identity_authority_ref"
+                    ),
+                    "case_id": case_id,
+                    "image_sha256": case["image_sha256"],
+                    "mime_type": visible["mime_type"],
+                    "prompt_sha256": hashlib.sha256(
+                        prompt.encode("utf-8")
+                    ).hexdigest().upper(),
+                    "request_max_output_tokens": request_max_output_tokens,
+                    "behavior_sha256": _sha256(
+                        {
+                            "model": run.requested_model,
+                            "thinking_mode": run.target.get("thinking_mode"),
+                            "cli_binary_sha256": run.target.get(
+                                "cli_binary_sha256"
+                            ),
+                            "cli_version": run.target.get("cli_version"),
+                            "image_sha256": case["image_sha256"],
+                            "mime_type": visible["mime_type"],
+                            "prompt": prompt,
+                            "purpose": "workflow_model_exam",
+                            "max_output_tokens": request_max_output_tokens,
+                        }
+                    ),
+                    "plan_sha256": run.plan["plan_sha256"],
+                    "provider_received_gold": False,
+                }
+                claim_receipt = _write_json_create_only(
+                    run.run_root / "claims" / f"call_{run.physical_index:02d}.json",
+                    claim,
+                )
+                result = dict(
+                    run.ocr_call(
+                        profile_kind=str(run.target["kind"]),
+                        service=run.target,
+                        model=run.target,
+                        image_bytes=image_bytes,
+                        mime_type=visible["mime_type"],
+                        prompt=prompt,
+                        purpose="workflow_model_exam",
+                        max_output_tokens=request_max_output_tokens,
+                        timeout_seconds=timeout_seconds,
                     )
-                    and bool(
-                        SHA256.fullmatch(
-                            str(execution_receipt["request_model_binding_sha256"])
-                        )
-                    )
                 )
-                from memorive.models.cli.templates import receipt_model_bound
-                generic_bound=target.get("adapter_id")=="command_template" and receipt_model_bound(execution_receipt,requested_model)
-                if returned != requested_model and not recorded_unverified and not generic_bound:
-                    raise ValueError("OCR_MODEL_IDENTITY_MISMATCH")
-                returned_model_evidence.append(
-                    returned if isinstance(returned, str) else None
-                )
-                identity_grades.append(
-                    str(identity_grade or "DIRECT_RETURNED_MODEL_MATCH")
-                )
-                raw_text = result.get("raw_text", result.get("text"))
-                if not isinstance(raw_text, str) or not raw_text:
-                    raise ValueError("OCR_RAW_TEXT_EVIDENCE_MISSING")
-                provider_output = {
-                    "schema_version": "WorkflowOcrProviderOutput-v2",
-                    "physical_index": physical_index,
+                self._consume_result(run.state, result)
+                attempt_summary = {
+                    "schema_version": "WorkflowOcrAttemptReceipt-v2",
+                    "physical_index": run.physical_index,
                     "logical_index": sample_row["logical_index"],
                     "generation": generation,
                     "case_id": case_id,
-                    "requested_model": requested_model,
+                    "status": result.get("status"),
+                    "reason": result.get("reason"),
+                    "requested_model": result.get("requested_model"),
                     "returned_model": result.get("returned_model"),
-                    "finish_reason": str(result.get("finish_reason") or "unknown"),
-                    "raw_text": raw_text,
-                    "normalized_text": result["text"],
-                    "raw_text_sha256": hashlib.sha256(
-                        raw_text.encode("utf-8")
-                    ).hexdigest().upper(),
-                    "normalized_text_sha256": hashlib.sha256(
-                        str(result["text"]).encode("utf-8")
-                    ).hexdigest().upper(),
-                    "normalization_revision": result.get(
-                        "normalization_revision", "LEGACY_IDENTITY_FALLBACK"
+                    "external_model_calls": int(
+                        result.get("external_model_calls") or 0
                     ),
-                    "normalization_applied": bool(
-                        result.get(
-                            "normalization_applied", raw_text != result["text"]
-                        )
+                    "physical_model_calls": int(
+                        result.get("physical_model_calls")
+                        if result.get("physical_model_calls") is not None
+                        else result.get("external_model_calls") or 0
+                    ),
+                    "external_budget_calls": int(
+                        result.get("external_budget_calls") or 0
+                    ),
+                    "local_model_calls": int(
+                        result.get("local_model_calls") or 0
+                    ),
+                    "duration_ms": result.get("duration_ms"),
+                    "pre_send_claim_sha256": claim_receipt["sha256"],
+                    "execution_receipt": deepcopy(
+                        dict(result.get("execution_receipt") or {})
                     ),
                     "provider_received_gold": False,
                 }
-                provider_output_receipt = _write_json_create_only(
-                    run_root
-                    / "provider_outputs"
-                    / f"logical_{int(sample_row['logical_index']):02d}_{generation}.json",
-                    provider_output,
-                )
-                output = modules["protocol"].freeze_output_envelope(
-                    form=form,
-                    case_id=case_id,
-                    output_text=result["text"],
-                    transport_status="MODEL_DELIVERED",
-                    finish_reason=str(result.get("finish_reason") or "unknown"),
-                )
                 _write_json_create_only(
-                    run_root
-                    / "receipts"
-                    / f"logical_{int(sample_row['logical_index']):02d}_{generation}.json",
-                    {
-                        "schema_version": "WorkflowOcrCallReceipt-v2",
-                        "physical_index": physical_index,
-                        "logical_index": sample_row["logical_index"],
-                        "generation": generation,
-                        "case_id": case_id,
-                        "image_sha256": case["image_sha256"],
-                        "output_sha256": output["output_sha256"],
-                        "pre_send_claim_sha256": claim_receipt["sha256"],
-                        "provider_output_sha256": provider_output_receipt["sha256"],
-                        "provider_received_gold": False,
-                        "execution_receipt": deepcopy(dict(execution_receipt)),
-                    },
+                    run.run_root
+                    / "attempts"
+                    / f"call_{run.physical_index:02d}.json",
+                    attempt_summary,
                 )
-                return output
+                if result.get("status") == "PASS":
+                    break
+                failure_reason = str(result.get("reason") or "OCR_CALL_FAILED")
+                retryable = any(
+                    token in failure_reason.upper()
+                    for token in (
+                        "RATE_LIMIT",
+                        "NETWORK",
+                        "TIMEOUT",
+                        "TEMPORARY",
+                        "CONNECTION",
+                    )
+                )
+                if (
+                    not retryable
+                    or run.retry_budget_remaining <= 0
+                    or int(result.get("external_model_calls") or 0) <= 0
+                ):
+                    raise ValueError(failure_reason)
+                run.retry_budget_remaining -= 1
 
-            main_outputs = [run_case(row) for row in sample["main_cases"]]
-            repeat_outputs = [run_case(row) for row in sample["repeat_cases"]]
-            if not self.MODEL_CALLS <= state["external_model_calls"] <= plan["maximum_model_calls"]:
-                raise ValueError("OCR_SUCCESSOR_PHYSICAL_CALL_COUNT_MISMATCH")
-            frozen = {
-                "schema_version": "WorkflowOcrBalancedOutputsFrozen-v2",
-                "sample_manifest_sha256": sample["sample_manifest_sha256"],
-                "requested_model": requested_model,
-                "main_outputs": main_outputs,
-                "repeat_outputs": repeat_outputs,
-                "physical_model_calls": state["physical_model_calls"],
-                "gold_sent_to_provider": False,
-            }
-            frozen_receipt = _write_json_create_only(
-                run_root / "outputs_frozen_before_gold.json", frozen
-            )
-
-            gold_by_case: dict[str, Mapping[str, Any]] = {}
-            for form_id in ("A", "B"):
-                gold = _load_json(
-                    self._reference_pack_root / "gold" / f"form_{form_id}_gold.json"
+            if result.get("requested_model") != run.requested_model:
+                raise ValueError("OCR_MODEL_IDENTITY_MISMATCH")
+            execution_receipt = result.get("execution_receipt")
+            if not isinstance(execution_receipt, Mapping):
+                raise ValueError("OCR_EXECUTION_RECEIPT_MISSING")
+            returned = result.get("returned_model")
+            identity_grade = execution_receipt.get("model_identity_grade")
+            recorded_unverified = (
+                run.target.get("kind") == "CLI"
+                and returned is None
+                and identity_grade == "RECORDED_UNVERIFIED"
+                and execution_receipt.get("provider_event_model_identity_grade")
+                == "PROVIDER_NOT_EXPOSED"
+                and execution_receipt.get("request_model_binding_status")
+                == "EXACT_ARGV_AND_FROZEN_ALLOWLIST"
+                and isinstance(
+                    execution_receipt.get("request_model_binding_sha256"), str
                 )
-                gold_by_case.update(
-                    {str(row["case_id"]): row for row in gold["cases"]}
+                and bool(
+                    SHA256.fullmatch(
+                        str(execution_receipt["request_model_binding_sha256"])
+                    )
                 )
-            main_details = [
-                score_ocr_case_successor(
-                    exam=modules["exam"],
-                    form_case=form_case_by_id[str(output["case_id"])][1],
-                    gold_case=gold_by_case[str(output["case_id"])],
-                    output=output,
-                )
-                for output in main_outputs
-            ]
-            repeat_details = [
-                score_ocr_case_successor(
-                    exam=modules["exam"],
-                    form_case=form_case_by_id[str(output["case_id"])][1],
-                    gold_case=gold_by_case[str(output["case_id"])],
-                    output=output,
-                )
-                for output in repeat_outputs
-            ]
-            stability_texts = [
-                next(
-                    str(output["output_text"])
-                    for output in main_outputs
-                    if output["case_id"] == OCR_STABILITY_CASE_ID
+            )
+            from memorive.models.cli.templates import receipt_model_bound
+            generic_bound=run.target.get("adapter_id")=="command_template" and receipt_model_bound(execution_receipt,run.requested_model)
+            if returned != run.requested_model and not recorded_unverified and not generic_bound:
+                raise ValueError("OCR_MODEL_IDENTITY_MISMATCH")
+            run.returned_model_evidence.append(
+                returned if isinstance(returned, str) else None
+            )
+            run.identity_grades.append(
+                str(identity_grade or "DIRECT_RETURNED_MODEL_MATCH")
+            )
+            raw_text = result.get("raw_text", result.get("text"))
+            if not isinstance(raw_text, str) or not raw_text:
+                raise ValueError("OCR_RAW_TEXT_EVIDENCE_MISSING")
+            provider_output = {
+                "schema_version": "WorkflowOcrProviderOutput-v2",
+                "physical_index": run.physical_index,
+                "logical_index": sample_row["logical_index"],
+                "generation": generation,
+                "case_id": case_id,
+                "requested_model": run.requested_model,
+                "returned_model": result.get("returned_model"),
+                "finish_reason": str(result.get("finish_reason") or "unknown"),
+                "raw_text": raw_text,
+                "normalized_text": result["text"],
+                "raw_text_sha256": hashlib.sha256(
+                    raw_text.encode("utf-8")
+                ).hexdigest().upper(),
+                "normalized_text_sha256": hashlib.sha256(
+                    str(result["text"]).encode("utf-8")
+                ).hexdigest().upper(),
+                "normalization_revision": result.get(
+                    "normalization_revision", "LEGACY_IDENTITY_FALLBACK"
                 ),
-                *(str(output["output_text"]) for output in repeat_outputs),
-            ]
-            score_result = score_ocr_balanced_sample(
-                exam=modules["exam"],
-                main_details=main_details,
-                repeat_details=repeat_details,
-                stability_texts=stability_texts,
-            )
-            _write_json_create_only(run_root / "sample_score.json", score_result)
-            if (
-                plan.get("budget_cap_cny") is not None
-                and state["estimated_cost_cny"] > float(plan["budget_cap_cny"])
-            ):
-                raise ValueError("OCR_SUCCESSOR_COST_CAP_EXCEEDED")
-            quality_verdict = (
-                "FAIL" if score_result["model_fail_established"] else "PASS"
-            )
-            operational_by_guard = {
-                "RECOMMENDED": ("SUITABLE", "SUITABLE"),
-                "RECOMMENDED_AFTER_DETERMINISTIC_NORMALIZATION": (
-                    "SUITABLE_AFTER_DETERMINISTIC_NORMALIZATION",
-                    "SUITABLE_AFTER_DETERMINISTIC_NORMALIZATION",
+                "normalization_applied": bool(
+                    result.get(
+                        "normalization_applied", raw_text != result["text"]
+                    )
                 ),
-                "PASS_WITH_BOUNDED_PAGE_RECOVERY": (
-                    "SUITABLE_AFTER_VERIFIED_PAGE_RECOVERY",
-                    "PAGE_RECOVERY_REQUIRED_BEFORE_RELEASE",
-                ),
-                "PASS_WITH_SOURCE_COMPARISON_GUARD": (
-                    "SUITABLE_WITH_SOURCE_COMPARISON_GUARD",
-                    "SOURCE_COMPARISON_REQUIRED_BEFORE_RELEASE",
-                ),
-                "PASS_WITH_STRUCTURE_GUARD": (
-                    "SUITABLE_WITH_STRUCTURE_GUARD",
-                    "STRUCTURE_REVIEW_REQUIRED_BEFORE_RELEASE",
-                ),
-            }
-            operational, terminal = operational_by_guard.get(
-                score_result["guarded_eligibility"],
-                ("NOT_RECOMMENDED", "NOT_RECOMMENDED_DIAGNOSTIC_SAMPLE"),
-            )
-            safety_count = len(score_result["material_safety_case_ids"])
-            if score_result["model_fail_established"]:
-                operational_safety_gate = "FAIL"
-            elif score_result["material_safety_case_ids"]:
-                operational_safety_gate = "SOURCE_COMPARISON_REQUIRED"
-            elif score_result["structural_case_ids"]:
-                operational_safety_gate = "STRUCTURE_REVIEW_REQUIRED"
-            else:
-                operational_safety_gate = "PASS"
-            calibration_count = len(score_result["calibration_case_ids"]) + sum(
-                int(bool(detail["presentation_resolutions"]))
-                for detail in main_details
-            )
-            failed_items = sorted(
-                set(score_result["material_safety_case_ids"])
-                | set(score_result["structural_case_ids"])
-                | set(score_result["coverage_case_ids"])
-            )
-            estimated_cost = (
-                None
-                if plan["profile_kind"] == "CLI"
-                else round(float(state["estimated_cost_cny"]), 9)
-            )
-            aggregate_returned_model = (
-                requested_model
-                if returned_model_evidence
-                and all(value == requested_model for value in returned_model_evidence)
-                else None
-            )
-            aggregate_identity_grade = ('REQUEST_BOUND_RETURNED_UNKNOWN' if 'REQUEST_BOUND_RETURNED_UNKNOWN' in identity_grades
-                else 'RECORDED_UNVERIFIED' if 'RECORDED_UNVERIFIED' in identity_grades else 'VERIFIED')
-            public_result = {
-                "schema_version": "WorkflowModelExamRunResult-v3",
-                "status": quality_verdict,
-                "reason": "Quality_OCR_WORKFLOW_POSITION_DIAGNOSTIC_COMPLETED",
-                "execution_outcome": "COMPLETED",
-                "scorability": "SCOREABLE",
-                "raw_quality_candidate_verdict": quality_verdict,
-                "quality_verdict": quality_verdict,
-                "model_fail_verdict": score_result["model_fail_verdict"],
-                "model_fail_established": score_result["model_fail_established"],
-                "score_band": score_result["score_band"],
-                "guarded_eligibility": score_result["guarded_eligibility"],
-                "unrestricted_eligibility": score_result[
-                    "unrestricted_eligibility"
-                ],
-                "workflow_eligibility": score_result["workflow_eligibility"],
-                "workflow_disposition": score_result["workflow_disposition"],
-                "operational_eligibility_verdict": operational,
-                "operational_policy_revision": (
-                    "Desktop_OCR_WORKFLOW_RECOVERY_AND_SOURCE_GUARDS_V3"
-                ),
-                "operational_safety_gate": operational_safety_gate,
-                "terminal_disposition": terminal,
-                "run_id": run_id,
-                "plan_sha256": plan["plan_sha256"],
-                "requested_model": requested_model,
-                "returned_model": aggregate_returned_model,
-                "model_identity_grade": aggregate_identity_grade,
-                "score": int(round(float(score_result["score"]))),
-                "score_exact": score_result["score"],
-                "first_pass_score_exact": score_result["first_pass_score"],
-                "deterministic_postprocess_score_exact": score_result[
-                    "deterministic_postprocess_score"
-                ],
-                "verified_recovery_score_exact": score_result[
-                    "verified_recovery_score"
-                ],
-                "unverified_recovery_ceiling": score_result[
-                    "unverified_recovery_ceiling"
-                ],
-                "unverified_recovery_ceiling_is_achieved_score": False,
-                "recovery_credit_policy": score_result[
-                    "recovery_credit_policy"
-                ],
-                "category_score_is_descriptive": True,
-                "sample_slot": plan["sample_slot"],
-                "sample_revision": plan["sample_revision"],
-                "sample_manifest_sha256": plan["sample_manifest_sha256"],
-                "exam_category_id": plan["exam_category_id"],
-                "role_id": plan["role_id"],
-                "comparison_cohort_id": plan["comparison_cohort_id"],
-                "comparison_binding_sha256": plan["comparison_binding_sha256"],
-                "horizontal_comparison_eligible": True,
-                "horizontal_comparison_allowed_only_with_same_cohort": True,
-                "failed_exam_item_count": len(failed_items),
-                "safety_blocking_residual_count": safety_count,
-                "calibration_residual_count": calibration_count,
-                "material_safety_case_ids": score_result[
-                    "material_safety_case_ids"
-                ],
-                "structural_case_ids": score_result["structural_case_ids"],
-                "coverage_case_ids": score_result["coverage_case_ids"],
-                "auto_normalization_case_ids": score_result[
-                    "auto_normalization_case_ids"
-                ],
-                "bounded_recovery_case_ids": score_result[
-                    "bounded_recovery_case_ids"
-                ],
-                "source_guard_case_ids": score_result[
-                    "source_guard_case_ids"
-                ],
-                "semantic_repair_rounds": 0,
-                "page_recovery_rounds": 0,
-                **state,
-                "estimated_cost_cny": estimated_cost,
-                "actual_cost": None,
-                "cost_semantics": plan["cost_semantics"],
-                "reference_regression_only": True,
-                "blind_holdout_eligible": False,
-                "qualification_eligible": False,
-                "qualification_verdict": "NOT_ASSESSED",
-                "provider_received_answer_key": False,
                 "provider_received_gold": False,
-                "local_reference_pack_embedded": True,
-                "outputs_frozen_before_gold_sha256": frozen_receipt["sha256"],
-                "cross_category_comparison_forbidden": True,
-                "global_ranking_forbidden": True,
             }
-            evidence = _write_json_create_only(
-                run_root / "exam_result.json", public_result
+            provider_output_receipt = _write_json_create_only(
+                run.run_root
+                / "provider_outputs"
+                / f"logical_{int(sample_row['logical_index']):02d}_{generation}.json",
+                provider_output,
             )
-            return {
-                **public_result,
-                "schema_version": RESULT_SCHEMA,
-                "kind": "WORKFLOW_NODE",
-                "duration_ms": max(0, int((monotonic() - started) * 1000)),
-                "exam_mode": plan["mode"],
-                "exam_run_id": run_id,
-                "exam_run_root": str(run_root.resolve()),
-                "exam_evidence_sha256": evidence["sha256"],
-            }
-        except Exception as error:
-            return self._failure(
-                started=started,
-                run_id=run_id,
-                run_root=run_root,
-                plan=plan,
-                requested_model=requested_model,
-                state=state,
-                error=error,
+            output = run.modules["protocol"].freeze_output_envelope(
+                form=form,
+                case_id=case_id,
+                output_text=result["text"],
+                transport_status="MODEL_DELIVERED",
+                finish_reason=str(result.get("finish_reason") or "unknown"),
             )
+            _write_json_create_only(
+                run.run_root
+                / "receipts"
+                / f"logical_{int(sample_row['logical_index']):02d}_{generation}.json",
+                {
+                    "schema_version": "WorkflowOcrCallReceipt-v2",
+                    "physical_index": run.physical_index,
+                    "logical_index": sample_row["logical_index"],
+                    "generation": generation,
+                    "case_id": case_id,
+                    "image_sha256": case["image_sha256"],
+                    "output_sha256": output["output_sha256"],
+                    "pre_send_claim_sha256": claim_receipt["sha256"],
+                    "provider_output_sha256": provider_output_receipt["sha256"],
+                    "provider_received_gold": False,
+                    "execution_receipt": deepcopy(dict(execution_receipt)),
+                },
+            )
+            return output
+
+        run.main_outputs = [run_case(row) for row in run.sample["main_cases"]]
+        run.repeat_outputs = [run_case(row) for row in run.sample["repeat_cases"]]
+
+    def _score_ocr_exam(self, run: _OcrExamRun) -> Any:
+        """Score the outputs against the gold (quality, stability, safety, the operational verdict), write
+        the public result and its evidence, and return the result."""
+        if not self.MODEL_CALLS <= run.state["external_model_calls"] <= run.plan["maximum_model_calls"]:
+            raise ValueError("OCR_SUCCESSOR_PHYSICAL_CALL_COUNT_MISMATCH")
+        frozen = {
+            "schema_version": "WorkflowOcrBalancedOutputsFrozen-v2",
+            "sample_manifest_sha256": run.sample["sample_manifest_sha256"],
+            "requested_model": run.requested_model,
+            "main_outputs": run.main_outputs,
+            "repeat_outputs": run.repeat_outputs,
+            "physical_model_calls": run.state["physical_model_calls"],
+            "gold_sent_to_provider": False,
+        }
+        frozen_receipt = _write_json_create_only(
+            run.run_root / "outputs_frozen_before_gold.json", frozen
+        )
+
+        gold_by_case: dict[str, Mapping[str, Any]] = {}
+        for form_id in ("A", "B"):
+            gold = _load_json(
+                self._reference_pack_root / "gold" / f"form_{form_id}_gold.json"
+            )
+            gold_by_case.update(
+                {str(row["case_id"]): row for row in gold["cases"]}
+            )
+        main_details = [
+            score_ocr_case_successor(
+                exam=run.modules["exam"],
+                form_case=run.form_case_by_id[str(output["case_id"])][1],
+                gold_case=gold_by_case[str(output["case_id"])],
+                output=output,
+            )
+            for output in run.main_outputs
+        ]
+        repeat_details = [
+            score_ocr_case_successor(
+                exam=run.modules["exam"],
+                form_case=run.form_case_by_id[str(output["case_id"])][1],
+                gold_case=gold_by_case[str(output["case_id"])],
+                output=output,
+            )
+            for output in run.repeat_outputs
+        ]
+        stability_texts = [
+            next(
+                str(output["output_text"])
+                for output in run.main_outputs
+                if output["case_id"] == OCR_STABILITY_CASE_ID
+            ),
+            *(str(output["output_text"]) for output in run.repeat_outputs),
+        ]
+        score_result = score_ocr_balanced_sample(
+            exam=run.modules["exam"],
+            main_details=main_details,
+            repeat_details=repeat_details,
+            stability_texts=stability_texts,
+        )
+        _write_json_create_only(run.run_root / "sample_score.json", score_result)
+        if (
+            run.plan.get("budget_cap_cny") is not None
+            and run.state["estimated_cost_cny"] > float(run.plan["budget_cap_cny"])
+        ):
+            raise ValueError("OCR_SUCCESSOR_COST_CAP_EXCEEDED")
+        quality_verdict = (
+            "FAIL" if score_result["model_fail_established"] else "PASS"
+        )
+        operational_by_guard = {
+            "RECOMMENDED": ("SUITABLE", "SUITABLE"),
+            "RECOMMENDED_AFTER_DETERMINISTIC_NORMALIZATION": (
+                "SUITABLE_AFTER_DETERMINISTIC_NORMALIZATION",
+                "SUITABLE_AFTER_DETERMINISTIC_NORMALIZATION",
+            ),
+            "PASS_WITH_BOUNDED_PAGE_RECOVERY": (
+                "SUITABLE_AFTER_VERIFIED_PAGE_RECOVERY",
+                "PAGE_RECOVERY_REQUIRED_BEFORE_RELEASE",
+            ),
+            "PASS_WITH_SOURCE_COMPARISON_GUARD": (
+                "SUITABLE_WITH_SOURCE_COMPARISON_GUARD",
+                "SOURCE_COMPARISON_REQUIRED_BEFORE_RELEASE",
+            ),
+            "PASS_WITH_STRUCTURE_GUARD": (
+                "SUITABLE_WITH_STRUCTURE_GUARD",
+                "STRUCTURE_REVIEW_REQUIRED_BEFORE_RELEASE",
+            ),
+        }
+        operational, terminal = operational_by_guard.get(
+            score_result["guarded_eligibility"],
+            ("NOT_RECOMMENDED", "NOT_RECOMMENDED_DIAGNOSTIC_SAMPLE"),
+        )
+        safety_count = len(score_result["material_safety_case_ids"])
+        if score_result["model_fail_established"]:
+            operational_safety_gate = "FAIL"
+        elif score_result["material_safety_case_ids"]:
+            operational_safety_gate = "SOURCE_COMPARISON_REQUIRED"
+        elif score_result["structural_case_ids"]:
+            operational_safety_gate = "STRUCTURE_REVIEW_REQUIRED"
+        else:
+            operational_safety_gate = "PASS"
+        calibration_count = len(score_result["calibration_case_ids"]) + sum(
+            int(bool(detail["presentation_resolutions"]))
+            for detail in main_details
+        )
+        failed_items = sorted(
+            set(score_result["material_safety_case_ids"])
+            | set(score_result["structural_case_ids"])
+            | set(score_result["coverage_case_ids"])
+        )
+        estimated_cost = (
+            None
+            if run.plan["profile_kind"] == "CLI"
+            else round(float(run.state["estimated_cost_cny"]), 9)
+        )
+        aggregate_returned_model = (
+            run.requested_model
+            if run.returned_model_evidence
+            and all(value == run.requested_model for value in run.returned_model_evidence)
+            else None
+        )
+        aggregate_identity_grade = ('REQUEST_BOUND_RETURNED_UNKNOWN' if 'REQUEST_BOUND_RETURNED_UNKNOWN' in run.identity_grades
+            else 'RECORDED_UNVERIFIED' if 'RECORDED_UNVERIFIED' in run.identity_grades else 'VERIFIED')
+        public_result = {
+            "schema_version": "WorkflowModelExamRunResult-v3",
+            "status": quality_verdict,
+            "reason": "Quality_OCR_WORKFLOW_POSITION_DIAGNOSTIC_COMPLETED",
+            "execution_outcome": "COMPLETED",
+            "scorability": "SCOREABLE",
+            "raw_quality_candidate_verdict": quality_verdict,
+            "quality_verdict": quality_verdict,
+            "model_fail_verdict": score_result["model_fail_verdict"],
+            "model_fail_established": score_result["model_fail_established"],
+            "score_band": score_result["score_band"],
+            "guarded_eligibility": score_result["guarded_eligibility"],
+            "unrestricted_eligibility": score_result[
+                "unrestricted_eligibility"
+            ],
+            "workflow_eligibility": score_result["workflow_eligibility"],
+            "workflow_disposition": score_result["workflow_disposition"],
+            "operational_eligibility_verdict": operational,
+            "operational_policy_revision": (
+                "Desktop_OCR_WORKFLOW_RECOVERY_AND_SOURCE_GUARDS_V3"
+            ),
+            "operational_safety_gate": operational_safety_gate,
+            "terminal_disposition": terminal,
+            "run_id": run.run_id,
+            "plan_sha256": run.plan["plan_sha256"],
+            "requested_model": run.requested_model,
+            "returned_model": aggregate_returned_model,
+            "model_identity_grade": aggregate_identity_grade,
+            "score": int(round(float(score_result["score"]))),
+            "score_exact": score_result["score"],
+            "first_pass_score_exact": score_result["first_pass_score"],
+            "deterministic_postprocess_score_exact": score_result[
+                "deterministic_postprocess_score"
+            ],
+            "verified_recovery_score_exact": score_result[
+                "verified_recovery_score"
+            ],
+            "unverified_recovery_ceiling": score_result[
+                "unverified_recovery_ceiling"
+            ],
+            "unverified_recovery_ceiling_is_achieved_score": False,
+            "recovery_credit_policy": score_result[
+                "recovery_credit_policy"
+            ],
+            "category_score_is_descriptive": True,
+            "sample_slot": run.plan["sample_slot"],
+            "sample_revision": run.plan["sample_revision"],
+            "sample_manifest_sha256": run.plan["sample_manifest_sha256"],
+            "exam_category_id": run.plan["exam_category_id"],
+            "role_id": run.plan["role_id"],
+            "comparison_cohort_id": run.plan["comparison_cohort_id"],
+            "comparison_binding_sha256": run.plan["comparison_binding_sha256"],
+            "horizontal_comparison_eligible": True,
+            "horizontal_comparison_allowed_only_with_same_cohort": True,
+            "failed_exam_item_count": len(failed_items),
+            "safety_blocking_residual_count": safety_count,
+            "calibration_residual_count": calibration_count,
+            "material_safety_case_ids": score_result[
+                "material_safety_case_ids"
+            ],
+            "structural_case_ids": score_result["structural_case_ids"],
+            "coverage_case_ids": score_result["coverage_case_ids"],
+            "auto_normalization_case_ids": score_result[
+                "auto_normalization_case_ids"
+            ],
+            "bounded_recovery_case_ids": score_result[
+                "bounded_recovery_case_ids"
+            ],
+            "source_guard_case_ids": score_result[
+                "source_guard_case_ids"
+            ],
+            "semantic_repair_rounds": 0,
+            "page_recovery_rounds": 0,
+            **run.state,
+            "estimated_cost_cny": estimated_cost,
+            "actual_cost": None,
+            "cost_semantics": run.plan["cost_semantics"],
+            "reference_regression_only": True,
+            "blind_holdout_eligible": False,
+            "qualification_eligible": False,
+            "qualification_verdict": "NOT_ASSESSED",
+            "provider_received_answer_key": False,
+            "provider_received_gold": False,
+            "local_reference_pack_embedded": True,
+            "outputs_frozen_before_gold_sha256": frozen_receipt["sha256"],
+            "cross_category_comparison_forbidden": True,
+            "global_ranking_forbidden": True,
+        }
+        evidence = _write_json_create_only(
+            run.run_root / "exam_result.json", public_result
+        )
+        return {
+            **public_result,
+            "schema_version": RESULT_SCHEMA,
+            "kind": "WORKFLOW_NODE",
+            "duration_ms": max(0, int((monotonic() - run.started) * 1000)),
+            "exam_mode": run.plan["mode"],
+            "exam_run_id": run.run_id,
+            "exam_run_root": str(run.run_root.resolve()),
+            "exam_evidence_sha256": evidence["sha256"],
+        }
