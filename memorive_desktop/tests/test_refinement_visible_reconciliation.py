@@ -28,9 +28,11 @@ from tests.test_refinement_inbox_and_local_mapping import (  # noqa: E402
 
 
 def test_queue_terminal_transition_has_a_dedicated_ui_projection_observer() -> None:
-    sessions = (
-        ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "controller.py"
-    ).read_text(encoding="utf-8")
+    # The sessions controller is a package; read all of its modules.
+    sessions = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "controller").glob("*.py"))
+    )
     runtime = (ATTEMPT_ROOT / "source" / "memorive" / "desktop" / "api.py").read_text(
         encoding="utf-8"
     )

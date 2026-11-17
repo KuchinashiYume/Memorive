@@ -5,7 +5,7 @@ ProductApi builds one BrowserCompanionDesktop at startup and forwards to it the 
 browser_companion_*, *_browser_companion*, sync_browser_sessions_from_downloads and
 import_browser_sessions_file calls. The extension writes into the browser's download folder;
 the sync reads its reports there and hands each session file to the sessions controller
-(memorive/sessions/controller.py). Its own state is in the BROWSER_COMPANION profile folder (setup_v1.json,
+(memorive/sessions/controller/). Its own state is in the BROWSER_COMPANION profile folder (setup_v1.json,
 the prepared extension, session-library).
 """
 from __future__ import annotations

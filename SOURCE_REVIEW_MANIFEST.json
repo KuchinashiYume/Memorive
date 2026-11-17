@@ -4121,8 +4121,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c303a6bfb544f039c6d59dd7a0674ced68df018ebe552567b53a4047b36f45ae",
-      "bytes": 272310
+      "sha256": "386d37a3a898feb568f14deea5c47a3aac7690a34512b081801ccb1241fae467",
+      "bytes": 273840
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -6951,13 +6951,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/__init__.py",
-      "sha256": "04b94ae61da9a6ae0cbfb4b3ccaf0a6dd3240563244869adc2ea826a5bd0f628",
+      "sha256": "68519c6bef6c6a538ee353d5374565c8fa9e33517cd622c331ef385073be22d1",
       "bytes": 745
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/archive/__init__.py",
-      "sha256": "175d21e0386c6c17084ddb28d483be927754c6e3cb914ab5cb1a7d34e95c5485",
-      "bytes": 617
+      "sha256": "347b55e8432607f0493235ccbaead5b965afcf0c5de53079d2feda7008cabca9",
+      "bytes": 615
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/archive/importers.py",
@@ -6986,8 +6986,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/desktop.py",
-      "sha256": "130120b02f0e1bce612d46df28562a786b5007192a0dcf1fe354e97af71e22b4",
-      "bytes": 95581
+      "sha256": "a6e8e77854e1bbf6a8ea218625368647abe9ac529924107e22e9cc46c7ce42aa",
+      "bytes": 95579
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/README.txt",
@@ -7058,11 +7058,6 @@
       "path": "memorive_desktop/source/memorive/sessions/companion/site_profiles.py",
       "sha256": "0f63500d76a8ba6f0037cc14594ca9c2a8ffb8b7a3536188ae4195ec68670b4a",
       "bytes": 12890
-    },
-    {
-      "path": "memorive_desktop/source/memorive/sessions/controller.py",
-      "sha256": "357829e4b38c26449a4c7507fdad2c410cc3a724a25c75fa52687992218bcc34",
-      "bytes": 190213
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/edge_visible_ui.py",
@@ -9948,6 +9943,51 @@
       "path": "memorive_desktop/source/memorive/exams/runner/workflow_exams.py",
       "sha256": "8e011544f24ed4a0b180fd6e120c9d3ba7da84c6b565aef6a5c5b9b897a58d76",
       "bytes": 67950
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/__init__.py",
+      "sha256": "2681cd8b3d8802bbc4450cc89ee2d253dd43564d663efcc5082d50fff998cdd0",
+      "bytes": 1398
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/browser.py",
+      "sha256": "6ab88b0c5693094f695950d17a8b91803b2d814237242c286e422c4551f03aee",
+      "bytes": 44236
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/common.py",
+      "sha256": "d217be15962ac28959be41bb6dd25e9bac15c181be784dd1617cfe67a529700f",
+      "bytes": 14388
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/listing.py",
+      "sha256": "4e927c4c7992561880d7104938b9a35de3d02560cb571021c3e1aac3833db9a4",
+      "bytes": 27520
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/local_cli.py",
+      "sha256": "51b1cf87b43143994c85afde5f31c9ebb93402553d645f0929b38bb38e37693e",
+      "bytes": 24882
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/product_controller.py",
+      "sha256": "e4e13b7c555e5de9fdd2fd2150b531ddc462bafeb34b75ca89c12710848cbe9e",
+      "bytes": 27567
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/refinement_queue.py",
+      "sha256": "6c430d2bd30912e84f35e87917495d13d78bc7d06b38a77cb293aa666dfcaa3b",
+      "bytes": 11893
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/refinement_tasks.py",
+      "sha256": "d8ae81d9ca0883f342a2ecccc222a5dcd44eec9d40c9315f5a3aa1f69dfa3dc8",
+      "bytes": 34670
+    },
+    {
+      "path": "memorive_desktop/source/memorive/sessions/controller/state.py",
+      "sha256": "108028f69063505fda41d4753ac473f276e0a91c25f2639961664b7b284e7bb1",
+      "bytes": 9784
     }
   ]
 }

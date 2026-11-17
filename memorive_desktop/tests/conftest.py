@@ -97,7 +97,11 @@ def _session_fixture_clock(request, monkeypatch):
             value = cls(2026, 9, 5, tzinfo=real.timezone.utc)
             return value.astimezone(tz) if tz else value.replace(tzinfo=None)
 
-    monkeypatch.setattr(controller, 'datetime', FixtureDateTime)
+    # The controller is a package; every module of it that reads the clock gets the fixture clock.
+    import sys
+    for name, module in list(sys.modules.items()):
+        if (name == controller.__name__ or name.startswith(controller.__name__ + '.')) and hasattr(module, 'datetime'):
+            monkeypatch.setattr(module, 'datetime', FixtureDateTime)
 
 
 # Tests must never touch the real data folders. run_tests.py, next to this file, points
