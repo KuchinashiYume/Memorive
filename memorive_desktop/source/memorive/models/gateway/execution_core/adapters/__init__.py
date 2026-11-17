@@ -1,4 +1,7 @@
-"""Provider-specific thin adapters for the Execution execution core."""
+"""Adapters that run a command-line model for the execution core, one module per CLI.
+
+cli_common.py holds what six of them share; codex_cli.py has its own structure.
+"""
 
 from memorive.models.gateway.execution_core.adapters.codex_cli import (
     CodexAdapterViolation,

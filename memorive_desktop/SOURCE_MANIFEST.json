@@ -4317,18 +4317,23 @@
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/__init__.py",
-      "sha256": "e787d6926a243cb2dcbef574702e9ab38cf2b34988b7ca6394167a4990b3ebe5",
-      "bytes": 2122
+      "sha256": "b4dfc4c1b5b71cd62794bf1cbe27ce9cd22db803251d506f002b06dbaaebba06",
+      "bytes": 2224
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/claude_code.py",
-      "sha256": "fdfd9ac3a53240ddbb0ed939ffabe3a35b40c1a4d03170cf479b1991de049350",
-      "bytes": 36336
+      "sha256": "cd94000e9e895befdb21659e48199b7eaac05258be89544fe6bfef88f2dfb63f",
+      "bytes": 31737
+    },
+    {
+      "path": "source/memorive/models/gateway/execution_core/adapters/cli_common.py",
+      "sha256": "760edb08a2c53628b379bb98f543e4825af15845c7c8ea7aed881e5815fe38c2",
+      "bytes": 20674
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/codebuddy_code.py",
-      "sha256": "b81a5ce83965e3936085b22140627da5c8b088782c9807a078776059546dd882",
-      "bytes": 42925
+      "sha256": "36fafc9ba150ea0c5ef8d448db996953df640351b9d4cb64a9775df2ce4de13d",
+      "bytes": 27272
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/codex_cli.py",
@@ -4337,23 +4342,23 @@
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/gemini_cli.py",
-      "sha256": "4cfa5c31ac283763378e56957a5c2655ce930a23f4d4f53246e87be6cb5a6db3",
-      "bytes": 38741
+      "sha256": "b87401c7158490c57e321af44bef9b602473bb2b282926d97cb911c1edfc9ec1",
+      "bytes": 22692
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/github_copilot_cli.py",
-      "sha256": "7ab30b0b47dec0197a9f9e2b296dc8b294ee16d674fd87601d0db3d44dbe894e",
-      "bytes": 42600
+      "sha256": "a702d1e67294b473cb600f08e114bf2c2d5b5de488d1330e3a9ab56080a15c5a",
+      "bytes": 31614
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/kimi_code.py",
-      "sha256": "cbd7e557fe299ccb47bd145cadddd924f7f5e50d33f464708c3500b21159a3a3",
-      "bytes": 36651
+      "sha256": "9269f1b6d447e0a9035d70eca4f1546fbb7b601593494aa92d7ac7d8482a33e9",
+      "bytes": 22163
     },
     {
       "path": "source/memorive/models/gateway/execution_core/adapters/qwen_code.py",
-      "sha256": "8711c6a793c8fb83073dc5b0bf7826efe6b9f76bd02a50cbf714e2d89eef5266",
-      "bytes": 39274
+      "sha256": "099c561d562d783cf38d44f140ed2f9d95d9daedc2ca2b36533a435df151f3b6",
+      "bytes": 23277
     },
     {
       "path": "source/memorive/models/gateway/execution_core/component_binding.py",

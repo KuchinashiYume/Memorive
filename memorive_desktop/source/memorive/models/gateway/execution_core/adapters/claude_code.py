@@ -8,6 +8,10 @@ used.  It deliberately does *not* treat generated text, or a model label
 returned through a third-party relay, as proof of the provider-served backend.
 It does not activate routes, retry, fall back, write the RUNTIME_LOG ledger, or read
 credential values for evidence.
+
+What it shares with the other command-line adapters (sidecar, entitlement or login checks, result
+normalization, the receipt) is in cli_common.py; this module keeps what is specific to the
+Claude Code: its policy, manifest, behavior hash, request binding, invocation, stream parsing, result normalization, receipt and qualification projection.
 """
 
 from __future__ import annotations
@@ -18,39 +22,38 @@ import json
 import os
 from pathlib import Path
 import re
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
-from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema import Draft202012Validator
 
 from memorive.models.gateway.execution_core.contracts import (
     base_object,
     canonical_json_bytes,
     canonical_sha256,
     immutable_copy,
-    utc_now,
     validate_initialization_object,
 )
 from memorive.models.gateway.execution_core.runner import ProcessRun, ProcessSpec
 from memorive.models.gateway.execution_core.component_binding import bindings_from_policy
 from memorive.models.gateway.execution_core.workspace import JobWorkspace
+from memorive.models.gateway.execution_core.adapters.cli_common import (
+    ANSI_RE,
+    CommandLineAdapter,
+    CommandLineAdapterViolation,
+    SHA256_RE,
+    integer_or_none,
+    schema_errors,
+)
 
 
-SHA256_RE = re.compile(r"^[0-9A-F]{64}$")
 SAFE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+\[\]-]{0,127}$")
-ANSI_RE = re.compile(rb"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1b\\))")
-SECRET_PREFIXES = ("sk-", "ghp_", "github_pat_", "xox", "pat-")
 RELAY_REPORTED_UNVERIFIED = "RELAY_REPORTED_UNVERIFIED"
-DIRECT_REQUEST_CONTROL_PLANE = "DIRECT_REQUEST_CONTROL_PLANE_V1"
 THIRD_PARTY_RELAY = "third_party_relay"
 DIRECT_PROVIDER = "direct_provider"
 
 
-class ClaudeCodeViolation(ValueError):
-    def __init__(self, code: str, details: Sequence[str] = ()):
-        self.code = code
-        self.details = tuple(details)
-        suffix = f": {'; '.join(self.details)}" if self.details else ""
-        super().__init__(f"{code}{suffix}")
+class ClaudeCodeViolation(CommandLineAdapterViolation):
+    """Errors of the Claude Code adapter."""
 
 
 @dataclass(frozen=True)
@@ -133,35 +136,12 @@ class ClaudeCodeInvocation:
     transport_kind: str
 
 
-def _secret_scan(value: Any, path: str = "$") -> None:
-    if isinstance(value, Mapping):
-        for key, item in value.items():
-            _secret_scan(item, f"{path}.{key}")
-    elif isinstance(value, list):
-        for index, item in enumerate(value):
-            _secret_scan(item, f"{path}[{index}]")
-    elif isinstance(value, str) and value.strip().lower().startswith(SECRET_PREFIXES):
-        raise ClaudeCodeViolation("SECRET_LIKE_VALUE_FORBIDDEN", [path])
-
-
-def _schema_errors(schema: Mapping[str, Any], value: Any) -> list[str]:
-    Draft202012Validator.check_schema(schema)
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(value),
-        key=lambda item: (list(item.absolute_path), item.message),
-    )
-    return [
-        f"{'/'.join(str(x) for x in item.absolute_path) or '$'}: {item.message}"
-        for item in errors[:20]
-    ]
-
-
-def _integer_or_none(value: Any) -> int | None:
-    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
-
-
-class ClaudeCodeAdapter:
+class ClaudeCodeAdapter(CommandLineAdapter):
     ADAPTER_ID = "claude_code"
+    VIOLATION = ClaudeCodeViolation
+    CODE_PREFIX = "CLAUDE"
+    PRODUCER = "CLAUDE_ADAPTER_CLAUDE_CODE_ADAPTER"
+    SIDECAR_TASK_ID = "Intake"
     PARSER_VERSION = "CLAUDE_ADAPTER_CLAUDE_STREAM_JSON_V1"
     NORMALIZATION_VERSION = "CLAUDE_ADAPTER_CLAUDE_STRUCTURED_OUTPUT_V1"
     FORBIDDEN_FLAGS = {
@@ -185,27 +165,6 @@ class ClaudeCodeAdapter:
         "Computer,NotebookEdit,AskUserQuestion"
     )
 
-    def __init__(
-        self,
-        policy: ClaudeCodePolicy,
-        core_schema: Mapping[str, Any],
-        external_call_schema: Mapping[str, Any],
-        *,
-        clock: Callable[[], str] = utc_now,
-    ):
-        self.policy = policy
-        self._core_schema = immutable_copy(core_schema)
-        self._external_call_schema = immutable_copy(external_call_schema)
-        Draft202012Validator.check_schema(self._external_call_schema)
-        self._clock = clock
-
-    def model_allowlist_sha256(self) -> str:
-        return canonical_sha256(
-            {
-                "allowed_models": sorted(self.policy.allowed_models),
-                "model_catalog_sha256": self.policy.model_catalog_sha256.upper(),
-            }
-        )
 
     def build_manifest(self) -> dict[str, Any]:
         value = base_object(
@@ -285,70 +244,6 @@ class ClaudeCodeAdapter:
             }
         )
 
-    def _validate_sidecar(
-        self,
-        value: Mapping[str, Any],
-        *,
-        attempt_id: str,
-        model: str,
-        access_profile: str,
-        prompt_sha256: str,
-        output_contract_sha256: str,
-        behavior_hash: str,
-    ) -> dict[str, Any]:
-        sidecar = immutable_copy(value)
-        errors = sorted(
-            Draft202012Validator(
-                self._external_call_schema, format_checker=FormatChecker()
-            ).iter_errors(sidecar),
-            key=lambda item: (list(item.absolute_path), item.message),
-        )
-        if errors:
-            raise ClaudeCodeViolation(
-                "CALL_SIDECAR_SCHEMA_INVALID",
-                [
-                    f"{'/'.join(str(x) for x in item.absolute_path) or '$'}: {item.message}"
-                    for item in errors[:20]
-                ],
-            )
-        _secret_scan(sidecar)
-        mismatches: list[str] = []
-        expected = {
-            "schema_version": "1.0",
-            "record_type": "call_binding_receipt",
-            "binding_mode": "PROSPECTIVE_STRICT",
-            "phase_id": "Execution",
-            "task_id": "Intake",
-            "attempt_id": attempt_id,
-            "request_disposition": "BLOCKED_BEFORE_SEND",
-        }
-        mismatches.extend(key for key, expected_value in expected.items() if sidecar.get(key) != expected_value)
-        profile = sidecar.get("profile_identity", {})
-        identity = sidecar.get("model_identity", {})
-        route = sidecar.get("route_identity", {})
-        artifacts = sidecar.get("artifact_bindings", {})
-        extensions = sidecar.get("extensions", {})
-        if profile.get("profile_id") != access_profile:
-            mismatches.append("profile_identity.profile_id")
-        if identity.get("requested_model") != model:
-            mismatches.append("model_identity.requested_model")
-        if route.get("route_id") != self.policy.route_id:
-            mismatches.append("route_identity.route_id")
-        if artifacts.get("prompt_hash", "").upper() != prompt_sha256:
-            mismatches.append("artifact_bindings.prompt_hash")
-        if artifacts.get("output_contract_hash", "").upper() != output_contract_sha256:
-            mismatches.append("artifact_bindings.output_contract_hash")
-        if artifacts.get("runner_hash", "").upper() != self.policy.runner_sha256.upper():
-            mismatches.append("artifact_bindings.runner_hash")
-        if extensions.get("behavior_hash", "").upper() != behavior_hash:
-            mismatches.append("extensions.behavior_hash")
-        if extensions.get("pre_send_state") != "FROZEN_READY":
-            mismatches.append("extensions.pre_send_state")
-        if sidecar.get("outcome", {}).get("call_status") != "BLOCKED_BEFORE_SEND":
-            mismatches.append("outcome.call_status")
-        if mismatches:
-            raise ClaudeCodeViolation("CALL_SIDECAR_BINDING_MISMATCH", sorted(set(mismatches)))
-        return sidecar
 
     def _request_binding_sha256(
         self, argv: Sequence[str], requested_model: str, behavior_hash: str
@@ -580,8 +475,8 @@ class ClaudeCodeAdapter:
             raise ClaudeCodeViolation("CLAUDE_MODEL_ALLOWLIST_BINDING_MISMATCH")
 
         usage = terminal.get("usage") if isinstance(terminal.get("usage"), Mapping) else {}
-        input_tokens = _integer_or_none(usage.get("input_tokens"))
-        output_tokens = _integer_or_none(usage.get("output_tokens"))
+        input_tokens = integer_or_none(usage.get("input_tokens"))
+        output_tokens = integer_or_none(usage.get("output_tokens"))
         usage_status = "UNKNOWN"
         token_usage = {
             "input_tokens": None,
@@ -650,7 +545,7 @@ class ClaudeCodeAdapter:
         elif not payload:
             error_code = "STRUCTURED_OUTPUT_MISSING"
         else:
-            warnings = _schema_errors(schema, payload)
+            warnings = schema_errors(schema, payload)
             if warnings:
                 payload = {}
                 error_code = "OUTPUT_SCHEMA_INVALID"
