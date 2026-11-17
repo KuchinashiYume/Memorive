@@ -57,8 +57,17 @@ SKIPPED_IN_DRAWINGS = {"module number"}
 TEXT = {".py", ".js", ".mjs", ".cjs", ".html", ".htm", ".css", ".json", ".md", ".txt", ".spec", ".iss", ".ps1", ".bat",
         ".cmd", ".toml", ".cfg", ".ini", ".yaml", ".yml", ".xml", ".sh", ".cs", ".tmpl", ".svg", ""}
 MANIFEST_PATH_LINE = re.compile(r'"(path|source|destination)"\s*:')
-# Script hashes in a page's Content-Security-Policy are random letters and digits ("sha256-...rE1Tz...").
-CONTENT_HASH = re.compile(r"sha(?:256|384|512)-[A-Za-z0-9+/]+=*")
+# A page's Content-Security-Policy lists script hashes, random letters and digits ("sha256-...rE1Tz..."). Only
+# whole digests (base64 of 32, 48 or 64 bytes) on such a line are left out; the rest of the line is checked.
+SCRIPT_HASH = re.compile(r"(?<![A-Za-z0-9+/])(?:sha256-[A-Za-z0-9+/]{43}=|sha384-[A-Za-z0-9+/]{64}|"
+                         r"sha512-[A-Za-z0-9+/]{86}==)(?![A-Za-z0-9+/=])")
+
+
+def without_script_hashes(line: str) -> str:
+    """The line with the script hashes of a Content-Security-Policy blanked out, positions unchanged."""
+    if "Content-Security-Policy" not in line:
+        return line
+    return SCRIPT_HASH.sub(lambda hit: " " * len(hit.group()), line)
 
 
 def word_patterns(path: Path) -> list[tuple[str, re.Pattern]]:
@@ -139,7 +148,7 @@ def main() -> int:
             for number, line in enumerate(handle, 1):
                 if manifest and MANIFEST_PATH_LINE.search(line):
                     continue  # manifests repeat every file name; the names themselves are checked above
-                line = CONTENT_HASH.sub(lambda hit: " " * len(hit.group()), line)
+                line = without_script_hashes(line)
                 for kind, pattern in patterns:
                     if suffix in DRAWING and kind in SKIPPED_IN_DRAWINGS:
                         continue
