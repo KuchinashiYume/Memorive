@@ -2,7 +2,8 @@
 
   metadata.py            the metadata fields saved scores carry, by revision, and which workflow
                          node each exam role binds to
-  catalog_validation.py  the check of the exam catalog (revision 8) WorkflowExams loads
+  catalog_validation.py  reading a stored exam catalog of any revision; WorkflowExams loads its
+                         catalog through it
   workflow_exams.py      WorkflowExams: the exam catalog, planning and running a node's exam, the
                          stored scores; FailClosedWorkflowExams when exams are unavailable
 

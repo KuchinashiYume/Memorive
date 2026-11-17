@@ -1105,6 +1105,8 @@ def _check_series(row, provenance, series_slots, core_closure_score, semantic_re
             _check_series_slot(slot, slot_fields)
         _check_series_aggregate(row, series_slots)
         return True
+
+
 def _check_series_aggregate(row, slots):
     """The entry aggregates its three checked slots: one each of slots 1 to 3 with distinct samples,
     the means of the scores and rates, the sums of the counts, the weakest operational and closure

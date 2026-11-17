@@ -99,11 +99,14 @@ def bind(workspace, *, library, service, desktop_call, stage_inbox_paths):
                 for document in workspace.store.list('connector_document'):
                     if document.get('processing'):
                         value = status(document)
-                        if value['results'] and not document.get('result_items'):
-                            # Its first results: refresh the library once, so the home page shows them.
-                            library.refresh_core_products()
+                        first_results = value['results'] and not document.get('result_items')
                         updated = dict(document, processing=value['processing'], result_items=value['results'])
                         workspace.store.put('connector_document', document['id'], document['project'], updated)
+                        if first_results:
+                            # Its first results: refresh the library once, so the home page shows them.
+                            # The document is stored first: a refresh refused by another job's data
+                            # leaves only the home page behind (kept as the last error below).
+                            library.refresh_core_products()
             except (ValueError, OSError, RuntimeError) as exc:
                 # Kept as the desktop's last error; the loop goes on.
                 workspace.store.put('connector_host', 'desktop', '', {'heartbeat': 0, 'error': str(exc)[:160]})

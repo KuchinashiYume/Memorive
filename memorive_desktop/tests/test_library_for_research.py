@@ -203,6 +203,47 @@ def test_a_device_documents_first_results_refresh_the_library_once(tmp_path, pap
     assert [row["kind"] for row in library.cached_rows()] == ["文献"]
 
 
+def test_a_failed_library_refresh_still_keeps_the_device_documents_results(tmp_path, paper):
+    """Another job's refused product makes the whole-library refresh fail. The document still gets its
+    results and state; the failure is kept as the desktop's last error, and the refresh is not tried
+    again on the next pass (the document already has its results)."""
+    whole = []
+
+    def refused():
+        whole.append(1)
+        raise ValueError("LIBRARY_Core_ARTIFACT_SUFFIX_INVALID")
+
+    library = LibraryProductController(
+        service=None, control_store=ControlStore(tmp_path / "ui"), contract_root=CONTRACTS,
+        fixture_root=tmp_path / "unused", state_root=tmp_path / "library", include_synthetic_projection=False,
+        core_artifact_provider=refused,
+        core_job_artifact_provider=lambda job_id: [row for row in paper.rows if row["job_id"] == job_id])
+    store = Store(tmp_path / "workspace")
+    store.put("connector_document", "doc-1", "project-1", {"id": "doc-1", "project": "project-1",
+                                                          "processing": {"item_id": "item-1"}})
+    stop = threading.Event()
+    workspace = SimpleNamespace(store=store, connections=SimpleNamespace(pump=lambda: None),
+                                conversations=SimpleNamespace(maintain=lambda: None), connector_stop=stop)
+    desktop_connections.bind(
+        workspace, library=library,
+        service=SimpleNamespace(call=lambda method, params: {"control_state": "SUCCEEDED"}),
+        desktop_call=lambda method, params: {"item_id": params["item_id"], "job_id": JOB, "state": "DONE"},
+        stage_inbox_paths=None)
+    try:
+        for _ in range(50):
+            if store.get("connector_document", "doc-1").get("result_items"):
+                break
+            stop.wait(0.1)
+        stop.wait(1.5)
+    finally:
+        stop.set()
+        workspace.connector_thread.join(5)
+    document = store.get("connector_document", "doc-1")
+    assert len(document["result_items"]) == 2 and document["processing"]["state"] == "DONE"
+    assert store.get("connector_host", "desktop")["error"] == "LIBRARY_Core_ARTIFACT_SUFFIX_INVALID"
+    assert len(whole) == 1
+
+
 def test_the_rows_of_one_job_ask_the_service_for_that_job_only(tmp_path):
     from memorive.documents.library.core_products import CoreProducts
 
