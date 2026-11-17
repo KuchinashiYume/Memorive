@@ -1357,7 +1357,7 @@ def transcription_verify(
             ]
             for subject in batch_input["subjects"]
         }
-        from memorive.documents.workflow.node_progress import scope
+        from memorive.platform.progress import scope
         with scope('CARD_REVIEW', ['initial', 'final']) as node_units:
             initial_rows, _ = _run_batch_stage_with_one_contract_retry(
                 _build_batch_initial_prompt(batch_input),

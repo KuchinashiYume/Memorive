@@ -76,7 +76,7 @@ class ReviewService:
         return self.store.create(context.job_id,item_id=context.item_id,source_sha256=context.source_sha256,
             config=config,logic_selected=choice.get('logic_selected',False),source_name=context.source_name)
     def checkpoint(self,job_id):
-        from memorive.documents.workflow import node_progress
+        from memorive.platform import progress as node_progress
         while True:
             node_progress.hold(self.store.get(job_id).get('paused',False))
             self.worker.execution_checkpoint(job_id)
@@ -281,7 +281,7 @@ class ReviewService:
     @scheduled('LITERATURE',pipeline=True)
     def run_claimed(self,job_id):
         from memorive.documents.workflow.scheduling import PIPELINE_LANES
-        from memorive.documents.workflow.node_progress import session_scope, facade_session, activity, scope
+        from memorive.platform.progress import session_scope, facade_session, activity, scope
         from memorive.models.scheduling import activity_scope
         lane=None
         try:

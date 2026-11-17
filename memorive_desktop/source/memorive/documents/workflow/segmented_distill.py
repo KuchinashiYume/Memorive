@@ -713,7 +713,7 @@ class CoreSegmentedDistiller:
         )
         cards = []
         segment_receipts = []
-        from memorive.documents.workflow.node_progress import scope
+        from memorive.platform.progress import scope
         with scope('CARD_SEGMENTS', [v['segment_id'] for v in topology['segments']] if self._split_depth == 0 and len(topology['segments']) > 1 else []) as node_units:
             for segment in topology["segments"]:
                 sequence = int(segment["sequence_index"])

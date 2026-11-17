@@ -480,7 +480,7 @@ def verify_research_analysis(analysis_result, chunk_texts: dict, *, data_ownersh
     # by the immutable Analysis ownership/content binding above.
     conclusions = [conclusion_from_claim(c) for c in claims]
     trace = []
-    from memorive.documents.workflow.node_progress import scope
+    from memorive.platform.progress import scope
     for i, c in enumerate(claims):
         sid = getattr(c, "source_id", None) or {}
         cid = sid.get("chunk_id")

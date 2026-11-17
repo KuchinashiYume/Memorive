@@ -1,4 +1,11 @@
-"""Optional, bounded progress observations. Business/control errors stay outside the sink."""
+"""Progress events of long-running steps, shared by every area that reports progress.
+
+Document workflow nodes and their phases, the data and card reviews, OCR rescue, vector generation
+and research jobs report here: a job opens a session (session_scope), steps report through scope
+and stage, the job record keeps the events (apply_event) and the window reads them back (project).
+It lives in platform so that every area uses the same current session.
+
+Optional, bounded progress observations. Business/control errors stay outside the sink."""
 from contextlib import contextmanager
 from contextvars import ContextVar
 from copy import deepcopy

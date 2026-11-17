@@ -125,7 +125,7 @@ def extract(text: str, *, source_sha256: str, checkpoint: Callable[[],None]) -> 
     tables=[]
     table=None
     previous=None
-    from memorive.documents.workflow.node_progress import scope
+    from memorive.platform.progress import scope
     with scope('RAW_EXTRACTION', range(1,len(text.splitlines())+1), 'PROCESSED_ITEMS') as node_units:
         for line_no,line in enumerate(text.splitlines(),1):
             if line_no%128==0:
@@ -540,7 +540,7 @@ def analyze(text:str, *, source_id:str, source_sha256:str|None=None, rules:list|
         raise ValueError('RULE_BINDING_BUDGET_EXCEEDED')
     if len({r.get('rule_id') for r in bound})!=len(bound):
         raise ValueError('RULE_ID_DUPLICATE')
-    from memorive.documents.workflow.node_progress import scope
+    from memorive.platform.progress import scope
     checks=[]
     with scope('RULE_EVALUATION', [r['rule_id'] for r in bound], 'PROCESSED_ITEMS') as node_units:
         for rule in bound:

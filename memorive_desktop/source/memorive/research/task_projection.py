@@ -14,7 +14,7 @@ def steps_for(item):
     return REPORT_STEPS if item.get('kind')=='report' else STEPS
 
 def bindings(runtime):
-    from memorive.documents.workflow.node_progress import project,is_live
+    from memorive.platform.progress import project,is_live
     rows=[]
     for item in runtime.task_list()['rows']:
         steps=steps_for(item)

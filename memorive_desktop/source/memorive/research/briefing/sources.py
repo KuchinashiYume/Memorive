@@ -155,7 +155,7 @@ class PublicSources:
         failures=[]
         unknown=[]
         statuses=[]
-        from memorive.documents.workflow.node_progress import scope
+        from memorive.platform.progress import scope
         progress=scope('SOURCE_BRANCHES',enabled,basis='PROCESSED_ITEMS')
         for source in enabled:
             checkpoint()

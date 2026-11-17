@@ -31,7 +31,7 @@ def recover_gap(path,*,source_sha256,gap,cache,checkpoint=lambda:None,max_pages=
     try:
         import fitz
         with fitz.open(path) as pdf:
-            from memorive.documents.workflow.node_progress import scope
+            from memorive.platform.progress import scope
             with scope('PDF_ASSIST', sorted(set(pages))) as node_units:
                 for page in sorted(set(pages)):
                     checkpoint()

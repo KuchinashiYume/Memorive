@@ -12,6 +12,7 @@
   data_folders.py   where data goes when nothing has bound the folders to a profile
   pickle_compat.py  reading job pickles of earlier versions after their classes moved
   projection_reads.py one read of a source per window query
+  progress.py       progress events of long steps (document nodes, reviews, research jobs)
   errors.py         the application's error types
   error_envelope.py the payload that reports an application error
   credentials.py    secrets in Windows Credential Manager, by reference

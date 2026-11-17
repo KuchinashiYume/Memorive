@@ -168,12 +168,12 @@ class ResearchRuntime:
             value=sealed(dict(prior,**changes))
             write(path,value)
             if 'stage' in changes:
-                from memorive.documents.workflow.node_progress import stage
+                from memorive.platform.progress import stage
                 stage(identity,changes['stage'],value.get('status')=='RUNNING')
             return value
 
     def progress_session(self,run_id):
-        from memorive.documents.workflow.node_progress import Session,apply_event
+        from memorive.platform.progress import Session,apply_event
         prior=read(self.run_path(run_id)/'state.json').get('node_progress',{})
         def sink(event):
             with self.lock:
@@ -470,7 +470,7 @@ class ResearchRuntime:
             def checkpoint():
                 if self.stop.is_set():
                     raise ValueError('RESEARCH_CANCELLED')
-            from memorive.documents.workflow.node_progress import session_scope
+            from memorive.platform.progress import session_scope
             with TASK_CATEGORIES.enter('RESEARCH_' + params['kind'].upper(), checkpoint=checkpoint), session_scope(self.progress_session(run_id)):
                 self.update_state(run_id,status='RUNNING',stage='COLLECTING')
                 if 'material_progress' in params:

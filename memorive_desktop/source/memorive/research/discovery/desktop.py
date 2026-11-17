@@ -5,7 +5,7 @@ from inspect import signature,Parameter
 from memorive.research.common import CHANNELS,sha,now,read,write,sealed
 from memorive.research.discovery.directions import effective_directions,channel_targets
 from memorive.research.discovery.transport import PAGE_LIMITS
-from memorive.documents.workflow.node_progress import scope
+from memorive.platform.progress import scope
 
 def run(runtime,run_id,params):
     from memorive.research.discovery import identity

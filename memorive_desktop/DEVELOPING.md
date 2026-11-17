@@ -83,7 +83,7 @@ places still reach across areas; these are the places to untangle when that code
 | Sessions | `memorive/sessions` (`controller.py`, `archive/`, `companion/`, `refinement/`; its docstring lists each part) |
 | Models | `memorive/models` (`validation/` sends every request; `execution/`, `calls/` with the call ledger, `cli/` with the command-line tools, endpoints, scheduling, identity, pricing, reply size; `gateway/` model transport with the prompt files, `local/` local model servers; its docstring lists each file) |
 | Exams | `memorive/exams` (one module or package per exam family, `runner/` WorkflowExams, `evaluation/` scoring and pack code, `resources.py` where the packs are; its docstring lists each file), `memorive/exams/data_anomaly.py` |
-| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language; its docstring lists each file; `jobs/`, `ledger/` the run ledgers and writer lock, `decisions/` design decision records, `errors.py`, `credentials.py`) |
+| Shared basics | `memorive/platform` (file and folder names, canonical JSON and whole-file writes, the secret check, the bundled root certificates, profile folders, the runtime log, the writing language, progress events of long steps; its docstring lists each file; `jobs/`, `ledger/` the run ledgers and writer lock, `decisions/` design decision records, `errors.py`, `credentials.py`) |
 
 During v2.00 the packages move into `source/memorive/<area>/` (desktop, documents, research,
 sessions, models, exams, platform); each row names what is already there first.

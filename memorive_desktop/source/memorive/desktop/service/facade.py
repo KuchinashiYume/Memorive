@@ -316,7 +316,7 @@ class ApplicationFacade:
                 leases.pop(node, None)
 
     def record_node_progress(self, job_id, event):
-        from memorive.documents.workflow.node_progress import apply_event
+        from memorive.platform.progress import apply_event
         from memorive.platform.errors import VersionConflict
         for observation_attempt in range(3):
             current = self.store.read_job(job_id)

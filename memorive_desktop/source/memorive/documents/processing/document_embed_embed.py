@@ -382,7 +382,7 @@ def embed(chunks_jsonl, *, target: str = "sandbox") -> dict:
     )
     reused_checkpoint_count = 0
     new_embedding_count = 0
-    from memorive.documents.workflow.node_progress import scope
+    from memorive.platform.progress import scope
     with scope('VECTOR_GENERATION', chunk_ids) as node_units:
         for index, r in enumerate(recs):
             checkpoint_path = _spool_record_path(spool_root, index, r["chunk_id"])

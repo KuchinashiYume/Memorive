@@ -592,7 +592,7 @@ class CurrentTaskProductController:
             from memorive.documents.data_review.store import ReviewStore
             review=ReviewStore(self._core_run_root).public(job_id)
             if review:
-                from memorive.documents.workflow.node_progress import project as node_progress_projection, is_live
+                from memorive.platform.progress import project as node_progress_projection, is_live
                 review['node_progress']=node_progress_projection(job.get('node_progress',{}),'E2_LOGIC_REVIEW',
                     job_id=job_id,attempt_id=job['attempt_id'],
                     active=review['logic_state'] in {'RUNNING','SENDING'} and not review.get('paused') and not review.get('cancel_requested') and control_state in {'RUNNING','PAUSE_REQUESTED'},

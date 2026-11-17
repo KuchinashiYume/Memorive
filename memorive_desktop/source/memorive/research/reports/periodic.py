@@ -94,7 +94,7 @@ def render(runtime, run_id, params):
     validate_window(period,window['start'],window['end'],params['report_cutoff'])
     if not progress:
         raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
-    from memorive.documents.workflow.node_progress import scope
+    from memorive.platform.progress import scope
     events=[]
     with scope('REPORT_ITEMS', [sha(item) for item in progress], 'PROCESSED_ITEMS') as item_units:
         for item in progress:

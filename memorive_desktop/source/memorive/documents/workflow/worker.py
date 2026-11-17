@@ -165,7 +165,7 @@ class CoreVerticalWorker:
 
     def execution_checkpoint(self, job_id: str) -> None:
         """Between steps: return while the job runs, wait while it is paused, stop when it was cancelled (also used by data review)."""
-        from memorive.documents.workflow import node_progress
+        from memorive.platform import progress as node_progress
         while True:
             if self._stop_event is not None and self._stop_event.is_set():
                 raise ExecutionControlSignal('STOPPED')
@@ -736,7 +736,7 @@ class CoreVerticalWorker:
                 self.execution_interrupt(job_id)
             done = len(checkpoint.load()['completed_node_ids'])
             current = node_id or node_ids[min(done, len(node_ids)-1)]
-            from memorive.documents.workflow import node_progress
+            from memorive.platform import progress as node_progress
             node_progress.activity(state, current)
             if state == 'PAUSED_BEFORE':
                 self.facade.record_progress(job_id,completed_units=done,total_units=len(node_ids),
@@ -772,7 +772,7 @@ class CoreVerticalWorker:
             if self.task_control_store is not None:
                 self.task_control_store.mark_started(job_id, node_id)
             state = checkpoint.complete(node_id)
-            from memorive.documents.workflow import node_progress
+            from memorive.platform import progress as node_progress
             node_progress.activity('CLOSED', node_id)
             self.facade.record_progress(
                 job_id,
@@ -785,7 +785,7 @@ class CoreVerticalWorker:
 
         try:
             from memorive.models.scheduling import activity_scope
-            from memorive.documents.workflow.node_progress import session_scope, facade_session
+            from memorive.platform.progress import session_scope, facade_session
             with execution_control(lambda: self.execution_checkpoint(job_id),
                                    interrupt=lambda: self.execution_interrupt(job_id)), activity_scope(on_activity), session_scope(facade_session(self.facade, job_id, job['attempt_id'])):
                 on_activity('WAITING')

@@ -92,7 +92,7 @@ class StructureDesktop:
             state['jobs'][context.job_id]=deepcopy(entry)
             self._write(state)
             self.active_jobs.add(context.job_id)
-        from memorive.documents.workflow.node_progress import scope
+        from memorive.platform.progress import scope
         stages=None
         def progress(stage,details):
             if stage in {'parse','validate','review'}:

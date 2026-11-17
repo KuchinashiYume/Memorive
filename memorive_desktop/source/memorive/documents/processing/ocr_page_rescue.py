@@ -227,7 +227,7 @@ def rescue_pdf_pages(
     unresolved = False
     attempted = False
     try:
-        from memorive.documents.workflow.node_progress import scope
+        from memorive.platform.progress import scope
         with scope('OCR_RESCUE', [row[0] for row in candidates]) as node_units:
             for page_number, reasons, is_forced in candidates:
                 attempted = True
