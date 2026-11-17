@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "abb036c80634fae9c2dbcca54ee0b77e5d65f636e786aa467f6c9aa00975a20f",
-      "bytes": 2715792
+      "sha256": "d769cedca428e48e32be49d01a38c6dc1c620bc2689269a71d4750438f3b49c1",
+      "bytes": 2611300
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "dd65aff94220b49dd4dce8f4cab6de0322f711c25c540e8df788dad1a2c22826",
+      "sha256": "77d6adfa8228e9a9952d5ae04ae9e38d4305ebdd70c25378dc8582bec1eda280",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "dc5214e0804a4c72bda918f5813839aa7b394012d4a0d2a9749ce7ad27f6b08a",
+      "sha256": "1a03e952dadc4f85c72f424cca1359fd238e2327e1a0fbcfdbb8ce95dc63a00f",
       "bytes": 275229
     },
     {
@@ -4616,8 +4616,8 @@
     },
     {
       "path": "memorive_desktop/ui/README.md",
-      "sha256": "e39c4c5af6ef52a7d58540dfc6de089cd0a1dadf7f9ba8814b38ba80e114515b",
-      "bytes": 15808
+      "sha256": "403efce58f375b864cb90d5df563d0b1985738626300d7a1475cee5f93240c43",
+      "bytes": 15852
     },
     {
       "path": "memorive_desktop/ui/assistant/assistant.css",
@@ -4661,8 +4661,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/page.html",
-      "sha256": "03c85126fa7beffd1cf72a739783b605d610cb499b01925e0470a035b95978b5",
-      "bytes": 5792
+      "sha256": "2b8ea210c5f4ef422f28aa432f015e7e957295dac145ea5a56a9e7e95c3fef1f",
+      "bytes": 5733
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/answer-styles.css",
@@ -4678,11 +4678,6 @@
       "path": "memorive_desktop/ui/integrated/routes/chat/markup.html",
       "sha256": "995de6fb4b49c066e0f68ac9875fb89d3963200327f7938dcc1b1be94105553c",
       "bytes": 16364
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/chat/shell.css",
-      "sha256": "da8726cc8b632bfb00817e8c9a4938edf1178e5d8d1bbbd874b0fcc535ae5b8a",
-      "bytes": 73645
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.css",
@@ -4718,11 +4713,6 @@
       "path": "memorive_desktop/ui/integrated/routes/inbox/view.js",
       "sha256": "2668178bec981f6a5dd49d4920542c89845de462493ec79e3b3723213feeaa68",
       "bytes": 21456
-    },
-    {
-      "path": "memorive_desktop/ui/integrated/routes/leaderboard/base.css",
-      "sha256": "13bce84eadc0073845f888a1696ab97064b4dc0b5fccf88c2c194de1497758d2",
-      "bytes": 103457
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/currency.js",
@@ -4926,8 +4916,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/cross-route.css",
-      "sha256": "6adb566ee6365e4254337694a37087ad9c985d154ec278016f484f9247da4ab6",
-      "bytes": 25704
+      "sha256": "0f6a1d2c181f916fa7164c51d7d9fbef235250f0a8a48321ea84379b301c916e",
+      "bytes": 25698
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/decorations.js",
@@ -5036,8 +5026,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/route-base.css",
-      "sha256": "46334cc4a593894bf73e9feb73d348e61366a7fdec37637f97e4f3c3444bf55e",
-      "bytes": 265098
+      "sha256": "9137dc5b72412f656ab5e4f5306c1cc0250ef2b9c146c24656f1dab317040168",
+      "bytes": 320739
     },
     {
       "path": "memorive_desktop/examples/research_qa.py",
@@ -10015,6 +10005,11 @@
       "bytes": 23601
     },
     {
+      "path": "memorive_desktop/ui/integrated/shared/toolbar-icons.css",
+      "sha256": "be15a81e90a9436b48bbf132f60e81fe67709c2bbac8059cc9622ade753f046c",
+      "bytes": 16992
+    },
+    {
       "path": "memorive_desktop/tools/page_check/README.md",
       "sha256": "55757855f75deadd7884b819a4acaa0bbe15dfb479dacbed949db1a8e8f35002",
       "bytes": 4803
@@ -10051,8 +10046,8 @@
     },
     {
       "path": "memorive_desktop/tools/page_check/seed.py",
-      "sha256": "e9e876d483d3a8acf484c2470b6ebbb7dcfd7a7158024584e99d82666e789ce0",
-      "bytes": 6174
+      "sha256": "c979ec5147c649aa65aad24a7f25f633abfd8b1c4132c7fa3d5b9fae1b5e55af",
+      "bytes": 6246
     }
   ]
 }

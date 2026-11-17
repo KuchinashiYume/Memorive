@@ -78,10 +78,11 @@ def _codex_session(codex_home: Path) -> None:
     day = start.strftime("%Y-%m-%d")
     rollout = codex_home / "sessions" / day[:4] / day[5:7] / day[8:] / f"rollout-{SESSION_ID}.jsonl"
     rollout.parent.mkdir(parents=True, exist_ok=True)
-    rows = [{"timestamp": f"{day}T08:00:00Z", "type": "session_meta",
+    stamp = lambda seconds: (start + timedelta(seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    rows = [{"timestamp": stamp(0), "type": "session_meta",
              "payload": {"id": SESSION_ID, "cwd": "C:\\samples"}}]
     for index, (role, text) in enumerate(TURNS):
-        rows.append({"timestamp": f"{day}T08:00:{index + 1:02d}Z", "type": "response_item",
+        rows.append({"timestamp": stamp(index + 1), "type": "response_item",
                      "payload": {"type": "message", "role": role,
                                  "content": [{"type": "input_text" if role == "user" else "output_text",
                                               "text": text}]}})
