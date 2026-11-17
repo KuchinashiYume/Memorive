@@ -1,7 +1,7 @@
 """Build a clean, unsigned local candidate from declared source; no predecessor EXE.
 
 Run with the Python interpreter from an isolated environment installed using
-requirements-build-baseline.lock.  This command never publishes or installs a build.
+requirements-build-agpl-candidate.lock.  This command never publishes or installs a build.
 """
 from pathlib import Path
 from hashlib import sha256

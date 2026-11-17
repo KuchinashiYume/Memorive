@@ -521,8 +521,8 @@
     },
     {
       "path": "memorive_desktop/BUILDING.md",
-      "sha256": "27a644a8563486f3a820deddd16024b3825d48d0f0ccc446c383a07acced5375",
-      "bytes": 7987
+      "sha256": "6bae874deeb41c06722c39dd4193b28140df3099f486d10ca50a30bb36c966eb",
+      "bytes": 8192
     },
     {
       "path": "memorive_desktop/contracts/accounting/AccountingPanelProductMethod-v3.json",
@@ -4006,8 +4006,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_memorive.py",
-      "sha256": "6a946db482e75aaa9a1976ea02890139782dfdf8b6dfd061c54fc9d6d0a97d37",
-      "bytes": 18859
+      "sha256": "14d663a9c9134939074145c6f0421095c851bf8878e638fe05db0629dbd24a7a",
+      "bytes": 18865
     },
     {
       "path": "memorive_desktop/tools/build_update_helper.py",

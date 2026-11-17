@@ -8,7 +8,7 @@ This repository contains the declared Windows application source, runtime contra
 
 ## Application
 
-Use Windows x64 and CPython **3.13.14** in a separate virtual environment. Install the exact versions from `requirements-build-agpl-candidate.lock`; the build refuses unexpected dependency versions or extra packages other than pip.
+Use Windows x64 and CPython **3.13.14** in a separate virtual environment. Install the exact versions from `requirements-build-agpl-candidate.lock`; the build refuses unexpected dependency versions or extra packages other than pip. `requirements-build-baseline.lock` is the lock of an earlier build, kept for reference; it is not a current build input (its PyMuPDF packages are 1.28.0, and the current PDF layout recovery needs 1.28.2).
 
 Prepare the verified WebView2 SDK directory described below at `G:\Memorive-verified-sdk` (or substitute your own path). Run from the repository root, selecting an output directory outside this checkout that does not already exist:
 
