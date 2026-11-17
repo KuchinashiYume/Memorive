@@ -2875,51 +2875,6 @@
       "bytes": 75650
     },
     {
-      "path": "memorive_desktop/product/web/document_structure.js",
-      "sha256": "d7af0e709fde9e1c45b2367b3f4656b7cba9136aa387315c1c1e77b43b0f3974",
-      "bytes": 36120
-    },
-    {
-      "path": "memorive_desktop/product/web/evidence_check.js",
-      "sha256": "2294c32f336355a773d742a11f2d973dd4165906b7baad5ede3cb2d5df0c3339",
-      "bytes": 4333
-    },
-    {
-      "path": "memorive_desktop/product/web/leaderboard.css",
-      "sha256": "a51e055beb2eb57ee190058c5ef64e9790cfbb1bb69f8ffff129fc0bcdf5eca3",
-      "bytes": 20932
-    },
-    {
-      "path": "memorive_desktop/product/web/leaderboard.html",
-      "sha256": "77ca1ae5ef88f2ae1cf8d82f9e08f14d735bd7bdcecb534fd340cf9c03240329",
-      "bytes": 22832
-    },
-    {
-      "path": "memorive_desktop/product/web/leaderboard.js",
-      "sha256": "6c372e68b63b051044c382e585ee3a4c869f1eace1a592c2aa552ab859790186",
-      "bytes": 50499
-    },
-    {
-      "path": "memorive_desktop/product/web/node_progress.css",
-      "sha256": "fc2c19a187341e77cb51530a65847581252be9a78d0c37a1a61641ac4ca348a5",
-      "bytes": 494
-    },
-    {
-      "path": "memorive_desktop/product/web/node_progress.js",
-      "sha256": "c7725e05ea28310a717cd5d52479e362be58d71f24280581a4d594e07d109287",
-      "bytes": 7660
-    },
-    {
-      "path": "memorive_desktop/product/web/settings_bridge.js",
-      "sha256": "d8aac2589877930bd2009b0dbd3af8a01813292ff002fa846fb1105833cd38b3",
-      "bytes": 293390
-    },
-    {
-      "path": "memorive_desktop/product/web/update_bridge.js",
-      "sha256": "7034afea55b33d7cdf44aaea430ad485a5da6795427ca2fa5aff7056d9eca11a",
-      "bytes": 11050
-    },
-    {
       "path": "memorive_desktop/PUBLISHING.md",
       "sha256": "d9231496ec82dad09df59da9782592dd7b4b75343e79e07933c7ee1a7fc54175",
       "bytes": 4718
@@ -4121,8 +4076,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "d6d9bcf70e88d7a273e8dcd52a5884ff92955ac11041403c29148441e9a164b6",
-      "bytes": 276753
+      "sha256": "7f533cdd0c059cb0d6ec7b700a2b29bbecd4193f4a9568da57dcdda0b777f9b4",
+      "bytes": 275229
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
