@@ -5,8 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import uuid
-from memorive.platform.json_files import canonical_sha256
-from memorive.desktop.settings.store import SettingsStore
+from memorive.platform.json_files import canonical_sha256, write_json_atomic
 
 def target_identity(target):
     from memorive.models.cli.templates import is_custom,configuration_identity
@@ -122,5 +121,5 @@ class ExamScoreHistory:
         row["record_sha256"] = canonical_sha256(row)
         self.root.mkdir(parents=True, exist_ok=True)
         # Existing atomic persistence, a new record each time, never an overwrite.
-        SettingsStore(self.root).write_json(self.root / (row["recorded_at"].replace(":", "-") + "-" + uuid.uuid4().hex + ".json"), row)
+        write_json_atomic(self.root / (row["recorded_at"].replace(":", "-") + "-" + uuid.uuid4().hex + ".json"), row)
         return True

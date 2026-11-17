@@ -2722,8 +2722,8 @@
     },
     {
       "path": "source/memorive/desktop/settings/store.py",
-      "sha256": "d830924ab62642db305bd5d34591c02cb168f60f66a47aee8b380bee5538854e",
-      "bytes": 18361
+      "sha256": "5c452000fb1f281cfd356afdda3b4856f03f06c36566fd527656ec4869ebf934",
+      "bytes": 18346
     },
     {
       "path": "source/memorive/desktop/settings/user_preferences.py",
@@ -4232,8 +4232,8 @@
     },
     {
       "path": "source/memorive/exams/score_history.py",
-      "sha256": "e1185360191eb4430fa129e6a54379ac0f843ddf42cf873e400ca0b6800f8a70",
-      "bytes": 7504
+      "sha256": "27582629e9eb953446f85d76fa2a1b144c7251f859368f6a95e52b40ee078e85",
+      "bytes": 7446
     },
     {
       "path": "source/memorive/exams/specialized_base.py",

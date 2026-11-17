@@ -137,8 +137,8 @@ class SettingsStore:
 
     def write_json(self, path: Path, payload: Mapping[str, Any]) -> None:
         """Write payload to path with write_json_atomic, through this store's fault injector. The other
-        settings files (exam and verification jobs, exports, external sources, score history) are
-        written through here too."""
+        settings files (exam and verification jobs, exports, external sources) are written through
+        here too."""
         write_json_atomic(path, payload, before_replace=self.fault_injector)
 
     def _validate_envelope(self, value: Any) -> dict[str, Any]:
