@@ -2,7 +2,7 @@
   'use strict';
   const root = document.getElementById('desktop-inbox-preview');
   if (!root) return;
-  const preview = window.DesktopPreview;
+  const preview = window.DesktopPreview_inbox;
   const METHODS = Object.freeze([
     'inbox.get_contract', 'inbox.import_paths', 'inbox.get_auto_run',
     'inbox.set_auto_run', 'inbox.retry_import', 'inbox.recover',

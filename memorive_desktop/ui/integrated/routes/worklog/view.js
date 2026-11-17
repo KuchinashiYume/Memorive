@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const root = document.getElementById('desktop-worklog-preview');
-  const preview = window.DesktopPreview;
+  const preview = window.DesktopPreview_worklog;
   if (!root || !preview) return;
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];

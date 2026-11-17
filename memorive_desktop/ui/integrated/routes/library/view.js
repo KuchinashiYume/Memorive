@@ -1,6 +1,6 @@
   (() => {
     const root = document.getElementById('desktop-library-preview');
-    const preview = window.DesktopPreview;
+    const preview = window.DesktopPreview_library;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];

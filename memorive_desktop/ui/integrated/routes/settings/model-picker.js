@@ -101,7 +101,7 @@
 
   (() => {
     const root = document.getElementById('desktop-settings-preview');
-    const preview = window.DesktopPreview;
+    const preview = window.DesktopPreview_settings;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];

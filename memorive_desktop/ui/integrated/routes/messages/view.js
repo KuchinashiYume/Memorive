@@ -1,6 +1,6 @@
   (() => {
     const root = document.getElementById('desktop-messages-preview');
-    const preview = window.DesktopPreview;
+    const preview = window.DesktopPreview_messages;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];

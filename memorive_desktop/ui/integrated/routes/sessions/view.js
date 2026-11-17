@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.getElementById('desktop-sessions-preview');
-  if (!root || !window.DesktopPreview) return;
+  if (!root || !window.DesktopPreview_sessions) return;
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
   const setRefineState = (message = '', { show = true, title = '' } = {}) => {
