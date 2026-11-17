@@ -77,7 +77,7 @@ def test_three_panels_without_material_residuals_pass_and_keep_the_first_pass_sc
 LOW = 0.0  # a form holds 18 cases (6 per panel) at 90; each case at 0 takes 5 points off its form
 
 
-def test_material_cases_in_two_panels_and_two_families_fail_the_model(tmp_path):
+def test_material_cases_in_two_panels_and_two_families_at_80_are_not_a_model_fail(tmp_path):
     run = cohort(tmp_path, [lambda e: panel(e, 1, {"A-S1-F1": LOW, "B-S1-F1": LOW}),
                             lambda e: panel(e, 2, {"A-S2-F2": LOW, "B-S2-F2": LOW}),
                             lambda e: panel(e, 3, {})])
