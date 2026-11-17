@@ -543,11 +543,11 @@ class CorePipelineExecutor:
     def _document_processing_query_readiness(self, paper_id: str) -> dict[str, Any]:
         """Distinguish durable rows from a restart-unsafe or unreadable HNSW index.
 
-        Chroma 1.5.9's Rust local backend can acknowledge every SQLite row and
-        answer queries in the writer process while leaving only
-        ``index_metadata.pickle`` on disk.  A later process then fails to load
-        the HNSW segment.  Inspect the exact collection segment as well as the
-        live API so node 02 does not silently claim restart-safe retrieval.
+        Once Chroma has saved the HNSW index and trimmed its write log, a
+        later process needs every index file to load the segment (see
+        inspect_chroma_restart_durability). Inspect the exact collection
+        segment as well as the live API so node 02 does not silently claim
+        restart-safe retrieval.
         """
         from memorive.documents.processing.chroma_durability import (
             embedding_checkpoint_status,

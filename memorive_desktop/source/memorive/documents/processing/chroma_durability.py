@@ -53,7 +53,13 @@ def _atomic_json(path: Path, value: dict[str, Any]) -> None:
 
 
 def inspect_chroma_restart_durability(target: str = "sandbox", *, root: Path | None = None) -> dict[str, Any]:
-    """Inspect SQLite and HNSW files without constructing a Chroma client."""
+    """Inspect SQLite and HNSW files without constructing a Chroma client.
+
+    Chroma (1.5.9) saves the HNSW index files and trims its write log only after about 1,000 records.
+    Until then the vector segment has no max_seq_id row and a new process rebuilds the index from the
+    log, so the files are not needed. Once the segment has a max_seq_id, a new process needs all five
+    files: without index_metadata.pickle queries fail ("Error finding id"), without the .bin files the
+    segment does not load."""
     store = (root or chroma_dir(target)).resolve(strict=False)
     if str(store).casefold() in _SESSION_WRITABLE_ROOTS:
         return {"status": "SESSION_WRITABLE", "store": str(store)}
@@ -72,7 +78,8 @@ def inspect_chroma_restart_durability(target: str = "sandbox", *, root: Path | N
                 (collection[0],),
             ).fetchone()
             vector_segment = database.execute(
-                "SELECT id FROM segments WHERE collection = ? AND type = 'urn:chroma:segment/vector/hnsw-local-persisted'",
+                "SELECT s.id, m.seq_id FROM segments AS s LEFT JOIN max_seq_id AS m ON m.segment_id = s.id"
+                " WHERE s.collection = ? AND s.type = 'urn:chroma:segment/vector/hnsw-local-persisted'",
                 (collection[0],),
             ).fetchone()
             row_count = (
@@ -84,6 +91,9 @@ def inspect_chroma_restart_durability(target: str = "sandbox", *, root: Path | N
     if row_count == 0:
         return {"status": "EMPTY", "store": str(store), "sqlite_row_count": 0}
     segment_id = str(vector_segment[0]) if vector_segment is not None else None
+    if vector_segment is not None and vector_segment[1] is None:
+        # never saved: the write log still holds every record
+        return {"status": "READY", "store": str(store), "sqlite_row_count": row_count, "segment_id": segment_id}
     segment_root = store / segment_id if segment_id else None
     present = (
         {path.name for path in segment_root.iterdir() if path.is_file()}
