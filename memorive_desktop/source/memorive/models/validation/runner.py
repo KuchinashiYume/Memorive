@@ -54,6 +54,7 @@ from memorive.models.validation.cli_route import (
     _codex_refinement_transport_schema,
     _codex_transport_schema,
     _execution_codex_event_diagnostic,
+    _cli_receipt_route,
     _resolved_file_sha256,
 )
 from memorive.models.validation.embeddings import _EmbeddingExecutionMixin
@@ -327,6 +328,8 @@ class _ChatAttempt:
     returned_model: str | None = None
     usage: Mapping[str, Any] = field(default_factory=dict)
     route: str = ''
+    region: str = ''
+    egress: str = ''
     external_network_calls: int = 0
     provider_calls: int = 0
     external_process_launches: int = 0
@@ -1113,6 +1116,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         executable_value = attempt.service.get("executable")
         if not isinstance(adapter_id, str):
             raise ValueError("CLI_ADAPTER_UNSUPPORTED")
+        attempt.route, attempt.region, attempt.egress = _cli_receipt_route(adapter_id)
         if not isinstance(executable_value, str):
             raise ValueError("CLI_EXECUTABLE_NOT_FOUND")
         executable = self._executable_resolver(executable_value)
@@ -1251,15 +1255,15 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     "CODEX_CONTINUATION_VALIDATION_FAILED", returned_model=None,
                     raw_usage=continuation.attempt_usage or {}, external_network_calls=0,
                     provider_calls=0, external_model_calls=1, external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION", region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI", transport_diagnostic=attempt.transport_diagnostic,
+                    route=attempt.route, region=attempt.region,
+                    egress=attempt.egress, transport_diagnostic=attempt.transport_diagnostic,
                 )
         if not process.started:
             return attempt.failed("CLI_PROCESS_START_FAILED", returned_model=None,
                 raw_usage=None, external_network_calls=0, provider_calls=0,
                 external_model_calls=0, external_process_launches=0,
-                route="CODEX_CLI_SUBSCRIPTION", region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI", transport_diagnostic={
+                route=attempt.route, region=attempt.region,
+                egress=attempt.egress, transport_diagnostic={
                     **dict(attempt.transport_diagnostic or {}), "provider_request_sent": False,
                 })
         attempt.external_process_launches = 1
@@ -1284,9 +1288,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 provider_calls=0,
                 external_model_calls=1,
                 external_process_launches=1,
-                route="CODEX_CLI_SUBSCRIPTION",
-                region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI",
+                route=attempt.route,
+                region=attempt.region,
+                egress=attempt.egress,
                 transport_diagnostic=attempt.transport_diagnostic,
             )
         if process.output_truncated:
@@ -1298,9 +1302,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 provider_calls=0,
                 external_model_calls=1,
                 external_process_launches=1,
-                route="CODEX_CLI_SUBSCRIPTION",
-                region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI",
+                route=attempt.route,
+                region=attempt.region,
+                egress=attempt.egress,
                 transport_diagnostic=attempt.transport_diagnostic,
             )
         if process.returncode != 0:
@@ -1317,9 +1321,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 provider_calls=0,
                 external_model_calls=1,
                 external_process_launches=1,
-                route="CODEX_CLI_SUBSCRIPTION",
-                region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI",
+                route=attempt.route,
+                region=attempt.region,
+                egress=attempt.egress,
                 transport_diagnostic=failure_diagnostic,
             )
         if adapter_id == "codex_cli":
@@ -1339,9 +1343,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     provider_calls=0,
                     external_model_calls=1,
                     external_process_launches=1,
-                    route="CODEX_CLI_SUBSCRIPTION",
-                    region="OPENAI_MANAGED_UNDISCLOSED",
-                    egress="CODEX_CLI",
+                    route=attempt.route,
+                    region=attempt.region,
+                    egress=attempt.egress,
                     transport_diagnostic={
                         **dict(attempt.transport_diagnostic or {}),
                         "execution_parser_error": execution_error,
@@ -1393,9 +1397,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                         provider_calls=0,
                         external_model_calls=1,
                         external_process_launches=1,
-                        route="CODEX_CLI_SUBSCRIPTION",
-                        region="OPENAI_MANAGED_UNDISCLOSED",
-                        egress="CODEX_CLI",
+                        route=attempt.route,
+                        region=attempt.region,
+                        egress=attempt.egress,
                         transport_diagnostic=attempt.transport_diagnostic,
                     )
                 if execution_diagnostic.get("model_identity_grade") == "CONFLICT":
@@ -1413,9 +1417,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                         provider_calls=0,
                         external_model_calls=1,
                         external_process_launches=1,
-                        route="CODEX_CLI_SUBSCRIPTION",
-                        region="OPENAI_MANAGED_UNDISCLOSED",
-                        egress="CODEX_CLI",
+                        route=attempt.route,
+                        region=attempt.region,
+                        egress=attempt.egress,
                         transport_diagnostic=attempt.transport_diagnostic,
                     )
                 execution_usage = execution_diagnostic.get("token_usage")
@@ -1436,9 +1440,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 provider_calls=0,
                 external_model_calls=1,
                 external_process_launches=1,
-                route="CODEX_CLI_SUBSCRIPTION",
-                region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI",
+                route=attempt.route,
+                region=attempt.region,
+                egress=attempt.egress,
             )
         if (
             attempt.purpose in {"workflow_model_exam", "core_document_processing", "report_daily", "report_weekly", "report_monthly", "research_chat", "ai_briefing"}
@@ -1453,9 +1457,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 provider_calls=0,
                 external_model_calls=1,
                 external_process_launches=1,
-                route="CODEX_CLI_SUBSCRIPTION",
-                region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI",
+                route=attempt.route,
+                region=attempt.region,
+                egress=attempt.egress,
             )
         attempt.response = _structured_document_from_output(process.stdout) or {}
         if continuation.enabled:
@@ -1469,16 +1473,15 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 provider_calls=0,
                 external_model_calls=1,
                 external_process_launches=1,
-                route="CODEX_CLI_SUBSCRIPTION",
-                region="OPENAI_MANAGED_UNDISCLOSED",
-                egress="CODEX_CLI",
+                route=attempt.route,
+                region=attempt.region,
+                egress=attempt.egress,
             )
         # Codex CLI binds the selected model through the exact --model
         # argument.  Current JSONL may omit a redundant model field; a
         # successful process with no contradictory identity still binds
         # the returned identity to that exact invocation.
         attempt.returned_model = attempt.requested_model
-        attempt.route = "CODEX_CLI_SUBSCRIPTION"
 
     def _send_local(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
         """Ask the local model; a failed result, or None with the reply on attempt."""
@@ -1598,7 +1601,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 external_process_launches=attempt.external_process_launches,
                 route=attempt.route,
                 region=(
-                    "OPENAI_MANAGED_UNDISCLOSED"
+                    attempt.region
                     if attempt.profile_kind == "CLI"
                     else (
                         "LOCAL_MACHINE"
@@ -1607,7 +1610,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     )
                 ),
                 egress=(
-                    "CODEX_CLI"
+                    attempt.egress
                     if attempt.profile_kind == "CLI"
                     else ("LOOPBACK_ONLY" if attempt.profile_kind == "LOCAL" else "PROVIDER_API")
                 ),
@@ -1627,7 +1630,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                 external_process_launches=attempt.external_process_launches,
                 route=attempt.route,
                 region=(
-                    "OPENAI_MANAGED_UNDISCLOSED"
+                    attempt.region
                     if attempt.profile_kind == "CLI"
                     else (
                         "LOCAL_MACHINE"
@@ -1636,7 +1639,7 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
                     )
                 ),
                 egress=(
-                    "CODEX_CLI"
+                    attempt.egress
                     if attempt.profile_kind == "CLI"
                     else ("LOOPBACK_ONLY" if attempt.profile_kind == "LOCAL" else "PROVIDER_API")
                 ),
@@ -1669,8 +1672,8 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
         )
         if attempt.profile_kind == "CLI":
             cost_evidence = "SUBSCRIPTION_CLI_NO_PER_CALL_PRICE"
-            region = "OPENAI_MANAGED_UNDISCLOSED"
-            egress = "CODEX_CLI"
+            region = attempt.region
+            egress = attempt.egress
         elif attempt.profile_kind == "LOCAL":
             estimated_cost_cny = 0.0
             cost_evidence = "LOCAL_COMPUTE_NO_PROVIDER_API_COST"

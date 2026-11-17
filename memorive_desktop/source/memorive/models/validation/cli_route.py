@@ -494,6 +494,15 @@ def _codex_agent_message_from_events(output: bytes) -> str:
     return messages[0]
 
 
+def _cli_receipt_route(adapter_id: str) -> tuple[str, str, str]:
+    """Route, region and egress in the receipt of a native command-line tool. codex_cli keeps its
+    names (CODEX_CLI_SUBSCRIPTION, OPENAI_MANAGED_UNDISCLOSED, CODEX_CLI); another tool writes its own
+    name the same way (claude_code: CLAUDE_CODE_SUBSCRIPTION, CLAUDE_CODE) and an undisclosed region."""
+    name = adapter_id.upper()
+    region = "OPENAI_MANAGED_UNDISCLOSED" if adapter_id == "codex_cli" else "PROVIDER_MANAGED_UNDISCLOSED"
+    return name + "_SUBSCRIPTION", region, name
+
+
 def _resolved_file_sha256(path: str) -> str:
     digest = hashlib.sha256()
     with Path(path).open("rb") as stream:

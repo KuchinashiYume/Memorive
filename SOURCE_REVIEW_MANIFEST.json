@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "3ccaec7b1264396678994312abbf59d581e40f2857fecc5ef3f428be5326cc98",
+      "sha256": "6f405396d1d742e3b3ae972aee13842d2d2029d1e9c61607c691346e9a462cf4",
       "bytes": 276564
     },
     {
@@ -5406,8 +5406,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/validation/cli_route.py",
-      "sha256": "0a424f45b438603b8351bd88b810e2b5814f746c904a375c10531a0715a65f93",
-      "bytes": 18804
+      "sha256": "9665f07e64ee3c20ab2b3a94a0225bb9d42fc9316a4905bddc96ab4e96aa0795",
+      "bytes": 19371
     },
     {
       "path": "memorive_desktop/source/memorive/models/validation/embeddings.py",
@@ -5421,8 +5421,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/validation/runner.py",
-      "sha256": "858086e7859f609146f433a079347f7b7d423cddb1f36118577c5839bdccdbd9",
-      "bytes": 83032
+      "sha256": "353e00ffef13d1a39966a07d06f838cf442276e4eeae87641ea3db86b6654d2e",
+      "bytes": 82864
     },
     {
       "path": "memorive_desktop/source/memorive/models/validation/structured.py",

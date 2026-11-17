@@ -100,7 +100,25 @@ def test_a_command_line_tool_that_exits_with_an_error_fails(tmp_path):
         model={"model_name": "gpt-5.6-luna", "thinking_mode": "high", "max_output_tokens_mode": "PROVIDER_DEFAULT"},
         prompt="Return one object.", response_schema=SCHEMA, purpose="research_chat")
     receipt = _check_failed(result, "gpt-5.6-luna", route="CODEX_CLI_SUBSCRIPTION", counts=(0, 0, 1, 1))
+    assert (receipt["region"], receipt["egress"]) == ("OPENAI_MANAGED_UNDISCLOSED", "CODEX_CLI")
     assert receipt["transport_diagnostic"]["returncode"] == 1
+    assert len(process.calls) == 1
+
+
+def test_another_command_line_tool_names_itself_in_the_receipt(tmp_path):
+    executable = tmp_path / "claude.exe"
+    executable.write_bytes(b"claude-code-fixture")
+    process = _FailingProcess()
+    runner = LiveModelValidationRunner(credential_resolver=lambda _ref: b"unused",
+                                       preferences_loader=lambda: dict(PREFERENCES),
+                                       scratch_root=tmp_path / "chat", process_transport=process,
+                                       executable_resolver=lambda _value: str(executable.resolve()))
+    result = runner.execute_structured_chat(
+        profile_kind="CLI", service={"adapter_id": "claude_code", "executable": "claude"},
+        model={"model_name": "claude-haiku-5-5", "max_output_tokens_mode": "PROVIDER_DEFAULT"},
+        prompt="Return one object.", response_schema=SCHEMA, purpose="research_chat")
+    receipt = _check_failed(result, "claude-haiku-5-5", route="CLAUDE_CODE_SUBSCRIPTION", counts=(0, 0, 1, 1))
+    assert (receipt["region"], receipt["egress"]) == ("PROVIDER_MANAGED_UNDISCLOSED", "CLAUDE_CODE")
     assert len(process.calls) == 1
 
 
