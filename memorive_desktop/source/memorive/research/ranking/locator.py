@@ -337,18 +337,9 @@ def make_locator(
     }
 
 
-def validate_locator(
-    locator: Mapping[str, Any],
-    owned_root: str | os.PathLike[str],
-) -> dict[str, Any]:
-    """Validate a locator and every member of its immutable candidate.
-
-    The validated locator is returned as a plain dict.  No alternate root is
-    attempted when any check fails.
-    """
-
-    if not isinstance(locator, Mapping):
-        raise LocatorError("locator must be a mapping")
+def _locator_root(locator, owned_root):
+    """The candidate folder the locator names: owned, with exactly the expected files, and the locator's
+    state, backend and flags."""
     root_value = locator.get("root")
     if not isinstance(root_value, str) or not root_value:
         raise LocatorError("locator.root is required; fallback is forbidden")
@@ -366,7 +357,12 @@ def validate_locator(
         raise LocatorError("production eligibility must be explicitly false")
     if locator.get("activation") is not False:
         raise LocatorError("activation must be explicitly false")
+    return root
 
+
+def _locator_manifest(root, locator):
+    """The candidate's manifest: its bytes match the locator's hash, its keys, state, flags and zero
+    counters, and its id is the hash of the rest."""
     manifest_path = root / "manifest.json"
     manifest_bytes = manifest_path.read_bytes()
     manifest_sha = _sha256(manifest_bytes)
@@ -396,7 +392,11 @@ def validate_locator(
     )
     if observed_manifest_id != expected_manifest_id:
         raise LocatorError("manifest_id does not bind the exact manifest payload")
+    return manifest_sha, manifest
 
+
+def _check_active_baseline(manifest):
+    """The manifest's read-only record of the active index the candidate was built next to."""
     active_baseline = _require_mapping(
         manifest.get("active_index_baseline"), field="manifest.active_index_baseline"
     )
@@ -420,6 +420,9 @@ def validate_locator(
     ):
         raise LocatorError("absent active-index baseline has non-zero measures")
 
+
+def _check_index_identity(locator, manifest):
+    """The locator's profile, index identity and build cutoff are the manifest's."""
     profile = _require_mapping(locator.get("profile"), field="locator.profile")
     identity = _require_mapping(locator.get("index_identity"), field="locator.index_identity")
     try:
@@ -440,7 +443,11 @@ def validate_locator(
         raise LocatorError("manifest top-level profile/index identity mismatch")
     if locator.get("build_cutoff_at") != manifest.get("build_cutoff_at"):
         raise LocatorError("build cutoff mismatch")
+    return profile, identity
 
+
+def _locator_field_sources(locator, manifest, root):
+    """The source snapshot: its file and hash, its fields and ids, and its field sources by id."""
     snapshot = _require_mapping(locator.get("snapshot"), field="locator.snapshot")
     snapshot_name = manifest.get("source_snapshot_file")
     if snapshot_name != "source_snapshot.json" or snapshot.get("path") != snapshot_name:
@@ -521,7 +528,12 @@ def validate_locator(
     ).lower()
     if snapshot_id != expected_snapshot_id:
         raise LocatorError("source_snapshot_id does not bind the exact member set")
+    return snapshot_bytes, source_snapshot, snapshot_id, field_sources
 
+
+def _locator_records(root, manifest, field_sources, source_snapshot, snapshot_id, profile, identity):
+    """The vector records: their file and hash, unique ids, anchors that match the manifest's exact set,
+    one ownership partition, and exactly the field sources of that ownership."""
     records_data = (root / "records.jsonl").read_bytes()
     records_sha = _require_sha(manifest.get("records_sha256"), field="records_sha256")
     if _sha256(records_data) != records_sha:
@@ -598,7 +610,11 @@ def validate_locator(
     }
     if observed_source_ids != expected_source_ids:
         raise LocatorError("candidate records differ from snapshot ownership exact set")
+    return records_data, vector_ids
 
+
+def _check_payload_tree(records_data, snapshot_bytes, root, manifest):
+    """The manifest's hash over the payload files, and the files it leaves out."""
     payload_members = {
         "records.jsonl": _sha256(records_data),
         "source_snapshot.json": _sha256(snapshot_bytes),
@@ -615,6 +631,10 @@ def validate_locator(
     ]:
         raise LocatorError("payload tree exclusion contract mismatch")
 
+
+def _check_tombstones(root, manifest, vector_ids):
+    """The tombstones: their file and hash, each naming a known predecessor once, matching the manifest's
+    exact set."""
     tombstone_data = (root / "tombstones.jsonl").read_bytes()
     tombstone_sha = _require_sha(manifest.get("tombstones_sha256"), field="tombstones_sha256")
     if _sha256(tombstone_data) != tombstone_sha:
@@ -690,6 +710,9 @@ def validate_locator(
     ):
         raise LocatorError("tombstone exact-set hash mismatch")
 
+
+def _check_immutable_marker(root, manifest_sha, locator):
+    """The immutable marker, the SHA256SUMS file and the locator's hash of the whole folder."""
     marker = load_json_file(root / "IMMUTABLE_CANDIDATE.json")
     if marker.get("state") != IMMUTABLE_STATE or marker.get("manifest_sha256") != manifest_sha:
         raise LocatorError("immutable marker mismatch")
@@ -700,6 +723,41 @@ def validate_locator(
     candidate_tree = tree_sha256(root)
     if candidate_tree != _require_sha(locator.get("tree_sha256"), field="tree_sha256"):
         raise LocatorError("candidate tree hash mismatch")
+
+
+def validate_locator(
+    locator: Mapping[str, Any],
+    owned_root: str | os.PathLike[str],
+) -> dict[str, Any]:
+    """Validate a locator and every member of its immutable candidate.
+
+    The validated locator is returned as a plain dict.  No alternate root is
+    attempted when any check fails.
+    """
+
+    if not isinstance(locator, Mapping):
+        raise LocatorError("locator must be a mapping")
+    root = _locator_root(locator, owned_root)
+
+    manifest_sha, manifest = _locator_manifest(root, locator)
+
+    _check_active_baseline(manifest)
+
+    profile, identity = _check_index_identity(locator, manifest)
+
+    (snapshot_bytes, source_snapshot, snapshot_id, field_sources) = _locator_field_sources(
+        locator, manifest, root
+    )
+
+    (records_data, vector_ids) = _locator_records(
+        root, manifest, field_sources, source_snapshot, snapshot_id, profile, identity
+    )
+
+    _check_payload_tree(records_data, snapshot_bytes, root, manifest)
+
+    _check_tombstones(root, manifest, vector_ids)
+
+    _check_immutable_marker(root, manifest_sha, locator)
 
     return dict(locator)
 

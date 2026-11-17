@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "d6d9bcf70e88d7a273e8dcd52a5884ff92955ac11041403c29148441e9a164b6",
+      "sha256": "11d02a5ff0a4202b1783750a3ac645fff8d5e05328b400e0ae714a7b7fc1906f",
       "bytes": 276753
     },
     {
@@ -8071,8 +8071,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/data_review/engine.py",
-      "sha256": "82826cd10914bf7994590a16b576cecee94093de575ff054c45c135cde638ccb",
-      "bytes": 33937
+      "sha256": "6cbb2c0ae1f0d21b320e3b5c2e1b2c596f96fea5c7a663ae8a7ecf563289806b",
+      "bytes": 34571
     },
     {
       "path": "memorive_desktop/source/memorive/documents/data_review/formats.py",
@@ -8516,8 +8516,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/locator.py",
-      "sha256": "2c9e131707ac02c9158ea38d4b3e5d2ea0ebc2c39c743cecbb115a2528c84a05",
-      "bytes": 32712
+      "sha256": "bfa74505b96a6d8e3dbb294aef66809d4aaf9297d81c3a24854fa14a61b63c13",
+      "bytes": 35192
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/migration.py",
@@ -9196,8 +9196,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/current_task/workflow_mapping.py",
-      "sha256": "e8d5e5441e36458d7175f98d100abb609189a125e4de5b3060ca05b0d46037cd",
-      "bytes": 17876
+      "sha256": "709ffe062a76dc6e9b6d1a753e5dad57f4e532244a27ccdf26c6dbf974bd4b1f",
+      "bytes": 19291
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/harness/__init__.py",

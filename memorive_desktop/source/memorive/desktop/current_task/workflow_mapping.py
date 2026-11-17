@@ -49,20 +49,8 @@ def _model_descriptor(service: Mapping[str, Any]) -> str:
     return rendered or str(service.get("provider") or "未命名模型服务")
 
 
-def build_core_execution_snapshot(
-    settings: Mapping[str, Any], *, settings_revision: int,
-    local_model_profiles: Sequence[Mapping[str, Any]] | None = None,
-    document_structure_config: Mapping[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Translate saved Settings v5 into the immutable Core nine-node job shape.
-
-    This function binds configuration only.  It never reads credential values,
-    enables a provider route, or sends a model request.
-    """
-
-    if isinstance(settings_revision, bool) or not isinstance(settings_revision, int) or settings_revision < 0:
-        raise ValueError("SETTINGS_REVISION_INVALID")
-    accepted = validate_settings(settings)
+def _api_services_and_models(accepted):
+    """The saved API services by settings id, and the models they offer the workflow."""
     services = {
         row["config_id"]: {
             **row,
@@ -104,9 +92,11 @@ def build_core_execution_snapshot(
         }
         for row in accepted["model_services"]
     ]
-    cli_service_enabled: dict[str, bool] = {}
-    from memorive.desktop.settings.cli_template_management import projection
-    accepted=projection(accepted)
+    return services, configured_models
+
+
+def _add_cli_services(accepted, services, cli_service_enabled, configured_models):
+    """The command-line services and their models, and which of them are enabled."""
     for cli_service in accepted["cli_services"]:
         for model in cli_service["models"]:
             services[model["profile_ref"]] = {
@@ -133,6 +123,10 @@ def build_core_execution_snapshot(
                         "embedding_eligible": False,
                     }
                 )
+
+
+def _add_local_profiles(local_model_profiles, services, configured_models):
+    """The local model profiles as services and models."""
     for local_profile in local_model_profiles or ():
         profile_ref = str(local_profile.get("profile_ref") or "")
         model_name = str(local_profile.get("model_name") or "")
@@ -174,6 +168,11 @@ def build_core_execution_snapshot(
                 ),
             }
         )
+
+
+def _core_node_definitions(accepted, services, cli_service_enabled):
+    """Each Core node's definition and its execution binding (service, model and options) from the
+    saved workflow; whether every node that needs a model has one."""
     settings_nodes = {row["node_id"]: row for row in accepted["workflow"]["nodes"]}
     definitions = []
     execution_nodes: dict[str, dict[str, Any]] = {}
@@ -287,26 +286,11 @@ def build_core_execution_snapshot(
                     "configuration_source": "INHERITED_NODE_PROFILE",
                 }
             )
-    # Node 06 has two distinct dependencies: vector retrieval stays in node
-    # 02's exact embedding space, while the amount of material it may assemble
-    # is planned against node 07's selected analysis capacity.  Keep both
-    # sources explicit so the UI and frozen job never conflate them.
-    if (
-        isinstance(execution_nodes.get("06_CONTEXT_PACK"), dict)
-        and isinstance(execution_nodes.get("07_ANALYSIS"), dict)
-        and isinstance(execution_nodes["07_ANALYSIS"].get("capacity"), Mapping)
-    ):
-        execution_nodes["06_CONTEXT_PACK"]["capacity"] = deepcopy(
-            execution_nodes["07_ANALYSIS"]["capacity"]
-        )
-        execution_nodes["06_CONTEXT_PACK"][
-            "capacity_planning_source_node_id"
-        ] = "07_ANALYSIS"
-        execution_nodes["06_CONTEXT_PACK"][
-            "retrieval_embedding_profile_source_node_id"
-        ] = "02_CHUNK_EMBEDDING"
-    definitions = [row for row in definitions if row["node_id"] != "E2_LOGIC_REVIEW"]
-    configured_models.sort(key=lambda row: row["profile_ref"])
+    return definitions, execution_nodes, required_model_nodes_ready
+
+
+def _profile_catalog(configured_models, services):
+    """The models in settings-id order as the profile catalog of the snapshot."""
     profile_catalog = []
     for option in configured_models:
         service = services.get(option["profile_ref"])
@@ -333,6 +317,53 @@ def build_core_execution_snapshot(
                 ),
             }
         )
+    return profile_catalog
+
+
+def build_core_execution_snapshot(
+    settings: Mapping[str, Any], *, settings_revision: int,
+    local_model_profiles: Sequence[Mapping[str, Any]] | None = None,
+    document_structure_config: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Translate saved Settings v5 into the immutable Core nine-node job shape.
+
+    This function binds configuration only.  It never reads credential values,
+    enables a provider route, or sends a model request.
+    """
+
+    if isinstance(settings_revision, bool) or not isinstance(settings_revision, int) or settings_revision < 0:
+        raise ValueError("SETTINGS_REVISION_INVALID")
+    accepted = validate_settings(settings)
+    services, configured_models = _api_services_and_models(accepted)
+    cli_service_enabled: dict[str, bool] = {}
+    from memorive.desktop.settings.cli_template_management import projection
+    accepted=projection(accepted)
+    _add_cli_services(accepted, services, cli_service_enabled, configured_models)
+    _add_local_profiles(local_model_profiles, services, configured_models)
+    (definitions, execution_nodes, required_model_nodes_ready) = _core_node_definitions(
+        accepted, services, cli_service_enabled
+    )
+    # Node 06 has two distinct dependencies: vector retrieval stays in node
+    # 02's exact embedding space, while the amount of material it may assemble
+    # is planned against node 07's selected analysis capacity.  Keep both
+    # sources explicit so the UI and frozen job never conflate them.
+    if (
+        isinstance(execution_nodes.get("06_CONTEXT_PACK"), dict)
+        and isinstance(execution_nodes.get("07_ANALYSIS"), dict)
+        and isinstance(execution_nodes["07_ANALYSIS"].get("capacity"), Mapping)
+    ):
+        execution_nodes["06_CONTEXT_PACK"]["capacity"] = deepcopy(
+            execution_nodes["07_ANALYSIS"]["capacity"]
+        )
+        execution_nodes["06_CONTEXT_PACK"][
+            "capacity_planning_source_node_id"
+        ] = "07_ANALYSIS"
+        execution_nodes["06_CONTEXT_PACK"][
+            "retrieval_embedding_profile_source_node_id"
+        ] = "02_CHUNK_EMBEDDING"
+    definitions = [row for row in definitions if row["node_id"] != "E2_LOGIC_REVIEW"]
+    configured_models.sort(key=lambda row: row["profile_ref"])
+    profile_catalog = _profile_catalog(configured_models, services)
     configuration_ready = required_model_nodes_ready and all(
         row["credential_reference_stored"] for row in configured_models
     )

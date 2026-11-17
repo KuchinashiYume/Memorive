@@ -261,6 +261,236 @@ def _tail(distribution, statistic, parameters):
         raise ValueError('TAIL_NOT_SUPPORTED')
     return Decimal(str(value))
 
+def _resolve_rule_inputs(inputs, records, result):
+    """Each input of the rule as its record (or list of records): a record id, or the exact raw value and
+    source quote of one record. The ids used are added to result['input_ids']."""
+    resolved={}
+    for key,ids in inputs.items():
+        sequence=ids if isinstance(ids,list) else [ids]
+        selected=[]
+        for selector in sequence:
+            if isinstance(selector,Mapping):
+                if not isinstance(selector.get('raw'),str) or not isinstance(selector.get('quote'),str) or not selector['quote'].strip():
+                    raise ValueError('EXACT_VALUE_AND_SOURCE_QUOTE_REQUIRED')
+                candidates=[row for row in records.values() if row['raw']==selector['raw'] and selector['quote'] in row['source'].get('quote','')
+                    and ('line' not in selector or selector['line']==row['source'].get('line'))]
+                if 'occurrence' in selector:
+                    ordinal=selector['occurrence']
+                    if isinstance(ordinal,bool) or not isinstance(ordinal,int) or not 1<=ordinal<=len(candidates):
+                        raise ValueError('SOURCE_OCCURRENCE_INVALID')
+                    candidates=[candidates[ordinal-1]]
+                if len(candidates)!=1:
+                    raise ValueError('INPUT_SELECTOR_NOT_UNIQUE_OR_NOT_FOUND')
+                selected.append(candidates[0]['record_id'])
+            else:
+                selected.append(selector)
+        if not selected or any(not isinstance(i,str) or i not in records for i in selected):
+            raise ValueError('INPUT_RECORD_NOT_FOUND')
+        result['input_ids'].extend(selected)
+        resolved[key]=[records[i] for i in selected] if isinstance(ids,list) else records[selected[0]]
+    result['input_ids']=sorted(set(result['input_ids']))
+    return resolved
+
+
+def _check_literal_arithmetic(p, scalar, resolved):
+    """A printed arithmetic relation (left op right = reported), each number allowed one last-place unit."""
+    if p['rounding']!='display_precision_envelope':
+        raise ValueError('EXPLICIT_ARITHMETIC_PRECISION_REQUIRED')
+    def envelope(key):
+        v=scalar(key)
+        step=Decimal(1).scaleb(decimal(resolved[key]['raw']).as_tuple().exponent)
+        return v-step,v+step
+    left,right=envelope('left'),envelope('right')
+    op=p['operation']
+    if op=='+':
+        expected=(left[0]+right[0],left[1]+right[1])
+    elif op in ('-','−'):
+        expected=(left[0]-right[1],left[1]-right[0])
+    elif op in ('*','×'):
+        products=[x*y for x in left for y in right]
+        expected=min(products),max(products)
+    elif op in ('/','÷'):
+        if right[0]<=0<=right[1]:
+            raise ValueError('DIVISOR_PRECISION_INTERVAL_INCLUDES_ZERO')
+        ratios=[x/y for x in left for y in right]
+        expected=min(ratios),max(ratios)
+    else:
+        raise ValueError('LITERAL_OPERATOR_NOT_SUPPORTED')
+    if p['percent_result']:
+        expected=expected[0]*100,expected[1]*100
+    observed=envelope('reported')
+    compatible=_overlap(expected,observed)
+    calculation={'formula':'literal left '+op+' right'+(' × 100' if p['percent_result'] else ''),
+        'expected_interval':_range(expected),'reported_interval':_range(observed),
+        'condition':'Only the explicitly printed arithmetic relation; each operand and result allows one last-place unit for nearest/truncation. No scientific or group interpretation.'}
+    return compatible, calculation
+
+
+def _check_numeric_domain(resolved, units, p):
+    """A value (or bound) lies in the rule's named numeric domain."""
+    record=resolved['value']
+    v=decimal(record['value'])
+    relation=record['relation']
+    normalization=units['value'][0]
+    v=decimal(normalization['normalized_value'])
+    lo=decimal(p['lower']) if p['lower'] is not None else None
+    hi=decimal(p['upper']) if p['upper'] is not None else None
+    if relation in ('','='):
+        compatible=(lo is None or v>=lo) and (hi is None or v<=hi)
+    elif relation in ('<','<='):
+        compatible=lo is None or (v>lo if relation=='<' else v>=lo)
+    elif relation in ('>','>='):
+        compatible=hi is None or (v<hi if relation=='>' else v<=hi)
+    else:
+        raise ValueError('DOMAIN_RELATION_NOT_SUPPORTED')
+    calculation={'formula':'nonempty intersection with literal named numeric domain','domain_label':p['domain_label'],'value':str(v),'relation':relation,'lower':p['lower'],'upper':p['upper'],'does_not_validate_statistical_method':True,
+                 'normalization':normalization}
+    return compatible, calculation
+
+
+def _check_percentage(p, scalar, integer, r):
+    """A reported percentage is 100 x count / denominator within its rounding."""
+    if p['unweighted_count'] is not True:
+        raise ValueError('UNWEIGHTED_COUNT_REQUIRED')
+    count=scalar('count')
+    denominator=integer('denominator')
+    if count!=count.to_integral_value() or not 0<=count<=denominator:
+        raise ValueError('COUNT_INVALID')
+    expected=count*100/denominator
+    observed=r('percent')
+    compatible=observed[0]<=expected<=observed[1]
+    calculation={'formula':'100 × count / denominator','expected':str(expected),'reported_interval':_range(observed)}
+    return compatible, calculation
+
+
+def _check_sum(p, resolved, r):
+    """Disjoint parts that cover the whole add up to the reported total within rounding."""
+    if p['mutually_exclusive'] is not True or p['exhaustive'] is not True:
+        raise ValueError('EXHAUSTIVE_DISJOINT_PARTS_REQUIRED')
+    parts=[interval(row,rounding=p['rounding'],exact=p.get('exact_parts') is True) for row in resolved['parts']]
+    expected=(sum(a for a,b in parts),sum(b for a,b in parts))
+    observed=r('total')
+    compatible=_overlap(expected,observed)
+    calculation={'formula':'sum(parts)','expected_interval':_range(expected),'reported_interval':_range(observed)}
+    return compatible, calculation
+
+
+def _check_sd_se(p, integer, r, scalar):
+    """A standard error and standard deviation agree with n: SD squared = n x SE squared, within rounding."""
+    if p['definition'] not in ('independent_equal_weight_mean','explicit_SE_equals_SD_over_sqrt_n'):
+        raise ValueError('SE_DEFINITION_NOT_SUPPORTED')
+    n=integer('n')
+    sd=r('sd')
+    se=r('se')
+    if scalar('sd')<0 or scalar('se')<0:
+        raise ValueError('SD_SE_NONNEGATIVE_REQUIRED')
+    sd=(max(Decimal(0),sd[0]),sd[1])
+    se=(max(Decimal(0),se[0]),se[1])
+    # Compare squared positive intervals, avoiding sqrt rounding.
+    expected=(sd[0]*sd[0],sd[1]*sd[1])
+    observed=(se[0]*se[0]*n,se[1]*se[1]*n)
+    compatible=_overlap(expected,observed)
+    calculation={'formula':'SD² = n × SE²','sd_squared_interval':_range(expected),'n_se_squared_interval':_range(observed),'n':n}
+    return compatible, calculation
+
+
+def _check_cross(p, r):
+    """Two reports of the same quantity overlap within rounding."""
+    if p['same_quantity'] is not True:
+        raise ValueError('SAME_QUANTITY_BINDING_REQUIRED')
+    a,b=r('left'),r('right')
+    compatible=_overlap(a,b)
+    calculation={'left_interval':_range(a),'right_interval':_range(b),'formula':'intersection of reported rounding intervals'}
+    return compatible, calculation
+
+
+def _check_grid_mean(p, integer, r):
+    """A mean of n values on a grid (origin + step x integer) can be the reported mean."""
+    if p['equal_weights'] is not True:
+        raise ValueError('EQUAL_WEIGHTS_REQUIRED')
+    n=integer('n')
+    step=Fraction(decimal(p['step']))
+    origin=Fraction(decimal(p['origin']))
+    if step<=0:
+        raise ValueError('GRID_STEP_POSITIVE_REQUIRED')
+    lo,hi=map(Fraction,r('mean'))
+    lower=math.ceil((lo-origin)*n/step)
+    upper=math.floor((hi-origin)*n/step)
+    if 'min_value' in p:
+        lower=max(lower,n*math.ceil((Fraction(decimal(p['min_value']))-origin)/step))
+    if 'max_value' in p:
+        upper=min(upper,n*math.floor((Fraction(decimal(p['max_value']))-origin)/step))
+    compatible=lower<=upper
+    calculation={'formula':'mean = origin + step × integer_sum / n','integer_sum_min':lower,'integer_sum_max':upper,
+                 'proof':'exact rational interval; boundary endpoints conservatively included','joint_mean_sd_tested':False}
+    return compatible, calculation
+
+
+def _check_test_p(r, p, scalar, resolved, units):
+    """A reported p value agrees with the tail probability of the reported statistic under the rule's
+    distribution (a numerical approximation)."""
+    a,b=r('statistic')
+    reported_interval=(a,b)
+    if p['distribution'] in ('chi_square','f'):
+        # Validate the observation before intersecting its rounding
+        # interval. An invalid negative statistic is never clamped.
+        if scalar('statistic')<0:
+            raise ValueError('DISTRIBUTION_DOMAIN_INVALID')
+        a=max(Decimal(0),a)
+        if a>b:
+            raise ValueError('STATISTIC_DOMAIN_INTERSECTION_EMPTY')
+    points=[a,b]+([Decimal(0)] if a<=0<=b else [])
+    values=[_tail(p['distribution'],v,p) for v in points]
+    epsilon=Decimal('1e-30')
+    expected=(max(Decimal(0),min(values)-epsilon),min(Decimal(1),max(values)+epsilon))
+    reported=resolved['p']
+    normalization=units['p'][0]
+    v=decimal(normalization['normalized_value'])
+    scale=decimal(normalization['scale'])
+    relation=reported['relation']
+    if not 0<=v<=1:
+        raise ValueError('P_RANGE_INVALID')
+    # Convert the literal precision interval once, with the same
+    # scale as the scalar/inequality threshold. Keep raw evidence.
+    if relation in ('<','<='):
+        observed=(Decimal(0),v)
+    elif relation in ('>','>='):
+        observed=(v,Decimal(1))
+    elif relation in ('','='):
+        observed=tuple(x*scale for x in r('p'))
+    else:
+        raise ValueError('P_RELATION_NOT_SUPPORTED')
+    compatible=_overlap(expected,observed)
+    approximate=True
+    if relation=='<':
+        compatible=compatible and expected[0]<v
+    elif relation=='>':
+        compatible=compatible and expected[1]>v
+    calculation={'formula':'specified distribution tail probability','expected_interval':_range(expected),
+                 'reported_interval':_range(observed),'algorithm':'mpmath 45 decimal digits; numerical approximation',
+                 'normalization':normalization,'reported_relation':relation,
+                 'strict_interval_proof':False,'df_parameters':{k:p[k] for k in ('df','df1','df2') if k in p},
+                 'reported_statistic_interval':_range(reported_interval),'effective_statistic_interval':_range((a,b))}
+    return compatible, approximate, calculation
+
+
+def _raw_summary(p, resolved):
+    """The mean, variance and standard deviation of raw values, for the record."""
+    if p['missing_policy']!='no_missing' or p['weights']!='equal' or p['sd_denominator'] not in ('sample','population'):
+        raise ValueError('RAW_SUMMARY_METHOD_NOT_SUPPORTED')
+    values=[decimal(v['value']) for v in resolved['values']]
+    if any(v['relation'] not in ('','=') for v in resolved['values']):
+        raise ValueError('RAW_CENSORED_VALUES_NOT_SUPPORTED')
+    n=len(values)
+    mean=sum(values)/n
+    denominator=n-1 if p['sd_denominator']=='sample' else n
+    if denominator<=0:
+        raise ValueError('SD_REQUIRES_MORE_VALUES')
+    variance=sum((x-mean)**2 for x in values)/denominator
+    calculation={'n':n,'mean':str(mean),'variance':str(variance),'sd':str(variance.sqrt()),'definition':p['sd_denominator']}
+    return calculation
+
+
 def evaluate(rule: Mapping[str,Any], records: dict[str,dict], *, checkpoint:Callable[[],None]) -> dict:
     checkpoint()
     result={'rule_id':str(rule.get('rule_id','')),'type':rule.get('type'),'rule_version':RULE_VERSION,
@@ -278,31 +508,7 @@ def evaluate(rule: Mapping[str,Any], records: dict[str,dict], *, checkpoint:Call
     if result['missing']:
         return result
     try:
-        resolved={}
-        for key,ids in inputs.items():
-            sequence=ids if isinstance(ids,list) else [ids]
-            selected=[]
-            for selector in sequence:
-                if isinstance(selector,Mapping):
-                    if not isinstance(selector.get('raw'),str) or not isinstance(selector.get('quote'),str) or not selector['quote'].strip():
-                        raise ValueError('EXACT_VALUE_AND_SOURCE_QUOTE_REQUIRED')
-                    candidates=[row for row in records.values() if row['raw']==selector['raw'] and selector['quote'] in row['source'].get('quote','')
-                        and ('line' not in selector or selector['line']==row['source'].get('line'))]
-                    if 'occurrence' in selector:
-                        ordinal=selector['occurrence']
-                        if isinstance(ordinal,bool) or not isinstance(ordinal,int) or not 1<=ordinal<=len(candidates):
-                            raise ValueError('SOURCE_OCCURRENCE_INVALID')
-                        candidates=[candidates[ordinal-1]]
-                    if len(candidates)!=1:
-                        raise ValueError('INPUT_SELECTOR_NOT_UNIQUE_OR_NOT_FOUND')
-                    selected.append(candidates[0]['record_id'])
-                else:
-                    selected.append(selector)
-            if not selected or any(not isinstance(i,str) or i not in records for i in selected):
-                raise ValueError('INPUT_RECORD_NOT_FOUND')
-            result['input_ids'].extend(selected)
-            resolved[key]=[records[i] for i in selected] if isinstance(ids,list) else records[selected[0]]
-        result['input_ids']=sorted(set(result['input_ids']))
+        resolved = _resolve_rule_inputs(inputs, records, result)
         r=lambda k:interval(resolved[k],rounding=p.get('rounding','nearest'),exact=k in p.get('exact_inputs',[]))
         def scalar(k):
             if resolved[k]['relation'] not in ('','='):
@@ -316,172 +522,28 @@ def evaluate(rule: Mapping[str,Any], records: dict[str,dict], *, checkpoint:Call
             ctx.prec=256
             units=_rule_units(kind,resolved,p)
             if kind=='literal_arithmetic':
-                if p['rounding']!='display_precision_envelope':
-                    raise ValueError('EXPLICIT_ARITHMETIC_PRECISION_REQUIRED')
-                def envelope(key):
-                    v=scalar(key)
-                    step=Decimal(1).scaleb(decimal(resolved[key]['raw']).as_tuple().exponent)
-                    return v-step,v+step
-                left,right=envelope('left'),envelope('right')
-                op=p['operation']
-                if op=='+':
-                    expected=(left[0]+right[0],left[1]+right[1])
-                elif op in ('-','−'):
-                    expected=(left[0]-right[1],left[1]-right[0])
-                elif op in ('*','×'):
-                    products=[x*y for x in left for y in right]
-                    expected=min(products),max(products)
-                elif op in ('/','÷'):
-                    if right[0]<=0<=right[1]:
-                        raise ValueError('DIVISOR_PRECISION_INTERVAL_INCLUDES_ZERO')
-                    ratios=[x/y for x in left for y in right]
-                    expected=min(ratios),max(ratios)
-                else:
-                    raise ValueError('LITERAL_OPERATOR_NOT_SUPPORTED')
-                if p['percent_result']:
-                    expected=expected[0]*100,expected[1]*100
-                observed=envelope('reported')
-                compatible=_overlap(expected,observed)
-                calculation={'formula':'literal left '+op+' right'+(' × 100' if p['percent_result'] else ''),
-                    'expected_interval':_range(expected),'reported_interval':_range(observed),
-                    'condition':'Only the explicitly printed arithmetic relation; each operand and result allows one last-place unit for nearest/truncation. No scientific or group interpretation.'}
+                compatible, calculation = _check_literal_arithmetic(p, scalar, resolved)
             elif kind=='numeric_domain':
-                record=resolved['value']
-                v=decimal(record['value'])
-                relation=record['relation']
-                normalization=units['value'][0]
-                v=decimal(normalization['normalized_value'])
-                lo=decimal(p['lower']) if p['lower'] is not None else None
-                hi=decimal(p['upper']) if p['upper'] is not None else None
-                if relation in ('','='):
-                    compatible=(lo is None or v>=lo) and (hi is None or v<=hi)
-                elif relation in ('<','<='):
-                    compatible=lo is None or (v>lo if relation=='<' else v>=lo)
-                elif relation in ('>','>='):
-                    compatible=hi is None or (v<hi if relation=='>' else v<=hi)
-                else:
-                    raise ValueError('DOMAIN_RELATION_NOT_SUPPORTED')
-                calculation={'formula':'nonempty intersection with literal named numeric domain','domain_label':p['domain_label'],'value':str(v),'relation':relation,'lower':p['lower'],'upper':p['upper'],'does_not_validate_statistical_method':True,
-                             'normalization':normalization}
+                compatible, calculation = _check_numeric_domain(resolved, units, p)
             elif kind=='percentage':
-                if p['unweighted_count'] is not True:
-                    raise ValueError('UNWEIGHTED_COUNT_REQUIRED')
-                count=scalar('count')
-                denominator=integer('denominator')
-                if count!=count.to_integral_value() or not 0<=count<=denominator:
-                    raise ValueError('COUNT_INVALID')
-                expected=count*100/denominator
-                observed=r('percent')
-                compatible=observed[0]<=expected<=observed[1]
-                calculation={'formula':'100 × count / denominator','expected':str(expected),'reported_interval':_range(observed)}
+                compatible, calculation = _check_percentage(p, scalar, integer, r)
             elif kind=='sum':
-                if p['mutually_exclusive'] is not True or p['exhaustive'] is not True:
-                    raise ValueError('EXHAUSTIVE_DISJOINT_PARTS_REQUIRED')
-                parts=[interval(row,rounding=p['rounding'],exact=p.get('exact_parts') is True) for row in resolved['parts']]
-                expected=(sum(a for a,b in parts),sum(b for a,b in parts))
-                observed=r('total')
-                compatible=_overlap(expected,observed)
-                calculation={'formula':'sum(parts)','expected_interval':_range(expected),'reported_interval':_range(observed)}
+                compatible, calculation = _check_sum(p, resolved, r)
             elif kind=='sd_se':
-                if p['definition'] not in ('independent_equal_weight_mean','explicit_SE_equals_SD_over_sqrt_n'):
-                    raise ValueError('SE_DEFINITION_NOT_SUPPORTED')
-                n=integer('n')
-                sd=r('sd')
-                se=r('se')
-                if scalar('sd')<0 or scalar('se')<0:
-                    raise ValueError('SD_SE_NONNEGATIVE_REQUIRED')
-                sd=(max(Decimal(0),sd[0]),sd[1])
-                se=(max(Decimal(0),se[0]),se[1])
-                # Compare squared positive intervals, avoiding sqrt rounding.
-                expected=(sd[0]*sd[0],sd[1]*sd[1])
-                observed=(se[0]*se[0]*n,se[1]*se[1]*n)
-                compatible=_overlap(expected,observed)
-                calculation={'formula':'SD² = n × SE²','sd_squared_interval':_range(expected),'n_se_squared_interval':_range(observed),'n':n}
+                compatible, calculation = _check_sd_se(p, integer, r, scalar)
             elif kind=='cross':
-                if p['same_quantity'] is not True:
-                    raise ValueError('SAME_QUANTITY_BINDING_REQUIRED')
-                a,b=r('left'),r('right')
-                compatible=_overlap(a,b)
-                calculation={'left_interval':_range(a),'right_interval':_range(b),'formula':'intersection of reported rounding intervals'}
+                compatible, calculation = _check_cross(p, r)
             elif kind=='grid_mean':
-                if p['equal_weights'] is not True:
-                    raise ValueError('EQUAL_WEIGHTS_REQUIRED')
-                n=integer('n')
-                step=Fraction(decimal(p['step']))
-                origin=Fraction(decimal(p['origin']))
-                if step<=0:
-                    raise ValueError('GRID_STEP_POSITIVE_REQUIRED')
-                lo,hi=map(Fraction,r('mean'))
-                lower=math.ceil((lo-origin)*n/step)
-                upper=math.floor((hi-origin)*n/step)
-                if 'min_value' in p:
-                    lower=max(lower,n*math.ceil((Fraction(decimal(p['min_value']))-origin)/step))
-                if 'max_value' in p:
-                    upper=min(upper,n*math.floor((Fraction(decimal(p['max_value']))-origin)/step))
-                compatible=lower<=upper
-                calculation={'formula':'mean = origin + step × integer_sum / n','integer_sum_min':lower,'integer_sum_max':upper,
-                             'proof':'exact rational interval; boundary endpoints conservatively included','joint_mean_sd_tested':False}
+                compatible, calculation = _check_grid_mean(p, integer, r)
             elif kind=='test_p':
                 if p['adjustment']!='none':
                     raise ValueError('ADJUSTED_P_METHOD_NOT_SUPPORTED')
                 missing=[key for key in (['df'] if p['distribution'] in ('t','chi_square') else ['df1','df2'] if p['distribution']=='f' else []) if key not in p]
                 if missing:
                     return {**result,'missing':['parameters.'+key for key in missing]}
-                a,b=r('statistic')
-                reported_interval=(a,b)
-                if p['distribution'] in ('chi_square','f'):
-                    # Validate the observation before intersecting its rounding
-                    # interval. An invalid negative statistic is never clamped.
-                    if scalar('statistic')<0:
-                        raise ValueError('DISTRIBUTION_DOMAIN_INVALID')
-                    a=max(Decimal(0),a)
-                    if a>b:
-                        raise ValueError('STATISTIC_DOMAIN_INTERSECTION_EMPTY')
-                points=[a,b]+([Decimal(0)] if a<=0<=b else [])
-                values=[_tail(p['distribution'],v,p) for v in points]
-                epsilon=Decimal('1e-30')
-                expected=(max(Decimal(0),min(values)-epsilon),min(Decimal(1),max(values)+epsilon))
-                reported=resolved['p']
-                normalization=units['p'][0]
-                v=decimal(normalization['normalized_value'])
-                scale=decimal(normalization['scale'])
-                relation=reported['relation']
-                if not 0<=v<=1:
-                    raise ValueError('P_RANGE_INVALID')
-                # Convert the literal precision interval once, with the same
-                # scale as the scalar/inequality threshold. Keep raw evidence.
-                if relation in ('<','<='):
-                    observed=(Decimal(0),v)
-                elif relation in ('>','>='):
-                    observed=(v,Decimal(1))
-                elif relation in ('','='):
-                    observed=tuple(x*scale for x in r('p'))
-                else:
-                    raise ValueError('P_RELATION_NOT_SUPPORTED')
-                compatible=_overlap(expected,observed)
-                approximate=True
-                if relation=='<':
-                    compatible=compatible and expected[0]<v
-                elif relation=='>':
-                    compatible=compatible and expected[1]>v
-                calculation={'formula':'specified distribution tail probability','expected_interval':_range(expected),
-                             'reported_interval':_range(observed),'algorithm':'mpmath 45 decimal digits; numerical approximation',
-                             'normalization':normalization,'reported_relation':relation,
-                             'strict_interval_proof':False,'df_parameters':{k:p[k] for k in ('df','df1','df2') if k in p},
-                             'reported_statistic_interval':_range(reported_interval),'effective_statistic_interval':_range((a,b))}
+                compatible, approximate, calculation = _check_test_p(r, p, scalar, resolved, units)
             elif kind=='raw_summary':
-                if p['missing_policy']!='no_missing' or p['weights']!='equal' or p['sd_denominator'] not in ('sample','population'):
-                    raise ValueError('RAW_SUMMARY_METHOD_NOT_SUPPORTED')
-                values=[decimal(v['value']) for v in resolved['values']]
-                if any(v['relation'] not in ('','=') for v in resolved['values']):
-                    raise ValueError('RAW_CENSORED_VALUES_NOT_SUPPORTED')
-                n=len(values)
-                mean=sum(values)/n
-                denominator=n-1 if p['sd_denominator']=='sample' else n
-                if denominator<=0:
-                    raise ValueError('SD_REQUIRES_MORE_VALUES')
-                variance=sum((x-mean)**2 for x in values)/denominator
-                calculation={'n':n,'mean':str(mean),'variance':str(variance),'sd':str(variance.sqrt()),'definition':p['sd_denominator']}
+                calculation = _raw_summary(p, resolved)
             calculation['unit_normalizations']=units
             result.update(status='COMPATIBLE' if compatible else 'INCONSISTENT',calculation=calculation,approximate=approximate)
             if not compatible:
