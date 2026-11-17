@@ -3797,8 +3797,8 @@
     },
     {
       "path": "source/memorive/exams/__init__.py",
-      "sha256": "d85d1cd13950582f8234e69f7e0197e9bed00471013d459c745b7d3c391b5360",
-      "bytes": 1195
+      "sha256": "843cced61f80e50ad6650d979fcc47e3077c36e44694cec1d8aa0bd5da782fb9",
+      "bytes": 1193
     },
     {
       "path": "source/memorive/exams/analysis.py",
@@ -3886,9 +3886,39 @@
       "bytes": 145797
     },
     {
-      "path": "source/memorive/exams/card_reviewer.py",
-      "sha256": "450a8ea25f46879e5a3f006727817d2941707aa8e45ac6a944e8481180fd9e47",
-      "bytes": 226144
+      "path": "source/memorive/exams/card_reviewer/__init__.py",
+      "sha256": "cf4dd6c3854297364896ea5dac901da1a2eb3a8a63f63a07ee2ce9671ed81cc2",
+      "bytes": 2815
+    },
+    {
+      "path": "source/memorive/exams/card_reviewer/executor.py",
+      "sha256": "ccc202f76df9483d59c61a87378bd9e6df3ff52df2b87069b420d13bac731c4a",
+      "bytes": 102648
+    },
+    {
+      "path": "source/memorive/exams/card_reviewer/policy.py",
+      "sha256": "f21423c609e35996ce0d609964f6e6e358f541cfa6919ac5460fdbf5cd6075dd",
+      "bytes": 7239
+    },
+    {
+      "path": "source/memorive/exams/card_reviewer/repair_prompt.py",
+      "sha256": "be04e86c2c1859f410b95610af58633643c06f8b7ebdefd1594b0bb8f28f0696",
+      "bytes": 9875
+    },
+    {
+      "path": "source/memorive/exams/card_reviewer/role_projection.py",
+      "sha256": "15239ab098362b0a4f25484da103043b4ac1c327f9560958e705e6585d9afda7",
+      "bytes": 33250
+    },
+    {
+      "path": "source/memorive/exams/card_reviewer/successor.py",
+      "sha256": "15bcbb37d8a25f1f3b4a92ceffd3edc80450209a75deb3b0a80573398b068412",
+      "bytes": 37823
+    },
+    {
+      "path": "source/memorive/exams/card_reviewer/successor_executor.py",
+      "sha256": "9f710a6e0291b429e553890b4cb47d0c5640cd047b935699ac4f26959bfc006d",
+      "bytes": 38978
     },
     {
       "path": "source/memorive/exams/catalog.py",
