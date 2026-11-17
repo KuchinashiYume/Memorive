@@ -1,8 +1,8 @@
 """Human read-confirmation, bound to every file of one paper's current run. The library page
 (product_controller.py) uses it.
 
-Receipts are separate from generated scientific content and never admit anything into the library
-or the artifact registry. Prior versions and source language remain untouched.
+Receipts are separate from generated scientific content and never grant card admission or a place
+in the artifact registry. Prior versions and source language remain untouched.
 """
 from copy import deepcopy
 import hashlib

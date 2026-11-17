@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "a45da460b1b3c74cb786a8260064632ad8213af75ae538e65d751e2a639b4708",
+      "sha256": "cce9a88a9c048788451b5ce2bf409f9f695381fa118dfc55096d4d9fc756bc0a",
       "bytes": 276217
     },
     {
@@ -7176,7 +7176,7 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/paper_review.py",
-      "sha256": "240cbe76477c07945a4cb2471db9ab433349306315441a0fa9d0fd3cad986998",
+      "sha256": "65ed623665c1229dbe9d7c32991eb1fe02717abfc14cd419e2b2af30892f8299",
       "bytes": 5321
     },
     {
