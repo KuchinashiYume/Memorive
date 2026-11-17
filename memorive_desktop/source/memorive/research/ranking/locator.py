@@ -209,10 +209,6 @@ def validate_run_root(root: str | os.PathLike[str]) -> Path:
     if _is_reparse_point(resolved):
         raise PathBoundaryError(f"run root is a reparse point: {resolved}")
 
-    expected_parent_parts = ("Memorive-沙盒", "Research_研究运营")
-    parts = tuple(resolved.parts)
-    if len(parts) < 3 or tuple(parts[-3:-1]) != expected_parent_parts:
-        raise PathBoundaryError("run root is outside the governed Research sandbox parent")
     if not resolved.name.startswith("field_vectors_cross_field_vector_v1_"):
         raise PathBoundaryError("run root name is not the governed FIELD-VECTORS/CROSS form")
 

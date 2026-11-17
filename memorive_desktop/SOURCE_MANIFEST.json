@@ -6307,8 +6307,8 @@
     },
     {
       "path": "source/memorive/research/ranking/locator.py",
-      "sha256": "c99e9b33feb79e9dca8f65ca545e01bd97acf21a1b005027559a3a9d062cc996",
-      "bytes": 32986
+      "sha256": "2c9e131707ac02c9158ea38d4b3e5d2ea0ebc2c39c743cecbb115a2528c84a05",
+      "bytes": 32712
     },
     {
       "path": "source/memorive/research/ranking/migration.py",

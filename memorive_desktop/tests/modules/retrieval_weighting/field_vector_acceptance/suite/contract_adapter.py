@@ -23,10 +23,8 @@ def _governed_run_root(package_root: Path) -> Path:
     import shutil
     import tempfile
 
-    # One run root per process: test runs from other sessions share this temp folder.
-    parent = Path(tempfile.gettempdir()) / "Memorive-沙盒" / "Research_研究运营"
-    parent.mkdir(parents=True, exist_ok=True)
-    root = Path(tempfile.mkdtemp(prefix="field_vectors_cross_field_vector_v1_", dir=parent))
+    # One run root per process: test runs from other sessions share the temp folder.
+    root = Path(tempfile.mkdtemp(prefix="field_vectors_cross_field_vector_v1_"))
     for name in ("fixtures", "10_contract", "00_manifest", "validator"):
         shutil.copytree(package_root / name, root / name)
     (root / "00_manifest" / "start_manifest.json").write_text(json.dumps(

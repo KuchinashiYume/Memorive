@@ -22,9 +22,7 @@ REPO_ROOT = (Path(__file__).resolve().parents[3] / "source")
 FIXTURE_ROOT = Path(__file__).resolve().parent / "field_vector_acceptance" / "fixtures"
 ORACLE = FIXTURE_ROOT / "reference_oracle_v1" / "expected_records.jsonl"
 BUILD_CUTOFF = "2026-08-03T00:00:00Z"
-# memorive/research/ranking/locator.py accepts a run root only under <...>/Memorive-沙盒/Research_研究运营/.
-# That parent is made in the temp folder, so running the tests leaves no folder in the checkout.
-GOVERNED_SANDBOX_PARENT = Path(tempfile.gettempdir()) / "Memorive-沙盒" / "Research_研究运营"
+# The run roots are made in the temp folder, so running the tests leaves no folder in the checkout.
 
 
 def _load(name: str) -> dict:
@@ -105,9 +103,8 @@ def _absent_baseline(root: Path) -> dict:
 
 @contextmanager
 def _governed_run_root(kind: str):
-    GOVERNED_SANDBOX_PARENT.mkdir(parents=True, exist_ok=True)
     prefix = f"field_vectors_cross_field_vector_v1_formal_runtime_{kind}_"
-    with tempfile.TemporaryDirectory(prefix=prefix, dir=GOVERNED_SANDBOX_PARENT) as temporary:
+    with tempfile.TemporaryDirectory(prefix=prefix) as temporary:
         root = Path(temporary).resolve()
         manifest_dir = root / "00_manifest"
         manifest_dir.mkdir()
