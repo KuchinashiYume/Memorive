@@ -4616,8 +4616,8 @@
     },
     {
       "path": "memorive_desktop/ui/README.md",
-      "sha256": "608453f3324580e590c3953ede45e198f8c205e3ada842b2055019ec3a58112b",
-      "bytes": 15436
+      "sha256": "e39c4c5af6ef52a7d58540dfc6de089cd0a1dadf7f9ba8814b38ba80e114515b",
+      "bytes": 15808
     },
     {
       "path": "memorive_desktop/ui/assistant/assistant.css",
@@ -5051,13 +5051,13 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "c7f74138bd7031aa52a56e06c3f90a2fec638ecb5240abbb9bd5f0a410fad01d",
-      "bytes": 28317
+      "sha256": "eee626d2a04609b806faff7d1688a206804770df302ee61729f3def3a4eb0876",
+      "bytes": 28392
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
-      "sha256": "1944d9a3b2c6491c8a5a0cc8d1a7db5c12d11bb80f41225120bcfdaa4f1b24b6",
-      "bytes": 4576
+      "sha256": "ed36ea8fe767e000cf53c2a364a672ecbdf7d34047d56d26ccf291d016088457",
+      "bytes": 4718
     },
     {
       "path": ".claude/skills/memorive-development/SKILL.md",
@@ -10013,6 +10013,46 @@
       "path": "memorive_desktop/ui/integrated/shared/window-frame.js",
       "sha256": "158027c43665abb13dd7eb9a91ee47e2dea3860d70a3359ceb66063770744efb",
       "bytes": 23601
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/README.md",
+      "sha256": "55757855f75deadd7884b819a4acaa0bbe15dfb479dacbed949db1a8e8f35002",
+      "bytes": 4803
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/compare.py",
+      "sha256": "facfba4a549d4ff592e814d28fa10056d140f89c0469db14d768e561785da9af",
+      "bytes": 10883
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/offline/sitecustomize.py",
+      "sha256": "c21d58f35c771ccc1b3201132663cd446947aadba8b66b8f6b69369f8c01962b",
+      "bytes": 750
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/page_js.py",
+      "sha256": "8da7a28786fbf26025f72af34582fc9ed92fded6c6564946e2d644730c756697",
+      "bytes": 9489
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/probe.py",
+      "sha256": "ebc9f5826edb852496e68577e7c769d9ea79b893e086c5e3472dbaa14bbf9e45",
+      "bytes": 10123
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/run.py",
+      "sha256": "c079ea17cbe9b04b48ddfdd0aa11ab6e3886a03de2eeb1669124d21c15c98bbc",
+      "bytes": 5038
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/scenarios.py",
+      "sha256": "09d9b907ef3c3686aa902375382d9bee2334d471bfa369e143acd6319c03bc69",
+      "bytes": 6135
+    },
+    {
+      "path": "memorive_desktop/tools/page_check/seed.py",
+      "sha256": "e9e876d483d3a8acf484c2470b6ebbb7dcfd7a7158024584e99d82666e789ce0",
+      "bytes": 6174
     }
   ]
 }

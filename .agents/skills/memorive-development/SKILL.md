@@ -48,7 +48,9 @@ kind of change), the code the window does not start, and where data is checked. 
 - UI: edit the sources under `memorive_desktop/ui/`, then run `python memorive_desktop/tools/build_pages.py`.
   Never edit `product/desktop/bundle_*.html` by hand.
   `memorive_desktop/ui/README.md` says how the pages are laid out, how to add a route, a setting, a dialog
-  or a text, and which names in the page the Python code uses.
+  or a text, and which names in the page the Python code uses. Run the page check
+  (`memorive_desktop/tools/page_check/`) before and after a page change and compare the two runs; its
+  README says how.
 - Every published file is listed with its hash in the manifests. After changing files under `source/`,
   `product/`, `ui/`, `integrations/`, `contracts/` or `memorive_console/`, run
   `python memorive_desktop/tools/sync_manifests.py`. The build refuses a file whose hash differs.

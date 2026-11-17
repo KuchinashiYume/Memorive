@@ -170,6 +170,8 @@ python .\memorive_desktop\tools\check_internal_codes.py
 
 Then run the tests through `python .\memorive_desktop\tests\run_tests.py` (see `DEVELOPING.md`). Tests that look at the page's code read these sources through `tests/page_sources.py`.
 
+To see what a change does to the page itself, run the page check before and after it and compare the two runs; `tools/page_check/README.md` says how. It records every element of the main window in three languages, at a larger font size and in a narrow window, with made-up records, and after the usual actions (opening details, saving and reverting settings, dialogs).
+
 ## Conventions
 
 - Keep the window frame in `shared/frame/` and `shared/window-frame.js`; a route only adds what is its own.
