@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from memorive.models.provider_aliases import matches_result_model
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
 import importlib
@@ -44,6 +45,48 @@ from memorive.exams.card_distiller.policy import (
     _card_distiller_residual_materiality_projection,
     _distiller_call_bound,
 )
+
+
+@dataclass
+class _DistillerStage:
+    """One stage of the card distiller exam while it runs (QualityCardDistillerExamExecutor._run_stage).
+
+    The stage's inputs and folder are set when it starts; _distiller_stage_responses asks the model under
+    test for forms A and B; when items are wrong, _repair_distiller_stage runs the repair rounds and
+    fixes the final scores; _distiller_stage_result scores what is left and writes the stage result."""
+
+    # The stage as asked for.
+    target: Mapping[str, Any]
+    modules: Mapping[str, Any]
+    run_id: str
+    stage_name: str
+    forms: Mapping[str, Mapping[str, Any]]
+    golds: Mapping[str, Mapping[str, Any]]
+    budget_cap_cny: float
+    state: dict[str, Any]
+    structured_chat: Callable[..., Mapping[str, Any]]
+    fact_shard_size: int
+    projection_shard_size: int
+    protocol: Any
+    repair: Any
+    stage_root: Path
+    stage_cost_before: float
+    schemas_by_form: dict[str, Any]
+    full_schema: Any
+    repair_score_kwargs: dict[str, Any]
+    # Replies and scores of forms A and B.
+    responses: dict[str, dict[str, Any]] = field(default_factory=dict)
+    candidate_output_metrics_by_form: dict[str, dict[str, Any]] = field(default_factory=dict)
+    initial_scores: Any = None
+    first_pass_role_ability_score: float = 0.0
+    final_scores: Any = None
+    # The repair rounds and the stage's score.
+    failed_exam_item_count: int = 0
+    repair_rounds: int = 0
+    repair_lifecycle: list[dict[str, Any]] = field(default_factory=list)
+    cumulative_penalty: dict[str, Any] | None = None
+    score: float = 0.0
+    verdict: str = ""
 
 
 class QualityCardDistillerExamExecutor:
@@ -1283,53 +1326,100 @@ class QualityCardDistillerExamExecutor:
         full_schema = schemas_by_form["A"]
         repair_score_kwargs = ({} if schemas_by_form["A"] == schemas_by_form["B"]
                                else {"schemas_by_form": schemas_by_form})
-        responses: dict[str, dict[str, Any]] = {}
-        candidate_output_metrics_by_form: dict[str, dict[str, Any]] = {}
+        stage = _DistillerStage(
+            target=target, modules=modules, run_id=run_id, stage_name=stage_name, forms=forms,
+            golds=golds, budget_cap_cny=budget_cap_cny, state=state, structured_chat=structured_chat,
+            fact_shard_size=fact_shard_size, projection_shard_size=projection_shard_size,
+            protocol=protocol, repair=repair, stage_root=stage_root,
+            stage_cost_before=stage_cost_before, schemas_by_form=schemas_by_form,
+            full_schema=full_schema, repair_score_kwargs=repair_score_kwargs,
+        )
+        self._distiller_stage_responses(stage)
+        _write_json_create_only(stage.stage_root / "responses_frozen.json", stage.responses)
+
+        stage.initial_scores = {
+            slot: stage.protocol.score_response(
+                deepcopy(stage.responses[slot]),
+                deepcopy(dict(stage.forms[slot])),
+                deepcopy(dict(stage.golds[slot])),
+                deepcopy(stage.schemas_by_form[slot]),
+            )
+            for slot in ("A", "B")
+        }
+        initial_dual = stage.protocol.aggregate_dual_form(
+            stage.initial_scores["A"], stage.initial_scores["B"]
+        )
+        stage.first_pass_role_ability_score = float(initial_dual["mean"])
+        stage.final_scores = deepcopy(stage.initial_scores)
+        wrong_count = sum(
+            int(score["critical_count"]) + int(score["major_count"])
+            for score in stage.initial_scores.values()
+        )
+        stage.failed_exam_item_count = 0
+        stage.repair_rounds = 0
+        stage.repair_lifecycle = []
+        stage.cumulative_penalty = None
+        if wrong_count:
+            self._repair_distiller_stage(stage)
+        else:
+            dual = stage.protocol.aggregate_dual_form(
+                stage.initial_scores["A"], stage.initial_scores["B"]
+            )
+            stage.score = float(dual["mean"])
+            stage.verdict = (
+                "PASS"
+                if dual["quality_hard_gate"] == "PASS" and stage.score >= PASSING_SCORE
+                else "FAIL"
+            )
+        return self._distiller_stage_result(stage)
+
+    def _distiller_stage_responses(self, stage: _DistillerStage) -> None:
+        """Ask the model under test for forms A and B, shard by shard, and keep each reply."""
         for slot in ("A", "B"):
-            form = forms[slot]
-            form_schema = schemas_by_form[slot]
+            form = stage.forms[slot]
+            form_schema = stage.schemas_by_form[slot]
             fact_ids = [str(row["case_id"]) for row in form["cases"]]
             pack_ids = [str(row["pack_id"]) for row in form["packs"]]
             facts: list[dict[str, Any]] = []
             projections: list[dict[str, Any]] = []
-            for start in range(0, len(fact_ids), fact_shard_size):
-                target_ids = fact_ids[start : start + fact_shard_size]
-                schema = protocol.artifact_schema(
+            for start in range(0, len(fact_ids), stage.fact_shard_size):
+                target_ids = fact_ids[start : start + stage.fact_shard_size]
+                schema = stage.protocol.artifact_schema(
                     form_schema, "fact_map", target_count=len(target_ids)
                 )
                 shard = self._run_shard(
-                    modules=modules,
-                    run_id=run_id,
-                    stage_root=stage_root,
-                    state=state,
-                    target=target,
+                    modules=stage.modules,
+                    run_id=stage.run_id,
+                    stage_root=stage.stage_root,
+                    state=stage.state,
+                    target=stage.target,
                     form=form,
                     artifact="fact_map",
                     target_ids=target_ids,
                     schema=schema,
-                    structured_chat=structured_chat,
+                    structured_chat=stage.structured_chat,
                 )
                 facts.extend(deepcopy(shard["fact_map"]))
-            for start in range(0, len(pack_ids), projection_shard_size):
-                target_ids = pack_ids[start : start + projection_shard_size]
-                schema = protocol.artifact_schema(
+            for start in range(0, len(pack_ids), stage.projection_shard_size):
+                target_ids = pack_ids[start : start + stage.projection_shard_size]
+                schema = stage.protocol.artifact_schema(
                     form_schema, "card_projection", target_count=len(target_ids)
                 )
                 shard = self._run_shard(
-                    modules=modules,
-                    run_id=run_id,
-                    stage_root=stage_root,
-                    state=state,
-                    target=target,
+                    modules=stage.modules,
+                    run_id=stage.run_id,
+                    stage_root=stage.stage_root,
+                    state=stage.state,
+                    target=stage.target,
                     form=form,
                     artifact="card_projection",
                     target_ids=target_ids,
                     schema=schema,
-                    structured_chat=structured_chat,
+                    structured_chat=stage.structured_chat,
                 )
                 projections.extend(deepcopy(shard["card_projection"]))
             response = {"fact_map": facts, "card_projection": projections}
-            protocol.validate_response_shape(
+            stage.protocol.validate_response_shape(
                 response, dict(form), deepcopy(form_schema)
             )
             output_metrics = _card_distiller_candidate_output_metrics(response)
@@ -1339,261 +1429,234 @@ class QualityCardDistillerExamExecutor:
             output_metrics["core_x2_reference_semantics"] = (
                 "DIAGNOSTIC_ONLY_NOT_INVALIDATION_MODEL_FAIL_OR_REPAIR"
             )
-            candidate_output_metrics_by_form[slot] = output_metrics
-            responses[slot] = response
-        _write_json_create_only(stage_root / "responses_frozen.json", responses)
+            stage.candidate_output_metrics_by_form[slot] = output_metrics
+            stage.responses[slot] = response
 
-        initial_scores = {
-            slot: protocol.score_response(
-                deepcopy(responses[slot]),
-                deepcopy(dict(forms[slot])),
-                deepcopy(dict(golds[slot])),
-                deepcopy(schemas_by_form[slot]),
-            )
-            for slot in ("A", "B")
-        }
-        initial_dual = protocol.aggregate_dual_form(
-            initial_scores["A"], initial_scores["B"]
+    def _repair_distiller_stage(self, stage: _DistillerStage) -> None:
+        """Repair rounds for the wrong items: directed repair packages, the repaired replies and their
+        scores, the penalty and the final scores."""
+        current_responses = deepcopy(stage.responses)
+        current_scores = deepcopy(stage.initial_scores)
+        initial_contract: Mapping[str, Any] | None = None
+        first_round_exact_sets: dict[str, list[str]] | None = None
+        round_two_burden: dict[str, Any] | None = None
+        unchanged_surface_sha256 = _sha256(
+            {
+                "forms": stage.forms,
+                "golds_excluded": True,
+                "schema": stage.full_schema,
+                "category_id": self.EXAM_CATEGORY_ID,
+            }
         )
-        first_pass_role_ability_score = float(initial_dual["mean"])
-        final_scores = deepcopy(initial_scores)
-        wrong_count = sum(
-            int(score["critical_count"]) + int(score["major_count"])
-            for score in initial_scores.values()
-        )
-        failed_exam_item_count = 0
-        repair_rounds = 0
-        repair_lifecycle: list[dict[str, Any]] = []
-        cumulative_penalty: dict[str, Any] | None = None
-        if wrong_count:
-            current_responses = deepcopy(responses)
-            current_scores = deepcopy(initial_scores)
-            initial_contract: Mapping[str, Any] | None = None
-            first_round_exact_sets: dict[str, list[str]] | None = None
-            round_two_burden: dict[str, Any] | None = None
-            unchanged_surface_sha256 = _sha256(
-                {
-                    "forms": forms,
-                    "golds_excluded": True,
-                    "schema": full_schema,
-                    "category_id": self.EXAM_CATEGORY_ID,
-                }
-            )
-            for round_number in range(
-                1, self.SEMANTIC_REPAIR_ROUND_LIMIT + 1
-            ):
-                source_scores = deepcopy(current_scores)
-                if round_number == 2:
-                    assert first_round_exact_sets is not None
-                    for form_id in ("A", "B"):
-                        allowed = set(first_round_exact_sets[form_id])
-                        source_scores[form_id]["details"] = [
-                            deepcopy(detail)
-                            for detail in source_scores[form_id].get(
-                                "details", []
-                            )
-                            if isinstance(detail, Mapping)
-                            and detail.get("case_id") in allowed
-                            and (
-                                detail.get("critical_reasons")
-                                or detail.get("major_reasons")
-                            )
-                        ]
-                    if not any(
-                        source_scores[form_id]["details"]
-                        for form_id in ("A", "B")
-                    ):
-                        break
-                package = repair.build_exam_directed_repair_package(
-                    forms=forms,
-                    original_responses=current_responses,
-                    original_scores=source_scores,
-                    schema=full_schema,
-                )
-                exact_sets = {
-                    form_id: list(case_ids)
-                    for form_id, case_ids in package["contract"][
-                        "wrong_item_exact_set"
-                    ].items()
-                }
-                if first_round_exact_sets is None:
-                    first_round_exact_sets = deepcopy(exact_sets)
-                    initial_contract = deepcopy(package["contract"])
-                lifecycle = build_repair_round(
-                    round_number=round_number,
-                    category_id=self.EXAM_CATEGORY_ID,
-                    targets_by_form=exact_sets,
-                    prior_targets_by_form=(
-                        first_round_exact_sets
-                        if round_number == 2
-                        else None
-                    ),
-                    prompt_projection=json.loads(package["prompt"]),
-                    unchanged_surface_sha256=unchanged_surface_sha256,
-                )
-                repair_response = self._run_exam_directed_repair(
-                    run_id=run_id,
-                    stage_root=stage_root,
-                    state=state,
-                    target=target,
-                    package=package,
-                    structured_chat=structured_chat,
-                    call_kind=(
-                        f"WHOLE_EXAM_DIRECTED_REPAIR_ROUND_{round_number}"
-                    ),
-                )
-                merge = repair.merge_exam_directed_repair(
-                    forms=forms,
-                    original_responses=current_responses,
-                    repair_response=repair_response,
-                    schema=full_schema,
-                    repair_contract=package["contract"],
-                )
-                current_responses = deepcopy(merge["responses"])
-                current_scores = {
-                    form_id: protocol.score_response(
-                        deepcopy(current_responses[form_id]),
-                        deepcopy(dict(forms[form_id])),
-                        deepcopy(dict(golds[form_id])),
-                        deepcopy(schemas_by_form[form_id]),
-                    )
+        for round_number in range(
+            1, self.SEMANTIC_REPAIR_ROUND_LIMIT + 1
+        ):
+            source_scores = deepcopy(current_scores)
+            if round_number == 2:
+                assert first_round_exact_sets is not None
+                for form_id in ("A", "B"):
+                    allowed = set(first_round_exact_sets[form_id])
+                    source_scores[form_id]["details"] = [
+                        deepcopy(detail)
+                        for detail in source_scores[form_id].get(
+                            "details", []
+                        )
+                        if isinstance(detail, Mapping)
+                        and detail.get("case_id") in allowed
+                        and (
+                            detail.get("critical_reasons")
+                            or detail.get("major_reasons")
+                        )
+                    ]
+                if not any(
+                    source_scores[form_id]["details"]
                     for form_id in ("A", "B")
-                }
-                if round_number == 2:
-                    second = repair.score_exam_after_directed_repair(
-                        forms=forms,
-                        golds=golds,
-                        original_scores=source_scores,
-                        merged_responses=current_responses,
-                        schema=full_schema,
-                        repair_contract=package["contract"],
-                        **repair_score_kwargs,
-                    )
-                    round_two_burden = {
-                        "by_form": {
-                            form_id: {
-                                "nonlinear_category_penalty": float(
-                                    second["repair_penalty"][
-                                        "initial_burden_by_form"
-                                    ][form_id]["total"]
-                                ),
-                                "fixed_penalty": 0.0,
-                                "volume_penalty": float(
-                                    second["repair_penalty"][
-                                        "initial_burden_by_form"
-                                    ][form_id]["wrong_item_volume"]
-                                ),
-                            }
-                            for form_id in ("A", "B")
-                        }
-                    }
-                repair_lifecycle.append(lifecycle)
-                if not sum(
-                    int(score["critical_count"])
-                    + int(score["major_count"])
-                    for score in current_scores.values()
                 ):
                     break
-            assert initial_contract is not None
-            final = repair.score_exam_after_directed_repair(
-                forms=forms,
-                golds=golds,
-                original_scores=initial_scores,
-                merged_responses=current_responses,
-                schema=full_schema,
-                repair_contract=initial_contract,
-                **repair_score_kwargs,
+            package = stage.repair.build_exam_directed_repair_package(
+                forms=stage.forms,
+                original_responses=current_responses,
+                original_scores=source_scores,
+                schema=stage.full_schema,
             )
-            penalty_rounds = [
-                {
-                    "round_number": 1,
-                    "category_id": self.EXAM_CATEGORY_ID,
-                    "nonlinear_category_penalty": float(
-                        final["repair_penalty"][
-                            "initial_burden_total_mean"
-                        ]
-                    ),
-                    "fixed_penalty": 0.0,
-                    "volume_penalty": 0.0,
-                }
-            ]
-            if round_two_burden is not None:
-                second_by_form = round_two_burden["by_form"]
-                for form_id in ("A", "B"):
-                    extra = sum(
-                        float(second_by_form[form_id][field])
-                        for field in (
-                            "nonlinear_category_penalty",
-                            "fixed_penalty",
-                            "volume_penalty",
-                        )
-                    )
-                    adjusted = max(
-                        0.0,
-                        float(final["final_form_scores"][form_id]) - extra,
-                    )
-                    final["final_form_scores"][form_id] = round(
-                        adjusted, 2
-                    )
-                    final["forms"][form_id][
-                        "round_two_additional_burden"
-                    ] = deepcopy(second_by_form[form_id])
-                    final["forms"][form_id]["final_form_score"] = round(
-                        adjusted, 2
-                    )
-                final["final_score"] = round(
-                    sum(final["final_form_scores"].values()) / 2.0, 2
+            exact_sets = {
+                form_id: list(case_ids)
+                for form_id, case_ids in package["contract"][
+                    "wrong_item_exact_set"
+                ].items()
+            }
+            if first_round_exact_sets is None:
+                first_round_exact_sets = deepcopy(exact_sets)
+                initial_contract = deepcopy(package["contract"])
+            lifecycle = build_repair_round(
+                round_number=round_number,
+                category_id=self.EXAM_CATEGORY_ID,
+                targets_by_form=exact_sets,
+                prior_targets_by_form=(
+                    first_round_exact_sets
+                    if round_number == 2
+                    else None
+                ),
+                prompt_projection=json.loads(package["prompt"]),
+                unchanged_surface_sha256=unchanged_surface_sha256,
+            )
+            repair_response = self._run_exam_directed_repair(
+                run_id=stage.run_id,
+                stage_root=stage.stage_root,
+                state=stage.state,
+                target=stage.target,
+                package=package,
+                structured_chat=stage.structured_chat,
+                call_kind=(
+                    f"WHOLE_EXAM_DIRECTED_REPAIR_ROUND_{round_number}"
+                ),
+            )
+            merge = stage.repair.merge_exam_directed_repair(
+                forms=stage.forms,
+                original_responses=current_responses,
+                repair_response=repair_response,
+                schema=stage.full_schema,
+                repair_contract=package["contract"],
+            )
+            current_responses = deepcopy(merge["responses"])
+            current_scores = {
+                form_id: stage.protocol.score_response(
+                    deepcopy(current_responses[form_id]),
+                    deepcopy(dict(stage.forms[form_id])),
+                    deepcopy(dict(stage.golds[form_id])),
+                    deepcopy(stage.schemas_by_form[form_id]),
                 )
-                penalty_rounds.append(
-                    {
-                        "round_number": 2,
-                        "category_id": self.EXAM_CATEGORY_ID,
-                        "nonlinear_category_penalty": sum(
-                            float(row["nonlinear_category_penalty"])
-                            for row in second_by_form.values()
-                        )
-                        / 2.0,
-                        "fixed_penalty": sum(
-                            float(row["fixed_penalty"])
-                            for row in second_by_form.values()
-                        )
-                        / 2.0,
-                        "volume_penalty": sum(
-                            float(row["volume_penalty"])
-                            for row in second_by_form.values()
-                        )
-                        / 2.0,
+                for form_id in ("A", "B")
+            }
+            if round_number == 2:
+                second = stage.repair.score_exam_after_directed_repair(
+                    forms=stage.forms,
+                    golds=stage.golds,
+                    original_scores=source_scores,
+                    merged_responses=current_responses,
+                    schema=stage.full_schema,
+                    repair_contract=package["contract"],
+                    **stage.repair_score_kwargs,
+                )
+                round_two_burden = {
+                    "by_form": {
+                        form_id: {
+                            "nonlinear_category_penalty": float(
+                                second["repair_penalty"][
+                                    "initial_burden_by_form"
+                                ][form_id]["total"]
+                            ),
+                            "fixed_penalty": 0.0,
+                            "volume_penalty": float(
+                                second["repair_penalty"][
+                                    "initial_burden_by_form"
+                                ][form_id]["wrong_item_volume"]
+                            ),
+                        }
+                        for form_id in ("A", "B")
                     }
+                }
+            stage.repair_lifecycle.append(lifecycle)
+            if not sum(
+                int(score["critical_count"])
+                + int(score["major_count"])
+                for score in current_scores.values()
+            ):
+                break
+        assert initial_contract is not None
+        final = stage.repair.score_exam_after_directed_repair(
+            forms=stage.forms,
+            golds=stage.golds,
+            original_scores=stage.initial_scores,
+            merged_responses=current_responses,
+            schema=stage.full_schema,
+            repair_contract=initial_contract,
+            **stage.repair_score_kwargs,
+        )
+        penalty_rounds = [
+            {
+                "round_number": 1,
+                "category_id": self.EXAM_CATEGORY_ID,
+                "nonlinear_category_penalty": float(
+                    final["repair_penalty"][
+                        "initial_burden_total_mean"
+                    ]
+                ),
+                "fixed_penalty": 0.0,
+                "volume_penalty": 0.0,
+            }
+        ]
+        if round_two_burden is not None:
+            second_by_form = round_two_burden["by_form"]
+            for form_id in ("A", "B"):
+                extra = sum(
+                    float(second_by_form[form_id][field])
+                    for field in (
+                        "nonlinear_category_penalty",
+                        "fixed_penalty",
+                        "volume_penalty",
+                    )
                 )
-            cumulative_penalty = cumulative_category_repair_penalty(
-                penalty_rounds
+                adjusted = max(
+                    0.0,
+                    float(final["final_form_scores"][form_id]) - extra,
+                )
+                final["final_form_scores"][form_id] = round(
+                    adjusted, 2
+                )
+                final["forms"][form_id][
+                    "round_two_additional_burden"
+                ] = deepcopy(second_by_form[form_id])
+                final["forms"][form_id]["final_form_score"] = round(
+                    adjusted, 2
+                )
+            final["final_score"] = round(
+                sum(final["final_form_scores"].values()) / 2.0, 2
             )
-            score = float(final["final_score"])
-            verdict = (
-                "PASS"
-                if final["quality_hard_gate"] == "PASS"
-                and score >= PASSING_SCORE
-                else "FAIL"
+            penalty_rounds.append(
+                {
+                    "round_number": 2,
+                    "category_id": self.EXAM_CATEGORY_ID,
+                    "nonlinear_category_penalty": sum(
+                        float(row["nonlinear_category_penalty"])
+                        for row in second_by_form.values()
+                    )
+                    / 2.0,
+                    "fixed_penalty": sum(
+                        float(row["fixed_penalty"])
+                        for row in second_by_form.values()
+                    )
+                    / 2.0,
+                    "volume_penalty": sum(
+                        float(row["volume_penalty"])
+                        for row in second_by_form.values()
+                    )
+                    / 2.0,
+                }
             )
-            failed_exam_item_count = int(final["failed_exam_item_count"])
-            repair_rounds = len(repair_lifecycle)
-            final_scores = deepcopy(current_scores)
-        else:
-            dual = protocol.aggregate_dual_form(
-                initial_scores["A"], initial_scores["B"]
-            )
-            score = float(dual["mean"])
-            verdict = (
-                "PASS"
-                if dual["quality_hard_gate"] == "PASS" and score >= PASSING_SCORE
-                else "FAIL"
-            )
+        stage.cumulative_penalty = cumulative_category_repair_penalty(
+            penalty_rounds
+        )
+        stage.score = float(final["final_score"])
+        stage.verdict = (
+            "PASS"
+            if final["quality_hard_gate"] == "PASS"
+            and stage.score >= PASSING_SCORE
+            else "FAIL"
+        )
+        stage.failed_exam_item_count = int(final["failed_exam_item_count"])
+        stage.repair_rounds = len(stage.repair_lifecycle)
+        stage.final_scores = deepcopy(current_scores)
+
+    def _distiller_stage_result(self, stage: _DistillerStage) -> Any:
+        """Score what is left after the repairs, decide the blocking failures and the stage verdict, check
+        the stage's cost, and write and return the stage result."""
         score_projection = self._stage_score_projection(
-            protocol=protocol,
-            forms=forms,
-            initial_scores=initial_scores,
-            final_scores=final_scores,
-            repair_rounds=repair_rounds,
+            protocol=stage.protocol,
+            forms=stage.forms,
+            initial_scores=stage.initial_scores,
+            final_scores=stage.final_scores,
+            repair_rounds=stage.repair_rounds,
         )
         primary_case_ids: set[str] | None = None
         if score_projection:
@@ -1613,15 +1676,15 @@ class QualityCardDistillerExamExecutor:
                 and projected_ids
                 and all(isinstance(value, str) and value for value in projected_ids)
             ):
-                score = float(projected_score)
-                first_pass_role_ability_score = float(projected_first_pass)
-                verdict = str(projected_verdict)
+                stage.score = float(projected_score)
+                stage.first_pass_role_ability_score = float(projected_first_pass)
+                stage.verdict = str(projected_verdict)
                 primary_case_ids = set(projected_ids)
             else:
                 raise ValueError("CARD_DISTILLER_STAGE_SCORE_PROJECTION_INVALID")
         blocking_failures: list[dict[str, Any]] = []
         for form_id in ("A", "B"):
-            for detail in final_scores[form_id].get("details", []):
+            for detail in stage.final_scores[form_id].get("details", []):
                 if not isinstance(detail, Mapping):
                     continue
                 if (
@@ -1643,14 +1706,14 @@ class QualityCardDistillerExamExecutor:
                             "case_id": str(detail.get("case_id") or f"{form_id}-UNKNOWN"),
                             "failed_fields": failed_fields,
                             "evidence_anchor": (
-                                f"{stage_name}/scores/form_{form_id}/"
+                                f"{stage.stage_name}/scores/form_{form_id}/"
                                 f"case_details/{detail.get('case_id')}"
                             ),
                             "blocking": True,
                         }
                     )
         if (
-            verdict == "FAIL"
+            stage.verdict == "FAIL"
             and not blocking_failures
             and primary_case_ids is None
         ):
@@ -1658,48 +1721,48 @@ class QualityCardDistillerExamExecutor:
                 {
                     "case_id": "CARD_DISTILLER_AGGREGATE",
                     "failed_fields": ["aggregate_score_or_repair_burden"],
-                    "evidence_anchor": f"{stage_name}/stage_result/aggregate",
+                    "evidence_anchor": f"{stage.stage_name}/stage_result/aggregate",
                     "blocking": True,
                 }
             )
         residual_materiality = (
             _card_distiller_residual_materiality_projection(
                 blocking_failures=blocking_failures,
-                golds=golds,
+                golds=stage.golds,
             )
         )
         blocking_failures = residual_materiality["blocking_failures"]
         model_fail_projection = _primary_model_fail_projection(
             category_id=self.EXAM_CATEGORY_ID,
-            score=score,
-            raw_quality_verdict=verdict,
+            score=stage.score,
+            raw_quality_verdict=stage.verdict,
             blocking_failures=blocking_failures,
             guarded_operational_verdict=(
                 "SUITABLE_WITH_CARD_REVIEWER_AND_GOVERNED_DISPOSITION"
             ),
         )
         repair_cycle_closed = (
-            repair_rounds == self.SEMANTIC_REPAIR_ROUND_LIMIT
-            or failed_exam_item_count == 0
+            stage.repair_rounds == self.SEMANTIC_REPAIR_ROUND_LIMIT
+            or stage.failed_exam_item_count == 0
         )
-        stage_cost = round(state["estimated_cost_cny"] - stage_cost_before, 9)
-        if stage_cost > budget_cap_cny:
+        stage_cost = round(stage.state["estimated_cost_cny"] - stage.stage_cost_before, 9)
+        if stage_cost > stage.budget_cap_cny:
             raise ValueError("WORKFLOW_MODEL_EXAM_STAGE_COST_CAP_EXCEEDED")
         stage_result = {
             "schema_version": "WorkflowModelExamStageResult-v1",
-            "stage": stage_name,
+            "stage": stage.stage_name,
             "chain_status": "PASS",
-            "quality_verdict": verdict,
-            "score": round(score, 2),
+            "quality_verdict": stage.verdict,
+            "score": round(stage.score, 2),
             "first_pass_role_ability_score": round(
-                first_pass_role_ability_score, 2
+                stage.first_pass_role_ability_score, 2
             ),
-            "post_repair_score": round(score, 2),
-            "failed_exam_item_count": failed_exam_item_count,
-            "repair_rounds": repair_rounds,
+            "post_repair_score": round(stage.score, 2),
+            "failed_exam_item_count": stage.failed_exam_item_count,
+            "repair_rounds": stage.repair_rounds,
             "semantic_repair_round_limit": self.SEMANTIC_REPAIR_ROUND_LIMIT,
-            "semantic_repair_lifecycle": repair_lifecycle,
-            "cumulative_category_repair_penalty": cumulative_penalty,
+            "semantic_repair_lifecycle": stage.repair_lifecycle,
+            "cumulative_category_repair_penalty": stage.cumulative_penalty,
             "blocking_failures": blocking_failures,
             **model_fail_projection,
             "residual_materiality_policy_revision": residual_materiality[
@@ -1711,16 +1774,16 @@ class QualityCardDistillerExamExecutor:
             "quality_raw_score_and_verdict_preserved": True,
             "repair_cycle_closed": repair_cycle_closed,
             "input_exact_set_sha256": _sha256(
-                {"forms": forms, "schema": full_schema}
+                {"forms": stage.forms, "schema": stage.full_schema}
             ),
             "transport_retry_is_semantic_repair": False,
-            "provider_calls": state["stage_calls"],
+            "provider_calls": stage.state["stage_calls"],
             "estimated_cost_cny": stage_cost,
-            "budget_cap_cny": budget_cap_cny,
+            "budget_cap_cny": stage.budget_cap_cny,
             "provider_received_answer_key": False,
-            "reference_regression_only": stage_name != "low_cost",
+            "reference_regression_only": stage.stage_name != "low_cost",
             "candidate_output_metrics_by_form": (
-                candidate_output_metrics_by_form
+                stage.candidate_output_metrics_by_form
             ),
             "candidate_output_capacity_limit_surface": (
                 "EACH_LOGICAL_ARTIFACT_PER_FORM_NOT_CUMULATIVE"
@@ -1740,7 +1803,7 @@ class QualityCardDistillerExamExecutor:
                 }
             },
         }
-        _write_json_create_only(stage_root / "stage_result.json", stage_result)
+        _write_json_create_only(stage.stage_root / "stage_result.json", stage_result)
         return stage_result
 
     def execute(

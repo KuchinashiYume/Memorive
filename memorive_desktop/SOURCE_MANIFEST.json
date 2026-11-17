@@ -3957,8 +3957,8 @@
     },
     {
       "path": "source/memorive/exams/card_distiller/executor.py",
-      "sha256": "91561e48eb6ea1936107d8a59dfe48ecb43da661746ecbd4e4baa59549ede615",
-      "bytes": 86347
+      "sha256": "2bd9fb8ca830ecd01bd9c2354f2bda67114a50242c190797c351840e039ef9c1",
+      "bytes": 89128
     },
     {
       "path": "source/memorive/exams/card_distiller/language_bank_executor.py",
