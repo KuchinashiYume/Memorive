@@ -16,7 +16,6 @@ from memorive.sessions.controller import SessionProductError, SessionsProductCon
 from memorive.desktop.api import ProductApi
 
 
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 
 
 class _HealthyService:

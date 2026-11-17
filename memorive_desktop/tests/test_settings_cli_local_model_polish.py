@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from page_sources import settings_scripts
 import json
 from pathlib import Path
 import sys
@@ -55,9 +56,7 @@ def _recognized_local_model(tmp_path: Path) -> tuple[LocalModelProductController
 
 
 def test_cli_save_retries_one_fresh_revision_without_losing_collected_draft() -> None:
-    bridge = (ATTEMPT_ROOT / "product" / "web" / "settings_bridge.js").read_text(
-        encoding="utf-8"
-    )
+    bridge = settings_scripts()
     save_block = bridge.split("const saveCliServices = async", 1)[1].split(
         "const save = async", 1
     )[0]
@@ -70,9 +69,7 @@ def test_cli_save_retries_one_fresh_revision_without_losing_collected_draft() ->
 
 
 def test_cli_validation_is_serialized_and_save_conflict_stays_not_run() -> None:
-    bridge = (ATTEMPT_ROOT / "product" / "web" / "settings_bridge.js").read_text(
-        encoding="utf-8"
-    )
+    bridge = settings_scripts()
     validation = bridge.split("const runCliValidation = async", 1)[1].split(
         "const runWorkflowNodeTest", 1
     )[0]

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
+from page_sources import settings_scripts
 from pathlib import Path
 import sys
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ATTEMPT_ROOT / "source"
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 
@@ -145,7 +145,7 @@ def test_validation_receipt_keeps_bounded_catalog_recovery_metadata() -> None:
 
 
 def test_api_validation_ui_offers_the_live_catalog_model_without_guessing_pass() -> None:
-    bridge = (WEB_ROOT / "settings_bridge.js").read_text(encoding="utf-8")
+    bridge = settings_scripts()
 
     assert "renderApiValidationReceipt" in bridge
     assert "receipt.available_models" in bridge

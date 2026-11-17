@@ -7,7 +7,6 @@ from typing import Any, Mapping
 
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 SOURCE_ROOT = ATTEMPT_ROOT / "source"
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))

@@ -1,5 +1,6 @@
 """Native capability routing only; all HTTP and vectors below are synthetic."""
 import json
+from page_sources import settings_scripts
 from pathlib import Path
 import re
 import shutil
@@ -47,7 +48,7 @@ def test_known_capabilities_are_not_inferred_from_multimodality(model, expected)
 
 def test_actual_browser_classifier_matches_backend_for_all_fixtures():
     # Evaluate the real shipped helper, not a separately maintained imitation.
-    source = (ROOT / "product/web/settings_bridge.js").read_text(encoding="utf-8")
+    source = settings_scripts()
     match = re.search(r"  const inferApiModelCapability = .*?\n  };", source, re.S)
     assert match
     script = match[0] + "\nprocess.stdout.write(JSON.stringify(" + json.dumps([r[0] for r in CASES]) + ".map(m=>inferApiModelCapability('siliconflow',m))));"

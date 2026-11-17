@@ -3,12 +3,13 @@
 No model is called.
 """
 from pathlib import Path
+from page_sources import settings_scripts
 
 ROOT=Path(__file__).resolve().parents[1]
 
 
 def test_exam_ui_has_no_native_confirmation_dialog():
-    source=(ROOT/'product/web/settings_bridge.js').read_text(encoding='utf-8')
+    source=settings_scripts()
     section=source.split('const runWorkflowNodeTest =')[1].split('const addCliModel =')[0]
     assert 'window.confirm(' not in section
 

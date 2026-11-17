@@ -8,7 +8,6 @@ from memorive.desktop.assistant.placement import WorkArea, clamp_placement
 
 ATTEMPT_ROOT = Path(__file__).resolve().parents[1]
 RUN_ROOT = ATTEMPT_ROOT.parents[1]
-WEB_ROOT = ATTEMPT_ROOT / "product" / "web"
 DESKTOP_ROOT = ATTEMPT_ROOT / "product" / "desktop"
 
 

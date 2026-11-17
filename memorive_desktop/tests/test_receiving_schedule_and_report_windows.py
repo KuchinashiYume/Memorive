@@ -10,7 +10,6 @@ from datetime import datetime,timezone
 
 ROOT=Path(__file__).resolve().parents[1]
 
-def web(name):return (ROOT/'product/web'/name).read_text(encoding='utf8')
 
 
 def _scheduler(root,config,requests):

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from page_sources import settings_scripts
 import json
 from pathlib import Path
 
@@ -76,8 +77,8 @@ def test_new_methods_are_in_all_packaged_bridge_allowlists():
     root = Path(__file__).resolve().parents[1]
     for method in ("settings.external_sources_get", "settings.external_sources_save", "settings.external_sources_refresh", "settings.external_model_reference"):
         assert method in SETTINGS_METHODS
-        for rel in ("product/web/settings_bridge.js", "source/memorive/desktop/api/common.py"):
-            assert method in (root / rel).read_text(encoding="utf-8")
+        assert method in settings_scripts()
+        assert method in (root / "source/memorive/desktop/api/common.py").read_text(encoding="utf-8")
 
 
 def test_os_lock_and_revision_protect_separate_controller_instances(tmp_path):
