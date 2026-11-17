@@ -156,6 +156,26 @@ class _AnalysisExamRun:
     completed_panel_records: Any = None
 
 
+@dataclass
+class _RepairForm:
+    """One form in a semantic repair round of the analysis exam
+    (QualityAnalysisExamExecutor._run_analysis_semantic_repair): its wrong cases by id with what the
+    model is told about each, the round's contracts and schema, and where its requests go."""
+
+    form_id: str
+    target_by_id: dict[str, Mapping[str, Any]]
+    contract: Mapping[str, Any]
+    lifecycle_contract: Mapping[str, Any]
+    repair_schema: Mapping[str, Any]
+    round_number: int
+    exam: Any
+    run_id: str
+    run_root: Path
+    state: dict[str, Any]
+    target: Mapping[str, Any]
+    structured_chat: Callable[..., Mapping[str, Any]]
+
+
 class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
     """Transport the frozen Quality analysis A/B exam through API/CLI/local."""
 
@@ -1513,6 +1533,9 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
         round_number: int,
         structured_chat: Callable[..., Mapping[str, Any]],
     ) -> dict[str, Any]:
+        """Ask the model under test to replace the wrong cases of forms A and B, in requests small
+        enough to send (_analysis_repair_chunks, _analysis_repair_chunk), and record each request in
+        the round's shards file. Returns the replacement rows by form."""
         contract = package.get("contract")
         repair_schema = package.get("repair_schema")
         repair_targets = package.get("repair_targets")
@@ -1545,378 +1568,29 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
             }
             if list(target_by_id) != case_ids:
                 raise ValueError("ANALYSIS_REPAIR_TARGET_ORDER_INVALID")
-
-            def request_for(
-                selected_ids: list[str],
-                *,
-                chunk_index: int,
-                chunk_count: int,
-            ) -> tuple[dict[str, Any], dict[str, Any]]:
-                selected_schema = self._project_analysis_repair_schema(
-                    repair_schema,
-                    form_id=form_id,
-                    case_ids=selected_ids,
-                )
-                selected_request = {
-                    "phase": "ANALYSIS_EXAM_DIRECTED_REPAIR",
-                    "semantic_repair_round": round_number,
-                    "instruction": (
-                        "Replace all and only the listed synthetic analysis "
-                        "cases. Return complete claim_map and analysis_summary "
-                        "rows for each listed case exactly once and no other "
-                        "case. Use source_case as the only source of truth, "
-                        "current_rows as the starting point, and correct every "
-                        "listed issue_code and failed_output_field. The JSON "
-                        "Schema is supplied once by the structured transport."
-                    ),
-                    "wrong_item_exact_set": {form_id: list(selected_ids)},
-                    "repair_targets": {
-                        form_id: [
-                            deepcopy(dict(target_by_id[case_id]))
-                            for case_id in selected_ids
-                        ]
-                    },
-                    "parent_contract_sha256": contract.get(
-                        "contract_sha256"
-                    ),
-                    "successor_lifecycle_sha256": lifecycle_contract.get(
-                        "contract_sha256"
-                    ),
-                    "transport_shard": {
-                        "form_id": form_id,
-                        "chunk_index": chunk_index,
-                        "chunk_count": chunk_count,
-                        "case_ids_sha256": _sha256(selected_ids),
-                    },
-                }
-                return selected_request, selected_schema
-
-            chunks: list[list[str]] = []
-            current: list[str] = []
-            for case_id in case_ids:
-                candidate = [*current, case_id]
-                candidate_request, candidate_schema = request_for(
-                    candidate,
-                    chunk_index=99,
-                    chunk_count=99,
-                )
-                metrics = _effective_structured_prompt_metrics(
-                    _serialized_request(
-                        self._subject_request_projection(
-                            target, candidate_request
-                        )
-                    ),
-                    candidate_schema,
-                )
-                if (
-                    current
-                    and metrics["effective_prompt_chars"]
-                    > Core_PRIMARY_ANALYSIS_PROMPT_CHAR_SURROGATE_LIMIT
-                ):
-                    chunks.append(current)
-                    current = [case_id]
-                else:
-                    current = candidate
-            if current:
-                chunks.append(current)
+            form = _RepairForm(
+                form_id=form_id,
+                target_by_id=target_by_id,
+                contract=contract,
+                lifecycle_contract=lifecycle_contract,
+                repair_schema=repair_schema,
+                round_number=round_number,
+                exam=exam,
+                run_id=run_id,
+                run_root=run_root,
+                state=state,
+                target=target,
+                structured_chat=structured_chat,
+            )
+            chunks = self._analysis_repair_chunks(form, case_ids)
             form_rows = {"claim_map": [], "analysis_summary": []}
             for chunk_index, chunk_ids in enumerate(chunks, start=1):
-                request, chunk_schema = request_for(
-                    chunk_ids,
-                    chunk_index=chunk_index,
-                    chunk_count=len(chunks),
+                rows_by_artifact, receipt = self._analysis_repair_chunk(
+                    form, chunk_ids, chunk_index, len(chunks)
                 )
-                prompt_metrics = _effective_structured_prompt_metrics(
-                    _serialized_request(
-                        self._subject_request_projection(target, request)
-                    ),
-                    chunk_schema,
-                )
-                response = self._stable_provider_call(
-                    run_id=run_id,
-                    run_root=run_root,
-                    state=state,
-                    target=target,
-                    request=request,
-                    response_schema=chunk_schema,
-                    structured_chat=structured_chat,
-                    call_kind=(
-                        f"ANALYSIS_SEMANTIC_REPAIR_ROUND_{round_number}_"
-                        f"FORM_{form_id}_CHUNK_{chunk_index}_OF_{len(chunks)}"
-                    ),
-                )
-                response_form = response.get(f"form_{form_id}")
-                if not isinstance(response_form, Mapping):
-                    raise ValueError("ANALYSIS_REPAIR_SHARD_RESPONSE_INVALID")
-                source_cases = [
-                    target_by_id[case_id].get("source_case")
-                    for case_id in chunk_ids
-                ]
-                if not all(isinstance(case, Mapping) for case in source_cases):
-                    raise ValueError("ANALYSIS_REPAIR_SOURCE_CASE_MISSING")
-                normalization = self._normalize_case_local_anchor_aliases(
-                    form={"cases": source_cases},
-                    response=response_form,
-                    artifact="claim_map",
-                )
-                response_form = normalization["normalized_response"]
-                state["analysis_anchor_normalizations"].extend(
-                    {
-                        "form_id": form_id,
-                        "artifact": "claim_map",
-                        "transport_stage": (
-                            f"SEMANTIC_REPAIR_ROUND_{round_number}"
-                        ),
-                        "shard_index": chunk_index,
-                        **deepcopy(action),
-                    }
-                    for action in normalization["actions"]
-                )
-
-                subset_form = {
-                    "form": form_id,
-                    "cases": deepcopy(source_cases),
-                }
-
-                def audit_candidate(
-                    candidate: Mapping[str, Any],
-                ) -> dict[str, dict[str, Any]]:
-                    try:
-                        form_schema = chunk_schema["properties"][
-                            f"form_{form_id}"
-                        ]
-                        artifact_properties = form_schema["properties"]
-                    except (KeyError, TypeError) as error:
-                        raise ValueError(
-                            "ANALYSIS_REPAIR_SHARD_SCHEMA_INVALID"
-                        ) from error
-                    result: dict[str, dict[str, Any]] = {}
-                    for artifact in ("claim_map", "analysis_summary"):
-                        artifact_schema = {
-                            "type": "object",
-                            "additionalProperties": False,
-                            "required": [artifact],
-                            "properties": {
-                                artifact: deepcopy(
-                                    artifact_properties[artifact]
-                                )
-                            },
-                        }
-                        result[artifact] = exam.audit_analysis_artifact(
-                            form=subset_form,
-                            response={artifact: candidate.get(artifact)},
-                            schema=artifact_schema,
-                            artifact=artifact,
-                        )
-                    return result
-
-                audits = audit_candidate(response_form)
-                structural_retry_used = 0
-                structural_retry_prompt_metrics = None
-                if any(
-                    audit.get("status") != "PASS"
-                    for audit in audits.values()
-                ):
-                    residual_projections = {
-                        artifact: self._bounded_structural_residual_projection(
-                            audit
-                        )
-                        for artifact, audit in audits.items()
-                        if audit.get("status") != "PASS"
-                    }
-                    residual_id_set = {
-                        str(case_id)
-                        for projection in residual_projections.values()
-                        for case_id in projection["repair_exact_set"]
-                    }
-                    structural_ids = [
-                        case_id
-                        for case_id in chunk_ids
-                        if case_id in residual_id_set
-                    ]
-                    if not structural_ids:
-                        structural_ids = list(chunk_ids)
-                    structural_schema = self._project_analysis_repair_schema(
-                        repair_schema,
-                        form_id=form_id,
-                        case_ids=structural_ids,
-                    )
-                    structural_source_cases = [
-                        target_by_id[case_id]["source_case"]
-                        for case_id in structural_ids
-                    ]
-                    structural_current_response = {
-                        artifact: [
-                            deepcopy(row)
-                            for row in response_form.get(artifact, [])
-                            if isinstance(row, Mapping)
-                            and row.get("case_id") in structural_ids
-                        ]
-                        for artifact in ("claim_map", "analysis_summary")
-                    }
-                    structural_request = {
-                        "phase": (
-                            "ANALYSIS_SEMANTIC_REPAIR_SHARD_STRUCTURAL_REPAIR"
-                        ),
-                        "semantic_repair_round": round_number,
-                        "instruction": (
-                            "Repair all and only the listed residual rows from "
-                            "the current directed-repair response. Preserve "
-                            "its semantic decisions unless a listed structural "
-                            "defect requires change. Return complete claim_map "
-                            "and analysis_summary rows exactly once in the "
-                            "listed order. Use source_cases only to resolve "
-                            "anchor identity or role conflicts."
-                        ),
-                        "residual_exact_set": {
-                            form_id: list(structural_ids)
-                        },
-                        "residual_projections": residual_projections,
-                        "source_cases": {
-                            form_id: deepcopy(structural_source_cases)
-                        },
-                        "current_response": {
-                            f"form_{form_id}": structural_current_response
-                        },
-                        "parent_contract_sha256": contract.get(
-                            "contract_sha256"
-                        ),
-                        "successor_lifecycle_sha256": (
-                            lifecycle_contract.get("contract_sha256")
-                        ),
-                        "semantic_repair_round_increment": 0,
-                    }
-                    structural_retry_prompt_metrics = (
-                        _effective_structured_prompt_metrics(
-                            _serialized_request(
-                                self._subject_request_projection(
-                                    target, structural_request
-                                )
-                            ),
-                            structural_schema,
-                        )
-                    )
-                    structural_response = self._stable_provider_call(
-                        run_id=run_id,
-                        run_root=run_root,
-                        state=state,
-                        target=target,
-                        request=structural_request,
-                        response_schema=structural_schema,
-                        structured_chat=structured_chat,
-                        call_kind=(
-                            f"ANALYSIS_SEMANTIC_REPAIR_ROUND_{round_number}_"
-                            f"FORM_{form_id}_CHUNK_{chunk_index}_STRUCTURAL_REPAIR"
-                        ),
-                    )
-                    structural_form = structural_response.get(
-                        f"form_{form_id}"
-                    )
-                    if not isinstance(structural_form, Mapping):
-                        raise ValueError(
-                            "ANALYSIS_REPAIR_SHARD_STRUCTURAL_RESPONSE_INVALID"
-                        )
-                    structural_normalization = (
-                        self._normalize_case_local_anchor_aliases(
-                            form={"cases": structural_source_cases},
-                            response=structural_form,
-                            artifact="claim_map",
-                        )
-                    )
-                    structural_form = structural_normalization[
-                        "normalized_response"
-                    ]
-                    state["analysis_anchor_normalizations"].extend(
-                        {
-                            "form_id": form_id,
-                            "artifact": "claim_map",
-                            "transport_stage": (
-                                f"SEMANTIC_REPAIR_ROUND_{round_number}_"
-                                "STRUCTURAL_REPAIR"
-                            ),
-                            "shard_index": chunk_index,
-                            **deepcopy(action),
-                        }
-                        for action in structural_normalization["actions"]
-                    )
-                    for artifact in ("claim_map", "analysis_summary"):
-                        replacement_rows = structural_form.get(artifact)
-                        observed_replacement_ids = [
-                            row.get("case_id")
-                            if isinstance(row, Mapping)
-                            else None
-                            for row in replacement_rows
-                        ] if isinstance(replacement_rows, list) else None
-                        if observed_replacement_ids != structural_ids:
-                            raise ValueError(
-                                "ANALYSIS_REPAIR_SHARD_STRUCTURAL_EXACT_SET_"
-                                "MISMATCH"
-                            )
-                        replacement_by_id = {
-                            str(row["case_id"]): deepcopy(row)
-                            for row in replacement_rows
-                        }
-                        response_form[artifact] = [
-                            replacement_by_id.get(
-                                str(row.get("case_id")), deepcopy(row)
-                            )
-                            for row in response_form.get(artifact, [])
-                            if isinstance(row, Mapping)
-                        ]
-                    structural_retry_used = 1
-                    state[
-                        "analysis_semantic_repair_structural_retries"
-                    ] += 1
-                    audits = audit_candidate(response_form)
-                if any(
-                    audit.get("status") != "PASS"
-                    for audit in audits.values()
-                ):
-                    raise ValueError(
-                        "ANALYSIS_REPAIR_SHARD_CONTRACT_UNCLOSED"
-                    )
-                for artifact in ("claim_map", "analysis_summary"):
-                    rows = response_form.get(artifact)
-                    observed = [
-                        row.get("case_id")
-                        if isinstance(row, Mapping)
-                        else None
-                        for row in rows
-                    ] if isinstance(rows, list) else None
-                    if observed != chunk_ids:
-                        raise ValueError(
-                            "ANALYSIS_REPAIR_SHARD_EXACT_SET_MISMATCH"
-                        )
-                    form_rows[artifact].extend(deepcopy(rows))
-                receipts.append(
-                    {
-                        "form_id": form_id,
-                        "chunk_index": chunk_index,
-                        "chunk_count": len(chunks),
-                        "case_ids": list(chunk_ids),
-                        "case_ids_sha256": _sha256(chunk_ids),
-                        "response_sha256": _sha256(response),
-                        "normalized_response_form_sha256": _sha256(
-                            response_form
-                        ),
-                        "effective_prompt_metrics": prompt_metrics,
-                        "artifact_audits": {
-                            artifact: {
-                                "status": audit.get("status"),
-                                "defect_count": audit.get("defect_count"),
-                                "repair_exact_set": audit.get(
-                                    "repair_exact_set"
-                                ),
-                                "audit_sha256": audit.get("audit_sha256"),
-                            }
-                            for artifact, audit in audits.items()
-                        },
-                        "structural_retry_used": structural_retry_used,
-                        "structural_retry_prompt_metrics": (
-                            structural_retry_prompt_metrics
-                        ),
-                    }
-                )
+                for artifact, rows in rows_by_artifact.items():
+                    form_rows[artifact].extend(rows)
+                receipts.append(receipt)
             merged[f"form_{form_id}"] = form_rows
         _write_json_create_only(
             run_root
@@ -1935,6 +1609,428 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
             },
         )
         return merged
+
+    def _analysis_repair_request(
+        self,
+        form: _RepairForm,
+        selected_ids: list[str],
+        *,
+        chunk_index: int,
+        chunk_count: int,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """The repair request for some of a form's wrong cases, and its reply schema."""
+        form_id = form.form_id
+        selected_schema = self._project_analysis_repair_schema(
+            form.repair_schema,
+            form_id=form_id,
+            case_ids=selected_ids,
+        )
+        selected_request = {
+            "phase": "ANALYSIS_EXAM_DIRECTED_REPAIR",
+            "semantic_repair_round": form.round_number,
+            "instruction": (
+                "Replace all and only the listed synthetic analysis "
+                "cases. Return complete claim_map and analysis_summary "
+                "rows for each listed case exactly once and no other "
+                "case. Use source_case as the only source of truth, "
+                "current_rows as the starting point, and correct every "
+                "listed issue_code and failed_output_field. The JSON "
+                "Schema is supplied once by the structured transport."
+            ),
+            "wrong_item_exact_set": {form_id: list(selected_ids)},
+            "repair_targets": {
+                form_id: [
+                    deepcopy(dict(form.target_by_id[case_id]))
+                    for case_id in selected_ids
+                ]
+            },
+            "parent_contract_sha256": form.contract.get(
+                "contract_sha256"
+            ),
+            "successor_lifecycle_sha256": form.lifecycle_contract.get(
+                "contract_sha256"
+            ),
+            "transport_shard": {
+                "form_id": form_id,
+                "chunk_index": chunk_index,
+                "chunk_count": chunk_count,
+                "case_ids_sha256": _sha256(selected_ids),
+            },
+        }
+        return selected_request, selected_schema
+
+    def _analysis_repair_chunks(
+        self,
+        form: _RepairForm,
+        case_ids: list[str],
+    ) -> list[list[str]]:
+        """The form's wrong cases in order, cut into runs whose request stays within the prompt limit
+        (a single case is never cut)."""
+        chunks: list[list[str]] = []
+        current: list[str] = []
+        for case_id in case_ids:
+            candidate = [*current, case_id]
+            candidate_request, candidate_schema = self._analysis_repair_request(
+                form,
+                candidate,
+                chunk_index=99,
+                chunk_count=99,
+            )
+            metrics = _effective_structured_prompt_metrics(
+                _serialized_request(
+                    self._subject_request_projection(
+                        form.target, candidate_request
+                    )
+                ),
+                candidate_schema,
+            )
+            if (
+                current
+                and metrics["effective_prompt_chars"]
+                > Core_PRIMARY_ANALYSIS_PROMPT_CHAR_SURROGATE_LIMIT
+            ):
+                chunks.append(current)
+                current = [case_id]
+            else:
+                current = candidate
+        if current:
+            chunks.append(current)
+        return chunks
+
+    def _analysis_repair_chunk(
+        self,
+        form: _RepairForm,
+        chunk_ids: list[str],
+        chunk_index: int,
+        chunk_count: int,
+    ) -> tuple[dict[str, list[Any]], dict[str, Any]]:
+        """One repair request: ask, expand case-local anchors, audit, retry the rows still wrong once
+        (_analysis_structural_retry), and require the exact cases in order. Returns the rows by
+        artifact and the request's record."""
+        form_id = form.form_id
+        round_number = form.round_number
+        state = form.state
+        request, chunk_schema = self._analysis_repair_request(
+            form,
+            chunk_ids,
+            chunk_index=chunk_index,
+            chunk_count=chunk_count,
+        )
+        prompt_metrics = _effective_structured_prompt_metrics(
+            _serialized_request(
+                self._subject_request_projection(form.target, request)
+            ),
+            chunk_schema,
+        )
+        response = self._stable_provider_call(
+            run_id=form.run_id,
+            run_root=form.run_root,
+            state=state,
+            target=form.target,
+            request=request,
+            response_schema=chunk_schema,
+            structured_chat=form.structured_chat,
+            call_kind=(
+                f"ANALYSIS_SEMANTIC_REPAIR_ROUND_{round_number}_"
+                f"FORM_{form_id}_CHUNK_{chunk_index}_OF_{chunk_count}"
+            ),
+        )
+        response_form = response.get(f"form_{form_id}")
+        if not isinstance(response_form, Mapping):
+            raise ValueError("ANALYSIS_REPAIR_SHARD_RESPONSE_INVALID")
+        source_cases = [
+            form.target_by_id[case_id].get("source_case")
+            for case_id in chunk_ids
+        ]
+        if not all(isinstance(case, Mapping) for case in source_cases):
+            raise ValueError("ANALYSIS_REPAIR_SOURCE_CASE_MISSING")
+        normalization = self._normalize_case_local_anchor_aliases(
+            form={"cases": source_cases},
+            response=response_form,
+            artifact="claim_map",
+        )
+        response_form = normalization["normalized_response"]
+        state["analysis_anchor_normalizations"].extend(
+            {
+                "form_id": form_id,
+                "artifact": "claim_map",
+                "transport_stage": (
+                    f"SEMANTIC_REPAIR_ROUND_{round_number}"
+                ),
+                "shard_index": chunk_index,
+                **deepcopy(action),
+            }
+            for action in normalization["actions"]
+        )
+
+        subset_form = {
+            "form": form_id,
+            "cases": deepcopy(source_cases),
+        }
+        audits = self._audit_analysis_repair_chunk(form, chunk_schema, subset_form, response_form)
+        structural_retry_used = 0
+        structural_retry_prompt_metrics = None
+        if any(
+            audit.get("status") != "PASS"
+            for audit in audits.values()
+        ):
+            structural_retry_prompt_metrics = self._analysis_structural_retry(
+                form, chunk_ids, chunk_index, response_form, audits
+            )
+            structural_retry_used = 1
+            state[
+                "analysis_semantic_repair_structural_retries"
+            ] += 1
+            audits = self._audit_analysis_repair_chunk(
+                form, chunk_schema, subset_form, response_form
+            )
+        if any(
+            audit.get("status") != "PASS"
+            for audit in audits.values()
+        ):
+            raise ValueError(
+                "ANALYSIS_REPAIR_SHARD_CONTRACT_UNCLOSED"
+            )
+        rows_by_artifact: dict[str, list[Any]] = {}
+        for artifact in ("claim_map", "analysis_summary"):
+            rows = response_form.get(artifact)
+            observed = [
+                row.get("case_id")
+                if isinstance(row, Mapping)
+                else None
+                for row in rows
+            ] if isinstance(rows, list) else None
+            if observed != chunk_ids:
+                raise ValueError(
+                    "ANALYSIS_REPAIR_SHARD_EXACT_SET_MISMATCH"
+                )
+            rows_by_artifact[artifact] = deepcopy(rows)
+        receipt = {
+            "form_id": form_id,
+            "chunk_index": chunk_index,
+            "chunk_count": chunk_count,
+            "case_ids": list(chunk_ids),
+            "case_ids_sha256": _sha256(chunk_ids),
+            "response_sha256": _sha256(response),
+            "normalized_response_form_sha256": _sha256(
+                response_form
+            ),
+            "effective_prompt_metrics": prompt_metrics,
+            "artifact_audits": {
+                artifact: {
+                    "status": audit.get("status"),
+                    "defect_count": audit.get("defect_count"),
+                    "repair_exact_set": audit.get(
+                        "repair_exact_set"
+                    ),
+                    "audit_sha256": audit.get("audit_sha256"),
+                }
+                for artifact, audit in audits.items()
+            },
+            "structural_retry_used": structural_retry_used,
+            "structural_retry_prompt_metrics": (
+                structural_retry_prompt_metrics
+            ),
+        }
+        return rows_by_artifact, receipt
+
+    @staticmethod
+    def _audit_analysis_repair_chunk(
+        form: _RepairForm,
+        chunk_schema: Mapping[str, Any],
+        subset_form: Mapping[str, Any],
+        candidate: Mapping[str, Any],
+    ) -> dict[str, dict[str, Any]]:
+        """The exam's audit of a repair reply, per artifact, against the request's own cases."""
+        try:
+            form_schema = chunk_schema["properties"][
+                f"form_{form.form_id}"
+            ]
+            artifact_properties = form_schema["properties"]
+        except (KeyError, TypeError) as error:
+            raise ValueError(
+                "ANALYSIS_REPAIR_SHARD_SCHEMA_INVALID"
+            ) from error
+        result: dict[str, dict[str, Any]] = {}
+        for artifact in ("claim_map", "analysis_summary"):
+            artifact_schema = {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [artifact],
+                "properties": {
+                    artifact: deepcopy(
+                        artifact_properties[artifact]
+                    )
+                },
+            }
+            result[artifact] = form.exam.audit_analysis_artifact(
+                form=subset_form,
+                response={artifact: candidate.get(artifact)},
+                schema=artifact_schema,
+                artifact=artifact,
+            )
+        return result
+
+    def _analysis_structural_retry(
+        self,
+        form: _RepairForm,
+        chunk_ids: list[str],
+        chunk_index: int,
+        response_form: dict[str, Any],
+        audits: Mapping[str, Mapping[str, Any]],
+    ) -> dict[str, Any]:
+        """Ask once more for the rows the audit still finds wrong (all of the request's rows when it
+        names none), with a compact view of what is wrong, and put the new rows into response_form.
+        Returns the retry's prompt metrics."""
+        form_id = form.form_id
+        round_number = form.round_number
+        residual_projections = {
+            artifact: self._bounded_structural_residual_projection(
+                audit
+            )
+            for artifact, audit in audits.items()
+            if audit.get("status") != "PASS"
+        }
+        residual_id_set = {
+            str(case_id)
+            for projection in residual_projections.values()
+            for case_id in projection["repair_exact_set"]
+        }
+        structural_ids = [
+            case_id
+            for case_id in chunk_ids
+            if case_id in residual_id_set
+        ]
+        if not structural_ids:
+            structural_ids = list(chunk_ids)
+        structural_schema = self._project_analysis_repair_schema(
+            form.repair_schema,
+            form_id=form_id,
+            case_ids=structural_ids,
+        )
+        structural_source_cases = [
+            form.target_by_id[case_id]["source_case"]
+            for case_id in structural_ids
+        ]
+        structural_current_response = {
+            artifact: [
+                deepcopy(row)
+                for row in response_form.get(artifact, [])
+                if isinstance(row, Mapping)
+                and row.get("case_id") in structural_ids
+            ]
+            for artifact in ("claim_map", "analysis_summary")
+        }
+        structural_request = {
+            "phase": (
+                "ANALYSIS_SEMANTIC_REPAIR_SHARD_STRUCTURAL_REPAIR"
+            ),
+            "semantic_repair_round": round_number,
+            "instruction": (
+                "Repair all and only the listed residual rows from "
+                "the current directed-repair response. Preserve "
+                "its semantic decisions unless a listed structural "
+                "defect requires change. Return complete claim_map "
+                "and analysis_summary rows exactly once in the "
+                "listed order. Use source_cases only to resolve "
+                "anchor identity or role conflicts."
+            ),
+            "residual_exact_set": {
+                form_id: list(structural_ids)
+            },
+            "residual_projections": residual_projections,
+            "source_cases": {
+                form_id: deepcopy(structural_source_cases)
+            },
+            "current_response": {
+                f"form_{form_id}": structural_current_response
+            },
+            "parent_contract_sha256": form.contract.get(
+                "contract_sha256"
+            ),
+            "successor_lifecycle_sha256": (
+                form.lifecycle_contract.get("contract_sha256")
+            ),
+            "semantic_repair_round_increment": 0,
+        }
+        structural_retry_prompt_metrics = (
+            _effective_structured_prompt_metrics(
+                _serialized_request(
+                    self._subject_request_projection(
+                        form.target, structural_request
+                    )
+                ),
+                structural_schema,
+            )
+        )
+        structural_response = self._stable_provider_call(
+            run_id=form.run_id,
+            run_root=form.run_root,
+            state=form.state,
+            target=form.target,
+            request=structural_request,
+            response_schema=structural_schema,
+            structured_chat=form.structured_chat,
+            call_kind=(
+                f"ANALYSIS_SEMANTIC_REPAIR_ROUND_{round_number}_"
+                f"FORM_{form_id}_CHUNK_{chunk_index}_STRUCTURAL_REPAIR"
+            ),
+        )
+        structural_form = structural_response.get(
+            f"form_{form_id}"
+        )
+        if not isinstance(structural_form, Mapping):
+            raise ValueError(
+                "ANALYSIS_REPAIR_SHARD_STRUCTURAL_RESPONSE_INVALID"
+            )
+        structural_normalization = (
+            self._normalize_case_local_anchor_aliases(
+                form={"cases": structural_source_cases},
+                response=structural_form,
+                artifact="claim_map",
+            )
+        )
+        structural_form = structural_normalization[
+            "normalized_response"
+        ]
+        form.state["analysis_anchor_normalizations"].extend(
+            {
+                "form_id": form_id,
+                "artifact": "claim_map",
+                "transport_stage": (
+                    f"SEMANTIC_REPAIR_ROUND_{round_number}_"
+                    "STRUCTURAL_REPAIR"
+                ),
+                "shard_index": chunk_index,
+                **deepcopy(action),
+            }
+            for action in structural_normalization["actions"]
+        )
+        for artifact in ("claim_map", "analysis_summary"):
+            replacement_rows = structural_form.get(artifact)
+            observed_replacement_ids = [
+                row.get("case_id")
+                if isinstance(row, Mapping)
+                else None
+                for row in replacement_rows
+            ] if isinstance(replacement_rows, list) else None
+            if observed_replacement_ids != structural_ids:
+                raise ValueError(
+                    "ANALYSIS_REPAIR_SHARD_STRUCTURAL_EXACT_SET_"
+                    "MISMATCH"
+                )
+            replacement_by_id = {
+                str(row["case_id"]): deepcopy(row)
+                for row in replacement_rows
+            }
+            response_form[artifact] = [
+                replacement_by_id.get(
+                    str(row.get("case_id")), deepcopy(row)
+                )
+                for row in response_form.get(artifact, [])
+                if isinstance(row, Mapping)
+            ]
+        return structural_retry_prompt_metrics
 
     def execute(
         self,
