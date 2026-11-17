@@ -2,7 +2,7 @@
 
   runner.py          WorkflowExams: the exam catalog, planning and running a node's exam, stored scores
   catalog.py         the exam catalog and the default exam of each workflow node
-  card_distiller/, card_reviewer/, analysis.py, embedding.py, ocr.py, reranker.py
+  card_distiller/, card_reviewer/, analysis.py, embedding/, ocr/, reranker/
                      the executors of each exam family (common.py and specialized_base.py are shared)
   analysis_reviewer/ the analysis reviewer exam: executor.py and its two scorer cores
   data_anomaly.py    the data anomaly exam; its pack files are in assets/data_anomaly/
