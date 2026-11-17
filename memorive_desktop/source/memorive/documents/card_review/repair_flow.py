@@ -1044,6 +1044,236 @@ def _final_payload(
     return fields, by_field, key_data, field_credibility
 
 
+def _verify_calls(call_verify, bypass_cache: bool):
+    """The review model's call and its retry call: the given stand-in for both, or the gateway's
+    verify slot (the retry always bypasses the cache)."""
+    if call_verify is not None:
+        return call_verify, call_verify
+
+    def verify_call(prompt: str) -> str:
+        return _tx._default_call_verify(prompt, bypass_cache=bypass_cache)
+
+    def verify_retry_call(prompt: str) -> str:
+        return _tx._default_call_verify(prompt, bypass_cache=True)
+    return verify_call, verify_retry_call
+
+
+def _repair_in_batches(card_path, fm, repair_rows, chunk_texts, distill_call, counts):
+    """The distill model repairs the flagged items, one bounded batch at a time; each batch gets the
+    initial attempt and two retries (_call_and_validate_repairs). A batch that still fails is logged
+    and its items are not kept. Returns the repairs, the items of failed batches, the number of
+    batches and the failed batches."""
+    bundle = _build_repair_bundle(fm, repair_rows, chunk_texts)
+    batches = _partition_repair_bundle(bundle)
+    repairs = []
+    failed_targets = set()
+    repair_batch_failures = []
+    for batch_index, repair_batch in enumerate(batches):
+        expected = {_row_key(row) for row in repair_batch["targets"]}
+        prompt = _build_repair_prompt(repair_batch)
+        try:
+            repairs.extend(_call_and_validate_repairs(
+                prompt,
+                expected=expected,
+                fm=fm,
+                chunk_texts=chunk_texts,
+                call_distill=distill_call,
+                counts=counts,
+                protection={
+                    _row_key(row): row.get("protected_clauses", ())
+                    for row in repair_batch["targets"]
+                },
+            ))
+        except (RepairContractError, DecisionError) as exc:
+            failed_targets.update(expected)
+            failure = {
+                "batch_index": batch_index,
+                "batch_count": len(batches),
+                "target_count": len(expected),
+                "targets": sorted([list(key) for key in expected]),
+                "reason": str(exc),
+            }
+            repair_batch_failures.append(failure)
+            log_reason(
+                "EVIDENCE_REVIEW",
+                "repair_flow_distill_batch_unavailable",
+                f"DeepSeek 返修分块 {batch_index + 1}/{len(batches)} 在本块两次重试后仍不可用；"
+                f"只删除本分块受影响项并继续:{exc}",
+                event_category="verify",
+                target=str(card_path),
+            )
+    return repairs, failed_targets, len(batches), repair_batch_failures
+
+
+def _review_repaired_items(card_path, working, repair_targets, repair_rows, chunk_texts, verify_call,
+                           verify_retry_call, counts):
+    """The review model checks only the repaired items, batch by batch, and the targeted-final report
+    is written when a batch was reviewed. An item it flags, and every item of a batch it could not
+    review, is not kept. Returns the problems found, the report (or None), the number of batches,
+    the failed batches and the items not kept."""
+    batch_input, final_subjects, expected_items = _filtered_batch_input(
+        working,
+        repair_targets,
+        chunk_texts,
+    )
+    final_batches = _partition_filtered_review_input(
+        batch_input, final_subjects, chunk_texts
+    )
+    final_checked_locations = []
+    all_final_problems = []
+    final_review_batch_failures = []
+    unconfirmed: set[tuple[str, int]] = set()
+
+    def final_call(prompt_text: str) -> str:
+        counts["verify"] += 1
+        counts["targeted_verify"] += 1
+        return verify_call(prompt_text)
+
+    def final_retry_call(prompt_text: str) -> str:
+        counts["verify"] += 1
+        counts["targeted_verify"] += 1
+        return verify_retry_call(prompt_text)
+
+    for batch_index, final_batch in enumerate(final_batches):
+        batch_expected_items = {
+            row["location"]: [
+                item["item_index"] for item in row["card_items"]
+            ]
+            for row in final_batch["subjects"]
+        }
+        batch_expected_locations = list(batch_expected_items)
+        batch_targets = {
+            (location, item_index)
+            for location, item_indexes in batch_expected_items.items()
+            for item_index in item_indexes
+        }
+        batch_subjects = {
+            row["location"]: final_subjects[row["location"]]._replace(
+                chunk_ids=list(row["chunk_ids"])
+            )
+            for row in final_batch["subjects"]
+        }
+        initial_for_batch = [
+            row for row in repair_rows if _row_key(row) in batch_targets
+        ]
+        final_prompt = (
+            _tx._build_batch_review_prompt(
+                final_batch,
+                initial_for_batch,
+                prior_source_context=final_batch["sources"],
+            )
+            + "\nEVIDENCE_REVIEW_REPAIR_TARGETED_FINAL\n"
+            "Review only the repaired Card items in the current batch. Do not re-review "
+            "unchanged fields.\n"
+        )
+        try:
+            _final_rows, batch_problems = _tx._run_batch_stage_with_one_contract_retry(
+                final_prompt,
+                stage=(
+                    f"targeted repaired-item final review batch "
+                    f"{batch_index + 1}/{len(final_batches)}"
+                ),
+                expected_locations=batch_expected_locations,
+                expected_items=batch_expected_items,
+                subjects_by_location=batch_subjects,
+                chunk_texts=chunk_texts,
+                call=final_call,
+                retry_call=final_retry_call,
+            )
+        except BatchContractExhausted as exc:
+            unconfirmed.update(batch_targets)
+            failure = {
+                "batch_index": batch_index,
+                "batch_count": len(final_batches),
+                "target_count": len(batch_targets),
+                "targets": sorted([list(key) for key in batch_targets]),
+                "reason": str(exc),
+            }
+            final_review_batch_failures.append(failure)
+            log_reason(
+                "EVIDENCE_REVIEW",
+                "repair_flow_final_batch_unavailable",
+                f"审核模型变更项复核分块 {batch_index + 1}/{len(final_batches)} "
+                f"在本块两次重试后仍不可用；只删除本分块变更项并继续:{exc}",
+                event_category="verify",
+                target=str(card_path),
+            )
+            continue
+        final_checked_locations.extend(batch_expected_locations)
+        all_final_problems.extend(batch_problems)
+        for problem in batch_problems:
+            unconfirmed.add((problem.location, _problem_item_index(problem)))
+
+    final_report = None
+    if final_checked_locations:
+        final_report = _make_report(
+            card_path,
+            working,
+            all_final_problems,
+            list(dict.fromkeys(final_checked_locations)),
+            suffix="targeted-final",
+        )
+        _report.write_report(final_report)
+    return all_final_problems, final_report, len(final_batches), final_review_batch_failures, unconfirmed
+
+
+def _keep_unaffected_clauses(fm, repair_rows, omissions):
+    """For an omitted by_field item whose disputed clauses are known, keep its other clauses: the
+    omission records the removed and the kept text (it is updated in place). Returns the kept text
+    per (location, item index)."""
+    # A compound field is not an atomic disposable item. If the exact disputed
+    # clause is known, preserve its unaffected original clauses even when the
+    # producer/reviewer is unavailable. Keep the result flagged and the actual
+    # removed text in the omission record; never turn partial work into complete.
+    retained_clauses = {}
+    for omission in omissions:
+        key = (omission['location'], omission['report_item_index'])
+        relevant = [row for row in repair_rows if _row_key(row) == key]
+        value = _target_value(fm, *key)
+        protected = _protected_clauses(value, relevant)
+        if protected and key[0].startswith('by_field.'):
+            retained = ''.join(protected)
+            removed = value
+            for part in protected:
+                removed = removed.replace(part, '', 1)
+            retained_clauses[key] = retained
+            omission.update(removed_value=removed, retained_value=retained,
+                            granularity='clause', status='failed_clauses_removed_unaffected_retained')
+    return retained_clauses
+
+
+def _admit_card(card_path, *, initial_report_id, final_report_id, fields, by_field, key_data,
+                field_credibility, omissions):
+    """Keep a copy of the card as it was in the repair folder, rewrite the card with the admitted
+    content and move it to ACTIVE. Returns the completion status, the admission reason and the
+    copy's path."""
+    completion_status = "passed_with_omissions" if omissions else "complete"
+
+    repair_dir = _repair_dir()
+    repair_dir.mkdir(parents=True, exist_ok=True)
+    pre_repair_path = repair_dir / f"{initial_report_id}.pre-repair-card.md"
+    if pre_repair_path.exists():
+        raise FileExistsError(f"pre-repair Card audit snapshot already exists: {pre_repair_path}")
+    _atomic_write(pre_repair_path, card_path.read_bytes())
+    finalize_card_after_repair(
+        card_path,
+        fields=fields,
+        by_field=by_field,
+        key_data=key_data,
+        field_credibility=field_credibility,
+        omissions=omissions,
+        completion_status=completion_status,
+    )
+    reason = (
+        "EVIDENCE_REVIEW 单轮返修准入:配置模型整卡初审→蒸馏模型有界分块返修→"
+        f"审核模型仅复核变更项;initial_report={initial_report_id};"
+        f"final_report={final_report_id or 'none'};omissions={len(omissions)};"
+        f"completion_status={completion_status}"
+    )
+    transition(card_path, ACTIVE, trigger=Trigger.GRADED_ADMIT, reason=reason)
+    return completion_status, reason, pre_repair_path
+
+
 def repair_and_admit(
     card_path,
     *,
@@ -1052,7 +1282,14 @@ def repair_and_admit(
     region_check=None,
     bypass_cache: bool = False,
 ) -> RepairAdmitResult:
-    """Run the user-approved single-round repair flow and output the final Card."""
+    """Run the user-approved single-round repair flow and output the final Card.
+
+    The review model checks the whole card (initial review); the distill model repairs the flagged
+    items in bounded batches (_repair_in_batches); the review model checks only the repaired items
+    (_review_repaired_items). What cannot be repaired or confirmed is dropped and recorded as an
+    omission; the card is rewritten with what is left and admitted as ACTIVE (_admit_card), and the
+    run is written to the repair trace. A failed initial review, or a card with nothing admissible
+    left, ends escalated."""
     card_path = Path(card_path)
     counts = {"verify": 0, "distill": 0, "initial_verify": 0, "targeted_verify": 0}
     fm = _read_frontmatter(card_path)
@@ -1062,16 +1299,7 @@ def repair_and_admit(
     elif call_verify is None:
         _tx._default_region_check()
     chunk_texts = _tx._load_chunk_texts(card_path)
-
-    if call_verify is None:
-        def verify_call(prompt: str) -> str:
-            return _tx._default_call_verify(prompt, bypass_cache=bypass_cache)
-
-        def verify_retry_call(prompt: str) -> str:
-            return _tx._default_call_verify(prompt, bypass_cache=True)
-    else:
-        verify_call = call_verify
-        verify_retry_call = call_verify
+    verify_call, verify_retry_call = _verify_calls(call_verify, bypass_cache)
     distill_call = call_distill or _default_distill_call
 
     try:
@@ -1118,44 +1346,9 @@ def repair_and_admit(
     final_review_batch_failures = []
 
     if repair_rows:
-        bundle = _build_repair_bundle(fm, repair_rows, chunk_texts)
-        batches = _partition_repair_bundle(bundle)
-        repair_batch_count = len(batches)
-        failed_targets = set()
-        for batch_index, repair_batch in enumerate(batches):
-            expected = {_row_key(row) for row in repair_batch["targets"]}
-            prompt = _build_repair_prompt(repair_batch)
-            try:
-                repairs.extend(_call_and_validate_repairs(
-                    prompt,
-                    expected=expected,
-                    fm=fm,
-                    chunk_texts=chunk_texts,
-                    call_distill=distill_call,
-                    counts=counts,
-                    protection={
-                        _row_key(row): row.get("protected_clauses", ())
-                        for row in repair_batch["targets"]
-                    },
-                ))
-            except (RepairContractError, DecisionError) as exc:
-                failed_targets.update(expected)
-                failure = {
-                    "batch_index": batch_index,
-                    "batch_count": len(batches),
-                    "target_count": len(expected),
-                    "targets": sorted([list(key) for key in expected]),
-                    "reason": str(exc),
-                }
-                repair_batch_failures.append(failure)
-                log_reason(
-                    "EVIDENCE_REVIEW",
-                    "repair_flow_distill_batch_unavailable",
-                    f"DeepSeek 返修分块 {batch_index + 1}/{len(batches)} 在本块两次重试后仍不可用；"
-                    f"只删除本分块受影响项并继续:{exc}",
-                    event_category="verify",
-                    target=str(card_path),
-                )
+        repairs, failed_targets, repair_batch_count, repair_batch_failures = _repair_in_batches(
+            card_path, fm, repair_rows, chunk_texts, distill_call, counts
+        )
         if repairs:
             working, dropped = _apply_repairs_in_memory(fm, repairs)
         dropped.update(failed_targets)
@@ -1171,108 +1364,12 @@ def repair_and_admit(
             if row["action"] != "drop"
         }
         if repair_targets:
-            batch_input, final_subjects, expected_items = _filtered_batch_input(
-                working,
-                repair_targets,
-                chunk_texts,
+            (final_problems, final_report, final_review_batch_count, final_review_batch_failures,
+             unconfirmed) = _review_repaired_items(
+                card_path, working, repair_targets, repair_rows, chunk_texts, verify_call,
+                verify_retry_call, counts,
             )
-            final_batches = _partition_filtered_review_input(
-                batch_input, final_subjects, chunk_texts
-            )
-            final_review_batch_count = len(final_batches)
-            final_checked_locations = []
-            all_final_problems = []
-
-            def final_call(prompt_text: str) -> str:
-                counts["verify"] += 1
-                counts["targeted_verify"] += 1
-                return verify_call(prompt_text)
-
-            def final_retry_call(prompt_text: str) -> str:
-                counts["verify"] += 1
-                counts["targeted_verify"] += 1
-                return verify_retry_call(prompt_text)
-
-            for batch_index, final_batch in enumerate(final_batches):
-                batch_expected_items = {
-                    row["location"]: [
-                        item["item_index"] for item in row["card_items"]
-                    ]
-                    for row in final_batch["subjects"]
-                }
-                batch_expected_locations = list(batch_expected_items)
-                batch_targets = {
-                    (location, item_index)
-                    for location, item_indexes in batch_expected_items.items()
-                    for item_index in item_indexes
-                }
-                batch_subjects = {
-                    row["location"]: final_subjects[row["location"]]._replace(
-                        chunk_ids=list(row["chunk_ids"])
-                    )
-                    for row in final_batch["subjects"]
-                }
-                initial_for_batch = [
-                    row for row in repair_rows if _row_key(row) in batch_targets
-                ]
-                final_prompt = (
-                    _tx._build_batch_review_prompt(
-                        final_batch,
-                        initial_for_batch,
-                        prior_source_context=final_batch["sources"],
-                    )
-                    + "\nEVIDENCE_REVIEW_REPAIR_TARGETED_FINAL\n"
-                    "Review only the repaired Card items in the current batch. Do not re-review "
-                    "unchanged fields.\n"
-                )
-                try:
-                    _final_rows, batch_problems = _tx._run_batch_stage_with_one_contract_retry(
-                        final_prompt,
-                        stage=(
-                            f"targeted repaired-item final review batch "
-                            f"{batch_index + 1}/{len(final_batches)}"
-                        ),
-                        expected_locations=batch_expected_locations,
-                        expected_items=batch_expected_items,
-                        subjects_by_location=batch_subjects,
-                        chunk_texts=chunk_texts,
-                        call=final_call,
-                        retry_call=final_retry_call,
-                    )
-                except BatchContractExhausted as exc:
-                    dropped.update(batch_targets)
-                    failure = {
-                        "batch_index": batch_index,
-                        "batch_count": len(final_batches),
-                        "target_count": len(batch_targets),
-                        "targets": sorted([list(key) for key in batch_targets]),
-                        "reason": str(exc),
-                    }
-                    final_review_batch_failures.append(failure)
-                    log_reason(
-                        "EVIDENCE_REVIEW",
-                        "repair_flow_final_batch_unavailable",
-                        f"审核模型变更项复核分块 {batch_index + 1}/{len(final_batches)} "
-                        f"在本块两次重试后仍不可用；只删除本分块变更项并继续:{exc}",
-                        event_category="verify",
-                        target=str(card_path),
-                    )
-                    continue
-                final_checked_locations.extend(batch_expected_locations)
-                all_final_problems.extend(batch_problems)
-                for problem in batch_problems:
-                    dropped.add((problem.location, _problem_item_index(problem)))
-
-            final_problems = all_final_problems
-            if final_checked_locations:
-                final_report = _make_report(
-                    card_path,
-                    working,
-                    final_problems,
-                    list(dict.fromkeys(final_checked_locations)),
-                    suffix="targeted-final",
-                )
-                _report.write_report(final_report)
+            dropped.update(unconfirmed)
 
     final_report_id = final_report.report_id if final_report else None
     omissions = _build_omissions(
@@ -1285,24 +1382,7 @@ def repair_and_admit(
         final_report_id=final_report_id,
         attempt_counts=counts,
     )
-    # A compound field is not an atomic disposable item. If the exact disputed
-    # clause is known, preserve its unaffected original clauses even when the
-    # producer/reviewer is unavailable. Keep the result flagged and the actual
-    # removed text in the omission record; never turn partial work into complete.
-    retained_clauses = {}
-    for omission in omissions:
-        key = (omission['location'], omission['report_item_index'])
-        relevant = [row for row in repair_rows if _row_key(row) == key]
-        value = _target_value(fm, *key)
-        protected = _protected_clauses(value, relevant)
-        if protected and key[0].startswith('by_field.'):
-            retained = ''.join(protected)
-            removed = value
-            for part in protected:
-                removed = removed.replace(part, '', 1)
-            retained_clauses[key] = retained
-            omission.update(removed_value=removed, retained_value=retained,
-                            granularity='clause', status='failed_clauses_removed_unaffected_retained')
+    retained_clauses = _keep_unaffected_clauses(fm, repair_rows, omissions)
     fields, by_field, key_data, field_credibility = _final_payload(
         fm,
         working,
@@ -1322,30 +1402,11 @@ def repair_and_admit(
             failure_reason="No admissible Card content remained after governed repair",
             root_reason_code="EVIDENCE_REVIEW_NO_ADMISSIBLE_CONTENT",
         )
-    completion_status = "passed_with_omissions" if omissions else "complete"
-
-    repair_dir = _repair_dir()
-    repair_dir.mkdir(parents=True, exist_ok=True)
-    pre_repair_path = repair_dir / f"{initial_report.report_id}.pre-repair-card.md"
-    if pre_repair_path.exists():
-        raise FileExistsError(f"pre-repair Card audit snapshot already exists: {pre_repair_path}")
-    _atomic_write(pre_repair_path, card_path.read_bytes())
-    finalize_card_after_repair(
-        card_path,
-        fields=fields,
-        by_field=by_field,
-        key_data=key_data,
-        field_credibility=field_credibility,
+    completion_status, reason, pre_repair_path = _admit_card(
+        card_path, initial_report_id=initial_report.report_id, final_report_id=final_report_id,
+        fields=fields, by_field=by_field, key_data=key_data, field_credibility=field_credibility,
         omissions=omissions,
-        completion_status=completion_status,
     )
-    reason = (
-        "EVIDENCE_REVIEW 单轮返修准入:配置模型整卡初审→蒸馏模型有界分块返修→"
-        f"审核模型仅复核变更项;initial_report={initial_report.report_id};"
-        f"final_report={final_report_id or 'none'};omissions={len(omissions)};"
-        f"completion_status={completion_status}"
-    )
-    transition(card_path, ACTIVE, trigger=Trigger.GRADED_ADMIT, reason=reason)
 
     trace = {
         "flow": "distill__whole_card_review__batch_repair__changed_item_review__tombstone",
@@ -1370,7 +1431,7 @@ def repair_and_admit(
     }
     if technical_repair_failure is not None:
         trace['technical_repair_failure'] = technical_repair_failure
-    trace_path = repair_dir / f"{initial_report.report_id}.json"
+    trace_path = pre_repair_path.parent / f"{initial_report.report_id}.json"
     _atomic_write(
         trace_path,
         json.dumps(trace, ensure_ascii=False, indent=2).encode("utf-8"),

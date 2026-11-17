@@ -217,6 +217,69 @@ class RepairFlowTest(unittest.TestCase):
             ]
         }
 
+    @staticmethod
+    def _reviewer(violations, *, targeted_violations=(), prompts=None):
+        """A review model that answers exactly the items a prompt asks about (its "subjects" block);
+        the targeted review of repaired items gets targeted_violations instead."""
+        def call(prompt: str) -> str:
+            if prompts is not None:
+                prompts.append(prompt)
+            start = prompt.index('{\n  "subjects": [')
+            subjects = json.JSONDecoder().raw_decode(prompt[start:])[0]["subjects"]
+            asked = {s["location"]: [item["item_index"] for item in s["card_items"]] for s in subjects}
+            rows = targeted_violations if "EVIDENCE_REVIEW_REPAIR_TARGETED_FINAL" in prompt else violations
+            return _batch_response(asked, [v for v in rows if v["item_index"] in asked.get(v["location"], [])])
+        return call
+
+    def _repairer(self, calls):
+        def call(prompt: str, bypass_cache: bool = False) -> str:
+            calls.append(prompt)
+            return json.dumps(self._repair_payload())
+        return call
+
+    def test_a_card_the_review_supports_is_admitted_unchanged(self) -> None:
+        repairs: list[str] = []
+        result = repair_and_admit(self.card, call_verify=self._reviewer([]), call_distill=self._repairer(repairs))
+        self.assertEqual((result.outcome, result.completion_status), ("active", "complete"))
+        self.assertEqual((result.verify_calls, result.distill_repair_calls, repairs), (2, 0, []))  # two batches
+        self.assertEqual(_frontmatter(self.card)["method"], ["Five reactors", "PANDAseq processed reads"])
+
+    def test_flagged_items_are_repaired_and_only_they_are_reviewed_again(self) -> None:
+        prompts: list[str] = []
+        repairs: list[str] = []
+        result = repair_and_admit(self.card, call_verify=self._reviewer(self._initial_violations(), prompts=prompts),
+                                  call_distill=self._repairer(repairs))
+        self.assertEqual((result.outcome, result.completion_status), ("active", "passed_with_omissions"))
+        self.assertEqual((len(repairs), result.verify_calls), (1, 3))         # two initial batches, one targeted
+        self.assertEqual(["EVIDENCE_REVIEW_REPAIR_TARGETED_FINAL" in p for p in prompts], [False, False, True])
+        targeted = json.JSONDecoder().raw_decode(prompts[2][prompts[2].index('{\n  "subjects": ['):])[0]
+        self.assertEqual([s["location"] for s in targeted["subjects"]], ["by_field.method"])
+        card = _frontmatter(self.card)
+        self.assertEqual(card["method"], ["PANDAseq processed reads"])       # the conflicting item is dropped
+        self.assertEqual([o["location"] for o in result.omissions], ["by_field.method"])
+        trace = json.loads(Path(result.repair_trace_path).read_text(encoding="utf-8"))
+        self.assertEqual(trace["completion_status"], "passed_with_omissions")
+        self.assertTrue(Path(trace["pre_repair_card"]).is_file())
+
+    def test_a_repaired_item_the_targeted_review_flags_is_dropped(self) -> None:
+        flagged = self._initial_violations()[1]                  # the reanchored item keeps its index 1
+        result = repair_and_admit(
+            self.card, call_verify=self._reviewer(self._initial_violations(), targeted_violations=[flagged]),
+            call_distill=self._repairer([]))
+        self.assertEqual(result.outcome, "active")
+        self.assertIsNotNone(result.final_report_id)
+        self.assertEqual([(o["location"], o["report_item_index"]) for o in result.omissions],
+                         [("by_field.method", 0), ("by_field.method", 1)])
+        self.assertIsNone(_frontmatter(self.card)["method"])
+
+    def test_an_unusable_initial_review_escalates_and_leaves_the_card(self) -> None:
+        before = self.card.read_bytes()
+        result = repair_and_admit(self.card, call_verify=lambda prompt: "not a review",
+                                  call_distill=self._repairer([]))
+        self.assertEqual(result.outcome, "escalated")
+        self.assertIsNone(result.initial_report_id)
+        self.assertEqual(self.card.read_bytes(), before)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -4121,7 +4121,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "504b252809547ee9b90ca3f4c3590247de45b9718be6d4ac550fb239a633df75",
+      "sha256": "1f3fecc0554e30d8f18951456e4df28b303d507d4599fe86913ab2e7dcf62f8c",
       "bytes": 276564
     },
     {
@@ -7911,8 +7911,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_review/repair_flow.py",
-      "sha256": "917557777e0e7b0985be80dbf600d5cedc3e97f51ffb5aad503a2b02c1350e8f",
-      "bytes": 59862
+      "sha256": "4bff84ef4f86178e6a5c577c0ceeda5292b706f85426c884a5982f40b69633af",
+      "bytes": 62546
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_review/report.py",
