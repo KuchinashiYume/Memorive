@@ -7,6 +7,7 @@
   hashed_payloads.py payloads that carry their own content hash, and the checks and errors they use
   sensitive.py      the check that keeps secrets out of what the app writes
   tls.py            the bundled public root certificates and the TLS context built from them
+  public_http.py    public metadata over HTTPS: the response record, error codes, curl.exe and its proxy
   windows_paths.py  file paths past the Windows MAX_PATH limit
   data_folders.py   where data goes when nothing has bound the folders to a profile
   pickle_compat.py  reading job pickles of earlier versions after their classes moved

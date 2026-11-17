@@ -1,31 +1,27 @@
-"""Strict public metadata TLS, scoped independently from model/API transports."""
-from dataclasses import dataclass
-import ctypes
+"""The settings' public metadata transport (PublicMetadataHttpTransport): GET requests over HTTPS,
+without credentials or redirects, to the built-in public sources the leaderboard, reference prices
+and exchange rates read (OpenRouter, LiveBench, Epoch AI, the ECB), and the back-off after a source's
+rate limit. Kept apart from the model and API transports. external_sources.py uses it; the HTTP
+helpers it shares with research discovery are in memorive/platform/public_http.py.
+"""
 from datetime import datetime, timezone
 import os
 import ipaddress
 import socket
-from pathlib import Path
 import re
-import ssl
 import subprocess
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPSHandler, ProxyHandler, Request, build_opener, getproxies, proxy_bypass
+from urllib.request import HTTPSHandler, ProxyHandler, Request, build_opener
 from memorive.models.validation.transport import UrllibHttpTransport, _NoRedirect
 from memorive.platform.tls import PUBLIC_ROOTS_SHA256, public_metadata_context
+from memorive.platform.public_http import MetadataResponse, curl_path
 
 ECB_ENDPOINT = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 _LIVEBENCH_BASE = 'https://raw.githubusercontent.com/LiveBench/new-livebench/main/'
 LIVEBENCH_GITHUB_API = 'https://api.github.com/repos/LiveBench/new-livebench'
 GITHUB_API_VERSION = '2026-03-10'
-
-
-class MetadataRateLimitError(ValueError):
-    def __init__(self, retry_after):
-        super().__init__('EXTERNAL_METADATA_RATE_LIMITED')
-        self.retry_after = retry_after
 
 
 def metadata_rate_limit(response, *, now=None):
@@ -68,36 +64,6 @@ def is_builtin_public_metadata(url):
     return bool(re.fullmatch(re.escape(_LIVEBENCH_BASE) +
         r'public/(?:categories_\d{4}_\d{2}_\d{2}\.json|table_\d{4}_\d{2}_\d{2}\.csv)', url))
 
-def metadata_error_code(error):
-    cause = getattr(error, "reason", error)
-    if isinstance(error, MetadataRateLimitError):
-        return "EXTERNAL_METADATA_RATE_LIMITED"
-    if isinstance(cause, ssl.SSLCertVerificationError):
-        return "EXTERNAL_METADATA_TLS_CERTIFICATE"
-    if isinstance(cause, (TimeoutError, subprocess.TimeoutExpired)):
-        return "EXTERNAL_METADATA_TIMEOUT"
-    if isinstance(cause, socket.gaierror):
-        return 'EXTERNAL_METADATA_DNS_FAILED'
-    if isinstance(cause, ConnectionError):
-        return 'EXTERNAL_METADATA_CONNECTION_FAILED'
-    if isinstance(cause, ssl.SSLError):
-        return "EXTERNAL_METADATA_TLS_CONNECTION"
-    import re
-    if isinstance(error, ValueError) and re.fullmatch(r"[A-Z0-9_]+", str(error)):
-        return str(error)
-    return "EXTERNAL_METADATA_FETCH_FAILED"
-
-def transient_metadata_error(reason):
-    return reason in {'EXTERNAL_METADATA_TIMEOUT', 'EXTERNAL_METADATA_DNS_FAILED',
-        'EXTERNAL_METADATA_CONNECTION_FAILED', 'EXTERNAL_METADATA_TLS_CONNECTION',
-        'EXTERNAL_METADATA_FETCH_FAILED'} or bool(
-        re.fullmatch(r'EXTERNAL_METADATA_HTTP_(408|425|429|5[0-9]{2})', reason))
-
-@dataclass(frozen=True)
-class MetadataResponse:
-    status_code: int
-    body: bytes
-    transport_evidence: dict
 
 class PublicMetadataHttpTransport(UrllibHttpTransport):
     @staticmethod
@@ -178,33 +144,6 @@ class PublicMetadataHttpTransport(UrllibHttpTransport):
             with error:
                 return response_value(error, int(error.code))
 
-    @staticmethod
-    def curl_path():
-        """curl.exe in the Windows system folder; public metadata requests go through it (also research's transport.py)."""
-        folder = ctypes.create_unicode_buffer(32768)
-        length = ctypes.windll.kernel32.GetSystemDirectoryW(folder, len(folder))
-        if not 0 < length < len(folder):
-            raise ValueError("EXTERNAL_METADATA_OS_TRANSPORT_UNAVAILABLE")
-        path = Path(folder.value) / "curl.exe"
-        if not path.is_file():
-            raise ValueError("EXTERNAL_METADATA_OS_TRANSPORT_UNAVAILABLE")
-        return path
-
-    @staticmethod
-    def curl_proxy(mode, address, hostname):
-        """The --proxy value for curl from the proxy setting: '' for none, the system's or the user's address."""
-        if mode == "NONE":
-            return ""
-        if mode == "SYSTEM":
-            address = "" if proxy_bypass(hostname) else getproxies().get("https", "")
-        elif mode != "CUSTOM":
-            raise ValueError("API_VALIDATION_PROXY_MODE_INVALID")
-        if address:
-            parts = urlsplit(address)
-            if parts.scheme not in ("http", "https") or not parts.hostname or parts.username or parts.password:
-                raise ValueError("API_VALIDATION_PROXY_INVALID")
-        return address
-
     def request(self, **kwargs):
         if is_builtin_public_metadata(kwargs['url']):
             return self._public_request(**kwargs)
@@ -223,7 +162,7 @@ class PublicMetadataHttpTransport(UrllibHttpTransport):
             raise ValueError("API_RESPONSE_LIMIT_INVALID")
         limit = min(limit or 262144, 262144)
         proxy, route = self._public_route(kwargs['url'], kwargs['proxy_mode'], kwargs['proxy_address'])
-        args = [str(self.curl_path()), "--disable", "--silent", "--show-error",
+        args = [str(curl_path()), "--disable", "--silent", "--show-error",
                 "--proto", "=https", "--proto-redir", "=https", "--max-redirs", "0", "--ca-native",
                 "--connect-timeout", str(min(timeout,10)), "--max-time", str(timeout),
                 "--max-filesize", str(limit), "--proxy", proxy, "--noproxy", ""]

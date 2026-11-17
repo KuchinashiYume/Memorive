@@ -34,9 +34,9 @@ from memorive.platform.sensitive import scan_sensitive
 from memorive.models.endpoints import normalize_external_api_base_url
 from memorive.models.validation.transport import UrllibHttpTransport
 from memorive.desktop.settings.store import SettingsStore
-from memorive.desktop.settings.metadata_transport import (PublicMetadataHttpTransport, MetadataRateLimitError,
-    metadata_error_code, metadata_rate_limit, transient_metadata_error,
+from memorive.desktop.settings.metadata_transport import (PublicMetadataHttpTransport, metadata_rate_limit,
     LIVEBENCH_GITHUB_API, GITHUB_API_VERSION)
+from memorive.platform.public_http import MetadataRateLimitError, metadata_error_code, transient_metadata_error
 from memorive.desktop.settings.livebench_reference import DEFAULT_ENDPOINT as LIVEBENCH_ENDPOINT, release_urls, normalized_rows as livebench_rows
 
 SCHEMA = "ExternalModelReference-v1"

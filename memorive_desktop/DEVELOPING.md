@@ -55,8 +55,6 @@ the shared basics (`memorive/platform`: jobs, run ledgers, decision records and 
 places still reach across areas; these are the places to untangle when that code is restructured:
 
 - Lower areas still import parts of `memorive/desktop`:
-  - research discovery (`memorive/research/discovery/transport.py`) uses the settings' metadata
-    transport and the list of literature sources;
   - the research workspace's headless model setup (`memorive/research/workspace/headless_models.py`)
     builds the settings controller with `memorive/desktop/service/service_main.py` and
     `memorive/desktop/settings/service_adapter.py`;

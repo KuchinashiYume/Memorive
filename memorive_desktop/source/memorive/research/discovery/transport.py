@@ -6,7 +6,8 @@ from memorive.research.discovery.live_metadata_transport import (
     TransportPolicy,
 )
 from memorive.models.validation.transport import UrllibHttpTransport
-from memorive.desktop.settings.metadata_transport import metadata_error_code, PublicMetadataHttpTransport, MetadataResponse
+from memorive.platform.public_http import MetadataResponse, curl_path, curl_proxy, metadata_error_code
+from memorive.research.discovery.sources import PRESETS
 from urllib.parse import urlsplit, urlencode
 from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHandler
 from urllib.error import HTTPError
@@ -40,8 +41,8 @@ class BoundedMetadataTransport:
             raise ValueError('METADATA_HEADER_INVALID')
         limit=min(k['max_response_bytes'],2000000)
         if os.name=='nt':
-            proxy=PublicMetadataHttpTransport.curl_proxy(k['proxy_mode'],k['proxy_address'],parts.hostname)
-            args=[str(PublicMetadataHttpTransport.curl_path()),'--disable','--silent','--show-error','--proto','=https','--max-redirs','0','--ca-native','--connect-timeout','10','--max-time','30','--max-filesize',str(limit),'--proxy',proxy,'--noproxy','']
+            proxy=curl_proxy(k['proxy_mode'],k['proxy_address'],parts.hostname)
+            args=[str(curl_path()),'--disable','--silent','--show-error','--proto','=https','--max-redirs','0','--ca-native','--connect-timeout','10','--max-time','30','--max-filesize',str(limit),'--proxy',proxy,'--noproxy','']
             # Pass credentialed headers over stdin, never a process command line.
             args.extend(['--header','@-'])
             header_input='\n'.join(key+': '+value for key,value in k['headers'].items()).encode('utf8')
@@ -77,7 +78,6 @@ class MetadataClient:
         self.source_config=source_config
 
     def fetch(self,provider,topic,count,run_id,call_id,stop,*,cursor=None,source_snapshot=None,exact_doi=None,exact_arxiv=None):
-        from memorive.desktop.settings.literature_sources import PRESETS
         from memorive.research.discovery import wos
         if provider.lower() not in PRESETS:
             raise ValueError('LITERATURE_PROVIDER_UNSUPPORTED')

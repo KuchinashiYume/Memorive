@@ -1,19 +1,16 @@
-"""Versioned source presets. Credentials stay in the environment, never in state."""
+"""The settings page's literature source slots: three slots, each bound to one provider of
+memorive/research/discovery/sources.py, the providers the user selected, reading older saved forms,
+saving, and the page's projection. Credentials stay in the environment, never in state.
+external_sources.py and export_bundle.py use it.
+"""
 from __future__ import annotations
 import json
 import os
 import re
 from pathlib import Path
 from memorive.platform.json_files import canonical_sha256
+from memorive.research.discovery.sources import CATALOG, PRESETS, SELECTABLE
 
-PRESETS = {
-    'arxiv': ('arXiv', 'https://export.arxiv.org/api/query', ''),
-    'crossref': ('Crossref', 'https://api.crossref.org/works', ''),
-    'web-of-science': ('Web of Science Starter', 'https://api.clarivate.com/apis/wos-starter/v1/documents', 'WOS_API_KEY'),
-}
-CATALOG = tuple((p, v[0], '官方文献元数据', 'CONNECTOR_BUILT', 'memorive.research.discovery.transport')
-                for p,v in PRESETS.items())
-SELECTABLE = frozenset(PRESETS)
 SLOT_IDS = ('literature-1','literature-2','literature-3')
 FIELDS = {'slot_id','provider','display_name','endpoint','credential_env','enabled'}
 
