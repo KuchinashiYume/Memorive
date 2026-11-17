@@ -37,6 +37,11 @@ throw-away profile. Every user folder points at a throw-away folder, as in `test
 limited to this computer, so the page shows the same thing in every run. The window opens far outside the
 screen and does not take the focus.
 
+The throw-away folder (`%TEMP%\memo_page_*`) is removed after a good run and kept after a failed one, for a look
+at the profile. Programs that hook into every window, such as an input method or a crash reporter, may write a
+few files into the redirected AppData and keep them open; those stay behind, `run.py` names the folder, and it
+can be deleted once they are closed.
+
 ## What it records
 
 - **Scenes** (`scenarios.py`): five view modes (Chinese, English, Japanese, Chinese at 130 % font size, a narrow

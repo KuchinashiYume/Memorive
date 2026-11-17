@@ -10021,8 +10021,8 @@
     },
     {
       "path": "memorive_desktop/tools/page_check/README.md",
-      "sha256": "55757855f75deadd7884b819a4acaa0bbe15dfb479dacbed949db1a8e8f35002",
-      "bytes": 4803
+      "sha256": "805ee040cc5103c9f97716c8cbcb8e7efd92ae6b6042a5b1c238a665e7e12358",
+      "bytes": 5181
     },
     {
       "path": "memorive_desktop/tools/page_check/compare.py",
@@ -10046,8 +10046,8 @@
     },
     {
       "path": "memorive_desktop/tools/page_check/run.py",
-      "sha256": "c079ea17cbe9b04b48ddfdd0aa11ab6e3886a03de2eeb1669124d21c15c98bbc",
-      "bytes": 5038
+      "sha256": "343c2111506ee9635c6d2c578504265fbf10a3d85822a68a6714a1e0292fafe9",
+      "bytes": 5386
     },
     {
       "path": "memorive_desktop/tools/page_check/scenarios.py",
