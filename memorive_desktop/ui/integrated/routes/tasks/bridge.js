@@ -1,3 +1,7 @@
+/* The current task page's calls to the desktop service (current_task.*): running jobs and their workflow nodes,
+   pausing, cancelling, answering a job's questions, overrides, and refinement tasks. Publishes
+   window.__Desktop_CURRENT_TASK_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   refresh(). */
 (() => {
   'use strict';
 

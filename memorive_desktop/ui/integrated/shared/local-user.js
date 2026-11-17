@@ -1,3 +1,6 @@
+/* The user panel in settings and the user's name and picture in the navigation: user name, avatar, the answer style,
+   and hiding the assistant's expressions (settings.user_get, settings.user_save). Takes part in the page's shared
+   save and revert. Publishes window.__Desktop_LOCAL_USER__. */
 (() => {
   'use strict';
   if(window.__Desktop_LOCAL_USER__)return;

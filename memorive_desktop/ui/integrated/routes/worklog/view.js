@@ -1,3 +1,5 @@
+/* Draws the work log page from what bridge.js loaded: entry cards, the filter popover and the entry details.
+   Publishes window.__Desktop_WORK_LOG_VIEW__ for bridge.js. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-worklog-preview');

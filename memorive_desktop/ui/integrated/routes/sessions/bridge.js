@@ -1,3 +1,6 @@
+/* The session management page's calls to the desktop service (sessions.*): the saved AI chat sessions, capturing them
+   from browsers (with the browser companion), refining them, and deleting local copies. Publishes
+   window.__Desktop_SESSIONS_BRIDGE__ for view.js. */
 (() => {
   'use strict';
 

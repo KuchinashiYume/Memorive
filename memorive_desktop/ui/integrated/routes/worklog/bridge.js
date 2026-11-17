@@ -1,3 +1,6 @@
+/* The work log page's calls to the desktop service (work_log.*): entries, milestones, export, and following an entry
+   to its job. Publishes window.__Desktop_WORK_LOG_BRIDGE__; shared/product-bridge.js and
+   memorive/desktop/api/page_events.py call it when the service reports a change. */
 (() => {
   'use strict';
 

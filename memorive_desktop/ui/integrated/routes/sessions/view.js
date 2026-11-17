@@ -1,3 +1,6 @@
+/* Draws the session management page: the source tabs, session cards, the selected session's turns, and the confirm
+   countdowns of removal and refinement retry. Publishes window.__Desktop_SESSION_PAGE__ and reads its data through
+   window.__Desktop_SESSIONS_BRIDGE__. */
 (() => {
   'use strict';
 

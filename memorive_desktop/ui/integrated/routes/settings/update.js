@@ -1,3 +1,6 @@
+/* The update panel in settings: shows the update state (updates.status every 1.5 seconds while the panel is open),
+   checks, downloads, applies and cancels updates, and the automatic-update switch. Checks once by itself 30 seconds
+   after start when automatic updates are on. */
 (() => {
   'use strict';
   const panel = document.querySelector('[data-panel="update"] .desktop-settings-form-stack');

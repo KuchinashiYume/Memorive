@@ -1,3 +1,4 @@
+/* Groups the fields of each settings panel into framed blocks, without rebuilding the fields or their handlers. */
 (() => {
   'use strict';
   // Frame existing semantic fields without rebuilding controls or their handlers.

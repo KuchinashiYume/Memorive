@@ -1,3 +1,5 @@
+/* The research connections panel in settings: the folders, Obsidian vaults, Zotero libraries and bibliography files a
+   project draws on, their previews, imports and exports (memo.connection_*). Publishes window.__MEMO_CONNECTIONS__. */
 (() => {
  'use strict';
  const q=s=>document.querySelector(s),

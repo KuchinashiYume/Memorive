@@ -1,3 +1,6 @@
+/* The settings page's external data panel: model scores, model prices, exchange rates and literature sources, with
+   editing, saving and per-source refresh (settings.external_sources_*, research.config_get, research.source_refresh).
+   Takes part in the page's shared save and revert. Publishes window.__Desktop_EXTERNAL_SOURCES__. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-settings-preview');

@@ -4,9 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;; script-src &#x27;self&#x27; &#x27;sha256-Z2sspOhpUpEhWcyHwU1dPZ5GqzZsIEAWlkl5zhrpuZg=&#x27; &#x27;sha256-zERae1eZ2tHUHkhpybuKye85+mSEIy48tT/XtFj6Dc4=&#x27; &#x27;sha256-AzVQh6HpFdzbGaG4fgVKfuYqOYILB5G1Dp5tWG6ZViI=&#x27; &#x27;sha256-DFPecsposyeqlSkNmHpvO1C5pJ/ISGs2k/aer1dF/aE=&#x27;; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;; script-src &#x27;self&#x27; &#x27;sha256-gWe1GiV1FoW5cR6QfhZw9QhDXjKpgKzO/Y42AhgIEsw=&#x27; &#x27;sha256-bN74bDWwCQe+tx7LnRKUbyWD61NwU1JjU4ZJAcOWev0=&#x27; &#x27;sha256-Z8VtGYIJjKJD4BsOY75CcKKz0KCxTil2TTElHs5gJo8=&#x27; &#x27;sha256-/6X/5rVoM0i3NKU54ZUtZ9xKyt373pW1cAnPYknEdeg=&#x27;; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
 <title>Memorive 桌面助手</title>
-<style>:root {
+<style>/* Base styles of the assistant page, from the page template it was built on: colour scheme, generic colour variables
+   (--background and the like) and fonts. */
+:root {
   color-scheme: light dark;
   background-color: var(
     --background,
@@ -892,7 +894,8 @@ svg.lucide {
 }
 
 html>body{padding:0}</style>
-<style>:root,
+<style>/* Makes the assistant page transparent and as large as its window, so only the pet and its bubble show. */
+:root,
 html,
 body {
   width: 100%;
@@ -1067,6 +1070,8 @@ body {
   </div>
 
   <style>
+/* Styles of the desktop assistant window: the pet, its speech bubble and its menu (#memorive-desktop-assistant-preview).
+   The assistant keeps its own colour variables (--memorive-pet-*), with light and dark values. */
     #memorive-desktop-assistant-preview {
       --memorive-pet-canvas: light-dark(rgb(234 241 237), rgb(24 34 36));
       --memorive-pet-canvas-deep: light-dark(rgb(206 224 217), rgb(34 53 54));
@@ -1612,6 +1617,8 @@ body {
   </style>
 
   <script>
+/* The pet in the assistant window: its frames and animations (blink, attention, working, success, error), the speech
+   bubble, the menu, and dragging the pet. runtime-bridge.js feeds it the desktop service's state. */
     (() => {
       const root = document.getElementById('memorive-desktop-assistant-preview');
       if (!root || root.dataset.ready === 'true') return;
@@ -2241,6 +2248,8 @@ body {
 </div>
 
 <script>
+/* Places hover tooltips with Floating UI when that library is on the page. The assistant page loads no Floating UI and
+   has no data-tooltip elements, so in the shipped page this does nothing; it came with the page template. */
 (() => {
   if (window.FloatingUIDOM == null) {
     return;
@@ -2462,6 +2471,8 @@ body {
 })();
 </script>
 <script>
+/* Draws Lucide icons when the Lucide script is on the page. The assistant page loads no Lucide script and has no
+   data-lucide elements, so in the shipped page this does nothing; it came with the page template. */
 (() => {
   const initialize = () => {
     globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
@@ -2476,7 +2487,11 @@ body {
 })();
 </script>
 
-<script>(() => {
+<script>/* Connects the assistant window to the desktop service: asks for the assistant's state every 3 seconds, shows it on the
+   pet and in the bubble, and runs the menu's shortcuts. Publishes window.__Desktop_ASSISTANT_RUNTIME__ (refresh,
+   setAutoRefreshEnabled, applyPresentation, closeMenu, fitMenuToViewport, inspect), which
+   memorive/desktop/assistant/desktop.py and product/desktop/console_expressions.py call through evaluate_js. */
+(() => {
   'use strict';
   const root = document.querySelector('#memorive-desktop-assistant-preview');
   const pet = document.querySelector('#memorive-pet-window');

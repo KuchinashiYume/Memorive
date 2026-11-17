@@ -1,3 +1,6 @@
+/* Research runs shared by several pages: starting, following and cancelling literature discovery runs, their
+   preferences and feedback (research.*), and their place on the current task, messages and library pages.
+   Publishes window.__Desktop_RESEARCH__. */
 (() => {
   'use strict';
   if (window.__Desktop_RESEARCH__) return;

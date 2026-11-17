@@ -1,3 +1,8 @@
+/* The main window's application shell: which route is shown (activate), the window-wide preferences (language,
+   font size, tooltips, remembered panels), translating the page's text, and the type role of every text element
+   (typography.css sizes them). Publishes window.__Desktop_INTEGRATED_APP__ (activate, applyPreferences, translate,
+   inspect, ...), which every route script, memorive/desktop/api/notifications.py, memorive/desktop/assistant/desktop.py
+   and app.py's self-test use. */
 window.__MEMO_PRODUCT_NAME__="Memorive";
 
 (() => {

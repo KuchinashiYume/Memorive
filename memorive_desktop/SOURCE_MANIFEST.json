@@ -432,13 +432,13 @@
     },
     {
       "path": "product/desktop/bundle_assistant.html",
-      "sha256": "61d1c2e730e7f2d0c11f5892bc8cbc75bbbc7a97e6a5a1864c5acba572f5f3a1",
-      "bytes": 94237
+      "sha256": "e727c7b6f1e59c5fcff796221a6f494eef06ea83c539447ee46b5cdfaccb95a5",
+      "bytes": 95834
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "7e3087332a30a07c02e69714cd370498d40db93891f6ea912dbdfb7edf5f803f",
-      "bytes": 2700570
+      "sha256": "abb036c80634fae9c2dbcca54ee0b77e5d65f636e786aa467f6c9aa00975a20f",
+      "bytes": 2715792
     },
     {
       "path": "product/desktop/console_expressions.py",

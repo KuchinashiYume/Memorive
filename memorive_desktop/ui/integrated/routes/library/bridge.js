@@ -1,3 +1,6 @@
+/* The library page's calls to the desktop service (library.*): the list of processed papers and its filters, an item's
+   files and lineage, opening files, and confirming reviews. Publishes window.__Desktop_LIBRARY_BRIDGE__;
+   shared/product-bridge.js and memorive/desktop/api/page_events.py call its refresh(). */
 (() => {
   'use strict';
 

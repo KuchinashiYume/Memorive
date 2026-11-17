@@ -1,3 +1,5 @@
+/* Draws the library page from what bridge.js loaded: the paper cards, the filters and the selected paper's files.
+   Publishes window.__Desktop_LIBRARY_VIEW__ for bridge.js. */
   (() => {
     const root = document.getElementById('desktop-library-preview');
     const preview = window.DesktopPreview_library;

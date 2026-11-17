@@ -1,3 +1,7 @@
+/* The research Q&A page: projects and conversations, asking (memo.ask, then memo.job_status until the answer is in),
+   answers and their versions, evidence and attachments, agents and desktop hand-off, and the chat's own settings.
+   Calls the memo.* service methods. Publishes window.__MEMO_WORKSPACE__ (openThread, importFiles, pickFiles,
+   configureThread, ...), used by the inbox home, the settings connections panel and app.py's self-test. */
 (() => {
   'use strict';
   const q=s=>document.querySelector(s), t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;

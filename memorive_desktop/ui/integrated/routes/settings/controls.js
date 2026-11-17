@@ -1,3 +1,5 @@
+/* Help buttons of the settings page: the question-mark button next to a setting that opens its explanation, and its
+   placement. Publishes window.__Desktop_SETTINGS_CONTROLS__. */
 (() => {
   'use strict';
   if(window.__Desktop_SETTINGS_CONTROLS__)return;

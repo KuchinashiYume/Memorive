@@ -1,3 +1,7 @@
+/* Connects the assistant window to the desktop service: asks for the assistant's state every 3 seconds, shows it on the
+   pet and in the bubble, and runs the menu's shortcuts. Publishes window.__Desktop_ASSISTANT_RUNTIME__ (refresh,
+   setAutoRefreshEnabled, applyPresentation, closeMenu, fitMenuToViewport, inspect), which
+   memorive/desktop/assistant/desktop.py and product/desktop/console_expressions.py call through evaluate_js. */
 (() => {
   'use strict';
   const root = document.querySelector('#memorive-desktop-assistant-preview');

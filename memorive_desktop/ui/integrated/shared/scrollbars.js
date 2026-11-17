@@ -1,3 +1,5 @@
+/* Marks scrollable areas (data-memo-scroll) and the one being scrolled or dragged (data-memo-scroll-active), so that
+   scrollbars.css shows a thin scrollbar only there. Publishes window.__MEMO_SCROLLBARS__. */
 (() => {
   'use strict';
   if (window.__MEMO_SCROLLBARS__) return;

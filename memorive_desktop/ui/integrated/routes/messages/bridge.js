@@ -1,3 +1,7 @@
+/* The messages page's calls to the desktop service (messages.*): the message list, reading and archiving, bulk actions,
+   and following a message to the page it is about. Refreshes every 5 seconds while the page is open. Publishes
+   window.__Desktop_MESSAGES_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   refresh(). */
 (() => {
   'use strict';
 

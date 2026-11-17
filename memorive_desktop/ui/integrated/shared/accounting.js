@@ -1,3 +1,5 @@
+/* The bottom accounting panel of every route: cost, requests and tokens by model and period, with its chart
+   (asked from the desktop service). Publishes window.__Desktop_ACCOUNTING_PANEL__. */
 (() => {
   'use strict';
   const t = text => window.__Desktop_INTEGRATED_APP__?.translate?.(text) || text;

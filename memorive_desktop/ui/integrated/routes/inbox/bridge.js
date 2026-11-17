@@ -1,3 +1,7 @@
+/* The inbox page's calls to the desktop service (inbox.*): the item list and its detail, importing files (picker and
+   drag and drop), dispatching items to processing, undo and redo, stars, deletion, and the preview of an item's file.
+   Publishes window.__Desktop_INBOX_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   refresh() when the service reports a change. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-inbox-preview');

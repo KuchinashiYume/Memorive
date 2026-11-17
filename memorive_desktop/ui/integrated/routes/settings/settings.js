@@ -1,3 +1,8 @@
+/* The settings page: loading and saving settings (settings.*), the shared save and revert of every panel
+   (registerSaveParticipant), API and CLI model services and their checks, local models, refinement, the browser
+   companion, the desk assistant, the developer editor, scoped resets, network tests and appearance. Publishes
+   window.__Desktop_SETTINGS_BRIDGE__ (call, refresh, registerSaveParticipant, syncSaveState, notify, ...), which the
+   other settings scripts, the chat page and app.py's self-test use. */
 (() => {
   'use strict';
 

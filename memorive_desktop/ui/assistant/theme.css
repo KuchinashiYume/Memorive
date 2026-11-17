@@ -1,3 +1,5 @@
+/* Base styles of the assistant page, from the page template it was built on: colour scheme, generic colour variables
+   (--background and the like) and fonts. */
 :root {
   color-scheme: light dark;
   background-color: var(
