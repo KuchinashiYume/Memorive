@@ -21,6 +21,57 @@
 .desktop-research-paper p { font-size:var(--memo-size-small);line-height:1.6; }
 .desktop-research-report { white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:var(--memo-size-small);line-height:1.7;margin:0; }
 .desktop-research-advanced summary { cursor:pointer; }
+/* Research opportunities (shared/opportunities.js): the search controls, then one card per opportunity. */
+.desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px; }
+.desktop-research-opportunity-head { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+/* An opportunity sits in the same frame as a research Q&A answer (routes/chat/workspace.css). */
+.desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:16px 20px 8px;border:1px solid var(--desktop-border-default);border-radius:16px;background:var(--desktop-surface-raised);box-shadow:0 3px 12px #2A272307;overflow-wrap:anywhere; }
+.desktop-research-opportunity-more { margin:0; }
+.desktop-research-opportunity-more > :not(summary) { margin-top:12px; }
+.desktop-research-opportunity-more[open] { padding-bottom:10px; }
+.desktop-research-opportunity h4 { margin:0;line-height:1.5; }
+.desktop-research-opportunity-tags { display:flex;gap:10px;align-items:center;margin:0; }
+.desktop-research-opportunity-kind { padding:1px 8px;border-radius:999px;background:var(--surface-subtle,#F0EDE6);color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity-part p { margin:2px 0 0; }
+.desktop-research-opportunity-dimensions { margin:4px 0 0;padding:0;list-style:none;display:grid;gap:4px; }
+.desktop-research-opportunity-dimensions li { display:flex;flex-wrap:wrap;column-gap:10px; }
+.desktop-research-opportunity-dimensions li > span:last-child { flex:1 1 14em;min-width:0; }
+.desktop-research-opportunity-dimensions li[data-compared="different"] .desktop-research-opportunity-compared { color:var(--yellow-text,#8A5B12); }
+.desktop-research-opportunity-dismissed > summary { cursor:pointer;color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity-dismissed { padding-top:8px; }
+.desktop-research-opportunity-dismissed > .desktop-research-opportunity { margin-top:16px; }
+.desktop-research-opportunity-fact { margin:10px 0 0;padding-left:12px;border-left:2px solid var(--border-default,#dfd9cf); }
+.desktop-research-opportunity-fact p { margin:2px 0 0; }
+.desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
+/* The search box takes the Q&A input box's frame and bar (routes/chat/workspace.css); these set its own parts. */
+#memo-chat-page .desktop-research-opportunity-box .memo-attachments { padding:10px 12px 0; }
+.desktop-research-opportunity-words { display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 14px 6px; }
+.desktop-research-opportunity-words input { flex:1 1 180px;min-width:0;border:0;outline:none;background:transparent;color:inherit;font:inherit;padding:4px 2px; }
+/* The rounded box shows the focus (.memo-input-shell:focus-within), not a square ring round the field. */
+#memo-chat-page .desktop-research-opportunity-words input:focus-visible { outline:none; }
+.desktop-research-opportunity-word { display:inline-flex;align-items:center;gap:2px;padding:1px 2px 1px 9px;border-radius:999px;background:var(--desktop-surface-subtle);color:var(--desktop-text-primary); }
+.desktop-research-opportunity-word .memo-quiet-button { padding:0 6px;color:var(--desktop-text-secondary); }
+#memo-chat-page .desktop-research-opportunity-box .memo-composer-bar .desktop-toolbar-icon { --desktop-toolbar-size:calc(32px * var(--desktop-scale)); }
+#memo-chat-page .desktop-research-opportunity-scope { max-width:280px; }
+.desktop-research-opportunity-scope-menu { width:auto;min-width:200px;max-width:320px; }
+.desktop-research-opportunity-rename { max-width:260px;min-height:0;padding:4px 8px; }
+#memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }
+#memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }
+/* Deleting a group asks for a second click; the button shows the countdown as the inbox's delete button does. */
+.desktop-toolbar-icon.desktop-research-opportunity-delete[data-restart-armed="true"] { width:auto !important;min-width:152px !important;padding:0 12px !important;font-size:var(--memo-size-small) !important;white-space:nowrap; }
+.desktop-toolbar-icon.desktop-research-opportunity-delete[data-restart-armed="true"]::before { display:none; }
+/* The paper picker shares the right panel with the citations panel; one of them shows at a time. */
+#desktop-chat-preview .memo-evidence[hidden] { display:none !important; }
+#desktop-chat-preview .memo-paper-picker-head .field { flex:1;min-width:0; }
+#desktop-chat-preview .memo-paper-picker-note { margin:0; }
+#desktop-chat-preview .memo-paper-picker .memo-library-copy small { display:block;color:var(--text-secondary); }
+#desktop-chat-preview .memo-paper-picker .memo-library-row:has(input:disabled) { cursor:default;opacity:.6; }
+/* Starring an opportunity: the leaderboard's star, outlined, filled in the brand colour once starred (no pressed box). */
+.desktop-toolbar-icon.desktop-research-opportunity-star { --desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%271.7%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m12%203%202.78%205.63L21%209.55l-4.5%204.39%201.06%206.19L12%2017.2l-5.56%202.93%201.06-6.19L3%209.55l6.22-.92Z%27%2F%3E%3C%2Fsvg%3E"); }
+.desktop-toolbar-icon.desktop-research-opportunity-star[aria-pressed="true"] { --desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%20stroke%3D%27black%27%20stroke-width%3D%271.7%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m12%203%202.78%205.63L21%209.55l-4.5%204.39%201.06%206.19L12%2017.2l-5.56%202.93%201.06-6.19L3%209.55l6.22-.92Z%27%2F%3E%3C%2Fsvg%3E"); border-color:transparent !important; background:transparent !important; box-shadow:none !important; color:var(--desktop-brand) !important; }
+/* In the open details, each part's heading sits on the window's subtle tint. */
+.desktop-research-opportunity-more .desktop-research-opportunity-part > small:first-child { display:inline-block;padding:1px 8px;border-radius:6px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary); }
 #library-research-result { font:inherit;line-height:1.6;overflow-wrap:anywhere; }
 #library-research-result[hidden] { display:none; }
 #library-research-result .desktop-research-paper { padding:16px 0; }

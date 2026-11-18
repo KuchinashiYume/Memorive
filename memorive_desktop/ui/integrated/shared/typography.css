@@ -30,9 +30,9 @@
 [data-memo-type="page"],[data-memo-type="section"],[data-memo-type="control"],[data-memo-type="value"],[data-memo-type="small"],[data-memo-type="empty"] {font-family:var(--memo-font-ui)!important;font-weight:400!important;line-height:1.5!important;}
 [data-memo-type="page"],[data-memo-type="section"] {font-weight:700!important;line-height:1.35!important;}
 [data-memo-type="body"] {font-family:var(--memo-font-ui)!important;font-weight:400!important;line-height:1.8!important;}
-/* Running text, the only text in the reading face: research Q&A questions and answers, message bodies, documents and
-   reports (app.js typeRole lists the same places). */
-:is(.memo-message-body,#messages-summary,.desktop-markdown,.desktop-research-paper,.paper-review-report-section,.paper-review-source-body)[data-memo-type="body"],:is(.memo-message-body,#messages-summary,.desktop-markdown,.desktop-research-paper,.paper-review-report-section,.paper-review-source-body) [data-memo-type="body"] {font-family:var(--memo-font-read)!important;}
+/* Running text, the only text in the reading face: research Q&A questions and answers (an answer being edited too),
+   message bodies, documents and reports (app.js typeRole lists the same places). */
+.memo-answer-editor textarea[data-memo-type="body"],:is(.memo-message-body,#messages-summary,.desktop-markdown,.desktop-research-paper,.paper-review-report-section,.paper-review-source-body,.desktop-research-opportunity-part > p,.desktop-research-opportunity-fact > :is(p,blockquote))[data-memo-type="body"],:is(.memo-message-body,#messages-summary,.desktop-markdown,.desktop-research-paper,.paper-review-report-section,.paper-review-source-body) [data-memo-type="body"] {font-family:var(--memo-font-read)!important;}
 [data-memo-type="code"] {font-family:var(--memo-font-code)!important;line-height:1.5!important;}
 /* Real emphasis only; legacy <strong> list/field wrappers are not headings. */
 .memo-message-body :is(strong,b)[data-memo-type],.desktop-markdown :is(strong,b)[data-memo-type],.desktop-research-paper :is(strong,b)[data-memo-type],.paper-review-report-section :is(strong,b)[data-memo-type] {font-family:var(--memo-font-read)!important;font-weight:700!important;}

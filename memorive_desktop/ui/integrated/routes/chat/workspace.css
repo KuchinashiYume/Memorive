@@ -96,7 +96,6 @@
 
 /* Project/thread layout; colour and type inherit the adopted memo shell. */
 /* Requested open-folder glyph uses the existing toolbar mask and button geometry. */
-#memo-connection-editor .desktop-action-folder-open,#memo-history-toggle.desktop-action-folder-open,#memo-bridge-open-folder.desktop-action-folder-open,#memo-pick-agent.desktop-action-folder-open,#memo-handoff-inline .desktop-action-folder-open,dialog:has(.memo-handoff-preview) .desktop-action-folder-open{--desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%2014%201.5-2.9A2%202%200%200%201%209.24%2010H20a2%202%200%200%201%201.94%202.5l-1.54%206a2%202%200%200%201-1.94%201.5H4a2%202%200%200%201-2-2V6a2%202%200%200%201%202-2h4.93a2%202%200%200%201%201.66.9L12%207h6a2%202%200%200%201%202%202v1%22%2F%3E%3C%2Fsvg%3E")}
 #memo-chat-page{position:relative;font-family:var(--memo-font-ui);background:var(--desktop-surface-raised,#FFFDF9);color:var(--desktop-text-primary,#2A2723);overflow:hidden}
 #memo-chat-page [hidden]{display:none!important}
 #memo-chat-page button,#memo-chat-page input,#memo-chat-page textarea{font-family:inherit}
@@ -344,6 +343,12 @@
 #memo-chat-page .memo-tree-heading{padding:0 6px 6px;min-height:30px;line-height:1.35}
 #memo-chat-page .memo-project-group{margin-bottom:10px}
 #memo-chat-page .memo-project-row{min-height:32px;padding:0 2px}
+/* A project row takes the window's subtle tint (as the navigation and segmented switches do); on hover the
+   pressed tint, one step darker. */
+#memo-chat-page .memo-project-row{background:var(--desktop-surface-subtle)}
+#memo-chat-page .memo-project-row:is(:hover,:focus-within){background:var(--desktop-surface-pressed)}
+/* The conversation menu belongs to an open conversation; with none open it is hidden (its place kept). */
+#memo-chat-page .memo-chat-toolbar[data-overview=true] #memo-thread-menu{visibility:hidden}
 #memo-chat-page .memo-project-toggle{min-height:32px;line-height:1.35;padding-block:4px}
 #memo-chat-page .memo-project-threads{display:grid;gap:3px;margin-top:3px;padding-top:0;padding-bottom:0}
 #memo-chat-page .memo-thread-row{min-height:0}
@@ -550,4 +555,38 @@
 #memo-chat-page .memo-context-details :is(ul,ol){padding-left:1.4em}
 #memo-chat-page .memo-context-details li{margin:4px 0}
 #memo-chat-page .memo-context-status{margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);white-space:nowrap}
+/* Answer versions: the in-place editor looks like the answer it edits; the history dialog lists the versions on the
+   left and shows the chosen one on the right (red: only in that version, green: only in the current one). */
+#memo-chat-page .memo-answer-editor{display:flex;flex-direction:column;gap:10px}
+#memo-chat-page .memo-answer-editor textarea{box-sizing:border-box;min-height:120px;padding:10px 12px;margin:-6px -13px 0;width:calc(100% + 26px);border:1px solid var(--desktop-selection-border);border-radius:10px;background:var(--desktop-surface);color:var(--desktop-text-primary);resize:vertical;field-sizing:content;outline:none}
+#memo-chat-page .memo-answer-editor textarea:focus{border-color:var(--desktop-border-strong);box-shadow:0 0 0 2px #A2603F12}
+#memo-chat-page .memo-answer-editor-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+#memo-chat-page .memo-answer-editor-bar .memo-status{flex:1 1 260px;margin:0}
+#desktop-chat-preview #memo-version-body:not(.memo-centered-empty){display:flex;flex-direction:column;gap:12px}
+#desktop-chat-preview .memo-history-list{list-style:none;margin:0;padding:0 0 8px;display:flex;flex-direction:column;gap:2px;max-height:calc(220px * var(--desktop-scale));overflow:auto;border-bottom:1px solid var(--desktop-border-subtle)}
+.memo-history-version{display:block;width:100%;border:1px solid transparent;border-radius:8px;background:transparent;padding:8px 10px;text-align:left;color:inherit;cursor:pointer}
+.memo-history-version:hover{background:var(--desktop-surface-hover)}
+.memo-history-version[aria-pressed=true]{background:var(--desktop-surface-selected);border-color:var(--desktop-selection-border)}
+.memo-history-version small{display:block;margin-top:3px;color:var(--desktop-text-secondary)}
+.memo-history-pane{min-width:0;display:flex;flex-direction:column;gap:12px}
+.memo-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.memo-history-head h4{margin:0}
+.memo-history-tools{display:flex;align-items:center;gap:6px}
+.memo-history-pane .memo-message-body{line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
+.memo-history-diff :is(ins,del),.memo-history-legend span{border-radius:3px;padding:0 2px}
+.memo-history-diff ins,.memo-history-new{text-decoration:none;background:var(--green-bg);color:var(--green-text)}
+.memo-history-diff del,.memo-history-old{background:var(--red-bg);color:var(--red-text)}
+.memo-history-legend{display:flex;flex-wrap:wrap;gap:12px;margin:0;color:var(--desktop-text-secondary)}
+.memo-history-skip{display:block;margin:4px 0;border:0;border-radius:6px;padding:2px 8px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);cursor:pointer}
+.memo-history-label{margin:0;color:var(--desktop-text-secondary)}
+.memo-history-citations{margin:0;padding-left:1.4em}
+#desktop-chat-preview .memo-evidence-tabs.desktop-icon-segmented{flex:0 0 auto}
+/* The panel's tabs and refresh button sit on the right, like the page header's tools. */
+#desktop-chat-preview .memo-evidence-heading{justify-content:flex-end}
+/* The research opportunities mode (shared/opportunities.js): the Q&A layout and its tools give way to that page,
+   which uses the reading column of the conversation. */
+#memo-chat-page[data-mode=opportunities] .memo-layout{display:none!important}
+#memo-chat-page[data-mode=opportunities] .memo-heading-tools > :not(#memo-mode){display:none!important}
+#memo-chat-page .memo-opportunities{flex:1;min-height:0;overflow:auto}
+#memo-chat-page .memo-opportunities-body{display:flex;flex-direction:column;gap:18px;padding:24px max(24px,calc((100% - var(--memo-column))/2)) 32px}
 #memo-chat-page .memo-context-technical > summary{cursor:pointer;color:var(--desktop-text-secondary);font-size:var(--memo-size-small)}

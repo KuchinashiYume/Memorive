@@ -1,4 +1,9 @@
 /* desktop-integrated-viewport-v1 */
+/* A page title that switches the page's mode (research Q&A and research opportunities; the library's literature and
+   Memorive documents), as the mode button next to it does. */
+.desktop-page-title-switch { margin:0 -6px;padding:0 6px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;cursor:pointer; }
+.desktop-page-title-switch:hover { background:var(--desktop-surface-hover); }
+.desktop-page-title-switch:focus-visible { outline:2px solid var(--desktop-focus-ring);outline-offset:2px; }
 html,
 body {
   width: 100%;
@@ -289,7 +294,6 @@ body {
 #desktop-settings-preview .desktop-settings-browser-stage-grid[hidden], #desktop-settings-preview .desktop-settings-browser-disclosure-body .desktop-settings-statusline[hidden], #desktop-settings-preview #memo-browser-code-workbench[hidden], #desktop-settings-preview .desktop-settings-browser-provider-grid[hidden] { display:none !important; }
 html[lang] #desktop-settings-preview .desktop-settings-categories { grid-auto-rows:max-content; }
 #desktop-settings-preview #memo-browser-sites .desktop-settings-browser-provider-grid { grid-template-columns:minmax(0,1fr); }
-#memo-handoff-inline .desktop-action-copy,#desktop-settings-preview .desktop-action-copy,dialog:has(.memo-handoff-preview) .desktop-action-copy{--desktop-action-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='12' height='12' rx='2'/%3E%3Cpath d='M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2'/%3E%3C/svg%3E")}
 #desktop-settings-preview #memo-bridge-setup-guide[hidden] { display:none; }
 
 #desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-test,

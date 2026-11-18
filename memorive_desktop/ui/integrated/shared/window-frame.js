@@ -440,7 +440,7 @@
       if (placement === 'right') {
         left = targetRect.right - appRect.left + 10;
         top = targetRect.top - appRect.top + (targetRect.height - tipRect.height) / 2;
-      }
+      } else if (placement === 'top') top = targetRect.top - appRect.top - tipRect.height - 8;
       left = Math.max(8, Math.min(left, appRect.width - tipRect.width - 8));
       top = Math.max(8, Math.min(top, appRect.height - tipRect.height - 8));
       tooltip.style.left = `${left}px`;

@@ -16,7 +16,6 @@
     'inbox.effect_metrics', 'sessions.refinement_cancel',
     'current_task.begin_cancel', 'current_task.confirm_cancel'
   ]);
-  const released = new WeakSet();
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
   const nativeReady = () => Boolean(window.pywebview && window.pywebview.api && window.pywebview.api.call);
@@ -478,10 +477,6 @@
     }
   };
 
-  const replayClick = (target) => {
-    released.add(target);
-    target.click();
-  };
   const stop = (event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -825,10 +820,6 @@
   document.addEventListener('click', (event) => {
     const target = event.target.closest('button');
     if (!target || !root.contains(target)) return;
-    if (released.has(target)) {
-      released.delete(target);
-      return;
-    }
     const effectful = target.matches(
       '#inbox-add,#inbox-refresh,#inbox-auto,#inbox-undo,#inbox-redo,#inbox-toast-undo,'
       + '#inbox-star-selected,#inbox-unstar-selected,#inbox-remove-selected,'
@@ -971,6 +962,7 @@
   };
 
   Memorive.inboxBridge = Object.freeze({
+    showToast,
     methods: METHODS,
     call,
     bootstrap,

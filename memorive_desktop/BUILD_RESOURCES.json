@@ -15,12 +15,12 @@
     {
       "source": "memorive_desktop/product/desktop/bundle_assistant.html",
       "destination": "bundle_assistant.html",
-      "sha256": "e727c7b6f1e59c5fcff796221a6f494eef06ea83c539447ee46b5cdfaccb95a5"
+      "sha256": "a7906df628a8fc5e9af98370befce73de23bb2c309fc5242aa098aea41b10541"
     },
     {
       "source": "memorive_desktop/product/desktop/bundle_integrated.html",
       "destination": "bundle_integrated.html",
-      "sha256": "bc948ef76a8d8ac5137e36fa5f2766e504dafca79de06a79e85fcbd6ccfb5409"
+      "sha256": "5b2a3e308913d929aa20c91b9d92aead99f36207815b53833c04c0151d47bad5"
     },
     {
       "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",

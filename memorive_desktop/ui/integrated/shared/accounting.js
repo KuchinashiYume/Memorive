@@ -80,7 +80,6 @@
   const tooltip = one('#desktop-accounting-tooltip');
   const empty = one('#desktop-accounting-empty');
   const metricButtons = [...panel.querySelectorAll('[data-metric]')];
-  const initial = window.MEMORIVE_ACCOUNTING_REFERENCE_INITIAL || {};
   const currencies = ['USD', 'CNY', 'JPY'];
   const currencyLabel = (code) => code === 'CNY' ? 'RMB' : code;
   // The chart title of each metric is accounting.chart.<metric>.
@@ -89,9 +88,11 @@
     REQUESTS: { icon: '#desktop-icon-requests', color: '#557C9E' },
     TOKENS: { icon: '#desktop-icon-tokens', color: '#4E7E65' },
   });
-  let selectedMetric = metricMeta[initial.metric] ? initial.metric : 'COST';
-  let preferredCurrency = currencies.includes(initial.currency) ? initial.currency : 'USD';
-  let currencyInitialized = currencies.includes(initial.currency);
+  let selectedMetric = 'COST';
+  let preferredCurrency = 'USD';
+  let currencyInitialized = false;
+  // The task "this task" means: the one selected on the current task page ({job_id, title}), or none.
+  let job = null;
   let projection = null;
   let requestSerial = 0;
 
@@ -134,15 +135,10 @@
     const parsed = new Date(value);
     return Number.isFinite(parsed.getTime()) ? parsed.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '—';
   };
-  const call = async (method, params) => {
-    if (typeof window.MEMORIVE_ACCOUNTING_REFERENCE_PROVIDER_V3 === 'function') {
-      return window.MEMORIVE_ACCOUNTING_REFERENCE_PROVIDER_V3(method, params);
-    }
-    return Memorive.service.call(method, params);
-  };
+  const call = (method, params) => Memorive.service.call(method, params);
   const params = () => ({
     scope: scope.value,
-    current_job_id: window.MEMORIVE_CURRENT_JOB_ID || null,
+    current_job_id: job?.job_id || null,
     time_range: range.value,
     model_profile_ref: model.value || 'ALL',
     preferred_currency: preferredCurrency,
@@ -175,10 +171,11 @@
 
   const applyScopeCapability = () => {
     const option = scope.querySelector('option[value="CURRENT_JOB"]');
-    const capability = projection?.scope_capabilities?.current_job;
-    const ready = capability?.status === 'READY';
+    const ready = Boolean(job) && projection?.scope_capabilities?.current_job?.status === 'READY';
     option.disabled = !ready;
-    i18n.set(option, ready ? 'accounting.scope.job' : 'accounting.scope.job-partial');
+    if (!job) i18n.set(option, 'accounting.scope.job-none');
+    else if (ready) i18n.set(option, 'accounting.scope.job-named', { title: job.title });
+    else i18n.set(option, 'accounting.scope.job-partial');
     if (!ready && scope.value === 'CURRENT_JOB') scope.value = 'ALL';
   };
 
@@ -378,7 +375,7 @@
   const visible = () => panel.getAttribute('aria-hidden') === 'false' && !panel.hidden && panel.getClientRects().length > 0;
   const loadVisible = () => { if (visible()) void load(); };
   new MutationObserver(loadVisible).observe(panel, { attributes: true, attributeFilter: ['aria-hidden', 'hidden'] });
-  window.addEventListener('desktop:route-changed', loadVisible);
+  window.addEventListener('desktop-integrated-route', loadVisible);
 
   metricButtons.forEach((button) => button.addEventListener('click', () => selectMetric(button.dataset.metric)));
   currencyButton.addEventListener('click', async () => {
@@ -390,7 +387,6 @@
   refreshButton.addEventListener('click', () => void load({ manual: true }));
   [scope, range, model].forEach((control) => control.addEventListener('change', () => void load()));
   closeButton.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('desktop:bottom-panel-close-request', { detail: { panel: 'accounting' } }));
     const toggle = document.getElementById('desktop-toggle-bottom');
     if (toggle.getAttribute('aria-pressed') === 'true') toggle.click();
   });
@@ -403,14 +399,20 @@
     loadVisible();
   });
   new ResizeObserver(() => { if (projection) renderChart(); }).observe(plot);
-  if ([...range.options].some((option) => option.value === initial.range)) range.value = initial.range;
   loadVisible();
-  return Object.freeze({ load, visible });
+  const selectJob = (next) => {
+    job = next?.job_id ? { job_id: String(next.job_id), title: String(next.title || next.job_id) } : null;
+    applyScopeCapability();
+    loadVisible();
+  };
+  return Object.freeze({ load, visible, selectJob });
   };
   const instances = [...document.querySelectorAll('.desktop-accounting-panel')].map(initialize).filter(Boolean);
   Memorive.accounting = Object.freeze({
     instanceCount: instances.length,
     refresh: (manual = false) => instances.filter((item) => item.visible()).forEach((item) => void item.load({ manual })),
+    // The current task page names the task it shows ({job_id, title}), or null when none is selected.
+    selectJob: (job) => instances.forEach((item) => item.selectJob(job)),
   });
   window.addEventListener('pywebviewready', () => Memorive.accounting.refresh());
   window.requestAnimationFrame(() => Memorive.accounting.refresh());
