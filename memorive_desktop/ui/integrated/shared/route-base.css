@@ -226,6 +226,16 @@
     background: var(--desktop-surface-pressed);
     color: var(--desktop-text-primary);
   }
+  /* A panel button with nothing to show (the right panel before an item is selected, or a page without one). */
+  & .desktop-icon-button:is(:disabled, [aria-disabled="true"]) {
+    opacity: .48;
+    cursor: default;
+  }
+  & .desktop-icon-button:is(:disabled, [aria-disabled="true"]):hover {
+    border-color: transparent;
+    background: transparent;
+    color: var(--desktop-text-secondary);
+  }
   & .desktop-icon-button:focus-visible,
   & .desktop-logo:focus-visible,
   & .desktop-nav-item:focus-visible,

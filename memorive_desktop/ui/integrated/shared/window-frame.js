@@ -127,11 +127,14 @@
     },
   };
 
+  // detail: on routes whose right panel shows the selected item, the selector of a selected item. Without one
+  // the right panel button looks unavailable (aria-disabled) until something is selected or the panel is open;
+  // the route's own click handler still says what to select.
   const ROUTES = [
-    { component: 'settings', rule: RIGHT_PANEL_RULES.remembered },
+    { component: 'settings', rule: RIGHT_PANEL_RULES.remembered, detail: '.desktop-settings-node[aria-current="true"]' },
     { component: 'inbox', rule: RIGHT_PANEL_RULES.shareUntilResized },
-    { component: 'tasks', rule: RIGHT_PANEL_RULES.fixed(390, 280, 280) },
-    { component: 'messages', rule: RIGHT_PANEL_RULES.freshShare },
+    { component: 'tasks', rule: RIGHT_PANEL_RULES.fixed(390, 280, 280), detail: '.desktop-tasks-task[aria-selected="true"]' },
+    { component: 'messages', rule: RIGHT_PANEL_RULES.freshShare, detail: '.desktop-messages-card[aria-selected="true"]' },
     { component: 'sessions', rule: RIGHT_PANEL_RULES.fixed(260, 130, 160) },
     { component: 'library', rule: RIGHT_PANEL_RULES.keptShare },
     { component: 'worklog', rule: RIGHT_PANEL_RULES.keptShare },
@@ -140,7 +143,7 @@
     { component: 'chat', rule: RIGHT_PANEL_RULES.keptShare },
   ];
 
-  const createFrame = ({ component, rule: makeRule, ownTooltips = false }) => {
+  const createFrame = ({ component, rule: makeRule, ownTooltips = false, detail = null }) => {
     const root = document.getElementById(`desktop-${component}-preview`);
     if (!root) return;
     const rule = makeRule();
@@ -451,6 +454,15 @@
     };
     if (rule.reset) shell.resetInspectorRatio = () => rule.reset(frame);
     Memorive.frames[component] = shell;
+
+    if (detail) {
+      const showDetailAvailability = () => {
+        const available = app.dataset.right === 'true' || Boolean(root.querySelector(detail));
+        rightButton.setAttribute('aria-disabled', String(!available));
+      };
+      new MutationObserver(showDetailAvailability).observe(root, { subtree: true, attributes: true, attributeFilter: ['aria-selected', 'aria-current', 'data-right'] });
+      showDetailAvailability();
+    }
 
     const resizeObserver = new ResizeObserver(updateResizerBounds);
     resizeObserver.observe(stage);
