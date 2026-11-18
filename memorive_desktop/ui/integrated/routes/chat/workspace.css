@@ -550,4 +550,31 @@
 #memo-chat-page .memo-context-details :is(ul,ol){padding-left:1.4em}
 #memo-chat-page .memo-context-details li{margin:4px 0}
 #memo-chat-page .memo-context-status{margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);white-space:nowrap}
+/* Answer versions: the in-place editor looks like the answer it edits; the history dialog lists the versions on the
+   left and shows the chosen one on the right (red: only in that version, green: only in the current one). */
+#memo-chat-page .memo-answer-editor{display:flex;flex-direction:column;gap:10px}
+#memo-chat-page .memo-answer-editor textarea{box-sizing:border-box;min-height:120px;padding:10px 12px;margin:-6px -13px 0;width:calc(100% + 26px);border:1px solid var(--desktop-selection-border);border-radius:10px;background:var(--desktop-surface);color:var(--desktop-text-primary);resize:vertical;field-sizing:content;outline:none}
+#memo-chat-page .memo-answer-editor textarea:focus{border-color:var(--desktop-border-strong);box-shadow:0 0 0 2px #A2603F12}
+#memo-chat-page .memo-answer-editor-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+#memo-chat-page .memo-answer-editor-bar .memo-status{flex:1 1 260px;margin:0}
+.memo-history-dialog{max-width:1040px}
+.memo-history-dialog .memo-dialog-error{grid-column:1/-1}
+.memo-history-dialog .memo-dialog-body{display:grid;grid-template-columns:minmax(190px,240px) minmax(0,1fr);gap:16px;align-items:start;height:60vh}
+.memo-history-list{list-style:none;margin:0;padding:0 4px 0 0;display:flex;flex-direction:column;gap:2px;max-height:100%;overflow:auto;border-right:1px solid var(--desktop-border-subtle)}
+.memo-history-version{display:block;width:100%;border:1px solid transparent;border-radius:8px;background:transparent;padding:8px 10px;text-align:left;color:inherit;cursor:pointer}
+.memo-history-version:hover{background:var(--desktop-surface-hover)}
+.memo-history-version[aria-pressed=true]{background:var(--desktop-surface-selected);border-color:var(--desktop-selection-border)}
+.memo-history-version small{display:block;margin-top:3px;color:var(--desktop-text-secondary)}
+.memo-history-pane{min-width:0;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px}
+.memo-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.memo-history-head h4{margin:0}
+.memo-history-pane .memo-message-body{line-height:1.9}
+.memo-history-diff :is(ins,del),.memo-history-legend span{border-radius:3px;padding:0 2px}
+.memo-history-diff ins,.memo-history-new{text-decoration:none;background:var(--green-bg);color:var(--green-text)}
+.memo-history-diff del,.memo-history-old{background:var(--red-bg);color:var(--red-text)}
+.memo-history-legend{display:flex;gap:12px;margin:0;color:var(--desktop-text-secondary)}
+.memo-history-skip{display:block;margin:4px 0;border:0;border-radius:6px;padding:2px 8px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);cursor:pointer}
+.memo-history-label{margin:0;color:var(--desktop-text-secondary)}
+.memo-history-citations{margin:0;padding-left:1.4em}
+@media(max-width:760px){.memo-history-dialog .memo-dialog-body{grid-template-columns:1fr;height:auto}.memo-history-list{border-right:0;max-height:180px}}
 #memo-chat-page .memo-context-technical > summary{cursor:pointer;color:var(--desktop-text-secondary);font-size:var(--memo-size-small)}

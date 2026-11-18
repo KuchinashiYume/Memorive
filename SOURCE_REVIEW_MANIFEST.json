@@ -1201,8 +1201,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "b32ddaa995cd3ff920546200cc8ebcb37c21dab002926c1cd30f2fa32271149d",
-      "bytes": 2487707
+      "sha256": "4b2256d665f488b18a24f8e1a5b4bc85de9f8a2479a54b94fc13172ed452fc6f",
+      "bytes": 2508802
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4076,12 +4076,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "89841eb01757b633b0d375575d01741359934685c708758999aa12bd1c2e6a88",
+      "sha256": "e0a5dda4556e5ef094c5fc32138ee18f9de37c2134258d1c968fd6fe1107f2b2",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "5befed657af7f46365442c971833c7e593cd7be49b31f04448c152aea5497cf2",
+      "sha256": "5ed61818bff4b30990b9c8b538440005299d2a013ff1d7b27b72d35518e30a2d",
       "bytes": 276403
     },
     {
@@ -4676,13 +4676,13 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.css",
-      "sha256": "03cc014cc46ab2e037d82dd86d2ce82ff0a537725a1a46a5b325c3410f18460c",
-      "bytes": 68002
+      "sha256": "9951ddc47ea37941cfdc26cc590d777fd632a0b1acc3f727dbbff88bd0ffd372",
+      "bytes": 71055
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.js",
-      "sha256": "27d64c6309c0e127cfe96c29a33f241d9436d41f34596337f53b7959b654e7fc",
-      "bytes": 115052
+      "sha256": "39e0f489eaa5175cc1ab51898148ba159ddd49a4b0a8c743d57dc3910e326faf",
+      "bytes": 129035
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/bridge.js",
@@ -4911,8 +4911,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/app.js",
-      "sha256": "7d8d6c8c1b843386b285d02dd85ef658118ed57c9f08a0bff88519a920bc2e29",
-      "bytes": 361788
+      "sha256": "a7de2ececdaa04b96fe46f19244b55cd8b5e2c23303ea9098d77061ffdea5e61",
+      "bytes": 365766
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/content-language.js",
@@ -5021,8 +5021,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/typography.css",
-      "sha256": "bc37c03931c59e52c3bb288f671cc6c61645f7ba3b6eb1e21cd3dc2d090d2e74",
-      "bytes": 5834
+      "sha256": "4e2b55f557f533d972c52a2e7d2af2fb6db11101762e51af2e5a2e7c2f36f485",
+      "bytes": 5915
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/window-chrome.css",

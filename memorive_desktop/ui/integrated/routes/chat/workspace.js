@@ -12,7 +12,7 @@
     return e;
   };
   const call=(method,params={})=>Memorive.service.call(method,params);
-  const errors={CLI_WORKSPACE_PATH_TOO_LONG:'当前目录过长，请将 Memo 放入较短的目录后重试',RULE_METRIC_INVALID:'请检查指标数值、年份与来源',RULE_SOURCE_REQUIRED:'请填写指标来源',VAULT_REQUIRED:'请先选择资料文件夹',CHAT_MODEL_UNAVAILABLE:'所选模型不可用，请检查模型设置',THREAD_BUSY:'当前对话正在回答',REVISION_CONFLICT:'内容已变化，请刷新后重试',EVIDENCE_STALE:'来源已修改，请更新索引',EVIDENCE_NOT_FOUND:'引用已失效，请更新索引',CHAT_MODEL_EXECUTION_FAILED:'模型未能完成回答，请查看调用记录',TENSION_NEEDS_TWO_SOURCES:'请选择至少两份文献证据',TENSION_NEEDS_TWO_PAPERS:'请选择来自不同文献的证据'};
+  const errors={CLI_WORKSPACE_PATH_TOO_LONG:'当前目录过长，请将 Memo 放入较短的目录后重试',RULE_METRIC_INVALID:'请检查指标数值、年份与来源',RULE_SOURCE_REQUIRED:'请填写指标来源',VAULT_REQUIRED:'请先选择资料文件夹',CHAT_MODEL_UNAVAILABLE:'所选模型不可用，请检查模型设置',THREAD_BUSY:'当前对话正在回答',ANSWER_VERSION_CONFLICT:'这条回答已有更新的版本，列表已刷新',ANSWER_TEXT_INVALID:'回答不能为空，也不能超过 20 万字',REVISION_CONFLICT:'内容已变化，请刷新后重试',EVIDENCE_STALE:'来源已修改，请更新索引',EVIDENCE_NOT_FOUND:'引用已失效，请更新索引',CHAT_MODEL_EXECUTION_FAILED:'模型未能完成回答，请查看调用记录',TENSION_NEEDS_TWO_SOURCES:'请选择至少两份文献证据',TENSION_NEEDS_TWO_PAPERS:'请选择来自不同文献的证据'};
   let state=null,
     project='default',
     thread=null,
@@ -218,7 +218,264 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     box.append(retry);
     return box;
   }
+  // Saved versions of an answer (memo.answer_*, answer_saves.py): every save keeps a version. An answer is edited
+  // in place; its history lists the versions, compares one with the current version and restores one (as a new
+  // version); an Agent's reply can be taken over as a new version of an earlier answer. Nothing here calls a model.
+  const ICONS={edit:'<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+    history:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+  const SOURCES={GENERATED:'最初的回答',EDIT:'修改',AUTOSAVE:'自动保存',AGENT:'采纳 Agent 回复',CLAIM_REVISION:'修订结论',RESTORE:'恢复'};
+  const edited=m=>Boolean(m.saved_version_id)||(m.answer_version||1)>1;
+  const versionsBlocked=()=>!!activeJob||waitingForFiles||!!thread?.archived;
+  // The version the server holds now, from an ANSWER_VERSION_CONFLICT:<version_id> error; null for other errors.
+  const conflictVersion=e=>String(e?.message||'').startsWith('ANSWER_VERSION_CONFLICT:')?String(e.message).slice(24):null;
+  function iconButton(label,svg,fn,actionName){
+    const b=button('',fn,'memo-quiet-button memo-message-icon');
+    b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+svg+'</svg>';
+    b.setAttribute('aria-label',t(label));
+    b.dataset.desktopTip=t(label);
+    b.dataset.answerAction=actionName;
+    return b;
+  }
+  function versionActions(m){
+    const nodes=[],edit=iconButton('修改',ICONS.edit,()=>startEdit(m),'edit');
+    edit.disabled=versionsBlocked()||editing.has(m.id);
+    nodes.push(edit);
+    if(edited(m))nodes.push(iconButton('历史版本',ICONS.history,()=>openHistory(m),'history'));
+    if(m.agent_result&&adoptTargets(m).length){
+      const adopt=button('采纳为新版本',()=>chooseAdoptTarget(m,adopt),'memo-quiet-button');
+      adopt.dataset.answerAction='adopt';
+      adopt.disabled=versionsBlocked();
+      nodes.push(adopt);
+    }
+    return nodes;
+  }
+  async function reloadThread(owner){
+    const fresh=await call('memo.thread_get',{thread_id:owner});
+    if(thread?.id!==owner)return false;
+    thread=fresh;
+    renderThread();
+    return true;
+  }
+  const focusAnswer=(id,actionName)=>[...q('#memo-transcript').querySelectorAll('[data-message-id]')].find(el=>el.dataset.messageId===id)
+    ?.querySelector('[data-answer-action="'+actionName+'"]')?.focus({preventScroll:true});
+
+  // Editing. The draft lives in `editing` (by answer id) until it is saved or cancelled, so a re-render or a switch
+  // to another conversation keeps it. It saves against the version it started from; if the answer changed meanwhile
+  // the server says so and the next save goes after that newer version (both stay in the history).
+  async function startEdit(m){
+    const owner=thread.id,history=await call('memo.answer_history',{thread_id:owner,answer_id:m.id});
+    if(thread?.id!==owner)return;
+    editing.set(m.id,{text:m.text,base:history.current_version_id,caret:m.text.length});
+    renderThread();
+    focusAnswer(m.id,'editor');
+  }
+  function cancelEdit(m){
+    editing.delete(m.id);
+    renderThread();
+    focusAnswer(m.id,'edit');
+  }
+  async function saveEdit(m){
+    const draft=editing.get(m.id),owner=thread.id;
+    if(!draft.text.trim())throw Error('ANSWER_TEXT_INVALID');
+    try{
+      const result=await call('memo.answer_save',{thread_id:owner,answer_id:m.id,text:draft.text,expected_version_id:draft.base});
+      editing.delete(m.id);
+      if(await reloadThread(owner)){
+        focusAnswer(m.id,'edit');
+        status('#memo-chat-status',result.saved?'已保存为新版本':'内容没有变化');
+      }
+    }catch(e){
+      const current=conflictVersion(e);
+      if(!current)throw e;
+      draft.conflict={from:draft.base,to:current};
+      draft.base=current;
+      renderThread();
+      focusAnswer(m.id,'editor');
+    }
+  }
+  function answerEditor(m){
+    const draft=editing.get(m.id),
+      box=create('div',null,'memo-answer-editor'),
+      area=create('textarea'),
+      bar=create('div',null,'memo-answer-editor-bar'),
+      save=button('保存',()=>saveEdit(m),'primary-button');
+    area.value=draft.text;
+    area.setAttribute('aria-label',t('修改回答'));
+    area.dataset.answerAction='editor';
+    const keep=()=>{draft.text=area.value;draft.caret=area.selectionStart;};
+    area.addEventListener('input',keep);
+    area.addEventListener('keyup',keep);
+    area.addEventListener('mouseup',keep);
+    area.addEventListener('keydown',e=>{
+      if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();save.click();}
+      // Escape leaves only an unchanged draft; a changed one is left with the Cancel button.
+      else if(e.key==='Escape'&&area.value===m.text){e.preventDefault();e.stopPropagation();cancelEdit(m);}
+    });
+    if(draft.conflict){
+      const note=create('p',t('这条回答已在别处改动。再次保存会存在那次改动之后，两次的内容都保留在历史版本里。'),'memo-status');
+      note.dataset.error='true';
+      bar.append(note,button('查看改动',()=>openHistory(m,draft.conflict.from),'soft-button'));
+    }
+    bar.append(button('取消',()=>cancelEdit(m),'soft-button'),save);
+    box.append(area,bar);
+    return box;
+  }
+
+  // Taking an Agent's reply over: it becomes a new version of an earlier answer of the same conversation (the
+  // nearest one first when there are several); the earlier text stays in that answer's history.
+  function adoptTargets(reply){
+    const at=thread.messages.indexOf(reply);
+    return thread.messages.slice(0,Math.max(at,0)).filter(m=>m.role==='assistant'&&!m.agent_result).reverse();
+  }
+  function questionOf(answer){
+    const at=thread.messages.indexOf(answer);
+    return thread.messages.slice(0,at).reverse().find(m=>m.role==='user')?.text||'';
+  }
+  function chooseAdoptTarget(reply,anchor){
+    const targets=adoptTargets(reply);
+    if(targets.length===1)return adoptReply(reply,targets[0]);
+    const excerpt=s=>s.length>40?s.slice(0,40)+'…':s;
+    openMenu(anchor,targets.map(m=>[t('作为这条回答的新版本')+' · '+excerpt(questionOf(m)||m.text),()=>adoptReply(reply,m)]));
+  }
+  async function adoptReply(reply,target){
+    const owner=thread.id,history=await call('memo.answer_history',{thread_id:owner,answer_id:target.id});
+    await call('memo.answer_adopt',{thread_id:owner,answer_id:target.id,from_message_id:reply.id,expected_version_id:history.current_version_id});
+    if(await reloadThread(owner)){
+      focusAnswer(target.id,'history');
+      status('#memo-chat-status','已存为新版本，原来的内容在历史版本里');
+    }
+  }
+
+  // The history: the versions, newest first, on the left; the chosen one on the right, compared with the current
+  // version (red: only in the chosen version, green: only in the current one) or in full, with copy and restore.
+  async function openHistory(m,select=null){
+    const owner=thread.id,view=dialog(t('历史版本')),
+      list=create('ol',null,'memo-history-list'),
+      pane=create('section',null,'memo-history-pane');
+    view.d.classList.add('memo-history-dialog');
+    view.body.append(list,pane);
+    let history=null,chosen=select,mode='compare',ticket=0;
+    const label=v=>{
+      let source=t(SOURCES[v.source]||v.source);
+      if(v.source==='RESTORE'){
+        const from=history.versions.find(x=>x.version_id===v.restored_from);
+        if(from)source+=' v'+from.number;
+      }
+      return 'v'+v.number+' · '+source;
+    };
+    const when=v=>new Date(v.saved_at).toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'});
+    async function load(){
+      history=await call('memo.answer_history',{thread_id:owner,answer_id:m.id});
+      if(!history.versions.some(v=>v.version_id===chosen))chosen=history.versions.at(-2)?.version_id||history.current_version_id;
+      renderList();
+      await renderPane();
+    }
+    function renderList(){
+      list.replaceChildren();
+      for(const v of [...history.versions].reverse()){
+        const item=create('li'),b=create('button',null,'memo-history-version');
+        b.type='button';
+        b.setAttribute('aria-pressed',String(v.version_id===chosen));
+        const facts=[when(v),v.characters.toLocaleString()+' '+t('字')];
+        if(v.citation_count)facts.push(t('引用')+' '+v.citation_count);
+        b.append(create('span',label(v)+(v.version_id===history.current_version_id?' · '+t('当前'):''),'memo-history-version-name'),
+          create('small',facts.join(' · ')));
+        if(v.review_inputs==='citations')b.append(create('small',t('仅保留引文')));
+        b.onclick=()=>{
+          chosen=v.version_id;
+          renderList();
+          void renderPane().catch(err=>showError(err));
+          list.querySelector('[aria-pressed="true"]')?.focus();
+        };
+        item.append(b);
+        list.append(item);
+      }
+    }
+    function showError(err){
+      const p=create('p',t(errors[err?.message]||err?.message||'操作未完成'),'memo-status');
+      p.dataset.error='true';
+      p.setAttribute('role','alert');
+      pane.append(p);
+    }
+    async function renderPane(){
+      const mine=++ticket,current=chosen===history.current_version_id,
+        version=history.versions.find(v=>v.version_id===chosen),
+        [full,diff]=await Promise.all([
+          call('memo.answer_version_get',{thread_id:owner,answer_id:m.id,version_id:chosen}),
+          current?null:call('memo.answer_diff',{thread_id:owner,answer_id:m.id,from_version_id:chosen,to_version_id:history.current_version_id})]);
+      if(mine!==ticket||!view.d.isConnected)return;
+      pane.replaceChildren();
+      const head=create('header',null,'memo-history-head');
+      head.append(create('h4',label(version)+(current?' · '+t('当前'):'')));
+      if(!current){
+        const modes=create('div',null,'segmented');
+        for(const [key,text] of [['compare','与当前比较'],['full','全文']]){
+          const b=create('button',t(text));
+          b.type='button';
+          b.setAttribute('aria-pressed',String(mode===key));
+          b.onclick=()=>{mode=key;void renderPane().catch(err=>showError(err));};
+          modes.append(b);
+        }
+        head.append(modes);
+      }
+      pane.append(head);
+      if(!current&&mode==='compare')pane.append(...diffView(diff,version));
+      else pane.append(messageBody(full.text),...citationList(full.citations));
+      view.footer.replaceChildren(button('复制此版本',()=>copyText(full.text),'soft-button'));
+      if(!current){
+        const restore=button('恢复为当前版本',async()=>{
+          try{
+            await call('memo.answer_restore',{thread_id:owner,answer_id:m.id,version_id:chosen,expected_version_id:history.current_version_id});
+          }catch(e){
+            if(!conflictVersion(e))throw e;
+            await load();
+            showError(Error('ANSWER_VERSION_CONFLICT'));
+            return;
+          }
+          view.d.close();
+          if(await reloadThread(owner)){
+            focusAnswer(m.id,'history');
+            status('#memo-chat-status','已恢复，并保存为新版本');
+          }
+        },'primary-button');
+        restore.disabled=versionsBlocked();
+        view.footer.append(restore);
+      }
+    }
+    function citationList(citations){
+      if(!citations?.length)return [];
+      const box=create('ol',null,'memo-history-citations');
+      for(const r of citations)box.append(create('li',r.title));
+      return [create('p',t('引用'),'memo-history-label'),box];
+    }
+    function diffView(diff,version){
+      const text=create('div',null,'memo-message-body memo-history-diff');
+      for(const block of diff.blocks){
+        if(block.kind==='equal'){
+          const lines=block.new_lines;
+          if(lines.length<=6){text.append(lines.join(''));continue;}
+          const more=create('button',t('展开未改动的行')+' · '+(lines.length-4),'memo-history-skip');
+          more.type='button';
+          more.onclick=()=>more.replaceWith(lines.slice(2,-2).join(''));
+          text.append(lines.slice(0,2).join(''),more,lines.slice(-2).join(''));
+        }else if(block.kind==='change'){
+          for(const w of block.words)text.append(w.op==='equal'?w.text:create(w.op==='insert'?'ins':'del',w.text));
+        }else text.append(create(block.kind==='insert'?'ins':'del',(block.kind==='insert'?block.new_lines:block.old_lines).join('')));
+      }
+      const legend=create('p',null,'memo-history-legend');
+      legend.append(create('span',t('只在此版本')+' · v'+version.number,'memo-history-old'),create('span',t('只在当前版本'),'memo-history-new'));
+      const c=diff.citations,notes=[];
+      if(c.added.length)notes.push(t('新增引用')+' · '+c.added.map(r=>r.title).join('；'));
+      if(c.removed.length)notes.push(t('移除引用')+' · '+c.removed.map(r=>r.title).join('；'));
+      if(c.changed?.length)notes.push(t('引用内容有变化')+' · '+c.changed.map(r=>r.title).join('；'));
+      if(c.reordered)notes.push(t('引用顺序有调整'));
+      const same=diff.blocks.every(b=>b.kind==='equal')&&!notes.length;
+      return same?[create('p',t('与当前版本内容相同'),'memo-history-label')]:[legend,text,...notes.map(n=>create('p',n,'memo-history-label'))];
+    }
+    await load();
+  }
 const collapsed=new Set();
+  const editing=new Map();
   let menu=null,menuAnchor=null,searchTimer=0;
   const viewClient=crypto.randomUUID().replaceAll('-','');
   let viewSequence=0,visibleThread=null,viewReady=false,pageLoading=false;
@@ -677,7 +934,7 @@ const collapsed=new Set();
       copy.dataset.desktopTip=t('复制');
       copy.dataset.answerAction='copy';
       if(m.role==='user')head.append(copy);
-      row.append(head,messageBody(m.text));
+      row.append(head,m.role==='assistant'&&editing.has(m.id)?answerEditor(m):messageBody(m.text));
       if(m.feedback_id){
         const proposal=state?.feedback.find(p=>p.id===m.feedback_id);
         if(proposal){
@@ -698,7 +955,7 @@ const collapsed=new Set();
       if(m.role==='assistant'){
         // Under an answer, one line: its actions first, then what it was made from and what it took.
         const foot=create('div',null,'memo-message-footer'),meta=create('span',null,'memo-message-meta');
-        foot.append(answerActions(m),copy);
+        foot.append(answerActions(m),copy,...versionActions(m));
         if(m.needs_agent)foot.append(button('继续深入 → 交给 Agent',()=>handoff(),'memo-quiet-button'));
         if(m.engine)meta.append(create('span',m.engine==='evidence_only'?'资料摘录':m.engine));
         if(Number.isFinite(m.elapsed_ms)&&m.elapsed_ms>=0)meta.append(create('span',(m.elapsed_ms/1000).toFixed(1)+' s'));
@@ -707,6 +964,7 @@ const collapsed=new Set();
         const cached=usage?.cached_input_tokens??usage?.cache_read_input_tokens;
         if(cached>0)meta.append(create('span',t('缓存命中')+' · '+cached.toLocaleString()));
         if(m.usage&&Object.keys(m.usage).length)meta.append(create('span',t('费用')+' · '+(m.usage.actual_cost==null?t('未知'):String(m.usage.actual_cost))));
+        if(edited(m))meta.append(create('span',t('已修改')));
         if(m.context)row.append(contextDetails(m));
         if(meta.childElementCount)foot.append(meta);
         row.append(foot);
@@ -724,6 +982,8 @@ const collapsed=new Set();
     if(focusMessage&&focusAction){
       const row=[...log.querySelectorAll('[data-message-id]')].find(el=>el.dataset.messageId===focusMessage);
       row?.querySelector('[data-answer-action="'+focusAction+'"]')?.focus({preventScroll:true});
+      const caret=editing.get(focusMessage)?.caret;
+      if(focusAction==='editor'&&caret!=null)row?.querySelector('textarea')?.setSelectionRange(caret,caret);
     }
   }
   function renderOpportunities(row,message){
