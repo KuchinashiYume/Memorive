@@ -511,27 +511,17 @@
       showToast('已找到任务，但未能完整打开对应流程节点，请重试。');
     });
 
-    const rightToggle = q('#desktop-toggle-right');
-    rightToggle.addEventListener('click', (event) => {
-      if (!selectedCard && preview.app.dataset.right !== 'true') {
+    // The right panel button (and Ctrl+Alt+B): with nothing selected it says what to select; closing the panel
+    // also clears the selection.
+    root.addEventListener('desktop:right-button', (event) => {
+      if (preview.app.dataset.right === 'true') {
+        if (selectedCard) {
+          event.preventDefault();
+          closeDetail({ restoreFocus:true });
+        }
+      } else if (!selectedCard) {
         event.preventDefault();
-        event.stopImmediatePropagation();
-        q('#desktop-live-state').textContent = '请先选择一条消息';
-      }
-    }, true);
-    rightToggle.addEventListener('click', () => {
-      if (selectedCard && preview.app.dataset.right !== 'true') closeDetail({ restoreFocus:true });
-    });
-    root.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.altKey && event.code === 'KeyB' && !selectedCard && preview.app.dataset.right !== 'true') {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        q('#desktop-live-state').textContent = '请先选择一条消息';
-      }
-    }, true);
-    root.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.altKey && event.code === 'KeyB' && selectedCard && preview.app.dataset.right !== 'true') {
-        closeDetail({ restoreFocus:true });
+        preview.announce('请先选择一条消息');
       }
     });
     applyMode();

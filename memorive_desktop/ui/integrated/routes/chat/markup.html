@@ -1,19 +1,7 @@
 <!-- The research Q&A route: the conversation list, the thread with its answers and evidence, the composer, and the
-     settings and evidence panels of the chat. Includes the window frame from shared/frame/. -->
+     settings and evidence panels of the chat. The window frame around it is in page.html. -->
 <section class="desktop-route-surface" data-desktop-route="chat" aria-label="研究问答" hidden>
-
 <div id="desktop-chat-preview" class="desktop-page-root" lang="zh-Hans">
-  <!-- include: shared/frame/icons.html -->
-
-  
-
-  <div class="desktop-preview-stage" id="desktop-preview-stage">
-    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 资料库">
-      <!-- include: shared/frame/global-bar.html -->
-
-      <div class="desktop-workspace">
-        <!-- include: shared/frame/navigation.html -->
-
         <main class="desktop-central" id="desktop-central"><div class="desktop-page-view" id="desktop-page-view"><div class="memo-page" id="memo-chat-page">
   <header class="memo-heading page-header">
     <div class="desktop-page-heading-with-back"><button class="icon-button desktop-main-back" id="desktop-return-main" type="button" aria-label="返回主界面" data-desktop-tip="返回主界面" data-desktop-placement="right">‹</button><div class="page-heading"><h2>研究问答</h2><span id="memo-current-label" hidden></span></div></div>
@@ -80,25 +68,6 @@
           </div>
         </aside>
 
-        <!-- include: shared/frame/accounting-panel.html -->
-
         <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整一级列表与二级资料档案宽度，默认 60% / 40%" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="200" aria-valuemax="760" aria-valuenow="498" hidden></button>
-        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
-      </div>
-
-      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
-      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
-    </section>
-  </div>
 </div>
-  
-  
-
-
-
-
-
-  
-  
-
 </section>

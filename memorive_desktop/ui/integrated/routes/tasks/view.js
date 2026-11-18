@@ -91,7 +91,7 @@
       const next = clampPaneSize(value, limits.min, limits.max);
       stage.style.setProperty('--desktop-tasks-flow-size', `${Math.round(next)}px`);
       updateFlowResizerAria(limits, next);
-      if (announce) q('#desktop-live-state').textContent = `任务流程边栏宽度 ${Math.round(next)} 像素`;
+      if (announce) preview.announce(`任务流程边栏宽度 ${Math.round(next)} 像素`);
       return next;
     };
     const updateFlowResizerBounds = () => {
@@ -1787,13 +1787,10 @@
       const visible = (node) => node?.isConnected && node.getClientRects().length && !node.closest('[hidden]');
       const target = visible(lastInspectedNode) ? lastInspectedNode : qa('.desktop-tasks-node').find(visible);
       if (currentTask && target) openNodeInspector(target);
-      else q('#desktop-live-state').textContent = '请先选择任务';
+      else preview.announce('请先选择任务');
     };
-    const rightToggle = q('#desktop-toggle-right');
-    rightToggle.addEventListener('click', toggleTaskInspector, true);
-    root.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.altKey && event.code === 'KeyB') toggleTaskInspector(event);
-    }, true);
+    // The right panel button and Ctrl+Alt+B open the selected task's node, or close the panel.
+    root.addEventListener('desktop:right-button', toggleTaskInspector);
     if (typeof ResizeObserver === 'function') {
       const flowResizeObserver = new ResizeObserver(() => {
         if (currentTask && !flowPane.hidden) window.requestAnimationFrame(() => drawBypass());

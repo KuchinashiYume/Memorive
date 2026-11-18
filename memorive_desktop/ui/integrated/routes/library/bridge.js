@@ -123,10 +123,12 @@
     return bootstrapPromise;
   };
   const maybeLoadMore = () => {
-    if (!root || root.hidden || !root.getClientRects().length || !paging.hasMore || paging.loading) return;
+    // The route's root adds no box of its own (display: contents); its central area is what scrolls into view.
+    const central = root?.querySelector('.desktop-central');
+    if (!central || !central.getClientRects().length || !paging.hasMore || paging.loading) return;
     const cards = root.querySelectorAll('.desktop-library-card');
     const marker = cards[Math.max(0, cards.length - 10)];
-    const box = root.getBoundingClientRect();
+    const box = central.getBoundingClientRect();
     // A fast scroll can jump completely past the prefetch marker.
     if (marker && marker.getBoundingClientRect().top < Math.min(window.innerHeight, box.bottom)) {
       void loadNextPage().catch(error => showToast(`继续加载资料失败：${error.message}`));
@@ -142,7 +144,7 @@
     if (Memorive.app?.activate) {
       Memorive.app?.activate(route);
     } else {
-      root?.querySelector(`.desktop-nav-item[data-route="${route}"]`)?.click();
+      document.querySelector(`.desktop-nav-item[data-route="${route}"]`)?.click();
     }
     void Memorive.productBridge?.dispatch(
       'navigation.select', { route }, source

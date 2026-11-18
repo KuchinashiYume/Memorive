@@ -4342,8 +4342,7 @@
       stopOriginal(event);
       void nativeAction('reset_panel_layout').then(() => {
         q('.desktop-settings-workarea')?.style.removeProperty('--desktop-settings-primary-size');
-        q('.desktop-workspace')?.style.removeProperty('--desktop-right-size');
-        q('.desktop-workspace')?.style.removeProperty('--desktop-bottom-size');
+        Memorive.frames.settings.resetSizes();
         Memorive.settingsView?.resetPaneLayout();
         showToast('面板布局已恢复设计默认值。');
       }).catch(fail('布局恢复失败'));

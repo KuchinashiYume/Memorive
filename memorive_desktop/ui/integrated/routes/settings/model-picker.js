@@ -195,7 +195,7 @@
       workarea.style.setProperty('--desktop-settings-primary-size', `${Math.round(next)}px`);
       if (remember) rememberedCategoryPrimarySize = next;
       updatePrimaryResizerAria(limits, next);
-      if (announce) q('#desktop-live-state').textContent = `设置详情边栏宽度 ${Math.round(next)} 像素`;
+      if (announce) preview.announce(`设置详情边栏宽度 ${Math.round(next)} 像素`);
       return next;
     };
     const updatePrimaryResizerBounds = () => {
@@ -1280,7 +1280,7 @@
         catch(error) { showToast(flowText('无法加载报告模型设置，请重试')); }
       }
       renderWorkflow();
-      q('#desktop-live-state').textContent = flowText(flowLabels[view]);
+      preview.announce(flowText(flowLabels[view]));
     };
     workflowKind?.addEventListener('click', () => {
       setWorkflowView(workflowViews[(workflowViews.indexOf(workflowView)+1)%workflowViews.length]);
@@ -1701,21 +1701,13 @@
       window.parent.postMessage({ type: 'desktop-workflow-template-request', page: '设置' }, '*');
     }
 
-    const rightToggle = q('#desktop-toggle-right');
-    rightToggle.addEventListener('click', (event) => {
+    // The right panel button (and Ctrl+Alt+B) with no node selected says what to select.
+    root.addEventListener('desktop:right-button', (event) => {
       if (!selectedNode && preview.app.dataset.right !== 'true') {
         event.preventDefault();
-        event.stopImmediatePropagation();
-        q('#desktop-live-state').textContent = '请先选择流程节点';
+        preview.announce('请先选择流程节点');
       }
-    }, true);
-    root.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.altKey && event.code === 'KeyB' && !selectedNode && preview.app.dataset.right !== 'true') {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        q('#desktop-live-state').textContent = '请先选择流程节点';
-      }
-    }, true);
+    });
     const inspectorObserver = new MutationObserver(() => {
       if (preview.app.dataset.right !== 'true' && workarea.classList.contains('has-node')) closeNode({ restoreFocus:false });
     });

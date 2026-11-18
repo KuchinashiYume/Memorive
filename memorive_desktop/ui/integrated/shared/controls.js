@@ -58,7 +58,7 @@
     }
     if(closed&&n.contains(document.activeElement)){
       const root=n.closest('.desktop-page-root'),saved=focusOwners.get(n);
-      const fallback=root?.querySelector(n.id==='desktop-bottom-panel'?'#desktop-toggle-bottom':'#desktop-toggle-right');
+      const fallback=document.getElementById(n.id==='desktop-bottom-panel'?'desktop-toggle-bottom':'desktop-toggle-right');
       (saved?.isConnected&&!saved.closest('[hidden],[inert]')?saved:fallback)?.focus({preventScroll:true});
     }
     if(!closed&&n.inert&&!n.contains(document.activeElement))focusOwners.set(n,document.activeElement);

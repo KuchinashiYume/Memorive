@@ -1,4 +1,4 @@
-/* The bottom accounting panel of every route: cost, requests and tokens by model and period, with its chart
+/* The bottom accounting panel of the window (one for every route): cost, requests and tokens by model and period, with its chart
    (asked from the desktop service). Its texts are the accounting.* messages in shared/frame/messages.js.
    Publishes Memorive.accounting. */
 (() => {
@@ -391,9 +391,8 @@
   [scope, range, model].forEach((control) => control.addEventListener('change', () => void load()));
   closeButton.addEventListener('click', () => {
     window.dispatchEvent(new CustomEvent('desktop:bottom-panel-close-request', { detail: { panel: 'accounting' } }));
-    const host = panel.closest('.desktop-page-root[id$="-preview"]');
-    const localToggle = host?.querySelector('#desktop-toggle-bottom');
-    if (localToggle?.getAttribute('aria-pressed') === 'true') localToggle.click();
+    const toggle = document.getElementById('desktop-toggle-bottom');
+    if (toggle.getAttribute('aria-pressed') === 'true') toggle.click();
   });
   window.addEventListener('desktop:model-commerce-context-changed', loadVisible);
   window.addEventListener('desktop:display-currency-changed', (event) => {

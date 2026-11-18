@@ -919,16 +919,17 @@
     }
   });
   new MutationObserver(()=>{
-    const open=q('#desktop-window').dataset.right==='true';
+    const open=root.dataset.right==='true';
     if(!open&&pane) closePane();
     else if(open&&!pane&&data) {
       draft=preferenceDraft();
       changePane('preferences');
       renderPreferences();
     }
-  }).observe(q('#desktop-window'),{attributes:true,attributeFilter:['data-right']});
-  // Delegate to the existing shell tooltip element so dynamically rendered headers also work.
-  const tip=q('#desktop-tooltip');
+  }).observe(root,{attributes:true,attributeFilter:['data-right']});
+  // The leaderboard's own tooltip (the window frame leaves this page's tooltips to it), delegated so that
+  // dynamically rendered headers also work.
+  const tip=q('#lb-tooltip');
   let tipOwner=null;
   function hideTip(){
     tip.hidden=true;

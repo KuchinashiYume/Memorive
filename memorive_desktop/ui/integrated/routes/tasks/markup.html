@@ -1,18 +1,7 @@
 <!-- The current task route: the job list, the selected job's workflow nodes and their details in the right
-     panel. Includes the window frame from shared/frame/. -->
+     panel. The window frame around it is in page.html. -->
 <section class="desktop-route-surface" data-desktop-route="current-task" aria-label="当前任务" hidden>
 <div id="desktop-tasks-preview" class="desktop-page-root" lang="zh-Hans">
-  <!-- include: shared/frame/icons.html -->
-
-  
-
-  <div class="desktop-preview-stage" id="desktop-preview-stage">
-    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 当前任务">
-      <!-- include: shared/frame/global-bar.html -->
-
-      <div class="desktop-workspace">
-        <!-- include: shared/frame/navigation.html -->
-
         <main class="desktop-central" id="desktop-central">
           <div class="desktop-page-view" id="desktop-page-view" hidden>
             <div class="page-shell desktop-tasks-shell">
@@ -33,10 +22,7 @@
                 <section class="desktop-tasks-listpane" aria-label="当前任务列表">
                   <div class="desktop-tasks-list" id="tasks-list"><p id="tasks-list-status" class="desktop-tasks-list-status" role="status">正在加载任务…</p>
                     <div class="empty-state desktop-tasks-empty" id="tasks-empty" hidden><div><strong id="tasks-empty-copy">暂无执行中的任务</strong><span></span></div></div>
-                    
-                    
-                    
-                    
+
                   </div>
                 </section>
                 <button class="desktop-tasks-pane-resizer" id="tasks-resize-flow" type="button" role="separator" aria-label="调整任务流程边栏宽度" aria-controls="tasks-flow" aria-orientation="vertical" aria-valuemin="420" aria-valuemax="760" aria-valuenow="660" hidden></button>
@@ -133,15 +119,6 @@
           </div>
         </aside>
 
-        <!-- include: shared/frame/accounting-panel.html -->
-
         <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整节点详情边栏宽度" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="440" aria-valuenow="390" hidden></button>
-        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
-      </div>
-
-      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
-      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
-    </section>
-  </div>
 </div>
 </section>
