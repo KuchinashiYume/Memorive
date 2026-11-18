@@ -466,7 +466,6 @@
       inbox_item:receipt.inbox_item_id ? { item_id:receipt.inbox_item_id, state:'QUEUED' } : null,
       task:receipt.job_id ? { ...receipt, control_state:receipt.status === 'TASK_RUNNING' ? 'RUNNING' : 'QUEUED' } : null
     });
-    window.dispatchEvent(new CustomEvent('desktop:session-refinement-inbox-enqueued', { detail:receipt }));
     if (['INBOX_QUEUED', 'TASK_QUEUED', 'TASK_RUNNING'].includes(receipt?.status)) {
       void watchRefinementTask(localProjectionId, receipt.job_id || 'inbox');
     }

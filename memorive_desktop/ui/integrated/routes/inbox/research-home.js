@@ -204,7 +204,8 @@
    const r=await api('home.resolve',{kind:kind==='continue'?'thread':kind==='library'?'material':'inbox',target:selected.target?.id||selected.target?.artifact_id||null});
    app().activate(r.route);
    if(!r.available){
-     window.dispatchEvent(new CustomEvent('desktop:toast',{detail:{message:t('目标已变化，已打开对应工作区')}}));
+     const notice=t('目标已变化，已打开对应工作区');
+     ({library:()=>Memorive.libraryView?.showToast(notice),inbox:()=>Memorive.inboxBridge?.showToast(notice),chat:()=>Memorive.chat?.notify(notice)})[r.route]?.();
      return;
    }
    if(kind==='continue')await Memorive.chat.openThread(r.thread_id);

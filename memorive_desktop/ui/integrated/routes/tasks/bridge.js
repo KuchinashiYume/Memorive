@@ -678,18 +678,7 @@
     }
   }, true);
 
-  const syncRefinementBindings = (event) => {
-    const jobId = event.detail?.job_id;
-    void refresh().then(() => {
-      if (jobId && bindings.has(jobId)) {
-        window.dispatchEvent(new CustomEvent('desktop:current-task-refinement-task-ready', {
-          detail: { job_id: jobId }
-        }));
-      }
-    });
-  };
-  window.addEventListener('desktop:session-refinement-task-created', syncRefinementBindings);
-  window.addEventListener('desktop:session-refinement-task-updated', syncRefinementBindings);
+  window.addEventListener('desktop:session-refinement-task-updated', () => void refresh());
   window.addEventListener('memorive:open-current-task', (event) => {
     if(String(event.detail?.job_id||'').startsWith('research-')){
       void Memorive.research?.openTask(event.detail.job_id);

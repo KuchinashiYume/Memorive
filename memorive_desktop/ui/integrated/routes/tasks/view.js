@@ -1380,6 +1380,7 @@
         taskList.querySelectorAll('.desktop-tasks-task:not([data-workflow-kind])').forEach((task) => task.remove());
         if (currentTask && !currentTask.isConnected) {
           currentTask = null;
+          Memorive.accounting?.selectJob(null);
           void returnToTaskList();
         }
       }
@@ -1630,6 +1631,7 @@
         item.setAttribute('aria-expanded', 'false');
       });
       currentTask = null;
+      Memorive.accounting?.selectJob(null);
       currentPre = false;
       lastBypassKeys = new Set();
       await wait(motionMs(220));
@@ -1652,6 +1654,7 @@
         item.setAttribute('aria-expanded', String(selected));
       });
       currentTask = task;
+      Memorive.accounting?.selectJob(task.dataset.jobId ? { job_id:task.dataset.jobId, title:task.dataset.task } : null);
       currentPre = task.dataset.pre === 'true';
       if (!['SESSION_REFINEMENT', 'CORE_DOCUMENT','RESEARCH_DISCOVERY','RESEARCH_REPORT'].includes(task.dataset.workflowKind)) getTaskSnapshot(task);
       q('#tasks-flow-title').textContent = task.dataset.task;
@@ -1821,13 +1824,6 @@
       if (data.type === 'desktop-workflow-task-snapshots-state') hydrateTaskSnapshots(data.snapshots);
     });
     window.addEventListener('desktop:workflow-config-updated', (event) => {
-      const detail = event.detail;
-      if (!detail || typeof detail !== 'object') return;
-      setConfiguredModelOptions(detail);
-      applyTemplateState(detail.template);
-      if (currentTask) renderTaskFlow();
-    });
-    window.addEventListener('desktop:workflow-sync', (event) => {
       const detail = event.detail;
       if (!detail || typeof detail !== 'object') return;
       setConfiguredModelOptions(detail);

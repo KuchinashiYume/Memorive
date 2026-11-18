@@ -167,7 +167,7 @@ Scripts talk to each other through what they publish in `window.Memorive` (each 
 
 | Event | Sent by | Listened to by |
 | --- | --- | --- |
-| `desktop-integrated-route` (the route was shown) | `shared/app.js` | the inbox, current-task, messages, library and work log bridges, `shared/research.js`, `shared/decorations.js`, `routes/chat/workspace.js`, `routes/leaderboard/view.js`, `routes/inbox/research-home.js` |
+| `desktop-integrated-route` (the route was shown) | `shared/app.js` | the inbox, current-task, messages, library and work log bridges, `shared/research.js`, `shared/accounting.js`, `shared/decorations.js`, `routes/chat/workspace.js`, `routes/leaderboard/view.js`, `routes/inbox/research-home.js` |
 | `desktop:right-button` (the right panel button or Ctrl+Alt+B, sent to the open route's root; cancelling it stops the default toggle) | `shared/window-frame.js` | `routes/messages/view.js`, `routes/settings/model-picker.js`, `routes/tasks/view.js` |
 | `desktop:inspector-closed` (a right panel was closed) | `shared/controls.js` | the inbox, library, messages and work log bridges, `shared/structure-review.js` |
 | `desktop:settings-locale-change` | `routes/settings/settings.js` | the settings scripts, `shared/local-user.js`, `shared/reports.js`, `shared/window-chrome.js` |
@@ -181,6 +181,7 @@ Scripts talk to each other through what they publish in `window.Memorive` (each 
 | `desktop:current-task-production-mode`, `-production-bindings`, `-refinement-bindings`, `-override-state` | `routes/tasks/bridge.js` | `routes/tasks/view.js` |
 | `desktop:session-refinement-task-updated` | `routes/sessions/bridge.js` | `routes/tasks/bridge.js` |
 | `desktop:open-session` | `routes/inbox/bridge.js` | `routes/sessions/view.js` |
+| `desktop:<page>-receipt` (the result of each service call a route bridge makes) | the inbox, current-task, messages, sessions, library, work log and settings bridges | nothing in the window; for an extension or a check that wants to follow a page's calls |
 | `memorive:open-current-task` | `routes/worklog/bridge.js` | `routes/tasks/bridge.js` |
 | `desktop:library-query` | `routes/library/view.js` | `routes/library/bridge.js` |
 | `desktop:library-selection` | `routes/library/bridge.js` | `shared/structure-review.js` |

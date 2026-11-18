@@ -239,9 +239,6 @@
       event_id: `ui-${now.toString(36)}-${String(signalSequence).padStart(4, '0')}`,
       reduced_motion: prefersReducedMotion()
     };
-    window.dispatchEvent(new CustomEvent('desktop:assistant-decoration-signal', {
-      detail: { ...request, source: String(detail.source || 'product-ui') }
-    }));
     if (typeof window.pywebview?.api?.assistant_ui_signal !== 'function') return {
       schema_version: 'DesktopAssistantUiSignalReceipt-v1',
       status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT',
@@ -250,9 +247,6 @@
     try {
       return await window.pywebview.api.assistant_ui_signal(request);
     } catch (error) {
-      window.dispatchEvent(new CustomEvent('desktop:assistant-decoration-signal-error', {
-        detail: { kind, error: String(error?.message || error || 'UNKNOWN') }
-      }));
       return null;
     }
   };

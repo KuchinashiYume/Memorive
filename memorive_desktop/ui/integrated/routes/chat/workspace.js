@@ -1754,7 +1754,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     new MutationObserver(()=>{if(loaded)refresh().then(renderThread).catch(fail);}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
     initAttachmentUI();
     renderComposer();
-    Memorive.chat={openThread:id=>selectThread({id}),reportImportFailure:message=>{
+    Memorive.chat={openThread:id=>selectThread({id}),notify:message=>status('#memo-chat-status',message),reportImportFailure:message=>{
       showEvidencePanel('materials');
       fail(Error(message),'#memo-evidence-status');
     },importFiles,pickFiles,configureThread,renderComposer,refreshMaterials,refresh,renderThread,send,saveSettings,revertSettings,hasSettingsDraft,inspect:()=>({loaded,project,thread_id:thread?.id,active_job:activeJob,evidence_count:lastEvidence.length}),openMaterials,showEvidencePanel,openSearch,openSettings:()=>route('research-settings')};
