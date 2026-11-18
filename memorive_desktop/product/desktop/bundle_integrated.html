@@ -6177,6 +6177,10 @@ details:not([open]) > .desktop-pending-removal {display:flex;}
 #memo-chat-page .memo-tree-heading{padding:0 6px 6px;min-height:30px;line-height:1.35}
 #memo-chat-page .memo-project-group{margin-bottom:10px}
 #memo-chat-page .memo-project-row{min-height:32px;padding:0 2px}
+/* A project row has a light tint of its own, between a plain conversation row and the selected one. */
+#memo-chat-page .memo-project-row{background:var(--desktop-canvas)}
+/* The conversation menu belongs to an open conversation; with none open it is hidden (its place kept). */
+#memo-chat-page .memo-chat-toolbar[data-overview=true] #memo-thread-menu{visibility:hidden}
 #memo-chat-page .memo-project-toggle{min-height:32px;line-height:1.35;padding-block:4px}
 #memo-chat-page .memo-project-threads{display:grid;gap:3px;margin-top:3px;padding-top:0;padding-bottom:0}
 #memo-chat-page .memo-thread-row{min-height:0}
