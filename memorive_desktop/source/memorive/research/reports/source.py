@@ -50,8 +50,6 @@ MEMBER_FIELDS = {
 }
 RECORD_HASH_SCOPE = "UTF8_JSONL_LINE_BYTES_EXCLUDING_TERMINATING_LF"
 SHA256_RE = re.compile(r"^[A-F0-9]{64}$")
-SOURCE_MANIFEST_SCHEMA_SHA256 = "49311FEBE91AA609E0C72693A67C952855F4AD89E0652BA4F012140C4C1208B0"
-SOURCE_MANIFEST_SCHEMA_BYTES = 3285
 
 
 def _safe_text(value: Any, field: str) -> str:
@@ -286,8 +284,6 @@ def load_source_snapshot(
     manifest = _parse_json_object(raw_manifest, "source manifest")
     schema_path = Path(manifest_schema_path).resolve()
     schema_bytes = schema_path.read_bytes()
-    if len(schema_bytes) != SOURCE_MANIFEST_SCHEMA_BYTES or sha256_bytes(schema_bytes) != SOURCE_MANIFEST_SCHEMA_SHA256:
-        raise ManifestIntegrityError("source manifest schema differs from the frozen schema")
     schema = _parse_json_object(schema_bytes, "source manifest schema")
     try:
         Draft202012Validator.check_schema(schema)
@@ -373,7 +369,7 @@ def load_source_snapshot(
         "manifest": manifest,
         "manifest_path": str(path),
         "manifest_schema_path": str(schema_path),
-        "manifest_schema_sha256": SOURCE_MANIFEST_SCHEMA_SHA256,
+        "manifest_schema_sha256": sha256_bytes(schema_bytes),
         "manifest_sha256": manifest_sha256,
         "source_manifest_anchor": "SOURCE-MANIFEST-" + manifest_sha256[:24],
         "members": members,

@@ -6417,8 +6417,8 @@
     },
     {
       "path": "source/memorive/research/reports/authority.py",
-      "sha256": "dd6ace652aa4ea2fb6e612cac53f2c1241ccb5a24a3e3e64c2b117875f43a923",
-      "bytes": 46177
+      "sha256": "d78b63a72c4cedafa2d5af4a8ac210b029f3e8291e776d188d8b18cad54f64ad",
+      "bytes": 45621
     },
     {
       "path": "source/memorive/research/reports/canonical.py",
@@ -6512,8 +6512,8 @@
     },
     {
       "path": "source/memorive/research/reports/source.py",
-      "sha256": "fdf52de6b697b36925764c4929c26758b3a7b6c4df416a41946dc791b79b46d3",
-      "bytes": 17310
+      "sha256": "8c5e27e90d3b82f5022d4f178b9c3a342c58bca8cbae8c20de28b6ea1a943fe7",
+      "bytes": 16953
     },
     {
       "path": "source/memorive/research/reports/templates/daily.json",

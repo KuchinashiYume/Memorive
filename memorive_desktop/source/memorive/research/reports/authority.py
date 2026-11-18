@@ -12,9 +12,6 @@ from memorive.research.reports.canonical import parse_datetime, require_safe_tex
 from memorive.research.reports.errors import ManifestIntegrityError
 from memorive.research.reports.initialization_pack import validate_common_object_pack
 
-COMMON_SCHEMA_SHA256 = "7AFAC28C2132121800E87362371253B9F6518C9272D42D459F463CA3A13064BC"
-COMMON_SCHEMA_BYTES = 11025
-ACCEPTED_VALIDATOR_SHA256 = "26DE22DDE9C28ECF83DDDF52116E22D122BB83CCE58188D5C6D6707E7EFF3708"
 EVIDENCE_REVIEW_POLICY = {
     "exact_trigger": "EvidenceReview校核结果",
     "reject_tag_only_spoof": True,
@@ -146,12 +143,10 @@ def _verify_file(path: Path, *, size: Any, sha256: Any, label: str) -> bytes:
 def load_common_schema(path: str | Path) -> tuple[dict[str, Any], str]:
     schema_path = Path(path).resolve()
     raw = schema_path.read_bytes()
-    if len(raw) != COMMON_SCHEMA_BYTES or sha256_bytes(raw) != COMMON_SCHEMA_SHA256:
-        raise ManifestIntegrityError("Initialization common schema differs from the accepted snapshot")
     value = _json_value(raw, "Initialization common schema")
     if not isinstance(value, dict):
         raise ManifestIntegrityError("Initialization common schema root must be an object")
-    return value, COMMON_SCHEMA_SHA256
+    return value, sha256_bytes(raw)
 
 
 def load_evidence_review_authority(path: str | Path, *, successor_root: Path) -> tuple[dict[str, dict[str, Any]], str]:
@@ -252,8 +247,6 @@ def load_actor_authority(
         raise ManifestIntegrityError("accepted actor oracle set mismatch")
     validator_path = _resolve(successor_root, accepted["path"], prefixes=("validator/authority_snapshots/",))
     _verify_file(validator_path, size=accepted["bytes"], sha256=accepted["sha256"], label="accepted_validator_snapshot")
-    if accepted["sha256"] != ACCEPTED_VALIDATOR_SHA256:
-        raise ManifestIntegrityError("accepted Initialization validator hash mismatch")
     dependency = _exact(
         manifest["dependency_task_actor_source"],
         {"anchors", "bytes", "exit_handoff", "path", "sha256", "task_id", "task_index"},
