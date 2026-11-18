@@ -6007,8 +6007,8 @@
     },
     {
       "path": "source/memorive/research/briefing/sources.py",
-      "sha256": "fbbc16e36a3f993abb6391871c645e658cc6f128c68fa80c5b1e5731d5599918",
-      "bytes": 10872
+      "sha256": "7d8e7e3e88faca2d31be2e2c9f34d50a1cd7aab779d370e009a76b83fd302ef0",
+      "bytes": 11459
     },
     {
       "path": "source/memorive/research/common.py",

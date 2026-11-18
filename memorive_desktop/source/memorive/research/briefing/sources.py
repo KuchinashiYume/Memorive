@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
-import json, urllib.request, urllib.parse, re
+import json, urllib.request, urllib.parse, re, zlib
 import xml.etree.ElementTree as ET
 from memorive.research.common import read, write, sealed, sha, now
 
@@ -145,8 +145,16 @@ class PublicSources:
             if response.status!=200:
                 raise ValueError('AI_SOURCE_HTTP_FAILED')
             body=response.read(BODY_LIMIT+1)
+            encoding=(response.headers.get('Content-Encoding') or '').strip().lower()
         if len(body)>BODY_LIMIT:
             raise ValueError('AI_SOURCE_BODY_LIMIT')
+        if encoding in {'gzip','x-gzip'}:
+            # Some servers compress although the request did not ask for it (DeepMind's feed did on
+            # 2026-11-18, and the feed was reported as failed). The size limit holds for the inflated text.
+            inflater=zlib.decompressobj(16+zlib.MAX_WBITS)
+            body=inflater.decompress(body,BODY_LIMIT+1)
+            if len(body)>BODY_LIMIT or inflater.unconsumed_tail:
+                raise ValueError('AI_SOURCE_BODY_LIMIT')
         checkpoint()
         (run_path/('public-'+sha(body)+'.body')).write_bytes(body)
         return body
