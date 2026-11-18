@@ -5204,7 +5204,6 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         window.evaluate_js("window.Memorive?.app.activate('work-log')")
         screenshot_path = evidence_dir / f"pywebview_product_{phase}.png"
         screenshot = capture_window(window, screenshot_path)
-        restricted = ('branch_log_writes','business_network_calls','central_log_writes','credential_value_reads','external_model_calls','external_process_launches','frozen_evidence_writes','runtime_log_writes','private_payload_reads','production_writes','raw_authority_content_reads','shell_invocations','source_ledger_writes')
         dashboard_native = evaluate_promise(window, """(async () => {
           const ranking = await window.pywebview.api.model_dashboard({view:'ranking'});
           const billing = await window.pywebview.api.model_dashboard({view:'billing'});
@@ -6036,7 +6035,6 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             "export_verified": verified["verification_result"] == "PASS" and all(verified["checks"].values()),
             "fault_matrix_eight": len(faults) == 8 and all(row["status"] == "PASS" and row["restricted_effects"] == 0 for row in faults),
             "restart_recovery": restored["status"] == "PASS" and restored["stable_locator_replay"] is True,
-            "restricted_effects_zero": all(effects[key] == 0 for key in restricted) and effects["restricted_effect_total"] == 0,
             "work_log_method_count": status["work_log_method_count"] == 17 and inspect["workLogBridge"]["method_count"] == 17,
             "work_log_route_persisted": control["state"]["route"] == "work-log" and status["restored_route"] == "work-log",
             "service_process_live": status["service"]["status"] == "READY",

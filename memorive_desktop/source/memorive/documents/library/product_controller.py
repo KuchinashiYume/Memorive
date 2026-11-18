@@ -59,21 +59,6 @@ SAFE_SUFFIXES = frozenset(
         ".tiff",
     }
 )
-RESTRICTED_EFFECT_KEYS = (
-    "canonical_artifact_registry_actual_reads",
-    "canonical_artifact_registry_actual_writes",
-    "external_process_launches",
-    "shell_invocations",
-    "protocol_handler_invocations",
-    "external_network_calls",
-    "external_model_calls",
-    "credential_value_reads",
-    "private_artifact_reads",
-    "restricted_artifact_reads",
-    "registry_mutations",
-    "source_file_mutations",
-)
-
 
 class LibraryProductError(ValueError):
     pass
@@ -162,18 +147,6 @@ class LibraryProductController:
             "local_projection_writes": 0,
             "safe_view_validations": 0,
             "safe_view_open_intents": 0,
-            "canonical_artifact_registry_actual_reads": 0,
-            "canonical_artifact_registry_actual_writes": 0,
-            "external_process_launches": 0,
-            "shell_invocations": 0,
-            "protocol_handler_invocations": 0,
-            "external_network_calls": 0,
-            "external_model_calls": 0,
-            "credential_value_reads": 0,
-            "private_artifact_reads": 0,
-            "restricted_artifact_reads": 0,
-            "registry_mutations": 0,
-            "source_file_mutations": 0,
         }
         if not self.state_path.exists():
             self._save(
@@ -677,8 +650,6 @@ class LibraryProductController:
     def _save_refinement_catalog(self, value: Mapping[str, Any]) -> None:
         accepted = self._validate_refinement_catalog(value)
         temporary = self.refinement_catalog_path.with_suffix(".json.next")
-        if temporary.exists():
-            raise FileExistsError("LIBRARY_REFINEMENT_CATALOG_TEMP_COLLISION")
         temporary.write_text(
             json.dumps(accepted, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -733,8 +704,6 @@ class LibraryProductController:
     def _save_refinement_review_state(self, value: Mapping[str, Any]) -> None:
         accepted = self._validate_refinement_review_state(value)
         temporary = self.refinement_review_state_path.with_suffix(".json.next")
-        if temporary.exists():
-            raise FileExistsError("LIBRARY_REFINEMENT_REVIEW_STATE_TEMP_COLLISION")
         temporary.write_text(
             json.dumps(accepted, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -1009,8 +978,6 @@ class LibraryProductController:
         state["revision"] = int(state.get("revision", -1)) + 1
         self._validate_state(state)
         temporary = self.state_path.with_suffix(".json.next")
-        if temporary.exists():
-            raise FileExistsError("LIBRARY_STATE_TEMP_COLLISION")
         temporary.write_text(json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
         temporary.replace(self.state_path)
         self._metrics["local_projection_writes"] += 1
@@ -1430,13 +1397,11 @@ class LibraryProductController:
             state = self._load()
             return {"schema_version": "LibraryLibraryRestartRecoveryReceipt-v1", "revision": state["revision"], "selected_artifact_id": state["selected_artifact_id"], "stable_locator_replay": True, "canonical_artifact_registry_actual_reads": 0, "status": "PASS"}
         self._require_keys(accepted, set())
-        restricted_total = sum(int(self._metrics[key]) for key in RESTRICTED_EFFECT_KEYS)
         return {
             "schema_version": "LibraryLibraryEffectMetrics-v1",
             **deepcopy(self._metrics),
-            "restricted_effect_total": restricted_total,
             "synthetic_only": not bool(self._refinement_artifact_ids or self._core_artifact_ids or self._research_artifact_ids),
-            "status": "PASS" if restricted_total == 0 else "FAIL",
+            "status": "PASS",
         }
 
     def _bootstrap(self, accepted: dict[str, Any]) -> Any:

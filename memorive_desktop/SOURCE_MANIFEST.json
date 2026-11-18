@@ -212,8 +212,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "644967f1da1b1442894bd841057eb670eeee590255fced3d7de36aecb02c81e0",
-      "bytes": 371386
+      "sha256": "0a07f481a1e173586a89d7e57d6433ddc13c97842fd9efceb473d160870f7894",
+      "bytes": 370927
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -2722,8 +2722,8 @@
     },
     {
       "path": "source/memorive/desktop/work_log/product_controller.py",
-      "sha256": "3b26a16ec64eef7c36fd09c429aa1153398c1d91b3d86d16e2c7bd2a1eaabec6",
-      "bytes": 53873
+      "sha256": "13b997fb76cf680c2536fe30f130cd4228adc19f9bdc365a09b5d1ea5cfb96c7",
+      "bytes": 52645
     },
     {
       "path": "source/memorive/documents/__init__.py",
@@ -3272,8 +3272,8 @@
     },
     {
       "path": "source/memorive/documents/library/product_controller.py",
-      "sha256": "9746102fa46afb0a5ca722f154544465178f24112ff22d729eaf42bd528465c5",
-      "bytes": 75297
+      "sha256": "cd3b41739f873b90e6b4d2e701dbf819d5813bdce370eac51a68c26941767af1",
+      "bytes": 73800
     },
     {
       "path": "source/memorive/documents/library/refinement_markdown.py",
