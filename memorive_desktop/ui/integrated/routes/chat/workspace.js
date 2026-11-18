@@ -219,10 +219,12 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     return box;
   }
   // Saved versions of an answer (memo.answer_*, answer_saves.py): every save keeps a version. An answer is edited
-  // in place; its history lists the versions, compares one with the current version and restores one (as a new
-  // version); an Agent's reply can be taken over as a new version of an earlier answer. Nothing here calls a model.
-  const ICONS={edit:'<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
-    history:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+  // in place; its history shows in the right panel's "versions" tab: the versions, one compared with the current
+  // version or read in full, copied or restored (as a new version). An Agent's reply can be taken over as a new
+  // version of an earlier answer. Nothing here calls a model. The icons are the window's own (toolbar-icons.css).
+  const ICONS={edit:'<path d="M4 20h4l10-10-4-4L4 16v4Z"/><path d="m12.5 7.5 4 4"/>',
+    history:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
+    confirm:'<path d="m5 12.5 4.2 4.2L19 7"/>'};
   const SOURCES={GENERATED:'最初的回答',EDIT:'修改',AUTOSAVE:'自动保存',AGENT:'采纳 Agent 回复',CLAIM_REVISION:'修订结论',RESTORE:'恢复'};
   const edited=m=>Boolean(m.saved_version_id)||(m.answer_version||1)>1;
   const versionsBlocked=()=>!!activeJob||waitingForFiles||!!thread?.archived;
@@ -242,8 +244,7 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     nodes.push(edit);
     if(edited(m))nodes.push(iconButton('历史版本',ICONS.history,()=>openHistory(m),'history'));
     if(m.agent_result&&adoptTargets(m).length){
-      const adopt=button('采纳为新版本',()=>chooseAdoptTarget(m,adopt),'memo-quiet-button');
-      adopt.dataset.answerAction='adopt';
+      const adopt=iconButton('采纳为新版本',ICONS.confirm,()=>chooseAdoptTarget(m,adopt),'adopt');
       adopt.disabled=versionsBlocked();
       nodes.push(adopt);
     }
@@ -254,6 +255,7 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     if(thread?.id!==owner)return false;
     thread=fresh;
     renderThread();
+    if(versionView.answerId)void renderVersions().catch(err=>fail(err,'#memo-evidence-status'));
     return true;
   }
   const focusAnswer=(id,actionName)=>[...q('#memo-transcript').querySelectorAll('[data-message-id]')].find(el=>el.dataset.messageId===id)
@@ -298,7 +300,7 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
       box=create('div',null,'memo-answer-editor'),
       area=create('textarea'),
       bar=create('div',null,'memo-answer-editor-bar'),
-      save=button('保存',()=>saveEdit(m),'primary-button');
+      save=agentIcon('保存（Ctrl+Enter）',()=>saveEdit(m),'desktop-toolbar-primary desktop-action-save');
     area.value=draft.text;
     area.setAttribute('aria-label',t('修改回答'));
     area.dataset.answerAction='editor';
@@ -308,15 +310,15 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     area.addEventListener('mouseup',keep);
     area.addEventListener('keydown',e=>{
       if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();save.click();}
-      // Escape leaves only an unchanged draft; a changed one is left with the Cancel button.
+      // Escape leaves only an unchanged draft; a changed one is left with the cancel button.
       else if(e.key==='Escape'&&area.value===m.text){e.preventDefault();e.stopPropagation();cancelEdit(m);}
     });
     if(draft.conflict){
       const note=create('p',t('这条回答已在别处改动。再次保存会存在那次改动之后，两次的内容都保留在历史版本里。'),'memo-status');
       note.dataset.error='true';
-      bar.append(note,button('查看改动',()=>openHistory(m,draft.conflict.from),'soft-button'));
+      bar.append(note,agentIcon('查看改动',()=>openHistory(m,draft.conflict.from),'desktop-action-history'));
     }
-    bar.append(button('取消',()=>cancelEdit(m),'soft-button'),save);
+    bar.append(agentIcon('取消修改',()=>cancelEdit(m),'desktop-action-cancel'),save);
     box.append(area,bar);
     return box;
   }
@@ -331,10 +333,10 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     const at=thread.messages.indexOf(answer);
     return thread.messages.slice(0,at).reverse().find(m=>m.role==='user')?.text||'';
   }
+  const excerpt=(s,n=40)=>s.length>n?s.slice(0,n)+'…':s;
   function chooseAdoptTarget(reply,anchor){
     const targets=adoptTargets(reply);
     if(targets.length===1)return adoptReply(reply,targets[0]);
-    const excerpt=s=>s.length>40?s.slice(0,40)+'…':s;
     openMenu(anchor,targets.map(m=>[t('作为这条回答的新版本')+' · '+excerpt(questionOf(m)||m.text),()=>adoptReply(reply,m)]));
   }
   async function adoptReply(reply,target){
@@ -346,15 +348,30 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     }
   }
 
-  // The history: the versions, newest first, on the left; the chosen one on the right, compared with the current
-  // version (red: only in the chosen version, green: only in the current one) or in full, with copy and restore.
-  async function openHistory(m,select=null){
-    const owner=thread.id,view=dialog(t('历史版本')),
-      list=create('ol',null,'memo-history-list'),
-      pane=create('section',null,'memo-history-pane');
-    view.d.classList.add('memo-history-dialog');
-    view.body.append(list,pane);
-    let history=null,chosen=select,mode='compare',ticket=0;
+  // The history, in the right panel's "versions" tab: which answer, its versions newest first, then the chosen one
+  // compared with the current version (red: only in the chosen version, green: only in the current one) or in full.
+  const versionView={answerId:null,threadId:null,chosen:null,mode:'compare',ticket:0};
+  function openHistory(m,select=null){
+    Object.assign(versionView,{answerId:m.id,threadId:thread.id,chosen:select,mode:'compare'});
+    showEvidencePanel('versions');
+  }
+  async function renderVersions(){
+    const body=q('#memo-version-body'),mine=++versionView.ticket,
+      m=thread&&versionView.threadId===thread.id&&thread.messages.find(x=>x.id===versionView.answerId);
+    body.classList.toggle('memo-centered-empty',!m);
+    if(!m){
+      body.replaceChildren(create('p',t('在回答下方点“历史版本”，这里显示它的各个版本。'),'memo-empty-state'));
+      return;
+    }
+    const owner=thread.id,history=await call('memo.answer_history',{thread_id:owner,answer_id:m.id});
+    if(!versionView.chosen||!history.versions.some(v=>v.version_id===versionView.chosen))
+      versionView.chosen=history.versions.at(-2)?.version_id||history.current_version_id;
+    const chosen=versionView.chosen,current=chosen===history.current_version_id,
+      version=history.versions.find(v=>v.version_id===chosen),
+      [full,diff]=await Promise.all([
+        call('memo.answer_version_get',{thread_id:owner,answer_id:m.id,version_id:chosen}),
+        current?null:call('memo.answer_diff',{thread_id:owner,answer_id:m.id,from_version_id:chosen,to_version_id:history.current_version_id})]);
+    if(mine!==versionView.ticket||thread?.id!==owner)return;
     const label=v=>{
       let source=t(SOURCES[v.source]||v.source);
       if(v.source==='RESTORE'){
@@ -364,115 +381,93 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
       return 'v'+v.number+' · '+source;
     };
     const when=v=>new Date(v.saved_at).toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'});
-    async function load(){
-      history=await call('memo.answer_history',{thread_id:owner,answer_id:m.id});
-      if(!history.versions.some(v=>v.version_id===chosen))chosen=history.versions.at(-2)?.version_id||history.current_version_id;
-      renderList();
-      await renderPane();
+    const head=create('div',null,'memo-version-head');
+    head.append(create('small',t('回答')+' · '+excerpt(questionOf(m)||m.text,60)));
+    const list=create('ol',null,'memo-history-list');
+    for(const v of [...history.versions].reverse()){
+      const item=create('li'),b=create('button',null,'memo-history-version');
+      b.type='button';
+      b.setAttribute('aria-pressed',String(v.version_id===chosen));
+      const facts=[when(v),v.characters.toLocaleString()+' '+t('字')];
+      if(v.citation_count)facts.push(t('引用')+' '+v.citation_count);
+      b.append(create('span',label(v)+(v.version_id===history.current_version_id?' · '+t('当前'):''),'memo-history-version-name'),create('small',facts.join(' · ')));
+      if(v.review_inputs==='citations')b.append(create('small',t('仅保留引文')));
+      b.onclick=()=>{
+        versionView.chosen=v.version_id;
+        void renderVersions().then(()=>q('#memo-version-body .memo-history-version[aria-pressed="true"]')?.focus()).catch(err=>fail(err,'#memo-evidence-status'));
+      };
+      item.append(b);
+      list.append(item);
     }
-    function renderList(){
-      list.replaceChildren();
-      for(const v of [...history.versions].reverse()){
-        const item=create('li'),b=create('button',null,'memo-history-version');
+    const pane=create('section',null,'memo-history-pane'),bar=create('div',null,'memo-history-head');
+    bar.append(create('h4',label(version)+(current?' · '+t('当前'):'')));
+    const tools=create('div',null,'memo-history-tools');
+    if(!current){
+      const modes=create('div',null,'segmented desktop-icon-segmented');
+      modes.setAttribute('role','group');
+      modes.setAttribute('aria-label',t('查看方式'));
+      for(const [key,text,icon] of [['compare','与当前比较','desktop-action-sync-code'],['full','全文','desktop-action-preview']]){
+        const b=create('button',t(text),'desktop-toolbar-icon desktop-toolbar-ghost '+icon);
         b.type='button';
-        b.setAttribute('aria-pressed',String(v.version_id===chosen));
-        const facts=[when(v),v.characters.toLocaleString()+' '+t('字')];
-        if(v.citation_count)facts.push(t('引用')+' '+v.citation_count);
-        b.append(create('span',label(v)+(v.version_id===history.current_version_id?' · '+t('当前'):''),'memo-history-version-name'),
-          create('small',facts.join(' · ')));
-        if(v.review_inputs==='citations')b.append(create('small',t('仅保留引文')));
-        b.onclick=()=>{
-          chosen=v.version_id;
-          renderList();
-          void renderPane().catch(err=>showError(err));
-          list.querySelector('[aria-pressed="true"]')?.focus();
-        };
-        item.append(b);
-        list.append(item);
+        b.setAttribute('aria-pressed',String(versionView.mode===key));
+        b.setAttribute('aria-label',t(text));
+        b.dataset.desktopTip=t(text);
+        b.onclick=()=>{versionView.mode=key;void renderVersions().catch(err=>fail(err,'#memo-evidence-status'));};
+        modes.append(b);
       }
+      tools.append(modes);
     }
-    function showError(err){
-      const p=create('p',t(errors[err?.message]||err?.message||'操作未完成'),'memo-status');
-      p.dataset.error='true';
-      p.setAttribute('role','alert');
-      pane.append(p);
-    }
-    async function renderPane(){
-      const mine=++ticket,current=chosen===history.current_version_id,
-        version=history.versions.find(v=>v.version_id===chosen),
-        [full,diff]=await Promise.all([
-          call('memo.answer_version_get',{thread_id:owner,answer_id:m.id,version_id:chosen}),
-          current?null:call('memo.answer_diff',{thread_id:owner,answer_id:m.id,from_version_id:chosen,to_version_id:history.current_version_id})]);
-      if(mine!==ticket||!view.d.isConnected)return;
-      pane.replaceChildren();
-      const head=create('header',null,'memo-history-head');
-      head.append(create('h4',label(version)+(current?' · '+t('当前'):'')));
-      if(!current){
-        const modes=create('div',null,'segmented');
-        for(const [key,text] of [['compare','与当前比较'],['full','全文']]){
-          const b=create('button',t(text));
-          b.type='button';
-          b.setAttribute('aria-pressed',String(mode===key));
-          b.onclick=()=>{mode=key;void renderPane().catch(err=>showError(err));};
-          modes.append(b);
+    tools.append(agentIcon('复制此版本',()=>copyText(full.text),'desktop-action-copy'));
+    if(!current){
+      const restore=agentIcon('恢复为当前版本',async()=>{
+        try{
+          await call('memo.answer_restore',{thread_id:owner,answer_id:m.id,version_id:chosen,expected_version_id:history.current_version_id});
+        }catch(e){
+          if(!conflictVersion(e))throw e;
+          await renderVersions();
+          throw Error('ANSWER_VERSION_CONFLICT');
         }
-        head.append(modes);
-      }
-      pane.append(head);
-      if(!current&&mode==='compare')pane.append(...diffView(diff,version));
-      else pane.append(messageBody(full.text),...citationList(full.citations));
-      view.footer.replaceChildren(button('复制此版本',()=>copyText(full.text),'soft-button'));
-      if(!current){
-        const restore=button('恢复为当前版本',async()=>{
-          try{
-            await call('memo.answer_restore',{thread_id:owner,answer_id:m.id,version_id:chosen,expected_version_id:history.current_version_id});
-          }catch(e){
-            if(!conflictVersion(e))throw e;
-            await load();
-            showError(Error('ANSWER_VERSION_CONFLICT'));
-            return;
-          }
-          view.d.close();
-          if(await reloadThread(owner)){
-            focusAnswer(m.id,'history');
-            status('#memo-chat-status','已恢复，并保存为新版本');
-          }
-        },'primary-button');
-        restore.disabled=versionsBlocked();
-        view.footer.append(restore);
-      }
+        versionView.chosen=null;
+        if(await reloadThread(owner))status('#memo-chat-status','已恢复，并保存为新版本');
+      },'desktop-action-restore');
+      restore.disabled=versionsBlocked();
+      tools.append(restore);
     }
-    function citationList(citations){
-      if(!citations?.length)return [];
-      const box=create('ol',null,'memo-history-citations');
-      for(const r of citations)box.append(create('li',r.title));
-      return [create('p',t('引用'),'memo-history-label'),box];
+    bar.append(tools);
+    pane.append(bar);
+    if(!current&&versionView.mode==='compare')pane.append(...diffView(diff,version));
+    else pane.append(messageBody(full.text),...citationList(full.citations));
+    body.replaceChildren(head,list,pane);
+  }
+  function citationList(citations){
+    if(!citations?.length)return [];
+    const box=create('ol',null,'memo-history-citations');
+    for(const r of citations)box.append(create('li',r.title));
+    return [create('p',t('引用'),'memo-history-label'),box];
+  }
+  function diffView(diff,version){
+    const text=create('div',null,'memo-message-body memo-history-diff');
+    for(const block of diff.blocks){
+      if(block.kind==='equal'){
+        const lines=block.new_lines;
+        if(lines.length<=6){text.append(lines.join(''));continue;}
+        const more=create('button',t('展开未改动的行')+' · '+(lines.length-4),'memo-history-skip');
+        more.type='button';
+        more.onclick=()=>more.replaceWith(lines.slice(2,-2).join(''));
+        text.append(lines.slice(0,2).join(''),more,lines.slice(-2).join(''));
+      }else if(block.kind==='change'){
+        for(const w of block.words)text.append(w.op==='equal'?w.text:create(w.op==='insert'?'ins':'del',w.text));
+      }else text.append(create(block.kind==='insert'?'ins':'del',(block.kind==='insert'?block.new_lines:block.old_lines).join('')));
     }
-    function diffView(diff,version){
-      const text=create('div',null,'memo-message-body memo-history-diff');
-      for(const block of diff.blocks){
-        if(block.kind==='equal'){
-          const lines=block.new_lines;
-          if(lines.length<=6){text.append(lines.join(''));continue;}
-          const more=create('button',t('展开未改动的行')+' · '+(lines.length-4),'memo-history-skip');
-          more.type='button';
-          more.onclick=()=>more.replaceWith(lines.slice(2,-2).join(''));
-          text.append(lines.slice(0,2).join(''),more,lines.slice(-2).join(''));
-        }else if(block.kind==='change'){
-          for(const w of block.words)text.append(w.op==='equal'?w.text:create(w.op==='insert'?'ins':'del',w.text));
-        }else text.append(create(block.kind==='insert'?'ins':'del',(block.kind==='insert'?block.new_lines:block.old_lines).join('')));
-      }
-      const legend=create('p',null,'memo-history-legend');
-      legend.append(create('span',t('只在此版本')+' · v'+version.number,'memo-history-old'),create('span',t('只在当前版本'),'memo-history-new'));
-      const c=diff.citations,notes=[];
-      if(c.added.length)notes.push(t('新增引用')+' · '+c.added.map(r=>r.title).join('；'));
-      if(c.removed.length)notes.push(t('移除引用')+' · '+c.removed.map(r=>r.title).join('；'));
-      if(c.changed?.length)notes.push(t('引用内容有变化')+' · '+c.changed.map(r=>r.title).join('；'));
-      if(c.reordered)notes.push(t('引用顺序有调整'));
-      const same=diff.blocks.every(b=>b.kind==='equal')&&!notes.length;
-      return same?[create('p',t('与当前版本内容相同'),'memo-history-label')]:[legend,text,...notes.map(n=>create('p',n,'memo-history-label'))];
-    }
-    await load();
+    const legend=create('p',null,'memo-history-legend');
+    legend.append(create('span',t('只在此版本')+' · v'+version.number,'memo-history-old'),create('span',t('只在当前版本'),'memo-history-new'));
+    const c=diff.citations,notes=[];
+    if(c.added.length)notes.push(t('新增引用')+' · '+c.added.map(r=>r.title).join('；'));
+    if(c.removed.length)notes.push(t('移除引用')+' · '+c.removed.map(r=>r.title).join('；'));
+    if(c.changed?.length)notes.push(t('引用内容有变化')+' · '+c.changed.map(r=>r.title).join('；'));
+    if(c.reordered)notes.push(t('引用顺序有调整'));
+    const same=diff.blocks.every(b=>b.kind==='equal')&&!notes.length;
+    return same?[create('p',t('与当前版本内容相同'),'memo-history-label')]:[legend,text,...notes.map(n=>create('p',n,'memo-history-label'))];
   }
 const collapsed=new Set();
   const editing=new Map();
@@ -1741,6 +1736,13 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
       q('#memo-search-toggle').focus();
     }
   }
+  function closeEvidence(){
+    const layout=q('#memo-layout');
+    if(layout.dataset.evidence!=='true')return;
+    setEvidenceOpen(false);
+    layout.dataset.evidence='false';
+    q('#memo-evidence-toggle').setAttribute('aria-expanded','false');
+  }
   function showEvidencePanel(tab='materials'){
     const layout=q('#memo-layout');
     materialView=tab;
@@ -1756,6 +1758,8 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     q('#memo-material-panel').hidden=tab!=='materials';
     q('#memo-reference-panel').hidden=tab!=='references';
     q('#memo-feedback-panel').hidden=tab!=='feedback';
+    q('#memo-version-panel').hidden=tab!=='versions';
+    if(tab==='versions')void renderVersions().catch(err=>fail(err,'#memo-evidence-status'));
     q('#memo-evidence-resizer').setAttribute('aria-valuenow',String(Math.round(q('.memo-evidence').getBoundingClientRect().width)));
   }
   async function openMaterials(id=project){
@@ -1886,12 +1890,8 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
       });
     }
     action('#memo-evidence-toggle',()=>{
-      const layout=q('#memo-layout');
-      if(layout.dataset.evidence==='true'){
-        setEvidenceOpen(false);
-        layout.dataset.evidence='false';
-        q('#memo-evidence-toggle').setAttribute('aria-expanded','false');
-      }else showEvidencePanel(materialView);
+      if(q('#memo-layout').dataset.evidence==='true')closeEvidence();
+      else showEvidencePanel(materialView);
     });
     action('#memo-back-chat',()=>route('chat'));
     action('#memo-configure-models',()=>{
@@ -2017,7 +2017,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     Memorive.chat={openThread:id=>selectThread({id}),notify:message=>status('#memo-chat-status',message),reportImportFailure:message=>{
       showEvidencePanel('materials');
       fail(Error(message),'#memo-evidence-status');
-    },importFiles,pickFiles,configureThread,renderComposer,refreshMaterials,refresh,renderThread,send,saveSettings,revertSettings,hasSettingsDraft,inspect:()=>({loaded,project,thread_id:thread?.id,active_job:activeJob,evidence_count:lastEvidence.length}),openMaterials,showEvidencePanel,openSearch,openSettings:()=>route('research-settings')};
+    },importFiles,pickFiles,configureThread,renderComposer,refreshMaterials,refresh,renderThread,send,saveSettings,revertSettings,hasSettingsDraft,inspect:()=>({loaded,project,thread_id:thread?.id,active_job:activeJob,evidence_count:lastEvidence.length}),openMaterials,showEvidencePanel,closeEvidence,openSearch,openSettings:()=>route('research-settings')};
   }
 
   const importing=new Map(), importFailures=new Map();

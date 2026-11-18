@@ -23,6 +23,9 @@
 .desktop-research-advanced summary { cursor:pointer; }
 /* Research opportunities (shared/opportunities.js): the search controls, then one card per opportunity. */
 .desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--border-default,#dfd9cf); }
+.desktop-research-opportunity-search { display:flex;align-items:center;gap:8px; }
+.desktop-research-opportunity-search .field { flex:1;min-width:0; }
+.desktop-research-opportunity-head { display:flex;align-items:center;justify-content:space-between;gap:12px; }
 .desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:4px 0 18px;border-bottom:1px solid var(--border-default,#dfd9cf);overflow-wrap:anywhere; }
 .desktop-research-opportunity h4 { margin:0;line-height:1.5; }
 .desktop-research-opportunity-tags { display:flex;gap:10px;align-items:center;margin:0; }

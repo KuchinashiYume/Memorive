@@ -563,24 +563,29 @@
 #memo-chat-page .memo-answer-editor textarea:focus{border-color:var(--desktop-border-strong);box-shadow:0 0 0 2px #A2603F12}
 #memo-chat-page .memo-answer-editor-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 #memo-chat-page .memo-answer-editor-bar .memo-status{flex:1 1 260px;margin:0}
-.memo-history-dialog{max-width:1040px}
-.memo-history-dialog .memo-dialog-error{grid-column:1/-1}
-.memo-history-dialog .memo-dialog-body{display:grid;grid-template-columns:minmax(190px,240px) minmax(0,1fr);gap:16px;align-items:start;height:60vh}
-.memo-history-list{list-style:none;margin:0;padding:0 4px 0 0;display:flex;flex-direction:column;gap:2px;max-height:100%;overflow:auto;border-right:1px solid var(--desktop-border-subtle)}
+#desktop-chat-preview #memo-version-body:not(.memo-centered-empty){display:flex;flex-direction:column;gap:12px}
+#desktop-chat-preview .memo-history-list{list-style:none;margin:0;padding:0 0 8px;display:flex;flex-direction:column;gap:2px;max-height:calc(220px * var(--desktop-scale));overflow:auto;border-bottom:1px solid var(--desktop-border-subtle)}
 .memo-history-version{display:block;width:100%;border:1px solid transparent;border-radius:8px;background:transparent;padding:8px 10px;text-align:left;color:inherit;cursor:pointer}
 .memo-history-version:hover{background:var(--desktop-surface-hover)}
 .memo-history-version[aria-pressed=true]{background:var(--desktop-surface-selected);border-color:var(--desktop-selection-border)}
 .memo-history-version small{display:block;margin-top:3px;color:var(--desktop-text-secondary)}
-.memo-history-pane{min-width:0;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px}
-.memo-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.memo-history-pane{min-width:0;display:flex;flex-direction:column;gap:12px}
+.memo-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .memo-history-head h4{margin:0}
-.memo-history-pane .memo-message-body{line-height:1.9}
+.memo-history-tools{display:flex;align-items:center;gap:6px}
+.memo-history-pane .memo-message-body{line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
 .memo-history-diff :is(ins,del),.memo-history-legend span{border-radius:3px;padding:0 2px}
 .memo-history-diff ins,.memo-history-new{text-decoration:none;background:var(--green-bg);color:var(--green-text)}
 .memo-history-diff del,.memo-history-old{background:var(--red-bg);color:var(--red-text)}
-.memo-history-legend{display:flex;gap:12px;margin:0;color:var(--desktop-text-secondary)}
+.memo-history-legend{display:flex;flex-wrap:wrap;gap:12px;margin:0;color:var(--desktop-text-secondary)}
 .memo-history-skip{display:block;margin:4px 0;border:0;border-radius:6px;padding:2px 8px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);cursor:pointer}
 .memo-history-label{margin:0;color:var(--desktop-text-secondary)}
 .memo-history-citations{margin:0;padding-left:1.4em}
-@media(max-width:760px){.memo-history-dialog .memo-dialog-body{grid-template-columns:1fr;height:auto}.memo-history-list{border-right:0;max-height:180px}}
+#desktop-chat-preview .memo-evidence-tabs.desktop-icon-segmented{flex:0 0 auto}
+/* The research opportunities mode (shared/opportunities.js): the Q&A layout and its tools give way to that page,
+   which uses the reading column of the conversation. */
+#memo-chat-page[data-mode=opportunities] .memo-layout{display:none!important}
+#memo-chat-page[data-mode=opportunities] .memo-heading-tools > :not(#memo-mode){display:none!important}
+#memo-chat-page .memo-opportunities{flex:1;min-height:0;overflow:auto}
+#memo-chat-page .memo-opportunities-body{display:flex;flex-direction:column;gap:18px;padding:24px max(24px,calc((100% - var(--memo-column))/2)) 32px}
 #memo-chat-page .memo-context-technical > summary{cursor:pointer;color:var(--desktop-text-secondary);font-size:var(--memo-size-small)}

@@ -157,6 +157,8 @@
       modeButton.setAttribute('aria-label', targetLabel);
       modeButton.dataset.desktopTip = targetLabel;
       modeButton.removeAttribute('title');
+      q('#library-mode-title').setAttribute('aria-label', targetLabel);
+      q('#library-mode-title').dataset.desktopTip = targetLabel;
       q('#library-mode-label').textContent = mode === 'literature' ? '文献' : 'Memorive 文档';
       renderFilterMenu();
       applyFilters();
@@ -417,6 +419,8 @@
     );
     let libraryTransitionVersion = 0;
     let libraryTransitionTimer = 0;
+    // The page title switches the mode too.
+    q('#library-mode-title').addEventListener('click', () => q('#library-mode').click());
     q('#library-mode').addEventListener('click', () => {
       const list = q('#library-list');
       const version = ++libraryTransitionVersion;
