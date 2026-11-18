@@ -39,7 +39,9 @@
   const errors = { OPPORTUNITIES_MODEL_REQUIRED: '先在研究问答的设置里选择模型', RESEARCH_ALREADY_RUNNING: '另一项研究任务正在运行，结束后再试',
     OPPORTUNITIES_REVISION_CONFLICT: '列表已更新，请再操作一次', OPPORTUNITY_NOT_FOUND: '这条机会已不存在，列表已刷新',
     OPPORTUNITIES_NO_PAPERS: '资料库里还没有处理完的论文', LIBRARY_SELECTION_STALE: '论文文件已变化，请重新寻找研究机会' };
-  let state = null, timer = 0, epoch = 0, focusText = '';
+  // keywords: the focus of the next search, at most MAX_KEYWORDS, sent to the model joined (opportunities.find focus).
+  const MAX_KEYWORDS = 5;
+  let state = null, timer = 0, epoch = 0, keywords = [];
   const page = () => q('#memo-chat-page'), body = () => q('#memo-opportunities-body'), status = () => q('#memo-opportunities-status');
   const shown = () => page()?.dataset.mode === 'opportunities';
 
@@ -115,22 +117,49 @@
   function render() {
     const target = body(), run = state.active_run || state.runs[0], running = !!state.active_run;
     target.replaceChildren();
-    // One row: the optional focus, find, and with a run its task and (while it runs) cancel; then its state.
+    // One row: the keyword field, find, and with a run its task and (while it runs) cancel; under it the keywords
+    // as chips (the composer's attachment chips), then the run's state.
     const controls = make('section', null, 'desktop-research-opportunity-controls'), row = make('div', null, 'desktop-research-opportunity-search');
-    const focus = make('input', null, 'field');
-    focus.maxLength = 500;
-    focus.placeholder = '关注点（可选）';
-    focus.setAttribute('aria-label', '关注点（可选）');
-    focus.value = focusText;
-    focus.oninput = () => { focusText = focus.value; };
+    const field = make('input', null, 'field'), chips = make('div', null, 'memo-attachments desktop-research-opportunity-keywords');
+    field.maxLength = 40;
+    field.setAttribute('aria-label', '关注点关键词');
+    const add = () => {
+      const word = field.value.trim();
+      if (word && keywords.length < MAX_KEYWORDS && !keywords.includes(word)) keywords.push(word);
+      field.value = '';
+      showKeywords();
+    };
+    const showKeywords = () => {
+      chips.replaceChildren(...keywords.map((word) => {
+        const chip = make('div', null, 'memo-attachment'), remove = make('button', '×', 'memo-quiet-button');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', '移除关键词 ' + word);
+        remove.onclick = () => {
+          keywords = keywords.filter((w) => w !== word);
+          showKeywords();
+          field.focus();
+        };
+        chip.append(make('span', word, 'memo-attachment-name'), remove);
+        return chip;
+      }));
+      chips.hidden = !keywords.length;
+      const full = keywords.length >= MAX_KEYWORDS;
+      field.disabled = full;
+      field.placeholder = full ? '最多 5 个关键词' : '关注点关键词，回车添加（最多 5 个）';
+    };
+    field.onkeydown = (e) => {
+      if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); add(); }
+      else if (e.key === 'Backspace' && !field.value && keywords.length) { keywords.pop(); showKeywords(); }
+    };
+    showKeywords();
     const unavailable = !state.model ? '先在研究问答的设置里选择模型' : !state.card_count ? '资料库里还没有处理完的论文' : '';
     const find = icon('寻找研究机会', async () => {
-      await call('opportunities.find', { request_id: 'opportunities-' + crypto.randomUUID(), ...(focusText.trim() ? { focus: focusText.trim() } : {}) });
+      add();   // a word typed but not yet added counts too
+      await call('opportunities.find', { request_id: 'opportunities-' + crypto.randomUUID(), ...(keywords.length ? { focus: keywords.join('；') } : {}) });
       await refresh();
     }, 'desktop-action-auto', 'desktop-toolbar-primary');
     find.disabled = running || !!unavailable;
-    focus.onkeydown = (e) => { if (e.key === 'Enter' && !find.disabled) find.click(); };
-    row.append(focus, find);
+    row.append(field, find);
     if (run) {
       row.append(icon('查看任务', () => Memorive.research.openTask(run.run_id), 'desktop-action-current-task'));
       if (running) row.append(icon('取消', async () => {
@@ -143,7 +172,7 @@
     s.setAttribute('role', 'status');
     s.textContent = run ? (RUNS[run.status] || run.status) + (run.error_code ? ' · ' + (errors[run.error_code] || '请查看任务记录') : '') : unavailable;
     s.hidden = !s.textContent;
-    controls.append(row, s);
+    controls.append(row, chips, s);
     if (state.papers_since_last_run > 0 && state.runs.length) {
       // Separate text nodes, so the label is translated and the number kept.
       const fresh = make('p', null, 'desktop-research-muted');

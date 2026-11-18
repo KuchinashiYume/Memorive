@@ -25,6 +25,7 @@
 .desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px; }
 .desktop-research-opportunity-search { display:flex;align-items:center;gap:8px;max-width:640px; }
 .desktop-research-opportunity-search .field { flex:1;min-width:0; }
+#memo-chat-page .memo-attachments.desktop-research-opportunity-keywords { max-width:640px;padding:0; }
 .desktop-research-opportunity-head { display:flex;align-items:center;justify-content:space-between;gap:12px; }
 /* An opportunity sits in the same frame as a research Q&A answer (routes/chat/workspace.css). */
 .desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:16px 20px 8px;border:1px solid var(--desktop-border-default);border-radius:16px;background:var(--desktop-surface-raised);box-shadow:0 3px 12px #2A272307;overflow-wrap:anywhere; }
