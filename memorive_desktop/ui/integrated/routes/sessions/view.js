@@ -1,11 +1,11 @@
 /* Draws the session management page: the source tabs, session cards, the selected session's turns, and the confirm
-   countdowns of removal and refinement retry. Publishes window.__Desktop_SESSION_PAGE__ and reads its data through
-   window.__Desktop_SESSIONS_BRIDGE__. */
+   countdowns of removal and refinement retry. Publishes Memorive.sessionsView and reads its data through
+   Memorive.sessionsBridge. */
 (() => {
   'use strict';
 
   const root = document.getElementById('desktop-sessions-preview');
-  if (!root || !window.DesktopPreview_sessions) return;
+  if (!root || !Memorive.frames.sessions) return;
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
   const setRefineState = (message = '', { show = true, title = '' } = {}) => {
@@ -73,7 +73,7 @@
   };
   const requestNextPage = () => {
     if (pageLoadRequested) return;
-    const bridge = window.__Desktop_SESSIONS_BRIDGE__;
+    const bridge = Memorive.sessionsBridge;
     if (!bridge?.loadNextPage) return;
     const retryOptions = pageTriggerOptions ? { ...pageTriggerOptions } : null;
     pageLoadRequested = true;
@@ -542,7 +542,7 @@
       q('#sessions-detail-title').focus({ preventScroll:true });
     });
     if (selectedProjectionId) {
-      void window.__Desktop_SESSIONS_BRIDGE__?.loadDetail(selectedProjectionId);
+      void Memorive.sessionsBridge?.loadDetail(selectedProjectionId);
     }
   };
 
@@ -597,9 +597,9 @@
       selectedCard?.setAttribute('aria-expanded', 'true');
     }
     updateBatch();
-    const pendingTarget = String(window.__Desktop_SESSION_NAV_TARGET__ || '').trim();
+    const pendingTarget = String(Memorive.sessionNavTarget || '').trim();
     if (pendingTarget && focusProjection(pendingTarget)) {
-      window.__Desktop_SESSION_NAV_TARGET__ = '';
+      Memorive.sessionNavTarget = '';
     }
     armPageTrigger(options);
     return { record_count:recordsById.size, selected_projection_id:selectedProjectionId };
@@ -861,7 +861,7 @@
 
   const queryBridge = () => {
     const filter = currentFilter();
-    const bridge = window.__Desktop_SESSIONS_BRIDGE__;
+    const bridge = Memorive.sessionsBridge;
     if (bridge) return bridge.query(filter);
     const term = filter.search.trim().toLowerCase();
     const rows = [...recordsById.values()].filter((record) => {
@@ -875,11 +875,11 @@
   window.addEventListener('desktop:open-session', (event) => {
     const projectionId = String(event?.detail?.local_projection_id || '').trim();
     if (!projectionId) return;
-    window.__Desktop_SESSION_NAV_TARGET__ = projectionId;
+    Memorive.sessionNavTarget = projectionId;
     q('#sessions-source').value = 'all';
     q('#sessions-search').value = '';
-    if (!focusProjection(projectionId)) void window.__Desktop_SESSIONS_BRIDGE__?.openProjection(projectionId);
-    else window.__Desktop_SESSION_NAV_TARGET__ = '';
+    if (!focusProjection(projectionId)) void Memorive.sessionsBridge?.openProjection(projectionId);
+    else Memorive.sessionNavTarget = '';
   });
 
   q('#sessions-search-toggle').addEventListener('click', () => {
@@ -910,7 +910,7 @@
   });
   q('#sessions-refresh').addEventListener('click', () => {
     closeDetail();
-    const bridge = window.__Desktop_SESSIONS_BRIDGE__;
+    const bridge = Memorive.sessionsBridge;
     if (!bridge) return;
     const refresh = q('#sessions-refresh');
     refresh.disabled = true;
@@ -925,7 +925,7 @@
 
   q('#sessions-refresh-local').addEventListener('click', () => {
     closeDetail();
-    const bridge = window.__Desktop_SESSIONS_BRIDGE__;
+    const bridge = Memorive.sessionsBridge;
     if (!bridge) return;
     const button = q('#sessions-refresh-local');
     button.disabled = true;
@@ -971,7 +971,7 @@
     button.disabled = true;
     window.clearInterval(batchConfirmTimer);
     batchConfirmTimer = 0;
-    void window.__Desktop_SESSIONS_BRIDGE__?.bulkDelete(ids)
+    void Memorive.sessionsBridge?.bulkDelete(ids)
       .then((receipt) => {
         showToast(`已从 Memorive 移除 ${receipt?.success_count || 0} 条`);
         exitBatchMode();
@@ -988,7 +988,7 @@
     const button = q('#sessions-refine');
     button.disabled = true;
     button.textContent = '精炼中…';
-    void window.__Desktop_SESSIONS_BRIDGE__?.refine(selectedProjectionId)
+    void Memorive.sessionsBridge?.refine(selectedProjectionId)
       .then((receipt) => {
         if (['INBOX_QUEUED', 'TASK_QUEUED', 'TASK_RUNNING'].includes(receipt?.status)) {
           activeRefinementJobId = receipt.job_id || 'inbox';
@@ -1016,14 +1016,14 @@
   q('#sessions-import-browser-sessions').addEventListener('click', () => {
     const button = q('#sessions-import-browser-sessions');
     button.disabled = true;
-    void window.__Desktop_SESSIONS_BRIDGE__?.importBrowserSessionsFile()
+    void Memorive.sessionsBridge?.importBrowserSessionsFile()
       .catch((error) => showToast(`网页会话导入失败：${error?.message || error}`))
       .finally(() => { button.disabled = false; });
   });
   q('#sessions-capture-current-page').addEventListener('click', () => {
     const button = q('#sessions-capture-current-page');
     button.disabled = true;
-    void window.__Desktop_SESSIONS_BRIDGE__?.captureCurrentPage()
+    void Memorive.sessionsBridge?.captureCurrentPage()
       .catch((error) => showToast(`当前界面录入失败：${error?.message || error}`))
       .finally(() => { button.disabled = false; });
   });
@@ -1036,7 +1036,7 @@
     button.disabled = true;
     window.clearInterval(deleteConfirmTimer);
     deleteConfirmTimer = 0;
-    void window.__Desktop_SESSIONS_BRIDGE__?.deleteLocal(projectionId)
+    void Memorive.sessionsBridge?.deleteLocal(projectionId)
       .then(() => {
         closeDetail({ immediate:true });
         showToast('已从 Memorive 移除');
@@ -1054,7 +1054,7 @@
   const globalRight = q('#desktop-toggle-right');
   globalRight.disabled = true;
   // This page shows details in the middle, so the shared button gets its own label instead of the frame's.
-  window.__Desktop_I18N__.set(globalRight, null, null, 'aria-label');
+  Memorive.i18n.set(globalRight, null, null, 'aria-label');
   globalRight.setAttribute('aria-label', '本页完整详情使用中央宽阅读区');
   root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !q('#sessions-searchbox').hidden) {
@@ -1063,7 +1063,7 @@
     }
   }, true);
 
-  window.__Desktop_SESSION_PAGE__ = Object.freeze({
+  Memorive.sessionsView = Object.freeze({
     replaceRows,
     appendRows,
     renderDetail,

@@ -3,12 +3,12 @@
 
    Each route section of the page carries its own copy of the frame markup (#desktop-<component>-preview).
    This script gives every copy the same behaviour; only the size rule of the right panel differs by route
-   (RIGHT_PANEL_RULES below). For each route it publishes window.DesktopPreview_<component>:
+   (RIGHT_PANEL_RULES below). For each route it publishes Memorive.frames.<component>:
    { app, root, setInspector(open, options), setSidebar(open), setBottom(open) }, plus resetInspectorRatio()
    on the inbox. shared/app.js and the route scripts use these objects. */
 (() => {
   'use strict';
-  const i18n = window.__Desktop_I18N__;
+  const i18n = Memorive.i18n;
 
   const BOTTOM_DEFAULT = 346;
 
@@ -136,8 +136,8 @@
     { component: 'library', rule: RIGHT_PANEL_RULES.keptShare },
     { component: 'worklog', rule: RIGHT_PANEL_RULES.keptShare },
     // The leaderboard shows its own tooltips (routes/leaderboard/view.js).
-    { component: 'partleaderboard', rule: RIGHT_PANEL_RULES.keptShare, ownTooltips: true },
-    { component: 'partchat', rule: RIGHT_PANEL_RULES.keptShare },
+    { component: 'leaderboard', rule: RIGHT_PANEL_RULES.keptShare, ownTooltips: true },
+    { component: 'chat', rule: RIGHT_PANEL_RULES.keptShare },
   ];
 
   const createFrame = ({ component, rule: makeRule, ownTooltips = false }) => {
@@ -450,7 +450,7 @@
       setBottom: (open) => setPanel('bottom', Boolean(open), bottomButton, bottomPanel),
     };
     if (rule.reset) shell.resetInspectorRatio = () => rule.reset(frame);
-    window[`DesktopPreview_${component}`] = shell;
+    Memorive.frames[component] = shell;
 
     const resizeObserver = new ResizeObserver(updateResizerBounds);
     resizeObserver.observe(stage);
@@ -462,4 +462,5 @@
   };
 
   ROUTES.forEach(createFrame);
+  Object.freeze(Memorive.frames);
 })();

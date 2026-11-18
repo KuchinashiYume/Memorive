@@ -122,5 +122,5 @@
     connected=value;
     if(!value)for(const node of [...active])clear(node);
   }
-  window.__MEMO_NODE_PROGRESS__={apply,clear,transport};
+  Memorive.nodeProgress={apply,clear,transport};
 })();

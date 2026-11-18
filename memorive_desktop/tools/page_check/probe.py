@@ -141,7 +141,7 @@ try:
             window.load_url(page)
             deadline, ready = time.monotonic() + 90, None
             while time.monotonic() < deadline:
-                ready = js("({ready: !!window.__check && !!window.__Desktop_INTEGRATED_APP__ && !!window.pywebview?.api?.call})")
+                ready = js("({ready: !!window.__check && !!window.Memorive?.app && !!window.pywebview?.api?.call})")
                 if ready and ready.get("ready"):
                     break
                 time.sleep(0.25)

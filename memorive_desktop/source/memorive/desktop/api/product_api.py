@@ -343,7 +343,7 @@ class ProductApi(
         if self._window is not None:
             try:
                 self._window.evaluate_js(
-                    "window.__Desktop_INTEGRATED_APP__?.applyPreferences("
+                    "window.Memorive?.app?.applyPreferences("
                     + json.dumps(preferences, ensure_ascii=False, separators=(",", ":"))
                     + ")"
                 )

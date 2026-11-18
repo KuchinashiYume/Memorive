@@ -1,10 +1,10 @@
 /* Research runs shared by several pages: starting, following and cancelling literature discovery runs, their
    preferences and feedback (research.*), and their place on the current task, messages and library pages.
-   Publishes window.__Desktop_RESEARCH__. */
+   Publishes Memorive.research. */
 (() => {
   'use strict';
-  if (window.__Desktop_RESEARCH__) return;
-  const call = (method, params = {}) => window.__Desktop_SERVICE__.call(method, params);
+  if (Memorive.research) return;
+  const call = (method, params = {}) => Memorive.service.call(method, params);
   const make = (tag, text, cls) => {
     const e = document.createElement(tag);
     if (text != null) e.textContent = text;
@@ -68,7 +68,7 @@
     return {wrap,input};
   }
   async function open(kind='discovery',origin=null) {
-    if(kind==='discovery') return window.__Desktop_EXTERNAL_SOURCES__?.load();
+    if(kind==='discovery') return Memorive.externalSources?.load();
     const view=openShell('周期报告',origin);
     const status=make('p',null,'desktop-research-status');
     status.setAttribute('role','status');
@@ -127,7 +127,7 @@
     const state=await call('research.get',{run_id:runId});
     if(!state.library_locator)throw new Error('结果尚未写入资料库');
     close();
-    return window.__Desktop_LIBRARY_BRIDGE__.openArtifactByLocator(state.library_locator);
+    return Memorive.libraryBridge.openArtifactByLocator(state.library_locator);
   }
   async function renderResult(runId,body) {
     body.dataset.researchRunId=runId;
@@ -145,7 +145,7 @@
     }
     body.append(make('small','校验值：'+state.result.sha256,'desktop-research-muted'));
     if(state.kind==='ai_briefing'){
-      window.__MEMO_RESEARCH_HOME__.renderAIResult(body,state.result,runId);
+      Memorive.researchHome.renderAIResult(body,state.result,runId);
       body.append(button('查看关联任务',()=>openTask(runId)));
       return;
     }
@@ -272,16 +272,16 @@
     card.append(actions);
   }
   async function openTask(runId){
-    await window.__Desktop_INTEGRATED_APP__.activate('current-task');
-    await window.__Desktop_CURRENT_TASK_BRIDGE__?.refresh?.();
-    await window.__Desktop_CURRENT_TASK_BRIDGE__?.selectRun?.(runId);
+    await Memorive.app.activate('current-task');
+    await Memorive.currentTaskBridge?.refresh?.();
+    await Memorive.currentTaskBridge?.selectRun?.(runId);
     const tasks=await call('research.task_list');
     const row=tasks.rows.find(r=>r.run_id===runId);
-    window.__Desktop_TASKS_UI__?.setTaskMode?.(row?.history?'history':'current');
-    window.__Desktop_TASKS_UI__?.openTaskByRun?.(runId);
+    Memorive.tasksView?.setTaskMode?.(row?.history?'history':'current');
+    Memorive.tasksView?.openTaskByRun?.(runId);
   }
   function taskActions(runId,binding,container){
-    if(binding.workflow_kind==='RESEARCH_AI_BRIEFING')return window.__MEMO_RESEARCH_HOME__.taskActions(runId,binding,container);
+    if(binding.workflow_kind==='RESEARCH_AI_BRIEFING')return Memorive.researchHome.taskActions(runId,binding,container);
     const status=make('span',null,'desktop-research-muted');
     const isReport=binding.workflow_kind==='RESEARCH_REPORT';
     if(binding.source_status==='PARTIAL')container.append(make('span','部分完成 · 请查看结果中的来源缺口或投递情况','desktop-research-muted'));
@@ -312,7 +312,7 @@
     }else{
       container.append(button(isReport?'重新生成报告':'重新检索',async event=>{
         const action=event.currentTarget;
-        if(!window.__Desktop_UI_CONTROLS__?.confirmRestart(action,'restart:'+runId))return;
+        if(!Memorive.controls?.confirmRestart(action,'restart:'+runId))return;
         action.disabled=true;
         try{
           const receipt=await call('research.start',{kind:isReport?'report':'discovery',...(isReport?{period:binding.period,regenerate_from:runId}:{}),request_id:'manual-'+crypto.randomUUID()});
@@ -366,10 +366,10 @@
         title=host.querySelector(':scope > span');
         title.classList.add('desktop-setting-label');
       }
-      window.__Desktop_SETTINGS_CONTROLS__.help(title,label,helpCopies[label]);
+      Memorive.settingsControls.help(title,label,helpCopies[label]);
       const input=host.querySelector('input');
       if(input?.type==='number'){
-        input.title=input.min+'–'+input.max+' · '+(window.__Desktop_INTEGRATED_APP__?.translate?.('整数')||'整数');
+        input.title=input.min+'–'+input.max+' · '+(Memorive.app?.translate?.('整数')||'整数');
         input.inputMode='numeric';
         input.addEventListener('keydown',event=>{if(['e','E','+','-','.'].includes(event.key))event.preventDefault();});
       }
@@ -385,7 +385,7 @@
       event.preventDefault();
       event.stopPropagation();
       enabled.setAttribute('aria-checked',String(enabled.getAttribute('aria-checked')!=='true'));
-      window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
+      Memorive.settingsBridge.syncSaveState();
     },'switch');
     enabled.setAttribute('role','switch');
     enabled.setAttribute('aria-label','接收外部文献');
@@ -432,7 +432,7 @@
       directionHead.append(make('h4','研究方向'));
       directionSection.append(directionHead);
       const directionRows=[];
-      const sync=()=>window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
+      const sync=()=>Memorive.settingsBridge.syncSaveState();
       const watch=element=>{
         for(const eventName of ['input','change'])element.addEventListener(eventName,sync);
         return element;
@@ -448,7 +448,7 @@
         const remove=button('删除',event=>{
           event.preventDefault();
           event.stopPropagation();
-          window.__Desktop_SETTINGS_CONTROLS__.pendingRemoval(card,()=>{
+          Memorive.settingsControls.pendingRemoval(card,()=>{
             card.remove();
             empty.hidden=directionRows.some(r=>r.card.isConnected);
             sync();
@@ -569,7 +569,7 @@
         return !invalid.length && sum>0 && !missingChannel;
       };
       block.__isDirty=()=>Boolean(block.querySelector('.desktop-pending-removal'))||JSON.stringify(collect())!==baseline;
-      window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('research-preferences',{
+      Memorive.settingsBridge.registerSaveParticipant('research-preferences',{
         isDirty:()=>block.isConnected && block.__isDirty(),
         validate:()=>!block.isConnected||validate(),
         save:async()=>{
@@ -650,9 +650,9 @@
       event.preventDefault();
       event.stopImmediatePropagation();
       notice.setAttribute('aria-checked',String(notice.getAttribute('aria-checked')!=='true'));
-      window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
+      Memorive.settingsBridge.syncSaveState();
     },true);
-    window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('literature-notification',{
+    Memorive.settingsBridge.registerSaveParticipant('literature-notification',{
       isDirty:noticeDirty,
       save:async()=>{
         const saved=await updatePreference({push_enabled:notice.getAttribute('aria-checked')==='true'});
@@ -664,14 +664,14 @@
   document.querySelector('[data-category="notice"]')?.addEventListener('click',syncNotice);
   window.addEventListener('desktop:research-preferences-saved',syncNotice);
   window.addEventListener('pywebviewready',syncNotice);
-  window.__Desktop_RESEARCH__={open,openResult,renderResult,openTask,taskActions,close,mountPreferences,syncNotice};
+  Memorive.research={open,openResult,renderResult,openTask,taskActions,close,mountPreferences,syncNotice};
 
   // Reports are scheduled from completed material progress, not a work-log command.
   window.addEventListener('desktop:research-published',()=> {
-    window.__Desktop_LIBRARY_BRIDGE__?.refresh?.();
-    window.__Desktop_MESSAGES_BRIDGE__?.refresh?.();
-    window.__Desktop_CURRENT_TASK_BRIDGE__?.refresh?.();
-    window.__Desktop_WORK_LOG_BRIDGE__?.refresh?.();
+    Memorive.libraryBridge?.refresh?.();
+    Memorive.messagesBridge?.refresh?.();
+    Memorive.currentTaskBridge?.refresh?.();
+    Memorive.workLogBridge?.refresh?.();
   });
 })();
 

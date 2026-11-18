@@ -1,8 +1,8 @@
 /* Draws the current task page: job cards, the workflow flow of the selected job with each node's state and progress,
-   node details and overrides. Publishes window.__Desktop_TASKS_UI__ for bridge.js. */
+   node details and overrides. Publishes Memorive.tasksView for bridge.js. */
   (() => {
     const root = document.getElementById('desktop-tasks-preview');
-    const preview = window.DesktopPreview_tasks;
+    const preview = Memorive.frames.tasks;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -581,7 +581,7 @@
       flowList.classList.remove('is-session-refinement');
     };
     const renderRefinementTaskFlow = () => {
-      window.__MEMORIVE_REVIEW_UI__?.renderTask(null,flowList);
+      Memorive.review?.renderTask(null,flowList);
       const binding = refinementBindings.get(currentTask?.dataset.run || '');
       if (!binding) return;
       const workflowNodes = Array.isArray(binding.workflow_nodes) ? binding.workflow_nodes : [];
@@ -630,7 +630,7 @@
         node.querySelector('[data-node-model]').textContent = model;
         node.querySelector('.desktop-tasks-node-status').innerHTML = statusIcon(state.tone) + '<span data-flow-state>' + state.label + '</span>';
         node.setAttribute('aria-label', `${copy.name}，${state.label}`);
-        window.__MEMO_NODE_PROGRESS__?.apply(node,definition,binding);
+        Memorive.nodeProgress?.apply(node,definition,binding);
       });
       flowList.classList.add('is-session-refinement');
       flowList.classList.remove('is-card-review-disabled', 'is-judgment-review-disabled');
@@ -656,7 +656,7 @@
     const renderProductionTaskFlow = () => {
       const binding = productionBindings.get(currentTask?.dataset.run || '');
       if (!binding) return;
-      window.__MEMORIVE_REVIEW_UI__?.renderTask(binding,flowList,{openNode:openNodeInspector});
+      Memorive.review?.renderTask(binding,flowList,{openNode:openNodeInspector});
       restoreCoreFlowNodes();
       const workflowNodes = Array.isArray(binding.workflow_nodes) ? binding.workflow_nodes : [];
       const steps = Array.from(flowList.querySelectorAll('.desktop-tasks-flow-step')); 
@@ -737,11 +737,11 @@
         if(definition.pause_scheduled && binding.control_state!=='PAUSED'){
           const hint=document.createElement('span');
           hint.className='paper-review-pause-hint';
-          hint.textContent=window.__MEMORIVE_REVIEW_UI__?.pauseHint(node.dataset.node)||('将在'+node.dataset.node+'前暂停');
+          hint.textContent=Memorive.review?.pauseHint(node.dataset.node)||('将在'+node.dataset.node+'前暂停');
           node.querySelector('.desktop-tasks-node-status').prepend(hint);
         }
         node.setAttribute('aria-label', `${node.dataset.node}，${state.label}，${model}`);
-        window.__MEMO_NODE_PROGRESS__?.apply(node,definition,binding);
+        Memorive.nodeProgress?.apply(node,definition,binding);
       });
       const disabledNodes = workflowNodes.filter((node) => node?.state === 'DISABLED');
       flowList.classList.toggle('is-card-review-disabled', disabledNodes.some((node) => node.node_id === '04_CARD_CROSS_CHECK'));
@@ -765,7 +765,7 @@
         actions.id='tasks-research-actions';
         actions.className='desktop-research-task-actions';
         q('#tasks-route-status').after(actions);
-        window.__Desktop_RESEARCH__?.taskActions(binding.job_id,binding,actions);
+        Memorive.research?.taskActions(binding.job_id,binding,actions);
       }
       if (selectedNode) updateInspector(selectedNode);
       window.requestAnimationFrame(() => drawBypass());
@@ -810,7 +810,7 @@
         }
         node.querySelector('.desktop-tasks-node-status').innerHTML = statusIcon(tone) + '<span data-flow-state>' + label + '</span>';
         node.setAttribute('aria-label', (node.dataset.node || '') + '，' + label + (disabled ? '，当前路径绕过此节点' : ''));
-        window.__MEMO_NODE_PROGRESS__?.clear(node);
+        Memorive.nodeProgress?.clear(node);
       });
       const cardReviewEnabled = isTaskNodeEnabled(snapshot, 'card-review');
       const judgmentReviewEnabled = isTaskNodeEnabled(snapshot, 'judgment-review');
@@ -829,7 +829,7 @@
       window.requestAnimationFrame(() => drawBypass({ animate:animateBypass }));
     };
     const updateInspector = (node) => {
-      if (window.__MEMORIVE_REVIEW_UI__?.renderTaskInspector(node,root)) {
+      if (Memorive.review?.renderTaskInspector(node,root)) {
         setModelMenu(false);
         return;
       }
@@ -1897,7 +1897,7 @@
         updateInspector(selectedNode);
       }
     });
-    window.__Desktop_TASKS_UI__ = Object.freeze({
+    Memorive.tasksView = Object.freeze({
       refreshNodeProgress: () => renderTaskFlow(),
       setConfiguredModelOptions,
       setProjectionLoadState,
@@ -1936,9 +1936,9 @@
         };
       }
     });
-    if (window.__Desktop_WORKFLOW_SYNC__) {
-      setConfiguredModelOptions(window.__Desktop_WORKFLOW_SYNC__);
-      applyTemplateState(window.__Desktop_WORKFLOW_SYNC__.template);
+    if (Memorive.workflowSync) {
+      setConfiguredModelOptions(Memorive.workflowSync);
+      applyTemplateState(Memorive.workflowSync.template);
     }
     if (window.parent !== window) {
       window.parent.postMessage({ type:'desktop-workflow-template-request', page:'当前任务' }, '*');

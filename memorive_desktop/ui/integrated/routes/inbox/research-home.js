@@ -1,8 +1,8 @@
 /* EVO E7: true-home actions and one shared, explicit AI briefing consumer. */
 (()=>{
  'use strict';
- if(window.__MEMO_RESEARCH_HOME__)return;
- const api=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
+ if(Memorive.researchHome)return;
+ const api=(method,params={})=>Memorive.service.call(method,params);
  const copy={"想构建什么呢？":["What would you like to explore?","今日は何を調べましょう？"],"上次的研究，继续吗？":["Ready to pick up where you left off?","前回の研究を続けますか？"],"看看研究方向的最新进展？":["What's new in your research area?","研究テーマの新しい動きを見てみますか？"],"找几篇高度相关的文献？":["Find a few papers close to your topic?","テーマに合う論文を探してみますか？"],"收件箱有什么待处理？":["Anything waiting in your inbox?","受信箱を確認してみますか？"],"看看最近整理的资料？":["Revisit your recent materials?","最近整理した資料を見てみますか？"],"看看最近的 AI 进展？":["Catch up on what's new in AI?","最近の AI の動きを見てみますか？"],"接着研究":["Pick up where I left off","続きを進める"],"继续上次的":["Resume my research","前回の続きへ"],"好，继续看看":["Let's keep going","もう少し見てみる"],"我看看":["Take a look","見てみる"],"看看新进展":["See what's new","新しい動きを見る"],"找几篇看看":["Find a few papers","いくつか探してみる"],"帮我找找":["Help me find some","探してもらう"],"看看相关的":["Explore related papers","関連する論文を見る"],"去处理一下":["Work through my inbox","確認して整理する"],"打开看看":["Open it up","開いてみる"],"翻翻资料":["Browse my materials","資料を見返す"],"看看最近进展":["Catch up on AI","最近の動きを知る"],"了解一下":["Get up to speed","詳しく見てみる"],"换一个问题":["Try another idea","別の話題へ"],"开始提问":["Ask a question","質問する"],"AI 近况":["AI updates","AI の最新動向"],"查看进度":["View progress","進捗を見る"],"查看结果":["View results","結果を見る"],"恢复结果投递":["Restore delivery","結果の反映を再開"],"研究方向":["Research direction","研究テーマ"],"确定":["Continue","決定"],"检索已开始":["Search started","検索を開始しました"],"目标已变化，已打开对应工作区":["That item has changed. Its workspace is open.","対象が変更されたため、対応する画面を開きました"],"返回":["Back","戻る"],"来源与模型":["Sources and model","情報源とモデル"],"尚未配置":["Not configured","未設定"],"尚未取得":["Not retrieved yet","未取得"],"生成":["Generate","生成"],"更新":["Update","更新"],"查看任务":["View task","タスクを見る"],"取消":["Cancel","キャンセル"],"取消生成":["Cancel generation","生成を中止"],"正在取消":["Cancelling…","中止しています…"],"重试未完成步骤":["Retry unfinished steps","未完了の処理を再試行"],"在资料库查看":["View in library","ライブラリで見る"],"打开 AI 近况":["Open AI updates","AI の最新動向を開く"],"尚未生成 AI 近况。":["No AI update has been generated yet.","AI の最新動向はまだ生成されていません。"],"正在读取…":["Loading…","読み込み中…"],"AI 近况模型":["AI updates model","AI の最新動向用モデル"],"调整 AI 近况模型":["Change the AI updates model","AI の最新動向用モデルを変更"],"调整":["Change","変更"],"继承问答模型":["Use the chat model","対話モデルを使用"],"AI 近况范围":["AI updates scope","AI の最新動向の対象範囲"],"日期范围":["Date range","対象期間"],"过去 7 天":["Past 7 days","過去 7 日間"],"过去 30 天":["Past 30 days","過去 30 日間"],"自定义日期":["Custom dates","期間を指定"],"开始日期":["Start date","開始日"],"结束日期":["End date","終了日"],"关注点（可选）":["Focus (optional)","注目する点（任意）"],"AI 近况来源":["AI updates sources","AI の最新動向の情報源"],"官方工具发布记录":["Official tool release notes","公式ツールのリリース情報"],"官方公告与研究进展":["Official announcements and research","公式発表と研究の進展"],"OpenAI 公告":["OpenAI announcements","OpenAI の公式発表"],"Google DeepMind 公告":["Google DeepMind announcements","Google DeepMind の公式発表"],"Claude Code 发布记录":["Claude Code releases","Claude Code のリリース情報"],"来源摘要":["Source summary","情報源の要約"],"发布记录":["Release notes","リリース情報"],"发布记录节选":["Release notes excerpt","リリース情報の抜粋"],"页面正文":["Article text","記事本文"],"正文节选":["Article excerpt","本文の抜粋"],"正文范围有限":["Limited source text","取得できた本文は一部のみ"],"部分来源读取失败，本次仅依据已取得的材料。":["Some sources could not be retrieved. This update uses only the available material.","取得できなかった情報源があります。今回は取得済みの資料のみを使用しています。"],"等待中":["Queued","待機中"],"进行中":["In progress","処理中"],"已完成":["Completed","完了"],"部分完成":["Partially completed","一部完了"],"未完成":["Failed","未完了"],"已取消":["Cancelled","中止済み"],"已中断":["Interrupted","中断"],"请查看任务记录":["See the task record","タスク記録を確認してください"],"请在研究问答与连接的模型设置中选择可用模型":["Choose an available model in Research & connections → Models & chat.","研究・接続設定の「モデルと対話」で利用可能なモデルを選択してください"],"请在外部数据来源中选择 AI 近况来源":["Choose AI update sources in External data sources.","「外部データソース」で AI の最新動向の情報源を選択してください"],"请先选择可用的问答或 AI 近况模型":["Choose an available chat or AI updates model first.","利用可能な対話モデルまたは AI の最新動向用モデルを選択してください"],"所选模型当前不可用":["The selected model is unavailable.","選択したモデルは現在利用できません"],"请先在外部数据来源中选择资讯来源":["Choose news sources in External data sources first.","「外部データソース」で情報源を選択してください"],"请选择有效的起止日期，结束日期不能晚于今天":["Choose a valid date range ending no later than today.","終了日が今日以前となる有効な期間を選択してください"],"资讯来源读取失败，请检查网络后重试":["Sources could not be retrieved. Check your connection and try again.","情報源を取得できませんでした。接続を確認して再試行してください"],"所选范围没有足够的带日期材料；未调用模型":["No usable dated material was found in this range. The model was not called.","対象期間の有効な日付付き資料がありません。モデルは呼び出していません"],"引用未通过核对，本次内容未发布":["Citation checks failed. This update was not published.","出典の確認に失敗したため、内容は保存されていません"],"来源链接未通过核对，本次内容未发布":["Source link checks failed. This update was not published.","出典リンクの確認に失敗したため、内容は保存されていません"],"模型执行未完成，原有报告仍可阅读":["Generation failed. Your previous report is still available.","生成を完了できませんでした。前のレポートは引き続き読めます"],"已有研究任务正在运行":["A research task is already running.","研究タスクがすでに実行中です"],"设置已变化，请重新载入":["Settings have changed. Reload them to continue.","設定が変更されました。再読み込みしてください"],"研究方向已变化，请重新选择":["The research direction has changed. Select it again.","研究テーマが変更されました。選び直してください"],"请先设置文献来源":["Set up literature sources first.","先に文献の情報源を設定してください"],"操作未完成，请查看任务记录后重试":["The action could not be completed. Check the task record and retry.","操作を完了できませんでした。タスク記録を確認して再試行してください"]};
  const t=text=>{
    const lang=document.documentElement.lang||'zh-CN',i=lang.startsWith('en')?0:lang.startsWith('ja')?1:-1;
@@ -14,7 +14,7 @@
   if((m=text.match(/^发布 (.*)$/)))return (i===0?'Published ':'公開 ')+t(m[1]);
   if((m=text.match(/^取得 (.*)$/)))return (i===0?'Retrieved ':'取得 ')+m[1];
   if(text.includes(' · '))return text.split(' · ').map(t).join(' · ');
-  return window.__Desktop_INTEGRATED_APP__?.translate?.(text)||text;
+  return Memorive.app?.translate?.(text)||text;
  };
  const localized=new Map(),localizedAttrs=new Map();
  const paint=(n,source)=>{
@@ -57,7 +57,7 @@
    if(actionIcons[text])setIcon(n,text,actionIcons[text]);
    return n;
  };
- const app=()=>window.__Desktop_INTEGRATED_APP__,route=()=>app()?.inspect().active_route;
+ const app=()=>Memorive.app,route=()=>app()?.inspect().active_route;
  const active=s=>['QUEUED','RUNNING'].includes(s?.status);
  const labels={QUEUED:'等待中',RUNNING:'进行中',SUCCEEDED:'已完成',PARTIAL:'部分完成',FAILED:'未完成',CANCELLED:'已取消',INTERRUPTED:'已中断'};
  const errors={AI_MODEL_REQUIRED:'请先选择可用的问答或 AI 近况模型',AI_MODEL_UNAVAILABLE:'所选模型当前不可用',AI_SOURCE_REQUIRED:'请先在外部数据来源中选择资讯来源',AI_RANGE_INVALID:'请选择有效的起止日期，结束日期不能晚于今天',AI_ALL_SOURCES_FAILED:'资讯来源读取失败，请检查网络后重试',AI_NO_DATED_MATERIALS:'所选范围没有足够的带日期材料；未调用模型',AI_REPORT_CITATION_INVALID:'引用未通过核对，本次内容未发布',AI_REPORT_MODEL_URL_FORBIDDEN:'来源链接未通过核对，本次内容未发布',CHAT_MODEL_EXECUTION_FAILED:'模型执行未完成，原有报告仍可阅读',RESEARCH_ALREADY_RUNNING:'已有研究任务正在运行',AI_SETTINGS_REVISION_CONFLICT:'设置已变化，请重新载入',RESEARCH_DIRECTION_NOT_FOUND:'研究方向已变化，请重新选择',RESEARCH_SOURCE_REQUIRED:'请先设置文献来源'};
@@ -179,18 +179,18 @@
       discovery.set(selected.key,{...fresh,result_available:!!fresh.library_locator});
      if(active(fresh)){
        app().activate('current-task');
-       await window.__Desktop_RESEARCH__.openTask(fresh.run_id);
+       await Memorive.research.openTask(fresh.run_id);
        return;
      }
      if(fresh.library_locator){
        app().activate('library');
-       await window.__Desktop_RESEARCH__.openResult(fresh.run_id);
+       await Memorive.research.openResult(fresh.run_id);
        return;
      }
      if(fresh.delivery_recoverable){
        await api('research.repair_delivery',{run_id:fresh.run_id});
        app().activate('library');
-       await window.__Desktop_RESEARCH__.openResult(fresh.run_id);
+       await Memorive.research.openResult(fresh.run_id);
        return;
      }
     }
@@ -198,7 +198,7 @@
     discovery.set(selected.key,receipt);
     paint(homeStatus,'检索已开始');
     app().activate('current-task');
-    await window.__Desktop_RESEARCH__.openTask(receipt.run_id);
+    await Memorive.research.openTask(receipt.run_id);
     return;
    }
    const r=await api('home.resolve',{kind:kind==='continue'?'thread':kind==='library'?'material':'inbox',target:selected.target?.id||selected.target?.artifact_id||null});
@@ -207,8 +207,8 @@
      window.dispatchEvent(new CustomEvent('desktop:toast',{detail:{message:t('目标已变化，已打开对应工作区')}}));
      return;
    }
-   if(kind==='continue')await window.__MEMO_WORKSPACE__.openThread(r.thread_id);
-   if(kind==='library')await window.__Desktop_LIBRARY_BRIDGE__.openArtifactByLocator('memorive://artifact/'+r.artifact_id);
+   if(kind==='continue')await Memorive.chat.openThread(r.thread_id);
+   if(kind==='library')await Memorive.libraryBridge.openArtifactByLocator('memorive://artifact/'+r.artifact_id);
   }catch(e){paint(homeStatus,message(e));}finally{
     homeBusy=false;
     homeRender();
@@ -253,11 +253,11 @@
   const previous=pane;
   pane=null;
   previous?.remove();
-  window.__Desktop_LEADERBOARD_PANE__?.closeAI();
+  Memorive.leaderboard?.closeAI();
   if(restore&&paneOrigin?.isConnected)paneOrigin.focus();
  }
  function openShell(origin){
-  window.__Desktop_RESEARCH__?.close();
+  Memorive.research?.close();
   closeAI(false);
   paneOrigin=origin||document.activeElement;
   pane=el('section',null,'memo-research-ai-pane');
@@ -268,7 +268,7 @@
   head.append(back,el('h3','AI 近况'));
   const body=el('div',null,'desktop-research-body');
   pane.append(head,body);
-  window.__Desktop_LEADERBOARD_PANE__.openAI(pane,()=>closeAI(false));
+  Memorive.leaderboard.openAI(pane,()=>closeAI(false));
   back.focus();
   pane.addEventListener('keydown',e=>{if(e.key==='Escape'){
     e.stopPropagation();
@@ -339,7 +339,7 @@
   if(run){
     actions.append(btn('查看任务',()=>{
       closeAI(false);
-      return window.__Desktop_RESEARCH__.openTask(run.run_id);
+      return Memorive.research.openTask(run.run_id);
     }));
    if(running)actions.append(btn('取消',async()=>{
      await api('ai.cancel',{run_id:run.run_id});
@@ -366,7 +366,7 @@
     showSources(body,latest.result,latest.reused_run_id||latest.run_id);
     body.append(btn('在资料库查看',()=>{
       closeAI(false);
-      return window.__Desktop_RESEARCH__.openResult(latest.reused_run_id||latest.run_id);
+      return Memorive.research.openResult(latest.reused_run_id||latest.run_id);
     }));
   }
  }
@@ -392,7 +392,7 @@
  }
  let saved=null,draft=null,settingsLoading=null,picker=null;
  const dirty=()=>!!saved&&JSON.stringify(saved.config)!==JSON.stringify(draft);
- const sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+ const sync=()=>Memorive.settingsBridge?.syncSaveState();
  function renderSettings(){
   if(!saved)return;
   const options=[{profileRef:'',model:t('继承问答模型'),state:saved.effective_model?'green':'yellow',note:saved.effective_model?.display_name||''},...saved.model_options.map(o=>({profileRef:o.profile_ref,model:o.display_name||o.model_name,state:o.eligible?'green':'yellow',disabled:!o.eligible,note:o.profile_kind}))];
@@ -459,7 +459,7 @@
   choice.append(dot,name,adjust);
   box.append(heading,choice,menu);
   host.children[0].after(box);
-  picker=window.__Desktop_MODEL_PICKER__.bind({button:adjust,menu,label:name,dot,onSelect:o=>{
+  picker=Memorive.modelPicker.bind({button:adjust,menu,label:name,dot,onSelect:o=>{
     draft.profile_ref=o.profileRef||null;
     renderSettings();
     sync();
@@ -516,7 +516,7 @@
   list.id='memo-ai-sources';
   sourceBox.append(list);
   panel.append(sourceBox);
-  window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('ai-briefing',{isDirty:dirty,validate:()=>!dirty()||((draft.profile_ref===null||saved.model_options.some(o=>o.profile_ref===draft.profile_ref&&o.eligible))&&(draft.range_mode!=='custom'||!!draft.range_start&&!!draft.range_end&&draft.range_start<=draft.range_end&&draft.range_end<=saved.default_window.end)),save:async()=>{
+  Memorive.settingsBridge.registerSaveParticipant('ai-briefing',{isDirty:dirty,validate:()=>!dirty()||((draft.profile_ref===null||saved.model_options.some(o=>o.profile_ref===draft.profile_ref&&o.eligible))&&(draft.range_mode!=='custom'||!!draft.range_start&&!!draft.range_end&&draft.range_start<=draft.range_end&&draft.range_end<=saved.default_window.end)),save:async()=>{
     saved=await api('ai.config_save',{config:draft,expected_revision:saved.revision});
     draft=structuredClone(saved.config);
     renderSettings();
@@ -526,7 +526,7 @@
   window.addEventListener('desktop:external-sources-changed',()=>loadSettings().catch(()=>{}));
  }
  function taskActions(run,binding,container){
-  if(binding.result_locator)container.append(btn('查看结果',()=>window.__Desktop_RESEARCH__.openResult(run)));
+  if(binding.result_locator)container.append(btn('查看结果',()=>Memorive.research.openResult(run)));
   if(['QUEUED','RUNNING'].includes(binding.source_status))container.append(btn('取消生成',async e=>{
     e.currentTarget.disabled=true;
     await api('ai.cancel',{run_id:run});
@@ -539,7 +539,7 @@
  function init(){
    initHome();
    initSettings();
-   const tools=document.querySelector('#desktop-partleaderboard-preview .lb-heading-tools');
+   const tools=document.querySelector('#desktop-leaderboard-preview .lb-heading-tools');
    if(tools){
      const b=btn('AI 近况',e=>openAI(e.currentTarget),'soft-button');
      b.id='memo-ai-leaderboard';
@@ -559,7 +559,7 @@
    if(route()==='home')pollHome();
    if(pane)refreshAI(pane.querySelector('.desktop-research-body')).catch(()=>{});
  });
- window.__MEMO_RESEARCH_HOME__=Object.freeze({choose,prompts:prompts.map(({available,...p})=>p),openAI,closeAI,taskActions,renderAIResult:showSources,loadSettings,inspect:()=>({question:question?{id:question.prompt.id,key:question.key,context:question.context}:null,ai_open:!!pane,ai_run_id:paneRun?.run_id,settings_dirty:dirty()})});
+ Memorive.researchHome=Object.freeze({choose,prompts:prompts.map(({available,...p})=>p),openAI,closeAI,taskActions,renderAIResult:showSources,loadSettings,inspect:()=>({question:question?{id:question.prompt.id,key:question.key,context:question.context}:null,ai_open:!!pane,ai_run_id:paneRun?.run_id,settings_dirty:dirty()})});
  new MutationObserver(()=>{
    for(const [n,s] of localized){if(n.isConnected)paint(n,s);else localized.delete(n);}
    for(const [n,values] of localizedAttrs){

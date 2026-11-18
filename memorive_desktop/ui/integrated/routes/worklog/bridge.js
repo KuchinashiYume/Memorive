@@ -1,5 +1,5 @@
 /* The work log page's calls to the desktop service (work_log.*): entries, milestones, export, and following an entry
-   to its job. Publishes window.__Desktop_WORK_LOG_BRIDGE__; shared/product-bridge.js and
+   to its job. Publishes Memorive.workLogBridge; shared/product-bridge.js and
    memorive/desktop/api/page_events.py call it when the service reports a change. */
 (() => {
   'use strict';
@@ -68,7 +68,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     } else {
-      result = await window.__Desktop_SERVICE__.call(method, params);
+      result = await Memorive.service.call(method, params);
     }
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:work-log-receipt', { detail: { method, result } }));
@@ -92,7 +92,7 @@
     const rows = Array.isArray(projection?.records)
       ? projection.records
       : Array.isArray(projection?.rows) ? projection.rows : [];
-    window.__Desktop_WORK_LOG_VIEW__?.renderRows(rows);
+    Memorive.workLogView?.renderRows(rows);
     bindings.clear();
     const byId = new Map(rows.map((row) => [row.log_entry_id, row]));
     document.querySelectorAll('#desktop-worklog-preview .desktop-worklog-card[data-id]').forEach((card) => {
@@ -101,10 +101,10 @@
       bindings.set(logEntryId, { card, record: byId.get(logEntryId) || null });
     });
     if (selectedLogEntryId && bindings.has(selectedLogEntryId)) {
-      window.__Desktop_WORK_LOG_VIEW__?.openDetailById(selectedLogEntryId);
+      Memorive.workLogView?.openDetailById(selectedLogEntryId);
     } else if (selectedLogEntryId) {
       selectedLogEntryId = null;
-      window.__Desktop_WORK_LOG_VIEW__?.closeDetail?.();
+      Memorive.workLogView?.closeDetail?.();
     }
     return rows;
   };
@@ -126,7 +126,7 @@
       nativeCall('work_log.get_entry', { log_entry_id:logEntryId }),
       nativeCall('work_log.get_milestones', { log_entry_id:logEntryId })
     ]);
-    window.__Desktop_WORK_LOG_VIEW__?.setMilestones(logEntryId, milestones.milestones || []);
+    Memorive.workLogView?.setMilestones(logEntryId, milestones.milestones || []);
     return { detail, milestones };
   };
 
@@ -162,11 +162,11 @@
     if (!locator) throw new Error('任务稳定定位符缺失');
     const receipt = await nativeCall('work_log.resolve_job_locator', { job_locator:locator });
     if (receipt?.status !== 'PASS') throw new Error(receipt?.status || '任务定位失败');
-    await window.__Desktop_PRODUCT_BRIDGE__?.dispatch(
+    await Memorive.productBridge?.dispatch(
       'navigation.select', { route:'current-task' }, 'work-log-job'
     );
-    if (window.__Desktop_INTEGRATED_APP__?.activate) {
-      window.__Desktop_INTEGRATED_APP__.activate('current-task');
+    if (Memorive.app?.activate) {
+      Memorive.app.activate('current-task');
     }
     window.dispatchEvent(new CustomEvent('memorive:open-current-task', {
       detail: {
@@ -181,7 +181,7 @@
   const openRelatedArtifact = async () => {
     const locator = selectedBinding()?.record?.related_artifact_locator;
     if (!locator) throw new Error('关联产物稳定定位符缺失');
-    const bridge = window.__Desktop_LIBRARY_BRIDGE__;
+    const bridge = Memorive.libraryBridge;
     if (!bridge?.openArtifactByLocator) throw new Error('资料库定位服务未就绪');
     return bridge.openArtifactByLocator(locator);
   };
@@ -192,7 +192,7 @@
     const card = target.closest('#desktop-worklog-preview .desktop-worklog-card[data-id]');
     if (card) {
       const nextLogEntryId = card.dataset.id || null;
-      if (nextLogEntryId) window.__Desktop_WORK_LOG_VIEW__?.openDetailById(nextLogEntryId);
+      if (nextLogEntryId) Memorive.workLogView?.openDetailById(nextLogEntryId);
       if (selectedLogEntryId !== nextLogEntryId) {
         selectedLogEntryId = nextLogEntryId;
         if (selectedLogEntryId) {
@@ -217,7 +217,7 @@
       void openRelatedArtifact();
     }
     if (target.closest('#worklog-close')) selectedLogEntryId = null;
-    if (target.closest('#worklog-refresh')) void window.__Desktop_UI_CONTROLS__.busy(target.closest('#worklog-refresh'),()=>nativeCall('work_log.refresh', {}).then(refresh));
+    if (target.closest('#worklog-refresh')) void Memorive.controls.busy(target.closest('#worklog-refresh'),()=>nativeCall('work_log.refresh', {}).then(refresh));
   }, true);
 
   window.addEventListener('desktop-integrated-route', (event) => {
@@ -230,7 +230,7 @@
     void bootstrap();
   }
 
-  window.__Desktop_WORK_LOG_BRIDGE__ = {
+  Memorive.workLogBridge = {
     bootstrap,
     refresh,
     notifyPending,

@@ -1,14 +1,14 @@
 /* Closing the window: the dialog that asks whether to quit or keep running in the tray when tasks are running or
-   settings are not saved. product/desktop/window_chrome.py calls window.__Desktop_WINDOW_CHROME__.requestClose(). */
+   settings are not saved. product/desktop/window_chrome.py calls Memorive.windowChrome.requestClose(). */
 (() => {
   'use strict';
-  if (window.__Desktop_WINDOW_CHROME__) return;
+  if (Memorive.windowChrome) return;
   const api=()=>window.pywebview?.api;
   // The texts are the window.* messages in shared/frame/messages.js.
   const WORDS=['title','cancel','exit','discard','tray','x','min','max','restore','close','busy','loading','unavailable','retry','dirty','running','background'];
   let nativeState=null,dialog=null,view=null,phase='idle',sequence=0,returnFocus=null,geometryFrame=0;
-  const words=()=>Object.fromEntries(WORDS.map(word=>[word,window.__Desktop_I18N__.text(`window.${word}`)]));
-  const edit=()=>window.__Desktop_SETTINGS_BRIDGE__?.getEditState?.()||{ready:false,dirty:false,saving:false};
+  const words=()=>Object.fromEntries(WORDS.map(word=>[word,Memorive.i18n.text(`window.${word}`)]));
+  const edit=()=>Memorive.settingsBridge?.getEditState?.()||{ready:false,dirty:false,saving:false};
   function node(tag,cls,text) {
     const e=document.createElement(tag);
     if(cls)e.className=cls;
@@ -132,7 +132,7 @@
     if(dialog?.open)updateCopy();
     try {
       if(!edit().ready){
-        await window.__Desktop_SETTINGS_BRIDGE__?.bootstrap?.();
+        await Memorive.settingsBridge?.bootstrap?.();
         if(serial!==sequence)return;
       }
       const value=await api().prepare_window_close(edit());
@@ -252,7 +252,7 @@
     if(api())void refreshNative();
     updateCopy();
   }
-  window.__Desktop_WINDOW_CHROME__=Object.freeze({requestClose,cancel,refreshNative,scheduleGeometry,
+  Memorive.windowChrome=Object.freeze({requestClose,cancel,refreshNative,scheduleGeometry,
     inspect:()=>({phase,open:Boolean(dialog?.open),native:nativeState,view})});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

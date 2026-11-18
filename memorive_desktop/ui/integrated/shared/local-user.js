@@ -1,17 +1,17 @@
 /* The user panel in settings and the user's name and picture in the navigation: user name, avatar, the answer style,
    and hiding the assistant's expressions (settings.user_get, settings.user_save). Takes part in the page's shared
-   save and revert. Publishes window.__Desktop_LOCAL_USER__. */
+   save and revert. Publishes Memorive.localUser. */
 (() => {
   'use strict';
-  if(window.__Desktop_LOCAL_USER__)return;
+  if(Memorive.localUser)return;
   const defaults=()=>({username:'',avatar_png:'',hide_expressions:false,answer_style:'professional'});
   let saved=null,draft=defaults(),loading=false,decoding=false,ready=false;
   const q=selector=>document.querySelector(selector);
-  const t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
-  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
+  const t=s=>Memorive.app?.translate?.(s)||s;
+  const call=(method,params={})=>Memorive.service.call(method,params);
   const config=()=>({...draft,username:q('#settings-username')?.value??draft.username});
   const dirty=()=>saved!==null&&JSON.stringify(config())!==JSON.stringify(saved.config);
-  const sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+  const sync=()=>Memorive.settingsBridge?.syncSaveState();
   const status=s=>{
     const node=q('#settings-user-status');
     if(node)node.textContent=t(s);
@@ -22,7 +22,7 @@
     for(const node of document.querySelectorAll('.desktop-app-title')){
       const view=node.parentElement.querySelector('[id$="view-name"]');
       const suffix=view?.textContent.trim()?(lang.startsWith('ja')?'の':lang.startsWith('en')?'’s':'的'):'';
-      const text=name?name+suffix:(window.__MEMO_PRODUCT_NAME__||'Memorive');
+      const text=name?name+suffix:(Memorive.productName||'Memorive');
       node.dataset.desktopNoTranslate='true';
       node.dataset.personalized=String(Boolean(name));
       if(node.textContent!==text)node.textContent=text;
@@ -56,7 +56,7 @@
         entry.append(avatar,caption);
         nav.append(entry);
         entry.addEventListener('click',async()=>{
-          await window.__Desktop_INTEGRATED_APP__?.activate('settings');
+          await Memorive.app?.activate('settings');
           if(q('[data-panel="user"]')?.hidden)q('[data-category="user"]')?.click();
         });
       }
@@ -81,7 +81,7 @@
   function presentation(value){
     document.documentElement.classList.toggle('desktop-hide-expressions',value.hide_expressions);
     document.documentElement.classList.remove('desktop-user-loading');
-    window.DesktopDecorations?.applyHidden?.(value.hide_expressions);
+    Memorive.decorations?.applyHidden?.(value.hide_expressions);
     titles();
   }
   function render(){
@@ -181,7 +181,7 @@
   function initialize(){
     if(ready)return;
     ready=true;
-    const bridge=window.__Desktop_SETTINGS_BRIDGE__;
+    const bridge=Memorive.settingsBridge;
     bridge?.registerSaveParticipant('local-user',{
       isDirty:dirty,validate,
       save:async()=>{
@@ -241,7 +241,7 @@
         sync();
       }
     });
-    const help=window.__Desktop_SETTINGS_CONTROLS__?.help;
+    const help=Memorive.settingsControls?.help;
     if(help&&q('#settings-username-label'))help(q('#settings-username-label'),'用户名','用于工作区标题；留空显示 Memorive。最多 64 个字符，仅保存在本机。');
     if(help&&q('#settings-avatar-label'))help(q('#settings-avatar-label'),'头像','显示在导航栏底部。上传后居中裁为 256×256，移除图片元数据；不会上传到外部服务。');
     const headerObserver=new MutationObserver(titles);
@@ -253,7 +253,7 @@
     if(window.pywebview?.api?.call)void load();
     else if(!window.chrome?.webview)presentation(defaults());
   }
-  window.__Desktop_LOCAL_USER__=Object.freeze({load,avatar,imageSize,presentation,titles,getState:()=>({saved,draft:config(),dirty:dirty(),decoding})});
+  Memorive.localUser=Object.freeze({load,avatar,imageSize,presentation,titles,getState:()=>({saved,draft:config(),dirty:dirty(),decoding})});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 })();
 

@@ -1,15 +1,9 @@
 /* Decorations of the main window: the home and empty-state illustrations, loading placeholders while a page waits
    for its first data (trackCall wraps service calls for this), and signals to the desk assistant
-   (assistant_ui_signal). Publishes window.DesktopDecorations. */
+   (assistant_ui_signal). Publishes Memorive.decorations. */
 (() => {
   'use strict';
-  if (window.__Desktop_DECORATIONS_READY__) return;
-  Object.defineProperty(window, '__Desktop_DECORATIONS_READY__', {
-    value: true,
-    configurable: false,
-    enumerable: false,
-    writable: false
-  });
+  if (Memorive.decorations) return;
 
   const assets = Object.freeze({
     interaction: 'assets/decorations/home-interaction.svg',
@@ -34,7 +28,7 @@
   const loadingStates = new Map();
   const routeRoots = {settings:'desktop-settings-preview',inbox:'desktop-inbox-preview',
     'current-task':'desktop-tasks-preview',messages:'desktop-messages-preview',sessions:'desktop-sessions-preview',
-    library:'desktop-library-preview','work-log':'desktop-worklog-preview',leaderboard:'desktop-partleaderboard-preview'};
+    library:'desktop-library-preview','work-log':'desktop-worklog-preview',leaderboard:'desktop-leaderboard-preview'};
   const readRoutes = new Map(Object.entries({
     settings:['settings.get_state','settings.capability_state'],
     inbox:['inbox.projection','inbox.refresh'],
@@ -46,7 +40,7 @@
     leaderboard:['settings.leaderboard_get','settings.leaderboard_refresh'],
     chat:['memo.state','memo.conversation_index','memo.thread_get']
   }).flatMap(([route, methods]) => methods.map(method => [method,route])));
-  const loadingCopy = text => window.__Desktop_INTEGRATED_APP__?.translate?.(text) || text;
+  const loadingCopy = text => Memorive.app?.translate?.(text) || text;
   const loadingTarget = route => {
     if (route === 'chat') return document.querySelector('#memo-layout');
     const surface = document.querySelector(`[data-desktop-route="${route}"]`)
@@ -371,7 +365,7 @@
     });
   };
 
-  window.DesktopDecorations = Object.freeze({
+  Memorive.decorations = Object.freeze({
     applyHidden:hidden=>{
       if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupQuestion);
       syncAllLoading();

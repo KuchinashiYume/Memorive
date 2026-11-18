@@ -45,6 +45,6 @@
     if(!valid(normalized,limits,group))throw Error('WEIGHT_ALLOCATION_FAILED');
     return normalized;
   }
-  window.__MEMO_WEIGHT_CONTROLS__=Object.freeze({allocate,valid});
+  Memorive.weightControls=Object.freeze({allocate,valid});
 })();
 

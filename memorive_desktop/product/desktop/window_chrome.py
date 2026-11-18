@@ -143,8 +143,8 @@ class MainWindowChrome:
         def request():
             try:
                 result = self.window.evaluate_js(
-                    'Boolean(window.__Desktop_WINDOW_CHROME__ && '
-                    'window.__Desktop_WINDOW_CHROME__.requestClose('
+                    'Boolean(window.Memorive?.windowChrome && '
+                    'window.Memorive?.windowChrome.requestClose('
                     + ('true' if force_ask else 'false') + '))')
                 if result is not True:
                     self.fallback()

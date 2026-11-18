@@ -105,7 +105,7 @@ class NotificationsMixin:
         if self._window is not None:
             try:
                 self._window.evaluate_js(
-                    "window.__Desktop_INTEGRATED_APP__?.activate("
+                    "window.Memorive?.app?.activate("
                     + json.dumps(route)
                     + ")"
                 )

@@ -2,17 +2,17 @@
    Shows its status and reading progress, prepares, reloads and checks the extension, and starts an incremental or
    full sync (browser_companion_status, install_browser_companion, the run_browser_companion_* window methods and
    sync_browser_sessions_from_downloads).
-   Publishes window.__Desktop_BROWSER_COMPANION__ (render, rerender, prepare, reload, sync, syncFull, reloadState,
+   Publishes Memorive.browserCompanion (render, rerender, prepare, reload, sync, syncFull, reloadState,
    fullSyncState), which routes/settings/settings.js uses; the site list is routes/settings/browser-sites.js.
-   Its texts come from window.__Desktop_SETTINGS_I18N__, notices and window methods from the settings bridge
+   Its texts come from Memorive.settingsText, notices and window methods from the settings bridge
    (notify, nativeAction). */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-settings-preview');
   if (!root) return;
   const q = (selector) => root.querySelector(selector);
-  const settings = () => window.__Desktop_SETTINGS_BRIDGE__;
-  const uiText = (...args) => window.__Desktop_SETTINGS_I18N__.text(...args);
+  const settings = () => Memorive.settingsBridge;
+  const uiText = (...args) => Memorive.settingsText.text(...args);
   const showToast = (message) => settings().notify(message);
   const nativeAction = (...args) => settings().nativeAction(...args);
 
@@ -190,8 +190,8 @@
       : uiText('browser.stage.wait-synced', '等待会话同步'));
     if(syncFailed)q('#settings-browser-companion-synced .status-dot').className='status-dot red';
     showBridgeSetupGuide(projection);
-    window.__Desktop_BROWSER_SITES__?.render(projection, browserCompanionSyncState !== 'idle' || browserCompanionFullSyncState !== 'idle');
-    for (const provider of window.__Desktop_BROWSER_SITES__ && projection.site_settings ? [] : ['deepseek', 'gemini', 'kimi']) {
+    Memorive.browserSites?.render(projection, browserCompanionSyncState !== 'idle' || browserCompanionFullSyncState !== 'idle');
+    for (const provider of Memorive.browserSites && projection.site_settings ? [] : ['deepseek', 'gemini', 'kimi']) {
       const row = q(`#settings-browser-provider-${provider}`);
       if (!row) continue;
       const status = providerSync[provider] || {};
@@ -333,7 +333,7 @@
   });
 
   const prepareBrowserCompanion = async () => {
-    if(window.__Desktop_BROWSER_SITES__?.isDirty()){
+    if(Memorive.browserSites?.isDirty()){
       showToast('请先保存网页设置');
       return {status:'UNSAVED'};
     }
@@ -547,7 +547,7 @@
       showToast(uiText('browser.toast.identity-required', '请先确认当前只读桥接身份，再开始网站试读。'));
       return browserCompanionState;
     }
-    if(window.__Desktop_BROWSER_SITES__?.isDirty()){
+    if(Memorive.browserSites?.isDirty()){
       showToast('请先保存网页设置');
       return browserCompanionState;
     }
@@ -616,7 +616,7 @@
     }
   };
 
-  window.__Desktop_BROWSER_COMPANION__ = Object.freeze({
+  Memorive.browserCompanion = Object.freeze({
     render: renderBrowserCompanionStatus,
     rerender: () => { if (browserCompanionState) renderBrowserCompanionStatus(browserCompanionState); },
     prepare: prepareBrowserCompanion,

@@ -3,7 +3,7 @@
    sample preview texts and import progress (previewFor, the import timer); bridge.js writes the real preview. */
   (() => {
     const root = document.getElementById('desktop-inbox-preview');
-    const preview = window.DesktopPreview_inbox;
+    const preview = Memorive.frames.inbox;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];

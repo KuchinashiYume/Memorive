@@ -311,7 +311,7 @@ def process_inbox_drop_event(event: Any, api: ProductApi, window: webview.Window
     try:
         imported = evaluate_promise(
             window,
-            "window.__Desktop_INBOX_BRIDGE__.acceptNativeDrop("
+            "window.Memorive?.inboxBridge.acceptNativeDrop("
             + json.dumps(staged["paths"], ensure_ascii=False)
             + ")",
             timeout=60.0,
@@ -366,21 +366,21 @@ def attach_inbox_drop_handler(window: webview.Window, api: ProductApi,
                     runtime["failure_count"] += 1
                     runtime["last_error"] = reason_code
                     window.evaluate_js(
-                        "window.__Desktop_INBOX_BRIDGE__.reportNativeDropFailure("
+                        "window.Memorive?.inboxBridge.reportNativeDropFailure("
                         + json.dumps(reason_code)
                         + ")"
                     )
                     raise RuntimeError(reason_code) from error
 
-        research_element = window.dom.get_element("#desktop-partchat-preview")
+        research_element = window.dom.get_element("#desktop-chat-preview")
         if research_element is not None:
             def on_research_drop(event):
                 try:
                     paths = extract_inbox_drop_paths(event)
                     staged = api.stage_inbox_paths(paths)
-                    return evaluate_promise(window, "window.__MEMO_WORKSPACE__.importFiles(" + json.dumps(staged["paths"],ensure_ascii=False) + ")",timeout=30)
+                    return evaluate_promise(window, "window.Memorive?.chat.importFiles(" + json.dumps(staged["paths"],ensure_ascii=False) + ")",timeout=30)
                 except Exception as error:
-                    window.evaluate_js("window.__MEMO_WORKSPACE__?.reportImportFailure(" + json.dumps(str(error)[:120]) + ")")
+                    window.evaluate_js("window.Memorive?.chat?.reportImportFailure(" + json.dumps(str(error)[:120]) + ")")
                     return {"status":"ERROR","reason":str(error)[:120]}
             research_element.on("drop",on_research_drop)
             runtime["research_element"]=research_element
@@ -501,8 +501,8 @@ def capture_packaged_visual_qa(
             (async () => {{
               const provider = {provider_json};
               const expectedMark = {expected_mark_json};
-              const app = window.__Desktop_INTEGRATED_APP__;
-              const bridge = window.__Desktop_SESSIONS_BRIDGE__;
+              const app = window.Memorive?.app;
+              const bridge = window.Memorive?.sessionsBridge;
               app.activate('sessions');
               await bridge.query({{source:provider, search:'', limit_per_source:20}});
               const root = document.querySelector('[data-desktop-route="sessions"] #desktop-sessions-preview');
@@ -565,7 +565,7 @@ def capture_packaged_visual_qa(
         window,
         r"""
         (async () => {
-          const app = window.__Desktop_INTEGRATED_APP__;
+          const app = window.Memorive?.app;
           app.activate('settings');
           const root = document.querySelector('[data-desktop-route="settings"] #desktop-settings-preview');
           const category = root.querySelector('.desktop-settings-category[data-category="local-models"]');
@@ -3554,15 +3554,15 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             }
         if sha256_file(native_pdf_source) != native_pdf_source_sha256:
             raise RuntimeError("native UI source PDF changed during import")
-        integrated_activation = window.evaluate_js("window.__Desktop_INTEGRATED_APP__.activate('work-log')")
+        integrated_activation = window.evaluate_js("window.Memorive?.app.activate('work-log')")
         bridge_targets = (
-            ("settings", "__Desktop_SETTINGS_BRIDGE__"),
-            ("inbox", "__Desktop_INBOX_BRIDGE__"),
-            ("current_task", "__Desktop_CURRENT_TASK_BRIDGE__"),
-            ("messages", "__Desktop_MESSAGES_BRIDGE__"),
-            ("sessions", "__Desktop_SESSIONS_BRIDGE__"),
-            ("library", "__Desktop_LIBRARY_BRIDGE__"),
-            ("work_log", "__Desktop_WORK_LOG_BRIDGE__"),
+            ("settings", "settingsBridge"),
+            ("inbox", "inboxBridge"),
+            ("current_task", "currentTaskBridge"),
+            ("messages", "messagesBridge"),
+            ("sessions", "sessionsBridge"),
+            ("library", "libraryBridge"),
+            ("work_log", "workLogBridge"),
         )
         bridge_bootstraps: dict[str, Any] = {}
         for key, global_name in bridge_targets:
@@ -3570,7 +3570,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
                 window,
                 f"Promise.resolve(window[{json.dumps(global_name)}].bootstrap())",
             )
-        evaluate_promise(window, "window.__Desktop_INBOX_BRIDGE__.refresh()")
+        evaluate_promise(window, "window.Memorive?.inboxBridge.refresh()")
         native_drop_source = evidence_dir / "native-ui-drop-real-user.md"
         native_drop_bytes = (
             "# Native drop regression\n\n"
@@ -3632,7 +3632,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             endpoint.value = 'https://native-smoke.invalid/v1';
             endpoint.dispatchEvent(new Event('input', { bubbles: true }));
           };
-          const app = window.__Desktop_INTEGRATED_APP__;
+          const app = window.Memorive?.app;
           const rectRatio = (left, right) => {
             const a = left.getBoundingClientRect().width;
             const b = right.getBoundingClientRect().width;
@@ -3696,14 +3696,14 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             non_overlapping: emptyStrongRect.bottom <= emptyCopyRect.top + 1,
           };
           const providerInput = settingsRoot.querySelector('#settings-provider');
-          const orphanCreateReceipt = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.credential_create', {
+          const orphanCreateReceipt = await window.Memorive?.settingsBridge.call('settings.credential_create', {
             provider: __CUSTOM_PROVIDER__,
             logical_key: 'primary',
             secret_input: __CUSTOM_CREDENTIAL__,
-            expected_revision: window.__Desktop_SETTINGS_BRIDGE__.inspect().revision,
+            expected_revision: window.Memorive?.settingsBridge.inspect().revision,
           });
-          await window.__Desktop_SETTINGS_BRIDGE__.refresh();
-          const orphanStateBeforeBinding = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+          await window.Memorive?.settingsBridge.refresh();
+          const orphanStateBeforeBinding = await window.Memorive?.settingsBridge.call('settings.get_state', {});
           settingsRoot.querySelector('#settings-add-api').click();
           await wait(220);
           const normalModelForm = {
@@ -3778,8 +3778,8 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           let developerApiEvidence = null;
           let developerWorkflowEvidence = null;
           try {
-            credentialService = await window.__Desktop_SETTINGS_BRIDGE__.bindCredential();
-            credentialState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+            credentialService = await window.Memorive?.settingsBridge.bindCredential();
+            credentialState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
             if (!credentialService?.config_id) throw new Error('CONFIGURED_MODEL_SERVICE_MISSING');
             orphanReferenceEvidence = {
               created_ref: orphanCreateReceipt.credential_ref,
@@ -3825,10 +3825,10 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             if (settingsRoot.querySelector('#settings-thinking-enabled').getAttribute('aria-checked') !== 'true') {
               settingsRoot.querySelector('#settings-thinking-enabled').click();
             }
-            const duplicateRevisionBefore = window.__Desktop_SETTINGS_BRIDGE__.inspect().revision;
+            const duplicateRevisionBefore = window.Memorive?.settingsBridge.inspect().revision;
             const duplicateCountBefore = credentialState.settings.model_services.length;
-            const duplicateResult = await window.__Desktop_SETTINGS_BRIDGE__.bindCredential();
-            const duplicateState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+            const duplicateResult = await window.Memorive?.settingsBridge.bindCredential();
+            const duplicateState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
             const duplicateProviderStyle = getComputedStyle(providerInput);
             duplicateProviderEvidence = {
               result_is_null: duplicateResult === null,
@@ -3855,8 +3855,8 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             if (settingsRoot.querySelector('#settings-thinking-enabled').getAttribute('aria-checked') === 'true') {
               settingsRoot.querySelector('#settings-thinking-enabled').click();
             }
-            credentialService2 = await window.__Desktop_SETTINGS_BRIDGE__.bindCredential();
-            credentialState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+            credentialService2 = await window.Memorive?.settingsBridge.bindCredential();
+            credentialState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
             if (!credentialService2?.config_id) throw new Error('SECOND_CONFIGURED_MODEL_SERVICE_MISSING');
 
             const apiDeveloperButton = settingsRoot.querySelector('#settings-mode button[data-mode="developer"]');
@@ -3871,10 +3871,10 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             const apiNormalListHiddenBeforeSave =
               getComputedStyle(settingsRoot.querySelector('#settings-api-list')).display === 'none';
             const apiEditor = settingsRoot.querySelector('#settings-api-code');
-            const apiDocument = window.__Desktop_SETTINGS_BRIDGE__.developerDocument('api');
+            const apiDocument = window.Memorive?.settingsBridge.developerDocument('api');
             const validationCode = (scope, value) => {
               try {
-                window.__Desktop_SETTINGS_BRIDGE__.validateDeveloperDocument(scope, value);
+                window.Memorive?.settingsBridge.validateDeveloperDocument(scope, value);
                 return null;
               } catch (error) {
                 return error.code || String(error.message || error).split(':')[0];
@@ -3916,10 +3916,10 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
               backgrounds_differ: Boolean(apiAddedRow && apiRemovedRow)
                 && getComputedStyle(apiAddedRow).backgroundColor !== getComputedStyle(apiRemovedRow).backgroundColor,
             };
-            const apiDeveloperRevisionBefore = window.__Desktop_SETTINGS_BRIDGE__.inspect().revision;
-            const apiDeveloperReceipt = await window.__Desktop_SETTINGS_BRIDGE__.saveDeveloper('api');
-            const apiDeveloperState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
-            const apiDeveloperInspect = window.__Desktop_SETTINGS_BRIDGE__.inspect().developer_editor;
+            const apiDeveloperRevisionBefore = window.Memorive?.settingsBridge.inspect().revision;
+            const apiDeveloperReceipt = await window.Memorive?.settingsBridge.saveDeveloper('api');
+            const apiDeveloperState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
+            const apiDeveloperInspect = window.Memorive?.settingsBridge.inspect().developer_editor;
             developerApiEvidence = {
               workbench_visible_before_save: apiWorkbenchVisibleBeforeSave,
               normal_list_hidden_before_save: apiNormalListHiddenBeforeSave,
@@ -3930,9 +3930,9 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
               unknown_field_block: validationCode('api', apiUnknownDocument),
               credential_values_absent: !apiEditor.value.includes(__CUSTOM_CREDENTIAL__)
                 && !apiEditor.value.includes(__CUSTOM_CREDENTIAL_2__),
-              api_key_fields_present: window.__Desktop_SETTINGS_BRIDGE__.developerDocument('api').model_services
+              api_key_fields_present: window.Memorive?.settingsBridge.developerDocument('api').model_services
                 .every((row) => Object.prototype.hasOwnProperty.call(row, 'api_key')),
-              api_key_fields_empty_after_save: window.__Desktop_SETTINGS_BRIDGE__.developerDocument('api').model_services
+              api_key_fields_empty_after_save: window.Memorive?.settingsBridge.developerDocument('api').model_services
                 .every((row) => row.api_key === ''),
               credential_refs_only: apiDocument.model_services.every((row) => /^REF:windows:/.test(row.credential_ref)),
               line_number_count: settingsRoot.querySelector('#settings-api-code-lines').textContent.trim().split('\n').length,
@@ -3952,12 +3952,12 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             const developerCreatedReference = apiDeveloperState.settings.model_services
               .find((row) => row.provider === __CUSTOM_PROVIDER_3__)?.credential_ref;
             if (!developerCreatedReference) throw new Error('DEVELOPER_CREATED_REFERENCE_MISSING');
-            await window.__Desktop_SETTINGS_BRIDGE__.call('settings.credential_delete', {
+            await window.Memorive?.settingsBridge.call('settings.credential_delete', {
               credential_ref: developerCreatedReference,
               expected_revision: apiDeveloperState.revision,
             });
-            await window.__Desktop_SETTINGS_BRIDGE__.refresh();
-            credentialState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+            await window.Memorive?.settingsBridge.refresh();
+            credentialState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
             developerApiEvidence.developer_created_service_removed_after_probe = credentialState.settings.model_services
               .every((row) => row.provider !== __CUSTOM_PROVIDER_3__);
 
@@ -4000,18 +4000,18 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
               analysis: await configureWorkflowNode('analysis', credentialService.config_id),
               judgment_review: await configureWorkflowNode('judgment-review', credentialService2.config_id),
             };
-            const revisionBeforeWorkflowSave = window.__Desktop_SETTINGS_BRIDGE__.inspect().revision;
+            const revisionBeforeWorkflowSave = window.Memorive?.settingsBridge.inspect().revision;
             const workflowPageSave = settingsRoot.querySelector('#settings-save');
             if (workflowPageSave.disabled) throw new Error('MAPPED_WORKFLOW_PAGE_SAVE_DISABLED');
             workflowPageSave.click();
             await waitUntil(() => {
-              const inspect = window.__Desktop_SETTINGS_BRIDGE__.inspect();
+              const inspect = window.Memorive?.settingsBridge.inspect();
               return inspect.revision > revisionBeforeWorkflowSave
                 && inspect.last_mutation_receipt?.method === 'settings.save'
                 && inspect.last_mutation_receipt?.action === 'SAVE';
             });
-            settingsSaveReceipt = window.__Desktop_SETTINGS_BRIDGE__.inspect().last_mutation_receipt;
-            mappedState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+            settingsSaveReceipt = window.Memorive?.settingsBridge.inspect().last_mutation_receipt;
+            mappedState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
             const configuredIds = new Set(credentialState.settings.model_services.map((service) => service.config_id));
             mappingEvidence = {
               option_count: workflowNodes.analysis.options.length,
@@ -4054,7 +4054,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             const workflowFlowHiddenBeforeSave =
               getComputedStyle(settingsRoot.querySelector('.desktop-settings-flow')).display === 'none';
             const workflowEditor = settingsRoot.querySelector('#settings-workflow-code');
-            const workflowDocument = window.__Desktop_SETTINGS_BRIDGE__.developerDocument('workflow');
+            const workflowDocument = window.Memorive?.settingsBridge.developerDocument('workflow');
             const workflowUnknownDocument = { ...workflowDocument, arbitrary_command: 'blocked' };
             const workflowWriteDocument = structuredClone(workflowDocument);
             const editableWorkflowNode = workflowWriteDocument.nodes.find((node) => node.node_id === 'transport_review');
@@ -4079,9 +4079,9 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
               backgrounds_differ: Boolean(workflowAddedRow && workflowRemovedRow)
                 && getComputedStyle(workflowAddedRow).backgroundColor !== getComputedStyle(workflowRemovedRow).backgroundColor,
             };
-            const workflowDeveloperRevisionBefore = window.__Desktop_SETTINGS_BRIDGE__.inspect().revision;
-            const workflowDeveloperReceipt = await window.__Desktop_SETTINGS_BRIDGE__.saveDeveloper('workflow');
-            const workflowDeveloperState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+            const workflowDeveloperRevisionBefore = window.Memorive?.settingsBridge.inspect().revision;
+            const workflowDeveloperReceipt = await window.Memorive?.settingsBridge.saveDeveloper('workflow');
+            const workflowDeveloperState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
             developerWorkflowEvidence = {
               tertiary_open_before_switch: workflowNodeOpenBeforeDeveloper,
               tertiary_closed_before_developer: workflowNodeClosedBeforeDeveloper,
@@ -4144,7 +4144,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             const taskCard = await chooseTaskModel('card', credentialService2.config_id);
             const taskAnalysis = await chooseTaskModel('analysis', credentialService.config_id);
             currentTaskModelEvidence = {
-              tasks: window.__Desktop_TASKS_UI__.inspect(),
+              tasks: window.Memorive?.tasksView.inspect(),
               card: taskCard,
               analysis: taskAnalysis,
             };
@@ -4152,17 +4152,17 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             await wait(100);
           } finally {
             for (const provider of [__CUSTOM_PROVIDER__, __CUSTOM_PROVIDER_2__, __CUSTOM_PROVIDER_3__]) {
-              const cleanupState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+              const cleanupState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
               const cleanupReference = cleanupState.settings.credential_references.find((row) => row.provider === provider)?.credential_ref;
               if (!cleanupReference) continue;
-              await window.__Desktop_SETTINGS_BRIDGE__.call('settings.credential_delete', {
+              await window.Memorive?.settingsBridge.call('settings.credential_delete', {
                 credential_ref: cleanupReference,
                 expected_revision: cleanupState.revision,
               });
-              await window.__Desktop_SETTINGS_BRIDGE__.refresh();
+              await window.Memorive?.settingsBridge.refresh();
             }
           }
-          let settingsSavedState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+          let settingsSavedState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
           if (mappingEvidence) {
             mappingEvidence.cleanup_profile_ref = settingsSavedState.settings.workflow.nodes.find((row) => row.node_id === 'analysis')?.profile_ref || null;
             mappingEvidence.cleanup_profile_refs = Object.fromEntries(
@@ -4183,10 +4183,10 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           const workspaceInput = settingsRoot.querySelector('#settings-workspace-root');
           const artifactInput = settingsRoot.querySelector('#settings-artifact-root');
           const libraryProvider = settingsRoot.querySelector('#settings-library-provider');
-          await window.__Desktop_SETTINGS_BRIDGE__.call('settings.register_directory', {
+          await window.Memorive?.settingsBridge.call('settings.register_directory', {
             role: 'workspace_root', path: __WORKSPACE_ROOT__
           });
-          await window.__Desktop_SETTINGS_BRIDGE__.call('settings.register_directory', {
+          await window.Memorive?.settingsBridge.call('settings.register_directory', {
             role: 'artifact_root', path: __ARTIFACT_ROOT__
           });
           workspaceInput.value = __WORKSPACE_ROOT__;
@@ -4204,13 +4204,13 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             settingsRoot.querySelector('#settings-library-status').textContent.trim() === '本地可用'
             && !settingsRoot.querySelector('#settings-library-test').disabled
           ));
-          const viewerRevisionBeforeSave = window.__Desktop_SETTINGS_BRIDGE__.inspect().revision;
+          const viewerRevisionBeforeSave = window.Memorive?.settingsBridge.inspect().revision;
           if (settingsRoot.querySelector('#settings-save').disabled) throw new Error('VIEWER_SETTINGS_SAVE_DISABLED');
           settingsRoot.querySelector('#settings-save').click();
           await waitUntil(() => (
-            window.__Desktop_SETTINGS_BRIDGE__.inspect().revision > viewerRevisionBeforeSave
+            window.Memorive?.settingsBridge.inspect().revision > viewerRevisionBeforeSave
           ));
-          settingsSavedState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+          settingsSavedState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
           settingsRoot.querySelector('#settings-library-test').click();
           await waitUntil(() => (
             settingsRoot.querySelector('#settings-library-status').textContent.trim() === '本地可用'
@@ -4258,13 +4258,13 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           settingsRoot.querySelector('#settings-dnd-start').dispatchEvent(new Event('change', { bubbles: true }));
           settingsRoot.querySelector('#settings-dnd-end').value = '00:00';
           settingsRoot.querySelector('#settings-dnd-end').dispatchEvent(new Event('change', { bubbles: true }));
-          const notificationRevisionBeforeSave = window.__Desktop_SETTINGS_BRIDGE__.inspect().revision;
+          const notificationRevisionBeforeSave = window.Memorive?.settingsBridge.inspect().revision;
           if (settingsRoot.querySelector('#settings-save').disabled) throw new Error('NOTIFICATION_SETTINGS_SAVE_DISABLED');
           settingsRoot.querySelector('#settings-save').click();
           await waitUntil(() => (
-            window.__Desktop_SETTINGS_BRIDGE__.inspect().revision > notificationRevisionBeforeSave
+            window.Memorive?.settingsBridge.inspect().revision > notificationRevisionBeforeSave
           ));
-          settingsSavedState = await window.__Desktop_SETTINGS_BRIDGE__.call('settings.get_state', {});
+          settingsSavedState = await window.Memorive?.settingsBridge.call('settings.get_state', {});
           const notificationReceipt = await window.pywebview.api.test_windows_notification({ kind: 'COMPLETE' });
           const notificationEvidence = {
             error_toggle_cycle: { before: errorBefore, off: errorOff, on_again: errorOnAgain },
@@ -4443,7 +4443,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             overflow_wrap: toastCopyStyle.overflowWrap,
           };
           toast.hidden = true;
-          const networkFlagEvidence = window.__Desktop_SETTINGS_BRIDGE__.renderNetworkLocation({
+          const networkFlagEvidence = window.Memorive?.settingsBridge.renderNetworkLocation({
             country_code: 'JP', colo: 'NRT'
           });
           const networkFlagNode = settingsRoot.querySelector('#settings-egress-location .desktop-settings-country-flag');
@@ -4463,7 +4463,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             long_toast: longToast,
             flow_stage_width: flowStageRect.width,
             flow_list_width: flowListRect.width,
-            preference_count: Object.keys(window.__Desktop_SETTINGS_BRIDGE__.collectSettings().preferences).length,
+            preference_count: Object.keys(window.Memorive?.settingsBridge.collectSettings().preferences).length,
             provider_control_tag: providerInput.tagName,
             provider_control_type: providerInput.type,
             custom_provider: credentialService?.provider || null,
@@ -4599,7 +4599,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           window.__Desktop_NATIVE_STAGE__ = 'inbox-pdf';
           app.activate('inbox');
           const inboxRoot = document.querySelector('[data-desktop-route="inbox"] #desktop-inbox-preview');
-          await window.__Desktop_INBOX_BRIDGE__.refresh();
+          await window.Memorive?.inboxBridge.refresh();
           const realCard = inboxRoot.querySelector('[data-item-id=__REAL_ITEM_ID__]');
           if (!realCard) throw new Error('INBOX_REAL_PDF_CARD_MISSING_AFTER_REFRESH');
           realCard?.click();
@@ -4989,7 +4989,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         main_webview_probe = window.evaluate_js(r"""
           (() => ({
             alive: true,
-            active_route: window.__Desktop_INTEGRATED_APP__?.inspect?.().active_route || null,
+            active_route: window.Memorive?.app?.inspect?.().active_route || null,
             surface_count: document.querySelectorAll('.desktop-route-surface').length,
           }))()
         """)
@@ -5068,7 +5068,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
               await new Promise((resolve) => setTimeout(resolve, 80));
             }
             await new Promise((resolve) => setTimeout(resolve, 160));
-            const bridge = window.__Desktop_INBOX_BRIDGE__.inspect();
+            const bridge = window.Memorive?.inboxBridge.inspect();
             return {
               deleted_item_id: itemId,
               card_absent: !root.querySelector(`[data-item-id="${CSS.escape(itemId)}"]`),
@@ -5080,9 +5080,9 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             };
           })()
         """, timeout=20.0)
-        window.evaluate_js("window.__Desktop_INTEGRATED_APP__.activate('work-log')")
+        window.evaluate_js("window.Memorive?.app.activate('work-log')")
         bootstrap = bridge_bootstraps["work_log"]
-        typed = evaluate_promise(window, "window.__Desktop_PRODUCT_BRIDGE__.dispatch('navigation.select',{route:'work-log'},'native-smoke')")
+        typed = evaluate_promise(window, "window.Memorive?.productBridge.dispatch('navigation.select',{route:'work-log'},'native-smoke')")
         contract = evaluate_promise(window, "window.pywebview.api.call('work_log.get_contract',{})")
         all_rows = evaluate_promise(window, "window.pywebview.api.call('work_log.list_entries',{page_size:500})")
         branch = evaluate_promise(window, "window.pywebview.api.call('work_log.list_entries',{ledger_type:'branch',page_size:500})")
@@ -5106,9 +5106,9 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         effects = evaluate_promise(window, "window.pywebview.api.call('work_log.effect_metrics',{})")
         control = evaluate_promise(window, "window.pywebview.api.get_control_state()")
         status = evaluate_promise(window, "window.pywebview.api.get_runtime_status()")
-        route_sweep = window.evaluate_js("window.__Desktop_INTEGRATED_APP__.probeAll()")
-        window.evaluate_js("window.__Desktop_INTEGRATED_APP__.activate('work-log')")
-        bridge_inspect = window.evaluate_js("(() => { const names=['__Desktop_SETTINGS_BRIDGE__','__Desktop_INBOX_BRIDGE__','__Desktop_CURRENT_TASK_BRIDGE__','__Desktop_MESSAGES_BRIDGE__','__Desktop_SESSIONS_BRIDGE__','__Desktop_LIBRARY_BRIDGE__','__Desktop_WORK_LOG_BRIDGE__']; return names.map((name) => { const bridge=window[name]; const detail=bridge && typeof bridge.inspect==='function' ? bridge.inspect() : {}; return {name,present:Boolean(bridge),method_count:Number(detail.method_count||0),native_transport:detail.native_transport===true,binding_count:Number(detail.binding_count||0),bootstrapped:detail.bootstrapped===undefined ? null : Boolean(detail.bootstrapped)}; }); })()")
+        route_sweep = window.evaluate_js("window.Memorive?.app.probeAll()")
+        window.evaluate_js("window.Memorive?.app.activate('work-log')")
+        bridge_inspect = window.evaluate_js("(() => { const names=['settingsBridge','inboxBridge','currentTaskBridge','messagesBridge','sessionsBridge','libraryBridge','workLogBridge']; return names.map((name) => { const bridge=window[name]; const detail=bridge && typeof bridge.inspect==='function' ? bridge.inspect() : {}; return {name,present:Boolean(bridge),method_count:Number(detail.method_count||0),native_transport:detail.native_transport===true,binding_count:Number(detail.binding_count||0),bootstrapped:detail.bootstrapped===undefined ? null : Boolean(detail.bootstrapped)}; }); })()")
         assistant_desktop_transparency = inspect_assistant_desktop_transparency(
             assistant_window, evidence_dir, phase
         )
@@ -5124,7 +5124,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         assistant_hidden_native = inspect_assistant_visibility(assistant_window)
         assistant_logo_toggle = evaluate_promise(window, r"""
           (async () => {
-            const app = window.__Desktop_INTEGRATED_APP__;
+            const app = window.Memorive?.app;
             app.activate('work-log');
             const logo = document.querySelector('[data-desktop-route="work-log"]:not([hidden]) .desktop-logo');
             if (!logo) throw new Error('ACTIVE_NAVIGATION_LOGO_MISSING');
@@ -5185,7 +5185,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         assistant_reopened_inspect = assistant_window.evaluate_js(
             "window.__Desktop_ASSISTANT_RUNTIME__.inspect()"
         )
-        inspect = window.evaluate_js("(() => { const root=document.querySelector('#desktop-worklog-preview'); return {root:Boolean(root),pageRootCount:document.querySelectorAll('.desktop-page-root').length,productWindow:Boolean(root&&root.querySelector('#desktop-window')),navCount:root?root.querySelectorAll('.desktop-nav-item').length:0,workLogCardCount:root?root.querySelectorAll('.desktop-worklog-card').length:0,iframeCount:document.querySelectorAll('iframe').length,previewControlCount:document.querySelectorAll('.viz-controls,.desktop-preview-controls').length,bridge:window.__Desktop_PRODUCT_BRIDGE__.inspect(),workLogBridge:window.__Desktop_WORK_LOG_BRIDGE__.inspect(),integrated:window.__Desktop_INTEGRATED_APP__.inspect()}; })()")
+        inspect = window.evaluate_js("(() => { const root=document.querySelector('#desktop-worklog-preview'); return {root:Boolean(root),pageRootCount:document.querySelectorAll('.desktop-page-root').length,productWindow:Boolean(root&&root.querySelector('#desktop-window')),navCount:root?root.querySelectorAll('.desktop-nav-item').length:0,workLogCardCount:root?root.querySelectorAll('.desktop-worklog-card').length:0,iframeCount:document.querySelectorAll('iframe').length,previewControlCount:document.querySelectorAll('.viz-controls,.desktop-preview-controls').length,bridge:window.Memorive?.productBridge.inspect(),workLogBridge:window.Memorive?.workLogBridge.inspect(),integrated:window.Memorive?.app.inspect()}; })()")
         assistant_screenshot_path = evidence_dir / f"pywebview_assistant_{phase}.png"
         # The WebView child is intentionally disabled after native bootstrap.
         # Capture the actual shaped WinForms host instead of waiting on the
@@ -5201,7 +5201,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         )
         assistant_window.hide()
         packaged_visual_qa = capture_packaged_visual_qa(window, evidence_dir, phase)
-        window.evaluate_js("window.__Desktop_INTEGRATED_APP__.activate('work-log')")
+        window.evaluate_js("window.Memorive?.app.activate('work-log')")
         screenshot_path = evidence_dir / f"pywebview_product_{phase}.png"
         screenshot = capture_window(window, screenshot_path)
         restricted = ('branch_log_writes','business_network_calls','central_log_writes','credential_value_reads','external_model_calls','external_process_launches','frozen_evidence_writes','runtime_log_writes','private_payload_reads','production_writes','raw_authority_content_reads','shell_invocations','source_ledger_writes')

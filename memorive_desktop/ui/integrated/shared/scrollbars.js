@@ -1,8 +1,8 @@
 /* Marks scrollable areas (data-memo-scroll) and the one being scrolled or dragged (data-memo-scroll-active), so that
-   scrollbars.css shows a thin scrollbar only there. Publishes window.__MEMO_SCROLLBARS__. */
+   scrollbars.css shows a thin scrollbar only there. Publishes Memorive.scrollbars. */
 (() => {
   'use strict';
-  if (window.__MEMO_SCROLLBARS__) return;
+  if (Memorive.scrollbars) return;
   const tracked = new Set();
   const active = new Set();
   const pending = new Set();
@@ -83,6 +83,6 @@
     dragging = false;
     setActive(new Set());
   });
-  window.__MEMO_SCROLLBARS__ = Object.freeze({refresh:() => scan(document.documentElement)});
+  Memorive.scrollbars = Object.freeze({refresh:() => scan(document.documentElement)});
 })();
 

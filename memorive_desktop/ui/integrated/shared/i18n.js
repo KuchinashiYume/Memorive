@@ -6,7 +6,7 @@
    given as {key, values} is itself a message, so it follows the language too.
    shared/app.js calls render() when the language changes and for every element added to the page, so keyed
    text always shows in the current language. Text without a key is still translated from its Chinese wording
-   by shared/app.js. Publishes window.__Desktop_I18N__; shared/frame/messages.js and the route scripts use it. */
+   by shared/app.js. Publishes Memorive.i18n; shared/frame/messages.js and the route scripts use it. */
 (() => {
   'use strict';
   const LANGUAGES = Object.freeze(['zh-CN', 'en-US', 'ja-JP']);
@@ -97,5 +97,5 @@
     return Boolean(name && element.hasAttribute(`data-i18n-${name}`));
   };
 
-  window.__Desktop_I18N__ = Object.freeze({ LANGUAGES, define, text, set, render, keyed, language });
+  Memorive.i18n = Object.freeze({ LANGUAGES, define, text, set, render, keyed, language });
 })();

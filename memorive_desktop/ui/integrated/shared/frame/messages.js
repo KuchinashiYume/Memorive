@@ -1,7 +1,7 @@
 /* The text of the window frame that every route shares: the navigation, the top bar, the panel announcements,
    the window buttons and the close dialog (shared/window-chrome.js), and the bottom accounting panel
    (shared/accounting.js). One row per message: zh-CN, en-US, ja-JP (see shared/i18n.js). */
-window.__Desktop_I18N__.define({
+Memorive.i18n.define({
   'frame.nav.label': ['一级导航', 'Primary Navigation', 'メインナビゲーション'],
   'frame.logo.play': ['播放标识动效', 'Play Logo Animation', 'ロゴアニメーションを再生'],
   'frame.logo.description': ['左键显示或唤回桌面助手，右键暂时隐藏桌面助手', 'Click to show or bring back the desktop assistant; right-click to hide it for now', 'クリックでデスクトップアシスタントを表示または呼び戻し、右クリックで一時的に非表示'],

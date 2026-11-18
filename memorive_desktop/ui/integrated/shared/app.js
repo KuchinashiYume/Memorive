@@ -1,15 +1,15 @@
 /* The main window's application shell: which route is shown (activate), the window-wide preferences (language,
    font size, tooltips, remembered panels), translating the page's text (keyed text through shared/i18n.js, older
    text from its Chinese wording with the table below), and the type role of every text element (typography.css
-   sizes them). Publishes window.__Desktop_INTEGRATED_APP__ (activate, applyPreferences, translate,
+   sizes them). Publishes Memorive.app (activate, applyPreferences, translate,
    inspect, ...), which every route script, memorive/desktop/api/notifications.py, memorive/desktop/assistant/desktop.py
    and app.py's self-test use. */
-window.__MEMO_PRODUCT_NAME__="Memorive";
+Memorive.productName="Memorive";
 
 (() => {
   'use strict';
-  const i18n = window.__Desktop_I18N__;
-  // Each route and the script name of its section (#desktop-<component>-preview, window.DesktopPreview_<component>).
+  const i18n = Memorive.i18n;
+  // Each route and the script name of its section (#desktop-<component>-preview, Memorive.frames.<component>).
   // Its name on screen is the message frame.route.<route> (shared/frame/messages.js).
   const routes = Object.freeze({
     "settings": { "component": "settings" },
@@ -19,8 +19,8 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     "sessions": { "component": "sessions" },
     "library": { "component": "library" },
     "work-log": { "component": "worklog" },
-    "leaderboard": { "component": "partleaderboard" },
-    "chat": { "component": "partchat" }
+    "leaderboard": { "component": "leaderboard" },
+    "chat": { "component": "chat" }
   });
   const routeName = (route, lang) => i18n.text(`frame.route.${route}`, {}, lang);
   const pageTitle = (route) => route === 'home' ? 'Memorive' : i18n.text('frame.title', { route: { key: `frame.route.${route}` } });
@@ -72,7 +72,7 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
 
   const translated = (source, language) => {
     if (language === 'zh-CN') return source;
-    const exact = window.__Desktop_REPORT_UI__?.translateText(source,language) ?? translations[language]?.[source];
+    const exact = Memorive.reports?.translateText(source,language) ?? translations[language]?.[source];
     if (exact != null) return exact;
     const ja = language === 'ja-JP';
     const reviewText={'待人工复核':['Awaiting review','確認待ち'],'请先打开 Card.md 和 Analysis.md':['Open Card.md and Analysis.md first','先に Card.md と Analysis.md を開いてください']};
@@ -193,7 +193,7 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
   const typeRole = (element) => {
     if(element.closest('textarea[data-cli-template],textarea[data-cli-environment],pre,code,kbd,samp,.desktop-inbox-preview-code,.desktop-settings-code-editor,.desktop-settings-code-diff-rows'))return 'code';
     // Detail navigation titles and sortable table headers are regular UI text.
-    if(element.closest('.desktop-settings-panel-title h3,.memo-settings-section-heading h3,#desktop-partleaderboard-preview thead'))return 'control';
+    if(element.closest('.desktop-settings-panel-title h3,.memo-settings-section-heading h3,#desktop-leaderboard-preview thead'))return 'control';
     if(element.closest('.desktop-research-muted,.desktop-research-status,.memo-research-home-status,.memo-answer-counter,.paper-review-pause-hint,.paper-review-report-risk,.memo-research-source-time'))return 'small';
     if(element.closest('small,time,.meta,.muted,.hint,.field-hint,.memo-status,.desktop-settings-field-help,[role="tooltip"],.count-badge,[class*="-badge"],[class*="-caption"],[class*="-helper"],[class*="-subtitle"],[class*="-metadata"],[class*="-timestamp"],[class*="-note"],.memo-select-group,.switch-copy > span,.desktop-settings-category-copy > span,.memo-weight-preset > span,.desktop-settings-status-card > span,.inspector-kicker'))return 'small';
     if(element.closest('.empty-state,.memo-empty-state,.desktop-library-empty-copy,.desktop-worklog-empty-copy,.desktop-home-speech'))return 'empty';
@@ -382,7 +382,7 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
 
   const previewFor = (route) => {
     const descriptor = routes[route];
-    return descriptor ? window[`DesktopPreview_${descriptor.component}`] : null;
+    return descriptor ? Memorive.frames[descriptor.component] : null;
   };
 
   const loadRememberedPanelState = (controlProjection) => {
@@ -546,7 +546,7 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
 
   // The desktop service keeps the route, so the window can reopen there (shared/product-bridge.js).
   const persist = (route, source = 'integrated-navigation') => {
-    window.__Desktop_PRODUCT_BRIDGE__.dispatch('navigation.select', { route }, source).catch(() => undefined);
+    Memorive.productBridge.dispatch('navigation.select', { route }, source).catch(() => undefined);
   };
 
   const runDesktopAssistantAction = (actionId = 'SHOW_DESKTOP_ASSISTANT') => {
@@ -655,7 +655,7 @@ window.__MEMO_PRODUCT_NAME__="Memorive";
     };
   };
 
-  window.__Desktop_INTEGRATED_APP__ = Object.freeze({
+  Memorive.app = Object.freeze({
     routes: Object.freeze(Object.keys(routes)),
     labels: Object.freeze(Object.keys(routes).map((route) => routeName(route, 'zh-CN'))),
     activate,

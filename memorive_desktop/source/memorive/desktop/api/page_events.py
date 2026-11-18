@@ -260,10 +260,10 @@ class PageEventsMixin:
             try:
                 self._window.evaluate_js(
                     "Promise.allSettled(["
-                    "window.__Desktop_MESSAGES_BRIDGE__?.refresh?.(),"
-                    "window.__Desktop_CURRENT_TASK_BRIDGE__?.refresh?.(),"
-                    "window.__Desktop_INBOX_BRIDGE__?.refresh?.(),"
-                    "window.__Desktop_WORK_LOG_BRIDGE__?.refresh?.()"
+                    "window.Memorive?.messagesBridge?.refresh?.(),"
+                    "window.Memorive?.currentTaskBridge?.refresh?.(),"
+                    "window.Memorive?.inboxBridge?.refresh?.(),"
+                    "window.Memorive?.workLogBridge?.refresh?.()"
                     "])"
                 )
             except Exception:
@@ -282,9 +282,9 @@ class PageEventsMixin:
             try:
                 self._window.evaluate_js(
                     "Promise.allSettled(["
-                    "window.__Desktop_INBOX_BRIDGE__?.refresh?.(),"
-                    "window.__Desktop_CURRENT_TASK_BRIDGE__?.refresh?.(),"
-                    "window.__Desktop_WORK_LOG_BRIDGE__?.refresh?.()"
+                    "window.Memorive?.inboxBridge?.refresh?.(),"
+                    "window.Memorive?.currentTaskBridge?.refresh?.(),"
+                    "window.Memorive?.workLogBridge?.refresh?.()"
                     "])"
                 )
             except Exception:
@@ -302,8 +302,8 @@ class PageEventsMixin:
             try:
                 self._window.evaluate_js(
                     "Promise.allSettled(["
-                    "window.__Desktop_LIBRARY_BRIDGE__?.refresh?.(),"
-                    "window.__Desktop_WORK_LOG_BRIDGE__?.refresh?.()"
+                    "window.Memorive?.libraryBridge?.refresh?.(),"
+                    "window.Memorive?.workLogBridge?.refresh?.()"
                     "])"
                 )
             except Exception:

@@ -70,7 +70,7 @@
     return e;
   };
   const call=async(method,params={})=>{
-    const result=await window.__Desktop_SERVICE__.call(method,params);
+    const result=await Memorive.service.call(method,params);
     if(result?.status==='BLOCKED')throw Error(result.code||'STRUCTURE_CONFIG_INVALID');
     return result;
   };
@@ -138,7 +138,7 @@
     retryButton,
     modeHelp;
   let loading=null,checking=false;
-  const settingsBridge=()=>window.__Desktop_SETTINGS_BRIDGE__;
+  const settingsBridge=()=>Memorive.settingsBridge;
   const draft=()=>({mode:mode.value,profile:profile.value,runtime_path:runtime.value.trim(),timeout_seconds:Number(timeout.value),runtime_lock_sha256:saved?.config.runtime_path===runtime.value.trim()?saved.config.runtime_lock_sha256:null});
   const isDirty=()=>Boolean(saved)&&Object.entries(draft()).some(([key,value])=>value!==saved.config[key]);
   const valid=()=>Boolean(saved)&&Number.isInteger(Number(timeout.value))&&Number(timeout.value)>=1&&Number(timeout.value)<=3600&&(mode.value!=='marker'||Boolean(runtime.value.trim()));
@@ -608,7 +608,7 @@
       for(const e of document.querySelectorAll('[data-structure-alt]'))e.alt=t(e.dataset.structureAlt);
     }).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   }
-  window.__MEMORIVE_STRUCTURE_UI__=Object.freeze({refreshSettings:loadSettings});
+  Memorive.structureReview=Object.freeze({refreshSettings:loadSettings});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
 

@@ -9,21 +9,21 @@
   font-size:var(--desktop-ui-body,14px);
   line-height:1.45;
 }
-:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-partchat-preview) .desktop-central .page-header {
+:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-chat-preview) .desktop-central .page-header {
   /* Supersede the preserved bundle's older important header font guard. */
   padding:10px 24px!important;
   min-height:76px;
   box-sizing:border-box;
   align-items:center;
 }
-:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-partchat-preview) .desktop-central .page-header h2 {margin:0;line-height:1.2;}
+:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-chat-preview) .desktop-central .page-header h2 {margin:0;line-height:1.2;}
 #desktop-inbox-preview .desktop-inbox-body,
 #desktop-messages-preview .desktop-messages-body,
 #desktop-library-preview .desktop-library-body,
 #desktop-worklog-preview .desktop-worklog-body,
 #desktop-tasks-preview .desktop-tasks-list,
 #desktop-sessions-preview .desktop-sessions-stage,
-#desktop-partleaderboard-preview .lb-page-body {
+#desktop-leaderboard-preview .lb-page-body {
   padding:var(--memo-page-inset) var(--memo-page-gutter);
 }
 #desktop-sessions-preview .desktop-sessions-listpane {border:0;background:transparent;border-radius:0;}
@@ -54,7 +54,7 @@
   padding:var(--memo-page-inset) var(--memo-page-gutter);gap:var(--memo-list-gap);
 }
 #desktop-settings-preview .desktop-settings-category-copy strong {font-size:15px;line-height:1.4;}
-#desktop-partleaderboard-preview .lb-heading {min-height:76px;padding:10px 24px!important;box-sizing:border-box;align-items:center;}
+#desktop-leaderboard-preview .lb-heading {min-height:76px;padding:10px 24px!important;box-sizing:border-box;align-items:center;}
 
 /* Keep the existing summary/chart split; align typography within each cell. */
 .desktop-accounting-panel .desktop-accounting-metric-main {gap:4px 10px;padding:10px 12px;}

@@ -52,6 +52,6 @@
       }
     });
   }
-  window.__MEMO_EVIDENCE_CHECK__=Object.freeze({bind});
+  Memorive.evidenceCheck=Object.freeze({bind});
 })();
 

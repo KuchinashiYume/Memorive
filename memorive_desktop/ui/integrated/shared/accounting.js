@@ -1,10 +1,10 @@
 /* The bottom accounting panel of every route: cost, requests and tokens by model and period, with its chart
    (asked from the desktop service). Its texts are the accounting.* messages in shared/frame/messages.js.
-   Publishes window.__Desktop_ACCOUNTING_PANEL__. */
+   Publishes Memorive.accounting. */
 (() => {
   'use strict';
-  const i18n = window.__Desktop_I18N__;
-  if (window.__Desktop_ACCOUNTING_PANEL__) return;
+  const i18n = Memorive.i18n;
+  if (Memorive.accounting) return;
   const initialize = (panel) => {
   if (!panel || panel.dataset.accountingInitialized === 'true') return null;
   panel.dataset.accountingInitialized = 'true';
@@ -18,7 +18,7 @@
   const range = one('#desktop-accounting-range');
   const model = one('#desktop-accounting-model');
   const refreshButton = one('#desktop-accounting-refresh');
-  const refreshIcon = window.__Desktop_UI_CONTROLS__?.createIcon('refresh');
+  const refreshIcon = Memorive.controls?.createIcon('refresh');
   if (refreshIcon) refreshButton.replaceChildren(refreshIcon);
   const currencyButton = one('#desktop-accounting-currency');
   const currencyCode = one('#desktop-accounting-currency-code');
@@ -138,7 +138,7 @@
     if (typeof window.MEMORIVE_ACCOUNTING_REFERENCE_PROVIDER_V3 === 'function') {
       return window.MEMORIVE_ACCOUNTING_REFERENCE_PROVIDER_V3(method, params);
     }
-    return window.__Desktop_SERVICE__.call(method, params);
+    return Memorive.service.call(method, params);
   };
   const params = () => ({
     scope: scope.value,
@@ -338,7 +338,7 @@
 
   const load = async ({ manual = false, currencyChanged = false } = {}) => {
     const serial = ++requestSerial;
-    const finishLoading = window.DesktopDecorations?.beginLoading(plot) || (()=>{});
+    const finishLoading = Memorive.decorations?.beginLoading(plot) || (()=>{});
     refreshButton.disabled = true;
     refreshButton.setAttribute('aria-busy', 'true');
     i18n.set(sync, manual ? 'accounting.sync.refreshing' : 'accounting.sync.syncing');
@@ -409,11 +409,11 @@
   return Object.freeze({ load, visible });
   };
   const instances = [...document.querySelectorAll('.desktop-accounting-panel')].map(initialize).filter(Boolean);
-  window.__Desktop_ACCOUNTING_PANEL__ = Object.freeze({
+  Memorive.accounting = Object.freeze({
     instanceCount: instances.length,
     refresh: (manual = false) => instances.filter((item) => item.visible()).forEach((item) => void item.load({ manual })),
   });
-  window.addEventListener('pywebviewready', () => window.__Desktop_ACCOUNTING_PANEL__.refresh());
-  window.requestAnimationFrame(() => window.__Desktop_ACCOUNTING_PANEL__.refresh());
+  window.addEventListener('pywebviewready', () => Memorive.accounting.refresh());
+  window.requestAnimationFrame(() => Memorive.accounting.refresh());
 })();
 

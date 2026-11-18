@@ -1,6 +1,6 @@
 /* The current task page's calls to the desktop service (current_task.*): running jobs and their workflow nodes,
    pausing, cancelling, answering a job's questions, overrides, and refinement tasks. Publishes
-   window.__Desktop_CURRENT_TASK_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   Memorive.currentTaskBridge; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
    refresh(). */
 (() => {
   'use strict';
@@ -79,7 +79,7 @@
     if (!window.pywebview?.api?.call) {
       return { schema_version: 'CurrentTaskBrowserOnlyReceipt-v1', method, params, status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT' };
     }
-    const result = await window.__Desktop_SERVICE__.call(method, params);
+    const result = await Memorive.service.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:current-task-receipt', { detail: { method, result } }));
     return result;
@@ -219,14 +219,14 @@
     try {
       projection = await nativeCall('current_task.list', {});
     } catch (error) {
-      window.__Desktop_TASKS_UI__?.setProjectionLoadState?.('error');
-      window.__MEMO_NODE_PROGRESS__?.transport(false);
+      Memorive.tasksView?.setProjectionLoadState?.('error');
+      Memorive.nodeProgress?.transport(false);
       lastProjectionFingerprint=null;
       progressConnectionLost=true;
       throw error;
     }
-    window.__Desktop_TASKS_UI__?.setProjectionLoadState?.('ready');
-    window.__MEMO_NODE_PROGRESS__?.transport(true);
+    Memorive.tasksView?.setProjectionLoadState?.('ready');
+    Memorive.nodeProgress?.transport(true);
     const fingerprint = projectionFingerprint(projection);
     const selectedMissing = Boolean(selectedRun && !projectionHasRun(projection, selectedRun));
     if (fingerprint === lastProjectionFingerprint && !selectedMissing) {
@@ -243,13 +243,13 @@
     }
     lastProjectionFingerprint = fingerprint;
     if (projection && Object.hasOwn(projection, 'workflow_execution_snapshot')) {
-      window.__Desktop_TASKS_UI__?.setConfiguredModelOptions?.(
+      Memorive.tasksView?.setConfiguredModelOptions?.(
         projection.workflow_execution_snapshot?.configured_models || []
       );
     }
     const bound = bindRows(projection);
     if(progressConnectionLost){
-      window.__Desktop_TASKS_UI__?.refreshNodeProgress?.();
+      Memorive.tasksView?.refreshNodeProgress?.();
       progressConnectionLost=false;
     }
     return {
@@ -335,8 +335,8 @@
         .map((jobId) => bindings.get(jobId))
         .filter(Boolean) }
     }));
-    window.__Desktop_TASKS_UI__?.setTaskMode?.('history');
-    window.__Desktop_TASKS_UI__?.openTaskByRun?.(acceptedRun);
+    Memorive.tasksView?.setTaskMode?.('history');
+    Memorive.tasksView?.openTaskByRun?.(acceptedRun);
     return view;
   };
 
@@ -395,20 +395,20 @@
         .map((jobId) => bindings.get(jobId))
         .filter(Boolean) }
     }));
-    window.__Desktop_TASKS_UI__?.setTaskMode?.(
+    Memorive.tasksView?.setTaskMode?.(
       row.collection_state === 'HISTORY' ? 'history' : 'current'
     );
-    const taskOpened = window.__Desktop_TASKS_UI__?.openTaskByRun?.(acceptedRun) === true;
+    const taskOpened = Memorive.tasksView?.openTaskByRun?.(acceptedRun) === true;
     const inferredNode = requestedNodeId || workflowNodes.find((node) => node?.state === 'FAILED')?.node_id;
     const uiKey = nodeUiKey[inferredNode];
     if (uiKey) {
       selectedNode = uiKey;
       await nativeCall('current_task.select_node', { node_id:uiKey });
-      window.__Desktop_TASKS_UI__?.openNodeByStep?.(uiKey);
+      Memorive.tasksView?.openNodeByStep?.(uiKey);
     }
     await new Promise((resolve) => window.requestAnimationFrame(resolve));
     await new Promise((resolve) => window.requestAnimationFrame(resolve));
-    const uiState = window.__Desktop_TASKS_UI__?.inspect?.() || {};
+    const uiState = Memorive.tasksView?.inspect?.() || {};
     const inspectorOpen = Boolean(
       inferredNode
       && uiKey
@@ -574,7 +574,7 @@
           selectedRunMissCount = 0;
           return refresh();
         })
-        .then(() => window.__Desktop_TASKS_UI__?.setTaskMode?.('current'))
+        .then(() => Memorive.tasksView?.setTaskMode?.('current'))
         .catch(() => {
           feedback.textContent = '删除失败，任务状态可能已变化。请刷新后重试。';
           feedback.hidden = false;
@@ -591,7 +591,7 @@
       if (nodeControl.disabled || nodeControlPromise || restartRequestPromise) return;
       const action = nodeControl.dataset.action;
       if (action === 'retry') {
-        if (!window.__Desktop_UI_CONTROLS__?.confirmRestart(nodeControl,selectedRun+':'+selectedNode)) return;
+        if (!Memorive.controls?.confirmRestart(nodeControl,selectedRun+':'+selectedNode)) return;
         void submitRecovery(nodeControl,()=>beginCancel().then(confirmCancel));
         return;
       }
@@ -602,7 +602,7 @@
       nodeControl.disabled=true;
       nodeControl.setAttribute('aria-busy','true');
       nodeControlPromise=nativeCall('current_task.'+action+'_node',params)
-        .then(()=>Promise.all([refresh(),window.__Desktop_INBOX_BRIDGE__?.refresh?.()]))
+        .then(()=>Promise.all([refresh(),Memorive.inboxBridge?.refresh?.()]))
         .catch(()=>{
           feedback.textContent='操作未完成，任务状态可能已变化。请刷新后重试。';
           feedback.hidden=false;
@@ -661,7 +661,7 @@
       event.preventDefault();
       event.stopImmediatePropagation();
       const button=event.target.closest('#tasks-return'),key=selectedRun+':'+selectedNode;
-      if(!window.__Desktop_UI_CONTROLS__?.confirmRestart(button,key))return;
+      if(!Memorive.controls?.confirmRestart(button,key))return;
       if (restartRequestPromise) return;
       void submitRecovery(button, () => beginCancel().then(confirmCancel));
       return;
@@ -692,7 +692,7 @@
   window.addEventListener('desktop:session-refinement-task-updated', syncRefinementBindings);
   window.addEventListener('memorive:open-current-task', (event) => {
     if(String(event.detail?.job_id||'').startsWith('research-')){
-      void window.__Desktop_RESEARCH__?.openTask(event.detail.job_id);
+      void Memorive.research?.openTask(event.detail.job_id);
       return;
     }
     const jobId = event.detail?.job_id || event.detail?.run;
@@ -708,7 +708,7 @@
     }
   }, CURRENT_TASK_FALLBACK_REFRESH_MS);
 
-  window.__Desktop_CURRENT_TASK_BRIDGE__ = Object.freeze({
+  Memorive.currentTaskBridge = Object.freeze({
     bootstrap,
     refresh,
     call: nativeCall,

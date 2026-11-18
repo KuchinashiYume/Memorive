@@ -1,5 +1,5 @@
 /* Currency handling for the model leaderboard: the three display currencies (USD, CNY, JPY), conversion with the day's
-   rates, and formatting. Publishes window.DesktopLeaderboardCurrency for routes/leaderboard/view.js. */
+   rates, and formatting. Publishes Memorive.leaderboardCurrency for routes/leaderboard/view.js. */
 (() => {
 
 const LeaderboardCurrency = (() => {
@@ -85,6 +85,6 @@ const LeaderboardCurrency = (() => {
     format, rangeInput, rangeBound, inRange});
 })();
 
-window.DesktopLeaderboardCurrency = LeaderboardCurrency;
+Memorive.leaderboardCurrency = LeaderboardCurrency;
 })();
 

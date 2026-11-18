@@ -7,7 +7,7 @@ page: opens records, edits and saves settings, arms and cancels buttons that ask
 dialogs and menus. It runs last because it changes saved settings.
 
 A step is a JavaScript expression run in the page, or "wait N" to let N seconds pass. The steps use the page's own
-entry points (window.__Desktop_INTEGRATED_APP__, the visible buttons, the window chrome). When a later change
+entry points (window.Memorive?.app, the visible buttons, the window chrome). When a later change
 renames one of those, change it here too, the same for the run before and the run after.
 
 A scene whose name ends in "+armed" shows a countdown; compare.py ignores the digits of its texts.
@@ -27,7 +27,7 @@ MODES = {
     "actions": {"language": "zh-CN", "font": 100, "size": (1440, 900)},
 }
 
-APP = "window.__Desktop_INTEGRATED_APP__"
+APP = "window.Memorive?.app"
 VISIBLE = '.desktop-route-surface:not([hidden]) '
 
 
@@ -89,14 +89,14 @@ def actions(m):
     yield f"{m}/settings.user+edited", [activate("settings"), click(user), type_text("#settings-username", "样例用户")], True
     yield f"{m}/settings.user+reverted", [click("#settings-revert")], False
     yield f"{m}/settings.user+saved", [type_text("#settings-username", "样例用户"), click("#settings-save")], False
-    yield f"{m}/settings.user+reloaded", [run("window.__Desktop_SETTINGS_BRIDGE__.refresh()")], False
+    yield f"{m}/settings.user+reloaded", [run("window.Memorive?.settingsBridge.refresh()")], False
     # Restoring a category's defaults counts down; a second click cancels, waiting it out restores.
     appearance = VISIBLE + '.desktop-settings-category[data-category="appearance"]'
     yield f"{m}/settings.reset+armed", [click(appearance), click("#settings-reset")], False
     yield f"{m}/settings.reset+cancelled", [click("#settings-reset")], False
     yield f"{m}/settings.reset+done", [click("#settings-reset"), "wait 11"], False
     # The dialog that asks before the window closes.
-    yield f"{m}/close-dialog", [run("window.__Desktop_WINDOW_CHROME__.requestClose(true)")], True
+    yield f"{m}/close-dialog", [run("window.Memorive?.windowChrome.requestClose(true)")], True
     yield f"{m}/close-dialog+cancelled", [click("[data-window-action=cancel]")], False
     # Menus and popovers.
     yield f"{m}/work-log.filter", [activate("work-log"), click(VISIBLE + "#worklog-filter-button")], False

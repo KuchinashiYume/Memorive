@@ -1,9 +1,9 @@
 /* The settings page: loading and saving settings (settings.*), the shared save and revert of every panel
    (registerSaveParticipant), API and CLI model services and their checks, local models, refinement, the desk
    assistant, the developer editor, scoped resets, network tests and appearance. Publishes
-   window.__Desktop_SETTINGS_BRIDGE__ (call, refresh, registerSaveParticipant, syncSaveState, notify, nativeAction,
+   Memorive.settingsBridge (call, refresh, registerSaveParticipant, syncSaveState, notify, nativeAction,
    ...), which the other settings scripts, the chat page and app.py's self-test use, and
-   window.__Desktop_SETTINGS_I18N__ (text, language), the page's own texts by key in the three languages. The browser
+   Memorive.settingsText (text, language), the page's own texts by key in the three languages. The browser
    companion is in browser-companion.js. */
 (() => {
   'use strict';
@@ -570,7 +570,7 @@
     });
     window.dispatchEvent(new CustomEvent('desktop:settings-locale-change', { detail: { language: settingsLanguage() } }));
   };
-  window.__Desktop_SETTINGS_I18N__ = Object.freeze({ text: uiText, language: settingsLanguage });
+  Memorive.settingsText = Object.freeze({ text: uiText, language: settingsLanguage });
   const control = (id) => {
     const element = q(`#${id}`);
     if (!element) throw new Error(`SETTINGS_CONTROL_MISSING:${id}`);
@@ -590,7 +590,7 @@
     };
     let receipt;
     try {
-      receipt = await window.__Desktop_SERVICE__.call(method, params);
+      receipt = await Memorive.service.call(method, params);
     } catch (error) {
       lastReceipt = { ...lastReceipt, status: 'ERROR' };
       window.dispatchEvent(new CustomEvent('desktop:settings-receipt', { detail: lastReceipt }));
@@ -615,7 +615,7 @@
     return target(...args);
   };
 
-  const companion = () => window.__Desktop_BROWSER_COMPANION__;
+  const companion = () => Memorive.browserCompanion;
 
   const showToast = (message) => {
     const toast = q('#settings-toast');
@@ -707,8 +707,8 @@
   const syncSaveState = () => {
     const dirty = generalDraftDirty || cliDraftDirty || extraDirty() ||
       Object.values(developerEditorMetrics.dirty).some(Boolean);
-    if (dirty) window.__Desktop_SETTINGS_UI__?.setDirty?.();
-    else window.__Desktop_SETTINGS_UI__?.setClean?.();
+    if (dirty) Memorive.settingsView?.setDirty?.();
+    else Memorive.settingsView?.setClean?.();
     if(q('#settings-revert'))q('#settings-revert').disabled=!dirty || aggregateSaveInFlight;
     if(aggregateSaveInFlight && q('#settings-save'))q('#settings-save').disabled=true;
     if(q('#settings-save') && [...saveParticipants.values()].some(part=>part.isDirty()&&part.validate?.()===false))q('#settings-save').disabled=true;
@@ -719,15 +719,15 @@
   };
   const markClean = () => {
     generalDraftDirty = false;
-    window.__Desktop_SETTINGS_UI__?.setClean?.();
+    Memorive.settingsView?.setClean?.();
     const revert = q('#settings-revert');
     if (revert) revert.disabled = !extraDirty();
-    if(extraDirty())window.__Desktop_SETTINGS_UI__?.setDirty?.();
+    if(extraDirty())Memorive.settingsView?.setDirty?.();
   };
   const markDirty = () => {
     if (applyingState || !state) return;
     generalDraftDirty = true;
-    window.__Desktop_SETTINGS_UI__?.setDirty?.();
+    Memorive.settingsView?.setDirty?.();
     const revert = q('#settings-revert');
     if (revert) revert.disabled = false;
   };
@@ -868,8 +868,8 @@
     return Number.isInteger(row?.score) && row.score >= 0 && row.score <= 100
       ? row.score : null;
   };
-  window.__Desktop_WORKFLOW_NODE_IDS__ = Object.fromEntries(nodeByStep);
-  window.__Desktop_WORKFLOW_EXAM_SCORE__ = cachedWorkflowExamScore;
+  Memorive.workflowNodeIds = Object.fromEntries(nodeByStep);
+  Memorive.workflowExamScore = cachedWorkflowExamScore;
 
   const localModelDisplayName = (model = {}) => {
     const raw = String(model.display_name || model.model_name || model.profile_ref || '').trim();
@@ -1008,8 +1008,8 @@
       configuredModelOptions: configuredModelOptions(settings),
       localModelProfiles
     };
-    window.__Desktop_LOCAL_MODEL_PROFILES__ = localModelProfiles;
-    window.__Desktop_WORKFLOW_SYNC__ = detail;
+    Memorive.localModelProfiles = localModelProfiles;
+    Memorive.workflowSync = detail;
     window.dispatchEvent(new CustomEvent('desktop:workflow-config-updated', { detail }));
     return detail;
   };
@@ -1647,8 +1647,8 @@
     }
     if (state?.settings) {
       const workflowSync = publishWorkflowConsumers(state.settings, state.revision);
-      window.__Desktop_SETTINGS_UI__?.setConfiguredModelOptions?.(workflowSync.configuredModelOptions);
-      window.__Desktop_SETTINGS_UI__?.applyWorkflow?.(workflowSync.template);
+      Memorive.settingsView?.setConfiguredModelOptions?.(workflowSync.configuredModelOptions);
+      Memorive.settingsView?.applyWorkflow?.(workflowSync.template);
     }
     const reachable = (projection?.endpoints || []).filter((row) => row.last_verification?.service_reachable);
     const models = reachable.flatMap((row) => row.last_verification?.models || []);
@@ -1660,7 +1660,7 @@
 
   const renderRefinementSettings = (projection) => {
     refinementState = projection;
-    window.__Desktop_SETTINGS_UI__?.setRefinementModelOptions?.(projection);
+    Memorive.settingsView?.setRefinementModelOptions?.(projection);
     const select = q('#settings-refinement-model');
     if (!select) return;
     const selected = projection?.settings?.profile_ref || '';
@@ -1903,8 +1903,8 @@
       const activeMode = settingsAppliedOnce && settingsModeDraft === null ? activeSettingsMode() : persistedMode;
       const mode = shell?.dataset.modeScope === 'workflow' && activeMode === 'advanced'
         ? 'normal' : activeMode;
-      if (window.__Desktop_SETTINGS_UI__?.applySettingsMode) {
-        window.__Desktop_SETTINGS_UI__.applySettingsMode(mode);
+      if (Memorive.settingsView?.applySettingsMode) {
+        Memorive.settingsView.applySettingsMode(mode);
       } else {
         qa('#settings-mode button[data-mode]').forEach((button) => {
           button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
@@ -1961,12 +1961,12 @@
       setSelect('settings-language', preferences.language);
       control('settings-font-size').textContent = `${preferences.font_scale_percent}%`;
       setSwitch('settings-full-tooltips', preferences.show_full_tooltips);
-      window.__Desktop_INTEGRATED_APP__?.applyPreferences?.(preferences);
+      Memorive.app?.applyPreferences?.(preferences);
       applySettingsLocale();
 
       const workflowSync = publishWorkflowConsumers(settings, nextState.revision);
-      window.__Desktop_SETTINGS_UI__?.setConfiguredModelOptions?.(workflowSync.configuredModelOptions);
-      window.__Desktop_SETTINGS_UI__?.applyWorkflow?.(workflowSync.template);
+      Memorive.settingsView?.setConfiguredModelOptions?.(workflowSync.configuredModelOptions);
+      Memorive.settingsView?.applyWorkflow?.(workflowSync.template);
       const routeBlocked = (capabilityState?.capabilities || []).some(
         (row) => row.capability_id.startsWith('model.') && row.blocked
       );
@@ -2520,7 +2520,7 @@
       for (const part of saveParticipants.values()) part.afterUnlock?.();
       q('#settings-save')?.removeAttribute('aria-busy');
       syncSaveState();
-      window.__Desktop_SETTINGS_ICONS__?.applyActions();
+      Memorive.settingsIcons?.applyActions();
     }
   };
 
@@ -3391,7 +3391,7 @@
     replacingConfigId = null;
     clearProviderError();
     syncDraftModelCapability();
-    if (close) await window.__Desktop_SETTINGS_UI__?.setApiDraftOpen?.(false);
+    if (close) await Memorive.settingsView?.setApiDraftOpen?.(false);
   };
 
   const prepareCredentialDraft = async () => {
@@ -3646,7 +3646,7 @@
 
   const previewAppearance = () => {
     if (!state?.settings) return;
-    window.__Desktop_INTEGRATED_APP__?.applyPreferences?.({
+    Memorive.app?.applyPreferences?.({
       ...state.settings.preferences,
       language: q('#settings-language')?.value || state.settings.preferences.language,
       font_scale_percent: Number.parseInt(q('#settings-font-size')?.textContent || '100', 10),
@@ -3787,7 +3787,7 @@
       setDraftPlan(normalPlanForService(service));
       syncDraftModelCapability();
     }
-    void window.__Desktop_SETTINGS_UI__?.setApiDraftOpen?.(true);
+    void Memorive.settingsView?.setApiDraftOpen?.(true);
     control('settings-api-key').focus();
     showToast('可直接保存模型字段；仅在需要更换 Key 时输入新凭据。');
   };
@@ -4068,7 +4068,7 @@
     };
     while (true) {
       const terminal = examTerminal(workflowExamJob);
-      window.__Desktop_EXAM_PANEL__?.progress(terminal ? (workflowExamJob.state === 'COMPLETE' ? 'COMPLETE' : 'ERROR') : 'RUNNING', {job:workflowExamJob,step,connectionLost});
+      Memorive.examPanel?.progress(terminal ? (workflowExamJob.state === 'COMPLETE' ? 'COMPLETE' : 'ERROR') : 'RUNNING', {job:workflowExamJob,step,connectionLost});
       stop.hidden = terminal;
       stop.disabled = !!workflowExamJob.cancel_requested;
       if (terminal) return workflowExamJob.receipt || {status:'NOT_RUN',reason:workflowExamJob.reason || workflowExamJob.state};
@@ -4088,7 +4088,7 @@
     if (!nodeId) throw new Error('WORKFLOW_NODE_NOT_FOUND');
     const selectedExamTier = q('#settings-exam-tier')?.value || 'FULL';
     workflowExamInFlight = true;
-    window.__Desktop_EXAM_PANEL__?.progress('PLANNING', {label:q('#settings-node-title')?.textContent || nodeId, nodeId,step});
+    Memorive.examPanel?.progress('PLANNING', {label:q('#settings-node-title')?.textContent || nodeId, nodeId,step});
     if (q('#settings-exam-tier')) q('#settings-exam-tier').disabled = true;
     const oldCopy = button.textContent;
     let examStarted = false;
@@ -4103,12 +4103,12 @@
         plan_only: true
       });
       if (plan.status !== 'READY') {
-        window.__Desktop_EXAM_PANEL__?.progress('ERROR');
+        Memorive.examPanel?.progress('ERROR');
         showToast(`当前映射没有可执行考试：${plan.reason || 'NOT_AVAILABLE'}`);
         return plan;
       }
       let authorization = null;
-      if (!(await window.__Desktop_EXAM_PANEL__.confirmRun(plan))) return null;
+      if (!(await Memorive.examPanel.confirmRun(plan))) return null;
       if (plan.authorization_required || plan.authorization_schema_version) {
         authorization = {schema_version:plan.authorization_schema_version, authorized:true,
           plan_sha256:plan.plan_sha256, cost_cap_cny:plan.budget_cap_cny,
@@ -4120,7 +4120,7 @@
       }
       examStarted = true;
       button.textContent = '考试中…';
-      window.__Desktop_EXAM_PANEL__?.progress('RUNNING');
+      Memorive.examPanel?.progress('RUNNING');
       const params = { node_id: nodeId, exam_tier: selectedExamTier, force_exam: true,
         idempotency_key:crypto.randomUUID(), expected_plan_sha256:plan.plan_sha256 };
       if (authorization) params.authorization = authorization;
@@ -4132,12 +4132,12 @@
         if (!job.job_id || job.plan_sha256 !== plan.plan_sha256) throw error;
       }
       const receipt = await watchWorkflowExam(job, step);
-      window.__Desktop_EXAM_PANEL__?.progress(receipt.status === 'NOT_RUN' && !receipt.execution_completed ? 'ERROR' : 'COMPLETE');
+      Memorive.examPanel?.progress(receipt.status === 'NOT_RUN' && !receipt.execution_completed ? 'ERROR' : 'COMPLETE');
       if (receipt.persistent_mutation) await refresh();
       if (!receipt.saved_mapping_changed && !receipt.tier_result_is_provisional && receipt.status !== 'NOT_RUN' && Number.isInteger(receipt.score)
           && q('button.desktop-settings-node[aria-current="true"]')?.dataset.step === step) q('#settings-node-test-score').textContent = String(receipt.score);
       const tierCopy = q('#settings-tier-result');
-      const panelCopy = (text) => (window.__Desktop_INTEGRATED_APP__?.translate?.(text) || text)
+      const panelCopy = (text) => (Memorive.app?.translate?.(text) || text)
         .replace('{score}', String(receipt.diagnostic_score)).replace('{count}', String(receipt.cohort_panel_count));
       if (tierCopy && q('button.desktop-settings-node[aria-current="true"]')?.dataset.step === step) tierCopy.textContent = receipt.exam_tier
         ? `${receipt.exam_tier.label} · 实际覆盖 ${Math.round(receipt.exam_tier.actual_fraction * 1000) / 10}%` +
@@ -4157,11 +4157,11 @@
           : `未取得有效评分：${receipt.reason || 'NOT_ASSESSED'}`);
       return receipt;
     } catch (error) {
-      window.__Desktop_EXAM_PANEL__?.progress('ERROR');
+      Memorive.examPanel?.progress('ERROR');
       throw error;
     } finally {
       workflowExamInFlight = false;
-      if (!examStarted) window.__Desktop_EXAM_PANEL__?.progress('IDLE');
+      if (!examStarted) Memorive.examPanel?.progress('IDLE');
       button.disabled = false;
       button.textContent = oldCopy;
       button.removeAttribute('aria-busy');
@@ -4292,7 +4292,7 @@
         scope,
         expected_revision: expectedRevision
       });
-      if(scope==='notice')await window.__Desktop_REPORT_UI__?.reset();
+      if(scope==='notice')await Memorive.reports?.reset();
       await refresh();
       showToast('当前项已恢复默认');
       return receipt;
@@ -4561,7 +4561,7 @@
         q('.desktop-settings-workarea')?.style.removeProperty('--desktop-settings-primary-size');
         q('.desktop-workspace')?.style.removeProperty('--desktop-right-size');
         q('.desktop-workspace')?.style.removeProperty('--desktop-bottom-size');
-        window.__Desktop_SETTINGS_UI__?.resetPaneLayout();
+        Memorive.settingsView?.resetPaneLayout();
         showToast('面板布局已恢复设计默认值。');
       }).catch(fail('布局恢复失败'));
     } else if (target.id === 'settings-assistant-show') {
@@ -4576,7 +4576,7 @@
     } else if (target.dataset.localHelp) {
       stopOriginal(event);
       void nativeAction('open_local_help', target.dataset.localHelp, settingsLanguage()).catch(() => {
-        showToast(window.__Desktop_INTEGRATED_APP__?.translate?.('文档打开失败，请检查默认打开程序') || '文档打开失败，请检查默认打开程序');
+        showToast(Memorive.app?.translate?.('文档打开失败，请检查默认打开程序') || '文档打开失败，请检查默认打开程序');
       });
     } else if (target.id === 'settings-confirm-retry' && !target.disabled) {
       const selected = q('button.desktop-settings-node[aria-current="true"]');
@@ -4687,7 +4687,7 @@
     updateScopedResetAvailability(event.detail?.category || 'none');
   });
 
-  window.__Desktop_SETTINGS_BRIDGE__ = Object.freeze({
+  Memorive.settingsBridge = Object.freeze({
     renderCodeEditor: (elements) => {
       renderDeveloperSyntax(null,elements);
       updateDeveloperLineNumbers(null,elements);
@@ -4707,11 +4707,11 @@
     getEditState: () => ({
       ready: Boolean(state && contract && capabilityState && effects),
       dirty: Boolean(generalDraftDirty || cliDraftDirty || extraDirty() ||
-        window.__Desktop_SETTINGS_UI__?.getEditState?.().dirty ||
+        Memorive.settingsView?.getEditState?.().dirty ||
         Object.values(developerEditorMetrics.dirty).some(Boolean) ||
         (q('#settings-api-draft') && !q('#settings-api-draft').hidden)),
       saving: Boolean(aggregateSaveInFlight || settingsSaveInFlight || cliSaveInFlight ||
-        window.__Desktop_LOCAL_USER__?.getState?.().decoding)
+        Memorive.localUser?.getState?.().decoding)
     }),
     saveCliServices,
     renderCliValidationReceipt,

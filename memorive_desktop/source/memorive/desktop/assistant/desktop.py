@@ -851,7 +851,7 @@ class AssistantDesktop:
         if self.main_window is None:
             raise RuntimeError("PRODUCT_WINDOW_NOT_ATTACHED")
         self.main_window.evaluate_js(
-            "window.__Desktop_INTEGRATED_APP__.activate(" + json.dumps(route) + ")"
+            "window.Memorive?.app.activate(" + json.dumps(route) + ")"
         )
         self.bring_main_window_to_foreground()
 
@@ -867,7 +867,7 @@ class AssistantDesktop:
         route_observation_error_type: str | None = None
         try:
             route_projection = self.main_window.evaluate_js(
-                "window.__Desktop_INTEGRATED_APP__ && window.__Desktop_INTEGRATED_APP__.inspect()"
+                "window.Memorive?.app && window.Memorive?.app.inspect()"
             )
             if isinstance(route_projection, dict) and isinstance(
                 route_projection.get("active_route"), str
@@ -1412,7 +1412,7 @@ class AssistantDesktop:
         elif action_id == "OPEN_DESKTOP_ASSISTANT_SETTINGS":
             self._activate_main_route("settings")
             self.main_window.evaluate_js(
-                "window.DesktopPreview_settings?.root?.querySelector('[data-category=\"behavior\"]')?.click()"
+                "window.Memorive?.frames.settings?.root?.querySelector('[data-category=\"behavior\"]')?.click()"
             )
         elif action_id == "OPEN_MESSAGE_DETAIL":
             self._activate_main_route("messages")

@@ -1,7 +1,7 @@
 /* Product leaderboard. All data comes from the allowlisted desktop bridge. */
 (() => {
   'use strict';
-  const root = document.getElementById('desktop-partleaderboard-preview');
+  const root = document.getElementById('desktop-leaderboard-preview');
   if (!root || root.dataset.leaderboardMounted) return;
   root.dataset.leaderboardMounted = 'true';
   const q = s => root.querySelector(s);
@@ -16,8 +16,8 @@
   headerObserver.observe(tableHead);
   window.addEventListener('beforeunload', () => headerObserver.disconnect(), {once:true});
 
-  const C = window.DesktopLeaderboardCurrency;
-  const shell = window.DesktopPreview_partleaderboard;
+  const C = Memorive.leaderboardCurrency;
+  const shell = Memorive.frames.leaderboard;
   const el = (tag, text, cls) => {
     const n = document.createElement(tag);
     if (text !== undefined && text !== null) n.textContent = text;
@@ -55,7 +55,7 @@
       const b = n.parentElement;
       b.classList.add('icon-button');
       b.textContent = '↻';
-      window.__Desktop_UI_CONTROLS__?.icons(b); // Reuse the current app's refresh asset.
+      Memorive.controls?.icons(b); // Reuse the current app's refresh asset.
     } else n.replaceWith(icon(n.dataset.lbIcon));
   });
   q('#lb-rule-toggle').setAttribute('aria-controls', 'desktop-right-panel');
@@ -87,7 +87,7 @@
     q('#lb-status').textContent = text;
     q('#lb-context').textContent = text;
   };
-  function uiText(text) { return window.__Desktop_INTEGRATED_APP__?.translate?.(text) || text; }
+  function uiText(text) { return Memorive.app?.translate?.(text) || text; }
   function emptyCatalogText() {
     const state = data?.refresh?.status;
     return state === 'RUNNING' ? uiText(uiText('正在获取模型数据…')) :
@@ -95,7 +95,7 @@
       state === 'ERROR' ? uiText(uiText('模型数据获取失败 · 点击刷新重试')) :
       uiText(uiText('尚无模型数据 · 点击刷新获取'));
   }
-  const call = (method, params = {}) => window.__Desktop_SERVICE__.call(method, params);
+  const call = (method, params = {}) => Memorive.service.call(method, params);
   function accept(value) {
     if (value?.schema_version !== 'ModelLeaderboardProjection-v4' || !Array.isArray(value.rows) ||
         !value.preferences || !Array.isArray(value.sources) || value.qualification_eligible !== false) throw new Error('PROJECTION_INVALID');
@@ -575,7 +575,7 @@
     (form.querySelector('input[type=search]')||fields[0])?.focus({preventScroll:true});
   }
   let aiClose = null;
-  window.__Desktop_LEADERBOARD_PANE__ = Object.freeze({
+  Memorive.leaderboard = Object.freeze({
     openAI(content, onClose) {
       if (pane === 'ai') closePane();
       aiClose = onClose;

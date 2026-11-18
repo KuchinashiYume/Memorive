@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   let pending=null;
-  window.__Desktop_LOAD_PDFJS__=()=>{
+  Memorive.loadPdfjs=()=>{
     if(globalThis.pdfjsLib?.getDocument&&globalThis.pdfjsWorker?.WorkerMessageHandler)
       return Promise.resolve(globalThis.pdfjsLib);
     if(pending)return pending;
