@@ -298,17 +298,12 @@ Research reports collect research events from runtime records, admission and ver
 
 *Figure 15 · Research opportunities*
 
-Research opportunities looks for three kinds of leads among admitted paper cards:
+Research opportunities looks for two kinds of leads among admitted cards:
 
-- **Divergences:** two or more papers report results on comparable subjects and measures that differ in direction or size.
-- **Different conditions:** the results differ, and so do the subjects, methods, samples or settings, so the difference may come from those conditions.
-- **Gaps:** questions no paper answers, that only one paper supports, or that the authors state they have not solved.
+- **Tensions:** after comparing subjects, conditions, methods, metrics, statistics and time ranges, it finds places where conditions are comparable but conclusions differ.
+- **Gaps:** it gathers the limitations, open questions and future work that authors state explicitly, keeps the original sentences and sources, and marks whether later papers have filled them.
 
-When you click "Find research opportunities" on the Research opportunities page, Memorive turns each paper card's research question, subjects, methods, key data, conclusions, boundary conditions and stated limitations into a fact sheet and has the model chosen for research Q&A compare them; you can add a focus in one sentence. Every opportunity the model proposes cites these facts, and Memorive checks each one: the cited facts must exist, a divergence or a difference in conditions involves at least two papers, and every number in its text must come from the papers it cites. An opportunity that fails a check is not shown.
-
-Each opportunity gives the question to ask next, the reasoning (dimension by dimension, what is comparable and what differs), how to resolve it, its limitations, and the evidence: the paper, the card field, the page and the quoted text. You can keep or dismiss an opportunity, or choose "Ask in research Q&A": Memorive starts a conversation with the papers involved and the question filled in; the answer cites the original text as research Q&A does, and a conclusion you want to keep goes through knowledge feedback from there.
-
-Research opportunities runs only when you click. Searching again lists only new opportunities and leaves the ones you kept or dismissed as they are; when a paper card changes, the opportunities based on it are marked so you can search again. Divergences and differences in conditions appear in the weekly report under "Source-backed potential tensions". Research opportunities proposes questions worth pursuing; it does not judge which paper is right.
+Results fall into four groups: A, highly comparable tensions; B, differences in conditions or methods; C, differences in wording, metrics or claim type; D, items you chose to ignore. When coverage is insufficient, results are marked "not comparable" or "coverage limited". Analysis runs incrementally by topic, on a schedule, on demand or after related materials change; you decide what is comparable and what is worth pursuing.
 
 ### Literature discovery
 
