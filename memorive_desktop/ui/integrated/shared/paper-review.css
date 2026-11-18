@@ -28,7 +28,7 @@
 #desktop-inbox-preview .desktop-inbox-state.has-pause-hint::before {grid-column:2;grid-row:1;}
 #desktop-inbox-preview .desktop-inbox-state.has-pause-hint .paper-review-pause-hint {grid-column:1;grid-row:1;text-align:right;overflow-wrap:anywhere;}
 #desktop-inbox-preview .desktop-inbox-state.has-pause-hint > span:last-child {grid-column:3;grid-row:1;overflow-wrap:anywhere;}
-#desktop-tasks-preview .paper-review-logic-task p {margin:8px 0;font-size:12px;}
+#desktop-tasks-preview .paper-review-logic-task p {margin:8px 0;font-size:var(--memo-size-small);}
 :is(.paper-review-dialog,.paper-review-panel) {box-sizing:border-box;font:inherit;line-height:1.65;background:var(--surface-primary,#FFFDF9);color:var(--text-primary,#33302A);}
 :is(.paper-review-dialog,.paper-review-panel)>.toolbar-group {display:flex;align-items:center;justify-content:space-between;gap:16px;}
 :is(.paper-review-dialog,.paper-review-panel) h4 {margin:18px 0 8px;}

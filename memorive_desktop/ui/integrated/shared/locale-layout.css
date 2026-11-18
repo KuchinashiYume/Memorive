@@ -9,7 +9,7 @@
 #desktop-settings-preview #memo-settings-page .memo-inline-editor,#memo-handoff-inline { padding:18px; display:grid; gap:18px; min-width:0; }
 #desktop-settings-preview #memo-settings-page .memo-inline-editor[hidden],#memo-handoff-inline[hidden] { display:none!important; }
 .memo-inline-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; min-width:0; }
-.memo-inline-heading strong { font-size:inherit; font-weight:500; }
+.memo-inline-heading strong { font-size:inherit; font-weight:400; }
 .memo-inline-editor footer.memo-actions { justify-content:flex-end; margin:0; }
 #desktop-settings-preview #memo-settings-page .memo-path-control { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:8px; }
 #desktop-settings-preview #memo-settings-page .memo-path-control>span { grid-column:1/-1; }
@@ -19,10 +19,10 @@
 #desktop-settings-preview #memo-settings-page .memo-connections-toolbar { display:flex; justify-content:flex-end; }
 #desktop-settings-preview #memo-settings-page .memo-connection-sidebar[hidden] { display:none!important; }
 #desktop-settings-preview #memo-settings-page .memo-connection-tabs button { display:inline-flex; align-items:center; gap:8px; white-space:normal; }
-#desktop-settings-preview #memo-settings-page .memo-tab-count { color:var(--text-secondary); font-variant-numeric:tabular-nums; font-size:.85em; }
+#desktop-settings-preview #memo-settings-page .memo-tab-count { color:var(--text-secondary); font-variant-numeric:tabular-nums; font-size:var(--memo-size-small); }
 #desktop-settings-preview #memo-settings-page .memo-connection-empty { display:flex; align-items:center; justify-content:center; min-height:150px; text-align:center; }
 #desktop-settings-preview #memo-settings-page .memo-connection-path,#desktop-settings-preview #memo-settings-page .memo-connection-row { overflow-wrap:anywhere; }
-#desktop-settings-preview #memo-settings-page .memo-connection-row h4 { font-size:var(--desktop-font-body); }
+#desktop-settings-preview #memo-settings-page .memo-connection-row h4 { font-size:var(--memo-size-body); }
 #desktop-settings-preview #memo-settings-page .memo-inline-editor .memo-status:empty,#memo-connection-status:empty { display:none; }
 #memo-handoff-inline { margin:12px 0; max-height:55vh; overflow:auto; flex-shrink:0; }
 

@@ -666,10 +666,9 @@ const collapsed=new Set();
       const row=create('article',null,'memo-message');
       row.dataset.role=m.role;
       row.dataset.messageId=m.id;
-      const head=create('header'),avatar=create('span',m.role==='user'?'U':'m','memo-avatar');
-      avatar.setAttribute('aria-hidden','true');
-      avatar.setAttribute('data-desktop-no-translate','');
-      head.append(avatar,create('strong',m.role==='user'?'你':'Memorive'));
+      // The speaker's name is for screen readers; a question shows as a bubble, an answer as plain text.
+      const head=create('header');
+      head.append(create('strong',m.role==='user'?'你':'Memorive','memo-message-speaker'));
       const copy=create('button',null,'memo-quiet-button memo-copy-message memo-message-icon');
       copy.type='button';
       copy.onclick=()=>copyText(m.text).catch(err=>fail(err));
@@ -677,8 +676,7 @@ const collapsed=new Set();
       copy.setAttribute('aria-label',t('复制'));
       copy.dataset.desktopTip=t('复制');
       copy.dataset.answerAction='copy';
-      head.append(copy);
-      if(m.engine)head.append(create('span',m.engine==='evidence_only'?'资料摘录':m.engine));
+      if(m.role==='user')head.append(copy);
       row.append(head,messageBody(m.text));
       if(m.feedback_id){
         const proposal=state?.feedback.find(p=>p.id===m.feedback_id);
@@ -698,16 +696,19 @@ const collapsed=new Set();
         row.append(links);
       }
       if(m.role==='assistant'){
-        const foot=create('div',null,'memo-message-footer');
-        if(Number.isFinite(m.elapsed_ms)&&m.elapsed_ms>=0)foot.append(create('span',(m.elapsed_ms/1000).toFixed(1)+' s'));
-        const usage=m.usage?.token_usage;
-        if(usage)foot.append(create('span','Tokens · '+(usage.prompt_tokens??usage.input_tokens??'?')+' / '+(usage.completion_tokens??usage.output_tokens??'?')));
-        const cached=usage?.cached_input_tokens??usage?.cache_read_input_tokens;
-        if(cached>0)foot.append(create('span',t('缓存命中')+' · '+cached.toLocaleString()));
-        if(m.context)row.append(contextDetails(m));
+        // Under an answer, one line: its actions first, then what it was made from and what it took.
+        const foot=create('div',null,'memo-message-footer'),meta=create('span',null,'memo-message-meta');
+        foot.append(answerActions(m),copy);
         if(m.needs_agent)foot.append(button('继续深入 → 交给 Agent',()=>handoff(),'memo-quiet-button'));
-        if(m.usage&&Object.keys(m.usage).length)foot.append(create('span',t('费用')+' · '+(m.usage.actual_cost==null?t('未知'):String(m.usage.actual_cost))));
-        foot.append(answerActions(m));
+        if(m.engine)meta.append(create('span',m.engine==='evidence_only'?'资料摘录':m.engine));
+        if(Number.isFinite(m.elapsed_ms)&&m.elapsed_ms>=0)meta.append(create('span',(m.elapsed_ms/1000).toFixed(1)+' s'));
+        const usage=m.usage?.token_usage;
+        if(usage)meta.append(create('span','Tokens · '+(usage.prompt_tokens??usage.input_tokens??'?')+' / '+(usage.completion_tokens??usage.output_tokens??'?')));
+        const cached=usage?.cached_input_tokens??usage?.cache_read_input_tokens;
+        if(cached>0)meta.append(create('span',t('缓存命中')+' · '+cached.toLocaleString()));
+        if(m.usage&&Object.keys(m.usage).length)meta.append(create('span',t('费用')+' · '+(m.usage.actual_cost==null?t('未知'):String(m.usage.actual_cost))));
+        if(m.context)row.append(contextDetails(m));
+        if(meta.childElementCount)foot.append(meta);
         row.append(foot);
       }
       log.append(row);
@@ -928,19 +929,24 @@ const collapsed=new Set();
     },'memo-quiet-button'),create('h4',fresh.title),create('small',fresh.page?t('页')+' '+fresh.page:'L'+fresh.line_start+'–'+fresh.line_end),create('pre',fresh.text),
       button('在外部查看',()=>window.pywebview.api.memo_open_evidence({evidence_id:ref.id,project,expected_hash:ref.content_hash}),'memo-quiet-button'));
   }
+  // What an answer was built from: one line of counts, the remembered notes it used, the evidence check (filled in
+  // when the disclosure opens, evidence-check.js) and, folded away, the answer style's versions and instruction hash.
   function contextDetails(message){
     const details=create('details',null,'memo-saved-memory memo-context-details'),
-      ids=new Set(message.context.memory_ids||[]);
-    details.append(create('summary',t('使用的上下文'),'desktop-settings-disclosure'),create('p',t('记忆条数')+' · '+ids.size));
-    for(const m of message.generation?.context.confirmed_memory||state.memories.filter(m=>ids.has(m.id))){
+      ids=new Set(message.context.memory_ids||[]),g=message.generation,
+      facts=[t('记忆条数')+' '+ids.size,t('摘要引用消息')+' '+(message.context.summary_message_ids||[]).length,t('上下文字符数')+' '+message.context.chars];
+    if(g)facts.push(t('回答风格')+' '+t(g.style.label));
+    details.append(create('summary',t('使用的上下文'),'desktop-settings-disclosure'),create('p',facts.join(' · '),'memo-context-summary'));
+    for(const m of g?.context.confirmed_memory||state.memories.filter(m=>ids.has(m.id))){
       const current=state.memories.find(row=>row.id===m.id);
       details.append(create('pre',current&&current.revision===m.revision?m.text:t('此记忆已变化或已遗忘')));
     }
-    if(message.generation){
-      const g=message.generation;
-      details.append(create('p',t('回答风格')+' · '+t(g.style.label)),create('small',g.style.common_version+' / '+g.style.mode_version),create('p',t('实际指令')+' · '+g.actual_instruction_sha256));
+    details.append(create('div',null,'memo-context-check'));
+    if(g){
+      const technical=create('details',null,'memo-saved-memory memo-context-technical');
+      technical.append(create('summary',t('技术细节'),'desktop-settings-disclosure'),create('p',g.style.common_version+' / '+g.style.mode_version),create('p',t('实际指令')+' · '+g.actual_instruction_sha256));
+      details.append(technical);
     }
-    details.append(create('p',t('摘要引用消息')+' · '+(message.context.summary_message_ids||[]).length),create('p',t('上下文字符数')+' · '+message.context.chars));
     Memorive.evidenceCheck?.bind(details,message,{threadId:thread.id,call,create,t});
     for(const warning of message.ranking_warnings||[])details.append(create('small',t('部分排序信息暂不可用')+' · '+warning.component,'memo-inline-error'));
     return details;
@@ -1612,6 +1618,13 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
       q('#memo-history-toggle').setAttribute('aria-expanded',String(show));
       q('#memo-evidence-toggle').setAttribute('aria-expanded',layout.dataset.evidence);
     });
+    // The handle on the projects panel's right edge collapses it; the handle on the chat's left edge opens it again.
+    for(const [handle,other] of [['#memo-history-collapse','#memo-history-expand'],['#memo-history-expand','#memo-history-collapse']]){
+      action(handle,()=>{
+        q('#memo-history-toggle').click();
+        q(other).focus({preventScroll:true});
+      });
+    }
     action('#memo-evidence-toggle',()=>{
       const layout=q('#memo-layout');
       if(layout.dataset.evidence==='true'){
@@ -1815,16 +1828,20 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     renderMaterials();
     positionComposerMenu();
   }
+  // The model menu opens above the input box, as a chat input's menus do: it never covers the text being written.
+  // It lines up with the model button and scrolls when the space above the box is short.
   function positionComposerMenu(){
     const menu=q('#memo-composer-model-menu'),anchor=q('#memo-composer-model');
     if(!menu||menu.dataset.open!=='true')return;
     const r=anchor.getBoundingClientRect(),
       host=q('#memo-composer').getBoundingClientRect(),
+      box=q('#memo-input-shell').getBoundingClientRect(),
+      top=q('#memo-transcript').getBoundingClientRect().top,
       width=Math.min(320,window.innerWidth-24);
     menu.style.width=width+'px';
     menu.style.left=Math.max(12,Math.min(r.left,window.innerWidth-width-12))-host.left+'px';
-    menu.style.bottom=host.bottom-r.top+7+'px';
-    menu.style.maxHeight=Math.min(340,Math.max(100,r.top-18))+'px';
+    menu.style.bottom=host.bottom-box.top+6+'px';
+    menu.style.maxHeight=Math.min(340,Math.max(96,box.top-top-12))+'px';
   }
 
   async function ensureThread(){

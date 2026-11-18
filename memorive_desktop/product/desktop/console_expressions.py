@@ -60,7 +60,7 @@ class ConsoleExpressionRenderer:
                   const title=document.createElement('div'),img=document.createElement('img'),visual=document.createElement('div');
                   const raw=document.documentElement.lang||'zh-CN',lang=raw.startsWith('en')?'en-US':raw.startsWith('ja')?'ja-JP':'zh-CN';
                   title.textContent=(s.label[lang]||s.label['zh-CN'])+' · '+({'zh-CN':'预览','en-US':'Preview','ja-JP':'プレビュー'}[lang]||'Preview');
-                  title.style.cssText='font:16px "Times New Roman",serif;color:#706b62;margin-bottom:8px';
+                  title.style.cssText='font:var(--memo-size-body) var(--memo-font-ui);color:#706b62;margin-bottom:8px';
                   img.src='assets/illustrations/'+s.asset+'.svg';img.alt='';
                   img.style.cssText='display:block;width:200px;height:200px;object-fit:contain';
                   visual.dataset.consoleVisual='';visual.append(img);panel.append(title,visual);panel.dataset.currentAsset=s.asset;
