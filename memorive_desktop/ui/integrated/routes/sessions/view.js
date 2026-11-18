@@ -997,7 +997,7 @@
           showToast(receipt?.deduplicated
             ? '该会话已有活动精炼任务，未重复创建。'
             : '已加入队列');
-          root.querySelector('.desktop-nav-item[data-page="收件箱"]')?.click();
+          root.querySelector('.desktop-nav-item[data-route="inbox"]')?.click();
         } else if (['TASK_SUCCEEDED', 'TASK_FAILED', 'TASK_CANCELLED'].includes(receipt?.status)) {
           activeRefinementJobId = receipt.job_id || 'terminal';
           button.disabled = true;
@@ -1049,10 +1049,12 @@
   });
   q('#sessions-toast button').addEventListener('click', () => hideToast({ animate:true }));
   qa('.desktop-nav-item').forEach((item) => item.addEventListener('click', () => {
-    if (item.dataset.page !== '会话管理') closeDetail({ immediate:true });
+    if (item.dataset.route !== 'sessions') closeDetail({ immediate:true });
   }, true));
   const globalRight = q('#desktop-toggle-right');
   globalRight.disabled = true;
+  // This page shows details in the middle, so the shared button gets its own label instead of the frame's.
+  window.__Desktop_I18N__.set(globalRight, null, null, 'aria-label');
   globalRight.setAttribute('aria-label', '本页完整详情使用中央宽阅读区');
   root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !q('#sessions-searchbox').hidden) {

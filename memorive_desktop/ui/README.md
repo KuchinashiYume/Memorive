@@ -36,7 +36,7 @@ Every source file starts with a comment that says what it is for and who uses it
 
 1. Add `routes/<route>/markup.html`. Copy the section of a route that looks like yours: `<section class="desktop-route-surface" data-desktop-route="<route>" hidden>` around the route's root `<div id="desktop-<component>-preview" class="desktop-page-root">`, which includes the frame parts from `shared/frame/`.
 2. Add the include line for the markup to `page.html`, after the other route sections, and the include lines for its scripts where they belong in the order of scripts.
-3. Add the route to `routes` at the top of `shared/app.js` (its key, its label and its component, the folder name), a button to `shared/frame/navigation.html` whose `data-page` is the label, and the component with its right-panel size rule (one of `RIGHT_PANEL_RULES`) to `ROUTES` in `shared/window-frame.js`.
+3. Add the route to `routes` at the top of `shared/app.js` (its key and its component, the folder name), its names to `shared/frame/messages.js` (`frame.nav.<route>` on the button, `frame.route.<route>` in the top bar and the window title), a button to `shared/frame/navigation.html` whose `data-route` is the route's key, and the component with its right-panel size rule (one of `RIGHT_PANEL_RULES`) to `ROUTES` in `shared/window-frame.js`.
 4. If the route reads data, give it a `bridge.js` that calls the desktop service (below) and publishes `window.__Desktop_<ROUTE>_BRIDGE__` with at least `refresh()` and `inspect()`.
 
 `shared/window-frame.js` publishes each route's frame as `window.DesktopPreview_<component>` (panels, resizers, shortcuts, tooltips); route scripts find their root and panels through it.
@@ -68,9 +68,24 @@ Compare a new dialog with an existing one in the running window (fonts, sizes, c
 
 ### Text and translations
 
-Write the page's text in Chinese, in the markup or in the script. When the language is English or Japanese, `shared/app.js` translates every text node and the `title`, `aria-label`, `aria-description`, `placeholder` and `data-desktop-tip` attributes, except inside `[data-desktop-no-translate]` and user content such as messages and answers:
+The page shows its text in Chinese, English or Japanese. Text gets there in one of two ways; give new text a key.
 
-- `translations` in `shared/app.js` maps each Chinese text to its English and Japanese text. Add a line for every new text.
+**Messages with a key.** The window frame uses them: the navigation, the top bar, the bottom accounting panel, the window buttons and the close dialog. `shared/i18n.js` (`window.__Desktop_I18N__`) holds every message in the three languages, one row per key, in the order zh-CN, en-US, ja-JP:
+
+```js
+'accounting.sync.synced': ['已同步 · {time}', 'Synced · {time}', '同期済み · {time}'],
+```
+
+- The frame's messages are in `shared/frame/messages.js`. A route that moves to keys gets its own `routes/<route>/messages.js`, included in `page.html` after `shared/frame/messages.js`. Keys start with the part they belong to (`frame.`, `window.`, `accounting.`, the route's name).
+- In markup, `data-i18n="key"` sets the element's text, and `data-i18n-aria-label`, `data-i18n-aria-description`, `data-i18n-aria-valuetext`, `data-i18n-title`, `data-i18n-tip` (for `data-desktop-tip`), `data-i18n-placeholder` and `data-i18n-label` set an attribute. Keep the Chinese text in the markup as well: `<span data-i18n="frame.nav.inbox">收件箱</span>`.
+- In a script, `__Desktop_I18N__.set(element, key, values, attribute)` writes the same attributes, so the text changes with the language. `__Desktop_I18N__.text(key, values)` returns the text for something shown once, such as a tooltip or a screen-reader announcement.
+- Values are named: `{ time: '12:30' }`. A value `{ key, values }` is a message itself and follows the language too, as the route name in `'Memorive {route}'` does.
+- A keyed text or attribute belongs to its key, so no other script should write it. To take it over, call `set(element, null, null, attribute)` first (`routes/sessions/view.js` does that for the right panel button).
+- `shared/app.js` shows every keyed element again when the language changes and when an element is added to the page.
+
+**Translation by the Chinese wording.** The routes still work this way. When the language is English or Japanese, `shared/app.js` translates every text node and the `title`, `aria-label`, `aria-description`, `placeholder` and `data-desktop-tip` attributes that have no key, except inside `[data-desktop-no-translate]` and user content such as messages and answers:
+
+- `translations` in `shared/app.js` maps each Chinese text to its English and Japanese text.
 - Text that contains a number or a name is matched by a pattern in `translated()` in the same file.
 - Text that a script sets later is translated as it appears; a script that needs the translated string itself calls `window.__Desktop_INTEGRATED_APP__.translate(text)`.
 
@@ -187,4 +202,4 @@ To see what a change does to the page itself, run the page check before and afte
 
 - Keep the window frame in `shared/frame/` and `shared/window-frame.js`; a route only adds what is its own.
 - Name a global that other scripts or Python use `window.__Desktop_<NAME>__` and freeze it (`Object.freeze`). Mention it in the file's header comment.
-- Comments are in English. Text shown to the user is in Chinese in the source and translated as above.
+- Comments are in English. Text shown to the user is written in Chinese in the source; new text gets a key (see "Text and translations").

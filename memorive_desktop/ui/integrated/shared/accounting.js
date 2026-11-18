@@ -1,8 +1,9 @@
 /* The bottom accounting panel of every route: cost, requests and tokens by model and period, with its chart
-   (asked from the desktop service). Publishes window.__Desktop_ACCOUNTING_PANEL__. */
+   (asked from the desktop service). Its texts are the accounting.* messages in shared/frame/messages.js.
+   Publishes window.__Desktop_ACCOUNTING_PANEL__. */
 (() => {
   'use strict';
-  const t = text => window.__Desktop_INTEGRATED_APP__?.translate?.(text) || text;
+  const i18n = window.__Desktop_I18N__;
   if (window.__Desktop_ACCOUNTING_PANEL__) return;
   const initialize = (panel) => {
   if (!panel || panel.dataset.accountingInitialized === 'true') return null;
@@ -33,9 +34,7 @@
   const legendButton = document.createElement('button');
   legendButton.type = 'button';
   legendButton.className = 'desktop-accounting-legend-button icon-button';
-  legendButton.setAttribute('aria-label', '查看图例');
-  legendButton.setAttribute('title', '查看图例');
-  legendButton.dataset.desktopTip = '查看图例';
+  ['aria-label', 'title', 'tip'].forEach((attribute) => i18n.set(legendButton, 'accounting.legend.show', null, attribute));
   legendButton.setAttribute('aria-expanded', 'false');
   const legendIcon = svgNode('svg', {viewBox:'0 0 24 24', 'aria-hidden':'true'});
   legendIcon.append(svgNode('use', {href:'#desktop-icon-models'}));
@@ -44,7 +43,7 @@
   legendWrap.append(legendButton, legend);
   legend.hidden = true;
   legend.setAttribute('role','region');
-  legend.setAttribute('aria-label','模型图例');
+  i18n.set(legend, 'accounting.legend', null, 'aria-label');
   const closeLegend = () => {
     legend.hidden = true;
     legendButton.setAttribute('aria-expanded','false');
@@ -58,13 +57,21 @@
     closeLegend();
     legendButton.focus();
   } });
+  // One span per line; each line is [message key, values].
   const detailLines = (target, lines) => {
-    target.replaceChildren(...lines.map(text => {
+    i18n.set(target, null);
+    target.replaceChildren(...lines.map(([key, values]) => {
       const n=document.createElement('span');
-      n.textContent=text;
+      i18n.set(n, key, values);
       return n;
     }));
   };
+  // Text that is data, not a message: a number, a currency code.
+  const plain = (target, value) => {
+    i18n.set(target, null);
+    target.textContent = value;
+  };
+  const kind = (code) => code === 'LOCAL' ? { key: 'accounting.local' } : code || '';
 
   const plot = one('#desktop-accounting-plot');
   const svg = one('#desktop-accounting-svg');
@@ -76,10 +83,11 @@
   const initial = window.MEMORIVE_ACCOUNTING_REFERENCE_INITIAL || {};
   const currencies = ['USD', 'CNY', 'JPY'];
   const currencyLabel = (code) => code === 'CNY' ? 'RMB' : code;
+  // The chart title of each metric is accounting.chart.<metric>.
   const metricMeta = Object.freeze({
-    COST: { title: '每日费用', icon: '#desktop-icon-cost', color: '#C8704F' },
-    REQUESTS: { title: '每日请求次数', icon: '#desktop-icon-requests', color: '#557C9E', unit: '次' },
-    TOKENS: { title: '每日 Token 用量', icon: '#desktop-icon-tokens', color: '#4E7E65', unit: 'Tokens' },
+    COST: { icon: '#desktop-icon-cost', color: '#C8704F' },
+    REQUESTS: { icon: '#desktop-icon-requests', color: '#557C9E' },
+    TOKENS: { icon: '#desktop-icon-tokens', color: '#4E7E65' },
   });
   let selectedMetric = metricMeta[initial.metric] ? initial.metric : 'COST';
   let preferredCurrency = currencies.includes(initial.currency) ? initial.currency : 'USD';
@@ -146,20 +154,17 @@
     const fragment = document.createDocumentFragment();
     const all = document.createElement('option');
     all.value = 'ALL';
-    all.textContent = `全部模型 · ${rows.length}`;
-    all.dataset.memoLabel=all.textContent;
+    i18n.set(all, 'accounting.model.all-count', { count: rows.length });
     fragment.append(all);
-    const labels = { API: 'API 模式', CLI: 'CLI 模式', LOCAL: '本地模型' };
-    for (const kind of ['API', 'CLI', 'LOCAL']) {
-      const groupRows = rows.filter((row) => row.profile_kind === kind);
+    for (const code of ['API', 'CLI', 'LOCAL']) {
+      const groupRows = rows.filter((row) => row.profile_kind === code);
       if (!groupRows.length) continue;
       const group = document.createElement('optgroup');
-      group.label = labels[kind];
+      i18n.set(group, `accounting.kind.${code}`, null, 'label');
       groupRows.forEach((row) => {
         const option = document.createElement('option');
         option.value = row.profile_ref;
-        option.textContent = `${kind === 'LOCAL' ? '本地' : kind} · ${row.provider_label} · ${row.model_label}`;
-        option.dataset.memoLabel=option.textContent;
+        i18n.set(option, 'accounting.model.option', { kind: kind(row.profile_kind), provider: row.provider_label, model: row.model_label });
         group.append(option);
       });
       fragment.append(group);
@@ -173,7 +178,7 @@
     const capability = projection?.scope_capabilities?.current_job;
     const ready = capability?.status === 'READY';
     option.disabled = !ready;
-    option.textContent = ready ? '本任务' : '本任务（归属未完整）';
+    i18n.set(option, ready ? 'accounting.scope.job' : 'accounting.scope.job-partial');
     if (!ready && scope.value === 'CURRENT_JOB') scope.value = 'ALL';
   };
 
@@ -183,24 +188,23 @@
     const usable = ['NATIVE', 'AVAILABLE', 'CACHED'].includes(display.conversion_status) && display.assessable_cost !== null;
     one('#desktop-accounting-cost').textContent = usable ? amount(display.assessable_cost, currency) : '—';
     detailLines(one('#desktop-accounting-cost-note'), usable
-      ? [`实际 ${amount(display.actual_cost, currency)}`, `估算 ${amount(display.estimated_cost, currency)}`]
-      : [t(display.conversion_status==='NOT_ASSESSED' ? '费用未报告' : '暂无可用汇率，原币种费用已保留')]);
+      ? [['accounting.cost.actual', { amount: amount(display.actual_cost, currency) }], ['accounting.cost.estimated', { amount: amount(display.estimated_cost, currency) }]]
+      : [[display.conversion_status==='NOT_ASSESSED' ? 'accounting.cost.not-reported' : 'accounting.cost.no-rate']]);
     if (projection?.attempt_count === 0) {
       one('#desktop-accounting-cost').textContent = '—';
-      one('#desktop-accounting-cost-note').textContent = '当前范围暂无记录';
+      i18n.set(one('#desktop-accounting-cost-note'), 'accounting.cost.no-records');
     }
     one('#desktop-accounting-attempts').textContent = integer(projection?.attempt_count);
-    detailLines(one('#desktop-accounting-attempt-note'), [`失败 ${integer(projection?.failed_attempt_count)} 次`, `未计价 ${integer(projection?.unpriced_attempt_count)} 次`]);
+    detailLines(one('#desktop-accounting-attempt-note'), [['accounting.requests.failed', { count: integer(projection?.failed_attempt_count) }], ['accounting.requests.unpriced', { count: integer(projection?.unpriced_attempt_count) }]]);
     const usage = projection?.tokens || {};
     one('#desktop-accounting-tokens').textContent = compact(numeric(usage.input) + numeric(usage.output));
-    detailLines(one('#desktop-accounting-token-note'), [`${projection?.source_summary?.reason_codes?.includes('TOKEN_USAGE_PARTIAL')?'已报告 · ':''}输入 ${compact(usage.input)}`, `输出 ${compact(usage.output)}`]);
+    const inputKey = projection?.source_summary?.reason_codes?.includes('TOKEN_USAGE_PARTIAL') ? 'accounting.tokens.input-partial' : 'accounting.tokens.input';
+    detailLines(one('#desktop-accounting-token-note'), [[inputKey, { count: compact(usage.input) }], ['accounting.tokens.output', { count: compact(usage.output) }]]);
     preferredCurrency = currency;
     currencyCode.textContent = currencyLabel(currency);
     const next = currencies[(currencies.indexOf(currency) + 1) % currencies.length];
-    currencyButton.setAttribute('aria-label', `当前 ${currencyLabel(currency)}，点击切换为 ${currencyLabel(next)}`);
-    sync.textContent = projection?.refresh?.status === 'REFRESHED'
-      ? `已刷新 · ${timestamp(projection.generated_at)}`
-      : `已同步 · ${timestamp(projection?.generated_at)}`;
+    i18n.set(currencyButton, 'accounting.currency', { current: currencyLabel(currency), next: currencyLabel(next) }, 'aria-label');
+    i18n.set(sync, projection?.refresh?.status === 'REFRESHED' ? 'accounting.sync.refreshed' : 'accounting.sync.synced', { time: timestamp(projection?.generated_at) });
   };
 
   const measureValue = (measure, metric) => {
@@ -208,15 +212,14 @@
     if (metric === 'REQUESTS') return numeric(measure.request_count);
     return numeric(measure.tokens_input) + numeric(measure.tokens_output);
   };
-  const formatMeasure = (value, metric) => metric === 'COST'
-    ? amount(value, projection.display_currency)
-    : metric === 'REQUESTS' ? `${integer(value)} 次` : `${integer(value)} Tokens`;
+  // One model's value on one day, for the chart tooltip.
   const measureDetail = (measure, metric) => {
-    if (metric !== 'COST') return formatMeasure(measureValue(measure, metric), metric);
-    if (numeric(measure.unpriced_attempt_count) > 0 && measureValue(measure, metric) === 0) return `未计价 ${integer(measure.unpriced_attempt_count)} 次`;
+    if (metric !== 'COST') return i18n.text(`accounting.measure.${metric}`, { count: integer(measureValue(measure, metric)) });
+    if (numeric(measure.unpriced_attempt_count) > 0 && measureValue(measure, metric) === 0) return i18n.text('accounting.requests.unpriced', { count: integer(measure.unpriced_attempt_count) });
     const actual = numeric(measure.display_actual_cost);
     const estimated = numeric(measure.display_estimated_cost);
-    return `${amount(actual + estimated, projection.display_currency)}（实际 ${amount(actual, projection.display_currency)} · 估算 ${amount(estimated, projection.display_currency)}）`;
+    const money = (value) => amount(value, projection.display_currency);
+    return i18n.text('accounting.measure.cost', { total: money(actual + estimated), actual: money(actual), estimated: money(estimated) });
   };
   const niceCeiling = (value, metric) => {
     if (value <= 0) return 1;
@@ -237,7 +240,7 @@
       swatch.className = 'desktop-accounting-legend-swatch';
       swatch.style.background = row.color;
       const label = document.createElement('span');
-      label.textContent = `${row.profile_kind === 'LOCAL' ? '本地' : row.profile_kind} · ${row.model_label}`;
+      i18n.set(label, 'accounting.model.short', { kind: kind(row.profile_kind), model: row.model_label });
       item.append(swatch, label);
       legend.append(item);
     });
@@ -246,14 +249,14 @@
   const renderChart = () => {
     if (!projection) return;
     const meta = metricMeta[selectedMetric];
-    const unit = selectedMetric === 'COST' ? currencyLabel(projection.display_currency) : meta.unit;
     panel.dataset.metric = selectedMetric;
-    chartTitle.textContent = meta.title;
-    chartUnit.textContent = unit;
+    i18n.set(chartTitle, `accounting.chart.${selectedMetric}`);
+    if (selectedMetric === 'REQUESTS') i18n.set(chartUnit, 'accounting.unit.REQUESTS');
+    else plain(chartUnit, selectedMetric === 'COST' ? currencyLabel(projection.display_currency) : 'Tokens');
     chartIcon.setAttribute('href', meta.icon);
     chart.setAttribute('aria-labelledby', `desktop-accounting-tab-${selectedMetric.toLowerCase()}`);
-    svgTitle.textContent = `${range.options[range.selectedIndex].text}${meta.title}`;
-    svgDesc.textContent = `横轴从 ${shortDate(projection.range.start_date)} 到 ${shortDate(projection.range.end_date)}，按模型配置堆叠显示。`;
+    i18n.set(svgTitle, 'accounting.chart.label', { range: { key: range.selectedOptions[0].dataset.i18n }, metric: { key: `accounting.chart.${selectedMetric}` } });
+    i18n.set(svgDesc, 'accounting.chart.axis', { start: shortDate(projection.range.start_date), end: shortDate(projection.range.end_date) });
     renderLegend();
     const rows = normalizedSeries();
     const map = modelMap();
@@ -295,9 +298,10 @@
       hit.addEventListener('pointermove', (event) => {
         const lines = safeArray(row.measures).filter((measure) => measureValue(measure, selectedMetric) > 0 || (selectedMetric === 'COST' && numeric(measure.unpriced_attempt_count) > 0)).map((measure) => {
           const info = map.get(measure.profile_ref) || {};
-          return `${info.profile_kind === 'LOCAL' ? '本地' : info.profile_kind || ''} · ${info.model_label || measure.profile_ref}: ${measureDetail(measure, selectedMetric)}`;
+          const name = i18n.text('accounting.model.short', { kind: kind(info.profile_kind), model: info.model_label || measure.profile_ref });
+          return `${name}: ${measureDetail(measure, selectedMetric)}`;
         });
-        tooltip.textContent = `${row.bucket}\n${lines.length ? lines.join('\n') : '无数据'}`;
+        tooltip.textContent = `${row.bucket}\n${lines.length ? lines.join('\n') : i18n.text('accounting.tooltip.none')}`;
         tooltip.hidden = false;
         const bounds = plot.getBoundingClientRect();
         tooltip.style.left = `${Math.min(Math.max(4, event.clientX - bounds.left + 10), Math.max(4, bounds.width - tooltip.offsetWidth - 4))}px`;
@@ -316,7 +320,8 @@
       svg.append(label);
     });
     const hasUnpriced = selectedMetric === 'COST' && numeric(projection?.unpriced_attempt_count) > 0;
-    empty.textContent = hasUnpriced ? `当前范围有 ${integer(projection.unpriced_attempt_count)} 次未计价调用` : '当前范围没有可显示数据';
+    if (hasUnpriced) i18n.set(empty, 'accounting.chart.unpriced', { count: integer(projection.unpriced_attempt_count) });
+    else i18n.set(empty, 'accounting.chart.empty');
     empty.hidden = totals.some((value) => value > 0) || hasUnpriced;
   };
 
@@ -336,7 +341,7 @@
     const finishLoading = window.DesktopDecorations?.beginLoading(plot) || (()=>{});
     refreshButton.disabled = true;
     refreshButton.setAttribute('aria-busy', 'true');
-    sync.textContent = manual ? '正在刷新…' : '正在同步…';
+    i18n.set(sync, manual ? 'accounting.sync.refreshing' : 'accounting.sync.syncing');
     try {
       if (!currencyInitialized) {
         const context = await call('models.get_commerce_context_v1', {});
@@ -359,7 +364,7 @@
       return next;
     } catch (error) {
       finishLoading(true);
-      if (serial === requestSerial) sync.textContent = `刷新失败 · ${error?.message || 'UNKNOWN'}`;
+      if (serial === requestSerial) i18n.set(sync, 'accounting.sync.failed', { error: error?.message || 'UNKNOWN' });
       return null;
     } finally {
       finishLoading(false);

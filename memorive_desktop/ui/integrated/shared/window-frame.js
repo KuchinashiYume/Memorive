@@ -8,6 +8,7 @@
    on the inbox. shared/app.js and the route scripts use these objects. */
 (() => {
   'use strict';
+  const i18n = window.__Desktop_I18N__;
 
   const BOTTOM_DEFAULT = 346;
 
@@ -191,7 +192,7 @@
       resizer.setAttribute('aria-valuemin', String(Math.round(limits.min)));
       resizer.setAttribute('aria-valuemax', String(Math.round(limits.max)));
       resizer.setAttribute('aria-valuenow', String(rounded));
-      resizer.setAttribute('aria-valuetext', `${rounded} 像素`);
+      i18n.set(resizer, 'frame.pixels', { size: rounded }, 'aria-valuetext');
     };
 
     // Set a panel's size within its limits. how: 'fit', 'drag', 'drop' or 'key' (see RIGHT_PANEL_RULES).
@@ -205,7 +206,7 @@
       else if (rule.remembersBottom) rule.resized(frame, next, how, 'bottom');
       updateResizerAria(resizer, limits, next);
       if (announce) {
-        liveState.textContent = `${panel === 'right' ? '右侧面板宽度' : '底部面板高度'} ${Math.round(next)} 像素`;
+        liveState.textContent = i18n.text(panel === 'right' ? 'frame.panel.width' : 'frame.panel.height', { size: Math.round(next) });
       }
       return next;
     };
@@ -225,7 +226,7 @@
       else updateResizerAria(bottomResizer, bottomLimits, clampNumber(bottomSize, bottomLimits.min, bottomLimits.max));
     };
 
-    const setPanel = (panel, value, button, panelElement, label, options = {}) => {
+    const setPanel = (panel, value, button, panelElement, options = {}) => {
       if (value && panel === 'right') {
         const asked = rule.opening(frame, options);
         setPanelSize('right', asked === undefined ? fitSize('right') : asked);
@@ -236,25 +237,25 @@
       if (panelElement) panelElement.setAttribute('aria-hidden', String(!value));
       if (panel === 'right') rightResizer.hidden = !value;
       if (panel === 'bottom') bottomResizer.hidden = !value;
-      liveState.textContent = `${label}${value ? '已打开' : '已关闭'}`;
+      liveState.textContent = i18n.text(value ? 'frame.panel.opened' : 'frame.panel.closed', { panel: { key: `frame.panel.${panel}` } });
       if (!(rule.noRefitOnOpen && value && panel === 'right')) window.requestAnimationFrame(updateResizerBounds);
     };
 
     const toggleLeft = () => {
       const next = app.dataset.left !== 'true';
-      setPanel('left', next, leftButton, null, '左侧导航栏');
+      setPanel('left', next, leftButton, null);
       if (!next && navigation.contains(document.activeElement)) leftButton.focus();
     };
 
     const toggleRight = () => {
       const next = app.dataset.right !== 'true';
-      setPanel('right', next, rightButton, rightPanel, '右侧面板');
+      setPanel('right', next, rightButton, rightPanel);
       if (!next && (rightPanel.contains(document.activeElement) || document.activeElement === rightResizer)) rightButton.focus();
     };
 
     const toggleBottom = () => {
       const next = app.dataset.bottom !== 'true';
-      setPanel('bottom', next, bottomButton, bottomPanel, '底部面板');
+      setPanel('bottom', next, bottomButton, bottomPanel);
       if (!next && (bottomPanel.contains(document.activeElement) || document.activeElement === bottomResizer)) bottomButton.focus();
     };
 
@@ -444,9 +445,9 @@
     const shell = {
       app,
       root,
-      setInspector: (open, options = {}) => setPanel('right', Boolean(open), rightButton, rightPanel, '右侧面板', options),
-      setSidebar: (open) => setPanel('left', Boolean(open), leftButton, null, '左侧导航栏'),
-      setBottom: (open) => setPanel('bottom', Boolean(open), bottomButton, bottomPanel, '底部面板'),
+      setInspector: (open, options = {}) => setPanel('right', Boolean(open), rightButton, rightPanel, options),
+      setSidebar: (open) => setPanel('left', Boolean(open), leftButton, null),
+      setBottom: (open) => setPanel('bottom', Boolean(open), bottomButton, bottomPanel),
     };
     if (rule.reset) shell.resetInspectorRatio = () => rule.reset(frame);
     window[`DesktopPreview_${component}`] = shell;

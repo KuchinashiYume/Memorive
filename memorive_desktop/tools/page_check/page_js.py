@@ -65,7 +65,7 @@ HELPERS = r"""
     const tag = el.tagName.toLowerCase();
     const id = el.id ? '#' + el.id : '';
     const cls = typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/).sort().join('.') : '';
-    const key = el.getAttribute('data-category') || el.getAttribute('data-page') || el.getAttribute('data-action') || '';
+    const key = el.getAttribute('data-category') || el.getAttribute('data-route') || el.getAttribute('data-action') || '';
     const text = ownText(el).slice(0, 32);
     return tag + id + cls + (key ? '[' + key + ']' : '') + (text ? ' "' + text + '"' : '');
   };

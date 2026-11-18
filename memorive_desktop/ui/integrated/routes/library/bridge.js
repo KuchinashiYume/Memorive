@@ -142,10 +142,7 @@
     if (window.__Desktop_INTEGRATED_APP__?.activate) {
       window.__Desktop_INTEGRATED_APP__?.activate(route);
     } else {
-      const page = {
-        'current-task':'当前任务', sessions:'会话管理'
-      }[route];
-      if (page) root?.querySelector(`.desktop-nav-item[data-page="${page}"]`)?.click();
+      root?.querySelector(`.desktop-nav-item[data-route="${route}"]`)?.click();
     }
     void window.__Desktop_PRODUCT_BRIDGE__?.dispatch(
       'navigation.select', { route }, source

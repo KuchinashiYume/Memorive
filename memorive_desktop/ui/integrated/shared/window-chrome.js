@@ -4,22 +4,10 @@
   'use strict';
   if (window.__Desktop_WINDOW_CHROME__) return;
   const api=()=>window.pywebview?.api;
-  const copy={
-    'zh':{title:'关闭窗口',cancel:'返回',exit:'退出',discard:'放弃并退出',tray:'最小化到托盘',x:'取消关闭',
-      min:'最小化',max:'最大化',restore:'还原',close:'关闭窗口',busy:'正在保存，请稍候。',loading:'正在检查…',
-      unavailable:'暂时无法确认窗口状态。',retry:'重试',dirty:'有未保存的修改，退出将丢弃。',
-      running:'{n} 个任务运行中，退出将中断。',background:'后台运行已关闭。'},
-    'en':{title:'Close window',cancel:'Back',exit:'Exit',discard:'Discard and exit',tray:'Minimize to tray',x:'Cancel closing',
-      min:'Minimize',max:'Maximize',restore:'Restore',close:'Close window',busy:'Saving. Please wait.',loading:'Checking…',
-      unavailable:'Window status is unavailable.',retry:'Retry',dirty:'Unsaved changes will be discarded.',
-      running:'{n} running task(s) will be interrupted.',background:'Background tasks are disabled.'},
-    'ja':{title:'ウィンドウを閉じる',cancel:'戻る',exit:'終了',discard:'破棄して終了',tray:'トレイに最小化',x:'閉じる操作を取り消す',
-      min:'最小化',max:'最大化',restore:'元に戻す',close:'ウィンドウを閉じる',busy:'保存中です。お待ちください。',loading:'確認中…',
-      unavailable:'ウィンドウの状態を確認できません。',retry:'再試行',dirty:'未保存の変更は破棄されます。',
-      running:'実行中のタスク {n} 件が中断されます。',background:'バックグラウンド実行は無効です。'}
-  };
+  // The texts are the window.* messages in shared/frame/messages.js.
+  const WORDS=['title','cancel','exit','discard','tray','x','min','max','restore','close','busy','loading','unavailable','retry','dirty','running','background'];
   let nativeState=null,dialog=null,view=null,phase='idle',sequence=0,returnFocus=null,geometryFrame=0;
-  const words=()=>copy[(document.documentElement.lang||'zh').split('-')[0]]||copy.zh;
+  const words=()=>Object.fromEntries(WORDS.map(word=>[word,window.__Desktop_I18N__.text(`window.${word}`)]));
   const edit=()=>window.__Desktop_SETTINGS_BRIDGE__?.getEditState?.()||{ready:false,dirty:false,saving:false};
   function node(tag,cls,text) {
     const e=document.createElement(tag);

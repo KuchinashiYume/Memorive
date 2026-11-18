@@ -918,7 +918,7 @@
       } else if (target.id === 'inbox-open-session') {
         if (!selectedRefinementProjectionId) throw new Error('精炼任务缺少来源会话身份');
         window.__Desktop_SESSION_NAV_TARGET__ = selectedRefinementProjectionId;
-        root.querySelector('.desktop-nav-item[data-page="会话管理"]')?.click();
+        root.querySelector('.desktop-nav-item[data-route="sessions"]')?.click();
         window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('desktop:open-session', {
           detail:{ local_projection_id:selectedRefinementProjectionId }
         })));
