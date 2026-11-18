@@ -1201,8 +1201,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "f133499178fa4e0038e8b5fbc484bf22d1e85146258726157ec2be256e426af0",
-      "bytes": 2529399
+      "sha256": "f3a3ffd52b196ff326ba373b6e3faeb26d6bef60be914435aa0665fb1c775ed9",
+      "bytes": 2529552
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4076,12 +4076,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "2d385145ad2d300d59210769b8b90a549c7fc3d525959b6f166ed2faa6e2b37f",
+      "sha256": "553ccf27f78faab894ab72223afbf334f323d69145abdd3c2c1cde44806bcabd",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "1884e835bb687764bbbddcd44bfcbe10b875d34baee0dc563a9dda0a4418f0ac",
+      "sha256": "e6d14d49c41bc7f11dcdcd5c9965786b827ed871189e4bf8b4ce92885c57525d",
       "bytes": 276403
     },
     {
@@ -4676,8 +4676,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.css",
-      "sha256": "887125477925ae1e82bbc364efc1063a5a03ebf6f6d5928c14964f00e8585947",
-      "bytes": 71430
+      "sha256": "17718b2f2828128fcb974a0e13d55e3edbef9a9003b3b49b200cbb0ead24f446",
+      "bytes": 71583
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.js",
