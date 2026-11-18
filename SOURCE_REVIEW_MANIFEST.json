@@ -4081,8 +4081,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "ae76d119f9cf17868f3d54b2a4fd626ebb19532c25881de6d562e1b6f1689403",
-      "bytes": 276403
+      "sha256": "3db7e5c552786f881cd22131e6487557fa245311bc67f7875835e6f8f2d8642a",
+      "bytes": 276404
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -5601,8 +5601,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/language/handoff.py",
-      "sha256": "7cb4a89a7f262faec166efed3059a885228025b0e40c7210795250159da09a1a",
-      "bytes": 7693
+      "sha256": "41a834c4e732610965791429986783343bbafa6911a7c3d20a10fbfa7929e6b6",
+      "bytes": 10741
     },
     {
       "path": "memorive_desktop/source/memorive/platform/language/messages.py",
@@ -8851,8 +8851,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/agents.py",
-      "sha256": "86e1a1c58479b7c17e4500a2ac083b1b0fbfc4b137ee3faaf2d145f283210fe7",
-      "bytes": 11901
+      "sha256": "91e121e179e430fd286a9f0dc17a22b9684749a743dac85356a48a27d9c5e4e0",
+      "bytes": 12701
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/answer_conversation.py",
@@ -9986,8 +9986,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/research_memo.py",
-      "sha256": "a0c03847b86c5591d4b12ae0ce21c34641be03c0f3396c8dfebc314ebea836e2",
-      "bytes": 6498
+      "sha256": "8b1f14337c20af359322f475512b62fbb8b07b560c403e3e859ea2c2aa8acf65",
+      "bytes": 6915
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/service_process.py",

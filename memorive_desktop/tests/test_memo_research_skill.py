@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from memorive.research.workspace.service import ResearchWorkspace
+from memorive.research.workspace.service import ResearchWorkspace, desktop_handoff
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "integrations" / "skills" / "memo-research" / "scripts"
 BRIDGE = SCRIPTS / "memo_bridge.py"
@@ -130,6 +130,67 @@ def test_every_problem_of_a_draft_is_reported_and_nothing_is_saved(handoff):
     assert "E9 has not been read" in run.stderr
     assert "a citation mark is not in the form" in run.stderr
     assert not (folder / "memo-answer.json").exists()
+
+
+# A desktop agent app: the hand-off folder carries the Skill
+
+SKILL = SCRIPTS.parent
+
+
+def shipped_files(folder):
+    return {p.relative_to(folder).as_posix(): p.read_bytes() for p in folder.rglob("*")
+            if p.is_file() and "__pycache__" not in p.parts}
+
+
+@pytest.fixture
+def desktop(handoff, tmp_path):
+    ws, thread_id, _ = handoff
+    settings = ws.settings()
+    ws.settings_save({"agent": "claude-desktop", "desktop_agents": {"claude-desktop": {"model": "opus"}}},
+                     settings["revision"])
+    return ws, thread_id, desktop_handoff(ws, thread_id, QUESTION, tmp_path / "desktop", SKILL)
+
+
+def test_a_desktop_handoff_folder_carries_the_skill_where_both_agents_find_it(desktop):
+    ws, _, prepared = desktop
+    folder = Path(prepared["path"])
+    claude, codex = folder / ".claude" / "skills" / "memo-research", folder / ".agents" / "skills" / "memo-research"
+    assert shipped_files(claude) == shipped_files(codex) == shipped_files(SKILL)
+    # The prompt the user pastes names the Skill; START_HERE.md says where both copies are.
+    assert str(claude / "SKILL.md") in prepared["prompt"]
+    start = (folder / "START_HERE.md").read_text(encoding="utf-8")
+    assert ".claude/skills/memo-research" in start and ".agents/skills/memo-research" in start
+    # The copies are bound like every other file of the folder.
+    row = ws.store.get("desktop_handoff", prepared["id"])
+    assert {".claude/skills/memo-research/SKILL.md", ".agents/skills/memo-research/scripts/memo_bridge.py"} <= set(row["files"])
+    assert ws.handoffs.validate_desktop(row)["status"] == "READY"
+    (codex / "scripts" / "memo_bridge.py").write_text("print('changed')\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="HANDOFF_CHANGED"):
+        ws.handoffs.validate_desktop(row)
+
+
+def test_an_agent_returns_its_answer_with_the_skill_copy_in_the_folder(desktop):
+    ws, thread_id, prepared = desktop
+    folder = Path(prepared["path"])
+    copy = folder / ".claude" / "skills" / "memo-research" / "scripts" / "memo_bridge.py"
+
+    def run(*args):
+        done = subprocess.run([sys.executable, str(copy), *map(str, args)], cwd=folder,
+                              capture_output=True, text=True, encoding="utf-8", timeout=180)
+        assert done.returncode == 0, done.stderr
+        return done.stdout
+
+    run("read", folder / "handoff.json")
+    e = alias(folder, "0.17 to 0.05")
+    path = draft(folder, f'Temperature scaling lowered the expected calibration error from 0.17 to 0.05 '
+                         f'[{e}: "reduced the expected calibration error from 0.17 to 0.05"].\n')
+    report = json.loads(run("answer", folder / "handoff.json", "--draft", path,
+                            "--gap", "The drift paper does not bear on this.", "--return"))
+    assert report["returned"]["status"] == "RETURNED" and report["returned"]["knowledge_admitted"] is False
+    reply = ws.thread_get(thread_id)["messages"][-1]
+    assert reply["engine"] == "memo-research-skill" and reply["agent_result"] is True
+    assert reply["text"] == "Temperature scaling lowered the expected calibration error from 0.17 to 0.05 [1]."
+    assert reply["skill_result"]["handoff_id"] == json.loads((folder / "handoff.json").read_text(encoding="utf-8"))["id"]
 
 
 # Without Memo: prepare, cite, and later bind to Memo

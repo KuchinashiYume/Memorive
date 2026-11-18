@@ -6,10 +6,12 @@ validate_agent_settings() checks these settings when they are saved; agent_match
 model profile belongs to the chosen agent.
 
 desktop_handoff() prepares a folder for a desktop agent app: the hand-off pack, copies of the
-sources with their text by excerpt, the conversation, and START_HERE.md. Nothing is sent and no model
-is called; the user opens the folder in the app.
+sources with their text by excerpt, the conversation, the memo-research Skill shipped with the app
+(so the agent reads and returns with the same version of the Skill), and START_HERE.md. Nothing is
+sent and no model is called; the user opens the folder in the app.
 """
 import re
+import shutil
 from pathlib import Path
 
 from memorive.platform.windows_paths import windows_io_path
@@ -22,6 +24,8 @@ DESKTOP_AGENTS = {'codex-desktop', 'claude-desktop'}
 # Adapters of the command-line agents; 'other' is any adapter that is none of these.
 CLI_ADAPTERS = {'codex': {'codex_cli'}, 'claude-code': {'claude_code', 'claude_code_cli'}}
 HISTORY_FILE_CHARS = 80000  # the conversation is split into files of about this size, between messages
+# Where the agents look for a project's skills: Claude Code in .claude/skills, Codex in .agents/skills.
+SKILL_FOLDERS = ('.claude/skills', '.agents/skills')
 
 
 def agent_matches(option, agent):
@@ -70,9 +74,10 @@ def validate_agent_settings(value):
             raise ValueError('AGENT_APP_PATH_INVALID')
 
 
-def desktop_handoff(workspace, thread_id, question, root):
+def desktop_handoff(workspace, thread_id, question, root, skill=None):
     """Prepare a folder under root for the chosen desktop agent app; returns its id, path and the
-    prompt to paste into the app."""
+    prompt to paste into the app. skill: the memo-research Skill folder shipped with the app, copied
+    into the folder where Claude Code and Codex find a project's skills (None: not included)."""
     from memorive.platform.language.handoff import desktop_intro, launch_prompt
     from memorive.research.workspace.skill_bridge import transport
     settings = workspace.settings()
@@ -114,9 +119,15 @@ def desktop_handoff(workspace, thread_id, question, root):
         f"## {a['title']}\nID: {a['id']}\nSHA256: {a['source_hash']}\nFiles: {', '.join(a['files'])}\nStatus: {a.get('issue', 'READY')}"
         for a in sources)
     (folder / 'sources.md').write_text(source_text, encoding='utf8')
+    skill_file = None
+    if skill is not None:
+        for place in SKILL_FOLDERS:
+            shutil.copytree(skill, folder / place / skill.name, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        skill_file = folder / SKILL_FOLDERS[0] / skill.name / 'SKILL.md'
     name = {'codex-desktop': 'Codex Desktop', 'claude-desktop': 'Claude Code Desktop'}.get(
         target, next((a['name'] for a in settings.get('custom_agents', []) if a['id'] == target), target))
-    (folder / 'START_HERE.md').write_text(desktop_intro(pack, name, model, history, sources, packed(warnings)), encoding='utf8')
+    (folder / 'START_HERE.md').write_text(desktop_intro(pack, name, model, history, sources, packed(warnings), skill_file),
+                                          encoding='utf8')
     files = {p.relative_to(folder).as_posix(): {'sha256': digest(p.read_bytes()), 'bytes': p.stat().st_size}
              for p in folder.rglob('*') if p.is_file()}
     receipt = {
@@ -132,7 +143,7 @@ def desktop_handoff(workspace, thread_id, question, root):
         workspace.handoffs.validate(pack, db)
         record = dict(receipt, path=str(folder), manifest_hash=digest((folder / 'manifest.json').read_bytes()))
         workspace.store.put('desktop_handoff', ident, thread['project'], record, db=db)
-    prompt = launch_prompt(pack, folder / 'START_HERE.md', model)
+    prompt = launch_prompt(pack, folder / 'START_HERE.md', model, skill_file)
     return {'status': 'PREPARED', 'id': ident, 'path': str(folder), 'prompt': prompt, 'message_count': len(messages),
             'source_count': len(sources), 'warnings': warnings, 'agent_name': name}
 
