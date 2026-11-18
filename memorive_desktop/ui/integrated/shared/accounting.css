@@ -1,13 +1,13 @@
 /* desktop-accounting-css-start */
 .desktop-accounting-panel {
-  --desktop-accounting-bg: #F0EDE6;
-  --desktop-accounting-surface: #FFFDF9;
-  --desktop-accounting-surface-strong: #FFFDF9;
-  --desktop-accounting-selected: #EFEAE0;
-  --desktop-accounting-text: #2A2723;
+  --desktop-accounting-bg: var(--desktop-surface-subtle);
+  --desktop-accounting-surface: var(--desktop-surface);
+  --desktop-accounting-surface-strong: var(--desktop-surface);
+  --desktop-accounting-selected: var(--desktop-surface-selected);
+  --desktop-accounting-text: var(--desktop-text-primary);
   --desktop-accounting-muted: #756D64;
-  --desktop-accounting-border: #DFD9CF;
-  --desktop-accounting-border-strong: #B6AEA3;
+  --desktop-accounting-border: var(--desktop-border-default);
+  --desktop-accounting-border-strong: var(--desktop-border-strong);
   --desktop-accounting-accent: #C8704F;
   --desktop-accounting-blue: #557C9E;
   --desktop-accounting-green: #4E7E65;
@@ -21,7 +21,7 @@
   background: var(--desktop-accounting-bg);
   border-top: 1px solid var(--desktop-accounting-border-strong);
   container: desktop-accounting / size;
-  font-family: "Times New Roman", "SimSun", "宋体", "Yu Mincho", serif;
+  font-family: var(--memo-font-body);
 }
 
 /* The drawer overlays the workspace; the inspector remains above it. */
@@ -29,6 +29,11 @@
   grid-template-rows:minmax(0,1fr) 0!important;
   padding-bottom:0!important;
   isolation:isolate;
+}
+/* The open panel sits below the page instead of over it: every route's content ends where the panel begins. */
+.desktop-page-root .desktop-central {
+  align-self:start;
+  height:max(0px,calc(100% - var(--desktop-live-bottom,0px)));
 }
 .desktop-page-root .desktop-bottom-panel.desktop-accounting-panel {
   position:absolute;left:var(--desktop-live-left);right:var(--desktop-live-right);bottom:0;
@@ -56,6 +61,7 @@
 
 .desktop-accounting-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
   min-width: 0;
@@ -71,16 +77,17 @@
   align-items: center;
   gap: 5px;
   min-width: 0;
-  height: 32px;
+  min-height: calc(40px * var(--desktop-scale));
   padding: 0 7px;
   border: 1px solid var(--desktop-accounting-border);
   border-radius: 9px;
   background: var(--desktop-accounting-surface);
 }
 .desktop-accounting-filter svg { color: var(--desktop-accounting-muted); }
-.desktop-accounting-filter select { min-width: 0; height: 28px; border: 0; outline: 0; background: transparent; }
-.desktop-accounting-scope-filter { width: 174px; }
-.desktop-accounting-model-filter { width: 244px; }
+.desktop-accounting-filter select { min-width: 0; min-height: calc(28px * var(--desktop-scale)); border: 0; outline: 0; background: transparent; }
+/* Filter widths follow the font size, like the text they hold. */
+.desktop-accounting-scope-filter { width: calc(174px * var(--desktop-scale)); }
+.desktop-accounting-model-filter { width: calc(244px * var(--desktop-scale)); }
 .desktop-accounting-icon-button {
   display: inline-flex;
   align-items: center;
@@ -116,7 +123,7 @@
 .desktop-accounting-metric-row {
   position: relative;
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-columns: calc(54px * var(--desktop-scale)) minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -148,7 +155,7 @@
 .desktop-accounting-metric-row[data-metric-row="TOKENS"] .desktop-accounting-metric-leading svg { color: var(--desktop-accounting-green); }
 .desktop-accounting-metric-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   align-items: center;
   gap: 1px 8px;
@@ -159,9 +166,10 @@
   background: transparent;
 }
 .desktop-accounting-metric-main:hover { background: rgba(42, 39, 35, .035); }
-.desktop-accounting-metric-label { grid-column: 1; color: var(--desktop-accounting-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.desktop-accounting-metric-value { grid-column: 1; font-size: 23px; line-height: 1.05; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.desktop-accounting-metric-note { grid-column: 2; grid-row: 1 / span 2; align-self: center; max-width: 116px; color: var(--desktop-accounting-muted); font-size: 11px; line-height: 1.35; text-align: right; }
+/* The label takes the whole first line; the value and its note share the second. */
+.desktop-accounting-metric-label { grid-column: 1 / -1; grid-row: 1; color: var(--desktop-accounting-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desktop-accounting-metric-value { grid-column: 1; grid-row: 2; font-size: 23px; line-height: 1.05; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.desktop-accounting-metric-note { grid-column: 2; grid-row: 2; align-self: center; color: var(--desktop-accounting-muted); font-size: 11px; line-height: 1.35; text-align: right; }
 
 .desktop-accounting-chart {
   display: grid;
@@ -194,22 +202,22 @@
 @keyframes desktop-accounting-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .desktop-accounting-icon-button[aria-busy="true"] svg { animation: none; } }
 @container desktop-accounting (max-width: 920px) {
-  .desktop-accounting-metric-row { grid-template-columns: 44px minmax(0, 1fr); }
+  .desktop-accounting-metric-row { grid-template-columns: calc(44px * var(--desktop-scale)) minmax(0, 1fr); }
   .desktop-accounting-metric-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; align-content: center; padding: 5px 8px; }
   .desktop-accounting-metric-label { grid-column: 1; grid-row: 1; }
   .desktop-accounting-metric-value { grid-column: 1; grid-row: 2; }
   .desktop-accounting-metric-note { grid-column: 1; grid-row: 3; align-self: auto; max-width: none; font-size: 10px; line-height: 1.2; text-align: left; white-space: normal; }
 }
 @container desktop-accounting (max-width: 790px) {
-  .desktop-accounting-model-filter { width: min(210px, 28vw); }
-  .desktop-accounting-scope-filter { width: 156px; }
+  .desktop-accounting-model-filter { width: min(calc(210px * var(--desktop-scale)), 28vw); }
+  .desktop-accounting-scope-filter { width: calc(156px * var(--desktop-scale)); }
   .desktop-accounting-sync { display: none; }
   .desktop-accounting-metric-main { grid-template-columns: 1fr; }
   .desktop-accounting-metric-note { display: none; }
 }
 @container desktop-accounting (max-width: 640px) {
   .desktop-accounting-title { display: none; }
-  .desktop-accounting-scope-filter { width: 148px; }
+  .desktop-accounting-scope-filter { width: calc(148px * var(--desktop-scale)); }
   .desktop-accounting-model-filter { flex: 1; width: auto; }
   .desktop-accounting-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 76px minmax(0, 1fr); }
   .desktop-accounting-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }

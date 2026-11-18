@@ -171,8 +171,8 @@
       q('#inbox-detail-type').textContent = kindLabel;
       q('#inbox-detail-size').textContent = (card.dataset.meta || '—').split(' · ').pop();
       q('#inbox-detail-state').textContent = card.dataset.state;
-      q('#inbox-detail-created').textContent = card.dataset.created || '—';
-      q('#inbox-detail-modified').textContent = card.dataset.modified || '—';
+      q('#inbox-detail-created').textContent = Memorive.i18n.dateTime(card.dataset.created);
+      q('#inbox-detail-modified').textContent = Memorive.i18n.dateTime(card.dataset.modified);
       q('#inbox-detail-path').textContent = card.dataset.path || '—';
       q('#inbox-detail-id').textContent = 'asset_' + Math.abs([...card.dataset.title].reduce((sum,char) => ((sum * 31) + char.charCodeAt(0)) | 0, 17)).toString(16).toUpperCase().padStart(8,'0');
       q('#inbox-preview-heading').textContent = ['office','presentation'].includes(card.dataset.kind) ? '文件属性' : '只读查看';

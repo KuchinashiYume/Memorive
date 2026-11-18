@@ -261,6 +261,8 @@
     try {
       const projection = await nativeCall('sessions.get', { local_projection_id:localProjectionId });
       page()?.renderDetail(projection);
+      // status NO_DRAFT (never refined) leaves the refine button as it is; a finished refinement whose draft
+      // file is gone reports SESSION_REFINEMENT_DRAFT_NOT_FOUND, and the detail still shows.
       try {
         const refinement = await nativeCall('sessions.refinement_get', { local_projection_id:localProjectionId });
         page()?.renderRefinementTaskState(refinement);

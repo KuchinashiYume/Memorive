@@ -156,8 +156,10 @@
     const categoryScrollPositions = new Map();
 
     const clampPaneSize = (value, min, max) => Math.min(max, Math.max(min, value));
+    // Larger font sizes widen the category column; smaller ones keep the 100% width (its icons and padding stay).
+    const fontScale = () => Math.max(1, Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desktop-font-factor')) || 1);
     const defaultCategoryPrimarySize = () => Math.round(
-      Math.max(0, workarea.getBoundingClientRect().width - 272)
+      Math.max(0, workarea.getBoundingClientRect().width - 260 * fontScale() - 12)
     );
     const getPrimarySize = () => {
       const inlineValue = Number.parseFloat(workarea.style.getPropertyValue('--desktop-settings-primary-size'));
@@ -166,7 +168,7 @@
     };
     const getPrimaryLimits = () => {
       const width = workarea.getBoundingClientRect().width;
-      const max = Math.max(96, width - 202);
+      const max = Math.max(96, width - 190 * fontScale() - 12);
       return { min: Math.min(360, max), max };
     };
     const preferredPrimarySize = () => {
@@ -180,7 +182,14 @@
       primaryResizer.setAttribute('aria-valuenow', String(rounded));
       primaryResizer.setAttribute('aria-valuetext', `${rounded} 像素`);
     };
+    // When the detail panel would be narrower than 480px (times the font size), the category column shows its
+    // icons only, as while a node is open (.is-compact shares the .has-node styles).
+    const updateCompact = () => {
+      const width = workarea.getBoundingClientRect().width;
+      workarea.classList.toggle('is-compact', workarea.classList.contains('has-category') && width - 260 * fontScale() - 12 < 480 * fontScale());
+    };
     const setPrimarySize = (value, announce = false, remember = true) => {
+      updateCompact();
       const limits = getPrimaryLimits();
       const next = clampPaneSize(value, limits.min, limits.max);
       workarea.style.setProperty('--desktop-settings-primary-size', `${Math.round(next)}px`);
@@ -576,6 +585,7 @@
 
     qa('select.select').forEach(enhanceSelect);
     document.querySelectorAll('.desktop-accounting-filter select').forEach((select,index)=>enhanceSelect(select,1000+index));
+    document.querySelectorAll('#desktop-sessions-preview .desktop-sessions-tools select.select').forEach((select,index)=>enhanceSelect(select,2000+index));
     window.addEventListener('resize',()=>enhancedSelects.filter(e=>e.select.closest('[id="desktop-bottom-panel"]')).forEach(e=>setSelectOpen(e,false)));
 
     const setApiSummaryState = (summary, open) => {
@@ -1358,6 +1368,7 @@
       cancelRisks();
       setModelMenu(false);
       workarea.classList.remove('has-category');
+      updateCompact();
       setActiveCategory('');
       setModeScope('');
       primary.setAttribute('aria-hidden', 'true');

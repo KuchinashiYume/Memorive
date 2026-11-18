@@ -353,9 +353,9 @@
   };
 
   const updateCounts = (visible, total) => {
-    q('#sessions-visible-count').textContent = String(visible);
-    q('#sessions-total-count').textContent = String(total);
-    q('#sessions-count').setAttribute('aria-label', `显示 ${visible} 项，共 ${total} 项`);
+    const badge = q('#sessions-count');
+    badge.textContent = visible === total ? String(total) : `${visible} / ${total}`;
+    badge.setAttribute('aria-label', `显示 ${visible} 项，共 ${total} 项`);
   };
 
   const updateBatch = () => {

@@ -6,7 +6,9 @@
    given as {key, values} is itself a message, so it follows the language too.
    shared/app.js calls render() when the language changes and for every element added to the page, so keyed
    text always shows in the current language. Text without a key is still translated from its Chinese wording
-   by shared/app.js. Publishes Memorive.i18n; shared/frame/messages.js and the route scripts use it. */
+   by shared/app.js. dateTime(raw) shows a stored time (ISO text) as local time, 2026/01/05 18:20:00, the one
+   format the page uses for a full time. Publishes Memorive.i18n; shared/frame/messages.js and the route scripts
+   use it. */
 (() => {
   'use strict';
   const LANGUAGES = Object.freeze(['zh-CN', 'en-US', 'ja-JP']);
@@ -97,5 +99,13 @@
     return Boolean(name && element.hasAttribute(`data-i18n-${name}`));
   };
 
-  Memorive.i18n = Object.freeze({ LANGUAGES, define, text, set, render, keyed, language });
+  const fullTime = new Intl.DateTimeFormat('zh-CN', {
+    year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
+  });
+  const dateTime = (raw) => {
+    const parsed = new Date(String(raw || ''));
+    return Number.isNaN(parsed.getTime()) ? (raw || '—') : fullTime.format(parsed);
+  };
+
+  Memorive.i18n = Object.freeze({ LANGUAGES, define, text, set, render, keyed, language, dateTime });
 })();

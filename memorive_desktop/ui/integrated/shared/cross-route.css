@@ -42,12 +42,15 @@ body {
 
 /* desktop-layout: adopted A–F UI checklist. Shared structure, existing page palettes. */
 .desktop-page-root { --desktop-ui-title:24px; --desktop-ui-section:17px; --desktop-ui-body:14px; --desktop-ui-helper:12px; }
-.desktop-page-root :is(.page-heading h2,.page-eyebrow,.inspector-kicker,.field-label,.switch-copy,.count-badge,time) { font-family:var(--font-ui,"Times New Roman","SimSun",serif); }
+.desktop-page-root :is(.page-eyebrow,.inspector-kicker,.field-label,.switch-copy,.count-badge,time) { font-family:var(--font-ui,"Times New Roman","SimSun",serif); }
 .desktop-page-root .field-label { font-weight:400; line-height:1.5; }
 .desktop-page-root .page-eyebrow:empty { display:none; }
 .desktop-page-root :is(h2,h3,h4) { overflow-wrap:anywhere; }
 .desktop-page-root :is(.desktop-icon-button,.icon-button):focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
 .desktop-page-root :is(.icon-button,.desktop-icon-button) { flex-shrink:0; }
+/* The head of every right panel stays at the top while the panel scrolls; its close button (×) is on the right. */
+.desktop-right-panel .inspector-head { position:sticky; z-index:4; top:-20px; margin:-20px -20px 16px; padding:18px 20px 14px; border-bottom:1px solid var(--border-subtle); background:var(--surface-raised); }
+.desktop-right-panel .desktop-detail-close { flex:0 0 auto; width:30px; min-height:30px; height:30px; padding:0; font-size:18px; line-height:1; }
 .desktop-page-root .desktop-symbol-control { display:inline-flex; align-items:center; justify-content:center; padding:0; font-size:0 !important; }
 .desktop-page-root .desktop-symbol { width:18px; height:18px; flex:0 0 18px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .desktop-page-root :is(.desktop-settings-disclosure-icon,.desktop-settings-category-chevron,.desktop-settings-api-chevron,.desktop-settings-cli-add-chevron) { display:inline-flex; width:18px; height:18px; align-items:center; justify-content:center; flex:0 0 18px; transition:transform 160ms ease; }
@@ -69,16 +72,14 @@ body {
 @keyframes desktop-browser-wait { to { transform:translateX(185%); } }
 @media (prefers-reduced-motion:reduce) { #desktop-settings-preview .desktop-settings-browser-read-progress > span { animation:none; transition:none; } }
 #desktop-settings-preview .desktop-settings-categories { gap:4px; padding:8px; }
-#desktop-settings-preview .desktop-settings-category { height:60px; min-height:60px; flex-shrink:0; grid-template-columns:28px minmax(0,1fr) 18px; padding:7px 9px; gap:8px; align-items:center; }
 #desktop-settings-preview .desktop-settings-category-copy { display:flex; align-items:center; height:auto; min-height:0; }
-#desktop-settings-preview .desktop-settings-category-copy strong { position:static; transform:none; }
 #desktop-settings-preview .desktop-settings-cat-icon { width:28px; height:28px; border:0; background:transparent; }
 #desktop-settings-preview .desktop-settings-icon { display:block; width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 #desktop-settings-preview .desktop-settings-icon text { fill:currentColor; stroke:none; font-family:"Times New Roman",Times,serif; font-weight:400; dominant-baseline:middle; text-anchor:middle; }
-#desktop-settings-preview .desktop-settings-workarea.has-node { grid-template-columns:64px 8px minmax(0,1fr); }
-#desktop-settings-preview .desktop-settings-workarea.has-node .desktop-settings-categories { padding-inline:6px; }
-#desktop-settings-preview .desktop-settings-workarea.has-node .desktop-settings-category { height:60px; min-height:60px; padding:7px 9px; grid-template-columns:28px; justify-content:center; justify-items:center; align-items:center; }
-#desktop-settings-preview .desktop-settings-workarea.has-node .desktop-settings-cat-icon { width:28px; height:28px; border:0; background:transparent; }
+#desktop-settings-preview .desktop-settings-workarea:is(.has-node,.is-compact) { grid-template-columns:64px 8px minmax(0,1fr); }
+#desktop-settings-preview .desktop-settings-workarea:is(.has-node,.is-compact) .desktop-settings-categories { padding-inline:6px; }
+#desktop-settings-preview .desktop-settings-workarea:is(.has-node,.is-compact) .desktop-settings-category { height:60px; min-height:60px; padding:7px 9px; grid-template-columns:28px; justify-content:center; justify-items:center; align-items:center; }
+#desktop-settings-preview .desktop-settings-workarea:is(.has-node,.is-compact) .desktop-settings-cat-icon { width:28px; height:28px; border:0; background:transparent; }
 #desktop-settings-preview :is(.desktop-settings-panel-head,.desktop-settings-node-head) { min-height:60px; box-sizing:border-box; padding:12px 16px; }
 #desktop-settings-preview .desktop-settings-panel-title { gap:8px; }
 #desktop-settings-preview .desktop-settings-form-stack { gap:12px; }
@@ -124,7 +125,8 @@ body {
   color:var(--text-secondary);
   font:inherit;
   line-height:1.5;
-  white-space:nowrap;
+  min-width:0;
+  text-wrap:balance;
 }
 .desktop-home-speech::after {
   content:"";
@@ -140,7 +142,8 @@ body {
 }
 .desktop-home-expression-button {
   display:grid;
-  flex:0 0 auto;
+  flex:0 1 auto;
+  min-width:96px;
   width:clamp(106px,13vw,166px);
   aspect-ratio:1;
   place-items:center;
@@ -165,7 +168,7 @@ body {
 .desktop-empty-decorated > div { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .desktop-empty-decorated .empty-mark { display:none; }
 #desktop-tasks-preview .desktop-tasks-listpane { position:relative; }
-#desktop-tasks-preview .desktop-tasks-empty { padding:36px; color:var(--text-secondary); text-align:center; }
+#desktop-tasks-preview .desktop-tasks-empty { padding:30px; color:var(--text-secondary); text-align:center; }
 #desktop-tasks-preview .desktop-tasks-empty > div { width:100%; height:100%; }
 .desktop-empty-illustration {
   display:block;
@@ -190,14 +193,10 @@ body {
 /* public-interface: inherit the pre095 per-status fills and selected outline. */
 #desktop-settings-preview .desktop-settings-node-test-score:empty, #desktop-tasks-preview .desktop-tasks-node-test-score:empty { display:none; }
 #desktop-settings-preview .desktop-settings-node-test-score[data-no-score="true"], #desktop-tasks-preview .desktop-tasks-node-test-score[data-no-score="true"] { display:none; }
-#desktop-inbox-preview .desktop-inbox-tools .desktop-toolbar-icon:not(#inbox-auto)::before { top:0; }
 #desktop-messages-preview .desktop-messages-detail-note:empty { display:none; }
 #desktop-messages-preview .desktop-messages-card .desktop-messages-copy strong { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #desktop-messages-preview .desktop-messages-card time { flex-shrink:0; white-space:nowrap; }
 #desktop-messages-preview .desktop-messages-inspector-heading { align-items:start; }
-#desktop-messages-preview .desktop-messages-card[aria-selected="true"], #desktop-sessions-preview .desktop-sessions-card[aria-selected="true"] { box-shadow:none; }
-#desktop-sessions-preview .desktop-sessions-title-counts { transform:none; vertical-align:middle; }
-#desktop-sessions-preview .desktop-sessions-tools .select { max-width:100%; }
 #desktop-settings-preview .desktop-settings-workarea, #desktop-settings-preview .desktop-settings-primary { transition:none; }
 .desktop-page-root :is(.desktop-settings-category,.desktop-settings-category-copy,.desktop-settings-category-chevron,.desktop-settings-cat-icon) { transition-duration:160ms; }
 .desktop-page-root [data-resizing] { transition:none !important; }
@@ -268,23 +267,20 @@ body {
   box-shadow: none !important;
 }
 .desktop-route-surface .desktop-preview-controls { display: none !important; }
+/* The page header of every route: the title on the left, the toolbar on the right (it wraps under the title
+   when the page is too narrow). The title's size and typeface come from typography.css (role "page"); a count
+   badge sits on the title's centre line. The leaderboard's .lb-heading uses the same height and padding. */
 .desktop-route-surface .page-header {
-  height: auto !important; min-height: 76px !important; max-height: none !important;
-  box-sizing: border-box; padding: 16px 24px !important; align-items: center !important;
-  flex-wrap: wrap; gap: 12px 20px;
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 20px;
+  height:auto; min-height:76px; box-sizing:border-box; padding:10px 24px;
 }
 .desktop-route-surface .page-header .desktop-page-heading-with-back { display:flex; align-items:center; gap:4px; min-width:0; }
 .desktop-route-surface .page-header .page-heading { display:block; height:auto; min-width:0; }
 .desktop-route-surface .page-header .page-heading > h2 {
-  margin:0; height:auto; font-size:24px; font-weight:500; line-height:1.35;
-  overflow-wrap:anywhere;
+  display:flex; flex-wrap:wrap; align-items:center; column-gap:8px; row-gap:2px; margin:0; overflow-wrap:anywhere;
 }
 .desktop-route-surface .page-header .page-heading > .page-eyebrow { margin:0 0 4px; font-size:12px; line-height:1.4; transform:none; }
 .desktop-route-surface .page-header .toolbar-group { margin-left:auto; min-width:0; max-width:100%; flex-wrap:wrap; gap:8px; }
-@media (max-width:1100px) {
-  .desktop-route-surface .page-header { align-items:flex-start !important; }
-  .desktop-route-surface[data-desktop-route="sessions"] .page-header .toolbar-group { flex-basis:100%; justify-content:flex-end; }
-}
   
 /* Reuse the API editor and cards for browser settings. */
 #desktop-settings-preview #memo-browser-code-workbench:not([hidden]) { display:grid; margin:0; }
@@ -294,12 +290,9 @@ html[lang] #desktop-settings-preview .desktop-settings-categories { grid-auto-ro
 #memo-handoff-inline .desktop-action-copy,#desktop-settings-preview .desktop-action-copy,dialog:has(.memo-handoff-preview) .desktop-action-copy{--desktop-action-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='12' height='12' rx='2'/%3E%3Cpath d='M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2'/%3E%3C/svg%3E")}
 #desktop-settings-preview #memo-bridge-setup-guide[hidden] { display:none; }
 
-
 #desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-test,
 #desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-full-sync,
 #desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-details .desktop-settings-browser-disclosure-body { display:none !important; }
-
-
 
 
 /* keep empty-state copy centered inside the existing research sidebar. */

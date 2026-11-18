@@ -588,8 +588,8 @@
     q('#inbox-detail-type').textContent = '会话精炼任务';
     q('#inbox-detail-size').textContent = `${Number(item?.message_count || 0)} 条消息`;
     q('#inbox-detail-state').textContent = item?.display_state || item?.state || '—';
-    q('#inbox-detail-created').textContent = item?.created_at || '—';
-    q('#inbox-detail-modified').textContent = item?.updated_at || '—';
+    q('#inbox-detail-created').textContent = Memorive.i18n.dateTime(item?.created_at);
+    q('#inbox-detail-modified').textContent = Memorive.i18n.dateTime(item?.updated_at);
     q('#inbox-detail-path').textContent = selectedRefinementProjectionId
       ? (item?.name || '会话管理') : '会话管理';
     q('#inbox-detail-id').textContent = item?.item_id || '—';
@@ -742,8 +742,8 @@
     }[receipt.mode] || '其他文件';
     q('#inbox-detail-size').textContent = formatBytes(item.bytes);
     q('#inbox-detail-state').textContent = item.display_state || item.state || '—';
-    q('#inbox-detail-created').textContent = item.created_at || '—';
-    q('#inbox-detail-modified').textContent = item.updated_at || '—';
+    q('#inbox-detail-created').textContent = Memorive.i18n.dateTime(item.created_at);
+    q('#inbox-detail-modified').textContent = Memorive.i18n.dateTime(item.updated_at);
     q('#inbox-detail-path').textContent = '收件箱 / ' + (item.name || '—');
     q('#inbox-detail-id').textContent = item.item_id || '—';
     q('#inbox-preview-heading').textContent = receipt.mode === 'PROPERTY_ONLY' ? '文件属性' : '预览';

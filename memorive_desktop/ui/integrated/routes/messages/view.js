@@ -56,10 +56,7 @@
       const clock = new Intl.DateTimeFormat('zh-CN', {
         hour:'2-digit', minute:'2-digit', hourCycle:'h23'
       }).format(parsed);
-      const full = new Intl.DateTimeFormat('zh-CN', {
-        year:'numeric', month:'2-digit', day:'2-digit',
-        hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
-      }).format(parsed);
+      const full = Memorive.i18n.dateTime(raw);
       return { raw:String(raw), day, clock, full };
     };
     const initializeCard = (card) => {
@@ -395,6 +392,7 @@
         return;
       }
       if (event.target.closest('.desktop-messages-copy')) showDetail(card);
+      else if (!event.target.closest('button,input,a,label,select')) card.querySelector('.desktop-messages-copy')?.click();
     });
     const openDetailById = (messageId) => {
       const card = cards().find((item) => item.dataset.messageId === String(messageId || ''));
