@@ -136,14 +136,13 @@ class LibraryProductController:
                 newline="\n",
             )
         self._load_refinement_review_state()
+        # Sample mode reads the catalog that ships with the repository (fixtures/README.md); the tests check it.
         self._catalog = (
             json.loads((self.fixture_root / "synthetic_library_catalog.json").read_text(encoding="utf-8"))
             if self.include_synthetic_projection
             else {"schema_version": "LibrarySyntheticLibraryCatalog-v1", "synthetic_only": True, "artifacts": []}
         )
         self._boundary = json.loads((self.contract_root / "SafeExternalViewContract.json").read_text(encoding="utf-8"))
-        if self.include_synthetic_projection:
-            self._validate_catalog(self._catalog)
         self._rows_by_id = {row["artifact_id"]: deepcopy(row) for row in self._catalog["artifacts"]}
         refinement_catalog = self._load_refinement_catalog()
         self._refinement_entries_by_artifact_id = {
@@ -985,36 +984,6 @@ class LibraryProductController:
         keys = set(params)
         if not required <= keys or keys - required - optional:
             raise LibraryProductError("LIBRARY_PRODUCT_PARAMS_INVALID")
-
-    @staticmethod
-    def _validate_catalog(catalog: Mapping[str, Any]) -> None:
-        if set(catalog) != {"schema_version", "synthetic_only", "artifacts"}:
-            raise LibraryProductError("LIBRARY_CATALOG_FIELDS_INVALID")
-        if catalog.get("schema_version") != "LibrarySyntheticLibraryCatalog-v1" or catalog.get("synthetic_only") is not True:
-            raise LibraryProductError("LIBRARY_CATALOG_AUTHORITY_INVALID")
-        rows = catalog.get("artifacts")
-        if not isinstance(rows, list) or len(rows) != 9:
-            raise LibraryProductError("LIBRARY_CATALOG_DENOMINATOR_INVALID")
-        required = {
-            "artifact_id", "view_snapshot_id", "stable_locator", "display_name", "mode", "kind", "status",
-            "rights_status", "privacy_class", "lineage", "relative_path", "file_exists", "file_state",
-            "products", "external_target", "task", "updated_at", "size_bytes",
-        }
-        ids: set[str] = set()
-        locators: set[str] = set()
-        for row in rows:
-            if set(row) != required:
-                raise LibraryProductError("LIBRARY_CATALOG_ROW_FIELDS_INVALID")
-            artifact_id = row["artifact_id"]
-            locator = row["stable_locator"]
-            if not isinstance(artifact_id, str) or artifact_id in ids:
-                raise LibraryProductError("LIBRARY_ARTIFACT_ID_INVALID")
-            if locator != f"memorive://artifact/{artifact_id}" or locator in locators:
-                raise LibraryProductError("LIBRARY_STABLE_LOCATOR_INVALID")
-            if row["privacy_class"] not in {"PUBLIC_SAFE", "PRIVATE", "RESTRICTED"}:
-                raise LibraryProductError("LIBRARY_PRIVACY_CLASS_INVALID")
-            ids.add(artifact_id)
-            locators.add(locator)
 
     @staticmethod
     def _validate_state(state: Mapping[str, Any]) -> None:

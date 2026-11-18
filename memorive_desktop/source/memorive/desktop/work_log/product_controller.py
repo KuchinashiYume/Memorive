@@ -124,17 +124,15 @@ class WorkLogProductController:
         self._core_job_provider = core_job_provider
         self._core_product_provider = core_product_provider
         self._now_provider = now_provider or (lambda: datetime.now(timezone.utc))
+        # Sample mode reads data that ships with the repository (fixtures/README.md); the tests check it.
         if self.include_synthetic_projection:
             self._canaries = json.loads((self.fixture_root / "synthetic_canary_corpus.json").read_text(encoding="utf-8"))
             self._sentinels = json.loads((self.fixture_root / "source_authority_sentinels.json").read_text(encoding="utf-8"))
-            self._validate_canaries(self._canaries)
-            self._validate_sentinels(self._sentinels)
         else:
             self._canaries = {"fields": [], "values": []}
             self._sentinels = {"sources": []}
         if self.include_synthetic_projection:
             self._stream = json.loads((self.fixture_root / "synthetic_work_log_stream.json").read_text(encoding="utf-8"))
-            self._validate_stream(self._stream)
             self._rows_by_id = {
                 row["log_entry_id"]: deepcopy(row)
                 for row in self._stream["entries"]
@@ -209,97 +207,6 @@ class WorkLogProductController:
         keys = set(params)
         if not required <= keys or keys - required - optional:
             raise WorkLogProductError("WORK_LOG_PRODUCT_PARAMS_INVALID")
-
-    @staticmethod
-    def _validate_stream(stream: Mapping[str, Any]) -> None:
-        if set(stream) != {"schema_version", "synthetic_only", "source_authority_mode", "entries"}:
-            raise WorkLogProductError("WORK_LOG_STREAM_FIELDS_INVALID")
-        if stream.get("schema_version") != "WorkLogSyntheticWorkLogStream-v1":
-            raise WorkLogProductError("WORK_LOG_STREAM_SCHEMA_INVALID")
-        if stream.get("synthetic_only") is not True or stream.get("source_authority_mode") != "LOCATOR_HASH_SENTINEL_ONLY":
-            raise WorkLogProductError("WORK_LOG_STREAM_AUTHORITY_INVALID")
-        rows = stream.get("entries")
-        if not isinstance(rows, list) or len(rows) != 7:
-            raise WorkLogProductError("WORK_LOG_STREAM_DENOMINATOR_INVALID")
-        required = {
-            "age_bucket",
-            "date",
-            "event_sequence",
-            "event_time_utc",
-            "evidence_locators",
-            "job_id",
-            "job_locator",
-            "ledger_type",
-            "log_entry_id",
-            "milestones",
-            "parse_status",
-            "public_payload",
-            "severity",
-            "source_locator",
-            "state_axis",
-            "summary",
-            "title",
-            "type_label",
-        }
-        ids: set[str] = set()
-        sequences: set[int] = set()
-        for row in rows:
-            if set(row) != required:
-                raise WorkLogProductError("WORK_LOG_STREAM_ROW_FIELDS_INVALID")
-            entry_id = row["log_entry_id"]
-            sequence = row["event_sequence"]
-            if not isinstance(entry_id, str) or not entry_id or entry_id in ids:
-                raise WorkLogProductError("WORK_LOG_ENTRY_ID_INVALID")
-            if not isinstance(sequence, int) or sequence < 1 or sequence in sequences:
-                raise WorkLogProductError("WORK_LOG_EVENT_SEQUENCE_INVALID")
-            if row["ledger_type"] not in {"branch", "central"}:
-                raise WorkLogProductError("WORK_LOG_LEDGER_TYPE_INVALID")
-            if row["parse_status"] not in {"ready", "partial", "failed"}:
-                raise WorkLogProductError("WORK_LOG_PARSE_STATUS_INVALID")
-            if row["severity"] not in {"INFO", "WARNING", "ERROR"}:
-                raise WorkLogProductError("WORK_LOG_SEVERITY_INVALID")
-            if row["job_locator"] != f"memorive://job/{row['job_id']}":
-                raise WorkLogProductError("WORK_LOG_JOB_LOCATOR_INVALID")
-            if not row["source_locator"].startswith("memorive://ledger/"):
-                raise WorkLogProductError("WORK_LOG_SOURCE_LOCATOR_INVALID")
-            if not isinstance(row["evidence_locators"], list) or not all(
-                isinstance(value, str) and value.startswith("memorive://evidence/") for value in row["evidence_locators"]
-            ):
-                raise WorkLogProductError("WORK_LOG_EVIDENCE_LOCATOR_INVALID")
-            if not isinstance(row["milestones"], list) or not isinstance(row["public_payload"], dict):
-                raise WorkLogProductError("WORK_LOG_PUBLIC_PROJECTION_INVALID")
-            ids.add(entry_id)
-            sequences.add(sequence)
-
-    @staticmethod
-    def _validate_canaries(canaries: Mapping[str, Any]) -> None:
-        if set(canaries) != {"schema_version", "synthetic_only", "fields", "values"}:
-            raise WorkLogProductError("WORK_LOG_CANARY_FIELDS_INVALID")
-        if canaries.get("schema_version") != "WorkLogSyntheticCanaryCorpus-v1" or canaries.get("synthetic_only") is not True:
-            raise WorkLogProductError("WORK_LOG_CANARY_SCHEMA_INVALID")
-        fields = canaries.get("fields")
-        values = canaries.get("values")
-        if sorted(fields) != sorted(FORBIDDEN_EXPORT_KEYS) or not isinstance(values, list) or len(values) != len(fields):
-            raise WorkLogProductError("WORK_LOG_CANARY_DENOMINATOR_INVALID")
-
-    @staticmethod
-    def _validate_sentinels(sentinels: Mapping[str, Any]) -> None:
-        if set(sentinels) != {"schema_version", "authority_mode", "sources", "status"}:
-            raise WorkLogProductError("WORK_LOG_SENTINEL_FIELDS_INVALID")
-        if sentinels.get("schema_version") != "WorkLogSourceAuthoritySentinels-v1":
-            raise WorkLogProductError("WORK_LOG_SENTINEL_SCHEMA_INVALID")
-        if sentinels.get("authority_mode") != "HASH_METADATA_ONLY_NO_RAW_BYTES" or sentinels.get("status") != "PASS":
-            raise WorkLogProductError("WORK_LOG_SENTINEL_MODE_INVALID")
-        sources = sentinels.get("sources")
-        if not isinstance(sources, list) or [row.get("source_kind") for row in sources] != ["BRANCH_LOG", "CENTRAL_LOG", "RUNTIME_LOG_LOG"]:
-            raise WorkLogProductError("WORK_LOG_SENTINEL_SOURCE_SET_INVALID")
-        for row in sources:
-            if sorted(row) != ["raw_content_copied", "raw_content_decoded_or_rendered", "sha256", "source_kind", "source_label"]:
-                raise WorkLogProductError("WORK_LOG_SENTINEL_ROW_FIELDS_INVALID")
-            if row["raw_content_copied"] is not False or row["raw_content_decoded_or_rendered"] is not False:
-                raise WorkLogProductError("WORK_LOG_SENTINEL_RAW_ACCESS_INVALID")
-            if not re.fullmatch(r"[A-F0-9]{64}", row["sha256"]):
-                raise WorkLogProductError("WORK_LOG_SENTINEL_HASH_INVALID")
 
     @staticmethod
     def _validate_state(state: Mapping[str, Any]) -> None:

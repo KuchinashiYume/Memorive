@@ -6,10 +6,71 @@
     {
       "age_bucket": "today",
       "date": "2026-08-23",
-      "event_sequence": 7,
+      "event_sequence": 11,
+      "event_time_utc": "2026-08-23T06:40:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-011"
+      ],
+      "job_id": "sample-retrieval-calibration",
+      "job_locator": "memorive://job/sample-retrieval-calibration",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-retrieval-calibration/run-002",
+      "milestones": [
+        {
+          "time": "2026-08-23 13:00—14:20 +09:00 · RUN_DONE",
+          "title": "对比实验完成",
+          "fields": [
+            [
+              "完成内容",
+              "六个主题、1,200 次问答，温度缩放与等渗回归各跑一遍。"
+            ],
+            [
+              "结果",
+              "校准误差 0.17 → 0.05（温度缩放）、0.04（等渗回归）。"
+            ],
+            [
+              "下一步",
+              "按主题设定阈值，试运行两周。"
+            ]
+          ],
+          "technical_public": "event_key=sample-retrieval-calibration/run-002\ndedup_key=branch-ledger-010-01\nquestions=1200"
+        },
+        {
+          "time": "2026-08-23 15:10 +09:00 · REPORT_WRITTEN",
+          "title": "结果写入日报",
+          "fields": [
+            [
+              "完成内容",
+              "结果表格已写入 2026-08-23 研究日报。"
+            ],
+            [
+              "边界",
+              "试运行开始前不改线上阈值。"
+            ]
+          ],
+          "technical_public": "event_key=sample-retrieval-calibration/report\nreport=memorive/2026-08-23_研究日报.md"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "两组阈值对比完成，低分区间误召回从 41% 降到 18%",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/branch/sample-011",
+      "state_axis": "completed / PASS / PASS",
+      "summary": "两组阈值对比完成，低分区间误召回从 41% 降到 18%",
+      "title": "检索置信度校准实验",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "today",
+      "date": "2026-08-23",
+      "event_sequence": 10,
       "event_time_utc": "2026-08-23T05:05:00Z",
       "evidence_locators": [
-        "memorive://evidence/sample-001"
+        "memorive://evidence/sample-010"
       ],
       "job_id": "sample-long-context-review",
       "job_locator": "memorive://job/sample-long-context-review",
@@ -81,7 +142,7 @@
         "unknown_fields_preserved": false
       },
       "severity": "INFO",
-      "source_locator": "memorive://ledger/branch/sample-001",
+      "source_locator": "memorive://ledger/branch/sample-010",
       "state_axis": "completed / PASS / NOT_ASSESSED",
       "summary": "输入清单已固定，尚未开始整理",
       "title": "长上下文评测文献整理",
@@ -90,10 +151,56 @@
     {
       "age_bucket": "today",
       "date": "2026-08-23",
-      "event_sequence": 6,
+      "event_sequence": 9,
+      "event_time_utc": "2026-08-23T03:10:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-009"
+      ],
+      "job_id": "sample-ocr-batch",
+      "job_locator": "memorive://job/sample-ocr-batch",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-ocr-batch/run-003",
+      "milestones": [
+        {
+          "time": "2026-08-23 11:30—12:02 +09:00 · STOPPED",
+          "title": "批处理停止",
+          "fields": [
+            [
+              "完成内容",
+              "前 11 页已识别并写入资料库。"
+            ],
+            [
+              "失败原因",
+              "第 12、13 页分辨率低于 150 dpi，文字无法可靠识别。"
+            ],
+            [
+              "下一步",
+              "重新扫描这两页后从第 12 页继续，已完成的页不重做。"
+            ]
+          ],
+          "technical_public": "event_key=sample-ocr-batch/run-003\npages_done=11\nfailed_pages=12,13"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "两页扫描件分辨率过低，处理停在第 12 页",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "ERROR",
+      "source_locator": "memorive://ledger/branch/sample-009",
+      "state_axis": "failed / FAIL / NOT_ASSESSED",
+      "summary": "两页扫描件分辨率过低，处理停在第 12 页",
+      "title": "扫描件 OCR 批处理",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "today",
+      "date": "2026-08-23",
+      "event_sequence": 8,
       "event_time_utc": "2026-08-22T15:30:00Z",
       "evidence_locators": [
-        "memorive://evidence/sample-002"
+        "memorive://evidence/sample-008"
       ],
       "job_id": "SHARED/CENTRAL",
       "job_locator": "memorive://job/SHARED/CENTRAL",
@@ -102,11 +209,11 @@
       "milestones": [
         {
           "time": "2026-08-23 00:30—00:42 +09:00",
-          "title": "预览范围复核",
+          "title": "当日汇总",
           "fields": [
             [
               "稳定结论",
-              "样例项目继续只读预览，execution=false。"
+              "检索校准完成；长上下文评测输入已固定；OCR 批处理待重扫两页。"
             ],
             [
               "验证与正式化",
@@ -141,15 +248,122 @@
       ],
       "parse_status": "ready",
       "public_payload": {
-        "impact": "样例项目保持只读预览，execution=false",
+        "impact": "当日两项实验完成、一项批处理待重扫",
         "next_step": "按当前任务说明继续",
         "unknown_fields_preserved": false
       },
       "severity": "INFO",
-      "source_locator": "memorive://ledger/central/sample-002",
+      "source_locator": "memorive://ledger/central/sample-008",
       "state_axis": "只读摘要",
-      "summary": "样例项目保持只读预览，execution=false",
+      "summary": "当日两项实验完成、一项批处理待重扫",
       "title": "工作日志 · 2026-08-23",
+      "type_label": "每日摘要"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-21",
+      "event_sequence": 7,
+      "event_time_utc": "2026-08-21T08:20:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-007"
+      ],
+      "job_id": "sample-sparse-attention",
+      "job_locator": "memorive://job/sample-sparse-attention",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-sparse-attention/run-001",
+      "milestones": [
+        {
+          "time": "2026-08-21 14:00—16:40 +09:00 · RUN_DONE",
+          "title": "80 篇长报告摘要完成",
+          "fields": [
+            [
+              "结果",
+              "内存 23%，耗时 41%，ROUGE-L -1.2。"
+            ],
+            [
+              "保留问题",
+              "两篇摘要漏掉了只在最后一节出现的结论。"
+            ]
+          ],
+          "technical_public": "event_key=sample-sparse-attention/run-001\ndocuments=80"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "内存降到全注意力的 23%，摘要质量差 1.2 分",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/branch/sample-007",
+      "state_axis": "completed / PASS / PASS",
+      "summary": "内存降到全注意力的 23%，摘要质量差 1.2 分",
+      "title": "稀疏注意摘要实验",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-21",
+      "event_sequence": 6,
+      "event_time_utc": "2026-08-20T15:17:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-006"
+      ],
+      "job_id": "SHARED/CENTRAL",
+      "job_locator": "memorive://job/SHARED/CENTRAL",
+      "ledger_type": "central",
+      "log_entry_id": "SHARED/CENTRAL/2026-08-21",
+      "milestones": [
+        {
+          "time": "2026-08-21 00:30—00:42 +09:00",
+          "title": "当日汇总",
+          "fields": [
+            [
+              "稳定结论",
+              "归档交接完成，同步回执已收到。"
+            ],
+            [
+              "验证与正式化",
+              "只记录已确认的里程碑。"
+            ],
+            [
+              "边界",
+              "不把每日摘要扩写成任务记录。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-21/001\nsource_order=04\ncommit_oid=READ_ONLY_SAMPLE"
+        },
+        {
+          "time": "2026-08-21 10:18—10:24 +09:00",
+          "title": "两份记录的回执核对",
+          "fields": [
+            [
+              "稳定结论",
+              "任务事件、每日摘要、任务回执的顺序可以核对。"
+            ],
+            [
+              "远端回执",
+              "NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "未知字段保留在技术细节里。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-21/002\ntransaction_id=central-demo-018\nunknown_field=preserved"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "样例项目完成同步回执",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/central/sample-006",
+      "state_axis": "两份记录已对齐 · 只读摘要",
+      "summary": "样例项目完成同步回执",
+      "title": "工作日志 · 2026-08-21",
       "type_label": "每日摘要"
     },
     {
@@ -158,7 +372,7 @@
       "event_sequence": 5,
       "event_time_utc": "2026-08-20T15:08:00Z",
       "evidence_locators": [
-        "memorive://evidence/sample-003"
+        "memorive://evidence/sample-005"
       ],
       "job_id": "sample-quarter-archive",
       "job_locator": "memorive://job/sample-quarter-archive",
@@ -230,7 +444,7 @@
         "unknown_fields_preserved": false
       },
       "severity": "INFO",
-      "source_locator": "memorive://ledger/branch/sample-003",
+      "source_locator": "memorive://ledger/branch/sample-005",
       "state_axis": "completed / PASS / PASS",
       "summary": "归档清单已核对完成",
       "title": "季度资料归档与交接",
@@ -238,76 +452,11 @@
     },
     {
       "age_bucket": "7",
-      "date": "2026-08-21",
-      "event_sequence": 4,
-      "event_time_utc": "2026-08-20T15:17:00Z",
-      "evidence_locators": [
-        "memorive://evidence/sample-004"
-      ],
-      "job_id": "SHARED/CENTRAL",
-      "job_locator": "memorive://job/SHARED/CENTRAL",
-      "ledger_type": "central",
-      "log_entry_id": "SHARED/CENTRAL/2026-08-21",
-      "milestones": [
-        {
-          "time": "2026-08-23 00:30—00:42 +09:00",
-          "title": "预览范围复核",
-          "fields": [
-            [
-              "稳定结论",
-              "样例项目继续只读预览，execution=false。"
-            ],
-            [
-              "验证与正式化",
-              "只记录已确认的里程碑。"
-            ],
-            [
-              "边界",
-              "不把每日摘要扩写成任务记录。"
-            ]
-          ],
-          "technical_public": "event_key=SHARED/CENTRAL/2026-08-21/001\nsource_order=04\ncommit_oid=READ_ONLY_SAMPLE"
-        },
-        {
-          "time": "2026-08-23 10:18—10:24 +09:00",
-          "title": "两份记录的回执核对",
-          "fields": [
-            [
-              "稳定结论",
-              "任务事件、每日摘要、任务回执的顺序可以核对。"
-            ],
-            [
-              "远端回执",
-              "NOT_ASSESSED"
-            ],
-            [
-              "边界",
-              "未知字段保留在技术细节里。"
-            ]
-          ],
-          "technical_public": "event_key=SHARED/CENTRAL/2026-08-21/002\ntransaction_id=central-demo-018\nunknown_field=preserved"
-        }
-      ],
-      "parse_status": "ready",
-      "public_payload": {
-        "impact": "样例项目完成同步回执",
-        "next_step": "按当前任务说明继续",
-        "unknown_fields_preserved": false
-      },
-      "severity": "INFO",
-      "source_locator": "memorive://ledger/central/sample-004",
-      "state_axis": "两份记录已对齐 · 只读摘要",
-      "summary": "样例项目完成同步回执",
-      "title": "工作日志 · 2026-08-21",
-      "type_label": "每日摘要"
-    },
-    {
-      "age_bucket": "7",
       "date": "2026-08-20",
-      "event_sequence": 3,
+      "event_sequence": 4,
       "event_time_utc": "2026-08-20T13:42:00Z",
       "evidence_locators": [
-        "memorive://evidence/sample-005"
+        "memorive://evidence/sample-004"
       ],
       "job_id": "sample-app-entry",
       "job_locator": "memorive://job/sample-app-entry",
@@ -379,7 +528,7 @@
         "unknown_fields_preserved": false
       },
       "severity": "INFO",
-      "source_locator": "memorive://ledger/branch/sample-005",
+      "source_locator": "memorive://ledger/branch/sample-004",
       "state_axis": "active / NOT_ASSESSED / NOT_ASSESSED",
       "summary": "任务记录 · 只读审查候选",
       "title": "统一应用入口准备",
@@ -388,10 +537,10 @@
     {
       "age_bucket": "7",
       "date": "2026-08-19",
-      "event_sequence": 2,
+      "event_sequence": 3,
       "event_time_utc": "2026-08-19T09:24:00Z",
       "evidence_locators": [
-        "memorive://evidence/sample-006"
+        "memorive://evidence/sample-003"
       ],
       "job_id": "sample-session-import",
       "job_locator": "memorive://job/sample-session-import",
@@ -425,7 +574,7 @@
         "unknown_fields_preserved": true
       },
       "severity": "WARNING",
-      "source_locator": "memorive://ledger/branch/sample-006",
+      "source_locator": "memorive://ledger/branch/sample-003",
       "state_axis": "部分解析 · 状态未确认",
       "summary": "只识别到标题、日期和一个里程碑",
       "title": "历史会话导入记录",
@@ -434,10 +583,10 @@
     {
       "age_bucket": "7",
       "date": "2026-08-18",
-      "event_sequence": 1,
+      "event_sequence": 2,
       "event_time_utc": "2026-08-18T06:02:00Z",
       "evidence_locators": [
-        "memorive://evidence/sample-007"
+        "memorive://evidence/sample-002"
       ],
       "job_id": "SHARED/CENTRAL",
       "job_locator": "memorive://job/SHARED/CENTRAL",
@@ -451,10 +600,75 @@
         "unknown_fields_preserved": true
       },
       "severity": "ERROR",
-      "source_locator": "memorive://ledger/central/sample-007",
+      "source_locator": "memorive://ledger/central/sample-002",
       "state_axis": "解析失败 · NOT_ASSESSED",
       "summary": "无法解析日志结构",
       "title": "工作日志 · 2026-08-18",
+      "type_label": "每日摘要"
+    },
+    {
+      "age_bucket": "30",
+      "date": "2026-08-05",
+      "event_sequence": 1,
+      "event_time_utc": "2026-08-05T02:00:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-001"
+      ],
+      "job_id": "SHARED/CENTRAL",
+      "job_locator": "memorive://job/SHARED/CENTRAL",
+      "ledger_type": "central",
+      "log_entry_id": "SHARED/CENTRAL/2026-08-05",
+      "milestones": [
+        {
+          "time": "2026-08-05 00:30—00:42 +09:00",
+          "title": "当日汇总",
+          "fields": [
+            [
+              "稳定结论",
+              "18 份旧资料归档，3 份重复文件移入回收站。"
+            ],
+            [
+              "验证与正式化",
+              "只记录已确认的里程碑。"
+            ],
+            [
+              "边界",
+              "不把每日摘要扩写成任务记录。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-05/001\nsource_order=04\ncommit_oid=READ_ONLY_SAMPLE"
+        },
+        {
+          "time": "2026-08-05 10:18—10:24 +09:00",
+          "title": "两份记录的回执核对",
+          "fields": [
+            [
+              "稳定结论",
+              "任务事件、每日摘要、任务回执的顺序可以核对。"
+            ],
+            [
+              "远端回执",
+              "NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "未知字段保留在技术细节里。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-05/002\ntransaction_id=central-demo-018\nunknown_field=preserved"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "月初整理：归档 18 份旧资料，清出 3 份重复文件",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/central/sample-001",
+      "state_axis": "只读摘要",
+      "summary": "月初整理：归档 18 份旧资料，清出 3 份重复文件",
+      "title": "工作日志 · 2026-08-05",
       "type_label": "每日摘要"
     }
   ]

@@ -1,3 +1,3 @@
-synthetic offline sample
-artifact_id=doc-design-notes
-not a real library file
+#!/bin/sh
+# A shell script: the library lists it but does not open this kind of file.
+echo design notes

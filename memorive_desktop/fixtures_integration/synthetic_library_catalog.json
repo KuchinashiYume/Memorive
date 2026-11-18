@@ -21,12 +21,63 @@
       ],
       "relative_path": "literature/Long_Context_Evaluation.pdf",
       "rights_status": "ALLOWED",
-      "size_bytes": 2048,
+      "size_bytes": 3737,
       "stable_locator": "memorive://artifact/lit-evidence-drift",
       "status": "complete",
       "task": "task-04",
       "updated_at": "2026-08-25T13:21:00+09:00",
       "view_snapshot_id": "synthetic-library-v1-001"
+    },
+    {
+      "artifact_id": "lit-sparse-attention",
+      "display_name": "Sparse Attention for Long Documents",
+      "external_target": "Zotero",
+      "file_exists": true,
+      "file_state": "READY",
+      "kind": "literature",
+      "lineage": [
+        "inbox:run-044",
+        "task-06"
+      ],
+      "mode": "literature",
+      "privacy_class": "PUBLIC_SAFE",
+      "products": [
+        "Card_Sparse_Attention.md",
+        "Analysis_Sparse_Attention.md"
+      ],
+      "relative_path": "literature/Sparse_Attention_Long_Documents.pdf",
+      "rights_status": "ALLOWED",
+      "size_bytes": 2923,
+      "stable_locator": "memorive://artifact/lit-sparse-attention",
+      "status": "complete",
+      "task": "task-06",
+      "updated_at": "2026-08-25T11:40:00+09:00",
+      "view_snapshot_id": "synthetic-library-v1-002"
+    },
+    {
+      "artifact_id": "lit-retrieval-calibration",
+      "display_name": "检索结果的置信度校准",
+      "external_target": "Obsidian",
+      "file_exists": true,
+      "file_state": "READY",
+      "kind": "literature",
+      "lineage": [
+        "inbox:run-045",
+        "task-07"
+      ],
+      "mode": "literature",
+      "privacy_class": "PUBLIC_SAFE",
+      "products": [
+        "Card_检索置信度校准.md"
+      ],
+      "relative_path": "literature/检索置信度校准.pdf",
+      "rights_status": "ALLOWED",
+      "size_bytes": 3188,
+      "stable_locator": "memorive://artifact/lit-retrieval-calibration",
+      "status": "complete",
+      "task": "task-07",
+      "updated_at": "2026-08-25T10:55:00+09:00",
+      "view_snapshot_id": "synthetic-library-v1-003"
     },
     {
       "artifact_id": "lit-visual-attention",
@@ -44,12 +95,12 @@
       "products": [],
       "relative_path": "literature/视觉注意机制回顾.pdf",
       "rights_status": "ALLOWED",
-      "size_bytes": 1536,
+      "size_bytes": 3158,
       "stable_locator": "memorive://artifact/lit-visual-attention",
       "status": "pending",
       "task": "task-08",
       "updated_at": "2026-08-25T12:54:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-002"
+      "view_snapshot_id": "synthetic-library-v1-004"
     },
     {
       "artifact_id": "lit-multilingual-reasoning",
@@ -69,12 +120,35 @@
       ],
       "relative_path": "literature/Multilingual_Reasoning.pdf",
       "rights_status": "ALLOWED",
-      "size_bytes": 4096,
+      "size_bytes": 2897,
       "stable_locator": "memorive://artifact/lit-multilingual-reasoning",
       "status": "processing",
       "task": "task-09",
       "updated_at": "2026-08-25T10:08:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-003"
+      "view_snapshot_id": "synthetic-library-v1-005"
+    },
+    {
+      "artifact_id": "lit-tabular-benchmark",
+      "display_name": "A Tabular Reasoning Benchmark (draft)",
+      "external_target": "",
+      "file_exists": true,
+      "file_state": "READY",
+      "kind": "literature",
+      "lineage": [
+        "inbox:waiting",
+        "task-10"
+      ],
+      "mode": "literature",
+      "privacy_class": "PUBLIC_SAFE",
+      "products": [],
+      "relative_path": "literature/Tabular_Reasoning_Benchmark.pdf",
+      "rights_status": "ALLOWED",
+      "size_bytes": 1931,
+      "stable_locator": "memorive://artifact/lit-tabular-benchmark",
+      "status": "pending",
+      "task": "task-10",
+      "updated_at": "2026-08-24T21:30:00+09:00",
+      "view_snapshot_id": "synthetic-library-v1-006"
     },
     {
       "artifact_id": "lit-damaged-scan",
@@ -94,7 +168,30 @@
       "status": "error",
       "task": "",
       "updated_at": "2026-08-24T18:08:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-004"
+      "view_snapshot_id": "synthetic-library-v1-007"
+    },
+    {
+      "artifact_id": "doc-daily-0824",
+      "display_name": "2026-08-24 研究日报",
+      "external_target": "Obsidian",
+      "file_exists": true,
+      "file_state": "READY",
+      "kind": "daily",
+      "lineage": [
+        "sample-project",
+        "report:daily"
+      ],
+      "mode": "memorive",
+      "privacy_class": "PUBLIC_SAFE",
+      "products": [],
+      "relative_path": "memorive/2026-08-24_研究日报.md",
+      "rights_status": "ALLOWED",
+      "size_bytes": 299,
+      "stable_locator": "memorive://artifact/doc-daily-0824",
+      "status": "daily",
+      "task": "task-12",
+      "updated_at": "2026-08-25T09:50:00+09:00",
+      "view_snapshot_id": "synthetic-library-v1-008"
     },
     {
       "artifact_id": "doc-daily-0823",
@@ -112,12 +209,12 @@
       "products": [],
       "relative_path": "memorive/2026-08-23_研究日报.md",
       "rights_status": "ALLOWED",
-      "size_bytes": 1024,
+      "size_bytes": 360,
       "stable_locator": "memorive://artifact/doc-daily-0823",
       "status": "daily",
       "task": "task-12",
       "updated_at": "2026-08-25T09:42:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-005"
+      "view_snapshot_id": "synthetic-library-v1-009"
     },
     {
       "artifact_id": "doc-weekly-34",
@@ -135,12 +232,12 @@
       "products": [],
       "relative_path": "memorive/第34周研究周报.md",
       "rights_status": "ALLOWED",
-      "size_bytes": 1200,
+      "size_bytes": 356,
       "stable_locator": "memorive://artifact/doc-weekly-34",
       "status": "weekly",
       "task": "task-13",
       "updated_at": "2026-08-24T20:15:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-006"
+      "view_snapshot_id": "synthetic-library-v1-010"
     },
     {
       "artifact_id": "doc-monthly-08",
@@ -158,12 +255,35 @@
       "products": [],
       "relative_path": "memorive/2026-08_研究月报.docx",
       "rights_status": "ALLOWED",
-      "size_bytes": 1800,
+      "size_bytes": 4657,
       "stable_locator": "memorive://artifact/doc-monthly-08",
       "status": "monthly",
       "task": "task-14",
       "updated_at": "2026-08-22T17:30:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-007"
+      "view_snapshot_id": "synthetic-library-v1-011"
+    },
+    {
+      "artifact_id": "doc-conversation-22",
+      "display_name": "阅读讨论记录 · 22",
+      "external_target": "Logseq",
+      "file_exists": true,
+      "file_state": "READY",
+      "kind": "conversation",
+      "lineage": [
+        "sample-project",
+        "session:synthetic-22"
+      ],
+      "mode": "memorive",
+      "privacy_class": "PUBLIC_SAFE",
+      "products": [],
+      "relative_path": "memorive/阅读讨论记录_22.md",
+      "rights_status": "ALLOWED",
+      "size_bytes": 293,
+      "stable_locator": "memorive://artifact/doc-conversation-22",
+      "status": "conversation",
+      "task": "",
+      "updated_at": "2026-08-22T15:20:00+09:00",
+      "view_snapshot_id": "synthetic-library-v1-012"
     },
     {
       "artifact_id": "doc-conversation-21",
@@ -181,12 +301,12 @@
       "products": [],
       "relative_path": "memorive/研究决策对话分析_21.md",
       "rights_status": "BLOCKED",
-      "size_bytes": 1500,
+      "size_bytes": 260,
       "stable_locator": "memorive://artifact/doc-conversation-21",
       "status": "conversation",
       "task": "",
       "updated_at": "2026-08-22T11:05:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-008"
+      "view_snapshot_id": "synthetic-library-v1-013"
     },
     {
       "artifact_id": "doc-design-notes",
@@ -204,12 +324,12 @@
       "products": [],
       "relative_path": "unsupported/design_notes.command",
       "rights_status": "ALLOWED",
-      "size_bytes": 900,
+      "size_bytes": 104,
       "stable_locator": "memorive://artifact/doc-design-notes",
       "status": "other",
       "task": "",
       "updated_at": "2026-08-22T08:16:00+09:00",
-      "view_snapshot_id": "synthetic-library-v1-009"
+      "view_snapshot_id": "synthetic-library-v1-014"
     }
   ]
 }

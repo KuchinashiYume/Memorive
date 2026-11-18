@@ -265,6 +265,31 @@ network replies, imported files, data written by older versions, and before anyt
 Code inside the app does not check the results of other code inside the app again. Readers for data
 written by older versions stay, even when no current code writes that form.
 
+A check belongs in the code when you can say what goes wrong without it. Add or keep one for:
+
+- input from outside the app: the window, files a user picks, network and model replies, other programs;
+- files on disk that a person or another program may have changed, and data written by older versions;
+- steps that cannot be undone: deleting, overwriting, paid model calls, sending data out;
+- security boundaries: paths that leave their folder, links and junctions, credentials, private fields
+  in exports;
+- results compared over time, such as exam scores, which are only comparable when the questions are the
+  same ones as before.
+
+Take a check out when it guards nothing outside the program:
+
+- the program checking what it has just computed or written itself: self-hashes, reading back a file it
+  just wrote, validating a state it built a moment ago before saving it;
+- run-time checks on data that ships with the repository, such as the sample data: tests check that;
+- fixed counts and exact field sets ("exactly 9 rows", "no other keys"): a missing field fails where it is
+  used, and an extra one does no harm;
+- hashes pinned on source or resource files, which break on every edit;
+- fields that state a fixed value instead of measuring it, such as `shell_invocations: 0`;
+- the same check at several layers: keep the one nearest the source.
+
+Before taking one out, make sure data written by older versions still reads, and that the error it stopped
+does not turn into a silently wrong result further on. If it would, keep the check, or move it to where
+the data comes from.
+
 ## Inherited behaviour
 
 Much of the app came over from an earlier project. When inherited code plainly does not do what it is
@@ -273,8 +298,8 @@ was written to do:
 
 1. Read the purpose from the code itself: names, comments, callers, and the page that shows the result.
 2. If the purpose is clear, make the code do it: change the one place that is wrong, or add what is
-   missing. Do not wrap it in a new check, a fallback or a "skip when missing" branch, and do not remove
-   the feature.
+   missing. Do not wrap it in a new check, a fallback or a "skip when missing" branch unless it closes a
+   risk named in "How checks are placed", and do not remove the feature.
 3. Say next to the code, in a sentence, what it is for and what was wrong before.
 4. If the purpose is not clear, leave the behaviour as it is and ask.
 

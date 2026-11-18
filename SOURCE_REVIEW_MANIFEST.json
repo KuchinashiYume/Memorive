@@ -4076,7 +4076,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "05293c9087d14cd3b3b8f0d793f820d4a9556a3e7b32e532bbc66cc611f0156c",
+      "sha256": "19db9e93c6d9766d73f132940edab4bc04e1c43123ed6527ae548369023964d4",
       "bytes": 275229
     },
     {
@@ -5046,8 +5046,8 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "1d96e10ce23bc5a14b147618dd4556ee18ca250b3c57a8492d35be165e14ec09",
-      "bytes": 29634
+      "sha256": "9ca396f95387823e1338cda5732f68e2a9267024dce541b16ff8b6c76062cde2",
+      "bytes": 31281
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
@@ -7091,8 +7091,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/product_controller.py",
-      "sha256": "76f6e041505a7e1081141bcaa8b023a3bb71d223e3698321021372ae73838fe8",
-      "bytes": 77068
+      "sha256": "9746102fa46afb0a5ca722f154544465178f24112ff22d729eaf42bd528465c5",
+      "bytes": 75297
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/refinement_markdown.py",
@@ -9441,8 +9441,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/work_log/product_controller.py",
-      "sha256": "cc633a008a5ba218062017f5b0e8a3b6167f1a5b91984b6b3a480da7afedf395",
-      "bytes": 59320
+      "sha256": "3b26a16ec64eef7c36fd09c429aa1153398c1d91b3d86d16e2c7bd2a1eaabec6",
+      "bytes": 53873
     },
     {
       "path": "memorive_desktop/source/memorive/platform/decisions/__init__.py",
@@ -10061,28 +10061,28 @@
     },
     {
       "path": "memorive_desktop/fixtures/README.md",
-      "sha256": "961044ec3e438dc9087ee9cb7a62c2f2bf2e41372b2b47261847a5e3d58d66bd",
-      "bytes": 2067
+      "sha256": "828f64d8a72f1af5c492472eb3418b4303060ba2d91eaade78e5a7226664f04c",
+      "bytes": 2443
     },
     {
       "path": "memorive_desktop/fixtures/source/basic.txt",
-      "sha256": "ff006190049ed562285c326d820d3ce95e4da8ba80cfdd5c0f8b7e95e68ef1bf",
-      "bytes": 36
+      "sha256": "83332ace1510075fea5f5089164a2650c0f40b6c6c12a0c429b135cb546ccc17",
+      "bytes": 277
     },
     {
       "path": "memorive_desktop/fixtures/source/sample.docx",
-      "sha256": "e4f6c2eec53c7a1695b425f57a4875c3332885b84c607fbd0197b243bee48c90",
-      "bytes": 291
+      "sha256": "9ec28ac2cc3b9ecfe160e6ada6e03c68ff0c725aeb24bbb214d56bdaf8dd2a92",
+      "bytes": 4258
     },
     {
       "path": "memorive_desktop/fixtures/source/sample.pdf",
-      "sha256": "ebf7758336db4f75faa1812420171892baa2ba6633ba196fd69f105069ac9148",
-      "bytes": 73
+      "sha256": "4b7d9a45f23907f04e61e7646e1f800caeffabc50b2c7c19bb96208eac96d3d4",
+      "bytes": 3760
     },
     {
       "path": "memorive_desktop/fixtures/source/sample.png",
-      "sha256": "4b280ee386975bb60d09380237b2024e649ce104f755b1e415dba09fff2b4b5c",
-      "bytes": 33
+      "sha256": "e47fc5706f99deecd3b46a1339566f68d008a0456d94722d439f37174d2312a2",
+      "bytes": 6316
     },
     {
       "path": "memorive_desktop/fixtures/source/sample.pptx",
@@ -10091,13 +10091,13 @@
     },
     {
       "path": "memorive_desktop/fixtures/source/sample.xlsx",
-      "sha256": "cdc275eca5613542623072e16382bc5b771234de949471f19db44b12dfa08b3a",
-      "bytes": 430
+      "sha256": "125eabc3e6e8826b292a0c8359a812dc5c9fc05d9444c59b1f14100e49b2f17a",
+      "bytes": 3486
     },
     {
       "path": "memorive_desktop/fixtures/source/unicode/研究_合成样例.md",
-      "sha256": "883b0a7d34cbfe71c9b8a34e5168c9dc6292c66b731d14cbef2f6e1cea56b17c",
-      "bytes": 37
+      "sha256": "eafd97e6cc89d4d8657aa6508e0b49e75b4f6008840012e790c97a8881cea4ff",
+      "bytes": 339
     },
     {
       "path": "memorive_desktop/fixtures/source/unsupported.exe",
@@ -10106,48 +10106,73 @@
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/literature/Long_Context_Evaluation.pdf",
-      "sha256": "f258f4a7e79ed416c2a8b4b132990794967e03a26a6552f760ea1386f93537cd",
-      "bytes": 80
+      "sha256": "2ade1e9f186aa948692f4dde1122df52c05ae74afdfa10eef38983e95f316008",
+      "bytes": 3737
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/literature/Multilingual_Reasoning.pdf",
-      "sha256": "3cf274bda3fc7aa1b25cb5492853fbeb45f1a3ddfb15ab23f9d70e62830b7560",
-      "bytes": 88
+      "sha256": "6cb66e6fcba5704cb1e38da6d61ab3233daf10f28b012205314b9fd6bd664a48",
+      "bytes": 2897
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/literature/视觉注意机制回顾.pdf",
-      "sha256": "d0df06b67e8cd0a776f1be4b8c499d6861eecd0676b61b27f6515b03f822678a",
-      "bytes": 82
+      "sha256": "8913a03c2f860249a9859ade8921a7bb3ffbf7cc6b286a1517c918f60c0e25fb",
+      "bytes": 3158
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/literature/Sparse_Attention_Long_Documents.pdf",
+      "sha256": "5b7754f59620f088416468c44157d1db135c10269e5564e3acfc4fc70246f4ca",
+      "bytes": 2923
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/literature/Tabular_Reasoning_Benchmark.pdf",
+      "sha256": "fd6ceefa0e753d6a232d095846ebf322b45353768a22ae354bf0dddd992f9c05",
+      "bytes": 1931
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/literature/检索置信度校准.pdf",
+      "sha256": "8a163298fd82d219e83b7e34f42fdfb303b18ac1490b0c0ebbc9b4409a50a7f2",
+      "bytes": 3188
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/memorive/2026-08-23_研究日报.md",
-      "sha256": "339b310345ebd27c7149f988253ad901f3cb35b55585fc5ad9c3c4624b69dac8",
-      "bytes": 76
+      "sha256": "e11e2590a50433ba15bba8c534d25411862ed7609e4a4d3de5f4978004468271",
+      "bytes": 360
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/memorive/2026-08_研究月报.docx",
-      "sha256": "cccd2768d99ab90a5f199a0bba8634c8c27f5ac7b2c7d0ccaefcbd47dc0a4bbc",
-      "bytes": 76
+      "sha256": "d45b626ee48ee21069c6923c9026be7b7f9a941b58fa43d327b7b35f5161b4e7",
+      "bytes": 4657
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/memorive/研究决策对话分析_21.md",
-      "sha256": "7f929c36e10c4380268edfe9016bd3af55f47ffb82681f32bb9d0fdf98b4a322",
-      "bytes": 81
+      "sha256": "efca3323c45ec3360d2a145a83ff8532431e01c9e3e7abad597a9308c38fee76",
+      "bytes": 260
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/memorive/第34周研究周报.md",
-      "sha256": "4efb46e90dbf7038099201c1f94d61852ab5494bcbc7cd14dd523de24caef40b",
-      "bytes": 75
+      "sha256": "13f81dc8dfb4b408fe1709825f66457674a5e715007be266c29e2f51a0b602ad",
+      "bytes": 356
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/memorive/2026-08-24_研究日报.md",
+      "sha256": "470945615db56f59a0360f9b5adeea2d6390f14c31b500e049138c289689b106",
+      "bytes": 299
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/memorive/阅读讨论记录_22.md",
+      "sha256": "6b86b6c4c06ca8ae90056256d86dc5e8edc968c2bee8961f1bf8c748aff95340",
+      "bytes": 293
     },
     {
       "path": "memorive_desktop/fixtures_integration/files/unsupported/design_notes.command",
-      "sha256": "4366611f735257743d6342bf8a2274fe9da244354e2890aa3a0a5892098ec6b6",
-      "bytes": 78
+      "sha256": "178710ecf7811b2260206862c986bf2f96c6f28bcb89b9147683fb7be9f80d4c",
+      "bytes": 104
     },
     {
       "path": "memorive_desktop/fixtures_integration/synthetic_library_catalog.json",
-      "sha256": "6df51f799fd029f0fa152732e0a14d03efd29332007f37f16b811576fad58a88",
-      "bytes": 6732
+      "sha256": "97a31289a6608c6a4b1576153619f8dd81cde6fdb05d13d689e853090d72e907",
+      "bytes": 10559
     },
     {
       "path": "memorive_desktop/fixtures_logging/source_authority_sentinels.json",
@@ -10161,8 +10186,8 @@
     },
     {
       "path": "memorive_desktop/fixtures_logging/synthetic_work_log_stream.json",
-      "sha256": "739d80e80d0e3d4cac7b3fa2001c708cc94f6e9a28377750440cc75b1d3f3607",
-      "bytes": 15522
+      "sha256": "46b7a7ae5c257c6454487765f54d06d7b8f9c5b2f1e37fe3ed2f2e62ae85b9f8",
+      "bytes": 23084
     },
     {
       "path": "memorive_desktop/fixtures_retrieval/locator_catalog.json",
