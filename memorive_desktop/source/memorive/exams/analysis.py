@@ -2863,47 +2863,48 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
 
     def _analysis_panel_record(self, run: _AnalysisExamRun) -> None:
         """Score what is left after the repairs, publish the form scores, decide the panel verdict and
-        write this panel's record."""
-        residual_materiality = analysis_material_repair_targets(
-            run.current_scores
-        )
-        residual_sets = deepcopy(
-            residual_materiality["targets_by_form"]
-        )
-        calibration_sets = deepcopy(
-            residual_materiality["calibration_only_by_form"]
-        )
+        write this panel's record.
+
+        Residuals and repair burden, then the forms' scores and final files, the published panel score,
+        the single-panel model-fail projection (never a failure: that takes the cohort), the cost cap, the
+        panel record, and last the run marked as waiting for the other panels of its cohort."""
+        residual_materiality = analysis_material_repair_targets(run.current_scores)
+        residual_sets = deepcopy(residual_materiality["targets_by_form"])
+        calibration_sets = deepcopy(residual_materiality["calibration_only_by_form"])
+        self._panel_repair_burden(run, residual_sets)
+        form_results = self._panel_form_results(run, calibration_sets)
+        run.failed_item_count = sum(len(case_ids) for case_ids in residual_sets.values())
+        run.calibration_residual_count = sum(len(case_ids) for case_ids in calibration_sets.values())
+        self._publish_panel_score(run, form_results)
+        self._panel_model_fail_projection(run, residual_sets, calibration_sets)
+        cap = run.plan.get("budget_cap_cny")
+        if cap is not None and run.state["estimated_cost_cny"] > float(cap):
+            raise ValueError("WORKFLOW_MODEL_EXAM_COST_CAP_EXCEEDED")
+        self._write_panel_record(run, residual_sets, calibration_sets)
+        self._await_panel_cohort(run)
+
+    def _panel_repair_burden(self, run: _AnalysisExamRun, residual_sets: Mapping[str, Any]) -> None:
+        """The burden of the residual cases, and the cumulative penalty of the repair rounds used."""
         run.residual_burden = self._analysis_category_burden(
-            exam=run.exam,
-            forms=run.forms,
-            scores=run.current_scores,
-            exact_sets=residual_sets,
-        )
+            exam=run.exam, forms=run.forms, scores=run.current_scores, exact_sets=residual_sets)
         penalty_round_rows: list[dict[str, Any]] = []
         for round_index, burden in enumerate(run.repair_burdens, start=1):
-            penalty_round_rows.append(
-                {
-                    "round_number": round_index,
-                    "category_id": self.EXAM_CATEGORY_ID,
-                    "nonlinear_category_penalty": burden["total_mean"],
-                    "fixed_penalty": 0.0,
-                    "volume_penalty": 0.0,
-                }
-            )
-        run.cumulative_penalty = (
-            cumulative_category_repair_penalty(penalty_round_rows)
-            if penalty_round_rows
-            else None
-        )
+            penalty_round_rows.append({
+                "round_number": round_index,
+                "category_id": self.EXAM_CATEGORY_ID,
+                "nonlinear_category_penalty": burden["total_mean"],
+                "fixed_penalty": 0.0,
+                "volume_penalty": 0.0,
+            })
+        run.cumulative_penalty = cumulative_category_repair_penalty(penalty_round_rows) if penalty_round_rows else None
+
+    def _panel_form_results(self, run: _AnalysisExamRun, calibration_sets: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+        """Each form's score and result row; writes the final raw projection and the final responses."""
         form_results: dict[str, dict[str, Any]] = {}
         run.form_scores = {}
         for form_id in ("A", "B"):
-            visible_output_chars = len(
-                _serialized_request(run.current_responses[form_id])
-            )
-            piecewise = run.exam.score_analysis_form_v2(
-                raw_scoring=run.current_scores[form_id]
-            )
+            visible_output_chars = len(_serialized_request(run.current_responses[form_id]))
+            piecewise = run.exam.score_analysis_form_v2(raw_scoring=run.current_scores[form_id])
             base_score = float(piecewise["score"])
             form_score = round(max(0.0, base_score), 2)
             run.form_scores[form_id] = form_score
@@ -2912,54 +2913,30 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                 "score": form_score,
                 "score_before_successor_repair_burden": base_score,
                 "repair_burden_applied_to_quality_score": False,
-                "quality_hard_gate": run.current_scores[form_id][
-                    "quality_hard_gate"
-                ],
-                "critical_count": run.current_scores[form_id][
-                    "critical_count"
-                ],
-                "repair_round_burdens": [
-                    deepcopy(burden["by_form"][form_id])
-                    for burden in run.repair_burdens
-                ],
-                "residual_burden": deepcopy(
-                    run.residual_burden["by_form"][form_id]
-                ),
+                "quality_hard_gate": run.current_scores[form_id]["quality_hard_gate"],
+                "critical_count": run.current_scores[form_id]["critical_count"],
+                "repair_round_burdens": [deepcopy(burden["by_form"][form_id]) for burden in run.repair_burdens],
+                "residual_burden": deepcopy(run.residual_burden["by_form"][form_id]),
                 "calibration_only_case_ids": calibration_sets[form_id],
                 "visible_output_chars": visible_output_chars,
-                "visible_output_reference_ceiling_chars": (
-                    Core_PRIMARY_ANALYSIS_OUTPUT_CHAR_LIMIT
-                ),
-                "visible_output_exceeds_reference": (
-                    visible_output_chars
-                    > Core_PRIMARY_ANALYSIS_OUTPUT_CHAR_LIMIT
-                ),
+                "visible_output_reference_ceiling_chars": Core_PRIMARY_ANALYSIS_OUTPUT_CHAR_LIMIT,
+                "visible_output_exceeds_reference": visible_output_chars > Core_PRIMARY_ANALYSIS_OUTPUT_CHAR_LIMIT,
                 "visible_output_reference_semantics": "DIAGNOSTIC_ONLY",
             }
             _write_json_create_only(
-                run.run_root
-                / "panel_scores"
-                / f"form_{form_id}_final_raw_projection.json",
-                self._analysis_cohort_raw_projection(
-                    run.current_scores[form_id]
-                ),
+                run.run_root / "panel_scores" / f"form_{form_id}_final_raw_projection.json",
+                self._analysis_cohort_raw_projection(run.current_scores[form_id]),
             )
-            _write_json_create_only(
-                run.run_root / "responses" / f"form_{form_id}_final.json",
-                run.current_responses[form_id],
-            )
-        run.failed_item_count = sum(
-            len(case_ids) for case_ids in residual_sets.values()
-        )
-        run.calibration_residual_count = sum(
-            len(case_ids) for case_ids in calibration_sets.values()
-        )
+            _write_json_create_only(run.run_root / "responses" / f"form_{form_id}_final.json",
+                                    run.current_responses[form_id])
+        return form_results
+
+    @staticmethod
+    def _publish_panel_score(run: _AnalysisExamRun, form_results: Mapping[str, Any]) -> None:
+        """The exam module's published panel score, and the panel's candidate verdict (80 or more, no
+        material residual, both hard gates passed)."""
         publication = run.exam.publish_analysis_exam_result(
-            provider=str(
-                run.target.get("provider")
-                or run.target.get("adapter_id")
-                or run.target.get("endpoint_kind")
-            ),
+            provider=str(run.target.get("provider") or run.target.get("adapter_id") or run.target.get("endpoint_kind")),
             model=str(run.target["model_name"]),
             parameters={
                 "profile_kind": run.target["kind"],
@@ -2968,74 +2945,47 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
                 "maximum_model_calls": run.plan["maximum_model_calls"],
             },
             forms=form_results,
-            evidence_refs=[
-                "responses/form_A_final.json",
-                "responses/form_B_final.json",
-            ],
+            evidence_refs=["responses/form_A_final.json", "responses/form_B_final.json"],
         )
         run.score = int(round(float(publication["total_score_out_of_100"])))
         run.panel_quality_candidate_verdict = (
             "PASS"
-            if run.score >= 80
-            and run.failed_item_count == 0
-            and all(
-                run.current_scores[form_id]["quality_hard_gate"] == "PASS"
-                for form_id in ("A", "B")
-            )
+            if run.score >= 80 and run.failed_item_count == 0
+            and all(run.current_scores[form_id]["quality_hard_gate"] == "PASS" for form_id in ("A", "B"))
             else "FAIL"
         )
+
+    def _panel_model_fail_projection(self, run: _AnalysisExamRun, residual_sets: Mapping[str, Any],
+                                     calibration_sets: Mapping[str, Any]) -> None:
+        """The residual case ids for the cohort, and a panel verdict that stays NOT_ASSESSED: one panel
+        cannot establish a model failure."""
         blocking_failures: list[dict[str, Any]] = []
         for form_id in ("A", "B"):
             residual_ids = set(residual_sets[form_id])
             for detail in run.current_scores[form_id].get("details", []):
-                if (
-                    not isinstance(detail, Mapping)
-                    or detail.get("case_id") not in residual_ids
-                ):
+                if not isinstance(detail, Mapping) or detail.get("case_id") not in residual_ids:
                     continue
                 failed_fields = sorted(
-                    {
-                        str(reason)
-                        for reason in (detail.get("critical_reasons") or [])
-                        if isinstance(reason, str) and reason
-                    }
+                    {str(reason) for reason in (detail.get("critical_reasons") or []) if isinstance(reason, str) and reason}
                 )
                 if not failed_fields:
                     failed_fields = ["CASE_SCORE_BELOW_80_MATERIAL"]
-                blocking_failures.append(
-                    {
-                        "case_id": str(detail["case_id"]),
-                        "failed_fields": failed_fields,
-                        "evidence_anchor": (
-                            f"scores/form_{form_id}.json#"
-                            f"case_details/{detail['case_id']}"
-                        ),
-                        "blocking": True,
-                        "model_fail_materiality": "MATERIAL",
-                    }
-                )
-        material_residual_case_ids = sorted(
-            str(row["case_id"]) for row in blocking_failures
-        )
-        calibration_residual_case_ids = sorted(
-            case_id
-            for case_ids in calibration_sets.values()
-            for case_id in case_ids
-        )
+                blocking_failures.append({
+                    "case_id": str(detail["case_id"]),
+                    "failed_fields": failed_fields,
+                    "evidence_anchor": f"scores/form_{form_id}.json#case_details/{detail['case_id']}",
+                    "blocking": True,
+                    "model_fail_materiality": "MATERIAL",
+                })
         run.model_fail_projection = {
-            "model_fail_policy_revision": (
-                PRIMARY_MODEL_FAIL_POLICY_REVISION
-            ),
+            "model_fail_policy_revision": PRIMARY_MODEL_FAIL_POLICY_REVISION,
             "model_fail_verdict": "NOT_ASSESSED",
             "model_fail_established": False,
             "model_fail_minimum_distinct_material_cases": None,
-            "material_residual_case_ids": material_residual_case_ids,
-            "calibration_residual_case_ids": (
-                calibration_residual_case_ids
-            ),
-            "operational_eligibility_verdict": (
-                "PENDING_THREE_PANEL_COHORT"
-            ),
+            "material_residual_case_ids": sorted(str(row["case_id"]) for row in blocking_failures),
+            "calibration_residual_case_ids": sorted(
+                case_id for case_ids in calibration_sets.values() for case_id in case_ids),
+            "operational_eligibility_verdict": "PENDING_THREE_PANEL_COHORT",
             "category_id": self.EXAM_CATEGORY_ID,
             "category_local_score": round(float(run.score), 2),
             "numeric_score_is_not_model_fail_verdict": True,
@@ -3046,23 +2996,16 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
         run.raw_quality_fail_admission = None
         run.quality_fail_admission = None
         run.verdict = "NOT_ASSESSED"
-        cap = run.plan.get("budget_cap_cny")
-        if cap is not None and run.state["estimated_cost_cny"] > float(cap):
-            raise ValueError("WORKFLOW_MODEL_EXAM_COST_CAP_EXCEEDED")
+
+    def _write_panel_record(self, run: _AnalysisExamRun, residual_sets: Mapping[str, Any],
+                            calibration_sets: Mapping[str, Any]) -> None:
+        """Write the anchor normalizations and panel_scores/panel_record.json, which later panels read."""
         run.normalization_receipt = _write_json_create_only(
-            run.run_root
-            / "normalizations"
-            / "analysis_case_local_anchor_aliases.json",
+            run.run_root / "normalizations" / "analysis_case_local_anchor_aliases.json",
             {
-                "schema_version": (
-                    ANALYSIS_PRIMARY_ANCHOR_NORMALIZATION_REVISION
-                ),
-                "normalization_count": len(
-                    run.state["analysis_anchor_normalizations"]
-                ),
-                "actions": deepcopy(
-                    run.state["analysis_anchor_normalizations"]
-                ),
+                "schema_version": ANALYSIS_PRIMARY_ANCHOR_NORMALIZATION_REVISION,
+                "normalization_count": len(run.state["analysis_anchor_normalizations"]),
+                "actions": deepcopy(run.state["analysis_anchor_normalizations"]),
                 "gold_consulted": False,
                 "provider_call_required": False,
                 "semantic_repair_round_increment": 0,
@@ -3075,74 +3018,43 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
             "panel_binding_sha256": run.plan["panel_binding_sha256"],
             "cohort_basis": {
                 "category_id": self.EXAM_CATEGORY_ID,
-                "reference_pack_sha256": run.plan[
-                    "reference_pack_sha256"
-                ],
+                "reference_pack_sha256": run.plan["reference_pack_sha256"],
                 "sample_revision": run.plan["sample_revision"],
-                "subject_projection_revision": run.plan[
-                    "subject_projection_revision"
-                ],
+                "subject_projection_revision": run.plan["subject_projection_revision"],
                 "executor_ref": self.EXECUTOR_REF,
             },
             "model_identity": self._panel_model_identity(run.target),
-            "selection": deepcopy(
-                run.inputs["sample_metadata"]["selection"]
-            ),
+            "selection": deepcopy(run.inputs["sample_metadata"]["selection"]),
             "initial_raw_scores": {
-                form_id: self._analysis_cohort_raw_projection(
-                    run.raw_scores[form_id]
-                )
-                for form_id in ("A", "B")
+                form_id: self._analysis_cohort_raw_projection(run.raw_scores[form_id]) for form_id in ("A", "B")
             },
             "raw_scores": {
-                form_id: self._analysis_cohort_raw_projection(
-                    run.current_scores[form_id]
-                )
-                for form_id in ("A", "B")
+                form_id: self._analysis_cohort_raw_projection(run.current_scores[form_id]) for form_id in ("A", "B")
             },
-            "panel_quality_candidate_verdict": (
-                run.panel_quality_candidate_verdict
-            ),
+            "panel_quality_candidate_verdict": run.panel_quality_candidate_verdict,
             "panel_score_diagnostic": run.score,
-            "first_pass_panel_score_diagnostic": (
-                run.first_pass_role_ability_score
-            ),
-            "material_residual_case_ids_by_form": deepcopy(
-                residual_sets
-            ),
-            "calibration_residual_case_ids_by_form": deepcopy(
-                calibration_sets
-            ),
+            "first_pass_panel_score_diagnostic": run.first_pass_role_ability_score,
+            "material_residual_case_ids_by_form": deepcopy(residual_sets),
+            "calibration_residual_case_ids_by_form": deepcopy(calibration_sets),
             "semantic_repair_rounds": len(run.repair_lifecycle),
-            "semantic_repair_acceptance": deepcopy(
-                run.repair_acceptance_receipts
-            ),
+            "semantic_repair_acceptance": deepcopy(run.repair_acceptance_receipts),
             "panel_evidence_only": True,
             "single_panel_cache_eligible": False,
             "provider_received_answer_key": False,
-            "initial_exact_progress_reuse": bool(
-                run.state["analysis_preloaded_initial_rows"]
-            ),
+            "initial_exact_progress_reuse": bool(run.state["analysis_preloaded_initial_rows"]),
             "initial_reused_case_row_count": sum(
-                len(action["reused_case_ids"])
-                for action in run.state[
-                    "analysis_preloaded_initial_rows"
-                ]
-            ),
+                len(action["reused_case_ids"]) for action in run.state["analysis_preloaded_initial_rows"]),
         }
         panel_record["panel_record_sha256"] = _sha256(panel_record)
-        run.panel_record_receipt = _write_json_create_only(
-            run.run_root / "panel_scores" / "panel_record.json",
-            panel_record,
-        )
+        run.panel_record_receipt = _write_json_create_only(run.run_root / "panel_scores" / "panel_record.json", panel_record)
+
+    def _await_panel_cohort(self, run: _AnalysisExamRun) -> None:
+        """Keep this panel's scores apart, mark the run as waiting for its cohort, and load the panels of the
+        cohort completed so far (this one included)."""
         run.panel_score_diagnostic = run.score
         run.panel_form_scores = deepcopy(run.form_scores)
-        run.panel_first_pass_role_ability_score = (
-            run.first_pass_role_ability_score
-        )
-        run.result_reason = (
-            "ANALYSIS_PRIMARY_PANEL_COMPLETED_COHORT_PENDING"
-        )
+        run.panel_first_pass_role_ability_score = run.first_pass_role_ability_score
+        run.result_reason = "ANALYSIS_PRIMARY_PANEL_COMPLETED_COHORT_PENDING"
         run.panel_evidence_only = True
         run.stable_score_cache_eligible = False
         run.horizontal_comparison_eligible = False
@@ -3155,16 +3067,11 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
         run.cohort_panel_score_range = None
         run.completed_panel_records = self._completed_panel_records(
             target=run.target,
-            cohort_basis=self._panel_cohort_basis(
-                str(run.plan["reference_pack_sha256"])
-            ),
+            cohort_basis=self._panel_cohort_basis(str(run.plan["reference_pack_sha256"])),
             cohort_slots=list(run.plan["panel_cohort_slots"]),
         )
         run.cohort_panel_count = len(run.completed_panel_records)
-        run.cohort_sample_slots = sorted(
-            int(record["sample_slot"])
-            for record in run.completed_panel_records
-        )
+        run.cohort_sample_slots = sorted(int(record["sample_slot"]) for record in run.completed_panel_records)
 
     def _analysis_cohort_result(self, run: _AnalysisExamRun) -> None:
         """Once every panel of the cohort is complete: the cohort's score, verdict and cache eligibility.
