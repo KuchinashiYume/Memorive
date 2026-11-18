@@ -282,7 +282,9 @@ Take a check out when it guards nothing outside the program:
 - run-time checks on data that ships with the repository, such as the sample data: tests check that;
 - fixed counts and exact field sets ("exactly 9 rows", "no other keys"): a missing field fails where it is
   used, and an extra one does no harm;
-- hashes pinned on source or resource files, which break on every edit;
+- hashes of source or resource files pinned in the code, which break on every edit (the release manifests
+  such as `SOURCE_MANIFEST.json` are another thing: `tools/sync_manifests.py` rewrites them and nothing
+  checks them at run time);
 - fields that state a fixed value instead of measuring it, such as `shell_invocations: 0`;
 - the same check at several layers: keep the one nearest the source.
 
