@@ -6,6 +6,8 @@ Finding opportunities across papers (the opportunities page, opportunities.* met
   finder.py    papers grouped, one model request per group, each opportunity checked against the facts
   runs.py      the run (research runtime), the ledger of opportunities found and what the user did
                with them, and the tensions the weekly report lists
+  groups.py    comparison groups: the papers the user chose to search among, and files picked from
+               disk on their way through the inbox
 
 Research Q&A uses research_opportunities.py and imports core.py for CONCEPT_ORDER, which lives in
 canonical.py together with the hashing shared with the verifier

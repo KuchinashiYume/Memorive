@@ -1,15 +1,17 @@
-"""Research opportunities across processed papers: fact sheets, checks, the run and the ledger.
+"""Research opportunities across processed papers: fact sheets, checks, the run, the ledger and comparison groups.
 
 Three made-up papers: two report calibration error after temperature scaling on different data
 (0.05 on synthetic reports, 0.11 on real clinical notes), the third states that reports with tables
 were not tested. The model is a stub that answers with prepared opportunities; the checks, the run,
-the library row, the message, the ledger and the weekly report are the real ones.
+the library row, the message, the ledger and the weekly report are the real ones. For comparison
+groups the inbox is a stand-in that imports, dispatches and reports items as the real one does.
 """
 from __future__ import annotations
 
 import copy
 import json
 import threading
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -17,7 +19,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from memorive.research.opportunities import facts, finder, runs
+from memorive.research.opportunities import facts, finder, groups, runs
 
 
 def card(title, *, question, objects, methods, context, data, results, conclusion, limits=(), outlook=(), status='active'):
@@ -51,11 +53,17 @@ PAPERS = {
 }
 
 
+def days_ago(days):
+    return (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+
 def library(tmp_path, papers=PAPERS, status=None):
+    """The library's products of the papers: a card and chunks each, processed a day ago; add() adds a
+    paper later (a job that finished), with status its card's review status."""
     records, files = {}, {}
-    for job, text in papers.items():
-        if status and job in status:
-            text = text.replace('review_status: active', 'review_status: ' + status[job])
+
+    def add(job, text, status='active', days=1):
+        text = text.replace('review_status: active', 'review_status: ' + status)
         card_path = tmp_path / 'library' / job / 'card.md'
         card_path.parent.mkdir(parents=True, exist_ok=True)
         card_path.write_text(text, encoding='utf-8')
@@ -65,10 +73,13 @@ def library(tmp_path, papers=PAPERS, status=None):
         for kind, path in (('CORE_CARD', card_path), ('CORE_CHUNKS', chunks)):
             artifact = f'{job}/{kind}'
             records[artifact] = {'artifact_kind': kind, 'job_id': job, 'content_sha256': f'{job}-{kind}-sha',
-                                 'private_path': str(path), 'row': {'display_name': job}}
+                                 'private_path': str(path), 'row': {'display_name': job, 'updated_at': days_ago(days)}}
             files[artifact] = path
+
+    for job, text in papers.items():
+        add(job, text, (status or {}).get(job, 'active'))
     return SimpleNamespace(core_artifacts=lambda: copy.deepcopy(records), resolve_core_private_artifact=files.__getitem__,
-                           records=records)
+                           records=records, add=add)
 
 
 def ids(sheets):
@@ -228,6 +239,42 @@ class Model:
                     'execution_receipt': {'status': 'PASS', 'behavior_sha256': 'b', 'token_usage': {'input_tokens': 1},
                                           'physical_call_ids': ['call-' + str(len(self.prompts))]},
                     'response': self.answer(params['prompt'])}
+        if method == 'get_job':
+            return {'control_state': 'RUNNING'}
+        raise AssertionError(method)
+
+
+class Inbox:
+    """The inbox methods a comparison group uses, as ProductApi.call answers them: a file is imported
+    as a queued item (an earlier file with the same name as a duplicate of it), dispatch gives it a job."""
+
+    def __init__(self):
+        self.items, self.by_name, self.dispatched, self.count = {}, {}, [], 0
+
+    def call(self, method, params):
+        if method == 'inbox.import_paths':
+            rows = []
+            for path in params['paths']:
+                name = Path(path).name
+                if name in self.by_name:
+                    rows.append({'item': {'item_id': 'dup-' + name, 'state': 'DEDUPLICATED', 'duplicate_of': self.by_name[name]}})
+                    continue
+                self.count += 1
+                item_id = 'item-' + str(self.count)
+                self.items[item_id] = {'item_id': item_id, 'state': 'QUEUED', 'source_name': name, 'job_id': None}
+                self.by_name[name] = item_id
+                rows.append({'item': dict(self.items[item_id])})
+            return {'items': rows}
+        if method == 'inbox.dispatch':
+            item = self.items[params['item_id']]
+            self.dispatched.append(params)
+            item.update(state='PROCESSING', job_id='job-of-' + item['source_name'])
+            return {}
+        if method == 'inbox.item_detail':
+            item = self.items.get(params['item_id'])
+            if item is None or item['state'] == 'TRASHED':
+                raise ValueError('INBOX_ITEM_NOT_VISIBLE')
+            return dict(item, name=item['source_name'])
         raise AssertionError(method)
 
 
@@ -239,6 +286,7 @@ def research(tmp_path, monkeypatch):
     monkeypatch.setattr(jobs, 'workspace_settings', lambda host: {'profile_ref': 'api:chat'})
     monkeypatch.setattr(report_models, 'catalog', lambda runtime, capability='CHAT': [{'profile_ref': 'api:chat', 'eligible': True}])
     lib = library(tmp_path)
+    inbox = Inbox()
     messages = []
 
     def make(answer, fail_group=None):
@@ -248,16 +296,17 @@ def research(tmp_path, monkeypatch):
         r.lock, r.stop, r.closed, r.current, r.thread, r._node_progress_live = threading.RLock(), threading.Event(), False, None, None, {}
         r.host = SimpleNamespace(service=Model(answer, fail_group), library=lib, notify_window=lambda name: None,
                                  messages=SimpleNamespace(post_event=lambda event: (messages.append(event), ['message-1'])[1]),
-                                 profile_path=lambda area: tmp_path / area)
+                                 profile_path=lambda area: tmp_path / area, desktop_call=inbox.call)
         r.opportunities = runs.Opportunities(r)
         return r
 
-    def run(r, request_id, focus=''):
-        item = r.opportunities.call('opportunities.find', {'request_id': request_id, 'focus': focus})
+    def run(r, request_id, focus='', group_id=None):
+        params = {'request_id': request_id, 'focus': focus} | ({'group_id': group_id} if group_id else {})
+        item = r.opportunities.call('opportunities.find', params)
         r.thread.join(20)
         return r.call('research.get', {'run_id': item['run_id']})
 
-    return SimpleNamespace(make=make, run=run, messages=messages, library=lib)
+    return SimpleNamespace(make=make, run=run, messages=messages, library=lib, inbox=inbox)
 
 
 def answer_from_prompt(prompt):
@@ -369,3 +418,120 @@ def test_the_weekly_report_lists_a_divergence_under_tensions_between_sources(res
         '（《Calibrating report classifiers on synthetic data》、《Calibration of clinical note classifiers》）']
     assert '## 明确来源的潜在张力' in result['markdown'] or '潜在张力' in result['markdown']
     assert 'Two papers disagree' in result['markdown']
+
+
+# Comparison groups
+
+
+def test_papers_lists_the_last_30_days_and_finds_older_ones_by_name(research):
+    research.library.add('job-old', PAPERS['job-b'].replace('Calibration of clinical note classifiers',
+                                                            'Older notes on calibration'), days=90)
+    research.library.add('job-waiting', PAPERS['job-c'].replace('Reading long reports', 'A card under review'),
+                         status='pending')
+    r = research.make(answer_from_prompt)
+    recent = r.opportunities.call('opportunities.papers', {})
+    assert {row['job_id'] for row in recent['items']} == {'job-a', 'job-b', 'job-c', 'job-waiting'}
+    assert {row['job_id']: row['card_status'] for row in recent['items']}['job-waiting'] == 'pending'
+    found = r.opportunities.call('opportunities.papers', {'query': 'older CALIBRATION'})
+    assert [(row['job_id'], row['title']) for row in found['items']] == [('job-old', 'Older notes on calibration')]
+
+
+def test_a_group_holds_admitted_papers_under_its_revision(research):
+    research.library.add('job-waiting', PAPERS['job-c'], status='pending')
+    r = research.make(answer_from_prompt)
+    call = r.opportunities.call
+    with pytest.raises(ValueError, match='OPPORTUNITIES_PAPER_NOT_ACTIVE:job-waiting'):
+        call('opportunities.group_save', {'job_ids': ['job-a', 'job-waiting'], 'expected_revision': 0})
+    saved = call('opportunities.group_save', {'job_ids': ['job-a', 'job-b'], 'expected_revision': 0})
+    group = saved['groups'][0]
+    assert (saved['revision'], group['name'], [p['job_id'] for p in group['papers']]) == (1, '比较组 1', ['job-a', 'job-b'])
+    with pytest.raises(ValueError, match='OPPORTUNITIES_GROUP_REVISION_CONFLICT'):
+        call('opportunities.group_save', {'group_id': group['group_id'], 'job_ids': ['job-a'], 'expected_revision': 0})
+    second = call('opportunities.group_save', {'job_ids': ['job-c'], 'name': ' Long reports ', 'expected_revision': 1})
+    assert [g['name'] for g in second['groups']] == ['比较组 1', 'Long reports']
+    # A card taken out of use later stays listed in the group, marked.
+    research.library.add('job-b', PAPERS['job-b'], status='quarantined')
+    assert [p['card_status'] for p in call('opportunities.groups', {})['groups'][0]['papers']] == ['active', 'quarantined']
+    left = call('opportunities.group_delete', {'group_id': group['group_id'], 'expected_revision': 2})
+    assert [g['name'] for g in left['groups']] == ['Long reports'] and left['revision'] == 3
+    with pytest.raises(ValueError, match='OPPORTUNITIES_GROUP_NOT_FOUND'):
+        call('opportunities.group_add_files', {'group_id': group['group_id'], 'paths': ['x.pdf'], 'request_id': 'r1'})
+
+
+def test_files_picked_for_a_group_join_it_once_their_card_is_admitted(research):
+    r = research.make(answer_from_prompt)
+    call = r.opportunities.call
+    group_id = call('opportunities.group_save', {'job_ids': ['job-a'], 'expected_revision': 0})['groups'][0]['group_id']
+    # An earlier file that was processed and admitted joins at once when picked again.
+    research.inbox.items['item-old'] = {'item_id': 'item-old', 'state': 'HANDED_OFF', 'source_name': 'clinical.pdf',
+                                        'job_id': 'job-b'}
+    research.inbox.by_name['clinical.pdf'] = 'item-old'
+    groups = call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/new.pdf', 'C:/stage/clinical.pdf'],
+                                                    'request_id': 'pick-1'})
+    group = groups['groups'][0]
+    assert [p['job_id'] for p in group['papers']] == ['job-a', 'job-b']
+    assert [(e['title'], e['status']) for e in group['pending']] == [('new.pdf', 'processing')]
+    assert [d['item_id'] for d in research.inbox.dispatched] == ['item-1']
+    # Picking the same file again with the same request adds nothing twice.
+    again = call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/new.pdf'], 'request_id': 'pick-1'})
+    assert len(again['groups'][0]['pending']) == 1
+    # Its card waits for review, then is admitted: from then on it is one of the group's papers.
+    research.library.add('job-of-new.pdf', PAPERS['job-c'], status='pending')
+    assert call('opportunities.groups', {})['groups'][0]['pending'][0]['status'] == 'card_pending'
+    research.library.add('job-of-new.pdf', PAPERS['job-c'])
+    group = call('opportunities.groups', {})['groups'][0]
+    assert [p['job_id'] for p in group['papers']] == ['job-a', 'job-b', 'job-of-new.pdf'] and group['pending'] == []
+    # A file taken out of the inbox before it was processed shows as removed; failing shows its error.
+    call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/gone.pdf', 'C:/stage/bad.pdf'],
+                                           'request_id': 'pick-2'})
+    research.inbox.items['item-2']['state'] = 'TRASHED'
+    research.inbox.items['item-3'].update(state='ERROR', error={'code': 'PDF_UNREADABLE'})
+    pending = call('opportunities.groups', {})['groups'][0]['pending']
+    assert [(e['title'], e['status'], e.get('error')) for e in pending] == [('gone.pdf', 'removed', None),
+                                                                           ('bad.pdf', 'failed', 'PDF_UNREADABLE')]
+    # Saving what the page shows keeps the papers and only the pending files it still lists.
+    revision = call('opportunities.groups', {})['revision']
+    saved = call('opportunities.group_save', {'group_id': group_id, 'job_ids': ['job-a', 'job-b', 'job-of-new.pdf'],
+                                              'pending_item_ids': ['item-3'], 'expected_revision': revision})
+    assert [e['item_id'] for e in saved['groups'][0]['pending']] == ['item-3']
+
+
+def test_a_search_in_a_group_reads_only_its_papers(research):
+    r = research.make(answer_from_prompt)
+    call = r.opportunities.call
+    saved = call('opportunities.group_save', {'job_ids': ['job-a', 'job-b'], 'expected_revision': 0})
+    small = call('opportunities.group_save', {'job_ids': ['job-c'], 'expected_revision': 1})
+    with pytest.raises(ValueError, match='OPPORTUNITIES_GROUP_TOO_SMALL'):
+        call('opportunities.find', {'request_id': 'one', 'group_id': small['groups'][1]['group_id']})
+    group = saved['groups'][0]
+    state = research.run(r, 'in-group', group_id=group['group_id'])
+    assert state['status'] == 'SUCCEEDED' and state['group_name'] == '比较组 1'
+    prompt = r.host.service.prompts[0]
+    assert 'Calibration of clinical note classifiers' in prompt and 'Reading long reports' not in prompt
+    result = state['result']
+    assert (result['paper_count'], result['group']['job_ids']) == (2, ['job-a', 'job-b'])
+    assert [o['kind'] for o in result['opportunities']] == ['divergence']
+    # Papers new since the last search of the whole library: a group's search does not count.
+    assert r.opportunities.call('opportunities.state', {})['papers_since_last_run'] == 3
+
+
+def test_files_picked_for_a_group_are_copied_to_the_inbox_staging_folder(tmp_path):
+    from memorive.desktop.api.inbox_files import InboxFilesMixin
+    library_folder = tmp_path / 'zotero'
+    library_folder.mkdir()
+    (library_folder / 'paper.pdf').write_bytes(b'%PDF-1.4 made up')
+    opened = []
+
+    class Window:
+        def create_file_dialog(self, kind, directory, allow_multiple, file_types):
+            opened.append((directory, file_types[0]))
+            return [str(library_folder / 'paper.pdf')] if len(opened) == 1 else None
+
+    api = InboxFilesMixin()
+    api._window, api._inbox_source_root = Window(), tmp_path / 'inbox-sources'
+    api._inbox_source_root.mkdir()
+    picked = api.pick_opportunity_files({'directory': str(library_folder)})
+    assert opened[0] == (str(library_folder), 'PDF (*.pdf)')
+    staged = Path(picked['paths'][0])
+    assert staged.parent.parent == api._inbox_source_root and staged.read_bytes() == b'%PDF-1.4 made up'
+    assert api.pick_opportunity_files({'directory': str(library_folder)}) == {'paths': [], 'path_count': 0, 'status': 'CANCELLED'}

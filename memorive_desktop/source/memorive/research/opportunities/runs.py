@@ -3,7 +3,8 @@
 ProductApi forwards opportunities.* here (Opportunities.call). opportunities.find starts a run in its
 own thread:
 
-  COLLECTING   the fact sheets of the processed papers (facts.papers)
+  COLLECTING   the fact sheets of the processed papers (facts.papers), or of a comparison group's
+               papers when the user chose one (groups.py)
   COMPOSING    one request per group of papers (finder.groups) to the model chosen for research Q&A,
                each answer checked (finder.checked); a group whose request fails is reported and the
                other groups go on (the run is then PARTIAL)
@@ -19,11 +20,12 @@ papers_since_last_run in the state, and the user decides when to look again.
 import re, threading
 from memorive.research.common import read, write, sealed, sha, now
 from memorive.research.opportunities import facts, finder
+from memorive.research.opportunities.groups import Groups, METHODS as GROUP_METHODS, MIN_PAPERS
 from memorive.platform.language.policy import from_settings
 from memorive.platform.language.text import choose
 
 METHODS = frozenset({'opportunities.state', 'opportunities.find', 'opportunities.get', 'opportunities.cancel',
-                     'opportunities.mark'})
+                     'opportunities.mark'}) | GROUP_METHODS
 STATUSES = ('new', 'kept', 'asked', 'dismissed')
 TENSION_KINDS = ('divergence', 'condition_difference')
 
@@ -63,10 +65,11 @@ def report_rows(root):
 class Opportunities:
     def __init__(self, runtime):
         self.r = runtime
+        self.groups = Groups(runtime)
 
-    def papers(self):
+    def papers(self, only=None):
         library = self.r.host.library
-        return facts.papers(library.core_artifacts(), library.resolve_core_private_artifact)
+        return facts.papers(library.core_artifacts(), library.resolve_core_private_artifact, only)
 
     def model(self):
         """The model chosen for research Q&A, when it can be used; None otherwise."""
@@ -83,7 +86,8 @@ class Opportunities:
         cards = {record['content_sha256'] for record in self.r.host.library.core_artifacts().values()
                  if record['artifact_kind'] == 'CORE_CARD'}
         runs = self.runs()
-        last = next((run for run in runs if run['status'] in {'SUCCEEDED', 'PARTIAL'}), None)
+        # Papers new since the last search of the whole library; a comparison group's search does not count.
+        last = next((run for run in runs if run['status'] in {'SUCCEEDED', 'PARTIAL'} and not run.get('group_id')), None)
         seen = set(read(self.r.run_path(last['run_id']) / 'result.json')['card_sha256s']) if last else set()
         items = []
         for item in ledger['items'].values():
@@ -104,12 +108,14 @@ class Opportunities:
         return state
 
     def call(self, method, p):
+        if method in GROUP_METHODS:
+            return self.groups.call(method, p)
         if method == 'opportunities.state':
             if p:
                 raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
             return self.state()
         if method == 'opportunities.find':
-            if set(p) - {'request_id', 'focus'}:
+            if set(p) - {'request_id', 'focus', 'group_id'}:
                 raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
             return self.start(**p)
         if method == 'opportunities.mark':
@@ -136,11 +142,22 @@ class Opportunities:
             write(ledger_path(self.r.root), sealed(dict(ledger, revision=ledger['revision'] + 1)))
         return self.state()
 
-    def start(self, request_id, focus=''):
-        if not isinstance(request_id, str) or not 1 <= len(request_id) <= 160 or not isinstance(focus, str) or len(focus) > 500:
+    def chosen(self, group_id):
+        """The group a search is limited to, with its admitted papers: {group_id, name, job_ids}."""
+        group = self.groups.group(group_id)
+        job_ids = [paper['job_id'] for paper in group['papers'] if paper['card_status'] == 'active']
+        if len(job_ids) < MIN_PAPERS:
+            raise ValueError('OPPORTUNITIES_GROUP_TOO_SMALL')
+        return {'group_id': group['group_id'], 'name': group['name'], 'job_ids': job_ids}
+
+    def start(self, request_id, focus='', group_id=None):
+        if not isinstance(request_id, str) or not 1 <= len(request_id) <= 160 or not isinstance(focus, str) or len(focus) > 500 \
+                or not (group_id is None or isinstance(group_id, str)):
             raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
         identity = 'research-' + sha('opportunities:' + request_id)[:24]
         path = self.r.run_path(identity)
+        # Read before taking the lock: it reads the library and asks the inbox about files on their way.
+        group = self.chosen(group_id) if group_id is not None else None
         with self.r.lock:
             if self.r.closed:
                 raise ValueError('RESEARCH_CLOSED')
@@ -153,14 +170,15 @@ class Opportunities:
                 raise ValueError('RESEARCH_ALREADY_RUNNING')
             language = from_settings(self.r.host.service, current_user_text=focus)
             params = {'kind': 'opportunities', 'period': None, 'config': {'push_enabled': True}, 'focus': focus.strip(),
-                      'model_ref': model['profile_ref'], 'language_context': language}
+                      'model_ref': model['profile_ref'], 'language_context': language, 'group': group}
             write(path / 'request.json', sealed(params))
             self.r.stop = threading.Event()
             self.r.current = identity
             item = self.r.update_state(identity, run_id=identity, kind='opportunities', period=None,
                                        title=title(language, today()), language_context=language, status='QUEUED',
                                        stage='WAITING', created_at=now(), request_sha256=sha(params),
-                                       model_calls=0, paid_model_calls=0)
+                                       model_calls=0, paid_model_calls=0, group_id=group and group['group_id'],
+                                       group_name=group and group['name'])
             self.r.thread = threading.Thread(target=self.execute, args=(identity, params), name='desktop-research-opportunities', daemon=True)
             self.r.thread.start()
             return item
@@ -212,7 +230,11 @@ class Opportunities:
             with execution_control(check), TASK_CATEGORIES.enter('RESEARCH_OPPORTUNITIES', checkpoint=check), \
                     session_scope(r.progress_session(run_id)):
                 r.update_state(run_id, status='RUNNING', stage='COLLECTING')
-                papers = self.papers()
+                chosen = params.get('group')
+                papers = self.papers(set(chosen['job_ids']) if chosen else None)
+                if chosen and len(papers) < MIN_PAPERS:
+                    # Cards changed between the click and the run.
+                    raise ValueError('OPPORTUNITIES_GROUP_TOO_SMALL')
                 if not papers:
                     raise ValueError('OPPORTUNITIES_NO_PAPERS')
                 write(path / 'papers.json', sealed({'papers': [{k: v for k, v in paper.items() if k != 'chunks'} for paper in papers]}))
@@ -243,7 +265,7 @@ class Opportunities:
                 result = sealed({
                     'schema_version': 'ResearchOpportunities-v1', 'kind': 'opportunities', 'period': None,
                     'status': 'PARTIAL' if failed else 'SUCCEEDED', 'language_context': language, 'focus': params['focus'],
-                    'paper_count': len(papers),
+                    'paper_count': len(papers), 'group': chosen,
                     'card_sha256s': sorted(paper['card_sha256'] for paper in papers),
                     'opportunities': new, 'dropped': dropped, 'failed_groups': failed,
                     'model': {k: model[k] for k in ('model_name', 'display_name', 'profile_kind')},

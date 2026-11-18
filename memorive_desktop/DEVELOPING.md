@@ -47,7 +47,8 @@ start" below).
   briefing, `opportunities/runs.py` the search for research opportunities, `home.py` the home page summary) with
   `memorive/research/discovery`, `memorive/research/recommendations`, `memorive/research/reports` and
   `memorive/research/opportunities` (`facts.py` the fact sheets of processed papers, `finder.py` the model
-  request per group of papers and the checks of each opportunity). Messages and current-task requests about a research run are answered by
+  request per group of papers and the checks of each opportunity, `groups.py` the comparison groups of
+  papers the user chose to search among). Messages and current-task requests about a research run are answered by
   its `routes.py`. The runtime reaches the rest of the app only through the `ResearchHost` that
   `ProductApi` builds (`host.py`): the settings service, library, messages, work log and window events.
 

@@ -114,19 +114,20 @@ def sheet(number: int, card: dict, chunks: dict[str, dict]) -> list[dict]:
     return facts
 
 
-def papers(core_artifacts: dict[str, dict], resolve) -> list[dict]:
+def papers(core_artifacts: dict[str, dict], resolve, only=None) -> list[dict]:
     """One fact sheet per processed paper whose card is admitted (active), oldest job first.
 
     core_artifacts is the library's core_artifacts(); resolve(artifact_id) gives the file of a
-    product (resolve_core_private_artifact). Each sheet also names the paper's library files with
-    their content hashes, as memo.library_add takes them, so a follow-up conversation can add them."""
+    product (resolve_core_private_artifact); only, when given, is the set of job ids to take (a
+    comparison group). Each sheet also names the paper's library files with their content hashes,
+    as memo.library_add takes them, so a follow-up conversation can add them."""
     by_job: dict[str, dict[str, str]] = {}
     for artifact_id, record in core_artifacts.items():
         by_job.setdefault(record['job_id'], {})[record['artifact_kind']] = artifact_id
     sheets = []
     for job_id, products in sorted(by_job.items()):
         card_id = products.get('CORE_CARD')
-        if not card_id:
+        if not card_id or only is not None and job_id not in only:
             continue
         card = card_fields(resolve(card_id))
         # Only admitted cards, as in retrieval: a pending card has not passed review, a quarantined one

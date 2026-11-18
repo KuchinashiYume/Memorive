@@ -75,6 +75,28 @@ class InboxFilesMixin:
             }
         return self.stage_inbox_paths([str(path) for path in selected])
 
+    def pick_opportunity_files(self, options: dict[str, Any] | None = None) -> dict[str, Any]:
+        """Papers for a research opportunities comparison group, chosen in the system file dialog.
+
+        The dialog opens in options["directory"] when it is a folder (a connected library's folder),
+        else in the workspace folder. The chosen files are copied into the inbox staging folder, as
+        pick_inbox_files does; the page passes the copies' paths to opportunities.group_add_files."""
+        if self._window is None:
+            raise RuntimeError("PRODUCT_WINDOW_NOT_ATTACHED")
+        from webview import FileDialog
+        directory = (options or {}).get("directory")
+        start = (Path(directory) if isinstance(directory, str) and directory and Path(directory).is_dir()
+                 else self._effective_directory("workspace_root"))
+        selected = self._window.create_file_dialog(
+            FileDialog.OPEN,
+            directory=str(start),
+            allow_multiple=True,
+            file_types=("PDF (*.pdf)", "Supported files (*.pdf;*.md;*.txt;*.docx)", "All files (*.*)"),
+        )
+        if not selected:
+            return {"paths": [], "path_count": 0, "status": "CANCELLED"}
+        return self.stage_inbox_paths([str(path) for path in selected])
+
     def pick_research_files(self) -> dict[str, Any]:
         """Keep source bundles together; research attachments own durable copying."""
         if self._window is None:
