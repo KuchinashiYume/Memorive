@@ -248,35 +248,11 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
         raise ValueError("CONTEXT_PACK_TOKEN_HARD_LIMIT_INVALID")
     ratio, overhead = cfg["token_ratio"], cfg["overhead_per_block"]
     hard = token_hard_limit or cfg["token_hard_limit"]
-    from copy import deepcopy
-    from memorive.research.retrieval.review_qualifications import render_review_context
-    qualifications = tuple(deepcopy(card_review_qualifications))
-    review_text = render_review_context(qualifications)
-    review_tokens = _estimate_tokens(review_text, ratio, 0) if review_text else 0
-    if review_tokens > hard:
-        raise ValueError("CONTEXT_PACK_REVIEW_QUALIFICATIONS_EXCEED_CAPACITY")
+    qualifications, review_tokens = _review_qualifications(card_review_qualifications, ratio, hard)
     cands = list(getattr(candidate_set, "candidates", ()) or ())
     wf = weight_fn or _default_weight
-
-    # The room for counterexamples: larger for FIND_COUNTEREXAMPLE, at most the number of candidates.
-    single_paper = retrieval_mode == "single_paper_extraction"
-    ce_target = (0 if single_paper
-                 else cfg["counterexample_target"])
-    boosted = not single_paper and bool(getattr(strategy, "counterexample_boost", False))
-    if boosted:
-        ce_target = max(ce_target, math.ceil(getattr(candidate_set, "final_active_count", len(cands)) * 0.5))
-    ce_target = min(ce_target, len(cands))
-
-    # 1. Weight, tokens and likely counterexample of each candidate.
-    bad_distance = 0
-    rows = []
-    for c in cands:
-        w = wf(c)
-        if w is None or not isinstance(w, (int, float)) or not math.isfinite(w):
-            w = 0.0
-            bad_distance += 1
-        rows.append({"c": c, "w": float(w), "tok": _estimate_tokens(c.text, ratio, overhead),
-                     "ce": _is_counterexample(c.text)})
+    single_paper, ce_target, boosted = _counterexample_room(cfg, candidate_set, strategy, retrieval_mode, cands)
+    rows, bad_distance = _weighted(cands, wf, ratio, overhead)
 
     # 2. A stable order: a model-generated ranking first, else weight and distance. A ranking place
     #    is not turned into a fake relevance score.
@@ -293,7 +269,80 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
     ce_pool = [] if single_paper else sorted((r for r in rows if r["ce"]), key=_key)
     main_pool = sorted(rows if single_paper else (r for r in rows if not r["ce"]), key=_key)
 
-    # 3. Pack: the limit first, then protected counterexamples, then the rest; whole blocks only.
+    selected, total, ce_filled, single_over, ce_token_dropped, main_truncated = _pack(
+        ce_pool, main_pool, ce_target, hard, review_tokens)
+    blocks, context_pack_ref, context_pack_hash, pack_snapshot, receipt = _bound_blocks(selected, _key, qualifications)
+    truncated = bool(single_over or ce_token_dropped or main_truncated)
+    pack = ContextPack(
+        blocks=blocks, estimated_tokens=total, token_hard_limit=hard,
+        counterexample_slots={"target": ce_target, "filled": ce_filled}, truncated=truncated,
+        raw_recall_count=getattr(candidate_set, "raw_recall_count", 0),
+        filtered_non_active_count=getattr(candidate_set, "filtered_non_active_count", 0),
+        final_active_count=getattr(candidate_set, "final_active_count", len(cands)),
+        require_verified=getattr(candidate_set, "require_verified", False),
+        scope_mode=getattr(candidate_set, "scope_mode", "shared"),
+        scope_paper_id=getattr(candidate_set, "scope_paper_id", None),
+        retrieval_mode=retrieval_mode or "multi_paper_synthesis",
+        context_pack_ref=context_pack_ref,
+        context_pack_hash=context_pack_hash,
+        original_estimated_tokens=review_tokens + sum(row["tok"] for row in rows),
+        card_review_qualifications=qualifications,
+        dropped_evidence_block_count=max(0, len(rows) - len(selected)),
+        dropped_reason_counts={
+            "single_block_over_limit": len(single_over),
+            "counterexample_capacity_dropped": len(ce_token_dropped),
+            "mainstream_capacity_dropped": len(main_truncated),
+        },
+        ownership_propagation_receipt=receipt.to_dict(),
+        **snapshot_fields(pack_snapshot, pack=True),
+    )
+    _log_pack(pack, total, hard, ce_filled, ce_target, boosted, truncated, single_over, ce_token_dropped,
+              main_truncated, bad_distance, blocks, cfg, token_hard_limit, retrieval_mode)
+    return pack
+
+
+def _review_qualifications(card_review_qualifications, ratio, hard):
+    """The card review's qualifications that go with the pack, and their tokens; they must fit the limit."""
+    from copy import deepcopy
+    from memorive.research.retrieval.review_qualifications import render_review_context
+    qualifications = tuple(deepcopy(card_review_qualifications))
+    review_text = render_review_context(qualifications)
+    review_tokens = _estimate_tokens(review_text, ratio, 0) if review_text else 0
+    if review_tokens > hard:
+        raise ValueError("CONTEXT_PACK_REVIEW_QUALIFICATIONS_EXCEED_CAPACITY")
+    return qualifications, review_tokens
+
+
+def _counterexample_room(cfg, candidate_set, strategy, retrieval_mode, cands):
+    """The room for counterexamples: larger for FIND_COUNTEREXAMPLE, at most the number of candidates;
+    none for single-paper extraction."""
+    single_paper = retrieval_mode == "single_paper_extraction"
+    ce_target = (0 if single_paper
+                 else cfg["counterexample_target"])
+    boosted = not single_paper and bool(getattr(strategy, "counterexample_boost", False))
+    if boosted:
+        ce_target = max(ce_target, math.ceil(getattr(candidate_set, "final_active_count", len(cands)) * 0.5))
+    ce_target = min(ce_target, len(cands))
+    return single_paper, ce_target, boosted
+
+
+def _weighted(cands, wf, ratio, overhead):
+    """1. Weight, tokens and likely counterexample of each candidate; a weight that is not a finite
+    number counts as 0 (bad_distance)."""
+    bad_distance = 0
+    rows = []
+    for c in cands:
+        w = wf(c)
+        if w is None or not isinstance(w, (int, float)) or not math.isfinite(w):
+            w = 0.0
+            bad_distance += 1
+        rows.append({"c": c, "w": float(w), "tok": _estimate_tokens(c.text, ratio, overhead),
+                     "ce": _is_counterexample(c.text)})
+    return rows, bad_distance
+
+
+def _pack(ce_pool, main_pool, ce_target, hard, review_tokens):
+    """3. Pack: the limit first, then protected counterexamples, then the rest; whole blocks only."""
     selected, total, ce_filled = [], review_tokens, 0
     single_over, ce_token_dropped, main_truncated = [], [], []
     for r in ce_pool:                                       # 3a: up to ce_target counterexamples, protected
@@ -315,8 +364,12 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
         else:
             selected.append(r)
             total += r["tok"]
+    return selected, total, ce_filled, single_over, ce_token_dropped, main_truncated
 
-    # 4. The pack, by weight (the counterexamples are among the selected blocks).
+
+def _bound_blocks(selected, _key, qualifications):
+    """4. The pack's blocks by weight (the counterexamples are among them), its identity, and the
+    receipt that binds each selected chunk's ownership to its block and to the pack."""
     blocks = tuple(_ownership_block(row) for row in sorted(selected, key=_key))
     context_pack_ref, context_pack_hash = _context_pack_identity(blocks, qualifications)
     pack_snapshot = aggregate_blocks(blocks, subject_ref=context_pack_ref)
@@ -344,30 +397,12 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
             "NO_CALLER_OWNERSHIP_AUTHORITY",
         ),
     )
-    truncated = bool(single_over or ce_token_dropped or main_truncated)
-    pack = ContextPack(
-        blocks=blocks, estimated_tokens=total, token_hard_limit=hard,
-        counterexample_slots={"target": ce_target, "filled": ce_filled}, truncated=truncated,
-        raw_recall_count=getattr(candidate_set, "raw_recall_count", 0),
-        filtered_non_active_count=getattr(candidate_set, "filtered_non_active_count", 0),
-        final_active_count=getattr(candidate_set, "final_active_count", len(cands)),
-        require_verified=getattr(candidate_set, "require_verified", False),
-        scope_mode=getattr(candidate_set, "scope_mode", "shared"),
-        scope_paper_id=getattr(candidate_set, "scope_paper_id", None),
-        retrieval_mode=retrieval_mode or "multi_paper_synthesis",
-        context_pack_ref=context_pack_ref,
-        context_pack_hash=context_pack_hash,
-        original_estimated_tokens=review_tokens + sum(row["tok"] for row in rows),
-        card_review_qualifications=qualifications,
-        dropped_evidence_block_count=max(0, len(rows) - len(selected)),
-        dropped_reason_counts={
-            "single_block_over_limit": len(single_over),
-            "counterexample_capacity_dropped": len(ce_token_dropped),
-            "mainstream_capacity_dropped": len(main_truncated),
-        },
-        ownership_propagation_receipt=receipt.to_dict(),
-        **snapshot_fields(pack_snapshot, pack=True),
-    )
+    return blocks, context_pack_ref, context_pack_hash, pack_snapshot, receipt
+
+
+def _log_pack(pack, total, hard, ce_filled, ce_target, boosted, truncated, single_over, ce_token_dropped,
+              main_truncated, bad_distance, blocks, cfg, token_hard_limit, retrieval_mode):
+    """The packing record in the retrieval log."""
     log_reason("RETRIEVAL", "ContextAssembly 打包",
                f"blocks={len(blocks)} tokens={total}/{hard} 反例={ce_filled}/{ce_target}"
                f"{' underfilled' if ce_filled < ce_target else ''}{' truncated' if truncated else ''}",
@@ -399,4 +434,4 @@ def build_context_pack(candidate_set, strategy=None, *, weight_fn=None,
                        "ownership_error_codes": list(pack.ownership_error_codes),
                    },
                })
-    return pack
+
