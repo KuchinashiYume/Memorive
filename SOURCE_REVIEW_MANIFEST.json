@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "ae76d119f9cf17868f3d54b2a4fd626ebb19532c25881de6d562e1b6f1689403",
+      "sha256": "cd57fcbe27c0d0c61106a820b96980004f984f4b73c653fba0998a2922d58761",
       "bytes": 276403
     },
     {
@@ -8401,8 +8401,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/groups.py",
-      "sha256": "0709965d7c80386f51a0b0fdbd4c31cd3bef12f9ac311aca2bd70f50f70f0d38",
-      "bytes": 14755
+      "sha256": "bd7607322e10e626ad9dec7cc1aff52fac4ada5096a1d78f707187c30c40bb64",
+      "bytes": 17298
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/__init__.py",

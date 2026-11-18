@@ -250,8 +250,9 @@ class Model:
 
 
 class Inbox:
-    """The inbox methods a comparison group uses, as ProductApi.call answers them: a file is imported
-    as a queued item (an earlier file with the same name as a duplicate of it), dispatch gives it a job."""
+    """The desktop methods comparison groups use, as ProductApi.call answers them: a file is imported
+    into the inbox as a queued item (an earlier file with the same name as a duplicate of it), dispatch
+    gives it a job; memo.connections_state knows one research Q&A connection, zotero in project default."""
 
     def __init__(self, auto_run=False):
         self.items, self.by_name, self.dispatched, self.count, self.auto_run = {}, {}, [], 0, auto_run
@@ -283,6 +284,10 @@ class Inbox:
             self.dispatched.append(params)
             item.update(state='PROCESSING', job_id='job-of-' + item['source_name'])
             return {}
+        if method == 'memo.connections_state':
+            if (params['project'], params['connection_id']) != ('default', 'zotero'):
+                raise ValueError('CONNECTION_NOT_FOUND')
+            return {'connections': [{'id': 'zotero', 'project': 'default'}]}
         if method == 'inbox.item_detail':
             item = self.items.get(params['item_id'])
             if item is None or item['state'] == 'TRASHED':
@@ -462,11 +467,14 @@ def test_a_group_holds_admitted_papers_under_its_revision(research):
         call('opportunities.group_save', {'group_id': group['group_id'], 'job_ids': ['job-a'], 'expected_revision': 0})
     second = call('opportunities.group_save', {'job_ids': ['job-c'], 'name': ' Long reports ', 'expected_revision': 1})
     assert [g['name'] for g in second['groups']] == ['比较组 1', 'Long reports']
-    # A card taken out of use later stays listed in the group, marked.
+    # A card taken out of use later stays listed in the group, marked; the group can still be renamed.
     research.library.add('job-b', PAPERS['job-b'], status='quarantined')
     assert [p['card_status'] for p in call('opportunities.groups', {})['groups'][0]['papers']] == ['active', 'quarantined']
-    left = call('opportunities.group_delete', {'group_id': group['group_id'], 'expected_revision': 2})
-    assert [g['name'] for g in left['groups']] == ['Long reports'] and left['revision'] == 3
+    renamed = call('opportunities.group_save', {'group_id': group['group_id'], 'name': 'Calibration',
+                                                'job_ids': ['job-a', 'job-b'], 'expected_revision': 2})
+    assert [g['name'] for g in renamed['groups']] == ['Calibration', 'Long reports']
+    left = call('opportunities.group_delete', {'group_id': group['group_id'], 'expected_revision': 3})
+    assert [g['name'] for g in left['groups']] == ['Long reports'] and left['revision'] == 4
     with pytest.raises(ValueError, match='OPPORTUNITIES_GROUP_NOT_FOUND'):
         call('opportunities.group_add_files', {'group_id': group['group_id'], 'paths': ['x.pdf'], 'request_id': 'r1'})
 
@@ -561,3 +569,17 @@ def test_files_picked_for_a_group_are_copied_to_the_inbox_staging_folder(tmp_pat
     staged = Path(picked['paths'][0])
     assert staged.parent.parent == api._inbox_source_root and staged.read_bytes() == b'%PDF-1.4 made up'
     assert api.pick_opportunity_files({'directory': str(library_folder)}) == {'paths': [], 'path_count': 0, 'status': 'CANCELLED'}
+
+
+def test_the_third_party_library_to_open_is_a_saved_connection(research):
+    r = research.make(answer_from_prompt)
+    call = r.opportunities.call
+    assert call('opportunities.preferences', {}) == {'revision': 0, 'library': None}
+    with pytest.raises(ValueError, match='CONNECTION_NOT_FOUND'):
+        call('opportunities.preferences_save', {'library': {'project': 'default', 'connection_id': 'gone'},
+                                                'expected_revision': 0})
+    chosen = {'project': 'default', 'connection_id': 'zotero'}
+    assert call('opportunities.preferences_save', {'library': chosen, 'expected_revision': 0}) == {'revision': 1, 'library': chosen}
+    with pytest.raises(ValueError, match='OPPORTUNITIES_PREFERENCES_REVISION_CONFLICT'):
+        call('opportunities.preferences_save', {'library': None, 'expected_revision': 0})
+    assert call('opportunities.preferences_save', {'library': None, 'expected_revision': 1}) == {'revision': 2, 'library': None}

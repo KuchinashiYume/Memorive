@@ -6237,8 +6237,8 @@
     },
     {
       "path": "source/memorive/research/opportunities/groups.py",
-      "sha256": "0709965d7c80386f51a0b0fdbd4c31cd3bef12f9ac311aca2bd70f50f70f0d38",
-      "bytes": 14755
+      "sha256": "bd7607322e10e626ad9dec7cc1aff52fac4ada5096a1d78f707187c30c40bb64",
+      "bytes": 17298
     },
     {
       "path": "source/memorive/research/opportunities/research_opportunities.py",

@@ -10,8 +10,12 @@ started, as a file dropped into the inbox. Until a file's card is admitted it wa
 pending list; a group read after that shows it among its papers. Nothing is written when a group is
 read: the next save keeps what the page then shows.
 
-Opportunities.call forwards opportunities.papers, groups, group_save, group_delete and
-group_add_files here.
+The page's "open a third-party library" opens the folder of one research Q&A connection (Obsidian,
+Zotero or a folder); which one is a preference the user sets in the settings
+(opportunities.preferences, kept in research/opportunity_preferences.json).
+
+Opportunities.call forwards opportunities.papers, groups, group_save, group_delete,
+group_add_files, preferences and preferences_save here.
 """
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -24,7 +28,8 @@ from memorive.research.common import read, write, sealed, now
 from memorive.research.opportunities.facts import card_fields
 
 METHODS = frozenset({'opportunities.papers', 'opportunities.groups', 'opportunities.group_save',
-                     'opportunities.group_delete', 'opportunities.group_add_files'})
+                     'opportunities.group_delete', 'opportunities.group_add_files', 'opportunities.preferences',
+                     'opportunities.preferences_save'})
 RECENT_DAYS = 30
 MIN_PAPERS = 2
 
@@ -100,6 +105,14 @@ class Groups:
             if set(p) != {'group_id', 'expected_revision'}:
                 raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
             return self.delete(**p)
+        if method == 'opportunities.preferences':
+            if p:
+                raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
+            return self.preferences()
+        if method == 'opportunities.preferences_save':
+            if set(p) != {'library', 'expected_revision'}:
+                raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
+            return self.save_preferences(**p)
         if set(p) != {'group_id', 'paths', 'request_id'}:
             raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
         return self.add_files(**p)
@@ -176,19 +189,23 @@ class Groups:
         return f'{label} {number}'
 
     def save(self, job_ids, expected_revision, group_id=None, name=None, pending_item_ids=None):
-        """Create a group (no group_id) or replace one's papers; pending_item_ids keeps only those
-        files still on their way (all of them when it is not given)."""
+        """Create a group (no group_id), rename it (name) or replace its papers; pending_item_ids
+        keeps only those files still on their way (all of them when it is not given). A paper added
+        must have an admitted card; one already in the group stays when its card changed since."""
         if not isinstance(job_ids, list) or not all(isinstance(job_id, str) for job_id in job_ids) \
                 or len(set(job_ids)) != len(job_ids) or len(job_ids) > 500 \
                 or not (name is None or isinstance(name, str) and len(name) <= 60) \
                 or not (pending_item_ids is None or isinstance(pending_item_ids, list)):
             raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
-        papers = self.library()
-        for job_id in job_ids:
+        kept = set((self.stored()['groups'].get(group_id) or {}).get('job_ids') or ())
+        added = [job_id for job_id in job_ids if job_id not in kept]
+        papers = self.library() if added else {}
+        for job_id in added:
             if (papers.get(job_id) or {}).get('card_status') != 'active':
                 raise ValueError('OPPORTUNITIES_PAPER_NOT_ACTIVE:' + job_id)
         with self.r.lock:
             stored = self.stored()
+            # The revision also guarantees the group's papers are those the check above read.
             if stored['revision'] != expected_revision:
                 raise ValueError('OPPORTUNITIES_GROUP_REVISION_CONFLICT')
             groups = dict(stored['groups'])
@@ -256,3 +273,27 @@ class Groups:
             groups = dict(stored['groups'], **{group_id: dict(group, job_ids=job_ids, pending=pending, updated_at=now())})
             self.store(dict(stored, groups=groups))
         return self.groups()
+
+    def preferences_path(self) -> Path:
+        return self.r.root / 'opportunity_preferences.json'
+
+    def preferences(self) -> dict:
+        """{revision, library}: the research Q&A connection ({project, connection_id}) whose folder
+        "open a third-party library" opens, or None."""
+        path = self.preferences_path()
+        stored = read(path) if path.exists() else {'revision': 0, 'library': None}
+        return {'revision': stored['revision'], 'library': stored['library']}
+
+    def save_preferences(self, library, expected_revision):
+        if library is not None:
+            if not isinstance(library, dict) or set(library) != {'project', 'connection_id'} \
+                    or not all(isinstance(value, str) and value for value in library.values()):
+                raise ValueError('OPPORTUNITIES_PARAMS_INVALID')
+            # Refused there when the project or the connection does not exist.
+            self.r.host.desktop_call('memo.connections_state', dict(library))
+        with self.r.lock:
+            current = self.preferences()
+            if current['revision'] != expected_revision:
+                raise ValueError('OPPORTUNITIES_PREFERENCES_REVISION_CONFLICT')
+            write(self.preferences_path(), sealed({'revision': current['revision'] + 1, 'library': library}))
+        return self.preferences()
