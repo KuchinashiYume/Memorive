@@ -29,7 +29,7 @@ from memorive.research.workspace.conversations import Conversations,METHODS as C
 from memorive.research.workspace.connections import Connections,DESKTOP as CONNECTION_METHODS
 from memorive.research.workspace.answer_evidence import AnswerEvidence,METHODS as ANSWER_EVIDENCE_METHODS
 from memorive.research.workspace.answer_saves import AnswerSaves,METHODS as ANSWER_SAVE_METHODS
-from memorive.research.workspace.agents import agent_matches,desktop_agent,desktop_handoff,validate_agent_settings  # noqa: F401 (desktop_handoff: runtime.py)
+from memorive.research.workspace.agents import CLI_ADAPTERS,agent_matches,desktop_agent,desktop_handoff,validate_agent_settings  # noqa: F401 (desktop_handoff: runtime.py)
 from memorive.research.workspace import answer_coverage
 from memorive.research.workspace import answer_versions
 from memorive.platform.language import freeze as freeze_language
@@ -368,12 +368,12 @@ class ResearchWorkspace:
     def agent_dispatch(self, thread_id, question, request_id, profile_ref=None):
         """Ask the chosen command-line agent instead of the chat model (memo.agent_dispatch)."""
         settings = self.settings()
-        ref = profile_ref or settings.get('agent_profile_ref')
-        options = [o for o in self.catalog() if o['profile_kind'] == 'CLI' and o['eligible']]
-        if not ref:
-            aliases = {'codex': {'codex_cli'}, 'claude-code': {'claude_code', 'claude_code_cli'}}.get(settings['agent'], set())
-            ref = next((o['profile_ref'] for o in options if o.get('adapter_id') in aliases), None)
-        if not ref or not any(o['profile_ref'] == ref and agent_matches(o, settings['agent']) for o in options):
+        agent = settings['agent']
+        options = [o['profile_ref'] for o in self.catalog()
+                   if o['profile_kind'] == 'CLI' and o['eligible'] and agent_matches(o, agent)]
+        # Without a chosen model, Codex and Claude Code run on their first connected command line.
+        ref = profile_ref or settings.get('agent_profile_ref') or (options[0] if options and agent in CLI_ADAPTERS else None)
+        if ref not in options:
             raise ValueError('AGENT_MODEL_UNAVAILABLE')
         if not self.agent_model:
             raise ValueError('AGENT_RUNNER_UNAVAILABLE')

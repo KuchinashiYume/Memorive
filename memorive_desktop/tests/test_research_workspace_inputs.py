@@ -142,6 +142,48 @@ def test_saving_invalid_agent_settings_keeps_the_saved_ones(workspace):
     assert workspace.settings() == before
 
 
+# Which command line "hand to the agent" runs on
+
+COMMAND_LINES = [
+    {"profile_ref": "cli:codex", "eligible": True, "profile_kind": "CLI", "adapter_id": "codex_cli"},
+    {"profile_ref": "cli:claude-off", "eligible": False, "profile_kind": "CLI", "adapter_id": "claude_code"},
+    {"profile_ref": "cli:claude", "eligible": True, "profile_kind": "CLI", "adapter_id": "claude_code"},
+    {"profile_ref": "cli:gemini", "eligible": True, "profile_kind": "CLI", "adapter_id": "gemini_cli"},
+    {"profile_ref": "api:chat", "eligible": True, "profile_kind": "API", "adapter_id": None},
+]
+
+
+@pytest.mark.parametrize("agent, chosen, runs_on", [
+    ("codex", None, "cli:codex"),                       # Codex and Claude Code: their first connected command line
+    ("claude-code", None, "cli:claude"),
+    ("claude-code", "cli:claude", "cli:claude"),
+    ("other", "cli:gemini", "cli:gemini"),              # another agent needs its command line chosen
+    ("custom-my-agent", "cli:codex", "cli:codex"),      # a custom command-line agent may run on any of them
+    ("other", None, "AGENT_MODEL_UNAVAILABLE"),
+    ("claude-code", "cli:codex", "AGENT_MODEL_UNAVAILABLE"),     # not this agent's command line
+    ("claude-code", "cli:claude-off", "AGENT_MODEL_UNAVAILABLE"),  # not connected
+    ("codex", "api:chat", "AGENT_MODEL_UNAVAILABLE"),
+])
+def test_hand_to_the_agent_runs_on_a_command_line_of_the_chosen_agent(tmp_path, agent, chosen, runs_on):
+    ws = ResearchWorkspace(tmp_path / "ws", catalog=lambda: [dict(o) for o in COMMAND_LINES])
+    try:
+        ws.settings_save({"agent": agent, "custom_agents": [{"id": "custom-my-agent", "name": "My agent", "kind": "cli"}]},
+                         ws.settings()["revision"])
+        ws.agent_model = object()
+        ws.ask = lambda thread_id, question, request_id, agent_profile_ref: agent_profile_ref
+        try:
+            result = ws.agent_dispatch("thread", "Why?", "request-0001", chosen)
+        except ValueError as error:
+            result = str(error)
+        assert result == runs_on
+        ws.agent_model = None
+        if runs_on.startswith("cli:"):
+            with pytest.raises(ValueError, match="AGENT_RUNNER_UNAVAILABLE"):
+                ws.agent_dispatch("thread", "Why?", "request-0002", chosen)
+    finally:
+        ws.close()
+
+
 # Bibliography files
 
 RIS = "TY  - JOUR\nTI  - First paper\nAU  - Doe, J\nPY  - 2024\nID  - k1\nER  - \nTY  - JOUR\nTI  - Second paper\nID  - k2\nER  - \n"

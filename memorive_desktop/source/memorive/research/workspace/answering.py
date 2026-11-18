@@ -355,10 +355,11 @@ class AnswerJob:
             from memorive.research.workspace.response_contract import REVISION, bind_evidence
             base_schema = ANSWER_SCHEMA
             if self.job.get('kind') == 'agent':
-                # An agent job answers in the agent's format and works from the agent's instructions.
+                # An agent job answers in the agent's format: its own instructions, then the chat rules
+                # (citation marks, language, knowledge draft).
                 from memorive.research.opportunities.research_opportunities import instructions, schema
                 base_schema = schema()
-                rules = instructions()
+                rules = instructions() + '\n' + CHAT_RULES
             self.response_schema = bind_evidence(base_schema, evidence_ids)
             response_contract = {'revision': REVISION, 'schema_sha256': digest(self.response_schema), 'evidence_ids': evidence_ids}
         self.store.put('job', self.job_id, self.job['project'], dict(self.ws.job_status(self.job_id),

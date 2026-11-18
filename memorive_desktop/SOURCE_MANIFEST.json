@@ -6242,8 +6242,8 @@
     },
     {
       "path": "source/memorive/research/opportunities/research_opportunities.py",
-      "sha256": "0222f45b6522715add5f7761d27f3648df5d3956aabba4e1fced6dab56a2986e",
-      "bytes": 3297
+      "sha256": "958e8ad97f02cff0965f642439dd26612ff5a137c5f653da4f93638f3eb20541",
+      "bytes": 3507
     },
     {
       "path": "source/memorive/research/opportunities/runs.py",
@@ -6752,8 +6752,8 @@
     },
     {
       "path": "source/memorive/research/workspace/answering.py",
-      "sha256": "a6ce6f3ae6ac50a2fc83bde74d60010e3e8a587ae89fca99bda1af4afe47bdb9",
-      "bytes": 38861
+      "sha256": "56a251515fbf12f534ee88db4bf3ffbebe9d1c17ede4f5a262e1f63c6221feee",
+      "bytes": 38947
     },
     {
       "path": "source/memorive/research/workspace/attachments.py",
@@ -6852,8 +6852,8 @@
     },
     {
       "path": "source/memorive/research/workspace/service.py",
-      "sha256": "ac2f300eef8174e07f6177d42f6fb62912b16a2b73b8d539990175661950420b",
-      "bytes": 36973
+      "sha256": "c76ab43ab3ef73a47efa33443c99302665821ced3fe2931d28cb14fa4310c058",
+      "bytes": 36914
     },
     {
       "path": "source/memorive/research/workspace/skill_bridge.py",
