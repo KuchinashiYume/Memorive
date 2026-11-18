@@ -85,10 +85,14 @@ def assess(record,direction,seeds,options):
     base=tokens(direction['query'])
     matched=sorted(base&all_tokens)
     keywords=[k for k in direction.get('keywords',[]) if keyword_in_text(k,title+' '+abstract)]
-    minimum=min(2,len(base))
+    # How many query terms a candidate must share: half of them, at least two (all of a shorter query), at most
+    # three (so a long query still finds papers). Two everyday words are not enough: with only "two terms and one
+    # keyword", a review of a drug's use in Cushing syndrome passed for a direction on citation evidence in RAG,
+    # because its abstract mentions citation searching and an evidence map.
+    needed=max(min(2,len(base)),min(3,math.ceil(len(base)/2)))
     # Explicit context terms disambiguate shared words across unrelated fields.
     context_required=bool(direction.get('keywords'))
-    supported=bool(base and len(matched)>=minimum and (len(matched)>=math.ceil(len(base)/3) or keywords) and (not context_required or keywords))
+    supported=bool(base and len(matched)>=needed and (not context_required or keywords))
     comparisons=[]
     for seed in seeds:
         sb=seed.get('bibliographic',seed)
