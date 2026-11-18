@@ -34,7 +34,7 @@
   const FIELDS = { research_question: '研究问题', research_object: '研究对象', method: '方法', comparison_context: '比较条件',
     key_data: '关键数据', key_results: '主要结果', author_conclusion: '作者结论', boundary_conditions: '边界条件',
     limitation: '作者所述局限', outlook: '作者所述展望' };
-  const MARKED = { kept: '已保留', asked: '已追问', dismissed: '已忽略' };
+  const MARKED = { kept: '已星标', asked: '已追问', dismissed: '已忽略' };
   const RUNS = { QUEUED: '等待中', RUNNING: '进行中', SUCCEEDED: '已完成', PARTIAL: '部分完成', FAILED: '未完成', CANCELLED: '已取消', INTERRUPTED: '已中断' };
   const errors = { OPPORTUNITIES_MODEL_REQUIRED: '先在研究问答的设置里选择模型', RESEARCH_ALREADY_RUNNING: '另一项研究任务正在运行，结束后再试',
     OPPORTUNITIES_REVISION_CONFLICT: '列表已更新，请再操作一次', OPPORTUNITY_NOT_FOUND: '这条机会已不存在，列表已刷新',
@@ -205,7 +205,8 @@
     const actions = make('div', null, 'desktop-research-actions');
     if (item.status === 'dismissed') actions.append(icon('恢复', () => mark(item, 'new'), 'desktop-action-restore'));
     else {
-      const keep = icon(item.status === 'kept' ? '取消保留' : '保留', () => mark(item, item.status === 'kept' ? 'new' : 'kept'), 'desktop-action-star', 'desktop-toolbar-ghost desktop-toolbar-toggle');
+      // The star of the window's other lists (the leaderboard's): outlined, filled once starred.
+      const keep = icon(item.status === 'kept' ? '取消星标' : '星标', () => mark(item, item.status === 'kept' ? 'new' : 'kept'), 'desktop-research-opportunity-star', 'desktop-toolbar-ghost');
       keep.setAttribute('aria-pressed', String(item.status === 'kept'));
       actions.append(icon(item.status === 'asked' ? '再次追问' : '在研究问答里追问', () => ask(item), 'desktop-action-message', 'desktop-toolbar-primary'),
         keep, icon('忽略', () => mark(item, 'dismissed'), 'desktop-action-archive', 'desktop-toolbar-ghost'));
@@ -213,7 +214,9 @@
     head.append(tags, actions);
     row.append(head, make('h4', item.title));
     if (item.outdated) row.append(make('p', '这条依据的论文卡片已经改动，建议重新寻找', 'desktop-research-status'));
-    row.append(section('要追问的问题', item.question));
+    const question = make('div', null, 'desktop-research-opportunity-part');
+    question.append(make('p', item.question));
+    row.append(question);
     // The rest is folded, in the same disclosure as an answer's context: why, the comparison, how to resolve it,
     // the limitations and the card facts.
     const more = make('details', null, 'memo-saved-memory memo-context-details desktop-research-opportunity-more');

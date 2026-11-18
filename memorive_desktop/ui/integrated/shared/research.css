@@ -47,6 +47,11 @@
 .desktop-research-opportunity-fact p { margin:2px 0 0; }
 .desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
 .desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
+/* Starring an opportunity: the leaderboard's star, outlined, filled in the brand colour once starred (no pressed box). */
+.desktop-toolbar-icon.desktop-research-opportunity-star { --desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%271.7%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m12%203%202.78%205.63L21%209.55l-4.5%204.39%201.06%206.19L12%2017.2l-5.56%202.93%201.06-6.19L3%209.55l6.22-.92Z%27%2F%3E%3C%2Fsvg%3E"); }
+.desktop-toolbar-icon.desktop-research-opportunity-star[aria-pressed="true"] { --desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%20stroke%3D%27black%27%20stroke-width%3D%271.7%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m12%203%202.78%205.63L21%209.55l-4.5%204.39%201.06%206.19L12%2017.2l-5.56%202.93%201.06-6.19L3%209.55l6.22-.92Z%27%2F%3E%3C%2Fsvg%3E"); border-color:transparent !important; background:transparent !important; box-shadow:none !important; color:var(--desktop-brand) !important; }
+/* In the open details, each part's heading sits on the window's subtle tint. */
+.desktop-research-opportunity-more .desktop-research-opportunity-part > small:first-child { display:inline-block;padding:1px 8px;border-radius:6px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary); }
 #library-research-result { font:inherit;line-height:1.6;overflow-wrap:anywhere; }
 #library-research-result[hidden] { display:none; }
 #library-research-result .desktop-research-paper { padding:16px 0; }
