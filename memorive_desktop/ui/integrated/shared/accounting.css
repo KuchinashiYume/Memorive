@@ -107,7 +107,7 @@
 
 .desktop-accounting-body {
   display: grid;
-  grid-template-columns: minmax(218px, 3fr) minmax(0, 7fr);
+  grid-template-columns: minmax(232px, 3fr) minmax(0, 7fr);
   gap: 9px;
   min-width: 0;
   min-height: 0;
