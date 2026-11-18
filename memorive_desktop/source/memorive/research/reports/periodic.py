@@ -95,20 +95,31 @@ def render(runtime, run_id, params):
     if not progress:
         raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
     from memorive.platform.progress import scope
+    from memorive.platform.language.text import choose
+    language=params.get('language_context')
+    # One record per processed paper or refined conversation: the library lists each output file of
+    # a paper (card, analysis, review notes ...) on its own, and a report listing those files read as
+    # a dozen records per paper. The files stay attached to their paper's record.
+    groups={}
+    for item in progress:
+        groups.setdefault((item['material_kind'],item.get('task_id') or item['stable_locator']),[]).append(item)
     events=[]
-    with scope('REPORT_ITEMS', [sha(item) for item in progress], 'PROCESSED_ITEMS') as item_units:
-        for item in progress:
-            key=sha(item)
-            stamp=item['updated_at']
-            paper=item['material_kind']=='PAPER'
-            from memorive.platform.language.text import choose
-            language=params.get('language_context')
-            suffix=choose(language,' · 文献处理完成，成果待人工复核',' · Paper processing complete; human review required',' · 文献処理が完了し、人による確認が必要です') if paper else choose(language,' · 对话精炼完成，成果待人工复核',' · Conversation refinement complete; human review required',' · 会話の精錬が完了し、人による確認が必要です')
-            text=item['display_name'] + suffix
+    with scope('REPORT_ITEMS', [sha(items) for items in groups.values()], 'PROCESSED_ITEMS') as item_units:
+        for (kind,_task),items in groups.items():
+            key=sha(items)
+            stamp=max(item['updated_at'] for item in items)
+            name=items[0].get('document_name') or items[0]['display_name']
+            if kind=='PAPER':
+                text=choose(language,'《{0}》文献处理完成，{1} 个成果待人工复核','“{0}”: paper processed, {1} outputs await human review',
+                            '「{0}」の文献処理が完了し、{1} 件の成果が確認待ちです').format(name,len(items))
+            else:
+                text=choose(language,'《{0}》对话精炼完成，待人工复核','“{0}”: conversation refined, awaits human review',
+                            '「{0}」の会話の精錬が完了し、確認待ちです').format(name)
+            refs=sorted(item['stable_locator'] for item in items)
             events.append({'event_id':'RE-'+key[:32].upper(),'event_kind':'MATERIAL_OUTPUT_READY',
                 'occurred_at':stamp,'observed_at':stamp,'source_system':'Desktop_MATERIAL_OUTPUT',
-                'source_record_ref':item['stable_locator'],'source_content_hash':key.upper(),
-                'subject_refs':[item['stable_locator']],'evidence_refs':[key.upper()],
+                'source_record_ref':refs[0],'source_content_hash':key.upper(),
+                'subject_refs':refs,'evidence_refs':sorted(sha(item).upper() for item in items),
                 'status_axis':'artifact_registry','to_state':'RESULT_AVAILABLE','verification_status':'not_applicable',
                 'display_text':text,'daily_category':'新增','weekly_categories':['研究进展'],
                 'monthly_categories':['知识库结构变化'],'explicit_tags':[]})

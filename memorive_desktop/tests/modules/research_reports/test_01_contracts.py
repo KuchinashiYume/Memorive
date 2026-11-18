@@ -1,24 +1,19 @@
 from __future__ import annotations
 
-import json
 import unittest
-from pathlib import Path
 
+from memorive.research.reports import renderer
 from memorive.research.reports.digest import GENERATOR_VERSION
 from memorive.research.reports.policy import SECTION_TITLES
 
-# The packaged report templates. CT-007 used to compare copies of them inside a materialized
-# acceptance sandbox; the sandbox and the schemas it copied were removed with the replay CLI
-# (b3407ef), and both copies came from this folder anyway.
-TEMPLATES = Path(__file__).resolve().parents[3] / "source" / "memorive" / "research" / "reports" / "templates"
-
 
 class ContractTests(unittest.TestCase):
-    def test_CT_007_templates_match_frozen_section_policy(self):
-        """CT-007"""
+    def test_CT_007_the_report_shows_every_section_once(self):
+        """CT-007: each section of a digest appears in the report, either under what needs attention
+        or under the progress of the period, and in only one of the two."""
         for kind, sections in SECTION_TITLES.items():
-            template = json.loads((TEMPLATES / f"{kind}.json").read_text(encoding="utf-8"))
-            self.assertEqual(template["sections"], list(sections))
+            shown = list(renderer.ATTENTION[kind]) + list(renderer.PROGRESS[kind])
+            self.assertEqual(sorted(shown), sorted(sections))
 
     def test_CT_008_generator_version_binds_package_tree(self):
         """CT-008"""

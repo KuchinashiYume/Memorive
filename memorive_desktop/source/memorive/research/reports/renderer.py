@@ -1,511 +1,270 @@
-"""Contract-bound Markdown renderer with hostile-text neutralization."""
+"""Daily, weekly and monthly reports as Markdown that a person reads from the top.
+
+render_markdown(digest) writes a report from the change digest (digest.py) alone;
+render_markdown_with_narrative(digest, narrative, metadata) adds the summary a model wrote, which
+api_briefing.py has checked: every sentence names the records it rests on. Both fill
+templates/report.md.tmpl and are @localized (zh-CN, en-US, ja-JP; the fixed text is translated in
+memorive.platform.language.reports).
+
+A report reads, in this order: the period and its record counts in one line; the model's summary, if
+any, each sentence followed by the numbers of the records it rests on (［1］); what needs attention;
+the progress of the period, one line per paper or conversation; the counts; and an appendix with every
+record (number, time, text, link), whether the records are complete, what the report does not assess,
+and where the report comes from. The digest decides what is in a report; this module only lays it out.
+
+Dynamic text (paper names, model sentences) is escaped where Markdown would read it as markup, and
+refused if it holds control characters or conclusion phrases (canonical.py), so a file name or a model
+sentence cannot add links, images or headings, or claim a finding.
+"""
 
 from __future__ import annotations
 
-import json
 import re
-import string
-from memorive.platform.language.reports import tr, localized, template as localized_template, HEADING_FIELDS
-from collections import Counter
+from datetime import datetime, timedelta
 from pathlib import Path
 
-from memorive.research.reports.canonical import FORBIDDEN_REPORT_PHRASES, forbidden_phrase, require_safe_text
+from memorive.platform.language.reports import localized, template as localized_template, tr
+from memorive.research.reports.canonical import forbidden_phrase, require_safe_text
+from memorive.research.reports.policy import ZONE
 
-MARKDOWN_META = frozenset(string.punctuation)
-TEMPLATE_ROOT = Path(__file__).resolve().parent / "templates"
+TEMPLATE = Path(__file__).resolve().parent / "templates" / "report.md.tmpl"
 TOKEN_PATTERN = re.compile(r"{{([^{}]+)}}")
-
-_TEMPLATE_CONTRACTS = {
-    "daily": {
-        "template_id": "Memorive-RESEARCH-REPORTS-RESEARCH_REPORTS-DAILY-REPORT",
-        "template_revision": "r2.0",
-        "sections": ("新增", "修改", "待审", "失败"),
-        "placeholders": (
-            "human_title",
-            "attention_items",
-            "overview_table",
-            "coverage_summary",
-            "detail_sections",
-            "data_quality",
-            "not_assessed",
-            "audit_metadata",
-        ),
-    },
-    "weekly": {
-        "template_id": "Memorive-RESEARCH-REPORTS-RESEARCH_REPORTS-WEEKLY-REPORT",
-        "template_revision": "r2.0",
-        "sections": (
-            "研究进展",
-            "明确标记的重要变化",
-            "未验证项",
-            "明确来源的潜在张力",
-            "风险与待办",
-        ),
-        "placeholders": (
-            "human_title",
-            "attention_items",
-            "overview_table",
-            "explicit_importance",
-            "tension_summary",
-            "coverage_summary",
-            "detail_sections",
-            "data_quality",
-            "not_assessed",
-            "audit_metadata",
-        ),
-    },
-    "monthly": {
-        "template_id": "Memorive-RESEARCH-REPORTS-RESEARCH_REPORTS-MONTHLY-REPORT",
-        "template_revision": "r2.0",
-        "sections": (
-            "知识库结构变化",
-            "明确记录的研究方向变化",
-            "长期待办",
-            "风险与未评估维度",
-        ),
-        "placeholders": (
-            "human_title",
-            "attention_items",
-            "structural_summary",
-            "direction_summary",
-            "long_term_summary",
-            "coverage_summary",
-            "detail_sections",
-            "data_quality",
-            "not_assessed",
-            "audit_metadata",
-        ),
-    },
+# Characters Markdown reads as markup inside a line (a value never holds a line break).
+# What lets a value add something to the page: links and images ([ ] !), HTML (< >), code (`), table
+# cells (|) and escapes (\). Underscores and asterisks only make italics; left as they are, file names
+# stay readable where the report is shown as plain text.
+MARKUP = frozenset("\\`[]<>!|")
+# A value at the start of a line must not start a heading, a list or a quote.
+LINE_START = re.compile(r"^(?:[#>*+-]|\d+[.)])")
+NAMES = {"daily": "日报", "weekly": "周报", "monthly": "月报"}
+SUMMARY_FROM = 4   # records in a progress section from which its summary sentence is shown
+PROGRESS_HEADING = {"daily": "这一天的进展", "weekly": "这一周的进展", "monthly": "这个月的进展"}
+LEAD = {"daily": "这一天的记录：{v0}。", "weekly": "这一周的记录：{v0}。", "monthly": "这个月的记录：{v0}。"}
+NOTHING = {"daily": "这一天没有新的记录。", "weekly": "这一周没有新的记录。", "monthly": "这个月没有新的记录。"}
+# The digest sections (digest.SECTION_TITLES) that hold what needs attention, and the progress.
+ATTENTION = {"daily": ("失败", "待审"), "weekly": ("风险与待办", "未验证项"),
+             "monthly": ("风险与未评估维度", "长期待办")}
+PROGRESS = {"daily": ("新增", "修改"), "weekly": ("研究进展", "明确标记的重要变化", "明确来源的潜在张力"),
+            "monthly": ("知识库结构变化", "明确记录的研究方向变化")}
+NOT_ASSESSED = {
+    "semantic_priority_quality": "- 哪些变化更重要：记录里没有重要性的标注，报告按时间排列，不排先后。",
+    "potential_tensions": "- 文献之间的分歧：这一时段没有研究机会的记录。",
+    "research_direction_changes": "- 研究方向的变化：这一时段没有记录方向决定。",
+    "optional_source_coverage": "- 部分可选来源的记录没能读取，上面的数字可能不全。",
+    "late_event_coverage": "- 有迟到的记录无法确认属于哪个时段。",
 }
 
 
-def _plain(value: object, field: str) -> str:
-    if field in HEADING_FIELDS:
-        value=tr(str(value))
+def _text(value: object, field: str) -> str:
     text = require_safe_text(str(value), field, allow_empty=True)
     hit = forbidden_phrase(text)
     if hit:
         raise ValueError(f"forbidden report phrase detected in {field}: {hit}")
-    # Every dynamic value is plain escaped text. Static template headings and
-    # bullets are the only Markdown syntax generated by this module.
-    return "".join("\\" + char if char in MARKDOWN_META else char for char in text)
+    text = "".join("\\" + char if char in MARKUP else char for char in text)
+    return "\\" + text if LINE_START.match(text) else text
 
 
-def _joined(values: list[object], field: str, *, empty: str = "N/A") -> str:
-    return ", ".join(_plain(value, field) for value in values) or empty
+def _local(stamp: str) -> datetime:
+    return datetime.fromisoformat(str(stamp).replace("Z", "+00:00")).astimezone(ZONE)
 
 
-def _line(item: dict) -> str:
-    refs = _joined(item["artifact_or_ledger_refs"], "artifact_or_ledger_ref")
-    evidence = _joined(item["evidence_refs"], "evidence_ref")
-    return (
-        tr('- event {v0} · source event {v1} · {v2} · {v3} · 状态轴 {v4}={v5} · 对象 {v6} · 来源 {v7} · 证据 {v8}', _plain(item['event_id'], 'event_id'), _plain(item['source_event_ref'], 'source_event_ref'), _plain(item['occurred_at'], 'occurred_at'), _plain(item['text'], 'text'), _plain(item['status_axis'], 'status_axis'), _plain(item['status'], 'status'), refs, _plain(item['source_record_ref'], 'source_record_ref'), evidence)
-    )
+def _when(stamp: str, kind: str) -> str:
+    return _local(stamp).strftime("%H:%M" if kind == "daily" else "%m-%d %H:%M")
 
 
-def _load_template(kind: str) -> tuple[dict, str]:
-    contract = _TEMPLATE_CONTRACTS.get(kind)
-    if contract is None:
-        raise ValueError(f"unsupported digest template kind: {kind}")
-    sidecar_path = TEMPLATE_ROOT / f"{kind}.json"
-    try:
-        sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise ValueError(f"unable to load {kind} template sidecar") from exc
-    expected_fields = {
-        "template_id",
-        "template_revision",
-        "supersedes",
-        "digest_kind",
-        "human_title",
-        "source_file",
-        "front_purpose",
-        "sections",
-        "required_placeholders",
-    }
-    if not isinstance(sidecar, dict) or set(sidecar) != expected_fields:
-        raise ValueError(f"{kind} template sidecar field contract mismatch")
-    if (
-        sidecar["template_id"] != contract["template_id"]
-        or sidecar["template_revision"] != contract["template_revision"]
-        or sidecar["supersedes"] != "r1.0"
-        or sidecar["digest_kind"] != kind
-        or sidecar["source_file"] != f"{kind}.md.tmpl"
-        or sidecar["sections"] != list(contract["sections"])
-        or sidecar["required_placeholders"] != list(contract["placeholders"])
-        or not isinstance(sidecar["human_title"], str)
-        or not sidecar["human_title"].strip()
-        or not isinstance(sidecar["front_purpose"], str)
-        or not sidecar["front_purpose"].strip()
-    ):
-        raise ValueError(f"{kind} template sidecar identity contract mismatch")
-    template_path = TEMPLATE_ROOT / sidecar["source_file"]
-    if template_path.parent.resolve() != TEMPLATE_ROOT.resolve():
-        raise ValueError(f"{kind} template path escapes template root")
-    try:
-        template = template_path.read_text(encoding="utf-8")
-    except (OSError, UnicodeError) as exc:
-        raise ValueError(f"unable to load {kind} Markdown template") from exc
-    tokens = [match.strip() for match in TOKEN_PATTERN.findall(template)]
-    expected_tokens = list(contract["placeholders"])
-    if Counter(tokens) != Counter(expected_tokens) or any(
-        count != 1 for count in Counter(tokens).values()
-    ):
-        raise ValueError(f"{kind} template placeholder contract mismatch")
-    return sidecar, localized_template(template)
+def _sections(digest: dict) -> dict[str, list[dict]]:
+    return {section["title"]: section["items"] for section in digest["sections"]}
 
 
-def _section_map(digest: dict, sidecar: dict) -> dict[str, list[dict]]:
-    sections = digest.get("sections")
-    if not isinstance(sections, list):
-        raise ValueError("digest sections must be a list")
-    titles = [section.get("title") for section in sections if isinstance(section, dict)]
-    if titles != sidecar["sections"] or len(titles) != len(sections):
-        raise ValueError("digest section contract does not match active template")
-    result: dict[str, list[dict]] = {}
-    for section in sections:
-        items = section.get("items")
-        if not isinstance(items, list):
-            raise ValueError("digest section items must be a list")
-        result[section["title"]] = items
-    return result
-
-
-def _event_summary(item: dict, section_title: str) -> str:
-    return (
-        tr('- [{v0}] event {v1} · {v2} · {v3}={v4} · 来源 {v5}', _plain(section_title, 'attention_section'), _plain(item['event_id'], 'attention_event_id'), _plain(item['text'], 'attention_text'), _plain(item['status_axis'], 'attention_status_axis'), _plain(item['status'], 'attention_status'), _plain(item['source_record_ref'], 'attention_source_record_ref'))
-    )
-
-
-def _unique_section_items(
-    section_map: dict[str, list[dict]], section_titles: tuple[str, ...]
-) -> list[tuple[str, dict]]:
-    result: list[tuple[str, dict]] = []
+def _numbered(digest: dict) -> tuple[list[dict], dict[str, int]]:
+    """Every record once, oldest first (the late ones too), and its number."""
     seen: dict[str, dict] = {}
-    for title in section_titles:
-        for item in section_map[title]:
-            event_id = item.get("event_id")
-            if not isinstance(event_id, str) or not event_id:
-                raise ValueError("report item lacks event_id")
-            prior = seen.get(event_id)
-            if prior is not None:
-                if prior != item:
-                    raise ValueError(f"duplicate event payload mismatch: {event_id}")
-                continue
-            seen[event_id] = item
-            result.append((title, item))
-    return result
+    for section in digest["sections"]:
+        for item in section["items"]:
+            seen.setdefault(item["event_id"], item)
+    for item in digest["late_arrivals"]:
+        seen.setdefault(item["event_id"], dict(item, late=True))
+    ordered = sorted(seen.values(), key=lambda item: (item["occurred_at"], item["event_id"]))
+    return ordered, {item["event_id"]: number for number, item in enumerate(ordered, 1)}
 
 
-def _attention_items(
-    digest: dict, section_map: dict[str, list[dict]], kind: str
-) -> str:
-    focus_sections = {
-        "daily": ("失败", "待审"),
-        "weekly": ("风险与待办", "未验证项"),
-        "monthly": ("风险与未评估维度", "长期待办"),
-    }[kind]
-    lines: list[str] = []
+def _refs(event_ids: list[str], numbers: dict[str, int]) -> str:
+    """［1–3, 5］ for the records a sentence rests on."""
+    values = sorted({numbers[event_id] for event_id in event_ids if event_id in numbers})
+    if not values:
+        return ""
+    runs, start = [], values[0]
+    for previous, value in zip(values, values[1:] + [None]):
+        if value != previous + 1:
+            runs.append(str(start) if start == previous else f"{start}–{previous}")
+            start = value
+    return "［" + ", ".join(runs) + "］"
+
+
+def _item_line(item: dict, kind: str, numbers: dict[str, int]) -> str:
+    return f"- {_when(item['occurred_at'], kind)} · {_text(item['text'], 'text')}{_refs([item['event_id']], numbers)}"
+
+
+def _title(digest: dict) -> str:
+    kind = digest["digest_kind"]
+    start, end = _local(digest["window_start"]), _local(digest["window_end"]) - timedelta(seconds=1)
+    span = {"daily": f"{start:%Y-%m-%d}", "weekly": f"{start:%Y-%m-%d} — {end:%Y-%m-%d}",
+            "monthly": f"{start:%Y-%m}"}[kind]
+    return f"{tr(NAMES[kind])} · {span}"
+
+
+def _lead(digest: dict) -> str:
+    kind = digest["digest_kind"]
+    counts = [(section["title"], len(section["items"])) for section in digest["sections"] if section["items"]]
+    if not counts:
+        return tr(NOTHING[kind])
+    return tr(LEAD[kind], tr("、").join(tr("{v0} {v1} 条", tr(title), count) for title, count in counts))
+
+
+def _summary(narrative: dict | None, numbers: dict[str, int]) -> str:
+    if not narrative:
+        return ""
+    return "\n\n".join(_text(row["text"], "summary_text") + _refs(row["event_ids"], numbers)
+                       for row in narrative["period_summary"])
+
+
+def _attention(digest: dict, narrative: dict | None, numbers: dict[str, int]) -> str:
+    kind = digest["digest_kind"]
+    lines, cited = [], set()
+    for row in (narrative or {}).get("priority_items", []):
+        lines.append("- " + _text(row["text"], "priority_text") + _refs(row["event_ids"], numbers))
+        cited.update(row["event_ids"])
     for conflict in digest["conflicts"]:
-        lines.append(
-            tr('- [冲突] event {v0} · 未自动择一 · 来源 ', _plain(conflict['event_id'], 'attention_conflict_event_id'))
-            + _joined(conflict["source_record_refs"], "attention_conflict_source_ref")
-        )
+        lines.append(tr("- {v0} 的内容互相冲突，报告没有替你选择，见附录“记录是否完整”。", _text(conflict["event_id"], "event_id")))
     for issue in digest["unparseable_events"]:
         if issue["blocking_status"] == "blocking":
-            lines.append(
-                tr('- [阻断] {v0} · {v1} · 来源 {v2}', _plain(issue['issue_id'], 'attention_issue_id'), _plain(issue['error_code'], 'attention_error_code'), _plain(issue['source_record_ref'], 'attention_issue_source_ref'))
-            )
-    lines.extend(
-        _event_summary(item, title)
-        for title, item in _unique_section_items(section_map, focus_sections)
-    )
-    if not lines:
-        return tr('- 当前窗口没有来源支持的需优先处理记录。')
-    visible_limit = 10
-    if len(lines) <= visible_limit:
-        return "\n".join(lines)
-    hidden = len(lines) - visible_limit
-    return "\n".join(lines[:visible_limit] + [tr('- 另有 {v0} 项，见详细记录。', hidden)])
+            lines.append(tr("- 有记录无法解析（{v0}），报告可能不完整，见附录。", _text(issue["error_code"], "error_code")))
+    sections = _sections(digest)
+    shown = set()
+    for title in ATTENTION[kind]:
+        for item in sections.get(title, []):
+            if item["event_id"] in cited or item["event_id"] in shown:
+                continue
+            shown.add(item["event_id"])
+            lines.append(f"- {tr(title)}：{_when(item['occurred_at'], kind)} · {_text(item['text'], 'text')}"
+                         f"{_refs([item['event_id']], numbers)}")
+    return "\n".join(lines) or tr("- 没有需要马上处理的事。")
 
 
-def _overview_table(
-    digest: dict, section_map: dict[str, list[dict]], sidecar: dict
-) -> str:
-    rows = [tr('| 类别 | 数量 |'), "|---|---:|"]
-    rows.extend(
-        f"| {_plain(title, 'overview_section')} | {len(section_map[title])} |"
-        for title in sidecar["sections"]
-    )
-    rows.extend(
-        (
-            tr('| 迟到事件 | {v0} |', len(digest['late_arrivals'])),
-            tr('| 冲突 | {v0} |', len(digest['conflicts'])),
-            tr('| 不可解析 | {v0} |', len(digest['unparseable_events'])),
-        )
-    )
+def _progress(digest: dict, narrative: dict | None, numbers: dict[str, int]) -> str:
+    kind = digest["digest_kind"]
+    sections = _sections(digest)
+    summaries = {row["section_title"]: row for row in (narrative or {}).get("section_summaries", [])}
+    blocks = []
+    for title in PROGRESS[kind]:
+        items = sections.get(title, [])
+        if not items:
+            continue
+        block = [f"### {tr(title)}", ""]
+        summary = summaries.get(title)
+        # With a few records the lines below say it all; a summary sentence only repeats them.
+        if summary and summary["text"] != "NONE" and len(items) >= SUMMARY_FROM:
+            block += [_text(summary["text"], "section_summary") + _refs(summary["event_ids"], numbers), ""]
+        block += [_item_line(item, kind, numbers) for item in items]
+        blocks.append("\n".join(block))
+    return "\n\n".join(blocks) or tr("这一时段没有新的进展记录。")
+
+
+def _numbers(digest: dict) -> str:
+    rows = [tr("| 类别 | 数量 |"), "|---|---:|"]
+    rows += [f"| {tr(section['title'])} | {len(section['items'])} |" for section in digest["sections"]]
+    for label, values in (("| 迟到 | {v0} |", digest["late_arrivals"]), ("| 冲突 | {v0} |", digest["conflicts"]),
+                          ("| 不可解析 | {v0} |", digest["unparseable_events"])):
+        if values:
+            rows.append(tr(label, len(values)))
     return "\n".join(rows)
 
 
-def _coverage_summary(digest: dict) -> str:
-    blocking_issues = sum(
-        issue["blocking_status"] == "blocking"
-        for issue in digest["unparseable_events"]
-    )
-    blocking_count = len(digest["conflicts"]) + blocking_issues
-    readable = digest["report_status"] == "complete" and blocking_count == 0
+def _records(ordered: list[dict], numbers: dict[str, int]) -> str:
+    if not ordered:
+        return tr("- 没有记录。")
     return "\n".join(
-        (
-            f"- report_status: {_plain(digest['report_status'], 'report_status')}",
-            f"- authority_status: {_plain(digest['authority_status'], 'authority_status')}",
-            f"- blocking_issue_count: {blocking_count}",
-            f"- complete_readable: {'YES' if readable else 'NO'}",
-            f"- NOT_ASSESSED_count: {len(digest['not_assessed_dimensions'])}",
-        )
-    )
+        tr("{v0}. {v1} · {v2}{v3} · {v4} · 编号 {v5}", numbers[item["event_id"]],
+           _local(item["occurred_at"]).strftime("%Y-%m-%d %H:%M"), _text(item["text"], "text"),
+           tr("（迟到）") if item.get("late") else "", _text(item["source_record_ref"], "source_record_ref"),
+           _text(item["event_id"][:11], "event_id"))
+        for item in ordered)
 
 
-def _section_summary(items: list[dict], title: str) -> str:
-    if not items:
-        return tr('- 无来源支持的记录。')
-    return "\n".join(_event_summary(item, title) for item in items)
-
-
-def _detail_sections(digest: dict) -> str:
-    lines: list[str] = []
-    seen: dict[str, tuple[str, dict]] = {}
-    for index, section in enumerate(digest["sections"], 1):
-        title = section["title"]
-        lines.extend((f"### 1.{index} {_plain(title, 'section_title')}", ""))
-        if not section["items"]:
-            lines.append(tr('- 无来源支持的记录。'))
-        for item in section["items"]:
-            event_id = item["event_id"]
-            prior = seen.get(event_id)
-            if prior is None:
-                seen[event_id] = (title, item)
-                lines.append(_line(item))
-            else:
-                first_title, first_item = prior
-                if first_item != item:
-                    raise ValueError(f"duplicate event payload mismatch: {event_id}")
-                lines.append(
-                    tr('- event {v0} → 交叉引用：首次完整记录见「{v1}」。', _plain(event_id, 'cross_reference_event_id'), _plain(first_title, 'cross_reference_section'))
-                )
-        lines.append("")
-    return "\n".join(lines).rstrip()
-
-
-def _data_quality(digest: dict) -> str:
-    lines = [tr('### 2.1 迟到事件'), ""]
-    if digest["late_arrivals"]:
-        for item in digest["late_arrivals"]:
-            lines.append(
-                _line(item)
-                + tr(' · 原窗口 ')
-                + _plain(item["original_window_ref"], "original_window_ref")
-                + tr(' · 原截止 ')
-                + _plain(item["original_cutoff_at"], "original_cutoff_at")
-            )
-    else:
-        lines.append(tr('- 无。'))
-    lines.extend(("", tr('### 2.2 冲突'), ""))
-    if digest["conflicts"]:
-        for conflict in digest["conflicts"]:
-            lines.append(
-                tr('- {v0} 存在内容冲突；未自动择一；来源 ', _plain(conflict['event_id'], 'conflict_event_id'))
-                + _joined(conflict["source_record_refs"], "conflict_source_ref")
-            )
-    else:
-        lines.append(tr('- 无。'))
-    lines.extend(("", tr('### 2.3 不可解析'), ""))
-    if digest["unparseable_events"]:
-        for issue in digest["unparseable_events"]:
-            lines.append(
-                tr('- {v0} · {v1} · {v2} · 来源 {v3}', _plain(issue['issue_id'], 'issue_id'), _plain(issue['error_code'], 'error_code'), _plain(issue['blocking_status'], 'blocking_status'), _plain(issue['source_record_ref'], 'issue_source_record_ref'))
-            )
-    else:
-        lines.append(tr('- 无。'))
+def _quality(digest: dict) -> str:
+    late, conflicts, issues = digest["late_arrivals"], digest["conflicts"], digest["unparseable_events"]
+    if digest["report_status"] == "complete" and not (late or conflicts or issues):
+        return tr("记录完整：没有迟到、冲突或无法解析的记录。")
+    lines = [] if digest["report_status"] == "complete" else [tr("记录不完整（{v0}）。", _text(digest["report_status"], "report_status"))]
+    if late:
+        lines.append(tr("- 迟到 {v0} 条：发生在这一时段，但在上一份报告截止后才记录，已列在记录清单里，标“迟到”。", len(late)))
+    for conflict in conflicts:
+        lines.append(tr("- {v0}：内容互相冲突，报告没有替你选择；来源 {v1}。", _text(conflict["event_id"], "event_id"),
+                        "、".join(_text(ref, "source_record_ref") for ref in conflict["source_record_refs"])))
+    for issue in issues:
+        effect = tr("影响报告完整性") if issue["blocking_status"] == "blocking" else tr("不影响报告完整性")
+        lines.append(tr("- {v0}：无法解析（{v1}），{v2}；来源 {v3}。", _text(issue["issue_id"], "issue_id"),
+                        _text(issue["error_code"], "error_code"), effect, _text(issue["source_record_ref"], "source_record_ref")))
     return "\n".join(lines)
 
 
 def _not_assessed(digest: dict) -> str:
-    if not digest["not_assessed_dimensions"]:
-        return tr('- 无。')
-    return "\n".join(
-        f"- {_plain(value['dimension'], 'dimension')} = "
-        f"{_plain(value.get('status', 'NOT_ASSESSED'), 'not_assessed_status')} · "
-        f"{_plain(value['reason_code'], 'reason_code')}"
-        for value in digest["not_assessed_dimensions"]
-    )
+    lines = [tr(NOT_ASSESSED[value["dimension"]]) if value["dimension"] in NOT_ASSESSED
+             else f"- {_text(value['dimension'], 'dimension')}（{_text(value['reason_code'], 'reason_code')}）"
+             for value in digest["not_assessed_dimensions"]]
+    return "\n".join(lines) or tr("- 没有。")
 
 
-def _audit_metadata(digest: dict, sidecar: dict) -> str:
-    supersedes = digest.get("supersedes_digest_id") or "NONE"
-    source_snapshots = _joined(
-        digest.get("source_snapshot_refs", []), "source_snapshot_ref", empty="NONE"
-    )
-    return "\n".join(
-        (
-            f"- template_id: {_plain(sidecar['template_id'], 'template_id')}",
-            f"- template_revision: {_plain(sidecar['template_revision'], 'template_revision')}",
-            f"- digest_id: {_plain(digest['digest_id'], 'digest_id')}",
-            f"- revision: {_plain(digest['revision'], 'revision')}",
-            tr('- window: {v0} 至 {v1}（左闭右开）', _plain(digest['window_start'], 'window_start'), _plain(digest['window_end'], 'window_end')),
-            f"- cutoff_at: {_plain(digest['cutoff_at'], 'cutoff_at')}",
-            f"- generated_at: {_plain(digest.get('generated_at', 'NOT_RECORDED'), 'generated_at')}",
-            f"- input_manifest_sha256: {_plain(digest['input_manifest_sha256'], 'input_manifest_sha256')}",
-            f"- source_snapshot_refs: {source_snapshots}",
-            f"- generator_version: {_plain(digest['generator_version'], 'generator_version')}",
-            f"- supersedes_digest_id: {_plain(supersedes, 'supersedes_digest_id')}",
-            f"- external_calls: {_plain(digest.get('external_calls', 'NOT_RECORDED'), 'external_calls')}",
-            f"- external_tokens: {_plain(digest.get('external_tokens', 'NOT_RECORDED'), 'external_tokens')}",
-            f"- cost_cny: {_plain(digest.get('cost_cny', 'NOT_RECORDED'), 'cost_cny')}",
-            f"- production_mutations: {_plain(digest.get('production_mutations', 'NOT_RECORDED'), 'production_mutations')}",
-            f"- production_activation: {_plain(digest.get('production_activation', 'NOT_RECORDED'), 'production_activation')}",
-        )
-    )
+def _about(digest: dict, ordered: list[dict], metadata: dict | None) -> str:
+    lines = [
+        tr("- 统计时段：{v0} 至 {v1}（{v2}，含开始、不含结束）", _local(digest["window_start"]).strftime("%Y-%m-%d %H:%M"),
+           _local(digest["window_end"]).strftime("%Y-%m-%d %H:%M"), _text(digest["report_timezone"], "report_timezone")),
+        tr("- 生成时间：{v0}", _local(digest["generated_at"]).strftime("%Y-%m-%d %H:%M") if digest.get("generated_at") else "—"),
+        tr("- 记录 {v0} 条；来源清单校验值 {v1}", len(ordered), _text(digest["input_manifest_sha256"][:16], "input_manifest_sha256")),
+        tr("- 摘要：由 {v0} 根据上面的记录撰写，每句后的编号是它依据的记录。", _text(metadata["model"], "model"))
+        if metadata else tr("- 摘要：这份报告没有模型摘要。"),
+        tr("- 报告编号：{v0}，第 {v1} 版", _text(digest["digest_id"], "digest_id"), digest["revision"])
+        + (tr("，取代 {v0}", _text(digest["supersedes_digest_id"], "supersedes_digest_id")) if digest.get("supersedes_digest_id") else ""),
+    ]
+    return "\n".join(lines)
 
 
-def _api_narrative_lines(rows: list[dict], label: str) -> str:
-    if not rows:
-        return tr('- 无来源支持的记录。')
-    return "\n".join(
-        f"- [API narrative · {_plain(label, 'api_narrative_label')}] "
-        f"{_plain(row['text'], 'api_narrative_text')} · events "
-        f"{_joined(row['event_ids'], 'api_narrative_event_id')}"
-        for row in rows
-    )
-
-
-def _api_section_summary(narrative: dict, title: str) -> str:
-    row = next(
-        item
-        for item in narrative["section_summaries"]
-        if item["section_title"] == title
-    )
-    if row["text"] == "NONE":
-        return tr('- 无来源支持的记录。')
-    return _api_narrative_lines(
-        [{"text": row["text"], "event_ids": row["event_ids"]}],
-        title,
-    )
-
-
-def _api_audit_metadata(digest: dict, sidecar: dict, metadata: dict) -> str:
-    base = _audit_metadata(digest, sidecar)
-    return "\n".join(
-        (
-            base,
-            "- narrative_external_calls: 1",
-            f"- narrative_slot: {_plain(metadata['slot'], 'narrative_slot')}",
-            f"- narrative_provider: {_plain(metadata['provider'], 'narrative_provider')}",
-            f"- narrative_model: {_plain(metadata['model'], 'narrative_model')}",
-            f"- narrative_response_sha256: {_plain(metadata['response_sha256'], 'narrative_response_sha256')}",
-            f"- narrative_input_tokens: {_plain(metadata.get('input_tokens', 'NOT_RECORDED'), 'narrative_input_tokens')}",
-            f"- narrative_output_tokens: {_plain(metadata.get('output_tokens', 'NOT_RECORDED'), 'narrative_output_tokens')}",
-            f"- narrative_reasoning_tokens: {_plain(metadata.get('reasoning_tokens', 'NOT_RECORDED'), 'narrative_reasoning_tokens')}",
-        )
-    )
-
-
-def _fill_template(template: str, values: dict[str, str], sidecar: dict) -> str:
-    required = sidecar["required_placeholders"]
-    if set(values) != set(required):
-        raise ValueError("renderer placeholder value contract mismatch")
-    rendered = template
-    for key in required:
-        rendered = rendered.replace("{{" + key + "}}", values[key])
-    if "{{" in rendered or "}}" in rendered:
-        raise ValueError("unresolved template placeholder")
-    hit = forbidden_phrase(rendered)
+def _render(digest: dict, narrative: dict | None, metadata: dict | None) -> str:
+    kind = digest["digest_kind"]
+    if kind not in NAMES:
+        raise ValueError(f"unsupported digest template kind: {kind}")
+    ordered, numbers = _numbered(digest)
+    values = {
+        "title": _title(digest),
+        "lead": _lead(digest),
+        "summary": _summary(narrative, numbers),
+        "attention": _attention(digest, narrative, numbers),
+        "progress_heading": tr(PROGRESS_HEADING[kind]),
+        "progress": _progress(digest, narrative, numbers),
+        "numbers": _numbers(digest),
+        "records": _records(ordered, numbers),
+        "quality": _quality(digest),
+        "not_assessed": _not_assessed(digest),
+        "about": _about(digest, ordered, metadata),
+    }
+    page = localized_template(TEMPLATE.read_text(encoding="utf-8"))
+    for match in TOKEN_PATTERN.finditer(page):
+        if match.group(1) not in values:
+            raise ValueError(f"unknown report template placeholder: {match.group(1)}")
+    page = TOKEN_PATTERN.sub(lambda match: values[match.group(1)], page)
+    hit = forbidden_phrase(page)
     if hit:
         raise ValueError(f"forbidden report phrase detected after normalized scan: {hit}")
-    return rendered.rstrip() + "\n"
+    return re.sub(r"\n{3,}", "\n\n", page).rstrip() + "\n"
 
 
 @localized
 def render_markdown(digest: dict) -> str:
-    kind = digest.get("digest_kind")
-    sidecar, template = _load_template(kind)
-    section_map = _section_map(digest, sidecar)
-    values = {
-        "human_title": _plain(sidecar["human_title"], "human_title"),
-        "attention_items": _attention_items(digest, section_map, kind),
-        "coverage_summary": _coverage_summary(digest),
-        "detail_sections": _detail_sections(digest),
-        "data_quality": _data_quality(digest),
-        "not_assessed": _not_assessed(digest),
-        "audit_metadata": _audit_metadata(digest, sidecar),
-    }
-    if kind in {"daily", "weekly"}:
-        values["overview_table"] = _overview_table(digest, section_map, sidecar)
-    if kind == "weekly":
-        values["explicit_importance"] = _section_summary(
-            section_map["明确标记的重要变化"], "明确标记的重要变化"
-        )
-        values["tension_summary"] = _section_summary(
-            section_map["明确来源的潜在张力"], "明确来源的潜在张力"
-        )
-    elif kind == "monthly":
-        values["structural_summary"] = _section_summary(
-            section_map["知识库结构变化"], "知识库结构变化"
-        )
-        values["direction_summary"] = _section_summary(
-            section_map["明确记录的研究方向变化"], "明确记录的研究方向变化"
-        )
-        values["long_term_summary"] = _section_summary(
-            section_map["长期待办"], "长期待办"
-        )
-    return _fill_template(template, values, sidecar)
+    """The report from the digest alone, without a model summary."""
+    return _render(digest, None, None)
 
 
 @localized
-def render_markdown_with_narrative(
-    digest: dict,
-    narrative: dict,
-    metadata: dict,
-) -> str:
-    """Fill the active fixed template with a validated API front narrative.
-
-    Detailed records, counts, quality state, NOT_ASSESSED dimensions and audit
-    identity remain deterministic.  The model can only supply the concise
-    front synthesis that was already validated against exact event IDs.
-    """
-
-    kind = digest.get("digest_kind")
-    sidecar, template = _load_template(kind)
-    section_map = _section_map(digest, sidecar)
-    attention = [
-        *_api_narrative_lines(narrative["period_summary"], "周期摘要").splitlines(),
-        *_api_narrative_lines(narrative["priority_items"], "优先处理").splitlines(),
-    ]
-    values = {
-        "human_title": _plain(sidecar["human_title"], "human_title"),
-        "attention_items": "\n".join(attention),
-        "coverage_summary": _coverage_summary(digest),
-        "detail_sections": _detail_sections(digest),
-        "data_quality": _data_quality(digest),
-        "not_assessed": _not_assessed(digest),
-        "audit_metadata": _api_audit_metadata(digest, sidecar, metadata),
-    }
-    if kind in {"daily", "weekly"}:
-        values["overview_table"] = _overview_table(digest, section_map, sidecar)
-    if kind == "weekly":
-        values["explicit_importance"] = _api_section_summary(
-            narrative, "明确标记的重要变化"
-        )
-        values["tension_summary"] = _api_section_summary(
-            narrative, "明确来源的潜在张力"
-        )
-    elif kind == "monthly":
-        values["structural_summary"] = _api_section_summary(
-            narrative, "知识库结构变化"
-        )
-        values["direction_summary"] = _api_section_summary(
-            narrative, "明确记录的研究方向变化"
-        )
-        values["long_term_summary"] = _api_section_summary(
-            narrative, "长期待办"
-        )
-    return _fill_template(template, values, sidecar)
+def render_markdown_with_narrative(digest: dict, narrative: dict, metadata: dict) -> str:
+    """The report with the model summary api_briefing validated; metadata names the model."""
+    return _render(digest, narrative, metadata)

@@ -1,4 +1,6 @@
-"""Fixed report templates, localized before dynamic source values are inserted."""
+"""The fixed text of daily, weekly and monthly reports (research/reports/renderer.py) in English and
+Japanese; the Chinese text is the key. The template's lines are translated before the dynamic values
+(paper names, model sentences, dates) go in."""
 from contextvars import ContextVar
 from functools import wraps
 from memorive.platform.language.policy import locale
@@ -16,59 +18,80 @@ def localized(function):
     return call
 
 COPY={
- '研究变更日志 · 日报':('Research change log · Daily report','研究変更記録 · 日報'),
- '研究变更日志 · 周报':('Research change log · Weekly report','研究変更記録 · 週報'),
- '研究变更日志 · 月报':('Research change log · Monthly report','研究変更記録 · 月報'),
- '研究工作日志 · 日报':('Research activity · Daily report','研究活動 · 日報'),
- '研究工作日志 · 周报':('Research activity · Weekly report','研究活動 · 週報'),
- '研究工作日志 · 月报':('Research activity · Monthly report','研究活動 · 月報'),
+ # Titles, headings and section names.
+ '日报':('Daily report','日報'),'周报':('Weekly report','週報'),'月报':('Monthly report','月報'),
+ '这一天的进展':('Progress of the day','この日の進捗'),'这一周的进展':('Progress of the week','今週の進捗'),
+ '这个月的进展':('Progress of the month','今月の進捗'),
+ '## 需要处理':('## Needs attention','## 対応が必要なこと'),'## 数字一览':('## Counts','## 件数'),
+ '## 附录':('## Appendix','## 付録'),'### 记录清单':('### Records','### 記録一覧'),
+ '### 记录是否完整':('### Completeness','### 記録の完全性'),
+ '### 本报告不评估':('### Not assessed in this report','### このレポートで評価しないこと'),
+ '### 报告信息':('### About this report','### レポート情報'),
  '新增':('Added','追加'),'修改':('Modified','変更'),'待审':('Pending review','確認待ち'),'失败':('Failed','失敗'),
  '研究进展':('Research progress','研究の進捗'),'明确标记的重要变化':('Explicitly marked important changes','重要と明示された変更'),
  '未验证项':('Unverified items','未検証の項目'),'明确来源的潜在张力':('Source-backed potential tensions','出典の明確な潜在的矛盾'),
  '风险与待办':('Risks and tasks','リスクと対応事項'),'知识库结构变化':('Knowledge structure changes','知識構造の変化'),
  '明确记录的研究方向变化':('Explicitly recorded research direction changes','明記された研究方向の変化'),
  '长期待办':('Long-term tasks','長期的な課題'),'风险与未评估维度':('Risks and unassessed dimensions','リスクと未評価の項目'),
- '周期摘要':('Period summary','期間の要約'),'优先处理':('Priorities','優先事項'),
- '- 当前窗口没有来源支持的需优先处理记录。':('- No source-backed priority records in this window.','- この期間には、出典のある優先対応記録はありません。'),
- '- 无来源支持的记录。':('- No source-backed records.','- 出典のある記録はありません。'),
- '- 无。':('- None.','- なし。'),
+ # The lead line.
+ '这一天的记录：{v0}。':('Records of the day: {v0}.','この日の記録：{v0}。'),
+ '这一周的记录：{v0}。':('Records of the week: {v0}.','今週の記録：{v0}。'),
+ '这个月的记录：{v0}。':('Records of the month: {v0}.','今月の記録：{v0}。'),
+ '这一天没有新的记录。':('No new records this day.','この日の新しい記録はありません。'),
+ '这一周没有新的记录。':('No new records this week.','今週の新しい記録はありません。'),
+ '这个月没有新的记录。':('No new records this month.','今月の新しい記録はありません。'),
+ '{v0} {v1} 条':('{v0} {v1}','{v0} {v1} 件'),'、':(', ','、'),
+ # Needs attention and progress.
+ '- 没有需要马上处理的事。':('- Nothing needs attention right now.','- すぐに対応が必要なことはありません。'),
+ '- {v0} 的内容互相冲突，报告没有替你选择，见附录“记录是否完整”。':
+ ('- {v0} has conflicting content; the report does not choose for you. See “Completeness” in the appendix.',
+  '- {v0} の内容が競合しています。レポートは選択しません。付録の「記録の完全性」を参照してください。'),
+ '- 有记录无法解析（{v0}），报告可能不完整，见附录。':
+ ('- A record could not be parsed ({v0}); the report may be incomplete. See the appendix.',
+  '- 解析できない記録があります（{v0}）。レポートが不完全な可能性があります。付録を参照してください。'),
+ '这一时段没有新的进展记录。':('No progress was recorded in this period.','この期間に進捗の記録はありません。'),
+ # Counts and records.
  '| 类别 | 数量 |':('| Category | Count |','| 分類 | 件数 |'),
- '### 2.1 迟到事件':('### 2.1 Late arrivals','### 2.1 遅着イベント'),
- '### 2.2 冲突':('### 2.2 Conflicts','### 2.2 競合'),
- '### 2.3 不可解析':('### 2.3 Unparseable records','### 2.3 解析不能な記録'),
- ' · 原窗口 ':(' · Original window ',' · 元の期間 '),' · 原截止 ':(' · Original cutoff ',' · 元の締切 '),
- '- event {v0} · source event {v1} · {v2} · {v3} · 状态轴 {v4}={v5} · 对象 {v6} · 来源 {v7} · 证据 {v8}':
- ('- event {v0} · source event {v1} · {v2} · {v3} · Status axis {v4}={v5} · Objects {v6} · Source {v7} · Evidence {v8}',
-  '- event {v0} · source event {v1} · {v2} · {v3} · 状態軸 {v4}={v5} · 対象 {v6} · 出典 {v7} · 証拠 {v8}'),
- '- [{v0}] event {v1} · {v2} · {v3}={v4} · 来源 {v5}':('- [{v0}] event {v1} · {v2} · {v3}={v4} · Source {v5}','- [{v0}] event {v1} · {v2} · {v3}={v4} · 出典 {v5}'),
- '| 迟到事件 | {v0} |':('| Late arrivals | {v0} |','| 遅着イベント | {v0} |'),
- '| 冲突 | {v0} |':('| Conflicts | {v0} |','| 競合 | {v0} |'),
+ '| 迟到 | {v0} |':('| Late | {v0} |','| 遅着 | {v0} |'),'| 冲突 | {v0} |':('| Conflicts | {v0} |','| 競合 | {v0} |'),
  '| 不可解析 | {v0} |':('| Unparseable | {v0} |','| 解析不能 | {v0} |'),
- '- window: {v0} 至 {v1}（左闭右开）':('- window: {v0} to {v1} (start inclusive, end exclusive)','- window: {v0} から {v1}（開始を含み、終了を含まない）'),
- '- [冲突] event {v0} · 未自动择一 · 来源 ':('- [Conflict] event {v0} · No automatic selection · Sources ','- [競合] event {v0} · 自動選択なし · 出典 '),
- '- [阻断] {v0} · {v1} · 来源 {v2}':('- [Blocked] {v0} · {v1} · Source {v2}','- [ブロック] {v0} · {v1} · 出典 {v2}'),
- '- 另有 {v0} 项，见详细记录。':('- {v0} more item(s); see detailed records.','- ほか {v0} 件。詳細記録を参照してください。'),
- '- {v0} · {v1} · {v2} · 来源 {v3}':('- {v0} · {v1} · {v2} · Source {v3}','- {v0} · {v1} · {v2} · 出典 {v3}'),
- '- event {v0} → 交叉引用：首次完整记录见「{v1}」。':('- event {v0} → Cross-reference: first complete record in “{v1}”.','- event {v0} → 相互参照：最初の完全な記録は「{v1}」にあります。'),
- '- {v0} 存在内容冲突；未自动择一；来源 ':('- {v0} has conflicting content; no automatic selection; sources ','- {v0} の内容に競合があります。自動選択なし。出典 '),
- '> Shadow / non-authoritative；仅报告已有来源支持的变化，不形成科研结论。':('> Shadow / non-authoritative. Reports only changes supported by existing sources; does not establish scientific conclusions.','> Shadow / non-authoritative。既存の出典で裏付けられた変更だけを報告し、科学的結論は確定しません。'),
- '## 0. 今日先看':('## 0. Today at a glance','## 0. 今日の概要'),
- '## 0. 本周先看':('## 0. This week at a glance','## 0. 今週の概要'),
- '## 0. 本月先看':('## 0. This month at a glance','## 0. 今月の概要'),
- '### 0.1 需要处理':('### 0.1 Needs attention','### 0.1 対応が必要な項目'),
- '### 0.2 今日变化总览':('### 0.2 Changes today','### 0.2 今日の変更'),
- '### 0.2 本周变化总览':('### 0.2 Changes this week','### 0.2 今週の変更'),
- '### 0.3 报告完整性':('### 0.3 Report completeness','### 0.3 レポートの完全性'),
- '### 0.3 明确标记的重要变化':('### 0.3 Explicitly marked important changes','### 0.3 重要と明示された変更'),
- '### 0.4 明确来源的潜在张力':('### 0.4 Source-backed potential tensions','### 0.4 出典の明確な潜在的矛盾'),
- '### 0.5 覆盖与风险':('### 0.5 Coverage and risks','### 0.5 対象範囲とリスク'),
- '### 0.2 知识结构变化':('### 0.2 Knowledge structure changes','### 0.2 知識構造の変化'),
- '### 0.3 明确记录的研究方向变化':('### 0.3 Explicitly recorded research direction changes','### 0.3 明記された研究方向の変化'),
- '### 0.4 长期未决事项':('### 0.4 Long-standing open items','### 0.4 長期の未解決事項'),
- '## 1. 详细记录':('## 1. Detailed records','## 1. 詳細記録'),
- '## 2. 迟到、冲突与不可解析':('## 2. Late arrivals, conflicts and unparseable records','## 2. 遅着・競合・解析不能な記録'),
- '## 3. 未评估维度':('## 3. Unassessed dimensions','## 3. 未評価の項目'),
- '## 附录 · 审计与重放信息':('## Appendix · Audit and replay information','## 付録 · 監査と再現の情報'),
+ '- 没有记录。':('- No records.','- 記録はありません。'),
+ '{v0}. {v1} · {v2}{v3} · {v4} · 编号 {v5}':('{v0}. {v1} · {v2}{v3} · {v4} · id {v5}','{v0}. {v1} · {v2}{v3} · {v4} · 番号 {v5}'),
+ '（迟到）':(' (late)','（遅着）'),
+ # Completeness.
+ '记录完整：没有迟到、冲突或无法解析的记录。':('Complete: no late, conflicting or unparseable records.',
+  '記録は完全です。遅着・競合・解析不能な記録はありません。'),
+ '记录不完整（{v0}）。':('Incomplete ({v0}).','記録は不完全です（{v0}）。'),
+ '- 迟到 {v0} 条：发生在这一时段，但在上一份报告截止后才记录，已列在记录清单里，标“迟到”。':
+ ("- {v0} late: they happened in this period but were recorded after the previous report's cutoff; they are among the records, marked “late”.",
+  '- 遅着 {v0} 件：この期間に起きたが、前回のレポートの締切後に記録されたもの。記録一覧に「遅着」として載せています。'),
+ '- {v0}：内容互相冲突，报告没有替你选择；来源 {v1}。':('- {v0}: conflicting content; the report does not choose for you. Sources {v1}.',
+  '- {v0}：内容が競合しています。レポートは選択しません。出典 {v1}。'),
+ '- {v0}：无法解析（{v1}），{v2}；来源 {v3}。':('- {v0}: could not be parsed ({v1}); {v2}. Source {v3}.',
+  '- {v0}：解析できません（{v1}）。{v2}。出典 {v3}。'),
+ '影响报告完整性':('the report is incomplete','レポートは不完全です'),'不影响报告完整性':('the report is still complete','レポートの完全性には影響しません'),
+ # Not assessed.
+ '- 哪些变化更重要：记录里没有重要性的标注，报告按时间排列，不排先后。':
+ ('- Which changes matter more: the records carry no importance, so the report lists them by time.',
+  '- どの変更がより重要か：記録に重要度がないため、時刻順に並べています。'),
+ '- 文献之间的分歧：这一时段没有研究机会的记录。':('- Disagreements between papers: no research opportunities were recorded in this period.',
+  '- 文献間の相違：この期間に研究機会の記録はありません。'),
+ '- 研究方向的变化：这一时段没有记录方向决定。':('- Changes of research direction: no direction decisions were recorded in this period.',
+  '- 研究方向の変化：この期間に方向の決定は記録されていません。'),
+ '- 部分可选来源的记录没能读取，上面的数字可能不全。':('- Some optional sources could not be read; the counts above may be incomplete.',
+  '- 一部の任意の出典を読み取れませんでした。上の件数は不完全な可能性があります。'),
+ '- 有迟到的记录无法确认属于哪个时段。':('- Some late records could not be placed in a period.','- 一部の遅着記録の期間を確認できませんでした。'),
+ '- 没有。':('- None.','- なし。'),
+ # About this report.
+ '- 统计时段：{v0} 至 {v1}（{v2}，含开始、不含结束）':('- Period: {v0} to {v1} ({v2}; start included, end excluded)',
+  '- 対象期間：{v0} から {v1}（{v2}。開始を含み、終了を含まない）'),
+ '- 生成时间：{v0}':('- Generated: {v0}','- 作成日時：{v0}'),
+ '- 记录 {v0} 条；来源清单校验值 {v1}':('- {v0} records; source list checksum {v1}','- 記録 {v0} 件。出典一覧のチェックサム {v1}'),
+ '- 摘要：由 {v0} 根据上面的记录撰写，每句后的编号是它依据的记录。':
+ ('- Summary: written by {v0} from the records above; the numbers after each sentence are the records it rests on.',
+  '- 要約：{v0} が上の記録をもとに作成しました。各文の後の番号は根拠とした記録です。'),
+ '- 摘要：这份报告没有模型摘要。':('- Summary: this report has no model summary.','- 要約：このレポートにはモデルによる要約はありません。'),
+ '- 报告编号：{v0}，第 {v1} 版':('- Report id: {v0}, revision {v1}','- レポート番号：{v0}、第 {v1} 版'),
+ '，取代 {v0}':(', replaces {v0}','。{v0} を置き換え'),
 }
 
 def tr(key, *values):
@@ -79,5 +102,3 @@ def tr(key, *values):
 
 def template(text):
     return '\n'.join(tr(line) for line in text.split('\n'))
-
-HEADING_FIELDS={'human_title','attention_section','overview_section','section_title','cross_reference_section','api_narrative_label'}

@@ -195,8 +195,8 @@ class ApiBriefingTests(unittest.TestCase):
                 effort,
             )
             self.assertEqual(calls[0][1]["max_tokens"], max_tokens)
-            self.assertIn("## 1. 详细记录", result.markdown_text)
-            self.assertIn("API narrative", result.markdown_text)
+            self.assertIn("## 附录", result.markdown_text)
+            self.assertIn("The period contains one source-bound library change.［1］", result.markdown_text)
 
     def test_explicit_anthropic_low_override_does_not_change_defaults(self) -> None:
         from memorive.research.reports.api_briefing import BriefProfile, PROFILES

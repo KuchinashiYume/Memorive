@@ -1081,6 +1081,10 @@ class LibraryProductController:
                     "artifact_id": artifact_id,
                     "stable_locator": row["stable_locator"],
                     "display_name": row["display_name"],
+                    # The paper the file belongs to, named as the library's paper row names it; the
+                    # product file rows below keep it (reports group a paper's files under it).
+                    "document_name": str(row["display_name"]).split(" · ", 1)[0].strip()
+                    or str(row.get("source_file_name") or ""),
                     "task_id": metadata["job_id"],
                     "status": row["status"],
                     "kind": row["kind"],
