@@ -456,7 +456,18 @@ class SessionsProductController(
             }
         path = self._refinement_root / f"{projection_id}.json"
         if not path.is_file():
-            raise SessionProductError("SESSION_REFINEMENT_DRAFT_NOT_FOUND")
+            if task is not None:
+                raise SessionProductError("SESSION_REFINEMENT_DRAFT_NOT_FOUND")
+            # No task, nothing in the inbox and no draft: the session was never refined, or its queued refinement
+            # was cancelled in the inbox before it became a task. That is a state the page shows, not an error;
+            # this used to raise SESSION_REFINEMENT_DRAFT_NOT_FOUND, logged as a traceback on every detail open.
+            return {
+                "schema_version": "DesktopSessionRefinementDraftProjection-v1",
+                "local_projection_id": projection_id,
+                "draft": None,
+                "task": None,
+                "status": "NO_DRAFT",
+            }
         try:
             draft = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as error:

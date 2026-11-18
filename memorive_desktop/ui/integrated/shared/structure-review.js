@@ -580,7 +580,7 @@
       #settings-ingest-structure[hidden],#settings-structure-marker-fields[hidden],#library-structure-section[hidden]{display:none}
       #settings-ingest-structure{gap:10px}
       #settings-ingest-structure .desktop-settings-local-model-advanced{margin:0}
-      #settings-ingest-structure .field-label{font-size:var(--desktop-settings-font-helper);line-height:1.5}
+      #settings-ingest-structure .field-label{font-size:var(--desktop-font-helper);line-height:1.5}
       #settings-ingest-structure [role=status]:empty,#library-structure-section [role=status]:empty{display:none}
       #settings-ingest-structure .structure-stack,#library-structure-section .structure-stack{display:grid;gap:10px;min-width:0}
       #library-structure-section summary{cursor:pointer;color:var(--text-primary);font-size:12px;line-height:1.6}

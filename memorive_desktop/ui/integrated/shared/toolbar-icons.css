@@ -1,18 +1,21 @@
 /* The toolbar icon buttons of every route: .desktop-toolbar-icon with its soft, primary, toggle and
    segmented forms, and the icon of each .desktop-action-* button (an SVG in --desktop-action-icon).
-   The page loads this after the routes' own style sheets. */
+   The page loads this after the routes' own style sheets. The button size (--desktop-toolbar-size) and the
+   icon size follow the font size setting (tokens.css); a button inside a segmented switch is 6px smaller, so
+   the switch is as tall as a plain button. */
 
 .desktop-toolbar-icon {
+  --desktop-toolbar-size: var(--desktop-control);
   position: relative !important;
   display: inline-flex !important;
   align-self: center !important;
   align-content: center !important;
   justify-content: center !important;
-  width: 38px !important;
-  min-width: 38px !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  flex: 0 0 38px !important;
+  width: var(--desktop-toolbar-size) !important;
+  min-width: var(--desktop-toolbar-size) !important;
+  height: var(--desktop-toolbar-size) !important;
+  min-height: var(--desktop-toolbar-size) !important;
+  flex: 0 0 var(--desktop-toolbar-size) !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 0 !important;
@@ -33,9 +36,9 @@
   position: relative;
   top: 0;
   display: block;
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
+  flex: 0 0 var(--desktop-icon);
+  width: var(--desktop-icon);
+  height: var(--desktop-icon);
   background: currentColor;
   -webkit-mask: var(--desktop-action-icon) center / contain no-repeat;
   mask: var(--desktop-action-icon) center / contain no-repeat;
@@ -117,17 +120,11 @@
 .desktop-icon-segmented {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 3px !important;
-  padding: 3px !important;
-  border-radius: 14px !important;
+  padding: 2px !important;
 }
 
 .desktop-icon-segmented > .desktop-toolbar-icon {
-  width: 32px !important;
-  min-width: 32px !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  flex-basis: 32px !important;
+  --desktop-toolbar-size: calc(var(--desktop-control) - 6px);
   border-radius: 8px !important;
 }
 
@@ -194,21 +191,11 @@
 
 @container (max-width: 760px) {
   .desktop-toolbar-icon {
-    width: 34px !important;
-    min-width: 34px !important;
-    height: 34px !important;
-    min-height: 34px !important;
-    flex-basis: 34px !important;
+    --desktop-toolbar-size: var(--desktop-control-compact);
     border-radius: 9px !important;
   }
-  .desktop-toolbar-icon::before { width: 16px; height: 16px; }
-  .desktop-icon-segmented > .desktop-toolbar-icon {
-    width: 30px !important;
-    min-width: 30px !important;
-    height: 30px !important;
-    min-height: 30px !important;
-    flex-basis: 30px !important;
-  }
+  .desktop-toolbar-icon::before { width: calc(16px * var(--desktop-scale)); height: calc(16px * var(--desktop-scale)); }
+  .desktop-icon-segmented > .desktop-toolbar-icon { --desktop-toolbar-size: calc(var(--desktop-control-compact) - 6px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

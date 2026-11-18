@@ -147,14 +147,14 @@
         enabled.setAttribute('aria-checked',String(isEnabled));
         Memorive.settingsBridge.syncSaveState();
       });
-      enabledBox.append(enabled, el('span', '›', 'desktop-settings-disclosure-icon'));
-      head.append(title, enabledBox);
-      const actions = el('div', null, 'desktop-settings-source-actions');
-      const save = el('button', '保存', 'primary-button');
-      save.type = 'button';
-      const refresh = el('button', '更新数据', 'soft-button');
+      // Update this source now: the same ⟳ button the literature sources have, left of the switch.
+      const refresh = el('button', '⟳', 'icon-button');
       refresh.type = 'button';
       refresh.disabled = !c.enabled;
+      refresh.setAttribute('aria-label', `更新 ${c.display_name}`);
+      refresh.title = '更新数据';
+      enabledBox.append(refresh, enabled, el('span', '›', 'desktop-settings-disclosure-icon'));
+      head.append(title, enabledBox);
       const dirty = () => name.value !== c.display_name || url.value.trim() !== c.endpoint || key.value.trim() !== c.credential_env || isEnabled !== c.enabled;
       card.__isDirty = dirty;
       let disabledFields = [];
@@ -284,7 +284,6 @@
       urlBox.classList.add('desktop-settings-source-wide');
       keyBox.classList.add('desktop-settings-source-wide');
       const note=el('small',slot.provider==='web-of-science'?'Starter API · Key 暂空；取得后设置对应环境变量，再启用此来源':'公开元数据来源，无需 API Key');
-      const actions=el('div',null,'desktop-settings-source-actions');
       let isEnabled=slot.enabled;
       const payload=()=>({slot_id:slot.slot_id,provider:endpoints[url.value.trim()]||null,
         display_name:name.value.trim(),endpoint:url.value.trim(),credential_env:key.value.trim(),enabled:isEnabled});
@@ -333,7 +332,7 @@
       [name,url,key].forEach(input=>{
         for(const eventName of ['input','change'])input.addEventListener(eventName,()=>Memorive.settingsBridge.syncSaveState());
       });
-      fields.append(actions,nameBox,urlBox,keyBox,note);
+      fields.append(nameBox,urlBox,keyBox,note);
       row.append(fields);
       group.append(row);
     }

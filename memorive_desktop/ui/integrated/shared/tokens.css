@@ -21,3 +21,31 @@
   --desktop-tooltip-bg: #2A2723;
   --desktop-tooltip-text: #FFFFFF;
 }
+
+/* The downward chevron that drawn dropdowns and disclosures show (as a mask, in the text colour). */
+:root { --desktop-chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+
+/* The type sizes and weights the routes' own rules use (most text takes its size from typography.css). */
+:root {
+  --desktop-font-panel-title: 17px;
+  --desktop-font-card-title: 15px;
+  --desktop-font-section-title: 14px;
+  --desktop-font-base: 14px;
+  --desktop-font-control: 14px;
+  --desktop-font-helper: 12px;
+  --desktop-font-status: 11px;
+  --desktop-weight-title: 600;
+  --desktop-weight-label: 400;
+  --desktop-weight-value: 400;
+}
+
+/* Sizes that follow the font size setting: app.js sets --desktop-font-factor (0.8 to 1.4) on this element, and
+   the navigation, the page headers and their buttons grow with the text they hold. */
+:root {
+  --desktop-scale: var(--desktop-font-factor, 1);
+  --desktop-nav-width: calc(204px * var(--desktop-scale));
+  --desktop-nav-width-narrow: calc(150px * var(--desktop-scale));
+  --desktop-icon: calc(18px * var(--desktop-scale));
+  --desktop-control: calc(38px * var(--desktop-scale));
+  --desktop-control-compact: calc(34px * var(--desktop-scale));
+}

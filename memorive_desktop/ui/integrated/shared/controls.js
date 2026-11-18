@@ -1,7 +1,7 @@
 /* Shared desktop-layout controls. No business calls, permissions or persistence. */
 (() => {
   if (Memorive.controls) return;
-  const iconSelector='.icon-button,.desktop-settings-stepper button,.desktop-tasks-stepper button,.desktop-settings-disclosure-icon,.desktop-settings-category-chevron,.desktop-settings-api-chevron,.desktop-settings-cli-add-chevron';
+  const iconSelector='.memo-tree-chevron,.memo-model-chevron,.icon-button,.desktop-settings-stepper button,.desktop-tasks-stepper button,.desktop-settings-disclosure-icon,.desktop-settings-category-chevron,.desktop-settings-api-chevron,.desktop-settings-cli-add-chevron';
   const paths={back:'m15 6-6 6 6 6',right:'m9 6 6 6-6 6',down:'m6 9 6 6 6-6',up:'m6 15 6-6 6 6',close:'m6 6 12 12M6 18 18 6',plus:'M12 5v14M5 12h14',minus:'M5 12h14',refresh:'M20 6v5h-5M4 18v-5h5M18.4 9A7 7 0 0 0 6.2 6.2L4 8M5.6 15a7 7 0 0 0 12.2 2.8L20 16'};
   const keys={'‹':'back','<':'back','›':'right','>':'right','⌄':'down','⌃':'up','^':'up','×':'close','＋':'plus','+':'plus','－':'minus','−':'minus','⟳':'refresh','↻':'refresh'};
   paths.leaderboard='M5 21v-6M12 21V9M19 21V3';

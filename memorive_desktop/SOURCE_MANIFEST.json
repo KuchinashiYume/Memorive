@@ -212,8 +212,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "0a07f481a1e173586a89d7e57d6433ddc13c97842fd9efceb473d160870f7894",
-      "bytes": 370927
+      "sha256": "847944ffca0161410f7da10a621befae4cf96c625d097643ff3cfaec8652c81f",
+      "bytes": 370949
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -437,8 +437,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "3dd892a1ccd618132d3f82144996772c77f895b81c4b9987c6216ed1330fd530",
-      "bytes": 2644655
+      "sha256": "4e30685cc63d39925e7a8cf456c79301ea75145ef91d7e098e2951c811915cba",
+      "bytes": 2637630
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -6982,8 +6982,8 @@
     },
     {
       "path": "source/memorive/sessions/controller/product_controller.py",
-      "sha256": "57984bbdffb502a21a19a17f9f1725fe7a74bbc620e66b79a2346bb085a7fcb6",
-      "bytes": 27742
+      "sha256": "cd85965b84fc9c2465349ca8591d8c086145a9b6f08bc19b780b74a39edf6e81",
+      "bytes": 28397
     },
     {
       "path": "source/memorive/sessions/controller/refinement_queue.py",

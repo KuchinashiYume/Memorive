@@ -10,7 +10,10 @@
   'use strict';
   const i18n = Memorive.i18n;
 
+  // Default panel sizes at 100% font size; they grow with the font size setting (app.js sets the factor).
   const BOTTOM_DEFAULT = 346;
+  const fontScale = () => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desktop-font-factor')) || 1;
+  const bottomDefault = () => Math.round(BOTTOM_DEFAULT * fontScale());
 
   // Width of the content area: the workspace minus the sidebar when it is open.
   const contentWidth = (frame) => {
@@ -67,9 +70,10 @@
         current: (frame) => contentWidth(frame) * ratio,
         limits: (frame) => {
           const content = contentWidth(frame);
-          const minPrimary = Math.min(360, Math.max(220, content * 0.36));
+          // The page keeps its own minimum, grown with the font size like the panel's.
+          const minPrimary = Math.min(360 * fontScale(), Math.max(220 * fontScale(), content * 0.36));
           const max = Math.max(160, content - minPrimary);
-          const requestedMin = content <= 620 ? 200 : 280;
+          const requestedMin = (content <= 620 ? 200 : 280) * fontScale();
           return { min: Math.min(requestedMin, max), max };
         },
         resized: (frame, next, how) => {
@@ -94,10 +98,10 @@
     }),
     // A fixed width (smaller in a narrow window) until the person resizes it.
     fixed: (large, small, smallest) => () => ({
-      current: (frame) => inlineOr(frame, '--desktop-right-size', frame.workspace.getBoundingClientRect().width <= 620 ? small : large),
+      current: (frame) => inlineOr(frame, '--desktop-right-size', (frame.workspace.getBoundingClientRect().width <= 620 ? small : large) * fontScale()),
       limits: (frame) => {
-        const max = Math.max(48, Math.min(440, contentWidth(frame) - 112));
-        return { min: Math.min(smallest, max), max };
+        const max = Math.max(48, Math.min(440 * fontScale(), contentWidth(frame) - 112));
+        return { min: Math.min(smallest * fontScale(), max), max };
       },
       resized: () => {},
       opening: () => {},
@@ -105,12 +109,15 @@
     // A width in pixels that stays as the person last set it, for the right and the bottom panel; a narrower
     // window clamps it for the moment only.
     remembered: () => {
-      const remembered = { right: 480, bottom: BOTTOM_DEFAULT };
+      // null until the person resizes the panel: then the default for the current font size applies.
+      const remembered = { right: null, bottom: null };
+      const right = () => remembered.right ?? Math.round(480 * fontScale());
+      const bottom = () => remembered.bottom ?? bottomDefault();
       return {
-        current: (frame) => inlineOr(frame, '--desktop-right-size', remembered.right),
-        fit: () => remembered.right,
-        bottomCurrent: (frame) => inlineOr(frame, '--desktop-bottom-size', remembered.bottom),
-        bottomFit: () => remembered.bottom,
+        current: (frame) => inlineOr(frame, '--desktop-right-size', right()),
+        fit: right,
+        bottomCurrent: (frame) => inlineOr(frame, '--desktop-bottom-size', bottom()),
+        bottomFit: bottom,
         limits: (frame) => {
           const workspaceWidth = frame.workspace.getBoundingClientRect().width;
           const leftWidth = frame.app.dataset.left === 'true' ? frame.navigation.getBoundingClientRect().width : 0;
@@ -172,7 +179,7 @@
 
     const getPanelSize = (panel) => {
       if (panel === 'right') return rule.current(frame);
-      return rule.bottomCurrent ? rule.bottomCurrent(frame) : inlineOr(frame, '--desktop-bottom-size', BOTTOM_DEFAULT);
+      return rule.bottomCurrent ? rule.bottomCurrent(frame) : inlineOr(frame, '--desktop-bottom-size', bottomDefault());
     };
 
     // The size a panel takes when it opens or the window resizes.
@@ -186,8 +193,9 @@
     const getBottomLimits = () => {
       const workspaceHeight = workspace.getBoundingClientRect().height;
       const bottomGap = Number.parseFloat(getComputedStyle(workspace).getPropertyValue('--desktop-bottom-gap')) || 0;
-      const max = Math.max(64, Math.min(528, workspaceHeight - bottomGap - 112));
-      return { min: Math.min(240, max), max };
+      // The page above keeps at least 330px (times the font size): on chat, the header, toolbar and composer.
+      const max = Math.max(64, Math.min(528 * fontScale(), workspaceHeight - bottomGap - 330 * fontScale()));
+      return { min: Math.min(240 * fontScale(), max), max };
     };
 
     const updateResizerAria = (resizer, limits, value) => {

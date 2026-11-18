@@ -243,7 +243,7 @@
   function updateTip() {
     const stamp = data.updated_at ? data.updated_at.slice(0,10).replaceAll('-','/') : '—';
     const t = q('#lb-updated-date');
-    t.textContent = stamp;
+    t.textContent = data.updated_at ? stamp : uiText('未更新');
     if (data.updated_at) t.setAttribute('datetime', data.updated_at); else t.removeAttribute('datetime');
     const fx = data.fx;
     const rates = usableFx() ? '1 USD = ' + fx.unitsPerUsd.CNY.toFixed(4) + ' RMB = ' + fx.unitsPerUsd.JPY.toFixed(4) + ' JPY' : fxPending?uiText('正在更新汇率…'):uiText('汇率暂不可用；USD 可查看原始报价');
@@ -264,7 +264,7 @@
     if(head.dataset.columns!==cols.join('|')) {
       head.replaceChildren();
       q('#lb-column-widths').replaceChildren();
-      const widths=pane?[30,14,16,23,17]:[4,21,11,7,11,11,11,11,13];
+      const widths=pane?[30,14,16,23,17]:[6,20,11,7,11,11,11,11,12];
       cols.forEach((key,index)=>{
         const col=el('col');
         col.style.width=widths[index]+'%';
@@ -953,6 +953,12 @@
       showTip(target);
     }
   },true));
+  // The last-update date and the value-rule "?" only explain something: a click (or Enter) shows the explanation
+  // too, for touch and for a pointer that has not rested on them.
+  root.addEventListener('click',e=>{
+    const target=e.target.closest?.('#lb-updated,#lb-value-help');
+    if(target)showTip(target);
+  });
   root.addEventListener('pointerout',e=>{if(tipOwner&&!tipOwner.contains(e.relatedTarget))hideTip();},true);
   root.addEventListener('focusout',hideTip,true);
   root.addEventListener('keydown',e=>{

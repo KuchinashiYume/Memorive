@@ -35,7 +35,8 @@
     baseMismatch:['当前文件与增量基线不同。','Current files do not match the delta baseline.','現在のファイルが差分の基準と一致しません。'],
     noDelta:['没有适合当前版本且更小的增量包。','No smaller delta matches this version.','このバージョンに対応する小さい差分がありません。']
   };
-  const language=()=>Memorive.settingsText?.language?.()||document.documentElement.lang||'zh-CN';
+  // The window's language, as every other part of the page uses (the language switch in settings sets it at once).
+  const language=()=>Memorive.i18n.language();
   const text=key=>(words[key]||words.failure)[{'en-US':1,'ja-JP':2}[language()]||0];
   // Reuse the existing settings list. No nested padded form stack.
   const section=panel, template=document.createElement('template');
@@ -142,6 +143,8 @@
     },30000);
   });
   window.addEventListener('beforeunload',()=>clearInterval(timer));
+  // Redraw at once when the language changes (the status poll only runs while the panel is open).
+  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   render();
 })();
 

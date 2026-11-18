@@ -8,7 +8,13 @@
   const assets = Object.freeze({
     interaction: 'assets/decorations/home-interaction.svg',
     question: 'assets/decorations/home-question.svg',
-    empty: 'assets/decorations/empty-state.svg'
+    empty: 'assets/decorations/empty-state.svg',
+    done: 'assets/decorations/assistant-save-success.svg'
+  });
+  // Empty pages: no files (inbox, library), nothing waiting (tasks, messages), nothing written yet (work log).
+  const emptyPicture = Object.freeze({
+    'inbox-empty': assets.empty, 'library-empty': assets.empty, 'tasks-empty': assets.done,
+    'messages-empty': assets.done, 'worklog-empty': assets.interaction
   });
   const prefersReducedMotion = () => Boolean(
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -271,13 +277,13 @@
   const enhanceEmptyState = (empty) => {
     /* Desktop_EMPTY_STATE_ILLUSTRATION_V1 */
     if (!(empty instanceof HTMLElement) || empty.dataset.illustrationReady === 'true') return;
-    if (!['inbox-empty', 'tasks-empty', 'messages-empty', 'library-empty', 'worklog-empty'].includes(empty.id)) return;
+    if (!emptyPicture[empty.id]) return;
     const container = empty.firstElementChild;
     if (!(container instanceof HTMLElement)) return;
     container.querySelectorAll('.empty-mark').forEach((mark) => mark.remove());
     const image = document.createElement('img');
     image.className = 'desktop-empty-illustration';
-    image.src = assets.empty;
+    image.src = emptyPicture[empty.id];
     image.alt = '';
     image.draggable = false;
     container.prepend(image);

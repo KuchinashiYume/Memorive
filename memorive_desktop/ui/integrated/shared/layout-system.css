@@ -9,14 +9,6 @@
   font-size:var(--desktop-ui-body,14px);
   line-height:1.45;
 }
-:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-chat-preview) .desktop-central .page-header {
-  /* Supersede the preserved bundle's older important header font guard. */
-  padding:10px 24px!important;
-  min-height:76px;
-  box-sizing:border-box;
-  align-items:center;
-}
-:is(#desktop-settings-preview,#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview,#desktop-chat-preview) .desktop-central .page-header h2 {margin:0;line-height:1.2;}
 #desktop-inbox-preview .desktop-inbox-body,
 #desktop-messages-preview .desktop-messages-body,
 #desktop-library-preview .desktop-library-body,
@@ -50,11 +42,10 @@
 #memo-chat-page .memo-layout[data-history=false] .memo-chat {margin-inline-start:0;}
 #desktop-settings-preview :is(.memo-settings,.memo-weights-panel) {line-height:1.45;}
 #desktop-settings-preview :is(.memo-field,.memo-settings-field) {gap:8px;margin-block:12px;}
-#desktop-settings-preview .desktop-settings-workarea:not(.has-node) .desktop-settings-categories {
+#desktop-settings-preview .desktop-settings-workarea:not(.has-node,.is-compact) .desktop-settings-categories {
   padding:var(--memo-page-inset) var(--memo-page-gutter);gap:var(--memo-list-gap);
 }
 #desktop-settings-preview .desktop-settings-category-copy strong {font-size:15px;line-height:1.4;}
-#desktop-leaderboard-preview .lb-heading {min-height:76px;padding:10px 24px!important;box-sizing:border-box;align-items:center;}
 
 /* Keep the existing summary/chart split; align typography within each cell. */
 .desktop-accounting-panel .desktop-accounting-metric-main {gap:4px 10px;padding:10px 12px;}
@@ -86,7 +77,7 @@
 
 /* application-service: retain page layout and assets; align the newly reported rows. */
 #desktop-sessions-preview .desktop-sessions-setup-required {margin:0 0 var(--memo-list-gap);}
-#desktop-messages-preview .desktop-central .desktop-messages-card {min-height:64px;padding:8px 11px;}
+#desktop-messages-preview .desktop-central .desktop-messages-card {padding:8px 11px;}
 #desktop-messages-preview .desktop-messages-card .desktop-messages-copy {padding:0 4px;}
 #desktop-messages-preview .desktop-messages-card .desktop-messages-copy small {
   min-height:1.4em;line-height:1.4;white-space:nowrap;display:block;
