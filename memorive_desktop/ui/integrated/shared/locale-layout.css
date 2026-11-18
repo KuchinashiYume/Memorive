@@ -1,7 +1,7 @@
 /* Settings category labels and leaderboard tables at larger font sizes. */
 #desktop-settings-preview .desktop-settings-category > span { min-width:0; }
 #desktop-leaderboard-preview .lb-table { min-width:calc(780px * var(--desktop-scale)); }
-#desktop-leaderboard-preview[data-lb-compact="true"] .lb-table { min-width:calc(660px * var(--desktop-scale)); }
+#desktop-leaderboard-preview[data-lb-compact="true"] .lb-table { min-width:calc(600px * var(--desktop-scale)); }
 #desktop-leaderboard-preview .lb-th-btn span, #desktop-leaderboard-preview .lb-table td[data-col="region"] { overflow-wrap:normal; word-break:normal; }
 #desktop-leaderboard-preview .lb-price-pair>span:not(.lb-price-divider) { min-width:0; white-space:normal; overflow-wrap:normal; }
 

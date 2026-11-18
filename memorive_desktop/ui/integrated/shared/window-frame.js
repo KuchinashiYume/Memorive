@@ -70,7 +70,8 @@
         current: (frame) => contentWidth(frame) * ratio,
         limits: (frame) => {
           const content = contentWidth(frame);
-          const minPrimary = Math.min(360, Math.max(220, content * 0.36));
+          // The page keeps its own minimum, grown with the font size like the panel's.
+          const minPrimary = Math.min(360 * fontScale(), Math.max(220 * fontScale(), content * 0.36));
           const max = Math.max(160, content - minPrimary);
           const requestedMin = (content <= 620 ? 200 : 280) * fontScale();
           return { min: Math.min(requestedMin, max), max };

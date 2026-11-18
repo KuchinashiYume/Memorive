@@ -93,7 +93,7 @@ Memorive.i18n.define({
   'accounting.metrics': ['选择图表指标', 'Select chart metric', 'グラフの指標を選択'],
   'accounting.currency': ['当前 {current}，点击切换为 {next}', 'Current {current}; switch to {next}', '現在 {current}、{next} に切り替え'],
   'accounting.currency.title': ['切换显示币种', 'Change display currency', '表示通貨を切り替える'],
-  'accounting.cost': ['费用（含估算）', 'Cost (including estimates)', '費用（推定を含む）'],
+  'accounting.cost': ['费用（含估算）', 'Cost (incl. estimates)', '費用（推定を含む）'],
   'accounting.cost.none': ['实际 — · 估算 —', 'Actual — · Estimated —', '実績 — · 推定 —'],
   'accounting.cost.actual': ['实际 {amount}', 'Actual {amount}', '実績 {amount}'],
   'accounting.cost.estimated': ['估算 {amount}', 'Estimated {amount}', '推定 {amount}'],

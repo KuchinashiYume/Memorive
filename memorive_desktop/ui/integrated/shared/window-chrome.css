@@ -72,9 +72,9 @@
 .desktop-report-schedule-head,.desktop-report-schedule-head > strong {display:flex;align-items:center;gap:8px;}
 .desktop-report-schedule-head {justify-content:space-between;padding-bottom:10px;}
 .desktop-report-schedule-head > small {color:var(--text-secondary);white-space:nowrap;}
-.desktop-report-schedule-row {display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:64px;border-top:1px solid var(--border-subtle);padding:10px 0;}
+.desktop-report-schedule-row {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;min-height:64px;border-top:1px solid var(--border-subtle);padding:10px 0;}
 .desktop-report-schedule-row:last-of-type {padding-bottom:0;}
-.desktop-report-schedule-controls {display:flex;align-items:center;gap:10px;min-width:0;}
+.desktop-report-schedule-controls {display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-width:0;}
 #desktop-settings-preview .desktop-report-schedule-controls > .desktop-settings-select-shell {width:148px;flex:0 0 148px;}
 .desktop-report-schedule-controls > input {flex:0 0 126px;}
 .desktop-report-schedule-row input.field {width:126px;min-width:0;font:inherit;}
@@ -88,7 +88,7 @@
 .desktop-report-day[aria-pressed="true"] {background:var(--desktop-brand,#A2603F);color:white;}
 .desktop-report-day:hover,.desktop-report-day:focus-visible {border-color:var(--desktop-brand,#A2603F);}
 #settings-report-schedule-status:empty {display:none;}
-@container (max-width:480px) {.desktop-report-schedule-controls {gap:6px;}.desktop-report-schedule-row {flex-wrap:wrap;}.desktop-report-calendar {right:0;width:246px;}}
+@container (max-width:480px) {.desktop-report-schedule-controls {gap:6px;}.desktop-report-calendar {right:0;width:246px;}}
 
 /* Main window only. The assistant remains an independent native surface. */
 .desktop-window-controls {display:none;}
