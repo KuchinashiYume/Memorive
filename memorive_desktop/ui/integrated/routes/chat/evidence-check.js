@@ -1,4 +1,6 @@
-/* Evidence check results, shown inside the chat's context disclosure. Adds no controls and calls no model. */
+/* Evidence check results, shown inside the chat's context disclosure (its .memo-context-check part): the sources
+   the answer read, the question's facets that have sources, and each conclusion with its review state. Adds no
+   controls and calls no model. */
 (function(){
   'use strict';
   const statuses={SUPPORTED:'有支持',PARTIAL:'部分支持',UNSUPPORTED:'缺少支持',CONFLICT:'存在冲突',NEEDS_REVIEW:'需复核',NOT_REVIEWED:'未审核'};
@@ -18,37 +20,40 @@
       try {
         const check=await call('memo.answer_check',{thread_id:threadId,answer_id:message.id});
         if(!details.isConnected||!details.open||ticket!==sequence)return;
-        details.querySelectorAll('[data-memo-evidence-result]').forEach(n=>n.remove());
-        const add=(tag,text)=>{
-          const node=create(tag,text);
-          node.dataset.memoEvidenceResult='';
-          details.append(node);
-        };
-        for(const source of check.coverage.sources){
-          const count=check.retained_evidence.filter(r=>r.artifact_id===source.id).length;
-          add('p',source.title+' · '+t(layers[source.material_layer]||'材料层未确认')+' · '+t('已加载片段')+' '+(source.read_ranges||[]).length+' · '+t('本次上下文')+' '+count);
-        }
-        for(const facet of check.coverage.facets){
-          const values=facet.sources.map(s=>s.title+'：'+t(({partial:'线索已进入上下文，充分性未核实',missing:'线索未进入上下文',not_assessed:'加载范围内未定位线索',covered:'已覆盖'})[s.status]||s.status));
-          add('p',t(facet.label)+' · '+values.join('；'));
-        }
-        check.claims.forEach((claim,index)=>{
-          add('p',(index+1)+'. '+claim.text+' · '+t(statuses[claim.status]));
-          if(claim.status!=='NOT_REVIEWED'){
-            add('p',claim.reason);
-            if(claim.conditions)add('p',claim.conditions);
-            for(const issue of claim.mechanical_issues||[])add('p',issue);
+        const host=details.querySelector('.memo-context-check')||details;
+        host.replaceChildren();
+        if(check.coverage.sources.length){
+          const list=create('ul',null,'memo-context-sources');
+          for(const source of check.coverage.sources){
+            const count=check.retained_evidence.filter(r=>r.artifact_id===source.id).length;
+            list.append(create('li',source.title+' · '+t(layers[source.material_layer]||'材料层未确认')+' · '+t('已加载片段')+' '+(source.read_ranges||[]).length+' · '+t('本次上下文')+' '+count));
           }
-        });
-        if(check.freshness!=='CURRENT')add('p',t('来源已变化'));
-        for(const old of check.history||[])add('pre','v'+old.version+'\n'+old.text);
-      } catch(error){
-        if(details.isConnected&&details.open&&ticket===sequence){
-          details.querySelectorAll('[data-memo-evidence-result]').forEach(n=>n.remove());
-          const node=create('p',String(error.message||error));
-          node.dataset.memoEvidenceResult='';
-          details.append(node);
+          host.append(list);
         }
+        // A facet without sources says nothing: it is left out.
+        for(const facet of check.coverage.facets.filter(f=>f.sources.length)){
+          const values=facet.sources.map(s=>s.title+'：'+t(({partial:'线索已进入上下文，充分性未核实',missing:'线索未进入上下文',not_assessed:'加载范围内未定位线索',covered:'已覆盖'})[s.status]||s.status));
+          host.append(create('p',t(facet.label)+' · '+values.join('；')));
+        }
+        if(check.claims.length){
+          const list=create('ol',null,'memo-context-claims');
+          for(const claim of check.claims){
+            const item=create('li',claim.text);
+            item.append(create('span',t(statuses[claim.status]),'memo-context-status'));
+            if(claim.status!=='NOT_REVIEWED'){
+              item.append(create('p',claim.reason));
+              if(claim.conditions)item.append(create('p',claim.conditions));
+              for(const issue of claim.mechanical_issues||[])item.append(create('p',issue));
+            }
+            list.append(item);
+          }
+          host.append(list);
+        }
+        if(check.freshness!=='CURRENT')host.append(create('p',t('来源已变化')));
+        for(const old of check.history||[])host.append(create('pre','v'+old.version+'\n'+old.text));
+      } catch(error){
+        if(details.isConnected&&details.open&&ticket===sequence)
+          (details.querySelector('.memo-context-check')||details).replaceChildren(create('p',String(error.message||error)));
       }
     });
   }

@@ -327,7 +327,7 @@
 
 /* A raised, rounded project panel over the continuous workspace surface. */
 #memo-chat-page .memo-layout{--memo-history-width:274px;display:block!important;position:relative}
-#memo-chat-page .memo-conversations{position:absolute;inset:0 auto 0 0;width:var(--memo-history-width);box-sizing:border-box;border:0;border-right:1px solid var(--border-subtle,var(--desktop-border-subtle));border-radius:0;background:var(--desktop-surface-subtle,var(--surface));box-shadow:none;padding:12px 8px;z-index:20;gap:6px}
+#memo-chat-page .memo-conversations{position:absolute;inset:12px auto 12px 12px;width:var(--memo-history-width);box-sizing:border-box;border:1px solid var(--border-default);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-soft),0 8px 24px rgba(42,39,35,.06);padding:10px 8px;z-index:20;gap:6px}
 #memo-chat-page .memo-chat{height:100%;min-width:0;margin-inline-start:calc(var(--memo-history-width) + 24px);border:0}
 #memo-chat-page .memo-layout[data-history=false] .memo-chat{margin-inline-start:0}
 /* The projects panel's collapse handle sits inside its right edge (the panel keeps room for it); the expand handle
@@ -527,7 +527,7 @@
 /* The conversation, after Claude Code's: one centred reading column as wide as the composer; the person's
    questions are bubbles on the right, the answers plain text, and an answer's actions and details one quiet line
    under it. Speaker names are for screen readers only. */
-#memo-chat-page{--memo-column:740px}
+#memo-chat-page{--memo-column:clamp(760px,82%,1180px)}
 #memo-chat-page .memo-transcript{padding:28px max(24px,calc((100% - var(--memo-column))/2)) 24px}
 #memo-chat-page .memo-composer{padding:8px max(22px,calc((100% - var(--memo-column))/2)) 14px}
 #memo-chat-page .memo-chat-toolbar{border-bottom-color:transparent;padding:14px max(24px,calc((100% - var(--memo-column))/2)) 6px}
@@ -537,6 +537,7 @@
 #memo-chat-page .memo-message[data-role=user]{position:relative;width:fit-content;max-width:min(78%,560px);margin:0 0 30px auto;padding:10px 16px;border-radius:18px;background:var(--desktop-surface-selected)}
 #memo-chat-page .memo-message[data-role=user] header{position:absolute;right:calc(100% + 6px);top:50%;transform:translateY(-50%)}
 #memo-chat-page .memo-message[data-role=user] .memo-copy-message{margin:0}
+#memo-chat-page .memo-message[data-role=assistant]{padding:16px 20px 8px;border:1px solid var(--desktop-border-default);border-radius:16px;background:var(--desktop-surface-raised);box-shadow:0 3px 12px #2A272307}
 #memo-chat-page .memo-message[data-role=assistant] .memo-message-body{color:var(--desktop-text-primary)}
 #memo-chat-page .memo-message-footer{margin-top:4px;gap:2px;justify-content:flex-start;color:var(--desktop-text-secondary)}
 #memo-chat-page .memo-message-footer .memo-answer-actions{display:flex;align-items:center;gap:2px;margin-left:-6px}
@@ -545,3 +546,8 @@
 #memo-chat-page .memo-message-footer .memo-message-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #memo-chat-page .memo-message-meta{display:inline-flex;flex-wrap:wrap;gap:4px 12px;margin-left:8px}
 #memo-chat-page .memo-message .memo-context-details{margin:12px 0 0;color:var(--desktop-text-secondary)}
+#memo-chat-page .memo-context-details > :is(p,ul,ol,pre,div,details){margin:6px 0 0}
+#memo-chat-page .memo-context-details :is(ul,ol){padding-left:1.4em}
+#memo-chat-page .memo-context-details li{margin:4px 0}
+#memo-chat-page .memo-context-status{margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);white-space:nowrap}
+#memo-chat-page .memo-context-technical > summary{cursor:pointer;color:var(--desktop-text-secondary);font-size:var(--memo-size-small)}

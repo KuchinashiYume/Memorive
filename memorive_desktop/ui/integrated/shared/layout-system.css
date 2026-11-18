@@ -37,8 +37,8 @@
   line-height:1.4;
 }
 #desktop-worklog-preview .desktop-worklog-mark > svg {width:18px;height:18px;}
-#memo-chat-page .memo-conversations {left:0;}
-#memo-chat-page .memo-chat {margin-inline-start:var(--memo-history-width);}
+#memo-chat-page .memo-conversations {left:var(--memo-page-gutter);}
+#memo-chat-page .memo-chat {margin-inline-start:calc(var(--memo-history-width) + var(--memo-page-gutter) * 2);}
 #memo-chat-page .memo-layout[data-history=false] .memo-chat {margin-inline-start:0;}
 #desktop-settings-preview :is(.memo-settings,.memo-weights-panel) {line-height:1.45;}
 #desktop-settings-preview :is(.memo-field,.memo-settings-field) {gap:8px;margin-block:12px;}

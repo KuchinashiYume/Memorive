@@ -929,19 +929,24 @@ const collapsed=new Set();
     },'memo-quiet-button'),create('h4',fresh.title),create('small',fresh.page?t('页')+' '+fresh.page:'L'+fresh.line_start+'–'+fresh.line_end),create('pre',fresh.text),
       button('在外部查看',()=>window.pywebview.api.memo_open_evidence({evidence_id:ref.id,project,expected_hash:ref.content_hash}),'memo-quiet-button'));
   }
+  // What an answer was built from: one line of counts, the remembered notes it used, the evidence check (filled in
+  // when the disclosure opens, evidence-check.js) and, folded away, the answer style's versions and instruction hash.
   function contextDetails(message){
     const details=create('details',null,'memo-saved-memory memo-context-details'),
-      ids=new Set(message.context.memory_ids||[]);
-    details.append(create('summary',t('使用的上下文'),'desktop-settings-disclosure'),create('p',t('记忆条数')+' · '+ids.size));
-    for(const m of message.generation?.context.confirmed_memory||state.memories.filter(m=>ids.has(m.id))){
+      ids=new Set(message.context.memory_ids||[]),g=message.generation,
+      facts=[t('记忆条数')+' '+ids.size,t('摘要引用消息')+' '+(message.context.summary_message_ids||[]).length,t('上下文字符数')+' '+message.context.chars];
+    if(g)facts.push(t('回答风格')+' '+t(g.style.label));
+    details.append(create('summary',t('使用的上下文'),'desktop-settings-disclosure'),create('p',facts.join(' · '),'memo-context-summary'));
+    for(const m of g?.context.confirmed_memory||state.memories.filter(m=>ids.has(m.id))){
       const current=state.memories.find(row=>row.id===m.id);
       details.append(create('pre',current&&current.revision===m.revision?m.text:t('此记忆已变化或已遗忘')));
     }
-    if(message.generation){
-      const g=message.generation;
-      details.append(create('p',t('回答风格')+' · '+t(g.style.label)),create('small',g.style.common_version+' / '+g.style.mode_version),create('p',t('实际指令')+' · '+g.actual_instruction_sha256));
+    details.append(create('div',null,'memo-context-check'));
+    if(g){
+      const technical=create('details',null,'memo-saved-memory memo-context-technical');
+      technical.append(create('summary',t('技术细节'),'desktop-settings-disclosure'),create('p',g.style.common_version+' / '+g.style.mode_version),create('p',t('实际指令')+' · '+g.actual_instruction_sha256));
+      details.append(technical);
     }
-    details.append(create('p',t('摘要引用消息')+' · '+(message.context.summary_message_ids||[]).length),create('p',t('上下文字符数')+' · '+message.context.chars));
     Memorive.evidenceCheck?.bind(details,message,{threadId:thread.id,call,create,t});
     for(const warning of message.ranking_warnings||[])details.append(create('small',t('部分排序信息暂不可用')+' · '+warning.component,'memo-inline-error'));
     return details;
