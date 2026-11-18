@@ -196,3 +196,67 @@ def test_failed_task_deeplink_and_repair_affordance(discovery,monkeypatch):
     message=next(m for m in messages if m['target_locator']=='memorive://job/'+row['run_id'])
     route=api.call('messages.navigate',{'message_id':message['message_id'],'locator':message['target_locator']})
     assert route['research_task_id']==row['run_id']
+
+
+# When sources fail or bring nothing new
+
+def test_one_failing_source_leaves_a_partial_result_that_names_it(discovery):
+    api,fixture=discovery
+    fixture.failures={'CROSSREF':503}
+    record=api._research.run_sync('discovery','one-source-down',topic='Synthetic workflow',count=3)
+    result=record['result']
+    assert record['status']=='PARTIAL' and result['status']=='PARTIAL'
+    assert {(f['source'],f['error_code']) for f in result['source_failures']}=={('crossref','SOURCE_HTTP_503')}
+    assert result['recommendations'] and record['message_id']           # what arXiv returned is still delivered
+    assert 'crossref: SOURCE\\_HTTP\\_503' in result['markdown'] or 'crossref: SOURCE_HTTP_503' in result['markdown']
+
+
+def test_when_every_source_fails_the_run_stops_with_each_reason_and_a_message(discovery):
+    api,fixture=discovery
+    fixture.failures={'ARXIV':'EXTERNAL_METADATA_TIMEOUT','CROSSREF':503}
+    item=api._research.start(kind='discovery',request_id='all-sources-down',topic='Synthetic workflow',count=3)
+    api._research.thread.join(20)
+    state=api.call('research.get',{'run_id':item['run_id']})
+    assert (state['status'],state['failed_stage'],state['error_code'])==('FAILED','COLLECTING','ALL_LITERATURE_SOURCES_FAILED')
+    path=api._research.run_path(item['run_id'])
+    from memorive.research.common import read
+    reasons={(f['source'],f['error_code']) for f in read(path/'source_failures.json')['failures']}
+    assert {('arxiv','EXTERNAL_METADATA_TIMEOUT'),('crossref','SOURCE_HTTP_503')}<=reasons
+    assert not (path/'result.json').exists() and 'result' not in state
+    message=next(m for m in api.call('messages.list',{})['rows'] if m['target_locator']=='memorive://job/'+item['run_id'])
+    assert api.call('messages.navigate',{'message_id':message['message_id'],'locator':message['target_locator']})['research_task_id']==item['run_id']
+
+
+def test_a_run_that_finds_nothing_new_saves_its_result_and_sends_no_message(discovery):
+    api,fixture=discovery
+    first=api._research.run_sync('discovery','nothing-new-1',topic='Synthetic workflow',count=3)
+    assert first['message_id']
+    before=len(api.call('messages.list',{})['rows'])
+    again=api._research.run_sync('discovery','nothing-new-2',topic='Synthetic workflow',count=3)
+    assert again['status']=='SUCCEEDED' and again['result']['new_work_count']==0
+    assert again['message_id'] is None and again['notification_status']=='SUPPRESSED_BY_USER'
+    assert len(api.call('messages.list',{})['rows'])==before
+    assert again['library_locator']=='memorive://artifact/'+again['run_id']+'/result'    # the result is still kept
+    fixture.entries=0
+    empty=api._research.run_sync('discovery','nothing-at-all',topic='Synthetic workflow',count=3)
+    assert empty['status']=='SUCCEEDED' and empty['result']['recommendations']==[] and empty['message_id'] is None
+
+
+def test_a_version_counts_as_new_only_when_it_was_not_known_before(tmp_path):
+    """An arXiv record that names its journal DOI stands for that journal version too: the Crossref
+    record of the same DOI later is not a new version. A new arXiv version, or a DOI first seen
+    later, is."""
+    from memorive.research.discovery.work_index import WorkIndex
+    index=WorkIndex(tmp_path)
+    def row(candidate,**identifiers):
+        return {'candidate_id':candidate,'primary_direction_id':'direction-1','identifiers':identifiers,
+                'bibliographic':{'title':'Synthetic workflow'}}
+    assert index.commit_batch('run-1',[row('a',arxiv_id='2609.10000v1',doi='10.9999/sample.0')])['new_work_count']==1
+    again=index.commit_batch('run-2',[row('b',doi='10.9999/sample.0')])
+    assert again['recommendations']==[] and again['duplicate_bindings'][0]['reason']=='DIRECTION_ALREADY_DELIVERED'
+    assert index.commit_batch('run-3',[row('c',arxiv_id='2609.10000v2',doi='10.9999/sample.0')])['new_version_count']==1
+    assert index.commit_batch('run-4',[row('d',arxiv_id='2609.20000v1')])['new_work_count']==1
+    # The same arXiv version again shows nothing, so its journal DOI has not been shown yet: the
+    # journal record that follows is the first sight of that version.
+    assert index.commit_batch('run-5',[row('e',arxiv_id='2609.20000v1',doi='10.9999/sample.2')])['recommendations']==[]
+    assert index.commit_batch('run-6',[row('f',doi='10.9999/sample.2')])['new_version_count']==1

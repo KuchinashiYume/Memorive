@@ -42,6 +42,19 @@ def canonical_manifestation(value):
         pass
     return token
 
+def known_manifestations(key,item):
+    """The manifestations a delivered record stood for: its own, and the DOI it names. An arXiv record
+    that already carries the journal DOI was that journal version too; the Crossref record of the DOI
+    seen later is the same publication, not a new version."""
+    known={canonical_manifestation(key)}
+    doi=record_identifiers(item).get('doi')
+    if doi:
+        try:
+            known.add('doi:'+canonical_doi(doi))
+        except (ValueError,TypeError,ConnectorError):
+            pass
+    return known
+
 def own_file_metadata(path):
     """Read explicit PDF metadata only; reference-list/body DOI is never identity."""
     result={'schema_version':'E6FileIdentity-v1','identifiers':{},'title':None,
@@ -258,13 +271,14 @@ class WorkIndex:
                 if wid is None:
                     duplicates.append({'candidate_id':row['candidate_id'],'reason':'IDENTITY_INSUFFICIENT'})
                     continue
-                previous=[dict(r,manifestation=canonical_manifestation(r['manifestation'])) for r in db.execute('SELECT manifestation,direction_id FROM delivered WHERE work_id=?',(wid,))]
+                previous=[{'manifestations':known_manifestations(r['manifestation'],json.loads(r['metadata'])),'direction_id':r['direction_id']}
+                          for r in db.execute('SELECT manifestation,direction_id,metadata FROM delivered WHERE work_id=?',(wid,))]
                 fulltext=any(canonical_manifestation(r['manifestation'])==variant for r in db.execute('SELECT manifestation FROM files WHERE work_id=? AND state NOT IN (\'TRASHED\',\'DELETED\',\'DEDUPLICATED\')',(wid,)))
-                exists=any(r['manifestation']==variant and r['direction_id']==direction for r in previous)
+                exists=any(variant in r['manifestations'] and r['direction_id']==direction for r in previous)
                 if fulltext or (exists and not row.get('allow_redisplay')):
                     duplicates.append({'candidate_id':row['candidate_id'],'work_id':wid,'reason':'FULLTEXT_EXISTS' if fulltext else 'DIRECTION_ALREADY_DELIVERED'})
                     continue
-                kind='REDISPLAY' if exists else 'NEW_WORK' if not previous else 'NEW_VERSION' if not any(r['manifestation']==variant for r in previous) else 'NEW_DIRECTION_RELATION'
+                kind='REDISPLAY' if exists else 'NEW_WORK' if not previous else 'NEW_VERSION' if not any(variant in r['manifestations'] for r in previous) else 'NEW_DIRECTION_RELATION'
                 if kind=='NEW_WORK':
                     new_works+=1
                 if kind=='NEW_VERSION':

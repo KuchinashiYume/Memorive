@@ -14,6 +14,9 @@ class LoopbackMetadata:
         self.calls = []
         self.entries = 2
         self.status = 200
+        # Per source ('ARXIV', 'CROSSREF'): an HTTP status to answer with, or the error the real
+        # transport raises (memorive/research/discovery/transport.py), such as EXTERNAL_METADATA_TIMEOUT.
+        self.failures = {}
         fixture = self
         class Handler(BaseHTTPRequestHandler):
             def log_message(self, *_):pass
@@ -21,7 +24,7 @@ class LoopbackMetadata:
                 source = self.path.strip('/')
                 fixture.calls.append(source)
                 data = fixture.payload(source)
-                self.send_response(fixture.status)
+                self.send_response(fixture.failures.get(source, fixture.status))
                 self.send_header('Content-Length', str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
@@ -41,6 +44,9 @@ class LoopbackMetadata:
         from memorive.desktop.settings.metadata_transport import MetadataResponse
         host = urlsplit(params['url']).hostname
         source = {'export.arxiv.org':'ARXIV','api.crossref.org':'CROSSREF'}[host]
+        if isinstance(self.failures.get(source), str):
+            self.calls.append(source)
+            raise ValueError(self.failures[source])
         opener = build_opener(ProxyHandler({}))
         try:
             response = opener.open('http://127.0.0.1:%d/%s' % (self.server.server_port,source),timeout=5)
