@@ -193,8 +193,8 @@
     const getBottomLimits = () => {
       const workspaceHeight = workspace.getBoundingClientRect().height;
       const bottomGap = Number.parseFloat(getComputedStyle(workspace).getPropertyValue('--desktop-bottom-gap')) || 0;
-      // The page above keeps at least 300px (times the font size) for its header and, on chat, the composer.
-      const max = Math.max(64, Math.min(528 * fontScale(), workspaceHeight - bottomGap - 300 * fontScale()));
+      // The page above keeps at least 330px (times the font size): on chat, the header, toolbar and composer.
+      const max = Math.max(64, Math.min(528 * fontScale(), workspaceHeight - bottomGap - 330 * fontScale()));
       return { min: Math.min(240 * fontScale(), max), max };
     };
 
