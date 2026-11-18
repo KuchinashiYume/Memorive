@@ -271,8 +271,7 @@ Much of the app came over from an earlier project. When inherited code plainly d
 for (it crashes, shuffles, or reads files the repository does not have), the fix follows what the code
 was written to do:
 
-1. Read the purpose from the code itself: names, comments, callers, the page that shows the result, and
-   the earlier project's files.
+1. Read the purpose from the code itself: names, comments, callers, and the page that shows the result.
 2. If the purpose is clear, make the code do it: change the one place that is wrong, or add what is
    missing. Do not wrap it in a new check, a fallback or a "skip when missing" branch, and do not remove
    the feature.
