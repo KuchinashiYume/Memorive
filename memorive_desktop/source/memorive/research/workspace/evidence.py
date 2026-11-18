@@ -53,14 +53,20 @@ def source_document_hash(artifact):
             value=match.group(1)
     return value.lower() if isinstance(value,str) and re.fullmatch(r'[a-fA-F0-9]{64}',value) else None
 def safe_path(root,path):
-    root=Path(root).resolve(strict=False)
+    chosen=Path(root).absolute()
+    root=chosen.resolve(strict=False)
     path=Path(path)
     if not windows_io_path(root).is_dir():
         raise ValueError('SOURCE_ROOT_UNAVAILABLE')
+    # A root the user chose through a folder link (a junction such as G:\Library -> D:\Papers) is
+    # compared as resolved; a file named through the same link is placed by its parts below it.
     try:
         rel=path.absolute().relative_to(root)
     except ValueError:
-        raise ValueError('SOURCE_OUTSIDE_VAULT')
+        try:
+            rel=path.absolute().relative_to(chosen)
+        except ValueError:
+            raise ValueError('SOURCE_OUTSIDE_VAULT') from None
     cur=root
     for part in rel.parts:
         if part.startswith('.') or part in DENY_DIRS:

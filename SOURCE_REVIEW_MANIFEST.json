@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "5ea4196f137219e1ccee61b05888aa566c7d3b54ba83d2c1ba70eaea7a816074",
+      "sha256": "dc61f715155c4093aa52ad4caf64ae9fd19d453d95d7fad6150807d8d5aa947d",
       "bytes": 276007
     },
     {
@@ -8941,8 +8941,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/evidence.py",
-      "sha256": "9498a826c6750ac0e1d420b49007291bcb59fd10b540b04f599d803ba49e8902",
-      "bytes": 25281
+      "sha256": "f2d7584f9ce75a8f321fbb98d198644626f95f3fb21cb97b7751131a42d745e8",
+      "bytes": 25610
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/handoffs.py",
