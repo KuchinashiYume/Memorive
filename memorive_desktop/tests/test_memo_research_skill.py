@@ -132,6 +132,16 @@ def test_every_problem_of_a_draft_is_reported_and_nothing_is_saved(handoff):
     assert not (folder / "memo-answer.json").exists()
 
 
+def test_a_failing_local_command_is_reported_even_in_another_encoding(handoff):
+    # On Windows a command that fails (blocked by an agent's sandbox, for instance) may report in the
+    # console's code page; the bridge must pass the message on, not fail decoding it.
+    _, _, folder = handoff
+    failing = "import sys; sys.stderr.buffer.write('无法打开文件：权限不足'.encode('gbk')); sys.exit(1)"
+    (folder / "transport.json").write_text(json.dumps({"command": [sys.executable, "-c", failing]}), encoding="utf-8")
+    run = bridge(folder, "read", check=False)
+    assert run.returncode == 2 and "Traceback" not in run.stderr and run.stderr.strip()
+
+
 # A desktop agent app: the hand-off folder carries the Skill
 
 SKILL = SCRIPTS.parent

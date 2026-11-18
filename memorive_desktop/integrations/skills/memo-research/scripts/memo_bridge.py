@@ -53,8 +53,10 @@ class Memo:
             raise ValueError('Invalid configured Memo transport command')
         if method not in BRIDGE_METHODS:
             raise ValueError('Unsupported bridge method')
+        # errors='replace': a failing command may report in the console's own encoding (a Windows path
+        # in GBK, for instance); its message must still reach the user instead of a decoding error.
         run = subprocess.run(command + ['--call', method], input=json.dumps(params, ensure_ascii=False),
-                             encoding='utf-8', capture_output=True, timeout=120, shell=False)
+                             encoding='utf-8', errors='replace', capture_output=True, timeout=120, shell=False)
         if run.returncode:
             raise ValueError(run.stderr.strip()[-300:] or 'Memo transport failed')
         return json.loads(run.stdout)
