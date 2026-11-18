@@ -4076,7 +4076,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "1732c3bb7aa640b982fcbeccbd73336673223fde0ccd880dd2a0483cfb00ff3d",
+      "sha256": "8736e00e7e6dc197baa0cc5666ff93ee44f20f58987ebf97674f059a969fa30f",
       "bytes": 275420
     },
     {
@@ -8996,8 +8996,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/answer_saves.py",
-      "sha256": "13d596708dceda570dcaee9a93d2631a5eba2b59b27982000b0e6b7b16f56bb4",
-      "bytes": 15267
+      "sha256": "1af5adfd33bf12c8a77f3e14b0214536ce3d9429b0b9074a20e13d203b105dcf",
+      "bytes": 17419
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/__init__.py",

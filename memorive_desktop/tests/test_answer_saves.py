@@ -169,7 +169,7 @@ def test_the_difference_of_two_versions_is_exact_by_line_and_by_word(answered):
     assert [w for w in words if w["op"] != "equal"] == [{"op": "delete", "text": "25"}, {"op": "insert", "text": "30"}]
     assert "".join(w["text"] for w in words if w["op"] != "insert") == "结果是 25% higher growth。\n"
     assert "".join(w["text"] for w in words if w["op"] != "delete") == "结果是 30% higher growth。\n"
-    assert diff["citations"] == {"added": [], "removed": []}
+    assert diff["citations"] == {"added": [], "removed": [], "changed": [], "reordered": False}
 
 
 def test_chinese_text_is_compared_character_by_character(answered):
@@ -213,6 +213,84 @@ def test_taking_over_an_agent_reply_joins_the_same_history(answered):
     with pytest.raises(ValueError, match="AGENT_REPLY_NOT_FOUND"):
         call(workspace, "memo.answer_adopt", thread_id=thread_id, answer_id=answer_id,
              from_message_id=answer_id, expected_version_id=after["version_id"])
+
+
+SECOND_PAPER = """# Growth of strain B7 in a second lab
+
+Strain B7 grew 40 percent faster at 30 C than at 20 C over 48 hours.
+"""
+
+
+def _second_material(workspace, thread_id, tmp_path):
+    """A second paper, and the conversation's material narrowed to it."""
+    library = tmp_path / "library2"
+    library.mkdir()
+    paper = library / "b7.md"
+    paper.write_text(SECOND_PAPER, encoding="utf-8")
+    thread = workspace.thread_get(thread_id)
+    material = workspace.index.add_library_file(
+        thread["project"], path=paper, root=library, external_id="b7",
+        expected_hash=hashlib.sha256(paper.read_bytes()).hexdigest(), title="Second lab", material_layer="cleaned")
+    workspace.attachments.configure(thread_id, thread["revision"], {"artifact_ids": [material["id"]]})
+    return material["id"]
+
+
+def checked_material(workspace, thread_id, answer_id):
+    """The material a claim check of the answer reads."""
+    check = call(workspace, "memo.answer_check", thread_id=thread_id, answer_id=answer_id)
+    return sorted({ref["artifact_id"] for ref in check["retained_evidence"]})
+
+
+def test_taking_over_an_agent_reply_takes_its_evidence_and_restoring_brings_the_old_back(answered, tmp_path):
+    workspace, thread_id, answer_id = answered
+    first = current(workspace, thread_id, answer_id)
+    [k12] = checked_material(workspace, thread_id, answer_id)
+    second = _second_material(workspace, thread_id, tmp_path)
+    workspace.agent_dispatch(thread_id, example.QUESTION, "agent-request-0002")
+    _finish(workspace)
+    reply = next(m for m in workspace.thread_get(thread_id)["messages"] if m.get("agent_result"))
+    assert {c["artifact_id"] for c in reply["citations"]} == {second}
+    adopted = call(workspace, "memo.answer_adopt", thread_id=thread_id, answer_id=answer_id,
+                   from_message_id=reply["id"], expected_version_id=first)["version"]
+    # The check reads the material the shown citations come from, not the original answer's.
+    assert checked_material(workspace, thread_id, answer_id) == [second]
+    restored = call(workspace, "memo.answer_restore", thread_id=thread_id, answer_id=answer_id,
+                    version_id=first, expected_version_id=adopted["version_id"])["version"]
+    assert restored["review_inputs"] == "evidence_context"
+    assert checked_material(workspace, thread_id, answer_id) == [k12]
+    diff = call(workspace, "memo.answer_diff", thread_id=thread_id, answer_id=answer_id,
+                from_version_id=first, to_version_id=adopted["version_id"])
+    assert [c["id"] for c in diff["citations"]["removed"]] == [c["id"] for c in
+                                                                 call(workspace, "memo.answer_version_get", thread_id=thread_id,
+                                                                      answer_id=answer_id, version_id=first)["citations"]]
+    assert [c["id"] for c in diff["citations"]["added"]] == [c["id"] for c in reply["citations"]]
+
+
+def test_a_version_that_kept_only_its_citations_is_checked_against_them(answered):
+    workspace, thread_id, answer_id = answered
+    # An answer written before answers kept their evidence context: only its citations.
+    thread = workspace.store.get("thread", thread_id)
+    message = next(m for m in thread["messages"] if m["id"] == answer_id)
+    citations = message["citations"]
+    del message["evidence_context"]
+    workspace.store.put("thread", thread_id, thread["project"], thread, expected=thread["revision"])
+    old = current(workspace, thread_id, answer_id)
+    save(workspace, thread_id, answer_id, EDITED)
+    restored = call(workspace, "memo.answer_restore", thread_id=thread_id, answer_id=answer_id, version_id=old,
+                    expected_version_id=current(workspace, thread_id, answer_id))["version"]
+    assert restored["review_inputs"] == "citations"
+    check = call(workspace, "memo.answer_check", thread_id=thread_id, answer_id=answer_id)
+    assert [ref["id"] for ref in check["retained_evidence"]] == [c["id"] for c in citations]
+
+
+def test_the_citation_comparison_sees_a_changed_record_and_a_new_order():
+    from memorive.research.workspace.answer_saves import citation_diff
+    a = {"id": "ev_a", "title": "A", "content_hash": "1"}
+    b = {"id": "ev_b", "title": "B", "content_hash": "2"}
+    changed = dict(a, content_hash="3")
+    assert citation_diff([a, b], [b, changed]) == {
+        "added": [], "removed": [], "changed": [{"id": "ev_a", "title": "A", "fields": ["content_hash"]}], "reordered": True}
+    assert citation_diff([a, b], [a, b]) == {"added": [], "removed": [], "changed": [], "reordered": False}
 
 
 def test_a_claim_revision_is_saved_as_a_version_too(answered):
