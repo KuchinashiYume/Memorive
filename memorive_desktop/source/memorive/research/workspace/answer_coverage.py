@@ -20,6 +20,12 @@ FACETS=(
 )
 CONSTRAINT_HINT=re.compile(r'\b(?:however|limitation|except|not significant|no significant|counterexample|contrary|footnote)\b|但|局限|不显著|未显著|例外|脚注',re.I)
 
+def facet(identity):
+    """One of the standard aspects of an answer, also for an answer whose plan does not list it: a
+    question about one paper plans only the question itself and its limitations, and a follow-up
+    may still ask to search its conditions, methods, sample or results."""
+    return next(({'id':key,'label':label,'query':query,'required':False} for key,label,query in FACETS if key==identity),None)
+
 def plan(question,scope_ids):
     comparative=bool(re.search(r'比较|对比|异同|差异|跨篇|两篇|多篇|compare|comparison|differ',question,re.I))
     rows=list(FACETS) if comparative else [('question','本次问题',question),FACETS[-1]]

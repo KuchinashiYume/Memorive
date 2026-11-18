@@ -168,7 +168,8 @@ def _clarify(lang,request):
 
 def _probe(ws,check,request,thread,source,job,lang):
     """Search the selected materials again for one aspect of the answer."""
-    facet=next((f for f in check['coverage']['facets'] if request['facet']==f['id'] or request['facet'] in f['label']),None)
+    from memorive.research.workspace.answer_coverage import facet as standard_facet
+    facet=next((f for f in check['coverage']['facets'] if request['facet']==f['id'] or request['facet'] in f['label']),None) or standard_facet(request['facet'])
     if facet is None:
         raise ValueError('FACET_NOT_FOUND')
     value=ws.answer_evidence.probe(thread['id'],source['id'],check['binding'],facet['id'],language_context=job.get('language_context'))

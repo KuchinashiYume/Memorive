@@ -293,7 +293,7 @@ class AnswerEvidence:
         cov=check['coverage']
         if not cov['explicit_scope']:
             raise ValueError('EXPLICIT_MATERIAL_SCOPE_REQUIRED')
-        facet=next((f for f in cov['facets'] if f['id']==facet_id),None)
+        facet=next((f for f in cov['facets'] if f['id']==facet_id),None) or coverage.facet(facet_id)
         if not facet:
             raise ValueError('FACET_NOT_FOUND')
         thread,_=self._get(thread_id,answer_id)

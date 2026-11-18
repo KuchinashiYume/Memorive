@@ -62,9 +62,12 @@ def test_asking_what_evidence_is_missing_answers_from_the_answer_itself(answered
     assert reply["citations"] and len(model.calls) == calls         # no new model question
 
 
-def test_a_search_for_one_aspect_of_the_answer_lists_what_it_finds(answered):
+@pytest.mark.parametrize("aspect", ["条件", "方法", "样本", "结果", "局限"])
+def test_a_search_for_one_aspect_of_the_answer_lists_what_it_finds(answered, aspect):
+    # A question about one paper plans only the question and its limitations; the other aspects
+    # are searched with their standard terms.
     workspace, thread_id, material_id, _ = answered
-    job = ask(workspace, thread_id, "补查上一回答的局限", "followup-0002", material_id)
+    job = ask(workspace, thread_id, "补查上一回答的" + aspect, "followup-0002", material_id)
     reply = last_reply(workspace, thread_id)
     assert job["status"] == "COMPLETE" and reply["e1_action"] == "probe"
     assert reply["text"]
