@@ -10061,8 +10061,8 @@
     },
     {
       "path": "memorive_desktop/tools/page_check/page_js.py",
-      "sha256": "cf407a5cc473543b0f15a5560a71612b255c81e63045c9bcb5de2cf209464dda",
-      "bytes": 9490
+      "sha256": "83d98d7a248dfb87523a1cc493dc9c1a24b36d6fb27156f29f759035591a4688",
+      "bytes": 9915
     },
     {
       "path": "memorive_desktop/tools/page_check/probe.py",

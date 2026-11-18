@@ -124,13 +124,18 @@ HELPERS = r"""
     return JSON.stringify(out);
   };
 
-  // The shape of every page global another script or the desktop service can reach.
+  // The shape of every page global another script or the desktop service can reach: the members of the page's
+  // namespace (Memorive.app, Memorive.frames.inbox, ...) and any other global whose name starts with __ or Desktop.
   check.globals = () => {
     const out = {};
+    const shape = (value) => value && typeof value === 'object' ? Object.keys(value).sort() : typeof value;
     for (const name of Object.getOwnPropertyNames(window)) {
       if (!/^(__|Desktop)/.test(name) || name === '__check') continue;
-      const value = window[name];
-      out[name] = value && typeof value === 'object' ? Object.keys(value).sort() : typeof value;
+      out[name] = shape(window[name]);
+    }
+    for (const [name, value] of Object.entries(window.Memorive || {})) {
+      if (name !== 'frames') out[`Memorive.${name}`] = shape(value);
+      else Object.entries(value).forEach(([part, frame]) => { out[`Memorive.frames.${part}`] = shape(frame); });
     }
     return JSON.stringify(out);
   };
