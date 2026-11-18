@@ -22,11 +22,15 @@
 .desktop-research-report { white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:var(--memo-size-small);line-height:1.7;margin:0; }
 .desktop-research-advanced summary { cursor:pointer; }
 /* Research opportunities (shared/opportunities.js): the search controls, then one card per opportunity. */
-.desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--border-default,#dfd9cf); }
-.desktop-research-opportunity-search { display:flex;align-items:center;gap:8px; }
+.desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px; }
+.desktop-research-opportunity-search { display:flex;align-items:center;gap:8px;max-width:640px; }
 .desktop-research-opportunity-search .field { flex:1;min-width:0; }
 .desktop-research-opportunity-head { display:flex;align-items:center;justify-content:space-between;gap:12px; }
-.desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:4px 0 18px;border-bottom:1px solid var(--border-default,#dfd9cf);overflow-wrap:anywhere; }
+/* An opportunity sits in the same frame as a research Q&A answer (routes/chat/workspace.css). */
+.desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:16px 20px 8px;border:1px solid var(--desktop-border-default);border-radius:16px;background:var(--desktop-surface-raised);box-shadow:0 3px 12px #2A272307;overflow-wrap:anywhere; }
+.desktop-research-opportunity-more { margin:0; }
+.desktop-research-opportunity-more > :not(summary) { margin-top:12px; }
+.desktop-research-opportunity-more[open] { padding-bottom:10px; }
 .desktop-research-opportunity h4 { margin:0;line-height:1.5; }
 .desktop-research-opportunity-tags { display:flex;gap:10px;align-items:center;margin:0; }
 .desktop-research-opportunity-kind { padding:1px 8px;border-radius:999px;background:var(--surface-subtle,#F0EDE6);color:var(--text-secondary,#6e675e); }
@@ -35,8 +39,9 @@
 .desktop-research-opportunity-dimensions li { display:flex;flex-wrap:wrap;column-gap:10px; }
 .desktop-research-opportunity-dimensions li > span:last-child { flex:1 1 14em;min-width:0; }
 .desktop-research-opportunity-dimensions li[data-compared="different"] .desktop-research-opportunity-compared { color:var(--yellow-text,#8A5B12); }
-:is(.desktop-research-opportunity-evidence,.desktop-research-opportunity-dismissed) > summary { cursor:pointer;color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity-dismissed > summary { cursor:pointer;color:var(--text-secondary,#6e675e); }
 .desktop-research-opportunity-dismissed { padding-top:8px; }
+.desktop-research-opportunity-dismissed > .desktop-research-opportunity { margin-top:16px; }
 .desktop-research-opportunity-fact { margin:10px 0 0;padding-left:12px;border-left:2px solid var(--border-default,#dfd9cf); }
 .desktop-research-opportunity-fact p { margin:2px 0 0; }
 .desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }

@@ -582,6 +582,8 @@
 .memo-history-label{margin:0;color:var(--desktop-text-secondary)}
 .memo-history-citations{margin:0;padding-left:1.4em}
 #desktop-chat-preview .memo-evidence-tabs.desktop-icon-segmented{flex:0 0 auto}
+/* The panel's tabs and refresh button sit on the right, like the page header's tools. */
+#desktop-chat-preview .memo-evidence-heading{justify-content:flex-end}
 /* The research opportunities mode (shared/opportunities.js): the Q&A layout and its tools give way to that page,
    which uses the reading column of the conversation. */
 #memo-chat-page[data-mode=opportunities] .memo-layout{display:none!important}

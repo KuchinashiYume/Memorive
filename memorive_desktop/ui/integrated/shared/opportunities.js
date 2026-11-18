@@ -184,7 +184,11 @@
     head.append(tags, actions);
     row.append(head, make('h4', item.title));
     if (item.outdated) row.append(make('p', '这条依据的论文卡片已经改动，建议重新寻找', 'desktop-research-status'));
-    row.append(section('要追问的问题', item.question), section('判断依据', item.reasoning));
+    row.append(section('要追问的问题', item.question));
+    // The rest is folded, in the same disclosure as an answer's context: why, the comparison, how to resolve it,
+    // the limitations and the card facts.
+    const more = make('details', null, 'memo-saved-memory memo-context-details desktop-research-opportunity-more');
+    more.append(make('summary', '详情', 'desktop-settings-disclosure'), section('判断依据', item.reasoning));
     if (item.dimensions.length) {
       const box = make('div', null, 'desktop-research-opportunity-part'), list = make('ul', null, 'desktop-research-opportunity-dimensions');
       for (const d of item.dimensions) {
@@ -194,24 +198,25 @@
         list.append(li);
       }
       box.append(make('small', '逐项比较', 'desktop-research-muted'), list);
-      row.append(box);
+      more.append(box);
     }
-    row.append(section('建议怎么解决', item.suggestion), section('局限', item.limitations));
+    more.append(section('建议怎么解决', item.suggestion), section('局限', item.limitations));
     if (item.evidence.length) {
-      const fold = make('details', null, 'desktop-research-opportunity-evidence'), summary = make('summary');
-      summary.append(make('span', '证据'), ' · ' + item.evidence.length);
-      fold.append(summary);
+      const box = make('div', null, 'desktop-research-opportunity-part'), label = make('small', null, 'desktop-research-muted');
+      label.append(make('span', '证据'), ' · ' + item.evidence.length);
+      box.append(label);
       for (const fact of item.evidence) {
-        const box = make('div', null, 'desktop-research-opportunity-fact'), where = make('small', null, 'desktop-research-muted');
+        const factBox = make('div', null, 'desktop-research-opportunity-fact'), where = make('small', null, 'desktop-research-muted');
         where.append('《' + fact.paper_title + '》 · ', make('span', FIELDS[fact.field] || fact.field));
         if (fact.page) where.append(' · p. ' + fact.page);
         if (fact.section) where.append(' · ' + fact.section);
-        box.append(where, make('p', fact.text));
-        if (fact.quote && !fact.text.includes(fact.quote)) box.append(make('blockquote', fact.quote));
-        fold.append(box);
+        factBox.append(where, make('p', fact.text));
+        if (fact.quote && !fact.text.includes(fact.quote)) factBox.append(make('blockquote', fact.quote));
+        box.append(factBox);
       }
-      row.append(fold);
+      more.append(box);
     }
+    row.append(more);
     return row;
   }
   window.addEventListener('desktop:research-published', () => {
