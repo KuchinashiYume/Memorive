@@ -8,20 +8,21 @@ from memorive.research.discovery.transport import PAGE_LIMITS
 from memorive.platform.progress import scope
 
 def run(runtime,run_id,params):
-    from memorive.research.discovery import identity
+    """One literature discovery run (ResearchRuntime starts it for research.start / research.discover):
+
+    1. collect: query the metadata services for the chosen directions (acquisition.collect);
+    2. resolve: group the fetched records into works and their versions (acquisition.resolve);
+    3. judge every work: which direction it relates to (query_plan.assess), whether the library
+       already has it, whether it was shown or turned down before (_judge_candidates);
+    4. compose the slate: channel quotas and exposure caps (slate.compose_projection);
+    5. write the readable result and the evidence files of the run (_write_evidence, _result).
+    """
     from memorive.research.discovery import slate
-    from memorive.research.discovery.connector_framework import sha256_json
-    config=params['config']
-    directions=effective_directions(config)
-    targets=channel_targets(config,directions)
     from memorive.research.discovery.acquisition import collect,resolve
-    from memorive.research.discovery.query_plan import assess
-    from memorive.research.discovery.metadata import links,date_bounds
-    from memorive.research.discovery.work_index import manifestation
+    from memorive.research.discovery.recent_interests import frozen as freeze_interests
+    config=params['config']
     options=params['discovery_options']
-    if options.get('direction_id'):
-        directions=[d for d in directions if d['id']==options['direction_id']]
-        targets=channel_targets(config,directions)
+    directions,targets=_chosen_directions(config,options)
     fetched,failures,observations,record_by_id,memberships,seed_map,seed_evidence=collect(runtime,run_id,params,directions,targets)
     runtime.update_state(run_id,stage='RESOLVING_IDENTITIES')
     registry={oid:{'content_hash':o['content_hash'],'source_snapshot_id':o['source_snapshot_id'],
@@ -29,7 +30,37 @@ def run(runtime,run_id,params):
     resolved=resolve(list(observations.values()),registry)
     library=runtime.work_index.coverage()
     feedback=runtime.feedback.snapshot()
-    seen={(e['work_cluster_id'],e['direction_id']) for e in feedback['events'] if e['event_type']=='EXPOSURE_RECORDED'}
+    context,plan=_slate_inputs(run_id,config,directions,targets)
+    interest_snapshot=freeze_interests(runtime,config)
+    facts,display,comparisons,suppressed=_judge_candidates(runtime,resolved,observations,record_by_id,memberships,
+        seed_map,options,config,library,feedback,interest_snapshot)
+    runtime.update_state(run_id,stage='COMPOSING')
+    history=runtime.feedback.history([d['id'] for d in directions])
+    result=slate.compose_projection(facts,context,plan,history)
+    recommendations=_recommendations(result,display,params)
+    from memorive.research.discovery.readable import discovery_markdown
+    markdown=discovery_markdown(config['topic'] or ' / '.join(d['name'] for d in directions),recommendations,failures,language=params.get('language_context'))
+    _write_evidence(runtime,run_id,resolved=resolved,observations=observations,interest_snapshot=interest_snapshot,
+        result=result,context=context,plan=plan,facts=facts,library=library,feedback=feedback,
+        comparisons=comparisons,suppressed=suppressed)
+    return _result(params,options,seed_evidence,library,recommendations,fetched,failures,result,resolved,history,
+        suppressed,markdown,interest_snapshot,facts)
+
+
+def _chosen_directions(config,options):
+    """The directions this run searches (one, when the request names it) and each channel's share."""
+    directions=effective_directions(config)
+    targets=channel_targets(config,directions)
+    if options.get('direction_id'):
+        directions=[d for d in directions if d['id']==options['direction_id']]
+        targets=channel_targets(config,directions)
+    return directions,targets
+
+
+def _slate_inputs(run_id,config,directions,targets):
+    """The sealed research context and discovery plan the slate is composed from: the directions,
+    the user's exposure caps (per author, institution, journal, direction) and the channel targets."""
+    from memorive.research.discovery import slate
     caps={d:config['exposure_limits'].get(d) or config['count'] for d in slate.CAP_ORDER}
     if config['exposure_limits']['direction_share'] is not None:
         caps['direction']=min(caps['direction'],int(config['count']*config['exposure_limits']['direction_share']))
@@ -51,8 +82,18 @@ def run(runtime,run_id,params):
         'context_hash':context['content_hash'],'primary_channel_priority':list(slate.PRIMARY_CHANNEL_PRIORITY),
         'tie_break':'CANONICAL_IDENTITY_ASC','no_backfill':'CORE_SILENT_BACKFILL_FORBIDDEN',
         'history_windows_days':[30,90],'frozen_as_of':now()})
-    from memorive.research.discovery.recent_interests import frozen as freeze_interests,ranking as interest_ranking
-    interest_snapshot=freeze_interests(runtime,config)
+    return context,plan
+
+
+def _judge_candidates(runtime,resolved,observations,record_by_id,memberships,seed_map,options,config,library,feedback,interest_snapshot):
+    """Step 3 of run: for every resolved work, the facts the slate ranks and the row the result shows.
+
+    A work can have several versions (a preprint and its journal version, arXiv v1 and v2); each is
+    judged on its own and the best one is kept (the newest arXiv version, then one with an abstract).
+    Returns (facts, display rows by candidate id, library comparisons, suppressed candidates).
+    """
+    from memorive.research.discovery.work_index import manifestation
+    seen={(e['work_cluster_id'],e['direction_id']) for e in feedback['events'] if e['event_type']=='EXPOSURE_RECORDED'}
     facts=[]
     display={}
     comparisons=[]
@@ -66,112 +107,137 @@ def run(runtime,run_id,params):
                 groups.setdefault(manifestation(record_by_id[ref]),[]).append(ref)
             variant_options=[]
             for variant_refs in groups.values():
-                candidate=dict(base_candidate)
-                refs=variant_refs
-                record=max((record_by_id[r] for r in refs),key=lambda r:(bool(r['bibliographic'].get('abstract')),len(r['bibliographic'].get('authors',[])),sha(r)))
-                bib=record['bibliographic']
-                ids=record['identifiers']
-                matches={key:value for ref in refs for key,value in memberships[ref].items()}
-                evidence=[observations[x]['source_evidence']['normalized_record_sha256'] for x in refs]
-                key=ids.get('doi') or ids.get('arxiv_id') or ids.get('wos_uid') or record['source_record_id']
-                candidate['original_work_cluster_id']=candidate['work_cluster_id']
-                candidate['work_cluster_id']=runtime.work_index.register(dict(record,work_cluster_id=candidate['work_cluster_id'])) or candidate['work_cluster_id']
-                feedback_aliases=runtime.work_index.feedback_clusters(candidate['work_cluster_id'])
-                indexed=runtime.work_index.lookup(record)
-                comparison={'relations':[], 'library_new':'FALSE' if indexed['has_fulltext'] else 'UNKNOWN' if indexed['possible_duplicates'] or library['unidentified_works'] or library['history'].get('status')!='COMPLETE' or library['inbox'].get('status')!='COMPLETE' or library['legacy'].get('status')!='COMPLETE' else 'TRUE',
-                    'identifier_scope':'WORKSPACE_INCREMENTAL_INDEX_ALL_LIFECYCLE_STATES','unidentified_local_records':library['unidentified_works'],
-                    'indexed_match':indexed,'topic_similarity':'METADATA_TERM_EVIDENCE','method_similarity':'NOT_ASSESSED',
-                    'object_similarity':'NOT_ASSESSED','citation_relation':'NOT_ASSESSED'}
-                comparisons.append({'candidate_id':candidate['candidate_id'],**comparison})
-                eligible=[]
-                relation_assessments={}
-                for match in matches.values():
-                    direction=match['direction']
-                    relation=assess(record,direction,seed_map.get(direction['id'],[]),options)
-                    relation_assessments[direction['id']]=relation
-                    if not relation['supported'] or not relation['publication_eligible']:
-                        suppressed.append({'candidate_id':candidate['candidate_id'],'direction_id':direction['id'],'reason':'RELATION_EVIDENCE_INSUFFICIENT' if not relation['supported'] else 'PUBLICATION_OUTSIDE_EXACT_WINDOW','assessment':relation})
-                        continue
-                    item={'candidate_id':candidate['candidate_id'],'work_cluster_id':candidate['work_cluster_id'],
-                        'primary_direction_id':direction['id'],'direction_revision':str(direction['revision']),
-                        'manifestation_id':manifestation(record)}
-                    outcome=runtime.feedback.eligibility(item,feedback,work_cluster_ids=feedback_aliases)
-                    prior=(candidate['work_cluster_id'],direction['id']) in seen
-                    # A revoked decision explicitly restores visibility. Passive no-click is not rejection.
-                    relevant=[e for e in feedback['events'] if e['work_cluster_id'] in feedback_aliases and e['direction_id']==direction['id']]
-                    restored=next((e['event_type'] in {'DECISION_REVOKED','MANUAL_RESTORE'} for e in reversed(relevant)
-                        if e['event_type'] in {'DECISION_REVOKED','MANUAL_RESTORE','EXPOSURE_RECORDED'}),False)
-                    relation['allow_redisplay']=bool(config['include_seen'] or restored)
-                    already_delivered=any(r['direction_id']==direction['id'] and r['manifestation']==manifestation(record) for r in indexed['delivered'])
-                    if outcome['eligibility']=='ELIGIBLE' and not indexed['has_fulltext'] and (config['include_seen'] or not already_delivered or restored):
-                        eligible.append((match,item,outcome))
-                    else:
-                        suppressed.append(dict(outcome,manifestation_id=item['manifestation_id'],already_delivered=already_delivered,has_fulltext=indexed['has_fulltext']))
-                if not eligible:
-                    continue
-                eligible.sort(key=lambda row:(min(slate.PRIMARY_CHANNEL_PRIORITY.index(c) for c in row[0]['channels']),row[1]['primary_direction_id']))
-                match,item,outcome=eligible[0]
-                direction=match['direction']
-                query_evidence=[{'channel':c,'direction_id':d[0]['direction']['id'],'query_sha256':d[0]['query_sha256'],
-                    'evidence_ref':evidence[0]} for d in eligible for c in d[0]['channels']]
-                metadata={'source_id':observations[refs[0]]['source_connector'],'source_available':True,
-                    'authors':[x['display_name'] for x in bib['authors']],'institutions':bib.get('institutions',[]),'journal_id':bib.get('journal'),
-                    'primary_direction_id':direction['id'],'direction_signals':[],'bridge_direction_refs':[],
-                    'horizon_anchor_refs':[],'coverage_gap_refs':[],'query_recall_evidence':query_evidence,'feedback_eligible':True,
-                    'evidence_completeness':int(bool(ids.get('doi')))+int(bool(bib.get('abstract')))+int(bool(bib.get('published_date'))),
-                    'manifestation_fitness':1,'timeliness':0,'access_posture':'METADATA_ONLY','evidence_refs':evidence}
-                metadata['e6_relations']=relation_assessments
-                metadata['e6_objective']=options['objective']
-                metadata['e6_relation_rank']=relation_assessments[direction['id']]['ranking_value']
-                metadata['source_record_verified']=candidate.get('source_record_verified',False)
-                metadata['recent_interest']=interest_ranking(interest_snapshot,bib['title'],bib.get('abstract'))
-                pub=bib.get('published_date')
-                if pub:
-                    try:
-                        metadata['timeliness']=date_bounds(pub)[0].toordinal()
-                    except ValueError:
-                        pass
-                fact=slate.seal_object({'candidate_id':candidate['candidate_id'],'work_cluster_id':candidate['work_cluster_id'],
-                    'canonical_identity':key,'state_axes':{'identity_status':candidate['identity_status']},
-                    'novelty_axes':{'library_new':comparison['library_new'],'first_seen_new':'TRUE'},'metadata_candidate_only':True,
-                    'relation_types':[r['relation_type'] for r in comparison['relations']],'relation_refs':evidence,'ranking_metadata':metadata})
-                display_row={'identity_key':key,'title':bib['title'],'authors':metadata['authors'],
-                    'published_date':pub,'abstract':bib.get('abstract'),'identifiers':ids,
-                    'journal':bib.get('journal'),'platform':bib.get('platform'),'institutions':bib.get('institutions',[]),
-                    'record_type':bib.get('record_type'),'date_precision':bib.get('date_precision'),'updated_date':bib.get('updated_date'),
-                    'publication_date_source':bib.get('publication_date_source'),'abstract_status':bib.get('abstract_status'),
-                    'identity_evidence_level':record.get('identity_evidence_level'),'partial_fields':record.get('partial_fields',[]),
-                    'source_record_id':record['source_record_id'],'links':links(ids,record['location_claims']),
-                    'relation_evidence':relation_assessments[direction['id']],'recommendation_reason':relation_assessments[direction['id']]['recommendation_reason'],
-                    'allow_redisplay':relation_assessments[direction['id']]['allow_redisplay'],
-                    'sources':sorted({observations[x]['source_connector'] for x in refs}),'locations':record['location_claims'],
-                    'direction_revision':str(direction['revision']),'direction_name':direction['name'],'manifestation_id':item['manifestation_id'],
-                    'recall_evidence':query_evidence,'relation_comparison':comparison,'feedback_eligibility':outcome,
-                    'matching_assessment':'METADATA_RELATION_ONLY_NOT_CALIBRATED_SEMANTIC_SCORE','in_current_library':comparison['library_new']=='FALSE',
-                    'previously_recommended':any((wid,direction['id']) in seen for wid in feedback_aliases)}
-                version=re.search(r"v(\d+)$",manifestation(record)) if ids.get("arxiv_id") else None
-                rank=(int(version.group(1)) if version else 0,bool(bib.get("abstract")),len(bib.get("authors",[])),manifestation(record),sha(record))
-                variant_options.append((rank,fact,display_row))
+                option=_judge_version(runtime,base_candidate,variant_refs,observations,record_by_id,memberships,seed_map,
+                    options,config,library,feedback,seen,interest_snapshot,comparisons,suppressed)
+                if option is not None:
+                    variant_options.append(option)
             if variant_options:
                 _,fact,row=max(variant_options,key=lambda value:value[0])
                 facts.append(fact)
                 display[fact['candidate_id']]=row
             candidate_units.complete(base_candidate['candidate_id'])
-    runtime.update_state(run_id,stage='COMPOSING')
-    history=runtime.feedback.history([d['id'] for d in directions])
-    result=slate.compose_projection(facts,context,plan,history)
-    recommendations=[dict(display[x['candidate_id']],**x) for x in result['slate']['selected']]
-    from memorive.research.discovery.readable import discovery_markdown
+    return facts,display,comparisons,suppressed
+
+
+def _judge_version(runtime,base_candidate,refs,observations,record_by_id,memberships,seed_map,options,config,library,
+                   feedback,seen,interest_snapshot,comparisons,suppressed):
+    """One version of a work: compared with the library, related to the directions it was found for,
+    checked against earlier feedback. Adds to comparisons and suppressed; returns (rank, fact, display
+    row) when some direction may show it, else None."""
+    from memorive.research.discovery import slate
+    from memorive.research.discovery.query_plan import assess
+    from memorive.research.discovery.metadata import links,date_bounds
+    from memorive.research.discovery.work_index import manifestation
+    from memorive.research.discovery.recent_interests import ranking as interest_ranking
+    candidate=dict(base_candidate)
+    record=max((record_by_id[r] for r in refs),key=lambda r:(bool(r['bibliographic'].get('abstract')),len(r['bibliographic'].get('authors',[])),sha(r)))
+    bib=record['bibliographic']
+    ids=record['identifiers']
+    matches={key:value for ref in refs for key,value in memberships[ref].items()}
+    evidence=[observations[x]['source_evidence']['normalized_record_sha256'] for x in refs]
+    key=ids.get('doi') or ids.get('arxiv_id') or ids.get('wos_uid') or record['source_record_id']
+    candidate['original_work_cluster_id']=candidate['work_cluster_id']
+    candidate['work_cluster_id']=runtime.work_index.register(dict(record,work_cluster_id=candidate['work_cluster_id'])) or candidate['work_cluster_id']
+    feedback_aliases=runtime.work_index.feedback_clusters(candidate['work_cluster_id'])
+    indexed=runtime.work_index.lookup(record)
+    comparison={'relations':[], 'library_new':'FALSE' if indexed['has_fulltext'] else 'UNKNOWN' if indexed['possible_duplicates'] or library['unidentified_works'] or library['history'].get('status')!='COMPLETE' or library['inbox'].get('status')!='COMPLETE' or library['legacy'].get('status')!='COMPLETE' else 'TRUE',
+        'identifier_scope':'WORKSPACE_INCREMENTAL_INDEX_ALL_LIFECYCLE_STATES','unidentified_local_records':library['unidentified_works'],
+        'indexed_match':indexed,'topic_similarity':'METADATA_TERM_EVIDENCE','method_similarity':'NOT_ASSESSED',
+        'object_similarity':'NOT_ASSESSED','citation_relation':'NOT_ASSESSED'}
+    comparisons.append({'candidate_id':candidate['candidate_id'],**comparison})
+    eligible=[]
+    relation_assessments={}
+    for match in matches.values():
+        direction=match['direction']
+        relation=assess(record,direction,seed_map.get(direction['id'],[]),options)
+        relation_assessments[direction['id']]=relation
+        if not relation['supported'] or not relation['publication_eligible']:
+            suppressed.append({'candidate_id':candidate['candidate_id'],'direction_id':direction['id'],'reason':'RELATION_EVIDENCE_INSUFFICIENT' if not relation['supported'] else 'PUBLICATION_OUTSIDE_EXACT_WINDOW','assessment':relation})
+            continue
+        item={'candidate_id':candidate['candidate_id'],'work_cluster_id':candidate['work_cluster_id'],
+            'primary_direction_id':direction['id'],'direction_revision':str(direction['revision']),
+            'manifestation_id':manifestation(record)}
+        outcome=runtime.feedback.eligibility(item,feedback,work_cluster_ids=feedback_aliases)
+        prior=(candidate['work_cluster_id'],direction['id']) in seen
+        # A revoked decision explicitly restores visibility. Passive no-click is not rejection.
+        relevant=[e for e in feedback['events'] if e['work_cluster_id'] in feedback_aliases and e['direction_id']==direction['id']]
+        restored=next((e['event_type'] in {'DECISION_REVOKED','MANUAL_RESTORE'} for e in reversed(relevant)
+            if e['event_type'] in {'DECISION_REVOKED','MANUAL_RESTORE','EXPOSURE_RECORDED'}),False)
+        relation['allow_redisplay']=bool(config['include_seen'] or restored)
+        already_delivered=any(r['direction_id']==direction['id'] and r['manifestation']==manifestation(record) for r in indexed['delivered'])
+        if outcome['eligibility']=='ELIGIBLE' and not indexed['has_fulltext'] and (config['include_seen'] or not already_delivered or restored):
+            eligible.append((match,item,outcome))
+        else:
+            suppressed.append(dict(outcome,manifestation_id=item['manifestation_id'],already_delivered=already_delivered,has_fulltext=indexed['has_fulltext']))
+    if not eligible:
+        return None
+    eligible.sort(key=lambda row:(min(slate.PRIMARY_CHANNEL_PRIORITY.index(c) for c in row[0]['channels']),row[1]['primary_direction_id']))
+    match,item,outcome=eligible[0]
+    direction=match['direction']
+    query_evidence=[{'channel':c,'direction_id':d[0]['direction']['id'],'query_sha256':d[0]['query_sha256'],
+        'evidence_ref':evidence[0]} for d in eligible for c in d[0]['channels']]
+    metadata={'source_id':observations[refs[0]]['source_connector'],'source_available':True,
+        'authors':[x['display_name'] for x in bib['authors']],'institutions':bib.get('institutions',[]),'journal_id':bib.get('journal'),
+        'primary_direction_id':direction['id'],'direction_signals':[],'bridge_direction_refs':[],
+        'horizon_anchor_refs':[],'coverage_gap_refs':[],'query_recall_evidence':query_evidence,'feedback_eligible':True,
+        'evidence_completeness':int(bool(ids.get('doi')))+int(bool(bib.get('abstract')))+int(bool(bib.get('published_date'))),
+        'manifestation_fitness':1,'timeliness':0,'access_posture':'METADATA_ONLY','evidence_refs':evidence}
+    metadata['e6_relations']=relation_assessments
+    metadata['e6_objective']=options['objective']
+    metadata['e6_relation_rank']=relation_assessments[direction['id']]['ranking_value']
+    metadata['source_record_verified']=candidate.get('source_record_verified',False)
+    metadata['recent_interest']=interest_ranking(interest_snapshot,bib['title'],bib.get('abstract'))
+    pub=bib.get('published_date')
+    if pub:
+        try:
+            metadata['timeliness']=date_bounds(pub)[0].toordinal()
+        except ValueError:
+            pass
+    fact=slate.seal_object({'candidate_id':candidate['candidate_id'],'work_cluster_id':candidate['work_cluster_id'],
+        'canonical_identity':key,'state_axes':{'identity_status':candidate['identity_status']},
+        'novelty_axes':{'library_new':comparison['library_new'],'first_seen_new':'TRUE'},'metadata_candidate_only':True,
+        'relation_types':[r['relation_type'] for r in comparison['relations']],'relation_refs':evidence,'ranking_metadata':metadata})
+    display_row={'identity_key':key,'title':bib['title'],'authors':metadata['authors'],
+        'published_date':pub,'abstract':bib.get('abstract'),'identifiers':ids,
+        'journal':bib.get('journal'),'platform':bib.get('platform'),'institutions':bib.get('institutions',[]),
+        'record_type':bib.get('record_type'),'date_precision':bib.get('date_precision'),'updated_date':bib.get('updated_date'),
+        'publication_date_source':bib.get('publication_date_source'),'abstract_status':bib.get('abstract_status'),
+        'identity_evidence_level':record.get('identity_evidence_level'),'partial_fields':record.get('partial_fields',[]),
+        'source_record_id':record['source_record_id'],'links':links(ids,record['location_claims']),
+        'relation_evidence':relation_assessments[direction['id']],'recommendation_reason':relation_assessments[direction['id']]['recommendation_reason'],
+        'allow_redisplay':relation_assessments[direction['id']]['allow_redisplay'],
+        'sources':sorted({observations[x]['source_connector'] for x in refs}),'locations':record['location_claims'],
+        'direction_revision':str(direction['revision']),'direction_name':direction['name'],'manifestation_id':item['manifestation_id'],
+        'recall_evidence':query_evidence,'relation_comparison':comparison,'feedback_eligibility':outcome,
+        'matching_assessment':'METADATA_RELATION_ONLY_NOT_CALIBRATED_SEMANTIC_SCORE','in_current_library':comparison['library_new']=='FALSE',
+        'previously_recommended':any((wid,direction['id']) in seen for wid in feedback_aliases)}
+    version=re.search(r"v(\d+)$",manifestation(record)) if ids.get("arxiv_id") else None
+    rank=(int(version.group(1)) if version else 0,bool(bib.get("abstract")),len(bib.get("authors",[])),manifestation(record),sha(record))
+    return rank,fact,display_row
+
+
+def _recommendations(result,display,params):
+    """The selected works as the result shows them, each with its reason in the run's language."""
     from memorive.platform.language.discovery import reason
+    recommendations=[dict(display[x['candidate_id']],**x) for x in result['slate']['selected']]
     for row in recommendations:
         row['recommendation_reason']=reason(row,params.get('language_context'))
         row['relation_evidence']=dict(row['relation_evidence'],recommendation_reason=row['recommendation_reason'])
-    markdown=discovery_markdown(config['topic'] or ' / '.join(d['name'] for d in directions),recommendations,failures,language=params.get('language_context'))
+    return recommendations
+
+
+def _write_evidence(runtime,run_id,*,resolved,observations,interest_snapshot,result,context,plan,facts,library,feedback,comparisons,suppressed):
+    """The run's evidence files next to its result: identity.json, observations.json, recent_interest.json,
+    slate.json and context.json."""
     for name,body in {'identity':resolved,'observations':{'observations':list(observations.values())},
         'recent_interest':interest_snapshot,
         'slate':result,'context':{'context':context,'plan':plan,'facts':facts,'library_sha256':sha(library),
         'feedback_sha256':sha(feedback),'comparisons':comparisons,'suppressions':suppressed}}.items():
         write(runtime.run_path(run_id)/(name+'.json'),sealed(body))
+
+
+def _result(params,options,seed_evidence,library,recommendations,fetched,failures,result,resolved,history,suppressed,markdown,interest_snapshot,facts):
+    """result.json of the run (DesktopDiscoveryResult-v3)."""
     calls=sum(bool(x.get('external_call_performed')) for x in fetched+failures)
     return {'schema_version':'DesktopDiscoveryResult-v3','language_context':params.get('language_context'),'discovery_options':options,'seed_evidence':seed_evidence,'index_coverage':library,'status':'PARTIAL' if failures else 'SUCCEEDED',
         'recommendations':recommendations,'source_results':fetched,'source_failures':failures,

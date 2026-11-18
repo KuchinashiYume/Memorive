@@ -6037,8 +6037,8 @@
     },
     {
       "path": "source/memorive/research/discovery/desktop.py",
-      "sha256": "3270acdc68eead5b4d5596c7e040aa701adeebccbdb9c0f27f174cb0c0c11436",
-      "bytes": 16774
+      "sha256": "16ef5e39862e1d94ad7dc1e9e6b6202e12f07fd3ac46c93993aff690713a7942",
+      "bytes": 19834
     },
     {
       "path": "source/memorive/research/discovery/directions.py",
