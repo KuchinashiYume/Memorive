@@ -452,8 +452,9 @@ class ResearchWorkspace:
                          + choose(language, '来源哈希：', 'Source hash: ', '出典のハッシュ：') + ref['content_hash'] + '\n\n')
             text += ('## ' + choose(language, '会话上下文', 'Conversation context', '会話のコンテキスト') + '\n\n'
                      + '\n\n'.join(m['role'] + ': ' + m['text'] for m in value['conversation_summary']))
-            text += ('\n\nUse memo-research with memo.skill_context and memo.skill_answer. The local transport command '
-                     'is in transport.json; append --call <method> and send JSON on stdin.\n')
+            text += ('\n\nUse the memo-research skill: python <skill>/scripts/memo_bridge.py read handoff.json, draft with '
+                     '[E3: "quote"] marks, then answer handoff.json --draft <draft> --return. Without the skill, the local '
+                     'transport command is in transport.json; append --call <method> and send JSON on stdin.\n')
             for name, data in [('handoff.json', packed(value)), ('START_HERE.md', text), ('transport.json', packed(transport(self)))]:
                 path = root / name
                 # Exported before: the files on disk must still be this pack.

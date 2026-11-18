@@ -127,8 +127,8 @@
     },
     {
       "path": "integrations/skills/memo-research/SKILL.md",
-      "sha256": "b6faef7b691e9e5969b2058203a77db7cb659b83cb0ee2d28a4f25bb82a609d7",
-      "bytes": 8380
+      "sha256": "12594a574e0d7c0f1470b6773fed81a78188f70c4f2198bd1c650acd47d09319",
+      "bytes": 8727
     },
     {
       "path": "integrations/skills/memo-research/agents/openai.yaml",
@@ -137,18 +137,23 @@
     },
     {
       "path": "integrations/skills/memo-research/references/memo-bridge.md",
-      "sha256": "3670d6accb6e7882e3e8449b02a5d5f2af9a080d13c6a6343b7d9f24d7bea1b4",
-      "bytes": 6139
+      "sha256": "e128c965a16eb95c55b62b56dbc208054edace647aff4c4426d21be51cb2b34d",
+      "bytes": 7461
     },
     {
       "path": "integrations/skills/memo-research/references/source-tools.md",
-      "sha256": "8e428e33fb10f391e4d09ff3da8a293960f7df8cc4defa57da3eaa7106467da1",
-      "bytes": 4045
+      "sha256": "940ec3778d788afaf25de64a013570ceea3e7529bb569d3a72c1c95766ceea22",
+      "bytes": 4782
+    },
+    {
+      "path": "integrations/skills/memo-research/scripts/drafts.py",
+      "sha256": "d314f951a8ce25ab7ac4ba0d043d7cb5541c203fcb320973179d8832b6016d68",
+      "bytes": 3491
     },
     {
       "path": "integrations/skills/memo-research/scripts/memo_bridge.py",
-      "sha256": "443f9b4e1fca43f3c5e600aee5f7cb37a51d71cc67aae2c017242cf93509433e",
-      "bytes": 6998
+      "sha256": "e1383e05cb1c4cb394df20ab2f4665801664a57296e973a477d918965be08a38",
+      "bytes": 16840
     },
     {
       "path": "integrations/skills/memo-research/scripts/requirements-pdf.txt",
@@ -157,8 +162,8 @@
     },
     {
       "path": "integrations/skills/memo-research/scripts/sources.py",
-      "sha256": "f1b2e1f449036ed19bc413f6132c187579e0224a0a2ccf394fc220d33426bca3",
-      "bytes": 9839
+      "sha256": "1ebbf9834191ad8452c79e2dbec5b5ed21dee015d4c8b0b9004aa6e96dce764b",
+      "bytes": 15459
     },
     {
       "path": "integrations/skills/memo-tension/SKILL.md",
@@ -5772,8 +5777,8 @@
     },
     {
       "path": "source/memorive/platform/language/handoff.py",
-      "sha256": "0cc0cbaeddbb8c5931440692569a0fc88ced261284cf2e7edb85484228ffc33b",
-      "bytes": 6918
+      "sha256": "7cb4a89a7f262faec166efed3059a885228025b0e40c7210795250159da09a1a",
+      "bytes": 7693
     },
     {
       "path": "source/memorive/platform/language/messages.py",
@@ -6837,8 +6842,8 @@
     },
     {
       "path": "source/memorive/research/workspace/service.py",
-      "sha256": "09e4d9ac6b7044a9088cd3b2048123d79b9bba241028a502bbe444c31310e7d7",
-      "bytes": 36825
+      "sha256": "ac2f300eef8174e07f6177d42f6fb62912b16a2b73b8d539990175661950420b",
+      "bytes": 36973
     },
     {
       "path": "source/memorive/research/workspace/skill_bridge.py",

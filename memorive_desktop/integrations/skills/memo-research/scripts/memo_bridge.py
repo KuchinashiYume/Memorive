@@ -1,55 +1,215 @@
-"""Use Memo's published local transport; never open or modify its database."""
+"""Read a Memo hand-off's sources and return a cited answer, through Memo's published local transport.
+
+    read    HANDOFF [--artifact ID] [--pages A-B]       fetch the evidence, number it E1, E2 ... and write
+                                                        work/evidence.md (to read) and work/evidence.json
+    answer  HANDOFF --draft DRAFT.md [--gap TEXT] [--return]
+                                                        turn a draft with [E3: "quote"] marks into
+                                                        memo-answer.json, check it, and optionally return it
+    return  HANDOFF --result memo-answer.json           return a saved answer to the Memo conversation
+    context HANDOFF [--artifact ID] [--cursor N] [--limit N]
+                                                        one raw page of memo.skill_context (JSON)
+    bind    HANDOFF --analysis A.md --citations C.json --request-id ID --out memo-answer.json
+                                                        map a standalone answer's local citations to Memo IDs
+
+The transport is the command in transport.json beside handoff.json; this script never opens Memo's
+database. Work files go to <handoff folder>/work unless --work names another folder.
+"""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import subprocess
 import sys
 
-import sources
+import drafts
+
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8')
+
+ANSWER_SCHEMA = 'memo-research-answer/1'
+BRIDGE_METHODS = {'memo.capabilities', 'memo.skill_context', 'memo.skill_answer'}
+# [E3: "quote"] · [E3: "quote"; E5: "quote"] · [inference E3: "quote"; E5: "quote"]
 
 
-def read(path):
+def read_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'))
 
 
-def call(transport, method, params):
-    command = transport['command']
-    if not isinstance(command, list) or not command or any(not isinstance(s, str) for s in command):
-        raise ValueError('Invalid configured Memo transport command')
-    if method not in {'memo.capabilities', 'memo.skill_context', 'memo.skill_answer'}:
-        raise ValueError('Unsupported bridge method')
-    run = subprocess.run(command + ['--call', method], input=json.dumps(params, ensure_ascii=False),
-                         encoding='utf-8', capture_output=True, timeout=90, shell=False)
-    if run.returncode:
-        raise ValueError(run.stderr.strip()[:300] or 'Memo transport failed')
-    return json.loads(run.stdout)
+class Memo:
+    """The Memo host behind one hand-off: its transport command and binding."""
+
+    def __init__(self, handoff, transport=None):
+        self.handoff = Path(handoff).resolve()
+        self.pack = read_json(self.handoff)
+        self.transport = read_json(transport or self.handoff.parent / 'transport.json')
+        self.binding = {'project': self.pack['project'], 'handoff_id': self.pack['id'],
+                        'handoff_hash': self.pack['content_hash']}
+        self._methods = None
+
+    def call(self, method, params):
+        command = self.transport['command']
+        if not isinstance(command, list) or not command or any(not isinstance(s, str) for s in command):
+            raise ValueError('Invalid configured Memo transport command')
+        if method not in BRIDGE_METHODS:
+            raise ValueError('Unsupported bridge method')
+        run = subprocess.run(command + ['--call', method], input=json.dumps(params, ensure_ascii=False),
+                             encoding='utf-8', capture_output=True, timeout=120, shell=False)
+        if run.returncode:
+            raise ValueError(run.stderr.strip()[-300:] or 'Memo transport failed')
+        return json.loads(run.stdout)
+
+    def require(self, method):
+        """Older Memo releases offer only some methods: keep local results instead of claiming a return."""
+        if self._methods is None:
+            caps = self.call('memo.capabilities', {})
+            self._methods = set(caps.get('tools', [])) | set(caps.get('methods', {}))
+        if method not in self._methods:
+            raise ValueError('Memo host does not support ' + method + '; keep local artifacts, do not claim a return')
+
+    def pages(self, artifact_id=None):
+        """Every evidence chunk of the hand-off (or of one source), page by page."""
+        self.require('memo.skill_context')
+        cursor, refs, first = 0, [], None
+        while cursor is not None:
+            params = dict(self.binding, cursor=cursor, limit=24)
+            if artifact_id:
+                params['artifact_id'] = artifact_id
+            page = self.call('memo.skill_context', params)
+            first = first or page
+            refs.extend(page['evidence'])
+            cursor = page['next_cursor']
+        return first, refs
 
 
-def binding(pack):
-    return {'project': pack['project'], 'handoff_id': pack['id'], 'handoff_hash': pack['content_hash']}
+# --- read: fetch the evidence once, number it, write it to read ------------------------------------
+
+def page_range(text):
+    if not text:
+        return None
+    low, _, high = text.partition('-')
+    return int(low), int(high or low)
 
 
-def check_capabilities(transport, method):
-    caps = call(transport, 'memo.capabilities', {})
-    if method not in caps.get('tools', []) and method not in caps.get('methods', {}):
-        raise ValueError('Memo host does not support ' + method + '; keep local artifacts, do not claim a return')
+def read_sources(memo, work, artifact_id=None, pages=None):
+    """Fetch the evidence into work/evidence.json (aliases E1, E2 ... kept across reads) and write
+    work/evidence.md, every chunk read so far by source and position."""
+    work.mkdir(parents=True, exist_ok=True)
+    store_path = work / 'evidence.json'
+    store = read_json(store_path) if store_path.is_file() else {'handoff_id': memo.binding['handoff_id'], 'evidence': {}}
+    if store['handoff_id'] != memo.binding['handoff_id']:
+        raise ValueError('work/evidence.json belongs to another hand-off; use a new --work folder')
+    first, refs = memo.pages(artifact_id)
+    store['question'], store['sources'] = first['question'], first['sources']
+    totals = store.setdefault('totals', {})
+    for artifact in {ref['artifact_id'] for ref in refs}:
+        totals[artifact] = sum(ref['artifact_id'] == artifact for ref in refs)
+    aliases = {row['id']: alias for alias, row in store['evidence'].items()}
+    span = page_range(pages)
+    for ref in refs:
+        if span and ref.get('page') is not None and not span[0] <= ref['page'] <= span[1]:
+            continue
+        alias = aliases.get(ref['id']) or 'E' + str(len(store['evidence']) + 1)
+        aliases[ref['id']] = alias
+        store['evidence'][alias] = {k: ref.get(k) for k in ('id', 'content_hash', 'artifact_id', 'title', 'page',
+                                                               'line_start', 'line_end', 'text')}
+    store_path.write_text(json.dumps(store, ensure_ascii=False, indent=1), encoding='utf-8')
+    (work / 'evidence.md').write_text(evidence_markdown(store), encoding='utf-8')
+    return store
 
 
-def bind_local(pack, transport, analysis, citations, request_id):
+def position(row):
+    page = f"p.{row['page']} · " if row.get('page') is not None else ''
+    return f"{page}lines {row['line_start']}–{row['line_end']}"
+
+
+def evidence_markdown(store):
+    lines = ['# Evidence', '', 'Question: ' + store['question'], '',
+             'Cite a passage as [E3: "short exact quote"]. Quotes must be copied from the passage text.', '']
+    order = {s['id']: n for n, s in enumerate(store['sources'])}
+    rows = sorted(store['evidence'].items(), key=lambda item: (order.get(item[1]['artifact_id'], 99),
+                                                               item[1].get('page') or 0, item[1]['line_start']))
+    current = None
+    for alias, row in rows:
+        if row['artifact_id'] != current:
+            current = row['artifact_id']
+            lines += ['## ' + (row.get('title') or current), '']
+        lines += [f'### {alias} · {position(row)}', '', row['text'].rstrip(), '']
+    return '\n'.join(lines)
+
+
+def read_summary(store):
+    read = {}
+    for row in store['evidence'].values():
+        read.setdefault(row['artifact_id'], set()).add(row['id'])
+    out = []
+    for source in store['sources']:
+        out.append(f"{source.get('title') or source['id']}: {len(read.get(source['id'], ()))} of "
+                   f"{source.get('chunks') or '?'} chunks read")
+    return out
+
+
+# --- answer: draft with marks -> checked memo-answer.json ------------------------------------------
+
+def build_answer(store, draft, gaps=None, request_id=None):
+    """The memo-answer.json of a draft (drafts.py): each [E..] mark becomes [n], n numbering the
+    passages in first-use order, and the text before it a claim with its supports. Every problem
+    is reported at once."""
+    cited = []
+
+    def resolve(alias, where, quote):
+        row = store['evidence'].get(alias)
+        if row is None:
+            raise ValueError(f'{alias} has not been read: run `read` for its source or pages first')
+        if drafts.squash(quote) not in drafts.squash(row['text']):
+            raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"')
+        return {'evidence_id': row['id'], 'content_hash': row['content_hash'], 'quote': quote}, row['text']
+
+    def render(supports):
+        ids = list(dict.fromkeys(s['evidence_id'] for s in supports))
+        cited.extend(i for i in ids if i not in cited)
+        return ''.join(f'[{cited.index(i) + 1}]' for i in ids)
+
+    answer, claims, problems = drafts.apply(draft, resolve, render)
+    if problems:
+        raise ValueError('The draft needs changes:\n- ' + '\n- '.join(problems))
+    coverage = []
+    for source in store['sources']:
+        read = sorted((row for row in store['evidence'].values() if row['artifact_id'] == source['id']),
+                      key=lambda row: (row.get('page') or 0, row['line_start']))
+        total = store.get('totals', {}).get(source['id'], 0)
+        status = 'unread' if not read else 'read' if total and len(read) >= total else 'partial'
+        note = '' if status == 'read' else 'Not read.' if status == 'unread' else (
+            f'{len(read)} of {total} chunks read' + (f" (pages {read[0]['page']}–{read[-1]['page']})"
+                                                      if read[0].get('page') is not None else '') + '.')
+        if status != 'read' and gaps:
+            note += ' ' + gaps
+        coverage.append({'artifact_id': source['id'], 'status': status, 'gaps': note.strip()})
+    request_id = request_id or 'skill-' + hashlib.sha256(json.dumps([store['handoff_id'], answer, claims],
+                                                                     ensure_ascii=False).encode()).hexdigest()[:24]
+    return {'answer': answer, 'claims': claims, 'coverage': coverage, 'request_id': request_id}
+
+
+def return_answer(memo, result):
+    if result.pop('schema', None) != ANSWER_SCHEMA:
+        raise ValueError('Unsupported answer file')
+    if any(result.get(k) != v for k, v in memo.binding.items()):
+        raise ValueError('Answer belongs to another handoff')
+    memo.require('memo.skill_answer')
+    return memo.call('memo.skill_answer', result)
+
+
+# --- bind: a standalone answer's local citations -> Memo evidence ----------------------------------
+
+def bind_local(memo, analysis, citations, request_id):
     """Map verified standalone RawMD spans to real Memo IDs without re-extracting."""
-    check_capabilities(transport, 'memo.skill_context')
-    params = binding(pack); refs = []; cursor = 0
-    while True:
-        page = call(transport, 'memo.skill_context', dict(params, cursor=cursor, limit=24))
-        refs.extend(page['evidence'])
-        cursor = page['next_cursor']
-        if cursor is None:
-            break
-    local = read(citations)
-    if local['question'].strip() != pack['question'].strip():
+    import sources
+    first, refs = memo.pages()
+    local = read_json(citations)
+    if local['question'].strip() != memo.pack['question'].strip():
         raise ValueError('Question changed: reason about the current question before binding a saved answer')
     answer = Path(analysis).read_text(encoding='utf-8-sig')
-    claims = []; used = set()
+    claims, used = [], set()
     for claim in local['claims']:
         if claim['text'] not in answer:
             raise ValueError('Claim text must occur verbatim in the delivered answer')
@@ -70,56 +230,71 @@ def bind_local(pack, transport, analysis, citations, request_id):
                        and r['page'] == support['page'] and r['line_start'] <= end and r['line_end'] >= start]
             covered = set()
             for ref in matches:
-                first, last = max(start, ref['line_start']), min(end, ref['line_end'])
-                quote = '\n'.join(ref['text'].splitlines()[first-ref['line_start']:last-ref['line_start']+1])
+                low, high = max(start, ref['line_start']), min(end, ref['line_end'])
+                quote = '\n'.join(ref['text'].splitlines()[low - ref['line_start']:high - ref['line_start'] + 1])
                 if quote.strip():
                     mapped.append({'evidence_id': ref['id'], 'content_hash': ref['content_hash'], 'quote': quote})
                     used.add(ref['artifact_id'])
-                covered.update(range(first, last + 1))
+                covered.update(range(low, high + 1))
             if not set(range(start, end + 1)) <= covered or not matches:
                 raise ValueError('Source/span has no exact Memo mapping; attach its source.json in Memo and create a fresh handoff')
         claims.append({'text': claim['text'], 'kind': claim['kind'], 'supports': mapped})
     coverage = [{'artifact_id': s['id'], 'status': 'partial' if s['id'] in used else 'unread',
                  'gaps': 'Only mapped claims recorded; whole-source reading not assessed.' if s['id'] in used
-                         else 'Not covered by this standalone answer.'} for s in page['sources']]
-    return dict(params, schema='memo-research-answer/1', request_id=request_id,
-                answer=answer, claims=claims, coverage=coverage)
+                         else 'Not covered by this standalone answer.'} for s in first['sources']]
+    return dict(memo.binding, schema=ANSWER_SCHEMA, request_id=request_id, answer=answer, claims=claims, coverage=coverage)
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--transport', type=Path, help='Explicit configured transport; defaults beside handoff.json')
     sub = parser.add_subparsers(dest='action', required=True)
+    read = sub.add_parser('read'); read.add_argument('handoff', type=Path)
+    read.add_argument('--artifact'); read.add_argument('--pages'); read.add_argument('--work', type=Path)
+    answer = sub.add_parser('answer'); answer.add_argument('handoff', type=Path)
+    answer.add_argument('--draft', type=Path, required=True); answer.add_argument('--gap')
+    answer.add_argument('--request-id'); answer.add_argument('--work', type=Path)
+    answer.add_argument('--out', type=Path); answer.add_argument('--return', dest='send', action='store_true')
+    submit = sub.add_parser('return'); submit.add_argument('handoff', type=Path)
+    submit.add_argument('--result', type=Path, required=True)
     context = sub.add_parser('context'); context.add_argument('handoff', type=Path)
     context.add_argument('--artifact'); context.add_argument('--cursor', type=int, default=0)
     context.add_argument('--limit', type=int, default=12)
     bind = sub.add_parser('bind'); bind.add_argument('handoff', type=Path)
     bind.add_argument('--analysis', type=Path, required=True); bind.add_argument('--citations', type=Path, required=True)
     bind.add_argument('--request-id', required=True); bind.add_argument('--out', type=Path, required=True)
-    submit = sub.add_parser('return'); submit.add_argument('handoff', type=Path)
-    submit.add_argument('--result', type=Path, required=True)
-    args = parser.parse_args(); pack = read(args.handoff)
-    transport = read(args.transport or args.handoff.parent / 'transport.json')
-    if args.action == 'context':
-        check_capabilities(transport, 'memo.skill_context')
-        params = dict(binding(pack), cursor=args.cursor, limit=args.limit)
+    args = parser.parse_args()
+    memo = Memo(args.handoff, args.transport)
+    work = getattr(args, 'work', None) or memo.handoff.parent / 'work'
+    if args.action == 'read':
+        store = read_sources(memo, work, args.artifact, args.pages)
+        print('\n'.join([f'Read into {work / "evidence.md"} ({len(store["evidence"])} passages, E1–E{len(store["evidence"])}).']
+                        + read_summary(store)))
+    elif args.action == 'answer':
+        store = read_json(work / 'evidence.json')
+        built = build_answer(store, Path(args.draft).read_text(encoding='utf-8-sig'), args.gap, args.request_id)
+        result = dict(memo.binding, schema=ANSWER_SCHEMA, **built)
+        out = args.out or memo.handoff.parent / 'memo-answer.json'
+        out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+        report = {'saved': str(out), 'claims': len(result['claims']),
+                  'citations': len({s['evidence_id'] for c in result['claims'] for s in c['supports']}),
+                  'coverage': {c['artifact_id']: c['status'] for c in result['coverage']}}
+        if args.send:
+            report['returned'] = return_answer(memo, dict(result))
+        print(json.dumps(report, ensure_ascii=False, indent=1))
+    elif args.action == 'return':
+        print(json.dumps(return_answer(memo, read_json(args.result)), ensure_ascii=False))
+    elif args.action == 'context':
+        memo.require('memo.skill_context')
+        params = dict(memo.binding, cursor=args.cursor, limit=args.limit)
         if args.artifact:
             params['artifact_id'] = args.artifact
-        result = call(transport, 'memo.skill_context', params)
-    elif args.action == 'bind':
-        result = bind_local(pack, transport, args.analysis, args.citations, args.request_id)
+        print(json.dumps(memo.call('memo.skill_context', params), ensure_ascii=False))
+    else:
+        result = bind_local(memo, args.analysis, args.citations, args.request_id)
         with args.out.open('x', encoding='utf-8') as stream:
             json.dump(result, stream, ensure_ascii=False, indent=2)
-        result = {'status': 'BOUND_LOCAL', 'path': str(args.out), 'returned': False}
-    else:
-        check_capabilities(transport, 'memo.skill_answer')
-        result = read(args.result)
-        if result.pop('schema', None) != 'memo-research-answer/1':
-            raise ValueError('Unsupported answer file')
-        if any(result.get(k) != v for k, v in binding(pack).items()):
-            raise ValueError('Answer belongs to another handoff')
-        result = call(transport, 'memo.skill_answer', result)
-    print(json.dumps(result, ensure_ascii=False))
+        print(json.dumps({'status': 'BOUND_LOCAL', 'path': str(args.out), 'returned': False}))
 
 
 if __name__ == '__main__':

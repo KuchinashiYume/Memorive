@@ -1,4 +1,12 @@
-"""Small, local-only, source-bound preparation and citation helper."""
+"""Small, local-only, source-bound preparation and citation helper.
+
+    prepare --out SOURCES INPUT...      bundles (original, raw.md, source.json) named S1, S2 ... in SOURCES/index.json
+    verify MANIFEST [--current INPUT]   bundle integrity, optionally against the current input
+    evidence MANIFEST [--page N] [--lines A:B] [--quote TEXT]
+    render MANIFEST --page N --out PNG
+    cite --sources SOURCES --draft DRAFT.md --question TEXT [--out DIR]
+                                        a draft with [S1 p.3 L120-124: "quote"] marks -> analysis.md + citations.json
+"""
 import argparse
 import contextlib
 import hashlib
@@ -6,9 +14,12 @@ import importlib.metadata
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import sys
 import uuid
+
+import drafts
 
 VERSION = "0.1.1"
 
@@ -78,7 +89,7 @@ def prepare(path, output):
         if data["converter"] != converter:
             raise ValueError("Conversion identity collision")
         return {"input": str(path), "status": "cached", "manifest": str(bundle / "source.json"),
-                "source_id": data["source_id"], "warnings": data["warnings"]}
+                "source_id": data["source_id"], "alias": name(root, bundle, path), "warnings": data["warnings"]}
     # Extract from a preserved snapshot, not a file that might change mid-conversion.
     # Inherit the output directory ACL, including the requesting user on Windows.
     # tempfile.mkdtemp uses mode 0700 and would restrict bundles to the sandbox account.
@@ -126,11 +137,24 @@ def prepare(path, output):
         # Same-volume rename publishes only a completed bundle; never replaces an existing one.
         temporary.rename(bundle)
         return {"input": str(path), "status": "prepared", "manifest": str(bundle / "source.json"),
-                "source_id": data["source_id"], "warnings": warnings}
+                "source_id": data["source_id"], "alias": name(root, bundle, path), "warnings": warnings}
     finally:
         # Only this function's verified temporary directory is eligible for cleanup.
         if temporary.exists() and temporary.parent == root and temporary.name.startswith(".prepare-"):
             shutil.rmtree(temporary)
+
+
+def name(root, bundle, path):
+    """The short name of a bundle (S1, S2 ...) in root/index.json; a bundle keeps its name."""
+    index_path = root / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {}
+    manifest = (bundle / "source.json").relative_to(root).as_posix()
+    alias = next((a for a, row in index.items() if row["manifest"] == manifest), None)
+    if alias is None:
+        alias = "S" + str(len(index) + 1)
+        index[alias] = {"manifest": manifest, "input": str(path)}
+        write_json(index_path, index)
+    return alias
 
 
 def evidence(manifest, page=None, span=None, quote=None):
@@ -153,6 +177,76 @@ def evidence(manifest, page=None, span=None, quote=None):
             "page": page, "line_start": start, "line_end": end,
             "text": excerpt, "integrity_verified": True, "quote_verified": quote is not None,
             "semantic_support": "NOT_ASSESSED"}
+
+
+COVERAGE = re.compile(r"<!--\s*coverage\s*\n(.*?)-->", re.S)
+COVERAGE_LINE = re.compile(r"^\s*(S\d+)\s+(read|partial|unread)\s*(?::\s*(.*))?$")
+WHERE = re.compile(r"^(?:p\.?\s*(\d+)\s+)?L(\d+)(?:\s*[-:]\s*(\d+))?$")
+
+
+def cite(sources, draft, question, out):
+    """analysis.md and citations.json from a draft with [S1 p.3 L120-124: "quote"] marks (drafts.py).
+    Each span is checked with `evidence` (bundle integrity, page, lines, quote), and the numbers of a
+    source statement must be in its spans. The draft ends with a coverage block naming every source:
+        <!-- coverage
+        S1 read
+        S2 partial: the methods section was not read
+        -->"""
+    sources, out = Path(sources).resolve(), Path(out).resolve()
+    index = json.loads((sources / "index.json").read_text(encoding="utf-8"))
+    problems, coverage = [], {}
+    block = COVERAGE.search(draft)
+    for line in (block.group(1).splitlines() if block else []):
+        if line.strip():
+            match = COVERAGE_LINE.match(line)
+            if not match or match.group(1) not in index:
+                problems.append(f"coverage line not understood: {line.strip()}")
+                continue
+            alias, status, gaps = match.groups()
+            if status != "read" and not (gaps or "").strip():
+                problems.append(f"coverage of {alias}: say what was not read and why it matters")
+            coverage[alias] = {"input": Path(index[alias]["input"]).name, "status": status,
+                               "gaps": [gaps.strip()] if gaps else []}
+    problems += [f"coverage: say whether {alias} was read, partially read or not read"
+                 for alias in index if alias not in coverage]
+    body = COVERAGE.sub("", draft)
+
+    def resolve(alias, where, quote):
+        if alias not in index:
+            raise ValueError(f"{alias} is not a prepared source (see {sources / 'index.json'})")
+        found = WHERE.match(where)
+        if not found:
+            raise ValueError(f'{alias}: give the place as "p.3 L120-124" (PDF) or "L8-10" (MD/TXT), not "{where}"')
+        page, first, last = found.group(1), int(found.group(2)), int(found.group(3) or found.group(2))
+        manifest = sources / index[alias]["manifest"]
+        try:
+            span = evidence(manifest, int(page) if page else None, f"{first}:{last}", quote)
+        except (ValueError, OSError) as error:
+            raise ValueError(f'{alias} {where}: {error}: "{quote[:120]}"') from None
+        record = {"manifest": os.path.relpath(manifest, out).replace(os.sep, "/"), "source_sha256": span["source_sha256"],
+                  "page": span["page"], "line_start": first, "line_end": last, "quote": quote, "checked": True}
+        return dict(record, alias=alias), span["text"]
+
+    def render(supports):
+        one = len(index) == 1
+        places = [("" if one else s["alias"] + ", ") + (f"p.{s['page']} " if s["page"] else "")
+                  + (f"L{s['line_start']}" + (f"-{s['line_end']}" if s["line_end"] != s["line_start"] else ""))
+                  for s in supports]
+        return "[" + "; ".join(places) + "]" if places else ""
+
+    text, claims, more = drafts.apply(body, resolve, render)
+    problems += more
+    if problems:
+        raise ValueError("The draft needs changes:\n- " + "\n- ".join(problems))
+    for claim in claims:
+        for support in claim["supports"]:
+            support.pop("alias")
+    claims = [dict(claim, id=f"C{n}") for n, claim in enumerate(claims, 1)]
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "analysis.md").write_text(text + "\n", encoding="utf-8")
+    write_json(out / "citations.json", {"question": question, "coverage": list(coverage.values()), "claims": claims})
+    return {"analysis": str(out / "analysis.md"), "citations": str(out / "citations.json"), "claims": len(claims),
+            "coverage": {alias: row["status"] for alias, row in coverage.items()}}
 
 
 def render(manifest, page, out):
@@ -192,6 +286,11 @@ def main():
     p.add_argument("manifest")
     p.add_argument("--page", required=True, type=int)
     p.add_argument("--out", required=True)
+    p = sub.add_parser("cite")
+    p.add_argument("--sources", required=True)
+    p.add_argument("--draft", required=True)
+    p.add_argument("--question", required=True)
+    p.add_argument("--out")
     args = parser.parse_args()
     if args.command == "prepare":
         results = []
@@ -209,6 +308,10 @@ def main():
                   "current_source_checked": args.current is not None})
         elif args.command == "evidence":
             emit(evidence(args.manifest, args.page, args.lines, args.quote))
+        elif args.command == "cite":
+            draft = Path(args.draft).read_text(encoding="utf-8-sig")
+            # By default the analysis goes to the task folder: the folder that holds the sources.
+            emit(cite(args.sources, draft, args.question, args.out or Path(args.sources).resolve().parent))
         else:
             emit(render(args.manifest, args.page, args.out))
         return 0
