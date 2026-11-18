@@ -68,6 +68,30 @@ def test_a_two_word_query_needs_both_words():
     assert related(record("Sleep and memory in older adults"), direction)["supported"] is False
 
 
+def test_a_phrase_written_as_its_abbreviation_counts():
+    # From the review: a paper naming the topic only as "RAG" fell below the query-term threshold even
+    # with RAG listed as a keyword. It shares citation and evidence written out, and RAG stands for
+    # retrieval augmented generation, three words of the query.
+    direction = dict(RAG, query="retrieval augmented generation citation evidence attribution", keywords=["RAG", "citation"])
+    paper = record("Evidence citation in RAG", "We check whether RAG answers cite the passages they rely on.")
+    result = related(paper, direction)
+    assert result["supported"] is True
+    assert {"retrieval", "augmented", "generation", "citation", "evidence"} <= set(result["matched_query_terms"])
+
+
+def test_the_letters_alone_with_no_other_shared_term_do_not_count():
+    paper = record("RAG status reporting in construction projects",
+                   "Forty sites reported red, amber and green statuses every week.")
+    result = related(paper)
+    assert result["matched_query_terms"] == []
+    assert result["supported"] is False
+
+
+def test_a_multi_word_keyword_is_found_by_its_abbreviation():
+    paper = record("Attribution errors of RAG systems", "We count misattributed citations in generated answers.")
+    assert "retrieval-augmented generation" in related(paper)["matched_keywords"]
+
+
 def test_latest_keeps_only_papers_inside_the_window():
     paper_text = ("Citation attribution in retrieval-augmented generation",
                   "We study evidence attribution for generated citations.")

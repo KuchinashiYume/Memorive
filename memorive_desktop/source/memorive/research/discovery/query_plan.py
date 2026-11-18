@@ -17,7 +17,26 @@ def keyword_in_text(keyword,text):
     parts=re.findall(r'[a-z0-9]+|[\u3400-\u9fff]+',keyword.casefold())
     if not parts:
         return False
-    return bool(re.search(r'(?<!\w)'+r'[\W_]+'.join(re.escape(x) for x in parts)+r'(?!\w)',text.casefold()))
+    return bool(re.search(r'(?<!\w)'+r'[\W_]+'.join(re.escape(x) for x in parts)+r'(?!\w)',text.casefold())
+                or (len(parts)>1 and ''.join(p[0] for p in parts).upper() in acronyms(text)))
+
+def acronyms(text):
+    """Upper-case abbreviations written in text, plural s dropped: RAG, LLMs -> {'RAG', 'LLM'}."""
+    return {m.rstrip('s') for m in re.findall(r'(?<![\w-])[A-Z][A-Z0-9]{1,5}s?(?![\w-])',str(text))}
+
+def acronym_terms(query,text):
+    """Query terms that text names by an abbreviation of the query words they stand in: with the query
+    "retrieval augmented generation citation", a text saying RAG names retrieval, augmented and
+    generation. Only runs of two to five consecutive query words count."""
+    words=[w for w in re.findall(r'[a-z0-9]+',str(query).casefold()) if w not in {'and','or','the','of','in','for','to'}]
+    found=acronyms(text)
+    terms=set()
+    for size in range(2,6):
+        for start in range(len(words)-size+1):
+            run=words[start:start+size]
+            if ''.join(w[0] for w in run).upper() in found:
+                terms|=tokens(' '.join(run))
+    return terms
 
 def request_options(objective=None,direction_id=None,days=None,as_of=None):
     objective=objective or 'related'
@@ -83,7 +102,14 @@ def assess(record,direction,seeds,options):
     title_tokens=tokens(title)
     all_tokens=title_tokens|tokens(abstract)
     base=tokens(direction['query'])
-    matched=sorted(base&all_tokens)
+    matched=base&all_tokens
+    # A paper may name a phrase of the query only by its abbreviation ("RAG"). Its words count when the
+    # paper also shares another query term written out, so an unrelated use of the same letters alone
+    # (a project report's RAG status) does not make a paper related.
+    abbreviated=acronym_terms(direction['query'],title+' '+abstract)&base
+    if matched-abbreviated:
+        matched|=abbreviated
+    matched=sorted(matched)
     keywords=[k for k in direction.get('keywords',[]) if keyword_in_text(k,title+' '+abstract)]
     # How many query terms a candidate must share: half of them, at least two (all of a shorter query), at most
     # three (so a long query still finds papers). Two everyday words are not enough: with only "two terms and one
