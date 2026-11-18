@@ -6,6 +6,7 @@ call(method, params): the window may use DESKTOP_METHODS, an external agent only
 Each method is short here and hands the work to the module that owns it:
 
   answer_versions.py   queuing a question (ask), answering again, answer branches
+  answer_saves.py      every save of an answer kept as a version: history, compare, restore
   answering.py         answering a queued question, step by step
   evidence.py          the evidence index: excerpts, reading them, searching
   attachments.py       a conversation's material and files added to it
@@ -27,6 +28,7 @@ from memorive.research.workspace.attachments import Attachments,METHODS as ATTAC
 from memorive.research.workspace.conversations import Conversations,METHODS as CONVERSATION_METHODS
 from memorive.research.workspace.connections import Connections,DESKTOP as CONNECTION_METHODS
 from memorive.research.workspace.answer_evidence import AnswerEvidence,METHODS as ANSWER_EVIDENCE_METHODS
+from memorive.research.workspace.answer_saves import AnswerSaves,METHODS as ANSWER_SAVE_METHODS
 from memorive.research.workspace.agents import agent_matches,desktop_agent,desktop_handoff,validate_agent_settings  # noqa: F401 (desktop_handoff: runtime.py)
 from memorive.research.workspace import answer_coverage
 from memorive.research.workspace import answer_versions
@@ -42,11 +44,12 @@ DESKTOP_METHODS=(PUBLIC_METHODS|DEVELOPER_METHODS|frozenset({
     'memo.agent_dispatch','memo.knowledge_health','memo.feedback_revise','memo.interests','memo.interest_remove',
     'memo.weight_settings','memo.weight_save','memo.weight_preview','memo.material_metadata','memo.material_metadata_save',
     'memo.feedback_review','memo.feedback_retract','memo.handoff','memo.export_handoff','memo.library_list','memo.library_add'})
-    |CONNECTION_METHODS|CONVERSATION_METHODS|ATTACHMENT_METHODS|ANSWER_EVIDENCE_METHODS|answer_versions.METHODS)
+    |CONNECTION_METHODS|CONVERSATION_METHODS|ATTACHMENT_METHODS|ANSWER_EVIDENCE_METHODS|answer_versions.METHODS
+    |ANSWER_SAVE_METHODS)
 SETTINGS_FIELDS={'profile_ref','memory_enabled','use_recent_interests','context_chars','recent_messages','agent',
                  'agent_profile_ref','default_project','custom_agents','desktop_agents'}
 # Kinds of record that belong to one conversation and go with it when it is forgotten.
-THREAD_RECORDS=('answer_history','answer_review','coverage_probe','answer_feedback','answer_draft','handoff',
+THREAD_RECORDS=('answer_history','answer_save','answer_review','coverage_probe','answer_feedback','answer_draft','handoff',
                 'desktop_handoff','agent_return','skill_return')
 
 
@@ -88,6 +91,7 @@ class ResearchWorkspace:
         self.connector_thread = None
         self.answer_evidence = AnswerEvidence(self)
         self.versions = answer_versions.AnswerVersions(self)
+        self.saves = AnswerSaves(self)
         self.language_settings_get = language_settings_get or (lambda: dict(revision=0, settings=dict(preferences=dict(language='zh-CN'))))
         self.user_preferences_get = user_preferences_get or (lambda: dict(revision=0, config=dict(answer_style='professional')))
         # Legacy answer trees are normalized on individual reads and persisted
@@ -476,6 +480,8 @@ class ResearchWorkspace:
             return self.versions.call(method, p)
         if method in ANSWER_EVIDENCE_METHODS:
             return self.answer_evidence.call(method, p)
+        if method in ANSWER_SAVE_METHODS:
+            return self.saves.call(method, p)
         if method in DEVELOPER_METHODS:
             return self.developer.desktop(method, p)
         if method in CONVERSATION_METHODS:

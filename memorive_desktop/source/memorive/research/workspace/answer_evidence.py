@@ -258,6 +258,8 @@ class AnswerEvidence:
                 raise ValueError('ANSWER_CHANGED')
             for r in check['retained_evidence']:
                 self.ws.index.read(r['id'],thread['project'],expected_hash=r['content_hash'],db=db)
+            # The answer's saved versions (answer_saves.py) get this revision too.
+            self.ws.saves.ensure(thread,message,db)
             old=copy.deepcopy(message)
             version=message.get('answer_version',1)
             self.ws.store.put('answer_history',thread_id+'-'+answer_id+'-v'+str(version),thread['project'],{'thread_id':thread_id,'answer_id':answer_id,'binding':check['binding'],'message':old,'saved_at':now()},expected=0,db=db)
@@ -270,6 +272,7 @@ class AnswerEvidence:
                 revision_note=generated('局部修订；本版主张和直接依赖关系需重新审核。',revision_language),revision_language_context=revision_language,
                 revision_routing=reviewer_mode_for_risk(classify_delta_risk([{'kind':'claim_revision','semantic_change':True,'cross_field_dependency':True}])) )
             message.pop('feedback_id',None)
+            self.ws.saves.record(thread,message,'CLAIM_REVISION',db)
             if completion:
                 reply=append_reply(thread,completion['question'],completion['text'],completion['refs'],source=message,action='revise',
                     elapsed_ms=round((time.monotonic()-completion['started'])*1000),job=job)
