@@ -1196,7 +1196,7 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "93bf3d984a137818754254f44dbd76bd6bcc8f63044ac1087650271a8a0b36b6",
+      "sha256": "4e30685cc63d39925e7a8cf456c79301ea75145ef91d7e098e2951c811915cba",
       "bytes": 2637630
     },
     {
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "8df5399823c745a809adadd9aed0aab6d976794c3fe1997187f20155d78c7992",
+      "sha256": "8fc1c36f210783b435f0ba429f971c18c70bf3eeab03e7cc20e1894638dc2404",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "b54be22bf3bf9967770ef9586519dcefa37d2997edb9a006e93d76b4751bc09f",
+      "sha256": "86fb3a734fc735fe66bc2db1c2ac3435f7f87f3a28eb88a4cc73463b8ccc5f54",
       "bytes": 275229
     },
     {
@@ -5041,7 +5041,7 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/route-base.css",
-      "sha256": "d91cc8a5d956b38b7733da52d0e12ba97c1f8f08c8b82ac8c19af581c7f5d5b2",
+      "sha256": "06086e37e1206e353f38e8cb9109c8263257a90d4d14667e7c8e181952760b7a",
       "bytes": 310177
     },
     {
