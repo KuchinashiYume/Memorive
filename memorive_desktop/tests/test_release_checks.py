@@ -2,12 +2,15 @@
 
 - check_internal_codes.py: no unregistered internal development code in the published files
   (it reads SOURCE_REVIEW_MANIFEST.json at the repository root, so it needs the whole repository);
+  in a PDF it reads link addresses and document information, also inside compressed objects;
 - build_pages.py --check: the two UI pages are what their sources under ui/ generate, script hashes included
   (after editing a file under ui/, run the tool without --check); sync_page_hashes.py is its earlier name.
 Each tool runs in its own isolated Python, the way a release does it.
 """
+import importlib.util
 import subprocess
 import sys
+import zlib
 from pathlib import Path
 
 import pytest
@@ -30,6 +33,23 @@ def test_no_unregistered_internal_codes():
         pytest.skip("needs the repository root (SOURCE_REVIEW_MANIFEST.json)")
     code, output = _run("check_internal_codes.py")
     assert code == 0, output
+
+
+def test_a_pdf_link_to_a_local_file_is_found_inside_a_compressed_object(tmp_path):
+    # The design PDFs, printed from a local page, linked their figures to file:///<the machine's folders>/...,
+    # and the check did not read PDFs at all. Such strings can also sit in a compressed object stream.
+    spec = importlib.util.spec_from_file_location("check_internal_codes", TOOLS / "check_internal_codes.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    hidden = zlib.compress(b"<< /S /URI /URI (file:///C:/Users/someone/help/figure-01.svg) >>")
+    title = b"<FEFF" + "设计".encode("utf-16-be").hex().upper().encode() + b">"
+    pdf = tmp_path / "design.pdf"
+    pdf.write_bytes(b"%PDF-1.4\n1 0 obj << /Title " + title + b" >> endobj\n"
+                    b"2 0 obj << /Type /ObjStm /Filter /FlateDecode >>\nstream\n" + hidden + b"\nendstream\nendobj\n")
+    lines = module.pdf_strings(pdf)
+    assert "/Title 设计" in lines
+    assert [line for line in lines if module.LOCAL_LINK.search(line)] == [
+        "/URI file:///C:/Users/someone/help/figure-01.svg"]
 
 
 def test_pages_match_their_sources():

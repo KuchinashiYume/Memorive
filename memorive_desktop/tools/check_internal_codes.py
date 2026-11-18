@@ -19,6 +19,11 @@ when historical_names.json, next to this file, covers it:
   "files"  files or folders whose cleanup is planned separately
 Rename everything else, or register it together with the reason it has to stay.
 
+From a PDF it reads the link addresses and the document information (title,
+author and the like), not the page text, which a PDF stores in encoded form. A
+link to a local file (file:) is reported too: it carries a path of the machine
+that made the PDF.
+
 The patterns below are general shapes. Codenames of your own that no pattern can
 know go in a word list, one per line, passed with --words. Keep that list
 outside the repository.
@@ -30,7 +35,9 @@ import json
 import re
 import subprocess
 import sys
+import zlib
 from pathlib import Path
+from urllib.parse import unquote
 
 REPO = Path(__file__).resolve().parents[2]
 ROOT_MANIFEST = "SOURCE_REVIEW_MANIFEST.json"
@@ -61,6 +68,32 @@ MANIFEST_PATH_LINE = re.compile(r'"(path|source|destination)"\s*:')
 # whole digests (base64 of 32, 48 or 64 bytes) on such a line are left out; the rest of the line is checked.
 SCRIPT_HASH = re.compile(r"(?<![A-Za-z0-9+/])(?:sha256-[A-Za-z0-9+/]{43}=|sha384-[A-Za-z0-9+/]{64}|"
                          r"sha512-[A-Za-z0-9+/]{86}==)(?![A-Za-z0-9+/=])")
+
+
+PDF_STREAM = re.compile(rb"stream\r?\n(.*?)\r?\nendstream", re.S)
+PDF_STRING = re.compile(rb"/(URI|Title|Author|Subject|Keywords|Creator|Producer)\s*(\((?:\\.|[^\\)])*\)|<[0-9A-Fa-f\s]*>)")
+LOCAL_LINK = re.compile(r"\bfile:", re.I)
+
+
+def pdf_strings(path: Path) -> list[str]:
+    """The link addresses and document information of a PDF, one per line, also from compressed objects."""
+    raw = path.read_bytes()
+    parts = [raw]
+    for match in PDF_STREAM.finditer(raw):
+        try:
+            parts.append(zlib.decompress(match.group(1)))
+        except zlib.error:
+            pass  # an image or font stream, not a compressed object stream
+    lines = []
+    for part in parts:
+        for key, value in PDF_STRING.findall(part):
+            if value.startswith(b"<"):
+                data = bytes.fromhex(value[1:-1].decode("ascii").replace(" ", "").replace("\n", ""))
+                text = data[2:].decode("utf-16-be", "replace") if data[:2] == b"\xfe\xff" else data.decode("latin-1")
+            else:
+                text = re.sub(rb"\\(.)", rb"\1", value[1:-1]).decode("utf-8", "replace")
+            lines.append(f"/{key.decode()} {unquote(text)}")
+    return lines
 
 
 def without_script_hashes(line: str) -> str:
@@ -141,6 +174,14 @@ def main() -> int:
             for match in pattern.finditer(path):
                 record(path, 0, kind, match.group(0), path, match.start())
         suffix = full.suffix.lower()
+        if suffix == ".pdf":
+            for line in pdf_strings(full):
+                if LOCAL_LINK.search(line):
+                    open_hits.append(f"  {path}  [local file link] {line[:160]}")
+                for kind, pattern in patterns:
+                    for match in pattern.finditer(line):
+                        record(path, 0, kind, match.group(0), line, match.start())
+            continue
         if suffix not in TEXT:
             continue
         manifest = "MANIFEST" in full.name or full.name.startswith("BUILD_RESOURCES") or full.name == "SOURCE_PROVENANCE.json"
