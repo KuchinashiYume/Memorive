@@ -1,0 +1,461 @@
+{
+  "schema_version": "WorkLogSyntheticWorkLogStream-v1",
+  "synthetic_only": true,
+  "source_authority_mode": "LOCATOR_HASH_SENTINEL_ONLY",
+  "entries": [
+    {
+      "age_bucket": "today",
+      "date": "2026-08-23",
+      "event_sequence": 7,
+      "event_time_utc": "2026-08-23T05:05:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-001"
+      ],
+      "job_id": "sample-long-context-review",
+      "job_locator": "memorive://job/sample-long-context-review",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-long-context-review/run-001",
+      "milestones": [
+        {
+          "time": "2026-08-23 09:10—09:28 +09:00 · INPUT_FIXED",
+          "title": "输入清单固定",
+          "fields": [
+            [
+              "完成内容",
+              "来源、负责人与范围已核对。"
+            ],
+            [
+              "当前状态",
+              "completed / PASS / NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "只读预览，不启动任务。"
+            ]
+          ],
+          "technical_public": "event_key=sample-long-context-review/input\ndedup_key=branch-ledger-001-01\nsource_sha256=8C2F…A190"
+        },
+        {
+          "time": "2026-08-23 11:40—12:06 +09:00 · CANDIDATE_READY",
+          "title": "候选形成",
+          "fields": [
+            [
+              "完成内容",
+              "摘要与退出条件已写入任务记录。"
+            ],
+            [
+              "保留失败",
+              "rehearsal-002：结构校验失败，原样保留。"
+            ],
+            [
+              "下一步",
+              "等待后续检查，不从日志页启动任务。"
+            ]
+          ],
+          "technical_public": "event_key=sample-long-context-review/candidate-003\ncommit_oid=ENCLOSING_COMMIT\nexact_set_count=12"
+        },
+        {
+          "time": "2026-08-23 14:05 +09:00 · CENTRAL_LOG_PENDING",
+          "title": "等待汇入每日摘要",
+          "fields": [
+            [
+              "当前状态",
+              "每日摘要待汇入"
+            ],
+            [
+              "完成内容",
+              "任务事件已有稳定去重键。"
+            ],
+            [
+              "边界",
+              "不能凭文件存在就认为两份记录已对齐。"
+            ]
+          ],
+          "technical_public": "event_key=sample-long-context-review/central-pending\ncentral_transaction_id=PENDING\ntokens=0\nestimated_cost=0"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "输入清单已固定，尚未开始整理",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/branch/sample-001",
+      "state_axis": "completed / PASS / NOT_ASSESSED",
+      "summary": "输入清单已固定，尚未开始整理",
+      "title": "长上下文评测文献整理",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "today",
+      "date": "2026-08-23",
+      "event_sequence": 6,
+      "event_time_utc": "2026-08-22T15:30:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-002"
+      ],
+      "job_id": "SHARED/CENTRAL",
+      "job_locator": "memorive://job/SHARED/CENTRAL",
+      "ledger_type": "central",
+      "log_entry_id": "SHARED/CENTRAL/2026-08-23",
+      "milestones": [
+        {
+          "time": "2026-08-23 00:30—00:42 +09:00",
+          "title": "预览范围复核",
+          "fields": [
+            [
+              "稳定结论",
+              "样例项目继续只读预览，execution=false。"
+            ],
+            [
+              "验证与正式化",
+              "只记录已确认的里程碑。"
+            ],
+            [
+              "边界",
+              "不把每日摘要扩写成任务记录。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-23/001\nsource_order=04\ncommit_oid=READ_ONLY_SAMPLE"
+        },
+        {
+          "time": "2026-08-23 10:18—10:24 +09:00",
+          "title": "两份记录的回执核对",
+          "fields": [
+            [
+              "稳定结论",
+              "任务事件、每日摘要、任务回执的顺序可以核对。"
+            ],
+            [
+              "远端回执",
+              "NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "未知字段保留在技术细节里。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-23/002\ntransaction_id=central-demo-018\nunknown_field=preserved"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "样例项目保持只读预览，execution=false",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/central/sample-002",
+      "state_axis": "只读摘要",
+      "summary": "样例项目保持只读预览，execution=false",
+      "title": "工作日志 · 2026-08-23",
+      "type_label": "每日摘要"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-21",
+      "event_sequence": 5,
+      "event_time_utc": "2026-08-20T15:08:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-003"
+      ],
+      "job_id": "sample-quarter-archive",
+      "job_locator": "memorive://job/sample-quarter-archive",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-quarter-archive/run-001",
+      "milestones": [
+        {
+          "time": "2026-08-23 09:10—09:28 +09:00 · INPUT_FIXED",
+          "title": "输入清单固定",
+          "fields": [
+            [
+              "完成内容",
+              "来源、负责人与范围已核对。"
+            ],
+            [
+              "当前状态",
+              "completed / PASS / NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "只读预览，不启动任务。"
+            ]
+          ],
+          "technical_public": "event_key=sample-quarter-archive/input\ndedup_key=branch-ledger-001-01\nsource_sha256=8C2F…A190"
+        },
+        {
+          "time": "2026-08-23 11:40—12:06 +09:00 · CANDIDATE_READY",
+          "title": "候选形成",
+          "fields": [
+            [
+              "完成内容",
+              "摘要与退出条件已写入任务记录。"
+            ],
+            [
+              "保留失败",
+              "rehearsal-002：结构校验失败，原样保留。"
+            ],
+            [
+              "下一步",
+              "等待后续检查，不从日志页启动任务。"
+            ]
+          ],
+          "technical_public": "event_key=sample-quarter-archive/candidate-003\ncommit_oid=ENCLOSING_COMMIT\nexact_set_count=12"
+        },
+        {
+          "time": "2026-08-23 14:05 +09:00 · CENTRAL_LOG_PENDING",
+          "title": "等待汇入每日摘要",
+          "fields": [
+            [
+              "当前状态",
+              "每日摘要待汇入"
+            ],
+            [
+              "完成内容",
+              "任务事件已有稳定去重键。"
+            ],
+            [
+              "边界",
+              "不能凭文件存在就认为两份记录已对齐。"
+            ]
+          ],
+          "technical_public": "event_key=sample-quarter-archive/central-pending\ncentral_transaction_id=PENDING\ntokens=0\nestimated_cost=0"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "归档清单已核对完成",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/branch/sample-003",
+      "state_axis": "completed / PASS / PASS",
+      "summary": "归档清单已核对完成",
+      "title": "季度资料归档与交接",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-21",
+      "event_sequence": 4,
+      "event_time_utc": "2026-08-20T15:17:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-004"
+      ],
+      "job_id": "SHARED/CENTRAL",
+      "job_locator": "memorive://job/SHARED/CENTRAL",
+      "ledger_type": "central",
+      "log_entry_id": "SHARED/CENTRAL/2026-08-21",
+      "milestones": [
+        {
+          "time": "2026-08-23 00:30—00:42 +09:00",
+          "title": "预览范围复核",
+          "fields": [
+            [
+              "稳定结论",
+              "样例项目继续只读预览，execution=false。"
+            ],
+            [
+              "验证与正式化",
+              "只记录已确认的里程碑。"
+            ],
+            [
+              "边界",
+              "不把每日摘要扩写成任务记录。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-21/001\nsource_order=04\ncommit_oid=READ_ONLY_SAMPLE"
+        },
+        {
+          "time": "2026-08-23 10:18—10:24 +09:00",
+          "title": "两份记录的回执核对",
+          "fields": [
+            [
+              "稳定结论",
+              "任务事件、每日摘要、任务回执的顺序可以核对。"
+            ],
+            [
+              "远端回执",
+              "NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "未知字段保留在技术细节里。"
+            ]
+          ],
+          "technical_public": "event_key=SHARED/CENTRAL/2026-08-21/002\ntransaction_id=central-demo-018\nunknown_field=preserved"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "样例项目完成同步回执",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/central/sample-004",
+      "state_axis": "两份记录已对齐 · 只读摘要",
+      "summary": "样例项目完成同步回执",
+      "title": "工作日志 · 2026-08-21",
+      "type_label": "每日摘要"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-20",
+      "event_sequence": 3,
+      "event_time_utc": "2026-08-20T13:42:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-005"
+      ],
+      "job_id": "sample-app-entry",
+      "job_locator": "memorive://job/sample-app-entry",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-app-entry/run-001",
+      "milestones": [
+        {
+          "time": "2026-08-23 09:10—09:28 +09:00 · INPUT_FIXED",
+          "title": "输入清单固定",
+          "fields": [
+            [
+              "完成内容",
+              "来源、负责人与范围已核对。"
+            ],
+            [
+              "当前状态",
+              "completed / PASS / NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "只读预览，不启动任务。"
+            ]
+          ],
+          "technical_public": "event_key=sample-app-entry/input\ndedup_key=branch-ledger-001-01\nsource_sha256=8C2F…A190"
+        },
+        {
+          "time": "2026-08-23 11:40—12:06 +09:00 · CANDIDATE_READY",
+          "title": "候选形成",
+          "fields": [
+            [
+              "完成内容",
+              "摘要与退出条件已写入任务记录。"
+            ],
+            [
+              "保留失败",
+              "rehearsal-002：结构校验失败，原样保留。"
+            ],
+            [
+              "下一步",
+              "等待后续检查，不从日志页启动任务。"
+            ]
+          ],
+          "technical_public": "event_key=sample-app-entry/candidate-003\ncommit_oid=ENCLOSING_COMMIT\nexact_set_count=12"
+        },
+        {
+          "time": "2026-08-23 14:05 +09:00 · CENTRAL_LOG_PENDING",
+          "title": "等待汇入每日摘要",
+          "fields": [
+            [
+              "当前状态",
+              "每日摘要待汇入"
+            ],
+            [
+              "完成内容",
+              "任务事件已有稳定去重键。"
+            ],
+            [
+              "边界",
+              "不能凭文件存在就认为两份记录已对齐。"
+            ]
+          ],
+          "technical_public": "event_key=sample-app-entry/central-pending\ncentral_transaction_id=PENDING\ntokens=0\nestimated_cost=0"
+        }
+      ],
+      "parse_status": "ready",
+      "public_payload": {
+        "impact": "任务记录 · 只读审查候选",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": false
+      },
+      "severity": "INFO",
+      "source_locator": "memorive://ledger/branch/sample-005",
+      "state_axis": "active / NOT_ASSESSED / NOT_ASSESSED",
+      "summary": "任务记录 · 只读审查候选",
+      "title": "统一应用入口准备",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-19",
+      "event_sequence": 2,
+      "event_time_utc": "2026-08-19T09:24:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-006"
+      ],
+      "job_id": "sample-session-import",
+      "job_locator": "memorive://job/sample-session-import",
+      "ledger_type": "branch",
+      "log_entry_id": "sample-session-import/run-004",
+      "milestones": [
+        {
+          "time": "2026-08-19 · 时间未记录",
+          "title": "已识别里程碑",
+          "fields": [
+            [
+              "完成内容",
+              "仅成功读取标题、日期和这一条里程碑。"
+            ],
+            [
+              "当前状态",
+              "NOT_ASSESSED"
+            ],
+            [
+              "边界",
+              "缺失字段不显示为 PASS、完成或无错误。"
+            ]
+          ],
+          "technical_public": "parser_status=PARTIAL\nunknown_fields=preserved\nsource_anchor=section-01"
+        }
+      ],
+      "parse_status": "partial",
+      "public_payload": {
+        "impact": "只识别到标题、日期和一个里程碑",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": true
+      },
+      "severity": "WARNING",
+      "source_locator": "memorive://ledger/branch/sample-006",
+      "state_axis": "部分解析 · 状态未确认",
+      "summary": "只识别到标题、日期和一个里程碑",
+      "title": "历史会话导入记录",
+      "type_label": "任务记录"
+    },
+    {
+      "age_bucket": "7",
+      "date": "2026-08-18",
+      "event_sequence": 1,
+      "event_time_utc": "2026-08-18T06:02:00Z",
+      "evidence_locators": [
+        "memorive://evidence/sample-007"
+      ],
+      "job_id": "SHARED/CENTRAL",
+      "job_locator": "memorive://job/SHARED/CENTRAL",
+      "ledger_type": "central",
+      "log_entry_id": "SHARED/CENTRAL/2026-08-18",
+      "milestones": [],
+      "parse_status": "failed",
+      "public_payload": {
+        "impact": "无法解析日志结构",
+        "next_step": "按当前任务说明继续",
+        "unknown_fields_preserved": true
+      },
+      "severity": "ERROR",
+      "source_locator": "memorive://ledger/central/sample-007",
+      "state_axis": "解析失败 · NOT_ASSESSED",
+      "summary": "无法解析日志结构",
+      "title": "工作日志 · 2026-08-18",
+      "type_label": "每日摘要"
+    }
+  ]
+}

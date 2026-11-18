@@ -106,6 +106,8 @@ class ProductApi(
         TASK_CATEGORIES.bind(self._state_dir / 'profile')
         self._source_root = source_root.resolve()
         self._method_binding_path = method_binding_path.resolve()
+        # Sample mode (test_fixture_mode) reads made-up data from fixtures/ and the fixtures_* folders beside source/;
+        # see fixtures/README.md.
         self._fixture_root = self._source_root.parent / "fixtures" / "source"
         self._window: Any | None = None
         self._notification_presenter: Any | None = None

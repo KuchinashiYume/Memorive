@@ -89,3 +89,26 @@ def test_inbox_projection_drives_durable_undo_redo_buttons(tmp_path: Path) -> No
     assert redone["history"] == {"undo_available": True, "redo_available": False}
 
 
+def test_files_just_imported_show_the_newest_first(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    paths = []
+    for name in ("first.md", "second.md", "third.md"):
+        paths.append(source_root / name)
+        paths[-1].write_text(name, encoding="utf-8")
+    inbox = InboxController(
+        source_roots=[source_root],
+        data_root=tmp_path / "inbox",
+        include_sample_projection=False,
+    )
+    items = {row["item"]["source_name"]: row["item"] for row in inbox.import_paths(paths, request_id="sample-order")["items"]}
+    # Later files have later times; read backwards, the last digits would put them oldest first.
+    for name, created_at in (("first.md", "2026-11-18T09:00:00.000001Z"),
+                             ("second.md", "2026-11-18T10:00:00.000002Z"),
+                             ("third.md", "2026-11-18T11:00:00.000003Z")):
+        inbox.store.update_item(items[name]["item_id"], "TEST_IMPORT_TIME", lambda row, at=created_at: row.update({"created_at": at}))
+
+    cards = inbox.projection()["cards"]
+    assert [card["name"] for card in cards] == ["third.md", "second.md", "first.md"]
+
+

@@ -1,0 +1,26 @@
+{
+  "schema_version": "WorkLogSyntheticCanaryCorpus-v1",
+  "synthetic_only": true,
+  "fields": [
+    "authorization",
+    "cookie",
+    "credential",
+    "password",
+    "private_payload",
+    "raw_prompt",
+    "restricted_path",
+    "secret",
+    "token"
+  ],
+  "values": [
+    "SAMPLE_CANARY_01_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_02_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_03_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_04_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_05_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_06_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_07_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_08_MUST_NOT_EXPORT",
+    "SAMPLE_CANARY_09_MUST_NOT_EXPORT"
+  ]
+}

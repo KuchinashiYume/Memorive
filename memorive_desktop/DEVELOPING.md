@@ -264,3 +264,26 @@ Data is checked where it enters the app: requests from the window, files read fr
 network replies, imported files, data written by older versions, and before anything is deleted.
 Code inside the app does not check the results of other code inside the app again. Readers for data
 written by older versions stay, even when no current code writes that form.
+
+## Inherited behaviour
+
+Much of the app came over from an earlier project. When inherited code plainly does not do what it is
+for (it crashes, shuffles, or reads files the repository does not have), the fix follows what the code
+was written to do:
+
+1. Read the purpose from the code itself: names, comments, callers, the page that shows the result, and
+   the earlier project's files.
+2. If the purpose is clear, make the code do it: change the one place that is wrong, or add what is
+   missing. Do not wrap it in a new check, a fallback or a "skip when missing" branch, and do not remove
+   the feature.
+3. Say next to the code, in a sentence, what it is for and what was wrong before.
+4. If the purpose is not clear, leave the behaviour as it is and ask.
+
+Two cases fixed this way in v2.00:
+
+- Inbox order. Files just imported were sorted by their import time read backwards, so every import came
+  out in a different order. They now show the newest first (`projection` in
+  `memorive/documents/inbox/controller.py`).
+- Sample mode (`app.py --desktop-test-mode`, `ProductApi(test_fixture_mode=True)`). It reads made-up files
+  that the public repository did not carry, so it stopped at start. The repository now has them; see
+  [fixtures/README.md](fixtures/README.md).

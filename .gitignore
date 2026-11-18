@@ -12,5 +12,7 @@ sandbox_profile/
 /build/
 /dist/
 *.exe
+# The inbox's sample of a type it rejects: a text file with an .exe name (memorive_desktop/fixtures/README.md).
+!memorive_desktop/fixtures/source/unsupported.exe
 *.pfx
 *.p12

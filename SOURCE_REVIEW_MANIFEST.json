@@ -11,8 +11,8 @@
     },
     {
       "path": ".gitignore",
-      "sha256": "5834239a613ffba84ba79f8513581715e5ed30b09194a797fd8051e7e228dd41",
-      "bytes": 151
+      "sha256": "34bee9520f49546f21cc5bb2168c1342af18dd725c9105b25e59349aab826884",
+      "bytes": 315
     },
     {
       "path": "docs/images/memorive-home-v1.02-en.png",
@@ -4076,7 +4076,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "51178135d24a360e386ec3f11a26a2e6346e7ec8db8fb52f7cce101cc09d8c5d",
+      "sha256": "05293c9087d14cd3b3b8f0d793f820d4a9556a3e7b32e532bbc66cc611f0156c",
       "bytes": 275229
     },
     {
@@ -5046,8 +5046,8 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "eee626d2a04609b806faff7d1688a206804770df302ee61729f3def3a4eb0876",
-      "bytes": 28392
+      "sha256": "99d59e4f752ac32638b972719a367ba92ba782dcd60082151645139ef2df502f",
+      "bytes": 29666
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
@@ -7046,8 +7046,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/inbox/controller.py",
-      "sha256": "d0324cfcc9a4666dbc57d6d622b4d651a7e919f509f6f1f2c00a17bc7ea884da",
-      "bytes": 65342
+      "sha256": "32dd634a56a6968e1d3f987341bcb9a96305bc7fc1946906a5034f5407c38c54",
+      "bytes": 66112
     },
     {
       "path": "memorive_desktop/source/memorive/documents/inbox/path_policy.py",
@@ -9236,8 +9236,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/service/service_main.py",
-      "sha256": "570b49a4b7da90d31eaedddb93eeb196e6d1c6aae6bb593cbd7f47e7c3bedf2f",
-      "bytes": 27457
+      "sha256": "4f1d4c4e6e7508c11f07ed2a4944389f152d5b9ee6f8c6235812e8952182da4b",
+      "bytes": 27581
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/service/single_instance.py",
@@ -9956,8 +9956,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/product_api.py",
-      "sha256": "68b9ccc4bf6c0a0ec7b4421d83f22f547542dd13a0a555f350e60cfdf2b2bee0",
-      "bytes": 40507
+      "sha256": "1622eb0f91d8b3a47c79cae5ae137294dbaaef94dc794ef4a8ea72d05c24bdd4",
+      "bytes": 40662
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/research_memo.py",
@@ -10058,6 +10058,116 @@
       "path": "memorive_desktop/tools/page_check/seed.py",
       "sha256": "c979ec5147c649aa65aad24a7f25f633abfd8b1c4132c7fa3d5b9fae1b5e55af",
       "bytes": 6246
+    },
+    {
+      "path": "memorive_desktop/fixtures/README.md",
+      "sha256": "961044ec3e438dc9087ee9cb7a62c2f2bf2e41372b2b47261847a5e3d58d66bd",
+      "bytes": 2067
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/basic.txt",
+      "sha256": "ff006190049ed562285c326d820d3ce95e4da8ba80cfdd5c0f8b7e95e68ef1bf",
+      "bytes": 36
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/sample.docx",
+      "sha256": "e4f6c2eec53c7a1695b425f57a4875c3332885b84c607fbd0197b243bee48c90",
+      "bytes": 291
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/sample.pdf",
+      "sha256": "ebf7758336db4f75faa1812420171892baa2ba6633ba196fd69f105069ac9148",
+      "bytes": 73
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/sample.png",
+      "sha256": "4b280ee386975bb60d09380237b2024e649ce104f755b1e415dba09fff2b4b5c",
+      "bytes": 33
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/sample.pptx",
+      "sha256": "640dc6328e8d2caa17cfd1f566135f6b4184429c6daeec98c8d35ac18c7bb99c",
+      "bytes": 274
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/sample.xlsx",
+      "sha256": "cdc275eca5613542623072e16382bc5b771234de949471f19db44b12dfa08b3a",
+      "bytes": 430
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/unicode/研究_合成样例.md",
+      "sha256": "883b0a7d34cbfe71c9b8a34e5168c9dc6292c66b731d14cbef2f6e1cea56b17c",
+      "bytes": 37
+    },
+    {
+      "path": "memorive_desktop/fixtures/source/unsupported.exe",
+      "sha256": "94778ac055bb35c225b77f75fef2e9f5ecb02ecaa7287aafac4c8fddd5361056",
+      "bytes": 18
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/literature/Long_Context_Evaluation.pdf",
+      "sha256": "f258f4a7e79ed416c2a8b4b132990794967e03a26a6552f760ea1386f93537cd",
+      "bytes": 80
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/literature/Multilingual_Reasoning.pdf",
+      "sha256": "3cf274bda3fc7aa1b25cb5492853fbeb45f1a3ddfb15ab23f9d70e62830b7560",
+      "bytes": 88
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/literature/视觉注意机制回顾.pdf",
+      "sha256": "d0df06b67e8cd0a776f1be4b8c499d6861eecd0676b61b27f6515b03f822678a",
+      "bytes": 82
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/memorive/2026-08-23_研究日报.md",
+      "sha256": "339b310345ebd27c7149f988253ad901f3cb35b55585fc5ad9c3c4624b69dac8",
+      "bytes": 76
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/memorive/2026-08_研究月报.docx",
+      "sha256": "cccd2768d99ab90a5f199a0bba8634c8c27f5ac7b2c7d0ccaefcbd47dc0a4bbc",
+      "bytes": 76
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/memorive/研究决策对话分析_21.md",
+      "sha256": "7f929c36e10c4380268edfe9016bd3af55f47ffb82681f32bb9d0fdf98b4a322",
+      "bytes": 81
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/memorive/第34周研究周报.md",
+      "sha256": "4efb46e90dbf7038099201c1f94d61852ab5494bcbc7cd14dd523de24caef40b",
+      "bytes": 75
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/files/unsupported/design_notes.command",
+      "sha256": "4366611f735257743d6342bf8a2274fe9da244354e2890aa3a0a5892098ec6b6",
+      "bytes": 78
+    },
+    {
+      "path": "memorive_desktop/fixtures_integration/synthetic_library_catalog.json",
+      "sha256": "6df51f799fd029f0fa152732e0a14d03efd29332007f37f16b811576fad58a88",
+      "bytes": 6732
+    },
+    {
+      "path": "memorive_desktop/fixtures_logging/source_authority_sentinels.json",
+      "sha256": "eeca41fa5b774bc93772b03d4c68f3d606ffb41115d2dacf2e5ac776fe0dfe39",
+      "bytes": 960
+    },
+    {
+      "path": "memorive_desktop/fixtures_logging/synthetic_canary_corpus.json",
+      "sha256": "8ebfd8ffed854693e48704ce31e07a653df32719e0b4db56ce9a32542be0b400",
+      "bytes": 640
+    },
+    {
+      "path": "memorive_desktop/fixtures_logging/synthetic_work_log_stream.json",
+      "sha256": "739d80e80d0e3d4cac7b3fa2001c708cc94f6e9a28377750440cc75b1d3f3607",
+      "bytes": 15522
+    },
+    {
+      "path": "memorive_desktop/fixtures_retrieval/locator_catalog.json",
+      "sha256": "3036d7a61541b27739a98f4736837c850272aee941d834c99a31e9b578e8ae7b",
+      "bytes": 765
     }
   ]
 }

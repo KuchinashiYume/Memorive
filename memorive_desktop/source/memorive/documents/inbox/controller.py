@@ -35,6 +35,12 @@ class SimulatedCrash(RuntimeError):
     pass
 
 
+def _newest_first(timestamp: str) -> tuple[int, ...]:
+    """Sort key that puts later timestamps first. The inbox writes every created_at with utc_now(), one fixed
+    format, so comparing the negated characters reverses the time order."""
+    return tuple(-ord(character) for character in timestamp)
+
+
 def _freeze_selection(method):
     @wraps(method)
     def locked(self,*args,**kwargs):
@@ -1273,7 +1279,12 @@ class InboxController:
                 4 if state == "QUEUED" else
                 5
             )
-            return (group, "".join(reversed(str(item["created_at"]))) if group == 3 else str(item["created_at"]), item["item_id"])
+            # Files just imported (group 3) show the newest first, so what the user added last is on top of the
+            # waiting files; the other groups keep the oldest first, the order the queue runs in. Up to v2.00
+            # group 3 was sorted by the time text read backwards, which ordered it by the last microsecond
+            # digits and shuffled every import (fixed by the rule in DEVELOPING.md, "Inherited behaviour").
+            created_at = str(item["created_at"])
+            return (group, _newest_first(created_at) if group == 3 else created_at, item["item_id"])
 
         cards = []
         for item in sorted(visible, key=key):

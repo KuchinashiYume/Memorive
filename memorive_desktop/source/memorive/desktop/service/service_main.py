@@ -332,6 +332,7 @@ def build_inbox_controller(
     profile_root: Path, *, include_sample_track: bool = False
 ) -> InboxController:
     folders = ProfileFolderManager(profile_root)
+    # The sample track (sample mode) imports the made-up files in memorive_desktop/fixtures/source; see fixtures/README.md.
     fixture_root = Path(__file__).resolve().parents[4] / "fixtures" / "source"
     user_source_root = folders.path_for("INBOX_SOURCE")
     user_source_root.mkdir(parents=True, exist_ok=True)

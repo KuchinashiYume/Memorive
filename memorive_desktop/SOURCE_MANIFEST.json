@@ -2232,8 +2232,8 @@
     },
     {
       "path": "source/memorive/desktop/api/product_api.py",
-      "sha256": "68b9ccc4bf6c0a0ec7b4421d83f22f547542dd13a0a555f350e60cfdf2b2bee0",
-      "bytes": 40507
+      "sha256": "1622eb0f91d8b3a47c79cae5ae137294dbaaef94dc794ef4a8ea72d05c24bdd4",
+      "bytes": 40662
     },
     {
       "path": "source/memorive/desktop/api/research_memo.py",
@@ -2532,8 +2532,8 @@
     },
     {
       "path": "source/memorive/desktop/service/service_main.py",
-      "sha256": "570b49a4b7da90d31eaedddb93eeb196e6d1c6aae6bb593cbd7f47e7c3bedf2f",
-      "bytes": 27457
+      "sha256": "4f1d4c4e6e7508c11f07ed2a4944389f152d5b9ee6f8c6235812e8952182da4b",
+      "bytes": 27581
     },
     {
       "path": "source/memorive/desktop/service/single_instance.py",
@@ -3227,8 +3227,8 @@
     },
     {
       "path": "source/memorive/documents/inbox/controller.py",
-      "sha256": "d0324cfcc9a4666dbc57d6d622b4d651a7e919f509f6f1f2c00a17bc7ea884da",
-      "bytes": 65342
+      "sha256": "32dd634a56a6968e1d3f987341bcb9a96305bc7fc1946906a5034f5407c38c54",
+      "bytes": 66112
     },
     {
       "path": "source/memorive/documents/inbox/import_binding.py",

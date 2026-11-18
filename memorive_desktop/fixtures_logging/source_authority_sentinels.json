@@ -1,0 +1,28 @@
+{
+  "schema_version": "WorkLogSourceAuthoritySentinels-v1",
+  "authority_mode": "HASH_METADATA_ONLY_NO_RAW_BYTES",
+  "sources": [
+    {
+      "raw_content_copied": false,
+      "raw_content_decoded_or_rendered": false,
+      "sha256": "8A99B931D2AC00BC4D64139979573C23ACD8F495820B6320343875FB869A5593",
+      "source_kind": "BRANCH_LOG",
+      "source_label": "BRANCH_LEDGER_HASH_SENTINEL"
+    },
+    {
+      "raw_content_copied": false,
+      "raw_content_decoded_or_rendered": false,
+      "sha256": "E27612A1A8CFBC79D398F5262B8F5A86480784E96242880C3C75720CB95B8A57",
+      "source_kind": "CENTRAL_LOG",
+      "source_label": "CENTRAL_DAILY_HASH_SENTINEL"
+    },
+    {
+      "raw_content_copied": false,
+      "raw_content_decoded_or_rendered": false,
+      "sha256": "23D51AEE61B9031978EF6C4A3BEAF82381FD04DC9FA022FC4CEB14AAD60A4E64",
+      "source_kind": "RUNTIME_LOG_LOG",
+      "source_label": "RUNTIME_LOG_HASH_SENTINEL"
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "MessagesSyntheticLocatorCatalog-v1",
+  "targets": [
+    {
+      "kind": "job",
+      "locator": "memorive://job/syn-job-001",
+      "route": "current-task"
+    },
+    {
+      "kind": "attempt",
+      "locator": "memorive://attempt/syn-attempt-001",
+      "route": "current-task"
+    },
+    {
+      "kind": "artifact",
+      "locator": "memorive://artifact/syn-job-001/syn-artifact-001",
+      "route": "library"
+    },
+    {
+      "kind": "action",
+      "locator": "memorive://action/syn-job-001/syn-action-001",
+      "route": "messages"
+    },
+    {
+      "kind": "event",
+      "locator": "memorive://event/syn-job-001/syn-event-001",
+      "route": "work-log"
+    }
+  ],
+  "fuzzy_match_allowed": false,
+  "production_locator_count": 0
+}
