@@ -482,6 +482,13 @@
         const projection = await nativeCall('sessions.refinement_get', {
           local_projection_id:localProjectionId
         });
+        if (projection?.status === 'NO_DRAFT') {
+          // The queued refinement left the inbox before it became a task (cancelled there): nothing is left to
+          // watch, and the session can be refined again. (Before NO_DRAFT existed this ended as a failed watch.)
+          const cancelled = { status:'TASK_CANCELLED', local_projection_id:localProjectionId, job_id:jobId };
+          page()?.renderRefinementTaskState(cancelled);
+          return cancelled;
+        }
         if (jobId !== 'inbox' && projection?.task?.job_id && projection.task.job_id !== jobId) {
           throw new Error('SESSION_REFINEMENT_TASK_ID_DRIFT');
         }

@@ -458,7 +458,9 @@ class SessionsProductController(
         if not path.is_file():
             if task is not None:
                 raise SessionProductError("SESSION_REFINEMENT_DRAFT_NOT_FOUND")
-            # A session that was never refined: an ordinary state, not an error.
+            # No task, nothing in the inbox and no draft: the session was never refined, or its queued refinement
+            # was cancelled in the inbox before it became a task. That is a state the page shows, not an error;
+            # this used to raise SESSION_REFINEMENT_DRAFT_NOT_FOUND, logged as a traceback on every detail open.
             return {
                 "schema_version": "DesktopSessionRefinementDraftProjection-v1",
                 "local_projection_id": projection_id,
