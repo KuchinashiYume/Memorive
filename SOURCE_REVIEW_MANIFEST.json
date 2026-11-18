@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "3d8b3309b1b70ad3c353d21e2a951d51a7b19e6456da1e284218d9fbf5f833d1",
+      "sha256": "00f6a6de463098c085a37a4ce26aea64b2c6db61f3918c5eb856441ae6e7e595",
       "bytes": 276007
     },
     {
@@ -8171,8 +8171,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/analysis/analysis.py",
-      "sha256": "a1770cf453fa2af7ca929d8cb615e22ea01b6eec231deef2ff4b5cea3b92150f",
-      "bytes": 34380
+      "sha256": "8994edf2a9dcebfbcf4e293a8caa2929d9dd31cb2a1d24ac59ff618bb62edce7",
+      "bytes": 37249
     },
     {
       "path": "memorive_desktop/source/memorive/research/analysis/cost_query.py",

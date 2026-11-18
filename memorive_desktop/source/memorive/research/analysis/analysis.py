@@ -470,6 +470,71 @@ def analyze(context_pack, question: str, *,
     if not isinstance(question, str) or not question.strip():
         raise ValueError("RESEARCH_ANALYSIS: 问题为空(fail-loud、不发空 prompt)")
 
+    ownership_envelope = _ownership_envelope(context_pack, data_ownership, legacy_data_ownership,
+                                             ownership_route_profile, model_call)
+    by_cid = _blocks_by_chunk(context_pack)
+    _check_region(region_check, model_call)
+    language, source_text = _question_language(context_pack, question, output_language)
+
+    payload = build_payload(context_pack, question, output_language=language)
+    resp = (model_call or _default_model_call)(payload)
+    text = (resp or {}).get("text") or ""
+    parsed = parse_analysis(text)          # broken or empty: AnalysisError
+
+    lit, flagged, possibly_irrelevant, suppressed_literature_chunk_ids = _sort_claims(parsed, by_cid)
+    analysis_model = (resp or {}).get("model") or (
+        {"zh":"(未知)","ja":"(不明)"}.get(language, "(unknown)")
+    )
+    mode = "manual" if model_call is not None else "auto"   # an injected model_call is manual (no gateway, no cost record); the "manual:" prefix only names analysis_model
+    analyzed_at = datetime.now().astimezone().isoformat(timespec="minutes")
+    coverage_status, missing_facets, study_limitations, retrieval_limitations, source_inconsistencies, ai_general = \
+        _limitations(context_pack, parsed)
+    quality_metrics = _analysis_quality_metrics(lit, by_cid, context_pack)
+    ownership_snapshot = OwnershipSnapshot.from_dict(ownership_envelope.ownership_snapshot)
+    from memorive.research.retrieval.review_qualifications import review_limitations
+    review_limits = review_limitations(getattr(context_pack, "card_review_qualifications", ()) or (), language)
+    result = AnalysisResult(
+        question=question.strip(),
+        review_limitations=review_limits,
+        literature_support=tuple(lit),
+        ai_general_knowledge=ai_general,
+        risks_and_uncertainties=tuple(study_limitations),
+        recheck_locations=tuple(parsed["recheck_locations"]),
+        flagged_unsourced=tuple(flagged),
+        disclaimer=(disclaimer_for(language) if language is not None else DISCLAIMER),
+        analysis_model=analysis_model,
+        analyzed_at=analyzed_at,
+        possibly_irrelevant=tuple(possibly_irrelevant),
+        coverage_status=coverage_status,
+        missing_facets=missing_facets,
+        answer_complete=(False if review_limits else (coverage_status == "complete"
+                         if coverage_status != "not_assessed" else None)),
+        study_limitations=tuple(study_limitations),
+        source_internal_inconsistencies=source_inconsistencies,
+        retrieval_limitations=tuple(dict.fromkeys(retrieval_limitations)),
+        quality_metrics=quality_metrics,
+        input_context_pack_ref=ownership_envelope.context_pack_ref,
+        input_context_pack_hash=ownership_envelope.context_pack_hash,
+        ownership_snapshot=ownership_snapshot.to_dict(),
+        ownership_binding_status="matched",
+        ownership_legacy_binding_status=ownership_envelope.ownership_binding_status,
+        ownership_request_envelope_ref=ownership_envelope.envelope_ref,
+        ownership_request_envelope_hash=ownership_envelope.envelope_hash,
+        ownership_required_route_class=ownership_envelope.required_route_class,
+        ownership_preflight_status=ownership_envelope.preflight_status,
+    )
+    _check_result_language(result, source_text, language)
+    result = _bound_result(result, ownership_snapshot, ownership_envelope)
+    _log_analysis(mode, analysis_model, lit, result, flagged, possibly_irrelevant, suppressed_literature_chunk_ids,
+                  ownership_snapshot, ownership_envelope, by_cid, question, coverage_status, missing_facets,
+                  quality_metrics)
+    return result
+
+
+def _ownership_envelope(context_pack, data_ownership, legacy_data_ownership, ownership_route_profile, model_call):
+    """The request envelope that binds the pack's ownership to the analysis, refused (OwnershipFailClosed)
+    when the old and new ownership arguments disagree, when the route preflight is blocked, or when a
+    local-only pack would go through the default model gateway."""
     if data_ownership is not None and legacy_data_ownership is not None:
         if data_ownership != legacy_data_ownership:
             _raise_ownership_fail_closed(
@@ -516,11 +581,13 @@ def analyze(context_pack, question: str, *,
             ),
             stage="model_seam",
         )
+    return ownership_envelope
 
-    # Index the blocks by chunk_id first: a repeated, missing or empty chunk_id raises before any
-    # model call. source_id is what the card review attaches to, so a repeated chunk_id is refused
-    # rather than silently overwritten (retrieval makes one query keyed by chunk_id, so a pack
-    # should not have one).
+
+def _blocks_by_chunk(context_pack):
+    """The pack's blocks by chunk_id; a repeated, missing or empty chunk_id raises before any model call.
+    source_id is what the card review attaches to, so a repeated chunk_id is refused rather than
+    silently overwritten (retrieval makes one query keyed by chunk_id, so a pack should not have one)."""
     by_cid = {}
     for b in getattr(context_pack, "blocks", ()) or ():
         cid = (getattr(b, "source", None) or {}).get("chunk_id")
@@ -529,15 +596,21 @@ def analyze(context_pack, question: str, *,
         if cid in by_cid:
             raise AnalysisError(f"Context Pack 出现重复 chunk_id={cid!r};source_id 挂载点会错配,拒绝分析(fail-loud、不发模型调用)")
         by_cid[cid] = b
+    return by_cid
 
-    # The region check runs only on the default gateway path (a real overseas call); tests inject
-    # region_check. The manual path and tests (model_call injected, region_check not) send no real
-    # call and skip it.
+
+def _check_region(region_check, model_call):
+    """The region check runs only on the default gateway path (a real overseas call); tests inject
+    region_check. The manual path and tests (model_call injected, region_check not) send no real call
+    and skip it."""
     if region_check is not None:
         region_check()
     elif model_call is None:
         _default_region_check()
 
+
+def _question_language(context_pack, question, output_language):
+    """The output language, and the pack's text the question (and later the analysis) must keep to."""
     language = (
         normalize_source_language(output_language)
         if output_language is not None
@@ -557,15 +630,14 @@ def analyze(context_pack, question: str, *,
             )
         except SourceLanguageDriftError as exc:
             raise AnalysisError(str(exc)) from exc
+    return language, source_text
 
-    payload = build_payload(context_pack, question, output_language=language)
-    resp = (model_call or _default_model_call)(payload)
-    text = (resp or {}).get("text") or ""
-    parsed = parse_analysis(text)          # broken or empty: AnalysisError
 
-    # possibly_irrelevant first, so its verdict on a source_chunk_id wins over literature_support:
-    # otherwise a block the model cited both ways would show as support and as off topic. Every
-    # possibly_irrelevant item resolves; one with an unknown chunk id goes to flagged.
+def _sort_claims(parsed, by_cid):
+    """The model's claims by the chunks they cite. possibly_irrelevant first, so its verdict on a
+    source_chunk_id wins over literature_support: otherwise a block the model cited both ways would show
+    as support and as off topic. Every possibly_irrelevant item resolves; one with an unknown chunk id
+    goes to flagged."""
     lit, flagged, possibly_irrelevant = [], [], []
     irrelevant_chunk_ids, suppressed_literature_chunk_ids = set(), []
     for item in parsed["possibly_irrelevant"]:
@@ -592,12 +664,12 @@ def analyze(context_pack, question: str, *,
                 origin=_block_origin(block),
                 facet_ids=_block_facets(block),
             ))
+    return lit, flagged, possibly_irrelevant, suppressed_literature_chunk_ids
 
-    analysis_model = (resp or {}).get("model") or (
-        {"zh":"(未知)","ja":"(不明)"}.get(language, "(unknown)")
-    )
-    mode = "manual" if model_call is not None else "auto"   # an injected model_call is manual (no gateway, no cost record); the "manual:" prefix only names analysis_model
-    analyzed_at = datetime.now().astimezone().isoformat(timespec="minutes")
+
+def _limitations(context_pack, parsed):
+    """Coverage and limits: risks that are really retrieval gaps move to the retrieval limitations, and
+    general knowledge is left out when the coverage is partial or insufficient."""
     coverage_status = str(getattr(context_pack, "coverage_status", "not_assessed"))
     missing_facets = tuple(getattr(context_pack, "missing_facets", ()) or ())
     study_limitations, moved_retrieval_gaps = [], []
@@ -619,40 +691,11 @@ def analyze(context_pack, question: str, *,
         if coverage_status in {"partial", "insufficient"}
         else tuple(parsed["ai_general_knowledge"])
     )
-    quality_metrics = _analysis_quality_metrics(lit, by_cid, context_pack)
-    ownership_snapshot = OwnershipSnapshot.from_dict(ownership_envelope.ownership_snapshot)
-    from memorive.research.retrieval.review_qualifications import review_limitations
-    review_limits = review_limitations(getattr(context_pack, "card_review_qualifications", ()) or (), language)
-    result = AnalysisResult(
-        question=question.strip(),
-        review_limitations=review_limits,
-        literature_support=tuple(lit),
-        ai_general_knowledge=ai_general,
-        risks_and_uncertainties=tuple(study_limitations),
-        recheck_locations=tuple(parsed["recheck_locations"]),
-        flagged_unsourced=tuple(flagged),
-        disclaimer=(disclaimer_for(language) if language is not None else DISCLAIMER),
-        analysis_model=analysis_model,
-        analyzed_at=analyzed_at,
-        possibly_irrelevant=tuple(possibly_irrelevant),
-        coverage_status=coverage_status,
-        missing_facets=missing_facets,
-        answer_complete=(False if review_limits else (coverage_status == "complete"
-                         if coverage_status != "not_assessed" else None)),
-        study_limitations=tuple(study_limitations),
-        source_internal_inconsistencies=source_inconsistencies,
-        retrieval_limitations=tuple(dict.fromkeys(retrieval_limitations)),
-        quality_metrics=quality_metrics,
-        input_context_pack_ref=ownership_envelope.context_pack_ref,
-        input_context_pack_hash=ownership_envelope.context_pack_hash,
-        ownership_snapshot=ownership_snapshot.to_dict(),
-        ownership_binding_status="matched",
-        ownership_legacy_binding_status=ownership_envelope.ownership_binding_status,
-        ownership_request_envelope_ref=ownership_envelope.envelope_ref,
-        ownership_request_envelope_hash=ownership_envelope.envelope_hash,
-        ownership_required_route_class=ownership_envelope.required_route_class,
-        ownership_preflight_status=ownership_envelope.preflight_status,
-    )
+    return coverage_status, missing_facets, study_limitations, retrieval_limitations, source_inconsistencies, ai_general
+
+
+def _check_result_language(result, source_text, language):
+    """The analysis is written in the output language."""
     if language is not None:
         try:
             validate_generated_language(
@@ -663,6 +706,10 @@ def analyze(context_pack, question: str, *,
             )
         except SourceLanguageDriftError as exc:
             raise AnalysisError(str(exc)) from exc
+
+
+def _bound_result(result, ownership_snapshot, ownership_envelope):
+    """The analysis with its identity and the receipt binding it to the pack and the request envelope."""
     analysis_hash = stable_sha256(analysis_binding_payload(result, snapshot=ownership_snapshot))
     analysis_ref = f"A-{analysis_hash.removeprefix('sha256:')[:24]}"
     receipt = propagation_receipt(
@@ -691,8 +738,13 @@ def analyze(context_pack, question: str, *,
         analysis_hash=analysis_hash,
         ownership_propagation_receipt=receipt.to_dict(),
     )
+    return result
 
-    # The reason record, with the count of sentences without a valid source.
+
+def _log_analysis(mode, analysis_model, lit, result, flagged, possibly_irrelevant, suppressed_literature_chunk_ids,
+                  ownership_snapshot, ownership_envelope, by_cid, question, coverage_status, missing_facets,
+                  quality_metrics):
+    """The reason record, with the count of sentences without a valid source."""
     log_reason("RESEARCH_ANALYSIS", "RESEARCH_ANALYSIS 分析",
                f"mode={mode} model={analysis_model} lit={len(lit)} ai={len(result.ai_general_knowledge)} "
                f"risk={len(result.risks_and_uncertainties)} recheck={len(result.recheck_locations)} "
@@ -726,4 +778,4 @@ def analyze(context_pack, question: str, *,
                    "retrieval_limitations_count": len(result.retrieval_limitations),
                    "quality_metrics": quality_metrics,
                })
-    return result
+
