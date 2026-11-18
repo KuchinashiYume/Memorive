@@ -49,8 +49,8 @@
   "events": {
     "duplicate_identical": "DEDUPE",
     "same_sequence_conflict": "FAIL_CLOSED",
-    "out_of_order": "BUFFER_AND_ORDER",
-    "gap": "RECONNECT_REQUIRED",
+    "out_of_order": "ORDER_BY_SEQUENCE_WITHIN_THE_PAGE",
+    "gap": "NORMAL: all jobs share one event counter, so a job's numbers increase without being consecutive",
     "stale": "IGNORE_WITH_RECEIPT",
     "cross_job_or_attempt": "FAIL_CLOSED",
     "terminal_rollback": "FAIL_CLOSED"

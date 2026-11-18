@@ -1120,7 +1120,7 @@
     {
       "source": "memorive_desktop/contracts/verification/CurrentTaskStateContract.json",
       "destination": "contracts/verification/CurrentTaskStateContract.json",
-      "sha256": "49152b87a0217b29edb8231e3728d1dcfd12aa31041e9330c91b50f8cf23b522"
+      "sha256": "9bd37fa72fef1bcc36c225304f5b8dcb6acfe6dab7ccb7896ff3cdeb22c50805"
     },
     {
       "source": "memorive_desktop/contracts/verification/RouteContract.json",
