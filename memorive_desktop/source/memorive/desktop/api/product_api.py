@@ -449,6 +449,9 @@ class ProductApi(
             return home_call(self._research.host,method,dict(params or {}))
         if method in AI_METHODS:
             return self._research.ai.call(method,dict(params or {}))
+        from memorive.research.opportunities.runs import METHODS as OPPORTUNITY_METHODS
+        if method in OPPORTUNITY_METHODS:
+            return self._research.opportunities.call(method,dict(params or {}))
         from memorive.research.workspace.service import DESKTOP_METHODS
         if method in DESKTOP_METHODS:
             with self._lock:

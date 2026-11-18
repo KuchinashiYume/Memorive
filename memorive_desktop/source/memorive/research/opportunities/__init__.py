@@ -1,5 +1,11 @@
-"""Research opportunities: questions and hypotheses an answer proposes from cited evidence, and the
-concepts two studies are compared on.
+"""Research opportunities: divergences, differences in conditions and gaps across the processed papers,
+and the questions an answer proposes from cited evidence.
+
+Finding opportunities across papers (the opportunities page, opportunities.* methods):
+  facts.py     a fact sheet per processed paper, from its card and chunks in the library
+  finder.py    papers grouped, one model request per group, each opportunity checked against the facts
+  runs.py      the run (research runtime), the ledger of opportunities found and what the user did
+               with them, and the tensions the weekly report lists
 
 Research Q&A uses research_opportunities.py and imports core.py for CONCEPT_ORDER, which lives in
 canonical.py together with the hashing shared with the verifier

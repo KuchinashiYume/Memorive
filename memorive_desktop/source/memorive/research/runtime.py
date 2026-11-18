@@ -33,6 +33,8 @@ class ResearchRuntime:
         self.root.mkdir(parents=True,exist_ok=True)
         from memorive.research.briefing.jobs import AIBriefing
         self.ai=AIBriefing(self)
+        from memorive.research.opportunities.runs import Opportunities
+        self.opportunities=Opportunities(self)
         from memorive.research.recommendations.feedback_store import FeedbackStore
         self.feedback=FeedbackStore(self.root)
         self.lock=threading.RLock()
@@ -531,7 +533,7 @@ class ResearchRuntime:
         for row in self.state()['runs']:
             end=row.get('finished_at')
             history=bool(end and (clock-datetime.fromisoformat(end.replace('Z','+00:00'))).total_seconds()>=900)
-            rows.append(dict(row,history=history,node_progress_live=dict(self._node_progress_live.get(row['run_id'],{})),progress_cancelled=self.stop.is_set() and self.current==row['run_id'],workflow_kind={'discovery':'RESEARCH_DISCOVERY','report':'RESEARCH_REPORT','ai_briefing':'RESEARCH_AI_BRIEFING'}[row['kind']]))
+            rows.append(dict(row,history=history,node_progress_live=dict(self._node_progress_live.get(row['run_id'],{})),progress_cancelled=self.stop.is_set() and self.current==row['run_id'],workflow_kind={'discovery':'RESEARCH_DISCOVERY','report':'RESEARCH_REPORT','ai_briefing':'RESEARCH_AI_BRIEFING','opportunities':'RESEARCH_OPPORTUNITIES'}[row['kind']]))
         return {'rows':rows,'archive_after_seconds':900,'automatic_history_is_not_deletion':True}
 
     def repair_delivery(self,run_id):
@@ -631,7 +633,7 @@ class ResearchRuntime:
         self.update_state(run_id,stage='COMPOSING')
         digest=build_digest(snapshot,digest_kind=period,window_start=start.isoformat(),window_end=end.isoformat(),cutoff_at=current.isoformat())
         markdown=render_markdown(digest,language=language_context)
-        return {'schema_version':'DesktopPeriodicReport-v1','language_context':language_context,'period':period,'window_start':start.isoformat(),'window_end':end.isoformat(),'source_event_count':len(events),'digest':digest,'markdown':markdown,'source_scope':['CURRENT_DESKTOP_APPLICATION_EVENTS','CURRENT_DESKTOP_WORK_LOG'],'status':'SUCCEEDED','engine':'Desktop RESEARCH_REPORTS runtime successor + unchanged RESEARCH_REPORTS templates','paid_model_calls':0}
+        return {'schema_version':'DesktopPeriodicReport-v1','language_context':language_context,'period':period,'window_start':start.isoformat(),'window_end':end.isoformat(),'source_event_count':len(events),'digest':digest,'markdown':markdown,'source_scope':['CURRENT_DESKTOP_APPLICATION_EVENTS','CURRENT_DESKTOP_WORK_LOG'],'status':'SUCCEEDED','engine':'Desktop RESEARCH_REPORTS runtime successor + RESEARCH_REPORTS renderer','paid_model_calls':0}
 
     def post_result_message(self,run_id,kind,result,period):
         summary = (f"{'部分来源未完成；已' if result.get('status')=='PARTIAL' else '检索完成，'}保存 {result.get('new_work_count',len(result.get('recommendations',[])))} 篇新增题录、{result.get('new_version_count',0)} 个新版本。"
@@ -648,9 +650,12 @@ class ResearchRuntime:
         elif kind=='report':
             state=read(self.run_path(run_id)/'state.json')
             event['message_content']=content('report.ready',period=period,start=result.get('window_start',''),end=result.get('window_end',''),revision=state.get('report_revision',1))
-        elif kind=='ai_briefing':
+        elif kind in {'ai_briefing','opportunities'}:
             from memorive.platform.language.messages import render
-            event['message_content']=content('ai.ready',start=result['window']['start'],end=result['window']['end'],partial=result.get('status')=='PARTIAL')
+            if kind=='ai_briefing':
+                event['message_content']=content('ai.ready',start=result['window']['start'],end=result['window']['end'],partial=result.get('status')=='PARTIAL')
+            else:
+                event['message_content']=content('opportunities.ready',found=len(result['opportunities']),papers=result['paper_count'],partial=result.get('status')=='PARTIAL')
             copy=render(event['message_content'],result.get('language_context'))
             event.update(safe_title=copy['title'],safe_summary=copy['summary'],safe_body=copy['body'])
         return self.host.messages.post_event(event)[0]

@@ -10,9 +10,12 @@ def material_progress(host):
     completed = {r['job_id'] for r in host.library_job_rows() if r.get('control_state') == 'SUCCEEDED'}
     papers = [dict(r,material_kind='PAPER') for r in host.library.core_activity_rows() if r['task_id'] in completed]
     conversations = [dict(r,material_kind='REFINEMENT') for r in host.library.refinement_activity_rows()]
+    # Divergences and condition differences found between papers (research/opportunities/runs.py).
+    from memorive.research.opportunities.runs import report_rows
+    tensions = report_rows(host.profile_path('WORKSPACE')/'research')
     # Review clicks, reading, reports and discovery metadata do not count as a new
     # processed paper or newly refined conversation.
-    return papers + conversations
+    return papers + conversations + tensions
 
 
 def windows(progress, current):
@@ -97,9 +100,9 @@ def render(runtime, run_id, params):
     from memorive.platform.progress import scope
     from memorive.platform.language.text import choose
     language=params.get('language_context')
-    # One record per processed paper or refined conversation: the library lists each output file of
-    # a paper (card, analysis, review notes ...) on its own, and a report listing those files read as
-    # a dozen records per paper. The files stay attached to their paper's record.
+    # One record per processed paper, refined conversation or found tension: the library lists each
+    # output file of a paper (card, analysis, review notes ...) on its own, and a report listing those
+    # files read as a dozen records per paper. The files stay attached to their paper's record.
     groups={}
     for item in progress:
         groups.setdefault((item['material_kind'],item.get('task_id') or item['stable_locator']),[]).append(item)
@@ -109,9 +112,18 @@ def render(runtime, run_id, params):
             key=sha(items)
             stamp=max(item['updated_at'] for item in items)
             name=items[0].get('document_name') or items[0]['display_name']
+            tension={}
             if kind=='PAPER':
                 text=choose(language,'《{0}》文献处理完成，{1} 个成果待人工复核','“{0}”: paper processed, {1} outputs await human review',
                             '「{0}」の文献処理が完了し、{1} 件の成果が確認待ちです').format(name,len(items))
+            elif kind=='OPPORTUNITY':
+                found=items[0]
+                label=(choose(language,'分歧','Divergence','相違') if found['opportunity_kind']=='divergence'
+                       else choose(language,'条件差异','Different conditions','条件の違い'))
+                papers=choose(language,'、','; ','、').join(choose(language,'《{0}》','“{0}”','「{0}」').format(t) for t in found['paper_titles'])
+                text=label+choose(language,'：',': ','：')+name+choose(language,'（{0}）',' ({0})','（{0}）').format(papers)
+                # The weekly report lists these under tensions between sources (digest.py).
+                tension={'semantic_authority':'RESEARCH_OPPORTUNITIES_TENSION_AUTHORITY'}
             else:
                 text=choose(language,'《{0}》对话精炼完成，待人工复核','“{0}”: conversation refined, awaits human review',
                             '「{0}」の会話の精錬が完了し、確認待ちです').format(name)
@@ -121,8 +133,8 @@ def render(runtime, run_id, params):
                 'source_record_ref':refs[0],'source_content_hash':key.upper(),
                 'subject_refs':refs,'evidence_refs':sorted(sha(item).upper() for item in items),
                 'status_axis':'artifact_registry','to_state':'RESULT_AVAILABLE','verification_status':'not_applicable',
-                'display_text':text,'daily_category':'新增','weekly_categories':['研究进展'],
-                'monthly_categories':['知识库结构变化'],'explicit_tags':[]})
+                'display_text':text,'daily_category':'新增','weekly_categories':[] if tension else ['研究进展'],
+                'monthly_categories':['知识库结构变化'],'explicit_tags':[],**tension})
             item_units.complete(key)
     members=[{'source_system':'Desktop_MATERIAL_OUTPUT','source_ref':r['stable_locator'],'sha256':sha(r).upper()} for r in progress]
     snapshot={'events':events,'members':members,'manifest_sha256':sha({'members':members,'events':events}).upper(),'issues':[],'conflicts':[]}
@@ -131,5 +143,5 @@ def render(runtime, run_id, params):
     digest=build_digest(snapshot,digest_kind=period,window_start=window['start'],window_end=window['end'],cutoff_at=params['report_cutoff'])
     return {'schema_version':'DesktopPeriodicReport-v1','period':period,'window_start':window['start'],
         'window_end':window['end'],'source_event_count':len(events),'material_progress_count':len(progress),
-        'digest':digest,'language_context':params.get('language_context'),'markdown':render_markdown(digest,language=params.get('language_context')),'source_scope':['COMPLETED_PAPERS','REFINED_CONVERSATIONS'],
+        'digest':digest,'language_context':params.get('language_context'),'markdown':render_markdown(digest,language=params.get('language_context')),'source_scope':['COMPLETED_PAPERS','REFINED_CONVERSATIONS','RESEARCH_OPPORTUNITIES'],
         'status':'SUCCEEDED','engine':'Desktop RESEARCH_REPORTS material-progress successor','paid_model_calls':0}

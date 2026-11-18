@@ -7,10 +7,13 @@ REPORT_STEPS=(('WAITING','确认报告周期'),('COLLECTING','汇总已完成成
               ('PUBLISHING','保存至资料库'),('NOTIFYING','发送报告提醒'),('COMPLETE','结果可用'))
 
 AI_STEPS=(('WAITING','确认日期与模型'),('COLLECTING','读取公开来源'),('COMPOSING','整理 AI 近况'),('VALIDATING','核对引用来源'),('PUBLISHING','保存至资料库'),('NOTIFYING','发送提醒'),('COMPLETE','结果可用'))
+OPPORTUNITY_STEPS=(('WAITING','确认模型'),('COLLECTING','整理论文事实表'),('COMPOSING','寻找并核对研究机会'),('PUBLISHING','保存至资料库'),('NOTIFYING','发送提醒'),('COMPLETE','结果可用'))
 
 def steps_for(item):
     if item.get('kind')=='ai_briefing':
         return AI_STEPS
+    if item.get('kind')=='opportunities':
+        return OPPORTUNITY_STEPS
     return REPORT_STEPS if item.get('kind')=='report' else STEPS
 
 def bindings(runtime):
@@ -28,7 +31,7 @@ def bindings(runtime):
             if key=='NOTIFYING' and item.get('notification_error'):
                 state='FAILED'
             model='本地生成 · 不调用模型' if item['kind']=='report' else '元数据与本地规则 · 不调用模型'
-            if item['kind'] in {'report','ai_briefing'} and key=='COMPOSING' and item.get('report_model'):
+            if item['kind'] in {'report','ai_briefing','opportunities'} and key=='COMPOSING' and item.get('report_model'):
                 frozen=item['report_model']
                 model=frozen.get('display_name') or frozen['model_name']
             nodes.append({'node_id':key,'number':str(i+1).zfill(2),'name':name,'purpose':name,'model':model,

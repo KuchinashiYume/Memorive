@@ -16,6 +16,7 @@ PARAMS = {
     'discovery.ready': {'topic': str, 'works': int, 'versions': int, 'relations': int},
     'report.ready': {'period': str, 'start': str, 'end': str, 'revision': int},
     'ai.ready': {'start': str, 'end': str, 'partial': bool},
+    'opportunities.ready': {'found': int, 'papers': int, 'partial': bool},
     'research.failed': {'kind': str, 'title': str, 'stage': str},
 }
 
@@ -82,6 +83,13 @@ def render(value, language):
         body=t('AI 近况已生成并保存。请前往资料库查看正文。','AI updates are saved. Read the report in the library.','AI の近況を生成して保存しました。本文はライブラリで確認できます。')
         if p['partial']:
             body+=' '+t('部分来源未能读取。','Some sources could not be read.','一部のソースを読み取れませんでした。')
+    elif key=='opportunities.ready':
+        title=t('研究机会','Research opportunities','研究の機会')
+        body=t('从 {papers} 篇论文中找到 {found} 条新的研究机会。请前往资料库或研究机会页查看。',
+               'Found {found} new research opportunities in {papers} papers. Read them in the library or on the opportunities page.',
+               '{papers} 本の論文から新しい研究の機会を {found} 件見つけました。ライブラリまたは研究の機会のページで確認できます。').format(**p)
+        if p['partial']:
+            body+=' '+t('部分论文组的请求没有完成。','Some groups of papers could not be examined.','一部の論文グループは処理できませんでした。')
     elif key=='research.failed':
         title=t('任务需要注意','Task needs attention','タスクの確認が必要です')+' · '+p['title']
         body=t('结果已生成，但投递未完成。请修复投递，无需重新生成。','The result is ready, but delivery is incomplete. Repair delivery without regenerating.','結果は生成済みですが、配信が完了していません。再生成せずに配信を修復してください。') if p['stage']=='PUBLISHING' else t('未生成有效结果。请查看任务及来源配置后重试。','No valid result was produced. Check the task and source configuration before retrying.','有効な結果を生成できませんでした。タスクとソース設定を確認してから再実行してください。')

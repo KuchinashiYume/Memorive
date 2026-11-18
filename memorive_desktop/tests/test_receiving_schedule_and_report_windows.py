@@ -33,14 +33,14 @@ def test_disabling_receiving_does_not_rewrite_schedule(tmp_path,monkeypatch):
     assert runtime.passive_tick(1000000)['status']=='DISABLED'
     assert (tmp_path/'passive_schedule.json').read_bytes()==snapshot
 
-def test_report_windows_only_come_from_material_progress():
+def test_report_windows_only_come_from_material_progress(tmp_path):
     from memorive.research.reports.periodic import windows,material_progress
     current=datetime(2026,9,8,tzinfo=timezone.utc)
     assert windows([],current)==[]
     library=SimpleNamespace(core_activity_rows=lambda:[{'task_id':'ok','updated_at':'2026-09-01T10:00:00Z'},
         {'task_id':'failed','updated_at':'2026-09-01T10:00:00Z'}],refinement_activity_rows=lambda:[])
     host=SimpleNamespace(library=library,library_job_rows=lambda:[{'job_id':'ok','control_state':'SUCCEEDED'},
-        {'job_id':'failed','control_state':'FAILED'}])
+        {'job_id':'failed','control_state':'FAILED'}],profile_path=lambda area:tmp_path)
     progress=material_progress(host)
     assert len(progress)==1 and progress[0]['task_id']=='ok'
     assert {r['window']['period'] for r in windows(progress,current)}=={'daily','weekly'}
