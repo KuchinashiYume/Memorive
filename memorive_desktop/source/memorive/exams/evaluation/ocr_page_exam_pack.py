@@ -321,6 +321,7 @@ def verify_reference_pack(pack: Path) -> dict[str, Any]:
     if manifest.get("member_set_sha256") != sha256_json(members):
         raise ExamMethodError("MANIFEST_MEMBER_SET_HASH_MISMATCH")
     member_map: dict[str, dict[str, Any]] = {}
+    root = pack.resolve()
     for member in members:
         if not isinstance(member, dict):
             raise ExamMethodError("MANIFEST_MEMBER_NOT_OBJECT")
@@ -331,6 +332,8 @@ def verify_reference_pack(pack: Path) -> dict[str, Any]:
             raise ExamMethodError(f"MANIFEST_MEMBER_DUPLICATE:{relative}")
         member_map[relative] = member
         path = pack / relative
+        if not path.resolve().is_relative_to(root):
+            raise ExamMethodError(f"MANIFEST_MEMBER_ESCAPES_PACK:{relative}")
         if not path.is_file():
             raise ExamMethodError(f"MANIFEST_MEMBER_MISSING:{relative}")
         if path.stat().st_size != member.get("bytes"):

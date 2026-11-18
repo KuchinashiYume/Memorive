@@ -268,9 +268,12 @@ def verify_candidate_pack(pack: Path) -> dict[str, Any]:
         "REPAIR_CONTRACT": (False, False),
     }
     member_paths: dict[str, Path] = {}
+    root = pack.resolve()
     for row in members:
         relative = row["path"]
         path = pack / relative
+        if not path.resolve().is_relative_to(root):
+            raise ValueError(f"MEMBER_ESCAPES_PACK:{relative}")
         if not path.is_file():
             raise ValueError(f"MEMBER_MISSING:{relative}")
         if path.stat().st_size != row["bytes"] or sha256_file(path) != row["sha256"]:
