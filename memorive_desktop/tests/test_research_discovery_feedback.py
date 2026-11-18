@@ -260,3 +260,79 @@ def test_a_version_counts_as_new_only_when_it_was_not_known_before(tmp_path):
     # journal record that follows is the first sight of that version.
     assert index.commit_batch('run-5',[row('e',arxiv_id='2609.20000v1',doi='10.9999/sample.2')])['recommendations']==[]
     assert index.commit_batch('run-6',[row('f',doi='10.9999/sample.2')])['new_version_count']==1
+
+
+# Starting a run: what is refused, and what a repeated request gets
+
+@pytest.mark.parametrize('params,code',[
+    (dict(kind='other',request_id='r1'),'RESEARCH_START_INVALID'),
+    (dict(kind='discovery',request_id=''),'RESEARCH_START_INVALID'),
+    (dict(kind='discovery',request_id='r1',topic='  '),'RESEARCH_TOPIC_REQUIRED'),
+    (dict(kind='discovery',request_id='r1',topic='Synthetic workflow',source_filter='wos'),'RESEARCH_SOURCE_NOT_ENABLED'),
+    (dict(kind='discovery',request_id='r1',topic='Synthetic workflow',direction_id='direction-missing'),'RESEARCH_DIRECTION_NOT_FOUND'),
+    (dict(kind='discovery',request_id='r1',topic='Synthetic workflow',regenerate_from='research-'+'0'*24),'REPORT_REGENERATION_INVALID'),
+    (dict(kind='discovery',request_id='r1',topic='Synthetic workflow',trigger='PASSIVE_OPT_IN'),'RESEARCH_PASSIVE_AUTHORIZATION_INVALID'),
+    (dict(kind='discovery',request_id='r1',topic='Synthetic workflow',trigger='PASSIVE_MATERIAL_PROGRESS'),'REPORT_MATERIAL_PROGRESS_REQUIRED'),
+    (dict(kind='report',request_id='r1',period='yearly'),'RESEARCH_PERIOD_INVALID'),
+    (dict(kind='report',request_id='r1',period='daily'),'REPORT_NO_LIBRARY_CHANGE'),
+])
+def test_a_request_that_cannot_run_is_refused_before_anything_is_written(discovery,params,code):
+    api,fixture=discovery
+    with pytest.raises(ValueError,match=code):
+        api._research.start(**params)
+    assert not list((api._research.root/'runs').glob('*/request.json')) and not fixture.calls
+
+
+def test_a_discovery_without_a_selected_source_is_refused(discovery):
+    api,_=discovery
+    for source in ('arxiv','crossref'):
+        s=api.call('settings.external_sources_get',{})['literature']
+        api.call('settings.external_sources_save',{'source':{'source_id':source,'selected':False},'expected_revision':s['revision']})
+    with pytest.raises(ValueError,match='RESEARCH_SOURCE_REQUIRED'):
+        api._research.start(kind='discovery',request_id='no-source',topic='Synthetic workflow')
+
+
+def test_a_report_regenerates_only_an_earlier_report_of_its_period(discovery):
+    api,_=discovery
+    run=api._research.run_sync('discovery','not-a-report',topic='Synthetic workflow',count=2)
+    with pytest.raises(ValueError,match='REPORT_REGENERATION_INVALID'):
+        api._research.start(kind='report',request_id='regenerate',period='daily',regenerate_from=run['run_id'])
+
+
+def test_a_repeated_request_gets_its_first_run_and_a_changed_one_is_a_conflict(discovery):
+    api,_=discovery
+    first=api._research.run_sync('discovery','same-request',topic='Synthetic workflow',count=2)
+    assert api._research.start(kind='discovery',request_id='same-request',topic='Synthetic workflow',count=2)['run_id']==first['run_id']
+    with pytest.raises(ValueError,match='RESEARCH_IDEMPOTENCY_CONFLICT'):
+        api._research.start(kind='discovery',request_id='same-request',topic='Another topic',count=2)
+
+
+def test_while_a_run_is_active_only_the_same_discovery_joins_it(discovery,monkeypatch):
+    api,_=discovery
+    running=api._research.run_sync('discovery','active-run',topic='Synthetic workflow',count=2)
+    monkeypatch.setattr(api._research,'has_active_run',lambda:True)
+    api._research.current=running['run_id']
+    with pytest.raises(ValueError,match='RESEARCH_ALREADY_RUNNING'):
+        api._research.start(kind='discovery',request_id='another-run',topic='Another topic',count=2)
+    assert api._research.start(kind='discovery',request_id='joining-run',topic='Synthetic workflow',count=2)['run_id']==running['run_id']
+
+
+def test_a_closed_runtime_starts_nothing(discovery,monkeypatch):
+    api,_=discovery
+    monkeypatch.setattr(api._research,'closed',True)
+    with pytest.raises(ValueError,match='RESEARCH_CLOSED'):
+        api._research.start(kind='discovery',request_id='after-close',topic='Synthetic workflow')
+
+
+def test_only_a_listed_link_of_a_shown_paper_opens(discovery,monkeypatch):
+    api,_=discovery
+    run=api._research.run_sync('discovery','links',topic='Synthetic workflow',count=2)
+    candidate=run['result']['recommendations'][0]['candidate_id']
+    opened=[]
+    import dataclasses
+    monkeypatch.setattr(api._research,'host',dataclasses.replace(api._research.host,open_target=lambda target:opened.append(target) or {'status':'OPENED'}))
+    with pytest.raises(ValueError,match='RESEARCH_SOURCE_LINK_INVALID'):
+        api.call('research.open_source',{'run_id':run['run_id'],'candidate_id':candidate,'url':'https://example.org/elsewhere'})
+    with pytest.raises(ValueError,match='RESEARCH_CANDIDATE_NOT_FOUND'):
+        api.call('research.expose',{'run_id':run['run_id'],'candidate_id':'missing','request_id':'expose-1'})
+    assert opened==[]

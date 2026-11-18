@@ -204,6 +204,8 @@ class ResearchRuntime:
                 'passive_console_locked':__import__('os').environ.get('MEMORIVE_TEST_CONSOLE_AUTO_EXECUTION')=='DISABLED'}
 
     def call(self,method,p):
+        """A research.* request from the window: each method checks its parameters, then answers
+        (state, settings, feedback, runs) or acts (start, repair, cancel)."""
         if method not in METHODS:
             raise ValueError('RESEARCH_METHOD_INVALID')
         if method=='research.discover':
@@ -216,15 +218,7 @@ class ResearchRuntime:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
             return self.work_index.coverage()
         if method=='research.open_source':
-            if set(p)!={'run_id','candidate_id','url'}:
-                raise ValueError('RESEARCH_PARAMS_INVALID')
-            result=read(self.run_path(p['run_id'])/'result.json')
-            row=next((r for r in result['recommendations'] if r['candidate_id']==p['candidate_id']),None)
-            from memorive.research.discovery.metadata import links
-            allowed=(row.get('links') or links(row['identifiers'],row.get('locations',[]))) if row else []
-            if not any(link['url']==p['url'] for link in allowed):
-                raise ValueError('RESEARCH_SOURCE_LINK_INVALID')
-            return self.host.open_target({'target':p['url']})
+            return self._open_source(p)
         if method=='research.workflow_get':
             if p:
                 raise ValueError('RESEARCH_PARAMS_INVALID')
@@ -265,13 +259,7 @@ class ResearchRuntime:
                 raise ValueError('RESEARCH_RECEIVING_DISABLED')
             return self.start(kind='discovery',request_id=p['request_id'],source_filter=p['source'])
         if method=='research.expose':
-            if set(p)!={'run_id','candidate_id','request_id'}:
-                raise ValueError('RESEARCH_PARAMS_INVALID')
-            result=read(self.run_path(p['run_id'])/'result.json')
-            item=next((x for x in result['recommendations'] if x['candidate_id']==p['candidate_id']),None)
-            if item is None:
-                raise ValueError('RESEARCH_CANDIDATE_NOT_FOUND')
-            return self.feedback.expose(p['run_id'],result.get('slate_sha256',result['sha256']),item,p['request_id'])
+            return self._expose(p)
         if method=='research.feedback':
             if not {'exposure_event_id','decision_type','request_id'}.issubset(p):
                 raise ValueError('RESEARCH_PARAMS_INVALID')
@@ -316,48 +304,42 @@ class ResearchRuntime:
                 return {'run_id':p['run_id'],'status':'CANCELLING'}
             return read(path/'state.json')
 
+    def _open_source(self,p):
+        """Open a link of a recommended paper; only the links its result lists can be opened."""
+        if set(p)!={'run_id','candidate_id','url'}:
+            raise ValueError('RESEARCH_PARAMS_INVALID')
+        result=read(self.run_path(p['run_id'])/'result.json')
+        row=next((r for r in result['recommendations'] if r['candidate_id']==p['candidate_id']),None)
+        from memorive.research.discovery.metadata import links
+        allowed=(row.get('links') or links(row['identifiers'],row.get('locations',[]))) if row else []
+        if not any(link['url']==p['url'] for link in allowed):
+            raise ValueError('RESEARCH_SOURCE_LINK_INVALID')
+        return self.host.open_target({'target':p['url']})
+
+    def _expose(self,p):
+        """Record that a recommended paper was shown, for the feedback it may receive."""
+        if set(p)!={'run_id','candidate_id','request_id'}:
+            raise ValueError('RESEARCH_PARAMS_INVALID')
+        result=read(self.run_path(p['run_id'])/'result.json')
+        item=next((x for x in result['recommendations'] if x['candidate_id']==p['candidate_id']),None)
+        if item is None:
+            raise ValueError('RESEARCH_CANDIDATE_NOT_FOUND')
+        return self.feedback.expose(p['run_id'],result.get('slate_sha256',result['sha256']),item,p['request_id'])
+
     def start(self,*,kind,request_id,topic=None,count=None,period=None,trigger='MANUAL',source_filter=None,report_window=None,material_progress=None,report_cutoff=None,regenerate_from=None,objective=None,direction_id=None,days=None,output_language=None):
+        """Start a literature discovery or a report run, or return the run this request already started.
+
+        The request is checked and turned into the run's parameters (the discovery settings and
+        sources, or the report window); then, holding the runtime, a repeated request returns its
+        first run, another running request refuses this one, and a new run is launched in its thread."""
         if kind not in {'discovery','report'} or not isinstance(request_id,str) or not 1<=len(request_id)<=160:
             raise ValueError('RESEARCH_START_INVALID')
         implicit_report=kind=='report' and trigger=='MANUAL' and report_window is None and report_cutoff is None and material_progress is None
         config=self.host.service.call('settings.research_get',{})['config']
         if kind=='discovery':
-            config=validate_config(dict(config,topic=config['topic'] if topic is None else topic,count=config['count'] if count is None else count))
-            if not config['topic'].strip() and not config.get('directions'):
-                raise ValueError('RESEARCH_TOPIC_REQUIRED')
-            literature=self.host.service.call('settings.external_sources_get',{})['literature']
-            sources=literature['selected']
-            if source_filter is not None:
-                if source_filter not in sources:
-                    raise ValueError('RESEARCH_SOURCE_NOT_ENABLED')
-                sources=[source_filter]
-            if not sources:
-                raise ValueError('RESEARCH_SOURCE_REQUIRED')
+            config,literature,sources=self._discovery_settings(config,topic,count,source_filter)
         else:
-            if period not in {'daily','weekly','monthly'}:
-                raise ValueError('RESEARCH_PERIOD_INVALID')
-            sources=[]
-            from memorive.research.reports.identity import previous_window,project
-            from memorive.research.reports.policy import ZONE,validate_window
-            current=self.report_clock() if self.report_clock else datetime.now(ZONE)
-            if regenerate_from is not None:
-                original_path=self.run_path(regenerate_from)
-                original=read(original_path/'state.json')
-                if original.get('kind')!='report' or original.get('period')!=period or original['status'] in {'QUEUED','RUNNING'}:
-                    raise ValueError('REPORT_REGENERATION_INVALID')
-                original=project(self.root,[original])[0]
-                report_window=original.get('report_window')
-                if not report_window:
-                    raise ValueError('REPORT_WINDOW_UNAVAILABLE')
-                previous=read(original_path/'request.json')
-                if 'material_progress' in previous:
-                    from memorive.research.reports.periodic import material_progress as progress_rows,windows
-                    from memorive.research.reports.identity import window_key
-                    matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
-                    material_progress=matches[0]['progress'] if matches else previous['material_progress']
-            report_window=report_window or previous_window(period,current)
-            report_cutoff=report_cutoff or current.isoformat()
-            validate_window(period,report_window['start'],report_window['end'],report_cutoff)
+            sources,current,report_window,report_cutoff,material_progress=self._report_window(period,regenerate_from,report_window,report_cutoff,material_progress)
         if kind!='report' and regenerate_from is not None:
             raise ValueError('REPORT_REGENERATION_INVALID')
         from memorive.platform.language import from_settings
@@ -372,19 +354,8 @@ class ResearchRuntime:
             if regenerate_from is not None:
                 params['regenerate_from']=regenerate_from
         if kind=='discovery':
-            params['source_snapshot']=[s for s in literature['slots'] if s['provider'] in sources]
-            from memorive.research.discovery.query_plan import request_options
-            params['discovery_options']=request_options(objective,direction_id,days)
-            if direction_id is not None and not any(d['id']==direction_id for d in config['directions']):
-                raise ValueError('RESEARCH_DIRECTION_NOT_FOUND')
-        if trigger == 'PASSIVE_MATERIAL_PROGRESS':
-            if kind!='report' or not report_window or not material_progress:
-                raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
-            params.update(trigger=trigger,report_window=report_window,material_progress=material_progress,report_cutoff=report_cutoff)
-        elif trigger != 'MANUAL':
-            if trigger != 'PASSIVE_OPT_IN' or kind != 'discovery' or not config['passive_enabled']:
-                raise ValueError('RESEARCH_PASSIVE_AUTHORIZATION_INVALID')
-            params['trigger'] = trigger
+            self._discovery_params(params,literature,sources,config,objective,direction_id,days)
+        self._check_trigger(params,trigger,kind,config,report_window,material_progress,report_cutoff)
         run_id='research-'+sha(request_id)[:24]
         path=self.run_path(run_id)
         with self.lock:
@@ -393,39 +364,7 @@ class ResearchRuntime:
             if self.scheduler_stop.is_set():
                 raise ValueError('RESEARCH_CLOSED')
             if (path/'state.json').exists():
-                item=read(path/'state.json')
-                replay=dict(params)
-                frozen_language=read(path/'request.json').get('language_context')
-                if frozen_language is not None:
-                    replay['language_context']=frozen_language
-                else:
-                    replay.pop('language_context',None)
-                if kind=='discovery':
-                    frozen_request=read(path/'request.json')
-                    requested=replay['discovery_options']
-                    frozen=frozen_request['discovery_options']
-                    same=all(requested.get(k)==frozen.get(k) for k in ('objective','direction_id','limits','method'))
-                    if requested.get('publication_window') and frozen.get('publication_window'):
-                        same= same and requested['publication_window']['days']==frozen['publication_window']['days']
-                    if same:
-                        replay['discovery_options']=frozen
-                if kind=='report':
-                    frozen_request=read(path/'request.json')
-                    for key in ('report_model','report_language'):
-                        if key in frozen_request:
-                            replay[key]=frozen_request[key]
-                if implicit_report:
-                    prior=read(path/'request.json')
-                    # A repeated click keeps the first request's frozen clock and
-                    # source snapshot, even across midnight or an app restart.
-                    for key in ('report_window','report_cutoff','material_progress','report_model','report_language'):
-                        if key in prior:
-                            replay[key]=prior[key]
-                        else:
-                            replay.pop(key,None)
-                if item['request_sha256']!=sha(replay):
-                    raise ValueError('RESEARCH_IDEMPOTENCY_CONFLICT')
-                return item
+                return self._replayed_run(path,params,kind,implicit_report)
             if self.has_active_run():
                 current_request=read(self.run_path(self.current)/'request.json')
                 comparison=lambda value:{k:v for k,v in value.items() if k not in {'sha256','trigger'}}
@@ -433,28 +372,137 @@ class ResearchRuntime:
                     return read(self.run_path(self.current)/'state.json')
                 raise ValueError('RESEARCH_ALREADY_RUNNING')
             if kind=='report':
-                from memorive.research.reports.models import freeze
+                self._freeze_report(params,run_id,period,current,report_window,language_context)
+            return self._launch(run_id,path,params,kind,config,direction_id,period,report_window,regenerate_from,language_context)
+
+    def _discovery_settings(self,config,topic,count,source_filter):
+        """A discovery run's settings with this request's topic and count, and the sources it reads."""
+        config=validate_config(dict(config,topic=config['topic'] if topic is None else topic,count=config['count'] if count is None else count))
+        if not config['topic'].strip() and not config.get('directions'):
+            raise ValueError('RESEARCH_TOPIC_REQUIRED')
+        literature=self.host.service.call('settings.external_sources_get',{})['literature']
+        sources=literature['selected']
+        if source_filter is not None:
+            if source_filter not in sources:
+                raise ValueError('RESEARCH_SOURCE_NOT_ENABLED')
+            sources=[source_filter]
+        if not sources:
+            raise ValueError('RESEARCH_SOURCE_REQUIRED')
+        return config,literature,sources
+
+    def _report_window(self,period,regenerate_from,report_window,report_cutoff,material_progress):
+        """A report run's window and cutoff, from the request, from the report it regenerates, or the
+        last finished period on the report clock; the material of a regenerated report is read again."""
+        if period not in {'daily','weekly','monthly'}:
+            raise ValueError('RESEARCH_PERIOD_INVALID')
+        sources=[]
+        from memorive.research.reports.identity import previous_window,project
+        from memorive.research.reports.policy import ZONE,validate_window
+        current=self.report_clock() if self.report_clock else datetime.now(ZONE)
+        if regenerate_from is not None:
+            original_path=self.run_path(regenerate_from)
+            original=read(original_path/'state.json')
+            if original.get('kind')!='report' or original.get('period')!=period or original['status'] in {'QUEUED','RUNNING'}:
+                raise ValueError('REPORT_REGENERATION_INVALID')
+            original=project(self.root,[original])[0]
+            report_window=original.get('report_window')
+            if not report_window:
+                raise ValueError('REPORT_WINDOW_UNAVAILABLE')
+            previous=read(original_path/'request.json')
+            if 'material_progress' in previous:
                 from memorive.research.reports.periodic import material_progress as progress_rows,windows
                 from memorive.research.reports.identity import window_key
-                if not params.get('material_progress'):
-                    matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
-                    params['material_progress']=matches[0]['progress'] if matches else []
-                if not params['material_progress']:
-                    raise ValueError('REPORT_NO_LIBRARY_CHANGE')
-                params['report_model']=freeze(self,run_id,period)
-                params['report_language']=language_context['effective_output_locale']
-            self.stop=threading.Event()
-            self.current=run_id
-            item=self.update_state(run_id,run_id=run_id,kind=kind,language_context=language_context,title=((next(d['name'] for d in config['directions'] if d['id']==direction_id) if direction_id else config['topic'] or ' / '.join(d['name'] for d in config['directions']))+' · '+choose(language_context,'最新文献' if params['discovery_options']['objective']=='latest' else '高度相关文献','Latest literature' if params['discovery_options']['objective']=='latest' else 'Related literature','最新文献' if params['discovery_options']['objective']=='latest' else '関連文献')) if kind=='discovery' else {'daily':'日报','weekly':'周报','monthly':'月报'}[period],created_at=now(),status='QUEUED',stage='WAITING',request_sha256=sha(params),period=period)
-            if report_window:
-                from memorive.research.reports.identity import next_revision,title
-                revision=next_revision(self.root,report_window)
-                item=self.update_state(run_id,title=title(report_window,revision,language_context),report_window=report_window,
-                    report_revision=revision,regenerate_from=regenerate_from,report_model=params.get('report_model'))
-            write(path/'request.json',sealed(params))
-            self.thread=threading.Thread(target=self._execute,args=(run_id,params),name='desktop-research',daemon=True)
-            self.thread.start()
-            return item
+                matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
+                material_progress=matches[0]['progress'] if matches else previous['material_progress']
+        report_window=report_window or previous_window(period,current)
+        report_cutoff=report_cutoff or current.isoformat()
+        validate_window(period,report_window['start'],report_window['end'],report_cutoff)
+        return sources,current,report_window,report_cutoff,material_progress
+
+    def _discovery_params(self,params,literature,sources,config,objective,direction_id,days):
+        """The source settings and options a discovery run keeps with its parameters."""
+        params['source_snapshot']=[s for s in literature['slots'] if s['provider'] in sources]
+        from memorive.research.discovery.query_plan import request_options
+        params['discovery_options']=request_options(objective,direction_id,days)
+        if direction_id is not None and not any(d['id']==direction_id for d in config['directions']):
+            raise ValueError('RESEARCH_DIRECTION_NOT_FOUND')
+
+    def _check_trigger(self,params,trigger,kind,config,report_window,material_progress,report_cutoff):
+        """What started the run: the user, new library material (a report), or the receiving schedule
+        the user switched on (a discovery)."""
+        if trigger == 'PASSIVE_MATERIAL_PROGRESS':
+            if kind!='report' or not report_window or not material_progress:
+                raise ValueError('REPORT_MATERIAL_PROGRESS_REQUIRED')
+            params.update(trigger=trigger,report_window=report_window,material_progress=material_progress,report_cutoff=report_cutoff)
+        elif trigger != 'MANUAL':
+            if trigger != 'PASSIVE_OPT_IN' or kind != 'discovery' or not config['passive_enabled']:
+                raise ValueError('RESEARCH_PASSIVE_AUTHORIZATION_INVALID')
+            params['trigger'] = trigger
+
+    def _replayed_run(self,path,params,kind,implicit_report):
+        """The run of a repeated request; the parameters it froze stand in for those that move with
+        time (the report clock, a re-read source snapshot), and any other difference is a conflict."""
+        item=read(path/'state.json')
+        replay=dict(params)
+        frozen_language=read(path/'request.json').get('language_context')
+        if frozen_language is not None:
+            replay['language_context']=frozen_language
+        else:
+            replay.pop('language_context',None)
+        if kind=='discovery':
+            frozen_request=read(path/'request.json')
+            requested=replay['discovery_options']
+            frozen=frozen_request['discovery_options']
+            same=all(requested.get(k)==frozen.get(k) for k in ('objective','direction_id','limits','method'))
+            if requested.get('publication_window') and frozen.get('publication_window'):
+                same= same and requested['publication_window']['days']==frozen['publication_window']['days']
+            if same:
+                replay['discovery_options']=frozen
+        if kind=='report':
+            frozen_request=read(path/'request.json')
+            for key in ('report_model','report_language'):
+                if key in frozen_request:
+                    replay[key]=frozen_request[key]
+        if implicit_report:
+            prior=read(path/'request.json')
+            # A repeated click keeps the first request's frozen clock and
+            # source snapshot, even across midnight or an app restart.
+            for key in ('report_window','report_cutoff','material_progress','report_model','report_language'):
+                if key in prior:
+                    replay[key]=prior[key]
+                else:
+                    replay.pop(key,None)
+        if item['request_sha256']!=sha(replay):
+            raise ValueError('RESEARCH_IDEMPOTENCY_CONFLICT')
+        return item
+
+    def _freeze_report(self,params,run_id,period,current,report_window,language_context):
+        """A report needs new library material in its window; its model and language are frozen now."""
+        from memorive.research.reports.models import freeze
+        from memorive.research.reports.periodic import material_progress as progress_rows,windows
+        from memorive.research.reports.identity import window_key
+        if not params.get('material_progress'):
+            matches=[row for row in windows(progress_rows(self.host),current) if window_key(row['window'])==window_key(report_window)]
+            params['material_progress']=matches[0]['progress'] if matches else []
+        if not params['material_progress']:
+            raise ValueError('REPORT_NO_LIBRARY_CHANGE')
+        params['report_model']=freeze(self,run_id,period)
+        params['report_language']=language_context['effective_output_locale']
+
+    def _launch(self,run_id,path,params,kind,config,direction_id,period,report_window,regenerate_from,language_context):
+        """Claim the runtime for the new run: its state (title, report revision), its request file, its thread."""
+        self.stop=threading.Event()
+        self.current=run_id
+        item=self.update_state(run_id,run_id=run_id,kind=kind,language_context=language_context,title=((next(d['name'] for d in config['directions'] if d['id']==direction_id) if direction_id else config['topic'] or ' / '.join(d['name'] for d in config['directions']))+' · '+choose(language_context,'最新文献' if params['discovery_options']['objective']=='latest' else '高度相关文献','Latest literature' if params['discovery_options']['objective']=='latest' else 'Related literature','最新文献' if params['discovery_options']['objective']=='latest' else '関連文献')) if kind=='discovery' else {'daily':'日报','weekly':'周报','monthly':'月报'}[period],created_at=now(),status='QUEUED',stage='WAITING',request_sha256=sha(params),period=period)
+        if report_window:
+            from memorive.research.reports.identity import next_revision,title
+            revision=next_revision(self.root,report_window)
+            item=self.update_state(run_id,title=title(report_window,revision,language_context),report_window=report_window,
+                report_revision=revision,regenerate_from=regenerate_from,report_model=params.get('report_model'))
+        write(path/'request.json',sealed(params))
+        self.thread=threading.Thread(target=self._execute,args=(run_id,params),name='desktop-research',daemon=True)
+        self.thread.start()
+        return item
 
     def run_sync(self,kind,request_id,**kwargs):
         item=self.start(kind=kind,request_id=request_id,**kwargs)
