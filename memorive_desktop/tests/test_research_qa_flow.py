@@ -201,6 +201,44 @@ def _restart_after_the_model_answered(setup, tmp_path, *, keep_result):
     return restarted, after_restart, model, thread_id, job_id
 
 
+def test_a_temporary_conversation_cut_off_during_the_model_call_is_gone_after_a_restart(tmp_path):
+    # The restart forgets the temporary conversation with its job; the job used to be answered again
+    # afterwards from its stale id, and opening the workspace failed (TypeError on the missing job).
+    library = tmp_path / "library"
+    library.mkdir()
+    paper = library / "k12.md"
+    paper.write_text(example.PAPER, encoding="utf-8")
+    model = Model()
+    model.release.clear()
+    service = SettingsService(model)
+    workspace = _open(tmp_path / "workspace", service)
+    service.workspace = workspace
+    restarted = None
+    try:
+        thread = workspace.thread_create(temporary=True)
+        material = workspace.index.add_library_file(
+            thread["project"], path=paper, root=library, external_id="k12",
+            expected_hash=hashlib.sha256(paper.read_bytes()).hexdigest(), title="K12", material_layer="cleaned")
+        workspace.attachments.configure(thread["id"], thread["revision"],
+                                        {"artifact_ids": [material["id"]], "profile_ref": example.PROFILE["profile_ref"]})
+        job_id = _ask(workspace, thread["id"], material["id"], wait=False)
+        assert model.called.wait(60)
+        restarted = _open(tmp_path / "workspace", Model(), recover=True)
+        model.release.set()
+        _finish(workspace)
+        restarted.finish_answers_received_before_restart(service.stored_result)
+        _finish(restarted)
+        assert restarted.interrupted_during_model_call == []
+        assert restarted.store.get("job", job_id) is None
+        with pytest.raises(ValueError, match="THREAD_NOT_FOUND"):
+            restarted.thread_get(thread["id"])
+    finally:
+        model.release.set()
+        workspace.close()
+        if restarted is not None:
+            restarted.close()
+
+
 def test_after_a_restart_an_answer_the_model_already_returned_is_saved(setup, tmp_path):
     restarted, after_restart, model, thread_id, job_id = _restart_after_the_model_answered(setup, tmp_path, keep_result=True)
     try:

@@ -128,6 +128,10 @@ class ResearchWorkspace:
             temporary = [(r['id'], r['source_revision']) for r in db.execute('SELECT id,source_revision FROM conversation_catalog WHERE temporary=1')]
         for identity, revision in temporary:
             self.thread_forget(identity, revision)
+        # Forgetting a temporary conversation deletes its jobs too; only the jobs still here are
+        # answered again (finish_answers_received_before_restart reads each one).
+        self.interrupted_during_model_call = [job_id for job_id in self.interrupted_during_model_call
+                                              if self.store.get('job', job_id) is not None]
 
     def note_model_snapshot(self, job_id, snapshot):
         """Keep on a running question the model snapshot it is sent with, so that after a restart the
