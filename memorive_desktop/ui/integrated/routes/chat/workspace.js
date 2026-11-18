@@ -666,10 +666,9 @@ const collapsed=new Set();
       const row=create('article',null,'memo-message');
       row.dataset.role=m.role;
       row.dataset.messageId=m.id;
-      const head=create('header'),avatar=create('span',m.role==='user'?'U':'m','memo-avatar');
-      avatar.setAttribute('aria-hidden','true');
-      avatar.setAttribute('data-desktop-no-translate','');
-      head.append(avatar,create('strong',m.role==='user'?'你':'Memorive'));
+      // The speaker's name is for screen readers; a question shows as a bubble, an answer as plain text.
+      const head=create('header');
+      head.append(create('strong',m.role==='user'?'你':'Memorive','memo-message-speaker'));
       const copy=create('button',null,'memo-quiet-button memo-copy-message memo-message-icon');
       copy.type='button';
       copy.onclick=()=>copyText(m.text).catch(err=>fail(err));
@@ -677,8 +676,7 @@ const collapsed=new Set();
       copy.setAttribute('aria-label',t('复制'));
       copy.dataset.desktopTip=t('复制');
       copy.dataset.answerAction='copy';
-      head.append(copy);
-      if(m.engine)head.append(create('span',m.engine==='evidence_only'?'资料摘录':m.engine));
+      if(m.role==='user')head.append(copy);
       row.append(head,messageBody(m.text));
       if(m.feedback_id){
         const proposal=state?.feedback.find(p=>p.id===m.feedback_id);
@@ -698,16 +696,19 @@ const collapsed=new Set();
         row.append(links);
       }
       if(m.role==='assistant'){
-        const foot=create('div',null,'memo-message-footer');
-        if(Number.isFinite(m.elapsed_ms)&&m.elapsed_ms>=0)foot.append(create('span',(m.elapsed_ms/1000).toFixed(1)+' s'));
-        const usage=m.usage?.token_usage;
-        if(usage)foot.append(create('span','Tokens · '+(usage.prompt_tokens??usage.input_tokens??'?')+' / '+(usage.completion_tokens??usage.output_tokens??'?')));
-        const cached=usage?.cached_input_tokens??usage?.cache_read_input_tokens;
-        if(cached>0)foot.append(create('span',t('缓存命中')+' · '+cached.toLocaleString()));
-        if(m.context)row.append(contextDetails(m));
+        // Under an answer, one line: its actions first, then what it was made from and what it took.
+        const foot=create('div',null,'memo-message-footer'),meta=create('span',null,'memo-message-meta');
+        foot.append(answerActions(m),copy);
         if(m.needs_agent)foot.append(button('继续深入 → 交给 Agent',()=>handoff(),'memo-quiet-button'));
-        if(m.usage&&Object.keys(m.usage).length)foot.append(create('span',t('费用')+' · '+(m.usage.actual_cost==null?t('未知'):String(m.usage.actual_cost))));
-        foot.append(answerActions(m));
+        if(m.engine)meta.append(create('span',m.engine==='evidence_only'?'资料摘录':m.engine));
+        if(Number.isFinite(m.elapsed_ms)&&m.elapsed_ms>=0)meta.append(create('span',(m.elapsed_ms/1000).toFixed(1)+' s'));
+        const usage=m.usage?.token_usage;
+        if(usage)meta.append(create('span','Tokens · '+(usage.prompt_tokens??usage.input_tokens??'?')+' / '+(usage.completion_tokens??usage.output_tokens??'?')));
+        const cached=usage?.cached_input_tokens??usage?.cache_read_input_tokens;
+        if(cached>0)meta.append(create('span',t('缓存命中')+' · '+cached.toLocaleString()));
+        if(m.usage&&Object.keys(m.usage).length)meta.append(create('span',t('费用')+' · '+(m.usage.actual_cost==null?t('未知'):String(m.usage.actual_cost))));
+        if(m.context)row.append(contextDetails(m));
+        if(meta.childElementCount)foot.append(meta);
         row.append(foot);
       }
       log.append(row);

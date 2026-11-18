@@ -1196,8 +1196,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "ba43c9c463c55e3658e37aee59d1601f74583450b4ad3a02f614eea3e118925a",
-      "bytes": 2495911
+      "sha256": "8e7124eec8510280cbe5b47b1bf54d524d95a75ecff328ef78426b8067a56ba0",
+      "bytes": 2498414
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4071,12 +4071,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "ea859937fbbc5ea7b088cf9ed3cfdda956138a37ad7ca4f4308bd4584b52ccaa",
+      "sha256": "f2846762ac583687e4e5c78475eeec580b354ad2dea88eb669e8f433ffe1af72",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c14ed439f1dfa938d52a6814586dcbc83a2d741e0226f345e0fcddd9e420a209",
+      "sha256": "815fa22691504300f4b0a5af46f5087118a88a573c9883e0342bfba7ab8e92ca",
       "bytes": 275420
     },
     {
@@ -4681,13 +4681,13 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.css",
-      "sha256": "3e65ba2116a97ede37ac44258f7ebc1b4b629eba781ca2ede4cf20eca37c6852",
-      "bytes": 64872
+      "sha256": "7dc124b29584157894f22682e34adade9199b19ae28669060b076631cc77ba33",
+      "bytes": 67252
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.js",
-      "sha256": "d5275f58d26999a144b21bf39bd850ee9a107b6d6bfc3828e1a78cc1899dbf27",
-      "bytes": 114369
+      "sha256": "361c0a422296984cfa9ba7dd0f5ec472fcb14a34a4410fa8446c8beb7597244f",
+      "bytes": 114550
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/bridge.js",
@@ -4941,8 +4941,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/layout-system.css",
-      "sha256": "50b65ee31c1b51d42344f2f7656ab1f361a5635f089341faa2684ef4448c66fc",
-      "bytes": 7047
+      "sha256": "50ea831d6a5b5603b859972302878b7d627d36b4f04e7d2724656471d55b0b69",
+      "bytes": 6989
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/local-user.css",
