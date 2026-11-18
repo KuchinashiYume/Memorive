@@ -53,7 +53,9 @@
   function notify(e) {
     const s = picker && !picker.hidden ? q('#memo-paper-picker-status') : status();
     if (!s) return;
-    s.textContent = errors[e?.message] || e?.message || '操作未完成，请查看任务记录后重试';
+    // Some codes carry what they are about after a colon (OPPORTUNITIES_PAPER_NOT_ACTIVE:<job_id>).
+    const code = String(e?.message || '').split(':')[0];
+    s.textContent = errors[code] || e?.message || '操作未完成，请查看任务记录后重试';
     s.dataset.error = 'true';
     s.hidden = false;
   }
@@ -232,14 +234,22 @@
   // of them; the last 30 days when nothing is typed), opens a connected library's folder or the file explorer (the
   // files go to the current task and join the group once their card passes review), and ticks papers whose card is
   // active; confirming saves the group and closes the panel.
-  const CARD = { pending: '卡片待审核', quarantined: '卡片已停用' };
+  const CARD = { pending: '卡片待审核', quarantined: '卡片已停用', missing: '没有卡片' };
+  // Where a file added to a group stands (opportunities.groups pending[].status); the last four end its way.
+  const PENDING = { queued: '排队中', processing: '处理中', card_pending: '卡片待审核', failed: '处理未完成',
+    no_card: '没有生成卡片', card_quarantined: '卡片已停用', removed: '已从收件箱删除' };
+  const PENDING_ENDED = new Set(['failed', 'no_card', 'card_quarantined', 'removed']);
   const PROVIDERS = { obsidian: 'Obsidian', zotero: 'Zotero', folder: '文件夹', bibliography: '文献目录' };
   let groups = { revision: 0, groups: [] }, groupId = '', picker = null, picked = new Set(), searchTimer = 0, pickerTicket = 0;
   const currentGroup = () => groups.groups.find((g) => g.group_id === groupId) || null;
   const pickerOpen = () => !!picker && !picker.hidden && Memorive.frames.chat.root.dataset.right === 'true';
-  async function saveGroup(jobIds) {
-    const before = new Set(groups.groups.map((g) => g.group_id));
-    groups = await call('opportunities.group_save', { ...(groupId ? { group_id: groupId } : {}), job_ids: jobIds, expected_revision: groups.revision });
+  // Save the chosen group (or a new one) as the page shows it: its papers (jobIds) and the files still on their way
+  // (pendingIds, by default all those shown; the backend merges admitted ones into the papers when it reads).
+  async function saveGroup(jobIds, { name, pendingIds } = {}) {
+    const before = new Set(groups.groups.map((g) => g.group_id)), group = currentGroup();
+    groups = await call('opportunities.group_save', { ...(groupId ? { group_id: groupId } : {}), job_ids: jobIds,
+      ...(group ? { pending_item_ids: pendingIds ?? group.pending.map((p) => p.item_id) } : {}), ...(name ? { name } : {}),
+      expected_revision: groups.revision });
     if (!groupId) groupId = groups.groups.find((g) => !before.has(g.group_id))?.group_id || '';
   }
   function pickerPanel() {
@@ -306,6 +316,7 @@
     row.dataset.selected = String(check.checked);
     title.setAttribute('data-desktop-no-translate', '');
     meta.append(new Date(paper.processed_at).toLocaleDateString());
+    if (paper.name && paper.name !== paper.title) meta.append(' · ' + paper.name);
     if (check.disabled) meta.append(' · ', make('span', CARD[paper.card_status] || paper.card_status));
     copy.append(title, meta);
     check.onchange = () => {
@@ -348,7 +359,7 @@
         const value = name.value.trim();
         try {
           if (save && value && value !== group.name)
-            groups = await call('opportunities.group_save', { group_id: group.group_id, name: value, job_ids: group.papers.map((p) => p.job_id), expected_revision: groups.revision });
+            await saveGroup(group.papers.map((p) => p.job_id), { name: value });
         } catch (e) { notify(e); }
         render();
       };
@@ -444,22 +455,28 @@
   // The chosen group's papers, as the composer's attachment chips; those still being processed say so.
   function groupPapers(group) {
     const chips = make('div', null, 'memo-attachments desktop-research-opportunity-papers');
-    for (const paper of group.papers) {
-      const chip = make('div', null, 'memo-attachment'), name = make('span', paper.title, 'memo-attachment-name'), x = make('button', '×', 'memo-quiet-button');
+    const chip = (title, note, ended, remove) => {
+      const box = make('div', null, 'memo-attachment'), name = make('span', title, 'memo-attachment-name'), x = make('button', '×', 'memo-quiet-button');
       name.setAttribute('data-desktop-no-translate', '');
-      name.title = paper.title;
+      name.title = title;
+      if (note) box.append(name, make('small', note)); else box.append(name);
+      if (note) box.dataset.state = ended ? 'error' : 'preparing';
       x.type = 'button';
-      x.setAttribute('aria-label', '移出比较组 ' + paper.title);
-      x.onclick = () => void saveGroup(group.papers.map((p) => p.job_id).filter((id) => id !== paper.job_id)).then(render, notify);
-      chip.append(name, x);
-      chips.append(chip);
-    }
+      x.setAttribute('aria-label', '移出比较组 ' + title);
+      x.onclick = () => void remove().then(render, notify);
+      box.append(x);
+      return box;
+    };
+    const jobIds = group.papers.map((p) => p.job_id), pendingIds = group.pending.map((p) => p.item_id);
+    // A paper whose card was taken out of use later stays in the group, marked; searches leave it out.
+    for (const paper of group.papers)
+      chips.append(chip(paper.title, paper.card_status === 'active' ? '' : CARD[paper.card_status] || paper.card_status, true,
+        () => saveGroup(jobIds.filter((id) => id !== paper.job_id))));
     for (const file of group.pending) {
-      const chip = make('div', null, 'memo-attachment'), name = make('span', file.title, 'memo-attachment-name');
-      name.setAttribute('data-desktop-no-translate', '');
-      chip.dataset.state = file.status === 'FAILED' ? 'error' : 'preparing';
-      chip.append(name, make('small', file.status === 'FAILED' ? '处理未完成' : '处理中'));
-      chips.append(chip);
+      const box = chip(file.title, PENDING[file.status] || file.status, PENDING_ENDED.has(file.status),
+        () => saveGroup(jobIds, { pendingIds: pendingIds.filter((id) => id !== file.item_id) }));
+      if (file.error) box.title = file.error;
+      chips.append(box);
     }
     if (!group.papers.length && !group.pending.length) chips.append(make('small', '比较组里还没有论文，点 ＋ 添加', 'desktop-research-muted'));
     return chips;
