@@ -248,8 +248,8 @@ class Inbox:
     """The inbox methods a comparison group uses, as ProductApi.call answers them: a file is imported
     as a queued item (an earlier file with the same name as a duplicate of it), dispatch gives it a job."""
 
-    def __init__(self):
-        self.items, self.by_name, self.dispatched, self.count = {}, {}, [], 0
+    def __init__(self, auto_run=False):
+        self.items, self.by_name, self.dispatched, self.count, self.auto_run = {}, {}, [], 0, auto_run
 
     def call(self, method, params):
         if method == 'inbox.import_paths':
@@ -264,9 +264,17 @@ class Inbox:
                 self.items[item_id] = {'item_id': item_id, 'state': 'QUEUED', 'source_name': name, 'job_id': None}
                 self.by_name[name] = item_id
                 rows.append({'item': dict(self.items[item_id])})
+            if self.auto_run:
+                # The inbox starts each imported file itself; the receipt shows the items as imported.
+                for row in rows:
+                    if row['item']['state'] == 'QUEUED':
+                        item_id = row['item']['item_id']
+                        self.call('inbox.dispatch', {'item_id': item_id, 'idempotency_key': 'auto:' + item_id})
             return {'items': rows}
         if method == 'inbox.dispatch':
             item = self.items[params['item_id']]
+            if params in self.dispatched:
+                return {'replayed': True}
             self.dispatched.append(params)
             item.update(state='PROCESSING', job_id='job-of-' + item['source_name'])
             return {}
@@ -475,25 +483,32 @@ def test_files_picked_for_a_group_join_it_once_their_card_is_admitted(research):
     # Picking the same file again with the same request adds nothing twice.
     again = call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/new.pdf'], 'request_id': 'pick-1'})
     assert len(again['groups'][0]['pending']) == 1
+    # With the inbox's automatic run on, the file is started once all the same.
+    research.inbox.auto_run = True
+    call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/auto.pdf'], 'request_id': 'pick-auto'})
+    assert [d['item_id'] for d in research.inbox.dispatched] == ['item-1', 'item-2']
+    research.inbox.auto_run = False
     # Its card waits for review, then is admitted: from then on it is one of the group's papers.
     research.library.add('job-of-new.pdf', PAPERS['job-c'], status='pending')
     assert call('opportunities.groups', {})['groups'][0]['pending'][0]['status'] == 'card_pending'
     research.library.add('job-of-new.pdf', PAPERS['job-c'])
     group = call('opportunities.groups', {})['groups'][0]
-    assert [p['job_id'] for p in group['papers']] == ['job-a', 'job-b', 'job-of-new.pdf'] and group['pending'] == []
+    assert [p['job_id'] for p in group['papers']] == ['job-a', 'job-b', 'job-of-new.pdf']
+    assert [e['title'] for e in group['pending']] == ['auto.pdf']
     # A file taken out of the inbox before it was processed shows as removed; failing shows its error.
     call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/gone.pdf', 'C:/stage/bad.pdf'],
                                            'request_id': 'pick-2'})
-    research.inbox.items['item-2']['state'] = 'TRASHED'
-    research.inbox.items['item-3'].update(state='ERROR', error={'code': 'PDF_UNREADABLE'})
+    research.inbox.items['item-3']['state'] = 'TRASHED'
+    research.inbox.items['item-4'].update(state='ERROR', error={'code': 'PDF_UNREADABLE'})
     pending = call('opportunities.groups', {})['groups'][0]['pending']
-    assert [(e['title'], e['status'], e.get('error')) for e in pending] == [('gone.pdf', 'removed', None),
+    assert [(e['title'], e['status'], e.get('error')) for e in pending] == [('auto.pdf', 'processing', None),
+                                                                           ('gone.pdf', 'removed', None),
                                                                            ('bad.pdf', 'failed', 'PDF_UNREADABLE')]
     # Saving what the page shows keeps the papers and only the pending files it still lists.
     revision = call('opportunities.groups', {})['revision']
     saved = call('opportunities.group_save', {'group_id': group_id, 'job_ids': ['job-a', 'job-b', 'job-of-new.pdf'],
-                                              'pending_item_ids': ['item-3'], 'expected_revision': revision})
-    assert [e['item_id'] for e in saved['groups'][0]['pending']] == ['item-3']
+                                              'pending_item_ids': ['item-4'], 'expected_revision': revision})
+    assert [e['item_id'] for e in saved['groups'][0]['pending']] == ['item-4']
 
 
 def test_a_search_in_a_group_reads_only_its_papers(research):

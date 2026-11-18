@@ -29,6 +29,12 @@ class InboxError(RuntimeError):
         self.retryable = retryable
 
 
+def start_key(item_id: str) -> str:
+    """The dispatch key that starts an imported file's job: the inbox's automatic run uses it, and so
+    does anything else that starts a file right after importing it, so the job starts once."""
+    return f"auto:{item_id}"
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 

@@ -17,9 +17,10 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from memorive.documents.inbox.contracts import start_key
 from memorive.platform.language.policy import from_settings
 from memorive.platform.language.text import choose
-from memorive.research.common import read, write, sealed, sha, now
+from memorive.research.common import read, write, sealed, now
 from memorive.research.opportunities.facts import card_fields
 
 METHODS = frozenset({'opportunities.papers', 'opportunities.groups', 'opportunities.group_save',
@@ -239,8 +240,8 @@ class Groups:
                 admitted.append(paper['job_id'])
                 continue
             if item['state'] == 'QUEUED' and not item.get('job_id'):
-                call('inbox.dispatch', {'item_id': item['item_id'],
-                                        'idempotency_key': 'opportunities-' + sha([request_id, item['item_id']])[:24]})
+                # The key the inbox's automatic run uses: when that is on, it has started the file already.
+                call('inbox.dispatch', {'item_id': item['item_id'], 'idempotency_key': start_key(item['item_id'])})
             waiting[item['item_id']] = {'item_id': item['item_id'], 'added_at': now(),
                                         'title': item.get('source_name') or item.get('name') or item['item_id']}
         with self.r.lock:

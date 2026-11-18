@@ -24,6 +24,7 @@ from memorive.documents.inbox.contracts import (
     immutable,
     item_id_for,
     require_identifier,
+    start_key,
     utc_now,
 )
 from memorive.documents.inbox.path_policy import PathSecurityPolicy
@@ -379,7 +380,7 @@ class InboxController:
                     auto_dispatch.append(
                         self.dispatch(
                             result["item"]["item_id"],
-                            idempotency_key=f"auto:{result['item']['item_id']}",
+                            idempotency_key=start_key(result["item"]["item_id"]),
                         )
                     )
         return {

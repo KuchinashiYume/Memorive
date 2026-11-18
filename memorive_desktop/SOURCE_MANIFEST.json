@@ -3227,13 +3227,13 @@
     },
     {
       "path": "source/memorive/documents/inbox/contracts.py",
-      "sha256": "7a84cd5e0d2e7bd3774efcd1dc0d1de18e17909f634e75f5c0beb9bc1ced0ce7",
-      "bytes": 2668
+      "sha256": "f8c577164b5042f59449857d8cfdc5e97dfeaabfdae2c18902d5b28de1c60b78",
+      "bytes": 2938
     },
     {
       "path": "source/memorive/documents/inbox/controller.py",
-      "sha256": "32dd634a56a6968e1d3f987341bcb9a96305bc7fc1946906a5034f5407c38c54",
-      "bytes": 66112
+      "sha256": "3f7fdf431d09070a638bd4e583f41af110850136e4890bed9384127b143348df",
+      "bytes": 66129
     },
     {
       "path": "source/memorive/documents/inbox/import_binding.py",
@@ -6237,8 +6237,8 @@
     },
     {
       "path": "source/memorive/research/opportunities/groups.py",
-      "sha256": "ab3ea9c13e930d73032b6b810fcd4331b9537bc5e3ae1294e441b9f6de76c885",
-      "bytes": 14486
+      "sha256": "a500abc80bbb26482ac31fc3d80b560da03af4323657710eb7f7781b23114614",
+      "bytes": 14575
     },
     {
       "path": "source/memorive/research/opportunities/research_opportunities.py",
