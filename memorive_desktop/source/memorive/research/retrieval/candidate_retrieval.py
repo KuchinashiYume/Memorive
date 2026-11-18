@@ -576,14 +576,7 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
       rerank_fn(question, texts) -> list[float] is used only in legacy_score mode. All modes are off
       by default. The number recalled is fixed and does not grow with the library.
     """
-    if not isinstance(question, str) or not question.strip():
-        raise ValueError("CandidateRetrieval: question 必须是非空字符串(空 / 纯空白 fail-loud)")
-    if paper_id is not None:
-        if not isinstance(paper_id, str) or not paper_id.strip():
-            raise ValueError("CandidateRetrieval: paper_id scope 必须是非空字符串或 None")
-        paper_id = paper_id.strip()
-    scope_where = None if paper_id is None else {"paper_id": paper_id}
-    scope_mode = "shared" if paper_id is None else "paper_id"
+    paper_id, scope_where, scope_mode = _scope(question, paper_id)
     cfg = _cfg()
     # Shared retrieval needs a per-paper diversity cap. In an explicit
     # single-paper scope that cap becomes a deterministic 3-block bottleneck,
@@ -611,6 +604,47 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
 
     # Keep chunks of active cards (the card's live status), counting the rest by reason.
     st_cache, fm_cache, ver_cache, chunk_metadata_cache = {}, {}, {}, {}
+    active = _active_hits(hits, lib_root, st_cache, drop, _ex)
+    if require_verified:
+        active = _verified_only(active, ver_cache, drop, _ex)
+    rcfg, rerank_state, active, rr_dropped_examples, rr_dropped_ce = _rank(
+        question, strategy, active, lib_root, chunk_metadata_cache, fm_cache, drop,
+        rerank_fn, rerank_task_type, multimodal_rank_fn)
+    final = _candidates(active, cfg, effective_per_card, lib_root, fm_cache, chunk_metadata_cache,
+                        require_verified, drop, _ex)
+
+    non_active = (drop["pending"] + drop["quarantined"] + drop["card_missing"]
+                  + drop["card_state_error"] + drop["verified_fail"])
+    reached_cap = (len(final) < cfg["target"]) and (count > cfg["max_overfetch"])
+
+    result = CandidateSet(
+        candidates=tuple(final), target_active_count=cfg["target"],
+        raw_recall_count=len(hits), filtered_non_active_count=non_active,
+        final_active_count=len(final), reached_overfetch_cap=reached_cap,
+        require_verified=require_verified, scope_mode=scope_mode,
+        scope_paper_id=paper_id,
+    )
+    _log_retrieval(rcfg, rerank_state, drop, rr_dropped_ce, rr_dropped_examples, hits, non_active, final, cfg,
+                   reached_cap, require_verified, scope_mode, paper_id, examples, effective_per_card, target,
+                   count, strategy, active)
+    return result
+
+
+def _scope(question, paper_id):
+    """The question must have text; a paper_id limits the search to that paper (a where clause)."""
+    if not isinstance(question, str) or not question.strip():
+        raise ValueError("CandidateRetrieval: question 必须是非空字符串(空 / 纯空白 fail-loud)")
+    if paper_id is not None:
+        if not isinstance(paper_id, str) or not paper_id.strip():
+            raise ValueError("CandidateRetrieval: paper_id scope 必须是非空字符串或 None")
+        paper_id = paper_id.strip()
+    scope_where = None if paper_id is None else {"paper_id": paper_id}
+    scope_mode = "shared" if paper_id is None else "paper_id"
+    return paper_id, scope_where, scope_mode
+
+
+def _active_hits(hits, lib_root, st_cache, drop, _ex):
+    """Keep chunks of active cards (the card's live status), counting the rest by reason."""
     active = []
     for h in hits:
         st = _live_status(h["paper_id"], lib_root, st_cache)
@@ -619,20 +653,27 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
         else:
             drop[st] += 1                                   # pending/quarantined/card_missing/card_state_error
             _ex(h["chunk_id"], st)
+    return active
 
-    # require_verified (off by default): only cards admitted on a card review verdict.
-    if require_verified:
-        kept = []
-        for h in active:
-            if _verified_by_evidence_review(h["paper_id"], ver_cache):
-                kept.append(h)
-            else:
-                drop["verified_fail"] += 1
-                _ex(h["chunk_id"], "verified_fail")
-        active = kept
 
-    # Reranking is off by default. legacy_score keeps the old scores and threshold; multimodal_listwise
-    # accepts only a full order of ids.
+def _verified_only(active, ver_cache, drop, _ex):
+    """require_verified (off by default): only cards admitted on a card review verdict."""
+    kept = []
+    for h in active:
+        if _verified_by_evidence_review(h["paper_id"], ver_cache):
+            kept.append(h)
+        else:
+            drop["verified_fail"] += 1
+            _ex(h["chunk_id"], "verified_fail")
+    active = kept
+    return active
+
+
+def _rank(question, strategy, active, lib_root, chunk_metadata_cache, fm_cache, drop,
+          rerank_fn, rerank_task_type, multimodal_rank_fn):
+    """Reranking, off by default. legacy_score keeps the old scores and threshold; multimodal_listwise
+    accepts only a full order of ids; auto runs it only for pages and questions that need it. Any
+    failure falls back to the distance order."""
     rcfg = _rerank_cfg()
     # When off, nothing changes: no sidecar is read for a ranking that will not run.
     if rcfg["enabled"]:
@@ -664,99 +705,122 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
                 )
                 active.sort(key=lambda h: h["distance"])
             else:
-                from memorive.research.retrieval.context_pack import _is_counterexample
-                rf = rerank_fn or (lambda q, txts: _default_rerank(q, txts, rerank_task_type))
-                scores = None
-                try:
-                    raw_scores = rf(question, [h["text"] for h in active])
-                    if (isinstance(raw_scores, (list, tuple)) and len(raw_scores) == len(active)
-                            and all(isinstance(score, (int, float)) and not isinstance(score, bool)
-                                    and math.isfinite(score) for score in raw_scores)):
-                        scores = [float(score) for score in raw_scores]
-                    else:
-                        rerank_state["fallback_reason"] = "invalid_scores"
-                except Exception as exc:
-                    rerank_state["fallback_reason"] = f"exception:{type(exc).__name__}"
-                rerank_state["attempted"] = True
-                rerank_state["output_kind"] = "PER_CANDIDATE_RELEVANCE_SCORE"
-                if scores is not None:
-                    for h, score in zip(active, scores):
-                        h["rerank_score"] = score
-                    thr = rcfg["threshold"]
-                    kept = []
-                    for h in active:
-                        rs = h.get("rerank_score")
-                        if rs < thr:
-                            drop["rerank_dropped"] += 1
-                            if _is_counterexample(h["text"]):
-                                rr_dropped_ce += 1
-                            if len(rr_dropped_examples) < _MAX_DROPPED_EXAMPLES:
-                                rr_dropped_examples.append({"chunk_id": h["chunk_id"], "rerank_score": rs})
-                        else:
-                            kept.append(h)
-                    active = sorted(kept, key=lambda h: h["rerank_score"], reverse=True)
-                else:
-                    active.sort(key=lambda h: h["distance"])
+                active, rr_dropped_ce = _legacy_scores(question, active, rcfg, rerank_state, drop,
+                                                       rr_dropped_examples, rr_dropped_ce, rerank_fn,
+                                                       rerank_task_type)
         else:
-            # This route is local-only, so entrusted content remains inside the
-            # loopback boundary. No dedicated reranker or cloud fallback exists.
-            ranker = multimodal_rank_fn or _default_multimodal_rank
-            documents = _rank_documents(active)
-            query_intent = getattr(getattr(strategy, "qtype", None), "value", None) or "unknown"
-            ranked_ids = None
-            try:
-                rank_result = ranker(question, documents, query_intent)
-                if isinstance(rank_result, dict):
-                    raw_ids = rank_result.get("candidate_ids")
-                    receipt = rank_result.get("receipt")
-                    if not isinstance(receipt, dict):
-                        raise ValueError("LOCAL_RANK_RECEIPT_MISSING")
-                    if (
-                        receipt.get("status") != "PASS"
-                        or receipt.get("external_request_count") != 0
-                        or receipt.get("cloud_fallback_count") != 0
-                        or receipt.get("dedicated_reranker_fallback_count") != 0
-                        or receipt.get("requested_model") != receipt.get("returned_model")
-                    ):
-                        raise ValueError("LOCAL_RANK_RECEIPT_INVALID")
-                    rerank_state["execution_receipt"] = {
-                        key: receipt.get(key)
-                        for key in (
-                            "schema_version", "receipt_sha256", "requested_model",
-                            "returned_model", "model_digest", "latency_ms",
-                            "local_metadata_request_count", "local_model_request_count",
-                            "external_request_count", "cloud_fallback_count",
-                            "dedicated_reranker_fallback_count", "production_mutation_count",
-                        )
-                    }
-                else:
-                    raw_ids = rank_result
-                expected_ids = [hit["chunk_id"] for hit in active]
-                if (
-                    isinstance(raw_ids, (list, tuple))
-                    and len(raw_ids) == len(expected_ids)
-                    and len(set(raw_ids)) == len(raw_ids)
-                    and set(raw_ids) == set(expected_ids)
-                ):
-                    ranked_ids = list(raw_ids)
-                else:
-                    rerank_state["fallback_reason"] = "invalid_candidate_exact_set"
-            except Exception as exc:
-                rerank_state["fallback_reason"] = f"exception:{type(exc).__name__}"
-            rerank_state["attempted"] = True
-            rerank_state["output_kind"] = "GENERATIVE_LISTWISE_EXACT_SET"
-            if ranked_ids is not None:
-                by_id = {hit["chunk_id"]: hit for hit in active}
-                active = [by_id[candidate_id] for candidate_id in ranked_ids]
-                for rank, hit in enumerate(active, 1):
-                    hit["ranking_rank"] = rank
-            else:
-                active.sort(key=lambda h: h["distance"])
+            active = _listwise(question, strategy, active, rerank_state, multimodal_rank_fn)
     else:
         active.sort(key=lambda h: h["distance"])            # distance ascending, smaller is closer; the path without reranking
+    return rcfg, rerank_state, active, rr_dropped_examples, rr_dropped_ce
 
-    # The per-card limit, then up to target, in order (the listwise place, the legacy score, or
-    # the distance when reranking is off).
+
+def _legacy_scores(question, active, rcfg, rerank_state, drop, rr_dropped_examples, rr_dropped_ce, rerank_fn,
+                   rerank_task_type):
+    """legacy_score: a relevance score per candidate from the reranker; scores below the threshold are cut
+    (counted, a likely counterexample among them noted) and the rest ordered by score. Invalid scores
+    or an error fall back to the distance order."""
+    from memorive.research.retrieval.context_pack import _is_counterexample
+    rf = rerank_fn or (lambda q, txts: _default_rerank(q, txts, rerank_task_type))
+    scores = None
+    try:
+        raw_scores = rf(question, [h["text"] for h in active])
+        if (isinstance(raw_scores, (list, tuple)) and len(raw_scores) == len(active)
+                and all(isinstance(score, (int, float)) and not isinstance(score, bool)
+                        and math.isfinite(score) for score in raw_scores)):
+            scores = [float(score) for score in raw_scores]
+        else:
+            rerank_state["fallback_reason"] = "invalid_scores"
+    except Exception as exc:
+        rerank_state["fallback_reason"] = f"exception:{type(exc).__name__}"
+    rerank_state["attempted"] = True
+    rerank_state["output_kind"] = "PER_CANDIDATE_RELEVANCE_SCORE"
+    if scores is not None:
+        for h, score in zip(active, scores):
+            h["rerank_score"] = score
+        thr = rcfg["threshold"]
+        kept = []
+        for h in active:
+            rs = h.get("rerank_score")
+            if rs < thr:
+                drop["rerank_dropped"] += 1
+                if _is_counterexample(h["text"]):
+                    rr_dropped_ce += 1
+                if len(rr_dropped_examples) < _MAX_DROPPED_EXAMPLES:
+                    rr_dropped_examples.append({"chunk_id": h["chunk_id"], "rerank_score": rs})
+            else:
+                kept.append(h)
+        active = sorted(kept, key=lambda h: h["rerank_score"], reverse=True)
+    else:
+        active.sort(key=lambda h: h["distance"])
+    return active, rr_dropped_ce
+
+
+def _listwise(question, strategy, active, rerank_state, multimodal_rank_fn):
+    """multimodal_listwise: a local model's full order of the candidate ids, with a receipt showing no
+    outside request and no fallback. This route is local-only, so entrusted content remains inside the
+    loopback boundary; anything else falls back to the distance order."""
+    # This route is local-only, so entrusted content remains inside the
+    # loopback boundary. No dedicated reranker or cloud fallback exists.
+    ranker = multimodal_rank_fn or _default_multimodal_rank
+    documents = _rank_documents(active)
+    query_intent = getattr(getattr(strategy, "qtype", None), "value", None) or "unknown"
+    ranked_ids = None
+    try:
+        rank_result = ranker(question, documents, query_intent)
+        if isinstance(rank_result, dict):
+            raw_ids = rank_result.get("candidate_ids")
+            receipt = rank_result.get("receipt")
+            if not isinstance(receipt, dict):
+                raise ValueError("LOCAL_RANK_RECEIPT_MISSING")
+            if (
+                receipt.get("status") != "PASS"
+                or receipt.get("external_request_count") != 0
+                or receipt.get("cloud_fallback_count") != 0
+                or receipt.get("dedicated_reranker_fallback_count") != 0
+                or receipt.get("requested_model") != receipt.get("returned_model")
+            ):
+                raise ValueError("LOCAL_RANK_RECEIPT_INVALID")
+            rerank_state["execution_receipt"] = {
+                key: receipt.get(key)
+                for key in (
+                    "schema_version", "receipt_sha256", "requested_model",
+                    "returned_model", "model_digest", "latency_ms",
+                    "local_metadata_request_count", "local_model_request_count",
+                    "external_request_count", "cloud_fallback_count",
+                    "dedicated_reranker_fallback_count", "production_mutation_count",
+                )
+            }
+        else:
+            raw_ids = rank_result
+        expected_ids = [hit["chunk_id"] for hit in active]
+        if (
+            isinstance(raw_ids, (list, tuple))
+            and len(raw_ids) == len(expected_ids)
+            and len(set(raw_ids)) == len(raw_ids)
+            and set(raw_ids) == set(expected_ids)
+        ):
+            ranked_ids = list(raw_ids)
+        else:
+            rerank_state["fallback_reason"] = "invalid_candidate_exact_set"
+    except Exception as exc:
+        rerank_state["fallback_reason"] = f"exception:{type(exc).__name__}"
+    rerank_state["attempted"] = True
+    rerank_state["output_kind"] = "GENERATIVE_LISTWISE_EXACT_SET"
+    if ranked_ids is not None:
+        by_id = {hit["chunk_id"]: hit for hit in active}
+        active = [by_id[candidate_id] for candidate_id in ranked_ids]
+        for rank, hit in enumerate(active, 1):
+            hit["ranking_rank"] = rank
+    else:
+        active.sort(key=lambda h: h["distance"])
+    return active
+
+
+def _candidates(active, cfg, effective_per_card, lib_root, fm_cache, chunk_metadata_cache,
+                require_verified, drop, _ex):
+    """The per-card limit, then up to target, in order (the listwise place, the legacy score, or the
+    distance when reranking is off); each chunk with its card field, credibility, structure and ownership."""
     per_card, final = {}, []
     for h in active:
         if len(final) >= cfg["target"]:
@@ -812,18 +876,13 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
             ownership_projection_revision=h.get("ownership_revision"),
             **snapshot_fields(ownership),
         ))
+    return final
 
-    non_active = (drop["pending"] + drop["quarantined"] + drop["card_missing"]
-                  + drop["card_state_error"] + drop["verified_fail"])
-    reached_cap = (len(final) < cfg["target"]) and (count > cfg["max_overfetch"])
 
-    result = CandidateSet(
-        candidates=tuple(final), target_active_count=cfg["target"],
-        raw_recall_count=len(hits), filtered_non_active_count=non_active,
-        final_active_count=len(final), reached_overfetch_cap=reached_cap,
-        require_verified=require_verified, scope_mode=scope_mode,
-        scope_paper_id=paper_id,
-    )
+def _log_retrieval(rcfg, rerank_state, drop, rr_dropped_ce, rr_dropped_examples, hits, non_active, final, cfg,
+                   reached_cap, require_verified, scope_mode, paper_id, examples, effective_per_card, target,
+                   count, strategy, active):
+    """The retrieval record in the log; a listwise place and a score are kept apart."""
     rerank_note = ""
     if rcfg["enabled"]:
         if rerank_state["skipped"]:
@@ -869,4 +928,4 @@ def retrieve_candidates(question: str, strategy=None, *, target: str = "sandbox"
                               "dropped": drop["rerank_dropped"], "dropped_counterexamples": rr_dropped_ce,
                               "dropped_examples": rr_dropped_examples},
                })
-    return result
+
