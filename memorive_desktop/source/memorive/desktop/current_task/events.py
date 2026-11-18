@@ -14,19 +14,23 @@ class EventIntegrityError(ValueError):
 
 
 class TimelineReconciler:
-    """Fail-closed event ordering for one selected job attempt."""
+    """The events of one job attempt, in order, for the current task page.
 
-    def __init__(self, job_id: str, attempt_id: str, *, after_sequence: int = 0, max_buffer: int = 256):
+    The service numbers the events of all jobs in one sequence (memorive/platform/jobs/durable_store.py),
+    so one job's events have increasing numbers with other jobs' events in between, and a page the
+    service returns for a job holds all of that job's events after the cursor. Each event not seen
+    before is accepted in number order. This used to wait for cursor + 1 and buffer the rest: every job
+    but the first of a profile then showed no timeline, and a job with more than 256 events made the
+    task list fail with BUFFER_OVERFLOW, and with it the window's start (it reads the task list).
+    """
+
+    def __init__(self, job_id: str, attempt_id: str, *, after_sequence: int = 0):
         self.job_id = require_identifier(job_id, "job_id")
         self.attempt_id = require_identifier(attempt_id, "attempt_id")
         if isinstance(after_sequence, bool) or not isinstance(after_sequence, int) or after_sequence < 0:
             raise EventIntegrityError("EVENT_CURSOR_INVALID")
-        if isinstance(max_buffer, bool) or not isinstance(max_buffer, int) or max_buffer <= 0:
-            raise EventIntegrityError("EVENT_BUFFER_INVALID")
         self.cursor = after_sequence
-        self.max_buffer = max_buffer
         self._fingerprints: dict[int, str] = {}
-        self._pending: dict[int, dict[str, Any]] = {}
         self._accepted: list[dict[str, Any]] = []
         self._terminal_state: str | None = None
 
@@ -55,7 +59,7 @@ class TimelineReconciler:
         sequences = [row.get("sequence") if isinstance(row, Mapping) else None for row in source]
         duplicate_count = 0
         stale_count = 0
-        newly_buffered = 0
+        fresh: list[dict[str, Any]] = []
         for raw in source:
             event = self._validate_event(raw)
             sequence = event["sequence"]
@@ -70,19 +74,15 @@ class TimelineReconciler:
             if sequence <= self.cursor:
                 stale_count += 1
                 continue
-            self._pending[sequence] = event
-            newly_buffered += 1
-        if len(self._pending) > self.max_buffer:
-            raise EventIntegrityError("BUFFER_OVERFLOW")
+            fresh.append(event)
         accepted_now: list[dict[str, Any]] = []
-        while self.cursor + 1 in self._pending:
-            event = self._pending.pop(self.cursor + 1)
+        for event in sorted(fresh, key=lambda row: row["sequence"]):
             state = event.get("control_state")
             if self._terminal_state is not None and state not in {None, self._terminal_state}:
                 raise EventIntegrityError("TERMINAL_STATE_ROLLBACK")
             if state in TERMINAL_CONTROL_STATES:
                 self._terminal_state = state
-            self.cursor += 1
+            self.cursor = event["sequence"]
             self._accepted.append(event)
             accepted_now.append(event)
         return {
@@ -91,16 +91,12 @@ class TimelineReconciler:
             "attempt_id": self.attempt_id,
             "input_count": len(source),
             "accepted_count": len(accepted_now),
-            "newly_buffered_count": newly_buffered,
             "duplicate_count": duplicate_count,
             "stale_count": stale_count,
             "out_of_order_input": sequences != sorted(sequences) if all(isinstance(row, int) for row in sequences) else False,
-            "gap_detected": bool(self._pending),
-            "pending_sequences": sorted(self._pending),
             "cursor": self.cursor,
             "terminal_state": self._terminal_state,
             "events": deepcopy(accepted_now),
-            "status": "RECONNECT_REQUIRED" if self._pending else "PASS",
         }
 
     def timeline(self) -> list[dict[str, Any]]:
@@ -129,9 +125,10 @@ class WatchRecoveryController:
     def reconnect(self, events: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
         if self.connection_state not in {"DISCONNECTED", "RECONNECTING", "RECOVERING_AFTER_RESTART"}:
             raise EventIntegrityError("WATCH_RECONNECT_PRECONDITION")
+        # The events after the cursor come as one page from the service: nothing is missing once read.
         receipt = self.reconciler.ingest(events)
-        self.connection_state = "CONNECTED" if receipt["status"] == "PASS" else "RECONNECTING"
-        self.disconnect_reason = None if self.connection_state == "CONNECTED" else self.disconnect_reason
+        self.connection_state = "CONNECTED"
+        self.disconnect_reason = None
         return {**self.snapshot("WATCH_RECONNECT"), "reconciliation": receipt}
 
     def service_restarted(self) -> dict[str, Any]:
