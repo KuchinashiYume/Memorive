@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "5a497a224e0c19ffa249994dbc51e439a3dc73f42d1e02dcd9dc4afc482dbf85",
+      "sha256": "42f072de5fa4fe11c18d4612262172df4b26191d04f711de7f210580253e0980",
       "bytes": 276007
     },
     {
@@ -8896,8 +8896,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/context_selection.py",
-      "sha256": "cfa4b8c1d97e239483ef3eceefd0e1dd4ec09a353250d46e951d9f5a1014ef50",
-      "bytes": 13732
+      "sha256": "63a809e2654a2a98fd90a8c25aa72f64c9ddabe383409fd3d836f9e0c7c86807",
+      "bytes": 14535
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/conversation_backfill.py",

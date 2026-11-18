@@ -155,11 +155,7 @@ def select(refs, question, fits):
     """
     ordered = pack_order(refs,question)
     hints = signals(ordered,question)
-    groups = {}
-    for ref in ordered:
-        groups.setdefault(document_key(ref),[]).append(ref)
-    for key, rows in groups.items():
-        groups[key] = sorted(rows,key=lambda r:-hints[r['id']]['primary'])
+    groups = _by_source(ordered, hints)
     chosen=[]
     seen=set()
     def admit(ref):
@@ -174,8 +170,26 @@ def select(refs, question, fits):
         for ref in rows:
             if admit(ref):
                 break
-    # One strongest remaining qualification per source is considered before
-    # generic contrasts and repeated result pages. A matched word is no verdict.
+    _admit_qualifications(groups, seen, hints, admit)
+    _exchange_for_qualification(chosen, seen, hints, question, ordered, fits)
+    _admit_design_companions(groups, chosen, seen, hints, question, admit)
+    _admit_remaining(groups, chosen, seen, admit)
+    return chosen
+
+
+def _by_source(ordered, hints):
+    """The excerpts of each source document, the strongest primary finding first."""
+    groups = {}
+    for ref in ordered:
+        groups.setdefault(document_key(ref),[]).append(ref)
+    for key, rows in groups.items():
+        groups[key] = sorted(rows,key=lambda r:-hints[r['id']]['primary'])
+    return groups
+
+
+def _admit_qualifications(groups, seen, hints, admit):
+    """One strongest remaining qualification per source is considered before generic contrasts and
+    repeated result pages. A matched word is no verdict."""
     constraints=[]
     for rows in groups.values():
         candidates=[r for r in rows if r['id'] not in seen and hints[r['id']]['constraint']>0]
@@ -183,11 +197,13 @@ def select(refs, question, fits):
             constraints.append(max(candidates,key=lambda r:(hints[r['id']]['constraint'],hints[r['id']]['primary'])))
     for ref in sorted(constraints,key=lambda r:(-hints[r['id']]['constraint'],-hints[r['id']]['primary'])):
         admit(ref)
-    # Greedy source heads can fill the budget with positive findings only.
-    # A complete qualification from the same source can replace one head;
-    # never lose source coverage, replace the sole primary, or do this for a
-    # methods-only question. Generic "however"/footnote hints (.25) alone do
-    # not justify evicting a primary. These remain lexical hints, not verdicts.
+
+
+def _exchange_for_qualification(chosen, seen, hints, question, ordered, fits):
+    """Greedy source heads can fill the budget with positive findings only. A complete qualification
+    from the same source can replace one head; never lose source coverage, replace the sole primary,
+    or do this for a methods-only question. Generic "however"/footnote hints (.25) alone do not
+    justify evicting a primary. These remain lexical hints, not verdicts."""
     method_focus = bool(METHOD_QUESTION.search(question) and not OUTCOME_QUESTION.search(question))
     if len(chosen)>1 and not method_focus and not any(hints[r['id']]['constraint']>.25 for r in chosen):
         exchanges=[]
@@ -208,10 +224,12 @@ def select(refs, question, fits):
             seen.remove(chosen[i]['id'])
             chosen[i]=ref
             seen.add(ref['id'])
-    # A result-only excerpt can lose the experimental system/control while
-    # keeping an impressive number. Prefer one intact source-local design
-    # companion before repeated result pages. Lexical hints do not establish
-    # that a design is complete, and cannot cross a document boundary.
+
+
+def _admit_design_companions(groups, chosen, seen, hints, question, admit):
+    """A result-only excerpt can lose the experimental system/control while keeping an impressive
+    number. Prefer one intact source-local design companion before repeated result pages. Lexical
+    hints do not establish that a design is complete, and cannot cross a document boundary."""
     if len(groups)>1 or METHOD_QUESTION.search(question):
         for key,rows in groups.items():
             source_chosen=[r for r in chosen if document_key(r)==key]
@@ -221,6 +239,10 @@ def select(refs, question, fits):
             for ref in sorted(companions,key=lambda r:(-hints[r['id']]['design'],-hints[r['id']]['primary'])):
                 if admit(ref):
                     break
+
+
+def _admit_remaining(groups, chosen, seen, admit):
+    """The rest, round-robin over sources, a page not yet used before a repeated one."""
     used_pages={(document_key(r),r.get('page')) for r in chosen if r.get('page') is not None}
     remaining=[]
     for key,rows in groups.items():
@@ -241,4 +263,4 @@ def select(refs, question, fits):
         for rows in remaining:
             if i<len(rows):
                 admit(rows[i])
-    return chosen
+
