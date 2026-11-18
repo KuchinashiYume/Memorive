@@ -671,7 +671,8 @@
   document.querySelector('[data-category="notice"]')?.addEventListener('click',syncNotice);
   window.addEventListener('desktop:research-preferences-saved',syncNotice);
   window.addEventListener('pywebviewready',syncNotice);
-  Memorive.research={open,openResult,renderResult,openTask,taskActions,close,mountPreferences,syncNotice};
+  // openPane / closePane: the same pane for other research views (shared/opportunities.js).
+  Memorive.research={open,openResult,renderResult,openTask,taskActions,close,mountPreferences,syncNotice,openPane:openShell,closePane:close};
 
   // Reports are scheduled from completed material progress, not a work-log command.
   window.addEventListener('desktop:research-published',()=> {

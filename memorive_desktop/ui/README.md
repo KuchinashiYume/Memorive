@@ -155,7 +155,7 @@ Python also sends two events to the page:
 | Event | Sent by | Listened to by |
 | --- | --- | --- |
 | `desktop:core-durable-event`, with the changed document jobs in `detail` | `memorive/desktop/api/page_events.py` | `shared/product-bridge.js`, which refreshes the routes that show them |
-| `desktop:research-published` | `memorive/research/runtime.py` (through `notify_window` in `memorive/research/host.py`) | `shared/research.js`, `routes/inbox/research-home.js` |
+| `desktop:research-published` | `memorive/research/runtime.py` (through `notify_window` in `memorive/research/host.py`) | `shared/research.js`, `shared/opportunities.js`, `routes/inbox/research-home.js` |
 
 and reads a few things straight from the page: the `[data-console-expression]` elements and the `desktop-hide-expressions` class (`product/desktop/console_expressions.py`), the settings category buttons (`[data-category="..."]`, `assistant/desktop.py`) and the data-review step of the workflow list (`#settings-flow-list [data-step="data-review"]`, `data_review/health.py`).
 

@@ -21,6 +21,23 @@
 .desktop-research-paper p { font-size:var(--memo-size-small);line-height:1.6; }
 .desktop-research-report { white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:var(--memo-size-small);line-height:1.7;margin:0; }
 .desktop-research-advanced summary { cursor:pointer; }
+/* Research opportunities (shared/opportunities.js): the search controls, then one card per opportunity. */
+.desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--border-default,#dfd9cf); }
+.desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:4px 0 18px;border-bottom:1px solid var(--border-default,#dfd9cf);overflow-wrap:anywhere; }
+.desktop-research-opportunity h4 { margin:0;line-height:1.5; }
+.desktop-research-opportunity-tags { display:flex;gap:10px;align-items:center;margin:0; }
+.desktop-research-opportunity-kind { padding:1px 8px;border-radius:999px;background:var(--surface-subtle,#F0EDE6);color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity-part p { margin:2px 0 0; }
+.desktop-research-opportunity-dimensions { margin:4px 0 0;padding:0;list-style:none;display:grid;gap:4px; }
+.desktop-research-opportunity-dimensions li { display:flex;flex-wrap:wrap;column-gap:10px; }
+.desktop-research-opportunity-dimensions li > span:last-child { flex:1 1 14em;min-width:0; }
+.desktop-research-opportunity-dimensions li[data-compared="different"] .desktop-research-opportunity-compared { color:var(--yellow-text,#8A5B12); }
+:is(.desktop-research-opportunity-evidence,.desktop-research-opportunity-dismissed) > summary { cursor:pointer;color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity-dismissed { padding-top:8px; }
+.desktop-research-opportunity-fact { margin:10px 0 0;padding-left:12px;border-left:2px solid var(--border-default,#dfd9cf); }
+.desktop-research-opportunity-fact p { margin:2px 0 0; }
+.desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
+.desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
 #library-research-result { font:inherit;line-height:1.6;overflow-wrap:anywhere; }
 #library-research-result[hidden] { display:none; }
 #library-research-result .desktop-research-paper { padding:16px 0; }
