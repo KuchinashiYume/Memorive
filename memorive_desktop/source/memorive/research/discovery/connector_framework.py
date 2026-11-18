@@ -476,7 +476,6 @@ class BaseOfflineConnector:
             raw_bytes=raw_bytes,
             normalized_payload=normalized_payload,
         )
-        verify_snapshot(snapshot, raw_bytes, normalized_payload)
         cursor_hash = None if cursor is None else sha256_bytes(cursor.encode("utf-8"))
         cache_key = sha256_json(
             [

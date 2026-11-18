@@ -6032,8 +6032,8 @@
     },
     {
       "path": "source/memorive/research/discovery/connector_framework.py",
-      "sha256": "8db2ab0af9a8f02a910ab9ebbb2d160e9fb4d0478380dae19eae5a4e7be4c3f2",
-      "bytes": 47224
+      "sha256": "8506877527a9ca604dd55bdc6b816b8c0712c59fbf22732ae8bd7e7b75d13c58",
+      "bytes": 47158
     },
     {
       "path": "source/memorive/research/discovery/desktop.py",
