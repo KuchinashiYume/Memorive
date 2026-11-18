@@ -126,14 +126,15 @@ class Groups:
                 raise
             return dict(entry, status='removed', job_id=None)
         job_id = item.get('job_id')
-        paper = papers.get(job_id)
-        if paper:
-            status = 'admitted' if paper['card_status'] == 'active' else (
-                'no_card' if paper['card_status'] == 'missing' else 'card_' + paper['card_status'])
+        paper = papers.get(job_id) or {}
+        if paper.get('card_status', 'missing') != 'missing':
+            status = 'admitted' if paper['card_status'] == 'active' else 'card_' + paper['card_status']
         elif item['state'] == 'ERROR':
             return dict(entry, status='failed', job_id=job_id, error=(item.get('error') or {}).get('code'))
-        elif job_id and self.r.host.service.call('get_job', {'job_id': job_id}).get('control_state') in {'FAILED', 'CANCELLED'}:
-            status = 'failed'
+        elif job_id:
+            # The library lists a document while its job still runs; no card means something only once it ended.
+            control = self.r.host.service.call('get_job', {'job_id': job_id}).get('control_state')
+            status = 'failed' if control in {'FAILED', 'CANCELLED'} else 'no_card' if control == 'SUCCEEDED' else 'processing'
         else:
             status = 'queued' if item['state'] == 'QUEUED' else 'processing'
         return dict(entry, status=status, job_id=job_id)

@@ -76,10 +76,15 @@ def library(tmp_path, papers=PAPERS, status=None):
                                  'private_path': str(path), 'row': {'display_name': job, 'updated_at': days_ago(days)}}
             files[artifact] = path
 
+    def document(job, name):
+        """The source document of a job, listed in the library while the job still runs."""
+        records[f'{job}/CORE_DOCUMENT'] = {'artifact_kind': 'CORE_DOCUMENT', 'job_id': job, 'content_sha256': job + '-doc',
+                                           'row': {'display_name': name, 'updated_at': days_ago(0)}}
+
     for job, text in papers.items():
         add(job, text, (status or {}).get(job, 'active'))
     return SimpleNamespace(core_artifacts=lambda: copy.deepcopy(records), resolve_core_private_artifact=files.__getitem__,
-                           records=records, add=add)
+                           records=records, add=add, document=document)
 
 
 def ids(sheets):
@@ -218,7 +223,7 @@ class Model:
     """The settings service, with a stub model that answers each group with the prepared opportunities."""
 
     def __init__(self, answer, fail_group=None):
-        self.answer, self.fail_group, self.prompts, self.snapshots = answer, fail_group, [], []
+        self.answer, self.fail_group, self.prompts, self.snapshots, self.jobs = answer, fail_group, [], [], {}
 
     def call(self, method, params):
         if method == 'settings.get_state':
@@ -240,7 +245,7 @@ class Model:
                                           'physical_call_ids': ['call-' + str(len(self.prompts))]},
                     'response': self.answer(params['prompt'])}
         if method == 'get_job':
-            return {'control_state': 'RUNNING'}
+            return {'control_state': self.jobs.get(params['job_id'], 'RUNNING')}
         raise AssertionError(method)
 
 
@@ -488,6 +493,9 @@ def test_files_picked_for_a_group_join_it_once_their_card_is_admitted(research):
     call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/auto.pdf'], 'request_id': 'pick-auto'})
     assert [d['item_id'] for d in research.inbox.dispatched] == ['item-1', 'item-2']
     research.inbox.auto_run = False
+    # The library lists the document while its job still runs: still processing, not "no card".
+    research.library.document('job-of-new.pdf', 'new.pdf')
+    assert call('opportunities.groups', {})['groups'][0]['pending'][0]['status'] == 'processing'
     # Its card waits for review, then is admitted: from then on it is one of the group's papers.
     research.library.add('job-of-new.pdf', PAPERS['job-c'], status='pending')
     assert call('opportunities.groups', {})['groups'][0]['pending'][0]['status'] == 'card_pending'
@@ -495,13 +503,16 @@ def test_files_picked_for_a_group_join_it_once_their_card_is_admitted(research):
     group = call('opportunities.groups', {})['groups'][0]
     assert [p['job_id'] for p in group['papers']] == ['job-a', 'job-b', 'job-of-new.pdf']
     assert [e['title'] for e in group['pending']] == ['auto.pdf']
-    # A file taken out of the inbox before it was processed shows as removed; failing shows its error.
+    # A file taken out of the inbox before it was processed shows as removed; failing shows its error; a job
+    # that ended without a card shows that.
     call('opportunities.group_add_files', {'group_id': group_id, 'paths': ['C:/stage/gone.pdf', 'C:/stage/bad.pdf'],
                                            'request_id': 'pick-2'})
     research.inbox.items['item-3']['state'] = 'TRASHED'
     research.inbox.items['item-4'].update(state='ERROR', error={'code': 'PDF_UNREADABLE'})
+    research.library.document('job-of-auto.pdf', 'auto.pdf')
+    r.host.service.jobs['job-of-auto.pdf'] = 'SUCCEEDED'
     pending = call('opportunities.groups', {})['groups'][0]['pending']
-    assert [(e['title'], e['status'], e.get('error')) for e in pending] == [('auto.pdf', 'processing', None),
+    assert [(e['title'], e['status'], e.get('error')) for e in pending] == [('auto.pdf', 'no_card', None),
                                                                            ('gone.pdf', 'removed', None),
                                                                            ('bad.pdf', 'failed', 'PDF_UNREADABLE')]
     # Saving what the page shows keeps the papers and only the pending files it still lists.
