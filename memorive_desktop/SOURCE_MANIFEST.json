@@ -5782,8 +5782,8 @@
     },
     {
       "path": "source/memorive/platform/language/handoff.py",
-      "sha256": "41a834c4e732610965791429986783343bbafa6911a7c3d20a10fbfa7929e6b6",
-      "bytes": 10741
+      "sha256": "f568059011f7e915f8cd02bf4e82a83505346423ed7d0e0540cb7359dab48103",
+      "bytes": 11391
     },
     {
       "path": "source/memorive/platform/language/messages.py",

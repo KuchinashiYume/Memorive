@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "bdabbc9d830a239b19327259525e507637f8084fe2068c9d0321bbdd3bdddb76",
+      "sha256": "8170fea3279e7f631c5d3c74baac5de19268d6d9dc7e88b08c16f9abe15bd1e8",
       "bytes": 276404
     },
     {
@@ -5601,8 +5601,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/language/handoff.py",
-      "sha256": "41a834c4e732610965791429986783343bbafa6911a7c3d20a10fbfa7929e6b6",
-      "bytes": 10741
+      "sha256": "f568059011f7e915f8cd02bf4e82a83505346423ed7d0e0540cb7359dab48103",
+      "bytes": 11391
     },
     {
       "path": "memorive_desktop/source/memorive/platform/language/messages.py",
