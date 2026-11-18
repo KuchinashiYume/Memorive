@@ -38,7 +38,10 @@
   const RUNS = { QUEUED: '等待中', RUNNING: '进行中', SUCCEEDED: '已完成', PARTIAL: '部分完成', FAILED: '未完成', CANCELLED: '已取消', INTERRUPTED: '已中断' };
   const errors = { OPPORTUNITIES_MODEL_REQUIRED: '先在研究问答的设置里选择模型', RESEARCH_ALREADY_RUNNING: '另一项研究任务正在运行，结束后再试',
     OPPORTUNITIES_REVISION_CONFLICT: '列表已更新，请再操作一次', OPPORTUNITY_NOT_FOUND: '这条机会已不存在，列表已刷新',
-    OPPORTUNITIES_NO_PAPERS: '资料库里还没有处理完的论文', LIBRARY_SELECTION_STALE: '论文文件已变化，请重新寻找研究机会' };
+    OPPORTUNITIES_NO_PAPERS: '资料库里还没有处理完的论文', LIBRARY_SELECTION_STALE: '论文文件已变化，请重新寻找研究机会',
+    OPPORTUNITIES_GROUP_TOO_SMALL: '比较组里至少要有两篇卡片已审核通过的论文', OPPORTUNITIES_GROUP_NOT_FOUND: '比较组已不存在，列表已刷新',
+    OPPORTUNITIES_GROUP_REVISION_CONFLICT: '比较组已在别处更新，请再操作一次', OPPORTUNITIES_PAPER_NOT_ACTIVE: '有论文的卡片还没通过审核，不能加入',
+    NO_CONNECTED_LIBRARY: '研究问答项目还没有连接 Obsidian、Zotero 或文件夹' };
   // keywords: the focus of the next search, at most MAX_KEYWORDS, sent to the model joined (opportunities.find focus).
   const MAX_KEYWORDS = 5;
   let state = null, timer = 0, epoch = 0, keywords = [];
@@ -46,7 +49,7 @@
   const shown = () => page()?.dataset.mode === 'opportunities';
 
   function notify(e) {
-    const s = status();
+    const s = picker && !picker.hidden ? q('#memo-paper-picker-status') : status();
     if (!s) return;
     s.textContent = errors[e?.message] || e?.message || '操作未完成，请查看任务记录后重试';
     s.dataset.error = 'true';
@@ -68,6 +71,7 @@
       Memorive.chat?.closeEvidence();
       return refresh();
     }
+    closePicker();
     clearTimeout(timer);
     return Promise.resolve();
   }
@@ -78,9 +82,11 @@
   async function refresh() {
     clearTimeout(timer);
     const mine = ++epoch;
-    const fresh = await call('opportunities.state');
+    const [fresh, saved] = await Promise.all([call('opportunities.state'), call('opportunities.groups')]);
     if (mine !== epoch || !shown()) return;
     state = fresh;
+    groups = saved;
+    if (!currentGroup()) groupId = '';
     render();
     if (state.active_run) timer = setTimeout(() => refresh().catch(notify), 1500);
   }
@@ -155,7 +161,8 @@
     const unavailable = !state.model ? '先在研究问答的设置里选择模型' : !state.card_count ? '资料库里还没有处理完的论文' : '';
     const find = icon('寻找研究机会', async () => {
       add();   // a word typed but not yet added counts too
-      await call('opportunities.find', { request_id: 'opportunities-' + crypto.randomUUID(), ...(keywords.length ? { focus: keywords.join('；') } : {}) });
+      await call('opportunities.find', { request_id: 'opportunities-' + crypto.randomUUID(), ...(keywords.length ? { focus: keywords.join('；') } : {}),
+        ...(groupId ? { group_id: groupId } : {}) });
       await refresh();
     }, 'desktop-action-auto', 'desktop-toolbar-primary');
     find.disabled = running || !!unavailable;
@@ -172,7 +179,7 @@
     s.setAttribute('role', 'status');
     s.textContent = run ? (RUNS[run.status] || run.status) + (run.error_code ? ' · ' + (errors[run.error_code] || '请查看任务记录') : '') : unavailable;
     s.hidden = !s.textContent;
-    controls.append(row, chips, s);
+    controls.append(row, chips, ...scopeRow(), s);
     if (state.papers_since_last_run > 0 && state.runs.length) {
       // Separate text nodes, so the label is translated and the number kept.
       const fresh = make('p', null, 'desktop-research-muted');
@@ -190,6 +197,174 @@
       fold.append(summary, ...dismissed.map(card));
       target.append(fold);
     }
+  }
+  // Comparison groups: papers chosen to be compared with each other, kept for later searches (opportunities.groups).
+  // groupId '' is the whole library. The paper picker in the right panel searches the library's papers by name (all
+  // of them; the last 30 days when nothing is typed), opens a connected library's folder or the file explorer (the
+  // files go to the current task and join the group once their card passes review), and ticks papers whose card is
+  // active; confirming saves the group and closes the panel.
+  const CARD = { pending: '卡片待审核', quarantined: '卡片已停用' };
+  const PROVIDERS = { obsidian: 'Obsidian', zotero: 'Zotero', folder: '文件夹', bibliography: '文献目录' };
+  let groups = { revision: 0, groups: [] }, groupId = '', picker = null, picked = new Set(), searchTimer = 0, pickerTicket = 0;
+  const currentGroup = () => groups.groups.find((g) => g.group_id === groupId) || null;
+  const pickerOpen = () => !!picker && !picker.hidden && Memorive.frames.chat.root.dataset.right === 'true';
+  async function saveGroup(jobIds) {
+    const before = new Set(groups.groups.map((g) => g.group_id));
+    groups = await call('opportunities.group_save', { ...(groupId ? { group_id: groupId } : {}), job_ids: jobIds, expected_revision: groups.revision });
+    if (!groupId) groupId = groups.groups.find((g) => !before.has(g.group_id))?.group_id || '';
+  }
+  function pickerPanel() {
+    if (picker) return picker;
+    picker = make('aside', null, 'memo-evidence memo-paper-picker');
+    picker.id = 'memo-paper-picker';
+    picker.setAttribute('aria-label', '选择论文');
+    picker.hidden = true;
+    const head = make('div', null, 'memo-evidence-heading memo-paper-picker-head'), search = make('input', null, 'field');
+    search.type = 'search';
+    search.placeholder = '按名称搜索资料库论文';
+    search.setAttribute('aria-label', '按名称搜索资料库论文');
+    search.oninput = () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => void loadPapers(search.value.trim()).catch(notify), 250);
+    };
+    head.append(search,
+      icon('打开第三方资料库', () => chooseLibrary(), 'desktop-action-third-party', 'desktop-toolbar-ghost'),
+      icon('打开文件资源管理器', () => addFiles(null), 'desktop-action-folder-open', 'desktop-toolbar-ghost'),
+      icon('确认', () => confirmPicker(), 'desktop-action-confirm', 'desktop-toolbar-primary'));
+    const sources = make('div', null, 'memo-paper-picker-sources'), scroll = make('div', null, 'memo-evidence-scroll'),
+      s = make('p', null, 'memo-status');
+    sources.hidden = true;
+    scroll.append(make('p', null, 'desktop-research-muted memo-paper-picker-note'), make('div', null, 'memo-library-selection'));
+    s.id = 'memo-paper-picker-status';
+    s.setAttribute('role', 'status');
+    picker.append(head, sources, scroll, s);
+    q('#memo-evidence-panel').after(picker);
+    return picker;
+  }
+  async function openPicker() {
+    const panel = pickerPanel(), group = currentGroup();
+    picked = new Set(group ? group.papers.map((p) => p.job_id) : []);
+    q('#memo-evidence-panel').hidden = true;
+    panel.hidden = false;
+    panel.querySelector('.memo-paper-picker-sources').hidden = true;
+    panel.querySelector('#memo-paper-picker-status').textContent = '';
+    const search = panel.querySelector('input[type="search"]');
+    search.value = '';
+    Memorive.frames.chat.setInspector(true, { targetRatio: 0.32 });
+    search.focus();
+    await loadPapers('');
+  }
+  function closePicker() {
+    if (!picker || picker.hidden) return;
+    picker.hidden = true;
+    q('#memo-evidence-panel').hidden = false;
+    Memorive.frames.chat.setInspector(false);
+  }
+  async function loadPapers(query) {
+    const mine = ++pickerTicket, result = await call('opportunities.papers', query ? { query } : {});
+    if (mine !== pickerTicket || !picker || picker.hidden) return;
+    const list = picker.querySelector('.memo-library-selection');
+    picker.querySelector('.memo-paper-picker-note').textContent = query ? '搜索结果（全部时间）' : '最近 30 天处理的论文；更早的可按名称搜索';
+    list.replaceChildren(...result.items.map(paperRow));
+    if (!result.items.length) list.append(make('p', query ? '没有找到这个名称的论文' : '最近 30 天没有处理完的论文', 'desktop-research-muted'));
+  }
+  // A row of the materials panel's library list (routes/chat/workspace.css .memo-library-row). Only a paper whose
+  // card passed review can be ticked; the others say why.
+  function paperRow(paper) {
+    const row = make('label', null, 'memo-library-row'), check = make('input', null, 'desktop-batch-check'),
+      copy = make('span', null, 'memo-library-copy'), title = make('span', paper.title), meta = make('small');
+    check.type = 'checkbox';
+    check.setAttribute('aria-label', paper.title);
+    check.disabled = paper.card_status !== 'active';
+    check.checked = picked.has(paper.job_id);
+    row.dataset.selected = String(check.checked);
+    title.setAttribute('data-desktop-no-translate', '');
+    meta.append(new Date(paper.processed_at).toLocaleDateString());
+    if (check.disabled) meta.append(' · ', make('span', CARD[paper.card_status] || paper.card_status));
+    copy.append(title, meta);
+    check.onchange = () => {
+      if (check.checked) picked.add(paper.job_id); else picked.delete(paper.job_id);
+      row.dataset.selected = String(check.checked);
+    };
+    row.append(check, copy);
+    return row;
+  }
+  async function confirmPicker() {
+    const group = currentGroup(), before = group ? group.papers.map((p) => p.job_id) : [];
+    const changed = picked.size !== before.length || before.some((id) => !picked.has(id));
+    if (changed) await saveGroup([...picked]);
+    closePicker();
+    render();
+  }
+  // The files go to the current task (opportunities.group_add_files imports and starts them); the group shows them as
+  // being processed until their card passes review. A new group is saved first when none is chosen.
+  async function addFiles(directory) {
+    const chosen = await window.pywebview.api.pick_opportunity_files(directory ? { directory } : {});
+    if (!chosen?.paths?.length) return;
+    if (!groupId) await saveGroup([...picked]);
+    groups = await call('opportunities.group_add_files', { group_id: groupId, paths: chosen.paths, request_id: 'opportunity-files-' + crypto.randomUUID() });
+    picker.querySelector('#memo-paper-picker-status').textContent = '已送去处理：处理完、卡片审核通过后自动加入比较组';
+    render();
+  }
+  // A connected library (Obsidian, Zotero or a folder of a research Q&A project): its folder opens in the file
+  // explorer; with several, the person picks one in the panel.
+  async function chooseLibrary() {
+    const project = Memorive.chat?.inspect().project || 'default';
+    const { connections } = await call('memo.connections_state', { project });
+    const usable = connections.filter((c) => c.enabled !== false && c.root);
+    if (!usable.length) throw Error('NO_CONNECTED_LIBRARY');
+    if (usable.length === 1) return addFiles(usable[0].root);
+    const box = picker.querySelector('.memo-paper-picker-sources');
+    box.replaceChildren(make('small', '选择要打开的资料库', 'desktop-research-muted'), ...usable.map((c) => {
+      const b = make('button', (PROVIDERS[c.provider] || c.provider) + ' · ' + c.name, 'memo-quiet-button');
+      b.type = 'button';
+      b.onclick = () => {
+        box.hidden = true;
+        void addFiles(c.root).catch(notify);
+      };
+      return b;
+    }));
+    box.hidden = false;
+  }
+  // Under the keywords: the comparison scope (the whole library or a group), add papers, delete the group, and the
+  // group's papers as chips (those still being processed say so).
+  function scopeRow() {
+    const scope = make('div', null, 'desktop-research-opportunity-scope'), select = make('select', null, 'select');
+    select.setAttribute('aria-label', '比较范围');
+    select.append(new Option('整个资料库', ''));
+    for (const g of groups.groups) select.append(new Option(g.name + ' · ' + g.papers.length, g.group_id));
+    select.value = groupId;
+    select.onchange = () => { groupId = select.value; render(); };
+    scope.append(select, icon('添加论文', () => openPicker(), 'desktop-action-file-plus'));
+    const group = currentGroup(), parts = [scope];
+    if (!group) return parts;
+    const remove = icon('删除比较组', async () => {
+      if (!Memorive.controls.confirmAction(remove, 'opportunity-group-' + group.group_id, '再次点击确认删除')) return;
+      groups = await call('opportunities.group_delete', { group_id: group.group_id, expected_revision: groups.revision });
+      groupId = '';
+      render();
+    }, 'desktop-action-trash desktop-research-opportunity-delete', 'desktop-toolbar-ghost');
+    scope.append(remove);
+    const chips = make('div', null, 'memo-attachments desktop-research-opportunity-papers');
+    for (const paper of group.papers) {
+      const chip = make('div', null, 'memo-attachment'), name = make('span', paper.title, 'memo-attachment-name'), x = make('button', '×', 'memo-quiet-button');
+      name.setAttribute('data-desktop-no-translate', '');
+      x.type = 'button';
+      x.setAttribute('aria-label', '移出比较组 ' + paper.title);
+      x.onclick = () => void saveGroup(group.papers.map((p) => p.job_id).filter((id) => id !== paper.job_id)).then(render, notify);
+      chip.append(name, x);
+      chips.append(chip);
+    }
+    for (const file of group.pending) {
+      const chip = make('div', null, 'memo-attachment'), name = make('span', file.title, 'memo-attachment-name');
+      name.setAttribute('data-desktop-no-translate', '');
+      chip.dataset.state = file.status === 'FAILED' ? 'error' : 'preparing';
+      chip.append(name, make('small', file.status === 'FAILED' ? '处理未完成' : '处理中'));
+      chips.append(chip);
+    }
+    if (!group.papers.length && !group.pending.length) chips.append(make('p', '比较组里还没有论文，点“添加论文”选择', 'desktop-research-muted'));
+    parts.push(chips);
+    return parts;
   }
   function section(title, text) {
     const box = make('div', null, 'desktop-research-opportunity-part');
@@ -258,6 +433,12 @@
   const init = () => {
     if (!page()) return;
     page().dataset.mode = 'qa';
+    // In this mode the window's right panel button opens and closes the paper picker.
+    Memorive.frames.chat.root.addEventListener('desktop:right-button', (event) => {
+      if (!shown()) return;
+      event.preventDefault();
+      if (pickerOpen()) closePicker(); else void openPicker().catch(notify);
+    });
     const toggle = () => setMode(shown() ? 'qa' : 'opportunities').catch(notify);
     q('#memo-mode').addEventListener('click', toggle);
     q('#memo-mode-title').addEventListener('click', toggle);

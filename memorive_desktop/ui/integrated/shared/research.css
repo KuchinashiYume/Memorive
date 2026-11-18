@@ -47,6 +47,21 @@
 .desktop-research-opportunity-fact p { margin:2px 0 0; }
 .desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
 .desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
+.desktop-research-opportunity-scope { display:flex;align-items:center;gap:8px;max-width:640px; }
+.desktop-research-opportunity-scope .select { flex:1;min-width:0; }
+#memo-chat-page .memo-attachments.desktop-research-opportunity-papers { max-width:640px;padding:0; }
+#memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }
+/* Deleting a group asks for a second click; the button shows the countdown as the inbox's delete button does. */
+.desktop-toolbar-icon.desktop-research-opportunity-delete[data-restart-armed="true"] { width:auto !important;min-width:152px !important;padding:0 12px !important;font-size:var(--memo-size-small) !important;white-space:nowrap; }
+.desktop-toolbar-icon.desktop-research-opportunity-delete[data-restart-armed="true"]::before { display:none; }
+/* The paper picker shares the right panel with the citations panel; one of them shows at a time. */
+#desktop-chat-preview .memo-evidence[hidden] { display:none !important; }
+#desktop-chat-preview .memo-paper-picker-head .field { flex:1;min-width:0; }
+#desktop-chat-preview .memo-paper-picker-sources { display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 12px;border-bottom:1px solid var(--border-default); }
+#desktop-chat-preview .memo-paper-picker-sources[hidden] { display:none; }
+#desktop-chat-preview .memo-paper-picker-note { margin:0; }
+#desktop-chat-preview .memo-paper-picker .memo-library-copy small { display:block;color:var(--text-secondary); }
+#desktop-chat-preview .memo-paper-picker .memo-library-row:has(input:disabled) { cursor:default;opacity:.6; }
 /* Starring an opportunity: the leaderboard's star, outlined, filled in the brand colour once starred (no pressed box). */
 .desktop-toolbar-icon.desktop-research-opportunity-star { --desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%271.7%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m12%203%202.78%205.63L21%209.55l-4.5%204.39%201.06%206.19L12%2017.2l-5.56%202.93%201.06-6.19L3%209.55l6.22-.92Z%27%2F%3E%3C%2Fsvg%3E"); }
 .desktop-toolbar-icon.desktop-research-opportunity-star[aria-pressed="true"] { --desktop-action-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27black%27%20stroke%3D%27black%27%20stroke-width%3D%271.7%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m12%203%202.78%205.63L21%209.55l-4.5%204.39%201.06%206.19L12%2017.2l-5.56%202.93%201.06-6.19L3%209.55l6.22-.92Z%27%2F%3E%3C%2Fsvg%3E"); border-color:transparent !important; background:transparent !important; box-shadow:none !important; color:var(--desktop-brand) !important; }
