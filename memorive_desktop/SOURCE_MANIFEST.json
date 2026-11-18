@@ -642,8 +642,8 @@
     },
     {
       "path": "product/desktop/help/en-US/design.pdf",
-      "sha256": "c1e227b4598b0aed0b9a4a27d94c5fdd18937747b57afb3c5c36ead8302ee2ac",
-      "bytes": 391272
+      "sha256": "efd1cae3e1995173840df757b6979f4d2c2dfadf3398f4f026674b0aece807e6",
+      "bytes": 373065
     },
     {
       "path": "product/desktop/help/en-US/index.html",
@@ -862,8 +862,8 @@
     },
     {
       "path": "product/desktop/help/ja-JP/design.pdf",
-      "sha256": "1c08cf6cf85ddcd79693a113b0a69e95678ff6e5b95d1ba86865229048fb1ac2",
-      "bytes": 740803
+      "sha256": "d4a1a407e3b514080442f9c3f8ef6d1f44a98efc0cfcb760b96fa91be0b614f3",
+      "bytes": 722795
     },
     {
       "path": "product/desktop/help/ja-JP/index.html",
@@ -1742,8 +1742,8 @@
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/design.pdf",
-      "sha256": "c1e227b4598b0aed0b9a4a27d94c5fdd18937747b57afb3c5c36ead8302ee2ac",
-      "bytes": 391272
+      "sha256": "efd1cae3e1995173840df757b6979f4d2c2dfadf3398f4f026674b0aece807e6",
+      "bytes": 373065
     },
     {
       "path": "product/desktop/help/web/downloads/en-US/manual-text.md",
@@ -1767,8 +1767,8 @@
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/design.pdf",
-      "sha256": "1c08cf6cf85ddcd79693a113b0a69e95678ff6e5b95d1ba86865229048fb1ac2",
-      "bytes": 740803
+      "sha256": "d4a1a407e3b514080442f9c3f8ef6d1f44a98efc0cfcb760b96fa91be0b614f3",
+      "bytes": 722795
     },
     {
       "path": "product/desktop/help/web/downloads/ja-JP/manual-text.md",
@@ -1792,8 +1792,8 @@
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/design.pdf",
-      "sha256": "ede16b5192e18996a763ee91b4312d8ed6acbbf5e3fc502da664956fb95da82f",
-      "bytes": 767131
+      "sha256": "8fb186be89c0e8e1651e1a704a43adaf4aa7a95a7304e7298354e941f0683443",
+      "bytes": 749130
     },
     {
       "path": "product/desktop/help/web/downloads/zh-CN/manual-text.md",
@@ -1997,8 +1997,8 @@
     },
     {
       "path": "product/desktop/help/zh-CN/design.pdf",
-      "sha256": "ede16b5192e18996a763ee91b4312d8ed6acbbf5e3fc502da664956fb95da82f",
-      "bytes": 767131
+      "sha256": "8fb186be89c0e8e1651e1a704a43adaf4aa7a95a7304e7298354e941f0683443",
+      "bytes": 749130
     },
     {
       "path": "product/desktop/help/zh-CN/index.html",
