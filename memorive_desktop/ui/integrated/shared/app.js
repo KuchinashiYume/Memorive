@@ -44,25 +44,13 @@ Memorive.productName="Memorive";
   let startupRestoredRoute = null;
   let startupRestoreEnabled = false;
   let rememberedPanelState = {};
-  // The sidebar and the bottom (accounting) panel are one setting for the whole window, kept here across routes.
-  // globalBottomSize: the height the person gave the bottom panel, or null for the default (route-base.css, font-size scaled).
-  let globalBottomOpen = false, globalBottomSize = null, bottomInitialized = false;
-  let globalSidebarOpen = true, sidebarInitialized = false;
-  const applyGlobalSidebar = (route) => {
-    const preview = previewFor(route === 'home' ? 'inbox' : route);
-    if (!preview?.app) return;
-    preview.setSidebar?.(globalSidebarOpen);
-    sidebarInitialized = true;
-  };
-  const applyGlobalBottom = (route) => {
-    const preview = previewFor(route === 'home' ? 'inbox' : route);
-    if (!preview?.app) return;
-    const workspace = preview.root.querySelector('.desktop-workspace');
-    if (globalBottomSize) workspace?.style.setProperty('--desktop-bottom-size', `${globalBottomSize}px`);
-    else workspace?.style.removeProperty('--desktop-bottom-size');
-    preview.setBottom?.(globalBottomOpen);
-    bottomInitialized = true;
-  };
+  // The window frame is one for all routes (page.html, shared/window-frame.js): the sidebar and the bottom panel
+  // stay as they are when the route changes. The first route opened takes the sidebar from the remembered panels.
+  let sidebarInitialized = false;
+  const frameWindow = document.getElementById('desktop-window');
+  const frameWorkspace = frameWindow.querySelector('.desktop-workspace');
+  const viewName = document.getElementById('desktop-view-name');
+  const navItems = () => frameWindow.querySelectorAll('.desktop-nav-item');
   let panelPersistenceTimer = 0;
   let currentPreferences = Object.freeze({
     language: 'zh-CN',
@@ -350,14 +338,14 @@ Memorive.productName="Memorive";
     const blank = root.querySelector('#desktop-blank-state');
     const placeholder = root.querySelector('#desktop-page-placeholder');
     const pageView = root.querySelector('#desktop-page-view');
-    const viewName = root.querySelector('#desktop-view-name');
     const returnButton = root.querySelector('#desktop-return-main');
     if (blank) blank.hidden = false;
     if (placeholder) placeholder.hidden = true;
     if (pageView) pageView.hidden = true;
-    if (viewName) i18n.set(viewName, 'frame.route.home');
+    i18n.set(frameWindow, 'frame.window', { route: { key: 'frame.route.home' } }, 'aria-label');
+    i18n.set(viewName, 'frame.route.home');
     if (returnButton) returnButton.hidden = true;
-    root.querySelectorAll('.desktop-nav-item').forEach((item) => {
+    navItems().forEach((item) => {
       item.setAttribute('aria-pressed', 'false');
       item.removeAttribute('aria-current');
     });
@@ -372,16 +360,14 @@ Memorive.productName="Memorive";
     const blank = root.querySelector('#desktop-blank-state');
     const placeholder = root.querySelector('#desktop-page-placeholder');
     const pageView = root.querySelector('#desktop-page-view');
-    const viewName = root.querySelector('#desktop-view-name');
     const returnButton = root.querySelector('#desktop-return-main');
     if (blank) blank.hidden = true;
     if (placeholder) placeholder.hidden = true;
     if (pageView) pageView.hidden = false;
-    const windowElement = root.querySelector('#desktop-window');
-    if (windowElement) i18n.set(windowElement, 'frame.window', { route: { key: `frame.route.${route}` } }, 'aria-label');
-    if (viewName) i18n.set(viewName, `frame.route.${route}`);
+    i18n.set(frameWindow, 'frame.window', { route: { key: `frame.route.${route}` } }, 'aria-label');
+    i18n.set(viewName, `frame.route.${route}`);
     if (returnButton) returnButton.hidden = false;
-    root.querySelectorAll('.desktop-nav-item').forEach((item) => {
+    navItems().forEach((item) => {
       const selected = item.dataset.route === route;
       item.setAttribute('aria-pressed', String(selected));
       if (selected) item.setAttribute('aria-current', 'page');
@@ -420,13 +406,9 @@ Memorive.productName="Memorive";
     const inspectorOpen = route !== 'settings' && Boolean(row.inspector_open) && (!['messages','library'].includes(route) ||
       Boolean(preview.root?.querySelector(route === 'library' ? '.desktop-library-card[aria-selected="true"]' : '.desktop-messages-card[aria-selected="true"]')));
     preview.setInspector?.(inspectorOpen);
-    // Bottom visibility belongs to the global session, never to this route.
-    const root = preview.root;
-    const workspace = root?.querySelector('.desktop-workspace');
-    const workarea = root?.querySelector('.desktop-settings-workarea');
-    if (workspace && Number.isInteger(row.right_size)) {
-      workspace.style.setProperty('--desktop-right-size', `${row.right_size}px`);
-    }
+    // Bottom visibility belongs to the whole window, never to this route.
+    const workarea = preview.root?.querySelector('.desktop-settings-workarea');
+    if (inspectorOpen && Number.isInteger(row.right_size)) preview.setInspectorSize(row.right_size);
 
     if (workarea && Number.isInteger(row.primary_size)) {
       workarea.style.setProperty('--desktop-settings-primary-size', `${row.primary_size}px`);
@@ -438,8 +420,6 @@ Memorive.productName="Memorive";
     if (route === 'home') return null;
     const preview = previewFor(route);
     if (!preview?.app || !preview.root) return null;
-    const app = preview.app;
-    const workspace = preview.root.querySelector('.desktop-workspace');
     const workarea = preview.root.querySelector('.desktop-settings-workarea');
     const readSize = (element, property, fallback) => {
       const value = element ? Number.parseFloat(getComputedStyle(element).getPropertyValue(property)) : NaN;
@@ -447,12 +427,12 @@ Memorive.productName="Memorive";
     };
     return {
       route,
-      sidebar_open: app.dataset.left === 'true',
-      inspector_open: app.dataset.right === 'true',
-      bottom_open: app.dataset.bottom === 'true',
+      sidebar_open: frameWindow.dataset.left === 'true',
+      inspector_open: preview.root.dataset.right === 'true',
+      bottom_open: frameWindow.dataset.bottom === 'true',
       primary_size: readSize(workarea, '--desktop-settings-primary-size', 248),
-      right_size: readSize(workspace, '--desktop-right-size', 336),
-      bottom_size: readSize(workspace, '--desktop-bottom-size', 260),
+      right_size: readSize(frameWorkspace, '--desktop-right-size', 336),
+      bottom_size: readSize(frameWorkspace, '--desktop-bottom-size', 260),
     };
   };
 
@@ -484,7 +464,7 @@ Memorive.productName="Memorive";
         home_visible: Boolean(blank && !blank.hidden),
         placeholder_visible: Boolean(placeholder && !placeholder.hidden),
         active_surface_count: activeSurfaces.length,
-        selected_nav_count: root.querySelectorAll('.desktop-nav-item[aria-current="page"]').length,
+        selected_nav_count: frameWindow.querySelectorAll('.desktop-nav-item[aria-current="page"]').length,
       };
     }
     const { descriptor, surface, root, placeholder, pageView } = prepareSurface(normalized);
@@ -499,7 +479,7 @@ Memorive.productName="Memorive";
       content_shell_present: Boolean(pageView && pageView.querySelector('.page-shell')),
       placeholder_visible: Boolean(placeholder && !placeholder.hidden),
       active_surface_count: activeSurfaces.length,
-      selected_nav_count: root.querySelectorAll('.desktop-nav-item[aria-current="page"]').length,
+      selected_nav_count: frameWindow.querySelectorAll('.desktop-nav-item[aria-current="page"]').length,
     };
   };
 
@@ -509,45 +489,34 @@ Memorive.productName="Memorive";
       // SAME_ROUTE_ALREADY_ACTIVE: preserve the mounted page and every open draft/panel.
       return inspectRoute(normalized);
     }
-    const previous = previewFor(activeRoute === 'home' ? 'inbox' : activeRoute);
-    if (sidebarInitialized && previous?.app) {
-      globalSidebarOpen = previous.app.dataset.left === 'true';
-    } else if (!sidebarInitialized && currentPreferences.remember_panel_state) {
-      const remembered = rememberedPanelState[normalized] || rememberedPanelState[activeRoute];
-      if (remembered && typeof remembered.sidebar_open === 'boolean') globalSidebarOpen = remembered.sidebar_open;
-    }
-    if (bottomInitialized) {
-      if (previous?.app) {
-        globalBottomOpen = previous.app.dataset.bottom === 'true';
-        const workspace = previous.root.querySelector('.desktop-workspace');
-        const height = parseFloat(getComputedStyle(workspace).getPropertyValue('--desktop-bottom-size'));
-        if (Number.isFinite(height) && height >= 240) globalBottomSize = height;
-      }
+    // A route opened before shared/window-frame.js has run is shown by it when it starts.
+    const frame = previewFor(normalized === 'home' ? 'inbox' : normalized);
+    if (!sidebarInitialized && frame) {
+      const remembered = currentPreferences.remember_panel_state && (rememberedPanelState[normalized] || rememberedPanelState[activeRoute]);
+      if (remembered && typeof remembered.sidebar_open === 'boolean') frame.setSidebar(remembered.sidebar_open);
+      sidebarInitialized = true;
     }
     const surfaceRoute = normalized === 'home' ? 'inbox' : normalized;
     document.querySelectorAll('[data-desktop-route]').forEach((surface) => {
       surface.hidden = surface.dataset.desktopRoute !== surfaceRoute;
     });
     activeRoute = normalized;
+    // The open route's right panel replaces the last one's at once, without the panel animation.
+    frameWorkspace.style.transition = 'none';
+    frame?.show();
     if (normalized === 'home') {
       prepareHome();
-      applyGlobalSidebar('home');
-      applyGlobalBottom('home');
+      void frameWorkspace.offsetWidth;
+      frameWorkspace.style.removeProperty('transition');
       document.title = 'Memorive';
       document.body.dataset.desktopActiveRoute = 'home';
       window.dispatchEvent(new CustomEvent('desktop-integrated-route', { detail: { route: 'home' } }));
       return inspectRoute('home');
     }
-    const state = prepareSurface(normalized);
-    applyGlobalSidebar(normalized);
-    applyGlobalBottom(normalized);
-    const layout = state.root.querySelector('.desktop-workspace');
-    if (layout) layout.style.transition = 'none';
+    prepareSurface(normalized);
     applyRememberedPanelState(normalized);
-    if (layout) {
-      void layout.offsetWidth;
-      layout.style.removeProperty('transition');
-    }
+    void frameWorkspace.offsetWidth;
+    frameWorkspace.style.removeProperty('transition');
     document.title = pageTitle(normalized);
     document.body.dataset.desktopActiveRoute = normalized;
     window.dispatchEvent(new CustomEvent('desktop-integrated-route', { detail: { route: normalized } }));

@@ -1,18 +1,7 @@
 <!-- The session management route: sessions by source, a session's turns, capture and refinement controls.
-     Includes the window frame from shared/frame/. -->
+     The window frame around it is in page.html. -->
 <section class="desktop-route-surface" data-desktop-route="sessions" aria-label="会话管理" hidden>
 <div id="desktop-sessions-preview" class="desktop-page-root" lang="zh-Hans">
-  <!-- include: shared/frame/icons.html -->
-
-  
-
-  <div class="desktop-preview-stage" id="desktop-preview-stage">
-    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 会话管理">
-      <!-- include: shared/frame/global-bar.html -->
-
-      <div class="desktop-workspace">
-        <!-- include: shared/frame/navigation.html -->
-
         <main class="desktop-central" id="desktop-central">
           <div class="desktop-page-view" id="desktop-page-view" hidden>
             <div class="page-shell desktop-sessions-shell">
@@ -65,15 +54,6 @@
 
         <aside class="desktop-right-panel" id="desktop-right-panel" aria-label="全局右侧上下文面板" aria-hidden="true"><div class="inspector-inner"><div class="inspector-head"><div><p class="inspector-kicker">PAGE CONTEXT</p><h3>全局上下文</h3></div></div><p>完整会话使用中央宽阅读区；本页不把正文压入窄检查器。</p></div></aside>
 
-        <!-- include: shared/frame/accounting-panel.html -->
-
         <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整右侧面板宽度" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="160" aria-valuemax="440" aria-valuenow="260" hidden></button>
-        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
-      </div>
-
-      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
-      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
-    </section>
-  </div>
 </div>
 </section>

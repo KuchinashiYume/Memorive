@@ -1,19 +1,8 @@
 <!-- The settings route: the category list and one panel per category (user, API models, CLI tools, local models,
      workflow, research, research weights, refinement, viewer, external data, literature, notices, behaviour, network,
-     privacy, appearance, update). Includes the window frame from shared/frame/. -->
+     privacy, appearance, update). The window frame around it is in page.html. -->
 <section class="desktop-route-surface" data-desktop-route="settings" aria-label="设置" hidden>
 <div id="desktop-settings-preview" class="desktop-page-root" lang="zh-Hans">
-  <!-- include: shared/frame/icons.html -->
-
-  
-
-  <div class="desktop-preview-stage" id="desktop-preview-stage">
-    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 设置">
-      <!-- include: shared/frame/global-bar.html -->
-
-      <div class="desktop-workspace">
-        <!-- include: shared/frame/navigation.html -->
-
         <main class="desktop-central" id="desktop-central">
           <div class="desktop-page-view" id="desktop-page-view" hidden>
             <div class="page-shell desktop-settings-shell" data-settings-mode="normal">
@@ -174,7 +163,6 @@
   </fieldset>
  </div></div>
 </div>
-
 
                   <div class="desktop-settings-panel" data-panel="user" hidden>
                     <div class="desktop-settings-panel-head"><div class="desktop-settings-panel-title"><button class="icon-button desktop-settings-back" type="button" aria-label="返回设置目录">‹</button><h3>用户</h3></div></div>
@@ -350,7 +338,7 @@
                           <button id="memo-bridge-open-folder" class="soft-button" type="button">打开插件文件夹</button>
                           <button id="memo-bridge-check" class="soft-button" type="button">检查插件连接</button>
                         </div>
-                        
+
                         <details class="desktop-settings-browser-disclosure" id="settings-browser-companion-details">
                           <summary>
                             <span class="desktop-settings-browser-progress-copy"><strong>连接状态</strong><small id="settings-browser-progress-label">尚未连接</small><span class="desktop-settings-browser-read-progress" id="settings-browser-read-progress" role="progressbar" aria-label="读取等待" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span></span></span></span>
@@ -558,15 +546,6 @@
           </div>
         </aside>
 
-        <!-- include: shared/frame/accounting-panel.html -->
-
         <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整节点设置边栏宽度" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="320" aria-valuemax="620" aria-valuenow="480" hidden></button>
-        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
-      </div>
-
-      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
-      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
-    </section>
-  </div>
 </div>
 </section>

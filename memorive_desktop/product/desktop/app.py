@@ -3660,7 +3660,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           const home = {
             title: document.title,
             prompt: homeRoot.querySelector('#desktop-blank-state')?.textContent.trim(),
-            selected_nav_count: homeRoot.querySelectorAll('.desktop-nav-item[aria-current="page"]').length,
+            selected_nav_count: document.querySelectorAll('#desktop-shell .desktop-nav-item[aria-current="page"]').length,
             back_hidden: homeRoot.querySelector('#desktop-return-main').hidden,
           };
 
@@ -4329,7 +4329,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
               && row.icon_center_x_delta <= 0.5 && row.icon_center_y_delta <= 0.5
             ))
           ));
-          const settingsShell = settingsRoot.querySelector('.desktop-workspace');
+          const settingsShell = document.querySelector('#desktop-shell .desktop-workspace');
           const flowStageRect = settingsRoot.querySelector('#settings-flow-stage').getBoundingClientRect();
           const flowListRect = settingsRoot.querySelector('#settings-flow-list').getBoundingClientRect();
           const nodePrimaryRect = settingsRoot.querySelector('#settings-primary').getBoundingClientRect();
@@ -4340,7 +4340,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           const selectedCategoryStyle = getComputedStyle(selectedCategory);
           const nodeCategoryContainerStyle = getComputedStyle(settingsRoot.querySelector('.desktop-settings-categories'));
           const nodeCategoryIcon = selectedCategory.querySelector('.desktop-settings-cat-icon');
-          const selectedNav = settingsRoot.querySelector('.desktop-nav-item[aria-current="page"]');
+          const selectedNav = document.querySelector('#desktop-shell .desktop-nav-item[aria-current="page"]');
           const selectedNavStyle = getComputedStyle(selectedNav);
           const modelHeading = settingsRoot.querySelector('.desktop-settings-model-heading');
           const modelDescription = settingsRoot.querySelector('.desktop-settings-model-description');
@@ -4433,7 +4433,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           toast.hidden = false;
           await wait(24);
           const toastRect = toast.getBoundingClientRect();
-          const toastHostRect = settingsRoot.querySelector('.desktop-window').getBoundingClientRect();
+          const toastHostRect = document.getElementById('desktop-window').getBoundingClientRect();
           const toastCopyStyle = getComputedStyle(toastCopy);
           const longToast = {
             within_window: toastRect.left >= toastHostRect.left - 1 && toastRect.right <= toastHostRect.right + 1,
@@ -4615,8 +4615,8 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           }
           const inboxCentral = inboxRoot.querySelector('#desktop-central');
           const inboxDetail = inboxRoot.querySelector('#desktop-right-panel');
-          const inboxWorkspace = inboxRoot.querySelector('.desktop-workspace');
-          const inboxNavigation = inboxRoot.querySelector('.desktop-navigation');
+          const inboxWorkspace = document.querySelector('#desktop-shell .desktop-workspace');
+          const inboxNavigation = document.querySelector('#desktop-shell .desktop-navigation');
           const pdf = {
             card_present: Boolean(realCard),
             selected: realCard?.getAttribute('aria-selected') === 'true',
@@ -4639,10 +4639,10 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
 
           window.__Desktop_NATIVE_STAGE__ = 'appearance-and-startup';
           const fileTitleBeforeLanguageChange = inboxRoot.querySelector('#inbox-detail-title').textContent.trim();
-          const viewName = inboxRoot.querySelector('#desktop-view-name');
-          const logo = inboxRoot.querySelector('.desktop-logo');
-          const tooltipTarget = inboxRoot.querySelector('#desktop-toggle-left');
-          const tooltip = inboxRoot.querySelector('#desktop-tooltip');
+          const viewName = document.getElementById('desktop-view-name');
+          const logo = document.getElementById('desktop-logo');
+          const tooltipTarget = document.getElementById('desktop-toggle-left');
+          const tooltip = document.getElementById('desktop-tooltip');
           const tooltipVisible = () => Boolean(
             tooltip
             && !tooltip.hidden
@@ -4709,11 +4709,11 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           tooltipTarget.dispatchEvent(new MouseEvent('mouseenter'));
           await wait(430);
           const firstDisabledTooltipHidden = !tooltipVisible();
-          const firstBasicTooltipVisible = tooltipVisible() && inboxRoot.querySelector('#desktop-tooltip').textContent === tooltipTarget.getAttribute('aria-label');
+          const firstBasicTooltipVisible = tooltipVisible() && document.getElementById('desktop-tooltip').textContent === tooltipTarget.getAttribute('aria-label');
           const englishFontSize = Number.parseFloat(getComputedStyle(viewName).fontSize);
           const english = {
             view_name: viewName.textContent.trim(),
-            settings_nav: [...inboxRoot.querySelectorAll('.desktop-nav-item')]
+            settings_nav: [...document.querySelectorAll('#desktop-shell .desktop-nav-item')]
               .some((node) => node.textContent.trim() === 'Settings'),
             file_title_unchanged: inboxRoot.querySelector('#inbox-detail-title').textContent.trim()
               === fileTitleBeforeLanguageChange,
@@ -4737,7 +4737,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           const firstEnabledTooltipVisible = tooltipVisible();
           const japanese = {
             view_name: viewName.textContent.trim(),
-            settings_nav: [...inboxRoot.querySelectorAll('.desktop-nav-item')]
+            settings_nav: [...document.querySelectorAll('#desktop-shell .desktop-nav-item')]
               .some((node) => node.textContent.trim() === '設定'),
             file_title_unchanged: inboxRoot.querySelector('#inbox-detail-title').textContent.trim()
               === fileTitleBeforeLanguageChange,
@@ -4758,7 +4758,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           tooltipTarget.dispatchEvent(new MouseEvent('mouseenter'));
           await wait(430);
           const secondDisabledTooltipHidden = !tooltipVisible();
-          const secondBasicTooltipVisible = tooltipVisible() && inboxRoot.querySelector('#desktop-tooltip').textContent === tooltipTarget.getAttribute('aria-label');
+          const secondBasicTooltipVisible = tooltipVisible() && document.getElementById('desktop-tooltip').textContent === tooltipTarget.getAttribute('aria-label');
           tooltipTarget.dispatchEvent(new MouseEvent('mouseleave'));
           app.applyPreferences({
             ...settingsSavedState.settings.preferences,
@@ -5126,7 +5126,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
           (async () => {
             const app = window.Memorive?.app;
             app.activate('work-log');
-            const logo = document.querySelector('[data-desktop-route="work-log"]:not([hidden]) .desktop-logo');
+            const logo = document.getElementById('desktop-logo');
             if (!logo) throw new Error('ACTIVE_NAVIGATION_LOGO_MISSING');
             const activate = async (eventName, expectedAction, expectedVisible, expectedRoute) => {
               const before = app.inspect();
@@ -5173,7 +5173,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
             return {
               route_before: routeBefore,
               route_after: app.inspect().active_route,
-              active_logo_count: document.querySelectorAll('[data-desktop-route="work-log"]:not([hidden]) .desktop-logo').length,
+              active_logo_count: document.querySelectorAll('#desktop-shell .desktop-logo').length,
               contextmenu: hiddenByContextMenu,
               opened_by_left_click: openedByLeftClick,
               shown_again_by_left_click: shownAgainByLeftClick,
@@ -5185,7 +5185,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         assistant_reopened_inspect = assistant_window.evaluate_js(
             "window.__Desktop_ASSISTANT_RUNTIME__.inspect()"
         )
-        inspect = window.evaluate_js("(() => { const root=document.querySelector('#desktop-worklog-preview'); return {root:Boolean(root),pageRootCount:document.querySelectorAll('.desktop-page-root').length,productWindow:Boolean(root&&root.querySelector('#desktop-window')),navCount:root?root.querySelectorAll('.desktop-nav-item').length:0,workLogCardCount:root?root.querySelectorAll('.desktop-worklog-card').length:0,iframeCount:document.querySelectorAll('iframe').length,previewControlCount:document.querySelectorAll('.viz-controls,.desktop-preview-controls').length,bridge:window.Memorive?.productBridge.inspect(),workLogBridge:window.Memorive?.workLogBridge.inspect(),integrated:window.Memorive?.app.inspect()}; })()")
+        inspect = window.evaluate_js("(() => { const root=document.querySelector('#desktop-worklog-preview'); return {root:Boolean(root),pageRootCount:document.querySelectorAll('.desktop-route-surface > .desktop-page-root').length,productWindow:Boolean(document.getElementById('desktop-window')),navCount:document.querySelectorAll('#desktop-shell .desktop-nav-item').length,workLogCardCount:root?root.querySelectorAll('.desktop-worklog-card').length:0,iframeCount:document.querySelectorAll('iframe').length,previewControlCount:document.querySelectorAll('.viz-controls,.desktop-preview-controls').length,bridge:window.Memorive?.productBridge.inspect(),workLogBridge:window.Memorive?.workLogBridge.inspect(),integrated:window.Memorive?.app.inspect()}; })()")
         assistant_screenshot_path = evidence_dir / f"pywebview_assistant_{phase}.png"
         # The WebView child is intentionally disabled after native bootstrap.
         # Capture the actual shaped WinForms host instead of waiting on the

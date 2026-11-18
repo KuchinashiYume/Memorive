@@ -7,7 +7,7 @@ body {
   margin: 0;
   overflow: hidden;
 }
-.desktop-route-surface {
+#desktop-shell {
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -245,20 +245,23 @@ body {
 .desktop-model-dashboard button:disabled { opacity:.4;cursor:default; }
 .desktop-model-dashboard :is(button,select):focus-visible { outline:2px solid var(--accent,#a36345);outline-offset:2px; }
 
-.desktop-route-surface,
-.desktop-route-surface > .desktop-page-root,
-.desktop-route-surface .desktop-preview-stage {
+#desktop-shell,
+#desktop-shell .desktop-preview-stage {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;
 }
+/* A route section and its root add no box of their own: the route's central area, right panel and resizer are
+   items of the frame's workspace grid (page.html). */
+.desktop-route-surface,
+.desktop-route-surface > .desktop-page-root { display: contents; }
 .desktop-route-surface[hidden] { display: none !important; }
-.desktop-route-surface .desktop-preview-stage {
+#desktop-shell .desktop-preview-stage {
   max-width: none !important;
   aspect-ratio: auto !important;
   margin: 0 !important;
 }
-.desktop-route-surface .desktop-window {
+#desktop-shell .desktop-window {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;

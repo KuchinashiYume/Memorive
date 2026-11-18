@@ -18,10 +18,10 @@ Do not edit the two pages themselves: the build stops when a page differs from i
 
 ## How `integrated/` is laid out
 
-- `page.html` is the page with an include line in place of each style, script and route section. It fixes the order: styles first, then the nine route sections, then the scripts. The order matters, because later rules and scripts build on earlier ones.
+- `page.html` is the page with an include line in place of each style, script and route section. It fixes the order: styles first, then the window frame with the nine route sections inside it, then the scripts. The order matters, because later rules and scripts build on earlier ones.
 - `routes/<route>/` holds what belongs to one route of the window: `markup.html` (the route's section of the page), and usually `view.js` (what it shows) and `bridge.js` (its calls to the desktop service). The routes are settings, inbox, tasks (current task), messages, sessions, library, worklog (work log), leaderboard (model rankings) and chat (research Q&A).
 - `shared/route-base.css` holds the base styles of all nine routes (the leaderboard's root is `#desktop-leaderboard-preview`, research Q&A's `#desktop-chat-preview`). A rule that several of them share is written once inside `:is(#desktop-<route>-preview, ...) { ... }`, where `&` stands for the route's root; a rule that only one route has keeps its `#desktop-<route>-preview` prefix. For each route its rules stay in their order. `shared/toolbar-icons.css` holds the toolbar icon buttons of every route.
-- Every route section carries a copy of the window frame: the icons, the global bar, the navigation and the bottom (accounting) panel, around the route's own page and right panel. The frame's markup is written once under `shared/frame/`, and each `markup.html` includes those parts (an included file may include others). `shared/window-frame.js` gives every copy the same behaviour — panels, resizers, shortcuts, tooltips, switches — and holds the one thing that differs by route, the size rule of the right panel.
+- The window frame is in `page.html` once, around the routes (`#desktop-shell`): the icons, the global bar, the navigation, the bottom (accounting) panel and its resizer, the tooltip. Its parts are written under `shared/frame/` (an included file may include others). A route section brings only its own central area, right panel and that panel's resizer; the section and its root are `display: contents`, so these sit in the frame's workspace grid. `shared/window-frame.js` gives the frame its behaviour — panels, resizers, shortcuts, tooltips, switches. The sidebar and the bottom panel belong to the whole window; the right panel belongs to its route (the root's `data-right` and the width it was given), and `show()` makes the open route's right panel the window's. The size rule of the right panel is the one thing that differs by route. In `route-base.css`, a shared group whose rules also style the frame names `#desktop-shell` beside the route roots, and a frame rule for some routes only reads the open route from `.desktop-window[data-route]`.
 - `shared/` also holds what several routes use: the application shell (`app.js`), window chrome, controls, typography, the review and research panels.
 
 The chat route's section also carries parts of the shared window (the right panel and the bottom accounting panel), because the page has always been laid out that way.
@@ -34,12 +34,12 @@ Every source file starts with a comment that says what it is for and who uses it
 
 ### A route
 
-1. Add `routes/<route>/markup.html`. Copy the section of a route that looks like yours: `<section class="desktop-route-surface" data-desktop-route="<route>" hidden>` around the route's root `<div id="desktop-<component>-preview" class="desktop-page-root">`, which includes the frame parts from `shared/frame/`.
+1. Add `routes/<route>/markup.html`. Copy the section of a route that looks like yours: `<section class="desktop-route-surface" data-desktop-route="<route>" hidden>` around the route's root `<div id="desktop-<component>-preview" class="desktop-page-root">`, which holds the route's `main.desktop-central`, and if it has one its `aside#desktop-right-panel` and `#desktop-resize-right`.
 2. Add the include line for the markup to `page.html`, after the other route sections, and the include lines for its scripts where they belong in the order of scripts.
 3. Add the route to `routes` at the top of `shared/app.js` (its key and its component, the folder name), its names to `shared/frame/messages.js` (`frame.nav.<route>` on the button, `frame.route.<route>` in the top bar and the window title), a button to `shared/frame/navigation.html` whose `data-route` is the route's key, and the component with its right-panel size rule (one of `RIGHT_PANEL_RULES`) to `ROUTES` in `shared/window-frame.js`.
 4. If the route reads data, give it a `bridge.js` that calls the desktop service (below) and publishes `Memorive.<route>Bridge` with at least `refresh()` and `inspect()`.
 
-`shared/window-frame.js` publishes each route's frame as `Memorive.frames.<component>` (panels, resizers, shortcuts, tooltips); route scripts find their root and panels through it.
+`shared/window-frame.js` publishes each route's frame as `Memorive.frames.<component>` (its root, its right panel, the window's sidebar and bottom panel, the live region); route scripts find their root and panels through it. A route that handles the right panel button itself (say what to select first, close its detail with the panel) listens for `desktop:right-button` on its root and cancels it.
 
 ### A setting
 
@@ -167,7 +167,8 @@ Scripts talk to each other through what they publish in `window.Memorive` (each 
 
 | Event | Sent by | Listened to by |
 | --- | --- | --- |
-| `desktop-integrated-route` (the route was shown) | `shared/app.js` | the inbox, current-task, messages, library and work log bridges, `shared/window-frame.js`, `shared/decorations.js`, `routes/chat/workspace.js`, `routes/leaderboard/view.js`, `routes/inbox/research-home.js` |
+| `desktop-integrated-route` (the route was shown) | `shared/app.js` | the inbox, current-task, messages, library and work log bridges, `shared/research.js`, `shared/decorations.js`, `routes/chat/workspace.js`, `routes/leaderboard/view.js`, `routes/inbox/research-home.js` |
+| `desktop:right-button` (the right panel button or Ctrl+Alt+B, sent to the open route's root; cancelling it stops the default toggle) | `shared/window-frame.js` | `routes/messages/view.js`, `routes/settings/model-picker.js`, `routes/tasks/view.js` |
 | `desktop:inspector-closed` (a right panel was closed) | `shared/controls.js` | the inbox, library, messages and work log bridges, `shared/structure-review.js` |
 | `desktop:settings-locale-change` | `routes/settings/settings.js` | the settings scripts, `shared/local-user.js`, `shared/reports.js`, `shared/window-chrome.js` |
 | `desktop:settings-category-changed`, `desktop:settings-mode-changed`, `desktop:settings-mode-scope-changed`, `desktop:workflow-model-selected` | `routes/settings/model-picker.js` | the settings scripts, `routes/chat/workspace.js`, `routes/inbox/research-home.js` |

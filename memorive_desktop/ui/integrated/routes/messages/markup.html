@@ -1,18 +1,7 @@
-<!-- The messages route: the message list, its filters and the message details in the right panel. Includes the
-     window frame from shared/frame/. -->
+<!-- The messages route: the message list, its filters and the message details in the right panel.
+     The window frame around it is in page.html. -->
 <section class="desktop-route-surface" data-desktop-route="messages" aria-label="消息" hidden>
 <div id="desktop-messages-preview" class="desktop-page-root" lang="zh-Hans">
-  <!-- include: shared/frame/icons.html -->
-
-  
-
-  <div class="desktop-preview-stage" id="desktop-preview-stage">
-    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 消息">
-      <!-- include: shared/frame/global-bar.html -->
-
-      <div class="desktop-workspace">
-        <!-- include: shared/frame/navigation.html -->
-
         <main class="desktop-central" id="desktop-central">
           <div class="desktop-page-view" id="desktop-page-view" hidden>
             <div class="page-shell desktop-messages-shell">
@@ -51,15 +40,6 @@
           </div>
         </aside>
 
-        <!-- include: shared/frame/accounting-panel.html -->
-
         <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整右侧面板宽度" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="160" aria-valuemax="440" aria-valuenow="390" hidden></button>
-        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
-      </div>
-
-      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
-      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
-    </section>
-  </div>
 </div>
 </section>

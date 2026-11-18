@@ -59,6 +59,19 @@
 </style>
 </head>
 <body data-desktop-product-page="integrated">
+<!-- The window frame, once for every route: the top bar, the navigation, the bottom accounting panel and its resizer,
+     the tooltip. Each route section below brings its central area, its right panel and that panel's resizer; it
+     lays them out in the frame's workspace grid (the route section and its root are display: contents).
+     shared/window-frame.js gives the frame its behaviour; shared/app.js shows one route at a time. -->
+<div id="desktop-shell" class="desktop-page-root" lang="zh-Hans">
+  <!-- include: shared/frame/icons.html -->
+  <div class="desktop-preview-stage" id="desktop-preview-stage">
+    <section class="desktop-window" id="desktop-window" data-route="inbox" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive">
+      <!-- include: shared/frame/global-bar.html -->
+
+      <div class="desktop-workspace">
+        <!-- include: shared/frame/navigation.html -->
+
 <!-- include: routes/settings/markup.html -->
 <!-- include: routes/inbox/markup.html -->
 <!-- include: routes/tasks/markup.html -->
@@ -68,6 +81,17 @@
 <!-- include: routes/worklog/markup.html -->
 <!-- include: routes/leaderboard/markup.html -->
 <!-- include: routes/chat/markup.html -->
+
+        <!-- include: shared/frame/accounting-panel.html -->
+
+        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
+      </div>
+
+      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
+      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
 <script>
 <!-- include: shared/service.js -->
 </script>

@@ -15,22 +15,28 @@
   const states = { QUEUED: '等待中', RUNNING: '运行中', SUCCEEDED: '已完成', PARTIAL: '部分完成', FAILED: '失败', CANCELLED: '已取消', INTERRUPTED: '已中断' };
   const errors = { RESEARCH_SOURCE_REQUIRED: '请先在外部数据来源中选择文献来源', RESEARCH_TOPIC_REQUIRED: '请输入检索主题', RESEARCH_ALREADY_RUNNING: '已有研究任务正在运行', ALL_LITERATURE_SOURCES_FAILED: '文献来源请求失败，请检查网络后重试', RESEARCH_IDEMPOTENCY_CONFLICT: '请求已变化，请重新运行' };
   Object.assign(errors,{REPORT_MODEL_REQUIRED:'请先在流程模型映射中选择报告模型',REPORT_MODEL_UNAVAILABLE:'所选报告模型不可用，请检查模型设置',REPORT_NO_LIBRARY_CHANGE:'该周期没有可汇总的新成果',REPORT_MODEL_EXECUTION_FAILED:'报告模型执行失败，请检查任务记录'});
-  let pane = null, workspace = null, timer = null, lastFocus = null;
+  // The pane sits in the section of the route it was opened from, so it shows only with that route; the window's
+  // workspace makes room for it while that route is open.
+  let pane = null, paneRoot = null, timer = null, lastFocus = null;
+  const showRoom = () => {
+    const workspace = document.querySelector('#desktop-shell .desktop-workspace');
+    if (paneRoot && !paneRoot.closest('[hidden]')) workspace.setAttribute('data-research-open', 'true');
+    else workspace.removeAttribute('data-research-open');
+  };
+  window.addEventListener('desktop-integrated-route', showRoom);
   function close() {
     clearTimeout(timer);
     pane?.remove();
-    workspace?.removeAttribute('data-research-open');
     pane = null;
-    workspace = null;
+    paneRoot = null;
+    showRoom();
     lastFocus?.focus();
   }
   function openShell(title, origin) {
     close();
     lastFocus=document.activeElement;
-    const root = origin?.closest('[id$="-preview"]') || [...document.querySelectorAll('[id$="-preview"]')].find(x => x.getBoundingClientRect().width > 0);
-    workspace = root?.querySelector('.desktop-workspace');
-    if (!workspace) throw new Error('当前页面不可用');
-    workspace.setAttribute('data-research-open', 'true');
+    paneRoot = origin?.closest('[id$="-preview"]') || [...document.querySelectorAll('[id$="-preview"]')].find(x => !x.closest('[hidden]'));
+    if (!paneRoot) throw new Error('当前页面不可用');
     pane = make('aside',null,'desktop-research-pane');
     pane.setAttribute('aria-label',title);
     const head=make('header',null,'desktop-research-head');
@@ -43,7 +49,8 @@
     head.append(back,heading,actions);
     const body=make('div',null,'desktop-research-body');
     pane.append(head,body);
-    workspace.append(pane);
+    paneRoot.append(pane);
+    showRoom();
     back.focus();
     pane.addEventListener('keydown',e=>{if(e.key==='Escape'){
       e.stopPropagation();

@@ -251,7 +251,7 @@
     const detailPercent = limits.splitWidth ? Math.round(detailSize / limits.splitWidth * 100) : 60;
     const listPercent = Math.max(0, 100 - detailPercent);
     detailResizer.setAttribute('aria-valuetext', `一级列表 ${listPercent}% · 会话详情 ${detailPercent}%`);
-    if (announce) q('#desktop-live-state').textContent = `一级列表约 ${listPercent}%，会话详情约 ${detailPercent}%`;
+    if (announce) Memorive.frames.sessions.announce(`一级列表约 ${listPercent}%，会话详情约 ${detailPercent}%`);
   };
 
   const sourceMark = (provider) => ({ codex:'CX', claude:'CC', deepseek:'DS', gemini:'GM', kimi:'KM', universal:'UN' }[provider] || 'SE');
@@ -997,7 +997,7 @@
           showToast(receipt?.deduplicated
             ? '该会话已有活动精炼任务，未重复创建。'
             : '已加入队列');
-          root.querySelector('.desktop-nav-item[data-route="inbox"]')?.click();
+          document.querySelector('.desktop-nav-item[data-route="inbox"]')?.click();
         } else if (['TASK_SUCCEEDED', 'TASK_FAILED', 'TASK_CANCELLED'].includes(receipt?.status)) {
           activeRefinementJobId = receipt.job_id || 'terminal';
           button.disabled = true;
@@ -1048,14 +1048,11 @@
       });
   });
   q('#sessions-toast button').addEventListener('click', () => hideToast({ animate:true }));
-  qa('.desktop-nav-item').forEach((item) => item.addEventListener('click', () => {
+  document.querySelectorAll('.desktop-nav-item').forEach((item) => item.addEventListener('click', () => {
     if (item.dataset.route !== 'sessions') closeDetail({ immediate:true });
   }, true));
-  const globalRight = q('#desktop-toggle-right');
-  globalRight.disabled = true;
-  // This page shows details in the middle, so the shared button gets its own label instead of the frame's.
-  Memorive.i18n.set(globalRight, null, null, 'aria-label');
-  globalRight.setAttribute('aria-label', '本页完整详情使用中央宽阅读区');
+  // This page shows details in the middle: the right panel button is off here, with its own label.
+  Memorive.frames.sessions.rightButtonUnavailable('本页完整详情使用中央宽阅读区');
   root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !q('#sessions-searchbox').hidden) {
       event.preventDefault();

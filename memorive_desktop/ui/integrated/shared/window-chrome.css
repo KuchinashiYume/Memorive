@@ -54,9 +54,9 @@
 #desktop-settings-preview .desktop-reminder-scope-row > .desktop-settings-select-shell {width:250px;max-width:48%;flex:0 0 250px;}
 #desktop-settings-preview .desktop-reminder-scope-row .select {width:100%;}
 @container (max-width:460px) {#desktop-settings-preview .desktop-reminder-scope-row {flex-wrap:wrap;}#desktop-settings-preview .desktop-reminder-scope-row > .desktop-settings-select-shell {max-width:100%;}}
-[data-desktop-route] .desktop-navigation {display:flex!important;flex-direction:column;min-height:0;}
-[data-desktop-route] .desktop-navigation > .desktop-logo {flex-shrink:0;}
-[data-desktop-route] .desktop-navigation > .desktop-nav-list {flex:1;min-height:0;overflow:auto;align-content:start;}
+.desktop-window .desktop-navigation {display:flex!important;flex-direction:column;min-height:0;}
+.desktop-window .desktop-navigation > .desktop-logo {flex-shrink:0;}
+.desktop-window .desktop-navigation > .desktop-nav-list {flex:1;min-height:0;overflow:auto;align-content:start;}
 .desktop-nav-user {display:flex;align-items:center;gap:10px;min-height:60px;margin:12px 12px 14px;padding:10px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--desktop-text-primary,#302d26);font:inherit;text-align:left;cursor:pointer;flex:none;min-width:0;}
 .desktop-nav-user:hover {background:var(--desktop-surface-hover,#E8E3DA);border-color:var(--desktop-border-default,#dfd9cf);}
 .desktop-nav-user:focus-visible {outline:2px solid var(--desktop-accent,#955b3e);outline-offset:2px;}

@@ -1,6 +1,6 @@
 /* desktop-user-css */
 /* Local presentation: share settings typography and reserve final home geometry. */
-.desktop-hide-expressions [data-desktop-route] .desktop-navigation {padding-top:5px;}
+.desktop-hide-expressions .desktop-window .desktop-navigation {padding-top:5px;}
 .desktop-user-loading .desktop-blank-state,.desktop-user-loading .desktop-logo {visibility:hidden;}
 .desktop-hide-expressions .desktop-home-expression-button,
 .desktop-hide-expressions .desktop-empty-illustration,

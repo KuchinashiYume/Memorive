@@ -1,18 +1,7 @@
 <!-- The inbox route, also the start view: the item list, the batch bar, the drop target, the item details in the
-     right panel, and the home view with the assistant picture. Includes the window frame from shared/frame/. -->
+     right panel, and the home view with the assistant picture. The window frame around it is in page.html. -->
 <section class="desktop-route-surface" data-desktop-route="inbox" aria-label="收件箱" hidden>
 <div id="desktop-inbox-preview" class="desktop-page-root" lang="zh-Hans">
-  <!-- include: shared/frame/icons.html -->
-
-  
-
-  <div class="desktop-preview-stage" id="desktop-preview-stage">
-    <section class="desktop-window" id="desktop-window" data-left="true" data-right="false" data-bottom="false" data-short-height="false" aria-label="Memorive 收件箱">
-      <!-- include: shared/frame/global-bar.html -->
-
-      <div class="desktop-workspace">
-        <!-- include: shared/frame/navigation.html -->
-
         <main class="desktop-central" id="desktop-central">
           <div class="desktop-page-view" id="desktop-page-view" hidden>
             <div class="page-shell desktop-inbox-shell">
@@ -61,15 +50,6 @@
             <p id="inbox-logic-analysis-help">原文就绪后排队，使用已配置的云端模型。</p>
           </div><section class="inspector-section"><h4 id="inbox-properties-heading">文件属性</h4><dl class="key-value"><dt>文件类型</dt><dd id="inbox-detail-type">—</dd><dt>文件大小</dt><dd id="inbox-detail-size">—</dd><dt>文件状态</dt><dd id="inbox-detail-state">—</dd><dt>创建时间</dt><dd id="inbox-detail-created">—</dd><dt>修改时间</dt><dd id="inbox-detail-modified">—</dd><dt>文件路径</dt><dd class="mono" id="inbox-detail-path">—</dd></dl><details class="desktop-copy-technical"><summary>技术详情</summary><dl class="key-value"><dt>ID</dt><dd class="mono" id="inbox-detail-id">—</dd></dl></details></section><section class="inspector-section"><h4 id="inbox-preview-heading" hidden>预览</h4><div class="desktop-inbox-preview" id="inbox-preview"></div></section></div></aside>
 
-        <!-- include: shared/frame/accounting-panel.html -->
-
         <button class="desktop-resizer desktop-right-resizer" id="desktop-resize-right" type="button" role="separator" aria-label="调整右侧面板宽度" aria-controls="desktop-right-panel" aria-orientation="vertical" aria-valuemin="160" aria-valuemax="900" aria-valuenow="40" aria-valuetext="内容区 40%" hidden></button>
-        <button class="desktop-resizer desktop-bottom-resizer" id="desktop-resize-bottom" type="button" role="separator" aria-label="调整底部面板高度" aria-controls="desktop-bottom-panel" aria-orientation="horizontal" aria-valuemin="240" aria-valuemax="528" aria-valuenow="346" hidden></button>
-      </div>
-
-      <div class="desktop-tooltip" id="desktop-tooltip" role="tooltip" hidden></div>
-      <div class="sr-only" id="desktop-live-state" aria-live="polite"></div>
-    </section>
-  </div>
 </div>
 </section>

@@ -68,15 +68,15 @@ def walk(mode_name):
     for category in SETTINGS:   # the last route opened above is settings
         yield f"{mode_name}/settings.{category}", [click(f'{VISIBLE}.desktop-settings-category[data-category="{category}"]')], False
     for route in ROUTES:
-        yield f"{mode_name}/{route}+right", [activate(route), click(VISIBLE + "#desktop-toggle-right")], False
-        yield f"{mode_name}/{route}+right+closed", [click(VISIBLE + "#desktop-toggle-right")], False
-        yield f"{mode_name}/{route}+bottom", [click(VISIBLE + "#desktop-toggle-bottom")], False
-        yield f"{mode_name}/{route}+bottom+closed", [click(VISIBLE + "#desktop-toggle-bottom")], False
+        yield f"{mode_name}/{route}+right", [activate(route), click("#desktop-toggle-right")], False
+        yield f"{mode_name}/{route}+right+closed", [click("#desktop-toggle-right")], False
+        yield f"{mode_name}/{route}+bottom", [click("#desktop-toggle-bottom")], False
+        yield f"{mode_name}/{route}+bottom+closed", [click("#desktop-toggle-bottom")], False
 
 
 def actions(m):
     """What a person does with the page, on the records seed.py put in."""
-    right = VISIBLE + "#desktop-toggle-right"
+    right = "#desktop-toggle-right"
     # Records and their details.
     yield f"{m}/inbox.detail", [activate("inbox"), click(VISIBLE + ".desktop-inbox-card:not(.new-file)")], True
     yield f"{m}/inbox.detail+closed", [click(right)], False

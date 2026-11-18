@@ -4,11 +4,14 @@
    :is(#desktop-<route>-preview, ...) { ... }, where & is the route's root element. A rule that only
    one route has keeps its #desktop-<route>-preview prefix. Rules apply in file order: to change one
    route only, edit its own rule or add one for it after the shared rule.
+   The window frame (top bar, navigation, bottom panel, tooltip) sits once around the routes in #desktop-shell
+   (page.html): a shared group whose rules also style the frame names #desktop-shell beside the route roots, and a
+   frame rule for some routes only reads the open route from .desktop-window[data-route].
    @scope blocks hold the rules that the routes scope to their root, with the @media and @keyframes
    rules written inside them; the top-level @keyframes are at the end.
    The toolbar icon buttons of every route are in toolbar-icons.css. */
 
-:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   & .desktop-icon-sprite {
     position: absolute;
     width: 0;
@@ -39,7 +42,7 @@
   }
 }
 
-:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   & .desktop-window {
     --desktop-left-size: var(--desktop-nav-width);
     --desktop-right-size: calc(260px * var(--desktop-scale));
@@ -60,11 +63,11 @@
   }
 }
 
-#desktop-settings-preview .desktop-window { --desktop-right-size: calc(480px * var(--desktop-scale)); }
-#desktop-inbox-preview .desktop-window { --desktop-right-size: 40%; }
-:is(#desktop-tasks-preview, #desktop-messages-preview) .desktop-window { --desktop-right-size: calc(390px * var(--desktop-scale)); }
+#desktop-shell .desktop-window:where([data-route="settings"]) { --desktop-right-size: calc(480px * var(--desktop-scale)); }
+#desktop-shell .desktop-window:where([data-route="inbox"]) { --desktop-right-size: 40%; }
+#desktop-shell .desktop-window:where([data-route="tasks"], [data-route="messages"]) { --desktop-right-size: calc(390px * var(--desktop-scale)); }
 
-:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   & .desktop-window[data-short-height="true"] {
     height: calc(100% - 8px);
     min-height: 292px;
@@ -154,7 +157,7 @@
   }
 }
 
-:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   & .desktop-icon-button:hover {
     border-color: var(--desktop-border-default);
     background: var(--desktop-surface-hover);
@@ -329,7 +332,7 @@
   box-shadow: 0 0 0 1px var(--desktop-surface-raised);
 }
 
-:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   & .desktop-central {
     grid-column: 2;
     grid-row: 1;
@@ -539,7 +542,7 @@
 }
 
 @container (max-width: 620px) {
-  :is(#desktop-settings-preview, #desktop-tasks-preview) {
+  #desktop-shell :where(.desktop-window[data-route="settings"], .desktop-window[data-route="tasks"]) {
     & .desktop-workspace {
       --desktop-left-size: var(--desktop-nav-width-narrow);
       --desktop-right-size: calc(280px * var(--desktop-scale));
@@ -548,21 +551,21 @@
 }
 
 @container (max-width: 620px) {
-  #desktop-inbox-preview .desktop-workspace {
+  #desktop-shell .desktop-window:where([data-route="inbox"]) .desktop-workspace {
     --desktop-left-size: var(--desktop-nav-width-narrow);
     --desktop-right-size: calc(240px * var(--desktop-scale));
   }
 }
 
 @container (max-width: 620px) {
-  #desktop-messages-preview .desktop-workspace {
+  #desktop-shell .desktop-window:where([data-route="messages"]) .desktop-workspace {
     --desktop-left-size: var(--desktop-nav-width-narrow);
     --desktop-right-size: calc(188px * var(--desktop-scale));
   }
 }
 
 @container (max-width: 620px) {
-  :is(#desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview) {
+  #desktop-shell :where(.desktop-window[data-route="sessions"], .desktop-window[data-route="library"], .desktop-window[data-route="worklog"]) {
     & .desktop-workspace {
       --desktop-left-size: var(--desktop-nav-width-narrow);
       --desktop-right-size: calc(130px * var(--desktop-scale));
@@ -571,7 +574,7 @@
 }
 
 @container (max-width: 620px) {
-  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
     & .desktop-view-name {
       display: none;
     }
@@ -583,7 +586,7 @@
 }
 
 @container (max-height: 560px) {
-  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
     & .desktop-logo {
       margin-block: 9px;
     }
@@ -597,7 +600,7 @@
 }
 
 @container (max-height: 360px) {
-  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
     & .desktop-logo {
       margin-block: 3px;
     }
@@ -613,7 +616,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+  :is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
     & .desktop-logo.desktop-logo-compress,
     & .desktop-logo.desktop-logo-shake {
       animation: none;
@@ -641,7 +644,7 @@
   }
 }
 
-:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+:is(#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   & .desktop-window {
     --canvas: var(--desktop-canvas);
     --surface: var(--desktop-surface);
@@ -734,7 +737,7 @@
   }
 }
 
-@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   * { box-sizing: border-box; }
   html, body { min-height: 100%; }
   body {
@@ -1463,7 +1466,7 @@
   }
 }
 
-@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   .sr-only {
     position: absolute;
     width: 1px;
@@ -1507,7 +1510,7 @@
   }
 }
 
-@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview) {
+@scope (#desktop-settings-preview, #desktop-inbox-preview, #desktop-tasks-preview, #desktop-messages-preview, #desktop-sessions-preview, #desktop-library-preview, #desktop-worklog-preview, #desktop-leaderboard-preview, #desktop-chat-preview, #desktop-shell) {
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   }
@@ -4583,12 +4586,7 @@
   height:100%; min-height:0; color-scheme:light; font:inherit;
 }
 
-#desktop-leaderboard-preview .desktop-preview-stage {
-  height:100%!important; max-width:none!important; aspect-ratio:auto!important;
-}
-
-#desktop-leaderboard-preview .desktop-window {
-  width:100%; height:100%; border:0; border-radius:0; box-shadow:none;
+#desktop-leaderboard-preview {
   --lb-bg:var(--desktop-canvas); --lb-surface:var(--desktop-surface); --lb-paper:var(--desktop-surface-raised);
   --lb-text:var(--desktop-text-primary); --lb-muted:var(--desktop-text-secondary);
   --lb-border:var(--desktop-border-default); --lb-border-strong:var(--desktop-border-strong);
