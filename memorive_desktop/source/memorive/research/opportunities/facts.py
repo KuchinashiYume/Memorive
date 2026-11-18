@@ -115,7 +115,7 @@ def sheet(number: int, card: dict, chunks: dict[str, dict]) -> list[dict]:
 
 
 def papers(core_artifacts: dict[str, dict], resolve) -> list[dict]:
-    """One fact sheet per processed paper that has an admitted card, oldest job first.
+    """One fact sheet per processed paper whose card is admitted (active), oldest job first.
 
     core_artifacts is the library's core_artifacts(); resolve(artifact_id) gives the file of a
     product (resolve_core_private_artifact). Each sheet also names the paper's library files with
@@ -129,8 +129,9 @@ def papers(core_artifacts: dict[str, dict], resolve) -> list[dict]:
         if not card_id:
             continue
         card = card_fields(resolve(card_id))
-        # A quarantined card was taken out of use; a pending one is used and marked as not yet reviewed.
-        if card.get('review_status') == 'quarantined':
+        # Only admitted cards, as in retrieval: a pending card has not passed review, a quarantined one
+        # was taken out of use.
+        if card.get('review_status', 'active') != 'active':
             continue
         chunks_id = products.get('CORE_CHUNKS')
         chunks = chunk_texts(resolve(chunks_id) if chunks_id else None)
@@ -141,7 +142,6 @@ def papers(core_artifacts: dict[str, dict], resolve) -> list[dict]:
         title = _clean(card.get('title')) or core_artifacts[card_id]['row'].get('display_name') or job_id
         sheets.append({'paper': f'P{number}', 'title': title, 'job_id': job_id, 'card_artifact_id': card_id,
                        'card_sha256': core_artifacts[card_id].get('content_sha256'),
-                       'card_reviewed': card.get('review_status', 'active') == 'active',
                        'library_files': [{'id': products[kind], 'content_hash': core_artifacts[products[kind]]['content_sha256']}
                                          for kind in LIBRARY_FILES if kind in products],
                        'facts': facts, 'chunks': chunks})

@@ -79,7 +79,7 @@ def groups(papers: list[dict], size: int = GROUP_SIZE) -> list[list[dict]]:
 def prompt(group: list[dict], *, focus: str, language_instruction: str, known: list[dict] = ()) -> str:
     """The request for one group. known: the opportunities found in these papers before ({kind,
     title, papers}, papers by their numbers here), which the model is asked not to return again."""
-    sheets = [{'paper': paper['paper'], 'title': paper['title'], 'reviewed': paper['card_reviewed'],
+    sheets = [{'paper': paper['paper'], 'title': paper['title'],
                'facts': [{'id': f['id'], 'field': f['field'], 'text': f['text'][:FACT_CHARS]} for f in paper['facts']]}
               for paper in group]
     template = PROMPTS.get(MODULE).body
@@ -185,7 +185,7 @@ def checked(response, group: list[dict]) -> tuple[list[dict], list[dict]]:
             'dimensions': [{k: row[k] for k in ('dimension', 'status', 'note', 'fact_ids')} for row in item['dimensions']],
             'fact_ids': list(dict.fromkeys(item['fact_ids'] + added)),
             'papers': [{'paper': p['paper'], 'title': p['title'], 'job_id': p['job_id'], 'card_sha256': p['card_sha256'],
-                        'card_reviewed': p['card_reviewed'], 'library_files': p['library_files']} for p in group if p['paper'] in papers],
+                        'library_files': p['library_files']} for p in group if p['paper'] in papers],
             'evidence': [{'fact_id': i, 'fact_key': fact_key(*facts_by_id[i]), 'paper': facts_by_id[i][0]['paper'],
                           'paper_title': facts_by_id[i][0]['title'], 'card_artifact_id': facts_by_id[i][0]['card_artifact_id'],
                           **{k: facts_by_id[i][1][k] for k in ('field', 'text', 'quote', 'chunk_id', 'page', 'section')}}
@@ -199,7 +199,7 @@ def _plain(text) -> str:
     return ''.join('\\' + c if c in MARKUP else c for c in ' '.join(str(text or '').split()))
 
 
-def markdown(opportunities: list[dict], *, day: str, paper_count: int, unreviewed: int, earlier: int, language) -> str:
+def markdown(opportunities: list[dict], *, day: str, paper_count: int, earlier: int, language) -> str:
     def t(zh, en, ja):
         return choose(language, zh, en, ja)
     kind_names = {'divergence': t('分歧', 'Divergence', '相違'),
@@ -224,9 +224,6 @@ def markdown(opportunities: list[dict], *, day: str, paper_count: int, unreviewe
     if earlier:
         lead += t('之前找到的 {0} 条不再重复列出，见研究机会页。', ' The {0} found before are not repeated here; see the opportunities page.',
                   '以前に見つけた {0} 件はここでは繰り返さず、研究の機会のページにあります。').format(earlier)
-    if unreviewed:
-        lead += t('其中 {0} 篇论文的卡片还没有人工复核。', ' The cards of {0} papers have not been reviewed yet.',
-                  ' うち {0} 本の論文カードはまだ確認されていません。').format(unreviewed)
     lines += [lead, '']
     if not opportunities:
         lines += [t('这些论文里没有找到新的、有依据的分歧或缺口。', 'No new divergence or gap with enough support was found in these papers.',

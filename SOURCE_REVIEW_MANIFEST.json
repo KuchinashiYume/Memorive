@@ -4081,8 +4081,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "dc61f715155c4093aa52ad4caf64ae9fd19d453d95d7fad6150807d8d5aa947d",
-      "bytes": 276007
+      "sha256": "810811134a2c29e35a8aad6d1657124880d514e3440dada4060f71b0fa6e91ec",
+      "bytes": 276214
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -8386,18 +8386,18 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/facts.py",
-      "sha256": "b5adc167ebea704e6d4e2a1c39088aad67db9316cb27047302140ecce3454c99",
-      "bytes": 7769
+      "sha256": "6e58bd6e38537e8e659768c914931e6ad9a6eba0a319a7a5e62106e9faf7495e",
+      "bytes": 7722
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/finder.py",
-      "sha256": "bb412003a20bf20a3d21236b8a035703719fb869185924a003d1ee6aa7892aca",
-      "bytes": 16364
+      "sha256": "ea6e6027960d8cb1f0c660c4c360cf167d63aec68c03d0b6959617bf199ed7eb",
+      "bytes": 16008
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/runs.py",
-      "sha256": "9b93cc2290dbf5181604c35beb7b353f3d718e5a7377595b4a57a60983f3a59b",
-      "bytes": 16124
+      "sha256": "c38c8ad052ab32db4e6b1815709d48ca43f0eacaada6ae7d9d9133cb70bde33f",
+      "bytes": 15987
     },
     {
       "path": "memorive_desktop/source/memorive/research/ranking/__init__.py",
@@ -10238,6 +10238,11 @@
       "path": "memorive_desktop/source/memorive/models/gateway/prompts/research_opportunities/v1.md",
       "sha256": "dae792d028e5a29663608e41719dde0fcb5c09c897cfed56a1e4120c1683f158",
       "bytes": 3262
+    },
+    {
+      "path": "memorive_desktop/source/memorive/models/gateway/prompts/research_opportunities/v2.md",
+      "sha256": "2084f04384419b9628eb724e468ba6ee717cf13ca4247387fa9617857bc665da",
+      "bytes": 3147
     }
   ]
 }

@@ -237,19 +237,18 @@ class Opportunities:
                 check()
                 stamp = now()
                 language = params['language_context']
-                unreviewed = sum(not paper['card_reviewed'] for paper in papers)
                 # The result lists what is new; one found again stays in the ledger as it was.
                 earlier = read_ledger(r.root)['items']
                 new = [item for item in found if item['fingerprint'] not in earlier]
                 result = sealed({
                     'schema_version': 'ResearchOpportunities-v1', 'kind': 'opportunities', 'period': None,
                     'status': 'PARTIAL' if failed else 'SUCCEEDED', 'language_context': language, 'focus': params['focus'],
-                    'paper_count': len(papers), 'unreviewed_count': unreviewed,
+                    'paper_count': len(papers),
                     'card_sha256s': sorted(paper['card_sha256'] for paper in papers),
                     'opportunities': new, 'dropped': dropped, 'failed_groups': failed,
                     'model': {k: model[k] for k in ('model_name', 'display_name', 'profile_kind')},
                     'model_calls': calls, 'paid_model_calls': calls if model['profile_kind'] == 'API' else 0,
-                    'markdown': finder.markdown(new, day=today(), paper_count=len(papers), unreviewed=unreviewed,
+                    'markdown': finder.markdown(new, day=today(), paper_count=len(papers),
                                                 earlier=len(earlier), language=language)})
                 write(path / 'result.json', result)
                 (path / 'result.md').write_text(result['markdown'], encoding='utf8')

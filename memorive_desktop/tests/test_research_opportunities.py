@@ -47,15 +47,15 @@ PAPERS = {
     'job-c': card('Reading long reports', question='Does evidence drift over long reports?', objects=['long reports'],
                   methods=['attention probing'], context={'object': 'long reports'}, data=[],
                   results='Evidence drifts after 4,000 tokens.', conclusion='Long reports need anchoring.',
-                  limits=['We did not test reports that contain tables.'], status='pending'),
+                  limits=['We did not test reports that contain tables.']),
 }
 
 
-def library(tmp_path, papers=PAPERS, quarantined=()):
+def library(tmp_path, papers=PAPERS, status=None):
     records, files = {}, {}
     for job, text in papers.items():
-        if job in quarantined:
-            text = text.replace('review_status: active', 'review_status: quarantined')
+        if status and job in status:
+            text = text.replace('review_status: active', 'review_status: ' + status[job])
         card_path = tmp_path / 'library' / job / 'card.md'
         card_path.parent.mkdir(parents=True, exist_ok=True)
         card_path.write_text(text, encoding='utf-8')
@@ -96,12 +96,12 @@ def test_a_fact_sheet_holds_what_the_card_says_with_its_place_in_the_paper(tmp_p
     second = [f['text'] for f in sheets[1]['facts'] if f['field'] == 'key_data']
     assert second == ['expected calibration error：0.11（900 notes）', 'false recall：39%→33%']    # nothing "not given", no second %
     third = sheets[2]
-    assert third['card_reviewed'] is False
     assert [f['text'] for f in third['facts'] if f['field'] == 'limitation'] == ['We did not test reports that contain tables.']
 
 
-def test_a_quarantined_card_gives_no_fact_sheet(tmp_path):
-    lib = library(tmp_path, quarantined=('job-b',))
+@pytest.mark.parametrize('state', ['pending', 'quarantined'])
+def test_only_an_admitted_card_gives_a_fact_sheet(tmp_path, state):
+    lib = library(tmp_path, status={'job-b': state})
     sheets = facts.papers(lib.core_artifacts(), lib.resolve_core_private_artifact)
     assert [s['title'] for s in sheets] == ['Calibrating report classifiers on synthetic data', 'Reading long reports']
 
@@ -190,8 +190,8 @@ def test_the_readable_result_names_the_papers_and_quotes_them(tmp_path):
     sheets = facts.papers(lib.core_artifacts(), lib.resolve_core_private_artifact)
     a, b, c = fields(sheets)
     kept, _ = finder.checked({'opportunities': [divergence(a, b), gap(c)]}, sheets)
-    text = finder.markdown(kept, day='2026-11-18', paper_count=3, unreviewed=1, earlier=0, language=None)
-    assert text.startswith('# 研究机会 · 2026-11-18\n\n从 3 篇论文中找到 2 条新的研究机会：分歧 1 条，缺口 1 条。其中 1 篇论文的卡片还没有人工复核。')
+    text = finder.markdown(kept, day='2026-11-18', paper_count=3, earlier=0, language=None)
+    assert text.startswith('# 研究机会 · 2026-11-18\n\n从 3 篇论文中找到 2 条新的研究机会：分歧 1 条，缺口 1 条。\n')
     assert '## 1. 分歧：Two papers disagree' in text
     assert '- 方法（相同）：Both use temperature scaling.' in text
     assert '- 《Calibration of clinical note classifiers》· 关键数据（第 2 页，Results）：expected calibration error：0.11（900 notes） “ECE remained 0.11”' in text
@@ -283,9 +283,9 @@ def test_a_run_finds_checks_saves_and_announces_the_opportunities(research):
     result = state['result']
     assert [o['kind'] for o in result['opportunities']] == ['divergence', 'gap']
     assert result['dropped'] == [{'title': 'An invented number', 'reason': 'NUMBER_NOT_IN_CITED_PAPERS', 'group': 1}]
-    assert (result['paper_count'], result['unreviewed_count'], result['model_calls']) == (3, 1, 1)
+    assert (result['paper_count'], result['model_calls']) == (3, 1)
     prompt = r.host.service.prompts[0]
-    assert 'calibration' in prompt and '"reviewed": false' in prompt
+    assert 'calibration' in prompt and 'Reading long reports' in prompt
     library_row = json.loads((r.run_path(state['run_id']) / 'library.json').read_text(encoding='utf-8'))['row']
     assert (library_row['kind'], library_row['mode'], library_row['product_kind']) == ('研究机会', 'memorive', 'RESEARCH_OPPORTUNITIES')
     assert (r.run_path(state['run_id']) / 'result.md').read_text(encoding='utf8') == result['markdown']
