@@ -281,6 +281,73 @@ class ApiBriefingTests(unittest.TestCase):
         ):
             run_api_briefing(digest=digest, model_call=missing_row)
 
+    def test_a_section_summarised_in_several_rows_is_joined(self) -> None:
+        # From a real daily report: the model summarised the two papers of "新增" in two rows.
+        digest = _digest("daily")
+        digest["sections"][0]["items"].append(_item("RE-LIBRARY-CHANGE-2"))
+
+        def per_paper(_slot: str, payload: dict) -> dict:
+            value = _narrative(payload["memorive_contract"])
+            first = value["section_summaries"][0]
+            value["section_summaries"][0:1] = [
+                dict(first, text="Paper one.", event_ids=first["event_ids"][:1]),
+                dict(first, text="Paper two.", event_ids=first["event_ids"][1:]),
+            ]
+            return _response(value, "deepseek", "deepseek-v4-flash")
+
+        result = run_api_briefing(digest=digest, model_call=per_paper)
+
+        self.assertEqual(result.status, GENERATED)
+        rows = result.narrative["section_summaries"]
+        self.assertEqual([row["section_title"] for row in rows], TITLES["daily"])
+        self.assertEqual(rows[0]["text"], "Paper one. Paper two.")
+        self.assertEqual(sorted(rows[0]["event_ids"]), ["RE-LIBRARY-CHANGE", "RE-LIBRARY-CHANGE-2"])
+
+    def test_a_row_citing_events_of_two_sections_still_fails(self) -> None:
+        digest = _digest("daily")
+        digest["sections"][3]["items"].append(_item("RE-FAILED-RUN"))
+
+        def mixed(_slot: str, payload: dict) -> dict:
+            value = _narrative(payload["memorive_contract"])
+            rows = value["section_summaries"]
+            rows.append(dict(rows[0], text="Both at once.", event_ids=rows[0]["event_ids"] + rows[3]["event_ids"]))
+            return _response(value, "deepseek", "deepseek-v4-flash")
+
+        with self.assertRaisesRegex(BriefingApiError, "NARRATIVE_SECTION_EVENT_REF_INVALID"):
+            run_api_briefing(digest=digest, model_call=mixed)
+
+    def test_a_sentence_without_events_cannot_borrow_the_sources_of_its_section(self) -> None:
+        # From the review: an extra, unanchored claim used to be joined to the anchored summary of
+        # its section and so carried that summary's events.
+        digest = _digest("daily")
+        digest["sections"][0]["items"].append(_item("RE-LIBRARY-CHANGE-2"))
+
+        def unanchored(_slot: str, payload: dict) -> dict:
+            value = _narrative(payload["memorive_contract"])
+            rows = value["section_summaries"]
+            rows.insert(1, dict(rows[0], text="The dataset had 900 participants.", event_ids=[]))
+            return _response(value, "deepseek", "deepseek-v4-flash")
+
+        with self.assertRaisesRegex(BriefingApiError, "NARRATIVE_NONEMPTY_SECTION_SUMMARY_INVALID"):
+            run_api_briefing(digest=digest, model_call=unanchored)
+
+    def test_sections_given_in_another_order_are_put_back_by_their_events(self) -> None:
+        digest = _digest("daily")
+        digest["sections"][3]["items"].append(_item("RE-FAILED-RUN"))
+
+        def swapped(_slot: str, payload: dict) -> dict:
+            value = _narrative(payload["memorive_contract"])
+            rows = value["section_summaries"]
+            rows[0], rows[3] = rows[3], rows[0]
+            return _response(value, "deepseek", "deepseek-v4-flash")
+
+        result = run_api_briefing(digest=digest, model_call=swapped)
+
+        self.assertEqual(result.status, GENERATED)
+        rows = result.narrative["section_summaries"]
+        self.assertEqual([row["section_title"] for row in rows], TITLES["daily"])
+        self.assertEqual((rows[0]["event_ids"], rows[3]["event_ids"]), (["RE-LIBRARY-CHANGE"], ["RE-FAILED-RUN"]))
+
     def test_unknown_event_reference_and_model_drift_fail_closed(self) -> None:
         digest = _digest("daily")
 

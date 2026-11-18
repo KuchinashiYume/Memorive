@@ -6407,8 +6407,8 @@
     },
     {
       "path": "source/memorive/research/reports/api_briefing.py",
-      "sha256": "5b51504a65f3bbddecfacbebd7eed9a7a76b947040d97a5b0f29ce75a271ddce",
-      "bytes": 21943
+      "sha256": "2b1dbd14faff86d62060637ea0d3b9fd73075eb480720155c0457174d5b01022",
+      "bytes": 23819
     },
     {
       "path": "source/memorive/research/reports/artifact_registry_wire.py",

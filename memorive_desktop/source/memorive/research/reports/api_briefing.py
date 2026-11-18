@@ -347,26 +347,56 @@ def _validate_narrative(
 
     validate_rows(value["period_summary"])
     validate_rows(value["priority_items"], allow_empty=True)
-    if len(value["section_summaries"]) != len(digest["sections"]):
-        raise BriefingApiError("NARRATIVE_SECTION_COVERAGE_INVALID")
-    for section, row in zip(digest["sections"], value["section_summaries"], strict=True):
-        # Section order and identity belong to the frozen digest, not to the
-        # narrative model.  Reattach the exact runtime title so harmless forms
-        # such as "S01-title" cannot consume another paid call.
-        row["section_title"] = section["title"]
-        allowed = {item["event_id"] for item in section["items"]}
-        if not set(row["event_ids"]).issubset(allowed):
-            raise BriefingApiError("NARRATIVE_SECTION_EVENT_REF_INVALID")
-        if allowed:
-            if row["text"] == "NONE" or not row["event_ids"]:
-                raise BriefingApiError("NARRATIVE_NONEMPTY_SECTION_SUMMARY_INVALID")
-        else:
-            if row["event_ids"]:
-                raise BriefingApiError("NARRATIVE_EMPTY_SECTION_SUMMARY_INVALID")
-            # An empty frozen section has no source material to narrate.  Its
-            # only valid canonical representation is therefore deterministic.
-            row["text"] = "NONE"
+    value["section_summaries"] = _one_row_per_section(value["section_summaries"], digest["sections"])
     return value
+
+
+def _one_row_per_section(rows, sections):
+    """The section summaries in the digest's order, one per section (section order and titles belong
+    to the frozen digest, not to the narrative model), each built only from rows whose own events
+    belong to that section.
+
+    A row that cites events goes to the section holding all of them, wherever it stands: a model may
+    give the sections in another order, or split one, a row per paper (a real daily report did, and
+    the whole narrative used to be thrown away). Each such row is checked before rows are joined: it
+    may cite events of one section only, and it must say something ("NONE" is no summary). A row that
+    cites no event makes no source-bound claim. It may only stand for a section without events (by its
+    title, possibly decorated, "S01-title", or else by its place when there are as many rows as
+    sections), and its text is dropped, since an empty section has no source material and is always
+    "NONE". Its prose never joins a section that has events, so it cannot borrow their
+    citations. A section no row stands for, or one with events but no summary of them, fails."""
+    allowed = [{item["event_id"] for item in section["items"]} for section in sections]
+    grouped = [[] for _ in sections]
+    covered = [False] * len(sections)
+    for position, row in enumerate(rows):
+        ids = set(row["event_ids"])
+        if ids:
+            homes = [index for index, events in enumerate(allowed) if ids <= events]
+            if len(homes) != 1:
+                raise BriefingApiError("NARRATIVE_SECTION_EVENT_REF_INVALID")
+            if row["text"] == "NONE":
+                raise BriefingApiError("NARRATIVE_NONEMPTY_SECTION_SUMMARY_INVALID")
+            grouped[homes[0]].append(row)
+            covered[homes[0]] = True
+            continue
+        title = row["section_title"]
+        homes = [index for index, section in enumerate(sections)
+                 if title == section["title"] or title.endswith("-" + section["title"])]
+        if len(homes) != 1 and len(rows) == len(sections):
+            homes = [position]
+        if len(homes) != 1:
+            raise BriefingApiError("NARRATIVE_SECTION_COVERAGE_INVALID")
+        if allowed[homes[0]] and row["text"] != "NONE":
+            raise BriefingApiError("NARRATIVE_NONEMPTY_SECTION_SUMMARY_INVALID")
+        covered[homes[0]] = True
+    if not all(covered):
+        raise BriefingApiError("NARRATIVE_SECTION_COVERAGE_INVALID")
+    if any(events and not group for events, group in zip(allowed, grouped)):
+        raise BriefingApiError("NARRATIVE_NONEMPTY_SECTION_SUMMARY_INVALID")
+    return [{"section_title": section["title"],
+             "text": " ".join(row["text"] for row in group) if group else "NONE",
+             "event_ids": list(dict.fromkeys(ref for row in group for ref in row["event_ids"]))}
+            for section, group in zip(sections, grouped)]
 
 
 def _event_aliases(digest):
