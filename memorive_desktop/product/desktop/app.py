@@ -3568,7 +3568,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         for key, global_name in bridge_targets:
             bridge_bootstraps[key] = evaluate_promise(
                 window,
-                f"Promise.resolve(window[{json.dumps(global_name)}].bootstrap())",
+                f"Promise.resolve(window.Memorive?.[{json.dumps(global_name)}].bootstrap())",
             )
         evaluate_promise(window, "window.Memorive?.inboxBridge.refresh()")
         native_drop_source = evidence_dir / "native-ui-drop-real-user.md"
@@ -5108,7 +5108,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         status = evaluate_promise(window, "window.pywebview.api.get_runtime_status()")
         route_sweep = window.evaluate_js("window.Memorive?.app.probeAll()")
         window.evaluate_js("window.Memorive?.app.activate('work-log')")
-        bridge_inspect = window.evaluate_js("(() => { const names=['settingsBridge','inboxBridge','currentTaskBridge','messagesBridge','sessionsBridge','libraryBridge','workLogBridge']; return names.map((name) => { const bridge=window[name]; const detail=bridge && typeof bridge.inspect==='function' ? bridge.inspect() : {}; return {name,present:Boolean(bridge),method_count:Number(detail.method_count||0),native_transport:detail.native_transport===true,binding_count:Number(detail.binding_count||0),bootstrapped:detail.bootstrapped===undefined ? null : Boolean(detail.bootstrapped)}; }); })()")
+        bridge_inspect = window.evaluate_js("(() => { const names=['settingsBridge','inboxBridge','currentTaskBridge','messagesBridge','sessionsBridge','libraryBridge','workLogBridge']; return names.map((name) => { const bridge=window.Memorive?.[name]; const detail=bridge && typeof bridge.inspect==='function' ? bridge.inspect() : {}; return {name,present:Boolean(bridge),method_count:Number(detail.method_count||0),native_transport:detail.native_transport===true,binding_count:Number(detail.binding_count||0),bootstrapped:detail.bootstrapped===undefined ? null : Boolean(detail.bootstrapped)}; }); })()")
         assistant_desktop_transparency = inspect_assistant_desktop_transparency(
             assistant_window, evidence_dir, phase
         )

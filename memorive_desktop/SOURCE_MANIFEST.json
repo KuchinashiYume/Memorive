@@ -212,8 +212,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "644967f1da1b1442894bd841057eb670eeee590255fced3d7de36aecb02c81e0",
-      "bytes": 371386
+      "sha256": "2d16c80ebf1b8b66be3b0c02086d871e33e38ade39b50940af8534ef1af09aa5",
+      "bytes": 371408
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -437,8 +437,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "f91d33f115f324772979a2ffc823a2243a7ddd6e6fc291ea86877f335d11dc81",
-      "bytes": 2636428
+      "sha256": "05c637402199da7cbc0c32c3d1915241b5508ba1bc2cf59a335982055868bb68",
+      "bytes": 2636452
     },
     {
       "path": "product/desktop/console_expressions.py",

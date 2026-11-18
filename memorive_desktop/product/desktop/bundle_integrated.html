@@ -1797,11 +1797,11 @@
 
 #desktop-sessions-preview .desktop-sessions-tools .search-field { width:210px; padding-right:34px; }
 
-#desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-shell { width:calc(155px * var(--desktop-scale)); }
+#desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-shell { width:calc(155px * max(1, var(--desktop-scale))); }
 
 #desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-trigger { min-height:var(--desktop-control); padding-block:4px; }
 
-#desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-shell:has(#sessions-limit) { width:calc(126px * var(--desktop-scale)); }
+#desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-shell:has(#sessions-limit) { width:calc(126px * max(1, var(--desktop-scale))); }
 
 #desktop-sessions-preview .desktop-sessions-refresh-glyph { display:inline-block; transform-origin:50% 50%; }
 
@@ -3466,7 +3466,7 @@
 
   #desktop-sessions-preview .desktop-sessions-tools .search-field { width:170px; }
 
-  #desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-shell { width:calc(125px * var(--desktop-scale)); }
+  #desktop-sessions-preview .desktop-sessions-tools .desktop-settings-select-shell { width:calc(125px * max(1, var(--desktop-scale))); }
 }
 
 @container (max-height:560px) {
