@@ -23,9 +23,6 @@
 .desktop-research-advanced summary { cursor:pointer; }
 /* Research opportunities (shared/opportunities.js): the search controls, then one card per opportunity. */
 .desktop-research-opportunity-controls { display:flex;flex-direction:column;gap:10px; }
-.desktop-research-opportunity-search { display:flex;align-items:center;gap:8px;max-width:640px; }
-.desktop-research-opportunity-search .field { flex:1;min-width:0; }
-#memo-chat-page .memo-attachments.desktop-research-opportunity-keywords { max-width:640px;padding:0; }
 .desktop-research-opportunity-head { display:flex;align-items:center;justify-content:space-between;gap:12px; }
 /* An opportunity sits in the same frame as a research Q&A answer (routes/chat/workspace.css). */
 .desktop-research-opportunity { display:flex;flex-direction:column;gap:10px;padding:16px 20px 8px;border:1px solid var(--desktop-border-default);border-radius:16px;background:var(--desktop-surface-raised);box-shadow:0 3px 12px #2A272307;overflow-wrap:anywhere; }
@@ -47,9 +44,19 @@
 .desktop-research-opportunity-fact p { margin:2px 0 0; }
 .desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
 .desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
-.desktop-research-opportunity-scope { display:flex;align-items:center;gap:8px;max-width:640px; }
-.desktop-research-opportunity-scope .select { flex:1;min-width:0; }
-#memo-chat-page .memo-attachments.desktop-research-opportunity-papers { max-width:640px;padding:0; }
+/* The search box takes the Q&A input box's frame and bar (routes/chat/workspace.css); these set its own parts. */
+#memo-chat-page .desktop-research-opportunity-box { max-width:760px; }
+#memo-chat-page .desktop-research-opportunity-box .memo-attachments { padding:10px 12px 0; }
+.desktop-research-opportunity-words { display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 14px 6px; }
+.desktop-research-opportunity-words input { flex:1 1 180px;min-width:0;border:0;outline:none;background:transparent;color:inherit;font:inherit;padding:4px 2px; }
+.desktop-research-opportunity-word { display:inline-flex;align-items:center;gap:2px;padding:1px 2px 1px 9px;border-radius:999px;background:var(--desktop-surface-subtle);color:var(--desktop-text-primary); }
+.desktop-research-opportunity-word .memo-quiet-button { padding:0 6px;color:var(--desktop-text-secondary); }
+#memo-chat-page .desktop-research-opportunity-box .memo-composer-bar .desktop-toolbar-icon { --desktop-toolbar-size:calc(32px * var(--desktop-scale)); }
+.desktop-research-opportunity-scope { max-width:260px;min-width:0;border:0;border-radius:7px;background:transparent;color:var(--text-secondary);font:inherit;padding:6px 4px;cursor:pointer; }
+.desktop-research-opportunity-scope:hover { background:var(--nav-hover,var(--desktop-surface-hover)); }
+.desktop-research-opportunity-scope:focus-visible { outline:2px solid var(--desktop-focus-ring);outline-offset:1px; }
+.desktop-research-opportunity-rename { max-width:260px;min-height:0;padding:4px 8px; }
+#memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }
 #memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }
 /* Deleting a group asks for a second click; the button shows the countdown as the inbox's delete button does. */
 .desktop-toolbar-icon.desktop-research-opportunity-delete[data-restart-armed="true"] { width:auto !important;min-width:152px !important;padding:0 12px !important;font-size:var(--memo-size-small) !important;white-space:nowrap; }
@@ -57,8 +64,6 @@
 /* The paper picker shares the right panel with the citations panel; one of them shows at a time. */
 #desktop-chat-preview .memo-evidence[hidden] { display:none !important; }
 #desktop-chat-preview .memo-paper-picker-head .field { flex:1;min-width:0; }
-#desktop-chat-preview .memo-paper-picker-sources { display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 12px;border-bottom:1px solid var(--border-default); }
-#desktop-chat-preview .memo-paper-picker-sources[hidden] { display:none; }
 #desktop-chat-preview .memo-paper-picker-note { margin:0; }
 #desktop-chat-preview .memo-paper-picker .memo-library-copy small { display:block;color:var(--text-secondary); }
 #desktop-chat-preview .memo-paper-picker .memo-library-row:has(input:disabled) { cursor:default;opacity:.6; }
