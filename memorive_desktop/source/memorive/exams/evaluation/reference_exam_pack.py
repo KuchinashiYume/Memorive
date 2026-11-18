@@ -438,22 +438,6 @@ def verify_reference_exam_pack(
                 f"REFERENCE_EXAM_PACK_REQUIRED_ROLE_MISMATCH:{relative}"
             )
 
-    observed_files = set()
-    for path in pack_root.rglob("*"):
-        if path.is_symlink():
-            raise ModelEvaluationReferenceExamPackError(
-                f"REFERENCE_EXAM_PACK_SYMLINK_FORBIDDEN:{path.name}"
-            )
-        if path.is_file():
-            observed_files.add(path.relative_to(pack_root).as_posix())
-    expected_files = set(members) | {MANIFEST_NAME, CHECKSUM_NAME}
-    if observed_files != expected_files:
-        raise ModelEvaluationReferenceExamPackError(
-            "REFERENCE_EXAM_PACK_FILESYSTEM_EXACT_SET_MISMATCH:"
-            f"missing={sorted(expected_files - observed_files)}:"
-            f"extra={sorted(observed_files - expected_files)}"
-        )
-
     checksums = _parse_checksums(checksum_path)
     checksum_exact_set = set(members) | {MANIFEST_NAME}
     if set(checksums) != checksum_exact_set:

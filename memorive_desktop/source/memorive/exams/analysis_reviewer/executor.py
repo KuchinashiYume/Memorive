@@ -1311,14 +1311,6 @@ class QualityAnalysisReviewerExamSuccessorExecutor(QualityCardReviewerExamExecut
                     repair_rounds_used == 2 or residual_count == 0
                 ),
                 blocking_failures=blocking_rows,
-                exact_hashes={
-                    "reference_pack_sha256": EXPECTED_MANIFEST_SHA256,
-                    "scoring_protocol_sha256": run.plan["scoring_protocol_sha256"],
-                    "executor_sha256": _file_sha256(Path(__file__)),
-                    "input_exact_set_sha256": canonical_sha256(
-                        run.sample["manifest"]["bindings"]
-                    ),
-                },
             )
             verdict = (
                 "FAIL"

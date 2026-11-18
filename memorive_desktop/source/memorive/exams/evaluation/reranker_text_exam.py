@@ -368,7 +368,6 @@ def inspect_language_successor_reference_pack(
             policy_errors.append(f"MEMBER_ESCAPES_PACK_ROOT:{relative}")
     status = "PASS" if not (
         missing
-        or extra
         or hash_mismatches
         or malformed_checksums
         or symlinks
@@ -534,8 +533,7 @@ def inspect_reference_pack(
         "PASS"
         if not (
             missing
-            or extra
-            or hash_mismatches
+                or hash_mismatches
             or malformed_checksums
             or symlinks
             or policy_errors
@@ -684,8 +682,7 @@ def inspect_public_assets() -> dict[str, Any]:
         "PASS"
         if not (
             missing
-            or extra
-            or hash_mismatches
+                or hash_mismatches
             or malformed_checksums
             or policy_errors
         )

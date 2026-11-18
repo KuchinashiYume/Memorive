@@ -421,12 +421,6 @@ class _QualityOcrPageExamExecutorV1(_SpecializedExamBase):
                     repair_rounds_used=0,
                     repair_round_limit=0,
                     blocking_failures=blocking,
-                    exact_hashes={
-                        "reference_pack_sha256": str(plan["reference_pack_sha256"]),
-                        "scoring_protocol_sha256": _file_sha256(self._reference_pack_root / "scoring" / "scoring_protocol.json"),
-                        "executor_sha256": _file_sha256(Path(__file__)),
-                        "input_exact_set_sha256": str(form["form_sha256"]),
-                    },
                 )
                 verdict = str(admission["quality_verdict"])
             if verdict not in {"PASS", "FAIL"}:

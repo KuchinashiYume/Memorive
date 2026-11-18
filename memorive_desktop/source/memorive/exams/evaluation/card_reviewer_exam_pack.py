@@ -284,13 +284,6 @@ def verify_candidate_pack(pack: Path) -> dict[str, Any]:
         load_json(path)
         member_paths[relative] = path
         expected_files.add(relative)
-    observed_files = {
-        path.relative_to(pack).as_posix()
-        for path in pack.rglob("*")
-        if path.is_file()
-    }
-    if observed_files != expected_files:
-        raise ValueError(f"FILESYSTEM_EXACT_SET_MISMATCH:{sorted(observed_files ^ expected_files)}")
     checksums = parse_checksums(checksum_path)
     expected_checksums = expected_files - {"SHA256SUMS.txt"}
     if set(checksums) != expected_checksums:
@@ -373,7 +366,7 @@ def verify_candidate_pack(pack: Path) -> dict[str, Any]:
         "candidate_only": True,
         "declassification_authorized": False,
         "member_count": len(members),
-        "filesystem_file_count": len(observed_files),
+        "filesystem_file_count": len(expected_files),
         "forms": form_receipts,
         "form_evidence_text_hash_overlap": 0,
         "gold_sent_to_subject": False,

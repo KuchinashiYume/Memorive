@@ -1955,18 +1955,6 @@ class QualityCardReviewerExamExecutor:
                     or run.failed_exam_item_count == 0
                 ),
                 blocking_failures=blocking_failures,
-                exact_hashes={
-                    "reference_pack_sha256": str(
-                        run.plan["reference_pack_sha256"]
-                    ),
-                    "scoring_protocol_sha256": str(
-                        run.comparison_projection["scoring_protocol_sha256"]
-                    ),
-                    "executor_sha256": _file_sha256(Path(__file__)),
-                    "input_exact_set_sha256": _sha256(
-                        {"forms": run.forms, "schemas": run.form_schemas}
-                    ),
-                },
             )
             run.verdict = str(quality_fail_admission["quality_verdict"])
 

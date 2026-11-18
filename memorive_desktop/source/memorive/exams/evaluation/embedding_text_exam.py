@@ -177,8 +177,7 @@ def inspect_reference_pack(
         "PASS"
         if not (
             missing
-            or extra
-            or hash_mismatches
+                or hash_mismatches
             or malformed_checksums
             or symlinks
             or policy_errors

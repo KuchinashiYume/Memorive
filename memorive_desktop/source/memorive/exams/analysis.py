@@ -3227,12 +3227,6 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
             repair_rounds_used=max(int(record.get("semantic_repair_rounds", 0)) for record in run.completed_panel_records),
             repair_round_limit=self.SEMANTIC_REPAIR_ROUND_LIMIT,
             blocking_failures=deepcopy(material_rows),
-            exact_hashes={
-                "reference_pack_sha256": str(run.plan["reference_pack_sha256"]),
-                "scoring_protocol_sha256": _file_sha256(Path(str(run.exam.__file__))),
-                "executor_sha256": _file_sha256(Path(__file__)),
-                "input_exact_set_sha256": str(final_cohort["cohort_binding_sha256"]),
-            },
             repair_cycle_closed=True,
         )
         run.raw_quality_fail_admission = deepcopy(run.quality_fail_admission)

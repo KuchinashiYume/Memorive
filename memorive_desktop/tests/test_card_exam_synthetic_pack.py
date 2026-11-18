@@ -125,3 +125,14 @@ def test_a_changed_pack_file_is_refused(tmp_path: Path) -> None:
     gold.write_bytes(gold.read_bytes().replace(b'"', b"'", 1))
     with pytest.raises(ModelEvaluationReferenceExamPackError, match="MEMBER_HASH_MISMATCH"):
         load_card_distiller_reference_exam_pack(tmp_path)
+
+
+def test_files_the_manifest_does_not_list_are_left_alone(tmp_path: Path) -> None:
+    # The exam reads only the listed members, so a cache folder or a file a file manager leaves
+    # behind does not stop the pack from loading.
+    _write_pack(tmp_path)
+    (tmp_path / "__pycache__").mkdir()
+    (tmp_path / "__pycache__" / "scoring.cpython-313.pyc").write_bytes(b"\x00")
+    (tmp_path / "forms" / "Thumbs.db").write_bytes(b"\x00")
+    pack = load_card_distiller_reference_exam_pack(tmp_path)
+    assert set(pack.members) == set(CARD_DISTILLER_REQUIRED_MEMBER_ROLES)

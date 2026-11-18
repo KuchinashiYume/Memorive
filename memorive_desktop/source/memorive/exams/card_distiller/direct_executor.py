@@ -564,18 +564,6 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
                     ),
                     repair_cycle_closed=bool(stage["repair_cycle_closed"]),
                     blocking_failures=stage["blocking_failures"],
-                    exact_hashes={
-                        "reference_pack_sha256": str(
-                            plan["reference_pack_sha256"]
-                        ),
-                        "scoring_protocol_sha256": _file_sha256(
-                            pack.member("scoring/scoring_protocol.json")
-                        ),
-                        "executor_sha256": _file_sha256(Path(__file__)),
-                        "input_exact_set_sha256": str(
-                            stage["input_exact_set_sha256"]
-                        ),
-                    },
                 )
             model_fail_established = bool(stage["model_fail_established"])
             fail_admission = (

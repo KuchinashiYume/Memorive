@@ -172,12 +172,6 @@ def test_round_two_penalty_is_cumulative_stricter_without_cross_category_weights
 
 
 def test_quality_fail_requires_completed_scoreable_evidence_and_two_round_exhaustion():
-    hashes = {
-        "reference_pack_sha256": SHA_A,
-        "scoring_protocol_sha256": SHA_B,
-        "executor_sha256": SHA_C,
-        "input_exact_set_sha256": SHA_D,
-    }
     blocking = [
         {
             "case_id": "A-1",
@@ -192,7 +186,6 @@ def test_quality_fail_requires_completed_scoreable_evidence_and_two_round_exhaus
         repair_rounds_used=2,
         repair_round_limit=2,
         blocking_failures=blocking,
-        exact_hashes=hashes,
     )
     assert admitted["quality_verdict"] == "FAIL"
     assert admitted["fail_admitted"] is True
@@ -202,19 +195,12 @@ def test_quality_fail_requires_completed_scoreable_evidence_and_two_round_exhaus
         repair_rounds_used=0,
         repair_round_limit=2,
         blocking_failures=blocking,
-        exact_hashes=hashes,
     )
     assert refused["quality_verdict"] == "NOT_ASSESSED"
     assert "EXECUTION_NOT_COMPLETED" in refused["reason_codes"]
 
 
 def test_quality_fail_allows_explicit_early_cycle_close_but_never_assumes_it():
-    hashes = {
-        "reference_pack_sha256": SHA_A,
-        "scoring_protocol_sha256": SHA_B,
-        "executor_sha256": SHA_C,
-        "input_exact_set_sha256": SHA_D,
-    }
     blocking = [
         {
             "case_id": "AGGREGATE",
@@ -229,7 +215,6 @@ def test_quality_fail_allows_explicit_early_cycle_close_but_never_assumes_it():
         repair_rounds_used=1,
         repair_round_limit=2,
         blocking_failures=blocking,
-        exact_hashes=hashes,
     )
     assert implicit["quality_verdict"] == "NOT_ASSESSED"
     assert "SEMANTIC_REPAIR_CYCLE_NOT_CLOSED" in implicit["reason_codes"]
@@ -241,7 +226,6 @@ def test_quality_fail_allows_explicit_early_cycle_close_but_never_assumes_it():
         repair_round_limit=2,
         repair_cycle_closed=True,
         blocking_failures=blocking,
-        exact_hashes=hashes,
     )
     assert explicit["quality_verdict"] == "FAIL"
     assert explicit["repair_cycle_closed"] is True

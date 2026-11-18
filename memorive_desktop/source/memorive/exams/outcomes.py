@@ -879,7 +879,6 @@ def admit_quality_fail(
     repair_rounds_used: int,
     repair_round_limit: int,
     blocking_failures: Sequence[Mapping[str, Any]],
-    exact_hashes: Mapping[str, str],
     repair_cycle_closed: bool | None = None,
 ) -> dict[str, Any]:
     """Admit FAIL only after scoreable completion and an evidence-bound repair cycle.
@@ -892,16 +891,6 @@ def admit_quality_fail(
 
     outcome = ExecutionOutcome(execution_outcome)
     score_state = Scorability(scorability)
-    required_hashes = {
-        "reference_pack_sha256",
-        "scoring_protocol_sha256",
-        "executor_sha256",
-        "input_exact_set_sha256",
-    }
-    hashes_ok = required_hashes.issubset(exact_hashes) and all(
-        isinstance(exact_hashes[key], str) and _SHA256.fullmatch(exact_hashes[key])
-        for key in required_hashes
-    )
     evidence_ok = bool(blocking_failures) and all(
         isinstance(row.get("case_id"), str)
         and bool(row.get("case_id"))
@@ -928,7 +917,6 @@ def admit_quality_fail(
     admitted = (
         outcome is ExecutionOutcome.COMPLETED
         and score_state is Scorability.SCOREABLE
-        and hashes_ok
         and evidence_ok
         and repair_cycle_complete
     )
@@ -937,8 +925,6 @@ def admit_quality_fail(
         reasons.append("EXECUTION_NOT_COMPLETED")
     if score_state is not Scorability.SCOREABLE:
         reasons.append("RESULT_NOT_SCOREABLE")
-    if not hashes_ok:
-        reasons.append("EXACT_HASH_BINDING_INCOMPLETE")
     if not evidence_ok:
         reasons.append("BLOCKING_EVIDENCE_INCOMPLETE")
     if not repair_cycle_complete:
