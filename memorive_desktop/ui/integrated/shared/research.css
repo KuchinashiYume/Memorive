@@ -45,16 +45,16 @@
 .desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
 .desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
 /* The search box takes the Q&A input box's frame and bar (routes/chat/workspace.css); these set its own parts. */
-#memo-chat-page .desktop-research-opportunity-box { max-width:760px; }
 #memo-chat-page .desktop-research-opportunity-box .memo-attachments { padding:10px 12px 0; }
 .desktop-research-opportunity-words { display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 14px 6px; }
 .desktop-research-opportunity-words input { flex:1 1 180px;min-width:0;border:0;outline:none;background:transparent;color:inherit;font:inherit;padding:4px 2px; }
+/* The rounded box shows the focus (.memo-input-shell:focus-within), not a square ring round the field. */
+#memo-chat-page .desktop-research-opportunity-words input:focus-visible { outline:none; }
 .desktop-research-opportunity-word { display:inline-flex;align-items:center;gap:2px;padding:1px 2px 1px 9px;border-radius:999px;background:var(--desktop-surface-subtle);color:var(--desktop-text-primary); }
 .desktop-research-opportunity-word .memo-quiet-button { padding:0 6px;color:var(--desktop-text-secondary); }
 #memo-chat-page .desktop-research-opportunity-box .memo-composer-bar .desktop-toolbar-icon { --desktop-toolbar-size:calc(32px * var(--desktop-scale)); }
-.desktop-research-opportunity-scope { max-width:260px;min-width:0;border:0;border-radius:7px;background:transparent;color:var(--text-secondary);font:inherit;padding:6px 4px;cursor:pointer; }
-.desktop-research-opportunity-scope:hover { background:var(--nav-hover,var(--desktop-surface-hover)); }
-.desktop-research-opportunity-scope:focus-visible { outline:2px solid var(--desktop-focus-ring);outline-offset:1px; }
+#memo-chat-page .desktop-research-opportunity-scope { max-width:280px; }
+.desktop-research-opportunity-scope-menu { width:auto;min-width:200px;max-width:320px; }
 .desktop-research-opportunity-rename { max-width:260px;min-height:0;padding:4px 8px; }
 #memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }
 #memo-chat-page .desktop-research-opportunity-papers .memo-attachment small { margin-left:2px; }

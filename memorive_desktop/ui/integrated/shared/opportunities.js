@@ -124,6 +124,7 @@
   }
   function render() {
     const target = body(), run = state.active_run || state.runs[0], running = !!state.active_run;
+    closeScopeMenu();
     target.replaceChildren();
     const controls = make('section', null, 'desktop-research-opportunity-controls');
     controls.append(searchBox(run, running));
@@ -194,6 +195,7 @@
     addPapers.type = 'button';
     addPapers.setAttribute('aria-label', '添加论文');
     addPapers.dataset.desktopTip = '添加论文';
+    addPapers.dataset.desktopPlacement = 'top';
     addPapers.onclick = () => void openPicker().catch(notify);
     tools.append(addPapers, ...scopeControls(group));
     if (run) {
@@ -221,6 +223,7 @@
     };
     acts.append(find);
     bar.append(tools, acts);
+    for (const b of bar.querySelectorAll('[data-desktop-tip]')) b.dataset.desktopPlacement = 'top';
     box.append(words, bar);
     return box;
   }
@@ -357,14 +360,8 @@
       requestAnimationFrame(() => { name.focus(); name.select(); });
       return [name];
     }
-    const select = make('select', null, 'desktop-research-opportunity-scope');
-    select.setAttribute('aria-label', '比较范围');
-    select.dataset.desktopTip = '比较范围';
-    select.append(new Option('整个资料库', ''));
-    for (const g of groups.groups) select.append(new Option(g.name + ' · ' + g.papers.length, g.group_id));
-    select.value = groupId;
-    select.onchange = () => { groupId = select.value; render(); };
-    if (!group) return [select];
+    const scope = scopeButton(group);
+    if (!group) return [scope];
     const rename = icon('重命名比较组', () => { renaming = true; render(); }, 'desktop-action-edit', 'desktop-toolbar-ghost');
     // Deleting asks for a second click (Memorive.controls.confirmAction): the button must stay enabled for it.
     const remove = make('button', '删除比较组', 'icon-button desktop-toolbar-icon desktop-toolbar-ghost desktop-action-trash desktop-research-opportunity-delete');
@@ -379,7 +376,70 @@
         render();
       } catch (e) { notify(e); }
     };
-    return [select, rename, remove];
+    return [scope, rename, remove];
+  }
+  // The comparison scope: the composer's model button, opening a menu like the conversation menu (routes/chat
+  // workspace.css .memo-context-menu) with the whole library and each group; the chosen one is ticked.
+  let scopeMenu = null;
+  function closeScopeMenu(restoreFocus = false) {
+    if (!scopeMenu) return;
+    const { menu, anchor } = scopeMenu;
+    scopeMenu = null;
+    menu.remove();
+    anchor.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('click', outside, true);
+    if (restoreFocus && anchor.isConnected) anchor.focus();
+  }
+  function outside(event) {
+    if (scopeMenu && !scopeMenu.menu.contains(event.target) && !scopeMenu.anchor.contains(event.target)) closeScopeMenu();
+  }
+  function scopeButton(group) {
+    const b = make('button', null, 'memo-model-button desktop-research-opportunity-scope');
+    b.type = 'button';
+    b.setAttribute('aria-haspopup', 'menu');
+    b.setAttribute('aria-expanded', 'false');
+    b.setAttribute('aria-label', '比较范围');
+    b.dataset.desktopTip = '比较范围';
+    b.dataset.desktopPlacement = 'top';
+    const label = make('span', group ? group.name + ' · ' + group.papers.length : '整个资料库');
+    if (group) label.setAttribute('data-desktop-no-translate', '');
+    b.append(label, make('span', '⌄', 'memo-model-chevron'));
+    b.onclick = () => {
+      if (scopeMenu) return closeScopeMenu();
+      const menu = make('div', null, 'memo-context-menu desktop-research-opportunity-scope-menu'), host = page();
+      menu.setAttribute('role', 'menu');
+      const choices = [['', '整个资料库'], ...groups.groups.map((g) => [g.group_id, g.name + ' · ' + g.papers.length])];
+      for (const [id, text] of choices) {
+        const item = make('button', text, 'memo-menu-item');
+        item.type = 'button';
+        item.setAttribute('role', 'menuitemcheckbox');
+        item.setAttribute('aria-checked', String(id === groupId));
+        if (id) item.setAttribute('data-desktop-no-translate', '');
+        item.onclick = () => {
+          closeScopeMenu();
+          groupId = id;
+          render();
+        };
+        menu.append(item);
+      }
+      menu.onkeydown = (e) => {
+        const items = [...menu.querySelectorAll('button')], i = items.indexOf(document.activeElement);
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeScopeMenu(true); }
+        if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
+          e.preventDefault();
+          items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
+        }
+      };
+      host.append(menu);
+      const rect = b.getBoundingClientRect(), bounds = host.getBoundingClientRect();
+      menu.style.left = Math.max(8, rect.left - bounds.left) + 'px';
+      menu.style.top = (rect.bottom - bounds.top + 6) + 'px';
+      b.setAttribute('aria-expanded', 'true');
+      scopeMenu = { menu, anchor: b };
+      document.addEventListener('click', outside, true);
+      (menu.querySelector('[aria-checked="true"]') || menu.querySelector('button')).focus();
+    };
+    return b;
   }
   // The chosen group's papers, as the composer's attachment chips; those still being processed say so.
   function groupPapers(group) {
@@ -466,7 +526,7 @@
       // The star of the window's other lists (the leaderboard's): outlined, filled once starred.
       const keep = icon(item.status === 'kept' ? '取消星标' : '星标', () => mark(item, item.status === 'kept' ? 'new' : 'kept'), 'desktop-research-opportunity-star', 'desktop-toolbar-ghost');
       keep.setAttribute('aria-pressed', String(item.status === 'kept'));
-      actions.append(icon(item.status === 'asked' ? '再次追问' : '在研究问答里追问', () => ask(item), 'desktop-action-message', 'desktop-toolbar-primary'),
+      actions.append(icon(item.status === 'asked' ? '再次追问' : '在研究问答里追问', () => ask(item), 'desktop-action-message', 'desktop-toolbar-soft'),
         keep, icon('忽略', () => mark(item, 'dismissed'), 'desktop-action-archive', 'desktop-toolbar-ghost'));
     }
     head.append(tags, actions);
