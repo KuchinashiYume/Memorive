@@ -3167,373 +3167,228 @@ class QualityAnalysisExamExecutor(QualityCardReviewerExamSuccessorExecutor):
         )
 
     def _analysis_cohort_result(self, run: _AnalysisExamRun) -> None:
-        """Once every panel of the cohort is complete: the cohort's score, verdict and cache eligibility."""
-        if len(run.completed_panel_records) == self.PANELS_REQUIRED_FOR_CACHE:
-            final_cohort = build_analysis_panel_cohort(
-                run.completed_panel_records
-            )
-            initial_panel_records: list[dict[str, Any]] = []
+        """Once every panel of the cohort is complete: the cohort's score, verdict and cache eligibility.
+
+        Combine the panels (as repaired, and as first answered), score both forms both ways, find the
+        material residuals with the panel and family each belongs to, decide the verdict and whether a model
+        failure is established, then record the cohort and write panel_scores/cohort_result.json."""
+        if len(run.completed_panel_records) != self.PANELS_REQUIRED_FOR_CACHE:
+            return
+        final_cohort, initial_cohort = self._combine_cohort_panels(run.completed_panel_records)
+        aggregate_raw_scores = final_cohort["aggregate_raw_scores"]
+        aggregate_initial_raw_scores = initial_cohort["aggregate_raw_scores"]
+        self._score_cohort_forms(run, aggregate_raw_scores, aggregate_initial_raw_scores)
+        material_rows, calibration_sets = self._cohort_residuals(run, aggregate_raw_scores)
+        cohort_fail_decision = self._decide_cohort(run, aggregate_raw_scores, material_rows, calibration_sets)
+        self._admit_cohort_fail(run, final_cohort, material_rows, cohort_fail_decision)
+        self._write_cohort_result(run, final_cohort, aggregate_raw_scores, aggregate_initial_raw_scores,
+                                  material_rows, calibration_sets, cohort_fail_decision)
+
+    @staticmethod
+    def _combine_cohort_panels(records: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
+        """The cohort of the panels as repaired, and the same cohort from each panel's first-pass scores."""
+        final_cohort = build_analysis_panel_cohort(records)
+        initial_panel_records: list[dict[str, Any]] = []
+        for record in records:
+            initial_scores = record.get("initial_raw_scores")
+            if not isinstance(initial_scores, Mapping):
+                raise ValueError("ANALYSIS_PANEL_INITIAL_RAW_SCORES_REQUIRED")
+            initial_record = deepcopy(record)
+            initial_record["raw_scores"] = deepcopy(dict(initial_scores))
+            initial_panel_records.append(initial_record)
+        return final_cohort, build_analysis_panel_cohort(initial_panel_records)
+
+    @staticmethod
+    def _score_cohort_forms(run: _AnalysisExamRun, aggregate_raw_scores: Mapping[str, Any],
+                            aggregate_initial_raw_scores: Mapping[str, Any]) -> None:
+        """Form scores after repair (run.form_scores, run.score) and as first answered (the ability score)."""
+        run.form_scores = {
+            form_id: round(float(run.exam.score_analysis_form_v2(raw_scoring=aggregate_raw_scores[form_id])["score"]), 2)
+            for form_id in ("A", "B")
+        }
+        run.first_pass_form_scores = {
+            form_id: round(float(run.exam.score_analysis_form_v2(
+                raw_scoring=aggregate_initial_raw_scores[form_id])["score"]), 2)
+            for form_id in ("A", "B")
+        }
+        run.score = int(round(sum(run.form_scores.values()) / len(run.form_scores)))
+        run.first_pass_role_ability_score = round(
+            sum(run.first_pass_form_scores.values()) / len(run.first_pass_form_scores), 2)
+
+    @staticmethod
+    def _cohort_residuals(run: _AnalysisExamRun, aggregate_raw_scores: Mapping[str, Any]
+                          ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        """The material residual cases, each charged to the panel whose selection holds it and to its family,
+        and the calibration-only residuals by form."""
+        cohort_materiality = analysis_material_repair_targets(aggregate_raw_scores)
+        residual_sets = deepcopy(cohort_materiality["targets_by_form"])
+        calibration_sets = deepcopy(cohort_materiality["calibration_only_by_form"])
+        material_rows: list[dict[str, Any]] = []
+        for form_id in ("A", "B"):
+            detail_by_id = {
+                str(detail.get("case_id")): detail
+                for detail in aggregate_raw_scores[form_id].get("details", [])
+                if isinstance(detail, Mapping)
+            }
+            owner_by_id: dict[str, str] = {}
             for record in run.completed_panel_records:
-                initial_scores = record.get("initial_raw_scores")
-                if not isinstance(initial_scores, Mapping):
-                    raise ValueError(
-                        "ANALYSIS_PANEL_INITIAL_RAW_SCORES_REQUIRED"
-                    )
-                initial_record = deepcopy(record)
-                initial_record["raw_scores"] = deepcopy(
-                    dict(initial_scores)
+                selected = record.get("selection", {}).get(form_id, [])
+                if not isinstance(selected, list):
+                    raise ValueError("ANALYSIS_PANEL_SELECTION_INVALID")
+                for item in selected:
+                    if isinstance(item, Mapping) and isinstance(item.get("case_id"), str):
+                        owner_by_id[str(item["case_id"])] = str(record["panel_id"])
+            for case_id in residual_sets[form_id]:
+                detail = detail_by_id.get(case_id)
+                panel_id = owner_by_id.get(case_id)
+                if detail is None or panel_id is None:
+                    raise ValueError("ANALYSIS_COHORT_RESIDUAL_OWNER_MISSING")
+                family = str(detail.get("family") or "")
+                if not family:
+                    raise ValueError("ANALYSIS_COHORT_RESIDUAL_FAMILY_MISSING")
+                failed_fields = sorted(
+                    {str(reason) for reason in (detail.get("critical_reasons") or []) if isinstance(reason, str) and reason}
                 )
-                initial_panel_records.append(initial_record)
-            initial_cohort = build_analysis_panel_cohort(
-                initial_panel_records
-            )
-            aggregate_raw_scores = final_cohort[
-                "aggregate_raw_scores"
-            ]
-            aggregate_initial_raw_scores = initial_cohort[
-                "aggregate_raw_scores"
-            ]
-            run.form_scores = {
-                form_id: round(
-                    float(
-                        run.exam.score_analysis_form_v2(
-                            raw_scoring=aggregate_raw_scores[form_id]
-                        )["score"]
-                    ),
-                    2,
-                )
-                for form_id in ("A", "B")
-            }
-            run.first_pass_form_scores = {
-                form_id: round(
-                    float(
-                        run.exam.score_analysis_form_v2(
-                            raw_scoring=aggregate_initial_raw_scores[
-                                form_id
-                            ]
-                        )["score"]
-                    ),
-                    2,
-                )
-                for form_id in ("A", "B")
-            }
-            run.score = int(
-                round(sum(run.form_scores.values()) / len(run.form_scores))
-            )
-            run.first_pass_role_ability_score = round(
-                sum(run.first_pass_form_scores.values())
-                / len(run.first_pass_form_scores),
-                2,
-            )
-            cohort_materiality = analysis_material_repair_targets(
-                aggregate_raw_scores
-            )
-            residual_sets = deepcopy(
-                cohort_materiality["targets_by_form"]
-            )
-            calibration_sets = deepcopy(
-                cohort_materiality["calibration_only_by_form"]
-            )
-            material_rows: list[dict[str, Any]] = []
-            for form_id in ("A", "B"):
-                detail_by_id = {
-                    str(detail.get("case_id")): detail
-                    for detail in aggregate_raw_scores[form_id].get(
-                        "details", []
-                    )
-                    if isinstance(detail, Mapping)
+                if not failed_fields:
+                    failed_fields = ["CASE_SCORE_BELOW_80_MATERIAL"]
+                material_rows.append({
+                    "form_id": form_id,
+                    "case_id": case_id,
+                    "panel_id": panel_id,
+                    "family": family,
+                    "failed_fields": failed_fields,
+                    "evidence_anchor": f"panel_scores/cohort_result.json#aggregate_raw_scores/{form_id}/details/{case_id}",
+                    "blocking": True,
+                    "model_fail_materiality": "MATERIAL",
+                })
+        run.failed_item_count = len(material_rows)
+        run.calibration_residual_count = sum(len(case_ids) for case_ids in calibration_sets.values())
+        return material_rows, calibration_sets
+
+    def _decide_cohort(self, run: _AnalysisExamRun, aggregate_raw_scores: Mapping[str, Any],
+                       material_rows: list[dict[str, Any]], calibration_sets: Mapping[str, Any]) -> dict[str, Any]:
+        """The cohort verdict: PASS or FAIL when decided, NOT_ASSESSED when the residuals do not settle it, and
+        the model-fail projection (a failure needs material cases across panels and families)."""
+        cohort_fail_decision = analysis_cohort_model_fail_decision(
+            score=float(run.score),
+            material_residuals=material_rows,
+            quality_hard_gate_pass=all(
+                aggregate_raw_scores[form_id]["quality_hard_gate"] == "PASS" for form_id in ("A", "B")),
+        )
+        cohort_quality_pass = cohort_fail_decision["status"] == "PASS"
+        run.verdict = str(cohort_fail_decision["status"])
+        if run.verdict in {"PASS", "FAIL"}:
+            run.result_reason = "ANALYSIS_PRIMARY_THREE_PANEL_COHORT_COMPLETED"
+        else:
+            run.verdict = "NOT_ASSESSED"
+            run.result_reason = "ANALYSIS_PRIMARY_THREE_PANEL_COHORT_INCONCLUSIVE"
+        run.panel_quality_candidate_verdict = "PASS" if cohort_quality_pass else "FAIL"
+        run.model_fail_projection = {
+            "model_fail_policy_revision": PRIMARY_MODEL_FAIL_POLICY_REVISION,
+            "cohort_fail_policy_revision": cohort_fail_decision["schema_version"],
+            "model_fail_verdict": cohort_fail_decision["model_fail_verdict"],
+            "model_fail_established": bool(cohort_fail_decision["model_fail_established"]),
+            "model_fail_minimum_distinct_material_cases": cohort_fail_decision["minimum_distinct_material_cases"],
+            "model_fail_minimum_distinct_panels": cohort_fail_decision["minimum_distinct_panels"],
+            "model_fail_minimum_distinct_families": cohort_fail_decision["minimum_distinct_families"],
+            "model_fail_distinct_material_case_count": cohort_fail_decision["distinct_material_case_count"],
+            "model_fail_distinct_panel_count": cohort_fail_decision["distinct_material_panel_count"],
+            "model_fail_distinct_family_count": cohort_fail_decision["distinct_material_family_count"],
+            "material_residual_case_ids": sorted(f"{row['form_id']}:{row['case_id']}" for row in material_rows),
+            "calibration_residual_case_ids": sorted(
+                f"{form_id}:{case_id}" for form_id, case_ids in calibration_sets.items() for case_id in case_ids),
+            "operational_eligibility_verdict": cohort_fail_decision["operational_eligibility_verdict"],
+            "category_id": self.EXAM_CATEGORY_ID,
+            "category_local_score": round(float(run.score), 2),
+            "numeric_score_is_not_model_fail_verdict": True,
+            "single_panel_cannot_establish_model_fail": True,
+            "cross_category_comparison_forbidden": True,
+            "global_ranking_forbidden": True,
+        }
+        return cohort_fail_decision
+
+    def _admit_cohort_fail(self, run: _AnalysisExamRun, final_cohort: Mapping[str, Any],
+                           material_rows: list[dict[str, Any]], cohort_fail_decision: Mapping[str, Any]) -> None:
+        """When the cohort establishes a model failure, the quality-fail admission that records it."""
+        run.quality_fail_admission = None
+        run.raw_quality_fail_admission = None
+        if not cohort_fail_decision["model_fail_established"]:
+            return
+        run.quality_fail_admission = admit_quality_fail(
+            execution_outcome=ExecutionOutcome.COMPLETED.value,
+            scorability=Scorability.SCOREABLE.value,
+            repair_rounds_used=max(int(record.get("semantic_repair_rounds", 0)) for record in run.completed_panel_records),
+            repair_round_limit=self.SEMANTIC_REPAIR_ROUND_LIMIT,
+            blocking_failures=deepcopy(material_rows),
+            exact_hashes={
+                "reference_pack_sha256": str(run.plan["reference_pack_sha256"]),
+                "scoring_protocol_sha256": _file_sha256(Path(str(run.exam.__file__))),
+                "executor_sha256": _file_sha256(Path(__file__)),
+                "input_exact_set_sha256": str(final_cohort["cohort_binding_sha256"]),
+            },
+            repair_cycle_closed=True,
+        )
+        run.raw_quality_fail_admission = deepcopy(run.quality_fail_admission)
+
+    def _write_cohort_result(self, run: _AnalysisExamRun, final_cohort: Mapping[str, Any],
+                             aggregate_raw_scores: Mapping[str, Any], aggregate_initial_raw_scores: Mapping[str, Any],
+                             material_rows: list[dict[str, Any]], calibration_sets: Mapping[str, Any],
+                             cohort_fail_decision: Mapping[str, Any]) -> None:
+        """Mark the score stable and comparable, record the cohort on the run, and write cohort_result.json."""
+        run.panel_evidence_only = False
+        run.stable_score_cache_eligible = True
+        run.horizontal_comparison_eligible = True
+        run.horizontal_comparison_pending = False
+        run.cohort_panel_count = int(final_cohort["panel_count"])
+        run.cohort_sample_slots = list(final_cohort["sample_slots"])
+        run.cohort_binding_sha256 = str(final_cohort["cohort_binding_sha256"])
+        run.cohort_difficulty_coverage = deepcopy(final_cohort["difficulty_coverage_by_form_family"])
+        cohort_panel_scores = [float(record["panel_score_diagnostic"]) for record in run.completed_panel_records]
+        run.cohort_panel_score_range = round(max(cohort_panel_scores) - min(cohort_panel_scores), 6)
+        cohort_result = {
+            "schema_version": "DesktopAnalysisPrimaryCohortResult-v1",
+            "status": run.verdict,
+            "reason": run.result_reason,
+            "comparison_binding_sha256": run.plan["comparison_binding_sha256"],
+            "cohort_binding_sha256": run.cohort_binding_sha256,
+            "model_identity": self._panel_model_identity(run.target),
+            "panel_ids": list(final_cohort["panel_ids"]),
+            "sample_slots": run.cohort_sample_slots,
+            "panel_count": run.cohort_panel_count,
+            "panel_score_diagnostics": cohort_panel_scores,
+            "panel_score_range": run.cohort_panel_score_range,
+            "panel_stability_is_diagnostic_only": True,
+            "panel_repair_diagnostics": [
+                {
+                    "panel_id": str(record["panel_id"]),
+                    "sample_slot": int(record["sample_slot"]),
+                    "first_pass_panel_score": float(record["first_pass_panel_score_diagnostic"]),
+                    "final_panel_score": float(record["panel_score_diagnostic"]),
+                    "semantic_repair_rounds": int(record.get("semantic_repair_rounds", 0)),
+                    "semantic_repair_acceptance": deepcopy(record.get("semantic_repair_acceptance", [])),
                 }
-                owner_by_id: dict[str, str] = {}
-                for record in run.completed_panel_records:
-                    selected = record.get("selection", {}).get(
-                        form_id, []
-                    )
-                    if not isinstance(selected, list):
-                        raise ValueError(
-                            "ANALYSIS_PANEL_SELECTION_INVALID"
-                        )
-                    for item in selected:
-                        if isinstance(item, Mapping) and isinstance(
-                            item.get("case_id"), str
-                        ):
-                            owner_by_id[str(item["case_id"])] = str(
-                                record["panel_id"]
-                            )
-                for case_id in residual_sets[form_id]:
-                    detail = detail_by_id.get(case_id)
-                    panel_id = owner_by_id.get(case_id)
-                    if detail is None or panel_id is None:
-                        raise ValueError(
-                            "ANALYSIS_COHORT_RESIDUAL_OWNER_MISSING"
-                        )
-                    family = str(detail.get("family") or "")
-                    if not family:
-                        raise ValueError(
-                            "ANALYSIS_COHORT_RESIDUAL_FAMILY_MISSING"
-                        )
-                    failed_fields = sorted(
-                        {
-                            str(reason)
-                            for reason in (
-                                detail.get("critical_reasons") or []
-                            )
-                            if isinstance(reason, str) and reason
-                        }
-                    )
-                    if not failed_fields:
-                        failed_fields = [
-                            "CASE_SCORE_BELOW_80_MATERIAL"
-                        ]
-                    material_rows.append(
-                        {
-                            "form_id": form_id,
-                            "case_id": case_id,
-                            "panel_id": panel_id,
-                            "family": family,
-                            "failed_fields": failed_fields,
-                            "evidence_anchor": (
-                                "panel_scores/cohort_result.json#"
-                                f"aggregate_raw_scores/{form_id}/"
-                                f"details/{case_id}"
-                            ),
-                            "blocking": True,
-                            "model_fail_materiality": "MATERIAL",
-                        }
-                    )
-            run.failed_item_count = len(material_rows)
-            run.calibration_residual_count = sum(
-                len(case_ids)
-                for case_ids in calibration_sets.values()
-            )
-            cohort_fail_decision = (
-                analysis_cohort_model_fail_decision(
-                    score=float(run.score),
-                    material_residuals=material_rows,
-                    quality_hard_gate_pass=all(
-                        aggregate_raw_scores[form_id][
-                            "quality_hard_gate"
-                        ]
-                        == "PASS"
-                        for form_id in ("A", "B")
-                    ),
-                )
-            )
-            strict_model_fail = bool(
-                cohort_fail_decision["model_fail_established"]
-            )
-            cohort_quality_pass = (
-                cohort_fail_decision["status"] == "PASS"
-            )
-            run.verdict = str(cohort_fail_decision["status"])
-            if run.verdict in {"PASS", "FAIL"}:
-                run.result_reason = (
-                    "ANALYSIS_PRIMARY_THREE_PANEL_COHORT_COMPLETED"
-                )
-            else:
-                run.verdict = "NOT_ASSESSED"
-                run.result_reason = (
-                    "ANALYSIS_PRIMARY_THREE_PANEL_COHORT_INCONCLUSIVE"
-                )
-            run.panel_quality_candidate_verdict = (
-                "PASS" if cohort_quality_pass else "FAIL"
-            )
-            blocking_failures = deepcopy(material_rows)
-            material_residual_case_ids = sorted(
-                f"{row['form_id']}:{row['case_id']}"
-                for row in material_rows
-            )
-            calibration_residual_case_ids = sorted(
-                f"{form_id}:{case_id}"
-                for form_id, case_ids in calibration_sets.items()
-                for case_id in case_ids
-            )
-            run.model_fail_projection = {
-                "model_fail_policy_revision": (
-                    PRIMARY_MODEL_FAIL_POLICY_REVISION
-                ),
-                "cohort_fail_policy_revision": (
-                    cohort_fail_decision["schema_version"]
-                ),
-                "model_fail_verdict": cohort_fail_decision[
-                    "model_fail_verdict"
-                ],
-                "model_fail_established": strict_model_fail,
-                "model_fail_minimum_distinct_material_cases": (
-                    cohort_fail_decision[
-                        "minimum_distinct_material_cases"
-                    ]
-                ),
-                "model_fail_minimum_distinct_panels": (
-                    cohort_fail_decision["minimum_distinct_panels"]
-                ),
-                "model_fail_minimum_distinct_families": (
-                    cohort_fail_decision["minimum_distinct_families"]
-                ),
-                "model_fail_distinct_material_case_count": (
-                    cohort_fail_decision[
-                        "distinct_material_case_count"
-                    ]
-                ),
-                "model_fail_distinct_panel_count": (
-                    cohort_fail_decision[
-                        "distinct_material_panel_count"
-                    ]
-                ),
-                "model_fail_distinct_family_count": (
-                    cohort_fail_decision[
-                        "distinct_material_family_count"
-                    ]
-                ),
-                "material_residual_case_ids": (
-                    material_residual_case_ids
-                ),
-                "calibration_residual_case_ids": (
-                    calibration_residual_case_ids
-                ),
-                "operational_eligibility_verdict": (
-                    cohort_fail_decision[
-                        "operational_eligibility_verdict"
-                    ]
-                ),
-                "category_id": self.EXAM_CATEGORY_ID,
-                "category_local_score": round(float(run.score), 2),
-                "numeric_score_is_not_model_fail_verdict": True,
-                "single_panel_cannot_establish_model_fail": True,
-                "cross_category_comparison_forbidden": True,
-                "global_ranking_forbidden": True,
-            }
-            run.quality_fail_admission = None
-            run.raw_quality_fail_admission = None
-            if strict_model_fail:
-                run.quality_fail_admission = admit_quality_fail(
-                    execution_outcome=(
-                        ExecutionOutcome.COMPLETED.value
-                    ),
-                    scorability=Scorability.SCOREABLE.value,
-                    repair_rounds_used=max(
-                        int(record.get("semantic_repair_rounds", 0))
-                        for record in run.completed_panel_records
-                    ),
-                    repair_round_limit=(
-                        self.SEMANTIC_REPAIR_ROUND_LIMIT
-                    ),
-                    blocking_failures=blocking_failures,
-                    exact_hashes={
-                        "reference_pack_sha256": str(
-                            run.plan["reference_pack_sha256"]
-                        ),
-                        "scoring_protocol_sha256": _file_sha256(
-                            Path(str(run.exam.__file__))
-                        ),
-                        "executor_sha256": _file_sha256(
-                            Path(__file__)
-                        ),
-                        "input_exact_set_sha256": str(
-                            final_cohort["cohort_binding_sha256"]
-                        ),
-                    },
-                    repair_cycle_closed=True,
-                )
-                run.raw_quality_fail_admission = deepcopy(
-                    run.quality_fail_admission
-                )
-            run.panel_evidence_only = False
-            run.stable_score_cache_eligible = True
-            run.horizontal_comparison_eligible = True
-            run.horizontal_comparison_pending = False
-            run.cohort_panel_count = int(final_cohort["panel_count"])
-            run.cohort_sample_slots = list(final_cohort["sample_slots"])
-            run.cohort_binding_sha256 = str(
-                final_cohort["cohort_binding_sha256"]
-            )
-            run.cohort_difficulty_coverage = deepcopy(
-                final_cohort[
-                    "difficulty_coverage_by_form_family"
-                ]
-            )
-            cohort_panel_scores = [
-                float(record["panel_score_diagnostic"])
                 for record in run.completed_panel_records
-            ]
-            run.cohort_panel_score_range = round(
-                max(cohort_panel_scores) - min(cohort_panel_scores),
-                6,
-            )
-            cohort_result = {
-                "schema_version": "DesktopAnalysisPrimaryCohortResult-v1",
-                "status": run.verdict,
-                "reason": run.result_reason,
-                "comparison_binding_sha256": run.plan[
-                    "comparison_binding_sha256"
-                ],
-                "cohort_binding_sha256": run.cohort_binding_sha256,
-                "model_identity": self._panel_model_identity(run.target),
-                "panel_ids": list(final_cohort["panel_ids"]),
-                "sample_slots": run.cohort_sample_slots,
-                "panel_count": run.cohort_panel_count,
-                "panel_score_diagnostics": cohort_panel_scores,
-                "panel_score_range": run.cohort_panel_score_range,
-                "panel_stability_is_diagnostic_only": True,
-                "panel_repair_diagnostics": [
-                    {
-                        "panel_id": str(record["panel_id"]),
-                        "sample_slot": int(record["sample_slot"]),
-                        "first_pass_panel_score": float(
-                            record[
-                                "first_pass_panel_score_diagnostic"
-                            ]
-                        ),
-                        "final_panel_score": float(
-                            record["panel_score_diagnostic"]
-                        ),
-                        "semantic_repair_rounds": int(
-                            record.get("semantic_repair_rounds", 0)
-                        ),
-                        "semantic_repair_acceptance": deepcopy(
-                            record.get(
-                                "semantic_repair_acceptance", []
-                            )
-                        ),
-                    }
-                    for record in run.completed_panel_records
-                ],
-                "aggregate_case_count_per_form": final_cohort[
-                    "aggregate_case_count_per_form"
-                ],
-                "aggregate_before_tail_components": True,
-                "difficulty_coverage_by_form_family": (
-                    run.cohort_difficulty_coverage
-                ),
-                "first_pass_form_scores": run.first_pass_form_scores,
-                "first_pass_role_ability_score": (
-                    run.first_pass_role_ability_score
-                ),
-                "form_scores": run.form_scores,
-                "score": run.score,
-                "aggregate_initial_raw_scores": (
-                    aggregate_initial_raw_scores
-                ),
-                "aggregate_raw_scores": aggregate_raw_scores,
-                "material_residuals": material_rows,
-                "cohort_fail_decision": cohort_fail_decision,
-                "calibration_residual_case_ids_by_form": (
-                    calibration_sets
-                ),
-                "strict_model_fail": strict_model_fail,
-                "model_fail_requires_two_cases_two_panels_two_families": (
-                    True
-                ),
-                "provider_received_answer_key": False,
-                "stable_score_cache_eligible": True,
-                "horizontal_comparison_eligible": True,
-            }
-            cohort_result["cohort_result_sha256"] = _sha256(
-                cohort_result
-            )
-            run.cohort_result_receipt = _write_json_create_only(
-                run.run_root / "panel_scores" / "cohort_result.json",
-                cohort_result,
-            )
+            ],
+            "aggregate_case_count_per_form": final_cohort["aggregate_case_count_per_form"],
+            "aggregate_before_tail_components": True,
+            "difficulty_coverage_by_form_family": run.cohort_difficulty_coverage,
+            "first_pass_form_scores": run.first_pass_form_scores,
+            "first_pass_role_ability_score": run.first_pass_role_ability_score,
+            "form_scores": run.form_scores,
+            "score": run.score,
+            "aggregate_initial_raw_scores": aggregate_initial_raw_scores,
+            "aggregate_raw_scores": aggregate_raw_scores,
+            "material_residuals": material_rows,
+            "cohort_fail_decision": cohort_fail_decision,
+            "calibration_residual_case_ids_by_form": calibration_sets,
+            "strict_model_fail": bool(cohort_fail_decision["model_fail_established"]),
+            "model_fail_requires_two_cases_two_panels_two_families": True,
+            "provider_received_answer_key": False,
+            "stable_score_cache_eligible": True,
+            "horizontal_comparison_eligible": True,
+        }
+        cohort_result["cohort_result_sha256"] = _sha256(cohort_result)
+        run.cohort_result_receipt = _write_json_create_only(run.run_root / "panel_scores" / "cohort_result.json", cohort_result)
 
     def _publish_analysis_exam(self, run: _AnalysisExamRun) -> Any:
         """Write the public result and its evidence, and return the result."""

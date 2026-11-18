@@ -4076,7 +4076,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "19db9e93c6d9766d73f132940edab4bc04e1c43123ed6527ae548369023964d4",
+      "sha256": "9136fd7f4575a58215d82f0fbdc3b42da9efcc86b63405aa03a600759c8d8e79",
       "bytes": 275229
     },
     {
@@ -5466,8 +5466,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/exams/analysis.py",
-      "sha256": "e9fa27981d8cb6a15f4c8c917045a6ec71498365039cd5f7a9bff5b7de7208a5",
-      "bytes": 156869
+      "sha256": "148278c8c20ac274e0737566ac19796882f8b9ca2f3645661c5cff459bb8ebc0",
+      "bytes": 154941
     },
     {
       "path": "memorive_desktop/source/memorive/exams/analysis_reviewer/__init__.py",
