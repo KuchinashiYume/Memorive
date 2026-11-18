@@ -46,8 +46,9 @@ Every source file starts with a comment that says what it is for and who uses it
 The settings page has a category list on the left (`<button class="desktop-settings-category" data-category="...">` in `routes/settings/markup.html`) and one panel per category (`data-panel="..."`). `routes/settings/model-picker.js` switches between them.
 
 A panel with much code of its own gets its own script next to `settings.js`, as the browser companion
-(`browser-companion.js`) and the browser sites (`browser-sites.js`) have. A panel that saves its own data
-registers with the page's Save and Revert buttons:
+(`browser-companion.js`), the browser sites (`browser-sites.js`) and the reset of a category to its defaults
+(`scoped-reset.js`) have; the rules for model services that the forms and the developer editor share are in
+`model-rules.js`. A panel that saves its own data registers with the page's Save and Revert buttons:
 
 ```js
 Memorive.settingsBridge.registerSaveParticipant('my-panel', {

@@ -1,10 +1,11 @@
 /* The settings page: loading and saving settings (settings.*), the shared save and revert of every panel
    (registerSaveParticipant), API and CLI model services and their checks, local models, refinement, the desk
-   assistant, the developer editor, scoped resets, network tests and appearance. Publishes
+   assistant, the developer editor, network tests and appearance. Publishes
    Memorive.settingsBridge (call, refresh, registerSaveParticipant, syncSaveState, notify, nativeAction,
    ...), which the other settings scripts, the chat page and app.py's self-test use, and
    Memorive.settingsText (text, language), the page's own texts by key in the three languages. The browser
-   companion is in browser-companion.js. */
+   companion is in browser-companion.js, the reset of one category to its defaults in scoped-reset.js, the
+   rules for model services in model-rules.js. */
 (() => {
   'use strict';
 
@@ -31,30 +32,12 @@
     'sessions.refinement_settings_get', 'sessions.refinement_settings_save',
     'assistant.preference_get', 'assistant.preference_save'
   ]);
-  const SENSITIVE_RESET_SCOPES = new Set(['api', 'cli', 'local-models', 'workflow', 'refinement']);
-  const RESETTABLE_SCOPES = new Set(['viewer', 'notice', 'behavior', 'network', 'privacy', 'appearance']);
-  const RESET_COUNTDOWN_SECONDS = 10;
   const nodeByStep = new Map([
     ['data-review','data_review'], ['logic-review','logic_review'], ['ingest', 'ingest'], ['embedding', 'chunk_embedding'], ['card', 'card_distill'],
     ['card-review', 'transport_review'], ['admission', 'card_admission'],
     ['context', 'context_pack'], ['analysis', 'analysis'],
     ['judgment-review', 'judgment_review'], ['human', 'human_judgment']
   ]);
-  const modelSegmentPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/;
-  const apiModelPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/;
-  const cliModelPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/;
-  const apiProtocolValues = new Set(['AUTO', 'OPENAI_COMPATIBLE', 'ANTHROPIC', 'GEMINI']);
-  const apiProtocolLabels = Object.freeze({
-    AUTO: '官方接口（自动）',
-    OPENAI_COMPATIBLE: 'OpenAI 兼容 / 中转站',
-    ANTHROPIC: 'Anthropic 兼容',
-    GEMINI: 'Gemini 兼容'
-  });
-  const KIMI_API_ENDPOINTS = Object.freeze({
-    CN: 'https://api.moonshot.cn/v1',
-    AI: 'https://api.moonshot.ai/v1'
-  });
-
   let state = null;
   let contract = null;
   let capabilityState = null;
@@ -81,11 +64,6 @@
   let settingsAppliedOnce = false;
   // Scoped display changes are not an instruction to downgrade global settings.
   let settingsModeDraft = null;
-  let activeResetScope = 'none';
-  let resetArmedScope = null;
-  let resetArmedRevision = null;
-  let resetDeadline = 0;
-  let resetCountdownTimer = 0;
   const confirmedRiskIds = new Set();
   const developerEditorMetrics = {
     save_count: 0,
@@ -104,6 +82,26 @@
     diff_removed_count: { api: 0, cli: 0, workflow: 0 }
   };
 
+  // Model service rules shared with the developer editor (model-rules.js).
+  const {
+    modelSegmentPattern,
+    apiModelPattern,
+    cliModelPattern,
+    apiProtocolValues,
+    apiProtocolLabels,
+    KIMI_API_ENDPOINTS,
+    modelDescriptor,
+    providerIdentity,
+    isKimiService,
+    applyKimiAutoDetection,
+    isKnownOfficialApiProvider,
+    inferApiModelCapability,
+    apiConnectionState,
+    modelIdentity,
+    examProviderFamily,
+    localModelDisplayName,
+    normalizeLocalCapabilities,
+  } = Memorive.settingsModelRules;
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
   const activeSettingsMode = () => {
@@ -754,56 +752,6 @@
     return element;
   };
 
-  const modelDescriptor = (service) => {
-    const parts = [service?.model_name, service?.tier, service?.thinking_mode]
-      .map((value) => typeof value === 'string' ? value.trim() : '')
-      .filter(Boolean);
-    return parts.length >= 2 ? parts.join('-') : (service?.provider || '未命名模型服务');
-  };
-
-  const providerIdentity = (value) => String(value || '')
-    .normalize('NFKC')
-    .trim()
-    .replace(/\s+/g, ' ')
-    .toLowerCase();
-
-  const isKimiService = (service = {}) => {
-    const labels = [service.provider, service.credential_ref]
-      .map((value) => providerIdentity(value).replace(/[^\p{L}\p{N}]/gu, ''));
-    return labels.some((label) => label.includes('kimi')
-      || label.includes('moonshot') || label.includes('月之暗面'));
-  };
-
-  const applyKimiAutoDetection = (service) => {
-    if (!isKimiService(service)) return;
-    const endpoint = String(service.api_base_url || '').trim().replace(/\/+$/, '');
-    // Keep custom compatible endpoints; official Kimi endpoints use the existing resolver.
-    if (endpoint && !Object.values(KIMI_API_ENDPOINTS).includes(endpoint)) return;
-    service.api_platform = 'AUTO';
-  };
-
-  const isKnownOfficialApiProvider = (provider) => {
-    const identity = providerIdentity(provider).replace(/[^a-z0-9]/g, '');
-    return [
-      /^deepseek(?:apikey[a-z0-9]*)?$/,
-      /^(?:anthropic|claude)(?:apikey[a-z0-9]*)?$/,
-      /^openai(?:apikey[a-z0-9]*)?$/,
-      /^(?:gemini|googleai)(?:apikey[a-z0-9]*)?$/,
-      /^siliconflow(?:apikey[a-z0-9]*)?$/
-    ].some((pattern) => pattern.test(identity)) || isKimiService({ provider });
-  };
-
-  const inferApiModelCapability = (provider, modelName) => {
-    const model = String(modelName || '').normalize('NFKC').trim().toLowerCase().replace(/^\/+|\/+$/g, '');
-    // Keep the known native families aligned with model_capabilities.py.
-    if (model === 'qwen/qwen3-vl-embedding-8b') return 'EMBEDDING';
-    if (model === 'bge-m3' || model.startsWith('bge-m3:')
-        || model.endsWith('/bge-m3') || model.includes('/bge-m3:')) return 'EMBEDDING';
-    if (model.includes('reranker')) return 'RERANKER';
-    if (model.endsWith('deepseek-ai/deepseek-ocr') || model.endsWith('deepseek-ocr')) return 'VISION_OCR';
-    return 'CHAT';
-  };
-
   const providerReference = (provider) => {
     if (!state?.settings) return null;
     const matchingServices = state.settings.model_services.filter(
@@ -814,49 +762,6 @@
     return state.settings.credential_references.find(
       (reference) => reference.credential_ref === references[0]
     ) || null;
-  };
-
-  const apiConnectionState = (provider, protocolValue, baseUrlValue) => {
-    const api_protocol = String(protocolValue || 'AUTO').trim().toUpperCase();
-    const api_base_url = String(baseUrlValue || '').trim().replace(/\/+$/, '');
-    if (!apiProtocolValues.has(api_protocol)) {
-      return { valid: false, code: 'API_PROTOCOL_INVALID', api_protocol, api_base_url };
-    }
-    if (api_protocol === 'AUTO') {
-      if (api_base_url) return { valid: false, code: 'API_CONNECTION_INCOMPLETE', api_protocol, api_base_url };
-      if (!isKnownOfficialApiProvider(provider)) {
-        return { valid: false, code: 'API_PROVIDER_PROTOCOL_REQUIRED', api_protocol, api_base_url };
-      }
-      return { valid: true, api_protocol, api_base_url };
-    }
-    if (!api_base_url) return { valid: false, code: 'API_BASE_URL_REQUIRED', api_protocol, api_base_url };
-    try {
-      const parsed = new URL(api_base_url);
-      const hostname = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-      if (parsed.protocol !== 'https:' || parsed.username || parsed.password
-          || parsed.search || parsed.hash || !hostname
-          || hostname === 'localhost' || hostname.endsWith('.localhost')) {
-        throw new Error('API_BASE_URL_INVALID');
-      }
-    } catch (_) {
-      return { valid: false, code: 'API_BASE_URL_INVALID', api_protocol, api_base_url };
-    }
-    return { valid: true, api_protocol, api_base_url };
-  };
-
-  const modelIdentity = (service) => [service?.model_name, service?.tier, service?.thinking_mode]
-    .map((value) => typeof value === 'string' ? value.trim().normalize('NFKC').toLowerCase() : '')
-    .join('|');
-
-  const examProviderFamily = (service = {}) => {
-    const protocol = String(service.api_protocol || 'AUTO').trim().toUpperCase();
-    if (protocol !== 'AUTO') return protocol;
-    const provider = String(service.provider || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
-    if (/^(anthropic|claude)/.test(provider)) return 'ANTHROPIC';
-    if (/^openai/.test(provider)) return 'OPENAI';
-    if (/^(gemini|googleai)/.test(provider)) return 'GEMINI';
-    if (/^(deepseek|siliconflow|硅基流动|硅基)/.test(provider)) return 'OPENAI_COMPATIBLE';
-    return '';
   };
 
   const cachedWorkflowExamScore = (nodeId, identity) => {
@@ -870,21 +775,6 @@
   };
   Memorive.workflowNodeIds = Object.fromEntries(nodeByStep);
   Memorive.workflowExamScore = cachedWorkflowExamScore;
-
-  const localModelDisplayName = (model = {}) => {
-    const raw = String(model.display_name || model.model_name || model.profile_ref || '').trim();
-    return raw.startsWith('[本地]') ? raw : `[本地] ${raw || '本地模型'}`;
-  };
-
-  const normalizeLocalCapabilities = (model = {}) => {
-    const raw = Array.isArray(model.capabilities)
-      ? model.capabilities
-      : [model.capability || inferApiModelCapability(model.endpoint_name, model.model_name)];
-    const normalized = raw
-      .map((value) => String(value || '').trim().toUpperCase())
-      .filter(Boolean);
-    return normalized.length ? [...new Set(normalized)] : ['CHAT'];
-  };
 
   const configuredModelOptions = (settings) => {
     const apiOptions = (settings.model_services || []).map((service) => {
@@ -2381,7 +2271,7 @@
   ).toUpperCase().replace(/[^A-Z0-9_:-]+/g, '_').slice(0, 120);
 
   const savePrimary = async () => {
-    cancelScopedReset();
+    Memorive.settingsReset.cancel();
     await bootstrap();
     // The header saves the collected draft, independent of the visible category.
     // Explicit CLI verification/editor actions still use saveCliServices().
@@ -4221,7 +4111,7 @@
   };
 
   const revert = async () => {
-    cancelScopedReset();
+    Memorive.settingsReset.cancel();
     await bootstrap();
     const receipt = await call('settings.revert', {});
     state = await call('settings.get_state', {});
@@ -4233,113 +4123,6 @@
     syncSaveState();
     showToast('已恢复已保存设置');
     return receipt;
-  };
-
-  const clearResetCountdownTimer = () => {
-    if (resetCountdownTimer) window.clearInterval(resetCountdownTimer);
-    resetCountdownTimer = 0;
-  };
-
-  const renderScopedResetIdle = () => {
-    const button = q('#settings-reset');
-    if (!button) return;
-    button.textContent = '恢复当前项默认';
-    button.removeAttribute('aria-pressed');
-    button.removeAttribute('data-reset-armed');
-    button.disabled = false;
-  };
-
-  const cancelScopedReset = ({ announce = false } = {}) => {
-    const wasArmed = Boolean(resetArmedScope);
-    clearResetCountdownTimer();
-    resetArmedScope = null;
-    resetArmedRevision = null;
-    resetDeadline = 0;
-    renderScopedResetIdle();
-    if (announce && wasArmed) showToast('已取消恢复默认，当前设置未改变。');
-    return wasArmed;
-  };
-
-  const updateScopedResetAvailability = (category) => {
-    const next = String(category || 'none');
-    if (next !== activeResetScope) cancelScopedReset();
-    activeResetScope = next;
-    const button = q('#settings-reset');
-    if (!button) return;
-    const isSensitive = SENSITIVE_RESET_SCOPES.has(next);
-    button.hidden = isSensitive || !RESETTABLE_SCOPES.has(next);
-    button.dataset.resetScope = button.hidden ? '' : next;
-    if (!button.hidden && !resetArmedScope) renderScopedResetIdle();
-  };
-
-  const executeScopedReset = async (scope, expectedRevision) => {
-    clearResetCountdownTimer();
-    resetArmedScope = null;
-    resetArmedRevision = null;
-    resetDeadline = 0;
-    if (scope !== activeResetScope || !RESETTABLE_SCOPES.has(scope)) {
-      updateScopedResetAvailability(activeResetScope);
-      return null;
-    }
-    const button = q('#settings-reset');
-    if (button) {
-      button.textContent = '正在恢复当前项…';
-      button.disabled = true;
-      button.removeAttribute('aria-pressed');
-    }
-    try {
-      const receipt = await call('settings.reset_scope', {
-        scope,
-        expected_revision: expectedRevision
-      });
-      if(scope==='notice')await Memorive.reports?.reset();
-      await refresh();
-      showToast('当前项已恢复默认');
-      return receipt;
-    } finally {
-      updateScopedResetAvailability(activeResetScope);
-    }
-  };
-
-  const renderScopedResetCountdown = () => {
-    const button = q('#settings-reset');
-    if (!button || !resetArmedScope) return;
-    const remaining = Math.max(0, Math.ceil((resetDeadline - Date.now()) / 1000));
-    if (remaining <= 0) {
-      const scope = resetArmedScope;
-      const expectedRevision = resetArmedRevision;
-      void executeScopedReset(scope, expectedRevision)
-        .catch((error) => {
-          updateScopedResetAvailability(activeResetScope);
-          showToast(`恢复默认失败：${error.message}`);
-        });
-      return;
-    }
-    button.textContent = `再次点击取消 · ${remaining}s`;
-    button.setAttribute('aria-pressed', 'true');
-    button.dataset.resetArmed = 'true';
-  };
-
-  const armScopedReset = async () => {
-    await bootstrap();
-    const scope = activeResetScope;
-    if (!RESETTABLE_SCOPES.has(scope) || SENSITIVE_RESET_SCOPES.has(scope)) return null;
-    if (resetArmedScope === scope) {
-      cancelScopedReset({ announce: true });
-      return null;
-    }
-    cancelScopedReset();
-    resetArmedScope = scope;
-    resetArmedRevision = state.revision;
-    resetDeadline = Date.now() + RESET_COUNTDOWN_SECONDS * 1000;
-    renderScopedResetCountdown();
-    resetCountdownTimer = window.setInterval(renderScopedResetCountdown, 250);
-    return {
-      status: 'ARMED',
-      scope,
-      countdown_seconds: RESET_COUNTDOWN_SECONDS,
-      persistent_mutation: false
-    };
   };
 
   const importSettings = async () => {
@@ -4427,7 +4210,7 @@
       void revert().catch(fail('恢复失败'));
     } else if (target.id === 'settings-reset') {
       stopOriginal(event);
-      void armScopedReset().catch(fail('恢复默认失败'));
+      void Memorive.settingsReset.arm().catch(fail('恢复默认失败'));
     } else if (target.id === 'settings-validate-draft') {
       stopOriginal(event);
       const operationGeneration = ++credentialDraftGeneration;
@@ -4683,10 +4466,6 @@
     }
   });
 
-  window.addEventListener('desktop:settings-category-changed', (event) => {
-    updateScopedResetAvailability(event.detail?.category || 'none');
-  });
-
   Memorive.settingsBridge = Object.freeze({
     renderCodeEditor: (elements) => {
       renderDeveloperSyntax(null,elements);
@@ -4724,8 +4503,9 @@
     saveDeveloper,
     refreshDeveloperEditors,
     revert,
-    armScopedReset,
-    cancelScopedReset,
+    armScopedReset: (...args) => Memorive.settingsReset.arm(...args),
+    cancelScopedReset: (...args) => Memorive.settingsReset.cancel(...args),
+    revision: () => state?.revision ?? null,
     inspect: () => ({
       method_count: SETTINGS_METHODS.length,
       native_transport: nativeReady(),
