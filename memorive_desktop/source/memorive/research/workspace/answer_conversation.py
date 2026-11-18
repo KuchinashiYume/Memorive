@@ -62,6 +62,9 @@ def coverage_reply(check,lang='zh'):
     return '\n\n'.join(lines),check['retained_evidence']
 
 def run_if_requested(ws,identity,question):
+    """A follow-up on the conversation's last answer, typed in the chat: the evidence still missing, a
+    search for one aspect, a review, a revision, or a question back when the target is unclear. It is
+    answered without a new model question; False when the question is not one of these."""
     request=intent(question)
     job=ws.store.get('job',identity)
     if not job or job['status'] not in {'QUEUED','RUNNING'}:
@@ -83,6 +86,40 @@ def run_if_requested(ws,identity,question):
     started=time.monotonic()
     from memorive.platform.language import locale
     lang=locale(job.get('language_context')).split('-')[0]
+    request,action=_resolve_target(request,action,check)
+    if job.get('cancel_requested'):
+        raise ValueError('RESEARCH_CANCELLED')
+    if check['freshness']!='CURRENT':
+        raise ValueError('EVIDENCE_CHANGED')
+    if action=='review':
+        _start_review(ws,identity,job,check,request,source,question)
+        return True
+    with ws.store.tx() as db:
+        latest=_active_job(ws,identity,db)
+        ws.store.put('job',identity,job['project'],dict(latest,status='RUNNING',kind='answer_'+action),db=db)
+    if action=='clarify':
+        text,refs=_clarify(lang,request)
+    elif action=='coverage':
+        text,refs=coverage_reply(check,lang)
+    elif action=='probe':
+        text,refs=_probe(ws,check,request,thread,source,job,lang)
+    else:
+        if not 0<=request['index']<len(check['claims']):
+            raise ValueError('CLAIM_NOT_FOUND')
+        claim=check['claims'][request['index']]
+        replacement=request['replacement']
+        hypothesis=bool(re.fullmatch(r'(?:待验证假设|(?:a )?(?:testable )?hypothesis|仮説)[。.!]?',replacement,re.I))
+        text=say(lang,'第 '+str(request['index']+1)+' 条：','Claim '+str(request['index']+1)+': ',str(request['index']+1)+' 番目：')+(say(lang,'待验证假设：','Hypothesis: ','検証待ち仮説：')+claim['text'] if hypothesis else replacement)
+        ws.answer_evidence._revise(thread['id'],source['id'],check['binding'],claim['id'],claim['text'] if hypothesis else replacement,hypothesis,job_id=identity,
+            completion={'question':question,'text':text,'refs':claim['evidence'],'started':started})
+        return True
+    _save_reply(ws,identity,job,thread,question,text,refs,source,action,request,started)
+    return True
+
+
+def _resolve_target(request,action,check):
+    """The claim a follow-up means, by quote or number; a question back when it is unclear or when a
+    review would cover more than 16 claims."""
     if 'quote' in request:
         matches=[i for i,c in enumerate(check['claims']) if request['quote'] in c['text']]
         if len(matches)==1:
@@ -96,56 +133,52 @@ def run_if_requested(ws,identity,question):
     if action=='review' and 'index' not in request and len(check['claims'])>16:
         request={'action':'clarify','reason':'many','pending':'review'}
         action='clarify'
-    if job.get('cancel_requested'):
-        raise ValueError('RESEARCH_CANCELLED')
-    if check['freshness']!='CURRENT':
-        raise ValueError('EVIDENCE_CHANGED')
-    if action=='review':
-        profile=next((p for p in check['review_options'] if p['profile_ref']==job['model_settings']['profile_ref']),None)
-        if profile is None:
-            raise ValueError('REVIEW_UNAVAILABLE')
-        if 'index' in request and not 0<=request['index']<len(check['claims']):
-            raise ValueError('CLAIM_NOT_FOUND')
-        selected=[check['claims'][request['index']]['id']] if 'index' in request else [c['id'] for c in check['claims']]
-        if not 1<=len(selected)<=16:
-            raise ValueError('CLAIM_SELECTION_INVALID')
-        payload=ws.answer_evidence._review_payload(check,selected)
-        payload['question']=question
-        payload['language_context']=job.get('language_context')
-        if len(packed(payload))>ws.settings()['context_chars']:
-            raise ValueError('REVIEW_CONTEXT_TOO_LARGE')
-        with ws.store.tx() as db:
-            latest=_active_job(ws,identity,db)
-            ws.store.put('job',identity,job['project'],dict(latest,kind='answer_review',answer_id=source['id'],expected_binding=check['binding'],
-                profile=profile,claim_ids=selected,contract=CONTRACT,conversation_question=question),db=db)
-        ws.answer_evidence._run_review(identity,payload)
-        return True
+    return request,action
+
+
+def _start_review(ws,identity,job,check,request,source,question):
+    """Hand the selected claims to the review job, with the model the conversation uses."""
+    profile=next((p for p in check['review_options'] if p['profile_ref']==job['model_settings']['profile_ref']),None)
+    if profile is None:
+        raise ValueError('REVIEW_UNAVAILABLE')
+    if 'index' in request and not 0<=request['index']<len(check['claims']):
+        raise ValueError('CLAIM_NOT_FOUND')
+    selected=[check['claims'][request['index']]['id']] if 'index' in request else [c['id'] for c in check['claims']]
+    if not 1<=len(selected)<=16:
+        raise ValueError('CLAIM_SELECTION_INVALID')
+    payload=ws.answer_evidence._review_payload(check,selected)
+    payload['question']=question
+    payload['language_context']=job.get('language_context')
+    if len(packed(payload))>ws.settings()['context_chars']:
+        raise ValueError('REVIEW_CONTEXT_TOO_LARGE')
     with ws.store.tx() as db:
         latest=_active_job(ws,identity,db)
-        ws.store.put('job',identity,job['project'],dict(latest,status='RUNNING',kind='answer_'+action),db=db)
-    if action=='clarify':
-        prompts={'multiple':('这次包含多个操作。要先核对、补查，还是修订哪条结论？','This asks for several actions. Which should run first: review, evidence search, or a specific revision?','複数の操作があります。根拠の確認、追加検索、結論の修正のどれを先に行いますか？'),'target':('要处理上一回答的哪条结论？请指出序号或原句。','Which claim in the previous answer do you mean? Give its number or exact sentence.','前の回答のどの結論ですか？番号か原文を示してください。'),'facet':('要补查哪个方面：条件、方法、样本、结果，还是局限与反例？','Which aspect should I search: conditions, methods, samples, results, or limitations?','条件、方法、標本、結果、限界のどれを追加検索しますか？'),'many':('上一回答有超过 16 条待核对内容。这次先核对哪一条？','The previous answer has more than 16 claims. Which claim should I review first?','前の回答には16件を超える確認対象があります。最初にどれを確認しますか？')}
-        text=say(lang,*prompts[request.get('reason','target')])
-        refs=[]
-    elif action=='coverage':
-        text,refs=coverage_reply(check,lang)
-    elif action=='probe':
-        facet=next((f for f in check['coverage']['facets'] if request['facet']==f['id'] or request['facet'] in f['label']),None)
-        if facet is None:
-            raise ValueError('FACET_NOT_FOUND')
-        value=ws.answer_evidence.probe(thread['id'],source['id'],check['binding'],facet['id'],language_context=job.get('language_context'))
-        refs=value['results']
-        text='\n\n'.join(f'[{n}] {r["title"]}\n{r["text"]}' for n,r in enumerate(refs,1)) or say(lang,'本次选定材料中未检索到对应片段。','No matching excerpt was retrieved from the selected materials.','今回選択した資料から該当断片は見つかりませんでした。')
-    else:
-        if not 0<=request['index']<len(check['claims']):
-            raise ValueError('CLAIM_NOT_FOUND')
-        claim=check['claims'][request['index']]
-        replacement=request['replacement']
-        hypothesis=bool(re.fullmatch(r'(?:待验证假设|(?:a )?(?:testable )?hypothesis|仮説)[。.!]?',replacement,re.I))
-        text=say(lang,'第 '+str(request['index']+1)+' 条：','Claim '+str(request['index']+1)+': ',str(request['index']+1)+' 番目：')+(say(lang,'待验证假设：','Hypothesis: ','検証待ち仮説：')+claim['text'] if hypothesis else replacement)
-        ws.answer_evidence._revise(thread['id'],source['id'],check['binding'],claim['id'],claim['text'] if hypothesis else replacement,hypothesis,job_id=identity,
-            completion={'question':question,'text':text,'refs':claim['evidence'],'started':started})
-        return True
+        ws.store.put('job',identity,job['project'],dict(latest,kind='answer_review',answer_id=source['id'],expected_binding=check['binding'],
+            profile=profile,claim_ids=selected,contract=CONTRACT,conversation_question=question),db=db)
+    ws.answer_evidence._run_review(identity,payload)
+
+
+def _clarify(lang,request):
+    """The question back: which claim, which aspect, or which of several actions first."""
+    prompts={'multiple':('这次包含多个操作。要先核对、补查，还是修订哪条结论？','This asks for several actions. Which should run first: review, evidence search, or a specific revision?','複数の操作があります。根拠の確認、追加検索、結論の修正のどれを先に行いますか？'),'target':('要处理上一回答的哪条结论？请指出序号或原句。','Which claim in the previous answer do you mean? Give its number or exact sentence.','前の回答のどの結論ですか？番号か原文を示してください。'),'facet':('要补查哪个方面：条件、方法、样本、结果，还是局限与反例？','Which aspect should I search: conditions, methods, samples, results, or limitations?','条件、方法、標本、結果、限界のどれを追加検索しますか？'),'many':('上一回答有超过 16 条待核对内容。这次先核对哪一条？','The previous answer has more than 16 claims. Which claim should I review first?','前の回答には16件を超える確認対象があります。最初にどれを確認しますか？')}
+    text=say(lang,*prompts[request.get('reason','target')])
+    refs=[]
+    return text,refs
+
+
+def _probe(ws,check,request,thread,source,job,lang):
+    """Search the selected materials again for one aspect of the answer."""
+    facet=next((f for f in check['coverage']['facets'] if request['facet']==f['id'] or request['facet'] in f['label']),None)
+    if facet is None:
+        raise ValueError('FACET_NOT_FOUND')
+    value=ws.answer_evidence.probe(thread['id'],source['id'],check['binding'],facet['id'],language_context=job.get('language_context'))
+    refs=value['results']
+    text='\n\n'.join(f'[{n}] {r["title"]}\n{r["text"]}' for n,r in enumerate(refs,1)) or say(lang,'本次选定材料中未检索到对应片段。','No matching excerpt was retrieved from the selected materials.','今回選択した資料から該当断片は見つかりませんでした。')
+    return text,refs
+
+
+def _save_reply(ws,identity,job,thread,question,text,refs,source,action,request,started):
+    """Add the reply to the conversation and complete the job."""
     with ws.store.tx() as db:
         latest=_active_job(ws,identity,db)
         thread=ws.store.get('thread',thread['id'],db=db)
@@ -158,7 +191,6 @@ def run_if_requested(ws,identity,question):
             reply['e1_pending_request']=request.get('pending')
         ws.store.put('thread',thread['id'],thread['project'],thread,expected=thread['revision'],db=db)
         ws.store.put('job',identity,job['project'],dict(latest,status='COMPLETE',answer_id=reply['id'],usage={},elapsed_ms=reply['elapsed_ms']),db=db)
-    return True
 
 
 def _active_job(ws,identity,db):
