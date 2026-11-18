@@ -123,7 +123,7 @@ def test_the_assistant_switches_to_a_known_page_and_raises_the_window(route):
     raised = []
     api = SimpleNamespace(main_window=_Window(), bring_main_window_to_foreground=lambda: raised.append(True))
     AssistantDesktop._activate_main_route(api, route)
-    assert api.main_window.scripts == ["window.__Desktop_INTEGRATED_APP__.activate(" + json.dumps(route) + ")"]
+    assert api.main_window.scripts == ["window.Memorive?.app.activate(" + json.dumps(route) + ")"]
     assert raised == [True]
 
 

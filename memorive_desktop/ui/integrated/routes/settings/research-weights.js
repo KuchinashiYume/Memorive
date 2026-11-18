@@ -4,8 +4,8 @@
  const page=document.getElementById('memo-weights-page');
  if(!page)return;
  const q=s=>page.querySelector(s),
-   t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s,
-   call=(m,p={})=>window.__Desktop_SERVICE__.call(m,p);
+   t=s=>Memorive.app?.translate?.(s)||s,
+   call=(m,p={})=>Memorive.service.call(m,p);
  const el=(tag,text,cls)=>{
    const n=document.createElement(tag);
    if(text!=null)n.textContent=t(text);
@@ -36,11 +36,11 @@
    n.dataset.error=String(error);
  };
  const error=e=>status(messages[e.message]||'操作未完成，请重试',true),
-   sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+   sync=()=>Memorive.settingsBridge?.syncSaveState();
  const inherited=()=>!!scope&&q('#memo-weight-inherit').checked;
  const valueValid=(c,inherit=false)=>{
   if(!c||Object.keys(c).sort().join()!==Object.keys(entry.defaults).sort().join())return false;
-  if(!inherit&&!window.__MEMO_WEIGHT_CONTROLS__.valid(c.weights,entry.limits,entry.relevance_limits))return false;
+  if(!inherit&&!Memorive.weightControls.valid(c.weights,entry.limits,entry.relevance_limits))return false;
   if(Object.keys(c.penalties||{}).sort().join()!==Object.keys(types).sort().join()||Object.values(c.penalties).some(v=>typeof v!=='number'||!Number.isFinite(v)||v<0||v>1))return false;
   for(const key of ['semantic_enabled','keep_counterevidence','rule_enrichment'])if(typeof c[key]!=='boolean')return false;
   for(const [key,min,max] of [['review_days',7,730],['interest_days',7,90],['interest_half_life',1,60]])if(!Number.isInteger(c[key])||c[key]<min||c[key]>max)return false;
@@ -70,7 +70,7 @@
    const sum=Object.values(draft.weights).reduce((a,b)=>a+b,0),r=draft.weights.Similarity+draft.weights.Semantic;
    const n=q('#memo-weight-total');
    n.textContent=t('合计')+' '+Math.round(sum*100)+'% · '+t('相关性')+' '+Math.round(r*100)+'%';
-   n.dataset.error=String(!window.__MEMO_WEIGHT_CONTROLS__.valid(draft.weights,entry.limits,entry.relevance_limits));
+   n.dataset.error=String(!Memorive.weightControls.valid(draft.weights,entry.limits,entry.relevance_limits));
  }
  function setRange(input,value){
    input.value=value;
@@ -99,7 +99,7 @@
   input.setAttribute('aria-label',t(label));
   setRange(input,Math.round(value*100));
   input.oninput=()=>{
-    if(group==='weights')draft.weights=window.__MEMO_WEIGHT_CONTROLS__.allocate(draft.weights,key,Number(input.value),entry.limits,entry.relevance_limits);else draft.penalties[key]=Number(input.value)/100;
+    if(group==='weights')draft.weights=Memorive.weightControls.allocate(draft.weights,key,Number(input.value),entry.limits,entry.relevance_limits);else draft.penalties[key]=Number(input.value)/100;
     mark();
   };
   bar.append(el('small',limits[0]+'%'),input,el('small',limits[1]+'%'));
@@ -121,7 +121,7 @@
   choice.append(dot,name,button);
   box.append(head,choice,menu);
   host.append(box);
-  const picker=window.__Desktop_MODEL_PICKER__.bind({button,menu,label:name,dot,onSelect:option=>{
+  const picker=Memorive.modelPicker.bind({button,menu,label:name,dot,onSelect:option=>{
     draft[key]=option.profileRef||null;
     picker.render(options,option.profileRef);
     mark();
@@ -155,7 +155,7 @@
   const input=q('#memo-weight-code'),
     text=codeDirty?codeText:JSON.stringify({schema_version:'MemoResearchWeights-v2',config:draft},null,2);
   if(input.value!==text)input.value=text;
-  window.__Desktop_SETTINGS_BRIDGE__?.renderCodeEditor({input,highlight:q('#memo-weight-code-highlight'),lines:q('#memo-weight-code-lines')});
+  Memorive.settingsBridge?.renderCodeEditor({input,highlight:q('#memo-weight-code-highlight'),lines:q('#memo-weight-code-lines')});
  }
  function modeView(){
   for(const item of page.querySelectorAll('[data-weight-mode]'))item.hidden=item.dataset.weightMode!==mode;
@@ -188,7 +188,7 @@
  async function load(newScope=scope){
   const epoch=++loadEpoch;
   scope=newScope;
-  const fresh=await call('memo.state',{project:window.__MEMO_WORKSPACE__?.inspect().project||'default',view_thread_id:''});
+  const fresh=await call('memo.state',{project:Memorive.chat?.inspect().project||'default',view_thread_id:''});
   if(epoch!==loadEpoch)return;
   data=fresh;
   const selectedScope=scope,
@@ -294,7 +294,7 @@
   status(codeError,!!codeError);
   renderCode();
  });
- q('#memo-weight-code').addEventListener('scroll',()=>window.__Desktop_SETTINGS_BRIDGE__?.renderCodeEditor({input:q('#memo-weight-code'),highlight:q('#memo-weight-code-highlight'),lines:q('#memo-weight-code-lines')}));
+ q('#memo-weight-code').addEventListener('scroll',()=>Memorive.settingsBridge?.renderCodeEditor({input:q('#memo-weight-code'),highlight:q('#memo-weight-code-highlight'),lines:q('#memo-weight-code-lines')}));
  q('#memo-weight-code-format').onclick=()=>{
    if(codeError)return;
    codeDirty=false;
@@ -308,7 +308,7 @@
   const before=JSON.stringify({schema_version:'MemoResearchWeights-v2',config:entry.config},null,2),
     after=q('#memo-weight-code').value;
   body.replaceChildren();
-  for(const r of window.__Desktop_SETTINGS_BRIDGE__.codeDiff(before,after)){
+  for(const r of Memorive.settingsBridge.codeDiff(before,after)){
     const row=el('div',null,'desktop-settings-diff-row desktop-settings-diff-'+r.kind);
     row.append(el('span',r.marker),el('code',r.text||' '));
     row.setAttribute('data-desktop-no-translate','');
@@ -319,7 +319,7 @@
    const b=q('#memo-weight-preview');
    b.disabled=true;
    try{
-     const result=await call('memo.weight_preview',{project:scope||window.__MEMO_WORKSPACE__.inspect().project,query:q('#memo-weight-query').value,config:draft});
+     const result=await call('memo.weight_preview',{project:scope||Memorive.chat.inspect().project,query:q('#memo-weight-query').value,config:draft});
      const out=q('#memo-weight-preview-result');
      out.replaceChildren();
      for(const [key,title] of [['before','当前设置'],['after','修改后']]){
@@ -378,14 +378,14 @@
  window.addEventListener('desktop:settings-category-changed',e=>{
    pickers.forEach(p=>p.setOpen(false));
    if(e.detail.category==='research-weights'){
-     window.__Desktop_SETTINGS_UI__?.applySettingsMode(mode);
+     Memorive.settingsView?.applySettingsMode(mode);
      load().catch(error);
    }
  });
  for(const event of ['input','change'])page.addEventListener(event,e=>e.stopPropagation());
  // settings.js loads earlier in the page and publishes its bridge as it loads.
- window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('research-weights',{isDirty:()=>dirty,save,discard,validate:valid});
- window.__MEMO_WEIGHTS__={load,save,discard,inspect:()=>({scope,dirty,draft,mode,codeError,valid:valid()})};
+ Memorive.settingsBridge.registerSaveParticipant('research-weights',{isDirty:()=>dirty,save,discard,validate:valid});
+ Memorive.researchWeights={load,save,discard,inspect:()=>({scope,dirty,draft,mode,codeError,valid:valid()})};
 })();
 
 

@@ -4,7 +4,7 @@
   const root=document.getElementById('desktop-settings-preview');
   const grid=root?.querySelector('.desktop-settings-browser-provider-grid');
   if(!grid)return;
-  const bridge=()=>window.__Desktop_SETTINGS_BRIDGE__;
+  const bridge=()=>Memorive.settingsBridge;
   const call=(method,...args)=>window.pywebview.api[method](...args);
   const el=(tag,text,cls)=>{
     const n=document.createElement(tag);
@@ -276,6 +276,6 @@
     build();
     sync();
   });
-  window.__Desktop_BROWSER_SITES__=Object.freeze({render,isDirty:dirty});
+  Memorive.browserSites=Object.freeze({render,isDirty:dirty});
 })();
 

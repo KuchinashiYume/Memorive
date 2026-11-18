@@ -1,5 +1,5 @@
 /* The research connections panel in settings: the folders, Obsidian vaults, Zotero libraries and bibliography files a
-   project draws on, their previews, imports and exports (memo.connection_*). Publishes window.__MEMO_CONNECTIONS__. */
+   project draws on, their previews, imports and exports (memo.connection_*). Publishes Memorive.researchConnections. */
 (() => {
  'use strict';
  const q=s=>document.querySelector(s),
@@ -9,9 +9,9 @@
      if(cls)e.className=cls;
      return e;
    };
- const t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
- const call=(m,p={})=>window.__Desktop_SERVICE__.call(m,p),
-   currentProject=()=>window.__MEMO_WORKSPACE__?.inspect().project||'default';
+ const t=s=>Memorive.app?.translate?.(s)||s;
+ const call=(m,p={})=>Memorive.service.call(m,p),
+   currentProject=()=>Memorive.chat?.inspect().project||'default';
  const names={obsidian:'Obsidian',zotero:'Zotero',folder:'资料文件夹',bibliography:'书目文件'};
  const statusNames={COMPLETE:'已完成',ERROR:'需要处理',PARTIAL:'部分完成',INTERRUPTED:'已中断',QUEUED:'已排队',RUNNING:'处理中',DISPATCHED:'已交给主线',active:'可检索',changed:'来源已更新',unavailable:'来源不可用',SYNCED:'已回写',PROCESSING:'处理中',DEDUPLICATED:'已关联已有文献'};
  const statusLabel=value=>statusNames[value]?t(statusNames[value]):value;
@@ -153,14 +153,14 @@
    if(d.processing)row.append(make('p',t('主线处理：')+statusLabel(d.processing.state)+(d.processing.job_id?' · '+d.processing.job_id:'')));
    const actions=make('div',null,'memo-actions');
    if(d.state==='active')actions.append(button('查看与导出结果',()=>outputs(d)),button('以标题提问',async()=>{
-     await window.__MEMO_WORKSPACE__.refresh();
-     window.__Desktop_INTEGRATED_APP__.activate('chat');
+     await Memorive.chat.refresh();
+     Memorive.app.activate('chat');
      q('#memo-question').value=d.title;
      q('#memo-question').focus();
    }));
    if(d.path&&d.state==='active')actions.append(button(d.processing?'查看主线任务':'交给主线处理',async()=>{
     if(d.processing){
-      window.__Desktop_INTEGRATED_APP__.activate('inbox');
+      Memorive.app.activate('inbox');
       return;
     }
     const r=await call('memo.connection_queue',{connection_id:connection.id,source_id:d.id,kind:'process',request_id:crypto.randomUUID()});
@@ -366,7 +366,7 @@
    };
  }
  const helpCopy='添加 Obsidian、Zotero、资料文件夹或书目来源后，用导入图标选择材料。资料与结果显示已导入资料及导出内容；导入与任务显示进度、失败和重试。仅读取你选择的材料；回写只修改 Memo 管理的笔记内容。';
- window.__Desktop_SETTINGS_CONTROLS__?.help(q('#memo-connections-help'),'连接与同步帮助',helpCopy);
+ Memorive.settingsControls?.help(q('#memo-connections-help'),'连接与同步帮助',helpCopy);
 
  timer=setInterval(()=>{
    if(opened&&q('#memo-connections-panel').getClientRects().length&&!busy&&!editing)refresh().catch(error);
@@ -375,6 +375,6 @@
    render();
    if(lastNotice)notice(lastNotice.text,lastNotice.bad);
  }}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
- window.__MEMO_CONNECTIONS__={open,close,refresh,inspect:()=>({opened,connection_id:connection?.id,document_count:data?.documents.length||0,activeTab,editing})};
+ Memorive.researchConnections={open,close,refresh,inspect:()=>({opened,connection_id:connection?.id,document_count:data?.documents.length||0,activeTab,editing})};
 })();
 

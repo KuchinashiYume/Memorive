@@ -1,9 +1,9 @@
 /* Draws the work log page from what bridge.js loaded: entry cards, the filter popover and the entry details.
-   Publishes window.__Desktop_WORK_LOG_VIEW__ for bridge.js. */
+   Publishes Memorive.workLogView for bridge.js. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-worklog-preview');
-  const preview = window.DesktopPreview_worklog;
+  const preview = Memorive.frames.worklog;
   if (!root || !preview) return;
   const q = (selector) => root.querySelector(selector);
   const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -253,7 +253,7 @@
   q('#worklog-toast button').addEventListener('click', hideToast);
 
   applyFilters();
-  window.__Desktop_WORK_LOG_VIEW__ = Object.freeze({
+  Memorive.workLogView = Object.freeze({
     renderRows,
     setMilestones,
     openDetailById,

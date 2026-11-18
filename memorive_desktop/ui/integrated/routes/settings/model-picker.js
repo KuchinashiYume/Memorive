@@ -1,6 +1,6 @@
 /* The existing workflow model picker, parameterized for other settings without workflow writes. */
 (() => {
-  if (window.__Desktop_MODEL_PICKER__) return;
+  if (Memorive.modelPicker) return;
   function bind({button,menu,label=null,dot=null,onSelect=null,manageEvents=true}) {
     let options=[],renderSignature=null;
     const setOpen=open=>{
@@ -96,12 +96,12 @@
       }
     }};
   }
-  window.__Desktop_MODEL_PICKER__=Object.freeze({bind});
+  Memorive.modelPicker=Object.freeze({bind});
 })();
 
   (() => {
     const root = document.getElementById('desktop-settings-preview');
-    const preview = window.DesktopPreview_settings;
+    const preview = Memorive.frames.settings;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -114,7 +114,7 @@
     const shell = q('.desktop-settings-shell');
     const modelMenu = q('#settings-model-menu');
     const modelButton = q('#settings-adjust-model');
-    const workflowModelPicker = window.__Desktop_MODEL_PICKER__.bind({button:modelButton,menu:modelMenu,manageEvents:false});
+    const workflowModelPicker = Memorive.modelPicker.bind({button:modelButton,menu:modelMenu,manageEvents:false});
     const shortcutPopover = q('#settings-shortcut-popover');
     const flowList = q('#settings-flow-list');
     const flowStage = q('#settings-flow-stage');
@@ -283,7 +283,7 @@
     const workflowViews = ['document', 'refinement', 'daily', 'weekly', 'monthly'];
     const reportView = () => ['daily', 'weekly', 'monthly'].includes(workflowView);
     const flowLabels = {document:'文献处理流程',refinement:'会话精炼流程',daily:'日报流程',weekly:'周报流程',monthly:'月报流程'};
-    const flowText = text => window.__Desktop_INTEGRATED_APP__?.translate?.(text) || text;
+    const flowText = text => Memorive.app?.translate?.(text) || text;
     const workflowSteps = [...flowList.querySelectorAll('.desktop-settings-flow-step')];
     const captureDocumentWorkflow = () => workflowSteps.map((step) => {
       const node = step.querySelector('.desktop-settings-node');
@@ -798,7 +798,7 @@
       return Boolean(reviewer && reviewer.state === 'green' && differsFromProducer(reviewer));
     };
 
-    const workflowText = (key, fallback) => window.__Desktop_SETTINGS_I18N__?.text?.(key, fallback) || fallback;
+    const workflowText = (key, fallback) => Memorive.settingsText?.text?.(key, fallback) || fallback;
     const setWorkflowStatus = (node, markerClass, key, fallback) => {
       const target = node.querySelector('.desktop-settings-node-status');
       target.replaceChildren();
@@ -910,9 +910,9 @@
     };
 
     const renderReportWorkflow = () => {
-      const state=window.__Desktop_REPORT_WORKFLOW__?.inspect();
+      const state=Memorive.reportWorkflow?.inspect();
       const ref=state?.draft?.[workflowView] || '';
-      const options=window.__Desktop_REPORT_WORKFLOW__?.options() || [];
+      const options=Memorive.reportWorkflow?.options() || [];
       const selected=options.find(row=>row.profileRef===ref);
       const definitions=state?.saved?.steps || [
         {key:'WAITING',name:'确认报告周期'},{key:'COLLECTING',name:'汇总已完成成果'},
@@ -1115,7 +1115,7 @@
 
     const modelOptionsFor = (node) => {
       if(node.dataset.step==='logic-review')return configuredModelOptions.filter(option=>!String(option.profileRef).startsWith('local:') && (option.capabilities||['CHAT']).includes('CHAT'));
-      if(reportView() && node.dataset.step==='COMPOSING') return window.__Desktop_REPORT_WORKFLOW__?.options() || [];
+      if(reportView() && node.dataset.step==='COMPOSING') return Memorive.reportWorkflow?.options() || [];
       const builtIn = workflowModels[node.dataset.step] || [{ profileRef: node.dataset.profileRef || '', model: node.dataset.model, state: 'green', note: '系统内置路径' }];
       if (node.dataset.modelLocked === 'true') return builtIn;
       if (workflowView === 'refinement' && node.dataset.step === '03_REFINEMENT_MODEL_EXECUTION') {
@@ -1181,7 +1181,7 @@
 
     const fallbackMenu = q('#settings-fallback-menu');
     const fallbackButton = q('#settings-adjust-fallback');
-    const fallbackPicker = window.__Desktop_MODEL_PICKER__.bind({button:fallbackButton,menu:fallbackMenu,manageEvents:false});
+    const fallbackPicker = Memorive.modelPicker.bind({button:fallbackButton,menu:fallbackMenu,manageEvents:false});
     const closeFallbackMenu = () => {
       fallbackMenu.dataset.open = 'false';
       fallbackMenu.setAttribute('aria-hidden', 'true');
@@ -1266,7 +1266,7 @@
       updateWorkflowHeader();
       if (view === 'document') restoreDocumentWorkflow();
       if (reportView()) {
-        try { await window.__Desktop_REPORT_WORKFLOW__?.load(); }
+        try { await Memorive.reportWorkflow?.load(); }
         catch(error) { showToast(flowText('无法加载报告模型设置，请重试')); }
       }
       renderWorkflow();
@@ -1429,7 +1429,7 @@
       q('#settings-retries').value = String(confirmedRetries);
       updateNodeRetryPresentation(node);
       confirmedModel = node.dataset.model || '尚未映射已配置模型';
-      const currentOption = [...(window.__Desktop_REPORT_WORKFLOW__?.options()||[]), ...refinementModelOptions, ...configuredModelOptions, ...(workflowModels[node.dataset.step] || [])]
+      const currentOption = [...(Memorive.reportWorkflow?.options()||[]), ...refinementModelOptions, ...configuredModelOptions, ...(workflowModels[node.dataset.step] || [])]
         .find((option) => option.profileRef === (node.dataset.profileRef || '') || option.model === confirmedModel);
       confirmedModelState = currentOption?.state || (confirmedModel.startsWith('[默认]') ? 'green' : 'yellow');
       q('#settings-current-model').textContent = confirmedModel.startsWith('尚未') ? '—' : (currentOption?.model || (confirmedModel.startsWith('[默认]') ? confirmedModel : '—'));
@@ -1538,7 +1538,7 @@
         confirmedModelState = button.dataset.state;
         if (selectedNode) selectedNode.dataset.model = confirmedModel;
         if (selectedNode?.dataset.step === 'embedding') syncContextFromEmbedding();
-        if(reportView() && selectedNode?.dataset.step==='COMPOSING') window.__Desktop_REPORT_WORKFLOW__?.select(workflowView,button.dataset.profileRef);
+        if(reportView() && selectedNode?.dataset.step==='COMPOSING') Memorive.reportWorkflow?.select(workflowView,button.dataset.profileRef);
         if (workflowView === 'refinement' && selectedNode?.dataset.step === '03_REFINEMENT_MODEL_EXECUTION') {
           refinementProfileRef = button.dataset.profileRef || '';
           const select = q('#settings-refinement-model');
@@ -1722,7 +1722,7 @@
       updateWorkflowHeader();
       renderWorkflow();
     });
-    window.__Desktop_SETTINGS_UI__ = Object.freeze({
+    Memorive.settingsView = Object.freeze({
       setWorkflowView,
       getEditState: () => ({dirty:pageDirty}),
       resetPaneLayout() {

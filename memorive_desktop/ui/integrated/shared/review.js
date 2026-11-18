@@ -42,7 +42,7 @@
     '跨段原文关系已检查':['Cross-segment source relationships checked','分割間の原文関係を確認済み'],'全局关系检查受限':['Global relationship review limited','全体の関係確認に制限あり'],
     'literal_arithmetic':['Printed arithmetic','記載された算術式','原文明确算术关系'],'numeric_domain':['Named numeric domain','明示された数値領域','明确标签的数值范围'],
     '自动识别明确格式并提供数值摘要；规则表单用于补充条件。Card 缺口会按原文锚点自动关联，可选定位仅用于补充。':['Supported explicit formats and numeric summaries run automatically. Rules and Card-gap locators are optional additions.','明示された形式と数値要約は自動処理します。ルールと Card の位置指定は任意の補足です。']});
-  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
+  const call=(method,params={})=>Memorive.service.call(method,params);
   const el=(tag,text,cls)=>{
     const e=document.createElement(tag);
     if(text!=null)e.textContent=text;
@@ -505,7 +505,7 @@
     node.querySelector('strong').textContent=t('逻辑分析');
     node.querySelector('.desktop-tasks-node-purpose').textContent=t('独立核查文献数据与逻辑');
     node.querySelector('.desktop-tasks-node-model').textContent=state.model_label||t('已配置的云端模型');
-    window.__MEMO_NODE_PROGRESS__?.apply(node,{node_id:'E2_LOGIC_REVIEW',state:(!state.paused&&['RUNNING','SENDING'].includes(state.logic_state))?'RUNNING':state.logic_state,node_progress:state.node_progress},binding);
+    Memorive.nodeProgress?.apply(node,{node_id:'E2_LOGIC_REVIEW',state:(!state.paused&&['RUNNING','SENDING'].includes(state.logic_state))?'RUNNING':state.logic_state,node_progress:state.node_progress},binding);
     node.reviewPanelState=state;
     node.reviewOwnerControlState=binding.control_state;
     node.onclick=()=>options.openNode?.(node);
@@ -601,6 +601,6 @@
   document.addEventListener('click',event=>{
     if(dialog&&event.target.closest('#desktop-library-preview .desktop-library-card,#library-close'))dialog.hidden=true;
   });
-  window.__MEMORIVE_REVIEW_UI__={inbox,reportButton,openReport,renderTask,renderTaskInspector,renderInboxState,pauseHint};
+  Memorive.review={inbox,reportButton,openReport,renderTask,renderTaskInspector,renderInboxState,pauseHint};
 })();
 

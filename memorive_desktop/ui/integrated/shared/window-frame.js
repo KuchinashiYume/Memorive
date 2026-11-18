@@ -3,11 +3,12 @@
 
    Each route section of the page carries its own copy of the frame markup (#desktop-<component>-preview).
    This script gives every copy the same behaviour; only the size rule of the right panel differs by route
-   (RIGHT_PANEL_RULES below). For each route it publishes window.DesktopPreview_<component>:
+   (RIGHT_PANEL_RULES below). For each route it publishes Memorive.frames.<component>:
    { app, root, setInspector(open, options), setSidebar(open), setBottom(open) }, plus resetInspectorRatio()
    on the inbox. shared/app.js and the route scripts use these objects. */
 (() => {
   'use strict';
+  const i18n = Memorive.i18n;
 
   const BOTTOM_DEFAULT = 346;
 
@@ -126,20 +127,23 @@
     },
   };
 
+  // detail: on routes whose right panel shows the selected item, the selector of a selected item. Without one
+  // the right panel button looks unavailable (aria-disabled) until something is selected or the panel is open;
+  // the route's own click handler still says what to select.
   const ROUTES = [
-    { component: 'settings', rule: RIGHT_PANEL_RULES.remembered },
+    { component: 'settings', rule: RIGHT_PANEL_RULES.remembered, detail: '.desktop-settings-node[aria-current="true"]' },
     { component: 'inbox', rule: RIGHT_PANEL_RULES.shareUntilResized },
-    { component: 'tasks', rule: RIGHT_PANEL_RULES.fixed(390, 280, 280) },
-    { component: 'messages', rule: RIGHT_PANEL_RULES.freshShare },
+    { component: 'tasks', rule: RIGHT_PANEL_RULES.fixed(390, 280, 280), detail: '.desktop-tasks-task[aria-selected="true"]' },
+    { component: 'messages', rule: RIGHT_PANEL_RULES.freshShare, detail: '.desktop-messages-card[aria-selected="true"]' },
     { component: 'sessions', rule: RIGHT_PANEL_RULES.fixed(260, 130, 160) },
     { component: 'library', rule: RIGHT_PANEL_RULES.keptShare },
     { component: 'worklog', rule: RIGHT_PANEL_RULES.keptShare },
     // The leaderboard shows its own tooltips (routes/leaderboard/view.js).
-    { component: 'partleaderboard', rule: RIGHT_PANEL_RULES.keptShare, ownTooltips: true },
-    { component: 'partchat', rule: RIGHT_PANEL_RULES.keptShare },
+    { component: 'leaderboard', rule: RIGHT_PANEL_RULES.keptShare, ownTooltips: true },
+    { component: 'chat', rule: RIGHT_PANEL_RULES.keptShare },
   ];
 
-  const createFrame = ({ component, rule: makeRule, ownTooltips = false }) => {
+  const createFrame = ({ component, rule: makeRule, ownTooltips = false, detail = null }) => {
     const root = document.getElementById(`desktop-${component}-preview`);
     if (!root) return;
     const rule = makeRule();
@@ -191,7 +195,7 @@
       resizer.setAttribute('aria-valuemin', String(Math.round(limits.min)));
       resizer.setAttribute('aria-valuemax', String(Math.round(limits.max)));
       resizer.setAttribute('aria-valuenow', String(rounded));
-      resizer.setAttribute('aria-valuetext', `${rounded} 像素`);
+      i18n.set(resizer, 'frame.pixels', { size: rounded }, 'aria-valuetext');
     };
 
     // Set a panel's size within its limits. how: 'fit', 'drag', 'drop' or 'key' (see RIGHT_PANEL_RULES).
@@ -205,7 +209,7 @@
       else if (rule.remembersBottom) rule.resized(frame, next, how, 'bottom');
       updateResizerAria(resizer, limits, next);
       if (announce) {
-        liveState.textContent = `${panel === 'right' ? '右侧面板宽度' : '底部面板高度'} ${Math.round(next)} 像素`;
+        liveState.textContent = i18n.text(panel === 'right' ? 'frame.panel.width' : 'frame.panel.height', { size: Math.round(next) });
       }
       return next;
     };
@@ -225,7 +229,7 @@
       else updateResizerAria(bottomResizer, bottomLimits, clampNumber(bottomSize, bottomLimits.min, bottomLimits.max));
     };
 
-    const setPanel = (panel, value, button, panelElement, label, options = {}) => {
+    const setPanel = (panel, value, button, panelElement, options = {}) => {
       if (value && panel === 'right') {
         const asked = rule.opening(frame, options);
         setPanelSize('right', asked === undefined ? fitSize('right') : asked);
@@ -236,25 +240,25 @@
       if (panelElement) panelElement.setAttribute('aria-hidden', String(!value));
       if (panel === 'right') rightResizer.hidden = !value;
       if (panel === 'bottom') bottomResizer.hidden = !value;
-      liveState.textContent = `${label}${value ? '已打开' : '已关闭'}`;
+      liveState.textContent = i18n.text(value ? 'frame.panel.opened' : 'frame.panel.closed', { panel: { key: `frame.panel.${panel}` } });
       if (!(rule.noRefitOnOpen && value && panel === 'right')) window.requestAnimationFrame(updateResizerBounds);
     };
 
     const toggleLeft = () => {
       const next = app.dataset.left !== 'true';
-      setPanel('left', next, leftButton, null, '左侧导航栏');
+      setPanel('left', next, leftButton, null);
       if (!next && navigation.contains(document.activeElement)) leftButton.focus();
     };
 
     const toggleRight = () => {
       const next = app.dataset.right !== 'true';
-      setPanel('right', next, rightButton, rightPanel, '右侧面板');
+      setPanel('right', next, rightButton, rightPanel);
       if (!next && (rightPanel.contains(document.activeElement) || document.activeElement === rightResizer)) rightButton.focus();
     };
 
     const toggleBottom = () => {
       const next = app.dataset.bottom !== 'true';
-      setPanel('bottom', next, bottomButton, bottomPanel, '底部面板');
+      setPanel('bottom', next, bottomButton, bottomPanel);
       if (!next && (bottomPanel.contains(document.activeElement) || document.activeElement === bottomResizer)) bottomButton.focus();
     };
 
@@ -444,12 +448,21 @@
     const shell = {
       app,
       root,
-      setInspector: (open, options = {}) => setPanel('right', Boolean(open), rightButton, rightPanel, '右侧面板', options),
-      setSidebar: (open) => setPanel('left', Boolean(open), leftButton, null, '左侧导航栏'),
-      setBottom: (open) => setPanel('bottom', Boolean(open), bottomButton, bottomPanel, '底部面板'),
+      setInspector: (open, options = {}) => setPanel('right', Boolean(open), rightButton, rightPanel, options),
+      setSidebar: (open) => setPanel('left', Boolean(open), leftButton, null),
+      setBottom: (open) => setPanel('bottom', Boolean(open), bottomButton, bottomPanel),
     };
     if (rule.reset) shell.resetInspectorRatio = () => rule.reset(frame);
-    window[`DesktopPreview_${component}`] = shell;
+    Memorive.frames[component] = shell;
+
+    if (detail) {
+      const showDetailAvailability = () => {
+        const available = app.dataset.right === 'true' || Boolean(root.querySelector(detail));
+        rightButton.setAttribute('aria-disabled', String(!available));
+      };
+      new MutationObserver(showDetailAvailability).observe(root, { subtree: true, attributes: true, attributeFilter: ['aria-selected', 'aria-current', 'data-right'] });
+      showDetailAvailability();
+    }
 
     const resizeObserver = new ResizeObserver(updateResizerBounds);
     resizeObserver.observe(stage);
@@ -461,4 +474,5 @@
   };
 
   ROUTES.forEach(createFrame);
+  Object.freeze(Memorive.frames);
 })();

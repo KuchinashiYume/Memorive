@@ -1,5 +1,5 @@
 /* The library page's calls to the desktop service (library.*): the list of processed papers and its filters, an item's
-   files and lineage, opening files, and confirming reviews. Publishes window.__Desktop_LIBRARY_BRIDGE__;
+   files and lineage, opening files, and confirming reviews. Publishes Memorive.libraryBridge;
    shared/product-bridge.js and memorive/desktop/api/page_events.py call its refresh(). */
 (() => {
   'use strict';
@@ -43,7 +43,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     } else {
-      result = await window.__Desktop_SERVICE__.call(method, params);
+      result = await Memorive.service.call(method, params);
     }
     receiptCount += 1;
     if(method === 'library.select' && result?.status === 'PASS' && result.artifact_id === selectedArtifactId)window.dispatchEvent(new CustomEvent('desktop:library-selection',{detail:{record:bindings.get(result.artifact_id)?.record || null}}));
@@ -53,7 +53,7 @@
 
   const bindRows = (projection) => {
     const rows = Array.isArray(projection?.records) ? projection.records : [];
-    window.__Desktop_LIBRARY_VIEW__?.renderRows(projection.render_records || rows, {append:projection.append === true, totalCount:projection.total_count, paginated:projection.paginated === true});
+    Memorive.libraryView?.renderRows(projection.render_records || rows, {append:projection.append === true, totalCount:projection.total_count, paginated:projection.paginated === true});
     bindings.clear();
     const byId = new Map(rows.map((row) => [row.artifact_id, row]));
     document.querySelectorAll('#desktop-library-preview .desktop-library-card[data-id]').forEach((card) => {
@@ -62,10 +62,10 @@
       bindings.set(artifactId, { card, record: byId.get(artifactId) || null });
     });
     if (selectedArtifactId && bindings.has(selectedArtifactId)) {
-      window.__Desktop_LIBRARY_VIEW__?.openDetailById(selectedArtifactId);
+      Memorive.libraryView?.openDetailById(selectedArtifactId);
     } else if (selectedArtifactId) {
       selectedArtifactId = null;
-      window.__Desktop_LIBRARY_VIEW__?.closeDetail?.();
+      Memorive.libraryView?.closeDetail?.();
     }
     window.dispatchEvent(new CustomEvent('desktop:library-selection',{detail:{record:bindings.get(selectedArtifactId)?.record || null}}));
     return rows;
@@ -76,7 +76,7 @@
   let paging = { page:0, total:0, hasMore:false, loading:false, query:null };
   let refreshPromise = null;
   let allRows = [];
-  const query = () => window.__Desktop_LIBRARY_VIEW__?.getQuery?.() || { view:'literature', status_filter:'all', kind_filter:'all' };
+  const query = () => Memorive.libraryView?.getQuery?.() || { view:'literature', status_filter:'all', kind_filter:'all' };
   const showPage = (projection, append) => {
     const incoming = projection.rows || [];
     const known = new Set(append ? allRows.map(row => row.artifact_id) : []);
@@ -137,17 +137,14 @@
   window.addEventListener('resize', maybeLoadMore);
 
   const selectedRecord = () => bindings.get(selectedArtifactId)?.record || null;
-  const showToast = (copy) => window.__Desktop_LIBRARY_VIEW__?.showToast?.(copy);
+  const showToast = (copy) => Memorive.libraryView?.showToast?.(copy);
   const activateRoute = (route, source) => {
-    if (window.__Desktop_INTEGRATED_APP__?.activate) {
-      window.__Desktop_INTEGRATED_APP__?.activate(route);
+    if (Memorive.app?.activate) {
+      Memorive.app?.activate(route);
     } else {
-      const page = {
-        'current-task':'当前任务', sessions:'会话管理'
-      }[route];
-      if (page) root?.querySelector(`.desktop-nav-item[data-page="${page}"]`)?.click();
+      root?.querySelector(`.desktop-nav-item[data-route="${route}"]`)?.click();
     }
-    void window.__Desktop_PRODUCT_BRIDGE__?.dispatch(
+    void Memorive.productBridge?.dispatch(
       'navigation.select', { route }, source
     );
   };
@@ -156,7 +153,7 @@
     const projectionId = String(selectedRecord()?.source_session_id || '').trim();
     if (!projectionId) throw new Error('来源会话稳定身份缺失');
     activateRoute('sessions', 'library-source-session');
-    const bridge = window.__Desktop_SESSIONS_BRIDGE__;
+    const bridge = Memorive.sessionsBridge;
     if (!bridge?.openProjection) throw new Error('会话管理定位服务未就绪');
     return bridge.openProjection(projectionId);
   };
@@ -166,7 +163,7 @@
     const taskId = String(record?.task_id || record?.task || record?.job_id || '').trim();
     if (!taskId) throw new Error('关联任务稳定身份缺失');
     activateRoute('current-task', 'library-related-task');
-    const bridge = window.__Desktop_CURRENT_TASK_BRIDGE__;
+    const bridge = Memorive.currentTaskBridge;
     if (record?.product_kind === 'Core_ARTIFACT') {
       if (!bridge?.openProductionRun) throw new Error('文献处理任务定位服务未就绪');
       return bridge.openProductionRun(taskId);
@@ -199,7 +196,7 @@
     if (receipt?.status !== 'PASS') throw new Error(receipt?.status || '资料定位失败');
     activateRoute('library', 'library-stable-locator');
     const targetArtifactId = receipt.artifact_id;
-    window.__Desktop_LIBRARY_VIEW__?.setMode?.(receipt.view || 'literature');
+    Memorive.libraryView?.setMode?.(receipt.view || 'literature');
     await refresh();
     // Stable locators must remain usable beyond the loaded first page.
     if (!bindings.has(targetArtifactId)) {
@@ -212,7 +209,7 @@
     selectedArtifactId = targetArtifactId;
     window.dispatchEvent(new CustomEvent('desktop:library-selection',{detail:{record:null}}));
     await nativeCall('library.select', { artifact_id:targetArtifactId });
-    if (!window.__Desktop_LIBRARY_VIEW__?.openDetailById?.(targetArtifactId)) {
+    if (!Memorive.libraryView?.openDetailById?.(targetArtifactId)) {
       throw new Error('资料记录已不存在或当前筛选不可见');
     }
     selectedArtifactId = targetArtifactId;
@@ -251,7 +248,7 @@
     const card = target.closest('#desktop-library-preview .desktop-library-card[data-id]');
     if (card) {
       const nextArtifactId = card.dataset.id || null;
-      if (nextArtifactId) window.__Desktop_LIBRARY_VIEW__?.openDetailById(nextArtifactId);
+      if (nextArtifactId) Memorive.libraryView?.openDetailById(nextArtifactId);
       if (selectedArtifactId !== nextArtifactId) {
         selectedArtifactId = nextArtifactId;
         window.dispatchEvent(new CustomEvent('desktop:library-selection',{detail:{record:null}}));
@@ -313,7 +310,7 @@
         .catch((error) => showToast(`确认复核失败：${error.message}`));
     }
     if (target.closest('#library-close')) selectedArtifactId = null;
-    if (target.closest('#library-refresh')) void window.__Desktop_UI_CONTROLS__.busy(target.closest('#library-refresh'),()=>nativeCall('library.refresh', {}).then(refresh));
+    if (target.closest('#library-refresh')) void Memorive.controls.busy(target.closest('#library-refresh'),()=>nativeCall('library.refresh', {}).then(refresh));
     if (target.closest('#library-mode-literature')) void nativeCall('library.set_view', { view: 'literature' });
     if (target.closest('#library-mode-memorive')) void nativeCall('library.set_view', { view: 'memorive' });
     const filter = target.closest('#library-filter-menu [data-filter]');
@@ -331,7 +328,7 @@
     void bootstrap();
   }
 
-  window.__Desktop_LIBRARY_BRIDGE__ = {
+  Memorive.libraryBridge = {
     bootstrap,
     refresh,
     loadNextPage,

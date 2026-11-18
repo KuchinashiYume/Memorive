@@ -1,17 +1,17 @@
 /* The research Q&A page: projects and conversations, asking (memo.ask, then memo.job_status until the answer is in),
    answers and their versions, evidence and attachments, agents and desktop hand-off, and the chat's own settings.
-   Calls the memo.* service methods. Publishes window.__MEMO_WORKSPACE__ (openThread, importFiles, pickFiles,
+   Calls the memo.* service methods. Publishes Memorive.chat (openThread, importFiles, pickFiles,
    configureThread, ...), used by the inbox home, the settings connections panel and app.py's self-test. */
 (() => {
   'use strict';
-  const q=s=>document.querySelector(s), t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
+  const q=s=>document.querySelector(s), t=s=>Memorive.app?.translate?.(s)||s;
   const create=(tag,text,cls)=>{
     const e=document.createElement(tag);
     if(text!=null)e.textContent=text;
     if(cls)e.className=cls;
     return e;
   };
-  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
+  const call=(method,params={})=>Memorive.service.call(method,params);
   const errors={CLI_WORKSPACE_PATH_TOO_LONG:'当前目录过长，请将 Memo 放入较短的目录后重试',RULE_METRIC_INVALID:'请检查指标数值、年份与来源',RULE_SOURCE_REQUIRED:'请填写指标来源',VAULT_REQUIRED:'请先选择资料文件夹',CHAT_MODEL_UNAVAILABLE:'所选模型不可用，请检查模型设置',THREAD_BUSY:'当前对话正在回答',REVISION_CONFLICT:'内容已变化，请刷新后重试',EVIDENCE_STALE:'来源已修改，请更新索引',EVIDENCE_NOT_FOUND:'引用已失效，请更新索引',CHAT_MODEL_EXECUTION_FAILED:'模型未能完成回答，请查看调用记录',TENSION_NEEDS_TWO_SOURCES:'请选择至少两份文献证据',TENSION_NEEDS_TWO_PAPERS:'请选择来自不同文献的证据'};
   let state=null,
     project='default',
@@ -72,9 +72,9 @@
   function route(name){
     const research=name==='research-settings';
     if(research)name='settings';
-    window.__Desktop_INTEGRATED_APP__?.activate(name);
+    Memorive.app?.activate(name);
     if(research)q('#memo-settings-category')?.click();
-    void window.__Desktop_PRODUCT_BRIDGE__.dispatch('navigation.select',{route:name},'memo-workspace').catch(fail);
+    void Memorive.productBridge.dispatch('navigation.select',{route:name},'memo-workspace').catch(fail);
   }
   function dialog(title){
     const d=create('dialog',null,'memo-dialog'),
@@ -117,7 +117,7 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     const el=q('#'+id);
     if(id==='memo-model')modelDraftTarget=thread?.id||null;
     dirtyForm.set(formKey(id),el.type==='checkbox'?el.checked:el.value);
-    window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+    Memorive.settingsBridge?.syncSaveState();
   }
   const currentModel=()=>thread&&Object.hasOwn(thread,'profile_ref')?thread.profile_ref:state?.settings.profile_ref;
   function restoreDirty(){
@@ -222,7 +222,7 @@ const collapsed=new Set();
   let menu=null,menuAnchor=null,searchTimer=0;
   const viewClient=crypto.randomUUID().replaceAll('-','');
   let viewSequence=0,visibleThread=null,viewReady=false,pageLoading=false;
-  const chatIsActive=()=>window.__Desktop_INTEGRATED_APP__?.inspect().active_route==='chat';
+  const chatIsActive=()=>Memorive.app?.inspect().active_route==='chat';
   async function viewReceipt(action,owner=null,opening=false){
     const receipt=await call('memo.thread_view',{client_id:viewClient+(opening?'_opening':''),sequence:++viewSequence,action,thread_id:owner});
     if(action==='heartbeat'&&receipt.nav_epoch!==undefined&&navIndex.nav_epoch!==undefined&&receipt.nav_epoch!==navIndex.nav_epoch)await refresh();
@@ -271,7 +271,7 @@ const collapsed=new Set();
     status('#memo-chat-status','已复制');
   }
   function closeMenu(restoreFocus=false){
-    if(menu)window.__Desktop_UI_CONTROLS__?.cancelAction();
+    if(menu)Memorive.controls?.cancelAction();
     menu?.remove();
     menu=null;
     if(restoreFocus)menuAnchor?.focus();
@@ -330,7 +330,7 @@ const collapsed=new Set();
     restoreDirty();
     renderThreadHeader();
     renderComposer();
-    window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+    Memorive.settingsBridge?.syncSaveState();
     if(repaint)renderThread();
   }
   function renderThreadHeader(){
@@ -508,7 +508,7 @@ const collapsed=new Set();
       },'memo-menu-item '+(cls||''));
       if(confirmationKey){
         const execute=b.onclick;
-        b.onclick=e=>{if(window.__Desktop_UI_CONTROLS__?.confirmAction(b,confirmationKey,'再次点击确认删除'))return execute(e);};
+        b.onclick=e=>{if(Memorive.controls?.confirmAction(b,confirmationKey,'再次点击确认删除'))return execute(e);};
       }
       b.setAttribute('role',options?'menuitemcheckbox':'menuitem');
       if(options){
@@ -941,7 +941,7 @@ const collapsed=new Set();
       details.append(create('p',t('回答风格')+' · '+t(g.style.label)),create('small',g.style.common_version+' / '+g.style.mode_version),create('p',t('实际指令')+' · '+g.actual_instruction_sha256));
     }
     details.append(create('p',t('摘要引用消息')+' · '+(message.context.summary_message_ids||[]).length),create('p',t('上下文字符数')+' · '+message.context.chars));
-    window.__MEMO_EVIDENCE_CHECK__?.bind(details,message,{threadId:thread.id,call,create,t});
+    Memorive.evidenceCheck?.bind(details,message,{threadId:thread.id,call,create,t});
     for(const warning of message.ranking_warnings||[])details.append(create('small',t('部分排序信息暂不可用')+' · '+warning.component,'memo-inline-error'));
     return details;
   }
@@ -1217,7 +1217,7 @@ const collapsed=new Set();
     option(select,'','使用常用 Agent 的可用模型');
     for(const m of options)option(select,m.profile_ref,m.display_name||m.model_name,!m.eligible);
     select.value=currentRef;
-    window.__MEMO_SETTINGS_R2__?.renderAgentOptions(options,select.value);
+    Memorive.researchNavigation?.renderAgentOptions(options,select.value);
   }
   function renderSettings(){
     const s=state.settings,select=q('#memo-model');
@@ -1386,7 +1386,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     return {status:'PASS'};
     }finally{
       saveInFlight=false;
-      window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+      Memorive.settingsBridge?.syncSaveState();
     }
   }
   async function revertSettings(){
@@ -1408,7 +1408,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
   function syncModelPicker(){
     if(!state)return;
     const options=[{profileRef:'',model:'本地检索 · 无模型调用',state:'green',note:''},...state.model_options.map(m=>({profileRef:m.profile_ref,model:(m.profile_kind==='LOCAL'?'['+t('本地')+'] ':'')+m.model_name,state:m.eligible?'green':'yellow',note:t(m.profile_kind==='LOCAL'?'本地':'API')+(m.provider?' · '+m.provider:''),disabled:!m.eligible}))];
-    window.__MEMO_SETTINGS_R2__?.renderModelOptions(options,q('#memo-model').value);
+    Memorive.researchNavigation?.renderModelOptions(options,q('#memo-model').value);
   }
   function renderMemories(){
     const list=q('#memo-memory-list');
@@ -1439,12 +1439,12 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
           memoryChanges.set(original.id,{original,text:f.input.value.trim()});
           d.d.close();
           renderMemories();
-          window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+          Memorive.settingsBridge?.syncSaveState();
         },'primary-button'));
       },'memo-quiet-button'),button(change?.remove?'取消遗忘':'遗忘',()=>{
         if(change?.remove)memoryChanges.delete(original.id);else memoryChanges.set(original.id,{original,remove:true});
         renderMemories();
-        window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+        Memorive.settingsBridge?.syncSaveState();
       },'memo-quiet-button'));
       body.append(actions);
       row.append(summary,body);
@@ -1597,7 +1597,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target))closeMenu();});
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&menu)closeMenu(true);
-      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&window.__Desktop_INTEGRATED_APP__?.inspect().active_route==='chat'){
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&Memorive.app?.inspect().active_route==='chat'){
         e.preventDefault();
         openSearch(true);
       }
@@ -1708,14 +1708,14 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     });
     // These inputs belong to the research save participant, not the model-service draft.
     for(const event of ['input','change'])q('#memo-settings-page').addEventListener(event,e=>e.stopPropagation());
-    window.__Desktop_SETTINGS_BRIDGE__?.registerSaveParticipant('research-workspace',{isDirty:hasSettingsDraft,save:saveSettings,discard:revertSettings,validate:()=>customAgentsValid()&&(!hasSettingsDraft()||(Number(q('#memo-context').value)>=8000&&Number(q('#memo-context').value)<=64000&&Number.isInteger(Number(q('#memo-recent').value))&&Number(q('#memo-recent').value)>=2&&Number(q('#memo-recent').value)<=24))});
+    Memorive.settingsBridge?.registerSaveParticipant('research-workspace',{isDirty:hasSettingsDraft,save:saveSettings,discard:revertSettings,validate:()=>customAgentsValid()&&(!hasSettingsDraft()||(Number(q('#memo-context').value)>=8000&&Number(q('#memo-context').value)<=64000&&Number.isInteger(Number(q('#memo-recent').value))&&Number(q('#memo-recent').value)>=2&&Number(q('#memo-recent').value)<=24))});
     window.addEventListener('desktop:settings-category-changed',e=>{if(e.detail.category==='research-workspace'){
       refresh().catch(fail);
       refreshAgents().catch(()=>{});
     }});
     let lastRoute='';
     const loadRoute=()=>{
-      const r=window.__Desktop_INTEGRATED_APP__?.inspect().active_route;
+      const r=Memorive.app?.inspect().active_route;
       if(r!==lastRoute){
         lastRoute=r;
         if(r==='chat')refreshAgents().catch(()=>{});
@@ -1741,7 +1741,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     new MutationObserver(()=>{if(loaded)refresh().then(renderThread).catch(fail);}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
     initAttachmentUI();
     renderComposer();
-    window.__MEMO_WORKSPACE__={openThread:id=>selectThread({id}),reportImportFailure:message=>{
+    Memorive.chat={openThread:id=>selectThread({id}),reportImportFailure:message=>{
       showEvidencePanel('materials');
       fail(Error(message),'#memo-evidence-status');
     },importFiles,pickFiles,configureThread,renderComposer,refreshMaterials,refresh,renderThread,send,saveSettings,revertSettings,hasSettingsDraft,inspect:()=>({loaded,project,thread_id:thread?.id,active_job:activeJob,evidence_count:lastEvidence.length}),openMaterials,showEvidencePanel,openSearch,openSettings:()=>route('research-settings')};
@@ -1749,7 +1749,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
 
   const importing=new Map(), importFailures=new Map();
   let composerPicker=null,waitingForFiles=false,materialView='materials';
-  const chatShell=()=>window.DesktopPreview_partchat;
+  const chatShell=()=>Memorive.frames.chat;
   const chatRoot=()=>q('#memo-chat-page')?.closest('.desktop-route-surface');
   const setEvidenceOpen=open=>{chatShell()?.setInspector(open,{targetRatio:.32});};
   function materialTitle(a){return a.title.replace(/\s*[·•]\s*(?:Card|Analysis|清洗文档|原始文档|Core_)[\s\S]*$/i,'').trim();}
@@ -2136,7 +2136,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     };
     new MutationObserver(sync).observe(shell.app,{attributes:true,attributeFilter:['data-right']});
     sync();
-    composerPicker=window.__Desktop_MODEL_PICKER__.bind({button:q('#memo-composer-model'),menu:q('#memo-composer-model-menu'),label:q('#memo-model-label'),
+    composerPicker=Memorive.modelPicker.bind({button:q('#memo-composer-model'),menu:q('#memo-composer-model-menu'),label:q('#memo-model-label'),
       onSelect:option=>selectConversationModel(option.profileRef||null).catch(fail)});
     action('#memo-add-file',()=>materialMenu(q('#memo-add-file')));
     action('#memo-add-materials',()=>materialMenu(q('#memo-add-materials')));

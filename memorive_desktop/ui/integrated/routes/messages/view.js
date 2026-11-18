@@ -1,8 +1,8 @@
 /* Draws the messages page from what bridge.js loaded: message cards, tones (failure, needs attention, done, notice),
-   selection and the detail panel. Publishes window.__Desktop_MESSAGES_VIEW__ for bridge.js. */
+   selection and the detail panel. Publishes Memorive.messagesView for bridge.js. */
   (() => {
     const root = document.getElementById('desktop-messages-preview');
-    const preview = window.DesktopPreview_messages;
+    const preview = Memorive.frames.messages;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -241,7 +241,7 @@
       const toneBySeverity = { RED:'red', YELLOW:'yellow', GREEN:'green', BLUE:'blue' };
       list.replaceChildren(...(Array.isArray(rows) ? rows : []).map((row) => {
         const originalRow=row;
-        row=window.__MemoContentLanguage__.project(row);
+        row=Memorive.contentLanguage.project(row);
         const tone = toneBySeverity[row.severity] || 'blue';
         const card = document.createElement('article');
         card.className = 'desktop-messages-card';
@@ -542,7 +542,7 @@
       for(const card of cards()){
         const original=contentRows.get(card);
         if(!original)continue;
-        const row=window.__MemoContentLanguage__.project(original);
+        const row=Memorive.contentLanguage.project(original);
         card.dataset.title=row.title;
         card.dataset.summary=row.summary||row.body||'';
         const title=card.querySelector('.desktop-messages-copy strong'),
@@ -560,7 +560,7 @@
       }
     };
     new MutationObserver(projectLoaded).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-    window.__Desktop_MESSAGES_VIEW__ = Object.freeze({
+    Memorive.messagesView = Object.freeze({
       projectLoaded,
       renderRows,
       openDetailById,

@@ -1,7 +1,7 @@
 /* SHARED report presentation and local due-time settings. */
 (() => {
   'use strict';
-  if(window.__Desktop_REPORT_UI__)return;
+  if(Memorive.reports)return;
   const labelSets=[['日报','周报','月报'],['Daily Report','Weekly Report','Monthly Report'],['日報','週報','月報']];
   const reportPattern=/^(日报|周报|月报|Daily Report|Weekly Report|Monthly Report|日報|週報|月報)(?=$|\s*·)/;
   function translateText(text,language){
@@ -17,13 +17,13 @@
     const index=labelSets.find(row=>row.includes(match[1])).indexOf(match[1]);
     return labelSets[locale][index]+text.slice(match[1].length);
   }
-  const t=text=>window.__Desktop_INTEGRATED_APP__?.translate?.(text)||text;
+  const t=text=>Memorive.app?.translate?.(text)||text;
   const q=selector=>document.querySelector(selector);
-  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
+  const call=(method,params={})=>Memorive.service.call(method,params);
   const clone=value=>JSON.parse(JSON.stringify(value));
   let saved=null,draft=null,loading=false;
   const dirty=()=>saved!==null&&JSON.stringify(draft)!==JSON.stringify(saved.config);
-  function sync(){window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();}
+  function sync(){Memorive.settingsBridge?.syncSaveState();}
   function valid(){
     return draft && ['daily_time','weekly_time','monthly_time'].every(key=>/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(draft[key]))
       && Number.isInteger(draft.weekly_day)&&draft.weekly_day>=0&&draft.weekly_day<7
@@ -122,9 +122,9 @@
       }
     });
     document.addEventListener('pointerdown',event=>{if(picker.open&&!picker.contains(event.target))picker.open=false;});
-    window.__Desktop_SETTINGS_CONTROLS__?.help(q('#settings-report-schedule-label'),'报告生成时间',
+    Memorive.settingsControls?.help(q('#settings-report-schedule-label'),'报告生成时间',
       '按 UTC+08:00 汇总上一完整周期；仅在有新成果时生成。关闭期间错过的报告会在下次启动补生成，已生成的周期不重复。月报所选日期不存在时使用当月最后一天。');
-    window.__Desktop_SETTINGS_BRIDGE__?.registerSaveParticipant('report-schedule',{
+    Memorive.settingsBridge?.registerSaveParticipant('report-schedule',{
       isDirty:dirty,validate:valid,save,discard:()=>load(true),afterUnlock:render
     });
     q('[data-category="notice"]')?.addEventListener('click',()=>load());
@@ -132,7 +132,7 @@
     new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
     render();
   }
-  window.__Desktop_REPORT_UI__=Object.freeze({translateText,load,save,reset,inspect:()=>({saved,draft,dirty:dirty()})});
+  Memorive.reports=Object.freeze({translateText,load,save,reset,inspect:()=>({saved,draft,dirty:dirty()})});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 

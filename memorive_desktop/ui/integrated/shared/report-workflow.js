@@ -1,12 +1,12 @@
 /* Report mappings participate in the existing settings Save/Revert transaction. */
 (()=>{
-  if(window.__Desktop_REPORT_WORKFLOW__)return;
+  if(Memorive.reportWorkflow)return;
   const clone=x=>JSON.parse(JSON.stringify(x));
   let saved=null,draft=null,loading=null;
-  const call=(method,params={})=>window.__Desktop_SERVICE__.call(method,params);
+  const call=(method,params={})=>Memorive.service.call(method,params);
   const dirty=()=>Boolean(saved&&JSON.stringify(saved.config)!==JSON.stringify(draft));
-  const render=()=>window.__Desktop_SETTINGS_UI__?.renderWorkflow();
-  const sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+  const render=()=>Memorive.settingsView?.renderWorkflow();
+  const sync=()=>Memorive.settingsBridge?.syncSaveState();
   const options=()=>(saved?.model_options||[]).map(row=>({profileRef:row.profile_ref,model:row.model,
     state:row.eligible?'green':'yellow',disabled:!row.eligible,note:row.eligible?'':'该模型尚未验证可用'}));
   async function load(force=false){
@@ -38,9 +38,9 @@
     draft[period]=ref||null;
     sync();
   }
-  window.__Desktop_REPORT_WORKFLOW__=Object.freeze({load,save,select,options,inspect:()=>({saved,draft,dirty:dirty()})});
+  Memorive.reportWorkflow=Object.freeze({load,save,select,options,inspect:()=>({saved,draft,dirty:dirty()})});
   function init(){
-    window.__Desktop_SETTINGS_BRIDGE__?.registerSaveParticipant('report-workflow',{isDirty:dirty,validate,save,discard:()=>load(true),afterUnlock:render});
+    Memorive.settingsBridge?.registerSaveParticipant('report-workflow',{isDirty:dirty,validate,save,discard:()=>load(true),afterUnlock:render});
     document.querySelector('[data-category="workflow"]')?.addEventListener('click',()=>load().catch(()=>{}));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();

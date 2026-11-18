@@ -1,12 +1,12 @@
 /* The inbox page's calls to the desktop service (inbox.*): the item list and its detail, importing files (picker and
    drag and drop), dispatching items to processing, undo and redo, stars, deletion, and the preview of an item's file.
-   Publishes window.__Desktop_INBOX_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   Publishes Memorive.inboxBridge; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
    refresh() when the service reports a change. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-inbox-preview');
   if (!root) return;
-  const preview = window.DesktopPreview_inbox;
+  const preview = Memorive.frames.inbox;
   const METHODS = Object.freeze([
     'inbox.get_contract', 'inbox.import_paths', 'inbox.get_auto_run',
     'inbox.set_auto_run', 'inbox.retry_import', 'inbox.recover',
@@ -92,7 +92,7 @@
 
   const call = async (method, params = {}) => {
     sequence += 1;
-    const receipt = await window.__Desktop_SERVICE__.call(method, params);
+    const receipt = await Memorive.service.call(method, params);
     lastReceipt = {
       method,
       request_sequence: sequence,
@@ -253,7 +253,7 @@
     if (strong) strong.textContent = row.name;
     if (small) small.textContent = meta;
     if (status) {
-      if(window.__MEMORIVE_REVIEW_UI__)window.__MEMORIVE_REVIEW_UI__.renderInboxState(status,row);else status.textContent=state;
+      if(Memorive.review)Memorive.review.renderInboxState(status,row);else status.textContent=state;
     }
     if (star) {
       star.disabled = row.state === 'PROCESSING';
@@ -326,7 +326,7 @@
     name.append(strong, small);
     const stateCell = document.createElement('div');
     stateCell.className = 'desktop-inbox-state';
-    if(window.__MEMORIVE_REVIEW_UI__)window.__MEMORIVE_REVIEW_UI__.renderInboxState(stateCell,row);else stateCell.textContent=state;
+    if(Memorive.review)Memorive.review.renderInboxState(stateCell,row);else stateCell.textContent=state;
     const deleteCell = document.createElement('div');
     deleteCell.className = 'desktop-inbox-deletecell';
     if (row.delete_visible !== false && (
@@ -501,7 +501,7 @@
   const setInspectorDeleteItem = (item = null) => {
     if (inspectorDeleteItem?.item_id !== item?.item_id
         || inspectorDeleteItem?.job_id !== item?.job_id) {
-      window.__Desktop_UI_CONTROLS__?.cancelAction();
+      Memorive.controls?.cancelAction();
     }
     inspectorDeleteItem = item;
     const button = q('#inbox-delete-task');
@@ -513,7 +513,7 @@
     const item = inspectorDeleteItem;
     if (inspectorDeleteBusy || !item || selectedItemId() !== item.item_id) return;
     const key = 'inbox-delete:' + item.item_id + ':' + (item.job_id || 'unbound');
-    if (!window.__Desktop_UI_CONTROLS__?.confirmAction(button, key)) return;
+    if (!Memorive.controls?.confirmAction(button, key)) return;
     inspectorDeleteBusy = true;
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
@@ -648,7 +648,7 @@
   };
 
   const pdfEngine = async () => {
-    const engine = await (window.__Desktop_LOAD_PDFJS__ ? window.__Desktop_LOAD_PDFJS__() : window.__Desktop_PDFJS_READY__);
+    const engine = await (Memorive.loadPdfjs ? Memorive.loadPdfjs() : window.__Desktop_PDFJS_READY__);
     if (!engine || typeof engine.getDocument !== 'function' || !globalThis.pdfjsWorker?.WorkerMessageHandler) {
       throw new Error('PDF_RENDERER_NOT_READY');
     }
@@ -917,8 +917,8 @@
           : '已从收件箱移除，可在本次会话撤销。', card?.dataset.itemKind !== 'SESSION_REFINEMENT');
       } else if (target.id === 'inbox-open-session') {
         if (!selectedRefinementProjectionId) throw new Error('精炼任务缺少来源会话身份');
-        window.__Desktop_SESSION_NAV_TARGET__ = selectedRefinementProjectionId;
-        root.querySelector('.desktop-nav-item[data-page="会话管理"]')?.click();
+        Memorive.sessionNavTarget = selectedRefinementProjectionId;
+        root.querySelector('.desktop-nav-item[data-route="sessions"]')?.click();
         window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('desktop:open-session', {
           detail:{ local_projection_id:selectedRefinementProjectionId }
         })));
@@ -970,7 +970,7 @@
     return projection;
   };
 
-  window.__Desktop_INBOX_BRIDGE__ = Object.freeze({
+  Memorive.inboxBridge = Object.freeze({
     methods: METHODS,
     call,
     bootstrap,

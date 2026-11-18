@@ -1,5 +1,5 @@
 /* The node test row in the settings workflow panel: runs the model exam of the selected workflow node and shows its
-   progress, elapsed time and score. Publishes window.__Desktop_EXAM_PANEL__ for settings.js and external-sources.js. */
+   progress, elapsed time and score. Publishes Memorive.examPanel for settings.js and external-sources.js. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-settings-preview');
@@ -130,7 +130,7 @@
   });
   window.addEventListener('desktop:external-model-reference', event => references(event.detail));
   new MutationObserver(core).observe(q('#settings-node-test-score'), {childList:true,subtree:true,characterData:true});
-  window.__Desktop_EXAM_PANEL__ = Object.freeze({progress, confirmRun, references, core, clearReferences});
+  Memorive.examPanel = Object.freeze({progress, confirmRun, references, core, clearReferences});
   core();
 })();
 

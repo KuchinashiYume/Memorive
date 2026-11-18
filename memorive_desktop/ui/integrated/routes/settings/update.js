@@ -35,7 +35,7 @@
     baseMismatch:['当前文件与增量基线不同。','Current files do not match the delta baseline.','現在のファイルが差分の基準と一致しません。'],
     noDelta:['没有适合当前版本且更小的增量包。','No smaller delta matches this version.','このバージョンに対応する小さい差分がありません。']
   };
-  const language=()=>window.__Desktop_SETTINGS_I18N__?.language?.()||document.documentElement.lang||'zh-CN';
+  const language=()=>Memorive.settingsText?.language?.()||document.documentElement.lang||'zh-CN';
   const text=key=>(words[key]||words.failure)[{'en-US':1,'ja-JP':2}[language()]||0];
   // Reuse the existing settings list. No nested padded form stack.
   const section=panel, template=document.createElement('template');
@@ -55,7 +55,7 @@
   window.addEventListener('desktop:settings-mode-scope-changed',mode);
   let state={},requesting=false,timer=null;
   const query=selector=>section.querySelector(selector);
-  const call=(action,params={})=>window.__Desktop_SERVICE__.call('updates.'+action,params);
+  const call=(action,params={})=>Memorive.service.call('updates.'+action,params);
   function render(){
     section.querySelectorAll('[data-update-text]').forEach(node=>node.textContent=text(node.dataset.updateText));
     const update=state.update||{},stage=update.stage||update.state||'IDLE',error=state.error||update.error;

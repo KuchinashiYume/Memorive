@@ -1,9 +1,9 @@
 /* Help buttons of the settings page: the question-mark button next to a setting that opens its explanation, and its
-   placement. Publishes window.__Desktop_SETTINGS_CONTROLS__. */
+   placement. Publishes Memorive.settingsControls. */
 (() => {
   'use strict';
-  if(window.__Desktop_SETTINGS_CONTROLS__)return;
-  const t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
+  if(Memorive.settingsControls)return;
+  const t=s=>Memorive.app?.translate?.(s)||s;
   let active=null;
   function help(host,label,copy){
     const button=document.createElement('button');
@@ -103,6 +103,6 @@
     tick();
     changed();
   }
-  window.__Desktop_SETTINGS_CONTROLS__=Object.freeze({help,pendingRemoval});
+  Memorive.settingsControls=Object.freeze({help,pendingRemoval});
 })();
 

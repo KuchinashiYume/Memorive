@@ -1,18 +1,18 @@
 /* The research Q&A part of the settings page (#memo-settings-page): switching between its categories, and its model
-   and agent pickers. Publishes window.__MEMO_SETTINGS_R2__ (show, renderAgentOptions, renderModelOptions,
+   and agent pickers. Publishes Memorive.researchNavigation (show, renderAgentOptions, renderModelOptions,
    refreshModelPicker, inspect), through which routes/chat/workspace.js fills the pickers. What is chosen is saved
    by the research workspace's own actions. */
 (() => {
   'use strict';
   const page = document.getElementById('memo-settings-page');
-  if (!page || window.__MEMO_SETTINGS_R2__) return;
+  if (!page || Memorive.researchNavigation) return;
   const buttons = [...page.querySelectorAll('[data-memo-settings-category]')];
   const panels = [...page.querySelectorAll('[data-memo-settings-panel]')];
   const detail = document.getElementById('settings-primary');
   const modelSelect = page.querySelector('#memo-model');
   let current = 'models';
   let modelOptions = null;
-  const modelPicker = window.__Desktop_MODEL_PICKER__.bind({
+  const modelPicker = Memorive.modelPicker.bind({
     button: page.querySelector('#memo-adjust-model'),
     menu: page.querySelector('#memo-model-menu'),
     label: page.querySelector('#memo-current-model'),
@@ -23,7 +23,7 @@
     }
   });
   const agentSelect=page.querySelector('#memo-agent-model');
-  const agentPicker=window.__Desktop_MODEL_PICKER__.bind({button:page.querySelector('#memo-agent-model-adjust'),menu:page.querySelector('#memo-agent-model-menu'),label:page.querySelector('#memo-agent-model-label'),dot:page.querySelector('#memo-agent-model-dot'),onSelect:option=>{
+  const agentPicker=Memorive.modelPicker.bind({button:page.querySelector('#memo-agent-model-adjust'),menu:page.querySelector('#memo-agent-model-menu'),label:page.querySelector('#memo-agent-model-label'),dot:page.querySelector('#memo-agent-model-dot'),onSelect:option=>{
     agentSelect.value=option.profileRef||'';
     agentSelect.dispatchEvent(new Event('change',{bubbles:true}));
   }});
@@ -54,7 +54,7 @@
     current = name;
     modelPicker.setOpen(false);
     agentPicker.setOpen(false);
-    if (window.__MEMO_CONNECTIONS__?.inspect().opened) window.__MEMO_CONNECTIONS__.close();
+    if (Memorive.researchConnections?.inspect().opened) Memorive.researchConnections.close();
     buttons.forEach(button => {
       if (button.dataset.memoSettingsCategory === name) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
@@ -89,12 +89,12 @@
     if (event.detail.category !== 'research-workspace') {
       modelPicker.setOpen(false);
       agentPicker.setOpen(false);
-      if (window.__MEMO_CONNECTIONS__?.inspect().opened) window.__MEMO_CONNECTIONS__.close();
+      if (Memorive.researchConnections?.inspect().opened) Memorive.researchConnections.close();
     }
   });
   show(current);
   refreshModelPicker();
-  window.__MEMO_SETTINGS_R2__ = {
+  Memorive.researchNavigation = {
     show,
     renderAgentOptions,
     renderModelOptions,

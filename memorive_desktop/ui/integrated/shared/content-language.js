@@ -26,5 +26,5 @@
   }
   return result;
  };
- window.__MemoContentLanguage__=Object.freeze({project,catalogVersion:'MemoMessages-v1'});
+ Memorive.contentLanguage=Object.freeze({project,catalogVersion:'MemoMessages-v1'});
 })();

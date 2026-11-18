@@ -20,7 +20,7 @@ Do not edit the two pages themselves: the build stops when a page differs from i
 
 - `page.html` is the page with an include line in place of each style, script and route section. It fixes the order: styles first, then the nine route sections, then the scripts. The order matters, because later rules and scripts build on earlier ones.
 - `routes/<route>/` holds what belongs to one route of the window: `markup.html` (the route's section of the page), and usually `view.js` (what it shows) and `bridge.js` (its calls to the desktop service). The routes are settings, inbox, tasks (current task), messages, sessions, library, worklog (work log), leaderboard (model rankings) and chat (research Q&A).
-- `shared/route-base.css` holds the base styles of all nine routes (the leaderboard's root is `#desktop-partleaderboard-preview`, research Q&A's `#desktop-partchat-preview`). A rule that several of them share is written once inside `:is(#desktop-<route>-preview, ...) { ... }`, where `&` stands for the route's root; a rule that only one route has keeps its `#desktop-<route>-preview` prefix. For each route its rules stay in their order. `shared/toolbar-icons.css` holds the toolbar icon buttons of every route.
+- `shared/route-base.css` holds the base styles of all nine routes (the leaderboard's root is `#desktop-leaderboard-preview`, research Q&A's `#desktop-chat-preview`). A rule that several of them share is written once inside `:is(#desktop-<route>-preview, ...) { ... }`, where `&` stands for the route's root; a rule that only one route has keeps its `#desktop-<route>-preview` prefix. For each route its rules stay in their order. `shared/toolbar-icons.css` holds the toolbar icon buttons of every route.
 - Every route section carries a copy of the window frame: the icons, the global bar, the navigation and the bottom (accounting) panel, around the route's own page and right panel. The frame's markup is written once under `shared/frame/`, and each `markup.html` includes those parts (an included file may include others). `shared/window-frame.js` gives every copy the same behaviour — panels, resizers, shortcuts, tooltips, switches — and holds the one thing that differs by route, the size rule of the right panel.
 - `shared/` also holds what several routes use: the application shell (`app.js`), window chrome, controls, typography, the review and research panels.
 
@@ -36,21 +36,22 @@ Every source file starts with a comment that says what it is for and who uses it
 
 1. Add `routes/<route>/markup.html`. Copy the section of a route that looks like yours: `<section class="desktop-route-surface" data-desktop-route="<route>" hidden>` around the route's root `<div id="desktop-<component>-preview" class="desktop-page-root">`, which includes the frame parts from `shared/frame/`.
 2. Add the include line for the markup to `page.html`, after the other route sections, and the include lines for its scripts where they belong in the order of scripts.
-3. Add the route to `routes` at the top of `shared/app.js` (its key, its label and its component, the folder name), a button to `shared/frame/navigation.html` whose `data-page` is the label, and the component with its right-panel size rule (one of `RIGHT_PANEL_RULES`) to `ROUTES` in `shared/window-frame.js`.
-4. If the route reads data, give it a `bridge.js` that calls the desktop service (below) and publishes `window.__Desktop_<ROUTE>_BRIDGE__` with at least `refresh()` and `inspect()`.
+3. Add the route to `routes` at the top of `shared/app.js` (its key and its component, the folder name), its names to `shared/frame/messages.js` (`frame.nav.<route>` on the button, `frame.route.<route>` in the top bar and the window title), a button to `shared/frame/navigation.html` whose `data-route` is the route's key, and the component with its right-panel size rule (one of `RIGHT_PANEL_RULES`) to `ROUTES` in `shared/window-frame.js`.
+4. If the route reads data, give it a `bridge.js` that calls the desktop service (below) and publishes `Memorive.<route>Bridge` with at least `refresh()` and `inspect()`.
 
-`shared/window-frame.js` publishes each route's frame as `window.DesktopPreview_<component>` (panels, resizers, shortcuts, tooltips); route scripts find their root and panels through it.
+`shared/window-frame.js` publishes each route's frame as `Memorive.frames.<component>` (panels, resizers, shortcuts, tooltips); route scripts find their root and panels through it.
 
 ### A setting
 
 The settings page has a category list on the left (`<button class="desktop-settings-category" data-category="...">` in `routes/settings/markup.html`) and one panel per category (`data-panel="..."`). `routes/settings/model-picker.js` switches between them.
 
 A panel with much code of its own gets its own script next to `settings.js`, as the browser companion
-(`browser-companion.js`) and the browser sites (`browser-sites.js`) have. A panel that saves its own data
-registers with the page's Save and Revert buttons:
+(`browser-companion.js`), the browser sites (`browser-sites.js`) and the reset of a category to its defaults
+(`scoped-reset.js`) have; the rules for model services that the forms and the developer editor share are in
+`model-rules.js`. A panel that saves its own data registers with the page's Save and Revert buttons:
 
 ```js
-window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('my-panel', {
+Memorive.settingsBridge.registerSaveParticipant('my-panel', {
   isDirty: () => ...,          // true while the panel has unsaved changes
   validate: () => ...,         // optional; false keeps Save disabled
   save: async () => { ... },   // write the draft, then show the saved state
@@ -62,17 +63,32 @@ window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('my-panel', {
 
 ### A dialog or a button that confirms
 
-Copy an existing one so that it looks the same: the close dialog in `shared/window-chrome.js` (`desktop-close-dialog`), the project materials dialog in `routes/chat/markup.html` (`memo-dialog`), or the filter popover of the work log. For a button that asks "click again to confirm", use `window.__Desktop_UI_CONTROLS__.confirmAction(button, key)` from `shared/controls.js`, as the inbox and the current-task page do.
+Copy an existing one so that it looks the same: the close dialog in `shared/window-chrome.js` (`desktop-close-dialog`), the project materials dialog in `routes/chat/markup.html` (`memo-dialog`), or the filter popover of the work log. For a button that asks "click again to confirm", use `Memorive.controls.confirmAction(button, key)` from `shared/controls.js`, as the inbox and the current-task page do.
 
 Compare a new dialog with an existing one in the running window (fonts, sizes, colours, spacing) before you commit it.
 
 ### Text and translations
 
-Write the page's text in Chinese, in the markup or in the script. When the language is English or Japanese, `shared/app.js` translates every text node and the `title`, `aria-label`, `aria-description`, `placeholder` and `data-desktop-tip` attributes, except inside `[data-desktop-no-translate]` and user content such as messages and answers:
+The page shows its text in Chinese, English or Japanese. Text gets there in one of two ways; give new text a key.
 
-- `translations` in `shared/app.js` maps each Chinese text to its English and Japanese text. Add a line for every new text.
+**Messages with a key.** The window frame uses them: the navigation, the top bar, the bottom accounting panel, the window buttons and the close dialog. `shared/i18n.js` (`Memorive.i18n`) holds every message in the three languages, one row per key, in the order zh-CN, en-US, ja-JP:
+
+```js
+'accounting.sync.synced': ['已同步 · {time}', 'Synced · {time}', '同期済み · {time}'],
+```
+
+- The frame's messages are in `shared/frame/messages.js`. A route that moves to keys gets its own `routes/<route>/messages.js`, included in `page.html` after `shared/frame/messages.js`. Keys start with the part they belong to (`frame.`, `window.`, `accounting.`, the route's name).
+- In markup, `data-i18n="key"` sets the element's text, and `data-i18n-aria-label`, `data-i18n-aria-description`, `data-i18n-aria-valuetext`, `data-i18n-title`, `data-i18n-tip` (for `data-desktop-tip`), `data-i18n-placeholder` and `data-i18n-label` set an attribute. Keep the Chinese text in the markup as well: `<span data-i18n="frame.nav.inbox">收件箱</span>`.
+- In a script, `Memorive.i18n.set(element, key, values, attribute)` writes the same attributes, so the text changes with the language. `Memorive.i18n.text(key, values)` returns the text for something shown once, such as a tooltip or a screen-reader announcement.
+- Values are named: `{ time: '12:30' }`. A value `{ key, values }` is a message itself and follows the language too, as the route name in `'Memorive {route}'` does.
+- A keyed text or attribute belongs to its key, so no other script should write it. To take it over, call `set(element, null, null, attribute)` first (`routes/sessions/view.js` does that for the right panel button).
+- `shared/app.js` shows every keyed element again when the language changes and when an element is added to the page.
+
+**Translation by the Chinese wording.** The routes still work this way. When the language is English or Japanese, `shared/app.js` translates every text node and the `title`, `aria-label`, `aria-description`, `placeholder` and `data-desktop-tip` attributes that have no key, except inside `[data-desktop-no-translate]` and user content such as messages and answers:
+
+- `translations` in `shared/app.js` maps each Chinese text to its English and Japanese text.
 - Text that contains a number or a name is matched by a pattern in `translated()` in the same file.
-- Text that a script sets later is translated as it appears; a script that needs the translated string itself calls `window.__Desktop_INTEGRATED_APP__.translate(text)`.
+- Text that a script sets later is translated as it appears; a script that needs the translated string itself calls `Memorive.app.translate(text)`.
 
 Check every new text in all three languages.
 
@@ -91,11 +107,11 @@ The window runs the page in pywebview. `memorive/desktop/api/` (in `source/`) ho
 Most calls go through one function, `shared/service.js`:
 
 ```js
-const result = await window.__Desktop_SERVICE__.call('library.list_artifacts', {});
+const result = await Memorive.service.call('library.list_artifacts', {});
 ```
 
 It sends `window.pywebview.api.call(method, params)`; while a route waits for its first list, it shows the route's
-loading placeholder (`DesktopDecorations.trackCall` in `shared/decorations.js`). Before pywebview is ready the
+loading placeholder (`Memorive.decorations.trackCall` in `shared/decorations.js`). Before pywebview is ready the
 promise is rejected with `DESKTOP_SERVICE_NOT_CONNECTED`. A route bridge wraps it only to add what is its own, such
 as a request number or a receipt event.
 
@@ -126,12 +142,13 @@ Python runs JavaScript in the page with `evaluate_js`. It uses these names, so k
 
 | Name in the page | Published by | Used from Python |
 | --- | --- | --- |
-| `__Desktop_INTEGRATED_APP__`: `activate(route)`, `inspect()`, `applyPreferences(preferences)` | `shared/app.js` | `memorive/desktop/api/notifications.py` and `product_api.py`, `memorive/desktop/assistant/desktop.py`, `memorive/documents/data_review/health.py` |
-| `__Desktop_INBOX_BRIDGE__`, `__Desktop_CURRENT_TASK_BRIDGE__`, `__Desktop_MESSAGES_BRIDGE__`, `__Desktop_LIBRARY_BRIDGE__`, `__Desktop_WORK_LOG_BRIDGE__`: `refresh()` | `routes/<route>/bridge.js` | `memorive/desktop/api/page_events.py`, after a session refinement changes |
-| `__Desktop_WINDOW_CHROME__.requestClose(askAlways)` | `shared/window-chrome.js` | `product/desktop/window_chrome.py`, when the window is closed |
+| `Memorive.app`: `activate(route)`, `inspect()`, `applyPreferences(preferences)` | `shared/app.js` | `memorive/desktop/api/notifications.py` and `product_api.py`, `memorive/desktop/assistant/desktop.py`, `memorive/documents/data_review/health.py` |
+| `Memorive.inboxBridge`, `Memorive.currentTaskBridge`, `Memorive.messagesBridge`, `Memorive.libraryBridge`, `Memorive.workLogBridge`: `refresh()` | `routes/<route>/bridge.js` | `memorive/desktop/api/page_events.py`, after a session refinement changes |
+| `Memorive.windowChrome.requestClose(askAlways)` | `shared/window-chrome.js` | `product/desktop/window_chrome.py`, when the window is closed |
+| `Memorive.inboxBridge.reportNativeDropFailure(reason)`, `Memorive.chat.importFiles(paths)` and `Memorive.chat.reportImportFailure(reason)`, and the elements `#desktop-inbox-preview` and `#desktop-chat-preview` that take dropped files | `routes/inbox/bridge.js`, `routes/chat/workspace.js` | `product/desktop/app.py` (`attach_inbox_drop_handler`), when files are dropped on the window |
 | `__Desktop_ASSISTANT_RUNTIME__`: `applyPresentation(...)`, `inspect()`, `setAutoRefreshEnabled(on)` | `assistant/runtime-bridge.js` | `memorive/desktop/assistant/desktop.py`, `product/desktop/console_expressions.py` |
-| `DesktopPreview_settings.root` | `shared/window-frame.js` | `memorive/desktop/assistant/desktop.py`, to open a settings category |
-| `__MEMORIVE_REVIEW_UI__` and the bridges above | `shared/review.js` and the bridges | `memorive/documents/data_review/health.py`, the window's health check |
+| `Memorive.frames.settings.root` | `shared/window-frame.js` | `memorive/desktop/assistant/desktop.py`, to open a settings category |
+| `Memorive.review` and the bridges above | `shared/review.js` and the bridges | `memorive/documents/data_review/health.py`, the window's health check |
 
 Python also sends two events to the page:
 
@@ -142,11 +159,11 @@ Python also sends two events to the page:
 
 and reads a few things straight from the page: the `[data-console-expression]` elements and the `desktop-hide-expressions` class (`product/desktop/console_expressions.py`), the settings category buttons (`[data-category="..."]`, `assistant/desktop.py`) and the data-review step of the workflow list (`#settings-flow-list [data-step="data-review"]`, `data_review/health.py`).
 
-`product/desktop/app.py` has a self-test that calls many more of the page's methods (`inspect()` of every bridge, the settings bridge's `call`, `refresh`, `developerDocument` and others, `__MEMO_WORKSPACE__.importFiles`). Run the full test suite after renaming anything a bridge publishes.
+`product/desktop/app.py` has a self-test that calls many more of the page's methods (`inspect()` of every bridge, the settings bridge's `call`, `refresh`, `developerDocument` and others, `Memorive.chat.importFiles`). Run the full test suite after renaming anything a bridge publishes.
 
 ### Between the page's scripts
 
-Scripts talk to each other through the globals they publish (each file's header comment names them) and through events on `window`:
+Scripts talk to each other through what they publish in `window.Memorive` (each file's header comment names it) and through events on `window`:
 
 | Event | Sent by | Listened to by |
 | --- | --- | --- |
@@ -186,5 +203,5 @@ To see what a change does to the page itself, run the page check before and afte
 ## Conventions
 
 - Keep the window frame in `shared/frame/` and `shared/window-frame.js`; a route only adds what is its own.
-- Name a global that other scripts or Python use `window.__Desktop_<NAME>__` and freeze it (`Object.freeze`). Mention it in the file's header comment.
-- Comments are in English. Text shown to the user is in Chinese in the source and translated as above.
+- Publish what other scripts or Python use as a member of `window.Memorive` (`shared/namespace.js` creates it, as the first script), in lower camel case, and freeze it (`Object.freeze`). Mention it in the file's header comment. Python reaches it as `window.Memorive?.<name>`, since it may run before the page's scripts.
+- Comments are in English. Text shown to the user is written in Chinese in the source; new text gets a key (see "Text and translations").

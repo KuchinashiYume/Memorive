@@ -28,13 +28,13 @@
     const revision = Number(detail.revision || 0);
     if (revision && revision <= lastCoreRevision) return coreRefreshPromise || Promise.resolve([]);
     if (revision) lastCoreRevision = revision;
-    window.__Desktop_WORK_LOG_BRIDGE__?.notifyPending?.(detail);
+    Memorive.workLogBridge?.notifyPending?.(detail);
     if (coreRefreshPromise) return coreRefreshPromise;
     coreRefreshPromise = Promise.allSettled([
-      window.__Desktop_CURRENT_TASK_BRIDGE__?.refresh?.(),
-      window.__Desktop_INBOX_BRIDGE__?.refresh?.(),
-      window.__Desktop_MESSAGES_BRIDGE__?.refresh?.(),
-      window.__Desktop_LIBRARY_BRIDGE__?.refresh?.()
+      Memorive.currentTaskBridge?.refresh?.(),
+      Memorive.inboxBridge?.refresh?.(),
+      Memorive.messagesBridge?.refresh?.(),
+      Memorive.libraryBridge?.refresh?.()
     ]).finally(() => { coreRefreshPromise = null; });
     return coreRefreshPromise;
   };
@@ -62,5 +62,5 @@
     }).catch(() => {});
   }, 15000);
 
-  window.__Desktop_PRODUCT_BRIDGE__ = { dispatch, refreshCoreSurfaces };
+  Memorive.productBridge = { dispatch, refreshCoreSurfaces };
 })();

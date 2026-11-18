@@ -1,6 +1,6 @@
 /* Shared desktop-layout controls. No business calls, permissions or persistence. */
 (() => {
-  if (window.__Desktop_UI_CONTROLS__) return;
+  if (Memorive.controls) return;
   const iconSelector='.icon-button,.desktop-settings-stepper button,.desktop-tasks-stepper button,.desktop-settings-disclosure-icon,.desktop-settings-category-chevron,.desktop-settings-api-chevron,.desktop-settings-cli-add-chevron';
   const paths={back:'m15 6-6 6 6 6',right:'m9 6 6 6-6 6',down:'m6 9 6 6 6-6',up:'m6 15 6-6 6 6',close:'m6 6 12 12M6 18 18 6',plus:'M12 5v14M5 12h14',minus:'M5 12h14',refresh:'M20 6v5h-5M4 18v-5h5M18.4 9A7 7 0 0 0 6.2 6.2L4 8M5.6 15a7 7 0 0 0 12.2 2.8L20 16'};
   const keys={'‹':'back','<':'back','›':'right','>':'right','⌄':'down','⌃':'up','^':'up','×':'close','＋':'plus','+':'plus','－':'minus','−':'minus','⟳':'refresh','↻':'refresh'};
@@ -46,9 +46,9 @@
       const root=n.closest('.desktop-page-root');
       // Route navigation and batch checkboxes are independent of detail selection.
       const views={
-        'desktop-messages-preview':window.__Desktop_MESSAGES_VIEW__,
-        'desktop-library-preview':window.__Desktop_LIBRARY_VIEW__,
-        'desktop-worklog-preview':window.__Desktop_WORK_LOG_VIEW__
+        'desktop-messages-preview':Memorive.messagesView,
+        'desktop-library-preview':Memorive.libraryView,
+        'desktop-worklog-preview':Memorive.workLogView
       };
       views[root?.id]?.closeDetail?.(false);
       if(root?.id==='desktop-inbox-preview'){
@@ -106,7 +106,7 @@
       }
       const seconds=Math.ceil((row.deadline-performance.now())/1000);
       const language=document.documentElement.lang||'zh-CN';
-      const label=row.confirmationLabel?(window.__Desktop_INTEGRATED_APP__?.translate?.(row.confirmationLabel)||row.confirmationLabel):(language.startsWith('en')?'Click again':language.startsWith('ja')?'もう一度クリック':'再次点击确认');
+      const label=row.confirmationLabel?(Memorive.app?.translate?.(row.confirmationLabel)||row.confirmationLabel):(language.startsWith('en')?'Click again':language.startsWith('ja')?'もう一度クリック':'再次点击确认');
       button.textContent=label+' · '+seconds+'s';
     };
     row.timer=setInterval(tick,100);
@@ -118,9 +118,9 @@
   document.addEventListener('click',e=>{
     if(pendingRestart&&!pendingRestart.button.contains(e.target))cancelRestart();
   },true);
-  window.__Desktop_UI_CONTROLS__=Object.freeze({icons,busy,createIcon,confirmRestart,cancelRestart,confirmAction:confirmRestart,cancelAction:cancelRestart});
+  Memorive.controls=Object.freeze({icons,busy,createIcon,confirmRestart,cancelRestart,confirmAction:confirmRestart,cancelAction:cancelRestart});
   function init(){
-    window.__Desktop_SETTINGS_ICONS__?.apply();
+    Memorive.settingsIcons?.apply();
     icons(document);
     document.querySelectorAll(panelSelector).forEach(panel);
     new MutationObserver(records=>{

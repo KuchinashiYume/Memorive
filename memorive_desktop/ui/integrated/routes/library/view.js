@@ -1,8 +1,8 @@
 /* Draws the library page from what bridge.js loaded: the paper cards, the filters and the selected paper's files.
-   Publishes window.__Desktop_LIBRARY_VIEW__ for bridge.js. */
+   Publishes Memorive.libraryView for bridge.js. */
   (() => {
     const root = document.getElementById('desktop-library-preview');
-    const preview = window.DesktopPreview_library;
+    const preview = Memorive.frames.library;
     if (!root || !preview) return;
     const q = (selector) => root.querySelector(selector);
     const qa = (selector) => [...root.querySelectorAll(selector)];
@@ -269,7 +269,7 @@
         const group=document.createElement('span');
         group.className='paper-review-library-report';
         group.append(button);
-        const badge=window.__MEMORIVE_REVIEW_UI__?.reportButton(value.literature_review);
+        const badge=Memorive.review?.reportButton(value.literature_review);
         if(badge)group.append(badge);
         return group;
       }
@@ -305,7 +305,7 @@
         q('#library-files-section').before(researchSection);
       }
       researchSection.hidden = !isResearch;
-      if (isResearch) window.__Desktop_RESEARCH__?.renderResult(card.dataset.researchRunId,researchSection)
+      if (isResearch) Memorive.research?.renderResult(card.dataset.researchRunId,researchSection)
         .catch(()=>{researchSection.textContent='资料读取失败，请刷新后重试';});
 
       const sourceContainer = q('#library-source-file');
@@ -502,7 +502,7 @@
     cards().forEach((card) => card.setAttribute('aria-expanded', 'false'));
     renderFilterMenu();
     applyFilters();
-    window.__Desktop_LIBRARY_VIEW__ = Object.freeze({
+    Memorive.libraryView = Object.freeze({
       renderRows,
       getQuery,
       setMode:setLibraryMode,

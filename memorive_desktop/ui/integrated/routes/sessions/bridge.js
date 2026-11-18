@@ -1,6 +1,6 @@
 /* The session management page's calls to the desktop service (sessions.*): the saved AI chat sessions, capturing them
    from browsers (with the browser companion), refining them, and deleting local copies. Publishes
-   window.__Desktop_SESSIONS_BRIDGE__ for view.js. */
+   Memorive.sessionsBridge for view.js. */
 (() => {
   'use strict';
 
@@ -30,9 +30,9 @@
     loading:false
   };
 
-  const page = () => window.__Desktop_SESSION_PAGE__;
+  const page = () => Memorive.sessionsView;
   const nativeCall = async (method, params = {}) => {
-    const result = await window.__Desktop_SERVICE__.call(method, params);
+    const result = await Memorive.service.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:sessions-receipt', { detail:{ method, result } }));
     return result;
@@ -287,7 +287,7 @@
       if (!page()?.ensureRecord(projection?.session)) {
         throw new Error('SESSION_DETAIL_PROJECTION_INVALID');
       }
-      window.__Desktop_SESSION_NAV_TARGET__ = '';
+      Memorive.sessionNavTarget = '';
       page()?.focusProjection(projectionId);
       page()?.renderDetail(projection);
       return projection;
@@ -512,7 +512,7 @@
     return watcher;
   };
 
-  window.__Desktop_SESSIONS_BRIDGE__ = Object.freeze({
+  Memorive.sessionsBridge = Object.freeze({
     bootstrap, query, loadNextPage, loadDetail, openProjection, refresh, refreshLocalSessions, refine, deleteLocal, bulkDelete,
     importBrowserSessionsFile, captureCurrentPage, browserCompanionStatus, installBrowserCompanion, call:nativeCall,
     inspect:() => ({

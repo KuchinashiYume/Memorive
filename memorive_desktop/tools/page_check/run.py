@@ -12,7 +12,9 @@
 
 The page is opened from product/desktop/bundle_integrated.html, so run tools/build_pages.py after changing ui/.
 Every user folder points at a new throw-away folder, and the network is limited to this computer, as in
-tests/run_tests.py. The output folder must not exist yet. The throw-away folder is removed after a good run.
+tests/run_tests.py. The output folder must not exist yet. After a good run the throw-away folder is removed, except
+files that other programs still hold open there (an input method or a crash reporter that hooks into every
+window writes into the redirected AppData); run.py then names the folder, and it can be deleted later.
 
 Then compare two runs:
     python memorive_desktop/tools/page_check/compare.py <run before> <run after> --report <file.md>
@@ -84,6 +86,8 @@ def main() -> int:
             print(run[key][-1500:])
     if code == 0 and run.get("status") == "DONE":
         shutil.rmtree(sandbox, ignore_errors=True)
+        if sandbox.exists():
+            print(f"throw-away folder left with files other programs still hold open: {sandbox}")
         return 0
     print(f"throw-away folder kept: {sandbox}")
     return 1

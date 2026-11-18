@@ -1,6 +1,6 @@
 /* The messages page's calls to the desktop service (messages.*): the message list, reading and archiving, bulk actions,
    and following a message to the page it is about. Refreshes every 5 seconds while the page is open. Publishes
-   window.__Desktop_MESSAGES_BRIDGE__; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
+   Memorive.messagesBridge; shared/product-bridge.js and memorive/desktop/api/page_events.py call its
    refresh(). */
 (() => {
   'use strict';
@@ -39,7 +39,7 @@
         status: 'BROWSER_TEST_NO_NATIVE_TRANSPORT'
       };
     }
-    const result = await window.__Desktop_SERVICE__.call(method, params);
+    const result = await Memorive.service.call(method, params);
     receiptCount += 1;
     window.dispatchEvent(new CustomEvent('desktop:messages-receipt', { detail: { method, result } }));
     return result;
@@ -47,7 +47,7 @@
 
   const bindRows = (projection) => {
     const rows = Array.isArray(projection?.records) ? projection.records : [];
-    window.__Desktop_MESSAGES_VIEW__?.renderRows(rows);
+    Memorive.messagesView?.renderRows(rows);
     bindings.clear();
     const byId = new Map(rows.map((row) => [row.message_id, row]));
     document.querySelectorAll('.desktop-messages-card[data-message-id]').forEach((card) => {
@@ -56,10 +56,10 @@
       bindings.set(row.message_id, { card, record: row });
     });
     if (selectedMessageId && bindings.has(selectedMessageId)) {
-      window.__Desktop_MESSAGES_VIEW__?.openDetailById(selectedMessageId);
+      Memorive.messagesView?.openDetailById(selectedMessageId);
     } else if (selectedMessageId) {
       selectedMessageId = null;
-      window.__Desktop_MESSAGES_VIEW__?.closeDetail?.();
+      Memorive.messagesView?.closeDetail?.();
     }
     return rows;
   };
@@ -127,11 +127,11 @@
       ...(nodeId ? { node_id:nodeId } : {})
     });
     if (receipt?.research_run_id) {
-      await window.__Desktop_RESEARCH__?.openResult(receipt.research_run_id);
+      await Memorive.research?.openResult(receipt.research_run_id);
       return receipt;
     }
     if(receipt?.research_task_id){
-      await window.__Desktop_RESEARCH__?.openTask(receipt.research_task_id);
+      await Memorive.research?.openTask(receipt.research_task_id);
       return receipt;
     }
     if (receipt?.status !== 'PASS') {
@@ -142,15 +142,15 @@
       return receipt;
     }
     const route = receipt.route;
-    if (window.__Desktop_INTEGRATED_APP__?.activate) {
-      window.__Desktop_INTEGRATED_APP__.activate(route);
+    if (Memorive.app?.activate) {
+      Memorive.app.activate(route);
     } else {
-      await window.__Desktop_PRODUCT_BRIDGE__?.dispatch(
+      await Memorive.productBridge?.dispatch(
         'navigation.select', { route }, 'messages-target'
       );
     }
     if (route === 'current-task') {
-      const currentTaskBridge = window.__Desktop_CURRENT_TASK_BRIDGE__;
+      const currentTaskBridge = Memorive.currentTaskBridge;
       if (!currentTaskBridge?.openProductionRun) {
         const unavailable = { ...receipt, status:'CURRENT_TASK_UI_UNAVAILABLE', inspector_open:false };
         window.dispatchEvent(new CustomEvent('desktop:messages-navigation-result', {
@@ -189,7 +189,7 @@
     const messageId = messageIdForCard(card);
 
     if (card && target.closest('.desktop-messages-copy')) {
-      if (messageId) window.__Desktop_MESSAGES_VIEW__?.openDetailById(messageId);
+      if (messageId) Memorive.messagesView?.openDetailById(messageId);
       if (selectedMessageId === messageId) return;
       selectedMessageId = messageId;
       if (messageId) void nativeCall('messages.open_detail', { message_id: messageId }).then(refresh);
@@ -227,7 +227,7 @@
     }
     if (target.closest('#messages-refresh')) {
       selectedMessageId = null;
-      void window.__Desktop_UI_CONTROLS__.busy(target.closest('#messages-refresh'),()=>nativeCall('messages.refresh_archive', {}).then(refresh));
+      void Memorive.controls.busy(target.closest('#messages-refresh'),()=>nativeCall('messages.refresh_archive', {}).then(refresh));
       return;
     }
     if (target.closest('#messages-batch-read')) {
@@ -248,7 +248,7 @@
     }
     if (target.closest('#messages-close')) {
       selectedMessageId = null;
-      window.__Desktop_MESSAGES_VIEW__?.closeDetail?.();
+      Memorive.messagesView?.closeDetail?.();
       void nativeCall('messages.close_detail', {});
       return;
     }
@@ -281,7 +281,7 @@
     }
   }, 5000);
 
-  window.__Desktop_MESSAGES_BRIDGE__ = Object.freeze({
+  Memorive.messagesBridge = Object.freeze({
     bootstrap,
     refresh,
     call: nativeCall,

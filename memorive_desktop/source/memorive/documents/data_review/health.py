@@ -53,13 +53,13 @@ def main(root):
             try:
                 deadline=time.monotonic()+45
                 while time.monotonic()<deadline:
-                    value=window.evaluate_js("({ready:!!window.__MEMORIVE_REVIEW_UI__&&!!window.pywebview?.api?.call,data:!!document.querySelector('#settings-flow-list [data-step=\"data-review\"]'),logic:!!document.querySelector('#settings-flow-list [data-step=\"logic-review\"]')})")
+                    value=window.evaluate_js("({ready:!!window.Memorive?.review&&!!window.pywebview?.api?.call,data:!!document.querySelector('#settings-flow-list [data-step=\"data-review\"]'),logic:!!document.querySelector('#settings-flow-list [data-step=\"logic-review\"]')})")
                     if value and value.get('ready'):break
                     time.sleep(.2)
                 assert value and value['ready'] and value['data'] and value['logic'],value
                 window.evaluate_js("""window.__NATIVE_HEALTH__={status:'RUNNING'};(async()=>{
-                    const pages=[['settings','__Desktop_SETTINGS_BRIDGE__'],['inbox','__Desktop_INBOX_BRIDGE__'],['current-task','__Desktop_CURRENT_TASK_BRIDGE__'],['library','__Desktop_LIBRARY_BRIDGE__']];
-                    for(const [route,bridge] of pages){window.__Desktop_INTEGRATED_APP__.activate(route);await window[bridge].bootstrap();}
+                    const pages=[['settings','settingsBridge'],['inbox','inboxBridge'],['current-task','currentTaskBridge'],['library','libraryBridge']];
+                    for(const [route,bridge] of pages){window.Memorive?.app.activate(route);await window.Memorive[bridge].bootstrap();}
                     const frame=await window.pywebview.api.get_window_state();
                     window.__NATIVE_HEALTH__={status:'PASS',pages:pages.map(p=>p[0]),frame};
                 })().catch(error=>{window.__NATIVE_HEALTH__={status:'FAIL',error:String(error?.stack||error)};});void 0;""")

@@ -1,8 +1,8 @@
 /* Local developer clients reuse the settings save, controls and disclosures. */
 (() => {
  'use strict';
- const q=s=>document.querySelector(s),t=s=>window.__Desktop_INTEGRATED_APP__?.translate?.(s)||s;
- const call=(m,p={})=>window.__Desktop_SERVICE__.call(m,p),
+ const q=s=>document.querySelector(s),t=s=>Memorive.app?.translate?.(s)||s;
+ const call=(m,p={})=>Memorive.service.call(m,p),
    el=(tag,text,cls)=>{
      const n=document.createElement(tag);
      if(text!==null)n.textContent=t(text);
@@ -12,7 +12,7 @@
  const scopes={read:'读取与检索',events:'读取事件',import:'导入资料',draft:'提交知识草稿',export:'导出结果',writeback:'回写笔记',automation:'提交自动化任务',model:'允许模型调用'};
  const states={UNAVAILABLE:'历史记录已移除',PAUSED:'已暂停',CANCELLING:'正在取消',QUEUED:'排队中',RUNNING:'执行中',DISPATCHED:'已交给处理流程',COMPLETE:'已完成',ERROR:'失败',CANCELLED:'已取消',INTERRUPTED:'已中断'};
  let data=null,drafts=new Map(),editing=null,automation=null,autoDirty=false,loading=false;
- const dirty=()=>drafts.size>0||autoDirty,sync=()=>window.__Desktop_SETTINGS_BRIDGE__?.syncSaveState();
+ const dirty=()=>drafts.size>0||autoDirty,sync=()=>Memorive.settingsBridge?.syncSaveState();
  function status(text,error=false,scope='clients'){
    const n=q(scope==='clients'?'#memo-dev-status':'#memo-auto-status');
    n.textContent=t(text);
@@ -180,18 +180,18 @@
    sync();
  }
  const openClients=()=>{
-   window.__Desktop_INTEGRATED_APP__.activate('settings');
+   Memorive.app.activate('settings');
    q('#memo-settings-category').click();
    q('[data-memo-settings-category=agent]').click();
    q('#memo-agent-config-details').open=true;
  };
  const openAutomation=()=>{
-   window.__Desktop_INTEGRATED_APP__.activate('settings');
+   Memorive.app.activate('settings');
    q('[data-category=behavior]').click();
    q('#memo-automation-details').open=true;
  };
  function init(){
-  window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('developer-access',{isDirty:dirty,validate:valid,save,discard});
+  Memorive.settingsBridge.registerSaveParticipant('developer-access',{isDirty:dirty,validate:valid,save,discard});
   q('#memo-dev-add').onclick=()=>editClient();
   q('#memo-dev-cancel').onclick=()=>{
     drafts.delete(editing);
@@ -215,11 +215,11 @@
     autoDirty=true;
     sync();
   };
-  q('#memo-auto-refresh').onclick=()=>window.__Desktop_UI_CONTROLS__.busy(q('#memo-auto-refresh'),async()=>{try{
+  q('#memo-auto-refresh').onclick=()=>Memorive.controls.busy(q('#memo-auto-refresh'),async()=>{try{
     await load();
     status('',false,'automation');
   }catch(e){fail(e,'automation');}});
-  q('#memo-dev-refresh').onclick=()=>window.__Desktop_UI_CONTROLS__.busy(q('#memo-dev-refresh'),load).catch(fail);
+  q('#memo-dev-refresh').onclick=()=>Memorive.controls.busy(q('#memo-dev-refresh'),load).catch(fail);
   q('#memo-api-sdk').onclick=()=>window.pywebview.api.open_developer_sdk().catch(fail);
   q('#memo-api-clients-link').onclick=openClients;
   q('#memo-api-automation-link').onclick=openAutomation;
@@ -233,6 +233,6 @@
   else window.addEventListener('pywebviewready',()=>load().catch(fail),{once:true});
  }
  init();   // settings.js, loaded earlier, has published its bridge; the panel's markup is in the page
- window.__MEMO_DEVELOPER__=Object.freeze({load,save,discard,openClients,openAutomation,inspect:()=>({loaded:!!data,dirty:dirty(),editing,clients:data?.clients.length||0,api_version:data?.api_version})});
+ Memorive.developerClients=Object.freeze({load,save,discard,openClients,openAutomation,inspect:()=>({loaded:!!data,dirty:dirty(),editing,clients:data?.clients.length||0,api_version:data?.api_version})});
 })();
 

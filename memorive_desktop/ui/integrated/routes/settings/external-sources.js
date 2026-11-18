@@ -1,6 +1,6 @@
 /* The settings page's external data panel: model scores, model prices, exchange rates and literature sources, with
    editing, saving and per-source refresh (settings.external_sources_*, research.config_get, research.source_refresh).
-   Takes part in the page's shared save and revert. Publishes window.__Desktop_EXTERNAL_SOURCES__. */
+   Takes part in the page's shared save and revert. Publishes Memorive.externalSources. */
 (() => {
   'use strict';
   const root = document.getElementById('desktop-settings-preview');
@@ -12,7 +12,7 @@
     if (cls) n.className = cls;
     return n;
   };
-  const call = (method, params = {}) => window.__Desktop_SETTINGS_BRIDGE__.call(method, params);
+  const call = (method, params = {}) => Memorive.settingsBridge.call(method, params);
   // These controls have their own persistence/invocation scope. Do not let
   // legacy form-wide listeners treat a reference edit or exam tier as a model
   // mapping change, which would otherwise disable immediate examination.
@@ -58,7 +58,7 @@
   const status = text => {
     q('#settings-external-status').textContent = text;
     q('#settings-literature-status').textContent = text;
-    if (text && !text.startsWith('正在更新')) window.__Desktop_SETTINGS_BRIDGE__.notify('外部数据 · '+text);
+    if (text && !text.startsWith('正在更新')) Memorive.settingsBridge.notify('外部数据 · '+text);
   };
   const failureCopy = receipt => {
     const reason = receipt?.reason || '';
@@ -145,7 +145,7 @@
         if(busy)return;
         isEnabled=!isEnabled;
         enabled.setAttribute('aria-checked',String(isEnabled));
-        window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
+        Memorive.settingsBridge.syncSaveState();
       });
       enabledBox.append(enabled, el('span', '›', 'desktop-settings-disclosure-icon'));
       head.append(title, enabledBox);
@@ -204,7 +204,7 @@
       };
       card.__syncAvailability=()=>{refresh.disabled=busy||!c.enabled;};
       [name,url,key].forEach(input=>{
-        for(const eventName of ['input','change'])input.addEventListener(eventName,()=>window.__Desktop_SETTINGS_BRIDGE__.syncSaveState());
+        for(const eventName of ['input','change'])input.addEventListener(eventName,()=>Memorive.settingsBridge.syncSaveState());
       });
       refresh.textContent='⟳';
       refresh.className='icon-button';
@@ -225,7 +225,7 @@
     }
     renderLiterature(groups.get('literature'));
     if(!q('#settings-literature-sources [data-research-preferences]'))
-      await window.__Desktop_RESEARCH__?.mountPreferences(q('#settings-literature-sources'));
+      await Memorive.research?.mountPreferences(q('#settings-literature-sources'));
     for (const [key,group] of groups) if(key!=='literature' && group.children.length===1) group.remove();
   }
   function renderLiterature(group) {
@@ -328,10 +328,10 @@
         if(busy)return;
         isEnabled=!isEnabled;
         toggle.setAttribute('aria-checked',String(isEnabled));
-        window.__Desktop_SETTINGS_BRIDGE__.syncSaveState();
+        Memorive.settingsBridge.syncSaveState();
       };
       [name,url,key].forEach(input=>{
-        for(const eventName of ['input','change'])input.addEventListener(eventName,()=>window.__Desktop_SETTINGS_BRIDGE__.syncSaveState());
+        for(const eventName of ['input','change'])input.addEventListener(eventName,()=>Memorive.settingsBridge.syncSaveState());
       });
       fields.append(actions,nameBox,urlBox,keyBox,note);
       row.append(fields);
@@ -353,7 +353,7 @@
     state=loaded;
     await render(force);
   }
-  window.__Desktop_SETTINGS_BRIDGE__.registerSaveParticipant('external-sources',{
+  Memorive.settingsBridge.registerSaveParticipant('external-sources',{
     isDirty:sourcesDirty,
     afterUnlock:()=>sourceCards().forEach(card=>card.__syncAvailability?.()),
     save:async()=>{
@@ -373,7 +373,7 @@
     const profileRef = node.dataset.profileRef || null;
     q('#settings-reference-summary').textContent = '—';
     q('#settings-reference-details').replaceChildren();
-    window.__Desktop_EXAM_PANEL__?.clearReferences();
+    Memorive.examPanel?.clearReferences();
     if (!nodeId) return;
     try {
       const result = await call('settings.external_model_reference', {node_id:nodeId, preview_profile_ref:profileRef});
@@ -417,6 +417,6 @@
     refreshCurrent();
   });
   window.addEventListener('desktop:workflow-config-updated', () => queueMicrotask(refreshCurrent));
-  window.__Desktop_EXTERNAL_SOURCES__ = Object.freeze({load, render, refreshCurrent});
+  Memorive.externalSources = Object.freeze({load, render, refreshCurrent});
 })();
 
