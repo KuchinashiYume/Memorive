@@ -45,3 +45,37 @@ def test_a_finished_job_does_not_go_back_to_running():
     reconciler = TimelineReconciler(JOB, ATTEMPT)
     with pytest.raises(EventIntegrityError, match="TERMINAL_STATE_ROLLBACK"):
         reconciler.ingest([event(40, "FAILED", "JOB_FAILED"), event(52, "RUNNING")])
+
+
+def test_the_task_page_shows_a_later_job_with_more_than_256_events(tmp_path):
+    # Real numbering: the application facade over a sandbox job store, as the service runs it.
+    from memorive.desktop.current_task.product_controller import _request
+    from memorive.desktop.current_task.projection import CurrentTaskProjector
+    from tests.test_session_refinement_tasks import _FacadeService
+
+    service = _FacadeService(tmp_path / "facade")
+    facade = service.facade
+
+    def started(run):
+        job_id = facade.start_job(_request(run, run), run)["job_id"]
+        facade.mark_running(job_id, expected_version=facade.get_job(job_id)["version"])
+        return job_id
+
+    def progress(job_id, count):
+        for n in range(count):
+            facade.record_progress(job_id, completed_units=n, total_units=None,
+                                   phase_code="01_DOCUMENT_INGEST", phase_label="ingest")
+
+    first = started("first")
+    progress(first, 30)
+    second = started("second")
+    progress(second, 150)
+    progress(first, 5)          # the first job's events land between the second job's
+    progress(second, 150)
+    projector = CurrentTaskProjector(service)
+    for job_id in (first, second):
+        events = facade.get_job_events(job_id)["events"]
+        timeline = projector.project(job_id)["timeline"]["events"]
+        assert [e["sequence"] for e in timeline] == [e["sequence"] for e in events]
+    numbers = [e["sequence"] for e in facade.get_job_events(second)["events"]]
+    assert len(numbers) > 256 and numbers[0] > 1 and numbers != list(range(numbers[0], numbers[0] + len(numbers)))
