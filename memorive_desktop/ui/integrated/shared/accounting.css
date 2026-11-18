@@ -14,14 +14,15 @@
   --desktop-accounting-amber: #B58732;
   --desktop-accounting-danger: #A54B3D;
   display: grid;
-  grid-template-rows: 44px minmax(0, 1fr);
+  /* The toolbar row takes the height of its filters, which grow with the font size. */
+  grid-template-rows: auto minmax(0, 1fr);
   height: 100%;
   min-height: 0;
   color: var(--desktop-accounting-text);
   background: var(--desktop-accounting-bg);
   border-top: 1px solid var(--desktop-accounting-border-strong);
   container: desktop-accounting / size;
-  font-family: var(--memo-font-body);
+  font-family: var(--memo-font-ui);
 }
 
 /* The drawer overlays the workspace; the inspector remains above it. */
@@ -69,7 +70,7 @@
   background: var(--desktop-accounting-surface-strong);
   border-bottom: 1px solid var(--desktop-accounting-border);
 }
-.desktop-accounting-title { display: inline-flex; align-items: center; gap: 7px; flex: none; font-weight: 500; white-space: nowrap; }
+.desktop-accounting-title { display: inline-flex; align-items: center; gap: 7px; flex: none; font-weight: 400; white-space: nowrap; }
 .desktop-accounting-title svg { color: var(--desktop-accounting-accent); }
 .desktop-accounting-filter {
   display: inline-grid;
@@ -77,7 +78,7 @@
   align-items: center;
   gap: 5px;
   min-width: 0;
-  min-height: calc(40px * var(--desktop-scale));
+  min-height: calc(34px * var(--desktop-scale));
   padding: 0 7px;
   border: 1px solid var(--desktop-accounting-border);
   border-radius: 9px;
@@ -103,7 +104,7 @@
 }
 .desktop-accounting-icon-button:hover { border-color: var(--desktop-accounting-border); background: var(--desktop-accounting-selected); color: var(--desktop-accounting-text); }
 .desktop-accounting-icon-button[aria-busy="true"] svg { animation: desktop-accounting-spin .75s linear infinite; }
-.desktop-accounting-sync { margin-left: auto; color: var(--desktop-accounting-muted); font-size: 12px; white-space: nowrap; }
+.desktop-accounting-sync { margin-left: auto; color: var(--desktop-accounting-muted); font-size: var(--memo-size-small); white-space: nowrap; }
 
 .desktop-accounting-body {
   display: grid;
@@ -147,7 +148,7 @@
   border-right: 1px solid var(--desktop-accounting-border);
   background: transparent;
   color: var(--desktop-accounting-muted);
-  font-size: 11px;
+  font-size: var(--memo-size-small);
 }
 .desktop-accounting-currency:hover { background: rgba(200, 112, 79, .08); color: var(--desktop-accounting-accent); }
 .desktop-accounting-currency svg { color: var(--desktop-accounting-accent); }
@@ -167,9 +168,9 @@
 }
 .desktop-accounting-metric-main:hover { background: rgba(42, 39, 35, .035); }
 /* The label takes the whole first line; the value and its note share the second. */
-.desktop-accounting-metric-label { grid-column: 1 / -1; grid-row: 1; color: var(--desktop-accounting-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.desktop-accounting-metric-value { grid-column: 1; grid-row: 2; font-size: 23px; line-height: 1.05; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.desktop-accounting-metric-note { grid-column: 2; grid-row: 2; align-self: center; color: var(--desktop-accounting-muted); font-size: 11px; line-height: 1.35; text-align: right; }
+.desktop-accounting-metric-label { grid-column: 1 / -1; grid-row: 1; color: var(--desktop-accounting-muted); font-size: var(--memo-size-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desktop-accounting-metric-value { grid-column: 1; grid-row: 2; font-size: var(--memo-size-title); line-height: 1.05; font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.desktop-accounting-metric-note { grid-column: 2; grid-row: 2; align-self: center; color: var(--desktop-accounting-muted); font-size: var(--memo-size-small); line-height: 1.35; text-align: right; }
 
 .desktop-accounting-chart {
   display: grid;
@@ -183,20 +184,20 @@
   background: var(--desktop-accounting-surface);
 }
 .desktop-accounting-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
-.desktop-accounting-chart-heading { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+.desktop-accounting-chart-heading { display: inline-flex; align-items: center; gap: 6px; font-size: var(--memo-size-small); white-space: nowrap; }
 .desktop-accounting-chart-heading svg { width: 15px; height: 15px; color: var(--desktop-accounting-accent); }
-.desktop-accounting-chart-heading small { color: var(--desktop-accounting-muted); font-size: 11px; }
-.desktop-accounting-legend { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; overflow: hidden; color: var(--desktop-accounting-muted); font-size: 11px; white-space: nowrap; }
+.desktop-accounting-chart-heading small { color: var(--desktop-accounting-muted); font-size: var(--memo-size-small); }
+.desktop-accounting-legend { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; overflow: hidden; color: var(--desktop-accounting-muted); font-size: var(--memo-size-small); white-space: nowrap; }
 .desktop-accounting-legend-item { display: inline-flex; align-items: center; gap: 4px; }
 .desktop-accounting-legend-swatch { width: 7px; height: 7px; border-radius: 2px; flex: none; }
 .desktop-accounting-plot { position: relative; min-width: 0; min-height: 0; }
 .desktop-accounting-plot > svg { width: 100%; height: 100%; overflow: visible; }
 .desktop-accounting-grid-line { stroke: var(--desktop-accounting-border); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.desktop-accounting-axis-label { fill: var(--desktop-accounting-muted); font-size: 10px; font-family: inherit; }
+.desktop-accounting-axis-label { fill: var(--desktop-accounting-muted); font-size: var(--memo-size-small); font-family: inherit; }
 .desktop-accounting-bar { shape-rendering: geometricPrecision; }
 .desktop-accounting-hit { fill: transparent; pointer-events: all; }
-.desktop-accounting-tooltip { position: absolute; z-index: 4; max-width: 320px; padding: 7px 9px; border: 1px solid var(--desktop-accounting-border-strong); border-radius: 8px; background: var(--desktop-accounting-surface-strong); color: var(--desktop-accounting-text); box-shadow: 0 8px 22px rgba(42, 39, 35, .14); font-size: 11px; line-height: 1.45; pointer-events: none; white-space: pre-line; }
-.desktop-accounting-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--desktop-accounting-muted); font-size: 12px; }
+.desktop-accounting-tooltip { position: absolute; z-index: 4; max-width: 320px; padding: 7px 9px; border: 1px solid var(--desktop-accounting-border-strong); border-radius: 8px; background: var(--desktop-accounting-surface-strong); color: var(--desktop-accounting-text); box-shadow: 0 8px 22px rgba(42, 39, 35, .14); font-size: var(--memo-size-small); line-height: 1.45; pointer-events: none; white-space: pre-line; }
+.desktop-accounting-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--desktop-accounting-muted); font-size: var(--memo-size-small); }
 .desktop-accounting-empty[hidden] { display: none; }
 
 @keyframes desktop-accounting-spin { to { transform: rotate(360deg); } }
@@ -206,7 +207,7 @@
   .desktop-accounting-metric-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; align-content: center; padding: 5px 8px; }
   .desktop-accounting-metric-label { grid-column: 1; grid-row: 1; }
   .desktop-accounting-metric-value { grid-column: 1; grid-row: 2; }
-  .desktop-accounting-metric-note { grid-column: 1; grid-row: 3; align-self: auto; max-width: none; font-size: 10px; line-height: 1.2; text-align: left; white-space: normal; }
+  .desktop-accounting-metric-note { grid-column: 1; grid-row: 3; align-self: auto; max-width: none; font-size: var(--memo-size-small); line-height: 1.2; text-align: left; white-space: normal; }
 }
 @container desktop-accounting (max-width: 790px) {
   .desktop-accounting-model-filter { width: min(calc(210px * var(--desktop-scale)), 28vw); }
@@ -222,16 +223,15 @@
   .desktop-accounting-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 76px minmax(0, 1fr); }
   .desktop-accounting-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
   .desktop-accounting-metric-row { grid-template-columns: 38px minmax(0, 1fr); }
-  .desktop-accounting-metric-value { font-size: 17px; }
+  .desktop-accounting-metric-value { font-size: var(--memo-size-body); }
   .desktop-accounting-metric-main { padding: 6px; }
 }
 @container desktop-accounting (max-height: 270px) {
-  .desktop-accounting-panel { grid-template-rows: 40px minmax(0, 1fr); }
   .desktop-accounting-toolbar { padding-block: 3px; }
   .desktop-accounting-body { padding-block: 6px; }
   .desktop-accounting-metric-note { display: none; }
   .desktop-accounting-metric-main { grid-template-columns: 1fr; padding-block: 4px; }
-  .desktop-accounting-metric-value { font-size: 18px; }
+  .desktop-accounting-metric-value { font-size: var(--memo-size-body); }
 }
 
 /* desktop-accounting-css-end */

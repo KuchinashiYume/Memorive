@@ -64,7 +64,7 @@
 .desktop-nav-avatar img {width:100%;height:100%;object-fit:cover;}
 .desktop-nav-avatar svg {width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.5;}
 .desktop-nav-avatar [hidden] {display:none;}
-.desktop-nav-username {font-family:"Times New Roman",serif;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.desktop-nav-username {font-family:var(--memo-font-ui);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .desktop-refinement-label {display:flex!important;align-items:center;gap:8px;min-width:0;width:100%;}
 .desktop-refinement-label > strong {display:block;min-width:0;}
 .desktop-refinement-label > .desktop-refinement-help {flex:0 0 auto;margin:0 0 0 auto;}
@@ -101,13 +101,13 @@
 .desktop-native-chrome .desktop-window-control[data-window-action="close"]:hover {background:#f7e8e1;color:#a04732;}
 .desktop-window-control svg,.desktop-close-x svg {width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
 .desktop-window-control:focus-visible,.desktop-close-dialog button:focus-visible {outline:2px solid #9b6041;outline-offset:2px;}
-.desktop-close-dialog {box-sizing:border-box;width:max-content;min-width:380px;max-width:calc(100vw - 32px);margin:auto;padding:22px 24px;border:1px solid var(--desktop-border-default);border-radius:18px;background:var(--desktop-surface);color:#302d26;box-shadow:0 18px 64px #332e2826;font:16px/1.6 "Times New Roman","SimSun","Yu Mincho",serif;}
+.desktop-close-dialog {box-sizing:border-box;width:max-content;min-width:380px;max-width:calc(100vw - 32px);margin:auto;padding:22px 24px;border:1px solid var(--desktop-border-default);border-radius:18px;background:var(--desktop-surface);color:#302d26;box-shadow:0 18px 64px #332e2826;font:var(--memo-size-body)/1.6 var(--memo-font-ui);}
 .desktop-close-dialog::backdrop {background:#302c2429;}
 .desktop-close-header {display:flex;align-items:center;justify-content:space-between;gap:32px;margin:0 0 22px;}
-.desktop-close-header h2 {margin:0;font:inherit;font-size:21px;font-weight:500;}
+.desktop-close-header h2 {margin:0;font:inherit;font-size:var(--memo-size-title);font-weight:400;}
 .desktop-close-x {display:grid;place-items:center;width:30px;height:30px;padding:5px;flex:none;border:0;border-radius:8px;background:transparent;color:#827b70;cursor:pointer;}
 .desktop-close-x:hover {background:var(--desktop-surface-subtle);color:#302d26;}
-.desktop-close-notice {max-width:430px;margin:0 0 20px;color:#81715b;font-size:14px;}
+.desktop-close-notice {max-width:430px;margin:0 0 20px;color:#81715b;font-size:var(--memo-size-small);}
 .desktop-close-notice[hidden],.desktop-close-dialog button[hidden] {display:none;}
 .desktop-close-actions,.desktop-close-choices {display:flex;align-items:center;gap:8px;}
 .desktop-close-actions {justify-content:space-between;gap:22px;}

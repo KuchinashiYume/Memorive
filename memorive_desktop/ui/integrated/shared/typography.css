@@ -1,23 +1,42 @@
-/* retain three sizes; refresh dynamic text without exposing icon labels. */
-:root {--memo-font-heading:Arial,"SimHei","Microsoft YaHei","Yu Gothic","Meiryo",sans-serif;--memo-font-body:"Times New Roman","SimSun","Yu Gothic","Meiryo",serif;}
-:root:lang(en) {--memo-font-heading:Arial,"SimHei","Microsoft YaHei","Yu Gothic","Meiryo",sans-serif;--memo-font-body:"Times New Roman","SimSun","Yu Gothic","Meiryo",serif;}
-:root:lang(ja) {--memo-font-heading:Arial,"Yu Gothic","Meiryo","SimHei","Microsoft YaHei",sans-serif;--memo-font-body:"Times New Roman","Yu Gothic","Meiryo","SimSun",serif;}
-[data-memo-type] {font-synthesis:none!important;}
-/* Sizes by role, scaled by the font size setting (app.js sets --desktop-font-factor on the page root). They sit in a
-   layer because an !important in a layer wins over the !important font sizes of the unlayered style sheets, as
-   the inline sizes they replace did. An inline !important font size would still win over them. */
-@layer memo-type-size {
-  [data-memo-type="page"] {font-size:calc(26px * var(--desktop-font-factor, 1))!important;}
-  [data-memo-type="section"],[data-memo-type="body"],[data-memo-type="empty"],[data-memo-type="control"],[data-memo-type="value"],[data-memo-type="code"] {font-size:calc(16px * var(--desktop-font-factor, 1))!important;}
-  [data-memo-type="small"] {font-size:calc(14px * var(--desktop-font-factor, 1))!important;}
+/* The type rule of the main window. Every text uses one of three typefaces, one of three sizes and one of two
+   weights; there are no others, and a new page or component takes its type from here, never adds its own
+   (tests/test_page_type_rule.py checks every style sheet).
+   - Typefaces. The interface face (--memo-font-ui: Arial, SimHei, Microsoft YaHei; Yu Gothic for Japanese) is for
+     all interface text: titles, navigation, buttons, labels, values, lists, tables, counts, times, notes, empty
+     states. The reading face (--memo-font-read: Times New Roman, SimSun) is for running text only: the questions
+     and answers of research Q&A, message and document bodies, reports. The code face (--memo-font-code) is for code.
+   - Sizes, times the font size setting (app.js sets --desktop-font-factor on the page root): title 26px for page
+     titles, body 16px for text and controls, small 14px for notes, counts and times.
+   - Weights: 400, and 700 for page and section titles and for emphasis (bold in running text, the chosen option).
+   app.js gives every element that shows text its role in data-memo-type (typeRole); the rules below give each role
+   its face, size and weight. Other style sheets name a face, size or weight only through these variables. */
+:root {
+  --memo-font-ui:Arial,"SimHei","Microsoft YaHei","Yu Gothic","Meiryo",sans-serif;
+  --memo-font-read:"Times New Roman","SimSun","Yu Gothic","Meiryo",serif;
+  --memo-font-code:"Cascadia Mono",Consolas,"Courier New",monospace;
+  --memo-size-title:calc(26px * var(--desktop-font-factor, 1));
+  --memo-size-body:calc(16px * var(--desktop-font-factor, 1));
+  --memo-size-small:calc(14px * var(--desktop-font-factor, 1));
 }
-[data-memo-type="page"],[data-memo-type="section"],[data-memo-type="control"] {font-family:var(--memo-font-heading)!important;font-weight:400!important;line-height:1.5!important;}
+:root:lang(ja) {--memo-font-ui:Arial,"Yu Gothic","Meiryo","SimHei","Microsoft YaHei",sans-serif;--memo-font-read:"Times New Roman","Yu Gothic","Meiryo","SimSun",serif;}
+[data-memo-type] {font-synthesis:none!important;}
+/* Sizes by role. They sit in a layer because an !important in a layer wins over the !important font sizes of the
+   unlayered style sheets, as the inline sizes they replace did. An inline !important font size would still win. */
+@layer memo-type-size {
+  [data-memo-type="page"] {font-size:var(--memo-size-title)!important;}
+  [data-memo-type="section"],[data-memo-type="body"],[data-memo-type="empty"],[data-memo-type="control"],[data-memo-type="value"],[data-memo-type="code"] {font-size:var(--memo-size-body)!important;}
+  [data-memo-type="small"] {font-size:var(--memo-size-small)!important;}
+}
+[data-memo-type="page"],[data-memo-type="section"],[data-memo-type="control"],[data-memo-type="value"],[data-memo-type="small"],[data-memo-type="empty"] {font-family:var(--memo-font-ui)!important;font-weight:400!important;line-height:1.5!important;}
 [data-memo-type="page"],[data-memo-type="section"] {font-weight:700!important;line-height:1.35!important;}
-[data-memo-type="body"],[data-memo-type="empty"],[data-memo-type="value"],[data-memo-type="small"] {font-family:var(--memo-font-body)!important;font-weight:400!important;line-height:1.5!important;}
-[data-memo-type="body"] {line-height:1.8!important;}
-[data-memo-type="code"] {font-family:Consolas,"Courier New",monospace!important;line-height:1.5!important;}
+[data-memo-type="body"] {font-family:var(--memo-font-ui)!important;font-weight:400!important;line-height:1.8!important;}
+/* Running text, the only text in the reading face: research Q&A questions and answers, message bodies, documents and
+   reports (app.js typeRole lists the same places). */
+:is(.memo-message-body,#messages-summary,.desktop-markdown,.desktop-research-paper,.paper-review-report-section,.paper-review-source-body)[data-memo-type="body"],:is(.memo-message-body,#messages-summary,.desktop-markdown,.desktop-research-paper,.paper-review-report-section,.paper-review-source-body) [data-memo-type="body"] {font-family:var(--memo-font-read)!important;}
+[data-memo-type="code"] {font-family:var(--memo-font-code)!important;line-height:1.5!important;}
 /* Real emphasis only; legacy <strong> list/field wrappers are not headings. */
-.memo-message-body :is(strong,b)[data-memo-type],.desktop-markdown :is(strong,b)[data-memo-type],.desktop-research-paper :is(strong,b)[data-memo-type],.paper-review-report-section :is(strong,b)[data-memo-type],[role="option"][aria-selected="true"][data-memo-type] {font-family:var(--memo-font-heading)!important;font-weight:700!important;}
+.memo-message-body :is(strong,b)[data-memo-type],.desktop-markdown :is(strong,b)[data-memo-type],.desktop-research-paper :is(strong,b)[data-memo-type],.paper-review-report-section :is(strong,b)[data-memo-type] {font-family:var(--memo-font-read)!important;font-weight:700!important;}
+[role="option"][aria-selected="true"][data-memo-type] {font-family:var(--memo-font-ui)!important;font-weight:700!important;}
 input[data-memo-type]:not([type="checkbox"]):not([type="radio"]),select[data-memo-type] {min-height:calc(1.5em + 12px);height:auto!important;box-sizing:border-box;}
 .desktop-settings-select-trigger[data-memo-type],button[data-memo-type="control"] {height:auto;}
 #desktop-bottom-panel .desktop-settings-select-shell {flex:1;width:auto;min-width:0;}
@@ -31,4 +50,4 @@ input[data-memo-type]:not([type="checkbox"]):not([type="radio"]),select[data-mem
 [id="desktop-bottom-panel"] .desktop-accounting-metric-note > span {white-space:normal;}
 [id="desktop-bottom-panel"] .desktop-accounting-metrics {grid-template-rows:repeat(3,minmax(min-content,1fr));overflow:auto;}
 [id="desktop-bottom-panel"] .desktop-accounting-metric-row {min-height:min-content;}
-.desktop-accounting-axis-label {font-family:var(--memo-font-body)!important;font-size:calc(14px * var(--desktop-font-factor,1))!important;}
+.desktop-accounting-axis-label {font-family:var(--memo-font-ui)!important;font-size:var(--memo-size-small)!important;}

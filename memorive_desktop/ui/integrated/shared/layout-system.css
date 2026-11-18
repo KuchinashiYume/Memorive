@@ -6,7 +6,7 @@
   --memo-list-gap:8px;
 }
 .desktop-page-root :is(.page-shell,.lb-content,.memo-page) {
-  font-size:var(--desktop-ui-body,14px);
+  font-size:var(--memo-size-small);
   line-height:1.45;
 }
 #desktop-inbox-preview .desktop-inbox-body,
@@ -24,16 +24,16 @@
 :is(#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview) .desktop-central :is(.desktop-inbox-card,.desktop-tasks-task,.desktop-messages-card,.desktop-sessions-card,.desktop-library-card,.desktop-worklog-card) {
   min-height:76px;
   line-height:1.45;
-  font-size:var(--desktop-ui-body,14px);
+  font-size:var(--memo-size-small);
 }
 :is(#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview) .desktop-central :is(.desktop-inbox-card,.desktop-tasks-task,.desktop-messages-copy,.desktop-sessions-card,.desktop-library-card,.desktop-worklog-card) strong {
-  font-size:calc(var(--desktop-ui-body,14px) * 1.0714285714);
+  font-size:var(--memo-size-body);
   line-height:1.4;
   font-weight:400;
 }
 :is(#desktop-inbox-preview,#desktop-tasks-preview,#desktop-messages-preview,#desktop-sessions-preview,#desktop-library-preview,#desktop-worklog-preview) .desktop-central :is(.desktop-inbox-card,.desktop-tasks-task,.desktop-messages-copy,.desktop-sessions-card,.desktop-library-card,.desktop-worklog-card) small {
   margin-top:4px;
-  font-size:var(--desktop-ui-helper,12px);
+  font-size:var(--memo-size-small);
   line-height:1.4;
 }
 #desktop-worklog-preview .desktop-worklog-mark > svg {width:18px;height:18px;}
@@ -45,16 +45,16 @@
 #desktop-settings-preview .desktop-settings-workarea:not(.has-node,.is-compact) .desktop-settings-categories {
   padding:var(--memo-page-inset) var(--memo-page-gutter);gap:var(--memo-list-gap);
 }
-#desktop-settings-preview .desktop-settings-category-copy strong {font-size:15px;line-height:1.4;}
+#desktop-settings-preview .desktop-settings-category-copy strong {font-size:var(--memo-size-body);line-height:1.4;}
 
 /* Keep the existing summary/chart split; align typography within each cell. */
 .desktop-accounting-panel .desktop-accounting-metric-main {gap:4px 10px;padding:10px 12px;}
-.desktop-accounting-panel .desktop-accounting-metric-label {font-size:12px;line-height:1.4;}
-.desktop-accounting-panel .desktop-accounting-metric-value {font-size:20px;line-height:1.2;}
-.desktop-accounting-panel .desktop-accounting-metric-note {font-size:12px;line-height:1.5;max-width:none;font-variant-numeric:tabular-nums;}
+.desktop-accounting-panel .desktop-accounting-metric-label {font-size:var(--memo-size-small);line-height:1.4;}
+.desktop-accounting-panel .desktop-accounting-metric-value {font-size:var(--memo-size-body);line-height:1.2;}
+.desktop-accounting-panel .desktop-accounting-metric-note {font-size:var(--memo-size-small);line-height:1.5;max-width:none;font-variant-numeric:tabular-nums;}
 /* Dynamic children need an unscaled baseline even when the previous note
    already received the user's font scale before a projection refresh. */
-.desktop-accounting-metric-note > span {display:block;white-space:nowrap;font-size:12px;}
+.desktop-accounting-metric-note > span {display:block;white-space:nowrap;font-size:var(--memo-size-small);}
 .desktop-accounting-legend-wrap {position:relative;display:inline-flex;flex:none;}
 .desktop-accounting-panel .desktop-accounting-legend-button {
   display:grid;place-items:center;width:26px;height:24px;padding:3px;
@@ -68,7 +68,7 @@
   width:min(340px,60vw);max-height:min(210px,35vh);overflow:auto;
   padding:12px;border:1px solid var(--desktop-accounting-border);border-radius:10px;
   box-shadow:0 6px 18px #2a272318;background:var(--desktop-accounting-surface-strong);
-  font-size:12px;line-height:1.4;white-space:normal;
+  font-size:var(--memo-size-small);line-height:1.4;white-space:normal;
 }
 .desktop-accounting-panel .desktop-accounting-legend[hidden] {display:none;}
 .desktop-accounting-panel .desktop-accounting-legend-item {display:flex;align-items:baseline;gap:8px;min-width:0;}

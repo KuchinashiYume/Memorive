@@ -30,7 +30,7 @@
 .desktop-loading-art { position:relative;width:min(340px,76%);max-height:calc(100% - 8px);aspect-ratio:2350/1254;opacity:.82; }
 .desktop-loading-art img { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none; }
 .desktop-loading-art img[hidden] { display:none; }
-.desktop-loading-copy { display:none;font-size:14px;line-height:1.6; }
+.desktop-loading-copy { display:none;font-size:var(--memo-size-small);line-height:1.6; }
 .desktop-hide-expressions .desktop-loading-copy,.desktop-user-loading .desktop-loading-copy,
 .desktop-loading-art-unavailable .desktop-loading-copy { display:block; }
 .desktop-user-loading .desktop-loading-art,.desktop-loading-art-unavailable .desktop-loading-art { display:none; }
@@ -46,7 +46,7 @@ html:not([lang^="en"]) .desktop-app-title[data-personalized="true"] + .desktop-v
 .desktop-setting-help:hover,.desktop-setting-help[aria-expanded="true"] {background:var(--surface-hover,#F0EDE6);color:var(--text,#302d26);}
 .desktop-setting-help:focus-visible {outline:2px solid var(--accent,#8F5334);outline-offset:2px;}
 .desktop-setting-help svg {width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
-.desktop-setting-help-popover {position:fixed;z-index:10000;width:max-content;max-width:min(360px,calc(100vw - 24px));padding:12px 16px;border:1px solid var(--border-subtle,#DFD9CF);border-radius:12px;background:var(--surface-raised,#fffdf9);color:var(--text,#302d26);box-shadow:0 8px 28px #332f2824;font:14px/1.65 var(--font-ui,"Times New Roman","SimSun",serif);overflow-wrap:anywhere;}
+.desktop-setting-help-popover {position:fixed;z-index:10000;width:max-content;max-width:min(360px,calc(100vw - 24px));padding:12px 16px;border:1px solid var(--border-subtle,#DFD9CF);border-radius:12px;background:var(--surface-raised,#fffdf9);color:var(--text,#302d26);box-shadow:0 8px 28px #332f2824;font:var(--memo-size-small)/1.65 var(--memo-font-ui);overflow-wrap:anywhere;}
 #desktop-settings-preview .desktop-user-form {padding:20px;}
 .desktop-user-avatar-row {display:flex;gap:20px;align-items:center;padding:20px 0;border-bottom:1px solid var(--border-subtle,#DFD9CF);}
 .desktop-user-avatar {width:88px;height:88px;flex:0 0 88px;border-radius:50%;overflow:hidden;background:var(--surface-hover,#F0EDE6);display:grid;place-items:center;}
@@ -54,16 +54,16 @@ html:not([lang^="en"]) .desktop-app-title[data-personalized="true"] + .desktop-v
 .desktop-user-avatar img {width:88px;height:88px;object-fit:cover;}
 .desktop-user-avatar [hidden] {display:none;}
 .desktop-user-avatar-copy {flex:1;min-width:0;display:grid;gap:10px;}
-.desktop-user-avatar-copy small {color:var(--muted,#827b70);font:inherit;font-size:var(--desktop-ui-helper,12px);}
+.desktop-user-avatar-copy small {color:var(--muted,#827b70);font:inherit;font-size:var(--memo-size-small);}
 .desktop-user-avatar-actions {display:flex;flex-wrap:wrap;gap:8px;}
 .desktop-user-status {font:inherit;color:var(--muted,#827b70);}
 .desktop-user-status:empty {display:none;}
 #desktop-settings-preview .desktop-settings-form-stack > .field-label,
 #desktop-settings-preview .desktop-settings-form-stack > .control-row,
 #desktop-settings-preview .desktop-settings-form-stack > .desktop-settings-link-row {padding:12px 0 18px;border-bottom:1px solid var(--border-subtle,#DFD9CF);}
-#desktop-settings-preview .desktop-research-preferences {font-family:var(--font-ui,"Times New Roman","SimSun",serif);font-size:var(--desktop-ui-body,14px);}
+#desktop-settings-preview .desktop-research-preferences {font-family:var(--memo-font-ui);font-size:var(--memo-size-small);}
 #desktop-settings-preview .desktop-research-preferences :is(input,button,summary,h4,label,strong) {font-family:inherit;}
-#desktop-settings-preview .desktop-research-preferences h4 {font-size:var(--desktop-ui-section,17px);font-weight:400;}
+#desktop-settings-preview .desktop-research-preferences h4 {font-size:var(--memo-size-body);font-weight:400;}
 #desktop-settings-preview .desktop-research-preferences > .switch-row {padding:16px 0;border:0;border-bottom:1px solid var(--border-subtle,#DFD9CF);border-radius:0;background:transparent;margin:0 0 20px;}
 #desktop-settings-preview .desktop-research-preferences .field-label {padding-bottom:18px;border-bottom:1px solid var(--border-subtle,#DFD9CF);}
 #desktop-settings-preview .desktop-research-preferences .switch-copy {display:flex!important;flex:1;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;}

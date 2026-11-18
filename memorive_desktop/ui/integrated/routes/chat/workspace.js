@@ -1612,6 +1612,13 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
       q('#memo-history-toggle').setAttribute('aria-expanded',String(show));
       q('#memo-evidence-toggle').setAttribute('aria-expanded',layout.dataset.evidence);
     });
+    // The handle on the projects panel's right edge collapses it; the handle on the chat's left edge opens it again.
+    for(const [handle,other] of [['#memo-history-collapse','#memo-history-expand'],['#memo-history-expand','#memo-history-collapse']]){
+      action(handle,()=>{
+        q('#memo-history-toggle').click();
+        q(other).focus({preventScroll:true});
+      });
+    }
     action('#memo-evidence-toggle',()=>{
       const layout=q('#memo-layout');
       if(layout.dataset.evidence==='true'){
@@ -1815,16 +1822,20 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     renderMaterials();
     positionComposerMenu();
   }
+  // The model menu opens above the input box, as a chat input's menus do: it never covers the text being written.
+  // It lines up with the model button and scrolls when the space above the box is short.
   function positionComposerMenu(){
     const menu=q('#memo-composer-model-menu'),anchor=q('#memo-composer-model');
     if(!menu||menu.dataset.open!=='true')return;
     const r=anchor.getBoundingClientRect(),
       host=q('#memo-composer').getBoundingClientRect(),
+      box=q('#memo-input-shell').getBoundingClientRect(),
+      top=q('#memo-transcript').getBoundingClientRect().top,
       width=Math.min(320,window.innerWidth-24);
     menu.style.width=width+'px';
     menu.style.left=Math.max(12,Math.min(r.left,window.innerWidth-width-12))-host.left+'px';
-    menu.style.bottom=host.bottom-r.top+7+'px';
-    menu.style.maxHeight=Math.min(340,Math.max(100,r.top-18))+'px';
+    menu.style.bottom=host.bottom-box.top+6+'px';
+    menu.style.maxHeight=Math.min(340,Math.max(96,box.top-top-12))+'px';
   }
 
   async function ensureThread(){
