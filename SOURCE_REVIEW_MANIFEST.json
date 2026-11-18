@@ -2866,8 +2866,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/startup_notice.py",
-      "sha256": "549d654a935b2bc6775677d4ebf5c53b68acf784001696c1ef1094de3317c5a4",
-      "bytes": 11213
+      "sha256": "a443ff8e45b100ae879bb42a668c867cf3acc23de964b56cdd3cab7c2695e177",
+      "bytes": 11395
     },
     {
       "path": "memorive_desktop/product/web/assets/assistant/adopted_inline_001.png",
@@ -4076,7 +4076,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "7e5ae823fa96d1579bceefa50426317ff1ef084afd34f5527c5af8f517d8623c",
+      "sha256": "3a626ef0a3706993de1240fcb67e2cc63830a1d0f40df2fd9a9e995dd1f615d2",
       "bytes": 275420
     },
     {

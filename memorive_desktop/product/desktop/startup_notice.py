@@ -48,7 +48,10 @@ _STYLE_BLOCK = re.compile(r"<style\b[^>]*>.*?</style\s*>", re.S | re.I)
 _CLOSE_GLYPH = re.compile(r"glyphs=\{[^}]*\bclose:'([^']+)'")
 _BODY_TAG = re.compile(r"<body\b[^>]*>", re.I)
 # The page's typography: which role an element has, and the size and typeface that follow from it.
-_TYPOGRAPHY = ("const typeRole = (element) => {", "const applyFontScale = (percent, rootNode = document.body) => {")
+# applyFontScale calls setFontFactor, so all three come along; the notice runs applyFontScale before
+# it opens the dialog.
+_TYPOGRAPHY = ("const typeRole = (element) => {", "const setFontFactor = (percent) => {",
+               "const applyFontScale = (percent, rootNode = document.body) => {")
 _SCRIPT = """
 const dialog = document.getElementById('desktop-close-dialog');
 function call(name, ...values) {

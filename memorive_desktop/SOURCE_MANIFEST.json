@@ -2072,8 +2072,8 @@
     },
     {
       "path": "product/desktop/startup_notice.py",
-      "sha256": "549d654a935b2bc6775677d4ebf5c53b68acf784001696c1ef1094de3317c5a4",
-      "bytes": 11213
+      "sha256": "a443ff8e45b100ae879bb42a668c867cf3acc23de964b56cdd3cab7c2695e177",
+      "bytes": 11395
     },
     {
       "path": "product/desktop/update_maintenance.py",
