@@ -36,4 +36,6 @@ S2 partial: the methods section and the supplementary tables were not read
 -->
 ```
 
+For a reusable analysis use one `analysis.md`: the direct answer and the scope of papers and question; what each source contributes (a comparison table only when it helps); the reasoning with locators, counterevidence and limits; useful background, labelled as such; open questions and processing gaps. Write per-paper analyses or cards only when asked. Save into a new task folder; never overwrite an earlier answer without being asked.
+
 `cite` checks every span with `evidence`, refuses a source statement whose numbers are not in its spans, and lists every problem at once. It then writes `<task>/analysis.md` (marks become readable locators such as `[p.3 L120-124]`) and `<task>/citations.json`: the question, the coverage, and each claim with its kind, verbatim text and supports (manifest path relative to the analysis, source hash, page, lines, quote, `checked: true`). Claim texts stay verbatim in the analysis, so `memo_bridge.py bind` can later map the answer to Memo evidence. `checked: true` means the cited location was actually checked; it does not grant scientific validity. Keep public prose concise rather than showing this JSON to the user by default.

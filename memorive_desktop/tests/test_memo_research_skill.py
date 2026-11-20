@@ -140,6 +140,87 @@ def test_a_failing_local_command_is_reported_even_in_another_encoding(handoff):
     (folder / "transport.json").write_text(json.dumps({"command": [sys.executable, "-c", failing]}), encoding="utf-8")
     run = bridge(folder, "read", check=False)
     assert run.returncode == 2 and "Traceback" not in run.stderr and run.stderr.strip()
+    # It also says how to go on: answer from the texts in the folder and tell the user.
+    assert "could not be reached" in run.stderr and "materials/" in run.stderr
+
+
+def test_find_prints_and_keeps_only_the_passages_with_a_term(handoff):
+    _, _, folder = handoff
+    printed = bridge(folder, "find", "Calibration Error", "isotonic").stdout
+    assert "E1 · calibration.md" in printed
+    assert "  > Temperature scaling reduced the expected calibration error from 0.17 to 0.05 on 1,200 questions." in printed
+    assert "drift.md" not in printed
+    store = json.loads((folder / "work" / "evidence.json").read_text(encoding="utf-8"))
+    assert [row["title"] for row in store["evidence"].values()] == ["calibration.md"]
+    # A later read keeps E1 and numbers the rest after it.
+    bridge(folder, "read")
+    store = json.loads((folder / "work" / "evidence.json").read_text(encoding="utf-8"))
+    assert [(alias, row["title"]) for alias, row in store["evidence"].items()] == [("E1", "calibration.md"), ("E2", "drift.md")]
+    assert "No passage contains these terms" in bridge(folder, "find", "quantum").stdout
+
+
+def test_an_answer_from_found_passages_returns_with_partial_coverage_and_typed_quotes(handoff):
+    ws, thread_id, folder = handoff
+    bridge(folder, "find", "temperature scaling")
+    e = alias(folder, "0.17 to 0.05")
+    # Chinese quotation marks and colon are read like "..." and ":".
+    path = draft(folder, f'温度缩放把期望校准误差从 0.17 降到 0.05 [{e}：“reduced the expected calibration error from 0.17 to 0.05”]。\n')
+    report = json.loads(bridge(folder, "answer", "--draft", path, "--return").stdout)
+    assert (report["status"], report["returned"]["status"]) == ("RETURNED", "RETURNED")
+    assert "nothing else is needed" in report["next"]
+    saved = json.loads((folder / "memo-answer.json").read_text(encoding="utf-8"))
+    assert saved["answer"] == "温度缩放把期望校准误差从 0.17 降到 0.05 [1]。"
+    assert sorted(c["status"] for c in saved["coverage"]) == ["read", "unread"]
+    assert ws.thread_get(thread_id)["messages"][-1]["text"] == saved["answer"]
+
+
+def test_a_draft_problem_says_how_to_fix_it(handoff):
+    _, _, folder = handoff
+    bridge(folder, "read")
+    calibration, drift = alias(folder, "0.17 to 0.05"), alias(folder, "81% to 64%")
+    path = draft(folder, f'Accuracy fell from 81% to 64% [{calibration}: "Temperature scaling reduced"]. '
+                         f'It was not tested on live logs [{calibration}: "not tested on live logs"].\n'
+                         'Other studies report 0.91 accuracy.\n')
+    run = bridge(folder, "answer", "--draft", path, check=False)
+    assert run.returncode == 2
+    assert f"81 not in the cited passages; it is in {drift}: cite that passage" in run.stderr
+    assert (f'{calibration}: the quote is not in the passage: "not tested on live logs"; the closest text in '
+            f'{calibration} is: "The method was not tested on live query logs."') in run.stderr
+    # Fixed, only the value nobody reports is left.
+    path = draft(folder, f'Accuracy fell from 81% to 64% [{drift}: "fell from 81% to 64%"]. '
+                         'Other studies report 0.91 accuracy.\n')
+    run = bridge(folder, "answer", "--draft", path, check=False)
+    assert run.returncode == 2 and "0.91: in the answer without a cited passage" in run.stderr
+    assert not (folder / "memo-answer.json").exists()
+
+
+def test_an_answer_that_cannot_be_returned_is_saved_and_says_what_to_tell_the_user(handoff):
+    ws, thread_id, folder = handoff
+    bridge(folder, "find", "calibration")
+    e = alias(folder, "0.17 to 0.05")
+    path = draft(folder, f'The error fell from 0.17 to 0.05 [{e}: "from 0.17 to 0.05"].\n')
+    blocked = "import sys; sys.stderr.write('Permission denied'); sys.exit(1)"
+    (folder / "transport.json").write_text(json.dumps({"command": [sys.executable, "-c", blocked]}), encoding="utf-8")
+    report = json.loads(bridge(folder, "answer", "--draft", path, "--return").stdout)
+    assert report["status"] == "NOT_RETURNED" and "Permission denied" in report["returned"]["reason"]
+    assert "attachment button" in report["next"]
+    assert json.loads((folder / "memo-answer.json").read_text(encoding="utf-8"))["answer"] == "The error fell from 0.17 to 0.05 [1]."
+    assert ws.thread_get(thread_id)["messages"] == []
+
+
+@pytest.mark.parametrize("quote, passage, found", [
+    ("overfitting", "is not caused by overﬁtting, and", "overﬁtting"),
+    ("degrades rapidly", "and then de-\ngrades rapidly.", "de-\ngrades rapidly"),
+    ("state-of-the-art results", "the state-\nof-the-art results", "state-\nof-the-art results"),
+    ("“degradation” problem", 'the "degradation" problem', '"degradation" problem'),
+    ("34 layers 28.54", "34 layers\n28.54\n25.03", "34 layers\n28.54"),
+    ("error — low", "error - low", "error - low"),
+    ("not caused by noise", "is not caused by overfitting", None),
+])
+def test_a_quote_is_found_as_the_passage_writes_it(quote, passage, found):
+    sys.path.insert(0, str(SCRIPTS))
+    import drafts
+    assert drafts.locate(quote, passage) == found
 
 
 # A desktop agent app: the hand-off folder carries the Skill

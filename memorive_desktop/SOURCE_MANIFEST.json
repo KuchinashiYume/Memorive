@@ -127,8 +127,8 @@
     },
     {
       "path": "integrations/skills/memo-research/SKILL.md",
-      "sha256": "12594a574e0d7c0f1470b6773fed81a78188f70c4f2198bd1c650acd47d09319",
-      "bytes": 8727
+      "sha256": "d9ad87cc43bc0e815eb80f2c80a8f0bce5be997c50f27044485933c5cc03ff37",
+      "bytes": 5463
     },
     {
       "path": "integrations/skills/memo-research/agents/openai.yaml",
@@ -137,23 +137,23 @@
     },
     {
       "path": "integrations/skills/memo-research/references/memo-bridge.md",
-      "sha256": "e128c965a16eb95c55b62b56dbc208054edace647aff4c4426d21be51cb2b34d",
-      "bytes": 7461
+      "sha256": "341424c07f6042c5028e3de5a7339394ad5e951ac41f7b7bc652ae9c3d23d279",
+      "bytes": 8251
     },
     {
       "path": "integrations/skills/memo-research/references/source-tools.md",
-      "sha256": "940ec3778d788afaf25de64a013570ceea3e7529bb569d3a72c1c95766ceea22",
-      "bytes": 4782
+      "sha256": "f9864f775261a17ba17e29fc4ea51d3f698d6cff0700fbdbd214c9835ba0f1df",
+      "bytes": 5221
     },
     {
       "path": "integrations/skills/memo-research/scripts/drafts.py",
-      "sha256": "d314f951a8ce25ab7ac4ba0d043d7cb5541c203fcb320973179d8832b6016d68",
-      "bytes": 3491
+      "sha256": "79403041d50e9ed1904e3dd858a1a627b0a6a87ba43026ca3acf0a776d32f78c",
+      "bytes": 6583
     },
     {
       "path": "integrations/skills/memo-research/scripts/memo_bridge.py",
-      "sha256": "d1557244ba597bcbe2a08e0ec5629e0a688f51374996c06ff2c511a2b2e7f23b",
-      "bytes": 17061
+      "sha256": "01600551cf97e6ee4c3d290d80ed8dc2671a6029da884b6bd4e81815ea009579",
+      "bytes": 24610
     },
     {
       "path": "integrations/skills/memo-research/scripts/requirements-pdf.txt",
@@ -5782,8 +5782,8 @@
     },
     {
       "path": "source/memorive/platform/language/handoff.py",
-      "sha256": "f568059011f7e915f8cd02bf4e82a83505346423ed7d0e0540cb7359dab48103",
-      "bytes": 11391
+      "sha256": "823ec1cb75ceb979bedc70e6fec7cea6520324ba53a2c35e3fa53f0dfad055af",
+      "bytes": 11538
     },
     {
       "path": "source/memorive/platform/language/messages.py",
