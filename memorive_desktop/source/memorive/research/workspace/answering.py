@@ -91,6 +91,8 @@ class AnswerJob:
         # Set by build_request:
         self.response_schema = None  # the answer format, bound to the excerpt ids
         self.prompt = None           # what the model is sent
+        self.no_material = False     # no excerpt was kept: the reply is made by no_material.py
+        self.no_material_record = None  # what the page shows of such a reply (the message's no_material)
         # Set by ask_model and check_answer:
         self.value = None            # the model's reply as returned
         self.text = None             # the answer text that is saved
@@ -360,10 +362,15 @@ class AnswerJob:
         response_contract = None
         rules = CHAT_RULES
         evidence_ids = [e['id'] for e in self.context['evidence']]
+        # With no excerpt to answer from, the model is asked only what is missing (no_material.py).
+        self.no_material = bool(self.settings['profile_ref']) and not evidence_ids and self.job.get('kind') != 'agent'
         if self.settings['profile_ref']:
             from memorive.research.workspace.desktop import ANSWER_SCHEMA
             from memorive.research.workspace.response_contract import REVISION, bind_evidence
             base_schema = ANSWER_SCHEMA
+            if self.no_material:
+                from memorive.research.workspace import no_material
+                base_schema, rules = no_material.SCHEMA, no_material.RULES
             if self.job.get('kind') == 'agent':
                 # An agent job answers in the agent's format: its own instructions, then the chat rules
                 # (citation marks, language, knowledge draft).
@@ -379,7 +386,8 @@ class AnswerJob:
             raise ValueError('RETRY_CONTEXT_EXCEEDS_CONTEXT_BUDGET' if self.job.get('retry_of') else 'QUESTION_EXCEEDS_CONTEXT_BUDGET')
         self.ws.versions.validate_context(self.job, self.context, self.refs)
         self.checkpoint()
-        self.prompt = research_prompt(rules + '\n' + METHOD_RULES, self.context)
+        # The reading method asks for an answer with citations; a reply with no material only says what is missing.
+        self.prompt = research_prompt(rules if self.no_material else rules + '\n' + METHOD_RULES, self.context)
 
     # --- 4. model ---------------------------------------------------------------------------------
 
@@ -410,7 +418,13 @@ class AnswerJob:
         self.value = result['response']
         self.usage = result.get('execution_receipt', {})
         self.engine = result.get('model_name', 'configured_model')
-        self.check_answer()
+        if self.no_material:
+            from memorive.research.workspace import no_material
+            self.text, self.no_material_record = no_material.answer(
+                self.value, self.thread, self.request_context['language_context'])
+            self.citations = []
+        else:
+            self.check_answer()
 
     def keep_sent_request(self):
         """Keep on the job what the model is about to be sent: if the app stops before the answer is saved,
@@ -561,6 +575,8 @@ class AnswerJob:
             'actual_instruction_sha256': digest(self.prompt.split('<SOURCE_CONTEXT>', 1)[0].encode()),
             'parent_path_hash': job['parent_path_hash'], 'retry_of': job.get('retry_of'),
         }
+        if self.no_material_record:
+            answer['no_material'] = self.no_material_record
         if self.received and not job.get('sent_request'):
             # Received before a restart by a version that did not keep what it sent: the evidence and prompt
             # recorded here were gathered again and may differ from what the model was given.
