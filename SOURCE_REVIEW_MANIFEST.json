@@ -1201,8 +1201,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "2b8089c39941346b9462299f55e5f7b50fce691c871c1f0a7e6c7cef655b4ad8",
-      "bytes": 2581916
+      "sha256": "9bf52f9a71ecc40b5ce1bfdba0c1faf72f1789bddf86ce7366d0eb6c332ca352",
+      "bytes": 2584687
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4076,12 +4076,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "9b894ced6d9fde710ee91289730d44c80d500f9df261e673dcd6fa74ca791995",
+      "sha256": "baea46f662e0b4debea0193f9b93ff3178a4923be31295f82b79b0f04de3d659",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "22e4091aef07274b103247e21cf82680d872f1fb09975183435668ce0e6e3e9d",
+      "sha256": "afbf498ad7202348789736d8c0b02e16e605664195c9374063da54ad1a2a16da",
       "bytes": 276404
     },
     {
@@ -4681,8 +4681,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.js",
-      "sha256": "e7fff3aa9a14dfd5453b2dec007f6bd242557c83f50ef8623e0debed56358d9f",
-      "bytes": 130750
+      "sha256": "604b73aea1a1a17f938083284ac41031f2dda1ffafd076e0d174c7aeb365452e",
+      "bytes": 131022
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/bridge.js",
@@ -4911,8 +4911,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/app.js",
-      "sha256": "15d3574bbf198f73cad056187e5e90d51774dd904f8a87abddb386f25d833b05",
-      "bytes": 376896
+      "sha256": "6bbf19b39316e7323728f09aaa842147033eed89cc52da1978a31e2e5a010abe",
+      "bytes": 377569
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/content-language.js",
@@ -10051,8 +10051,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/opportunities.js",
-      "sha256": "03274b66797336c1da3565c9aefdb967c9737c6a6956dfad4ab9ef03bd8e6380",
-      "bytes": 44456
+      "sha256": "5aa5cecb74314133aecc64a999778bf5ce1571e2a9fb4b9750145c6b38f59258",
+      "bytes": 46282
     },
     {
       "path": "memorive_desktop/tools/page_check/README.md",

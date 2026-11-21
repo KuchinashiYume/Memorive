@@ -594,8 +594,8 @@ const collapsed=new Set();
     q('.memo-chat-toolbar').dataset.overview=String(!thread);
     q('#memo-back-overview').disabled=!thread;
     q('#memo-thread-menu').disabled=false;
-    // The switch shows the open conversation's; going from a conversation back to the overview turns it off, so the
-    // overview's next conversation is temporary only when chosen there (a conversation's menu in the list).
+    // The switch shows the open conversation's; going from a conversation back to the overview turns it off, so a
+    // question asked in the overview starts a normal conversation (a temporary one: 新建临时对话 in a list menu).
     if(thread)q('#memo-temporary').checked=!!thread.temporary;
     else if(headerThread)q('#memo-temporary').checked=false;
     headerThread=thread?.id||null;
@@ -661,10 +661,9 @@ const collapsed=new Set();
     renderThread();
     renderComposer();
   }
-  async function newThread(target=project){
+  async function newThread(target=project,temporary=q('#memo-temporary').checked){
     const epoch=++selectionEpoch;
     saveDraft();
-    const temporary=q('#memo-temporary').checked;
     clearTimeout(pollTimer);
     activeJob=null;
     busy(false);
@@ -823,10 +822,13 @@ const collapsed=new Set();
     await refresh();
     renderThread();
   }
+  // In a conversation: a new conversation, temporary or not (the item shows whether the open one is). In the
+  // overview (a conversation's menu in the list): a new temporary conversation, opened at once.
   function temporaryItem(){
+    if(!thread)return ['新建临时对话',()=>newThread(project,true)];
     return ['临时对话',async()=>{
       q('#memo-temporary').checked=!q('#memo-temporary').checked;
-      if(thread)await newThread();
+      await newThread();
     },'',null,{checked:q('#memo-temporary').checked,disabled:!!activeJob}];
   }
   function threadMenu(row,anchor,point){openMenu(anchor,[
