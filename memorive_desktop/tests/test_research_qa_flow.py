@@ -342,14 +342,16 @@ AGENT = {"profile_ref": "cli:codex", "eligible": True, "profile_kind": "CLI", "a
 class Agent:
     """Stands in for a coding agent run from the command line; keeps the prompt it was given."""
 
-    def __init__(self):
-        self.prompts = []
+    def __init__(self, opportunities=()):
+        self.prompts, self.opportunities = [], list(opportunities)
 
     def __call__(self, *, profile_ref, prompt, job_id, response_schema):
         self.prompts.append(prompt)
         first = example.EXCERPT_ID.search(prompt).group(0)
+        opportunities = [dict(row, evidence_ids=[first if i == "FIRST" else i for i in row["evidence_ids"]])
+                         for row in self.opportunities]
         answer = {"answer": "Growth doubles from 25 C to 37 C.", "citations": [first], "needs_agent": False,
-                  "opportunities": []}
+                  "opportunities": opportunities}
         return {"response": answer, "model_name": AGENT["model_name"], "execution_receipt": {"status": "PASS"}}
 
 
@@ -384,5 +386,34 @@ def test_an_agent_job_works_from_the_agent_instructions_and_leaves_a_handoff_pac
         assert answer["agent_result"] is True and answer["opportunities"] == []
         handoff = workspace.store.get("handoff", job["handoff_id"])
         assert (handoff["question"], handoff["instructions"]) == (example.QUESTION, instructions())
+    finally:
+        workspace.close()
+
+
+def test_an_agent_answer_is_kept_when_one_of_its_opportunities_cites_an_excerpt_it_was_not_given(tmp_path):
+    from memorive.research.opportunities.research_opportunities import FIELDS
+    good = {field: "Temperature above 37 C" for field in FIELDS}
+    good.update(classification="missing_evidence", evidence_ids=["FIRST"])
+    bad = dict(good, evidence_ids=["ev_not_given"])
+    library = tmp_path / "library"
+    library.mkdir()
+    paper = library / "k12.md"
+    paper.write_text(example.PAPER, encoding="utf-8")
+    workspace = ResearchWorkspace(tmp_path / "workspace", catalog=lambda: [dict(example.PROFILE), dict(AGENT)], model=Model())
+    workspace.agent_model = agent = Agent([good, bad])
+    try:
+        thread = workspace.thread_create()
+        material = workspace.index.add_library_file(
+            thread["project"], path=paper, root=library, external_id="k12",
+            expected_hash=hashlib.sha256(paper.read_bytes()).hexdigest(), title="K12", material_layer="cleaned")
+        workspace.attachments.configure(thread["id"], thread["revision"], {"artifact_ids": [material["id"]]})
+        job_id = workspace.agent_dispatch(thread["id"], example.QUESTION, "agent-request-0002")["id"]
+        _finish(workspace)
+        assert workspace.job_status(job_id)["status"] == "COMPLETE"
+        [answer] = _answers(workspace, thread["id"])
+        assert answer["text"].startswith("Growth doubles") and len(agent.prompts) == 1
+        [kept] = answer["opportunities"]
+        assert kept["evidence_ids"] != ["ev_not_given"] and kept["state"] == "draft"
+        assert answer["opportunity_issues"] == ["OPPORTUNITY_CITATION_INVALID"]
     finally:
         workspace.close()

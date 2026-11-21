@@ -479,8 +479,7 @@ class AnswerJob:
             user = copy.deepcopy(job['question_message'])
             answer = self.answer_message()
             if job.get('kind') == 'agent':
-                from memorive.research.opportunities.research_opportunities import validate
-                answer['opportunities'] = validate(self.value.get('opportunities', []), self.admitted)
+                answer['opportunities'] = self.checked_opportunities(answer, db)
                 answer['agent_result'] = True
                 answer['needs_agent'] = False
             self.propose_knowledge(answer, db)
@@ -539,6 +538,26 @@ class AnswerJob:
             'parent_path_hash': job['parent_path_hash'], 'retry_of': job.get('retry_of'),
         }
         return answer
+
+    def checked_opportunities(self, answer, db):
+        """The agent's research opportunities that pass their check. One that fails (an excerpt the agent
+        was not given, a missing field) is left out and noted on the answer; the answer itself is kept, as
+        with a knowledge draft, so the user does not have to run the agent again."""
+        from memorive.research.opportunities.research_opportunities import MAX_OPPORTUNITIES, validate
+        items = self.value.get('opportunities', [])
+        if not isinstance(items, list):
+            items = [items]
+        kept, issues = [], ['OPPORTUNITY_RESULT_INVALID'] * max(0, len(items) - MAX_OPPORTUNITIES)
+        items = items[:MAX_OPPORTUNITIES]
+        for row in items:
+            try:
+                kept += validate([row], self.admitted)
+            except ValueError as exc:
+                issues.append(str(exc))
+        if issues:
+            answer['opportunity_issues'] = issues
+            self.store.event('OPPORTUNITY_WITHHELD', self.job_id, {'reasons': issues, 'answer_preserved': True}, db)
+        return kept
 
     def propose_knowledge(self, answer, db):
         """A comparison, knowledge or agent answer may carry a knowledge draft: propose it for review,
