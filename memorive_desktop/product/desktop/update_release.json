@@ -12,8 +12,8 @@
   "source_commit": "SOURCE_ARCHIVE_v2.00_release001",
   "release_authorized": false,
   "notes": {
-    "zh-CN": "研究问答新增研究机会：从已审核的卡片里找出分歧、条件差异和证据缺口，可在整库或比较组里查找，并直接追问。每次保存回答都留下一个版本，可以比较和恢复。交给桌面 Agent 时，交接文件夹附带同版本的 memo-research Skill，Agent 的回答可以回到原对话。新增临时对话。另修复了中断后的恢复、引用页码和费用统计等问题。测试控制台不随本版提供。",
-    "en-US": "Research Q&A adds research opportunities: disagreements, differing conditions and evidence gaps found in reviewed cards, across the library or within a comparison group, each ready for a follow-up question. Every saved answer keeps a version you can compare and restore. A hand-off to a desktop agent includes the matching memo-research Skill, and the agent's answer can return to the same conversation. Temporary conversations are new. Fixes cover recovery after interruptions, page numbers in citations and cost figures. The Test Console is not part of this release.",
-    "ja-JP": "研究Q&Aに研究機会を追加しました。審査済みのカードから見解の相違、条件の違い、証拠の欠けている点を、ライブラリ全体または比較グループ内で探し、そのまま追加質問できます。回答を保存するたびに版が残り、比較と復元ができます。デスクトップ Agent への引き継ぎには同じ版の memo-research Skill が同梱され、Agent の回答を元の会話に戻せます。一時的な会話を追加しました。中断後の復旧、引用のページ番号、費用の集計なども修正しました。テストコンソールはこの版には含まれません。"
+    "zh-CN": "研究问答新增研究机会：从已审核的卡片里找出分歧、条件差异和证据缺口，可在整库或比较组里查找，并直接追问。每次保存回答都留下一个版本，可以比较和恢复。交给桌面 Agent 时，交接文件夹附带同版本的 memo-research Skill，Agent 的回答可以回到原对话。临时对话的入口更清楚。另修复了中断后的恢复、引用页码和费用统计等问题。测试控制台不随本版提供。",
+    "en-US": "Research Q&A adds research opportunities: disagreements, differing conditions and evidence gaps found in reviewed cards, across the library or within a comparison group, each ready for a follow-up question. Every saved answer keeps a version you can compare and restore. A hand-off to a desktop agent includes the matching memo-research Skill, and the agent's answer can return to the same conversation. There is a clearer way to start a temporary conversation. Fixes cover recovery after interruptions, page numbers in citations and cost figures. The Test Console is not part of this release.",
+    "ja-JP": "研究Q&Aに研究機会を追加しました。審査済みのカードから見解の相違、条件の違い、証拠の欠けている点を、ライブラリ全体または比較グループ内で探し、そのまま追加質問できます。回答を保存するたびに版が残り、比較と復元ができます。デスクトップ Agent への引き継ぎには同じ版の memo-research Skill が同梱され、Agent の回答を元の会話に戻せます。一時的な会話を始めやすくしました。中断後の復旧、引用のページ番号、費用の集計なども修正しました。テストコンソールはこの版には含まれません。"
   }
 }

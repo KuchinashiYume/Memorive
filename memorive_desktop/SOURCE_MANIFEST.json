@@ -2087,8 +2087,8 @@
     },
     {
       "path": "product/desktop/update_release.json",
-      "sha256": "36cdf310355696ecb9be701e6bb333d1e0d09a26baaa9e9219a645955bfe03c2",
-      "bytes": 2091
+      "sha256": "919332713f3b9df07c0e62777127dc0ae00fc86d5438363200aff959c0030239",
+      "bytes": 2137
     },
     {
       "path": "product/desktop/update_service.py",

@@ -2851,8 +2851,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/update_release.json",
-      "sha256": "36cdf310355696ecb9be701e6bb333d1e0d09a26baaa9e9219a645955bfe03c2",
-      "bytes": 2091
+      "sha256": "919332713f3b9df07c0e62777127dc0ae00fc86d5438363200aff959c0030239",
+      "bytes": 2137
     },
     {
       "path": "memorive_desktop/product/desktop/update_service.py",
@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "f7569abff3f1205d9aed13f56427c9c9b0b3007f986f9e027407d8b187e73440",
+      "sha256": "274aff5408f3ea9e3fd9c53e9064271b77bea551c98100561e25a849d376d6fc",
       "bytes": 276404
     },
     {
