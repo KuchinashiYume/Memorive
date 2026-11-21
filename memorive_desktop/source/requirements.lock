@@ -65,9 +65,9 @@ pydantic==2.13.4
 pydantic_core==2.46.4
 pydantic-settings==2.14.2
 Pygments==2.20.0
-pymupdf==1.28.0
-pymupdf-layout==1.28.0
-pymupdf4llm==1.28.0
+pymupdf==1.28.2
+pymupdf-layout==1.28.2
+pymupdf4llm==1.28.2
 PyPika==0.51.1
 pyproject_hooks==1.2.0
 pyreadline3==3.5.6

@@ -5,8 +5,8 @@
 
 # ── 已就位(Initialization MODEL_GATEWAY 网关 / DataContracts RUNTIME_LOG 日志 / ServiceContracts 第1步 DocumentIngest+DocumentConvert 运行所需)────────
 PyYAML==6.0.3          # MODEL_GATEWAY 读 models.yaml + DOCUMENT_PROCESSING paper_id_registry.yaml
-pymupdf==1.28.0        # DocumentConvert 轻量沙盒引擎直接依赖(pymupdf4llm 连带装同版)
-pymupdf4llm==1.28.0    # DocumentConvert 轻量沙盒引擎:数字版 PDF→Markdown(非正式主力,仅沙盒/显式选用)
+pymupdf==1.28.2        # DocumentConvert 轻量沙盒引擎直接依赖(pymupdf4llm 连带装同版)
+pymupdf4llm==1.28.2    # DocumentConvert 轻量沙盒引擎:数字版 PDF→Markdown(非正式主力,仅沙盒/显式选用)
 markitdown==0.1.6      # DocumentConvert txt/office→Markdown 引擎
 
 # ── ServiceContracts 第3步 DocumentEmbed 嵌入运行所需(2026-07-01 装)────────

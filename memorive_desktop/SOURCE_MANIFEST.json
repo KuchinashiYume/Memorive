@@ -7097,7 +7097,7 @@
     },
     {
       "path": "source/requirements.lock",
-      "sha256": "604af1fdf20ab77277a05e173254581bb2f190448b9d744264867dc89dda5279",
+      "sha256": "9efd7765dd59693ea441979663b2a1e709d6ddd29ebe1dddc24eb5d642b3c0a2",
       "bytes": 2094
     },
     {
@@ -7112,7 +7112,7 @@
     },
     {
       "path": "source/requirements.txt",
-      "sha256": "2363c184498c1a48c104a313734d2607fe300178e29c220fd51650ce4bb750b5",
+      "sha256": "9f8745782085a4e3493228de0110255fc70f72c554492bac32d4ff0f68af8b5e",
       "bytes": 1919
     },
     {
