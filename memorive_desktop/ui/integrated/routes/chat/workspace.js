@@ -267,7 +267,7 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
   async function startEdit(m){
     const owner=thread.id,history=await call('memo.answer_history',{thread_id:owner,answer_id:m.id});
     if(thread?.id!==owner)return;
-    editing.set(m.id,{text:m.text,base:history.current_version_id,caret:m.text.length});
+    editing.set(m.id,{text:m.text,original:m.text,thread:owner,base:history.current_version_id,caret:m.text.length});
     renderThread();
     focusAnswer(m.id,'editor');
   }
@@ -585,6 +585,7 @@ const collapsed=new Set();
     Memorive.settingsBridge?.syncSaveState();
     if(repaint)renderThread();
   }
+  let headerThread=null;
   function renderThreadHeader(){
     const name=state?.projects.find(p=>p.id===project)?.name||'研究项目';
     updateAgentTip();
@@ -593,7 +594,11 @@ const collapsed=new Set();
     q('.memo-chat-toolbar').dataset.overview=String(!thread);
     q('#memo-back-overview').disabled=!thread;
     q('#memo-thread-menu').disabled=false;
+    // The switch shows the open conversation's; going from a conversation back to the overview turns it off, so the
+    // overview's next conversation is temporary only when chosen there (a conversation's menu in the list).
     if(thread)q('#memo-temporary').checked=!!thread.temporary;
+    else if(headerThread)q('#memo-temporary').checked=false;
+    headerThread=thread?.id||null;
     q('#memo-temporary').disabled=!!activeJob;
     q('#memo-composer').dataset.archived=String(!!thread?.archived);
     if(thread?.archived)status('#memo-chat-status','这条对话已归档。请在对话菜单中恢复后继续。',false,'archived');
@@ -864,6 +869,8 @@ const collapsed=new Set();
   async function deleteThread(row){
     const fresh=await call('memo.thread_get',{thread_id:row.id});
     await call('memo.thread_forget',{thread_id:row.id,expected_revision:fresh.revision});
+    // Its answers being edited go with it (open or not), so closing the window does not ask about them.
+    for(const [id,draft] of editing)if(draft.thread===row.id)editing.delete(id);
     if(thread?.id===row.id){
       selectionEpoch++;
       for(const key of drafts.keys())if(key.startsWith(thread.id+'::')){
@@ -2017,7 +2024,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     Memorive.chat={openThread:id=>selectThread({id}),notify:message=>status('#memo-chat-status',message),reportImportFailure:message=>{
       showEvidencePanel('materials');
       fail(Error(message),'#memo-evidence-status');
-    },importFiles,pickFiles,configureThread,renderComposer,refreshMaterials,refresh,renderThread,send,saveSettings,revertSettings,hasSettingsDraft,inspect:()=>({loaded,project,thread_id:thread?.id,active_job:activeJob,evidence_count:lastEvidence.length}),openMaterials,showEvidencePanel,closeEvidence,openSearch,openSettings:()=>route('research-settings')};
+    },importFiles,pickFiles,configureThread,renderComposer,refreshMaterials,refresh,renderThread,send,saveSettings,revertSettings,hasSettingsDraft,inspect:()=>({loaded,project,thread_id:thread?.id,active_job:activeJob,evidence_count:lastEvidence.length}),openMaterials,showEvidencePanel,closeEvidence,hasUnsavedEdits:()=>[...editing.values()].some(d=>d.text!==d.original),openSearch,openSettings:()=>route('research-settings')};
   }
 
   const importing=new Map(), importFailures=new Map();
