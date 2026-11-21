@@ -1192,6 +1192,21 @@ class QualityCardReviewerExamExecutor:
             raise ValueError(
                 reason if isinstance(reason, str) and reason else "WORKFLOW_MODEL_EXAM_CALL_FAILED"
             )
+        # Counted before the checks: a reply they refuse was still sent and may have been paid for.
+        for field in (
+            "provider_calls",
+            "external_model_calls",
+            "external_network_calls",
+            "external_process_launches",
+        ):
+            state[field] += int(result.get(field) or 0)
+        sent = result.get("execution_receipt")
+        sent = sent if isinstance(sent, Mapping) else {}
+        estimate = sent.get("estimated_cost_cny")
+        if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
+            state["estimated_cost_cny"] += float(estimate)
+        from memorive.models.cli.templates import accumulate_usage
+        accumulate_usage(state, sent.get("token_usage"))
         receipt = self._validate_call_result(
             result,
             requested_model=model_name,
@@ -1213,18 +1228,6 @@ class QualityCardReviewerExamExecutor:
                 "provider_output_sha256": output_receipt["sha256"],
             },
         )
-        for field in (
-            "provider_calls",
-            "external_model_calls",
-            "external_network_calls",
-            "external_process_launches",
-        ):
-            state[field] += int(result[field])
-        estimate = receipt.get("estimated_cost_cny")
-        if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
-            state["estimated_cost_cny"] += float(estimate)
-        from memorive.models.cli.templates import accumulate_usage
-        accumulate_usage(state,receipt.get("token_usage"))
         state["returned_model"]=receipt.get("returned_model")
         return response
 

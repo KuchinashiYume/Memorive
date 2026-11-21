@@ -174,15 +174,15 @@ class DataAnomalyExamExecutor:
                 outcome_pending=False
                 atomic(root/(call_id+'.result.json'),result)
                 calls+=int(result.get('external_model_calls') or 0)
-                receipt=QualityCardReviewerExamExecutor._validate_call_result(result,requested_model=target['model_name'],profile_kind=target['kind'])
-                receipts.append(receipt)
-                cost=receipt.get('estimated_cost_cny')
+                # Counted before the checks: a reply they refuse was still sent and paid for.
+                cost=(result.get('execution_receipt') or {}).get('estimated_cost_cny')
                 if target['kind']=='API':
                     import math
                     if isinstance(cost,(int,float)) and not isinstance(cost,bool) and math.isfinite(cost) and cost>=0:
                         spent+=cost
                     else:
                         cost_complete=False
+                receipts.append(QualityCardReviewerExamExecutor._validate_call_result(result,requested_model=target['model_name'],profile_kind=target['kind']))
                 scored=score_answers(cases,result['response'],key)
                 scores.append(scored)
                 atomic(root/(call_id+'-score.json'),scored)

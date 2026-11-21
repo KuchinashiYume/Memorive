@@ -591,6 +591,16 @@ class QualityCardDistillerExamExecutor:
             raise ValueError(
                 reason if isinstance(reason, str) and reason else "WORKFLOW_MODEL_EXAM_CALL_FAILED"
             )
+        # Counted before the checks: a reply they refuse was still sent and may have been paid for.
+        state["stage_calls"] += 1
+        state["provider_calls"] += int(result.get("provider_calls") or 0)
+        state["external_model_calls"] += int(result.get("external_model_calls") or 0)
+        state["external_network_calls"] += int(result.get("external_network_calls") or 0)
+        state["external_process_launches"] += int(result.get("external_process_launches") or 0)
+        sent = result.get("execution_receipt")
+        state["estimated_cost_cny"] += float(
+            (sent if isinstance(sent, Mapping) else {}).get("estimated_cost_cny") or 0.0
+        )
         receipt = self._validate_call_result(result, model_name, profile_kind)
         response = deepcopy(dict(result["response"]))
         output_receipt = _write_json_create_only(
@@ -607,16 +617,6 @@ class QualityCardDistillerExamExecutor:
         }
         _write_json_create_only(
             stage_root / "receipts" / f"{call_id}.json", receipt_payload
-        )
-        state["stage_calls"] += 1
-        state["provider_calls"] += int(result["provider_calls"])
-        state["external_model_calls"] += int(result["external_model_calls"])
-        state["external_network_calls"] += int(result["external_network_calls"])
-        state["external_process_launches"] += int(
-            result["external_process_launches"]
-        )
-        state["estimated_cost_cny"] += float(
-            receipt.get("estimated_cost_cny") or 0.0
         )
         return response
 
