@@ -2317,8 +2317,8 @@
     },
     {
       "path": "source/memorive/desktop/current_task/events.py",
-      "sha256": "13d64e3c15db502917ab70724d98db151468219a3f4511b10d498e8d1fd5f7fe",
-      "bytes": 7185
+      "sha256": "92b99bc780e74dee227549281ddb7285f10ab7099a4b76d11a64be84e8aa53cc",
+      "bytes": 7297
     },
     {
       "path": "source/memorive/desktop/current_task/locators.py",

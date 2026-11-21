@@ -19,7 +19,7 @@ def event(sequence, state="RUNNING", event_type="NODE_PROGRESS"):
 
 
 def test_a_later_job_with_many_events_shows_them_all_in_order():
-    # 389 events from number 351 on, as a long paper processed after other jobs; another job's
+    # 639 events from number 351 on, more than 256, as a long paper processed after other jobs; another job's
     # events (900-909) came in between when both ran.
     numbers = list(range(351, 900)) + list(range(910, 1000))
     events = [event(351, "QUEUED", "JOB_CREATED")] + [event(n) for n in numbers[1:-1]] + \

@@ -17,8 +17,8 @@ class TimelineReconciler:
     """The events of one job attempt, in order, for the current task page.
 
     The service numbers the events of all jobs in one sequence (memorive/platform/jobs/durable_store.py),
-    so one job's events have increasing numbers with other jobs' events in between, and a page the
-    service returns for a job holds all of that job's events after the cursor. Each event not seen
+    so one job's events have increasing numbers with other jobs' events in between, and the page
+    get_job_events returns for a job holds all of that job's events after the cursor. Each event not seen
     before is accepted in number order. This used to wait for cursor + 1 and buffer the rest: every job
     but the first of a profile then showed no timeline, and a job with more than 256 events made the
     task list fail with BUFFER_OVERFLOW, and with it the window's start (it reads the task list).
@@ -125,7 +125,8 @@ class WatchRecoveryController:
     def reconnect(self, events: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
         if self.connection_state not in {"DISCONNECTED", "RECONNECTING", "RECOVERING_AFTER_RESTART"}:
             raise EventIntegrityError("WATCH_RECONNECT_PRECONDITION")
-        # The events after the cursor come as one page from the service: nothing is missing once read.
+        # A get_job_events page holds all events after the cursor. A watch_job_events page may be cut
+        # (truncated, at most 64): it is then a prefix without missing numbers, and the next page goes on.
         receipt = self.reconciler.ingest(events)
         self.connection_state = "CONNECTED"
         self.disconnect_reason = None
