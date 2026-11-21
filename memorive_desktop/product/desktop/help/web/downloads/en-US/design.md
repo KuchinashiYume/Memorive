@@ -176,9 +176,9 @@ Research analysis checks that each citation comes from the current context pack.
 
 ### Research Skill
 
-The memo-research Skill lets agents such as Codex or Claude Code read papers for you: the agent reads and drafts an answer, then checks the passages behind its key claims in one pass, and revises or flags as uncertain anything it cannot support.
+The memo-research Skill lets agents such as Codex or Claude Code read papers for you and check their quotations. When you click "Hand off to agent" in research Q&A and choose a desktop app, Memorive prepares a hand-off folder with the conversation, the original documents, the extracted text and the Skill that comes with Memorive. Open the agent app and paste the prompt Memorive copied. Following the Skill, the agent finds the relevant passages, writes an answer that quotes the original text, checks it and returns it to the same conversation. Returning it runs a local Memorive command; approve it when the agent asks. If the answer could not be returned, it is saved in the hand-off folder, and you can return it through the conversation's attachment button. A returned answer does not enter the knowledge base by itself.
 
-Used on its own, the Skill keeps the original, RawMD and source.json for each paper. Select the source.json through the attachment button in Research Q&A, and Memorive checks the files and reuses them without converting again. You can also export a handoff package from the current conversation for an agent to continue reading; its answer comes back through the same conversation's attachment button, linked to the current question and material versions. Returned answers join the knowledge base only after you confirm them.
+Used on its own, without Memorive, the Skill keeps the original, RawMD and source.json for each paper. Select the source.json through the attachment button in research Q&A; Memorive checks it and reuses it without converting the paper again.
 
 ## Review and checks
 

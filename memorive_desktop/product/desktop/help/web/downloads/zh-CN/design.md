@@ -176,9 +176,9 @@ Memorive 有四条主要流程：
 
 ### 研究 Skill
 
-memo-research Skill 让 Codex、Claude Code 等 Agent 帮你读文献：先读完并形成回答，再集中核对支撑关键主张的原文，没有依据的说法会修改或标为不确定。
+memo-research Skill 让 Codex、Claude Code 等 Agent 帮你读文献并核对引文。在研究问答里点“交给 Agent”并选择桌面应用时，Memorive 会准备一个交接文件夹：里面有对话、资料原件、抽出的正文和随 Memorive 附带的 Skill。打开 Agent 应用，粘贴复制好的提示词即可。Agent 按 Skill 找出相关段落，写出带原文引语的回答，核对后交回同一个对话。交回要运行一条 Memorive 的本机命令，Agent 请求批准时同意即可；没能交回时，回答保存在交接文件夹里，可以通过对话的附件入口交回。交回的回答不会自动进入知识库。
 
-单独使用时，Skill 会为每篇文献保留原件、RawMD 和 source.json。在研究问答里通过附件入口选择 source.json，Memorive 核对文件后直接复用，省去重新转换。你也可以从当前对话导出交接包，交给 Agent 继续读；它的回答通过同一对话的附件入口返回，并和当前问题、资料版本关联。返回的回答需要你确认后才进入知识库。
+不经过 Memorive 单独使用时，Skill 会为每篇文献保留原件、RawMD 和 source.json。在研究问答里通过附件入口选择 source.json，Memorive 核对后直接复用，不再重新转换。
 
 ## 审核与核查
 
