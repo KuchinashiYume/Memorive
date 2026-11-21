@@ -60,3 +60,18 @@ def test_pages_match_their_sources():
 def test_earlier_tool_name_still_checks_the_pages():
     code, output = _run("sync_page_hashes.py", "--check")
     assert code == 0, output
+
+
+def test_the_native_windows_read_the_type_rule_of_the_built_page():
+    # The installer and update window take their faces and sizes from the main window's type rule. When the
+    # sizes moved into typography.css, the build of the native engine still looked for the old inline ones
+    # and stopped, so no installer could be built.
+    spec = importlib.util.spec_from_file_location("build_update_helper", TOOLS / "build_update_helper.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    contract = module.typography_contract(DESKTOP)
+    assert contract["sizes"]["page"] > contract["sizes"]["body"] > contract["sizes"]["small"] > 0
+    assert set(contract["weights"]) == set(contract["sizes"])
+    for language in ("zh-CN", "en-US", "ja-JP"):
+        assert contract["stacks"][language]["heading"] and contract["stacks"][language]["body"]
+    assert contract["stacks"]["ja-JP"]["body"][1] == "Yu Gothic" and contract["code"]

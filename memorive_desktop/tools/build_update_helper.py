@@ -10,30 +10,41 @@ import re
 
 
 def typography_contract(source):
-    """Use the delivered Memo declarations, not a second installer type scale."""
+    """The main window's type rule (ui/integrated/shared/typography.css, inlined in the bundle as
+    <style id="memo-typography">) for the native installer and update window: the interface face per
+    language, the code face, the sizes of the three steps and the weights.
+
+    The window has one interface face for all its controls and text (the reading face is for long
+    running text only, which the native windows do not show), three sizes (title 26px, body 16px,
+    small 14px) and regular weight. update_entry.cs reads stacks[language]["heading"|"body"], sizes and
+    weights per role, and code."""
     path=source/'product/desktop/bundle_integrated.html'
     html=path.read_text('utf8')
     styles=re.findall(r'<style id="memo-typography">(.*?)</style>',html,re.S)
-    sizes=re.findall(r'const sizes=\{(page:\d+,section:\d+,body:\d+,empty:\d+,control:\d+,value:\d+,small:\d+,code:\d+)\}',html)
-    if len(styles)!=1 or len(sizes)!=1:
+    if len(styles)!=1:
         raise ValueError('MEMO_TYPOGRAPHY_DECLARATION_AMBIGUOUS')
     css=styles[0]
+
+    def declared(selector,name):
+        blocks=re.findall(re.escape(selector)+r'\s*\{([^}]+)\}',css)
+        found=[m.group(1) for block in blocks for m in [re.search('--memo-'+name+r':([^;]+)',block)] if m]
+        if len(found)!=1:
+            raise ValueError('MEMO_TYPOGRAPHY_VARIABLE_MISSING:'+selector+':'+name)
+        return found[0]
+
+    def family(raw):
+        return [x.strip().strip('"') for x in raw.split(',')]
+
     stacks={}
-    for language,selector in [('zh-CN',':root'),('en-US',':root:lang(en)'),('ja-JP',':root:lang(ja)')]:
-        matches=re.findall(re.escape(selector)+r'\s*\{([^}]+)\}',css)
-        if len(matches)!=1:raise ValueError('MEMO_FONT_DECLARATION_MISSING:'+language)
-        stacks[language]={}
-        for name in ('heading','body'):
-            raw=re.search('--memo-font-'+name+r':([^;]+)',matches[0]).group(1)
-            stacks[language][name]=[x.strip().strip('"') for x in raw.split(',')]
-    if '[data-memo-type="page"],[data-memo-type="section"] {font-weight:700!important;' not in css:
-        raise ValueError('MEMO_HEADING_WEIGHT_CHANGED')
-    if 'font-family:Consolas,"Courier New",monospace!important;' not in css:
-        raise ValueError('MEMO_CODE_FONT_CHANGED')
+    for language,selector in [('zh-CN',':root'),('en-US',':root'),('ja-JP',':root:lang(ja)')]:
+        ui=family(declared(selector,'font-ui'))
+        stacks[language]={'heading':ui,'body':ui}
+    step={name:int(re.match(r'calc\((\d+)px',declared(':root','size-'+name)).group(1)) for name in ('title','body','small')}
+    sizes={'page':step['title'],'section':step['body'],'body':step['body'],'empty':step['body'],'control':step['body'],
+           'value':step['body'],'small':step['small'],'code':step['body']}
     return dict(schema='MemoNativeTypography-v1',source='product/desktop/bundle_integrated.html',source_sha256=sha(path),
-                sizes={k:int(v) for k,v in (x.split(':') for x in sizes[0].split(','))},stacks=stacks,
-                weights={role:700 if role in ('page','section') else 400 for role in ('page','section','body','empty','control','value','small','code')},
-                code=['Consolas','Courier New','monospace'],native_bridge='Use declared Latin family for Latin UI and first declared CJK family for zh/ja UI; OS font resolution is verified separately.')
+                sizes=sizes,stacks=stacks,weights={role:400 for role in sizes},code=family(declared(':root','font-code')),
+                native_bridge='Use declared Latin family for Latin UI and first declared CJK family for zh/ja UI; OS font resolution is verified separately.')
 
 SOURCES = ('installation_cross_setup.cs','lifecycle.cs','html_host.cs','prerequisite_wizard.cs',
            'update_protocol.cs','update_download.cs','update_transaction.cs','update_entry.cs','installer_locale.cs')

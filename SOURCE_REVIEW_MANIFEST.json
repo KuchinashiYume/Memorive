@@ -3971,8 +3971,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_update_helper.py",
-      "sha256": "661ad81d044ed9122ea7ea890adf19540e970edaa550d709e6c3ca2fa7114409",
-      "bytes": 7680
+      "sha256": "f47e48ab57b473b710ef1945c4ea162e821558c4413d2749456e6ac0c199671e",
+      "bytes": 8063
     },
     {
       "path": "memorive_desktop/tools/build_update_packages.py",
