@@ -223,6 +223,33 @@ def test_a_quote_is_found_as_the_passage_writes_it(quote, passage, found):
     assert drafts.locate(quote, passage) == found
 
 
+def test_marks_after_a_full_stop_or_after_another_mark_support_that_sentence():
+    # The ways writers place marks: after the full stop, one after another, at the end of a table row;
+    # page references, years and names with digits in a sentence are not values to cite.
+    sys.path.insert(0, str(SCRIPTS))
+    import drafts
+    passages = {"E1": "Table 2. Top-1 error (%, 10-crop testing).\n34 layers\n28.54\n25.03",
+                "E2": "ResNet reduces the top-1 error by 3.5% (Table 2)."}
+
+    def resolve(alias, where, quote):
+        return {"id": alias}, passages[alias]
+
+    draft = ('The 34-layer plain net (VGG16 style, PDF page 5, printed page 774, 2016) has 28.54% top-1 error.'
+             '[E1: "28.54"]\nThe residual net has 25.03% [E1: "25.03"][E2: "reduces the top-1 error"].\n'
+             '| plain-34 | 28.54 | [E1: "28.54"]\n')
+    text, claims, problems = drafts.apply(draft, resolve, lambda supports: "[n]" * len(supports))
+    assert problems == []
+    assert [(c["text"], len(c["supports"])) for c in claims] == [
+        ("The 34-layer plain net (VGG16 style, PDF page 5, printed page 774, 2016) has 28.54% top-1 error.", 1),
+        ("The residual net has 25.03%", 2),
+        ("plain-34 | 28.54", 1)]
+    assert all(c["text"] in text for c in claims)
+    # A value the cited passage does not report is still refused.
+    _, _, problems = drafts.apply('The error was 27.10% [E2: "reduces the top-1 error"].', resolve, lambda s: "[n]")
+    assert problems == ['"The error was 27.10%": 27.1 not in the cited passages; cite the passage that reports it, '
+                        'or mark a computed value as [inference ...]']
+
+
 # A desktop agent app: the hand-off folder carries the Skill
 
 SKILL = SCRIPTS.parent

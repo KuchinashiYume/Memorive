@@ -91,20 +91,48 @@ def numbers(text):
     return found
 
 
+# Numbers in a writer's sentence that are not reported values: page references (p. 774, 第 5 页,
+# 期刊页 774), digits of a name (VGG16, ResNet-34, fc7) and years.
+PAGE_REFERENCE = re.compile(r'(?:\bpp?\.|\bpages?|第|页)\s*\d+(?:\s*[-–]\s*\d+)?|\d+(?:\s*[-–]\s*\d+)?\s*页')
+NAME_DIGITS = re.compile(r'(?<=[A-Za-z])-?\d+')
+
+
+def stated_values(text):
+    """The values a written sentence reports (numbers() without page references, names and years)."""
+    text = NAME_DIGITS.sub(' ', PAGE_REFERENCE.sub(' ', text))
+    return {v for v in numbers(text) if not (v.is_integer() and 1900 <= v <= 2100)}
+
+
+def _claim(text, floor):
+    """The claim a mark at the end of text supports: from the last sentence end, mark or line start
+    (not before floor) to the mark. A mark written after the sentence's own full stop supports that
+    sentence."""
+    end = len(text)
+    for _ in range(2):
+        found = list(BOUNDARY.finditer(text, floor, end))
+        start = found[-1].end() if found else floor
+        claim = text[start:end].strip().lstrip('-*>#·•|').strip().rstrip('，,：:|').strip()
+        if claim or not found:
+            return claim
+        end = found[-1].start()
+    return claim
+
+
 def apply(draft, resolve, render, where_value=None):
     """Turn a marked draft into (text, claims, problems).
 
     resolve(alias, where, quote) -> (support, passage text) for one support, or raises ValueError
     with the problem; render(supports) -> what replaces the mark in the text. A source statement's
-    numbers must be in the passages it cites; a computed value belongs in an inference.
+    numbers must be in the passages it cites; a computed value belongs in an inference. Marks
+    written one after another support the same claim.
     where_value(value) -> names of passages that report value, to say where to cite it from."""
-    problems, claims = [], []
-    text, last, boundary = '', 0, 0
+    problems, claims, passages_of = [], [], []
+    text, last, boundary, claimed = '', 0, 0, False
     for mark in MARK.finditer(draft):
         text += draft[last:mark.start()]
         last = mark.end()
-        start = max([boundary] + [m.end() for m in BOUNDARY.finditer(text, boundary)])
-        claim = text[start:].strip().lstrip('-*>#·•').strip().rstrip('，,：:').strip()
+        follows = claimed and not text[boundary:].strip(' \t，,、;；')   # right after the previous mark
+        claim = '' if follows else _claim(text, boundary)
         kind = 'inference' if mark.group(1) else 'source_statement'
         supports, passages = [], []
         for alias, where, straight, curly in SUPPORT.findall(mark.group(2)):
@@ -116,20 +144,25 @@ def apply(draft, resolve, render, where_value=None):
                 continue
             supports.append(support)
             passages.append(passage)
-        if not claim:
+        if follows:
+            claims[-1]['supports'] += supports
+            passages_of[-1] += passages
+        elif claim:
+            claims.append({'text': claim, 'kind': kind, 'supports': supports})
+            passages_of.append(passages)
+        else:
             problems.append(f'a mark has no claim before it: {mark.group(0)[:80]}')
-        elif kind == 'source_statement' and passages:
-            missing = numbers(claim) - set().union(*(numbers(p) for p in passages))
-            for value in sorted(missing):
-                found = where_value(value) if where_value else []
-                hint = (f'it is in {", ".join(found)}: cite that passage' if found
-                        else 'cite the passage that reports it')
-                problems.append(f'"{claim[:80]}": {value:g} not in the cited passages; {hint}, '
-                                'or mark a computed value as [inference ...]')
+        claimed = bool(follows or claim)
         text += render(supports)
         boundary = len(text)
-        if claim:
-            claims.append({'text': claim, 'kind': kind, 'supports': supports})
+    for claim, passages in zip(claims, passages_of):
+        if claim['kind'] != 'source_statement' or not passages:
+            continue
+        for value in sorted(stated_values(claim['text']) - set().union(*(numbers(p) for p in passages))):
+            found = where_value(value) if where_value else []
+            hint = f'it is in {", ".join(found)}: cite that passage' if found else 'cite the passage that reports it'
+            problems.append(f'"{claim["text"][:80]}": {value:g} not in the cited passages; {hint}, '
+                            'or mark a computed value as [inference ...]')
     text = (text + draft[last:]).strip()
     if LEFTOVER.search(MARK.sub(' ', draft)):    # in the draft: rendered locators such as [L7] are fine
         problems.append('a citation mark is not in the form [E3: "quote"] / [S1 p.3 L120-124: "quote"] '

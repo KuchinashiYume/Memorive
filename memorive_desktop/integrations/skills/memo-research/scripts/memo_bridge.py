@@ -281,17 +281,15 @@ def build_answer(store, draft, gaps=None, request_id=None):
 
 
 def uncited_values(answer, claims, store):
-    """Values in the answer outside its claims that no kept passage, page number or the question
-    reports (years aside): the place a value recalled from outside the material shows up."""
+    """Values in the answer outside its claims that no kept passage or the question reports (page
+    references, names and years aside): the place a value recalled from outside the material shows up."""
     text = re.sub(r'\[\d+\]', ' ', answer)
     for claim in claims:
         text = text.replace(claim['text'], ' ')
     known = set(drafts.numbers(store.get('question') or ''))
     for row in store['evidence'].values():
         known |= drafts.numbers(row['text'])
-        if row.get('page') is not None:
-            known.add(float(row['page']))
-    return sorted(v for v in drafts.numbers(text) - known if not (v.is_integer() and 1900 <= v <= 2100))
+    return sorted(drafts.stated_values(text) - known)
 
 
 def return_answer(memo, result):

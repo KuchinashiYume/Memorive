@@ -19,11 +19,11 @@ python <skill>/scripts/memo_bridge.py find handoff.json "calibration error" "tem
 
 `find` searches all passages of the hand-off's papers and prints the ones that contain a term, numbered E1, E2 …, with paper, page and the matching lines. Search for the question's key words, metric names and the numbers you look for, in the papers' language. Run it again with other terms as often as needed; the numbers stay the same.
 
-Before you use a number, read where it comes from in the printed lines: the table or figure title, the row and the column, and the setting it belongs to (dataset, model or variant, test method). Then search that metric once more on its own: papers often report the same metric in several tables under different settings, and the question decides which one is meant. Extracted tables often have one cell per line; if a row is unclear, look at that page of the paper in `materials/`.
+Before you use a number, read where it comes from in the printed lines: the table or figure title, the row and the column, and the setting it belongs to (dataset, model or variant, test method). Then search that metric once more on its own: papers often report the same metric in several tables under different settings, and the question decides which one is meant. Extracted tables often have one cell per line; if a row is unclear, open that page of the PDF in `materials/` with your file-reading tool.
 
 For a question about a whole paper ("explain this paper", "what are its limits"), run `python <skill>/scripts/memo_bridge.py read handoff.json` instead: it keeps every passage, and you read `work/evidence.md`.
 
-**2. Write the answer with quotes.** Write `work/draft.md`. After each sentence that states something from a paper, put the passage and a short quote copied from it:
+**2. Write the answer with quotes.** Write `work/draft.md` with your file-writing tool. After each sentence that states something from a paper, put the passage and a short quote copied from it:
 
 ```text
 Temperature scaling reduced the expected calibration error from 0.17 to 0.05 on 1,200 questions [E3: "reduced the expected calibration error from 0.17 to 0.05 on 1,200 questions"]. That is a drop of 0.12 [inference E3: "from 0.17 to 0.05"]. The method was not tested on live query logs [E3: "not tested on live query logs"].
@@ -50,7 +50,7 @@ If `find` or `read` says Memorive could not be reached, answer from the extracte
 
 - **Answers the question first**, then the conditions that matter for it, then limits. A short question gets a short answer, but the conditions of each number stay in it.
 - **Comparing papers:** before writing, note for each paper its result, unit, conditions (data set, model, hardware, test method) and passage in `work/facts.md`. Compare only numbers measured under comparable conditions; say which differences in conditions keep other numbers apart. Each paper's result cites that paper.
-- **When the material does not answer the question:** answer the part the passages support, and say exactly what is missing (which section, table or condition) and what that leaves open. Do not fill the gap from memory: a number you remember, even from this paper, is not in the material and cannot be cited. `answer` refuses values that no passage reports.
+- **When the material does not answer the question:** answer the part the passages support, and say exactly what is missing (which section, table or condition) and what that leaves open. Do not fill the gap from memory, not even as "background": neither a number you remember, even from this paper, nor what you think the missing part says. `answer` refuses values that no passage reports.
 - Keeps source statements, your inferences, general background and the user's hypotheses apart.
 - Explains unfamiliar concepts when they help. Does not recommend other papers, authors or DOIs, and does not search outside the supplied papers unless the user asks.
 - A paper's original, extracted text, card and earlier analyses are one source, not independent confirmations.
