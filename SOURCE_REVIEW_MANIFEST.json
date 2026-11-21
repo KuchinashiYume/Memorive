@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "bfc414b7edf7566a31e88ae3d8e5b0ce81f0059166003dd936109aec739f803c",
+      "sha256": "06a294d1cb14b0b0d426d67cdd5b9bb4e437148d142149b65830649404b4576e",
       "bytes": 276404
     },
     {
@@ -8371,8 +8371,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/research_opportunities.py",
-      "sha256": "958e8ad97f02cff0965f642439dd26612ff5a137c5f653da4f93638f3eb20541",
-      "bytes": 3507
+      "sha256": "1f44a315d84da125b7caf295fd0bb41d4a37404a8c97e6e6c3693100a2c48fb9",
+      "bytes": 3552
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/facts.py",
@@ -8966,8 +8966,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/response_contract.py",
-      "sha256": "04f63b35909451f2b1c275abc99a5613ddf3a26d410848f0fce6344984b8f399",
-      "bytes": 1891
+      "sha256": "07e13c1cd3577b76a5a168f5eab5ca879c7bdec4690c1ff34755046001bea797",
+      "bytes": 2358
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/service.py",

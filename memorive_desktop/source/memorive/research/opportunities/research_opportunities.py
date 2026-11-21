@@ -49,6 +49,7 @@ def validate(items, allowed):
             raise ValueError('OPPORTUNITY_RESULT_INVALID')
         if row['classification'] not in CLASSIFICATIONS:
             raise ValueError('OPPORTUNITY_RESULT_INVALID')
-        if not isinstance(row['evidence_ids'], list) or not row['evidence_ids'] or any(i not in allowed for i in row['evidence_ids']):
+        if (not isinstance(row['evidence_ids'], list) or not row['evidence_ids']
+                or any(not isinstance(i, str) or i not in allowed for i in row['evidence_ids'])):
             raise ValueError('OPPORTUNITY_CITATION_INVALID')
     return [dict(r, state='draft', scientific_verdict='NOT_ASSESSED') for r in items]
