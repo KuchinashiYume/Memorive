@@ -242,8 +242,11 @@ def build_answer(store, draft, gaps=None, request_id=None):
             raise ValueError(f'{alias} has not been read: run `find` or `read` for its source first')
         exact = drafts.locate(quote, row['text'])   # the passage's own text, which Memo checks again
         if exact is None:
-            raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"; the closest text in '
-                             f'{alias} is: "{drafts.closest(quote, row["text"])}"')
+            elsewhere = [other for other, text in store['evidence'].items()
+                         if other != alias and drafts.locate(quote, text['text']) is not None]
+            hint = (f'it is in {", ".join(elsewhere)}: cite that passage' if elsewhere else
+                    f'the closest text in {alias} is: "{drafts.closest(quote, row["text"])}"')
+            raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"; {hint}')
         return {'evidence_id': row['id'], 'content_hash': row['content_hash'], 'quote': exact}, row['text']
 
     def render(supports):

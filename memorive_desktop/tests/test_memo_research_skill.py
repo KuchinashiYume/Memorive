@@ -128,7 +128,7 @@ def test_every_problem_of_a_draft_is_reported_and_nothing_is_saved(handoff):
     assert "0.03 not in the cited passages" in run.stderr
     assert f'{e}: the quote is not in the passage: "tested on live logs"' in run.stderr
     assert "E9 has not been read" in run.stderr
-    assert "a citation mark is not in the form" in run.stderr
+    assert '"[E1 "no colon"]" is not a citation mark' in run.stderr
     assert not (folder / "memo-answer.json").exists()
 
 
@@ -179,13 +179,16 @@ def test_a_draft_problem_says_how_to_fix_it(handoff):
     bridge(folder, "read")
     calibration, drift = alias(folder, "0.17 to 0.05"), alias(folder, "81% to 64%")
     path = draft(folder, f'Accuracy fell from 81% to 64% [{calibration}: "Temperature scaling reduced"]. '
-                         f'It was not tested on live logs [{calibration}: "not tested on live logs"].\n'
+                         f'It was not tested on live logs [{calibration}: "not tested on live logs"]. '
+                         f'Drift hurts accuracy [{calibration}: "Accuracy fell from 81% to 64%"].\n'
                          'Other studies report 0.91 accuracy.\n')
     run = bridge(folder, "answer", "--draft", path, check=False)
     assert run.returncode == 2
     assert f"81 not in the cited passages; it is in {drift}: cite that passage" in run.stderr
     assert (f'{calibration}: the quote is not in the passage: "not tested on live logs"; the closest text in '
             f'{calibration} is: "The method was not tested on live query logs."') in run.stderr
+    assert (f'{calibration}: the quote is not in the passage: "Accuracy fell from 81% to 64%"; it is in {drift}: '
+            'cite that passage') in run.stderr
     # Fixed, only the value nobody reports is left.
     path = draft(folder, f'Accuracy fell from 81% to 64% [{drift}: "fell from 81% to 64%"]. '
                          'Other studies report 0.91 accuracy.\n')
@@ -215,6 +218,7 @@ def test_an_answer_that_cannot_be_returned_is_saved_and_says_what_to_tell_the_us
     ("“degradation” problem", 'the "degradation" problem', '"degradation" problem'),
     ("34 layers 28.54", "34 layers\n28.54\n25.03", "34 layers\n28.54"),
     ("error — low", "error - low", "error - low"),
+    ("VOC07 mAP\\n57.1\\n59.2", "VOC07 mAP\n57.1\n59.2\n66.9", "VOC07 mAP\n57.1\n59.2"),
     ("not caused by noise", "is not caused by overfitting", None),
 ])
 def test_a_quote_is_found_as_the_passage_writes_it(quote, passage, found):

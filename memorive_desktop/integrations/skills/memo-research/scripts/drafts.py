@@ -61,8 +61,9 @@ def _even(text, hyphens=None):
 
 
 def locate(quote, passage):
-    """The passage's own text for quote, or None when the quote is not in it."""
-    wanted = _even(quote)[0].strip()
+    """The passage's own text for quote, or None when the quote is not in it. A line break typed as
+    \\n inside a quote (as when copying table cells) counts as a line break."""
+    wanted = _even(quote.replace('\\n', '\n').replace('\\t', '\t'))[0].strip()
     if not wanted:
         return None
     for hyphens in (None, 'drop', 'tight'):
@@ -164,9 +165,12 @@ def apply(draft, resolve, render, where_value=None):
             problems.append(f'"{claim["text"][:80]}": {value:g} not in the cited passages; {hint}, '
                             'or mark a computed value as [inference ...]')
     text = (text + draft[last:]).strip()
-    if LEFTOVER.search(MARK.sub(' ', draft)):    # in the draft: rendered locators such as [L7] are fine
-        problems.append('a citation mark is not in the form [E3: "quote"] / [S1 p.3 L120-124: "quote"] '
-                        'or [inference ...; ...]: every mark needs a quote copied from its passage')
+    rest = MARK.sub(' ', draft)    # in the draft: rendered locators such as [L7] are fine
+    for odd in LEFTOVER.finditer(rest):
+        end = rest.find(']', odd.start())
+        problems.append(f'"{rest[odd.start():end + 1 if 0 <= end - odd.start() < 160 else odd.start() + 80]}" is not '
+                        'a citation mark: write [E3: "quote"] / [S1 p.3 L120-124: "quote"] or [inference ...; ...], '
+                        'every mark with a quote copied from its passage')
     if not claims:
         problems.append('the draft cites no passage')
     return text, claims, problems

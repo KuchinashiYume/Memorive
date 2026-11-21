@@ -147,13 +147,13 @@
     },
     {
       "path": "integrations/skills/memo-research/scripts/drafts.py",
-      "sha256": "c403ae6ccb7c5307cc218e97f7165cfd9651282149b04fe3170e82f5da7f9dab",
-      "bytes": 8087
+      "sha256": "182742bdde6b6a58125dd36a6b65e5606f92e1b21e9b73e57761b98a2984089c",
+      "bytes": 8402
     },
     {
       "path": "integrations/skills/memo-research/scripts/memo_bridge.py",
-      "sha256": "f621183fdac880259ab682b82eddb170d6d1cadad9941f2a5316417843849122",
-      "bytes": 24491
+      "sha256": "bc943571f6bb47c8556a6496b79487c879415bbc61e82a9b1acec0696ead8ba5",
+      "bytes": 24752
     },
     {
       "path": "integrations/skills/memo-research/scripts/requirements-pdf.txt",
