@@ -251,6 +251,18 @@ def test_after_a_restart_an_answer_the_model_already_returned_is_saved(setup, tm
         restarted.close()
 
 
+def test_an_agent_answer_saved_after_a_restart_keeps_the_agent_task_in_its_context():
+    # The context sent to the agent names the agent task; taking it up again after a restart used to put the
+    # question's intent there, so the saved context no longer matched the prompt the agent was given.
+    from memorive.research.workspace.answering import AnswerJob
+    job = AnswerJob.__new__(AnswerJob)
+    job.job, job.request_context = {"kind": "agent"}, {"language_context": {"answer_language": "en-US"}}
+    sent = {"context": {"task_intent": "agent", "evidence": []}, "summary": [], "refs": [], "search": {},
+            "intent": "question", "coverage_snapshot": {}, "evidence_context": {}}
+    job.reuse_evidence(sent)
+    assert job.context["task_intent"] == "agent" and job.intent == "question"
+
+
 def test_an_answer_saved_after_a_restart_records_the_request_the_model_was_given(setup, tmp_path):
     # Between the model call and the restart the material's title changes. The answer is saved from the
     # evidence and prompt kept on the job before the call; it used to search again and record a prompt the

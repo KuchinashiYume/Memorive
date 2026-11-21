@@ -175,7 +175,8 @@ class AnswerJob:
         self.coverage_snapshot = copy.deepcopy(prior['coverage_snapshot'])
         self.evidence_context = copy.deepcopy(prior['evidence_context'])
         self.admitted = {r['id'] for r in self.refs}
-        self.context.update(self.request_context, task_intent=self.intent)
+        # As gather_evidence builds it: an agent job's context names the agent task, whatever the question's intent.
+        self.context.update(self.request_context, task_intent='agent' if self.job.get('kind') == 'agent' else self.intent)
 
     def gather_evidence(self):
         """Search the selected material, choose the excerpts and build the model context."""
@@ -560,6 +561,10 @@ class AnswerJob:
             'actual_instruction_sha256': digest(self.prompt.split('<SOURCE_CONTEXT>', 1)[0].encode()),
             'parent_path_hash': job['parent_path_hash'], 'retry_of': job.get('retry_of'),
         }
+        if self.received and not job.get('sent_request'):
+            # Received before a restart by a version that did not keep what it sent: the evidence and prompt
+            # recorded here were gathered again and may differ from what the model was given.
+            answer['generation']['request_gathered_again_after_restart'] = True
         return answer
 
     def checked_opportunities(self, answer, db):
