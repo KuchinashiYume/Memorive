@@ -421,7 +421,7 @@ class AnswerJob:
         if self.no_material:
             from memorive.research.workspace import no_material
             self.text, self.no_material_record = no_material.answer(
-                self.value, self.thread, self.request_context['language_context'])
+                self.value, self.thread, self.request_context['language_context'], self.question)
             self.citations = []
         else:
             self.check_answer()

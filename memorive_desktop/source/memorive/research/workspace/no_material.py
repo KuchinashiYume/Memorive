@@ -10,7 +10,8 @@ paragraph is shown apart from the answer (the page folds it), is never cited, an
 knowledge or a research note: the reply has no knowledge draft and no notes.
 
 Every sentence that holds a number is left out of both parts, so a value recalled from memory cannot
-reach the answer; digits inside names (ResNet-34, VGG16) do not count.
+reach the answer. Digits inside names (ResNet-34, VGG16) and numbers the question itself holds (a
+34-layer network) do not count.
 """
 import re
 
@@ -44,17 +45,19 @@ Leave it empty if you have nothing reliable to say.
 Write both in the output language of the request."""
 
 NAME_DIGITS = re.compile(r'(?<=[A-Za-z])-?\d+')
+NUMBER = re.compile(r'\d+(?:\.\d+)?')
 SENTENCE_END = re.compile(r'(?<=[。！？；])|(?<=[.!?;])\s+|\n+')
 
 
-def without_values(text):
-    """text without the sentences that hold a number, and how many were left out."""
+def without_values(text, question=''):
+    """text without the sentences that hold a number the question does not, and how many were left out."""
+    asked = set(NUMBER.findall(question or ''))
     kept, left_out = [], 0
     for sentence in SENTENCE_END.split(text or ''):
         sentence = sentence.strip()
         if not sentence:
             continue
-        if re.search(r'\d', NAME_DIGITS.sub('', sentence)):
+        if any(number not in asked for number in NUMBER.findall(NAME_DIGITS.sub('', sentence))):
             left_out += 1
         else:
             kept.append(sentence)
@@ -66,13 +69,13 @@ def without_values(text):
     return joined, left_out
 
 
-def answer(value, thread, language):
+def answer(value, thread, language, question=''):
     """The saved text and the record the page shows it from (the message's no_material field)."""
     if (not isinstance(value, dict) or set(value) != {'missing', 'background'}
             or not all(isinstance(value[k], str) for k in ('missing', 'background'))):
         raise ValueError('CHAT_RESPONSE_INVALID')
-    missing, missing_left_out = without_values(value['missing'])
-    background, background_left_out = without_values(value['background'])
+    missing, missing_left_out = without_values(value['missing'], question)
+    background, background_left_out = without_values(value['background'], question)
     searched_project = bool(thread.get('include_project', thread.get('scope', 'project') == 'project'))
     head = choose(language,
                   '没有找到能回答这个问题的资料。' + ('本对话和整个项目里都没有相关的资料。' if searched_project

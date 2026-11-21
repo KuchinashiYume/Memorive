@@ -98,10 +98,13 @@ def test_with_no_material_an_ordinary_answer_is_refused(ask):
     assert answers == []
 
 
-@pytest.mark.parametrize("text, kept, left_out", [
-    ("残差连接让信号跨层传递。ResNet-34 的错误率是 25.03%。VGG16 更深。", "残差连接让信号跨层传递。VGG16 更深。", 1),
-    ("It was published in 2016. Shortcuts add no parameters.", "Shortcuts add no parameters.", 1),
-    ("", "", 0),
+@pytest.mark.parametrize("text, question, kept, left_out", [
+    ("残差连接让信号跨层传递。ResNet-34 的错误率是 25.03%。VGG16 更深。", "", "残差连接让信号跨层传递。VGG16 更深。", 1),
+    ("It was published in 2016. Shortcuts add no parameters.", "", "Shortcuts add no parameters.", 1),
+    # a number the question holds is the user's own, not a value from memory
+    ("需要对照 34 层普通网络和残差网络的表格。它的错误率是 25.03%。", "34 层网络的 top-1 错误率降低了多少？",
+     "需要对照 34 层普通网络和残差网络的表格。", 1),
+    ("", "", "", 0),
 ])
-def test_sentences_with_values_are_left_out(text, kept, left_out):
-    assert no_material.without_values(text) == (kept, left_out)
+def test_sentences_with_values_are_left_out(text, question, kept, left_out):
+    assert no_material.without_values(text, question) == (kept, left_out)
