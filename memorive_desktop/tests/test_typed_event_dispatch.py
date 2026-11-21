@@ -21,7 +21,9 @@ def _api(state_root):
 
 
 def _files(root):
-    return {p.relative_to(root).as_posix(): p.stat().st_size for p in root.rglob("*") if p.is_file()}
+    # Names only: the app's background threads keep SQLite databases open, and a database's -wal or
+    # -shm file can disappear between listing it and reading its size (a full run failed on that once).
+    return {p.relative_to(root).as_posix() for p in root.rglob("*") if not p.is_dir()}
 
 
 def test_dispatch_receipts_and_no_event_files(tmp_path):
