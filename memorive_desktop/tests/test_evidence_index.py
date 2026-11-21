@@ -8,6 +8,7 @@ in a temporary folder.
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 from pathlib import Path
 
@@ -87,6 +88,20 @@ def test_the_page_markers_of_a_markdown_file_give_its_excerpts_their_pages(works
         (None, 1, 1, "# K12"), (8, 3, 4, "Growth at 25 C.\nGrowth at 30 C."), (9, 6, 6, "Growth at 37 C.")]
     excerpt = workspace.index.read(rows[1]["id"], "default")
     assert (excerpt["page"], excerpt["line_start"], excerpt["line_end"]) == (8, 3, 4)
+
+
+def test_adding_an_unchanged_file_again_keeps_the_excerpts_answers_cite(workspace, tmp_path, monkeypatch):
+    # A version that did not read page markers cut a marked Markdown file into one page-less excerpt. Adding the
+    # same file again used to cut it anew with pages and drop that excerpt, so citations of it were not found.
+    from memorive.research.workspace import evidence
+    text = "\n".join(["<!-- memorive:page:8 -->", "Growth at 25 C.", "<!-- memorive:page:9 -->", "Growth at 37 C."])
+    monkeypatch.setattr(evidence, "PAGE_MARKER", re.compile(r"(?!)"))  # cut as that version did
+    material = add_paper(workspace, tmp_path / "library", text=text)
+    [old] = excerpts(workspace, material["id"])
+    monkeypatch.undo()
+    again = add_paper(workspace, tmp_path / "library", text=text)
+    assert [row["id"] for row in excerpts(workspace, again["id"])] == [old["id"]] and again["chunks"] == 1
+    assert workspace.index.read(old["id"], "default")["text"] == old["text"]
 
 def test_an_excerpt_of_a_changed_file_is_not_read(workspace, tmp_path):
     material = add_paper(workspace, tmp_path / "library")

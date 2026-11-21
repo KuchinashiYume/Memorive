@@ -216,8 +216,16 @@ class EvidenceIndex:
             'source_content_hash': source_content_hash.lower() if source_content_hash else None,
             'selection': 'EXPLICIT_DESKTOP_USER', **({'structure_binding': structure_binding} if structure_binding else {})}
         with self.store.tx() as db:
+            # The same text added again keeps the excerpts it was cut into before: saved answers cite them by id,
+            # and an earlier version may have cut it otherwise (before page markers were read, for one).
+            old = self.store.get('artifact', identity, db=db)
+            kept = old and old['content_hash'] == raw_hash and db.execute(
+                'SELECT COUNT(*) FROM chunks WHERE artifact_id=?', (identity,)).fetchone()[0]
+            if kept:
+                artifact['chunks'] = kept
             row = self.store.put('artifact', identity, project, artifact, db=db)
-            replace_excerpts(db, identity, rows)
+            if not kept:
+                replace_excerpts(db, identity, rows)
         return row
 
     def _page_layout_binding(self, root, structure_bundle, expected_hash, source_content_hash):
