@@ -6,16 +6,27 @@ from memorive.research.common import sha, sealed, write, read
 from memorive.research.reports.digest_builder import build_digest
 
 
+def _time(value):
+    return datetime.fromisoformat(str(value).replace('Z','+00:00'))
+
+
 def material_progress(host):
-    completed = {r['job_id'] for r in host.library_job_rows() if r.get('control_state') == 'SUCCEEDED'}
+    jobs = host.library_job_rows()
+    completed = {r['job_id'] for r in jobs if r.get('control_state') == 'SUCCEEDED'}
+    succeeded = {}  # source file -> its latest successful processing
+    for r in jobs:
+        if r.get('control_state') == 'SUCCEEDED' and r.get('source_sha256') and r.get('updated_at'):
+            succeeded[r['source_sha256']] = max(succeeded.get(r['source_sha256'], _time(r['updated_at'])), _time(r['updated_at']))
     papers = [dict(r,material_kind='PAPER') for r in host.library.core_activity_rows() if r['task_id'] in completed]
     conversations = [dict(r,material_kind='REFINEMENT') for r in host.library.refinement_activity_rows()]
     # Divergences and condition differences found between papers (research/opportunities/runs.py).
     from memorive.research.opportunities.runs import report_rows
     tensions = report_rows(host.profile_path('WORKSPACE')/'research')
     # Processing that ended without a result goes in the 失败 category, shown under 需要处理; a day with only
-    # failures has a report of its own. A failed attempt stays listed after a later one succeeds.
-    failed = [dict(row, material_kind='FAILED_PAPER', task_id=row['job_id'], stable_locator='job:'+row['job_id'])
+    # failures has a report of its own. A failed attempt stays listed after a later one succeeds, as such.
+    failed = [dict(row, material_kind='FAILED_PAPER', task_id=row['job_id'], stable_locator='job:'+row['job_id'],
+                   retried_successfully=row.get('source_sha256') in succeeded
+                   and succeeded[row['source_sha256']] > _time(row['updated_at']))
               for row in host.library_failed_job_rows() if row.get('updated_at')]
     # Review clicks, reading, reports and discovery metadata do not count as a new
     # processed paper or newly refined conversation.
@@ -121,7 +132,10 @@ def render(runtime, run_id, params):
             axis,state,event_kind='artifact_registry','RESULT_AVAILABLE','MATERIAL_OUTPUT_READY'
             if kind=='FAILED_PAPER':
                 state=items[0]['control_state']
-                text=(choose(language,'《{0}》没能开始处理','“{0}”: processing could not start','「{0}」の処理を開始できませんでした')
+                text=(choose(language,'《{0}》处理失败，之后重试成功','“{0}”: processing failed, a later attempt succeeded',
+                             '「{0}」の処理は失敗し、後の再試行で成功しました')
+                      if items[0].get('retried_successfully') else
+                      choose(language,'《{0}》没能开始处理','“{0}”: processing could not start','「{0}」の処理を開始できませんでした')
                       if state=='BLOCKED_BEFORE_START' else
                       choose(language,'《{0}》文献处理失败，没有产出成果','“{0}”: paper processing failed, no outputs',
                              '「{0}」の文献処理が失敗し、成果はありません')).format(name)

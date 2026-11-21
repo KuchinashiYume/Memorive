@@ -50,9 +50,12 @@ class CoreProducts:
         for status in projection.get("jobs", []) if isinstance(projection, Mapping) else []:
             state = str(status.get("job_control_state") or "").upper() if isinstance(status, Mapping) else ""
             if status.get("job_type") == "memorive-core" and state in {"FAILED", "BLOCKED_BEFORE_START"}:
+                job = self.service.call("get_job", {"job_id": status["job_id"]})
+                resolved = job.get("snapshots", {}).get("resolved_task_input", {}).get("content", {})
+                source = (resolved.get("content_sha256") if isinstance(resolved, Mapping) else None) or job.get("source_sha256")
                 rows.append({"job_id": str(status["job_id"]), "control_state": state,
                              "display_name": str(status.get("display_name") or status["job_id"])[:180],
-                             "updated_at": status.get("updated_at")})
+                             "source_sha256": str(source or "").upper(), "updated_at": status.get("updated_at")})
         return rows
 
     def job_rows(self, only_job_id: str | None = None) -> list[dict[str, Any]]:

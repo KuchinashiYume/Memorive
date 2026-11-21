@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "b8d5635d094eb29ba5d9f38ad60147169acd2d93de7acce9eb1b378866b80c11",
+      "sha256": "03a6eba65800bad36c3f45163a12f177754fa044aa881e3c5741672f77019f73",
       "bytes": 278081
     },
     {
@@ -7106,8 +7106,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/core_products.py",
-      "sha256": "b7599cb871bb0e8d7bc5a183503f42d0f5d809332f4424a42ec4edbad396397e",
-      "bytes": 29267
+      "sha256": "0a0e5c4064fef51f9861098a2e6872e9451889aa054328c5cdd5f88b3c8bc6ba",
+      "bytes": 29626
     },
     {
       "path": "memorive_desktop/source/memorive/documents/library/paper_review.py",
@@ -8706,8 +8706,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/reports/periodic.py",
-      "sha256": "1d5539617cc91a19c975d8b0d1b3f0ecf53680895c295c4caf541af4c924850d",
-      "bytes": 10991
+      "sha256": "12a523995eca7beb2cd12d8fc28db994ba79dcc94126cea44711f1ae934d1cf3",
+      "bytes": 11911
     },
     {
       "path": "memorive_desktop/source/memorive/research/reports/schedule.py",

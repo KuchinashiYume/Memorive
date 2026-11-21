@@ -68,3 +68,21 @@ def test_a_failed_processing_job_is_reported_under_failures(tmp_path):
     composed=compose(runtime,'run-1',{'report_model':{'profile_kind':'API','model_name':'m'},'period':'daily'},result)
     assert (composed['narrative_status'],composed['model_calls'],composed['paid_model_calls'])==('NOT_REQUESTED_NO_LIBRARY_CHANGE',0,0)
 
+
+def test_a_failure_retried_successfully_later_says_so(tmp_path):
+    # The same file processed again with success: the failure stays counted but no longer reads as open work
+    # (the report's summary used to ask for the reason of a failure already retried).
+    from memorive.research.reports.periodic import material_progress,windows,render
+    library=SimpleNamespace(core_activity_rows=lambda:[],refinement_activity_rows=lambda:[])
+    host=SimpleNamespace(library=library,profile_path=lambda area:tmp_path,
+        library_job_rows=lambda:[{'job_id':'job-2','control_state':'SUCCEEDED','source_sha256':'S','updated_at':'2026-09-01T11:00:00Z'}],
+        library_failed_job_rows=lambda:[{'job_id':'job-1','control_state':'FAILED','display_name':'Zeiler2014.pdf',
+                                         'source_sha256':'S','updated_at':'2026-09-01T10:00:00Z'}])
+    [daily]=[w for w in windows(material_progress(host),datetime(2026,9,8,tzinfo=timezone.utc)) if w['window']['period']=='daily']
+    (tmp_path/'run-1').mkdir()
+    runtime=SimpleNamespace(run_path=lambda run_id:tmp_path/run_id,update_state=lambda run_id,**fields:None)
+    result=render(runtime,'run-1',{'report_window':daily['window'],'material_progress':daily['progress'],
+                                   'report_cutoff':'2026-09-08T00:00:00+00:00'})
+    sections={s['title']:s['items'] for s in result['digest']['sections']}
+    assert [item['text'] for item in sections['失败']]==['《Zeiler2014.pdf》处理失败，之后重试成功']
+
