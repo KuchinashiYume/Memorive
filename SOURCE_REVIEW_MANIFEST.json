@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "59e1834dc9aad12342e5ecfd20d5ebc33d921e760972339d028dd09931d41fbd",
+      "sha256": "6c1b66e511ed2d0b61f00b0d74a13fdbcc75d5a859f98fe013c959339f2a079d",
       "bytes": 276404
     },
     {
@@ -8876,8 +8876,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/attachments.py",
-      "sha256": "2e78562b5ed60ad43d4fa255d6abacc7ddf8d718b97e017337e4c232a0d8ebf2",
-      "bytes": 20214
+      "sha256": "379f98da3b8b10c9087b61fdc5b7c1c6c62b9f5d6dfc998e725ac6ee09d64bec",
+      "bytes": 20225
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/bibliography.py",
@@ -8936,8 +8936,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/evidence.py",
-      "sha256": "30fc5b3d82bea3e83efeaaeb1c040f7abc839a844834b4a04f2b53e2fe28e5c1",
-      "bytes": 26515
+      "sha256": "c050717b38f207e18277a94948b7e83b3c24a151886d2d56b4ce193e286a733f",
+      "bytes": 26860
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/handoffs.py",
@@ -8986,8 +8986,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/store.py",
-      "sha256": "d4a9eddb47bbc37d813da6ff2320be268f946326145e8735ceef8b36b47d8870",
-      "bytes": 8490
+      "sha256": "1057f3e8663f51d2bd24df976fd80b76ca8ab4de6442bccf3b12444a87db66ed",
+      "bytes": 9193
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/topic.py",

@@ -334,7 +334,8 @@ class EvidenceIndex:
                     'notice': 'Current admission metadata. Draft wording inside the saved title or text is historical content. Admission does not establish scientific correctness.'}}
         structure_refs = self._places_in_page_layout(artifact, row['text'])
         return {'id':evidence_id,'artifact_id':artifact['id'],'title':artifact['title']+(' · '+field['field_label'] if field else ''),'text':row['text'],'card_field':field,
-            'content_hash':artifact['content_hash'],'chunk_hash':row['hash'],'path':artifact['path'],
+            'content_hash':artifact['content_hash'],'chunk_hash':row['hash'],
+            'path':artifact['path'] if artifact['kind'] == 'source' else str(self.store.here(artifact['path'])),
             'line_start':row['line_start'],'line_end':row['line_end'],'page':row['page'],'kind':artifact['kind'],'project':project,
             'document_id':binding.get('document_id',artifact.get('document_id',artifact['id'])),'source_uri':uri,'source_binding':binding,
             'material_layer':material_layer(artifact),'source_content_hash':source_document_hash(artifact),**review,
@@ -352,10 +353,13 @@ class EvidenceIndex:
                 original = safe_path(connection['root'], document['path'])
                 if not file_unchanged(original, document['file_hash']):
                     raise ValueError('EVIDENCE_STALE')
+        # A file of the project's own folder stays where it was; everything else is inside the workspace, which may
+        # have moved with the data folder.
+        here = Path if artifact['kind'] == 'source' else self.store.here
         if artifact['kind'] in {'source', 'library'}:
-            path = safe_path(artifact['root'], artifact['path'])
+            path = safe_path(here(artifact['root']), here(artifact['path']))
         else:  # made inside the workspace: a derived note, an attachment ...
-            path = Path(artifact['path']).resolve(strict=False)
+            path = here(artifact['path']).resolve(strict=False)
             if not path.is_relative_to(self.store.root) or not windows_io_path(path).is_file():
                 raise ValueError('EVIDENCE_OUTSIDE_WORKSPACE')
             # A derived note holds only while the excerpts it was made from hold.
@@ -364,11 +368,11 @@ class EvidenceIndex:
         if not file_unchanged(path, artifact['content_hash']):
             raise ValueError('EVIDENCE_STALE')
         if artifact.get('source_original_path'):
-            original = safe_path(artifact['root'], artifact['source_original_path'])
+            original = safe_path(here(artifact['root']), here(artifact['source_original_path']))
             if not file_unchanged(original, artifact['source_content_hash']):
                 raise ValueError('EVIDENCE_STALE')
         if artifact.get('extraction_path'):
-            extraction = Path(artifact['extraction_path']).resolve(strict=False)
+            extraction = here(artifact['extraction_path']).resolve(strict=False)
             if (not extraction.is_relative_to(self.store.root) or not windows_io_path(extraction).is_file()
                     or not file_unchanged(extraction, artifact['extraction_hash'])):
                 raise ValueError('EVIDENCE_STALE')

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -116,3 +117,27 @@ def test_the_material_scope_of_a_conversation(workspace, tmp_path):
     assert workspace.store.get("artifact", a)["state"] == "active"  # removed from the conversation only
     with pytest.raises(ValueError, match="MATERIAL_OUTSIDE_PROJECT"):
         workspace.attachments.preview(thread["project"], foreign)
+
+
+def _move(tmp_path):
+    """The data folder copied to another place as a whole, the old one gone (a restored backup)."""
+    shutil.copytree(tmp_path / "old", tmp_path / "moved")
+    shutil.rmtree(tmp_path / "old")
+    return ResearchWorkspace(tmp_path / "moved" / "workspace", catalog=lambda: [])
+
+
+def test_material_is_read_after_the_data_folder_moved(tmp_path):
+    # The citation of a file added to a conversation used to fail with EVIDENCE_OUTSIDE_WORKSPACE once the data
+    # folder had moved: the recorded copy was outside the workspace's new folder.
+    opened = ResearchWorkspace(tmp_path / "old" / "workspace", catalog=lambda: [])
+    thread = opened.thread_create()
+    note = write(tmp_path / "files", "note.md", NOTE.encode("utf-8"))
+    [item] = attach(opened, thread, note)["items"]
+    first = opened.index.read(opened.attachments.preview(thread["project"], item["id"])["evidence"][0]["id"],
+                              thread["project"])
+    opened.close()
+    moved = _move(tmp_path)
+    try:
+        assert moved.index.read(first["id"], thread["project"])["text"] == first["text"]
+    finally:
+        moved.close()

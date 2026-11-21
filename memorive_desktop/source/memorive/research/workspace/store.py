@@ -37,6 +37,17 @@ class Store:
             if self.get('project','default',db=db) is None:
                 self.put('project','default','default',{'name':'默认研究项目','vault':None,'index_epoch':0},db=db)
 
+    def here(self,recorded):
+        """A path recorded inside this workspace, below the workspace's folder as it is now. Records keep absolute
+        paths; when the data folder was moved as a whole (a restored backup, another drive) each file is at the same
+        place below this folder. A path that is below this folder already, or has no folder of this folder's name,
+        is returned as recorded. Callers still compare the file's hash."""
+        path=Path(recorded)
+        parts=path.parts
+        if path.is_relative_to(self.root) or self.root.name not in parts:
+            return path
+        return self.root.joinpath(*parts[len(parts)-parts[::-1].index(self.root.name):])
+
     @contextmanager
     def tx(self):
         db=sqlite3.connect(self.path,timeout=15,isolation_level=None)

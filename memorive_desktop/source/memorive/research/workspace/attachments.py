@@ -249,7 +249,7 @@ class Attachments:
     def _pages(self, artifact, profile_ref, job_id):
         """The file's text by page. Pictures, and PDF pages without a text layer, are read by the
         vision model of the conversation; each call's receipt is kept."""
-        path = Path(artifact['path'])
+        path = self.store.here(artifact['path'])
         raw = windows_io_path(path).read_bytes()
         suffix = path.suffix.lower()
         receipts = []

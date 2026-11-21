@@ -8,6 +8,7 @@ in a temporary folder.
 from __future__ import annotations
 
 import hashlib
+import shutil
 from pathlib import Path
 
 import pytest
@@ -129,3 +130,26 @@ def test_a_project_folder_is_indexed_without_private_folders_or_settings(workspa
     workspace.index.refresh(project)
     [row] = excerpts(workspace, sources["k12"]["id"])
     assert workspace.index.read(row["id"], project)["text"] == "edited"
+
+
+def _move(tmp_path):
+    """The data folder copied to another place as a whole, the old one gone (a restored backup)."""
+    shutil.copytree(tmp_path / "old", tmp_path / "moved")
+    shutil.rmtree(tmp_path / "old")
+    return ResearchWorkspace(tmp_path / "moved" / "workspace", catalog=lambda: [])
+
+
+def test_an_excerpt_is_read_after_the_data_folder_moved(tmp_path):
+    # Records keep absolute paths. The workspace's copy of a library file used to be looked for at the old place,
+    # so no excerpt of it could be read after the data folder moved.
+    opened = ResearchWorkspace(tmp_path / "old" / "workspace", catalog=lambda: [])
+    material = add_paper(opened, tmp_path / "library")
+    first = excerpts(opened, material["id"])[0]
+    opened.close()
+    moved = _move(tmp_path)
+    try:
+        excerpt = moved.index.read(first["id"], "default", expected_hash=material["content_hash"])
+        assert excerpt["text"] == first["text"]
+        assert Path(excerpt["path"]).is_relative_to(moved.store.root)
+    finally:
+        moved.close()

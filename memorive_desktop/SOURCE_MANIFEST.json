@@ -6757,8 +6757,8 @@
     },
     {
       "path": "source/memorive/research/workspace/attachments.py",
-      "sha256": "2e78562b5ed60ad43d4fa255d6abacc7ddf8d718b97e017337e4c232a0d8ebf2",
-      "bytes": 20214
+      "sha256": "379f98da3b8b10c9087b61fdc5b7c1c6c62b9f5d6dfc998e725ac6ee09d64bec",
+      "bytes": 20225
     },
     {
       "path": "source/memorive/research/workspace/bibliography.py",
@@ -6817,8 +6817,8 @@
     },
     {
       "path": "source/memorive/research/workspace/evidence.py",
-      "sha256": "30fc5b3d82bea3e83efeaaeb1c040f7abc839a844834b4a04f2b53e2fe28e5c1",
-      "bytes": 26515
+      "sha256": "c050717b38f207e18277a94948b7e83b3c24a151886d2d56b4ce193e286a733f",
+      "bytes": 26860
     },
     {
       "path": "source/memorive/research/workspace/handoffs.py",
@@ -6867,8 +6867,8 @@
     },
     {
       "path": "source/memorive/research/workspace/store.py",
-      "sha256": "d4a9eddb47bbc37d813da6ff2320be268f946326145e8735ceef8b36b47d8870",
-      "bytes": 8490
+      "sha256": "1057f3e8663f51d2bd24df976fd80b76ca8ab4de6442bccf3b12444a87db66ed",
+      "bytes": 9193
     },
     {
       "path": "source/memorive/research/workspace/topic.py",
