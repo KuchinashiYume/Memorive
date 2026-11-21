@@ -258,6 +258,7 @@ def build_answer(store, draft, gaps=None, request_id=None):
         return [alias for alias, row in store['evidence'].items() if value in drafts.numbers(row['text'])]
 
     answer, claims, problems = drafts.apply(draft, resolve, render, where_value)
+    answer = re.sub(r'(\[\d+\])(?:\s*\1)+', r'\1', answer)   # marks one after another on one passage: [4] [4]
     loose = [] if problems else uncited_values(answer, claims, store)
     if loose:
         problems.append(f'{", ".join(f"{v:g}" for v in loose)}: in the answer without a cited passage. Put each value '

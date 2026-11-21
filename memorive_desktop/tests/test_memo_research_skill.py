@@ -164,7 +164,9 @@ def test_an_answer_from_found_passages_returns_with_partial_coverage_and_typed_q
     bridge(folder, "find", "temperature scaling")
     e = alias(folder, "0.17 to 0.05")
     # Chinese quotation marks and colon are read like "..." and ":".
-    path = draft(folder, f'温度缩放把期望校准误差从 0.17 降到 0.05 [{e}：“reduced the expected calibration error from 0.17 to 0.05”]。\n')
+    # Two marks on one passage show one number.
+    path = draft(folder, f'温度缩放把期望校准误差从 0.17 降到 0.05 [{e}：“reduced the expected calibration error from 0.17 to 0.05”] '
+                         f'[{e}: "1,200 questions"]。\n')
     report = json.loads(bridge(folder, "answer", "--draft", path, "--return").stdout)
     assert (report["status"], report["returned"]["status"]) == ("RETURNED", "RETURNED")
     assert "nothing else is needed" in report["next"]

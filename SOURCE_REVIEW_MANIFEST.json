@@ -891,8 +891,8 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/scripts/memo_bridge.py",
-      "sha256": "bc943571f6bb47c8556a6496b79487c879415bbc61e82a9b1acec0696ead8ba5",
-      "bytes": 24752
+      "sha256": "bd61beb6ef7cc9fed610ccb8466c90bb7002b852a8e3939fcbec7d3dacb8c9ed",
+      "bytes": 24863
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/scripts/requirements-pdf.txt",
@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "ccbf789173f88dd8b0cc49bbd030bf1d0361643f9aa3cd2d703e27c11cfd1e90",
+      "sha256": "69af495b6b093957e62b601fbbe5f0c0e517117c01c4372829e74425c1d6de8e",
       "bytes": 276404
     },
     {
