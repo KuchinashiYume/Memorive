@@ -346,6 +346,33 @@ def test_an_agent_returns_its_answer_with_the_skill_copy_in_the_folder(desktop):
     assert reply["skill_result"]["handoff_id"] == json.loads((folder / "handoff.json").read_text(encoding="utf-8"))["id"]
 
 
+def test_a_desktop_handoff_reads_its_sources_after_the_data_folder_moved(tmp_path):
+    # A file added to a conversation is copied into the workspace. After the data folder was moved as a whole
+    # (a restored backup, another drive), the hand-off read it at the recorded old path and listed it as unavailable.
+    import shutil
+    old = ResearchWorkspace(tmp_path / "old" / "ws")
+    thread = old.thread_create()
+    paper = tmp_path / "files" / "calibration.md"
+    paper.parent.mkdir()
+    paper.write_text(CALIBRATION, encoding="utf-8")
+    old.attachments.attach(thread["id"], [str(paper)])
+    for future in list(old.futures.values()):
+        future.result(timeout=60)
+    old.settings_save({"agent": "claude-desktop", "desktop_agents": {"claude-desktop": {"model": "opus"}}},
+                      old.settings()["revision"])
+    old.close()
+    shutil.copytree(tmp_path / "old", tmp_path / "moved")
+    shutil.rmtree(tmp_path / "old")
+    moved = ResearchWorkspace(tmp_path / "moved" / "ws")
+    try:
+        prepared = desktop_handoff(moved, thread["id"], QUESTION, tmp_path / "desktop")
+        assert prepared["source_count"] == 1 and prepared["warnings"] == []
+        sources = (Path(prepared["path"]) / "sources.md").read_text(encoding="utf-8")
+        assert "Status: READY" in sources
+    finally:
+        moved.close()
+
+
 # Without Memo: prepare, cite, and later bind to Memo
 
 def helper(*args, check=True):

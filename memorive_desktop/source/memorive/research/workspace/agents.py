@@ -156,8 +156,11 @@ def _export_source(workspace, artifact, number, material, folder, warnings):
     A source that cannot be exported is listed with its issue and added to warnings."""
     row = {'id': artifact['id'], 'title': artifact['title'], 'state': artifact['state'],
            'source_hash': artifact['content_hash'], 'files': []}
+    # A file of the project's own folder stays where it was; everything else is inside the workspace, which may
+    # have moved with the data folder (Store.here, as evidence.py reads it).
+    here = Path if artifact['kind'] == 'source' else workspace.store.here
     try:
-        source = safe_path(workspace.store.root if artifact['kind'] == 'derived' else artifact['root'], artifact['path'])
+        source = safe_path(workspace.store.root if artifact['kind'] == 'derived' else here(artifact['root']), here(artifact['path']))
         data = windows_io_path(source).read_bytes()  # read once: what is written is what was checked
         if digest(data) != artifact['content_hash']:
             raise ValueError('EVIDENCE_STALE')
@@ -173,7 +176,7 @@ def _export_source(workspace, artifact, number, material, folder, warnings):
         row['files'].append(extracted.relative_to(folder).as_posix())
         row['chunks'] = len(excerpts)
         if artifact.get('source_original_path'):
-            original = safe_path(artifact['root'], artifact['source_original_path'])
+            original = safe_path(here(artifact['root']), here(artifact['source_original_path']))
             data = original.read_bytes()
             if digest(data) != artifact['source_content_hash']:
                 raise ValueError('EVIDENCE_STALE')
