@@ -79,7 +79,8 @@ class ResearchMemoMixin:
         if ctypes.windll.shell32.SHGetFolderPathW(None,28,None,0,buffer)!=0:
             raise ValueError('HANDOFF_DIRECTORY_UNAVAILABLE')
         root=Path(buffer.value)/'Memorive'/'Handoff'
-        return desktop_handoff(self._memo,request['thread_id'],request.get('question',''),root)
+        skill=self._integrations_root()/'skills'/'memo-research'
+        return desktop_handoff(self._memo,request['thread_id'],request.get('question',''),root,skill if skill.is_dir() else None)
 
     def memo_desktop_handoff_action(self,request):
         self.call('memo.capabilities',{})
@@ -109,9 +110,15 @@ class ResearchMemoMixin:
             os.startfile('shell:AppsFolder\\'+app['app_id'])
         return {'status':'OPEN_REQUESTED','model_called':False,'task_started':False}
 
+    def _integrations_root(self):
+        """The integrations shipped with the app (companions, developer API, research skills): beside the
+        executable when packaged, memorive_desktop/integrations when run from source."""
+        base=Path(sys.executable).parent if getattr(sys,'frozen',False) else self._source_root.parent
+        return base/'integrations'
+
     def memo_agent_config(self):
         self.call('memo.capabilities',{})
-        base=Path(sys.executable).parent if getattr(sys,'frozen',False) else self._source_root.parent
+        base=self._integrations_root().parent
         helper=Path(sys.executable) if getattr(sys,'frozen',False) else base/'Memorive.exe'
         args=['--memo-agent','--workspace',str(self._memo.store.root),'--mcp']
         if not helper.exists():

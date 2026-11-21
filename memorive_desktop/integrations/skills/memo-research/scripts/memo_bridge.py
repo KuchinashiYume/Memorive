@@ -1,5 +1,7 @@
 """Read a Memo hand-off's sources and return a cited answer, through Memo's published local transport.
 
+    find    HANDOFF TERM [TERM ...] [--artifact ID]     print the passages that contain a term, numbered
+                                                        E1, E2 ..., and keep them like read does
     read    HANDOFF [--artifact ID] [--pages A-B]       fetch the evidence, number it E1, E2 ... and write
                                                         work/evidence.md (to read) and work/evidence.json
     answer  HANDOFF --draft DRAFT.md [--gap TEXT] [--return]
@@ -18,6 +20,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -30,6 +33,21 @@ for _stream in (sys.stdout, sys.stderr):
 ANSWER_SCHEMA = 'memo-research-answer/1'
 BRIDGE_METHODS = {'memo.capabilities', 'memo.skill_context', 'memo.skill_answer'}
 # [E3: "quote"] · [E3: "quote"; E5: "quote"] · [inference E3: "quote"; E5: "quote"]
+# What Memo's refusals mean for the agent: keep the answer, the hand-off cannot take it any more.
+REFUSALS = {
+    'HANDOFF_VERSION_CHANGED': 'the conversation or its sources changed after this hand-off was made',
+    'HANDOFF_SOURCE_CHANGED': 'a source of this hand-off changed after it was made',
+    'HANDOFF_THREAD_CHANGED': 'the conversation was archived or moved after this hand-off was made',
+    'HANDOFF_NOT_FOUND': 'Memorive does not know this hand-off',
+}
+NOT_REACHED = ('Answer from the extracted texts in materials/ (sources.md says which file is which paper), giving '
+               'page numbers, and tell the user the answer could not be returned: approving this command lets it '
+               'be returned, or the user can add the saved answer in the Memorive conversation.')
+
+
+class NotReached(ValueError):
+    """Memorive's local command could not be run (blocked, missing, timed out), as opposed to Memo
+    refusing a request."""
 
 
 def read_json(path):
@@ -53,10 +71,21 @@ class Memo:
             raise ValueError('Invalid configured Memo transport command')
         if method not in BRIDGE_METHODS:
             raise ValueError('Unsupported bridge method')
-        run = subprocess.run(command + ['--call', method], input=json.dumps(params, ensure_ascii=False),
-                             encoding='utf-8', capture_output=True, timeout=120, shell=False)
+        # errors='replace': a failing command may report in the console's own encoding (a Windows path
+        # in GBK, for instance); its message must still reach the user instead of a decoding error.
+        try:
+            run = subprocess.run(command + ['--call', method], input=json.dumps(params, ensure_ascii=False),
+                                 encoding='utf-8', errors='replace', capture_output=True, timeout=120, shell=False)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise NotReached(f'Memorive could not be reached: {error}') from error
         if run.returncode:
-            raise ValueError(run.stderr.strip()[-300:] or 'Memo transport failed')
+            message = (run.stderr or '').strip()
+            # Memo answers a refused request with one code; anything else means the command did not run.
+            if re.fullmatch(r'[A-Z][A-Z0-9_:]{1,95}', message):
+                meaning = REFUSALS.get(message)
+                raise ValueError(message + (f': {meaning}. Keep your answer; a new hand-off is needed to return it.'
+                                            if meaning else ''))
+            raise NotReached('Memorive could not be reached: ' + (message[-300:] or 'the local command failed'))
         return json.loads(run.stdout)
 
     def require(self, method):
@@ -91,9 +120,8 @@ def page_range(text):
     return int(low), int(high or low)
 
 
-def read_sources(memo, work, artifact_id=None, pages=None):
-    """Fetch the evidence into work/evidence.json (aliases E1, E2 ... kept across reads) and write
-    work/evidence.md, every chunk read so far by source and position."""
+def fetch(memo, work, artifact_id=None):
+    """The kept evidence of work/evidence.json and every passage of the hand-off (or of one source)."""
     work.mkdir(parents=True, exist_ok=True)
     store_path = work / 'evidence.json'
     store = read_json(store_path) if store_path.is_file() else {'handoff_id': memo.binding['handoff_id'], 'evidence': {}}
@@ -104,18 +132,69 @@ def read_sources(memo, work, artifact_id=None, pages=None):
     totals = store.setdefault('totals', {})
     for artifact in {ref['artifact_id'] for ref in refs}:
         totals[artifact] = sum(ref['artifact_id'] == artifact for ref in refs)
+    return store, refs
+
+
+def keep(store, refs, work):
+    """Add refs to the kept evidence (aliases E1, E2 ... kept across calls), write work/evidence.json
+    and work/evidence.md, and return the aliases of refs."""
     aliases = {row['id']: alias for alias, row in store['evidence'].items()}
-    span = page_range(pages)
     for ref in refs:
-        if span and ref.get('page') is not None and not span[0] <= ref['page'] <= span[1]:
-            continue
         alias = aliases.get(ref['id']) or 'E' + str(len(store['evidence']) + 1)
         aliases[ref['id']] = alias
         store['evidence'][alias] = {k: ref.get(k) for k in ('id', 'content_hash', 'artifact_id', 'title', 'page',
                                                                'line_start', 'line_end', 'text')}
-    store_path.write_text(json.dumps(store, ensure_ascii=False, indent=1), encoding='utf-8')
+    (work / 'evidence.json').write_text(json.dumps(store, ensure_ascii=False, indent=1), encoding='utf-8')
     (work / 'evidence.md').write_text(evidence_markdown(store), encoding='utf-8')
+    return [aliases[ref['id']] for ref in refs]
+
+
+def read_sources(memo, work, artifact_id=None, pages=None):
+    """Fetch the evidence into work/evidence.json and write work/evidence.md, every chunk read so far
+    by source and position."""
+    store, refs = fetch(memo, work, artifact_id)
+    span = page_range(pages)
+    keep(store, [ref for ref in refs if not span or ref.get('page') is None or span[0] <= ref['page'] <= span[1]], work)
     return store
+
+
+# --- find: the passages that hold the question's terms ---------------------------------------------
+
+CAPTION = re.compile(r'^\s*(?:Table|Tab\.|Figure|Fig\.|表|图)\s*[\dA-Z]', re.IGNORECASE)
+
+
+def find_passages(memo, work, terms, artifact_id=None, shown=12):
+    """Keep the passages holding any term (most terms first, then in reading order) and return what to
+    print: each passage's alias, source, page and its matching lines, with table and figure titles."""
+    store, refs = fetch(memo, work, artifact_id)
+    wanted = [drafts._even(t)[0].strip().lower() for t in terms if t.strip()]
+    order = {s['id']: n for n, s in enumerate(store['sources'])}
+    hits = []
+    for ref in refs:
+        lines = ref['text'].splitlines()
+        even = [drafts._even(line)[0].lower() for line in lines]
+        whole = ' '.join(even)
+        matched = [t for t in wanted if t in whole]
+        if matched:
+            hits.append((-len(set(matched)), order.get(ref['artifact_id'], 99), ref.get('page') or 0, ref['line_start'],
+                         ref, lines, even))
+    hits.sort(key=lambda h: h[:4])
+    aliases = keep(store, [h[4] for h in hits[:shown]], work)
+    out = []
+    for alias, (_, _, _, _, ref, lines, even) in zip(aliases, hits):
+        rows = set()
+        for n, line in enumerate(even):
+            if any(t in line for t in wanted):
+                rows.update(range(max(0, n - 2), min(len(lines), n + 3)))
+        rows.update(n for n, line in enumerate(lines) if CAPTION.match(line))
+        out.append(f"\n{alias} · {ref.get('title') or ref['artifact_id']} · {position(ref)}")
+        out += [('  > ' if any(t in even[n] for t in wanted) else '    ') + lines[n] for n in sorted(rows)]
+    if len(hits) > shown:
+        out.append(f'\n{len(hits) - shown} more passages match; search with more specific terms to see them.')
+    if not hits:
+        out.append('No passage contains these terms. Try other words or the numbers you expect, or read the '
+                   'extracted texts in materials/.')
+    return out
 
 
 def position(row):
@@ -151,26 +230,49 @@ def read_summary(store):
 
 # --- answer: draft with marks -> checked memo-answer.json ------------------------------------------
 
-def build_answer(store, draft, gaps=None, request_id=None):
+def build_answer(store, draft, gaps=None, request_id=None, notes=None):
     """The memo-answer.json of a draft (drafts.py): each [E..] mark becomes [n], n numbering the
     passages in first-use order, and the text before it a claim with its supports. Every problem
-    is reported at once."""
+    is reported at once; notes (a list) gets what was corrected without asking."""
     cited = []
+    notes = [] if notes is None else notes
 
     def resolve(alias, where, quote):
         row = store['evidence'].get(alias)
         if row is None:
-            raise ValueError(f'{alias} has not been read: run `read` for its source or pages first')
-        if drafts.squash(quote) not in drafts.squash(row['text']):
-            raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"')
-        return {'evidence_id': row['id'], 'content_hash': row['content_hash'], 'quote': quote}, row['text']
+            raise ValueError(f'{alias} has not been read: run `find` or `read` for its source first')
+        exact = drafts.locate(quote, row['text'])   # the passage's own text, which Memo checks again
+        if exact is None:
+            elsewhere = [other for other, text in store['evidence'].items()
+                         if other != alias and drafts.locate(quote, text['text']) is not None]
+            if len(elsewhere) == 1:
+                # The quote is in exactly one other kept passage (a number written one passage off, a
+                # sentence split across two passages): cite that one and say so.
+                notes.append(f'{alias} → {elsewhere[0]}: "{quote[:60]}" is in {elsewhere[0]}, which is cited instead')
+                row = store['evidence'][elsewhere[0]]
+                exact = drafts.locate(quote, row['text'])
+            else:
+                hint = (f'it is in {", ".join(elsewhere)}: cite one of them' if elsewhere else
+                        f'the closest text in {alias} is: "{drafts.closest(quote, row["text"])}"')
+                raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"; {hint}')
+        return {'evidence_id': row['id'], 'content_hash': row['content_hash'], 'quote': exact}, row['text']
 
     def render(supports):
         ids = list(dict.fromkeys(s['evidence_id'] for s in supports))
         cited.extend(i for i in ids if i not in cited)
         return ''.join(f'[{cited.index(i) + 1}]' for i in ids)
 
-    answer, claims, problems = drafts.apply(draft, resolve, render)
+    def where_value(value):
+        return [alias for alias, row in store['evidence'].items() if value in drafts.numbers(row['text'])]
+
+    answer, claims, problems = drafts.apply(draft, resolve, render, where_value)
+    answer = re.sub(r'(\[\d+\])(?:\s*\1)+', r'\1', answer)   # marks one after another on one passage: [4] [4]
+    loose = [] if problems else uncited_values(answer, claims, store)
+    if loose:
+        problems.append(f'{", ".join(f"{v:g}" for v in loose)}: in the answer without a cited passage. Put each value '
+                        'in a sentence with its passage and quote (find it with the `find` command), mark a value '
+                        'you computed as [inference ...], or delete it: a value from outside the material cannot be '
+                        'cited here.')
     if problems:
         raise ValueError('The draft needs changes:\n- ' + '\n- '.join(problems))
     coverage = []
@@ -188,6 +290,18 @@ def build_answer(store, draft, gaps=None, request_id=None):
     request_id = request_id or 'skill-' + hashlib.sha256(json.dumps([store['handoff_id'], answer, claims],
                                                                      ensure_ascii=False).encode()).hexdigest()[:24]
     return {'answer': answer, 'claims': claims, 'coverage': coverage, 'request_id': request_id}
+
+
+def uncited_values(answer, claims, store):
+    """Values in the answer outside its claims that no kept passage or the question reports (page
+    references, names and years aside): the place a value recalled from outside the material shows up."""
+    text = re.sub(r'\[\d+\]', ' ', answer)
+    for claim in claims:
+        text = text.replace(claim['text'], ' ')
+    known = set(drafts.numbers(store.get('question') or ''))
+    for row in store['evidence'].values():
+        known |= drafts.numbers(row['text'])
+    return sorted(drafts.stated_values(text) - known)
 
 
 def return_answer(memo, result):
@@ -249,6 +363,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--transport', type=Path, help='Explicit configured transport; defaults beside handoff.json')
     sub = parser.add_subparsers(dest='action', required=True)
+    find = sub.add_parser('find'); find.add_argument('handoff', type=Path); find.add_argument('terms', nargs='+')
+    find.add_argument('--artifact'); find.add_argument('--work', type=Path)
     read = sub.add_parser('read'); read.add_argument('handoff', type=Path)
     read.add_argument('--artifact'); read.add_argument('--pages'); read.add_argument('--work', type=Path)
     answer = sub.add_parser('answer'); answer.add_argument('handoff', type=Path)
@@ -266,21 +382,45 @@ def main():
     args = parser.parse_args()
     memo = Memo(args.handoff, args.transport)
     work = getattr(args, 'work', None) or memo.handoff.parent / 'work'
-    if args.action == 'read':
-        store = read_sources(memo, work, args.artifact, args.pages)
-        print('\n'.join([f'Read into {work / "evidence.md"} ({len(store["evidence"])} passages, E1–E{len(store["evidence"])}).']
-                        + read_summary(store)))
+    if args.action in {'find', 'read'}:
+        try:
+            if args.action == 'find':
+                print('\n'.join(find_passages(memo, work, args.terms, args.artifact)
+                                + [f'\nThese passages are kept in {work / "evidence.md"}; cite them as [E1: "quote"].']))
+            else:
+                store = read_sources(memo, work, args.artifact, args.pages)
+                print('\n'.join([f'Read into {work / "evidence.md"} ({len(store["evidence"])} passages, '
+                                 f'E1–E{len(store["evidence"])}).'] + read_summary(store)))
+        except NotReached as error:
+            raise NotReached(f'{error}\n{NOT_REACHED}') from error
     elif args.action == 'answer':
+        if not (work / 'evidence.json').is_file():
+            raise ValueError('No passages kept yet: run `find` or `read` first')
         store = read_json(work / 'evidence.json')
-        built = build_answer(store, Path(args.draft).read_text(encoding='utf-8-sig'), args.gap, args.request_id)
+        notes = []
+        built = build_answer(store, Path(args.draft).read_text(encoding='utf-8-sig'), args.gap, args.request_id, notes)
         result = dict(memo.binding, schema=ANSWER_SCHEMA, **built)
         out = args.out or memo.handoff.parent / 'memo-answer.json'
         out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
-        report = {'saved': str(out), 'claims': len(result['claims']),
+        report = {'status': 'SAVED', 'next': f'The answer is checked and saved in {out}. Return it with the `return` '
+                                             'command, or run `answer` again with --return.',
+                  'saved': str(out), 'claims': len(result['claims']),
                   'citations': len({s['evidence_id'] for c in result['claims'] for s in c['supports']}),
                   'coverage': {c['artifact_id']: c['status'] for c in result['coverage']}}
+        if notes:
+            report['corrected'] = notes
         if args.send:
-            report['returned'] = return_answer(memo, dict(result))
+            try:
+                report['returned'] = return_answer(memo, dict(result))
+                report['status'] = 'RETURNED'
+                report['next'] = ('The answer is in the Memorive conversation with its citations. Give the user the '
+                                  'answer in brief and say it was returned; nothing else is needed.')
+            except NotReached as error:
+                report['returned'] = {'status': 'NOT_RETURNED', 'reason': str(error)}
+                report['status'] = 'NOT_RETURNED'
+                report['next'] = (f'The answer is complete and saved in {out}, but Memorive could not be reached. '
+                                  'Give the user the answer, and tell them they can approve this command and run it '
+                                  'again, or add that file with the attachment button of the Memorive conversation.')
         print(json.dumps(report, ensure_ascii=False, indent=1))
     elif args.action == 'return':
         print(json.dumps(return_answer(memo, read_json(args.result)), ensure_ascii=False))

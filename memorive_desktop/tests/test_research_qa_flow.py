@@ -373,9 +373,12 @@ def test_an_agent_job_works_from_the_agent_instructions_and_leaves_a_handoff_pac
         _finish(workspace)
         job = workspace.job_status(job_id)
         assert (job["status"], job.get("error"), job["kind"]) == ("COMPLETE", None, "agent")
-        # The agent is given its own instructions, not the chat rules, and the saved hash is of that prompt.
+        # The agent is given its own instructions and then the chat rules (so it cites with [1], [2] and
+        # never prints excerpt IDs in its answer); the saved hash is of that prompt. The sessions view
+        # recognizes a research task by the first sentence.
         [prompt] = agent.prompts
-        assert instructions() in prompt and CHAT_RULES not in prompt
+        assert prompt.startswith(instructions() + "\n" + CHAT_RULES)
+        assert prompt.startswith("You are the user-selected research agent. Complete the research question")
         [answer] = _answers(workspace, thread["id"])
         assert answer["generation"]["prompt_sha256"] == digest(prompt.encode())
         assert answer["agent_result"] is True and answer["opportunities"] == []

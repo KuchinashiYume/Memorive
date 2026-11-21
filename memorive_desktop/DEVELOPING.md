@@ -206,7 +206,7 @@ can ask again from the window.
 | How a document becomes numbered, searchable excerpts | `excerpts_of` and `EvidenceIndex` in `memorive/research/workspace/evidence.py` | `test_evidence_index.py`, `test_research_qa_flow.py` |
 | When an excerpt counts as stale, and how often its files are hashed | `EvidenceIndex.read` and `checking_each_file_once` in `evidence.py`; the blocks are opened in `AnswerJob.run` and `AnswerVersions.validate_context` | `test_evidence_index.py`, `test_research_qa_flow.py` |
 | Which material a conversation draws on; files added in the window | `scope_ids`, `configure`, `attach` in `memorive/research/workspace/attachments.py` | `test_attachments.py`, `test_workspace_vision_and_handoffs.py` |
-| Agent settings; the folder prepared for a desktop agent app | `memorive/research/workspace/agents.py` | `test_research_workspace_inputs.py`, `test_workspace_vision_and_handoffs.py` |
+| Agent settings; the folder prepared for a desktop agent app, with the memo-research Skill copied in | `memorive/research/workspace/agents.py`; its texts in `memorive/platform/language/handoff.py` | `test_research_workspace_inputs.py`, `test_workspace_vision_and_handoffs.py`, `test_memo_research_skill.py` |
 | Which processed papers can be added to a research project | `memorive/research/workspace/library_bridge.py` | `test_library_for_research.py` |
 | Connected apps: bringing papers in, outputs, note write-back, the companion's calls | `memorive/research/workspace/connections.py` | `test_connections.py` |
 | What a connected device is shown when its document is processed | `job_results` in `memorive/research/workspace/desktop_connections.py` | `test_library_for_research.py` |

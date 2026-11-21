@@ -881,18 +881,18 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/references/memo-bridge.md",
-      "sha256": "e128c965a16eb95c55b62b56dbc208054edace647aff4c4426d21be51cb2b34d",
-      "bytes": 7461
+      "sha256": "a470f459aa098c94753fb7c34424109d759ee3de243087fa661a7b825fb6155c",
+      "bytes": 8402
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/references/source-tools.md",
-      "sha256": "940ec3778d788afaf25de64a013570ceea3e7529bb569d3a72c1c95766ceea22",
-      "bytes": 4782
+      "sha256": "f9864f775261a17ba17e29fc4ea51d3f698d6cff0700fbdbd214c9835ba0f1df",
+      "bytes": 5221
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/scripts/memo_bridge.py",
-      "sha256": "e1383e05cb1c4cb394df20ab2f4665801664a57296e973a477d918965be08a38",
-      "bytes": 16840
+      "sha256": "2d8f328afb9d50e4be43e16e491b18bf7481a64512bf0387755d8e1d1b171af5",
+      "bytes": 25538
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/scripts/requirements-pdf.txt",
@@ -906,13 +906,13 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/scripts/drafts.py",
-      "sha256": "d314f951a8ce25ab7ac4ba0d043d7cb5541c203fcb320973179d8832b6016d68",
-      "bytes": 3491
+      "sha256": "182742bdde6b6a58125dd36a6b65e5606f92e1b21e9b73e57761b98a2984089c",
+      "bytes": 8402
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/SKILL.md",
-      "sha256": "12594a574e0d7c0f1470b6773fed81a78188f70c4f2198bd1c650acd47d09319",
-      "bytes": 8727
+      "sha256": "fa11be53bdfccf0ba505b7bc81fbba298905c999f9ab3ea9b0412cb1f7da056b",
+      "bytes": 6504
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-tension/SKILL.md",
@@ -4081,8 +4081,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "e87af1bcf5bca22c0111ad2ef52561b460f00d64df51b3e792d0dbadee66ac3b",
-      "bytes": 276403
+      "sha256": "c409882042cc16392ec8916930d33563d74b67e624c2e16191890b37fc25646d",
+      "bytes": 276404
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -5051,8 +5051,8 @@
     },
     {
       "path": "memorive_desktop/DEVELOPING.md",
-      "sha256": "1c771f2e7f2078ba3babc4e5ac5d9389bb2dfabf9da52584f703524aaae049d9",
-      "bytes": 31972
+      "sha256": "1a13b0bc0b4c6624f2c9040b7072f3cfe61d46fffc43e3993e8b8119cbd4cf08",
+      "bytes": 32097
     },
     {
       "path": ".agents/skills/memorive-development/SKILL.md",
@@ -5591,8 +5591,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/platform/language/handoff.py",
-      "sha256": "7cb4a89a7f262faec166efed3059a885228025b0e40c7210795250159da09a1a",
-      "bytes": 7693
+      "sha256": "823ec1cb75ceb979bedc70e6fec7cea6520324ba53a2c35e3fa53f0dfad055af",
+      "bytes": 11538
     },
     {
       "path": "memorive_desktop/source/memorive/platform/language/messages.py",
@@ -8371,8 +8371,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/research_opportunities.py",
-      "sha256": "0222f45b6522715add5f7761d27f3648df5d3956aabba4e1fced6dab56a2986e",
-      "bytes": 3297
+      "sha256": "958e8ad97f02cff0965f642439dd26612ff5a137c5f653da4f93638f3eb20541",
+      "bytes": 3507
     },
     {
       "path": "memorive_desktop/source/memorive/research/opportunities/facts.py",
@@ -8841,8 +8841,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/agents.py",
-      "sha256": "86e1a1c58479b7c17e4500a2ac083b1b0fbfc4b137ee3faaf2d145f283210fe7",
-      "bytes": 11901
+      "sha256": "91e121e179e430fd286a9f0dc17a22b9684749a743dac85356a48a27d9c5e4e0",
+      "bytes": 12701
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/answer_conversation.py",
@@ -8871,8 +8871,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/answering.py",
-      "sha256": "a6ce6f3ae6ac50a2fc83bde74d60010e3e8a587ae89fca99bda1af4afe47bdb9",
-      "bytes": 38861
+      "sha256": "56a251515fbf12f534ee88db4bf3ffbebe9d1c17ede4f5a262e1f63c6221feee",
+      "bytes": 38947
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/attachments.py",
@@ -8971,8 +8971,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/service.py",
-      "sha256": "ac2f300eef8174e07f6177d42f6fb62912b16a2b73b8d539990175661950420b",
-      "bytes": 36973
+      "sha256": "c76ab43ab3ef73a47efa33443c99302665821ced3fe2931d28cb14fa4310c058",
+      "bytes": 36914
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/skill_bridge.py",
@@ -9976,8 +9976,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/research_memo.py",
-      "sha256": "a0c03847b86c5591d4b12ae0ce21c34641be03c0f3396c8dfebc314ebea836e2",
-      "bytes": 6498
+      "sha256": "8b1f14337c20af359322f475512b62fbb8b07b560c403e3e859ea2c2aa8acf65",
+      "bytes": 6915
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/api/service_process.py",
@@ -10230,6 +10230,11 @@
       "bytes": 765
     },
     {
+      "path": "memorive_desktop/source/memorive/research/reports/templates/report.md.tmpl",
+      "sha256": "1532885c3c332d5647c4fedb8de06b8416d2beeed33ecdf80d4c4f4fa43f4caf",
+      "bytes": 286
+    },
+    {
       "path": "memorive_desktop/source/memorive/models/gateway/prompts/research_opportunities/v1.md",
       "sha256": "dae792d028e5a29663608e41719dde0fcb5c09c897cfed56a1e4120c1683f158",
       "bytes": 3262
@@ -10238,11 +10243,6 @@
       "path": "memorive_desktop/source/memorive/models/gateway/prompts/research_opportunities/v2.md",
       "sha256": "2084f04384419b9628eb724e468ba6ee717cf13ca4247387fa9617857bc665da",
       "bytes": 3147
-    },
-    {
-      "path": "memorive_desktop/source/memorive/research/reports/templates/report.md.tmpl",
-      "sha256": "1532885c3c332d5647c4fedb8de06b8416d2beeed33ecdf80d4c4f4fa43f4caf",
-      "bytes": 286
     }
   ]
 }
