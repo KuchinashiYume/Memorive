@@ -66,6 +66,9 @@ class Opportunities:
     def __init__(self, runtime):
         self.r = runtime
         self.groups = Groups(runtime)
+        # A card's review status by its content hash: the state is read often and a card's file only
+        # changes together with its hash.
+        self._card_status: dict[str, str] = {}
 
     def papers(self, only=None):
         library = self.r.host.library
@@ -81,10 +84,26 @@ class Opportunities:
     def runs(self):
         return [s for s in self.r.state()['runs'] if s['kind'] == 'opportunities']
 
+    def admitted_cards(self):
+        """The content hashes of the admitted (active) cards: the ones a search reads (facts.papers)."""
+        library = self.r.host.library
+        cards = set()
+        for artifact_id, record in library.core_artifacts().items():
+            if record['artifact_kind'] != 'CORE_CARD':
+                continue
+            sha = record['content_sha256']
+            if sha not in self._card_status:
+                card = facts.card_fields(library.resolve_core_private_artifact(artifact_id))
+                self._card_status[sha] = card.get('review_status', 'active')
+            if self._card_status[sha] == 'active':
+                cards.add(sha)
+        return cards
+
     def state(self):
         ledger = read_ledger(self.r.root)
-        cards = {record['content_sha256'] for record in self.r.host.library.core_artifacts().values()
-                 if record['artifact_kind'] == 'CORE_CARD'}
+        # Admitted cards only, as a search reads them: a card under review is not "new since the last
+        # search" before it can be searched, and an opportunity resting on a card taken out of use is outdated.
+        cards = self.admitted_cards()
         runs = self.runs()
         # Papers new since the last search of the whole library; a comparison group's search does not count.
         last = next((run for run in runs if run['status'] in {'SUCCEEDED', 'PARTIAL'} and not run.get('group_id')), None)

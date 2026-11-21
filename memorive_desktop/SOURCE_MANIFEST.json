@@ -6247,8 +6247,8 @@
     },
     {
       "path": "source/memorive/research/opportunities/runs.py",
-      "sha256": "196c603966e3cb9ada339b7ba725a5e841fc303a26bdced18dd0a7e3f48a1873",
-      "bytes": 17654
+      "sha256": "1c6046e73e27bceffc9069b92c0bf18e0e3bb3cd8ce5377366307d3c920fd2f8",
+      "bytes": 18659
     },
     {
       "path": "source/memorive/research/ranking/__init__.py",

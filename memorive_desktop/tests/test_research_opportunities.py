@@ -391,6 +391,19 @@ def test_what_the_user_did_with_an_opportunity_survives_the_next_run(research):
     assert runs.report_rows(r.root) == []
 
 
+def test_a_card_under_review_is_not_counted_as_new_since_the_last_search(research):
+    # A search reads admitted cards only; a pending card is not new for it until it is admitted.
+    research.library.add('job-waiting', PAPERS['job-c'].replace('Reading long reports', 'A card under review'),
+                         status='pending')
+    r = research.make(answer_from_prompt)
+    research.run(r, 'first')
+    state = r.opportunities.call('opportunities.state', {})
+    assert (state['card_count'], state['papers_since_last_run']) == (3, 0)
+    research.library.add('job-waiting', PAPERS['job-c'].replace('Reading long reports', 'A card under review'))
+    research.library.records['job-waiting/CORE_CARD']['content_sha256'] = 'job-waiting-admitted'
+    assert r.opportunities.call('opportunities.state', {})['papers_since_last_run'] == 1
+
+
 def test_an_opportunity_whose_card_changed_is_marked_outdated(research):
     r = research.make(answer_from_prompt)
     research.run(r, 'first')
