@@ -291,3 +291,20 @@ def test_numeric_context_surfaces_in_scope_inconsistencies_before_compatible_row
     ids = [check["rule_id"] for check in checks["checks"]]
     assert ids[0] == target and excluded not in ids
     assert len(ids) == 24 and checks["omitted_checks"] == 3
+
+
+@pytest.mark.parametrize("text", [
+    ("Measurements from the instrument were recorded. " * 200)[:4883],
+    "\n".join(f"Measurement {i} was independently repeated and recorded." for i in range(71)),
+])
+def test_a_text_whose_plain_prompt_fits_goes_in_one_request(text):
+    from memorive.documents.data_review.logic import segment_budget, segments
+    from memorive.platform.language.source import context
+
+    budget = dict(max_chars=8000, source_sha256="A" * 64, language_context=context(text))
+    parts = segments(text, max_chars=segment_budget("LOCAL_SEGMENT", **budget),
+                     full_document_budget=segment_budget("FULL_DOCUMENT", **budget),
+                     packed_document_budget=segment_budget("FULL_DOCUMENT", packed=True, **budget),
+                     calculation_headroom=512)
+    assert [part["mode"] for part in parts] == ["FULL_DOCUMENT"] and "source_packet" not in parts[0]
+    assert len(prompt(parts[0], **budget).encode("utf-8")) <= 8000

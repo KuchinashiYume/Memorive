@@ -26,13 +26,32 @@ def source_rule(ident,kind,inputs,parameters,line,quote,**extra):
         binding_source=dict(kind='EXPLICIT_SOURCE_SYNTAX',line=line,quote=quote,format_version=FORMAT_VERSION,**extra))
 
 
+TABLE_NAME=re.compile(r'\b(?:Table|Tab\.)\s*(S?\d+[A-Za-z]?)\b|表\s*(S?\d+)',re.I)
+CAPTION=re.compile(r'\s*(?:\*\*)?\s*(?:Table|Tab\.|表)\s*S?\d',re.I)
+
+
+def _table_names(text):
+    return {(a or b).upper() for a, b in TABLE_NAME.findall(text)}
+
+
 def table_percent_is_weighted(table, lines):
+    """Whether this table's own caption (the nearest text above, when it starts "Table n") or note (the
+    nearest text below) says its percentages are weighted. Text that is about another table does not
+    count: "In Table 2, percentages are weighted" under a table captioned Table 1, or the caption of the
+    next table ("Table 2. ...") right below this one."""
     if not table['rows']:
         return False
-    # A directly following weighting note can qualify the whole table.
-    last_row = table['rows'][-1]['line']
-    note = next((lines[i] for i in range(last_row, len(lines)) if lines[i].strip()), '')
-    return bool(WEIGHTED_PERCENT_NOTE.search(note))
+    caption = next((lines[i] for i in range(table['header_line']-2, -1, -1) if lines[i].strip()), '')
+    caption = caption if CAPTION.match(caption) else ''
+    note = next((lines[i] for i in range(table['rows'][-1]['line'], len(lines)) if lines[i].strip()), '')
+    own = _table_names(caption)
+    for text, is_caption in ((caption, True), (note, False)):
+        if not WEIGHTED_PERCENT_NOTE.search(text):
+            continue
+        named = _table_names(text)
+        if is_caption or own & named or not (CAPTION.match(text) or named and own):
+            return True
+    return False
 
 
 def _ratio_rules(table, lines, by_id, bad):

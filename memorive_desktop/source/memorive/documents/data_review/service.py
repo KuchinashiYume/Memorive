@@ -115,7 +115,8 @@ class ReviewService:
                     raise ValueError('LOGIC_INPUT_CAPACITY_TOO_SMALL_FOR_REVIEW_CONTRACT')
                 budget=dict(max_chars=chars,source_sha256=sha,language_context=changes['language_context'])
                 parts=segments(text,max_chars=segment_budget('LOCAL_SEGMENT',**budget),
-                    full_document_budget=segment_budget('FULL_DOCUMENT',packed=True,**budget),calculation_headroom=512)
+                    full_document_budget=segment_budget('FULL_DOCUMENT',**budget),
+                    packed_document_budget=segment_budget('FULL_DOCUMENT',packed=True,**budget),calculation_headroom=512)
                 if len(parts)>1:
                     parts.append({'segment_id':'global-relations','mode':'GLOBAL_RELATIONS','pending_inventory':True})
                 changes.update(logic_state='QUEUED',segment_count=len(parts),completed_segments=0,segments=parts,responses=[],receipts=[],input_capacity_chars=chars)

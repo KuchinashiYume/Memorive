@@ -120,12 +120,19 @@ def _range(pair):return [str(v) for v in pair]
 def _overlap(a,b):return a[0]<=b[1] and b[0]<=a[1]
 
 
+def _open_ends(record, rounding, exact=False):
+    """Which ends of a printed value's interval are open: a value cut toward zero never reaches the
+    next display step away from zero (0.04 cut from below stands for [0.04, 0.05))."""
+    if rounding != 'toward_zero' or exact:
+        return False, False
+    reported = decimal(record['value'])
+    return reported <= 0, reported >= 0
+
+
 def _contains_exact(value, bounds, record, *, rounding, exact=False, squared=False):
     """Check an exact rational or variance against the stated display precision."""
     lo, hi = map(Fraction, bounds)
-    reported = decimal(record['value'])
-    truncated = rounding == 'toward_zero' and not exact
-    open_lo, open_hi = truncated and reported <= 0, truncated and reported >= 0
+    open_lo, open_hi = _open_ends(record, rounding, exact)
     if squared:
         if lo < 0:
             lo, open_lo = Fraction(0), False
@@ -285,6 +292,20 @@ def _tail(distribution, statistic, parameters):
         raise ValueError('DISTRIBUTION_NOT_SUPPORTED')
     return Decimal(str(value))
 
+def _inside_quote(row, quote):
+    """Whether the record's own characters lie inside one occurrence of the quote on its line."""
+    line, column = row['source'].get('quote',''), row['source'].get('column')
+    if not column:
+        return False
+    begin, end = column-1, column-1+len(row['raw'])
+    at = line.find(quote)
+    while at >= 0:
+        if at <= begin and end <= at+len(quote):
+            return True
+        at = line.find(quote, at+1)
+    return False
+
+
 def _resolve_rule_inputs(inputs, records, result):
     """Each input of the rule as its record (or list of records): a record id, or the exact raw value and
     source quote of one record. The ids used are added to result['input_ids']."""
@@ -298,6 +319,9 @@ def _resolve_rule_inputs(inputs, records, result):
                     raise ValueError('EXACT_VALUE_AND_SOURCE_QUOTE_REQUIRED')
                 candidates=[row for row in records.values() if row['raw']==selector['raw'] and selector['quote'] in row['source'].get('quote','')
                     and ('line' not in selector or selector['line']==row['source'].get('line'))]
+                if len(candidates)>1 and 'occurrence' not in selector:
+                    # Equal numbers on one line (A=2; B=2): the value is the one inside the quoted text.
+                    candidates=[row for row in candidates if _inside_quote(row,selector['quote'])]
                 if 'occurrence' in selector:
                     ordinal=selector['occurrence']
                     if isinstance(ordinal,bool) or not isinstance(ordinal,int) or not 1<=ordinal<=len(candidates):
@@ -512,16 +536,20 @@ def _check_ci_p(p, r, resolved, units):
     observed, relation = _reported_probability(resolved['p'], units['p'][0], r)
     if (relation == '<' and observed[1] == 0) or (relation == '>' and observed[0] == 1):
         raise ValueError('EMPTY_P_BOUND')
-    if lower[0] > upper[1]:
+    ends = lambda key: _open_ends(resolved[key], p['rounding'], key in p.get('exact_inputs', []))
+    lower_open, upper_open = ends('lower')[0], ends('upper')[1]
+    p_open = relation == '<' or (relation in ('', '=') and ends('p')[1])
+    if lower[0] > upper[1] or (lower[0] == upper[1] and (lower_open or upper_open)):
         return False, {'formula': 'CI lower endpoint ≤ upper endpoint',
                        'lower_interval': _range(lower), 'upper_interval': _range(upper)}
     ci_decision = None
-    if null < lower[0] or null > upper[1]:
+    # An open end is never reached: a lower endpoint cut toward zero from −0.20 lies in (−0.21, −0.20].
+    if (null <= lower[0] if lower_open else null < lower[0]) or (null >= upper[1] if upper_open else null > upper[1]):
         ci_decision = 'REJECT'
     elif lower[1] <= null <= upper[0]:
         ci_decision = 'RETAIN'
     p_decision = None
-    if observed[1] < alpha or (observed[1] == alpha and relation == '<'):
+    if observed[1] < alpha or (observed[1] == alpha and p_open):
         p_decision = 'REJECT'
     elif observed[0] >= alpha:
         p_decision = 'RETAIN'
@@ -532,9 +560,26 @@ def _check_ci_p(p, r, resolved, units):
     return (ci_decision == p_decision if ci_decision and p_decision else None), calculation
 
 
+def _raw_summary_parameters(inputs):
+    """The parameters a raw-value summary needs. The plain summary needs all three; a comparison needs
+    only what its reported values depend on: counting needs no weights, a mean no SD definition."""
+    compared=[key for key in REPORTED_SUMMARY_FIELDS if key in inputs]
+    if not compared:
+        return ['missing_policy','weights','sd_denominator']
+    needed=['missing_policy','exact_complete_sample']
+    if 'reported_mean' in compared or 'reported_sd' in compared:
+        needed+=['weights','rounding']
+    if 'reported_sd' in compared:
+        needed.append('sd_denominator')
+    return needed
+
+
 def _raw_summary(p, resolved, r):
-    """The mean, variance and standard deviation of raw values, for the record."""
-    if p['missing_policy']!='no_missing' or p['weights']!='equal' or p['sd_denominator'] not in ('sample','population'):
+    """The count, mean, variance and standard deviation of raw values; with reported values bound, each
+    one is compared to its recomputed value."""
+    needed=_raw_summary_parameters(resolved)
+    if p['missing_policy']!='no_missing' or ('weights' in needed and p['weights']!='equal') or (
+            'sd_denominator' in needed and p['sd_denominator'] not in ('sample','population')):
         raise ValueError('RAW_SUMMARY_METHOD_NOT_SUPPORTED')
     rows=resolved['values']
     if len({row['record_id'] for row in rows}) != len(rows):
@@ -543,14 +588,17 @@ def _raw_summary(p, resolved, r):
     if any(v['relation'] not in ('','=') for v in rows):
         raise ValueError('RAW_CENSORED_VALUES_NOT_SUPPORTED')
     n=len(values)
-    mean=sum(values)/n
-    denominator=n-1 if p['sd_denominator']=='sample' else n
-    compared=[key for key in REPORTED_SUMMARY_FIELDS if key in resolved]
-    if denominator<=0 and (not compared or 'reported_sd' in compared):
+    # A mean or SD is worked out only when its weights and definition were given.
+    mean=sum(values)/n if p.get('weights')=='equal' else None
+    definition=p.get('sd_denominator') if mean is not None and p.get('sd_denominator') in ('sample','population') else None
+    denominator=(n-1 if definition=='sample' else n) if definition else None
+    if denominator is not None and denominator<=0 and 'sd_denominator' in needed:
         raise ValueError('SD_REQUIRES_MORE_VALUES')
     variance=sum((x-mean)**2 for x in values)/denominator if denominator else None
-    calculation={'n':n,'mean':str(mean),'variance':str(variance) if variance is not None else None,
-                 'sd':str(variance.sqrt()) if variance is not None else None,'definition':p['sd_denominator']}
+    calculation={'n':n,'mean':str(mean) if mean is not None else None,
+                 'variance':str(variance) if variance is not None else None,
+                 'sd':str(variance.sqrt()) if variance is not None else None,'definition':definition}
+    compared=[key for key in REPORTED_SUMMARY_FIELDS if key in resolved]
     if not compared:
         return True, calculation
     rational_values = list(map(Fraction, values))
@@ -588,10 +636,8 @@ def evaluate(rule: Mapping[str,Any], records: dict[str,dict], *, checkpoint:Call
     if kind not in REQUIRED:
         return {**result,'status':'NOT_APPLICABLE','reason':'RULE_NOT_SUPPORTED'}
     needed,parameters=REQUIRED[kind]
-    if kind=='raw_summary' and any(key in inputs for key in REPORTED_SUMMARY_FIELDS):
-        parameters=[*parameters, 'exact_complete_sample']
-        if 'reported_mean' in inputs or 'reported_sd' in inputs:
-            parameters.append('rounding')
+    if kind=='raw_summary':
+        parameters=_raw_summary_parameters(inputs)
     result['missing']=[f'inputs.{key}' for key in needed if key not in inputs]+[f'parameters.{key}' for key in parameters if key not in p]
     if not rule.get('binding_source'):
         result['missing'].append('binding_source')

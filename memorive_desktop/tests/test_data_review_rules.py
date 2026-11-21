@@ -273,3 +273,58 @@ def test_p_rule_handles_signed_tails_fractional_df_and_very_small_p(distribution
     result = run(binding, records(x=statistic, p=probability))
     assert (result["status"], result["approximate"]) == ("COMPATIBLE", True), result
     assert run(binding, records(x=statistic, p="1e-40"))["status"] == "INCONSISTENT"
+
+
+TABLE = "| Group | n/N (%) |\n| --- | --- |\n| A | 2/5 (70.0%) |"
+
+
+@pytest.mark.parametrize("before, after, checked", [
+    ("", "", True),
+    ("Table 1. Percentages are survey-weighted.\n\n", "", False),
+    ("", "\n\nNote: percentages are survey-weighted.", False),
+    # a statement about another table, or the next table's own caption, leaves this table checked
+    ("Table 1. Survey responses.\n\n", "\n\nIn Table 2, percentages are survey-weighted.", True),
+    ("Table 1. Survey responses.\n\n", "\n\nIn Table 1, percentages are survey-weighted.", False),
+    ("Table 1. Survey responses.\n\n", "\n\nTable 2. Percentages are survey-weighted.", True),
+])
+def test_a_weighting_statement_applies_to_its_own_table(before, after, checked):
+    report = analyze(before + TABLE + after, source_id="sample")
+    assert [c["status"] for c in report["checks"] if c["type"] == "percentage"] == (["INCONSISTENT"] if checked else [])
+
+
+def test_equal_numbers_on_one_line_are_told_apart_by_their_quotes():
+    summary = rule("raw_summary", {"values": [{"raw": "2", "quote": "A=2"}, {"raw": "2", "quote": "B=2"},
+                                              {"raw": "5", "quote": "C=5"}],
+                                   "reported_mean": {"raw": "3", "quote": "Mean=3"}},
+                   missing_policy="no_missing", weights="equal", sd_denominator="sample",
+                   exact_complete_sample=True, rounding="nearest")
+    check = lambda: next(c for c in analyze("A=2; B=2; C=5\nMean=3", source_id="sample", rules=[summary])["checks"]
+                         if c["rule_id"] == "rule-raw_summary")
+    assert (check()["status"], check()["calculation"]["n"]) == ("COMPATIBLE", 3)
+    # a quote holding both equal numbers names neither of them
+    summary["inputs"]["values"][0]["quote"] = "A=2; B=2"
+    assert (check()["status"], check()["reason"]) == ("INPUT_ERROR", "INPUT_SELECTOR_NOT_UNIQUE_OR_NOT_FOUND")
+
+
+@pytest.mark.parametrize("p, rounding, expected", [
+    ("0.04", "toward_zero", "INCONSISTENT"),  # p in [0.04, 0.05) is below .05, while the CI holds 0
+    ("0.05", "toward_zero", "COMPATIBLE"),  # p in [0.05, 0.06)
+    ("0.05", "nearest", "INSUFFICIENT_INFORMATION"),  # p in [0.045, 0.055] may fall on either side
+])
+def test_a_truncated_p_never_reaches_its_next_display_step(p, rounding, expected):
+    binding = rule("ci_p", {"lower": "lo", "upper": "hi", "p": "p"}, alpha="0.05", null_value="0",
+                   relationship="same_two_sided_test_inversion", rounding=rounding)
+    assert run(binding, records(lo="-0.20", hi="0.90", p=p))["status"] == expected
+
+
+def test_a_count_alone_needs_no_weights_or_sd_definition():
+    binding = rule("raw_summary", {"values": ["a", "b", "c"], "reported_n": "n"},
+                   missing_policy="no_missing", exact_complete_sample=True)
+    result = run(binding, records(a="4", b="5", c="6", n="2"))
+    assert (result["status"], result["calculation"]["mismatched_reported_fields"]) == ("INCONSISTENT", ["reported_n"])
+    assert result["calculation"]["mean"] is None
+    binding["inputs"]["reported_mean"] = "m"
+    assert run(binding, records(a="4", b="5", c="6", n="3", m="5"))["missing"] == [
+        "parameters.weights", "parameters.rounding"]
+    binding["parameters"].update(weights="equal", rounding="nearest")
+    assert run(binding, records(a="4", b="5", c="6", n="3", m="5"))["status"] == "COMPATIBLE"

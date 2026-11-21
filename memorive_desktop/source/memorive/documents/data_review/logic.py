@@ -97,9 +97,21 @@ def source_packet(lines, selected):
         result.update(complete_document=True,total_line_count=len(lines),omitted_lines_are_empty=True)
     return result
 
-def segments(text,max_chars=18000,*,full_document_budget=None,calculation_headroom=0):
-    """Keep original line addresses and budget the UTF-8 bytes of the JSON input."""
+def segments(text,max_chars=18000,*,full_document_budget=None,packed_document_budget=None,calculation_headroom=0):
+    """The parts of the text the review sends, with original line addresses, budgeted in UTF-8 bytes of
+    the JSON input. The whole text goes in one request when it fits: as plain lines within
+    full_document_budget, else as a lossless source packet within packed_document_budget. Only a text
+    that fits neither is split into local segments of at most max_chars."""
     lines=text.splitlines()
+    whole={'segment_id':'segment-1','mode':'FULL_DOCUMENT','start_line':1,'end_line':len(lines),'context_start_line':1}
+    if lines and full_document_budget:
+        plain={**whole,'text':'\n'.join(f'L{i}: {line}' for i,line in enumerate(lines,1))}
+        if _json_bytes(plain)<=full_document_budget:
+            return [plain]
+    if lines and packed_document_budget:
+        packed={**whole,'text':'','source_packet':source_packet(lines,range(1,len(lines)+1))}
+        if _json_bytes(packed)<=packed_document_budget:
+            return [packed]
     result=[]
     start=0
     # Reserve space for the part envelope, including the largest possible
@@ -107,12 +119,6 @@ def segments(text,max_chars=18000,*,full_document_budget=None,calculation_headro
     envelope={'segment_id':'segment-64','mode':'LOCAL_SEGMENT','start_line':len(lines),
               'end_line':len(lines),'context_start_line':len(lines),'text':''}
     text_budget=max_chars-_json_bytes(envelope)
-    if full_document_budget and len(text.encode('utf-8'))>max_chars:
-        packet=source_packet(lines,range(1,len(lines)+1))
-        part={'segment_id':'segment-1','mode':'FULL_DOCUMENT','start_line':1,
-              'end_line':len(lines),'context_start_line':1,'text':'','source_packet':packet}
-        if _json_bytes(part)<=full_document_budget:
-            return [part]
     lengths=[_json_bytes(f'L{i}: {line}\n')-2 for i,line in enumerate(lines,1)]
     # Leave room for a calculation where practicable without forcing a source
     # line to be dropped or starting a separate request just for calculations.
