@@ -251,6 +251,43 @@ def test_after_a_restart_an_answer_the_model_already_returned_is_saved(setup, tm
         restarted.close()
 
 
+def test_an_answer_saved_after_a_restart_records_the_request_the_model_was_given(setup, tmp_path):
+    # Between the model call and the restart the material's title changes. The answer is saved from the
+    # evidence and prompt kept on the job before the call; it used to search again and record a prompt the
+    # model never saw (with the new title).
+    model = Model()
+    model.release.clear()
+    sent = []
+
+    class Recording(SettingsService):
+        def __call__(self, **request):
+            sent.append(request["prompt"])
+            return super().__call__(**request)
+
+    service = Recording(model)
+    workspace, thread_id, material_id = setup(service)
+    service.workspace = workspace
+    job_id = _ask(workspace, thread_id, material_id, wait=False)
+    assert model.called.wait(60)
+    after_restart = Model()
+    restarted = _open(tmp_path / "workspace", after_restart, recover=True)
+    model.release.set()
+    _finish(workspace)
+    try:
+        material = restarted.store.get("artifact", material_id)
+        restarted.store.put("artifact", material_id, material["project"], dict(material, title="K12, renamed"),
+                            expected=material["revision"])
+        restarted.finish_answers_received_before_restart(service.stored_result)
+        _finish(restarted)
+        assert restarted.job_status(job_id)["status"] == "COMPLETE"
+        [answer] = _answers(restarted, thread_id)
+        assert answer["generation"]["prompt_sha256"] == digest(sent[0].encode())
+        assert "K12, renamed" not in str(answer["generation"]["context"])
+        assert (len(sent), len(after_restart.calls)) == (1, 0)
+    finally:
+        restarted.close()
+
+
 @pytest.mark.parametrize("asked_in_conversation", [False, True])
 def test_a_claim_review_running_at_a_restart_stays_interrupted(setup, tmp_path, asked_in_conversation):
     """A claim review calls the same model function as an answer, but it is not answered again after a

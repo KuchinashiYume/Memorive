@@ -26,7 +26,9 @@ stop a cancelled job. A model call that is already running is not stopped; save_
 returns and keeps its usage on the job as late_usage.
 Restart: a workspace opened with recover=True marks QUEUED and RUNNING jobs INTERRUPTED. A job whose model call
 had finished is then answered again through these same steps with the result the settings service kept, in place
-of the call (ResearchWorkspace.finish_answers_received_before_restart); nothing is sent again.
+of the call (ResearchWorkspace.finish_answers_received_before_restart); nothing is sent again. It is answered from
+the evidence and prompt it was sent with (sent_request, kept on the job before the call), so the saved answer
+records what the model was actually given. A job from before sent_request was kept searches its excerpts again.
 """
 from __future__ import annotations
 
@@ -118,6 +120,8 @@ class AnswerJob:
                     return
                 if self.job.get('retry_snapshot'):
                     self.reuse_evidence_of_retried_answer()
+                elif self.received and self.job.get('sent_request'):
+                    self.reuse_evidence(self.job['sent_request'])
                 else:
                     with checking_each_file_once():  # a source file is hashed once, not once per excerpt
                         self.gather_evidence()
@@ -157,6 +161,12 @@ class AnswerJob:
     def reuse_evidence_of_retried_answer(self):
         """Answering again reuses the evidence and context frozen with the earlier answer."""
         prior = self.job['retry_snapshot']
+        self.reuse_evidence(prior)
+        self.ws.versions.validate_retry_topic(self.job, prior, self.context)
+
+    def reuse_evidence(self, prior):
+        """Take the evidence and context of an earlier request: the earlier answer's when answering again,
+        or this job's own sent_request when a result received before a restart is saved."""
         self.context = copy.deepcopy(prior['context'])
         self.summary = copy.deepcopy(prior['summary'])
         self.refs = copy.deepcopy(prior['refs'])
@@ -165,7 +175,6 @@ class AnswerJob:
         self.coverage_snapshot = copy.deepcopy(prior['coverage_snapshot'])
         self.evidence_context = copy.deepcopy(prior['evidence_context'])
         self.admitted = {r['id'] for r in self.refs}
-        self.ws.versions.validate_retry_topic(self.job, prior, self.context)
         self.context.update(self.request_context, task_intent=self.intent)
 
     def gather_evidence(self):
@@ -391,13 +400,27 @@ class AnswerJob:
             from memorive.research.workspace.model_receipts import verified_result  # imported here, as in desktop.py: it loads memorive/desktop/settings
             snapshot, kept = self.received
             result = verified_result(kept, snapshot)  # as the model function checks a result it receives
+            if self.job.get('sent_request'):
+                self.prompt = self.job['sent_request']['prompt']  # what the model was given, as it was given
         else:
+            self.keep_sent_request()
             result = model(profile_ref=self.settings['profile_ref'], prompt=self.prompt, job_id=self.job_id,
                            response_schema=self.response_schema)
         self.value = result['response']
         self.usage = result.get('execution_receipt', {})
         self.engine = result.get('model_name', 'configured_model')
         self.check_answer()
+
+    def keep_sent_request(self):
+        """Keep on the job what the model is about to be sent: if the app stops before the answer is saved,
+        the result received for this call is saved with this evidence and prompt."""
+        sent = {'context': self.context, 'summary': self.summary, 'refs': self.refs, 'search': self.search,
+                'intent': self.intent, 'coverage_snapshot': self.coverage_snapshot,
+                'evidence_context': self.evidence_context, 'prompt': self.prompt}
+        with self.store.tx() as db:
+            job = self.store.get('job', self.job_id, db=db)
+            if job:
+                self.store.put('job', self.job_id, job['project'], dict(job, sent_request=copy.deepcopy(sent)), db=db)
 
     def check_answer(self):
         """The answer must have text, and cite only excerpts the model was shown."""
