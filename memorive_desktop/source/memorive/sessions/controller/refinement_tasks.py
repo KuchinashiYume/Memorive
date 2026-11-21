@@ -571,6 +571,45 @@ class RefinementTasksMixin:
         task = manager.get_session_refinement_task(job_id)
         if task.get("control_state") != "QUEUED":
             raise SessionProductError("SESSION_REFINEMENT_TASK_NOT_QUEUED")
+        try:
+            projection_id, messages, source_binding, snapshot_sha256, task_settings = self._refinement_start_inputs(task)
+        except SessionProductError as error:
+            # The task cannot start as it was queued (its source changed, or its content is incomplete):
+            # end it, so the next request for this conversation makes a new attempt instead of finding it.
+            manager.fail_session_refinement_task(job_id, error_code=str(error))
+            raise
+        worker = threading.Thread(
+            target=self._run_refinement_task,
+            kwargs={
+                "job_id": job_id,
+                "projection_id": projection_id,
+                "snapshot_sha256": snapshot_sha256,
+                "messages": messages,
+                "source_binding": source_binding,
+                "settings": deepcopy(task_settings),
+            },
+            name=f"memorive-session-refinement-{job_id[-12:]}",
+            daemon=True,
+        )
+        with self._refinement_lock:
+            if job_id in self._refinement_workers:
+                raise SessionProductError("SESSION_REFINEMENT_TASK_ALREADY_STARTING")
+            self._refinement_workers[job_id] = worker
+        worker.start()
+        return {
+            "schema_version": "DesktopSessionRefinementStartReceipt-v1",
+            "local_projection_id": projection_id,
+            "job_id": job_id,
+            "attempt_id": task["attempt_id"],
+            "source_snapshot_sha256": snapshot_sha256,
+            "selected_profile_ref": task_settings["profile_ref"],
+            "model_calls": 0,
+            "status": "TASK_STARTED",
+        }
+
+    def _refinement_start_inputs(self, task: dict[str, Any]) -> tuple:
+        """What a queued task starts with: its conversation's messages and source binding, checked
+        against the snapshot the task was queued with, and the settings it runs with."""
         projection_id = str(task["local_projection_id"])
         row = self._get_internal(projection_id)
         source_messages, completeness = self._messages_for(row)
@@ -605,34 +644,7 @@ class RefinementTasksMixin:
             "profile_ref": task["selected_profile_ref"],
         }
         task_settings, _ = self._prepare_refinement_settings_for_start(task_settings)
-        worker = threading.Thread(
-            target=self._run_refinement_task,
-            kwargs={
-                "job_id": job_id,
-                "projection_id": projection_id,
-                "snapshot_sha256": snapshot_sha256,
-                "messages": messages,
-                "source_binding": source_binding,
-                "settings": deepcopy(task_settings),
-            },
-            name=f"memorive-session-refinement-{job_id[-12:]}",
-            daemon=True,
-        )
-        with self._refinement_lock:
-            if job_id in self._refinement_workers:
-                raise SessionProductError("SESSION_REFINEMENT_TASK_ALREADY_STARTING")
-            self._refinement_workers[job_id] = worker
-        worker.start()
-        return {
-            "schema_version": "DesktopSessionRefinementStartReceipt-v1",
-            "local_projection_id": projection_id,
-            "job_id": job_id,
-            "attempt_id": task["attempt_id"],
-            "source_snapshot_sha256": snapshot_sha256,
-            "selected_profile_ref": task_settings["profile_ref"],
-            "model_calls": 0,
-            "status": "TASK_STARTED",
-        }
+        return projection_id, messages, source_binding, snapshot_sha256, task_settings
 
     def _cancel_refinement_task(self, inbox_item_id: str) -> dict[str, Any]:
         item_id = str(inbox_item_id or "").strip()

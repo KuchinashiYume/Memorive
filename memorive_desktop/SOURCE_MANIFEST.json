@@ -7022,8 +7022,8 @@
     },
     {
       "path": "source/memorive/sessions/controller/refinement_tasks.py",
-      "sha256": "d8ae81d9ca0883f342a2ecccc222a5dcd44eec9d40c9315f5a3aa1f69dfa3dc8",
-      "bytes": 34670
+      "sha256": "ed52cfdcfc8f3c8593748188090ae92b8fe601313e621710af4b60074987df4f",
+      "bytes": 35519
     },
     {
       "path": "source/memorive/sessions/controller/state.py",

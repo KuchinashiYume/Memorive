@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c381685c5ab51174c1f3e02e820872968f3012f9a95601b4427fd353a356f9d1",
+      "sha256": "2d4c796c5c488b795a73161b9f41ad02b8088964b43f539d05c5c37f817d58f3",
       "bytes": 276404
     },
     {
@@ -9916,8 +9916,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/refinement_tasks.py",
-      "sha256": "d8ae81d9ca0883f342a2ecccc222a5dcd44eec9d40c9315f5a3aa1f69dfa3dc8",
-      "bytes": 34670
+      "sha256": "ed52cfdcfc8f3c8593748188090ae92b8fe601313e621710af4b60074987df4f",
+      "bytes": 35519
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/state.py",
