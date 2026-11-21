@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 import queue
 import threading
 import time
 from typing import Any, Mapping
-from memorive.desktop.current_task.refinement_tasks import safe_error_code
+from memorive.desktop.current_task.refinement_tasks import REFINEMENT_NODE_IDS, safe_error_code
 from memorive.sessions.controller.common import SessionProductError
 
 
@@ -217,6 +218,57 @@ class RefinementQueueMixin:
                 with self._refinement_lock:
                     self._refinement_queue_items.discard(item_id)
                 self._refinement_queue.task_done()
+
+    def end_interrupted_refinements(self) -> dict[str, Any]:
+        """Called once when the app starts, before the queue runs.
+
+        A refinement whose worker had started when the app closed has no worker now. Its task stayed RUNNING
+        (or QUEUED, when the app closed just after its inbox card became 处理中), the card showed 处理中 for
+        good, a new request for the conversation got the old task back, and the queue waited for it. Such a
+        task ends here: as it would have, when its draft had been written (the draft is its result), and
+        otherwise FAILED with SESSION_REFINEMENT_INTERRUPTED. Its inbox card ends the same way.
+        """
+        manager = self._refinement_task_manager
+        processing = {}  # job id -> inbox item id, for the cards still 处理中
+        projection = self._inbox_refinement_call("inbox.projection", {})
+        for card in projection.get("cards", []) if isinstance(projection, Mapping) else []:
+            if card.get("item_kind") == "SESSION_REFINEMENT" and card.get("state") == "PROCESSING":
+                detail = self._inbox_refinement_call("inbox.item_detail", {"item_id": card["item_id"]})
+                if isinstance(detail, Mapping) and detail.get("job_id"):
+                    processing[detail["job_id"]] = detail["item_id"]
+        ended = []
+        for task in manager.list_jobs():
+            job_id = task["job_id"]
+            if not (task["control_state"] == "RUNNING"
+                    or (task["control_state"] == "QUEUED" and job_id in processing)):
+                continue  # finished, or not started yet (the queue starts it)
+            draft = self._written_refinement_draft(task["local_projection_id"], job_id)
+            if draft is not None:
+                for node in task["nodes"]:
+                    if node["state"] == "RUNNING":
+                        manager.complete_session_refinement_step(job_id, node["node_id"])
+                task = manager.succeed_session_refinement_task(
+                    job_id, draft_id=draft["draft_id"], model_calls=1,
+                    external_model_calls=int(draft["external_model_calls"]))
+            else:
+                answered = any(node["node_id"] == REFINEMENT_NODE_IDS[2] and node["state"] == "COMPLETED"
+                               for node in task["nodes"])
+                task = manager.fail_session_refinement_task(
+                    job_id, error_code="SESSION_REFINEMENT_INTERRUPTED", model_calls=int(answered))
+            if job_id in processing:
+                self._inbox_refinement_call("inbox.complete_session_refinement", {
+                    "item_id": processing[job_id], "succeeded": task["control_state"] == "SUCCEEDED",
+                    "error_code": task["error_code"]})
+            ended.append(job_id)
+        return {"schema_version": "DesktopSessionRefinementRestart-v1", "ended_job_ids": ended}
+
+    def _written_refinement_draft(self, projection_id: str, job_id: str) -> dict[str, Any] | None:
+        """The draft this task wrote for its conversation, or None."""
+        try:
+            draft = json.loads((self._refinement_root / f"{projection_id}.json").read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+        return draft if isinstance(draft, Mapping) and draft.get("task_id") == job_id else None
 
     def _refinement_auto_run_enabled(self) -> bool:
         setting = self._inbox_refinement_call("inbox.get_auto_run", {})

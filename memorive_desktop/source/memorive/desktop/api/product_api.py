@@ -261,6 +261,7 @@ class ProductApi(
                 refinement_queue_observer=self._on_refinement_queue_projection,
                 refinement_result_observer=self._on_refinement_result,
             )
+            self._sessions.end_interrupted_refinements()
             self._sessions.sync_refinement_queue()
             from memorive.sessions.companion.desktop import BrowserCompanionDesktop
             self._browser_companion = BrowserCompanionDesktop(
