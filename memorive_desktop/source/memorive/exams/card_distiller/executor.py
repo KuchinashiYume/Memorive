@@ -587,6 +587,8 @@ class QualityCardDistillerExamExecutor:
             estimate = receipt.get("estimated_cost_cny")
             if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
                 state["estimated_cost_cny"] += float(estimate)
+            elif profile_kind == "API":
+                state["cost_estimate_complete"] = False  # an API call whose cost is not known
             reason = result.get("reason")
             raise ValueError(
                 reason if isinstance(reason, str) and reason else "WORKFLOW_MODEL_EXAM_CALL_FAILED"
@@ -598,9 +600,11 @@ class QualityCardDistillerExamExecutor:
         state["external_network_calls"] += int(result.get("external_network_calls") or 0)
         state["external_process_launches"] += int(result.get("external_process_launches") or 0)
         sent = result.get("execution_receipt")
-        state["estimated_cost_cny"] += float(
-            (sent if isinstance(sent, Mapping) else {}).get("estimated_cost_cny") or 0.0
-        )
+        estimate = (sent if isinstance(sent, Mapping) else {}).get("estimated_cost_cny")
+        if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
+            state["estimated_cost_cny"] += float(estimate)
+        elif profile_kind == "API":
+            state["cost_estimate_complete"] = False  # an API call whose cost is not known
         receipt = self._validate_call_result(result, model_name, profile_kind)
         response = deepcopy(dict(result["response"]))
         output_receipt = _write_json_create_only(
@@ -1664,6 +1668,7 @@ class QualityCardDistillerExamExecutor:
             "external_network_calls": 0,
             "external_process_launches": 0,
             "estimated_cost_cny": 0.0,
+            "cost_estimate_complete": True,
         }
         try:
             modules = self._quality()
@@ -1775,7 +1780,9 @@ class QualityCardDistillerExamExecutor:
                 "external_process_launches": state[
                     "external_process_launches"
                 ],
-                "estimated_cost_cny": round(state["estimated_cost_cny"], 9),
+                "estimated_cost_cny": (
+                    round(state["estimated_cost_cny"], 9) if state["cost_estimate_complete"] else None),
+                "cost_estimate_complete": state["cost_estimate_complete"],
                 "score": None,
             }
             evidence = _write_json_create_only(run_root / "exam_failure.json", failure)
@@ -1790,6 +1797,7 @@ class QualityCardDistillerExamExecutor:
                 exam_run_id=run_id,
                 exam_run_root=str(run_root.resolve()),
                 exam_evidence_sha256=evidence["sha256"],
-                estimated_cost_cny=round(state["estimated_cost_cny"], 9),
+                estimated_cost_cny=failure["estimated_cost_cny"],
+                cost_estimate_complete=failure["cost_estimate_complete"],
             )
             return result

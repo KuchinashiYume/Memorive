@@ -38,3 +38,19 @@ def test_a_reply_refused_for_naming_another_model_is_still_counted(tmp_path):
     result = executor.execute(NODE, TARGET, {}, authorization=authorization, structured_chat=another_model)
     assert result["status"] == "NOT_RUN" and result["external_model_calls"] == 1
     assert result["estimated_cost_cny"] == pytest.approx(0.0042) and result["cost_estimate_complete"] is True
+
+
+def test_a_refused_reply_whose_cost_is_not_known_leaves_the_cost_open(tmp_path):
+    # Its cost cannot be added; the result says so instead of a total that leaves it out.
+    def unknown_cost(**request):
+        result = another_model(**request)
+        result["execution_receipt"]["estimated_cost_cny"] = None
+        return result
+
+    executor = DataAnomalyExamExecutor(tmp_path)
+    plan = executor.plan(NODE, TARGET, {})
+    authorization = {"schema_version": "WorkflowModelExamAuthorization-v1", "authorized": True,
+                     "plan_sha256": plan["plan_sha256"], "cost_cap_cny": plan["budget_cap_cny"],
+                     "acknowledged_subscription_no_per_call_price": False}
+    result = executor.execute(NODE, TARGET, {}, authorization=authorization, structured_chat=unknown_cost)
+    assert (result["estimated_cost_cny"], result["cost_estimate_complete"]) == (None, False)

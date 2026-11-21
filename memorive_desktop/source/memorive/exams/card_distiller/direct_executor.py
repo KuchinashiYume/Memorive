@@ -507,6 +507,7 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
             "external_network_calls": 0,
             "external_process_launches": 0,
             "estimated_cost_cny": 0.0,
+            "cost_estimate_complete": True,
         }
         try:
             modules = self._quality()
@@ -716,10 +717,11 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
                 "external_network_calls": state["external_network_calls"],
                 "external_process_launches": state["external_process_launches"],
                 "estimated_cost_cny": (
-                    round(state["estimated_cost_cny"], 9)
+                    (round(state["estimated_cost_cny"], 9) if state["cost_estimate_complete"] else None)
                     if plan["profile_kind"] == "API"
                     else (0.0 if plan["profile_kind"] == "LOCAL" else None)
                 ),
+                "cost_estimate_complete": state["cost_estimate_complete"],
                 "score": None,
                 "execution_outcome": classify_execution_outcome(
                     {"status": "ERROR", "reason": reason}
@@ -741,6 +743,7 @@ class QualityCardDistillerDirectExamExecutor(QualityCardDistillerExamExecutor):
                 exam_run_root=str(run_root.resolve()),
                 exam_evidence_sha256=evidence["sha256"],
                 estimated_cost_cny=failure["estimated_cost_cny"],
+                cost_estimate_complete=failure["cost_estimate_complete"],
                 cost_semantics=plan["cost_semantics"],
                 execution_outcome=failure["execution_outcome"],
                 scorability=failure["scorability"],

@@ -1182,6 +1182,8 @@ class QualityCardReviewerExamExecutor:
             estimate = receipt.get("estimated_cost_cny")
             if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
                 state["estimated_cost_cny"] += float(estimate)
+            elif profile_kind == "API":
+                state["cost_estimate_complete"] = False  # an API call whose cost is not known
             usage = receipt.get("token_usage")
             if isinstance(usage, Mapping):
                 for field in ("prompt_tokens", "completion_tokens"):
@@ -1205,6 +1207,8 @@ class QualityCardReviewerExamExecutor:
         estimate = sent.get("estimated_cost_cny")
         if isinstance(estimate, (int, float)) and not isinstance(estimate, bool):
             state["estimated_cost_cny"] += float(estimate)
+        elif profile_kind == "API":
+            state["cost_estimate_complete"] = False  # an API call whose cost is not known
         from memorive.models.cli.templates import accumulate_usage
         accumulate_usage(state, sent.get("token_usage"))
         receipt = self._validate_call_result(
@@ -1395,6 +1399,7 @@ class QualityCardReviewerExamExecutor:
             "external_network_calls": 0,
             "external_process_launches": 0,
             "estimated_cost_cny": 0.0,
+            "cost_estimate_complete": True,
             "token_usage": {"prompt_tokens": 0, "completion_tokens": 0},
         },
         )
@@ -1498,10 +1503,11 @@ class QualityCardReviewerExamExecutor:
                 ],
                 "token_usage": run.state["token_usage"],
                 "estimated_cost_cny": (
-                    round(run.state["estimated_cost_cny"], 9)
+                    (round(run.state["estimated_cost_cny"], 9) if run.state["cost_estimate_complete"] else None)
                     if run.plan["profile_kind"] == "API"
                     else (0.0 if run.plan["profile_kind"] == "LOCAL" else None)
                 ),
+                "cost_estimate_complete": run.state["cost_estimate_complete"],
                 "score": None,
                 "execution_outcome": classify_execution_outcome(
                     {"status": "ERROR", "reason": reason}
@@ -1526,6 +1532,7 @@ class QualityCardReviewerExamExecutor:
                 exam_evidence_sha256=evidence["sha256"],
                 token_usage=run.state["token_usage"],
                 estimated_cost_cny=failure["estimated_cost_cny"],
+                cost_estimate_complete=failure["cost_estimate_complete"],
                 cost_semantics=run.plan["cost_semantics"],
                 execution_outcome=failure["execution_outcome"],
                 scorability=failure["scorability"],
