@@ -4081,8 +4081,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "eecc0841fea2aa215c3ae041185260cdd5750ebd9af29fa9a3c4990cc2169f6a",
-      "bytes": 276404
+      "sha256": "9512b55a73d2ed2d52f5ea38e2bdf0addd37b4621aafada9b8a7a97407d0cf97",
+      "bytes": 276405
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -8341,8 +8341,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/knowledge_feedback/research_ingest.py",
-      "sha256": "847ae767fad1085d71f58fcb6aa5319afb1408bbd3cf086dc33f187001c637e3",
-      "bytes": 15281
+      "sha256": "649373bae871c50e573061e7e259ebcb92492bb7b94ad5e4bcd49f2f9e529b0f",
+      "bytes": 15334
     },
     {
       "path": "memorive_desktop/source/memorive/research/knowledge_feedback/decision.py",
@@ -8936,8 +8936,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/evidence.py",
-      "sha256": "af821bd34f27304f17157bf224f702bb6ba23e74f6d751098fb6bc225f8f100f",
-      "bytes": 27402
+      "sha256": "3cc8a4a8d63755890e48674198fd400dc00021ce3d3797cd2f84eeebbef1cfde",
+      "bytes": 27615
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/handoffs.py",
@@ -8986,8 +8986,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/store.py",
-      "sha256": "1057f3e8663f51d2bd24df976fd80b76ca8ab4de6442bccf3b12444a87db66ed",
-      "bytes": 9193
+      "sha256": "58f8837dcb911ec9e8772e616e89746333be3ff503110618ac94176490918d6e",
+      "bytes": 10686
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/topic.py",

@@ -212,7 +212,7 @@ class ResearchFeedback:
         if source['kind'] == 'derived':
             parent_id = source['id']
         else:
-            raw = Path(source['path']).read_bytes()
+            raw = (Path if source['kind'] == 'source' else self.store.here)(source['path']).read_bytes()
             if digest(raw) != ref['content_hash']:
                 raise ValueError('EVIDENCE_STALE')
             parent_id = 'art_' + digest([ref['artifact_id'], ref['content_hash']])[:32]

@@ -390,7 +390,9 @@ class EvidenceIndex:
         link = artifact.get('structure_binding')
         if not link:
             return []
-        folder = safe_path(link['root'], Path(link['path']) / 'bundle.json').parent
+        # The layout is in the library, which moves with the data folder; artifact['root'] is inside the workspace.
+        moved = lambda recorded: self.store.moved_with(recorded, artifact['root'])
+        folder = safe_path(moved(link['root']), moved(Path(link['path']) / 'bundle.json')).parent
         structure = page_layout(folder)
         if structure['structure_id'] != link['structure_id']:
             raise ValueError('EVIDENCE_STRUCTURE_STALE')

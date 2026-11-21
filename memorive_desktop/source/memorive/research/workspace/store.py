@@ -43,10 +43,35 @@ class Store:
         place below this folder. A path that is below this folder already, or has no folder of this folder's name,
         is returned as recorded. Callers still compare the file's hash."""
         path=Path(recorded)
-        parts=path.parts
-        if path.is_relative_to(self.root) or self.root.name not in parts:
+        if path.is_relative_to(self.root):
             return path
-        return self.root.joinpath(*parts[len(parts)-parts[::-1].index(self.root.name):])
+        old=self._old_root(path)
+        return path if old is None else self.root.joinpath(*path.parts[len(old.parts):])
+
+    def _old_root(self,recorded):
+        """Where this workspace's folder was when the path was recorded: the folder of this name in the path below
+        which the same place exists now (the first such folder when none does), or None."""
+        parts=Path(recorded).parts
+        roots=[Path(*parts[:i+1]) for i,part in enumerate(parts) if part==self.root.name]
+        return next((root for root in roots if self.root.joinpath(*parts[len(root.parts):]).exists()),
+                    roots[0] if roots else None)
+
+    def moved_with(self,recorded,inside):
+        """A path recorded outside this workspace but in the data folder that moved with it (a page layout in the
+        library). inside: a path the same record keeps inside the workspace, which shows where the workspace was.
+        The part the path shares with the old workspace folder is replaced by the matching part of the workspace's
+        folder now. A path that still exists, or with nothing to go by, is returned as recorded."""
+        path=Path(recorded)
+        old=self._old_root(inside)
+        if path.exists() or old is None or old==self.root:
+            return path
+        shared=0
+        while shared<min(len(old.parts),len(path.parts)) and old.parts[shared]==path.parts[shared]:
+            shared+=1
+        up=len(old.parts)-shared
+        if not shared or up>=len(self.root.parts):
+            return path
+        return (self.root.parents[up-1] if up else self.root).joinpath(*path.parts[shared:])
 
     @contextmanager
     def tx(self):

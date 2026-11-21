@@ -168,3 +168,45 @@ def test_an_excerpt_is_read_after_the_data_folder_moved(tmp_path):
         assert Path(excerpt["path"]).is_relative_to(moved.store.root)
     finally:
         moved.close()
+
+
+def test_a_paper_with_a_page_layout_is_read_after_the_data_folder_moved(tmp_path):
+    # The layout is in the library, outside the workspace but in the same data folder. Its recorded path used
+    # to be looked up as it was, so every excerpt of such a paper failed after the data folder moved.
+    import pymupdf
+    from memorive.documents.processing.document_structure.bundle import build_bundle
+    library = tmp_path / "old" / "library"
+    library.mkdir(parents=True)
+    pdf = library / "paper.pdf"
+    document = pymupdf.open()
+    document.new_page().insert_text((72, 72), "Samples were incubated at 37 C for 20 minutes.")
+    document.save(pdf)
+    rawmd = library / "paper.md"
+    rawmd.write_text("Samples were incubated at 37 C for 20 minutes.\n", encoding="utf-8")
+    build_bundle(pdf, rawmd, library / "structure", {"mode": "native"})
+    opened = ResearchWorkspace(tmp_path / "old" / "workspace", catalog=lambda: [])
+    material = opened.index.add_library_file(
+        "default", path=rawmd, root=library, external_id="paper", expected_hash=sha256(rawmd.read_bytes()),
+        title="Paper", material_layer="original", source_content_hash=sha256(pdf.read_bytes()),
+        structure_bundle=library / "structure")
+    [first] = excerpts(opened, material["id"])
+    places = opened.index.read(first["id"], "default").get("structure_refs")  # the read looks the layout up
+    opened.close()
+    moved = _move(tmp_path)
+    try:
+        assert moved.index.read(first["id"], "default").get("structure_refs") == places
+    finally:
+        moved.close()
+
+
+def test_a_recorded_path_goes_to_the_place_that_exists(tmp_path):
+    # A folder of the workspace's name inside the workspace: the place below the first one exists, so the path
+    # is not cut at the last one.
+    opened = ResearchWorkspace(tmp_path / "workspace", catalog=lambda: [])
+    try:
+        inner = opened.store.root / "sub" / "workspace"
+        inner.mkdir(parents=True)
+        (inner / "a.md").write_text("x", encoding="utf-8")
+        assert opened.store.here(Path("D:/old/workspace/sub/workspace/a.md")) == inner / "a.md"
+    finally:
+        opened.close()
