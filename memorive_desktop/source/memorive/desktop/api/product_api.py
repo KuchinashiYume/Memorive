@@ -24,7 +24,6 @@ from memorive.desktop.api.common import (
     LIBRARY_METHODS,
     LOCAL_MODEL_METHODS,
     MESSAGES_METHODS,
-    QUERY_METHODS,
     REVIEW_METHODS,
     SESSIONS_METHODS,
     SETTINGS_METHODS,
@@ -414,6 +413,10 @@ class ProductApi(
             return receipt
 
     def invoke_facade(self, request: dict[str, Any]) -> Any:
+        """The application facade's allowlisted methods (facade_method_binding.json), kept for callers of the
+        earlier desktop interface. Queries and commands go to the settings service; a command repeated with
+        the same idempotency key is answered by the facade with its first result (the command outbox that
+        recorded them here as well was removed in 1232c35)."""
         if not isinstance(request, dict) or sorted(request) != ["args", "kwargs", "method", "request_id"]:
             raise ValueError("facade request key set mismatch")
         method = request["method"]
@@ -427,13 +430,7 @@ class ProductApi(
             raise ValueError("private facade kwarg forbidden")
         params = self._params(method, args, kwargs)
         with self._lock:
-            if method in QUERY_METHODS:
-                return self._service.call(method, params)
-            idempotency_key = str(params.get("idempotency_key") or request["request_id"])
-            self._outbox.enqueue(idempotency_key=idempotency_key, method=method, params=params)
-            result = self._service.call(method, params)
-            self._outbox.complete(idempotency_key, result, succeeded=True)
-            return result
+            return self._service.call(method, params)
 
     def call(self, method: str, params: dict[str, Any] | None = None) -> Any:
         from update_service import METHODS as UPDATE_METHODS
