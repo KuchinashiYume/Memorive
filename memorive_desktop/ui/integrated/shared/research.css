@@ -44,6 +44,8 @@
 .desktop-research-opportunity-fact p { margin:2px 0 0; }
 .desktop-research-opportunity-fact blockquote { margin:4px 0 0;color:var(--text-secondary,#6e675e); }
 .desktop-research-opportunity .desktop-research-actions { flex-wrap:wrap; }
+/* The list and the run's buttons are wrappers update fills; they take no box of their own. */
+.desktop-research-opportunity-list, .desktop-research-opportunity-run { display:contents; }
 /* The search box takes the Q&A input box's frame and bar (routes/chat/workspace.css); these set its own parts. */
 #memo-chat-page .desktop-research-opportunity-box .memo-attachments { padding:10px 12px 0; }
 .desktop-research-opportunity-words { display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:12px 14px 6px; }

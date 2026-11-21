@@ -169,14 +169,24 @@
     model.value = [...model.options].some((option) => option.value === previous) ? previous : 'ALL';
   };
 
+  // The scope is set together with its options' selected attribute, so the dressed select shows it at once.
+  const setScope = (value) => {
+    scope.value = value;
+    for (const option of scope.options) option.toggleAttribute('selected', option.value === value);
+  };
+  // wantJob: the person chose "this task"; it is shown again whenever the selected task has records in the range.
+  let wantJob = false;
+  scope.addEventListener('change', () => { wantJob = scope.value === 'CURRENT_JOB'; });
   const applyScopeCapability = () => {
     const option = scope.querySelector('option[value="CURRENT_JOB"]');
-    const ready = Boolean(job) && projection?.scope_capabilities?.current_job?.status === 'READY';
+    // Only for the task the projection was read for: after another task is selected the old answer does not hold.
+    const ready = Boolean(job) && projection?.filters?.current_job_id === job.job_id
+      && projection?.scope_capabilities?.current_job?.status === 'READY';
     option.disabled = !ready;
     if (!job) i18n.set(option, 'accounting.scope.job-none');
     else if (ready) i18n.set(option, 'accounting.scope.job-named', { title: job.title });
     else i18n.set(option, 'accounting.scope.job-partial');
-    if (!ready && scope.value === 'CURRENT_JOB') scope.value = 'ALL';
+    if (!ready && scope.value === 'CURRENT_JOB') setScope('ALL');
   };
 
   const renderSummary = () => {
@@ -333,7 +343,9 @@
     renderChart();
   };
 
-  const load = async ({ manual = false, currencyChanged = false } = {}) => {
+  // settle: after this read, show "this task" again when the person chose it and it has become available (the reads
+  // that follow from here do not, so a task whose records come and go cannot make the panel read in a loop).
+  const load = async ({ manual = false, currencyChanged = false, settle = true } = {}) => {
     const serial = ++requestSerial;
     const finishLoading = Memorive.decorations?.beginLoading(plot) || (()=>{});
     refreshButton.disabled = true;
@@ -353,6 +365,11 @@
       projection = next;
       setModelOptions(safeArray(next.model_options));
       applyScopeCapability();
+      // Read for all records while "this task" waited for the new task's: show the task's own now that it has records.
+      if (settle && wantJob && scope.value !== 'CURRENT_JOB' && job && projection.scope_capabilities?.current_job?.status === 'READY') {
+        setScope('CURRENT_JOB');
+        return load({ manual, currencyChanged, settle: false });
+      }
       renderSummary();
       renderChart();
       if (currencyChanged) {
@@ -361,6 +378,13 @@
       return next;
     } catch (error) {
       finishLoading(true);
+      // The task has no records in this range or for this model: read all records instead (once; "this task" comes
+      // back when it has records again).
+      if (serial === requestSerial && scope.value === 'CURRENT_JOB' && String(error?.message || '').includes('ACCOUNTING_CURRENT_JOB_SCOPE_NOT_READY')) {
+        setScope('ALL');
+        void load({ manual, currencyChanged, settle: false });
+        return null;
+      }
       if (serial === requestSerial) i18n.set(sync, 'accounting.sync.failed', { error: error?.message || 'UNKNOWN' });
       return null;
     } finally {

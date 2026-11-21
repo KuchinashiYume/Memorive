@@ -8,7 +8,11 @@
   const WORDS=['title','cancel','exit','discard','tray','x','min','max','restore','close','busy','loading','unavailable','retry','dirty','running','background'];
   let nativeState=null,dialog=null,view=null,phase='idle',sequence=0,returnFocus=null,geometryFrame=0;
   const words=()=>Object.fromEntries(WORDS.map(word=>[word,Memorive.i18n.text(`window.${word}`)]));
-  const edit=()=>Memorive.settingsBridge?.getEditState?.()||{ready:false,dirty:false,saving:false};
+  // Unsaved work: the settings' drafts, and an answer being edited in research Q&A.
+  const edit=()=>{
+    const settings=Memorive.settingsBridge?.getEditState?.()||{ready:false,dirty:false,saving:false};
+    return {...settings,dirty:settings.dirty||!!Memorive.chat?.hasUnsavedEdits?.()};
+  };
   function node(tag,cls,text) {
     const e=document.createElement(tag);
     if(cls)e.className=cls;
