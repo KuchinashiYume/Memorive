@@ -139,7 +139,7 @@ class ResearchMemoMixin:
         if not value:
             return {'path':None}
         self.call('memo.capabilities',{})
-        return dict(self._skill_targets().install(folder=value[0]),path=value[0])
+        return dict(self._skill_targets().choose(value[0]),path=value[0])
 
     def memo_skill_forget(self,request):
         self.call('memo.capabilities',{})

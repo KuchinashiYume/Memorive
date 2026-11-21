@@ -2277,8 +2277,8 @@
     },
     {
       "path": "source/memorive/desktop/api/research_memo.py",
-      "sha256": "11741e77632df721f9270548d6401e95f0c2c1fd6e16143468e613429710cb7b",
-      "bytes": 8309
+      "sha256": "0579845584d3dc2fb72cf50c9903ae10af1bb7aac7a4202df95416f28dab44a8",
+      "bytes": 8301
     },
     {
       "path": "source/memorive/desktop/api/service_process.py",
@@ -6907,8 +6907,8 @@
     },
     {
       "path": "source/memorive/research/workspace/skill_install.py",
-      "sha256": "90c7ae237cb50242c3f57a1a8c6f0bd8204fd23e11077375b687f064c69732e4",
-      "bytes": 6955
+      "sha256": "07e33e770676d6216e662691ed6e2c8694d41674cfc1b17208f81ce9a4110dbf",
+      "bytes": 7357
     },
     {
       "path": "source/memorive/research/workspace/skill_runner.py",

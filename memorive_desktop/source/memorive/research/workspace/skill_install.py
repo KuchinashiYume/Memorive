@@ -86,24 +86,31 @@ class SkillTargets:
                    for f in self._folders()]
         return {'skill': SKILL, 'agents': agents, 'folders': folders}
 
+    def choose(self, folder):
+        """A skills folder the person picked in the folder window: remembered, then installed into. This is
+        the only way a new folder is added; the page itself can name only folders already remembered."""
+        skills = Path(folder)
+        if skills.name == SKILL:   # the person chose the Skill's own folder, not the folder of Skills
+            skills = skills.parent
+        folders = self._folders()
+        if str(skills) not in folders:
+            self._save_folders(folders + [str(skills)])
+        return self.install(folder=str(skills))
+
     def install(self, agent=None, folder=None):
-        """Install the shipped Skill for one agent (its id) or into one chosen skills folder, which is then
-        remembered. A copy already there is moved to backups/<time>-<name>/ first."""
+        """Install the shipped Skill for one agent (its id) or into one remembered folder (see choose). A copy
+        already there is moved to backups/<time>-<name>/ first."""
         if agent is not None:
             entry = next((a for a in AGENTS if a['id'] == agent), None)
             if entry is None:
                 raise ValueError('SKILL_AGENT_UNKNOWN')
             skills, label = self.home / entry['skills'], entry['id']
         else:
+            # A script in the page could otherwise copy the Skill into, and move a folder out of, any path.
+            if folder not in self._folders():
+                raise ValueError('SKILL_FOLDER_NOT_CHOSEN')
             skills = Path(folder)
-            if not skills.is_absolute():
-                raise ValueError('SKILL_FOLDER_INVALID')
-            if skills.name == SKILL:   # the person chose the Skill's own folder, not the folder of Skills
-                skills = skills.parent
             label = 'folder-' + hashlib.sha256(str(skills).encode()).hexdigest()[:8]
-            folders = self._folders()
-            if str(skills) not in folders:
-                self._save_folders(folders + [str(skills)])
         target = skills / SKILL
         if target.exists():
             base = self.data / 'skill_backups' / (time.strftime('%Y%m%d-%H%M%S') + '-' + label)

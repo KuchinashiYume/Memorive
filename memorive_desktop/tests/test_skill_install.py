@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from memorive.research.workspace.skill_install import AGENTS, PROJECT_FOLDERS, SkillTargets, tree_hash
 
 SKILL = Path(__file__).resolve().parents[1] / "integrations" / "skills" / "memo-research"
@@ -59,11 +61,25 @@ def test_a_chosen_folder_is_installed_into_and_remembered(tmp_path):
     home, data, chosen = tmp_path / "home", tmp_path / "data", tmp_path / "my-agent" / "skills"
     targets = SkillTargets(SKILL, data, home)
     assert targets.targets() == {"skill": "memo-research", "agents": [], "folders": []}
-    targets.install(folder=str(chosen))
+    targets.choose(str(chosen))
     # Choosing the Skill's own folder means the folder of Skills it is in.
-    targets.install(folder=str(chosen / "memo-research"))
+    targets.choose(str(chosen / "memo-research"))
     listed = SkillTargets(SKILL, data, home).targets()
     assert listed["folders"] == [{"path": str(chosen / "memo-research"), "folder": str(chosen), "state": "current"}]
     assert len(list((data / "skill_backups").iterdir())) == 1   # the second install moved the first aside
     assert targets.forget(str(chosen))["folders"] == []
     assert (chosen / "memo-research" / "SKILL.md").is_file()     # forgetting leaves the Skill where it is
+
+
+def test_the_page_can_only_update_a_folder_already_chosen(tmp_path):
+    # A new folder comes from the folder window (choose); a folder named by the page itself is refused and
+    # nothing is written there or moved out of it.
+    home, data, chosen, other = tmp_path / "home", tmp_path / "data", tmp_path / "chosen", tmp_path / "other"
+    (other / "memo-research").mkdir(parents=True)
+    (other / "memo-research" / "mine.txt").write_text("kept", encoding="utf-8")
+    targets = SkillTargets(SKILL, data, home)
+    with pytest.raises(ValueError, match="SKILL_FOLDER_NOT_CHOSEN"):
+        targets.install(folder=str(other))
+    assert [p.name for p in (other / "memo-research").iterdir()] == ["mine.txt"] and not (data / "skill_targets.json").exists()
+    targets.choose(str(chosen))
+    assert targets.install(folder=str(chosen))["folders"][0]["state"] == "current"   # updating a chosen folder
