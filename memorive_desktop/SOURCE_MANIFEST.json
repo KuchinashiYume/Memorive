@@ -127,8 +127,8 @@
     },
     {
       "path": "integrations/skills/memo-research/SKILL.md",
-      "sha256": "c3f54baf3c5a5f92e1c9168f9405bc5b6a03da55b62cbe1e903cd8dd845ea2ff",
-      "bytes": 5546
+      "sha256": "fa11be53bdfccf0ba505b7bc81fbba298905c999f9ab3ea9b0412cb1f7da056b",
+      "bytes": 6504
     },
     {
       "path": "integrations/skills/memo-research/agents/openai.yaml",
