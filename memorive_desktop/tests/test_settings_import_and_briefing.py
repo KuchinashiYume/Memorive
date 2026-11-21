@@ -100,7 +100,12 @@ def test_a_source_without_a_credential_may_move_to_another_site(owner):
 
 # AI briefing settings
 
-TODAY = datetime.now(timezone(timedelta(hours=9))).date()
+# The dated cases are built when a test runs, not when the module loads: a run that crosses midnight
+# would otherwise send yesterday as "today" (a date one day ahead was then no longer in the future).
+def _today():
+    return datetime.now(timezone(timedelta(hours=9))).date()
+
+
 OPTIONS = [{"profile_ref": "api:chat", "eligible": True}, {"profile_ref": "api:off", "eligible": False}]
 
 
@@ -120,42 +125,44 @@ def _briefing(**changes):
 
 
 @pytest.mark.parametrize("config", [
-    _briefing(),
-    _briefing(profile_ref="api:chat", range_mode="30", focus="agents"),
-    _briefing(range_mode="custom", range_start=(TODAY - timedelta(days=365)).isoformat(), range_end=TODAY.isoformat()),
-    _briefing(sources=[]),
+    lambda TODAY: _briefing(),
+    lambda TODAY: _briefing(profile_ref="api:chat", range_mode="30", focus="agents"),
+    lambda TODAY: _briefing(range_mode="custom", range_start=(TODAY - timedelta(days=365)).isoformat(), range_end=TODAY.isoformat()),
+    lambda TODAY: _briefing(sources=[]),
 ])
 def test_briefing_settings_within_bounds_are_saved(briefing, config):
+    config = config(_today())
     result = briefing.save(config, 0)
     assert (result["revision"], result["config"]) == (1, config)
     assert briefing.save(config, 1)["revision"] == 2
 
 
 @pytest.mark.parametrize("config, code", [
-    ([], "AI_SETTINGS_INVALID"),
-    (dict(_briefing(), language="en"), "AI_SETTINGS_INVALID"),
-    ({k: v for k, v in _briefing().items() if k != "focus"}, "AI_SETTINGS_INVALID"),
-    (_briefing(range_mode="14"), "AI_SETTINGS_INVALID"),
-    (_briefing(focus="f" * 501), "AI_SETTINGS_INVALID"),
-    (_briefing(focus=None), "AI_SETTINGS_INVALID"),
-    (_briefing(range_start=TODAY.isoformat()), "AI_SETTINGS_INVALID"),
-    (_briefing(range_end=TODAY.isoformat()), "AI_SETTINGS_INVALID"),
-    (_briefing(range_mode="custom", range_start=TODAY.isoformat(), range_end=(TODAY + timedelta(days=1)).isoformat()),
+    (lambda TODAY: [], "AI_SETTINGS_INVALID"),
+    (lambda TODAY: dict(_briefing(), language="en"), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: {k: v for k, v in _briefing().items() if k != "focus"}, "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(range_mode="14"), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(focus="f" * 501), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(focus=None), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(range_start=TODAY.isoformat()), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(range_end=TODAY.isoformat()), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(range_mode="custom", range_start=TODAY.isoformat(), range_end=(TODAY + timedelta(days=1)).isoformat()),
      "AI_RANGE_INVALID"),
-    (_briefing(range_mode="custom", range_start=TODAY.isoformat(), range_end=(TODAY - timedelta(days=1)).isoformat()),
+    (lambda TODAY: _briefing(range_mode="custom", range_start=TODAY.isoformat(), range_end=(TODAY - timedelta(days=1)).isoformat()),
      "AI_RANGE_INVALID"),
-    (_briefing(range_mode="custom", range_start=(TODAY - timedelta(days=366)).isoformat(), range_end=TODAY.isoformat()),
+    (lambda TODAY: _briefing(range_mode="custom", range_start=(TODAY - timedelta(days=366)).isoformat(), range_end=TODAY.isoformat()),
      "AI_RANGE_INVALID"),
-    (_briefing(range_mode="custom", range_start="last week", range_end=TODAY.isoformat()), "AI_RANGE_INVALID"),
-    (_briefing(range_mode="custom", range_start=TODAY.isoformat(), range_end=None), "AI_RANGE_INVALID"),
-    (_briefing(sources="openai_news"), "AI_SETTINGS_INVALID"),
-    (_briefing(sources={"openai_news": True}), "AI_SETTINGS_INVALID"),
-    (_briefing(sources=["openai_news", "openai_news"]), "AI_SETTINGS_INVALID"),
-    (_briefing(sources=["someone_blog"]), "AI_SETTINGS_INVALID"),
-    (_briefing(profile_ref="api:missing"), "AI_MODEL_UNAVAILABLE"),
-    (_briefing(profile_ref="api:off"), "AI_MODEL_UNAVAILABLE"),
+    (lambda TODAY: _briefing(range_mode="custom", range_start="last week", range_end=TODAY.isoformat()), "AI_RANGE_INVALID"),
+    (lambda TODAY: _briefing(range_mode="custom", range_start=TODAY.isoformat(), range_end=None), "AI_RANGE_INVALID"),
+    (lambda TODAY: _briefing(sources="openai_news"), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(sources={"openai_news": True}), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(sources=["openai_news", "openai_news"]), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(sources=["someone_blog"]), "AI_SETTINGS_INVALID"),
+    (lambda TODAY: _briefing(profile_ref="api:missing"), "AI_MODEL_UNAVAILABLE"),
+    (lambda TODAY: _briefing(profile_ref="api:off"), "AI_MODEL_UNAVAILABLE"),
 ])
 def test_briefing_settings_out_of_bounds_are_refused(briefing, config, code):
+    config = config(_today())
     with pytest.raises(ValueError) as caught:
         briefing.save(config, 0)
     assert str(caught.value) == code
