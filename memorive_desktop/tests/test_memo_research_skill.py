@@ -266,6 +266,21 @@ def test_marks_after_a_full_stop_or_after_another_mark_support_that_sentence():
                         'or mark a computed value as [inference ...]']
 
 
+@pytest.mark.parametrize("sentence, values", [
+    # places in the paper are not values (Codex wrote these and the drafts were refused, 2026-11-21)
+    ("原论文第 3 页 §2.2 给出候选框和特征的耗时，GPU 13 秒/图", {13.0}),
+    ("训练时先采样图像再采样 RoI（第 3 页 §2.3）", set()),
+    ("Section 2.2 and Table 12 report 66.9% mAP; see Fig. 3 and Eq. (14).", {66.9}),
+    ("见表 12，第 4.1 节和 2.3 节的设置下 mAP 为 58.5%", {58.5}),
+    # 表 inside a word is not a place: the number after it is still a value
+    ("这一行代表 28.54% 的错误率", {28.54}),
+])
+def test_places_in_the_paper_are_not_values_to_cite(sentence, values):
+    sys.path.insert(0, str(SCRIPTS))
+    import drafts
+    assert drafts.stated_values(sentence) == values
+
+
 # A desktop agent app: the hand-off folder carries the Skill
 
 SKILL = SCRIPTS.parent

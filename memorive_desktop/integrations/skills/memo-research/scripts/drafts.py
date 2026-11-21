@@ -93,14 +93,21 @@ def numbers(text):
 
 
 # Numbers in a writer's sentence that are not reported values: page references (p. 774, 第 5 页,
-# 期刊页 774), digits of a name (VGG16, ResNet-34, fc7) and years.
+# 期刊页 774), places in the paper (§2.3, Section 2.2, Table 12, Fig. 3, 第 4 节, 2.3 节, 见表 12),
+# digits of a name (VGG16, ResNet-34, fc7) and years.
 PAGE_REFERENCE = re.compile(r'(?:\bpp?\.|\bpages?|第|页)\s*\d+(?:\s*[-–]\s*\d+)?|\d+(?:\s*[-–]\s*\d+)?\s*页')
+# 表 and 图 count as a place only after a boundary or a pointing word (见表 12), so 代表 28.54% stays a value.
+PLACE_REFERENCE = re.compile(
+    r'§+\s*\d+(?:\.\d+)*'
+    r'|\b(?:sections?|sec|tables?|tab|figures?|fig|equations?|eq|appendix)\.?\s*\(?\d+(?:\.\d+)*\)?'
+    r'|第\s*\d+(?:\.\d+)*\s*[节章表图]|\d+(?:\.\d+)*\s*[节章]'
+    r'|(?:^|(?<=[\s(（,，.。;；:：见如在由从据及与和]))[表图]\s*\d+(?:\.\d+)*', re.I)
 NAME_DIGITS = re.compile(r'(?<=[A-Za-z])-?\d+')
 
 
 def stated_values(text):
-    """The values a written sentence reports (numbers() without page references, names and years)."""
-    text = NAME_DIGITS.sub(' ', PAGE_REFERENCE.sub(' ', text))
+    """The values a written sentence reports (numbers() without page and place references, names and years)."""
+    text = NAME_DIGITS.sub(' ', PLACE_REFERENCE.sub(' ', PAGE_REFERENCE.sub(' ', text)))
     return {v for v in numbers(text) if not (v.is_integer() and 1900 <= v <= 2100)}
 
 

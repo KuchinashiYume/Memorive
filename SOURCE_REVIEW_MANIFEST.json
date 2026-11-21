@@ -906,8 +906,8 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/scripts/drafts.py",
-      "sha256": "182742bdde6b6a58125dd36a6b65e5606f92e1b21e9b73e57761b98a2984089c",
-      "bytes": 8402
+      "sha256": "a93e326d62fca51a307cd6ace1aa02f0a6979df1321bc75c0f2cccc959e629b9",
+      "bytes": 8978
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/SKILL.md",
@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "274aff5408f3ea9e3fd9c53e9064271b77bea551c98100561e25a849d376d6fc",
+      "sha256": "85bdd428fd2d4ee293fb954bad61841aad602bc4fdb1a84d5aa3e0e934aef11f",
       "bytes": 276404
     },
     {
