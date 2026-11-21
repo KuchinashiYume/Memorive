@@ -2,6 +2,8 @@
 
 Resolve script paths relative to this Skill, and choose the host's available Python 3.10+. MD/TXT preparation uses the standard library. PDF conversion and rendering require the optional dependencies in `scripts/requirements-pdf.txt`. Use an existing suitable interpreter first; if missing, create a task-local venv and install that file. Do not install into an unrelated project or silently modify a shared interpreter.
 
+Without Python, `Memorive.exe --memo-sources` runs the same script with Memorive's own Python (in PowerShell end the command with `| Out-String`); the commands below stay the same after it.
+
 ```text
 python <skill>/scripts/sources.py prepare --out <task>/sources <paper.pdf> <other.md>
 python <skill>/scripts/sources.py verify <bundle>/source.json

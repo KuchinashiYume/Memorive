@@ -245,6 +245,21 @@ kept and shipped; this list says how each one is entered.
 | Local model components: the packages `memorive/models/gateway/local_capability/`, `local_embedding/` and `model_api_relay/` | Component API: the broker's `execute()` in `local_capability/broker.py`, `LocalEmbeddingSeam.execute()` in `local_embedding/seam.py`, `SafeRelayClient.invoke()` in `model_api_relay/client.py`. Each needs its configuration from the caller and is off by default. | `python -m memorive.models.gateway.local_capability` prints status and diagnostics only. |
 | Evidence review orchestration, `memorive/documents/card_review/review_orchestration/` | Its operator (`operator.py`): `create_or_get_job`, `pause`, `resume`, `cancel`, and `dispatch_once` with an execute function the caller supplies. | |
 
+## Compatibility code
+
+Code that lets Memorive work with programs outside this repository. Its callers are those programs,
+so a search of the repository finds none: a cleanup must not take that for unused code. Each piece
+says so at its top, and a test calls it.
+
+| Code | What it is for | Who calls it | Test that keeps it |
+| --- | --- | --- | --- |
+| `memorive/research/workspace/skill_install.py` and the Skill rows in settings (`ui/integrated/routes/settings/skill-install.js`) | Installs the memo-research Skill into the skills folders of Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, DeepSeek Harness and CodeBuddy, or into a folder the person picks. `AGENTS` says where each agent keeps Skills and when that was checked; `PROJECT_FOLDERS` is where a hand-off folder (`agents.py`) puts its copies. | The person, in settings (Agent and connections, integration config and plugins); the agents read the installed copy. | `tests/test_skill_install.py`, `tests/test_memo_research_skill.py` |
+| `memorive/research/workspace/skill_runner.py` and the `--memo-bridge` / `--memo-sources` options of `product/desktop/app.py` | Runs the Skill's `scripts/memo_bridge.py` or `scripts/sources.py` with Memorive's own Python, on a computer without Python. | Agents following `SKILL.md` and a hand-off's `START_HERE.md` (the "bridge" command of `transport.json`). | `tests/test_skill_runners.py` |
+| `integrations/skills/memo-research/c/`, built into `bin/memo_bridge.exe` by `tools/build_skill_bridge.py` (called by `tools/build_memorive.py`) | The C version of `memo_bridge.py`: the same commands, output and files, as a console program. | Agents following `SKILL.md` (`<skill>/bin/memo_bridge.exe`). | `tests/test_skill_runners.py` (builds it with Visual Studio's C compiler) |
+
+When `memo_bridge.py` or `drafts.py` changes, change the C version too: the test compares what both
+print and write on the same hand-off.
+
 ## Reading library files from other packages
 
 The library controller (`memorive/documents/library/product_controller.py`) keeps the files that document

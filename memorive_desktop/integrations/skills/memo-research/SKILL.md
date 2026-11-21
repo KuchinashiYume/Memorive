@@ -44,6 +44,11 @@ python <skill>/scripts/memo_bridge.py answer handoff.json --draft work/draft.md 
 - `"status": "RETURNED"`: the answer is in the Memorive conversation. Give the user the answer in brief and say it was returned. Done.
 - `"status": "NOT_RETURNED"`: your answer is complete and saved, but Memorive could not be reached. Give the user the answer and follow the `next` text.
 
+**No Python on this computer?** Run the same commands another way; START_HERE.md gives the exact command line:
+
+- `Memorive.exe --memo-bridge find handoff.json "..."`: Memorive's own Python runs this script. In PowerShell end the command with `| Out-String`, or it returns before Memorive prints anything.
+- `<skill>/bin/memo_bridge.exe find handoff.json "..."`: the Skill's own program, when the file is there; every command but `bind`.
+
 If `find` or `read` says Memorive could not be reached, answer from the extracted texts in `materials/` (`sources.md` says which file is which paper) with page numbers, and tell the user the answer could not be returned.
 
 ## What a good answer does

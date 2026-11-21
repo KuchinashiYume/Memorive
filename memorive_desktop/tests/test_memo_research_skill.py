@@ -300,15 +300,19 @@ def desktop(handoff, tmp_path):
     return ws, thread_id, desktop_handoff(ws, thread_id, QUESTION, tmp_path / "desktop", SKILL)
 
 
-def test_a_desktop_handoff_folder_carries_the_skill_where_both_agents_find_it(desktop):
+def test_a_desktop_handoff_folder_carries_the_skill_where_every_agent_finds_it(desktop):
     ws, _, prepared = desktop
     folder = Path(prepared["path"])
-    claude, codex = folder / ".claude" / "skills" / "memo-research", folder / ".agents" / "skills" / "memo-research"
-    assert shipped_files(claude) == shipped_files(codex) == shipped_files(SKILL)
-    # The prompt the user pastes names the Skill; START_HERE.md says where both copies are.
+    copies = [folder / place / "memo-research" for place in (".claude/skills", ".agents/skills", ".dsh/skills", ".codebuddy/skills")]
+    claude, codex = copies[0], copies[1]
+    assert all(shipped_files(copy) == shipped_files(SKILL) for copy in copies)
+    # The prompt the user pastes names the Skill; START_HERE.md says where the copies are and how to run
+    # the Skill's commands without Python.
     assert str(claude / "SKILL.md") in prepared["prompt"]
     start = (folder / "START_HERE.md").read_text(encoding="utf-8")
-    assert ".claude/skills/memo-research" in start and ".agents/skills/memo-research" in start
+    assert all(place + "/memo-research" in start for place in (".claude/skills", ".agents/skills", ".dsh/skills", ".codebuddy/skills"))
+    transport = json.loads((folder / "transport.json").read_text(encoding="utf-8"))
+    assert all(part in start for part in transport["bridge"]) and "bin/memo_bridge.exe" in start
     # The copies are bound like every other file of the folder.
     row = ws.store.get("desktop_handoff", prepared["id"])
     assert {".claude/skills/memo-research/SKILL.md", ".agents/skills/memo-research/scripts/memo_bridge.py"} <= set(row["files"])
