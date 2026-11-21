@@ -271,8 +271,9 @@ def test_a_full_source_response_that_needed_a_missing_table_is_limited():
     report = build_report(source_id="synthetic", source_sha256="source", text=TEXT,
                           parts=[part], responses=[result], node=_node(), data_report_id=None)
     assert report["status"] == "COMPLETED_LIMITED"
-    assert report["scope"]["global_relationship_check"]["status"] == "LIMITED"
     assert "Table S2" in report["scope"]["limitations"]
+    # the whole supplied text was still read in one request
+    assert report["scope"]["global_relationship_check"]["status"] == "FULL_SOURCE_CHECKED"
 
 
 def test_numeric_context_surfaces_in_scope_inconsistencies_before_compatible_rows():

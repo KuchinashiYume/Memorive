@@ -441,12 +441,14 @@ def build_report(*,source_id,source_sha256,text,parts,responses,node,data_report
     for finding in findings:
         unique.setdefault(finding['root_cause_key'],finding)
     findings=list(unique.values())
+    # A whole text read in one request has had its sections compared with each other; what it lacks
+    # (a missing table, unreported data) is listed in the limitations and makes the report limited.
     limited=bool(limitations)
     color='RED' if any(f['level']=='PRIORITY' for f in findings) else 'YELLOW' if any(f['level']=='CLARIFY' for f in findings) else None if limited else 'GREEN'
     report={'schema_version':'LiteratureLogicReport-v1','kind':'LOGIC','status':'COMPLETED_LIMITED' if limited else 'COMPLETED',
             'prompt_version':PROMPT_VERSION,'decision_policy_version':DECISION_POLICY_VERSION,'source_id':source_id,'source_sha256':source_sha256,
             'scope':{'source':'RawMD','processed_lines':len(text.splitlines()),'segments':[{'start_line':p['start_line'],'end_line':p['end_line']} for p in local_parts],
-                     'global_relationship_check':{'status':'LIMITED' if limited else 'FULL_SOURCE_CHECKED','source_lines':len(text.splitlines()),
+                     'global_relationship_check':{'status':'FULL_SOURCE_CHECKED','source_lines':len(text.splitlines()),
                          'source_encoding':local_parts[0].get('source_packet',{}).get('encoding','ORIGINAL_LINES')} if whole_source else global_results[0] if global_results else {'status':'NOT_RUN'},
                      'limitations':list(dict.fromkeys(limitations)),'not_run':['pixel image forensics','unloaded supplements','author investigation']},
             'findings':findings,'color':color,'data_report_id':data_report_id,'derived_opinion':True,'raw_evidence_eligible':False,
