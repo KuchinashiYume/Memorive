@@ -1395,7 +1395,7 @@
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/memorive.ico",
       "destination": "assets/illustrations/memorive.ico",
-      "sha256": "69323726708144b820e961eb8e203527b4fee798db7a5a67023fc5c9ab3f35b6"
+      "sha256": "5af8fe1bf7c87c7194886427230437555d7ebe577bc3a34ec39e557f8b61a245"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
@@ -2510,7 +2510,7 @@
   ],
   "icon": {
     "path": "memorive_desktop/product/desktop/assets/memorive.ico",
-    "sha256": "69323726708144b820e961eb8e203527b4fee798db7a5a67023fc5c9ab3f35b6"
+    "sha256": "5af8fe1bf7c87c7194886427230437555d7ebe577bc3a34ec39e557f8b61a245"
   },
   "package_id": "v1.01"
 }

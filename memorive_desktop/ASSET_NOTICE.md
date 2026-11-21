@@ -40,7 +40,7 @@ Memorive は、主に学習・研究を目的として個人が開発する、�
 | --- | --- |
 | 桌宠、表情及角色插图 | `product/desktop/assets/illustrations/` 中的角色 SVG／ICO，包括中文原文件名、英文映射文件和图集。主窗口页面按路径引用这些文件 |
 | 界面角色装饰与头像 | `product/desktop/assets/decorations/`、`product/web/assets/assistant/` 中的角色图像及内嵌副本 |
-| 应用及网页图标 | `product/desktop/assets/memorive.ico`、`product/desktop/help/web/assets/wink.svg` 及包含相同角色图像的其他图标版本 |
+| 网页图标 | `product/desktop/help/web/assets/wink.svg` 及包含相同角色图像的其他图标版本。程序图标 `product/desktop/assets/memorive.ico` 自 v2.00 起是 Memorive 的书页 M 标志，不含角色图像，不适用本声明 |
 | 组合文件与生成物 | `product/desktop/bundle_*.html` 等组合文件内的角色图像；由同类素材生成的 EXE 图标、安装器图像、缩略图和格式转换副本 |
 | 截图、使用文档与网站 | `product/desktop/help/` 及最终公开文档、网页中出现的上述角色图像部分，包括 PDF、PNG、SVG、HTML 内嵌图片 |
 
