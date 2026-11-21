@@ -54,6 +54,12 @@ def provider_name(row):
 def mapped_report(response,collection,window,style,language_context=None):
     language=validate_language(language_context or freeze_language())
     def t(zh,en,ja):return choose(language,zh,en,ja)
+    if isinstance(response,dict) and set(response)=={'mainline','items','trend','source_ids'}:
+        # A model that writes the main line and the trend as text and gives their sources once, at the top: each
+        # becomes a statement citing those sources (checked below like any statement's). The report used to be
+        # refused whole for this, its items valid and the call paid for.
+        response={key:({'text':value,'source_ids':response['source_ids']} if key in ('mainline','trend') and isinstance(value,str) else value)
+                  for key,value in response.items() if key!='source_ids'}
     if not isinstance(response,dict) or set(response)!={'mainline','items','trend'}:
         raise ValueError('AI_REPORT_SCHEMA_INVALID')
     rows=collection['materials']

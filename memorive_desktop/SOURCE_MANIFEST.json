@@ -6022,8 +6022,8 @@
     },
     {
       "path": "source/memorive/research/briefing/jobs.py",
-      "sha256": "20ae3d7f813de45c0b4eca3bfd0105a2b58539c6843d30e06f2dddbb0de40ffb",
-      "bytes": 26422
+      "sha256": "0606ff1a35fce5213f5695b95d8225df6ea59309310c80b33a9f89d36c6a865d",
+      "bytes": 27037
     },
     {
       "path": "source/memorive/research/briefing/prompt.py",
