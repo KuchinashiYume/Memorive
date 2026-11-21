@@ -27,6 +27,8 @@ class Started(Queued):
         self._refinement_root.mkdir(exist_ok=True)
         self.cards = cards  # item id -> {"state": ..., "job_id": ...}; shared by both starts
         self.completed = []
+        self.published = []  # drafts put in the library
+        self._refinement_result_observer = self.published.append
 
     def _inbox_refinement_call(self, method, params):
         if method == "inbox.projection":
@@ -90,6 +92,17 @@ def test_a_refinement_whose_draft_was_written_ends_as_it_would_have(tmp_path):
     assert (ended["control_state"], ended["draft_id"], ended["model_calls"], ended["external_model_calls"]) == (
         "SUCCEEDED", "refinement-draft", 1, 1)
     assert after.completed == [("item-1", True, "")]
+    # The worker puts the draft in the library before it marks success; the app may have closed in between.
+    assert [draft["draft_id"] for draft in after.published] == ["refinement-draft"]
+
+
+def test_a_card_left_processing_after_its_task_ended_is_closed(tmp_path):
+    # The app closed after the task ended but before its card did; the card used to stay 处理中 for good.
+    job_id, after = _closed_while(tmp_path, steps_done=0)
+    after._refinement_task_manager.fail_session_refinement_task(job_id, error_code="SESSION_REFINEMENT_X")
+    restarted = Started(tmp_path, after.cards)
+    assert restarted.end_interrupted_refinements()["ended_job_ids"] == []
+    assert restarted.completed == [("item-1", False, "SESSION_REFINEMENT_X")]
 
 
 def test_a_refinement_not_yet_started_is_left_for_the_queue(tmp_path):

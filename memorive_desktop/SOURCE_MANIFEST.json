@@ -7017,8 +7017,8 @@
     },
     {
       "path": "source/memorive/sessions/controller/refinement_queue.py",
-      "sha256": "5aeaef77cd51f91140c16487b51732a87726c5a73f76e2fa85178ab179af3787",
-      "bytes": 15339
+      "sha256": "7e6db3f1bb695fe4f8fd9b560fd84f31a3e18f5c3799341e0a2c387485f6bbeb",
+      "bytes": 16270
     },
     {
       "path": "source/memorive/sessions/controller/refinement_tasks.py",

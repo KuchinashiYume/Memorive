@@ -225,8 +225,10 @@ class RefinementQueueMixin:
         A refinement whose worker had started when the app closed has no worker now. Its task stayed RUNNING
         (or QUEUED, when the app closed just after its inbox card became 处理中), the card showed 处理中 for
         good, a new request for the conversation got the old task back, and the queue waited for it. Such a
-        task ends here: as it would have, when its draft had been written (the draft is its result), and
-        otherwise FAILED with SESSION_REFINEMENT_INTERRUPTED. Its inbox card ends the same way.
+        task ends here as the worker would have ended it: when its draft had been written, the draft is put in
+        the library (as the worker does before it marks success) and the task succeeds; otherwise it ends
+        FAILED with SESSION_REFINEMENT_INTERRUPTED. A card still 处理中 whose task has ended, here or before the
+        app closed (between the task's end and the card's), ends the same way as its task.
         """
         manager = self._refinement_task_manager
         processing = {}  # job id -> inbox item id, for the cards still 处理中
@@ -239,28 +241,39 @@ class RefinementQueueMixin:
         ended = []
         for task in manager.list_jobs():
             job_id = task["job_id"]
-            if not (task["control_state"] == "RUNNING"
-                    or (task["control_state"] == "QUEUED" and job_id in processing)):
-                continue  # finished, or not started yet (the queue starts it)
-            draft = self._written_refinement_draft(task["local_projection_id"], job_id)
-            if draft is not None:
-                for node in task["nodes"]:
-                    if node["state"] == "RUNNING":
-                        manager.complete_session_refinement_step(job_id, node["node_id"])
-                task = manager.succeed_session_refinement_task(
-                    job_id, draft_id=draft["draft_id"], model_calls=1,
-                    external_model_calls=int(draft["external_model_calls"]))
-            else:
-                answered = any(node["node_id"] == REFINEMENT_NODE_IDS[2] and node["state"] == "COMPLETED"
-                               for node in task["nodes"])
-                task = manager.fail_session_refinement_task(
-                    job_id, error_code="SESSION_REFINEMENT_INTERRUPTED", model_calls=int(answered))
-            if job_id in processing:
-                self._inbox_refinement_call("inbox.complete_session_refinement", {
-                    "item_id": processing[job_id], "succeeded": task["control_state"] == "SUCCEEDED",
-                    "error_code": task["error_code"]})
-            ended.append(job_id)
+            if task["control_state"] == "RUNNING" or (task["control_state"] == "QUEUED" and job_id in processing):
+                task = self._end_interrupted_refinement(task)
+                ended.append(job_id)
+            elif task["control_state"] == "QUEUED" or job_id not in processing:
+                continue  # not started yet (the queue starts it), or finished with its card closed
+            error_code = task["error_code"] or (
+                "SESSION_REFINEMENT_CANCELLED" if task["control_state"] == "CANCELLED" else "")
+            self._inbox_refinement_call("inbox.complete_session_refinement", {
+                "item_id": processing[job_id], "succeeded": task["control_state"] == "SUCCEEDED",
+                "error_code": error_code})
         return {"schema_version": "DesktopSessionRefinementRestart-v1", "ended_job_ids": ended}
+
+    def _end_interrupted_refinement(self, task: Mapping[str, Any]) -> dict[str, Any]:
+        manager = self._refinement_task_manager
+        job_id = task["job_id"]
+        draft = self._written_refinement_draft(task["local_projection_id"], job_id)
+        if draft is not None:
+            try:
+                if self._refinement_result_observer is not None:
+                    self._refinement_result_observer(deepcopy(draft))  # a draft put in before is answered as such
+            except Exception:
+                return manager.fail_session_refinement_task(
+                    job_id, error_code="SESSION_REFINEMENT_EXECUTION_FAILED", model_calls=1)
+            for node in task["nodes"]:
+                if node["state"] == "RUNNING":
+                    manager.complete_session_refinement_step(job_id, node["node_id"])
+            return manager.succeed_session_refinement_task(
+                job_id, draft_id=draft["draft_id"], model_calls=1,
+                external_model_calls=int(draft["external_model_calls"]))
+        answered = any(node["node_id"] == REFINEMENT_NODE_IDS[2] and node["state"] == "COMPLETED"
+                       for node in task["nodes"])
+        return manager.fail_session_refinement_task(
+            job_id, error_code="SESSION_REFINEMENT_INTERRUPTED", model_calls=int(answered))
 
     def _written_refinement_draft(self, projection_id: str, job_id: str) -> dict[str, Any] | None:
         """The draft this task wrote for its conversation, or None."""
