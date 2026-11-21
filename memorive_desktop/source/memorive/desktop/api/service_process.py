@@ -294,7 +294,12 @@ class ServiceProcessManager:
                 if self._process.poll() is not None:
                     raise RuntimeError("APPLICATION_SERVICE_EXITED_BEFORE_READY")
                 if self._endpoint_file.is_file():
-                    descriptor = json.loads(self._endpoint_file.read_text(encoding="utf-8"))
+                    try:
+                        descriptor = json.loads(self._endpoint_file.read_text(encoding="utf-8"))
+                    except PermissionError:
+                        # Windows refuses the read while the service is replacing the file; read it again.
+                        time.sleep(0.05)
+                        continue
                     expected = {
                         "schema_version", "protocol_version", "host", "port", "pid", "profile_root",
                         "secret_env_name", "secret_value_recorded", "external_network_calls",

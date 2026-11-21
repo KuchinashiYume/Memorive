@@ -2247,8 +2247,8 @@
     },
     {
       "path": "source/memorive/desktop/api/service_process.py",
-      "sha256": "f1bee290d91e3a2e4fccd532d632a67cd16066033f9ef6b1d123964ef15c06a6",
-      "bytes": 19734
+      "sha256": "418f30d9419768ddf133ddcafa65e7a07e19d9d40f2f2891e93193d3b460c188",
+      "bytes": 19993
     },
     {
       "path": "source/memorive/desktop/api/settings_page.py",
