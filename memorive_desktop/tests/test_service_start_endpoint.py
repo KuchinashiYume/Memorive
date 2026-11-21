@@ -3,10 +3,13 @@
 The service writes the file to a temporary name and replaces the endpoint file with it. On Windows a read
 at that moment is refused with PermissionError, and start() used to stop the app there (seen once in a
 test run). The service here is a stand-in process that writes the endpoint file when it is started.
+Run from source in a virtual environment, the service also gets the environment's packages.
 """
 from __future__ import annotations
 
 import json
+import os
+import site
 from pathlib import Path
 
 from memorive.desktop.api import service_process
@@ -56,3 +59,30 @@ def test_a_read_refused_while_the_service_replaces_the_endpoint_file_is_tried_ag
         for stream in (manager._stdout_handle, manager._stderr_handle, manager._owner_stream):
             if stream is not None:
                 stream.close()
+
+
+def test_a_service_started_from_a_virtual_environment_gets_its_packages(tmp_path, monkeypatch):
+    # Run from source in a virtual environment, the service runs on the base interpreter, which does not see
+    # the environment's packages (pythonnet was missing, so a profile picture could not be read).
+    manager = ServiceProcessManager(tmp_path / "source", tmp_path / "profile", tmp_path / "runtime")
+    packages = tmp_path / "venv" / "Lib" / "site-packages"
+    started = []
+
+    class Service:
+        def __init__(self, *args, env, **kwargs):
+            started.append(env["PYTHONPATH"].split(os.pathsep))
+            raise OSError("stand-in: only the start request is looked at")
+
+    monkeypatch.setattr(service_process.sys, "prefix", str(tmp_path / "venv"))
+    monkeypatch.setattr(site, "getsitepackages", lambda: [str(tmp_path / "venv"), str(packages)])
+    monkeypatch.setattr(service_process.subprocess, "Popen", Service)
+    try:
+        manager.start(timeout_seconds=1)
+    except OSError:
+        pass
+    finally:
+        for stream in (manager._stdout_handle, manager._stderr_handle, manager._owner_stream):
+            if stream is not None and not stream.closed:
+                stream.close()
+    [path] = started
+    assert str(packages) in path and str(tmp_path / "venv") not in path

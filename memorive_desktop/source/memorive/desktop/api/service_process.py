@@ -260,6 +260,12 @@ class ServiceProcessManager:
         dependency_overlay = self.source_root.parent / "dependency_overlay"
         if dependency_overlay.is_dir():
             local_import_roots.append(str(dependency_overlay))
+        if not self._frozen_runtime and sys.prefix != sys.base_prefix:
+            # Run from source in a virtual environment. The service runs on the base interpreter (on Windows a
+            # venv's python.exe starts it as a child process, whose id would not be the one started here), so it
+            # is given the environment's packages; without them pythonnet and the like were missing.
+            import site
+            local_import_roots.extend(path for path in site.getsitepackages() if Path(path).name == "site-packages")
         if existing_python_path:
             local_import_roots.append(existing_python_path)
         environment["PYTHONPATH"] = os.pathsep.join(local_import_roots)
