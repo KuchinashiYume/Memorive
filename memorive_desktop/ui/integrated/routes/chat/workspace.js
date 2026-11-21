@@ -721,7 +721,7 @@ const collapsed=new Set();
           wrap.setAttribute('aria-current',String(thread?.id===row.id));
           const b=button('',()=>selectThread(row),'memo-thread');
           b.append(create('span',(row.pinned?'· ':'')+row.title,'memo-thread-name'));
-          const meta=(showArchived?p.name+' · ':'')+(row.excerpt||(row.temporary?t('临时对话'):(row.question_count??Number((row.message_count/2).toFixed(0)))+' '+t('轮对话')));
+          const meta=(showArchived?p.name+' · ':'')+(row.excerpt||(row.temporary?t('临时对话'):t((row.question_count??Number((row.message_count/2).toFixed(0)))+' 轮对话')));
           b.append(create('small',meta));
           b.setAttribute('aria-current',String(thread?.id===row.id));
           b.title=row.title;
@@ -1201,7 +1201,7 @@ const collapsed=new Set();
     list.replaceChildren(button('‹ '+t(origin==='feedback'?'返回知识':'返回引用'),()=>{
       showEvidencePanel(origin==='feedback'?'feedback':'references');
       renderEvidence();
-    },'memo-quiet-button'),create('h4',fresh.title),create('small',fresh.page?t('页')+' '+fresh.page:'L'+fresh.line_start+'–'+fresh.line_end),create('pre',fresh.text),
+    },'memo-quiet-button'),create('h4',fresh.title),create('small',fresh.page?t('页 '+fresh.page):'L'+fresh.line_start+'–'+fresh.line_end),create('pre',fresh.text),
       button('在外部查看',()=>window.pywebview.api.memo_open_evidence({evidence_id:ref.id,project,expected_hash:ref.content_hash}),'memo-quiet-button'));
   }
   // What an answer was built from: one line of counts, the remembered notes it used, the evidence check (filled in
@@ -2265,7 +2265,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
       line.append(open,remove);
       card.append(line);
       const failed=group.items.find(a=>a.state==='error'),preparing=group.items.some(a=>a.state==='preparing');
-      card.append(create('small',t(failed?'读取失败':preparing?'正在读取…':'已就绪')+(a.page_count?' · '+a.page_count+' '+t('页'):'')));
+      card.append(create('small',t(failed?'读取失败':preparing?'正在读取…':'已就绪')+(a.page_count?' · '+t(a.page_count+' 页'):'')));
       if(failed){
         card.append(create('p',t(errors[failed.error]||'文件未能读取，请更换模型后重试。'),'memo-inline-error'),button('重试',()=>importFiles([failed.path]),'memo-quiet-button'));
       }
@@ -2295,7 +2295,7 @@ const preferenceIds=formIds.filter(id=>!['memo-project-name','memo-vault','memo-
     }
     const result=await call('memo.material_preview',{project,artifact_id:a.id});
     status('#memo-evidence-status','');
-    for(const ref of result.evidence){target.append(create('small',ref.page?t('页')+' '+ref.page:t('原文摘录')),create('pre',ref.text));}
+    for(const ref of result.evidence){target.append(create('small',ref.page?t('页 '+ref.page):t('原文摘录')),create('pre',ref.text));}
     await materialMetadata(target,a);
     if(result.evidence[0])target.append(button('在外部查看',()=>window.pywebview.api.memo_open_evidence({project,evidence_id:result.evidence[0].id,expected_hash:result.evidence[0].content_hash}),'memo-quiet-button'));
   }

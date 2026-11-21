@@ -89,6 +89,9 @@ Memorive.productName="Memorive";
     if ((m=source.match(/^当前填写的是版本\/档位描述；可直接改用实时目录 ID“(.+)”。$/))) return ja?`入力はバージョンまたはレベルの表記です。一覧の ID「${m[1]}」を使用できます。`:`This is a version or tier label. Use catalog ID “${m[1]}”.`;
     if ((m=source.match(/^API 验证未通过：(.+)$/))) return `${ja?'API 検証失敗：':'API verification failed: '}${translated(m[1],language)}`;
     if ((m=source.match(/^Memorive (.+)$/))) return 'Memorive '+translated(m[1],language);
+    // A count or a page number with its word: English says 1 exchange, 2 exchanges, Page 4.
+    if ((m=source.match(/^(\d+) (轮对话|页)$/))) return ja?`${m[1]} ${translated(m[2],language)}`:`${m[1]} ${m[2]==='页'?'page':'exchange'}${m[1]==='1'?'':'s'}`;
+    if ((m=source.match(/^页 (\d+)$/))) return ja?`${translated('页',language)} ${m[1]}`:`Page ${m[1]}`;
     if ((m=source.match(/^当前任务 (\d+) 项$/))) return ja?`現在のタスク ${m[1]} 件`:`Current tasks: ${m[1]}`;
     if ((m=source.match(/^当前显示 (\d+) 条消息$/))) return ja?`${m[1]} 件のメッセージを表示`:`Showing ${m[1]} messages`;
     if ((m=source.match(/^显示 (\d+) 项，共 (\d+) 项$/))) return ja?`${m[2]} 件中 ${m[1]} 件を表示`:`Showing ${m[1]} of ${m[2]}`;
