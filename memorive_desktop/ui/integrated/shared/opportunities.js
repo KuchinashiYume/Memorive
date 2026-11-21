@@ -52,7 +52,8 @@
   const page = () => q('#memo-chat-page'), body = () => q('#memo-opportunities-body'), status = () => q('#memo-opportunities-status');
   const shown = () => page()?.dataset.mode === 'opportunities';
 
-  // A notice on the page's status line stays there (update leaves it) until the person acts again (acted()).
+  // A notice on the page's status line stays there (update leaves it) until the person acts again (acted()), comes
+  // back to this mode or a research run ends: then the line says how things stand again.
   let notice = '';
   const acted = () => { notice = ''; };
   function notify(e) {
@@ -79,6 +80,7 @@
     q('#memo-mode').dataset.mode = page().dataset.mode;
     if (opportunities) {
       Memorive.chat?.closeEvidence();
+      acted();
       return refresh();
     }
     closePicker();
@@ -113,11 +115,11 @@
     const waiting = currentGroup()?.pending.some((p) => p.status === 'queued' || p.status === 'processing');
     if (state.active_run || waiting) timer = setTimeout(() => refresh().catch(notify), state.active_run ? 1500 : 5000);
   }
-  // After a write (a mark, a group saved, files added, a group deleted) a read that started before it is dropped: it
-  // would put back what the write changed.
+  // After a write (a mark, a group saved, files added, a group deleted) the page reads again: a read that started
+  // before the write is dropped (it would put back what the write changed), and the new one shows what happened
+  // meanwhile, such as a search just started.
   function wrote() {
-    ++epoch;
-    poll();
+    void refresh().catch(notify);
   }
   // A mark answers with the whole state; a stale revision or a removed opportunity reloads it.
   async function mark(item, next) {
@@ -354,14 +356,12 @@
   // review) shows ticked; what the person ticked or unticked stays as it is.
   function syncPicker(group) {
     if (!pickerOpen() || pickerGroup !== groupId || !group) return;
-    const now = new Set(group.papers.map((p) => p.job_id));
-    for (const id of [...ticked]) if (!now.has(id)) { ticked.delete(id); picked.delete(id); }
-    for (const id of now) if (!ticked.has(id)) { ticked.add(id); picked.add(id); }
-    for (const row of picker.querySelectorAll('.memo-library-row')) {
-      const check = row.querySelector('input');
-      check.checked = picked.has(row.dataset.jobId);
-      row.dataset.selected = String(check.checked);
-    }
+    const now = new Set(group.papers.map((p) => p.job_id)), left = [...ticked].filter((id) => !now.has(id)),
+      joined = [...now].filter((id) => !ticked.has(id));
+    for (const id of left) { ticked.delete(id); picked.delete(id); }
+    for (const id of joined) { ticked.add(id); picked.add(id); }
+    // The list is read again, so the rows show the papers' cards as they are now (and can be ticked or unticked).
+    if (left.length || joined.length) void loadPapers(pickerQuery).catch(notify);
   }
   function pickerPanel() {
     if (picker) return picker;
@@ -453,21 +453,24 @@
   // being processed until their card passes review. A new group is saved first when none is chosen.
   // A file processed before, whose card passed review, joins the group at once: it shows ticked in the picker.
   async function addFiles(directory) {
+    const scope = groupId;
     const chosen = await window.pywebview.api.pick_opportunity_files(directory ? { directory } : {});
-    if (!chosen?.paths?.length) return;
+    // Another scope chosen while the files were copied closed the picker: they are not added.
+    if (!chosen?.paths?.length || groupId !== scope) return;
     if (!groupId) {
       await saveGroup({ add: [...picked] });
       ticked = new Set(picked);
       pickerGroup = groupId;
     }
-    const before = new Set(currentGroup().papers.map((p) => p.job_id));
-    groups = await call('opportunities.group_add_files', { group_id: groupId, paths: chosen.paths, request_id: 'opportunity-files-' + crypto.randomUUID() });
-    wrote();
+    const target = groupId, before = new Set(currentGroup().papers.map((p) => p.job_id));
+    groups = await call('opportunities.group_add_files', { group_id: target, paths: chosen.paths, request_id: 'opportunity-files-' + crypto.randomUUID() });
+    wrote();   // and the page reads the group again while its files are on their way
+    // Another scope chosen meanwhile closed the picker; the files are in the group they were added to.
+    if (groupId !== target) return;
     for (const paper of currentGroup().papers) if (!before.has(paper.job_id)) { picked.add(paper.job_id); ticked.add(paper.job_id); }
     picker.querySelector('#memo-paper-picker-status').textContent = '已送去处理：处理完、卡片审核通过后自动加入比较组';
     render();
     await loadPapers(pickerQuery);
-    void refresh().catch(notify);   // and read the group again while its files are on their way
   }
   // In the search box's bar: the comparison scope (the whole library or a group), and for a group rename and delete.
   let renaming = false;
@@ -716,7 +719,9 @@
     return row;
   }
   window.addEventListener('desktop:research-published', () => {
-    if (shown()) refresh().catch(notify);
+    if (!shown()) return;
+    acted();
+    refresh().catch(notify);
   });
   Memorive.opportunities = Object.freeze({ open, setMode });
   const init = () => {

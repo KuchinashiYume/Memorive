@@ -368,7 +368,7 @@
       // Read for all records while "this task" waited for the new task's: show the task's own now that it has records.
       if (settle && wantJob && scope.value !== 'CURRENT_JOB' && job && projection.scope_capabilities?.current_job?.status === 'READY') {
         setScope('CURRENT_JOB');
-        return load({ manual, settle: false });
+        return load({ manual, currencyChanged, settle: false });
       }
       renderSummary();
       renderChart();
@@ -382,7 +382,7 @@
       // back when it has records again).
       if (serial === requestSerial && scope.value === 'CURRENT_JOB' && String(error?.message || '').includes('ACCOUNTING_CURRENT_JOB_SCOPE_NOT_READY')) {
         setScope('ALL');
-        void load({ manual, settle: false });
+        void load({ manual, currencyChanged, settle: false });
         return null;
       }
       if (serial === requestSerial) i18n.set(sync, 'accounting.sync.failed', { error: error?.message || 'UNKNOWN' });
