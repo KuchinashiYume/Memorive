@@ -17,6 +17,7 @@ from pathlib import Path
 from memorive.platform.windows_paths import windows_io_path
 
 from memorive.research.workspace.evidence import material_layer, safe_path, source_document_hash
+from memorive.research.workspace.skill_install import PROJECT_FOLDERS
 from memorive.research.workspace.store import digest, now, packed, uid
 
 BUILT_IN_AGENTS = {'codex', 'claude-code', 'other', 'codex-desktop', 'claude-desktop'}
@@ -24,8 +25,9 @@ DESKTOP_AGENTS = {'codex-desktop', 'claude-desktop'}
 # Adapters of the command-line agents; 'other' is any adapter that is none of these.
 CLI_ADAPTERS = {'codex': {'codex_cli'}, 'claude-code': {'claude_code', 'claude_code_cli'}}
 HISTORY_FILE_CHARS = 80000  # the conversation is split into files of about this size, between messages
-# Where the agents look for a project's skills: Claude Code in .claude/skills, Codex in .agents/skills.
-SKILL_FOLDERS = ('.claude/skills', '.agents/skills')
+# Where the agents look for a project's skills (.claude/skills, .agents/skills, .dsh/skills, .codebuddy/skills):
+# a hand-off folder carries a copy of the Skill in each, so every agent of skill_install.AGENTS finds it.
+SKILL_FOLDERS = PROJECT_FOLDERS
 
 
 def agent_matches(option, agent):
@@ -77,7 +79,7 @@ def validate_agent_settings(value):
 def desktop_handoff(workspace, thread_id, question, root, skill=None):
     """Prepare a folder under root for the chosen desktop agent app; returns its id, path and the
     prompt to paste into the app. skill: the memo-research Skill folder shipped with the app, copied
-    into the folder where Claude Code and Codex find a project's skills (None: not included)."""
+    into the folders where the agents find a project's skills (None: not included)."""
     from memorive.platform.language.handoff import desktop_intro, launch_prompt
     from memorive.research.workspace.skill_bridge import transport
     settings = workspace.settings()
@@ -126,7 +128,8 @@ def desktop_handoff(workspace, thread_id, question, root, skill=None):
         skill_file = folder / SKILL_FOLDERS[0] / skill.name / 'SKILL.md'
     name = {'codex-desktop': 'Codex Desktop', 'claude-desktop': 'Claude Code Desktop'}.get(
         target, next((a['name'] for a in settings.get('custom_agents', []) if a['id'] == target), target))
-    (folder / 'START_HERE.md').write_text(desktop_intro(pack, name, model, history, sources, packed(warnings), skill_file),
+    (folder / 'START_HERE.md').write_text(desktop_intro(pack, name, model, history, sources, packed(warnings), skill_file,
+                                                        transport(workspace)['bridge']),
                                           encoding='utf8')
     files = {p.relative_to(folder).as_posix(): {'sha256': digest(p.read_bytes()), 'bytes': p.stat().st_size}
              for p in folder.rglob('*') if p.is_file()}
@@ -153,8 +156,11 @@ def _export_source(workspace, artifact, number, material, folder, warnings):
     A source that cannot be exported is listed with its issue and added to warnings."""
     row = {'id': artifact['id'], 'title': artifact['title'], 'state': artifact['state'],
            'source_hash': artifact['content_hash'], 'files': []}
+    # A file of the project's own folder stays where it was; everything else is inside the workspace, which may
+    # have moved with the data folder (Store.here, as evidence.py reads it).
+    here = Path if artifact['kind'] == 'source' else workspace.store.here
     try:
-        source = safe_path(workspace.store.root if artifact['kind'] == 'derived' else artifact['root'], artifact['path'])
+        source = safe_path(workspace.store.root if artifact['kind'] == 'derived' else here(artifact['root']), here(artifact['path']))
         data = windows_io_path(source).read_bytes()  # read once: what is written is what was checked
         if digest(data) != artifact['content_hash']:
             raise ValueError('EVIDENCE_STALE')
@@ -170,7 +176,7 @@ def _export_source(workspace, artifact, number, material, folder, warnings):
         row['files'].append(extracted.relative_to(folder).as_posix())
         row['chunks'] = len(excerpts)
         if artifact.get('source_original_path'):
-            original = safe_path(artifact['root'], artifact['source_original_path'])
+            original = safe_path(here(artifact['root']), here(artifact['source_original_path']))
             data = original.read_bytes()
             if digest(data) != artifact['source_content_hash']:
                 raise ValueError('EVIDENCE_STALE')

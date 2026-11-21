@@ -24,9 +24,16 @@ and knowledge admission are optional separate operations. Do not reveal internal
 
 
 def transport(workspace):
-    command = ([sys.executable, '--memo-agent'] if getattr(sys, 'frozen', False) else
+    """transport.json of a hand-off. command: Memo's local command (the Skill's scripts append --call
+    <method>). bridge: the Skill's memo_bridge.py run by Memorive itself, for a computer without Python
+    (compatibility, see skill_runner.py); the hand-off's START_HERE.md gives it as a command line."""
+    frozen = getattr(sys, 'frozen', False)
+    command = ([sys.executable, '--memo-agent'] if frozen else
                [sys.executable, str(Path(__file__).with_name('agent_entry.py'))])
-    return {'command': command + ['--workspace', str(workspace.store.root)]}
+    from memorive.research.workspace.skill_runner import integrations_root
+    bridge = ([sys.executable, '--memo-bridge'] if frozen else
+              [sys.executable, str(integrations_root() / 'skills' / 'memo-research' / 'scripts' / 'memo_bridge.py')])
+    return {'command': command + ['--workspace', str(workspace.store.root)], 'bridge': bridge}
 
 
 def _snapshot(path, data):

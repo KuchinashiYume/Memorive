@@ -178,6 +178,9 @@ def main():
         hidden.add(rel.removesuffix('.__init__'))
     hidden.update(['assistant_alpha','assistant_native_motion','console_expressions','console_permission','install_health','integrated_agent','notification_runtime','offline_help','product_identity','memorive.desktop.api','window_chrome','network_diagnostics','clr','pythonnet','fitz','docx','websockets','sqlite3.dbapi2'])
     hidden.update(['update_maintenance','update_startup','update_service','startup_notice'])
+    # The memo-research Skill's scripts run inside Memorive.exe (--memo-bridge, --memo-sources) and are loaded
+    # from integrations/ at run time, so the standard modules they import are named here.
+    hidden.update(['argparse','contextlib','difflib','hashlib','importlib.metadata','json','runpy','shutil','subprocess','unicodedata'])
     spec=out/'Memorive.spec'
     version=out/'version.txt'
     version.write_text("VSVersionInfo(ffi=FixedFileInfo(filevers=(1,1,0,0),prodvers=(1,1,0,0),mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),kids=[StringFileInfo([StringTable('040904B0',[StringStruct('FileDescription','Memorive local source candidate'),StringStruct('ProductName','Memorive'),StringStruct('FileVersion','1.01'),StringStruct('ProductVersion','1.01'),StringStruct('OriginalFilename','Memorive.exe')])]),VarFileInfo([VarStruct('Translation',[1033,1200])])])",encoding='utf8')
@@ -243,6 +246,10 @@ coll = COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='Memorive')
                 raise ValueError('PACKAGED_RELEASE_UI_MISMATCH:'+row['path'])
         from package_companions import package
         receipt['companion_files'] = len(package(out/'dist/Memorive/integrations'))
+        # The memo-research Skill's console program for computers without Python (compatibility code,
+        # integrations/skills/memo-research/c/README.md); it ships in the Skill beside Memorive.exe.
+        from build_skill_bridge import build as build_skill_bridge
+        receipt['skill_bridge']=str(build_skill_bridge(out/'dist/Memorive/integrations/skills/memo-research/bin/memo_bridge.exe'))
         from package_notices import package as package_notices
         receipt['notice_files']=package_notices(DESKTOP/'release_materials',out/'dist/Memorive/notices')
         from build_update_helper import compile_engine

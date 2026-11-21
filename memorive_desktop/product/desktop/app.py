@@ -6732,6 +6732,16 @@ if __name__ == "__main__":
             configure_resource_imports(root.parents[1])
         from memorive.documents.processing.engines.isolated_pdf import main as native_pdf_main
         raise SystemExit(native_pdf_main([v for v in sys.argv[1:] if v != '--memo-native-pdf']))
+    if '--memo-bridge' in sys.argv or '--memo-sources' in sys.argv:
+        # Compatibility: agents on a computer without Python run the memo-research Skill's scripts this way
+        # (research/workspace/skill_runner.py says who calls it; DEVELOPING.md, "Compatibility code").
+        root = resource_root()
+        configure_resource_imports(root)
+        if not getattr(sys, 'frozen', False):
+            configure_resource_imports(root.parents[1])
+        from memorive.research.workspace.skill_runner import run as run_skill_script
+        option = '--memo-bridge' if '--memo-bridge' in sys.argv else '--memo-sources'
+        raise SystemExit(run_skill_script(option, [v for v in sys.argv[1:] if v != option]))
     if '--memo-agent' in sys.argv or ('--workspace' in sys.argv and any(v in sys.argv for v in ('--mcp','--call','--connector-call'))):
         root=resource_root()
         configure_resource_imports(root)

@@ -116,6 +116,35 @@ class ResearchMemoMixin:
         base=Path(sys.executable).parent if getattr(sys,'frozen',False) else self._source_root.parent
         return base/'integrations'
 
+    # Installing the memo-research Skill into the agents' own skills folders (settings, Agent and connections).
+    # Compatibility code: research/workspace/skill_install.py says which agents and why.
+    def _skill_targets(self):
+        from memorive.research.workspace.skill_install import SkillTargets
+        return SkillTargets(self._integrations_root()/'skills'/'memo-research',self._memo.store.root,Path.home())
+
+    def memo_skill_targets(self):
+        self.call('memo.capabilities',{})
+        return self._skill_targets().targets()
+
+    def memo_skill_install(self,request):
+        self.call('memo.capabilities',{})
+        return self._skill_targets().install(agent=request.get('agent'),folder=request.get('folder'))
+
+    def memo_skill_pick_folder(self):
+        """A skills folder the person chooses: the Skill is installed there and the folder remembered."""
+        if self._window is None:
+            return {'path':None}
+        import webview
+        value=self._window.create_file_dialog(webview.FileDialog.FOLDER)
+        if not value:
+            return {'path':None}
+        self.call('memo.capabilities',{})
+        return dict(self._skill_targets().install(folder=value[0]),path=value[0])
+
+    def memo_skill_forget(self,request):
+        self.call('memo.capabilities',{})
+        return self._skill_targets().forget(request['folder'])
+
     def memo_agent_config(self):
         self.call('memo.capabilities',{})
         base=self._integrations_root().parent
