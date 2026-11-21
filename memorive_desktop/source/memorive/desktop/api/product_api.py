@@ -300,6 +300,7 @@ class ProductApi(
                 profile_path=self._profile_path, desktop_call=self.call,
                 open_target=self.assistant_launch_target,
                 library_job_rows=self._core_products.job_rows,
+                library_failed_job_rows=self._core_products.failed_job_rows,
                 notify_window=self._send_page_event,
                 research_workspace=lambda: getattr(self, "_memo", None)))
             self._library.research_artifact_provider = self._research.library_rows

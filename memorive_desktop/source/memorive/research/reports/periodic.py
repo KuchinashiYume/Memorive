@@ -13,9 +13,13 @@ def material_progress(host):
     # Divergences and condition differences found between papers (research/opportunities/runs.py).
     from memorive.research.opportunities.runs import report_rows
     tensions = report_rows(host.profile_path('WORKSPACE')/'research')
+    # Processing that ended without a result goes in the 失败 category, shown under 需要处理; a day with only
+    # failures has a report of its own. A failed attempt stays listed after a later one succeeds.
+    failed = [dict(row, material_kind='FAILED_PAPER', task_id=row['job_id'], stable_locator='job:'+row['job_id'])
+              for row in host.library_failed_job_rows() if row.get('updated_at')]
     # Review clicks, reading, reports and discovery metadata do not count as a new
     # processed paper or newly refined conversation.
-    return papers + conversations + tensions
+    return papers + conversations + tensions + failed
 
 
 def windows(progress, current):
@@ -113,7 +117,17 @@ def render(runtime, run_id, params):
             stamp=max(item['updated_at'] for item in items)
             name=items[0].get('document_name') or items[0]['display_name']
             tension={}
-            if kind=='PAPER':
+            categories={'daily_category':'新增','monthly_categories':['知识库结构变化']}
+            axis,state,event_kind='artifact_registry','RESULT_AVAILABLE','MATERIAL_OUTPUT_READY'
+            if kind=='FAILED_PAPER':
+                state=items[0]['control_state']
+                text=(choose(language,'《{0}》没能开始处理','“{0}”: processing could not start','「{0}」の処理を開始できませんでした')
+                      if state=='BLOCKED_BEFORE_START' else
+                      choose(language,'《{0}》文献处理失败，没有产出成果','“{0}”: paper processing failed, no outputs',
+                             '「{0}」の文献処理が失敗し、成果はありません')).format(name)
+                categories={'daily_category':'失败','weekly_categories':['风险与待办'],'monthly_categories':['风险与未评估维度']}
+                axis,event_kind='processing_job','MATERIAL_PROCESSING_FAILED'
+            elif kind=='PAPER':
                 text=choose(language,'《{0}》文献处理完成，{1} 个成果待人工复核','“{0}”: paper processed, {1} outputs await human review',
                             '「{0}」の文献処理が完了し、{1} 件の成果が確認待ちです').format(name,len(items))
             elif kind=='OPPORTUNITY':
@@ -128,13 +142,13 @@ def render(runtime, run_id, params):
                 text=choose(language,'《{0}》对话精炼完成，待人工复核','“{0}”: conversation refined, awaits human review',
                             '「{0}」の会話の精錬が完了し、確認待ちです').format(name)
             refs=sorted(item['stable_locator'] for item in items)
-            events.append({'event_id':'RE-'+key[:32].upper(),'event_kind':'MATERIAL_OUTPUT_READY',
+            events.append({'event_id':'RE-'+key[:32].upper(),'event_kind':event_kind,
                 'occurred_at':stamp,'observed_at':stamp,'source_system':'Desktop_MATERIAL_OUTPUT',
                 'source_record_ref':refs[0],'source_content_hash':key.upper(),
                 'subject_refs':refs,'evidence_refs':sorted(sha(item).upper() for item in items),
-                'status_axis':'artifact_registry','to_state':'RESULT_AVAILABLE','verification_status':'not_applicable',
-                'display_text':text,'daily_category':'新增','weekly_categories':[] if tension else ['研究进展'],
-                'monthly_categories':['知识库结构变化'],'explicit_tags':[],**tension})
+                'status_axis':axis,'to_state':state,'verification_status':'not_applicable',
+                'display_text':text,'weekly_categories':[] if tension else ['研究进展'],
+                'explicit_tags':[],**categories,**tension})
             item_units.complete(key)
     members=[{'source_system':'Desktop_MATERIAL_OUTPUT','source_ref':r['stable_locator'],'sha256':sha(r).upper()} for r in progress]
     snapshot={'events':events,'members':members,'manifest_sha256':sha({'members':members,'events':events}).upper(),'issues':[],'conflicts':[]}
@@ -143,5 +157,5 @@ def render(runtime, run_id, params):
     digest=build_digest(snapshot,digest_kind=period,window_start=window['start'],window_end=window['end'],cutoff_at=params['report_cutoff'])
     return {'schema_version':'DesktopPeriodicReport-v1','period':period,'window_start':window['start'],
         'window_end':window['end'],'source_event_count':len(events),'material_progress_count':len(progress),
-        'digest':digest,'language_context':params.get('language_context'),'markdown':render_markdown(digest,language=params.get('language_context')),'source_scope':['COMPLETED_PAPERS','REFINED_CONVERSATIONS','RESEARCH_OPPORTUNITIES'],
+        'digest':digest,'language_context':params.get('language_context'),'markdown':render_markdown(digest,language=params.get('language_context')),'source_scope':['COMPLETED_PAPERS','REFINED_CONVERSATIONS','RESEARCH_OPPORTUNITIES','FAILED_PROCESSING'],
         'status':'SUCCEEDED','engine':'Desktop RESEARCH_REPORTS material-progress successor','paid_model_calls':0}

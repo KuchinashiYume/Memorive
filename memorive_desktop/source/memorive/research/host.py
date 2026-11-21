@@ -29,6 +29,8 @@ class ResearchHost:
     """Open a web page or file for the user (ProductApi.assistant_launch_target)."""
     library_job_rows: Callable[[], list]
     """Document processing jobs with their states, for the periodic reports."""
+    library_failed_job_rows: Callable[[], list]
+    """Document processing jobs that ended without a result, for the periodic reports' 失败 category."""
     notify_window: Callable[[str], None]
     """Dispatch a named event on the page, such as 'desktop:research-published'."""
     research_workspace: Callable[[], Any]

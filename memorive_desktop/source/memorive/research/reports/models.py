@@ -88,6 +88,14 @@ def compose(runtime,run_id,params,result):
     from memorive.research.reports.renderer import render_markdown,render_markdown_with_narrative
     frozen=params['report_model']
     digest=result['digest']
+    from memorive.research.reports.api_briefing import qualifying_library_change_ids
+    if not qualifying_library_change_ids(digest):
+        # Only failed processing in this window: no library change for a summary to describe. The report is
+        # its records; no model is called.
+        result.update(narrative=None,narrative_status='NOT_REQUESTED_NO_LIBRARY_CHANGE',report_model=frozen,
+                      model_calls=0,paid_model_calls=0,engine='Desktop source-bound deterministic report')
+        runtime.update_state(run_id,narrative_status='NOT_REQUESTED_NO_LIBRARY_CHANGE')
+        return result
     prompt,schema=prepare_mapped_briefing(digest,language=params.get('language_context'))
     language=params['report_language']
     # Language requirements are already frozen inside the original prompt contract.

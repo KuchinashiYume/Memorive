@@ -42,6 +42,19 @@ class CoreProducts:
                 rows.append(self.unavailable_row(core_job, error))
         return rows
 
+    def failed_job_rows(self) -> list[dict[str, Any]]:
+        """Document processing jobs that ended without a result (failed, or blocked before they started),
+        for the 失败 category of the periodic reports (research/reports/periodic.py)."""
+        projection = self.service.call("list_jobs", {})
+        rows = []
+        for status in projection.get("jobs", []) if isinstance(projection, Mapping) else []:
+            state = str(status.get("job_control_state") or "").upper() if isinstance(status, Mapping) else ""
+            if status.get("job_type") == "memorive-core" and state in {"FAILED", "BLOCKED_BEFORE_START"}:
+                rows.append({"job_id": str(status["job_id"]), "control_state": state,
+                             "display_name": str(status.get("display_name") or status["job_id"])[:180],
+                             "updated_at": status.get("updated_at")})
+        return rows
+
     def job_rows(self, only_job_id: str | None = None) -> list[dict[str, Any]]:
         """Return durable, successfully delivered Core products (of every job, or of only_job_id).
 
