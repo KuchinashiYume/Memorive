@@ -881,8 +881,8 @@
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/references/memo-bridge.md",
-      "sha256": "a470f459aa098c94753fb7c34424109d759ee3de243087fa661a7b825fb6155c",
-      "bytes": 8402
+      "sha256": "47d353e8fe592910d3e6ee7d7cb8b5e4d4d9ba89d48f593a9b86b7761151d93f",
+      "bytes": 8507
     },
     {
       "path": "memorive_desktop/integrations/skills/memo-research/references/source-tools.md",
@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "4dcfc9242117c54d95b542c38f9e29d333f2bed0f07fb6469bee56f25ee5a812",
+      "sha256": "d311c3eb0b1f7f3448cc780e811a3bcde8789e20da892c26abd8fb8a544e7d3f",
       "bytes": 276404
     },
     {
@@ -5111,8 +5111,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/processing/document_chunk_chunk.py",
-      "sha256": "5e8250278cc3f352da6e583bd224c192b8cd4c04b3a31ec63948f96bd76b3a30",
-      "bytes": 16992
+      "sha256": "6ec1b537f5fe7a59ddfbc992e6b1ab4ee7ad5c0a471375f714634b3daee81431",
+      "bytes": 17158
     },
     {
       "path": "memorive_desktop/source/memorive/documents/processing/document_clean_clean.py",
@@ -8936,8 +8936,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/evidence.py",
-      "sha256": "f2d7584f9ce75a8f321fbb98d198644626f95f3fb21cb97b7751131a42d745e8",
-      "bytes": 25610
+      "sha256": "30fc5b3d82bea3e83efeaaeb1c040f7abc839a844834b4a04f2b53e2fe28e5c1",
+      "bytes": 26515
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/handoffs.py",

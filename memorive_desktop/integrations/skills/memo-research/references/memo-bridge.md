@@ -14,7 +14,7 @@ python <skill>/scripts/memo_bridge.py read PATH/handoff.json --artifact art_REAL
 
 `find` prints the passages that contain any of the terms (most terms first), numbered E1, E2 …, with paper, page and the matching lines plus table and figure titles, and keeps them. `read` keeps every passage of the hand-off (or of one source and page range) and writes them all to `work/evidence.md` to read with your file tool. Both write `work/evidence.json` and `work/evidence.md`, and later calls keep the numbers. The answer's coverage follows what was kept: a source counts as read when all its passages were kept, partial otherwise. For a broad question keep reading until the coverage you need is actually reached.
 
-Use Memo's text directly; do not reconvert a PDF because its converter differs from the standalone helper. `line_basis=rawmd_global` means global RawMD lines; regular attachments use page-local lines. Physical PDF pages are independent. Inspect a supplied original for important diagrams or extraction ambiguities. Source warnings are processing gaps, not limitations of the research.
+Use Memo's text directly; do not reconvert a PDF because its converter differs from the standalone helper. `line_basis=rawmd_global` means global RawMD lines. Other Markdown and text materials count lines through the whole file too, even where a page is given; a PDF counts them from the top of each page. Physical PDF pages are independent. Inspect a supplied original for important diagrams or extraction ambiguities. Source warnings are processing gaps, not limitations of the research.
 
 ## 2. Draft with support marks
 

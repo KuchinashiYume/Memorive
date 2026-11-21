@@ -42,7 +42,9 @@ from memorive.platform.naming import display_title, file_name, folder_name
 # re-embed one can tell which chunk structure a vector came from.
 CHUNK_SCHEMA_VERSION = "7"
 
-_PAGE_RE = re.compile(r"^\s*<!--\s*memorive:page:(\d+)\s*-->\s*$")
+# A page marker line: the lines after it are on physical page N (from 1). The research index
+# (research/workspace/evidence.py) reads the same markers.
+PAGE_MARKER = re.compile(r"^\s*<!--\s*memorive:page:(\d+)\s*-->\s*$")
 _COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
 _BR_RE = re.compile(r"<br\s*/?>", re.I)
 _TAG_NO_BR = re.compile(r"</?(?!br\b)[a-zA-Z][a-zA-Z0-9]*(?:\s[^>]*)?/?>", re.I)  # every tag except br
@@ -97,7 +99,7 @@ def _strip(s: str, *, keep_br: bool) -> str:
 
 
 def _blocktype(lines: list) -> str:
-    if _PAGE_RE.match(lines[0]):
+    if PAGE_MARKER.match(lines[0]):
         return "pagemarker"
     if parse_source_marker(lines[0]) is not None:
         return "sourcemarker"
@@ -159,7 +161,7 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
     # ── blocks at blank lines; each page or page span marker is a block of its own ──
     raw, cur = [], []
     for line in body.splitlines():
-        if _PAGE_RE.match(line) or parse_source_marker(line) is not None:
+        if PAGE_MARKER.match(line) or parse_source_marker(line) is not None:
             if cur:
                 raw.append(cur)
                 cur = []
@@ -200,7 +202,7 @@ def chunk(cleanmd_path, *, target: str = "sandbox") -> Path:
     for lines in raw:
         t = _blocktype(lines)
         if t == "pagemarker":
-            page = int(_PAGE_RE.match(lines[0]).group(1))
+            page = int(PAGE_MARKER.match(lines[0]).group(1))
             continue
         if t == "sourcemarker":
             source_anchor = parse_source_marker(lines[0])

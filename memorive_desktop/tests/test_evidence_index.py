@@ -73,6 +73,20 @@ def test_an_excerpt_is_read_with_its_place_in_the_document(workspace, tmp_path):
         workspace.index.read(first["id"], "default", expected_hash="0" * 64)
 
 
+
+def test_the_page_markers_of_a_markdown_file_give_its_excerpts_their_pages(workspace, tmp_path):
+    # Document processing writes <!-- memorive:page:N --> ahead of page N's lines. A marker ends an
+    # excerpt and stays out of its text; lines are still counted through the file. The excerpts used to
+    # be one page-less excerpt with the markers in its text.
+    text = "\n".join(["# K12", "<!-- memorive:page:8 -->", "Growth at 25 C.", "Growth at 30 C.",
+                      "<!-- memorive:page:9 -->", "Growth at 37 C."])
+    material = add_paper(workspace, tmp_path / "library", text=text)
+    rows = excerpts(workspace, material["id"])
+    assert [(row["page"], row["line_start"], row["line_end"], row["text"]) for row in rows] == [
+        (None, 1, 1, "# K12"), (8, 3, 4, "Growth at 25 C.\nGrowth at 30 C."), (9, 6, 6, "Growth at 37 C.")]
+    excerpt = workspace.index.read(rows[1]["id"], "default")
+    assert (excerpt["page"], excerpt["line_start"], excerpt["line_end"]) == (8, 3, 4)
+
 def test_an_excerpt_of_a_changed_file_is_not_read(workspace, tmp_path):
     material = add_paper(workspace, tmp_path / "library")
     first = excerpts(workspace, material["id"])[0]

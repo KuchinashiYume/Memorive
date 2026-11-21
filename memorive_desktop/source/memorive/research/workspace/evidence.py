@@ -5,6 +5,9 @@ Material comes in two ways:
                      content's hash, under library_snapshots/, and cites that copy.
   refresh            the files of a project's own folder (its vault), read where they are.
 excerpts_of() cuts a document into excerpts of whole lines; an answer cites an excerpt by its id.
+A PDF's excerpts carry the PDF's page and lines counted on that page. A Markdown or text file has
+lines counted through the file; the page markers document processing writes into it
+(<!-- memorive:page:N -->) give the page of the lines after them.
 
 read() returns an excerpt only while the files it rests on still have their recorded hashes: the
 document or its snapshot, the original it was made from, the text extracted from it, and the
@@ -21,6 +24,7 @@ from pathlib import Path
 from urllib.parse import quote
 from memorive.research.workspace.store import digest,packed,now
 from memorive.platform.windows_paths import windows_io_path
+from memorive.documents.processing.document_chunk_chunk import PAGE_MARKER
 
 DENY_DIRS={'.git','.obsidian','.codex','.claude','node_modules','__pycache__','.venv','venv'}
 EXTENSIONS={'.md','.txt','.json','.pdf'}
@@ -109,19 +113,33 @@ def read_document(path):
 
 def excerpts_of(identity, project, raw, pages):
     """Cut a document into excerpts of whole lines, page by page. Each is a row of the chunks table:
-    (excerpt id, artifact id, project, text, first line, last line, page, hash of the text)."""
+    (excerpt id, artifact id, project, text, first line, last line, page, hash of the text).
+
+    A file read as text is one page without a number (read_document); in it a page marker line ends
+    the excerpt before it, sets the page of the lines after it and stays out of the excerpt text."""
     document_hash = digest(raw)
     rows = []
+
+    def add(page, taken, first, last):
+        content = '\n'.join(taken)
+        excerpt_id = 'ev_' + digest([identity, document_hash, page, first, last])[:32]
+        rows.append((excerpt_id, identity, project, content, first, last, page, digest(content)))
+
     for page, text in pages:
+        reads_markers = page is None
         lines = text.splitlines()
         taken, size, start = [], 0, 1
         for number, line in enumerate(lines, 1):
+            marker = PAGE_MARKER.match(line) if reads_markers else None
+            if marker:
+                if taken:
+                    add(page, taken, start, number - 1)
+                page, taken, size, start = int(marker.group(1)), [], 0, number + 1
+                continue
             taken.append(line)
             size += len(line) + 1
             if size >= EXCERPT_CHARS or number == len(lines):
-                content = '\n'.join(taken)
-                excerpt_id = 'ev_' + digest([identity, document_hash, page, start, number])[:32]
-                rows.append((excerpt_id, identity, project, content, start, number, page, digest(content)))
+                add(page, taken, start, number)
                 taken, size, start = [], 0, number + 1
     return rows
 
