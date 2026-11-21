@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "b1dba8f368f5bd226e17f46572e8a1cc2e06e65b15754442680162ee6d5107b7",
+      "sha256": "07069aed3cc03bf764f4b0f534c6df61d65e60832a089110808a2a5e62a02c43",
       "bytes": 278081
     },
     {
@@ -8021,8 +8021,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/data_review/logic.py",
-      "sha256": "4fb4b01d1436b6e6b902c07a3b17681b3e6c343eee1ae67be42268103de3d51d",
-      "bytes": 31072
+      "sha256": "ecd6c953b3fe43c3bde683d298f589f9b71f6f855975451c0437e8c1a3699e4b",
+      "bytes": 31235
     },
     {
       "path": "memorive_desktop/source/memorive/documents/data_review/pdf_assist.py",

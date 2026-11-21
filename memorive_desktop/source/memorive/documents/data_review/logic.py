@@ -228,6 +228,8 @@ def prompt(segment,*,data_report=None,source_sha256,max_chars=None,language_cont
             '3. Distinguish incompatible matched statements from a conclusion exceeding its design/results. '
             'Name any necessary unavailable table, method, supplement or image as missing_material or a limitation. '
             'Missing input, small n or repeated digits alone do not support a defect. Calculations are leads under their stated conditions.\n'
+            'In each finding, claim says in one sentence of your own what is wrong or unsupported; '
+            'the paper\'s own words go only in citations. '
             'Quote separate original passages for a comparison. Give its conditions and strongest alternative, '
             'with alternative_checked=false if the source does not resolve it. PRIORITY needs a supported primary/core '
             'impact, a resolved alternative and two distinct passages. Return no findings if none are supported. '
