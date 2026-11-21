@@ -147,13 +147,13 @@
     },
     {
       "path": "integrations/skills/memo-research/c/drafts.c",
-      "sha256": "7ae6859215d8e15ce5da8d69216ec7461657f231d974198f1cd5d1d2ef3715c4",
-      "bytes": 14140
+      "sha256": "04d175e630c831768ed0a5bcf0ffc8edd6510eaf1d037278aa432bd201ba97f7",
+      "bytes": 13807
     },
     {
       "path": "integrations/skills/memo-research/c/json.c",
-      "sha256": "664821962ce1c2d4bcc2a8a561cea66bb4f97b9fe03e29153cb2e98234c6f879",
-      "bytes": 10401
+      "sha256": "a04270e93ebe64d88477274bbe4c7e8b217d746c5f619c04331f09c523ee970a",
+      "bytes": 10090
     },
     {
       "path": "integrations/skills/memo-research/c/memo_bridge.c",
@@ -162,13 +162,13 @@
     },
     {
       "path": "integrations/skills/memo-research/c/sha256.c",
-      "sha256": "72737a8c90d28c7dadbd4d2d94a473ff2d7b4376c11b8c11c4489fdc7cb85b44",
-      "bytes": 2884
+      "sha256": "6d7c8c19becf2c9db179e60d2b6c9aeb2c4be20fd732bff6070972f1d060fcf0",
+      "bytes": 2830
     },
     {
       "path": "integrations/skills/memo-research/c/text.c",
-      "sha256": "55bf4c6b6644bc889e8dd343f7881c266c869624cfcafd0f99c5716762088a8d",
-      "bytes": 28263
+      "sha256": "a3f987a8ab346a55555b1dd1b582b53563830283777aff706ac3086ae446dbfd",
+      "bytes": 27540
     },
     {
       "path": "integrations/skills/memo-research/references/memo-bridge.md",
@@ -6907,13 +6907,13 @@
     },
     {
       "path": "source/memorive/research/workspace/skill_install.py",
-      "sha256": "07e33e770676d6216e662691ed6e2c8694d41674cfc1b17208f81ce9a4110dbf",
-      "bytes": 7357
+      "sha256": "efaffcff18413d1ed850ee7e18a614e23fc8d6192a3418df5c3e8185a3f8e8cd",
+      "bytes": 7486
     },
     {
       "path": "source/memorive/research/workspace/skill_runner.py",
-      "sha256": "4068944c3ebcf6291f41c84e7b53d640201fe2ee9d60023fde07d3c656a9e5ab",
-      "bytes": 1959
+      "sha256": "2883a3ec52c74e689734db73193efa06af0428544e67158176712d6f84e29879",
+      "bytes": 1999
     },
     {
       "path": "source/memorive/research/workspace/store.py",
