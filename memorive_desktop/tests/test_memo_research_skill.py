@@ -181,22 +181,32 @@ def test_a_draft_problem_says_how_to_fix_it(handoff):
     bridge(folder, "read")
     calibration, drift = alias(folder, "0.17 to 0.05"), alias(folder, "81% to 64%")
     path = draft(folder, f'Accuracy fell from 81% to 64% [{calibration}: "Temperature scaling reduced"]. '
-                         f'It was not tested on live logs [{calibration}: "not tested on live logs"]. '
-                         f'Drift hurts accuracy [{calibration}: "Accuracy fell from 81% to 64%"].\n'
+                         f'It was not tested on live logs [{calibration}: "not tested on live logs"].\n'
                          'Other studies report 0.91 accuracy.\n')
     run = bridge(folder, "answer", "--draft", path, check=False)
     assert run.returncode == 2
     assert f"81 not in the cited passages; it is in {drift}: cite that passage" in run.stderr
     assert (f'{calibration}: the quote is not in the passage: "not tested on live logs"; the closest text in '
             f'{calibration} is: "The method was not tested on live query logs."') in run.stderr
-    assert (f'{calibration}: the quote is not in the passage: "Accuracy fell from 81% to 64%"; it is in {drift}: '
-            'cite that passage') in run.stderr
     # Fixed, only the value nobody reports is left.
     path = draft(folder, f'Accuracy fell from 81% to 64% [{drift}: "fell from 81% to 64%"]. '
                          'Other studies report 0.91 accuracy.\n')
     run = bridge(folder, "answer", "--draft", path, check=False)
     assert run.returncode == 2 and "0.91: in the answer without a cited passage" in run.stderr
     assert not (folder / "memo-answer.json").exists()
+
+
+def test_a_quote_cited_under_the_wrong_passage_is_cited_from_the_one_that_holds_it(handoff):
+    ws, thread_id, folder = handoff
+    bridge(folder, "read")
+    calibration, drift = alias(folder, "0.17 to 0.05"), alias(folder, "81% to 64%")
+    path = draft(folder, f'Accuracy fell from 81% to 64% [{calibration}: "Accuracy fell from 81% to 64%"].\n')
+    report = json.loads(bridge(folder, "answer", "--draft", path).stdout)
+    assert report["status"] == "SAVED"
+    assert report["corrected"] == [f'{calibration} → {drift}: "Accuracy fell from 81% to 64%" is in {drift}, which is cited instead']
+    saved = json.loads((folder / "memo-answer.json").read_text(encoding="utf-8"))
+    store = json.loads((folder / "work" / "evidence.json").read_text(encoding="utf-8"))
+    assert saved["claims"][0]["supports"][0]["evidence_id"] == store["evidence"][drift]["id"]
 
 
 def test_an_answer_that_cannot_be_returned_is_saved_and_says_what_to_tell_the_user(handoff):

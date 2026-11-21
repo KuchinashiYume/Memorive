@@ -230,11 +230,12 @@ def read_summary(store):
 
 # --- answer: draft with marks -> checked memo-answer.json ------------------------------------------
 
-def build_answer(store, draft, gaps=None, request_id=None):
+def build_answer(store, draft, gaps=None, request_id=None, notes=None):
     """The memo-answer.json of a draft (drafts.py): each [E..] mark becomes [n], n numbering the
     passages in first-use order, and the text before it a claim with its supports. Every problem
-    is reported at once."""
+    is reported at once; notes (a list) gets what was corrected without asking."""
     cited = []
+    notes = [] if notes is None else notes
 
     def resolve(alias, where, quote):
         row = store['evidence'].get(alias)
@@ -244,9 +245,16 @@ def build_answer(store, draft, gaps=None, request_id=None):
         if exact is None:
             elsewhere = [other for other, text in store['evidence'].items()
                          if other != alias and drafts.locate(quote, text['text']) is not None]
-            hint = (f'it is in {", ".join(elsewhere)}: cite that passage' if elsewhere else
-                    f'the closest text in {alias} is: "{drafts.closest(quote, row["text"])}"')
-            raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"; {hint}')
+            if len(elsewhere) == 1:
+                # The quote is in exactly one other kept passage (a number written one passage off, a
+                # sentence split across two passages): cite that one and say so.
+                notes.append(f'{alias} → {elsewhere[0]}: "{quote[:60]}" is in {elsewhere[0]}, which is cited instead')
+                row = store['evidence'][elsewhere[0]]
+                exact = drafts.locate(quote, row['text'])
+            else:
+                hint = (f'it is in {", ".join(elsewhere)}: cite one of them' if elsewhere else
+                        f'the closest text in {alias} is: "{drafts.closest(quote, row["text"])}"')
+                raise ValueError(f'{alias}: the quote is not in the passage: "{quote[:120]}"; {hint}')
         return {'evidence_id': row['id'], 'content_hash': row['content_hash'], 'quote': exact}, row['text']
 
     def render(supports):
@@ -389,7 +397,8 @@ def main():
         if not (work / 'evidence.json').is_file():
             raise ValueError('No passages kept yet: run `find` or `read` first')
         store = read_json(work / 'evidence.json')
-        built = build_answer(store, Path(args.draft).read_text(encoding='utf-8-sig'), args.gap, args.request_id)
+        notes = []
+        built = build_answer(store, Path(args.draft).read_text(encoding='utf-8-sig'), args.gap, args.request_id, notes)
         result = dict(memo.binding, schema=ANSWER_SCHEMA, **built)
         out = args.out or memo.handoff.parent / 'memo-answer.json'
         out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -398,6 +407,8 @@ def main():
                   'saved': str(out), 'claims': len(result['claims']),
                   'citations': len({s['evidence_id'] for c in result['claims'] for s in c['supports']}),
                   'coverage': {c['artifact_id']: c['status'] for c in result['coverage']}}
+        if notes:
+            report['corrected'] = notes
         if args.send:
             try:
                 report['returned'] = return_answer(memo, dict(result))
