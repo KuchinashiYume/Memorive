@@ -190,6 +190,63 @@ def test_workflow_exam_has_no_hidden_legacy_32768_ceiling(
     assert result["execution_receipt"]["request_max_output_tokens"] == 128_000
 
 
+
+def test_anthropic_cache_reads_and_writes_count_as_input(tmp_path: Path) -> None:
+    # Anthropic's input_tokens leaves out the input read from and written to its prompt cache (research
+    # questions send a cached prefix). The receipt counts all input in prompt_tokens, as for the other
+    # providers, so the input shown and the estimate include it. It used to count 1,000 input tokens,
+    # all of them at the cache-hit rate.
+    http = _Http(
+        {
+            "model": "claude-opus-5",
+            "content": [{"type": "text", "text": '{"ok":true}'}],
+            "usage": {
+                "input_tokens": 1_000,
+                "cache_read_input_tokens": 9_000,
+                "cache_creation_input_tokens": 2_000,
+                "output_tokens": 100,
+            },
+        }
+    )
+    result = _runner(tmp_path, http).execute_structured_chat(
+        profile_kind="API",
+        service={
+            "provider": "ANTHROPIC_API_KEY_00",
+            "credential_ref": "REF:fixture",
+        },
+        model={
+            "model_name": "claude-opus-5",
+            "max_output_tokens_mode": "EXPLICIT",
+            "pricing_estimate_cny_per_million": {
+                "input": 37.5,
+                "output": 187.5,
+                "input_cache_hit": 3.75,
+            },
+            "pricing_evidence_ref": "anthropic-official-2026-09-03",
+        },
+        prompt="Return one object.",
+        response_schema={
+            "type": "object",
+            "required": ["ok"],
+            "properties": {"ok": {"type": "boolean"}},
+        },
+        purpose="workflow_model_exam",
+        max_output_tokens=128_000,
+        timeout_seconds=300,
+    )
+
+    receipt = result["execution_receipt"]
+    assert receipt["token_usage"] == {
+        "prompt_tokens": 12_000,
+        "completion_tokens": 100,
+        "cached_input_tokens": 9_000,
+        "cache_write_input_tokens": 2_000,
+    }
+    # 9,000 read at the cache-hit rate; 1,000 and the 2,000 written at the input rate
+    assert receipt["estimated_cost_cny"] == round(
+        (9_000 * 3.75 + 3_000 * 37.5 + 100 * 187.5) / 1_000_000, 12
+    )
+
 def test_workflow_exam_clamps_declared_request_to_calibrated_ceiling(
     tmp_path: Path,
 ) -> None:

@@ -141,23 +141,15 @@ def _normalise_token_usage(value: Mapping[str, Any]) -> dict[str, int]:
     )
     if prompt is None or completion is None:
         return {}
+    if "prompt_tokens" not in value:
+        # Anthropic's input_tokens leaves out the input read from and written to its prompt cache;
+        # prompt_tokens counts all input, as in the OpenAI form the other providers report.
+        prompt += sum(_nonnegative_int(value.get(key)) or 0
+                      for key in ("cache_read_input_tokens", "cache_creation_input_tokens"))
     normalised = {
         "prompt_tokens": prompt,
         "completion_tokens": completion,
     }
-    cached = next(
-        (
-            parsed
-            for key in (
-                "cached_input_tokens",
-                "prompt_cache_hit_tokens",
-                "cache_read_input_tokens",
-                "cachedContentTokenCount",
-            )
-            if (parsed := _nonnegative_int(value.get(key))) is not None
-        ),
-        None,
-    )
     observed_cache = cache_usage(dict(value))
     cached = observed_cache["read_tokens"]
     if cached is not None:
@@ -206,8 +198,9 @@ def _target_estimated_cost_cny(
     The transport deliberately does not carry a mutable global price table for
     every vendor.  A campaign that uses another paid API must bind its dated
     price evidence before sending and pass the conservative CNY rates with the
-    model binding.  Cached input is charged at the ordinary input rate unless
-    an explicit cache-hit rate is present, which keeps the estimate fail-safe.
+    model binding.  Input read from the provider's cache is charged at the
+    cache-hit rate when the profile gives one and at the input rate otherwise;
+    input written to the cache is charged at the input rate.
     """
 
     pricing = model_config.get("pricing_estimate_cny_per_million")
