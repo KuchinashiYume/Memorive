@@ -276,7 +276,7 @@ class ResearchWorkspace:
         title = str(title)[:120] or choose(freeze_language(self.language_settings_get()), '新对话', 'New conversation', '新しい会話')
         result = self.store.put('thread', uid('chat_'), project, {
             'project': project, 'title': title, 'temporary': temporary, 'created_at': now(), 'messages': [], 'summary': [],
-            'summary_ids': [], 'artifact_ids': [], 'scope': 'conversation', 'include_project': False, 'excluded_artifact_ids': []})
+            'summary_ids': [], 'artifact_ids': [], 'scope': 'project', 'include_project': True, 'excluded_artifact_ids': []})
         if temporary:
             self.temporary_threads.add(result['id'])
         return answer_versions.project(result)

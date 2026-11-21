@@ -200,6 +200,8 @@ can ask again from the window.
 | The answer format the model must return | `ANSWER_SCHEMA` in `memorive/research/workspace/desktop.py`; `AnswerJob.build_request` ties it to the excerpt ids | `test_research_qa_flow.py` |
 | Which excerpts go into the prompt | `AnswerJob.gather_evidence` and `AnswerJob.model_context` in `answering.py`; `context_selection.py` | `test_research_qa_flow.py` |
 | How an answer is checked (text present, only shown excerpts cited) | `AnswerJob.check_answer` | `test_research_qa_flow.py` |
+| A question no excerpt was found for: what the answer says is missing, the [AI] background, no value from memory | `memorive/research/workspace/no_material.py`; `AnswerJob.build_request` and `ask_model` switch to it | `test_research_qa_no_material.py` |
+| What a new conversation searches (the whole project; the user can narrow it) | `ResearchWorkspace.thread_create` in `service.py`; `scope_ids` in `attachments.py` | `test_research_qa_no_material.py`, `test_attachments.py` |
 | The message a research run leaves when it finishes or fails | `post_result_message` and `_failure_message` in `memorive/research/runtime.py`; they hand the event to `MessagesProductController.post_event` | `test_research_discovery_feedback.py` |
 | Where a message about a research run leads; research runs on the current-task page | `memorive/research/routes.py` | `test_research_discovery_feedback.py` |
 | What is saved with an answer, answer versions | `AnswerJob.save_answer`, `answer_versions.py` | `test_research_qa_flow.py`, `test_workspace_answer_context.py` |

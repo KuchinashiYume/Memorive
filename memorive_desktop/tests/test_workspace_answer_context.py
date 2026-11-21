@@ -21,14 +21,20 @@ PROFILE = {"profile_ref": "api:chat", "eligible": True, "profile_kind": "API", "
 
 
 class _Model:
+    """Answers in the format it is given. These questions have no material, so it is the no-material
+    format (no_material.py); what these tests check is whether the frozen inputs held."""
+
     def __init__(self):
         self.during = None
 
-    def __call__(self, **kwargs):
+    def __call__(self, *, response_schema=None, **kwargs):
         if self.during:
             self.during()
-        return {"response": {"answer": "Growth doubled.", "citations": []}, "execution_receipt": RECEIPT,
-                "model_name": "model-a"}
+        if "missing" in ((response_schema or {}).get("properties") or {}):
+            response = {"missing": "A paper on growth at two temperatures.", "background": ""}
+        else:
+            response = {"answer": "Growth doubled.", "citations": []}
+        return {"response": response, "execution_receipt": RECEIPT, "model_name": "model-a"}
 
 
 @pytest.fixture
@@ -57,7 +63,8 @@ def test_an_answer_whose_inputs_held_is_saved(chat):
     ws, thread_id, _, _ = chat
     job = _ask(ws, thread_id)
     assert job["status"] == "COMPLETE"
-    assert [m["text"] for m in _assistant_messages(ws, thread_id)] == ["Growth doubled."]
+    [answer] = _assistant_messages(ws, thread_id)
+    assert answer["no_material"] and "A paper on growth at two temperatures." in answer["text"]
 
 
 @pytest.mark.parametrize("change", [

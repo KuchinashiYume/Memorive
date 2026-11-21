@@ -281,6 +281,8 @@
 #memo-chat-page .memo-attachment[data-state=error]{border-color:var(--status-error,#A44236)}
 #memo-chat-page .memo-input-shell.is-file-drag{border-color:var(--focus-ring);background:var(--surface-selected);box-shadow:0 0 0 2px var(--selection-border)}
 #memo-chat-page .memo-knowledge-result{border:1px solid var(--border-subtle);border-radius:9px;margin:12px 0;padding:10px 12px;background:var(--surface)}
+/* The [AI] background of an answer with no material: the window's subtle tint sets it apart from the answer. */
+#memo-chat-page .memo-ai-background{background:var(--desktop-surface-subtle)}
 :is(#memo-chat-page,#memo-evidence-panel) :is(.memo-knowledge-result,.memo-context-details,.memo-metadata,.memo-saved-memory) > summary{cursor:pointer;font-size:var(--memo-size-small)}
 @media(max-width:950px){#memo-chat-page .memo-layout,#memo-chat-page .memo-layout[data-evidence=true]{grid-template-columns:calc(180px * var(--desktop-scale)) minmax(0,1fr)}#memo-chat-page .memo-layout[data-history=false]{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){#memo-chat-page .memo-project-row,#memo-chat-page .memo-thread-row,#memo-chat-page .memo-project-row>.memo-icon-action{transition:none}#desktop-chat-preview .memo-material-row,#memo-chat-page .memo-attachment,#memo-chat-page .memo-composer-model-menu[data-open=true]{animation:none}}

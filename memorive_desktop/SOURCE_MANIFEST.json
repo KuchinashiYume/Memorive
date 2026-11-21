@@ -477,8 +477,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "86a40cdc4fef3c49126b74ce66e2d4e8e1d0fe4cfed3502d6c12b2e098435705",
-      "bytes": 2591611
+      "sha256": "c169d04ec58bc3a113581097f10d7d9e57b970c6e5421b3069d07b90ef7d4d14",
+      "bytes": 2592934
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -6787,8 +6787,8 @@
     },
     {
       "path": "source/memorive/research/workspace/answering.py",
-      "sha256": "3fe9827a70c92fa82e08d06a48bcc26d7ecaec2937deb0fd7f5ab30e1d203f07",
-      "bytes": 42057
+      "sha256": "412ca741a38a5c5256d4aa9a6e6ba3808bb3d3c24ebe8f9e01be6f7c856e71f7",
+      "bytes": 43223
     },
     {
       "path": "source/memorive/research/workspace/attachments.py",
@@ -6881,14 +6881,19 @@
       "bytes": 1025
     },
     {
+      "path": "source/memorive/research/workspace/no_material.py",
+      "sha256": "4bdb9504c9ffc3156ebf268368b9e236edb6f3bb18d56f935a53d1a89fd341f9",
+      "bytes": 6602
+    },
+    {
       "path": "source/memorive/research/workspace/response_contract.py",
       "sha256": "07e13c1cd3577b76a5a168f5eab5ca879c7bdec4690c1ff34755046001bea797",
       "bytes": 2358
     },
     {
       "path": "source/memorive/research/workspace/service.py",
-      "sha256": "3241e3a2d99651023b8b11f93ec9c70a753a5680445ef1a1fa01dfbf1d7d9acb",
-      "bytes": 38493
+      "sha256": "dcbc89dc16c2b82590439c924c150ef825d945700b89c444bfcb45a2d522ba08",
+      "bytes": 38487
     },
     {
       "path": "source/memorive/research/workspace/skill_bridge.py",

@@ -20,7 +20,7 @@
     {
       "source": "memorive_desktop/product/desktop/bundle_integrated.html",
       "destination": "bundle_integrated.html",
-      "sha256": "86a40cdc4fef3c49126b74ce66e2d4e8e1d0fe4cfed3502d6c12b2e098435705"
+      "sha256": "c169d04ec58bc3a113581097f10d7d9e57b970c6e5421b3069d07b90ef7d4d14"
     },
     {
       "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",

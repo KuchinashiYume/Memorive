@@ -903,6 +903,16 @@ const collapsed=new Set();
     body.append(document.createTextNode(text.slice(offset)));
     return body;
   }
+  // An answer with no material (no_material.py): the answer says what is missing; the AI's background,
+  // if any, follows in its own folded block, marked [AI]. An edited answer shows as written.
+  function noMaterialShown(m){return m.role==='assistant'&&!!m.no_material&&String(m.text||'').startsWith(m.no_material.main_text);}
+  function aiBackground(record){
+    if(!record.ai_background)return document.createDocumentFragment();
+    const details=create('details',null,'memo-knowledge-result memo-ai-background');
+    details.open=true;
+    details.append(create('summary','[AI] '+t('AI 背景 · 未经资料核实，不能作为引用'),'desktop-settings-disclosure'),create('p',record.ai_background));
+    return details;
+  }
   function renderThread(){
     renderThreadHeader();
     const log=q('#memo-transcript'),
@@ -938,7 +948,8 @@ const collapsed=new Set();
       copy.dataset.desktopTip=t('复制');
       copy.dataset.answerAction='copy';
       if(m.role==='user')head.append(copy);
-      row.append(head,m.role==='assistant'&&editing.has(m.id)?answerEditor(m):messageBody(m.text));
+      row.append(head,m.role==='assistant'&&editing.has(m.id)?answerEditor(m):messageBody(noMaterialShown(m)?m.no_material.main_text:m.text));
+      if(noMaterialShown(m)&&!editing.has(m.id))row.append(aiBackground(m.no_material));
       if(m.feedback_id){
         const proposal=state?.feedback.find(p=>p.id===m.feedback_id);
         if(proposal){
