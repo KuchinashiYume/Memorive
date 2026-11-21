@@ -128,6 +128,7 @@ class ResearchWorkspace:
             temporary = [(r['id'], r['source_revision']) for r in db.execute('SELECT id,source_revision FROM conversation_catalog WHERE temporary=1')]
         for identity, revision in temporary:
             self.thread_forget(identity, revision)
+        self.remove_handoff_folders()  # those a forget of an earlier session could not remove
         # Forgetting a temporary conversation deletes its jobs too; only the jobs still here are
         # answered again (finish_answers_received_before_restart reads each one).
         self.interrupted_during_model_call = [job_id for job_id in self.interrupted_during_model_call
@@ -294,14 +295,20 @@ class ResearchWorkspace:
     def thread_forget(self, thread_id, expected_revision):
         """Delete a conversation with its jobs and records; its temporary attachments become unavailable.
         A temporary conversation's desktop hand-off folders, which Memorive wrote, go with it: they hold
-        the conversation and copies of its sources, which the user expects to end with the conversation."""
+        the conversation and copies of its sources, which the user expects to end with the conversation.
+        Each folder is noted in the same transaction (kind handoff_removal) and the note goes once the folder
+        is gone, so a folder that could not be removed (a file held open) is tried again at the next start."""
         with self.store.tx() as db:
             row = self.store.get('thread', thread_id, db=db)
             if not row or row['revision'] != expected_revision:
                 raise ValueError('REVISION_CONFLICT')
             self.conversations._get(thread_id, expected_revision, db)  # refused while the conversation is busy
-            handoff_folders = [record for record in self.store.list('desktop_handoff', row['project'], db=db)
-                               if row['temporary'] and record.get('thread_id') == thread_id]
+            for record in self.store.list('desktop_handoff', row['project'], db=db):
+                folder = Path(record['path'])
+                # The folder this record describes: named by its id and holding the manifest Memorive wrote.
+                if (row['temporary'] and record.get('thread_id') == thread_id and folder.name == record['id']
+                        and (folder / 'manifest.json').is_file()):
+                    self.store.put('handoff_removal', record['id'], row['project'], {'path': str(folder)}, db=db)
             for job in self.store.list('job', row['project'], db=db):
                 if job.get('thread_id') == thread_id:
                     db.execute("DELETE FROM objects WHERE kind='job' AND id=?", (job['id'],))
@@ -316,12 +323,16 @@ class ResearchWorkspace:
                     if record.get('thread_id') == thread_id:
                         db.execute('DELETE FROM objects WHERE kind=? AND id=?', (kind, record['id']))
             self.store.event('THREAD_FORGOTTEN', thread_id, {}, db)
-        for record in handoff_folders:
-            folder = Path(record['path'])
-            # The folder this record describes: named by its id and holding the manifest Memorive wrote.
-            if folder.name == record['id'] and (folder / 'manifest.json').is_file():
-                shutil.rmtree(folder, ignore_errors=True)
+        self.remove_handoff_folders()
         return {'status': 'FORGOTTEN', 'removed_from_future_context': True}
+
+    def remove_handoff_folders(self):
+        """Remove the hand-off folders noted for removal; a note goes once its folder is gone."""
+        for record in self.store.list('handoff_removal'):
+            shutil.rmtree(record['path'], ignore_errors=True)
+            if not Path(record['path']).exists():
+                with self.store.tx() as db:
+                    db.execute("DELETE FROM objects WHERE kind='handoff_removal' AND id=?", (record['id'],))
 
     def memory_save(self, text, scope='project', project='default', memory_id=None, expected_revision=0):
         if scope not in {'user', 'project'} or not isinstance(text, str) or not text.strip() or len(text) > 4000:

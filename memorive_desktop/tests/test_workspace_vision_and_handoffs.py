@@ -201,6 +201,31 @@ def test_forgetting_a_temporary_conversation_removes_its_desktop_handoff_folder(
     assert folder.exists() is not temporary
 
 
+
+def test_a_handoff_folder_that_could_not_be_removed_goes_at_the_next_start(tmp_path, monkeypatch):
+    # A file held open kept the folder when the temporary conversation was forgotten. Its record was gone with
+    # the conversation, so nothing tried again and the copies of its sources stayed.
+    from memorive.research.workspace import service
+    ws = ResearchWorkspace(tmp_path / "ws", catalog=lambda: list(CATALOG), vision=_Vision())
+    note = tmp_path / "temporary-note.md"
+    note.write_text("Samples were incubated at 37 C.\n", encoding="utf-8")
+    thread = ws.thread_create(temporary=True)
+    assert _attach(ws, thread, note)["status"] == "COMPLETE"
+    settings = ws.settings()
+    ws.settings_save({"agent": "codex-desktop", "desktop_agents": {"codex-desktop": {"model": "gpt-test"}}},
+                     settings["revision"])
+    folder = Path(desktop_handoff(ws, thread["id"], "What changed?", tmp_path / "handoff")["path"])
+    monkeypatch.setattr(service.shutil, "rmtree", lambda *args, **kwargs: None)  # the folder cannot go now
+    ws.thread_forget(thread["id"], ws.store.get("thread", thread["id"])["revision"])
+    ws.close()
+    monkeypatch.undo()
+    assert folder.exists()
+    restarted = ResearchWorkspace(tmp_path / "ws", catalog=lambda: list(CATALOG), vision=_Vision(), recover=True)
+    try:
+        assert not folder.exists() and restarted.store.list("handoff_removal") == []
+    finally:
+        restarted.close()
+
 def test_an_untouched_desktop_handoff_is_ready(ws, desktop):
     ready = ws.handoffs.validate_desktop(desktop)
     assert (ready["status"], ready["model_called"]) == ("READY", False)
