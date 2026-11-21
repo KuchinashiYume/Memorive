@@ -35,7 +35,7 @@
     {
       "source": "memorive_desktop/product/desktop/release_identity_binding.json",
       "destination": "release_identity_binding.json",
-      "sha256": "0a1d89bd0b3e1191bd2ed9aa9a5935d14937187163b2aa25b48ddf8de51eb793"
+      "sha256": "9e951a13b318cc91e75009c28224569e80f2154c49002a71c14f61af522661f9"
     },
     {
       "source": "memorive_desktop/contracts/InboxImportContract.json",

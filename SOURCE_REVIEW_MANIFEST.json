@@ -1,7 +1,7 @@
 {
   "schema": "MemoriveSourceExportReview-v1",
-  "version": "1.03",
-  "public_release_authorized": true,
+  "version": "2.00",
+  "public_release_authorized": false,
   "scope": "desktop, multilingual console and research skill",
   "files": [
     {
@@ -2841,7 +2841,7 @@
     },
     {
       "path": "memorive_desktop/product/desktop/release_identity_binding.json",
-      "sha256": "0a1d89bd0b3e1191bd2ed9aa9a5935d14937187163b2aa25b48ddf8de51eb793",
+      "sha256": "9e951a13b318cc91e75009c28224569e80f2154c49002a71c14f61af522661f9",
       "bytes": 1364
     },
     {
@@ -2851,8 +2851,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/update_release.json",
-      "sha256": "596980b7621ab81cc0007476e4d408546f95bd13b5420778d2395691c8e80043",
-      "bytes": 1526
+      "sha256": "36cdf310355696ecb9be701e6bb333d1e0d09a26baaa9e9219a645955bfe03c2",
+      "bytes": 2091
     },
     {
       "path": "memorive_desktop/product/desktop/update_service.py",
@@ -4071,17 +4071,17 @@
     },
     {
       "path": "SOURCE_VERSION.json",
-      "sha256": "5cdc951412652d676cb22dee8a38953b51bbf5fb0db995871479846707c6acd6",
-      "bytes": 896
+      "sha256": "012264f483fb66e660f6ae18c0596ee6f7929c922d1889a9df4dd9952cf37302",
+      "bytes": 719
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "baea46f662e0b4debea0193f9b93ff3178a4923be31295f82b79b0f04de3d659",
+      "sha256": "ce82e1474d6bde46014106bccbb42b502c600ad8ce02d3da720703655956e2f5",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "3ea2bc6763fba7adf9e2b348cf505c0bd143bd01b366a27ce700a366c2614b05",
+      "sha256": "06318019af2dda2cf6f0f46636dbb9c1a805fab7545b0ac1c05f4a2ff32d11c3",
       "bytes": 276404
     },
     {

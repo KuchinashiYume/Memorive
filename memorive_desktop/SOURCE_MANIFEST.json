@@ -1,8 +1,8 @@
 {
   "schema": "MemoriveDesktopSourceSnapshot-v1",
-  "revision": "Memorive-1.03-release002",
-  "product_version": "1.03",
-  "candidate_revision": "Memorive-1.03-release002",
+  "revision": "Memorive-2.00-release001",
+  "product_version": "2.00",
+  "candidate_revision": "Memorive-2.00-release001",
   "selected_build_root": "memorive_desktop",
   "files": [
     {
@@ -2072,7 +2072,7 @@
     },
     {
       "path": "product/desktop/release_identity_binding.json",
-      "sha256": "0a1d89bd0b3e1191bd2ed9aa9a5935d14937187163b2aa25b48ddf8de51eb793",
+      "sha256": "9e951a13b318cc91e75009c28224569e80f2154c49002a71c14f61af522661f9",
       "bytes": 1364
     },
     {
@@ -2087,8 +2087,8 @@
     },
     {
       "path": "product/desktop/update_release.json",
-      "sha256": "596980b7621ab81cc0007476e4d408546f95bd13b5420778d2395691c8e80043",
-      "bytes": 1526
+      "sha256": "36cdf310355696ecb9be701e6bb333d1e0d09a26baaa9e9219a645955bfe03c2",
+      "bytes": 2091
     },
     {
       "path": "product/desktop/update_service.py",
