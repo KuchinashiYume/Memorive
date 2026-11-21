@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "e4523006068ee9409bbf19b1562ea4ce16bb2b89aeef80a0952fbd5a230cf70c",
+      "sha256": "c381685c5ab51174c1f3e02e820872968f3012f9a95601b4427fd353a356f9d1",
       "bytes": 276404
     },
     {
@@ -8971,8 +8971,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/service.py",
-      "sha256": "c76ab43ab3ef73a47efa33443c99302665821ced3fe2931d28cb14fa4310c058",
-      "bytes": 36914
+      "sha256": "bea8f5f42ce6d2c9e1ad3f5abb93216dfed1994e43788435381e871e93ec61b6",
+      "bytes": 37672
     },
     {
       "path": "memorive_desktop/source/memorive/research/workspace/skill_bridge.py",

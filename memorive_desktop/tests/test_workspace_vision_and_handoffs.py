@@ -183,6 +183,24 @@ def desktop(ws, sourced, tmp_path):
     return ws.store.get("desktop_handoff", result["id"])
 
 
+@pytest.mark.parametrize("temporary", [True, False])
+def test_forgetting_a_temporary_conversation_removes_its_desktop_handoff_folder(ws, tmp_path, temporary):
+    # The folder holds the conversation and copies of its sources; a temporary conversation's folder ends
+    # with it. A normal conversation's folder stays (the user may still be working in it).
+    note = tmp_path / "temporary-note.md"
+    note.write_text("Samples were incubated at 37 C.\n", encoding="utf-8")
+    thread = ws.thread_create(temporary=temporary)
+    assert _attach(ws, thread, note)["status"] == "COMPLETE"
+    settings = ws.settings()
+    ws.settings_save({"agent": "codex-desktop", "desktop_agents": {"codex-desktop": {"model": "gpt-test"}}},
+                     settings["revision"])
+    folder = Path(desktop_handoff(ws, thread["id"], "What changed?", tmp_path / "handoff")["path"])
+    assert (folder / "handoff.json").is_file()
+    current = ws.store.get("thread", thread["id"])
+    assert ws.thread_forget(thread["id"], current["revision"])["status"] == "FORGOTTEN"
+    assert folder.exists() is not temporary
+
+
 def test_an_untouched_desktop_handoff_is_ready(ws, desktop):
     ready = ws.handoffs.validate_desktop(desktop)
     assert (ready["status"], ready["model_called"]) == ("READY", False)

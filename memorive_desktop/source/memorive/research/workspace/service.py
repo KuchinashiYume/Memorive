@@ -19,7 +19,7 @@ Each method is short here and hands the work to the module that owns it:
 The model is optional. Without one a question gets the excerpts found, said as such; nothing then
 pretends to be a generated answer or starts an external agent.
 """
-import json,threading,time
+import json,shutil,threading,time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from memorive.research.workspace.store import Store,digest,uid,now,packed
@@ -292,12 +292,16 @@ class ResearchWorkspace:
         return answer_versions.project(row)
 
     def thread_forget(self, thread_id, expected_revision):
-        """Delete a conversation with its jobs and records; its temporary attachments become unavailable."""
+        """Delete a conversation with its jobs and records; its temporary attachments become unavailable.
+        A temporary conversation's desktop hand-off folders, which Memorive wrote, go with it: they hold
+        the conversation and copies of its sources, which the user expects to end with the conversation."""
         with self.store.tx() as db:
             row = self.store.get('thread', thread_id, db=db)
             if not row or row['revision'] != expected_revision:
                 raise ValueError('REVISION_CONFLICT')
             self.conversations._get(thread_id, expected_revision, db)  # refused while the conversation is busy
+            handoff_folders = [record for record in self.store.list('desktop_handoff', row['project'], db=db)
+                               if row['temporary'] and record.get('thread_id') == thread_id]
             for job in self.store.list('job', row['project'], db=db):
                 if job.get('thread_id') == thread_id:
                     db.execute("DELETE FROM objects WHERE kind='job' AND id=?", (job['id'],))
@@ -312,6 +316,11 @@ class ResearchWorkspace:
                     if record.get('thread_id') == thread_id:
                         db.execute('DELETE FROM objects WHERE kind=? AND id=?', (kind, record['id']))
             self.store.event('THREAD_FORGOTTEN', thread_id, {}, db)
+        for record in handoff_folders:
+            folder = Path(record['path'])
+            # The folder this record describes: named by its id and holding the manifest Memorive wrote.
+            if folder.name == record['id'] and (folder / 'manifest.json').is_file():
+                shutil.rmtree(folder, ignore_errors=True)
         return {'status': 'FORGOTTEN', 'removed_from_future_context': True}
 
     def memory_save(self, text, scope='project', project='default', memory_id=None, expected_revision=0):
