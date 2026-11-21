@@ -55,7 +55,16 @@
   // A notice on the page's status line stays there (update leaves it) until the person acts again (acted()), comes
   // back to this mode or a research run ends: then the line says how things stand again.
   let notice = '';
-  const acted = () => { notice = ''; };
+  const acted = () => {
+    notice = '';
+    if (picker?.querySelector('#memo-paper-picker-status').dataset.error) pickerSay();
+  };
+  // The picker's status line: an error (from notify, until the next action or a successful read) or a receipt.
+  function pickerSay(text = '', error = false) {
+    const s = picker.querySelector('#memo-paper-picker-status');
+    s.textContent = text;
+    if (error) s.dataset.error = 'true'; else delete s.dataset.error;
+  }
   function notify(e) {
     const inPicker = picker && !picker.hidden, s = inPicker ? q('#memo-paper-picker-status') : status();
     if (!s) return;
@@ -81,6 +90,12 @@
     if (opportunities) {
       Memorive.chat?.closeEvidence();
       acted();
+      // Before the first view: the status line in a row (research.css .desktop-research-check), room for a button.
+      if (!built) {
+        const row = make('div', null, 'desktop-research-check');
+        row.append(statusLine());
+        body().replaceChildren(row);
+      }
       return refresh();
     }
     closePicker();
@@ -89,7 +104,26 @@
   }
   async function open() {
     if (Memorive.app.inspect().active_route !== 'chat') Memorive.app.activate('chat');
-    await setMode('opportunities');
+    await enter();
+  }
+  // Entering the mode (the header switch, the title, the home page). When the first read fails nothing has been
+  // shown yet: the status line says so (the reason in its tooltip) and a button next to it reads again.
+  function enter() {
+    return setMode('opportunities').catch(entryFailed);
+  }
+  function entryFailed(e) {
+    if (built || !shown()) return notify(e);
+    const s = status();
+    s.textContent = '研究机会没有读出来';
+    s.dataset.error = 'true';
+    s.dataset.desktopTip = e?.message || '';
+    if (!s.nextElementSibling) s.after(icon('重新读取', () => refresh().catch(entryFailed), 'desktop-action-refresh', 'desktop-toolbar-ghost'));
+  }
+  function statusLine() {
+    const s = make('p', null, 'desktop-research-status');
+    s.id = 'memo-opportunities-status';
+    s.setAttribute('role', 'status');
+    return s;
   }
   // The page is built once per view (render) and then kept current in place (update): while a search runs, or files
   // of the chosen group are on their way, the page reads again and only the run's state, the group's files and the
@@ -149,7 +183,14 @@
     await call('memo.answer_draft_save', { thread_id: thread.id, branch_key: 'root', text: item.question, expected_revision: draft.revision });
     await mark(item, 'asked');
     await setMode('qa');
-    await Memorive.chat.openThread(thread.id);
+    // The conversation, its papers and the question are saved: when it does not open now, the list has it.
+    try {
+      await Memorive.chat.openThread(thread.id);
+    } catch {
+      Memorive.chat.notify('追问的对话已建好，暂时打不开，可以在对话列表里打开');
+      void Memorive.chat.refresh().catch(() => {});   // so the list shows it now (it reads again later anyway)
+      return;
+    }
     q('#memo-question')?.focus();
   }
   // The fingerprints of the opportunities whose details are open, and whether the dismissed ones are unfolded.
@@ -170,9 +211,7 @@
     if (pickerOpen() && pickerGroup !== groupId) closePicker();
     const controls = make('section', null, 'desktop-research-opportunity-controls');
     controls.append(searchBox(built.group));
-    built.status = make('p', null, 'desktop-research-status');
-    built.status.id = 'memo-opportunities-status';
-    built.status.setAttribute('role', 'status');
+    built.status = statusLine();
     built.fresh = make('p', null, 'desktop-research-muted');
     built.list = make('div', null, 'desktop-research-opportunity-list');
     controls.append(built.status, built.fresh);
@@ -397,7 +436,7 @@
     pickerGroup = groupId;
     q('#memo-evidence-panel').hidden = true;
     panel.hidden = false;
-    panel.querySelector('#memo-paper-picker-status').textContent = '';
+    pickerSay();
     const search = panel.querySelector('input[type="search"]');
     search.value = '';
     Memorive.frames.chat.setInspector(true, { targetRatio: 0.32 });
@@ -413,6 +452,7 @@
   async function loadPapers(query) {
     const mine = ++pickerTicket, result = await call('opportunities.papers', query ? { query } : {});
     if (mine !== pickerTicket || !picker || picker.hidden) return;
+    if (picker.querySelector('#memo-paper-picker-status').dataset.error) pickerSay();
     const list = picker.querySelector('.memo-library-selection');
     picker.querySelector('.memo-paper-picker-note').textContent = query ? '搜索结果（全部时间）' : '最近 30 天处理的论文；更早的可按名称搜索';
     list.replaceChildren(...result.items.map(paperRow));
@@ -468,7 +508,7 @@
     // Another scope chosen meanwhile closed the picker; the files are in the group they were added to.
     if (groupId !== target) return;
     for (const paper of currentGroup().papers) if (!before.has(paper.job_id)) { picked.add(paper.job_id); ticked.add(paper.job_id); }
-    picker.querySelector('#memo-paper-picker-status').textContent = '已送去处理：处理完、卡片审核通过后自动加入比较组';
+    pickerSay('已送去处理：处理完、卡片审核通过后自动加入比较组');
     render();
     await loadPapers(pickerQuery);
   }
@@ -598,6 +638,7 @@
       if (note) box.dataset.state = ended ? 'error' : 'preparing';
       x.type = 'button';
       x.setAttribute('aria-label', t('移出比较组') + ' ' + title);
+      x.dataset.desktopTip = '移出比较组';
       x.onclick = () => { acted(); void remove().then(render, notify); };
       box.append(x);
       return box;
@@ -733,7 +774,7 @@
       event.preventDefault();
       if (pickerOpen()) closePicker(); else void openPicker().catch(notify);
     });
-    const toggle = () => setMode(shown() ? 'qa' : 'opportunities').catch(notify);
+    const toggle = () => shown() ? setMode('qa') : enter();
     q('#memo-mode').addEventListener('click', toggle);
     q('#memo-mode-title').addEventListener('click', toggle);
     initLibrarySetting();
