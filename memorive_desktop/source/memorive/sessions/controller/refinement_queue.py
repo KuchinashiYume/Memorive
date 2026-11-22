@@ -276,12 +276,16 @@ class RefinementQueueMixin:
             job_id, error_code="SESSION_REFINEMENT_INTERRUPTED", model_calls=int(answered))
 
     def _written_refinement_draft(self, projection_id: str, job_id: str) -> dict[str, Any] | None:
-        """The draft this task wrote for its conversation, or None."""
-        try:
-            draft = json.loads((self._refinement_root / f"{projection_id}.json").read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return None
-        return draft if isinstance(draft, Mapping) and draft.get("task_id") == job_id else None
+        """The draft this task wrote for its conversation, or None. A task the version before v2.00 ran wrote
+        <projection id>.json."""
+        for path in (self._refinement_draft_path(projection_id, job_id), self._refinement_root / f"{projection_id}.json"):
+            try:
+                draft = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if isinstance(draft, Mapping) and draft.get("task_id") == job_id:
+                return draft
+        return None
 
     def _refinement_auto_run_enabled(self) -> bool:
         setting = self._inbox_refinement_call("inbox.get_auto_run", {})

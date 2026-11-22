@@ -6992,18 +6992,18 @@
     },
     {
       "path": "source/memorive/sessions/controller/product_controller.py",
-      "sha256": "53795c959d5655ed32080e08ce348079a5a43d8f2926fc46a17a9cef70c713cd",
-      "bytes": 28996
+      "sha256": "1a715d670b4050d4ccdb6f38967409aa367fcae427e923f2669edbaca6ebf6e6",
+      "bytes": 29417
     },
     {
       "path": "source/memorive/sessions/controller/refinement_queue.py",
-      "sha256": "7e6db3f1bb695fe4f8fd9b560fd84f31a3e18f5c3799341e0a2c387485f6bbeb",
-      "bytes": 16270
+      "sha256": "9adb071416f862d3aacbbd80a088da360f697cb1c18bd284aeec59bee4ab05ca",
+      "bytes": 16468
     },
     {
       "path": "source/memorive/sessions/controller/refinement_tasks.py",
-      "sha256": "6345ccbf6da37b6a748f39a5df4daf22cb15652dcde76d52b3d1e188df3dacb5",
-      "bytes": 36045
+      "sha256": "844b454d7cdc417ff163f1e3b48906569e928577134adc3a2ddc5a21263dd8df",
+      "bytes": 37665
     },
     {
       "path": "source/memorive/sessions/controller/state.py",

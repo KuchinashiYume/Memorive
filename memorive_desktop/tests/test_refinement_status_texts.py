@@ -47,10 +47,14 @@ def test_the_settings_projection_names_the_chosen_models_state():
 class _Page(Queued):
     """A session whose refinement waits in the queue, with the inbox's automatic processing off."""
 
+    def __init__(self, root):
+        super().__init__(root)
+        self._refinement_root = root / "drafts"   # no saved versions
+
     def _refinement_auto_run_enabled(self):
         return False
 
-    def _require_keys(self, accepted, keys):
+    def _require_keys(self, accepted, keys, optional=None):
         pass
 
 

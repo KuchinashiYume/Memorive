@@ -422,9 +422,19 @@ class SessionsProductController(
         }
 
     def _get_refinement(self, accepted: dict[str, Any]) -> Any:
-        self._require_keys(accepted, {"local_projection_id"})
+        """A session's refinement as the page shows it: the task in progress or last ended, and the saved
+        versions. The newest version (or the one asked for by job_id) is shown, also while a newer one is
+        queued, runs or failed."""
+        self._require_keys(accepted, {"local_projection_id"}, {"job_id"})
         projection_id = str(accepted["local_projection_id"])
         self._get_internal(projection_id)
+        versions = self._refinement_versions(projection_id)
+        wanted = str(accepted.get("job_id") or "")
+        draft = (next((row for row in versions if row.get("task_id") == wanted), None) if wanted
+                 else versions[-1] if versions else None)
+        if wanted and draft is None:
+            raise SessionProductError("SESSION_REFINEMENT_DRAFT_NOT_FOUND")
+        shown = {"draft": draft, "versions": [self._refinement_version_row(row) for row in versions]}
         task = self._refinement_task_for_projection(projection_id)
         if task is None:
             inbox_item = self._find_inbox_refinement(projection_id)
@@ -434,7 +444,7 @@ class SessionsProductController(
                     "schema_version": "DesktopSessionRefinementTaskProjection-v2",
                     "task": None,
                     "inbox_item": inbox_item,
-                    "draft": None,
+                    **shown,
                     "status": (
                         "INBOX_QUEUED"
                         if queued
@@ -450,7 +460,7 @@ class SessionsProductController(
             return {
                 "schema_version": "DesktopSessionRefinementTaskProjection-v1",
                 "task": task,
-                "draft": None,
+                **shown,
                 "status": {
                     "QUEUED": "TASK_QUEUED",
                     "RUNNING": "TASK_RUNNING",
@@ -459,8 +469,7 @@ class SessionsProductController(
                 }.get(str(task.get("control_state")), "TASK_STATE_UNKNOWN"),
                 **({"auto_run": self._refinement_auto_run_enabled()} if queued else {}),
             }
-        path = self._refinement_root / f"{projection_id}.json"
-        if not path.is_file():
+        if draft is None:
             if task is not None:
                 raise SessionProductError("SESSION_REFINEMENT_DRAFT_NOT_FOUND")
             # No task, nothing in the inbox and no draft: the session was never refined, or its queued refinement
@@ -473,17 +482,13 @@ class SessionsProductController(
                 "task": None,
                 "status": "NO_DRAFT",
             }
-        try:
-            draft = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as error:
-            raise SessionProductError("SESSION_REFINEMENT_DRAFT_UNAVAILABLE") from error
         return {
             "schema_version": "DesktopSessionRefinementDraftProjection-v1",
-            "draft": draft,
+            **shown,
             "task": task,
             "status": "PASS",
-            # The conversation went on since: the page lets it be refined again (sessions/view.js).
-            "source_changed": task is not None and self._refinement_source_changed(projection_id, task),
+            # The conversation went on since the newest version: the page lets it be refined again.
+            "source_changed": self._refinement_source_changed(projection_id, versions[-1]),
         }
 
     def _delete_local(self, accepted: dict[str, Any]) -> Any:

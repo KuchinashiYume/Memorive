@@ -5,6 +5,8 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
+import json
+from pathlib import Path
 import re
 import threading
 from typing import Any, Iterable, Mapping
@@ -359,10 +361,10 @@ class RefinementTasksMixin:
             }
             if manager.session_refinement_cancelled(job_id):
                 return
+            path = self._refinement_draft_path(projection_id, job_id)
             with self._refinement_lock:
-                self._write_private_json(
-                    self._refinement_root / f"{projection_id}.json", draft
-                )
+                path.parent.mkdir(exist_ok=True)
+                self._write_private_json(path, draft)
             self._metrics["local_projection_writes"] += 1
             self._metrics["refinement_drafts_created"] += 1
             if self._refinement_result_observer is not None:
@@ -429,10 +431,39 @@ class RefinementTasksMixin:
         }
         return row, messages, source_binding, _sha256_json({"source": source_binding, "messages": messages})
 
-    def _refinement_source_changed(self, projection_id: str, task: Mapping[str, Any]) -> bool:
-        """Whether the session changed since this (finished) refinement was made."""
+    def _refinement_source_changed(self, projection_id: str, made: Mapping[str, Any]) -> bool:
+        """Whether the session changed since this refinement (its task or its draft) was made."""
         current = self._refinement_input(projection_id)[3]
-        return str(task.get("source_snapshot_sha256") or "").upper() != current.upper()
+        return str(made.get("source_snapshot_sha256") or "").upper() != current.upper()
+
+    def _refinement_draft_path(self, projection_id: str, job_id: str) -> Path:
+        """Where one refinement job keeps its draft: one file per job, so the earlier versions stay."""
+        return self._refinement_root / projection_id / f"{job_id}.json"
+
+    def _refinement_versions(self, projection_id: str) -> list[dict[str, Any]]:
+        """The session's saved refinements, oldest first. Before v2.00 a session kept one, <projection id>.json."""
+        paths = [*sorted((self._refinement_root / projection_id).glob("*.json")),
+                 self._refinement_root / f"{projection_id}.json"]
+        drafts = []
+        for path in paths:
+            if not path.is_file():
+                continue
+            try:
+                drafts.append(json.loads(path.read_text(encoding="utf-8")))
+            except (OSError, json.JSONDecodeError) as error:
+                raise SessionProductError("SESSION_REFINEMENT_DRAFT_UNAVAILABLE") from error
+        return sorted(drafts, key=lambda draft: str(draft.get("created_at") or ""))
+
+    @staticmethod
+    def _refinement_version_row(draft: Mapping[str, Any]) -> dict[str, Any]:
+        """One version as the page lists it."""
+        brief = draft.get("brief")
+        return {
+            "job_id": draft.get("task_id"),
+            "created_at": draft.get("created_at"),
+            "item_count": len(brief["items"]) if isinstance(brief, Mapping) else len(draft.get("items") or []),
+            "brief": isinstance(brief, Mapping),
+        }
 
     def _create_refinement_task(self, projection_id: str) -> dict[str, Any]:
         row, messages, _source_binding, snapshot_sha256 = self._refinement_input(projection_id)
