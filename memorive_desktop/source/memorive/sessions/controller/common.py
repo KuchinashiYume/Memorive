@@ -94,6 +94,7 @@ _PUBLIC_FIELDS = frozenset(
         "recency_bucket",
         "source_recency_rank",
         "sync_status",
+        "source_site",
     }
 )
 
@@ -155,6 +156,14 @@ def _universal_source_name(source_locator: Any) -> str:
         return f"{identity['name']} 网页 · 当前页录入"
     safe_host = re.sub(r"[^a-z0-9.-]+", "", host)[:96]
     return f"{safe_host or '通用 AI 网页'} · 当前页录入"
+
+
+def _universal_source_site(source_locator: Any) -> str:
+    """The recorded website's key in the official site list (chatgpt, claude, gemini, ...), or "" for another
+    address; the sessions page shows a letter mark by it."""
+    from memorive.sessions.companion.site_profiles import official_web_identity
+    identity = official_web_identity(str(source_locator or ""))
+    return identity["provider"] if identity else ""
 
 
 class SessionProductError(ValueError):

@@ -34,6 +34,7 @@ from memorive.sessions.controller.common import (
     _projection_id,
     _text,
     _universal_source_name,
+    _universal_source_site,
 )
 
 
@@ -691,6 +692,9 @@ class BrowserSessionsMixin:
             else "UNKNOWN"
         )
         row["sync_status"] = completeness
+        row["source_site"] = (
+            _universal_source_site(archived.get("source_locator")) if provider_id == _UNIVERSAL_PROVIDER_ID else provider_id
+        )
         row["recency_bucket"] = "UNKNOWN"
         row["source_recency_rank"] = 0
         row["lineage"] = {

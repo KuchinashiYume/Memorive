@@ -1,5 +1,5 @@
-/* The session management page's calls to the desktop service (sessions.*): the saved AI chat sessions, capturing them
-   from browsers (with the browser companion), refining them, and deleting local copies. Publishes
+/* The session management page's calls to the desktop service (sessions.*): the saved AI chat sessions, importing the
+   web recordings of the browser extension, refining them, and deleting local copies. Publishes
    Memorive.sessionsBridge for view.js. */
 (() => {
   'use strict';
@@ -16,7 +16,6 @@
   let receiptCount = 0;
   let bootstrapPromise = null;
   let assessedSourceCount = 0;
-  let webRefreshPromise = null;
   let currentPageCapturePromise = null;
   const refinementWatchers = new Map();
   const ALL_SOURCE_PAGE_SIZE = 30;
@@ -107,16 +106,16 @@
       return '源文件读取期间发生变化，请重试。';
     }
     if (raw.includes('DEEPSEEK_VISIBLE_UI_CONVERSATION_INCOMPLETE')) {
-      return '会话未完整读取，请重新同步。';
+      return '会话未完整读取，请重新录入。';
     }
     if (raw.includes('DEEPSEEK_VISIBLE_UI_FULL_SCROLL_PROOF_MISSING')) {
-      return '会话未完整读取，请重新同步。';
+      return '会话未完整读取，请重新录入。';
     }
     if (raw.includes('BROWSER_SESSION_INCOMPLETE')) {
-      return '会话未完整读取，请重新同步。';
+      return '会话未完整读取，请重新录入。';
     }
     if (raw.includes('BROWSER_SESSION_CAPTURE_FAILED')) {
-      return '会话正文同步失败，请重新同步。';
+      return '会话正文读取失败，请重新录入。';
     }
     return `读取会话正文失败：${raw || '未知错误'}`;
   };
@@ -133,52 +132,10 @@
     return [10, 30, 50].includes(parsed) ? parsed : 30;
   };
   const wait = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
-  const runBrowserCompanionSync = async () => {
-    const action = window.pywebview?.api?.run_browser_companion_sync;
-    if (typeof action !== 'function') throw new Error('BROWSER_COMPANION_SYNC_UNAVAILABLE');
-    const receipt = await action();
-    receiptCount += 1;
-    return receipt;
-  };
   const notifyBrowserCompanionUpdated = (projection) => {
     page()?.setBrowserCompanionStatus(projection);
     window.dispatchEvent(new CustomEvent('desktop:browser-companion-updated', { detail:projection }));
   };
-  const refreshWebSessions = async (initialStatus) => {
-    if (webRefreshPromise) return webRefreshPromise;
-    webRefreshPromise = (async () => {
-      if (initialStatus?.preflight_eligible !== true) {
-        return { triggered:false, completed:false, status:initialStatus, imported_session_count:0 };
-      }
-      const previousReportSha = initialStatus?.latest_sync_report_sha256 || null;
-      const launch = await runBrowserCompanionSync();
-      const accepted = new Set([
-        'SYNC_TRIGGERED', 'SYNC_READY',
-        'INCREMENTAL_SYNC_TRIGGERED', 'INCREMENTAL_SYNC_READY'
-      ]);
-      if (!accepted.has(launch?.status)) {
-        const status = await browserCompanionStatus();
-        notifyBrowserCompanionUpdated(status);
-        return { triggered:false, completed:false, status, imported_session_count:0 };
-      }
-      let imported = 0;
-      let latest = initialStatus;
-      for (let attempt = 0; attempt < 240; attempt += 1) {
-        if (attempt) await wait(1500);
-        const importReceipt = await syncBrowserSessionsFromDownloads().catch(() => null);
-        imported += Number(importReceipt?.imported_session_count) || 0;
-        latest = await browserCompanionStatus();
-        notifyBrowserCompanionUpdated(latest);
-        const nextReportSha = latest?.latest_sync_report_sha256 || null;
-        if (nextReportSha && nextReportSha !== previousReportSha) {
-          return { triggered:true, completed:true, status:latest, imported_session_count:imported, launch };
-        }
-      }
-      return { triggered:true, completed:false, status:latest, imported_session_count:imported, launch };
-    })().finally(() => { webRefreshPromise = null; });
-    return webRefreshPromise;
-  };
-
   const bootstrap = async () => {
     if (!bootstrapPromise) {
       const filters = normalizeFilters({ source:'all', search:'', limit_per_source:30 });
@@ -305,24 +262,16 @@
     const normalized = normalizeFilters(filters);
     const generation = ++listGeneration;
     try {
-      const initialImportReceipt = await syncBrowserSessionsFromDownloads();
-      const initialStatus = await browserCompanionStatus();
-      notifyBrowserCompanionUpdated(initialStatus);
-      const webReceipt = await refreshWebSessions(initialStatus);
+      // The web recordings the extension saved to the download folder come in first.
+      const importReceipt = await syncBrowserSessionsFromDownloads();
       const projection = await nativeCall('sessions.refresh', pagedParams(normalized));
       assessedSourceCount = Object.values(projection.source_status || {}).filter((value) => value?.available).length;
       acceptFirstPage(projection, normalized, generation);
-      const finalStatus = webReceipt?.status || await browserCompanionStatus();
-      notifyBrowserCompanionUpdated(finalStatus);
-      const imported = (Number(initialImportReceipt?.imported_session_count) || 0)
-        + (Number(webReceipt?.imported_session_count) || 0);
+      notifyBrowserCompanionUpdated(await browserCompanionStatus());
+      const imported = Number(importReceipt?.imported_session_count) || 0;
       page()?.showToast(imported
-        ? `网页增量同步完成，已合并 ${imported} 条；当前显示 ${projection.record_count || 0} 条。`
-        : webReceipt?.triggered && !webReceipt?.completed
-          ? '后台同步中'
-          : webReceipt?.completed
-            ? `网页增量同步完成；当前显示 ${projection.record_count || 0} 条。`
-            : `已刷新 ${projection.record_count || 0} 条本地会话；网页桥接尚未连接。`);
+        ? `已导入 ${imported} 条网页录入；当前显示 ${projection.record_count || 0} 条。`
+        : `已刷新，当前显示 ${projection.record_count || 0} 条。`);
       return projection;
     } catch (error) {
       page()?.showToast(`刷新会话失败：${String(error?.message || error)}`);
@@ -377,10 +326,10 @@
     } catch (error) {
       const raw = String(error?.message || error || '');
       if (raw.includes('BROWSER_SESSION_IMPORT_JSON_INVALID')) {
-        throw new Error('选择的文件不是有效 JSON；请导入只读桥接扩展生成的会话包。');
+        throw new Error('选择的文件不是有效 JSON；请导入网页录入插件生成的文件。');
       }
       if (raw.includes('BROWSER_SESSION_BUNDLE') || raw.includes('BROWSER_SESSION_CONVERSATION')) {
-        throw new Error('会话包结构或版本不受支持；请重新加载最新版只读桥接扩展后再导出。');
+        throw new Error('文件结构或版本不受支持；请在扩展页重新加载最新版网页录入插件后再录入。');
       }
       if (raw.includes('BROWSER_SESSION_IMPORT_FILE_INVALID')) {
         throw new Error('请选择扩展导出的 .json 会话包。');
