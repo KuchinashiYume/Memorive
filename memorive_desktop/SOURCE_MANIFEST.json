@@ -407,8 +407,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "702bb8f43b38af992fbe41f22b3d1cad0bfb0c0892b6beb4afc6cd35f3b75499",
-      "bytes": 2611436
+      "sha256": "091a78a80423e0174daf99e4bc3cf292a08679fb840ff76dffed2423545bbb07",
+      "bytes": 2611997
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -5587,8 +5587,8 @@
     },
     {
       "path": "source/memorive/models/validation/runner.py",
-      "sha256": "5050c0a8587456cc526da3fb2bb3be465b7f58dafbcb9da66e7633ffc1859407",
-      "bytes": 85315
+      "sha256": "efeec467a340786b256a4a33eaa53fd6e4cf3a13455847660e3d5713b761aca1",
+      "bytes": 85547
     },
     {
       "path": "source/memorive/models/validation/structured.py",

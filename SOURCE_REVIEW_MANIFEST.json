@@ -1131,8 +1131,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "702bb8f43b38af992fbe41f22b3d1cad0bfb0c0892b6beb4afc6cd35f3b75499",
-      "bytes": 2611436
+      "sha256": "091a78a80423e0174daf99e4bc3cf292a08679fb840ff76dffed2423545bbb07",
+      "bytes": 2611997
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4001,12 +4001,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "1b7c0050bb866be2b0ae09bf825586754584cdce91dfb64307fec0382404178c",
+      "sha256": "6205d338f440e32044d0af7379b9558a38f948a4e6b97c954338c9c5c37866ac",
       "bytes": 134375
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "5b8c4f06ab277c63697ea5faec3ffd518b96f5cef38650dc085c34dc5ef97247",
+      "sha256": "c8dbac8490260c33589bc41510c4ac3b1bcf06205666546ebb663c8833acd39d",
       "bytes": 275297
     },
     {
@@ -4761,8 +4761,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/settings.js",
-      "sha256": "86c0cf8739c060f82562b2d42dd6a95b6a6599de61eac3095a9f3cf66b06d8ec",
-      "bytes": 255361
+      "sha256": "bd739e6c78ff8a66c9ad79b31862cf44b6e6e142cc3c32d16e6ff57de60e8be4",
+      "bytes": 255576
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/update.css",
@@ -4841,8 +4841,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/app.js",
-      "sha256": "d919deb1eb8389ee0ab37b5f25bd1baaad1bf67669a72b3e778084a9a9bdc2da",
-      "bytes": 380563
+      "sha256": "0ca3b2768a418f2b5eb555b441722fdccc037531060ef9d3572bc8ebbd43b644",
+      "bytes": 380909
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/content-language.js",
@@ -5266,8 +5266,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/validation/runner.py",
-      "sha256": "5050c0a8587456cc526da3fb2bb3be465b7f58dafbcb9da66e7633ffc1859407",
-      "bytes": 85315
+      "sha256": "efeec467a340786b256a4a33eaa53fd6e4cf3a13455847660e3d5713b761aca1",
+      "bytes": 85547
     },
     {
       "path": "memorive_desktop/source/memorive/models/validation/structured.py",

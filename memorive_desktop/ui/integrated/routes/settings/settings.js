@@ -1221,7 +1221,9 @@
     || ({CLI_VERIFICATION_NOT_ASSESSED:'验证未完成，请检查 CLI 运行状态后重新验证。',
          CLI_VERIFICATION_WORKER_LOST:'验证进程已结束，未取得结果；没有自动重发请求。'}[receipt.reason])
     ||
-    cliValidationReasonCopy[receipt.reason]
+    (receipt.reason === 'CLI_RETURNED_MODEL_MISMATCH' && receipt.available_models?.length
+      ? cliValidationReasonCopy[receipt.reason] + 'CLI 报告的模型：' + receipt.available_models.join('、') : '')
+    || cliValidationReasonCopy[receipt.reason]
     || (receipt.reason ? String(receipt.reason).replaceAll('_', ' ') : '待验证。')
   );
 

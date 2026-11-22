@@ -862,7 +862,9 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             return result
         reported = _reported_models(process.stdout)
         if reported and requested_model not in reported:
-            result["reason"] = "CLI_RETURNED_MODEL_MISMATCH"
+            # Name what the CLI reported, so the user can enter the model ID it accepts (an alias such as
+            # "haiku" may be answered by another model, which stays a mismatch).
+            result.update(reason="CLI_RETURNED_MODEL_MISMATCH", available_models=sorted(reported)[:50])
             return result
         result.update(
             status="AVAILABLE",

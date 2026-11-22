@@ -92,6 +92,7 @@ Memorive.productName="Memorive";
     // A count or a page number with its word: English says 1 exchange, 2 exchanges, Page 4.
     if ((m=source.match(/^(\d+) (轮对话|页)$/))) return ja?`${m[1]} ${translated(m[2],language)}`:`${m[1]} ${m[2]==='页'?'page':'exchange'}${m[1]==='1'?'':'s'}`;
     if ((m=source.match(/^页 (\d+)$/))) return ja?`${translated('页',language)} ${m[1]}`:`Page ${m[1]}`;
+    if ((m=source.match(/^CLI 返回的模型与当前模型标识不一致。(?:CLI 报告的模型：(.+))?$/))) return (ja?'CLI が返したモデルが現在のモデル ID と一致しません。':'The model the CLI returned differs from this model ID.')+(m[1]?(ja?'CLI が報告したモデル：':' Models the CLI reported: ')+m[1]:'');
     if ((m=source.match(/^当前任务 (\d+) 项$/))) return ja?`現在のタスク ${m[1]} 件`:`Current tasks: ${m[1]}`;
     if ((m=source.match(/^当前显示 (\d+) 条消息$/))) return ja?`${m[1]} 件のメッセージを表示`:`Showing ${m[1]} messages`;
     if ((m=source.match(/^显示 (\d+) 项，共 (\d+) 项$/))) return ja?`${m[2]} 件中 ${m[1]} 件を表示`:`Showing ${m[1]} of ${m[2]}`;
