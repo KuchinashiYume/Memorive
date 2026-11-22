@@ -741,9 +741,12 @@ def configure_assistant_native(
                 left, top, width, height, radius = 8, 50, 176, 92, 18
                 card = Bitmap(width, height, PixelFormat.Format24bppRgb)
                 card_graphics = Graphics.FromImage(card)
+                # NoPrefix: '&' is a character of the faces' encoding animation, not a mnemonic prefix.
+                flags = (TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
+                         | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix)
                 size = 34
                 font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
-                while TextRenderer.MeasureText(text, font).Width > width - 16 and size > 14:
+                while TextRenderer.MeasureText(text, font, Size(width, height), flags).Width > width - 16 and size > 14:
                     font.Dispose()
                     size -= 2
                     font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
@@ -751,9 +754,7 @@ def configure_assistant_native(
                     card_graphics.Clear(Color.White)
                     TextRenderer.DrawText(
                         card_graphics, text, font, Rectangle(0, 0, width, height),
-                        Color.FromArgb(0x60, 0xB2, 0xC0), Color.White,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
-                        | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding,
+                        Color.FromArgb(0x60, 0xB2, 0xC0), Color.White, flags,
                     )
                 finally:
                     font.Dispose()
@@ -1489,6 +1490,8 @@ def configure_assistant_native(
                     drag["moved"] = True
                 if not drag["moved"]:
                     return
+                if garbled_playing():
+                    interrupt_motion_for_drag()
                 auto_blink_timer.Stop()
                 state["animation_state"] = "DRAG"
                 set_visual("interaction")
@@ -1534,10 +1537,15 @@ def configure_assistant_native(
 
             state["interrupt_motion_for_drag"] = interrupt_motion_for_drag
 
+            def garbled_playing() -> bool:
+                # EASTER EGG (彩蛋): clicks leave the garbled face playing; a drag still interrupts it.
+                return bool(state.get("animation_locked")) and state.get("animation_state") == "GARBLED"
+
             def on_mouse_down(_sender, event) -> None:
                 if event.Button != MouseButtons.Left:
                     return
-                interrupt_motion_for_drag()
+                if not garbled_playing():
+                    interrupt_motion_for_drag()
                 cursor = Cursor.Position
                 state["drag"] = {
                     "cursor_x": int(cursor.X), "cursor_y": int(cursor.Y),
@@ -1568,9 +1576,11 @@ def configure_assistant_native(
                     state["recent_clicks"] = [] if len(clicks) >= 5 else clicks
                     if len(clicks) >= 5:
                         play_native_motion("GARBLED", source_name="easter-egg")
-                    else:
+                    elif not garbled_playing():
                         play_native_motion("INTERACTION", source_name="user")
                     dispatch_action("OPEN_Desktop_MAIN")
+                    return
+                if not drag["moved"] and garbled_playing():
                     return
                 state["animation_state"] = "STATIC"
                 set_visual(str(state.get("base_frame") or "idle"))

@@ -268,7 +268,8 @@
   };
   const playHomeGarbled = () => {
     if (expressionsHidden()) return;
-    const shown = entry => homeMode === 'greeting' ? faces.greeting : homeMode === 'question' ? faces.question : entry.rest.text;
+    const mode = homeMode;  // setHome below changes it
+    const shown = entry => mode === 'greeting' ? faces.greeting : mode === 'question' ? faces.question : entry.rest.text;
     setHome('garbled', entry => [[garbled(shown(entry)), 2000], ...decodeSteps(entry.rest.text, 1, 0)]);
     homeTimer = window.setTimeout(() => restHome(false), 2400);
   };
