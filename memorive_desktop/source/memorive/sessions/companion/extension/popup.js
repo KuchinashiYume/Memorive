@@ -94,7 +94,8 @@ testButton.addEventListener("click", async () => {
   try {
     const response = await chrome.runtime.sendMessage({ type: "MEMORIVE_TEST_ACTIVE_TAB" });
     if (!response?.ok) throw Error(response?.error_code || "CURRENT_PAGE_CAPTURE_FAILED");
-    say(statusNode, "testResult", response.message_count);
+    say(statusNode, response.read_method === "GENERIC_LAYOUT" ? "testResultGeneric" : "testResultMarkers",
+        response.message_count, response.user_count, response.assistant_count);
   } catch (error) {
     const code = String(error?.message || error), roles = /ROLES_UNCLEAR_U(\d+)_A(\d+)/.exec(code);
     if (roles) say(statusNode, "errorRolesUnclear", Number(roles[1]) + Number(roles[2]), roles[1], roles[2]);

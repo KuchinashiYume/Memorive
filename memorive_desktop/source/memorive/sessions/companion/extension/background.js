@@ -267,7 +267,12 @@ const captureActiveTab = async (sender, readOnly = false) => {
       sanitizedHttpsPageUrl(conversation?.source_url) !== sourceUrl) {
     throw new Error("CURRENT_PAGE_ORIGIN_OR_SESSION_CHANGED");
   }
-  if (readOnly) return {ok:true, message_count:conversation.messages.length, capture_status:conversation.capture_status};
+  if (readOnly) {
+    const users = conversation.messages.filter((row) => row.role === "user").length;
+    return {ok:true, message_count:conversation.messages.length, user_count:users,
+            assistant_count:conversation.messages.length - users, read_method:conversation.read_method || "",
+            capture_status:conversation.capture_status};
+  }
   return exportVisibleConversation(conversation, sourceUrl);
 };
 

@@ -56,8 +56,11 @@
   "testReading": {
     "message": "正在读取当前页面…"
   },
-  "testResult": {
-    "message": "读到 $1 条消息（当前页面），未保存"
+  "testResultMarkers": {
+    "message": "读到 $1 条（提问 $2、回答 $3），按网站标记识别；未保存"
+  },
+  "testResultGeneric": {
+    "message": "读到 $1 条（提问 $2、回答 $3），按通用规则识别；未保存"
   },
   "siteSync": {
     "message": "网站同步"

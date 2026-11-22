@@ -1,4 +1,4 @@
-Memorive web conversation extension 3.11.0 / Memorive 网页会话插件 3.11.0 / Memorive ウェブ会話拡張機能 3.11.0
+Memorive web conversation extension 4.0.0 / Memorive 网页会话插件 4.0.0 / Memorive ウェブ会話拡張機能 4.0.0
 
 English
 =======
@@ -9,7 +9,8 @@ Popup
   whole conversation has shown, then click "Stop and save". The messages seen while recording are saved as a
   partial record. Messages whose place could not be confirmed are counted and left out. Recording ends after
   10 minutes and saves; changing page ends it.
-- Test read: reads the conversation visible on the page and shows the count only; nothing is saved.
+- Test read: reads the conversation visible on the page and shows how many questions and answers it found, and
+  whether the site's markers or the general rules found them; nothing is saved.
 - Site sync: syncs the enabled websites; a full sync is started from Memorive.
 - Aa: chooses the language of the popup (简体中文, English, 日本語). The extension name in the browser's lists
   follows the browser's language.
@@ -47,7 +48,7 @@ Reading rules
 插件弹窗
 - 开始录制 / 停止并录入：在会话页面点「开始录制」，上下滚动让整段对话显示出来，再点「停止并录入」。保存录制期间页面上
   出现过的消息，记为部分记录；位置确认不了的消息会计数，不保存。录制最长 10 分钟，到时自动停止并保存；切换页面会结束录制。
-- 测试读取：读取当前页面上可见的对话，只显示条数，不保存。
+- 测试读取：读取当前页面上可见的对话，显示读到的提问和回答各几条，以及是按网站标记还是按通用规则识别的；不保存。
 - 网站同步：同步已启用的网站；完整同步由 Memorive 发起。
 - Aa：选择弹窗的语言（简体中文、English、日本語）。浏览器扩展列表里的插件名跟随浏览器的语言。
 - 保存后回到 Memo 导入文件。
@@ -80,7 +81,8 @@ Memorive 发起的同步
 - 記録を開始 / 停止して保存：会話ページで「記録を開始」を押し、会話全体が表示されるまで上下にスクロールしてから
   「停止して保存」を押します。記録中に表示されたメッセージを部分記録として保存します。位置を確認できなかったメッセージは
   件数を表示し、保存しません。記録は最長 10 分で自動的に停止して保存します。ページを切り替えると記録は終わります。
-- 読み取りテスト：ページに表示中の会話を読み取り、件数だけを表示します。保存はしません。
+- 読み取りテスト：ページに表示中の会話を読み取り、質問と回答がそれぞれ何件か、サイトの目印と汎用ルールの
+  どちらで判別したかを表示します。保存はしません。
 - サイト同期：有効なサイトを同期します。全体の同期は Memorive から始めます。
 - Aa：ポップアップの言語（简体中文、English、日本語）を選びます。ブラウザーの拡張機能一覧の名前はブラウザーの言語に従います。
 - 保存したら Memo に戻ってファイルを取り込んでください。

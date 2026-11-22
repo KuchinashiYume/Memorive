@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const BRIDGE_VERSION = "3.11.0";
+  const BRIDGE_VERSION = "4.0.0";
   const SITE_CONFIG = globalThis.MEMORIVE_SITE_PROFILES;
   if (!SITE_CONFIG) return;
   const bridgeIdentity = BRIDGE_VERSION + ':' + SITE_CONFIG.sha256 + ':history-ready-v2';
@@ -140,7 +140,10 @@
       assistant: ['[data-testid="receive_message"]'] },
     { hosts: ["chat.deepseek.com"],
       user: ['.ds-chat-user-message'],
-      assistant: [] }
+      assistant: [] },
+    { hosts: ["gemini.google.com"],
+      user: ['.user-query-container', '.query-text'],
+      assistant: ['message-content', '.markdown-main-panel'] }
   ];
 
   // Reuse the production scroll/role/boundary capture for declared custom DOMs.
@@ -804,6 +807,9 @@
     }
     return grouped;
   };
+  // How the last read found the messages: by the site's question and answer markers, or by the general layout
+  // rules when the markers did not show both (the test button says which).
+  let lastReadMethod = "PAGE_MARKERS";
   const messageRows = (providerId, definition, retainIdentity = false) => {
     const prepared = [];
     for (const [role, selectors] of [["user", definition.user], ["assistant", definition.assistant]]) {
@@ -812,8 +818,10 @@
         if (text) prepared.push({ node, role, text });
       });
     }
+    lastReadMethod = "PAGE_MARKERS";
     if (!prepared.some((row) => row.role === "user") || !prepared.some((row) => row.role === "assistant")) {
       prepared.push(...genericMessageRows(definition));
+      lastReadMethod = "GENERIC_LAYOUT";
     }
     const nested = prepared.filter((row) => !prepared.some((other) => (
       other !== row && row.role === other.role && row.node.contains(other.node) &&
@@ -881,7 +889,10 @@
       .replace(/\s+[|·]\s+[^|·]{1,80}$/u, "")
       .slice(0, 160);
     const title = documentTitle || firstUser.slice(0, 96) || "当前网页会话";
-    const conversationPath = /\/(?:c|chat|app|conversation|session)\/[^/]+\/?$/.test(safeUrl.pathname);
+    // A conversation address (…/c/<id>, …/chat/<id>, DeepSeek's …/s/<id>) is the conversation's identity, so a
+    // page read and a recording of one conversation are one conversation in Memorive; the desktop merges the same
+    // addresses (archive/store.py _capture_identity). Other pages: the title and the first question.
+    const conversationPath = /\/(?:c|chat|app|conversation|session|s)\/[^/]+\/?$/.test(safeUrl.pathname);
     const stableSeed = conversationPath ? safeUrl.href.replace(/\/$/, "") :
       `${safeUrl.hostname}|${safeUrl.pathname}|${title}|${firstUser.slice(0, 160)}`;
     const observedAt = new Date().toISOString();
@@ -889,6 +900,7 @@
       provider_id: "universal",
       provider_session_id: `universal-${simpleHash(stableSeed)}`,
       title,
+      read_method: lastReadMethod,
       created_at: "UNKNOWN",
       updated_at: "UNKNOWN",
       recency_bucket: "UNKNOWN",

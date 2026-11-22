@@ -434,7 +434,9 @@ class SessionArchive:
             return conversation
         url = conversation.source_locator
         parsed = urlparse(url)
-        if not re.search(r"/(?:c|chat|app|conversation|session)/[^/]+/?$", parsed.path):
+        # The same conversation addresses as the extension's identity (content.js captureCurrentVisiblePage),
+        # DeepSeek's /s/<id> included: earlier captures of that address keep their conversation.
+        if not re.search(r"/(?:c|chat|app|conversation|session|s)/[^/]+/?$", parsed.path):
             return conversation
         rows = self._connection.execute(
             "SELECT provider_conversation_id FROM conversations WHERE provider = ? "

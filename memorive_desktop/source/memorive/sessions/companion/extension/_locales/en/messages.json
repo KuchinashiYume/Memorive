@@ -56,8 +56,11 @@
   "testReading": {
     "message": "Reading the current page…"
   },
-  "testResult": {
-    "message": "Read $1 messages on this page; nothing saved"
+  "testResultMarkers": {
+    "message": "Read $1 messages ($2 questions, $3 answers) by the site's markers; nothing saved"
+  },
+  "testResultGeneric": {
+    "message": "Read $1 messages ($2 questions, $3 answers) by the general rules; nothing saved"
   },
   "siteSync": {
     "message": "Site sync"

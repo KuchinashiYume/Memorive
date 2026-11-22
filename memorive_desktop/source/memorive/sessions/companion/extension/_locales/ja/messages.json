@@ -56,8 +56,11 @@
   "testReading": {
     "message": "現在のページを読み取り中…"
   },
-  "testResult": {
-    "message": "このページで $1 件を読み取りました（保存はしていません）"
+  "testResultMarkers": {
+    "message": "$1 件を読み取りました（質問 $2、回答 $3、サイトの目印で判別）。保存はしていません"
+  },
+  "testResultGeneric": {
+    "message": "$1 件を読み取りました（質問 $2、回答 $3、汎用ルールで判別）。保存はしていません"
   },
   "siteSync": {
     "message": "サイト同期"

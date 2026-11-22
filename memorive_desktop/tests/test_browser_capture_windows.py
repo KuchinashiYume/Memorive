@@ -131,6 +131,11 @@ out.blocks = groupMessageBlocks([
   out.recorder_gap = await run([slice(0, 2), [conversation[4], row("assistant", "S06 assistant end")]]);
   out.recorder_mid_reply = await run([slice(1, 2), slice(0, 2)]);
   out.recorder_one_role = await run([slice(1, 2)]);
+  // Two stretches that never line up: a longer one of answers only, and a shorter one with a question and its
+  // answer. Only the shorter one can be imported, so it is saved and the longer one is counted as left out.
+  out.recorder_importable = await run([
+    ["Long answer one.", "Long answer two.", "Long answer three.", "Long answer four."].map(text => row("assistant", text)),
+    [row("user", "Other question"), row("assistant", "Other answer")]]);
   process.stdout.write(JSON.stringify(out));
 })().catch(error => { console.error(error); process.exitCode = 1; });
 """
@@ -209,3 +214,10 @@ def test_the_recording_saves_what_lines_up(results: dict) -> None:
     assert mid["saved"] == ["user:S01 user opening", "assistant:I can continue."]
     one_role = results["recorder_one_role"]
     assert one_role["status"] == "ERROR" and one_role["error"] == "CURRENT_PAGE_ROLES_UNCLEAR"
+
+
+def test_the_recording_saves_a_stretch_it_can_import(results: dict) -> None:
+    importable = results["recorder_importable"]
+    assert importable["status"] == "SAVED"
+    assert importable["saved"] == ["user:Other question", "assistant:Other answer"]
+    assert (importable["message_count"], importable["unplaced"]) == (2, 4)

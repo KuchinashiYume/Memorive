@@ -108,7 +108,8 @@
         return "JOINED";
       },
       // The messages to save, with how much was left out. Fragments are put in order only when every row has
-      // a site turn number; otherwise the largest fragment is kept and the others are counted as unplaced.
+      // a site turn number; otherwise the largest fragment that holds both questions and answers is kept (one that
+      // holds a single role cannot be imported) and the others are counted as unplaced.
       result() {
         if (!fragments.length) return {messages: [], unplaced_count: 0, gap_count: 0, ambiguous_count: ambiguous};
         const numbered = fragments.every(fragment => fragment.every(row => Number.isInteger(row.source_order)));
@@ -117,7 +118,10 @@
           return {messages: ordered.flat().map(row => ({...row})), unplaced_count: 0,
             gap_count: fragments.length - 1, ambiguous_count: ambiguous};
         }
-        const kept = fragments.reduce((best, fragment) => fragment.length > best.length ? fragment : best);
+        const importable = fragments.filter(fragment => fragment.some(row => row.role === "user") &&
+          fragment.some(row => row.role === "assistant"));
+        const kept = (importable.length ? importable : fragments)
+          .reduce((best, fragment) => fragment.length > best.length ? fragment : best);
         return {messages: kept.map(row => ({...row})),
           unplaced_count: fragments.flat().length - kept.length,
           gap_count: fragments.length - 1, ambiguous_count: ambiguous};
