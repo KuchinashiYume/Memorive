@@ -252,8 +252,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "984b525e529d8e48d70d65e3b0a53bdb0c35499f72ac1cf1fb4dd32f1f8a7879",
-      "bytes": 370973
+      "sha256": "e70b4b22f078aa98be2fc5f7fdfebd99ab90b275a7efe57c96db943dea093db3",
+      "bytes": 373094
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -392,8 +392,8 @@
     },
     {
       "path": "product/desktop/assistant_native_motion.py",
-      "sha256": "67b5b92dd4b47b6a850330f615506a2fbc10bc05967604486dfecada3499fc95",
-      "bytes": 9469
+      "sha256": "78ac5a9fa4c5ce39638d31e6694566f0597ae211b5d7015a2fc7436b848103e9",
+      "bytes": 12554
     },
     {
       "path": "product/desktop/brand_profile.json",
@@ -402,13 +402,13 @@
     },
     {
       "path": "product/desktop/bundle_assistant.html",
-      "sha256": "a7906df628a8fc5e9af98370befce73de23bb2c309fc5242aa098aea41b10541",
-      "bytes": 88107
+      "sha256": "b9146b00ea23425bb334cfffdebe77efd18e081862bc15dd8953a2a12fe99f54",
+      "bytes": 87974
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "346c9e1081e2944aca39a96143b73b717b6a65787c2ac9bdf627b3fea9b0c001",
-      "bytes": 2597238
+      "sha256": "4a3ab23b331a1aa2ce2cb887dcb0b001e5affa157344b12c503e939d3d9b57b6",
+      "bytes": 2601664
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -2662,8 +2662,8 @@
     },
     {
       "path": "source/memorive/desktop/test_console/expressions.py",
-      "sha256": "992e45f05cc0f3a282572176de6a1f0cb86aa144333047b536162d12e3e50020",
-      "bytes": 9271
+      "sha256": "4e50eb83d5f3950591588b28420e1feb3c994acf13cedb2e4dddab53de0b260f",
+      "bytes": 9269
     },
     {
       "path": "source/memorive/desktop/test_console/product_adapter.py",

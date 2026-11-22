@@ -31,7 +31,7 @@ MOTIONS=[
  ('error','ERROR','LOCAL_UI_ERROR',900,('错误提示','Error cue','エラー通知')),
 ]
 WEB_ANIMATIONS=[
- ('home-question','wink',2460,('主页歪头','Home tilt','ホームの首かしげ')),
+ ('home-question','wink',2460,('主页提问','Home question','ホームの質問')),
  ('logo-compress','one_eye',460,('Logo 按压','Logo press','ロゴの押下')),
  ('logo-shake','one_eye',480,('Logo 晃动','Logo shake','ロゴの揺れ')),
 ]

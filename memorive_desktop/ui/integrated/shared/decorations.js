@@ -18,13 +18,40 @@
   const prefersReducedMotion = () => Boolean(
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   );
+  // A face changes into the next one through an encoding animation: for a few frames the new face shows with its
+  // characters not yet decoded replaced by the glyphs of an encoding, decoded in that encoding's order. There are
+  // three fixed encodings, taken in encodingOrder, a fixed order that looks random. The desk assistant plays the same
+  // three (product/desktop/assistant_native_motion.py, ENCODINGS); change both together.
+  const encodings = Object.freeze([
+    { narrow: '01', wide: '０１', order: 'left' },
+    { narrow: '?#%&', wide: '锟斤拷烫屯', order: 'right' },
+    { narrow: ".:;'", wide: '░▒▓█', order: 'middle' }
+  ]);
+  const encodingOrder = [1, 0, 2, 2, 1, 0, 2];
+  let encodingCount = 0;
+  const nextEncoding = () => encodingOrder[encodingCount++ % encodingOrder.length];
+  // The count frames of one encoding animation that decodes into text (text itself comes after them).
+  const encodingFrames = (text, encoding, count) => {
+    const { narrow, wide, order } = encodings[encoding];
+    const characters = Array.from(text), size = characters.length;
+    const positions = characters.map((_, index) => index);
+    if (order === 'right') positions.reverse();
+    else if (order === 'middle') positions.sort((a, b) => Math.abs(2 * a - (size - 1)) - Math.abs(2 * b - (size - 1)) || a - b);
+    const place = new Map(positions.map((position, rank) => [position, rank]));
+    return Array.from({ length: count }, (_, frame) => {
+      const decoded = Math.floor(size * frame / count);
+      return characters.map((character, index) => {
+        if (place.get(index) < decoded || character === ' ') return character;
+        const glyphs = Array.from(character.codePointAt(0) < 0x370 && character !== '×' ? narrow : wide);
+        return glyphs[(index * 3 + frame * 5 + encoding) % glyphs.length];
+      }).join('');
+    });
+  };
+  // The easter egg: a face as a program that reads UTF-8 as GBK shows it.
+  const garbled = text => new TextDecoder('gbk').decode(new TextEncoder().encode(text)).replace(/\uFFFD/g, '?');
   let signalSequence = 0;
   const recentSignals = new Map();
   const seenErrorMessages = new Set();
-  const homeExpressions = [];
-  let homeResetTimer = 0;
-  let homeQuestionUntil = 0;
-  let startupPlayed = false;
 
   // Reuse the native request lifecycle; decorative loading never starts work.
   const loadingFrames = Array.from({length:6}, (_, i) => i % 2 ? faces.closed : faces.open);
@@ -85,6 +112,8 @@
     state.frames=loadingFrames.map((text,index)=>{
       const frame=document.createElement('span');
       frame.className='desktop-kaomoji';
+      // Decoration, like the other faces: app.js gives aria-hidden elements no text size.
+      frame.setAttribute('aria-hidden','true');
       frame.textContent=text;
       frame.hidden=index!==0;
       art.append(frame);
@@ -190,35 +219,70 @@
     && element.getClientRects().length > 0
     && getComputedStyle(element).visibility !== 'hidden';
 
-  // Each face goes back to the one its page shows at rest (the chat page rests on the question face).
-  const resetHomeExpression = () => {
-    window.clearTimeout(homeResetTimer);
-    homeResetTimer = 0;
-    homeQuestionUntil = 0;
-    homeExpressions.forEach(({ button, image, rest }) => {
-      button.dataset.expression = rest.expression;
-      button.removeAttribute('aria-busy');
-      image.textContent = rest.text;
+  // The home faces (one in each page's blank state, changed together; the visible one is seen). Each rests on its
+  // page's face. Memorive opens on the Ciallo greeting, kept until another page is opened; a click types a question
+  // mark and goes back to rest two seconds later; five clicks within three seconds show the face garbled.
+  const homeExpressions = [];
+  const homeClicks = [];
+  let homeMode = 'rest';
+  let homeTimer = 0;
+  let greetingRoute = '';
+  let startupPlayed = false;
+  const expressionsHidden = () => document.documentElement.classList.contains('desktop-hide-expressions');
+  // Steps are [text, ms]: each text shows for ms, the last one stays.
+  const playSteps = (entry, steps) => {
+    window.clearTimeout(entry.timer);
+    const show = index => {
+      entry.image.textContent = steps[index][0];
+      if (index + 1 < steps.length) entry.timer = window.setTimeout(() => show(index + 1), steps[index][1]);
+    };
+    show(0);
+  };
+  const decodeSteps = (text, encoding, hold) => prefersReducedMotion() ? [[text, hold]]
+    : [...encodingFrames(text, encoding, 6).map(frame => [frame, 50]), [text, hold]];
+  const setHome = (mode, stepsFor) => {
+    window.clearTimeout(homeTimer);
+    homeMode = mode;
+    homeExpressions.forEach(entry => {
+      entry.button.dataset.expression = mode === 'rest' ? entry.rest.expression : mode;
+      if (mode === 'rest') entry.button.removeAttribute('aria-busy');
+      else entry.button.setAttribute('aria-busy', 'true');
+      playSteps(entry, stepsFor(entry));
     });
   };
-  const showHomeFace = (expression, text) => {
-    if(document.documentElement.classList.contains('desktop-hide-expressions'))return;
-    if (homeQuestionUntil > Date.now()) return;
-    homeQuestionUntil = Date.now() + 2000;
-    homeExpressions.forEach(({ button, image }) => {
-      button.dataset.expression = expression;
-      button.setAttribute('aria-busy', 'true');
-      image.textContent = text;
-    });
-    homeResetTimer = window.setTimeout(resetHomeExpression, 2000);
+  const restHome = animate => {
+    const encoding = nextEncoding();
+    setHome('rest', entry => animate && entry.image.textContent !== entry.rest.text
+      ? decodeSteps(entry.rest.text, encoding, 0) : [[entry.rest.text, 0]]);
   };
-  const playHomeQuestion = () => showHomeFace('question', faces.question);
-  // Opening Memorive: Ciallo for two seconds on the first visible home, then the usual face.
+  const playHomeQuestion = () => {
+    if (expressionsHidden() || homeMode === 'question' || homeMode === 'garbled') return;
+    const encoding = nextEncoding(), caret = faces.open + '_';
+    setHome('question', () => prefersReducedMotion() ? [[faces.question, 0]]
+      : [...decodeSteps(faces.open, encoding, 160), [caret, 160], [faces.open, 160], [caret, 160], [faces.question, 0]]);
+    homeTimer = window.setTimeout(() => restHome(true), 2000);
+  };
+  const playHomeGarbled = () => {
+    if (expressionsHidden()) return;
+    const shown = entry => homeMode === 'greeting' ? faces.greeting : homeMode === 'question' ? faces.question : entry.rest.text;
+    setHome('garbled', entry => [[garbled(shown(entry)), 2000], ...decodeSteps(entry.rest.text, 1, 0)]);
+    homeTimer = window.setTimeout(() => restHome(false), 2400);
+  };
+  const clickHome = () => {
+    const now = Date.now();
+    homeClicks.push(now);
+    while (now - homeClicks[0] > 3000) homeClicks.shift();
+    if (homeClicks.length < 5) return playHomeQuestion();
+    homeClicks.length = 0;
+    playHomeGarbled();
+  };
   const playStartupGreeting = () => {
-    if (startupPlayed) return;
+    if (startupPlayed || expressionsHidden()) return;
     if (!homeExpressions.some(({ button }) => isVisible(button))) return;
     startupPlayed = true;
-    showHomeFace('greeting', faces.greeting);
+    greetingRoute = document.body.dataset.desktopActiveRoute || 'home';
+    const encoding = nextEncoding();
+    setHome('greeting', () => decodeSteps(faces.greeting, encoding, 0));
   };
 
   const signalAssistant = async (kind, detail = {}) => {
@@ -255,9 +319,10 @@
     if(!button||!image)return;
     button.setAttribute('data-desktop-no-tooltip','');
     button.removeAttribute('title');
-    homeExpressions.push({ button, image, rest: { expression: button.dataset.expression || 'interaction', text: image.textContent } });
+    homeExpressions.push({ button, image, timer: 0,
+      rest: { expression: button.dataset.expression || 'interaction', text: image.textContent } });
     button.addEventListener('click', (event) => {
-      if (event.button === 0) playHomeQuestion();
+      if (event.button === 0) clickHome();
     });
     blank.dataset.expressionReady = 'true';
   };
@@ -328,11 +393,11 @@
     document.querySelectorAll('.empty-state').forEach(enhanceEmptyState);
     if (document.readyState === 'complete') requestAnimationFrame(playStartupGreeting);
     else window.addEventListener('load', () => requestAnimationFrame(playStartupGreeting), { once: true });
-    document.addEventListener('visibilitychange', () => {
-      if (homeQuestionUntil && Date.now() >= homeQuestionUntil) resetHomeExpression();
-      syncAllLoading();
-    });
+    document.addEventListener('visibilitychange', syncAllLoading);
     window.addEventListener('desktop-integrated-route',syncAllLoading,true);
+    window.addEventListener('desktop-integrated-route', event => {
+      if (homeMode === 'greeting' && event.detail?.route !== greetingRoute) restHome(false);
+    });
     window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change',syncAllLoading);
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -360,11 +425,13 @@
 
   Memorive.decorations = Object.freeze({
     applyHidden:hidden=>{
-      if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupGreeting);
+      if(hidden)restHome(false);else requestAnimationFrame(playStartupGreeting);
       syncAllLoading();
     },
     beginLoading,
     trackCall,
+    encodingFrames,
+    garbled,
     inspectLoading:()=>[...loadingStates].map(([target,state])=>({target:target.id||target.className,pending:state.count,
       visible:Boolean(state.overlay&&isVisible(state.overlay)),animating:Boolean(state.frameTimer),loaded:state.loaded})),
     notifySaveSuccess: (detail) => signalAssistant('SAVE_SUCCESS', detail),

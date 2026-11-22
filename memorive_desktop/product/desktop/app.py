@@ -25,6 +25,7 @@ from assistant_native_motion import (
     TERMINAL_ANIMATION_COALESCE_MS,
     auto_blink_completion_plan,
     base_frame_for_presentation,
+    face_change_texts,
     public_motion_contract,
     sample_motion,
     should_suppress_presentation_during_auto_blink,
@@ -879,6 +880,9 @@ def configure_assistant_native(
                 "drag_move_count": 0,
                 "last_drag_target": None,
                 "base_frame": "idle",
+                "text_plan": [],
+                "face_change_count": 0,
+                "recent_clicks": [],
                 "animation_state": "STATIC",
                 "animation_sequence": ["idle"],
                 "animation_started_at": 0.0,
@@ -1073,6 +1077,19 @@ def configure_assistant_native(
                 state["current_frame"] = resolved
                 state["current_frame_sha256"] = state["frame_sha256s"][resolved]
 
+            def face_text(frame_name: str) -> str:
+                if frame_name.startswith("text:"):
+                    return frame_name[len("text:"):]
+                return ASSISTANT_FACES.get(frame_name, ASSISTANT_FACES["idle"])
+
+            def text_frame(text: str) -> str:
+                """The frame that shows text (a step of an encoding animation), drawn the first time it is needed."""
+                name = "text:" + text
+                if name not in state["frames"]:
+                    state["frames"][name] = draw_face(text)
+                    state["frame_sha256s"][name] = frame_sha256(state["frames"][name])
+                return name
+
             def schedule_auto_blink(*, preserve_existing: bool = False) -> None:
                 if (
                     preserve_existing
@@ -1098,6 +1115,7 @@ def configure_assistant_native(
 
             def finish_motion() -> None:
                 animation_timer.Stop()
+                state["text_plan"] = []
                 completed_source = state.get("animation_source")
                 state["animation_locked"] = False
                 state["animation_source"] = None
@@ -1173,6 +1191,8 @@ def configure_assistant_native(
                     sample.frame,
                     done=sample.done,
                 )
+                if state["text_plan"] and not sample.done:
+                    frame = state["text_plan"].pop(0)
                 if bool(state.get("reduced_motion")):
                     # Keep the acknowledgement visible for its normal duration,
                     # without motion, then let finish_motion restore the base.
@@ -1219,6 +1239,7 @@ def configure_assistant_native(
                         presentation_frame_name("ERROR", "idle"),
                         str(state["base_frame"]),
                     ],
+                    "GARBLED": ["interaction", str(state["base_frame"])],
                 }.get(normalized, [str(state["base_frame"])])
                 reduced_expression = (
                     bool(state.get("reduced_motion"))
@@ -1240,7 +1261,7 @@ def configure_assistant_native(
                     set_visual(static_frame)
                     schedule_auto_blink()
                     return False
-                if normalized not in {"INTERACTION", "BLINK", "WAKE", "MESSAGE", "WORKING", "ATTENTION", "SUCCESS", "ERROR"}:
+                if normalized not in {"INTERACTION", "BLINK", "WAKE", "MESSAGE", "WORKING", "ATTENTION", "SUCCESS", "ERROR", "GARBLED"}:
                     state["animation_locked"] = False
                     state["animation_source"] = None
                     set_visual(str(state["base_frame"]))
@@ -1258,10 +1279,16 @@ def configure_assistant_native(
                     )
                     state["auto_blink_count"] += 1
                 first = sample_motion(normalized, 0.0, base_frame=str(state["base_frame"]))
+                target_frame = presentation_frame_name(normalized, first.frame, done=first.done)
+                # A new face decodes in through an encoding animation, one text per tick (face_change_texts).
+                texts = () if reduced_expression else face_change_texts(
+                    face_text(str(state.get("current_frame") or "idle")), face_text(target_frame),
+                    normalized, int(state["face_change_count"]))
+                if texts and normalized != "GARBLED":
+                    state["face_change_count"] += 1
+                state["text_plan"] = [text_frame(text) for text in texts]
                 set_visual(
-                    presentation_frame_name(
-                        normalized, first.frame, done=first.done
-                    ),
+                    state["text_plan"].pop(0) if state["text_plan"] else target_frame,
                     offset_x=0.0 if reduced_expression else first.offset_x,
                     offset_y=0.0 if reduced_expression else first.offset_y,
                     rotation_degrees=0.0 if reduced_expression else first.rotation_degrees,
@@ -1534,7 +1561,14 @@ def configure_assistant_native(
                 picture.Capture = False
                 picture.Cursor = Cursors.Hand
                 if not drag["moved"] and activate_if_click:
-                    play_native_motion("INTERACTION", source_name="user")
+                    # Five clicks within three seconds show the garbled face (an easter egg).
+                    now = time.perf_counter()
+                    clicks = [moment for moment in state["recent_clicks"] if now - moment < 3.0] + [now]
+                    state["recent_clicks"] = [] if len(clicks) >= 5 else clicks
+                    if len(clicks) >= 5:
+                        play_native_motion("GARBLED", source_name="easter-egg")
+                    else:
+                        play_native_motion("INTERACTION", source_name="user")
                     dispatch_action("OPEN_Desktop_MAIN")
                     return
                 state["animation_state"] = "STATIC"

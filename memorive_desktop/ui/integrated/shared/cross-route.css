@@ -144,7 +144,8 @@ body {
   background:inherit;
   transform:rotate(45deg);
 }
-/* Kaomoji (the former character pictures): text in the logo's teal. */
+/* Kaomoji, in place of the former character pictures: decoration in the logo's teal. Like pictures they set their own
+   face and size here (typography.css, tests/test_page_type_rule.py), and app.js gives them no text size (aria-hidden). */
 .desktop-kaomoji {
   font-family:"Yu Gothic UI","Meiryo","Microsoft YaHei",sans-serif;
   color:#60B2C0;
@@ -161,13 +162,11 @@ body {
   border-radius:24px;
   background:transparent;
   cursor:pointer;
-  transform:rotate(0deg);
-  transition:transform 260ms cubic-bezier(.2,.8,.2,1),filter 180ms ease;
 }
 .desktop-home-expression-button:hover { filter:none; }
 .desktop-home-expression-button:focus-visible { outline:2px solid var(--focus-ring); outline-offset:5px; }
-.desktop-home-expression-button[data-expression="question"] { transform:rotate(8deg); }
-.desktop-home-expression-image { display:block; font-size:clamp(22px,2.4vw,32px); pointer-events:none; user-select:none; }
+.desktop-home-expression-image { display:block; pointer-events:none; user-select:none; }
+.desktop-kaomoji.desktop-home-expression-image { font-size:clamp(22px,2.4vw,32px); }
 .desktop-home-expression-image,.desktop-empty-illustration { opacity:.82; }
 .page-shell > .page-body:has(.desktop-empty-decorated:not([hidden])) {
   grid-row:-2/-1;
@@ -181,18 +180,15 @@ body {
 #desktop-tasks-preview .desktop-tasks-empty > div { width:100%; height:100%; }
 .desktop-empty-illustration {
   display:block;
-  font-size:clamp(28px,3.2vw,42px);
   margin:0 auto 14px;
   text-align:center;
   user-select:none;
 }
+.desktop-kaomoji.desktop-empty-illustration { font-size:clamp(28px,3.2vw,42px); }
 @media (max-width:640px) {
   .desktop-home-prompt { flex-direction:column-reverse; gap:8px; }
   .desktop-home-speech::after { top:-6px; right:auto; left:calc(50% - 6px); transform:rotate(-45deg); }
-  .desktop-empty-illustration { font-size:30px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .desktop-home-expression-button { transition:none; }
+  .desktop-kaomoji.desktop-empty-illustration { font-size:30px; }
 }
 #desktop-settings-preview .desktop-settings-flow-list, #desktop-tasks-preview .desktop-tasks-flow-list { gap:20px; }
 #desktop-settings-preview .desktop-settings-flow-step:not(:last-child)::after, #desktop-tasks-preview .desktop-tasks-flow-step:not(:last-child)::after { height:10px; }

@@ -36,16 +36,16 @@ MOTION_DURATIONS_MS: Final[dict[str, int]] = {
     "ATTENTION": 1100,
     "SUCCESS": 1400,
     "ERROR": 900,
+    "GARBLED": 2000,
 }
 
 
 _TRANSFORM_KEYFRAMES: Final[dict[str, tuple[tuple[float, float, float, float, float, float], ...]]] = {
     # progress, x, y, rotation, scale, opacity
-    "INTERACTION": (
+    "INTERACTION": (  # a small nod, no tilt
         (0.00, 0.0, 0.0, 0.0, 1.00, 1.00),
-        (0.24, 0.0, 1.0, -9.0, 1.00, 1.00),
-        (0.62, 0.0, 1.0, -9.0, 1.00, 1.00),
-        (0.82, 0.0, 0.0, 2.0, 1.00, 1.00),
+        (0.24, 0.0, 1.0, 0.0, 1.00, 1.00),
+        (0.62, 0.0, 1.0, 0.0, 1.00, 1.00),
         (1.00, 0.0, 0.0, 0.0, 1.00, 1.00),
     ),
     "WAKE": (
@@ -102,6 +102,7 @@ _TRANSIENT_FRAMES: Final[dict[str, str]] = {
     "ATTENTION": "interaction",
     "SUCCESS": "success",
     "ERROR": "idle",
+    "GARBLED": "interaction",
 }
 
 
@@ -253,13 +254,71 @@ def sample_motion(motion: str, elapsed_ms: float, *, base_frame: str = "idle") -
     # visible until the 1400 ms transient completes.
     transform_duration = 1100 if normalized == "SUCCESS" else duration
     transform_progress = min(max(elapsed_ms, 0.0), transform_duration) / transform_duration
-    transform_name = "INTERACTION" if normalized == "ATTENTION" else normalized
+    transform_name = "INTERACTION" if normalized in {"ATTENTION", "GARBLED"} else normalized
     values = _interpolate(
         _TRANSFORM_KEYFRAMES[transform_name],
         transform_progress,
         _TIMING_CURVES[transform_name],
     )
     return MotionSample(_TRANSIENT_FRAMES[normalized], *values)
+
+
+# A face changes into the next one through an encoding animation: for a few frames the new face shows with its
+# characters not yet decoded replaced by the glyphs of an encoding, decoded in that encoding's order. There are
+# three fixed encodings, taken in ENCODING_ORDER, a fixed order that looks random. The main window plays the same
+# three (ui/integrated/shared/decorations.js, encodings); change both together.
+# Each encoding: (glyphs for narrow characters, glyphs for wide characters, decoding order).
+ENCODINGS: Final[tuple[tuple[str, str, str], ...]] = (
+    ("01", "０１", "left"),
+    ("?#%&", "锟斤拷烫屯", "right"),
+    (".:;'", "░▒▓█", "middle"),
+)
+ENCODING_ORDER: Final[tuple[int, ...]] = (1, 0, 2, 2, 1, 0, 2)
+ENCODING_FRAMES: Final[int] = 3  # one frame per 100 ms animation tick
+GARBLED_HOLD_FRAMES: Final[int] = 10  # the easter egg shows the garbled face for a second before it decodes
+
+
+def encoding_frames(text: str, encoding: int, count: int) -> tuple[str, ...]:
+    """The count frames of one encoding animation that decodes into text (text itself comes after them)."""
+    narrow, wide, order = ENCODINGS[encoding]
+    characters = list(text)
+    size = len(characters)
+    if order == "left":
+        positions = list(range(size))
+    elif order == "right":
+        positions = list(range(size - 1, -1, -1))
+    else:
+        positions = sorted(range(size), key=lambda index: (abs(2 * index - (size - 1)), index))
+    place = {position: rank for rank, position in enumerate(positions)}
+    frames = []
+    for frame in range(count):
+        decoded = size * frame // count
+        shown = []
+        for index, character in enumerate(characters):
+            if place[index] < decoded or character == " ":
+                shown.append(character)
+            else:
+                glyphs = narrow if ord(character) < 0x370 and character != "×" else wide
+                shown.append(glyphs[(index * 3 + frame * 5 + encoding) % len(glyphs)])
+        frames.append("".join(shown))
+    return tuple(frames)
+
+
+def garbled(text: str) -> str:
+    """The easter egg: text as a program that reads UTF-8 as GBK shows it (the main window's garbled() too)."""
+    return text.encode("utf-8").decode("gb18030", errors="replace").replace("\ufffd", "?")
+
+
+def face_change_texts(shown: str, target: str, motion: str, count: int) -> tuple[str, ...]:
+    """What the desk assistant shows, one per tick, before the face target when motion starts while it shows the
+    face shown: the count-th encoding animation; for the easter egg (GARBLED) the garbled face first; nothing for a
+    blink or when the face stays the same."""
+    normalized = motion.upper()
+    if normalized == "GARBLED":
+        return (garbled(target),) * GARBLED_HOLD_FRAMES + encoding_frames(target, 1, ENCODING_FRAMES)
+    if normalized == "BLINK" or shown == target:
+        return ()
+    return encoding_frames(target, ENCODING_ORDER[count % len(ENCODING_ORDER)], ENCODING_FRAMES)
 
 
 def public_motion_contract() -> dict[str, object]:

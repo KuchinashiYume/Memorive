@@ -83,7 +83,7 @@
 
       function clearMotion() {
         pet.classList.remove(
-          'memorive-is-tilting',
+          'memorive-is-nodding',
           'memorive-is-waking',
           'memorive-is-shaking-working',
           'memorive-is-shaking-success',
@@ -278,7 +278,7 @@
           prefersReduced ? 320 : 1100,
           '桌面助手歪头回应中；动画期间其他互动已锁定。',
           'pink',
-          { motionClass: 'memorive-is-tilting', endMessage: '点击回应结束；互动已恢复。', endTone: 'pink' }
+          { motionClass: 'memorive-is-nodding', endMessage: '点击回应结束；互动已恢复。', endTone: 'pink' }
         );
       }
 
@@ -363,7 +363,7 @@
           prefersReduced ? 520 : 1100,
           '有一项内容需要处理；黄色提醒不会自动批准任务。',
           'yellow',
-          { motionClass: 'memorive-is-tilting', displayState: 'NOTIFYING', endMessage: '待处理动画结束；气泡将在出现 8 秒后自动收起。' }
+          { motionClass: 'memorive-is-nodding', displayState: 'NOTIFYING', endMessage: '待处理动画结束；气泡将在出现 8 秒后自动收起。' }
         );
       }
 

@@ -10,12 +10,12 @@
     {
       "source": "memorive_desktop/product/desktop/bundle_assistant.html",
       "destination": "bundle_assistant.html",
-      "sha256": "a7906df628a8fc5e9af98370befce73de23bb2c309fc5242aa098aea41b10541"
+      "sha256": "b9146b00ea23425bb334cfffdebe77efd18e081862bc15dd8953a2a12fe99f54"
     },
     {
       "source": "memorive_desktop/product/desktop/bundle_integrated.html",
       "destination": "bundle_integrated.html",
-      "sha256": "346c9e1081e2944aca39a96143b73b717b6a65787c2ac9bdf627b3fea9b0c001"
+      "sha256": "4a3ab23b331a1aa2ce2cb887dcb0b001e5affa157344b12c503e939d3d9b57b6"
     },
     {
       "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
@@ -1360,7 +1360,7 @@
     {
       "source": "memorive_desktop/contracts/extensions/DesktopExpressionConsoleHandoff-v1.md",
       "destination": "contracts/extensions/DesktopExpressionConsoleHandoff-v1.md",
-      "sha256": "c8c88dfb4737c8dfbfff71559d365531cba6c8f5bd7f3e16d684015819cbf550"
+      "sha256": "d1719b2d9329354bd3a2459f8926193ca81efba2717bef84293be83991bcd408"
     },
     {
       "source": "contracts/Discovery_文献发现/10_模块契约/Memorive_DISCOVERY_CONTRACTS_CROSS_任务依赖与接口矩阵_模块契约_r0.1.json",

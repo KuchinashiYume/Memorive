@@ -1,7 +1,8 @@
 """The main window's type rule (ui/integrated/shared/typography.css): three typefaces, three sizes, two weights.
 
 Every style sheet, script and markup file of the window names a face, a size or a weight only through the rule's
-variables, so a new page or a later version cannot bring its own fonts or sizes in.
+variables, so a new page or a later version cannot bring its own fonts or sizes in. The kaomoji are decoration in
+place of pictures: rules whose every selector is a .desktop-kaomoji element set their own face and size.
 """
 from __future__ import annotations
 
@@ -15,6 +16,16 @@ SIZES = {"var(--memo-size-title)", "var(--memo-size-body)", "var(--memo-size-sma
 WEIGHTS = {"400", "700", "inherit"}
 DECLARATION = re.compile(r"(?<![-\w])(font-family|font-size|font-weight|font)\s*:\s*([^;{}\"'`]+?)\s*(?:!important)?\s*(?=[;}\"'`])")
 SHORTHAND = re.compile(r"(?:(400|700)\s+)?(var\(--memo-size-\w+\))(?:/[\d.]+)?\s+(var\(--memo-font-\w+\))")
+COMMENT = re.compile(r"/\*.*?\*/", re.S)
+RULE = re.compile(r"([^{};]*)\{([^{}]*)\}")
+
+
+def _without_kaomoji_rules(text):
+    """A style sheet without the rules whose every selector is a kaomoji (.desktop-kaomoji)."""
+    def keep(match):
+        selectors = [selector for selector in match.group(1).split(",") if selector.strip()]
+        return "" if selectors and all(".desktop-kaomoji" in selector for selector in selectors) else match.group(0)
+    return RULE.sub(keep, COMMENT.sub("", text))
 
 
 def _files():
@@ -25,6 +36,8 @@ def test_faces_sizes_and_weights_come_from_the_rule():
     found = []
     for path in _files():
         text = path.read_text(encoding="utf-8")
+        if path.suffix == ".css":
+            text = _without_kaomoji_rules(text)
         for match in DECLARATION.finditer(text):
             prop, value = match.group(1), match.group(2).strip()
             if prop == "font-family" and value not in FACES:
