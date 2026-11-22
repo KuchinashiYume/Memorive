@@ -1,0 +1,11 @@
+/* Settings › 外观与辅助功能 › 表情包 (routes/settings/expression-packs.js): layout only; rows, buttons and the
+   disclosure are the shared settings ones. */
+#desktop-settings-preview [data-expression-packs] .desktop-expression-packs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px}
+#desktop-settings-preview [data-expression-packs] .desktop-expression-packs-head small{color:var(--text-secondary);font-size:var(--memo-size-small);line-height:1.5}
+#desktop-settings-preview #settings-expression-packs{display:grid;gap:8px}
+#desktop-settings-preview .desktop-expression-pack>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}
+#desktop-settings-preview .desktop-expression-pack-preview{flex:0 0 72px;height:44px;display:grid;place-items:center;overflow:hidden}
+#desktop-settings-preview .desktop-expression-pack-preview.desktop-kaomoji{font-size:15px}
+#desktop-settings-preview .desktop-expression-pack-preview.desktop-expression-picture>img{width:44px;height:44px}
+#desktop-settings-preview [data-expression-packs] [data-error=true]{color:var(--error,#b64532)}
+#desktop-settings-preview #settings-expression-pack-status{margin:0;line-height:1.5}

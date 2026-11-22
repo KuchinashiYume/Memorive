@@ -913,6 +913,7 @@ const collapsed=new Set();
     if(!thread){
       const content=q('#memo-empty-template').content.cloneNode(true);
       content.querySelector('.desktop-home-expression-button')?.addEventListener('click',()=>q('#memo-question').focus());
+      Memorive.decorations?.paintFaces(content);
       log.append(content);
     } else for(const m of thread.messages){
       const row=create('article',null,'memo-message');

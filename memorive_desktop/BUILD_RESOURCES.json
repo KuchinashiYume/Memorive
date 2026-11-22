@@ -15,7 +15,7 @@
     {
       "source": "memorive_desktop/product/desktop/bundle_integrated.html",
       "destination": "bundle_integrated.html",
-      "sha256": "578e1f5e388e0010a765fd15fddb3d579ee6cd1652ddd4479cef148ce73b7b81"
+      "sha256": "453d6a327c07dfbe38f0216863cbc8f9a1684e14c3c8ab5e059fb3196d1263b7"
     },
     {
       "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
@@ -1270,7 +1270,7 @@
     {
       "source": "memorive_desktop/contracts/extensions/DesktopFolderManagementPolicy.json",
       "destination": "contracts/extensions/DesktopFolderManagementPolicy.json",
-      "sha256": "e51d2a5d00efb6d39e59ff1933c18d0a0d9a56fe85a28dd435070f055a965cb5"
+      "sha256": "ab0e32f52974714ba0bfba4736396296f77549130e4bf0cf960a4d2b68386b67"
     },
     {
       "source": "memorive_desktop/contracts/extensions/DesktopResourceLimitsPolicy.json",
@@ -1281,6 +1281,21 @@
       "source": "memorive_desktop/contracts/extensions/SafeShortcutRegistryContract.json",
       "destination": "contracts/extensions/SafeShortcutRegistryContract.json",
       "sha256": "763377eb7af1b5a6685034a23abf098da754a27b14475f3bc8c7b1dd66e4fe5b"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/expression_packs/kaomoji/pack.json",
+      "destination": "assets/expression_packs/kaomoji/pack.json",
+      "sha256": "1614062df97f2db9e2d07a3f0196ef76f643f594bad1ad8c982206c64266e4e8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/expression_packs/表情包制作说明.md",
+      "destination": "assets/expression_packs/表情包制作说明.md",
+      "sha256": "a7a32e5c621f888f82b491f9f369554c8bc0c7eba8266f44aedb9f02f992b1d8"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/memorive-symbol.png",
+      "destination": "assets/illustrations/memorive-symbol.png",
+      "sha256": "e14b5bae634c8152c438d29ca59afe00a20e4cc3dfb403c462000a7152a5e9d0"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/manifest.json",

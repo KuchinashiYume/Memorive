@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Final
+from pathlib import Path
+from typing import Any, Final
 
 
 # User-selected final interaction authority. The native Windows overlay exists
@@ -322,6 +323,36 @@ def face_change_texts(shown: str, target: str, motion: str, count: int) -> tuple
     if normalized == "BLINK" or shown == target:
         return ()
     return encoding_frames(target, ENCODING_ORDER[count % len(ENCODING_ORDER)], ENCODING_FRAMES)
+
+
+# The desk assistant's frames and the expression pack position each shows (memorive/desktop/settings/expression_packs.py).
+# app.py (configure_assistant_native) draws them from the pack in use: a text face on a white card, a picture as it is.
+ASSISTANT_FRAME_POSITIONS = {
+    "idle": "idle", "blink-open": "open", "blink-closed": "closed", "interaction": "interaction",
+    "working": "working", "success": "success", "save-success": "saved", "error": "error",
+    "message": "message", "drag": "drag", "sleep": "sleep",
+}
+
+
+def assistant_looks(pack: dict[str, Any] | None, mark: Path) -> dict[str, list[dict[str, Any]]]:
+    """Each desk assistant frame's variants it can draw: {"text"} or {"pictures", "ms", "loop"}. Pictures GDI+ cannot
+    read (WebP, SVG; they show in the main window only) are left out, a frame left with none shows idle's, and
+    without a pack, or without an idle it can draw, every frame is the Memorive mark."""
+    from memorive.desktop.settings.expression_packs import PET_TYPES
+    drawable: dict[str, list[dict[str, Any]]] = {}
+    for frame, position in ASSISTANT_FRAME_POSITIONS.items():
+        variants = []
+        for look in (pack or {}).get("looks", {}).get(position) or ():
+            if "text" in look:
+                variants.append({"text": look["text"]})
+                continue
+            files = [look["image"]] if "image" in look else look["frames"]
+            if all(Path(name).suffix.lower() in PET_TYPES for name in files):
+                variants.append({"pictures": [Path(pack["root"]) / name for name in files],
+                                 "ms": look.get("ms", [0] * len(files)), "loop": look.get("loop", True)})
+        drawable[frame] = variants
+    idle = drawable["idle"] or [{"pictures": [mark], "ms": [0], "loop": False}]
+    return {frame: variants or idle for frame, variants in drawable.items()}
 
 
 def public_motion_contract() -> dict[str, object]:

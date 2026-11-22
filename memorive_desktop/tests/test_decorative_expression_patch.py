@@ -12,7 +12,7 @@ DESKTOP = ROOT / "product" / "desktop"
 
 def test_native_pet_adds_frames_without_changing_motion_contract() -> None:
     source = (DESKTOP / "app.py").read_text(encoding="utf-8")
-    assert "ASSISTANT_FACES" in source
+    assert "assistant_looks" in source
     assert '"save-success"' in source
     assert '"error"' in source
     assert "LOCAL_UI_SAVE_SUCCESS" in source

@@ -1,0 +1,24 @@
+{
+  "format": "MemoriveExpressionPack-v1",
+  "id": "kaomoji",
+  "name": "颜文字",
+  "author": "Memorive",
+  "version": "2.00",
+  "text_style": {
+    "font": "'Yu Gothic UI','Meiryo','Microsoft YaHei',sans-serif",
+    "color": "#60B2C0"
+  },
+  "looks": {
+    "idle": "(>ω-)",
+    "open": "(・ω・)",
+    "closed": "(-ω-)",
+    "greeting": "Ciallo～(∠・ω< )⌒☆",
+    "interaction": "(・ω<)☆",
+    "question": "(・ω・)？",
+    "working": "(>ω<)ゞ",
+    "success": "(^ω^)✧",
+    "saved": "(*≧ω≦)✓",
+    "error": "(×ω×)",
+    "empty": "(´・ω・`)"
+  }
+}

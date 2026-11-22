@@ -1,5 +1,5 @@
 /* The user panel in settings and the user's name and picture in the navigation: user name, avatar, the answer style,
-   and hiding the assistant's expressions (settings.user_get, settings.user_save). Takes part in the page's shared
+   and hiding the faces (settings.user_get, settings.user_save). Takes part in the page's shared
    save and revert. Publishes Memorive.localUser. */
 (() => {
   'use strict';
@@ -79,8 +79,7 @@
     }
   }
   function presentation(value){
-    document.documentElement.classList.toggle('desktop-hide-expressions',value.hide_expressions);
-    document.documentElement.classList.remove('desktop-user-loading');
+    // decorations.js shows or hides the faces (they are hidden too while no expression pack is in use).
     Memorive.decorations?.applyHidden?.(value.hide_expressions);
     titles();
   }

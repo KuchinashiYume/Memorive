@@ -252,13 +252,23 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "1b7a4cbbb924ac9d7edaa08215ea45ee07a2b43554e5800abb3b70316e5f6f42",
-      "bytes": 373890
+      "sha256": "cd2eb829ef6f32e9311eddc0c2ddfbbbfe164109c67403d2422672c72809ca2f",
+      "bytes": 384161
     },
     {
       "path": "product/desktop/application_behavior.py",
       "sha256": "bece11e477586c1f4f8bb571583277adfb374a97064f615c2552bf72d472f508",
       "bytes": 4367
+    },
+    {
+      "path": "product/desktop/assets/expression_packs/kaomoji/pack.json",
+      "sha256": "1614062df97f2db9e2d07a3f0196ef76f643f594bad1ad8c982206c64266e4e8",
+      "bytes": 614
+    },
+    {
+      "path": "product/desktop/assets/expression_packs/表情包制作说明.md",
+      "sha256": "a7a32e5c621f888f82b491f9f369554c8bc0c7eba8266f44aedb9f02f992b1d8",
+      "bytes": 4907
     },
     {
       "path": "product/desktop/assets/illustrations/empty.svg",
@@ -392,8 +402,8 @@
     },
     {
       "path": "product/desktop/assistant_native_motion.py",
-      "sha256": "f0a2dc81f83ce8c43a91b2ce0c47b9e80b83641a67c0e4cad96a47b58c4a431f",
-      "bytes": 13004
+      "sha256": "a3ca6835b9b4c93cdbff9576469685deabb3a350795aa9d070b4b60b182d65a7",
+      "bytes": 14938
     },
     {
       "path": "product/desktop/brand_profile.json",
@@ -407,8 +417,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "578e1f5e388e0010a765fd15fddb3d579ee6cd1652ddd4479cef148ce73b7b81",
-      "bytes": 2582827
+      "sha256": "453d6a327c07dfbe38f0216863cbc8f9a1684e14c3c8ab5e059fb3196d1263b7",
+      "bytes": 2604167
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -2176,6 +2186,11 @@
       "bytes": 10121
     },
     {
+      "path": "source/memorive/desktop/api/expression_packs.py",
+      "sha256": "71f6b5fad2164855abfcfd85dfe69ceab436a6a2df0735d41b23f11890ab73d4",
+      "bytes": 5064
+    },
+    {
       "path": "source/memorive/desktop/api/inbox_files.py",
       "sha256": "d46eb5e2cd200803c6c633f2cdc01470d9307777125360e4276bf005bb91aeb5",
       "bytes": 12364
@@ -2197,8 +2212,8 @@
     },
     {
       "path": "source/memorive/desktop/api/product_api.py",
-      "sha256": "2839a3b548f0e6e7e0fc9475d42dd8e0a566bab5a0751b2e166274f1b69ae4d1",
-      "bytes": 41151
+      "sha256": "86ee35e36bba674a41feda5eab165a460e8c8b06c617666aeb5c6399b1039fdf",
+      "bytes": 41250
     },
     {
       "path": "source/memorive/desktop/api/research_memo.py",
@@ -2584,6 +2599,11 @@
       "path": "source/memorive/desktop/settings/export_bundle.py",
       "sha256": "e7943819e34541e4be40cdac9216d6f9a58722dee9d387fe1c3797ba350c8303",
       "bytes": 5996
+    },
+    {
+      "path": "source/memorive/desktop/settings/expression_packs.py",
+      "sha256": "62abcca1760af403e1cedbc52066d97e21b35b90140bba6ac9446cbc1b19149e",
+      "bytes": 16252
     },
     {
       "path": "source/memorive/desktop/settings/external_sources.py",

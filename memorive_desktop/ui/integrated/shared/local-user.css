@@ -29,7 +29,8 @@
 }
 .desktop-loading-art { position:relative;width:min(340px,76%);max-height:calc(100% - 8px);aspect-ratio:2350/1254;opacity:.82; }
 .desktop-loading-art > .desktop-kaomoji { position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(30px,4.4vw,52px);user-select:none;pointer-events:none; }
-.desktop-loading-art > .desktop-kaomoji[hidden] { display:none; }
+.desktop-loading-art > .desktop-expression-picture { position:absolute;inset:0; }
+.desktop-loading-art > [hidden] { display:none; }
 .desktop-loading-copy { display:none;font-size:var(--memo-size-small);line-height:1.6; }
 .desktop-hide-expressions .desktop-loading-copy,.desktop-user-loading .desktop-loading-copy { display:block; }
 .desktop-user-loading .desktop-loading-art { display:none; }

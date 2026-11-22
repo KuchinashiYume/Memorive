@@ -141,11 +141,12 @@ body {
   background:inherit;
   transform:rotate(45deg);
 }
-/* Kaomoji, in place of the former character pictures: decoration in the logo's teal. Like pictures they set their own
-   face and size here (typography.css, tests/test_page_type_rule.py), and app.js gives them no text size (aria-hidden). */
+/* Faces from the expression pack (shared/expression-pack.js). Text faces (kaomoji) are decoration in the pack's font and
+   colour (the logo's teal by default). Like pictures they set their own face and size here (typography.css,
+   tests/test_page_type_rule.py), and app.js gives them no text size (aria-hidden). */
 .desktop-kaomoji {
-  font-family:"Yu Gothic UI","Meiryo","Microsoft YaHei",sans-serif;
-  color:#60B2C0;
+  font-family:var(--expression-font,"Yu Gothic UI","Meiryo","Microsoft YaHei",sans-serif);
+  color:var(--expression-color,#60B2C0);
   line-height:1.2;
   white-space:nowrap;
 }
@@ -164,6 +165,10 @@ body {
 .desktop-home-expression-button:focus-visible { outline:2px solid var(--focus-ring); outline-offset:5px; }
 .desktop-home-expression-image { display:block; pointer-events:none; user-select:none; }
 .desktop-kaomoji.desktop-home-expression-image { font-size:clamp(22px,2.4vw,32px); }
+/* Picture faces (a pack's images or frames) take the size the character pictures had before v2.00. */
+.desktop-expression-picture > img { display:block; width:100%; height:100%; object-fit:contain; pointer-events:none; user-select:none; }
+.desktop-expression-picture.desktop-home-expression-image { width:clamp(106px,13vw,166px); aspect-ratio:1; }
+.desktop-expression-picture.desktop-empty-illustration { width:clamp(138px,17vw,214px); aspect-ratio:1; }
 .desktop-home-expression-image,.desktop-empty-illustration { opacity:.82; }
 .page-shell > .page-body:has(.desktop-empty-decorated:not([hidden])) {
   grid-row:-2/-1;
@@ -186,6 +191,8 @@ body {
   .desktop-home-prompt { flex-direction:column-reverse; gap:8px; }
   .desktop-home-speech::after { top:-6px; right:auto; left:calc(50% - 6px); transform:rotate(-45deg); }
   .desktop-kaomoji.desktop-empty-illustration { font-size:30px; }
+  .desktop-expression-picture.desktop-home-expression-image { width:116px; }
+  .desktop-expression-picture.desktop-empty-illustration { width:148px; }
 }
 #desktop-settings-preview .desktop-settings-flow-list, #desktop-tasks-preview .desktop-tasks-flow-list { gap:20px; }
 #desktop-settings-preview .desktop-settings-flow-step:not(:last-child)::after, #desktop-tasks-preview .desktop-tasks-flow-step:not(:last-child)::after { height:10px; }

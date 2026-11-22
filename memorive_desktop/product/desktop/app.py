@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from assistant_native_motion import (
+    assistant_looks,
     AUTO_BLINK_MAX_MS,
     AUTO_BLINK_MIN_MS,
     NATIVE_ANIMATION_FRAME_INTERVAL_MS,
@@ -42,12 +43,6 @@ EXPECTED_DESKTOP_ROUTES = (
 _ASSISTANT_NATIVE_DEACTIVATE_HANDLERS: dict[int, Any] = {}
 _ASSISTANT_NATIVE_OVERLAYS: dict[int, dict[str, Any]] = {}
 _MAIN_WINDOW_BEHAVIORS: dict[int, dict[str, Any]] = {}
-# The desk assistant's faces (code-plan/颜文字表情方案_2026-11-21.md): each frame is the kaomoji drawn as
-# text on a white card at start-up (configure_assistant_native), so no picture file is shipped.
-ASSISTANT_FACES = {
-    "idle": "(>ω-)", "blink-open": "(・ω・)", "blink-closed": "(-ω-)", "interaction": "(・ω<)☆",
-    "working": "(>ω<)ゞ", "success": "(^ω^)✧", "save-success": "(*≧ω≦)✓", "error": "(×ω×)",
-}
 
 
 def resource_root() -> Path:
@@ -648,10 +643,10 @@ def configure_assistant_native(
     import clr
     clr.AddReference("System.Windows.Forms")
     clr.AddReference("System.Drawing")
-    from System import Action
-    from System.Drawing import Bitmap, Color, Graphics, GraphicsUnit, Point, Rectangle, Region, Size
+    from System import Action, Array, Byte
+    from System.Drawing import Bitmap, Color, Graphics, GraphicsUnit, Image, Point, Rectangle, RectangleF, Region, Size
     from System.Drawing.Drawing2D import InterpolationMode, PixelOffsetMode, SmoothingMode
-    from System.Drawing.Imaging import ColorMatrix, ImageAttributes, ImageFormat, PixelFormat
+    from System.Drawing.Imaging import ColorMatrix, FrameDimension, ImageAttributes, ImageFormat, PixelFormat
     from System.IO import MemoryStream
     from System.Windows.Forms import (
         ContextMenuStrip, Cursor, Cursors, MouseButtons, PictureBox,
@@ -729,8 +724,12 @@ def configure_assistant_native(
                 overlay["alpha_surface"].present(overlay["rendered_image"])
 
         if existing is None:
+            # The text style of the pack in use (build_faces sets it): GDI font family and colour.
+            text_style: dict[str, Any] = {"family": "Yu Gothic UI", "color": (0x60, 0xB2, 0xC0)}
+            mark_path = resource_root() / "assets" / "illustrations" / "memorive-symbol.png"
+
             def draw_face(text: str) -> Any:
-                """One 192 px frame: the kaomoji in the logo's teal on a white rounded card.
+                """One 192 px frame: a text face in the pack's colour (the logo's teal) on a white rounded card.
 
                 GDI text (TextRenderer) is used for its font linking, so every symbol finds a font.
                 GDI text does not keep alpha on a transparent bitmap, so the card is drawn opaque
@@ -745,16 +744,17 @@ def configure_assistant_native(
                 flags = (TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
                          | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix)
                 size = 34
-                font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
+                family = str(text_style["family"])
+                font = Font(family, size, GraphicsUnit.Pixel)
                 while TextRenderer.MeasureText(text, font, Size(width, height), flags).Width > width - 16 and size > 14:
                     font.Dispose()
                     size -= 2
-                    font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
+                    font = Font(family, size, GraphicsUnit.Pixel)
                 try:
                     card_graphics.Clear(Color.White)
                     TextRenderer.DrawText(
                         card_graphics, text, font, Rectangle(0, 0, width, height),
-                        Color.FromArgb(0x60, 0xB2, 0xC0), Color.White, flags,
+                        Color.FromArgb(*text_style["color"]), Color.White, flags,
                     )
                 finally:
                     font.Dispose()
@@ -784,7 +784,81 @@ def configure_assistant_native(
                     card.Dispose()
                 return frame
 
-            frames = {name: draw_face(text) for name, text in ASSISTANT_FACES.items()}
+            def draw_picture(image: Any) -> Any:
+                """One 192 px frame: a picture of the pack, scaled to fit, on a transparent background."""
+                frame = Bitmap(192, 192, PixelFormat.Format32bppArgb)
+                graphics = Graphics.FromImage(frame)
+                try:
+                    graphics.Clear(Color.Transparent)
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic
+                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality
+                    scale = min(184.0 / max(1, int(image.Width)), 184.0 / max(1, int(image.Height)))
+                    width, height = float(image.Width) * scale, float(image.Height) * scale
+                    graphics.DrawImage(image, RectangleF((192.0 - width) / 2, (192.0 - height) / 2, width, height))
+                finally:
+                    graphics.Dispose()
+                return frame
+
+            def draw_variant(variant: dict[str, Any]) -> list[tuple[Any, int]]:
+                """The drawn steps of one variant with how long each shows: a text face is one card, a GIF that
+                moves brings its own frames and delays, frames are one picture each."""
+                if "text" in variant:
+                    return [(draw_face(variant["text"]), 0)]
+                drawn = []
+                for path, ms in zip(variant["pictures"], variant["ms"]):
+                    # From memory, so the file is not held open (a pack can be removed while it shows).
+                    stream = MemoryStream(Array[Byte](Path(path).read_bytes()))
+                    image = Image.FromStream(stream)
+                    try:
+                        dimension = FrameDimension(image.FrameDimensionsList[0])
+                        count = int(image.GetFrameCount(dimension))
+                        if count > 1 and len(variant["pictures"]) == 1:
+                            delays = bytes(image.GetPropertyItem(0x5100).Value)
+                            for step in range(count):
+                                image.SelectActiveFrame(dimension, step)
+                                delay = int.from_bytes(delays[4 * step:4 * step + 4], "little") * 10
+                                drawn.append((draw_picture(image), delay if delay >= 20 else 100))
+                        else:
+                            drawn.append((draw_picture(image), int(ms)))
+                    finally:
+                        image.Dispose()
+                        stream.Dispose()
+                return drawn
+
+            def build_faces() -> dict[str, Any]:
+                """The faces of the pack in use, read again: each frame's variants (drawn when first shown) and the
+                text style. Called at start and when Settings › 表情包 changes the pack (reload_faces)."""
+                pack = api.expression_pack_for_assistant()
+                style = (pack or {}).get("text_style") or {}
+                family = str(style.get("font") or "").split(",")[0].strip().strip("'\"")
+                color = str(style.get("color") or "#60B2C0")
+                text_style.update(family=family or "Yu Gothic UI",
+                                  color=(int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)))
+                looks = {name: [dict(variant, keys=[]) for variant in variants]
+                         for name, variants in assistant_looks(pack, mark_path).items()}
+                return {"looks": looks, "frames": {}, "frame_sha256s": {}, "veiled": set(), "variant": {},
+                        "pictured": any("pictures" in v for variants in looks.values() for v in variants),
+                        "face_draw_error_count": 0}
+
+            def ensure_drawn(holder: dict[str, Any], name: str, index: int) -> dict[str, Any]:
+                """Variant index of frame name, drawn now if it has not been: its steps become frames named
+                name (the first step of the first variant), or name~index#step."""
+                variant = holder["looks"][name][index]
+                if not variant["keys"]:
+                    try:
+                        drawn = draw_variant(variant)
+                    except Exception:
+                        # A picture GDI+ cannot read after all shows the Memorive mark.
+                        holder["face_draw_error_count"] += 1
+                        drawn = draw_variant({"pictures": [mark_path], "ms": [0], "loop": False})
+                    variant["keys"] = [name if index == 0 and step == 0 else f"{name}~{index}#{step}"
+                                       for step in range(len(drawn))]
+                    variant["ms"] = [ms for _, ms in drawn]
+                    for key, (bitmap, _ms) in zip(variant["keys"], drawn):
+                        holder["frames"][key] = bitmap
+                        if "text" in variant and name in {"save-success", "error"}:
+                            holder["veiled"].add(key)
+                return variant
 
             def frame_sha256(frame: Any) -> str:
                 stream = MemoryStream()
@@ -794,16 +868,19 @@ def configure_assistant_native(
                 finally:
                     stream.Dispose()
 
-            frame_sha256s = {
-                name: frame_sha256(frame) for name, frame in frames.items()
-            }
+            def frame_hash(holder: dict[str, Any], key: str) -> str:
+                if key not in holder["frame_sha256s"]:
+                    holder["frame_sha256s"][key] = frame_sha256(holder["frames"][key])
+                return holder["frame_sha256s"][key]
 
-            def build_input_mask_runs() -> tuple[tuple[int, int, int], ...]:
+            def build_input_mask_runs(holder: dict[str, Any]) -> tuple[tuple[int, int, int], ...]:
+                if holder["pictured"]:
+                    return ()  # a picture face can have any shape: the whole square takes clicks
                 from assistant_alpha import bitmap_alpha_rows
-                alpha_planes = tuple(bitmap_alpha_rows(frame) for frame in frames.values())
+                alpha_planes = (bitmap_alpha_rows(holder["frames"]["idle"]),)
                 # Rendered frames occupy 16..208 in the 224px transform canvas.
-                # Union every authoritative Assistant frame and add a small motion
-                # allowance so rotations, blink and status animations are not
+                # Text faces share one card shape: take the idle card and add a small
+                # motion allowance so rotations, blink and status animations are not
                 # clipped while the transparent corners stay outside the HWND.
                 source_rows: list[tuple[int, int] | None] = [None] * 192
                 for source_y in range(192):
@@ -842,12 +919,14 @@ def configure_assistant_native(
                     if bounds is not None
                 )
 
-            input_mask_runs = build_input_mask_runs()
+            faces = build_faces()
+            ensure_drawn(faces, "idle", 0)
+            input_mask_runs = build_input_mask_runs(faces)
 
             picture = PictureBox()
             picture.Name = "DesktopNativePetHitSurface"
             picture.BackColor = Color.Transparent
-            picture.Image = frames["idle"]
+            picture.Image = faces["frames"]["idle"]
             # Startup and monitor-DPI transitions can temporarily give the
             # host unequal dimensions. Never distort the square sprite canvas.
             picture.SizeMode = PictureBoxSizeMode.Zoom
@@ -866,7 +945,6 @@ def configure_assistant_native(
                 "api": api,
                 "alpha_surface": LayeredPetSurface(form),
                 "picture": picture,
-                "frames": frames,
                 "menu": menu,
                 "handlers": [],
                 "menu_open_count": 0,
@@ -891,8 +969,11 @@ def configure_assistant_native(
                 "animation_source": None,
                 "reduced_motion": False,
                 "current_frame": "idle",
-                "current_frame_sha256": frame_sha256s["idle"],
-                "frame_sha256s": frame_sha256s,
+                "current_frame_sha256": frame_hash(faces, "idle"),
+                "look_name": None,
+                "look_started": 0.0,
+                "picked": None,
+                "last_transform": {},
                 "current_transform": None,
                 "rendered_image": None,
                 "render_cache": {},
@@ -920,6 +1001,7 @@ def configure_assistant_native(
                 "coalesced_terminal_count": 0,
                 "interrupted_presentation_count": 0,
                 "receipt_record_error_count": 0,
+                **faces,
             }
 
             def presentation_frame_name(
@@ -928,15 +1010,17 @@ def configure_assistant_native(
                 if done:
                     return sampled_frame
                 normalized = str(motion_name).upper()
-                if normalized == "ERROR" and "error" in state["frames"]:
+                if normalized == "ERROR" and "error" in state["looks"]:
                     return "error"
                 if (
                     normalized == "SUCCESS"
                     and state.get("presentation_reason_code")
                     == "LOCAL_UI_SAVE_SUCCESS"
-                    and "save-success" in state["frames"]
+                    and "save-success" in state["looks"]
                 ):
                     return "save-success"
+                if normalized == "MESSAGE" and sampled_frame == "interaction":
+                    return "message"
                 return sampled_frame
 
             receipt_queue: queue.Queue[dict[str, Any] | None] = queue.Queue()
@@ -1000,8 +1084,8 @@ def configure_assistant_native(
                     matrix.Matrix22 = 1.0
                     matrix.Matrix33 = max(0.0, min(1.0, float(opacity)))
                     matrix.Matrix44 = 1.0
-                    if frame_name in {"save-success", "error"}:
-                        # A light white veil softens the additive expressions.
+                    if frame_name in state["veiled"]:
+                        # A light white veil softens the text cards of save-success and error.
                         # Preserve alpha so the native pet keeps transparent edges.
                         matrix.Matrix00 = 0.82
                         matrix.Matrix11 = 0.82
@@ -1034,7 +1118,18 @@ def configure_assistant_native(
                 scale: float = 1.0,
                 opacity: float = 1.0,
             ) -> None:
-                resolved = frame_name if frame_name in state["frames"] else "idle"
+                name = frame_name if frame_name in state["looks"] or frame_name in state["frames"] else "idle"
+                if name != state.get("look_name"):
+                    # A frame coming on shows one of its variants (picked now, or by pick_variant before a face
+                    # change) from its first step.
+                    if name in state["looks"] and state.get("picked") != name:
+                        state["variant"][name] = random.randrange(len(state["looks"][name]))
+                    state["picked"] = None
+                    state["look_name"] = name
+                    state["look_started"] = time.perf_counter()
+                state["last_transform"] = {"offset_x": offset_x, "offset_y": offset_y,
+                                           "rotation_degrees": rotation_degrees, "scale": scale, "opacity": opacity}
+                resolved = current_key(name)
                 signature = (
                     resolved,
                     round(float(offset_x), 2),
@@ -1075,20 +1170,47 @@ def configure_assistant_native(
                     state["rendered_image"] = rendered
                     state["current_transform"] = signature
                     state["alpha_surface"].present(rendered)
-                state["current_frame"] = resolved
-                state["current_frame_sha256"] = state["frame_sha256s"][resolved]
+                state["current_frame"] = name
+                state["current_frame_sha256"] = frame_hash(state, resolved)
 
-            def face_text(frame_name: str) -> str:
+            def current_key(name: str) -> str:
+                """The drawn frame that shows name now: the step of its variant that is due (frames and moving GIFs
+                run on their own clock; with reduced motion the first step stays)."""
+                if name not in state["looks"]:
+                    return name
+                variant = ensure_drawn(state, name, state["variant"].get(name, 0))
+                keys, durations = variant["keys"], variant["ms"]
+                if len(keys) == 1 or bool(state.get("reduced_motion")):
+                    return keys[0]
+                elapsed = (time.perf_counter() - float(state["look_started"])) * 1000.0
+                total = sum(durations) or 1
+                if not variant.get("loop", True) and elapsed >= total:
+                    return keys[-1]
+                elapsed %= total
+                for key, duration in zip(keys, durations):
+                    if elapsed < duration:
+                        return key
+                    elapsed -= duration
+                return keys[-1]
+
+            def pick_variant(name: str) -> None:
+                """Pick the variant a frame will come on with, before a face change needs to know its text."""
+                if name in state["looks"] and name != state.get("look_name"):
+                    state["variant"][name] = random.randrange(len(state["looks"][name]))
+                    state["picked"] = name
+
+            def face_text(frame_name: str) -> str | None:
+                """The text face frame_name shows (its picked variant), or None when it shows a picture."""
                 if frame_name.startswith("text:"):
                     return frame_name[len("text:"):]
-                return ASSISTANT_FACES.get(frame_name, ASSISTANT_FACES["idle"])
+                variants = state["looks"].get(frame_name) or state["looks"]["idle"]
+                return variants[state["variant"].get(frame_name, 0) % len(variants)].get("text")
 
             def text_frame(text: str) -> str:
                 """The frame that shows text (a step of an encoding animation), drawn the first time it is needed."""
                 name = "text:" + text
                 if name not in state["frames"]:
                     state["frames"][name] = draw_face(text)
-                    state["frame_sha256s"][name] = frame_sha256(state["frames"][name])
                 return name
 
             def schedule_auto_blink(*, preserve_existing: bool = False) -> None:
@@ -1229,7 +1351,7 @@ def configure_assistant_native(
                     "BLINK": ["blink-open", "blink-closed", "blink-open", "blink-closed", "blink-open", str(state["base_frame"])],
                     "INTERACTION": ["interaction", str(state["base_frame"])],
                     "WAKE": ["interaction", str(state["base_frame"])],
-                    "MESSAGE": ["interaction", str(state["base_frame"])],
+                    "MESSAGE": ["message", str(state["base_frame"])],
                     "WORKING": ["working", "working"],
                     "ATTENTION": ["interaction", str(state["base_frame"])],
                     "SUCCESS": [
@@ -1251,8 +1373,8 @@ def configure_assistant_native(
                     bool(state.get("reduced_motion")) and not reduced_expression
                 ):
                     static_frame = (
-                        "interaction" if normalized == "DRAG"
-                        else "blink-closed" if normalized == "SLEEP"
+                        "drag" if normalized == "DRAG"
+                        else "sleep" if normalized == "SLEEP"
                         else presentation_frame_name(
                             normalized, str(state["base_frame"])
                         )
@@ -1281,10 +1403,13 @@ def configure_assistant_native(
                     state["auto_blink_count"] += 1
                 first = sample_motion(normalized, 0.0, base_frame=str(state["base_frame"]))
                 target_frame = presentation_frame_name(normalized, first.frame, done=first.done)
-                # A new face decodes in through an encoding animation, one text per tick (face_change_texts).
-                texts = () if reduced_expression else face_change_texts(
-                    face_text(str(state.get("current_frame") or "idle")), face_text(target_frame),
-                    normalized, int(state["face_change_count"]))
+                pick_variant(target_frame)
+                # A new text face decodes in through an encoding animation, one text per tick
+                # (face_change_texts); a picture just shows.
+                shown_text = face_text(str(state.get("current_frame") or "idle"))
+                target_text = face_text(target_frame)
+                texts = () if reduced_expression or target_text is None else face_change_texts(
+                    shown_text or "", target_text, normalized, int(state["face_change_count"]))
                 if texts and normalized != "GARBLED":
                     state["face_change_count"] += 1
                 state["text_plan"] = [text_frame(text) for text in texts]
@@ -1325,8 +1450,43 @@ def configure_assistant_native(
                 state["auto_blink_due_ms"] = None
                 play_native_motion("BLINK", source_name="auto")
 
+            # Frames and moving GIFs of a picture pack step on their own clock, also between motions.
+            look_timer = FormsTimer()
+            look_timer.Interval = 40
+
+            def on_look_tick(_sender, _event) -> None:
+                name = state.get("look_name")
+                if name in state["looks"] and current_key(name) != (state.get("current_transform") or (None,))[0]:
+                    set_visual(name, **state["last_transform"])
+
+            def sync_look_timer() -> None:
+                if state["pictured"] and bool(form.Visible):
+                    look_timer.Start()
+                else:
+                    look_timer.Stop()
+
+            def reload_faces() -> None:
+                """The pack in use changed (Settings › 表情包): draw the faces again and show the frame that showed."""
+                old = list(state["frames"].values()) + list(state["render_cache"].values())
+                state.update(build_faces())
+                ensure_drawn(state, "idle", 0)
+                state.update(look_name=None, picked=None, current_transform=None, render_cache={}, text_plan=[])
+                state["input_mask_runs"] = build_input_mask_runs(state)
+                apply_pet_window_region(state)
+                set_visual(str(state.get("base_frame") or "idle"), **state["last_transform"])
+                for image in {id(image): image for image in old}.values():
+                    try:
+                        image.Dispose()
+                    except Exception:
+                        pass
+                sync_look_timer()
+
+            api.attach_expression_pack_listener(lambda: form.BeginInvoke(Action(reload_faces)))
+            look_timer.Tick += on_look_tick
             animation_timer.Tick += on_animation_tick
             auto_blink_timer.Tick += on_auto_blink
+            state["look_timer"] = look_timer
+            state["reload_faces"] = reload_faces
             state["animation_timer"] = animation_timer
             state["auto_blink_timer"] = auto_blink_timer
             state["set_frame"] = lambda frame_name: set_visual(frame_name)
@@ -1494,7 +1654,7 @@ def configure_assistant_native(
                     interrupt_motion_for_drag()
                 auto_blink_timer.Stop()
                 state["animation_state"] = "DRAG"
-                set_visual("interaction")
+                set_visual("drag")
                 target_x = int(drag["form_x"]) + delta_x
                 target_y = int(drag["form_y"]) + delta_y
                 form.Left = target_x
@@ -1636,9 +1796,11 @@ def configure_assistant_native(
                     if state.get("rendered_image") is not None:
                         state["alpha_surface"].present(state["rendered_image"])
                     schedule_auto_blink()
+                    sync_look_timer()
                 else:
                     animation_timer.Stop()
                     auto_blink_timer.Stop()
+                    look_timer.Stop()
                     drag_timer.Stop()
                     state["drag"] = None
                     picture.Capture = False
@@ -1655,6 +1817,12 @@ def configure_assistant_native(
                     animation_timer.Stop()
                     animation_timer.Tick -= on_animation_tick
                     animation_timer.Dispose()
+                except Exception:
+                    pass
+                try:
+                    look_timer.Stop()
+                    look_timer.Tick -= on_look_tick
+                    look_timer.Dispose()
                 except Exception:
                     pass
                 try:
@@ -1701,6 +1869,7 @@ def configure_assistant_native(
             form.Controls.Add(picture)
             place_overlay(picture, state)
             set_visual("idle")
+            sync_look_timer()
             _ASSISTANT_NATIVE_OVERLAYS[form_handle] = state
         else:
             place_overlay(existing["picture"], existing)

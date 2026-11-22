@@ -110,6 +110,7 @@
   "profile_directories": {
     "ARTIFACTS": "artifacts",
     "BROWSER_COMPANION": "browser_companion",
+    "EXPRESSION_PACKS": "expression_packs",
     "INBOX": "inbox",
     "INBOX_SOURCE": "inbox_source",
     "MODEL_VALIDATION": "model_validation",

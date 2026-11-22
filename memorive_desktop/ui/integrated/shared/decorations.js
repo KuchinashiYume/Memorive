@@ -1,19 +1,18 @@
-/* Decorations of the main window: the home and empty-state kaomoji, loading placeholders while a page waits
+/* Decorations of the main window: the home and empty-state faces, loading placeholders while a page waits
    for its first data (trackCall wraps service calls for this), and signals to the desk assistant
-   (assistant_ui_signal). Publishes Memorive.decorations. */
+   (assistant_ui_signal). The faces are looks of the expression pack in use (shared/expression-pack.js); without a
+   pack, or with 隐藏所有表情 on, the page shows none (.desktop-hide-expressions). Publishes Memorive.decorations. */
 (() => {
   'use strict';
   if (Memorive.decorations) return;
 
-  // Kaomoji, shown as text (.desktop-kaomoji): code-plan scheme of 2026-11-21, one face per state.
-  const faces = Object.freeze({
-    interaction: '(・ω<)☆', question: '(・ω・)？', empty: '(´・ω・`)', done: '(*≧ω≦)✓',
-    greeting: 'Ciallo～(∠・ω< )⌒☆', open: '(・ω・)', closed: '(-ω-)'
-  });
+  // A face is a look of the pack's position: {text}, {image} or {frames}; a step of an encoding animation is text.
+  const packs = Memorive.expressionPack;
+  const asLook = value => typeof value === 'string' ? { text: value } : value;
   // Empty pages: no files (inbox, library), nothing waiting (tasks, messages), nothing written yet (work log).
-  const emptyPicture = Object.freeze({
-    'inbox-empty': faces.empty, 'library-empty': faces.empty, 'tasks-empty': faces.done,
-    'messages-empty': faces.done, 'worklog-empty': faces.interaction
+  const emptyPosition = Object.freeze({
+    'inbox-empty': 'empty', 'library-empty': 'empty', 'tasks-empty': 'saved',
+    'messages-empty': 'saved', 'worklog-empty': 'interaction'
   });
   const prefersReducedMotion = () => Boolean(
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -57,8 +56,12 @@
   const seenErrorMessages = new Set();
 
   // Reuse the native request lifecycle; decorative loading never starts work.
-  const loadingFrames = Array.from({length:6}, (_, i) => i % 2 ? faces.closed : faces.open);
+  // The pack's loading look, or its open and closed eyes in turn.
   const loadingDurations = [450,180,450,180,450,180];
+  const loadingLooks = () => {
+    const loading = packs.look('loading');
+    return loading ? [loading] : loadingDurations.map((_, i) => packs.look(i % 2 ? 'closed' : 'open'));
+  };
   const loadingStates = new Map();
   const routeRoots = {settings:'desktop-settings-preview',inbox:'desktop-inbox-preview',
     'current-task':'desktop-tasks-preview',messages:'desktop-messages-preview',sessions:'desktop-sessions-preview',
@@ -92,12 +95,12 @@
     const hidden = document.documentElement.classList.contains('desktop-hide-expressions')
       || document.documentElement.classList.contains('desktop-user-loading');
     state.frames.forEach((image,index) => { image.hidden=index!==0; });
-    if (hidden || prefersReducedMotion()) return;
+    if (hidden || prefersReducedMotion() || state.frames.length < 2) return;
     let frame=0;
     const next=()=>{
       if (!state.count || !state.overlay?.isConnected || !isVisible(state.overlay) || document.hidden) return;
       state.frames[frame].hidden=true;
-      frame=(frame+1)%loadingFrames.length;
+      frame=(frame+1)%state.frames.length;
       state.frames[frame].hidden=false;
       state.frameTimer=setTimeout(next,loadingDurations[frame]);
     };
@@ -112,12 +115,11 @@
     const art=document.createElement('div');
     art.className='desktop-loading-art';
     art.setAttribute('aria-hidden','true');
-    state.frames=loadingFrames.map((text,index)=>{
+    state.frames=loadingLooks().map((look,index)=>{
       const frame=document.createElement('span');
-      frame.className='desktop-kaomoji';
       // Decoration, like the other faces: app.js gives aria-hidden elements no text size.
       frame.setAttribute('aria-hidden','true');
-      frame.textContent=text;
+      packs.paint(frame,look);
       frame.hidden=index!==0;
       art.append(frame);
       return frame;
@@ -223,9 +225,10 @@
     && getComputedStyle(element).visibility !== 'hidden';
 
   // The home faces (one in each page's blank state, changed together; the visible one is seen). Each rests on its
-  // page's face. Memorive opens on the Ciallo greeting, kept until another page is opened; a click types a question
-  // mark and goes back to rest two seconds later; five clicks within three seconds show the face garbled for two
-  // seconds (EASTER EGG (彩蛋), intentional: playHomeGarbled, not a bug).
+  // page's position (data-expression). Memorive opens on the pack's greeting, kept until another page is opened; a
+  // click shows the question (text faces type a question mark) and goes back to rest two seconds later; five clicks
+  // within three seconds show a text face garbled for two seconds (EASTER EGG (彩蛋), intentional: playHomeGarbled,
+  // not a bug).
   const homeExpressions = [];
   const homeClicks = [];
   let homeMode = 'rest';
@@ -233,17 +236,20 @@
   let greetingRoute = '';
   let startupPlayed = false;
   const expressionsHidden = () => document.documentElement.classList.contains('desktop-hide-expressions');
-  // Steps are [text, ms]: each text shows for ms, the last one stays.
+  // Steps are [look, ms] (a string is a text face): each shows for ms, the last one stays and is the entry's face.
   const playSteps = (entry, steps) => {
     window.clearTimeout(entry.timer);
+    entry.face = asLook(steps[steps.length - 1][0]);
     const show = index => {
-      entry.image.textContent = steps[index][0];
+      packs.paint(entry.image, asLook(steps[index][0]));
       if (index + 1 < steps.length) entry.timer = window.setTimeout(() => show(index + 1), steps[index][1]);
     };
     show(0);
   };
-  const decodeSteps = (text, encoding, hold) => prefersReducedMotion() ? [[text, hold]]
-    : [...encodingFrames(text, encoding, 6).map(frame => [frame, 50]), [text, hold]];
+  // A text face decodes in through an encoding animation; a picture just shows.
+  const decodeSteps = (look, encoding, hold) => !packs.isText(look) || prefersReducedMotion() ? [[look, hold]]
+    : [...encodingFrames(look.text, encoding, 6).map(frame => [frame, 50]), [look, hold]];
+  const sameLook = (a, b) => a === b || (packs.isText(a) && packs.isText(b) && a.text === b.text);
   const setHome = (mode, stepsFor) => {
     window.clearTimeout(homeTimer);
     homeMode = mode;
@@ -256,21 +262,25 @@
   };
   const restHome = animate => {
     const encoding = nextEncoding();
-    setHome('rest', entry => animate && entry.image.textContent !== entry.rest.text
-      ? decodeSteps(entry.rest.text, encoding, 0) : [[entry.rest.text, 0]]);
+    setHome('rest', entry => animate && !sameLook(entry.face, entry.rest.look)
+      ? decodeSteps(entry.rest.look, encoding, 0) : [[entry.rest.look, 0]]);
   };
   const playHomeQuestion = () => {
     if (expressionsHidden() || homeMode === 'question' || homeMode === 'garbled') return;
-    const encoding = nextEncoding(), caret = faces.open + '_';
-    setHome('question', () => prefersReducedMotion() ? [[faces.question, 0]]
-      : [...decodeSteps(faces.open, encoding, 160), [caret, 160], [faces.open, 160], [caret, 160], [faces.question, 0]]);
+    const encoding = nextEncoding(), open = packs.look('open'), question = packs.look('question');
+    // Text faces type a question mark after the open eyes; otherwise the question look just shows.
+    const typing = packs.isText(open) && packs.isText(question) && !prefersReducedMotion();
+    const caret = typing && open.text + '_';
+    setHome('question', () => typing
+      ? [...decodeSteps(open, encoding, 160), [caret, 160], [open, 160], [caret, 160], [question, 0]]
+      : [[question, 0]]);
     homeTimer = window.setTimeout(() => restHome(true), 2000);
   };
   const playHomeGarbled = () => {
-    if (expressionsHidden()) return;
-    const mode = homeMode;  // setHome below changes it
-    const shown = entry => mode === 'greeting' ? faces.greeting : mode === 'question' ? faces.question : entry.rest.text;
-    setHome('garbled', entry => [[garbled(shown(entry)), 2000], ...decodeSteps(entry.rest.text, 1, 0)]);
+    if (expressionsHidden() || !homeExpressions.some(entry => packs.isText(entry.face))) return;
+    setHome('garbled', entry => packs.isText(entry.face)
+      ? [[garbled(entry.face.text), 2000], ...decodeSteps(entry.rest.look, 1, 0)]
+      : [[entry.face, 2000], [entry.rest.look, 0]]);
     homeTimer = window.setTimeout(() => restHome(false), 2400);
   };
   // EASTER EGG (彩蛋), intentional: the fifth click within three seconds shows the garbled face.
@@ -283,12 +293,33 @@
     playHomeGarbled();
   };
   const playStartupGreeting = () => {
-    if (startupPlayed || expressionsHidden()) return;
+    if (startupPlayed || expressionsHidden() || !packs.active()) return;
     if (!homeExpressions.some(({ button }) => isVisible(button))) return;
     startupPlayed = true;
     greetingRoute = document.body.dataset.desktopActiveRoute || 'home';
-    const encoding = nextEncoding();
-    setHome('greeting', () => decodeSteps(faces.greeting, encoding, 0));
+    const encoding = nextEncoding(), greeting = packs.look('greeting');
+    setHome('greeting', () => decodeSteps(greeting, encoding, 0));
+  };
+
+  // Paints the faces from the pack in use: each home face at rest, and every face marked data-expression-face (the
+  // empty pages' and the research chat's home face, which workspace.js copies from a template and paints with this).
+  const paintFaces = (root = document) => {
+    if (root === document) {
+      homeExpressions.forEach(entry => { entry.rest.look = packs.look(entry.rest.expression); });
+      restHome(false);
+    }
+    root.querySelectorAll('[data-expression-face]').forEach(face => packs.paint(face, packs.look(face.dataset.expressionFace)));
+  };
+  // The faces are hidden while 隐藏所有表情 is on or no pack is in use. The page keeps its home and logo out of sight
+  // (.desktop-user-loading) until both the person's settings (local-user.js) and the pack are read.
+  let userHidden = null;
+  const syncHidden = () => {
+    if (userHidden === null || !packs.loaded()) return;
+    const hidden = userHidden || !packs.active();
+    document.documentElement.classList.toggle('desktop-hide-expressions', hidden);
+    document.documentElement.classList.remove('desktop-user-loading');
+    if (hidden) restHome(false); else requestAnimationFrame(playStartupGreeting);
+    syncAllLoading();
   };
 
   const signalAssistant = async (kind, detail = {}) => {
@@ -325,8 +356,9 @@
     if(!button||!image)return;
     button.setAttribute('data-desktop-no-tooltip','');
     button.removeAttribute('title');
-    homeExpressions.push({ button, image, timer: 0,
-      rest: { expression: button.dataset.expression || 'interaction', text: image.textContent } });
+    // The look it rests on is picked from the pack when the pack is read (paintFaces).
+    homeExpressions.push({ button, image, timer: 0, face: null,
+      rest: { expression: button.dataset.expression || 'interaction', look: null } });
     // The easter egg counts every click, also those that the research home's click interval holds back
     // (routes/inbox/research-home.js stops them on the way down); the question plays on the clicks that arrive.
     blank.addEventListener('click', (event) => {
@@ -341,14 +373,15 @@
   const enhanceEmptyState = (empty) => {
     /* Desktop_EMPTY_STATE_ILLUSTRATION_V1 */
     if (!(empty instanceof HTMLElement) || empty.dataset.illustrationReady === 'true') return;
-    if (!emptyPicture[empty.id]) return;
+    if (!emptyPosition[empty.id]) return;
     const container = empty.firstElementChild;
     if (!(container instanceof HTMLElement)) return;
     container.querySelectorAll('.empty-mark').forEach((mark) => mark.remove());
     const face = document.createElement('span');
-    face.className = 'desktop-empty-illustration desktop-kaomoji';
+    face.className = 'desktop-empty-illustration';
     face.setAttribute('aria-hidden', 'true');
-    face.textContent = emptyPicture[empty.id];
+    face.dataset.expressionFace = emptyPosition[empty.id];
+    packs.paint(face, packs.look(face.dataset.expressionFace));
     container.prepend(face);
     empty.classList.add('desktop-empty-decorated');
     empty.dataset.illustrationReady = 'true';
@@ -402,6 +435,8 @@
     });
     document.querySelectorAll('.desktop-blank-state').forEach(enhanceHomePrompt);
     document.querySelectorAll('.empty-state').forEach(enhanceEmptyState);
+    packs.onChange(() => { paintFaces(); syncHidden(); });
+    if (packs.loaded()) paintFaces();
     if (document.readyState === 'complete') requestAnimationFrame(playStartupGreeting);
     else window.addEventListener('load', () => requestAnimationFrame(playStartupGreeting), { once: true });
     document.addEventListener('visibilitychange', syncAllLoading);
@@ -436,9 +471,10 @@
 
   Memorive.decorations = Object.freeze({
     applyHidden:hidden=>{
-      if(hidden)restHome(false);else requestAnimationFrame(playStartupGreeting);
-      syncAllLoading();
+      userHidden=Boolean(hidden);
+      syncHidden();
     },
+    paintFaces,
     beginLoading,
     trackCall,
     encodingFrames,

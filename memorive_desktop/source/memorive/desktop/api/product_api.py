@@ -41,11 +41,13 @@ from memorive.desktop.api.artifacts import ArtifactsMixin
 from memorive.desktop.api.settings_page import SettingsPageMixin
 from memorive.desktop.api.browser_companion import BrowserCompanionCallsMixin
 from memorive.desktop.api.links import LinksMixin
+from memorive.desktop.api.expression_packs import ExpressionPacksMixin
 
 
 class ProductApi(
     PageEventsMixin, AssistantCallsMixin, NotificationsMixin, WindowMixin, InboxFilesMixin,
     ResearchMemoMixin, ArtifactsMixin, SettingsPageMixin, BrowserCompanionCallsMixin, LinksMixin,
+    ExpressionPacksMixin,
 ):
     def _profile_path(self, logical_directory: str) -> Path:
         """Resolve a declared profile directory through the packaged policy.
