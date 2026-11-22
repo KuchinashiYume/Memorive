@@ -6932,8 +6932,8 @@
     },
     {
       "path": "source/memorive/sessions/companion/extension/manifest.json",
-      "sha256": "4c713f0701cfeae8804cc0080e64b694f90ae5cade0b2b8a4ff87c043a3d847b",
-      "bytes": 1003
+      "sha256": "1b71634d0d1f1e78d61b62140043311a3723687655ae9570551f944cb92733c2",
+      "bytes": 1251
     },
     {
       "path": "source/memorive/sessions/companion/extension/popup.css",
@@ -6977,8 +6977,8 @@
     },
     {
       "path": "source/memorive/sessions/companion/site_profiles.py",
-      "sha256": "f6b846ed78ec0856cc11a4ee0dffc6740a3ffa9482ffe53d5f2c21e1bc09160f",
-      "bytes": 12972
+      "sha256": "2da956a50f0f07d0337c307c79889f7e779ea9ae8ebb142ff3af1350a140fd04",
+      "bytes": 13388
     },
     {
       "path": "source/memorive/sessions/controller/__init__.py",

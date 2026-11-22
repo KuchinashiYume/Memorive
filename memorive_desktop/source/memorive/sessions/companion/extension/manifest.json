@@ -15,7 +15,11 @@
     "https://gemini.google.com/*",
     "https://kimi.com/*",
     "https://www.kimi.com/*",
-    "https://kimi.moonshot.cn/*"
+    "https://kimi.moonshot.cn/*",
+    "https://chat.qwen.ai/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://grok.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -31,7 +35,11 @@
         "https://gemini.google.com/*",
         "https://kimi.com/*",
         "https://www.kimi.com/*",
-        "https://kimi.moonshot.cn/*"
+        "https://kimi.moonshot.cn/*",
+        "https://chat.qwen.ai/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://grok.com/*"
       ],
       "js": [
         "site_profiles.js",

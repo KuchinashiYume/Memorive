@@ -218,12 +218,19 @@ def extension_profile_script(rows):
 """
     return script
 
+def capture_patterns():
+    """The official AI websites the extension records a conversation on (OFFICIAL_WEB_SITES). The extension may
+    always read them, so recording does not depend on the toolbar click's temporary access."""
+    return [f'https://{host}/*' for _key,_name,hosts,_proof in OFFICIAL_WEB_SITES for host in hosts]
+
+
 def configured_extension(source, destination, rows):
-    """Derive a reloadable package with only explicitly configured origins."""
+    """Derive a reloadable package: the configured sync origins plus the official sites it records."""
     source=Path(source)
     destination=Path(destination)
     manifest=json.loads((source/'manifest.json').read_text(encoding='utf-8'))
-    patterns=[f'https://{host}/*' for row in active_sites(rows) for host in row['hosts']]
+    patterns=list(dict.fromkeys(
+        [f'https://{host}/*' for row in active_sites(rows) for host in row['hosts']] + capture_patterns()))
     manifest['host_permissions']=patterns
     manifest['content_scripts']=[dict(matches=patterns,js=['site_profiles.js','recording.js','content.js'],run_at='document_start')] if patterns else []
     material={p.relative_to(source).as_posix():p.read_bytes() for p in source.rglob('*') if p.is_file()}

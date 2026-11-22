@@ -57,7 +57,9 @@ def test_all_off_no_sites_no_capture_no_full_gate(tmp_path):
     status=api.browser_companion_status()
     assert not status['preflight_eligible'] and not status['full_sync_eligible']
     source,_,_=api._browser_companion_package()
-    assert json.loads((source/'manifest.json').read_text(encoding='utf-8'))['host_permissions']==[]
+    # With every sync site off the extension still records the official AI websites, nothing else.
+    from memorive.sessions.companion.site_profiles import capture_patterns
+    assert json.loads((source/'manifest.json').read_text(encoding='utf-8'))['host_permissions']==capture_patterns()
 
 def test_site_save_revision_lock_and_history(tmp_path):
     s=SiteProfiles(tmp_path); rows=default_sites();rows[0]['enabled']=False

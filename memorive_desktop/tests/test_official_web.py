@@ -5,7 +5,7 @@ import sys
 import pytest
 from memorive.sessions.companion.site_profiles import (
     SiteProfiles, default_sites, normalize_sites, profile_hash, active_sites,
-    official_web_identity, configured_extension, extension_profile_script,
+    official_web_identity, configured_extension, extension_profile_script, capture_patterns,
 )
 from memorive.sessions.archive.importers import BrowserLibraryImporter
 from memorive.sessions.archive.models import ArchiveInputError
@@ -67,18 +67,20 @@ def test_legacy_unknown_config_remains_editable_but_cannot_issue_plugin(tmp_path
     assert active_sites(rows)==[]
     package=configured_extension(ROOT/"source/memorive/sessions/companion/extension",tmp_path/"pack",rows)
     manifest=json.loads((package/"manifest.json").read_text(encoding="utf-8"))
-    assert manifest["host_permissions"]==manifest["content_scripts"]==[]
+    assert manifest["host_permissions"]==manifest["content_scripts"][0]["matches"]==capture_patterns()
+    assert "https://unverified.example.org/*" not in manifest["host_permissions"]
     assert api.install_browser_companion()["status"]=="BROWSER_NO_VERIFIED_OFFICIAL_SITES"
     assert not (store.root/"extension-v1").exists()
     assert api.browser_companion_sites()["site_authorizations"][0]["verified_official"] is False
     rows[0]["enabled"]=False
     assert store.save(rows,1)["revision"]==2
 
-def test_verified_custom_site_gets_only_its_exact_permission(tmp_path):
+def test_verified_custom_site_gets_its_exact_permission_besides_the_recorded_sites(tmp_path):
     saved=SiteProfiles(tmp_path/"state").save(custom(),0)
     package=configured_extension(ROOT/"source/memorive/sessions/companion/extension",tmp_path/"pack",saved["sites"])
     manifest=json.loads((package/"manifest.json").read_text(encoding="utf-8"))
-    assert manifest["host_permissions"]==["https://chat.qwen.ai/*"]
+    assert manifest["host_permissions"][0]=="https://chat.qwen.ai/*"
+    assert set(manifest["host_permissions"])=={"https://chat.qwen.ai/*",*capture_patterns()}
     assert manifest["content_scripts"][0]["matches"]==manifest["host_permissions"]
     assert "<all_urls>" not in json.dumps(manifest)
 
@@ -111,3 +113,11 @@ def test_gemini_full_link_keeps_account_path_not_temporary_parameters(tmp_path,u
     assert saved["sites"][1]["url"]=="https://gemini.google.com"+urlsplit(url).path
     assert saved["sites"][1]["hosts"]==["gemini.google.com"]
     assert "?" not in saved["sites"][1]["url"] and "#" not in saved["sites"][1]["url"]
+
+
+def test_the_extension_may_read_every_official_ai_website_it_records():
+    # ChatGPT, Claude, Qwen and Grok besides the sync sites: recording must not depend on the toolbar click's
+    # temporary access, which Edge did not give on chatgpt.com. Nothing beyond the official list is granted.
+    manifest=json.loads((ROOT/"source/memorive/sessions/companion/extension/manifest.json").read_text(encoding="utf-8"))
+    assert manifest["host_permissions"]==manifest["content_scripts"][0]["matches"]==capture_patterns()
+    assert {"https://chatgpt.com/*","https://claude.ai/*","https://grok.com/*","https://chat.qwen.ai/*"}<=set(capture_patterns())
