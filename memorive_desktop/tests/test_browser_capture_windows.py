@@ -1,5 +1,5 @@
 """How the browser companion builds one conversation from the windows a page shows while it scrolls
-(extension/recording.js createMerger, used by the recording and by the site sync in content.js), and how
+(extension/recording.js createMerger, used by the recording), and how
 content.js joins the text blocks of one message (groupMessageBlocks).
 
 One synthetic conversation of seven messages, written down first with its roles, texts and order: both
@@ -77,9 +77,6 @@ out.gap_outcome = gap.add(slice(5, 7));
 out.gap_result = gap.result();
 out.gap_bridge_outcome = gap.add(slice(3, 6));
 out.gap_bridged = { ...gap.result(), fragments: gap.fragmentCount() };
-const strict = createMerger();
-strict.add(slice(0, 4));
-out.strict_gap = { outcome: strict.add(slice(5, 7), { keepGaps: false }), fragments: strict.fragmentCount() };
 
 // A window that lines up in two places with different results is skipped.
 const ambiguous = createMerger();
@@ -180,7 +177,6 @@ def test_a_gap_is_kept_apart_and_joined_when_bridged(results: dict) -> None:
     assert results["gap_bridge_outcome"] == "JOINED"
     assert len(results["gap_bridged"]["messages"]) == 7
     assert results["gap_bridged"]["fragments"] == 1
-    assert results["strict_gap"] == {"outcome": "GAP", "fragments": 1}
 
 
 def test_a_window_that_lines_up_twice_is_skipped(results: dict) -> None:

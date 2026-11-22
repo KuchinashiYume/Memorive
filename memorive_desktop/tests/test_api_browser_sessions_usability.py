@@ -184,16 +184,6 @@ def test_local_model_discovery_verifies_each_saved_loopback_endpoint(
     assert receipt["external_network_calls"] == 0
 
 
-def test_browser_companion_indexes_history_titles_and_captures_canonical_turns() -> None:
-    content = (
-        ATTEMPT_ROOT / "source" / "memorive" / "sessions" / "companion" / "extension" / "content.js"
-    ).read_text(encoding="utf-8")
-
-    assert "indexRecentSessions" in content
-    assert "titleForHistoryNode" in content
-    assert "captureConversation" in content
-
-
 def test_visible_ui_drops_nested_rich_text_children_before_geometry_role_merge() -> None:
     nodes = [
         {

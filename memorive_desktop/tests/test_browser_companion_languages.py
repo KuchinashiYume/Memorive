@@ -1,5 +1,5 @@
 """The browser extension speaks 简体中文, English and 日本語: every word is in _locales/<language>/messages.json,
-used by manifest.json (__MSG_key__) and by the popup and runner pages through i18n.js, where the Aa button
+used by manifest.json (__MSG_key__) and by the popup through i18n.js, where the Aa button
 picks the language. The package Memorive prepares for the browser, default or for changed sites, carries them."""
 from __future__ import annotations
 
@@ -40,15 +40,13 @@ def test_no_message_reads_as_a_named_placeholder() -> None:
 
 def test_every_word_the_extension_asks_for_exists() -> None:
     used = set()
-    for name in ("popup.js", "runner.js"):
+    for name in ("popup.js",):
         used |= set(re.findall(r"""\bt\(\s*["']([A-Za-z]+)["']""", (EXTENSION / name).read_text(encoding="utf-8")))
         used |= set(re.findall(r"""say\(\s*\w+\s*,\s*["']([A-Za-z]+)["']""", (EXTENSION / name).read_text(encoding="utf-8")))
-    for name in ("popup.html", "runner.html"):
+    for name in ("popup.html",):
         used |= set(re.findall(r'data-i18n(?:-title|-aria-label)?="([A-Za-z]+)"', (EXTENSION / name).read_text(encoding="utf-8")))
     used |= set(re.findall(r"__MSG_([A-Za-z]+)__", (EXTENSION / "manifest.json").read_text(encoding="utf-8")))
-    stage_keys = re.search(r"const STAGE_KEYS = \{(.*?)\};", (EXTENSION / "runner.js").read_text(encoding="utf-8"), re.S)
-    used |= set(re.findall(r'"(stage[A-Za-z]+)"', stage_keys.group(1)))
-    assert len(used) > 40
+    assert len(used) > 20
     assert used <= set(_words("en")), sorted(used - set(_words("en")))
 
 

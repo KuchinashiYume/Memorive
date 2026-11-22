@@ -668,27 +668,3 @@ def test_local_model_discovery_continues_after_one_adapter_returns_invalid_paylo
         "MODEL_LISTED_INFERENCE_NOT_RUN",
         "SERVICE_RESPONSE_INVALID_INFERENCE_NOT_RUN",
     }
-
-
-def test_extension_caps_new_syncs_at_50_and_uses_14_day_or_sidebar_evidence() -> None:
-    runner = (
-        ROOT / "source" / "memorive" / "sessions" / "companion" / "extension" / "runner.js"
-    ).read_text(encoding="utf-8")
-    content = (
-        ROOT / "source" / "memorive" / "sessions" / "companion" / "extension" / "content.js"
-    ).read_text(encoding="utf-8")
-    runtime = (ROOT / "source" / "memorive" / "sessions" / "companion" / "desktop.py").read_text(
-        encoding="utf-8"
-    )
-
-    assert "MEMORIVE_BROWSER_SESSION_LIBRARY_V4_DRAFT" in runner
-    assert "MEMORIVE_BROWSER_COMPANION_VISIBLE_UI_V4_DRAFT" in runner
-    assert "enumerated_count: conversations.length + failures.length" in runner
-    assert "INDEX_SAFETY_CEILING = Number.isFinite(requestedLimit)" in runner
-    assert "Math.max(1, Math.min(50" in runner
-    assert "MAX_RECENT_CONVERSATIONS = 50" in content
-    assert "UNDATED_FALLBACK_CONVERSATIONS = 30" in content
-    assert "RECENT_14_DAYS_OR_30_CONVERSATIONS" in runner
-    assert "RECENT_14_DAYS" in content
-    assert "RECENT_30_CONVERSATIONS" in content
-    assert "self.sessions.import_session_file(source)" in runtime
