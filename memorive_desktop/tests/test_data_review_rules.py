@@ -359,3 +359,62 @@ def test_count_only_includes_censored_observations_without_treating_bounds_as_me
     binding["inputs"]["reported_mean"] = "m"
     binding["parameters"].update(weights="equal", rounding="nearest")
     assert run(binding, data)["reason"] == "RAW_CENSORED_VALUES_NOT_SUPPORTED"
+
+
+@pytest.mark.parametrize("printed, written", [
+    ("30.0%", "30.0%"),
+    ("30.0 %", "30.0%"),  # a space before the unit is not part of the value
+    ("30.0%", "30.0 %"),
+    ("30.0％", "30.0％"),  # full-width percent sign
+    ("30.0%", "30.0"),  # the bare number still selects it
+])
+def test_a_value_may_be_written_with_the_unit_the_paper_prints(printed, written):
+    share = rule("percentage", {"count": {"raw": "12", "quote": "12 ("}, "denominator": {"raw": "40", "quote": "Of 40"},
+                                "percent": {"raw": written, "quote": printed}}, unweighted_count=True, rounding="nearest")
+    [check] = analyze(f"Of 40 people, 12 ({printed}) agreed.", source_id="sample", rules=[share])["checks"]
+    assert check["status"] == "COMPATIBLE"  # 12 / 40 = 30.0 %
+
+
+def test_the_printed_unit_tells_equal_numbers_apart_but_never_adds_a_match():
+    same = rule("cross", {"left": {"raw": "64%", "quote": "64 and 64%"}, "right": {"raw": "64%", "quote": "Recall: 64%"}},
+                same_quantity=True, rounding="nearest")
+    check = lambda: analyze("Rank 64 and 64% accuracy\nRecall: 64%", source_id="sample", rules=[same])["checks"][0]
+    # "Rank 64 and " is 12 characters and "Recall: " 8, so the two 64% start at columns 13 and 9
+    assert (check()["status"], check()["input_ids"]) == ("COMPATIBLE", ["L1:C13", "L2:C9"])
+    # the bare number names both numbers in the quote; a unit the paper does not print names neither
+    for written in ("64", "64 mg"):
+        same["inputs"]["left"]["raw"] = written
+        assert (check()["status"], check()["reason"]) == ("INPUT_ERROR", "INPUT_SELECTOR_NOT_UNIQUE_OR_NOT_FOUND")
+
+
+def test_counts_marked_not_rounded_are_added_exactly():
+    quote = "biology 40, chemistry 50 and physics 30"
+    total = rule("sum", {"parts": [{"raw": v, "quote": quote} for v in ("40", "50", "30")],
+                         "total": {"raw": "121", "quote": "121 reports"}},
+                 mutually_exclusive=True, exhaustive=True, rounding="exact")
+    text = f"Reports: {quote}, 121 reports in total."
+    status = lambda: next(c for c in analyze(text, source_id="sample", rules=[total])["checks"]
+                          if c["rule_id"] == "rule-sum")["status"]
+    assert status() == "INCONSISTENT"  # 40 + 50 + 30 = 120, not 121
+    total["parameters"]["rounding"] = "nearest"
+    assert status() == "COMPATIBLE"  # read as rounded values, 118.5-121.5 reaches 121
+
+
+def test_the_file_facts_at_the_top_are_not_read_as_the_paper():
+    text = "---\npaper_id: DOC_1\nconverted_at: 2026-11-22T07:14:33+09:00\n---\n\nOf 40 people, 12 (30.0%) agreed."
+    report = analyze(text, source_id="sample")
+    assert [r["raw"] for r in report["records"]] == ["40", "12", "30.0"]
+    assert report["records"][0]["source"]["line"] == 6  # line numbers stay those of the file
+
+
+@pytest.mark.parametrize("text, values, issues", [
+    ("Far (> 20,000): 64%.", ["20000", "64"], []),
+    # a decimal comma elsewhere (0,031): 1,200 may be one too
+    ("n = 1,200 and p = 0,031.", [], ["AMBIGUOUS_NUMBER_FORMAT"]),
+    # digits grouped with points (1.200): 1,250 may be a decimal comma
+    ("Stichprobe 1.200, Anteil 1,250.", ["1.200"], ["AMBIGUOUS_NUMBER_FORMAT"]),
+])
+def test_thousands_commas_are_read_only_where_no_decimal_comma_is_possible(text, values, issues):
+    report = analyze(text, source_id="sample")
+    assert [r["value"] for r in report["records"]] == values
+    assert [i["kind"] for i in report["input_issues"]] == issues

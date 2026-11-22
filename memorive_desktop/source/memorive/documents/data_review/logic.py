@@ -6,13 +6,13 @@ import json
 import re
 from pathlib import Path
 from typing import Mapping
-from memorive.documents.data_review.engine import digest
+from memorive.documents.data_review.engine import body_text, digest
 from memorive.documents.data_review.store import atomic
 
 PROMPT_VERSION='LiteratureLogicPrompt-v6-claim-scope'
 GLOBAL_INPUT_CONTRACT='LiteratureGlobalInput-v2-local-coverage'
 GLOBAL_PROMPT_VERSION='LiteratureLogicGlobalPrompt-v7-claim-scope'
-DECISION_POLICY_VERSION='LiteratureLogicDecisionPolicy-v3-distinct-evidence'
+DECISION_POLICY_VERSION='LiteratureLogicDecisionPolicy-v4-quotes-across-lines'
 LOGIC_NODE='E2_LOGIC_REVIEW'
 
 def prompt_version(part):
@@ -102,7 +102,8 @@ def segments(text,max_chars=18000,*,full_document_budget=None,packed_document_bu
     the JSON input. The whole text goes in one request when it fits: as plain lines within
     full_document_budget, else as a lossless source packet within packed_document_budget. Only a text
     that fits neither is split into local segments of at most max_chars."""
-    lines=text.splitlines()
+    # the model reads the paper, not the RawMD file facts above it; line numbers stay the same
+    lines=body_text(text).splitlines()
     whole={'segment_id':'segment-1','mode':'FULL_DOCUMENT','start_line':1,'end_line':len(lines),'context_start_line':1}
     if lines and full_document_budget:
         plain={**whole,'text':'\n'.join(f'L{i}: {line}' for i,line in enumerate(lines,1))}
@@ -280,6 +281,48 @@ def segment_budget(mode, *, max_chars, source_sha256, language_context, packed=F
     return max_chars-len(fixed.encode('utf-8'))+_json_bytes(sample)
 
 
+def _locate_quote(lines, index, quote, first, last):
+    """Where an exact quote sits on lines[index]: (begin, end), or None. RawMD keeps the PDF's line breaks,
+    so a quoted sentence may start on an earlier line or run on into later ones (lines first..last); there
+    each line break reads as a space. The quote must cover part of lines[index]."""
+    begin=lines[index].find(quote)
+    if begin>=0:
+        return begin,begin+len(quote)
+    words=' '.join(quote.split())
+    if not words:
+        return None
+    low,high=index,index
+    while low>first and sum(len(lines[i]) for i in range(low,index))<len(words):
+        low-=1
+    while high<last and sum(len(lines[i]) for i in range(index+1,high+1))<len(words):
+        high+=1
+    parts=[' '.join(lines[i].split()) for i in range(low,high+1)]
+    own=sum(len(part)+1 for part in parts[:index-low])
+    own_end=own+len(parts[index-low])
+    text=' '.join(parts)
+    at=text.find(words)
+    while at>=0:
+        if at<own_end and at+len(words)>own:
+            raw=lines[index]
+            begin=_raw_index(raw,at-own) if at>own else 0
+            end=_raw_index(raw,at+len(words)-own) if at+len(words)<own_end else len(raw)
+            return begin,end
+        at=text.find(words,at+1)
+    return None
+
+
+def _raw_index(raw, at):
+    """The index in raw of position at of ' '.join(raw.split())."""
+    count,space=0,True
+    for index,char in enumerate(raw):
+        if not (char.isspace() and space):
+            if count==at:
+                return index
+            count+=1
+        space=char.isspace()
+    return len(raw)
+
+
 def _distinct_passages(spans):
     """Repeated or overlapping quotes cannot supply both sides of a comparison."""
     return any(text != other_text and (line != other_line or end <= other_begin or other_end <= begin)
@@ -301,10 +344,16 @@ def validate_response(value,*,text,segment):
             raise ValueError('LOGIC_CITATION_NOT_IN_SUPPLIED_SOURCE')
         if 'allowed_lines' in segment and line not in segment['allowed_lines']:
             raise ValueError('LOGIC_CITATION_NOT_IN_GLOBAL_SOURCE_PACKET')
-        begin=lines[line-1].find(quote)
-        if begin<0:
+        # the supplied lines around it, for a sentence broken across lines
+        first,last=line,line
+        while first>segment['context_start_line'] and ('allowed_lines' not in segment or first-1 in segment['allowed_lines']):
+            first-=1
+        while last<segment['end_line'] and ('allowed_lines' not in segment or last+1 in segment['allowed_lines']):
+            last+=1
+        span=_locate_quote(lines,line-1,quote,first-1,last-1)
+        if span is None:
             raise ValueError('LOGIC_CITATION_NOT_IN_SUPPLIED_SOURCE')
-        return line,begin,begin+len(quote),quote.strip().casefold()
+        return line,span[0],span[1],quote.strip().casefold()
     for item in value.get('relation_inventory',{}).get('items',[]):
         verify_citation(item['citation'])
     if segment.get('mode')=='GLOBAL_RELATIONS':

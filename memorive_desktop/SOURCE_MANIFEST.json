@@ -477,8 +477,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "0d6d58e4f1414df3e3e1f1440a94c6475103fd3a8e79102c70aee48711aa7ec6",
-      "bytes": 2597887
+      "sha256": "d8c91eebac7aef5e7a51dcc2df28c91b83efd4a5a11a7297cdbb042c12aadc6c",
+      "bytes": 2602811
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -3212,8 +3212,8 @@
     },
     {
       "path": "source/memorive/documents/data_review/engine.py",
-      "sha256": "392df040c402aee513b121f10424901f5232dfd6c19fa2fafa66179fae552505",
-      "bytes": 44417
+      "sha256": "cd54e9902b6f58f0052c6266b842ca17a26d8cff8901182edf335b24d6dcb052",
+      "bytes": 46295
     },
     {
       "path": "source/memorive/documents/data_review/formats.py",
@@ -3232,8 +3232,8 @@
     },
     {
       "path": "source/memorive/documents/data_review/logic.py",
-      "sha256": "465e8ecbfee78dee2592912af203d464dd837c8cd52912777017d57c1693edc9",
-      "bytes": 31343
+      "sha256": "45662817cd8355e48a3f8755ca4b8d7213f87669667c0247117f43475be7f59c",
+      "bytes": 33505
     },
     {
       "path": "source/memorive/documents/data_review/pdf_assist.py",

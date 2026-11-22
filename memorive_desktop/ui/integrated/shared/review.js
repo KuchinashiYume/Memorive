@@ -114,7 +114,7 @@
     }));
     return button;
   };
-  const ruleNames={percentage:'比例与计数',sum:'分项合计',sd_se:'SD / SE 关系',cross:'同一量交叉核对',grid_mean:'离散量均值',test_p:'统计量与 p 值',raw_summary:'原始数值摘要',ci_p:'置信区间与 p 值'};
+  const ruleNames={literal_arithmetic:'印刷算式',numeric_domain:'取值范围',percentage:'比例与计数',sum:'分项合计',sd_se:'SD / SE 关系',cross:'同一量交叉核对',grid_mean:'离散量均值',test_p:'统计量与 p 值',raw_summary:'原始数值摘要',ci_p:'置信区间与 p 值'};
   const inputNames={count:'计数',denominator:'分母',percent:'百分比',parts:'分项数值',total:'合计',sd:'SD',se:'SE',n:'n',left:'左侧数值',right:'右侧数值',mean:'均值',statistic:'统计量',p:'p 值',values:'原始数值',
     reported_n:'报告样本量',reported_mean:'报告均值',reported_sd:'报告标准差',lower:'区间下限',upper:'区间上限'};
   const paramNames={unweighted_count:'未加权计数',rounding:'舍入方式',mutually_exclusive:'各部分互斥',exhaustive:'各部分穷尽总体',definition:'SE 定义',same_quantity:'明确为同一量',step:'离散步长',origin:'起点',equal_weights:'等权',distribution:'分布',tail:'尾部',adjustment:'校正',df:'自由度',df1:'分子自由度',df2:'分母自由度',missing_policy:'缺失值处理',weights:'权重',sd_denominator:'标准差定义',
@@ -122,7 +122,7 @@
   const spec={percentage:[['count','denominator','percent'],['unweighted_count','rounding']],sum:[['parts','total'],['mutually_exclusive','exhaustive','rounding']],sd_se:[['sd','se','n'],['definition','rounding']],cross:[['left','right'],['same_quantity','rounding']],grid_mean:[['mean','n'],['step','origin','equal_weights','rounding']],test_p:[['statistic','p'],['distribution','tail','adjustment','df','df1','df2','rounding']],
     raw_summary:[['values','reported_n','reported_mean','reported_sd'],['missing_policy','weights','sd_denominator','exact_complete_sample','rounding']],
     ci_p:[['lower','upper','p'],['relationship','alpha','null_value','rounding']]};
-  const choices={rounding:[['nearest','四舍五入'],['toward_zero','向零截断']],definition:[['independent_equal_weight_mean','独立、等权均值']],distribution:[['normal','正态'],['t','t'],['chi_square','卡方'],['f','F']],tail:[['two_sided','双侧'],['upper','上尾'],['lower','下尾']],adjustment:[['none','未校正']],missing_policy:[['no_missing','无缺失']],weights:[['equal','等权']],sd_denominator:[['sample','样本'],['population','总体']],
+  const choices={rounding:[['nearest','四舍五入'],['toward_zero','向零截断'],['exact','未舍入（如人数、计数）']],definition:[['independent_equal_weight_mean','独立、等权均值']],distribution:[['normal','正态'],['t','t'],['chi_square','卡方'],['f','F']],tail:[['two_sided','双侧'],['upper','上尾'],['lower','下尾']],adjustment:[['none','未校正']],missing_policy:[['no_missing','无缺失']],weights:[['equal','等权']],sd_denominator:[['sample','样本'],['population','总体']],
     relationship:[['same_two_sided_test_inversion','区间由同一双侧检验反演'],['different_model_or_method','区间与检验采用不同方法']]};
   Object.assign(copy,{
     '置信区间与 p 值':['Confidence interval and p value','信頼区間と p 値'],
@@ -136,6 +136,25 @@
     '区间与检验采用不同方法':['Interval and test use different methods','区間と検定で異なる方法を使用'],
     '选填报告样本量、均值或标准差可逐项对照原始值。':['Fill in any reported summary to compare it with the raw values.','報告された要約値を入力すると、生データと照合できます。'],
     '与原始值不相容':['Incompatible with the raw values','生データと整合しない'],
+    'INPUT_SELECTOR_NOT_UNIQUE_OR_NOT_FOUND':['The value was not found in the quote, or more than one matched. Make the quote more specific.','原文引用の中にこの数値が見つからないか、複数見つかりました。引用をより具体的にしてください。','原文片段里找不到这个数值，或者找到不止一个。请把片段写得更具体。'],
+    'EXACT_VALUE_AND_SOURCE_QUOTE_REQUIRED':['Each value needs its exact text and a source quote.','各数値に原表記と原文引用が必要です。','每个数值都要填原样数值和原文片段。'],
+    'SOURCE_OCCURRENCE_INVALID':['The chosen occurrence is beyond the matches found.','指定した出現順が見つかった数を超えています。','指定的出现次序超出了找到的数量。'],
+    'INPUT_RECORD_NOT_FOUND':['A value the rule refers to is no longer in the text.','ルールが参照する数値が原文にありません。','规则用到的数值已不在原文里。'],
+    'SCALAR_REQUIRED':['This needs a single value, not a bound such as <0.05.','ここには <0.05 のような範囲ではなく、一つの値が必要です。','这里要一个确定的数值，不能是 <0.05 这样的范围。'],
+    'ROUNDING_RULE_REQUIRED':['Choose how the values were rounded.','丸め方を選んでください。','请选择舍入方式。'],
+    'COUNT_INVALID':['The count must be a whole number between 0 and the denominator.','件数は 0 以上、分母以下の整数である必要があります。','计数要是 0 到分母之间的整数。'],
+    'UNWEIGHTED_COUNT_REQUIRED':['Only an unweighted count can be compared with the percentage.','重み付けのない件数だけが割合と比較できます。','只有未加权计数能和百分比直接比较。'],
+    'EXHAUSTIVE_DISJOINT_PARTS_REQUIRED':['The parts must not overlap and must make up the whole.','各部分が重ならず、合わせて全体になる必要があります。','各部分要互不重叠，合起来正好是总体。'],
+    'DUPLICATE_PART_RECORD':['The same value was chosen twice.','同じ数値が二回選ばれています。','同一个数值被选了两次。'],
+    'DUPLICATE_OBSERVATION_RECORD':['The same value was chosen twice.','同じ数値が二回選ばれています。','同一个数值被选了两次。'],
+    'UNIT_MISMATCH_CONVERSION_NOT_DECLARED':['The values have different units and the rule gives no conversion.','数値の単位が異なり、換算方法が指定されていません。','数值的单位不同，规则里没有说明怎样换算。'],
+    'SAME_QUANTITY_BINDING_REQUIRED':['Confirm first that both values are the same quantity.','まず二つの値が同じ量であることを確認してください。','要先确认两处说的是同一个量。'],
+    'EXACT_COMPLETE_SAMPLE_REQUIRED':['Reported values are compared only when the raw values are the complete, exact sample.','生データが完全で正確な標本の場合にのみ報告値と比較します。','只有确认原始值是全部、精确的样本，才和报告值比较。'],
+    'RULE_NOT_SUPPORTED':['This kind of rule is not supported yet.','この種類のルールはまだ対応していません。','这种规则还不支持。'],
+    'AMBIGUOUS_NUMBER_FORMAT':['Number format unclear (1,200 may be a thousands separator or a decimal); not checked','数値の書き方が判別できません（1,200 は桁区切りか小数か不明）。確認していません','数字写法无法确定（1,200 可能是千位分隔，也可能是小数），没有核查'],
+    'UNSUPPORTED_NUMBER':['Number could not be read; not checked','数値を読み取れません。確認していません','数字无法读取，没有核查'],
+    'TABLE_COLUMN_MISMATCH':['Table row does not match its header; not checked','表の行が見出しと合いません。確認していません','表格这一行和表头列数不一致，没有核查'],
+    '印刷算式':['Printed arithmetic','印刷された計算'],'取值范围':['Value range','値の範囲'],'没有完成核查':['Not checked','確認できませんでした'],
     'CI_P_DECISION_UNRESOLVED_AT_REPORTED_PRECISION':['The reported precision does not resolve the decision.','報告された精度では判定できません。','报告精度不足以确定是否排除原假设值。'],
     'CI_P_SAME_TWO_SIDED_TEST_REQUIRED':['The interval and p value must come from the same two-sided test.','区間と p 値は同じ両側検定に対応する必要があります。','区间和 p 值须来自同一双侧检验。']
   });
@@ -143,7 +162,7 @@
     '比例与计数':['Proportion and counts','割合と件数'],'分项合计':['Sum of parts','内訳の合計'],'SD / SE 关系':['SD / SE relationship','SD / SE の関係'],'同一量交叉核对':['Cross-check the same quantity','同じ量の照合'],'离散量均值':['Discrete mean','離散値の平均'],'统计量与 p 值':['Statistic and p value','統計量と p 値'],'原始数值摘要':['Raw-value summary','生データの要約'],
     '计数':['Count','件数'],'分母':['Denominator','分母'],'百分比':['Percent','割合'],'分项数值':['Parts','内訳'],'合计':['Total','合計'],'左侧数值':['Left value','左の値'],'右侧数值':['Right value','右の値'],'均值':['Mean','平均'],'统计量':['Statistic','統計量'],'p 值':['p value','p 値'],'原始数值':['Raw values','生データ'],
     '未加权计数':['Unweighted counts','重みなしの件数'],'舍入方式':['Rounding','丸め方'],'各部分互斥':['Mutually exclusive parts','互いに排他的な内訳'],'各部分穷尽总体':['Exhaustive parts','全体を網羅する内訳'],'SE 定义':['SE definition','SE の定義'],'明确为同一量':['Explicitly the same quantity','同じ量と明示'],'离散步长':['Discrete step','刻み幅'],'起点':['Origin','原点'],'等权':['Equal weights','等しい重み'],'分布':['Distribution','分布'],'尾部':['Tail','裾'],'校正':['Adjustment','補正'],'自由度':['Degrees of freedom','自由度'],'分子自由度':['Numerator df','分子の自由度'],'分母自由度':['Denominator df','分母の自由度'],'缺失值处理':['Missing values','欠測値の扱い'],'权重':['Weights','重み'],'标准差定义':['SD definition','標準偏差の定義'],
-    '四舍五入':['Nearest','最近接丸め'],'向零截断':['Toward zero','ゼロ方向に切り捨て'],'独立、等权均值':['Independent, equally weighted mean','独立・等加重の平均'],'正态':['Normal','正規'],'卡方':['Chi-square','カイ二乗'],'双侧':['Two-sided','両側'],'上尾':['Upper','上側'],'下尾':['Lower','下側'],'未校正':['Unadjusted','補正なし'],'无缺失':['No missing values','欠測なし'],'样本':['Sample','標本'],'总体':['Population','母集団']
+    '四舍五入':['Nearest','最近接丸め'],'向零截断':['Toward zero','ゼロ方向に切り捨て'],'未舍入（如人数、计数）':['Not rounded (counts, for example)','丸めなし（人数・件数など）'],'独立、等权均值':['Independent, equally weighted mean','独立・等加重の平均'],'正态':['Normal','正規'],'卡方':['Chi-square','カイ二乗'],'双侧':['Two-sided','両側'],'上尾':['Upper','上側'],'下尾':['Lower','下側'],'未校正':['Unadjusted','補正なし'],'无缺失':['No missing values','欠測なし'],'样本':['Sample','標本'],'总体':['Population','母集団']
   });
   function openBindings(id,saved,frozen){
     const d=el('dialog',null,'paper-review-dialog');
@@ -385,6 +404,9 @@
     for(const limitation of scope.limitations||[])body.append(el('p',rt(limitation)));
     if(scope.not_run?.length)body.append(el('h4',rt('未覆盖范围')),el('p',scope.not_run.map(rt).join(' · ')));
     for(const note of report.missing_parameters||[])body.append(el('p',note));
+    const issues=new Map();
+    for(const issue of report.input_issues||[])issues.set(issue.kind,[...(issues.get(issue.kind)||[]),'L'+issue.line]);
+    for(const [kind,lines] of issues)body.append(el('p',rt(kind)+'：'+lines.join('、')));
     const statuses={COMPATIBLE:'条件相容',INCONSISTENT:'条件不相容',INSUFFICIENT_INFORMATION:'信息不足',INPUT_ERROR:'输入问题',NOT_APPLICABLE:'不适用'};
     if(report.checks?.length)body.append(el('h4',rt('核查结果')));
     const records=new Map([...(report.records||[]),...(report.supplemental_records||[])].map(r=>[r.record_id,r]));
@@ -392,9 +414,9 @@
       const d=el('details',null,'paper-review-check');
       d.open=check.status!=='COMPATIBLE';
       d.append(el('summary',rt(ruleNames[check.type]||check.type)+' · '+rt(statuses[check.status]||check.status)));
-      if(check.reason)d.append(el('p',rt(check.reason)));
+      if(check.reason)d.append(el('p',copy[check.reason]?rt(check.reason):rt('没有完成核查')+'（'+check.reason+'）'));
       if(check.calculation?.formula)d.append(el('p',rt('公式')+'：'+check.calculation.formula));
-      for(const key of ['expected','expected_interval','reported_interval'])if(check.calculation?.[key]!=null)d.append(el('p',rt(key==='reported_interval'?'报告区间':'期待区间')+'：'+[].concat(check.calculation[key]).join(' — ')));
+      for(const key of ['expected','expected_interval','reported_interval'])if(check.calculation?.[key]!=null)d.append(el('p',rt(key==='reported_interval'?'报告区间':'期待区间')+'：'+[].concat(check.calculation[key]).map(v=>String(v).replace(/^(-?\d+\.\d{6})\d+$/,'$1…')).join(' — ')));
       if(check.missing?.length)d.append(el('p',rt('缺少参数')+'：'+check.missing.map(k=>rt(inputNames[k.split('.')[1]]||paramNames[k.split('.')[1]]||k)).join('、')));
       const mismatched=check.calculation?.mismatched_reported_fields;
       if(mismatched?.length)d.append(el('p',rt('与原始值不相容')+'：'+mismatched.map(key=>rt(inputNames[key])).join('、')));
@@ -444,7 +466,8 @@
       select.setAttribute('aria-label',t('核查项目'));
       for(const f of report.findings){
         const check=report.checks?.find(c=>c.rule_id===f.rule_id);
-        const option=el('option',f.claim||t(ruleNames[check?.type]||f.rule_id));
+        const line=check?.binding_source?.line||records.get(check?.input_ids?.[0])?.source?.line;
+        const option=el('option',f.claim||t(ruleNames[check?.type]||check?.type||f.rule_id)+(line?' · L'+line:''));
         option.value=f.finding_id;
         select.append(option);
       }
