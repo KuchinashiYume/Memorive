@@ -4,6 +4,9 @@ from collections.abc import Mapping
 SOURCE='https://api-docs.deepseek.com/zh-cn/quick_start/pricing/'
 VERIFIED_AT='2026-09-14'
 FLASH_ALIASES={'deepseek-v4-flash':'deepseek-flash','deepseek-v4-flash-vision-exp':'deepseek-flash'}
+# The name the model reference sources (Epoch AI, LiveBench, OpenRouter) give a model that the official API
+# lists under another name. desktop/settings/external_sources.py looks a model's references up under both.
+REFERENCE_NAMES={'deepseek-flash':'deepseek-v4-flash'}
 def official_deepseek(service):
     if 'deepseek' not in str(service.get('provider','')).lower():
         return False

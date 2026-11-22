@@ -420,6 +420,8 @@ def _reference_matches(target: Mapping[str, Any], rows: list[Mapping[str, Any]])
     wanted = str(target.get("model_name") or "").casefold()
     if not wanted:
         return []
+    from memorive.models.provider_aliases import REFERENCE_NAMES
+    wanted_names = {wanted} | ({REFERENCE_NAMES[wanted]} if wanted in REFERENCE_NAMES else set())
     effort = str(target.get("thinking_mode") or "").casefold().removeprefix("adaptive-")
     suffix = _EFFORT_SUFFIX
     exact, envelopes, catalog, livebench = [], [], [], []
@@ -428,22 +430,22 @@ def _reference_matches(target: Mapping[str, Any], rows: list[Mapping[str, Any]])
         names = {str(row.get(k) or "").casefold() for k in ("model_id", "model_slug", "model_name")}
         identifier = str(row.get("model_id") or "").casefold()
         if (row.get("source_id") == "epoch-ai" and "eci" in row.get("metrics", {})
-                and suffix.sub("", identifier) == wanted and identifier != wanted):
+                and suffix.sub("", identifier) in wanted_names and identifier not in wanted_names):
             row["match_kind"] = "MODEL_ENVELOPE_REFERENCE"
             envelopes.append(row)
-        elif row.get('upstream_source')=='livebench' and row.get('model_slug') == wanted:
+        elif row.get('upstream_source')=='livebench' and row.get('model_slug') in wanted_names:
             row['match_kind']='SOURCE_BASE_MODEL_REFERENCE'
             row['effort_mismatch']=bool(effort and row.get('benchmark_effort') and effort!=row['benchmark_effort'])
             livebench.append(row)
-        elif wanted in names:
+        elif wanted_names & names:
             row["match_kind"] = "EXACT_SOURCE_ID"
             exact.append(row)
         elif row.get("source_id") == "openrouter" and "/" in identifier:
             provider, model = identifier.split("/", 1)
-            if provider in {"openai", "anthropic", "deepseek", "qwen", "moonshotai"} and model == wanted:
+            if provider in {"openai", "anthropic", "deepseek", "qwen", "moonshotai"} and model in wanted_names:
                 row["match_kind"] = "OFFICIAL_PROVIDER_PREFIX"
                 catalog.append(row)
-    preferred = [row for row in envelopes if row["model_id"].casefold() == wanted + "_" + effort]
+    preferred = [row for row in envelopes if row["model_id"].casefold() in {name + "_" + effort for name in wanted_names}]
     if preferred:
         envelopes = preferred
     elif len({canonical_sha256(row["metrics"]) for row in envelopes}) > 1:

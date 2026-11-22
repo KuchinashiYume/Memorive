@@ -4006,7 +4006,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c8dbac8490260c33589bc41510c4ac3b1bcf06205666546ebb663c8833acd39d",
+      "sha256": "cf746ae9c57988e8bb13fee81f5abdc4a62a85256fa94a57eabc18f55b15675c",
       "bytes": 275297
     },
     {
@@ -5221,8 +5221,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/models/provider_aliases.py",
-      "sha256": "95c0a6f9b914ce1327e630956e0df4b93cd7e2faeb91c61a1451294ffcad3393",
-      "bytes": 1924
+      "sha256": "0b4c55a1739919905a4e90eaca2440c339e99da714ee59113057149f9288cc2c",
+      "bytes": 2197
     },
     {
       "path": "memorive_desktop/source/memorive/models/request_options.py",
@@ -9301,8 +9301,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/settings/external_sources.py",
-      "sha256": "07236c23b5b6c5c6174572505cee3dc2de58993212a5101366b6269670094304",
-      "bytes": 71072
+      "sha256": "056b7f2892561b24dffd77cf4667b8d45df2bdb614fd4294914d271f03e9f37a",
+      "bytes": 71295
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/settings/leaderboard.py",
