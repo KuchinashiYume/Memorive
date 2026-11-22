@@ -1,10 +1,9 @@
-"""Browser companion for capturing chat sessions: finds installed browsers (browsers.py), knows the
-page layout of supported chat sites (site_profiles.py), and keeps the position up to which a
-conversation was archived (incremental_cursor.py).
+"""The browser extension that records web AI conversations (extension/), and its desktop side: the installed
+browsers (browsers.py) and the official chat websites it records on (site_profiles.py).
 
-desktop.py (BrowserCompanionDesktop) is what the desktop runs: installing, reloading and syncing the
-extension and importing browser session files. ProductApi (memorive/desktop/api/) builds it; api/browser_companion.py forwards the
-window's browser companion calls to it; the session archive (memorive/sessions/archive) uses site_profiles.py.
+desktop.py (BrowserCompanionDesktop) is what the desktop runs: preparing the extension, telling whether the
+browser loaded it, and importing its recordings. ProductApi (memorive/desktop/api/) builds it; api/browser_companion.py
+forwards the window's calls to it; the session controller and archive (memorive/sessions/) use site_profiles.py.
 """
 
 from pathlib import Path

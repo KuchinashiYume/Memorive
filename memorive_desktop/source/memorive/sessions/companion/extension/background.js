@@ -2,8 +2,6 @@
 
 importScripts('site_profiles.js', 'browser_identity.js');
 const SITE_CONFIG = globalThis.MEMORIVE_SITE_PROFILES;
-const ACTIVE_SITES = SITE_CONFIG.sites.filter(row => row.enabled);
-const ACTIVE_IDS = ACTIVE_SITES.map(row => row.provider_id);
 
 const IDENTITY_VERSION_MARKER_PREFIX = "memorive_identity_receipt_";
 const IDENTITY_VERSION_MARKER_MINUTES = 525600;
@@ -13,6 +11,8 @@ const safeErrorCode = (error) => {
   return raw.replace(/[^A-Z0-9_]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 120) || "UNKNOWN_ERROR";
 };
 
+// The identity receipt tells Memorive which extension the browser loaded (memorive/sessions/companion/desktop.py
+// _latest_browser_companion_identity_receipt): its id, version and browser.
 const writeIdentityReceipt = async (reason) => {
   const manifest = chrome.runtime.getManifest();
   const payload = {
@@ -21,16 +21,7 @@ const writeIdentityReceipt = async (reason) => {
     extension_version: manifest.version,
     browser_family: await MEMORIVE_BROWSER_IDENTITY.detect(),
     observed_at: new Date().toISOString(),
-    lifecycle_reason: String(reason || "UNKNOWN").toUpperCase(),
-    trigger_protocol: "HTTPS_APPROVED_FRAGMENT_V3",
-    preflight_limit: 2,
-    full_limit: 50,
-    incremental_limit: 10,
-    providers: ACTIVE_IDS,
-    site_profile_sha256: SITE_CONFIG.sha256,
-    cookie_value_reads: 0,
-    browser_storage_value_reads: 0,
-    hidden_provider_api_calls: 0
+    lifecycle_reason: String(reason || "UNKNOWN").toUpperCase()
   };
   const encoded = encodeURIComponent(JSON.stringify(payload, null, 2));
   await chrome.downloads.download({

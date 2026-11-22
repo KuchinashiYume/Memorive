@@ -45,9 +45,8 @@ Every source file starts with a comment that says what it is for and who uses it
 
 The settings page has a category list on the left (`<button class="desktop-settings-category" data-category="...">` in `routes/settings/markup.html`) and one panel per category (`data-panel="..."`). `routes/settings/model-picker.js` switches between them.
 
-A panel with much code of its own gets its own script next to `settings.js`, as the browser companion
-(`browser-companion.js`), the browser sites (`browser-sites.js`) and the reset of a category to its defaults
-(`scoped-reset.js`) have; the rules for model services that the forms and the developer editor share are in
+A panel with much code of its own gets its own script next to `settings.js`, as the browser extension
+(`browser-companion.js`) and the reset of a category to its defaults (`scoped-reset.js`) have; the rules for model services that the forms and the developer editor share are in
 `model-rules.js`. A panel that saves its own data registers with the page's Save and Revert buttons:
 
 ```js
@@ -131,7 +130,7 @@ itself. `settings.js` and `browser-companion.js` call them through the settings 
 | `research_memo.py` | `memo_agent_config`, `memo_desktop_apps`, `memo_desktop_handoff_action`, `memo_open_evidence`, `memo_pick_agent_app`, `memo_pick_materials`, `memo_pick_vault`, `memo_prepare_desktop_handoff`, `memo_skill_targets`, `memo_skill_install`, `memo_skill_pick_folder`, `memo_skill_forget` | `routes/chat/workspace.js`, `routes/settings/research-connections.js`, `routes/settings/skill-install.js` |
 | `artifacts.py` | `open_library_core_artifact`, `open_library_refinement_artifact`, `locate_library_core_source`, `locate_library_refinement_artifact`, `open_structure_original` | `routes/library/bridge.js`, `shared/structure-review.js` |
 | `settings_page.py` | `api_call_readiness`, `get_console_connection`, `set_console_connection`, `pick_settings_directory`, `open_settings_log_directory`, `clear_temporary_cache`, `test_network_connection`, `test_external_library`, `import_redacted_settings_file`, `export_redacted_settings_file`, `export_support_bundle_file`, `export_cli_template_file`, `record_settings_save_receipt` | `routes/settings/settings.js` |
-| `browser_companion.py` | `browser_companion_status`, `install_browser_companion`, `open_browser_companion_folder`, `open_browser_companion_site`, `save_browser_companion_sites`, `run_browser_companion_sync`, `run_browser_companion_full_sync`, `run_browser_companion_reload`, `run_browser_companion_test_read`, `sync_browser_sessions_from_downloads`, `import_browser_sessions_file` | `routes/settings/browser-companion.js`, `routes/settings/browser-sites.js`, `routes/sessions/bridge.js` |
+| `browser_companion.py` | `browser_companion_status`, `install_browser_companion`, `open_browser_companion_folder`, `sync_browser_sessions_from_downloads`, `import_browser_sessions_file` | `routes/settings/browser-companion.js`, `routes/sessions/bridge.js` |
 | `links.py` | `open_project_page`, `open_local_help`, `open_developer_sdk` | `routes/settings/settings.js`, `routes/settings/developer-clients.js` |
 
 A script that calls Python waits for the `pywebviewready` event when `window.pywebview.api` is not there yet.
@@ -175,7 +174,7 @@ Scripts talk to each other through what they publish in `window.Memorive` (each 
 | `desktop:workflow-config-updated` | `routes/settings/settings.js` | `routes/settings/external-sources.js`, `routes/tasks/view.js` |
 | `desktop:external-sources-changed`, `desktop:external-model-reference` | `routes/settings/external-sources.js` | `routes/inbox/research-home.js`, `routes/leaderboard/view.js`, `routes/settings/exam-panel.js` |
 | `desktop:research-preferences-saved` | `shared/research.js` | `shared/research.js`, `routes/settings/external-sources.js` |
-| `desktop:browser-companion-updated` | `routes/sessions/bridge.js`, `routes/settings/browser-sites.js` | `routes/settings/settings.js` |
+| `desktop:browser-companion-updated` | `routes/sessions/bridge.js` | `routes/settings/settings.js` |
 | `desktop:display-currency-changed` | `shared/accounting.js`, `routes/leaderboard/view.js` | the same two |
 | `desktop:model-commerce-context-changed` | `routes/leaderboard/view.js` | `shared/accounting.js` |
 | `desktop:current-task-production-mode`, `-production-bindings`, `-refinement-bindings`, `-override-state` | `routes/tasks/bridge.js` | `routes/tasks/view.js` |

@@ -17,71 +17,11 @@ from tests.test_browser_capture_successor_repair import (  # noqa: E402
     _conversation,
     _library,
 )
-from memorive.desktop.api import ProductApi  # noqa: E402
-from browser_companion_support import companion  # noqa: E402
 from memorive.sessions.archive import (  # noqa: E402
     ArchiveInputError,
     BrowserLibraryImporter,
     SessionArchive,
 )
-
-
-def test_terminal_sync_report_accepts_runner_timeout_metadata(tmp_path: Path) -> None:
-    report = {
-        "schema_version": "MEMORIVE_BROWSER_SESSION_SYNC_REPORT_V2",
-        "source": "MEMORIVE_BROWSER_COMPANION_RUNNER_V4_DRAFT",
-        "extension_id": "jfgfakepddanncmccgbckjpllhaklghi",
-        "extension_version": "3.5.0",
-        "per_provider_limit": 2,
-        "sync_mode": "PREFLIGHT",
-        "browser_family": "EDGE",
-        "generated_at": "2026-08-29T07:39:28.932Z",
-        "trigger": "APPROVED_PROVIDER_FRAGMENT_PREFLIGHT_V1",
-        "status": "COMPLETE",
-        "error_code": "",
-        "hard_timeout_ms": 1_200_000,
-        "active_provider_count": 3,
-        "provider_parallelism": True,
-        "maximum_capture_windows": 1,
-        "per_provider_capture_mode": "DEDICATED_MINIMIZED_WINDOW_OWNED_TABS",
-        "window_mode": "DEDICATED_MINIMIZED",
-        "user_tab_reused": False,
-        "providers": [
-            {
-                "provider_id": provider,
-                "status": "COMPLETE",
-                "indexed_count": 2,
-                "candidate_count": 2,
-                "capture_target": 2,
-                "body_read_count": 2,
-                "captured_count": 2,
-                "unchanged_count": 0,
-                "failed_count": 0,
-                "skipped_candidate_count": 0,
-                "error_code": "",
-                "skipped_error_codes": [],
-                "safe_diagnostic": None,
-            }
-            for provider in ("deepseek", "gemini", "kimi")
-        ],
-        "cookie_value_reads": 0,
-        "browser_storage_value_reads": 0,
-        "hidden_provider_api_calls": 0,
-        "remote_session_mutations": 0,
-    }
-    report_path = tmp_path / "memorive-session-library-sync-report-real-3-5-0.json"
-    report_path.write_text(json.dumps(report), encoding="utf-8")
-    api = companion()
-    api._browser_session_download_roots = lambda: [tmp_path]
-
-    loaded = api._latest_browser_companion_sync_report(  # noqa: SLF001
-        expected_sync_mode="PREFLIGHT"
-    )
-
-    assert loaded is not None
-    assert loaded["extension_version"] == "3.5.0"
-    assert loaded["status"] == "COMPLETE"
-    assert all(row["captured_count"] == 2 for row in loaded["providers"].values())
 
 
 def test_verified_zero_change_incremental_bundle_is_an_accepted_noop(

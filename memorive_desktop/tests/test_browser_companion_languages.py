@@ -8,7 +8,6 @@ from pathlib import Path
 import re
 
 from browser_companion_support import companion  # noqa: E402
-from memorive.sessions.companion.site_profiles import configured_extension, default_sites  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 EXTENSION = ROOT / "source" / "memorive" / "sessions" / "companion" / "extension"
@@ -71,11 +70,3 @@ def test_the_prepared_extension_folder_carries_the_three_languages(tmp_path: Pat
     for name in LANGUAGE_FILES | {"i18n.js"}:
         assert (folder / name).read_bytes() == (EXTENSION / name).read_bytes(), name
 
-
-def test_a_package_for_changed_sites_carries_them_too(tmp_path: Path) -> None:
-    sites = default_sites()
-    sites[0]["enabled"] = False
-    folder = configured_extension(EXTENSION, tmp_path / "packages", sites)
-    for name in LANGUAGE_FILES:
-        assert (folder / name).read_bytes() == (EXTENSION / name).read_bytes(), name
-    assert json.loads((folder / "manifest.json").read_text(encoding="utf-8"))["name"] == "__MSG_extName__"
