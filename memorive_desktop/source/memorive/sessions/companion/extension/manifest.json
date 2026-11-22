@@ -19,7 +19,20 @@
     "https://chat.qwen.ai/*",
     "https://chatgpt.com/*",
     "https://claude.ai/*",
-    "https://grok.com/*"
+    "https://grok.com/*",
+    "https://www.qianwen.com/*",
+    "https://qianwen.com/*",
+    "https://tongyi.aliyun.com/*",
+    "https://www.doubao.com/*",
+    "https://doubao.com/*",
+    "https://yuanbao.tencent.com/*",
+    "https://yiyan.baidu.com/*",
+    "https://chatglm.cn/*",
+    "https://copilot.microsoft.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
+    "https://poe.com/*",
+    "https://chat.mistral.ai/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -39,7 +52,20 @@
         "https://chat.qwen.ai/*",
         "https://chatgpt.com/*",
         "https://claude.ai/*",
-        "https://grok.com/*"
+        "https://grok.com/*",
+        "https://www.qianwen.com/*",
+        "https://qianwen.com/*",
+        "https://tongyi.aliyun.com/*",
+        "https://www.doubao.com/*",
+        "https://doubao.com/*",
+        "https://yuanbao.tencent.com/*",
+        "https://yiyan.baidu.com/*",
+        "https://chatglm.cn/*",
+        "https://copilot.microsoft.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*",
+        "https://poe.com/*",
+        "https://chat.mistral.ai/*"
       ],
       "js": [
         "site_profiles.js",

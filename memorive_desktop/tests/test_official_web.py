@@ -121,3 +121,15 @@ def test_the_extension_may_read_every_official_ai_website_it_records():
     manifest=json.loads((ROOT/"source/memorive/sessions/companion/extension/manifest.json").read_text(encoding="utf-8"))
     assert manifest["host_permissions"]==manifest["content_scripts"][0]["matches"]==capture_patterns()
     assert {"https://chatgpt.com/*","https://claude.ai/*","https://grok.com/*","https://chat.qwen.ai/*"}<=set(capture_patterns())
+
+
+@pytest.mark.parametrize(("url", "name"), [
+    ("https://www.qianwen.com/chat/1", "千问"), ("https://www.doubao.com/chat/1", "豆包"),
+    ("https://yuanbao.tencent.com/chat/1", "腾讯元宝"), ("https://yiyan.baidu.com/chat/1", "文心一言"),
+    ("https://chatglm.cn/main/1", "智谱清言"), ("https://copilot.microsoft.com/chats/1", "Copilot"),
+    ("https://www.perplexity.ai/search/1", "Perplexity"), ("https://poe.com/chat/1", "Poe"),
+    ("https://chat.mistral.ai/chat/1", "Le Chat"),
+])
+def test_more_official_ai_websites_are_recognised(url, name):
+    assert official_web_identity(url)["name"] == name
+    assert f"https://{official_web_identity(url)['hosts'][0]}/*" in capture_patterns()

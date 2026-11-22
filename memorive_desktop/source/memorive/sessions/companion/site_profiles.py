@@ -21,7 +21,7 @@ GENERIC = dict(path_prefix='/chat/', history='nav a[href], aside a[href]',
     assistant='[data-message-author-role="assistant"], [data-role="assistant"]')
 # Security authority is bundled code reviewed against provider-owned pages.
 # Replaceable benchmark feeds and user selectors cannot add trusted domains.
-OFFICIAL_WEB_REVISION = "Desktop_OFFICIAL_CHAT_ORIGINS_20260914_V2"
+OFFICIAL_WEB_REVISION = "Desktop_OFFICIAL_CHAT_ORIGINS_20261122_V3"
 OFFICIAL_WEB_SITES = (
     ("deepseek", "DeepSeek", ("chat.deepseek.com",), "https://www.deepseek.com/"),
     ("gemini", "Gemini", ("gemini.google.com",), "https://support.google.com/gemini/answer/14886647"),
@@ -30,6 +30,16 @@ OFFICIAL_WEB_SITES = (
     ("chatgpt", "ChatGPT", ("chatgpt.com",), "https://help.openai.com/en/articles/9125172-the-chatgpt-home-page"),
     ("claude", "Claude", ("claude.ai",), "https://support.claude.com/en/articles/8114491-get-started-with-claude"),
     ("grok", "Grok", ("grok.com",), "https://docs.x.ai/grok/overview"),
+    # 2026-11-22: more chat websites to record. 千问 is Alibaba's consumer assistant (formerly 通义), now on qianwen.com.
+    ("qianwen", "千问", ("www.qianwen.com", "qianwen.com", "tongyi.aliyun.com"), "https://www.qianwen.com/"),
+    ("doubao", "豆包", ("www.doubao.com", "doubao.com"), "https://www.doubao.com/"),
+    ("yuanbao", "腾讯元宝", ("yuanbao.tencent.com",), "https://yuanbao.tencent.com/"),
+    ("yiyan", "文心一言", ("yiyan.baidu.com",), "https://yiyan.baidu.com/"),
+    ("chatglm", "智谱清言", ("chatglm.cn",), "https://chatglm.cn/"),
+    ("copilot", "Copilot", ("copilot.microsoft.com",), "https://copilot.microsoft.com/"),
+    ("perplexity", "Perplexity", ("www.perplexity.ai", "perplexity.ai"), "https://www.perplexity.ai/"),
+    ("poe", "Poe", ("poe.com",), "https://poe.com/"),
+    ("mistral", "Le Chat", ("chat.mistral.ai",), "https://mistral.ai/"),
 )
 
 def official_web_identity(raw):

@@ -4006,7 +4006,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "654516ba2252f9c74e66be79281758b2e517819dfbf9c9fc882f02df82dacd56",
+      "sha256": "c843582db60cb52063a04c92e85e9425b54d1d921e23e037eb4c13a98e6256ea",
       "bytes": 276124
     },
     {
@@ -6851,8 +6851,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/README.txt",
-      "sha256": "d68da8f369382002ccffd84179ebe7ba889c9b711fc3978e98d47f6b1186389e",
-      "bytes": 7923
+      "sha256": "4c1e67c88ccc2e3003c02c60b364703cb04e1f69735c41348395e501e49df088",
+      "bytes": 8322
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/background.js",
@@ -6871,8 +6871,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/manifest.json",
-      "sha256": "1b71634d0d1f1e78d61b62140043311a3723687655ae9570551f944cb92733c2",
-      "bytes": 1251
+      "sha256": "725df54e97bbb7b7fa6406e55a06f9431baf4ecd9a4ee89dd04fa344fa7abf02",
+      "bytes": 2165
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/popup.css",
@@ -6906,8 +6906,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/site_profiles.js",
-      "sha256": "136a997af1bab644d8417b88b4d79ce5e65d3b4d73e005d9be1fb0b01e9d4940",
-      "bytes": 2666
+      "sha256": "648310c6d156c43b0ee5d4856930de79a157ea028cd2ed5dc3a8164ee78367b3",
+      "bytes": 2902
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/incremental_cursor.py",
@@ -6916,8 +6916,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/site_profiles.py",
-      "sha256": "2da956a50f0f07d0337c307c79889f7e779ea9ae8ebb142ff3af1350a140fd04",
-      "bytes": 13388
+      "sha256": "90a547273faf66bf6d3c938d1214025e3ff3a1d48733696c185eed6537ef1bad",
+      "bytes": 14289
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/edge_visible_ui.py",
@@ -9836,8 +9836,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/common.py",
-      "sha256": "821915c6218d2e9fb11b1b20bff05d35624ca5308c0b84364b51063a7a3a184d",
-      "bytes": 14787
+      "sha256": "793759a7e012eea5462af67d6fe1d0532d2aeae9d4d81d08ac18b7a9ca378199",
+      "bytes": 14874
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/listing.py",

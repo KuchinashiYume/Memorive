@@ -26,8 +26,9 @@ Syncs started by Memorive
 Supported websites
 - Sync reads DeepSeek, Gemini and Kimi by default; change this in Memorive under Settings > Conversation
   Refinement > Web Session Library.
-- Recording the current page works on the official websites of DeepSeek, Gemini, Kimi, Qwen, ChatGPT, Claude and
-  Grok, matched by full domain; mirror sites are not supported.
+- Recording the current page works on the official websites of DeepSeek, Gemini, Kimi, Qwen, 千问 (Qianwen),
+  ChatGPT, Claude, Grok, Doubao, Tencent Yuanbao, ERNIE Bot (文心一言), Zhipu Qingyan (智谱清言), Microsoft Copilot,
+  Perplexity, Poe and Mistral Le Chat, matched by full domain; mirror sites are not supported.
 
 Install and update
 1. Prepare the extension in Memorive, then load the folder on the extensions page of Edge, Chrome or Brave.
@@ -59,7 +60,8 @@ Memorive 发起的同步
 
 支持的网站
 - 同步默认读取 DeepSeek、Gemini、Kimi，可以在 Memorive「设置 → 对话精炼设置 → 网页会话库」里更改。
-- 录入当前页面支持 DeepSeek、Gemini、Kimi、Qwen、ChatGPT、Claude、Grok 的官网，按完整域名匹配，不支持镜像站。
+- 录入当前页面支持 DeepSeek、Gemini、Kimi、Qwen、千问、ChatGPT、Claude、Grok、豆包、腾讯元宝、文心一言、智谱清言、
+  Microsoft Copilot、Perplexity、Poe、Mistral Le Chat 的官网，按完整域名匹配，不支持镜像站。
 
 安装和更新
 1. 在 Memorive 里准备插件，然后在 Edge、Chrome 或 Brave 的扩展管理页加载生成的文件夹。
@@ -92,8 +94,8 @@ Memorive から始める同期
 
 対応サイト
 - 同期は既定で DeepSeek、Gemini、Kimi を読み取ります。Memorive の「設定 → 会話精製設定 → Web セッションライブラリ」で変更できます。
-- 現在のページの記録は DeepSeek、Gemini、Kimi、Qwen、ChatGPT、Claude、Grok の公式サイトで使えます。完全なドメインで照合し、
-  ミラーサイトには対応しません。
+- 現在のページの記録は DeepSeek、Gemini、Kimi、Qwen、千問、ChatGPT、Claude、Grok、豆包、騰訊元宝、文心一言、智譜清言、
+  Microsoft Copilot、Perplexity、Poe、Mistral Le Chat の公式サイトで使えます。完全なドメインで照合し、ミラーサイトには対応しません。
 
 インストールと更新
 1. Memorive で拡張機能を準備し、Edge、Chrome、Brave の拡張機能管理ページで作成されたフォルダーを読み込みます。

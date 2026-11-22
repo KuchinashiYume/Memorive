@@ -133,6 +133,8 @@ _UNIVERSAL_SITE_NAMES = {
     "doubao.com": "豆包网页",
     "yuanbao.tencent.com": "腾讯元宝网页",
     "poe.com": "Poe 网页",
+    "yiyan.baidu.com": "文心一言网页",
+    "chatglm.cn": "智谱清言网页",
 }
 
 
