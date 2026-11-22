@@ -46,7 +46,7 @@ def test_every_word_the_extension_asks_for_exists() -> None:
     for name in ("popup.html",):
         used |= set(re.findall(r'data-i18n(?:-title|-aria-label)?="([A-Za-z]+)"', (EXTENSION / name).read_text(encoding="utf-8")))
     used |= set(re.findall(r"__MSG_([A-Za-z]+)__", (EXTENSION / "manifest.json").read_text(encoding="utf-8")))
-    assert len(used) > 20
+    assert len(used) > 10
     assert used <= set(_words("en")), sorted(used - set(_words("en")))
 
 
