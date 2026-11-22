@@ -294,6 +294,7 @@ const exportVisibleConversation = async (conversation, sourceUrl) => {
       message_id: String(row.message_id || `universal-${index + 1}`).slice(0, 240),
       role: row.role,
       content_kind: "text",
+      content_format: "MARKDOWN_V1",
       content: String(row.text || "").trim(),
       occurred_at: "UNKNOWN"
     })).filter((row) => row.content)

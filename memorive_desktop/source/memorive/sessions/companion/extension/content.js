@@ -604,9 +604,12 @@
     if (element.matches("a,sup") && NUMERIC_CITATION_TEXT.test(text)) return true;
     return !isRoot && text.length <= 32 && MESSAGE_ACTION_TEXT.test(text);
   };
+  // The text of one message as light Markdown (content_format MARKDOWN_V1 in the export): a link keeps its
+  // address as [text](url), a code block keeps its lines and indentation in a fenced block with its language,
+  // inline code sits in backticks. Code blocks are set aside while the spacing of the prose is tidied.
   const structuredMessageText = (node) => {
     if (!(node instanceof Element) || messageNoiseElement(node, true)) return "";
-    const chunks = [];
+    const chunks = [], codeBlocks = [];
     const appendBreak = () => {
       if (chunks.length && chunks[chunks.length - 1] !== "\n") chunks.push("\n");
     };
@@ -619,6 +622,26 @@
       if (current.tagName === "BR") {
         appendBreak();
         return;
+      }
+      if (current.tagName === "PRE") {
+        const code = current.querySelector("code") || current;
+        const language = /(?:^|\s)(?:language|lang)-([\w+#.-]+)/i.exec(`${code.className || ""} ${current.className || ""}`)?.[1] || "";
+        appendBreak();
+        chunks.push(`\ue000${codeBlocks.length}\ue001`);
+        codeBlocks.push("```" + language + "\n" + String(code.textContent || "").replace(/\n+$/, "") + "\n```");
+        appendBreak();
+        return;
+      }
+      if (current.tagName === "CODE") {
+        chunks.push("`" + String(current.textContent || "") + "`");
+        return;
+      }
+      if (current.tagName === "A") {
+        const href = current.getAttribute("href") || "", label = cleanText(current.textContent);
+        if (/^https?:\/\//i.test(href) && label) {
+          chunks.push(label === href ? href : `[${label}](${href})`);
+          return;
+        }
       }
       const block = MESSAGE_BLOCK_TAGS.has(current.tagName);
       if (block) appendBreak();
@@ -665,7 +688,8 @@
       normalized.push(pendingBullet ? `• ${trimmed}` : line.trimStart());
       pendingBullet = false;
     }
-    return normalized.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+    return normalized.join("\n").replace(/\n{3,}/g, "\n\n").trim()
+      .replace(/\ue000(\d+)\ue001/g, (_, index) => codeBlocks[Number(index)]);
   };
   const roleMarker = (node) => {
     let current = node;

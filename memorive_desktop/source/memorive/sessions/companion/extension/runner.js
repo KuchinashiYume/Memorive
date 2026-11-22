@@ -582,6 +582,7 @@ const archiveConversation = (conversation) => {
       message_id: message.message_id,
       role: message.role,
       content_kind: "text",
+      content_format: "MARKDOWN_V1",
       content: message.text,
       occurred_at: occurredAt
     }))

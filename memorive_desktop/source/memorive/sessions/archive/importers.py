@@ -96,6 +96,13 @@ def _normalized_visible_message_content(value: Any) -> str:
     return "\n".join(normalized).strip()
 
 
+def _markdown_message_content(value: Any) -> str:
+    """A browser message written as light Markdown (content_format MARKDOWN_V1): links with their address and
+    code blocks with their indentation. Only line endings and trailing spaces are tidied."""
+    content = _required_text(value, "content").replace("\r\n", "\n").replace("\r", "\n")
+    return "\n".join(line.rstrip() for line in content.split("\n")).strip("\n")
+
+
 def _iso_timestamp(value: Any, field_name: str) -> str:
     text = _required_text(value, field_name)
     try:
@@ -683,12 +690,19 @@ class BrowserLibraryImporter:
                 raise ArchiveInputError("BROWSER_MESSAGE_ROLE_INVALID")
             if content_kind not in {"text", "thinking", "tool"}:
                 raise ArchiveInputError("BROWSER_MESSAGE_KIND_INVALID")
+            content_format = message.get("content_format")
+            if content_format not in {None, "MARKDOWN_V1"}:
+                raise ArchiveInputError("BROWSER_MESSAGE_FORMAT_UNSUPPORTED")
             messages.append(
                 NormalizedMessage(
                     message_id=_required_text(message.get("message_id"), "message_id"),
                     role=role,
                     content_kind=content_kind,
-                    content=_normalized_visible_message_content(message.get("content")),
+                    content=(
+                        _markdown_message_content(message.get("content"))
+                        if content_format == "MARKDOWN_V1"
+                        else _normalized_visible_message_content(message.get("content"))
+                    ),
                     occurred_at=_browser_timestamp(
                         message.get("occurred_at"), "occurred_at"
                     ),

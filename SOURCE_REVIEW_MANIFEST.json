@@ -4006,7 +4006,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "9c3d97d7f2e529dc746d8008a6bf45ec4a657b270407ff116f5747a24b2e191b",
+      "sha256": "077c8e0d19264a0dee6b20b3e7c51552dbfd1d48267b4c9a6c741c1c91b71ea6",
       "bytes": 275298
     },
     {
@@ -6821,8 +6821,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/archive/importers.py",
-      "sha256": "f48b03ebfae6d3ae1f1d0992be35b03f0fa59f17e7e1d23e8d1e2e46e3d03ea8",
-      "bytes": 33846
+      "sha256": "551a7c271c9e5f8368d379e8848ec867c158f8e67334316ea9757ef477166998",
+      "bytes": 34667
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/archive/models.py",
@@ -6856,8 +6856,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/background.js",
-      "sha256": "dc9c599c377a188f45b8ec77ef02fc8331d8587c25a51d5367d3bb4812d4df08",
-      "bytes": 27964
+      "sha256": "078f216b29eff0cadce1ccf84ee00c7a4a0830c9d02f68cf108080789d2dba2d",
+      "bytes": 28002
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/browser_identity.js",
@@ -6866,8 +6866,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/content.js",
-      "sha256": "a06c386b8525bfbd79d7cc2a238b1842ed4e75da44953dd5e3595c700815acf4",
-      "bytes": 57242
+      "sha256": "9db1894b197ef50f2bd200ecf24e4b5a4db98ccce32570bf73c38d689f426bbb",
+      "bytes": 58586
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/manifest.json",
@@ -6901,8 +6901,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/runner.js",
-      "sha256": "f6ec715f577c7dc572b34d45dd1ea23afcafd40b5d90b05e13242743b1bd5d51",
-      "bytes": 42849
+      "sha256": "6916c2f809a592edaa9d25b23e31b6397191cc67a00ab44772d1422ebd4f5404",
+      "bytes": 42887
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/site_profiles.js",
