@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
+import re
 import sqlite3
 from typing import Any, Iterable, Mapping
 from memorive.platform.windows_paths import windows_io_path
@@ -20,6 +21,9 @@ from memorive.sessions.controller.common import (
     _sha256_json,
     _text,
 )
+
+
+_CODEX_FILE_SESSION_ID = re.compile(r"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$")
 
 
 class LocalCliSessionsMixin:
@@ -394,12 +398,21 @@ class LocalCliSessionsMixin:
         index = home / "session_index.jsonl"
         if not index.is_file():
             return []
-        file_map: dict[str, Path] = {}
+        # Codex names a session file rollout-<time>-<session id>.jsonl; older files end in _<session id>.
+        # Two files claiming one id: the one whose session_meta carries that id.
+        candidates: dict[str, list[Path]] = {}
         for root in self._allowed_record_roots("codex"):
             if not root.is_dir():
                 continue
             for path in root.rglob("*.jsonl"):
-                file_map.setdefault(path.stem.rsplit("_", 1)[-1], path.resolve())
+                match = _CODEX_FILE_SESSION_ID.search(path.stem)
+                session_id = match.group(1) if match else path.stem.rsplit("_", 1)[-1]
+                candidates.setdefault(session_id, []).append(path.resolve())
+        file_map: dict[str, Path] = {
+            session_id: next((path for path in paths if self._codex_embedded_session_id(path) == session_id), paths[0])
+            if len(paths) > 1 else paths[0]
+            for session_id, paths in candidates.items()
+        }
         rows: list[dict[str, Any]] = []
         excluded_internal = 0
         with index.open("r", encoding="utf-8", errors="replace") as handle:
