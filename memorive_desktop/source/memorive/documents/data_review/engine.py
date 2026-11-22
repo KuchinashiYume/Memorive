@@ -16,7 +16,7 @@ import time
 from typing import Any, Callable, Mapping
 
 ENGINE_VERSION = 'MemoriveDataEngine-v8'
-RULE_VERSION = 'ExplicitNumericRules-v6'
+RULE_VERSION = 'ExplicitNumericRules-v7'
 MAX_BYTES = 4_000_000
 MAX_RECORDS = 20_000
 MAX_RULES = 200
@@ -105,7 +105,8 @@ def interval(record: Mapping[str,Any], *, rounding: str = 'nearest', exact: bool
     relation=record.get('relation','')
     if relation not in ('','='):
         raise ValueError('SCALAR_REQUIRED')
-    if exact:
+    # 'exact': the printed value was not rounded (a count, for example), so it stands for itself.
+    if exact or rounding=='exact':
         return (value,value)
     step=Decimal(1).scaleb(value.as_tuple().exponent)
     if rounding=='display_precision_envelope':
@@ -306,9 +307,16 @@ def _inside_quote(row, quote):
     return False
 
 
+def _printed_as(row, text):
+    """Whether text is the record as the paper prints it: its raw number, alone or followed by the unit the
+    extractor recorded for it ("64%" or "64 %" for 64 with unit %, "5 mg" for 5 with unit mg)."""
+    unit = row.get('unit_literal', '')
+    return text == row['raw'] or bool(unit) and text.startswith(row['raw']) and text[len(row['raw']):].lstrip() == unit
+
+
 def _resolve_rule_inputs(inputs, records, result):
-    """Each input of the rule as its record (or list of records): a record id, or the exact raw value and
-    source quote of one record. The ids used are added to result['input_ids']."""
+    """Each input of the rule as its record (or list of records): a record id, or the exact printed value
+    (with or without its unit) and source quote of one record. The ids used are added to result['input_ids']."""
     resolved={}
     for key,ids in inputs.items():
         sequence=ids if isinstance(ids,list) else [ids]
@@ -317,7 +325,7 @@ def _resolve_rule_inputs(inputs, records, result):
             if isinstance(selector,Mapping):
                 if not isinstance(selector.get('raw'),str) or not isinstance(selector.get('quote'),str) or not selector['quote'].strip():
                     raise ValueError('EXACT_VALUE_AND_SOURCE_QUOTE_REQUIRED')
-                candidates=[row for row in records.values() if row['raw']==selector['raw'] and selector['quote'] in row['source'].get('quote','')
+                candidates=[row for row in records.values() if _printed_as(row,selector['raw']) and selector['quote'] in row['source'].get('quote','')
                     and ('line' not in selector or selector['line']==row['source'].get('line'))]
                 if len(candidates)>1 and 'occurrence' not in selector:
                     # Equal numbers on one line (A=2; B=2): the value is the one inside the quoted text.

@@ -309,3 +309,31 @@ def test_a_text_whose_plain_prompt_fits_goes_in_one_request(text):
                      calculation_headroom=512)
     assert [part["mode"] for part in parts] == ["FULL_DOCUMENT"] and "source_packet" not in parts[0]
     assert len(prompt(parts[0], **budget).encode("utf-8")) <= 8000
+
+
+BROKEN = "\n".join([
+    "Accuracy fell with distance. With",
+    "revision-aware re-ranking: 90%, 84% and 78%.",
+    "We conclude re-ranking removes the drop.",
+])
+
+
+@pytest.mark.parametrize("line, quote", [
+    (2, "With revision-aware re-ranking: 90%, 84% and 78%."),  # starts at the end of the line before
+    (1, "With revision-aware re-ranking"),  # runs on into the next line
+])
+def test_a_quote_broken_across_pdf_lines_is_found(line, quote):
+    citations = [_citation(line, quote), _citation(3, "removes the drop")]
+    result = validate_response(_response(_finding(citations=citations)), text=BROKEN,
+                               segment={"context_start_line": 1, "end_line": 3})
+    assert len(result["findings"]) == 1
+
+
+@pytest.mark.parametrize("line, quote", [
+    (3, "With revision-aware re-ranking"),  # in the text, but not on or across line 3
+    (2, "With revision-aware re-ranking: 91%"),  # not what the paper says
+])
+def test_a_quote_that_does_not_touch_its_cited_line_is_still_refused(line, quote):
+    with pytest.raises(ValueError, match="LOGIC_CITATION_NOT_IN_SUPPLIED_SOURCE"):
+        validate_response(_response(_finding(citations=[_citation(line, quote)])), text=BROKEN,
+                          segment={"context_start_line": 1, "end_line": 3})
