@@ -429,6 +429,7 @@ class SessionsProductController(
         if task is None:
             inbox_item = self._find_inbox_refinement(projection_id)
             if inbox_item is not None:
+                queued = inbox_item.get("state") == "QUEUED"
                 return {
                     "schema_version": "DesktopSessionRefinementTaskProjection-v2",
                     "task": None,
@@ -436,13 +437,16 @@ class SessionsProductController(
                     "draft": None,
                     "status": (
                         "INBOX_QUEUED"
-                        if inbox_item.get("state") == "QUEUED"
+                        if queued
                         else "INBOX_PROCESSING"
                         if inbox_item.get("state") == "PROCESSING"
                         else "INBOX_FAILED"
                     ),
+                    # A queued refinement starts only while the inbox runs tasks automatically; the page says so.
+                    **({"auto_run": self._refinement_auto_run_enabled()} if queued else {}),
                 }
         if task is not None and task.get("control_state") != "SUCCEEDED":
+            queued = task.get("control_state") == "QUEUED"
             return {
                 "schema_version": "DesktopSessionRefinementTaskProjection-v1",
                 "task": task,
@@ -453,6 +457,7 @@ class SessionsProductController(
                     "FAILED": "TASK_FAILED",
                     "CANCELLED": "TASK_CANCELLED",
                 }.get(str(task.get("control_state")), "TASK_STATE_UNKNOWN"),
+                **({"auto_run": self._refinement_auto_run_enabled()} if queued else {}),
             }
         path = self._refinement_root / f"{projection_id}.json"
         if not path.is_file():

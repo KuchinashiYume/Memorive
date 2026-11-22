@@ -197,8 +197,7 @@
     if (!workload) return row && row.error && row.error.code || '属性读取中';
     if (row?.item_kind === 'SESSION_REFINEMENT') {
       if (row.state === 'ERROR') {
-        const code = String(row.error?.code || 'SESSION_REFINEMENT_EXECUTION_FAILED');
-        return `执行异常 · ${code}`;
+        return `执行异常 · ${Memorive.refinementStatus.failureText(row.error?.code)}`;
       }
       return `${workload.label || '消息'} ${workload.value || row.message_count || 0} · 会话精炼队列`;
     }
@@ -565,13 +564,6 @@
     q('#inbox-properties-heading').textContent = enabled ? '任务属性' : '文件属性';
   };
 
-  const formatRefinementError = (code) => ({
-    REFINEMENT_MESSAGE_FIELDS_INVALID: '会话格式不兼容，请重新创建精炼任务。',
-    SESSION_REFINEMENT_CANCELLED: '任务已由用户取消，没有继续调用模型。',
-    SESSION_REFINEMENT_PROFILE_EXECUTION_UNAVAILABLE: '所选模型当前没有可用的精炼执行通道。',
-    SESSION_REFINEMENT_MODEL_NOT_CONFIGURED: '尚未选择精炼模型，请先前往设置完成配置。'
-  })[String(code || '')] || (code ? `执行失败：${code}` : '排队中');
-
   const renderRefinementDetail = (item) => {
     setInspectorDeleteItem(item);
     const panel = q('#inbox-preview');
@@ -593,9 +585,7 @@
     const title = document.createElement('h5');
     title.textContent = item?.state === 'ERROR' ? '精炼未完成' : '';
     const description = document.createElement('p');
-    description.textContent = errorCode
-      ? formatRefinementError(errorCode)
-      : '排队中';
+    description.textContent = errorCode ? Memorive.refinementStatus.failureText(errorCode) : '排队中';
     const profile = document.createElement('div');
     profile.className = 'desktop-inbox-preview-code';
     profile.textContent = [

@@ -1,5 +1,5 @@
-/* Draws the session management page: the source tabs, session cards, the selected session's turns, and the confirm
-   countdowns of removal and refinement retry. Publishes Memorive.sessionsView and reads its data through
+/* Draws the session management page: the source tabs, session cards, the selected session's turns, the removal
+   confirm countdown and the refinement state. Publishes Memorive.sessionsView and reads its data through
    Memorive.sessionsBridge. */
 (() => {
   'use strict';
@@ -41,6 +41,7 @@
   let refinementProfileStartEligible = false;
   let refinementProfileKind = '';
   let refinementProfileExecutionStatus = 'MODEL_NOT_CONFIGURED';
+  let refinementModelState = 'UNSELECTED';
   let refinementExecutionReady = false;
   let selectedRefinementEligible = false;
   let activeRefinementJobId = null;
@@ -50,9 +51,6 @@
   let pageTriggerElement = null;
   let pageLoadRequested = false;
   let pageTriggerOptions = null;
-  const REFINEMENT_RETRY_COUNTDOWN_SECONDS = 3;
-  let refinementRetryTimer = 0;
-  let refinementRetryProjectionId = null;
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)') || { matches:false };
 
   const cards = () => qa('.desktop-sessions-card');
@@ -140,6 +138,7 @@
       projection?.selected_profile_execution_status || 'PROFILE_NOT_CONFIGURED'
     );
     refinementExecutionReady = projection?.execution_ready === true;
+    refinementModelState = String(projection?.model_state || 'UNSELECTED');
     return refinementModelConfigured
       && refinementProfileStartEligible
       && refinementExecutionReady;
@@ -151,42 +150,6 @@
     || !refinementProfileStartEligible
     || !refinementExecutionReady
   );
-
-  const clearRefinementRetryReset = () => {
-    window.clearInterval(refinementRetryTimer);
-    refinementRetryTimer = 0;
-    refinementRetryProjectionId = null;
-  };
-
-  const scheduleRefinementRetryReset = (projectionId, errorCode = '') => {
-    clearRefinementRetryReset();
-    if (projectionId !== selectedProjectionId) return;
-    refinementRetryProjectionId = projectionId;
-    let remaining = REFINEMENT_RETRY_COUNTDOWN_SECONDS;
-    const button = q('#sessions-refine');
-    const render = () => {
-      if (refinementRetryProjectionId !== selectedProjectionId) {
-        clearRefinementRetryReset();
-        return;
-      }
-      button.disabled = false;
-      button.textContent = `执行失败 · ${remaining}`;
-      setRefineState(`精炼任务执行失败${errorCode ? `（${errorCode}）` : ''}；可立即点击重试，或等待 ${remaining} 秒恢复。`);
-    };
-    render();
-    refinementRetryTimer = window.setInterval(() => {
-      remaining -= 1;
-      if (remaining > 0) {
-        render();
-        return;
-      }
-      clearRefinementRetryReset();
-      if (projectionId !== selectedProjectionId) return;
-      button.disabled = refinementStartDisabled();
-      button.textContent = '精炼对话';
-      setRefineState('上次执行失败，现已可重新精炼。');
-    }, 1000);
-  };
 
   const clearToastTimers = () => {
     window.clearTimeout(toastTimer);
@@ -452,7 +415,6 @@
   const closeDetail = ({ restoreFocus = false, immediate = false } = {}) => {
     const closingCard = selectedCard;
     resetDeleteConfirm();
-    clearRefinementRetryReset();
     selectedCard = null;
     selectedProjectionId = null;
     selectedRefinementEligible = false;
@@ -480,7 +442,6 @@
   const renderCapability = (card) => {
     window.clearInterval(deleteConfirmTimer);
     deleteConfirmTimer = 0;
-    clearRefinementRetryReset();
     const canDelete = Boolean(card.dataset.delete);
     q('#sessions-readonly').hidden = canDelete;
     q('#sessions-delete-start').hidden = !canDelete;
@@ -684,14 +645,12 @@
       ? '该记录仅包含录入时的当前页可见内容；可按该范围精炼，任务快照会保留部分内容标记。'
       : !complete
       ? '会话未完整读取，请重新同步。'
-      : !refinementModelConfigured
-        ? '请先选择精炼模型'
+      : refinementModelState === 'UNSELECTED'
+        ? '请先在设置中选择精炼模型'
+        : refinementModelState === 'REMOVED'
+          ? '原来的精炼模型已移除，请在设置中重新选择'
         : !refinementProfileStartEligible
-          ? ['API', 'CLI'].includes(refinementProfileKind)
-            ? '请先验证模型'
-            : refinementProfileExecutionStatus === 'LOCAL_REFINEMENT_EXECUTION_NOT_ELIGIBLE'
-              ? '当前模型不可用'
-              : '当前模型不可用'
+          ? ['API', 'CLI'].includes(refinementProfileKind) ? '请先验证模型' : '当前模型不可用'
         : !refinementExecutionReady
           ? '精炼服务未就绪'
         : !refinementProfileExecutionEligible
@@ -763,32 +722,33 @@
     const status = projection?.status;
     const button = q('#sessions-refine');
     const jobId = projection?.task?.job_id || projection?.job_id || activeRefinementJobId;
-    if (['INBOX_QUEUED', 'INBOX_PROCESSING', 'TASK_CREATED', 'TASK_QUEUED', 'TASK_RUNNING'].includes(status)) {
-      clearRefinementRetryReset();
+    const queued = ['INBOX_QUEUED', 'TASK_CREATED', 'TASK_QUEUED'].includes(status);
+    if (queued || ['INBOX_PROCESSING', 'TASK_RUNNING'].includes(status)) {
       activeRefinementJobId = jobId;
       button.disabled = true;
       button.textContent = '请在收件箱中查看';
-      setRefineState(status === 'INBOX_QUEUED' ? '已加入队列' : '精炼中');
+      // A queued refinement starts only while the inbox runs tasks automatically.
+      setRefineState(!queued ? '精炼中，可在收件箱查看进度'
+        : projection?.auto_run === false ? '已加入队列；收件箱的自动处理已关闭，请在收件箱开启' : '已加入队列');
       return true;
     }
     if (status === 'PASS') {
-      clearRefinementRetryReset();
       activeRefinementJobId = null;
       // New messages since this refinement: it can be refined again (the earlier draft stays shown until then).
       button.disabled = projection?.source_changed ? refinementStartDisabled() : true;
       button.textContent = projection?.source_changed ? '精炼对话' : '精炼完成';
       return renderRefinementDraft(projection);
     }
-    if (status === 'TASK_FAILED' || status === 'TASK_CANCELLED') {
+    if (['TASK_FAILED', 'INBOX_FAILED', 'TASK_CANCELLED'].includes(status)) {
       activeRefinementJobId = null;
-      const errorCode = projection?.task?.error_code || projection?.error_code || '';
-      if (status === 'TASK_FAILED') {
-        scheduleRefinementRetryReset(projectionId, errorCode);
-      } else {
-        clearRefinementRetryReset();
-        button.disabled = refinementStartDisabled();
-        button.textContent = '精炼对话';
+      button.disabled = refinementStartDisabled();
+      button.textContent = '精炼对话';
+      if (status === 'TASK_CANCELLED') {
         setRefineState('精炼任务已取消，可重新精炼。');
+      } else {
+        // The sentence says why and what to do; the error code is the tooltip.
+        const errorCode = projection?.task?.error_code || projection?.inbox_item?.error?.code || projection?.error_code || '';
+        setRefineState(Memorive.refinementStatus.failureText(errorCode), { title:errorCode });
       }
       return true;
     }
@@ -985,7 +945,6 @@
   });
   q('#sessions-refine').addEventListener('click', () => {
     if (!selectedProjectionId || q('#sessions-refine').disabled) return;
-    clearRefinementRetryReset();
     const button = q('#sessions-refine');
     button.disabled = true;
     button.textContent = '精炼中…';
@@ -1006,7 +965,7 @@
           showToast('该会话已有精炼任务，未重复创建。');
         }
       })
-      .catch((error) => showToast(`对话精炼失败：${error?.message || error}`))
+      .catch((error) => showToast(Memorive.refinementStatus.failureText(error?.code || error?.message)))
       .finally(() => {
         if (!activeRefinementJobId) {
           button.disabled = refinementStartDisabled();

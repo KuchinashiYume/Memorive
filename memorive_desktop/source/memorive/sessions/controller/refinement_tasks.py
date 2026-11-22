@@ -186,6 +186,13 @@ class RefinementTasksMixin:
                 else "MODEL_NOT_CONFIGURED"
             ),
             "execution_ready": execution_ready,
+            # What the settings and session pages say about the chosen model.
+            "model_state": (
+                "UNSELECTED" if not configured
+                else "REMOVED" if selected_option is None
+                else "READY" if execution_ready
+                else "UNAVAILABLE"
+            ),
             "external_model_calls": 0,
             "review_required": True,
             "auto_ingest": False,

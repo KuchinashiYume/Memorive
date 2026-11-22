@@ -407,8 +407,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "091a78a80423e0174daf99e4bc3cf292a08679fb840ff76dffed2423545bbb07",
-      "bytes": 2611997
+      "sha256": "6c4dcb3888e77a35f681b9eb2fb5f1a8a36bcba281cc8977e4cb4f6a924ad156",
+      "bytes": 2617688
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -6987,8 +6987,8 @@
     },
     {
       "path": "source/memorive/sessions/controller/product_controller.py",
-      "sha256": "1b250d02d67f509631c31a01f8e1d99821e11f4534ab0e9b9d7f6a801116d49b",
-      "bytes": 28604
+      "sha256": "53795c959d5655ed32080e08ce348079a5a43d8f2926fc46a17a9cef70c713cd",
+      "bytes": 28996
     },
     {
       "path": "source/memorive/sessions/controller/refinement_queue.py",
@@ -6997,8 +6997,8 @@
     },
     {
       "path": "source/memorive/sessions/controller/refinement_tasks.py",
-      "sha256": "1bf6cd731cff6813f0573decb03a5d1ac14761f2a4de581290bbe6e48436a2e8",
-      "bytes": 35517
+      "sha256": "263e1dde004c713d85227a59df52b17aeed2077d7d64b9fd719859581d1ef6ca",
+      "bytes": 35834
     },
     {
       "path": "source/memorive/sessions/controller/state.py",

@@ -177,9 +177,6 @@
       'refinement.tasks.help': '',
       'refinement.risks.title': 'Extract risks',
       'refinement.risks.help': '',
-      'refinement.status.configured': 'Configured; results still require human review.',
-      'refinement.status.unconfigured': 'Unavailable until a model is configured.',
-      'refinement.status.saved': 'Saved; results still require human review.',
       'refinement.saved.toast': 'Conversation refinement settings saved.',
       'browser.title': 'Web conversation library',
       'browser.help': 'Load the read-only bridge once. Later updates are automatic. Sync reads conversations in dedicated windows, one site at a time, and closes those windows when finished.',
@@ -339,9 +336,6 @@
       'refinement.tasks.help': '',
       'refinement.risks.title': 'リスクを抽出',
       'refinement.risks.help': '',
-      'refinement.status.configured': '設定済みです。結果は人による確認が必要です。',
-      'refinement.status.unconfigured': 'モデルを設定するまで利用できません。',
-      'refinement.status.saved': '保存しました。結果は人による確認が必要です。',
       'refinement.saved.toast': '会話精製の設定を保存しました。',
       'browser.title': 'Web 会話ライブラリ',
       'browser.help': '読取専用ブリッジは初回だけ読み込みます。以後の更新は自動です。同期は専用ウィンドウでサイトを順番に読み取り、完了後にそのウィンドウを閉じます。',
@@ -444,7 +438,7 @@
     if (String(raw).toLowerCase().startsWith('en')) return 'en-US';
     return 'zh-CN';
   };
-  const COPY_SETTINGS = Object.freeze({"browser.result.partial":["已读取 {count} 条 · {failed} 个网站需重试", "Read {count} chats · {failed} websites need retry", "{count} 件読み取り済み · {failed} サイトで再試行が必要"],"browser.result.done":["会话已同步 · 本次读取 {count} 条", "Chats synced · {count} read this time", "会話を同期済み · 今回 {count} 件を読み取り"],"browser.stage.read-failed":["本次读取未完成","Current read incomplete","今回の読み取りが未完了"],"browser.progress.no-receipt":["未收到本次读取结果 · 可重试","No result received · retry available","今回の結果未受信 · 再試行できます"],"browser.progress.manual-load":["待加载插件","Load extension","拡張の読み込み待ち"],"browser.progress.importing":["正在导入会话","Importing conversations","会話を取り込み中"],"browser.progress.import-failed":["会话导入失败 · 可重试","Import failed · retry available","取り込み失敗 · 再試行できます"],"browser.help":["连接浏览器以同步会话","Connect your browser to sync conversations","ブラウザーを接続して会話を同期"],"local.protocol.help":["发现本机模型服务","Discover local model services","ローカルモデルサービスを検出"],"local.endpoint.help":["仅接受 127.0.0.1 或 ::1","Only 127.0.0.1 or ::1","127.0.0.1 または ::1 のみ"],"local.detect":["发现模型","Discover models","モデルを検出"],"local.verify":["验证","Verify","検証"],"refinement.model.help":["请先添加可用模型","Add an available model first","利用可能なモデルを追加してください"],"refinement.content.help":["","",""],"refinement.tasks.help":["","",""],"refinement.risks.help":["","",""],"refinement.status.configured":["已配置","Configured","設定済み"],"refinement.status.saved":["已保存","Saved","保存済み"],"refinement.saved.toast":["已保存","Saved","保存済み"],"browser.setup":["配置浏览器扩展","Set up browser extension","ブラウザー拡張を設定"],"browser.setup.continue":["继续配置","Continue setup","設定を続ける"],"browser.setup.update":["更新浏览器扩展","Update browser extension","ブラウザー拡張を更新"],"browser.setup.current":["已配置","Configured","設定済み"],"browser.reload":["重新连接","Reconnect","再接続"],"browser.reload.starting":["正在重新连接","Reconnecting","再接続中"],"browser.reload.triggered":["正在重新连接","Reconnecting","再接続中"],"browser.sync":["试同步（每站 2 条）","Trial sync (2 per site)","試験同期（各サイト 2 件）"],"browser.sync.starting":["正在同步","Syncing","同期中"],"browser.sync.triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.full.triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.guidance":["","",""],"browser.stage.wait-connected":["等待浏览器连接","Waiting for browser connection","ブラウザーの接続待ち"],"browser.gate.ready":["可以完整同步","Ready for full sync","完全同期が可能"],"browser.gate.required":["请先完成试同步","Complete trial sync first","試験同期を完了してください"],"browser.gate.pending":["试同步未完成","Trial sync incomplete","試験同期が未完了"],"browser.gate.human":["请在浏览器完成人机验证。","Complete verification in your browser.","ブラウザーで人間確認を完了してください。"],"browser.provider.safe.pass":["已读取 {count} 条","Read {count} conversations","{count} 件読み取り済み"],"browser.provider.safe.human":["请在浏览器完成人机验证。","Complete verification in your browser.","ブラウザーで人間確認を完了してください。"],"browser.provider.safe.empty":["未读取到会话","No conversations read","会話を読み取れませんでした"],"browser.toast.identity":["已连接","Connected","接続済み"],"browser.toast.identity-required":["请先连接浏览器","Connect your browser first","ブラウザーを接続してください"],"browser.toast.preflight-ready":["可以完整同步","Ready for full sync","完全同期が可能"],"browser.toast.full-blocked":["请先完成试同步","Complete trial sync first","試験同期を完了してください"],"browser.toast.full-triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.toast.reload":["正在重新连接","Reconnecting","再接続中"],"browser.status.reloading":["正在重新连接","Reconnecting","再接続中"],"browser.status.reload-required":["请重新连接浏览器","Reconnect your browser","ブラウザーを再接続してください"],"browser.status.manual":["请先配置浏览器扩展","Set up the browser extension first","ブラウザー拡張を設定してください"],"browser.status.unconfigured":["等待浏览器连接","Waiting for browser connection","ブラウザーの接続待ち"],"assistant.status.enabled":["已启用","Enabled","有効"],"assistant.status.disabled":["已关闭","Disabled","無効"],"assistant.saved.toast":["已保存","Saved","保存済み"]});
+  const COPY_SETTINGS = Object.freeze({"browser.result.partial":["已读取 {count} 条 · {failed} 个网站需重试", "Read {count} chats · {failed} websites need retry", "{count} 件読み取り済み · {failed} サイトで再試行が必要"],"browser.result.done":["会话已同步 · 本次读取 {count} 条", "Chats synced · {count} read this time", "会話を同期済み · 今回 {count} 件を読み取り"],"browser.stage.read-failed":["本次读取未完成","Current read incomplete","今回の読み取りが未完了"],"browser.progress.no-receipt":["未收到本次读取结果 · 可重试","No result received · retry available","今回の結果未受信 · 再試行できます"],"browser.progress.manual-load":["待加载插件","Load extension","拡張の読み込み待ち"],"browser.progress.importing":["正在导入会话","Importing conversations","会話を取り込み中"],"browser.progress.import-failed":["会话导入失败 · 可重试","Import failed · retry available","取り込み失敗 · 再試行できます"],"browser.help":["连接浏览器以同步会话","Connect your browser to sync conversations","ブラウザーを接続して会話を同期"],"local.protocol.help":["发现本机模型服务","Discover local model services","ローカルモデルサービスを検出"],"local.endpoint.help":["仅接受 127.0.0.1 或 ::1","Only 127.0.0.1 or ::1","127.0.0.1 または ::1 のみ"],"local.detect":["发现模型","Discover models","モデルを検出"],"local.verify":["验证","Verify","検証"],"refinement.model.help":["请先添加可用模型","Add an available model first","利用可能なモデルを追加してください"],"refinement.content.help":["","",""],"refinement.tasks.help":["","",""],"refinement.risks.help":["","",""],"refinement.status.ready":["就绪","Ready","準備完了"],"refinement.status.unselected":["未选择 · 请选择精炼模型","Not selected · choose a refinement model","未選択 · 精製モデルを選んでください"],"refinement.status.removed":["已移除 · 原来的模型已不在，请重新选择","Removed · the chosen model is gone; choose another","削除済み · 選んだモデルがありません。選び直してください"],"refinement.status.unavailable":["暂不可用 · 请检查模型服务","Unavailable · check the model service","一時的に利用不可 · モデルサービスを確認してください"],"refinement.saved.toast":["已保存","Saved","保存済み"],"browser.setup":["配置浏览器扩展","Set up browser extension","ブラウザー拡張を設定"],"browser.setup.continue":["继续配置","Continue setup","設定を続ける"],"browser.setup.update":["更新浏览器扩展","Update browser extension","ブラウザー拡張を更新"],"browser.setup.current":["已配置","Configured","設定済み"],"browser.reload":["重新连接","Reconnect","再接続"],"browser.reload.starting":["正在重新连接","Reconnecting","再接続中"],"browser.reload.triggered":["正在重新连接","Reconnecting","再接続中"],"browser.sync":["试同步（每站 2 条）","Trial sync (2 per site)","試験同期（各サイト 2 件）"],"browser.sync.starting":["正在同步","Syncing","同期中"],"browser.sync.triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.full.triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.guidance":["","",""],"browser.stage.wait-connected":["等待浏览器连接","Waiting for browser connection","ブラウザーの接続待ち"],"browser.gate.ready":["可以完整同步","Ready for full sync","完全同期が可能"],"browser.gate.required":["请先完成试同步","Complete trial sync first","試験同期を完了してください"],"browser.gate.pending":["试同步未完成","Trial sync incomplete","試験同期が未完了"],"browser.gate.human":["请在浏览器完成人机验证。","Complete verification in your browser.","ブラウザーで人間確認を完了してください。"],"browser.provider.safe.pass":["已读取 {count} 条","Read {count} conversations","{count} 件読み取り済み"],"browser.provider.safe.human":["请在浏览器完成人机验证。","Complete verification in your browser.","ブラウザーで人間確認を完了してください。"],"browser.provider.safe.empty":["未读取到会话","No conversations read","会話を読み取れませんでした"],"browser.toast.identity":["已连接","Connected","接続済み"],"browser.toast.identity-required":["请先连接浏览器","Connect your browser first","ブラウザーを接続してください"],"browser.toast.preflight-ready":["可以完整同步","Ready for full sync","完全同期が可能"],"browser.toast.full-blocked":["请先完成试同步","Complete trial sync first","試験同期を完了してください"],"browser.toast.full-triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.toast.reload":["正在重新连接","Reconnecting","再接続中"],"browser.status.reloading":["正在重新连接","Reconnecting","再接続中"],"browser.status.reload-required":["请重新连接浏览器","Reconnect your browser","ブラウザーを再接続してください"],"browser.status.manual":["请先配置浏览器扩展","Set up the browser extension first","ブラウザー拡張を設定してください"],"browser.status.unconfigured":["等待浏览器连接","Waiting for browser connection","ブラウザーの接続待ち"],"assistant.status.enabled":["已启用","Enabled","有効"],"assistant.status.disabled":["已关闭","Disabled","無効"],"assistant.saved.toast":["已保存","Saved","保存済み"]});
   const uiText = (key, fallback, params = {}) => {
     const language = settingsLanguage();
     const compact = COPY_SETTINGS[key];
@@ -1552,6 +1546,12 @@
       : uiText('local.summary.none', '未检测到可用服务。');
   };
 
+  // The chosen refinement model's state (model_state of sessions.refinement_settings_get): dot colour and text.
+  const refinementModelStatus = (projection) => {
+    const state = String(projection?.model_state || 'UNSELECTED').toLowerCase();
+    return [state === 'ready' ? 'green' : 'yellow', uiText(`refinement.status.${state}`, '')];
+  };
+
   const renderRefinementSettings = (projection) => {
     refinementState = projection;
     Memorive.settingsView?.setRefinementModelOptions?.(projection);
@@ -1565,10 +1565,9 @@
     select.value = [...select.options].some((option) => option.value === selected) ? selected : '';
     setSwitch('settings-refinement-tasks', projection?.settings?.include_tasks !== false);
     setSwitch('settings-refinement-risks', projection?.settings?.include_risks !== false);
-    q('#settings-refinement-dot').className = `status-dot ${projection?.configured ? 'green' : 'yellow'}`;
-    q('#settings-refinement-status').textContent = projection?.configured
-      ? uiText('refinement.status.configured', '已配置')
-      : uiText('refinement.status.unconfigured', '未配置时不可用。');
+    const [tone, status] = refinementModelStatus(projection);
+    q('#settings-refinement-dot').className = `status-dot ${tone}`;
+    q('#settings-refinement-status').textContent = status;
   };
 
   const renderAssistantAppearance = (enabled) => {
@@ -1748,8 +1747,6 @@
     if (options.refreshAfter !== false) {
       renderRefinementSettings(await call('sessions.refinement_settings_get', {}));
     }
-    q('#settings-refinement-dot').className = 'status-dot green';
-    q('#settings-refinement-status').textContent = uiText('refinement.status.saved', '已保存');
     if (options.announce !== false) showToast(uiText('refinement.saved.toast', '已保存'));
     return receipt;
   };
@@ -3566,9 +3563,7 @@
     if (refinementState) {
       const empty = q('#settings-refinement-model option[value=""]');
       if (empty) empty.textContent = uiText('refinement.model.none', '未配置模型');
-      q('#settings-refinement-status').textContent = refinementState?.configured
-        ? uiText('refinement.status.configured', '已配置')
-        : uiText('refinement.status.unconfigured', '未配置时不可用。');
+      q('#settings-refinement-status').textContent = refinementModelStatus(refinementState)[1];
     }
     renderAssistantAppearance(switchValue('settings-assistant-enabled-appearance'));
   };

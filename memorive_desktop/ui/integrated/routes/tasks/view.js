@@ -527,19 +527,6 @@
       PAUSE_SCHEDULED:{ tone:'yellow', label:'已设置暂停点' },
       DISABLED:{ tone:'disabled', label:'已禁用' }
     });
-    const formatRefinementError = (code) => {
-      const value = String(code || '').trim();
-      const known = {
-        LOCAL_STRUCTURED_CHAT_RESPONSE_SCHEMA_INVALID:'本地模型返回的结构不符合精炼结果格式。',
-        LOCAL_STRUCTURED_CHAT_MODEL_IDENTITY_MISMATCH:'本地服务返回的模型与所选模型不一致。',
-        LOCAL_MODEL_NOT_EXECUTION_ELIGIBLE:'所选本地模型当前不可执行，请在设置中重新验证。',
-        REFINEMENT_EXECUTION_CHANNEL_NOT_AVAILABLE:'所选模型尚未接通精炼执行通道。',
-        SESSION_REFINEMENT_FROZEN_SNAPSHOT_DRIFT:'会话内容已变化，请重新创建任务。',
-        SESSION_REFINEMENT_SOURCE_MESSAGE_INVALID:'会话正文包含无法处理的消息结构。',
-        SESSION_REFINEMENT_CANCELLED:'任务已取消。'
-      };
-      return known[value] || (value ? `执行失败：${value}` : '执行失败：未返回可识别的错误原因。');
-    };
     const refinementNodeProductCopy = Object.freeze({
       '01_SESSION_SELECTION_FREEZE':{
         name:'准备会话',
@@ -613,7 +600,7 @@
         node.dataset.modelLocked = String(definition.model_change_eligible !== true);
         node.dataset.errorCode = definition.error_code || binding.error_code || '';
         node.dataset.summary = definition.state === 'FAILED'
-          ? formatRefinementError(node.dataset.errorCode)
+          ? Memorive.refinementStatus.failureText(node.dataset.errorCode)
           : copy.purpose;
         node.dataset.enabled = 'true';
         node.dataset.human = 'false';

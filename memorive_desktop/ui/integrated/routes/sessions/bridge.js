@@ -501,7 +501,7 @@
         if (projection?.status === 'PASS') {
           return projection;
         }
-        if (['TASK_FAILED', 'TASK_CANCELLED'].includes(projection?.status)) return projection;
+        if (['TASK_FAILED', 'INBOX_FAILED', 'TASK_CANCELLED'].includes(projection?.status)) return projection;
         await wait(750);
       }
       const timeout = { status:'TASK_MONITOR_TIMEOUT', local_projection_id:localProjectionId, job_id:jobId };
