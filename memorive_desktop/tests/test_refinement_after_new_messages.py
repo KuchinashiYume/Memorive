@@ -21,7 +21,7 @@ class Refined(Queued):
         self._conversation_refinement_channel = SimpleNamespace(execute=lambda request: None)
         self.enqueued = 0
 
-    def _messages_for(self, row):
+    def _messages_for(self, row, presentation=False):
         return list(self.messages), {"status": "COMPLETE"}
 
     def _load_refinement_settings(self):

@@ -45,7 +45,7 @@ class Queued(RefinementQueueMixin, RefinementTasksMixin):
     def _get_internal(self, projection_id):
         return {"provider_id": "test", "captured_at": "2026-11-21T00:00:00Z"}
 
-    def _messages_for(self, row):
+    def _messages_for(self, row, presentation=False):
         # The conversation as it is now: different from the snapshot it was queued with.
         return [{"role": "user", "text": "The conversation changed after it was queued."}], {"status": "COMPLETE"}
 

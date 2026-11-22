@@ -397,42 +397,36 @@ class RefinementTasksMixin:
         if self._refinement_task_manager.session_refinement_cancelled(job_id):
             raise RefinementTaskCancelled('REFINEMENT_TASK_CANCELLED')
 
-    def _refinement_source_snapshot(self, projection_id, row, messages, completeness) -> str:
-        """The hash of what a refinement of this session reads: its source and its messages. A refinement
-        made from another hash is out of date (the conversation went on), so it may be made again."""
+    def _refinement_input(self, projection_id: str) -> tuple[dict[str, Any], list[dict[str, str]], dict[str, Any], str]:
+        """What a refinement of this session reads, and its hash.
+
+        The messages are the user and assistant text the session page shows: runtime envelopes and
+        meta records of Codex and Claude Code are left out, text mixed with them is kept. The hash
+        covers the session's identity, its coverage and the messages in order, nothing else: a re-sync,
+        a new title or appended tool logs keep the existing refinement; new conversation makes a new one.
+        """
+        row = self._get_internal(projection_id)
+        source_messages, completeness = self._messages_for(row, presentation=True)
+        if not self._refinement_source_content_allowed(row, source_messages, completeness):
+            raise SessionProductError("SESSION_REFINEMENT_REQUIRES_COMPLETE_CONTENT")
+        messages = self._refinement_channel_messages(source_messages)
         source_binding = {
-            "schema_version": "DesktopSessionRefinementSourceBinding-v1",
+            "schema_version": "DesktopSessionRefinementSourceBinding-v2",
             "local_projection_id": projection_id,
             "provider_id": _text(row.get("provider_id"), 80),
             "provider_session_id": _text(row.get("provider_session_id"), 240),
             "source_format": _text(row.get("source_format"), 160),
-            "captured_at": _text(
-                row.get("captured_at")
-                or row.get("conversation_at")
-                or row.get("updated_at")
-                or "UNKNOWN",
-                120,
-            ),
-            "content_completeness": deepcopy(dict(completeness)),
+            "coverage": _text(completeness.get("status"), 40) or "UNKNOWN",
         }
-        return _sha256_json({"source": source_binding, "messages": messages})
+        return row, messages, source_binding, _sha256_json({"source": source_binding, "messages": messages})
 
     def _refinement_source_changed(self, projection_id: str, task: Mapping[str, Any]) -> bool:
         """Whether the session changed since this (finished) refinement was made."""
-        row = self._get_internal(projection_id)
-        source_messages, completeness = self._messages_for(row)
-        current = self._refinement_source_snapshot(projection_id, row, self._refinement_channel_messages(source_messages),
-                                                   completeness)
+        current = self._refinement_input(projection_id)[3]
         return str(task.get("source_snapshot_sha256") or "").upper() != current.upper()
 
     def _create_refinement_task(self, projection_id: str) -> dict[str, Any]:
-        row = self._get_internal(projection_id)
-        source_messages, completeness = self._messages_for(row)
-        if not self._refinement_source_content_allowed(
-            row, source_messages, completeness
-        ):
-            raise SessionProductError("SESSION_REFINEMENT_REQUIRES_COMPLETE_CONTENT")
-        messages = self._refinement_channel_messages(source_messages)
+        row, messages, _source_binding, snapshot_sha256 = self._refinement_input(projection_id)
         settings = self._load_refinement_settings()
         if not settings.get("profile_ref"):
             raise SessionProductError("SESSION_REFINEMENT_MODEL_NOT_CONFIGURED")
@@ -448,7 +442,6 @@ class RefinementTasksMixin:
             )
         ):
             raise SessionProductError("SESSION_REFINEMENT_CHANNEL_UNAVAILABLE")
-        snapshot_sha256 = self._refinement_source_snapshot(projection_id, row, messages, completeness)
         active_task = self._refinement_task_for_projection(projection_id)
         control_state = str(active_task.get("control_state") or "") if active_task else ""
         # A finished refinement of the same messages is returned as it is; after new messages a new one is made.
@@ -625,31 +618,7 @@ class RefinementTasksMixin:
         """What a queued task starts with: its conversation's messages and source binding, checked
         against the snapshot the task was queued with, and the settings it runs with."""
         projection_id = str(task["local_projection_id"])
-        row = self._get_internal(projection_id)
-        source_messages, completeness = self._messages_for(row)
-        if not self._refinement_source_content_allowed(
-            row, source_messages, completeness
-        ):
-            raise SessionProductError("SESSION_REFINEMENT_REQUIRES_COMPLETE_CONTENT")
-        messages = self._refinement_channel_messages(source_messages)
-        source_binding = {
-            "schema_version": "DesktopSessionRefinementSourceBinding-v1",
-            "local_projection_id": projection_id,
-            "provider_id": _text(row.get("provider_id"), 80),
-            "provider_session_id": _text(row.get("provider_session_id"), 240),
-            "source_format": _text(row.get("source_format"), 160),
-            "captured_at": _text(
-                row.get("captured_at")
-                or row.get("conversation_at")
-                or row.get("updated_at")
-                or "UNKNOWN",
-                120,
-            ),
-            "content_completeness": deepcopy(dict(completeness)),
-        }
-        snapshot_sha256 = _sha256_json(
-            {"source": source_binding, "messages": messages}
-        )
+        _row, messages, source_binding, snapshot_sha256 = self._refinement_input(projection_id)
         if snapshot_sha256.upper() != str(task["source_snapshot_sha256"]).upper():
             raise SessionProductError("SESSION_REFINEMENT_FROZEN_SNAPSHOT_DRIFT")
         saved_settings = self._load_refinement_settings()

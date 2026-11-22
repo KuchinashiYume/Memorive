@@ -203,7 +203,7 @@ def _full_message_text(content: Any) -> str:
 def _cli_user_presentation(text: str) -> str:
     """Remove recognized leading runtime envelopes, never arbitrary quoted text.
 
-    Display only: raw capture, source hashes and refinement input stay unchanged.
+    For the session page and the refinement input; raw capture and source hashes stay unchanged.
     Match complete envelopes before clipping metadata into a one-line title.
     """
     value = text.strip()
