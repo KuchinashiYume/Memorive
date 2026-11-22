@@ -15,7 +15,7 @@ from memorive.documents.workflow.model_bridge import CoreModelBridge, _provider_
 
 
 @pytest.mark.parametrize("names, family", [
-    (("Moonshot", "kimi-k2.6"), "moonshot"), (("智谱", "glm-5"), "zhipu"), (("", "MiniMax-M2"), "minimax"),
+    (("Moonshot", "kimi-k2.6"), "moonshot"), (("智谱", "glm-5"), "zhipu"), (("", "minimax-text"), "minimax"),
     (("xAI", "grok-4"), "xai"), (("DeepSeek", "deepseek-v4-pro"), "deepseek"),
 ])
 def test_the_vendor_of_these_models_is_recognised(names, family):
