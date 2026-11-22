@@ -1477,8 +1477,41 @@ class LiveModelValidationRunner(_EmbeddingExecutionMixin, _SpecializedModelExecu
             }
         return None
 
+    def _send_local_openai_compatible(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
+        """Ask a model on a local OpenAI-compatible server (LM Studio, vLLM, LocalAI, Jan, llama.cpp) through
+        /v1/chat/completions, with the request and reply readers of the API route."""
+        import urllib.request
+        from memorive.models.endpoints import _ApiProfile
+        from memorive.models.gateway.local_structured_chat import _default_open
+        from memorive.models.calls.ledger import recording_urlopen
+        url = attempt.service.get("chat_endpoint")
+        if not isinstance(url, str) or not url.endswith("/v1/chat/completions"):
+            raise ValueError("LOCAL_STRUCTURED_CHAT_PROFILE_INVALID")
+        profile = _ApiProfile("OPENAI_COMPATIBLE", url[: -len("/chat/completions")] + "/models", "", {})
+        body = _api_chat_request(profile, model=attempt.requested_model, prompt=attempt.prompt_bytes.decode("utf-8"),
+                                 response_schema=attempt.response_schema,
+                                 max_output_tokens=attempt.effective_max_output_tokens, model_config={})
+        request = urllib.request.Request(url, data=body, method="POST", headers={"Content-Type": "application/json"})
+        attempt.route = "LOCAL_OPENAI_COMPATIBLE_LOOPBACK"
+        attempt.transport_diagnostic = {}
+        try:
+            with recording_urlopen(_default_open)(request, timeout=attempt.timeout_seconds) as response:
+                reply = response.read()
+            attempt.returned_model, document, usage = _api_chat_response(profile, reply)
+        except (OSError, ValueError) as error:
+            code = str(error) if isinstance(error, ValueError) and str(error).isupper() else "LOCAL_STRUCTURED_CHAT_FAILED"
+            return attempt.failed(code, returned_model=None, raw_usage={}, external_network_calls=0, provider_calls=0,
+                                  external_model_calls=1, external_process_launches=0, route=attempt.route,
+                                  region="LOCAL_MACHINE", egress="LOOPBACK_ONLY",
+                                  transport_diagnostic=attempt.transport_diagnostic)
+        attempt.response = dict(document)
+        attempt.usage = dict(usage) if isinstance(usage, Mapping) else {}
+        return None
+
     def _send_local(self, attempt: "_ChatAttempt") -> Mapping[str, Any] | None:
         """Ask the local model; a failed result, or None with the reply on attempt."""
+        if attempt.service.get("structured_chat_adapter") == "LOCAL_OPENAI_COMPATIBLE_CHAT_V1":
+            return self._send_local_openai_compatible(attempt)
         if (
             attempt.service.get("endpoint_kind") != "ollama"
             or attempt.service.get("structured_chat_adapter")

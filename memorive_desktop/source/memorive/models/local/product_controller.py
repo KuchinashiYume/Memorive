@@ -247,6 +247,10 @@ class LocalModelProductController:
                     continue
                 seen.add(profile_ref)
                 endpoint_name = str(endpoint["display_name"])
+                # Ollama is run through its native API and pins a model by its digest. An OpenAI-compatible
+                # server (LM Studio, vLLM, LocalAI, Jan, llama.cpp) names a model only by the id it lists, and
+                # is run through /v1/chat/completions (models/validation/runner.py _send_local).
+                ollama = endpoint["kind"] == "ollama"
                 profiles.append(
                     {
                         "profile_ref": profile_ref,
@@ -254,22 +258,18 @@ class LocalModelProductController:
                         "endpoint_name": endpoint_name,
                         "endpoint_kind": endpoint["kind"],
                         "endpoint": endpoint["endpoint"],
-                        "chat_endpoint": (
-                            f"{str(endpoint['endpoint']).rstrip('/')}/api/chat"
-                            if endpoint["kind"] == "ollama"
-                            else None
-                        ),
+                        "chat_endpoint": f"{str(endpoint['endpoint']).rstrip('/')}"
+                                         + ("/api/chat" if ollama else "/v1/chat/completions"),
                         "provider": f"[本地] {endpoint_name}",
                         "display_name": f"[本地] {model_name}",
                         "model_name": model_name,
                         "model_digest": model_digest,
-                        "exact_identity_available": model_digest is not None,
+                        "exact_identity_available": model_digest is not None or not ollama,
                         "structured_chat_adapter": (
-                            "EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1"
-                            if endpoint["kind"] == "ollama" and model_digest is not None
-                            else None
+                            ("EvaluationAssets_LOCAL_STRUCTURED_CHAT_V1" if model_digest is not None else None)
+                            if ollama else "LOCAL_OPENAI_COMPATIBLE_CHAT_V1"
                         ),
-                        "execution_eligible": endpoint["kind"] == "ollama" and model_digest is not None,
+                        "execution_eligible": model_digest is not None or not ollama,
                         "capability": infer_api_model_capability(endpoint_name, model_name),
                         "connection_status": "AVAILABLE",
                         "verified_at": verification.get("verified_at"),
