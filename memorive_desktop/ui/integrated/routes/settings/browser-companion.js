@@ -251,7 +251,8 @@
       showToast(uiText('browser.toast.load-plugin', '请在扩展页加载插件文件夹'));
       return receipt;
     }
-    showToast(updating
+    // An update (here, or copied in when Memorive started) needs a reload on the extensions page, not a new load.
+    showToast(updating || receipt?.status === 'AWAITING_EXTENSION_RELOAD'
       ? uiText('browser.toast.updated', '插件文件夹已更新；请在扩展页重新加载插件。')
       : uiText('browser.toast.prepared', '已准备组件文件夹；请在所选浏览器的扩展页加载一次。'));
     void pollIdentity({ attempts: 300 }).then((latest) => {
