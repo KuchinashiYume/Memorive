@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const BRIDGE_VERSION = "3.10.2";
+  const BRIDGE_VERSION = "3.11.0";
   const SITE_CONFIG = globalThis.MEMORIVE_SITE_PROFILES;
   if (!SITE_CONFIG) return;
   const bridgeIdentity = BRIDGE_VERSION + ':' + SITE_CONFIG.sha256 + ':history-ready-v2';
@@ -725,6 +725,30 @@
     // only fall back to leaves when outer roots cannot establish both roles.
     return candidates[0] || candidates[1] || [];
   };
+  // The element that holds one message (or one turn) on the supported sites. Text blocks of one message
+  // (an answer split into several rendered parts) join only inside the same container; two containers are two
+  // messages even when they are next to each other and have the same role. A row outside every container is
+  // its own message. (.ds-message and data-virtual-list-item-key: DeepSeek's message rows; check on the site.)
+  const MESSAGE_CONTAINER_SELECTOR = [
+    "[data-message-id]", "[data-turn-id]", '[data-testid^="conversation-turn-"]',
+    ".ds-message", "[data-virtual-list-item-key]"
+  ].join(",");
+  const messageContainer = (node) => node.closest(MESSAGE_CONTAINER_SELECTOR) || node;
+  // Rows in page order, each with its container: joins the blocks of one message.
+  const groupMessageBlocks = (rows) => {
+    const grouped = [];
+    for (const row of rows) {
+      const prior = grouped[grouped.length - 1];
+      if (prior && prior.role === row.role && prior.container === row.container) {
+        if (!prior.text.includes(row.text)) {
+          prior.text = row.text.includes(prior.text) ? row.text : `${prior.text}\n\n${row.text}`;
+        }
+        continue;
+      }
+      grouped.push({ ...row });
+    }
+    return grouped;
+  };
   const messageRows = (providerId, definition, retainIdentity = false) => {
     const prepared = [];
     for (const [role, selectors] of [["user", definition.user], ["assistant", definition.assistant]]) {
@@ -744,12 +768,14 @@
       if (left.node === right.node) return 0;
       return left.node.compareDocumentPosition(right.node) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
     });
+    const seen = new Set();
+    const grouped = groupMessageBlocks(specific.filter((row) => {
+      if (seen.has(row.node)) return false;
+      seen.add(row.node);
+      return true;
+    }).map((row) => ({ ...row, container: messageContainer(row.node) })));
     if (retainIdentity) {
-      const seen = new Set();
-      return specific.filter(row => {
-        if (seen.has(row.node)) return false;
-        seen.add(row.node); return true;
-      }).map(({node,role,text}) => {
+      return grouped.map(({node,role,text}) => {
         let key = "", order = null, cursor = node;
         for (let i=0;cursor && i<8;i++,cursor=cursor.parentElement) {
           if (!key) key = cursor.getAttribute("data-message-id") || cursor.getAttribute("data-turn-id") || "";
@@ -760,21 +786,7 @@
         return {role,text,source_key:key ? role+":"+key : "",source_order:order};
       });
     }
-    const deduped = [];
-    specific.forEach(({ role, text }) => {
-      const prior = deduped[deduped.length - 1];
-      if (prior && prior.role === role && (prior.text === text || prior.text.includes(text))) return;
-      if (prior && prior.role === role && text.includes(prior.text)) {
-        prior.text = text;
-        return;
-      }
-      if (prior && prior.role === role) {
-        prior.text = `${prior.text}\n\n${text}`;
-        return;
-      }
-      deduped.push({ role, text });
-    });
-    return deduped;
+    return grouped.map(({ role, text }) => ({ role, text }));
   };
   const captureCurrentVisiblePage = (recording = false) => {
     if (location.protocol !== "https:") throw new Error("CURRENT_PAGE_HTTPS_REQUIRED");
@@ -783,9 +795,13 @@
       key,[...new Set([...(currentPageDefinition[key]||[]),...(known?.[key]||[])])]
     ]));
     const rows = messageRows("universal", definition, recording).filter(row=>row.text.length > 0);
+    // A recording samples any window, also one long reply alone or none while the page loads; the saved record
+    // must still hold both roles (recording.js). A single read must show both now.
     if (
-      !rows.some((row) => row.role === "user") ||
-      !rows.some((row) => row.role === "assistant")
+      !recording && (
+        !rows.some((row) => row.role === "user") ||
+        !rows.some((row) => row.role === "assistant")
+      )
     ) {
       throw new Error("CURRENT_PAGE_CONVERSATION_NOT_FOUND");
     }
@@ -827,26 +843,6 @@
         ...(recording ? {source_key:row.source_key,source_order:row.source_order} : {})
       }))
     };
-  };
-  const compatibleMessage = (left, right) => {
-    if (left.role !== right.role) return false;
-    if (left.text === right.text || left.text.includes(right.text) || right.text.includes(left.text)) return true;
-    const prefixLength = Math.min(48, left.text.length, right.text.length);
-    return prefixLength >= 24 && left.text.slice(0, prefixLength) === right.text.slice(0, prefixLength);
-  };
-  const mergeWindow = (target, page) => {
-    let overlap = 0;
-    for (let length = Math.min(target.length, page.length); length > 0; length -= 1) {
-      if (target.slice(-length).every((message, index) => compatibleMessage(message, page[index]))) {
-        overlap = length;
-        break;
-      }
-    }
-    for (let index = 0; index < overlap; index += 1) {
-      const targetIndex = target.length - overlap + index;
-      if (page[index].text.length > target[targetIndex].text.length) target[targetIndex] = page[index];
-    }
-    target.push(...page.slice(overlap));
   };
   const conversationScroller = (definition) => {
     const message = uniqueNodes([
@@ -899,7 +895,12 @@
     const target = conversationScroller(definition);
     if (!target) throw new Error("CONVERSATION_SCROLL_CONTAINER_NOT_FOUND");
     const originalTop = target.scrollTop;
-    const collected = [];
+    // The recording's merger (recording.js): a window joins only where it lines up with what was read. Here a
+    // window that does not line up is read again from the last one that did, with a smaller step; if that fails
+    // three times the conversation is reported as failed (the sync accepts complete conversations only).
+    const merger = globalThis.MEMORIVE_SCROLL_RECORDING.createMerger();
+    const fullStride = Math.max(180, Math.floor(target.clientHeight * 0.72));
+    let stride = fullStride, lastJoinedTop = 0, retries = 0;
     let priorTopSignature = "";
     let topStable = 0;
     for (let step = 0; step < 40; step += 1) {
@@ -925,8 +926,23 @@
       ? RECENT_BOTTOM_STABLE_CYCLES
       : DEFAULT_BOTTOM_STABLE_CYCLES;
     for (let step = 0; step < MAX_CONVERSATION_SCROLL_STEPS; step += 1) {
-      const rows = messageRows(providerId, definition);
-      mergeWindow(collected, rows);
+      const rows = messageRows(providerId, definition, true);
+      const outcome = merger.add(rows, { keepGaps: false });
+      if (outcome === "GAP" || outcome === "AMBIGUOUS") {
+        retries += 1;
+        if (retries > 3) {
+          target.scrollTop = originalTop;
+          throw new Error("CONVERSATION_CONTINUITY_UNPROVEN");
+        }
+        stride = Math.max(60, Math.floor(stride / 2));
+        target.scrollTop = Math.min(target.scrollHeight, lastJoinedTop + stride);
+        await sleep(WAIT_MS);
+        continue;
+      }
+      retries = 0;
+      stride = fullStride;
+      lastJoinedTop = target.scrollTop;
+      const collected = merger.result().messages;
       const signature = `${target.scrollTop}|${target.scrollHeight}|${messageWindowSignature(rows)}|${messageWindowSignature(collected)}`;
       stable = signature === priorSignature ? stable + 1 : 0;
       priorSignature = signature;
@@ -939,14 +955,12 @@
         complete = true;
         break;
       }
-      target.scrollTop = Math.min(
-        target.scrollHeight,
-        target.scrollTop + Math.max(180, Math.floor(target.clientHeight * 0.72))
-      );
+      target.scrollTop = Math.min(target.scrollHeight, target.scrollTop + stride);
       await sleep(WAIT_MS);
     }
     target.scrollTop = originalTop;
     if (!complete) throw new Error("CONVERSATION_SCROLL_LIMIT_REACHED");
+    const collected = merger.result().messages;
     if (!collected.length) throw new Error("CONVERSATION_MESSAGES_NOT_FOUND");
     if (
       !collected.some((message) => message.role === "user") ||

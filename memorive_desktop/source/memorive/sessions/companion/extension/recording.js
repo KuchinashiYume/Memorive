@@ -1,64 +1,128 @@
 "use strict";
 (() => {
-  // Rendered windows may contain pinned turns and gaps. Preserve the observed
-  // relative order instead of assuming every window is a contiguous slice.
-  const createMerger = () => {
-    const rows = new Map(), edges = new Map(); let serial = 0;
-    const edge = (a,b) => { if(a!==b) edges.get(a).add(b); };
-    const ordered = (strict = false) => {
-      const links = new Map([...edges].map(([k,v])=>[k,new Set(v)]));
-      const numbered = [...rows].filter(([,r])=>Number.isInteger(r.source_order))
-        .sort((a,b)=>a[1].source_order-b[1].source_order);
-      for(let i=1;i<numbered.length;i++) {
-        if(numbered[i-1][1].source_order < numbered[i][1].source_order)
-          links.get(numbered[i-1][0]).add(numbered[i][0]);
+  // One conversation built from the windows a page shows while it scrolls: the recording (createRecorder
+  // below) and the background site sync (captureConversation in content.js) both add each visible window.
+  // Identity, order and continuity are judged separately:
+  // - a row with a source key (a site message ID) is that message wherever it shows; its text may grow;
+  // - a source order (a site turn number) identifies and orders a row the same way;
+  // - a row with neither is matched by role and text, and only through the window's overlap with what is
+  //   already recorded: the window joins where that overlap lines up in exactly one place. Text alone, a
+  //   long common prefix or a repeated short reply never proves that two rows are one message.
+  // A window that lines up nowhere starts a separate fragment (a gap); a later window that overlaps two
+  // fragments joins them. A window that lines up in more than one place is skipped: the next window, with
+  // more context, usually settles it.
+  const same = (recorded, seen, growing) => {
+    if (recorded.role !== seen.role) return false;
+    if (recorded.source_key || seen.source_key) return recorded.source_key === seen.source_key;
+    if (Number.isInteger(recorded.source_order) && Number.isInteger(seen.source_order)) {
+      return recorded.source_order === seen.source_order;
+    }
+    if (recorded.text === seen.text) return true;
+    // A reply still being written grows at the very end: the last row of both the record and the window.
+    return growing && recorded.role === "assistant"
+      && (recorded.text.startsWith(seen.text) || seen.text.startsWith(recorded.text));
+  };
+  const identity = row => row.source_key ? "id:" + row.source_key
+    : Number.isInteger(row.source_order) ? "order:" + row.role + ":" + row.source_order : "";
+  // Offsets at which window lines up with record: every overlapping pair is the same message, the overlap is
+  // not empty, and no identified row of the window sits anywhere else in the record.
+  const placements = (record, window) => {
+    const known = new Map();
+    record.forEach((row, index) => { const id = identity(row); if (id) known.set(id, index); });
+    const found = [];
+    for (let offset = 1 - window.length; offset < record.length; offset += 1) {
+      let overlap = 0, valid = true;
+      for (let index = 0; index < window.length && valid; index += 1) {
+        const at = offset + index, id = identity(window[index]);
+        if (id && known.has(id) && known.get(id) !== at) valid = false;
+        else if (at >= 0 && at < record.length) {
+          const growing = at === record.length - 1 && index === window.length - 1;
+          if (same(record[at], window[index], growing)) overlap += 1;
+          else valid = false;
+        }
       }
-      const degree = new Map([...rows.keys()].map(k=>[k,0]));
-      for(const values of links.values()) for(const k of values) degree.set(k,degree.get(k)+1);
-      const ready = [...degree].filter(([,n])=>n===0).map(([k])=>k), result=[];
-      while(ready.length) {
-        if(strict && ready.length>1) throw Error('RECORDING_ORDER_UNRESOLVED');
-        const k=ready.shift();result.push({...rows.get(k)});
-        for(const next of links.get(k)) { degree.set(next,degree.get(next)-1);if(!degree.get(next)) ready.push(next); }
+      if (valid && overlap) found.push(offset);
+    }
+    return found;
+  };
+  const combine = (record, window, offset) => {
+    const result = [];
+    for (let at = Math.min(0, offset); at < Math.max(record.length, offset + window.length); at += 1) {
+      const recorded = at >= 0 && at < record.length ? record[at] : null;
+      const seen = at - offset >= 0 && at - offset < window.length ? window[at - offset] : null;
+      if (recorded && seen) {
+        // Keep the longer text: the newer one while a reply grows, the fuller one if a window cut it.
+        result.push(seen.text.length >= recorded.text.length ? {...recorded, ...seen} : {...seen, ...recorded});
+      } else result.push({...(recorded || seen)});
+    }
+    return result;
+  };
+  const sequenceKey = rows => rows.map(row => identity(row) || row.role + "\0" + row.text).join("\u0001");
+  // The one way window joins record, "AMBIGUOUS" if it lines up in places that give different results, or
+  // null if it lines up nowhere.
+  const join = (record, window) => {
+    const offsets = placements(record, window);
+    if (!offsets.length) return null;
+    const results = offsets.map(offset => combine(record, window, offset));
+    const first = sequenceKey(results[0]);
+    return results.every(rows => sequenceKey(rows) === first) ? results[0] : "AMBIGUOUS";
+  };
+  const createMerger = ({maxRows = 10000, maxCharacters = 10000000} = {}) => {
+    let fragments = [], ambiguous = 0;
+    const checkSize = (candidate) => {
+      const rows = candidate.flat();
+      if (rows.length > maxRows || rows.reduce((total, row) => total + row.text.length, 0) > maxCharacters) {
+        throw Error("RECORDING_SIZE_LIMIT");
       }
-      if(result.length!==rows.size) throw Error('RECORDING_ORDER_CONFLICT');
-      return result;
     };
     return {
-      add(incoming) {
-        const previousRows=new Map([...rows].map(([k,v])=>[k,{...v}]));
-        const previousEdges=new Map([...edges].map(([k,v])=>[k,new Set(v)]));
-        try {
-        const page=incoming.filter(r=>r.text && ['user','assistant'].includes(r.role));
-        const occurrences=new Map(), window=[];
-        for(const r of page) {
-          // Ordinals are stable when a provider has no message IDs. Text-only
-          // fallback uses occurrence counts so two identical turns in one window survive.
-          const body=r.role+'\0'+r.text;
-          const occurrence=(occurrences.get(body)||0)+1;occurrences.set(body,occurrence);
-          const key=r.source_key ? 'id:'+r.source_key : Number.isInteger(r.source_order) ?
-            'order:'+r.role+':'+r.source_order : 'text:'+body+'\0'+occurrence;
-          if(window.includes(key)) continue;
-          const old=rows.get(key);
-          if(old && Number.isInteger(old.source_order) && Number.isInteger(r.source_order) && old.source_order!==r.source_order)
-            throw Error('RECORDING_ORDER_CONFLICT');
-          rows.set(key,{...old,...r,source_order:Number.isInteger(r.source_order)?r.source_order:old?.source_order,
-            capture_key:old?.capture_key||'r'+(++serial)});
-          if(!edges.has(key)) edges.set(key,new Set());
-          window.push(key);
+      // Returns "JOINED", "GAP" (kept as a new fragment unless keepGaps is false), "AMBIGUOUS" or "EMPTY".
+      add(rows, {keepGaps = true} = {}) {
+        const window = rows.filter(row => row.text && ["user", "assistant"].includes(row.role))
+          .map(({role, text, source_key, source_order}) => ({role, text,
+            ...(source_key ? {source_key} : {}), ...(Number.isInteger(source_order) ? {source_order} : {})}));
+        if (!window.length) return "EMPTY";
+        if (!fragments.length) { checkSize([window]); fragments = [window]; return "JOINED"; }
+        const joined = fragments.map(fragment => join(fragment, window));
+        if (joined.includes("AMBIGUOUS")) { ambiguous += 1; return "AMBIGUOUS"; }
+        const target = joined.findIndex(Boolean);
+        if (target < 0) {
+          if (!keepGaps) return "GAP";
+          checkSize([...fragments, window]);
+          fragments = [...fragments, window];
+          return "GAP";
         }
-        for(let i=1;i<window.length;i++) edge(window[i-1],window[i]);
-        if(rows.size>10000 || [...rows.values()].reduce((n,r)=>n+r.text.length,0)>10000000)
-          throw Error('RECORDING_SIZE_LIMIT');
-        ordered();
-        } catch(e) {
-          rows.clear();edges.clear();
-          for(const [k,v] of previousRows) rows.set(k,v);
-          for(const [k,v] of previousEdges) edges.set(k,v);
-          throw e;
+        // The window may also bridge to other fragments: join every one that now lines up with it.
+        let merged = joined[target], rest = fragments.filter((_, index) => index !== target), changed = true;
+        while (changed) {
+          changed = false;
+          for (const fragment of rest) {
+            const bridged = join(merged, fragment);
+            if (bridged && bridged !== "AMBIGUOUS") {
+              merged = bridged; rest = rest.filter(other => other !== fragment); changed = true; break;
+            }
+          }
         }
+        checkSize([merged, ...rest]);
+        fragments = [merged, ...rest];
+        return "JOINED";
       },
-      get:ordered
+      // The messages to save, with how much was left out. Fragments are put in order only when every row has
+      // a site turn number; otherwise the largest fragment is kept and the others are counted as unplaced.
+      result() {
+        if (!fragments.length) return {messages: [], unplaced_count: 0, gap_count: 0, ambiguous_count: ambiguous};
+        const numbered = fragments.every(fragment => fragment.every(row => Number.isInteger(row.source_order)));
+        if (numbered) {
+          const ordered = [...fragments].sort((left, right) => left[0].source_order - right[0].source_order);
+          return {messages: ordered.flat().map(row => ({...row})), unplaced_count: 0,
+            gap_count: fragments.length - 1, ambiguous_count: ambiguous};
+        }
+        const kept = fragments.reduce((best, fragment) => fragment.length > best.length ? fragment : best);
+        return {messages: kept.map(row => ({...row})),
+          unplaced_count: fragments.flat().length - kept.length,
+          gap_count: fragments.length - 1, ambiguous_count: ambiguous};
+      },
+      fragmentCount: () => fragments.length
     };
   };
 
@@ -68,14 +132,19 @@
   const MIN_SCROLL_SAMPLE_GAP_MS = 100;
   const createRecorder = ({capture,validate,finish,now=()=>Date.now(),schedule=setInterval,cancel=clearInterval}) => {
     let state = null, timer = null, merger = null, base = null, lastSampleAt = 0;
-    const status = () => state ? {...state, message_count:merger.get().length,
-      remaining_seconds:Math.max(0,Math.ceil((state.deadline-now())/1000))} : {status:"IDLE",message_count:0};
+    const status = () => {
+      if (!state) return {status:"IDLE",message_count:0,unplaced_count:0};
+      const merged = merger.result();
+      return {...state, message_count:merged.messages.length, unplaced_count:merged.unplaced_count,
+        remaining_seconds:Math.max(0,Math.ceil((state.deadline-now())/1000))};
+    };
     const stop = async (reason="USER_STOP") => {
       if (!state || state.status !== "RECORDING") return status();
       state.status="SAVING";state.stop_reason=reason;
       if (timer!==null) cancel(timer);timer=null;
       try {
-        const messages = merger.get(true).map((r,index)=>({role:r.role,text:r.text,
+        // The import needs both roles; a record of one role (or none) is not a conversation yet.
+        const messages = merger.result().messages.map((r,index)=>({role:r.role,text:r.text,
           message_id:r.source_key ? "source-"+r.source_key : "scroll-"+index+"-"+r.role}));
         if (!messages.some(r=>r.role==="user") || !messages.some(r=>r.role==="assistant"))
           throw Error("CURRENT_PAGE_CONVERSATION_NOT_FOUND");
@@ -99,10 +168,6 @@
       } catch(e) {
         const code=String(e?.message || "");
         if (code==="CURRENT_PAGE_CONVERSATION_NOT_FOUND") return;
-        if (code==="RECORDING_ORDER_CONFLICT") {
-          if(timer!==null) cancel(timer);timer=null;
-          state.status="ERROR";state.error_code=code;return;
-        }
         void stop(code.includes("SIZE_LIMIT")?"SIZE_LIMIT":"PAGE_CHANGED_OR_UNAVAILABLE");
       }
     };

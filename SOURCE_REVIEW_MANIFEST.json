@@ -4006,8 +4006,8 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "3c9e2551712f41c389a646fa4c098673b5ab68915be71e52909b0aefee32bb54",
-      "bytes": 275297
+      "sha256": "9c3d97d7f2e529dc746d8008a6bf45ec4a657b270407ff116f5747a24b2e191b",
+      "bytes": 275298
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -6851,7 +6851,7 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/README.txt",
-      "sha256": "b0e96c7bbfedffaad4712e709b48ddab8a8cab340ac22f5764e96dd446bcb79e",
+      "sha256": "9a878976223795d8102b582209f46f10ffc872a2b58089c051ccdc48d944d1e6",
       "bytes": 2274
     },
     {
@@ -6866,12 +6866,12 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/content.js",
-      "sha256": "fbea6dd95930b9088eb08a7a9e8a91d45f82aa8ec8bc7b8107f59bf3e5aa67cd",
-      "bytes": 55976
+      "sha256": "a06c386b8525bfbd79d7cc2a238b1842ed4e75da44953dd5e3595c700815acf4",
+      "bytes": 57242
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/manifest.json",
-      "sha256": "1f7ed5be5e573df9f02c990c59b1b6ccd6c1c354d4335ebffa1d9a776bbcbeb0",
+      "sha256": "63b6e49e6392b3eb53c41de1ef181e3a89c5e9196f7881afe54094a017759d8d",
       "bytes": 1036
     },
     {
@@ -6891,8 +6891,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/recording.js",
-      "sha256": "3e736bbf0700ee55e3fd8d8e892512b8014f1142b10f6d25ad0b1cf5633ba76f",
-      "bytes": 6392
+      "sha256": "c54c682464b6c663546cc838afb4359d4089a00d1565debae5faf95cce38711e",
+      "bytes": 10560
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/runner.html",

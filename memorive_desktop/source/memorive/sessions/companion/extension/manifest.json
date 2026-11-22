@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Memo 网页会话",
-  "version": "3.10.2",
+  "version": "3.11.0",
   "description": "录入常用 AI 官网当前可见的会话，或同步已配置的网站。",
   "permissions": [
     "activeTab",
