@@ -268,11 +268,11 @@
     setHome('garbled', entry => [[garbled(shown(entry)), 2000], ...decodeSteps(entry.rest.text, 1, 0)]);
     homeTimer = window.setTimeout(() => restHome(false), 2400);
   };
-  const clickHome = () => {
+  const countHomeClick = () => {
     const now = Date.now();
     homeClicks.push(now);
     while (now - homeClicks[0] > 3000) homeClicks.shift();
-    if (homeClicks.length < 5) return playHomeQuestion();
+    if (homeClicks.length < 5) return;
     homeClicks.length = 0;
     playHomeGarbled();
   };
@@ -321,8 +321,13 @@
     button.removeAttribute('title');
     homeExpressions.push({ button, image, timer: 0,
       rest: { expression: button.dataset.expression || 'interaction', text: image.textContent } });
+    // The easter egg counts every click, also those that the research home's click interval holds back
+    // (routes/inbox/research-home.js stops them on the way down); the question plays on the clicks that arrive.
+    blank.addEventListener('click', (event) => {
+      if (event.button === 0 && button.contains(event.target)) countHomeClick();
+    }, true);
     button.addEventListener('click', (event) => {
-      if (event.button === 0) clickHome();
+      if (event.button === 0) playHomeQuestion();
     });
     blank.dataset.expressionReady = 'true';
   };
