@@ -629,7 +629,7 @@
     }
     if (element.hidden || element.getAttribute("aria-hidden") === "true") return true;
     // ChatGPT's role heading ("You said:") inside a message is a label, not part of the message.
-    if (!isRoot && element.hasAttribute("data-conversation-role")) return true;
+    if (!isRoot && element.getAttribute?.("data-conversation-role") != null) return true;
     const style = getComputedStyle(element);
     if (style.display === "none" || style.visibility === "hidden") return true;
     const marker = messageElementMarker(element);
