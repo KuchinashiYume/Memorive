@@ -117,6 +117,31 @@
       'main article', 'main [role="listitem"]', '[role="main"] article'
     ]
   };
+  // Message markers of single sites that the shared lists above do not cover, as other open-source exporters
+  // read them in 2026-11 (Covai-Labs/ACE, AiMsgExport). Check on the site when one of them stops reading.
+  const CAPTURE_SITE_RULES = [
+    { hosts: ["claude.ai"],
+      user: ['[data-testid="user-message"]', '[data-author="user"]'],
+      assistant: ['[data-testid="assistant-message"]', '[data-cds="AssistantMessage"]', '.font-claude-response',
+                  '.font-claude-message', '[data-author="assistant"]'] },
+    { hosts: ["copilot.microsoft.com"],
+      user: ['[data-content="user-message"]', '.fai-UserMessage', '[data-testid="chatQuestion"]',
+             '[class*="group/user-message"]'],
+      assistant: ['[data-content="ai-message"]', '.fai-CopilotMessage', '[data-testid="copilot-message-div"]',
+                  '[data-testid="ai-message"]', '[class*="group/ai-message"]'] },
+    { hosts: ["www.perplexity.ai", "perplexity.ai"],
+      user: ['[class~="group/query"]', '[class~="group/user-bubble"]'],
+      assistant: ['[id^="markdown-content-"]'] },
+    { hosts: ["chat.qwen.ai"],
+      user: ['.qwen-chat-message-user', '.chat-user-message-container-wrapper'],
+      assistant: ['.qwen-chat-message-assistant', '.chat-assistant-message-container-wrapper', '.qwen-markdown'] },
+    { hosts: ["www.doubao.com", "doubao.com"],
+      user: ['[data-testid="send_message"]'],
+      assistant: ['[data-testid="receive_message"]'] },
+    { hosts: ["chat.deepseek.com"],
+      user: ['.ds-chat-user-message'],
+      assistant: [] }
+  ];
 
   // Reuse the production scroll/role/boundary capture for declared custom DOMs.
   // Configuration is generated locally; no remote script, eval, cookie or storage read.
@@ -790,9 +815,14 @@
     if (!prepared.some((row) => row.role === "user") || !prepared.some((row) => row.role === "assistant")) {
       prepared.push(...genericMessageRows(definition));
     }
-    const specific = prepared.filter((row) => !prepared.some((other) => (
+    const nested = prepared.filter((row) => !prepared.some((other) => (
       other !== row && row.role === other.role && row.node.contains(other.node) &&
       other.text.length >= Math.floor(row.text.length * 0.72) && row.text.includes(other.text)
+    )));
+    // What is left inside another marker of the same role (an answer body inside a message element that also
+    // holds more) is part of that message: keep the outer one, not a second copy of the text.
+    const specific = nested.filter((row) => !nested.some((other) => (
+      other !== row && other.role === row.role && other.node !== row.node && other.node.contains(row.node)
     )));
     specific.sort((left, right) => {
       if (left.node === right.node) return 0;
@@ -820,9 +850,13 @@
   };
   const captureCurrentVisiblePage = (recording = false) => {
     if (location.protocol !== "https:") throw new Error("CURRENT_PAGE_HTTPS_REQUIRED");
-    const known = Object.values(providers).find(row=>row.hosts.includes(location.hostname));
+    // The site's own markers join the shared lists: a configured site, a built-in one (also when its sync is
+    // off) and the single-site rules above.
+    const onHost = row => row.hosts.includes(location.hostname);
+    const known = [Object.values(providers).find(onHost), Object.values(builtinDefinitions).find(onHost),
+                   CAPTURE_SITE_RULES.find(onHost)].filter(Boolean);
     const definition = Object.fromEntries(['user','assistant','generic'].map(key=>[
-      key,[...new Set([...(currentPageDefinition[key]||[]),...(known?.[key]||[])])]
+      key,[...new Set([...(currentPageDefinition[key]||[]),...known.flatMap(row=>row[key]||[])])]
     ]));
     const rows = messageRows("universal", definition, recording).filter(row=>row.text.length > 0);
     // A recording samples any window, also one long reply alone or none while the page loads; the saved record
