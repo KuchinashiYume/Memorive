@@ -554,6 +554,12 @@
       focusRefreshRunning = false;
     }
   });
+  // The refinement model may be chosen in settings after this page loaded: read it again on every visit.
+  window.addEventListener('desktop-integrated-route', (event) => {
+    if (event.detail?.route !== 'sessions' || !bootstrapPromise) return;
+    nativeCall('sessions.refinement_settings_get', {})
+      .then((settings) => page()?.setRefinementConfiguration(settings)).catch(() => null);
+  });
   window.addEventListener('pywebviewready', start, { once:true });
   if (window.pywebview?.api?.call) start();
 })();
