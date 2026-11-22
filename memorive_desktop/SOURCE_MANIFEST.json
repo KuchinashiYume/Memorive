@@ -5602,8 +5602,8 @@
     },
     {
       "path": "source/memorive/models/validation/usage.py",
-      "sha256": "15415c8d943faa58ea4bb8eb82848a1caef000bdb5b007fa9552e911afba2fcc",
-      "bytes": 8476
+      "sha256": "004aa02b19074086b6bbb96a3bcb23277f1dd4875e181fe964f00894e6f044bd",
+      "bytes": 8989
     },
     {
       "path": "source/memorive/platform/__init__.py",

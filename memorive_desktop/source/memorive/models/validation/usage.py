@@ -111,6 +111,11 @@ def _nonnegative_int(value: Any) -> int | None:
 
 
 def _normalise_token_usage(value: Mapping[str, Any]) -> dict[str, int]:
+    # Claude Code's modelUsage gives its cache counts in camelCase; read them as the snake_case ones, or the
+    # input read from and written to the cache was left out (10 input tokens recorded for some 5,300).
+    value = {**{snake: value[camel] for camel, snake in (("cacheReadInputTokens", "cache_read_input_tokens"),
+                                                         ("cacheCreationInputTokens", "cache_creation_input_tokens"))
+                if camel in value and snake not in value}, **value}
     prompt = next(
         (
             parsed
