@@ -158,6 +158,7 @@
       'local.detect.complete': 'Detection complete: {models} model(s).',
       'local.detect.empty': 'Detection complete: no service responded.',
       'local.added': 'Local service added.',
+      'local.already_listed': 'A service at this address is already in the list.',
       'local.verify.reachable': 'Service reachable; {models} model(s) available.',
       'local.verify.unreachable': 'Local service not responding: {error}',
       'local.removed': 'Custom local model endpoint removed.',
@@ -319,6 +320,7 @@
       'local.detect.complete': '検出完了：{models} 件のモデル。',
       'local.detect.empty': '検出完了：応答するサービスはありません。',
       'local.added': 'ローカルサービスを追加しました。',
+      'local.already_listed': 'このアドレスのサービスはすでに一覧にあります。',
       'local.verify.reachable': 'サービスに接続できました。{models} 件のモデルを利用できます。',
       'local.verify.unreachable': 'ローカルサービスが応答しません：{error}',
       'local.removed': 'カスタムのローカルモデルエンドポイントを削除しました。',
@@ -1678,7 +1680,12 @@
   const saveLocalModelEndpoint = async () => {
     const draft = localEndpointDraft();
     if (!draft.display_name || !draft.endpoint) throw new Error('请填写本机服务名称和地址。');
-    const receipt = await call('local_models.endpoint_save', draft);
+    const receipt = await call('local_models.endpoint_save', draft).catch((error) => {
+      if (String(error?.message || error).includes('LOCAL_MODEL_ENDPOINT_ALREADY_LISTED')) {
+        throw new Error(uiText('local.already_listed', '这个地址的服务已经在列表里。'));
+      }
+      throw error;
+    });
     renderLocalModels(await call('local_models.bootstrap', {}));
     q('#settings-local-model-name').value = '';
     localEndpointBaseline = localEndpointDraft();

@@ -123,19 +123,24 @@ class LocalModelProductController:
             "model_downloads": 0,
             "credential_value_reads": 0,
         }
-        if not self.state_path.exists():
-            endpoints = {}
-            for display_name, kind, endpoint in _DEFAULT_ENDPOINTS:
-                endpoint_id = self._endpoint_id(kind, endpoint)
-                endpoints[endpoint_id] = {
-                    "endpoint_id": endpoint_id,
-                    "display_name": display_name,
-                    "kind": kind,
-                    "endpoint": endpoint,
-                    "user_added": False,
-                    "last_verification": None,
-                }
-            self._save({"schema_version": "DesktopLocalModelState-v1", "revision": -1, "endpoints": endpoints})
+        state = self._load() if self.state_path.exists() else {
+            "schema_version": "DesktopLocalModelState-v1", "revision": -1, "endpoints": {}}
+        # The built-in services cannot be removed. A state file may lack one all the same: saving a service at a
+        # built-in's address used to replace it, and removing that service then removed the built-in too.
+        missing = [row for row in _DEFAULT_ENDPOINTS
+                   if self._endpoint_id(row[1], row[2]) not in state["endpoints"]]
+        for display_name, kind, endpoint in missing:
+            endpoint_id = self._endpoint_id(kind, endpoint)
+            state["endpoints"][endpoint_id] = {
+                "endpoint_id": endpoint_id,
+                "display_name": display_name,
+                "kind": kind,
+                "endpoint": endpoint,
+                "user_added": False,
+                "last_verification": None,
+            }
+        if missing:
+            self._save(state)
         self._validate_state(self._load())
 
     @staticmethod
@@ -439,6 +444,10 @@ class LocalModelProductController:
                 raise LocalModelProductError("LOCAL_MODEL_ENDPOINT_FIELDS_INVALID")
             endpoint_id = self._endpoint_id(kind, endpoint)
             state = self._load()
+            existing = state["endpoints"].get(endpoint_id)
+            if isinstance(existing, Mapping) and not existing.get("user_added"):
+                # This address is a built-in service already in the list (it used to be replaced by the new one).
+                raise LocalModelProductError("LOCAL_MODEL_ENDPOINT_ALREADY_LISTED")
             state["endpoints"][endpoint_id] = {
                 "endpoint_id": endpoint_id,
                 "display_name": display_name,
