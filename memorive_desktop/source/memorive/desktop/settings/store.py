@@ -399,18 +399,30 @@ def follow_moved_data_folder(store: "SettingsStore", profile_root: Path, own: Ma
     """After the data folder was restored or moved elsewhere, point the workspace and artifact folders that were
     recorded at their default place inside the old data folder to the same place inside this one.
 
-    own: {"workspace_root": ..., "artifact_root": ...}, this data folder's defaults. A folder the user chose
-    elsewhere is left as it is. Called by desktop/service/service_main.py at start; returns the roles changed.
+    own: {"workspace_root": ..., "artifact_root": ...}, this data folder's defaults. A recorded folder moves only
+    when the folder holding it was a data folder: it still holds a settings file where every data folder keeps
+    one, or it is gone and every role was recorded at its default name inside it (a layout only a data folder
+    has). A folder the user chose stays as it is, also one named workspace or artifacts. Called by
+    desktop/service/service_main.py at start; returns the roles changed.
     """
     current = store.load()
     settings = deepcopy(current["settings"])
-    changed = []
+    root = Path(profile_root).resolve()
+    settings_file = store.path.resolve().relative_to(root)
+    # The folder each role was recorded in, when its recorded path is <that folder>/<the role's default name>.
+    holders: dict[str, Path] = {}
     for role, path in own.items():
         recorded = settings["directories"].get(role)
-        tail = [part.casefold() for part in Path(path).relative_to(profile_root).parts]
-        parts = [part.casefold() for part in Path(recorded).parts] if recorded else []
-        if recorded and Path(recorded) != Path(path) and len(parts) > len(tail) and parts[-len(tail):] == tail:
-            settings["directories"][role] = str(path)
+        tail = [part.casefold() for part in Path(path).resolve().relative_to(root).parts]
+        parts = Path(recorded).parts if recorded else ()
+        if (recorded and Path(recorded) != Path(path) and len(parts) > len(tail)
+                and [part.casefold() for part in parts[-len(tail):]] == tail):
+            holders[role] = Path(*parts[:-len(tail)])
+    one_old_layout = len(holders) == len(own) and len({os.path.normcase(str(holder)) for holder in holders.values()}) == 1
+    changed = []
+    for role, holder in holders.items():
+        if (holder / settings_file).is_file() or not holder.exists() and one_old_layout:
+            settings["directories"][role] = str(own[role])
             changed.append(role)
     if changed:
         store.save(settings, expected_revision=current["revision"])
