@@ -1,120 +1,158 @@
 "use strict";
 
+// The popup: record the conversation on the current tab, or test-read it.
+// Its words come from _locales through i18n.js; the Aa button picks the language.
+const { t, ready, choose, languages, current } = globalThis.MEMORIVE_I18N;
 const statusNode = document.getElementById("status");
-const syncButton = document.getElementById("sync-library");
 const testButton = document.getElementById("test-current-page");
-let testBusy=false,syncRunning=false;
+const recordButton = document.getElementById("record-page");
+const recordStatus = document.getElementById("record-status");
+const supportHint = document.getElementById("support-hint");
+const languageButton = document.getElementById("language-button");
+const languageMenu = document.getElementById("language-menu");
+let testBusy = false, recordBusy = false, recordingState = { status: "IDLE" };
+
+// A line shown by key, so that a language change can show it again in the new language.
+const say = (node, key, ...values) => {
+  node.memoriveWords = key ? [key, values] : null;
+  node.textContent = key ? t(key, ...values) : "";
+};
+const sayAgain = (node) => { if (node.memoriveWords) say(node, node.memoriveWords[0], ...node.memoriveWords[1]); };
+
 const refreshCaptureAvailability = async () => {
   try {
-    const [tab] = await chrome.tabs.query({ active:true, currentWindow:true });
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     globalThis.MEMORIVE_OFFICIAL_WEB.requireCaptureUrl(tab?.url);
-    testButton.disabled = testBusy || syncRunning || ['RECORDING','SAVING'].includes(recordingState.status);
+    supportHint.hidden = true;
+    testButton.disabled = testBusy || ["RECORDING", "SAVING"].includes(recordingState.status);
   } catch (_error) {
+    supportHint.hidden = false;
     testButton.disabled = true;
   }
 };
-const enabledSites = globalThis.MEMORIVE_SITE_PROFILES.sites.filter(row=>row.enabled);
-document.getElementById("enabled-sites").textContent = enabledSites.map(row=>row.name).join(" / ") || "—";
-
-const renderState = (state) => {
-  if (!state) return;
-  syncRunning=Boolean(state.running);
-  syncButton.disabled = !enabledSites.length || Boolean(state.running);
-  if (["RUNNER_STARTING", "DISCOVERING", "INDEXING", "CAPTURING", "DOWNLOADING"].includes(state.status)) {
-    const provider = state.provider_id ? ` · ${state.provider_id}` : "";
-    const progress = state.total ? ` ${state.current} / ${state.total}` : "";
-    statusNode.textContent = `同步中${provider}${progress} · ${state.captured || 0} 条` + (state.failed ? ` · 失败 ${state.failed} 条` : "");
-  } else if (state.status === "COMPLETE") {
-    statusNode.textContent = `已同步 ${state.captured || 0} 条` + (state.failed ? ` · 失败 ${state.failed} 条` : "");
-  } else if (state.status === "ERROR") {
-    statusNode.textContent = `同步失败：${state.error_code || "UNKNOWN_ERROR"}`;
-  }
-};
-
-const refreshStatus = async () => {
-  try {
-    const response = await chrome.runtime.sendMessage({ type: "MEMORIVE_SYNC_STATUS" });
-    if (response?.ok) renderState(response.state);
-  } catch (_error) {
-    statusNode.textContent = "无法读取同步状态；请在扩展管理页重新加载此扩展。";
-  }
-};
-
-chrome.runtime.onMessage.addListener((message) => {
-  if (["MEMORIVE_SYNC_ALL_PROGRESS", "MEMORIVE_SYNC_ALL_COMPLETE", "MEMORIVE_SYNC_ALL_ERROR"].includes(message?.type)) {
-    renderState(message.state);
-  }
-});
-
-syncButton.addEventListener("click", async () => {
-  syncButton.disabled = true;
-  statusNode.textContent = "后台同步中";
-  try {
-    const response = await chrome.runtime.sendMessage({ type: "MEMORIVE_SYNC_ALL_LIBRARIES" });
-    if (!response?.ok) throw new Error(response?.error_code || "SESSION_LIBRARY_SYNC_START_FAILED");
-    renderState(response.state);
-  } catch (error) {
-    syncButton.disabled = !enabledSites.length;
-    statusNode.textContent = `同步失败：${String(error?.message || error)}`;
-  }
-});
-
 // String() so a missing code shows the generic message instead of throwing.
-const readError = raw => { const code = String(raw || ''); return code.includes('RECORDING_ORDER_') ? '消息顺序无法确认，请刷新页面后重新录制'
-  : code.includes('NOT_VERIFIED_OFFICIAL') ? '仅支持 AI 官网会话页面'
-  : code.includes('HUMAN_VERIFICATION') ? '请先在网页完成验证，再重试'
-  : code.includes('CONVERSATION_NOT_FOUND') ? '未找到可见的对话，请先打开一段会话'
-  : code.includes('ORIGIN_OR_SESSION_CHANGED') ? '页面已切换，请重试'
-  : '读取失败，请刷新当前网页后重试'; };
-testButton.addEventListener('click', async()=>{
-  testBusy=true;testButton.disabled=true;statusNode.textContent='正在读取当前页面…';
+const errorKey = (raw) => {
+  const code = String(raw || "");
+  return code.includes("NOT_VERIFIED_OFFICIAL") ? "errorNotOfficial"
+    : code.includes("HUMAN_VERIFICATION") ? "errorVerification"
+    : code.includes("CONVERSATION_NOT_FOUND") ? "errorNoConversation"
+    : code.includes("ORIGIN_OR_SESSION_CHANGED") ? "errorPageChanged"
+    : "errorGeneric";
+};
+testButton.addEventListener("click", async () => {
+  testBusy = true; testButton.disabled = true;
+  say(statusNode, "testReading");
   try {
-    const response=await chrome.runtime.sendMessage({type:'MEMORIVE_TEST_ACTIVE_TAB'});
-    if(!response?.ok)throw Error(response?.error_code||'CURRENT_PAGE_CAPTURE_FAILED');
-    statusNode.textContent=`已读取 ${response.message_count} 条（当前页面），未录入`;
-  } catch(error) {statusNode.textContent=readError(String(error?.message||error));}
-  finally {testBusy=false;await refreshCaptureAvailability();}
+    const response = await chrome.runtime.sendMessage({ type: "MEMORIVE_TEST_ACTIVE_TAB" });
+    if (!response?.ok) throw Error(response?.error_code || "CURRENT_PAGE_CAPTURE_FAILED");
+    say(statusNode, response.read_method === "GENERIC_LAYOUT" ? "testResultGeneric" : "testResultMarkers",
+        response.message_count, response.user_count, response.assistant_count);
+  } catch (error) {
+    const code = String(error?.message || error), roles = /ROLES_UNCLEAR_U(\d+)_A(\d+)/.exec(code);
+    if (roles) say(statusNode, "errorRolesUnclear", Number(roles[1]) + Number(roles[2]), roles[1], roles[2]);
+    else say(statusNode, errorKey(code));
+  } finally {
+    testBusy = false;
+    await refreshCaptureAvailability();
+  }
 });
 
-refreshStatus();
-void refreshCaptureAvailability();
-
-const recordButton=document.getElementById("record-page");
-const recordStatus=document.getElementById("record-status");
-let recordingState={status:"IDLE"},recordBusy=false;
-const showRecording=state=>{
-  recordingState=state || {status:"IDLE"};
-  const active=recordingState.status==="RECORDING";
-  recordButton.textContent=active ? "停止并录入" : "开始录制";
-  recordButton.disabled=recordBusy || testBusy || syncRunning || recordingState.status==="SAVING";
-  testButton.disabled=active || testBusy || syncRunning || recordBusy || recordingState.status==="SAVING";
-  syncButton.disabled=active || testBusy || syncRunning || recordBusy || recordingState.status==="SAVING" || !enabledSites.length;
-  recordButton.title=active ? "停止并录入已收集的消息" : "仅支持 AI 官网；开始后滚动加载对话";
-  if (active) recordStatus.textContent="已累计 "+state.message_count+" 条 · 剩余 "+state.remaining_seconds+" 秒";
-  else if (state?.status==="SAVING") recordStatus.textContent="录制已停止，正在保存…";
-  else if (state?.status==="SAVED") recordStatus.textContent="已录入 "+state.message_count+" 条消息（部分内容）";
-  else if (state?.status==="ERROR") recordStatus.textContent=readError(state.error_code);
+const showRecording = (state) => {
+  recordingState = state || { status: "IDLE" };
+  const active = recordingState.status === "RECORDING";
+  recordButton.textContent = t(active ? "recordStop" : "recordStart");
+  recordButton.title = t(active ? "recordStopTitle" : "recordStartTitle");
+  recordButton.disabled = recordBusy || testBusy || recordingState.status === "SAVING";
+  testButton.disabled = active || testBusy || recordBusy || recordingState.status === "SAVING";
+  const count = recordingState.message_count || 0, unplaced = recordingState.unplaced_count || 0;
+  if (active) {
+    if (unplaced) say(recordStatus, "recordingProgressGap", count, unplaced, recordingState.remaining_seconds);
+    else say(recordStatus, "recordingProgress", count, recordingState.remaining_seconds);
+  } else if (recordingState.status === "SAVING") say(recordStatus, "recordingSaving");
+  else if (recordingState.status === "SAVED") {
+    if (unplaced) say(recordStatus, "recordingSavedGap", count, unplaced);
+    else say(recordStatus, "recordingSaved", count);
+  } else if (recordingState.status === "ERROR") {
+    if (String(recordingState.error_code).includes("ROLES_UNCLEAR")) {
+      say(recordStatus, "errorRolesUnclear", count, recordingState.user_count || 0, recordingState.assistant_count || 0);
+    } else say(recordStatus, errorKey(recordingState.error_code));
+  }
 };
-const refreshRecording=async()=>{
+const refreshRecording = async () => {
   if (recordBusy) return;
   try {
-    const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     globalThis.MEMORIVE_OFFICIAL_WEB.requireCaptureUrl(tab?.url);
-    const reply=await chrome.runtime.sendMessage({type:"MEMORIVE_RECORD_ACTIVE_STATUS"});
+    const reply = await chrome.runtime.sendMessage({ type: "MEMORIVE_RECORD_ACTIVE_STATUS" });
     if (reply?.ok) showRecording(reply.state);
-    else recordButton.disabled=false;
-  } catch {recordButton.disabled=true;testButton.disabled=true;}
+    else recordButton.disabled = false;
+  } catch {
+    recordButton.disabled = true;
+    testButton.disabled = true;
+  }
 };
-recordButton.addEventListener("click",async()=>{
-  recordBusy=true;recordButton.disabled=true;
-  statusNode.textContent="";
+recordButton.addEventListener("click", async () => {
+  recordBusy = true; recordButton.disabled = true;
+  say(statusNode, null);
   try {
-    const type=recordingState.status==="RECORDING"?"MEMORIVE_RECORD_ACTIVE_STOP":"MEMORIVE_RECORD_ACTIVE_START";
-    const reply=await chrome.runtime.sendMessage({type});
+    const type = recordingState.status === "RECORDING" ? "MEMORIVE_RECORD_ACTIVE_STOP" : "MEMORIVE_RECORD_ACTIVE_START";
+    const reply = await chrome.runtime.sendMessage({ type });
     if (!reply?.ok) throw Error(reply?.error_code || "RECORDING_FAILED");
-    recordBusy=false;showRecording(reply.state);
-  } catch(error) {recordStatus.textContent=readError(String(error?.message || error));}
-  finally {recordBusy=false;await refreshRecording();}
+    recordBusy = false;
+    showRecording(reply.state);
+  } catch (error) {
+    say(recordStatus, errorKey(String(error?.message || error)));
+  } finally {
+    recordBusy = false;
+    await refreshRecording();
+  }
 });
-void refreshRecording();
-setInterval(refreshRecording,1000);
+
+// The Aa button: a short menu of the three languages, each written in itself.
+const closeLanguageMenu = () => {
+  languageMenu.hidden = true;
+  languageButton.setAttribute("aria-expanded", "false");
+};
+const fillLanguageMenu = () => {
+  languageMenu.replaceChildren(...languages.map(([code, name]) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.setAttribute("role", "menuitemradio");
+    item.setAttribute("aria-checked", String(code === current()));
+    item.lang = code.replace("_", "-");
+    item.textContent = name;
+    item.addEventListener("click", async () => {
+      closeLanguageMenu();
+      await choose(code);
+    });
+    return item;
+  }));
+};
+languageButton.addEventListener("click", () => {
+  if (!languageMenu.hidden) return closeLanguageMenu();
+  fillLanguageMenu();
+  languageMenu.hidden = false;
+  languageButton.setAttribute("aria-expanded", "true");
+  languageMenu.querySelector('[aria-checked="true"]')?.focus();
+});
+document.addEventListener("click", (event) => {
+  if (!event.target.closest?.(".language")) closeLanguageMenu();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !languageMenu.hidden) {
+    closeLanguageMenu();
+    languageButton.focus();
+  }
+});
+// i18n.js has already put the fixed words in the new language; show the changing lines again too.
+document.addEventListener("memorive-language", () => {
+  sayAgain(statusNode);
+  sayAgain(recordStatus);
+  showRecording(recordingState);
+});
+
+ready.then(() => {
+  void refreshCaptureAvailability();
+  void refreshRecording();
+  setInterval(refreshRecording, 1000);
+});

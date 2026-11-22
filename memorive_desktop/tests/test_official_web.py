@@ -1,17 +1,16 @@
-"""Official origin restrictions through real settings, package and importer."""
+"""The official AI websites: the address check, the importer's check of a recorded page and the extension's
+generated site file (memorive/sessions/companion/site_profiles.py)."""
 import json
 from pathlib import Path
 import sys
 import pytest
 from memorive.sessions.companion.site_profiles import (
-    SiteProfiles, default_sites, normalize_sites, profile_hash, active_sites,
-    official_web_identity, configured_extension, extension_profile_script,
+    default_sites, normalize_sites, official_web_identity, extension_site_script, capture_patterns,
 )
 from memorive.sessions.archive.importers import BrowserLibraryImporter
 from memorive.sessions.archive.models import ArchiveInputError
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"tests"))
-from test_extension_upgrade_repair_gate import _api
 from test_universal_current_page_capture import _current_page_bundle
 
 GOOD=["https://chat.deepseek.com/chat/s/a","https://gemini.google.com/app/a",
@@ -37,58 +36,6 @@ def test_verified_identity(url):
 def test_unverified_identity(url):
     assert official_web_identity(url) is None
 
-def custom(url="https://chat.qwen.ai/"):
-    rows=default_sites()
-    rows[0].update(name="Qwen",adapter="generic",url=url)
-    rows[0]["selectors"]["path_prefix"]="/c/"
-    rows[1]["enabled"]=rows[2]["enabled"]=False
-    return rows
-
-def test_save_rejects_unknown_origin_without_state_mutation(tmp_path):
-    store=SiteProfiles(tmp_path)
-    before=store.get()
-    with pytest.raises(ValueError,match="NOT_VERIFIED_OFFICIAL"):
-        store.save(custom("https://unverified.example.org/"),0)
-    assert store.get()==before and not store.path.exists()
-
-@pytest.mark.parametrize("url",["https://chat.qw\nen.ai/","https://chat.qwen.ai\t/"])
-def test_save_rejects_control_characters(tmp_path,url):
-    with pytest.raises(ValueError,match="HTTPS_PUBLIC_HOST_REQUIRED"):
-        SiteProfiles(tmp_path).save(custom(url),0)
-
-def test_legacy_unknown_config_remains_editable_but_cannot_issue_plugin(tmp_path):
-    api,_,_= _api(tmp_path)
-    store=SiteProfiles(api.profile_path("BROWSER_COMPANION"))
-    rows=normalize_sites(custom("https://unverified.example.org/"))
-    state=dict(schema_version="DesktopBrowserSites-v1",revision=1,sites=rows,profile_sha256=profile_hash(rows))
-    store.root.mkdir(parents=True,exist_ok=True)
-    store.path.write_text(json.dumps(state),encoding="utf-8")
-    assert store.get()["sites"][0]["enabled"] is True
-    assert active_sites(rows)==[]
-    package=configured_extension(ROOT/"source/memorive/sessions/companion/extension",tmp_path/"pack",rows)
-    manifest=json.loads((package/"manifest.json").read_text(encoding="utf-8"))
-    assert manifest["host_permissions"]==manifest["content_scripts"]==[]
-    assert api.install_browser_companion()["status"]=="BROWSER_NO_VERIFIED_OFFICIAL_SITES"
-    assert not (store.root/"extension-v1").exists()
-    assert api.browser_companion_sites()["site_authorizations"][0]["verified_official"] is False
-    rows[0]["enabled"]=False
-    assert store.save(rows,1)["revision"]==2
-
-def test_verified_custom_site_gets_only_its_exact_permission(tmp_path):
-    saved=SiteProfiles(tmp_path/"state").save(custom(),0)
-    package=configured_extension(ROOT/"source/memorive/sessions/companion/extension",tmp_path/"pack",saved["sites"])
-    manifest=json.loads((package/"manifest.json").read_text(encoding="utf-8"))
-    assert manifest["host_permissions"]==["https://chat.qwen.ai/*"]
-    assert manifest["content_scripts"][0]["matches"]==manifest["host_permissions"]
-    assert "<all_urls>" not in json.dumps(manifest)
-
-def test_external_source_fields_cannot_grant_permission(tmp_path):
-    rows=custom("https://unverified.example.org/")
-    rows[0].update(official=True,verified_official=True,website="https://chatgpt.com/",
-                   evidence_url="https://openrouter.ai/api/v1/models")
-    with pytest.raises(ValueError,match="NOT_VERIFIED_OFFICIAL"):
-        SiteProfiles(tmp_path).save(rows,0)
-
 @pytest.mark.parametrize("url",["https://unverified.example.org/c/a","https://chat.qwen.ai.evil.example/c/a"])
 def test_import_rejects_unofficial_current_page(url):
     payload=_current_page_bundle(source_url=url)
@@ -96,18 +43,39 @@ def test_import_rejects_unofficial_current_page(url):
         BrowserLibraryImporter.parse_payload(payload,raw_bytes=json.dumps(payload).encode())
 
 
-def test_generated_default_profile_has_no_drift():
-    assert (ROOT/"source/memorive/sessions/companion/extension/site_profiles.js").read_text(encoding="utf-8")==extension_profile_script(default_sites())
+def test_the_extension_site_file_is_the_generated_one():
+    assert (ROOT/"source/memorive/sessions/companion/extension/site_profiles.js").read_text(encoding="utf-8")==extension_site_script()
 
 @pytest.mark.parametrize("url",[
     "https://gemini.google.com/u/0/app?hl=zh-cn&pageId=none",
     "https://gemini.google.com/u/1/app/abc123?hl=ja#display",
 ])
-def test_gemini_full_link_keeps_account_path_not_temporary_parameters(tmp_path,url):
+def test_gemini_full_link_keeps_account_path_not_temporary_parameters(url):
+    # The site list of the earlier sync, as it is read for its old files.
     rows=default_sites();rows[1]["url"]=url
     assert official_web_identity(url)["provider"]=="gemini"
-    saved=SiteProfiles(tmp_path).save(rows,0)
+    saved=normalize_sites(rows)
     from urllib.parse import urlsplit
-    assert saved["sites"][1]["url"]=="https://gemini.google.com"+urlsplit(url).path
-    assert saved["sites"][1]["hosts"]==["gemini.google.com"]
-    assert "?" not in saved["sites"][1]["url"] and "#" not in saved["sites"][1]["url"]
+    assert saved[1]["url"]=="https://gemini.google.com"+urlsplit(url).path
+    assert saved[1]["hosts"]==["gemini.google.com"]
+    assert "?" not in saved[1]["url"] and "#" not in saved[1]["url"]
+
+
+def test_the_extension_may_read_every_official_ai_website_it_records():
+    # ChatGPT, Claude, Qwen and Grok as well: recording must not depend on the toolbar click's
+    # temporary access, which Edge did not give on chatgpt.com. Nothing beyond the official list is granted.
+    manifest=json.loads((ROOT/"source/memorive/sessions/companion/extension/manifest.json").read_text(encoding="utf-8"))
+    assert manifest["host_permissions"]==manifest["content_scripts"][0]["matches"]==capture_patterns()
+    assert {"https://chatgpt.com/*","https://claude.ai/*","https://grok.com/*","https://chat.qwen.ai/*"}<=set(capture_patterns())
+
+
+@pytest.mark.parametrize(("url", "name"), [
+    ("https://www.qianwen.com/chat/1", "千问"), ("https://www.doubao.com/chat/1", "豆包"),
+    ("https://yuanbao.tencent.com/chat/1", "腾讯元宝"), ("https://yiyan.baidu.com/chat/1", "文心一言"),
+    ("https://chatglm.cn/main/1", "智谱清言"), ("https://copilot.microsoft.com/chats/1", "Copilot"),
+    ("https://www.perplexity.ai/search/1", "Perplexity"), ("https://poe.com/chat/1", "Poe"),
+    ("https://chat.mistral.ai/chat/1", "Le Chat"),
+])
+def test_more_official_ai_websites_are_recognised(url, name):
+    assert official_web_identity(url)["name"] == name
+    assert f"https://{official_web_identity(url)['hosts'][0]}/*" in capture_patterns()

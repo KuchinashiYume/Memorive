@@ -270,7 +270,8 @@ class ProductApi(
                 effective_directory=self._effective_directory,
                 system_effects_enabled=self._system_effects_enabled,
             )
-            self._sessions.browser_sites_provider = self._browser_companion.browser_companion_sites
+            # The custom-site files of the earlier site sync import against the site list it saved.
+            self._sessions.browser_sites_provider = self._browser_companion.saved_site_settings
             work_log_module = importlib.import_module("memorive.desktop.work_log.product_controller")
             self._work_log = work_log_module.WorkLogProductController(
                 self._service, self._control_store,
@@ -291,7 +292,8 @@ class ProductApi(
                 bring_main_window_to_foreground=self._bring_main_window_to_foreground,
                 sample_job=self._sample_job, sample_message=self._sample_message,
             )
-            self._browser_companion_auto_update = self._browser_companion.refresh_prepared_package()
+            # A newer extension in this build replaces the prepared copy; the user then reloads it in the browser.
+            self._browser_companion.refresh_prepared_package()
             from memorive.research.host import ResearchHost
             from memorive.research.runtime import ResearchRuntime
             self._research = ResearchRuntime(ResearchHost(

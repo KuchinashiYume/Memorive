@@ -1,13 +1,11 @@
 """SHARED sample feedback regressions; fixtures only, no private capture."""
 from copy import deepcopy
 import json
-from pathlib import Path
 import pytest
 from memorive.desktop.settings.external_sources import ExternalDataSources
 from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import configure_aa
 
-ROOT=Path(__file__).resolve().parents[1]
 class AA:
     def __init__(self): self.calls=[]; self.fail_page=0
     def request(self,**kwargs):
@@ -27,16 +25,6 @@ def test_aa_follows_documented_pagination_and_keeps_page_receipts(tmp_path):
     assert len(list((tmp_path/'receipts').glob('*.page*.presend.json')))==2
     assert all(x['headers']['x-api-key']=='fixture' for x in transport.calls)
     assert 'fixture' not in ''.join(p.read_text(encoding='utf-8') for p in tmp_path.rglob('*.json'))
-def test_explicit_preflight_does_not_turn_into_incremental(tmp_path,monkeypatch):
-    import sys
-    sys.path.insert(0,str(ROOT/'tests'))
-    from test_browser_companion_incremental_product import _launchable_api
-    from test_extension_upgrade_repair_gate import _eligible_cursor
-    api=_launchable_api([])
-    monkeypatch.setattr(api,'_browser_companion_incremental_cursor',_eligible_cursor)
-    monkeypatch.setattr(api,'_launch_browser_companion_sync_fragment',lambda _status,**kw:kw)
-    result=api.run_browser_companion_test_read()
-    assert result['sync_mode']=='PREFLIGHT' and result['per_provider_limit']==2
 def test_site_profiles_exact_hosts_and_disabled_scope():
     from memorive.sessions.companion.site_profiles import default_sites, normalize_sites, profile_hash, active_sites
     rows=default_sites(); rows[1]['enabled']=False

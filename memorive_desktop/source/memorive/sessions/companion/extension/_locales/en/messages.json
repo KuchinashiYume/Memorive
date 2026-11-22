@@ -1,0 +1,83 @@
+{
+  "extName": {
+    "message": "Memo Web Conversations"
+  },
+  "extDescription": {
+    "message": "Save the conversation you are viewing on a major AI website."
+  },
+  "actionTitle": {
+    "message": "Save to Memo"
+  },
+  "languageButton": {
+    "message": "Language"
+  },
+  "popupHeading": {
+    "message": "Save a web conversation"
+  },
+  "popupIntro": {
+    "message": "Start, then scroll the page to collect the conversation as it loads."
+  },
+  "recordStart": {
+    "message": "Start recording"
+  },
+  "recordStop": {
+    "message": "Stop and save"
+  },
+  "recordStartTitle": {
+    "message": "Official AI websites only; after starting, scroll to load the conversation"
+  },
+  "recordStopTitle": {
+    "message": "Stop and save the messages collected so far"
+  },
+  "testRead": {
+    "message": "Test read"
+  },
+  "recordHint": {
+    "message": "Saved when you stop · ends after 10 minutes"
+  },
+  "unsupportedHint": {
+    "message": "Open a conversation on a supported AI website, or save this page as HTML and import it from the Memo inbox."
+  },
+  "recordingProgress": {
+    "message": "$1 messages · $2 s left"
+  },
+  "recordingProgressGap": {
+    "message": "$1 messages · $2 not yet in place · $3 s left"
+  },
+  "recordingSaving": {
+    "message": "Recording stopped, saving…"
+  },
+  "recordingSaved": {
+    "message": "Saved $1 messages (partial record) · import them in Memo"
+  },
+  "recordingSavedGap": {
+    "message": "Saved $1 messages (partial record); $2 could not be placed and were left out · import them in Memo"
+  },
+  "testReading": {
+    "message": "Reading the current page…"
+  },
+  "testResultMarkers": {
+    "message": "Read $1 messages ($2 questions, $3 answers) by the site's markers; nothing saved"
+  },
+  "testResultGeneric": {
+    "message": "Read $1 messages ($2 questions, $3 answers) by the general rules; nothing saved"
+  },
+  "errorNotOfficial": {
+    "message": "Only conversation pages of official AI websites are supported"
+  },
+  "errorVerification": {
+    "message": "Complete the website's verification first, then try again"
+  },
+  "errorNoConversation": {
+    "message": "No conversation is visible; open one first"
+  },
+  "errorRolesUnclear": {
+    "message": "Read $1 messages but could not tell questions from answers ($2 questions, $3 answers); nothing saved"
+  },
+  "errorPageChanged": {
+    "message": "The page changed; try again"
+  },
+  "errorGeneric": {
+    "message": "Reading failed; reload the page and try again"
+  }
+}

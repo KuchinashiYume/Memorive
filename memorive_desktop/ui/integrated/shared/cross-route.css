@@ -91,9 +91,6 @@ body {
 #desktop-settings-preview .desktop-settings-refinement-section > .switch-row { border:0; border-bottom:1px solid var(--border-subtle); border-radius:0; background:transparent; padding:12px 0; }
 #desktop-settings-preview .desktop-settings-form-stack > .switch-row:last-child,
 #desktop-settings-preview .desktop-settings-refinement-section > .switch-row:last-child { border-bottom:0; }
-#desktop-settings-preview .desktop-settings-browser-provider-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; }
-#desktop-settings-preview .desktop-settings-browser-site-fields { align-items:start; }
-#desktop-settings-preview .desktop-settings-browser-site-fields > .desktop-settings-source-actions { grid-column:1/-1; margin-top:4px; }
 #desktop-settings-preview .desktop-settings-source-actions > button { flex:0 0 auto; min-height:36px; height:auto; padding:8px 14px; align-self:center; }
 #desktop-settings-preview .desktop-settings-browser-adapter { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:16px; min-height:36px; color:var(--text-secondary); }
 #desktop-settings-preview .desktop-settings-browser-adapter [role="status"] { color:var(--text-primary); }
@@ -207,7 +204,6 @@ body {
   .desktop-page-root *, .desktop-page-root *::before, .desktop-page-root *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
 }
 @container (max-width:460px) {
-  #desktop-settings-preview .desktop-settings-browser-site-fields, #desktop-settings-preview .desktop-settings-browser-site-rules { grid-template-columns:minmax(0,1fr); }
   #desktop-settings-preview .desktop-settings-panel-head { flex-wrap:wrap; align-items:flex-start; }
   #desktop-settings-preview .desktop-settings-panel-title { flex:1 1 100%; }
   #desktop-settings-preview .desktop-settings-panel-title > div { flex:1; }
@@ -289,14 +285,10 @@ body {
 .desktop-route-surface .page-header .toolbar-group { margin-left:auto; min-width:0; max-width:100%; flex-wrap:wrap; gap:8px; }
   
 /* Reuse the API editor and cards for browser settings. */
-#desktop-settings-preview #memo-browser-code-workbench:not([hidden]) { display:grid; margin:0; }
-#desktop-settings-preview .desktop-settings-browser-stage-grid[hidden], #desktop-settings-preview .desktop-settings-browser-disclosure-body .desktop-settings-statusline[hidden], #desktop-settings-preview #memo-browser-code-workbench[hidden], #desktop-settings-preview .desktop-settings-browser-provider-grid[hidden] { display:none !important; }
+#desktop-settings-preview .desktop-settings-browser-stage-grid[hidden] { display:none !important; }
 html[lang] #desktop-settings-preview .desktop-settings-categories { grid-auto-rows:max-content; }
-#desktop-settings-preview #memo-browser-sites .desktop-settings-browser-provider-grid { grid-template-columns:minmax(0,1fr); }
 #desktop-settings-preview #memo-bridge-setup-guide[hidden] { display:none; }
 
-#desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-test,
-#desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-full-sync,
 #desktop-settings-preview .desktop-settings-shell[data-mode-scope="refinement"][data-settings-mode="normal"] #settings-browser-companion-details .desktop-settings-browser-disclosure-body { display:none !important; }
 
 

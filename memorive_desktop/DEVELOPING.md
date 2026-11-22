@@ -34,7 +34,7 @@ start" below).
   knowledge draft (`memorive/research/knowledge_feedback/research_ingest.py`).
 - **Sessions**: imported or captured conversations (`memorive/sessions`: `controller.py`, `archive/`,
   `companion/`) → refinement (`refinement/`, its model channel `model_channel.py`) → typed items for review.
-  The browser extension's install, reload and sync, and importing session files, are in
+  The browser extension's setup and connection, and importing what it records, are in
   `memorive/sessions/companion/desktop.py` (`BrowserCompanionDesktop`); `ProductApi` forwards the
   window's calls to it.
 - **Exams**: the settings page → `memorive/desktop/settings` (exam jobs and executors) → the exam modules

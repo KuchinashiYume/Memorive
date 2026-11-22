@@ -3,8 +3,8 @@
    assistant, the developer editor, network tests and appearance. Publishes
    Memorive.settingsBridge (call, refresh, registerSaveParticipant, syncSaveState, notify, nativeAction,
    ...), which the other settings scripts, the chat page and app.py's self-test use, and
-   Memorive.settingsText (text, language), the page's own texts by key in the three languages. The browser
-   companion is in browser-companion.js, the reset of one category to its defaults in scoped-reset.js, the
+   Memorive.settingsText (text, language), the page's own texts by key in the three languages. The web
+   recording extension is in browser-companion.js, the reset of one category to its defaults in scoped-reset.js, the
    rules for model services in model-rules.js. */
 (() => {
   'use strict';
@@ -178,88 +178,6 @@
       'refinement.risks.title': 'Extract risks',
       'refinement.risks.help': '',
       'refinement.saved.toast': 'Conversation refinement settings saved.',
-      'browser.title': 'Web conversation library',
-      'browser.help': 'Load the read-only bridge once. Later updates are automatic. Sync reads conversations in dedicated windows, one site at a time, and closes those windows when finished.',
-      'browser.progress.aria': 'Web conversation library status',
-      'browser.progress.ready': '{stage}',
-      'browser.progress.not-started': 'Not started',
-      'browser.progress.identity': 'Waiting for browser connection',
-      'browser.progress.sync': 'Reading web conversations {attempt}/{total}',
-      'browser.progress.setup': 'Preparing browser component',
-      'browser.progress.error': 'Connection failed',
-      'browser.error.timeout': 'Connection failed. Reload the extension and retry.',
-      'browser.error.disconnected': 'The browser bridge is disconnected. Confirm that the extension is enabled, then try again.',
-      'browser.providers.aria': 'Web conversation source sync status',
-      'browser.setup': 'Connect browser',
-      'browser.setup.continue': 'Continue bridge setup',
-      'browser.setup.update': 'Update read-only bridge',
-      'browser.setup.current': 'Bridge configured',
-      'browser.reload': 'Reconnect read-only bridge',
-      'browser.reload.starting': 'Reconnecting read-only bridge',
-      'browser.reload.triggered': 'Read-only bridge reconnection triggered',
-      'browser.sync': 'Enabled-site preflight (2 per site)',
-      'browser.sync.starting': 'Starting enabled-site preflight',
-      'browser.sync.triggered': 'Enabled-site preflight triggered',
-      'browser.incremental': 'Incremental sync (up to 10 per site)',
-      'browser.incremental.starting': 'Starting enabled-site incremental sync',
-      'browser.incremental.triggered': 'Enabled-site incremental sync triggered',
-      'browser.full': 'Full sync',
-      'browser.full.starting': 'Starting full sync',
-      'browser.full.triggered': 'Full sync triggered',
-      'browser.guidance': 'First read: 2 per site. Later runs sync only new or changed conversations (up to 10 per site).',
-      'browser.badge.unconfigured': 'Not configured',
-      'browser.badge.prepared': 'Awaiting connection',
-      'browser.badge.reload': 'Bridge reload required',
-      'browser.badge.connected': 'Connected',
-      'browser.badge.syncing': 'Connected · syncing',
-      'browser.badge.empty': 'Connected · 0 conversations',
-      'browser.badge.synced': 'Synced',
-      'browser.badge.update': 'Update available',
-      'browser.badge.disconnected': 'Connection failed',
-      'browser.stage.prepared': 'Component ready',
-      'browser.stage.wait-prepared': 'Waiting for component',
-      'browser.stage.connected': '{browser} connected',
-      'browser.stage.connected-short': 'Browser connected',
-      'browser.stage.wait-connected': 'Waiting for bridge identity',
-      'browser.stage.synced': 'Conversations synced',
-      'browser.stage.wait-synced': 'Waiting for conversation sync',
-      'browser.provider.synced': '{count} synced',
-      'browser.provider.failed': '{count} failed',
-      'browser.provider.empty': 'Sync complete · 0 found',
-      'browser.provider.wait-sync': 'Waiting for sync',
-      'browser.provider.wait-connect': 'Waiting for connection',
-      'browser.provider.safe.pass': 'Safe · {count} read',
-      'browser.provider.safe.human': 'Human verification · full sync blocked',
-      'browser.provider.safe.failed': '{count} failed · full sync blocked',
-      'browser.provider.safe.empty': 'No content read · full sync blocked',
-      'browser.provider.safe.required': 'Preflight required',
-      'browser.gate.ready': 'All enabled sites passed. Full sync can be started manually.',
-      'browser.gate.human': 'Human verification detected. Full sync is blocked.',
-      'browser.gate.pending': 'Preflight did not pass: every site must read content with zero failures. No automatic upgrade.',
-      'browser.gate.required': 'Complete the enabled-site preflight to check full-sync eligibility.',
-      'browser.status.reloading': 'Reloading the read-only bridge. Waiting for the {version} identity receipt; no sync will start.',
-      'browser.status.reload-required': 'Reload the read-only bridge, then wait for the {version} identity receipt.',
-      'browser.status.update': 'A bridge update is available. Run one-click setup before reloading the bridge.',
-      'browser.status.synced': 'Bridge identity and local import have both been verified.',
-      'browser.status.empty': 'All three sources completed, but no conversations matched: prefer the last 14 days, or the latest 30 sidebar items when dates are unavailable.',
-      'browser.status.connected': 'Read-only bridge identity verified; preflight is available.',
-      'browser.status.incremental': 'Read-only bridge identity verified; existing archives will now receive incremental updates.',
-      'browser.status.manual': 'Load the unpacked extension once, then verify its identity receipt.',
-      'browser.status.unconfigured': 'No bridge identity receipt detected.',
-      'browser.toast.manual': 'The extension manager and prepared folder are open. Load the unpacked extension once; Memorive will verify it automatically.',
-      'browser.toast.reload': 'Reloading the read-only bridge. No sync has started.',
-      'browser.toast.identity': 'Read-only bridge identity {version} verified. Preflight is now available.',
-      'browser.toast.identity-required': 'Verify the current read-only bridge identity before preflight.',
-      'browser.toast.prepared': 'The extension folder is ready. Load it once from the Edge or Chrome extension manager.',
-      'browser.toast.current': 'The read-only bridge is already configured. No repeated setup is needed.',
-      'browser.toast.triggered': 'Enabled-site preflight triggered, with at most 5 items per site.',
-      'browser.toast.incremental-triggered': 'Enabled-site incremental sync triggered, with at most 10 items per site.',
-      'browser.toast.preflight-ready': 'All enabled sites passed. Full sync is now available manually.',
-      'browser.toast.full-triggered': 'Full sync triggered. Waiting for the background conversation package.',
-      'browser.toast.full-blocked': 'Full sync remains blocked until the latest preflight passes all enabled sites.',
-      'browser.toast.synced': 'The web conversation library has been verified and synced.',
-      'browser.toast.connected': 'Extension connected; waiting for a conversation package.',
-      'browser.toast.unconfigured': 'No extension handshake detected. Complete the one-time unpacked-extension load first.',
       'assistant.title': 'Desktop assistant',
       'assistant.help': '',
       'assistant.enabled.aria': 'Enable desktop assistant',
@@ -337,88 +255,6 @@
       'refinement.risks.title': 'リスクを抽出',
       'refinement.risks.help': '',
       'refinement.saved.toast': '会話精製の設定を保存しました。',
-      'browser.title': 'Web 会話ライブラリ',
-      'browser.help': '読取専用ブリッジは初回だけ読み込みます。以後の更新は自動です。同期は専用ウィンドウでサイトを順番に読み取り、完了後にそのウィンドウを閉じます。',
-      'browser.progress.aria': 'Web 会話ライブラリの状態',
-      'browser.progress.ready': '{stage}',
-      'browser.progress.not-started': '未開始',
-      'browser.progress.identity': 'ブラウザー接続を待機中',
-      'browser.progress.sync': 'Web 会話を読取中 {attempt}/{total}',
-      'browser.progress.setup': 'ブラウザーコンポーネントを準備中',
-      'browser.progress.error': '接続に失敗しました',
-      'browser.error.timeout': '接続できませんでした。拡張機能を再読み込みして、もう一度お試しください。',
-      'browser.error.disconnected': 'ブラウザーブリッジが切断されています。拡張機能が有効か確認して、もう一度お試しください。',
-      'browser.providers.aria': 'Web 会話ソースの同期状態',
-      'browser.setup': 'ブラウザーに接続',
-      'browser.setup.continue': 'ブリッジ設定を続行',
-      'browser.setup.update': '読取専用ブリッジを更新',
-      'browser.setup.current': 'ブリッジ設定済み',
-      'browser.reload': '読取専用ブリッジを再接続',
-      'browser.reload.starting': '読取専用ブリッジを再接続中',
-      'browser.reload.triggered': '読取専用ブリッジの再接続を開始',
-      'browser.sync': '有効なサイト試読（各 5 件）',
-      'browser.sync.starting': '有効なサイト試読を開始中',
-      'browser.sync.triggered': '有効なサイト試読を開始しました',
-      'browser.incremental': '増分同期（各サイト最大 10 件）',
-      'browser.incremental.starting': '有効なサイト増分同期を開始中',
-      'browser.incremental.triggered': '有効なサイト増分同期を開始しました',
-      'browser.full': '完全同期',
-      'browser.full.starting': '完全同期を開始中',
-      'browser.full.triggered': '完全同期を開始しました',
-      'browser.guidance': '初回は各サイト 5 件を試読し、以後は新規・変更分だけを同期します（各サイト最大 10 件）。',
-      'browser.badge.unconfigured': '未設定',
-      'browser.badge.prepared': '接続待ち',
-      'browser.badge.reload': 'ブリッジ再読込が必要',
-      'browser.badge.connected': '接続済み',
-      'browser.badge.syncing': '接続済み・同期中',
-      'browser.badge.empty': '接続済み・会話 0 件',
-      'browser.badge.synced': '同期済み',
-      'browser.badge.update': '更新あり',
-      'browser.badge.disconnected': '接続失敗',
-      'browser.stage.prepared': 'コンポーネント準備済み',
-      'browser.stage.wait-prepared': 'コンポーネント準備待ち',
-      'browser.stage.connected': '{browser} 接続済み',
-      'browser.stage.connected-short': 'ブラウザー接続済み',
-      'browser.stage.wait-connected': 'ブリッジ ID の確認待ち',
-      'browser.stage.synced': '会話を同期済み',
-      'browser.stage.wait-synced': '会話同期待ち',
-      'browser.provider.synced': '{count} 件同期',
-      'browser.provider.failed': '{count} 件失敗',
-      'browser.provider.empty': '同期完了・0 件',
-      'browser.provider.wait-sync': '同期待ち',
-      'browser.provider.wait-connect': '接続待ち',
-      'browser.provider.safe.pass': '安全 · {count} 件読取',
-      'browser.provider.safe.human': '人による確認 · 完全同期をブロック',
-      'browser.provider.safe.failed': '{count} 件失敗 · 完全同期をブロック',
-      'browser.provider.safe.empty': '内容なし · 完全同期をブロック',
-      'browser.provider.safe.required': '試読が必要',
-      'browser.gate.ready': '有効なサイトすべてが通過しました。完全同期を手動で開始できます。',
-      'browser.gate.human': '人による確認を検出したため、完全同期をブロックしました。',
-      'browser.gate.pending': '試読未通過です。各サイトで内容を取得し、失敗 0 件が必要です。自動移行はしません。',
-      'browser.gate.required': '有効なサイト試読後に完全同期の資格を確認します。',
-      'browser.status.reloading': '読取専用ブリッジを再読込中です。{version} の ID 受領票を待っています。同期は開始しません。',
-      'browser.status.reload-required': '読取専用ブリッジを再読込し、{version} の ID 受領票を待ってください。',
-      'browser.status.update': 'ブリッジの更新があります。ワンクリック設定後にブリッジを再読込してください。',
-      'browser.status.synced': 'ブリッジ ID とローカルへの取り込みを検証しました。',
-      'browser.status.empty': '3 つのソースの同期は完了しましたが、対象の会話はありませんでした。過去 14 日を優先し、日付がない場合はサイドバーの最新 30 件を読み取ります。',
-      'browser.status.connected': '読取専用ブリッジの ID を確認しました。試読を開始できます。',
-      'browser.status.incremental': '読取専用ブリッジの ID を確認しました。既存アーカイブには増分更新だけを追加します。',
-      'browser.status.manual': '拡張機能を一度読み込み、ID 受領票を確認してください。',
-      'browser.status.unconfigured': 'ブリッジの ID 受領票を検出できません。',
-      'browser.toast.manual': '拡張機能管理ページと準備済みフォルダーを開きました。「展開して読み込み」を一度実行すると、Memorive が自動検証します。',
-      'browser.toast.reload': '読取専用ブリッジを再読込中です。同期は開始していません。',
-      'browser.toast.identity': '読取専用ブリッジ {version} の ID を確認しました。試読を開始できます。',
-      'browser.toast.identity-required': '試読の前に現在の読取専用ブリッジ ID を確認してください。',
-      'browser.toast.prepared': '拡張機能フォルダーを準備しました。Edge または Chrome の拡張機能管理ページから一度読み込んでください。',
-      'browser.toast.current': '読取専用ブリッジは設定済みです。再設定は不要です。',
-      'browser.toast.triggered': '有効なサイト試読を開始しました。各サイト最大 5 件です。',
-      'browser.toast.incremental-triggered': '有効なサイト増分同期を開始しました。各サイト最大 10 件です。',
-      'browser.toast.preflight-ready': '有効なサイトすべてが通過し、完全同期を手動で開始できます。',
-      'browser.toast.full-triggered': '完全同期を開始しました。バックグラウンドの会話パッケージを待っています。',
-      'browser.toast.full-blocked': '最新の試読で 有効なサイトすべてが通過するまで完全同期は利用できません。',
-      'browser.toast.synced': 'Web 会話ライブラリを検証し、同期しました。',
-      'browser.toast.connected': '拡張機能は接続済みです。会話パッケージを待っています。',
-      'browser.toast.unconfigured': '拡張機能の接続を検出できません。初回の「展開して読み込み」を完了してください。',
       'assistant.title': 'デスクトップ助手',
       'assistant.help': '',
       'assistant.enabled.aria': 'デスクトップ助手を有効化',
@@ -438,7 +274,7 @@
     if (String(raw).toLowerCase().startsWith('en')) return 'en-US';
     return 'zh-CN';
   };
-  const COPY_SETTINGS = Object.freeze({"browser.result.partial":["已读取 {count} 条 · {failed} 个网站需重试", "Read {count} chats · {failed} websites need retry", "{count} 件読み取り済み · {failed} サイトで再試行が必要"],"browser.result.done":["会话已同步 · 本次读取 {count} 条", "Chats synced · {count} read this time", "会話を同期済み · 今回 {count} 件を読み取り"],"browser.stage.read-failed":["本次读取未完成","Current read incomplete","今回の読み取りが未完了"],"browser.progress.no-receipt":["未收到本次读取结果 · 可重试","No result received · retry available","今回の結果未受信 · 再試行できます"],"browser.progress.manual-load":["待加载插件","Load extension","拡張の読み込み待ち"],"browser.progress.importing":["正在导入会话","Importing conversations","会話を取り込み中"],"browser.progress.import-failed":["会话导入失败 · 可重试","Import failed · retry available","取り込み失敗 · 再試行できます"],"browser.help":["连接浏览器以同步会话","Connect your browser to sync conversations","ブラウザーを接続して会話を同期"],"local.protocol.help":["发现本机模型服务","Discover local model services","ローカルモデルサービスを検出"],"local.endpoint.help":["仅接受 127.0.0.1 或 ::1","Only 127.0.0.1 or ::1","127.0.0.1 または ::1 のみ"],"local.detect":["发现模型","Discover models","モデルを検出"],"local.verify":["验证","Verify","検証"],"refinement.model.help":["请先添加可用模型","Add an available model first","利用可能なモデルを追加してください"],"refinement.content.help":["","",""],"refinement.tasks.help":["","",""],"refinement.risks.help":["","",""],"refinement.status.ready":["就绪","Ready","準備完了"],"refinement.status.unselected":["未选择 · 请选择精炼模型","Not selected · choose a refinement model","未選択 · 精製モデルを選んでください"],"refinement.status.removed":["已移除 · 原来的模型已不在，请重新选择","Removed · the chosen model is gone; choose another","削除済み · 選んだモデルがありません。選び直してください"],"refinement.status.unavailable":["暂不可用 · 请检查模型服务","Unavailable · check the model service","一時的に利用不可 · モデルサービスを確認してください"],"refinement.saved.toast":["已保存","Saved","保存済み"],"browser.setup":["配置浏览器扩展","Set up browser extension","ブラウザー拡張を設定"],"browser.setup.continue":["继续配置","Continue setup","設定を続ける"],"browser.setup.update":["更新浏览器扩展","Update browser extension","ブラウザー拡張を更新"],"browser.setup.current":["已配置","Configured","設定済み"],"browser.reload":["重新连接","Reconnect","再接続"],"browser.reload.starting":["正在重新连接","Reconnecting","再接続中"],"browser.reload.triggered":["正在重新连接","Reconnecting","再接続中"],"browser.sync":["试同步（每站 2 条）","Trial sync (2 per site)","試験同期（各サイト 2 件）"],"browser.sync.starting":["正在同步","Syncing","同期中"],"browser.sync.triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.full.triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.guidance":["","",""],"browser.stage.wait-connected":["等待浏览器连接","Waiting for browser connection","ブラウザーの接続待ち"],"browser.gate.ready":["可以完整同步","Ready for full sync","完全同期が可能"],"browser.gate.required":["请先完成试同步","Complete trial sync first","試験同期を完了してください"],"browser.gate.pending":["试同步未完成","Trial sync incomplete","試験同期が未完了"],"browser.gate.human":["请在浏览器完成人机验证。","Complete verification in your browser.","ブラウザーで人間確認を完了してください。"],"browser.provider.safe.pass":["已读取 {count} 条","Read {count} conversations","{count} 件読み取り済み"],"browser.provider.safe.human":["请在浏览器完成人机验证。","Complete verification in your browser.","ブラウザーで人間確認を完了してください。"],"browser.provider.safe.empty":["未读取到会话","No conversations read","会話を読み取れませんでした"],"browser.toast.identity":["已连接","Connected","接続済み"],"browser.toast.identity-required":["请先连接浏览器","Connect your browser first","ブラウザーを接続してください"],"browser.toast.preflight-ready":["可以完整同步","Ready for full sync","完全同期が可能"],"browser.toast.full-blocked":["请先完成试同步","Complete trial sync first","試験同期を完了してください"],"browser.toast.full-triggered":["同步已提交","Sync submitted","同期を開始しました"],"browser.toast.reload":["正在重新连接","Reconnecting","再接続中"],"browser.status.reloading":["正在重新连接","Reconnecting","再接続中"],"browser.status.reload-required":["请重新连接浏览器","Reconnect your browser","ブラウザーを再接続してください"],"browser.status.manual":["请先配置浏览器扩展","Set up the browser extension first","ブラウザー拡張を設定してください"],"browser.status.unconfigured":["等待浏览器连接","Waiting for browser connection","ブラウザーの接続待ち"],"assistant.status.enabled":["已启用","Enabled","有効"],"assistant.status.disabled":["已关闭","Disabled","無効"],"assistant.saved.toast":["已保存","Saved","保存済み"]});
+  const COPY_SETTINGS = Object.freeze({"browser.title":["网页录入", "Web recording", "ウェブ記録"],"browser.help.aria":["查看网页录入说明", "About web recording", "ウェブ記録について"],"browser.progress.aria":["网页录入插件状态", "Web recording extension status", "ウェブ記録の拡張機能の状態"],"browser.progress.not-started":["未开始", "Not started", "未開始"],"browser.progress.identity":["等待浏览器连接", "Waiting for the browser", "ブラウザーの接続を待っています"],"browser.progress.setup":["正在准备浏览器组件", "Preparing the browser component", "ブラウザー用コンポーネントを準備中"],"browser.progress.error":["连接失败，请重试。", "Connection failed; try again.", "接続できませんでした。もう一度お試しください。"],"browser.error.disconnected":["浏览器插件未连接，请确认扩展已启用后重试。", "The browser extension is not connected. Make sure it is enabled, then try again.", "ブラウザーの拡張機能が接続されていません。有効になっていることを確認してから、もう一度お試しください。"],"browser.badge.unconfigured":["未配置", "Not set up", "未設定"],"browser.badge.prepared":["待连接", "Awaiting connection", "接続待ち"],"browser.badge.connected":["已连接", "Connected", "接続済み"],"browser.badge.update":["可更新", "Update available", "更新あり"],"browser.badge.incomplete":["未完成", "Not finished", "未完了"],"browser.stage.prepared":["组件已准备", "Component ready", "コンポーネント準備済み"],"browser.stage.wait-prepared":["等待准备组件", "Waiting for the component", "コンポーネントの準備待ち"],"browser.stage.connected":["{browser} 已连接", "{browser} connected", "{browser} 接続済み"],"browser.stage.connected-short":["浏览器已连接", "Browser connected", "ブラウザー接続済み"],"browser.toast.current":["已配置", "Already set up", "設定済み"],"browser.toast.load-plugin":["请在扩展页加载插件文件夹", "Load the extension folder on the extensions page", "拡張機能ページで拡張機能フォルダーを読み込んでください"],"browser.toast.prepared":["已准备组件文件夹；请在所选浏览器的扩展页加载一次。", "The component folder is ready; load it once on the chosen browser's extensions page.", "コンポーネントのフォルダーを準備しました。選んだブラウザーの拡張機能ページで一度読み込んでください。"],"browser.toast.updated":["插件文件夹已更新；请在扩展页重新加载插件。", "The extension folder is updated; reload the extension on the extensions page.", "拡張機能フォルダーを更新しました。拡張機能ページで再読み込みしてください。"],"browser.progress.manual-load":["待加载插件", "Load the extension", "拡張機能の読み込み待ち"],"browser.help":["首次在扩展页打开开发者模式并加载插件文件夹，完成后会自动确认连接。之后在 AI 网页上点插件按钮录入会话。插件更新后，在扩展页重新加载一次。", "Load the extension folder once on the browser's extensions page with developer mode on; the connection is then confirmed automatically. After that, record a conversation with the extension's button on the AI website. After an update, reload the extension there once.", "拡張機能ページでデベロッパーモードをオンにして拡張機能フォルダーを一度読み込むと、接続が自動で確認されます。その後は AI サイトで拡張機能のボタンから会話を記録します。更新後は拡張機能ページで一度再読み込みしてください。"],"local.protocol.help":["发现本机模型服务", "Discover local model services", "ローカルモデルサービスを検出"],"local.endpoint.help":["仅接受 127.0.0.1 或 ::1", "Only 127.0.0.1 or ::1", "127.0.0.1 または ::1 のみ"],"local.detect":["发现模型", "Discover models", "モデルを検出"],"local.verify":["验证", "Verify", "検証"],"refinement.model.help":["请先添加可用模型", "Add an available model first", "利用可能なモデルを追加してください"],"refinement.content.help":["", "", ""],"refinement.tasks.help":["", "", ""],"refinement.risks.help":["", "", ""],"refinement.status.ready":["就绪", "Ready", "準備完了"],"refinement.status.unselected":["未选择 · 请选择精炼模型", "Not selected · choose a refinement model", "未選択 · 精製モデルを選んでください"],"refinement.status.removed":["已移除 · 原来的模型已不在，请重新选择", "Removed · the chosen model is gone; choose another", "削除済み · 選んだモデルがありません。選び直してください"],"refinement.status.unavailable":["暂不可用 · 请检查模型服务", "Unavailable · check the model service", "一時的に利用不可 · モデルサービスを確認してください"],"refinement.saved.toast":["已保存", "Saved", "保存済み"],"browser.setup":["连接浏览器", "Connect browser", "ブラウザーに接続"],"browser.setup.continue":["继续连接", "Continue connecting", "接続を続ける"],"browser.setup.update":["更新浏览器扩展", "Update the extension", "拡張機能を更新"],"browser.setup.current":["浏览器已连接", "Browser connected", "ブラウザー接続済み"],"browser.stage.wait-connected":["等待插件连接", "Waiting for the extension", "拡張機能の接続待ち"],"browser.toast.identity":["网页录入插件 {version} 已连接", "Web recording extension {version} connected", "ウェブ記録の拡張機能 {version} が接続されました"],"assistant.status.enabled":["已启用", "Enabled", "有効"],"assistant.status.disabled":["已关闭", "Disabled", "無効"],"assistant.saved.toast":["已保存", "Saved", "保存済み"]});
   const uiText = (key, fallback, params = {}) => {
     const language = settingsLanguage();
     const compact = COPY_SETTINGS[key];
@@ -496,27 +332,13 @@
     if (!localModelBusy) setText('[data-local-model-refresh-label]', 'local.detect', '发现模型');
     setText('#settings-refinement-model-title', 'refinement.model.title', '精炼模型');
     setText('#settings-refinement-model-title + small', 'refinement.model.help', '请先添加可用模型');
-    setText('#settings-browser-companion-title', 'browser.title', '网页会话库');
+    setText('#settings-browser-companion-title', 'browser.title', '网页录入');
     const browserHelp = q('#settings-browser-companion-help');
-    if (browserHelp) browserHelp.setAttribute('aria-label', uiText('browser.help.aria', '查看网页会话库说明'));
-    setText('#settings-browser-companion-tip', 'browser.help', '首次需要在 Edge 或 Chrome 中加载一次只读桥接；之后更新自动完成。同步会依次打开独立窗口读取网页会话，完成后自动关闭采集窗口。首次试读每站 2 条，后续只同步新增或变化。');
-    q('.desktop-settings-browser-stage-grid')?.setAttribute('aria-label', uiText('browser.progress.aria', '网页会话库配置进度'));
-    q('.desktop-settings-browser-provider-grid')?.setAttribute('aria-label', uiText('browser.providers.aria', '网页会话来源同步状态'));
-    setText('#settings-browser-companion-setup', 'browser.setup', '配置浏览器扩展');
-    const browserReloadCopy = companion().reloadState() === 'starting'
-      ? ['browser.reload.starting', '正在重新连接']
-      : companion().reloadState() === 'triggered'
-        ? ['browser.reload.triggered', '只读桥接已触发重载']
-        : ['browser.reload', '重新连接'];
-    setText('#settings-browser-companion-reload', browserReloadCopy[0], browserReloadCopy[1]);
-    q('#settings-browser-companion-sync').textContent = '增量同步';
-    q('#settings-browser-companion-test').textContent = '测试读取';
-    const browserFullCopy = companion().fullSyncState() === 'starting'
-      ? ['browser.full.starting', '正在启动完整同步']
-      : companion().fullSyncState() === 'triggered'
-        ? ['browser.full.triggered', '完整同步已触发']
-        : ['browser.full', '完整同步'];
-    setText('#settings-browser-companion-full-sync', browserFullCopy[0], browserFullCopy[1]);
+    if (browserHelp) browserHelp.setAttribute('aria-label', uiText('browser.help.aria', '查看网页录入说明'));
+    setText('#settings-browser-companion-tip', 'browser.help', '首次在扩展页打开开发者模式并加载插件文件夹，完成后会自动确认连接。之后在 AI 网页上点插件按钮录入会话。插件更新后，在扩展页重新加载一次。');
+    q('.desktop-settings-browser-stage-grid')?.setAttribute('aria-label', uiText('browser.progress.aria', '网页录入插件状态'));
+    // The setup button's words depend on the extension's state.
+    companion().rerender();
     setText('#settings-refinement-content-title', 'refinement.content.title', '精炼内容');
     setText('#settings-refinement-content-title + small', 'refinement.content.help', '');
     const taskRow = q('#settings-refinement-tasks')?.closest('.switch-row');
@@ -4290,18 +4112,7 @@
       void removeLocalModel(target.dataset.localModelRemove).catch(fail('本地模型端点移除失败'));
     } else if (target.id === 'settings-browser-companion-setup') {
       stopOriginal(event);
-      void companion().prepare().catch(fail('网页会话读取组件准备失败'));
-    } else if (target.id === 'settings-browser-companion-reload') {
-      stopOriginal(event);
-      void companion().reload().catch(fail('只读桥接重新加载失败'));
-    } else if (target.id === 'settings-browser-companion-test') {
-      void companion().sync('PREFLIGHT').catch(error => showToast(error.message));
-    } else if (target.id === 'settings-browser-companion-sync') {
-      stopOriginal(event);
-      void companion().sync(root.querySelector('.desktop-settings-shell')?.dataset.settingsMode==='normal'?'AUTO':'INCREMENTAL').catch(fail('网页会话同步失败'));
-    } else if (target.id === 'settings-browser-companion-full-sync') {
-      stopOriginal(event);
-      void companion().syncFull().catch(fail('网页会话完整同步失败'));
+      void companion().prepare().catch(fail('网页录入插件准备失败'));
     } else if (target.id === 'settings-network-test') {
       stopOriginal(event);
       void networkTest().catch(fail('网络检查失败'));

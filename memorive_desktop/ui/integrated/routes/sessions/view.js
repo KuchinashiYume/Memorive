@@ -125,9 +125,7 @@
     const manualCapture = projection?.manual_capture_available === true || configured;
     const banner = q('#sessions-browser-setup-required');
     banner.hidden = configured;
-    banner.querySelector('strong').textContent = projection?.manual_import_observed
-      ? '网页录入已可用，自动同步连接尚未确认'
-      : '自动同步连接尚未确认';
+    banner.querySelector('strong').textContent = '网页录入插件尚未连接，请在设置中连接浏览器';
     q('#sessions-import-browser-sessions').disabled = !manualImport;
     q('#sessions-capture-current-page').disabled = !manualCapture;
     q('#sessions-import-browser-sessions').title = '导入 Memo 网页会话插件生成的 JSON 会话包';
@@ -226,7 +224,12 @@
     if (announce) Memorive.frames.sessions.announce(`一级列表约 ${listPercent}%，会话详情约 ${detailPercent}%`);
   };
 
-  const sourceMark = (provider) => ({ codex:'CX', claude:'CC', deepseek:'DS', gemini:'GM', kimi:'KM', universal:'UN' }[provider] || 'SE');
+  // The source's letter mark: local CLI sessions, earlier synced web sessions, and web recordings by their site
+  // (source_site); a recorded site without its own reading rules shows "?".
+  const SITE_MARKS = Object.freeze({ chatgpt:'GPT', claude:'CL', gemini:'GM', deepseek:'DS', kimi:'KM' });
+  const sourceMark = (record) => record.provider_id === 'universal'
+    ? SITE_MARKS[record.source_site] || '?'
+    : ({ codex:'CX', claude:'CC', deepseek:'DS', gemini:'GM', kimi:'KM' }[record.provider_id] || '?');
   const webProvider = (provider) => ['deepseek', 'gemini', 'kimi', 'universal'].includes(provider);
 
   const displayTime = (value, recencyBucket = 'UNKNOWN', ingestedAt = 'UNKNOWN', timeBasis = '') => {
@@ -293,7 +296,7 @@
 
     const source = document.createElement('span');
     source.className = 'desktop-sessions-source';
-    source.textContent = sourceMark(record.provider_id);
+    source.textContent = sourceMark(record);
     source.title = card.dataset.sourceName;
     source.setAttribute('aria-label', `来源：${card.dataset.sourceName}`);
 
@@ -665,7 +668,7 @@
     const refinementState = currentPagePartial
       ? '该记录仅包含录入时的当前页可见内容；可按该范围精炼，任务快照会保留部分内容标记。'
       : !complete
-      ? '会话未完整读取，请重新同步。'
+      ? '会话未完整读取，请重新录入。'
       : refinementModelState === 'UNSELECTED'
         ? '请先在设置中选择精炼模型'
         : refinementModelState === 'REMOVED'

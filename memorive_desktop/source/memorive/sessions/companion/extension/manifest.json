@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Memo 网页会话",
-  "version": "3.10.2",
-  "description": "录入常用 AI 官网当前可见的会话，或同步已配置的网站。",
+  "name": "__MSG_extName__",
+  "version": "4.1.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "alarms",
@@ -14,13 +15,30 @@
     "https://gemini.google.com/*",
     "https://kimi.com/*",
     "https://www.kimi.com/*",
-    "https://kimi.moonshot.cn/*"
+    "https://kimi.moonshot.cn/*",
+    "https://chat.qwen.ai/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://grok.com/*",
+    "https://www.qianwen.com/*",
+    "https://qianwen.com/*",
+    "https://tongyi.aliyun.com/*",
+    "https://www.doubao.com/*",
+    "https://doubao.com/*",
+    "https://yuanbao.tencent.com/*",
+    "https://yiyan.baidu.com/*",
+    "https://chatglm.cn/*",
+    "https://copilot.microsoft.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
+    "https://poe.com/*",
+    "https://chat.mistral.ai/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "同步或录入到 Memo",
+    "default_title": "__MSG_actionTitle__",
     "default_popup": "popup.html"
   },
   "content_scripts": [
@@ -30,7 +48,24 @@
         "https://gemini.google.com/*",
         "https://kimi.com/*",
         "https://www.kimi.com/*",
-        "https://kimi.moonshot.cn/*"
+        "https://kimi.moonshot.cn/*",
+        "https://chat.qwen.ai/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://grok.com/*",
+        "https://www.qianwen.com/*",
+        "https://qianwen.com/*",
+        "https://tongyi.aliyun.com/*",
+        "https://www.doubao.com/*",
+        "https://doubao.com/*",
+        "https://yuanbao.tencent.com/*",
+        "https://yiyan.baidu.com/*",
+        "https://chatglm.cn/*",
+        "https://copilot.microsoft.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*",
+        "https://poe.com/*",
+        "https://chat.mistral.ai/*"
       ],
       "js": [
         "site_profiles.js",

@@ -1,0 +1,83 @@
+{
+  "extName": {
+    "message": "Memo 网页会话"
+  },
+  "extDescription": {
+    "message": "录入常用 AI 官网上正在看的会话。"
+  },
+  "actionTitle": {
+    "message": "录入到 Memo"
+  },
+  "languageButton": {
+    "message": "切换语言"
+  },
+  "popupHeading": {
+    "message": "录入网页会话"
+  },
+  "popupIntro": {
+    "message": "开始后滚动页面，收集已加载的对话。"
+  },
+  "recordStart": {
+    "message": "开始录制"
+  },
+  "recordStop": {
+    "message": "停止并录入"
+  },
+  "recordStartTitle": {
+    "message": "仅支持 AI 官网；开始后滚动加载对话"
+  },
+  "recordStopTitle": {
+    "message": "停止并录入已收集的消息"
+  },
+  "testRead": {
+    "message": "测试读取"
+  },
+  "recordHint": {
+    "message": "停止即录入 · 10 分钟自动结束"
+  },
+  "unsupportedHint": {
+    "message": "在支持的 AI 网站打开一段对话，或将此页保存为 HTML 后从 Memo 收件箱导入。"
+  },
+  "recordingProgress": {
+    "message": "已累计 $1 条 · 剩余 $2 秒"
+  },
+  "recordingProgressGap": {
+    "message": "已累计 $1 条 · $2 条接不上 · 剩余 $3 秒"
+  },
+  "recordingSaving": {
+    "message": "录制已停止，正在保存…"
+  },
+  "recordingSaved": {
+    "message": "已保存 $1 条（部分记录）· 回到 Memo 导入"
+  },
+  "recordingSavedGap": {
+    "message": "已保存 $1 条（部分记录）；另有 $2 条接不上，未保存 · 回到 Memo 导入"
+  },
+  "testReading": {
+    "message": "正在读取当前页面…"
+  },
+  "testResultMarkers": {
+    "message": "读到 $1 条（提问 $2、回答 $3），按网站标记识别；未保存"
+  },
+  "testResultGeneric": {
+    "message": "读到 $1 条（提问 $2、回答 $3），按通用规则识别；未保存"
+  },
+  "errorNotOfficial": {
+    "message": "仅支持 AI 官网会话页面"
+  },
+  "errorVerification": {
+    "message": "请先在网页完成验证，再重试"
+  },
+  "errorNoConversation": {
+    "message": "未找到可见的对话，请先打开一段会话"
+  },
+  "errorRolesUnclear": {
+    "message": "读到 $1 条，但分不出提问和回答（提问 $2 条、回答 $3 条），没有保存"
+  },
+  "errorPageChanged": {
+    "message": "页面已切换，请重试"
+  },
+  "errorGeneric": {
+    "message": "读取失败，请刷新当前网页后重试"
+  }
+}

@@ -1,18 +1,20 @@
-"""The browser companion as the desktop runs it: install, reload and sync the extension, and bring
-browser sessions into the session library.
+"""The browser extension as the desktop runs it: prepare the extension for the user's browser, tell whether the
+browser has loaded it, and bring the conversations it records into the session library.
 
 ProductApi builds one BrowserCompanionDesktop at startup and forwards to it the window's
-browser_companion_*, *_browser_companion*, sync_browser_sessions_from_downloads and
-import_browser_sessions_file calls. The extension writes into the browser's download folder;
-the sync reads its reports there and hands each session file to the sessions controller
-(memorive/sessions/controller/). Its own state is in the BROWSER_COMPANION profile folder (setup_v1.json,
-the prepared extension, session-library).
+browser_companion_status, install_browser_companion, confirm_browser_companion_setup,
+open_browser_companion_folder, sync_browser_sessions_from_downloads and import_browser_sessions_file calls
+(memorive/desktop/api/browser_companion.py). The extension saves each recording, and an identity receipt when it
+starts, into the browser's download folder ("Memorive会话桥接"); refreshing the sessions page hands each recording
+to the sessions controller (memorive/sessions/controller/). Its own state is in the BROWSER_COMPANION profile
+folder (setup_v1.json, session-library); the prepared extension is under AppData/Local/Memorive/Bridge.
+
+The site sync of earlier versions is gone; the files it wrote still import (saved_site_settings).
 """
 from __future__ import annotations
 
 from datetime import datetime
 import hashlib
-import importlib
 import json
 import os
 from pathlib import Path
@@ -20,7 +22,7 @@ import re
 import shutil
 import subprocess
 import time
-from typing import Any, Callable, Mapping
+from typing import Any, Callable
 import uuid
 
 from memorive.platform.windows_paths import windows_io_path
@@ -47,33 +49,12 @@ class BrowserCompanionDesktop:
         self.system_effects_enabled = system_effects_enabled
         self.window = window
 
-    def browser_companion_sites(self) -> dict[str, Any]:
-        from memorive.sessions.companion.site_profiles import SiteProfiles, default_sites, normalize_sites, profile_hash, site_authorizations, OFFICIAL_WEB_SITES, BUILTINS
-        catalog = [dict(provider=key, name=name, hosts=list(hosts), adapter=key if key in BUILTINS else 'generic')
-                   for key, name, hosts, _proof in OFFICIAL_WEB_SITES]
-        if self.profile_root is None:
-            rows = normalize_sites(default_sites())
-            return dict(revision=0, sites=rows, profile_sha256=profile_hash(rows), site_authorizations=site_authorizations(rows), official_site_catalog=catalog)
-        state = SiteProfiles(self.profile_path('BROWSER_COMPANION')).get()
-        return dict(state, site_authorizations=site_authorizations(state['sites']), official_site_catalog=catalog)
-
-    def save_browser_companion_sites(self, sites, expected_revision):
-        from memorive.sessions.companion.site_profiles import SiteProfiles
-        # Reconcile a newly arrived terminal report before inspecting the
-        # durable request marker. A completed request is not an active worker.
-        self.browser_companion_status()
-        state_path = self._browser_companion_state_path()
-        if state_path.is_file():
-            running = json.loads(state_path.read_text(encoding='utf-8'))
-            if running.get('sync_requested_mode'):
-                raise ValueError('BROWSER_SYNC_ALREADY_RUNNING')
-        result = SiteProfiles(self.profile_path('BROWSER_COMPANION')).save(sites, expected_revision)
-        refreshed = self.refresh_prepared_package()
-        return dict(result, package_refresh=refreshed)
-
-    def _browser_enabled_sites(self):
-        from memorive.sessions.companion.site_profiles import active_sites
-        return active_sites(self.browser_companion_sites()['sites'])
+    def saved_site_settings(self) -> dict[str, Any] | None:
+        """The site list the site sync of earlier versions saved, or None: the sessions controller checks the
+        custom-site files that sync wrote against it on import (site_profiles.saved_site_settings).
+        Compatibility reader for those files; keep."""
+        from memorive.sessions.companion.site_profiles import saved_site_settings
+        return saved_site_settings(self.profile_path("BROWSER_COMPANION"))
 
     def _browser_companion_package(self) -> tuple[Path, set[str], str]:
         source = (self.source_root / "memorive" / "sessions" / "companion" / "extension").resolve()
@@ -81,6 +62,7 @@ class BrowserCompanionDesktop:
             source.relative_to(self.source_root)
         except ValueError as error:
             raise RuntimeError("BROWSER_COMPANION_SOURCE_ESCAPE") from error
+        # Paths relative to the extension folder; the three languages live in _locales/<language>/.
         required = {
             "manifest.json",
             "background.js",
@@ -88,18 +70,15 @@ class BrowserCompanionDesktop:
             "popup.html",
             "popup.css",
             "popup.js",
-            "runner.html",
-            "runner.js",
             "README.txt",
             "site_profiles.js",
-            "recording.js", "browser_identity.js",
+            "recording.js", "browser_identity.js", "i18n.js",
+            "_locales/en/messages.json", "_locales/ja/messages.json", "_locales/zh_CN/messages.json",
         }
-        if not source.is_dir() or {path.name for path in source.iterdir() if path.is_file()} != required:
+        if not source.is_dir() or {
+            path.relative_to(source).as_posix() for path in source.rglob("*") if path.is_file()
+        } != required:
             raise RuntimeError("BROWSER_COMPANION_PACKAGE_INVALID")
-        from memorive.sessions.companion.site_profiles import configured_extension, default_sites, profile_hash
-        settings = self.browser_companion_sites()
-        if settings['profile_sha256'] != profile_hash(default_sites()):
-            source = configured_extension(source, self._browser_companion_export_root()/'packages', settings['sites'])
         digest = hashlib.sha256()
         for name in sorted(required):
             digest.update(name.encode("utf-8"))
@@ -119,20 +98,6 @@ class BrowserCompanionDesktop:
         roots = (self.profile_path("BROWSER_COMPANION").resolve(), self._browser_companion_export_root())
         if not any(resolved.is_relative_to(root) and resolved != root for root in roots):
             raise RuntimeError("BROWSER_COMPANION_DESTINATION_ESCAPE")
-
-    def open_browser_companion_site(self, url, preferred_browser=None):
-        from memorive.sessions.companion.site_profiles import normalize_sites, official_web_identity, GENERIC, BUILTINS
-        identity = official_web_identity(url)
-        if not identity:
-            raise ValueError("BROWSER_SITE_NOT_VERIFIED_OFFICIAL")
-        row = normalize_sites([dict(slot=1, name=identity['name'], url=url,
-            adapter=identity['provider'] if identity['provider'] in BUILTINS else 'generic',
-            enabled=True, selectors=GENERIC)])[0]
-        selected = select_browser(self._browser_executables(), preferred_browser)
-        command = [str(selected[1]), row['url']]
-        if self.system_effects_enabled:
-            subprocess.Popen(command, shell=False, close_fds=True)
-        return dict(status='OPENED' if self.system_effects_enabled else 'READY', url=row['url'], browser=selected[0])
 
     def open_browser_companion_folder(self):
         setup_path = self._browser_companion_state_path()
@@ -159,7 +124,7 @@ class BrowserCompanionDesktop:
         # An unpacked extension keeps a browser/profile-specific id.  Do not
         # force a manifest key during an upgrade: adding one would change the
         # identity of already loaded 3.1 installations.  The extension writes
-        # chrome.runtime.id into its signed-shape local sync report instead.
+        # chrome.runtime.id into its identity receipt instead.
         return {"extension_version": version.strip()}
 
     @staticmethod
@@ -173,276 +138,6 @@ class BrowserCompanionDesktop:
             return None
         version = manifest.get("version") if isinstance(manifest, dict) else None
         return version.strip() if isinstance(version, str) and version.strip() else None
-
-    def _latest_browser_companion_sync_report(
-        self,
-        *,
-        prepared_at_unix: int | None = None,
-        expected_sync_mode: str | None = None,
-        expected_browser: str | None = None,
-        expected_extension_id: str | None = None,
-    ) -> dict[str, Any] | None:
-        candidates: list[Path] = []
-        for root in self._browser_session_download_roots():
-            for folder in (root, root / "Memorive会话桥接"):
-                if not folder.is_dir():
-                    continue
-                candidates.extend(
-                    path.resolve()
-                    for path in folder.glob("memorive-session-library-sync-report-*.json")
-                    if path.is_file()
-                )
-        required_fields = {
-            "schema_version", "source", "extension_version", "extension_id", "browser_family",
-            "generated_at", "trigger", "status", "providers",
-            "cookie_value_reads", "browser_storage_value_reads",
-            "hidden_provider_api_calls", "remote_session_mutations",
-        }
-        enriched_fields = {
-            "per_provider_limit", "sync_mode", "active_provider_count",
-            "provider_parallelism", "maximum_capture_windows",
-            "per_provider_capture_mode",
-        }
-        dedicated_window_fields = {"window_mode", "user_tab_reused"}
-        optional_terminal_fields = {"error_code", "hard_timeout_ms"}
-        required_provider_fields = {
-            "provider_id", "status", "indexed_count", "captured_count",
-            "failed_count", "error_code",
-        }
-        enriched_provider_fields = {
-            "candidate_count", "capture_target", "body_read_count",
-            "unchanged_count", "skipped_candidate_count",
-            "skipped_error_codes", "safe_diagnostic",
-        }
-        for path in sorted(
-            candidates,
-            key=lambda value: (value.stat().st_mtime_ns, value.name),
-            reverse=True,
-        ):
-            try:
-                stat_result = path.stat()
-                if stat_result.st_size <= 0 or stat_result.st_size > 1024 * 1024:
-                    continue
-                if prepared_at_unix and stat_result.st_mtime < prepared_at_unix:
-                    continue
-                payload_bytes = path.read_bytes()
-                payload = json.loads(payload_bytes.decode("utf-8"))
-                if isinstance(payload, dict) and (
-                    (expected_browser is not None and payload.get("browser_family") != expected_browser)
-                    or (expected_extension_id is not None and payload.get("extension_id") != expected_extension_id)
-                ):
-                    continue
-                payload_fields = set(payload) if isinstance(payload, dict) else set()
-                if (
-                    not isinstance(payload, dict)
-                    or not required_fields.issubset(payload_fields)
-                    or not payload_fields.issubset(
-                        required_fields
-                        | enriched_fields
-                        | dedicated_window_fields
-                        | optional_terminal_fields | {'site_profile_sha256'}
-                    )
-                ):
-                    continue
-                has_enriched_report = bool(payload_fields & enriched_fields)
-                if has_enriched_report and not enriched_fields.issubset(payload_fields):
-                    continue
-                has_dedicated_window_contract = bool(
-                    payload_fields & dedicated_window_fields
-                )
-                if (
-                    has_dedicated_window_contract
-                    and not dedicated_window_fields.issubset(payload_fields)
-                ):
-                    continue
-                if (
-                    payload.get("schema_version") != "MEMORIVE_BROWSER_SESSION_SYNC_REPORT_V2"
-                    or payload.get("source") != "MEMORIVE_BROWSER_COMPANION_RUNNER_V4_DRAFT"
-                    or not isinstance(payload.get("extension_version"), str)
-                    or not self._browser_companion_semver_at_least(
-                        payload.get("extension_version"), (0, 0, 0)
-                    )
-                    or not isinstance(payload.get("extension_id"), str)
-                    or len(payload.get("extension_id")) != 32
-                    or any(character not in "abcdefghijklmnop" for character in payload["extension_id"])
-                    or payload.get("browser_family") not in FAMILIES | {"CHROMIUM"}
-                    or not isinstance(payload.get("generated_at"), str)
-                    or not isinstance(payload.get("trigger"), str)
-                    or payload.get("status") not in {"COMPLETE", "ERROR"}
-                    or any(
-                        payload.get(field) != 0
-                        for field in (
-                            "cookie_value_reads", "browser_storage_value_reads",
-                            "hidden_provider_api_calls", "remote_session_mutations",
-                        )
-                    )
-                ):
-                    continue
-                if has_enriched_report:
-                    if (
-                        not isinstance(payload.get("per_provider_limit"), int)
-                        or not 1 <= payload["per_provider_limit"] <= 50
-                        or payload.get("sync_mode")
-                        not in {"PREFLIGHT", "FULL", "INCREMENTAL"}
-                        or (
-                            payload["sync_mode"] == "PREFLIGHT"
-                            and payload["per_provider_limit"] != 2
-                        )
-                        or (
-                            payload["sync_mode"] == "FULL"
-                            and payload["per_provider_limit"] <= 2
-                        )
-                        or (
-                            payload["sync_mode"] == "INCREMENTAL"
-                            and payload["per_provider_limit"] != 10
-                        )
-                        or payload.get("active_provider_count") != len(self._browser_enabled_sites())
-                        or not isinstance(payload.get("provider_parallelism"), bool)
-                        or (
-                            "error_code" in payload
-                            and not isinstance(payload.get("error_code"), str)
-                        )
-                        or (
-                            "hard_timeout_ms" in payload
-                            and (
-                                not isinstance(payload.get("hard_timeout_ms"), int)
-                                or not 1_000
-                                <= payload["hard_timeout_ms"]
-                                <= 5_400_000
-                            )
-                        )
-                    ):
-                        continue
-                    dedicated_window_contract = bool(
-                        has_dedicated_window_contract
-                        and (payload.get("window_mode"), payload.get("per_provider_capture_mode"), payload.get("provider_parallelism")) in (
-                            ("DEDICATED_MINIMIZED", "DEDICATED_MINIMIZED_WINDOW_OWNED_TABS", True),
-                            ("DEDICATED_VISIBLE", "DEDICATED_VISIBLE_WINDOW_OWNED_TABS", False),
-                        )
-                        and payload.get("user_tab_reused") is False
-                        and payload.get("maximum_capture_windows") == 1
-                    )
-                    legacy_window_contract = bool(
-                        not has_dedicated_window_contract
-                        and payload.get("maximum_capture_windows") == 3
-                        and payload.get("per_provider_capture_mode")
-                        in {
-                            "SEQUENTIAL_REUSED_SINGLE_WINDOW",
-                            "DEEPSEEK_FOREGROUND_REUSED_TAB__GEMINI_KIMI_ISOLATED_REUSED_WINDOW",
-                        }
-                    )
-                    requires_dedicated_window = (
-                        self._browser_companion_semver_at_least(
-                            payload["extension_version"], (3, 4, 8)
-                        )
-                    )
-                    if (
-                        requires_dedicated_window
-                        and not dedicated_window_contract
-                    ) or (
-                        not requires_dedicated_window
-                        and not (
-                            legacy_window_contract
-                            or dedicated_window_contract
-                        )
-                    ):
-                        continue
-                if expected_sync_mode and payload.get("sync_mode") != expected_sync_mode:
-                    continue
-                providers = payload.get("providers")
-                expected_providers = {row['provider_id'] for row in self._browser_enabled_sites()}
-                if (self._browser_companion_semver_at_least(payload.get('extension_version'),(3,6,0))
-                        and payload.get('site_profile_sha256') != self.browser_companion_sites()['profile_sha256']):
-                    continue
-                if not isinstance(providers, list) or not expected_providers or len(providers) != len(expected_providers):
-                    continue
-                provider_projection: dict[str, dict[str, Any]] = {}
-                valid = True
-                for row in providers:
-                    row_fields = set(row) if isinstance(row, dict) else set()
-                    if (
-                        not isinstance(row, dict)
-                        or not required_provider_fields.issubset(row_fields)
-                        or not row_fields.issubset(
-                            required_provider_fields | enriched_provider_fields
-                        )
-                    ):
-                        valid = False
-                        break
-                    provider_id = row.get("provider_id")
-                    if provider_id not in expected_providers or provider_id in provider_projection:
-                        valid = False
-                        break
-                    if (
-                        not isinstance(row.get("status"), str)
-                        or not isinstance(row.get("error_code"), str)
-                        or any(
-                            not isinstance(row.get(field), int) or row[field] < 0
-                            for field in ("indexed_count", "captured_count", "failed_count")
-                        )
-                    ):
-                        valid = False
-                        break
-                    if any(
-                        field in row
-                        and (
-                            not isinstance(row.get(field), int)
-                            or row[field] < 0
-                        )
-                        for field in (
-                            "candidate_count", "capture_target", "body_read_count",
-                            "unchanged_count", "skipped_candidate_count",
-                        )
-                    ):
-                        valid = False
-                        break
-                    if (
-                        "skipped_error_codes" in row
-                        and (
-                            not isinstance(row.get("skipped_error_codes"), list)
-                            or any(
-                                not isinstance(value, str)
-                                for value in row["skipped_error_codes"]
-                            )
-                        )
-                    ):
-                        valid = False
-                        break
-                    if (
-                        "safe_diagnostic" in row
-                        and row.get("safe_diagnostic") is not None
-                        and not isinstance(row.get("safe_diagnostic"), dict)
-                    ):
-                        valid = False
-                        break
-                    provider_projection[provider_id] = dict(row)
-                if not valid or set(provider_projection) != expected_providers:
-                    continue
-                return {
-                    "path": path,
-                    "sha256": hashlib.sha256(payload_bytes).hexdigest().upper(),
-                    "browser_family": payload["browser_family"],
-                    "extension_version": payload["extension_version"],
-                    "extension_id": payload["extension_id"],
-                    "generated_at": payload["generated_at"],
-                    "status": payload["status"],
-                    "sync_mode": payload.get("sync_mode"),
-                    "per_provider_limit": payload.get("per_provider_limit"),
-                    "provider_parallelism": payload.get("provider_parallelism"),
-                    "maximum_capture_windows": payload.get(
-                        "maximum_capture_windows"
-                    ),
-                    "per_provider_capture_mode": payload.get(
-                        "per_provider_capture_mode"
-                    ),
-                    "window_mode": payload.get("window_mode"),
-                    "user_tab_reused": payload.get("user_tab_reused"),
-                    "providers": provider_projection,
-                    "site_profile_sha256": payload.get('site_profile_sha256'),
-                }
-            except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError):
-                continue
-        return None
 
     @staticmethod
     def _browser_companion_extension_id_valid(value: Any) -> bool:
@@ -460,7 +155,12 @@ class BrowserCompanionDesktop:
         expected_browser: str | None = None,
         prepared_at_unix: int | None = None,
     ) -> dict[str, Any] | None:
-        """Read and retain the newest fail-closed bridge identity receipt."""
+        """The newest identity receipt of the loaded extension (kept under session-library), or None.
+
+        The extension saves one when its service worker starts with a new version (background.js
+        writeIdentityReceipt). A receipt counts only for the prepared version, saved after the extension was
+        prepared or updated, by the same extension id and browser when those are known, so an older file left
+        in Downloads cannot stand for the extension now loaded."""
 
         candidates: list[Path] = []
         for root in self._browser_session_download_roots():
@@ -472,21 +172,6 @@ class BrowserCompanionDesktop:
                     for path in folder.glob("memorive-browser-companion-identity-*.json")
                     if path.is_file()
                 )
-        required_fields = {
-            "schema_version",
-            "extension_id",
-            "extension_version",
-            "observed_at",
-            "lifecycle_reason",
-            "trigger_protocol",
-            "preflight_limit",
-            "full_limit",
-            "incremental_limit",
-            "providers",
-            "cookie_value_reads",
-            "browser_storage_value_reads",
-            "hidden_provider_api_calls",
-        }
         for path in sorted(
             candidates,
             key=lambda value: (value.stat().st_mtime_ns, value.name),
@@ -500,48 +185,20 @@ class BrowserCompanionDesktop:
                     continue
                 payload_bytes = path.read_bytes()
                 payload = json.loads(payload_bytes.decode("utf-8"))
-                if (not isinstance(payload, dict) or not required_fields.issubset(payload)
-                        or set(payload) - required_fields - {'site_profile_sha256', 'browser_family'}):
+                if not isinstance(payload, dict):
                     continue
                 extension_id = payload.get("extension_id")
-                extension_version = payload.get("extension_version")
+                browser = payload.get("browser_family")
+                observed_at = payload.get("observed_at")
                 if (
-                    payload.get("schema_version")
-                    != "MEMORIVE_BROWSER_COMPANION_IDENTITY_V1"
+                    payload.get("schema_version") != "MEMORIVE_BROWSER_COMPANION_IDENTITY_V1"
                     or not self._browser_companion_extension_id_valid(extension_id)
-                    or (
-                        isinstance(expected_extension_id, str)
-                        and expected_extension_id
-                        and extension_id != expected_extension_id
-                    )
-                    or extension_version != current_extension_version
-                    or (self._browser_companion_semver_at_least(extension_version, (3, 10, 1))
-                        and payload.get("browser_family") not in FAMILIES)
-                    or (expected_browser is not None and payload.get("browser_family") != expected_browser)
-                    or not self._browser_companion_semver_at_least(
-                        extension_version, (3, 4, 0)
-                    )
-                    or not isinstance(payload.get("observed_at"), str)
-                    or not payload["observed_at"].strip()
-                    or not isinstance(payload.get("lifecycle_reason"), str)
-                    or not payload["lifecycle_reason"].strip()
-                    or payload.get("trigger_protocol")
-                    != "HTTPS_APPROVED_FRAGMENT_V3"
-                    or payload.get("preflight_limit") != 2
-                    or payload.get("full_limit") != 50
-                    or payload.get("incremental_limit") != 10
-                    or payload.get("providers")
-                    != [row['provider_id'] for row in self._browser_enabled_sites()]
-                    or (self._browser_companion_semver_at_least(extension_version,(3,6,0))
-                        and payload.get('site_profile_sha256') != self.browser_companion_sites()['profile_sha256'])
-                    or any(
-                        payload.get(field) != 0
-                        for field in (
-                            "cookie_value_reads",
-                            "browser_storage_value_reads",
-                            "hidden_provider_api_calls",
-                        )
-                    )
+                    or (expected_extension_id and extension_id != expected_extension_id)
+                    or payload.get("extension_version") != current_extension_version
+                    or browser not in FAMILIES
+                    or (expected_browser is not None and browser != expected_browser)
+                    or not isinstance(observed_at, str)
+                    or not observed_at.strip()
                 ):
                     continue
                 retained_path = self._retain_browser_session_artifact(
@@ -551,207 +208,17 @@ class BrowserCompanionDesktop:
                     "path": retained_path,
                     "sha256": hashlib.sha256(payload_bytes).hexdigest().upper(),
                     "extension_id": extension_id,
-                    "extension_version": extension_version,
-                    "observed_at": payload["observed_at"],
-                    "lifecycle_reason": payload["lifecycle_reason"],
-                    "browser_family": payload.get("browser_family"),
-                    "trigger_protocol": payload["trigger_protocol"],
-                    "incremental_limit": payload["incremental_limit"],
+                    "extension_version": current_extension_version,
+                    "observed_at": observed_at,
+                    "browser_family": browser,
                 }
-            except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError):
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError):
                 continue
         return None
 
-    @staticmethod
-    def _browser_companion_semver_at_least(
-        version: Any,
-        minimum: tuple[int, int, int],
-    ) -> bool:
-        if not isinstance(version, str):
-            return False
-        match = re.fullmatch(
-            r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
-            r"(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
-            r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?",
-            version,
-        )
-        if not match:
-            return False
-        core = tuple(int(match.group(index)) for index in (1, 2, 3))
-        if core != minimum:
-            return core > minimum
-        # A prerelease has lower precedence than the corresponding stable floor.
-        return match.group(4) is None
-
-    @staticmethod
-    def _browser_companion_full_sync_gate(
-        handshake: Mapping[str, Any] | None,
-        *,
-        current_extension_version: str,
-        enabled_providers=None,
-        site_profile_sha256=None,
-    ) -> dict[str, Any]:
-        minimum_version = (3, 5, 0)
-        report_version = handshake.get("extension_version") if handshake else None
-        version_eligible = BrowserCompanionDesktop._browser_companion_semver_at_least(
-            report_version,
-            minimum_version,
-        )
-        identity_matches = bool(
-            handshake
-            and report_version == current_extension_version
-        )
-        report_contract_matches = bool(
-            handshake
-            and version_eligible
-            and identity_matches
-            and handshake.get("sync_mode") == "PREFLIGHT"
-            and handshake.get("per_provider_limit") == 2
-            and (site_profile_sha256 is None or handshake.get('site_profile_sha256') == site_profile_sha256)
-        )
-        report_complete = bool(
-            report_contract_matches and handshake.get("status") == "COMPLETE"
-        )
-        provider_rows = handshake.get("providers", {}) if handshake else {}
-        providers: dict[str, dict[str, Any]] = {}
-        for provider in (enabled_providers if enabled_providers is not None else ("deepseek", "gemini", "kimi")):
-            row = provider_rows.get(provider, {}) if isinstance(provider_rows, Mapping) else {}
-            captured_count = row.get("captured_count", 0)
-            if not isinstance(captured_count, int) or captured_count < 0:
-                captured_count = 0
-            failed_count = row.get("failed_count", 0)
-            if not isinstance(failed_count, int) or failed_count < 0:
-                failed_count = 0
-            diagnostic = row.get("safe_diagnostic")
-            diagnostic_text = (
-                json.dumps(diagnostic, ensure_ascii=True, sort_keys=True)
-                if isinstance(diagnostic, Mapping)
-                else ""
-            )
-            human_verification = "HUMAN_VERIFICATION" in (
-                f"{row.get('error_code', '')} {diagnostic_text}".upper()
-            )
-            provider_passes = bool(
-                report_contract_matches
-                and captured_count > 0
-                and failed_count == 0
-                and not human_verification
-            )
-            eligible = report_complete and provider_passes
-            providers[provider] = {
-                "captured_count": captured_count,
-                "failed_count": failed_count,
-                "human_verification_detected": human_verification,
-                "eligible": eligible,
-                "status": (
-                    "HUMAN_VERIFICATION_BLOCKED"
-                    if human_verification
-                    else "PREFLIGHT_FAILED"
-                    if report_contract_matches and failed_count > 0
-                    else "PREFLIGHT_PASS"
-                    if provider_passes
-                    else "NO_CAPTURED_CONVERSATIONS"
-                    if report_contract_matches
-                    else "PREFLIGHT_REQUIRED"
-                ),
-            }
-        eligible = bool(providers) and report_complete and all(row["eligible"] for row in providers.values())
-        return {
-            "minimum_extension_version": "3.5.0",
-            "current_extension_version": current_extension_version,
-            "report_extension_version": report_version,
-            "version_eligible": version_eligible,
-            "identity_matches": identity_matches,
-            "report_sync_mode": handshake.get("sync_mode") if handshake else None,
-            "report_status": handshake.get("status") if handshake else None,
-            "report_per_provider_limit": (
-                handshake.get("per_provider_limit") if handshake else None
-            ),
-            "report_generated_at": handshake.get("generated_at") if handshake else None,
-            "report_sha256": handshake.get("sha256") if handshake else None,
-            "providers": providers,
-            "eligible": eligible,
-        }
-
-    def _browser_companion_incremental_cursor(self) -> dict[str, Any]:
-        """Build a privacy-safe cursor from the local three-provider archive."""
-
-        session_controller = self.sessions
-        archive = getattr(session_controller, "session_archive", None)
-        provider_ids = [row['provider_id'] for row in self._browser_enabled_sites()]
-        empty_counts = {provider_id: 0 for provider_id in provider_ids}
-        if archive is None or not hasattr(archive, "list_sessions"):
-            return {
-                "schema_version": "DesktopBrowserCompanionIncrementalCursorProjection-v1",
-                "provider_counts": empty_counts,
-                "known_session_count": 0,
-                "overlap_fingerprint_count": 0,
-                "eligible": False,
-                "raw_session_ids_in_token": False,
-                "raw_private_content_in_token": False,
-            }
-        try:
-            cursor_module = importlib.import_module(
-                "memorive.sessions.companion.incremental_cursor"
-            )
-            provider_counts = {
-                provider_id: len(
-                    archive.list_sessions(
-                        provider=provider_id,
-                        limit=50,
-                        search="",
-                    )
-                )
-                for provider_id in provider_ids
-            }
-            if not provider_ids or not all(provider_counts.values()):
-                return {
-                    "schema_version": "DesktopBrowserCompanionIncrementalCursorProjection-v1",
-                    "provider_counts": provider_counts,
-                    "known_session_count": sum(provider_counts.values()),
-                    "overlap_fingerprint_count": 0,
-                    "eligible": False,
-                    "raw_session_ids_in_token": False,
-                    "raw_private_content_in_token": False,
-                }
-            built = cursor_module.build_incremental_cursor(archive, providers=provider_ids)
-        except (ImportError, AttributeError, OSError, RuntimeError, ValueError):
-            built = None
-        if not built:
-            return {
-                "schema_version": "DesktopBrowserCompanionIncrementalCursorProjection-v1",
-                "provider_counts": empty_counts,
-                "known_session_count": 0,
-                "overlap_fingerprint_count": 0,
-                "eligible": False,
-                "raw_session_ids_in_token": False,
-                "raw_private_content_in_token": False,
-            }
-        cursor_payload = built["payload"]
-        cursor_providers = cursor_payload["providers"]
-        provider_counts = {
-            provider_id: len(row["known_session_hashes"])
-            for provider_id, row in cursor_providers.items()
-        }
-        cursor_token = built["token"]
-        return {
-            "schema_version": "DesktopBrowserCompanionIncrementalCursorProjection-v1",
-            "cursor_schema_version": cursor_payload["schema_version"],
-            "providers": cursor_providers,
-            "provider_counts": provider_counts,
-            "known_session_count": built["known_session_count"],
-            "overlap_fingerprint_count": built["overlap_fingerprint_count"],
-            "cursor_token": cursor_token,
-            "cursor_token_sha256": hashlib.sha256(
-                cursor_token.encode("ascii")
-            ).hexdigest().upper(),
-            "eligible": True,
-            "raw_session_ids_in_token": False,
-            "raw_private_content_in_token": False,
-        }
-
     def refresh_prepared_package(self) -> dict[str, Any]:
-        """Refresh an already prepared unpacked extension without resetting setup."""
+        """At startup, copy a newer extension over the prepared one, keeping the setup. The browser keeps
+        running the old copy until the user reloads the extension on its extensions page."""
         state_path = self._browser_companion_state_path()
         if not state_path.is_file():
             return {"updated": False, "status": "NOT_PREPARED"}
@@ -775,34 +242,15 @@ class BrowserCompanionDesktop:
         path_changed = destination != short_destination
         if path_changed:
             destination = short_destination
-        installed_version = self._browser_companion_installed_version(destination)
-        if installed_version is None:
-            prior_state_version = state.get("package_extension_version")
-            installed_version = (
-                prior_state_version.strip()
-                if isinstance(prior_state_version, str)
-                and prior_state_version.strip()
-                else None
-            )
-        version_changed = bool(
-            installed_version and installed_version != current_version
-        )
-        capture_repair_required = bool(
-            state.get("capture_repair_preflight_required") or version_changed
-            or state.get('site_profile_sha256') != self.browser_companion_sites()['profile_sha256']
-        )
         if (
             state.get("package_sha256") == package_sha256
-            and installed_version == current_version
+            and self._browser_companion_installed_version(destination) == current_version
             and not path_changed
         ):
-            return {
-                "updated": False,
-                "capture_repair_preflight_required": capture_repair_required,
-                "status": "CURRENT",
-            }
+            return {"updated": False, "status": "CURRENT"}
         destination.mkdir(parents=True, exist_ok=True)
         for name in sorted(required):
+            (destination / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source / name, destination / name)
         state["package_sha256"] = package_sha256
         if path_changed:
@@ -811,24 +259,20 @@ class BrowserCompanionDesktop:
                          extension_connected=False, connected_browser=None)
             for key in ('identity_receipt_sha256', 'identity_observed_at'):
                 state.pop(key, None)
-        state['site_profile_sha256'] = self.browser_companion_sites()['profile_sha256']
-        # The files on disk are now current, but Chromium keeps the already
-        # loaded service worker and runner until the extension/browser reloads.
         state["browser_reload_required"] = True
         state["package_updated_at_unix"] = int(time.time())
         state["package_extension_version"] = current_version
-        state["capture_repair_preflight_required"] = capture_repair_required
-        if capture_repair_required:
-            state["capture_repair_target_version"] = current_version
         self.write_json_file(state_path, state)
         return {
             "updated": True,
-            "browser_reload_required": state["browser_reload_required"],
-            "capture_repair_preflight_required": capture_repair_required,
+            "browser_reload_required": True,
             "status": "UPDATED",
         }
 
     def browser_companion_status(self) -> dict[str, Any]:
+        """The extension's setup as the settings and sessions pages show it. It counts as connected
+        (bridge_identity_verified, configured) once the browser has saved an identity receipt for the prepared
+        package; update_available means a newer extension waits to be prepared."""
         _source, _required, package_sha256 = self._browser_companion_package()
         identity = self._browser_companion_manifest_projection()
         path = self._browser_companion_state_path()
@@ -842,233 +286,65 @@ class BrowserCompanionDesktop:
                 state = {}
         package_current = state.get("package_sha256") == package_sha256
         prepared = bool(state.get("prepared"))
-        user_confirmed = bool(state.get("user_confirmed"))
         import_verified = bool(state.get("import_verified"))
-        freshness_values = [
-            state.get("prepared_at_unix"),
-            state.get("package_updated_at_unix"),
-            state.get("bridge_reload_requested_at_unix"),
-        ]
-        # Legacy setup files did not carry a preparation timestamp.  Never let
-        # an unrelated, older report already present in Downloads impersonate
-        # a fresh extension handshake for a newly created profile; the setup
-        # state file's own mtime is the conservative lower bound in that case.
+        # A receipt counts only when saved after the package was prepared or updated. Old setup files carry no
+        # timestamps; their own modification time is then the lower bound.
         try:
             state_file_mtime = int(path.stat().st_mtime)
         except OSError:
             state_file_mtime = None
         freshness_floor = max(
-            (value for value in freshness_values if isinstance(value, int)),
+            (
+                value
+                for value in (state.get("prepared_at_unix"), state.get("package_updated_at_unix"))
+                if isinstance(value, int)
+            ),
             default=state_file_mtime,
         )
         identity_receipt = self._latest_browser_companion_identity_receipt(
             current_extension_version=identity["extension_version"],
             expected_extension_id=(
                 state.get("extension_id")
-                if self._browser_companion_extension_id_valid(
-                    state.get("extension_id")
-                )
+                if self._browser_companion_extension_id_valid(state.get("extension_id"))
                 else None
             ),
             prepared_at_unix=freshness_floor,
             expected_browser=browser_family(state.get("preferred_browser")),
         )
-        report_identity = {
-            "expected_browser": browser_family(state.get("preferred_browser")),
-            "expected_extension_id": (identity_receipt or {}).get("extension_id"),
-        }
-        latest_report = self._latest_browser_companion_sync_report(
-            prepared_at_unix=freshness_floor, **report_identity
-        )
-        latest_preflight_report = self._latest_browser_companion_sync_report(
-            prepared_at_unix=freshness_floor,
-            expected_sync_mode="PREFLIGHT", **report_identity,
-        )
-        bridge_identity_verified = bool(identity_receipt and package_current)
-        handshake = (
-            latest_report
-            if (
-                bridge_identity_verified
-                and latest_report
-                and latest_report.get("extension_id")
-                == identity_receipt.get("extension_id")
-                and latest_report.get("extension_version")
-                == identity_receipt.get("extension_version")
-            )
-            else None
-        )
-        preflight_handshake = (
-            latest_preflight_report
-            if (
-                bridge_identity_verified
-                and latest_preflight_report
-                and latest_preflight_report.get("extension_id")
-                == identity_receipt.get("extension_id")
-                and latest_preflight_report.get("extension_version")
-                == identity_receipt.get("extension_version")
-            )
-            else None
-        )
-        full_sync_gate = self._browser_companion_full_sync_gate(
-            preflight_handshake,
-            current_extension_version=identity["extension_version"],
-            enabled_providers=[row['provider_id'] for row in self._browser_enabled_sites()],
-            site_profile_sha256=(self.browser_companion_sites()['profile_sha256']
-                if self._browser_companion_semver_at_least(identity['extension_version'],(3,6,0)) else None),
-        )
-        preflight_passed = bool(full_sync_gate["eligible"])
-        preflight_status = (
-            "PASS"
-            if preflight_passed
-            else "FAIL"
-            if preflight_handshake
-            else "NOT_RUN"
-        )
-        if state.get("sync_requested_mode") in {'PREFLIGHT','INCREMENTAL','FULL'}:
-            requested_handshake = preflight_handshake if state['sync_requested_mode']=='PREFLIGHT' else handshake
-            previous_report_sha256 = state.get(
-                "sync_requested_previous_report_sha256"
-            )
-            current_report_sha256 = (
-                requested_handshake.get("sha256")
-                if requested_handshake and requested_handshake.get('sync_mode') == state['sync_requested_mode']
-                else None
-            )
-            if (
-                not current_report_sha256
-                or current_report_sha256 == previous_report_sha256
-            ):
-                if state['sync_requested_mode']=='PREFLIGHT':
-                    preflight_status = "RUNNING"
-            else:
-                state.pop("sync_requested_mode", None)
-                state.pop("sync_requested_at_unix", None)
-                state.pop("sync_requested_previous_report_sha256", None)
-        incremental_cursor = self._browser_companion_incremental_cursor()
-        extension_connected = bridge_identity_verified
-        configured = extension_connected
-        capture_repair_required = bool(
-            state.get("capture_repair_preflight_required")
-        )
-        capture_repair_target = state.get("capture_repair_target_version")
-        capture_repair_completed = bool(
-            capture_repair_required
-            and capture_repair_target == identity["extension_version"]
-            and bridge_identity_verified
-            and full_sync_gate["eligible"]
-        )
-        if capture_repair_completed:
-            capture_repair_required = False
-            state.update(
-                {
-                    "capture_repair_preflight_required": False,
-                    "capture_repair_completed_version": identity[
-                        "extension_version"
-                    ],
-                    "capture_repair_report_sha256": full_sync_gate[
-                        "report_sha256"
-                    ],
-                    "capture_repair_completed_at_unix": int(time.time()),
-                }
-            )
-        if capture_repair_required:
-            full_sync_gate = {
-                **full_sync_gate,
-                "eligible": False,
-                "capture_repair_preflight_required": True,
-            }
-        incremental_sync_eligible = bool(
-            incremental_cursor["eligible"] and not capture_repair_required
-        )
-        browser_reload_required = bool(
-            prepared
-            and package_current
-            and (
-                state.get("browser_reload_required")
-                or not bridge_identity_verified
-            )
-        )
-        if extension_connected:
+        connected = bool(identity_receipt and package_current)
+        if connected:
             state.update(
                 {
                     "extension_connected": True,
                     "extension_id": identity_receipt["extension_id"],
                     "identity_receipt_sha256": identity_receipt["sha256"],
                     "identity_observed_at": identity_receipt["observed_at"],
-                    "connected_browser": identity_receipt.get("browser_family") or state.get("connected_browser"),
+                    "connected_browser": identity_receipt["browser_family"],
                     "browser_reload_required": False,
                 }
             )
-            if handshake:
-                state.update(
-                    {
-                        "connected_browser": handshake["browser_family"],
-                        "last_sync_report_sha256": handshake["sha256"],
-                        "last_sync_report_generated_at": handshake["generated_at"],
-                    }
-                )
             path.parent.mkdir(parents=True, exist_ok=True)
             self.write_json_file(path, state)
         return {
-            "schema_version": "DesktopBrowserCompanionStatus-v3",
+            "schema_version": "DesktopBrowserCompanionStatus-v4",
             "manual_import_available": True,
             "manual_capture_available": bool(prepared and package_current),
-            "manual_import_observed": bool(import_verified or incremental_cursor["known_session_count"]),
-            "automatic_sync_connection": "VERIFIED" if bridge_identity_verified else "UNCONFIRMED",
+            "manual_import_observed": import_verified,
             "prepared": prepared,
             "extension_path": state.get("extension_path"),
             "path_changed": state.get("path_changed", False),
-            "user_confirmed": user_confirmed,
+            "user_confirmed": bool(state.get("user_confirmed")),
             "import_verified": import_verified,
-            "extension_connected": extension_connected,
-            "bridge_identity_verified": bridge_identity_verified,
-            "preflight_eligible": bool(
-                prepared and package_current and bridge_identity_verified and self._browser_enabled_sites()
-            ),
-            "configured": configured,
+            "extension_connected": connected,
+            "bridge_identity_verified": connected,
+            "configured": connected,
             "package_current": package_current,
             "update_available": prepared and not package_current,
-            "bridge_reload_required": False if extension_connected else browser_reload_required,
-            "browser_reload_required": False if extension_connected else browser_reload_required,
-            "providers": [row['provider_id'] for row in self._browser_enabled_sites()],
-            "site_settings": self.browser_companion_sites(),
-            "provider_sync": handshake["providers"] if handshake else {},
-            "preflight_status": preflight_status,
-            "preflight_report_sha256": (
-                preflight_handshake.get("sha256")
-                if preflight_handshake
-                else None
-            ),
-            "latest_sync_mode": handshake.get("sync_mode") if handshake else None,
-            "latest_per_provider_limit": (
-                handshake.get("per_provider_limit") if handshake else None
-            ),
-            "latest_sync_report_sha256": (
-                handshake.get("sha256") if handshake else None
-            ),
-            "next_sync_mode": (
-                "INCREMENTAL" if incremental_sync_eligible else "PREFLIGHT"
-            ),
-            "incremental_sync_eligible": incremental_sync_eligible,
-            "capture_repair_preflight_required": capture_repair_required,
-            "capture_repair_target_version": capture_repair_target,
-            "archive_provider_counts": incremental_cursor["provider_counts"],
-            "incremental_known_session_count": incremental_cursor["known_session_count"],
-            "incremental_overlap_fingerprint_count": incremental_cursor[
-                "overlap_fingerprint_count"
-            ],
-            "full_sync_eligible": full_sync_gate["eligible"],
-            "full_sync_gate": full_sync_gate,
+            "browser_reload_required": bool(prepared and package_current and not connected),
             "connected_browser": state.get("connected_browser"),
             "selected_browser": browser_family(state.get("preferred_browser")) or browser_family(state.get("connected_browser")),
             "browser_options": self._browser_options(),
             "extension_version": identity["extension_version"],
-            "identity_extension_version": (
-                identity_receipt["extension_version"] if identity_receipt else None
-            ),
-            "report_extension_version": (
-                latest_report["extension_version"] if latest_report else None
-            ),
             "identity_receipt_sha256": (
                 identity_receipt["sha256"] if identity_receipt else None
             ),
@@ -1080,12 +356,9 @@ class BrowserCompanionDesktop:
                 if identity_receipt
                 else state.get("extension_id")
             ),
-            "cookie_permission": False,
-            "browser_storage_read": False,
-            "hidden_provider_api": False,
             "status": (
                 "EXTENSION_IDENTITY_VERIFIED"
-                if configured
+                if connected
                 else "PACKAGE_UPDATE_REQUIRED"
                 if prepared and not package_current
                 else "AWAITING_EXTENSION_IDENTITY"
@@ -1103,77 +376,12 @@ class BrowserCompanionDesktop:
         return [{"id": key, "name": label, "installed": key in available}
                 for key, label, _exe, _manager, _suffix in BROWSERS]
 
-    def _launch_browser_companion_reload(
-        self, preferred: str | None = None
-    ) -> dict[str, Any]:
-        """Open the public HTTPS marker consumed only by bridge 3.3.9+."""
-
-        sites = self._browser_enabled_sites()
-        trigger_url = (self._browser_sync_trigger('memorive-browser-companion-reload-v1')
-                       .replace('?memorive_bridge_sync=v1#', '?memorive_bridge_reload=v1#')) if sites else None
-        browsers = self._browser_executables()
-        if not browsers:
-            return {
-                "schema_version": "DesktopBrowserCompanionReloadLaunchReceipt-v1",
-                "selected_browser": None,
-                "trigger_transport": "HTTPS_APPROVED_FRAGMENT_RELOAD",
-                "trigger_url": trigger_url,
-                "process_id": None,
-                "status": "SUPPORTED_BROWSER_NOT_FOUND",
-            }
-        selected = select_browser(browsers, preferred)
-        selected_browser, executable, _manager_url = selected
-        # All sites disabled: use only the browser's local extension manager.
-        trigger_url = trigger_url or _manager_url
-        process_id = None
-        if self.system_effects_enabled and os.name == "nt":
-            process = subprocess.Popen(
-                [str(executable), trigger_url], shell=False, close_fds=True
-            )
-            process_id = process.pid
-        return {
-            "schema_version": "DesktopBrowserCompanionReloadLaunchReceipt-v1",
-            "selected_browser": selected_browser,
-            "trigger_transport": "HTTPS_APPROVED_FRAGMENT_RELOAD",
-            "trigger_url": trigger_url,
-            "process_id": process_id,
-            "status": (
-                "BRIDGE_RELOAD_TRIGGERED" if process_id else "BRIDGE_RELOAD_READY"
-            ),
-        }
-
     def install_browser_companion(self, preferred_browser: str | None = None) -> dict[str, Any]:
-        if not self._browser_enabled_sites():
-            return {"status": "BROWSER_NO_VERIFIED_OFFICIAL_SITES", "prepared": False}
+        """Copy the extension into the folder for the chosen browser and, unless that browser already runs this
+        very package, open the folder and the browser's extensions page: the user loads the folder the first time
+        and reloads the extension after an update. Another browser or another folder (where the unpacked
+        extension gets a new id) needs a fresh load."""
         source, required, package_sha256 = self._browser_companion_package()
-        setup_path = self._browser_companion_state_path()
-        try:
-            prior_selection = json.loads(setup_path.read_text(encoding="utf-8")) if setup_path.is_file() else {}
-        except (OSError, ValueError):
-            prior_selection = {}
-        if not isinstance(prior_selection, dict):
-            prior_selection = {}
-        target = preferred_browser or prior_selection.get("preferred_browser") or browser_family(prior_selection.get("connected_browser"))
-        browsers = self._browser_executables()
-        selected = select_browser(browsers, target) if browsers or target else None
-        selected_family = browser_family(selected[0]) if selected else None
-        switched_browser = bool(selected_family and selected_family != browser_family(prior_selection.get("preferred_browser") or prior_selection.get("connected_browser")))
-        destination = self._browser_companion_export_root() / (selected_family.lower() if selected_family else "browser")
-        prior_path = prior_selection.get("extension_path")
-        path_changed = bool(prior_path and Path(prior_path).resolve() != destination.resolve())
-        # Relocation changes Chromium's unpacked extension ID; require a fresh
-        # load/receipt instead of accepting an old path's identity.
-        switched_browser = switched_browser or path_changed
-        self._check_browser_companion_destination(destination)
-        prior_destination_version = self._browser_companion_installed_version(
-            destination
-        )
-        destination.mkdir(parents=True, exist_ok=True)
-        for name in sorted(required):
-            shutil.copy2(source / name, destination / name)
-        manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
-        if manifest.get("manifest_version") != 3 or "cookies" in manifest.get("permissions", []):
-            raise RuntimeError("BROWSER_COMPANION_MANIFEST_BOUNDARY_INVALID")
         setup_path = self._browser_companion_state_path()
         prior_state: dict[str, Any] = {}
         setup_path_io = windows_io_path(setup_path)
@@ -1184,160 +392,120 @@ class BrowserCompanionDesktop:
                     prior_state = loaded
             except (OSError, json.JSONDecodeError):
                 prior_state = {}
+        prior_browser = browser_family(prior_state.get("preferred_browser") or prior_state.get("connected_browser"))
+        target = preferred_browser or prior_state.get("preferred_browser") or browser_family(prior_state.get("connected_browser"))
+        browsers = self._browser_executables()
+        selected = select_browser(browsers, target) if browsers or target else None
+        selected_family = browser_family(selected[0]) if selected else None
+        destination = self._browser_companion_export_root() / (selected_family.lower() if selected_family else "browser")
+        prior_path = prior_state.get("extension_path")
+        path_changed = bool(prior_path and Path(prior_path).resolve() != destination.resolve())
+        switched_browser = path_changed or bool(selected_family and selected_family != prior_browser)
+        self._check_browser_companion_destination(destination)
+        prior_destination_version = self._browser_companion_installed_version(destination)
+        destination.mkdir(parents=True, exist_ok=True)
+        for name in sorted(required):
+            (destination / name).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source / name, destination / name)
+        current_version = json.loads((destination / "manifest.json").read_text(encoding="utf-8")).get("version")
+        if not isinstance(current_version, str) or not current_version.strip():
+            raise RuntimeError("BROWSER_COMPANION_MANIFEST_VERSION_MISSING")
+        current_version = current_version.strip()
         prior_hashes = prior_state.get("imported_bundle_sha256s", [])
         if not isinstance(prior_hashes, list):
             prior_hashes = []
         if switched_browser:
-            for key in ("extension_id", "connected_browser", "identity_receipt_sha256", "identity_observed_at", "sync_requested_mode", "sync_requested_at_unix", "sync_requested_previous_report_sha256"):
+            for key in ("extension_id", "connected_browser", "identity_receipt_sha256", "identity_observed_at"):
                 prior_state.pop(key, None)
         prior_prepared = bool(prior_state.get("prepared") and not switched_browser)
         prior_connected_browser = prior_state.get("connected_browser")
+        if prior_connected_browser not in FAMILIES:
+            prior_connected_browser = None
         prior_extension_id = prior_state.get("extension_id")
-        current_version = manifest.get("version")
-        if not isinstance(current_version, str) or not current_version.strip():
-            raise RuntimeError("BROWSER_COMPANION_MANIFEST_VERSION_MISSING")
-        current_version = current_version.strip()
-        prior_state_version = prior_state.get("package_extension_version")
-        prior_version = prior_destination_version or (
-            prior_state_version.strip()
-            if isinstance(prior_state_version, str) and prior_state_version.strip()
-            else None
-        )
+        if not self._browser_companion_extension_id_valid(prior_extension_id):
+            prior_extension_id = None
         package_unchanged = bool(
             prior_prepared
             and prior_destination_version == current_version
             and prior_state.get("package_sha256") == package_sha256
         )
-        version_changed = bool(prior_version and prior_version != current_version)
-        package_changed = bool(prior_prepared and not package_unchanged)
-        capture_repair_required = bool(
-            prior_state.get("capture_repair_preflight_required")
-            or version_changed
-            or package_changed
-        )
-        if prior_connected_browser not in FAMILIES:
-            prior_connected_browser = None
-        if not self._browser_companion_extension_id_valid(prior_extension_id):
-            prior_extension_id = None
-        current_identity = self._latest_browser_companion_identity_receipt(
+        current_identity = None if path_changed else self._latest_browser_companion_identity_receipt(
             current_extension_version=current_version,
             expected_extension_id=prior_extension_id,
             expected_browser=selected_family,
             prepared_at_unix=max((value for value in (
                 prior_state.get("prepared_at_unix"),
                 prior_state.get("package_updated_at_unix"),
-                prior_state.get("bridge_reload_requested_at_unix"),
             ) if isinstance(value, int)), default=None),
         )
-        if path_changed:
-            current_identity = None
         if prior_prepared and prior_extension_id is None and current_identity:
             prior_extension_id = current_identity["extension_id"]
-        bridge_identity_current = bool(
-            current_identity
+        already_configured = bool(
+            package_unchanged
+            and current_identity
             and current_identity.get("extension_id") == prior_extension_id
         )
-        auto_reload_eligible = bool(
-            prior_prepared
-            and self._browser_companion_extension_id_valid(prior_extension_id)
-        )
-        reload_needed = bool(
-            auto_reload_eligible
-            and (not package_unchanged or not bridge_identity_current)
-        )
+        # Loaded before: the browser knows the folder, so an update only needs a reload there.
+        loaded_before = bool(prior_prepared and prior_extension_id)
         now = int(time.time())
-        prepared_at_unix = (
-            prior_state.get("prepared_at_unix")
-            if package_unchanged
-            and isinstance(prior_state.get("prepared_at_unix"), int)
-            else now
-        )
         next_state = {
             **prior_state,
             "schema_version": "DesktopBrowserCompanionSetupState-v1",
             "package_sha256": package_sha256,
             "prepared": True,
             "user_confirmed": bool(prior_state.get("user_confirmed")),
-            "extension_connected": bridge_identity_current,
+            "extension_connected": already_configured,
             "import_verified": bool(prior_state.get("import_verified")),
             "imported_bundle_sha256s": [
                 value for value in prior_hashes if isinstance(value, str) and value
             ][-256:],
-            "browser_reload_required": reload_needed,
-            "prepared_at_unix": prepared_at_unix,
+            "browser_reload_required": bool(loaded_before and not already_configured),
+            "prepared_at_unix": (
+                prior_state["prepared_at_unix"]
+                if package_unchanged and isinstance(prior_state.get("prepared_at_unix"), int)
+                else now
+            ),
             "path_changed": path_changed,
             "connected_browser": prior_connected_browser,
             "preferred_browser": selected_family,
             "extension_path": str(destination),
             "extension_id": prior_extension_id,
             "package_extension_version": current_version,
-            "capture_repair_preflight_required": capture_repair_required,
-            "capture_repair_target_version": (
-                current_version if capture_repair_required else None
-            ),
         }
-        if package_changed:
+        if prior_prepared and not package_unchanged:
             next_state["package_updated_at_unix"] = now
-        # On a new install nothing has made the companion's profile folder yet (saving the site list does).
+        # On a new install nothing has made the companion's profile folder yet.
         setup_path.parent.mkdir(parents=True, exist_ok=True)
-        self.write_json_file(
-            setup_path,
-            next_state,
-        )
+        self.write_json_file(setup_path, next_state)
         folder_opened = False
         browser_manager_opened = False
         selected_browser = None
-        reload_receipt: dict[str, Any] | None = None
-        if self.system_effects_enabled and os.name == "nt":
-            if reload_needed:
-                reload_receipt = self._launch_browser_companion_reload(
-                    selected_family
-                )
-                selected_browser = reload_receipt.get("selected_browser")
-                refreshed_state = json.loads(setup_path.read_text(encoding="utf-8"))
-                refreshed_state["bridge_reload_requested_at_unix"] = int(time.time())
-                refreshed_state["bridge_reload_requested_for"] = selected_browser
-                self.write_json_file(setup_path, refreshed_state)
-            elif not (package_unchanged and bridge_identity_current):
-                subprocess.Popen(["explorer.exe", str(destination)], shell=False, close_fds=True)
-                folder_opened = True
-                if selected:
-                    selected_browser, executable, manager_url = selected
-                    subprocess.Popen([str(executable), manager_url], shell=False, close_fds=True)
-                    browser_manager_opened = True
+        if self.system_effects_enabled and os.name == "nt" and not already_configured:
+            subprocess.Popen(["explorer.exe", str(destination)], shell=False, close_fds=True)
+            folder_opened = True
+            if selected:
+                selected_browser, executable, manager_url = selected
+                subprocess.Popen([str(executable), manager_url], shell=False, close_fds=True)
+                browser_manager_opened = True
         return {
-            "schema_version": "DesktopBrowserCompanionPreparationReceipt-v1",
+            "schema_version": "DesktopBrowserCompanionPreparationReceipt-v2",
             "extension_path": str(destination),
             "folder_opened": folder_opened,
             "browser_manager_opened": browser_manager_opened,
             "selected_browser": selected_browser,
             "supported_browsers": [row[1] for row in BROWSERS],
             "selected_browser_family": selected_family,
-            "providers": [row['provider_id'] for row in self._browser_enabled_sites()],
             "package_unchanged": package_unchanged,
-            "already_configured": bool(
-                package_unchanged and bridge_identity_current
-            ),
-            "manual_load_required": not auto_reload_eligible,
+            "already_configured": already_configured,
+            "manual_load_required": not loaded_before,
             "path_changed": path_changed,
-            "cookie_permission": False,
-            "browser_storage_read": False,
-            "hidden_provider_api": False,
-            "one_time_setup": True,
             "extension_id": prior_extension_id,
-            "bridge_reload_requested": bool(
-                reload_receipt and reload_receipt.get("process_id")
-            ),
-            "capture_repair_preflight_required": capture_repair_required,
-            "reload_receipt": reload_receipt,
             "status": (
-                reload_receipt["status"]
-                if reload_receipt
-                else "ALREADY_CONFIGURED"
-                if package_unchanged and bridge_identity_current
+                "ALREADY_CONFIGURED"
+                if already_configured
+                else "AWAITING_EXTENSION_RELOAD"
+                if loaded_before
                 else "AWAITING_EXTENSION_LOAD"
-                if not auto_reload_eligible
-                else "AWAITING_EXTENSION_IDENTITY"
             ),
         }
 
@@ -1348,259 +516,6 @@ class BrowserCompanionDesktop:
         if not status["extension_connected"]:
             raise RuntimeError("BROWSER_COMPANION_HANDSHAKE_NOT_FOUND")
         return {**status, "schema_version": "DesktopBrowserCompanionConfirmationReceipt-v2"}
-
-    def reload_browser_companion(self) -> dict[str, Any]:
-        """Reload the unpacked bridge without starting any provider sync."""
-
-        status = self.browser_companion_status()
-        if not status["prepared"]:
-            raise RuntimeError("BROWSER_COMPANION_NOT_PREPARED")
-        path = self._browser_companion_state_path()
-        state = json.loads(path.read_text(encoding="utf-8"))
-        state["browser_reload_required"] = True
-        state["extension_connected"] = False
-        state["bridge_reload_requested_at_unix"] = int(time.time())
-        preferred = status.get("selected_browser") or status.get("connected_browser")
-        self.write_json_file(path, state)
-        receipt = self._launch_browser_companion_reload(preferred)
-        if receipt["status"] == "SUPPORTED_BROWSER_NOT_FOUND":
-            raise RuntimeError("SUPPORTED_BROWSER_NOT_FOUND")
-        state["bridge_reload_requested_for"] = receipt["selected_browser"]
-        self.write_json_file(path, state)
-        return {
-            **receipt,
-            "expected_extension_version": status["extension_version"],
-            "bridge_identity_verified": False,
-            "browser_reload_required": True,
-        }
-
-    def run_browser_companion_reload(self) -> dict[str, Any]:
-        """UI-facing alias for the explicit bridge self-reload action."""
-
-        return self.reload_browser_companion()
-
-    @staticmethod
-    def _browser_companion_sync_window_contract() -> dict[str, Any]:
-        """Describe the extension-owned window boundary for every sync launch."""
-
-        return {
-            "window_mode": "DEDICATED_VISIBLE",
-            "dedicated_window_focused": False,
-            "user_tab_reused": False,
-            "user_tabs_queried": False,
-            "user_tabs_closed": False,
-            "maximum_capture_windows": 1,
-            "per_provider_capture_mode": (
-                "DEDICATED_VISIBLE_WINDOW_OWNED_TABS"
-            ),
-            "trigger_tab_created_once": True,
-            "trigger_tab_lifecycle": (
-                "EXTENSION_MIGRATES_THEN_CLOSES_TRIGGER_ONLY"
-            ),
-        }
-
-    def _launch_browser_companion_sync_fragment(
-        self,
-        status: Mapping[str, Any],
-        *,
-        trigger_url: str,
-        sync_mode: str,
-        per_provider_limit: int,
-        trigger_transport: str,
-        incremental_cursor: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        browsers = self._browser_executables()
-        if not browsers:
-            raise RuntimeError("SUPPORTED_BROWSER_NOT_FOUND")
-        preferred = status.get("selected_browser") or status.get("connected_browser")
-        selected = select_browser(browsers, preferred)
-        selected_browser, executable, _manager_url = selected
-        process_id = None
-        if self.system_effects_enabled and os.name == "nt":
-            process = subprocess.Popen(
-                [str(executable), trigger_url], shell=False, close_fds=True
-            )
-            process_id = process.pid
-        receipt = {
-            "schema_version": "DesktopBrowserCompanionSyncLaunchReceipt-v2",
-            "selected_browser": selected_browser,
-            "extension_id": status["extension_id"],
-            "trigger_transport": trigger_transport,
-            "trigger_url": trigger_url,
-            "sync_mode": sync_mode,
-            "per_provider_limit": per_provider_limit,
-            "providers": [row['provider_id'] for row in self._browser_enabled_sites()],
-            "site_profile_sha256": self.browser_companion_sites()['profile_sha256'],
-            "process_id": process_id,
-            **self._browser_companion_sync_window_contract(),
-            "status": (
-                "FULL_SYNC_TRIGGERED"
-                if process_id and sync_mode == "FULL"
-                else "FULL_SYNC_READY"
-                if sync_mode == "FULL"
-                else "INCREMENTAL_SYNC_TRIGGERED"
-                if process_id and sync_mode == "INCREMENTAL"
-                else "INCREMENTAL_SYNC_READY"
-                if sync_mode == "INCREMENTAL"
-                else "SYNC_TRIGGERED"
-                if process_id
-                else "SYNC_READY"
-            ),
-        }
-        if sync_mode == "INCREMENTAL" and incremental_cursor:
-            receipt.update(
-                {
-                    "cursor_schema_version": incremental_cursor.get(
-                        "cursor_schema_version"
-                    ),
-                    "cursor_token_sha256": incremental_cursor.get(
-                        "cursor_token_sha256"
-                    ),
-                    "known_session_count": incremental_cursor.get(
-                        "known_session_count"
-                    ),
-                    "overlap_fingerprint_count": incremental_cursor.get(
-                        "overlap_fingerprint_count"
-                    ),
-                    "archive_provider_counts": incremental_cursor.get(
-                        "provider_counts"
-                    ),
-                    "raw_session_ids_in_trigger": False,
-                    "raw_private_content_in_trigger": False,
-                }
-            )
-        if process_id and self.profile_root is not None:
-            state_path = self._browser_companion_state_path()
-            try:
-                state = json.loads(state_path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                state = {}
-            if isinstance(state, dict):
-                state["sync_requested_mode"] = sync_mode
-                state["sync_requested_at_unix"] = int(time.time())
-                state["sync_requested_previous_report_sha256"] = status.get(
-                    "latest_sync_report_sha256"
-                )
-                self.write_json_file(state_path, state)
-        return receipt
-
-    def run_browser_companion_test_read(self) -> dict[str, Any]:
-        return self.run_browser_companion_sync('PREFLIGHT')
-
-    def _browser_sync_trigger(self, suffix):
-        rows = self._browser_enabled_sites()
-        if not rows:
-            raise ValueError('BROWSER_NO_ENABLED_SITES')
-        entry = next((row['url'] for row in rows if row['provider_id']=='gemini'), rows[0]['url'])
-        # No disabled provider page is opened even as a one-shot trigger.
-        return entry + '?memorive_bridge_sync=v1#' + suffix
-
-    def run_browser_companion_sync(self, requested_mode=None) -> dict[str, Any]:
-        """Launch preflight first, then a privacy-safe bounded incremental sync."""
-
-        status = self.browser_companion_status()
-        if not self._browser_enabled_sites():
-            return {'status':'BROWSER_NO_ENABLED_SITES','sync_mode':requested_mode or 'INCREMENTAL'}
-        if requested_mode not in (None,'PREFLIGHT','INCREMENTAL'):
-            raise ValueError('BROWSER_SYNC_MODE_INVALID')
-        if not status["prepared"]:
-            preparation = self.install_browser_companion()
-            return {
-                "schema_version": "DesktopBrowserCompanionSyncLaunchReceipt-v2",
-                "extension_connected": False,
-                "preparation": preparation,
-                "sync_mode": "PREFLIGHT",
-                "per_provider_limit": 2,
-                **self._browser_companion_sync_window_contract(),
-                "status": "PREPARATION_REQUIRED",
-            }
-        if (
-            not status.get("bridge_identity_verified")
-            or status.get("preflight_eligible") is not True
-        ):
-            return {
-                "schema_version": "DesktopBrowserCompanionSyncLaunchReceipt-v3",
-                "extension_connected": False,
-                "bridge_identity_verified": False,
-                "bridge_reload_required": bool(
-                    status.get("bridge_reload_required")
-                ),
-                "expected_extension_version": status.get("extension_version"),
-                "sync_mode": "PREFLIGHT",
-                "per_provider_limit": 2,
-                **self._browser_companion_sync_window_contract(),
-                "status": "BRIDGE_IDENTITY_REQUIRED",
-            }
-        if requested_mode == 'INCREMENTAL' and status.get("capture_repair_preflight_required"):
-            return {'status':'PREFLIGHT_REQUIRED','sync_mode':'INCREMENTAL'}
-        if requested_mode == 'PREFLIGHT' or status.get("capture_repair_preflight_required"):
-            return self._launch_browser_companion_sync_fragment(
-                status,
-                trigger_url=self._browser_sync_trigger('memorive-browser-session-preflight-2-v5'),
-                sync_mode="PREFLIGHT",
-                per_provider_limit=2,
-                trigger_transport="HTTPS_APPROVED_FRAGMENT_PREFLIGHT",
-            )
-        incremental_cursor = self._browser_companion_incremental_cursor()
-        if incremental_cursor["eligible"]:
-            cursor_token = incremental_cursor["cursor_token"]
-            return self._launch_browser_companion_sync_fragment(
-                status,
-                trigger_url=self._browser_sync_trigger(f'memorive-browser-session-incremental-v2:{cursor_token}'),
-                sync_mode="INCREMENTAL",
-                per_provider_limit=10,
-                trigger_transport="HTTPS_APPROVED_FRAGMENT_INCREMENTAL",
-                incremental_cursor=incremental_cursor,
-            )
-        if requested_mode == 'INCREMENTAL':
-            return {'status':'INCREMENTAL_BASELINE_REQUIRED','sync_mode':'INCREMENTAL'}
-        return self._launch_browser_companion_sync_fragment(
-            status,
-            trigger_url=self._browser_sync_trigger('memorive-browser-session-preflight-2-v5'),
-            sync_mode="PREFLIGHT",
-            per_provider_limit=2,
-            trigger_transport="HTTPS_APPROVED_FRAGMENT_PREFLIGHT",
-        )
-
-    def run_browser_companion_full_sync(self) -> dict[str, Any]:
-        """Launch full sync only after a current capability report passes every provider gate."""
-
-        status = self.browser_companion_status()
-        full_sync_gate = status.get("full_sync_gate", {})
-        if (
-            not status.get("prepared")
-            or not status.get("extension_connected")
-            or not status.get("bridge_identity_verified")
-            or status.get("full_sync_eligible") is not True
-        ):
-            return {
-                "schema_version": "DesktopBrowserCompanionSyncLaunchReceipt-v2",
-                "extension_connected": bool(status.get("extension_connected")),
-                "sync_mode": "FULL",
-                "per_provider_limit": 50,
-                "preflight_gate_passed": False,
-                "full_sync_gate": full_sync_gate,
-                "capture_repair_preflight_required": bool(
-                    status.get("capture_repair_preflight_required")
-                ),
-                **self._browser_companion_sync_window_contract(),
-                "status": "FULL_SYNC_PREFLIGHT_REQUIRED",
-            }
-        receipt = self._launch_browser_companion_sync_fragment(
-            status,
-            trigger_url=self._browser_sync_trigger('memorive-browser-session-full-v4'),
-            sync_mode="FULL",
-            per_provider_limit=50,
-            trigger_transport="HTTPS_APPROVED_FRAGMENT_FULL",
-        )
-        receipt["preflight_gate_passed"] = True
-        receipt["full_sync_gate"] = full_sync_gate
-        return receipt
-
-    def restart_browser_companion(self) -> dict[str, Any]:
-        """Compatibility alias; reload only the unpacked extension service worker."""
-
-        return self.reload_browser_companion()
 
     def _browser_session_managed_root(self) -> Path:
         """Return the app-owned durable intake next to the user's Memorive state."""
@@ -1635,6 +550,23 @@ class BrowserCompanionDesktop:
             temporary_io.write_bytes(payload_bytes)
             os.replace(temporary_io, destination_io)
         return destination
+
+    def _clear_retained_download(self, source: Path, retained: Path, payload_bytes: bytes) -> bool:
+        """Remove a bridge file from the browser's download folder once Memorive keeps an identical copy, so
+        captures move out of Downloads instead of piling up there. Only files in the extension's own
+        "Memorive会话桥接" download folder go; Memorive's own folder and folders the user granted stay as
+        they are, and so does a file whose copy is missing or differs."""
+        managed_root = self._browser_session_managed_root().resolve(strict=False)
+        source = source.resolve(strict=False)
+        if source.parent.name != "Memorive会话桥接" or source.is_relative_to(managed_root):
+            return False
+        try:
+            if windows_io_path(retained).read_bytes() != payload_bytes:
+                return False
+            windows_io_path(source).unlink()
+        except OSError:
+            return False  # still open in the browser, or already gone: try again on the next refresh
+        return True
 
     def _browser_session_download_roots(self) -> list[Path]:
         """Resolve the app-owned intake first, then compatible browser downloads."""
@@ -1705,17 +637,14 @@ class BrowserCompanionDesktop:
         return resolved
 
     def sync_browser_sessions_from_downloads(self) -> dict[str, Any]:
-        """Import browser bundles and retain them under Memorive managed state."""
+        """Import the recordings in the download folders (and the session files of the earlier site sync, whose
+        names carry a site), keep a copy of each under session-library and move it out of Downloads."""
         candidates: dict[Path, None] = {}
-        reports: dict[Path, None] = {}
         for root in self._browser_session_download_roots():
             for folder in (root, root / "Memorive会话桥接"):
                 folder_io = windows_io_path(folder)
                 if not folder_io.is_dir():
                     continue
-                for path_io in folder_io.glob("memorive-session-library-sync-report-*.json"):
-                    if path_io.is_file():
-                        reports[(folder / path_io.name).resolve(strict=False)] = None
                 for path_io in folder_io.glob("memorive-session-library-*.json"):
                     if (
                         path_io.is_file()
@@ -1744,21 +673,12 @@ class BrowserCompanionDesktop:
         # Automatic intake belongs to this configured bridge, not every old
         # test export that happens to remain in the Downloads folder.
         intake_since = setup_state.get("prepared_at_unix") if setup_state.get("prepared") else None
-        site_profile = setup_state.get("site_profile_sha256") if setup_state.get("prepared") else None
         ignored_files = 0
+        moved_downloads = 0
         imported_files = 0
         imported_sessions = 0
         retained_files: set[Path] = set()
         failures: list[dict[str, str]] = []
-        for report in reports:
-            try:
-                report_bytes = windows_io_path(report).read_bytes()
-                if 0 < len(report_bytes) <= 1024 * 1024:
-                    retained_files.add(
-                        self._retain_browser_session_artifact(report, report_bytes)
-                    )
-            except OSError:
-                continue
         for source in sorted(candidates, key=lambda value: (windows_io_path(value).stat().st_mtime_ns, value.name)):
             try:
                 source_io = windows_io_path(source)
@@ -1768,26 +688,26 @@ class BrowserCompanionDesktop:
                 payload_bytes = source_io.read_bytes()
                 digest = hashlib.sha256(payload_bytes).hexdigest().upper()
                 if digest in imported_hashes:
+                    retained = self._retain_browser_session_artifact(source, payload_bytes)
+                    moved_downloads += self._clear_retained_download(source, retained, payload_bytes)
                     continue
                 payload = json.loads(payload_bytes.decode("utf-8-sig"))
-                if isinstance(intake_since, int) or site_profile:
+                if isinstance(intake_since, int):
                     generated = payload.get("generated_at") if isinstance(payload, dict) else None
                     try:
                         generated_at = datetime.fromisoformat(str(generated).replace("Z", "+00:00"))
-                        current_capture = generated_at.tzinfo is not None and (
-                            not isinstance(intake_since, int) or generated_at.timestamp() >= intake_since
-                        )
+                        current_capture = generated_at.tzinfo is not None and generated_at.timestamp() >= intake_since
                     except (TypeError, ValueError):
                         current_capture = False
-                    if not current_capture or (site_profile and payload.get("site_profile_sha256") != site_profile):
+                    if not current_capture:
                         ignored_files += 1
                         continue
-                retained_files.add(
-                    self._retain_browser_session_artifact(source, payload_bytes)
-                )
+                retained = self._retain_browser_session_artifact(source, payload_bytes)
+                retained_files.add(retained)
                 receipt = self.sessions.import_session_file(source)
                 if receipt.get("status") != "PASS":
                     raise ValueError("BROWSER_SESSION_IMPORT_NOT_ACCEPTED")
+                moved_downloads += self._clear_retained_download(source, retained, payload_bytes)
                 imported_hashes.add(digest)
                 imported_files += 1
                 imported_sessions += int(receipt.get("imported_count", 0))
@@ -1838,6 +758,7 @@ class BrowserCompanionDesktop:
             "imported_file_count": imported_files,
             "imported_session_count": imported_sessions,
             "managed_artifact_count": len(retained_files),
+            "moved_download_count": moved_downloads,
             "managed_directory": str(self._browser_session_managed_root()),
             "failure_count": len(failures),
             "failures": failures,

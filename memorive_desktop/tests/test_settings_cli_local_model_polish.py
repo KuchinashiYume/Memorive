@@ -16,19 +16,6 @@ for candidate in (SOURCE_ROOT, ATTEMPT_ROOT / "product" / "desktop"):
 from memorive.desktop.current_task.workflow_mapping import build_core_execution_snapshot  # noqa: E402
 from memorive.models.local.product_controller import LocalModelProductController  # noqa: E402
 from memorive.desktop.settings.contracts import default_settings, validate_settings  # noqa: E402
-from memorive.desktop.api import ProductApi  # noqa: E402
-from browser_companion_support import companion  # noqa: E402
-
-
-CURRENT_EXTENSION_VERSION = json.loads(
-    (
-        ATTEMPT_ROOT
-        / "source"
-        / "memorive" / "sessions" / "companion"
-        / "extension"
-        / "manifest.json"
-    ).read_text(encoding="utf-8")
-)["version"]
 
 
 def _recognized_local_model(tmp_path: Path) -> tuple[LocalModelProductController, dict[str, object]]:
@@ -108,68 +95,4 @@ def test_recognized_local_models_have_stable_profiles_and_phase1_mapping(
     assert snapshot["workflow_config"]["nodes"]["03_CARD_DISTILL"]["model"] == "[本地] qwen3:8b"
     assert snapshot["workflow_config"]["nodes"]["03_CARD_DISTILL"]["provider"] == "[本地] Ollama"
     assert snapshot["configuration_ready"] is False
-
-
-def test_browser_status_projects_explicit_preflight_result(tmp_path: Path) -> None:
-    api = companion()
-    api.profile_root = tmp_path / "profile"
-    state_path = api._browser_companion_state_path()
-    state_path.parent.mkdir(parents=True)
-    state_path.write_text(
-        json.dumps(
-            {
-                "prepared": True,
-                "prepared_at_unix": 100,
-                "package_sha256": "A" * 64,
-                "extension_id": "abcdefghijklmnopabcdefghijklmnop",
-            }
-        ),
-        encoding="utf-8",
-    )
-    identity = {
-        "extension_id": "abcdefghijklmnopabcdefghijklmnop",
-        "extension_version": CURRENT_EXTENSION_VERSION,
-        "sha256": "B" * 64,
-        "observed_at": "2026-08-29T10:00:00Z",
-    }
-    report = {
-        "extension_id": identity["extension_id"],
-        "extension_version": CURRENT_EXTENSION_VERSION,
-        "sha256": "C" * 64,
-        "sync_mode": "PREFLIGHT",
-        "per_provider_limit": 2,
-        "browser_family": "EDGE",
-        "generated_at": "2026-08-29T10:01:00Z",
-        "providers": {
-            provider: {"status": "COMPLETE", "captured_count": 5, "failed_count": 0}
-            for provider in ("deepseek", "gemini", "kimi")
-        },
-    }
-    api._browser_companion_package = lambda: (tmp_path, set(), "A" * 64)
-    api._browser_companion_manifest_projection = lambda: {
-        "extension_version": CURRENT_EXTENSION_VERSION
-    }
-    api._latest_browser_companion_identity_receipt = lambda **_kwargs: identity
-    api._latest_browser_companion_sync_report = (
-        lambda **kwargs: report
-        if kwargs.get("expected_sync_mode") in {None, "PREFLIGHT"}
-        else None
-    )
-    api._browser_companion_full_sync_gate = lambda *_args, **_kwargs: {
-        "eligible": True,
-        "report_sha256": report["sha256"],
-        "providers": {},
-    }
-    api._browser_companion_incremental_cursor = lambda: {
-        "eligible": False,
-        "provider_counts": {},
-        "known_session_count": 0,
-        "overlap_fingerprint_count": 0,
-    }
-
-    status = api.browser_companion_status()
-
-    assert status["preflight_status"] == "PASS"
-    assert status["preflight_report_sha256"] == report["sha256"]
-
 
