@@ -1,7 +1,9 @@
-/* Version history views shared by Research Chat's answer versions (routes/chat/workspace.js) and the edit history
-   of a session refinement (routes/sessions/view.js): the versions, newest first, and a version compared with the
-   current one word by word (the blocks of memorive/platform/text_diff.py: red only in that version, green only in
-   the current one). Styles: shared/version-history.css. Publishes Memorive.versionHistory. */
+/* Two levels of versions, the same in Research Chat (routes/chat/workspace.js) and session refinement
+   (routes/sessions/view.js): switching between the outputs of one request (the answers to a question, the
+   refinements of a conversation: ‹ n / m ›), and the history of one output's edits: the versions, newest first, and
+   a version compared with the current one word by word (the blocks of memorive/platform/text_diff.py: red only in
+   that version, green only in the current one). Styles: shared/version-history.css. Publishes
+   Memorive.versionHistory. */
 (() => {
   'use strict';
   const t = (s) => Memorive.app?.translate?.(s) || s;
@@ -63,5 +65,26 @@
 
   const unchanged = (blocks) => blocks.every((b) => b.kind === 'equal');
 
-  Memorive.versionHistory = Object.freeze({ when, list, diffText, legend, unchanged });
+  // ‹ n / m › between the outputs of one request: the shown one is index (from 0) of count. make(symbol, onClick,
+  // action) makes each arrow button ('previous', 'next'; default: a quiet button); pick(index, action) shows another.
+  const quietButton = (symbol, onClick) => {
+    const b = create('button', symbol, 'memo-quiet-button');
+    b.type = 'button';
+    b.onclick = onClick;
+    return b;
+  };
+  const switcher = (index, count, { labels, pick, make = quietButton }) => {
+    const nodes = [];
+    for (const [symbol, delta, action, label] of [['‹', -1, 'previous', labels[0]], ['›', 1, 'next', labels[1]]]) {
+      if (delta === 1) nodes.push(create('span', (index + 1) + ' / ' + count, 'memo-answer-counter'));
+      const available = index + delta >= 0 && index + delta < count;
+      const b = make(symbol, () => (available ? pick(index + delta, action) : undefined), action);
+      b.setAttribute('aria-disabled', String(!available));
+      b.setAttribute('aria-label', t(label));
+      nodes.push(b);
+    }
+    return nodes;
+  };
+
+  Memorive.versionHistory = Object.freeze({ when, list, diffText, legend, unchanged, switcher });
 })();

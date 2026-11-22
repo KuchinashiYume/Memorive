@@ -199,15 +199,14 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     const box=create('div',null,'memo-answer-actions'),
       versions=message.answer_variants||[],
       index=(message.variant_number||1)-1;
-    if(versions.length>1){for(const [symbol,delta,action,label] of [['‹',-1,'previous','上一个回答'],['›',1,'next','下一个回答']]){
-      if(delta===1)box.append(create('span',(index+1)+' / '+versions.length,'memo-answer-counter'));
-      const available=index+delta>=0&&index+delta<versions.length;
-      const b=button(symbol,()=>available?selectAnswer(versions[index+delta].id,action):undefined,'memo-quiet-button');
-      b.dataset.answerAction=action;
-      b.setAttribute('aria-disabled',String(!available));
-      b.setAttribute('aria-label',t(label));
-      box.append(b);
-    }}
+    if(versions.length>1)box.append(...Memorive.versionHistory.switcher(index,versions.length,{
+      labels:['上一个回答','下一个回答'],
+      pick:(to,action)=>selectAnswer(versions[to].id,action),
+      make:(symbol,fn,action)=>{
+        const b=button(symbol,fn,'memo-quiet-button');
+        b.dataset.answerAction=action;
+        return b;
+      }}));
     const retry=button('',()=>retryAnswer(message),'memo-quiet-button memo-message-icon');
     retry.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg>';
     retry.setAttribute('aria-label',t('重试回答'));

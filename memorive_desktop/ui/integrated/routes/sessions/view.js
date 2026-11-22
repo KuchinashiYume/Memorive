@@ -51,7 +51,7 @@
   let shownBrief = null;                // its brief (null for a draft made before v2.00)
   let shownReview = null;               // library.refinement_review of the shown version: product, edits
   let editing = null;                   // the item being edited: { index, field:'text' | 'answer' }
-  // 修改记录: open or not, the version chosen in it (a number) and how it shows (compared with the current one, or full).
+  // 历史版本: open or not, the version chosen in it (a number) and how it shows (compared with the current one, or full).
   const historyView = { open:false, chosen:null, mode:'compare', ticket:0 };
   let shownRefinementCurrent = false;   // the shown version read the conversation the page shows now
   const ALL_SOURCE_PAGE_SIZE = 30;
@@ -853,7 +853,7 @@
       });
   };
 
-  // 修改记录: the versions of the shown refinement's edits (the library keeps them; version 1 is the model's brief),
+  // 历史版本: the versions of the shown refinement's edits (the library keeps them; version 1 is the model's brief),
   // newest first, and the chosen one compared word by word with the current one or shown in full, as Research
   // Chat shows an answer's versions (shared/version-history.js). Restoring saves the chosen one as the newest.
   const tr = (s) => Memorive.app?.translate?.(s) || s;
@@ -1025,6 +1025,13 @@
     row.append(block);
   };
 
+  // Another refinement of the conversation, from the ‹ › switcher.
+  const showRefinementRun = (jobId) => {
+    void Memorive.sessionsBridge?.call('sessions.refinement_get', { local_projection_id:selectedProjectionId, job_id:jobId })
+      .then((projection) => renderRefinementDraft(projection, true))
+      .catch((error) => showToast(Memorive.refinementStatus.failureText(error?.message)));
+  };
+
   // A saved version of the session's refinement (sessions.refinement_get: draft, versions), whatever the state of
   // a newer one. open: switch to it (a refinement just finished, or another version was picked).
   const renderRefinementDraft = (projection, open = false) => {
@@ -1050,11 +1057,16 @@
       q('#sessions-open-library').hidden = true;
       loadVersionReview(draft);
     }
-    const select = q('#sessions-refinement-version');
-    select.replaceChildren(...versions.map((row, index) => new Option(
-      `第 ${index + 1} 版 · ${Memorive.i18n.dateTime(row.created_at)}`, row.job_id)).reverse());
-    select.value = draft.task_id;
-    select.hidden = !versions.length;
+    // The refinements of this conversation switch like Research Chat's answers: ‹ n / m ›; the counter's tooltip
+    // says when the shown one was made.
+    const shownIndex = versions.findIndex((row) => row.job_id === draft.task_id);
+    const runs = q('#sessions-refinement-runs');
+    runs.replaceChildren(...(versions.length > 1 ? Memorive.versionHistory.switcher(shownIndex, versions.length, {
+      labels:['上一次精炼', '下一次精炼'],
+      pick:(to) => showRefinementRun(versions[to].job_id)
+    }) : []));
+    const counter = runs.querySelector('.memo-answer-counter');
+    if (counter) counter.dataset.desktopTip = Memorive.versionHistory.when(draft.created_at);
     q('#sessions-view-switch').hidden = false;
     showSessionView(open ? 'brief' : sessionView);
     const target = q('#sessions-refinement-items');
@@ -1369,13 +1381,6 @@
     if (!shownReview?.stable_locator) return;
     void Memorive.libraryBridge?.openArtifactByLocator(shownReview.stable_locator)
       .catch((error) => showToast(`没有在资料库打开：${error?.message || error}`));
-  });
-  q('#sessions-refinement-version').addEventListener('change', (event) => {
-    void Memorive.sessionsBridge?.call('sessions.refinement_get', {
-      local_projection_id:selectedProjectionId, job_id:event.target.value
-    })
-      .then((projection) => renderRefinementDraft(projection, true))
-      .catch((error) => showToast(Memorive.refinementStatus.failureText(error?.message)));
   });
   q('#sessions-refine').addEventListener('click', () => {
     if (!selectedProjectionId || q('#sessions-refine').disabled) return;

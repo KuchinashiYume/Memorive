@@ -3328,6 +3328,7 @@
 #desktop-sessions-preview .desktop-sessions-turn.is-cited { outline:2px solid var(--selection-border); outline-offset:2px; }
 #desktop-sessions-preview .desktop-sessions-view-switch { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
 #desktop-sessions-preview .desktop-sessions-view-switch[hidden] { display:none; }
+#desktop-sessions-preview .desktop-sessions-refinement-runs { display:flex; align-items:center; gap:2px; }
 
 #desktop-sessions-preview .desktop-sessions-turn p { white-space:pre-wrap; overflow-wrap:anywhere; }
 
