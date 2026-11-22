@@ -4,7 +4,7 @@
 
 ## Changes in v1.03
 
-Research Q&A can reuse originals and converted text prepared by the memo-research Skill, read and compare sources for the current question, and return source-checked answers to the same conversation. The Skill also works independently for one paper or agent-led comparisons. The Test Console adds three languages, a review-and-results view, and shareable summaries.
+Research Chat can reuse originals and converted text prepared by the memo-research Skill, read and compare sources for the current question, and return source-checked answers to the same conversation. The Skill also works independently for one paper or agent-led comparisons. The Test Console adds three languages, a review-and-results view, and shareable summaries.
 
 This version retains the settings-save and three-part version fixes from 1.02.01. The research Skill complements question-led reading and source reuse; no low-latency or full-workflow replacement claim is made. Source integration checks and two real agent returns are recorded separately from package checks; they do not establish scientific quality, full business regression, clean-machine or online-upgrade acceptance.
 
@@ -20,7 +20,7 @@ Back up data and settings before upgrading with the installer or complete portab
 
 ## v1.03 の変更点
 
-研究Q&Aで memo-research Skill が準備した原本と変換テキストを再利用し、現在の質問に沿った読解・比較・引用確認を行えます。出典と範囲を確認した回答を元の会話へ戻し、追加質問を続けられます。Skill単体の読解やAgentによる複数文献の比較にも対応。テストコンソールには三言語、レビュー・結果画面、共有用要約を追加しました。
+研究チャットで memo-research Skill が準備した原本と変換テキストを再利用し、現在の質問に沿った読解・比較・引用確認を行えます。出典と範囲を確認した回答を元の会話へ戻し、追加質問を続けられます。Skill単体の読解やAgentによる複数文献の比較にも対応。テストコンソールには三言語、レビュー・結果画面、共有用要約を追加しました。
 
 1.02.01の設定保存と三段階版番号の修正を継承します。研究Skillは質問に沿った読解と出典再利用を補助するもので、低遅延や全処理の代替性能は未確認です。ソース統合の確認と実Agentによる2回の返却を記録しています。配布物の確認は別途記録し、科学的品質・全機能・クリーン環境・オンライン更新の全経路の合格を意味しません。
 
@@ -48,4 +48,4 @@ Update metadata uses the existing production signing key; Windows Authenticode r
 
 [v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02): discovery, AI Updates, custom CLI, multilingual output, archiving and signed updates.
 
-[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01): document processing and research Q&A.
+[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01): document processing and Research Chat.

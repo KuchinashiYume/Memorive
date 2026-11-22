@@ -20,7 +20,7 @@
     {
       "source": "memorive_desktop/product/desktop/bundle_integrated.html",
       "destination": "bundle_integrated.html",
-      "sha256": "08b4bb59d1652a6d90adfa1bc67cfc697a598e4276347d06371286a3a07aa0ef"
+      "sha256": "0d6d58e4f1414df3e3e1f1440a94c6475103fd3a8e79102c70aee48711aa7ec6"
     },
     {
       "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
@@ -100,7 +100,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/en-US/design.md",
       "destination": "help/en-US/design.md",
-      "sha256": "44031797a6b02f455f693b59f3c7b609f1835b4edec287c2bfa82137472c759b"
+      "sha256": "5c1b995bf3decf22299a5f62545f7541bf938d3e147b48531e1f830e6f236917"
     },
     {
       "source": "memorive_desktop/product/desktop/help/en-US/design.pdf",
@@ -130,7 +130,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/ja-JP/design.md",
       "destination": "help/ja-JP/design.md",
-      "sha256": "7f938e8b2201ec3a48028fca4b525c05fe9bdcea3b11ec3f66e502a349bec9f7"
+      "sha256": "c052f1f7b570ac230887a6e7737a50c923d89abab4546b78e81bf485e74e00f0"
     },
     {
       "source": "memorive_desktop/product/desktop/help/ja-JP/design.pdf",
@@ -145,12 +145,12 @@
     {
       "source": "memorive_desktop/product/desktop/help/ja-JP/manual-text.md",
       "destination": "help/ja-JP/manual-text.md",
-      "sha256": "f159dc2615b4ec44d87709993cbdeecca11cab68bb5b91ba71cbb2b2ced3dbd7"
+      "sha256": "e8f02a40ba3d82a1f5333ac27afe5b8db8ac7c3456817eca9fa79fdcaa9b7112"
     },
     {
       "source": "memorive_desktop/product/desktop/help/ja-JP/manual.md",
       "destination": "help/ja-JP/manual.md",
-      "sha256": "f159dc2615b4ec44d87709993cbdeecca11cab68bb5b91ba71cbb2b2ced3dbd7"
+      "sha256": "e8f02a40ba3d82a1f5333ac27afe5b8db8ac7c3456817eca9fa79fdcaa9b7112"
     },
     {
       "source": "memorive_desktop/product/desktop/help/ja-JP/manual.pdf",
@@ -170,7 +170,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/content.js",
       "destination": "help/web/content.js",
-      "sha256": "7c37f4e065fe1677a7063c6f827b4983c70a009e058c9f811419dcbe39851717"
+      "sha256": "4a19af5cef1f6d1fcef3879a9028314f8a5065d560d203e0f40477ac061b3d34"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/index.html",
@@ -310,7 +310,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/design.md",
       "destination": "help/web/downloads/en-US/design.md",
-      "sha256": "44031797a6b02f455f693b59f3c7b609f1835b4edec287c2bfa82137472c759b"
+      "sha256": "5c1b995bf3decf22299a5f62545f7541bf938d3e147b48531e1f830e6f236917"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/design.pdf",
@@ -335,7 +335,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/design.md",
       "destination": "help/web/downloads/ja-JP/design.md",
-      "sha256": "7f938e8b2201ec3a48028fca4b525c05fe9bdcea3b11ec3f66e502a349bec9f7"
+      "sha256": "c052f1f7b570ac230887a6e7737a50c923d89abab4546b78e81bf485e74e00f0"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/design.pdf",
@@ -350,7 +350,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/manual.md",
       "destination": "help/web/downloads/ja-JP/manual.md",
-      "sha256": "f159dc2615b4ec44d87709993cbdeecca11cab68bb5b91ba71cbb2b2ced3dbd7"
+      "sha256": "e8f02a40ba3d82a1f5333ac27afe5b8db8ac7c3456817eca9fa79fdcaa9b7112"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/ja-JP/manual.pdf",

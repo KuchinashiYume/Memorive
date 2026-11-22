@@ -18,7 +18,7 @@ Connect a cloud model API, a command-line tool you are already signed in to (suc
 
 ## New in v1.03
 
-- **Read papers with an AI agent.** The new memo-research Skill lets agents such as Codex or Claude Code read papers for you. Papers an agent has already converted can go straight into Research Q&A, or you can hand the current question to an agent and get its cited answer back in the same conversation. The Skill also works on its own.
+- **Read papers with an AI agent.** The new memo-research Skill lets agents such as Codex or Claude Code read papers for you. Papers an agent has already converted can go straight into Research Chat, or you can hand the current question to an agent and get its cited answer back in the same conversation. The Skill also works on its own.
 - **Test Console** now comes in English, Chinese and Japanese, with a review-and-results view and shareable summaries.
 - Includes the settings-save fix from v1.02.01.
 
@@ -32,7 +32,7 @@ Back up your data and settings before upgrading, then use the installer or the c
 
 ### Read: bring your materials in
 
-Import materials through the Inbox, check the preview, then decide when to process them. You can also add PDF, images, Word, Markdown or TXT straight into Research Q&A and ask about them right away. Session Management gathers your local Codex and Claude Code records and conversations captured in the browser, and refines them into key points, decisions and next steps.
+Import materials through the Inbox, check the preview, then decide when to process them. You can also add PDF, images, Word, Markdown or TXT straight into Research Chat and ask about them right away. Session Management gathers your local Codex and Claude Code records and conversations captured in the browser, and refines them into key points, decisions and next steps.
 
 ### Organize: turn materials into evidence you can trace
 
@@ -44,7 +44,7 @@ Select several papers in one conversation to compare their methods, sample condi
 
 ### Retain: keep what you have checked
 
-Research Q&A suggests conclusions worth saving. Once you have checked a conclusion's claim, scope and citations, confirm it into your knowledge base, and later questions can draw on it. Research records, refined conversations and daily, weekly or monthly reports help you review your progress.
+Research Chat suggests conclusions worth saving. Once you have checked a conclusion's claim, scope and citations, confirm it into your knowledge base, and later questions can draw on it. Research records, refined conversations and daily, weekly or monthly reports help you review your progress.
 
 ### Models and tools
 
@@ -110,7 +110,7 @@ flowchart LR
   sources[Documents, pages, conversations] --> processing[Process and organize]
   processing --> library[Originals and literature cards]
   library --> retrieval[Retrieve for the project and question]
-  retrieval --> answer[Research Q&A and comparison]
+  retrieval --> answer[Research Chat and comparison]
   answer --> check[Check citations and make a judgment]
   check --> knowledge[Confirmed research knowledge]
   knowledge --> retrieval
@@ -154,4 +154,4 @@ Report questions, bugs and feature ideas in [GitHub Issues](https://github.com/K
 
 - **[v1.02.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02.01)**: settings-save and version-parsing fixes.
 - **[v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02)**: literature discovery, AI Updates, custom CLI connections, multilingual output, conversation archiving and signed updates.
-- **[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)**: first public release, with document processing, research Q&A and model connections.
+- **[v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01)**: first public release, with document processing, Research Chat and model connections.

@@ -4,7 +4,7 @@
 
 ## What's new
 
-- **Read papers with an AI agent.** The new memo-research Skill lets agents such as Codex or Claude Code read papers for you. Papers an agent has already converted can go straight into Research Q&A, or you can hand the current question to an agent and get its cited answer back in the same conversation. The Skill also works on its own.
+- **Read papers with an AI agent.** The new memo-research Skill lets agents such as Codex or Claude Code read papers for you. Papers an agent has already converted can go straight into Research Chat, or you can hand the current question to an agent and get its cited answer back in the same conversation. The Skill also works on its own.
 - **Test Console** now comes in English, Chinese and Japanese, with a review-and-results view and shareable summaries.
 - Includes the settings-save fix from v1.02.01.
 
@@ -20,7 +20,7 @@
 
 ## v1.03 の新機能
 
-- **AI エージェントと一緒に文献を読む**：memo-research Skill を追加しました。Codex や Claude Code などのエージェントが処理した論文を、研究 Q&A にそのまま追加できます。いまの質問をエージェントに渡すと、引用付きの回答が元の会話に戻ってきます。Skill は単体でも使えます。
+- **AI エージェントと一緒に文献を読む**：memo-research Skill を追加しました。Codex や Claude Code などのエージェントが処理した論文を、研究チャットにそのまま追加できます。いまの質問をエージェントに渡すと、引用付きの回答が元の会話に戻ってきます。Skill は単体でも使えます。
 - **テストコンソール**が日本語・英語・中国語に対応し、レビュー・結果画面と共有用の要約を追加しました。
 - v1.02.01 の設定保存の修正を含みます。
 
@@ -44,4 +44,4 @@ The "Source code" archives that GitHub adds contain source only; use the install
 
 - [v1.02.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02.01): settings-save and version-parsing fixes.
 - [v1.02](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.02): literature discovery, AI Updates, custom CLI connections, multilingual output, conversation archiving and signed updates.
-- [v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01): first public release, with document processing, research Q&A and model connections.
+- [v1.01](https://github.com/KuchinashiYume/Memorive/releases/tag/v1.01): first public release, with document processing, Research Chat and model connections.

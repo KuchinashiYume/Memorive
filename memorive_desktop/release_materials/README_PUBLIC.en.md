@@ -16,7 +16,7 @@ Memorive, or memo, is a Windows desktop workspace for personal learning and rese
 
 ### Read: bring documents, pages, and conversations into your research
 
-Import materials through the Inbox, check their previews, and choose when to process them. Research Q&A also accepts PDF, images, Word, Markdown, and TXT directly; a document does not need a generated card before you can discuss it. Session Management brings together local Codex and Claude Code records, browser captures, and manual imports. Refinement turns a conversation into reviewable notes about ideas, decisions, assumptions, and next steps.
+Import materials through the Inbox, check their previews, and choose when to process them. Research Chat also accepts PDF, images, Word, Markdown, and TXT directly; a document does not need a generated card before you can discuss it. Session Management brings together local Codex and Claude Code records, browser captures, and manual imports. Refinement turns a conversation into reviewable notes about ideas, decisions, assumptions, and next steps.
 
 ### Organize: turn materials into evidence you can revisit
 
@@ -85,7 +85,7 @@ flowchart LR
   sources[Documents, pages, conversations] --> processing[Process and organize]
   processing --> library[Originals and literature cards]
   library --> retrieval[Retrieve for the project and question]
-  retrieval --> answer[Research Q&A and comparison]
+  retrieval --> answer[Research Chat and comparison]
   answer --> check[Check citations and make a judgment]
   check --> knowledge[Confirmed research knowledge]
   knowledge --> retrieval
