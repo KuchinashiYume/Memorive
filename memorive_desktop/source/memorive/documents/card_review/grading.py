@@ -130,6 +130,22 @@ def grade_from_report(rep, key_data_count: int):
     return field_cred, kd_cred
 
 
+def admit_unreviewed(card_path, **_ignored) -> AdmitResult:
+    """Admission when the card check (workflow node 04) is turned off: nothing is checked, so every field and
+    key_data entry is unknown (marked, never verified) and the card becomes active (trigger=GRADED_ADMIT).
+    documents/workflow/executor.py passes it to review_card_revision in place of the review."""
+    card_path = Path(card_path)
+    fm = _read_frontmatter(card_path)
+    kd = fm.get("key_data") if isinstance(fm, dict) else None
+    unchecked = type("Unchecked", (), {"problems": [], "checked_locations": []})()
+    field_cred, kd_cred = grade_from_report(unchecked, len(kd) if isinstance(kd, list) else 0)
+    apply_field_credibility(card_path, field_cred, kd_cred)
+    reason = "卡片核对（04）已关闭：没有核对，各字段都标为未核，不能直接引用"
+    transition(card_path, ACTIVE, trigger=Trigger.GRADED_ADMIT, reason=reason)
+    log_reason("EVIDENCE_REVIEW", "admit_unreviewed", reason, event_category="verify", target=str(card_path))
+    return AdmitResult(outcome="active", attempts=0, field_credibility=field_cred, key_data_credibility=kd_cred)
+
+
 def grade_and_admit(card_path, *, call_verify=None, region_check=None, escalate_after=2) -> AdmitResult:
     """Graded admission: run the transcription check, write each field's and key_data entry's
     credibility, move the card from pending to active (trigger=GRADED_ADMIT).

@@ -909,8 +909,12 @@ class CorePipelineExecutor:
             def before_admission():
                 run.mark("04_CARD_CROSS_CHECK")
                 run.start("05_CARD_ADMISSION")
+            # Node 04 may be turned off in the workflow settings: the card is then admitted unchecked.
+            reviewer = None
+            if not run.bridge.node_enabled("04_CARD_CROSS_CHECK"):
+                from memorive.documents.card_review.grading import admit_unreviewed as reviewer
             run.card_path = review_card_revision(review_input, run.folder, run.stage_root,
-                                            before_publish=before_admission)
+                                            reviewer=reviewer, before_publish=before_admission)
             admitted_seed = run.stage_root / "05_admitted_card.md"
             if not admitted_seed.exists():
                 shutil.copy2(run.card_path, admitted_seed)

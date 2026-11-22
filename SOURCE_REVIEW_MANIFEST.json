@@ -4081,7 +4081,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "6b0128f12600ad4231a1f4046ad4bc2ac089516a1a2c22c8b9188a5ba3092ae0",
+      "sha256": "2bd35a06a49c99aa52f183dd8fa5c7def8ade8cb8c42cef8d1318696ee4ca989",
       "bytes": 278270
     },
     {
@@ -7801,8 +7801,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_review/grading.py",
-      "sha256": "9905d850b085e05bb2d2dbcb344a434899476dc0da509780f47c38933701d4a8",
-      "bytes": 12006
+      "sha256": "6be55d3bad90a795dd3ecef1a989a15128e2e5d48a474abf09560736fc99e023",
+      "bytes": 13177
     },
     {
       "path": "memorive_desktop/source/memorive/documents/card_review/judgment.py",
@@ -8071,8 +8071,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/documents/workflow/executor.py",
-      "sha256": "c1a4b3735002186d5ef2a1aea85b8f9f590af70b7caceac95f2cd819e597cf43",
-      "bytes": 72199
+      "sha256": "aa4584be6e53848066bdcec40955540ef7071050890f8ad3f7bdafcf56851f3f",
+      "bytes": 72516
     },
     {
       "path": "memorive_desktop/source/memorive/documents/workflow/model_bridge.py",
