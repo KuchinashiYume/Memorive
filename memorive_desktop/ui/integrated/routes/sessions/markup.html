@@ -39,7 +39,8 @@
                   </header>
                   <div class="desktop-sessions-conversation">
                     <div class="desktop-sessions-refine-state" id="sessions-refine-state" hidden></div>
-                    <section class="desktop-sessions-refinement-draft" id="sessions-refinement-draft" aria-label="对话精炼草稿" hidden><header><strong>精炼草稿 · 待复核</strong><span class="badge"></span></header><div id="sessions-refinement-items"></div></section>
+                    <div class="desktop-sessions-view-switch" id="sessions-view-switch" hidden><div class="segmented" role="tablist" aria-label="会话视图"><button type="button" role="tab" id="sessions-show-turns" aria-selected="true" aria-pressed="true" aria-controls="sessions-turns">原对话</button><button type="button" role="tab" id="sessions-show-brief" aria-selected="false" aria-pressed="false" aria-controls="sessions-refinement-draft" tabindex="-1">精炼结果</button></div><select class="select" id="sessions-refinement-version" aria-label="精炼版本"></select></div>
+                    <section class="desktop-sessions-refinement-draft" id="sessions-refinement-draft" role="tabpanel" aria-label="对话精炼草稿" hidden><header><strong>精炼草稿 · 待复核</strong><span class="badge"></span></header><div id="sessions-refinement-items"></div></section>
                     <div class="desktop-sessions-turns" id="sessions-turns" aria-live="polite"><div class="desktop-sessions-turn-placeholder">正在读取会话正文…</div></div>
                     <div class="warning-banner" id="sessions-delete-help" hidden>此来源不允许在 Memorive 中删除或修改。</div>
                   </div>

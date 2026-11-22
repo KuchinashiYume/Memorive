@@ -45,6 +45,9 @@
   let refinementExecutionReady = false;
   let selectedRefinementEligible = false;
   let activeRefinementJobId = null;
+  let sessionView = 'turns';            // 'turns' (原对话) or 'brief' (精炼结果)
+  let shownBriefQuotes = {};            // the cited messages as the shown version read them
+  let shownRefinementCurrent = false;   // the shown version read the conversation the page shows now
   const ALL_SOURCE_PAGE_SIZE = 30;
   const ALL_SOURCE_PREFETCH_ROW = 20;
   let pageTriggerObserver = null;
@@ -453,7 +456,8 @@
     selectedRefinementEligible = false;
     activeRefinementJobId = null;
     setRefineState('', { show: false });
-    q('#sessions-refinement-draft').hidden = true;
+    q('#sessions-view-switch').hidden = true;
+    showSessionView('turns');
     q('#sessions-refinement-items').replaceChildren();
   };
 
@@ -611,10 +615,13 @@
     q('#sessions-partial').hidden = !session.partial;
     const turns = q('#sessions-turns');
     const fragment = document.createDocumentFragment();
+    let refinementNumber = 0;
     (projection.messages || []).forEach((message) => {
       if (!['user', 'assistant'].includes(message?.role) || !message.content) return;
       const turn = document.createElement('div');
       turn.className = `desktop-sessions-turn ${message.role}`;
+      // The number a refinement gives this message (m1, m2, ...): user and assistant text, in order.
+      if (message.content.trim()) turn.dataset.ref = `m${refinementNumber += 1}`;
       const label = document.createElement('small');
       label.textContent = message.role === 'user' ? '你' : 'AI';
       const content = document.createElement('p');
@@ -696,11 +703,14 @@
   const refinementRow = (label, text, notes = []) => {
     const row = document.createElement('article');
     row.className = 'desktop-sessions-refinement-item';
-    const small = document.createElement('small');
-    small.textContent = label;
+    if (label) {
+      const small = document.createElement('small');
+      small.textContent = label;
+      row.append(small);
+    }
     const copy = document.createElement('p');
     copy.textContent = text;
-    row.append(small, copy);
+    row.append(copy);
     for (const note of notes) {
       const line = document.createElement('small');
       line.textContent = note;
@@ -709,37 +719,107 @@
     return row;
   };
 
-  // The overview, then each item under its section with the messages it cites (#n is message mn).
+  // The overview, then the items under their sections, each with buttons for the messages it cites (#n is mn).
   const briefRows = (brief) => {
     const fragment = document.createDocumentFragment();
     fragment.append(refinementRow('概况', String(brief.overview || '')));
+    let kind = null;
     for (const item of brief.items || []) {
-      const refs = (item.message_refs || []).map((ref) => `#${String(ref).replace(/^m/, '')}`).join(' ');
+      if (item.kind !== kind) {
+        kind = item.kind;
+        const heading = document.createElement('h4');
+        heading.className = 'desktop-sessions-refinement-section';
+        heading.textContent = briefSections[kind] || kind;
+        fragment.append(heading);
+      }
       const notes = [...(item.flags || []), ...(item.moved_from ? [item.moved_from] : [])]
         .map((key) => briefNotes[key]).filter(Boolean);
-      fragment.append(refinementRow(`${briefSections[item.kind] || item.kind} · ${refs}`, String(item.text || ''), notes));
+      const row = refinementRow('', String(item.text || ''), notes);
+      const refs = document.createElement('div');
+      refs.className = 'desktop-sessions-refinement-refs';
+      for (const ref of item.message_refs || []) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'text-button';
+        button.dataset.ref = ref;
+        button.title = '查看原话';
+        button.textContent = `#${String(ref).replace(/^m/, '')}`;
+        refs.append(button);
+      }
+      row.append(refs);
+      fragment.append(row);
     }
     return fragment;
   };
 
-  const renderRefinementDraft = (projection) => {
+  const showSessionView = (view) => {
+    sessionView = view;
+    q('#sessions-turns').hidden = view === 'brief';
+    q('#sessions-refinement-draft').hidden = view !== 'brief';
+    for (const [id, on] of [['#sessions-show-turns', view !== 'brief'], ['#sessions-show-brief', view === 'brief']]) {
+      const tab = q(id);
+      tab.setAttribute('aria-selected', String(on));
+      tab.setAttribute('aria-pressed', String(on));
+      tab.tabIndex = on ? 0 : -1;
+    }
+  };
+
+  // A cited message: the turn it is, when the shown version read the conversation as it is now; otherwise the
+  // text this version read, shown under the item.
+  const showCitedMessage = (button) => {
+    const ref = button.dataset.ref;
+    const turn = shownRefinementCurrent ? q(`#sessions-turns [data-ref="${ref}"]`) : null;
+    if (turn) {
+      showSessionView('turns');
+      turn.scrollIntoView({ block:'center', behavior:reducedMotion.matches ? 'auto' : 'smooth' });
+      turn.classList.add('is-cited');
+      window.setTimeout(() => turn.classList.remove('is-cited'), 2400);
+      return;
+    }
+    const row = button.closest('.desktop-sessions-refinement-item');
+    const open = row.querySelector(`.desktop-sessions-refinement-quote[data-ref="${ref}"]`);
+    if (open) {
+      open.remove();
+      return;
+    }
+    const quote = shownBriefQuotes[ref];
+    if (!quote) return;
+    const block = document.createElement('blockquote');
+    block.className = 'desktop-sessions-refinement-quote';
+    block.dataset.ref = ref;
+    const who = document.createElement('small');
+    who.textContent = quote.role === 'user' ? '这一版读到的原话 · 你' : '这一版读到的原话 · AI';
+    const text = document.createElement('p');
+    text.textContent = String(quote.text || '');
+    block.append(who, text);
+    row.append(block);
+  };
+
+  // A saved version of the session's refinement (sessions.refinement_get: draft, versions), whatever the state of
+  // a newer one. open: switch to it (a refinement just finished, or another version was picked).
+  const renderRefinementDraft = (projection, open = false) => {
     const draft = projection?.draft;
     const brief = draft?.schema_version === 'DesktopSessionRefinementDraft-v4' ? draft.brief : null;
     // A draft made before v2.00 (v3) lists one typed item per message.
     const subjectOutput = draft?.subject_output;
     if (
-      projection?.status !== 'PASS'
-      || draft?.local_projection_id !== selectedProjectionId
+      draft?.local_projection_id !== selectedProjectionId
       || !brief && (subjectOutput?.schema_version !== 'CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1'
         || !Array.isArray(subjectOutput?.items))
     ) return false;
-    const panel = q('#sessions-refinement-draft');
+    const versions = Array.isArray(projection?.versions) ? projection.versions : [];
+    shownRefinementCurrent = projection?.source_changed === false && versions.at(-1)?.job_id === draft.task_id;
+    shownBriefQuotes = brief?.quotes || {};
+    const select = q('#sessions-refinement-version');
+    select.replaceChildren(...versions.map((row, index) => new Option(
+      `第 ${index + 1} 版 · ${Memorive.i18n.dateTime(row.created_at)}`, row.job_id)).reverse());
+    select.value = draft.task_id;
+    select.hidden = !versions.length;
+    q('#sessions-view-switch').hidden = false;
+    showSessionView(open ? 'brief' : sessionView);
     const target = q('#sessions-refinement-items');
     if (brief) {
       target.replaceChildren(briefRows(brief));
-      panel.hidden = false;
-      setRefineState('纪要已生成，待复核');
-      panel.scrollIntoView({ block:'nearest', behavior:reducedMotion.matches ? 'auto' : 'smooth' });
       return true;
     }
     const fragment = document.createDocumentFragment();
@@ -761,9 +841,6 @@
       fragment.append(row);
     }
     target.replaceChildren(fragment);
-    panel.hidden = false;
-    setRefineState(`已生成 ${subjectOutput.items.length} 条，待复核`);
-    panel.scrollIntoView({ block:'nearest', behavior:reducedMotion.matches ? 'auto' : 'smooth' });
     return true;
   };
 
@@ -783,19 +860,26 @@
       // A queued refinement starts only while the inbox runs tasks automatically.
       setRefineState(!queued ? '精炼中，可在收件箱查看进度'
         : projection?.auto_run === false ? '已加入队列；收件箱的自动处理已关闭，请在收件箱开启' : '已加入队列');
+      renderRefinementDraft(projection);   // the newest version stays readable meanwhile
       return true;
     }
     if (status === 'PASS') {
+      const finished = activeRefinementJobId !== null;
       activeRefinementJobId = null;
-      // New messages since this refinement: it can be refined again (the earlier draft stays shown until then).
+      // New messages since the newest version: it can be refined again (the versions stay readable).
       button.disabled = projection?.source_changed ? refinementStartDisabled() : true;
       button.textContent = projection?.source_changed ? '精炼对话' : '精炼完成';
-      return renderRefinementDraft(projection);
+      if (!renderRefinementDraft(projection, finished)) return false;
+      const items = projection.draft.brief ? null : projection.draft.subject_output.items.length;
+      setRefineState(projection.source_changed ? '会话有新内容，可重新精炼'
+        : items === null ? '纪要已生成，待复核' : `已生成 ${items} 条，待复核`);
+      return true;
     }
     if (['TASK_FAILED', 'INBOX_FAILED', 'TASK_CANCELLED'].includes(status)) {
       activeRefinementJobId = null;
       button.disabled = refinementStartDisabled();
       button.textContent = '精炼对话';
+      renderRefinementDraft(projection);   // an earlier version, if any, stays readable
       if (status === 'TASK_CANCELLED') {
         setRefineState('精炼任务已取消，可重新精炼。');
       } else {
@@ -995,6 +1079,19 @@
         showToast(`批量移除失败：${error?.message || error}`);
         resetBatchConfirm();
       });
+  });
+  q('#sessions-show-turns').addEventListener('click', () => showSessionView('turns'));
+  q('#sessions-show-brief').addEventListener('click', () => showSessionView('brief'));
+  q('#sessions-refinement-items').addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-ref]');
+    if (button) showCitedMessage(button);
+  });
+  q('#sessions-refinement-version').addEventListener('change', (event) => {
+    void Memorive.sessionsBridge?.call('sessions.refinement_get', {
+      local_projection_id:selectedProjectionId, job_id:event.target.value
+    })
+      .then((projection) => renderRefinementDraft(projection, true))
+      .catch((error) => showToast(Memorive.refinementStatus.failureText(error?.message)));
   });
   q('#sessions-refine').addEventListener('click', () => {
     if (!selectedProjectionId || q('#sessions-refine').disabled) return;
