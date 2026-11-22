@@ -610,6 +610,10 @@
   ]);
   const MESSAGE_ACTION_TEXT = /^(?:复制|编辑|分享|重试|朗读|点赞|点踩|收藏|展开|收起|继续生成|停止生成|copy|edit|share|retry|read aloud|like|dislike|stop generating)$/i;
   const NUMERIC_CITATION_TEXT = /^(?:[-‐–—]?\d{1,3})(?:\s*[-,，]\s*\d{1,3})*$/;
+  // Controls inside a message on one site, left out of its text: Claude's status line above an answer (what it
+  // is thinking or which tool it used, with the button that opens it; class group/status, checked on claude.ai
+  // 2026-11-22).
+  const SITE_NOISE_CLASSES = { "claude.ai": ["group/status"] }[globalThis.location?.hostname] || [];
   const messageElementMarker = (element) => [
     element.id,
     element.className,
@@ -628,6 +632,8 @@
       return true;
     }
     if (element.hidden || element.getAttribute("aria-hidden") === "true") return true;
+    if (SITE_NOISE_CLASSES.length &&
+        String(element.className || "").split(/\s+/).some((name) => SITE_NOISE_CLASSES.includes(name))) return true;
     // ChatGPT's role heading ("You said:") inside a message is a label, not part of the message.
     if (!isRoot && element.getAttribute?.("data-conversation-role") != null) return true;
     const style = getComputedStyle(element);

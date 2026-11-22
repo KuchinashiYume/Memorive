@@ -49,16 +49,29 @@ class Element {
 }
 const text = value => ({ nodeType: 3, nodeValue: value, textContent: value });
 const el = (tag, attrs, ...children) => new Element(tag, attrs, ...children);
-const structuredMessageText = vm.runInNewContext(
+const reader = (hostname) => vm.runInNewContext(
   part("  const cleanText", "  const simpleHash") + part("  const MESSAGE_BLOCK_TAGS", "  const roleMarker") +
   "\nstructuredMessageText;",
-  { Element, Node: { TEXT_NODE: 3 }, getComputedStyle: () => ({ display: "block", visibility: "visible" }) });
+  { Element, Node: { TEXT_NODE: 3 }, getComputedStyle: () => ({ display: "block", visibility: "visible" }),
+    location: { hostname } });
+const structuredMessageText = reader("chatgpt.com");
 const answer = el("article", {},
   el("p", {}, text("Study "), el("a", { href: "https://example.invalid/paper" }, text("source")),
      el("a", { class: "citation", href: "https://example.invalid/citation" }, text("[1]"))),
   el("pre", {}, el("code", { class: "language-python" }, text("if ready:\n    print(42)\n"))),
   el("p", {}, text("Run "), el("code", {}, text("pip install x")), text(" first.")));
-process.stdout.write(JSON.stringify({ answer: structuredMessageText(answer) }));
+// Claude: the status line above the answer (what it thought, which tool it used) is a control, not the answer.
+const claudeAnswer = el("div", { "data-testid": "assistant-message", class: "group/message-row relative flex" },
+  el("h3", { class: "sr-only select-none" }, text("Claude replied")),
+  el("div", { class: "flex min-w-0 flex-col" },
+    el("div", { class: "group/status flex w-full" },
+      el("div", { class: "group/status-line flex min-w-0" },
+        el("span", { class: "min-w-0 overflow-x-clip text-ellipsis" }, text("Searched the web")),
+        el("button", { "aria-expanded": "false" }, text(">")))),
+    el("div", { class: "font-claude-response" }, el("p", {}, text("Here is the answer.")))));
+process.stdout.write(JSON.stringify({ answer: structuredMessageText(answer),
+                                      claude: reader("claude.ai")(claudeAnswer),
+                                      elsewhere: structuredMessageText(claudeAnswer) }));
 """
 
 
@@ -71,7 +84,11 @@ def test_the_extension_writes_links_and_code_as_markdown(tmp_path: Path) -> None
     run = subprocess.run([node, str(harness), str(CONTENT)], capture_output=True, text=True,
                          encoding="utf-8", timeout=60, check=False)
     assert run.returncode == 0, run.stderr
-    assert json.loads(run.stdout)["answer"] == ANSWER
+    result = json.loads(run.stdout)
+    assert result["answer"] == ANSWER
+    assert result["claude"] == "Here is the answer."
+    # The rule is Claude's own: on other sites that class is not taken as a control.
+    assert result["elsewhere"] == "Searched the web\nHere is the answer."
 
 
 def _bundle_with_answer(content: str, content_format: str | None) -> dict[str, object]:
