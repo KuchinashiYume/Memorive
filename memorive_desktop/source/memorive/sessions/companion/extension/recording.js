@@ -130,6 +130,18 @@
     };
   };
 
+  // A window cut where the page has not drawn a message yet (content.js marks it unread): the parts on either
+  // side go to the merger on their own, so a missing answer never sits as a join between its neighbours and a
+  // later window can still put it in its place.
+  const windowParts = (rows) => {
+    const parts = [[]];
+    for (const row of rows) {
+      if (row.unread) parts.push([]);
+      else parts[parts.length - 1].push(row);
+    }
+    return parts.filter(part => part.length);
+  };
+
   // Scroll events can fire dozens of times a second, and each sample walks the
   // whole conversation DOM. Unthrottled, long conversations stuttered while
   // recording. The 250 ms timer still samples whatever the scroll skipped.
@@ -174,7 +186,7 @@
         validate(base.source_url);
         const page=capture();
         if (page.source_url!==base.source_url) { void stop("PAGE_CHANGED");return; }
-        merger.add(page.messages);
+        windowParts(page.messages).forEach(part => merger.add(part));
       } catch(e) {
         const code=String(e?.message || "");
         if (code==="CURRENT_PAGE_CONVERSATION_NOT_FOUND") return;
@@ -185,7 +197,7 @@
       start({token,deadline}) {
         if (state?.status==="RECORDING" || state?.status==="SAVING") return status();
         validate();
-        base=capture();merger=createMerger();merger.add(base.messages);
+        base=capture();merger=createMerger();windowParts(base.messages).forEach(part => merger.add(part));
         state={status:"RECORDING",token,deadline:Math.min(Number(deadline),now()+600000),started_at:now()};
         timer=schedule(()=>sample(true),250);
         return status();

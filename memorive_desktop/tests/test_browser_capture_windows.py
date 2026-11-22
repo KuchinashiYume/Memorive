@@ -133,6 +133,10 @@ out.blocks = groupMessageBlocks([
   out.recorder_one_role = await run([slice(1, 2)]);
   // Two stretches that never line up: a longer one of answers only, and a shorter one with a question and its
   // answer. Only the shorter one can be imported, so it is saved and the longer one is counted as left out.
+  // A window taken while an answer was not drawn yet (content.js marks it unread) is not joined across that
+  // place; a later window with the answer puts it where it belongs.
+  out.recorder_hole = await run([[...slice(0, 3), { role: "assistant", text: "", unread: true }, conversation[4]],
+                                 slice(2, 7)]);
   out.recorder_importable = await run([
     ["Long answer one.", "Long answer two.", "Long answer three.", "Long answer four."].map(text => row("assistant", text)),
     [row("user", "Other question"), row("assistant", "Other answer")]]);
@@ -214,6 +218,17 @@ def test_the_recording_saves_what_lines_up(results: dict) -> None:
     assert mid["saved"] == ["user:S01 user opening", "assistant:I can continue."]
     one_role = results["recorder_one_role"]
     assert one_role["status"] == "ERROR" and one_role["error"] == "CURRENT_PAGE_ROLES_UNCLEAR"
+
+
+def test_an_answer_drawn_late_is_put_back_in_its_place(results: dict) -> None:
+    hole = results["recorder_hole"]
+    assert hole["status"] == "SAVED"
+    assert hole["saved"] == [
+        "user:S01 user opening", "assistant:I can continue.", "user:S03 user middle",
+        "assistant:Detailed analysis of the common study, method and shared reporting structure: result A",
+        "user:S05 user new question", "assistant:I can continue.", "user:S07 user end",
+    ]
+    assert hole["unplaced"] == 0
 
 
 def test_the_recording_saves_a_stretch_it_can_import(results: dict) -> None:

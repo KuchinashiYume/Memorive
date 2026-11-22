@@ -813,9 +813,14 @@
            section.parentElement.querySelectorAll(ROLE_HEADING).length === 1) {
       section = section.parentElement;
     }
-    if (section === heading || !showsContent(section)) return [];
-    const text = structuredMessageText(section);
-    return text ? [{ node: section, role, text }] : [];
+    if (section === heading) return [];
+    const text = showsContent(section) ? structuredMessageText(section) : "";
+    if (text) return [{ node: section, role, text }];
+    // The heading is drawn but the text is not yet (ChatGPT draws an answer after its question): a hole that a
+    // recording does not join across (recording.js windowParts). Only inside a turn that is on screen, so the
+    // hidden earlier conversations ChatGPT keeps in the page leave none.
+    const turn = section.closest(TURN) || section.parentElement;
+    return turn && showsContent(turn) ? [{ node: heading, role, text: "", unread: true }] : [];
   });
   const messageContainer = (node) => node.closest(MESSAGE_CONTAINER_SELECTOR) || node;
   // Rows in page order, each with its container: joins the blocks of one message.
@@ -870,7 +875,7 @@
       return true;
     }).map((row) => ({ ...row, container: messageContainer(row.node) })));
     if (retainIdentity) {
-      return grouped.map(({node,role,text}) => {
+      return grouped.map(({node,role,text,unread}) => {
         let key = "", order = null, cursor = node;
         for (let i=0;cursor && i<8;i++,cursor=cursor.parentElement) {
           if (!key) key = cursor.getAttribute("data-message-id") || cursor.getAttribute("data-turn-id") || "";
@@ -878,7 +883,7 @@
           const match = /^conversation-turn-(\d+)$/.exec(testId);
           if (match) { order=Number(match[1]); if (!key) key=testId; }
         }
-        return {role,text,source_key:key ? role+":"+key : "",source_order:order};
+        return {role,text,source_key:key ? role+":"+key : "",source_order:order,...(unread ? {unread} : {})};
       });
     }
     return grouped.map(({ role, text }) => ({ role, text }));
@@ -893,7 +898,8 @@
     const definition = Object.fromEntries(['user','assistant','generic'].map(key=>[
       key,[...new Set([...(currentPageDefinition[key]||[]),...known.flatMap(row=>row[key]||[])])]
     ]));
-    const rows = messageRows("universal", definition, recording).filter(row=>row.text.length > 0);
+    // A recording keeps the holes where the page has not drawn a message yet; a single read leaves them out.
+    const rows = messageRows("universal", definition, recording).filter(row=>row.text.length > 0 || (recording && row.unread));
     // A recording samples any window, also one long reply alone or none while the page loads; the saved record
     // must still hold both roles (recording.js). A single read must show both now.
     if (
@@ -911,7 +917,7 @@
     safeUrl.password = "";
     safeUrl.search = "";
     safeUrl.hash = "";
-    const firstUser = rows.find((row) => row.role === "user")?.text || "";
+    const firstUser = rows.find((row) => row.role === "user" && row.text)?.text || "";
     const documentTitle = cleanText(document.title)
       .replace(/\s+[|·]\s+[^|·]{1,80}$/u, "")
       .slice(0, 160);
@@ -945,7 +951,7 @@
         message_id: `universal-${simpleHash(`${stableSeed}|${index}|${row.role}|${row.text}`)}`,
         role: row.role,
         text: row.text,
-        ...(recording ? {source_key:row.source_key,source_order:row.source_order} : {})
+        ...(recording ? {source_key:row.source_key,source_order:row.source_order,...(row.unread ? {unread:true} : {})} : {})
       }))
     };
   };
