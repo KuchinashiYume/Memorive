@@ -72,7 +72,7 @@
     "message": "Syncing $1 · $2 done$3"
   },
   "syncDone": {
-    "message": "Synced $1$2"
+    "message": "$1 synced$2"
   },
   "syncFailedCount": {
     "message": " · $1 failed"
@@ -144,10 +144,10 @@
     "message": " · preparing"
   },
   "runnerStatusProgress": {
-    "message": "Syncing: $1 · $2 ($3$4); complete $5, failed $6."
+    "message": "Syncing: $1 · $2 ($3); complete $4, failed $5."
   },
   "runnerTitleProgress": {
-    "message": "Memorive sync $1 · $2 · $3$4"
+    "message": "Memorive sync $1 · $2 · $3"
   },
   "runnerSummary": {
     "message": "$1: $2; complete $3, failed $4."

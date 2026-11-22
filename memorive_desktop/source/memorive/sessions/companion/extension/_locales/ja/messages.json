@@ -144,10 +144,10 @@
     "message": " · 準備中"
   },
   "runnerStatusProgress": {
-    "message": "同期中：$1 · $2（$3$4）。完了 $5、失敗 $6。"
+    "message": "同期中：$1 · $2（$3）。完了 $4、失敗 $5。"
   },
   "runnerTitleProgress": {
-    "message": "Memorive 同期 $1 · $2 · $3$4"
+    "message": "Memorive 同期 $1 · $2 · $3"
   },
   "runnerSummary": {
     "message": "$1：$2。完了 $3、失敗 $4。"

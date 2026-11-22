@@ -30,6 +30,14 @@ def test_every_language_has_the_same_words_with_the_same_blanks() -> None:
             assert sorted(set(re.findall(r"\$\d", tables[language][key]))) == blanks, (language, key)
 
 
+def test_no_message_reads_as_a_named_placeholder() -> None:
+    # Chrome and Edge read "$3$" (two blanks side by side) as a named placeholder and refuse to load the
+    # extension when it is not defined.
+    for language in LANGUAGES:
+        for key, message in _words(language).items():
+            assert not re.search(r"\$\w+\$", message), (language, key, message)
+
+
 def test_every_word_the_extension_asks_for_exists() -> None:
     used = set()
     for name in ("popup.js", "runner.js"):

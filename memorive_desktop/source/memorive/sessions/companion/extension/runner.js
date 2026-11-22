@@ -272,13 +272,13 @@ const reportProgress = async (patch = {}) => {
   const itemProgress = aggregateState.total
     ? t("runnerItemProgress", aggregateState.current, aggregateState.total)
     : "";
-  statusNode.textContent = t("runnerStatusProgress", provider, stage, providerProgress, itemProgress,
+  statusNode.textContent = t("runnerStatusProgress", provider, stage, providerProgress + itemProgress,
     aggregateState.captured, aggregateState.failed);
   const progressPercent = aggregateState.total
     ? Math.min(96, (aggregateState.current / aggregateState.total) * 100)
     : Math.min(24, (aggregateState.provider_index / Math.max(1, aggregateState.provider_total)) * 24);
   renderRunnerProgress(progressPercent, `${providerProgress}${itemProgress || t("runnerPreparingSuffix")}`);
-  document.title = t("runnerTitleProgress", providerProgress, provider, stage, itemProgress);
+  document.title = t("runnerTitleProgress", providerProgress, provider, stage + itemProgress);
   await chrome.runtime.sendMessage({
     type: "MEMORIVE_SYNC_ALL_PROGRESS",
     state: { ...aggregateState }
