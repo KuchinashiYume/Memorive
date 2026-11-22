@@ -3,11 +3,6 @@
   "paths_relative_to": "repository_root",
   "files": [
     {
-      "source": "memorive_desktop/product/web/assets/assistant/adopted_inline_001.png",
-      "destination": "adopted_inline_001.png",
-      "sha256": "5374cd25658256fe5d2042d9d8997854e3d8b2d01a13e4d724177b1be2a0ebca"
-    },
-    {
       "source": "memorive_desktop/product/desktop/brand_profile.json",
       "destination": "brand_profile.json",
       "sha256": "989ded15c96014bf0317dfe086cb314af5d9e5414e22a9b9ff9f975cc7fda954"
@@ -20,7 +15,7 @@
     {
       "source": "memorive_desktop/product/desktop/bundle_integrated.html",
       "destination": "bundle_integrated.html",
-      "sha256": "8d003ac435764e46ed4b480dfa1696ee68130360b3559f2df066cec14fbe47ba"
+      "sha256": "346c9e1081e2944aca39a96143b73b717b6a65787c2ac9bdf627b3fea9b0c001"
     },
     {
       "source": "memorive_desktop/product/desktop/PDFJS-LICENSE.txt",
@@ -175,7 +170,7 @@
     {
       "source": "memorive_desktop/product/desktop/help/web/index.html",
       "destination": "help/web/index.html",
-      "sha256": "1dd908b97e45db85828ef6285dbf684b549f1d503189474734e7d7a8c17042b2"
+      "sha256": "a3d26dbe0e17470a88d5529d84d5227a231109e46944f42df6c927611f073db5"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/README.md",
@@ -303,9 +298,9 @@
       "sha256": "36ed1ed0a2864b19c31a52b65bf1700c6eb9c4588a34e8fba046f1c919085ff8"
     },
     {
-      "source": "memorive_desktop/product/desktop/help/web/assets/wink.svg",
-      "destination": "help/web/assets/wink.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+      "source": "memorive_desktop/product/desktop/help/web/assets/memorive-symbol.svg",
+      "destination": "help/web/assets/memorive-symbol.svg",
+      "sha256": "f3d98ade85cbe1b2ae62f21f634790e9cf48049ef653dd08b52ebb965173d2c7"
     },
     {
       "source": "memorive_desktop/product/desktop/help/web/downloads/en-US/design.md",
@@ -1288,109 +1283,24 @@
       "sha256": "763377eb7af1b5a6685034a23abf098da754a27b14475f3bc8c7b1dd66e4fe5b"
     },
     {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.png",
-      "destination": "assets/decorations/assistant-error.png",
-      "sha256": "65cd34d76bcc53257e77724771093b35fc0326054e4f724a24041c0ebfaa897e"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
-      "destination": "assets/decorations/assistant-error.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.png",
-      "destination": "assets/decorations/assistant-save-success.png",
-      "sha256": "c93994fa3b6a871b5e247c0cfcdfe2a2788384d7513153510025923854c65600"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
-      "destination": "assets/decorations/assistant-save-success.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.png",
-      "destination": "assets/decorations/empty-state.png",
-      "sha256": "edc2423a19b17878effb73f11fccffc96fcc17ea0274a1e03930618875a84443"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
-      "destination": "assets/decorations/empty-state.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.png",
-      "destination": "assets/decorations/home-interaction.png",
-      "sha256": "e3dd7792cba61a66873f94ecc526af6751e03f20c7b426063fed73ba7f3f9e99"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
-      "destination": "assets/decorations/home-interaction.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.png",
-      "destination": "assets/decorations/home-question.png",
-      "sha256": "d676100706521a8688838f2b2681d14707c0a781cf1afb5ced692fda1fe63efa"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
-      "destination": "assets/decorations/home-question.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_01.svg",
-      "destination": "assets/decorations/加载中合成_01.svg",
-      "sha256": "135e21e204bc00c998fe14e582b6de14d75d595c9363c8b74feed751c785a35d"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_02.svg",
-      "destination": "assets/decorations/加载中合成_02.svg",
-      "sha256": "32a56726740a17d8b5c04d77906b36c372f061ecf3a250f7c35b9dc73c476806"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_03.svg",
-      "destination": "assets/decorations/加载中合成_03.svg",
-      "sha256": "18e39118246cee4025a65719284f65746b5b718940bfe8c627dc27ea80aef36b"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_04.svg",
-      "destination": "assets/decorations/加载中合成_04.svg",
-      "sha256": "f8d189dbe981c57a0c7705587c1746a7f5b3a48523eadace91f1b871a26b7488"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_05.svg",
-      "destination": "assets/decorations/加载中合成_05.svg",
-      "sha256": "fc3a49e310064381e4928411f3ee3eed79f5badafe6a2cd2bbb2209d75bbe8b4"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/加载中合成_06.svg",
-      "destination": "assets/decorations/加载中合成_06.svg",
-      "sha256": "2a7f68f821f9aae8a89e1349faa4e86e7bb6893b864b80aea04cb1c1b8fbcc34"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
-      "destination": "assets/illustrations/empty.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
-      "destination": "assets/illustrations/injury.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868"
-    },
-    {
       "source": "memorive_desktop/product/desktop/assets/illustrations/manifest.json",
       "destination": "assets/illustrations/manifest.json",
-      "sha256": "b3d3f0a97de560da0c57a0c2e9765a1dbe5041322d106b5ed2cd6752a444a533"
+      "sha256": "71c83ee5bbbc7f60b393c4f2f90e4ca59c7e42d74fd51dbf9659bef834d087ee"
+    },
+    {
+      "source": "memorive_desktop/product/desktop/assets/illustrations/memorive-symbol.svg",
+      "destination": "assets/illustrations/memorive-symbol.svg",
+      "sha256": "f3d98ade85cbe1b2ae62f21f634790e9cf48049ef653dd08b52ebb965173d2c7"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/neutral.svg",
       "destination": "assets/illustrations/neutral.svg",
-      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6"
+      "sha256": "d3590da372ced578dd759381039fda99b6f9fd85b63b05dce98503814fe3e489"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/one_eye.svg",
       "destination": "assets/illustrations/one_eye.svg",
-      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde"
+      "sha256": "b8f7e55907ad787736c992075b0caa2e286e9bda8b0b43d2058d1892f1ece9c8"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/memorive.ico",
@@ -1398,89 +1308,49 @@
       "sha256": "5af8fe1bf7c87c7194886427230437555d7ebe577bc3a34ec39e557f8b61a245"
     },
     {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
-      "destination": "assets/illustrations/question.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55"
-    },
-    {
       "source": "memorive_desktop/product/desktop/assets/illustrations/shovel.svg",
       "destination": "assets/illustrations/shovel.svg",
-      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83"
+      "sha256": "bfc4b2f7b1902e63d1b14b2101b338e5a75ea088359dbf6ef4c6a0a900bc393d"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/sleepy.svg",
       "destination": "assets/illustrations/sleepy.svg",
-      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d"
+      "sha256": "88775782e50f77c4d9c45e322e2d403a4822ff0cb7f1019e5ebe7655d71dda5a"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/sprite.svg",
       "destination": "assets/illustrations/sprite.svg",
-      "sha256": "1981f58e0f8e0fc6f42a29d29b1f5d276fb1929fb92205deaed7ade46f14cd9e"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
-      "destination": "assets/illustrations/success.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
-      "destination": "assets/illustrations/wink.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+      "sha256": "93b7ffb02dece85449ca2bcd50cf061852851b8a10843a060572630de7ac1c25"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/writing.svg",
       "destination": "assets/illustrations/writing.svg",
-      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
-      "destination": "assets/illustrations/互动logo.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa"
+      "sha256": "89c8a9923028ac5a7f8d70fad458e3082babd92f005835f9229cdce445b565d4"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/writing.svg",
       "destination": "assets/illustrations/完成logo.svg",
-      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5"
+      "sha256": "89c8a9923028ac5a7f8d70fad458e3082babd92f005835f9229cdce445b565d4"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/one_eye.svg",
       "destination": "assets/illustrations/常驻logo.svg",
-      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
-      "destination": "assets/illustrations/报错logo.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868"
+      "sha256": "b8f7e55907ad787736c992075b0caa2e286e9bda8b0b43d2058d1892f1ece9c8"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/shovel.svg",
       "destination": "assets/illustrations/施工logo.svg",
-      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
-      "destination": "assets/illustrations/无文件logo.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
-      "destination": "assets/illustrations/疑问logo.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55"
+      "sha256": "bfc4b2f7b1902e63d1b14b2101b338e5a75ea088359dbf6ef4c6a0a900bc393d"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/neutral.svg",
       "destination": "assets/illustrations/眨眼logo01.svg",
-      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6"
+      "sha256": "d3590da372ced578dd759381039fda99b6f9fd85b63b05dce98503814fe3e489"
     },
     {
       "source": "memorive_desktop/product/desktop/assets/illustrations/sleepy.svg",
       "destination": "assets/illustrations/眨眼logo02.svg",
-      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d"
-    },
-    {
-      "source": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
-      "destination": "assets/illustrations/确认logo.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439"
+      "sha256": "88775782e50f77c4d9c45e322e2d403a4822ff0cb7f1019e5ebe7655d71dda5a"
     },
     {
       "source": "memorive_desktop/contracts/extensions/DesktopExpressionConsoleContract-v1.json",

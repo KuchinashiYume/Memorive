@@ -41,41 +41,16 @@ EXPECTED_DESKTOP_ROUTES = (
 _ASSISTANT_NATIVE_DEACTIVATE_HANDLERS: dict[int, Any] = {}
 _ASSISTANT_NATIVE_OVERLAYS: dict[int, dict[str, Any]] = {}
 _MAIN_WINDOW_BEHAVIORS: dict[int, dict[str, Any]] = {}
-ASSISTANT_EXPRESSION_ASSET_FILENAMES = {
-    "save-success": "assistant-save-success.png",
-    "error": "assistant-error.png",
+# The desk assistant's faces (code-plan/颜文字表情方案_2026-11-21.md): each frame is the kaomoji drawn as
+# text on a white card at start-up (configure_assistant_native), so no picture file is shipped.
+ASSISTANT_FACES = {
+    "idle": "(>ω-)", "blink-open": "(・ω・)", "blink-closed": "(-ω-)", "interaction": "(・ω<)☆",
+    "working": "(>ω<)ゞ", "success": "(^ω^)✧", "save-success": "(*≧ω≦)✓", "error": "(×ω×)",
 }
 
 
 def resource_root() -> Path:
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)).resolve()
-
-
-def assistant_pet_sheet_path(root: Path) -> Path:
-    candidates = (
-        root / "adopted_inline_001.png",
-        root.parent / "web" / "assets" / "assistant" / "adopted_inline_001.png",
-    )
-    for candidate in candidates:
-        if candidate.is_file():
-            return candidate.resolve()
-    raise FileNotFoundError("assistant pet sprite sheet is missing")
-
-
-def assistant_expression_asset_paths(root: Path) -> dict[str, Path]:
-    """Resolve optional additive frames without weakening stable-pet startup."""
-
-    resolved: dict[str, Path] = {}
-    for frame_name, filename in ASSISTANT_EXPRESSION_ASSET_FILENAMES.items():
-        candidates = (
-            root / "assets" / "decorations" / filename,
-            root.parent / "web" / "assets" / "decorations" / filename,
-        )
-        for candidate in candidates:
-            if candidate.is_file():
-                resolved[frame_name] = candidate.resolve()
-                break
-    return resolved
 
 
 def configure_resource_imports(root: Path) -> None:
@@ -666,10 +641,8 @@ def capture_visual_qa_compatibility(
 def configure_assistant_native(
     window: webview.Window,
     api: ProductApi,
-    pet_sheet: Path,
     *,
     reveal: bool,
-    expression_assets: dict[str, Path] | None = None,
 ) -> None:
     import clr
     clr.AddReference("System.Windows.Forms")
@@ -755,58 +728,61 @@ def configure_assistant_native(
                 overlay["alpha_surface"].present(overlay["rendered_image"])
 
         if existing is None:
-            source = Bitmap(str(pet_sheet))
-            try:
-                frames = {
-                    "idle": source.Clone(Rectangle(0, 0, 192, 192), PixelFormat.Format32bppArgb),
-                    "blink-open": source.Clone(Rectangle(192, 0, 192, 192), PixelFormat.Format32bppArgb),
-                    "blink-closed": source.Clone(Rectangle(384, 0, 192, 192), PixelFormat.Format32bppArgb),
-                    "interaction": source.Clone(Rectangle(0, 192, 192, 192), PixelFormat.Format32bppArgb),
-                    "working": source.Clone(Rectangle(192, 192, 192, 192), PixelFormat.Format32bppArgb),
-                    "success": source.Clone(Rectangle(384, 192, 192, 192), PixelFormat.Format32bppArgb),
-                }
-            finally:
-                source.Dispose()
+            def draw_face(text: str) -> Any:
+                """One 192 px frame: the kaomoji in the logo's teal on a white rounded card.
 
-            for frame_name, asset_path in (expression_assets or {}).items():
-                if frame_name not in ASSISTANT_EXPRESSION_ASSET_FILENAMES:
-                    continue
-                expression_frame = None
+                GDI text (TextRenderer) is used for its font linking, so every symbol finds a font.
+                GDI text does not keep alpha on a transparent bitmap, so the card is drawn opaque
+                first and then cut to its rounded shape."""
+                from System.Drawing import Font, Pen, TextureBrush
+                from System.Drawing.Drawing2D import GraphicsPath
+                from System.Windows.Forms import TextFormatFlags, TextRenderer
+                left, top, width, height, radius = 8, 50, 176, 92, 18
+                card = Bitmap(width, height, PixelFormat.Format24bppRgb)
+                card_graphics = Graphics.FromImage(card)
+                size = 34
+                font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
+                while TextRenderer.MeasureText(text, font).Width > width - 16 and size > 14:
+                    font.Dispose()
+                    size -= 2
+                    font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
                 try:
-                    expression_source = Bitmap(str(asset_path))
-                    expression_frame = Bitmap(
-                        192, 192, PixelFormat.Format32bppArgb
+                    card_graphics.Clear(Color.White)
+                    TextRenderer.DrawText(
+                        card_graphics, text, font, Rectangle(0, 0, width, height),
+                        Color.FromArgb(0x60, 0xB2, 0xC0), Color.White,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
+                        | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding,
                     )
-                    expression_graphics = Graphics.FromImage(expression_frame)
-                    try:
-                        expression_graphics.Clear(Color.Transparent)
-                        expression_graphics.SmoothingMode = SmoothingMode.HighQuality
-                        expression_graphics.InterpolationMode = (
-                            InterpolationMode.HighQualityBicubic
-                        )
-                        expression_graphics.PixelOffsetMode = PixelOffsetMode.HighQuality
-                        expression_graphics.DrawImage(
-                            expression_source,
-                            Rectangle(0, 0, 192, 192),
-                            0,
-                            0,
-                            int(expression_source.Width),
-                            int(expression_source.Height),
-                            GraphicsUnit.Pixel,
-                        )
-                    finally:
-                        expression_graphics.Dispose()
-                        expression_source.Dispose()
-                    frames[frame_name] = expression_frame
-                except Exception:
-                    # Decorations are additive. Missing/corrupt optional files
-                    # must fall back to the six adopted frames, never block boot.
-                    if expression_frame is not None:
-                        try:
-                            expression_frame.Dispose()
-                        except Exception:
-                            pass
-                    continue
+                finally:
+                    font.Dispose()
+                    card_graphics.Dispose()
+                frame = Bitmap(192, 192, PixelFormat.Format32bppArgb)
+                frame_graphics = Graphics.FromImage(frame)
+                outline = GraphicsPath()
+                texture = TextureBrush(card)
+                border = Pen(Color.FromArgb(0xDD, 0xD7, 0xCC), 1.5)
+                try:
+                    frame_graphics.Clear(Color.Transparent)
+                    frame_graphics.SmoothingMode = SmoothingMode.AntiAlias
+                    d = 2 * radius
+                    outline.AddArc(left, top, d, d, 180, 90)
+                    outline.AddArc(left + width - d, top, d, d, 270, 90)
+                    outline.AddArc(left + width - d, top + height - d, d, d, 0, 90)
+                    outline.AddArc(left, top + height - d, d, d, 90, 90)
+                    outline.CloseFigure()
+                    texture.TranslateTransform(left, top)
+                    frame_graphics.FillPath(texture, outline)
+                    frame_graphics.DrawPath(border, outline)
+                finally:
+                    border.Dispose()
+                    texture.Dispose()
+                    outline.Dispose()
+                    frame_graphics.Dispose()
+                    card.Dispose()
+                return frame
+
+            frames = {name: draw_face(text) for name, text in ASSISTANT_FACES.items()}
 
             def frame_sha256(frame: Any) -> str:
                 stream = MemoryStream()
@@ -3344,9 +3320,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         configure_assistant_native(
             assistant_window,
             api,
-            assistant_pet_sheet_path(resource_root()),
             reveal=True,
-            expression_assets=assistant_expression_asset_paths(resource_root()),
         )
         time.sleep(0.25)
         assistant_projection = evaluate_promise(
@@ -6593,9 +6567,8 @@ def main() -> int:
         def on_assistant_loaded() -> None:
             log_webview_startup_event("assistant_window_loaded")
             configure_assistant_native(
-                assistant_window, api, assistant_pet_sheet_path(root),
+                assistant_window, api,
                 reveal=False,
-                expression_assets=assistant_expression_asset_paths(root),
             )
             log_webview_startup_event("assistant_native_configured")
             if console_bridge is not None:

@@ -1,20 +1,19 @@
-/* Decorations of the main window: the home and empty-state illustrations, loading placeholders while a page waits
+/* Decorations of the main window: the home and empty-state kaomoji, loading placeholders while a page waits
    for its first data (trackCall wraps service calls for this), and signals to the desk assistant
    (assistant_ui_signal). Publishes Memorive.decorations. */
 (() => {
   'use strict';
   if (Memorive.decorations) return;
 
-  const assets = Object.freeze({
-    interaction: 'assets/decorations/home-interaction.svg',
-    question: 'assets/decorations/home-question.svg',
-    empty: 'assets/decorations/empty-state.svg',
-    done: 'assets/decorations/assistant-save-success.svg'
+  // Kaomoji, shown as text (.desktop-kaomoji): code-plan scheme of 2026-11-21, one face per state.
+  const faces = Object.freeze({
+    interaction: '(・ω<)☆', question: '(・ω・)？', empty: '(´・ω・`)', done: '(*≧ω≦)✓',
+    greeting: 'Ciallo～(∠・ω< )⌒☆', open: '(・ω・)', closed: '(-ω-)'
   });
   // Empty pages: no files (inbox, library), nothing waiting (tasks, messages), nothing written yet (work log).
   const emptyPicture = Object.freeze({
-    'inbox-empty': assets.empty, 'library-empty': assets.empty, 'tasks-empty': assets.done,
-    'messages-empty': assets.done, 'worklog-empty': assets.interaction
+    'inbox-empty': faces.empty, 'library-empty': faces.empty, 'tasks-empty': faces.done,
+    'messages-empty': faces.done, 'worklog-empty': faces.interaction
   });
   const prefersReducedMotion = () => Boolean(
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -28,8 +27,7 @@
   let startupPlayed = false;
 
   // Reuse the native request lifecycle; decorative loading never starts work.
-  const loadingFrames = Array.from({length:6}, (_, i) =>
-    `assets/decorations/加载中合成_${String(i + 1).padStart(2, '0')}.svg`);
+  const loadingFrames = Array.from({length:6}, (_, i) => i % 2 ? faces.closed : faces.open);
   const loadingDurations = [450,180,450,180,450,180];
   const loadingStates = new Map();
   const routeRoots = {settings:'desktop-settings-preview',inbox:'desktop-inbox-preview',
@@ -84,15 +82,13 @@
     const art=document.createElement('div');
     art.className='desktop-loading-art';
     art.setAttribute('aria-hidden','true');
-    state.frames=loadingFrames.map((source,index)=>{
-      const image=document.createElement('img');
-      image.src=source;
-      image.alt='';
-      image.draggable=false;
-      image.hidden=index!==0;
-      image.addEventListener('error',()=>overlay.classList.add('desktop-loading-art-unavailable'),{once:true});
-      art.append(image);
-      return image;
+    state.frames=loadingFrames.map((text,index)=>{
+      const frame=document.createElement('span');
+      frame.className='desktop-kaomoji';
+      frame.textContent=text;
+      frame.hidden=index!==0;
+      art.append(frame);
+      return frame;
     });
     const copy=document.createElement('span');
     copy.className='desktop-loading-copy';
@@ -194,37 +190,35 @@
     && element.getClientRects().length > 0
     && getComputedStyle(element).visibility !== 'hidden';
 
+  // Each face goes back to the one its page shows at rest (the chat page rests on the question face).
   const resetHomeExpression = () => {
     window.clearTimeout(homeResetTimer);
     homeResetTimer = 0;
     homeQuestionUntil = 0;
-    homeExpressions.forEach(({ button, image }) => {
-      button.dataset.expression = 'interaction';
+    homeExpressions.forEach(({ button, image, rest }) => {
+      button.dataset.expression = rest.expression;
       button.removeAttribute('aria-busy');
-      image.src = assets.interaction;
+      image.textContent = rest.text;
     });
   };
-  const playHomeQuestion = () => {
+  const showHomeFace = (expression, text) => {
     if(document.documentElement.classList.contains('desktop-hide-expressions'))return;
     if (homeQuestionUntil > Date.now()) return;
     homeQuestionUntil = Date.now() + 2000;
     homeExpressions.forEach(({ button, image }) => {
-      button.dataset.expression = 'question';
+      button.dataset.expression = expression;
       button.setAttribute('aria-busy', 'true');
-      image.src = assets.question;
+      image.textContent = text;
     });
     homeResetTimer = window.setTimeout(resetHomeExpression, 2000);
   };
-  const playStartupQuestion = async () => {
+  const playHomeQuestion = () => showHomeFace('question', faces.question);
+  // Opening Memorive: Ciallo for two seconds on the first visible home, then the usual face.
+  const playStartupGreeting = () => {
     if (startupPlayed) return;
-    const entry = homeExpressions.find(({ button }) => isVisible(button));
-    if (!entry) return;
+    if (!homeExpressions.some(({ button }) => isVisible(button))) return;
     startupPlayed = true;
-    const question = new Image();
-    question.src = assets.question;
-    try { await Promise.all([entry.image.decode(), question.decode()]); }
-    catch (_) { return; }
-    if (isVisible(entry.button)) playHomeQuestion();
+    showHomeFace('greeting', faces.greeting);
   };
 
   const signalAssistant = async (kind, detail = {}) => {
@@ -261,7 +255,7 @@
     if(!button||!image)return;
     button.setAttribute('data-desktop-no-tooltip','');
     button.removeAttribute('title');
-    homeExpressions.push({ button, image });
+    homeExpressions.push({ button, image, rest: { expression: button.dataset.expression || 'interaction', text: image.textContent } });
     button.addEventListener('click', (event) => {
       if (event.button === 0) playHomeQuestion();
     });
@@ -275,12 +269,11 @@
     const container = empty.firstElementChild;
     if (!(container instanceof HTMLElement)) return;
     container.querySelectorAll('.empty-mark').forEach((mark) => mark.remove());
-    const image = document.createElement('img');
-    image.className = 'desktop-empty-illustration';
-    image.src = emptyPicture[empty.id];
-    image.alt = '';
-    image.draggable = false;
-    container.prepend(image);
+    const face = document.createElement('span');
+    face.className = 'desktop-empty-illustration desktop-kaomoji';
+    face.setAttribute('aria-hidden', 'true');
+    face.textContent = emptyPicture[empty.id];
+    container.prepend(face);
     empty.classList.add('desktop-empty-decorated');
     empty.dataset.illustrationReady = 'true';
   };
@@ -333,8 +326,8 @@
     });
     document.querySelectorAll('.desktop-blank-state').forEach(enhanceHomePrompt);
     document.querySelectorAll('.empty-state').forEach(enhanceEmptyState);
-    if (document.readyState === 'complete') requestAnimationFrame(playStartupQuestion);
-    else window.addEventListener('load', () => requestAnimationFrame(playStartupQuestion), { once: true });
+    if (document.readyState === 'complete') requestAnimationFrame(playStartupGreeting);
+    else window.addEventListener('load', () => requestAnimationFrame(playStartupGreeting), { once: true });
     document.addEventListener('visibilitychange', () => {
       if (homeQuestionUntil && Date.now() >= homeQuestionUntil) resetHomeExpression();
       syncAllLoading();
@@ -367,7 +360,7 @@
 
   Memorive.decorations = Object.freeze({
     applyHidden:hidden=>{
-      if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupQuestion);
+      if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupGreeting);
       syncAllLoading();
     },
     beginLoading,

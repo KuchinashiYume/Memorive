@@ -516,8 +516,8 @@
     },
     {
       "path": "memorive_desktop/ASSET_NOTICE.md",
-      "sha256": "92345099b131f1389a7507f8fde9246dfd336e975fc1bd6b1e78368cdd4f936f",
-      "bytes": 6652
+      "sha256": "b594b1c0ee577ba8c58df15875d1af266b46b1803bef9d7296f53784cfc0885e",
+      "bytes": 7379
     },
     {
       "path": "memorive_desktop/BUILDING.md",
@@ -966,13 +966,13 @@
     },
     {
       "path": "memorive_desktop/LICENSING.md",
-      "sha256": "79557f830010b1afeb2864e4dd3090c9b422b6e78b345e8e1024a991aa119aae",
-      "bytes": 1532
+      "sha256": "e02d3d8368b1fb515e829a88e7cc0895c29272d0d99bae639b7a8076d7f3f5f8",
+      "bytes": 1656
     },
     {
       "path": "memorive_desktop/product/desktop/app.py",
-      "sha256": "a0bb3986f8f99c7115f0e312f84f8757e103ca7bd8b2d42ac2421f498bab27b8",
-      "bytes": 371717
+      "sha256": "984b525e529d8e48d70d65e3b0a53bdb0c35499f72ac1cf1fb4dd32f1f8a7879",
+      "bytes": 370973
     },
     {
       "path": "memorive_desktop/product/desktop/application_behavior.py",
@@ -980,99 +980,19 @@
       "bytes": 4367
     },
     {
-      "path": "memorive_desktop/product/desktop/assets/decorations/assistant-error.png",
-      "sha256": "65cd34d76bcc53257e77724771093b35fc0326054e4f724a24041c0ebfaa897e",
-      "bytes": 80235
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/assistant-error.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868",
-      "bytes": 63947
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.png",
-      "sha256": "c93994fa3b6a871b5e247c0cfcdfe2a2788384d7513153510025923854c65600",
-      "bytes": 77994
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/assistant-save-success.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439",
-      "bytes": 63342
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/empty-state.png",
-      "sha256": "edc2423a19b17878effb73f11fccffc96fcc17ea0274a1e03930618875a84443",
-      "bytes": 77818
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/empty-state.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c",
-      "bytes": 63733
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/home-interaction.png",
-      "sha256": "e3dd7792cba61a66873f94ecc526af6751e03f20c7b426063fed73ba7f3f9e99",
-      "bytes": 75955
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/home-interaction.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/home-question.png",
-      "sha256": "d676100706521a8688838f2b2681d14707c0a781cf1afb5ced692fda1fe63efa",
-      "bytes": 78451
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/home-question.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55",
-      "bytes": 63398
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/加载中合成_01.svg",
-      "sha256": "135e21e204bc00c998fe14e582b6de14d75d595c9363c8b74feed751c785a35d",
-      "bytes": 65249
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/加载中合成_02.svg",
-      "sha256": "32a56726740a17d8b5c04d77906b36c372f061ecf3a250f7c35b9dc73c476806",
-      "bytes": 65086
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/加载中合成_03.svg",
-      "sha256": "18e39118246cee4025a65719284f65746b5b718940bfe8c627dc27ea80aef36b",
-      "bytes": 65251
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/加载中合成_04.svg",
-      "sha256": "f8d189dbe981c57a0c7705587c1746a7f5b3a48523eadace91f1b871a26b7488",
-      "bytes": 65088
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/加载中合成_05.svg",
-      "sha256": "fc3a49e310064381e4928411f3ee3eed79f5badafe6a2cd2bbb2209d75bbe8b4",
-      "bytes": 65251
-    },
-    {
-      "path": "memorive_desktop/product/desktop/assets/decorations/加载中合成_06.svg",
-      "sha256": "2a7f68f821f9aae8a89e1349faa4e86e7bb6893b864b80aea04cb1c1b8fbcc34",
-      "bytes": 65088
-    },
-    {
       "path": "memorive_desktop/product/desktop/assets/illustrations/empty.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c",
-      "bytes": 63733
+      "sha256": "bd58c58431d8a270ac9a4df5dd63bb4ec4ab95d1cc9ffa84c1486e96b5f48d20",
+      "bytes": 348
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/injury.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868",
-      "bytes": 63947
+      "sha256": "684c49de9ea927cbd0fd844d2e88f94593255adf8d1b38f0bf81b8925fe7ad71",
+      "bytes": 344
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/manifest.json",
-      "sha256": "b3d3f0a97de560da0c57a0c2e9765a1dbe5041322d106b5ed2cd6752a444a533",
-      "bytes": 5603
+      "sha256": "71c83ee5bbbc7f60b393c4f2f90e4ca59c7e42d74fd51dbf9659bef834d087ee",
+      "bytes": 2892
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/memorive.ico",
@@ -1081,98 +1001,108 @@
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/neutral.svg",
-      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6",
-      "bytes": 62470
+      "sha256": "d3590da372ced578dd759381039fda99b6f9fd85b63b05dce98503814fe3e489",
+      "bytes": 347
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/one_eye.svg",
-      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde",
-      "bytes": 62249
+      "sha256": "b8f7e55907ad787736c992075b0caa2e286e9bda8b0b43d2058d1892f1ece9c8",
+      "bytes": 346
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/question.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55",
-      "bytes": 63398
+      "sha256": "36d7b1ec50bb9cdebfc5a747ca1f3e0d6f098ead722072db1ec7a33671ab21bd",
+      "bytes": 351
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/shovel.svg",
-      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83",
-      "bytes": 63186
+      "sha256": "bfc4b2f7b1902e63d1b14b2101b338e5a75ea088359dbf6ef4c6a0a900bc393d",
+      "bytes": 351
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/sleepy.svg",
-      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d",
-      "bytes": 62633
+      "sha256": "88775782e50f77c4d9c45e322e2d403a4822ff0cb7f1019e5ebe7655d71dda5a",
+      "bytes": 342
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/sprite.svg",
-      "sha256": "1981f58e0f8e0fc6f42a29d29b1f5d276fb1929fb92205deaed7ade46f14cd9e",
-      "bytes": 378282
+      "sha256": "93b7ffb02dece85449ca2bcd50cf061852851b8a10843a060572630de7ac1c25",
+      "bytes": 1986
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/success.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439",
-      "bytes": 63342
+      "sha256": "5218d6d9159744731928014a0acbb398eb738663040909fbea448cb6288bad87",
+      "bytes": 351
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/wink.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
+      "sha256": "d3958cf93fa6dd27d93be6414bc6931be1a68e1d10c273970058ba59b46c9dfa",
+      "bytes": 348
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/writing.svg",
-      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5",
-      "bytes": 63735
+      "sha256": "89c8a9923028ac5a7f8d70fad458e3082babd92f005835f9229cdce445b565d4",
+      "bytes": 346
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/互动logo.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
+      "sha256": "4a6d803471f56f1e23832d539b909b6b05868ebf45cf3f989501ac4eeb22ba3b",
+      "bytes": 354
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/完成logo.svg",
-      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5",
-      "bytes": 63735
+      "sha256": "7436196841c084e5dfcfc5aa1cbd3b80f1d6bd94c389daab5da6ba3520b77eb4",
+      "bytes": 349
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/常驻logo.svg",
-      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde",
-      "bytes": 62249
+      "sha256": "47946b8ae3f678083d916fa780721502c7045e257662d7286597e6fda011920e",
+      "bytes": 349
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/报错logo.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868",
-      "bytes": 63947
+      "sha256": "97af39a7c3b687b9d8233b41ce25f097e76cd5b8878edf67bd46407cda4ac324",
+      "bytes": 348
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/施工logo.svg",
-      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83",
-      "bytes": 63186
+      "sha256": "5a2987c8141289a9e8cdec3d5fffb1d90432fb34646001adc13db6315f97e155",
+      "bytes": 355
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/无文件logo.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c",
-      "bytes": 63733
+      "sha256": "fa2986dcf5387934175fe39e26ce25fa3e2b5dd692315c7eeddaa216b23d95e5",
+      "bytes": 356
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/疑问logo.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55",
-      "bytes": 63398
+      "sha256": "be42286da88c792be3dcbaf66737c8d5cc7acee1cf3692ed16bd7ebd570e6f64",
+      "bytes": 353
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/眨眼logo01.svg",
-      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6",
-      "bytes": 62470
+      "sha256": "0e9d2223afda838bc5c4b17c916fb304ef592a90e2aa47cd9437cab525f49d2f",
+      "bytes": 352
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/眨眼logo02.svg",
-      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d",
-      "bytes": 62633
+      "sha256": "4631371e6ecc9fce7f3fb69d16c3a2a128485bfdd16fee05223978ef4907aa40",
+      "bytes": 348
     },
     {
       "path": "memorive_desktop/product/desktop/assets/illustrations/确认logo.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439",
-      "bytes": 63342
+      "sha256": "cafc9e9b65cd85ef743af0c306009c4dbfc34cdd510419634aace2d4fb9b9a54",
+      "bytes": 354
+    },
+    {
+      "path": "memorive_desktop/product/desktop/assets/illustrations/memorive-symbol.png",
+      "sha256": "e14b5bae634c8152c438d29ca59afe00a20e4cc3dfb403c462000a7152a5e9d0",
+      "bytes": 9994
+    },
+    {
+      "path": "memorive_desktop/product/desktop/assets/illustrations/memorive-symbol.svg",
+      "sha256": "f3d98ade85cbe1b2ae62f21f634790e9cf48049ef653dd08b52ebb965173d2c7",
+      "bytes": 1137
     },
     {
       "path": "memorive_desktop/product/desktop/assets/memorive.ico",
@@ -1201,8 +1131,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "8d003ac435764e46ed4b480dfa1696ee68130360b3559f2df066cec14fbe47ba",
-      "bytes": 2597232
+      "sha256": "346c9e1081e2944aca39a96143b73b717b6a65787c2ac9bdf627b3fea9b0c001",
+      "bytes": 2597238
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -2030,11 +1960,6 @@
       "bytes": 176706
     },
     {
-      "path": "memorive_desktop/product/desktop/help/web/assets/wink.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
-    },
-    {
       "path": "memorive_desktop/product/desktop/help/web/assets/zh-CN/billing.svg",
       "sha256": "5ee90f78420e3dd078279349cbe1a048a6dd06f49c1169dc1495a0ca9ec67f77",
       "bytes": 2088
@@ -2208,6 +2133,11 @@
       "path": "memorive_desktop/product/desktop/help/web/assets/zh-CN/weights.png",
       "sha256": "36ed1ed0a2864b19c31a52b65bf1700c6eb9c4588a34e8fba046f1c919085ff8",
       "bytes": 175771
+    },
+    {
+      "path": "memorive_desktop/product/desktop/help/web/assets/memorive-symbol.svg",
+      "sha256": "f3d98ade85cbe1b2ae62f21f634790e9cf48049ef653dd08b52ebb965173d2c7",
+      "bytes": 1137
     },
     {
       "path": "memorive_desktop/product/desktop/help/web/content.js",
@@ -2561,8 +2491,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/help/web/index.html",
-      "sha256": "1dd908b97e45db85828ef6285dbf684b549f1d503189474734e7d7a8c17042b2",
-      "bytes": 4101
+      "sha256": "a3d26dbe0e17470a88d5529d84d5227a231109e46944f42df6c927611f073db5",
+      "bytes": 4112
     },
     {
       "path": "memorive_desktop/product/desktop/help/web/README.md",
@@ -2873,11 +2803,6 @@
       "path": "memorive_desktop/product/desktop/startup_notice.py",
       "sha256": "a443ff8e45b100ae879bb42a668c867cf3acc23de964b56cdd3cab7c2695e177",
       "bytes": 11395
-    },
-    {
-      "path": "memorive_desktop/product/web/assets/assistant/adopted_inline_001.png",
-      "sha256": "5374cd25658256fe5d2042d9d8997854e3d8b2d01a13e4d724177b1be2a0ebca",
-      "bytes": 75650
     },
     {
       "path": "memorive_desktop/PUBLISHING.md",
@@ -3971,8 +3896,8 @@
     },
     {
       "path": "memorive_desktop/tools/build_update_helper.py",
-      "sha256": "f47e48ab57b473b710ef1945c4ea162e821558c4413d2749456e6ac0c199671e",
-      "bytes": 8063
+      "sha256": "3f2c01e6eb2ceb62b7d36305e85766a7b73f7efb220043dcdbbbdf49060554db",
+      "bytes": 8064
     },
     {
       "path": "memorive_desktop/tools/build_update_packages.py",
@@ -4076,13 +4001,13 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "5d9f22d85e89052a876c3c90bc6291915f483919cab4109615f012d0f42d2f6a",
-      "bytes": 140961
+      "sha256": "cfc48ea82fb58d8d598a774660cb739b6652c5a2226cdd16003c60b6baa2abeb",
+      "bytes": 134375
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "b1c5bbe38a1cd434fb95086643db4012ab54e02b4394a649c87ac8aaba3ceaeb",
-      "bytes": 278270
+      "sha256": "4892abfb3b866fce5023bcfcdbea61549cda3f43cfe601e1fab7a963126080f8",
+      "bytes": 275296
     },
     {
       "path": "memorive_desktop/installer/windows/SOURCE_PROVENANCE.json",
@@ -4671,8 +4596,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/markup.html",
-      "sha256": "5aa3492404493cd532fde80355416797a802944308603a162050b86e486c62d1",
-      "bytes": 17463
+      "sha256": "96c447387ae2148b0f889dc39a6898b231d61c538c9b4ca7f642eeb1e9c9fbea",
+      "bytes": 17451
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/chat/workspace.css",
@@ -4691,8 +4616,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/markup.html",
-      "sha256": "72fcb7a7e31524993b0bdf97c4f7863e66308da9d30118c7cbb3eb3218f3586b",
-      "bytes": 10047
+      "sha256": "af9ab941243d50e3da705e2d27977da12c42889dae4c8ca917c0408b04a3c131",
+      "bytes": 10033
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/inbox/research-home.css",
@@ -4716,8 +4641,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/markup.html",
-      "sha256": "929fc6db003909d4b12dc5410a892d00eb5d3d8dfc9702f80c1101098108a11e",
-      "bytes": 6927
+      "sha256": "263b8dc896f631d8b938c07a0f27238a40b4371250031e3dc17e024c8df14869",
+      "bytes": 6913
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/view.js",
@@ -4731,8 +4656,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/markup.html",
-      "sha256": "61393fca43811fe26660ab067956a91511789c0900447ba4cccea4a9633be48f",
-      "bytes": 8264
+      "sha256": "2da3355d66688e96c2105817a74fdf5435584002bf6f406a27224914d65a0c5a",
+      "bytes": 8250
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/view.js",
@@ -4746,8 +4671,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/markup.html",
-      "sha256": "b26de1d43ad1035684ae6b7d133d56a955ac85e906dabe4026eba0258d5caac7",
-      "bytes": 7062
+      "sha256": "a6184a51ba10a4b01a8c40bd85ef6daba2c734338ee7a2c11ae1ea5d63c4d897",
+      "bytes": 7048
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/messages/view.js",
@@ -4761,8 +4686,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/markup.html",
-      "sha256": "ca57a18b11075c4f9c06105366c5d5232a7a838deda54b78ac43112797ee8468",
-      "bytes": 10395
+      "sha256": "1897c38c5ba1a607c3401bce314cf1a7ad786943879f4d0d5b8aa438a7e6344c",
+      "bytes": 10381
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/view.js",
@@ -4811,8 +4736,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/markup.html",
-      "sha256": "b8782dbfc144af6d3c5e2d60fb74631e574e0b20be534e79cfd5960d4125d236",
-      "bytes": 114131
+      "sha256": "2463a4c337326c4ff70914c65cacf8672b8c7d5e037d6d21e017511e0fbe8f31",
+      "bytes": 114117
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/model-picker.js",
@@ -4881,8 +4806,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/markup.html",
-      "sha256": "981e16b3198f8465b4747d54d2acd0bd0f09f704824107caca3b60aa0e499c3c",
-      "bytes": 25518
+      "sha256": "0e5a59ca9d6fde01e659558d040285e8eb6724bd31e8ff999c09c8c5e8049a80",
+      "bytes": 25504
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/tasks/view.js",
@@ -4896,8 +4821,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/markup.html",
-      "sha256": "4c50885e4c7f10ac031adbc470fc42997512d91c4862062de13038cec3769688",
-      "bytes": 7081
+      "sha256": "8ec5074a3020ce3377497738d96697227046caf29e14f339c32cfea9f77247f1",
+      "bytes": 7067
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/worklog/view.js",
@@ -4931,13 +4856,13 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/cross-route.css",
-      "sha256": "9fc677c7b092040b58bd5fce29671e0dc7bb4915639f2d503da1d12d8cfbef9e",
-      "bytes": 25863
+      "sha256": "e7ccebc9cc06d3159b437c3936a4eca4d111c540e7efa37a6c069784c1b45f99",
+      "bytes": 25968
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/decorations.js",
-      "sha256": "79cddfb76854443ecb89cac52b759cb057ecd15aae5c66a9f31481cbae1d34c6",
-      "bytes": 18250
+      "sha256": "974f0475466bcd12e77731eeee69eece8d0800676042017b69f9bdd0356dddca",
+      "bytes": 18328
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/layout-system.css",
@@ -4946,8 +4871,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/local-user.css",
-      "sha256": "957980def1ead72db66466f92dfb5c75f5a50114bbb76336d47c0e8732502812",
-      "bytes": 7932
+      "sha256": "521266589f1abbca5f0106dd4d2e0e97aa62e407e970aadc665a2c0499893f78",
+      "bytes": 7874
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/local-user.js",
@@ -10031,8 +9956,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/frame/navigation.html",
-      "sha256": "d1dc9eb5ca519fd5b4de8309ac4a607ab54f89ac38285770ffe9d9773eacf6be",
-      "bytes": 3439
+      "sha256": "6735603f5dd0699b1b8790ddd1d3ae3f833badeeafbce4203207e61dd24c120f",
+      "bytes": 3444
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/frame/messages.js",
