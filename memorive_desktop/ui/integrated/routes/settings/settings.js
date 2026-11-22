@@ -3348,6 +3348,7 @@
       return null;
     }
     let createdReference = null;
+    let verifyAfterSave = false;
     input.value = '';
     if (credentialRefToWrite && secretInput) {
       await call('settings.credential_replace', {
@@ -3398,7 +3399,12 @@
       service.credential_ref = reference.credential_ref;
       service.thinking = Boolean(profile.thinking_mode);
       Object.assign(service, profile);
-      service.connection_status = 'UNVERIFIED';
+      // The embedding (02) and reranker (06) steps may only use a verified service, so saving this one as
+      // unverified was refused and nothing on the page could be saved until it was verified. Such a service is
+      // verified again right after the save instead (verifyAfterSave), which then sets its status.
+      verifyAfterSave = next.workflow.nodes.some((node) => ['chunk_embedding', 'context_pack'].includes(node.node_id)
+        && node.profile_ref === service.config_id) && service.connection_status === 'AVAILABLE';
+      if (!verifyAfterSave) service.connection_status = 'UNVERIFIED';
     }
     if (isKimiService(service)) {
       applyKimiAutoDetection(service);
@@ -3426,6 +3432,9 @@
       throw error;
     }
     if (operationGeneration === credentialDraftGeneration) await resetApiDraft();
+    if (verifyAfterSave) {
+      await runApiValidation(service.config_id, q(`[data-validate-api="${service.config_id}"]`) || create('button'));
+    }
     return options.returnReceipt ? saveReceipt : service;
   };
 
