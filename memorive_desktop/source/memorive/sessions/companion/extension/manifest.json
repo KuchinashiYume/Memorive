@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Memo 网页会话",
+  "name": "__MSG_extName__",
   "version": "3.11.0",
-  "description": "录入常用 AI 官网当前可见的会话，或同步已配置的网站。",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "alarms",
@@ -20,7 +21,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "同步或录入到 Memo",
+    "default_title": "__MSG_actionTitle__",
     "default_popup": "popup.html"
   },
   "content_scripts": [

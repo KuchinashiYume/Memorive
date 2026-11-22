@@ -1,0 +1,188 @@
+{
+  "extName": {
+    "message": "Memo 网页会话"
+  },
+  "extDescription": {
+    "message": "录入常用 AI 官网上正在看的会话，或同步已设置的网站。"
+  },
+  "actionTitle": {
+    "message": "录入或同步到 Memo"
+  },
+  "languageButton": {
+    "message": "切换语言"
+  },
+  "popupHeading": {
+    "message": "录入网页会话"
+  },
+  "popupIntro": {
+    "message": "开始后滚动页面，收集已加载的对话。"
+  },
+  "recordStart": {
+    "message": "开始录制"
+  },
+  "recordStop": {
+    "message": "停止并录入"
+  },
+  "recordStartTitle": {
+    "message": "仅支持 AI 官网；开始后滚动加载对话"
+  },
+  "recordStopTitle": {
+    "message": "停止并录入已收集的消息"
+  },
+  "testRead": {
+    "message": "测试读取"
+  },
+  "recordHint": {
+    "message": "停止即录入 · 10 分钟自动结束"
+  },
+  "unsupportedHint": {
+    "message": "在支持的 AI 网站打开一段对话，或将此页保存为 HTML 后从 Memo 收件箱导入。"
+  },
+  "recordingProgress": {
+    "message": "已累计 $1 条 · 剩余 $2 秒"
+  },
+  "recordingProgressGap": {
+    "message": "已累计 $1 条 · $2 条接不上 · 剩余 $3 秒"
+  },
+  "recordingSaving": {
+    "message": "录制已停止，正在保存…"
+  },
+  "recordingSaved": {
+    "message": "已保存 $1 条（部分记录）· 回到 Memo 导入"
+  },
+  "recordingSavedGap": {
+    "message": "已保存 $1 条（部分记录）；另有 $2 条接不上，未保存 · 回到 Memo 导入"
+  },
+  "testReading": {
+    "message": "正在读取当前页面…"
+  },
+  "testResult": {
+    "message": "读到 $1 条消息（当前页面），未保存"
+  },
+  "siteSync": {
+    "message": "网站同步"
+  },
+  "syncSelected": {
+    "message": "同步所选网站"
+  },
+  "syncStarting": {
+    "message": "后台同步中"
+  },
+  "syncProgress": {
+    "message": "同步中 $1 · 已完成 $2 条$3"
+  },
+  "syncDone": {
+    "message": "已同步 $1 条$2"
+  },
+  "syncFailedCount": {
+    "message": " · 失败 $1 条"
+  },
+  "syncError": {
+    "message": "同步失败：$1"
+  },
+  "syncStatusUnreadable": {
+    "message": "无法读取同步状态；请在扩展管理页重新加载此扩展。"
+  },
+  "errorNotOfficial": {
+    "message": "仅支持 AI 官网会话页面"
+  },
+  "errorVerification": {
+    "message": "请先在网页完成验证，再重试"
+  },
+  "errorNoConversation": {
+    "message": "未找到可见的对话，请先打开一段会话"
+  },
+  "errorPageChanged": {
+    "message": "页面已切换，请重试"
+  },
+  "errorGeneric": {
+    "message": "读取失败，请刷新当前网页后重试"
+  },
+  "runnerTitle": {
+    "message": "Memorive 网站会话同步"
+  },
+  "runnerHeading": {
+    "message": "网站会话同步"
+  },
+  "runnerIntro": {
+    "message": "正在同步会话"
+  },
+  "runnerProgressLabel": {
+    "message": "网站会话同步进度"
+  },
+  "runnerPreparing": {
+    "message": "正在准备同步…"
+  },
+  "runnerFinding": {
+    "message": "正在查找已打开且已登录的站点…"
+  },
+  "stageDiscovering": {
+    "message": "发现已打开站点"
+  },
+  "stageIndexing": {
+    "message": "读取会话列表"
+  },
+  "stageCapturing": {
+    "message": "读取完整正文"
+  },
+  "stageDownloading": {
+    "message": "写入本地会话包"
+  },
+  "runnerSourcesSync": {
+    "message": "$1 个来源同步"
+  },
+  "runnerAllSites": {
+    "message": "所有站点"
+  },
+  "runnerSiteProgress": {
+    "message": "站点 $1/$2"
+  },
+  "runnerItemProgress": {
+    "message": "，会话 $1/$2"
+  },
+  "runnerPreparingSuffix": {
+    "message": " · 正在准备"
+  },
+  "runnerStatusProgress": {
+    "message": "同步中：$1 · $2（$3$4）；完整 $5，失败 $6。"
+  },
+  "runnerTitleProgress": {
+    "message": "Memorive 同步 $1 · $2 · $3$4"
+  },
+  "runnerSummary": {
+    "message": "$1：$2；完整 $3，失败 $4。"
+  },
+  "runnerTitleSummary": {
+    "message": "Memorive $1 · $2/$3"
+  },
+  "runnerDone": {
+    "message": "同步完成：$1 个站点，新增或更新 $2，未变化 $3，跳过候选 $4，失败 $5。"
+  },
+  "runnerIncomplete": {
+    "message": "同步未完成；诊断报告已在本机生成，Memorive 刷新时会自动接管。"
+  },
+  "runnerDoneMeta": {
+    "message": "同步完成 · 会话包已写入本机"
+  },
+  "runnerIncompleteMeta": {
+    "message": "同步未完成 · 已生成诊断报告"
+  },
+  "runnerTimeout": {
+    "message": "同步已在 $1 分钟安全上限后停止；正在写入终止报告。"
+  },
+  "runnerFailed": {
+    "message": "同步失败：$1"
+  },
+  "runnerTimeoutMeta": {
+    "message": "同步超时 · 已保留成功结果"
+  },
+  "runnerFailedMeta": {
+    "message": "同步失败 · 请返回 Memorive 查看诊断"
+  },
+  "runnerReportFailed": {
+    "message": "同步已停止，但终止报告写入失败：$1。此页面将保留。"
+  },
+  "runnerReportFailedMeta": {
+    "message": "终止报告写入失败 · 页面已保留"
+  }
+}

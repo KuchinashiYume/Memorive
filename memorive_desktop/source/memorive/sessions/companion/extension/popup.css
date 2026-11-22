@@ -24,3 +24,13 @@ button:disabled { opacity: .55; cursor: wait; }
 .sync-options { margin-top: 16px; border-top: 1px solid #e5ddd3; padding-top: 12px; }
 .sync-options summary { cursor: pointer; font-size: 12px; color: #776f66; }
 .sync-options .copy { margin: 10px 0 0; }
+/* Header: the MEMO mark and the Aa language button with its menu of the three languages. */
+.popup-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 4px; }
+.popup-head .eyebrow { margin: 0; }
+.language { position: relative; }
+.language-button { width: auto; margin: 0; padding: 2px 8px; border-color: #d8cbbb; border-radius: 8px; color: #8d492c; background: #fff; font: 600 12px/1.5 "Segoe UI", sans-serif; }
+.language-button:hover, .language-button[aria-expanded="true"] { border-color: #a75c38; }
+.language-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 2; min-width: 132px; padding: 4px; border: 1px solid #ded5ca; border-radius: 10px; background: #fff; box-shadow: 0 6px 18px rgba(41, 38, 31, .12); }
+.language-menu button { display: block; width: 100%; margin: 0; padding: 7px 10px; border: 0; border-radius: 7px; color: #29261f; background: transparent; text-align: left; font-size: 13px; }
+.language-menu button:hover, .language-menu button:focus-visible { background: #f3ede5; outline: none; }
+.language-menu button[aria-checked="true"]::after { content: "\2713"; float: right; color: #a75c38; }

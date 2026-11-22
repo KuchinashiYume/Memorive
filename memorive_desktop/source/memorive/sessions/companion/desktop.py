@@ -81,6 +81,7 @@ class BrowserCompanionDesktop:
             source.relative_to(self.source_root)
         except ValueError as error:
             raise RuntimeError("BROWSER_COMPANION_SOURCE_ESCAPE") from error
+        # Paths relative to the extension folder; the three languages live in _locales/<language>/.
         required = {
             "manifest.json",
             "background.js",
@@ -92,9 +93,12 @@ class BrowserCompanionDesktop:
             "runner.js",
             "README.txt",
             "site_profiles.js",
-            "recording.js", "browser_identity.js",
+            "recording.js", "browser_identity.js", "i18n.js",
+            "_locales/en/messages.json", "_locales/ja/messages.json", "_locales/zh_CN/messages.json",
         }
-        if not source.is_dir() or {path.name for path in source.iterdir() if path.is_file()} != required:
+        if not source.is_dir() or {
+            path.relative_to(source).as_posix() for path in source.rglob("*") if path.is_file()
+        } != required:
             raise RuntimeError("BROWSER_COMPANION_PACKAGE_INVALID")
         from memorive.sessions.companion.site_profiles import configured_extension, default_sites, profile_hash
         settings = self.browser_companion_sites()
@@ -803,6 +807,7 @@ class BrowserCompanionDesktop:
             }
         destination.mkdir(parents=True, exist_ok=True)
         for name in sorted(required):
+            (destination / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source / name, destination / name)
         state["package_sha256"] = package_sha256
         if path_changed:
@@ -1170,6 +1175,7 @@ class BrowserCompanionDesktop:
         )
         destination.mkdir(parents=True, exist_ok=True)
         for name in sorted(required):
+            (destination / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source / name, destination / name)
         manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
         if manifest.get("manifest_version") != 3 or "cookies" in manifest.get("permissions", []):

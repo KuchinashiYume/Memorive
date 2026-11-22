@@ -1,0 +1,188 @@
+{
+  "extName": {
+    "message": "Memo ウェブ会話"
+  },
+  "extDescription": {
+    "message": "主要な AI 公式サイトで表示中の会話を取り込むか、設定済みのサイトを同期します。"
+  },
+  "actionTitle": {
+    "message": "Memo に取り込む・同期する"
+  },
+  "languageButton": {
+    "message": "言語を切り替え"
+  },
+  "popupHeading": {
+    "message": "ウェブ会話を取り込む"
+  },
+  "popupIntro": {
+    "message": "開始してからページをスクロールし、読み込まれた会話を集めます。"
+  },
+  "recordStart": {
+    "message": "記録を開始"
+  },
+  "recordStop": {
+    "message": "停止して保存"
+  },
+  "recordStartTitle": {
+    "message": "AI 公式サイトのみ。開始後にスクロールして会話を読み込みます"
+  },
+  "recordStopTitle": {
+    "message": "集めたメッセージを保存して停止します"
+  },
+  "testRead": {
+    "message": "読み取りテスト"
+  },
+  "recordHint": {
+    "message": "停止すると保存 · 10 分で自動終了"
+  },
+  "unsupportedHint": {
+    "message": "対応する AI サイトで会話を開くか、このページを HTML で保存して Memo の受信箱から取り込んでください。"
+  },
+  "recordingProgress": {
+    "message": "$1 件 · 残り $2 秒"
+  },
+  "recordingProgressGap": {
+    "message": "$1 件 · $2 件つながらず · 残り $3 秒"
+  },
+  "recordingSaving": {
+    "message": "記録を停止しました。保存中…"
+  },
+  "recordingSaved": {
+    "message": "$1 件を保存しました（部分記録）· Memo で取り込んでください"
+  },
+  "recordingSavedGap": {
+    "message": "$1 件を保存しました（部分記録）。つながらない $2 件は保存していません · Memo で取り込んでください"
+  },
+  "testReading": {
+    "message": "現在のページを読み取り中…"
+  },
+  "testResult": {
+    "message": "このページで $1 件を読み取りました（保存はしていません）"
+  },
+  "siteSync": {
+    "message": "サイト同期"
+  },
+  "syncSelected": {
+    "message": "選択したサイトを同期"
+  },
+  "syncStarting": {
+    "message": "バックグラウンドで同期中"
+  },
+  "syncProgress": {
+    "message": "同期中 $1 · $2 件完了$3"
+  },
+  "syncDone": {
+    "message": "$1 件を同期しました$2"
+  },
+  "syncFailedCount": {
+    "message": " · $1 件失敗"
+  },
+  "syncError": {
+    "message": "同期に失敗しました：$1"
+  },
+  "syncStatusUnreadable": {
+    "message": "同期の状態を読み取れません。拡張機能の管理ページでこの拡張機能を再読み込みしてください。"
+  },
+  "errorNotOfficial": {
+    "message": "AI 公式サイトの会話ページのみ対応しています"
+  },
+  "errorVerification": {
+    "message": "先にサイトの認証を済ませてから、もう一度お試しください"
+  },
+  "errorNoConversation": {
+    "message": "表示中の会話が見つかりません。先に会話を開いてください"
+  },
+  "errorPageChanged": {
+    "message": "ページが切り替わりました。もう一度お試しください"
+  },
+  "errorGeneric": {
+    "message": "読み取りに失敗しました。ページを再読み込みしてからお試しください"
+  },
+  "runnerTitle": {
+    "message": "Memorive サイト同期"
+  },
+  "runnerHeading": {
+    "message": "サイト会話の同期"
+  },
+  "runnerIntro": {
+    "message": "会話を同期しています"
+  },
+  "runnerProgressLabel": {
+    "message": "サイト同期の進み具合"
+  },
+  "runnerPreparing": {
+    "message": "同期を準備しています…"
+  },
+  "runnerFinding": {
+    "message": "開いていてログイン済みのサイトを探しています…"
+  },
+  "stageDiscovering": {
+    "message": "開いているサイトを確認"
+  },
+  "stageIndexing": {
+    "message": "会話一覧を読み取り"
+  },
+  "stageCapturing": {
+    "message": "会話全文を読み取り"
+  },
+  "stageDownloading": {
+    "message": "ローカルの会話パックを書き込み"
+  },
+  "runnerSourcesSync": {
+    "message": "$1 ソースの同期"
+  },
+  "runnerAllSites": {
+    "message": "すべてのサイト"
+  },
+  "runnerSiteProgress": {
+    "message": "サイト $1/$2"
+  },
+  "runnerItemProgress": {
+    "message": "、会話 $1/$2"
+  },
+  "runnerPreparingSuffix": {
+    "message": " · 準備中"
+  },
+  "runnerStatusProgress": {
+    "message": "同期中：$1 · $2（$3$4）。完了 $5、失敗 $6。"
+  },
+  "runnerTitleProgress": {
+    "message": "Memorive 同期 $1 · $2 · $3$4"
+  },
+  "runnerSummary": {
+    "message": "$1：$2。完了 $3、失敗 $4。"
+  },
+  "runnerTitleSummary": {
+    "message": "Memorive $1 · $2/$3"
+  },
+  "runnerDone": {
+    "message": "同期完了：$1 サイト、新規・更新 $2、変更なし $3、候補スキップ $4、失敗 $5。"
+  },
+  "runnerIncomplete": {
+    "message": "同期は完了しませんでした。診断レポートをこのコンピューターに作成しました。Memorive が更新時に読み込みます。"
+  },
+  "runnerDoneMeta": {
+    "message": "同期完了 · 会話パックをこのコンピューターに書き込みました"
+  },
+  "runnerIncompleteMeta": {
+    "message": "同期未完了 · 診断レポートを作成しました"
+  },
+  "runnerTimeout": {
+    "message": "同期は $1 分の安全上限で停止しました。停止レポートを書き込んでいます。"
+  },
+  "runnerFailed": {
+    "message": "同期に失敗しました：$1"
+  },
+  "runnerTimeoutMeta": {
+    "message": "同期がタイムアウト · 完了した結果は保持しました"
+  },
+  "runnerFailedMeta": {
+    "message": "同期に失敗しました · Memorive で診断をご確認ください"
+  },
+  "runnerReportFailed": {
+    "message": "同期は停止しましたが、停止レポートの書き込みに失敗しました：$1。このページは開いたままにします。"
+  },
+  "runnerReportFailedMeta": {
+    "message": "停止レポートの書き込みに失敗 · ページを保持しました"
+  }
+}

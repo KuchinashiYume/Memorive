@@ -37,11 +37,13 @@ const SYNC_HARD_TIMEOUT_MS_BY_MODE = Object.freeze({
   FULL: 90 * 60 * 1000
 });
 const PROVIDER_LABELS = Object.fromEntries(ACTIVE_SITES.map(row=>[row.provider_id,row.name]));
-const STAGE_LABELS = {
-  DISCOVERING: "发现已打开站点",
-  INDEXING: "读取会话列表",
-  CAPTURING: "读取完整正文",
-  DOWNLOADING: "写入本地会话包"
+// Words come from _locales through i18n.js (runner.html loads it first).
+const { t } = globalThis.MEMORIVE_I18N;
+const STAGE_KEYS = {
+  DISCOVERING: "stageDiscovering",
+  INDEXING: "stageIndexing",
+  CAPTURING: "stageCapturing",
+  DOWNLOADING: "stageDownloading"
 };
 const statusNode = document.getElementById("runner-status");
 const progressTrackNode = document.getElementById("runner-progress-track");
@@ -81,7 +83,7 @@ const ACTIVE_PROVIDER_ORDER = !providerScopeValid ? [] : (requestedProviders.len
 let startupError = !providerScopeValid
   ? new Error("SYNC_PROVIDER_SCOPE_INVALID")
   : (ACTIVE_PROVIDER_ORDER.length ? null : new Error("BROWSER_NO_ENABLED_SITES"));
-const ACTIVE_SYNC_LABEL = `${ACTIVE_PROVIDER_ORDER.length} 来源同步`;
+const activeSyncLabel = () => t("runnerSourcesSync", ACTIVE_PROVIDER_ORDER.length);
 let runnerWindowId = null;
 const establishRunnerWindowOwnership = async () => {
   const current = await chrome.tabs.getCurrent();
@@ -264,20 +266,19 @@ const assertSyncActive = () => {
 const reportProgress = async (patch = {}) => {
   assertSyncActive();
   aggregateState = { ...aggregateState, ...patch, running: true };
-  const provider = PROVIDER_LABELS[aggregateState.provider_id] || "三站";
-  const stage = STAGE_LABELS[aggregateState.status] || aggregateState.status;
-  const providerProgress = aggregateState.provider_index
-    ? `站点 ${aggregateState.provider_index}/${aggregateState.provider_total}`
-    : `站点 0/${aggregateState.provider_total}`;
+  const provider = PROVIDER_LABELS[aggregateState.provider_id] || t("runnerAllSites");
+  const stage = STAGE_KEYS[aggregateState.status] ? t(STAGE_KEYS[aggregateState.status]) : aggregateState.status;
+  const providerProgress = t("runnerSiteProgress", aggregateState.provider_index || 0, aggregateState.provider_total);
   const itemProgress = aggregateState.total
-    ? `，会话 ${aggregateState.current}/${aggregateState.total}`
+    ? t("runnerItemProgress", aggregateState.current, aggregateState.total)
     : "";
-  statusNode.textContent = `同步中：${provider} · ${stage}（${providerProgress}${itemProgress}）；完整 ${aggregateState.captured}，失败 ${aggregateState.failed}。`;
+  statusNode.textContent = t("runnerStatusProgress", provider, stage, providerProgress, itemProgress,
+    aggregateState.captured, aggregateState.failed);
   const progressPercent = aggregateState.total
     ? Math.min(96, (aggregateState.current / aggregateState.total) * 100)
     : Math.min(24, (aggregateState.provider_index / Math.max(1, aggregateState.provider_total)) * 24);
-  renderRunnerProgress(progressPercent, `${providerProgress}${itemProgress || " · 正在准备"}`);
-  document.title = `Memorive 同步 ${providerProgress} · ${provider} · ${stage}${itemProgress}`;
+  renderRunnerProgress(progressPercent, `${providerProgress}${itemProgress || t("runnerPreparingSuffix")}`);
+  document.title = t("runnerTitleProgress", providerProgress, provider, stage, itemProgress);
   await chrome.runtime.sendMessage({
     type: "MEMORIVE_SYNC_ALL_PROGRESS",
     state: { ...aggregateState }
@@ -311,8 +312,8 @@ const reportProviderProgress = async (providerId, providerIndex, patch = {}) => 
   const providerSummary = rows.map((row) => (
     `${PROVIDER_LABELS[row.provider_id]} ${row.current}/${row.total || "?"}`
   )).join(" · ");
-  statusNode.textContent = `${ACTIVE_SYNC_LABEL}：${providerSummary}；完整 ${aggregateState.captured}，失败 ${aggregateState.failed}。`;
-  document.title = `Memorive ${ACTIVE_SYNC_LABEL} · ${current}/${total || "?"}`;
+  statusNode.textContent = t("runnerSummary", activeSyncLabel(), providerSummary, aggregateState.captured, aggregateState.failed);
+  document.title = t("runnerTitleSummary", activeSyncLabel(), current, total || "?");
 };
 
 let keepAliveHandle = null;
@@ -1006,11 +1007,11 @@ Promise.race([executeSync(), hardTimeout]).then(async ({ results, completed, fin
     providers: results
   };
   statusNode.textContent = completed
-    ? `同步完成：${completed} 个站点，新增或更新 ${aggregateState.captured}，未变化 ${aggregateState.unchanged}，跳过候选 ${aggregateState.skipped}，失败 ${aggregateState.failed}。`
-    : "同步未完成；诊断报告已在本机生成，Memorive 刷新时会自动接管。";
+    ? t("runnerDone", completed, aggregateState.captured, aggregateState.unchanged, aggregateState.skipped, aggregateState.failed)
+    : t("runnerIncomplete");
   renderRunnerProgress(
     completed ? 100 : Math.min(99, aggregateState.total ? aggregateState.current / aggregateState.total * 100 : 0),
-    completed ? "同步完成 · 会话包已写入本机" : "同步未完成 · 已生成诊断报告",
+    completed ? t("runnerDoneMeta") : t("runnerIncompleteMeta"),
     completed ? "complete" : "error"
   );
   await chrome.runtime.sendMessage({
@@ -1034,11 +1035,11 @@ Promise.race([executeSync(), hardTimeout]).then(async ({ results, completed, fin
   aggregateState.providers = partialRows;
   const timeoutMinutes = Math.round(SYNC_HARD_TIMEOUT_MS / 60000);
   statusNode.textContent = aggregateState.error_code === "SYNC_HARD_TIMEOUT"
-    ? `同步已在 ${timeoutMinutes} 分钟安全上限后停止；正在写入终止报告。`
-    : `同步失败：${aggregateState.error_code}`;
+    ? t("runnerTimeout", timeoutMinutes)
+    : t("runnerFailed", aggregateState.error_code);
   renderRunnerProgress(
     Math.min(99, aggregateState.total ? aggregateState.current / aggregateState.total * 100 : 0),
-    aggregateState.error_code === "SYNC_HARD_TIMEOUT" ? "同步超时 · 已保留成功结果" : "同步失败 · 请返回 Memorive 查看诊断",
+    aggregateState.error_code === "SYNC_HARD_TIMEOUT" ? t("runnerTimeoutMeta") : t("runnerFailedMeta"),
     "error"
   );
   await chrome.runtime.sendMessage({
@@ -1055,10 +1056,10 @@ Promise.race([executeSync(), hardTimeout]).then(async ({ results, completed, fin
     terminalReportWritten = true;
   } catch (reportError) {
     const reportErrorCode = safeErrorCode(reportError);
-    statusNode.textContent = `同步已停止，但终止报告写入失败：${reportErrorCode}。此页面将保留。`;
+    statusNode.textContent = t("runnerReportFailed", reportErrorCode);
     renderRunnerProgress(
       Math.min(99, aggregateState.total ? aggregateState.current / aggregateState.total * 100 : 0),
-      "终止报告写入失败 · 页面已保留",
+      t("runnerReportFailedMeta"),
       "error"
     );
   }

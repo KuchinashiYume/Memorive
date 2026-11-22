@@ -226,7 +226,7 @@ def configured_extension(source, destination, rows):
     patterns=[f'https://{host}/*' for row in active_sites(rows) for host in row['hosts']]
     manifest['host_permissions']=patterns
     manifest['content_scripts']=[dict(matches=patterns,js=['site_profiles.js','recording.js','content.js'],run_at='document_start')] if patterns else []
-    material={p.name:p.read_bytes() for p in source.iterdir() if p.is_file()}
+    material={p.relative_to(source).as_posix():p.read_bytes() for p in source.rglob('*') if p.is_file()}
     material['manifest.json']=(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
     material['site_profiles.js']=extension_profile_script(rows).encode('utf-8')
     digest=canonical_sha256({k:hashlib.sha256(v).hexdigest() for k,v in sorted(material.items())})
@@ -234,6 +234,7 @@ def configured_extension(source, destination, rows):
     target.mkdir(parents=True,exist_ok=True)
     for name,body in material.items():
         path=target/name
+        path.parent.mkdir(parents=True,exist_ok=True)
         if path.exists():
             if path.read_bytes()!=body:
                 raise ValueError('BROWSER_PACKAGE_CANDIDATE_CHANGED')

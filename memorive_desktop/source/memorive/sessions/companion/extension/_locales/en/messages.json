@@ -1,0 +1,188 @@
+{
+  "extName": {
+    "message": "Memo Web Conversations"
+  },
+  "extDescription": {
+    "message": "Save the conversation you are viewing on a major AI website, or sync the sites you set up."
+  },
+  "actionTitle": {
+    "message": "Save or sync to Memo"
+  },
+  "languageButton": {
+    "message": "Language"
+  },
+  "popupHeading": {
+    "message": "Save a web conversation"
+  },
+  "popupIntro": {
+    "message": "Start, then scroll the page to collect the conversation as it loads."
+  },
+  "recordStart": {
+    "message": "Start recording"
+  },
+  "recordStop": {
+    "message": "Stop and save"
+  },
+  "recordStartTitle": {
+    "message": "Official AI websites only; after starting, scroll to load the conversation"
+  },
+  "recordStopTitle": {
+    "message": "Stop and save the messages collected so far"
+  },
+  "testRead": {
+    "message": "Test read"
+  },
+  "recordHint": {
+    "message": "Saved when you stop · ends after 10 minutes"
+  },
+  "unsupportedHint": {
+    "message": "Open a conversation on a supported AI website, or save this page as HTML and import it from the Memo inbox."
+  },
+  "recordingProgress": {
+    "message": "$1 messages · $2 s left"
+  },
+  "recordingProgressGap": {
+    "message": "$1 messages · $2 not yet in place · $3 s left"
+  },
+  "recordingSaving": {
+    "message": "Recording stopped, saving…"
+  },
+  "recordingSaved": {
+    "message": "Saved $1 messages (partial record) · import them in Memo"
+  },
+  "recordingSavedGap": {
+    "message": "Saved $1 messages (partial record); $2 could not be placed and were left out · import them in Memo"
+  },
+  "testReading": {
+    "message": "Reading the current page…"
+  },
+  "testResult": {
+    "message": "Read $1 messages on this page; nothing saved"
+  },
+  "siteSync": {
+    "message": "Site sync"
+  },
+  "syncSelected": {
+    "message": "Sync selected sites"
+  },
+  "syncStarting": {
+    "message": "Syncing in the background"
+  },
+  "syncProgress": {
+    "message": "Syncing $1 · $2 done$3"
+  },
+  "syncDone": {
+    "message": "Synced $1$2"
+  },
+  "syncFailedCount": {
+    "message": " · $1 failed"
+  },
+  "syncError": {
+    "message": "Sync failed: $1"
+  },
+  "syncStatusUnreadable": {
+    "message": "Cannot read the sync status; reload this extension on the extensions page."
+  },
+  "errorNotOfficial": {
+    "message": "Only conversation pages of official AI websites are supported"
+  },
+  "errorVerification": {
+    "message": "Complete the website's verification first, then try again"
+  },
+  "errorNoConversation": {
+    "message": "No conversation is visible; open one first"
+  },
+  "errorPageChanged": {
+    "message": "The page changed; try again"
+  },
+  "errorGeneric": {
+    "message": "Reading failed; reload the page and try again"
+  },
+  "runnerTitle": {
+    "message": "Memorive site sync"
+  },
+  "runnerHeading": {
+    "message": "Site conversation sync"
+  },
+  "runnerIntro": {
+    "message": "Syncing conversations"
+  },
+  "runnerProgressLabel": {
+    "message": "Site sync progress"
+  },
+  "runnerPreparing": {
+    "message": "Preparing the sync…"
+  },
+  "runnerFinding": {
+    "message": "Looking for open sites you are signed in to…"
+  },
+  "stageDiscovering": {
+    "message": "Finding open sites"
+  },
+  "stageIndexing": {
+    "message": "Reading the conversation list"
+  },
+  "stageCapturing": {
+    "message": "Reading full conversations"
+  },
+  "stageDownloading": {
+    "message": "Writing the local bundle"
+  },
+  "runnerSourcesSync": {
+    "message": "$1-source sync"
+  },
+  "runnerAllSites": {
+    "message": "all sites"
+  },
+  "runnerSiteProgress": {
+    "message": "site $1/$2"
+  },
+  "runnerItemProgress": {
+    "message": ", conversation $1/$2"
+  },
+  "runnerPreparingSuffix": {
+    "message": " · preparing"
+  },
+  "runnerStatusProgress": {
+    "message": "Syncing: $1 · $2 ($3$4); complete $5, failed $6."
+  },
+  "runnerTitleProgress": {
+    "message": "Memorive sync $1 · $2 · $3$4"
+  },
+  "runnerSummary": {
+    "message": "$1: $2; complete $3, failed $4."
+  },
+  "runnerTitleSummary": {
+    "message": "Memorive $1 · $2/$3"
+  },
+  "runnerDone": {
+    "message": "Sync complete: $1 sites, $2 new or updated, $3 unchanged, $4 candidates skipped, $5 failed."
+  },
+  "runnerIncomplete": {
+    "message": "The sync did not finish; a diagnostic report was written on this computer and Memorive picks it up when it refreshes."
+  },
+  "runnerDoneMeta": {
+    "message": "Sync complete · bundle written on this computer"
+  },
+  "runnerIncompleteMeta": {
+    "message": "Sync not finished · diagnostic report written"
+  },
+  "runnerTimeout": {
+    "message": "The sync stopped at its $1-minute safety limit; writing the stop report."
+  },
+  "runnerFailed": {
+    "message": "Sync failed: $1"
+  },
+  "runnerTimeoutMeta": {
+    "message": "Sync timed out · finished results kept"
+  },
+  "runnerFailedMeta": {
+    "message": "Sync failed · see the diagnostics in Memorive"
+  },
+  "runnerReportFailed": {
+    "message": "The sync stopped, but writing the stop report failed: $1. This page stays open."
+  },
+  "runnerReportFailedMeta": {
+    "message": "Stop report not written · page kept open"
+  }
+}
