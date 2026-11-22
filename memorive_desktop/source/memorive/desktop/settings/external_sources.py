@@ -35,11 +35,12 @@ from memorive.models.endpoints import normalize_external_api_base_url
 from memorive.models.validation.transport import UrllibHttpTransport
 from memorive.desktop.settings.store import SettingsStore
 from memorive.desktop.settings.metadata_transport import (PublicMetadataHttpTransport, metadata_rate_limit,
-    LIVEBENCH_GITHUB_API, GITHUB_API_VERSION)
+    LIVEBENCH_GITHUB_API, LIVEBENCH_RELEASE_FILE, LIVEBENCH_REPOSITORY, GITHUB_API_VERSION)
 from memorive.platform.public_http import MetadataRateLimitError, metadata_error_code, transient_metadata_error
 from memorive.desktop.settings.livebench_reference import DEFAULT_ENDPOINT as LIVEBENCH_ENDPOINT, release_urls, normalized_rows as livebench_rows
 
 SCHEMA = "ExternalModelReference-v1"
+_REMOVED_LIVEBENCH_ENDPOINT = 'https://raw.githubusercontent.com/LiveBench/new-livebench/main/src/lib/constants.js'
 
 
 def _github_commit(body):
@@ -48,7 +49,7 @@ def _github_commit(body):
         sha = data.get('sha')
         if (not isinstance(sha, str) or not re.fullmatch(r'[0-9a-f]{40}', sha)
                 or data.get('url') != LIVEBENCH_GITHUB_API + '/commits/' + sha
-                or data.get('html_url') != 'https://github.com/LiveBench/new-livebench/commit/' + sha):
+                or data.get('html_url') != 'https://github.com/' + LIVEBENCH_REPOSITORY + '/commit/' + sha):
             raise ValueError
         return sha
     except (ValueError, TypeError, AttributeError) as exc:
@@ -80,7 +81,7 @@ def _github_content(body, path, commit):
     if data.get('sha') != blob:
         raise ValueError('LIVEBENCH_GITHUB_HASH_MISMATCH')
     if (data.get('git_url') != LIVEBENCH_GITHUB_API + '/git/blobs/' + blob
-            or data.get('html_url') != 'https://github.com/LiveBench/new-livebench/blob/' + commit + '/' + path):
+            or data.get('html_url') != 'https://github.com/' + LIVEBENCH_REPOSITORY + '/blob/' + commit + '/' + path):
         raise ValueError('LIVEBENCH_GITHUB_IDENTITY_INVALID')
     return raw, dict(path=path, commit=commit, git_blob_sha1=blob, bytes=size,
                      decoded_sha256=hashlib.sha256(raw).hexdigest())
@@ -573,6 +574,8 @@ class ExternalDataSources:
             if not isinstance(row, dict) or row.get("source_id") not in defaults or row["source_id"] in seen:
                 raise ValueError("EXTERNAL_SOURCE_SLOT_INVALID")
             seen.add(row["source_id"])
+            if row.get("endpoint") == _REMOVED_LIVEBENCH_ENDPOINT:   # saved before LiveBench moved
+                row = {**row, "endpoint": LIVEBENCH_ENDPOINT}
             # Only absent fields are filled. Invalid values, unknown fields and
             # missing credential-origin bindings still fail validation.
             accepted.append(validate_source({**defaults[row["source_id"]], **row}))
@@ -887,7 +890,7 @@ class ExternalDataSources:
             headers = {"Accept": "application/json, application/zip, application/xml, text/xml", "User-Agent": "Memorive-QualityNew-References/1"}
             env = source["credential_env"]
             github_live = source['format'] == 'LIVEBENCH_RELEASE' and source['endpoint'] == LIVEBENCH_ENDPOINT
-            github_commit, github_files, github_paths = None, [], ['src/lib/constants.js']
+            github_commit, github_files, github_paths = None, [], [LIVEBENCH_RELEASE_FILE]
             if github_live:
                 if env:
                     raise ValueError('EXTERNAL_METADATA_PUBLIC_CREDENTIAL_FORBIDDEN')
@@ -982,7 +985,7 @@ class ExternalDataSources:
                     if len(live_documents) == 1:
                         live_release, canonical_urls = release_urls(source['endpoint'], live_documents[0])
                         if github_live:
-                            github_paths = ['src/lib/constants.js'] + [u.split('/main/',1)[1] for u in canonical_urls[1:]]
+                            github_paths = [LIVEBENCH_RELEASE_FILE] + [u.split('/main/',1)[1] for u in canonical_urls[1:]]
                         else:
                             live_urls = canonical_urls
                     if len(live_documents)<3:
@@ -1088,7 +1091,7 @@ class ExternalDataSources:
                                 attribution=source["display_name"] + " | " + source["endpoint"],
                                 redistributed_snapshot_approved=False)
                 if github_live:
-                    snapshot['upstream_identity'] = dict(repository='LiveBench/new-livebench',
+                    snapshot['upstream_identity'] = dict(repository=LIVEBENCH_REPOSITORY,
                         commit=github_commit, api_version=GITHUB_API_VERSION, files=github_files)
                     receipt['upstream_identity'] = snapshot['upstream_identity']
                 snapshot["sha256"] = canonical_sha256(snapshot)

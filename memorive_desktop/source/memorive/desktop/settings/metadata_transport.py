@@ -19,8 +19,13 @@ from memorive.platform.tls import PUBLIC_ROOTS_SHA256, public_metadata_context
 from memorive.platform.public_http import MetadataResponse, curl_path
 
 ECB_ENDPOINT = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
-_LIVEBENCH_BASE = 'https://raw.githubusercontent.com/LiveBench/new-livebench/main/'
-LIVEBENCH_GITHUB_API = 'https://api.github.com/repos/LiveBench/new-livebench'
+# LiveBench publishes its tables in the repository of its site. The former data repository
+# (LiveBench/new-livebench, release list in src/lib/constants.js) was removed in November 2026;
+# the site repository has the same public/ files and lists the releases in src/App.js.
+LIVEBENCH_REPOSITORY = 'LiveBench/livebench.github.io'
+LIVEBENCH_RELEASE_FILE = 'src/App.js'
+_LIVEBENCH_BASE = 'https://raw.githubusercontent.com/' + LIVEBENCH_REPOSITORY + '/main/'
+LIVEBENCH_GITHUB_API = 'https://api.github.com/repos/' + LIVEBENCH_REPOSITORY
 GITHUB_API_VERSION = '2026-03-10'
 
 
@@ -50,7 +55,7 @@ def metadata_rate_limit(response, *, now=None):
 
 def is_livebench_github_metadata(url):
     return url == LIVEBENCH_GITHUB_API + '/commits/main' or bool(re.fullmatch(
-        re.escape(LIVEBENCH_GITHUB_API) + r'/contents/(?:src/lib/constants\.js|public/categories_\d{4}_\d{2}_\d{2}\.json|public/table_\d{4}_\d{2}_\d{2}\.csv)\?ref=[0-9a-f]{40}', url))
+        re.escape(LIVEBENCH_GITHUB_API) + r'/contents/(?:' + re.escape(LIVEBENCH_RELEASE_FILE) + r'|public/categories_\d{4}_\d{2}_\d{2}\.json|public/table_\d{4}_\d{2}_\d{2}\.csv)\?ref=[0-9a-f]{40}', url))
 
 def is_builtin_public_metadata(url):
     from memorive.desktop.settings.reference_pricing import is_endpoint_url
@@ -59,7 +64,7 @@ def is_builtin_public_metadata(url):
     if is_livebench_github_metadata(url):
         return True
     if url in {'https://epoch.ai/data/benchmark_data.zip', 'https://openrouter.ai/api/v1/models',
-               _LIVEBENCH_BASE + 'src/lib/constants.js'}:
+               _LIVEBENCH_BASE + LIVEBENCH_RELEASE_FILE}:
         return True
     return bool(re.fullmatch(re.escape(_LIVEBENCH_BASE) +
         r'public/(?:categories_\d{4}_\d{2}_\d{2}\.json|table_\d{4}_\d{2}_\d{2}\.csv)', url))

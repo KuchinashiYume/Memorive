@@ -1,6 +1,6 @@
 """Public LiveBench release tables; data only, never execute downloaded JS.
 
-Source contract: LiveBench/new-livebench README, src/lib/constants.js and
+Source contract: LiveBench/livebench.github.io, src/App.js (the release dates) and
 src/Table/Averaging.js. Seven category means have equal weight. Raw model
 identity, effort, release and input hashes remain visible; no inferred grades.
 """
@@ -10,8 +10,10 @@ import io
 import re
 from urllib.parse import urlsplit
 
-SUFFIX='/src/lib/constants.js'
-DEFAULT_ENDPOINT='https://raw.githubusercontent.com/LiveBench/new-livebench/main'+SUFFIX
+from memorive.desktop.settings.metadata_transport import LIVEBENCH_RELEASE_FILE, LIVEBENCH_REPOSITORY
+
+SUFFIX='/'+LIVEBENCH_RELEASE_FILE
+DEFAULT_ENDPOINT='https://raw.githubusercontent.com/'+LIVEBENCH_REPOSITORY+'/main'+SUFFIX
 CATEGORY_METRICS={'Reasoning':'livebench_reasoning','Coding':'livebench_coding',
     'Agentic Coding':'livebench_agentic_coding','Mathematics':'livebench_math',
     'Data Analysis':'livebench_data_analysis','Language':'livebench_language','IF':'livebench_instruction_following'}
@@ -20,12 +22,10 @@ def release_urls(endpoint,body):
     if not url.path.endswith(SUFFIX) or url.query or url.fragment:
         raise ValueError('LIVEBENCH_RELEASE_ENDPOINT_INVALID')
     text=body.decode('utf-8-sig')
-    match=re.search(r'export\s+const\s+RELEASES\s*=\s*\[([^\]]+)\]',text)
-    if not match:
-        raise ValueError('LIVEBENCH_RELEASE_LIST_MISSING')
-    releases=re.findall(r'["\'](\d{4}-\d{2}-\d{2})["\']',match[1])
+    # The page picks a release with useState('2026-06-25') and setSelectedDate('2026-06-25').
+    releases=re.findall(r'(?:useState|setSelectedDate)\(\s*["\'](\d{4}-\d{2}-\d{2})["\']\s*\)',text)
     if not releases:
-        raise ValueError('LIVEBENCH_RELEASE_LIST_EMPTY')
+        raise ValueError('LIVEBENCH_RELEASE_LIST_MISSING')
     for value in releases:
         date.fromisoformat(value)
     release=max(releases)

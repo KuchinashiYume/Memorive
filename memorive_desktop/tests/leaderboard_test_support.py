@@ -78,7 +78,7 @@ class Transport:
         if "livebench" in url.lower():
             key = "artificial-analysis"
             data = self.data[key]
-            body = ('export const RELEASES = ["' + data["release"] + '"];').encode() if url.endswith("constants.js") else (
+            body = ("setSelectedDate('" + data["release"] + "');").encode() if url.endswith("App.js") else (
                 json.dumps(data["categories"]).encode() if url.endswith(".json") else data["table_csv"].encode())
         elif "epoch.ai" in url:
             key, body = "epoch-ai", self.data["epoch-ai"]

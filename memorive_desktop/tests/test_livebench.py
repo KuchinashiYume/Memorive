@@ -8,6 +8,7 @@ from memorive.desktop.settings.external_sources import ExternalDataSources,defau
 from memorive.desktop.settings.livebench_reference import CATEGORY_METRICS,release_urls,DEFAULT_ENDPOINT
 from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import configure_aa
+from memorive.platform.json_files import canonical_sha256
 
 def bundle(models=None):
     categories={name:[f'task_{i}'] for i,name in enumerate(CATEGORY_METRICS)}
@@ -23,7 +24,7 @@ class Transport:
         self.calls.append(kw); n=(len(self.calls)-1)%3
         if len(self.calls)==self.fail: return HttpResponse(503,b'not reflected')
         data=bundle()
-        body=[b'export const RELEASES = ["2026-01-01","2026-06-25"];',
+        body=[b"useState('2026-06-25'); setSelectedDate('2026-01-01'); setSelectedDate('2026-06-25');",
             json.dumps(data['categories']).encode(),data['table_csv'].encode()][n]
         return HttpResponse(200,body)
 
@@ -82,6 +83,20 @@ def test_invalid_score_rejected(bad):
     with pytest.raises(ValueError): normalize_payload(default_sources()[0],data)
 
 def test_remote_javascript_is_not_executed():
-    release,urls=release_urls(DEFAULT_ENDPOINT,b'alert("no"); export const RELEASES=["2026-06-25"];')
+    release,urls=release_urls(DEFAULT_ENDPOINT,b"alert('no'); setSelectedDate('2026-06-25');")
     assert release=='2026-06-25' and len(urls)==3
-    assert all(u.startswith('https://raw.githubusercontent.com/LiveBench/new-livebench/main/') for u in urls)
+    assert all(u.startswith('https://raw.githubusercontent.com/LiveBench/livebench.github.io/main/') for u in urls)
+
+
+def test_a_source_saved_with_the_removed_livebench_address_reads_from_the_new_one(tmp_path):
+    # LiveBench removed its data repository (new-livebench) in November 2026; the tables are now in the
+    # repository of its site, with the release dates in src/App.js.
+    s=ExternalDataSources(tmp_path,environment={})
+    state=s._load()
+    state['sources'][0]['endpoint']='https://raw.githubusercontent.com/LiveBench/new-livebench/main/src/lib/constants.js'
+    state['sha256']=canonical_sha256(state)
+    s.writer.write_json(s.path,state)
+    assert s.get_state()['sources'][0]['config']['endpoint']==DEFAULT_ENDPOINT
+    release,urls=release_urls(DEFAULT_ENDPOINT,b"const [d,setSelectedDate]=useState('2026-06-25');\nsetSelectedDate('2024-06-24');")
+    assert release=='2026-06-25' and urls[2].endswith('/LiveBench/livebench.github.io/main/public/table_2026_06_25.csv')
+

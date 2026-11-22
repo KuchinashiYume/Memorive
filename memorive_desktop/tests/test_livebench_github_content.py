@@ -29,7 +29,7 @@ def _file(**changes) -> dict:
     value = {"type": "file", "path": PATH, "name": "table.csv", "size": len(RAW), "encoding": "base64",
              "content": ENCODED[:20] + "\n" + ENCODED[20:], "sha": _blob(RAW),
              "git_url": LIVEBENCH_GITHUB_API + "/git/blobs/" + _blob(RAW),
-             "html_url": "https://github.com/LiveBench/new-livebench/blob/" + COMMIT + "/" + PATH}
+             "html_url": "https://github.com/LiveBench/livebench.github.io/blob/" + COMMIT + "/" + PATH}
     value.update(changes)
     return value
 
@@ -63,7 +63,7 @@ def test_the_named_file_at_the_named_commit_is_decoded():
     ({"sha": "0" * 40}, "LIVEBENCH_GITHUB_HASH_MISMATCH"),
     ({"git_url": "https://api.github.com/repos/someone/else/git/blobs/" + _blob(RAW)},
      "LIVEBENCH_GITHUB_IDENTITY_INVALID"),
-    ({"html_url": "https://github.com/LiveBench/new-livebench/blob/main/" + PATH}, "LIVEBENCH_GITHUB_IDENTITY_INVALID"),
+    ({"html_url": "https://github.com/LiveBench/livebench.github.io/blob/main/" + PATH}, "LIVEBENCH_GITHUB_IDENTITY_INVALID"),
 ])
 def test_anything_but_that_exact_file_is_refused(changes, code):
     assert _content(_file(**changes)) == code
@@ -82,7 +82,7 @@ def test_changed_bytes_with_the_old_hash_are_refused():
 
 def _commit(**changes) -> bytes:
     value = {"sha": COMMIT, "url": LIVEBENCH_GITHUB_API + "/commits/" + COMMIT,
-             "html_url": "https://github.com/LiveBench/new-livebench/commit/" + COMMIT}
+             "html_url": "https://github.com/LiveBench/livebench.github.io/commit/" + COMMIT}
     value.update(changes)
     return json.dumps(value).encode()
 
@@ -93,9 +93,9 @@ def test_the_commit_page_gives_the_commit():
 
 @pytest.mark.parametrize("body", [
     _commit(sha="A" * 40, url=LIVEBENCH_GITHUB_API + "/commits/" + "A" * 40,
-            html_url="https://github.com/LiveBench/new-livebench/commit/" + "A" * 40),
+            html_url="https://github.com/LiveBench/livebench.github.io/commit/" + "A" * 40),
     _commit(sha="a" * 39, url=LIVEBENCH_GITHUB_API + "/commits/" + "a" * 39,
-            html_url="https://github.com/LiveBench/new-livebench/commit/" + "a" * 39),
+            html_url="https://github.com/LiveBench/livebench.github.io/commit/" + "a" * 39),
     _commit(url="https://api.github.com/repos/someone/else/commits/" + COMMIT),
     _commit(html_url="https://github.com/someone/else/commit/" + COMMIT),
     b"not json",
