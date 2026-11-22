@@ -131,6 +131,17 @@ def test_universal_current_page_bundle_imports_as_partial_un_source(tmp_path: Pa
     assert [item["role"] for item in detail["messages"]] == ["user", "assistant"]
 
 
+@pytest.mark.parametrize(("url", "name"), [
+    ("https://gemini.google.com/u/0/app/41b6593158aae374", "Gemini 网页 · 当前页录入"),
+    ("https://chat.deepseek.com/a/chat/s/visible-session", "DeepSeek 网页 · 当前页录入"),
+])
+def test_a_current_page_capture_is_listed_by_the_site_brand(tmp_path: Path, url: str, name: str) -> None:
+    controller = _controller(tmp_path)
+    controller.import_browser_bundle(_current_page_bundle(source_url=url))
+    listed = controller.call("sessions.list", {"source": "universal", "search": "", "limit_per_source": 10})
+    assert listed["rows"][0]["source_name"] == name
+
+
 def test_current_page_bundle_rejects_query_fragment_and_non_https_remote_url(tmp_path: Path) -> None:
     controller = _controller(tmp_path)
 

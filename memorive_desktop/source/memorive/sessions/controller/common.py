@@ -143,6 +143,14 @@ def _universal_source_name(source_locator: Any) -> str:
         host = ""
     if host in _UNIVERSAL_SITE_NAMES:
         return f"{_UNIVERSAL_SITE_NAMES[host]} · 当前页录入"
+    # Other official AI websites the extension records (Gemini, DeepSeek, Kimi, Grok) by their brand name.
+    from memorive.sessions.companion.site_profiles import official_web_identity
+    try:
+        identity = official_web_identity(str(source_locator or ""))
+    except ValueError:
+        identity = None
+    if identity:
+        return f"{identity['name']} 网页 · 当前页录入"
     safe_host = re.sub(r"[^a-z0-9.-]+", "", host)[:96]
     return f"{safe_host or '通用 AI 网页'} · 当前页录入"
 

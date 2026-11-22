@@ -1642,6 +1642,23 @@ class BrowserCompanionDesktop:
             os.replace(temporary_io, destination_io)
         return destination
 
+    def _clear_retained_download(self, source: Path, retained: Path, payload_bytes: bytes) -> bool:
+        """Remove a bridge file from the browser's download folder once Memorive keeps an identical copy, so
+        captures move out of Downloads instead of piling up there. Only files in the extension's own
+        "Memorive会话桥接" download folder go; Memorive's own folder and folders the user granted stay as
+        they are, and so does a file whose copy is missing or differs."""
+        managed_root = self._browser_session_managed_root().resolve(strict=False)
+        source = source.resolve(strict=False)
+        if source.parent.name != "Memorive会话桥接" or source.is_relative_to(managed_root):
+            return False
+        try:
+            if windows_io_path(retained).read_bytes() != payload_bytes:
+                return False
+            windows_io_path(source).unlink()
+        except OSError:
+            return False  # still open in the browser, or already gone: try again on the next refresh
+        return True
+
     def _browser_session_download_roots(self) -> list[Path]:
         """Resolve the app-owned intake first, then compatible browser downloads."""
         candidates: list[Path] = [self._browser_session_managed_root()]
@@ -1752,6 +1769,7 @@ class BrowserCompanionDesktop:
         intake_since = setup_state.get("prepared_at_unix") if setup_state.get("prepared") else None
         site_profile = setup_state.get("site_profile_sha256") if setup_state.get("prepared") else None
         ignored_files = 0
+        moved_downloads = 0
         imported_files = 0
         imported_sessions = 0
         retained_files: set[Path] = set()
@@ -1760,9 +1778,9 @@ class BrowserCompanionDesktop:
             try:
                 report_bytes = windows_io_path(report).read_bytes()
                 if 0 < len(report_bytes) <= 1024 * 1024:
-                    retained_files.add(
-                        self._retain_browser_session_artifact(report, report_bytes)
-                    )
+                    retained = self._retain_browser_session_artifact(report, report_bytes)
+                    retained_files.add(retained)
+                    moved_downloads += self._clear_retained_download(report, retained, report_bytes)
             except OSError:
                 continue
         for source in sorted(candidates, key=lambda value: (windows_io_path(value).stat().st_mtime_ns, value.name)):
@@ -1774,6 +1792,8 @@ class BrowserCompanionDesktop:
                 payload_bytes = source_io.read_bytes()
                 digest = hashlib.sha256(payload_bytes).hexdigest().upper()
                 if digest in imported_hashes:
+                    retained = self._retain_browser_session_artifact(source, payload_bytes)
+                    moved_downloads += self._clear_retained_download(source, retained, payload_bytes)
                     continue
                 payload = json.loads(payload_bytes.decode("utf-8-sig"))
                 if isinstance(intake_since, int) or site_profile:
@@ -1788,12 +1808,12 @@ class BrowserCompanionDesktop:
                     if not current_capture or (site_profile and payload.get("site_profile_sha256") != site_profile):
                         ignored_files += 1
                         continue
-                retained_files.add(
-                    self._retain_browser_session_artifact(source, payload_bytes)
-                )
+                retained = self._retain_browser_session_artifact(source, payload_bytes)
+                retained_files.add(retained)
                 receipt = self.sessions.import_session_file(source)
                 if receipt.get("status") != "PASS":
                     raise ValueError("BROWSER_SESSION_IMPORT_NOT_ACCEPTED")
+                moved_downloads += self._clear_retained_download(source, retained, payload_bytes)
                 imported_hashes.add(digest)
                 imported_files += 1
                 imported_sessions += int(receipt.get("imported_count", 0))
@@ -1844,6 +1864,7 @@ class BrowserCompanionDesktop:
             "imported_file_count": imported_files,
             "imported_session_count": imported_sessions,
             "managed_artifact_count": len(retained_files),
+            "moved_download_count": moved_downloads,
             "managed_directory": str(self._browser_session_managed_root()),
             "failure_count": len(failures),
             "failures": failures,
