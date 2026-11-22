@@ -11,7 +11,8 @@ import pytest
 from leaderboard_test_support import LIVEBENCH_SOURCE  # noqa: F401  (puts source/ on the path)
 from memorive.desktop.settings import lmarena_reference as lm
 from memorive.desktop.settings.external_sources import ExternalDataSources, default_sources, normalize_payload
-from memorive.desktop.settings.leaderboard import DEFAULTS, FORMER_DEFAULT_WEIGHTS, PREF_SCHEMA, LeaderboardService, project_rows
+from memorive.desktop.settings.leaderboard import (DEFAULTS, FORMER_DEFAULT_WEIGHTS, FORMER_PREF_SCHEMA, PREF_SCHEMA,
+                                                   LeaderboardService, project_rows)
 from memorive.desktop.settings.livebench_reference import DEFAULT_ENDPOINT as LIVEBENCH_ENDPOINT
 from memorive.desktop.settings.metadata_transport import is_builtin_public_metadata
 from memorive.models.identity import identity
@@ -152,13 +153,33 @@ def test_a_renamed_livebench_slot_is_kept(tmp_path):
     assert saved(tmp_path, LIVEBENCH_SOURCE)["format"] == "LIVEBENCH_RELEASE"
 
 
-@pytest.mark.parametrize(("weights", "expected"), [
-    (FORMER_DEFAULT_WEIGHTS, DEFAULTS["weights"]),
-    ({"artificial-analysis": 30, "epoch-ai": 70}, {"artificial-analysis": 30, "epoch-ai": 70}),
+@pytest.mark.parametrize(("schema", "weights", "expected"), [
+    (FORMER_PREF_SCHEMA, FORMER_DEFAULT_WEIGHTS, DEFAULTS["weights"]),  # saved while LiveBench held the slot
+    (FORMER_PREF_SCHEMA, {"artificial-analysis": 30, "epoch-ai": 70}, {"artificial-analysis": 30, "epoch-ai": 70}),
+    (PREF_SCHEMA, FORMER_DEFAULT_WEIGHTS, FORMER_DEFAULT_WEIGHTS),  # LMArena only, chosen after the change
 ])
-def test_weights_left_at_the_former_default_follow_the_new_one(tmp_path, weights, expected):
-    value = {"schema_version": PREF_SCHEMA, "revision": 2, "preferences": {**deepcopy(DEFAULTS), "weights": weights}}
+def test_weights_left_at_the_former_default_follow_the_new_one(tmp_path, schema, weights, expected):
+    value = {"schema_version": schema, "revision": 2, "preferences": {**deepcopy(DEFAULTS), "weights": weights}}
     value["sha256"] = canonical_sha256(value)
     (tmp_path / "leaderboard_preferences.json").write_text(json.dumps(value), encoding="utf-8")
     service = LeaderboardService(ExternalDataSources(tmp_path / "external", environment={}), tmp_path)
     assert service._load()["preferences"]["weights"] == expected
+
+
+def test_lmarena_only_stays_after_a_save(tmp_path):
+    service = LeaderboardService(ExternalDataSources(tmp_path / "external", environment={}), tmp_path)
+    service.save(expected_revision=0, changes={"weights": {"artificial-analysis": 100, "epoch-ai": 0}})
+    stored = json.loads((tmp_path / "leaderboard_preferences.json").read_text(encoding="utf-8"))
+    assert stored["schema_version"] == PREF_SCHEMA
+    assert service._load()["preferences"]["weights"] == {"artificial-analysis": 100, "epoch-ai": 0}
+
+
+def test_a_former_file_is_written_back_as_v2_on_the_next_save(tmp_path):
+    value = {"schema_version": FORMER_PREF_SCHEMA, "revision": 4,
+             "preferences": {**deepcopy(DEFAULTS), "weights": FORMER_DEFAULT_WEIGHTS}}
+    value["sha256"] = canonical_sha256(value)
+    (tmp_path / "leaderboard_preferences.json").write_text(json.dumps(value), encoding="utf-8")
+    service = LeaderboardService(ExternalDataSources(tmp_path / "external", environment={}), tmp_path)
+    service.save(expected_revision=4, changes={"currency": "CNY"})
+    stored = json.loads((tmp_path / "leaderboard_preferences.json").read_text(encoding="utf-8"))
+    assert stored["schema_version"] == PREF_SCHEMA and stored["preferences"]["weights"] == DEFAULTS["weights"]

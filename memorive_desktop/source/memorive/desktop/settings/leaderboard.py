@@ -16,9 +16,12 @@ from memorive.models.price_registry import alias_model_id, official_catalog_mode
 from memorive.models.identity import VENDORS, identity, join_base, number, text
 
 SCHEMA = "ModelLeaderboardProjection-v4"
-PREF_SCHEMA = "ModelLeaderboardPreferences-v1"
+PREF_SCHEMA = "ModelLeaderboardPreferences-v2"
+# Files written while LiveBench held the first slot (before 2026-11-22). Their weights {artificial-analysis: 100,
+# epoch-ai: 0} are the former default and follow the current one; in a v2 file the same weights mean LMArena only.
+FORMER_PREF_SCHEMA = "ModelLeaderboardPreferences-v1"
 # Ability by default: Epoch AI's capability index and LMArena's text board (slot "artificial-analysis") in equal
-# parts. FORMER_DEFAULT_WEIGHTS (LiveBench alone) are read as the current default.
+# parts. FORMER_DEFAULT_WEIGHTS (LiveBench alone) in a FORMER_PREF_SCHEMA file are read as the current default.
 DEFAULTS = {"currency": "USD", "weights": {"artificial-analysis": 50, "epoch-ai": 50},
             "preset": "general", "ability_weight": 70, "cost_weight": 30,
             "input_ratio": 0.8, "stars": []}
@@ -345,14 +348,16 @@ class LeaderboardService:
             return {"schema_version": PREF_SCHEMA, "revision": 0, "preferences": deepcopy(DEFAULTS)}
         value = json.loads(self.path.read_text(encoding="utf-8"))
         digest = value.pop("sha256", None)
-        if digest != canonical_sha256(value) or value.get("schema_version") != PREF_SCHEMA or type(value.get("revision")) is not int:
+        if (digest != canonical_sha256(value) or value.get("schema_version") not in {PREF_SCHEMA, FORMER_PREF_SCHEMA}
+                or type(value.get("revision")) is not int):
             raise ValueError("LEADERBOARD_PREFERENCES_CORRUPT")
         preferences = value["preferences"]
         if not isinstance(preferences, dict):
             raise ValueError("LEADERBOARD_PREFERENCES_INVALID")
-        if preferences.get("weights") == FORMER_DEFAULT_WEIGHTS:
+        if value["schema_version"] == FORMER_PREF_SCHEMA and preferences.get("weights") == FORMER_DEFAULT_WEIGHTS:
             # Never changed by the person: follow the default (Epoch AI and LMArena), not the stalled LiveBench.
             preferences = {**preferences, "weights": deepcopy(DEFAULTS["weights"])}
+        value["schema_version"] = PREF_SCHEMA  # the next save writes v2, where 100 / 0 means LMArena only
         value["preferences"] = validate_preferences({**deepcopy(DEFAULTS), **preferences})
         return value
 
