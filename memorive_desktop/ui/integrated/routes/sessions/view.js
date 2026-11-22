@@ -51,6 +51,8 @@
   let shownBrief = null;                // its brief (null for a draft made before v2.00)
   let shownReview = null;               // library.refinement_review of the shown version: product, edits
   let editing = null;                   // the item being edited: { index, field:'text' | 'answer' }
+  // 修改记录: open or not, the version chosen in it (a number) and how it shows (compared with the current one, or full).
+  const historyView = { open:false, chosen:null, mode:'compare', ticket:0 };
   let shownRefinementCurrent = false;   // the shown version read the conversation the page shows now
   const ALL_SOURCE_PAGE_SIZE = 30;
   const ALL_SOURCE_PREFETCH_ROW = 20;
@@ -466,6 +468,8 @@
     shownBrief = null;
     shownReview = null;
     editing = null;
+    Object.assign(historyView, { open:false, chosen:null, mode:'compare' });
+    void drawEditHistory();
     q('#sessions-open-library').hidden = true;
     showSessionView('turns');
     q('#sessions-refinement-items').replaceChildren();
@@ -839,7 +843,7 @@
     })
       .then((receipt) => {
         if (shownReview !== review) return;
-        shownReview = { ...review, edits:receipt.edits };
+        shownReview = { ...review, edits:receipt.edits, history:receipt.history };
         editing = null;
         drawBrief();
       })
@@ -847,6 +851,111 @@
         drawBrief();
         showToast(`没有保存：${error?.message || error}`);
       });
+  };
+
+  // 修改记录: the versions of the shown refinement's edits (the library keeps them; version 1 is the model's brief),
+  // newest first, and the chosen one compared word by word with the current one or shown in full, as Research
+  // Chat shows an answer's versions (shared/version-history.js). Restoring saves the chosen one as the newest.
+  const tr = (s) => Memorive.app?.translate?.(s) || s;
+  const editSources = Object.freeze({
+    ORIGINAL:'模型生成', REWORD:'改措辞', UNREWORD:'恢复原文', ADOPT:'采纳建议', UNADOPT:'撤销采纳',
+    ANSWER:'写结论', UNANSWER:'撤销结论', RESTORE:'恢复'
+  });
+  const editLabel = (v) => `v${v.number} · ${tr(editSources[v.source] || v.source)}`
+    + (v.source === 'RESTORE' && v.restored_from ? ` v${v.restored_from}` : '');
+  const historyIcon = (label, kind, onClick) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `icon-button desktop-toolbar-icon desktop-toolbar-soft ${kind}`;
+    b.setAttribute('aria-label', tr(label));
+    b.dataset.desktopTip = tr(label);
+    b.onclick = onClick;
+    return b;
+  };
+  const drawEditHistory = async () => {
+    const panel = q('#sessions-edit-history-panel');
+    const toggle = q('#sessions-edit-history');
+    const review = shownReview;
+    toggle.hidden = !review?.history || !shownBrief;
+    toggle.setAttribute('aria-pressed', String(historyView.open));
+    if (!historyView.open || toggle.hidden) {
+      panel.hidden = true;
+      q('#sessions-refinement-items').hidden = false;
+      return;
+    }
+    const mine = ++historyView.ticket;
+    const history = review.history;
+    const current = history.at(-1).number;
+    if (!history.some((v) => v.number === historyView.chosen)) historyView.chosen = history.at(-2)?.number ?? current;
+    const chosen = historyView.chosen;
+    const version = history.find((v) => v.number === chosen);
+    const isCurrent = chosen === current;
+    const diff = !isCurrent && historyView.mode === 'compare'
+      ? await Memorive.sessionsBridge.call('library.refinement_edits_diff', {
+        artifact_id:review.artifact_id, from_number:chosen, to_number:current })
+      : null;
+    if (mine !== historyView.ticket || shownReview !== review) return;
+    const H = Memorive.versionHistory;
+    const itemText = (index) => String(shownBrief.items?.[index]?.text || '');
+    const list = H.list(history, {
+      chosen, id:(v) => v.number,
+      name:(v) => editLabel(v) + (v.number === current ? ' · ' + tr('当前') : ''),
+      details:(v) => [H.when(v.saved_at) + (v.item == null ? '' : ' · ' + (itemText(v.item).length > 24
+        ? itemText(v.item).slice(0, 24) + '…' : itemText(v.item)))],
+      onPick:(v) => {
+        historyView.chosen = v.number;
+        void drawEditHistory().then(() => q('#sessions-edit-history-panel .memo-history-version[aria-pressed="true"]')?.focus());
+      }
+    });
+    const bar = document.createElement('div');
+    bar.className = 'memo-history-head';
+    const title = document.createElement('h4');
+    title.textContent = editLabel(version) + (isCurrent ? ' · ' + tr('当前') : '');
+    const tools = document.createElement('div');
+    tools.className = 'memo-history-tools';
+    if (!isCurrent) {
+      const modes = document.createElement('div');
+      modes.className = 'segmented desktop-icon-segmented';
+      modes.setAttribute('role', 'group');
+      modes.setAttribute('aria-label', tr('查看方式'));
+      for (const [key, text, icon] of [['compare', '与当前比较', 'desktop-action-sync-code'], ['full', '全文', 'desktop-action-preview']]) {
+        const b = historyIcon(text, icon, () => {
+          historyView.mode = key;
+          void drawEditHistory();
+        });
+        b.className = `desktop-toolbar-icon desktop-toolbar-ghost ${icon}`;
+        b.textContent = tr(text);
+        b.setAttribute('aria-pressed', String(historyView.mode === key));
+        modes.append(b);
+      }
+      tools.append(modes, historyIcon('恢复为当前版本', 'desktop-action-restore', () => {
+        void Memorive.sessionsBridge.call('library.restore_refinement_edits', { artifact_id:review.artifact_id, number:chosen })
+          .then((receipt) => {
+            if (shownReview !== review) return;
+            shownReview = { ...review, edits:receipt.edits, history:receipt.history };
+            historyView.chosen = null;
+            drawBrief();
+            void drawEditHistory();
+            showToast('已恢复，并保存为新版本');
+          })
+          .catch((error) => showToast(`没有保存：${error?.message || error}`));
+      }));
+    }
+    bar.append(title, tools);
+    const body = [];
+    if (diff) {
+      body.push(...(H.unchanged(diff.blocks)
+        ? [Object.assign(document.createElement('p'), { className:'memo-history-label', textContent:tr('与当前版本内容相同') })]
+        : [H.legend(tr('只在此版本') + ' · v' + chosen, tr('只在当前版本')), H.diffText(diff.blocks)]));
+    } else {
+      const full = document.createElement('div');
+      full.className = 'desktop-sessions-edit-history-full';
+      full.append(briefRows(shownBrief, version.edits, false));
+      body.push(full);
+    }
+    panel.replaceChildren(list, bar, ...body);
+    panel.hidden = false;
+    q('#sessions-refinement-items').hidden = true;
   };
 
   // The shown version's library product: the arrow opens it, the edits are kept there.
@@ -858,6 +967,7 @@
         shownReview = review;
         q('#sessions-open-library').hidden = false;
         drawBrief();
+        void drawEditHistory();
       })
       .catch(() => undefined);   // not in the library (yet): no arrow, no choices
   };
@@ -935,6 +1045,8 @@
       shownDraftId = draft.draft_id;
       shownReview = null;
       editing = null;
+      Object.assign(historyView, { open:false, chosen:null, mode:'compare' });
+      void drawEditHistory();
       q('#sessions-open-library').hidden = true;
       loadVersionReview(draft);
     }
@@ -1247,6 +1359,11 @@
     void saveItemEdit(index, {
       adopt:{ adopted:true }, unadopt:{ adopted:null }, unanswer:{ answer:null }, untext:{ text:null }
     }[act]);
+  });
+  q('#sessions-edit-history').addEventListener('click', () => {
+    historyView.open = !historyView.open;
+    historyView.chosen = null;
+    void drawEditHistory();
   });
   q('#sessions-open-library').addEventListener('click', () => {
     if (!shownReview?.stable_locator) return;

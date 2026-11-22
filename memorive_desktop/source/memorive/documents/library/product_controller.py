@@ -39,6 +39,8 @@ LIBRARY_METHODS = frozenset(
         "library.confirm_refinement_review",
         "library.refinement_review",
         "library.edit_refinement_item",
+        "library.restore_refinement_edits",
+        "library.refinement_edits_diff",
         "library.confirm_core_review",
         "library.refresh",
         "library.inject_fault",
@@ -105,7 +107,7 @@ class LibraryProductController:
         self.refinement_catalog_path = self.state_root / "refinement_products_v1.json"
         self.refinement_product_root = self.state_root / "refinement_products_private"
         self.refinement_review_state_path = self.state_root / "refinement_review_state_v1.json"
-        self.refinement_edits_path = self.state_root / "refinement_edits_v1.json"
+        self.refinement_edit_log_path = self.state_root / "refinement_edit_log_v1.json"
         self.refinement_product_root.mkdir(parents=True, exist_ok=True)
         self._refinement_lock = threading.RLock()
         self._core_lock = self._refinement_lock  # one catalog publication lock
@@ -772,7 +774,7 @@ class LibraryProductController:
             if _sha256_json(payload) != entry["draft_sha256"]:
                 raise LibraryProductError("LIBRARY_REFINEMENT_PRIVATE_HASH_MISMATCH")
             target = original.parent / readable_name(artifact_id, payload["display_name"])
-            edits = self._load_refinement_edits().get(artifact_id)
+            edits = self._refinement_history(artifact_id, payload)[-1]["edits"]
             content = render(payload, entry["draft_sha256"], edits).encode("utf-8")
             if target.exists() or target.is_symlink():
                 attributes = target.lstat()
@@ -815,18 +817,33 @@ class LibraryProductController:
 
     # The user's edits on the items of a refinement brief, made while reviewing it: new wording ("text"), an AI
     # suggestion adopted ("adopted": true) or an open question's conclusion ("answer"). Kept apart from the draft,
-    # whose hash the library pins; the session page and the Markdown show them.
+    # whose hash the library pins, as a log of versions like Research Chat's answer versions
+    # (research/workspace/answer_saves.py): version 1 is the brief as the model wrote it, every change saves the
+    # edits of all items as the next version with its time and source, restoring saves an earlier version again as
+    # the newest one, and nothing is ever taken out of the log. The session page and the Markdown show the newest.
     _EDIT_KINDS = {"adopted": "ai_suggestion", "answer": "open_question"}
+    # What a change did, by the field it changed: (set, taken back).
+    _EDIT_SOURCES = {"text": ("REWORD", "UNREWORD"), "adopted": ("ADOPT", "UNADOPT"), "answer": ("ANSWER", "UNANSWER")}
 
-    def _load_refinement_edits(self) -> dict[str, dict[str, dict[str, Any]]]:
-        """{artifact id: {item index: edit}}."""
+    def _load_refinement_edit_log(self) -> dict[str, list[dict[str, Any]]]:
+        """{artifact id: the versions saved after version 1, oldest first}."""
         try:
-            value = json.loads(self.refinement_edits_path.read_text(encoding="utf-8"))
+            value = json.loads(self.refinement_edit_log_path.read_text(encoding="utf-8"))
         except FileNotFoundError:
             return {}
         except (OSError, json.JSONDecodeError) as error:
             raise LibraryProductError("LIBRARY_REFINEMENT_EDITS_UNREADABLE") from error
         return dict(value["artifacts"])
+
+    def _refinement_history(self, artifact_id: str, draft: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Every version of a refinement's edits, oldest first; version 1 is the model's brief, without edits."""
+        first = {"number": 1, "saved_at": draft["created_at"], "source": "ORIGINAL", "item": None,
+                 "restored_from": None, "edits": {}}
+        return [first, *self._load_refinement_edit_log().get(artifact_id, [])]
+
+    def _refinement_draft(self, artifact_id: str) -> tuple[Path, dict[str, Any]]:
+        original = self.resolve_refinement_private_artifact(artifact_id)
+        return original, json.loads(original.read_text(encoding="utf-8"))
 
     @classmethod
     def _checked_item_edit(cls, edit: Any, kind: str) -> dict[str, Any] | None:
@@ -850,47 +867,46 @@ class LibraryProductController:
         return kept
 
     def _refinement_review(self, draft_id: str) -> dict[str, Any]:
-        """The library product of one refinement version (by its draft id), its edits and whether it was reviewed;
-        the session page uses it to open the product and to show and change the edits."""
+        """The library product of one refinement version (by its draft id), its edits with their history and
+        whether it was reviewed; the session page uses it to open the product and to show and change the edits."""
         entry = next((row for row in self._load_refinement_catalog()["products"] if row["draft_id"] == draft_id), None)
         if entry is None:
             return {"schema_version": "DesktopLibraryRefinementReviewView-v1", "draft_id": draft_id,
                     "status": "NOT_REGISTERED"}
         artifact_id = entry["row"]["artifact_id"]
         review = self._load_refinement_review_state()["artifacts"].get(artifact_id)
+        history = self._refinement_history(artifact_id, self._refinement_draft(artifact_id)[1])
         return {
             "schema_version": "DesktopLibraryRefinementReviewView-v1",
             "draft_id": draft_id,
             "artifact_id": artifact_id,
             "stable_locator": entry["row"]["stable_locator"],
-            "edits": self._load_refinement_edits().get(artifact_id, {}),
+            "edits": history[-1]["edits"],
+            "history": history,
             "review_confirmed": bool(review and review.get("confirmed_at")),
             "status": "PASS",
         }
 
-    def _edit_refinement_item(self, artifact_id: str, item: Any, edit: Any) -> dict[str, Any]:
-        """Set the edit of one item (None takes it back). A readable Markdown already written is rewritten with
-        it, unless the user has edited that file."""
+    def _save_refinement_edits(self, artifact_id: str, original: Path, draft: Mapping[str, Any],
+                               after: dict[str, Any], source: str, *, item: int | None = None,
+                               restored_from: int | None = None) -> dict[str, Any]:
+        """Save after as the next version of the edits (unless it equals the newest), then rewrite a readable
+        Markdown already written, unless the user has edited that file."""
         from memorive.documents.library.refinement_markdown import readable_name, render
-        with self._refinement_lock:
-            original = self.resolve_refinement_private_artifact(artifact_id)
-            draft = json.loads(original.read_text(encoding="utf-8"))
-            items = (draft["brief"]["items"] if draft.get("schema_version") == "DesktopSessionRefinementDraft-v4"
-                     else None)
-            if items is None or isinstance(item, bool) or not isinstance(item, int) or not 0 <= item < len(items):
-                raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
-            kept = self._checked_item_edit(edit, items[item]["kind"])
-            everything = self._load_refinement_edits()
-            before = dict(everything.get(artifact_id, {}))
-            after = {key: value for key, value in before.items() if key != str(item)}
-            if kept is not None:
-                after[str(item)] = kept
-            everything[artifact_id] = after
-            temporary = self.refinement_edits_path.with_suffix(".json.next")
-            temporary.write_text(json.dumps({"schema_version": "DesktopLibraryRefinementEdits-v1",
+        history = self._refinement_history(artifact_id, draft)
+        before = history[-1]["edits"]
+        saved = after != before
+        if saved:
+            version = {"number": history[-1]["number"] + 1, "saved_at": self.utc_now(), "source": source,
+                       "item": item, "restored_from": restored_from, "edits": after}
+            everything = self._load_refinement_edit_log()
+            everything[artifact_id] = [*history[1:], version]
+            temporary = self.refinement_edit_log_path.with_suffix(".json.next")
+            temporary.write_text(json.dumps({"schema_version": "DesktopLibraryRefinementEditLog-v1",
                                              "artifacts": everything}, ensure_ascii=False, indent=2, sort_keys=True)
                                  + "\n", encoding="utf-8", newline="\n")
-            temporary.replace(self.refinement_edits_path)
+            temporary.replace(self.refinement_edit_log_path)
+            history.append(version)
             digest = self._refinement_entries_by_artifact_id[artifact_id]["draft_sha256"]
             readable = original.parent / readable_name(artifact_id, draft["display_name"])
             if readable.is_file() and readable.read_bytes() == render(draft, digest, before).encode("utf-8"):
@@ -898,7 +914,51 @@ class LibraryProductController:
                 next_file.write_bytes(render(draft, digest, after).encode("utf-8"))
                 next_file.replace(readable)
         return {"schema_version": "DesktopLibraryRefinementEditReceipt-v1", "artifact_id": artifact_id,
-                "edits": after, "status": "PASS"}
+                "saved": saved, "edits": history[-1]["edits"], "history": history, "status": "PASS"}
+
+    def _edit_refinement_item(self, artifact_id: str, item: Any, edit: Any) -> dict[str, Any]:
+        """Set the edit of one item (None takes it back) and save the result as the next version."""
+        with self._refinement_lock:
+            original, draft = self._refinement_draft(artifact_id)
+            items = (draft["brief"]["items"] if draft.get("schema_version") == "DesktopSessionRefinementDraft-v4"
+                     else None)
+            if items is None or isinstance(item, bool) or not isinstance(item, int) or not 0 <= item < len(items):
+                raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
+            kept = self._checked_item_edit(edit, items[item]["kind"])
+            before = self._refinement_history(artifact_id, draft)[-1]["edits"]
+            after = {key: value for key, value in before.items() if key != str(item)}
+            if kept is not None:
+                after[str(item)] = kept
+            old, new = before.get(str(item), {}), kept or {}
+            changed = next((key for key in self._EDIT_SOURCES if old.get(key) != new.get(key)), "text")
+            source = self._EDIT_SOURCES[changed][0 if new.get(changed) else 1]
+            return self._save_refinement_edits(artifact_id, original, draft, after, source, item=item)
+
+    def _restore_refinement_edits(self, artifact_id: str, number: Any) -> dict[str, Any]:
+        """Save the edits of an earlier version as the newest version (version 1: the model's brief again)."""
+        with self._refinement_lock:
+            original, draft = self._refinement_draft(artifact_id)
+            history = self._refinement_history(artifact_id, draft)
+            chosen = next((row for row in history if row["number"] == number and not isinstance(number, bool)), None)
+            if chosen is None:
+                raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_VERSION_NOT_FOUND")
+            return self._save_refinement_edits(artifact_id, original, draft, dict(chosen["edits"]), "RESTORE",
+                                               restored_from=number)
+
+    def _refinement_edits_diff(self, artifact_id: str, from_number: Any, to_number: Any) -> dict[str, Any]:
+        """Two versions of the edits compared as the readable brief, line by line and word by word."""
+        from memorive.documents.library.refinement_markdown import render
+        from memorive.platform.text_diff import line_diff
+        _original, draft = self._refinement_draft(artifact_id)
+        history = {row["number"]: row for row in self._refinement_history(artifact_id, draft)}
+        if from_number not in history or to_number not in history or isinstance(from_number, bool) \
+                or isinstance(to_number, bool):
+            raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_VERSION_NOT_FOUND")
+        digest = self._refinement_entries_by_artifact_id[artifact_id]["draft_sha256"]
+        text = lambda number: render(draft, digest, history[number]["edits"])   # noqa: E731
+        return {"schema_version": "DesktopLibraryRefinementEditDiff-v1", "artifact_id": artifact_id,
+                "from_number": from_number, "to_number": to_number,
+                "blocks": line_diff(text(from_number), text(to_number))}
 
     def _confirm_refinement_review(self, artifact_id: str) -> dict[str, Any]:
         self.resolve_refinement_private_artifact(artifact_id)
@@ -1497,6 +1557,13 @@ class LibraryProductController:
         if method == "library.edit_refinement_item":
             self._require_keys(accepted, {"artifact_id", "item", "edit"})
             return self._edit_refinement_item(str(accepted["artifact_id"]), accepted["item"], accepted["edit"])
+        if method == "library.restore_refinement_edits":
+            self._require_keys(accepted, {"artifact_id", "number"})
+            return self._restore_refinement_edits(str(accepted["artifact_id"]), accepted["number"])
+        if method == "library.refinement_edits_diff":
+            self._require_keys(accepted, {"artifact_id", "from_number", "to_number"})
+            return self._refinement_edits_diff(str(accepted["artifact_id"]), accepted["from_number"],
+                                               accepted["to_number"])
         if method == "library.confirm_core_review":
             self._require_keys(accepted, {"artifact_id"})
             return self.paper_review.confirm(str(accepted["artifact_id"]))

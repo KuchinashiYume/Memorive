@@ -1,10 +1,12 @@
 """While reviewing a refinement, the user edits its items: new wording, an AI suggestion adopted, an open question's
 conclusion.
 
-The library keeps the edits per version, apart from the draft (whose hash it pins). The session page finds a
-version's library product by its draft id, shows the edits and changes them; the readable Markdown lists an adopted
-suggestion and a concluded question with the decisions, and is rewritten after a change unless the user has edited
-that file.
+The library keeps the edits per version, apart from the draft (whose hash it pins), as a history like Research
+Chat's answer versions: every change is the next numbered version with its time and source, an earlier version is
+restored as the newest, and two versions are compared word by word (platform/text_diff.py). The session page finds
+a version's library product by its draft id, shows the edits and changes them; the readable Markdown lists an
+adopted suggestion and a concluded question with the decisions, and is rewritten after a change unless the user has
+edited that file.
 """
 from __future__ import annotations
 
@@ -77,6 +79,32 @@ def test_a_markdown_the_user_edited_is_left_as_it_is(tmp_path):
     assert readable.read_text(encoding="utf-8") == "my notes"
     with pytest.raises(LibraryProductError, match="READABLE_HASH_MISMATCH"):
         library.resolve_refinement_readable_artifact(artifact_id)
+
+
+def test_each_change_is_a_version_that_can_be_compared_and_restored(tmp_path):
+    library, artifact_id, edit = _library(tmp_path)
+    assert edit(0, {"text": "按文章分别列出要点。"})["saved"] is True
+    assert edit(0, {"text": "按文章分别列出要点。"})["saved"] is False          # nothing changed: no version
+    edit(2, {"adopted": True})
+    edit(1, {"answer": "v2 数据集"})
+    edit(1, None)
+    history = library.call("library.refinement_review", {"draft_id": "refinement-demo"})["history"]
+    assert [(v["number"], v["source"], v["item"]) for v in history] == [
+        (1, "ORIGINAL", None), (2, "REWORD", 0), (3, "ADOPT", 2), (4, "ANSWER", 1), (5, "UNANSWER", 1)]
+    assert history[0]["saved_at"] == "2026-11-22T00:00:00Z" and history[0]["edits"] == {}
+
+    diff = library.call("library.refinement_edits_diff", {"artifact_id": artifact_id, "from_number": 1, "to_number": 5})
+    changed = [word for block in diff["blocks"] if block["kind"] == "change" for word in block["words"]]
+    assert {"op": "insert", "text": "分别"} in changed
+
+    restored = library.call("library.restore_refinement_edits", {"artifact_id": artifact_id, "number": 1})
+    assert (restored["saved"], restored["edits"]) == (True, {})
+    assert (restored["history"][-1]["number"], restored["history"][-1]["source"],
+            restored["history"][-1]["restored_from"]) == (6, "RESTORE", 1)
+    with pytest.raises(LibraryProductError, match="LIBRARY_REFINEMENT_EDIT_VERSION_NOT_FOUND"):
+        library.call("library.restore_refinement_edits", {"artifact_id": artifact_id, "number": 9})
+    with pytest.raises(LibraryProductError, match="LIBRARY_REFINEMENT_EDIT_VERSION_NOT_FOUND"):
+        library.call("library.refinement_edits_diff", {"artifact_id": artifact_id, "from_number": True, "to_number": 6})
 
 
 @pytest.mark.parametrize("item, value", [

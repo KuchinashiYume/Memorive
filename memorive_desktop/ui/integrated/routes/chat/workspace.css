@@ -565,23 +565,6 @@
 #memo-chat-page .memo-answer-editor-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 #memo-chat-page .memo-answer-editor-bar .memo-status{flex:1 1 260px;margin:0}
 #desktop-chat-preview #memo-version-body:not(.memo-centered-empty){display:flex;flex-direction:column;gap:12px}
-#desktop-chat-preview .memo-history-list{list-style:none;margin:0;padding:0 0 8px;display:flex;flex-direction:column;gap:2px;max-height:calc(220px * var(--desktop-scale));overflow:auto;border-bottom:1px solid var(--desktop-border-subtle)}
-.memo-history-version{display:block;width:100%;border:1px solid transparent;border-radius:8px;background:transparent;padding:8px 10px;text-align:left;color:inherit;cursor:pointer}
-.memo-history-version:hover{background:var(--desktop-surface-hover)}
-.memo-history-version[aria-pressed=true]{background:var(--desktop-surface-selected);border-color:var(--desktop-selection-border)}
-.memo-history-version small{display:block;margin-top:3px;color:var(--desktop-text-secondary)}
-.memo-history-pane{min-width:0;display:flex;flex-direction:column;gap:12px}
-.memo-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.memo-history-head h4{margin:0}
-.memo-history-tools{display:flex;align-items:center;gap:6px}
-.memo-history-pane .memo-message-body{line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
-.memo-history-diff :is(ins,del),.memo-history-legend span{border-radius:3px;padding:0 2px}
-.memo-history-diff ins,.memo-history-new{text-decoration:none;background:var(--green-bg);color:var(--green-text)}
-.memo-history-diff del,.memo-history-old{background:var(--red-bg);color:var(--red-text)}
-.memo-history-legend{display:flex;flex-wrap:wrap;gap:12px;margin:0;color:var(--desktop-text-secondary)}
-.memo-history-skip{display:block;margin:4px 0;border:0;border-radius:6px;padding:2px 8px;background:var(--desktop-surface-subtle);color:var(--desktop-text-secondary);cursor:pointer}
-.memo-history-label{margin:0;color:var(--desktop-text-secondary)}
-.memo-history-citations{margin:0;padding-left:1.4em}
 #desktop-chat-preview .memo-evidence-tabs.desktop-icon-segmented{flex:0 0 auto}
 /* The panel's tabs and refresh button sit on the right, like the page header's tools. */
 #desktop-chat-preview .memo-evidence-heading{justify-content:flex-end}

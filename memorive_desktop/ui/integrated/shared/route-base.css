@@ -3379,8 +3379,11 @@
 #desktop-sessions-preview .desktop-sessions-refinement-refs button:hover { background:color-mix(in srgb, var(--brand) 16%, var(--surface-raised)); }
 #desktop-sessions-preview .desktop-sessions-refinement-refs button:focus-visible { outline:2px solid var(--focus-ring); outline-offset:1px; }
 #desktop-sessions-preview .desktop-sessions-refinement-refs .desktop-sessions-refinement-choice { margin-left:auto; font-family:inherit; }
-#desktop-sessions-preview .desktop-sessions-refinement-answer { color:var(--text-primary); font-weight:600; }
+#desktop-sessions-preview .desktop-sessions-refinement-answer { color:var(--text-primary); font-weight:700; }
 #desktop-sessions-preview .desktop-sessions-refinement-editor { display:grid; gap:6px; }
+#desktop-sessions-preview .desktop-sessions-refinement-draft > header .icon-button { width:30px; height:30px; min-height:30px; padding:0; }
+#desktop-sessions-preview .desktop-sessions-edit-history[hidden], #desktop-sessions-preview #sessions-refinement-items[hidden] { display:none; }
+#desktop-sessions-preview .desktop-sessions-edit-history-full { display:grid; gap:7px; }
 #desktop-sessions-preview .desktop-sessions-refinement-editor textarea { width:100%; min-height:64px; box-sizing:border-box; resize:vertical; font:inherit; }
 #desktop-sessions-preview .desktop-sessions-refine-state:not([hidden]) { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 #desktop-sessions-preview .desktop-sessions-refine-state .icon-button { flex:0 0 auto; width:26px; height:26px; min-height:26px; padding:0; }

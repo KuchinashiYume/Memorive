@@ -175,6 +175,8 @@ LIBRARY_METHODS = frozenset({
     "library.confirm_refinement_review",
     "library.refinement_review",
     "library.edit_refinement_item",
+    "library.restore_refinement_edits",
+    "library.refinement_edits_diff",
     "library.confirm_core_review",
     "library.refresh",
     "library.inject_fault",

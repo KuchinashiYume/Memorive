@@ -380,25 +380,20 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
       }
       return 'v'+v.number+' · '+source;
     };
-    const when=v=>new Date(v.saved_at).toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'});
+    const H=Memorive.versionHistory;
     const head=create('div',null,'memo-version-head');
     head.append(create('small',t('回答')+' · '+excerpt(questionOf(m)||m.text,60)));
-    const list=create('ol',null,'memo-history-list');
-    for(const v of [...history.versions].reverse()){
-      const item=create('li'),b=create('button',null,'memo-history-version');
-      b.type='button';
-      b.setAttribute('aria-pressed',String(v.version_id===chosen));
-      const facts=[when(v),v.characters.toLocaleString()+' '+t('字')];
-      if(v.citation_count)facts.push(t('引用')+' '+v.citation_count);
-      b.append(create('span',label(v)+(v.version_id===history.current_version_id?' · '+t('当前'):''),'memo-history-version-name'),create('small',facts.join(' · ')));
-      if(v.review_inputs==='citations')b.append(create('small',t('仅保留引文')));
-      b.onclick=()=>{
+    const list=H.list(history.versions,{chosen,id:v=>v.version_id,
+      name:v=>label(v)+(v.version_id===history.current_version_id?' · '+t('当前'):''),
+      details:v=>{
+        const facts=[H.when(v.saved_at),v.characters.toLocaleString()+' '+t('字')];
+        if(v.citation_count)facts.push(t('引用')+' '+v.citation_count);
+        return [facts.join(' · '),...(v.review_inputs==='citations'?[t('仅保留引文')]:[])];
+      },
+      onPick:v=>{
         versionView.chosen=v.version_id;
         void renderVersions().then(()=>q('#memo-version-body .memo-history-version[aria-pressed="true"]')?.focus()).catch(err=>fail(err,'#memo-evidence-status'));
-      };
-      item.append(b);
-      list.append(item);
-    }
+      }});
     const pane=create('section',null,'memo-history-pane'),bar=create('div',null,'memo-history-head');
     bar.append(create('h4',label(version)+(current?' · '+t('当前'):'')));
     const tools=create('div',null,'memo-history-tools');
@@ -446,27 +441,14 @@ Object.assign(errors,{"ANSWER_PATH_CHANGED": "当前回答路径已变化，请�
     return [create('p',t('引用'),'memo-history-label'),box];
   }
   function diffView(diff,version){
-    const text=create('div',null,'memo-message-body memo-history-diff');
-    for(const block of diff.blocks){
-      if(block.kind==='equal'){
-        const lines=block.new_lines;
-        if(lines.length<=6){text.append(lines.join(''));continue;}
-        const more=create('button',t('展开未改动的行')+' · '+(lines.length-4),'memo-history-skip');
-        more.type='button';
-        more.onclick=()=>more.replaceWith(lines.slice(2,-2).join(''));
-        text.append(lines.slice(0,2).join(''),more,lines.slice(-2).join(''));
-      }else if(block.kind==='change'){
-        for(const w of block.words)text.append(w.op==='equal'?w.text:create(w.op==='insert'?'ins':'del',w.text));
-      }else text.append(create(block.kind==='insert'?'ins':'del',(block.kind==='insert'?block.new_lines:block.old_lines).join('')));
-    }
-    const legend=create('p',null,'memo-history-legend');
-    legend.append(create('span',t('只在此版本')+' · v'+version.number,'memo-history-old'),create('span',t('只在当前版本'),'memo-history-new'));
+    const H=Memorive.versionHistory,text=H.diffText(diff.blocks);
+    const legend=H.legend(t('只在此版本')+' · v'+version.number,t('只在当前版本'));
     const c=diff.citations,notes=[];
     if(c.added.length)notes.push(t('新增引用')+' · '+c.added.map(r=>r.title).join('；'));
     if(c.removed.length)notes.push(t('移除引用')+' · '+c.removed.map(r=>r.title).join('；'));
     if(c.changed?.length)notes.push(t('引用内容有变化')+' · '+c.changed.map(r=>r.title).join('；'));
     if(c.reordered)notes.push(t('引用顺序有调整'));
-    const same=diff.blocks.every(b=>b.kind==='equal')&&!notes.length;
+    const same=H.unchanged(diff.blocks)&&!notes.length;
     return same?[create('p',t('与当前版本内容相同'),'memo-history-label')]:[legend,text,...notes.map(n=>create('p',n,'memo-history-label'))];
   }
 const collapsed=new Set();
