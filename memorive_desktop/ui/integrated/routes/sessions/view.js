@@ -453,6 +453,7 @@
     q('#sessions-refine').hidden = false;
     q('#sessions-refine').disabled = true;
     q('#sessions-refine').textContent = '精炼对话';
+    delete q('#sessions-refine').dataset.desktopTip;
     selectedRefinementEligible = false;
     activeRefinementJobId = null;
     setRefineState('', { show: false });
@@ -868,10 +869,13 @@
       // New messages since the newest version: it can be refined again (the versions stay readable).
       button.disabled = projection?.source_changed ? refinementStartDisabled() : true;
       button.textContent = projection?.source_changed ? '精炼对话' : '精炼完成';
+      // The greyed-out button says why it cannot be pressed (the page's own tooltip; titles are removed).
+      if (projection?.source_changed) delete button.dataset.desktopTip;
+      else button.dataset.desktopTip = '这段会话已经精炼过；会话有新内容后，可以再次精炼';
       if (!renderRefinementDraft(projection, finished)) return false;
       const items = projection.draft.brief ? null : projection.draft.subject_output.items.length;
       setRefineState(projection.source_changed ? '会话有新内容，可重新精炼'
-        : items === null ? '纪要已生成，待复核' : `已生成 ${items} 条，待复核`);
+        : items === null ? '纪要已生成，请在资料库打开并确认复核' : `已生成 ${items} 条，待复核`);
       return true;
     }
     if (['TASK_FAILED', 'INBOX_FAILED', 'TASK_CANCELLED'].includes(status)) {
