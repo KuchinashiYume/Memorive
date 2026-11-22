@@ -133,6 +133,8 @@ def build_settings_controller(profile_root: Path) -> SettingsController:
             workspace_root=str(workspace), artifact_root=str(artifacts)
         ),
     )
+    from memorive.desktop.settings.store import follow_moved_data_folder
+    follow_moved_data_folder(store, profile_root, {"workspace_root": workspace, "artifact_root": artifacts})
     current = store.load()["settings"]
     allowed_roots = [profile_root]
     for value in (

@@ -2497,8 +2497,8 @@
     },
     {
       "path": "source/memorive/desktop/service/service_main.py",
-      "sha256": "4f1d4c4e6e7508c11f07ed2a4944389f152d5b9ee6f8c6235812e8952182da4b",
-      "bytes": 27581
+      "sha256": "38ade26976ebedb8391696a68b0fc78ffe618baf1f08d340013ea9064c223ff3",
+      "bytes": 27763
     },
     {
       "path": "source/memorive/desktop/service/single_instance.py",
@@ -2642,8 +2642,8 @@
     },
     {
       "path": "source/memorive/desktop/settings/store.py",
-      "sha256": "5c452000fb1f281cfd356afdda3b4856f03f06c36566fd527656ec4869ebf934",
-      "bytes": 18346
+      "sha256": "625f922aba527f2ddad3218ef2661a20d45614789affab98a2e0ae6e8b98ee58",
+      "bytes": 19578
     },
     {
       "path": "source/memorive/desktop/settings/user_preferences.py",

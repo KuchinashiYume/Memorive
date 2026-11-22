@@ -393,3 +393,26 @@ class SettingsStore:
 
 
 __all__ = ["SettingsCorrupt", "SettingsFromNewerVersion", "SettingsStore", "file_from_newer_version"]
+
+
+def follow_moved_data_folder(store: "SettingsStore", profile_root: Path, own: Mapping[str, Path]) -> list[str]:
+    """After the data folder was restored or moved elsewhere, point the workspace and artifact folders that were
+    recorded at their default place inside the old data folder to the same place inside this one.
+
+    own: {"workspace_root": ..., "artifact_root": ...}, this data folder's defaults. A folder the user chose
+    elsewhere is left as it is. Called by desktop/service/service_main.py at start; returns the roles changed.
+    """
+    current = store.load()
+    settings = deepcopy(current["settings"])
+    changed = []
+    for role, path in own.items():
+        recorded = settings["directories"].get(role)
+        tail = [part.casefold() for part in Path(path).relative_to(profile_root).parts]
+        parts = [part.casefold() for part in Path(recorded).parts] if recorded else []
+        if recorded and Path(recorded) != Path(path) and len(parts) > len(tail) and parts[-len(tail):] == tail:
+            settings["directories"][role] = str(path)
+            changed.append(role)
+    if changed:
+        store.save(settings, expected_revision=current["revision"])
+    return changed
+
