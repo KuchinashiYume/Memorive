@@ -22,6 +22,8 @@
   // characters not yet decoded replaced by the glyphs of an encoding, decoded in that encoding's order. There are
   // three fixed encodings, taken in encodingOrder, a fixed order that looks random. The desk assistant plays the same
   // three (product/desktop/assistant_native_motion.py, ENCODINGS); change both together.
+  // EASTER EGG (彩蛋), intentional: the glyphs look like garbled text (锟斤拷, 烫, 屯 are the classic mojibake) on
+  // purpose. They show for a few frames while a face changes; they are not an encoding bug, do not "fix" them.
   const encodings = Object.freeze([
     { narrow: '01', wide: '０１', order: 'left' },
     { narrow: '?#%&', wide: '锟斤拷烫屯', order: 'right' },
@@ -47,7 +49,8 @@
       }).join('');
     });
   };
-  // The easter egg: a face as a program that reads UTF-8 as GBK shows it.
+  // EASTER EGG (彩蛋), intentional: a face as a program that reads UTF-8 as GBK shows it, e.g. (・ω・) as (銉幌夈兓).
+  // Shown only after five clicks on the home face within three seconds (countHomeClick); not an encoding bug.
   const garbled = text => new TextDecoder('gbk').decode(new TextEncoder().encode(text)).replace(/\uFFFD/g, '?');
   let signalSequence = 0;
   const recentSignals = new Map();
@@ -221,7 +224,8 @@
 
   // The home faces (one in each page's blank state, changed together; the visible one is seen). Each rests on its
   // page's face. Memorive opens on the Ciallo greeting, kept until another page is opened; a click types a question
-  // mark and goes back to rest two seconds later; five clicks within three seconds show the face garbled.
+  // mark and goes back to rest two seconds later; five clicks within three seconds show the face garbled for two
+  // seconds (EASTER EGG (彩蛋), intentional: playHomeGarbled, not a bug).
   const homeExpressions = [];
   const homeClicks = [];
   let homeMode = 'rest';
@@ -268,6 +272,7 @@
     setHome('garbled', entry => [[garbled(shown(entry)), 2000], ...decodeSteps(entry.rest.text, 1, 0)]);
     homeTimer = window.setTimeout(() => restHome(false), 2400);
   };
+  // EASTER EGG (彩蛋), intentional: the fifth click within three seconds shows the garbled face.
   const countHomeClick = () => {
     const now = Date.now();
     homeClicks.push(now);

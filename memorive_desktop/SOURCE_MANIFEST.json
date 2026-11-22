@@ -252,8 +252,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "e70b4b22f078aa98be2fc5f7fdfebd99ab90b275a7efe57c96db943dea093db3",
-      "bytes": 373094
+      "sha256": "f0b44e37ede59b910de7a86d136af3584a40e23c6a25701b1a7aa647fee2eca7",
+      "bytes": 373216
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -392,8 +392,8 @@
     },
     {
       "path": "product/desktop/assistant_native_motion.py",
-      "sha256": "78ac5a9fa4c5ce39638d31e6694566f0597ae211b5d7015a2fc7436b848103e9",
-      "bytes": 12554
+      "sha256": "f0a2dc81f83ce8c43a91b2ce0c47b9e80b83641a67c0e4cad96a47b58c4a431f",
+      "bytes": 13004
     },
     {
       "path": "product/desktop/brand_profile.json",
@@ -407,8 +407,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "a6fdae0abef8bea4a3c87b99418f892e14cdfb88165d9acd2494aac6c88de369",
-      "bytes": 2602023
+      "sha256": "776719c5e1a2a2d2dc46634748d3e79dfcaed10d6f281a94853c3ef2f2cecd73",
+      "bytes": 2602611
     },
     {
       "path": "product/desktop/console_expressions.py",

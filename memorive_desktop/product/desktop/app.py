@@ -1561,7 +1561,8 @@ def configure_assistant_native(
                 picture.Capture = False
                 picture.Cursor = Cursors.Hand
                 if not drag["moved"] and activate_if_click:
-                    # Five clicks within three seconds show the garbled face (an easter egg).
+                    # EASTER EGG (彩蛋), intentional: five clicks within three seconds show the face garbled
+                    # (GARBLED in assistant_native_motion.py). The garbled text is not an encoding bug.
                     now = time.perf_counter()
                     clicks = [moment for moment in state["recent_clicks"] if now - moment < 3.0] + [now]
                     state["recent_clicks"] = [] if len(clicks) >= 5 else clicks

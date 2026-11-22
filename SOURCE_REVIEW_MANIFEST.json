@@ -971,8 +971,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/app.py",
-      "sha256": "e70b4b22f078aa98be2fc5f7fdfebd99ab90b275a7efe57c96db943dea093db3",
-      "bytes": 373094
+      "sha256": "f0b44e37ede59b910de7a86d136af3584a40e23c6a25701b1a7aa647fee2eca7",
+      "bytes": 373216
     },
     {
       "path": "memorive_desktop/product/desktop/application_behavior.py",
@@ -1116,8 +1116,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/assistant_native_motion.py",
-      "sha256": "78ac5a9fa4c5ce39638d31e6694566f0597ae211b5d7015a2fc7436b848103e9",
-      "bytes": 12554
+      "sha256": "f0a2dc81f83ce8c43a91b2ce0c47b9e80b83641a67c0e4cad96a47b58c4a431f",
+      "bytes": 13004
     },
     {
       "path": "memorive_desktop/product/desktop/brand_profile.json",
@@ -1131,8 +1131,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "a6fdae0abef8bea4a3c87b99418f892e14cdfb88165d9acd2494aac6c88de369",
-      "bytes": 2602023
+      "sha256": "776719c5e1a2a2d2dc46634748d3e79dfcaed10d6f281a94853c3ef2f2cecd73",
+      "bytes": 2602611
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4001,12 +4001,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "207a218b8f97f5c50d948c63d551bb6328b02fa0eafed80188d636b713c9dcd6",
+      "sha256": "b1f0d18dd9d0fe24458e963dfaf3efebc3dc5738b26f1033c91ce673e26e383f",
       "bytes": 134375
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c9e258b497f54f34c24274f5fc4d5be53455dd1ebe8b0d872b89b8e783984fa9",
+      "sha256": "1c2e61ee9bf4ce5b44d24a1d8416c6a87d872dea4c131292843a7074634f4fb4",
       "bytes": 275297
     },
     {
@@ -4861,8 +4861,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/decorations.js",
-      "sha256": "db77da5715eff61ceb67adb5e82450000991b99afd49c9be868ae47cad511a5a",
-      "bytes": 22864
+      "sha256": "d55f12de6a267166076be5d4c70e55e9b3f52f1e1aff5ea3a3a3273b604008b5",
+      "bytes": 23452
     },
     {
       "path": "memorive_desktop/ui/integrated/shared/layout-system.css",

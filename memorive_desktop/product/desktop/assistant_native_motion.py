@@ -36,7 +36,7 @@ MOTION_DURATIONS_MS: Final[dict[str, int]] = {
     "ATTENTION": 1100,
     "SUCCESS": 1400,
     "ERROR": 900,
-    "GARBLED": 2000,
+    "GARBLED": 2000,  # EASTER EGG (彩蛋), intentional: five quick clicks show the face garbled (face_change_texts)
 }
 
 
@@ -268,6 +268,8 @@ def sample_motion(motion: str, elapsed_ms: float, *, base_frame: str = "idle") -
 # three fixed encodings, taken in ENCODING_ORDER, a fixed order that looks random. The main window plays the same
 # three (ui/integrated/shared/decorations.js, encodings); change both together.
 # Each encoding: (glyphs for narrow characters, glyphs for wide characters, decoding order).
+# EASTER EGG (彩蛋), intentional: the glyphs look like garbled text (锟斤拷, 烫, 屯 are the classic mojibake) on
+# purpose. They show for a few frames while a face changes; they are not an encoding bug, do not "fix" them.
 ENCODINGS: Final[tuple[tuple[str, str, str], ...]] = (
     ("01", "０１", "left"),
     ("?#%&", "锟斤拷烫屯", "right"),
@@ -305,7 +307,8 @@ def encoding_frames(text: str, encoding: int, count: int) -> tuple[str, ...]:
 
 
 def garbled(text: str) -> str:
-    """The easter egg: text as a program that reads UTF-8 as GBK shows it (the main window's garbled() too)."""
+    """EASTER EGG (彩蛋), intentional: text as a program that reads UTF-8 as GBK shows it, e.g. (・ω・) as
+    (銉幌夈兓); the main window's garbled() is the same. Shown only after five quick clicks; not an encoding bug."""
     return text.encode("utf-8").decode("gb18030", errors="replace").replace("\ufffd", "?")
 
 
