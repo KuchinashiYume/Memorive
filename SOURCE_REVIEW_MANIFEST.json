@@ -1201,8 +1201,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "8d003ac435764e46ed4b480dfa1696ee68130360b3559f2df066cec14fbe47ba",
-      "bytes": 2597232
+      "sha256": "40de2ecaf7067f62697e56ba61a017d6a273be029e60aeea1ef91e5ff1281064",
+      "bytes": 2597449
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4076,12 +4076,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "5d9f22d85e89052a876c3c90bc6291915f483919cab4109615f012d0f42d2f6a",
+      "sha256": "73aee7a7a7bce581042830f5d5feed61f6ef977e932640ad349d394bee17a977",
       "bytes": 140961
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "bc1a8a681e2b4085b64fd2ac1daa07fd0e8f82562c842332e082b39be773a3da",
+      "sha256": "3998b4f047ed162e73325d25fe6bbbf4d19a145e798db3d6a6e5e280ef63cdcf",
       "bytes": 278270
     },
     {
@@ -4766,8 +4766,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/sessions/view.js",
-      "sha256": "cee7cf2a72422a708dfeb1266465079b34ee64ff8ba6e4deaa8b43e72d2a0aba",
-      "bytes": 48227
+      "sha256": "e19c5b2c62997ec93d3ab33b82202c9be0e359210f3cfeb7d007217a653430a2",
+      "bytes": 48444
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/settings/browser-sites.js",
@@ -9926,8 +9926,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/product_controller.py",
-      "sha256": "cd85965b84fc9c2465349ca8591d8c086145a9b6f08bc19b780b74a39edf6e81",
-      "bytes": 28397
+      "sha256": "1b250d02d67f509631c31a01f8e1d99821e11f4534ab0e9b9d7f6a801116d49b",
+      "bytes": 28604
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/refinement_queue.py",
@@ -9936,8 +9936,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/refinement_tasks.py",
-      "sha256": "ed52cfdcfc8f3c8593748188090ae92b8fe601313e621710af4b60074987df4f",
-      "bytes": 35519
+      "sha256": "434ad89e3bd4dba551905b2300966a2c53211722d48171d8672b26ec5471fb0b",
+      "bytes": 36736
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/controller/state.py",

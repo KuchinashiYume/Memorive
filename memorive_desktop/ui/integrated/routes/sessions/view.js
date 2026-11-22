@@ -774,8 +774,9 @@
     if (status === 'PASS') {
       clearRefinementRetryReset();
       activeRefinementJobId = null;
-      button.disabled = true;
-      button.textContent = '精炼完成';
+      // New messages since this refinement: it can be refined again (the earlier draft stays shown until then).
+      button.disabled = projection?.source_changed ? refinementStartDisabled() : true;
+      button.textContent = projection?.source_changed ? '精炼对话' : '精炼完成';
       return renderRefinementDraft(projection);
     }
     if (status === 'TASK_FAILED' || status === 'TASK_CANCELLED') {

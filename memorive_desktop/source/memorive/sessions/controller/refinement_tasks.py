@@ -397,6 +397,34 @@ class RefinementTasksMixin:
         if self._refinement_task_manager.session_refinement_cancelled(job_id):
             raise RefinementTaskCancelled('REFINEMENT_TASK_CANCELLED')
 
+    def _refinement_source_snapshot(self, projection_id, row, messages, completeness) -> str:
+        """The hash of what a refinement of this session reads: its source and its messages. A refinement
+        made from another hash is out of date (the conversation went on), so it may be made again."""
+        source_binding = {
+            "schema_version": "DesktopSessionRefinementSourceBinding-v1",
+            "local_projection_id": projection_id,
+            "provider_id": _text(row.get("provider_id"), 80),
+            "provider_session_id": _text(row.get("provider_session_id"), 240),
+            "source_format": _text(row.get("source_format"), 160),
+            "captured_at": _text(
+                row.get("captured_at")
+                or row.get("conversation_at")
+                or row.get("updated_at")
+                or "UNKNOWN",
+                120,
+            ),
+            "content_completeness": deepcopy(dict(completeness)),
+        }
+        return _sha256_json({"source": source_binding, "messages": messages})
+
+    def _refinement_source_changed(self, projection_id: str, task: Mapping[str, Any]) -> bool:
+        """Whether the session changed since this (finished) refinement was made."""
+        row = self._get_internal(projection_id)
+        source_messages, completeness = self._messages_for(row)
+        current = self._refinement_source_snapshot(projection_id, row, self._refinement_channel_messages(source_messages),
+                                                   completeness)
+        return str(task.get("source_snapshot_sha256") or "").upper() != current.upper()
+
     def _create_refinement_task(self, projection_id: str) -> dict[str, Any]:
         row = self._get_internal(projection_id)
         source_messages, completeness = self._messages_for(row)
@@ -420,27 +448,13 @@ class RefinementTasksMixin:
             )
         ):
             raise SessionProductError("SESSION_REFINEMENT_CHANNEL_UNAVAILABLE")
-        source_binding = {
-            "schema_version": "DesktopSessionRefinementSourceBinding-v1",
-            "local_projection_id": projection_id,
-            "provider_id": _text(row.get("provider_id"), 80),
-            "provider_session_id": _text(row.get("provider_session_id"), 240),
-            "source_format": _text(row.get("source_format"), 160),
-            "captured_at": _text(
-                row.get("captured_at")
-                or row.get("conversation_at")
-                or row.get("updated_at")
-                or "UNKNOWN",
-                120,
-            ),
-            "content_completeness": deepcopy(dict(completeness)),
-        }
-        snapshot_sha256 = _sha256_json(
-            {"source": source_binding, "messages": messages}
-        )
+        snapshot_sha256 = self._refinement_source_snapshot(projection_id, row, messages, completeness)
         active_task = self._refinement_task_for_projection(projection_id)
         control_state = str(active_task.get("control_state") or "") if active_task else ""
-        if active_task is not None and control_state in {"QUEUED", "RUNNING", "SUCCEEDED"}:
+        # A finished refinement of the same messages is returned as it is; after new messages a new one is made.
+        if active_task is not None and (control_state in {"QUEUED", "RUNNING"} or (
+                control_state == "SUCCEEDED"
+                and str(active_task.get("source_snapshot_sha256") or "").upper() == snapshot_sha256.upper())):
             return {
                 "schema_version": "DesktopSessionRefineReceipt-v6",
                 "local_projection_id": projection_id,

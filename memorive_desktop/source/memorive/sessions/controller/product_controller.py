@@ -477,6 +477,8 @@ class SessionsProductController(
             "draft": draft,
             "task": task,
             "status": "PASS",
+            # The conversation went on since: the page lets it be refined again (sessions/view.js).
+            "source_changed": task is not None and self._refinement_source_changed(projection_id, task),
         }
 
     def _delete_local(self, accepted: dict[str, Any]) -> Any:
