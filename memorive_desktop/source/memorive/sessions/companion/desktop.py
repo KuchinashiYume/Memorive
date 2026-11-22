@@ -1278,6 +1278,8 @@ class BrowserCompanionDesktop:
         }
         if package_changed:
             next_state["package_updated_at_unix"] = now
+        # On a new install nothing has made the companion's profile folder yet (saving the site list does).
+        setup_path.parent.mkdir(parents=True, exist_ok=True)
         self.write_json_file(
             setup_path,
             next_state,

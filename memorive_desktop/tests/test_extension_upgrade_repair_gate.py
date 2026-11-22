@@ -257,3 +257,19 @@ def test_failed_provider_does_not_clear_repair_gate(tmp_path: Path) -> None:
     assert state["capture_repair_preflight_required"] is True
 
 
+def test_the_first_connect_on_a_new_profile_prepares_the_extension(tmp_path: Path) -> None:
+    # A new install has no browser companion folder in the profile yet. The first "Connect browser" copied the
+    # extension and then stopped with JSON_EXPORT_PARENT_MISSING writing setup_v1.json into that folder.
+    api = companion()
+    api.source_root = ATTEMPT_ROOT / "source"
+    api.profile_root = tmp_path / "profile"
+    api.system_effects_enabled = False
+    state_path = api._browser_companion_state_path()
+    assert not state_path.parent.exists()
+
+    receipt = api.install_browser_companion("EDGE")
+
+    assert receipt["status"] == "AWAITING_EXTENSION_LOAD"
+    assert (Path(receipt["extension_path"]) / "manifest.json").is_file()
+    assert json.loads(state_path.read_text(encoding="utf-8"))["preferred_browser"] == "EDGE"
+
