@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import json
 import re
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping
 import unicodedata
 
 from memorive.platform.json_files import canonical_json_bytes
@@ -330,7 +330,6 @@ def _validate_settings(value: Any) -> dict[str, Any]:
             fallback_service["provider"], fallback_service.get("model_name", "")
         )):
             raise ValueError("WORKFLOW_FALLBACK_CAPABILITY_MISMATCH")
-    _validate_heterogeneous_model_relations(workflow, model_services, cli_services)
     preferences = _validate_preferences(value["preferences"], mode)
     return {
         "schema_version": SETTINGS_SCHEMA_VERSION,
@@ -786,63 +785,6 @@ def _validate_workflow(value: Any) -> dict[str, Any]:
         if node_id == "ingest" and "fallback_profile_ref" in row:
             accepted[-1]["fallback_profile_ref"] = fallback_ref
     return {"nodes": accepted}
-
-
-def _configured_model_identity(
-    profile_ref: str | None,
-    services_by_id: Mapping[str, Mapping[str, Any]],
-) -> tuple[str, ...] | None:
-    if profile_ref is None or profile_ref == "AUTO_HETEROGENEOUS":
-        return None
-    service = services_by_id.get(profile_ref)
-    if service is None:
-        return ("PROFILE", profile_ref.casefold())
-    model_name = str(service.get("model_name") or "").strip()
-    tier = str(service.get("tier") or "").strip()
-    thinking_mode = str(service.get("thinking_mode") or "").strip()
-    if not model_name or not tier:
-        return ("CONFIG", profile_ref.casefold())
-    return (
-        "MODEL",
-        _display_name_identity(model_name),
-        _display_name_identity(tier),
-        _display_name_identity(thinking_mode),
-    )
-
-
-def _validate_heterogeneous_model_relations(
-    workflow: Mapping[str, Any],
-    model_services: Sequence[Mapping[str, Any]],
-    cli_services: Sequence[Mapping[str, Any]],
-) -> None:
-    nodes = {row["node_id"]: row for row in workflow["nodes"]}
-    services_by_id = {row["config_id"]: row for row in model_services}
-    for service in cli_services:
-        for model in service["models"]:
-            services_by_id[model["profile_ref"]] = {
-                "config_id": model["profile_ref"],
-                "model_name": model["model_name"],
-                "tier": service["adapter_id"],
-                "thinking_mode": model["thinking_mode"],
-            }
-    for producer_id, reviewer_id in (
-        ("card_distill", "transport_review"),
-        ("analysis", "judgment_review"),
-    ):
-        producer_identity = _configured_model_identity(
-            nodes[producer_id]["profile_ref"], services_by_id
-        )
-        reviewer_identity = _configured_model_identity(
-            nodes[reviewer_id]["profile_ref"], services_by_id
-        )
-        if (
-            producer_identity is not None
-            and reviewer_identity is not None
-            and producer_identity == reviewer_identity
-        ):
-            raise ValueError(
-                f"WORKFLOW_HETEROGENEOUS_MODEL_CONFLICT:{reviewer_id}:{producer_id}"
-            )
 
 
 def _validate_preferences(value: Any, mode: str) -> dict[str, Any]:

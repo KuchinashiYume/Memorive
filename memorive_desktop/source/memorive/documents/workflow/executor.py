@@ -275,6 +275,20 @@ def render_human_review(
         "",
         labels["boundary_text"],
     ]
+    independence = judgment.get("independence")
+    if independence in {"SAME_MODEL", "SAME_VENDOR", "VENDOR_UNKNOWN"}:
+        notice = {
+            "SAME_MODEL": {"zh": "核对分析用的是与分析相同的模型，独立性较低，请重点人工复核。",
+                           "en": "The analysis was checked by the model that wrote it; the check is less independent. Review it with care.",
+                           "ja": "分析と同じモデルで照合したため、独立性は低くなります。重点的に確認してください。"},
+            "SAME_VENDOR": {"zh": "核对分析用的是与分析同一家的模型，独立性较低，请重点人工复核。",
+                            "en": "The analysis was checked by a model of the same vendor; the check is less independent. Review it with care.",
+                            "ja": "分析と同じ提供元のモデルで照合したため、独立性は低くなります。重点的に確認してください。"},
+            "VENDOR_UNKNOWN": {"zh": "核对分析的模型认不出是哪一家，不能确认与分析模型相互独立，请重点人工复核。",
+                               "en": "The vendor of the checking model is not known, so its independence from the analysis model is not confirmed. Review it with care.",
+                               "ja": "照合したモデルの提供元が不明なため、分析モデルとの独立性を確認できません。重点的に確認してください。"},
+        }[independence][source_language]
+        lines.extend(["", notice])
     if judgment.get("execution_status") == "SKIPPED":
         notice = {
             "zh": "核对分析已按设置跳过；尚未核验分析结论，须人工审核。",
@@ -1183,6 +1197,7 @@ class CorePipelineExecutor:
                     candidate_resolver=run.bridge.select_judgment_candidates,
                     output_language=run.source_language,
                 )
+                run.judgment["independence"] = run.bridge.judgment_independence(run.analysis.analysis_model)
                 if run.judgment.get("trace_resolved") != run.judgment.get("trace_total"):
                     raise RuntimeError("Core_JUDGMENT_TRACE_UNRESOLVED")
                 if run.judgment.get("drives_knowledge_admission") is not False:

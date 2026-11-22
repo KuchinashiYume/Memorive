@@ -800,12 +800,10 @@
       const producerProfileRef = getFlowNode(producerStep)?.dataset?.profileRef || '';
       const producer = configuredModelOptions.find((option) => option.profileRef === producerProfileRef);
       if (!producer) return false;
-      const differsFromProducer = (option) => option.profileRef !== producerProfileRef
-        && !(option.modelKey && producer.modelKey && option.modelKey === producer.modelKey);
       const reviewerProfileRef = node?.dataset?.profileRef || '';
       if (reviewerProfileRef === 'AUTO_HETEROGENEOUS') return false;
       const reviewer = configuredModelOptions.find((option) => option.profileRef === reviewerProfileRef);
-      return Boolean(reviewer && reviewer.state === 'green' && differsFromProducer(reviewer));
+      return Boolean(reviewer && reviewer.state === 'green');
     };
 
     const workflowText = (key, fallback) => Memorive.settingsText?.text?.(key, fallback) || fallback;
@@ -1000,10 +998,14 @@
           if (step !== steps.at(-1)) step.classList.add('link-yellow');
           setWorkflowStatus(node, 'status-dot yellow', 'workflow.status.model-unavailable', '待验证');
         } else if (heterogeneousConflict) {
-          step.classList.remove('state-green', 'state-yellow', 'state-disabled', 'link-green', 'link-yellow');
-          step.classList.add('state-red');
-          if (step !== steps.at(-1)) step.classList.add('link-red');
-          setWorkflowStatus(node, 'status-dot red', 'workflow.status.conflict', '与上游生产模型重复');
+          // The user chose the producing model to check itself: allowed, with a warning that stays.
+          setWorkflowStepReady(step, node, steps);
+          const warning = document.createElement('span');
+          warning.className = 'desktop-settings-same-model-warning';
+          warning.setAttribute('role', 'img');
+          warning.setAttribute('aria-label', '与上游生产模型相同，可能遗漏相同错误');
+          warning.dataset.desktopTip = '与上游生产模型相同，可能遗漏相同错误';
+          node.querySelector('.desktop-settings-node-status').prepend(warning);
         } else if (['card-review','judgment-review'].includes(node.dataset.step) && !heterogeneousReady) {
           step.classList.remove('state-green', 'state-red', 'state-disabled', 'link-green', 'link-red');
           step.classList.add('state-yellow');
@@ -1175,8 +1177,9 @@
           );
           return conflicts ? {
             ...option,
-            disabled: true,
-            note: '异源校核不能选择与上游生产节点相同的模型'
+            disabled: false,
+            risk: true,
+            note: '与上游生产模型相同，可能遗漏相同错误'
           } : { ...option, disabled: false };
         });
       }

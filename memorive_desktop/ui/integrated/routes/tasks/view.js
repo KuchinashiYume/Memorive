@@ -351,8 +351,8 @@
         );
         return conflicts ? {
           ...option,
-          disabled:true,
-          note:'异源校核不能选择与上游生产节点相同的模型'
+          disabled:false,
+          note:'与上游生产模型相同，可能遗漏相同错误'
         } : { ...option, disabled:false };
       });
     };

@@ -477,8 +477,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "d8c91eebac7aef5e7a51dcc2df28c91b83efd4a5a11a7297cdbb042c12aadc6c",
-      "bytes": 2602811
+      "sha256": "f832a6e1fa840c28647aaa2eabe6d5cf8f4046add285b27fd3afe11bab321407",
+      "bytes": 2604433
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -2637,8 +2637,8 @@
     },
     {
       "path": "source/memorive/desktop/settings/contracts.py",
-      "sha256": "fa5ce548740e1ba6a465526b7e566653599397cb60fb88611a3ff8c5f9de2abb",
-      "bytes": 50158
+      "sha256": "c0d23e640b98d454d8a4a021821be1b3786964cdecf7c6a6c5bd71add9c6180e",
+      "bytes": 47872
     },
     {
       "path": "source/memorive/desktop/settings/controller.py",
@@ -3822,13 +3822,13 @@
     },
     {
       "path": "source/memorive/documents/workflow/executor.py",
-      "sha256": "aa4584be6e53848066bdcec40955540ef7071050890f8ad3f7bdafcf56851f3f",
-      "bytes": 72516
+      "sha256": "3fd37ddfdade94f8fd1e0045bc0a932d6b2878891578683b2a2428f29b09e274",
+      "bytes": 74242
     },
     {
       "path": "source/memorive/documents/workflow/model_bridge.py",
-      "sha256": "432d3788d8653c93002729764c1e69be53309799e0c4981250d2433b77fdc2ce",
-      "bytes": 49857
+      "sha256": "6902f37f8a48fb39a9c103f4282b91e49cc7c1a2a29ddabe543fe946f0a6e400",
+      "bytes": 50844
     },
     {
       "path": "source/memorive/documents/workflow/scheduling.py",

@@ -101,17 +101,15 @@ def test_both_heterogeneous_review_nodes_accept_a_different_configured_model() -
         ("analysis", "judgment_review"),
     ],
 )
-def test_heterogeneous_review_rejects_the_same_model(
+def test_a_review_step_may_use_the_model_it_checks(
     producer: str, reviewer: str
 ) -> None:
+    # The user decided (2026-11-22) that the same model may check its own output; the settings page shows a
+    # warning that stays. This used to be refused with WORKFLOW_HETEROGENEOUS_MODEL_CONFLICT.
     settings = _configured_settings()
     _node(settings, producer)["profile_ref"] = "provider-a-primary"
     _node(settings, reviewer)["profile_ref"] = "provider-a-primary"
-    with pytest.raises(
-        ValueError,
-        match=rf"^WORKFLOW_HETEROGENEOUS_MODEL_CONFLICT:{reviewer}:{producer}$",
-    ):
-        validate_settings(settings)
+    assert _node(validate_settings(settings), reviewer)["profile_ref"] == "provider-a-primary"
 
 
 def test_repeated_idle_projection_preserves_the_existing_blink_deadline() -> None:

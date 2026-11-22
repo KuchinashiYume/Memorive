@@ -42,6 +42,10 @@ def _provider_family(*values: Any) -> str | None:
         ("google", ("google", "gemini")),
         ("mistral", ("mistral",)),
         ("meta", ("meta", "llama")),
+        ("moonshot", ("moonshot", "kimi")),
+        ("zhipu", ("zhipu", "bigmodel", "z-ai", "glm", "智谱")),
+        ("minimax", ("minimax",)),
+        ("xai", ("x-ai", "xai", "grok")),
     )
     for family, markers in families:
         if any(marker in identity for marker in markers):
@@ -342,20 +346,28 @@ class CoreModelBridge:
         verifier_provider = _provider_family(
             node.get("provider"), requested_model, node.get("profile_ref")
         )
-        if (
-            producer_provider is None
-            or verifier_provider is None
-            or producer_provider == verifier_provider
-        ):
-            return producer_provider, []
+        # The model the user chose checks, of whatever vendor (judgment_independence says how independent).
         return producer_provider, [
             VerifierCandidate(
                 task_type="verify_judgment",
-                provider=verifier_provider,
+                provider=verifier_provider or "unknown",
                 model_id=requested_model,
                 enabled=True,
             )
         ]
+
+    def judgment_independence(self, producer_model: str | None) -> str:
+        """How independent step 08's check of the analysis is: another vendor, the same vendor, the same model,
+        or a vendor that is not known. Written into 08_judgment.json and the human review package."""
+        node = self._node("08_JUDGMENT_CROSS_CHECK")
+        requested_model = str(node["execution_profile"]["model"].get("model_name") or "")
+        if producer_model and requested_model.casefold() == str(producer_model).casefold():
+            return "SAME_MODEL"
+        producer = _provider_family(producer_model)
+        verifier = _provider_family(node.get("provider"), requested_model, node.get("profile_ref"))
+        if producer is None or verifier is None:
+            return "VENDOR_UNKNOWN"
+        return "SAME_VENDOR" if producer == verifier else "OTHER_VENDOR"
 
     def review_identity(self):
         """Use this job's effective reviewer, never the legacy YAML slot."""
