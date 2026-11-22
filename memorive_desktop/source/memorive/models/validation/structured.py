@@ -32,14 +32,16 @@ def _json_object_from_text(value: str) -> Mapping[str, Any] | None:
     fenced = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", accepted, re.DOTALL | re.IGNORECASE)
     if fenced:
         accepted = fenced.group(1).strip()
+    # strict=False: models often put a line break straight into a JSON string (four of seven research chat
+    # replies in acceptance testing); the schema check that follows still decides what is accepted.
     try:
-        document = json.loads(accepted)
+        document = json.loads(accepted, strict=False)
     except json.JSONDecodeError:
         start = accepted.find("{")
         if start < 0:
             return None
         try:
-            document, _ = json.JSONDecoder().raw_decode(accepted[start:])
+            document, _ = json.JSONDecoder(strict=False).raw_decode(accepted[start:])
         except json.JSONDecodeError:
             return None
     return document if isinstance(document, Mapping) else None

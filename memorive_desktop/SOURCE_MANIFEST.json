@@ -5667,8 +5667,8 @@
     },
     {
       "path": "source/memorive/models/validation/structured.py",
-      "sha256": "d05084fd8d871f8670b023911740f15f76d5a11805348da10dead715ac31fe8c",
-      "bytes": 3229
+      "sha256": "d21b0eb7f3bb8de129fedf150a183b1d041a5426a93fc11ad46a68b9709c29fb",
+      "bytes": 3464
     },
     {
       "path": "source/memorive/models/validation/transport.py",
