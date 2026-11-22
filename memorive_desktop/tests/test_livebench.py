@@ -8,6 +8,7 @@ from memorive.desktop.settings.external_sources import ExternalDataSources,defau
 from memorive.desktop.settings.livebench_reference import CATEGORY_METRICS,release_urls,DEFAULT_ENDPOINT
 from memorive.models.validation.transport import HttpResponse
 from legacy_aa_fixture import configure_aa
+from leaderboard_test_support import LIVEBENCH_SOURCE
 from memorive.platform.json_files import canonical_sha256
 
 def bundle(models=None):
@@ -28,9 +29,10 @@ class Transport:
             json.dumps(data['categories']).encode(),data['table_csv'].encode()][n]
         return HttpResponse(200,body)
 
-def test_default_is_livebench_with_no_credentials():
-    row=default_sources()[0]
-    assert row['display_name']=='LiveBench' and row['format']=='LIVEBENCH_RELEASE'
+def test_livebench_slot_needs_no_credentials():
+    # LiveBench was the default until 2026-11-22 (now LMArena, tests/test_lmarena.py).
+    row=LIVEBENCH_SOURCE
+    assert row['format']=='LIVEBENCH_RELEASE' and default_sources()[0]['format']=='LMARENA_LEADERBOARD'
     assert not row['credential_env'] and row['endpoint']==DEFAULT_ENDPOINT
 
 
@@ -38,23 +40,23 @@ def test_category_means_not_weighted_by_number_of_tasks():
     data=bundle([('a',80)])
     data['categories']['Reasoning']=['task_0','extra']
     data['table_csv']='model,task_0,task_1,task_2,task_3,task_4,task_5,task_6,extra\na,0,70,70,70,70,70,70,0\n'
-    row=normalize_payload(default_sources()[0],data)[0]
+    row=normalize_payload(LIVEBENCH_SOURCE,data)[0]
     assert row['metrics']['livebench_global']==60
 
 def test_missing_tasks_never_fabricate_complete_global():
     data=bundle([('a',80)])
     data['table_csv']=data['table_csv'].replace('80,80',',80',1)
-    row=normalize_payload(default_sources()[0],data)[0]
+    row=normalize_payload(LIVEBENCH_SOURCE,data)[0]
     assert row['metrics']['livebench_global'] is None and not row['complete_category_coverage']
 
 def test_exact_effort_preferred_and_ambiguous_variants_not_arbitrarily_selected():
-    rows=normalize_payload(default_sources()[0],bundle([('gpt-5.6-sol-max',80),('gpt-5.6-sol-high',70)]))
+    rows=normalize_payload(LIVEBENCH_SOURCE,bundle([('gpt-5.6-sol-max',80),('gpt-5.6-sol-high',70)]))
     assert role_references('ANALYSIS_PRIMARY',{'model_name':'gpt-5.6-sol'},rows)['references']==[]
     matched=role_references('ANALYSIS_PRIMARY',{'model_name':'gpt-5.6-sol','thinking_mode':'high'},rows)['references']
     assert len(matched)==1 and matched[0]['metrics']['livebench_global']==70
 
 def test_local_quantization_is_only_a_base_reference():
-    rows=normalize_payload(default_sources()[0],bundle())
+    rows=normalize_payload(LIVEBENCH_SOURCE,bundle())
     row=role_references('CARD_DISTILLER',{'kind':'LOCAL','model_name':'[本地] qwen3.8:27b-q4_K_M'},rows)['references'][0]
     assert row['model_id']=='qwen3.8-27b'
     assert row['quantized_profile_assessed'] is False
@@ -65,7 +67,7 @@ def test_legacy_default_migration_retains_backup_other_modes_and_no_key_binding(
     s.save(other,expected_revision=0)
     assert s.enable_weekly_updates()['status']=='MIGRATED'
     configs=[x['config'] for x in s.get_state()['sources']]
-    assert configs[0]['format']=='LIVEBENCH_RELEASE' and not configs[0]['credential_env']
+    assert configs[0]['format']=='LMARENA_LEADERBOARD' and not configs[0]['credential_env']  # the current default
     assert configs[2]['refresh_mode']=='MANUAL'
     assert len(list((tmp_path/'policy_migrations').glob('*.json')))==1
     assert s.enable_weekly_updates()['status']=='UNCHANGED'
@@ -80,7 +82,7 @@ def test_user_custom_source_is_not_replaced(tmp_path):
 @pytest.mark.parametrize('bad',['nan','inf','-1','101'])
 def test_invalid_score_rejected(bad):
     data=bundle();data['table_csv']=data['table_csv'].replace(',80,',','+bad+',',1)
-    with pytest.raises(ValueError): normalize_payload(default_sources()[0],data)
+    with pytest.raises(ValueError): normalize_payload(LIVEBENCH_SOURCE,data)
 
 def test_remote_javascript_is_not_executed():
     release,urls=release_urls(DEFAULT_ENDPOINT,b"alert('no'); setSelectedDate('2026-06-25');")

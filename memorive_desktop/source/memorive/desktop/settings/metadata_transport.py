@@ -1,6 +1,6 @@
 """The settings' public metadata transport (PublicMetadataHttpTransport): GET requests over HTTPS,
 without credentials or redirects, to the built-in public sources the leaderboard, reference prices
-and exchange rates read (OpenRouter, LiveBench, Epoch AI, the ECB), and the back-off after a source's
+and exchange rates read (OpenRouter, LMArena, LiveBench, Epoch AI, the ECB), and the back-off after a source's
 rate limit. Kept apart from the model and API transports. external_sources.py uses it; the HTTP
 helpers it shares with research discovery are in memorive/platform/public_http.py.
 """
@@ -62,6 +62,9 @@ def is_builtin_public_metadata(url):
     if is_endpoint_url(url):
         return True
     if is_livebench_github_metadata(url):
+        return True
+    from memorive.desktop.settings.lmarena_reference import is_page_url as is_lmarena_page
+    if is_lmarena_page(url):
         return True
     if url in {'https://epoch.ai/data/benchmark_data.zip', 'https://openrouter.ai/api/v1/models',
                _LIVEBENCH_BASE + LIVEBENCH_RELEASE_FILE}:

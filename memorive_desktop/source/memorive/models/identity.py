@@ -1,7 +1,7 @@
 """Model identity: which vendor and base model a model id names, and the reasoning effort when the
 id or its ranking record carries one.
 
-identity() turns a model id, or a ranking record (Artificial Analysis, Epoch AI, LiveBench rows),
+identity() turns a model id, or a ranking record (Artificial Analysis, Epoch AI, LMArena, LiveBench rows),
 into (vendor, base_model, effort); join_base() makes version punctuation comparable. The model
 leaderboard in Settings (memorive/desktop/settings/leaderboard.py) groups ranking rows by these keys, and
 the price registry (memorive/models/price_registry.json) is keyed by them, so the
@@ -51,6 +51,9 @@ def identity(record):
                 base = base[:match.start()]
             base = re.sub(r'_unknown$', '', base)
             effort = 'reference'
+    if record.get("upstream_source") == "lmarena":
+        # LMArena rates a model by its best effort or mode: a model-level upper envelope, as Epoch's ECI.
+        effort = "reference"
     if record.get("upstream_source") == "livebench":
         match = EFFORT.search(base)
         effort = record.get("benchmark_effort")

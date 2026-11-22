@@ -17,9 +17,12 @@ from memorive.models.identity import VENDORS, identity, join_base, number, text
 
 SCHEMA = "ModelLeaderboardProjection-v4"
 PREF_SCHEMA = "ModelLeaderboardPreferences-v1"
-DEFAULTS = {"currency": "USD", "weights": {"artificial-analysis": 100, "epoch-ai": 0},
+# Ability by default: Epoch AI's capability index and LMArena's text board (slot "artificial-analysis") in equal
+# parts. FORMER_DEFAULT_WEIGHTS (LiveBench alone) are read as the current default.
+DEFAULTS = {"currency": "USD", "weights": {"artificial-analysis": 50, "epoch-ai": 50},
             "preset": "general", "ability_weight": 70, "cost_weight": 30,
             "input_ratio": 0.8, "stars": []}
+FORMER_DEFAULT_WEIGHTS = {"artificial-analysis": 100, "epoch-ai": 0}
 CATEGORIES = ("reasoning", "coding", "agentic_coding", "math", "data_analysis", "language", "instruction_following")
 PRESETS = {"general": (1, 1, 1, 1, 1, 1, 1),
            "research": (20, 5, 5, 10, 20, 20, 20),
@@ -87,6 +90,8 @@ def source_quality(record, preset):
             v is not None and 0 <= v <= 100 for v, _ in pairs) else None
     if record.get("source_id") == "epoch-ai":
         return number(metrics.get("eci"))
+    if record.get("upstream_source") == "lmarena":
+        return number(metrics.get("lmarena_text"))
     if record.get("upstream_source") == "artificial-analysis":
         return number(metrics.get("artificial_analysis_intelligence_index"))
     return None
@@ -246,7 +251,8 @@ def project_rows(sources, preferences):
         model["price_status"] = product.get("regular_price_status", "NO_CURRENT_PUBLIC_ROUTE")
         model["price_reason"] = product.get("regular_price_reason", "NO_EXACT_PROVIDER_ROUTE_IN_CURRENT_PUBLIC_CATALOGS")
         official_name = (model.get("official_release") or {}).get("display_name")
-        model["name"] = official_name or display_name(product.get("display_name"), base, vendor)
+        # Without a catalog name, the name the first ranking source gave (not the lower-case id).
+        model["name"] = official_name or display_name(product.get("display_name") or model["name"], base, vendor)
         if status == "CACHED":
             model["availability"] = "IN_CATALOG"
         for detail in references.get((vendor, base), []):
@@ -264,7 +270,11 @@ def project_rows(sources, preferences):
     weights = {k: v for k, v in preferences["weights"].items() if v > 0}
     # Use the union of selected-source coverage, not a mandatory intersection.
     # Missing sources never become zero scores; effective shares are disclosed.
-    cohort = [m for m in rows if m['vendor_id'] in VENDORS and any(number(m['quality'].get(k)) is not None for k in weights)]
+    # Epoch AI also lists historical research models: a model only Epoch lists (no price, official release or
+    # arena rating) stays a reference and does not enter the current catalog.
+    listed = lambda m: any(d["source_id"] != "epoch-ai" for d in m["details"])
+    cohort = [m for m in rows if m['vendor_id'] in VENDORS and listed(m)
+              and any(number(m['quality'].get(k)) is not None for k in weights)]
     distributions = {k: sorted(m['quality'][k] for m in cohort if number(m['quality'].get(k)) is not None) for k in weights}
     costs, cost_keys = [], set()
     ratio = preferences["input_ratio"]
@@ -340,6 +350,9 @@ class LeaderboardService:
         preferences = value["preferences"]
         if not isinstance(preferences, dict):
             raise ValueError("LEADERBOARD_PREFERENCES_INVALID")
+        if preferences.get("weights") == FORMER_DEFAULT_WEIGHTS:
+            # Never changed by the person: follow the default (Epoch AI and LMArena), not the stalled LiveBench.
+            preferences = {**preferences, "weights": deepcopy(DEFAULTS["weights"])}
         value["preferences"] = validate_preferences({**deepcopy(DEFAULTS), **preferences})
         return value
 

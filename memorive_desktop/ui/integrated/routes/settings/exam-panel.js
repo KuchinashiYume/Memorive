@@ -39,10 +39,10 @@
   function references(result) {
     clearReferences();
     const slot=result.source_slots?.find(row=>row.source_id==='artificial-analysis');
-    q('#settings-exam-secondary-source').textContent=slot?.display_name || 'LiveBench';
+    q('#settings-exam-secondary-source').textContent=slot?.display_name || 'LMArena';
     const definitions = [
       ['epoch-ai','epoch',['eci']],
-      ['artificial-analysis','aa',['livebench_global','artificial_analysis_intelligence_index']],
+      ['artificial-analysis','aa',['lmarena_text','livebench_global','artificial_analysis_intelligence_index']],
       ['openrouter','openrouter',['artificial_analysis_intelligence_index','intelligence_index']]
     ];
     for (const [source,id,metrics] of definitions) {

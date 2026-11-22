@@ -21,7 +21,7 @@ ROLE_NAMES = {"ingest": "文档处理", "card_distill": "生成卡片", "judgmen
     "transport_review": "核对卡片", "card_reviewer": "核对卡片", "context_pack": "整理分析材料",
     "reranker": "整理分析材料", "analysis_primary": "分析", "analysis": "分析",
     "analysis_reviewer": "核对分析"}
-METRICS = {"eci": "ECI", "livebench_global": "LiveBench", "artificial_analysis_intelligence_index": "Intelligence Index",
+METRICS = {"eci": "ECI", "lmarena_text": "LMArena", "livebench_global": "LiveBench", "artificial_analysis_intelligence_index": "Intelligence Index",
     "intelligence_index": "Intelligence Index"}
 CHANNELS = {"API", "CLI", "LOCAL"}
 

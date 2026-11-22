@@ -6,12 +6,13 @@ deepseek-flash. The reference lookup now tries both names; an unrelated name sti
 """
 from __future__ import annotations
 
-from memorive.desktop.settings.external_sources import default_sources, normalize_payload, role_references
+from memorive.desktop.settings.external_sources import normalize_payload, role_references
+from leaderboard_test_support import LIVEBENCH_SOURCE
 from test_livebench import bundle
 
 
 def test_the_official_name_finds_the_reference_of_the_listed_name():
-    rows = normalize_payload(default_sources()[0], bundle([("deepseek-v4-flash", 60), ("qwen3.8-27b", 70)]))
+    rows = normalize_payload(LIVEBENCH_SOURCE, bundle([("deepseek-v4-flash", 60), ("qwen3.8-27b", 70)]))
     [reference] = role_references("ANALYSIS_PRIMARY", {"model_name": "deepseek-flash"}, rows)["references"]
     assert reference["model_slug"] == "deepseek-v4-flash"
     assert role_references("ANALYSIS_PRIMARY", {"model_name": "deepseek-chat"}, rows)["references"] == []

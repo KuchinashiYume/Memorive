@@ -38,6 +38,8 @@ from memorive.desktop.settings.metadata_transport import (PublicMetadataHttpTran
     LIVEBENCH_GITHUB_API, LIVEBENCH_RELEASE_FILE, LIVEBENCH_REPOSITORY, GITHUB_API_VERSION)
 from memorive.platform.public_http import MetadataRateLimitError, metadata_error_code, transient_metadata_error
 from memorive.desktop.settings.livebench_reference import DEFAULT_ENDPOINT as LIVEBENCH_ENDPOINT, release_urls, normalized_rows as livebench_rows
+from memorive.desktop.settings.lmarena_reference import (ENDPOINT as LMARENA_ENDPOINT, MAX_ROWS as LMARENA_MAX_ROWS,
+    METRIC as LMARENA_METRIC, PAGE_SIZE as LMARENA_PAGE_SIZE, normalized_rows as lmarena_rows, page_url as lmarena_page_url)
 
 SCHEMA = "ExternalModelReference-v1"
 _REMOVED_LIVEBENCH_ENDPOINT = 'https://raw.githubusercontent.com/LiveBench/new-livebench/main/src/lib/constants.js'
@@ -88,7 +90,8 @@ def _github_content(body, path, commit):
 
 
 PUBLIC_PRESET_VERSION = "Memorive-PublicModelReferences-v1"
-FORMATS = {"ECB_FX_XML", "ARTIFICIAL_ANALYSIS", "EPOCH_CSV_ZIP", "OPENROUTER", "REFERENCE_JSON_V1", "LIVEBENCH_RELEASE"}
+FORMATS = {"ECB_FX_XML", "ARTIFICIAL_ANALYSIS", "EPOCH_CSV_ZIP", "OPENROUTER", "REFERENCE_JSON_V1", "LIVEBENCH_RELEASE",
+           "LMARENA_LEADERBOARD"}
 AA_METRICS = {
     "artificial_analysis_intelligence_index", "artificial_analysis_coding_index",
     "artificial_analysis_agentic_index", "aa_lcr", "aa_omniscience_accuracy",
@@ -106,16 +109,16 @@ ROLE_METRICS = {
 }
 AUTO_REFRESH_INTERVAL_DAYS = 7
 for _role in ('CARD_DISTILLER','CARD_REVIEWER','ANALYSIS_PRIMARY','ANALYSIS_REVIEWER','RERANKER_TEXT'):
-    ROLE_METRICS[_role].update({'livebench_language','livebench_instruction_following','livebench_reasoning'})
+    ROLE_METRICS[_role].update({'livebench_language','livebench_instruction_following','livebench_reasoning',LMARENA_METRIC})
 for _role in ('ANALYSIS_PRIMARY','ANALYSIS_REVIEWER'):
     ROLE_METRICS[_role].update({'livebench_data_analysis','livebench_math'})
 
 
 def default_sources() -> list[dict[str, Any]]:
     rows = [
-        # Keep the persisted slot id for existing replaceable-source bindings;
-        # display name, format and upstream provenance explicitly become LiveBench.
-        ("artificial-analysis", "LiveBench", "LIVEBENCH_RELEASE", LIVEBENCH_ENDPOINT, "", "LICENSE_REVIEW_REQUIRED"),
+        # Keep the persisted slot id for existing replaceable-source bindings; the slot held Artificial
+        # Analysis, then LiveBench (no release after 2026-06-25), and now LMArena's text board (CC BY 4.0).
+        ("artificial-analysis", "LMArena", "LMARENA_LEADERBOARD", LMARENA_ENDPOINT, "", "ATTRIBUTION_AND_UPSTREAM_LICENSES"),
         ("epoch-ai", "Epoch AI", "EPOCH_CSV_ZIP", "https://epoch.ai/data/benchmark_data.zip", "", "ATTRIBUTION_AND_UPSTREAM_LICENSES"),
         ("openrouter", "OpenRouter", "OPENROUTER", "https://openrouter.ai/api/v1/models", "", "PER_DATASET_LICENSE_REVIEW"),
     ]
@@ -287,6 +290,15 @@ def normalize_payload(source: Mapping[str, Any], payload: Any) -> list[dict[str,
         return [dict(schema_version="ExchangeRateReference-v1", source_id=source["source_id"],
                      model_id="USD", model_name="USD/CNY/JPY", metrics={}, reference_only=True,
                      qualification_eligible=False, fx=fx)]
+    if source['format'] == 'LMARENA_LEADERBOARD':
+        if not isinstance(payload, Mapping):
+            raise ValueError('LMARENA_ROWS_REQUIRED')
+        return [_record(source, item['model_id'], item['name'], {LMARENA_METRIC: item['rating']},
+                        upstream_source='lmarena', version=item['published'], source_as_of=item['published'],
+                        scale='ELO_RATING', model_slug=item['slug'], vote_count=_number(item['votes']),
+                        identity_scope='MODEL_CAPABILITY_UPPER_ENVELOPE',
+                        date_semantics='LEADERBOARD_PUBLISH_DATE_NOT_MODEL_DATE')
+                for item in lmarena_rows(payload['rows'])]
     if source['format']=='LIVEBENCH_RELEASE':
         if not isinstance(payload,Mapping):
             raise ValueError('LIVEBENCH_BUNDLE_REQUIRED')
@@ -465,7 +477,7 @@ def _reference_matches(target: Mapping[str, Any], rows: list[Mapping[str, Any]])
         for value in rows:
             if value.get('source_id') in exact_sources:
                 continue
-            identifier = _base_model_id(value.get('model_slug') if value.get('upstream_source')=='livebench' else value.get('model_id'))
+            identifier = _base_model_id(value.get('model_slug') if value.get('upstream_source') in ('livebench', 'lmarena') else value.get('model_id'))
             if value.get('source_id') == 'epoch-ai' and 'eci' in value.get('metrics', {}):
                 identifier = suffix.sub('', identifier)
             if identifier == base:
@@ -578,6 +590,11 @@ class ExternalDataSources:
             seen.add(row["source_id"])
             if row.get("endpoint") == _REMOVED_LIVEBENCH_ENDPOINT:   # saved before LiveBench moved
                 row = {**row, "endpoint": LIVEBENCH_ENDPOINT}
+            if (row["source_id"] == "artificial-analysis" and row.get("format") == "LIVEBENCH_RELEASE"
+                    and row.get("endpoint") == LIVEBENCH_ENDPOINT and row.get("display_name") == "LiveBench"):
+                # The former built-in LiveBench slot becomes LMArena, keeping the person's schedule.
+                row = {**defaults["artificial-analysis"],
+                       **{k: row[k] for k in ("enabled", "refresh_mode", "ttl_days") if k in row}}
             # Only absent fields are filled. Invalid values, unknown fields and
             # missing credential-origin bindings still fail validation.
             accepted.append(validate_source({**defaults[row["source_id"]], **row}))
@@ -892,6 +909,9 @@ class ExternalDataSources:
             headers = {"Accept": "application/json, application/zip, application/xml, text/xml", "User-Agent": "Memorive-QualityNew-References/1"}
             env = source["credential_env"]
             github_live = source['format'] == 'LIVEBENCH_RELEASE' and source['endpoint'] == LIVEBENCH_ENDPOINT
+            lmarena_live = source['format'] == 'LMARENA_LEADERBOARD'
+            if lmarena_live and source['endpoint'] != LMARENA_ENDPOINT:
+                raise ValueError('LMARENA_ENDPOINT_UNSUPPORTED')  # only the built-in board is read
             github_commit, github_files, github_paths = None, [], [LIVEBENCH_RELEASE_FILE]
             if github_live:
                 if env:
@@ -903,7 +923,8 @@ class ExternalDataSources:
                     raise ValueError("EXTERNAL_SOURCE_CREDENTIAL_NOT_CONFIGURED")
                 headers["x-api-key" if source["format"] == "ARTIFICIAL_ANALYSIS" else "Authorization"] = secret if source["format"] == "ARTIFICIAL_ANALYSIS" else f"Bearer {secret}"
             route_owned = (isinstance(self.transport, PublicMetadataHttpTransport) and
-                self.transport.owns_public_route(LIVEBENCH_GITHUB_API + '/commits/main' if github_live else source['endpoint']))
+                self.transport.owns_public_route(LIVEBENCH_GITHUB_API + '/commits/main' if github_live
+                                                 else lmarena_page_url(0) if lmarena_live else source['endpoint']))
             if isinstance(self.transport, UrllibHttpTransport) and not route_owned:
                 host = urlsplit(LIVEBENCH_GITHUB_API if github_live else source['endpoint']).hostname
                 addresses = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
@@ -913,6 +934,7 @@ class ExternalDataSources:
             # snapshot; each physical metadata GET has its own pre-send receipt.
             records, page_hashes, model_ids = [], [], set()
             live_documents, live_urls, live_release = [], [], None
+            board_rows, board_total = [], None
             page, total_pages, index_version = 1, None, None
             while True:
                 split = urlsplit(source["endpoint"])
@@ -921,6 +943,8 @@ class ExternalDataSources:
                     (split.scheme, split.netloc, split.path, urlencode(query + [('page',str(page))]), ''))
                 if live_urls:
                     page_url=live_urls[page-1]
+                if lmarena_live:
+                    page_url = lmarena_page_url((page - 1) * LMARENA_PAGE_SIZE)
                 github_path = None
                 if github_live:
                     if page == 1:
@@ -996,6 +1020,21 @@ class ExternalDataSources:
                     rows=normalize_payload(source,dict(release=live_release,
                         categories=json.loads(live_documents[1].decode('utf-8-sig')),
                         table_csv=live_documents[2].decode('utf-8-sig')))
+                elif lmarena_live:
+                    # The board comes in pages of the rows API; a snapshot needs every page of one total.
+                    payload = json.loads(response.body.decode('utf-8-sig'))
+                    total = payload.get('num_rows_total') if isinstance(payload, Mapping) else None
+                    if (type(total) is not int or not 1 <= total <= LMARENA_MAX_ROWS
+                            or not isinstance(payload.get('rows'), list) or board_total not in (None, total)):
+                        raise ValueError('LMARENA_PAGE_INVALID')
+                    board_total = total
+                    board_rows.extend(item.get('row') if isinstance(item, Mapping) else None for item in payload['rows'])
+                    if page * LMARENA_PAGE_SIZE < total:
+                        page += 1
+                        continue
+                    if len(board_rows) != total or not all(isinstance(row, Mapping) for row in board_rows):
+                        raise ValueError('LMARENA_PAGE_INVALID')
+                    rows = normalize_payload(source, {'rows': board_rows})
                 else:
                     rows = normalize_payload(source, response.body)
                 records.extend(rows)

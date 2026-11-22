@@ -75,7 +75,7 @@
     if (receipt?.status === 'BUSY') return '正在更新';
     return '更新失败 · '+retained;
   };
-  const metricNames = {livebench_global:'LiveBench 综合',livebench_reasoning:'推理',livebench_coding:'编程',livebench_agentic_coding:'Agent 编程',livebench_math:'数学',livebench_data_analysis:'数据分析',livebench_language:'语言',livebench_instruction_following:'指令遵循',eci:'Epoch 能力指数（非百分制）', artificial_analysis_intelligence_index:'AA 智能指数',
+  const metricNames = {lmarena_text:'LMArena 文本 Elo（非百分制）',livebench_global:'LiveBench 综合',livebench_reasoning:'推理',livebench_coding:'编程',livebench_agentic_coding:'Agent 编程',livebench_math:'数学',livebench_data_analysis:'数据分析',livebench_language:'语言',livebench_instruction_following:'指令遵循',eci:'Epoch 能力指数（非百分制）', artificial_analysis_intelligence_index:'AA 智能指数',
     artificial_analysis_coding_index:'AA 编程指数', artificial_analysis_agentic_index:'AA 智能体指数',
     aa_lcr:'长上下文推理', ifbench:'指令遵循', gpqa_diamond:'科学推理 · GPQA',
     hle:'高难度知识推理 · HLE', critpt:'前沿科学推理 · CritPt', mmmu_pro:'多模态理解',

@@ -19,11 +19,24 @@ from memorive.desktop.settings.controller import SettingsController
 from memorive.desktop.settings.credentials import CredentialReferenceManager
 from memorive.desktop.settings.directory_policy import DirectoryPolicy
 from memorive.desktop.settings.external_sources import ExternalDataSources, default_sources, normalize_payload
-from memorive.desktop.settings.livebench_reference import CATEGORY_METRICS
+from memorive.desktop.settings.livebench_reference import CATEGORY_METRICS, DEFAULT_ENDPOINT as LIVEBENCH_ENDPOINT
 from memorive.models.validation.transport import HttpResponse
 from memorive.desktop.settings.service_adapter import SettingsServiceAdapter
 from memorive.desktop.settings.store import SettingsStore
 from memorive.desktop.api import ProductApi
+
+
+# The leaderboard tests score LiveBench rows in the first slot. Since 2026-11-22 the slot's default is LMArena
+# (tests/test_lmarena.py); a person who renamed their LiveBench slot keeps it, and so does this fixture.
+LIVEBENCH_SOURCE = {**default_sources()[0], "display_name": "LiveBench（样例）", "format": "LIVEBENCH_RELEASE",
+                    "endpoint": LIVEBENCH_ENDPOINT, "redistribution": "LICENSE_REVIEW_REQUIRED"}
+
+
+def use_livebench_slot(external):
+    state = {"schema_version": "ExternalDataSourceSettings-v2", "revision": 0,
+             "sources": [LIVEBENCH_SOURCE, *default_sources()[1:]]}
+    state["sha256"] = canonical_sha256(state)
+    external.writer.write_json(external.path, state)
 
 
 def model(index):
@@ -98,6 +111,7 @@ def setup(root, count=12, seed=True):
     transport = Transport(count)
     store = SettingsStore(root / "profile", default_factory=lambda: default_settings(workspace_root=str(root), artifact_root=str(root)))
     external = ExternalDataSources(root / "profile/external_data", transport=transport, environment={})
+    use_livebench_slot(external)
     controller = SettingsController(store=store, credentials=CredentialReferenceManager(),
         capabilities=CapabilityProjection([], revision="leaderboard-test"), directory_policy=DirectoryPolicy([root]),
         external_data_sources=external)

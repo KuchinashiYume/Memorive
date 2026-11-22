@@ -238,7 +238,7 @@
       'K = 100 / (1 + C / C₀)。\n' +
       (alpha === 0 ? 'V = K。' : beta === 0 ? 'V = A。' : 'V = 100 × (A/100)^' + alpha.toFixed(3) + ' × (K/100)^' + beta.toFixed(3) + '。') +
       uiText('\n缺失数据不按 0 分；零价格不参与成本评分。星标、筛选和币种不改变计算样本。') +
-      uiText('\n只比较 Token 单价，不预测实际用量。未标档位的 Epoch 分数单列为“模型级参考”，不用于其他档位。');
+      uiText('\n只比较 Token 单价，不预测实际用量。Epoch 和 LMArena 是模型级分数（LMArena 取各档位的最高分），单列为“模型级参考”，不用于其他档位；只有 Epoch 收录的模型只作参考，不进入榜单。');
   }
   // The date of a stored UTC time on this computer's calendar (2026-11-21T23:30Z is 11-22 in Tokyo).
   const localDay = (value) => {
