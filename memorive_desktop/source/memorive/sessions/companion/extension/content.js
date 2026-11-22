@@ -85,8 +85,11 @@
       ]
     }
   };
+  // ChatGPT since 2026-11: data-conversation-role on each message; the bubble / answer body inside it is the
+  // fallback when the outer element has no box of its own (checked on chatgpt.com 2026-11-22).
   const currentPageDefinition = {
     user: [
+      '[data-conversation-role="user"]', '[data-user-message-bubble="true"]',
       '[data-message-author-role="user"]', '[data-author-role="user"]',
       '[data-role="user"]', '[data-message-role="user"]',
       '[data-testid*="user-message" i]', '[data-test-id*="user-message" i]',
@@ -95,6 +98,7 @@
       '[class*="questionitem" i]'
     ],
     assistant: [
+      '[data-conversation-role="assistant"]', '[data-markdown-text-style="assistant-message"]',
       '[data-message-author-role="assistant"]', '[data-author-role="assistant"]',
       '[data-message-author-role="model"]', '[data-author-role="model"]',
       '[data-role="assistant"]', '[data-message-role="assistant"]',
@@ -105,7 +109,7 @@
       '[class*="answeritem" i]'
     ],
     generic: [
-      '[data-message-author-role]', '[data-author-role]',
+      '[data-conversation-role]', '[data-message-author-role]', '[data-author-role]',
       '[data-role]', '[data-message-role]',
       '[class*="chat-message" i]', '[class*="message-item" i]',
       '[class*="messageitem" i]', '[class*="chat-item" i]',
@@ -699,6 +703,7 @@
         current.className,
         current.getAttribute?.("data-role"),
         current.getAttribute?.("data-message-role"),
+        current.getAttribute?.("data-conversation-role"),
         current.getAttribute?.("data-message-author-role"),
         current.getAttribute?.("data-author-role"),
         current.getAttribute?.("data-testid"),
@@ -752,10 +757,11 @@
   // The element that holds one message (or one turn) on the supported sites. Text blocks of one message
   // (an answer split into several rendered parts) join only inside the same container; two containers are two
   // messages even when they are next to each other and have the same role. A row outside every container is
-  // its own message. (.ds-message and data-virtual-list-item-key: DeepSeek's message rows; check on the site.)
+  // its own message. (.ds-message and data-virtual-list-item-key: DeepSeek's message rows; data-conversation-role:
+  // ChatGPT's message element; check on the site.)
   const MESSAGE_CONTAINER_SELECTOR = [
     "[data-message-id]", "[data-turn-id]", '[data-testid^="conversation-turn-"]',
-    ".ds-message", "[data-virtual-list-item-key]"
+    ".ds-message", "[data-virtual-list-item-key]", "[data-conversation-role]"
   ].join(",");
   const messageContainer = (node) => node.closest(MESSAGE_CONTAINER_SELECTOR) || node;
   // Rows in page order, each with its container: joins the blocks of one message.
