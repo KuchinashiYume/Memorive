@@ -6,7 +6,7 @@ import json
 import re
 from pathlib import Path
 from typing import Mapping
-from memorive.documents.data_review.engine import digest
+from memorive.documents.data_review.engine import body_text, digest
 from memorive.documents.data_review.store import atomic
 
 PROMPT_VERSION='LiteratureLogicPrompt-v6-claim-scope'
@@ -102,7 +102,8 @@ def segments(text,max_chars=18000,*,full_document_budget=None,packed_document_bu
     the JSON input. The whole text goes in one request when it fits: as plain lines within
     full_document_budget, else as a lossless source packet within packed_document_budget. Only a text
     that fits neither is split into local segments of at most max_chars."""
-    lines=text.splitlines()
+    # the model reads the paper, not the RawMD file facts above it; line numbers stay the same
+    lines=body_text(text).splitlines()
     whole={'segment_id':'segment-1','mode':'FULL_DOCUMENT','start_line':1,'end_line':len(lines),'context_start_line':1}
     if lines and full_document_budget:
         plain={**whole,'text':'\n'.join(f'L{i}: {line}' for i,line in enumerate(lines,1))}

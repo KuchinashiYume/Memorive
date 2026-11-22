@@ -337,3 +337,11 @@ def test_a_quote_that_does_not_touch_its_cited_line_is_still_refused(line, quote
     with pytest.raises(ValueError, match="LOGIC_CITATION_NOT_IN_SUPPLIED_SOURCE"):
         validate_response(_response(_finding(citations=[_citation(line, quote)])), text=BROKEN,
                           segment={"context_start_line": 1, "end_line": 3})
+
+
+def test_the_model_does_not_read_the_file_facts_at_the_top():
+    from memorive.documents.data_review.logic import segments
+
+    text = "---\nsource_sha256: ABC\n---\nWe conclude the enzyme is temperature independent."
+    [part] = segments(text, max_chars=8000)
+    assert "source_sha256" not in part["text"] and "L4: We conclude" in part["text"]

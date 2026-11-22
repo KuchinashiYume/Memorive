@@ -15,7 +15,7 @@ import re
 import time
 from typing import Any, Callable, Mapping
 
-ENGINE_VERSION = 'MemoriveDataEngine-v8'
+ENGINE_VERSION = 'MemoriveDataEngine-v9'
 RULE_VERSION = 'ExplicitNumericRules-v7'
 MAX_BYTES = 4_000_000
 MAX_RECORDS = 20_000
@@ -23,6 +23,13 @@ MAX_RULES = 200
 # A sentence period may follow a complete numeric token. A further decimal
 # component may not: never backtrack away from a percent sign to satisfy it.
 NUMBER = re.compile(r'(?:(?P<relation><=|>=|<|>|≤|≥|=)\s*|(?<![\w.]))(?P<value>(?:[+−-]\s*)?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+−-]?\d+)?)(?P<percent>\s*%)?(?!\w|\.\d)')
+# Thousands commas (5,000) are read as such only in a text whose comma numbers all group three digits
+# after a non-zero lead and which never groups digits with points (1.200); elsewhere 1,200 or 0,031 may
+# be a decimal comma and stays ambiguous.
+NUMBER_GROUPED = re.compile(NUMBER.pattern.replace(r'(?:\d+(?:\.\d*)?|\.\d+)', r'(?:\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d*)?|\.\d+)', 1))
+THOUSANDS = re.compile(r'[1-9]\d{0,2}(?:,\d{3})+')
+POINT_GROUPED = re.compile(r'(?<![\d.,])\d{1,3}(?:\.\d{3})+(?!\d|[.,]\d)')
+COMMA_NUMBER = re.compile(r'(?<![\d,])\d+(?:,\d+)+(?![\d,])')
 AMBIGUOUS = re.compile(r'(?<!\w)(?:\d+(?:\.\d+){2,}|\d+,\d+|[0-9]*[OlI][0-9]*\.[0-9]+|\d+\.[0-9]*[OlI][0-9]*)(?!\w)')
 UNITS = re.compile(r'^\s*([%‰‱％]|(?:µ|μ|u|m|k)?(?:g|L|l|mol|M|m|s|Hz|Pa)(?:/(?:mL|ml|L|l|kg|g|s))?)(?!\w)')
 
@@ -88,6 +95,18 @@ def _rule_units(kind,resolved,parameters):
         raise ValueError('UNIT_MISMATCH_CONVERSION_NOT_DECLARED')
     return normalized
 
+def body_text(text: str) -> str:
+    """text with the RawMD front matter at its top (the --- block of file facts: converter, hashes,
+    conversion time) blanked line for line, so a review reads only the paper and keeps its line numbers."""
+    from memorive.documents.front_matter import split_front_matter
+    parts=split_front_matter(text)
+    if parts is None or parts[0].strip():
+        return text
+    after=parts[2]
+    header=text[:len(text)-len(after)]
+    return '\n'*header.count('\n')+after
+
+
 def digest(value: Any) -> str:
     raw = value if isinstance(value, bytes) else json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False).encode('utf-8')
     return hashlib.sha256(raw).hexdigest().upper()
@@ -148,6 +167,7 @@ def _integer(v,name):
     return int(x)
 
 def extract(text: str, *, source_sha256: str, checkpoint: Callable[[],None]) -> dict:
+    grouped=not POINT_GROUPED.search(text) and all(THOUSANDS.fullmatch(m.group()) for m in COMMA_NUMBER.finditer(text))
     records=[]
     issues=[]
     tables=[]
@@ -168,11 +188,11 @@ def extract(text: str, *, source_sha256: str, checkpoint: Callable[[],None]) -> 
                 tables.append(table)
             elif not cells:
                 table=None
-            spans=[(m.start(),m.end()) for m in AMBIGUOUS.finditer(line)]
+            spans=[(m.start(),m.end()) for m in AMBIGUOUS.finditer(line) if not (grouped and THOUSANDS.fullmatch(m.group()))]
             if spans:
                 issues.append({'kind':'AMBIGUOUS_NUMBER_FORMAT','line':line_no,'quote':line,'spans':spans})
             row_ids=[]
-            for match in NUMBER.finditer(line):
+            for match in (NUMBER_GROUPED if grouped else NUMBER).finditer(line):
                 if any(a<match.end() and match.start()<b for a,b in spans):
                     continue
                 if len(records)>=MAX_RECORDS:
@@ -187,7 +207,7 @@ def extract(text: str, *, source_sha256: str, checkpoint: Callable[[],None]) -> 
                     raw=raw[skip:]
                     value_start+=skip
                 try:
-                    value=decimal(raw)
+                    value=decimal(raw.replace(',',''))
                 except (ValueError,InvalidOperation):
                     issues.append({'kind':'UNSUPPORTED_NUMBER','line':line_no,'quote':match.group()})
                     continue
@@ -746,6 +766,7 @@ def analyze(text:str, *, source_id:str, source_sha256:str|None=None, rules:list|
         checkpoint()
         if time.monotonic()-start>max_seconds:
             raise TimeoutError('DATA_COMPUTE_TIME_BUDGET_EXCEEDED')
+    text=body_text(text)
     parsed=extract(text,source_sha256=actual,checkpoint=check)
     from memorive.documents.data_review.formats import discover
     formats=discover(text,parsed)
