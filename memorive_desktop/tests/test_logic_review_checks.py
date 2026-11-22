@@ -12,7 +12,7 @@ import copy
 import jsonschema
 import pytest
 
-from memorive.documents.data_review.logic import cloud_profile, validate_response
+from memorive.documents.data_review.logic import build_report, cloud_profile, global_segment, prompt, validate_response
 from memorive.models.cli.templates import ADAPTER
 
 TEXT = "\n".join([
@@ -198,3 +198,114 @@ def test_the_model_status_overrides_the_service_status():
     node["execution_profile"]["model"]["connection_status"] = "UNAVAILABLE"
     with pytest.raises(ValueError, match="LOGIC_PROFILE_UNAVAILABLE"):
         cloud_profile(node)
+
+
+@pytest.mark.parametrize("citations", [
+    [_citation(3, "temperature independent")],
+    [_citation(3, "temperature independent"), _citation(3, "temperature independent")],
+    [_citation(3, "temperature independent"), _citation(3, "independent")],
+])
+def test_one_source_passage_does_not_support_priority_by_itself(citations):
+    result = validate_response(_response(_finding(citations=citations)), text=TEXT, segment=SEGMENT)
+    assert result["findings"][0]["level"] == "CLARIFY"
+
+
+def test_two_separate_passages_on_one_line_can_support_priority():
+    line = "Only one temperature was tested. The study claims the enzyme is temperature independent."
+    finding = _finding(citations=[_citation(1, "Only one temperature was tested"),
+                                  _citation(1, "the enzyme is temperature independent")])
+    result = validate_response(_response(finding), text=line, segment={"context_start_line": 1, "end_line": 1})
+    assert result["findings"][0]["level"] == "PRIORITY"
+
+
+def test_repeating_the_same_quote_is_not_a_global_conflict():
+    same = [_citation(3, "temperature independent")] * 2
+    result = validate_response(_response(global_relations=_global(citations=same)), text=TEXT, segment=GLOBAL)
+    assert result["global_relations"]["checks"][0]["assessment"] == "UNDETERMINED"
+
+
+def _local(part_id, lo, hi, role, citation, *findings):
+    part = {"segment_id": part_id, "mode": "LOCAL_SEGMENT",
+            "start_line": lo, "context_start_line": lo, "end_line": hi}
+    inventory = {"complete": True, "limitations": [], "items": [
+        {"role": role, "citation": citation, "summary": citation["quote"]},
+    ] if citation else []}
+    return part, _response(*findings, relation_inventory=inventory)
+
+
+def test_global_packet_includes_local_evidence_missing_from_the_inventory():
+    lines = ["Only one temperature was tested.", "The enzyme is temperature independent.",
+             *[f"Context line {i}" for i in range(3, 13)],
+             "The main result at 37 C.", "The limitation to this experimental setup is explicit."]
+    text = "\n".join(lines)
+    finding = _finding(citations=[_citation(1, lines[0]), _citation(2, lines[1])])
+    first, a = _local("segment-1", 1, 13, "RESULT", _citation(13, lines[12]), finding)
+    second, b = _local("segment-2", 14, 14, "LIMITATION", _citation(14, lines[13]))
+    part = global_segment(text, [first, second], [a, b], max_chars=12000)
+    assert {1, 2, 13, 14} <= set(part["allowed_lines"])
+
+
+@pytest.mark.parametrize("third_role, expected", [("CONCLUSION", "LIMITED"), ("OTHER", "CHECKED")])
+def test_global_report_coverage_comes_from_compared_sources_not_the_segment_id_list(third_role, expected):
+    parts, answers = map(list, zip(
+        _local("segment-1", 1, 1, "METHOD", _citation(1, "Samples were incubated at 37 C.")),
+        _local("segment-2", 2, 2, "RESULT", _citation(2, "Growth doubled after 20 minutes.")),
+        _local("segment-3", 3, 4, third_role, _citation(3, "temperature independent")),
+    ))
+    part = global_segment(TEXT, parts, answers, max_chars=12000)
+    comparison = _global(assessment="CONSISTENT", covered=part["source_segment_ids"],
+                         relation="Result under the one tested temperature",
+                         citations=[_citation(1, "incubated at 37 C"), _citation(2, "Growth doubled")])
+    report = build_report(source_id="synthetic", source_sha256="source", text=TEXT,
+                          parts=[*parts, part], responses=[*answers, _response(global_relations=comparison)],
+                          node=_node(), data_report_id=None)
+    scope = report["scope"]["global_relationship_check"]
+    assert scope["status"] == expected
+    assert scope["compared_segment_ids"] == ["segment-1", "segment-2"]
+    assert scope["uncompared_material_segment_ids"] == (["segment-3"] if expected == "LIMITED" else [])
+
+
+def test_a_full_source_response_that_needed_a_missing_table_is_limited():
+    part = dict(SEGMENT, mode="FULL_DOCUMENT", start_line=1)
+    result = _response(_finding(missing_material=["Table S2"]))
+    report = build_report(source_id="synthetic", source_sha256="source", text=TEXT,
+                          parts=[part], responses=[result], node=_node(), data_report_id=None)
+    assert report["status"] == "COMPLETED_LIMITED"
+    assert "Table S2" in report["scope"]["limitations"]
+    # the whole supplied text was still read in one request
+    assert report["scope"]["global_relationship_check"]["status"] == "FULL_SOURCE_CHECKED"
+
+
+def test_numeric_context_surfaces_in_scope_inconsistencies_before_compatible_rows():
+    import json
+    from memorive.documents.data_review.engine import analyze
+
+    rows = [f"| Group {i} | 2/5 (40.0%) |" for i in range(25)]
+    rows += ["| Wrong | 2/5 (90.0%) |", "| Not supplied | 2/5 (95.0%) |"]
+    document = "\n".join(["| Group | n/N (%) |", "| --- | --- |", *rows])
+    data = analyze(document, source_id="synthetic")
+    target = data["checks"][-2]["rule_id"]
+    excluded = data["checks"][-1]["rule_id"]
+    part = {"mode": "LOCAL_SEGMENT", "context_start_line": 1, "end_line": 28}
+    message = prompt(part, data_report=data, source_sha256=data["source_sha256"])
+    checks = json.loads(message.split("\nLITERATURE_INPUT_JSON\n")[1])["data_calculations"]
+    ids = [check["rule_id"] for check in checks["checks"]]
+    assert ids[0] == target and excluded not in ids
+    assert len(ids) == 24 and checks["omitted_checks"] == 3
+
+
+@pytest.mark.parametrize("text", [
+    ("Measurements from the instrument were recorded. " * 200)[:4883],
+    "\n".join(f"Measurement {i} was independently repeated and recorded." for i in range(71)),
+])
+def test_a_text_whose_plain_prompt_fits_goes_in_one_request(text):
+    from memorive.documents.data_review.logic import segment_budget, segments
+    from memorive.platform.language.source import context
+
+    budget = dict(max_chars=8000, source_sha256="A" * 64, language_context=context(text))
+    parts = segments(text, max_chars=segment_budget("LOCAL_SEGMENT", **budget),
+                     full_document_budget=segment_budget("FULL_DOCUMENT", **budget),
+                     packed_document_budget=segment_budget("FULL_DOCUMENT", packed=True, **budget),
+                     calculation_headroom=512)
+    assert [part["mode"] for part in parts] == ["FULL_DOCUMENT"] and "source_packet" not in parts[0]
+    assert len(prompt(parts[0], **budget).encode("utf-8")) <= 8000

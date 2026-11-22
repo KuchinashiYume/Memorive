@@ -4,7 +4,7 @@ import re
 from collections import Counter
 from decimal import Decimal
 
-FORMAT_VERSION='LiteralNumericFormats-v4'
+FORMAT_VERSION='LiteralNumericFormats-v6'
 NUM=r'(?:[+−-]\s*)?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+−-]?\d+)?'
 EXPR=re.compile(r'(?<![\w./])('+NUM+r')\s*([+*/×÷−-])\s*('+NUM+r')\s*=\s*('+NUM+r')\s*(%)?(?!\w|\.\d)')
 PAIR=re.compile(r'('+NUM+r')\s*(?:±|\\pm)\s*('+NUM+r')')
@@ -12,9 +12,72 @@ FORMULA=re.compile(r'\bSE\s*=\s*SD\s*/\s*(?:sqrt\s*\(\s*n\s*\)|√\s*n)',re.I)
 DOMAIN_HEADERS={'p-value':('0','1'),'p value':('0','1'),'p值':('0','1'),
                 'sd':('0',None),'se':('0',None),'sem':('0',None),
                 'standard deviation':('0',None),'standard error':('0',None),'标准差':('0',None),'标准误':('0',None)}
+RATIO_HEADER=re.compile(r'(?:n\s*/\s*N|count\s*/\s*total|计数\s*/\s*总数)\s*[(（]\s*[%％]\s*[)）]')
+RATIO_CELL=re.compile(r'\s*(\d+)\s*/\s*(\d+)\s*[(（]\s*('+NUM+r')\s*[%％]?\s*[)）]\s*')
+WEIGHTED_PERCENT_NOTE=re.compile(
+    r'\bpercentages?\s+(?:are|were)\s+(?:(?:survey|sampling|design)[- ])?weighted\b'
+    r'|(?:百分比|百分率)(?:为|采用|使用)(?:调查|抽样|设计)?加权|(?:割合|百分率)は(?:調査|標本)?(?:の)?重み付け',
+    re.I,
+)
+
+
 def source_rule(ident,kind,inputs,parameters,line,quote,**extra):
     return dict(rule_id=ident,type=kind,inputs=inputs,parameters=parameters,
         binding_source=dict(kind='EXPLICIT_SOURCE_SYNTAX',line=line,quote=quote,format_version=FORMAT_VERSION,**extra))
+
+
+TABLE_NAME=re.compile(r'\b(?:Table|Tab\.)\s*(S?\d+[A-Za-z]?)\b|表\s*(S?\d+)',re.I)
+CAPTION=re.compile(r'\s*(?:\*\*)?\s*(?:Supplementary\s+Table|Table|Tab\.|表)\s*S?\d',re.I)
+
+
+def _table_names(text):
+    return {(a or b).upper() for a, b in TABLE_NAME.findall(text)}
+
+
+def table_percent_is_weighted(table, lines):
+    """Whether this table's own caption (the nearest text above, when it starts "Table n") or note (the
+    nearest text below) says its percentages are weighted. Text that is about another table does not
+    count: "In Table 2, percentages are weighted" under a table captioned Table 1, or the caption of the
+    next table ("Table 2. ...") right below this one."""
+    if not table['rows']:
+        return False
+    caption = next((lines[i] for i in range(table['header_line']-2, -1, -1) if lines[i].strip()), '')
+    caption = caption if CAPTION.match(caption) else ''
+    note = next((lines[i] for i in range(table['rows'][-1]['line'], len(lines)) if lines[i].strip()), '')
+    caption_name = TABLE_NAME.search(caption)
+    own = (caption_name.group(1) or caption_name.group(2)).upper() if caption_name else None
+    for text in (caption, note):
+        # A caption directly below this table opens another table.
+        if text == note and CAPTION.match(note) and own not in _table_names(note):
+            continue
+        names = set()
+        for clause in re.split(r'[;；。]|\.\s+(?=[A-Z])|\b(?:whereas|while|but)\b', text):
+            names = _table_names(clause) or names
+            if WEIGHTED_PERCENT_NOTE.search(clause) and (not names or own in names or own is None):
+                return True
+    return False
+
+
+def _ratio_rules(table, lines, by_id, bad):
+    """The counts in an explicit n/N cell are exact; only the percent is rounded."""
+    columns = [col for col, header in enumerate(table['headers']) if RATIO_HEADER.fullmatch(header.strip())]
+    if not columns or table_percent_is_weighted(table, lines):
+        return
+    for row in table['rows']:
+        if row['line'] in bad:
+            continue
+        for col in columns:
+            if not RATIO_CELL.fullmatch(row['cells'][col]):
+                continue
+            records = [by_id[r] for r in row['record_ids'] if by_id[r]['table_column'] == col]
+            if len(records) == 3:
+                yield source_rule(
+                    f'ratio-{row["line"]}-{col}', 'percentage',
+                    dict(zip(('count', 'denominator', 'percent'), (r['record_id'] for r in records))),
+                    dict(unweighted_count=True, rounding='display_precision_envelope'), row['line'],
+                    records[0]['source']['quote'], header_line=table['header_line'],
+                    header=table['headers'][col],
+                )
 
 def discover(text,parsed):
     by_line={}
@@ -82,6 +145,7 @@ def discover(text,parsed):
                 input_labels=dict(sd='SD',se='SE',n='n'),block_start=lo+1,block_end=hi,ambiguous_labels=ambiguous))
     by_id={r['record_id']:r for r in parsed['records']}
     for table in parsed['tables']:
+        rules.extend(_ratio_rules(table, lines, by_id, bad))
         for col,header in enumerate(table['headers']):
             selected=[by_id[r] for row in table['rows'] for r in row['record_ids'] if by_id[r]['table_column']==col]
             if selected:
@@ -99,14 +163,4 @@ def discover(text,parsed):
                     if r['source']['line'] not in bad and r['relation'] in ('','=','<','<=','>','>='):
                         rules.append(source_rule('domain-'+r['record_id'],'numeric_domain',dict(value=r['record_id']),
                             dict(lower=bounds[0],upper=bounds[1],domain_label=header,unit_basis='PROBABILITY' if header.strip().casefold() in ('p-value','p value','p值') else 'LITERAL'),r['source']['line'],r['source']['quote']))
-            # n/N and its printed percentage expressly state the ratio; no neighboring n is inferred.
-            if re.fullmatch(r'(?:n\s*/\s*N|count\s*/\s*total|计数\s*/\s*总数)\s*\(\s*%\s*\)',header.strip()):
-                for row in table['rows']:
-                    cell=row['cells'][col]
-                    m=re.fullmatch(r'\s*(\d+)\s*/\s*(\d+)\s*\(\s*('+NUM+r')\s*%?\s*\)\s*',cell)
-                    rr=[by_id[r] for r in row['record_ids'] if by_id[r]['table_column']==col]
-                    if m and len(rr)==3 and row['line'] not in bad:
-                        rules.append(source_rule(f'ratio-{row["line"]}-{col}','literal_arithmetic',
-                            dict(zip(('left','right','reported'),[r['record_id'] for r in rr])),
-                            dict(operation='/',percent_result=True,rounding='display_precision_envelope'),row['line'],rr[0]['source']['quote']))
     return dict(rules=rules,table_columns=blocks,plus_minus_pairs=pairs,format_version=FORMAT_VERSION)

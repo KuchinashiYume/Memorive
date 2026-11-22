@@ -15,7 +15,10 @@ from memorive.models.scheduling import scheduled
 from memorive.documents.workflow.contracts import DATA_NODE, LOGIC_NODE, CoreArtifact
 from memorive.documents.data_review.engine import analyze, digest, MAX_BYTES, ENGINE_VERSION, RULE_VERSION
 from memorive.documents.data_review.store import ReviewStore, atomic, TERMINAL
-from memorive.documents.data_review.logic import GLOBAL_INPUT_CONTRACT, cloud_profile, segments, global_segment, response_schema, prompt, invoke, validate_response, build_report
+from memorive.documents.data_review.logic import (
+    GLOBAL_INPUT_CONTRACT, build_report, cloud_profile, global_segment, invoke, prompt,
+    response_schema, segment_budget, segments, validate_response,
+)
 
 from memorive.documents.processing.document_structure.desktop import StructureDesktop, METHODS as STRUCTURE_METHODS
 REVIEW_METHODS=('review.job','review.report','review.disposition','review.control','review.list')+STRUCTURE_METHODS
@@ -110,7 +113,10 @@ class ReviewService:
                 chars=min(160000,min(known)-8192) if known else 28000
                 if chars<6000:
                     raise ValueError('LOGIC_INPUT_CAPACITY_TOO_SMALL_FOR_REVIEW_CONTRACT')
-                parts=segments(text,max_chars=int(chars*.60),full_document_budget=chars-2400)
+                budget=dict(max_chars=chars,source_sha256=sha,language_context=changes['language_context'])
+                parts=segments(text,max_chars=segment_budget('LOCAL_SEGMENT',**budget),
+                    full_document_budget=segment_budget('FULL_DOCUMENT',**budget),
+                    packed_document_budget=segment_budget('FULL_DOCUMENT',packed=True,**budget),calculation_headroom=512)
                 if len(parts)>1:
                     parts.append({'segment_id':'global-relations','mode':'GLOBAL_RELATIONS','pending_inventory':True})
                 changes.update(logic_state='QUEUED',segment_count=len(parts),completed_segments=0,segments=parts,responses=[],receipts=[],input_capacity_chars=chars)
@@ -302,6 +308,9 @@ class ReviewService:
                     responses=state.get('responses',[])
                     receipts=state.get('receipts',[])
                     parts=deepcopy(state['segments'])
+                    language=state.get('language_context') or source_language_context(text)
+                    budget=dict(max_chars=state.get('input_capacity_chars',28000),source_sha256=state['raw_sha256'],
+                                language_context=language)
                     local_units=[p['segment_id'] for p in parts if p.get('mode')=='LOCAL_SEGMENT' and not p.get('not_run_reason')]
                     with scope('LOCAL_LOGIC', local_units) as node_units:
                         for saved_part,saved_response,saved_receipt in zip(parts,responses,receipts):
@@ -320,7 +329,9 @@ class ReviewService:
                                 node_units.close()
                             execution_checkpoint()
                             if part.get('pending_inventory') or (part.get('mode')=='GLOBAL_RELATIONS' and part.get('input_contract')!=GLOBAL_INPUT_CONTRACT):
-                                part=global_segment(text,parts[:index],responses,max_chars=state.get('input_capacity_chars',28000)-3000)
+                                part=global_segment(text,parts[:index],responses,
+                                    max_chars=segment_budget('GLOBAL_RELATIONS',**budget),
+                                    packed_max_chars=segment_budget('GLOBAL_RELATIONS',packed=True,**budget))
                                 parts[index]=part
                                 self.store.update(job_id,'GLOBAL_SOURCE_PACKET_PREPARED',{'segments':parts})
                             if part.get('not_run_reason'):
@@ -328,9 +339,7 @@ class ReviewService:
                                 self.store.update(job_id,'GLOBAL_REVIEW_NOT_RUN',{'logic_state':'RUNNING','responses':responses,'completed_segments':len(responses),'reason_code':part['not_run_reason']})
                                 continue
                             data=self.store.report(state['data_report_id']) if state.get('data_report_id') else None
-                            source_prompt=prompt(part,data_report=data,source_sha256=state['raw_sha256'],max_chars=state.get('input_capacity_chars',28000),language_context=state.get('language_context') or source_language_context(text))
-                            if len(source_prompt.encode('utf-8'))>state.get('input_capacity_chars',28000):
-                                raise ValueError('LOGIC_FULL_PROMPT_EXCEEDS_PLANNED_CAPACITY')
+                            source_prompt=None
                             retry_limit=max(0,min(8,int(node.get('retry_count',0))))
                             for safe_retry in range(retry_limit+1):
                                 request_id=f'{job_id}:logic:{state["logic_attempt"]}:{part["segment_id"]}:{safe_retry}'
@@ -338,6 +347,10 @@ class ReviewService:
                                 if response_path.is_file():
                                     result=json.loads(response_path.read_text(encoding='utf-8'))
                                 else:
+                                    if source_prompt is None:
+                                        source_prompt=prompt(part,data_report=data,**budget)
+                                        if len(source_prompt.encode('utf-8'))>budget['max_chars']:
+                                            raise ValueError('LOGIC_FULL_PROMPT_EXCEEDS_PLANNED_CAPACITY')
                                     execution_checkpoint()
                                     self.store.update(job_id,'REQUEST_PREPARED',{'logic_state':'SENDING','request_id':request_id,
                                         'response_path':str(response_path),'prompt_sha256':digest(source_prompt.encode('utf-8'))})
