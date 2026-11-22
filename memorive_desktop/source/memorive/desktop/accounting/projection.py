@@ -8,7 +8,7 @@ provider APIs and never invents a missing charge or exchange rate.
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone, tzinfo
 from decimal import Decimal, InvalidOperation
 from typing import Any, Iterable, Mapping
 
@@ -138,7 +138,9 @@ def build_projection(
     *,
     now: datetime | None = None,
     refreshed: bool = False,
+    zone: tzinfo | None = None,
 ) -> dict[str, Any]:
+    """zone: the time zone whose days the panel counts; this computer's own when not given."""
     accepted = dict(params)
     allowed = {"scope", "current_job_id", "time_range", "model_profile_ref", "group_by", "preferred_currency"}
     if set(accepted) - allowed or any(str(key).startswith("_") for key in accepted):
@@ -164,13 +166,14 @@ def build_projection(
         raise ValueError("ACCOUNTING_MODEL_PROFILE_UNKNOWN")
 
     observed_at = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-    end = observed_at.date()
+    local_day = lambda moment: moment.astimezone(zone).date()   # astimezone(None) is the local zone
+    end = local_day(observed_at)
     start = end.replace(day=1) if preset == "MONTH" else end - timedelta(days=6 if preset == "7D" else 29)
     rows = [_normalize(row) for row in raw_attempts]
     unknown = sorted({row["profile_ref"] for row in rows if row["profile_ref"] not in by_profile})
     if unknown:
         raise ValueError("ACCOUNTING_UNKNOWN_PROFILE_REF")
-    rows = [row for row in rows if start <= row["occurred_at"].date() <= end]
+    rows = [row for row in rows if start <= local_day(row["occurred_at"]) <= end]
     range_profile_refs = {row["profile_ref"] for row in rows}
     if selected_profile != "ALL":
         rows = [row for row in rows if row["profile_ref"] == selected_profile]
@@ -218,7 +221,7 @@ def build_projection(
         output_total += row["tokens_output"]
         reasoning_total += row["tokens_reasoning"]
         source_counts[row["source_kind"]] += 1
-        bucket = daily[(row["occurred_at"].date(), row["profile_ref"])]
+        bucket = daily[(local_day(row["occurred_at"]), row["profile_ref"])]
         bucket["requests"] += 1
         bucket["input"] += row["tokens_input"]
         bucket["output"] += row["tokens_output"]

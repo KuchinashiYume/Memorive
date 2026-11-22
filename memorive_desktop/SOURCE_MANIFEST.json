@@ -407,8 +407,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "313b424fa62c901abcd2ea180f8f0caf9923edbecb90e5a7d35062ff9e913b2e",
-      "bytes": 2609861
+      "sha256": "8fa279741a0018376cce41bc45dde48e8d259367c8739047e46954ace0c55100",
+      "bytes": 2610245
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -2142,13 +2142,13 @@
     },
     {
       "path": "source/memorive/desktop/accounting/product_controller.py",
-      "sha256": "47e1a28b15f021ff3fc5e41384da72ba3a10b1330236dc3792b15ec07e319e22",
-      "bytes": 20521
+      "sha256": "bf872418d9e888eb2b4d4fb29ca67f1c19dde409a05aff95907ba571467de462",
+      "bytes": 20998
     },
     {
       "path": "source/memorive/desktop/accounting/projection.py",
-      "sha256": "1da994c5548cd4cef85c0b417a5fe9b662eec5c144e468dd1a722ca2ccbe931a",
-      "bytes": 16540
+      "sha256": "bb90cacc9693a03e7ab3ced2eef6424ba468bd5374dc4e5f0babc96534f23358",
+      "bytes": 16791
     },
     {
       "path": "source/memorive/desktop/api/__init__.py",

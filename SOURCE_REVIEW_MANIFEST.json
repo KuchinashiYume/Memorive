@@ -1131,8 +1131,8 @@
     },
     {
       "path": "memorive_desktop/product/desktop/bundle_integrated.html",
-      "sha256": "313b424fa62c901abcd2ea180f8f0caf9923edbecb90e5a7d35062ff9e913b2e",
-      "bytes": 2609861
+      "sha256": "8fa279741a0018376cce41bc45dde48e8d259367c8739047e46954ace0c55100",
+      "bytes": 2610245
     },
     {
       "path": "memorive_desktop/product/desktop/console_expressions.py",
@@ -4001,12 +4001,12 @@
     },
     {
       "path": "memorive_desktop/BUILD_RESOURCES.json",
-      "sha256": "ec668cd68b251d3e72ac3b60b7a174d545d19900141a71ebc316b8764c9c265b",
+      "sha256": "546ece77c5da1bea9b0930215da60cdcb7d6a825e9fd349dbef556d00be07b9b",
       "bytes": 134375
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "3c9e2551712f41c389a646fa4c098673b5ab68915be71e52909b0aefee32bb54",
+      "sha256": "70093cde3698816fcb064296e59fca9e099b71317af6df7591f421ddae7a7690",
       "bytes": 275297
     },
     {
@@ -4646,8 +4646,8 @@
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/leaderboard/view.js",
-      "sha256": "f726a8e05e269587d6136a8ed6cf6d75bcf984da00b249f2867e77d12601a6a0",
-      "bytes": 53212
+      "sha256": "ecc91bf53ff8d3046e04b658747868a631a1a0581f097eadb185123552c78008",
+      "bytes": 53596
     },
     {
       "path": "memorive_desktop/ui/integrated/routes/library/bridge.js",
@@ -8961,13 +8961,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/accounting/product_controller.py",
-      "sha256": "47e1a28b15f021ff3fc5e41384da72ba3a10b1330236dc3792b15ec07e319e22",
-      "bytes": 20521
+      "sha256": "bf872418d9e888eb2b4d4fb29ca67f1c19dde409a05aff95907ba571467de462",
+      "bytes": 20998
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/accounting/projection.py",
-      "sha256": "1da994c5548cd4cef85c0b417a5fe9b662eec5c144e468dd1a722ca2ccbe931a",
-      "bytes": 16540
+      "sha256": "bb90cacc9693a03e7ab3ced2eef6424ba468bd5374dc4e5f0babc96534f23358",
+      "bytes": 16791
     },
     {
       "path": "memorive_desktop/source/memorive/desktop/assistant/__init__.py",

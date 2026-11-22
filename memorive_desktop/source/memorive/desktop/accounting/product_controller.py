@@ -14,6 +14,8 @@ from typing import Any, Callable, Iterable, Mapping
 from memorive.desktop.accounting.commerce_context import build_shared_context
 from memorive.desktop.accounting.projection import build_projection
 
+SUCCEEDED_STATUSES = frozenset({"PASS", "SUCCEEDED", "COMPLETED", "SUCCESS"})
+
 
 ACCOUNTING_METHODS = frozenset({
     "accounting.get_projection_v3",
@@ -284,8 +286,8 @@ class AccountingProductController:
         for _priority, path, root, source_kind, inferred_job in sorted(self._candidate_files(), key=lambda row: (row[0], str(row[1]))):
             try:
                 wrapper, pre, receipt = self._receipt(path, root)
-                if str(wrapper.get('purpose') or pre.get('purpose') or '').startswith('verify_'):
-                    continue
+                # Connection checks (purpose verify_*) are counted too: the provider received them. Their
+                # token use is often not reported, which the panel shows as partial token data.
                 profile_ref = _clean(wrapper.get("profile_ref") or receipt.get("profile_ref") or pre.get("profile_ref"))
                 if not profile_ref:
                     diagnostics["unbound"] += 1
@@ -300,7 +302,12 @@ class AccountingProductController:
                 run_key = str(path.parents[1].resolve(strict=False))
                 execution_id = receipt.get('execution_id') or wrapper.get('execution_id')
                 identity = ('native', str(execution_id)) if execution_id else (run_key, physical)
+                status = str(wrapper.get("status") or receipt.get("status") or "").upper()
                 if identity in attempts:
+                    # The call ledger records a request when the model answers; a document job may refuse the
+                    # answer's content afterwards and record the same execution as FAILED in its own call file.
+                    if status not in SUCCEEDED_STATUSES:
+                        attempts[identity]["outcome"] = "FAILED"
                     continue
                 usage = receipt.get("token_usage") or receipt.get("usage") or {}
                 if not isinstance(usage, Mapping):
@@ -313,7 +320,6 @@ class AccountingProductController:
                     diagnostics["unreadable"] += 1
                     continue
                 cost_status, cost_value, currency = self._cost(receipt, profile["profile_kind"])
-                status = str(wrapper.get("status") or receipt.get("status") or "").upper()
                 attempts[identity] = {
                     "attempt_id": f"attempt:{_hash(identity)[:24]}",
                     "occurred_at": _timestamp(receipt.get("finished_at") or receipt.get("requested_at") or wrapper.get("recorded_at") or wrapper.get("created_at") or pre.get("created_at"), path),
@@ -323,7 +329,7 @@ class AccountingProductController:
                     "provider_label": profile["provider_label"],
                     "model_label": profile["model_label"],
                     "model_id": profile["model_id"],
-                    "outcome": "SUCCEEDED" if status in {"PASS", "SUCCEEDED", "COMPLETED", "SUCCESS"} else "FAILED",
+                    "outcome": "SUCCEEDED" if status in SUCCEEDED_STATUSES else "FAILED",
                     "tokens_input": _integer(usage.get("prompt_tokens", usage.get("input_tokens"))),
                     "tokens_output": output,
                     "tokens_reasoning": reasoning,

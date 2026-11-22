@@ -240,8 +240,14 @@
       uiText('\n缺失数据不按 0 分；零价格不参与成本评分。星标、筛选和币种不改变计算样本。') +
       uiText('\n只比较 Token 单价，不预测实际用量。未标档位的 Epoch 分数单列为“模型级参考”，不用于其他档位。');
   }
+  // The date of a stored UTC time on this computer's calendar (2026-11-21T23:30Z is 11-22 in Tokyo).
+  const localDay = (value) => {
+    const moment = new Date(value);
+    if (!Number.isFinite(moment.getTime())) return String(value).slice(0,10);
+    return `${moment.getFullYear()}-${String(moment.getMonth()+1).padStart(2,'0')}-${String(moment.getDate()).padStart(2,'0')}`;
+  };
   function updateTip() {
-    const stamp = data.updated_at ? data.updated_at.slice(0,10).replaceAll('-','/') : '—';
+    const stamp = data.updated_at ? localDay(data.updated_at).replaceAll('-','/') : '—';
     const t = q('#lb-updated-date');
     t.textContent = data.updated_at ? stamp : uiText('未更新');
     if (data.updated_at) t.setAttribute('datetime', data.updated_at); else t.removeAttribute('datetime');
@@ -250,7 +256,7 @@
     const details = data.sources.map(s => {
       const limited=s.last_refresh?.status==='RATE_LIMITED';
       const recovery=limited&&s.last_refresh?.retry_after?uiText(' · 预计恢复 ')+new Date(s.last_refresh.retry_after).toLocaleString():'';
-      return s.name + '：' + (s.retrieved_at ? s.retrieved_at.slice(0,10) : uiText('未更新')) +
+      return s.name + '：' + (s.retrieved_at ? localDay(s.retrieved_at) : uiText('未更新')) +
         (s.status === 'CACHED' ? '' : ' · ' + ({DISABLED:uiText('已停用'),STALE:uiText('待更新'),NOT_FETCHED:uiText('尚无数据'),CACHE_INVALID:uiText('缓存异常')}[s.status] || uiText('未知状态'))) +
         (limited?uiText(' · 额度受限，继续使用旧缓存'):'') + recovery;
     });
