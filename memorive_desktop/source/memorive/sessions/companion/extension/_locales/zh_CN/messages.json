@@ -92,6 +92,9 @@
   "errorNoConversation": {
     "message": "未找到可见的对话，请先打开一段会话"
   },
+  "errorRolesUnclear": {
+    "message": "读到 $1 条，但分不出提问和回答（提问 $2 条、回答 $3 条），没有保存"
+  },
   "errorPageChanged": {
     "message": "页面已切换，请重试"
   },

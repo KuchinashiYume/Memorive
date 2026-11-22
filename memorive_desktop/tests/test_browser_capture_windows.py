@@ -208,4 +208,4 @@ def test_the_recording_saves_what_lines_up(results: dict) -> None:
     assert mid["status"] == "SAVED"
     assert mid["saved"] == ["user:S01 user opening", "assistant:I can continue."]
     one_role = results["recorder_one_role"]
-    assert one_role["status"] == "ERROR" and one_role["error"] == "CURRENT_PAGE_CONVERSATION_NOT_FOUND"
+    assert one_role["status"] == "ERROR" and one_role["error"] == "CURRENT_PAGE_ROLES_UNCLEAR"

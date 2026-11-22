@@ -146,8 +146,14 @@
         // The import needs both roles; a record of one role (or none) is not a conversation yet.
         const messages = merger.result().messages.map((r,index)=>({role:r.role,text:r.text,
           message_id:r.source_key ? "source-"+r.source_key : "scroll-"+index+"-"+r.role}));
-        if (!messages.some(r=>r.role==="user") || !messages.some(r=>r.role==="assistant"))
-          throw Error("CURRENT_PAGE_CONVERSATION_NOT_FOUND");
+        const users = messages.filter(r=>r.role==="user").length, answers = messages.length-users;
+        if (!messages.length) throw Error("CURRENT_PAGE_CONVERSATION_NOT_FOUND");
+        if (!users || !answers) {
+          // Read, but the page's questions and answers could not be told apart (a site whose markup the
+          // reader does not know): report the counts rather than "no conversation".
+          state.user_count=users;state.assistant_count=answers;
+          throw Error("CURRENT_PAGE_ROLES_UNCLEAR");
+        }
         const reply=await finish({ ...base, messages,
           error_code:"SCROLL_RECORDING_VISIBLE_WINDOWS_ONLY",recording_stop_reason:reason},state.token);
         if (!reply?.ok) throw Error(reply?.error_code || "RECORDING_SAVE_FAILED");

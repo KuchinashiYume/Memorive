@@ -96,7 +96,9 @@ testButton.addEventListener("click", async () => {
     if (!response?.ok) throw Error(response?.error_code || "CURRENT_PAGE_CAPTURE_FAILED");
     say(statusNode, "testResult", response.message_count);
   } catch (error) {
-    say(statusNode, errorKey(String(error?.message || error)));
+    const code = String(error?.message || error), roles = /ROLES_UNCLEAR_U(\d+)_A(\d+)/.exec(code);
+    if (roles) say(statusNode, "errorRolesUnclear", Number(roles[1]) + Number(roles[2]), roles[1], roles[2]);
+    else say(statusNode, errorKey(code));
   } finally {
     testBusy = false;
     await refreshCaptureAvailability();
@@ -119,7 +121,11 @@ const showRecording = (state) => {
   else if (recordingState.status === "SAVED") {
     if (unplaced) say(recordStatus, "recordingSavedGap", count, unplaced);
     else say(recordStatus, "recordingSaved", count);
-  } else if (recordingState.status === "ERROR") say(recordStatus, errorKey(recordingState.error_code));
+  } else if (recordingState.status === "ERROR") {
+    if (String(recordingState.error_code).includes("ROLES_UNCLEAR")) {
+      say(recordStatus, "errorRolesUnclear", count, recordingState.user_count || 0, recordingState.assistant_count || 0);
+    } else say(recordStatus, errorKey(recordingState.error_code));
+  }
 };
 const refreshRecording = async () => {
   if (recordBusy) return;

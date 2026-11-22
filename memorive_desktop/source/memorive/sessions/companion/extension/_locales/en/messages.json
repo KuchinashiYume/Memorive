@@ -92,6 +92,9 @@
   "errorNoConversation": {
     "message": "No conversation is visible; open one first"
   },
+  "errorRolesUnclear": {
+    "message": "Read $1 messages but could not tell questions from answers ($2 questions, $3 answers); nothing saved"
+  },
   "errorPageChanged": {
     "message": "The page changed; try again"
   },

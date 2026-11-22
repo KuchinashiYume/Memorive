@@ -827,7 +827,9 @@
         !rows.some((row) => row.role === "assistant")
       )
     ) {
-      throw new Error("CURRENT_PAGE_CONVERSATION_NOT_FOUND");
+      if (!rows.length) throw new Error("CURRENT_PAGE_CONVERSATION_NOT_FOUND");
+      const users = rows.filter((row) => row.role === "user").length;
+      throw new Error(`CURRENT_PAGE_ROLES_UNCLEAR_U${users}_A${rows.length - users}`);
     }
     const safeUrl = new URL(location.href);
     safeUrl.username = "";

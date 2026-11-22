@@ -92,6 +92,9 @@
   "errorNoConversation": {
     "message": "表示中の会話が見つかりません。先に会話を開いてください"
   },
+  "errorRolesUnclear": {
+    "message": "$1 件を読み取りましたが、質問と回答を区別できませんでした（質問 $2 件、回答 $3 件）。保存していません"
+  },
   "errorPageChanged": {
     "message": "ページが切り替わりました。もう一度お試しください"
   },

@@ -4006,7 +4006,7 @@
     },
     {
       "path": "memorive_desktop/SOURCE_MANIFEST.json",
-      "sha256": "c843582db60cb52063a04c92e85e9425b54d1d921e23e037eb4c13a98e6256ea",
+      "sha256": "1b91230bf0385bddfbe6348a4c49d0460e5c3bd515b6bd8213f6cb42c9958040",
       "bytes": 276124
     },
     {
@@ -6866,8 +6866,8 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/content.js",
-      "sha256": "9db1894b197ef50f2bd200ecf24e4b5a4db98ccce32570bf73c38d689f426bbb",
-      "bytes": 58586
+      "sha256": "1157bac538b73a9f246733dc44c92c51a19f66b9e95aa82028a053f050ba28b8",
+      "bytes": 58763
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/manifest.json",
@@ -6886,13 +6886,13 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/popup.js",
-      "sha256": "b3876145fe1852cd85168f90748c3ba1a763d9c2aea48ac9300a93ac6d78ba32",
-      "bytes": 9089
+      "sha256": "534666172fc8ab4a8c05f82a1e017ab847fa5c52f2491ff709b5f459e0a39c47",
+      "bytes": 9493
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/recording.js",
-      "sha256": "c54c682464b6c663546cc838afb4359d4089a00d1565debae5faf95cce38711e",
-      "bytes": 10560
+      "sha256": "9c30b03f6f2da4adc9c959660585e1ec1f83450a16e204b283c959c4cb81f41f",
+      "bytes": 10945
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/runner.html",
@@ -10231,18 +10231,18 @@
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/_locales/en/messages.json",
-      "sha256": "a7c199afc6a2e2da2e82a05c06f24e0d118f881c609c306dce0f9d69b7732f4c",
-      "bytes": 5315
+      "sha256": "e48de4dab6c4febba1c9439309f7fe47c7f8596c7b04d411324324f754065c5d",
+      "bytes": 5466
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/_locales/ja/messages.json",
-      "sha256": "c5a9029e341e96d1c4ef94d1d432df67fbfd07b0d256b6e2a032ef9510334348",
-      "bytes": 6336
+      "sha256": "f594264996387faedc558e1758458e82e0812c2d1a0d628902d20ab934f5fda8",
+      "bytes": 6533
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/_locales/zh_CN/messages.json",
-      "sha256": "b60c97fca55efeb00c5528dbca6b51507904a38f2625c281dbb8b2be2af9a22c",
-      "bytes": 5196
+      "sha256": "6786c835eace7c7e5560a8303ba64590860e21135bbcff96797737b404b0bea3",
+      "bytes": 5340
     },
     {
       "path": "memorive_desktop/source/memorive/sessions/companion/extension/i18n.js",
