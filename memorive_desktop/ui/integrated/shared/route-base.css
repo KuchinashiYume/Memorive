@@ -3375,6 +3375,9 @@
 #desktop-sessions-preview .desktop-sessions-refinement-item p { margin:0; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
 #desktop-sessions-preview .desktop-sessions-refinement-section { margin:6px 0 0; font-size:inherit; color:var(--text-primary); }
 #desktop-sessions-preview .desktop-sessions-refinement-refs { display:flex; flex-wrap:wrap; gap:4px; }
+#desktop-sessions-preview .desktop-sessions-refinement-refs button { min-height:24px; padding:2px 9px; border:1px solid var(--selection-border); border-radius:999px; background:var(--brand-subtle); color:var(--brand); font-family:var(--memo-font-code); font-size:var(--memo-size-small); cursor:pointer; }
+#desktop-sessions-preview .desktop-sessions-refinement-refs button:hover { background:color-mix(in srgb, var(--brand) 16%, var(--surface-raised)); }
+#desktop-sessions-preview .desktop-sessions-refinement-refs button:focus-visible { outline:2px solid var(--focus-ring); outline-offset:1px; }
 #desktop-sessions-preview .desktop-sessions-refinement-quote { display:grid; gap:4px; margin:0; padding:6px 9px; border-left:2px solid var(--selection-border); background:var(--surface-subtle); }
 
 #desktop-sessions-preview .desktop-sessions-turn { max-width:78%; padding:11px 13px; font-size:var(--memo-size-small); font-weight:400; }

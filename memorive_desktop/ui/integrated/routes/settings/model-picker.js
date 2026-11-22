@@ -441,9 +441,13 @@
         enhancedSelects.forEach((other) => { if (other !== entry) setSelectOpen(other, false); });
         setModelMenu(false);
         setShortcutPopover(false);
-        const boundary = entry.shell.closest('.desktop-settings-primary, .desktop-settings-node-settings') || root;
+        // The room above and below: inside the settings panel the select sits in, or the window for a select on
+        // another page (the session tools). Measured against the hidden settings page, those read as no room
+        // below and opened upward under their page's header.
+        const boundary = entry.shell.closest('.desktop-settings-primary, .desktop-settings-node-settings')
+          || (root.contains(entry.shell) ? root : null);
         const triggerRect = entry.trigger.getBoundingClientRect();
-        const boundaryRect = boundary.getBoundingClientRect();
+        const boundaryRect = boundary ? boundary.getBoundingClientRect() : { top: 0, bottom: innerHeight };
         const menuHeight = Math.min(entry.menu.scrollHeight || 220, 220);
         const below = boundaryRect.bottom - triggerRect.bottom;
         const above = triggerRect.top - boundaryRect.top;

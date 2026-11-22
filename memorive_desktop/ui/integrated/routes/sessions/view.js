@@ -740,7 +740,6 @@
       for (const ref of item.message_refs || []) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'text-button';
         button.dataset.ref = ref;
         button.title = '查看原话';
         button.textContent = `#${String(ref).replace(/^m/, '')}`;
