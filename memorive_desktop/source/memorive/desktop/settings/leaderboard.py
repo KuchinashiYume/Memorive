@@ -253,6 +253,14 @@ def project_rows(sources, preferences):
             if detail not in model["details"]:
                 model["details"].append(deepcopy(detail))
         rows.append(model)
+    # Versions a source lists under one display name (dated releases of Gemini 2.5 Flash, say) would show as
+    # identical rows: each such row names its version.
+    named = {}
+    for model in rows:
+        named.setdefault((model["vendor_id"], model["name"], model["effort"]), set()).add(model["base_model"])
+    for model in rows:
+        if len(named[(model["vendor_id"], model["name"], model["effort"])]) > 1:
+            model["name"] = f'{model["name"]} ({model["base_model"]})'
     weights = {k: v for k, v in preferences["weights"].items() if v > 0}
     # Use the union of selected-source coverage, not a mandatory intersection.
     # Missing sources never become zero scores; effective shares are disclosed.

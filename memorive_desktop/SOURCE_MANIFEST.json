@@ -2592,8 +2592,8 @@
     },
     {
       "path": "source/memorive/desktop/settings/leaderboard.py",
-      "sha256": "4eda0e79ddc8c64577fdab126bab4db2d1f9e63147717c36fd1b545bb669aeb7",
-      "bytes": 30233
+      "sha256": "75a585bce567f03f4fe19942ebed3d7adebd405a41489907db8b2cdf7761eb26",
+      "bytes": 30729
     },
     {
       "path": "source/memorive/desktop/settings/leaderboard_fx.py",
