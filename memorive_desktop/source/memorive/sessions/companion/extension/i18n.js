@@ -1,7 +1,7 @@
 "use strict";
 // The extension's words in three languages, all in _locales/<language>/messages.json (manifest.json uses the
 // same keys). The browser's language picks one; the Aa button in the popup picks another, kept in this
-// extension's localStorage, which its popup and runner pages share. The extension's name in the browser's
+// extension's localStorage for the popup. The extension's name in the browser's
 // own lists follows the browser's language only.
 (() => {
   const LANGUAGES = Object.freeze([["zh_CN", "简体中文"], ["en", "English"], ["ja", "日本語"]]);

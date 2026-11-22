@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   // One conversation built from the windows a page shows while it scrolls: the recording (createRecorder
-  // below) and the background site sync (captureConversation in content.js) both add each visible window.
+  // below) adds each visible window.
   // Identity, order and continuity are judged separately:
   // - a row with a source key (a site message ID) is that message wherever it shows; its text may grow;
   // - a source order (a site turn number) identifies and orders a row the same way;
@@ -76,8 +76,8 @@
       }
     };
     return {
-      // Returns "JOINED", "GAP" (kept as a new fragment unless keepGaps is false), "AMBIGUOUS" or "EMPTY".
-      add(rows, {keepGaps = true} = {}) {
+      // Returns "JOINED", "GAP" (kept as a new fragment), "AMBIGUOUS" or "EMPTY".
+      add(rows) {
         const window = rows.filter(row => row.text && ["user", "assistant"].includes(row.role))
           .map(({role, text, source_key, source_order}) => ({role, text,
             ...(source_key ? {source_key} : {}), ...(Number.isInteger(source_order) ? {source_order} : {})}));
@@ -87,7 +87,6 @@
         if (joined.includes("AMBIGUOUS")) { ambiguous += 1; return "AMBIGUOUS"; }
         const target = joined.findIndex(Boolean);
         if (target < 0) {
-          if (!keepGaps) return "GAP";
           checkSize([...fragments, window]);
           fragments = [...fragments, window];
           return "GAP";

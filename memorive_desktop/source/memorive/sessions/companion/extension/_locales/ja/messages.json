@@ -3,10 +3,10 @@
     "message": "Memo ウェブ会話"
   },
   "extDescription": {
-    "message": "主要な AI 公式サイトで表示中の会話を取り込むか、設定済みのサイトを同期します。"
+    "message": "主要な AI 公式サイトで表示中の会話を取り込みます。"
   },
   "actionTitle": {
-    "message": "Memo に取り込む・同期する"
+    "message": "Memo に取り込む"
   },
   "languageButton": {
     "message": "言語を切り替え"
@@ -62,30 +62,6 @@
   "testResultGeneric": {
     "message": "$1 件を読み取りました（質問 $2、回答 $3、汎用ルールで判別）。保存はしていません"
   },
-  "siteSync": {
-    "message": "サイト同期"
-  },
-  "syncSelected": {
-    "message": "選択したサイトを同期"
-  },
-  "syncStarting": {
-    "message": "バックグラウンドで同期中"
-  },
-  "syncProgress": {
-    "message": "同期中 $1 · $2 件完了$3"
-  },
-  "syncDone": {
-    "message": "$1 件を同期しました$2"
-  },
-  "syncFailedCount": {
-    "message": " · $1 件失敗"
-  },
-  "syncError": {
-    "message": "同期に失敗しました：$1"
-  },
-  "syncStatusUnreadable": {
-    "message": "同期の状態を読み取れません。拡張機能の管理ページでこの拡張機能を再読み込みしてください。"
-  },
   "errorNotOfficial": {
     "message": "AI 公式サイトの会話ページのみ対応しています"
   },
@@ -103,92 +79,5 @@
   },
   "errorGeneric": {
     "message": "読み取りに失敗しました。ページを再読み込みしてからお試しください"
-  },
-  "runnerTitle": {
-    "message": "Memorive サイト同期"
-  },
-  "runnerHeading": {
-    "message": "サイト会話の同期"
-  },
-  "runnerIntro": {
-    "message": "会話を同期しています"
-  },
-  "runnerProgressLabel": {
-    "message": "サイト同期の進み具合"
-  },
-  "runnerPreparing": {
-    "message": "同期を準備しています…"
-  },
-  "runnerFinding": {
-    "message": "開いていてログイン済みのサイトを探しています…"
-  },
-  "stageDiscovering": {
-    "message": "開いているサイトを確認"
-  },
-  "stageIndexing": {
-    "message": "会話一覧を読み取り"
-  },
-  "stageCapturing": {
-    "message": "会話全文を読み取り"
-  },
-  "stageDownloading": {
-    "message": "ローカルの会話パックを書き込み"
-  },
-  "runnerSourcesSync": {
-    "message": "$1 ソースの同期"
-  },
-  "runnerAllSites": {
-    "message": "すべてのサイト"
-  },
-  "runnerSiteProgress": {
-    "message": "サイト $1/$2"
-  },
-  "runnerItemProgress": {
-    "message": "、会話 $1/$2"
-  },
-  "runnerPreparingSuffix": {
-    "message": " · 準備中"
-  },
-  "runnerStatusProgress": {
-    "message": "同期中：$1 · $2（$3）。完了 $4、失敗 $5。"
-  },
-  "runnerTitleProgress": {
-    "message": "Memorive 同期 $1 · $2 · $3"
-  },
-  "runnerSummary": {
-    "message": "$1：$2。完了 $3、失敗 $4。"
-  },
-  "runnerTitleSummary": {
-    "message": "Memorive $1 · $2/$3"
-  },
-  "runnerDone": {
-    "message": "同期完了：$1 サイト、新規・更新 $2、変更なし $3、候補スキップ $4、失敗 $5。"
-  },
-  "runnerIncomplete": {
-    "message": "同期は完了しませんでした。診断レポートをこのコンピューターに作成しました。Memorive が更新時に読み込みます。"
-  },
-  "runnerDoneMeta": {
-    "message": "同期完了 · 会話パックをこのコンピューターに書き込みました"
-  },
-  "runnerIncompleteMeta": {
-    "message": "同期未完了 · 診断レポートを作成しました"
-  },
-  "runnerTimeout": {
-    "message": "同期は $1 分の安全上限で停止しました。停止レポートを書き込んでいます。"
-  },
-  "runnerFailed": {
-    "message": "同期に失敗しました：$1"
-  },
-  "runnerTimeoutMeta": {
-    "message": "同期がタイムアウト · 完了した結果は保持しました"
-  },
-  "runnerFailedMeta": {
-    "message": "同期に失敗しました · Memorive で診断をご確認ください"
-  },
-  "runnerReportFailed": {
-    "message": "同期は停止しましたが、停止レポートの書き込みに失敗しました：$1。このページは開いたままにします。"
-  },
-  "runnerReportFailedMeta": {
-    "message": "停止レポートの書き込みに失敗 · ページを保持しました"
   }
 }

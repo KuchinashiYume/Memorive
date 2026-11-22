@@ -1,18 +1,16 @@
 "use strict";
 
-// The popup: record the conversation on the current tab, test-read it, or sync the configured sites.
+// The popup: record the conversation on the current tab, or test-read it.
 // Its words come from _locales through i18n.js; the Aa button picks the language.
 const { t, ready, choose, languages, current } = globalThis.MEMORIVE_I18N;
 const statusNode = document.getElementById("status");
-const syncButton = document.getElementById("sync-library");
 const testButton = document.getElementById("test-current-page");
 const recordButton = document.getElementById("record-page");
 const recordStatus = document.getElementById("record-status");
 const supportHint = document.getElementById("support-hint");
 const languageButton = document.getElementById("language-button");
 const languageMenu = document.getElementById("language-menu");
-let testBusy = false, syncRunning = false, recordBusy = false, recordingState = { status: "IDLE" };
-let lastSyncState = null;
+let testBusy = false, recordBusy = false, recordingState = { status: "IDLE" };
 
 // A line shown by key, so that a language change can show it again in the new language.
 const say = (node, key, ...values) => {
@@ -26,59 +24,12 @@ const refreshCaptureAvailability = async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     globalThis.MEMORIVE_OFFICIAL_WEB.requireCaptureUrl(tab?.url);
     supportHint.hidden = true;
-    testButton.disabled = testBusy || syncRunning || ["RECORDING", "SAVING"].includes(recordingState.status);
+    testButton.disabled = testBusy || ["RECORDING", "SAVING"].includes(recordingState.status);
   } catch (_error) {
     supportHint.hidden = false;
     testButton.disabled = true;
   }
 };
-const enabledSites = globalThis.MEMORIVE_SITE_PROFILES.sites.filter((row) => row.enabled);
-document.getElementById("enabled-sites").textContent = enabledSites.map((row) => row.name).join(" / ") || "—";
-
-const renderState = (state) => {
-  if (!state) return;
-  lastSyncState = state;
-  syncRunning = Boolean(state.running);
-  syncButton.disabled = !enabledSites.length || Boolean(state.running);
-  const failed = state.failed ? t("syncFailedCount", state.failed) : "";
-  if (["RUNNER_STARTING", "DISCOVERING", "INDEXING", "CAPTURING", "DOWNLOADING"].includes(state.status)) {
-    const where = [state.provider_id, state.total ? `${state.current} / ${state.total}` : ""].filter(Boolean).join(" ");
-    say(statusNode, "syncProgress", where, state.captured || 0, failed);
-  } else if (state.status === "COMPLETE") {
-    say(statusNode, "syncDone", state.captured || 0, failed);
-  } else if (state.status === "ERROR") {
-    say(statusNode, "syncError", state.error_code || "UNKNOWN_ERROR");
-  }
-};
-
-const refreshStatus = async () => {
-  try {
-    const response = await chrome.runtime.sendMessage({ type: "MEMORIVE_SYNC_STATUS" });
-    if (response?.ok) renderState(response.state);
-  } catch (_error) {
-    say(statusNode, "syncStatusUnreadable");
-  }
-};
-
-chrome.runtime.onMessage.addListener((message) => {
-  if (["MEMORIVE_SYNC_ALL_PROGRESS", "MEMORIVE_SYNC_ALL_COMPLETE", "MEMORIVE_SYNC_ALL_ERROR"].includes(message?.type)) {
-    renderState(message.state);
-  }
-});
-
-syncButton.addEventListener("click", async () => {
-  syncButton.disabled = true;
-  say(statusNode, "syncStarting");
-  try {
-    const response = await chrome.runtime.sendMessage({ type: "MEMORIVE_SYNC_ALL_LIBRARIES" });
-    if (!response?.ok) throw new Error(response?.error_code || "SESSION_LIBRARY_SYNC_START_FAILED");
-    renderState(response.state);
-  } catch (error) {
-    syncButton.disabled = !enabledSites.length;
-    say(statusNode, "syncError", String(error?.message || error));
-  }
-});
-
 // String() so a missing code shows the generic message instead of throwing.
 const errorKey = (raw) => {
   const code = String(raw || "");
@@ -111,9 +62,8 @@ const showRecording = (state) => {
   const active = recordingState.status === "RECORDING";
   recordButton.textContent = t(active ? "recordStop" : "recordStart");
   recordButton.title = t(active ? "recordStopTitle" : "recordStartTitle");
-  recordButton.disabled = recordBusy || testBusy || syncRunning || recordingState.status === "SAVING";
-  testButton.disabled = active || testBusy || syncRunning || recordBusy || recordingState.status === "SAVING";
-  syncButton.disabled = active || testBusy || syncRunning || recordBusy || recordingState.status === "SAVING" || !enabledSites.length;
+  recordButton.disabled = recordBusy || testBusy || recordingState.status === "SAVING";
+  testButton.disabled = active || testBusy || recordBusy || recordingState.status === "SAVING";
   const count = recordingState.message_count || 0, unplaced = recordingState.unplaced_count || 0;
   if (active) {
     if (unplaced) say(recordStatus, "recordingProgressGap", count, unplaced, recordingState.remaining_seconds);
@@ -196,15 +146,12 @@ document.addEventListener("keydown", (event) => {
 });
 // i18n.js has already put the fixed words in the new language; show the changing lines again too.
 document.addEventListener("memorive-language", () => {
-  const shown = statusNode.memoriveWords?.[0] || "";
-  if (lastSyncState && ["syncProgress", "syncDone", "syncError"].includes(shown)) renderState(lastSyncState);
-  else sayAgain(statusNode);
+  sayAgain(statusNode);
   sayAgain(recordStatus);
   showRecording(recordingState);
 });
 
 ready.then(() => {
-  refreshStatus();
   void refreshCaptureAvailability();
   void refreshRecording();
   setInterval(refreshRecording, 1000);

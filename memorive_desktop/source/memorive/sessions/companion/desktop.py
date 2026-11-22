@@ -89,8 +89,6 @@ class BrowserCompanionDesktop:
             "popup.html",
             "popup.css",
             "popup.js",
-            "runner.html",
-            "runner.js",
             "README.txt",
             "site_profiles.js",
             "recording.js", "browser_identity.js", "i18n.js",
