@@ -796,8 +796,13 @@
   ].join(",");
   // ChatGPT since 2026-11 starts each message with a small heading for screen readers ("You said:" / "ChatGPT
   // said:") that carries data-conversation-role. The message is the largest element around that heading that
-  // holds no other such heading, never above one turn (data-turn-key) or the page's main area.
+  // holds no other such heading, never above one turn (data-turn-key) or the page's main area. On
+  // chatgpt.com (2026-11-22) the heading is an h4 and the message a div around it.
   const ROLE_HEADING = "[data-conversation-role]";
+  // Shown on screen: the element itself, or, when it has no height of its own (ChatGPT's message wrappers measure
+  // 0 px high, checked 2026-11-22), an element inside it. Content under a hidden ancestor has no size and does
+  // not count.
+  const showsContent = (node) => visible(node) || [...node.children].some(showsContent);
   const TURN = '[data-turn-key], article, [data-testid^="conversation-turn-"]';
   const roleHeadingRows = () => [...document.querySelectorAll(ROLE_HEADING)].flatMap((heading) => {
     const role = heading.getAttribute("data-conversation-role");
@@ -808,7 +813,7 @@
            section.parentElement.querySelectorAll(ROLE_HEADING).length === 1) {
       section = section.parentElement;
     }
-    if (section === heading || !visible(section)) return [];
+    if (section === heading || !showsContent(section)) return [];
     const text = structuredMessageText(section);
     return text ? [{ node: section, role, text }] : [];
   });
