@@ -624,9 +624,14 @@ class SettingsController:
         expected_revision: int,
         confirmed_risk_ids: Sequence[str] | None = None,
     ) -> dict[str, Any]:
+        return self._save(settings, expected_revision=expected_revision, confirmed_risk_ids=confirmed_risk_ids)
+
+    def _save(self, settings, *, expected_revision, confirmed_risk_ids=None, references_from_import=False):
+        """save; an import (import_redacted, export_bundle.import_bundle) may also bring key references, which
+        it has already merged with this computer's. The page reaches only save, which may not change them."""
         current = self.store.load(recover_corruption=False)
         accepted = validate_settings(settings)
-        if (
+        if not references_from_import and (
             accepted["credential_references"]
             != current["settings"]["credential_references"]
         ):
@@ -830,18 +835,24 @@ class SettingsController:
             self.store.write_json(self.store.profile_root/('import_migration_'+original_hash+'.json'),{'schema_version':'E2ImportedSettingsMigration-v1','source_export_sha256':original_hash,'converted_export_sha256':payload['export_sha256']})
         settings = validate_settings(payload["settings"])
         current = self.store.load(recover_corruption=False)
-        if (
-            settings["credential_references"]
-            != current["settings"]["credential_references"]
-        ):
-            raise ValueError("SETTINGS_IMPORT_CREDENTIAL_REFERENCE_DRIFT")
+        # Keys are not exported. A key reference this computer has keeps its own row (status, times); one it does
+        # not have comes in as MISSING, for the user to enter the key here. This used to require the references to
+        # be identical, times included, so a file could only go back into the settings it came from.
+        local = {row["credential_ref"]: row for row in current["settings"]["credential_references"]}
+        imported = {row["credential_ref"] for row in settings["credential_references"]}
+        settings["credential_references"] = sorted(
+            [local.get(row["credential_ref"]) or dict(row, status="MISSING") for row in settings["credential_references"]]
+            + [row for reference, row in local.items() if reference not in imported],
+            key=lambda row: row["credential_ref"])
+        payload = dict(payload, settings=settings)
         if payload['schema_version']=='SettingsRedactedExport-v2':
             from memorive.desktop.settings.export_bundle import import_bundle
             return import_bundle(self,payload,expected_revision,confirmed_risk_ids)
-        receipt = self.save(
+        receipt = self._save(
             settings,
             expected_revision=expected_revision,
             confirmed_risk_ids=confirmed_risk_ids,
+            references_from_import=True,
         )
         receipt["action"] = "IMPORT_REDACTED"
         return receipt

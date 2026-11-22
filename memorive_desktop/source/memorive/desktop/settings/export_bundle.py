@@ -76,7 +76,8 @@ def import_bundle(owner,payload,expected_revision,confirmed_risk_ids):
         path=owner.store.profile_root/'settings_import_transaction.json'
         owner.store.write_json(path,tx)
         try:
-            receipt=owner.save(payload['settings'],expected_revision=expected_revision,confirmed_risk_ids=confirmed_risk_ids)
+            receipt=owner._save(payload['settings'],expected_revision=expected_revision,confirmed_risk_ids=confirmed_risk_ids,
+                                references_from_import=True)
             ext=source._load()
             ext.update(sources=accepted['external_sources'],revision=ext['revision']+1)
             lit=literature_sources.load(source.root)
