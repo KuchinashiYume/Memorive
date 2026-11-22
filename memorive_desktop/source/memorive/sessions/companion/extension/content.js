@@ -85,11 +85,11 @@
       ]
     }
   };
-  // ChatGPT since 2026-11: data-conversation-role on each message; the bubble / answer body inside it is the
-  // fallback when the outer element has no box of its own (checked on chatgpt.com 2026-11-22).
+  // ChatGPT since 2026-11: the question bubble and the answer body carry these two markers; the whole message is
+  // found from its role heading (roleHeadingRows) when the answer body has no marker.
   const currentPageDefinition = {
     user: [
-      '[data-conversation-role="user"]', '[data-user-message-bubble="true"]',
+      '[data-user-message-bubble="true"]',
       '[data-message-author-role="user"]', '[data-author-role="user"]',
       '[data-role="user"]', '[data-message-role="user"]',
       '[data-testid*="user-message" i]', '[data-test-id*="user-message" i]',
@@ -98,7 +98,7 @@
       '[class*="questionitem" i]'
     ],
     assistant: [
-      '[data-conversation-role="assistant"]', '[data-markdown-text-style="assistant-message"]',
+      '[data-markdown-text-style="assistant-message"]',
       '[data-message-author-role="assistant"]', '[data-author-role="assistant"]',
       '[data-message-author-role="model"]', '[data-author-role="model"]',
       '[data-role="assistant"]', '[data-message-role="assistant"]',
@@ -109,7 +109,7 @@
       '[class*="answeritem" i]'
     ],
     generic: [
-      '[data-conversation-role]', '[data-message-author-role]', '[data-author-role]',
+      '[data-message-author-role]', '[data-author-role]',
       '[data-role]', '[data-message-role]',
       '[class*="chat-message" i]', '[class*="message-item" i]',
       '[class*="messageitem" i]', '[class*="chat-item" i]',
@@ -194,6 +194,8 @@
   const visible = (node) => {
     if (!(node instanceof Element)) return false;
     const style = getComputedStyle(node);
+    // An element without a box of its own (display: contents) is visible when its content is.
+    if (style.display === "contents") return [...node.children].some(visible);
     const rect = node.getBoundingClientRect();
     return style.display !== "none" && style.visibility !== "hidden" && rect.width > 1 && rect.height > 1;
   };
@@ -626,6 +628,8 @@
       return true;
     }
     if (element.hidden || element.getAttribute("aria-hidden") === "true") return true;
+    // ChatGPT's role heading ("You said:") inside a message is a label, not part of the message.
+    if (!isRoot && element.hasAttribute("data-conversation-role")) return true;
     const style = getComputedStyle(element);
     if (style.display === "none" || style.visibility === "hidden") return true;
     const marker = messageElementMarker(element);
@@ -785,12 +789,29 @@
   // The element that holds one message (or one turn) on the supported sites. Text blocks of one message
   // (an answer split into several rendered parts) join only inside the same container; two containers are two
   // messages even when they are next to each other and have the same role. A row outside every container is
-  // its own message. (.ds-message and data-virtual-list-item-key: DeepSeek's message rows; data-conversation-role:
-  // ChatGPT's message element; check on the site.)
+  // its own message. (.ds-message and data-virtual-list-item-key: DeepSeek's message rows; check on the site.)
   const MESSAGE_CONTAINER_SELECTOR = [
     "[data-message-id]", "[data-turn-id]", '[data-testid^="conversation-turn-"]',
-    ".ds-message", "[data-virtual-list-item-key]", "[data-conversation-role]"
+    ".ds-message", "[data-virtual-list-item-key]"
   ].join(",");
+  // ChatGPT since 2026-11 starts each message with a small heading for screen readers ("You said:" / "ChatGPT
+  // said:") that carries data-conversation-role. The message is the largest element around that heading that
+  // holds no other such heading, never above one turn (data-turn-key) or the page's main area.
+  const ROLE_HEADING = "[data-conversation-role]";
+  const TURN = '[data-turn-key], article, [data-testid^="conversation-turn-"]';
+  const roleHeadingRows = () => [...document.querySelectorAll(ROLE_HEADING)].flatMap((heading) => {
+    const role = heading.getAttribute("data-conversation-role");
+    if (!["user", "assistant"].includes(role)) return [];
+    let section = heading;
+    while (!section.matches(TURN) && section.parentElement &&
+           !section.parentElement.matches("main, [role='main'], body") &&
+           section.parentElement.querySelectorAll(ROLE_HEADING).length === 1) {
+      section = section.parentElement;
+    }
+    if (section === heading || !visible(section)) return [];
+    const text = structuredMessageText(section);
+    return text ? [{ node: section, role, text }] : [];
+  });
   const messageContainer = (node) => node.closest(MESSAGE_CONTAINER_SELECTOR) || node;
   // Rows in page order, each with its container: joins the blocks of one message.
   const groupMessageBlocks = (rows) => {
@@ -818,6 +839,7 @@
         if (text) prepared.push({ node, role, text });
       });
     }
+    prepared.push(...roleHeadingRows());
     lastReadMethod = "PAGE_MARKERS";
     if (!prepared.some((row) => row.role === "user") || !prepared.some((row) => row.role === "assistant")) {
       prepared.push(...genericMessageRows(definition));
