@@ -49,7 +49,8 @@
   let shownBriefQuotes = {};            // the cited messages as the shown version read them
   let shownDraftId = null;              // the version on the page
   let shownBrief = null;                // its brief (null for a draft made before v2.00)
-  let shownReview = null;               // library.refinement_review of the shown version: product, choices
+  let shownReview = null;               // library.refinement_review of the shown version: product, edits
+  let editing = null;                   // the item being edited: { index, field:'text' | 'answer' }
   let shownRefinementCurrent = false;   // the shown version read the conversation the page shows now
   const ALL_SOURCE_PAGE_SIZE = 30;
   const ALL_SOURCE_PREFETCH_ROW = 20;
@@ -464,6 +465,7 @@
     shownDraftId = null;
     shownBrief = null;
     shownReview = null;
+    editing = null;
     q('#sessions-open-library').hidden = true;
     showSessionView('turns');
     q('#sessions-refinement-items').replaceChildren();
@@ -707,12 +709,8 @@
     decision:'没有引用用户原话，从已定事项移来',
     next_step:'没有引用用户原话，从下一步移来',
     adopted:'由你采纳（原为 AI 建议）',
-    resolved:'已解决'
-  });
-  // The choice an item takes while reviewing (kept by the library), and its buttons: [label, value to send].
-  const briefChoices = Object.freeze({
-    ai_suggestion:{ value:'adopted', take:'采纳', undo:'撤销采纳' },
-    open_question:{ value:'resolved', take:'标为已解决', undo:'撤销' }
+    answered:'由你确认（原为待确认）',
+    reworded:'你改过措辞'
   });
 
   const refinementRow = (label, text, notes = []) => {
@@ -734,19 +732,44 @@
     return row;
   };
 
+  const pill = (text, data) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    Object.assign(button.dataset, data);
+    button.textContent = text;
+    return button;
+  };
+
+  // The item being edited: its text (or its conclusion) in a box, with 保存 and 取消.
+  const itemEditor = (index, field, value) => {
+    const editor = document.createElement('div');
+    editor.className = 'desktop-sessions-refinement-editor';
+    const box = document.createElement('textarea');
+    box.className = 'field';
+    box.rows = 3;
+    box.value = value;
+    box.setAttribute('aria-label', field === 'answer' ? '结论' : '修改措辞');
+    const actions = document.createElement('div');
+    actions.className = 'desktop-sessions-refinement-refs';
+    actions.append(pill('保存', { act:'save', item:String(index) }), pill('取消', { act:'cancel', item:String(index) }));
+    editor.append(box, actions);
+    return editor;
+  };
+
   // The overview, then the items under their sections, each with buttons for the messages it cites (#n is mn).
-  // An adopted suggestion is listed with the decisions; a resolved question stays, marked. The choice buttons show
-  // once the version's library product is known (the library keeps the choices).
-  const briefRows = (brief, decisions = {}, canChoose = false) => {
+  // The user's edits (kept by the library per version) show here: new wording, an adopted suggestion and a
+  // question's conclusion, both listed with the decisions. The edit buttons show once the version's library
+  // product is known.
+  const briefRows = (brief, edits = {}, canEdit = false) => {
     const fragment = document.createDocumentFragment();
     fragment.append(refinementRow('概况', String(brief.overview || '')));
     const order = Object.keys(briefSections);
     const shown = (brief.items || []).map((item, index) => {
-      const choice = decisions[String(index)];
-      return { item, index, choice, kind:choice === 'adopted' ? 'decision' : item.kind };
+      const edit = edits[String(index)] || {};
+      return { item, index, edit, kind:edit.adopted || edit.answer ? 'decision' : item.kind };
     }).sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || a.index - b.index);
     let kind = null;
-    for (const { item, index, choice, kind:section } of shown) {
+    for (const { item, index, edit, kind:section } of shown) {
       if (section !== kind) {
         kind = section;
         const heading = document.createElement('h4');
@@ -754,29 +777,42 @@
         heading.textContent = briefSections[kind] || kind;
         fragment.append(heading);
       }
-      const notes = [...(item.flags || []), ...(item.moved_from ? [item.moved_from] : []), ...(choice ? [choice] : [])]
+      const notes = [...(edit.text ? [] : item.flags || []), ...(item.moved_from ? [item.moved_from] : []),
+        ...(edit.adopted ? ['adopted'] : []), ...(edit.answer ? ['answered'] : []), ...(edit.text ? ['reworded'] : [])]
         .map((key) => briefNotes[key]).filter(Boolean);
-      const row = refinementRow('', String(item.text || ''), notes);
-      row.classList.toggle('is-resolved', choice === 'resolved');
+      const row = refinementRow('', String(edit.text || item.text || ''), notes);
+      if (edit.answer) {
+        const answer = document.createElement('p');
+        answer.className = 'desktop-sessions-refinement-answer';
+        answer.textContent = `结论：${edit.answer}`;
+        row.querySelector('p').after(answer);
+      }
+      if (canEdit && editing?.index === index) {
+        row.append(itemEditor(index, editing.field,
+          editing.field === 'answer' ? (edit.answer || '') : (edit.text || item.text || '')));
+        fragment.append(row);
+        continue;
+      }
       const refs = document.createElement('div');
       refs.className = 'desktop-sessions-refinement-refs';
       for (const ref of item.message_refs || []) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.dataset.ref = ref;
+        const button = pill(`#${String(ref).replace(/^m/, '')}`, { ref });
         button.dataset.desktopTip = '查看原话';
-        button.textContent = `#${String(ref).replace(/^m/, '')}`;
         refs.append(button);
       }
-      const options = briefChoices[item.kind];
-      if (canChoose && options) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'desktop-sessions-refinement-choice';
-        button.dataset.item = String(index);
-        button.dataset.choice = choice ? '' : options.value;
-        button.textContent = choice ? options.undo : options.take;
-        refs.append(button);
+      if (canEdit) {
+        const own = { item:String(index) };
+        const actions = [pill('编辑', { ...own, act:'text' })];
+        if (edit.text) actions.push(pill('恢复原文', { ...own, act:'untext' }));
+        if (item.kind === 'ai_suggestion') {
+          actions.push(edit.adopted ? pill('撤销采纳', { ...own, act:'unadopt' }) : pill('采纳', { ...own, act:'adopt' }));
+        }
+        if (item.kind === 'open_question') {
+          actions.push(pill(edit.answer ? '改结论' : '写结论', { ...own, act:'answer' }));
+          if (edit.answer) actions.push(pill('撤销结论', { ...own, act:'unanswer' }));
+        }
+        actions[0].classList.add('desktop-sessions-refinement-choice');   // the item's actions start at the right
+        refs.append(...actions);
       }
       row.append(refs);
       fragment.append(row);
@@ -787,10 +823,33 @@
   const drawBrief = () => {
     if (!shownBrief) return;
     q('#sessions-refinement-items').replaceChildren(
-      briefRows(shownBrief, shownReview?.decisions || {}, Boolean(shownReview?.artifact_id)));
+      briefRows(shownBrief, shownReview?.edits || {}, Boolean(shownReview?.artifact_id)));
   };
 
-  // The shown version's library product: the arrow opens it, the choices are kept there.
+  // Save one item's edit: the fields given are set, a null one is taken back; nothing left takes the edit back.
+  const saveItemEdit = (index, change) => {
+    const review = shownReview;
+    const current = { ...(review.edits || {})[String(index)] };
+    for (const [key, value] of Object.entries(change)) {
+      if (value === null) delete current[key];
+      else current[key] = value;
+    }
+    return Memorive.sessionsBridge.call('library.edit_refinement_item', {
+      artifact_id:review.artifact_id, item:index, edit:Object.keys(current).length ? current : null
+    })
+      .then((receipt) => {
+        if (shownReview !== review) return;
+        shownReview = { ...review, edits:receipt.edits };
+        editing = null;
+        drawBrief();
+      })
+      .catch((error) => {
+        drawBrief();
+        showToast(`没有保存：${error?.message || error}`);
+      });
+  };
+
+  // The shown version's library product: the arrow opens it, the edits are kept there.
   const loadVersionReview = (draft) => {
     const draftId = draft?.draft_id;
     void Memorive.sessionsBridge?.call('library.refinement_review', { draft_id:draftId })
@@ -815,18 +874,20 @@
     }
   };
 
-  // A cited message: the turn it is, when the shown version read the conversation as it is now; otherwise the
-  // text this version read, shown under the item.
+  // The turn of a cited message in 原对话, scrolled to and outlined for a moment.
+  const locateTurn = (ref) => {
+    const turn = q(`#sessions-turns [data-ref="${ref}"]`);
+    if (!turn) return;
+    showSessionView('turns');
+    turn.scrollIntoView({ block:'center', behavior:reducedMotion.matches ? 'auto' : 'smooth' });
+    turn.classList.add('is-cited');
+    window.setTimeout(() => turn.classList.remove('is-cited'), 2400);
+  };
+
+  // A cited message, shown under the item as this version read it (a second press closes it). When this version
+  // read the conversation as it is now, 在原对话中定位 jumps to the turn.
   const showCitedMessage = (button) => {
     const ref = button.dataset.ref;
-    const turn = shownRefinementCurrent ? q(`#sessions-turns [data-ref="${ref}"]`) : null;
-    if (turn) {
-      showSessionView('turns');
-      turn.scrollIntoView({ block:'center', behavior:reducedMotion.matches ? 'auto' : 'smooth' });
-      turn.classList.add('is-cited');
-      window.setTimeout(() => turn.classList.remove('is-cited'), 2400);
-      return;
-    }
     const row = button.closest('.desktop-sessions-refinement-item');
     const open = row.querySelector(`.desktop-sessions-refinement-quote[data-ref="${ref}"]`);
     if (open) {
@@ -838,11 +899,19 @@
     const block = document.createElement('blockquote');
     block.className = 'desktop-sessions-refinement-quote';
     block.dataset.ref = ref;
+    const current = shownRefinementCurrent && q(`#sessions-turns [data-ref="${ref}"]`);
     const who = document.createElement('small');
-    who.textContent = quote.role === 'user' ? '这一版读到的原话 · 你' : '这一版读到的原话 · AI';
+    who.textContent = current ? (quote.role === 'user' ? '原话 · 你' : '原话 · AI')
+      : (quote.role === 'user' ? '这一版读到的原话 · 你' : '这一版读到的原话 · AI');
     const text = document.createElement('p');
     text.textContent = String(quote.text || '');
     block.append(who, text);
+    if (current) {
+      const actions = document.createElement('div');
+      actions.className = 'desktop-sessions-refinement-refs';
+      actions.append(pill('在原对话中定位', { locate:ref }));
+      block.append(actions);
+    }
     row.append(block);
   };
 
@@ -865,6 +934,7 @@
     if (draft.draft_id !== shownDraftId) {   // another version: its product and choices are looked up again
       shownDraftId = draft.draft_id;
       shownReview = null;
+      editing = null;
       q('#sessions-open-library').hidden = true;
       loadVersionReview(draft);
     }
@@ -1144,24 +1214,39 @@
   q('#sessions-show-turns').addEventListener('click', () => showSessionView('turns'));
   q('#sessions-show-brief').addEventListener('click', () => showSessionView('brief'));
   q('#sessions-refinement-items').addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-ref]');
-    if (button) showCitedMessage(button);
-    const choice = event.target.closest('button[data-item]');
-    if (!choice || !shownReview?.artifact_id) return;
-    choice.disabled = true;
-    const review = shownReview;
-    void Memorive.sessionsBridge?.call('library.set_refinement_decision', {
-      artifact_id:review.artifact_id, item:Number(choice.dataset.item), decision:choice.dataset.choice || null
-    })
-      .then((receipt) => {
-        if (shownReview !== review) return;
-        shownReview = { ...review, decisions:receipt.decisions };
-        drawBrief();
-      })
-      .catch((error) => {
-        choice.disabled = false;
-        showToast(`没有保存：${error?.message || error}`);
-      });
+    const cited = event.target.closest('button[data-ref]');
+    if (cited) showCitedMessage(cited);
+    const locate = event.target.closest('button[data-locate]');
+    if (locate) locateTurn(locate.dataset.locate);
+    const action = event.target.closest('button[data-act]');
+    if (!action || !shownReview?.artifact_id) return;
+    const index = Number(action.dataset.item);
+    const act = action.dataset.act;
+    if (act === 'text' || act === 'answer') {
+      editing = { index, field:act };
+      drawBrief();
+      q('#sessions-refinement-items .desktop-sessions-refinement-editor textarea')?.focus();
+      return;
+    }
+    if (act === 'cancel') {
+      editing = null;
+      drawBrief();
+      return;
+    }
+    if (act === 'save') {
+      const value = action.closest('.desktop-sessions-refinement-editor').querySelector('textarea').value.trim();
+      if (!value) {
+        showToast('内容为空，没有保存');
+        return;
+      }
+      action.disabled = true;
+      void saveItemEdit(index, { [editing.field]:value });
+      return;
+    }
+    action.disabled = true;
+    void saveItemEdit(index, {
+      adopt:{ adopted:true }, unadopt:{ adopted:null }, unanswer:{ answer:null }, untext:{ text:null }
+    }[act]);
   });
   q('#sessions-open-library').addEventListener('click', () => {
     if (!shownReview?.stable_locator) return;

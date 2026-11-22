@@ -38,7 +38,7 @@ LIBRARY_METHODS = frozenset(
         "library.open_artifact",
         "library.confirm_refinement_review",
         "library.refinement_review",
-        "library.set_refinement_decision",
+        "library.edit_refinement_item",
         "library.confirm_core_review",
         "library.refresh",
         "library.inject_fault",
@@ -105,7 +105,7 @@ class LibraryProductController:
         self.refinement_catalog_path = self.state_root / "refinement_products_v1.json"
         self.refinement_product_root = self.state_root / "refinement_products_private"
         self.refinement_review_state_path = self.state_root / "refinement_review_state_v1.json"
-        self.refinement_decisions_path = self.state_root / "refinement_decisions_v1.json"
+        self.refinement_edits_path = self.state_root / "refinement_edits_v1.json"
         self.refinement_product_root.mkdir(parents=True, exist_ok=True)
         self._refinement_lock = threading.RLock()
         self._core_lock = self._refinement_lock  # one catalog publication lock
@@ -772,8 +772,8 @@ class LibraryProductController:
             if _sha256_json(payload) != entry["draft_sha256"]:
                 raise LibraryProductError("LIBRARY_REFINEMENT_PRIVATE_HASH_MISMATCH")
             target = original.parent / readable_name(artifact_id, payload["display_name"])
-            decisions = self._load_refinement_decisions().get(artifact_id)
-            content = render(payload, entry["draft_sha256"], decisions).encode("utf-8")
+            edits = self._load_refinement_edits().get(artifact_id)
+            content = render(payload, entry["draft_sha256"], edits).encode("utf-8")
             if target.exists() or target.is_symlink():
                 attributes = target.lstat()
                 if target.is_symlink() or bool(getattr(attributes,"st_file_attributes",0) & 0x400):
@@ -813,23 +813,45 @@ class LibraryProductController:
             "status": "OPENED",
         }
 
-    # The user's choices on the items of a refinement brief, taken while reviewing it: an AI suggestion adopted, an
-    # open question resolved. Kept apart from the draft, whose hash the library pins; the Markdown shows them.
-    _DECISION_FOR_KIND = {"ai_suggestion": "adopted", "open_question": "resolved"}
+    # The user's edits on the items of a refinement brief, made while reviewing it: new wording ("text"), an AI
+    # suggestion adopted ("adopted": true) or an open question's conclusion ("answer"). Kept apart from the draft,
+    # whose hash the library pins; the session page and the Markdown show them.
+    _EDIT_KINDS = {"adopted": "ai_suggestion", "answer": "open_question"}
 
-    def _load_refinement_decisions(self) -> dict[str, dict[str, str]]:
-        """{artifact id: {item index: decision}}."""
+    def _load_refinement_edits(self) -> dict[str, dict[str, dict[str, Any]]]:
+        """{artifact id: {item index: edit}}."""
         try:
-            value = json.loads(self.refinement_decisions_path.read_text(encoding="utf-8"))
+            value = json.loads(self.refinement_edits_path.read_text(encoding="utf-8"))
         except FileNotFoundError:
             return {}
         except (OSError, json.JSONDecodeError) as error:
-            raise LibraryProductError("LIBRARY_REFINEMENT_DECISIONS_UNREADABLE") from error
+            raise LibraryProductError("LIBRARY_REFINEMENT_EDITS_UNREADABLE") from error
         return dict(value["artifacts"])
 
+    @classmethod
+    def _checked_item_edit(cls, edit: Any, kind: str) -> dict[str, Any] | None:
+        """The edit of one item as it is kept, or None for none; one that does not fit the item is refused."""
+        if edit is None:
+            return None
+        if not isinstance(edit, Mapping) or not edit or set(edit) - {"text", "adopted", "answer"}:
+            raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
+        kept: dict[str, Any] = {}
+        for key, value in edit.items():
+            if key in cls._EDIT_KINDS and cls._EDIT_KINDS[key] != kind:
+                raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
+            if key == "adopted":
+                if value is not True:
+                    raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
+                kept[key] = True
+                continue
+            if not isinstance(value, str) or not value.strip() or len(value) > 2_000 or "\x00" in value:
+                raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
+            kept[key] = value.strip()
+        return kept
+
     def _refinement_review(self, draft_id: str) -> dict[str, Any]:
-        """The library product of one refinement version (by its draft id), its choices and whether it was reviewed;
-        the session page uses it to open the product and to show and change the choices."""
+        """The library product of one refinement version (by its draft id), its edits and whether it was reviewed;
+        the session page uses it to open the product and to show and change the edits."""
         entry = next((row for row in self._load_refinement_catalog()["products"] if row["draft_id"] == draft_id), None)
         if entry is None:
             return {"schema_version": "DesktopLibraryRefinementReviewView-v1", "draft_id": draft_id,
@@ -841,42 +863,42 @@ class LibraryProductController:
             "draft_id": draft_id,
             "artifact_id": artifact_id,
             "stable_locator": entry["row"]["stable_locator"],
-            "decisions": self._load_refinement_decisions().get(artifact_id, {}),
+            "edits": self._load_refinement_edits().get(artifact_id, {}),
             "review_confirmed": bool(review and review.get("confirmed_at")),
             "status": "PASS",
         }
 
-    def _set_refinement_decision(self, artifact_id: str, item: Any, decision: Any) -> dict[str, Any]:
-        """Adopt an AI suggestion or mark an open question resolved (decision None takes the choice back). A
-        readable Markdown already written is rewritten with the choice, unless the user has edited it."""
+    def _edit_refinement_item(self, artifact_id: str, item: Any, edit: Any) -> dict[str, Any]:
+        """Set the edit of one item (None takes it back). A readable Markdown already written is rewritten with
+        it, unless the user has edited that file."""
         from memorive.documents.library.refinement_markdown import readable_name, render
         with self._refinement_lock:
             original = self.resolve_refinement_private_artifact(artifact_id)
             draft = json.loads(original.read_text(encoding="utf-8"))
             items = (draft["brief"]["items"] if draft.get("schema_version") == "DesktopSessionRefinementDraft-v4"
                      else None)
-            if (items is None or isinstance(item, bool) or not isinstance(item, int) or not 0 <= item < len(items)
-                    or decision not in {None, self._DECISION_FOR_KIND.get(items[item]["kind"])}):
-                raise LibraryProductError("LIBRARY_REFINEMENT_DECISION_INVALID")
-            everything = self._load_refinement_decisions()
+            if items is None or isinstance(item, bool) or not isinstance(item, int) or not 0 <= item < len(items):
+                raise LibraryProductError("LIBRARY_REFINEMENT_EDIT_INVALID")
+            kept = self._checked_item_edit(edit, items[item]["kind"])
+            everything = self._load_refinement_edits()
             before = dict(everything.get(artifact_id, {}))
             after = {key: value for key, value in before.items() if key != str(item)}
-            if decision is not None:
-                after[str(item)] = decision
+            if kept is not None:
+                after[str(item)] = kept
             everything[artifact_id] = after
-            temporary = self.refinement_decisions_path.with_suffix(".json.next")
-            temporary.write_text(json.dumps({"schema_version": "DesktopLibraryRefinementDecisions-v1",
+            temporary = self.refinement_edits_path.with_suffix(".json.next")
+            temporary.write_text(json.dumps({"schema_version": "DesktopLibraryRefinementEdits-v1",
                                              "artifacts": everything}, ensure_ascii=False, indent=2, sort_keys=True)
                                  + "\n", encoding="utf-8", newline="\n")
-            temporary.replace(self.refinement_decisions_path)
+            temporary.replace(self.refinement_edits_path)
             digest = self._refinement_entries_by_artifact_id[artifact_id]["draft_sha256"]
             readable = original.parent / readable_name(artifact_id, draft["display_name"])
             if readable.is_file() and readable.read_bytes() == render(draft, digest, before).encode("utf-8"):
                 next_file = readable.with_name("." + readable.name + ".next")
                 next_file.write_bytes(render(draft, digest, after).encode("utf-8"))
                 next_file.replace(readable)
-        return {"schema_version": "DesktopLibraryRefinementDecisionReceipt-v1", "artifact_id": artifact_id,
-                "decisions": after, "status": "PASS"}
+        return {"schema_version": "DesktopLibraryRefinementEditReceipt-v1", "artifact_id": artifact_id,
+                "edits": after, "status": "PASS"}
 
     def _confirm_refinement_review(self, artifact_id: str) -> dict[str, Any]:
         self.resolve_refinement_private_artifact(artifact_id)
@@ -1472,9 +1494,9 @@ class LibraryProductController:
         if method == "library.refinement_review":
             self._require_keys(accepted, {"draft_id"})
             return self._refinement_review(str(accepted["draft_id"]))
-        if method == "library.set_refinement_decision":
-            self._require_keys(accepted, {"artifact_id", "item", "decision"})
-            return self._set_refinement_decision(str(accepted["artifact_id"]), accepted["item"], accepted["decision"])
+        if method == "library.edit_refinement_item":
+            self._require_keys(accepted, {"artifact_id", "item", "edit"})
+            return self._edit_refinement_item(str(accepted["artifact_id"]), accepted["item"], accepted["edit"])
         if method == "library.confirm_core_review":
             self._require_keys(accepted, {"artifact_id"})
             return self.paper_review.confirm(str(accepted["artifact_id"]))

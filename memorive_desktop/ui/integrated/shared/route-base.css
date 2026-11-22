@@ -3379,7 +3379,9 @@
 #desktop-sessions-preview .desktop-sessions-refinement-refs button:hover { background:color-mix(in srgb, var(--brand) 16%, var(--surface-raised)); }
 #desktop-sessions-preview .desktop-sessions-refinement-refs button:focus-visible { outline:2px solid var(--focus-ring); outline-offset:1px; }
 #desktop-sessions-preview .desktop-sessions-refinement-refs .desktop-sessions-refinement-choice { margin-left:auto; font-family:inherit; }
-#desktop-sessions-preview .desktop-sessions-refinement-item.is-resolved > p { color:var(--text-muted); text-decoration:line-through; }
+#desktop-sessions-preview .desktop-sessions-refinement-answer { color:var(--text-primary); font-weight:600; }
+#desktop-sessions-preview .desktop-sessions-refinement-editor { display:grid; gap:6px; }
+#desktop-sessions-preview .desktop-sessions-refinement-editor textarea { width:100%; min-height:64px; box-sizing:border-box; resize:vertical; font:inherit; }
 #desktop-sessions-preview .desktop-sessions-refine-state:not([hidden]) { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 #desktop-sessions-preview .desktop-sessions-refine-state .icon-button { flex:0 0 auto; width:26px; height:26px; min-height:26px; padding:0; }
 #desktop-sessions-preview .desktop-sessions-refinement-quote { display:grid; gap:4px; margin:0; padding:6px 9px; border-left:2px solid var(--selection-border); background:var(--surface-subtle); }
