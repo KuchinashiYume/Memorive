@@ -10,10 +10,13 @@ sealing it again: today the envelope rejects them, and after the envelope goes t
 expected to pass or to fail on the field checks instead. 64-character hex values are masked,
 since the hashes of these records will change with the envelope.
 """
+import hashlib
+import json
 import re
 from copy import deepcopy
 from pathlib import Path
 
+from memorive.platform.jcs import typed_payload_hash
 from memorive.research.knowledge_feedback.canonical import make_hashed_payload
 from memorive.sessions.refinement import (
     make_context_capsule,
@@ -24,7 +27,6 @@ from memorive.sessions.refinement import (
     validate_redaction_result,
     validate_typed_refinement_item,
 )
-from memorive.sessions.refinement.model_channel import _build_graph
 from tests.characterize.golden import check, outcome
 
 HERE = Path(__file__).parent
@@ -49,6 +51,31 @@ def _reseal(record, change):
     payload = {key: deepcopy(value) for key, value in record.items() if key != "content_hash"}
     change(payload)
     return make_hashed_payload(payload)
+
+
+def _build_graph(request):
+    """A conversation graph as the refinement channel built one before v2.00 (one node per message, each the
+    reply to the one before); the graph records are what these tests pin."""
+    source = json.dumps(request["source"], ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
+    conversation_id = "conversation:" + hashlib.sha256(source.encode("utf-8")).hexdigest()[:24]
+    nodes, message_ids, prior = [], [], None
+    for index, row in enumerate(request["messages"]):
+        message_id = f"message-{index:08d}"
+        message_ids.append(message_id)
+        nodes.append({"message_id": message_id, "conversation_id": conversation_id, "parent_id": prior,
+                      "role": row["role"], "blocks": [{"type": "text", "text": row["content"], "metadata": {}}],
+                      "created_at": f"SEQUENCE:{index:08d}", "status": "VISIBLE_COMPLETE", "edit_of": None,
+                      "regeneration_group": None, "provider_sequence": index})
+        prior = message_id
+    nodes.sort(key=lambda node: node["message_id"])
+    graph = make_hashed_payload({
+        "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
+        "graph_id": f"graph:{request['task_id']}", "revision": 1,
+        "snapshot_ref": f"desktop-session-snapshot:{request['task_id']}@1",
+        "snapshot_hash": typed_payload_hash({"source_snapshot_sha256": request["source_snapshot_sha256"]}),
+        "conversation_ids": [conversation_id], "nodes": nodes, "orphan_message_ids": [],
+        "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE", "deterministic": True})
+    return graph, message_ids
 
 
 def _graph():
