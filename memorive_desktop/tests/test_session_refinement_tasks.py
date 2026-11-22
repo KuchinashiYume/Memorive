@@ -22,12 +22,7 @@ from memorive.desktop.current_task import CurrentTaskProductController  # noqa: 
 from memorive.desktop.service.adapters import RealFacadeAdapter  # noqa: E402
 from memorive.desktop.service.control_store import ControlStore  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
-from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
-from memorive.sessions.refinement import (  # noqa: E402
-    make_context_capsule,
-    make_model_typed_refinement_item,
-    validate_normalized_graph,
-)
+from refinement_answers import brief_for  # noqa: E402
 
 
 REFINEMENT_NODE_IDS = [
@@ -128,67 +123,11 @@ class _FakeExistingConversationRefinementChannel:
         self.requests.append(accepted)
         if self.fail:
             raise RuntimeError("FAKE_LOCAL_REFINEMENT_FAILURE")
-        conversation_id = "conversation:sample-fake"
-        node = {
-            "message_id": "a-056",
-            "conversation_id": conversation_id,
-            "parent_id": None,
-            "role": "assistant",
-            "blocks": [
-                {
-                    "type": "text",
-                    "text": "本地 fake adapter 生成的精炼候选。",
-                    "metadata": {},
-                }
-            ],
-            "created_at": "SEQUENCE:00000000",
-            "status": "VISIBLE_COMPLETE",
-            "edit_of": None,
-            "regeneration_group": None,
-            "provider_sequence": 0,
-        }
-        graph = validate_normalized_graph(
-            make_hashed_payload(
-                {
-                    "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
-                    "graph_id": f"graph:{accepted['task_id']}",
-                    "revision": 1,
-                    "snapshot_ref": f"desktop-session-snapshot:{accepted['task_id']}@1",
-                    "snapshot_hash": typed_payload_hash(
-                        {"source_snapshot_sha256": accepted["source_snapshot_sha256"]}
-                    ),
-                    "conversation_ids": [conversation_id],
-                    "nodes": [node],
-                    "orphan_message_ids": [],
-                    "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
-                    "deterministic": True,
-                }
-            )
-        )
-        capsule = make_context_capsule(
-            capsule_id=f"capsule:{accepted['task_id']}:a-056",
-            required_message_refs=["a-056"],
-            scope="SELECTED_SESSION_MESSAGES",
-        )
-        item = make_model_typed_refinement_item(
-            item_id=f"item:{accepted['task_id']}:a-056",
-            graph=graph,
-            node=node,
-            capsule=capsule,
-            candidate_text="本地 fake adapter 生成的精炼候选。",
-            refinement_type="AI_SUGGESTION",
-            scope="SELECTED_SESSION_MESSAGES",
-        )
         return {
             "profile_ref": accepted["profile_ref"],
             "requested_model": "fake-local-refiner",
             "returned_model": "fake-local-refiner",
-            "subject_output": {
-                "schema_version": "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1",
-                "pack_id": accepted["task_id"],
-                "graph_hash": graph["content_hash"],
-                "items": [item],
-            },
+            "brief": brief_for(accepted, "本地 fake adapter 生成的精炼候选。"),
             "model_calls": 1,
             "external_model_calls": 0,
             "external_network_calls": 0,

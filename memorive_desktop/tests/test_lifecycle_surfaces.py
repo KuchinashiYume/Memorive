@@ -28,7 +28,8 @@ from tests.test_session_refinement_tasks import (  # noqa: E402
 from tests.test_refinement_runtime_coordination import (  # noqa: E402
     _HealthyService,
 )
-from tests.test_refinement_delivery_loop import _formal_subject  # noqa: E402
+from tests.test_refinement_result_and_inbox_review import _formal_subject  # noqa: E402
+from refinement_answers import brief_for  # noqa: E402
 
 
 def _parse_utc(value: str) -> datetime:
@@ -120,22 +121,24 @@ def test_successful_current_task_remains_for_three_minutes_then_expires(tmp_path
     assert controller.call("current_task.list", {})["refinement_bindings"] == []
 
 
-def _refinement_draft() -> dict[str, Any]:
+def _refinement_draft(version: int = 4) -> dict[str, Any]:
+    """A refinement draft as the library receives it; version 3 is the per-message layout made before v2.00."""
     task_id = "refinement-sample-library"
     source_hash = "B" * 64
-    subject = _formal_subject(
-        {"task_id": task_id, "source_snapshot_sha256": source_hash}
-    )
-    return {
-        "schema_version": "DesktopSessionRefinementDraft-v3",
+    draft = {
+        "schema_version": f"DesktopSessionRefinementDraft-v{version}",
         "draft_id": "draft-sample-library",
         "task_id": task_id,
         "display_name": "精炼对话 · sample 资料库详情",
         "local_projection_id": "session-sample-library",
         "source_snapshot_sha256": source_hash,
-        "items": subject["items"],
         "created_at": "2026-08-30T12:00:00Z",
     }
+    if version == 3:
+        return {**draft, "items": _formal_subject({"task_id": task_id, "source_snapshot_sha256": source_hash})["items"]}
+    messages = [{"role": "user", "content": "验收会话需要生成可复核的本地精炼成品。"}]
+    return {**draft, "brief": brief_for({"messages": messages, "options": {"include_tasks": True, "include_risks": True}},
+                                        "生成可复核的本地精炼成品。", "decision")}
 
 
 def test_work_log_projects_live_refinement_task_and_persisted_product(tmp_path: Path) -> None:

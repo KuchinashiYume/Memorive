@@ -6,6 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
+from refinement_answers import answer_for
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,24 +30,14 @@ def _request(profile_ref: str) -> dict:
             {"role": "user", "content": "请把这段会话整理为可复核条目。"},
             {"role": "assistant", "content": "建议先保留来源，再生成候选条目。"},
         ],
+        "options": {"include_tasks": True, "include_risks": True},
         "review_required": True,
         "auto_ingest": False,
     }
 
 
 def _subject_from_schema(schema: dict) -> dict:
-    item_schemas = schema["properties"]["items"]["prefixItems"]
-    items = []
-    for index, item_schema in enumerate(item_schemas):
-        type_name = "PROVENANCE_ONLY" if index == 0 else "AI_SUGGESTION"
-        items.append(
-            {
-                "message_id": item_schema["properties"]["message_id"]["const"],
-                "candidate_text": "保留来源" if index == 0 else "先生成可复核候选条目",
-                "refinement_type": type_name,
-            }
-        )
-    return {"items": items}
+    return answer_for(schema)
 
 
 class _LocalRegistry:
@@ -135,7 +127,7 @@ def test_channel_reuses_phase7_local_adapter_and_phase6_subject_contract():
     assert result["profile_ref"] == local["profile_ref"]
     assert result["requested_model"] == local["model_name"]
     assert result["returned_model"] == local["model_name"]
-    assert result["subject_output"]["schema_version"] == "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1"
+    assert result["brief"]["schema_version"] == "ConversationBrief-v1"
     assert result["model_calls"] == 1
     assert result["external_model_calls"] == 0
     assert result["external_network_calls"] == 0

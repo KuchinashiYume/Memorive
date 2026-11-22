@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from page_sources import settings_scripts
+from refinement_answers import answer_for
 import json
 import sys
 import threading
@@ -136,19 +137,7 @@ class _ExistingProfileExecutor:
     def call(self, method: str, params: Mapping[str, Any]) -> Mapping[str, Any]:
         accepted = dict(params)
         self.calls.append((method, accepted))
-        schema = accepted["response_schema"]
-        properties = schema["properties"]
-        items = []
-        for item_schema in properties["items"]["prefixItems"]:
-            message_id = item_schema["properties"]["message_id"]["const"]
-            items.append(
-                {
-                    "message_id": message_id,
-                    "candidate_text": "复用现有执行通道生成的候选。",
-                    "refinement_type": "USER_DECISION_CLAIM",
-                }
-            )
-        response = {"items": items}
+        response = answer_for(accepted["response_schema"], "复用现有执行通道生成的决定。", "decision")
         is_cli = str(accepted["profile_ref"]).startswith("cli:")
         return {
             "schema_version": "SettingsStructuredChatExecutionResult-v1",
@@ -176,6 +165,7 @@ def _refinement_request(profile_ref: str) -> dict[str, Any]:
             {"role": "user", "content": "请提炼决定。"},
             {"role": "assistant", "content": "决定使用现有执行组件。"},
         ],
+        "options": {"include_tasks": True, "include_risks": True},
         "review_required": True,
         "auto_ingest": False,
     }
@@ -196,8 +186,8 @@ def test_existing_refinement_channel_reuses_saved_api_and_cli_executor() -> None
     ]
     assert api["external_network_calls"] == 1
     assert cli["external_network_calls"] == 0
-    assert api["subject_output"]["schema_version"] == "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1"
-    assert cli["subject_output"]["schema_version"] == "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1"
+    assert [item["kind"] for item in api["brief"]["items"]] == ["decision"]
+    assert [item["kind"] for item in cli["brief"]["items"]] == ["decision"]
 
 
 def test_refinement_queue_is_not_projected_as_current_task(tmp_path: Path) -> None:

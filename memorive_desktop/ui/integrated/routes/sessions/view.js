@@ -678,17 +678,70 @@
     FORBIDDEN_REUSE:'禁止复用'
   });
 
+  // Section titles of a conversation brief (a v4 draft; sessions/refinement/brief.py), in the brief's order.
+  const briefSections = Object.freeze({
+    decision:'已定事项',
+    next_step:'下一步',
+    result:'结果与进展',
+    open_question:'待确认',
+    risk:'风险',
+    ai_suggestion:'AI 建议 · 未采纳'
+  });
+  const briefNotes = Object.freeze({
+    NUMBER_NOT_IN_SOURCE:'数字未在所引原话中找到',
+    decision:'没有引用用户原话，从已定事项移来',
+    next_step:'没有引用用户原话，从下一步移来'
+  });
+
+  const refinementRow = (label, text, notes = []) => {
+    const row = document.createElement('article');
+    row.className = 'desktop-sessions-refinement-item';
+    const small = document.createElement('small');
+    small.textContent = label;
+    const copy = document.createElement('p');
+    copy.textContent = text;
+    row.append(small, copy);
+    for (const note of notes) {
+      const line = document.createElement('small');
+      line.textContent = note;
+      row.append(line);
+    }
+    return row;
+  };
+
+  // The overview, then each item under its section with the messages it cites (#n is message mn).
+  const briefRows = (brief) => {
+    const fragment = document.createDocumentFragment();
+    fragment.append(refinementRow('概况', String(brief.overview || '')));
+    for (const item of brief.items || []) {
+      const refs = (item.message_refs || []).map((ref) => `#${String(ref).replace(/^m/, '')}`).join(' ');
+      const notes = [...(item.flags || []), ...(item.moved_from ? [item.moved_from] : [])]
+        .map((key) => briefNotes[key]).filter(Boolean);
+      fragment.append(refinementRow(`${briefSections[item.kind] || item.kind} · ${refs}`, String(item.text || ''), notes));
+    }
+    return fragment;
+  };
+
   const renderRefinementDraft = (projection) => {
     const draft = projection?.draft;
+    const brief = draft?.schema_version === 'DesktopSessionRefinementDraft-v4' ? draft.brief : null;
+    // A draft made before v2.00 (v3) lists one typed item per message.
     const subjectOutput = draft?.subject_output;
     if (
       projection?.status !== 'PASS'
       || draft?.local_projection_id !== selectedProjectionId
-      || subjectOutput?.schema_version !== 'CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1'
-      || !Array.isArray(subjectOutput?.items)
+      || !brief && (subjectOutput?.schema_version !== 'CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1'
+        || !Array.isArray(subjectOutput?.items))
     ) return false;
     const panel = q('#sessions-refinement-draft');
     const target = q('#sessions-refinement-items');
+    if (brief) {
+      target.replaceChildren(briefRows(brief));
+      panel.hidden = false;
+      setRefineState('纪要已生成，待复核');
+      panel.scrollIntoView({ block:'nearest', behavior:reducedMotion.matches ? 'auto' : 'smooth' });
+      return true;
+    }
     const fragment = document.createDocumentFragment();
     for (const item of subjectOutput.items) {
       const row = document.createElement('article');

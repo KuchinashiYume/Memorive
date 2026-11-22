@@ -15,13 +15,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-from memorive.research.knowledge_feedback.canonical import make_hashed_payload, typed_payload_hash  # noqa: E402
-from memorive.sessions.refinement.refinement import make_typed_refinement_item  # noqa: E402
-from memorive.sessions.refinement import (  # noqa: E402
-    make_context_capsule,
-    validate_normalized_graph,
-    validate_typed_refinement_item,
-)
+from memorive.sessions.refinement.brief import validate_brief  # noqa: E402
 from memorive.desktop.service.control_store import ControlStore  # noqa: E402
 from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.documents.library import LibraryProductController  # noqa: E402
@@ -52,62 +46,7 @@ from tests.test_refinement_runtime_coordination import (  # noqa: E402
 )
 
 
-def _formal_subject(request: Mapping[str, Any]) -> dict[str, Any]:
-    conversation_id = "conversation:sample"
-    node = {
-        "message_id": "message-00000000",
-        "conversation_id": conversation_id,
-        "parent_id": None,
-        "role": "user",
-        "blocks": [
-            {
-                "type": "text",
-                "text": "验收会话需要生成可复核的本地精炼成品。",
-                "metadata": {},
-            }
-        ],
-        "created_at": "SEQUENCE:00000000",
-        "status": "VISIBLE_COMPLETE",
-        "edit_of": None,
-        "regeneration_group": None,
-        "provider_sequence": 0,
-    }
-    graph = validate_normalized_graph(
-        make_hashed_payload(
-            {
-                "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
-                "graph_id": f"graph:{request['task_id']}",
-                "revision": 1,
-                "snapshot_ref": f"desktop-session-snapshot:{request['task_id']}@1",
-                "snapshot_hash": typed_payload_hash(
-                    {"source_snapshot_sha256": request["source_snapshot_sha256"]}
-                ),
-                "conversation_ids": [conversation_id],
-                "nodes": [node],
-                "orphan_message_ids": [],
-                "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
-                "deterministic": True,
-            }
-        )
-    )
-    capsule = make_context_capsule(
-        capsule_id=f"capsule:{request['task_id']}:message-00000000",
-        required_message_refs=[node["message_id"]],
-        scope="SELECTED_SESSION_MESSAGES",
-    )
-    item = make_typed_refinement_item(
-        item_id=f"item:{request['task_id']}:message-00000000",
-        graph=graph,
-        node=node,
-        capsule=capsule,
-        scope="SELECTED_SESSION_MESSAGES",
-    )
-    return {
-        "schema_version": "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1",
-        "pack_id": request["task_id"],
-        "graph_hash": deepcopy(graph["content_hash"]),
-        "items": [item],
-    }
+
 
 
 def _sessions(
@@ -147,27 +86,14 @@ def _sessions(
     return sessions, inbox, current_task, projection_id
 
 
-def test_bridge_returns_existing_formal_typed_items_not_parallel_simplified_items() -> None:
+def test_bridge_returns_a_checked_brief() -> None:
     local = _local_row()
-    adapter = _LocalAdapter()
     result = ExistingConversationRefinementChannel(
-        local_model_registry=_LocalRegistry(local),
-        local_adapter=adapter,
-        prompt_path=(
-            ATTEMPT_ROOT
-            / "source"
-            / "memorive" / "models" / "gateway"
-            / "prompts"
-            / "conversation_refinement"
-            / "v2.md"
-        ),
+        local_model_registry=_LocalRegistry(local), local_adapter=_LocalAdapter(),
     ).execute(_request(local["profile_ref"]))
 
-    assert result["subject_output"]["items"]
-    for item in result["subject_output"]["items"]:
-        assert item["schema_version"] == "CONVERSATION_REFINEMENT_TYPED_REFINEMENT_ITEM_V1"
-        assert validate_typed_refinement_item(item) == item
-        assert item["truth_decided_by_refiner"] is False
+    assert validate_brief(result["brief"]) == result["brief"]
+    assert result["brief"]["items"] and result["brief"]["quotes"]
 
 
 def test_workflow_model_test_reuses_exact_frozen_exam_score_without_new_call(

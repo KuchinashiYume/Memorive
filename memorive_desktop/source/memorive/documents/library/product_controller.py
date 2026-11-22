@@ -17,6 +17,9 @@ from typing import Any, Callable, Collection, Mapping
 from memorive.sessions.refinement import (
     validate_typed_refinement_item,
 )
+from memorive.sessions.refinement.brief import (
+    validate_brief,
+)
 
 
 LIBRARY_METHODS = frozenset(
@@ -829,35 +832,44 @@ class LibraryProductController:
         }
 
     def register_refinement_draft(self, draft: Mapping[str, Any]) -> dict[str, Any]:
-        """Persist one private refinement draft as a reviewable Library product."""
+        """Persist one private refinement draft as a reviewable Library product.
+
+        A v4 draft holds a conversation brief (sessions/refinement/brief.py); a v3 draft, made before v2.00, holds
+        one typed item per message. Both are registered and opened; only v4 drafts are made now.
+        """
 
         if not isinstance(draft, Mapping):
             raise LibraryProductError("LIBRARY_REFINEMENT_DRAFT_INVALID")
         accepted = deepcopy(dict(draft))
+        version = accepted.get("schema_version")
         required = {
             "draft_id",
             "task_id",
             "display_name",
             "local_projection_id",
             "source_snapshot_sha256",
-            "items",
             "created_at",
         }
         if (
-            accepted.get("schema_version") != "DesktopSessionRefinementDraft-v3"
+            version not in {"DesktopSessionRefinementDraft-v3", "DesktopSessionRefinementDraft-v4"}
             or not required <= set(accepted)
             or not all(
                 isinstance(accepted.get(field), str) and accepted[field].strip()
-                for field in required - {"items"}
+                for field in required
             )
-            or not isinstance(accepted.get("items"), list)
-            or not accepted["items"]
+            or version == "DesktopSessionRefinementDraft-v3"
+            and (not isinstance(accepted.get("items"), list) or not accepted["items"])
         ):
             raise LibraryProductError("LIBRARY_REFINEMENT_DRAFT_FIELDS_INVALID")
         try:
-            accepted["items"] = [
-                validate_typed_refinement_item(item) for item in accepted["items"]
-            ]
+            if version == "DesktopSessionRefinementDraft-v4":
+                accepted["brief"] = validate_brief(accepted.get("brief"))
+                item_count = len(accepted["brief"]["items"])
+            else:
+                accepted["items"] = [
+                    validate_typed_refinement_item(item) for item in accepted["items"]
+                ]
+                item_count = len(accepted["items"])
         except Exception as error:
             raise LibraryProductError("LIBRARY_REFINEMENT_TYPED_ITEMS_INVALID") from error
         draft_sha256 = _sha256_json(accepted)
@@ -889,7 +901,7 @@ class LibraryProductController:
             "relative_path": f"refinement_products_private/{private_name}",
             "file_exists": True,
             "file_state": "精炼结果",
-            "products": [f"精炼条目 {len(accepted['items'])} 项"],
+            "products": [f"精炼条目 {item_count} 项"],
             "external_target": "",
             "task": accepted["task_id"],
             "updated_at": accepted["created_at"],

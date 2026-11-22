@@ -1,12 +1,12 @@
 """The channel through which session refinement runs a model.
 
 ProductApi (memorive/desktop/api/) builds the channel (ExistingConversationRefinementChannel); the sessions
-page sends refinement requests through it and gets typed refinement items back.
+controller sends one request per refinement through it (sessions/controller/refinement_tasks.py) and gets the
+conversation brief back (brief.py: the answer's checks and local rules).
 """
 from __future__ import annotations
 from memorive.models.scheduling import scheduled
 
-from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
@@ -14,11 +14,7 @@ import re
 from typing import Any, Mapping, Sequence
 import unicodedata
 
-from memorive.platform.hashed_payloads import make_hashed_payload
-from memorive.platform.jcs import typed_payload_hash
-from memorive.sessions.refinement import make_model_refinement_items
-from memorive.sessions.refinement.contracts import REFINEMENT_TYPES
-from memorive.sessions.refinement.graph import node_text
+from memorive.sessions.refinement.brief import make_brief, message_refs, response_schema
 from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter
 from memorive.models.gateway.prompts import PROMPT_DIR
 
@@ -34,15 +30,10 @@ _REQUEST_FIELDS = {
     "source_snapshot_sha256",
     "source",
     "messages",
+    "options",
     "review_required",
     "auto_ingest",
 }
-_ITEM_FIELDS = {
-    "message_id",
-    "candidate_text",
-    "refinement_type",
-}
-_MAX_CANDIDATE_CHARS = 10_000
 
 
 class ConversationRefinementBridgeError(ValueError):
@@ -115,6 +106,10 @@ def _validate_request(value: Mapping[str, Any]) -> dict[str, Any]:
         raise ConversationRefinementBridgeError("REFINEMENT_SNAPSHOT_HASH_INVALID")
     if not isinstance(request["source"], Mapping) or not request["source"]:
         raise ConversationRefinementBridgeError("REFINEMENT_SOURCE_INVALID")
+    options = request["options"]
+    if (not isinstance(options, Mapping) or set(options) != {"include_tasks", "include_risks"}
+            or not all(isinstance(value, bool) for value in options.values())):
+        raise ConversationRefinementBridgeError("REFINEMENT_OPTIONS_INVALID")
     raw_messages = request["messages"]
     if not isinstance(raw_messages, list) or not raw_messages:
         raise ConversationRefinementBridgeError("REFINEMENT_MESSAGES_REQUIRED")
@@ -142,164 +137,18 @@ def _validate_request(value: Mapping[str, Any]) -> dict[str, Any]:
     return request
 
 
-def _build_graph(request: Mapping[str, Any]) -> tuple[dict[str, Any], list[str]]:
-    """One graph node per selected message, each the reply to the one before. Every message goes
-    in whole: a conversation too long for the model fails there, nothing is cut here."""
-    conversation_id = "conversation:" + hashlib.sha256(
-        _canonical_bytes(request["source"])
-    ).hexdigest()[:24]
-    nodes: list[dict[str, Any]] = []
-    message_ids: list[str] = []
-    prior: str | None = None
-    for original_index, row in enumerate(request["messages"]):
-        message_id = f"message-{original_index:08d}"
-        message_ids.append(message_id)
-        nodes.append(
-            {
-                "message_id": message_id,
-                "conversation_id": conversation_id,
-                "parent_id": prior,
-                "role": row["role"],
-                "blocks": [{"type": "text", "text": row["content"], "metadata": {}}],
-                "created_at": f"SEQUENCE:{original_index:08d}",
-                "status": "VISIBLE_COMPLETE",
-                "edit_of": None,
-                "regeneration_group": None,
-                "provider_sequence": original_index,
-            }
-        )
-        prior = message_id
-    nodes.sort(key=lambda row: row["message_id"])
-    graph = make_hashed_payload(
-        {
-            "schema_version": "CONVERSATION_REFINEMENT_NORMALIZED_CONVERSATION_GRAPH_V1",
-            "graph_id": f"graph:{request['task_id']}",
-            "revision": 1,
-            "snapshot_ref": f"desktop-session-snapshot:{request['task_id']}@1",
-            "snapshot_hash": typed_payload_hash(
-                {"source_snapshot_sha256": request["source_snapshot_sha256"]}
-            ),
-            "conversation_ids": [conversation_id],
-            "nodes": nodes,
-            "orphan_message_ids": [],
-            "edge_policy": "EXPLICIT_PARENT_ONLY_NO_TIMESTAMP_INFERENCE",
-            "deterministic": True,
-        }
-    )
-    return graph, message_ids
-
-
-def _response_schema(*, message_ids: Sequence[str]) -> dict[str, Any]:
-    item_base = {
-        "type": "object",
-        "additionalProperties": False,
-        "required": sorted(_ITEM_FIELDS),
-        "properties": {
-            "candidate_text": {"type": "string", "minLength": 1, "maxLength": _MAX_CANDIDATE_CHARS},
-            "refinement_type": {"enum": sorted(REFINEMENT_TYPES)},
-        },
-    }
-    prefix_items: list[dict[str, Any]] = []
-    for message_id in message_ids:
-        row = deepcopy(item_base)
-        row["properties"]["message_id"] = {"const": message_id}
-        prefix_items.append(row)
-    return {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "additionalProperties": False,
-        "required": ["items"],
-        "properties": {
-            "items": {
-                "type": "array",
-                "minItems": len(prefix_items),
-                "maxItems": len(prefix_items),
-                "prefixItems": prefix_items,
-            },
-        },
-    }
-
-
-def _validate_model_proposals(
-    value: Any,
-    *,
-    message_ids: Sequence[str],
-) -> list[dict[str, Any]]:
-    if not isinstance(value, Mapping):
-        raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_OBJECT_REQUIRED")
-    output = _json_copy(dict(value))
-    if set(output) != {"items"}:
-        raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_FIELDS_INVALID")
-    items = output["items"]
-    if not isinstance(items, list) or len(items) != len(message_ids):
-        raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_ITEM_COUNT_INVALID")
-    for item, message_id in zip(items, message_ids, strict=True):
-        if not isinstance(item, Mapping) or set(item) != _ITEM_FIELDS:
-            raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_ITEM_FIELDS_INVALID")
-        if item["message_id"] != message_id:
-            raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_ITEM_ORDER_INVALID")
-        text = item["candidate_text"]
-        if not isinstance(text, str) or not text.strip() or len(text) > _MAX_CANDIDATE_CHARS or "\x00" in text:
-            raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID")
-        if item["refinement_type"] not in REFINEMENT_TYPES:
-            raise ConversationRefinementBridgeError("REFINEMENT_PROPOSAL_TYPE_INVALID")
-    return items
-
-
-def _formal_subject_output(
-    value: Any,
-    *,
-    task_id: str,
-    graph: Mapping[str, Any],
-    message_ids: Sequence[str],
-) -> dict[str, Any]:
-    proposals = _validate_model_proposals(value, message_ids=message_ids)
-    try:
-        items = make_model_refinement_items(
-            graph=graph,
-            proposals=proposals,
-            scope="SELECTED_SESSION_MESSAGES",
-        )
-    except Exception as error:
-        raise ConversationRefinementBridgeError(
-            str(getattr(error, "code", None) or error)
-            or "FORMAL_REFINEMENT_ITEM_CONSTRUCTION_FAILED"
-        ) from error
-    return {
-        "schema_version": "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1",
-        "pack_id": task_id,
-        "graph_hash": _json_copy(graph["content_hash"]),
-        "items": items,
-    }
-
-
-def _render_prompt(
-    template: str, graph: Mapping[str, Any], message_ids: Sequence[str], language_context=None
-) -> str:
+def _render_prompt(template: str, request: Mapping[str, Any], refs: Sequence[str]) -> str:
+    """The prompt: the template, then the conversation with its message numbers, the options and the language."""
     payload = {
-        **({"language_context":language_context} if language_context is not None else {}),
-        "pack_id": graph["graph_id"].removeprefix("graph:"),
-        "graph_hash": graph["content_hash"],
-        "selected_message_ids": list(message_ids),
+        **({"language_context": request["language_context"]} if request.get("language_context") is not None else {}),
+        "options": request["options"],
         "conversation": [
-            {
-                "message_id": row["message_id"],
-                "role": row["role"],
-                "content": node_text(row),
-            }
-            for row in graph["nodes"]
-            if row["message_id"] in message_ids
+            {"message_ref": ref, "role": row["role"], "content": row["content"]}
+            for ref, row in zip(refs, request["messages"])
         ],
-        "review_required": True,
-        "auto_ingest": False,
     }
     return template.rstrip() + "\n\nINPUT_JSON:\n" + json.dumps(
-        payload,
-        ensure_ascii=False,
-        allow_nan=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    )
+        payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
 
 
 class ExistingConversationRefinementChannel:
@@ -318,7 +167,7 @@ class ExistingConversationRefinementChannel:
         self._profile_executor = profile_executor
         self._prompt_path = Path(
             prompt_path
-            or PROMPT_DIR / "conversation_refinement" / "v3.md"
+            or PROMPT_DIR / "conversation_refinement" / "v4.md"
         ).resolve()
 
     def _local_profile(self, profile_ref: str) -> dict[str, Any]:
@@ -397,9 +246,9 @@ class ExistingConversationRefinementChannel:
                 "REFINEMENT_PROMPT_UNAVAILABLE"
             ) from error
 
-        graph, message_ids = _build_graph(request)
-        schema = _response_schema(message_ids=message_ids)
-        prompt = _render_prompt(template, graph, message_ids,request.get("language_context"))
+        refs = message_refs(len(request["messages"]))
+        schema = response_schema(refs, **request["options"])
+        prompt = _render_prompt(template, request, refs)
         if not _LOCAL_PROFILE.fullmatch(request["profile_ref"]) or self._profile_executor is not None:
             caller = getattr(self._profile_executor, "call", None)
             if not callable(caller):
@@ -445,17 +294,12 @@ class ExistingConversationRefinementChannel:
                 raise ConversationRefinementBridgeError(
                     "REFINEMENT_PROFILE_EXECUTION_RESULT_INVALID"
                 )
-            subject = _formal_subject_output(
-                result.get("response"),
-                task_id=request["task_id"],
-                graph=graph,
-                message_ids=message_ids,
-            )
+            brief = make_brief(result.get("response"), messages=request["messages"], **request["options"])
             return {
                 "profile_ref": request["profile_ref"],
                 "requested_model": result["requested_model"],
                 "returned_model": result["returned_model"],
-                "subject_output": subject,
+                "brief": brief,
                 "model_calls": 1,
                 "external_model_calls": result["external_model_calls"],
                 "external_network_calls": result["external_network_calls"],
@@ -495,17 +339,12 @@ class ExistingConversationRefinementChannel:
             requested_model=profile["model_name"],
             model_digest=profile["model_digest"],
         )
-        subject = _formal_subject_output(
-            getattr(outcome, "response", None),
-            task_id=request["task_id"],
-            graph=graph,
-            message_ids=message_ids,
-        )
+        brief = make_brief(getattr(outcome, "response", None), messages=request["messages"], **request["options"])
         return {
             "profile_ref": request["profile_ref"],
             "requested_model": profile["model_name"],
             "returned_model": profile["model_name"],
-            "subject_output": subject,
+            "brief": brief,
             "model_calls": 1,
             "external_model_calls": 0,
             "external_network_calls": 0,

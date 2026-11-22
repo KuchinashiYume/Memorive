@@ -24,7 +24,7 @@ for candidate in (SOURCE_ROOT, DESKTOP_ROOT):
 from memorive.documents.inbox import InboxController  # noqa: E402
 from memorive.models.gateway.local_structured_chat import LocalStructuredChatAdapter  # noqa: E402
 from memorive.desktop.messages import MessagesProductController  # noqa: E402
-from memorive.sessions.refinement.model_channel import _response_schema  # noqa: E402
+from memorive.sessions.refinement.brief import response_schema  # noqa: E402
 from memorive.sessions.controller import SessionsProductController  # noqa: E402
 from memorive.desktop.api import ServiceProcessManager  # noqa: E402
 from tests.test_session_refinement_tasks import (  # noqa: E402
@@ -79,14 +79,18 @@ def _sessions(
 
 
 def test_local_refinement_schema_avoids_ollama_unsupported_boolean_items() -> None:
-    schema = _response_schema(
-        message_ids=("msg-01", "msg-02"),
-    )
+    schema = response_schema(("m1", "m2"), include_tasks=True, include_risks=True)
 
-    item_array = schema["properties"]["items"]
+    def items_values(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "items":
+                    yield value
+                yield from items_values(value)
 
-    assert item_array["minItems"] == item_array["maxItems"] == 2
-    assert "items" not in item_array
+    # Ollama's structured output takes a schema for array items, not true/false.
+    found = list(items_values(schema))
+    assert found and all(isinstance(value, dict) for value in found)
 
 
 class _JsonResponse:

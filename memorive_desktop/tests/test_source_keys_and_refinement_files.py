@@ -110,9 +110,10 @@ def test_wos_no_key_fails_before_transport(tmp_path, monkeypatch):
         client.fetch("WEB-OF-SCIENCE", "synthetic", 3, "run", "call", threading.Event())
 
 
-def test_refinement_external_open_is_md_preserves_json(api, monkeypatch):
+@pytest.mark.parametrize("version", [4, 3])
+def test_refinement_external_open_is_md_preserves_json(api, monkeypatch, version):
     from tests.test_lifecycle_surfaces import _refinement_draft
-    draft=_refinement_draft()
+    draft=_refinement_draft(version)
     registration=api._library.register_refinement_draft(draft)
     artifact=registration["artifact_id"]
     original=api._library.resolve_refinement_private_artifact(artifact)
@@ -123,7 +124,10 @@ def test_refinement_external_open_is_md_preserves_json(api, monkeypatch):
     assert opened[0].suffix == ".md"
     assert original.read_bytes() == original_bytes
     text=opened[0].read_text(encoding="utf8")
-    assert all(item["candidate_text"] in text for item in draft["items"])
+    if version == 3:
+        assert all(item["candidate_text"] in text for item in draft["items"])
+    else:
+        assert draft["brief"]["overview"] in text and all(item["text"] in text for item in draft["brief"]["items"])
     assert receipt["review_open_recorded"] is True
     again=api._library.resolve_refinement_readable_artifact(artifact)
     assert again==opened[0]

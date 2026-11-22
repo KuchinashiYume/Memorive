@@ -1,9 +1,10 @@
-"""Session refinement: what the model's answer must look like, and the items made from it.
+"""Session refinement: what the model's answer must look like, and the brief made from it.
 
-The model channel (memorive/sessions/refinement/model_channel.py) turns the selected
-messages of a session into a conversation graph, asks a model for one proposal per message, and
-turns each proposal into a typed refinement item (memorive/sessions/refinement).
-The model is replaced here by a local adapter that returns a prepared answer.
+The model channel (memorive/sessions/refinement/model_channel.py) numbers the session's messages m1, m2, ...,
+asks a model for an overview and topic-organized items citing those numbers, and checks the answer
+(memorive/sessions/refinement/brief.py): switched-off sections are dropped, a decision or next step that cites
+no user message moves to the AI's suggestions, a number its cited messages do not hold is flagged, and secrets
+are redacted. The model is replaced here by a local adapter that returns a prepared answer.
 """
 from __future__ import annotations
 
@@ -12,8 +13,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from memorive.research.knowledge_feedback.canonical import typed_payload_hash
-from memorive.sessions.refinement import validate_typed_refinement_item
+from memorive.documents.library.refinement_markdown import render
+from memorive.sessions.refinement.brief import BriefError, validate_brief
 from memorive.sessions.refinement.model_channel import (
     ConversationRefinementBridgeError,
     ExistingConversationRefinementChannel,
@@ -21,23 +22,28 @@ from memorive.sessions.refinement.model_channel import (
 
 PROFILE = "local:0123456789abcdef01234567"
 MESSAGES = [
-    {"role": "user", "content": "DECISION: keep the source of every claim."},
-    {"role": "assistant", "content": "Then build the candidate items from the kept sources."},
+    {"role": "user", "content": "DECISION: keep the source of every claim. Budget is 1,200 tokens."},
+    {"role": "assistant", "content": "Then build the candidate items from the kept sources; it took 35 seconds."},
     {"role": "user", "content": "Why did the first run fail?"},
+    {"role": "user", "content": "Next: rerun with the small model tomorrow."},
 ]
-ANSWER = {"items": [
-    {"message_id": "message-00000000", "candidate_text": "Keep the source of every claim.", "refinement_type": "USER_DECISION_CLAIM"},
-    {"message_id": "message-00000001", "candidate_text": "Build candidates from kept sources.", "refinement_type": "AI_SUGGESTION"},
-    {"message_id": "message-00000002", "candidate_text": "Why did the first run fail?", "refinement_type": "OPEN_QUESTION"},
+ANSWER = {"overview": "Sources are kept; one question is open.", "items": [
+    {"kind": "ai_suggestion", "text": "Build candidates from kept sources.", "message_refs": ["m2"]},
+    {"kind": "decision", "text": "Keep the source of every claim; budget 1200 tokens.", "message_refs": ["m1"]},
+    {"kind": "next_step", "text": "Rerun with the small model tomorrow.", "message_refs": ["m4"]},
+    {"kind": "result", "text": "Building took 35 seconds.", "message_refs": ["m2"]},
+    {"kind": "open_question", "text": "Why did the first run fail?", "message_refs": ["m3"]},
+    {"kind": "risk", "text": "Kept sources may be incomplete.", "message_refs": ["m2", "m1"]},
 ]}
 
 
-def request(messages=MESSAGES):
+def request(messages=MESSAGES, include_tasks=True, include_risks=True):
     return {
         "task_id": "refinement-test-002", "logical_slot": "conversation_refinement", "profile_ref": PROFILE,
         "explicit_user_action": True, "source_snapshot_sha256": "a" * 64,
         "source": {"local_projection_id": "session-002", "provider_id": "deepseek"},
         "messages": deepcopy(messages), "review_required": True, "auto_ingest": False,
+        "options": {"include_tasks": include_tasks, "include_risks": include_risks},
     }
 
 
@@ -64,107 +70,115 @@ class Adapter:
             "local_model_request_count": 1, "external_request_count": 0, "cloud_fallback_count": 0, "api_cost_cny": 0.0})
 
 
-def run(answer=ANSWER, messages=MESSAGES):
+def run(answer=ANSWER, messages=MESSAGES, **options):
     adapter = Adapter(answer)
     channel = ExistingConversationRefinementChannel(local_model_registry=Registry(), local_adapter=adapter)
-    return channel.execute(request(messages)), adapter
+    return channel.execute(request(messages, **options)), adapter
 
 
-def test_each_answer_becomes_a_typed_item_bound_to_its_message():
+def test_the_answer_becomes_a_brief_in_section_order_with_cited_messages():
     result, adapter = run()
-    subject = result["subject_output"]
-    assert subject["schema_version"] == "CONVERSATION_REFINEMENT_SUBJECT_OUTPUT_V1"
-    assert subject["pack_id"] == "refinement-test-002"
-    items = subject["items"]
-    assert [i["message_refs"] for i in items] == [["message-00000000"], ["message-00000001"], ["message-00000002"]]
-    assert [i["refinement_type"] for i in items] == ["USER_DECISION_CLAIM", "AI_SUGGESTION", "OPEN_QUESTION"]
-    assert [i["evidence_state"] for i in items] == ["UNVERIFIED_CLAIM"] * 3
-    assert [i["limitations"] for i in items] == [[], ["REQUIRES_INDEPENDENT_EVIDENCE_OR_USER_DECISION"], []]
-    assert {i["producer"] for i in items} == {"CONVERSATION_REFINEMENT_MODEL_ASSISTED_REFINER_V1"}
-    assert {i["graph_hash"]["value"] for i in items} == {subject["graph_hash"]["value"]}
-    for item in items:
-        assert item["candidate_text_hash"] == typed_payload_hash({"candidate_text": item["candidate_text"]})
-        assert item["truth_decided_by_refiner"] is False and item["scope"] == "SELECTED_SESSION_MESSAGES"
-        assert validate_typed_refinement_item(item) == item
+    brief = result["brief"]
+    assert brief["overview"] == ANSWER["overview"]
+    assert [item["kind"] for item in brief["items"]] == [
+        "decision", "next_step", "result", "open_question", "risk", "ai_suggestion"]
+    assert brief["items"][4]["message_refs"] == ["m1", "m2"]          # in conversation order
+    assert sorted(brief["quotes"]) == ["m1", "m2", "m3", "m4"]
+    assert brief["quotes"]["m3"] == {"role": "user", "text": MESSAGES[2]["content"]}
+    assert all(item["flags"] == [] for item in brief["items"])          # 1200 and 35 are in their messages
+    assert validate_brief(brief) == brief
     assert len(adapter.calls) == 1
 
 
-def test_the_prompt_carries_every_selected_message_whole():
+@pytest.mark.parametrize("include_tasks", [True, False])
+@pytest.mark.parametrize("include_risks", [True, False])
+def test_switched_off_sections_are_neither_asked_for_nor_kept(include_tasks, include_risks):
+    result, adapter = run(include_tasks=include_tasks, include_risks=include_risks)
+    asked = adapter.calls[0]["schema"]["properties"]["items"]["items"]["properties"]["kind"]["enum"]
+    kept = {item["kind"] for item in result["brief"]["items"]}
+    for kind, on in (("next_step", include_tasks), ("risk", include_risks)):
+        assert (kind in asked, kind in kept) == (on, on)
+    assert {"decision", "result", "open_question", "ai_suggestion"} <= kept
+    assert result["brief"]["options"] == {"include_tasks": include_tasks, "include_risks": include_risks}
+
+
+def test_a_decision_citing_only_the_ai_is_kept_as_an_ai_suggestion():
+    answer = {"overview": "o", "items": [
+        {"kind": "decision", "text": "Build candidates from kept sources.", "message_refs": ["m2"]},
+        {"kind": "next_step", "text": "Rerun tomorrow.", "message_refs": ["m2", "m4"]}]}
+    items = run(answer)[0]["brief"]["items"]
+    assert [(item["kind"], item.get("moved_from")) for item in items] == [
+        ("next_step", None), ("ai_suggestion", "decision")]
+
+
+def test_a_number_its_cited_messages_do_not_hold_is_flagged():
+    answer = {"overview": "o", "items": [
+        {"kind": "result", "text": "Building took 45 seconds.", "message_refs": ["m2"]},
+        {"kind": "result", "text": "Building took 35 seconds.", "message_refs": ["m2"]},
+        {"kind": "decision", "text": "Budget 1,200 tokens.", "message_refs": ["m1"]}]}
+    flags = [(item["text"], item["flags"]) for item in run(answer)[0]["brief"]["items"]]
+    assert flags == [("Budget 1,200 tokens.", []), ("Building took 45 seconds.", ["NUMBER_NOT_IN_SOURCE"]),
+                     ("Building took 35 seconds.", [])]
+
+
+def test_the_prompt_carries_every_message_whole_with_its_number():
     long_text = "x" * 150_000
     messages = MESSAGES[:2] + [{"role": "user", "content": long_text}]
-    answer = deepcopy(ANSWER)
+    answer = {"overview": "o", "items": [{"kind": "result", "text": "t", "message_refs": ["m3"]}]}
     _, adapter = run(answer, messages)
     prompt = adapter.calls[0]["prompt"]
-    assert long_text in prompt and MESSAGES[0]["content"] in prompt
-    schema = adapter.calls[0]["schema"]
-    assert [row["properties"]["message_id"]["const"] for row in schema["properties"]["items"]["prefixItems"]] == [
-        "message-00000000", "message-00000001", "message-00000002"]
+    assert long_text in prompt and MESSAGES[0]["content"] in prompt and '"message_ref":"m3"' in prompt
+    assert '"options":{"include_risks":true,"include_tasks":true}' in prompt
+    refs = adapter.calls[0]["schema"]["properties"]["items"]["items"]["properties"]["message_refs"]["items"]["enum"]
+    assert refs == ["m1", "m2", "m3"]
 
 
-def test_secrets_in_an_answer_are_redacted():
-    answer = deepcopy(ANSWER)
-    answer["items"][1]["candidate_text"] = "Mail the summary to someone@example.org."
-    result, _ = run(answer)
-    item = result["subject_output"]["items"][1]
-    assert item["candidate_text"] == "Mail the summary to [REDACTED:EMAIL]."
+def test_secrets_in_an_answer_and_its_quotes_are_redacted():
+    messages = [{"role": "user", "content": "Mail the summary to someone@example.org."}]
+    answer = {"overview": "Write to someone@example.org.",
+              "items": [{"kind": "next_step", "text": "Mail someone@example.org.", "message_refs": ["m1"]}]}
+    brief = run(answer, messages)[0]["brief"]
+    assert "someone@example.org" not in repr(brief)
+    assert brief["items"][0]["text"] == "Mail [REDACTED:EMAIL]."
 
 
-def test_each_item_names_the_context_it_was_read_in():
-    result, _ = run()
-    items = result["subject_output"]["items"]
-    assert [i["context_capsule_ref"].split("@")[0] for i in items] == [
-        f"capsule:graph:refinement-test-002:message-0000000{n}" for n in range(3)]
-    assert all("CONTEXT_INSUFFICIENT" not in i["limitations"] for i in items)
-
-
-def changed(change):
-    answer = deepcopy(ANSWER)
-    change(answer)
-    return answer
+def test_a_greeting_gives_an_overview_alone():
+    brief = run({"overview": "Only greetings.", "items": []}, MESSAGES[:1])[0]["brief"]
+    assert (brief["overview"], brief["items"], brief["quotes"]) == ("Only greetings.", [], {})
 
 
 @pytest.mark.parametrize("answer, code", [
-    ("not an object", "REFINEMENT_PROPOSAL_OBJECT_REQUIRED"),
-    ({"items": ANSWER["items"], "note": "extra"}, "REFINEMENT_PROPOSAL_FIELDS_INVALID"),
-    ({"items": ANSWER["items"][:2]}, "REFINEMENT_PROPOSAL_ITEM_COUNT_INVALID"),
-    ({"items": "none"}, "REFINEMENT_PROPOSAL_ITEM_COUNT_INVALID"),
-    (changed(lambda a: a["items"][0].update(confidence=1)), "REFINEMENT_PROPOSAL_ITEM_FIELDS_INVALID"),
-    (changed(lambda a: a["items"][0].pop("refinement_type")), "REFINEMENT_PROPOSAL_ITEM_FIELDS_INVALID"),
-    (changed(lambda a: a["items"].reverse()), "REFINEMENT_PROPOSAL_ITEM_ORDER_INVALID"),
-    (changed(lambda a: a["items"][1].update(candidate_text="   ")), "REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID"),
-    (changed(lambda a: a["items"][1].update(candidate_text=7)), "REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID"),
-    (changed(lambda a: a["items"][1].update(candidate_text="a\x00b")), "REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID"),
-    (changed(lambda a: a["items"][1].update(candidate_text="y" * 10_001)), "REFINEMENT_PROPOSAL_CANDIDATE_TEXT_INVALID"),
-    (changed(lambda a: a["items"][1].update(refinement_type="FACT")), "REFINEMENT_PROPOSAL_TYPE_INVALID"),
+    ({"items": []}, "REFINEMENT_PROPOSAL_FIELDS_INVALID"),
+    ({"overview": " ", "items": []}, "REFINEMENT_PROPOSAL_OVERVIEW_INVALID"),
+    ({"overview": "o", "items": [{"kind": "summary", "text": "t", "message_refs": ["m1"]}]},
+     "REFINEMENT_PROPOSAL_TYPE_INVALID"),
+    ({"overview": "o", "items": [{"kind": "result", "text": "t", "message_refs": ["m9"]}]},
+     "REFINEMENT_PROPOSAL_MESSAGE_REFS_INVALID"),
+    ({"overview": "o", "items": [{"kind": "result", "text": "t", "message_refs": []}]},
+     "REFINEMENT_PROPOSAL_MESSAGE_REFS_INVALID"),
 ])
-def test_an_answer_that_does_not_fit_is_refused(answer, code):
-    with pytest.raises(ConversationRefinementBridgeError, match=code):
+def test_an_answer_that_is_not_a_brief_is_refused(answer, code):
+    with pytest.raises(BriefError, match=code):
         run(answer)
 
 
-def test_an_answer_of_exactly_ten_thousand_characters_is_accepted():
-    answer = changed(lambda a: a["items"][1].update(candidate_text="z" * 10_000))
-    result, _ = run(answer)
-    assert result["subject_output"]["items"][1]["candidate_text"] == "z" * 10_000
-
-
-def test_an_answer_padded_past_ten_thousand_characters_is_refused():
-    answer = changed(lambda a: a["items"][1].update(candidate_text="z" * 9_999 + "  "))
-    with pytest.raises(Exception):
-        run(answer)
-
-
-@pytest.mark.parametrize("change, code", [
-    (lambda r: r.update(explicit_user_action=False), "REFINEMENT_EXPLICIT_ACTION_REQUIRED"),
-    (lambda r: r.update(auto_ingest=True), "REFINEMENT_REVIEW_BOUNDARY_INVALID"),
-    (lambda r: r.update(messages=[]), "REFINEMENT_MESSAGES_REQUIRED"),
-    (lambda r: r["messages"].append({"role": "system", "content": "x"}), "REFINEMENT_MESSAGE_ROLE_INVALID"),
-    (lambda r: r["messages"].append({"role": "user", "content": "  "}), "REFINEMENT_MESSAGE_CONTENT_INVALID"),
-    (lambda r: r.update(source_snapshot_sha256="xyz"), "REFINEMENT_SNAPSHOT_HASH_INVALID"),
-])
-def test_a_request_must_come_from_a_reviewed_explicit_action(change, code):
-    value = request()
-    change(value)
+def test_options_must_be_given():
     channel = ExistingConversationRefinementChannel(local_model_registry=Registry(), local_adapter=Adapter(ANSWER))
-    with pytest.raises(ConversationRefinementBridgeError, match=code):
+    value = request()
+    del value["options"]
+    with pytest.raises(ConversationRefinementBridgeError, match="REFINEMENT_REQUEST_FIELDS_INVALID"):
         channel.execute(value)
+
+
+def test_the_brief_reads_as_markdown_by_section():
+    brief = run()[0]["brief"]
+    brief["items"][2]["flags"] = ["NUMBER_NOT_IN_SOURCE"]
+    draft = {"schema_version": "DesktopSessionRefinementDraft-v4", "display_name": "精炼对话 · Planning",
+             "language_context": None, "brief": brief, "local_projection_id": "session-002",
+             "created_at": "2026-11-22T00:00:00Z", "source_snapshot_sha256": "A" * 64}
+    text = render(draft, "B" * 64)
+    assert text.startswith("# Planning\n")
+    assert text.index("## Decisions") < text.index("## Next steps") < text.index("## AI suggestions · not adopted")
+    assert "- [ ] Rerun with the small model tomorrow. (#4)" in text
+    assert "- Kept sources may be incomplete. (#1, #2)" in text
+    assert "  - Number not found in the cited messages" in text

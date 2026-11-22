@@ -407,8 +407,8 @@
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "6c4dcb3888e77a35f681b9eb2fb5f1a8a36bcba281cc8977e4cb4f6a924ad156",
-      "bytes": 2617688
+      "sha256": "afadb23ab0f6b5adb7404d544eb5f8751f966e4af9d033ab6418925fc3c77c8c",
+      "bytes": 2621312
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -3237,13 +3237,13 @@
     },
     {
       "path": "source/memorive/documents/library/product_controller.py",
-      "sha256": "ec09e70df5584b6f74f94c5d0d6f306dcd020f7fa1ee55d48395ae18a9d76683",
-      "bytes": 74153
+      "sha256": "8fb363af98f27a2d33672c2311d0865cef43fd463b644e4dff8fdb470c99cd24",
+      "bytes": 74812
     },
     {
       "path": "source/memorive/documents/library/refinement_markdown.py",
-      "sha256": "42eb6d7458e22d99561dab9ac5677e948a50db0450d37741c9bf91ff88639ff8",
-      "bytes": 2538
+      "sha256": "22fbc88b979f37df48b4ebf65368ac9d09a96ecef9c348654dbce86e401a53bd",
+      "bytes": 5235
     },
     {
       "path": "source/memorive/documents/processing/__init__.py",
@@ -5011,6 +5011,11 @@
       "bytes": 2407
     },
     {
+      "path": "source/memorive/models/gateway/prompts/conversation_refinement/v4.md",
+      "sha256": "96acdb2ea43d494c10ed20dcdf84504d367d594b50401b79bd7806a44fd01f0b",
+      "bytes": 2402
+    },
+    {
       "path": "source/memorive/models/gateway/prompts/cross_analysis_review_delta/v1.md",
       "sha256": "abb60509ecf470def00fb55d644ee9e5ded1536a9e966ebfe42b5ff4f62de363",
       "bytes": 1175
@@ -5757,8 +5762,8 @@
     },
     {
       "path": "source/memorive/platform/language/refinement.py",
-      "sha256": "53d6c98f07ad27b9f1546368829b61250ade96c413dae87710fd6bef649e5b39",
-      "bytes": 2519
+      "sha256": "3abe499533ad7fe66b28a534e5231d58465e77d3da17f2d0df8baf9f35757b50",
+      "bytes": 3204
     },
     {
       "path": "source/memorive/platform/language/reports.py",
@@ -6997,8 +7002,8 @@
     },
     {
       "path": "source/memorive/sessions/controller/refinement_tasks.py",
-      "sha256": "263e1dde004c713d85227a59df52b17aeed2077d7d64b9fd719859581d1ef6ca",
-      "bytes": 35834
+      "sha256": "6345ccbf6da37b6a748f39a5df4daf22cb15652dcde76d52b3d1e188df3dacb5",
+      "bytes": 36045
     },
     {
       "path": "source/memorive/sessions/controller/state.py",
@@ -7019,6 +7024,11 @@
       "path": "source/memorive/sessions/refinement/batch.py",
       "sha256": "25b72772b9e806cd15cde05799bf04a7203444090f631017519b64612d81ec9d",
       "bytes": 4994
+    },
+    {
+      "path": "source/memorive/sessions/refinement/brief.py",
+      "sha256": "a6ca32e412a8bc68e30f5dcb03941df9b81df78e22f737a191b3567188fc885e",
+      "bytes": 7806
     },
     {
       "path": "source/memorive/sessions/refinement/contracts.py",
@@ -7047,8 +7057,8 @@
     },
     {
       "path": "source/memorive/sessions/refinement/model_channel.py",
-      "sha256": "350c3201345e9ca834fc6f8e1312991fab87addf13a04f200175f6c429261bfa",
-      "bytes": 21150
+      "sha256": "145bb6e77e41b5d37e6a54e7128e545126597c04bb3527620a30e97d52388943",
+      "bytes": 15358
     },
     {
       "path": "source/memorive/sessions/refinement/model_choices.py",

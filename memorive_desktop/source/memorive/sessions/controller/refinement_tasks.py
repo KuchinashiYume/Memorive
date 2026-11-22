@@ -312,6 +312,9 @@ class RefinementTasksMixin:
                 "source_snapshot_sha256": snapshot_sha256,
                 "source": deepcopy(dict(source_binding)),
                 "messages": channel_messages,
+                # The settings page's 提取待办 / 提取风险 switches, as saved when the task started.
+                "options": {"include_tasks": settings.get("include_tasks") is not False,
+                            "include_risks": settings.get("include_risks") is not False},
                 "review_required": True,
                 "auto_ingest": False,
             }
@@ -331,7 +334,7 @@ class RefinementTasksMixin:
             manager.begin_session_refinement_step(job_id, REFINEMENT_NODE_IDS[3])
             draft_id = f"refinement-{job_id.removeprefix('refinement-')[:32]}"
             draft = {
-                "schema_version": "DesktopSessionRefinementDraft-v3",
+                "schema_version": "DesktopSessionRefinementDraft-v4",
                 **({"language_context":current_task["language_context"]} if current_task.get("language_context") is not None else {}),
                 "draft_id": draft_id,
                 "task_id": job_id,
@@ -345,8 +348,7 @@ class RefinementTasksMixin:
                 "returned_model": result["returned_model"],
                 "execution_mode": "EXISTING_CONVERSATION_REFINEMENT_CHANNEL",
                 "logical_slot": "conversation_refinement",
-                "subject_output": result["subject_output"],
-                "items": result["subject_output"]["items"],
+                "brief": result["brief"],
                 "execution_receipt": result["execution_receipt"],
                 "review_required": True,
                 "auto_ingest": False,
