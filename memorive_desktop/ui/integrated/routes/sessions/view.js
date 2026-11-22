@@ -1337,11 +1337,14 @@
   });
   q('#sessions-show-turns').addEventListener('click', () => showSessionView('turns'));
   q('#sessions-show-brief').addEventListener('click', () => showSessionView('brief'));
-  q('#sessions-refinement-items').addEventListener('click', (event) => {
+  // #n and 在原对话中定位, in the items and in 历史版本's full text alike.
+  q('#sessions-refinement-draft').addEventListener('click', (event) => {
     const cited = event.target.closest('button[data-ref]');
     if (cited) showCitedMessage(cited);
     const locate = event.target.closest('button[data-locate]');
     if (locate) locateTurn(locate.dataset.locate);
+  });
+  q('#sessions-refinement-items').addEventListener('click', (event) => {
     const action = event.target.closest('button[data-act]');
     if (!action || !shownReview?.artifact_id) return;
     const index = Number(action.dataset.item);
