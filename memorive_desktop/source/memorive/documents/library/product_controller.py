@@ -37,6 +37,8 @@ LIBRARY_METHODS = frozenset(
         "library.validate_external_view",
         "library.open_artifact",
         "library.confirm_refinement_review",
+        "library.refinement_review",
+        "library.set_refinement_decision",
         "library.confirm_core_review",
         "library.refresh",
         "library.inject_fault",
@@ -103,6 +105,7 @@ class LibraryProductController:
         self.refinement_catalog_path = self.state_root / "refinement_products_v1.json"
         self.refinement_product_root = self.state_root / "refinement_products_private"
         self.refinement_review_state_path = self.state_root / "refinement_review_state_v1.json"
+        self.refinement_decisions_path = self.state_root / "refinement_decisions_v1.json"
         self.refinement_product_root.mkdir(parents=True, exist_ok=True)
         self._refinement_lock = threading.RLock()
         self._core_lock = self._refinement_lock  # one catalog publication lock
@@ -769,7 +772,8 @@ class LibraryProductController:
             if _sha256_json(payload) != entry["draft_sha256"]:
                 raise LibraryProductError("LIBRARY_REFINEMENT_PRIVATE_HASH_MISMATCH")
             target = original.parent / readable_name(artifact_id, payload["display_name"])
-            content = render(payload, entry["draft_sha256"]).encode("utf-8")
+            decisions = self._load_refinement_decisions().get(artifact_id)
+            content = render(payload, entry["draft_sha256"], decisions).encode("utf-8")
             if target.exists() or target.is_symlink():
                 attributes = target.lstat()
                 if target.is_symlink() or bool(getattr(attributes,"st_file_attributes",0) & 0x400):
@@ -808,6 +812,71 @@ class LibraryProductController:
             "verified_draft_sha256": entry["draft_sha256"],
             "status": "OPENED",
         }
+
+    # The user's choices on the items of a refinement brief, taken while reviewing it: an AI suggestion adopted, an
+    # open question resolved. Kept apart from the draft, whose hash the library pins; the Markdown shows them.
+    _DECISION_FOR_KIND = {"ai_suggestion": "adopted", "open_question": "resolved"}
+
+    def _load_refinement_decisions(self) -> dict[str, dict[str, str]]:
+        """{artifact id: {item index: decision}}."""
+        try:
+            value = json.loads(self.refinement_decisions_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return {}
+        except (OSError, json.JSONDecodeError) as error:
+            raise LibraryProductError("LIBRARY_REFINEMENT_DECISIONS_UNREADABLE") from error
+        return dict(value["artifacts"])
+
+    def _refinement_review(self, draft_id: str) -> dict[str, Any]:
+        """The library product of one refinement version (by its draft id), its choices and whether it was reviewed;
+        the session page uses it to open the product and to show and change the choices."""
+        entry = next((row for row in self._load_refinement_catalog()["products"] if row["draft_id"] == draft_id), None)
+        if entry is None:
+            return {"schema_version": "DesktopLibraryRefinementReviewView-v1", "draft_id": draft_id,
+                    "status": "NOT_REGISTERED"}
+        artifact_id = entry["row"]["artifact_id"]
+        review = self._load_refinement_review_state()["artifacts"].get(artifact_id)
+        return {
+            "schema_version": "DesktopLibraryRefinementReviewView-v1",
+            "draft_id": draft_id,
+            "artifact_id": artifact_id,
+            "stable_locator": entry["row"]["stable_locator"],
+            "decisions": self._load_refinement_decisions().get(artifact_id, {}),
+            "review_confirmed": bool(review and review.get("confirmed_at")),
+            "status": "PASS",
+        }
+
+    def _set_refinement_decision(self, artifact_id: str, item: Any, decision: Any) -> dict[str, Any]:
+        """Adopt an AI suggestion or mark an open question resolved (decision None takes the choice back). A
+        readable Markdown already written is rewritten with the choice, unless the user has edited it."""
+        from memorive.documents.library.refinement_markdown import readable_name, render
+        with self._refinement_lock:
+            original = self.resolve_refinement_private_artifact(artifact_id)
+            draft = json.loads(original.read_text(encoding="utf-8"))
+            items = (draft["brief"]["items"] if draft.get("schema_version") == "DesktopSessionRefinementDraft-v4"
+                     else None)
+            if (items is None or isinstance(item, bool) or not isinstance(item, int) or not 0 <= item < len(items)
+                    or decision not in {None, self._DECISION_FOR_KIND.get(items[item]["kind"])}):
+                raise LibraryProductError("LIBRARY_REFINEMENT_DECISION_INVALID")
+            everything = self._load_refinement_decisions()
+            before = dict(everything.get(artifact_id, {}))
+            after = {key: value for key, value in before.items() if key != str(item)}
+            if decision is not None:
+                after[str(item)] = decision
+            everything[artifact_id] = after
+            temporary = self.refinement_decisions_path.with_suffix(".json.next")
+            temporary.write_text(json.dumps({"schema_version": "DesktopLibraryRefinementDecisions-v1",
+                                             "artifacts": everything}, ensure_ascii=False, indent=2, sort_keys=True)
+                                 + "\n", encoding="utf-8", newline="\n")
+            temporary.replace(self.refinement_decisions_path)
+            digest = self._refinement_entries_by_artifact_id[artifact_id]["draft_sha256"]
+            readable = original.parent / readable_name(artifact_id, draft["display_name"])
+            if readable.is_file() and readable.read_bytes() == render(draft, digest, before).encode("utf-8"):
+                next_file = readable.with_name("." + readable.name + ".next")
+                next_file.write_bytes(render(draft, digest, after).encode("utf-8"))
+                next_file.replace(readable)
+        return {"schema_version": "DesktopLibraryRefinementDecisionReceipt-v1", "artifact_id": artifact_id,
+                "decisions": after, "status": "PASS"}
 
     def _confirm_refinement_review(self, artifact_id: str) -> dict[str, Any]:
         self.resolve_refinement_private_artifact(artifact_id)
@@ -1400,6 +1469,12 @@ class LibraryProductController:
         if method == "library.confirm_refinement_review":
             self._require_keys(accepted, {"artifact_id"})
             return self._confirm_refinement_review(str(accepted["artifact_id"]))
+        if method == "library.refinement_review":
+            self._require_keys(accepted, {"draft_id"})
+            return self._refinement_review(str(accepted["draft_id"]))
+        if method == "library.set_refinement_decision":
+            self._require_keys(accepted, {"artifact_id", "item", "decision"})
+            return self._set_refinement_decision(str(accepted["artifact_id"]), accepted["item"], accepted["decision"])
         if method == "library.confirm_core_review":
             self._require_keys(accepted, {"artifact_id"})
             return self.paper_review.confirm(str(accepted["artifact_id"]))
