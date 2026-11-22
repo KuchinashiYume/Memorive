@@ -1,28 +1,18 @@
 from __future__ import annotations
 
-import hashlib
-import json
 from pathlib import Path
-import struct
 import sys
 import threading
 
 import pytest
-from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 DESKTOP = ROOT / "product" / "desktop"
-WEB = ROOT / "product" / "web"
-ASSETS = WEB / "assets" / "decorations"
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
 
 def test_native_pet_adds_frames_without_changing_motion_contract() -> None:
     source = (DESKTOP / "app.py").read_text(encoding="utf-8")
-    assert "assistant_expression_asset_paths" in source
+    assert "ASSISTANT_FACES" in source
     assert '"save-success"' in source
     assert '"error"' in source
     assert "LOCAL_UI_SAVE_SUCCESS" in source

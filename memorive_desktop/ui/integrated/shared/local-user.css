@@ -28,12 +28,11 @@
   background:var(--bg-workspace,var(--surface,#faf8f5));
 }
 .desktop-loading-art { position:relative;width:min(340px,76%);max-height:calc(100% - 8px);aspect-ratio:2350/1254;opacity:.82; }
-.desktop-loading-art img { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none; }
-.desktop-loading-art img[hidden] { display:none; }
+.desktop-loading-art > .desktop-kaomoji { position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(30px,4.4vw,52px);user-select:none;pointer-events:none; }
+.desktop-loading-art > .desktop-kaomoji[hidden] { display:none; }
 .desktop-loading-copy { display:none;font-size:var(--memo-size-small);line-height:1.6; }
-.desktop-hide-expressions .desktop-loading-copy,.desktop-user-loading .desktop-loading-copy,
-.desktop-loading-art-unavailable .desktop-loading-copy { display:block; }
-.desktop-user-loading .desktop-loading-art,.desktop-loading-art-unavailable .desktop-loading-art { display:none; }
+.desktop-hide-expressions .desktop-loading-copy,.desktop-user-loading .desktop-loading-copy { display:block; }
+.desktop-user-loading .desktop-loading-art { display:none; }
 .desktop-accounting-plot .desktop-loading-state { bottom:0;padding:10px;background:var(--bg-workspace,var(--surface,#faf8f5)); }
 .desktop-accounting-plot .desktop-loading-art { width:min(280px,76%); }
 .desktop-hide-expressions .desktop-home-speech {background:none!important;border:0!important;box-shadow:none!important;padding:0!important;}

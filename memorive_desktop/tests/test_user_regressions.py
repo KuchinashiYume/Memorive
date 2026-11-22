@@ -21,12 +21,12 @@ def test_part11_motion_samples_match_final_keyframes_and_restore_once() -> None:
     interaction = sample_motion("INTERACTION", 1100 * 0.24)
     assert interaction.frame == "interaction"
     assert interaction.offset_y == 1
-    assert interaction.rotation_degrees == -9
+    assert interaction.rotation_degrees == 0
     assert interaction.done is False
 
     interaction_hold = sample_motion("INTERACTION", 1100 * 0.62)
     assert interaction_hold.offset_y == 1
-    assert interaction_hold.rotation_degrees == -9
+    assert interaction_hold.rotation_degrees == 0
     assert sample_motion("INTERACTION", 1100, base_frame="working").frame == "working"
     assert sample_motion("INTERACTION", 1100, base_frame="working").done is True
 

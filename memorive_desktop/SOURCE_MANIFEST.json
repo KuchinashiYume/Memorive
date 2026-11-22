@@ -252,8 +252,8 @@
     },
     {
       "path": "product/desktop/app.py",
-      "sha256": "a0bb3986f8f99c7115f0e312f84f8757e103ca7bd8b2d42ac2421f498bab27b8",
-      "bytes": 371717
+      "sha256": "1b7a4cbbb924ac9d7edaa08215ea45ee07a2b43554e5800abb3b70316e5f6f42",
+      "bytes": 373890
     },
     {
       "path": "product/desktop/application_behavior.py",
@@ -261,99 +261,29 @@
       "bytes": 4367
     },
     {
-      "path": "product/desktop/assets/decorations/assistant-error.png",
-      "sha256": "65cd34d76bcc53257e77724771093b35fc0326054e4f724a24041c0ebfaa897e",
-      "bytes": 80235
-    },
-    {
-      "path": "product/desktop/assets/decorations/assistant-error.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868",
-      "bytes": 63947
-    },
-    {
-      "path": "product/desktop/assets/decorations/assistant-save-success.png",
-      "sha256": "c93994fa3b6a871b5e247c0cfcdfe2a2788384d7513153510025923854c65600",
-      "bytes": 77994
-    },
-    {
-      "path": "product/desktop/assets/decorations/assistant-save-success.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439",
-      "bytes": 63342
-    },
-    {
-      "path": "product/desktop/assets/decorations/empty-state.png",
-      "sha256": "edc2423a19b17878effb73f11fccffc96fcc17ea0274a1e03930618875a84443",
-      "bytes": 77818
-    },
-    {
-      "path": "product/desktop/assets/decorations/empty-state.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c",
-      "bytes": 63733
-    },
-    {
-      "path": "product/desktop/assets/decorations/home-interaction.png",
-      "sha256": "e3dd7792cba61a66873f94ecc526af6751e03f20c7b426063fed73ba7f3f9e99",
-      "bytes": 75955
-    },
-    {
-      "path": "product/desktop/assets/decorations/home-interaction.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
-    },
-    {
-      "path": "product/desktop/assets/decorations/home-question.png",
-      "sha256": "d676100706521a8688838f2b2681d14707c0a781cf1afb5ced692fda1fe63efa",
-      "bytes": 78451
-    },
-    {
-      "path": "product/desktop/assets/decorations/home-question.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55",
-      "bytes": 63398
-    },
-    {
-      "path": "product/desktop/assets/decorations/加载中合成_01.svg",
-      "sha256": "135e21e204bc00c998fe14e582b6de14d75d595c9363c8b74feed751c785a35d",
-      "bytes": 65249
-    },
-    {
-      "path": "product/desktop/assets/decorations/加载中合成_02.svg",
-      "sha256": "32a56726740a17d8b5c04d77906b36c372f061ecf3a250f7c35b9dc73c476806",
-      "bytes": 65086
-    },
-    {
-      "path": "product/desktop/assets/decorations/加载中合成_03.svg",
-      "sha256": "18e39118246cee4025a65719284f65746b5b718940bfe8c627dc27ea80aef36b",
-      "bytes": 65251
-    },
-    {
-      "path": "product/desktop/assets/decorations/加载中合成_04.svg",
-      "sha256": "f8d189dbe981c57a0c7705587c1746a7f5b3a48523eadace91f1b871a26b7488",
-      "bytes": 65088
-    },
-    {
-      "path": "product/desktop/assets/decorations/加载中合成_05.svg",
-      "sha256": "fc3a49e310064381e4928411f3ee3eed79f5badafe6a2cd2bbb2209d75bbe8b4",
-      "bytes": 65251
-    },
-    {
-      "path": "product/desktop/assets/decorations/加载中合成_06.svg",
-      "sha256": "2a7f68f821f9aae8a89e1349faa4e86e7bb6893b864b80aea04cb1c1b8fbcc34",
-      "bytes": 65088
-    },
-    {
       "path": "product/desktop/assets/illustrations/empty.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c",
-      "bytes": 63733
+      "sha256": "bd58c58431d8a270ac9a4df5dd63bb4ec4ab95d1cc9ffa84c1486e96b5f48d20",
+      "bytes": 348
     },
     {
       "path": "product/desktop/assets/illustrations/injury.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868",
-      "bytes": 63947
+      "sha256": "684c49de9ea927cbd0fd844d2e88f94593255adf8d1b38f0bf81b8925fe7ad71",
+      "bytes": 344
     },
     {
       "path": "product/desktop/assets/illustrations/manifest.json",
-      "sha256": "b3d3f0a97de560da0c57a0c2e9765a1dbe5041322d106b5ed2cd6752a444a533",
-      "bytes": 5603
+      "sha256": "71c83ee5bbbc7f60b393c4f2f90e4ca59c7e42d74fd51dbf9659bef834d087ee",
+      "bytes": 2892
+    },
+    {
+      "path": "product/desktop/assets/illustrations/memorive-symbol.png",
+      "sha256": "e14b5bae634c8152c438d29ca59afe00a20e4cc3dfb403c462000a7152a5e9d0",
+      "bytes": 9994
+    },
+    {
+      "path": "product/desktop/assets/illustrations/memorive-symbol.svg",
+      "sha256": "f3d98ade85cbe1b2ae62f21f634790e9cf48049ef653dd08b52ebb965173d2c7",
+      "bytes": 1137
     },
     {
       "path": "product/desktop/assets/illustrations/memorive.ico",
@@ -362,98 +292,98 @@
     },
     {
       "path": "product/desktop/assets/illustrations/neutral.svg",
-      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6",
-      "bytes": 62470
+      "sha256": "d3590da372ced578dd759381039fda99b6f9fd85b63b05dce98503814fe3e489",
+      "bytes": 347
     },
     {
       "path": "product/desktop/assets/illustrations/one_eye.svg",
-      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde",
-      "bytes": 62249
+      "sha256": "b8f7e55907ad787736c992075b0caa2e286e9bda8b0b43d2058d1892f1ece9c8",
+      "bytes": 346
     },
     {
       "path": "product/desktop/assets/illustrations/question.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55",
-      "bytes": 63398
+      "sha256": "36d7b1ec50bb9cdebfc5a747ca1f3e0d6f098ead722072db1ec7a33671ab21bd",
+      "bytes": 351
     },
     {
       "path": "product/desktop/assets/illustrations/shovel.svg",
-      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83",
-      "bytes": 63186
+      "sha256": "bfc4b2f7b1902e63d1b14b2101b338e5a75ea088359dbf6ef4c6a0a900bc393d",
+      "bytes": 351
     },
     {
       "path": "product/desktop/assets/illustrations/sleepy.svg",
-      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d",
-      "bytes": 62633
+      "sha256": "88775782e50f77c4d9c45e322e2d403a4822ff0cb7f1019e5ebe7655d71dda5a",
+      "bytes": 342
     },
     {
       "path": "product/desktop/assets/illustrations/sprite.svg",
-      "sha256": "1981f58e0f8e0fc6f42a29d29b1f5d276fb1929fb92205deaed7ade46f14cd9e",
-      "bytes": 378282
+      "sha256": "93b7ffb02dece85449ca2bcd50cf061852851b8a10843a060572630de7ac1c25",
+      "bytes": 1986
     },
     {
       "path": "product/desktop/assets/illustrations/success.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439",
-      "bytes": 63342
+      "sha256": "5218d6d9159744731928014a0acbb398eb738663040909fbea448cb6288bad87",
+      "bytes": 351
     },
     {
       "path": "product/desktop/assets/illustrations/wink.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
+      "sha256": "d3958cf93fa6dd27d93be6414bc6931be1a68e1d10c273970058ba59b46c9dfa",
+      "bytes": 348
     },
     {
       "path": "product/desktop/assets/illustrations/writing.svg",
-      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5",
-      "bytes": 63735
+      "sha256": "89c8a9923028ac5a7f8d70fad458e3082babd92f005835f9229cdce445b565d4",
+      "bytes": 346
     },
     {
       "path": "product/desktop/assets/illustrations/互动logo.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
+      "sha256": "4a6d803471f56f1e23832d539b909b6b05868ebf45cf3f989501ac4eeb22ba3b",
+      "bytes": 354
     },
     {
       "path": "product/desktop/assets/illustrations/完成logo.svg",
-      "sha256": "647f161f108c30fdc3d13c12e909d000275a1f1c8f6c38859d8736835a11f1c5",
-      "bytes": 63735
+      "sha256": "7436196841c084e5dfcfc5aa1cbd3b80f1d6bd94c389daab5da6ba3520b77eb4",
+      "bytes": 349
     },
     {
       "path": "product/desktop/assets/illustrations/常驻logo.svg",
-      "sha256": "2499f4c028afeb466a7ff6b20ff64d54b89d68c825a04d142ceebc63a4a95cde",
-      "bytes": 62249
+      "sha256": "47946b8ae3f678083d916fa780721502c7045e257662d7286597e6fda011920e",
+      "bytes": 349
     },
     {
       "path": "product/desktop/assets/illustrations/报错logo.svg",
-      "sha256": "4f3e47a1c31ef91f9ffaf57537c3353be94cb9029e46995a0e601c2bc2558868",
-      "bytes": 63947
+      "sha256": "97af39a7c3b687b9d8233b41ce25f097e76cd5b8878edf67bd46407cda4ac324",
+      "bytes": 348
     },
     {
       "path": "product/desktop/assets/illustrations/施工logo.svg",
-      "sha256": "756674c84d0bae8efb821bdfaa531b570bfc5ffaeb29f58995253d841823cc83",
-      "bytes": 63186
+      "sha256": "5a2987c8141289a9e8cdec3d5fffb1d90432fb34646001adc13db6315f97e155",
+      "bytes": 355
     },
     {
       "path": "product/desktop/assets/illustrations/无文件logo.svg",
-      "sha256": "b160c5594bf286f3b4f911d0a5088ff6e89b65cdefdb47a2f0a520ce2184fc6c",
-      "bytes": 63733
+      "sha256": "fa2986dcf5387934175fe39e26ce25fa3e2b5dd692315c7eeddaa216b23d95e5",
+      "bytes": 356
     },
     {
       "path": "product/desktop/assets/illustrations/疑问logo.svg",
-      "sha256": "a4c622480d795a70eae36c8b3da06c0fc6a2d4da2cbe2e974556c0012381cd55",
-      "bytes": 63398
+      "sha256": "be42286da88c792be3dcbaf66737c8d5cc7acee1cf3692ed16bd7ebd570e6f64",
+      "bytes": 353
     },
     {
       "path": "product/desktop/assets/illustrations/眨眼logo01.svg",
-      "sha256": "8afe8b5963bb727409224c779cf92b5cb3d6b353491799825fdd52b9b84e54a6",
-      "bytes": 62470
+      "sha256": "0e9d2223afda838bc5c4b17c916fb304ef592a90e2aa47cd9437cab525f49d2f",
+      "bytes": 352
     },
     {
       "path": "product/desktop/assets/illustrations/眨眼logo02.svg",
-      "sha256": "b7e9dc8deb0281963ba249f1e4d849772a33b355b6312cea7510114fb334fb7d",
-      "bytes": 62633
+      "sha256": "4631371e6ecc9fce7f3fb69d16c3a2a128485bfdd16fee05223978ef4907aa40",
+      "bytes": 348
     },
     {
       "path": "product/desktop/assets/illustrations/确认logo.svg",
-      "sha256": "b76a966a62fcc5f04d5d929a8be41b787b9dceb9d55463e9dd7341761e65a439",
-      "bytes": 63342
+      "sha256": "cafc9e9b65cd85ef743af0c306009c4dbfc34cdd510419634aace2d4fb9b9a54",
+      "bytes": 354
     },
     {
       "path": "product/desktop/assistant_alpha.py",
@@ -462,8 +392,8 @@
     },
     {
       "path": "product/desktop/assistant_native_motion.py",
-      "sha256": "67b5b92dd4b47b6a850330f615506a2fbc10bc05967604486dfecada3499fc95",
-      "bytes": 9469
+      "sha256": "f0a2dc81f83ce8c43a91b2ce0c47b9e80b83641a67c0e4cad96a47b58c4a431f",
+      "bytes": 13004
     },
     {
       "path": "product/desktop/brand_profile.json",
@@ -472,13 +402,13 @@
     },
     {
       "path": "product/desktop/bundle_assistant.html",
-      "sha256": "a7906df628a8fc5e9af98370befce73de23bb2c309fc5242aa098aea41b10541",
-      "bytes": 88107
+      "sha256": "b9146b00ea23425bb334cfffdebe77efd18e081862bc15dd8953a2a12fe99f54",
+      "bytes": 87974
     },
     {
       "path": "product/desktop/bundle_integrated.html",
-      "sha256": "f832a6e1fa840c28647aaa2eabe6d5cf8f4046add285b27fd3afe11bab321407",
-      "bytes": 2604433
+      "sha256": "313b424fa62c901abcd2ea180f8f0caf9923edbecb90e5a7d35062ff9e913b2e",
+      "bytes": 2609861
     },
     {
       "path": "product/desktop/console_expressions.py",
@@ -1316,9 +1246,9 @@
       "bytes": 176706
     },
     {
-      "path": "product/desktop/help/web/assets/wink.svg",
-      "sha256": "dba69561036e2514037556b873cb4e8e3b96783f4565954abfd71d755d42aefa",
-      "bytes": 62874
+      "path": "product/desktop/help/web/assets/memorive-symbol.svg",
+      "sha256": "f3d98ade85cbe1b2ae62f21f634790e9cf48049ef653dd08b52ebb965173d2c7",
+      "bytes": 1137
     },
     {
       "path": "product/desktop/help/web/assets/zh-CN/billing.svg",
@@ -1847,8 +1777,8 @@
     },
     {
       "path": "product/desktop/help/web/index.html",
-      "sha256": "1dd908b97e45db85828ef6285dbf684b549f1d503189474734e7d7a8c17042b2",
-      "bytes": 4101
+      "sha256": "a3d26dbe0e17470a88d5529d84d5227a231109e46944f42df6c927611f073db5",
+      "bytes": 4112
     },
     {
       "path": "product/desktop/help/zh-CN/assets/billing.svg",
@@ -2139,11 +2069,6 @@
       "path": "product/desktop/window_chrome.py",
       "sha256": "7a3cef2f8d422fee2b15bd89afc5924c0d0f9420b28b97062a4796a9002aac62",
       "bytes": 19154
-    },
-    {
-      "path": "product/web/assets/assistant/adopted_inline_001.png",
-      "sha256": "5374cd25658256fe5d2042d9d8997854e3d8b2d01a13e4d724177b1be2a0ebca",
-      "bytes": 75650
     },
     {
       "path": "release_materials/INSTALL.md",
@@ -2737,8 +2662,8 @@
     },
     {
       "path": "source/memorive/desktop/test_console/expressions.py",
-      "sha256": "992e45f05cc0f3a282572176de6a1f0cb86aa144333047b536162d12e3e50020",
-      "bytes": 9271
+      "sha256": "4e50eb83d5f3950591588b28420e1feb3c994acf13cedb2e4dddab53de0b260f",
+      "bytes": 9269
     },
     {
       "path": "source/memorive/desktop/test_console/product_adapter.py",

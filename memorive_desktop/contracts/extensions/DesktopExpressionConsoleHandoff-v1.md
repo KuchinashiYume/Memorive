@@ -25,7 +25,7 @@ command 的 SUCCEEDED 只表示接受预览请求。取 result.probe.probe_id，
 
 ## 静态表情与真实动画必须分开
 
-目录分为四组：静态插画10、桌宠姿态11、桌宠动画9、页面动画3。idle/drag/sleep 是原有静态姿态，不应标成正在播放的动画；拖动姿态不移动真实窗口。页面动画为主页歪头、Logo 按压与 Logo 晃动，复用现行 CSS 动作；不是给 PNG 换了名字。
+目录分为四组：静态插画10、桌宠姿态11、桌宠动画9、页面动画3。idle/drag/sleep 是原有静态姿态，不应标成正在播放的动画；拖动姿态不移动真实窗口。页面动画为主页提问、Logo 按压与 Logo 晃动，复用现行 CSS 动作；不是给 PNG 换了名字。
 
 桌宠通过现有 WinForms 原生渲染器播放，保留原动作时序/插值/帧切换。监控 samples 包含实际 frame、animation_locked 及 transform `[frame,x,y,rotation,scale,opacity]`；frame_sha256 只是源帧hash，不能以它不变判断没有晃动。坐标以90px参考盒为单位，控制台若镜像预览应按显示尺寸同比例换算平移，旋转/缩放/透明度直接应用。静态源来自 EXE 同级 `_internal/assets/illustrations`；frame→asset 映射见 JSON 契约，不要加载输入目录或网络素材。
 

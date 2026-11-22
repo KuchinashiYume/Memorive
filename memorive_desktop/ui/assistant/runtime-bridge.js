@@ -78,8 +78,8 @@
         && !['HIDDEN','DISABLED'].includes(presentation.display_state)) {
       visibleDeliveryId = presentation.delivery_id;
       const deliveryId = visibleDeliveryId;
-      const motion = presentation.animation_state === 'ERROR' ? 'memorive-is-shaking-error' : 'memorive-is-tilting';
-      pet.classList.remove('memorive-is-shaking-error', 'memorive-is-tilting');
+      const motion = presentation.animation_state === 'ERROR' ? 'memorive-is-shaking-error' : 'memorive-is-nodding';
+      pet.classList.remove('memorive-is-shaking-error', 'memorive-is-nodding');
       void pet.offsetWidth;
       const finish = () => {
         pet.classList.remove(motion);

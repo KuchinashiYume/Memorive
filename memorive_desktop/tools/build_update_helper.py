@@ -89,7 +89,7 @@ def compile_engine(source, toolchain, output, *, trust=None):
     command += [str(localized/name if (localized/name).exists() else installer/name) for name in SOURCES]+[str(metadata)]
     for name in ('Microsoft.Web.WebView2.Core.dll','Microsoft.Web.WebView2.WinForms.dll'):
         command+=['/reference:'+str(toolchain/name),'/resource:'+str(toolchain/name)+','+name]
-    resources=[(source/'product/desktop/assets/decorations/home-interaction.png','memorive-brand.png'),(icon,'memorive.ico'),(toolchain/'WebView2Loader.dll','WebView2Loader.dll'),(trust,'update_trust.json')]
+    resources=[(source/'product/desktop/assets/illustrations/memorive-symbol.png','memorive-brand.png'),(icon,'memorive.ico'),(toolchain/'WebView2Loader.dll','WebView2Loader.dll'),(trust,'update_trust.json')]
     typography=output/'memo-typography.json'
     typography.write_text(json.dumps(typography_contract(source),ensure_ascii=False,indent=2),encoding='utf8')
     resources.append((typography,'memo-typography.json'))

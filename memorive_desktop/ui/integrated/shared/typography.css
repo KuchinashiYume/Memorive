@@ -9,7 +9,10 @@
      titles, body 16px for text and controls, small 14px for notes, counts and times.
    - Weights: 400, and 700 for page and section titles and for emphasis (bold in running text, the chosen option).
    app.js gives every element that shows text its role in data-memo-type (typeRole); the rules below give each role
-   its face, size and weight. Other style sheets name a face, size or weight only through these variables. */
+   its face, size and weight. Other style sheets name a face, size or weight only through these variables.
+   - Kaomoji (.desktop-kaomoji), the faces in place of the former character pictures, are decoration, not text: app.js
+     leaves them untyped (aria-hidden) and their own .desktop-kaomoji rules set their face and size, as a picture
+     sets its size. */
 :root {
   --memo-font-ui:Arial,"SimHei","Microsoft YaHei","Yu Gothic","Meiryo",sans-serif;
   --memo-font-read:"Times New Roman","SimSun","Yu Gothic","Meiryo",serif;

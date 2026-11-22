@@ -430,8 +430,8 @@
       color: var(--memorive-pet-muted);
     }
 
-    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite {
-      animation: memorive-pet-interaction-tilt 1100ms cubic-bezier(.2, .8, .2, 1) both;
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-nodding > .memorive-pet-sprite {
+      animation: memorive-pet-interaction-nod 1100ms cubic-bezier(.2, .8, .2, 1) both;
     }
 
     #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking {
@@ -454,11 +454,9 @@
       transform: translateY(-5px) scale(1.04);
     }
 
-    @keyframes memorive-pet-interaction-tilt {
-      0%, 100% { transform: rotate(0deg) translateY(0); }
-      24% { transform: rotate(-9deg) translateY(1px); }
-      62% { transform: rotate(-9deg) translateY(1px); }
-      82% { transform: rotate(2deg) translateY(0); }
+    @keyframes memorive-pet-interaction-nod {
+      0%, 100% { transform: translateY(0); }
+      24%, 62% { transform: translateY(1px); }
     }
 
     @keyframes memorive-pet-wake {
@@ -524,7 +522,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-nodding > .memorive-pet-sprite,
       #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking,
       #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-working,
       #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-success,

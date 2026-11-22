@@ -25,6 +25,7 @@ from assistant_native_motion import (
     TERMINAL_ANIMATION_COALESCE_MS,
     auto_blink_completion_plan,
     base_frame_for_presentation,
+    face_change_texts,
     public_motion_contract,
     sample_motion,
     should_suppress_presentation_during_auto_blink,
@@ -41,41 +42,16 @@ EXPECTED_DESKTOP_ROUTES = (
 _ASSISTANT_NATIVE_DEACTIVATE_HANDLERS: dict[int, Any] = {}
 _ASSISTANT_NATIVE_OVERLAYS: dict[int, dict[str, Any]] = {}
 _MAIN_WINDOW_BEHAVIORS: dict[int, dict[str, Any]] = {}
-ASSISTANT_EXPRESSION_ASSET_FILENAMES = {
-    "save-success": "assistant-save-success.png",
-    "error": "assistant-error.png",
+# The desk assistant's faces (code-plan/颜文字表情方案_2026-11-21.md): each frame is the kaomoji drawn as
+# text on a white card at start-up (configure_assistant_native), so no picture file is shipped.
+ASSISTANT_FACES = {
+    "idle": "(>ω-)", "blink-open": "(・ω・)", "blink-closed": "(-ω-)", "interaction": "(・ω<)☆",
+    "working": "(>ω<)ゞ", "success": "(^ω^)✧", "save-success": "(*≧ω≦)✓", "error": "(×ω×)",
 }
 
 
 def resource_root() -> Path:
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)).resolve()
-
-
-def assistant_pet_sheet_path(root: Path) -> Path:
-    candidates = (
-        root / "adopted_inline_001.png",
-        root.parent / "web" / "assets" / "assistant" / "adopted_inline_001.png",
-    )
-    for candidate in candidates:
-        if candidate.is_file():
-            return candidate.resolve()
-    raise FileNotFoundError("assistant pet sprite sheet is missing")
-
-
-def assistant_expression_asset_paths(root: Path) -> dict[str, Path]:
-    """Resolve optional additive frames without weakening stable-pet startup."""
-
-    resolved: dict[str, Path] = {}
-    for frame_name, filename in ASSISTANT_EXPRESSION_ASSET_FILENAMES.items():
-        candidates = (
-            root / "assets" / "decorations" / filename,
-            root.parent / "web" / "assets" / "decorations" / filename,
-        )
-        for candidate in candidates:
-            if candidate.is_file():
-                resolved[frame_name] = candidate.resolve()
-                break
-    return resolved
 
 
 def configure_resource_imports(root: Path) -> None:
@@ -666,10 +642,8 @@ def capture_visual_qa_compatibility(
 def configure_assistant_native(
     window: webview.Window,
     api: ProductApi,
-    pet_sheet: Path,
     *,
     reveal: bool,
-    expression_assets: dict[str, Path] | None = None,
 ) -> None:
     import clr
     clr.AddReference("System.Windows.Forms")
@@ -755,58 +729,62 @@ def configure_assistant_native(
                 overlay["alpha_surface"].present(overlay["rendered_image"])
 
         if existing is None:
-            source = Bitmap(str(pet_sheet))
-            try:
-                frames = {
-                    "idle": source.Clone(Rectangle(0, 0, 192, 192), PixelFormat.Format32bppArgb),
-                    "blink-open": source.Clone(Rectangle(192, 0, 192, 192), PixelFormat.Format32bppArgb),
-                    "blink-closed": source.Clone(Rectangle(384, 0, 192, 192), PixelFormat.Format32bppArgb),
-                    "interaction": source.Clone(Rectangle(0, 192, 192, 192), PixelFormat.Format32bppArgb),
-                    "working": source.Clone(Rectangle(192, 192, 192, 192), PixelFormat.Format32bppArgb),
-                    "success": source.Clone(Rectangle(384, 192, 192, 192), PixelFormat.Format32bppArgb),
-                }
-            finally:
-                source.Dispose()
+            def draw_face(text: str) -> Any:
+                """One 192 px frame: the kaomoji in the logo's teal on a white rounded card.
 
-            for frame_name, asset_path in (expression_assets or {}).items():
-                if frame_name not in ASSISTANT_EXPRESSION_ASSET_FILENAMES:
-                    continue
-                expression_frame = None
+                GDI text (TextRenderer) is used for its font linking, so every symbol finds a font.
+                GDI text does not keep alpha on a transparent bitmap, so the card is drawn opaque
+                first and then cut to its rounded shape."""
+                from System.Drawing import Font, Pen, TextureBrush
+                from System.Drawing.Drawing2D import GraphicsPath
+                from System.Windows.Forms import TextFormatFlags, TextRenderer
+                left, top, width, height, radius = 8, 50, 176, 92, 18
+                card = Bitmap(width, height, PixelFormat.Format24bppRgb)
+                card_graphics = Graphics.FromImage(card)
+                # NoPrefix: '&' is a character of the faces' encoding animation, not a mnemonic prefix.
+                flags = (TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
+                         | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix)
+                size = 34
+                font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
+                while TextRenderer.MeasureText(text, font, Size(width, height), flags).Width > width - 16 and size > 14:
+                    font.Dispose()
+                    size -= 2
+                    font = Font("Yu Gothic UI", size, GraphicsUnit.Pixel)
                 try:
-                    expression_source = Bitmap(str(asset_path))
-                    expression_frame = Bitmap(
-                        192, 192, PixelFormat.Format32bppArgb
+                    card_graphics.Clear(Color.White)
+                    TextRenderer.DrawText(
+                        card_graphics, text, font, Rectangle(0, 0, width, height),
+                        Color.FromArgb(0x60, 0xB2, 0xC0), Color.White, flags,
                     )
-                    expression_graphics = Graphics.FromImage(expression_frame)
-                    try:
-                        expression_graphics.Clear(Color.Transparent)
-                        expression_graphics.SmoothingMode = SmoothingMode.HighQuality
-                        expression_graphics.InterpolationMode = (
-                            InterpolationMode.HighQualityBicubic
-                        )
-                        expression_graphics.PixelOffsetMode = PixelOffsetMode.HighQuality
-                        expression_graphics.DrawImage(
-                            expression_source,
-                            Rectangle(0, 0, 192, 192),
-                            0,
-                            0,
-                            int(expression_source.Width),
-                            int(expression_source.Height),
-                            GraphicsUnit.Pixel,
-                        )
-                    finally:
-                        expression_graphics.Dispose()
-                        expression_source.Dispose()
-                    frames[frame_name] = expression_frame
-                except Exception:
-                    # Decorations are additive. Missing/corrupt optional files
-                    # must fall back to the six adopted frames, never block boot.
-                    if expression_frame is not None:
-                        try:
-                            expression_frame.Dispose()
-                        except Exception:
-                            pass
-                    continue
+                finally:
+                    font.Dispose()
+                    card_graphics.Dispose()
+                frame = Bitmap(192, 192, PixelFormat.Format32bppArgb)
+                frame_graphics = Graphics.FromImage(frame)
+                outline = GraphicsPath()
+                texture = TextureBrush(card)
+                border = Pen(Color.FromArgb(0xDD, 0xD7, 0xCC), 1.5)
+                try:
+                    frame_graphics.Clear(Color.Transparent)
+                    frame_graphics.SmoothingMode = SmoothingMode.AntiAlias
+                    d = 2 * radius
+                    outline.AddArc(left, top, d, d, 180, 90)
+                    outline.AddArc(left + width - d, top, d, d, 270, 90)
+                    outline.AddArc(left + width - d, top + height - d, d, d, 0, 90)
+                    outline.AddArc(left, top + height - d, d, d, 90, 90)
+                    outline.CloseFigure()
+                    texture.TranslateTransform(left, top)
+                    frame_graphics.FillPath(texture, outline)
+                    frame_graphics.DrawPath(border, outline)
+                finally:
+                    border.Dispose()
+                    texture.Dispose()
+                    outline.Dispose()
+                    frame_graphics.Dispose()
+                    card.Dispose()
+                return frame
+
+            frames = {name: draw_face(text) for name, text in ASSISTANT_FACES.items()}
 
             def frame_sha256(frame: Any) -> str:
                 stream = MemoryStream()
@@ -903,6 +881,9 @@ def configure_assistant_native(
                 "drag_move_count": 0,
                 "last_drag_target": None,
                 "base_frame": "idle",
+                "text_plan": [],
+                "face_change_count": 0,
+                "recent_clicks": [],
                 "animation_state": "STATIC",
                 "animation_sequence": ["idle"],
                 "animation_started_at": 0.0,
@@ -1097,6 +1078,19 @@ def configure_assistant_native(
                 state["current_frame"] = resolved
                 state["current_frame_sha256"] = state["frame_sha256s"][resolved]
 
+            def face_text(frame_name: str) -> str:
+                if frame_name.startswith("text:"):
+                    return frame_name[len("text:"):]
+                return ASSISTANT_FACES.get(frame_name, ASSISTANT_FACES["idle"])
+
+            def text_frame(text: str) -> str:
+                """The frame that shows text (a step of an encoding animation), drawn the first time it is needed."""
+                name = "text:" + text
+                if name not in state["frames"]:
+                    state["frames"][name] = draw_face(text)
+                    state["frame_sha256s"][name] = frame_sha256(state["frames"][name])
+                return name
+
             def schedule_auto_blink(*, preserve_existing: bool = False) -> None:
                 if (
                     preserve_existing
@@ -1122,6 +1116,7 @@ def configure_assistant_native(
 
             def finish_motion() -> None:
                 animation_timer.Stop()
+                state["text_plan"] = []
                 completed_source = state.get("animation_source")
                 state["animation_locked"] = False
                 state["animation_source"] = None
@@ -1197,6 +1192,8 @@ def configure_assistant_native(
                     sample.frame,
                     done=sample.done,
                 )
+                if state["text_plan"] and not sample.done:
+                    frame = state["text_plan"].pop(0)
                 if bool(state.get("reduced_motion")):
                     # Keep the acknowledgement visible for its normal duration,
                     # without motion, then let finish_motion restore the base.
@@ -1243,6 +1240,7 @@ def configure_assistant_native(
                         presentation_frame_name("ERROR", "idle"),
                         str(state["base_frame"]),
                     ],
+                    "GARBLED": ["interaction", str(state["base_frame"])],
                 }.get(normalized, [str(state["base_frame"])])
                 reduced_expression = (
                     bool(state.get("reduced_motion"))
@@ -1264,7 +1262,7 @@ def configure_assistant_native(
                     set_visual(static_frame)
                     schedule_auto_blink()
                     return False
-                if normalized not in {"INTERACTION", "BLINK", "WAKE", "MESSAGE", "WORKING", "ATTENTION", "SUCCESS", "ERROR"}:
+                if normalized not in {"INTERACTION", "BLINK", "WAKE", "MESSAGE", "WORKING", "ATTENTION", "SUCCESS", "ERROR", "GARBLED"}:
                     state["animation_locked"] = False
                     state["animation_source"] = None
                     set_visual(str(state["base_frame"]))
@@ -1282,10 +1280,16 @@ def configure_assistant_native(
                     )
                     state["auto_blink_count"] += 1
                 first = sample_motion(normalized, 0.0, base_frame=str(state["base_frame"]))
+                target_frame = presentation_frame_name(normalized, first.frame, done=first.done)
+                # A new face decodes in through an encoding animation, one text per tick (face_change_texts).
+                texts = () if reduced_expression else face_change_texts(
+                    face_text(str(state.get("current_frame") or "idle")), face_text(target_frame),
+                    normalized, int(state["face_change_count"]))
+                if texts and normalized != "GARBLED":
+                    state["face_change_count"] += 1
+                state["text_plan"] = [text_frame(text) for text in texts]
                 set_visual(
-                    presentation_frame_name(
-                        normalized, first.frame, done=first.done
-                    ),
+                    state["text_plan"].pop(0) if state["text_plan"] else target_frame,
                     offset_x=0.0 if reduced_expression else first.offset_x,
                     offset_y=0.0 if reduced_expression else first.offset_y,
                     rotation_degrees=0.0 if reduced_expression else first.rotation_degrees,
@@ -1486,6 +1490,8 @@ def configure_assistant_native(
                     drag["moved"] = True
                 if not drag["moved"]:
                     return
+                if garbled_playing():
+                    interrupt_motion_for_drag()
                 auto_blink_timer.Stop()
                 state["animation_state"] = "DRAG"
                 set_visual("interaction")
@@ -1531,10 +1537,15 @@ def configure_assistant_native(
 
             state["interrupt_motion_for_drag"] = interrupt_motion_for_drag
 
+            def garbled_playing() -> bool:
+                # EASTER EGG (彩蛋): clicks leave the garbled face playing; a drag still interrupts it.
+                return bool(state.get("animation_locked")) and state.get("animation_state") == "GARBLED"
+
             def on_mouse_down(_sender, event) -> None:
                 if event.Button != MouseButtons.Left:
                     return
-                interrupt_motion_for_drag()
+                if not garbled_playing():
+                    interrupt_motion_for_drag()
                 cursor = Cursor.Position
                 state["drag"] = {
                     "cursor_x": int(cursor.X), "cursor_y": int(cursor.Y),
@@ -1558,8 +1569,18 @@ def configure_assistant_native(
                 picture.Capture = False
                 picture.Cursor = Cursors.Hand
                 if not drag["moved"] and activate_if_click:
-                    play_native_motion("INTERACTION", source_name="user")
+                    # EASTER EGG (彩蛋), intentional: five clicks within three seconds show the face garbled
+                    # (GARBLED in assistant_native_motion.py). The garbled text is not an encoding bug.
+                    now = time.perf_counter()
+                    clicks = [moment for moment in state["recent_clicks"] if now - moment < 3.0] + [now]
+                    state["recent_clicks"] = [] if len(clicks) >= 5 else clicks
+                    if len(clicks) >= 5:
+                        play_native_motion("GARBLED", source_name="easter-egg")
+                    elif not garbled_playing():
+                        play_native_motion("INTERACTION", source_name="user")
                     dispatch_action("OPEN_Desktop_MAIN")
+                    return
+                if not drag["moved"] and garbled_playing():
                     return
                 state["animation_state"] = "STATIC"
                 set_visual(str(state.get("base_frame") or "idle"))
@@ -3344,9 +3365,7 @@ def run_test(window: webview.Window, assistant_window: webview.Window, api: Prod
         configure_assistant_native(
             assistant_window,
             api,
-            assistant_pet_sheet_path(resource_root()),
             reveal=True,
-            expression_assets=assistant_expression_asset_paths(resource_root()),
         )
         time.sleep(0.25)
         assistant_projection = evaluate_promise(
@@ -6593,9 +6612,8 @@ def main() -> int:
         def on_assistant_loaded() -> None:
             log_webview_startup_event("assistant_window_loaded")
             configure_assistant_native(
-                assistant_window, api, assistant_pet_sheet_path(root),
+                assistant_window, api,
                 reveal=False,
-                expression_assets=assistant_expression_asset_paths(root),
             )
             log_webview_startup_event("assistant_native_configured")
             if console_bridge is not None:

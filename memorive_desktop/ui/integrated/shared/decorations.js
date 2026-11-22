@@ -1,35 +1,63 @@
-/* Decorations of the main window: the home and empty-state illustrations, loading placeholders while a page waits
+/* Decorations of the main window: the home and empty-state kaomoji, loading placeholders while a page waits
    for its first data (trackCall wraps service calls for this), and signals to the desk assistant
    (assistant_ui_signal). Publishes Memorive.decorations. */
 (() => {
   'use strict';
   if (Memorive.decorations) return;
 
-  const assets = Object.freeze({
-    interaction: 'assets/decorations/home-interaction.svg',
-    question: 'assets/decorations/home-question.svg',
-    empty: 'assets/decorations/empty-state.svg',
-    done: 'assets/decorations/assistant-save-success.svg'
+  // Kaomoji, shown as text (.desktop-kaomoji): code-plan scheme of 2026-11-21, one face per state.
+  const faces = Object.freeze({
+    interaction: '(・ω<)☆', question: '(・ω・)？', empty: '(´・ω・`)', done: '(*≧ω≦)✓',
+    greeting: 'Ciallo～(∠・ω< )⌒☆', open: '(・ω・)', closed: '(-ω-)'
   });
   // Empty pages: no files (inbox, library), nothing waiting (tasks, messages), nothing written yet (work log).
   const emptyPicture = Object.freeze({
-    'inbox-empty': assets.empty, 'library-empty': assets.empty, 'tasks-empty': assets.done,
-    'messages-empty': assets.done, 'worklog-empty': assets.interaction
+    'inbox-empty': faces.empty, 'library-empty': faces.empty, 'tasks-empty': faces.done,
+    'messages-empty': faces.done, 'worklog-empty': faces.interaction
   });
   const prefersReducedMotion = () => Boolean(
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   );
+  // A face changes into the next one through an encoding animation: for a few frames the new face shows with its
+  // characters not yet decoded replaced by the glyphs of an encoding, decoded in that encoding's order. There are
+  // three fixed encodings, taken in encodingOrder, a fixed order that looks random. The desk assistant plays the same
+  // three (product/desktop/assistant_native_motion.py, ENCODINGS); change both together.
+  // EASTER EGG (彩蛋), intentional: the glyphs look like garbled text (锟斤拷, 烫, 屯 are the classic mojibake) on
+  // purpose. They show for a few frames while a face changes; they are not an encoding bug, do not "fix" them.
+  const encodings = Object.freeze([
+    { narrow: '01', wide: '０１', order: 'left' },
+    { narrow: '?#%&', wide: '锟斤拷烫屯', order: 'right' },
+    { narrow: ".:;'", wide: '░▒▓█', order: 'middle' }
+  ]);
+  const encodingOrder = [1, 0, 2, 2, 1, 0, 2];
+  let encodingCount = 0;
+  const nextEncoding = () => encodingOrder[encodingCount++ % encodingOrder.length];
+  // The count frames of one encoding animation that decodes into text (text itself comes after them).
+  const encodingFrames = (text, encoding, count) => {
+    const { narrow, wide, order } = encodings[encoding];
+    const characters = Array.from(text), size = characters.length;
+    const positions = characters.map((_, index) => index);
+    if (order === 'right') positions.reverse();
+    else if (order === 'middle') positions.sort((a, b) => Math.abs(2 * a - (size - 1)) - Math.abs(2 * b - (size - 1)) || a - b);
+    const place = new Map(positions.map((position, rank) => [position, rank]));
+    return Array.from({ length: count }, (_, frame) => {
+      const decoded = Math.floor(size * frame / count);
+      return characters.map((character, index) => {
+        if (place.get(index) < decoded || character === ' ') return character;
+        const glyphs = Array.from(character.codePointAt(0) < 0x370 && character !== '×' ? narrow : wide);
+        return glyphs[(index * 3 + frame * 5 + encoding) % glyphs.length];
+      }).join('');
+    });
+  };
+  // EASTER EGG (彩蛋), intentional: a face as a program that reads UTF-8 as GBK shows it, e.g. (・ω・) as (銉幌夈兓).
+  // Shown only after five clicks on the home face within three seconds (countHomeClick); not an encoding bug.
+  const garbled = text => new TextDecoder('gbk').decode(new TextEncoder().encode(text)).replace(/\uFFFD/g, '?');
   let signalSequence = 0;
   const recentSignals = new Map();
   const seenErrorMessages = new Set();
-  const homeExpressions = [];
-  let homeResetTimer = 0;
-  let homeQuestionUntil = 0;
-  let startupPlayed = false;
 
   // Reuse the native request lifecycle; decorative loading never starts work.
-  const loadingFrames = Array.from({length:6}, (_, i) =>
-    `assets/decorations/加载中合成_${String(i + 1).padStart(2, '0')}.svg`);
+  const loadingFrames = Array.from({length:6}, (_, i) => i % 2 ? faces.closed : faces.open);
   const loadingDurations = [450,180,450,180,450,180];
   const loadingStates = new Map();
   const routeRoots = {settings:'desktop-settings-preview',inbox:'desktop-inbox-preview',
@@ -84,15 +112,15 @@
     const art=document.createElement('div');
     art.className='desktop-loading-art';
     art.setAttribute('aria-hidden','true');
-    state.frames=loadingFrames.map((source,index)=>{
-      const image=document.createElement('img');
-      image.src=source;
-      image.alt='';
-      image.draggable=false;
-      image.hidden=index!==0;
-      image.addEventListener('error',()=>overlay.classList.add('desktop-loading-art-unavailable'),{once:true});
-      art.append(image);
-      return image;
+    state.frames=loadingFrames.map((text,index)=>{
+      const frame=document.createElement('span');
+      frame.className='desktop-kaomoji';
+      // Decoration, like the other faces: app.js gives aria-hidden elements no text size.
+      frame.setAttribute('aria-hidden','true');
+      frame.textContent=text;
+      frame.hidden=index!==0;
+      art.append(frame);
+      return frame;
     });
     const copy=document.createElement('span');
     copy.className='desktop-loading-copy';
@@ -194,37 +222,73 @@
     && element.getClientRects().length > 0
     && getComputedStyle(element).visibility !== 'hidden';
 
-  const resetHomeExpression = () => {
-    window.clearTimeout(homeResetTimer);
-    homeResetTimer = 0;
-    homeQuestionUntil = 0;
-    homeExpressions.forEach(({ button, image }) => {
-      button.dataset.expression = 'interaction';
-      button.removeAttribute('aria-busy');
-      image.src = assets.interaction;
+  // The home faces (one in each page's blank state, changed together; the visible one is seen). Each rests on its
+  // page's face. Memorive opens on the Ciallo greeting, kept until another page is opened; a click types a question
+  // mark and goes back to rest two seconds later; five clicks within three seconds show the face garbled for two
+  // seconds (EASTER EGG (彩蛋), intentional: playHomeGarbled, not a bug).
+  const homeExpressions = [];
+  const homeClicks = [];
+  let homeMode = 'rest';
+  let homeTimer = 0;
+  let greetingRoute = '';
+  let startupPlayed = false;
+  const expressionsHidden = () => document.documentElement.classList.contains('desktop-hide-expressions');
+  // Steps are [text, ms]: each text shows for ms, the last one stays.
+  const playSteps = (entry, steps) => {
+    window.clearTimeout(entry.timer);
+    const show = index => {
+      entry.image.textContent = steps[index][0];
+      if (index + 1 < steps.length) entry.timer = window.setTimeout(() => show(index + 1), steps[index][1]);
+    };
+    show(0);
+  };
+  const decodeSteps = (text, encoding, hold) => prefersReducedMotion() ? [[text, hold]]
+    : [...encodingFrames(text, encoding, 6).map(frame => [frame, 50]), [text, hold]];
+  const setHome = (mode, stepsFor) => {
+    window.clearTimeout(homeTimer);
+    homeMode = mode;
+    homeExpressions.forEach(entry => {
+      entry.button.dataset.expression = mode === 'rest' ? entry.rest.expression : mode;
+      if (mode === 'rest') entry.button.removeAttribute('aria-busy');
+      else entry.button.setAttribute('aria-busy', 'true');
+      playSteps(entry, stepsFor(entry));
     });
+  };
+  const restHome = animate => {
+    const encoding = nextEncoding();
+    setHome('rest', entry => animate && entry.image.textContent !== entry.rest.text
+      ? decodeSteps(entry.rest.text, encoding, 0) : [[entry.rest.text, 0]]);
   };
   const playHomeQuestion = () => {
-    if(document.documentElement.classList.contains('desktop-hide-expressions'))return;
-    if (homeQuestionUntil > Date.now()) return;
-    homeQuestionUntil = Date.now() + 2000;
-    homeExpressions.forEach(({ button, image }) => {
-      button.dataset.expression = 'question';
-      button.setAttribute('aria-busy', 'true');
-      image.src = assets.question;
-    });
-    homeResetTimer = window.setTimeout(resetHomeExpression, 2000);
+    if (expressionsHidden() || homeMode === 'question' || homeMode === 'garbled') return;
+    const encoding = nextEncoding(), caret = faces.open + '_';
+    setHome('question', () => prefersReducedMotion() ? [[faces.question, 0]]
+      : [...decodeSteps(faces.open, encoding, 160), [caret, 160], [faces.open, 160], [caret, 160], [faces.question, 0]]);
+    homeTimer = window.setTimeout(() => restHome(true), 2000);
   };
-  const playStartupQuestion = async () => {
-    if (startupPlayed) return;
-    const entry = homeExpressions.find(({ button }) => isVisible(button));
-    if (!entry) return;
+  const playHomeGarbled = () => {
+    if (expressionsHidden()) return;
+    const mode = homeMode;  // setHome below changes it
+    const shown = entry => mode === 'greeting' ? faces.greeting : mode === 'question' ? faces.question : entry.rest.text;
+    setHome('garbled', entry => [[garbled(shown(entry)), 2000], ...decodeSteps(entry.rest.text, 1, 0)]);
+    homeTimer = window.setTimeout(() => restHome(false), 2400);
+  };
+  // EASTER EGG (彩蛋), intentional: the fifth click within three seconds shows the garbled face.
+  const countHomeClick = () => {
+    const now = Date.now();
+    homeClicks.push(now);
+    while (now - homeClicks[0] > 3000) homeClicks.shift();
+    if (homeClicks.length < 5) return;
+    homeClicks.length = 0;
+    playHomeGarbled();
+  };
+  const playStartupGreeting = () => {
+    if (startupPlayed || expressionsHidden()) return;
+    if (!homeExpressions.some(({ button }) => isVisible(button))) return;
     startupPlayed = true;
-    const question = new Image();
-    question.src = assets.question;
-    try { await Promise.all([entry.image.decode(), question.decode()]); }
-    catch (_) { return; }
-    if (isVisible(entry.button)) playHomeQuestion();
+    greetingRoute = document.body.dataset.desktopActiveRoute || 'home';
+    const encoding = nextEncoding();
+    setHome('greeting', () => decodeSteps(faces.greeting, encoding, 0));
   };
 
   const signalAssistant = async (kind, detail = {}) => {
@@ -261,7 +325,13 @@
     if(!button||!image)return;
     button.setAttribute('data-desktop-no-tooltip','');
     button.removeAttribute('title');
-    homeExpressions.push({ button, image });
+    homeExpressions.push({ button, image, timer: 0,
+      rest: { expression: button.dataset.expression || 'interaction', text: image.textContent } });
+    // The easter egg counts every click, also those that the research home's click interval holds back
+    // (routes/inbox/research-home.js stops them on the way down); the question plays on the clicks that arrive.
+    blank.addEventListener('click', (event) => {
+      if (event.button === 0 && button.contains(event.target)) countHomeClick();
+    }, true);
     button.addEventListener('click', (event) => {
       if (event.button === 0) playHomeQuestion();
     });
@@ -275,12 +345,11 @@
     const container = empty.firstElementChild;
     if (!(container instanceof HTMLElement)) return;
     container.querySelectorAll('.empty-mark').forEach((mark) => mark.remove());
-    const image = document.createElement('img');
-    image.className = 'desktop-empty-illustration';
-    image.src = emptyPicture[empty.id];
-    image.alt = '';
-    image.draggable = false;
-    container.prepend(image);
+    const face = document.createElement('span');
+    face.className = 'desktop-empty-illustration desktop-kaomoji';
+    face.setAttribute('aria-hidden', 'true');
+    face.textContent = emptyPicture[empty.id];
+    container.prepend(face);
     empty.classList.add('desktop-empty-decorated');
     empty.dataset.illustrationReady = 'true';
   };
@@ -333,13 +402,13 @@
     });
     document.querySelectorAll('.desktop-blank-state').forEach(enhanceHomePrompt);
     document.querySelectorAll('.empty-state').forEach(enhanceEmptyState);
-    if (document.readyState === 'complete') requestAnimationFrame(playStartupQuestion);
-    else window.addEventListener('load', () => requestAnimationFrame(playStartupQuestion), { once: true });
-    document.addEventListener('visibilitychange', () => {
-      if (homeQuestionUntil && Date.now() >= homeQuestionUntil) resetHomeExpression();
-      syncAllLoading();
-    });
+    if (document.readyState === 'complete') requestAnimationFrame(playStartupGreeting);
+    else window.addEventListener('load', () => requestAnimationFrame(playStartupGreeting), { once: true });
+    document.addEventListener('visibilitychange', syncAllLoading);
     window.addEventListener('desktop-integrated-route',syncAllLoading,true);
+    window.addEventListener('desktop-integrated-route', event => {
+      if (homeMode === 'greeting' && event.detail?.route !== greetingRoute) restHome(false);
+    });
     window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change',syncAllLoading);
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -367,11 +436,13 @@
 
   Memorive.decorations = Object.freeze({
     applyHidden:hidden=>{
-      if(hidden)resetHomeExpression();else requestAnimationFrame(playStartupQuestion);
+      if(hidden)restHome(false);else requestAnimationFrame(playStartupGreeting);
       syncAllLoading();
     },
     beginLoading,
     trackCall,
+    encodingFrames,
+    garbled,
     inspectLoading:()=>[...loadingStates].map(([target,state])=>({target:target.id||target.className,pending:state.count,
       visible:Boolean(state.overlay&&isVisible(state.overlay)),animating:Boolean(state.frameTimer),loaded:state.loaded})),
     notifySaveSuccess: (detail) => signalAssistant('SAVE_SUCCESS', detail),

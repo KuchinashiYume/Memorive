@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;; script-src &#x27;self&#x27; &#x27;sha256-gWe1GiV1FoW5cR6QfhZw9QhDXjKpgKzO/Y42AhgIEsw=&#x27; &#x27;sha256-/6X/5rVoM0i3NKU54ZUtZ9xKyt373pW1cAnPYknEdeg=&#x27;; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; img-src &#x27;self&#x27; data: blob:; style-src &#x27;unsafe-inline&#x27;; script-src &#x27;self&#x27; &#x27;sha256-OCxkao1DwwHnHDdd16dhqmFCQVSQkD7TImWIxOEUixg=&#x27; &#x27;sha256-gJOi7BfkpYu8rLaPoKzQe2NGdE8O/ttKXC4zEJJwBJA=&#x27;; connect-src &#x27;none&#x27;; frame-src &#x27;none&#x27;; object-src blob:; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;">
 <title>Memorive 桌面助手</title>
 <style>/* Base styles of the assistant page, from the page template it was built on: colour scheme, generic colour variables
    (--background and the like) and fonts. */
@@ -1502,8 +1502,8 @@ body {
       color: var(--memorive-pet-muted);
     }
 
-    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite {
-      animation: memorive-pet-interaction-tilt 1100ms cubic-bezier(.2, .8, .2, 1) both;
+    #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-nodding > .memorive-pet-sprite {
+      animation: memorive-pet-interaction-nod 1100ms cubic-bezier(.2, .8, .2, 1) both;
     }
 
     #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking {
@@ -1526,11 +1526,9 @@ body {
       transform: translateY(-5px) scale(1.04);
     }
 
-    @keyframes memorive-pet-interaction-tilt {
-      0%, 100% { transform: rotate(0deg) translateY(0); }
-      24% { transform: rotate(-9deg) translateY(1px); }
-      62% { transform: rotate(-9deg) translateY(1px); }
-      82% { transform: rotate(2deg) translateY(0); }
+    @keyframes memorive-pet-interaction-nod {
+      0%, 100% { transform: translateY(0); }
+      24%, 62% { transform: translateY(1px); }
     }
 
     @keyframes memorive-pet-wake {
@@ -1596,7 +1594,7 @@ body {
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-tilting > .memorive-pet-sprite,
+      #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-nodding > .memorive-pet-sprite,
       #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-waking,
       #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-working,
       #memorive-desktop-assistant-preview .memorive-pet-window.memorive-is-shaking-success,
@@ -1702,7 +1700,7 @@ body {
 
       function clearMotion() {
         pet.classList.remove(
-          'memorive-is-tilting',
+          'memorive-is-nodding',
           'memorive-is-waking',
           'memorive-is-shaking-working',
           'memorive-is-shaking-success',
@@ -1897,7 +1895,7 @@ body {
           prefersReduced ? 320 : 1100,
           '桌面助手歪头回应中；动画期间其他互动已锁定。',
           'pink',
-          { motionClass: 'memorive-is-tilting', endMessage: '点击回应结束；互动已恢复。', endTone: 'pink' }
+          { motionClass: 'memorive-is-nodding', endMessage: '点击回应结束；互动已恢复。', endTone: 'pink' }
         );
       }
 
@@ -1982,7 +1980,7 @@ body {
           prefersReduced ? 520 : 1100,
           '有一项内容需要处理；黄色提醒不会自动批准任务。',
           'yellow',
-          { motionClass: 'memorive-is-tilting', displayState: 'NOTIFYING', endMessage: '待处理动画结束；气泡将在出现 8 秒后自动收起。' }
+          { motionClass: 'memorive-is-nodding', displayState: 'NOTIFYING', endMessage: '待处理动画结束；气泡将在出现 8 秒后自动收起。' }
         );
       }
 
@@ -2328,8 +2326,8 @@ body {
         && !['HIDDEN','DISABLED'].includes(presentation.display_state)) {
       visibleDeliveryId = presentation.delivery_id;
       const deliveryId = visibleDeliveryId;
-      const motion = presentation.animation_state === 'ERROR' ? 'memorive-is-shaking-error' : 'memorive-is-tilting';
-      pet.classList.remove('memorive-is-shaking-error', 'memorive-is-tilting');
+      const motion = presentation.animation_state === 'ERROR' ? 'memorive-is-shaking-error' : 'memorive-is-nodding';
+      pet.classList.remove('memorive-is-shaking-error', 'memorive-is-nodding');
       void pet.offsetWidth;
       const finish = () => {
         pet.classList.remove(motion);
